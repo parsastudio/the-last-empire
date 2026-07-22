@@ -1,8 +1,8 @@
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import type {
-  GameState,
   GameAction,
   DiplomaticProposalAction,
-} from "@/core/types";
+} from "@/modules/game-engine/schemas/action.schema";
 import { TreatyEvaluator } from "@/modules/diplomacy/domain/treaty-evaluator";
 import { ActionHandler } from "./action-handler";
 
@@ -29,15 +29,36 @@ export class DiplomacyActionHandler implements ActionHandler {
       const senderRelation = sender.relations[diploAction.targetNationId];
       const receiverRelation = receiver.relations[action.nationId];
       if (senderRelation && receiverRelation) {
-        sender.relations[diploAction.targetNationId] =
-          this.evaluator.applyTreatyStance(
-            senderRelation,
-            diploAction.proposalType,
-          );
-        receiver.relations[action.nationId] = this.evaluator.applyTreatyStance(
-          receiverRelation,
-          diploAction.proposalType,
-        );
+        const updatedSender = {
+          ...sender,
+          relations: {
+            ...sender.relations,
+            [diploAction.targetNationId]: this.evaluator.applyTreatyStance(
+              senderRelation,
+              diploAction.proposalType,
+            ),
+          },
+        };
+
+        const updatedReceiver = {
+          ...receiver,
+          relations: {
+            ...receiver.relations,
+            [action.nationId]: this.evaluator.applyTreatyStance(
+              receiverRelation,
+              diploAction.proposalType,
+            ),
+          },
+        };
+
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: updatedSender,
+            [diploAction.targetNationId]: updatedReceiver,
+          },
+        };
       }
     }
 

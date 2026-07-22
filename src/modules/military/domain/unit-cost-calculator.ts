@@ -1,4 +1,4 @@
-import type { UnitType } from "@/core/types";
+import type { UnitType } from "@/modules/military/schemas/military.schema";
 
 export interface UnitCostDetails {
   moneyCost: number;
@@ -38,6 +38,8 @@ export class UnitCostCalculator {
           manpowerCost: 2,
           buildTurns: Math.max(1, 3 - timeReduction),
         };
+      default:
+        throw new Error(`Unknown unit type: ${unitType}`);
     }
   }
 
