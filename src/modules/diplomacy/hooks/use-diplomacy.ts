@@ -43,8 +43,48 @@ export function useDiplomacy(
     [nation, dispatch],
   );
 
+  const fundEspionage = useCallback(
+    (targetNationId: string, budget: number) => {
+      if (!nation) {
+        return;
+      }
+      dispatch({
+        id: `fund-esp-${Date.now()}`,
+        nationId: nation.id,
+        type: "FUND_ESPIONAGE",
+        targetNationId,
+        budget,
+      });
+    },
+    [nation, dispatch],
+  );
+
+  const executeCovertOperation = useCallback(
+    (
+      targetNationId: string,
+      operationType:
+        | "SABOTAGE_INDUSTRY"
+        | "INSTIGATE_UNREST"
+        | "MILITARY_INTEL_HEIST",
+    ) => {
+      if (!nation) {
+        return;
+      }
+      dispatch({
+        id: `covert-${Date.now()}`,
+        nationId: nation.id,
+        type: "COVERT_OPERATIONS",
+        targetNationId,
+        operationType,
+      });
+    },
+    [nation, dispatch],
+  );
+
   return {
     proposeTreaty,
     declareWar,
+    fundEspionage,
+    executeCovertOperation,
   };
 }

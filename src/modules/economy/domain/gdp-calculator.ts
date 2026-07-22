@@ -1,8 +1,10 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
+import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 
 export class GdpCalculator {
   private traitManager = new TraitManager();
+  private tariffCalculator = new TariffCalculator();
 
   public calculateBaseGdp(
     population: number,
@@ -34,9 +36,11 @@ export class GdpCalculator {
     const tradeBonus = peacefulNeighborsCount * 0.015;
     multiplier += tradeBonus;
 
-    if (nation.tariffRate > 15) {
-      multiplier -= (nation.tariffRate - 15) * 0.002;
-    }
+    const tariffResult = this.tariffCalculator.calculateTariffEffects(
+      nation,
+      100000,
+    );
+    multiplier -= tariffResult.gdpGrowthPenalty;
 
     multiplier += this.traitManager.getGdpGrowthModifier(nation);
 

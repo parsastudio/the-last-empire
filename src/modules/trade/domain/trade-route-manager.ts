@@ -26,7 +26,9 @@ export class TradeRouteManager {
       }
 
       const relation = nation.relations[neighborId];
-      const isPeaceful = !relation || relation.stance !== "WAR";
+      const isPeaceful =
+        !relation ||
+        (relation.stance !== "WAR" && relation.stance !== "COALITION");
       const isEmbargoed = relation?.embargoActive ?? false;
 
       if (isPeaceful && !isEmbargoed) {
