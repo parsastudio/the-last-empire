@@ -35,6 +35,7 @@ export const GameEventChoiceSchema = z.object({
       )
       .optional(),
     addModifier: GameModifierSchema.optional(),
+    setFlags: z.array(z.string()).optional(),
   }),
 });
 
@@ -49,6 +50,7 @@ export const GameEventSchema = z.object({
     minTreasury: z.number().optional(),
     maxTreasury: z.number().optional(),
     specificNationId: z.string().optional(),
+    requiredFlags: z.record(z.string(), z.boolean()).optional(),
   }),
   choices: z.array(GameEventChoiceSchema),
 });

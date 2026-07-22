@@ -10,6 +10,7 @@ export interface GameEventChoice {
     reputationDelta?: number;
     relationsDelta?: { targetNationId: string; delta: number }[];
     addModifier?: GameModifier;
+    setFlags?: string[];
   };
 }
 
@@ -24,6 +25,7 @@ export interface GameEvent {
     minTreasury?: number;
     maxTreasury?: number;
     specificNationId?: string;
+    requiredFlags?: Record<string, boolean>;
   };
   choices: GameEventChoice[];
 }

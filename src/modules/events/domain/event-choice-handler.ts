@@ -26,6 +26,15 @@ export class EventChoiceHandler {
     const updatedNation = this.applier.applyChoiceEffects(nation, choice);
     state.nations[nationId] = updatedNation;
 
+    const currentFlags = { ...state.eventFlags };
+    if (choice.effects.setFlags) {
+      for (const flag of choice.effects.setFlags) {
+        currentFlags[flag] = true;
+      }
+    }
+
+    state.eventFlags = currentFlags;
+
     const entry = this.logger.createEntry(
       state.currentTurn,
       nationId,

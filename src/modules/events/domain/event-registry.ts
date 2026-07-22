@@ -67,5 +67,92 @@ export class EventRegistry {
         },
       ],
     });
+
+    this.register({
+      id: "energy-crisis-stage-1",
+      title: "Energy Deficit Scarcity",
+      description:
+        "Severe shortages in raw fuel reserves are limiting electric grids.",
+      triggerCondition: {
+        minStability: 50,
+      },
+      choices: [
+        {
+          id: "ration-energy",
+          description: "Ration energy to domestic heavy industries.",
+          effects: {
+            stabilityDelta: -5,
+            treasuryDelta: 10000,
+            setFlags: ["energy_crisis_rationed"],
+          },
+        },
+        {
+          id: "subsidize-power",
+          description:
+            "Subsidize power generation plants with massive national capital.",
+          effects: {
+            stabilityDelta: 5,
+            treasuryDelta: -30000,
+            setFlags: ["energy_crisis_subsidized"],
+          },
+        },
+      ],
+    });
+
+    this.register({
+      id: "energy-crisis-strikes",
+      title: "Industrial Strikes and Riot Unrest",
+      description:
+        "Angry workers are striking nationwide over forced industrial energy rationing.",
+      triggerCondition: {
+        maxStability: 45,
+        requiredFlags: {
+          energy_crisis_rationed: true,
+        },
+      },
+      choices: [
+        {
+          id: "deploy-police",
+          description:
+            "Deploy internal police forces to forcefully crush workers strikes.",
+          effects: {
+            stabilityDelta: 10,
+            reputationDelta: -20,
+          },
+        },
+        {
+          id: "lift-rationing",
+          description:
+            "Negotiate union terms and lift energy rationing restrictions.",
+          effects: {
+            stabilityDelta: -5,
+            treasuryDelta: -15000,
+          },
+        },
+      ],
+    });
+
+    this.register({
+      id: "energy-crisis-boom",
+      title: "Industrial Recovery Success",
+      description:
+        "Our extensive energy subsidies successfully yielded a massive manufacturing expansion.",
+      triggerCondition: {
+        requiredFlags: {
+          energy_crisis_subsidized: true,
+        },
+      },
+      choices: [
+        {
+          id: "celebrate-expansion",
+          description:
+            "Celebrate nationwide industrial expansion achievements.",
+          effects: {
+            reputationDelta: 10,
+            stabilityDelta: 10,
+          },
+        },
+      ],
+    });
   }
 }

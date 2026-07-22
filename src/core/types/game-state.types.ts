@@ -13,4 +13,5 @@ export interface GameState {
   marketPrices: ResourceMarketPrice;
   nations: Record<string, Nation>;
   turnLogs: TurnLogEntry[];
+  eventFlags: Record<string, boolean>;
 }

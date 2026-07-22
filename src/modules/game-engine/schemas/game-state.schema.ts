@@ -37,4 +37,5 @@ export const GameStateSchema = z.object({
   marketPrices: ResourceMarketPriceSchema,
   nations: z.record(z.string(), NationSchema),
   turnLogs: z.array(TurnLogEntrySchema),
+  eventFlags: z.record(z.string(), z.boolean()),
 });

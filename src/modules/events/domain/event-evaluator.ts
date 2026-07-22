@@ -27,6 +27,7 @@ export class EventEvaluator {
             nation.treasury,
             activeWar,
             id,
+            state.eventFlags,
           )
         ) {
           if (nation.isAi) {
@@ -63,6 +64,7 @@ export class EventEvaluator {
     treasury: number,
     isAtWar: boolean,
     nationId: string,
+    eventFlags: Record<string, boolean>,
   ): boolean {
     const cond = event.triggerCondition;
 
@@ -86,6 +88,15 @@ export class EventEvaluator {
       cond.specificNationId !== nationId
     ) {
       return false;
+    }
+
+    if (cond.requiredFlags) {
+      for (const [flag, expected] of Object.entries(cond.requiredFlags)) {
+        const actual = !!eventFlags[flag];
+        if (actual !== expected) {
+          return false;
+        }
+      }
     }
 
     return true;
