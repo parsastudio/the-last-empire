@@ -22,3 +22,7 @@ export const ResourceMarketSchema = z.object({
   steelSupply: z.number().nonnegative(),
   steelDemand: z.number().nonnegative(),
 });
+
+export type TradeRoute = z.infer<typeof TradeRouteSchema>;
+export type ImfLoan = z.infer<typeof ImfLoanSchema>;
+export type ResourceMarket = z.infer<typeof ResourceMarketSchema>;

@@ -25,3 +25,7 @@ export const WarStateSchema = z.object({
   warExhaustionAttacker: z.number().min(0).max(100),
   warExhaustionDefender: z.number().min(0).max(100),
 });
+
+export type CombatCasualties = z.infer<typeof CombatCasualtiesSchema>;
+export type BattleReport = z.infer<typeof BattleReportSchema>;
+export type WarState = z.infer<typeof WarStateSchema>;

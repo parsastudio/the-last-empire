@@ -43,3 +43,17 @@ export const TreasuryTransactionSchema = z.object({
   amount: z.number(),
   turn: z.number().nonnegative(),
 });
+
+export const ResourceMarketPriceSchema = z.object({
+  oil: z.number().positive(),
+  steel: z.number().positive(),
+});
+
+export type Resources = z.infer<typeof ResourcesSchema>;
+export type UpkeepRates = z.infer<typeof UpkeepRatesSchema>;
+export type EconomyStats = z.infer<typeof EconomyStatsSchema>;
+export type TreasuryTransactionType = z.infer<
+  typeof TreasuryTransactionTypeSchema
+>;
+export type TreasuryTransaction = z.infer<typeof TreasuryTransactionSchema>;
+export type ResourceMarketPrice = z.infer<typeof ResourceMarketPriceSchema>;

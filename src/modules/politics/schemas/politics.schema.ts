@@ -37,3 +37,10 @@ export const RebellionStatusSchema = z.object({
   hasRebellionTriggered: z.boolean(),
   rebelInfantryCount: z.number().nonnegative(),
 });
+
+export type GovernmentType = z.infer<typeof GovernmentTypeSchema>;
+export type GovernmentState = z.infer<typeof GovernmentStateSchema>;
+export type ElectionProfile = z.infer<typeof ElectionProfileSchema>;
+export type CorruptionProfile = z.infer<typeof CorruptionProfileSchema>;
+export type SocialFreedomProfile = z.infer<typeof SocialFreedomProfileSchema>;
+export type RebellionStatus = z.infer<typeof RebellionStatusSchema>;

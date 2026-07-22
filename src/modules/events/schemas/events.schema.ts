@@ -54,3 +54,8 @@ export const GameEventSchema = z.object({
   }),
   choices: z.array(GameEventChoiceSchema),
 });
+
+export type ModifierEffectType = z.infer<typeof ModifierEffectTypeSchema>;
+export type GameModifier = z.infer<typeof GameModifierSchema>;
+export type GameEventChoice = z.infer<typeof GameEventChoiceSchema>;
+export type GameEvent = z.infer<typeof GameEventSchema>;

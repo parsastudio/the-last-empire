@@ -25,3 +25,7 @@ export const RecruitmentOrderSchema = z.object({
   totalCost: z.number().nonnegative(),
   manpowerRequired: z.number().nonnegative(),
 });
+
+export type UnitType = z.infer<typeof UnitTypeSchema>;
+export type MilitaryStack = z.infer<typeof MilitaryStackSchema>;
+export type RecruitmentOrder = z.infer<typeof RecruitmentOrderSchema>;

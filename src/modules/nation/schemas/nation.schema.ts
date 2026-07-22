@@ -64,3 +64,8 @@ export const NationSchema = z.object({
   traits: z.array(NationTraitSchema),
   aggressionScore: z.number().min(0).max(100),
 });
+
+export type NationTrait = z.infer<typeof NationTraitSchema>;
+export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
+export type Geography = z.infer<typeof GeographySchema>;
+export type Nation = z.infer<typeof NationSchema>;

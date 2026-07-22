@@ -30,3 +30,9 @@ export const RelationProfileSchema = z.object({
   embargoActive: z.boolean(),
   treatyTurnsRemaining: z.number().nonnegative(),
 });
+
+export type DiplomaticStance = z.infer<typeof DiplomaticStanceSchema>;
+export type DiplomaticProposalType = z.infer<
+  typeof DiplomaticProposalTypeSchema
+>;
+export type RelationProfile = z.infer<typeof RelationProfileSchema>;
