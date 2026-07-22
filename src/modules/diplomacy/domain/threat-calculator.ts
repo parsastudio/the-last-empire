@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 
 export class ThreatCalculator {
   public calculateGlobalThreat(state: GameState): number {

@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { RelationProfile } from "@/core/types/diplomacy.types";
+import type { Nation, RelationProfile } from "@/core/types";
 import { GameError } from "@/core/errors/game-error";
 
 export class RelationsManager {

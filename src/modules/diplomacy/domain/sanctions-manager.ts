@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
+import type { Nation } from "@/core/types";
 
 export class SanctionsManager {
   public applyEmbargo(nationA: Nation, targetId: string): Nation {

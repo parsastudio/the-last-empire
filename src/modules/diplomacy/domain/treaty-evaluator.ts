@@ -1,8 +1,8 @@
 import type {
   RelationProfile,
   DiplomaticProposalType,
-} from "@/core/types/diplomacy.types";
-import type { Nation } from "@/core/types/nation.types";
+  Nation,
+} from "@/core/types";
 
 export interface ProposalEvaluation {
   accepted: boolean;
