@@ -1,4 +1,5 @@
-import type { Nation, MilitaryStack } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { MilitaryStack } from "@/modules/military/schemas/military.schema";
 import { SeededRandom } from "@/core/math/seeded-random";
 import { CombatContext } from "./stages/combat-context";
 import { CombatStage } from "./stages/combat-stage";

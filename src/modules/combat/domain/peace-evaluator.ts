@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 
 export class PeaceEvaluator {
   public shouldAcceptPeace(proposer: Nation, receiver: Nation): boolean {

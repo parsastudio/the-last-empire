@@ -1,4 +1,4 @@
-import type { MilitaryStack } from "@/core/types";
+import type { MilitaryStack } from "@/modules/military/schemas/military.schema";
 
 export interface DroneStrikeResult {
   softeningDamage: number;
