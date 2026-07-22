@@ -1,4 +1,4 @@
-import { GameModifier } from "./modifiers.types";
+import { GameModifier } from "@/modules/events/schemas/events.schema";
 
 export interface GameEventChoice {
   id: string;
