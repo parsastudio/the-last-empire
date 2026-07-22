@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
 
 export interface BreakdownUpkeep {
