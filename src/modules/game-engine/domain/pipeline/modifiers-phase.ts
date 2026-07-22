@@ -1,12 +1,12 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { ModifierManager } from "@/modules/events/domain/modifier-manager";
-import { TurnPhase } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class ModifiersPhase implements TurnPhase {
   private modifierManager = new ModifierManager();
 
-  public execute(state: GameState): GameState {
-    const nextState = { ...state };
+  public execute(context: PipelineContext): GameState {
+    const nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {

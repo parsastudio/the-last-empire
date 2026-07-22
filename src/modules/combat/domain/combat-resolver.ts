@@ -28,10 +28,8 @@ export class CombatResolver {
     attacker: Nation,
     defender: Nation,
     attackForce: MilitaryStack,
-    seed: number,
+    prng: SeededRandom,
   ): CombatResult {
-    const prng = new SeededRandom(seed);
-
     const context: CombatContext = {
       attacker,
       defender,

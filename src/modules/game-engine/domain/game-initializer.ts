@@ -16,10 +16,9 @@ export class GameInitializer {
 
   public assignDeterministicTraits(
     nations: Record<string, Nation>,
-    seed: number,
+    prng: SeededRandom,
   ): Record<string, Nation> {
     const updated = { ...nations };
-    const prng = new SeededRandom(seed);
 
     for (const [id, nation] of Object.entries(updated)) {
       const traitIndex1 = prng.nextInt(0, this.traitsList.length - 1);

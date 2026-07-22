@@ -93,7 +93,7 @@ export class GameEngine {
 
     this.processActionQueue();
 
-    this.currentState = this.pipeline.processTurn(this.currentState);
+    this.currentState = this.pipeline.processTurn(this.currentState, this.prng);
 
     this.currentState = this.livenessManager.updateLiveness(this.currentState);
 

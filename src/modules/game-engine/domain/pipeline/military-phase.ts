@@ -1,14 +1,14 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { RecruitmentQueueManager } from "@/modules/military/domain/recruitment-queue";
 import { AttritionManager } from "@/modules/military/domain/attrition-manager";
-import { TurnPhase } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class MilitaryPhase implements TurnPhase {
   private recruitmentQueue = new RecruitmentQueueManager();
   private attritionManager = new AttritionManager();
 
-  public execute(state: GameState): GameState {
-    const nextState = { ...state };
+  public execute(context: PipelineContext): GameState {
+    const nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {
