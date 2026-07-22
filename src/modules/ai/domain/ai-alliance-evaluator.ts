@@ -1,4 +1,5 @@
-import type { Nation, DiplomaticProposalType } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { DiplomaticProposalType } from "@/modules/diplomacy/schemas/diplomacy.schema";
 
 export class AIAllianceEvaluator {
   public shouldAcceptTreaty(

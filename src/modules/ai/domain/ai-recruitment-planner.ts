@@ -1,4 +1,5 @@
-import type { Nation, RecruitUnitAction } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { RecruitUnitAction } from "@/modules/game-engine/schemas/action.schema";
 
 export class AIRecruitmentPlanner {
   public planRecruitment(nation: Nation, budget: number): RecruitUnitAction[] {

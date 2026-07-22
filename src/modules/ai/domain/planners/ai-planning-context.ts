@@ -1,8 +1,8 @@
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import type {
-  Nation,
   AIPersonalityWeights,
   AINeedEvaluation,
-} from "@/core/types";
+} from "@/modules/ai/schemas/ai.schema";
 import type { BudgetAllocation } from "../ai-budget-balancer";
 
 export interface AIPlanningContext {

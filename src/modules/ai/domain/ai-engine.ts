@@ -1,4 +1,6 @@
-import type { GameState, GameAction, AIPersonalityType } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
+import type { AIPersonalityType } from "@/modules/ai/schemas/ai.schema";
 import { AIActionGenerator } from "./ai-action-generator";
 
 export class AIEngine {

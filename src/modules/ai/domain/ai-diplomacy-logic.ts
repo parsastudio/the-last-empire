@@ -1,4 +1,5 @@
-import type { Nation, GameAction } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 
 export class AIDiplomacyLogic {
   public planDiplomacy(

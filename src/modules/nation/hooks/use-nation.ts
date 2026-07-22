@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import type { GameState, Nation } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { NationManager } from "../domain/nation-manager";
 
 export function useNation(state: GameState | null, nationId: string) {

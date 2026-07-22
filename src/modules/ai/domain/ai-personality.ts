@@ -1,4 +1,7 @@
-import type { AIPersonalityType, AIPersonalityWeights } from "@/core/types";
+import type {
+  AIPersonalityType,
+  AIPersonalityWeights,
+} from "@/modules/ai/schemas/ai.schema";
 
 export class AIPersonality {
   public getPersonalityWeights(type: AIPersonalityType): AIPersonalityWeights {
