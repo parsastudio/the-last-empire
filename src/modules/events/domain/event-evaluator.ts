@@ -1,4 +1,5 @@
-import type { GameState, GameEvent } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameEvent } from "@/modules/events/schemas/events.schema";
 import { EventRegistry } from "./event-registry";
 import { EventLogger } from "@/modules/game-engine/domain/event-logger";
 

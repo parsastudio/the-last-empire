@@ -1,4 +1,8 @@
-import type { Nation, ActiveModifier, GameModifier } from "@/core/types";
+import type {
+  Nation,
+  ActiveModifier,
+} from "@/modules/nation/schemas/nation.schema";
+import type { GameModifier } from "@/modules/events/schemas/events.schema";
 
 export class ModifierManager {
   public addModifier(nation: Nation, modifier: GameModifier): Nation {

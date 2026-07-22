@@ -1,4 +1,5 @@
-import type { Nation, GameEventChoice } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { GameEventChoice } from "@/modules/events/schemas/events.schema";
 import { ModifierManager } from "./modifier-manager";
 
 export class EventEffectsApplier {
@@ -13,17 +14,23 @@ export class EventEffectsApplier {
     }
 
     if (effects.stabilityDelta) {
-      updated.government.stability = Math.max(
-        0,
-        Math.min(100, updated.government.stability + effects.stabilityDelta),
-      );
+      updated.government = {
+        ...updated.government,
+        stability: Math.max(
+          0,
+          Math.min(100, updated.government.stability + effects.stabilityDelta),
+        ),
+      };
     }
 
     if (effects.manpowerDelta) {
-      updated.resources.manpower = Math.max(
-        0,
-        updated.resources.manpower + effects.manpowerDelta,
-      );
+      updated.resources = {
+        ...updated.resources,
+        manpower: Math.max(
+          0,
+          updated.resources.manpower + effects.manpowerDelta,
+        ),
+      };
     }
 
     if (effects.reputationDelta) {
@@ -34,15 +41,17 @@ export class EventEffectsApplier {
     }
 
     if (effects.relationsDelta) {
+      const updatedRelations = { ...updated.relations };
       for (const delta of effects.relationsDelta) {
-        const rel = updated.relations[delta.targetNationId];
+        const rel = updatedRelations[delta.targetNationId];
         if (rel) {
-          updated.relations[delta.targetNationId] = {
+          updatedRelations[delta.targetNationId] = {
             ...rel,
             opinion: Math.max(-100, Math.min(100, rel.opinion + delta.delta)),
           };
         }
       }
+      updated.relations = updatedRelations;
     }
 
     if (effects.addModifier) {

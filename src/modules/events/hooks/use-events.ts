@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import type { GameState, GameEvent } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameEvent } from "@/modules/events/schemas/events.schema";
 import { EventChoiceHandler } from "../domain/event-choice-handler";
 
 export function useEvents(

@@ -1,4 +1,4 @@
-import type { GameEvent } from "@/core/types";
+import type { GameEvent } from "@/modules/events/schemas/events.schema";
 
 export class EventRegistry {
   private events: GameEvent[] = [];
