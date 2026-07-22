@@ -1,8 +1,8 @@
-import type { GameState } from "@/core/types/game-state.types";
 import type {
+  GameState,
   GameAction,
   ChangeGovernmentAction,
-} from "@/core/types/actions.types";
+} from "@/core/types";
 import { RegimeChangeManager } from "@/modules/politics/domain/regime-change-manager";
 import { ActionHandler } from "./action-handler";
 

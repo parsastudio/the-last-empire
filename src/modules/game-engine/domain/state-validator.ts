@@ -1,5 +1,4 @@
-import type { GameAction } from "@/core/types/actions.types";
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameAction, GameState } from "@/core/types";
 import { GameError } from "@/core/errors/game-error";
 
 export class StateValidator {

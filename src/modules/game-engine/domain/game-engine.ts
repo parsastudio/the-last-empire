@@ -1,5 +1,4 @@
-import type { GameAction, ActionResult } from "@/core/types/actions.types";
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameAction, ActionResult, GameState } from "@/core/types";
 import { deepClone } from "@/core/utils/deep-clone";
 import { SeededRandom } from "@/core/math/seeded-random";
 import { GameError } from "@/core/errors/game-error";

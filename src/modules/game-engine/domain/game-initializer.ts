@@ -1,4 +1,4 @@
-import type { Nation, NationTrait } from "@/core/types/nation.types";
+import type { Nation, NationTrait } from "@/core/types";
 import { SeededRandom } from "@/core/math/seeded-random";
 
 export class GameInitializer {

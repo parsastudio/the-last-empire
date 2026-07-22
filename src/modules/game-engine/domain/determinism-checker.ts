@@ -1,5 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
-import type { GameAction } from "@/core/types/actions.types";
+import type { GameState, GameAction } from "@/core/types";
 import { GameEngine } from "./game-engine";
 import { calculateStateHash } from "@/core/utils/state-hash";
 

@@ -1,9 +1,9 @@
-import type { GameState } from "@/core/types/game-state.types";
 import type {
+  GameState,
   GameAction,
   RecruitUnitAction,
   DeclareWarAction,
-} from "@/core/types/actions.types";
+} from "@/core/types";
 import { RecruitmentQueueManager } from "@/modules/military/domain/recruitment-queue";
 import { ActionHandler } from "./action-handler";
 

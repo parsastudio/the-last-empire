@@ -1,5 +1,4 @@
-import type { GameAction } from "@/core/types/actions.types";
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameAction, GameState } from "@/core/types";
 import { StateValidator } from "./state-validator";
 
 export class ActionQueue {

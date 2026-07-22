@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { deepClone } from "@/core/utils/deep-clone";
 
 export class StateHistory {
