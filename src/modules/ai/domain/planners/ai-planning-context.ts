@@ -1,8 +1,8 @@
-import type { Nation } from "@/core/types/nation.types";
 import type {
+  Nation,
   AIPersonalityWeights,
   AINeedEvaluation,
-} from "@/core/types/ai.types";
+} from "@/core/types";
 import type { BudgetAllocation } from "../ai-budget-balancer";
 
 export interface AIPlanningContext {

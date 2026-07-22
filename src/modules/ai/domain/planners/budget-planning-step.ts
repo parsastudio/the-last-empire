@@ -1,4 +1,4 @@
-import type { GameAction } from "@/core/types/actions.types";
+import type { GameAction } from "@/core/types";
 import { AIPlanner } from "./ai-planner";
 import { AIPlanningContext } from "./ai-planning-context";
 
