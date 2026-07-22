@@ -4,64 +4,50 @@ import { AIPersonality } from "./ai-personality";
 import { NeedEvaluator } from "./need-evaluator";
 import { RiskAssessor } from "./risk-assessor";
 import { AIBudgetBalancer } from "./ai-budget-balancer";
-import { AIRecruitmentPlanner } from "./ai-recruitment-planner";
-import { AIDiplomacyLogic } from "./ai-diplomacy-logic";
+import { AIPlanner } from "./planners/ai-planner";
+import { BudgetPlanningStep } from "./planners/budget-planning-step";
+import { MilitaryPlanningStep } from "./planners/military-planning-step";
+import { DiplomacyPlanningStep } from "./planners/diplomacy-planning-step";
 
 export class AIActionGenerator {
   private personalityManager = new AIPersonality();
   private needEvaluator = new NeedEvaluator();
   private riskAssessor = new RiskAssessor();
   private budgetBalancer = new AIBudgetBalancer();
-  private recruitmentPlanner = new AIRecruitmentPlanner();
-  private diplomacyLogic = new AIDiplomacyLogic();
+
+  private planners: AIPlanner[] = [
+    new BudgetPlanningStep(),
+    new MilitaryPlanningStep(),
+    new DiplomacyPlanningStep(),
+  ];
 
   public generateActions(
     nation: Nation,
     allNations: Record<string, Nation>,
     personalityType: "AGGRESSIVE" | "PACIFIST" | "ECONOMIC" | "ISOLATIONIST",
   ): GameAction[] {
-    const actions: GameAction[] = [];
-
     const weights =
       this.personalityManager.getPersonalityWeights(personalityType);
     const needs = this.needEvaluator.evaluateNeeds(nation);
     const risk = this.riskAssessor.assessRisk(nation, allNations);
-
     const allocation = this.budgetBalancer.balanceBudget(
       nation,
       weights.personality,
     );
 
-    if (
-      allocation.recruitmentBudget > 0 &&
-      (needs.needMilitary > 0.4 || risk > 30)
-    ) {
-      const recruitment = this.recruitmentPlanner.planRecruitment(
-        nation,
-        allocation.recruitmentBudget,
-      );
-      actions.push(...recruitment);
-    }
+    const context = {
+      nation,
+      allNations,
+      weights,
+      needs,
+      risk,
+      budget: allocation,
+    };
 
-    if (needs.needDiplomacy > 0.3) {
-      const diplomacy = this.diplomacyLogic.planDiplomacy(
-        nation,
-        allNations,
-        weights.personality,
-      );
-      actions.push(...diplomacy);
-    }
+    const actions: GameAction[] = [];
 
-    if (
-      nation.government.corruption > 35 &&
-      allocation.antiCorruptionBudget > 10000
-    ) {
-      actions.push({
-        id: `ai-anti-corruption-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        nationId: nation.id,
-        type: "SET_TAX_RATE",
-        newRate: Math.max(10, nation.taxRate - 2),
-      });
+    for (const planner of this.planners) {
+      actions.push(...planner.plan(context));
     }
 
     return actions;
