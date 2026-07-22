@@ -1,4 +1,7 @@
-import type { TurnLogEntry, TurnLogLevel } from "@/core/types";
+import type {
+  TurnLogEntry,
+  TurnLogLevel,
+} from "@/modules/game-engine/schemas/game-state.schema";
 
 export class EventLogger {
   public createEntry(

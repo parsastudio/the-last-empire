@@ -1,4 +1,5 @@
-import type { GameAction, GameState } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { StateValidator } from "./state-validator";
 
 export class ActionQueue {
