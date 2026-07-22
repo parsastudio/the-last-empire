@@ -69,3 +69,10 @@ export type GameAction =
   | TradeResourcesAction
   | UpgradeIndustrialLevelAction
   | InvestInfrastructureAction;
+
+export interface ActionResult {
+  success: boolean;
+  actionId: string;
+  message: string;
+  error?: string;
+}

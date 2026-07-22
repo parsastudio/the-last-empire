@@ -14,10 +14,3 @@ export interface GameState {
   nations: Record<string, Nation>;
   turnLogs: TurnLogEntry[];
 }
-
-export interface ActionResult {
-  success: boolean;
-  actionId: string;
-  message: string;
-  error?: string;
-}

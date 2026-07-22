@@ -6,16 +6,6 @@ export type DiplomaticStance =
   | "DEFENSIVE_PACT"
   | "EMBARGO";
 
-export interface RelationProfile {
-  targetNationId: string;
-  stance: DiplomaticStance;
-  opinion: number;
-  tributePerTurn: number;
-  militaryAccess: boolean;
-  embargoActive: boolean;
-  treatyTurnsRemaining: number;
-}
-
 export type DiplomaticProposalType =
   | "PEACE_TREATY"
   | "NON_AGGRESSION_PACT"
@@ -25,3 +15,13 @@ export type DiplomaticProposalType =
   | "IMPROVE_RELATIONS"
   | "DEMAND_TRIBUTE"
   | "LIFT_EMBARGO";
+
+export interface RelationProfile {
+  targetNationId: string;
+  stance: DiplomaticStance;
+  opinion: number;
+  tributePerTurn: number;
+  militaryAccess: boolean;
+  embargoActive: boolean;
+  treatyTurnsRemaining: number;
+}
