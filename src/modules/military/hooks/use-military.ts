@@ -1,5 +1,7 @@
 import { useCallback, useMemo } from "react";
-import type { GameAction, Nation, UnitType } from "@/core/types";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { UnitType } from "@/modules/military/schemas/military.schema";
 import { UnitCostCalculator } from "../domain/unit-cost-calculator";
 import { ResearchDevelopmentManager } from "../domain/research-development-manager";
 

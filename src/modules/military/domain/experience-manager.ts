@@ -1,4 +1,4 @@
-import type { MilitaryStack } from "@/core/types";
+import type { MilitaryStack } from "@/modules/military/schemas/military.schema";
 
 export class ExperienceManager {
   private readonly maxExperience = 100;

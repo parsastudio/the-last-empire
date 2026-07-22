@@ -1,4 +1,8 @@
-import type { Nation, UnitType, RecruitmentOrder } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type {
+  UnitType,
+  RecruitmentOrder,
+} from "@/modules/military/schemas/military.schema";
 import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
 import { CoastalRequirementValidator } from "./coastal-requirement-validator";
