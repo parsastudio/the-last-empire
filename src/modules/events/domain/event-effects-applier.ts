@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { GameEventChoice } from "@/core/types/events.types";
+import type { Nation, GameEventChoice } from "@/core/types";
 import { ModifierManager } from "./modifier-manager";
 
 export class EventEffectsApplier {

@@ -1,5 +1,4 @@
-import type { Nation, ActiveModifier } from "@/core/types/nation.types";
-import type { GameModifier } from "@/core/types/modifiers.types";
+import type { Nation, ActiveModifier, GameModifier } from "@/core/types";
 
 export class ModifierManager {
   public addModifier(nation: Nation, modifier: GameModifier): Nation {

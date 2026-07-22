@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { IndexedDbAdapter } from "../storage/indexed-db-adapter";
 
 export class SyncEngine {
