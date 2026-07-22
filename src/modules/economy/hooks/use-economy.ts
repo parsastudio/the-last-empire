@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
-import type { GameAction, Nation } from "@/core/types";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { InfrastructureManager } from "../domain/infrastructure-manager";
 import { IndustrialLevelManager } from "../domain/industrial-level-manager";
 

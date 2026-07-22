@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { EventEvaluator } from "@/modules/events/domain/event-evaluator";
 import { TurnPhase } from "./turn-phase";
 

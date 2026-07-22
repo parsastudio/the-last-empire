@@ -1,4 +1,5 @@
-import type { Nation, AINeedEvaluation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { AINeedEvaluation } from "@/modules/ai/schemas/ai.schema";
 
 export class NeedEvaluator {
   public evaluateNeeds(nation: Nation): AINeedEvaluation {
