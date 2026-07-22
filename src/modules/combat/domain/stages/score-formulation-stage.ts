@@ -1,0 +1,40 @@
+import { TraitManager } from "@/modules/nation/domain/trait-manager";
+import { CombatContext } from "./combat-context";
+import { CombatStage } from "./combat-stage";
+
+export class ScoreFormulationStage implements CombatStage {
+  private traitManager = new TraitManager();
+
+  public process(context: CombatContext): void {
+    const defenderHomeBonus =
+      1.2 + this.traitManager.getCombatDefenseBonus(context.defender);
+    const attackerAttackBonus =
+      1.0 + this.traitManager.getCombatAttackBonus(context.attacker);
+
+    const attackerBase =
+      (context.attackForce.infantry * 1.0 +
+        context.attackForce.airForce * 3.0 +
+        context.attackForce.navy * 2.0 +
+        context.attackForce.droneMissile * 2.5) *
+      (1 + context.attackForce.techLevel * 0.15) *
+      (1 + context.attackForce.experience * 0.005) *
+      attackerAttackBonus;
+
+    const defenderBase =
+      (context.defenderInfantryAfterDrone * 1.0 +
+        context.defenderMilitary.airForce * 3.0 +
+        context.defenderMilitary.navy * 2.0 +
+        context.defenderMilitary.droneMissile * 2.5) *
+      (1 + context.defenderMilitary.techLevel * 0.15) *
+      (1 + context.defenderMilitary.experience * 0.005) *
+      defenderHomeBonus *
+      context.defenderDebuffMultiplier;
+
+    const rngFactorAttacker = 0.9 + context.prng.nextFloat() * 0.2;
+    const rngFactorDefender = 0.9 + context.prng.nextFloat() * 0.2;
+
+    context.attackerScore = Math.floor(attackerBase * rngFactorAttacker);
+    context.defenderScore = Math.floor(defenderBase * rngFactorDefender);
+    context.attackerWon = context.attackerScore > context.defenderScore;
+  }
+}
