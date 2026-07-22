@@ -1,4 +1,8 @@
-import type { GameState, GameAction, TradeResourcesAction } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type {
+  GameAction,
+  TradeResourcesAction,
+} from "@/modules/game-engine/schemas/action.schema";
 import { MarketEngine } from "@/modules/trade/domain/market-engine";
 import { ActionHandler } from "./action-handler";
 
@@ -22,8 +26,14 @@ export class TradeActionHandler implements ActionHandler {
         tradeAction.resourceType,
         tradeAction.amount,
       );
-      state.nations[action.nationId] = result.updatedNation;
-      state.marketPrices = result.updatedMarketPrices;
+      return {
+        ...state,
+        marketPrices: result.updatedMarketPrices,
+        nations: {
+          ...state.nations,
+          [action.nationId]: result.updatedNation,
+        },
+      };
     } else {
       const result = this.marketEngine.sellResource(
         nation,
@@ -31,10 +41,14 @@ export class TradeActionHandler implements ActionHandler {
         tradeAction.resourceType,
         tradeAction.amount,
       );
-      state.nations[action.nationId] = result.updatedNation;
-      state.marketPrices = result.updatedMarketPrices;
+      return {
+        ...state,
+        marketPrices: result.updatedMarketPrices,
+        nations: {
+          ...state.nations,
+          [action.nationId]: result.updatedNation,
+        },
+      };
     }
-
-    return state;
   }
 }

@@ -1,8 +1,8 @@
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import type {
-  GameState,
   GameAction,
   ChangeGovernmentAction,
-} from "@/core/types";
+} from "@/modules/game-engine/schemas/action.schema";
 import { RegimeChangeManager } from "@/modules/politics/domain/regime-change-manager";
 import { ActionHandler } from "./action-handler";
 
@@ -15,12 +15,19 @@ export class GovernmentActionHandler implements ActionHandler {
     }
     const govAction = action as ChangeGovernmentAction;
     const nation = state.nations[action.nationId];
-    if (nation) {
-      state.nations[action.nationId] = this.manager.changeRegime(
-        nation,
-        govAction.newGovernment,
-      );
+    if (!nation) {
+      return state;
     }
-    return state;
+
+    return {
+      ...state,
+      nations: {
+        ...state.nations,
+        [action.nationId]: this.manager.changeRegime(
+          nation,
+          govAction.newGovernment,
+        ),
+      },
+    };
   }
 }

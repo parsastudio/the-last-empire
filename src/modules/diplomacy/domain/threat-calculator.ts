@@ -1,6 +1,9 @@
-import type { GameState } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import { NationManager } from "@/modules/nation/domain/nation-manager";
 
 export class ThreatCalculator {
+  private nationManager = new NationManager();
+
   public calculateGlobalThreat(state: GameState): number {
     let totalThreat = 0;
 
@@ -13,11 +16,7 @@ export class ThreatCalculator {
         (r) => r.stance === "WAR",
       ).length;
 
-      const militaryPower =
-        nation.military.infantry +
-        nation.military.airForce * 3 +
-        nation.military.navy * 2 +
-        nation.military.droneMissile * 2.5;
+      const militaryPower = this.nationManager.getTotalMilitaryPower(nation);
 
       if (aggressiveStances > 0) {
         totalThreat += Math.floor(militaryPower * 0.05 * aggressiveStances);

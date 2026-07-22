@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { GdpCalculator } from "@/modules/economy/domain/gdp-calculator";
 import { UpkeepCalculator } from "@/modules/economy/domain/upkeep-calculator";
 import { TaxCalculator } from "@/modules/economy/domain/tax-calculator";
@@ -8,6 +8,7 @@ import { InflationCalculator } from "@/modules/economy/domain/inflation-calculat
 import { PopulationGrowthEngine } from "@/modules/economy/domain/population-growth-engine";
 import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
+import { TradeRouteManager } from "@/modules/trade/domain/trade-route-manager";
 import { TurnPhase } from "./turn-phase";
 
 export class EconomyPhase implements TurnPhase {
@@ -20,6 +21,7 @@ export class EconomyPhase implements TurnPhase {
   private popEngine = new PopulationGrowthEngine();
   private manpowerManager = new ManpowerManager();
   private tariffCalculator = new TariffCalculator();
+  private tradeRouteManager = new TradeRouteManager();
 
   public execute(state: GameState): GameState {
     const nextState = { ...state };
@@ -48,7 +50,10 @@ export class EconomyPhase implements TurnPhase {
       const taxResult = this.taxCalc.evaluateTaxPolicy(updated);
       const upkeepResult = this.upkeepCalc.calculateUpkeep(updated);
 
-      const totalTradeValue = peacefulNeighbors * 5000;
+      const totalTradeValue = this.tradeRouteManager.calculateTotalTradeRevenue(
+        updated,
+        nations,
+      );
       const tariffResult = this.tariffCalculator.calculateTariffEffects(
         updated,
         totalTradeValue,

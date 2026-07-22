@@ -1,4 +1,5 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { NationManager } from "@/modules/nation/domain/nation-manager";
 
 export interface CoupStatus {
   hasCoupOccurred: boolean;
@@ -6,17 +7,14 @@ export interface CoupStatus {
 }
 
 export class MilitaryCoupEngine {
+  private nationManager = new NationManager();
+
   public checkAndExecuteCoup(nation: Nation): CoupStatus {
     if (nation.government.type === "DEMOCRACY") {
       return { hasCoupOccurred: false, updatedNation: nation };
     }
 
-    const militaryPower =
-      nation.military.infantry +
-      nation.military.airForce * 3 +
-      nation.military.navy * 2 +
-      nation.military.droneMissile * 2.5;
-
+    const militaryPower = this.nationManager.getTotalMilitaryPower(nation);
     const stateAuthority = nation.government.stability * 10;
 
     if (

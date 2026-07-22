@@ -1,4 +1,8 @@
-import type { GameState, GameAction, SetTaxRateAction } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type {
+  GameAction,
+  SetTaxRateAction,
+} from "@/modules/game-engine/schemas/action.schema";
 import { ActionHandler } from "./action-handler";
 
 export class TaxActionHandler implements ActionHandler {
@@ -8,9 +12,19 @@ export class TaxActionHandler implements ActionHandler {
     }
     const setTaxAction = action as SetTaxRateAction;
     const nation = state.nations[action.nationId];
-    if (nation) {
-      nation.taxRate = setTaxAction.newRate;
+    if (!nation) {
+      return state;
     }
-    return state;
+
+    return {
+      ...state,
+      nations: {
+        ...state.nations,
+        [action.nationId]: {
+          ...nation,
+          taxRate: setTaxAction.newRate,
+        },
+      },
+    };
   }
 }
