@@ -62,4 +62,5 @@ export const NationSchema = z.object({
   activeModifiers: z.array(ActiveModifierSchema),
   imfLoans: z.array(ImfLoanSchema),
   traits: z.array(NationTraitSchema),
+  aggressionScore: z.number().min(0).max(100),
 });

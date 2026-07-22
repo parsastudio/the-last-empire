@@ -19,6 +19,7 @@ import { ModifierManager } from "@/modules/events/domain/modifier-manager";
 import { EventEvaluator } from "@/modules/events/domain/event-evaluator";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
+import { CoalitionManager } from "@/modules/diplomacy/domain/coalition-manager";
 
 export class TurnPipeline {
   private gdpCalc = new GdpCalculator();
@@ -40,9 +41,10 @@ export class TurnPipeline {
   private eventEvaluator = new EventEvaluator();
   private tariffCalculator = new TariffCalculator();
   private traitManager = new TraitManager();
+  private coalitionManager = new CoalitionManager();
 
   public processTurn(state: GameState): GameState {
-    const nextState = deepClone(state);
+    let nextState = deepClone(state);
 
     for (const [id, nation] of Object.entries(nextState.nations)) {
       if (!nation.isAlive) {
@@ -132,6 +134,8 @@ export class TurnPipeline {
       updated.government.turnsInPower += 1;
       nextState.nations[id] = updated;
     }
+
+    nextState = this.coalitionManager.processCoalitions(nextState);
 
     this.eventEvaluator.evaluateTurnEvents(nextState);
 

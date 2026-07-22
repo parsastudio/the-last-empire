@@ -119,6 +119,32 @@ export class GameEngine {
   private processActionQueue(): void {
     const actions = this.actionQueue.getQueue();
     for (const action of actions) {
+      const source = this.currentState.nations[action.nationId];
+      if (source && source.isAlive) {
+        if (action.type === "DECLARE_WAR") {
+          const target = this.currentState.nations[action.targetNationId];
+          if (target && target.isAlive) {
+            source.aggressionScore = Math.min(100, source.aggressionScore + 25);
+            const relToTarget = source.relations[action.targetNationId];
+            if (relToTarget) {
+              source.relations[action.targetNationId] = {
+                ...relToTarget,
+                stance: "WAR",
+              };
+            }
+            const relToSource = target.relations[action.nationId];
+            if (relToSource) {
+              target.relations[action.nationId] = {
+                ...relToSource,
+                stance: "WAR",
+              };
+            }
+          }
+        } else if (action.type === "ATTACK") {
+          source.aggressionScore = Math.min(100, source.aggressionScore + 10);
+        }
+      }
+
       const logEntry = this.eventLogger.createEntry(
         this.currentState.currentTurn,
         action.nationId,

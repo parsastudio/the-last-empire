@@ -47,4 +47,5 @@ export interface Nation {
   activeModifiers: ActiveModifier[];
   imfLoans: ImfLoan[];
   traits: NationTrait[];
+  aggressionScore: number;
 }

@@ -15,6 +15,30 @@ export class AIDiplomacyLogic {
         continue;
       }
 
+      if (relation.stance === "COALITION") {
+        const targetRelations = target.relations;
+        for (const [allyId, allyRelation] of Object.entries(targetRelations)) {
+          if (allyRelation.stance === "WAR" && allyId !== nation.id) {
+            const allyNation = allNations[allyId];
+            if (allyNation && allyNation.isAlive) {
+              const ownRelationToAlly = nation.relations[allyId];
+              if (
+                ownRelationToAlly &&
+                ownRelationToAlly.stance === "COALITION"
+              ) {
+                actions.push({
+                  id: `ai-coalition-war-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+                  nationId: nation.id,
+                  type: "DECLARE_WAR",
+                  targetNationId: targetId,
+                });
+                break;
+              }
+            }
+          }
+        }
+      }
+
       if (
         relation.opinion < -50 &&
         relation.stance !== "WAR" &&

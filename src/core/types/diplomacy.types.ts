@@ -4,7 +4,8 @@ export type DiplomaticStance =
   | "ALLIANCE"
   | "NON_AGGRESSION_PACT"
   | "DEFENSIVE_PACT"
-  | "EMBARGO";
+  | "EMBARGO"
+  | "COALITION";
 
 export type DiplomaticProposalType =
   | "PEACE_TREATY"
