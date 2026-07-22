@@ -1,4 +1,8 @@
-import type { GameAction, ActionResult, GameState } from "@/core/types";
+import type {
+  GameAction,
+  ActionResult,
+} from "@/modules/game-engine/schemas/action.schema";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { deepClone } from "@/core/utils/deep-clone";
 import { SeededRandom } from "@/core/math/seeded-random";
 import { GameError } from "@/core/errors/game-error";
@@ -120,16 +124,22 @@ export class GameEngine {
 
   private processActionQueue(): void {
     const actions = this.actionQueue.getQueue();
+    let state = this.currentState;
     for (const action of actions) {
-      this.currentState = this.actionRouter.route(this.currentState, action);
+      state = this.actionRouter.route(state, action);
 
       const logEntry = this.eventLogger.createEntry(
-        this.currentState.currentTurn,
+        state.currentTurn,
         action.nationId,
         "INFO",
         `Action processed: ${action.type}`,
       );
-      this.currentState.turnLogs.push(logEntry);
+
+      state = {
+        ...state,
+        turnLogs: [...state.turnLogs, logEntry],
+      };
     }
+    this.currentState = state;
   }
 }

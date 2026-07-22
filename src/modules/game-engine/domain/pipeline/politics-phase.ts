@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { StabilityCalculator } from "@/modules/politics/domain/stability-calculator";
 import { CorruptionManager } from "@/modules/politics/domain/corruption-manager";
 import { RebellionEngine } from "@/modules/politics/domain/rebellion-engine";
@@ -24,7 +24,12 @@ export class PoliticsPhase implements TurnPhase {
         continue;
       }
 
-      let updated = { ...nation };
+      let updated = {
+        ...nation,
+        government: {
+          ...nation.government,
+        },
+      };
 
       updated.government.corruption =
         this.corruptionManager.updateCorruptionLevel(updated);
@@ -59,7 +64,11 @@ export class PoliticsPhase implements TurnPhase {
         updated = coupResult.updatedNation;
       }
 
-      updated.government.turnsInPower += 1;
+      updated.government = {
+        ...updated.government,
+        turnsInPower: updated.government.turnsInPower + 1,
+      };
+
       nations[id] = updated;
     }
 
