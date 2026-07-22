@@ -1,4 +1,5 @@
-import type { ResourceMarketPrice, Nation } from "@/core/types";
+import type { ResourceMarketPrice } from "@/modules/economy/schemas/economy.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { GameError } from "@/core/errors/game-error";
 
 export interface TradeTransactionResult {

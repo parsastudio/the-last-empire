@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import type { GameAction, Nation } from "@/core/types";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 
 export function useTrade(
   nation: Nation | undefined,

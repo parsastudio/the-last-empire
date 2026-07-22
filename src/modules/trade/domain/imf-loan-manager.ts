@@ -1,4 +1,5 @@
-import type { Nation, ImfLoan } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { ImfLoan } from "@/modules/trade/schemas/trade.schema";
 import { GameError } from "@/core/errors/game-error";
 
 export class ImfLoanManager {
