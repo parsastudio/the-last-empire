@@ -1,8 +1,7 @@
 import { useCallback, useMemo } from "react";
-import type { GameAction } from "@/core/types/actions.types";
+import type { GameAction, Nation } from "@/core/types";
 import { InfrastructureManager } from "../domain/infrastructure-manager";
 import { IndustrialLevelManager } from "../domain/industrial-level-manager";
-import type { Nation } from "@/core/types/nation.types";
 
 export function useEconomy(
   nation: Nation | undefined,

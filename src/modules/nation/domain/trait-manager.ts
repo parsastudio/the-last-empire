@@ -1,4 +1,4 @@
-import type { Nation, NationTrait } from "@/core/types/nation.types";
+import type { Nation, NationTrait } from "@/core/types";
 
 export class TraitManager {
   public hasTrait(nation: Nation, trait: NationTrait): boolean {
