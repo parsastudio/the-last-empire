@@ -1,4 +1,4 @@
-import type { TurnLogEntry, TurnLogLevel } from "@/core/types/turn-log.types";
+import type { TurnLogEntry, TurnLogLevel } from "@/core/types";
 
 export class EventLogger {
   public createEntry(
