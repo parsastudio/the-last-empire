@@ -1,4 +1,4 @@
-import type { UnitType } from "@/core/types/military.types";
+import type { UnitType } from "@/core/types";
 
 export interface UnitCostDetails {
   moneyCost: number;

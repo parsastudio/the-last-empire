@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { RecruitmentQueueManager } from "@/modules/military/domain/recruitment-queue";
 import { AttritionManager } from "@/modules/military/domain/attrition-manager";
 import { TurnPhase } from "./turn-phase";

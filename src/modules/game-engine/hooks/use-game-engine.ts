@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import type { GameState } from "@/core/types/game-state.types";
-import type { GameAction, ActionResult } from "@/core/types/actions.types";
+import type { GameState, GameAction, ActionResult } from "@/core/types";
 import { GameEngine } from "../domain/game-engine";
 import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
 import { SyncEngine } from "@/infrastructure/sync/sync-engine";

@@ -1,4 +1,4 @@
-import type { MilitaryStack } from "@/core/types/military.types";
+import type { MilitaryStack } from "@/core/types";
 
 export class TransportCapacityCalculator {
   public calculateGroundMobility(military: MilitaryStack): number {

@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { UnitType } from "@/core/types/military.types";
+import type { Nation, UnitType } from "@/core/types";
 import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
 

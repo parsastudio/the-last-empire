@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { GdpCalculator } from "@/modules/economy/domain/gdp-calculator";
 import { UpkeepCalculator } from "@/modules/economy/domain/upkeep-calculator";
 import { TaxCalculator } from "@/modules/economy/domain/tax-calculator";
