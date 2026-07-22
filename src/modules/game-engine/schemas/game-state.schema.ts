@@ -1,10 +1,6 @@
 import { z } from "zod";
 import { NationSchema } from "@/modules/nation/schemas/nation.schema";
-
-export const ResourceMarketPriceSchema = z.object({
-  oil: z.number().positive(),
-  steel: z.number().positive(),
-});
+import { ResourceMarketPriceSchema } from "@/modules/economy/schemas/economy.schema";
 
 export const TurnLogLevelSchema = z.enum([
   "INFO",
@@ -39,3 +35,7 @@ export const GameStateSchema = z.object({
   turnLogs: z.array(TurnLogEntrySchema),
   eventFlags: z.record(z.string(), z.boolean()),
 });
+
+export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;
+export type TurnLogEntry = z.infer<typeof TurnLogEntrySchema>;
+export type GameState = z.infer<typeof GameStateSchema>;

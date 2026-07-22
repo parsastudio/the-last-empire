@@ -91,3 +91,23 @@ export const ActionResultSchema = z.object({
   message: z.string(),
   error: z.string().optional(),
 });
+
+export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;
+export type ChangeGovernmentAction = z.infer<
+  typeof ChangeGovernmentActionSchema
+>;
+export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
+export type DeclareWarAction = z.infer<typeof DeclareWarActionSchema>;
+export type AttackAction = z.infer<typeof AttackActionSchema>;
+export type DiplomaticProposalAction = z.infer<
+  typeof DiplomaticProposalActionSchema
+>;
+export type TradeResourcesAction = z.infer<typeof TradeResourcesActionSchema>;
+export type UpgradeIndustrialLevelAction = z.infer<
+  typeof UpgradeIndustrialLevelActionSchema
+>;
+export type InvestInfrastructureAction = z.infer<
+  typeof InvestInfrastructureActionSchema
+>;
+export type GameAction = z.infer<typeof GameActionSchema>;
+export type ActionResult = z.infer<typeof ActionResultSchema>;
