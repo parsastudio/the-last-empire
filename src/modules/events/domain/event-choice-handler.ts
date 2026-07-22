@@ -1,5 +1,5 @@
 import type { GameState } from "@/core/types/game-state.types";
-import type { GameEvent, GameEventChoice } from "@/core/types/events.types";
+import type { GameEvent } from "@/core/types/events.types";
 import { EventEffectsApplier } from "./event-effects-applier";
 import { EventLogger } from "@/modules/game-engine/domain/event-logger";
 

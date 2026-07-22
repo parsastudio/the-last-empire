@@ -15,7 +15,7 @@ export class ModifierManager {
       (m) => m.id === modifier.id,
     );
 
-    let updatedModifiers = [...nation.activeModifiers];
+    const updatedModifiers = [...nation.activeModifiers];
     if (existingIndex > -1) {
       updatedModifiers[existingIndex] = active;
     } else {

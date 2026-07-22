@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { GameAction } from "@/core/types/actions.types";
 import type { Nation } from "@/core/types/nation.types";
 import type { UnitType } from "@/core/types/military.types";
@@ -9,8 +9,8 @@ export function useMilitary(
   nation: Nation | undefined,
   dispatch: (action: GameAction) => void,
 ) {
-  const costCalculator = new UnitCostCalculator();
-  const researchManager = new ResearchDevelopmentManager();
+  const costCalculator = useMemo(() => new UnitCostCalculator(), []);
+  const researchManager = useMemo(() => new ResearchDevelopmentManager(), []);
 
   const getUnitCostDetails = useCallback(
     (unitType: UnitType, quantity: number) => {

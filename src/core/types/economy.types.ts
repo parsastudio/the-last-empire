@@ -1,5 +1,3 @@
-import { Resources } from "./resources.types";
-
 export interface EconomyStats {
   baseGdp: number;
   gdpGrowth: number;

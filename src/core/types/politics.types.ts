@@ -1,5 +1,3 @@
-import { GovernmentType } from "./government.types";
-
 export interface ElectionProfile {
   lastElectionTurn: number;
   electionInterval: number;

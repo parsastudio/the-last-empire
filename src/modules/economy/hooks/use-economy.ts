@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import type { GameAction } from "@/core/types/actions.types";
 import { InfrastructureManager } from "../domain/infrastructure-manager";
 import { IndustrialLevelManager } from "../domain/industrial-level-manager";
@@ -8,8 +8,8 @@ export function useEconomy(
   nation: Nation | undefined,
   dispatch: (action: GameAction) => void,
 ) {
-  const infraManager = new InfrastructureManager();
-  const industrialManager = new IndustrialLevelManager();
+  const infraManager = useMemo(() => new InfrastructureManager(), []);
+  const industrialManager = useMemo(() => new IndustrialLevelManager(), []);
 
   const canUpgradeInfrastructure = useCallback((): boolean => {
     if (!nation) {

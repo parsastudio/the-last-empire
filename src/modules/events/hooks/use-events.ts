@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { GameState } from "@/core/types/game-state.types";
 import type { GameEvent } from "@/core/types/events.types";
 import { EventChoiceHandler } from "../domain/event-choice-handler";
@@ -8,7 +8,7 @@ export function useEvents(
   onStateUpdate: (state: GameState) => void,
 ) {
   const [activeEvent, setActiveEvent] = useState<GameEvent | null>(null);
-  const choiceHandler = new EventChoiceHandler();
+  const choiceHandler = useMemo(() => new EventChoiceHandler(), []);
 
   const triggerEventModal = useCallback((event: GameEvent) => {
     setActiveEvent(event);
