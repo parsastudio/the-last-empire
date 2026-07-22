@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { AINeedEvaluation } from "@/core/types/ai.types";
+import type { Nation, AINeedEvaluation } from "@/core/types";
 
 export class NeedEvaluator {
   public evaluateNeeds(nation: Nation): AINeedEvaluation {

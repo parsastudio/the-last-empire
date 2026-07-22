@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { RecruitUnitAction } from "@/core/types/actions.types";
+import type { Nation, RecruitUnitAction } from "@/core/types";
 
 export class AIRecruitmentPlanner {
   public planRecruitment(nation: Nation, budget: number): RecruitUnitAction[] {

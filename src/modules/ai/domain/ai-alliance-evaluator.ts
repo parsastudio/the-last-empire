@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { DiplomaticProposalType } from "@/core/types/diplomacy.types";
+import type { Nation, DiplomaticProposalType } from "@/core/types";
 
 export class AIAllianceEvaluator {
   public shouldAcceptTreaty(

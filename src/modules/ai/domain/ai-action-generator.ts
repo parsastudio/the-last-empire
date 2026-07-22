@@ -1,5 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { GameAction } from "@/core/types/actions.types";
+import type { Nation, GameAction } from "@/core/types";
 import { AIPersonality } from "./ai-personality";
 import { NeedEvaluator } from "./need-evaluator";
 import { RiskAssessor } from "./risk-assessor";

@@ -1,6 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
-import type { GameAction } from "@/core/types/actions.types";
-import type { AIPersonalityType } from "@/core/types/ai.types";
+import type { GameState, GameAction, AIPersonalityType } from "@/core/types";
 import { AIActionGenerator } from "./ai-action-generator";
 
 export class AIEngine {

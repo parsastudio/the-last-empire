@@ -1,7 +1,4 @@
-import type {
-  AIPersonalityType,
-  AIPersonalityWeights,
-} from "@/core/types/ai.types";
+import type { AIPersonalityType, AIPersonalityWeights } from "@/core/types";
 
 export class AIPersonality {
   public getPersonalityWeights(type: AIPersonalityType): AIPersonalityWeights {
