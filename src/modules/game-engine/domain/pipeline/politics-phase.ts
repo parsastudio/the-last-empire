@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { StabilityCalculator } from "@/modules/politics/domain/stability-calculator";
 import { CorruptionManager } from "@/modules/politics/domain/corruption-manager";
 import { RebellionEngine } from "@/modules/politics/domain/rebellion-engine";

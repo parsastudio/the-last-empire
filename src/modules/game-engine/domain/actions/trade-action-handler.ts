@@ -1,8 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
-import type {
-  GameAction,
-  TradeResourcesAction,
-} from "@/core/types/actions.types";
+import type { GameState, GameAction, TradeResourcesAction } from "@/core/types";
 import { MarketEngine } from "@/modules/trade/domain/market-engine";
 import { ActionHandler } from "./action-handler";
 

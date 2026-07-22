@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { ModifierManager } from "@/modules/events/domain/modifier-manager";
 import { TurnPhase } from "./turn-phase";
 

@@ -1,5 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
-import type { GameAction } from "@/core/types/actions.types";
+import type { GameState, GameAction } from "@/core/types";
 import { IndustrialLevelManager } from "@/modules/economy/domain/industrial-level-manager";
 import { InfrastructureManager } from "@/modules/economy/domain/infrastructure-manager";
 import { ActionHandler } from "./action-handler";

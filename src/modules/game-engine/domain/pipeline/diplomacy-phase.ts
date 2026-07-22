@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types/game-state.types";
+import type { GameState } from "@/core/types";
 import { CoalitionManager } from "@/modules/diplomacy/domain/coalition-manager";
 import { TurnPhase } from "./turn-phase";
 

@@ -1,8 +1,8 @@
-import type { GameState } from "@/core/types/game-state.types";
 import type {
+  GameState,
   GameAction,
   DiplomaticProposalAction,
-} from "@/core/types/actions.types";
+} from "@/core/types";
 import { TreatyEvaluator } from "@/modules/diplomacy/domain/treaty-evaluator";
 import { ActionHandler } from "./action-handler";
 
