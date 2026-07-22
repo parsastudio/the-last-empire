@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 
 export class ReputationManager {
   public applyReputationPenalty(nation: Nation, penaltyAmount: number): Nation {

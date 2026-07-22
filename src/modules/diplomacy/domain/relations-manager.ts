@@ -1,4 +1,5 @@
-import type { Nation, RelationProfile } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { RelationProfile } from "@/modules/diplomacy/schemas/diplomacy.schema";
 import { GameError } from "@/core/errors/game-error";
 
 export class RelationsManager {

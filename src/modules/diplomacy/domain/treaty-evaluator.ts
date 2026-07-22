@@ -1,8 +1,8 @@
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import type {
   RelationProfile,
   DiplomaticProposalType,
-  Nation,
-} from "@/core/types";
+} from "@/modules/diplomacy/schemas/diplomacy.schema";
 
 export interface ProposalEvaluation {
   accepted: boolean;

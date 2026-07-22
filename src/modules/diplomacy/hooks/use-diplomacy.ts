@@ -1,5 +1,7 @@
 import { useCallback } from "react";
-import type { GameAction, Nation, DiplomaticProposalType } from "@/core/types";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { DiplomaticProposalType } from "@/modules/diplomacy/schemas/diplomacy.schema";
 
 export function useDiplomacy(
   nation: Nation | undefined,
