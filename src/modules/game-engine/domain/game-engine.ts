@@ -10,6 +10,7 @@ import { VictoryChecker } from "./victory-checker";
 import { StateHistory } from "./state-history";
 import { TurnPipeline } from "./turn-pipeline";
 import { AIEngine } from "@/modules/ai/domain/ai-engine";
+import { ActionRouter } from "./actions/action-router";
 
 export class GameEngine {
   private currentState: GameState;
@@ -21,6 +22,7 @@ export class GameEngine {
   private pipeline: TurnPipeline;
   private aiEngine: AIEngine;
   private prng: SeededRandom;
+  private actionRouter: ActionRouter;
 
   constructor(initialState: GameState) {
     this.currentState = deepClone(initialState);
@@ -32,6 +34,7 @@ export class GameEngine {
     this.pipeline = new TurnPipeline();
     this.aiEngine = new AIEngine();
     this.prng = new SeededRandom(initialState.seed);
+    this.actionRouter = new ActionRouter();
     this.stateHistory.saveSnapshot(this.currentState);
   }
 
@@ -119,31 +122,7 @@ export class GameEngine {
   private processActionQueue(): void {
     const actions = this.actionQueue.getQueue();
     for (const action of actions) {
-      const source = this.currentState.nations[action.nationId];
-      if (source && source.isAlive) {
-        if (action.type === "DECLARE_WAR") {
-          const target = this.currentState.nations[action.targetNationId];
-          if (target && target.isAlive) {
-            source.aggressionScore = Math.min(100, source.aggressionScore + 25);
-            const relToTarget = source.relations[action.targetNationId];
-            if (relToTarget) {
-              source.relations[action.targetNationId] = {
-                ...relToTarget,
-                stance: "WAR",
-              };
-            }
-            const relToSource = target.relations[action.nationId];
-            if (relToSource) {
-              target.relations[action.nationId] = {
-                ...relToSource,
-                stance: "WAR",
-              };
-            }
-          }
-        } else if (action.type === "ATTACK") {
-          source.aggressionScore = Math.min(100, source.aggressionScore + 10);
-        }
-      }
+      this.currentState = this.actionRouter.route(this.currentState, action);
 
       const logEntry = this.eventLogger.createEntry(
         this.currentState.currentTurn,
