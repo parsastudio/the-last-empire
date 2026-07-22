@@ -35,6 +35,10 @@ export class TerritoryOccupationManager {
         ...loser.geography,
         territorySize: loser.geography.territorySize - seizedTerritory,
       },
+      government: {
+        ...loser.government,
+        stability: Math.max(0, loser.government.stability - 20),
+      },
     };
 
     return {

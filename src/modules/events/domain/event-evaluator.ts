@@ -20,7 +20,17 @@ export class EventEvaluator {
       );
 
       for (const event of events) {
+        let triggerChanceMultiplier = 1.0;
+        if (nation.geography.territorySize > 1500) {
+          triggerChanceMultiplier = 1.3;
+        }
+
+        const seedFactor = Math.sin(state.seed + id.charCodeAt(0)) * 10000;
+        const randomChance =
+          (seedFactor - Math.floor(seedFactor)) * triggerChanceMultiplier;
+
         if (
+          randomChance > 0.4 &&
           this.isTriggered(
             event,
             nation.government.stability,
@@ -32,7 +42,7 @@ export class EventEvaluator {
         ) {
           if (nation.isAi) {
             const randomChoice =
-              event.choices[Math.floor(Math.random() * event.choices.length)];
+              event.choices[Math.floor(randomChance * event.choices.length)];
             if (randomChoice) {
               const entry = this.logger.createEntry(
                 state.currentTurn,
