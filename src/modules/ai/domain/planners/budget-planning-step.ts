@@ -1,4 +1,4 @@
-import type { GameAction } from "@/core/types";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { AIPlanner } from "./ai-planner";
 import { AIPlanningContext } from "./ai-planning-context";
 
