@@ -17,27 +17,16 @@ export class UpkeepCalculator {
     const inflationMultiplier = 1 + nation.inflation / 100;
     const traitMultiplier = this.traitManager.getUpkeepMultiplier(nation);
 
-    const infantry = Math.floor(
-      nation.military.infantry *
-        nation.upkeep.infantryUpkeep *
-        inflationMultiplier *
-        traitMultiplier,
-    );
-    const airForce = Math.floor(
-      nation.military.airForce *
-        nation.upkeep.airForceUpkeep *
-        inflationMultiplier *
-        traitMultiplier,
-    );
-    const navy = Math.floor(
-      nation.military.navy *
-        nation.upkeep.navyUpkeep *
-        inflationMultiplier *
-        traitMultiplier,
-    );
-    const droneMissile = Math.floor(
-      nation.military.droneMissile *
-        nation.upkeep.droneMissileUpkeep *
+    const baseWeight =
+      nation.military.infantry * 1.0 +
+      nation.military.airForce * 3.0 +
+      nation.military.navy * 2.0 +
+      nation.military.droneMissile * 2.5;
+
+    const totalMilitaryCost = Math.floor(
+      baseWeight *
+        12 *
+        nation.military.techLevel *
         inflationMultiplier *
         traitMultiplier,
     );
@@ -49,13 +38,13 @@ export class UpkeepCalculator {
         inflationMultiplier,
     );
 
-    const total = infantry + airForce + navy + droneMissile + infrastructure;
+    const total = totalMilitaryCost + infrastructure;
 
     return {
-      infantry,
-      airForce,
-      navy,
-      droneMissile,
+      infantry: Math.floor(totalMilitaryCost * 0.4),
+      airForce: Math.floor(totalMilitaryCost * 0.3),
+      navy: Math.floor(totalMilitaryCost * 0.2),
+      droneMissile: Math.floor(totalMilitaryCost * 0.1),
       infrastructure,
       total,
     };

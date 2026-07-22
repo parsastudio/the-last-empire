@@ -33,6 +33,53 @@ export class VictoryChecker {
       };
     }
 
+    const totalGlobalGdp = aliveNations.reduce((sum, n) => sum + n.gdp, 0);
+    if (totalGlobalGdp > 0) {
+      for (const nation of aliveNations) {
+        const share = nation.gdp / totalGlobalGdp;
+        if (share >= 0.6) {
+          return {
+            isGameOver: true,
+            winnerNationId: nation.id,
+            reason: "ECONOMIC_DOMINANCE",
+          };
+        }
+      }
+    }
+
+    const peacefulTurns = state.peacefulTurnsCount ?? 0;
+    if (peacefulTurns >= 30) {
+      const totalPopulation = aliveNations.reduce(
+        (sum, n) => sum + n.population,
+        0,
+      );
+      if (totalPopulation > 0) {
+        for (const nation of aliveNations) {
+          let coalitionPopulation = nation.population;
+          for (const [targetId, rel] of Object.entries(nation.relations)) {
+            if (
+              rel.stance === "ALLIANCE" ||
+              rel.stance === "DEFENSIVE_PACT" ||
+              rel.stance === "NON_AGGRESSION_PACT"
+            ) {
+              const partner = state.nations[targetId];
+              if (partner && partner.isAlive) {
+                coalitionPopulation += partner.population;
+              }
+            }
+          }
+
+          if (coalitionPopulation / totalPopulation >= 0.7) {
+            return {
+              isGameOver: true,
+              winnerNationId: nation.id,
+              reason: "DIPLOMATIC_HEGEMONY",
+            };
+          }
+        }
+      }
+    }
+
     return {
       isGameOver: false,
     };

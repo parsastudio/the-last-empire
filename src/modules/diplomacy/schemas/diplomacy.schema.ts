@@ -29,6 +29,10 @@ export const RelationProfileSchema = z.object({
   militaryAccess: z.boolean(),
   embargoActive: z.boolean(),
   treatyTurnsRemaining: z.number().nonnegative(),
+  spyNetworkStrength: z.number().min(0).max(100),
+  intelLevel: z.number().min(0).max(3),
+  trust: z.number().min(-100).max(100),
+  tension: z.number().min(0).max(100),
 });
 
 export type DiplomaticStance = z.infer<typeof DiplomaticStanceSchema>;

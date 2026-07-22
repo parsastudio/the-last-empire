@@ -14,6 +14,7 @@ import {
 } from "./economy-action-handler";
 import { TradeActionHandler } from "./trade-action-handler";
 import { DiplomacyActionHandler } from "./diplomacy-action-handler";
+import { EspionageActionHandler } from "./espionage-action-handler";
 
 export class ActionRouter {
   private handlers: Map<string, ActionHandler> = new Map();
@@ -50,5 +51,7 @@ export class ActionRouter {
     );
     this.register("TRADE_RESOURCES", new TradeActionHandler());
     this.register("DIPLOMATIC_PROPOSAL", new DiplomacyActionHandler());
+    this.register("FUND_ESPIONAGE", new EspionageActionHandler());
+    this.register("COVERT_OPERATIONS", new EspionageActionHandler());
   }
 }

@@ -34,6 +34,7 @@ export const GameStateSchema = z.object({
   nations: z.record(z.string(), NationSchema),
   turnLogs: z.array(TurnLogEntrySchema),
   eventFlags: z.record(z.string(), z.boolean()),
+  peacefulTurnsCount: z.number().nonnegative().optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;

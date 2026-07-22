@@ -1,17 +1,15 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { StabilityCalculator } from "@/modules/politics/domain/stability-calculator";
 import { CorruptionManager } from "@/modules/politics/domain/corruption-manager";
-import { RebellionEngine } from "@/modules/politics/domain/rebellion-engine";
-import { MilitaryCoupEngine } from "@/modules/politics/domain/military-coup-engine";
 import { ElectionEngine } from "@/modules/politics/domain/election-engine";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
+import { DomesticCrisisManager } from "@/modules/politics/domain/domestic-crisis-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface PoliticsEngines {
   stabilityCalc: StabilityCalculator;
   corruptionManager: CorruptionManager;
-  rebellionEngine: RebellionEngine;
-  coupEngine: MilitaryCoupEngine;
+  domesticCrisisManager: DomesticCrisisManager;
   electionEngine: ElectionEngine;
   traitManager: TraitManager;
 }
@@ -23,8 +21,7 @@ export class PoliticsPhase implements TurnPhase {
     this.engines = engines ?? {
       stabilityCalc: new StabilityCalculator(),
       corruptionManager: new CorruptionManager(),
-      rebellionEngine: new RebellionEngine(),
-      coupEngine: new MilitaryCoupEngine(),
+      domesticCrisisManager: new DomesticCrisisManager(),
       electionEngine: new ElectionEngine(),
       traitManager: new TraitManager(),
     };
@@ -69,16 +66,9 @@ export class PoliticsPhase implements TurnPhase {
         updated = electionResult.updatedNation;
       }
 
-      const rebellionResult =
-        this.engines.rebellionEngine.checkAndTriggerRebellion(updated);
-      if (rebellionResult.hasRebellionTriggered) {
-        updated = rebellionResult.updatedNation;
-      }
-
-      const coupResult = this.engines.coupEngine.checkAndExecuteCoup(updated);
-      if (coupResult.hasCoupOccurred) {
-        updated = coupResult.updatedNation;
-      }
+      const crisisResult =
+        this.engines.domesticCrisisManager.checkAndProcessCrisis(updated);
+      updated = crisisResult.updatedNation;
 
       updated.government = {
         ...updated.government,

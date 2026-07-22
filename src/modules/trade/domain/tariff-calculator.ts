@@ -14,8 +14,8 @@ export class TariffCalculator {
     const tariffRevenue = Math.floor(totalTradeValue * (tariffRate / 100));
 
     let gdpGrowthPenalty = 0;
-    if (tariffRate > 15) {
-      gdpGrowthPenalty = (tariffRate - 15) * 0.002;
+    if (tariffRate > 10) {
+      gdpGrowthPenalty = (tariffRate - 10) * 0.0035;
     }
 
     return {

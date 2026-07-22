@@ -64,9 +64,13 @@ export class EconomyPhase implements TurnPhase {
         updated,
         peacefulNeighbors,
       );
+
+      const activeWar = Object.values(updated.relations).some(
+        (r) => r.stance === "WAR",
+      );
       updated.population = this.calcs.popEngine.updatePopulation(
         updated,
-        false,
+        activeWar,
       );
 
       const growth = this.calcs.manpowerManager.calculateGrowth(updated);

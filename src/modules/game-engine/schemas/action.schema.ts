@@ -73,6 +73,26 @@ export const InvestInfrastructureActionSchema = z.object({
   type: z.literal("INVEST_INFRASTRUCTURE"),
 });
 
+export const FundEspionageActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  type: z.literal("FUND_ESPIONAGE"),
+  targetNationId: z.string(),
+  budget: z.number().positive(),
+});
+
+export const CovertOperationsActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  type: z.literal("COVERT_OPERATIONS"),
+  targetNationId: z.string(),
+  operationType: z.enum([
+    "SABOTAGE_INDUSTRY",
+    "INSTIGATE_UNREST",
+    "MILITARY_INTEL_HEIST",
+  ]),
+});
+
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   ChangeGovernmentActionSchema,
@@ -83,6 +103,8 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   TradeResourcesActionSchema,
   UpgradeIndustrialLevelActionSchema,
   InvestInfrastructureActionSchema,
+  FundEspionageActionSchema,
+  CovertOperationsActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
@@ -108,6 +130,10 @@ export type UpgradeIndustrialLevelAction = z.infer<
 >;
 export type InvestInfrastructureAction = z.infer<
   typeof InvestInfrastructureActionSchema
+>;
+export type FundEspionageAction = z.infer<typeof FundEspionageActionSchema>;
+export type CovertOperationsAction = z.infer<
+  typeof CovertOperationsActionSchema
 >;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;

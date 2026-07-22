@@ -2,7 +2,7 @@ import type { Nation } from "@/modules/nation/schemas/nation.schema";
 
 export class PopulationGrowthEngine {
   public calculatePopulationChange(nation: Nation, isAtWar: boolean): number {
-    let growthRate = 0.01;
+    let growthRate = 0.012;
 
     if (nation.government.stability > 70) {
       growthRate += 0.005;
@@ -16,6 +16,12 @@ export class PopulationGrowthEngine {
 
     if (nation.inflation > 20) {
       growthRate -= 0.008;
+    }
+
+    const size = nation.geography.territorySize || 100;
+    const density = nation.population / size;
+    if (density > 1500) {
+      growthRate -= 0.006;
     }
 
     const change = Math.floor(nation.population * growthRate);

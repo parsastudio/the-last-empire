@@ -93,9 +93,24 @@ export class GameEngine {
 
     this.processActionQueue();
 
-    this.currentState = this.pipeline.processTurn(this.currentState, this.prng);
+    const activeWars = Object.values(this.currentState.nations).some((n) =>
+      Object.values(n.relations).some((r) => r.stance === "WAR"),
+    );
 
+    this.currentState = this.pipeline.processTurn(this.currentState, this.prng);
     this.currentState = this.livenessManager.updateLiveness(this.currentState);
+
+    let peacefulCount = this.currentState.peacefulTurnsCount ?? 0;
+    if (!activeWars) {
+      peacefulCount += 1;
+    } else {
+      peacefulCount = 0;
+    }
+
+    this.currentState = {
+      ...this.currentState,
+      peacefulTurnsCount: peacefulCount,
+    };
 
     const victoryStatus = this.victoryChecker.checkVictory(this.currentState);
     if (victoryStatus.isGameOver) {

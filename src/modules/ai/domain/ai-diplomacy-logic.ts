@@ -39,31 +39,29 @@ export class AIDiplomacyLogic {
         }
       }
 
-      if (
-        relation.opinion < -50 &&
-        relation.stance !== "WAR" &&
-        personality === "AGGRESSIVE"
-      ) {
-        const ownPower =
-          nation.military.infantry + nation.military.airForce * 3;
-        const enemyPower =
-          target.military.infantry + target.military.airForce * 3;
+      const relativePower =
+        this.calculatePower(nation) / (this.calculatePower(target) || 1);
 
-        if (ownPower > enemyPower * 1.5) {
-          actions.push({
-            id: `ai-war-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-            nationId: nation.id,
-            type: "DECLARE_WAR",
-            targetNationId: targetId,
-          });
-          break;
-        }
+      if (
+        personality === "AGGRESSIVE" &&
+        relation.trust < -20 &&
+        relation.stance !== "WAR" &&
+        relativePower > 2.0
+      ) {
+        actions.push({
+          id: `ai-backstab-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          nationId: nation.id,
+          type: "DECLARE_WAR",
+          targetNationId: targetId,
+        });
+        break;
       }
 
       if (
         relation.opinion > 10 &&
         relation.opinion < 80 &&
-        nation.treasury > 20000
+        nation.treasury > 20000 &&
+        relation.stance !== "WAR"
       ) {
         actions.push({
           id: `ai-diplomacy-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
@@ -79,5 +77,14 @@ export class AIDiplomacyLogic {
     }
 
     return actions;
+  }
+
+  private calculatePower(nation: Nation): number {
+    return (
+      nation.military.infantry * 1.0 +
+      nation.military.airForce * 3.0 +
+      nation.military.navy * 2.0 +
+      nation.military.droneMissile * 2.5
+    );
   }
 }
