@@ -3,8 +3,15 @@ import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { ActionHandler } from "./action-handler";
 import { TaxActionHandler } from "./tax-action-handler";
 import { GovernmentActionHandler } from "./government-action-handler";
-import { MilitaryActionHandler } from "./military-action-handler";
-import { EconomyActionHandler } from "./economy-action-handler";
+import {
+  RecruitUnitActionHandler,
+  DeclareWarActionHandler,
+  AttackActionHandler,
+} from "./military-action-handler";
+import {
+  UpgradeIndustrialLevelActionHandler,
+  InvestInfrastructureActionHandler,
+} from "./economy-action-handler";
 import { TradeActionHandler } from "./trade-action-handler";
 import { DiplomacyActionHandler } from "./diplomacy-action-handler";
 
@@ -28,16 +35,19 @@ export class ActionRouter {
   }
 
   private registerDefaultHandlers(): void {
-    const militaryHandler = new MilitaryActionHandler();
-    const economyHandler = new EconomyActionHandler();
-
     this.register("SET_TAX_RATE", new TaxActionHandler());
     this.register("CHANGE_GOVERNMENT", new GovernmentActionHandler());
-    this.register("RECRUIT_UNIT", militaryHandler);
-    this.register("DECLARE_WAR", militaryHandler);
-    this.register("ATTACK", militaryHandler);
-    this.register("UPGRADE_INDUSTRIAL_LEVEL", economyHandler);
-    this.register("INVEST_INFRASTRUCTURE", economyHandler);
+    this.register("RECRUIT_UNIT", new RecruitUnitActionHandler());
+    this.register("DECLARE_WAR", new DeclareWarActionHandler());
+    this.register("ATTACK", new AttackActionHandler());
+    this.register(
+      "UPGRADE_INDUSTRIAL_LEVEL",
+      new UpgradeIndustrialLevelActionHandler(),
+    );
+    this.register(
+      "INVEST_INFRASTRUCTURE",
+      new InvestInfrastructureActionHandler(),
+    );
     this.register("TRADE_RESOURCES", new TradeActionHandler());
     this.register("DIPLOMATIC_PROPOSAL", new DiplomacyActionHandler());
   }

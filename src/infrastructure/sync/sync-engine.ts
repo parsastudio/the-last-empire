@@ -1,10 +1,18 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
-import { IndexedDbAdapter } from "../storage/indexed-db-adapter";
+
+export interface StateStorageAdapter {
+  saveState(gameId: string, state: GameState): Promise<void>;
+  loadState(gameId: string): Promise<GameState | null>;
+}
 
 export class SyncEngine {
-  private dbAdapter = new IndexedDbAdapter();
+  private dbAdapter: StateStorageAdapter;
   private syncQueue: GameState[] = [];
   private isProcessing = false;
+
+  constructor(dbAdapter: StateStorageAdapter) {
+    this.dbAdapter = dbAdapter;
+  }
 
   public queueStateSync(state: GameState): void {
     this.syncQueue.push(state);

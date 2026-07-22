@@ -1,6 +1,7 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import { SeededRandom } from "@/core/math/seeded-random";
 import { deepClone } from "@/core/utils/deep-clone";
-import { TurnPhase } from "./pipeline/turn-phase";
+import { TurnPhase, PipelineContext } from "./pipeline/turn-phase";
 import { ModifiersPhase } from "./pipeline/modifiers-phase";
 import { EconomyPhase } from "./pipeline/economy-phase";
 import { MilitaryPhase } from "./pipeline/military-phase";
@@ -9,22 +10,30 @@ import { DiplomacyPhase } from "./pipeline/diplomacy-phase";
 import { EventsPhase } from "./pipeline/events-phase";
 
 export class TurnPipeline {
-  private phases: TurnPhase[] = [
-    new ModifiersPhase(),
-    new EconomyPhase(),
-    new MilitaryPhase(),
-    new PoliticsPhase(),
-    new DiplomacyPhase(),
-    new EventsPhase(),
-  ];
+  private phases: TurnPhase[];
 
-  public processTurn(state: GameState): GameState {
+  constructor(phases?: TurnPhase[]) {
+    this.phases = phases ?? [
+      new ModifiersPhase(),
+      new EconomyPhase(),
+      new MilitaryPhase(),
+      new PoliticsPhase(),
+      new DiplomacyPhase(),
+      new EventsPhase(),
+    ];
+  }
+
+  public processTurn(state: GameState, prng: SeededRandom): GameState {
     let nextState = deepClone(state);
+    const context: PipelineContext = {
+      state: nextState,
+      prng,
+    };
 
     for (const phase of this.phases) {
-      nextState = phase.execute(nextState);
+      context.state = phase.execute(context);
     }
 
-    return nextState;
+    return context.state;
   }
 }

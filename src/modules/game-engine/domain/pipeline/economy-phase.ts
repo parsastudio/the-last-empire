@@ -9,22 +9,41 @@ import { PopulationGrowthEngine } from "@/modules/economy/domain/population-grow
 import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 import { TradeRouteManager } from "@/modules/trade/domain/trade-route-manager";
-import { TurnPhase } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "./turn-phase";
+
+export interface EconomyCalculators {
+  gdpCalc: GdpCalculator;
+  upkeepCalc: UpkeepCalculator;
+  taxCalc: TaxCalculator;
+  debtManager: DebtManager;
+  bankruptcyManager: BankruptcyManager;
+  inflationCalc: InflationCalculator;
+  popEngine: PopulationGrowthEngine;
+  manpowerManager: ManpowerManager;
+  tariffCalculator: TariffCalculator;
+  tradeRouteManager: TradeRouteManager;
+}
 
 export class EconomyPhase implements TurnPhase {
-  private gdpCalc = new GdpCalculator();
-  private upkeepCalc = new UpkeepCalculator();
-  private taxCalc = new TaxCalculator();
-  private debtManager = new DebtManager();
-  private bankruptcyManager = new BankruptcyManager();
-  private inflationCalc = new InflationCalculator();
-  private popEngine = new PopulationGrowthEngine();
-  private manpowerManager = new ManpowerManager();
-  private tariffCalculator = new TariffCalculator();
-  private tradeRouteManager = new TradeRouteManager();
+  private calcs: EconomyCalculators;
 
-  public execute(state: GameState): GameState {
-    const nextState = { ...state };
+  constructor(calcs?: EconomyCalculators) {
+    this.calcs = calcs ?? {
+      gdpCalc: new GdpCalculator(),
+      upkeepCalc: new UpkeepCalculator(),
+      taxCalc: new TaxCalculator(),
+      debtManager: new DebtManager(),
+      bankruptcyManager: new BankruptcyManager(),
+      inflationCalc: new InflationCalculator(),
+      popEngine: new PopulationGrowthEngine(),
+      manpowerManager: new ManpowerManager(),
+      tariffCalculator: new TariffCalculator(),
+      tradeRouteManager: new TradeRouteManager(),
+    };
+  }
+
+  public execute(context: PipelineContext): GameState {
+    const nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {
@@ -41,35 +60,43 @@ export class EconomyPhase implements TurnPhase {
         },
       ).length;
 
-      updated.gdp = this.gdpCalc.updateNationGdp(updated, peacefulNeighbors);
-      updated.population = this.popEngine.updatePopulation(updated, false);
-
-      const growth = this.manpowerManager.calculateGrowth(updated);
-      updated = this.manpowerManager.restoreManpower(updated, growth);
-
-      const taxResult = this.taxCalc.evaluateTaxPolicy(updated);
-      const upkeepResult = this.upkeepCalc.calculateUpkeep(updated);
-
-      const totalTradeValue = this.tradeRouteManager.calculateTotalTradeRevenue(
+      updated.gdp = this.calcs.gdpCalc.updateNationGdp(
         updated,
-        nations,
+        peacefulNeighbors,
       );
-      const tariffResult = this.tariffCalculator.calculateTariffEffects(
+      updated.population = this.calcs.popEngine.updatePopulation(
+        updated,
+        false,
+      );
+
+      const growth = this.calcs.manpowerManager.calculateGrowth(updated);
+      updated = this.calcs.manpowerManager.restoreManpower(updated, growth);
+
+      const taxResult = this.calcs.taxCalc.evaluateTaxPolicy(updated);
+      const upkeepResult = this.calcs.upkeepCalc.calculateUpkeep(updated);
+
+      const totalTradeValue =
+        this.calcs.tradeRouteManager.calculateTotalTradeRevenue(
+          updated,
+          nations,
+        );
+      const tariffResult = this.calcs.tariffCalculator.calculateTariffEffects(
         updated,
         totalTradeValue,
       );
 
-      const financial = this.debtManager.processFinancials(
+      const financial = this.calcs.debtManager.processFinancials(
         updated,
         taxResult.taxIncome + tariffResult.tariffRevenue,
         upkeepResult.total,
       );
 
       updated = financial.updatedNation;
-      updated.inflation = this.inflationCalc.calculateNextInflation(updated);
+      updated.inflation =
+        this.calcs.inflationCalc.calculateNextInflation(updated);
 
-      if (this.bankruptcyManager.isBankrupt(updated)) {
-        updated = this.bankruptcyManager.applyBankruptcy(updated);
+      if (this.calcs.bankruptcyManager.isBankrupt(updated)) {
+        updated = this.calcs.bankruptcyManager.applyBankruptcy(updated);
       }
 
       nations[id] = updated;

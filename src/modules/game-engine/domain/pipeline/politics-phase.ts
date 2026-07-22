@@ -5,18 +5,33 @@ import { RebellionEngine } from "@/modules/politics/domain/rebellion-engine";
 import { MilitaryCoupEngine } from "@/modules/politics/domain/military-coup-engine";
 import { ElectionEngine } from "@/modules/politics/domain/election-engine";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
-import { TurnPhase } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "./turn-phase";
+
+export interface PoliticsEngines {
+  stabilityCalc: StabilityCalculator;
+  corruptionManager: CorruptionManager;
+  rebellionEngine: RebellionEngine;
+  coupEngine: MilitaryCoupEngine;
+  electionEngine: ElectionEngine;
+  traitManager: TraitManager;
+}
 
 export class PoliticsPhase implements TurnPhase {
-  private stabilityCalc = new StabilityCalculator();
-  private corruptionManager = new CorruptionManager();
-  private rebellionEngine = new RebellionEngine();
-  private coupEngine = new MilitaryCoupEngine();
-  private electionEngine = new ElectionEngine();
-  private traitManager = new TraitManager();
+  private engines: PoliticsEngines;
 
-  public execute(state: GameState): GameState {
-    const nextState = { ...state };
+  constructor(engines?: PoliticsEngines) {
+    this.engines = engines ?? {
+      stabilityCalc: new StabilityCalculator(),
+      corruptionManager: new CorruptionManager(),
+      rebellionEngine: new RebellionEngine(),
+      coupEngine: new MilitaryCoupEngine(),
+      electionEngine: new ElectionEngine(),
+      traitManager: new TraitManager(),
+    };
+  }
+
+  public execute(context: PipelineContext): GameState {
+    const nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {
@@ -32,34 +47,35 @@ export class PoliticsPhase implements TurnPhase {
       };
 
       updated.government.corruption =
-        this.corruptionManager.updateCorruptionLevel(updated);
+        this.engines.corruptionManager.updateCorruptionLevel(updated);
 
-      let stability = this.stabilityCalc.calculateTurnStability(updated);
+      let stability =
+        this.engines.stabilityCalc.calculateTurnStability(updated);
       stability = Math.max(
         0,
         Math.min(
           100,
-          stability + this.traitManager.getBaseStabilityDelta(updated),
+          stability + this.engines.traitManager.getBaseStabilityDelta(updated),
         ),
       );
       updated.government.stability = stability;
 
-      const electionResult = this.electionEngine.processElection(
+      const electionResult = this.engines.electionEngine.processElection(
         updated,
         nextState.currentTurn,
-        nextState.seed,
+        context.prng.nextInt(1, 1000000),
       );
       if (electionResult.electionHeld) {
         updated = electionResult.updatedNation;
       }
 
       const rebellionResult =
-        this.rebellionEngine.checkAndTriggerRebellion(updated);
+        this.engines.rebellionEngine.checkAndTriggerRebellion(updated);
       if (rebellionResult.hasRebellionTriggered) {
         updated = rebellionResult.updatedNation;
       }
 
-      const coupResult = this.coupEngine.checkAndExecuteCoup(updated);
+      const coupResult = this.engines.coupEngine.checkAndExecuteCoup(updated);
       if (coupResult.hasCoupOccurred) {
         updated = coupResult.updatedNation;
       }

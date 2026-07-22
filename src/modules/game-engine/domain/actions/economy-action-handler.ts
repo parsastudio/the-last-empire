@@ -4,29 +4,44 @@ import { IndustrialLevelManager } from "@/modules/economy/domain/industrial-leve
 import { InfrastructureManager } from "@/modules/economy/domain/infrastructure-manager";
 import { ActionHandler } from "./action-handler";
 
-export class EconomyActionHandler implements ActionHandler {
+export class UpgradeIndustrialLevelActionHandler implements ActionHandler {
   private industrialManager = new IndustrialLevelManager();
-  private infraManager = new InfrastructureManager();
 
   public execute(state: GameState, action: GameAction): GameState {
+    if (action.type !== "UPGRADE_INDUSTRIAL_LEVEL") {
+      return state;
+    }
     const nation = state.nations[action.nationId];
     if (!nation) {
       return state;
     }
-
-    let updatedNation = { ...nation };
-
-    if (action.type === "UPGRADE_INDUSTRIAL_LEVEL") {
-      updatedNation = this.industrialManager.upgradeIndustrialLevel(nation);
-    } else if (action.type === "INVEST_INFRASTRUCTURE") {
-      updatedNation = this.infraManager.upgradeInfrastructure(nation);
-    }
-
     return {
       ...state,
       nations: {
         ...state.nations,
-        [action.nationId]: updatedNation,
+        [action.nationId]:
+          this.industrialManager.upgradeIndustrialLevel(nation),
+      },
+    };
+  }
+}
+
+export class InvestInfrastructureActionHandler implements ActionHandler {
+  private infraManager = new InfrastructureManager();
+
+  public execute(state: GameState, action: GameAction): GameState {
+    if (action.type !== "INVEST_INFRASTRUCTURE") {
+      return state;
+    }
+    const nation = state.nations[action.nationId];
+    if (!nation) {
+      return state;
+    }
+    return {
+      ...state,
+      nations: {
+        ...state.nations,
+        [action.nationId]: this.infraManager.upgradeInfrastructure(nation),
       },
     };
   }
