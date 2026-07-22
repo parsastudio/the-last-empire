@@ -87,7 +87,7 @@ export class EspionageActionHandler implements ActionHandler {
         randomVal,
       );
 
-      let updatedTarget = { ...target };
+      const updatedTarget = { ...target };
       let updatedSource = { ...source };
 
       if (opResult.success) {

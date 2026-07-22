@@ -1,6 +1,6 @@
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
-import { CombatContext } from "./stages/combat-context";
-import { CombatStage } from "./stages/combat-stage";
+import { CombatContext } from "./combat-context";
+import { CombatStage } from "./combat-stage";
 
 export class ScoreFormulationStage implements CombatStage {
   private traitManager = new TraitManager();
