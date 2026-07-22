@@ -24,7 +24,7 @@ export class TurnPipeline {
   }
 
   public processTurn(state: GameState, prng: SeededRandom): GameState {
-    let nextState = deepClone(state);
+    const nextState = deepClone(state);
     const context: PipelineContext = {
       state: nextState,
       prng,

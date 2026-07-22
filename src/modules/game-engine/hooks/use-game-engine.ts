@@ -13,7 +13,7 @@ export function useGameEngine(initialState: GameState | null) {
   const [error, setError] = useState<string | null>(null);
 
   const dbAdapter = useMemo(() => new IndexedDbAdapter(), []);
-  const syncEngine = useMemo(() => new SyncEngine(), []);
+  const syncEngine = useMemo(() => new SyncEngine(dbAdapter), [dbAdapter]);
 
   const engine = useMemo(() => {
     if (!state) {
