@@ -1,0 +1,29 @@
+import type { Nation } from "@/core/types/nation.types";
+
+export class PopulationGrowthEngine {
+  public calculatePopulationChange(nation: Nation, isAtWar: boolean): number {
+    let growthRate = 0.01;
+
+    if (nation.government.stability > 70) {
+      growthRate += 0.005;
+    } else if (nation.government.stability < 30) {
+      growthRate -= 0.01;
+    }
+
+    if (isAtWar) {
+      growthRate -= 0.015;
+    }
+
+    if (nation.inflation > 20) {
+      growthRate -= 0.008;
+    }
+
+    const change = Math.floor(nation.population * growthRate);
+    return change;
+  }
+
+  public updatePopulation(nation: Nation, isAtWar: boolean): number {
+    const change = this.calculatePopulationChange(nation, isAtWar);
+    return Math.max(1, nation.population + change);
+  }
+}
