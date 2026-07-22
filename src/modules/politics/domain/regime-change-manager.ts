@@ -1,4 +1,5 @@
-import type { Nation, GovernmentType } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { GovernmentType } from "@/modules/politics/schemas/politics.schema";
 import { GameError } from "@/core/errors/game-error";
 
 export class RegimeChangeManager {

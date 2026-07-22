@@ -1,4 +1,4 @@
-import type { GovernmentType } from "@/core/types";
+import type { GovernmentType } from "@/modules/politics/schemas/politics.schema";
 
 export interface GovernmentTraits {
   economicGrowthBonus: number;

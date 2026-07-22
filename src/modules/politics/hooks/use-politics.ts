@@ -1,5 +1,7 @@
 import { useCallback } from "react";
-import type { GameAction, Nation, GovernmentType } from "@/core/types";
+import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type { GovernmentType } from "@/modules/politics/schemas/politics.schema";
 
 export function usePolitics(
   nation: Nation | undefined,

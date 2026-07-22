@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { SeededRandom } from "@/core/math/seeded-random";
 
 export interface ElectionResult {
