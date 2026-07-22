@@ -1,6 +1,9 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { NationManager } from "@/modules/nation/domain/nation-manager";
 
 export class ForceLimitCalculator {
+  private nationManager = new NationManager();
+
   public calculateForceLimit(nation: Nation): number {
     const baseLimit = Math.floor(nation.population * 0.05);
 
@@ -17,12 +20,7 @@ export class ForceLimitCalculator {
   }
 
   public getTotalMilitaryCount(nation: Nation): number {
-    return (
-      nation.military.infantry +
-      nation.military.airForce +
-      nation.military.navy +
-      nation.military.droneMissile
-    );
+    return this.nationManager.getTotalArmyCount(nation);
   }
 
   public getOverForceLimitPenalty(nation: Nation): number {

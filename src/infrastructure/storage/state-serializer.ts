@@ -1,4 +1,4 @@
-import type { GameState } from "@/core/types";
+import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { GameStateSchema } from "@/modules/game-engine/schemas/game-state.schema";
 import { GameError } from "@/core/errors/game-error";
 

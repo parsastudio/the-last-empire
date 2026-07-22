@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "../schemas/nation.schema";
 
 export class NationManager {
   public getTotalArmyCount(nation: Nation): number {
@@ -7,6 +7,15 @@ export class NationManager {
       nation.military.airForce +
       nation.military.navy +
       nation.military.droneMissile
+    );
+  }
+
+  public getTotalMilitaryPower(nation: Nation): number {
+    return (
+      nation.military.infantry * 1.0 +
+      nation.military.airForce * 3.0 +
+      nation.military.navy * 2.0 +
+      nation.military.droneMissile * 2.5
     );
   }
 

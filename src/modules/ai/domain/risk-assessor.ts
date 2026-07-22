@@ -1,6 +1,9 @@
-import type { Nation } from "@/core/types";
+import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { NationManager } from "@/modules/nation/domain/nation-manager";
 
 export class RiskAssessor {
+  private nationManager = new NationManager();
+
   public assessRisk(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -14,16 +17,8 @@ export class RiskAssessor {
       }
 
       if (relation.stance === "WAR") {
-        const enemyPower =
-          target.military.infantry +
-          target.military.airForce * 3 +
-          target.military.navy * 2 +
-          target.military.droneMissile * 2.5;
-        const ownPower =
-          nation.military.infantry +
-          nation.military.airForce * 3 +
-          nation.military.navy * 2 +
-          nation.military.droneMissile * 2.5;
+        const enemyPower = this.nationManager.getTotalMilitaryPower(target);
+        const ownPower = this.nationManager.getTotalMilitaryPower(nation);
 
         const ratio = enemyPower / (ownPower || 1);
         threatLevel += ratio * 30;
