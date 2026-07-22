@@ -17,6 +17,7 @@ import { MilitaryCoupEngine } from "@/modules/politics/domain/military-coup-engi
 import { ElectionEngine } from "@/modules/politics/domain/election-engine";
 import { ModifierManager } from "@/modules/events/domain/modifier-manager";
 import { EventEvaluator } from "@/modules/events/domain/event-evaluator";
+import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 
 export class TurnPipeline {
   private gdpCalc = new GdpCalculator();
@@ -36,6 +37,7 @@ export class TurnPipeline {
   private electionEngine = new ElectionEngine();
   private modifierManager = new ModifierManager();
   private eventEvaluator = new EventEvaluator();
+  private tariffCalculator = new TariffCalculator();
 
   public processTurn(state: GameState): GameState {
     const nextState = deepClone(state);
@@ -71,14 +73,19 @@ export class TurnPipeline {
       const taxResult = this.taxCalc.evaluateTaxPolicy(updated);
       const upkeepResult = this.upkeepCalc.calculateUpkeep(updated);
 
+      const totalTradeValue = peacefulNeighbors * 5000;
+      const tariffResult = this.tariffCalculator.calculateTariffEffects(
+        updated,
+        totalTradeValue,
+      );
+
       const financial = this.debtManager.processFinancials(
         updated,
-        taxResult.taxIncome,
+        taxResult.taxIncome + tariffResult.tariffRevenue,
         upkeepResult.total,
       );
 
-      updated.treasury = financial.newTreasury;
-      updated.debt = financial.newDebt;
+      updated = financial.updatedNation;
 
       const inflation = this.inflationCalc.calculateNextInflation(updated);
       updated.inflation = inflation;

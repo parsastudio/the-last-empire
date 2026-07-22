@@ -3,6 +3,7 @@ import type { GovernmentState } from "./government.types";
 import type { MilitaryStack, RecruitmentOrder } from "./military.types";
 import type { RelationProfile } from "./diplomacy.types";
 import type { Resources, UpkeepRates } from "./resources.types";
+import type { ImfLoan } from "./trade.types";
 
 export interface ActiveModifier {
   id: string;
@@ -20,6 +21,7 @@ export interface Nation {
   flagCode: string;
   gdp: number;
   taxRate: number;
+  tariffRate: number;
   treasury: number;
   debt: number;
   population: number;
@@ -35,4 +37,5 @@ export interface Nation {
   geography: Geography;
   relations: Record<string, RelationProfile>;
   activeModifiers: ActiveModifier[];
+  imfLoans: ImfLoan[];
 }

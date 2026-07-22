@@ -4,18 +4,12 @@ export interface TradeRoute {
   baseTradeValue: number;
 }
 
-export interface TariffRate {
-  rate: number;
-  gdpGrowthPenalty: number;
-}
-
-export interface LoanAgreement {
+export interface ImfLoan {
   id: string;
-  lenderId: string;
-  borrowerId: string;
   principalAmount: number;
   interestRate: number;
   turnsRemaining: number;
+  totalRepayable: number;
 }
 
 export interface ResourceMarket {

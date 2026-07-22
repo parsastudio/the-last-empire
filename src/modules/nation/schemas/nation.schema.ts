@@ -9,6 +9,7 @@ import {
   RecruitmentOrderSchema,
 } from "@/modules/military/schemas/military.schema";
 import { RelationProfileSchema } from "@/modules/diplomacy/schemas/diplomacy.schema";
+import { ImfLoanSchema } from "@/modules/trade/schemas/trade.schema";
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -34,6 +35,7 @@ export const NationSchema = z.object({
   flagCode: z.string(),
   gdp: z.number().nonnegative(),
   taxRate: z.number().min(0).max(100),
+  tariffRate: z.number().min(0).max(100),
   treasury: z.number(),
   debt: z.number().nonnegative(),
   population: z.number().nonnegative(),
@@ -49,4 +51,5 @@ export const NationSchema = z.object({
   geography: GeographySchema,
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
+  imfLoans: z.array(ImfLoanSchema),
 });

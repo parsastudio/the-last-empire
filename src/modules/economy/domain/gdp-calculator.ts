@@ -31,6 +31,10 @@ export class GdpCalculator {
     const tradeBonus = peacefulNeighborsCount * 0.015;
     multiplier += tradeBonus;
 
+    if (nation.tariffRate > 15) {
+      multiplier -= (nation.tariffRate - 15) * 0.002;
+    }
+
     return Math.max(0.5, multiplier);
   }
 
