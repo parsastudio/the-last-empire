@@ -1,4 +1,4 @@
-import type { GovernmentType } from "@/core/types/government.types";
+import type { GovernmentType } from "@/core/types";
 
 export interface GovernmentTraits {
   economicGrowthBonus: number;

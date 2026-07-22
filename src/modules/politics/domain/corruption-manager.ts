@@ -1,4 +1,4 @@
-import type { Nation } from "@/core/types/nation.types";
+import type { Nation } from "@/core/types";
 import { GameError } from "@/core/errors/game-error";
 
 export class CorruptionManager {

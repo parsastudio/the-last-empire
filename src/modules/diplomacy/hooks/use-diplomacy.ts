@@ -1,7 +1,5 @@
 import { useCallback } from "react";
-import type { GameAction } from "@/core/types/actions.types";
-import type { Nation } from "@/core/types/nation.types";
-import type { DiplomaticProposalType } from "@/core/types/diplomacy.types";
+import type { GameAction, Nation, DiplomaticProposalType } from "@/core/types";
 
 export function useDiplomacy(
   nation: Nation | undefined,
