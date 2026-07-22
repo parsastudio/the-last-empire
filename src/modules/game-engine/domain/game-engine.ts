@@ -8,6 +8,8 @@ import { EventLogger } from "./event-logger";
 import { NationLivenessManager } from "./nation-liveness-manager";
 import { VictoryChecker } from "./victory-checker";
 import { StateHistory } from "./state-history";
+import { TurnPipeline } from "./turn-pipeline";
+import { AIEngine } from "@/modules/ai/domain/ai-engine";
 
 export class GameEngine {
   private currentState: GameState;
@@ -16,6 +18,8 @@ export class GameEngine {
   private livenessManager: NationLivenessManager;
   private victoryChecker: VictoryChecker;
   private stateHistory: StateHistory;
+  private pipeline: TurnPipeline;
+  private aiEngine: AIEngine;
   private prng: SeededRandom;
 
   constructor(initialState: GameState) {
@@ -25,6 +29,8 @@ export class GameEngine {
     this.livenessManager = new NationLivenessManager();
     this.victoryChecker = new VictoryChecker();
     this.stateHistory = new StateHistory();
+    this.pipeline = new TurnPipeline();
+    this.aiEngine = new AIEngine();
     this.prng = new SeededRandom(initialState.seed);
     this.stateHistory.saveSnapshot(this.currentState);
   }
@@ -69,6 +75,20 @@ export class GameEngine {
     }
 
     this.processActionQueue();
+
+    const aiActions = this.aiEngine.generateTurnActions(this.currentState);
+    for (const aiAction of aiActions) {
+      try {
+        this.actionQueue.enqueue(this.currentState, aiAction);
+      } catch {
+        continue;
+      }
+    }
+
+    this.processActionQueue();
+
+    this.currentState = this.pipeline.processTurn(this.currentState);
+
     this.currentState = this.livenessManager.updateLiveness(this.currentState);
 
     const victoryStatus = this.victoryChecker.checkVictory(this.currentState);
