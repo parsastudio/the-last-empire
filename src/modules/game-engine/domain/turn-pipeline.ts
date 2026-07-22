@@ -18,6 +18,7 @@ import { ElectionEngine } from "@/modules/politics/domain/election-engine";
 import { ModifierManager } from "@/modules/events/domain/modifier-manager";
 import { EventEvaluator } from "@/modules/events/domain/event-evaluator";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
+import { TraitManager } from "@/modules/nation/domain/trait-manager";
 
 export class TurnPipeline {
   private gdpCalc = new GdpCalculator();
@@ -38,6 +39,7 @@ export class TurnPipeline {
   private modifierManager = new ModifierManager();
   private eventEvaluator = new EventEvaluator();
   private tariffCalculator = new TariffCalculator();
+  private traitManager = new TraitManager();
 
   public processTurn(state: GameState): GameState {
     const nextState = deepClone(state);
@@ -97,7 +99,14 @@ export class TurnPipeline {
       updated = this.recruitmentQueue.processTurnQueue(updated);
       updated = this.attritionManager.applyUpkeepDeficitAttrition(updated);
 
-      const stability = this.stabilityCalc.calculateTurnStability(updated);
+      let stability = this.stabilityCalc.calculateTurnStability(updated);
+      stability = Math.max(
+        0,
+        Math.min(
+          100,
+          stability + this.traitManager.getBaseStabilityDelta(updated),
+        ),
+      );
       updated.government.stability = stability;
 
       const electionResult = this.electionEngine.processElection(

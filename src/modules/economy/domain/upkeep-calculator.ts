@@ -1,4 +1,5 @@
 import type { Nation } from "@/core/types/nation.types";
+import { TraitManager } from "@/modules/nation/domain/trait-manager";
 
 export interface BreakdownUpkeep {
   infantry: number;
@@ -10,26 +11,35 @@ export interface BreakdownUpkeep {
 }
 
 export class UpkeepCalculator {
+  private traitManager = new TraitManager();
+
   public calculateUpkeep(nation: Nation): BreakdownUpkeep {
     const inflationMultiplier = 1 + nation.inflation / 100;
+    const traitMultiplier = this.traitManager.getUpkeepMultiplier(nation);
 
     const infantry = Math.floor(
       nation.military.infantry *
         nation.upkeep.infantryUpkeep *
-        inflationMultiplier,
+        inflationMultiplier *
+        traitMultiplier,
     );
     const airForce = Math.floor(
       nation.military.airForce *
         nation.upkeep.airForceUpkeep *
-        inflationMultiplier,
+        inflationMultiplier *
+        traitMultiplier,
     );
     const navy = Math.floor(
-      nation.military.navy * nation.upkeep.navyUpkeep * inflationMultiplier,
+      nation.military.navy *
+        nation.upkeep.navyUpkeep *
+        inflationMultiplier *
+        traitMultiplier,
     );
     const droneMissile = Math.floor(
       nation.military.droneMissile *
         nation.upkeep.droneMissileUpkeep *
-        inflationMultiplier,
+        inflationMultiplier *
+        traitMultiplier,
     );
 
     const infrastructure = Math.floor(

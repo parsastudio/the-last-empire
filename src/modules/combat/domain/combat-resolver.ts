@@ -1,9 +1,9 @@
-import type { Nation } from "@/core/types/nation.types";
-import type { MilitaryStack } from "@/core/types/military.types";
+import type { Nation, MilitaryStack } from "@/core/types";
 import { SeededRandom } from "@/core/math/seeded-random";
 import { AirSuperiorityCalculator } from "./air-superiority";
 import { DroneStrikeCalculator } from "./drone-strike-calculator";
 import { CasualtyCalculator } from "./casualty-calculator";
+import { TraitManager } from "@/modules/nation/domain/trait-manager";
 
 export interface CombatResult {
   attackerWon: boolean;
@@ -14,15 +14,10 @@ export interface CombatResult {
 }
 
 export class CombatResolver {
-  private airCalc: AirSuperiorityCalculator;
-  private droneCalc: DroneStrikeCalculator;
-  private casualtyCalc: CasualtyCalculator;
-
-  constructor() {
-    this.airCalc = new AirSuperiorityCalculator();
-    this.droneCalc = new DroneStrikeCalculator();
-    this.casualtyCalc = new CasualtyCalculator();
-  }
+  private airCalc = new AirSuperiorityCalculator();
+  private droneCalc = new DroneStrikeCalculator();
+  private casualtyCalc = new CasualtyCalculator();
+  private traitManager = new TraitManager();
 
   public resolveCombat(
     attacker: Nation,
@@ -43,7 +38,10 @@ export class CombatResolver {
 
     const defenderInfantryAfterDrone = droneResult.remainingDefenderInfantry;
 
-    const defenderHomeBonus = 1.2;
+    const defenderHomeBonus =
+      1.2 + this.traitManager.getCombatDefenseBonus(defender);
+    const attackerAttackBonus =
+      1.0 + this.traitManager.getCombatAttackBonus(attacker);
     const defenderDebuffMultiplier = 1.0 - airResult.defenderDefenseDebuff;
 
     const attackerBase =
@@ -52,7 +50,8 @@ export class CombatResolver {
         attackForce.navy * 2.0 +
         attackForce.droneMissile * 2.5) *
       (1 + attackForce.techLevel * 0.15) *
-      (1 + attackForce.experience * 0.005);
+      (1 + attackForce.experience * 0.005) *
+      attackerAttackBonus;
 
     const defenderBase =
       (defenderInfantryAfterDrone * 1.0 +

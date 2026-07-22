@@ -1,6 +1,9 @@
 import type { Nation } from "@/core/types/nation.types";
+import { TraitManager } from "@/modules/nation/domain/trait-manager";
 
 export class GdpCalculator {
+  private traitManager = new TraitManager();
+
   public calculateBaseGdp(
     population: number,
     infrastructureLevel: number,
@@ -34,6 +37,8 @@ export class GdpCalculator {
     if (nation.tariffRate > 15) {
       multiplier -= (nation.tariffRate - 15) * 0.002;
     }
+
+    multiplier += this.traitManager.getGdpGrowthModifier(nation);
 
     return Math.max(0.5, multiplier);
   }

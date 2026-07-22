@@ -5,6 +5,14 @@ import type { RelationProfile } from "./diplomacy.types";
 import type { Resources, UpkeepRates } from "./resources.types";
 import type { ImfLoan } from "./trade.types";
 
+export type NationTrait =
+  | "OIL_RICH"
+  | "ISLAND_FORTRESS"
+  | "MILITARISTIC"
+  | "FRAGILE_ECONOMY"
+  | "INDUSTRIAL_HUB"
+  | "ISOLATED_SOCIETY";
+
 export interface ActiveModifier {
   id: string;
   name: string;
@@ -38,4 +46,5 @@ export interface Nation {
   relations: Record<string, RelationProfile>;
   activeModifiers: ActiveModifier[];
   imfLoans: ImfLoan[];
+  traits: NationTrait[];
 }

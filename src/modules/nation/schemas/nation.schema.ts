@@ -11,6 +11,15 @@ import {
 import { RelationProfileSchema } from "@/modules/diplomacy/schemas/diplomacy.schema";
 import { ImfLoanSchema } from "@/modules/trade/schemas/trade.schema";
 
+export const NationTraitSchema = z.enum([
+  "OIL_RICH",
+  "ISLAND_FORTRESS",
+  "MILITARISTIC",
+  "FRAGILE_ECONOMY",
+  "INDUSTRIAL_HUB",
+  "ISOLATED_SOCIETY",
+]);
+
 export const ActiveModifierSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -52,4 +61,5 @@ export const NationSchema = z.object({
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
   imfLoans: z.array(ImfLoanSchema),
+  traits: z.array(NationTraitSchema),
 });
