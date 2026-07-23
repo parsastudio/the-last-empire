@@ -4,10 +4,10 @@ import type { GameState } from "@/modules/game-engine/schemas/game-state.schema"
 
 export function runSyncEngineTest(): boolean {
   const mockDbAdapter: StateStorageAdapter = {
-    saveState: async (_gameId: string, _state: GameState): Promise<void> => {
+    saveState: async (): Promise<void> => {
       return Promise.resolve();
     },
-    loadState: async (_gameId: string): Promise<GameState | null> => {
+    loadState: async (): Promise<GameState | null> => {
       return Promise.resolve(null);
     },
   };

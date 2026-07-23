@@ -122,7 +122,8 @@ export class AttackActionHandler implements ActionHandler {
       );
     }
 
-    let { infantry, airForce, navy, droneMissile } = attackAction;
+    const { airForce, navy } = attackAction;
+    let { infantry, droneMissile } = attackAction;
     if (
       attacker.military.infantry < infantry ||
       attacker.military.airForce < airForce ||
