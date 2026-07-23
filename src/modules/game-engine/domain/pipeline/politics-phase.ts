@@ -4,6 +4,7 @@ import { CorruptionManager } from "@/modules/politics/domain/corruption-manager"
 import { ElectionEngine } from "@/modules/politics/domain/election-engine";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
 import { DomesticCrisisManager } from "@/modules/politics/domain/domestic-crisis-manager";
+import { ProxyWarManager } from "@/modules/politics/domain/proxy-war-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface PoliticsEngines {
@@ -16,6 +17,7 @@ export interface PoliticsEngines {
 
 export class PoliticsPhase implements TurnPhase {
   private engines: PoliticsEngines;
+  private proxyManager = new ProxyWarManager();
 
   constructor(engines?: PoliticsEngines) {
     this.engines = engines ?? {
@@ -42,6 +44,19 @@ export class PoliticsPhase implements TurnPhase {
           ...nation.government,
         },
       };
+
+      let accumulatedProxyBudget = 0;
+      for (const other of Object.values(nations)) {
+        if (other.isAlive && other.id !== id) {
+          accumulatedProxyBudget += other.proxyInfluenceBudget[id] || 0;
+        }
+      }
+
+      const proxyResult = this.proxyManager.processTurnProxyImpact(
+        updated,
+        accumulatedProxyBudget,
+      );
+      updated = proxyResult.updatedTargetNation;
 
       updated.government.corruption =
         this.engines.corruptionManager.updateCorruptionLevel(updated);

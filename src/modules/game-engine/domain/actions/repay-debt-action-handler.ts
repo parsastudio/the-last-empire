@@ -4,7 +4,7 @@ import type {
   RepayDebtAction,
 } from "@/modules/game-engine/schemas/action.schema";
 import { GameError } from "@/core/errors/game-error";
-import { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "./action-handler";
 
 export class RepayDebtActionHandler implements ActionHandler {
   public execute(state: GameState, action: GameAction): GameState {

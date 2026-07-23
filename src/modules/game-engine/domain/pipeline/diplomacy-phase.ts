@@ -1,64 +1,63 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
-import { CoalitionManager } from "@/modules/diplomacy/domain/coalition-manager";
-import { TrustManager } from "@/modules/diplomacy/domain/trust-manager";
+import { DiplomaticOpinionCalculator } from "@/modules/diplomacy/domain/diplomatic-opinion-calculator";
+import { GlobalIntelligenceUpdater } from "@/modules/diplomacy/domain/global-intelligence-updater";
+import { PowerScoreCalculator } from "@/modules/diplomacy/domain/power-score-calculator";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class DiplomacyPhase implements TurnPhase {
-  private coalitionManager = new CoalitionManager();
-  private trustManager = new TrustManager();
+  private opinionCalculator = new DiplomaticOpinionCalculator();
+  private intelligenceUpdater = new GlobalIntelligenceUpdater();
+  private powerCalculator = new PowerScoreCalculator();
 
   public execute(context: PipelineContext): GameState {
-    const nextState = this.coalitionManager.processCoalitions(context.state);
+    const nextState = { ...context.state };
     const nations = { ...nextState.nations };
+
+    const rawNationsList = Object.values(nations)
+      .filter((n) => n.isAlive)
+      .map((n) => ({
+        id: n.id,
+        gdp: n.gdp,
+        treasury: n.treasury,
+        infantry: n.military.infantry,
+        airForce: n.military.airForce,
+        drone: n.military.droneMissile,
+      }));
+
+    this.powerCalculator.rankNations(rawNationsList);
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
         continue;
       }
-      const updatedRelations = { ...nation.relations };
+
+      let updated = this.intelligenceUpdater.updatePassiveIntel(
+        nation,
+        nations,
+      );
+      const updatedRelations = { ...updated.relations };
+
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         const target = nations[targetId];
         if (target && target.isAlive) {
-          const baseRelation = this.trustManager.updateTrustAndTension(
-            nation,
-            target,
-            relation,
+          const isLandNeighbor =
+            updated.geography.landNeighbors.includes(targetId);
+          const nextOpinion = this.opinionCalculator.calculateOpinion(
+            updated.globalReputation,
+            updated.globalAggression,
+            relation.stance,
+            isLandNeighbor,
           );
 
-          let calculatedIntel = 0;
-          const isLandNeighbor =
-            nation.geography.landNeighbors.includes(targetId);
-
-          if (
-            baseRelation.stance === "ALLIANCE" ||
-            isLandNeighbor ||
-            baseRelation.militaryAccess
-          ) {
-            calculatedIntel = 3;
-          } else if (
-            baseRelation.stance === "PEACE" ||
-            baseRelation.stance === "NON_AGGRESSION_PACT" ||
-            baseRelation.stance === "DEFENSIVE_PACT"
-          ) {
-            calculatedIntel = 2;
-          } else if (
-            baseRelation.stance === "WAR" ||
-            baseRelation.stance === "EMBARGO" ||
-            baseRelation.stance === "COALITION"
-          ) {
-            calculatedIntel = 1;
-          }
-
           updatedRelations[targetId] = {
-            ...baseRelation,
-            intelLevel: calculatedIntel,
+            ...relation,
+            opinion: nextOpinion,
           };
         }
       }
-      nations[id] = {
-        ...nation,
-        relations: updatedRelations,
-      };
+
+      updated.relations = updatedRelations;
+      nations[id] = updated;
     }
 
     nextState.nations = nations;

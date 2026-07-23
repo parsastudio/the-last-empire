@@ -1,22 +1,19 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
-import { ActionHandler } from "./action-handler";
 import { TaxActionHandler } from "./tax-action-handler";
 import { GovernmentActionHandler } from "./government-action-handler";
-import {
-  RecruitUnitActionHandler,
-  DeclareWarActionHandler,
-  AttackActionHandler,
-} from "./military-action-handler";
-import {
-  UpgradeIndustrialLevelActionHandler,
-  InvestInfrastructureActionHandler,
-} from "./economy-action-handler";
+import { RecruitActionHandler } from "./recruit-action-handler";
+import { DeclareWarActionHandler } from "./declare-war-action-handler";
+import { AttackActionHandler } from "./attack-action-handler";
+import { UpgradeIndustrialActionHandler } from "./upgrade-industrial-action-handler";
+import { InvestInfrastructureActionHandler } from "./invest-infrastructure-action-handler";
 import { TradeActionHandler } from "./trade-action-handler";
 import { DiplomacyActionHandler } from "./diplomacy-action-handler";
-import { EspionageActionHandler } from "./espionage-action-handler";
 import { RepayDebtActionHandler } from "./repay-debt-action-handler";
 import { ActivateAbilityActionHandler } from "./activate-ability-action-handler";
+import { FundProxyInfluenceActionHandler } from "./fund-proxy-influence-action-handler";
+import { UnlockDoctrineActionHandler } from "./unlock-doctrine-action-handler";
+import type { ActionHandler } from "./action-handler";
 
 export class ActionRouter {
   private handlers: Map<string, ActionHandler> = new Map();
@@ -40,12 +37,12 @@ export class ActionRouter {
   private registerDefaultHandlers(): void {
     this.register("SET_TAX_RATE", new TaxActionHandler());
     this.register("CHANGE_GOVERNMENT", new GovernmentActionHandler());
-    this.register("RECRUIT_UNIT", new RecruitmentQueueManagerWrapper());
+    this.register("RECRUIT_UNIT", new RecruitActionHandler());
     this.register("DECLARE_WAR", new DeclareWarActionHandler());
     this.register("ATTACK", new AttackActionHandler());
     this.register(
       "UPGRADE_INDUSTRIAL_LEVEL",
-      new UpgradeIndustrialLevelActionHandler(),
+      new UpgradeIndustrialActionHandler(),
     );
     this.register(
       "INVEST_INFRASTRUCTURE",
@@ -53,16 +50,12 @@ export class ActionRouter {
     );
     this.register("TRADE_RESOURCES", new TradeActionHandler());
     this.register("DIPLOMATIC_PROPOSAL", new DiplomacyActionHandler());
-    this.register("FUND_ESPIONAGE", new EspionageActionHandler());
-    this.register("COVERT_OPERATIONS", new EspionageActionHandler());
     this.register("REPAY_DEBT", new RepayDebtActionHandler());
     this.register("ACTIVATE_ABILITY", new ActivateAbilityActionHandler());
-  }
-}
-
-class RecruitmentQueueManagerWrapper implements ActionHandler {
-  private handler = new RecruitUnitActionHandler();
-  public execute(state: GameState, action: GameAction): GameState {
-    return this.handler.execute(state, action);
+    this.register(
+      "FUND_PROXY_INFLUENCE",
+      new FundProxyInfluenceActionHandler(),
+    );
+    this.register("UNLOCK_DOCTRINE", new UnlockDoctrineActionHandler());
   }
 }

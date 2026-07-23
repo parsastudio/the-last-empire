@@ -4,7 +4,7 @@ import type {
   DiplomaticProposalAction,
 } from "@/modules/game-engine/schemas/action.schema";
 import { TreatyEvaluator } from "@/modules/diplomacy/domain/treaty-evaluator";
-import { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "./action-handler";
 
 export class DiplomacyActionHandler implements ActionHandler {
   private evaluator = new TreatyEvaluator();

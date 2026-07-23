@@ -1,7 +1,7 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { GameError } from "@/core/errors/game-error";
-import { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "./action-handler";
 import type { ActiveModifier } from "@/modules/nation/schemas/nation.schema";
 
 export class ActivateAbilityActionHandler implements ActionHandler {

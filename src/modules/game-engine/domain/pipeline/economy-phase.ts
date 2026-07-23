@@ -9,6 +9,7 @@ import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 import { TradeRouteManager } from "@/modules/trade/domain/trade-route-manager";
 import { OverextensionCalculator } from "@/modules/economy/domain/overextension-calculator";
+import { DoctrinesManager } from "@/modules/politics/domain/doctrines-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface EconomyCalculators {
@@ -26,6 +27,7 @@ export interface EconomyCalculators {
 export class EconomyPhase implements TurnPhase {
   private calcs: EconomyCalculators;
   private overextensionCalculator = new OverextensionCalculator();
+  private doctrinesManager = new DoctrinesManager();
 
   constructor(calcs?: EconomyCalculators) {
     this.calcs = calcs ?? {
@@ -80,10 +82,14 @@ export class EconomyPhase implements TurnPhase {
         },
       ).length;
 
-      updated.gdp = this.calcs.gdpCalc.updateNationGdp(
+      const rawGdp = this.calcs.gdpCalc.updateNationGdp(
         updated,
         peacefulNeighbors,
       );
+      const doctrineGdpBonus = this.doctrinesManager.getGdpGrowthModifier(
+        updated.doctrines.unlockedDoctrines,
+      );
+      updated.gdp = Math.floor(rawGdp * (1.0 + doctrineGdpBonus));
 
       const activeWar = Object.values(updated.relations).some(
         (r) => r.stance === "WAR",
@@ -106,7 +112,13 @@ export class EconomyPhase implements TurnPhase {
       updated = this.calcs.manpowerManager.restoreManpower(updated, growth);
 
       const taxResult = this.calcs.taxCalc.evaluateTaxPolicy(updated);
-      const upkeepResult = this.calcs.upkeepCalc.calculateUpkeep(updated);
+      const rawUpkeep = this.calcs.upkeepCalc.calculateUpkeep(updated);
+      const doctrineUpkeepDiscount = this.doctrinesManager.getUpkeepMultiplier(
+        updated.doctrines.unlockedDoctrines,
+      );
+      const finalUpkeepTotal = Math.floor(
+        rawUpkeep.total * doctrineUpkeepDiscount,
+      );
 
       const totalTradeValue =
         this.calcs.tradeRouteManager.calculateTotalTradeRevenue(
@@ -121,7 +133,7 @@ export class EconomyPhase implements TurnPhase {
       const financial = this.calcs.debtManager.processFinancials(
         updated,
         taxResult.taxIncome + tariffResult.tariffRevenue,
-        upkeepResult.total,
+        finalUpkeepTotal,
       );
 
       updated = financial.updatedNation;
