@@ -4,7 +4,6 @@ import { UpkeepCalculator } from "@/modules/economy/domain/upkeep-calculator";
 import { TaxCalculator } from "@/modules/economy/domain/tax-calculator";
 import { DebtManager } from "@/modules/economy/domain/debt-manager";
 import { BankruptcyManager } from "@/modules/economy/domain/bankruptcy-manager";
-import { InflationCalculator } from "@/modules/economy/domain/inflation-calculator";
 import { PopulationGrowthEngine } from "@/modules/economy/domain/population-growth-engine";
 import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
@@ -17,7 +16,6 @@ export interface EconomyCalculators {
   taxCalc: TaxCalculator;
   debtManager: DebtManager;
   bankruptcyManager: BankruptcyManager;
-  inflationCalc: InflationCalculator;
   popEngine: PopulationGrowthEngine;
   manpowerManager: ManpowerManager;
   tariffCalculator: TariffCalculator;
@@ -34,7 +32,6 @@ export class EconomyPhase implements TurnPhase {
       taxCalc: new TaxCalculator(),
       debtManager: new DebtManager(),
       bankruptcyManager: new BankruptcyManager(),
-      inflationCalc: new InflationCalculator(),
       popEngine: new PopulationGrowthEngine(),
       manpowerManager: new ManpowerManager(),
       tariffCalculator: new TariffCalculator(),
@@ -116,8 +113,6 @@ export class EconomyPhase implements TurnPhase {
       );
 
       updated = financial.updatedNation;
-      updated.inflation =
-        this.calcs.inflationCalc.calculateNextInflation(updated);
 
       if (this.calcs.bankruptcyManager.isBankrupt(updated)) {
         updated = this.calcs.bankruptcyManager.applyBankruptcy(updated);

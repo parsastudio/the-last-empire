@@ -9,7 +9,10 @@ export class StabilityCalculator {
     if (nation.taxRate > 25) {
       delta -= (nation.taxRate - 25) * 0.5;
     } else if (nation.taxRate < 15) {
-      delta += 0.5;
+      delta += Math.min(5, (15 - nation.taxRate) * 0.5);
+    }
+    if (nation.taxRate < 5) {
+      delta -= 15;
     }
     if (nation.warExhaustion > 30) {
       delta -= (nation.warExhaustion - 30) * 0.2;

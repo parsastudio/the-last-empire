@@ -35,8 +35,8 @@ export class SyncDeltaPacker {
       if (nation.treasury !== prevNation.treasury) {
         changes[`nations.${id}.treasury`] = nation.treasury;
       }
-      if (nation.debt !== prevNation.debt) {
-        changes[`nations.${id}.debt`] = nation.debt;
+      if (nation.nationalDebt !== prevNation.nationalDebt) {
+        changes[`nations.${id}.nationalDebt`] = nation.nationalDebt;
       }
       if (nation.gdp !== prevNation.gdp) {
         changes[`nations.${id}.gdp`] = nation.gdp;

@@ -9,7 +9,6 @@ import {
   RecruitmentOrderSchema,
 } from "@/modules/military/schemas/military.schema";
 import { RelationProfileSchema } from "@/modules/diplomacy/schemas/diplomacy.schema";
-import { ImfLoanSchema } from "@/modules/trade/schemas/trade.schema";
 
 export const NationTraitSchema = z.enum([
   "OIL_RICH",
@@ -46,9 +45,8 @@ export const NationSchema = z.object({
   taxRate: z.number().min(0).max(100),
   tariffRate: z.number().min(0).max(100),
   treasury: z.number(),
-  debt: z.number().nonnegative(),
+  nationalDebt: z.number().nonnegative(),
   population: z.number().nonnegative(),
-  inflation: z.number().min(0),
   warExhaustion: z.number().min(0).max(100),
   reputation: z.number().min(-100).max(100),
   industrialLevel: z.number().positive(),
@@ -60,7 +58,6 @@ export const NationSchema = z.object({
   geography: GeographySchema,
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
-  imfLoans: z.array(ImfLoanSchema),
   traits: z.array(NationTraitSchema),
   aggressionScore: z.number().min(0).max(100),
 });

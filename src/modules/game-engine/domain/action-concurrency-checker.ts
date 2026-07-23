@@ -6,6 +6,38 @@ export class ActionConcurrencyChecker {
     actionList: GameAction[],
     newAction: GameAction,
   ): void {
+    if (newAction.type === "ATTACK") {
+      const target = newAction.targetNationId;
+      const hasWarDeclaredThisTurn = actionList.some(
+        (a) =>
+          a.type === "DECLARE_WAR" &&
+          a.nationId === newAction.nationId &&
+          a.targetNationId === target,
+      );
+      if (hasWarDeclaredThisTurn) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot declare war and attack the same nation in the same turn",
+        );
+      }
+    }
+
+    if (newAction.type === "DECLARE_WAR") {
+      const target = newAction.targetNationId;
+      const hasAttackThisTurn = actionList.some(
+        (a) =>
+          a.type === "ATTACK" &&
+          a.nationId === newAction.nationId &&
+          a.targetNationId === target,
+      );
+      if (hasAttackThisTurn) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot declare war and attack the same nation in the same turn",
+        );
+      }
+    }
+
     const isDuplicateTrade =
       newAction.type === "TRADE_RESOURCES" &&
       actionList.some(

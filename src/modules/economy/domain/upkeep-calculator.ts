@@ -16,7 +16,6 @@ export class UpkeepCalculator {
   private governmentSystem = new GovernmentSystem();
 
   public calculateUpkeep(nation: Nation): BreakdownUpkeep {
-    const inflationMultiplier = 1 + nation.inflation / 100;
     const traitMultiplier = this.traitManager.getUpkeepMultiplier(nation);
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
 
@@ -30,7 +29,6 @@ export class UpkeepCalculator {
       baseWeight *
         12 *
         nation.military.techLevel *
-        inflationMultiplier *
         traitMultiplier *
         govTraits.militaryUpkeepMultiplier,
     );
@@ -38,21 +36,25 @@ export class UpkeepCalculator {
     const baseInfraUpkeep =
       nation.geography.infrastructureLevel *
       nation.upkeep.infrastructureUpkeep *
-      1000 *
-      inflationMultiplier;
+      1000;
 
     const infrastructure = Math.floor(
       baseInfraUpkeep * (1 + nation.geography.territorySize * 0.0001),
     );
 
-    const total = totalMilitaryCost + infrastructure;
+    let adminPenalty = 0;
+    if (nation.taxRate < 5) {
+      adminPenalty = 250000;
+    }
+
+    const total = totalMilitaryCost + infrastructure + adminPenalty;
 
     return {
       infantry: Math.floor(totalMilitaryCost * 0.4),
       airForce: Math.floor(totalMilitaryCost * 0.3),
       navy: Math.floor(totalMilitaryCost * 0.2),
       droneMissile: Math.floor(totalMilitaryCost * 0.1),
-      infrastructure,
+      infrastructure: infrastructure + adminPenalty,
       total,
     };
   }

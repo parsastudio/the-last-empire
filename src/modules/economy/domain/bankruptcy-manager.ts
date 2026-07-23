@@ -5,16 +5,16 @@ export class BankruptcyManager {
 
   public isBankrupt(nation: Nation): boolean {
     if (nation.gdp <= 0) {
-      return nation.debt > 0;
+      return nation.nationalDebt > 0;
     }
-    return nation.debt / nation.gdp >= this.debtToGdpLimitRatio;
+    return nation.nationalDebt / nation.gdp >= this.debtToGdpLimitRatio;
   }
 
   public applyBankruptcy(nation: Nation): Nation {
     return {
       ...nation,
       treasury: 0,
-      debt: Math.floor(nation.gdp * 0.5),
+      nationalDebt: Math.floor(nation.gdp * 0.5),
       government: {
         ...nation.government,
         stability: 0,

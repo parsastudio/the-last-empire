@@ -14,10 +14,6 @@ export class PopulationGrowthEngine {
       growthRate -= 0.015;
     }
 
-    if (nation.inflation > 20) {
-      growthRate -= 0.008;
-    }
-
     const size = nation.geography.territorySize || 100;
     const density = nation.population / size;
     if (density > 1500) {

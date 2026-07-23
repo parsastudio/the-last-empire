@@ -85,6 +85,14 @@ export class DomesticCrisisManager {
   private applyCoup(nation: Nation): Nation {
     return {
       ...nation,
+      gdp: Math.floor(nation.gdp * 0.5),
+      military: {
+        ...nation.military,
+        infantry: Math.floor(nation.military.infantry * 0.5),
+        airForce: Math.floor(nation.military.airForce * 0.5),
+        navy: Math.floor(nation.military.navy * 0.5),
+        droneMissile: Math.floor(nation.military.droneMissile * 0.5),
+      },
       government: {
         ...nation.government,
         type: "DICTATORSHIP",

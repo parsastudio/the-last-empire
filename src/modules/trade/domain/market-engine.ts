@@ -11,6 +11,7 @@ export interface TradeTransactionResult {
 export class MarketEngine {
   private readonly minPrice = 10;
   private readonly maxPrice = 500;
+  private readonly feeRate = 0.1;
 
   public updateMarketPrices(
     currentPrices: ResourceMarketPrice,
@@ -62,7 +63,11 @@ export class MarketEngine {
       totalCost = variableCost + flatCost;
       finalPrice = this.maxPrice;
     }
-    if (nation.treasury < totalCost) {
+
+    const fee = Math.floor(totalCost * this.feeRate);
+    const totalCostWithFee = totalCost + fee;
+
+    if (nation.treasury < totalCostWithFee) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
         "Not enough treasury to buy resources",
@@ -70,7 +75,7 @@ export class MarketEngine {
     }
     const updatedNation: Nation = {
       ...nation,
-      treasury: nation.treasury - totalCost,
+      treasury: nation.treasury - totalCostWithFee,
       resources: {
         ...nation.resources,
         [resourceType]: nation.resources[resourceType] + amount,
@@ -83,7 +88,7 @@ export class MarketEngine {
     return {
       updatedNation,
       updatedMarketPrices,
-      totalCostOrRevenue: totalCost,
+      totalCostOrRevenue: totalCostWithFee,
     };
   }
 
@@ -109,18 +114,21 @@ export class MarketEngine {
     const k = currentPrice - this.minPrice;
     let totalRevenue = 0;
     let finalPrice = currentPrice;
+
     if (amount <= k) {
       totalRevenue = amount * currentPrice - (amount * (amount - 1)) / 2;
       finalPrice = currentPrice - amount;
     } else {
-      const variableRevenue = k * currentPrice - (k * (k - 1)) / 2;
-      const flatRevenue = (amount - k) * this.minPrice;
-      totalRevenue = variableRevenue + flatRevenue;
+      totalRevenue = k * currentPrice - (k * (k - 1)) / 2;
       finalPrice = this.minPrice;
     }
+
+    const fee = Math.floor(totalRevenue * this.feeRate);
+    const netRevenue = Math.max(0, totalRevenue - fee);
+
     const updatedNation: Nation = {
       ...nation,
-      treasury: nation.treasury + totalRevenue,
+      treasury: nation.treasury + netRevenue,
       resources: {
         ...nation.resources,
         [resourceType]: nation.resources[resourceType] - amount,
@@ -133,7 +141,7 @@ export class MarketEngine {
     return {
       updatedNation,
       updatedMarketPrices,
-      totalCostOrRevenue: totalRevenue,
+      totalCostOrRevenue: netRevenue,
     };
   }
 }

@@ -22,11 +22,11 @@ export class RepayDebtActionHandler implements ActionHandler {
         "Not enough money in treasury for requested manual debt repayment",
       );
     }
-    const maxRepayable = Math.min(repayAction.amount, nation.debt);
+    const maxRepayable = Math.min(repayAction.amount, nation.nationalDebt);
     const updatedNation = {
       ...nation,
       treasury: nation.treasury - maxRepayable,
-      debt: nation.debt - maxRepayable,
+      nationalDebt: nation.nationalDebt - maxRepayable,
     };
     return {
       ...state,

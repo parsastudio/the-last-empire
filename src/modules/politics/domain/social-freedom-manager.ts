@@ -15,15 +15,4 @@ export class SocialFreedomManager {
         return 10;
     }
   }
-
-  public calculateBrainDrainEffect(
-    socialFreedom: number,
-    population: number,
-  ): number {
-    if (socialFreedom >= 40) {
-      return 0;
-    }
-    const drainRate = (40 - socialFreedom) * 0.0002;
-    return Math.floor(population * drainRate);
-  }
 }
