@@ -44,7 +44,6 @@ export const AttackActionSchema = z.object({
   targetNationId: z.string(),
   infantry: z.number().nonnegative(),
   airForce: z.number().nonnegative(),
-  navy: z.number().nonnegative(),
   droneMissile: z.number().nonnegative(),
 });
 
@@ -82,26 +81,21 @@ export const InvestInfrastructureActionSchema = z.object({
   type: z.literal("INVEST_INFRASTRUCTURE"),
 });
 
-export const FundEspionageActionSchema = z.object({
+export const FundProxyInfluenceActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   signature: z.string().optional(),
-  type: z.literal("FUND_ESPIONAGE"),
+  type: z.literal("FUND_PROXY_INFLUENCE"),
   targetNationId: z.string(),
   budget: z.number().positive(),
 });
 
-export const CovertOperationsActionSchema = z.object({
+export const UnlockDoctrineActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   signature: z.string().optional(),
-  type: z.literal("COVERT_OPERATIONS"),
-  targetNationId: z.string(),
-  operationType: z.enum([
-    "SABOTAGE_INDUSTRY",
-    "INSTIGATE_UNREST",
-    "MILITARY_INTEL_HEIST",
-  ]),
+  type: z.literal("UNLOCK_DOCTRINE"),
+  doctrineId: z.string(),
 });
 
 export const RepayDebtActionSchema = z.object({
@@ -137,8 +131,8 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   TradeResourcesActionSchema,
   UpgradeIndustrialLevelActionSchema,
   InvestInfrastructureActionSchema,
-  FundEspionageActionSchema,
-  CovertOperationsActionSchema,
+  FundProxyInfluenceActionSchema,
+  UnlockDoctrineActionSchema,
   RepayDebtActionSchema,
   ActivateAbilityActionSchema,
 ]);
@@ -167,10 +161,10 @@ export type UpgradeIndustrialLevelAction = z.infer<
 export type InvestInfrastructureAction = z.infer<
   typeof InvestInfrastructureActionSchema
 >;
-export type FundEspionageAction = z.infer<typeof FundEspionageActionSchema>;
-export type CovertOperationsAction = z.infer<
-  typeof CovertOperationsActionSchema
+export type FundProxyInfluenceAction = z.infer<
+  typeof FundProxyInfluenceActionSchema
 >;
+export type UnlockDoctrineAction = z.infer<typeof UnlockDoctrineActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type ActivateAbilityAction = z.infer<typeof ActivateAbilityActionSchema>;
 export type GameAction = z.infer<typeof GameActionSchema>;

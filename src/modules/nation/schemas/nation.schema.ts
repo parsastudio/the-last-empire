@@ -9,6 +9,7 @@ import {
   RecruitmentOrderSchema,
 } from "@/modules/military/schemas/military.schema";
 import { RelationProfileSchema } from "@/modules/diplomacy/schemas/diplomacy.schema";
+import { DoctrinesStateSchema } from "@/modules/politics/schemas/doctrines.schema";
 
 export const NationTraitSchema = z.enum([
   "OIL_RICH",
@@ -27,12 +28,20 @@ export const ActiveModifierSchema = z.object({
   turnsRemaining: z.number().nonnegative(),
 });
 
+export const IsolatedPocketSchema = z.object({
+  id: z.string(),
+  territorySize: z.number().nonnegative(),
+  territoryIds: z.array(z.string()),
+});
+
 export const GeographySchema = z.object({
   landNeighbors: z.array(z.string()),
   seaNeighbors: z.array(z.string()),
   hasSeaAccess: z.boolean(),
   territorySize: z.number().nonnegative(),
   infrastructureLevel: z.number().positive(),
+  contiguousMainlandSize: z.number().nonnegative(),
+  isolatedPockets: z.array(IsolatedPocketSchema),
 });
 
 export const NationSchema = z.object({
@@ -61,10 +70,14 @@ export const NationSchema = z.object({
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
   traits: z.array(NationTraitSchema),
-  aggressionScore: z.number().min(0).max(100),
+  globalReputation: z.number().min(-100).max(100),
+  globalAggression: z.number().min(0).max(100),
+  doctrines: DoctrinesStateSchema,
+  proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
 });
 
 export type NationTrait = z.infer<typeof NationTraitSchema>;
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
+export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
 export type Nation = z.infer<typeof NationSchema>;
