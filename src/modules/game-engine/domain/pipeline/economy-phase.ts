@@ -12,6 +12,7 @@ import { OverextensionCalculator } from "@/modules/economy/domain/overextension-
 import { DoctrinesManager } from "@/modules/politics/domain/doctrines-manager";
 import { TributeManager } from "@/modules/diplomacy/domain/tribute-manager";
 import { MarketEngine } from "@/modules/trade/domain/market-engine";
+import { ResourceDependencyManager } from "@/modules/trade/domain/resource-dependency-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface EconomyCalculators {
@@ -32,6 +33,7 @@ export class EconomyPhase implements TurnPhase {
   private doctrinesManager = new DoctrinesManager();
   private tributeManager = new TributeManager();
   private marketEngine = new MarketEngine();
+  private resourceDependencyManager = new ResourceDependencyManager();
 
   constructor(calcs?: EconomyCalculators) {
     this.calcs = calcs ?? {
@@ -132,12 +134,17 @@ export class EconomyPhase implements TurnPhase {
 
       const taxResult = this.calcs.taxCalc.evaluateTaxPolicy(updated);
       const rawUpkeep = this.calcs.upkeepCalc.calculateUpkeep(updated);
+
+      let upkeepTotal = rawUpkeep.total;
+      upkeepTotal = this.resourceDependencyManager.applyOilScarcityPenalty(
+        updated,
+        upkeepTotal,
+      );
+
       const doctrineUpkeepDiscount = this.doctrinesManager.getUpkeepMultiplier(
         updated.doctrines.unlockedDoctrines,
       );
-      const finalUpkeepTotal = Math.floor(
-        rawUpkeep.total * doctrineUpkeepDiscount,
-      );
+      const finalUpkeepTotal = Math.floor(upkeepTotal * doctrineUpkeepDiscount);
 
       const totalTradeValue =
         this.calcs.tradeRouteManager.calculateTotalTradeRevenue(
@@ -156,6 +163,7 @@ export class EconomyPhase implements TurnPhase {
       );
 
       updated = financial.updatedNation;
+      updated = this.resourceDependencyManager.consumeTurnResources(updated);
 
       const hasReachedDebtLimit =
         this.calcs.bankruptcyManager.isBankrupt(updated);

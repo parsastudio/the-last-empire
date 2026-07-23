@@ -2,9 +2,11 @@ import type { GameState } from "@/modules/game-engine/schemas/game-state.schema"
 import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { GameError } from "@/core/errors/game-error";
 import { LoanManager } from "@/modules/trade/domain/loan-manager";
+import { ResourceDependencyManager } from "@/modules/trade/domain/resource-dependency-manager";
 
 export class StateValidator {
   private loanManager = new LoanManager();
+  private resourceDependencyManager = new ResourceDependencyManager();
 
   public validateAction(state: GameState, action: GameAction): void {
     if (state.isGameOver) {
@@ -48,6 +50,11 @@ export class StateValidator {
           "Recruitment quantity must be greater than zero",
         );
       }
+      this.resourceDependencyManager.validateUnitRecruitmentResources(
+        sourceNation,
+        action.unitType,
+        action.quantity,
+      );
     }
 
     if (action.type === "FUND_PROXY_INFLUENCE") {

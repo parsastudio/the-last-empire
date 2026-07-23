@@ -6,16 +6,24 @@ import type {
 import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
 import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
+import { ResourceDependencyManager } from "@/modules/trade/domain/resource-dependency-manager";
 
 export class RecruitmentQueueManager {
   private costCalculator = new UnitCostCalculator();
   private manpowerManager = new ManpowerManager();
+  private resourceDependencyManager = new ResourceDependencyManager();
 
   public enqueueOrder(
     nation: Nation,
     unitType: UnitType,
     quantity: number,
   ): Nation {
+    this.resourceDependencyManager.validateUnitRecruitmentResources(
+      nation,
+      unitType,
+      quantity,
+    );
+
     const costDetails = this.costCalculator.calculateTotalCost(
       unitType,
       quantity,
@@ -45,12 +53,18 @@ export class RecruitmentQueueManager {
       manpowerRequired: costDetails.manpowerCost,
     };
 
+    let finalSteel = nation.resources.steel;
+    if (unitType === "AIR_FORCE" || unitType === "DRONE_MISSILE") {
+      finalSteel = Math.max(0, finalSteel - quantity * 2);
+    }
+
     return {
       ...nation,
       treasury: nation.treasury - costDetails.moneyCost,
       resources: {
         ...nation.resources,
         manpower: nation.resources.manpower - costDetails.manpowerCost,
+        steel: finalSteel,
       },
       recruitmentQueue: [...nation.recruitmentQueue, newOrder],
     };
@@ -115,12 +129,18 @@ export class RecruitmentQueueManager {
       nation.resources.manpower + manpowerRefund,
     );
 
+    let finalSteel = nation.resources.steel;
+    if (order.unitType === "AIR_FORCE" || order.unitType === "DRONE_MISSILE") {
+      finalSteel = finalSteel + order.quantity * 2;
+    }
+
     return {
       ...nation,
       treasury: nation.treasury + moneyRefund,
       resources: {
         ...nation.resources,
         manpower: finalManpower,
+        steel: finalSteel,
       },
       recruitmentQueue: newQueue,
     };
