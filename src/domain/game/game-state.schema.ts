@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NationSchema } from "@/domain/nation/nation.schema";
 import { ResourceMarketPriceSchema } from "@/domain/economy/economy.schema";
+import { ProvinceSchema } from "@/domain/map/province.schema";
 
 export const TurnLogLevelSchema = z.enum([
   "INFO",
@@ -39,6 +40,7 @@ export const GameStateSchema = z.object({
   globalThreatLevel: z.number().min(0).max(100),
   marketPrices: ResourceMarketPriceSchema,
   nations: z.record(z.string(), NationSchema),
+  provinces: z.record(z.string(), ProvinceSchema),
   turnLogs: z.array(TurnLogEntrySchema),
   eventFlags: z.record(z.string(), z.boolean()),
   peacefulTurnsCount: z.number().nonnegative().optional(),

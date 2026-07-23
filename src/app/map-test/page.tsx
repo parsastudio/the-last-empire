@@ -1,218 +1,106 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
-import { useMapInteraction } from "@/presentation/hooks/use-map-interaction";
 import { GameMap } from "@/presentation/components/game-map";
-import { ActivePowersList } from "@/presentation/components/active-powers-list";
-import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import type { GeoJsonData } from "@/engine/map/grid-generator";
 
-const MAP_CDN_URL =
-  "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson";
-
-export default function SelectionDashboardPage() {
-  const { grid, loadMapFromData } = useMapLoader();
-  const [activeNations, setActiveNations] = useState<Record<string, any>>({});
-  const [loadingText, setLoadingText] = useState(
-    "Establishing Geopolitical Matrix...",
-  );
+export default function MapTestPage() {
+  const { grid, loading, error, loadMapFromData } = useMapLoader();
+  const [dragActive, setDragActive] = useState(false);
 
   const activeKeysSet = useMemo(() => {
-    return new Set(Object.keys(activeNations));
-  }, [activeNations]);
+    return new Set([
+      "USA",
+      "CAN",
+      "RUS",
+      "SAU",
+      "DEU",
+      "IRN",
+      "CHN",
+      "BRA",
+      "AUS",
+      "ZAF",
+      "IND",
+      "FRA",
+      "GBR",
+      "JPN",
+      "EGY",
+      "TUR",
+      "MEX",
+      "ARG",
+      "ITA",
+      "ESP",
+    ]);
+  }, []);
 
-  const {
-    hoveredNationId,
-    selectedNationId,
-    setHoveredNationId,
-    setSelectedNationId,
-    handleMouseMove,
-    handleMouseLeave,
-    handleClick,
-  } = useMapInteraction({
-    grid,
-    gridWidth: 300,
-    gridHeight: 150,
-  });
-
-  useEffect(() => {
-    async function fetchAndSetupMap() {
-      try {
-        setLoadingText("Fetching Global Vector Geometries...");
-        const response = await fetch(MAP_CDN_URL);
-        if (!response.ok) {
-          throw new Error("CDN_OFFLINE");
-        }
-        const geoJson: GeoJsonData = await response.json();
-
-        setLoadingText("Filtering Sovereign States and Adjusting Neighbors...");
-        const minPopulation = 3000000;
-        const filteredFeatures = geoJson.features.filter((f) => {
-          const id = f.properties.ISO_A3;
-          const pop = f.properties.POP_EST || 0;
-          return id && id !== "-99" && pop >= minPopulation;
-        });
-
-        const filteredGeoJson: GeoJsonData = {
-          type: "FeatureCollection",
-          features: filteredFeatures,
-        };
-
-        const nationsList: Record<string, any> = {};
-        filteredFeatures.forEach((feature) => {
-          const props = feature.properties;
-          nationsList[props.ISO_A3] = {
-            id: props.ISO_A3,
-            name: props.NAME,
-            gdp: (props.GDP_MD || 1000) * 1000000,
-            population: props.POP_EST || 1000000,
-          };
-        });
-
-        setActiveNations(nationsList);
-        const activeKeys = new Set(Object.keys(nationsList));
-        await loadMapFromData(filteredGeoJson, 300, 150, activeKeys);
-      } catch (err) {
-        setLoadingText("Network Offline. Bootstrapping Local Fallback Map...");
-        const localNationsList: Record<string, any> = {};
-        FALLBACK_WORLD_MAP.features.forEach((feature) => {
-          const props = feature.properties;
-          localNationsList[props.ISO_A3] = {
-            id: props.ISO_A3,
-            name: props.NAME,
-            gdp: props.GDP_MD * 1000000,
-            population: props.POP_EST,
-          };
-        });
-
-        setActiveNations(localNationsList);
-        const fallbackKeys = new Set(Object.keys(localNationsList));
-        await loadMapFromData(FALLBACK_WORLD_MAP, 300, 150, fallbackKeys);
-      }
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
+  };
 
-    fetchAndSetupMap();
-  }, [loadMapFromData]);
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
 
-  const selectedNationDetails = useMemo(() => {
-    if (!selectedNationId) return null;
-    return activeNations[selectedNationId] || null;
-  }, [selectedNationId, activeNations]);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      await processFile(file);
+    }
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await processFile(file);
+    }
+  };
+
+  const processFile = async (file: File) => {
+    try {
+      const text = await file.text();
+      const geoJson = JSON.parse(text) as GeoJsonData;
+      await loadMapFromData(geoJson, 300, 150, activeKeysSet);
+    } catch (err) {
+      console.error(err);
+      alert("Invalid GeoJSON file or parsing failed");
+    }
+  };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-white font-sans p-8">
-      <header className="max-w-7xl mx-auto w-full mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold tracking-widest text-emerald-500 uppercase">
-            GEOPOLITICAL ENGINE v0.1.0
-          </span>
-          <h1 className="text-4xl font-extrabold tracking-tight mt-1">
-            Select Your Sovereign Nation
-          </h1>
-          <p className="text-slate-400 mt-2">
-            Establish your regime, manage dynamic resources, and prepare for
-            global operations.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="h-2 w-2 bg-emerald-500 rounded-full animate-ping" />
-          <span className="text-xs font-semibold text-slate-400 font-mono">
-            LIVE SYSTEM ONLINE
-          </span>
-        </div>
+    <div className="flex flex-col min-h-screen bg-slate-900 text-white p-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-extrabold tracking-tight">
+          GeoJSON Map Engine Test
+        </h1>
+        <p className="text-slate-400 mt-2">
+          Upload your World GeoJSON file to test raw map parsing, country
+          filtering, and neighborhood absorption.
+        </p>
       </header>
 
-      <main className="max-w-7xl mx-auto w-full flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          {grid ? (
-            <div className="flex-1 flex flex-col justify-center">
-              <GameMap
-                grid={grid}
-                width={300}
-                height={150}
-                hoveredNationId={hoveredNationId}
-                selectedNationId={selectedNationId}
-                onMouseMove={handleMouseMove}
-                onMouseLeave={handleMouseLeave}
-                onClick={handleClick}
-              />
-            </div>
-          ) : (
-            <div className="flex-1 flex items-center justify-center bg-slate-900/30 rounded-3xl border border-slate-800 min-h-[350px]">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-slate-400 text-sm">{loadingText}</p>
-              </div>
-            </div>
-          )}
-
-          <div className="bg-slate-900/30 p-6 rounded-3xl border border-slate-800">
-            {selectedNationDetails ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <div className="text-xs text-slate-500 font-bold uppercase">
-                    Nation Identity
-                  </div>
-                  <div className="text-2xl font-bold mt-1 text-white">
-                    {selectedNationDetails.name}
-                  </div>
-                  <div className="text-xs text-emerald-400 font-mono mt-1">
-                    System Identifier: {selectedNationDetails.id}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 font-bold uppercase">
-                    Estimated Population
-                  </div>
-                  <div className="text-2xl font-bold mt-1 text-slate-100 font-mono">
-                    {selectedNationDetails.population.toLocaleString()}
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    Active Citizens Base
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 font-bold uppercase">
-                    Gross Domestic Product
-                  </div>
-                  <div className="text-2xl font-bold mt-1 text-emerald-400 font-mono">
-                    ${(selectedNationDetails.gdp / 1e9).toFixed(2)}B
-                  </div>
-                  <div className="text-xs text-slate-500 mt-1">
-                    Global Trade Capital
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-full py-4 text-slate-500 font-medium text-sm">
-                Click on any continent or country to preview administrative
-                statistics and select it.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          {grid && Object.keys(activeNations).length > 0 && (
-            <ActivePowersList
-              grid={grid}
-              survivingNations={activeNations}
-              hoveredNationId={hoveredNationId}
-              selectedNationId={selectedNationId}
-              onSelectNation={setSelectedNationId}
-              onHoverNation={setHoveredNationId}
-            />
-          )}
-
-          {selectedNationId && (
-            <button
-              onClick={() => alert(`Starting game as: ${selectedNationId}`)}
-              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-950/40 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
-            >
-              Start Operation Scenario
+      <main className="flex-1 flex flex-col items-center justify-center">
+        {!grid && !loading && (
+          <div
+            onDragEnter={handleDrag}
+            onDragOver={handleDrag}
+            onDragLeave={handleDrag}
+            onDrop={handleDrop}
+            className={`w-full max-w-xl p-12 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center transition-all ${
+              dragActive
+                ? "border-emerald-500 bg-slate-800/50"
+                : "border-slate-700 bg-slate-800/30 hover:border-slate-600"
+            }`}
+          >
+            <div className="mb-4 text-slate-500">
               <svg
-                className="w-5 h-5"
+                className="w-12 h-12 mx-auto"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -220,13 +108,71 @@ export default function SelectionDashboardPage() {
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  strokeWidth={1.5}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-            </button>
-          )}
-        </div>
+            </div>
+            <p className="text-lg font-medium text-slate-200">
+              Drag and drop your GeoJSON file here
+            </p>
+            <p className="text-sm text-slate-400 mt-1">or</p>
+            <label className="mt-4 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-full cursor-pointer transition-colors shadow-lg shadow-emerald-900/30">
+              Browse Files
+              <input
+                type="file"
+                accept=".geojson,.json"
+                onChange={handleFileInput}
+                className="hidden"
+              />
+            </label>
+          </div>
+        )}
+
+        {loading && (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-slate-400 font-medium">
+              Generating Map Matrix and Merging Territories...
+            </p>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 bg-red-950/30 border border-red-800 text-red-400 rounded-xl mb-6">
+            Error: {error}
+          </div>
+        )}
+
+        {grid && !loading && (
+          <div className="w-full flex flex-col items-center">
+            <div className="w-full max-w-5xl mb-6 flex justify-between items-center">
+              <div className="text-sm text-slate-400">
+                Resolution:{" "}
+                <span className="text-emerald-400 font-semibold">
+                  300x150 Pixels
+                </span>{" "}
+                | Top 20 Global Powers Active
+              </div>
+              <button
+                onClick={() => window.location.reload()}
+                className="text-xs bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full font-medium transition-colors"
+              >
+                Reset Map
+              </button>
+            </div>
+            <GameMap
+              grid={grid}
+              width={300}
+              height={150}
+              hoveredNationId={null}
+              selectedNationId={null}
+              onMouseMove={() => {}}
+              onMouseLeave={() => {}}
+              onClick={() => {}}
+            />
+          </div>
+        )}
       </main>
     </div>
   );

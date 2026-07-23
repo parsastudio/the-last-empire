@@ -1,5 +1,6 @@
 import { EquirectangularProjection } from "./projection";
 import type { GridCell } from "@/domain/map/grid.schema";
+import type { Province } from "@/domain/map/province.schema";
 
 export interface GeoJsonFeature {
   type: string;
@@ -20,6 +21,11 @@ export interface GeoJsonData {
   features: GeoJsonFeature[];
 }
 
+export interface GeneratedMapPayload {
+  grid: GridCell[][];
+  provinces: Record<string, Province>;
+}
+
 export class GridGenerator {
   private projection = new EquirectangularProjection();
 
@@ -28,16 +34,21 @@ export class GridGenerator {
     width: number,
     height: number,
     survivingNations: Set<string>,
-  ): GridCell[][] {
+  ): GeneratedMapPayload {
+    if (typeof window === "undefined") {
+      return { grid: [], provinces: {} };
+    }
+
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
     if (!ctx) {
       throw new Error("CANVAS_CONTEXT_NOT_SUPPORTED");
     }
 
+    ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.fillRect(0, 0, width, height);
 
@@ -45,10 +56,18 @@ export class GridGenerator {
       (f) => f.properties.ISO_A3 && f.properties.ISO_A3 !== "-99",
     );
 
+    const provinces: Record<string, Province> = {};
+
     validFeatures.forEach((feature, index) => {
-      const colorValue = index + 1;
-      ctx.fillStyle = `rgb(${colorValue}, 0, 0)`;
-      ctx.strokeStyle = `rgb(${colorValue}, 0, 0)`;
+      const countryCode = feature.properties.ISO_A3;
+      const provinceId = `${countryCode}_P1`;
+
+      const r = (index + 1) & 0xff;
+      const g = ((index + 1) >> 8) & 0xff;
+      const b = ((index + 1) >> 16) & 0xff;
+
+      ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+      ctx.strokeStyle = `rgb(${r}, ${g}, ${b})`;
       ctx.lineWidth = 0.5;
 
       const geometry = feature.geometry;
@@ -64,6 +83,16 @@ export class GridGenerator {
           this.drawPolygon(ctx, polygonCoords, width, height);
         });
       }
+
+      provinces[provinceId] = {
+        id: provinceId,
+        name: `${feature.properties.NAME} Region`,
+        ownerNationId: countryCode,
+        gdp: feature.properties.GDP_MD * 1000000,
+        population: feature.properties.POP_EST,
+        isCapital: true,
+        territorySize: 100,
+      };
     });
 
     const imgData = ctx.getImageData(0, 0, width, height);
@@ -76,20 +105,29 @@ export class GridGenerator {
       for (let x = 0; x < width; x++) {
         const pixelIndex = (y * width + x) * 4;
         const r = pixels[pixelIndex];
+        const g = pixels[pixelIndex + 1];
+        const b = pixels[pixelIndex + 2];
 
-        if (r === undefined || r === 0) {
-          row.push({ x, y, ownerId: null, type: "SEA" });
+        if (
+          r === undefined ||
+          g === undefined ||
+          b === undefined ||
+          (r === 0 && g === 0 && b === 0)
+        ) {
+          row.push({ x, y, ownerId: null, provinceId: null, type: "SEA" });
         } else {
-          const featureIndex = r - 1;
+          const featureIndex = (r | (g << 8) | (b << 16)) - 1;
           const matchedFeature = validFeatures[featureIndex];
           const ownerId = matchedFeature
             ? matchedFeature.properties.ISO_A3
             : null;
+          const provinceId = ownerId ? `${ownerId}_P1` : null;
 
           row.push({
             x,
             y,
             ownerId,
+            provinceId,
             type: "LAND",
           });
         }
@@ -97,12 +135,17 @@ export class GridGenerator {
       grid.push(row);
     }
 
-    return this.swallowDeletedTerritories(
+    const modifiedGrid = this.swallowDeletedTerritories(
       grid,
       survivingNations,
       width,
       height,
     );
+
+    return {
+      grid: modifiedGrid,
+      provinces,
+    };
   }
 
   private drawPolygon(
@@ -149,9 +192,10 @@ export class GridGenerator {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const cell = grid[y][x];
-        if (cell.type === "LAND") {
+        if (cell && cell.type === "LAND") {
           if (cell.ownerId && !survivingNations.has(cell.ownerId)) {
             cell.ownerId = null;
+            cell.provinceId = null;
           }
         }
       }
@@ -160,14 +204,18 @@ export class GridGenerator {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const cell = grid[y][x];
-        if (cell.type === "LAND" && cell.ownerId !== null) {
+        if (cell && cell.type === "LAND" && cell.ownerId !== null) {
           let hasEmptyNeighbor = false;
           for (const dir of directions) {
             const nx = x + dir.dx;
             const ny = y + dir.dy;
             if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-              const neighbor = grid[ny][nx];
-              if (neighbor.type === "LAND" && neighbor.ownerId === null) {
+              const neighbor = grid[ny]?.[nx];
+              if (
+                neighbor &&
+                neighbor.type === "LAND" &&
+                neighbor.ownerId === null
+              ) {
                 hasEmptyNeighbor = true;
                 break;
               }
@@ -182,10 +230,11 @@ export class GridGenerator {
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      const currentCell = grid[current.y][current.x];
-      const currentOwner = currentCell.ownerId;
+      const currentCell = grid[current.y]?.[current.x];
+      const currentOwner = currentCell?.ownerId;
+      const currentProvince = currentCell?.provinceId;
 
-      if (!currentOwner) {
+      if (!currentCell || !currentOwner) {
         continue;
       }
 
@@ -194,9 +243,14 @@ export class GridGenerator {
         const ny = current.y + dir.dy;
 
         if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-          const neighbor = grid[ny][nx];
-          if (neighbor.type === "LAND" && neighbor.ownerId === null) {
+          const neighbor = grid[ny]?.[nx];
+          if (
+            neighbor &&
+            neighbor.type === "LAND" &&
+            neighbor.ownerId === null
+          ) {
             neighbor.ownerId = currentOwner;
+            neighbor.provinceId = currentProvince;
             queue.push({ x: nx, y: ny });
           }
         }

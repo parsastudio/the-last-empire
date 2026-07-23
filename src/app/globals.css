@@ -24,8 +24,3 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-
-canvas {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
-}

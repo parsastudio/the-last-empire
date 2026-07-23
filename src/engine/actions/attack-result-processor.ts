@@ -63,15 +63,27 @@ export class AttackResultProcessor {
     );
 
     let logMessage = `Battle occurred. Attacker: ${attacker.name}, Defender: ${defender.name}. Deployed drones: ${deployedDrones}. `;
+    const updatedProvinces = { ...state.provinces };
 
     if (combatResult.attackerWon) {
       const transfer = this.occupationManager.processVictoryOccupation(
         finalAttacker,
         finalDefender,
+        updatedProvinces,
         0.25,
       );
       finalAttacker = transfer.winner;
       finalDefender = transfer.loser;
+
+      transfer.capturedProvinceIds.forEach((provId) => {
+        const prov = updatedProvinces[provId];
+        if (prov) {
+          updatedProvinces[provId] = {
+            ...prov,
+            ownerNationId: attacker.id,
+          };
+        }
+      });
 
       let targetLoot = 0;
       if (finalDefender.geography.isolatedPockets.length > 0) {
@@ -89,64 +101,7 @@ export class AttackResultProcessor {
       finalAttacker.treasury += targetLoot;
       finalDefender.treasury = Math.max(0, finalDefender.treasury - targetLoot);
 
-      logMessage += `Victory for Attacker! Occupied ${transfer.seizedTerritory} size territory and seized ${transfer.transferredTreasury} treasury and looted ${targetLoot} as pocket resources.`;
-
-      const isContiguousNeighbor = attacker.geography.landNeighbors.includes(
-        defender.id,
-      );
-
-      if (isContiguousNeighbor) {
-        finalAttacker.geography.contiguousMainlandSize +=
-          transfer.seizedTerritory;
-        finalDefender.geography.contiguousMainlandSize = Math.max(
-          0,
-          finalDefender.geography.contiguousMainlandSize -
-            transfer.seizedTerritory,
-        );
-      } else {
-        const newPocket = {
-          id: `pocket-conquered-${defender.id}-${Date.now()}`,
-          territorySize: transfer.seizedTerritory,
-          territoryIds: [defender.id],
-          coordinates: [],
-        };
-        finalAttacker.geography.isolatedPockets = [
-          ...finalAttacker.geography.isolatedPockets,
-          newPocket,
-        ];
-
-        if (finalDefender.geography.isolatedPockets.length > 0) {
-          let remainingLoss = transfer.seizedTerritory;
-          const updatedPockets: typeof finalDefender.geography.isolatedPockets =
-            [];
-          for (const pocket of finalDefender.geography.isolatedPockets) {
-            if (remainingLoss <= 0) {
-              updatedPockets.push(pocket);
-            } else if (pocket.territorySize > remainingLoss) {
-              updatedPockets.push({
-                ...pocket,
-                territorySize: pocket.territorySize - remainingLoss,
-              });
-              remainingLoss = 0;
-            } else {
-              remainingLoss -= pocket.territorySize;
-            }
-          }
-          finalDefender.geography.isolatedPockets = updatedPockets;
-          if (remainingLoss > 0) {
-            finalDefender.geography.contiguousMainlandSize = Math.max(
-              0,
-              finalDefender.geography.contiguousMainlandSize - remainingLoss,
-            );
-          }
-        } else {
-          finalDefender.geography.contiguousMainlandSize = Math.max(
-            0,
-            finalDefender.geography.contiguousMainlandSize -
-              transfer.seizedTerritory,
-          );
-        }
-      }
+      logMessage += `Victory for Attacker! Occupied ${transfer.seizedTerritory} size territory and seized ${transfer.transferredTreasury} treasury. Transferred provinces: ${transfer.capturedProvinceIds.join(", ")}.`;
     } else {
       logMessage += `Defender successfully defended their territory.`;
     }
@@ -172,6 +127,7 @@ export class AttackResultProcessor {
 
     return {
       ...state,
+      provinces: updatedProvinces,
       nations: updatedNations,
       turnLogs: [...state.turnLogs, logEntry],
     };
