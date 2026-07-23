@@ -65,10 +65,16 @@ export class VictoryChecker {
             }
           }
 
+          const isHumanInCoalition =
+            nation.id === state.humanNationId ||
+            nation.relations[state.humanNationId]?.stance === "ALLIANCE";
+
           if (coalitionPopulation / totalPopulation >= 0.7) {
             return {
               isGameOver: true,
-              winnerNationId: nation.id,
+              winnerNationId: isHumanInCoalition
+                ? state.humanNationId
+                : nation.id,
               reason: "DIPLOMATIC_HEGEMONY",
             };
           }

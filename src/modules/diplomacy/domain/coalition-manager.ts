@@ -36,26 +36,6 @@ export class CoalitionManager {
             }
           }
         }
-      } else {
-        for (const neighborId of updatedNation.geography.landNeighbors) {
-          const neighbor = nations[neighborId];
-          if (neighbor && neighbor.isAlive) {
-            const relationToAggressor = neighbor.relations[id];
-            if (relationToAggressor && relationToAggressor.stance === "WAR") {
-              neighbor.relations[id] = {
-                ...relationToAggressor,
-                stance: "PEACE",
-              };
-            }
-            const relationToNeighbor = updatedNation.relations[neighborId];
-            if (relationToNeighbor && relationToNeighbor.stance === "WAR") {
-              updatedNation.relations[neighborId] = {
-                ...relationToNeighbor,
-                stance: "PEACE",
-              };
-            }
-          }
-        }
       }
       nations[id] = updatedNation;
     }
