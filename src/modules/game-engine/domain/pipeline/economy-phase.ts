@@ -47,7 +47,7 @@ export class EconomyPhase implements TurnPhase {
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
-    let nations = { ...nextState.nations };
+    const nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {

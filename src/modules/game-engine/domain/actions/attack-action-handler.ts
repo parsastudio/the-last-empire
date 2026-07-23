@@ -128,7 +128,6 @@ export class AttackActionHandler implements ActionHandler {
       experience: attacker.military.experience,
       techLevel: attacker.military.techLevel,
       mobility: attacker.military.mobility,
-      navy: 0,
     };
 
     const updatedAttackerNation = {

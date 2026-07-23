@@ -222,7 +222,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       updatedNations[nationId] = {
         ...nation,
         treasury: nation.treasury - 40000,
-        reputation: Math.min(100, nation.reputation + 15),
+        globalReputation: Math.min(100, nation.globalReputation + 15),
         activeModifiers: [...nation.activeModifiers, cooldown],
       };
 

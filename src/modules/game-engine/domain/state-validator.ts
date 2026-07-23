@@ -1,8 +1,11 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { GameError } from "@/core/errors/game-error";
+import { LoanManager } from "@/modules/trade/domain/loan-manager";
 
 export class StateValidator {
+  private loanManager = new LoanManager();
+
   public validateAction(state: GameState, action: GameAction): void {
     if (state.isGameOver) {
       throw new GameError(
@@ -66,7 +69,7 @@ export class StateValidator {
       if (sourceNation.doctrines.doctrinePoints < 3) {
         throw new GameError(
           "INVALID_ACTION",
-          "Insufficient doctrine points to unlock any strategy",
+          "Insufficient doctrine points to unlock doctrines",
         );
       }
     }
@@ -98,6 +101,18 @@ export class StateValidator {
         throw new GameError(
           "INVALID_ACTION",
           "Requested loan amount must be positive",
+        );
+      }
+      const creditRating = this.loanManager.calculateCreditRating(sourceNation);
+      const maxDebtLimit = Math.floor(sourceNation.gdp * (creditRating / 100));
+      const availableCredit = Math.max(
+        0,
+        maxDebtLimit - sourceNation.nationalDebt,
+      );
+      if (action.amount > availableCredit) {
+        throw new GameError(
+          "INVALID_ACTION",
+          `Requested loan amount exceeds available credit limit of ${availableCredit}`,
         );
       }
     }
