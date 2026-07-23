@@ -5,6 +5,7 @@ import { PowerScoreCalculator } from "@/modules/diplomacy/domain/power-score-cal
 import { GovernmentSystem } from "@/modules/politics/domain/government-system";
 import { RelationsManager } from "@/modules/diplomacy/domain/relations-manager";
 import { CoalitionManager } from "@/modules/diplomacy/domain/coalition-manager";
+import { ReputationManager } from "@/modules/diplomacy/domain/reputation-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class DiplomacyPhase implements TurnPhase {
@@ -14,6 +15,7 @@ export class DiplomacyPhase implements TurnPhase {
   private governmentSystem = new GovernmentSystem();
   private relationsManager = new RelationsManager();
   private coalitionManager = new CoalitionManager();
+  private reputationManager = new ReputationManager();
 
   public execute(context: PipelineContext): GameState {
     let nextState = { ...context.state };
@@ -41,10 +43,20 @@ export class DiplomacyPhase implements TurnPhase {
         continue;
       }
 
-      const updated = this.intelligenceUpdater.updatePassiveIntel(
+      let updated = this.intelligenceUpdater.updatePassiveIntel(
         nation,
         nations,
       );
+
+      if (updated.globalReputation < 0) {
+        updated = this.reputationManager.applyReputationGain(updated, 2);
+      } else if (updated.globalReputation > 0) {
+        updated = {
+          ...updated,
+          globalReputation: Math.max(0, updated.globalReputation - 1),
+        };
+      }
+
       const updatedRelations = { ...updated.relations };
 
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
@@ -57,6 +69,7 @@ export class DiplomacyPhase implements TurnPhase {
             this.relationsManager.calculateGovernmentFriction(updated, target);
 
           const nextOpinion = this.opinionCalculator.calculateOpinion(
+            relation.opinion,
             updated.globalReputation,
             updated.globalAggression,
             relation.stance,

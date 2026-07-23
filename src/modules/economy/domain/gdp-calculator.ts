@@ -2,11 +2,13 @@ import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 import { GovernmentSystem } from "@/modules/politics/domain/government-system";
+import { ModifierManager } from "@/modules/events/domain/modifier-manager";
 
 export class GdpCalculator {
   private traitManager = new TraitManager();
   private tariffCalculator = new TariffCalculator();
   private governmentSystem = new GovernmentSystem();
+  private modifierManager = new ModifierManager();
 
   public calculateBaseGdp(
     population: number,
@@ -42,6 +44,11 @@ export class GdpCalculator {
     growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     growthRate += govTraits.economicGrowthBonus * 0.1;
+
+    growthRate += this.modifierManager.getModifierImpact(
+      nation,
+      "GDP_GROWTH_MULT",
+    );
 
     const isMartialLawActive = nation.activeModifiers.some(
       (m) => m.id === "martial-law-active",

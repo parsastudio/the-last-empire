@@ -2,6 +2,7 @@ import type { DiplomaticStance } from "../schemas/diplomacy.schema";
 
 export class DiplomaticOpinionCalculator {
   public calculateOpinion(
+    currentOpinion: number,
     globalReputation: number,
     globalAggression: number,
     stance: DiplomaticStance,
@@ -17,11 +18,13 @@ export class DiplomaticOpinionCalculator {
     } else if (stance === "ALLIANCE") {
       treatyModifier += 50;
     }
-    const calculated =
+    const baseline =
       globalReputation -
       globalAggression +
       treatyModifier +
       govFrictionValue * 5;
-    return Math.max(-100, Math.min(100, calculated));
+    const target = Math.max(-100, Math.min(100, baseline));
+    const nextOpinion = currentOpinion + (target - currentOpinion) * 0.2;
+    return Math.max(-100, Math.min(100, Math.round(nextOpinion)));
   }
 }

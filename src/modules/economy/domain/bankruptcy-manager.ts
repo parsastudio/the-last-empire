@@ -35,10 +35,19 @@ export class BankruptcyManager {
       turnsRemaining: 10,
     };
 
+    const badCreditModifier: ActiveModifier = {
+      id: "bankruptcy-bad-credit",
+      name: "Ruined Credit Rating",
+      effectType: "CREDIT_RATING_MULT",
+      magnitude: -80,
+      turnsRemaining: 30,
+    };
+
     const existingModifiers = nation.activeModifiers.filter(
       (m) =>
         m.id !== "bankruptcy-structural-decay" &&
-        m.id !== "bankruptcy-debt-holiday",
+        m.id !== "bankruptcy-debt-holiday" &&
+        m.id !== "bankruptcy-bad-credit",
     );
 
     const restructuredDebt = Math.min(
@@ -88,6 +97,7 @@ export class BankruptcyManager {
         ...existingModifiers,
         decayModifier,
         restructuringHoliday,
+        badCreditModifier,
       ],
     };
   }

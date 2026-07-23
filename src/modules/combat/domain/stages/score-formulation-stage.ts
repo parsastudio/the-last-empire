@@ -53,7 +53,7 @@ export class ScoreFormulationStage implements CombatStage {
     const attackerBase =
       (context.attackForce.infantry * 1.0 +
         context.attackForce.airForce * 3.0 +
-        context.attackForce.droneMissile * 0.5) *
+        context.attackForce.droneMissile * 2.0) *
       (1 + context.attackForce.techLevel * 0.15) *
       (1 + context.attackForce.experience * 0.005) *
       attackerAttackBonus *

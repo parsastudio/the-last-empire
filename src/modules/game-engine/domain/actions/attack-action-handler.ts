@@ -147,7 +147,13 @@ export class AttackActionHandler implements ActionHandler {
       },
     };
 
-    const prng = new SeededRandom(state.seed);
+    let mixedSeed = state.seed;
+    for (let i = 0; i < action.id.length; i++) {
+      mixedSeed = (mixedSeed << 5) - mixedSeed + action.id.charCodeAt(i);
+      mixedSeed |= 0;
+    }
+    const prng = new SeededRandom(Math.abs(mixedSeed));
+
     const combatResult = this.combatResolver.resolveCombat(
       updatedAttackerNation,
       defender,
@@ -224,37 +230,55 @@ export class AttackActionHandler implements ActionHandler {
 
       logMessage += `Victory for Attacker! Occupied ${transfer.seizedTerritory} size territory and seized ${transfer.transferredTreasury} treasury and looted ${targetLoot} as pocket resources.`;
 
-      const attackerTerritories = [
-        { id: finalAttacker.id, size: finalAttacker.geography.territorySize },
-      ];
-      const attackerNeighborsMap: Record<string, string[]> = {
-        [finalAttacker.id]: finalAttacker.geography.landNeighbors,
-      };
-      const attackerConnectivity = this.connectivityGraph.analyzeConnectivity(
-        attackerTerritories,
-        attackerNeighborsMap,
-        finalAttacker.id,
+      const isDirectNeighbor = attacker.geography.landNeighbors.includes(
+        defender.id,
       );
-      finalAttacker.geography.contiguousMainlandSize =
-        attackerConnectivity.contiguousMainlandSize;
-      finalAttacker.geography.isolatedPockets =
-        attackerConnectivity.isolatedPockets;
 
-      const defenderTerritories = [
-        { id: finalDefender.id, size: finalDefender.geography.territorySize },
-      ];
-      const defenderNeighborsMap: Record<string, string[]> = {
-        [finalDefender.id]: finalDefender.geography.landNeighbors,
-      };
-      const defenderConnectivity = this.connectivityGraph.analyzeConnectivity(
-        defenderTerritories,
-        defenderNeighborsMap,
-        finalDefender.id,
-      );
-      finalDefender.geography.contiguousMainlandSize =
-        defenderConnectivity.contiguousMainlandSize;
-      finalDefender.geography.isolatedPockets =
-        defenderConnectivity.isolatedPockets;
+      if (isDirectNeighbor) {
+        finalAttacker.geography.contiguousMainlandSize +=
+          transfer.seizedTerritory;
+      } else {
+        const newPocket = {
+          id: `pocket-conquered-${defender.id}-${Date.now()}`,
+          territorySize: transfer.seizedTerritory,
+          territoryIds: [defender.id],
+        };
+        finalAttacker.geography.isolatedPockets = [
+          ...finalAttacker.geography.isolatedPockets,
+          newPocket,
+        ];
+      }
+
+      if (finalDefender.geography.isolatedPockets.length > 0) {
+        let remainingLoss = transfer.seizedTerritory;
+        const updatedPockets = [];
+        for (const pocket of finalDefender.geography.isolatedPockets) {
+          if (remainingLoss <= 0) {
+            updatedPockets.push(pocket);
+          } else if (pocket.territorySize > remainingLoss) {
+            updatedPockets.push({
+              ...pocket,
+              territorySize: pocket.territorySize - remainingLoss,
+            });
+            remainingLoss = 0;
+          } else {
+            remainingLoss -= pocket.territorySize;
+          }
+        }
+        finalDefender.geography.isolatedPockets = updatedPockets;
+        if (remainingLoss > 0) {
+          finalDefender.geography.contiguousMainlandSize = Math.max(
+            0,
+            finalDefender.geography.contiguousMainlandSize - remainingLoss,
+          );
+        }
+      } else {
+        finalDefender.geography.contiguousMainlandSize = Math.max(
+          0,
+          finalDefender.geography.contiguousMainlandSize -
+            transfer.seizedTerritory,
+        );
+      }
     } else {
       logMessage += `Defender successfully defended their territory.`;
     }

@@ -24,8 +24,14 @@ export class ResourceDependencyManager {
       (nation.military.airForce + nation.military.droneMissile) * 0.5,
     );
 
+    if (requiredOilPerTurn <= 0) {
+      return baseUpkeep;
+    }
+
     if (nation.resources.oil < requiredOilPerTurn) {
-      return baseUpkeep * 3.0;
+      const availableRatio = nation.resources.oil / requiredOilPerTurn;
+      const penaltyMultiplier = 1.0 + (1.0 - availableRatio) * 2.0;
+      return Math.floor(baseUpkeep * penaltyMultiplier);
     }
 
     return baseUpkeep;

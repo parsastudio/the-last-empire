@@ -111,16 +111,26 @@ export class StateValidator {
           "Requested loan amount must be positive",
         );
       }
+      const hasBankruptcyHoliday = sourceNation.activeModifiers.some(
+        (m) => m.id === "bankruptcy-debt-holiday",
+      );
+      if (hasBankruptcyHoliday) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot request loans while under Bankruptcy Restructuring Period",
+        );
+      }
       const creditRating = this.loanManager.calculateCreditRating(sourceNation);
       const maxDebtLimit = Math.floor(sourceNation.gdp * (creditRating / 100));
       const availableCredit = Math.max(
         0,
         maxDebtLimit - sourceNation.nationalDebt,
       );
-      if (action.amount > availableCredit) {
+      const totalRepayable = action.amount + Math.floor(action.amount * 0.05);
+      if (totalRepayable > availableCredit) {
         throw new GameError(
           "INVALID_ACTION",
-          `Requested loan amount exceeds available credit limit of ${availableCredit}`,
+          `Requested loan inclusive of interest (${totalRepayable}) exceeds available credit limit of ${availableCredit}`,
         );
       }
     }
