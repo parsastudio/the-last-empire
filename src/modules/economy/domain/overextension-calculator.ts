@@ -12,7 +12,12 @@ export class OverextensionCalculator {
         ? 1.0 + Math.log10(population / 10000000) * 0.3
         : 1.0;
 
-    const multiplier = territoryFactor * populationFactor;
-    return Math.min(10.0, Number(multiplier.toFixed(2)));
+    let multiplier = territoryFactor * populationFactor;
+
+    if (territory > 5000) {
+      multiplier += Math.pow(territory / 5000, 1.3) - 1.0;
+    }
+
+    return Math.min(50.0, Number(multiplier.toFixed(2)));
   }
 }

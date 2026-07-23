@@ -27,7 +27,8 @@ export class IntelMasker {
     }
 
     const factor = this.getErrorFactor(intelLevel);
-    const multiplier = 1.0 + (this.deterministicRandom(seed) * 2 - 1) * factor;
+    const multiplier =
+      1.0 + (this.deterministicRandom(seed, nation.id) * 2 - 1) * factor;
 
     if (intelLevel === 1) {
       return {
@@ -72,8 +73,13 @@ export class IntelMasker {
     return 0.5;
   }
 
-  private deterministicRandom(seed: number): number {
-    const x = Math.sin(seed) * 10000;
+  private deterministicRandom(seed: number, nationId: string): number {
+    let hash = seed;
+    for (let i = 0; i < nationId.length; i++) {
+      hash = (hash << 5) - hash + nationId.charCodeAt(i);
+      hash |= 0;
+    }
+    const x = Math.sin(hash) * 10000;
     return x - Math.floor(x);
   }
 }

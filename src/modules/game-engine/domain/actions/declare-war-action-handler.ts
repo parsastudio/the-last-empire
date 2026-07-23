@@ -29,6 +29,7 @@ export class DeclareWarActionHandler implements ActionHandler {
               [warAction.targetNationId]: {
                 ...sourceRel,
                 stance: "WAR" as const,
+                opinion: Math.max(-100, sourceRel.opinion - 80),
               },
             }
           : {}),
@@ -43,6 +44,7 @@ export class DeclareWarActionHandler implements ActionHandler {
               [action.nationId]: {
                 ...targetRel,
                 stance: "WAR" as const,
+                opinion: Math.max(-100, targetRel.opinion - 80),
               },
             }
           : {}),

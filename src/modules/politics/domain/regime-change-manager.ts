@@ -12,6 +12,12 @@ export class RegimeChangeManager {
         "Nation is already under this government type",
       );
     }
+    if (nation.government.turnsInPower < 15) {
+      throw new GameError(
+        "INVALID_GOVERNMENT_CHANGE",
+        `Must wait at least 15 turns between government regime changes. Current turns in power: ${nation.government.turnsInPower}`,
+      );
+    }
     const changeCost = Math.floor(nation.gdp * 0.05);
     if (nation.treasury < changeCost) {
       throw new GameError(

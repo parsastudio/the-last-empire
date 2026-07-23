@@ -3,6 +3,7 @@ import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { GameError } from "@/core/errors/game-error";
 import { LoanManager } from "@/modules/trade/domain/loan-manager";
 import { ResourceDependencyManager } from "@/modules/trade/domain/resource-dependency-manager";
+import { GeographyDistanceCalculator } from "@/modules/economy/domain/geography-distance-calculator";
 
 export class StateValidator {
   private loanManager = new LoanManager();
@@ -157,6 +158,18 @@ export class StateValidator {
         throw new GameError(
           "INVALID_ACTION",
           "Cannot attack a nation without first being in a state of war",
+        );
+      }
+      const distanceCalculator = new GeographyDistanceCalculator();
+      const distance = distanceCalculator.calculateDistance(
+        sourceNation.id,
+        action.targetNationId,
+        state.nations,
+      );
+      if (distance > 6) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Target is geographically unreachable for direct attack. Max attack range is 6.",
         );
       }
     }

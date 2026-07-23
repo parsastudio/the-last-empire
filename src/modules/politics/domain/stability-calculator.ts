@@ -26,12 +26,16 @@ export class StabilityCalculator {
     );
 
     if (isMartialLawActive && newStability < currentStability) {
-      if (nation.taxRate > 30) {
+      const maxProtectedTax = 20;
+      if (nation.taxRate > maxProtectedTax) {
         return Math.floor(
-          Math.max(0, currentStability - (nation.taxRate - 30) * 0.5),
+          Math.max(
+            0,
+            currentStability - (nation.taxRate - maxProtectedTax) * 0.75,
+          ),
         );
       }
-      return currentStability;
+      return Math.floor((currentStability + newStability) / 2);
     }
 
     return Math.floor(newStability);

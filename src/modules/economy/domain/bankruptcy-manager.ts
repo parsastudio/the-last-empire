@@ -77,6 +77,12 @@ export class BankruptcyManager {
         airForce: Math.floor(nation.military.airForce * 0.1),
         droneMissile: 0,
       },
+      resources: {
+        ...nation.resources,
+        oil: Math.floor(nation.resources.oil * 0.1),
+        steel: Math.floor(nation.resources.steel * 0.1),
+        manpower: Math.floor(nation.resources.manpower * 0.2),
+      },
       recruitmentQueue: [],
       activeModifiers: [
         ...existingModifiers,
@@ -128,6 +134,10 @@ export class BankruptcyManager {
                 neighbor.geography.territorySize + territoryPerNeighbor,
             },
             population: neighbor.population + popPerNeighbor,
+            government: {
+              ...neighbor.government,
+              stability: Math.max(10, neighbor.government.stability - 15),
+            },
           };
         }
       }

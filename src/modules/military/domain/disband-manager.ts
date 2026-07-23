@@ -12,7 +12,7 @@ export class DisbandManager {
     nation: Nation,
     unitType: UnitType,
     quantity: number,
-    manpowerRefundRate = 0.8,
+    manpowerRefundRate = 0.4,
   ): Nation {
     if (quantity <= 0) {
       throw new GameError(
@@ -33,6 +33,12 @@ export class DisbandManager {
         "INVALID_ACTION",
         "Cannot disband more units than present in military stack",
       );
+    }
+
+    const ratio = quantity / (currentAmount || 1);
+    let stabilityPenalty = 0;
+    if (ratio > 0.2) {
+      stabilityPenalty = Math.floor(ratio * 30);
     }
 
     const unitDetails = this.costCalculator.getUnitDetails(
@@ -62,12 +68,21 @@ export class DisbandManager {
       nation.resources.manpower + recoveredManpower,
     );
 
+    const updatedStability = Math.max(
+      0,
+      nation.government.stability - stabilityPenalty,
+    );
+
     return {
       ...nation,
       military: updatedMilitary,
       resources: {
         ...nation.resources,
         manpower: finalManpower,
+      },
+      government: {
+        ...nation.government,
+        stability: updatedStability,
       },
     };
   }
