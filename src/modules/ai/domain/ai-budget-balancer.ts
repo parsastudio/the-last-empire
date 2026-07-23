@@ -1,4 +1,5 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { AIBudgetStrategy } from "./planners/ai-budget-strategy";
 
 export interface BudgetAllocation {
   researchBudget: number;
@@ -9,6 +10,8 @@ export interface BudgetAllocation {
 }
 
 export class AIBudgetBalancer {
+  private budgetStrategy = new AIBudgetStrategy();
+
   public balanceBudget(nation: Nation, focus: string): BudgetAllocation {
     const totalFunds = Math.max(0, nation.treasury);
 
@@ -38,12 +41,14 @@ export class AIBudgetBalancer {
       corruptionRatio = 0.1;
     }
 
-    return {
+    const baseAllocation: BudgetAllocation = {
       researchBudget: Math.floor(totalFunds * researchRatio),
       recruitmentBudget: Math.floor(totalFunds * recruitmentRatio),
       infrastructureBudget: Math.floor(totalFunds * infraRatio),
       antiCorruptionBudget: Math.floor(totalFunds * corruptionRatio),
       reserveFunds: Math.floor(totalFunds * reserveRatio),
     };
+
+    return this.budgetStrategy.applyTraitFocus(nation, baseAllocation);
   }
 }

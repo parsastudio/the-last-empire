@@ -6,6 +6,7 @@ import { DiplomaticProposalTypeSchema } from "@/modules/diplomacy/schemas/diplom
 export const SetTaxRateActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("SET_TAX_RATE"),
   newRate: z.number().min(0).max(100),
 });
@@ -13,6 +14,7 @@ export const SetTaxRateActionSchema = z.object({
 export const ChangeGovernmentActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("CHANGE_GOVERNMENT"),
   newGovernment: GovernmentTypeSchema,
 });
@@ -20,6 +22,7 @@ export const ChangeGovernmentActionSchema = z.object({
 export const RecruitUnitActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("RECRUIT_UNIT"),
   unitType: UnitTypeSchema,
   quantity: z.number().positive(),
@@ -28,6 +31,7 @@ export const RecruitUnitActionSchema = z.object({
 export const DeclareWarActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("DECLARE_WAR"),
   targetNationId: z.string(),
 });
@@ -35,6 +39,7 @@ export const DeclareWarActionSchema = z.object({
 export const AttackActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("ATTACK"),
   targetNationId: z.string(),
   infantry: z.number().nonnegative(),
@@ -46,6 +51,7 @@ export const AttackActionSchema = z.object({
 export const DiplomaticProposalActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("DIPLOMATIC_PROPOSAL"),
   targetNationId: z.string(),
   proposalType: DiplomaticProposalTypeSchema,
@@ -55,6 +61,7 @@ export const DiplomaticProposalActionSchema = z.object({
 export const TradeResourcesActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("TRADE_RESOURCES"),
   resourceType: z.enum(["oil", "steel"]),
   isBuy: z.boolean(),
@@ -64,18 +71,21 @@ export const TradeResourcesActionSchema = z.object({
 export const UpgradeIndustrialLevelActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("UPGRADE_INDUSTRIAL_LEVEL"),
 });
 
 export const InvestInfrastructureActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("INVEST_INFRASTRUCTURE"),
 });
 
 export const FundEspionageActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("FUND_ESPIONAGE"),
   targetNationId: z.string(),
   budget: z.number().positive(),
@@ -84,6 +94,7 @@ export const FundEspionageActionSchema = z.object({
 export const CovertOperationsActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("COVERT_OPERATIONS"),
   targetNationId: z.string(),
   operationType: z.enum([
@@ -96,6 +107,7 @@ export const CovertOperationsActionSchema = z.object({
 export const RepayDebtActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
+  signature: z.string().optional(),
   type: z.literal("REPAY_DEBT"),
   amount: z.number().positive(),
 });

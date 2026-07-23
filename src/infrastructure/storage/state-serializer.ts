@@ -6,7 +6,19 @@ export class StateSerializer {
   public serialize(state: GameState): string {
     try {
       const validated = GameStateSchema.parse(state);
-      return JSON.stringify(validated);
+      const visited = new Set();
+      const cleanState = JSON.parse(
+        JSON.stringify(validated, (key, value) => {
+          if (typeof value === "object" && value !== null) {
+            if (visited.has(value)) {
+              return undefined;
+            }
+            visited.add(value);
+          }
+          return value;
+        }),
+      );
+      return JSON.stringify(cleanState);
     } catch (err) {
       throw new GameError(
         "INVALID_ACTION",

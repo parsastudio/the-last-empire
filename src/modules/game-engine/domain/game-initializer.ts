@@ -3,6 +3,7 @@ import type {
   NationTrait,
 } from "@/modules/nation/schemas/nation.schema";
 import { SeededRandom } from "@/core/math/seeded-random";
+import { HISTORICAL_NATIONS_MAP } from "./historical-nations.config";
 
 export class GameInitializer {
   private traitsList: NationTrait[] = [
@@ -21,22 +22,39 @@ export class GameInitializer {
     const updated = { ...nations };
 
     for (const [id, nation] of Object.entries(updated)) {
-      const traitIndex1 = prng.nextInt(0, this.traitsList.length - 1);
-      let traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
+      let assignedTraits: NationTrait[] = [];
+      let nextGdp = nation.gdp;
+      let nextPopulation = nation.population;
+      let nextTerritory = nation.geography.territorySize;
+      let nextFlag = nation.flagCode;
+      let nextName = nation.name;
 
-      while (traitIndex1 === traitIndex2) {
-        traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
-      }
+      const historicalConfig = HISTORICAL_NATIONS_MAP[id];
 
-      const assignedTraits: NationTrait[] = [];
-      const trait1 = this.traitsList[traitIndex1];
-      const trait2 = this.traitsList[traitIndex2];
+      if (historicalConfig) {
+        assignedTraits = [...historicalConfig.traits];
+        nextGdp = historicalConfig.gdp;
+        nextPopulation = historicalConfig.population;
+        nextTerritory = historicalConfig.territorySize;
+        nextFlag = historicalConfig.flagCode;
+        nextName = historicalConfig.name;
+      } else {
+        const traitIndex1 = prng.nextInt(0, this.traitsList.length - 1);
+        let traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
 
-      if (trait1) {
-        assignedTraits.push(trait1);
-      }
-      if (trait2) {
-        assignedTraits.push(trait2);
+        while (traitIndex1 === traitIndex2) {
+          traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
+        }
+
+        const trait1 = this.traitsList[traitIndex1];
+        const trait2 = this.traitsList[traitIndex2];
+
+        if (trait1) {
+          assignedTraits.push(trait1);
+        }
+        if (trait2) {
+          assignedTraits.push(trait2);
+        }
       }
 
       const updatedRelations = { ...nation.relations };
@@ -52,8 +70,16 @@ export class GameInitializer {
 
       updated[id] = {
         ...nation,
+        name: nextName,
+        flagCode: nextFlag,
+        gdp: nextGdp,
+        population: nextPopulation,
         traits: assignedTraits,
         relations: updatedRelations,
+        geography: {
+          ...nation.geography,
+          territorySize: nextTerritory,
+        },
       };
     }
 
