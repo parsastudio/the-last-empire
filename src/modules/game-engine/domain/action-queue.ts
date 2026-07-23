@@ -2,20 +2,32 @@ import type { GameState } from "@/modules/game-engine/schemas/game-state.schema"
 import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 import { StateValidator } from "./state-validator";
 import { ActionConcurrencyChecker } from "./action-concurrency-checker";
+import { ActionRouter } from "./actions/action-router";
+import { deepClone } from "@/core/utils/deep-clone";
 
 export class ActionQueue {
   private queue: GameAction[] = [];
   private validator: StateValidator;
   private concurrencyChecker = new ActionConcurrencyChecker();
+  private actionRouter = new ActionRouter();
+  private projectedState: GameState | null = null;
 
   constructor(validator?: StateValidator) {
     this.validator = validator ?? new StateValidator();
   }
 
   public enqueue(state: GameState, action: GameAction): void {
-    this.validator.validateAction(state, action);
+    if (
+      !this.projectedState ||
+      this.projectedState.gameId !== state.gameId ||
+      this.projectedState.currentTurn !== state.currentTurn
+    ) {
+      this.projectedState = deepClone(state);
+    }
+    this.validator.validateAction(this.projectedState, action);
     this.concurrencyChecker.verifyConcurrencies(this.queue, action);
     this.queue.push(action);
+    this.projectedState = this.actionRouter.route(this.projectedState, action);
   }
 
   public getQueue(): readonly GameAction[] {
@@ -24,6 +36,7 @@ export class ActionQueue {
 
   public clear(): void {
     this.queue = [];
+    this.projectedState = null;
   }
 
   public size(): number {

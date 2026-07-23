@@ -23,9 +23,11 @@ export class DeclareWarActionHandler implements ActionHandler {
     const targetRel = target.relations[action.nationId];
 
     const currentStance = sourceRel ? sourceRel.stance : "PEACE";
+    const coolOffTurns = sourceRel ? sourceRel.coolOffTurnsRemaining : 0;
     const penalties = this.coolOffManager.checkViolation(
       currentStance,
       "DECLARE_WAR",
+      coolOffTurns,
     );
 
     let finalSourceReputation = source.globalReputation;

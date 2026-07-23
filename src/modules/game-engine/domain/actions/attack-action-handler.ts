@@ -43,10 +43,14 @@ export class AttackActionHandler implements ActionHandler {
     const currentStance = activeCombatRelation
       ? activeCombatRelation.stance
       : "PEACE";
+    const coolOffTurns = activeCombatRelation
+      ? activeCombatRelation.coolOffTurnsRemaining
+      : 0;
 
     const penalties = this.coolOffManager.checkViolation(
       currentStance,
       "ATTACK",
+      coolOffTurns,
     );
     let finalAttackerReputation = attacker.globalReputation;
     let finalAttackerStability = attacker.government.stability;

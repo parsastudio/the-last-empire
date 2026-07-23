@@ -4,6 +4,8 @@ import { DoctrinesManager } from "@/modules/politics/domain/doctrines-manager";
 export interface DroneStrikeResult {
   softeningDamage: number;
   remainingDefenderInfantry: number;
+  attackerDronesDestroyed: number;
+  defenderDronesDestroyed: number;
 }
 
 export class DroneStrikeCalculator {
@@ -19,6 +21,8 @@ export class DroneStrikeCalculator {
       return {
         softeningDamage: 0,
         remainingDefenderInfantry: defenderMilitary.infantry,
+        attackerDronesDestroyed: 0,
+        defenderDronesDestroyed: 0,
       };
     }
 
@@ -31,7 +35,8 @@ export class DroneStrikeCalculator {
       interceptionRate = Math.min(0.75, defensePower / drones);
     }
 
-    const effectiveDrones = Math.max(0, drones * (1.0 - interceptionRate));
+    const interceptedDrones = Math.floor(drones * interceptionRate);
+    const effectiveDrones = Math.max(0, drones - interceptedDrones);
     const droneMultiplier = this.doctrinesManager.getDroneMultiplier(
       attackerUnlockedDoctrines,
     );
@@ -46,9 +51,17 @@ export class DroneStrikeCalculator {
       defenderMilitary.infantry - actualDamage,
     );
 
+    const attackerDronesDestroyed = drones;
+    const defenderDronesDestroyed = Math.min(
+      defenderDrones,
+      Math.floor(interceptedDrones * 0.5),
+    );
+
     return {
       softeningDamage: actualDamage,
       remainingDefenderInfantry: remainingInfantry,
+      attackerDronesDestroyed,
+      defenderDronesDestroyed,
     };
   }
 }

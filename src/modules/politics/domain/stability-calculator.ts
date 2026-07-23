@@ -25,6 +25,10 @@ export class StabilityCalculator {
     );
     delta += stabilityModifier;
 
+    if (nation.adminBurdenMultiplier > 1.5) {
+      delta -= (nation.adminBurdenMultiplier - 1.5) * 2.0;
+    }
+
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     const targetStability = govTraits.baseStability;
     const alignmentFactor = (targetStability - currentStability) * 0.05;

@@ -12,6 +12,14 @@ export class DroneStrikeStage implements CombatStage {
       context.attacker.doctrines.unlockedDoctrines,
     );
     context.defenderInfantryAfterDrone = droneResult.remainingDefenderInfantry;
-    context.attackForce.droneMissile = 0;
+    context.attackForce.droneMissile = Math.max(
+      0,
+      context.attackForce.droneMissile - droneResult.attackerDronesDestroyed,
+    );
+    context.defenderMilitary.droneMissile = Math.max(
+      0,
+      context.defenderMilitary.droneMissile -
+        droneResult.defenderDronesDestroyed,
+    );
   }
 }

@@ -7,7 +7,7 @@ export interface UpgradeCostResult {
 
 export class IndustrialLevelManager {
   public getUpgradeCost(currentLevel: number): number {
-    return Math.floor(50000 * Math.pow(1.8, currentLevel - 1));
+    return Math.floor(50000 * Math.pow(1.3, currentLevel - 1));
   }
 
   public evaluateUpgrade(nation: Nation): UpgradeCostResult {

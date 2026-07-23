@@ -7,7 +7,7 @@ export interface InfrastructureUpgradeResult {
 
 export class InfrastructureManager {
   public getUpgradeCost(currentLevel: number): number {
-    return Math.floor(30000 * Math.pow(1.6, currentLevel - 1));
+    return Math.floor(30000 * Math.pow(1.25, currentLevel - 1));
   }
 
   public evaluateUpgrade(nation: Nation): InfrastructureUpgradeResult {

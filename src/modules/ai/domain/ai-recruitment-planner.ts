@@ -1,9 +1,23 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import type { RecruitUnitAction } from "@/modules/game-engine/schemas/action.schema";
+import { UpkeepCalculator } from "@/modules/economy/domain/upkeep-calculator";
+import { TaxCalculator } from "@/modules/economy/domain/tax-calculator";
 
 export class AIRecruitmentPlanner {
+  private upkeepCalculator = new UpkeepCalculator();
+  private taxCalculator = new TaxCalculator();
+
   public planRecruitment(nation: Nation, budget: number): RecruitUnitAction[] {
     const actions: RecruitUnitAction[] = [];
+
+    const upkeep = this.upkeepCalculator.calculateUpkeep(nation);
+    const tax = this.taxCalculator.evaluateTaxPolicy(nation);
+    const netIncome = tax.taxIncome - upkeep.total;
+
+    if (netIncome <= 2000 && nation.treasury < 50000) {
+      return actions;
+    }
+
     let remainingBudget = budget;
     let remainingManpower = nation.resources.manpower;
     let remainingSteel = nation.resources.steel;

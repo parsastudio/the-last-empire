@@ -91,8 +91,6 @@ export class EconomyPhase implements TurnPhase {
           oil: updated.resources.oil + resourceIncomeFactor * 5,
           steel: updated.resources.steel + resourceIncomeFactor * 5,
         };
-        totalOilSupply += resourceIncomeFactor * 5;
-        totalSteelSupply += resourceIncomeFactor * 5;
       }
 
       const oilDemand = Math.ceil(

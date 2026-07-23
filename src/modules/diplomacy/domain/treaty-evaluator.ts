@@ -56,10 +56,13 @@ export class TreatyEvaluator {
         }
         return { accepted: false, reason: "DEFENSE_CAPABLE" };
       case "IMPROVE_RELATIONS":
-        if (sender.treasury >= 10000) {
-          return { accepted: true };
+        if (sender.treasury < 10000) {
+          return { accepted: false, reason: "INSUFFICIENT_SENDER_FUNDS" };
         }
-        return { accepted: false, reason: "INSUFFICIENT_SENDER_FUNDS" };
+        if (opinion >= 40) {
+          return { accepted: false, reason: "OPINION_ALREADY_HIGH" };
+        }
+        return { accepted: true };
       default:
         return { accepted: false, reason: "UNKNOWN_PROPOSAL" };
     }
@@ -86,7 +89,7 @@ export class TreatyEvaluator {
         return {
           ...profile,
           stance: "PEACE",
-          coolOffTurnsRemaining: 0,
+          coolOffTurnsRemaining: 10,
         };
       default:
         return profile;
