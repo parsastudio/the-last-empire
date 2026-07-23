@@ -50,6 +50,10 @@ export class GdpCalculator {
       "GDP_GROWTH_MULT",
     );
 
+    if (nation.adminBurdenMultiplier > 1.5) {
+      growthRate -= (nation.adminBurdenMultiplier - 1.5) * 0.01;
+    }
+
     const isMartialLawActive = nation.activeModifiers.some(
       (m) => m.id === "martial-law-active",
     );

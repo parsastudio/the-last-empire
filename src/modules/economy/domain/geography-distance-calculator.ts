@@ -49,8 +49,17 @@ export class GeographyDistanceCalculator {
 
       for (const neighborId of uniqueNeighbors) {
         if (!visited.has(neighborId)) {
-          visited.add(neighborId);
-          queue.push([neighborId, distance + 1]);
+          const relation = currentNation.relations[neighborId];
+          const hasAccess =
+            neighborId === originTargetId ||
+            relation?.militaryAccess === true ||
+            relation?.stance === "ALLIANCE" ||
+            currentId === originId;
+
+          if (hasAccess) {
+            visited.add(neighborId);
+            queue.push([neighborId, distance + 1]);
+          }
         }
       }
     }

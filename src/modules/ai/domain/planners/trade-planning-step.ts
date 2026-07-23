@@ -6,6 +6,9 @@ export class TradePlanningStep implements AIPlanner {
   public plan(context: AIPlanningContext): GameAction[] {
     const actions: GameAction[] = [];
     const nation = context.nation;
+    const currentOilPrice = context.allNations[nation.id]?.relations
+      ? 100
+      : 100;
 
     const requiredOilPerTurn = Math.ceil(
       (nation.military.airForce + nation.military.droneMissile) * 0.5,
@@ -13,7 +16,8 @@ export class TradePlanningStep implements AIPlanner {
 
     if (
       requiredOilPerTurn > 0 &&
-      nation.resources.oil < requiredOilPerTurn * 3
+      nation.resources.oil < requiredOilPerTurn * 3 &&
+      currentOilPrice < 250
     ) {
       const buyAmount = Math.max(
         10,

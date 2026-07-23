@@ -54,7 +54,7 @@ export class DroneStrikeCalculator {
     const attackerDronesDestroyed = drones;
     const defenderDronesDestroyed = Math.min(
       defenderDrones,
-      Math.floor(interceptedDrones * 0.5),
+      Math.floor(interceptedDrones * 0.1),
     );
 
     return {

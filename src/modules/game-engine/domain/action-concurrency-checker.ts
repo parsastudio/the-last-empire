@@ -61,6 +61,43 @@ export class ActionConcurrencyChecker {
           "Cannot request multiple loans in a single turn",
         );
       }
+      const hasTaxRateChangeThisTurn = actionList.some(
+        (a) => a.type === "SET_TAX_RATE" && a.nationId === newAction.nationId,
+      );
+      if (hasTaxRateChangeThisTurn) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot change tax rate and request a loan in the same turn",
+        );
+      }
+    }
+
+    if (newAction.type === "SET_TAX_RATE") {
+      const hasLoanThisTurn = actionList.some(
+        (a) => a.type === "REQUEST_LOAN" && a.nationId === newAction.nationId,
+      );
+      if (hasLoanThisTurn) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot change tax rate and request a loan in the same turn",
+        );
+      }
+    }
+
+    if (newAction.type === "DIPLOMATIC_PROPOSAL") {
+      const isDuplicateProposal = actionList.some(
+        (a) =>
+          a.type === "DIPLOMATIC_PROPOSAL" &&
+          a.nationId === newAction.nationId &&
+          a.targetNationId === newAction.targetNationId &&
+          a.proposalType === newAction.proposalType,
+      );
+      if (isDuplicateProposal) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Already enqueued a diplomatic proposal of this type to the target nation this turn",
+        );
+      }
     }
 
     const hasConflictingTrade =

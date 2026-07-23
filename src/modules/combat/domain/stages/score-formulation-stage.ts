@@ -34,17 +34,13 @@ export class ScoreFormulationStage implements CombatStage {
       context.attacker.geography.seaNeighbors.includes(context.defender.id);
     const distanceMultiplier = isNeighbor ? 1.0 : 0.85;
 
-    const attackerOilRequired = Math.ceil(
-      (context.attackForce.airForce + context.deployedDronesCount) * 0.5,
-    );
+    const attackerOilRequired = Math.ceil(context.attackForce.airForce * 0.5);
     const attackerHasOil =
       context.attacker.resources.oil >= attackerOilRequired;
     const attackerOilPenalty = attackerHasOil ? 1.0 : 0.3;
 
     const defenderOilRequired = Math.ceil(
-      (context.defenderMilitary.airForce +
-        context.defenderMilitary.droneMissile) *
-        0.5,
+      context.defenderMilitary.airForce * 0.5,
     );
     const defenderHasOil =
       context.defender.resources.oil >= defenderOilRequired;
@@ -52,8 +48,7 @@ export class ScoreFormulationStage implements CombatStage {
 
     const attackerBase =
       (context.attackForce.infantry * 1.0 +
-        context.attackForce.airForce * 3.0 +
-        context.deployedDronesCount * 2.0) *
+        context.attackForce.airForce * 3.0) *
       (1 + context.attackForce.techLevel * 0.15) *
       (1 + context.attackForce.experience * 0.005) *
       attackerAttackBonus *
@@ -63,8 +58,7 @@ export class ScoreFormulationStage implements CombatStage {
 
     const defenderBase =
       (context.defenderInfantryAfterDrone * 1.0 +
-        context.defenderMilitary.airForce * 3.0 +
-        context.defenderMilitary.droneMissile * 2.5) *
+        context.defenderMilitary.airForce * 3.0) *
       (1 + context.defenderMilitary.techLevel * 0.15) *
       (1 + context.defenderMilitary.experience * 0.005) *
       defenderHomeBonus *

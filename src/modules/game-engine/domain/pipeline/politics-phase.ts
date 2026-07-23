@@ -58,6 +58,14 @@ export class PoliticsPhase implements TurnPhase {
       );
       updated = proxyResult.updatedTargetNation;
 
+      if (proxyResult.coupTriggered) {
+        for (const otherId of Object.keys(nations)) {
+          if (nations[otherId]?.proxyInfluenceBudget) {
+            nations[otherId].proxyInfluenceBudget[id] = 0;
+          }
+        }
+      }
+
       updated.government.corruption =
         this.engines.corruptionManager.updateCorruptionLevel(updated);
 
@@ -89,6 +97,14 @@ export class PoliticsPhase implements TurnPhase {
       const crisisResult =
         this.engines.domesticCrisisManager.checkAndProcessCrisis(updated);
       updated = crisisResult.updatedNation;
+
+      if (crisisResult.status === "COUP") {
+        for (const otherId of Object.keys(nations)) {
+          if (nations[otherId]?.proxyInfluenceBudget) {
+            nations[otherId].proxyInfluenceBudget[id] = 0;
+          }
+        }
+      }
 
       updated.government = {
         ...updated.government,

@@ -56,11 +56,13 @@ export class VictoryChecker {
       if (totalPopulation > 0) {
         for (const nation of aliveNations) {
           let coalitionPopulation = nation.population;
+          let maxPartnerPop = 0;
           for (const [targetId, rel] of Object.entries(nation.relations)) {
             if (rel.stance === "ALLIANCE") {
               const partner = state.nations[targetId];
               if (partner && partner.isAlive) {
                 coalitionPopulation += partner.population;
+                maxPartnerPop = Math.max(maxPartnerPop, partner.population);
               }
             }
           }
@@ -69,12 +71,20 @@ export class VictoryChecker {
             nation.id === state.humanNationId ||
             nation.relations[state.humanNationId]?.stance === "ALLIANCE";
 
+          let isHumanDominant = false;
+          if (isHumanInCoalition && humanNation) {
+            if (humanNation.population >= maxPartnerPop) {
+              isHumanDominant = true;
+            }
+          }
+
           if (coalitionPopulation / totalPopulation >= 0.7) {
             return {
               isGameOver: true,
-              winnerNationId: isHumanInCoalition
-                ? state.humanNationId
-                : nation.id,
+              winnerNationId:
+                isHumanInCoalition && isHumanDominant
+                  ? state.humanNationId
+                  : nation.id,
               reason: "DIPLOMATIC_HEGEMONY",
             };
           }

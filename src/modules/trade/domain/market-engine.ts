@@ -156,7 +156,10 @@ export class MarketEngine {
     }
     const currentPrice = marketPrices[resourceType];
     const k = this.maxPrice - currentPrice;
-    const finalPrice = amount <= k ? currentPrice + amount : this.maxPrice;
+    const finalPrice =
+      amount <= k
+        ? currentPrice + Math.max(1, Math.floor(amount * 0.5))
+        : this.maxPrice;
 
     const updatedNation: Nation = {
       ...nation,
@@ -207,7 +210,9 @@ export class MarketEngine {
     );
     const k = adjustedStartPrice - this.minPrice;
     const finalPrice =
-      amount <= k ? adjustedStartPrice - amount : this.minPrice;
+      amount <= k
+        ? adjustedStartPrice - Math.max(1, Math.floor(amount * 0.5))
+        : this.minPrice;
 
     const updatedNation: Nation = {
       ...nation,

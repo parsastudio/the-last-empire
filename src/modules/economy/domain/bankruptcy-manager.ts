@@ -57,9 +57,7 @@ export class BankruptcyManager {
     );
 
     const restructuredDebt = Math.floor(nation.nationalDebt * 0.8);
-
     const finalGdp = Math.floor(nation.gdp * 0.5);
-
     const excessiveDebtPenalty = debtRatio > 3.0 ? 3 : 1;
 
     return {
@@ -84,9 +82,14 @@ export class BankruptcyManager {
       },
       military: {
         ...nation.military,
+        techLevel: Math.max(1, nation.military.techLevel - 2),
         infantry: Math.floor(nation.military.infantry * 0.1),
         airForce: Math.floor(nation.military.airForce * 0.05),
         droneMissile: 0,
+      },
+      doctrines: {
+        doctrinePoints: 0,
+        unlockedDoctrines: [],
       },
       resources: {
         ...nation.resources,

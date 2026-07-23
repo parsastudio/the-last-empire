@@ -121,7 +121,8 @@ export class StateValidator {
         );
       }
       const creditRating = this.loanManager.calculateCreditRating(sourceNation);
-      const taxIncome = sourceNation.gdp * (sourceNation.taxRate / 100);
+      const effectiveTaxRateForCredit = Math.min(20, sourceNation.taxRate);
+      const taxIncome = sourceNation.gdp * (effectiveTaxRateForCredit / 100);
       const maxDebtLimit = Math.min(
         Math.floor(sourceNation.gdp * 0.2 * (creditRating / 100)),
         Math.floor(taxIncome * 5 * (creditRating / 100)),
@@ -134,7 +135,7 @@ export class StateValidator {
       if (totalRepayable > availableCredit) {
         throw new GameError(
           "INVALID_ACTION",
-          `Requested loan inclusive of interest (${totalRepayable}) exceeds available credit limit of ${availableCredit}`,
+          `Requested loan inclusive of interest exceeds available credit limit`,
         );
       }
     }

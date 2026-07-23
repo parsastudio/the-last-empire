@@ -21,7 +21,7 @@ export class UpkeepCalculator {
     const baseWeight =
       nation.military.infantry * 1.0 +
       nation.military.airForce * 3.0 +
-      nation.military.droneMissile * 2.5;
+      nation.military.droneMissile * 0.2;
 
     const totalMilitaryCost = Math.floor(
       baseWeight *
@@ -34,7 +34,7 @@ export class UpkeepCalculator {
     const baseInfraUpkeep =
       nation.geography.infrastructureLevel *
       nation.upkeep.infrastructureUpkeep *
-      1000;
+      15000;
 
     const sizeFactor = 1 + Math.log10(nation.geography.territorySize + 1) * 0.5;
 
