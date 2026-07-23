@@ -5,7 +5,6 @@ import { GovernmentSystem } from "@/modules/politics/domain/government-system";
 export interface BreakdownUpkeep {
   infantry: number;
   airForce: number;
-  navy: number;
   droneMissile: number;
   infrastructure: number;
   total: number;
@@ -22,7 +21,6 @@ export class UpkeepCalculator {
     const baseWeight =
       nation.military.infantry * 1.0 +
       nation.military.airForce * 3.0 +
-      nation.military.navy * 2.0 +
       nation.military.droneMissile * 2.5;
 
     const totalMilitaryCost = Math.floor(
@@ -52,10 +50,9 @@ export class UpkeepCalculator {
     const total = totalMilitaryCost + infrastructure + adminPenalty;
 
     return {
-      infantry: Math.floor(totalMilitaryCost * 0.4),
-      airForce: Math.floor(totalMilitaryCost * 0.3),
-      navy: Math.floor(totalMilitaryCost * 0.2),
-      droneMissile: Math.floor(totalMilitaryCost * 0.1),
+      infantry: Math.floor(totalMilitaryCost * 0.5),
+      airForce: Math.floor(totalMilitaryCost * 0.35),
+      droneMissile: Math.floor(totalMilitaryCost * 0.15),
       infrastructure,
       total,
     };

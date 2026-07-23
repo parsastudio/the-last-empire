@@ -15,7 +15,6 @@ export class AttritionManager {
         ...nation.military,
         infantry: Math.floor(nation.military.infantry * (1 - attritionRate)),
         airForce: Math.floor(nation.military.airForce * (1 - attritionRate)),
-        navy: Math.floor(nation.military.navy * (1 - attritionRate)),
         droneMissile: Math.floor(
           nation.military.droneMissile * (1 - attritionRate),
         ),

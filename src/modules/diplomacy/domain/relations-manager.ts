@@ -1,19 +1,7 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
-import type { RelationProfile } from "@/modules/diplomacy/schemas/diplomacy.schema";
 import { GameError } from "@/core/errors/game-error";
 
 export class RelationsManager {
-  public updateOpinion(
-    profile: RelationProfile,
-    delta: number,
-  ): RelationProfile {
-    const newOpinion = Math.max(-100, Math.min(100, profile.opinion + delta));
-    return {
-      ...profile,
-      opinion: newOpinion,
-    };
-  }
-
   public calculateGovernmentFriction(nationA: Nation, nationB: Nation): number {
     const typeA = nationA.government.type;
     const typeB = nationB.government.type;
@@ -59,14 +47,17 @@ export class RelationsManager {
       );
     }
 
-    const updatedRelation = this.updateOpinion(relation, 5);
+    const updatedOpinion = Math.min(100, relation.opinion + 15);
 
     return {
       ...nationA,
       treasury: nationA.treasury - cost,
       relations: {
         ...nationA.relations,
-        [targetId]: updatedRelation,
+        [targetId]: {
+          ...relation,
+          opinion: updatedOpinion,
+        },
       },
     };
   }
@@ -80,13 +71,16 @@ export class RelationsManager {
       );
     }
 
-    const updatedRelation = this.updateOpinion(relation, -25);
+    const updatedOpinion = Math.max(-100, relation.opinion - 30);
 
     return {
       ...nationA,
       relations: {
         ...nationA.relations,
-        [targetId]: updatedRelation,
+        [targetId]: {
+          ...relation,
+          opinion: updatedOpinion,
+        },
       },
     };
   }

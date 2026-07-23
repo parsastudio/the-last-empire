@@ -39,7 +39,6 @@ export class BankruptcyManager {
         ...nation.military,
         infantry: Math.floor(nation.military.infantry * 0.2),
         airForce: Math.floor(nation.military.airForce * 0.1),
-        navy: Math.floor(nation.military.navy * 0.1),
         droneMissile: 0,
       },
       recruitmentQueue: [],

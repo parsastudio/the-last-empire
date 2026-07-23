@@ -5,24 +5,15 @@ import type {
 } from "@/modules/military/schemas/military.schema";
 import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
-import { CoastalRequirementValidator } from "./coastal-requirement-validator";
 
 export class RecruitmentQueueManager {
-  private costCalculator: UnitCostCalculator;
-  private coastalValidator: CoastalRequirementValidator;
-
-  constructor() {
-    this.costCalculator = new UnitCostCalculator();
-    this.coastalValidator = new CoastalRequirementValidator();
-  }
+  private costCalculator = new UnitCostCalculator();
 
   public enqueueOrder(
     nation: Nation,
     unitType: UnitType,
     quantity: number,
   ): Nation {
-    this.coastalValidator.validateSeaAccess(nation, unitType);
-
     const costDetails = this.costCalculator.calculateTotalCost(
       unitType,
       quantity,
@@ -76,9 +67,6 @@ export class RecruitmentQueueManager {
             break;
           case "AIR_FORCE":
             updatedMilitary.airForce += order.quantity;
-            break;
-          case "NAVY":
-            updatedMilitary.navy += order.quantity;
             break;
           case "DRONE_MISSILE":
             updatedMilitary.droneMissile += order.quantity;

@@ -26,11 +26,6 @@ export class TreatyEvaluator {
           return { accepted: true };
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
-      case "DEFENSIVE_PACT":
-        if (opinion >= 30) {
-          return { accepted: true };
-        }
-        return { accepted: false, reason: "OPINION_TOO_LOW" };
       case "FULL_ALLIANCE":
         if (opinion >= 60 && sender.reputation >= 20) {
           return { accepted: true };
@@ -46,11 +41,6 @@ export class TreatyEvaluator {
           return { accepted: true };
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
-      case "LIFT_EMBARGO":
-        if (opinion >= 10) {
-          return { accepted: true };
-        }
-        return { accepted: false, reason: "HOSTILE_RELATIONS" };
       case "DEMAND_TRIBUTE":
         if (receiver.military.infantry < sender.military.infantry * 0.3) {
           return { accepted: true };
@@ -70,18 +60,20 @@ export class TreatyEvaluator {
         return {
           ...profile,
           stance: "NON_AGGRESSION_PACT",
-          treatyTurnsRemaining: 15,
-        };
-      case "DEFENSIVE_PACT":
-        return {
-          ...profile,
-          stance: "DEFENSIVE_PACT",
-          treatyTurnsRemaining: 20,
+          coolOffTurnsRemaining: 0,
         };
       case "FULL_ALLIANCE":
-        return { ...profile, stance: "ALLIANCE", treatyTurnsRemaining: 25 };
+        return {
+          ...profile,
+          stance: "ALLIANCE",
+          coolOffTurnsRemaining: 0,
+        };
       case "PEACE_TREATY":
-        return { ...profile, stance: "PEACE", treatyTurnsRemaining: 10 };
+        return {
+          ...profile,
+          stance: "PEACE",
+          coolOffTurnsRemaining: 0,
+        };
       default:
         return profile;
     }

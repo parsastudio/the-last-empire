@@ -8,11 +8,7 @@ export class ResourceDependencyManager {
     unitType: UnitType,
     quantity: number,
   ): void {
-    if (
-      unitType === "AIR_FORCE" ||
-      unitType === "NAVY" ||
-      unitType === "DRONE_MISSILE"
-    ) {
+    if (unitType === "AIR_FORCE" || unitType === "DRONE_MISSILE") {
       const requiredSteel = quantity * 2;
       if (nation.resources.steel < requiredSteel) {
         throw new GameError(
@@ -25,10 +21,7 @@ export class ResourceDependencyManager {
 
   public applyOilScarcityPenalty(nation: Nation, baseUpkeep: number): number {
     const requiredOilPerTurn = Math.ceil(
-      (nation.military.airForce +
-        nation.military.navy +
-        nation.military.droneMissile) *
-        0.5,
+      (nation.military.airForce + nation.military.droneMissile) * 0.5,
     );
 
     if (nation.resources.oil < requiredOilPerTurn) {
@@ -40,10 +33,7 @@ export class ResourceDependencyManager {
 
   public consumeTurnResources(nation: Nation): Nation {
     const requiredOil = Math.ceil(
-      (nation.military.airForce +
-        nation.military.navy +
-        nation.military.droneMissile) *
-        0.5,
+      (nation.military.airForce + nation.military.droneMissile) * 0.5,
     );
 
     const availableOil = nation.resources.oil;

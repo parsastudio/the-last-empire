@@ -1,12 +1,15 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { IntelLevelEvaluator } from "./intel-level-evaluator";
 
 export class IntelMasker {
+  private evaluator = new IntelLevelEvaluator();
+
   public maskNationData(
     nation: Nation,
     intelLevel: number,
     seed: number,
   ): Record<string, unknown> {
-    if (intelLevel >= 3) {
+    if (intelLevel >= 2) {
       return {
         id: nation.id,
         name: nation.name,
@@ -18,7 +21,6 @@ export class IntelMasker {
         military: {
           infantry: nation.military.infantry,
           airForce: nation.military.airForce,
-          navy: nation.military.navy,
           droneMissile: nation.military.droneMissile,
         },
       };
@@ -27,45 +29,21 @@ export class IntelMasker {
     const factor = this.getErrorFactor(intelLevel);
     const multiplier = 1.0 + (this.deterministicRandom(seed) * 2 - 1) * factor;
 
-    if (intelLevel === 2) {
+    if (intelLevel === 1) {
       return {
         id: nation.id,
         name: nation.name,
         gdp: Math.floor(nation.gdp * multiplier),
         population: Math.floor(nation.population * multiplier),
-        treasury: Math.floor(nation.treasury * multiplier),
-        debt: Math.floor(nation.nationalDebt * multiplier),
+        treasury: "UNKNOWN",
+        debt: "UNKNOWN",
         stability: Math.max(
           0,
           Math.min(100, Math.floor(nation.government.stability * multiplier)),
         ),
         military: {
-          infantry: Math.floor(nation.military.infantry * multiplier),
+          infantry: this.evaluator.getInfantryLabel(nation.military.infantry),
           airForce: "UNKNOWN",
-          navy: "UNKNOWN",
-          droneMissile: "UNKNOWN",
-        },
-      };
-    }
-
-    if (intelLevel === 1) {
-      const wideMultiplier =
-        1.0 + (this.deterministicRandom(seed) * 2 - 1) * 0.5;
-      return {
-        id: nation.id,
-        name: nation.name,
-        gdp: "UNKNOWN",
-        population: "UNKNOWN",
-        treasury: "UNKNOWN",
-        debt: "UNKNOWN",
-        stability: "UNKNOWN",
-        military: {
-          infantry: Math.max(
-            0,
-            Math.floor(nation.military.infantry * wideMultiplier),
-          ),
-          airForce: "UNKNOWN",
-          navy: "UNKNOWN",
           droneMissile: "UNKNOWN",
         },
       };
@@ -82,14 +60,13 @@ export class IntelMasker {
       military: {
         infantry: "UNKNOWN",
         airForce: "UNKNOWN",
-        navy: "UNKNOWN",
         droneMissile: "UNKNOWN",
       },
     };
   }
 
   private getErrorFactor(intelLevel: number): number {
-    if (intelLevel === 2) {
+    if (intelLevel === 1) {
       return 0.15;
     }
     return 0.5;

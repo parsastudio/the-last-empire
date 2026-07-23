@@ -19,7 +19,6 @@ export class DomesticCrisisManager {
       const totalMilitaryPower =
         nation.military.infantry * 1.0 +
         nation.military.airForce * 3.0 +
-        nation.military.navy * 2.0 +
         nation.military.droneMissile * 2.5;
 
       if (totalMilitaryPower === 0 || rebelStrength > totalMilitaryPower) {
@@ -94,7 +93,6 @@ export class DomesticCrisisManager {
         ...nation.military,
         infantry: 0,
         airForce: 0,
-        navy: 0,
         droneMissile: 0,
       },
       government: {

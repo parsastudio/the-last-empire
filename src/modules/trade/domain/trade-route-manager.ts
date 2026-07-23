@@ -12,7 +12,6 @@ export class TradeRouteManager {
     allNations: Record<string, Nation>,
   ): ActiveTradeRoute[] {
     const routes: ActiveTradeRoute[] = [];
-
     const neighbors = [
       ...nation.geography.landNeighbors,
       ...nation.geography.seaNeighbors,
@@ -25,24 +24,15 @@ export class TradeRouteManager {
         continue;
       }
 
-      const isSeaNeighborOnly =
-        nation.geography.seaNeighbors.includes(neighborId) &&
-        !nation.geography.landNeighbors.includes(neighborId);
-
-      if (
-        isSeaNeighborOnly &&
-        (!nation.geography.hasSeaAccess || !neighbor.geography.hasSeaAccess)
-      ) {
+      const relation = nation.relations[neighborId];
+      if (!relation) {
         continue;
       }
 
-      const relation = nation.relations[neighborId];
-      const isPeaceful =
-        !relation ||
-        (relation.stance !== "WAR" && relation.stance !== "COALITION");
-      const isEmbargoed = relation?.embargoActive ?? false;
+      const isPeaceful = relation.stance !== "WAR";
+      const isOpinionAllowed = relation.opinion > -30;
 
-      if (isPeaceful && !isEmbargoed) {
+      if (isPeaceful && isOpinionAllowed) {
         const tradeValue = Math.floor((nation.gdp + neighbor.gdp) * 0.001);
         routes.push({
           partnerId: neighborId,

@@ -4,11 +4,7 @@ import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
 
 export class DisbandManager {
-  private costCalculator: UnitCostCalculator;
-
-  constructor() {
-    this.costCalculator = new UnitCostCalculator();
-  }
+  private costCalculator = new UnitCostCalculator();
 
   public disbandUnits(
     nation: Nation,
@@ -28,9 +24,7 @@ export class DisbandManager {
         ? nation.military.infantry
         : unitType === "AIR_FORCE"
           ? nation.military.airForce
-          : unitType === "NAVY"
-            ? nation.military.navy
-            : nation.military.droneMissile;
+          : nation.military.droneMissile;
 
     if (currentAmount < quantity) {
       throw new GameError(
@@ -54,9 +48,6 @@ export class DisbandManager {
         break;
       case "AIR_FORCE":
         updatedMilitary.airForce -= quantity;
-        break;
-      case "NAVY":
-        updatedMilitary.navy -= quantity;
         break;
       case "DRONE_MISSILE":
         updatedMilitary.droneMissile -= quantity;
