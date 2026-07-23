@@ -35,7 +35,8 @@ export class ProxyWarManager {
       return { updatedTargetNation: targetNation, coupTriggered: false };
     }
 
-    const stabilityDrain = Math.floor(playerInfluenceBudget / 10000);
+    const rawStabilityDrain = Math.floor(Math.log10(playerInfluenceBudget) * 3);
+    const stabilityDrain = Math.max(1, Math.min(15, rawStabilityDrain));
     const finalStability = Math.max(
       0,
       targetNation.government.stability - stabilityDrain,

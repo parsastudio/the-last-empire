@@ -31,8 +31,8 @@ export class DroneStrikeCalculator {
 
     let interceptionRate = 0;
     if (defenderAir > 0 || defenderDrones > 0) {
-      const defensePower = defenderAir * 0.2 + defenderDrones * 0.3;
-      interceptionRate = Math.min(0.75, defensePower / drones);
+      const defensePower = defenderAir * 0.4 + defenderDrones * 0.6;
+      interceptionRate = Math.min(1.0, defensePower / drones);
     }
 
     const interceptedDrones = Math.floor(drones * interceptionRate);

@@ -36,10 +36,10 @@ export class UpkeepCalculator {
       nation.upkeep.infrastructureUpkeep *
       1000;
 
+    const sizeFactor = 1 + Math.log10(nation.geography.territorySize + 1) * 0.5;
+
     const infrastructure = Math.floor(
-      baseInfraUpkeep *
-        (1 + Math.pow(nation.geography.territorySize, 1.1) * 0.001) *
-        nation.adminBurdenMultiplier,
+      baseInfraUpkeep * sizeFactor * nation.adminBurdenMultiplier,
     );
 
     let adminPenalty = 0;

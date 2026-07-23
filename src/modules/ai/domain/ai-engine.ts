@@ -16,7 +16,11 @@ export class AIEngine {
         continue;
       }
 
-      const personality = this.getDeterministicPersonality(id, state.gameId);
+      const personality = this.getDeterministicPersonality(
+        id,
+        state.gameId,
+        state.seed,
+      );
       const aiActions = this.actionGenerator.generateActions(
         nation,
         state.nations,
@@ -32,6 +36,7 @@ export class AIEngine {
   private getDeterministicPersonality(
     nationId: string,
     gameId: string,
+    seed: number,
   ): AIPersonalityType {
     const list: AIPersonalityType[] = [
       "AGGRESSIVE",
@@ -39,7 +44,7 @@ export class AIEngine {
       "ECONOMIC",
       "ISOLATIONIST",
     ];
-    let hash = 0;
+    let hash = seed;
     for (let i = 0; i < gameId.length; i++) {
       hash += gameId.charCodeAt(i);
     }

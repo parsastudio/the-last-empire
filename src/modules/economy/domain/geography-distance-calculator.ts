@@ -55,6 +55,15 @@ export class GeographyDistanceCalculator {
       }
     }
 
+    const originNation = allNations[originId];
+    const targetNation = allNations[originTargetId];
+    if (
+      originNation?.geography.hasSeaAccess &&
+      targetNation?.geography.hasSeaAccess
+    ) {
+      return 6;
+    }
+
     return 15;
   }
 }

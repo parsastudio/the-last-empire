@@ -19,21 +19,9 @@ export class WarExhaustionManager {
       this.maxWarExhaustion,
       nation.warExhaustion + totalIncrease,
     );
-    let stabilityDrop = 0;
-    if (newExhaustion > 50) {
-      stabilityDrop = Math.floor((newExhaustion - 50) * 0.2);
-    }
-    const newStability = Math.max(
-      0,
-      nation.government.stability - stabilityDrop,
-    );
     return {
       ...nation,
       warExhaustion: newExhaustion,
-      government: {
-        ...nation.government,
-        stability: newStability,
-      },
     };
   }
 

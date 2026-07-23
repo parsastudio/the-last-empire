@@ -130,25 +130,20 @@ export class BankruptcyManager {
     );
 
     if (aliveLandNeighbors.length > 0) {
-      const territoryPerNeighbor = Math.floor(
-        territoryLoss / aliveLandNeighbors.length,
+      const refugeesPerNeighbor = Math.floor(
+        (popLoss * 0.05) / aliveLandNeighbors.length,
       );
-      const popPerNeighbor = Math.floor(popLoss / aliveLandNeighbors.length);
 
       for (const neighborId of aliveLandNeighbors) {
         const neighbor = updatedAllNations[neighborId];
         if (neighbor) {
           updatedAllNations[neighborId] = {
             ...neighbor,
-            geography: {
-              ...neighbor.geography,
-              territorySize:
-                neighbor.geography.territorySize + territoryPerNeighbor,
-            },
-            population: neighbor.population + popPerNeighbor,
+            population: neighbor.population + refugeesPerNeighbor,
             government: {
               ...neighbor.government,
               stability: Math.max(10, neighbor.government.stability - 15),
+              corruption: Math.min(100, neighbor.government.corruption + 10),
             },
           };
         }

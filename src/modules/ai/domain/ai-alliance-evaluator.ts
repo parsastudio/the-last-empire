@@ -31,7 +31,16 @@ export class AIAllianceEvaluator {
       return opinion >= 20;
     }
     if (proposalType === "DEMAND_TRIBUTE") {
-      return receiver.military.infantry < sender.military.infantry * 0.3;
+      const receiverPower =
+        receiver.military.infantry * 1.0 +
+        receiver.military.airForce * 3.0 +
+        receiver.military.droneMissile * 2.5;
+      const senderPower =
+        sender.military.infantry * 1.0 +
+        sender.military.airForce * 3.0 +
+        sender.military.droneMissile * 2.5;
+
+      return receiverPower < senderPower * 0.3;
     }
 
     return false;
