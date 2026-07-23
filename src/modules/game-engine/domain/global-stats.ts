@@ -37,7 +37,6 @@ export class GlobalStatsCalculator {
       const militaryCount =
         nation.military.infantry +
         nation.military.airForce +
-        nation.military.navy +
         nation.military.droneMissile;
 
       if (militaryCount > strongestNationMilitaryCount) {

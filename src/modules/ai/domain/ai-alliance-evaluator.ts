@@ -12,35 +12,23 @@ export class AIAllianceEvaluator {
       return false;
     }
 
-    if (receiver.reputation < -50) {
+    if (receiver.globalReputation < -50) {
       return false;
     }
 
     const opinion = relation.opinion;
-    const trust = relation.trust;
-    const tension = relation.tension;
-
-    if (tension > 70) {
-      return false;
-    }
 
     if (proposalType === "NON_AGGRESSION_PACT") {
-      return opinion >= -10 && trust >= -10;
-    }
-    if (proposalType === "DEFENSIVE_PACT") {
-      return opinion >= 30 && trust >= 20;
+      return opinion >= -10;
     }
     if (proposalType === "FULL_ALLIANCE") {
-      return opinion >= 60 && sender.reputation >= 20 && trust >= 50;
+      return opinion >= 60 && sender.globalReputation >= 20;
     }
     if (proposalType === "PEACE_TREATY") {
       return receiver.warExhaustion > 40 || opinion > -20;
     }
     if (proposalType === "MILITARY_ACCESS") {
-      return opinion >= 20 && trust >= 10;
-    }
-    if (proposalType === "LIFT_EMBARGO") {
-      return opinion >= 10 && trust >= 0;
+      return opinion >= 20;
     }
     if (proposalType === "DEMAND_TRIBUTE") {
       return receiver.military.infantry < sender.military.infantry * 0.3;

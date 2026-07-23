@@ -57,11 +57,7 @@ export class VictoryChecker {
         for (const nation of aliveNations) {
           let coalitionPopulation = nation.population;
           for (const [targetId, rel] of Object.entries(nation.relations)) {
-            if (
-              rel.stance === "ALLIANCE" ||
-              rel.stance === "DEFENSIVE_PACT" ||
-              rel.stance === "NON_AGGRESSION_PACT"
-            ) {
+            if (rel.stance === "ALLIANCE") {
               const partner = state.nations[targetId];
               if (partner && partner.isAlive) {
                 coalitionPopulation += partner.population;

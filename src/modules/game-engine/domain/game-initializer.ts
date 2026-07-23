@@ -111,9 +111,8 @@ export class GameInitializer {
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         updatedRelations[targetId] = {
           ...relation,
-          trust: 0,
-          tension: 0,
-          spyNetworkStrength: 0,
+          opinion: 0,
+          coolOffTurnsRemaining: 0,
           intelLevel: 0,
         };
       }
@@ -134,7 +133,16 @@ export class GameInitializer {
         geography: {
           ...nation.geography,
           territorySize: nextTerritory,
+          contiguousMainlandSize: nextTerritory,
+          isolatedPockets: [],
         },
+        globalReputation: 0,
+        globalAggression: 0,
+        doctrines: {
+          doctrinePoints: 0,
+          unlockedDoctrines: [],
+        },
+        proxyInfluenceBudget: {},
       };
     }
     return updated;

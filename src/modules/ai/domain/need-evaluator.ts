@@ -9,13 +9,12 @@ export class NeedEvaluator {
     const totalMilitaryCount =
       nation.military.infantry +
       nation.military.airForce +
-      nation.military.navy +
       nation.military.droneMissile;
     const needMilitary =
       totalMilitaryCount < 50 ? 1.0 : totalMilitaryCount < 200 ? 0.6 : 0.2;
 
     const peaceAlliances = Object.values(nation.relations).filter(
-      (r) => r.stance === "ALLIANCE" || r.stance === "DEFENSIVE_PACT",
+      (r) => r.stance === "ALLIANCE",
     ).length;
     const needDiplomacy =
       peaceAlliances === 0 ? 0.8 : peaceAlliances < 2 ? 0.4 : 0.1;

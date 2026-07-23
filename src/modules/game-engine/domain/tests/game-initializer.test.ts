@@ -21,6 +21,8 @@ export function runGameInitializerTest(): boolean {
         hasSeaAccess: true,
         territorySize: 100,
         infrastructureLevel: 1,
+        contiguousMainlandSize: 100,
+        isolatedPockets: [],
       },
     } as unknown as Nation,
     SAU: {
@@ -38,6 +40,8 @@ export function runGameInitializerTest(): boolean {
         hasSeaAccess: true,
         territorySize: 100,
         infrastructureLevel: 1,
+        contiguousMainlandSize: 100,
+        isolatedPockets: [],
       },
     } as unknown as Nation,
   };

@@ -10,6 +10,8 @@ export function runTerritoryTransferTest(): boolean {
     treasury: 10000,
     geography: {
       territorySize: 1000,
+      contiguousMainlandSize: 1000,
+      isolatedPockets: [],
       infrastructureLevel: 2,
       landNeighbors: [],
       seaNeighbors: [],
@@ -29,6 +31,8 @@ export function runTerritoryTransferTest(): boolean {
     treasury: 5000,
     geography: {
       territorySize: 800,
+      contiguousMainlandSize: 800,
+      isolatedPockets: [],
       infrastructureLevel: 1,
       landNeighbors: [],
       seaNeighbors: [],

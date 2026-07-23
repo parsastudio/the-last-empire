@@ -47,14 +47,28 @@ export class StateValidator {
       }
     }
 
-    if (
-      action.type === "FUND_ESPIONAGE" ||
-      action.type === "COVERT_OPERATIONS"
-    ) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Manual espionage operations have been deactivated in favor of automated Geopolitical Intel.",
-      );
+    if (action.type === "FUND_PROXY_INFLUENCE") {
+      if (action.budget <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Proxy war budget must be positive",
+        );
+      }
+      if (sourceNation.treasury < action.budget) {
+        throw new GameError(
+          "INSUFFICIENT_FUNDS",
+          "Insufficient funds to sponsor proxy influence",
+        );
+      }
+    }
+
+    if (action.type === "UNLOCK_DOCTRINE") {
+      if (sourceNation.doctrines.doctrinePoints < 3) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Insufficient doctrine points to unlock any strategy",
+        );
+      }
     }
   }
 }

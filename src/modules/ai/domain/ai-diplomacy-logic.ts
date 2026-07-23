@@ -13,29 +13,7 @@ export class AIDiplomacyLogic {
       if (!target || !target.isAlive) {
         continue;
       }
-      if (relation.stance === "COALITION") {
-        const targetRelations = target.relations;
-        for (const [allyId, allyRelation] of Object.entries(targetRelations)) {
-          if (allyRelation.stance === "WAR" && allyId !== nation.id) {
-            const allyNation = allNations[allyId];
-            if (allyNation && allyNation.isAlive) {
-              const ownRelationToAlly = nation.relations[allyId];
-              if (
-                ownRelationToAlly &&
-                ownRelationToAlly.stance === "COALITION"
-              ) {
-                actions.push({
-                  id: `ai-coalition-war-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-                  nationId: nation.id,
-                  type: "DECLARE_WAR",
-                  targetNationId: targetId,
-                });
-                break;
-              }
-            }
-          }
-        }
-      }
+
       const ownPower = this.calculatePower(nation);
       const targetPower = this.calculatePower(target);
       const relativePower = ownPower / (targetPower || 1);
@@ -49,7 +27,7 @@ export class AIDiplomacyLogic {
 
       if (
         personality === "AGGRESSIVE" &&
-        relation.trust < -2 &&
+        relation.opinion < -40 &&
         relation.stance !== "WAR" &&
         relativePower >= 2.0
       ) {
@@ -61,6 +39,7 @@ export class AIDiplomacyLogic {
         });
         break;
       }
+
       if (
         relation.opinion > 10 &&
         relation.opinion < 80 &&
@@ -75,7 +54,7 @@ export class AIDiplomacyLogic {
           proposalType:
             relation.stance === "PEACE"
               ? "NON_AGGRESSION_PACT"
-              : "DEFENSIVE_PACT",
+              : "FULL_ALLIANCE",
         });
       }
     }
@@ -86,7 +65,6 @@ export class AIDiplomacyLogic {
     return (
       nation.military.infantry * 1.0 +
       nation.military.airForce * 3.0 +
-      nation.military.navy * 2.0 +
       nation.military.droneMissile * 2.5
     );
   }
