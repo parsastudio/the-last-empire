@@ -31,7 +31,7 @@ export class DiplomacyPhase implements TurnPhase {
         continue;
       }
 
-      let updated = this.intelligenceUpdater.updatePassiveIntel(
+      const updated = this.intelligenceUpdater.updatePassiveIntel(
         nation,
         nations,
       );

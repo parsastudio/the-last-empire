@@ -11,23 +11,20 @@ export class CoalitionManager {
         continue;
       }
       const updatedNation = { ...nation };
-      updatedNation.aggressionScore = Math.max(
+      updatedNation.globalAggression = Math.max(
         0,
-        updatedNation.aggressionScore - 2,
+        updatedNation.globalAggression - 2,
       );
-      if (updatedNation.aggressionScore >= this.threshold) {
+
+      if (updatedNation.globalAggression >= this.threshold) {
         for (const neighborId of updatedNation.geography.landNeighbors) {
           const neighbor = nations[neighborId];
           if (neighbor && neighbor.isAlive) {
             const relation = neighbor.relations[id];
-            if (
-              relation &&
-              relation.stance !== "WAR" &&
-              relation.stance !== "COALITION"
-            ) {
+            if (relation && relation.stance !== "WAR") {
               neighbor.relations[id] = {
                 ...relation,
-                stance: "COALITION",
+                stance: "WAR",
               };
             }
           }
@@ -37,7 +34,7 @@ export class CoalitionManager {
           const neighbor = nations[neighborId];
           if (neighbor && neighbor.isAlive) {
             const relation = neighbor.relations[id];
-            if (relation && relation.stance === "COALITION") {
+            if (relation && relation.stance === "WAR") {
               neighbor.relations[id] = {
                 ...relation,
                 stance: "PEACE",

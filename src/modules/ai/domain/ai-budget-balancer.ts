@@ -52,18 +52,11 @@ export class AIBudgetBalancer {
       proxyBudget: Math.floor(totalFunds * proxyRatio),
     };
 
-    const strategyAdjusted = this.budgetStrategy.applyTraitFocus(nation, {
-      researchBudget: baseAllocation.researchBudget,
-      recruitmentBudget: baseAllocation.recruitmentBudget,
-      infrastructureBudget: baseAllocation.infrastructureBudget,
-      antiCorruptionBudget: baseAllocation.antiCorruptionBudget,
-      reserveFunds: baseAllocation.reserveFunds,
-    });
+    const strategyAdjusted = this.budgetStrategy.applyTraitFocus(
+      nation,
+      baseAllocation,
+    );
 
-    return {
-      ...strategyAdjusted,
-      doctrinesBudget: baseAllocation.doctrinesBudget,
-      proxyBudget: baseAllocation.proxyBudget,
-    };
+    return strategyAdjusted;
   }
 }

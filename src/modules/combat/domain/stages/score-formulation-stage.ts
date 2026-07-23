@@ -19,7 +19,6 @@ export class ScoreFormulationStage implements CombatStage {
     const attackerBase =
       (context.attackForce.infantry * 1.0 +
         context.attackForce.airForce * 3.0 +
-        context.attackForce.navy * 2.0 +
         context.attackForce.droneMissile * 2.5) *
       (1 + context.attackForce.techLevel * 0.15) *
       (1 + context.attackForce.experience * 0.005) *
@@ -29,7 +28,6 @@ export class ScoreFormulationStage implements CombatStage {
     const defenderBase =
       (context.defenderInfantryAfterDrone * 1.0 +
         context.defenderMilitary.airForce * 3.0 +
-        context.defenderMilitary.navy * 2.0 +
         context.defenderMilitary.droneMissile * 2.5) *
       (1 + context.defenderMilitary.techLevel * 0.15) *
       (1 + context.defenderMilitary.experience * 0.005) *

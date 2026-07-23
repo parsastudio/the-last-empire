@@ -1,10 +1,12 @@
 import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
 import { ModifierManager } from "@/modules/events/domain/modifier-manager";
+import { EspionageManager } from "@/modules/diplomacy/domain/espionage-manager";
 import { CoolOffManager } from "@/modules/diplomacy/domain/cool-off-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class ModifiersPhase implements TurnPhase {
   private modifierManager = new ModifierManager();
+  private espionageManager = new EspionageManager();
   private coolOffManager = new CoolOffManager();
 
   public execute(context: PipelineContext): GameState {
@@ -19,20 +21,24 @@ export class ModifiersPhase implements TurnPhase {
 
       const updatedRelations = { ...updated.relations };
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
-        if (relation.coolOffTurnsRemaining > 0) {
+        let currentRel = relation;
+        currentRel = this.espionageManager.applyDecay(currentRel);
+
+        if (currentRel.coolOffTurnsRemaining > 0) {
           const nextTurns = this.coolOffManager.processTurnTick(
-            relation.coolOffTurnsRemaining,
+            currentRel.coolOffTurnsRemaining,
           );
-          let finalStance = relation.stance;
-          if (nextTurns === 0 && relation.coolOffTargetStance) {
-            finalStance = relation.coolOffTargetStance;
+          let finalStance = currentRel.stance;
+          if (nextTurns === 0 && currentRel.coolOffTargetStance) {
+            finalStance = currentRel.coolOffTargetStance;
           }
-          updatedRelations[targetId] = {
-            ...relation,
+          currentRel = {
+            ...currentRel,
             coolOffTurnsRemaining: nextTurns,
             stance: finalStance,
           };
         }
+        updatedRelations[targetId] = currentRel;
       }
       updated.relations = updatedRelations;
 

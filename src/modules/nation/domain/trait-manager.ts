@@ -30,7 +30,7 @@ export class TraitManager {
   public getUpkeepMultiplier(nation: Nation): number {
     let multiplier = 1.0;
     if (this.hasTrait(nation, "MILITARISTIC")) {
-      modifier -= 0.15;
+      multiplier -= 0.15;
     }
     if (this.hasTrait(nation, "INDUSTRIAL_HUB")) {
       multiplier -= 0.05;

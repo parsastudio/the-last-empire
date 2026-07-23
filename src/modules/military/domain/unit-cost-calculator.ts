@@ -26,12 +26,6 @@ export class UnitCostCalculator {
           manpowerCost: 5,
           buildTurns: Math.max(1, 4 - timeReduction),
         };
-      case "NAVY":
-        return {
-          moneyCost: 800,
-          manpowerCost: 15,
-          buildTurns: Math.max(1, 5 - timeReduction),
-        };
       case "DRONE_MISSILE":
         return {
           moneyCost: 400,

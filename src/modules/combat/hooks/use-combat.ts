@@ -23,7 +23,6 @@ export function useCombat(
         targetNationId,
         infantry,
         airForce,
-        navy: 0,
         droneMissile,
       });
     },
