@@ -243,6 +243,11 @@ export class AttackActionHandler implements ActionHandler {
       if (isContiguousNeighbor) {
         finalAttacker.geography.contiguousMainlandSize +=
           transfer.seizedTerritory;
+        finalDefender.geography.contiguousMainlandSize = Math.max(
+          0,
+          finalDefender.geography.contiguousMainlandSize -
+            transfer.seizedTerritory,
+        );
       } else {
         const newPocket = {
           id: `pocket-conquered-${defender.id}-${Date.now()}`,
@@ -253,37 +258,37 @@ export class AttackActionHandler implements ActionHandler {
           ...finalAttacker.geography.isolatedPockets,
           newPocket,
         ];
-      }
 
-      if (finalDefender.geography.isolatedPockets.length > 0) {
-        let remainingLoss = transfer.seizedTerritory;
-        const updatedPockets = [];
-        for (const pocket of finalDefender.geography.isolatedPockets) {
-          if (remainingLoss <= 0) {
-            updatedPockets.push(pocket);
-          } else if (pocket.territorySize > remainingLoss) {
-            updatedPockets.push({
-              ...pocket,
-              territorySize: pocket.territorySize - remainingLoss,
-            });
-            remainingLoss = 0;
-          } else {
-            remainingLoss -= pocket.territorySize;
+        if (finalDefender.geography.isolatedPockets.length > 0) {
+          let remainingLoss = transfer.seizedTerritory;
+          const updatedPockets = [];
+          for (const pocket of finalDefender.geography.isolatedPockets) {
+            if (remainingLoss <= 0) {
+              updatedPockets.push(pocket);
+            } else if (pocket.territorySize > remainingLoss) {
+              updatedPockets.push({
+                ...pocket,
+                territorySize: pocket.territorySize - remainingLoss,
+              });
+              remainingLoss = 0;
+            } else {
+              remainingLoss -= pocket.territorySize;
+            }
           }
-        }
-        finalDefender.geography.isolatedPockets = updatedPockets;
-        if (remainingLoss > 0) {
+          finalDefender.geography.isolatedPockets = updatedPockets;
+          if (remainingLoss > 0) {
+            finalDefender.geography.contiguousMainlandSize = Math.max(
+              0,
+              finalDefender.geography.contiguousMainlandSize - remainingLoss,
+            );
+          }
+        } else {
           finalDefender.geography.contiguousMainlandSize = Math.max(
             0,
-            finalDefender.geography.contiguousMainlandSize - remainingLoss,
+            finalDefender.geography.contiguousMainlandSize -
+              transfer.seizedTerritory,
           );
         }
-      } else {
-        finalDefender.geography.contiguousMainlandSize = Math.max(
-          0,
-          finalDefender.geography.contiguousMainlandSize -
-            transfer.seizedTerritory,
-        );
       }
     } else {
       logMessage += `Defender successfully defended their territory.`;

@@ -38,7 +38,7 @@ export class UpkeepCalculator {
 
     const infrastructure = Math.floor(
       baseInfraUpkeep *
-        (1 + nation.geography.territorySize * 0.0001) *
+        (1 + Math.pow(nation.geography.territorySize, 1.1) * 0.001) *
         nation.adminBurdenMultiplier,
     );
 

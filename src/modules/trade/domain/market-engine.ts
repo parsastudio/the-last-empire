@@ -23,8 +23,10 @@ export class MarketEngine {
   ): ResourceMarketPrice {
     const oilBalance = totalOilDemand - totalOilSupply;
     const steelBalance = totalSteelDemand - totalSteelSupply;
-    const oilDelta = Math.floor(oilBalance * 0.5);
-    const steelDelta = Math.floor(steelBalance * 0.5);
+    const rawOilDelta = Math.floor(oilBalance * 0.08);
+    const rawSteelDelta = Math.floor(steelBalance * 0.08);
+    const oilDelta = Math.max(-25, Math.min(25, rawOilDelta));
+    const steelDelta = Math.max(-25, Math.min(25, rawSteelDelta));
     const newOilPrice = Math.max(
       this.minPrice,
       Math.min(this.maxPrice, currentPrices.oil + oilDelta),

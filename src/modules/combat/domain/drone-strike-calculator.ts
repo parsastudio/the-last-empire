@@ -23,9 +23,12 @@ export class DroneStrikeCalculator {
     }
 
     const defenderAir = defenderMilitary.airForce;
+    const defenderDrones = defenderMilitary.droneMissile;
+
     let interceptionRate = 0;
-    if (defenderAir > 0) {
-      interceptionRate = Math.min(0.8, (defenderAir / drones) * 0.2);
+    if (defenderAir > 0 || defenderDrones > 0) {
+      const defensePower = defenderAir * 0.2 + defenderDrones * 0.3;
+      interceptionRate = Math.min(0.75, defensePower / drones);
     }
 
     const effectiveDrones = Math.max(0, drones * (1.0 - interceptionRate));
@@ -33,14 +36,18 @@ export class DroneStrikeCalculator {
       attackerUnlockedDoctrines,
     );
     const damagePerDrone = 8 * droneMultiplier;
-    const totalDamage = effectiveDrones * damagePerDrone;
+    const totalDamage = Math.floor(effectiveDrones * damagePerDrone);
+
+    const maxAllowedDamage = Math.floor(defenderMilitary.infantry * 0.4);
+    const actualDamage = Math.min(totalDamage, maxAllowedDamage);
+
     const remainingInfantry = Math.max(
       0,
-      defenderMilitary.infantry - totalDamage,
+      defenderMilitary.infantry - actualDamage,
     );
 
     return {
-      softeningDamage: totalDamage,
+      softeningDamage: actualDamage,
       remainingDefenderInfantry: remainingInfantry,
     };
   }

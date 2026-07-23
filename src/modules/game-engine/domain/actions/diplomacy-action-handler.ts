@@ -63,6 +63,43 @@ export class DiplomacyActionHandler implements ActionHandler {
           };
         }
 
+        if (diploAction.proposalType === "DEMAND_TRIBUTE") {
+          const tributeAmount =
+            diploAction.tributeAmount || Math.floor(receiver.gdp * 0.005);
+          const updatedSender = {
+            ...sender,
+            relations: {
+              ...sender.relations,
+              [diploAction.targetNationId]: {
+                ...senderRelation,
+                tributePerTurn: tributeAmount,
+                stance: "PEACE" as const,
+              },
+            },
+          };
+
+          const updatedReceiver = {
+            ...receiver,
+            relations: {
+              ...receiver.relations,
+              [action.nationId]: {
+                ...receiverRelation,
+                opinion: Math.max(-100, receiverRelation.opinion - 30),
+                stance: "PEACE" as const,
+              },
+            },
+          };
+
+          return {
+            ...state,
+            nations: {
+              ...state.nations,
+              [action.nationId]: updatedSender,
+              [diploAction.targetNationId]: updatedReceiver,
+            },
+          };
+        }
+
         const updatedSender = {
           ...sender,
           relations: {

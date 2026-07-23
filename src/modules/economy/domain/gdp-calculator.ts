@@ -57,7 +57,11 @@ export class GdpCalculator {
       growthRate -= 0.02;
     }
 
-    return Math.max(0.95, 1.0 + growthRate);
+    const baseGdpForScale = nation.gdp || 1000000;
+    const logScale = Math.max(1, Math.log10(baseGdpForScale / 1000000));
+    const dampenedGrowthRate = growthRate / logScale;
+
+    return Math.max(0.95, 1.0 + dampenedGrowthRate);
   }
 
   public updateNationGdp(

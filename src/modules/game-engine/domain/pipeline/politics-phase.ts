@@ -72,6 +72,11 @@ export class PoliticsPhase implements TurnPhase {
       );
       updated.government.stability = stability;
 
+      const pointsEarned = 0.1 + (stability / 100) * 0.1;
+      updated.doctrines.doctrinePoints = Number(
+        (updated.doctrines.doctrinePoints + pointsEarned).toFixed(2),
+      );
+
       const electionResult = this.engines.electionEngine.processElection(
         updated,
         nextState.currentTurn,

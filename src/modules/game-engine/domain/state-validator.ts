@@ -121,7 +121,11 @@ export class StateValidator {
         );
       }
       const creditRating = this.loanManager.calculateCreditRating(sourceNation);
-      const maxDebtLimit = Math.floor(sourceNation.gdp * (creditRating / 100));
+      const taxIncome = sourceNation.gdp * (sourceNation.taxRate / 100);
+      const maxDebtLimit = Math.min(
+        Math.floor(sourceNation.gdp * 0.2 * (creditRating / 100)),
+        Math.floor(taxIncome * 5 * (creditRating / 100)),
+      );
       const availableCredit = Math.max(
         0,
         maxDebtLimit - sourceNation.nationalDebt,

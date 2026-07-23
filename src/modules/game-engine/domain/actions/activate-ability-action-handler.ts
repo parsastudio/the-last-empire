@@ -176,7 +176,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         id: "industrial-mobilization-active",
         name: "Industrial Mobilization",
         effectType: "GDP_GROWTH_MULT",
-        magnitude: 0.2,
+        magnitude: 0.05,
         turnsRemaining: 5,
       };
 
@@ -197,7 +197,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         },
         government: {
           ...nation.government,
-          stability: Math.max(0, nation.government.stability - 10),
+          stability: Math.max(0, nation.government.stability - 15),
         },
         activeModifiers: [...nation.activeModifiers, activeMod, cooldown],
       };
