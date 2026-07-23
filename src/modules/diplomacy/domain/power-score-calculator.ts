@@ -13,8 +13,10 @@ export class PowerScoreCalculator {
     infantry: number,
     airForce: number,
     drone: number,
+    militaryPowerMultiplier = 1.0,
   ): number {
-    return infantry * 1.0 + airForce * 3.0 + drone * 2.5;
+    const baseStrength = infantry * 1.0 + airForce * 3.0 + drone * 2.5;
+    return baseStrength * militaryPowerMultiplier;
   }
 
   public calculatePowerScore(
@@ -23,12 +25,14 @@ export class PowerScoreCalculator {
     infantry: number,
     airForce: number,
     drone: number,
+    militaryPowerMultiplier = 1.0,
   ): PowerScoreDetails {
     const economicScore = this.calculateEconomicScore(gdp, treasury);
     const militaryScore = this.calculateMilitaryScore(
       infantry,
       airForce,
       drone,
+      militaryPowerMultiplier,
     );
     const powerScore = Number((economicScore + militaryScore).toFixed(4));
     return {
@@ -46,6 +50,7 @@ export class PowerScoreCalculator {
       infantry: number;
       airForce: number;
       drone: number;
+      militaryPowerMultiplier?: number;
     }[],
   ): { id: string; score: number; rank: number }[] {
     const scores = nations.map((n) => {
@@ -55,6 +60,7 @@ export class PowerScoreCalculator {
         n.infantry,
         n.airForce,
         n.drone,
+        n.militaryPowerMultiplier ?? 1.0,
       );
       return {
         id: n.id,

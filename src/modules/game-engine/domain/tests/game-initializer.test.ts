@@ -14,7 +14,7 @@ export function runGameInitializerTest(): boolean {
       traits: [],
       flagCode: "X",
       relations: {},
-      resources: { money: 100, oil: 10, steel: 10, manpower: 100 },
+      resources: { oil: 10, steel: 10, manpower: 100 },
       geography: {
         landNeighbors: [],
         seaNeighbors: [],
@@ -33,7 +33,7 @@ export function runGameInitializerTest(): boolean {
       traits: [],
       flagCode: "X",
       relations: {},
-      resources: { money: 100, oil: 10, steel: 10, manpower: 100 },
+      resources: { oil: 10, steel: 10, manpower: 100 },
       geography: {
         landNeighbors: [],
         seaNeighbors: [],

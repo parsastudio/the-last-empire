@@ -2,12 +2,14 @@ import type { GameState } from "@/modules/game-engine/schemas/game-state.schema"
 import { DiplomaticOpinionCalculator } from "@/modules/diplomacy/domain/diplomatic-opinion-calculator";
 import { GlobalIntelligenceUpdater } from "@/modules/diplomacy/domain/global-intelligence-updater";
 import { PowerScoreCalculator } from "@/modules/diplomacy/domain/power-score-calculator";
+import { GovernmentSystem } from "@/modules/politics/domain/government-system";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class DiplomacyPhase implements TurnPhase {
   private opinionCalculator = new DiplomaticOpinionCalculator();
   private intelligenceUpdater = new GlobalIntelligenceUpdater();
   private powerCalculator = new PowerScoreCalculator();
+  private governmentSystem = new GovernmentSystem();
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
@@ -15,14 +17,18 @@ export class DiplomacyPhase implements TurnPhase {
 
     const rawNationsList = Object.values(nations)
       .filter((n) => n.isAlive)
-      .map((n) => ({
-        id: n.id,
-        gdp: n.gdp,
-        treasury: n.treasury,
-        infantry: n.military.infantry,
-        airForce: n.military.airForce,
-        drone: n.military.droneMissile,
-      }));
+      .map((n) => {
+        const govTraits = this.governmentSystem.getTraits(n.government.type);
+        return {
+          id: n.id,
+          gdp: n.gdp,
+          treasury: n.treasury,
+          infantry: n.military.infantry,
+          airForce: n.military.airForce,
+          drone: n.military.droneMissile,
+          militaryPowerMultiplier: govTraits.militaryPowerMultiplier,
+        };
+      });
 
     this.powerCalculator.rankNations(rawNationsList);
 

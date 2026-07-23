@@ -57,7 +57,6 @@ export const NationSchema = z.object({
   nationalDebt: z.number().nonnegative(),
   population: z.number().nonnegative(),
   warExhaustion: z.number().min(0).max(100),
-  reputation: z.number().min(-100).max(100),
   industrialLevel: z.number().positive(),
   adminBurdenMultiplier: z.number().nonnegative(),
   consecutiveDeficitTurns: z.number().nonnegative(),

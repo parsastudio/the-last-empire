@@ -9,6 +9,7 @@ export class DroneStrikeStage implements CombatStage {
     const droneResult = this.droneCalc.calculateDroneImpact(
       context.attackForce,
       context.defenderMilitary,
+      context.attacker.doctrines.unlockedDoctrines,
     );
     context.defenderInfantryAfterDrone = droneResult.remainingDefenderInfantry;
   }

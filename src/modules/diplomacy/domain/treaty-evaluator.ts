@@ -17,7 +17,7 @@ export class TreatyEvaluator {
   ): ProposalEvaluation {
     const relation = receiver.relations[sender.id];
     const opinion = relation ? relation.opinion : 0;
-    if (receiver.reputation < -50) {
+    if (receiver.globalReputation < -50) {
       return { accepted: false, reason: "LOW_SENDER_REPUTATION" };
     }
     switch (proposalType) {
@@ -27,7 +27,7 @@ export class TreatyEvaluator {
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
       case "FULL_ALLIANCE":
-        if (opinion >= 60 && sender.reputation >= 20) {
+        if (opinion >= 60 && sender.globalReputation >= 20) {
           return { accepted: true };
         }
         return { accepted: false, reason: "REQUIREMENTS_NOT_MET" };

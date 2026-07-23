@@ -1,4 +1,5 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { GovernmentSystem } from "@/modules/politics/domain/government-system";
 
 export interface ActiveTradeRoute {
   partnerId: string;
@@ -7,6 +8,8 @@ export interface ActiveTradeRoute {
 }
 
 export class TradeRouteManager {
+  private governmentSystem = new GovernmentSystem();
+
   public getActiveTradeRoutes(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -17,6 +20,8 @@ export class TradeRouteManager {
       ...nation.geography.seaNeighbors,
     ];
     const uniqueNeighbors = Array.from(new Set(neighbors));
+
+    const govTraits = this.governmentSystem.getTraits(nation.government.type);
 
     for (const neighborId of uniqueNeighbors) {
       const neighbor = allNations[neighborId];
@@ -33,7 +38,10 @@ export class TradeRouteManager {
       const isOpinionAllowed = relation.opinion > -30;
 
       if (isPeaceful && isOpinionAllowed) {
-        const tradeValue = Math.floor((nation.gdp + neighbor.gdp) * 0.001);
+        const rawTradeValue = Math.floor((nation.gdp + neighbor.gdp) * 0.001);
+        const tradeValue = Math.floor(
+          rawTradeValue * govTraits.tradeMultiplier,
+        );
         routes.push({
           partnerId: neighborId,
           isPeaceful: true,
