@@ -21,10 +21,8 @@ export class MarketEngine {
   ): ResourceMarketPrice {
     const oilBalance = totalOilDemand - totalOilSupply;
     const steelBalance = totalSteelDemand - totalSteelSupply;
-
     const oilDelta = Math.floor(oilBalance * 0.5);
     const steelDelta = Math.floor(steelBalance * 0.5);
-
     const newOilPrice = Math.max(
       this.minPrice,
       Math.min(this.maxPrice, currentPrices.oil + oilDelta),
@@ -33,7 +31,6 @@ export class MarketEngine {
       this.minPrice,
       Math.min(this.maxPrice, currentPrices.steel + steelDelta),
     );
-
     return {
       oil: newOilPrice,
       steel: newSteelPrice,
@@ -52,22 +49,25 @@ export class MarketEngine {
         "Buy amount must be greater than zero",
       );
     }
-
+    const currentPrice = marketPrices[resourceType];
+    const k = this.maxPrice - currentPrice;
     let totalCost = 0;
-    let currentPrice = marketPrices[resourceType];
-
-    for (let i = 0; i < amount; i++) {
-      totalCost += currentPrice;
-      currentPrice = Math.min(this.maxPrice, currentPrice + 1);
+    let finalPrice = currentPrice;
+    if (amount <= k) {
+      totalCost = amount * currentPrice + (amount * (amount - 1)) / 2;
+      finalPrice = currentPrice + amount;
+    } else {
+      const variableCost = k * currentPrice + (k * (k - 1)) / 2;
+      const flatCost = (amount - k) * this.maxPrice;
+      totalCost = variableCost + flatCost;
+      finalPrice = this.maxPrice;
     }
-
     if (nation.treasury < totalCost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
         "Not enough treasury to buy resources",
       );
     }
-
     const updatedNation: Nation = {
       ...nation,
       treasury: nation.treasury - totalCost,
@@ -76,12 +76,10 @@ export class MarketEngine {
         [resourceType]: nation.resources[resourceType] + amount,
       },
     };
-
     const updatedMarketPrices: ResourceMarketPrice = {
       ...marketPrices,
-      [resourceType]: currentPrice,
+      [resourceType]: finalPrice,
     };
-
     return {
       updatedNation,
       updatedMarketPrices,
@@ -101,22 +99,25 @@ export class MarketEngine {
         "Sell amount must be greater than zero",
       );
     }
-
     if (nation.resources[resourceType] < amount) {
       throw new GameError(
         "INSUFFICIENT_RESOURCES",
         `Not enough ${resourceType} to sell`,
       );
     }
-
+    const currentPrice = marketPrices[resourceType];
+    const k = currentPrice - this.minPrice;
     let totalRevenue = 0;
-    let currentPrice = marketPrices[resourceType];
-
-    for (let i = 0; i < amount; i++) {
-      totalRevenue += currentPrice;
-      currentPrice = Math.max(this.minPrice, currentPrice - 1);
+    let finalPrice = currentPrice;
+    if (amount <= k) {
+      totalRevenue = amount * currentPrice - (amount * (amount - 1)) / 2;
+      finalPrice = currentPrice - amount;
+    } else {
+      const variableRevenue = k * currentPrice - (k * (k - 1)) / 2;
+      const flatRevenue = (amount - k) * this.minPrice;
+      totalRevenue = variableRevenue + flatRevenue;
+      finalPrice = this.minPrice;
     }
-
     const updatedNation: Nation = {
       ...nation,
       treasury: nation.treasury + totalRevenue,
@@ -125,12 +126,10 @@ export class MarketEngine {
         [resourceType]: nation.resources[resourceType] - amount,
       },
     };
-
     const updatedMarketPrices: ResourceMarketPrice = {
       ...marketPrices,
-      [resourceType]: currentPrice,
+      [resourceType]: finalPrice,
     };
-
     return {
       updatedNation,
       updatedMarketPrices,

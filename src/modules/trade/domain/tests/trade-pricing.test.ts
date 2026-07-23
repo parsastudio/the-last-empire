@@ -4,12 +4,10 @@ import type { ResourceMarketPrice } from "@/modules/economy/schemas/economy.sche
 
 export function runTradePricingTest(): boolean {
   const engine = new MarketEngine();
-
   const initialPrices: ResourceMarketPrice = {
     oil: 100,
     steel: 100,
   };
-
   const nationTemplate = {
     id: "NATION_TEST",
     name: "Test Land",
@@ -19,29 +17,23 @@ export function runTradePricingTest(): boolean {
       steel: 0,
     },
   } as unknown as Nation;
-
-  let singleTxNation = { ...nationTemplate };
-  let singleTxPrices = { ...initialPrices };
-
-  for (let i = 0; i < 100; i++) {
-    const result = engine.buyResource(singleTxNation, singleTxPrices, "oil", 1);
-    singleTxNation = result.updatedNation;
-    singleTxPrices = result.updatedMarketPrices;
-  }
-
   const bulkResult = engine.buyResource(
     { ...nationTemplate },
     { ...initialPrices },
     "oil",
     100,
   );
-
+  let stepPrices = { ...initialPrices };
+  let stepNation = { ...nationTemplate };
+  for (let i = 0; i < 100; i++) {
+    const res = engine.buyResource(stepNation, stepPrices, "oil", 1);
+    stepPrices = res.updatedMarketPrices;
+    stepNation = res.updatedNation;
+  }
   const treasuryMatches =
-    singleTxNation.treasury === bulkResult.updatedNation.treasury;
+    stepNation.treasury === bulkResult.updatedNation.treasury;
   const oilMatches =
-    singleTxNation.resources.oil === bulkResult.updatedNation.resources.oil;
-  const priceMatches =
-    singleTxPrices.oil === bulkResult.updatedMarketPrices.oil;
-
+    stepNation.resources.oil === bulkResult.updatedNation.resources.oil;
+  const priceMatches = stepPrices.oil === bulkResult.updatedMarketPrices.oil;
   return treasuryMatches && oilMatches && priceMatches;
 }

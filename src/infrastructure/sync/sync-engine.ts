@@ -32,10 +32,8 @@ export class SyncEngine {
     if (this.isProcessing || this.syncQueue.length === 0) {
       return;
     }
-
     this.isProcessing = true;
     const nextState = this.syncQueue.shift();
-
     if (nextState) {
       try {
         await this.dbAdapter.saveState(nextState.gameId, nextState);
@@ -44,7 +42,6 @@ export class SyncEngine {
         this.syncQueue.unshift(nextState);
       }
     }
-
     this.isProcessing = false;
     setTimeout(() => this.processSyncQueue(), 1000);
   }

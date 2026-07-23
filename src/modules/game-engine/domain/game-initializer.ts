@@ -3,7 +3,18 @@ import type {
   NationTrait,
 } from "@/modules/nation/schemas/nation.schema";
 import { SeededRandom } from "@/core/math/seeded-random";
-import { HISTORICAL_NATIONS_MAP } from "./historical-nations.config";
+
+export interface AbstractProfile {
+  name: string;
+  flagCode: string;
+  gdp: number;
+  population: number;
+  territorySize: number;
+  traits: NationTrait[];
+  oil: number;
+  steel: number;
+  treasury: number;
+}
 
 export class GameInitializer {
   private traitsList: NationTrait[] = [
@@ -15,40 +26,80 @@ export class GameInitializer {
     "ISOLATED_SOCIETY",
   ];
 
+  private profiles: Record<string, AbstractProfile> = {
+    TIER_1: {
+      name: "Industrial Superpower",
+      flagCode: "ISP",
+      gdp: 20000000,
+      population: 300000000,
+      territorySize: 9000,
+      traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
+      oil: 1000,
+      steel: 2000,
+      treasury: 500000,
+    },
+    TIER_2: {
+      name: "Resource Hub",
+      flagCode: "RHB",
+      gdp: 10000000,
+      population: 150000000,
+      territorySize: 5000,
+      traits: ["OIL_RICH"],
+      oil: 5000,
+      steel: 1000,
+      treasury: 300000,
+    },
+    TIER_3: {
+      name: "Emerging Market",
+      flagCode: "EMR",
+      gdp: 5000000,
+      population: 80000000,
+      territorySize: 3000,
+      traits: ["FRAGILE_ECONOMY"],
+      oil: 500,
+      steel: 500,
+      treasury: 100000,
+    },
+  };
+
   public assignDeterministicTraits(
     nations: Record<string, Nation>,
     prng: SeededRandom,
   ): Record<string, Nation> {
     const updated = { ...nations };
-
+    const tierKeys = Object.keys(this.profiles);
+    let index = 0;
     for (const [id, nation] of Object.entries(updated)) {
+      const assignedTier = tierKeys[index % tierKeys.length];
+      const profile = this.profiles[assignedTier];
+      index++;
       let assignedTraits: NationTrait[] = [];
       let nextGdp = nation.gdp;
       let nextPopulation = nation.population;
       let nextTerritory = nation.geography.territorySize;
       let nextFlag = nation.flagCode;
       let nextName = nation.name;
-
-      const historicalConfig = HISTORICAL_NATIONS_MAP[id];
-
-      if (historicalConfig) {
-        assignedTraits = [...historicalConfig.traits];
-        nextGdp = historicalConfig.gdp;
-        nextPopulation = historicalConfig.population;
-        nextTerritory = historicalConfig.territorySize;
-        nextFlag = historicalConfig.flagCode;
-        nextName = historicalConfig.name;
+      let nextOil = nation.resources.oil;
+      let nextSteel = nation.resources.steel;
+      let nextTreasury = nation.treasury;
+      if (profile) {
+        assignedTraits = [...profile.traits];
+        nextGdp = profile.gdp;
+        nextPopulation = profile.population;
+        nextTerritory = profile.territorySize;
+        nextFlag = profile.flagCode;
+        nextName = profile.name;
+        nextOil = profile.oil;
+        nextSteel = profile.steel;
+        nextTreasury = profile.treasury;
       } else {
         const traitIndex1 = prng.nextInt(0, this.traitsList.length - 1);
         let traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
-
         while (traitIndex1 === traitIndex2) {
           traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
         }
-
         const trait1 = this.traitsList[traitIndex1];
         const trait2 = this.traitsList[traitIndex2];
-
         if (trait1) {
           assignedTraits.push(trait1);
         }
@@ -56,7 +107,6 @@ export class GameInitializer {
           assignedTraits.push(trait2);
         }
       }
-
       const updatedRelations = { ...nation.relations };
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         updatedRelations[targetId] = {
@@ -67,22 +117,26 @@ export class GameInitializer {
           intelLevel: 0,
         };
       }
-
       updated[id] = {
         ...nation,
         name: nextName,
         flagCode: nextFlag,
         gdp: nextGdp,
         population: nextPopulation,
+        treasury: nextTreasury,
         traits: assignedTraits,
         relations: updatedRelations,
+        resources: {
+          ...nation.resources,
+          oil: nextOil,
+          steel: nextSteel,
+        },
         geography: {
           ...nation.geography,
           territorySize: nextTerritory,
         },
       };
     }
-
     return updated;
   }
 }

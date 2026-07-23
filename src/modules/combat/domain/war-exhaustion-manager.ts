@@ -15,22 +15,18 @@ export class WarExhaustionManager {
     const totalIncrease = Math.floor(
       (baseIncrement + casualtyFactor) * govTraits.warExhaustionMultiplier,
     );
-
     const newExhaustion = Math.min(
       this.maxWarExhaustion,
       nation.warExhaustion + totalIncrease,
     );
-
     let stabilityDrop = 0;
     if (newExhaustion > 50) {
       stabilityDrop = Math.floor((newExhaustion - 50) * 0.2);
     }
-
     const newStability = Math.max(
       0,
       nation.government.stability - stabilityDrop,
     );
-
     return {
       ...nation,
       warExhaustion: newExhaustion,

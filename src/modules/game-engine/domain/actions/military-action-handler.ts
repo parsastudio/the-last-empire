@@ -50,10 +50,8 @@ export class DeclareWarActionHandler implements ActionHandler {
     if (!source || !target || !target.isAlive) {
       return state;
     }
-
     const sourceRel = source.relations[warAction.targetNationId];
     const targetRel = target.relations[action.nationId];
-
     const updatedSource = {
       ...source,
       aggressionScore: Math.min(100, source.aggressionScore + 25),
@@ -69,7 +67,6 @@ export class DeclareWarActionHandler implements ActionHandler {
           : {}),
       },
     };
-
     const updatedTarget = {
       ...target,
       relations: {
@@ -84,7 +81,6 @@ export class DeclareWarActionHandler implements ActionHandler {
           : {}),
       },
     };
-
     return {
       ...state,
       nations: {
@@ -108,13 +104,10 @@ export class AttackActionHandler implements ActionHandler {
     const attackAction = action as AttackAction;
     const attacker = state.nations[action.nationId];
     const defender = state.nations[attackAction.targetNationId];
-
     if (!attacker || !defender || !defender.isAlive) {
       return state;
     }
-
     const { infantry, airForce, navy, droneMissile } = attackAction;
-
     if (
       attacker.military.infantry < infantry ||
       attacker.military.airForce < airForce ||
@@ -126,7 +119,14 @@ export class AttackActionHandler implements ActionHandler {
         "Attacker does not possess requested deployment force",
       );
     }
-
+    const activeCombatRelation =
+      attacker.relations[attackAction.targetNationId];
+    const hasCasusBelli =
+      activeCombatRelation && activeCombatRelation.stance === "WAR";
+    let finalAttackerReputation = attacker.reputation;
+    if (!hasCasusBelli) {
+      finalAttackerReputation = Math.max(-100, attacker.reputation - 20);
+    }
     const attackForceStack = {
       infantry,
       airForce,
@@ -136,9 +136,9 @@ export class AttackActionHandler implements ActionHandler {
       techLevel: attacker.military.techLevel,
       mobility: attacker.military.mobility,
     };
-
     const updatedAttackerNation = {
       ...attacker,
+      reputation: finalAttackerReputation,
       military: {
         ...attacker.military,
         infantry: attacker.military.infantry - infantry,
@@ -147,7 +147,6 @@ export class AttackActionHandler implements ActionHandler {
         droneMissile: attacker.military.droneMissile - droneMissile,
       },
     };
-
     const prng = new SeededRandom(state.seed);
     const combatResult = this.combatResolver.resolveCombat(
       updatedAttackerNation,
@@ -155,7 +154,6 @@ export class AttackActionHandler implements ActionHandler {
       attackForceStack,
       prng,
     );
-
     let finalAttacker = {
       ...updatedAttackerNation,
       military: {
@@ -174,18 +172,15 @@ export class AttackActionHandler implements ActionHandler {
           combatResult.updatedAttackerMilitary.droneMissile,
       },
     };
-
     let finalDefender = {
       ...defender,
       military: combatResult.updatedDefenderMilitary,
     };
-
     const attackerKilledInfantry =
       infantry - combatResult.updatedAttackerMilitary.infantry;
     const attackerKilledAir =
       airForce - combatResult.updatedAttackerMilitary.airForce;
     const attackerTotalCasualties = attackerKilledInfantry + attackerKilledAir;
-
     const defenderKilledInfantry =
       defender.military.infantry -
       combatResult.updatedDefenderMilitary.infantry;
@@ -193,7 +188,6 @@ export class AttackActionHandler implements ActionHandler {
       defender.military.airForce -
       combatResult.updatedDefenderMilitary.airForce;
     const defenderTotalCasualties = defenderKilledInfantry + defenderKilledAir;
-
     finalAttacker = this.warExhaustionManager.incrementWarExhaustion(
       finalAttacker,
       attackerTotalCasualties,
@@ -202,7 +196,6 @@ export class AttackActionHandler implements ActionHandler {
       finalDefender,
       defenderTotalCasualties,
     );
-
     let logMessage = `Battle occurred. Attacker: ${attacker.name}, Defender: ${defender.name}. `;
     if (combatResult.attackerWon) {
       const transfer = this.occupationManager.processVictoryOccupation(
@@ -216,7 +209,6 @@ export class AttackActionHandler implements ActionHandler {
     } else {
       logMessage += `Defender successfully defended their territory.`;
     }
-
     const updatedNations = {
       ...state.nations,
       [attacker.id]: {
@@ -225,7 +217,6 @@ export class AttackActionHandler implements ActionHandler {
       },
       [defender.id]: finalDefender,
     };
-
     const logEntry = {
       id: `combat-${state.currentTurn}-${Date.now()}`,
       turn: state.currentTurn,
@@ -235,7 +226,6 @@ export class AttackActionHandler implements ActionHandler {
       level: "COMBAT" as const,
       message: logMessage,
     };
-
     return {
       ...state,
       seed: prng.getSeed(),

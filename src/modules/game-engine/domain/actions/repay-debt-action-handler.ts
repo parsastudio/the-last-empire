@@ -16,22 +16,18 @@ export class RepayDebtActionHandler implements ActionHandler {
     if (!nation) {
       return state;
     }
-
     if (nation.treasury < repayAction.amount) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
         "Not enough money in treasury for requested manual debt repayment",
       );
     }
-
     const maxRepayable = Math.min(repayAction.amount, nation.debt);
-
     const updatedNation = {
       ...nation,
       treasury: nation.treasury - maxRepayable,
       debt: nation.debt - maxRepayable,
     };
-
     return {
       ...state,
       nations: {

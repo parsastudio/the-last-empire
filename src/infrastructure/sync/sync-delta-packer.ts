@@ -15,7 +15,6 @@ export class SyncDeltaPacker {
     stateHash: string,
   ): DeltaPacket {
     const changes: Record<string, unknown> = {};
-
     if (!previousState) {
       return {
         gameId: currentState.gameId,
@@ -25,17 +24,14 @@ export class SyncDeltaPacker {
         changes: { fullState: currentState },
       };
     }
-
     const currentNations = currentState.nations;
     const previousNations = previousState.nations;
-
     for (const [id, nation] of Object.entries(currentNations)) {
       const prevNation = previousNations[id];
       if (!prevNation) {
         changes[`nations.${id}`] = nation;
         continue;
       }
-
       if (nation.treasury !== prevNation.treasury) {
         changes[`nations.${id}.treasury`] = nation.treasury;
       }
@@ -57,7 +53,6 @@ export class SyncDeltaPacker {
           nation.government.corruption;
       }
     }
-
     return {
       gameId: currentState.gameId,
       turn: currentState.currentTurn,

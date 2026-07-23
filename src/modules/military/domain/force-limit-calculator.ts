@@ -22,11 +22,9 @@ export class ForceLimitCalculator {
   public getOverForceLimitPenalty(nation: Nation): number {
     const forceLimit = this.calculateForceLimit(nation);
     const totalCount = this.getTotalMilitaryCount(nation);
-
     if (totalCount <= forceLimit) {
       return 1.0;
     }
-
     const excessRatio = (totalCount - forceLimit) / forceLimit;
     return 1.0 + excessRatio * 2.0;
   }

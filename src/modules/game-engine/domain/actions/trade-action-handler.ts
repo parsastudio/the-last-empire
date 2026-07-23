@@ -19,7 +19,14 @@ export class TradeActionHandler implements ActionHandler {
     if (!nation) {
       return state;
     }
-
+    if (!tradeAction.isBuy) {
+      if (nation.resources[tradeAction.resourceType] < tradeAction.amount) {
+        throw new GameError(
+          "INSUFFICIENT_RESOURCES",
+          `Not enough ${tradeAction.resourceType} in stock for transaction`,
+        );
+      }
+    }
     if (tradeAction.isBuy) {
       const result = this.marketEngine.buyResource(
         nation,
@@ -36,12 +43,6 @@ export class TradeActionHandler implements ActionHandler {
         },
       };
     } else {
-      if (nation.resources[tradeAction.resourceType] < tradeAction.amount) {
-        throw new GameError(
-          "INSUFFICIENT_RESOURCES",
-          `Not enough ${tradeAction.resourceType} in stock for transaction`,
-        );
-      }
       const result = this.marketEngine.sellResource(
         nation,
         state.marketPrices,
