@@ -8,7 +8,7 @@ export class DiplomacyPhase implements TurnPhase {
   private trustManager = new TrustManager();
 
   public execute(context: PipelineContext): GameState {
-    let nextState = this.coalitionManager.processCoalitions(context.state);
+    const nextState = this.coalitionManager.processCoalitions(context.state);
     const nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {

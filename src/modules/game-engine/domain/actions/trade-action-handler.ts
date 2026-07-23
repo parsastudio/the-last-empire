@@ -4,6 +4,7 @@ import type {
   TradeResourcesAction,
 } from "@/modules/game-engine/schemas/action.schema";
 import { MarketEngine } from "@/modules/trade/domain/market-engine";
+import { GameError } from "@/core/errors/game-error";
 import { ActionHandler } from "./action-handler";
 
 export class TradeActionHandler implements ActionHandler {
@@ -35,6 +36,12 @@ export class TradeActionHandler implements ActionHandler {
         },
       };
     } else {
+      if (nation.resources[tradeAction.resourceType] < tradeAction.amount) {
+        throw new GameError(
+          "INSUFFICIENT_RESOURCES",
+          `Not enough ${tradeAction.resourceType} in stock for transaction`,
+        );
+      }
       const result = this.marketEngine.sellResource(
         nation,
         state.marketPrices,

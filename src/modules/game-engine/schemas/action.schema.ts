@@ -93,6 +93,13 @@ export const CovertOperationsActionSchema = z.object({
   ]),
 });
 
+export const RepayDebtActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  type: z.literal("REPAY_DEBT"),
+  amount: z.number().positive(),
+});
+
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   ChangeGovernmentActionSchema,
@@ -105,6 +112,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   InvestInfrastructureActionSchema,
   FundEspionageActionSchema,
   CovertOperationsActionSchema,
+  RepayDebtActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
@@ -135,5 +143,6 @@ export type FundEspionageAction = z.infer<typeof FundEspionageActionSchema>;
 export type CovertOperationsAction = z.infer<
   typeof CovertOperationsActionSchema
 >;
+export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;

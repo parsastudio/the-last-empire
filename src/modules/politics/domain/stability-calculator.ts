@@ -1,6 +1,9 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { GovernmentSystem } from "./government-system";
 
 export class StabilityCalculator {
+  private governmentSystem = new GovernmentSystem();
+
   public calculateTurnStability(nation: Nation): number {
     let delta = 0;
 
@@ -18,8 +21,15 @@ export class StabilityCalculator {
       delta -= (nation.government.corruption - 30) * 0.1;
     }
 
+    const govTraits = this.governmentSystem.getTraits(nation.government.type);
     const currentStability = nation.government.stability;
-    const newStability = Math.max(0, Math.min(100, currentStability + delta));
+    const targetStability = govTraits.baseStability;
+
+    const alignmentFactor = (targetStability - currentStability) * 0.05;
+    const newStability = Math.max(
+      0,
+      Math.min(100, currentStability + delta + alignmentFactor),
+    );
 
     return Math.floor(newStability);
   }

@@ -19,7 +19,7 @@ export class GovernmentSystem {
           militaryUpkeepMultiplier: 1.0,
           baseStability: 70,
           tradeMultiplier: 1.25,
-          militaryPowerMultiplier: 0.9,
+          militaryPowerMultiplier: 0.85,
         };
       case "DICTATORSHIP":
         return {
@@ -28,7 +28,7 @@ export class GovernmentSystem {
           militaryUpkeepMultiplier: 0.9,
           baseStability: 50,
           tradeMultiplier: 0.9,
-          militaryPowerMultiplier: 1.1,
+          militaryPowerMultiplier: 1.25,
         };
       case "MONARCHY":
         return {
@@ -55,7 +55,7 @@ export class GovernmentSystem {
           militaryUpkeepMultiplier: 1.1,
           baseStability: 55,
           tradeMultiplier: 0.8,
-          militaryPowerMultiplier: 1.3,
+          militaryPowerMultiplier: 1.5,
         };
     }
   }

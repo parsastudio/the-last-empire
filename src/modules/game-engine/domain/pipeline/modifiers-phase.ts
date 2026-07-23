@@ -15,7 +15,7 @@ export class ModifiersPhase implements TurnPhase {
       if (!nation.isAlive) {
         continue;
       }
-      let updated = this.modifierManager.updateActiveModifiers(nation);
+      const updated = this.modifierManager.updateActiveModifiers(nation);
 
       const updatedRelations = { ...updated.relations };
       for (const [targetId, relation] of Object.entries(updatedRelations)) {

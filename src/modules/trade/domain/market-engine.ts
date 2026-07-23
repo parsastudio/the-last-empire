@@ -53,8 +53,13 @@ export class MarketEngine {
       );
     }
 
-    const unitPrice = marketPrices[resourceType];
-    const totalCost = unitPrice * amount;
+    let totalCost = 0;
+    let currentPrice = marketPrices[resourceType];
+
+    for (let i = 0; i < amount; i++) {
+      totalCost += currentPrice;
+      currentPrice = Math.min(this.maxPrice, currentPrice + 1);
+    }
 
     if (nation.treasury < totalCost) {
       throw new GameError(
@@ -72,13 +77,9 @@ export class MarketEngine {
       },
     };
 
-    const priceIncrease = Math.max(1, Math.floor(amount * 0.1));
     const updatedMarketPrices: ResourceMarketPrice = {
       ...marketPrices,
-      [resourceType]: Math.min(
-        this.maxPrice,
-        marketPrices[resourceType] + priceIncrease,
-      ),
+      [resourceType]: currentPrice,
     };
 
     return {
@@ -108,8 +109,13 @@ export class MarketEngine {
       );
     }
 
-    const unitPrice = marketPrices[resourceType];
-    const totalRevenue = unitPrice * amount;
+    let totalRevenue = 0;
+    let currentPrice = marketPrices[resourceType];
+
+    for (let i = 0; i < amount; i++) {
+      totalRevenue += currentPrice;
+      currentPrice = Math.max(this.minPrice, currentPrice - 1);
+    }
 
     const updatedNation: Nation = {
       ...nation,
@@ -120,13 +126,9 @@ export class MarketEngine {
       },
     };
 
-    const priceDrop = Math.max(1, Math.floor(amount * 0.1));
     const updatedMarketPrices: ResourceMarketPrice = {
       ...marketPrices,
-      [resourceType]: Math.max(
-        this.minPrice,
-        marketPrices[resourceType] - priceDrop,
-      ),
+      [resourceType]: currentPrice,
     };
 
     return {

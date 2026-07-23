@@ -1,7 +1,9 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { GovernmentSystem } from "@/modules/politics/domain/government-system";
 
 export class WarExhaustionManager {
   private readonly maxWarExhaustion = 100;
+  private governmentSystem = new GovernmentSystem();
 
   public incrementWarExhaustion(
     nation: Nation,
@@ -9,7 +11,10 @@ export class WarExhaustionManager {
   ): Nation {
     const baseIncrement = 2;
     const casualtyFactor = Math.floor(casualtiesIncurred / 100);
-    const totalIncrease = baseIncrement + casualtyFactor;
+    const govTraits = this.governmentSystem.getTraits(nation.government.type);
+    const totalIncrease = Math.floor(
+      (baseIncrement + casualtyFactor) * govTraits.warExhaustionMultiplier,
+    );
 
     const newExhaustion = Math.min(
       this.maxWarExhaustion,

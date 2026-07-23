@@ -55,10 +55,6 @@ export class DebtManager {
     if (treasury < 0) {
       debt += Math.abs(treasury);
       treasury = 0;
-    } else if (debt > 0 && treasury > 0) {
-      const repayment = Math.min(treasury, debt);
-      debt -= repayment;
-      treasury -= repayment;
     }
 
     const updatedNation: Nation = {

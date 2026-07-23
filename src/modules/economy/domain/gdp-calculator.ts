@@ -1,10 +1,12 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import { TraitManager } from "@/modules/nation/domain/trait-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
+import { GovernmentSystem } from "@/modules/politics/domain/government-system";
 
 export class GdpCalculator {
   private traitManager = new TraitManager();
   private tariffCalculator = new TariffCalculator();
+  private governmentSystem = new GovernmentSystem();
 
   public calculateBaseGdp(
     population: number,
@@ -43,6 +45,9 @@ export class GdpCalculator {
     multiplier -= tariffResult.gdpGrowthPenalty;
 
     multiplier += this.traitManager.getGdpGrowthModifier(nation);
+
+    const govTraits = this.governmentSystem.getTraits(nation.government.type);
+    multiplier += govTraits.economicGrowthBonus;
 
     return Math.max(0.5, multiplier);
   }

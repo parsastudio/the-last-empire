@@ -15,6 +15,7 @@ import {
 import { TradeActionHandler } from "./trade-action-handler";
 import { DiplomacyActionHandler } from "./diplomacy-action-handler";
 import { EspionageActionHandler } from "./espionage-action-handler";
+import { RepayDebtActionHandler } from "./repay-debt-action-handler";
 
 export class ActionRouter {
   private handlers: Map<string, ActionHandler> = new Map();
@@ -38,7 +39,7 @@ export class ActionRouter {
   private registerDefaultHandlers(): void {
     this.register("SET_TAX_RATE", new TaxActionHandler());
     this.register("CHANGE_GOVERNMENT", new GovernmentActionHandler());
-    this.register("RECRUIT_UNIT", new RecruitUnitActionHandler());
+    this.register("RECRUIT_UNIT", new RecruitmentQueueManagerWrapper());
     this.register("DECLARE_WAR", new DeclareWarActionHandler());
     this.register("ATTACK", new AttackActionHandler());
     this.register(
@@ -53,5 +54,13 @@ export class ActionRouter {
     this.register("DIPLOMATIC_PROPOSAL", new DiplomacyActionHandler());
     this.register("FUND_ESPIONAGE", new EspionageActionHandler());
     this.register("COVERT_OPERATIONS", new EspionageActionHandler());
+    this.register("REPAY_DEBT", new RepayDebtActionHandler());
+  }
+}
+
+class RecruitmentQueueManagerWrapper implements ActionHandler {
+  private handler = new RecruitUnitActionHandler();
+  public execute(state: GameState, action: GameAction): GameState {
+    return this.handler.execute(state, action);
   }
 }
