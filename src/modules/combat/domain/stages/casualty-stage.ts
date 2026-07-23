@@ -1,9 +1,11 @@
 import { CasualtyCalculator } from "../casualty-calculator";
+import { ExperienceManager } from "@/modules/military/domain/experience-manager";
 import { CombatContext } from "./combat-context";
 import { CombatStage } from "./combat-stage";
 
 export class CasualtyStage implements CombatStage {
   private casualtyCalc = new CasualtyCalculator();
+  private experienceManager = new ExperienceManager();
 
   public process(context: CombatContext): void {
     const casualties = this.casualtyCalc.calculateCasualties(
@@ -30,6 +32,15 @@ export class CasualtyStage implements CombatStage {
     context.defenderMilitary.airForce = Math.max(
       0,
       context.defenderMilitary.airForce - casualties.defenderKilledAirForce,
+    );
+
+    context.attackForce = this.experienceManager.addExperience(
+      context.attackForce,
+      context.attackerWon ? 5 : 2,
+    );
+    context.defenderMilitary = this.experienceManager.addExperience(
+      context.defenderMilitary,
+      context.attackerWon ? 2 : 5,
     );
   }
 }

@@ -13,6 +13,7 @@ import { CoolOffManager } from "@/modules/diplomacy/domain/cool-off-manager";
 import { PocketCombatCalculator } from "@/modules/diplomacy/domain/pocket-combat-calculator";
 import { NavalTransportCostCalculator } from "@/modules/military/domain/naval-transport-cost-calculator";
 import { LootCalculator } from "@/modules/diplomacy/domain/loot-calculator";
+import { ConnectivityGraph } from "@/modules/diplomacy/domain/connectivity-graph";
 import type { ActionHandler } from "./action-handler";
 
 export class AttackActionHandler implements ActionHandler {
@@ -24,6 +25,7 @@ export class AttackActionHandler implements ActionHandler {
   private pocketCalculator = new PocketCombatCalculator();
   private transportCostCalculator = new NavalTransportCostCalculator();
   private lootCalculator = new LootCalculator();
+  private connectivityGraph = new ConnectivityGraph();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "ATTACK") {
@@ -220,6 +222,38 @@ export class AttackActionHandler implements ActionHandler {
       finalDefender.treasury = Math.max(0, finalDefender.treasury - targetLoot);
 
       logMessage += `Victory for Attacker! Occupied ${transfer.seizedTerritory} size territory and seized ${transfer.transferredTreasury} treasury and looted ${targetLoot} as pocket resources.`;
+
+      const attackerTerritories = [
+        { id: finalAttacker.id, size: finalAttacker.geography.territorySize },
+      ];
+      const attackerNeighborsMap: Record<string, string[]> = {
+        [finalAttacker.id]: finalAttacker.geography.landNeighbors,
+      };
+      const attackerConnectivity = this.connectivityGraph.analyzeConnectivity(
+        attackerTerritories,
+        attackerNeighborsMap,
+        finalAttacker.id,
+      );
+      finalAttacker.geography.contiguousMainlandSize =
+        attackerConnectivity.contiguousMainlandSize;
+      finalAttacker.geography.isolatedPockets =
+        attackerConnectivity.isolatedPockets;
+
+      const defenderTerritories = [
+        { id: finalDefender.id, size: finalDefender.geography.territorySize },
+      ];
+      const defenderNeighborsMap: Record<string, string[]> = {
+        [finalDefender.id]: finalDefender.geography.landNeighbors,
+      };
+      const defenderConnectivity = this.connectivityGraph.analyzeConnectivity(
+        defenderTerritories,
+        defenderNeighborsMap,
+        finalDefender.id,
+      );
+      finalDefender.geography.contiguousMainlandSize =
+        defenderConnectivity.contiguousMainlandSize;
+      finalDefender.geography.isolatedPockets =
+        defenderConnectivity.isolatedPockets;
     } else {
       logMessage += `Defender successfully defended their territory.`;
     }

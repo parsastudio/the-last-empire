@@ -70,5 +70,63 @@ export class StateValidator {
         );
       }
     }
+
+    if (action.type === "DISBAND_UNIT") {
+      if (action.quantity <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Disband quantity must be greater than zero",
+        );
+      }
+      const currentCount =
+        action.unitType === "INFANTRY"
+          ? sourceNation.military.infantry
+          : action.unitType === "AIR_FORCE"
+            ? sourceNation.military.airForce
+            : sourceNation.military.droneMissile;
+
+      if (currentCount < action.quantity) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot disband more units than available in the military stack",
+        );
+      }
+    }
+
+    if (action.type === "REQUEST_LOAN") {
+      if (action.amount <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Requested loan amount must be positive",
+        );
+      }
+    }
+
+    if (action.type === "CANCEL_RECRUITMENT") {
+      const orderExists = sourceNation.recruitmentQueue.some(
+        (o) => o.id === action.orderId,
+      );
+      if (!orderExists) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Recruitment order not found in the queue",
+        );
+      }
+    }
+
+    if (action.type === "ANTI_CORRUPTION_DRIVE") {
+      if (action.amount <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Anti-corruption drive investment must be positive",
+        );
+      }
+      if (sourceNation.treasury < action.amount) {
+        throw new GameError(
+          "INSUFFICIENT_FUNDS",
+          "Insufficient treasury to fund anti-corruption drive",
+        );
+      }
+    }
   }
 }

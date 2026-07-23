@@ -6,6 +6,7 @@ export class DiplomaticOpinionCalculator {
     globalAggression: number,
     stance: DiplomaticStance,
     isLandNeighbor: boolean,
+    govFrictionValue = 0,
   ): number {
     let treatyModifier = 0;
     if (isLandNeighbor) {
@@ -16,7 +17,11 @@ export class DiplomaticOpinionCalculator {
     } else if (stance === "ALLIANCE") {
       treatyModifier += 50;
     }
-    const calculated = globalReputation - globalAggression + treatyModifier;
+    const calculated =
+      globalReputation -
+      globalAggression +
+      treatyModifier +
+      govFrictionValue * 5;
     return Math.max(-100, Math.min(100, calculated));
   }
 }

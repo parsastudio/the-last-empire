@@ -121,6 +121,46 @@ export const ActivateAbilityActionSchema = z.object({
   targetNationId: z.string().optional(),
 });
 
+export const DisbandUnitActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("DISBAND_UNIT"),
+  unitType: UnitTypeSchema,
+  quantity: z.number().positive(),
+});
+
+export const RequestLoanActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("REQUEST_LOAN"),
+  amount: z.number().positive(),
+});
+
+export const CancelRecruitmentActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("CANCEL_RECRUITMENT"),
+  orderId: z.string(),
+});
+
+export const InvestResearchActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("INVEST_RESEARCH"),
+});
+
+export const AntiCorruptionDriveActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("ANTI_CORRUPTION_DRIVE"),
+  amount: z.number().positive(),
+});
+
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   ChangeGovernmentActionSchema,
@@ -135,6 +175,11 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   UnlockDoctrineActionSchema,
   RepayDebtActionSchema,
   ActivateAbilityActionSchema,
+  DisbandUnitActionSchema,
+  RequestLoanActionSchema,
+  CancelRecruitmentActionSchema,
+  InvestResearchActionSchema,
+  AntiCorruptionDriveActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
@@ -167,5 +212,14 @@ export type FundProxyInfluenceAction = z.infer<
 export type UnlockDoctrineAction = z.infer<typeof UnlockDoctrineActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type ActivateAbilityAction = z.infer<typeof ActivateAbilityActionSchema>;
+export type DisbandUnitAction = z.infer<typeof DisbandUnitActionSchema>;
+export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
+export type CancelRecruitmentAction = z.infer<
+  typeof CancelRecruitmentActionSchema
+>;
+export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
+export type AntiCorruptionDriveAction = z.infer<
+  typeof AntiCorruptionDriveActionSchema
+>;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;

@@ -10,6 +10,7 @@ import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 import { TradeRouteManager } from "@/modules/trade/domain/trade-route-manager";
 import { OverextensionCalculator } from "@/modules/economy/domain/overextension-calculator";
 import { DoctrinesManager } from "@/modules/politics/domain/doctrines-manager";
+import { TributeManager } from "@/modules/diplomacy/domain/tribute-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface EconomyCalculators {
@@ -28,6 +29,7 @@ export class EconomyPhase implements TurnPhase {
   private calcs: EconomyCalculators;
   private overextensionCalculator = new OverextensionCalculator();
   private doctrinesManager = new DoctrinesManager();
+  private tributeManager = new TributeManager();
 
   constructor(calcs?: EconomyCalculators) {
     this.calcs = calcs ?? {
@@ -45,7 +47,7 @@ export class EconomyPhase implements TurnPhase {
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
-    const nations = { ...nextState.nations };
+    let nations = { ...nextState.nations };
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
@@ -157,6 +159,25 @@ export class EconomyPhase implements TurnPhase {
       }
 
       nations[id] = updated;
+    }
+
+    for (const [id, nation] of Object.entries(nations)) {
+      if (!nation.isAlive) {
+        continue;
+      }
+      for (const [targetId, relation] of Object.entries(nation.relations)) {
+        if (relation.tributePerTurn > 0) {
+          const targetNation = nations[targetId];
+          if (targetNation && targetNation.isAlive) {
+            const result = this.tributeManager.processTurnTributes(
+              nation,
+              targetNation,
+            );
+            nations[id] = result.nation;
+            nations[targetId] = result.targetNation;
+          }
+        }
+      }
     }
 
     nextState.nations = nations;

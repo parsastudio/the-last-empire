@@ -3,6 +3,8 @@ import { DiplomaticOpinionCalculator } from "@/modules/diplomacy/domain/diplomat
 import { GlobalIntelligenceUpdater } from "@/modules/diplomacy/domain/global-intelligence-updater";
 import { PowerScoreCalculator } from "@/modules/diplomacy/domain/power-score-calculator";
 import { GovernmentSystem } from "@/modules/politics/domain/government-system";
+import { RelationsManager } from "@/modules/diplomacy/domain/relations-manager";
+import { CoalitionManager } from "@/modules/diplomacy/domain/coalition-manager";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export class DiplomacyPhase implements TurnPhase {
@@ -10,9 +12,11 @@ export class DiplomacyPhase implements TurnPhase {
   private intelligenceUpdater = new GlobalIntelligenceUpdater();
   private powerCalculator = new PowerScoreCalculator();
   private governmentSystem = new GovernmentSystem();
+  private relationsManager = new RelationsManager();
+  private coalitionManager = new CoalitionManager();
 
   public execute(context: PipelineContext): GameState {
-    const nextState = { ...context.state };
+    let nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
     const rawNationsList = Object.values(nations)
@@ -48,11 +52,16 @@ export class DiplomacyPhase implements TurnPhase {
         if (target && target.isAlive) {
           const isLandNeighbor =
             updated.geography.landNeighbors.includes(targetId);
+
+          const frictionValue =
+            this.relationsManager.calculateGovernmentFriction(updated, target);
+
           const nextOpinion = this.opinionCalculator.calculateOpinion(
             updated.globalReputation,
             updated.globalAggression,
             relation.stance,
             isLandNeighbor,
+            frictionValue,
           );
 
           updatedRelations[targetId] = {
@@ -67,6 +76,8 @@ export class DiplomacyPhase implements TurnPhase {
     }
 
     nextState.nations = nations;
+    nextState = this.coalitionManager.processCoalitions(nextState);
+
     return nextState;
   }
 }

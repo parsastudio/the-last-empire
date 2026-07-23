@@ -27,9 +27,9 @@ export class BudgetPlanningStep implements AIPlanner {
           id: `ai-fund-proxy-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
           nationId: nation.id,
           type: "FUND_PROXY_INFLUENCE",
-          targetId: targetRival,
+          targetNationId: targetRival,
           budget: 15000,
-        } as unknown as GameAction);
+        });
       }
     }
 
@@ -40,10 +40,27 @@ export class BudgetPlanningStep implements AIPlanner {
       actions.push({
         id: `ai-anti-corruption-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         nationId: nation.id,
-        type: "SET_TAX_RATE",
-        newRate: Math.max(10, nation.taxRate - 2),
+        type: "ANTI_CORRUPTION_DRIVE",
+        amount: Math.min(allocation.antiCorruptionBudget, 15000),
       });
     }
+
+    if (allocation.infrastructureBudget > 30000) {
+      actions.push({
+        id: `ai-upgrade-infra-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        nationId: nation.id,
+        type: "INVEST_INFRASTRUCTURE",
+      });
+    }
+
+    if (allocation.researchBudget > 100000) {
+      actions.push({
+        id: `ai-research-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        nationId: nation.id,
+        type: "INVEST_RESEARCH",
+      });
+    }
+
     return actions;
   }
 }

@@ -13,6 +13,11 @@ import { RepayDebtActionHandler } from "./repay-debt-action-handler";
 import { ActivateAbilityActionHandler } from "./activate-ability-action-handler";
 import { FundProxyInfluenceActionHandler } from "./fund-proxy-influence-action-handler";
 import { UnlockDoctrineActionHandler } from "./unlock-doctrine-action-handler";
+import { DisbandActionHandler } from "./disband-action-handler";
+import { ImfLoanActionHandler } from "./imf-loan-action-handler";
+import { CancelRecruitmentActionHandler } from "./cancel-recruitment-action-handler";
+import { InvestResearchActionHandler } from "./invest-research-action-handler";
+import { AntiCorruptionActionHandler } from "./anti-corruption-action-handler";
 import type { ActionHandler } from "./action-handler";
 
 export class ActionRouter {
@@ -57,5 +62,10 @@ export class ActionRouter {
       new FundProxyInfluenceActionHandler(),
     );
     this.register("UNLOCK_DOCTRINE", new UnlockDoctrineActionHandler());
+    this.register("DISBAND_UNIT", new DisbandActionHandler());
+    this.register("REQUEST_LOAN", new ImfLoanActionHandler());
+    this.register("CANCEL_RECRUITMENT", new CancelRecruitmentActionHandler());
+    this.register("INVEST_RESEARCH", new InvestResearchActionHandler());
+    this.register("ANTI_CORRUPTION_DRIVE", new AntiCorruptionActionHandler());
   }
 }
