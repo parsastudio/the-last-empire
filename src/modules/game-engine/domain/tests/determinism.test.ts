@@ -5,7 +5,6 @@ import type { GameAction } from "@/modules/game-engine/schemas/action.schema";
 
 export function runDeterminismTest(): boolean {
   const initialPrices = { oil: 100, steel: 100 };
-
   const mockState: GameState = {
     gameId: "DETERMINISM_TEST_GAME",
     currentTurn: 1,
@@ -19,16 +18,16 @@ export function runDeterminismTest(): boolean {
     nations: {
       USA: {
         id: "USA",
-        name: "United States of America",
+        name: "Industrial Superpower",
         isAi: false,
         isAlive: true,
-        flagCode: "US",
-        gdp: 25000000,
+        flagCode: "ISP",
+        gdp: 20000000,
         taxRate: 15,
         tariffRate: 10,
-        treasury: 100000,
-        debt: 0,
-        population: 330000000,
+        treasury: 500000,
+        debt: 50000,
+        population: 300000000,
         inflation: 2.0,
         warExhaustion: 0,
         reputation: 50,
@@ -40,7 +39,7 @@ export function runDeterminismTest(): boolean {
           socialFreedom: 80,
           turnsInPower: 5,
         },
-        resources: { money: 100000, oil: 50, steel: 50, manpower: 500 },
+        resources: { money: 500000, oil: 1000, steel: 2000, manpower: 500 },
         upkeep: {
           infantryUpkeep: 1,
           airForceUpkeep: 1,
@@ -62,7 +61,7 @@ export function runDeterminismTest(): boolean {
           landNeighbors: ["CAN"],
           seaNeighbors: [],
           hasSeaAccess: true,
-          territorySize: 9800,
+          territorySize: 9000,
           infrastructureLevel: 1,
         },
         relations: {
@@ -87,16 +86,16 @@ export function runDeterminismTest(): boolean {
       },
       CAN: {
         id: "CAN",
-        name: "Canada",
+        name: "Resource Hub",
         isAi: true,
         isAlive: true,
-        flagCode: "CA",
-        gdp: 2000000,
+        flagCode: "RHB",
+        gdp: 10000000,
         taxRate: 15,
         tariffRate: 10,
-        treasury: 50000,
+        treasury: 300000,
         debt: 0,
-        population: 38000000,
+        population: 150000000,
         inflation: 1.5,
         warExhaustion: 0,
         reputation: 60,
@@ -108,7 +107,7 @@ export function runDeterminismTest(): boolean {
           socialFreedom: 85,
           turnsInPower: 4,
         },
-        resources: { money: 50000, oil: 10, steel: 10, manpower: 100 },
+        resources: { money: 300000, oil: 5000, steel: 1000, manpower: 100 },
         upkeep: {
           infantryUpkeep: 1,
           airForceUpkeep: 1,
@@ -130,7 +129,7 @@ export function runDeterminismTest(): boolean {
           landNeighbors: ["USA"],
           seaNeighbors: [],
           hasSeaAccess: true,
-          territorySize: 9980,
+          territorySize: 5000,
           infrastructureLevel: 1,
         },
         relations: {
@@ -150,13 +149,12 @@ export function runDeterminismTest(): boolean {
         },
         activeModifiers: [],
         imfLoans: [],
-        traits: [],
+        traits: ["OIL_RICH"],
         aggressionScore: 0,
       },
     },
   };
-
-  const action: GameAction = {
+  const tradeAction: GameAction = {
     id: "action-1",
     nationId: "USA",
     type: "TRADE_RESOURCES",
@@ -164,18 +162,21 @@ export function runDeterminismTest(): boolean {
     isBuy: true,
     amount: 10,
   };
-
+  const repayAction: GameAction = {
+    id: "action-2",
+    nationId: "USA",
+    type: "REPAY_DEBT",
+    amount: 10000,
+  };
   const engineA = new GameEngine(mockState);
   const engineB = new GameEngine(mockState);
-
-  engineA.dispatchAction(action);
-  engineB.dispatchAction(action);
-
+  engineA.dispatchAction(tradeAction);
+  engineB.dispatchAction(tradeAction);
+  engineA.dispatchAction(repayAction);
+  engineB.dispatchAction(repayAction);
   const stateA = engineA.nextTurn();
   const stateB = engineB.nextTurn();
-
   const hashA = calculateStateHash(stateA);
   const hashB = calculateStateHash(stateB);
-
   return hashA === hashB;
 }

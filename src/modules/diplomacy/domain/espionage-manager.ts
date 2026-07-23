@@ -18,11 +18,9 @@ export class EspionageManager {
     const networkModifier = relation.spyNetworkStrength * 0.4;
     const techDiff = attacker.military.techLevel - defender.military.techLevel;
     const stabilityPenalty = defender.government.stability * 0.2;
-
     const finalSuccessChance =
       baseChance + networkModifier + techDiff * 5 - stabilityPenalty;
     const cappedSuccessChance = Math.max(5, Math.min(95, finalSuccessChance));
-
     const success = randomVal * 100 < cappedSuccessChance;
     const baseExposure = success ? 20 : 50;
     const exposureChance = Math.max(
@@ -32,7 +30,6 @@ export class EspionageManager {
         baseExposure - relation.spyNetworkStrength * 0.2 + stabilityPenalty,
       ),
     );
-
     return {
       success,
       exposureChance,
@@ -42,7 +39,6 @@ export class EspionageManager {
   public applyDecay(relation: RelationProfile): RelationProfile {
     const nextStrength = Math.max(0, relation.spyNetworkStrength - 2);
     let nextIntel = relation.intelLevel;
-
     if (nextStrength < 15) {
       nextIntel = 0;
     } else if (nextStrength < 40) {
@@ -50,7 +46,6 @@ export class EspionageManager {
     } else if (nextStrength < 70) {
       nextIntel = 2;
     }
-
     return {
       ...relation,
       spyNetworkStrength: nextStrength,

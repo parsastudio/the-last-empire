@@ -10,7 +10,6 @@ export class DomesticCrisisManager {
   public checkAndProcessCrisis(nation: Nation): DomesticCrisisResult {
     const stability = nation.government.stability;
     const corruption = nation.government.corruption;
-
     if (stability < 10) {
       if (
         nation.government.type !== "DEMOCRACY" &&
@@ -28,7 +27,6 @@ export class DomesticCrisisManager {
         updatedNation: this.applyRebellion(nation),
       };
     }
-
     if (stability < 30 || corruption > 60) {
       return {
         hasTriggered: true,
@@ -36,7 +34,6 @@ export class DomesticCrisisManager {
         updatedNation: this.applyCrisisPenalty(nation),
       };
     }
-
     if (stability < 50 || corruption > 35) {
       return {
         hasTriggered: true,
@@ -44,7 +41,6 @@ export class DomesticCrisisManager {
         updatedNation: nation,
       };
     }
-
     return {
       hasTriggered: false,
       status: "STABLE",
@@ -72,7 +68,6 @@ export class DomesticCrisisManager {
   private applyRebellion(nation: Nation): Nation {
     const defectedInfantry = Math.floor(nation.military.infantry * 0.35);
     const defectedAir = Math.floor(nation.military.airForce * 0.25);
-
     return {
       ...nation,
       military: {

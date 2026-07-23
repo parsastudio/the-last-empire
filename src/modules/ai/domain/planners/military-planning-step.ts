@@ -10,7 +10,6 @@ export class MilitaryPlanningStep implements AIPlanner {
     const needs = context.needs;
     const risk = context.risk;
     const allocation = context.budget;
-
     if (
       allocation.recruitmentBudget > 0 &&
       (needs.needMilitary > 0.4 || risk > 30)
@@ -20,7 +19,6 @@ export class MilitaryPlanningStep implements AIPlanner {
         allocation.recruitmentBudget,
       );
     }
-
     return [];
   }
 }

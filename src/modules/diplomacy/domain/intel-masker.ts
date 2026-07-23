@@ -23,10 +23,8 @@ export class IntelMasker {
         },
       };
     }
-
     const factor = this.getErrorFactor(intelLevel);
     const multiplier = 1.0 + (this.deterministicRandom(seed) * 2 - 1) * factor;
-
     if (intelLevel === 2) {
       return {
         id: nation.id,
@@ -47,7 +45,6 @@ export class IntelMasker {
         },
       };
     }
-
     if (intelLevel === 1) {
       return {
         id: nation.id,
@@ -68,7 +65,6 @@ export class IntelMasker {
         },
       };
     }
-
     return {
       id: nation.id,
       name: nation.name,

@@ -17,21 +17,16 @@ export class ElectionEngine {
     if (nation.government.type !== "DEMOCRACY") {
       return { electionHeld: false, incumbentWon: true, updatedNation: nation };
     }
-
     const lastElection = nation.government.lastElectionTurn ?? 0;
     if (currentTurn - lastElection < this.electionIntervalTurns) {
       return { electionHeld: false, incumbentWon: true, updatedNation: nation };
     }
-
     const incumbentWinChance =
       (nation.government.stability / 100) * 0.7 +
       (100 - nation.taxRate) * 0.003;
-
     const incumbentWon = randomVal < incumbentWinChance;
-
     let newTaxRate = nation.taxRate;
     let newStability = nation.government.stability;
-
     if (!incumbentWon) {
       newTaxRate = Math.max(
         10,
@@ -39,7 +34,6 @@ export class ElectionEngine {
       );
       newStability = Math.min(100, nation.government.stability + 15);
     }
-
     const updatedNation: Nation = {
       ...nation,
       taxRate: newTaxRate,
@@ -49,7 +43,6 @@ export class ElectionEngine {
         lastElectionTurn: currentTurn,
       },
     };
-
     return {
       electionHeld: true,
       incumbentWon,

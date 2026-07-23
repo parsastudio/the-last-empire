@@ -7,7 +7,6 @@ export class BudgetPlanningStep implements AIPlanner {
     const actions: GameAction[] = [];
     const nation = context.nation;
     const allocation = context.budget;
-
     if (
       nation.government.corruption > 35 &&
       allocation.antiCorruptionBudget > 10000
@@ -19,7 +18,6 @@ export class BudgetPlanningStep implements AIPlanner {
         newRate: Math.max(10, nation.taxRate - 2),
       });
     }
-
     return actions;
   }
 }

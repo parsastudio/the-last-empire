@@ -8,13 +8,11 @@ export class AIDiplomacyLogic {
     personality: string,
   ): GameAction[] {
     const actions: GameAction[] = [];
-
     for (const [targetId, relation] of Object.entries(nation.relations)) {
       const target = allNations[targetId];
       if (!target || !target.isAlive) {
         continue;
       }
-
       if (relation.stance === "COALITION") {
         const targetRelations = target.relations;
         for (const [allyId, allyRelation] of Object.entries(targetRelations)) {
@@ -38,11 +36,9 @@ export class AIDiplomacyLogic {
           }
         }
       }
-
       const ownPower = this.calculatePower(nation);
       const targetPower = this.calculatePower(target);
       const relativePower = ownPower / (targetPower || 1);
-
       if (
         personality === "AGGRESSIVE" &&
         relation.trust < -2 &&
@@ -57,7 +53,6 @@ export class AIDiplomacyLogic {
         });
         break;
       }
-
       if (
         relation.opinion > 10 &&
         relation.opinion < 80 &&
@@ -76,7 +71,6 @@ export class AIDiplomacyLogic {
         });
       }
     }
-
     return actions;
   }
 

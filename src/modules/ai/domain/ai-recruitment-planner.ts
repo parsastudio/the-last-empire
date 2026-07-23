@@ -5,11 +5,9 @@ export class AIRecruitmentPlanner {
   public planRecruitment(nation: Nation, budget: number): RecruitUnitAction[] {
     const actions: RecruitUnitAction[] = [];
     let remainingBudget = budget;
-
     const maxInfantryCost = 100;
     const maxAirForceCost = 500;
     const maxNavyCost = 800;
-
     if (nation.geography.hasSeaAccess && remainingBudget >= maxNavyCost) {
       const qty = Math.floor((remainingBudget * 0.2) / maxNavyCost);
       if (qty > 0) {
@@ -23,7 +21,6 @@ export class AIRecruitmentPlanner {
         remainingBudget -= qty * maxNavyCost;
       }
     }
-
     if (remainingBudget >= maxAirForceCost) {
       const qty = Math.floor((remainingBudget * 0.3) / maxAirForceCost);
       if (qty > 0) {
@@ -37,7 +34,6 @@ export class AIRecruitmentPlanner {
         remainingBudget -= qty * maxAirForceCost;
       }
     }
-
     if (remainingBudget >= maxInfantryCost) {
       const qty = Math.floor(remainingBudget / maxInfantryCost);
       if (qty > 0) {
@@ -50,7 +46,6 @@ export class AIRecruitmentPlanner {
         });
       }
     }
-
     return actions;
   }
 }

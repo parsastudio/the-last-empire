@@ -14,13 +14,11 @@ export class AIBudgetBalancer {
 
   public balanceBudget(nation: Nation, focus: string): BudgetAllocation {
     const totalFunds = Math.max(0, nation.treasury);
-
     let reserveRatio = 0.3;
     let researchRatio = 0.15;
     let recruitmentRatio = 0.25;
     let infraRatio = 0.2;
     let corruptionRatio = 0.1;
-
     if (focus === "AGGRESSIVE") {
       reserveRatio = 0.15;
       recruitmentRatio = 0.5;
@@ -40,7 +38,6 @@ export class AIBudgetBalancer {
       researchRatio = 0.1;
       corruptionRatio = 0.1;
     }
-
     const baseAllocation: BudgetAllocation = {
       researchBudget: Math.floor(totalFunds * researchRatio),
       recruitmentBudget: Math.floor(totalFunds * recruitmentRatio),
@@ -48,7 +45,6 @@ export class AIBudgetBalancer {
       antiCorruptionBudget: Math.floor(totalFunds * corruptionRatio),
       reserveFunds: Math.floor(totalFunds * reserveRatio),
     };
-
     return this.budgetStrategy.applyTraitFocus(nation, baseAllocation);
   }
 }
