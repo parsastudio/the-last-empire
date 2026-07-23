@@ -3,8 +3,10 @@ import type { MilitaryStack } from "@/modules/military/schemas/military.schema";
 export interface CasualtyReport {
   attackerKilledInfantry: number;
   attackerKilledAirForce: number;
+  attackerKilledDrones: number;
   defenderKilledInfantry: number;
   defenderKilledAirForce: number;
+  defenderKilledDrones: number;
 }
 
 export class CasualtyCalculator {
@@ -46,6 +48,9 @@ export class CasualtyCalculator {
     const attackerKilledAirForce = Math.floor(
       attackerMilitary.airForce * Math.min(0.5, attackerBaseRate * 0.5),
     );
+    const attackerKilledDrones = Math.floor(
+      attackerMilitary.droneMissile * Math.min(0.7, attackerBaseRate * 0.8),
+    );
 
     const maxDefenderLoss = Math.floor(attackerPower * 10.0);
     const rawDefenderKilledInfantry = Math.floor(
@@ -58,12 +63,17 @@ export class CasualtyCalculator {
     const defenderKilledAirForce = Math.floor(
       defenderMilitary.airForce * Math.min(0.6, defenderBaseRate * 0.5),
     );
+    const defenderKilledDrones = Math.floor(
+      defenderMilitary.droneMissile * Math.min(0.7, defenderBaseRate * 0.8),
+    );
 
     return {
       attackerKilledInfantry,
       attackerKilledAirForce,
+      attackerKilledDrones,
       defenderKilledInfantry,
       defenderKilledAirForce,
+      defenderKilledDrones,
     };
   }
 }

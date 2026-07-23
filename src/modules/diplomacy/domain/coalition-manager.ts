@@ -20,10 +20,17 @@ export class CoalitionManager {
         for (const neighborId of updatedNation.geography.landNeighbors) {
           const neighbor = nations[neighborId];
           if (neighbor && neighbor.isAlive) {
-            const relation = neighbor.relations[id];
-            if (relation && relation.stance !== "WAR") {
+            const relationToAggressor = neighbor.relations[id];
+            if (relationToAggressor && relationToAggressor.stance !== "WAR") {
               neighbor.relations[id] = {
-                ...relation,
+                ...relationToAggressor,
+                stance: "WAR",
+              };
+            }
+            const relationToNeighbor = updatedNation.relations[neighborId];
+            if (relationToNeighbor && relationToNeighbor.stance !== "WAR") {
+              updatedNation.relations[neighborId] = {
+                ...relationToNeighbor,
                 stance: "WAR",
               };
             }
@@ -33,10 +40,17 @@ export class CoalitionManager {
         for (const neighborId of updatedNation.geography.landNeighbors) {
           const neighbor = nations[neighborId];
           if (neighbor && neighbor.isAlive) {
-            const relation = neighbor.relations[id];
-            if (relation && relation.stance === "WAR") {
+            const relationToAggressor = neighbor.relations[id];
+            if (relationToAggressor && relationToAggressor.stance === "WAR") {
               neighbor.relations[id] = {
-                ...relation,
+                ...relationToAggressor,
+                stance: "PEACE",
+              };
+            }
+            const relationToNeighbor = updatedNation.relations[neighborId];
+            if (relationToNeighbor && relationToNeighbor.stance === "WAR") {
+              updatedNation.relations[neighborId] = {
+                ...relationToNeighbor,
                 stance: "PEACE",
               };
             }

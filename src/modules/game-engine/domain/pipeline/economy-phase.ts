@@ -168,7 +168,14 @@ export class EconomyPhase implements TurnPhase {
       }
 
       if (updated.consecutiveDeficitTurns >= 3) {
-        updated = this.calcs.bankruptcyManager.applyDisintegration(updated);
+        const disintegrationResult =
+          this.calcs.bankruptcyManager.applyDisintegration(updated, nations);
+        updated = disintegrationResult.updatedNation;
+        for (const [neighId, neighNation] of Object.entries(
+          disintegrationResult.updatedAllNations,
+        )) {
+          nations[neighId] = neighNation;
+        }
       }
 
       if (this.calcs.bankruptcyManager.isBankrupt(updated)) {

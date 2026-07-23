@@ -70,10 +70,14 @@ export class BankruptcyManager {
     };
   }
 
-  public applyDisintegration(nation: Nation): Nation {
+  public applyDisintegration(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+  ): { updatedNation: Nation; updatedAllNations: Record<string, Nation> } {
     const territoryLoss = Math.floor(nation.geography.territorySize * 0.25);
     const popLoss = Math.floor(nation.population * 0.2);
-    return {
+
+    const updatedNation = {
       ...nation,
       geography: {
         ...nation.geography,
@@ -85,5 +89,34 @@ export class BankruptcyManager {
       population: Math.max(10000, nation.population - popLoss),
       consecutiveDeficitTurns: 0,
     };
+
+    const updatedAllNations = { ...allNations };
+    const aliveLandNeighbors = nation.geography.landNeighbors.filter(
+      (id) => allNations[id] && allNations[id].isAlive,
+    );
+
+    if (aliveLandNeighbors.length > 0) {
+      const territoryPerNeighbor = Math.floor(
+        territoryLoss / aliveLandNeighbors.length,
+      );
+      const popPerNeighbor = Math.floor(popLoss / aliveLandNeighbors.length);
+
+      for (const neighborId of aliveLandNeighbors) {
+        const neighbor = updatedAllNations[neighborId];
+        if (neighbor) {
+          updatedAllNations[neighborId] = {
+            ...neighbor,
+            geography: {
+              ...neighbor.geography,
+              territorySize:
+                neighbor.geography.territorySize + territoryPerNeighbor,
+            },
+            population: neighbor.population + popPerNeighbor,
+          };
+        }
+      }
+    }
+
+    return { updatedNation, updatedAllNations };
   }
 }

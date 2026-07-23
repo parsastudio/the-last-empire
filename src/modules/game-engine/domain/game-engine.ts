@@ -80,8 +80,6 @@ export class GameEngine {
       return this.getState();
     }
 
-    this.processActionQueue();
-
     const aiActions = this.aiEngine.generateTurnActions(this.currentState);
     for (const aiAction of aiActions) {
       try {

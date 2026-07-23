@@ -60,7 +60,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         ...nation.relations,
         [targetId]: {
           ...relation,
-          opinion: Math.min(100, relation.opinion + 35),
+          opinion: Math.min(100, relation.opinion + 20),
         },
       };
 
@@ -69,7 +69,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       if (targetNation && targetRelations[nationId]) {
         targetRelations[nationId] = {
           ...targetRelations[nationId],
-          opinion: Math.min(100, targetRelations[nationId].opinion + 35),
+          opinion: Math.min(100, targetRelations[nationId].opinion + 20),
         };
       }
 
@@ -78,7 +78,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         name: "Summit Cooldown",
         effectType: "COOLDOWN",
         magnitude: 0,
-        turnsRemaining: 6,
+        turnsRemaining: 12,
       };
 
       const updatedNations = { ...state.nations };

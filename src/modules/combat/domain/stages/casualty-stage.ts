@@ -24,6 +24,10 @@ export class CasualtyStage implements CombatStage {
       0,
       context.attackForce.airForce - casualties.attackerKilledAirForce,
     );
+    context.attackForce.droneMissile = Math.max(
+      0,
+      context.attackForce.droneMissile - casualties.attackerKilledDrones,
+    );
 
     context.defenderMilitary.infantry = Math.max(
       0,
@@ -32,6 +36,10 @@ export class CasualtyStage implements CombatStage {
     context.defenderMilitary.airForce = Math.max(
       0,
       context.defenderMilitary.airForce - casualties.defenderKilledAirForce,
+    );
+    context.defenderMilitary.droneMissile = Math.max(
+      0,
+      context.defenderMilitary.droneMissile - casualties.defenderKilledDrones,
     );
 
     context.attackForce = this.experienceManager.addExperience(
