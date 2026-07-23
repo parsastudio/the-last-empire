@@ -119,7 +119,11 @@ export class EconomyPhase implements TurnPhase {
 
       updated = financial.updatedNation;
 
-      if (updated.treasury <= 0) {
+      const hasReachedDebtLimit =
+        this.calcs.bankruptcyManager.isBankrupt(updated);
+      const isDeficitIncurred = financial.netIncome < 0;
+
+      if (hasReachedDebtLimit && isDeficitIncurred && updated.treasury <= 0) {
         updated.consecutiveDeficitTurns += 1;
       } else {
         updated.consecutiveDeficitTurns = 0;

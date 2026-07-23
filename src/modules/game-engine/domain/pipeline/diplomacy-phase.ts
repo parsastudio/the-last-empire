@@ -19,11 +19,40 @@ export class DiplomacyPhase implements TurnPhase {
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         const target = nations[targetId];
         if (target && target.isAlive) {
-          updatedRelations[targetId] = this.trustManager.updateTrustAndTension(
+          const baseRelation = this.trustManager.updateTrustAndTension(
             nation,
             target,
             relation,
           );
+
+          let calculatedIntel = 0;
+          const isLandNeighbor =
+            nation.geography.landNeighbors.includes(targetId);
+
+          if (
+            baseRelation.stance === "ALLIANCE" ||
+            isLandNeighbor ||
+            baseRelation.militaryAccess
+          ) {
+            calculatedIntel = 3;
+          } else if (
+            baseRelation.stance === "PEACE" ||
+            baseRelation.stance === "NON_AGGRESSION_PACT" ||
+            baseRelation.stance === "DEFENSIVE_PACT"
+          ) {
+            calculatedIntel = 2;
+          } else if (
+            baseRelation.stance === "WAR" ||
+            baseRelation.stance === "EMBARGO" ||
+            baseRelation.stance === "COALITION"
+          ) {
+            calculatedIntel = 1;
+          }
+
+          updatedRelations[targetId] = {
+            ...baseRelation,
+            intelLevel: calculatedIntel,
+          };
         }
       }
       nations[id] = {

@@ -1,4 +1,7 @@
-import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import type {
+  Nation,
+  ActiveModifier,
+} from "@/modules/nation/schemas/nation.schema";
 
 export class BankruptcyManager {
   private readonly debtToGdpLimitRatio = 2.5;
@@ -11,10 +14,23 @@ export class BankruptcyManager {
   }
 
   public applyBankruptcy(nation: Nation): Nation {
+    const decayModifier: ActiveModifier = {
+      id: "bankruptcy-structural-decay",
+      name: "Bankruptcy Economic Decay",
+      effectType: "GDP_GROWTH_MULT",
+      magnitude: -0.15,
+      turnsRemaining: 9999,
+    };
+
+    const existingModifiers = nation.activeModifiers.filter(
+      (m) => m.id !== "bankruptcy-structural-decay",
+    );
+
     return {
       ...nation,
       treasury: 0,
       nationalDebt: Math.floor(nation.gdp * 0.5),
+      industrialLevel: Math.max(1, nation.industrialLevel - 2),
       government: {
         ...nation.government,
         stability: 0,
@@ -27,6 +43,7 @@ export class BankruptcyManager {
         droneMissile: 0,
       },
       recruitmentQueue: [],
+      activeModifiers: [...existingModifiers, decayModifier],
     };
   }
 

@@ -13,7 +13,7 @@ export class IntelMasker {
         gdp: nation.gdp,
         population: nation.population,
         treasury: nation.treasury,
-        debt: nation.debt,
+        debt: nation.nationalDebt,
         stability: nation.government.stability,
         military: {
           infantry: nation.military.infantry,
@@ -23,8 +23,10 @@ export class IntelMasker {
         },
       };
     }
+
     const factor = this.getErrorFactor(intelLevel);
     const multiplier = 1.0 + (this.deterministicRandom(seed) * 2 - 1) * factor;
+
     if (intelLevel === 2) {
       return {
         id: nation.id,
@@ -32,27 +34,7 @@ export class IntelMasker {
         gdp: Math.floor(nation.gdp * multiplier),
         population: Math.floor(nation.population * multiplier),
         treasury: Math.floor(nation.treasury * multiplier),
-        debt: Math.floor(nation.debt * multiplier),
-        stability: Math.max(
-          0,
-          Math.min(100, Math.floor(nation.government.stability * multiplier)),
-        ),
-        military: {
-          infantry: Math.floor(nation.military.infantry * multiplier),
-          airForce: Math.floor(nation.military.airForce * multiplier),
-          navy: Math.floor(nation.military.navy * multiplier),
-          droneMissile: Math.floor(nation.military.droneMissile * multiplier),
-        },
-      };
-    }
-    if (intelLevel === 1) {
-      return {
-        id: nation.id,
-        name: nation.name,
-        gdp: Math.floor(nation.gdp * multiplier),
-        population: Math.floor(nation.population * multiplier),
-        treasury: "UNKNOWN",
-        debt: "UNKNOWN",
+        debt: Math.floor(nation.nationalDebt * multiplier),
         stability: Math.max(
           0,
           Math.min(100, Math.floor(nation.government.stability * multiplier)),
@@ -65,6 +47,30 @@ export class IntelMasker {
         },
       };
     }
+
+    if (intelLevel === 1) {
+      const wideMultiplier =
+        1.0 + (this.deterministicRandom(seed) * 2 - 1) * 0.5;
+      return {
+        id: nation.id,
+        name: nation.name,
+        gdp: "UNKNOWN",
+        population: "UNKNOWN",
+        treasury: "UNKNOWN",
+        debt: "UNKNOWN",
+        stability: "UNKNOWN",
+        military: {
+          infantry: Math.max(
+            0,
+            Math.floor(nation.military.infantry * wideMultiplier),
+          ),
+          airForce: "UNKNOWN",
+          navy: "UNKNOWN",
+          droneMissile: "UNKNOWN",
+        },
+      };
+    }
+
     return {
       id: nation.id,
       name: nation.name,
@@ -84,12 +90,9 @@ export class IntelMasker {
 
   private getErrorFactor(intelLevel: number): number {
     if (intelLevel === 2) {
-      return 0.1;
+      return 0.15;
     }
-    if (intelLevel === 1) {
-      return 0.35;
-    }
-    return 0.7;
+    return 0.5;
   }
 
   private deterministicRandom(seed: number): number {

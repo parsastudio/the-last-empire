@@ -47,23 +47,14 @@ export class StateValidator {
       }
     }
 
-    if (action.type === "FUND_ESPIONAGE") {
-      if (action.budget <= 0) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Funding budget must be positive",
-        );
-      }
-    }
-
-    if (action.type === "COVERT_OPERATIONS") {
-      const relation = sourceNation.relations[action.targetNationId];
-      if (!relation || relation.spyNetworkStrength < 20) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Infiltration requires at least 20 spy network strength",
-        );
-      }
+    if (
+      action.type === "FUND_ESPIONAGE" ||
+      action.type === "COVERT_OPERATIONS"
+    ) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "Manual espionage operations have been deactivated in favor of automated Geopolitical Intel.",
+      );
     }
   }
 }

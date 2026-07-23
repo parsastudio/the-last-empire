@@ -109,7 +109,20 @@ export class AttackActionHandler implements ActionHandler {
     if (!attacker || !defender || !defender.isAlive) {
       return state;
     }
-    const { infantry, airForce, navy, droneMissile } = attackAction;
+
+    const isSeaNeighbor = attacker.geography.seaNeighbors.includes(defender.id);
+    const isLandNeighbor = attacker.geography.landNeighbors.includes(
+      defender.id,
+    );
+
+    if (isSeaNeighbor && !isLandNeighbor && !attacker.geography.hasSeaAccess) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "Landlocked nations cannot execute naval invasions without direct sea access.",
+      );
+    }
+
+    let { infantry, airForce, navy, droneMissile } = attackAction;
     if (
       attacker.military.infantry < infantry ||
       attacker.military.airForce < airForce ||
@@ -120,6 +133,24 @@ export class AttackActionHandler implements ActionHandler {
         "INSUFFICIENT_RESOURCES",
         "Attacker does not possess requested deployment force",
       );
+    }
+
+    if (isSeaNeighbor && !isLandNeighbor) {
+      const totalGroundTroops = infantry + droneMissile;
+      const navyTransportCapacity = attacker.military.navy * 50;
+      if (navyTransportCapacity < totalGroundTroops) {
+        const transportDeficit = totalGroundTroops - navyTransportCapacity;
+        const infantryRatio =
+          totalGroundTroops > 0 ? infantry / totalGroundTroops : 0;
+        const droneRatio =
+          totalGroundTroops > 0 ? droneMissile / totalGroundTroops : 0;
+
+        const lostInfantry = Math.floor(transportDeficit * infantryRatio * 0.6);
+        const lostDrones = Math.floor(transportDeficit * droneRatio * 0.6);
+
+        infantry = Math.max(0, infantry - lostInfantry);
+        droneMissile = Math.max(0, droneMissile - lostDrones);
+      }
     }
 
     const distance = this.distanceCalculator.calculateDistance(
@@ -162,10 +193,11 @@ export class AttackActionHandler implements ActionHandler {
       treasury: attacker.treasury - deploymentCost,
       military: {
         ...attacker.military,
-        infantry: attacker.military.infantry - infantry,
-        airForce: attacker.military.airForce - airForce,
-        navy: attacker.military.navy - navy,
-        droneMissile: attacker.military.droneMissile - droneMissile,
+        infantry: attacker.military.infantry - attackAction.infantry,
+        airForce: attacker.military.airForce - attackAction.airForce,
+        navy: attacker.military.navy - attackAction.navy,
+        droneMissile:
+          attacker.military.droneMissile - attackAction.droneMissile,
       },
     };
     const prng = new SeededRandom(state.seed);

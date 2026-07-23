@@ -25,6 +25,17 @@ export class TradeRouteManager {
         continue;
       }
 
+      const isSeaNeighborOnly =
+        nation.geography.seaNeighbors.includes(neighborId) &&
+        !nation.geography.landNeighbors.includes(neighborId);
+
+      if (
+        isSeaNeighborOnly &&
+        (!nation.geography.hasSeaAccess || !neighbor.geography.hasSeaAccess)
+      ) {
+        continue;
+      }
+
       const relation = nation.relations[neighborId];
       const isPeaceful =
         !relation ||

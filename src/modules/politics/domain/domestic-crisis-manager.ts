@@ -10,23 +10,33 @@ export class DomesticCrisisManager {
   public checkAndProcessCrisis(nation: Nation): DomesticCrisisResult {
     const stability = nation.government.stability;
     const corruption = nation.government.corruption;
+
     if (stability < 10) {
-      if (
-        nation.government.type !== "DEMOCRACY" &&
-        this.calculateMilitaryRatio(nation) > 3.0
-      ) {
+      const rebelStrength = Math.max(
+        50,
+        Math.floor(nation.population * 0.0001),
+      );
+      const totalMilitaryPower =
+        nation.military.infantry * 1.0 +
+        nation.military.airForce * 3.0 +
+        nation.military.navy * 2.0 +
+        nation.military.droneMissile * 2.5;
+
+      if (totalMilitaryPower === 0 || rebelStrength > totalMilitaryPower) {
         return {
           hasTriggered: true,
           status: "COUP",
           updatedNation: this.applyCoup(nation),
         };
       }
+
       return {
         hasTriggered: true,
         status: "REVOLT",
-        updatedNation: this.applyRebellion(nation),
+        updatedNation: this.applyRebellion(nation, rebelStrength),
       };
     }
+
     if (stability < 30 || corruption > 60) {
       return {
         hasTriggered: true,
@@ -34,6 +44,7 @@ export class DomesticCrisisManager {
         updatedNation: this.applyCrisisPenalty(nation),
       };
     }
+
     if (stability < 50 || corruption > 35) {
       return {
         hasTriggered: true,
@@ -41,21 +52,12 @@ export class DomesticCrisisManager {
         updatedNation: nation,
       };
     }
+
     return {
       hasTriggered: false,
       status: "STABLE",
       updatedNation: nation,
     };
-  }
-
-  private calculateMilitaryRatio(nation: Nation): number {
-    const power =
-      nation.military.infantry * 1.0 +
-      nation.military.airForce * 3.0 +
-      nation.military.navy * 2.0 +
-      nation.military.droneMissile * 2.5;
-    const authority = nation.government.stability * 10;
-    return power / (authority || 1);
   }
 
   private applyCrisisPenalty(nation: Nation): Nation {
@@ -65,19 +67,20 @@ export class DomesticCrisisManager {
     };
   }
 
-  private applyRebellion(nation: Nation): Nation {
-    const defectedInfantry = Math.floor(nation.military.infantry * 0.35);
-    const defectedAir = Math.floor(nation.military.airForce * 0.25);
+  private applyRebellion(nation: Nation, rebelStrength: number): Nation {
+    const casualtyInfantry = Math.min(
+      nation.military.infantry,
+      Math.floor(rebelStrength * 0.5),
+    );
     return {
       ...nation,
       military: {
         ...nation.military,
-        infantry: nation.military.infantry - defectedInfantry,
-        airForce: nation.military.airForce - defectedAir,
+        infantry: nation.military.infantry - casualtyInfantry,
       },
       government: {
         ...nation.government,
-        stability: Math.min(100, nation.government.stability + 30),
+        stability: 25,
       },
     };
   }
@@ -86,18 +89,19 @@ export class DomesticCrisisManager {
     return {
       ...nation,
       gdp: Math.floor(nation.gdp * 0.5),
+      treasury: Math.floor(nation.treasury * 0.5),
       military: {
         ...nation.military,
-        infantry: Math.floor(nation.military.infantry * 0.5),
-        airForce: Math.floor(nation.military.airForce * 0.5),
-        navy: Math.floor(nation.military.navy * 0.5),
-        droneMissile: Math.floor(nation.military.droneMissile * 0.5),
+        infantry: 0,
+        airForce: 0,
+        navy: 0,
+        droneMissile: 0,
       },
       government: {
         ...nation.government,
         type: "DICTATORSHIP",
-        stability: 50,
-        corruption: Math.min(100, nation.government.corruption + 20),
+        stability: 20,
+        corruption: Math.min(100, nation.government.corruption + 25),
         turnsInPower: 0,
       },
     };
