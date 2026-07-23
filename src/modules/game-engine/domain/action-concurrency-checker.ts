@@ -63,6 +63,22 @@ export class ActionConcurrencyChecker {
       }
     }
 
+    const hasConflictingTrade =
+      newAction.type === "TRADE_RESOURCES" &&
+      actionList.some(
+        (a) =>
+          a.type === "TRADE_RESOURCES" &&
+          a.nationId === newAction.nationId &&
+          a.resourceType === newAction.resourceType &&
+          a.isBuy !== newAction.isBuy,
+      );
+    if (hasConflictingTrade) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "Conflicting trade operations queued for the same resource in a single turn",
+      );
+    }
+
     const isDuplicateTrade =
       newAction.type === "TRADE_RESOURCES" &&
       actionList.some(
@@ -75,9 +91,10 @@ export class ActionConcurrencyChecker {
     if (isDuplicateTrade) {
       throw new GameError(
         "INVALID_ACTION",
-        "Conflicting trade operations queued for the same resource in a single turn",
+        "Already enqueued a trade operation for this resource this turn",
       );
     }
+
     const isDuplicateGov =
       newAction.type === "CHANGE_GOVERNMENT" &&
       actionList.some(
@@ -90,6 +107,7 @@ export class ActionConcurrencyChecker {
         "Cannot trigger multiple government regime changes in a single turn",
       );
     }
+
     const isDuplicateInfra =
       newAction.type === "INVEST_INFRASTRUCTURE" &&
       actionList.some(
@@ -103,6 +121,7 @@ export class ActionConcurrencyChecker {
         "Already enqueued infrastructure upgrade for this turn",
       );
     }
+
     const isDuplicateIndustry =
       newAction.type === "UPGRADE_INDUSTRIAL_LEVEL" &&
       actionList.some(

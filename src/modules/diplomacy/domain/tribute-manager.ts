@@ -32,9 +32,9 @@ export class TributeManager {
       return { nation, targetNation };
     }
 
-    const actualAmount = Math.min(
-      targetNation.treasury,
-      relation.tributePerTurn,
+    const actualAmount = Math.max(
+      0,
+      Math.min(targetNation.treasury, relation.tributePerTurn),
     );
 
     const updatedTarget: Nation = {

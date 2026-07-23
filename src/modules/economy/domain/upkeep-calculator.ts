@@ -44,7 +44,7 @@ export class UpkeepCalculator {
 
     let adminPenalty = 0;
     if (nation.taxRate < 5) {
-      adminPenalty = 250000;
+      adminPenalty = Math.floor(nation.gdp * 0.01 * (5 - nation.taxRate));
     }
 
     const total = totalMilitaryCost + infrastructure + adminPenalty;

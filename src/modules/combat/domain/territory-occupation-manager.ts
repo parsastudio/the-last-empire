@@ -13,7 +13,10 @@ export class TerritoryOccupationManager {
     loser: Nation,
     seizeRatio = 0.25,
   ): OccupationResult {
-    const transferredTreasury = Math.floor(loser.treasury * seizeRatio);
+    const transferredTreasury = Math.max(
+      0,
+      Math.floor(loser.treasury * seizeRatio),
+    );
     const seizedTerritory = Math.min(
       loser.geography.territorySize,
       Math.floor(loser.geography.territorySize * seizeRatio),
@@ -30,7 +33,10 @@ export class TerritoryOccupationManager {
 
     const updatedLoser: Nation = {
       ...loser,
-      treasury: loser.treasury - transferredTreasury,
+      treasury:
+        loser.treasury > 0
+          ? loser.treasury - transferredTreasury
+          : loser.treasury,
       geography: {
         ...loser.geography,
         territorySize: loser.geography.territorySize - seizedTerritory,

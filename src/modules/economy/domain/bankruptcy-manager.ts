@@ -46,11 +46,27 @@ export class BankruptcyManager {
       Math.floor(nation.gdp * 1.2),
     );
 
+    const hasExistingDecay = nation.activeModifiers.some(
+      (m) => m.id === "bankruptcy-structural-decay",
+    );
+
+    const finalGdp = hasExistingDecay
+      ? Math.floor(nation.gdp * 0.7)
+      : nation.gdp;
+
     return {
       ...nation,
+      gdp: finalGdp,
       treasury: 0,
       nationalDebt: restructuredDebt,
       industrialLevel: Math.max(1, nation.industrialLevel - 2),
+      geography: {
+        ...nation.geography,
+        infrastructureLevel: Math.max(
+          1,
+          nation.geography.infrastructureLevel - 2,
+        ),
+      },
       government: {
         ...nation.government,
         stability: 0,
