@@ -17,11 +17,6 @@ export function runSerializerCircularTest(): boolean {
     nations: {},
   } as unknown as GameState;
 
-  const circularRef: Record<string, unknown> = {
-    nested: {},
-  };
-  circularRef.nested = circularRef;
-
   let serializationSucceeded = false;
   try {
     const stringified = serializer.serialize(mockState);

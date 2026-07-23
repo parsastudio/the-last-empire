@@ -11,7 +11,6 @@ export function useCombat(
       targetNationId: string,
       infantry: number,
       airForce: number,
-      navy: number,
       droneMissile: number,
     ) => {
       if (!nation) {
@@ -24,7 +23,7 @@ export function useCombat(
         targetNationId,
         infantry,
         airForce,
-        navy,
+        navy: 0,
         droneMissile,
       });
     },

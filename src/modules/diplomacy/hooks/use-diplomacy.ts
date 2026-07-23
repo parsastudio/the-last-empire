@@ -43,15 +43,15 @@ export function useDiplomacy(
     [nation, dispatch],
   );
 
-  const fundEspionage = useCallback(
+  const fundProxyInfluence = useCallback(
     (targetNationId: string, budget: number) => {
       if (!nation) {
         return;
       }
       dispatch({
-        id: `fund-esp-${Date.now()}`,
+        id: `proxy-fund-${Date.now()}`,
         nationId: nation.id,
-        type: "FUND_ESPIONAGE",
+        type: "FUND_PROXY_INFLUENCE",
         targetNationId,
         budget,
       });
@@ -59,23 +59,16 @@ export function useDiplomacy(
     [nation, dispatch],
   );
 
-  const executeCovertOperation = useCallback(
-    (
-      targetNationId: string,
-      operationType:
-        | "SABOTAGE_INDUSTRY"
-        | "INSTIGATE_UNREST"
-        | "MILITARY_INTEL_HEIST",
-    ) => {
+  const unlockDoctrine = useCallback(
+    (doctrineId: string) => {
       if (!nation) {
         return;
       }
       dispatch({
-        id: `covert-${Date.now()}`,
+        id: `unlock-${Date.now()}`,
         nationId: nation.id,
-        type: "COVERT_OPERATIONS",
-        targetNationId,
-        operationType,
+        type: "UNLOCK_DOCTRINE",
+        doctrineId,
       });
     },
     [nation, dispatch],
@@ -84,7 +77,7 @@ export function useDiplomacy(
   return {
     proposeTreaty,
     declareWar,
-    fundEspionage,
-    executeCovertOperation,
+    fundProxyInfluence,
+    unlockDoctrine,
   };
 }

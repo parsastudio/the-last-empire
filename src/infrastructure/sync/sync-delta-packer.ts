@@ -52,6 +52,12 @@ export class SyncDeltaPacker {
         changes[`nations.${id}.government.corruption`] =
           nation.government.corruption;
       }
+      if (nation.globalReputation !== prevNation.globalReputation) {
+        changes[`nations.${id}.globalReputation`] = nation.globalReputation;
+      }
+      if (nation.globalAggression !== prevNation.globalAggression) {
+        changes[`nations.${id}.globalAggression`] = nation.globalAggression;
+      }
     }
     return {
       gameId: currentState.gameId,
