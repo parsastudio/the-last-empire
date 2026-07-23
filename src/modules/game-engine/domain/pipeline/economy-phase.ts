@@ -61,9 +61,9 @@ export class EconomyPhase implements TurnPhase {
     };
 
     let totalOilDemand = tradeVolume.oilBought;
-    let totalOilSupply = tradeVolume.oilSold;
+    const totalOilSupply = tradeVolume.oilSold;
     let totalSteelDemand = tradeVolume.steelBought;
-    let totalSteelSupply = tradeVolume.steelSold;
+    const totalSteelSupply = tradeVolume.steelSold;
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {

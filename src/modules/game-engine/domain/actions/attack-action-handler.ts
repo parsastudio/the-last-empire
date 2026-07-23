@@ -4,28 +4,22 @@ import type {
   AttackAction,
 } from "@/modules/game-engine/schemas/action.schema";
 import { CombatResolver } from "@/modules/combat/domain/combat-resolver";
-import { TerritoryOccupationManager } from "@/modules/combat/domain/territory-occupation-manager";
-import { WarExhaustionManager } from "@/modules/combat/domain/war-exhaustion-manager";
 import { GeographyDistanceCalculator } from "@/modules/economy/domain/geography-distance-calculator";
 import { SeededRandom } from "@/core/math/seeded-random";
 import { GameError } from "@/core/errors/game-error";
 import { CoolOffManager } from "@/modules/diplomacy/domain/cool-off-manager";
 import { PocketCombatCalculator } from "@/modules/diplomacy/domain/pocket-combat-calculator";
 import { NavalTransportCostCalculator } from "@/modules/military/domain/naval-transport-cost-calculator";
-import { LootCalculator } from "@/modules/diplomacy/domain/loot-calculator";
-import { ConnectivityGraph } from "@/modules/diplomacy/domain/connectivity-graph";
+import { AttackResultProcessor } from "./attack-result-processor";
 import type { ActionHandler } from "./action-handler";
 
 export class AttackActionHandler implements ActionHandler {
   private combatResolver = new CombatResolver();
-  private occupationManager = new TerritoryOccupationManager();
-  private warExhaustionManager = new WarExhaustionManager();
   private distanceCalculator = new GeographyDistanceCalculator();
   private coolOffManager = new CoolOffManager();
   private pocketCalculator = new PocketCombatCalculator();
   private transportCostCalculator = new NavalTransportCostCalculator();
-  private lootCalculator = new LootCalculator();
-  private connectivityGraph = new ConnectivityGraph();
+  private resultProcessor = new AttackResultProcessor();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "ATTACK") {
@@ -171,157 +165,19 @@ export class AttackActionHandler implements ActionHandler {
       prng,
     );
 
-    let finalAttacker = {
-      ...updatedAttackerNation,
-      military: {
-        ...updatedAttackerNation.military,
-        infantry:
-          updatedAttackerNation.military.infantry +
-          combatResult.updatedAttackerMilitary.infantry,
-        airForce:
-          updatedAttackerNation.military.airForce +
-          combatResult.updatedAttackerMilitary.airForce,
-        droneMissile:
-          updatedAttackerNation.military.droneMissile +
-          combatResult.updatedAttackerMilitary.droneMissile,
-      },
-    };
-
-    let finalDefender = {
-      ...defender,
-      military: combatResult.updatedDefenderMilitary,
-    };
-
-    const attackerKilledInfantry =
-      infantry - combatResult.updatedAttackerMilitary.infantry;
-    const attackerKilledAir =
-      airForce - combatResult.updatedAttackerMilitary.airForce;
-    const attackerTotalCasualties = attackerKilledInfantry + attackerKilledAir;
-    const defenderKilledInfantry =
-      defender.military.infantry -
-      combatResult.updatedDefenderMilitary.infantry;
-    const defenderKilledAir =
-      defender.military.airForce -
-      combatResult.updatedDefenderMilitary.airForce;
-    const defenderTotalCasualties = defenderKilledInfantry + defenderKilledAir;
-
-    finalAttacker = this.warExhaustionManager.incrementWarExhaustion(
-      finalAttacker,
-      attackerTotalCasualties,
+    const nextState = this.resultProcessor.process(
+      state,
+      updatedAttackerNation,
+      defender,
+      combatResult,
+      infantry,
+      airForce,
+      droneMissile,
     );
-    finalDefender = this.warExhaustionManager.incrementWarExhaustion(
-      finalDefender,
-      defenderTotalCasualties,
-    );
-
-    let logMessage = `Battle occurred. Attacker: ${attacker.name}, Defender: ${defender.name}. `;
-    if (combatResult.attackerWon) {
-      const transfer = this.occupationManager.processVictoryOccupation(
-        finalAttacker,
-        finalDefender,
-        0.25,
-      );
-      finalAttacker = transfer.winner;
-      finalDefender = transfer.loser;
-
-      let targetLoot = 0;
-      if (finalDefender.geography.isolatedPockets.length > 0) {
-        const actualPocket = finalDefender.geography.isolatedPockets[0];
-        targetLoot = this.lootCalculator.calculateLoot(
-          finalDefender.treasury,
-          actualPocket.territorySize,
-          finalDefender.geography.contiguousMainlandSize,
-          0.25,
-        );
-      }
-
-      finalAttacker.treasury += targetLoot;
-      finalDefender.treasury = Math.max(0, finalDefender.treasury - targetLoot);
-
-      logMessage += `Victory for Attacker! Occupied ${transfer.seizedTerritory} size territory and seized ${transfer.transferredTreasury} treasury and looted ${targetLoot} as pocket resources.`;
-
-      const isContiguousNeighbor = attacker.geography.landNeighbors.includes(
-        defender.id,
-      );
-
-      if (isContiguousNeighbor) {
-        finalAttacker.geography.contiguousMainlandSize +=
-          transfer.seizedTerritory;
-        finalDefender.geography.contiguousMainlandSize = Math.max(
-          0,
-          finalDefender.geography.contiguousMainlandSize -
-            transfer.seizedTerritory,
-        );
-      } else {
-        const newPocket = {
-          id: `pocket-conquered-${defender.id}-${Date.now()}`,
-          territorySize: transfer.seizedTerritory,
-          territoryIds: [defender.id],
-        };
-        finalAttacker.geography.isolatedPockets = [
-          ...finalAttacker.geography.isolatedPockets,
-          newPocket,
-        ];
-
-        if (finalDefender.geography.isolatedPockets.length > 0) {
-          let remainingLoss = transfer.seizedTerritory;
-          const updatedPockets = [];
-          for (const pocket of finalDefender.geography.isolatedPockets) {
-            if (remainingLoss <= 0) {
-              updatedPockets.push(pocket);
-            } else if (pocket.territorySize > remainingLoss) {
-              updatedPockets.push({
-                ...pocket,
-                territorySize: pocket.territorySize - remainingLoss,
-              });
-              remainingLoss = 0;
-            } else {
-              remainingLoss -= pocket.territorySize;
-            }
-          }
-          finalDefender.geography.isolatedPockets = updatedPockets;
-          if (remainingLoss > 0) {
-            finalDefender.geography.contiguousMainlandSize = Math.max(
-              0,
-              finalDefender.geography.contiguousMainlandSize - remainingLoss,
-            );
-          }
-        } else {
-          finalDefender.geography.contiguousMainlandSize = Math.max(
-            0,
-            finalDefender.geography.contiguousMainlandSize -
-              transfer.seizedTerritory,
-          );
-        }
-      }
-    } else {
-      logMessage += `Defender successfully defended their territory.`;
-    }
-
-    const updatedNations = {
-      ...state.nations,
-      [attacker.id]: {
-        ...finalAttacker,
-        globalAggression: Math.min(100, finalAttacker.globalAggression + 10),
-      },
-      [defender.id]: finalDefender,
-    };
-
-    const logEntry = {
-      id: `combat-${state.currentTurn}-${Date.now()}`,
-      turn: state.currentTurn,
-      timestamp: Date.now(),
-      sourceNationId: attacker.id,
-      targetNationId: defender.id,
-      level: "COMBAT" as const,
-      message: logMessage,
-    };
 
     return {
-      ...state,
+      ...nextState,
       seed: prng.getSeed(),
-      nations: updatedNations,
-      turnLogs: [...state.turnLogs, logEntry],
     };
   }
 }
