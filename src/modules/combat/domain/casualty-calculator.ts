@@ -19,13 +19,26 @@ export class CasualtyCalculator {
       0.1,
       Math.min(2.0, defenderScore / (attackerScore || 1)),
     );
-    const attackerBaseRate = attackerWon ? 0.1 * ratio : 0.25 * ratio;
+    let attackerBaseRate = attackerWon ? 0.1 * ratio : 0.25 * ratio;
     const defenderBaseRate = attackerWon ? 0.3 / ratio : 0.15 / ratio;
 
     const attackerPower =
       attackerMilitary.infantry * 1.0 +
       attackerMilitary.airForce * 3.0 +
       attackerMilitary.droneMissile * 2.5;
+
+    const defenderPower =
+      defenderMilitary.infantry * 1.0 +
+      defenderMilitary.airForce * 3.0 +
+      defenderMilitary.droneMissile * 2.5;
+
+    if (attackerWon && attackerPower > defenderPower * 5 && defenderPower > 0) {
+      const powerAdvantageFactor = Math.max(
+        0.01,
+        defenderPower / attackerPower,
+      );
+      attackerBaseRate = attackerBaseRate * powerAdvantageFactor;
+    }
 
     const attackerKilledInfantry = Math.floor(
       attackerMilitary.infantry * Math.min(0.8, attackerBaseRate),

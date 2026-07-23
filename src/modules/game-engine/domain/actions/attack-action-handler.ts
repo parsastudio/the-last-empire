@@ -94,7 +94,7 @@ export class AttackActionHandler implements ActionHandler {
     } else {
       const totalDeployedUnits = infantry + airForce + droneMissile;
       deploymentCost = Math.floor(
-        totalDeployedUnits * 150 * Math.pow(1.5, distance - 1),
+        totalDeployedUnits * 100 * Math.pow(1.12, distance - 1),
       );
     }
 

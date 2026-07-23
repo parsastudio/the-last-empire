@@ -35,7 +35,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
           "Diplomatic Summit is on cooldown.",
         );
       }
-      if (nation.treasury < 30000) {
+      if (nation.treasury < 20000) {
         throw new GameError(
           "INSUFFICIENT_FUNDS",
           "Insufficient treasury to convene summit.",
@@ -60,7 +60,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         ...nation.relations,
         [targetId]: {
           ...relation,
-          opinion: Math.min(100, relation.opinion + 5),
+          opinion: Math.min(100, relation.opinion + 35),
         },
       };
 
@@ -69,7 +69,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       if (targetNation && targetRelations[nationId]) {
         targetRelations[nationId] = {
           ...targetRelations[nationId],
-          opinion: Math.min(100, targetRelations[nationId].opinion + 5),
+          opinion: Math.min(100, targetRelations[nationId].opinion + 35),
         };
       }
 
@@ -78,13 +78,14 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         name: "Summit Cooldown",
         effectType: "COOLDOWN",
         magnitude: 0,
-        turnsRemaining: 15,
+        turnsRemaining: 6,
       };
 
       const updatedNations = { ...state.nations };
       updatedNations[nationId] = {
         ...nation,
-        treasury: nation.treasury - 30000,
+        treasury: nation.treasury - 20000,
+        globalReputation: Math.min(100, nation.globalReputation + 10),
         relations: updatedRelations,
         activeModifiers: [...nation.activeModifiers, cooldown],
       };
