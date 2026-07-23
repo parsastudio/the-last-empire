@@ -105,20 +105,26 @@ export class AttackActionHandler implements ActionHandler {
       );
     }
 
+    const isDirectNeighbor =
+      attacker.geography.landNeighbors.includes(defender.id) ||
+      attacker.geography.seaNeighbors.includes(defender.id);
+
     let combatStrengthMultiplier = 1.0;
-    const pocket = attacker.geography.isolatedPockets.find((p) =>
-      p.territoryIds.some(
-        (id) =>
-          defender.geography.landNeighbors.includes(id) ||
-          defender.geography.seaNeighbors.includes(id),
-      ),
-    );
-    if (pocket) {
-      combatStrengthMultiplier =
-        this.pocketCalculator.getLogisticalCombatMultiplier(
-          pocket.territorySize,
-          attacker.geography.contiguousMainlandSize,
-        );
+    if (!isDirectNeighbor) {
+      const pocket = attacker.geography.isolatedPockets.find((p) =>
+        p.territoryIds.some(
+          (id) =>
+            defender.geography.landNeighbors.includes(id) ||
+            defender.geography.seaNeighbors.includes(id),
+        ),
+      );
+      if (pocket) {
+        combatStrengthMultiplier =
+          this.pocketCalculator.getLogisticalCombatMultiplier(
+            pocket.territorySize,
+            attacker.geography.contiguousMainlandSize,
+          );
+      }
     }
 
     const attackForceStack = {
@@ -230,11 +236,11 @@ export class AttackActionHandler implements ActionHandler {
 
       logMessage += `Victory for Attacker! Occupied ${transfer.seizedTerritory} size territory and seized ${transfer.transferredTreasury} treasury and looted ${targetLoot} as pocket resources.`;
 
-      const isDirectNeighbor = attacker.geography.landNeighbors.includes(
+      const isContiguousNeighbor = attacker.geography.landNeighbors.includes(
         defender.id,
       );
 
-      if (isDirectNeighbor) {
+      if (isContiguousNeighbor) {
         finalAttacker.geography.contiguousMainlandSize +=
           transfer.seizedTerritory;
       } else {

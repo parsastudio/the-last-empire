@@ -90,6 +90,15 @@ export class PoliticsPhase implements TurnPhase {
         turnsInPower: updated.government.turnsInPower + 1,
       };
 
+      const updatedBudgets = { ...updated.proxyInfluenceBudget };
+      for (const targetId of Object.keys(updatedBudgets)) {
+        updatedBudgets[targetId] = Math.max(
+          0,
+          Math.floor(updatedBudgets[targetId] * 0.75),
+        );
+      }
+      updated.proxyInfluenceBudget = updatedBudgets;
+
       nations[id] = updated;
     }
 

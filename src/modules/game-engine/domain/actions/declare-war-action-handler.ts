@@ -3,9 +3,12 @@ import type {
   GameAction,
   DeclareWarAction,
 } from "@/modules/game-engine/schemas/action.schema";
+import { CoolOffManager } from "@/modules/diplomacy/domain/cool-off-manager";
 import type { ActionHandler } from "./action-handler";
 
 export class DeclareWarActionHandler implements ActionHandler {
+  private coolOffManager = new CoolOffManager();
+
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "DECLARE_WAR") {
       return state;
@@ -19,8 +22,33 @@ export class DeclareWarActionHandler implements ActionHandler {
     const sourceRel = source.relations[warAction.targetNationId];
     const targetRel = target.relations[action.nationId];
 
+    const currentStance = sourceRel ? sourceRel.stance : "PEACE";
+    const penalties = this.coolOffManager.checkViolation(
+      currentStance,
+      "DECLARE_WAR",
+    );
+
+    let finalSourceReputation = source.globalReputation;
+    let finalSourceStability = source.government.stability;
+
+    if (penalties.reputationPenalty > 0 || penalties.stabilityPenalty > 0) {
+      finalSourceReputation = Math.max(
+        -100,
+        source.globalReputation - penalties.reputationPenalty,
+      );
+      finalSourceStability = Math.max(
+        0,
+        source.government.stability - penalties.stabilityPenalty,
+      );
+    }
+
     const updatedSource = {
       ...source,
+      globalReputation: finalSourceReputation,
+      government: {
+        ...source.government,
+        stability: finalSourceStability,
+      },
       globalAggression: Math.min(100, source.globalAggression + 25),
       relations: {
         ...source.relations,

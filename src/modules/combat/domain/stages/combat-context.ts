@@ -13,4 +13,5 @@ export interface CombatContext {
   attackerScore: number;
   defenderScore: number;
   attackerWon: boolean;
+  deployedDronesCount: number;
 }

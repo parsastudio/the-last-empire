@@ -41,6 +41,7 @@ export class CombatResolver {
       attackerScore: 0,
       defenderScore: 0,
       attackerWon: false,
+      deployedDronesCount: attackForce.droneMissile,
     };
 
     for (const stage of this.stages) {

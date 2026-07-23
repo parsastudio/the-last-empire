@@ -62,6 +62,27 @@ export class DiplomacyPhase implements TurnPhase {
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         const target = nations[targetId];
         if (target && target.isAlive) {
+          if (relation.tributePerTurn > 0) {
+            const receiverPower =
+              target.military.infantry * 1.0 +
+              target.military.airForce * 3.0 +
+              target.military.droneMissile * 2.5;
+            const payerPower =
+              updated.military.infantry * 1.0 +
+              updated.military.airForce * 3.0 +
+              updated.military.droneMissile * 2.5;
+
+            if (payerPower >= receiverPower * 0.5) {
+              updatedRelations[targetId] = {
+                ...relation,
+                tributePerTurn: 0,
+                opinion: Math.max(-100, relation.opinion - 40),
+                stance: "PEACE",
+              };
+              continue;
+            }
+          }
+
           const isLandNeighbor =
             updated.geography.landNeighbors.includes(targetId);
 

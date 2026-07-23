@@ -136,9 +136,47 @@ export class GameEngine {
   }
 
   private processActionQueue(): void {
-    const actions = this.actionQueue.getQueue();
+    const rawQueue = [...this.actionQueue.getQueue()];
+
+    const priority1 = rawQueue.filter((a) =>
+      ["DECLARE_WAR", "CHANGE_GOVERNMENT", "ACTIVATE_ABILITY"].includes(a.type),
+    );
+    const priority2 = rawQueue.filter((a) => a.type === "TRADE_RESOURCES");
+    const priority3 = rawQueue.filter((a) =>
+      [
+        "RECRUIT_UNIT",
+        "INVEST_INFRASTRUCTURE",
+        "UPGRADE_INDUSTRIAL_LEVEL",
+        "UNLOCK_DOCTRINE",
+        "INVEST_RESEARCH",
+        "ANTI_CORRUPTION_DRIVE",
+        "REPAY_DEBT",
+        "REQUEST_LOAN",
+        "CANCEL_RECRUITMENT",
+        "DISBAND_UNIT",
+        "DIPLOMATIC_PROPOSAL",
+        "FUND_PROXY_INFLUENCE",
+      ].includes(a.type),
+    );
+    const priority4 = rawQueue.filter((a) => a.type === "ATTACK");
+
+    const shuffledTrades = [...priority2];
+    for (let i = shuffledTrades.length - 1; i > 0; i--) {
+      const j = Math.floor(this.prng.nextFloat() * (i + 1));
+      const temp = shuffledTrades[i];
+      shuffledTrades[i] = shuffledTrades[j];
+      shuffledTrades[j] = temp;
+    }
+
+    const sortedActions = [
+      ...priority1,
+      ...shuffledTrades,
+      ...priority3,
+      ...priority4,
+    ];
+
     let state = this.currentState;
-    for (const action of actions) {
+    for (const action of sortedActions) {
       try {
         state = this.actionRouter.route(state, action);
         const logEntry = this.eventLogger.createEntry(

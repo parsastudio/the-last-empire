@@ -19,11 +19,13 @@ export class BankruptcyManager {
   }
 
   public applyBankruptcy(nation: Nation): Nation {
+    const debtRatio = nation.gdp > 0 ? nation.nationalDebt / nation.gdp : 1;
+
     const decayModifier: ActiveModifier = {
       id: "bankruptcy-structural-decay",
       name: "Bankruptcy Economic Decay",
       effectType: "GDP_GROWTH_MULT",
-      magnitude: -0.15,
+      magnitude: -0.25,
       turnsRemaining: 9999,
     };
 
@@ -32,15 +34,15 @@ export class BankruptcyManager {
       name: "Debt Restructuring Period",
       effectType: "BANKRUPTCY_HOLIDAY",
       magnitude: 0,
-      turnsRemaining: 10,
+      turnsRemaining: 15,
     };
 
     const badCreditModifier: ActiveModifier = {
       id: "bankruptcy-bad-credit",
       name: "Ruined Credit Rating",
       effectType: "CREDIT_RATING_MULT",
-      magnitude: -80,
-      turnsRemaining: 30,
+      magnitude: -95,
+      turnsRemaining: 40,
     };
 
     const existingModifiers = nation.activeModifiers.filter(
@@ -50,30 +52,26 @@ export class BankruptcyManager {
         m.id !== "bankruptcy-bad-credit",
     );
 
-    const restructuredDebt = Math.min(
-      Math.floor(nation.nationalDebt * 0.5),
-      Math.floor(nation.gdp * 1.2),
-    );
+    const restructuredDebt = Math.floor(nation.nationalDebt * 0.8);
 
-    const hasExistingDecay = nation.activeModifiers.some(
-      (m) => m.id === "bankruptcy-structural-decay",
-    );
+    const finalGdp = Math.floor(nation.gdp * 0.5);
 
-    const finalGdp = hasExistingDecay
-      ? Math.floor(nation.gdp * 0.7)
-      : nation.gdp;
+    const excessiveDebtPenalty = debtRatio > 3.0 ? 3 : 1;
 
     return {
       ...nation,
       gdp: finalGdp,
       treasury: 0,
       nationalDebt: restructuredDebt,
-      industrialLevel: Math.max(1, nation.industrialLevel - 2),
+      industrialLevel: Math.max(
+        1,
+        nation.industrialLevel - excessiveDebtPenalty,
+      ),
       geography: {
         ...nation.geography,
         infrastructureLevel: Math.max(
           1,
-          nation.geography.infrastructureLevel - 2,
+          nation.geography.infrastructureLevel - excessiveDebtPenalty,
         ),
       },
       government: {
@@ -82,15 +80,15 @@ export class BankruptcyManager {
       },
       military: {
         ...nation.military,
-        infantry: Math.floor(nation.military.infantry * 0.2),
-        airForce: Math.floor(nation.military.airForce * 0.1),
+        infantry: Math.floor(nation.military.infantry * 0.1),
+        airForce: Math.floor(nation.military.airForce * 0.05),
         droneMissile: 0,
       },
       resources: {
         ...nation.resources,
-        oil: Math.floor(nation.resources.oil * 0.1),
-        steel: Math.floor(nation.resources.steel * 0.1),
-        manpower: Math.floor(nation.resources.manpower * 0.2),
+        oil: Math.floor(nation.resources.oil * 0.05),
+        steel: Math.floor(nation.resources.steel * 0.05),
+        manpower: Math.floor(nation.resources.manpower * 0.05),
       },
       recruitmentQueue: [],
       activeModifiers: [

@@ -20,6 +20,15 @@ export class TreatyEvaluator {
     if (receiver.globalReputation < -50) {
       return { accepted: false, reason: "LOW_SENDER_REPUTATION" };
     }
+    const receiverPower =
+      receiver.military.infantry * 1.0 +
+      receiver.military.airForce * 3.0 +
+      receiver.military.droneMissile * 2.5;
+    const senderPower =
+      sender.military.infantry * 1.0 +
+      sender.military.airForce * 3.0 +
+      sender.military.droneMissile * 2.5;
+
     switch (proposalType) {
       case "NON_AGGRESSION_PACT":
         if (opinion >= -10) {
@@ -42,7 +51,7 @@ export class TreatyEvaluator {
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
       case "DEMAND_TRIBUTE":
-        if (receiver.military.infantry < sender.military.infantry * 0.3) {
+        if (receiverPower < senderPower * 0.3) {
           return { accepted: true };
         }
         return { accepted: false, reason: "DEFENSE_CAPABLE" };

@@ -117,8 +117,8 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       const activeMod: ActiveModifier = {
         id: "martial-law-active",
         name: "Martial Law",
-        effectType: "MARTIAL_LAW",
-        magnitude: 0,
+        effectType: "STABILITY_DELTA",
+        magnitude: 5,
         turnsRemaining: 5,
       };
 
@@ -133,6 +133,10 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       const updatedNations = { ...state.nations };
       updatedNations[nationId] = {
         ...nation,
+        government: {
+          ...nation.government,
+          stability: Math.min(100, nation.government.stability + 15),
+        },
         activeModifiers: [...nation.activeModifiers, activeMod, cooldownMod],
       };
 
@@ -147,6 +151,12 @@ export class ActivateAbilityActionHandler implements ActionHandler {
         throw new GameError(
           "INVALID_ACTION",
           "Only communist regimes can trigger Industrial Mobilization.",
+        );
+      }
+      if (nation.resources.manpower < 50) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Must have at least 50 manpower to execute Industrial Mobilization.",
         );
       }
       if (

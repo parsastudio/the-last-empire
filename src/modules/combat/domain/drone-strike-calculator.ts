@@ -25,7 +25,7 @@ export class DroneStrikeCalculator {
     const droneMultiplier = this.doctrinesManager.getDroneMultiplier(
       attackerUnlockedDoctrines,
     );
-    const damagePerDrone = 5 * droneMultiplier;
+    const damagePerDrone = 8 * droneMultiplier;
     const totalDamage = drones * damagePerDrone;
     const remainingInfantry = Math.max(
       0,

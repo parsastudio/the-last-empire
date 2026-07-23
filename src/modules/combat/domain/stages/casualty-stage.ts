@@ -24,10 +24,7 @@ export class CasualtyStage implements CombatStage {
       0,
       context.attackForce.airForce - casualties.attackerKilledAirForce,
     );
-    context.attackForce.droneMissile = Math.max(
-      0,
-      context.attackForce.droneMissile - casualties.attackerKilledDrones,
-    );
+    context.attackForce.droneMissile = 0;
 
     context.defenderMilitary.infantry = Math.max(
       0,

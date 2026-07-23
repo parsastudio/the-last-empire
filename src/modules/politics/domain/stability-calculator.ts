@@ -1,8 +1,10 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
+import { ModifierManager } from "@/modules/events/domain/modifier-manager";
 import { GovernmentSystem } from "./government-system";
 
 export class StabilityCalculator {
   private governmentSystem = new GovernmentSystem();
+  private modifierManager = new ModifierManager();
 
   public calculateTurnStability(nation: Nation): number {
     const isMartialLawActive = nation.activeModifiers.some(
@@ -16,6 +18,12 @@ export class StabilityCalculator {
     } else if (nation.taxRate < 15) {
       delta += (15 - nation.taxRate) * 0.4;
     }
+
+    const stabilityModifier = this.modifierManager.getModifierImpact(
+      nation,
+      "STABILITY_DELTA",
+    );
+    delta += stabilityModifier;
 
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     const targetStability = govTraits.baseStability;
