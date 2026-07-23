@@ -187,8 +187,8 @@ export class EconomyPhase implements TurnPhase {
           const targetNation = nations[targetId];
           if (targetNation && targetNation.isAlive) {
             const result = this.tributeManager.processTurnTributes(
-              nation,
-              targetNation,
+              nations[id],
+              nations[targetId],
             );
             nations[id] = result.nation;
             nations[targetId] = result.targetNation;

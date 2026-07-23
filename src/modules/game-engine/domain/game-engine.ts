@@ -141,19 +141,32 @@ export class GameEngine {
     const actions = this.actionQueue.getQueue();
     let state = this.currentState;
     for (const action of actions) {
-      state = this.actionRouter.route(state, action);
-
-      const logEntry = this.eventLogger.createEntry(
-        state.currentTurn,
-        action.nationId,
-        "INFO",
-        `Action processed: ${action.type}`,
-      );
-
-      state = {
-        ...state,
-        turnLogs: [...state.turnLogs, logEntry],
-      };
+      try {
+        state = this.actionRouter.route(state, action);
+        const logEntry = this.eventLogger.createEntry(
+          state.currentTurn,
+          action.nationId,
+          "INFO",
+          `Action processed: ${action.type}`,
+        );
+        state = {
+          ...state,
+          turnLogs: [...state.turnLogs, logEntry],
+        };
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Unknown execution error";
+        const logEntry = this.eventLogger.createEntry(
+          state.currentTurn,
+          action.nationId,
+          "CRITICAL",
+          `Action failed during execution: ${action.type}. Reason: ${errorMessage}`,
+        );
+        state = {
+          ...state,
+          turnLogs: [...state.turnLogs, logEntry],
+        };
+      }
     }
     this.currentState = state;
   }

@@ -7,6 +7,11 @@ export class BankruptcyManager {
   private readonly debtToGdpLimitRatio = 2.5;
 
   public isBankrupt(nation: Nation): boolean {
+    if (
+      nation.activeModifiers.some((m) => m.id === "bankruptcy-debt-holiday")
+    ) {
+      return false;
+    }
     if (nation.gdp <= 0) {
       return nation.nationalDebt > 0;
     }
@@ -22,13 +27,23 @@ export class BankruptcyManager {
       turnsRemaining: 9999,
     };
 
+    const restructuringHoliday: ActiveModifier = {
+      id: "bankruptcy-debt-holiday",
+      name: "Debt Restructuring Period",
+      effectType: "BANKRUPTCY_HOLIDAY",
+      magnitude: 0,
+      turnsRemaining: 10,
+    };
+
     const existingModifiers = nation.activeModifiers.filter(
-      (m) => m.id !== "bankruptcy-structural-decay",
+      (m) =>
+        m.id !== "bankruptcy-structural-decay" &&
+        m.id !== "bankruptcy-debt-holiday",
     );
 
-    const restructuredDebt = Math.max(
-      Math.floor(nation.nationalDebt * 0.9),
-      Math.floor(nation.gdp * 2.0),
+    const restructuredDebt = Math.min(
+      Math.floor(nation.nationalDebt * 0.5),
+      Math.floor(nation.gdp * 1.2),
     );
 
     return {
@@ -47,7 +62,11 @@ export class BankruptcyManager {
         droneMissile: 0,
       },
       recruitmentQueue: [],
-      activeModifiers: [...existingModifiers, decayModifier],
+      activeModifiers: [
+        ...existingModifiers,
+        decayModifier,
+        restructuringHoliday,
+      ],
     };
   }
 

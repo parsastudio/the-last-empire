@@ -13,18 +13,12 @@ export class StabilityCalculator {
     let delta = 0;
     if (nation.taxRate > 25) {
       delta -= (nation.taxRate - 25) * 0.5;
-    } else if (nation.taxRate < 15) {
-      delta += Math.min(5, (15 - nation.taxRate) * 0.5);
+    } else if (nation.taxRate >= 10 && nation.taxRate < 15) {
+      delta += (15 - nation.taxRate) * 0.3;
+    } else if (nation.taxRate < 10) {
+      delta -= (10 - nation.taxRate) * 1.5;
     }
-    if (nation.taxRate < 5) {
-      delta -= 15;
-    }
-    if (nation.warExhaustion > 30) {
-      delta -= (nation.warExhaustion - 30) * 0.2;
-    }
-    if (nation.government.corruption > 30) {
-      delta -= (nation.government.corruption - 30) * 0.1;
-    }
+
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     const targetStability = govTraits.baseStability;
     const alignmentFactor = (targetStability - currentStability) * 0.05;
