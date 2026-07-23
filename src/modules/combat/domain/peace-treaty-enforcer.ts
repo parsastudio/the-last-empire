@@ -1,8 +1,6 @@
 import type { Nation } from "@/modules/nation/schemas/nation.schema";
 
 export class PeaceTreatyEnforcer {
-  private readonly defaultTreatyTurns = 10;
-
   public establishPeace(nationA: Nation, nationBId: string): Nation {
     const relation = nationA.relations[nationBId];
     if (!relation) {
@@ -16,7 +14,7 @@ export class PeaceTreatyEnforcer {
         [nationBId]: {
           ...relation,
           stance: "PEACE",
-          treatyTurnsRemaining: this.defaultTreatyTurns,
+          coolOffTurnsRemaining: 0,
         },
       },
     };
@@ -28,7 +26,10 @@ export class PeaceTreatyEnforcer {
 
     return {
       ...violator,
-      reputation: Math.max(-100, violator.reputation - reputationPenalty),
+      globalReputation: Math.max(
+        -100,
+        violator.globalReputation - reputationPenalty,
+      ),
       government: {
         ...violator.government,
         stability: Math.max(
