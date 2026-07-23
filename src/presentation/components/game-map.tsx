@@ -1,120 +1,211 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
-import type { GridCell } from "@/domain/map/grid.schema";
+import React, { useState, useRef } from "react";
+import type { VectorProvince } from "@/engine/map/grid-generator";
+import type { Province } from "@/domain/map/province.schema";
 
 interface GameMapProps {
-  grid: GridCell[][];
+  vectorProvinces: VectorProvince[];
+  provincesState: Record<string, Province>;
   width: number;
   height: number;
-  hoveredNationId: string | null;
-  selectedNationId: string | null;
-  onMouseMove: (e: React.MouseEvent<HTMLCanvasElement>) => void;
-  onMouseLeave: () => void;
-  onClick: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  onCountryClick: (countryCode: string, angle: number) => void;
 }
 
 export function GameMap({
-  grid,
+  vectorProvinces,
+  provincesState,
   width,
   height,
-  hoveredNationId,
-  selectedNationId,
-  onMouseMove,
-  onMouseLeave,
-  onClick,
+  onCountryClick,
 }: GameMapProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
 
-  const renderWidth = 1200;
-  const renderHeight = 600;
-  const scaleX = renderWidth / width;
-  const scaleY = renderHeight / height;
+  const [scale, setScale] = useState<number>(1);
+  const [position, setPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
 
-  const getNationColor = (
-    ownerId: string | null,
-    isHovered: boolean,
-    isSelected: boolean,
-  ): string => {
-    if (!ownerId) return "rgb(15, 23, 42)";
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const getNationColor = (countryCode: string): string => {
+    if (countryCode === "IRN") {
+      return "rgb(16, 185, 129)";
+    }
     let hash = 0;
-    for (let i = 0; i < ownerId.length; i++) {
-      hash = ownerId.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < countryCode.length; i++) {
+      hash = countryCode.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const r = (Math.abs((hash & 0xff0000) >> 16) % 180) + 50;
-    const g = (Math.abs((hash & 0x00ff00) >> 8) % 180) + 50;
-    const b = (Math.abs(hash & 0x0000ff) % 180) + 50;
-
-    if (isSelected) {
-      return `rgb(${Math.min(255, r + 70)}, ${Math.min(255, g + 70)}, 255)`;
-    }
-    if (isHovered) {
-      return `rgb(${Math.min(255, r + 45)}, ${Math.min(255, g + 45)}, ${Math.min(255, b + 45)})`;
-    }
+    const r = (Math.abs((hash & 0xff0000) >> 16) % 100) + 50;
+    const g = (Math.abs((hash & 0x00ff00) >> 8) % 100) + 50;
+    const b = (Math.abs(hash & 0x0000ff) % 100) + 50;
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+  const handleCountryClick = (e: React.MouseEvent, countryCode: string) => {
+    e.stopPropagation();
+    if (countryCode === "IRN") return;
+    onCountryClick(countryCode, 0);
+  };
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
 
-    ctx.clearRect(0, 0, renderWidth, renderHeight);
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    setPosition({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y,
+    });
+  };
 
-    for (let y = 0; y < height; y++) {
-      const row = grid[y];
-      if (!row) continue;
-      for (let x = 0; x < width; x++) {
-        const cell = row[x];
-        if (!cell) continue;
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
-        if (cell.type === "SEA") {
-          ctx.fillStyle = "rgb(10, 15, 30)";
-        } else {
-          const isHovered = cell.ownerId === hoveredNationId;
-          const isSelected = cell.ownerId === selectedNationId;
-          ctx.fillStyle = getNationColor(cell.ownerId, isHovered, isSelected);
-        }
-        ctx.fillRect(x * scaleX, y * scaleY, scaleX, scaleY);
+  const zoomIn = () => setScale((prev) => Math.min(prev + 0.5, 6));
+  const zoomOut = () => {
+    setScale((prev) => {
+      const next = Math.max(prev - 0.5, 1);
+      if (next === 1) {
+        setPosition({ x: 0, y: 0 });
       }
-    }
-  }, [grid, width, height, hoveredNationId, selectedNationId, scaleX, scaleY]);
+      return next;
+    });
+  };
+
+  const resetView = () => {
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
+  };
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-slate-950 p-4 rounded-3xl border border-slate-800/80 shadow-2xl shadow-emerald-950/20">
-      <div className="relative w-full aspect-[2/1] max-w-5xl">
-        <canvas
-          ref={canvasRef}
-          width={renderWidth}
-          height={renderHeight}
-          onMouseMove={onMouseMove}
-          onMouseLeave={onMouseLeave}
-          onClick={onClick}
-          className="w-full h-full object-cover cursor-crosshair"
-          style={{
-            filter: "url(#organic-map-borders)",
-          }}
-        />
+    <div
+      ref={containerRef}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      className={`w-full h-full relative overflow-hidden bg-slate-950 cursor-grab ${
+        isDragging ? "cursor-grabbing" : ""
+      }`}
+    >
+      <div
+        className="w-full h-full transition-transform duration-75 ease-out select-none origin-center flex items-center justify-center"
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+        }}
+      >
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-full pointer-events-auto"
+        >
+          <defs>
+            <pattern
+              id="military-stripes-IRN"
+              width="12"
+              height="12"
+              patternTransform="rotate(45)"
+              patternUnits="userSpaceOnUse"
+            >
+              <rect width="12" height="12" fill="rgb(16, 185, 129)" />
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="12"
+                stroke="rgba(10, 15, 30, 0.35)"
+                strokeWidth="4"
+              />
+            </pattern>
+          </defs>
+
+          <rect width={width} height={height} fill="rgb(10, 15, 30)" />
+
+          {vectorProvinces.map((prov) => {
+            const isHovered = hoveredCountry === prov.countryCode;
+            const provData = provincesState[prov.id];
+            const currentOwner = provData
+              ? provData.ownerNationId
+              : prov.countryCode;
+
+            const isOccupiedByIran =
+              currentOwner === "IRN" && prov.countryCode !== "IRN";
+
+            let fillValue = getNationColor(currentOwner);
+            if (isOccupiedByIran) {
+              fillValue = "url(#military-stripes-IRN)";
+            } else if (isHovered) {
+              fillValue = "rgb(14, 165, 233)";
+            }
+
+            return (
+              <g key={prov.id}>
+                <path
+                  d={prov.pathData}
+                  fill={fillValue}
+                  stroke="rgba(10, 15, 30, 0.6)"
+                  strokeWidth={isHovered ? "1.5" : "0.5"}
+                  className="transition-all duration-150 cursor-pointer"
+                  onMouseEnter={() => setHoveredCountry(prov.countryCode)}
+                  onMouseLeave={() => setHoveredCountry(null)}
+                  onClick={(e) => handleCountryClick(e, prov.countryCode)}
+                />
+              </g>
+            );
+          })}
+        </svg>
       </div>
 
-      <svg className="absolute w-0 h-0 invisible">
-        <defs>
-          <filter id="organic-map-borders">
-            <feGaussianBlur
-              in="SourceGraphic"
-              stdDeviation="6.5"
-              result="blur"
-            />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 35 -15"
-            />
-          </filter>
-        </defs>
-      </svg>
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full border border-slate-800/80 flex items-center gap-4 shadow-2xl pointer-events-auto z-50">
+        <button
+          onClick={zoomOut}
+          className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center font-bold text-lg select-none transition-colors border border-slate-700/50"
+        >
+          -
+        </button>
+        <span className="text-xs font-mono font-bold text-slate-400 select-none min-w-[32px] text-center">
+          {scale.toFixed(1)}x
+        </span>
+        <button
+          onClick={zoomIn}
+          className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center font-bold text-lg select-none transition-colors border border-slate-700/50"
+        >
+          +
+        </button>
+        <div className="w-px h-6 bg-slate-800" />
+        <button
+          onClick={resetView}
+          className="text-xs bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full font-semibold transition-colors border border-slate-700/50"
+        >
+          Reset View
+        </button>
+      </div>
+
+      {hoveredCountry && (
+        <div className="absolute top-6 left-6 bg-slate-900/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-slate-800/80 text-xs font-semibold shadow-2xl pointer-events-none z-40">
+          <div className="text-slate-400">Target Country</div>
+          <div className="text-lg font-bold text-white mt-0.5">
+            {hoveredCountry}
+          </div>
+          {provincesState[`${hoveredCountry}_P1`]?.ownerNationId === "IRN" &&
+            hoveredCountry !== "IRN" && (
+              <div className="text-[10px] text-emerald-400 mt-1 font-bold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                Occupied territory of Iran
+              </div>
+            )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,32 +1,28 @@
 import { useState, useCallback, useMemo } from "react";
 import { GridGenerator } from "@/engine/map/grid-generator";
-import type { GridCell } from "@/domain/map/grid.schema";
-import type { GeoJsonData } from "@/engine/map/grid-generator";
+import type { GeoJsonData, VectorProvince } from "@/engine/map/grid-generator";
+import type { Province } from "@/domain/map/province.schema";
 
 export function useMapLoader() {
-  const [grid, setGrid] = useState<GridCell[][] | null>(null);
+  const [vectorProvinces, setVectorProvinces] = useState<
+    VectorProvince[] | null
+  >(null);
+  const [provinces, setProvinces] = useState<Record<string, Province> | null>(
+    null,
+  );
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const generator = useMemo(() => new GridGenerator(), []);
 
   const loadMapFromData = useCallback(
-    async (
-      geoJson: GeoJsonData,
-      width: number,
-      height: number,
-      survivingNations: Set<string>,
-    ) => {
+    async (geoJson: GeoJsonData, width: number, height: number) => {
       setLoading(true);
       setError(null);
       try {
-        const generatedGrid = generator.generateGrid(
-          geoJson,
-          width,
-          height,
-          survivingNations,
-        );
-        setGrid(generatedGrid);
+        const payload = generator.generateVectorMap(geoJson, width, height);
+        setVectorProvinces(payload.vectorProvinces);
+        setProvinces(payload.provinces);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Map conversion failed");
       } finally {
@@ -37,7 +33,8 @@ export function useMapLoader() {
   );
 
   return {
-    grid,
+    vectorProvinces,
+    provinces,
     loading,
     error,
     loadMapFromData,
