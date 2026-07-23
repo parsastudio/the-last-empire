@@ -7,12 +7,30 @@ interface GameMapProps {
   grid: GridCell[][];
   width: number;
   height: number;
+  hoveredNationId: string | null;
+  selectedNationId: string | null;
+  onMouseMove: (e: React.MouseEvent<HTMLCanvasElement>) => void;
+  onMouseLeave: () => void;
+  onClick: (e: React.MouseEvent<HTMLCanvasElement>) => void;
 }
 
-export function GameMap({ grid, width, height }: GameMapProps) {
+export function GameMap({
+  grid,
+  width,
+  height,
+  hoveredNationId,
+  selectedNationId,
+  onMouseMove,
+  onMouseLeave,
+  onClick,
+}: GameMapProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const getNationColor = (ownerId: string | null): string => {
+  const getNationColor = (
+    ownerId: string | null,
+    isHovered: boolean,
+    isSelected: boolean,
+  ): string => {
     if (!ownerId) return "rgb(15, 23, 42)";
     let hash = 0;
     for (let i = 0; i < ownerId.length; i++) {
@@ -21,6 +39,13 @@ export function GameMap({ grid, width, height }: GameMapProps) {
     const r = (Math.abs((hash & 0xff0000) >> 16) % 180) + 50;
     const g = (Math.abs((hash & 0x00ff00) >> 8) % 180) + 50;
     const b = (Math.abs(hash & 0x0000ff) % 180) + 50;
+
+    if (isSelected) {
+      return `rgb(${Math.min(255, r + 60)}, ${Math.min(255, g + 60)}, 255)`;
+    }
+    if (isHovered) {
+      return `rgb(${Math.min(255, r + 40)}, ${Math.min(255, g + 40)}, ${Math.min(255, b + 40)})`;
+    }
     return `rgb(${r}, ${g}, ${b})`;
   };
 
@@ -43,21 +68,26 @@ export function GameMap({ grid, width, height }: GameMapProps) {
         if (cell.type === "SEA") {
           ctx.fillStyle = "rgb(10, 15, 30)";
         } else {
-          ctx.fillStyle = getNationColor(cell.ownerId);
+          const isHovered = cell.ownerId === hoveredNationId;
+          const isSelected = cell.ownerId === selectedNationId;
+          ctx.fillStyle = getNationColor(cell.ownerId, isHovered, isSelected);
         }
         ctx.fillRect(x, y, 1, 1);
       }
     }
-  }, [grid, width, height]);
+  }, [grid, width, height, hoveredNationId, selectedNationId]);
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-slate-950 p-6 rounded-2xl border border-slate-800">
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-slate-950 p-4 rounded-3xl border border-slate-800 shadow-2xl shadow-emerald-950/10">
       <div className="relative w-full aspect-[2/1] max-w-5xl">
         <canvas
           ref={canvasRef}
           width={width}
           height={height}
-          className="w-full h-full object-cover"
+          onMouseMove={onMouseMove}
+          onMouseLeave={onMouseLeave}
+          onClick={onClick}
+          className="w-full h-full object-cover cursor-crosshair"
           style={{
             filter: "url(#organic-map-borders)",
           }}
@@ -69,7 +99,7 @@ export function GameMap({ grid, width, height }: GameMapProps) {
           <filter id="organic-map-borders">
             <feGaussianBlur
               in="SourceGraphic"
-              stdDeviation="2.5"
+              stdDeviation="2.2"
               result="blur"
             />
             <feColorMatrix
