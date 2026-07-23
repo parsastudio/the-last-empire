@@ -1,5 +1,5 @@
-import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
-import { calculateStateHash } from "@/core/utils/state-hash";
+import type { GameState } from "@/domain/game/game-state.schema";
+import { calculateStateHash } from "@/domain/shared/state-hash";
 import { SyncDeltaPacker } from "./sync-delta-packer";
 
 export interface StateStorageAdapter {

@@ -1,4 +1,4 @@
-import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameState } from "@/domain/game/game-state.schema";
 
 export interface DeltaPacket {
   gameId: string;

@@ -1,5 +1,5 @@
 import { StateSerializer } from "../state-serializer";
-import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameState } from "@/domain/game/game-state.schema";
 
 export function runSerializerCircularTest(): boolean {
   const serializer = new StateSerializer();

@@ -1,6 +1,6 @@
 import { SyncEngine } from "../sync-engine";
 import type { StateStorageAdapter } from "../sync-engine";
-import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
+import type { GameState } from "@/domain/game/game-state.schema";
 
 export function runSyncEngineTest(): boolean {
   const mockDbAdapter: StateStorageAdapter = {

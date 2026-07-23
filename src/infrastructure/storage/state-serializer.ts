@@ -1,6 +1,6 @@
-import type { GameState } from "@/modules/game-engine/schemas/game-state.schema";
-import { GameStateSchema } from "@/modules/game-engine/schemas/game-state.schema";
-import { GameError } from "@/core/errors/game-error";
+import type { GameState } from "@/domain/game/game-state.schema";
+import { GameStateSchema } from "@/domain/game/game-state.schema";
+import { GameError } from "@/domain/shared/game-error";
 
 export class StateSerializer {
   public serialize(state: GameState): string {
