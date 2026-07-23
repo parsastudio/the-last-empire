@@ -11,7 +11,7 @@ export interface GeoJsonFeature {
   };
   geometry: {
     type: "Polygon" | "MultiPolygon";
-    coordinates: any;
+    coordinates: number[][][] | number[][][][];
   };
 }
 
@@ -53,9 +53,14 @@ export class GridGenerator {
 
       const geometry = feature.geometry;
       if (geometry.type === "Polygon") {
-        this.drawPolygon(ctx, geometry.coordinates, width, height);
+        this.drawPolygon(
+          ctx,
+          geometry.coordinates as number[][][],
+          width,
+          height,
+        );
       } else if (geometry.type === "MultiPolygon") {
-        geometry.coordinates.forEach((polygonCoords: any) => {
+        (geometry.coordinates as number[][][][]).forEach((polygonCoords) => {
           this.drawPolygon(ctx, polygonCoords, width, height);
         });
       }

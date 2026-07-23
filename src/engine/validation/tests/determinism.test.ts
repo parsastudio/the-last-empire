@@ -63,6 +63,7 @@ export function runDeterminismTest(): boolean {
           infrastructureLevel: 1,
           contiguousMainlandSize: 9000,
           isolatedPockets: [],
+          coordinates: [],
         },
         relations: {
           CAN: {
@@ -132,6 +133,7 @@ export function runDeterminismTest(): boolean {
           infrastructureLevel: 1,
           contiguousMainlandSize: 5000,
           isolatedPockets: [],
+          coordinates: [],
         },
         relations: {
           USA: {

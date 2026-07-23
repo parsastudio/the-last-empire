@@ -62,7 +62,7 @@ export class AttackResultProcessor {
       defenderTotalCasualties,
     );
 
-    let logMessage = `Battle occurred. Attacker: ${attacker.name}, Defender: ${defender.name}. `;
+    let logMessage = `Battle occurred. Attacker: ${attacker.name}, Defender: ${defender.name}. Deployed drones: ${deployedDrones}. `;
 
     if (combatResult.attackerWon) {
       const transfer = this.occupationManager.processVictoryOccupation(
@@ -108,6 +108,7 @@ export class AttackResultProcessor {
           id: `pocket-conquered-${defender.id}-${Date.now()}`,
           territorySize: transfer.seizedTerritory,
           territoryIds: [defender.id],
+          coordinates: [],
         };
         finalAttacker.geography.isolatedPockets = [
           ...finalAttacker.geography.isolatedPockets,
@@ -116,7 +117,8 @@ export class AttackResultProcessor {
 
         if (finalDefender.geography.isolatedPockets.length > 0) {
           let remainingLoss = transfer.seizedTerritory;
-          const updatedPockets = [];
+          const updatedPockets: typeof finalDefender.geography.isolatedPockets =
+            [];
           for (const pocket of finalDefender.geography.isolatedPockets) {
             if (remainingLoss <= 0) {
               updatedPockets.push(pocket);

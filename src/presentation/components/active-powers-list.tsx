@@ -3,9 +3,16 @@
 import React, { useMemo } from "react";
 import type { GridCell } from "@/domain/map/grid.schema";
 
+export interface ActivePowerNation {
+  id: string;
+  name: string;
+  gdp: number;
+  population: number;
+}
+
 interface ActivePowersListProps {
   grid: GridCell[][];
-  survivingNations: Record<string, any>;
+  survivingNations: Record<string, ActivePowerNation>;
   hoveredNationId: string | null;
   selectedNationId: string | null;
   onSelectNation: (id: string) => void;

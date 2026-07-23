@@ -1,39 +1,26 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { useMapInteraction } from "@/presentation/hooks/use-map-interaction";
 import { GameMap } from "@/presentation/components/game-map";
 import { ActivePowersList } from "@/presentation/components/active-powers-list";
-import { GeoJsonNationInitializer } from "@/application/game-initializer";
 import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
+import type { GeoJsonData } from "@/engine/map/grid-generator";
+
+const MAP_CDN_URL =
+  "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson";
 
 export default function SelectionDashboardPage() {
   const { grid, loadMapFromData } = useMapLoader();
-
-  const nationInitializer = useMemo(() => new GeoJsonNationInitializer(), []);
-
-  const survivingNations = useMemo(() => {
-    return nationInitializer.assignDeterministicTraits({}, null as any);
-  }, [nationInitializer]);
-
-  const activeSurvivingList = useMemo(() => {
-    const defaultNations: Record<string, any> = {};
-    FALLBACK_WORLD_MAP.features.forEach((feature) => {
-      const props = feature.properties;
-      defaultNations[props.ISO_A3] = {
-        id: props.ISO_A3,
-        name: props.NAME,
-        gdp: props.GDP_MD * 1000000,
-        population: props.POP_EST,
-      };
-    });
-    return defaultNations;
-  }, []);
+  const [activeNations, setActiveNations] = useState<Record<string, any>>({});
+  const [loadingText, setLoadingText] = useState(
+    "Establishing Geopolitical Matrix...",
+  );
 
   const activeKeysSet = useMemo(() => {
-    return new Set(Object.keys(activeSurvivingList));
-  }, [activeSurvivingList]);
+    return new Set(Object.keys(activeNations));
+  }, [activeNations]);
 
   const {
     hoveredNationId,
@@ -50,13 +37,68 @@ export default function SelectionDashboardPage() {
   });
 
   useEffect(() => {
-    loadMapFromData(FALLBACK_WORLD_MAP, 300, 150, activeKeysSet);
-  }, [loadMapFromData, activeKeysSet]);
+    async function fetchAndSetupMap() {
+      try {
+        setLoadingText("Fetching Global Vector Geometries...");
+        const response = await fetch(MAP_CDN_URL);
+        if (!response.ok) {
+          throw new Error("CDN_OFFLINE");
+        }
+        const geoJson: GeoJsonData = await response.json();
+
+        setLoadingText("Filtering Sovereign States and Adjusting Neighbors...");
+        const minPopulation = 3000000;
+        const filteredFeatures = geoJson.features.filter((f) => {
+          const id = f.properties.ISO_A3;
+          const pop = f.properties.POP_EST || 0;
+          return id && id !== "-99" && pop >= minPopulation;
+        });
+
+        const filteredGeoJson: GeoJsonData = {
+          type: "FeatureCollection",
+          features: filteredFeatures,
+        };
+
+        const nationsList: Record<string, any> = {};
+        filteredFeatures.forEach((feature) => {
+          const props = feature.properties;
+          nationsList[props.ISO_A3] = {
+            id: props.ISO_A3,
+            name: props.NAME,
+            gdp: (props.GDP_MD || 1000) * 1000000,
+            population: props.POP_EST || 1000000,
+          };
+        });
+
+        setActiveNations(nationsList);
+        const activeKeys = new Set(Object.keys(nationsList));
+        await loadMapFromData(filteredGeoJson, 300, 150, activeKeys);
+      } catch (err) {
+        setLoadingText("Network Offline. Bootstrapping Local Fallback Map...");
+        const localNationsList: Record<string, any> = {};
+        FALLBACK_WORLD_MAP.features.forEach((feature) => {
+          const props = feature.properties;
+          localNationsList[props.ISO_A3] = {
+            id: props.ISO_A3,
+            name: props.NAME,
+            gdp: props.GDP_MD * 1000000,
+            population: props.POP_EST,
+          };
+        });
+
+        setActiveNations(localNationsList);
+        const fallbackKeys = new Set(Object.keys(localNationsList));
+        await loadMapFromData(FALLBACK_WORLD_MAP, 300, 150, fallbackKeys);
+      }
+    }
+
+    fetchAndSetupMap();
+  }, [loadMapFromData]);
 
   const selectedNationDetails = useMemo(() => {
     if (!selectedNationId) return null;
-    return activeSurvivingList[selectedNationId] || null;
-  }, [selectedNationId, activeSurvivingList]);
+    return activeNations[selectedNationId] || null;
+  }, [selectedNationId, activeNations]);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-white font-sans p-8">
@@ -97,12 +139,10 @@ export default function SelectionDashboardPage() {
               />
             </div>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-slate-900/30 rounded-3xl border border-slate-800 min-h-[300px]">
+            <div className="flex-1 flex items-center justify-center bg-slate-900/30 rounded-3xl border border-slate-800 min-h-[350px]">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-10 h-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-                <p className="text-slate-400 text-sm">
-                  Bootstrapping World Geometries...
-                </p>
+                <p className="text-slate-400 text-sm">{loadingText}</p>
               </div>
             </div>
           )}
@@ -154,10 +194,10 @@ export default function SelectionDashboardPage() {
         </div>
 
         <div className="flex flex-col gap-6">
-          {grid && (
+          {grid && Object.keys(activeNations).length > 0 && (
             <ActivePowersList
               grid={grid}
-              survivingNations={activeSurvivingList}
+              survivingNations={activeNations}
               hoveredNationId={hoveredNationId}
               selectedNationId={selectedNationId}
               onSelectNation={setSelectedNationId}
