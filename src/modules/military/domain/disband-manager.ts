@@ -2,9 +2,11 @@ import type { Nation } from "@/modules/nation/schemas/nation.schema";
 import type { UnitType } from "@/modules/military/schemas/military.schema";
 import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
+import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 
 export class DisbandManager {
   private costCalculator = new UnitCostCalculator();
+  private manpowerManager = new ManpowerManager();
 
   public disbandUnits(
     nation: Nation,
@@ -54,12 +56,18 @@ export class DisbandManager {
         break;
     }
 
+    const maxManpower = this.manpowerManager.getMaxManpower(nation.population);
+    const finalManpower = Math.min(
+      maxManpower,
+      nation.resources.manpower + recoveredManpower,
+    );
+
     return {
       ...nation,
       military: updatedMilitary,
       resources: {
         ...nation.resources,
-        manpower: nation.resources.manpower + recoveredManpower,
+        manpower: finalManpower,
       },
     };
   }

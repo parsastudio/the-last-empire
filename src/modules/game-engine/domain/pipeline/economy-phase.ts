@@ -11,6 +11,7 @@ import { TradeRouteManager } from "@/modules/trade/domain/trade-route-manager";
 import { OverextensionCalculator } from "@/modules/economy/domain/overextension-calculator";
 import { DoctrinesManager } from "@/modules/politics/domain/doctrines-manager";
 import { TributeManager } from "@/modules/diplomacy/domain/tribute-manager";
+import { MarketEngine } from "@/modules/trade/domain/market-engine";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface EconomyCalculators {
@@ -30,6 +31,7 @@ export class EconomyPhase implements TurnPhase {
   private overextensionCalculator = new OverextensionCalculator();
   private doctrinesManager = new DoctrinesManager();
   private tributeManager = new TributeManager();
+  private marketEngine = new MarketEngine();
 
   constructor(calcs?: EconomyCalculators) {
     this.calcs = calcs ?? {
@@ -48,6 +50,11 @@ export class EconomyPhase implements TurnPhase {
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
     const nations = { ...nextState.nations };
+
+    let totalOilDemand = 0;
+    let totalOilSupply = 0;
+    let totalSteelDemand = 0;
+    let totalSteelSupply = 0;
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
@@ -75,7 +82,17 @@ export class EconomyPhase implements TurnPhase {
           oil: updated.resources.oil + resourceIncomeFactor * 5,
           steel: updated.resources.steel + resourceIncomeFactor * 5,
         };
+        totalOilSupply += resourceIncomeFactor * 5;
+        totalSteelSupply += resourceIncomeFactor * 5;
       }
+
+      const oilDemand = Math.ceil(
+        (updated.military.airForce + updated.military.droneMissile) * 0.5,
+      );
+      totalOilDemand += oilDemand;
+
+      const steelDemand = updated.industrialLevel * 2;
+      totalSteelDemand += steelDemand;
 
       const peacefulNeighbors = updated.geography.landNeighbors.filter(
         (nId) => {
@@ -179,6 +196,14 @@ export class EconomyPhase implements TurnPhase {
         }
       }
     }
+
+    nextState.marketPrices = this.marketEngine.updateMarketPrices(
+      nextState.marketPrices,
+      totalOilDemand,
+      totalOilSupply,
+      totalSteelDemand,
+      totalSteelSupply,
+    );
 
     nextState.nations = nations;
     return nextState;

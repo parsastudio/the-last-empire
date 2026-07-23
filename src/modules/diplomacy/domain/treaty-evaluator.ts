@@ -46,6 +46,11 @@ export class TreatyEvaluator {
           return { accepted: true };
         }
         return { accepted: false, reason: "DEFENSE_CAPABLE" };
+      case "IMPROVE_RELATIONS":
+        if (sender.treasury >= 10000) {
+          return { accepted: true };
+        }
+        return { accepted: false, reason: "INSUFFICIENT_SENDER_FUNDS" };
       default:
         return { accepted: false, reason: "UNKNOWN_PROPOSAL" };
     }

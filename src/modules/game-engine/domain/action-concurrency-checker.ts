@@ -20,6 +20,19 @@ export class ActionConcurrencyChecker {
           "Cannot declare war and attack the same nation in the same turn",
         );
       }
+
+      const hasAttackThisTurnOnTarget = actionList.some(
+        (a) =>
+          a.type === "ATTACK" &&
+          a.nationId === newAction.nationId &&
+          a.targetNationId === target,
+      );
+      if (hasAttackThisTurnOnTarget) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot launch multiple attacks on the same nation in a single turn",
+        );
+      }
     }
 
     if (newAction.type === "DECLARE_WAR") {
@@ -34,6 +47,18 @@ export class ActionConcurrencyChecker {
         throw new GameError(
           "INVALID_ACTION",
           "Cannot declare war and attack the same nation in the same turn",
+        );
+      }
+    }
+
+    if (newAction.type === "REQUEST_LOAN") {
+      const hasLoanThisTurn = actionList.some(
+        (a) => a.type === "REQUEST_LOAN" && a.nationId === newAction.nationId,
+      );
+      if (hasLoanThisTurn) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot request multiple loans in a single turn",
         );
       }
     }

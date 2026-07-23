@@ -143,5 +143,15 @@ export class StateValidator {
         );
       }
     }
+
+    if (action.type === "ATTACK") {
+      const relation = sourceNation.relations[action.targetNationId];
+      if (!relation || relation.stance !== "WAR") {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot attack a nation without first being in a state of war",
+        );
+      }
+    }
   }
 }
