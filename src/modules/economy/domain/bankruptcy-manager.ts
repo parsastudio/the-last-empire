@@ -27,8 +27,8 @@ export class BankruptcyManager {
     );
 
     const restructuredDebt = Math.max(
-      Math.floor(nation.nationalDebt * 0.85),
-      Math.floor(nation.gdp * 1.5),
+      Math.floor(nation.nationalDebt * 0.9),
+      Math.floor(nation.gdp * 2.0),
     );
 
     return {

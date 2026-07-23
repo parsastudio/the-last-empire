@@ -13,7 +13,7 @@ export class CorruptionManager {
       delta -= 0.3;
     }
     if (nation.adminBurdenMultiplier > 1.5) {
-      delta += (nation.adminBurdenMultiplier - 1.5) * 0.5;
+      delta += Math.min(1.5, (nation.adminBurdenMultiplier - 1.5) * 0.15);
     }
     const current = nation.government.corruption;
     return Math.max(0, Math.min(100, Math.floor(current + delta)));
@@ -39,7 +39,7 @@ export class CorruptionManager {
         "Not enough treasury to fund anti-corruption drive",
       );
     }
-    const corruptionReduction = Math.floor(investmentAmount / 10000);
+    const corruptionReduction = Math.floor(investmentAmount / 5000);
     const newCorruption = Math.max(
       0,
       nation.government.corruption - corruptionReduction,

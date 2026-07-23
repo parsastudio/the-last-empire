@@ -103,7 +103,9 @@ export class MarketEngine {
     if (amount <= k) {
       totalRevenue = amount * adjustedStartPrice - (amount * (amount - 1)) / 2;
     } else {
-      totalRevenue = k * adjustedStartPrice - (k * (k - 1)) / 2;
+      const variableRevenue = k * adjustedStartPrice - (k * (k - 1)) / 2;
+      const flatRevenue = (amount - k) * this.minPrice;
+      totalRevenue = variableRevenue + flatRevenue;
     }
     const fee = Math.floor(totalRevenue * this.feeRate);
     return Math.max(0, totalRevenue - fee);

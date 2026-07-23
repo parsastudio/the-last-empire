@@ -21,36 +21,36 @@ export class GdpCalculator {
     nation: Nation,
     peacefulNeighborsCount: number,
   ): number {
-    let multiplier = 1.0;
+    let growthRate = 0.0;
     if (nation.taxRate < 15) {
-      multiplier += 0.03;
+      growthRate += 0.003;
     } else if (nation.taxRate > 25) {
-      multiplier -= (nation.taxRate - 25) * 0.008;
+      growthRate -= (nation.taxRate - 25) * 0.0008;
     }
     if (nation.government.stability > 70) {
-      multiplier += 0.02;
+      growthRate += 0.002;
     } else if (nation.government.stability < 30) {
-      multiplier -= 0.05;
+      growthRate -= 0.005;
     }
-    const tradeBonus = peacefulNeighborsCount * 0.015;
-    multiplier += tradeBonus;
+    const tradeBonus = peacefulNeighborsCount * 0.0015;
+    growthRate += tradeBonus;
     const tariffResult = this.tariffCalculator.calculateTariffEffects(
       nation,
       100000,
     );
-    multiplier -= tariffResult.gdpGrowthPenalty;
-    multiplier += this.traitManager.getGdpGrowthModifier(nation);
+    growthRate -= tariffResult.gdpGrowthPenalty;
+    growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
-    multiplier += govTraits.economicGrowthBonus;
+    growthRate += govTraits.economicGrowthBonus * 0.1;
 
     const isMartialLawActive = nation.activeModifiers.some(
       (m) => m.id === "martial-law-active",
     );
     if (isMartialLawActive) {
-      multiplier -= 0.2;
+      growthRate -= 0.02;
     }
 
-    return Math.max(0.5, multiplier);
+    return Math.max(0.95, 1.0 + growthRate);
   }
 
   public updateNationGdp(

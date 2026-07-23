@@ -160,7 +160,14 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       }
 
       const sacrificedManpower = Math.floor(nation.resources.manpower * 0.15);
-      const gdpBoost = Math.floor(nation.gdp * 0.2);
+
+      const activeMod: ActiveModifier = {
+        id: "industrial-mobilization-active",
+        name: "Industrial Mobilization",
+        effectType: "GDP_GROWTH_MULT",
+        magnitude: 0.2,
+        turnsRemaining: 5,
+      };
 
       const cooldown: ActiveModifier = {
         id: "cooldown-industrial-mobilization",
@@ -173,7 +180,6 @@ export class ActivateAbilityActionHandler implements ActionHandler {
       const updatedNations = { ...state.nations };
       updatedNations[nationId] = {
         ...nation,
-        gdp: nation.gdp + gdpBoost,
         resources: {
           ...nation.resources,
           manpower: nation.resources.manpower - sacrificedManpower,
@@ -182,7 +188,7 @@ export class ActivateAbilityActionHandler implements ActionHandler {
           ...nation.government,
           stability: Math.max(0, nation.government.stability - 10),
         },
-        activeModifiers: [...nation.activeModifiers, cooldown],
+        activeModifiers: [...nation.activeModifiers, activeMod, cooldown],
       };
 
       return {

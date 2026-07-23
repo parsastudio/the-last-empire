@@ -5,9 +5,11 @@ import type {
 } from "@/modules/military/schemas/military.schema";
 import { GameError } from "@/core/errors/game-error";
 import { UnitCostCalculator } from "./unit-cost-calculator";
+import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 
 export class RecruitmentQueueManager {
   private costCalculator = new UnitCostCalculator();
+  private manpowerManager = new ManpowerManager();
 
   public enqueueOrder(
     nation: Nation,
@@ -107,13 +109,18 @@ export class RecruitmentQueueManager {
     const manpowerRefund = order.manpowerRequired;
 
     const newQueue = nation.recruitmentQueue.filter((o) => o.id !== orderId);
+    const maxManpower = this.manpowerManager.getMaxManpower(nation.population);
+    const finalManpower = Math.min(
+      maxManpower,
+      nation.resources.manpower + manpowerRefund,
+    );
 
     return {
       ...nation,
       treasury: nation.treasury + moneyRefund,
       resources: {
         ...nation.resources,
-        manpower: nation.resources.manpower + manpowerRefund,
+        manpower: finalManpower,
       },
       recruitmentQueue: newQueue,
     };
