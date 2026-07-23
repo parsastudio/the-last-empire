@@ -16,6 +16,7 @@ import { TradeActionHandler } from "./trade-action-handler";
 import { DiplomacyActionHandler } from "./diplomacy-action-handler";
 import { EspionageActionHandler } from "./espionage-action-handler";
 import { RepayDebtActionHandler } from "./repay-debt-action-handler";
+import { ActivateAbilityActionHandler } from "./activate-ability-action-handler";
 
 export class ActionRouter {
   private handlers: Map<string, ActionHandler> = new Map();
@@ -55,6 +56,7 @@ export class ActionRouter {
     this.register("FUND_ESPIONAGE", new EspionageActionHandler());
     this.register("COVERT_OPERATIONS", new EspionageActionHandler());
     this.register("REPAY_DEBT", new RepayDebtActionHandler());
+    this.register("ACTIVATE_ABILITY", new ActivateAbilityActionHandler());
   }
 }
 

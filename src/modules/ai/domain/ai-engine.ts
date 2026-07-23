@@ -8,9 +8,11 @@ export class AIEngine {
 
   public generateTurnActions(state: GameState): GameAction[] {
     const actions: GameAction[] = [];
+    const sortedIds = Object.keys(state.nations).sort();
 
-    for (const [id, nation] of Object.entries(state.nations)) {
-      if (!nation.isAlive || !nation.isAi) {
+    for (const id of sortedIds) {
+      const nation = state.nations[id];
+      if (!nation || !nation.isAlive || !nation.isAi) {
         continue;
       }
 

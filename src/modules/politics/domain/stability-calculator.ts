@@ -5,6 +5,11 @@ export class StabilityCalculator {
   private governmentSystem = new GovernmentSystem();
 
   public calculateTurnStability(nation: Nation): number {
+    const isMartialLawActive = nation.activeModifiers.some(
+      (m) => m.id === "martial-law-active",
+    );
+    const currentStability = nation.government.stability;
+
     let delta = 0;
     if (nation.taxRate > 25) {
       delta -= (nation.taxRate - 25) * 0.5;
@@ -21,13 +26,17 @@ export class StabilityCalculator {
       delta -= (nation.government.corruption - 30) * 0.1;
     }
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
-    const currentStability = nation.government.stability;
     const targetStability = govTraits.baseStability;
     const alignmentFactor = (targetStability - currentStability) * 0.05;
     const newStability = Math.max(
       0,
       Math.min(100, currentStability + delta + alignmentFactor),
     );
+
+    if (isMartialLawActive && newStability < currentStability) {
+      return currentStability;
+    }
+
     return Math.floor(newStability);
   }
 

@@ -52,6 +52,13 @@ export class EconomyPhase implements TurnPhase {
 
       let updated = { ...nation };
 
+      const isMartialLawActive = updated.activeModifiers.some(
+        (m) => m.id === "martial-law-active",
+      );
+      if (isMartialLawActive) {
+        updated.warExhaustion = Math.min(100, updated.warExhaustion + 5);
+      }
+
       updated.adminBurdenMultiplier =
         this.overextensionCalculator.calculateOverextension(updated);
 
