@@ -82,7 +82,7 @@ export class DomesticCrisisManager {
       },
       government: {
         ...nation.government,
-        stability: Math.min(30, nation.government.stability + 15),
+        stability: Math.min(100, nation.government.stability + 30),
       },
     };
   }

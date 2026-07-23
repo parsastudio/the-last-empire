@@ -24,8 +24,7 @@ export class PopulationGrowthEngine {
       growthRate -= 0.006;
     }
 
-    const change = Math.floor(nation.population * growthRate);
-    return change;
+    return Math.floor(nation.population * growthRate);
   }
 
   public updatePopulation(nation: Nation, isAtWar: boolean): number {

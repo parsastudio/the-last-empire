@@ -11,10 +11,7 @@ export class EspionageManager {
     attacker: Nation,
     defender: Nation,
     relation: RelationProfile,
-    operationType:
-      | "SABOTAGE_INDUSTRY"
-      | "INSTIGATE_UNREST"
-      | "MILITARY_INTEL_HEIST",
+    operationType: string,
     randomVal: number,
   ): EspionageResult {
     const baseChance = this.getBaseChance(operationType);
@@ -46,11 +43,11 @@ export class EspionageManager {
     const nextStrength = Math.max(0, relation.spyNetworkStrength - 2);
     let nextIntel = relation.intelLevel;
 
-    if (nextStrength < 15 && relation.intelLevel > 0) {
+    if (nextStrength < 15) {
       nextIntel = 0;
-    } else if (nextStrength < 40 && relation.intelLevel > 1) {
+    } else if (nextStrength < 40) {
       nextIntel = 1;
-    } else if (nextStrength < 70 && relation.intelLevel > 2) {
+    } else if (nextStrength < 70) {
       nextIntel = 2;
     }
 
@@ -62,15 +59,15 @@ export class EspionageManager {
   }
 
   private getBaseChance(type: string): number {
-    switch (type) {
-      case "MILITARY_INTEL_HEIST":
-        return 55;
-      case "INSTIGATE_UNREST":
-        return 40;
-      case "SABOTAGE_INDUSTRY":
-        return 35;
-      default:
-        return 30;
+    if (type === "MILITARY_INTEL_HEIST") {
+      return 55;
     }
+    if (type === "INSTIGATE_UNREST") {
+      return 40;
+    }
+    if (type === "SABOTAGE_INDUSTRY") {
+      return 35;
+    }
+    return 30;
   }
 }

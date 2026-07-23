@@ -53,6 +53,17 @@ export class EconomyPhase implements TurnPhase {
 
       let updated = { ...nation };
 
+      const resourceIncomeFactor = Math.floor(
+        updated.geography.territorySize / 1000,
+      );
+      if (resourceIncomeFactor > 0) {
+        updated.resources = {
+          ...updated.resources,
+          oil: updated.resources.oil + resourceIncomeFactor * 5,
+          steel: updated.resources.steel + resourceIncomeFactor * 5,
+        };
+      }
+
       const peacefulNeighbors = updated.geography.landNeighbors.filter(
         (nId) => {
           const rel = updated.relations[nId];
@@ -72,6 +83,15 @@ export class EconomyPhase implements TurnPhase {
         updated,
         activeWar,
       );
+
+      const density =
+        updated.population / (updated.geography.territorySize || 1);
+      if (density > 1500) {
+        updated.government = {
+          ...updated.government,
+          stability: Math.max(0, updated.government.stability - 2),
+        };
+      }
 
       const growth = this.calcs.manpowerManager.calculateGrowth(updated);
       updated = this.calcs.manpowerManager.restoreManpower(updated, growth);

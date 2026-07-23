@@ -31,11 +31,14 @@ export class UpkeepCalculator {
         traitMultiplier,
     );
 
-    const infrastructure = Math.floor(
+    const baseInfraUpkeep =
       nation.geography.infrastructureLevel *
-        nation.upkeep.infrastructureUpkeep *
-        1000 *
-        inflationMultiplier,
+      nation.upkeep.infrastructureUpkeep *
+      1000 *
+      inflationMultiplier;
+
+    const infrastructure = Math.floor(
+      baseInfraUpkeep * (1 + nation.geography.territorySize * 0.0001),
     );
 
     const total = totalMilitaryCost + infrastructure;

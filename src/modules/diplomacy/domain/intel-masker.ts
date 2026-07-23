@@ -87,18 +87,17 @@ export class IntelMasker {
   }
 
   private getErrorFactor(intelLevel: number): number {
-    switch (intelLevel) {
-      case 2:
-        return 0.1;
-      case 1:
-        return 0.35;
-      default:
-        return 0.7;
+    if (intelLevel === 2) {
+      return 0.1;
     }
+    if (intelLevel === 1) {
+      return 0.35;
+    }
+    return 0.7;
   }
 
   private deterministicRandom(seed: number): number {
-    const x = Math.sin(seed++) * 10000;
+    const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
   }
 }

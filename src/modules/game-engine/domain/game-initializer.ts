@@ -39,9 +39,21 @@ export class GameInitializer {
         assignedTraits.push(trait2);
       }
 
+      const updatedRelations = { ...nation.relations };
+      for (const [targetId, relation] of Object.entries(updatedRelations)) {
+        updatedRelations[targetId] = {
+          ...relation,
+          trust: 0,
+          tension: 0,
+          spyNetworkStrength: 0,
+          intelLevel: 0,
+        };
+      }
+
       updated[id] = {
         ...nation,
         traits: assignedTraits,
+        relations: updatedRelations,
       };
     }
 

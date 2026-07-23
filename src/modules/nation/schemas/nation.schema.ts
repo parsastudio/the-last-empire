@@ -4,10 +4,7 @@ import {
   ResourcesSchema,
   UpkeepRatesSchema,
 } from "@/modules/economy/schemas/economy.schema";
-import {
-  MilitaryStackSchema,
-  RecruitmentOrderSchema,
-} from "@/modules/military/schemas/military.schema";
+import { MilitaryStackSchema } from "@/modules/military/schemas/military.schema";
 import { RelationProfileSchema } from "@/modules/diplomacy/schemas/diplomacy.schema";
 import { ImfLoanSchema } from "@/modules/trade/schemas/trade.schema";
 
@@ -56,7 +53,7 @@ export const NationSchema = z.object({
   resources: ResourcesSchema,
   upkeep: UpkeepRatesSchema,
   military: MilitaryStackSchema,
-  recruitmentQueue: z.array(RecruitmentOrderSchema),
+  recruitmentQueue: z.array(z.any()),
   geography: GeographySchema,
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),

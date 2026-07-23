@@ -39,14 +39,15 @@ export class AIDiplomacyLogic {
         }
       }
 
-      const relativePower =
-        this.calculatePower(nation) / (this.calculatePower(target) || 1);
+      const ownPower = this.calculatePower(nation);
+      const targetPower = this.calculatePower(target);
+      const relativePower = ownPower / (targetPower || 1);
 
       if (
         personality === "AGGRESSIVE" &&
-        relation.trust < -20 &&
+        relation.trust < -2 &&
         relation.stance !== "WAR" &&
-        relativePower > 2.0
+        relativePower >= 2.0
       ) {
         actions.push({
           id: `ai-backstab-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
