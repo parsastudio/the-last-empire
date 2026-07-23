@@ -34,6 +34,11 @@ export class StabilityCalculator {
     );
 
     if (isMartialLawActive && newStability < currentStability) {
+      if (nation.taxRate > 30) {
+        return Math.floor(
+          Math.max(0, currentStability - (nation.taxRate - 30) * 0.5),
+        );
+      }
       return currentStability;
     }
 

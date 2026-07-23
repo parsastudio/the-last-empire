@@ -21,13 +21,6 @@ export class GdpCalculator {
     nation: Nation,
     peacefulNeighborsCount: number,
   ): number {
-    const isMartialLawActive = nation.activeModifiers.some(
-      (m) => m.id === "martial-law-active",
-    );
-    if (isMartialLawActive) {
-      return 1.0;
-    }
-
     let multiplier = 1.0;
     if (nation.taxRate < 15) {
       multiplier += 0.03;
@@ -49,6 +42,14 @@ export class GdpCalculator {
     multiplier += this.traitManager.getGdpGrowthModifier(nation);
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     multiplier += govTraits.economicGrowthBonus;
+
+    const isMartialLawActive = nation.activeModifiers.some(
+      (m) => m.id === "martial-law-active",
+    );
+    if (isMartialLawActive) {
+      multiplier -= 0.2;
+    }
+
     return Math.max(0.5, multiplier);
   }
 

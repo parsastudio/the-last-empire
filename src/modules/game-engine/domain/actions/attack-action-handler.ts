@@ -208,14 +208,16 @@ export class AttackActionHandler implements ActionHandler {
       finalAttacker = transfer.winner;
       finalDefender = transfer.loser;
 
-      const isolatedPocketSize =
-        defender.geography.contiguousMainlandSize * 0.25;
-      const targetLoot = this.lootCalculator.calculateLoot(
-        defender.treasury,
-        isolatedPocketSize,
-        defender.geography.contiguousMainlandSize,
-        0.25,
-      );
+      let targetLoot = 0;
+      if (finalDefender.geography.isolatedPockets.length > 0) {
+        const actualPocket = finalDefender.geography.isolatedPockets[0];
+        targetLoot = this.lootCalculator.calculateLoot(
+          finalDefender.treasury,
+          actualPocket.territorySize,
+          finalDefender.geography.contiguousMainlandSize,
+          0.25,
+        );
+      }
 
       finalAttacker.treasury += targetLoot;
       finalDefender.treasury = Math.max(0, finalDefender.treasury - targetLoot);

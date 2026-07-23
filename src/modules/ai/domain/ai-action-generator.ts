@@ -8,6 +8,7 @@ import { AIPlanner } from "./planners/ai-planner";
 import { BudgetPlanningStep } from "./planners/budget-planning-step";
 import { MilitaryPlanningStep } from "./planners/military-planning-step";
 import { DiplomacyPlanningStep } from "./planners/diplomacy-planning-step";
+import { TradePlanningStep } from "./planners/trade-planning-step";
 
 export class AIActionGenerator {
   private personalityManager = new AIPersonality();
@@ -19,6 +20,7 @@ export class AIActionGenerator {
     new BudgetPlanningStep(),
     new MilitaryPlanningStep(),
     new DiplomacyPlanningStep(),
+    new TradePlanningStep(),
   ];
 
   public generateActions(

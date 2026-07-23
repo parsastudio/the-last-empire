@@ -3,10 +3,10 @@ import type { Nation } from "@/modules/nation/schemas/nation.schema";
 export class GeographyDistanceCalculator {
   public calculateDistance(
     originId: string,
-    targetId: string,
+    originTargetId: string,
     allNations: Record<string, Nation>,
   ): number {
-    if (originId === targetId) {
+    if (originId === originTargetId) {
       return 0;
     }
 
@@ -15,7 +15,7 @@ export class GeographyDistanceCalculator {
 
     while (queue.length > 0) {
       const [currentId, distance] = queue.shift()!;
-      if (currentId === targetId) {
+      if (currentId === originTargetId) {
         return distance;
       }
 
@@ -37,6 +37,6 @@ export class GeographyDistanceCalculator {
       }
     }
 
-    return 5;
+    return 15;
   }
 }
