@@ -49,9 +49,54 @@ export function useMilitary(
     return researchManager.getResearchCost(nation.military.techLevel);
   }, [nation, researchManager]);
 
+  const investResearch = useCallback(() => {
+    if (!nation) {
+      return;
+    }
+    dispatch({
+      id: `research-${Date.now()}`,
+      nationId: nation.id,
+      type: "INVEST_RESEARCH",
+    });
+  }, [nation, dispatch]);
+
+  const disbandUnit = useCallback(
+    (unitType: UnitType, quantity: number) => {
+      if (!nation) {
+        return;
+      }
+      dispatch({
+        id: `disband-${Date.now()}`,
+        nationId: nation.id,
+        type: "DISBAND_UNIT",
+        unitType,
+        quantity,
+      });
+    },
+    [nation, dispatch],
+  );
+
+  const cancelRecruitment = useCallback(
+    (orderId: string) => {
+      if (!nation) {
+        return;
+      }
+      dispatch({
+        id: `cancel-${Date.now()}`,
+        nationId: nation.id,
+        type: "CANCEL_RECRUITMENT",
+        orderId,
+      });
+    },
+    [nation, dispatch],
+  );
+
   return {
     getUnitCostDetails,
     recruitUnit,
     getResearchUpgradeCost,
+    investResearch,
+    disbandUnit,
+    cancelRecruitment,
   };
 }

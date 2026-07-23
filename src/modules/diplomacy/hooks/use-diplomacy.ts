@@ -74,10 +74,26 @@ export function useDiplomacy(
     [nation, dispatch],
   );
 
+  const requestLoan = useCallback(
+    (amount: number) => {
+      if (!nation) {
+        return;
+      }
+      dispatch({
+        id: `loan-${Date.now()}`,
+        nationId: nation.id,
+        type: "REQUEST_LOAN",
+        amount,
+      });
+    },
+    [nation, dispatch],
+  );
+
   return {
     proposeTreaty,
     declareWar,
     fundProxyInfluence,
     unlockDoctrine,
+    requestLoan,
   };
 }

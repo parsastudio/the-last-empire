@@ -22,7 +22,23 @@ export function usePolitics(
     [nation, dispatch],
   );
 
+  const fundAntiCorruptionDrive = useCallback(
+    (amount: number) => {
+      if (!nation) {
+        return;
+      }
+      dispatch({
+        id: `anti-corruption-${Date.now()}`,
+        nationId: nation.id,
+        type: "ANTI_CORRUPTION_DRIVE",
+        amount,
+      });
+    },
+    [nation, dispatch],
+  );
+
   return {
     changeGovernment,
+    fundAntiCorruptionDrive,
   };
 }

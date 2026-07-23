@@ -15,6 +15,7 @@ export function runTradePricingTest(): boolean {
     resources: {
       oil: 0,
       steel: 0,
+      manpower: 500,
     },
   } as unknown as Nation;
 
