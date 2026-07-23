@@ -24,12 +24,30 @@ export class GeographyDistanceCalculator {
         continue;
       }
 
+      const pocketTargetIds = currentNation.geography.isolatedPockets.flatMap(
+        (p) => p.territoryIds,
+      );
+
+      const pocketNeighbors = pocketTargetIds.flatMap((id) => {
+        const targetNation = allNations[id];
+        if (!targetNation) {
+          return [];
+        }
+        return [
+          ...targetNation.geography.landNeighbors,
+          ...targetNation.geography.seaNeighbors,
+        ];
+      });
+
       const neighbors = [
         ...currentNation.geography.landNeighbors,
         ...currentNation.geography.seaNeighbors,
+        ...pocketNeighbors,
       ];
 
-      for (const neighborId of neighbors) {
+      const uniqueNeighbors = Array.from(new Set(neighbors));
+
+      for (const neighborId of uniqueNeighbors) {
         if (!visited.has(neighborId)) {
           visited.add(neighborId);
           queue.push([neighborId, distance + 1]);

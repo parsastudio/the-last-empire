@@ -22,6 +22,13 @@ export const TurnLogEntrySchema = z.object({
     .optional(),
 });
 
+export const TurnTradeVolumeSchema = z.object({
+  oilBought: z.number().nonnegative(),
+  oilSold: z.number().nonnegative(),
+  steelBought: z.number().nonnegative(),
+  steelSold: z.number().nonnegative(),
+});
+
 export const GameStateSchema = z.object({
   gameId: z.string(),
   currentTurn: z.number().nonnegative(),
@@ -35,8 +42,10 @@ export const GameStateSchema = z.object({
   turnLogs: z.array(TurnLogEntrySchema),
   eventFlags: z.record(z.string(), z.boolean()),
   peacefulTurnsCount: z.number().nonnegative().optional(),
+  turnTradeVolume: TurnTradeVolumeSchema.optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;
 export type TurnLogEntry = z.infer<typeof TurnLogEntrySchema>;
 export type GameState = z.infer<typeof GameStateSchema>;
+export type TurnTradeVolume = z.infer<typeof TurnTradeVolumeSchema>;

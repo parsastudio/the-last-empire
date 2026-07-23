@@ -53,10 +53,17 @@ export class EconomyPhase implements TurnPhase {
     const nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
-    let totalOilDemand = 0;
-    let totalOilSupply = 0;
-    let totalSteelDemand = 0;
-    let totalSteelSupply = 0;
+    const tradeVolume = nextState.turnTradeVolume ?? {
+      oilBought: 0,
+      oilSold: 0,
+      steelBought: 0,
+      steelSold: 0,
+    };
+
+    let totalOilDemand = tradeVolume.oilBought;
+    let totalOilSupply = tradeVolume.oilSold;
+    let totalSteelDemand = tradeVolume.steelBought;
+    let totalSteelSupply = tradeVolume.steelSold;
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
@@ -166,7 +173,7 @@ export class EconomyPhase implements TurnPhase {
       updated = this.resourceDependencyManager.consumeTurnResources(updated);
 
       const hasReachedDebtLimit =
-        this.calcs.bankruptcyManager.isBankrupt(updated);
+        this.calcs.bankruptcyManager.hasReachedDebtLimit(updated);
       const isDeficitIncurred = financial.netIncome < 0;
 
       if (hasReachedDebtLimit && isDeficitIncurred && updated.treasury <= 0) {
@@ -219,6 +226,13 @@ export class EconomyPhase implements TurnPhase {
       totalSteelDemand,
       totalSteelSupply,
     );
+
+    nextState.turnTradeVolume = {
+      oilBought: 0,
+      oilSold: 0,
+      steelBought: 0,
+      steelSold: 0,
+    };
 
     nextState.nations = nations;
     return nextState;

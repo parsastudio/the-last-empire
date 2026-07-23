@@ -9,7 +9,7 @@ export interface FinancialUpdateResult {
 }
 
 export class DebtManager {
-  private readonly interestRate = 0.015;
+  private readonly interestRate = 0.003;
 
   public processFinancials(
     nation: Nation,

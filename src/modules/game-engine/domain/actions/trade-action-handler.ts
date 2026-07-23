@@ -27,6 +27,29 @@ export class TradeActionHandler implements ActionHandler {
         );
       }
     }
+
+    const currentVolume = state.turnTradeVolume ?? {
+      oilBought: 0,
+      oilSold: 0,
+      steelBought: 0,
+      steelSold: 0,
+    };
+
+    const updatedVolume = { ...currentVolume };
+    if (tradeAction.resourceType === "oil") {
+      if (tradeAction.isBuy) {
+        updatedVolume.oilBought += tradeAction.amount;
+      } else {
+        updatedVolume.oilSold += tradeAction.amount;
+      }
+    } else if (tradeAction.resourceType === "steel") {
+      if (tradeAction.isBuy) {
+        updatedVolume.steelBought += tradeAction.amount;
+      } else {
+        updatedVolume.steelSold += tradeAction.amount;
+      }
+    }
+
     if (tradeAction.isBuy) {
       const result = this.marketEngine.buyResource(
         nation,
@@ -37,6 +60,7 @@ export class TradeActionHandler implements ActionHandler {
       return {
         ...state,
         marketPrices: result.updatedMarketPrices,
+        turnTradeVolume: updatedVolume,
         nations: {
           ...state.nations,
           [action.nationId]: result.updatedNation,
@@ -52,6 +76,7 @@ export class TradeActionHandler implements ActionHandler {
       return {
         ...state,
         marketPrices: result.updatedMarketPrices,
+        turnTradeVolume: updatedVolume,
         nations: {
           ...state.nations,
           [action.nationId]: result.updatedNation,

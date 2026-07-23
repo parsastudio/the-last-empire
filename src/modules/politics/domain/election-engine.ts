@@ -21,9 +21,19 @@ export class ElectionEngine {
     if (currentTurn - lastElection < this.electionIntervalTurns) {
       return { electionHeld: false, incumbentWon: true, updatedNation: nation };
     }
-    const incumbentWinChance =
-      (nation.government.stability / 100) * 0.7 +
-      (100 - nation.taxRate) * 0.003;
+
+    let taxPenalty = 0;
+    if (nation.taxRate > 25) {
+      taxPenalty = (nation.taxRate - 25) * 0.015;
+    }
+
+    const incumbentWinChance = Math.max(
+      0,
+      (nation.government.stability / 100) * 0.6 +
+        (1.0 - nation.taxRate / 100) * 0.4 -
+        taxPenalty,
+    );
+
     const incumbentWon = randomVal < incumbentWinChance;
     let newTaxRate = nation.taxRate;
     let newStability = nation.government.stability;

@@ -163,6 +163,14 @@ export class StateValidator {
     }
 
     if (action.type === "ATTACK") {
+      const totalUnits =
+        action.infantry + action.airForce + action.droneMissile;
+      if (totalUnits <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Must deploy at least one military unit to launch an attack",
+        );
+      }
       const relation = sourceNation.relations[action.targetNationId];
       if (!relation || relation.stance !== "WAR") {
         throw new GameError(

@@ -6,16 +6,20 @@ import type {
 export class BankruptcyManager {
   private readonly debtToGdpLimitRatio = 2.5;
 
+  public hasReachedDebtLimit(nation: Nation): boolean {
+    if (nation.gdp <= 0) {
+      return nation.nationalDebt > 0;
+    }
+    return nation.nationalDebt / nation.gdp >= this.debtToGdpLimitRatio;
+  }
+
   public isBankrupt(nation: Nation): boolean {
     if (
       nation.activeModifiers.some((m) => m.id === "bankruptcy-debt-holiday")
     ) {
       return false;
     }
-    if (nation.gdp <= 0) {
-      return nation.nationalDebt > 0;
-    }
-    return nation.nationalDebt / nation.gdp >= this.debtToGdpLimitRatio;
+    return this.hasReachedDebtLimit(nation);
   }
 
   public applyBankruptcy(nation: Nation): Nation {

@@ -15,9 +15,9 @@ export class OverextensionCalculator {
     let multiplier = territoryFactor * populationFactor;
 
     if (territory > 5000) {
-      multiplier += Math.pow(territory / 5000, 1.3) - 1.0;
+      multiplier += Math.log10(territory / 5000) * 1.5;
     }
 
-    return Math.min(50.0, Number(multiplier.toFixed(2)));
+    return Math.min(6.0, Number(multiplier.toFixed(2)));
   }
 }

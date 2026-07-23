@@ -9,6 +9,10 @@ export class AIDiplomacyLogic {
   ): GameAction[] {
     const actions: GameAction[] = [];
     for (const [targetId, relation] of Object.entries(nation.relations)) {
+      if (actions.length >= 2) {
+        break;
+      }
+
       const target = allNations[targetId];
       if (!target || !target.isAlive) {
         continue;
