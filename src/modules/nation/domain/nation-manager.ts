@@ -5,7 +5,6 @@ export class NationManager {
     return (
       nation.military.infantry +
       nation.military.airForce +
-      nation.military.navy +
       nation.military.droneMissile
     );
   }
@@ -14,7 +13,6 @@ export class NationManager {
     return (
       nation.military.infantry * 1.0 +
       nation.military.airForce * 3.0 +
-      nation.military.navy * 2.0 +
       nation.military.droneMissile * 2.5
     );
   }

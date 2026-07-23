@@ -34,9 +34,9 @@ export class EventEffectsApplier {
     }
 
     if (effects.reputationDelta) {
-      updated.reputation = Math.max(
+      updated.globalReputation = Math.max(
         -100,
-        Math.min(100, updated.reputation + effects.reputationDelta),
+        Math.min(100, updated.globalReputation + effects.reputationDelta),
       );
     }
 
