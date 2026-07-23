@@ -11,6 +11,11 @@ export class ScoreFormulationStage implements CombatStage {
     const attackerAttackBonus =
       1.0 + this.traitManager.getCombatAttackBonus(context.attacker);
 
+    const isNeighbor =
+      context.attacker.geography.landNeighbors.includes(context.defender.id) ||
+      context.attacker.geography.seaNeighbors.includes(context.defender.id);
+    const distanceMultiplier = isNeighbor ? 1.0 : 0.85;
+
     const attackerBase =
       (context.attackForce.infantry * 1.0 +
         context.attackForce.airForce * 3.0 +
@@ -18,7 +23,8 @@ export class ScoreFormulationStage implements CombatStage {
         context.attackForce.droneMissile * 2.5) *
       (1 + context.attackForce.techLevel * 0.15) *
       (1 + context.attackForce.experience * 0.005) *
-      attackerAttackBonus;
+      attackerAttackBonus *
+      distanceMultiplier;
 
     const defenderBase =
       (context.defenderInfantryAfterDrone * 1.0 +

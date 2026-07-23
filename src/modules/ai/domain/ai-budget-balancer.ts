@@ -45,6 +45,13 @@ export class AIBudgetBalancer {
       antiCorruptionBudget: Math.floor(totalFunds * corruptionRatio),
       reserveFunds: Math.floor(totalFunds * reserveRatio),
     };
+
+    if (nation.adminBurdenMultiplier > 1.8) {
+      const shift = Math.floor(baseAllocation.reserveFunds * 0.3);
+      baseAllocation.antiCorruptionBudget += shift;
+      baseAllocation.reserveFunds -= shift;
+    }
+
     return this.budgetStrategy.applyTraitFocus(nation, baseAllocation);
   }
 }

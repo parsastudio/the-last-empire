@@ -25,7 +25,7 @@ export class GdpCalculator {
     if (nation.taxRate < 15) {
       multiplier += 0.03;
     } else if (nation.taxRate > 25) {
-      multiplier -= 0.04;
+      multiplier -= (nation.taxRate - 25) * 0.008;
     }
     if (nation.government.stability > 70) {
       multiplier += 0.02;

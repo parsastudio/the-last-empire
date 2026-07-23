@@ -31,6 +31,8 @@ export function runDeterminismTest(): boolean {
         warExhaustion: 0,
         reputation: 50,
         industrialLevel: 1,
+        adminBurdenMultiplier: 1.0,
+        consecutiveDeficitTurns: 0,
         government: {
           type: "DEMOCRACY",
           stability: 80,
@@ -97,6 +99,8 @@ export function runDeterminismTest(): boolean {
         warExhaustion: 0,
         reputation: 60,
         industrialLevel: 1,
+        adminBurdenMultiplier: 1.0,
+        consecutiveDeficitTurns: 0,
         government: {
           type: "DEMOCRACY",
           stability: 85,

@@ -39,6 +39,14 @@ export class AIDiplomacyLogic {
       const ownPower = this.calculatePower(nation);
       const targetPower = this.calculatePower(target);
       const relativePower = ownPower / (targetPower || 1);
+
+      const isNeighbor =
+        nation.geography.landNeighbors.includes(targetId) ||
+        nation.geography.seaNeighbors.includes(targetId);
+      if (!isNeighbor && nation.treasury < 300000) {
+        continue;
+      }
+
       if (
         personality === "AGGRESSIVE" &&
         relation.trust < -2 &&

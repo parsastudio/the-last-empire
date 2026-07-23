@@ -8,6 +8,7 @@ import { PopulationGrowthEngine } from "@/modules/economy/domain/population-grow
 import { ManpowerManager } from "@/modules/economy/domain/manpower-manager";
 import { TariffCalculator } from "@/modules/trade/domain/tariff-calculator";
 import { TradeRouteManager } from "@/modules/trade/domain/trade-route-manager";
+import { OverextensionCalculator } from "@/modules/economy/domain/overextension-calculator";
 import { TurnPhase, PipelineContext } from "./turn-phase";
 
 export interface EconomyCalculators {
@@ -24,6 +25,7 @@ export interface EconomyCalculators {
 
 export class EconomyPhase implements TurnPhase {
   private calcs: EconomyCalculators;
+  private overextensionCalculator = new OverextensionCalculator();
 
   constructor(calcs?: EconomyCalculators) {
     this.calcs = calcs ?? {
@@ -49,6 +51,9 @@ export class EconomyPhase implements TurnPhase {
       }
 
       let updated = { ...nation };
+
+      updated.adminBurdenMultiplier =
+        this.overextensionCalculator.calculateOverextension(updated);
 
       const resourceIncomeFactor = Math.floor(
         updated.geography.territorySize / 1000,
@@ -113,6 +118,16 @@ export class EconomyPhase implements TurnPhase {
       );
 
       updated = financial.updatedNation;
+
+      if (updated.treasury <= 0) {
+        updated.consecutiveDeficitTurns += 1;
+      } else {
+        updated.consecutiveDeficitTurns = 0;
+      }
+
+      if (updated.consecutiveDeficitTurns >= 3) {
+        updated = this.calcs.bankruptcyManager.applyDisintegration(updated);
+      }
 
       if (this.calcs.bankruptcyManager.isBankrupt(updated)) {
         updated = this.calcs.bankruptcyManager.applyBankruptcy(updated);

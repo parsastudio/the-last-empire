@@ -9,6 +9,7 @@ import { RecruitmentQueueManager } from "@/modules/military/domain/recruitment-q
 import { CombatResolver } from "@/modules/combat/domain/combat-resolver";
 import { TerritoryOccupationManager } from "@/modules/combat/domain/territory-occupation-manager";
 import { WarExhaustionManager } from "@/modules/combat/domain/war-exhaustion-manager";
+import { GeographyDistanceCalculator } from "@/modules/economy/domain/geography-distance-calculator";
 import { SeededRandom } from "@/core/math/seeded-random";
 import { GameError } from "@/core/errors/game-error";
 import { ActionHandler } from "./action-handler";
@@ -96,6 +97,7 @@ export class AttackActionHandler implements ActionHandler {
   private combatResolver = new CombatResolver();
   private occupationManager = new TerritoryOccupationManager();
   private warExhaustionManager = new WarExhaustionManager();
+  private distanceCalculator = new GeographyDistanceCalculator();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "ATTACK") {
@@ -119,6 +121,24 @@ export class AttackActionHandler implements ActionHandler {
         "Attacker does not possess requested deployment force",
       );
     }
+
+    const distance = this.distanceCalculator.calculateDistance(
+      attacker.id,
+      defender.id,
+      state.nations,
+    );
+    const totalDeployedUnits = infantry + airForce + navy + droneMissile;
+    const deploymentCost = Math.floor(
+      totalDeployedUnits * 150 * Math.pow(1.5, distance - 1),
+    );
+
+    if (attacker.treasury < deploymentCost) {
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "Insufficient funds for logistics of this attack",
+      );
+    }
+
     const activeCombatRelation =
       attacker.relations[attackAction.targetNationId];
     const hasCasusBelli =
@@ -139,6 +159,7 @@ export class AttackActionHandler implements ActionHandler {
     const updatedAttackerNation = {
       ...attacker,
       reputation: finalAttackerReputation,
+      treasury: attacker.treasury - deploymentCost,
       military: {
         ...attacker.military,
         infantry: attacker.military.infantry - infantry,

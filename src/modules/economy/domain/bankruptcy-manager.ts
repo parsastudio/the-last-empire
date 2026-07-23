@@ -29,4 +29,21 @@ export class BankruptcyManager {
       recruitmentQueue: [],
     };
   }
+
+  public applyDisintegration(nation: Nation): Nation {
+    const territoryLoss = Math.floor(nation.geography.territorySize * 0.25);
+    const popLoss = Math.floor(nation.population * 0.2);
+    return {
+      ...nation,
+      geography: {
+        ...nation.geography,
+        territorySize: Math.max(
+          10,
+          nation.geography.territorySize - territoryLoss,
+        ),
+      },
+      population: Math.max(10000, nation.population - popLoss),
+      consecutiveDeficitTurns: 0,
+    };
+  }
 }

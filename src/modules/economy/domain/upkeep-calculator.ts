@@ -39,7 +39,9 @@ export class UpkeepCalculator {
       1000;
 
     const infrastructure = Math.floor(
-      baseInfraUpkeep * (1 + nation.geography.territorySize * 0.0001),
+      baseInfraUpkeep *
+        (1 + nation.geography.territorySize * 0.0001) *
+        nation.adminBurdenMultiplier,
     );
 
     let adminPenalty = 0;
@@ -54,7 +56,7 @@ export class UpkeepCalculator {
       airForce: Math.floor(totalMilitaryCost * 0.3),
       navy: Math.floor(totalMilitaryCost * 0.2),
       droneMissile: Math.floor(totalMilitaryCost * 0.1),
-      infrastructure: infrastructure + adminPenalty,
+      infrastructure,
       total,
     };
   }
