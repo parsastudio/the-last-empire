@@ -1,6 +1,7 @@
 import { Province } from "@/domain/map/province.schema";
+import { STATIC_ADJACENCY_LIST } from "../map-data.config";
 import { COUNTRY_POLYGONS_CACHE } from "@/engine/map/grid-generator";
-import { computeAdjacencyList } from "@/engine/map/utils/adjacency-calculator";
+import { getBoundingBox } from "@/engine/map/utils/polygon-geometry";
 
 export function executeProvinceAttack(
   targetCountryCode: string,
@@ -16,16 +17,43 @@ export function executeProvinceAttack(
     return { newlyConqueredProvIds: [] };
   }
 
-  const defenderTotal = targetProvs.length;
-  const targetCount = Math.max(1, Math.floor(defenderTotal * 0.25));
+  const remainingProvs = targetProvs.filter(
+    (p) =>
+      (!attackerCountryCode || p.ownerNationId !== attackerCountryCode) &&
+      !p.isOccupied,
+  );
+
+  if (remainingProvs.length === 0) {
+    return { newlyConqueredProvIds: [] };
+  }
+
+  const targetCount = Math.max(1, Math.floor(remainingProvs.length * 0.25));
 
   let startProvince: Province | null = null;
   let attackerSourceId: string | undefined;
 
   if (attackerCountryCode) {
-    const dynamicAdjacency = computeAdjacencyList(COUNTRY_POLYGONS_CACHE);
-    const attackerAdjacency =
-      dynamicAdjacency[`${attackerCountryCode}_P1`] || [];
+    let attackerAdjacency =
+      STATIC_ADJACENCY_LIST[`${attackerCountryCode}_P1`] || [];
+
+    if (attackerAdjacency.length === 0) {
+      const polyA = COUNTRY_POLYGONS_CACHE[attackerCountryCode];
+      const polyB = COUNTRY_POLYGONS_CACHE[targetCountryCode];
+      if (polyA && polyB) {
+        const boxA = getBoundingBox(polyA);
+        const boxB = getBoundingBox(polyB);
+        const areNear = !(
+          boxA.minX - 30 > boxB.maxX ||
+          boxB.minX - 30 > boxA.maxX ||
+          boxA.minY - 30 > boxB.maxY ||
+          boxB.minY - 30 > boxA.maxY
+        );
+        if (areNear) {
+          attackerAdjacency = [`${targetCountryCode}_P1`];
+        }
+      }
+    }
+
     const hasLandBorder = attackerAdjacency.some((id) =>
       id.startsWith(targetCountryCode),
     );
@@ -35,26 +63,21 @@ export function executeProvinceAttack(
       if (attackerCapital) {
         attackerSourceId = attackerCapital.id;
         let minDistance = Infinity;
-        for (const p of targetProvs) {
-          const isOccupied = p.ownerNationId === attackerCountryCode;
-          if (!isOccupied) {
-            const dist = Math.sqrt(
-              Math.pow(p.x - attackerCapital.x, 2) +
-                Math.pow(p.y - attackerCapital.y, 2),
-            );
-            if (dist < minDistance) {
-              minDistance = dist;
-              startProvince = p;
-            }
+        for (const p of remainingProvs) {
+          const dist = Math.sqrt(
+            Math.pow(p.x - attackerCapital.x, 2) +
+              Math.pow(p.y - attackerCapital.y, 2),
+          );
+          if (dist < minDistance) {
+            minDistance = dist;
+            startProvince = p;
           }
         }
       }
     } else {
       const attackerCoastal =
         allProvinces[attackerCountryCode]?.filter((p) => p.isCoastal) || [];
-      const defenderCoastal = targetProvs.filter(
-        (p) => p.isCoastal && p.ownerNationId !== attackerCountryCode,
-      );
+      const defenderCoastal = remainingProvs.filter((p) => p.isCoastal);
 
       if (attackerCoastal.length > 0 && defenderCoastal.length > 0) {
         let minDistance = Infinity;
@@ -75,10 +98,13 @@ export function executeProvinceAttack(
   }
 
   if (!startProvince) {
-    const unOccupied = targetProvs.filter(
-      (p) => p.ownerNationId !== attackerCountryCode,
-    );
-    startProvince = unOccupied[0] || null;
+    startProvince = remainingProvs[0] || null;
+    if (attackerCountryCode) {
+      const attackerCapital = allProvinces[attackerCountryCode]?.[0];
+      if (attackerCapital) {
+        attackerSourceId = attackerCapital.id;
+      }
+    }
   }
 
   if (!startProvince) {

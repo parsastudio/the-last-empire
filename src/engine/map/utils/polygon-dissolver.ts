@@ -54,8 +54,10 @@ export class PolygonDissolver {
         const pt = points.get(currentKey);
         if (pt) loop.push(pt);
 
-        const neighbors = adj.get(currentKey) || [];
-        let nextKey = neighbors.find((n) => !visited.has(n));
+        const neighbors: string[] = adj.get(currentKey) || [];
+        let nextKey: string | undefined = neighbors.find(
+          (n: string) => !visited.has(n),
+        );
         if (!nextKey && neighbors.includes(startKey)) {
           nextKey = startKey;
         }

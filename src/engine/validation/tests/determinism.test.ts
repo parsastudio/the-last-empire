@@ -28,6 +28,7 @@ export function runDeterminismTest(): boolean {
         y: 100,
         isCoastal: true,
         neighbors: ["CAN_P1"],
+        isOccupied: false,
       },
       CAN_P1: {
         id: "CAN_P1",
@@ -41,6 +42,7 @@ export function runDeterminismTest(): boolean {
         y: 200,
         isCoastal: true,
         neighbors: ["USA_P1"],
+        isOccupied: false,
       },
     },
     nations: {

@@ -4,7 +4,6 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { GameMap } from "@/presentation/components/game-map";
 import { StrategicDashboard } from "@/presentation/components/strategic-dashboard";
-import { ActivePowersList } from "@/presentation/components/active-powers-list";
 import { useMapCalculations } from "@/presentation/hooks/use-map-calculations";
 import { useMapTestSimulation } from "./hooks/use-map-test-simulation";
 import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
@@ -22,15 +21,15 @@ export default function MapTestPage() {
   const [occupiedProvinceIds, setOccupiedProvinceIds] = useState<Set<string>>(
     new Set(),
   );
-  const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
 
   useEffect(() => {
     async function autoLoadWorldMap() {
       try {
         const response = await fetch(
-          "https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json",
+          "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_1_states_provinces.geojson",
         );
-        if (!response.ok) throw new Error("Network response was not ok");
+        if (!response.ok)
+          throw new Error("Local map file not found in public folder");
         const geoJson = (await response.json()) as GeoJsonData;
         await loadMapFromData(geoJson, 1200, 600);
       } catch {
@@ -86,7 +85,7 @@ export default function MapTestPage() {
     if (!processedMap) return {};
     const state: Record<string, Province> = {};
     for (const prov of Object.values(processedMap.provinces)) {
-      const countryCode = prov.id.replace("_P1", "");
+      const countryCode = prov.id.substring(0, prov.id.indexOf("_P"));
       const occupiedPercent = occupations[countryCode] || 0;
       state[prov.id] = {
         ...prov,
@@ -99,13 +98,12 @@ export default function MapTestPage() {
     return state;
   }, [processedMap, occupations, playerCountryCode]);
 
-  const { activeBorders, empireStats, conquests, activePowersListData } =
-    useMapCalculations({
-      playerCountryCode,
-      provincesMap,
-      provincesState,
-      occupations,
-    });
+  const { activeBorders, empireStats, conquests } = useMapCalculations({
+    playerCountryCode,
+    provincesMap,
+    provincesState,
+    occupations,
+  });
 
   const { assaultVector, handleCountryClick } = useMapTestSimulation({
     playerCountryCode,
@@ -144,25 +142,6 @@ export default function MapTestPage() {
             playerCountryCode={playerCountryCode}
             activeAssaultVector={assaultVector}
           />
-
-          <div className="absolute top-6 left-6 w-80 pointer-events-none z-40">
-            <div className="pointer-events-auto">
-              <ActivePowersList
-                survivingNations={activePowersListData}
-                hoveredNationId={hoveredCountryId}
-                selectedNationId={playerCountryCode}
-                onSelectNation={(code) => {
-                  if (!playerCountryCode) {
-                    const confirmed = window.confirm(
-                      `Are you sure you want to select ${code}?`,
-                    );
-                    if (confirmed) setPlayerCountryCode(code);
-                  }
-                }}
-                onHoverNation={setHoveredCountryId}
-              />
-            </div>
-          </div>
 
           <div className="absolute top-6 right-6 w-80 pointer-events-none z-40">
             <div className="pointer-events-auto">

@@ -31,7 +31,7 @@ export function StrategicDashboard({
       {!playerCountryCode ? (
         <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
           <p className="text-xs text-blue-400 font-semibold animate-pulse">
-            Click on any country to select and start!
+            Click on a country to select and start!
           </p>
         </div>
       ) : (

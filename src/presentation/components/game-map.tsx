@@ -101,6 +101,7 @@ export function GameMap({
             occupations={occupations}
             playerCountryCode={playerCountryCode}
             getNationColor={getNationColor}
+            provincesState={provincesState}
           />
 
           <rect width={width} height={height} fill="rgb(10, 15, 30)" />
