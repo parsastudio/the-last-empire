@@ -61,7 +61,7 @@ export function WorldMapSvg({
         />
       );
     });
-  }, [regions, hoveredRegionId, mapWidth, mapHeight]);
+  }, [regions, hoveredRegionId, mapWidth, mapHeight, onHoverRegion]);
 
   return (
     <svg
