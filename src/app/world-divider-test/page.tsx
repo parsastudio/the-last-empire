@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
-import {
-  subdivideWorld,
-  SubdividedRegion,
-} from "@/engine/world-divider/world-divider";
+import { SubdividedRegion } from "@/engine/world-divider/world-divider";
 import { MapControls } from "@/presentation/components/map-controls";
 import { TestPageHeader } from "./components/test-page-header";
 import { RegionTooltip } from "./components/region-tooltip";
@@ -17,6 +13,8 @@ export default function WorldDividerTestPage() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [baking, setBaking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -27,23 +25,32 @@ export default function WorldDividerTestPage() {
   const mapHeight = 600;
 
   useEffect(() => {
-    async function loadAndPartition() {
+    async function initLifecycle() {
       try {
-        const response = await fetch(
-          "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
-        );
-        if (!response.ok) throw new Error();
-        const geoJson = await response.json();
-        const results = subdivideWorld(geoJson.features, 3000);
-        setRegions(results);
+        const check = await fetch("/world-map-subdivided.json");
+        if (check.ok) {
+          const cached = await check.json();
+          setRegions(cached);
+        } else {
+          setBaking(true);
+          const bakeRes = await fetch("/api/bake-map?type=full");
+          const bakeJson = await bakeRes.json();
+          if (bakeJson.success) {
+            const getBaked = await fetch("/world-map-subdivided.json");
+            const data = await getBaked.json();
+            setRegions(data);
+          } else {
+            throw new Error();
+          }
+        }
       } catch {
-        const results = subdivideWorld(FALLBACK_WORLD_MAP.features, 100);
-        setRegions(results);
+        setError("Failed to load or bake world map data");
       } finally {
         setLoading(false);
+        setBaking(false);
       }
     }
-    loadAndPartition();
+    initLifecycle();
   }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -93,8 +100,16 @@ export default function WorldDividerTestPage() {
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
           <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-400 font-medium">
-            Dividing World into 3000 Grid Sectors...
+            {baking
+              ? "Pre-Processing & Baking Global 3D Vector Assets..."
+              : "Loading Baked Geopolitical Grid..."}
           </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 p-4 bg-red-950/80 border border-red-800/80 text-red-400 rounded-xl shadow-2xl z-50">
+          {error}
         </div>
       )}
 
