@@ -33,6 +33,23 @@ export class VictoryChecker {
       };
     }
 
+    const totalProvinces = Object.keys(state.provinces).length;
+    if (totalProvinces > 0) {
+      for (const nation of aliveNations) {
+        const nationProvinces = Object.values(state.provinces).filter(
+          (p) => p.ownerNationId === nation.id,
+        ).length;
+        const share = nationProvinces / totalProvinces;
+        if (share >= 0.6) {
+          return {
+            isGameOver: true,
+            winnerNationId: nation.id,
+            reason: "TERRITORIAL_DOMINANCE",
+          };
+        }
+      }
+    }
+
     const totalGlobalGdp = aliveNations.reduce((sum, n) => sum + n.gdp, 0);
     if (totalGlobalGdp > 0) {
       for (const nation of aliveNations) {

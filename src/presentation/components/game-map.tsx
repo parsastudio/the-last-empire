@@ -5,7 +5,6 @@ import { MapOverlayNodes } from "./map-overlay-nodes";
 import { MapControls } from "./map-controls";
 import type { VectorProvince } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
-import type { AbstractProvince } from "@/application/province-engine";
 
 interface GameMapProps {
   vectorProvinces: VectorProvince[];
@@ -14,7 +13,7 @@ interface GameMapProps {
   height: number;
   onCountryClick: (countryCode: string, angle: number) => void;
   occupations?: Record<string, number>;
-  allProvinces?: Record<string, AbstractProvince[]>;
+  allProvinces?: Record<string, Province[]>;
   playerCountryCode?: string | null;
 }
 

@@ -68,6 +68,65 @@ export class GridGenerator {
         feature.properties?.name ||
         "Unknown Region";
 
+      const geometry = feature.geometry;
+      let pathData = "";
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+
+      let sumX = 0;
+      let sumY = 0;
+      let vertexCount = 0;
+
+      const trackCoords = (lon: number, lat: number) => {
+        const x = ((lon + 180) / 360) * width;
+        const y = ((90 - lat) / 180) * height;
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+
+        sumX += x;
+        sumY += y;
+        vertexCount++;
+      };
+
+      if (geometry.type === "Polygon") {
+        const rings = geometry.coordinates as number[][][];
+        rings.forEach((ring) => {
+          ring.forEach((coord) => {
+            if (coord[0] !== undefined && coord[1] !== undefined) {
+              trackCoords(coord[0], coord[1]);
+            }
+          });
+        });
+        pathData = this.buildPathFromPolygon(rings, width, height);
+      } else if (geometry.type === "MultiPolygon") {
+        const multiRings = geometry.coordinates as number[][][][];
+        multiRings.forEach((polygonCoords) => {
+          polygonCoords.forEach((ring) => {
+            ring.forEach((coord) => {
+              if (coord[0] !== undefined && coord[1] !== undefined) {
+                trackCoords(coord[0], coord[1]);
+              }
+            });
+          });
+        });
+        pathData = multiRings
+          .map((polygonCoords) =>
+            this.buildPathFromPolygon(polygonCoords, width, height),
+          )
+          .join(" ");
+      }
+
+      const areaWidth = maxX - minX;
+      const areaHeight = maxY - minY;
+      const boundingBoxArea = Math.max(10, Math.round(areaWidth * areaHeight));
+
+      const centerX = vertexCount > 0 ? sumX / vertexCount : width / 2;
+      const centerY = vertexCount > 0 ? sumY / vertexCount : height / 2;
+
       provinces[provinceId] = {
         id: provinceId,
         name: `${name} Region`,
@@ -75,25 +134,12 @@ export class GridGenerator {
         gdp: rawGdp * 1000000,
         population: rawPop,
         isCapital: true,
-        territorySize: 100,
+        territorySize: boundingBoxArea,
+        x: centerX,
+        y: centerY,
+        isCoastal: false,
+        neighbors: [],
       };
-
-      const geometry = feature.geometry;
-      let pathData = "";
-
-      if (geometry.type === "Polygon") {
-        pathData = this.buildPathFromPolygon(
-          geometry.coordinates as number[][][],
-          width,
-          height,
-        );
-      } else if (geometry.type === "MultiPolygon") {
-        pathData = (geometry.coordinates as number[][][][])
-          .map((polygonCoords) =>
-            this.buildPathFromPolygon(polygonCoords, width, height),
-          )
-          .join(" ");
-      }
 
       vectorProvinces.push({
         id: provinceId,

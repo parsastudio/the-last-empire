@@ -1,9 +1,9 @@
 import React from "react";
-import type { AbstractProvince } from "@/application/province-engine";
+import type { Province } from "@/domain/map/province.schema";
 
 interface MapOverlayNodesProps {
   hoveredCountry: string | null;
-  allProvinces: Record<string, AbstractProvince[]>;
+  allProvinces: Record<string, Province[]>;
 }
 
 export function MapOverlayNodes({

@@ -1,18 +1,17 @@
 "use client";
 
 import React, { useMemo } from "react";
-import type { GridCell } from "@/domain/map/grid.schema";
 
 export interface ActivePowerNation {
   id: string;
   name: string;
   gdp: number;
   population: number;
+  provinceCount: number;
 }
 
 interface ActivePowersListProps {
-  grid: GridCell[][];
-  survivingNations: Record<string, ActivePowerNation>;
+  survivingNations: ActivePowerNation[];
   hoveredNationId: string | null;
   selectedNationId: string | null;
   onSelectNation: (id: string) => void;
@@ -20,36 +19,20 @@ interface ActivePowersListProps {
 }
 
 export function ActivePowersList({
-  grid,
   survivingNations,
   hoveredNationId,
   selectedNationId,
   onSelectNation,
   onHoverNation,
 }: ActivePowersListProps) {
-  const territorySizes = useMemo(() => {
-    const sizes: Record<string, number> = {};
-    grid.forEach((row) => {
-      row.forEach((cell) => {
-        if (cell.type === "LAND" && cell.ownerId) {
-          sizes[cell.ownerId] = (sizes[cell.ownerId] || 0) + 1;
-        }
-      });
-    });
-    return sizes;
-  }, [grid]);
-
   const sortedPowers = useMemo(() => {
-    return Object.values(survivingNations)
-      .map((nation) => ({
-        ...nation,
-        cells: territorySizes[nation.id] || 0,
-      }))
-      .sort((a, b) => b.cells - a.cells);
-  }, [survivingNations, territorySizes]);
+    return [...survivingNations].sort(
+      (a, b) => b.provinceCount - a.provinceCount,
+    );
+  }, [survivingNations]);
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-900/50 backdrop-blur-md p-6 rounded-3xl border border-slate-800">
+    <div className="w-full h-full flex flex-col bg-slate-900/50 backdrop-blur-md p-6 rounded-3xl border border-slate-800 shadow-2xl">
       <h3 className="text-lg font-bold text-slate-100 mb-4 flex items-center gap-2">
         <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
         Active Global Powers
@@ -91,7 +74,7 @@ export function ActivePowersList({
               </div>
               <div className="text-right">
                 <span className="text-xs font-semibold px-2 py-1 bg-slate-950/50 rounded-lg text-emerald-400 font-mono">
-                  {power.cells} px
+                  {power.provinceCount} regions
                 </span>
               </div>
             </div>

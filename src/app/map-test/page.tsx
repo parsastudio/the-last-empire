@@ -4,7 +4,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { GameMap } from "@/presentation/components/game-map";
 import { StrategicDashboard } from "@/presentation/components/strategic-dashboard";
+import { ActivePowersList } from "@/presentation/components/active-powers-list";
+import type { ActivePowerNation } from "@/presentation/components/active-powers-list";
 import { STATIC_ADJACENCY_LIST } from "@/application/map-data.config";
+import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { processProvincesAndVectors } from "@/application/map-processor";
 import {
   expandCountryProvinces,
@@ -22,6 +25,8 @@ export default function MapTestPage() {
   const [occupiedProvinceIds, setOccupiedProvinceIds] = useState<Set<string>>(
     new Set(),
   );
+  const [isAttacking, setIsAttacking] = useState<boolean>(false);
+  const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
 
   useEffect(() => {
     async function autoLoadWorldMap() {
@@ -36,6 +41,7 @@ export default function MapTestPage() {
         await loadMapFromData(geoJson, 1200, 600);
       } catch (err) {
         console.error(err);
+        await loadMapFromData(FALLBACK_WORLD_MAP, 1200, 600);
       }
     }
     autoLoadWorldMap();
@@ -112,7 +118,7 @@ export default function MapTestPage() {
       return;
     }
 
-    if (countryCode === playerCountryCode) return;
+    if (countryCode === playerCountryCode || isAttacking) return;
 
     const result = executeProvinceAttack(
       countryCode,
@@ -120,11 +126,26 @@ export default function MapTestPage() {
       playerCountryCode,
     );
     if (result.newlyConqueredProvIds.length > 0) {
-      setOccupiedProvinceIds((prev: Set<string>) => {
-        const next = new Set(prev);
-        result.newlyConqueredProvIds.forEach((id: string) => next.add(id));
-        return next;
-      });
+      setIsAttacking(true);
+      let index = 0;
+      const queuedIds = result.newlyConqueredProvIds;
+
+      const interval = setInterval(() => {
+        if (index < queuedIds.length) {
+          const nextId = queuedIds[index];
+          if (nextId) {
+            setOccupiedProvinceIds((prev) => {
+              const next = new Set(prev);
+              next.add(nextId);
+              return next;
+            });
+          }
+          index++;
+        } else {
+          clearInterval(interval);
+          setIsAttacking(false);
+        }
+      }, 150);
     }
   };
 
@@ -200,6 +221,24 @@ export default function MapTestPage() {
       .filter((p) => p.occupiedPercent > 0);
   }, [provincesState, occupations, playerCountryCode]);
 
+  const activePowersListData = useMemo((): ActivePowerNation[] => {
+    const list: ActivePowerNation[] = [];
+    for (const [code, provs] of Object.entries(provincesMap)) {
+      const provId = `${code}_P1`;
+      const prov = provincesState[provId];
+      if (prov) {
+        list.push({
+          id: code,
+          name: prov.name.replace(" Region", ""),
+          gdp: provs.reduce((sum, p) => sum + p.gdp, 0),
+          population: provs.reduce((sum, p) => sum + p.population, 0),
+          provinceCount: provs.length,
+        });
+      }
+    }
+    return list;
+  }, [provincesMap, provincesState]);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 text-white select-none">
       {loading && (
@@ -230,16 +269,41 @@ export default function MapTestPage() {
             playerCountryCode={playerCountryCode}
           />
 
-          <StrategicDashboard
-            playerCountryCode={playerCountryCode}
-            empireStats={empireStats}
-            activeBorders={activeBorders}
-            conquests={conquests}
-            onReset={() => {
-              setPlayerCountryCode(null);
-              setOccupiedProvinceIds(new Set());
-            }}
-          />
+          <div className="absolute top-6 left-6 w-80 pointer-events-none z-40">
+            <div className="pointer-events-auto">
+              <ActivePowersList
+                survivingNations={activePowersListData}
+                hoveredNationId={hoveredCountryId}
+                selectedNationId={playerCountryCode}
+                onSelectNation={(code) => {
+                  if (!playerCountryCode) {
+                    const confirmed = window.confirm(
+                      `Are you sure you want to select ${code}?`,
+                    );
+                    if (confirmed) {
+                      setPlayerCountryCode(code);
+                    }
+                  }
+                }}
+                onHoverNation={setHoveredCountryId}
+              />
+            </div>
+          </div>
+
+          <div className="absolute top-6 right-6 w-80 pointer-events-none z-40">
+            <div className="pointer-events-auto">
+              <StrategicDashboard
+                playerCountryCode={playerCountryCode}
+                empireStats={empireStats}
+                activeBorders={activeBorders}
+                conquests={conquests}
+                onReset={() => {
+                  setPlayerCountryCode(null);
+                  setOccupiedProvinceIds(new Set());
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>
