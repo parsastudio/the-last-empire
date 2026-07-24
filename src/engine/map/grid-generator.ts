@@ -36,6 +36,8 @@ export interface GeneratedVectorMapPayload {
   vectorProvinces: VectorProvince[];
 }
 
+export const COUNTRY_POLYGONS_CACHE: Record<string, [number, number][][]> = {};
+
 export class GridGenerator {
   public generateVectorMap(
     geoJson: GeoJsonData,
@@ -79,6 +81,8 @@ export class GridGenerator {
       let sumY = 0;
       let vertexCount = 0;
 
+      const countryPolygons: [number, number][][] = [];
+
       const trackCoords = (lon: number, lat: number) => {
         const x = ((lon + 180) / 360) * width;
         const y = ((90 - lat) / 180) * height;
@@ -95,22 +99,36 @@ export class GridGenerator {
       if (geometry.type === "Polygon") {
         const rings = geometry.coordinates as number[][][];
         rings.forEach((ring) => {
+          const polyPoints: [number, number][] = [];
           ring.forEach((coord) => {
             if (coord[0] !== undefined && coord[1] !== undefined) {
               trackCoords(coord[0], coord[1]);
+              const x = ((coord[0] + 180) / 360) * width;
+              const y = ((90 - coord[1]) / 180) * height;
+              polyPoints.push([x, y]);
             }
           });
+          if (polyPoints.length > 0) {
+            countryPolygons.push(polyPoints);
+          }
         });
         pathData = this.buildPathFromPolygon(rings, width, height);
       } else if (geometry.type === "MultiPolygon") {
         const multiRings = geometry.coordinates as number[][][][];
         multiRings.forEach((polygonCoords) => {
           polygonCoords.forEach((ring) => {
+            const polyPoints: [number, number][] = [];
             ring.forEach((coord) => {
               if (coord[0] !== undefined && coord[1] !== undefined) {
                 trackCoords(coord[0], coord[1]);
+                const x = ((coord[0] + 180) / 360) * width;
+                const y = ((90 - coord[1]) / 180) * height;
+                polyPoints.push([x, y]);
               }
             });
+            if (polyPoints.length > 0) {
+              countryPolygons.push(polyPoints);
+            }
           });
         });
         pathData = multiRings
@@ -119,6 +137,8 @@ export class GridGenerator {
           )
           .join(" ");
       }
+
+      COUNTRY_POLYGONS_CACHE[countryCode] = countryPolygons;
 
       const areaWidth = maxX - minX;
       const areaHeight = maxY - minY;
@@ -138,6 +158,7 @@ export class GridGenerator {
         x: centerX,
         y: centerY,
         isCoastal: false,
+        isOccupied: false,
         neighbors: [],
       };
 

@@ -17,9 +17,7 @@ export function MapOverlayNodes({
   allProvinces,
   activeAssaultVector = null,
 }: MapOverlayNodesProps) {
-  const visibleCountries = hoveredCountry
-    ? [hoveredCountry]
-    : Object.keys(allProvinces);
+  const visibleCountries = hoveredCountry ? [hoveredCountry] : [];
 
   return (
     <g className="pointer-events-none">
@@ -81,11 +79,7 @@ export function MapOverlayNodes({
                       y1={p.y}
                       x2={targetProv.x}
                       y2={targetProv.y}
-                      stroke={
-                        hoveredCountry === cCode
-                          ? "rgba(16, 185, 129, 0.45)"
-                          : "rgba(255, 255, 255, 0.08)"
-                      }
+                      stroke="rgba(16, 185, 129, 0.45)"
                       strokeWidth="1"
                       strokeDasharray="3 3"
                     />
@@ -104,10 +98,9 @@ export function MapOverlayNodes({
                   fill={p.isOccupied ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"}
                   stroke="rgb(10, 15, 30)"
                   strokeWidth="1"
-                  className={hoveredCountry === cCode ? "animate-pulse" : ""}
-                  opacity={hoveredCountry === cCode ? 1.0 : 0.35}
+                  className="animate-pulse"
                 />
-                {p.isCoastal && hoveredCountry === cCode && (
+                {p.isCoastal && (
                   <circle
                     cx={p.x}
                     cy={p.y}
