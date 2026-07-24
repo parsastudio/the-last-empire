@@ -1,5 +1,5 @@
 import { Province } from "@/domain/map/province.schema";
-import { STATIC_ADJACENCY_LIST, CENTROIDS } from "./map-data.config";
+import { STATIC_ADJACENCY_LIST } from "./map-data.config";
 
 export function generateProvinces(
   countryCode: string,
@@ -25,6 +25,7 @@ export function generateProvinces(
     x: centerX,
     y: centerY,
     isCoastal: hasSeaAccess && isCoastalCount > 0,
+    isOccupied: false,
     neighbors: [],
   });
 
@@ -47,6 +48,7 @@ export function generateProvinces(
         x: px,
         y: py,
         isCoastal: i < isCoastalCount - 1,
+        isOccupied: false,
         neighbors: [],
       });
     }
@@ -144,10 +146,7 @@ export function expandCountryProvinces(
       "MAR",
       "DZA",
     ].includes(countryCode);
-    const center = CENTROIDS[countryCode] || {
-      x: (prov.gdp % 400) + 300,
-      y: (prov.population % 250) + 150,
-    };
+    const center = { x: prov.x, y: prov.y };
     const countryArea = prov.territorySize;
     const provinceShare =
       totalArea > 0 ? Math.round((countryArea / totalArea) * 1000) : 5;
@@ -190,7 +189,11 @@ export function executeProvinceAttack(
   targetCountryCode: string,
   allProvinces: Record<string, Province[]>,
   attackerCountryCode?: string,
-): { newlyConqueredProvIds: string[] } {
+): {
+  newlyConqueredProvIds: string[];
+  attackerSourceId?: string;
+  defenderEntryId?: string;
+} {
   const targetProvs = allProvinces[targetCountryCode];
   if (!targetProvs || targetProvs.length === 0) {
     return { newlyConqueredProvIds: [] };
@@ -200,6 +203,7 @@ export function executeProvinceAttack(
   const targetCount = Math.max(1, Math.floor(defenderTotal * 0.25));
 
   let startProvince: Province | null = null;
+  let attackerSourceId: string | undefined;
 
   if (attackerCountryCode) {
     const attackerAdjacency =
@@ -211,6 +215,7 @@ export function executeProvinceAttack(
     if (hasLandBorder) {
       const attackerCapital = allProvinces[attackerCountryCode]?.[0];
       if (attackerCapital) {
+        attackerSourceId = attackerCapital.id;
         let minDistance = Infinity;
         for (const p of targetProvs) {
           const isOccupied = p.ownerNationId === attackerCountryCode;
@@ -243,6 +248,7 @@ export function executeProvinceAttack(
             if (dist < minDistance) {
               minDistance = dist;
               startProvince = d;
+              attackerSourceId = a.id;
             }
           }
         }
@@ -285,5 +291,9 @@ export function executeProvinceAttack(
     }
   }
 
-  return { newlyConqueredProvIds };
+  return {
+    newlyConqueredProvIds,
+    attackerSourceId,
+    defenderEntryId: startProvince.id,
+  };
 }

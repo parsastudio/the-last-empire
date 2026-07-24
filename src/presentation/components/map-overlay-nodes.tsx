@@ -4,11 +4,18 @@ import type { Province } from "@/domain/map/province.schema";
 interface MapOverlayNodesProps {
   hoveredCountry: string | null;
   allProvinces: Record<string, Province[]>;
+  activeAssaultVector?: {
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+  } | null;
 }
 
 export function MapOverlayNodes({
   hoveredCountry,
   allProvinces,
+  activeAssaultVector = null,
 }: MapOverlayNodesProps) {
   const visibleCountries = hoveredCountry
     ? [hoveredCountry]
@@ -16,6 +23,47 @@ export function MapOverlayNodes({
 
   return (
     <g className="pointer-events-none">
+      {activeAssaultVector && (
+        <g>
+          <style>{`
+            @keyframes tacticalDash {
+              to {
+                stroke-dashoffset: -20;
+              }
+            }
+            .tactical-assault-laser {
+              animation: tacticalDash 1.2s linear infinite;
+            }
+          `}</style>
+          <path
+            d={`M ${activeAssaultVector.fromX},${activeAssaultVector.fromY} Q ${(activeAssaultVector.fromX + activeAssaultVector.toX) / 2},${Math.min(activeAssaultVector.fromY, activeAssaultVector.toY) - 80} ${activeAssaultVector.toX},${activeAssaultVector.toY}`}
+            fill="none"
+            stroke="rgb(244, 63, 94)"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+            strokeDasharray="6 4"
+            className="tactical-assault-laser"
+            filter="drop-shadow(0 0 4px rgb(244, 63, 94))"
+          />
+          <circle
+            cx={activeAssaultVector.fromX}
+            cy={activeAssaultVector.fromY}
+            r="6"
+            fill="rgb(16, 185, 129)"
+            className="animate-ping"
+          />
+          <circle
+            cx={activeAssaultVector.toX}
+            cy={activeAssaultVector.toY}
+            r="8"
+            fill="none"
+            stroke="rgb(244, 63, 94)"
+            strokeWidth="2"
+            className="animate-ping"
+          />
+        </g>
+      )}
+
       {visibleCountries.map((cCode) => {
         const targetProvs = allProvinces[cCode];
         if (!targetProvs) return null;

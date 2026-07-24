@@ -1,139 +1,139 @@
-import { GameState } from "@/domain/game/game-state.schema";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/map/province.schema";
-import { GridGenerator } from "@/engine/map/grid-generator";
-import { expandCountryProvinces } from "@/application/province-engine";
-import { HISTORICAL_NATIONS_MAP } from "@/application/historical-nations.config";
-import type { GeoJsonData } from "@/engine/map/grid-generator";
+import type { Nation, NationTrait } from "@/domain/nation/nation.schema";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 
+export interface AbstractProfile {
+  name: string;
+  flagCode: string;
+  gdp: number;
+  population: number;
+  territorySize: number;
+  traits: NationTrait[];
+  oil: number;
+  steel: number;
+  treasury: number;
+}
+
 export class GameInitializer {
-  public initializeGame(
-    geoJson: GeoJsonData,
-    humanNationId: string,
-    seed: number,
-  ): GameState {
-    const generator = new GridGenerator();
-    const rawPayload = generator.generateVectorMap(geoJson, 1200, 600);
-    const expandedProvinces = expandCountryProvinces(rawPayload.provinces);
-    const prng = new SeededRandom(seed);
+  private traitsList: NationTrait[] = [
+    "OIL_RICH",
+    "ISLAND_FORTRESS",
+    "MILITARISTIC",
+    "FRAGILE_ECONOMY",
+    "INDUSTRIAL_HUB",
+    "ISOLATED_SOCIETY",
+  ];
 
-    const nations: Record<string, Nation> = {};
-    const activeCountryCodes = Array.from(
-      new Set(Object.values(expandedProvinces).map((p) => p.ownerNationId)),
-    );
+  private profiles: Record<string, AbstractProfile> = {
+    TIER_1: {
+      name: "Industrial Superpower",
+      flagCode: "ISP",
+      gdp: 20000000,
+      population: 300000000,
+      territorySize: 9000,
+      traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
+      oil: 1000,
+      steel: 2000,
+      treasury: 500000,
+    },
+    TIER_2: {
+      name: "Resource Hub",
+      flagCode: "RHB",
+      gdp: 10000000,
+      population: 150000000,
+      territorySize: 5000,
+      traits: ["OIL_RICH"],
+      oil: 5000,
+      steel: 1000,
+      treasury: 300000,
+    },
+    TIER_3: {
+      name: "Emerging Market",
+      flagCode: "EMR",
+      gdp: 5000000,
+      population: 80000000,
+      territorySize: 3000,
+      traits: ["FRAGILE_ECONOMY"],
+      oil: 500,
+      steel: 500,
+      treasury: 100000,
+    },
+  };
 
-    activeCountryCodes.forEach((code) => {
-      const historical = HISTORICAL_NATIONS_MAP[code];
-      const codeProvs = Object.values(expandedProvinces).filter(
-        (p) => p.ownerNationId === code,
-      );
-      const territorySize = codeProvs.reduce(
-        (sum, p) => sum + p.territorySize,
-        0,
-      );
-
-      const gdp = historical
-        ? historical.gdp * 1000000
-        : territorySize * 25000000;
-      const population = historical
-        ? historical.population
-        : territorySize * 30000;
-      const name = historical ? historical.name : `${code} Republic`;
-      const flagCode = historical ? historical.flagCode : code.substring(0, 2);
-      const traits = historical ? historical.traits : [];
-
-      const subGdp = Math.floor(gdp / codeProvs.length);
-      const subPop = Math.floor(population / codeProvs.length);
-      codeProvs.forEach((p) => {
-        p.gdp = subGdp;
-        p.population = subPop;
-      });
-
-      const relations: Record<
-        string,
-        {
-          targetNationId: string;
-          stance: "PEACE" | "WAR" | "ALLIANCE" | "NON_AGGRESSION_PACT";
-          opinion: number;
-          tributePerTurn: number;
-          militaryAccess: boolean;
-          intelLevel: number;
-          coolOffTurnsRemaining: number;
+  public assignDeterministicTraits(
+    nations: Record<string, Nation>,
+    prng: SeededRandom,
+  ): Record<string, Nation> {
+    const updated = { ...nations };
+    const tierKeys = Object.keys(this.profiles);
+    let index = 0;
+    for (const [id, nation] of Object.entries(updated)) {
+      const assignedTier = tierKeys[index % tierKeys.length];
+      const profile = this.profiles[assignedTier];
+      index++;
+      let assignedTraits: NationTrait[] = [];
+      let nextGdp = nation.gdp;
+      let nextPopulation = nation.population;
+      let nextTerritory = nation.geography.territorySize;
+      let nextFlag = nation.flagCode;
+      let nextName = nation.name;
+      let nextOil = nation.resources.oil;
+      let nextSteel = nation.resources.steel;
+      let nextTreasury = nation.treasury;
+      if (profile) {
+        assignedTraits = [...profile.traits];
+        nextGdp = profile.gdp;
+        nextPopulation = profile.population;
+        nextTerritory = profile.territorySize;
+        nextFlag = profile.flagCode;
+        nextName = profile.name;
+        nextOil = profile.oil;
+        nextSteel = profile.steel;
+        nextTreasury = profile.treasury;
+      } else {
+        const traitIndex1 = prng.nextInt(0, this.traitsList.length - 1);
+        let traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
+        while (traitIndex1 === traitIndex2) {
+          traitIndex2 = prng.nextInt(0, this.traitsList.length - 1);
         }
-      > = {};
-
-      activeCountryCodes.forEach((otherCode) => {
-        if (otherCode !== code) {
-          relations[otherCode] = {
-            targetNationId: otherCode,
-            stance: "PEACE",
-            opinion: 0,
-            tributePerTurn: 0,
-            militaryAccess: false,
-            intelLevel: 0,
-            coolOffTurnsRemaining: 0,
-          };
+        const trait1 = this.traitsList[traitIndex1];
+        const trait2 = this.traitsList[traitIndex2];
+        if (trait1) {
+          assignedTraits.push(trait1);
         }
-      });
-
-      nations[code] = {
-        id: code,
-        name,
-        isAi: code !== humanNationId,
-        isAlive: true,
-        flagCode,
-        gdp,
-        taxRate: 15,
-        tariffRate: 10,
-        treasury: 100000,
-        nationalDebt: 0,
-        population,
-        warExhaustion: 0,
-        industrialLevel: 1,
-        adminBurdenMultiplier: 1.0,
-        consecutiveDeficitTurns: 0,
-        government: {
-          type: "DEMOCRACY",
-          stability: 70,
-          corruption: 10,
-          socialFreedom: 70,
-          turnsInPower: 0,
-        },
+        if (trait2) {
+          assignedTraits.push(trait2);
+        }
+      }
+      const updatedRelations = { ...nation.relations };
+      for (const [targetId, relation] of Object.entries(updatedRelations)) {
+        updatedRelations[targetId] = {
+          ...relation,
+          opinion: 0,
+          coolOffTurnsRemaining: 0,
+          intelLevel: 0,
+        };
+      }
+      updated[id] = {
+        ...nation,
+        name: nextName,
+        flagCode: nextFlag,
+        gdp: nextGdp,
+        population: nextPopulation,
+        treasury: nextTreasury,
+        traits: assignedTraits,
+        relations: updatedRelations,
         resources: {
-          oil: prng.nextInt(100, 500),
-          steel: prng.nextInt(100, 500),
-          manpower: Math.floor(population * 0.05),
+          ...nation.resources,
+          oil: nextOil,
+          steel: nextSteel,
         },
-        upkeep: {
-          infantryUpkeep: 10,
-          airForceUpkeep: 50,
-          droneMissileUpkeep: 20,
-          infrastructureUpkeep: 5,
-        },
-        military: {
-          infantry: prng.nextInt(30, 100),
-          airForce: prng.nextInt(5, 20),
-          droneMissile: prng.nextInt(0, 10),
-          experience: 0,
-          techLevel: 1,
-          mobility: 1,
-        },
-        recruitmentQueue: [],
         geography: {
-          landNeighbors: [],
-          seaNeighbors: [],
-          hasSeaAccess: true,
-          territorySize,
-          infrastructureLevel: 1,
-          contiguousMainlandSize: territorySize,
+          ...nation.geography,
+          territorySize: nextTerritory,
+          contiguousMainlandSize: nextTerritory,
           isolatedPockets: [],
-          coordinates: [],
         },
-        relations,
-        activeModifiers: [],
-        traits,
-        globalReputation: 50,
+        globalReputation: 0,
         globalAggression: 0,
         doctrines: {
           doctrinePoints: 0,
@@ -141,42 +141,7 @@ export class GameInitializer {
         },
         proxyInfluenceBudget: {},
       };
-    });
-
-    activeCountryCodes.forEach((code) => {
-      const nation = nations[code];
-      if (nation) {
-        const neighbors = new Set<string>();
-        const codeProvs = Object.values(expandedProvinces).filter(
-          (p) => p.ownerNationId === code,
-        );
-        codeProvs.forEach((p) => {
-          p.neighbors.forEach((nId) => {
-            const neighborProv = expandedProvinces[nId];
-            if (neighborProv && neighborProv.ownerNationId !== code) {
-              neighbors.add(neighborProv.ownerNationId);
-            }
-          });
-        });
-        nation.geography.landNeighbors = Array.from(neighbors);
-      }
-    });
-
-    return {
-      gameId: `procedural-game-${Date.now()}`,
-      currentTurn: 1,
-      seed,
-      isGameOver: false,
-      humanNationId,
-      globalThreatLevel: 0,
-      marketPrices: {
-        oil: 100,
-        steel: 100,
-      },
-      nations,
-      provinces: expandedProvinces,
-      turnLogs: [],
-      eventFlags: {},
-    };
+    }
+    return updated;
   }
 }

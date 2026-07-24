@@ -56,6 +56,11 @@ export function runTerritoryTransferTest(): boolean {
       population: 100000,
       isCapital: true,
       territorySize: 800,
+      x: 0,
+      y: 0,
+      isCoastal: false,
+      isOccupied: false,
+      neighbors: [],
     },
   };
 

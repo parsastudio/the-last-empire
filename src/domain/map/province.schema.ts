@@ -11,6 +11,7 @@ export const ProvinceSchema = z.object({
   x: z.number(),
   y: z.number(),
   isCoastal: z.boolean(),
+  isOccupied: z.boolean(),
   neighbors: z.array(z.string()),
 });
 

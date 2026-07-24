@@ -15,6 +15,12 @@ interface GameMapProps {
   occupations?: Record<string, number>;
   allProvinces?: Record<string, Province[]>;
   playerCountryCode?: string | null;
+  activeAssaultVector?: {
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+  } | null;
 }
 
 export function GameMap({
@@ -26,6 +32,7 @@ export function GameMap({
   occupations = {},
   allProvinces = {},
   playerCountryCode = null,
+  activeAssaultVector = null,
 }: GameMapProps) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [scale, setScale] = useState<number>(1);
@@ -211,6 +218,7 @@ export function GameMap({
           <MapOverlayNodes
             hoveredCountry={hoveredCountry}
             allProvinces={allProvinces}
+            activeAssaultVector={activeAssaultVector}
           />
         </svg>
       </div>

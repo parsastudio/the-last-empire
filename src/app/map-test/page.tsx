@@ -5,8 +5,7 @@ import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { GameMap } from "@/presentation/components/game-map";
 import { StrategicDashboard } from "@/presentation/components/strategic-dashboard";
 import { ActivePowersList } from "@/presentation/components/active-powers-list";
-import type { ActivePowerNation } from "@/presentation/components/active-powers-list";
-import { STATIC_ADJACENCY_LIST } from "@/application/map-data.config";
+import { useMapCalculations } from "@/presentation/hooks/use-map-calculations";
 import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { processProvincesAndVectors } from "@/application/map-processor";
 import {
@@ -27,6 +26,12 @@ export default function MapTestPage() {
   );
   const [isAttacking, setIsAttacking] = useState<boolean>(false);
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
+  const [assaultVector, setAssaultVector] = useState<{
+    fromX: number;
+    fromY: number;
+    toX: number;
+    toY: number;
+  } | null>(null);
 
   useEffect(() => {
     async function autoLoadWorldMap() {
@@ -107,6 +112,14 @@ export default function MapTestPage() {
     return state;
   }, [processedMap, occupations, playerCountryCode]);
 
+  const { activeBorders, empireStats, conquests, activePowersListData } =
+    useMapCalculations({
+      playerCountryCode,
+      provincesMap,
+      provincesState,
+      occupations,
+    });
+
   const handleCountryClick = (countryCode: string) => {
     if (!playerCountryCode) {
       const confirmed = window.confirm(
@@ -127,6 +140,23 @@ export default function MapTestPage() {
     );
     if (result.newlyConqueredProvIds.length > 0) {
       setIsAttacking(true);
+
+      const fromProv = Object.values(provincesMap)
+        .flat()
+        .find((p) => p.id === result.attackerSourceId);
+      const toProv = Object.values(provincesMap)
+        .flat()
+        .find((p) => p.id === result.defenderEntryId);
+
+      if (fromProv && toProv) {
+        setAssaultVector({
+          fromX: fromProv.x,
+          fromY: fromProv.y,
+          toX: toProv.x,
+          toY: toProv.y,
+        });
+      }
+
       let index = 0;
       const queuedIds = result.newlyConqueredProvIds;
 
@@ -144,100 +174,11 @@ export default function MapTestPage() {
         } else {
           clearInterval(interval);
           setIsAttacking(false);
+          setAssaultVector(null);
         }
       }, 150);
     }
   };
-
-  const activeBorders = useMemo(() => {
-    if (!playerCountryCode) return [];
-    const borderSet = new Set<string>();
-    const occupiedNations = new Set<string>([playerCountryCode]);
-
-    Object.entries(occupations).forEach(([code, percent]: [string, number]) => {
-      if (percent > 0) {
-        occupiedNations.add(code);
-      }
-    });
-
-    occupiedNations.forEach((nationCode: string) => {
-      const provId = `${nationCode}_P1`;
-      const neighbors = STATIC_ADJACENCY_LIST[provId] || [];
-      neighbors.forEach((neighborProvId: string) => {
-        const neighborCode = neighborProvId.replace("_P1", "");
-        if (!occupiedNations.has(neighborCode)) {
-          borderSet.add(neighborCode);
-        }
-      });
-    });
-
-    return Array.from(borderSet);
-  }, [occupations, playerCountryCode]);
-
-  const empireStats = useMemo(() => {
-    let totalGdp = 0;
-    let totalPopulation = 0;
-    let totalTerritories = 0;
-
-    if (!playerCountryCode)
-      return { totalGdp, totalPopulation, totalTerritories };
-
-    Object.values(provincesState).forEach((p: Province) => {
-      const countryCode = p.id.replace("_P1", "");
-      const occupiedPercent = occupations[countryCode] || 0;
-
-      if (p.id === `${playerCountryCode}_P1`) {
-        totalGdp += p.gdp;
-        totalPopulation += p.population;
-        totalTerritories += 1;
-      } else {
-        if (p.ownerNationId === playerCountryCode) {
-          totalGdp += p.gdp;
-          totalPopulation += p.population;
-          totalTerritories += 1;
-        } else if (occupiedPercent > 0) {
-          totalGdp += p.gdp * (occupiedPercent / 100);
-          totalPopulation += p.population * (occupiedPercent / 100);
-          totalTerritories += occupiedPercent / 100;
-        }
-      }
-    });
-
-    return { totalGdp, totalPopulation, totalTerritories };
-  }, [provincesState, occupations, playerCountryCode]);
-
-  const conquests = useMemo((): (Province & { occupiedPercent: number })[] => {
-    if (!playerCountryCode) return [];
-    return Object.values(provincesState)
-      .filter((p: Province) => p.id !== `${playerCountryCode}_P1`)
-      .map((p: Province) => {
-        const countryCode = p.id.replace("_P1", "");
-        const occupiedPercent = occupations[countryCode] || 0;
-        return {
-          ...p,
-          occupiedPercent,
-        };
-      })
-      .filter((p) => p.occupiedPercent > 0);
-  }, [provincesState, occupations, playerCountryCode]);
-
-  const activePowersListData = useMemo((): ActivePowerNation[] => {
-    const list: ActivePowerNation[] = [];
-    for (const [code, provs] of Object.entries(provincesMap)) {
-      const provId = `${code}_P1`;
-      const prov = provincesState[provId];
-      if (prov) {
-        list.push({
-          id: code,
-          name: prov.name.replace(" Region", ""),
-          gdp: provs.reduce((sum, p) => sum + p.gdp, 0),
-          population: provs.reduce((sum, p) => sum + p.population, 0),
-          provinceCount: provs.length,
-        });
-      }
-    }
-    return list;
-  }, [provincesMap, provincesState]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 text-white select-none">
@@ -267,6 +208,7 @@ export default function MapTestPage() {
             occupations={occupations}
             allProvinces={provincesMap}
             playerCountryCode={playerCountryCode}
+            activeAssaultVector={assaultVector}
           />
 
           <div className="absolute top-6 left-6 w-80 pointer-events-none z-40">

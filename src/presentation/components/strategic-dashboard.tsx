@@ -79,7 +79,7 @@ export function StrategicDashboard({
                   No neighbors.
                 </p>
               ) : (
-                activeBorders.map((borderNation) => (
+                activeBorders.map((borderNation: string) => (
                   <div
                     key={borderNation}
                     className="flex items-center justify-between p-2 bg-slate-950/40 border border-slate-800/50 rounded-lg text-[10px] font-mono text-slate-400"
@@ -104,7 +104,7 @@ export function StrategicDashboard({
                   No conquests.
                 </p>
               ) : (
-                conquests.map((p) => (
+                conquests.map((p: Province & { occupiedPercent: number }) => (
                   <div
                     key={p.id}
                     className="p-2.5 bg-slate-950/50 border border-slate-800/50 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-300"
