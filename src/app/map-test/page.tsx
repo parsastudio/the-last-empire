@@ -3,37 +3,14 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { GameMap } from "@/presentation/components/game-map";
-import { BorderGraphCalculator } from "@/engine/map/border-graph-calculator";
+import { STATIC_ADJACENCY_LIST } from "@/application/map-adjacency.config";
 import type { GeoJsonData } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
 
 export default function MapTestPage() {
   const { vectorProvinces, provinces, loading, error, loadMapFromData } =
     useMapLoader();
-  const [provincesState, setProvincesState] = useState<
-    Record<string, Province>
-  >({});
-
-  const graphCalculator = useMemo(() => new BorderGraphCalculator(), []);
-
-  const staticAdjacencyList: Record<string, string[]> = useMemo(
-    () => ({
-      IRN_P1: ["IRQ_P1", "TUR_P1", "AFG_P1", "PAK_P1", "AZE_P1", "ARM_P1"],
-      USA_P1: ["CAN_P1", "MEX_P1"],
-      CAN_P1: ["USA_P1"],
-      MEX_P1: ["USA_P1"],
-      AFG_P1: ["IRN_P1", "PAK_P1", "CHN_P1"],
-      PAK_P1: ["IRN_P1", "AFG_P1", "IND_P1"],
-      IRQ_P1: ["IRN_P1", "TUR_P1", "SAU_P1", "SYR_P1"],
-      TUR_P1: ["IRN_P1", "IRQ_P1", "SYR_P1"],
-      SAU_P1: ["YEM_P1", "OMN_P1", "IRQ_P1", "ARE_P1"],
-      CHN_P1: ["RUS_P1", "IND_P1", "AFG_P1", "PAK_P1"],
-      RUS_P1: ["CHN_P1", "UKR_P1", "FIN_P1"],
-      IND_P1: ["PAK_P1", "CHN_P1"],
-      BRA_P1: ["ARG_P1", "COL_P1"],
-    }),
-    [],
-  );
+  const [occupations, setOccupations] = useState<Record<string, number>>({});
 
   useEffect(() => {
     async function autoLoadWorldMap() {
@@ -53,33 +30,65 @@ export default function MapTestPage() {
     autoLoadWorldMap();
   }, [loadMapFromData]);
 
-  useEffect(() => {
-    if (provinces) {
-      setProvincesState(provinces);
+  const provincesState = useMemo((): Record<string, Province> => {
+    if (!provinces) return {};
+    const state: Record<string, Province> = {};
+    for (const [id, prov] of Object.entries(provinces)) {
+      const countryCode = prov.id.replace("_P1", "");
+      const occupiedPercent = occupations[countryCode] || 0;
+      state[id] = {
+        ...prov,
+        ownerNationId: occupiedPercent >= 100 ? "IRN" : prov.ownerNationId,
+      };
     }
-  }, [provinces]);
+    return state;
+  }, [provinces, occupations]);
 
   const handleCountryAttack = (countryCode: string) => {
-    const provinceId = `${countryCode}_P1`;
-    const province = provincesState[provinceId];
-    if (!province) return;
+    if (countryCode === "IRN") return;
 
-    setProvincesState((prev) => ({
-      ...prev,
-      [provinceId]: {
-        ...province,
-        ownerNationId: "IRN",
-      },
-    }));
+    setOccupations((prev) => {
+      const current = prev[countryCode] || 0;
+      const remaining = 100 - current;
+      const newlyOccupied = remaining * 0.2;
+      const nextPercent = Number((current + newlyOccupied).toFixed(1));
+
+      const updated = {
+        ...prev,
+        [countryCode]: nextPercent,
+      };
+
+      if (nextPercent >= 99.9) {
+        updated[countryCode] = 100;
+      }
+
+      return updated;
+    });
   };
 
   const activeBorders = useMemo(() => {
-    return graphCalculator.calculateActiveBorders(
-      "IRN",
-      provincesState,
-      staticAdjacencyList,
-    );
-  }, [provincesState, graphCalculator, staticAdjacencyList]);
+    const borderSet = new Set<string>();
+    const occupiedNations = new Set<string>(["IRN"]);
+
+    Object.entries(occupations).forEach(([code, percent]) => {
+      if (percent > 0) {
+        occupiedNations.add(code);
+      }
+    });
+
+    occupiedNations.forEach((nationCode) => {
+      const provId = `${nationCode}_P1`;
+      const neighbors = STATIC_ADJACENCY_LIST[provId] || [];
+      neighbors.forEach((neighborProvId) => {
+        const neighborCode = neighborProvId.replace("_P1", "");
+        if (!occupiedNations.has(neighborCode)) {
+          borderSet.add(neighborCode);
+        }
+      });
+    });
+
+    return Array.from(borderSet);
+  }, [occupations]);
 
   const empireStats = useMemo(() => {
     let totalGdp = 0;
@@ -87,20 +96,45 @@ export default function MapTestPage() {
     let totalTerritories = 0;
 
     Object.values(provincesState).forEach((p) => {
-      if (p.ownerNationId === "IRN") {
+      const countryCode = p.id.replace("_P1", "");
+      const occupiedPercent = occupations[countryCode] || 0;
+
+      if (p.id === "IRN_P1") {
         totalGdp += p.gdp;
         totalPopulation += p.population;
-        totalTerritories++;
+        totalTerritories += 1;
+      } else {
+        if (p.ownerNationId === "IRN") {
+          totalGdp += p.gdp;
+          totalPopulation += p.population;
+          totalTerritories += 1;
+        } else if (occupiedPercent > 0) {
+          totalGdp += p.gdp * (occupiedPercent / 100);
+          totalPopulation += p.population * (occupiedPercent / 100);
+          totalTerritories += occupiedPercent / 100;
+        }
       }
     });
 
     return { totalGdp, totalPopulation, totalTerritories };
-  }, [provincesState]);
+  }, [provincesState, occupations]);
+
+  const conquests = useMemo(() => {
+    return Object.values(provincesState)
+      .filter((p) => p.id !== "IRN_P1")
+      .map((p) => {
+        const countryCode = p.id.replace("_P1", "");
+        const occupiedPercent = occupations[countryCode] || 0;
+        return {
+          ...p,
+          occupiedPercent,
+        };
+      })
+      .filter((p) => p.occupiedPercent > 0);
+  }, [provincesState, occupations]);
 
   const handleReset = () => {
-    if (provinces) {
-      setProvincesState(provinces);
-    }
+    setOccupations({});
   };
 
   return (
@@ -128,6 +162,7 @@ export default function MapTestPage() {
             width={1200}
             height={600}
             onCountryClick={handleCountryAttack}
+            occupations={occupations}
           />
 
           <div className="absolute top-6 right-6 w-80 space-y-4 pointer-events-none z-40">
@@ -151,13 +186,13 @@ export default function MapTestPage() {
                 </h2>
                 <div className="space-y-1.5 font-mono text-xs bg-slate-950/50 p-3 rounded-xl border border-slate-800/50 text-slate-300">
                   <div>
-                    Territories:{" "}
+                    Control Size:{" "}
                     <span className="text-white font-bold">
-                      {empireStats.totalTerritories}
+                      {empireStats.totalTerritories.toFixed(2)} units
                     </span>
                   </div>
                   <div>
-                    GDP:{" "}
+                    Total GDP:{" "}
                     <span className="text-white font-bold">
                       ${(empireStats.totalGdp / 1e9).toFixed(1)}B
                     </span>
@@ -165,7 +200,7 @@ export default function MapTestPage() {
                   <div>
                     Population:{" "}
                     <span className="text-white font-bold">
-                      {(empireStats.totalPopulation / 1e6).toFixed(1)}M
+                      ${(empireStats.totalPopulation / 1e6).toFixed(1)}M
                     </span>
                   </div>
                 </div>
@@ -201,29 +236,36 @@ export default function MapTestPage() {
                   Invasion Conquests
                 </h2>
                 <div className="max-h-[150px] overflow-y-auto pr-1 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
-                  {Object.values(provincesState).filter(
-                    (p) => p.ownerNationId === "IRN" && p.id !== "IRN_P1",
-                  ).length === 0 ? (
+                  {conquests.length === 0 ? (
                     <p className="text-[10px] text-slate-500 font-mono italic">
                       No conquests.
                     </p>
                   ) : (
-                    Object.values(provincesState)
-                      .filter(
-                        (p) => p.ownerNationId === "IRN" && p.id !== "IRN_P1",
-                      )
-                      .map((p) => (
-                        <div
-                          key={p.id}
-                          className="p-2.5 bg-slate-950/50 border border-slate-800/50 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-300"
-                        >
-                          <div className="text-white font-bold">{p.name}</div>
-                          <div className="text-slate-500 text-[8px]">
-                            GDP: ${(p.gdp / 1e9).toFixed(1)}B | Pop:{" "}
-                            {(p.population / 1e6).toFixed(1)}M
-                          </div>
+                    conquests.map((p) => (
+                      <div
+                        key={p.id}
+                        className="p-2.5 bg-slate-950/50 border border-slate-800/50 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-300"
+                      >
+                        <div className="flex justify-between">
+                          <span className="text-white font-bold">{p.name}</span>
+                          <span className="text-emerald-400 font-extrabold">
+                            {p.occupiedPercent}%
+                          </span>
                         </div>
-                      ))
+                        <div className="text-slate-500 text-[8px]">
+                          GDP Contribution: $
+                          {((p.gdp * (p.occupiedPercent / 100)) / 1e9).toFixed(
+                            1,
+                          )}
+                          B | Pop: $
+                          {(
+                            (p.population * (p.occupiedPercent / 100)) /
+                            1e6
+                          ).toFixed(1)}
+                          M
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>

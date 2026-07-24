@@ -1,5 +1,6 @@
 import { TerritoryOccupationManager } from "../territory-occupation-manager";
 import type { Nation } from "@/domain/nation/nation.schema";
+import type { Province } from "@/domain/map/province.schema";
 
 export function runTerritoryTransferTest(): boolean {
   const manager = new TerritoryOccupationManager();
@@ -46,7 +47,24 @@ export function runTerritoryTransferTest(): boolean {
     },
   } as unknown as Nation;
 
-  const result = manager.processVictoryOccupation(mockWinner, mockLoser, 0.25);
+  const mockProvinces: Record<string, Province> = {
+    NATION_B_P1: {
+      id: "NATION_B_P1",
+      name: "Region B",
+      ownerNationId: "NATION_B",
+      gdp: 5000,
+      population: 100000,
+      isCapital: true,
+      territorySize: 800,
+    },
+  };
+
+  const result = manager.processVictoryOccupation(
+    mockWinner,
+    mockLoser,
+    mockProvinces,
+    0.25,
+  );
 
   const winnerValid =
     result.winner.geography.territorySize === 1200 &&

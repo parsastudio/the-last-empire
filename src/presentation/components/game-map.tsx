@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import type { VectorProvince } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
 
@@ -10,6 +10,7 @@ interface GameMapProps {
   width: number;
   height: number;
   onCountryClick: (countryCode: string, angle: number) => void;
+  occupations?: Record<string, number>;
 }
 
 export function GameMap({
@@ -18,9 +19,9 @@ export function GameMap({
   width,
   height,
   onCountryClick,
+  occupations = {},
 }: GameMapProps) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
-
   const [scale, setScale] = useState<number>(1);
   const [position, setPosition] = useState<{ x: number; y: number }>({
     x: 0,
@@ -31,8 +32,6 @@ export function GameMap({
     x: 0,
     y: 0,
   });
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const getNationColor = (countryCode: string): string => {
     if (countryCode === "IRN") {
@@ -72,17 +71,6 @@ export function GameMap({
     setIsDragging(false);
   };
 
-  const zoomIn = () => setScale((prev) => Math.min(prev + 0.5, 6));
-  const zoomOut = () => {
-    setScale((prev) => {
-      const next = Math.max(prev - 0.5, 1);
-      if (next === 1) {
-        setPosition({ x: 0, y: 0 });
-      }
-      return next;
-    });
-  };
-
   const resetView = () => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
@@ -90,7 +78,6 @@ export function GameMap({
 
   return (
     <div
-      ref={containerRef}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -127,6 +114,37 @@ export function GameMap({
                 strokeWidth="4"
               />
             </pattern>
+
+            {vectorProvinces.map((prov) => {
+              const occupiedPercent = occupations[prov.countryCode] || 0;
+              if (
+                occupiedPercent > 0 &&
+                occupiedPercent < 100 &&
+                prov.countryCode !== "IRN"
+              ) {
+                const baseColor = getNationColor(prov.countryCode);
+                return (
+                  <linearGradient
+                    key={`grad-${prov.id}`}
+                    id={`occupied-grad-${prov.countryCode}`}
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="0%"
+                  >
+                    <stop
+                      offset={`${occupiedPercent}%`}
+                      stopColor="rgb(16, 185, 129)"
+                    />
+                    <stop
+                      offset={`${occupiedPercent}%`}
+                      stopColor={baseColor}
+                    />
+                  </linearGradient>
+                );
+              }
+              return null;
+            })}
           </defs>
 
           <rect width={width} height={height} fill="rgb(10, 15, 30)" />
@@ -137,15 +155,20 @@ export function GameMap({
             const currentOwner = provData
               ? provData.ownerNationId
               : prov.countryCode;
-
-            const isOccupiedByIran =
-              currentOwner === "IRN" && prov.countryCode !== "IRN";
+            const occupiedPercent = occupations[prov.countryCode] || 0;
 
             let fillValue = getNationColor(currentOwner);
-            if (isOccupiedByIran) {
-              fillValue = "url(#military-stripes-IRN)";
+
+            if (prov.countryCode !== "IRN") {
+              if (currentOwner === "IRN" || occupiedPercent >= 100) {
+                fillValue = "url(#military-stripes-IRN)";
+              } else if (occupiedPercent > 0) {
+                fillValue = `url(#occupied-grad-${prov.countryCode})`;
+              } else if (isHovered) {
+                fillValue = "rgb(14, 165, 233)";
+              }
             } else if (isHovered) {
-              fillValue = "rgb(14, 165, 233)";
+              fillValue = "rgb(52, 211, 153)";
             }
 
             return (
@@ -168,7 +191,7 @@ export function GameMap({
 
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full border border-slate-800/80 flex items-center gap-4 shadow-2xl pointer-events-auto z-50">
         <button
-          onClick={zoomOut}
+          onClick={() => setScale((prev) => Math.max(prev - 0.5, 1))}
           className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center font-bold text-lg select-none transition-colors border border-slate-700/50"
         >
           -
@@ -177,7 +200,7 @@ export function GameMap({
           {scale.toFixed(1)}x
         </span>
         <button
-          onClick={zoomIn}
+          onClick={() => setScale((prev) => Math.min(prev + 0.5, 6))}
           className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center font-bold text-lg select-none transition-colors border border-slate-700/50"
         >
           +
@@ -197,11 +220,11 @@ export function GameMap({
           <div className="text-lg font-bold text-white mt-0.5">
             {hoveredCountry}
           </div>
-          {provincesState[`${hoveredCountry}_P1`]?.ownerNationId === "IRN" &&
-            hoveredCountry !== "IRN" && (
+          {hoveredCountry !== "IRN" &&
+            (occupations[hoveredCountry] || 0) > 0 && (
               <div className="text-[10px] text-emerald-400 mt-1 font-bold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
-                Occupied territory of Iran
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                {occupations[hoveredCountry]}% occupied by Iran
               </div>
             )}
         </div>

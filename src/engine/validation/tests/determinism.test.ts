@@ -15,6 +15,7 @@ export function runDeterminismTest(): boolean {
     marketPrices: initialPrices,
     turnLogs: [],
     eventFlags: {},
+    provinces: {},
     nations: {
       USA: {
         id: "USA",
