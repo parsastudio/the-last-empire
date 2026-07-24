@@ -174,12 +174,18 @@ export function GameMap({
               fillValue = "rgb(52, 211, 153)";
             }
 
+            const isOriginallyDifferent = !prov.id.startsWith(currentOwner);
+            const strokeColor =
+              isOriginallyDifferent && !isHovered
+                ? fillValue
+                : "rgba(10, 15, 30, 0.6)";
+
             return (
               <g key={prov.id}>
                 <path
                   d={prov.pathData}
                   fill={fillValue}
-                  stroke="rgba(10, 15, 30, 0.6)"
+                  stroke={strokeColor}
                   strokeWidth={isHovered ? "1.5" : "0.5"}
                   className="transition-all duration-150 cursor-pointer"
                   onMouseEnter={() => setHoveredCountry(prov.countryCode)}
