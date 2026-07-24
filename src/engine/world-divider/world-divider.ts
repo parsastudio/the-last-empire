@@ -182,6 +182,18 @@ export function subdivideWorld(
     });
   });
 
+  let totalArea = 0;
+  countriesData.forEach((c) => {
+    totalArea += c.area;
+  });
+
+  const targetWeights = countriesData.map((c) => {
+    const weight = Math.pow(c.area, 0.45);
+    return { code: c.code, weight };
+  });
+
+  const totalWeight = targetWeights.reduce((sum, w) => sum + w.weight, 0);
+
   const regionAllocations: Record<string, number> = {};
   countriesData.forEach((c, idx) => {
     const w = targetWeights[idx]?.weight || 0;

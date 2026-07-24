@@ -3,11 +3,11 @@
 import React, { useEffect, useState, useRef } from "react";
 import { SubdividedRegion } from "@/engine/world-divider/world-divider";
 import { MapControls } from "@/presentation/components/map-controls";
-import { TestPageHeader } from "./components/test-page-header";
-import { RegionTooltip } from "./components/region-tooltip";
-import { WorldMapSvg } from "./components/world-map-svg";
+import { TestPageHeader } from "../world-divider-test/components/test-page-header";
+import { RegionTooltip } from "../world-divider-test/components/region-tooltip";
+import { WorldMapSvg } from "../world-divider-test/components/world-map-svg";
 
-export default function WorldDividerTestPage() {
+export default function WorldDividerSimplifiedTestPage() {
   const [regions, setRegions] = useState<SubdividedRegion[]>([]);
   const [hoveredRegion, setHoveredRegion] = useState<SubdividedRegion | null>(
     null,
@@ -27,16 +27,16 @@ export default function WorldDividerTestPage() {
   useEffect(() => {
     async function initLifecycle() {
       try {
-        const check = await fetch("/world-map-subdivided.json");
+        const check = await fetch("/world-map-simplified.json");
         if (check.ok) {
           const cached = await check.json();
           setRegions(cached);
         } else {
           setBaking(true);
-          const bakeRes = await fetch("/api/bake-map?type=full");
+          const bakeRes = await fetch("/api/bake-map?type=simplified");
           const bakeJson = await bakeRes.json();
           if (bakeJson.success) {
-            const getBaked = await fetch("/world-map-subdivided.json");
+            const getBaked = await fetch("/world-map-simplified.json");
             const data = await getBaked.json();
             setRegions(data);
           } else {
@@ -44,7 +44,7 @@ export default function WorldDividerTestPage() {
           }
         }
       } catch {
-        setError("Failed to load or bake world map data");
+        setError("Failed to load or bake simplified map data");
       } finally {
         setLoading(false);
         setBaking(false);
@@ -101,7 +101,7 @@ export default function WorldDividerTestPage() {
           <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-400 font-medium">
             {baking
-              ? "Pre-Processing & Baking Global 3D Vector Assets..."
+              ? "Pre-Processing & Baking Simplified 70-Country World Assets..."
               : "Loading Baked Geopolitical Grid..."}
           </p>
         </div>
