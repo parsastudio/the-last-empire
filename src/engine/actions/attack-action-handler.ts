@@ -1,8 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import type {
-  GameAction,
-  AttackAction,
-} from "@/domain/game/action.schema";
+import type { GameAction, AttackAction } from "@/domain/game/action.schema";
 import { CombatResolver } from "@/engine/combat/combat-resolver";
 import { GeographyDistanceCalculator } from "@/engine/economy/geography-distance-calculator";
 import { SeededRandom } from "@/domain/shared/seeded-random";

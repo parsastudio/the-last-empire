@@ -4,19 +4,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { GameMap } from "@/presentation/components/game-map";
 import { StrategicDashboard } from "@/presentation/components/strategic-dashboard";
-import {
-  STATIC_ADJACENCY_LIST,
-  CENTROIDS,
-} from "@/application/map-data.config";
+import { STATIC_ADJACENCY_LIST } from "@/application/map-data.config";
 import { processProvincesAndVectors } from "@/application/map-processor";
 import {
-  generateProvinces,
-  linkCountryProvinces,
+  expandCountryProvinces,
   executeProvinceAttack,
 } from "@/application/province-engine";
-import type { AbstractProvince } from "@/application/province-engine";
-import type { GeoJsonData } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
+import type { GeoJsonData } from "@/engine/map/grid-generator";
 
 export default function MapTestPage() {
   const { vectorProvinces, provinces, loading, error, loadMapFromData } =
@@ -51,79 +46,37 @@ export default function MapTestPage() {
     return processProvincesAndVectors(provinces, vectorProvinces);
   }, [vectorProvinces, provinces]);
 
-  const totalArea = useMemo(() => {
-    if (!processedMap) return 0;
-    return Object.values(processedMap.provinces).reduce(
-      (sum, p) => sum + p.territorySize,
-      0,
-    );
-  }, [processedMap]);
-
-  const provincesMap = useMemo((): Record<string, AbstractProvince[]> => {
+  const provincesMap = useMemo((): Record<string, Province[]> => {
     if (!processedMap) return {};
-    const initialMap: Record<string, AbstractProvince[]> = {};
-    for (const prov of Object.values(processedMap.provinces)) {
-      const countryCode = prov.id.replace("_P1", "");
-      const hasSeaAccess = [
-        "USA",
-        "CAN",
-        "RUS",
-        "CHN",
-        "IRN",
-        "SAU",
-        "DEU",
-        "IRQ",
-        "MYS",
-        "MAR",
-        "DZA",
-      ].includes(countryCode);
-      const center = CENTROIDS[countryCode] || {
-        x: (prov.gdp % 400) + 300,
-        y: (prov.population % 250) + 150,
-      };
+    const expanded = expandCountryProvinces(processedMap.provinces);
+    const grouped: Record<string, Province[]> = {};
 
-      const countryArea = prov.territorySize;
-      const provinceShare =
-        totalArea > 0 ? Math.round((countryArea / totalArea) * 1000) : 5;
-      const numProvinces = Math.max(4, Math.min(60, provinceShare));
-
-      const provs = generateProvinces(
-        countryCode,
-        prov.name.replace(" Region", ""),
-        center.x,
-        center.y,
-        hasSeaAccess,
-        numProvinces,
-      );
-
-      if (playerCountryCode && countryCode === playerCountryCode) {
-        provs.forEach((p: AbstractProvince) => {
-          p.isOccupied = true;
-        });
+    for (const prov of Object.values(expanded)) {
+      if (!grouped[prov.ownerNationId]) {
+        grouped[prov.ownerNationId] = [];
       }
-
-      initialMap[countryCode] = provs;
+      grouped[prov.ownerNationId].push(prov);
     }
-    linkCountryProvinces(initialMap, STATIC_ADJACENCY_LIST);
 
-    for (const provs of Object.values(initialMap)) {
-      for (const p of provs) {
+    for (const list of Object.values(grouped)) {
+      for (const p of list) {
+        if (playerCountryCode && p.ownerNationId === playerCountryCode) {
+          p.isOccupied = true;
+        }
         if (occupiedProvinceIds.has(p.id)) {
           p.isOccupied = true;
         }
       }
     }
 
-    return initialMap;
-  }, [processedMap, occupiedProvinceIds, playerCountryCode, totalArea]);
+    return grouped;
+  }, [processedMap, occupiedProvinceIds, playerCountryCode]);
 
   const occupations = useMemo((): Record<string, number> => {
     const occs: Record<string, number> = {};
     for (const [code, provs] of Object.entries(provincesMap)) {
       if (code === playerCountryCode || provs.length === 0) continue;
-      const occupiedCount = provs.filter(
-        (p: AbstractProvince) => p.isOccupied,
-      ).length;
+      const occupiedCount = provs.filter((p: Province) => p.isOccupied).length;
       if (occupiedCount > 0) {
         occs[code] = Number(((occupiedCount / provs.length) * 100).toFixed(1));
       }

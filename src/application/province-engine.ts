@@ -1,15 +1,5 @@
-import { STATIC_ADJACENCY_LIST } from "./map-data.config";
-
-export interface AbstractProvince {
-  id: string;
-  name: string;
-  countryCode: string;
-  x: number;
-  y: number;
-  isCoastal: boolean;
-  isOccupied: boolean;
-  neighbors: string[];
-}
+import { Province } from "@/domain/map/province.schema";
+import { STATIC_ADJACENCY_LIST, CENTROIDS } from "./map-data.config";
 
 export function generateProvinces(
   countryCode: string,
@@ -18,8 +8,8 @@ export function generateProvinces(
   centerY: number,
   hasSeaAccess: boolean,
   numProvinces = 5,
-): AbstractProvince[] {
-  const provinces: AbstractProvince[] = [];
+): Province[] {
+  const provinces: Province[] = [];
   const isCoastalCount = hasSeaAccess
     ? Math.max(1, Math.floor(numProvinces * 0.4))
     : 0;
@@ -27,11 +17,14 @@ export function generateProvinces(
   provinces.push({
     id: `${countryCode}_P1`,
     name: `${name} - Capital Region`,
-    countryCode,
+    ownerNationId: countryCode,
+    gdp: 0,
+    population: 0,
+    isCapital: true,
+    territorySize: 10,
     x: centerX,
     y: centerY,
     isCoastal: hasSeaAccess && isCoastalCount > 0,
-    isOccupied: false,
     neighbors: [],
   });
 
@@ -46,11 +39,14 @@ export function generateProvinces(
       provinces.push({
         id: `${countryCode}_P${i + 2}`,
         name: `${name} - Sector ${i + 1}`,
-        countryCode,
+        ownerNationId: countryCode,
+        gdp: 0,
+        population: 0,
+        isCapital: false,
+        territorySize: 10,
         x: px,
         y: py,
         isCoastal: i < isCoastalCount - 1,
-        isOccupied: false,
         neighbors: [],
       });
     }
@@ -81,7 +77,7 @@ export function generateProvinces(
 }
 
 export function linkCountryProvinces(
-  allProvinces: Record<string, AbstractProvince[]>,
+  allProvinces: Record<string, Province[]>,
   adjacencyList: Record<string, string[]>,
 ): void {
   for (const [countryId, neighbors] of Object.entries(adjacencyList)) {
@@ -95,8 +91,8 @@ export function linkCountryProvinces(
       if (!neighborProvs || neighborProvs.length === 0) continue;
 
       let minDistance = Infinity;
-      let closestA: AbstractProvince | null = null;
-      let closestB: AbstractProvince | null = null;
+      let closestA: Province | null = null;
+      let closestB: Province | null = null;
 
       for (const a of countryProvs) {
         for (const b of neighborProvs) {
@@ -123,9 +119,76 @@ export function linkCountryProvinces(
   }
 }
 
+export function expandCountryProvinces(
+  rawProvinces: Record<string, Province>,
+): Record<string, Province> {
+  const totalArea = Object.values(rawProvinces).reduce(
+    (sum, p) => sum + p.territorySize,
+    0,
+  );
+  const expanded: Record<string, Province> = {};
+  const tempProvsMap: Record<string, Province[]> = {};
+
+  for (const [id, prov] of Object.entries(rawProvinces)) {
+    const countryCode = id.replace("_P1", "");
+    const hasSeaAccess = [
+      "USA",
+      "CAN",
+      "RUS",
+      "CHN",
+      "IRN",
+      "SAU",
+      "DEU",
+      "IRQ",
+      "MYS",
+      "MAR",
+      "DZA",
+    ].includes(countryCode);
+    const center = CENTROIDS[countryCode] || {
+      x: (prov.gdp % 400) + 300,
+      y: (prov.population % 250) + 150,
+    };
+    const countryArea = prov.territorySize;
+    const provinceShare =
+      totalArea > 0 ? Math.round((countryArea / totalArea) * 1000) : 5;
+    const numProvinces = Math.max(4, Math.min(60, provinceShare));
+
+    const list = generateProvinces(
+      countryCode,
+      prov.name.replace(" Region", ""),
+      center.x,
+      center.y,
+      hasSeaAccess,
+      numProvinces,
+    );
+
+    const subGdp = Math.floor(prov.gdp / numProvinces);
+    const subPop = Math.floor(prov.population / numProvinces);
+    const subSize = Math.max(1, Math.floor(prov.territorySize / numProvinces));
+
+    list.forEach((p) => {
+      p.gdp = subGdp;
+      p.population = subPop;
+      p.territorySize = subSize;
+    });
+
+    tempProvsMap[countryCode] = list;
+  }
+
+  linkCountryProvinces(tempProvsMap, STATIC_ADJACENCY_LIST);
+
+  for (const list of Object.values(tempProvsMap)) {
+    for (const p of list) {
+      expanded[p.id] = p;
+    }
+  }
+
+  return expanded;
+}
+
 export function executeProvinceAttack(
   targetCountryCode: string,
-  allProvinces: Record<string, AbstractProvince[]>,
+  allProvinces: Record<string, Province[]>,
   attackerCountryCode?: string,
 ): { newlyConqueredProvIds: string[] } {
   const targetProvs = allProvinces[targetCountryCode];
@@ -136,7 +199,7 @@ export function executeProvinceAttack(
   const defenderTotal = targetProvs.length;
   const targetCount = Math.max(1, Math.floor(defenderTotal * 0.25));
 
-  let startProvince: AbstractProvince | null = null;
+  let startProvince: Province | null = null;
 
   if (attackerCountryCode) {
     const attackerAdjacency =
@@ -150,7 +213,8 @@ export function executeProvinceAttack(
       if (attackerCapital) {
         let minDistance = Infinity;
         for (const p of targetProvs) {
-          if (!p.isOccupied) {
+          const isOccupied = p.ownerNationId === attackerCountryCode;
+          if (!isOccupied) {
             const dist = Math.sqrt(
               Math.pow(p.x - attackerCapital.x, 2) +
                 Math.pow(p.y - attackerCapital.y, 2),
@@ -166,7 +230,7 @@ export function executeProvinceAttack(
       const attackerCoastal =
         allProvinces[attackerCountryCode]?.filter((p) => p.isCoastal) || [];
       const defenderCoastal = targetProvs.filter(
-        (p) => p.isCoastal && !p.isOccupied,
+        (p) => p.isCoastal && p.ownerNationId !== attackerCountryCode,
       );
 
       if (attackerCoastal.length > 0 && defenderCoastal.length > 0) {
@@ -187,7 +251,9 @@ export function executeProvinceAttack(
   }
 
   if (!startProvince) {
-    const unOccupied = targetProvs.filter((p) => !p.isOccupied);
+    const unOccupied = targetProvs.filter(
+      (p) => p.ownerNationId !== attackerCountryCode,
+    );
     startProvince = unOccupied[0] || null;
   }
 
@@ -196,14 +262,13 @@ export function executeProvinceAttack(
   }
 
   const newlyConqueredProvIds: string[] = [];
-  const queue: AbstractProvince[] = [startProvince];
+  const queue: Province[] = [startProvince];
   const visited = new Set<string>([startProvince.id]);
 
   while (queue.length > 0 && newlyConqueredProvIds.length < targetCount) {
     const current = queue.shift();
     if (!current) continue;
 
-    current.isOccupied = true;
     newlyConqueredProvIds.push(current.id);
 
     for (const neighborId of current.neighbors) {
@@ -212,7 +277,7 @@ export function executeProvinceAttack(
         !visited.has(neighborId)
       ) {
         const neighbor = targetProvs.find((p) => p.id === neighborId);
-        if (neighbor && !neighbor.isOccupied) {
+        if (neighbor && neighbor.ownerNationId !== attackerCountryCode) {
           visited.add(neighborId);
           queue.push(neighbor);
         }

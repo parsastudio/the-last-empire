@@ -8,6 +8,10 @@ export const ProvinceSchema = z.object({
   population: z.number().nonnegative(),
   isCapital: z.boolean(),
   territorySize: z.number().positive(),
+  x: z.number(),
+  y: z.number(),
+  isCoastal: z.boolean(),
+  neighbors: z.array(z.string()),
 });
 
 export type Province = z.infer<typeof ProvinceSchema>;

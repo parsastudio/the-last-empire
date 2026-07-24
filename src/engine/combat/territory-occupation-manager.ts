@@ -1,5 +1,6 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { Province } from "@/domain/map/province.schema";
+import { executeProvinceAttack } from "@/application/province-engine";
 
 export interface OccupationResult {
   winner: Nation;
@@ -25,16 +26,24 @@ export class TerritoryOccupationManager {
       (p) => p.ownerNationId === loser.id,
     );
 
-    const numToCapture = Math.max(
-      1,
-      Math.floor(loserProvinces.length * seizeRatio),
+    const winnerProvinces = Object.values(provinces).filter(
+      (p) => p.ownerNationId === winner.id,
     );
-    const capturedProvinces = loserProvinces.slice(0, numToCapture);
-    const capturedProvinceIds = capturedProvinces.map((p) => p.id);
+
+    const groupedProvs: Record<string, Province[]> = {
+      [loser.id]: loserProvinces,
+      [winner.id]: winnerProvinces,
+    };
+
+    const result = executeProvinceAttack(loser.id, groupedProvs, winner.id);
+    const capturedProvinceIds = result.newlyConqueredProvIds;
 
     let seizedTerritory = 0;
-    capturedProvinces.forEach((prov) => {
-      seizedTerritory += prov.territorySize;
+    capturedProvinceIds.forEach((id) => {
+      const prov = provinces[id];
+      if (prov) {
+        seizedTerritory += prov.territorySize;
+      }
     });
 
     const updatedWinner = {
