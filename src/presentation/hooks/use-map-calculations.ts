@@ -19,7 +19,7 @@ export function useMapCalculations({
 }: UseMapCalculationsProps) {
   const activeBorders = useActiveBorders({
     playerCountryCode,
-    occupations,
+    provincesState,
   });
 
   const empireStats = useEmpireStats({

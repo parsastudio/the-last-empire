@@ -1,8 +1,6 @@
 import React from "react";
-import type { Province } from "@/domain/map/province.schema";
 import { TacticalAssaultLaser } from "./map/tactical-assault-laser";
-import { NetworkConnectionLines } from "./map/network-connection-lines";
-import { CoastalNodeIndicators } from "./map/coastal-node-indicators";
+import type { Province } from "@/domain/map/province.schema";
 
 interface MapOverlayNodesProps {
   hoveredCountry: string | null;
@@ -16,29 +14,14 @@ interface MapOverlayNodesProps {
 }
 
 export function MapOverlayNodes({
-  hoveredCountry,
-  allProvinces,
   activeAssaultVector = null,
+  ..._unused
 }: MapOverlayNodesProps) {
-  const visibleCountries = hoveredCountry ? [hoveredCountry] : [];
-
   return (
     <g className="pointer-events-none">
       {activeAssaultVector && (
         <TacticalAssaultLaser vector={activeAssaultVector} />
       )}
-
-      {visibleCountries.map((cCode) => {
-        const targetProvs = allProvinces[cCode];
-        if (!targetProvs) return null;
-
-        return (
-          <g key={`network-${cCode}`}>
-            <NetworkConnectionLines targetProvs={targetProvs} />
-            <CoastalNodeIndicators targetProvs={targetProvs} />
-          </g>
-        );
-      })}
     </g>
   );
 }

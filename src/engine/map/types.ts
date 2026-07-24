@@ -6,6 +6,7 @@ export interface GeoJsonFeature {
   properties: {
     ISO_A3?: string;
     iso_a3?: string;
+    adm0_a3?: string;
     NAME?: string;
     name?: string;
     POP_EST?: number;
