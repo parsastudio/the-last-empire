@@ -3,6 +3,10 @@
 import React, { useState } from "react";
 import { MapOverlayNodes } from "./map-overlay-nodes";
 import { MapControls } from "./map-controls";
+import { useMapGesture } from "../hooks/use-map-gesture";
+import { MapDefs } from "./map-defs";
+import { MapCountryPaths } from "./map-country-paths";
+import { MapTooltip } from "./map-tooltip";
 import type { VectorProvince } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
 
@@ -35,16 +39,17 @@ export function GameMap({
   activeAssaultVector = null,
 }: GameMapProps) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
-  const [scale, setScale] = useState<number>(1);
-  const [position, setPosition] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
+  const {
+    scale,
+    position,
+    isDragging,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    zoomIn,
+    zoomOut,
+    resetView,
+  } = useMapGesture();
 
   const getNationColor = (countryCode: string): string => {
     if (playerCountryCode && countryCode === playerCountryCode) {
@@ -60,24 +65,6 @@ export function GameMap({
     return `rgb(${r}, ${g}, ${b})`;
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
   const stripeId = playerCountryCode
     ? `military-stripes-${playerCountryCode}`
     : "military-stripes-IRN";
@@ -85,10 +72,7 @@ export function GameMap({
   const getCountryFullName = (code: string): string => {
     const provId = `${code}_P1`;
     const prov = provincesState[provId];
-    if (prov) {
-      return prov.name.replace(" Region", "");
-    }
-    return code;
+    return prov ? prov.name.replace(" Region", "") : code;
   };
 
   return (
@@ -111,109 +95,27 @@ export function GameMap({
           viewBox={`0 0 ${width} ${height}`}
           className="w-full h-full pointer-events-auto"
         >
-          <defs>
-            <pattern
-              id={stripeId}
-              width="12"
-              height="12"
-              patternTransform="rotate(45)"
-              patternUnits="userSpaceOnUse"
-            >
-              <rect width="12" height="12" fill="rgb(16, 185, 129)" />
-              <line
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="12"
-                stroke="rgba(10, 15, 30, 0.35)"
-                strokeWidth="4"
-              />
-            </pattern>
-
-            {vectorProvinces.map((prov) => {
-              const occupiedPercent = occupations[prov.countryCode] || 0;
-              if (
-                occupiedPercent > 0 &&
-                occupiedPercent < 100 &&
-                prov.countryCode !== playerCountryCode
-              ) {
-                const baseColor = getNationColor(prov.countryCode);
-                return (
-                  <linearGradient
-                    key={`grad-${prov.id}`}
-                    id={`occupied-grad-${prov.countryCode}`}
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="0%"
-                  >
-                    <stop
-                      offset={`${occupiedPercent}%`}
-                      stopColor="rgb(16, 185, 129)"
-                    />
-                    <stop
-                      offset={`${occupiedPercent}%`}
-                      stopColor={baseColor}
-                    />
-                  </linearGradient>
-                );
-              }
-              return null;
-            })}
-          </defs>
+          <MapDefs
+            stripeId={stripeId}
+            vectorProvinces={vectorProvinces}
+            occupations={occupations}
+            playerCountryCode={playerCountryCode}
+            getNationColor={getNationColor}
+          />
 
           <rect width={width} height={height} fill="rgb(10, 15, 30)" />
 
-          {vectorProvinces.map((prov) => {
-            const isHovered = hoveredCountry === prov.countryCode;
-            const provData = provincesState[prov.id];
-            const currentOwner = provData
-              ? provData.ownerNationId
-              : prov.countryCode;
-            const occupiedPercent = occupations[prov.countryCode] || 0;
-
-            let fillValue = getNationColor(currentOwner);
-
-            if (prov.countryCode !== playerCountryCode) {
-              if (
-                currentOwner === playerCountryCode ||
-                occupiedPercent >= 100
-              ) {
-                fillValue = `url(#${stripeId})`;
-              } else if (occupiedPercent > 0) {
-                fillValue = `url(#occupied-grad-${prov.countryCode})`;
-              } else if (isHovered) {
-                fillValue = "rgb(14, 165, 233)";
-              }
-            } else if (isHovered) {
-              fillValue = "rgb(52, 211, 153)";
-            }
-
-            const isOriginallyDifferent = !prov.id.startsWith(currentOwner);
-            const strokeColor =
-              isOriginallyDifferent ||
-              (isHovered && currentOwner === hoveredCountry)
-                ? fillValue
-                : "rgba(10, 15, 30, 0.6)";
-
-            return (
-              <g key={prov.id}>
-                <path
-                  d={prov.pathData}
-                  fill={fillValue}
-                  stroke={strokeColor}
-                  strokeWidth={isHovered ? "1.5" : "0.5"}
-                  className="transition-all duration-150 cursor-pointer"
-                  onMouseEnter={() => setHoveredCountry(prov.countryCode)}
-                  onMouseLeave={() => setHoveredCountry(null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onCountryClick(prov.countryCode, 0);
-                  }}
-                />
-              </g>
-            );
-          })}
+          <MapCountryPaths
+            vectorProvinces={vectorProvinces}
+            provincesState={provincesState}
+            playerCountryCode={playerCountryCode}
+            hoveredCountry={hoveredCountry}
+            stripeId={stripeId}
+            occupations={occupations}
+            getNationColor={getNationColor}
+            setHoveredCountry={setHoveredCountry}
+            onCountryClick={onCountryClick}
+          />
 
           <MapOverlayNodes
             hoveredCountry={hoveredCountry}
@@ -225,29 +127,18 @@ export function GameMap({
 
       <MapControls
         scale={scale}
-        onZoomIn={() => setScale((prev) => Math.min(prev + 0.5, 6))}
-        onZoomOut={() => setScale((prev) => Math.max(prev - 0.5, 1))}
-        onResetView={() => {
-          setScale(1);
-          setPosition({ x: 0, y: 0 });
-        }}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        onResetView={resetView}
       />
 
       {hoveredCountry && (
-        <div className="absolute top-6 left-6 bg-slate-900/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-slate-800/80 text-xs font-semibold shadow-2xl pointer-events-none z-40">
-          <div className="text-slate-400">Target Country</div>
-          <div className="text-lg font-bold text-white mt-0.5">
-            {getCountryFullName(hoveredCountry)}
-          </div>
-          {playerCountryCode &&
-            hoveredCountry !== playerCountryCode &&
-            (occupations[hoveredCountry] || 0) > 0 && (
-              <div className="text-[10px] text-emerald-400 mt-1 font-bold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                {occupations[hoveredCountry]}% occupied by {playerCountryCode}
-              </div>
-            )}
-        </div>
+        <MapTooltip
+          hoveredCountry={hoveredCountry}
+          playerCountryCode={playerCountryCode}
+          occupations={occupations}
+          getCountryFullName={getCountryFullName}
+        />
       )}
     </div>
   );

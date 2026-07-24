@@ -6,12 +6,10 @@ import { GameMap } from "@/presentation/components/game-map";
 import { StrategicDashboard } from "@/presentation/components/strategic-dashboard";
 import { ActivePowersList } from "@/presentation/components/active-powers-list";
 import { useMapCalculations } from "@/presentation/hooks/use-map-calculations";
+import { useMapTestSimulation } from "./hooks/use-map-test-simulation";
 import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { processProvincesAndVectors } from "@/application/map-processor";
-import {
-  expandCountryProvinces,
-  executeProvinceAttack,
-} from "@/application/province-engine";
+import { expandCountryProvinces } from "@/application/province-engine";
 import type { Province } from "@/domain/map/province.schema";
 import type { GeoJsonData } from "@/engine/map/grid-generator";
 
@@ -24,14 +22,7 @@ export default function MapTestPage() {
   const [occupiedProvinceIds, setOccupiedProvinceIds] = useState<Set<string>>(
     new Set(),
   );
-  const [isAttacking, setIsAttacking] = useState<boolean>(false);
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
-  const [assaultVector, setAssaultVector] = useState<{
-    fromX: number;
-    fromY: number;
-    toX: number;
-    toY: number;
-  } | null>(null);
 
   useEffect(() => {
     async function autoLoadWorldMap() {
@@ -39,13 +30,10 @@ export default function MapTestPage() {
         const response = await fetch(
           "https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json",
         );
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         const geoJson = (await response.json()) as GeoJsonData;
         await loadMapFromData(geoJson, 1200, 600);
-      } catch (err) {
-        console.error(err);
+      } catch {
         await loadMapFromData(FALLBACK_WORLD_MAP, 1200, 600);
       }
     }
@@ -79,7 +67,6 @@ export default function MapTestPage() {
         }
       }
     }
-
     return grouped;
   }, [processedMap, occupiedProvinceIds, playerCountryCode]);
 
@@ -120,65 +107,12 @@ export default function MapTestPage() {
       occupations,
     });
 
-  const handleCountryClick = (countryCode: string) => {
-    if (!playerCountryCode) {
-      const confirmed = window.confirm(
-        "Are you sure you want to select this nation?",
-      );
-      if (confirmed) {
-        setPlayerCountryCode(countryCode);
-      }
-      return;
-    }
-
-    if (countryCode === playerCountryCode || isAttacking) return;
-
-    const result = executeProvinceAttack(
-      countryCode,
-      provincesMap,
-      playerCountryCode,
-    );
-    if (result.newlyConqueredProvIds.length > 0) {
-      setIsAttacking(true);
-
-      const fromProv = Object.values(provincesMap)
-        .flat()
-        .find((p) => p.id === result.attackerSourceId);
-      const toProv = Object.values(provincesMap)
-        .flat()
-        .find((p) => p.id === result.defenderEntryId);
-
-      if (fromProv && toProv) {
-        setAssaultVector({
-          fromX: fromProv.x,
-          fromY: fromProv.y,
-          toX: toProv.x,
-          toY: toProv.y,
-        });
-      }
-
-      let index = 0;
-      const queuedIds = result.newlyConqueredProvIds;
-
-      const interval = setInterval(() => {
-        if (index < queuedIds.length) {
-          const nextId = queuedIds[index];
-          if (nextId) {
-            setOccupiedProvinceIds((prev) => {
-              const next = new Set(prev);
-              next.add(nextId);
-              return next;
-            });
-          }
-          index++;
-        } else {
-          clearInterval(interval);
-          setIsAttacking(false);
-          setAssaultVector(null);
-        }
-      }, 150);
-    }
-  };
+  const { assaultVector, handleCountryClick } = useMapTestSimulation({
+    playerCountryCode,
+    setPlayerCountryCode,
+    provincesMap,
+    setOccupiedProvinceIds,
+  });
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 text-white select-none">
@@ -222,9 +156,7 @@ export default function MapTestPage() {
                     const confirmed = window.confirm(
                       `Are you sure you want to select ${code}?`,
                     );
-                    if (confirmed) {
-                      setPlayerCountryCode(code);
-                    }
+                    if (confirmed) setPlayerCountryCode(code);
                   }
                 }}
                 onHoverNation={setHoveredCountryId}
