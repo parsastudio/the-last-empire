@@ -3,14 +3,25 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useMapLoader } from "@/presentation/hooks/use-map-loader";
 import { GameMap } from "@/presentation/components/game-map";
-import { STATIC_ADJACENCY_LIST } from "@/application/map-adjacency.config";
+import {
+  STATIC_ADJACENCY_LIST,
+  CENTROIDS,
+} from "@/application/map-data.config";
+import {
+  generateProvinces,
+  linkCountryProvinces,
+  executeProvinceAttack,
+} from "@/application/province-engine";
+import type { AbstractProvince } from "@/application/province-engine";
 import type { GeoJsonData } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
 
 export default function MapTestPage() {
   const { vectorProvinces, provinces, loading, error, loadMapFromData } =
     useMapLoader();
-  const [occupations, setOccupations] = useState<Record<string, number>>({});
+  const [occupiedProvinceIds, setOccupiedProvinceIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   useEffect(() => {
     async function autoLoadWorldMap() {
@@ -30,13 +41,66 @@ export default function MapTestPage() {
     autoLoadWorldMap();
   }, [loadMapFromData]);
 
+  const provincesMap = useMemo((): Record<string, AbstractProvince[]> => {
+    if (!provinces) return {};
+    const initialMap: Record<string, AbstractProvince[]> = {};
+    for (const prov of Object.values(provinces)) {
+      const countryCode = prov.id.replace("_P1", "");
+      const hasSeaAccess = [
+        "USA",
+        "CAN",
+        "RUS",
+        "CHN",
+        "IRN",
+        "SAU",
+        "DEU",
+        "IRQ",
+      ].includes(countryCode);
+      const center = CENTROIDS[countryCode] || {
+        x: (prov.gdp % 400) + 300,
+        y: (prov.population % 250) + 150,
+      };
+
+      initialMap[countryCode] = generateProvinces(
+        countryCode,
+        prov.name.replace(" Region", ""),
+        center.x,
+        center.y,
+        hasSeaAccess,
+      );
+    }
+    linkCountryProvinces(initialMap, STATIC_ADJACENCY_LIST);
+
+    for (const provs of Object.values(initialMap)) {
+      for (const p of provs) {
+        if (occupiedProvinceIds.has(p.id)) {
+          p.isOccupied = true;
+        }
+      }
+    }
+
+    return initialMap;
+  }, [provinces, occupiedProvinceIds]);
+
+  const occupations = useMemo((): Record<string, number> => {
+    const occs: Record<string, number> = {};
+    for (const [code, provs] of Object.entries(provincesMap)) {
+      if (code === "IRN" || provs.length === 0) continue;
+      const occupiedCount = provs.filter((p) => p.isOccupied).length;
+      if (occupiedCount > 0) {
+        occs[code] = Number(((occupiedCount / provs.length) * 100).toFixed(1));
+      }
+    }
+    return occs;
+  }, [provincesMap]);
+
   const provincesState = useMemo((): Record<string, Province> => {
     if (!provinces) return {};
     const state: Record<string, Province> = {};
-    for (const [id, prov] of Object.entries(provinces)) {
+    for (const prov of Object.values(provinces)) {
       const countryCode = prov.id.replace("_P1", "");
       const occupiedPercent = occupations[countryCode] || 0;
-      state[id] = {
+      state[prov.id] = {
         ...prov,
         ownerNationId: occupiedPercent >= 100 ? "IRN" : prov.ownerNationId,
       };
@@ -46,24 +110,14 @@ export default function MapTestPage() {
 
   const handleCountryAttack = (countryCode: string) => {
     if (countryCode === "IRN") return;
-
-    setOccupations((prev) => {
-      const current = prev[countryCode] || 0;
-      const remaining = 100 - current;
-      const newlyOccupied = remaining * 0.2;
-      const nextPercent = Number((current + newlyOccupied).toFixed(1));
-
-      const updated = {
-        ...prev,
-        [countryCode]: nextPercent,
-      };
-
-      if (nextPercent >= 99.9) {
-        updated[countryCode] = 100;
-      }
-
-      return updated;
-    });
+    const result = executeProvinceAttack(countryCode, provincesMap);
+    if (result.newlyConqueredProvId) {
+      setOccupiedProvinceIds((prev) => {
+        const next = new Set(prev);
+        next.add(result.newlyConqueredProvId!);
+        return next;
+      });
+    }
   };
 
   const activeBorders = useMemo(() => {
@@ -134,7 +188,7 @@ export default function MapTestPage() {
   }, [provincesState, occupations]);
 
   const handleReset = () => {
-    setOccupations({});
+    setOccupiedProvinceIds(new Set());
   };
 
   return (
@@ -163,6 +217,7 @@ export default function MapTestPage() {
             height={600}
             onCountryClick={handleCountryAttack}
             occupations={occupations}
+            allProvinces={provincesMap}
           />
 
           <div className="absolute top-6 right-6 w-80 space-y-4 pointer-events-none z-40">

@@ -13,3 +13,13 @@ export const STATIC_ADJACENCY_LIST: Record<string, string[]> = {
   IND_P1: ["PAK_P1", "CHN_P1"],
   BRA_P1: ["ARG_P1", "COL_P1"],
 };
+
+export const CENTROIDS: Record<string, { x: number; y: number }> = {
+  USA: { x: 280, y: 190 },
+  CAN: { x: 280, y: 100 },
+  RUS: { x: 780, y: 120 },
+  DEU: { x: 570, y: 180 },
+  IRN: { x: 700, y: 240 },
+  SAU: { x: 670, y: 270 },
+  IRQ: { x: 670, y: 235 },
+};

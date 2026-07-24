@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import type { VectorProvince } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
+import type { AbstractProvince } from "@/application/province-engine";
 
 interface GameMapProps {
   vectorProvinces: VectorProvince[];
@@ -11,6 +12,7 @@ interface GameMapProps {
   height: number;
   onCountryClick: (countryCode: string, angle: number) => void;
   occupations?: Record<string, number>;
+  allProvinces?: Record<string, AbstractProvince[]>;
 }
 
 export function GameMap({
@@ -20,6 +22,7 @@ export function GameMap({
   height,
   onCountryClick,
   occupations = {},
+  allProvinces = {},
 }: GameMapProps) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [scale, setScale] = useState<number>(1);
@@ -186,6 +189,60 @@ export function GameMap({
               </g>
             );
           })}
+
+          {hoveredCountry && allProvinces[hoveredCountry] && (
+            <g className="pointer-events-none">
+              {allProvinces[hoveredCountry]?.map((p) =>
+                p.neighbors.map((nId) => {
+                  const targetProv = allProvinces[hoveredCountry]?.find(
+                    (tp) => tp.id === nId,
+                  );
+                  if (targetProv) {
+                    return (
+                      <line
+                        key={`line-${p.id}-${nId}`}
+                        x1={p.x}
+                        y1={p.y}
+                        x2={targetProv.x}
+                        y2={targetProv.y}
+                        stroke="rgba(255, 255, 255, 0.15)"
+                        strokeWidth="1.5"
+                        strokeDasharray="4 2"
+                      />
+                    );
+                  }
+                  return null;
+                }),
+              )}
+
+              {allProvinces[hoveredCountry]?.map((p) => (
+                <g key={`node-${p.id}`}>
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={p.isCoastal ? "7" : "5"}
+                    fill={
+                      p.isOccupied ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"
+                    }
+                    stroke="rgb(10, 15, 30)"
+                    strokeWidth="1.5"
+                    className="transition-all duration-300 animate-pulse"
+                  />
+                  {p.isCoastal && (
+                    <circle
+                      cx={p.x}
+                      cy={p.y}
+                      r="10"
+                      fill="none"
+                      stroke="rgb(14, 165, 233)"
+                      strokeWidth="1"
+                      strokeDasharray="2 1"
+                    />
+                  )}
+                </g>
+              ))}
+            </g>
+          )}
         </svg>
       </div>
 
