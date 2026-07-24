@@ -40,7 +40,7 @@ export default function MapTestPage() {
         const geoJson = (await response.json()) as GeoJsonData;
         await loadMapFromData(geoJson, 1200, 600);
       } catch (err) {
-        console.error("Auto-load failed", err);
+        console.error(err);
       }
     }
     autoLoadWorldMap();
@@ -50,6 +50,14 @@ export default function MapTestPage() {
     if (!vectorProvinces || !provinces) return null;
     return processProvincesAndVectors(provinces, vectorProvinces);
   }, [vectorProvinces, provinces]);
+
+  const totalArea = useMemo(() => {
+    if (!processedMap) return 0;
+    return Object.values(processedMap.provinces).reduce(
+      (sum, p) => sum + p.territorySize,
+      0,
+    );
+  }, [processedMap]);
 
   const provincesMap = useMemo((): Record<string, AbstractProvince[]> => {
     if (!processedMap) return {};
@@ -65,11 +73,19 @@ export default function MapTestPage() {
         "SAU",
         "DEU",
         "IRQ",
+        "MYS",
+        "MAR",
+        "DZA",
       ].includes(countryCode);
       const center = CENTROIDS[countryCode] || {
         x: (prov.gdp % 400) + 300,
         y: (prov.population % 250) + 150,
       };
+
+      const countryArea = prov.territorySize;
+      const provinceShare =
+        totalArea > 0 ? Math.round((countryArea / totalArea) * 1000) : 5;
+      const numProvinces = Math.max(4, Math.min(60, provinceShare));
 
       const provs = generateProvinces(
         countryCode,
@@ -77,6 +93,7 @@ export default function MapTestPage() {
         center.x,
         center.y,
         hasSeaAccess,
+        numProvinces,
       );
 
       if (playerCountryCode && countryCode === playerCountryCode) {
@@ -98,7 +115,7 @@ export default function MapTestPage() {
     }
 
     return initialMap;
-  }, [processedMap, occupiedProvinceIds, playerCountryCode]);
+  }, [processedMap, occupiedProvinceIds, playerCountryCode, totalArea]);
 
   const occupations = useMemo((): Record<string, number> => {
     const occs: Record<string, number> = {};
@@ -133,7 +150,9 @@ export default function MapTestPage() {
 
   const handleCountryClick = (countryCode: string) => {
     if (!playerCountryCode) {
-      const confirmed = window.confirm("مطمئنی میخوای این کشور باشی؟");
+      const confirmed = window.confirm(
+        "Are you sure you want to select this nation?",
+      );
       if (confirmed) {
         setPlayerCountryCode(countryCode);
       }
@@ -142,7 +161,11 @@ export default function MapTestPage() {
 
     if (countryCode === playerCountryCode) return;
 
-    const result = executeProvinceAttack(countryCode, provincesMap);
+    const result = executeProvinceAttack(
+      countryCode,
+      provincesMap,
+      playerCountryCode,
+    );
     if (result.newlyConqueredProvIds.length > 0) {
       setOccupiedProvinceIds((prev: Set<string>) => {
         const next = new Set(prev);

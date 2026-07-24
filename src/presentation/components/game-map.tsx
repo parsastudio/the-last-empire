@@ -76,6 +76,15 @@ export function GameMap({
     ? `military-stripes-${playerCountryCode}`
     : "military-stripes-IRN";
 
+  const getCountryFullName = (code: string): string => {
+    const provId = `${code}_P1`;
+    const prov = provincesState[provId];
+    if (prov) {
+      return prov.name.replace(" Region", "");
+    }
+    return code;
+  };
+
   return (
     <div
       onMouseDown={handleMouseDown}
@@ -176,7 +185,8 @@ export function GameMap({
 
             const isOriginallyDifferent = !prov.id.startsWith(currentOwner);
             const strokeColor =
-              isOriginallyDifferent && !isHovered
+              isOriginallyDifferent ||
+              (isHovered && currentOwner === hoveredCountry)
                 ? fillValue
                 : "rgba(10, 15, 30, 0.6)";
 
@@ -220,7 +230,7 @@ export function GameMap({
         <div className="absolute top-6 left-6 bg-slate-900/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-slate-800/80 text-xs font-semibold shadow-2xl pointer-events-none z-40">
           <div className="text-slate-400">Target Country</div>
           <div className="text-lg font-bold text-white mt-0.5">
-            {hoveredCountry}
+            {getCountryFullName(hoveredCountry)}
           </div>
           {playerCountryCode &&
             hoveredCountry !== playerCountryCode &&
