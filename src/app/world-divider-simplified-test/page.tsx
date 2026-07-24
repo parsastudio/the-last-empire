@@ -27,21 +27,17 @@ export default function WorldDividerSimplifiedTestPage() {
   useEffect(() => {
     async function initLifecycle() {
       try {
-        const check = await fetch("/world-map-simplified.json");
-        if (check.ok) {
-          const cached = await check.json();
-          setRegions(cached);
+        setBaking(true);
+        const bakeRes = await fetch("/api/bake-map?type=simplified");
+        const bakeJson = await bakeRes.json();
+        if (bakeJson.success) {
+          const getBaked = await fetch(
+            "/world-map-simplified.json?t=" + Date.now(),
+          );
+          const data = await getBaked.json();
+          setRegions(data);
         } else {
-          setBaking(true);
-          const bakeRes = await fetch("/api/bake-map?type=simplified");
-          const bakeJson = await bakeRes.json();
-          if (bakeJson.success) {
-            const getBaked = await fetch("/world-map-simplified.json");
-            const data = await getBaked.json();
-            setRegions(data);
-          } else {
-            throw new Error();
-          }
+          throw new Error();
         }
       } catch {
         setError("Failed to load or bake simplified map data");
@@ -101,7 +97,7 @@ export default function WorldDividerSimplifiedTestPage() {
           <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-slate-400 font-medium">
             {baking
-              ? "Pre-Processing & Baking Simplified 70-Country World Assets..."
+              ? "Pre-Processing & Baking Simplified 120-Country World Assets..."
               : "Loading Baked Geopolitical Grid..."}
           </p>
         </div>

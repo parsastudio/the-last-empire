@@ -2,81 +2,13 @@ import {
   getBoundingBox,
   calculatePolygonArea,
   getDistance,
-  getPointToSegmentDistance,
 } from "./geometry-utils";
 import { clipPolygonToBox } from "./sutherland-hodgman";
-
-export interface InputFeature {
-  id?: string | number;
-  properties?: {
-    adm0_a3?: string | number;
-    ISO_A3?: string | number;
-    iso_a3?: string | number;
-    name?: string;
-    NAME?: string;
-  };
-  geometry: {
-    type: "Polygon" | "MultiPolygon";
-    coordinates: number[][][] | number[][][][];
-  };
-}
-
-export interface SubdividedRegion {
-  id: string;
-  countryCode: string;
-  countryName: string;
-  polygons: [number, number][][];
-  neighbors: string[];
-  isCoastal: boolean;
-  area: number;
-  center: [number, number];
-}
-
-interface GridBox {
-  box: [number, number, number, number];
-  clippedPolygons: [number, number][][];
-  area: number;
-}
-
-const LANDLOCKED_COUNTRIES = new Set([
-  "MNG",
-  "KAZ",
-  "UZB",
-  "TKM",
-  "TJK",
-  "KGZ",
-  "AFG",
-  "NPL",
-  "BTN",
-  "LAO",
-  "ARM",
-  "AZE",
-  "CHE",
-  "AUT",
-  "HUN",
-  "SVK",
-  "CZE",
-  "BLR",
-  "BOL",
-  "PRY",
-  "ETH",
-  "SSD",
-  "TCD",
-  "NER",
-  "MLI",
-  "RWA",
-  "BDI",
-  "UGA",
-  "MWI",
-  "ZMB",
-  "ZWE",
-  "BWA",
-  "LSO",
-  "SWZ",
-  "AND",
-  "LUX",
-  "MDA",
-]);
+import { InputFeature, SubdividedRegion, GridBox } from "./types";
+import {
+  classifyCoastalRegion,
+  CountryCoastalEdge,
+} from "./coastal-classifier";
 
 export function subdivideWorld(
   features: InputFeature[],
@@ -154,11 +86,7 @@ export function subdivideWorld(
       polygons,
       area: countryArea,
       originalEdges,
-      originalCoastalEdges: [] as {
-        p1: [number, number];
-        p2: [number, number];
-        mid: [number, number];
-      }[],
+      originalCoastalEdges: [] as CountryCoastalEdge[],
     };
   });
 
@@ -177,14 +105,9 @@ export function subdivideWorld(
         if (isLandBorder) break;
       }
       if (!isLandBorder) {
-        c1.originalCoastalEdges.push(e1);
+        c1.originalCoastalEdges.push({ p1: e1.p1, p2: e1.p2 });
       }
     });
-  });
-
-  let totalArea = 0;
-  countriesData.forEach((c) => {
-    totalArea += c.area;
   });
 
   const targetWeights = countriesData.map((c) => {
@@ -211,7 +134,7 @@ export function subdivideWorld(
     if (country.polygons.length === 0) return;
 
     const fullBbox = getBoundingBox(country.polygons);
-    let activeBoxes: GridBox[] = [
+    const activeBoxes: GridBox[] = [
       { box: fullBbox, clippedPolygons: country.polygons, area: country.area },
     ];
 
@@ -377,25 +300,14 @@ export function subdivideWorld(
           ];
 
           const country = countriesData.find((c) => c.code === reg.countryCode);
-          if (country && !LANDLOCKED_COUNTRIES.has(reg.countryCode)) {
-            let matchesCoast = false;
-            for (const cEdge of country.originalCoastalEdges) {
-              if (getPointToSegmentDistance(mid, cEdge.p1, cEdge.p2) < 0.005) {
-                matchesCoast = true;
-                break;
-              }
-            }
-
+          if (country) {
+            const matchesCoast = classifyCoastalRegion(
+              mid,
+              reg.countryCode,
+              country.originalCoastalEdges,
+            );
             if (matchesCoast) {
-              const isCaspianEdge =
-                mid[0] >= 45.0 &&
-                mid[0] <= 56.0 &&
-                mid[1] >= 35.5 &&
-                mid[1] <= 48.0;
-
-              if (!isCaspianEdge) {
-                reg.isCoastal = true;
-              }
+              reg.isCoastal = true;
             }
           }
         }

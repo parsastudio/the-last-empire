@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import type { GeoJsonData } from "@/engine/map/grid-generator";
+import React, { useEffect, useState, useMemo } from "react";
+import { GeoJsonData, InputFeature } from "@/engine/world-divider/types";
 
 export default function RawMapTestPage() {
   const [geoData, setGeoJsonData] = useState<GeoJsonData | null>(null);
@@ -27,7 +27,7 @@ export default function RawMapTestPage() {
     loadRawFile();
   }, []);
 
-  const paths = React.useMemo(() => {
+  const paths = useMemo(() => {
     if (!geoData) return [];
     const list: {
       id: string;
@@ -36,30 +36,32 @@ export default function RawMapTestPage() {
       country: string;
     }[] = [];
 
-    geoData.features.forEach((feature, idx) => {
+    const features = geoData.features as InputFeature[];
+
+    features.forEach((feature, idx) => {
       const stateName = feature.properties?.name || "Region";
       const countryCode = (
         feature.properties?.adm0_a3 ||
         feature.properties?.ISO_A3 ||
-        feature.properties?.iso_a2 ||
+        feature.properties?.iso_a3 ||
         "UNKNOWN"
       )
         .toString()
         .toUpperCase();
 
-      const rings: number[][] = [];
+      const rings: [number, number][][] = [];
       const geometry = feature.geometry;
 
       if (geometry.type === "Polygon") {
         const polygonCoords = geometry.coordinates as number[][][];
         polygonCoords.forEach((ring) => {
-          rings.push(ring);
+          rings.push(ring.map((pt) => [pt[0] as number, pt[1] as number]));
         });
       } else if (geometry.type === "MultiPolygon") {
         const multiPolygonCoords = geometry.coordinates as number[][][][];
         multiPolygonCoords.forEach((polygon) => {
           polygon.forEach((ring) => {
-            rings.push(ring);
+            rings.push(ring.map((pt) => [pt[0] as number, pt[1] as number]));
           });
         });
       }
@@ -88,7 +90,7 @@ export default function RawMapTestPage() {
         list.push({
           id: `feature-${idx}`,
           pathData: pathStr.trim(),
-          name: stateName,
+          name: String(stateName),
           country: countryCode,
         });
       }
@@ -101,7 +103,7 @@ export default function RawMapTestPage() {
     <div className="w-screen h-screen bg-slate-950 text-white flex flex-col p-6 overflow-hidden select-none">
       <div className="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
         <div>
-          <h1 className="text-lg font-bold text-white uppercase tracking-wider">
+          <h1 className="text-sm font-bold uppercase tracking-wider">
             Raw GeoJSON File Integrity Test
           </h1>
           <p className="text-xs text-slate-400 mt-1">
@@ -143,7 +145,6 @@ export default function RawMapTestPage() {
                 stroke="rgba(16, 185, 129, 0.45)"
                 strokeWidth="0.5"
                 className="hover:fill-emerald-500/40 hover:stroke-emerald-400 transition-colors duration-150 cursor-pointer"
-                title={`${p.name} (${p.country})`}
               />
             ))}
           </svg>
