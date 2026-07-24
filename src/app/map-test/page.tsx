@@ -7,6 +7,7 @@ import {
   STATIC_ADJACENCY_LIST,
   CENTROIDS,
 } from "@/application/map-data.config";
+import { processProvincesAndVectors } from "@/application/map-processor";
 import {
   generateProvinces,
   linkCountryProvinces,
@@ -19,6 +20,9 @@ import type { Province } from "@/domain/map/province.schema";
 export default function MapTestPage() {
   const { vectorProvinces, provinces, loading, error, loadMapFromData } =
     useMapLoader();
+  const [playerCountryCode, setPlayerCountryCode] = useState<string | null>(
+    null,
+  );
   const [occupiedProvinceIds, setOccupiedProvinceIds] = useState<Set<string>>(
     new Set(),
   );
@@ -41,10 +45,15 @@ export default function MapTestPage() {
     autoLoadWorldMap();
   }, [loadMapFromData]);
 
+  const processedMap = useMemo(() => {
+    if (!vectorProvinces || !provinces) return null;
+    return processProvincesAndVectors(provinces, vectorProvinces);
+  }, [vectorProvinces, provinces]);
+
   const provincesMap = useMemo((): Record<string, AbstractProvince[]> => {
-    if (!provinces) return {};
+    if (!processedMap) return {};
     const initialMap: Record<string, AbstractProvince[]> = {};
-    for (const prov of Object.values(provinces)) {
+    for (const prov of Object.values(processedMap.provinces)) {
       const countryCode = prov.id.replace("_P1", "");
       const hasSeaAccess = [
         "USA",
@@ -61,13 +70,21 @@ export default function MapTestPage() {
         y: (prov.population % 250) + 150,
       };
 
-      initialMap[countryCode] = generateProvinces(
+      const provs = generateProvinces(
         countryCode,
         prov.name.replace(" Region", ""),
         center.x,
         center.y,
         hasSeaAccess,
       );
+
+      if (playerCountryCode && countryCode === playerCountryCode) {
+        provs.forEach((p) => {
+          p.isOccupied = true;
+        });
+      }
+
+      initialMap[countryCode] = provs;
     }
     linkCountryProvinces(initialMap, STATIC_ADJACENCY_LIST);
 
@@ -80,49 +97,62 @@ export default function MapTestPage() {
     }
 
     return initialMap;
-  }, [provinces, occupiedProvinceIds]);
+  }, [processedMap, occupiedProvinceIds, playerCountryCode]);
 
   const occupations = useMemo((): Record<string, number> => {
     const occs: Record<string, number> = {};
     for (const [code, provs] of Object.entries(provincesMap)) {
-      if (code === "IRN" || provs.length === 0) continue;
+      if (code === playerCountryCode || provs.length === 0) continue;
       const occupiedCount = provs.filter((p) => p.isOccupied).length;
       if (occupiedCount > 0) {
         occs[code] = Number(((occupiedCount / provs.length) * 100).toFixed(1));
       }
     }
     return occs;
-  }, [provincesMap]);
+  }, [provincesMap, playerCountryCode]);
 
   const provincesState = useMemo((): Record<string, Province> => {
-    if (!provinces) return {};
+    if (!processedMap) return {};
     const state: Record<string, Province> = {};
-    for (const prov of Object.values(provinces)) {
+    for (const prov of Object.values(processedMap.provinces)) {
       const countryCode = prov.id.replace("_P1", "");
       const occupiedPercent = occupations[countryCode] || 0;
       state[prov.id] = {
         ...prov,
-        ownerNationId: occupiedPercent >= 100 ? "IRN" : prov.ownerNationId,
+        ownerNationId:
+          playerCountryCode && occupiedPercent >= 100
+            ? playerCountryCode
+            : prov.ownerNationId,
       };
     }
     return state;
-  }, [provinces, occupations]);
+  }, [processedMap, occupations, playerCountryCode]);
 
   const handleCountryAttack = (countryCode: string) => {
-    if (countryCode === "IRN") return;
+    if (!playerCountryCode) {
+      const confirmed = window.confirm("مطمئنی میخوای این کشور باشی؟");
+      if (confirmed) {
+        setPlayerCountryCode(countryCode);
+      }
+      return;
+    }
+
+    if (countryCode === playerCountryCode) return;
+
     const result = executeProvinceAttack(countryCode, provincesMap);
-    if (result.newlyConqueredProvId) {
+    if (result.newlyConqueredProvIds.length > 0) {
       setOccupiedProvinceIds((prev) => {
         const next = new Set(prev);
-        next.add(result.newlyConqueredProvId!);
+        result.newlyConqueredProvIds.forEach((id) => next.add(id));
         return next;
       });
     }
   };
 
   const activeBorders = useMemo(() => {
+    if (!playerCountryCode) return [];
     const borderSet = new Set<string>();
-    const occupiedNations = new Set<string>(["IRN"]);
+    const occupiedNations = new Set<string>([playerCountryCode]);
 
     Object.entries(occupations).forEach(([code, percent]) => {
       if (percent > 0) {
@@ -142,23 +172,26 @@ export default function MapTestPage() {
     });
 
     return Array.from(borderSet);
-  }, [occupations]);
+  }, [occupations, playerCountryCode]);
 
   const empireStats = useMemo(() => {
     let totalGdp = 0;
     let totalPopulation = 0;
     let totalTerritories = 0;
 
+    if (!playerCountryCode)
+      return { totalGdp, totalPopulation, totalTerritories };
+
     Object.values(provincesState).forEach((p) => {
       const countryCode = p.id.replace("_P1", "");
       const occupiedPercent = occupations[countryCode] || 0;
 
-      if (p.id === "IRN_P1") {
+      if (p.id === `${playerCountryCode}_P1`) {
         totalGdp += p.gdp;
         totalPopulation += p.population;
         totalTerritories += 1;
       } else {
-        if (p.ownerNationId === "IRN") {
+        if (p.ownerNationId === playerCountryCode) {
           totalGdp += p.gdp;
           totalPopulation += p.population;
           totalTerritories += 1;
@@ -171,11 +204,12 @@ export default function MapTestPage() {
     });
 
     return { totalGdp, totalPopulation, totalTerritories };
-  }, [provincesState, occupations]);
+  }, [provincesState, occupations, playerCountryCode]);
 
   const conquests = useMemo(() => {
+    if (!playerCountryCode) return [];
     return Object.values(provincesState)
-      .filter((p) => p.id !== "IRN_P1")
+      .filter((p) => p.id !== `${playerCountryCode}_P1`)
       .map((p) => {
         const countryCode = p.id.replace("_P1", "");
         const occupiedPercent = occupations[countryCode] || 0;
@@ -185,11 +219,7 @@ export default function MapTestPage() {
         };
       })
       .filter((p) => p.occupiedPercent > 0);
-  }, [provincesState, occupations]);
-
-  const handleReset = () => {
-    setOccupiedProvinceIds(new Set());
-  };
+  }, [provincesState, occupations, playerCountryCode]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-slate-950 text-white select-none">
@@ -208,16 +238,17 @@ export default function MapTestPage() {
         </div>
       )}
 
-      {vectorProvinces && !loading && (
+      {processedMap && !loading && (
         <div className="w-full h-full relative">
           <GameMap
-            vectorProvinces={vectorProvinces}
+            vectorProvinces={processedMap.vectorProvinces}
             provincesState={provincesState}
             width={1200}
             height={600}
             onCountryClick={handleCountryAttack}
             occupations={occupations}
             allProvinces={provincesMap}
+            playerCountryCode={playerCountryCode}
           />
 
           <div className="absolute top-6 right-6 w-80 space-y-4 pointer-events-none z-40">
@@ -227,103 +258,119 @@ export default function MapTestPage() {
                   Strategic Dashboard
                 </h1>
                 <button
-                  onClick={handleReset}
+                  onClick={() => {
+                    setPlayerCountryCode(null);
+                    setOccupiedProvinceIds(new Set());
+                  }}
                   className="px-3 py-1.5 bg-rose-600/90 hover:bg-rose-500 text-white text-[10px] font-bold rounded-lg transition-colors border border-rose-500/30"
                 >
                   Reset Map
                 </button>
               </div>
 
-              <div>
-                <h2 className="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                  Iran Empire Stats
-                </h2>
-                <div className="space-y-1.5 font-mono text-xs bg-slate-950/50 p-3 rounded-xl border border-slate-800/50 text-slate-300">
-                  <div>
-                    Control Size:{" "}
-                    <span className="text-white font-bold">
-                      {empireStats.totalTerritories.toFixed(2)} units
-                    </span>
-                  </div>
-                  <div>
-                    Total GDP:{" "}
-                    <span className="text-white font-bold">
-                      ${(empireStats.totalGdp / 1e9).toFixed(1)}B
-                    </span>
-                  </div>
-                  <div>
-                    Population:{" "}
-                    <span className="text-white font-bold">
-                      ${(empireStats.totalPopulation / 1e6).toFixed(1)}M
-                    </span>
-                  </div>
+              {!playerCountryCode ? (
+                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-center">
+                  <p className="text-xs text-blue-400 font-semibold animate-pulse">
+                    Click on any country to select and start!
+                  </p>
                 </div>
-              </div>
-
-              <div>
-                <h2 className="text-xs font-bold text-sky-400 mb-2">
-                  Active Land Neighbors
-                </h2>
-                <div className="max-h-[120px] overflow-y-auto pr-1 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
-                  {activeBorders.length === 0 ? (
-                    <p className="text-[10px] text-slate-500 font-mono italic">
-                      No neighbors.
-                    </p>
-                  ) : (
-                    activeBorders.map((borderNation) => (
-                      <div
-                        key={borderNation}
-                        className="flex items-center justify-between p-2 bg-slate-950/40 border border-slate-800/50 rounded-lg text-[10px] font-mono text-slate-400"
-                      >
-                        <span>{borderNation}</span>
-                        <span className="text-rose-500 font-bold uppercase text-[8px] bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
-                          Border
+              ) : (
+                <>
+                  <div>
+                    <h2 className="text-xs font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
+                      {playerCountryCode} Empire Stats
+                    </h2>
+                    <div className="space-y-1.5 font-mono text-xs bg-slate-950/50 p-3 rounded-xl border border-slate-800/50 text-slate-300">
+                      <div>
+                        Control Size:{" "}
+                        <span className="text-white font-bold">
+                          {empireStats.totalTerritories.toFixed(2)} units
                         </span>
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-xs font-bold text-slate-400 mb-2">
-                  Invasion Conquests
-                </h2>
-                <div className="max-h-[150px] overflow-y-auto pr-1 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
-                  {conquests.length === 0 ? (
-                    <p className="text-[10px] text-slate-500 font-mono italic">
-                      No conquests.
-                    </p>
-                  ) : (
-                    conquests.map((p) => (
-                      <div
-                        key={p.id}
-                        className="p-2.5 bg-slate-950/50 border border-slate-800/50 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-300"
-                      >
-                        <div className="flex justify-between">
-                          <span className="text-white font-bold">{p.name}</span>
-                          <span className="text-emerald-400 font-extrabold">
-                            {p.occupiedPercent}%
-                          </span>
-                        </div>
-                        <div className="text-slate-500 text-[8px]">
-                          GDP Contribution: $
-                          {((p.gdp * (p.occupiedPercent / 100)) / 1e9).toFixed(
-                            1,
-                          )}
-                          B | Pop: $
-                          {(
-                            (p.population * (p.occupiedPercent / 100)) /
-                            1e6
-                          ).toFixed(1)}
-                          M
-                        </div>
+                      <div>
+                        Total GDP:{" "}
+                        <span className="text-white font-bold">
+                          ${(empireStats.totalGdp / 1e9).toFixed(1)}B
+                        </span>
                       </div>
-                    ))
-                  )}
-                </div>
-              </div>
+                      <div>
+                        Population:{" "}
+                        <span className="text-white font-bold">
+                          ${(empireStats.totalPopulation / 1e6).toFixed(1)}M
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xs font-bold text-sky-400 mb-2">
+                      Active Land Neighbors
+                    </h2>
+                    <div className="max-h-[120px] overflow-y-auto pr-1 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+                      {activeBorders.length === 0 ? (
+                        <p className="text-[10px] text-slate-500 font-mono italic">
+                          No neighbors.
+                        </p>
+                      ) : (
+                        activeBorders.map((borderNation) => (
+                          <div
+                            key={borderNation}
+                            className="flex items-center justify-between p-2 bg-slate-950/40 border border-slate-800/50 rounded-lg text-[10px] font-mono text-slate-400"
+                          >
+                            <span>{borderNation}</span>
+                            <span className="text-rose-500 font-bold uppercase text-[8px] bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
+                              Border
+                            </span>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h2 className="text-xs font-bold text-slate-400 mb-2">
+                      Invasion Conquests
+                    </h2>
+                    <div className="max-h-[150px] overflow-y-auto pr-1 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+                      {conquests.length === 0 ? (
+                        <p className="text-[10px] text-slate-500 font-mono italic">
+                          No conquests.
+                        </p>
+                      ) : (
+                        conquests.map((p) => (
+                          <div
+                            key={p.id}
+                            className="p-2.5 bg-slate-950/50 border border-slate-800/50 rounded-lg text-[10px] font-mono space-y-0.5 text-slate-300"
+                          >
+                            <div className="flex justify-between">
+                              <span className="text-white font-bold">
+                                {p.name}
+                              </span>
+                              <span className="text-emerald-400 font-extrabold">
+                                {p.occupiedPercent}%
+                              </span>
+                            </div>
+                            <div className="text-slate-500 text-[8px]">
+                              GDP Contribution: $
+                              {(
+                                (p.gdp * (p.occupiedPercent / 100)) /
+                                1e9
+                              ).toFixed(1)}
+                              B | Pop: $
+                              {(
+                                (p.population * (p.occupiedPercent / 100)) /
+                                1e6
+                              ).toFixed(1)}
+                              M
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

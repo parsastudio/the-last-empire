@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { MapOverlayNodes } from "./map-overlay-nodes";
+import { MapControls } from "./map-controls";
 import type { VectorProvince } from "@/engine/map/grid-generator";
 import type { Province } from "@/domain/map/province.schema";
 import type { AbstractProvince } from "@/application/province-engine";
@@ -13,6 +15,7 @@ interface GameMapProps {
   onCountryClick: (countryCode: string, angle: number) => void;
   occupations?: Record<string, number>;
   allProvinces?: Record<string, AbstractProvince[]>;
+  playerCountryCode?: string | null;
 }
 
 export function GameMap({
@@ -23,6 +26,7 @@ export function GameMap({
   onCountryClick,
   occupations = {},
   allProvinces = {},
+  playerCountryCode = null,
 }: GameMapProps) {
   const [hoveredCountry, setHoveredCountry] = useState<string | null>(null);
   const [scale, setScale] = useState<number>(1);
@@ -37,7 +41,7 @@ export function GameMap({
   });
 
   const getNationColor = (countryCode: string): string => {
-    if (countryCode === "IRN") {
+    if (playerCountryCode && countryCode === playerCountryCode) {
       return "rgb(16, 185, 129)";
     }
     let hash = 0;
@@ -48,12 +52,6 @@ export function GameMap({
     const g = (Math.abs((hash & 0x00ff00) >> 8) % 100) + 50;
     const b = (Math.abs(hash & 0x0000ff) % 100) + 50;
     return `rgb(${r}, ${g}, ${b})`;
-  };
-
-  const handleCountryClick = (e: React.MouseEvent, countryCode: string) => {
-    e.stopPropagation();
-    if (countryCode === "IRN") return;
-    onCountryClick(countryCode, 0);
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -74,10 +72,9 @@ export function GameMap({
     setIsDragging(false);
   };
 
-  const resetView = () => {
-    setScale(1);
-    setPosition({ x: 0, y: 0 });
-  };
+  const stripeId = playerCountryCode
+    ? `military-stripes-${playerCountryCode}`
+    : "military-stripes-IRN";
 
   return (
     <div
@@ -101,7 +98,7 @@ export function GameMap({
         >
           <defs>
             <pattern
-              id="military-stripes-IRN"
+              id={stripeId}
               width="12"
               height="12"
               patternTransform="rotate(45)"
@@ -123,7 +120,7 @@ export function GameMap({
               if (
                 occupiedPercent > 0 &&
                 occupiedPercent < 100 &&
-                prov.countryCode !== "IRN"
+                prov.countryCode !== playerCountryCode
               ) {
                 const baseColor = getNationColor(prov.countryCode);
                 return (
@@ -162,9 +159,12 @@ export function GameMap({
 
             let fillValue = getNationColor(currentOwner);
 
-            if (prov.countryCode !== "IRN") {
-              if (currentOwner === "IRN" || occupiedPercent >= 100) {
-                fillValue = "url(#military-stripes-IRN)";
+            if (prov.countryCode !== playerCountryCode) {
+              if (
+                currentOwner === playerCountryCode ||
+                occupiedPercent >= 100
+              ) {
+                fillValue = `url(#${stripeId})`;
               } else if (occupiedPercent > 0) {
                 fillValue = `url(#occupied-grad-${prov.countryCode})`;
               } else if (isHovered) {
@@ -184,92 +184,31 @@ export function GameMap({
                   className="transition-all duration-150 cursor-pointer"
                   onMouseEnter={() => setHoveredCountry(prov.countryCode)}
                   onMouseLeave={() => setHoveredCountry(null)}
-                  onClick={(e) => handleCountryClick(e, prov.countryCode)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onCountryClick(prov.countryCode, 0);
+                  }}
                 />
               </g>
             );
           })}
 
-          {hoveredCountry && allProvinces[hoveredCountry] && (
-            <g className="pointer-events-none">
-              {allProvinces[hoveredCountry]?.map((p) =>
-                p.neighbors.map((nId) => {
-                  const targetProv = allProvinces[hoveredCountry]?.find(
-                    (tp) => tp.id === nId,
-                  );
-                  if (targetProv) {
-                    return (
-                      <line
-                        key={`line-${p.id}-${nId}`}
-                        x1={p.x}
-                        y1={p.y}
-                        x2={targetProv.x}
-                        y2={targetProv.y}
-                        stroke="rgba(255, 255, 255, 0.15)"
-                        strokeWidth="1.5"
-                        strokeDasharray="4 2"
-                      />
-                    );
-                  }
-                  return null;
-                }),
-              )}
-
-              {allProvinces[hoveredCountry]?.map((p) => (
-                <g key={`node-${p.id}`}>
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r={p.isCoastal ? "7" : "5"}
-                    fill={
-                      p.isOccupied ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"
-                    }
-                    stroke="rgb(10, 15, 30)"
-                    strokeWidth="1.5"
-                    className="transition-all duration-300 animate-pulse"
-                  />
-                  {p.isCoastal && (
-                    <circle
-                      cx={p.x}
-                      cy={p.y}
-                      r="10"
-                      fill="none"
-                      stroke="rgb(14, 165, 233)"
-                      strokeWidth="1"
-                      strokeDasharray="2 1"
-                    />
-                  )}
-                </g>
-              ))}
-            </g>
-          )}
+          <MapOverlayNodes
+            hoveredCountry={hoveredCountry}
+            allProvinces={allProvinces}
+          />
         </svg>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full border border-slate-800/80 flex items-center gap-4 shadow-2xl pointer-events-auto z-50">
-        <button
-          onClick={() => setScale((prev) => Math.max(prev - 0.5, 1))}
-          className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center font-bold text-lg select-none transition-colors border border-slate-700/50"
-        >
-          -
-        </button>
-        <span className="text-xs font-mono font-bold text-slate-400 select-none min-w-[32px] text-center">
-          {scale.toFixed(1)}x
-        </span>
-        <button
-          onClick={() => setScale((prev) => Math.min(prev + 0.5, 6))}
-          className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 active:bg-slate-600 flex items-center justify-center font-bold text-lg select-none transition-colors border border-slate-700/50"
-        >
-          +
-        </button>
-        <div className="w-px h-6 bg-slate-800" />
-        <button
-          onClick={resetView}
-          className="text-xs bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-full font-semibold transition-colors border border-slate-700/50"
-        >
-          Reset View
-        </button>
-      </div>
+      <MapControls
+        scale={scale}
+        onZoomIn={() => setScale((prev) => Math.min(prev + 0.5, 6))}
+        onZoomOut={() => setScale((prev) => Math.max(prev - 0.5, 1))}
+        onResetView={() => {
+          setScale(1);
+          setPosition({ x: 0, y: 0 });
+        }}
+      />
 
       {hoveredCountry && (
         <div className="absolute top-6 left-6 bg-slate-900/90 backdrop-blur-md px-5 py-3 rounded-2xl border border-slate-800/80 text-xs font-semibold shadow-2xl pointer-events-none z-40">
@@ -277,11 +216,12 @@ export function GameMap({
           <div className="text-lg font-bold text-white mt-0.5">
             {hoveredCountry}
           </div>
-          {hoveredCountry !== "IRN" &&
+          {playerCountryCode &&
+            hoveredCountry !== playerCountryCode &&
             (occupations[hoveredCountry] || 0) > 0 && (
               <div className="text-[10px] text-emerald-400 mt-1 font-bold flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                {occupations[hoveredCountry]}% occupied by Iran
+                {occupations[hoveredCountry]}% occupied by {playerCountryCode}
               </div>
             )}
         </div>

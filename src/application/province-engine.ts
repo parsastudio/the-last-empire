@@ -47,7 +47,7 @@ export function generateProvinces(
       x: px,
       y: py,
       isCoastal: i < isCoastalCount,
-      isOccupied: countryCode === "IRN",
+      isOccupied: false,
       neighbors: [],
     });
   }
@@ -118,7 +118,7 @@ export function executeProvinceAttack(
   const attackQuantity = Math.max(1, Math.floor(totalProvincesCount * 0.25));
   const conqueredIds: string[] = [];
 
-  for (let step = 0; i < attackQuantity; step++) {
+  for (let step = 0; step < attackQuantity; step++) {
     const unOccupied = targetProvs.filter((p) => !p.isOccupied);
     if (unOccupied.length === 0) break;
 
