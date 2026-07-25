@@ -1,6 +1,8 @@
-import type { Nation } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 import { TraitManager } from "@/engine/politics/trait-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { MilitaryUpkeepCalculator } from "./upkeep/military-upkeep.calculator";
+import { InfrastructureUpkeepCalculator } from "./upkeep/infrastructure-upkeep.calculator";
 
 export interface BreakdownUpkeep {
   infantry: number;
@@ -13,33 +15,22 @@ export interface BreakdownUpkeep {
 export class UpkeepCalculator {
   private traitManager = new TraitManager();
   private governmentSystem = new GovernmentSystem();
+  private militaryUpkeep = new MilitaryUpkeepCalculator();
+  private infraUpkeep = new InfrastructureUpkeepCalculator();
 
   public calculateUpkeep(nation: Nation): BreakdownUpkeep {
     const traitMultiplier = this.traitManager.getUpkeepMultiplier(nation);
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
 
-    const baseWeight =
-      nation.military.infantry * 1.0 +
-      nation.military.airForce * 3.0 +
-      nation.military.droneMissile * 0.2;
-
-    const totalMilitaryCost = Math.floor(
-      baseWeight *
-        12 *
-        nation.military.techLevel *
-        traitMultiplier *
-        govTraits.militaryUpkeepMultiplier,
+    const totalMilitaryCost = this.militaryUpkeep.calculateMilitaryCost(
+      nation,
+      traitMultiplier,
+      govTraits.militaryUpkeepMultiplier,
     );
 
-    const baseInfraUpkeep =
-      nation.geography.infrastructureLevel *
-      nation.upkeep.infrastructureUpkeep *
-      15000;
-
-    const sizeFactor = 1 + Math.log10(nation.geography.territorySize + 1) * 0.5;
-
-    const infrastructure = Math.floor(
-      baseInfraUpkeep * sizeFactor * nation.adminBurdenMultiplier,
+    const infrastructure = this.infraUpkeep.calculateInfrastructureCost(
+      nation,
+      nation.upkeep.infrastructureUpkeep,
     );
 
     let adminPenalty = 0;
