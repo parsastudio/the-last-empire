@@ -18,13 +18,13 @@ export function StateUpgradesPanel({
   onUpgradeIndustrial,
 }: StateUpgradesPanelProps) {
   return (
-    <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-850 space-y-3">
-      <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-        State & Economy Upgrades
+    <div className="bg-slate-950/30 p-4 rounded-2xl border border-slate-950 space-y-3.5">
+      <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+        Development Core
       </h3>
       <div className="space-y-1.5">
         <div className="flex justify-between items-center text-[10px] font-mono">
-          <span className="text-slate-400">Fiscal Tax Rate</span>
+          <span className="text-slate-500">Tax Assessment</span>
           <span className="text-white font-bold">{currentTaxRate}%</span>
         </div>
         <input
@@ -33,25 +33,29 @@ export function StateUpgradesPanel({
           max="100"
           value={currentTaxRate}
           onChange={(e) => onTaxChange(Number(e.target.value))}
-          className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+          className="w-full h-1 bg-slate-850 rounded-lg appearance-none cursor-pointer accent-emerald-500"
         />
       </div>
-      <div className="grid grid-cols-2 gap-2 text-center pt-1.5">
+      <div className="grid grid-cols-2 gap-2 pt-1">
         <button
           onClick={onUpgradeInfra}
-          className="p-2.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-xl transition-all font-mono"
+          className="p-2.5 bg-slate-900/40 border border-slate-850 hover:bg-slate-800 rounded-xl transition-all font-mono text-center"
         >
-          <span className="text-[9px] text-slate-500 block">Logistics</span>
-          <span className="text-xs font-bold text-white block">
+          <span className="text-[9px] text-slate-600 block">
+            Logistics Grid
+          </span>
+          <span className="text-xs font-bold text-white block mt-0.5">
             Lvl {infraLevel}
           </span>
         </button>
         <button
           onClick={onUpgradeIndustrial}
-          className="p-2.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 rounded-xl transition-all font-mono"
+          className="p-2.5 bg-slate-900/40 border border-slate-850 hover:bg-slate-800 rounded-xl transition-all font-mono text-center"
         >
-          <span className="text-[9px] text-slate-500 block">Industrial</span>
-          <span className="text-xs font-bold text-white block">
+          <span className="text-[9px] text-slate-600 block">
+            Industrial Output
+          </span>
+          <span className="text-xs font-bold text-white block mt-0.5">
             Lvl {industrialLevel}
           </span>
         </button>

@@ -200,11 +200,11 @@ export default function MapTest6Page() {
               isAttacking={isAttacking}
               playerNationId={playerNationId}
             />
+
+            <TurnEventsTerminal logs={filteredLogs} />
           </>
         )}
       </TacticalViewport>
-
-      {gameState && <TurnEventsTerminal logs={filteredLogs} />}
 
       {pendingSelection && (
         <SelectionModal
