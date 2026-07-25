@@ -41,9 +41,11 @@ export const Phase1Renderer: React.FC<Phase1RendererProps> = ({
             key={country.code}
             d={dPath.trim()}
             fill={color}
-            stroke="rgba(0,0,0,0.35)"
+            fillOpacity={isHovered ? 0.8 : 1}
+            stroke="rgba(10, 15, 30, 0.4)"
             strokeWidth="0.5"
             data-code={country.code}
+            className="transition-all duration-100 cursor-pointer"
           />
         );
       })}

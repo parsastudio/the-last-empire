@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Phase1Renderer } from "./phase1-renderer";
 import { Phase2Renderer } from "./phase2-renderer";
 import { Phase34Renderer } from "./phase3-4-renderer";
+import { PolygonDissolver } from "@/map-systems/test1/engine/polygon-dissolver";
 import type {
   CountryPhase1,
   IslandPhase2,
@@ -51,96 +52,64 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
 
   const staticPhase5 = useMemo(() => {
     if (!phase4Data) return null;
-    return phase4Data.map((region) => {
-      const color = getCountryColor(region.countryCode);
-      let dPath = "";
-      let ringPath = "";
-      region.coordinates.forEach((pt, idx) => {
-        const x = ((pt[0] + 180) / 360) * mapWidth;
-        const y = ((90 - pt[1]) / 180) * mapHeight;
-        if (idx === 0) {
-          ringPath += `M ${x.toFixed(1)},${y.toFixed(1)}`;
-        } else {
-          ringPath += ` L ${x.toFixed(1)},${y.toFixed(1)}`;
-        }
+
+    const grouped = new Map<
+      string,
+      { countryName: string; polygons: [number, number][][] }
+    >();
+    phase4Data.forEach((region) => {
+      if (!grouped.has(region.countryCode)) {
+        grouped.set(region.countryCode, {
+          countryName: region.countryName,
+          polygons: [],
+        });
+      }
+      grouped.get(region.countryCode)!.polygons.push(region.coordinates);
+    });
+
+    const countriesList: {
+      countryCode: string;
+      countryName: string;
+      pathData: string;
+    }[] = [];
+    const dissolver = new PolygonDissolver();
+
+    grouped.forEach((data, code) => {
+      const dissolved = dissolver.dissolve(data.polygons);
+      const pathData = dissolver.buildPath(dissolved);
+      countriesList.push({
+        countryCode: code,
+        countryName: data.countryName,
+        pathData,
       });
-      if (ringPath) ringPath += " Z";
-      dPath += ringPath + " ";
+    });
+
+    return countriesList.map((country) => {
+      const color = getCountryColor(country.countryCode);
+      const isHovered = hoveredCountry === country.countryCode;
 
       return (
         <path
-          key={`p5-${region.id}`}
-          d={dPath.trim()}
+          key={`p5-${country.countryCode}`}
+          d={country.pathData}
           fill={color}
-          stroke={color}
-          strokeWidth="0.6"
-          data-id={region.id}
+          fillOpacity={isHovered ? 0.8 : 1}
+          stroke="rgba(10, 15, 30, 0.5)"
+          strokeWidth="0.8"
+          data-code={country.countryCode}
+          className="transition-all duration-100 cursor-pointer"
         />
       );
     });
-  }, [phase4Data]);
+  }, [phase4Data, hoveredCountry]);
 
   const activeCountryOverlay = useMemo(() => {
-    if (phase !== 1 || !hoveredCountry || !phase1Data) return null;
-    const country = phase1Data.find((c) => c.code === hoveredCountry);
-    if (!country) return null;
-
-    let dPath = "";
-    country.rings.forEach((ring) => {
-      let ringPath = "";
-      ring.forEach((pt, idx) => {
-        const x = ((pt[0] + 180) / 360) * mapWidth;
-        const y = ((90 - pt[1]) / 180) * mapHeight;
-        if (idx === 0) {
-          ringPath += `M ${x.toFixed(1)},${y.toFixed(1)}`;
-        } else {
-          ringPath += ` L ${x.toFixed(1)},${y.toFixed(1)}`;
-        }
-      });
-      if (ringPath) ringPath += " Z";
-      dPath += ringPath + " ";
-    });
-
-    return (
-      <path
-        d={dPath.trim()}
-        fill="none"
-        stroke="#ffffff"
-        strokeWidth="1.2"
-        className="pointer-events-none"
-      />
-    );
-  }, [phase, hoveredCountry, phase1Data]);
+    return null;
+  }, []);
 
   const activeIslandOverlay = useMemo(() => {
-    if (phase !== 2 || !hoveredIsland || !phase2Data) return null;
-    const island = phase2Data.find((i) => i.id === hoveredIsland);
-    if (!island) return null;
-
-    let dPath = "";
-    let ringPath = "";
-    island.coordinates.forEach((pt, idx) => {
-      const x = ((pt[0] + 180) / 360) * mapWidth;
-      const y = ((90 - pt[1]) / 180) * mapHeight;
-      if (idx === 0) {
-        ringPath += `M ${x.toFixed(1)},${y.toFixed(1)}`;
-      } else {
-        ringPath += ` L ${x.toFixed(1)},${y.toFixed(1)}`;
-      }
-    });
-    if (ringPath) ringPath += " Z";
-    dPath += ringPath + " ";
-
-    return (
-      <path
-        d={dPath.trim()}
-        fill="rgb(244, 63, 94)"
-        stroke="#ffffff"
-        strokeWidth="1.0"
-        className="pointer-events-none"
-      />
-    );
-  }, [phase, hoveredIsland, phase2Data]);
+    return null;
+  }, []);
 
   const activeRegionOverlay = useMemo(() => {
     const isPhase3 = phase === 3;
@@ -179,9 +148,13 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
             <path
               key={`overlay-${region.id}`}
               d={dPath.trim()}
-              fill={isHovered ? "rgb(239, 68, 68)" : "none"}
-              stroke={isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.45)"}
-              strokeWidth={isHovered ? "1.2" : "0.7"}
+              fill={isHovered ? "rgba(255, 255, 255, 0.15)" : "none"}
+              stroke={
+                isHovered
+                  ? "rgba(255, 255, 255, 0.8)"
+                  : "rgba(255, 255, 255, 0.3)"
+              }
+              strokeWidth="0.8"
             />
           );
         })}
@@ -190,67 +163,29 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
   }, [phase, hoveredRegion, phase3Data, phase4Data]);
 
   const activePhase5Overlay = useMemo(() => {
-    if (phase !== 5 || !hoveredRegion || !phase4Data) return null;
-    const hoveredReg = phase4Data.find((r) => r.id === hoveredRegion);
-    if (!hoveredReg) return null;
-
-    const activeCountryRegions = phase4Data.filter(
-      (r) => r.countryCode === hoveredReg.countryCode,
-    );
-
-    return (
-      <g className="pointer-events-none">
-        {activeCountryRegions.map((region) => {
-          let dPath = "";
-          let ringPath = "";
-          region.coordinates.forEach((pt, idx) => {
-            const x = ((pt[0] + 180) / 360) * mapWidth;
-            const y = ((90 - pt[1]) / 180) * mapHeight;
-            if (idx === 0) {
-              ringPath += `M ${x.toFixed(1)},${y.toFixed(1)}`;
-            } else {
-              ringPath += ` L ${x.toFixed(1)},${y.toFixed(1)}`;
-            }
-          });
-          if (ringPath) ringPath += " Z";
-          dPath += ringPath + " ";
-
-          const isHovered = region.id === hoveredRegion;
-
-          return (
-            <path
-              key={`overlay-p5-${region.id}`}
-              d={dPath.trim()}
-              fill={isHovered ? "rgba(255, 255, 255, 0.15)" : "none"}
-              stroke="#ffffff"
-              strokeWidth={isHovered ? "1.4" : "0.8"}
-            />
-          );
-        })}
-      </g>
-    );
-  }, [phase, hoveredRegion, phase4Data]);
+    return null;
+  }, []);
 
   const handleMouseOver = (e: React.MouseEvent<SVGSVGElement>) => {
     const target = e.target as SVGElement;
     const code = target.getAttribute("data-code");
     const id = target.getAttribute("data-id");
 
-    if (phase === 1) {
+    if (phase === 1 || phase === 5) {
       if (code) setHoveredCountry(code);
     } else if (phase === 2) {
       if (id) setHoveredIsland(id);
-    } else if (phase === 3 || phase === 4 || phase === 5) {
+    } else if (phase === 3 || phase === 4) {
       if (id) setHoveredRegion(id);
     }
   };
 
   const handleMouseOut = () => {
-    if (phase === 1) {
+    if (phase === 1 || phase === 5) {
       setHoveredCountry(null);
     } else if (phase === 2) {
       setHoveredIsland(null);
-    } else if (phase === 3 || phase === 4 || phase === 5) {
+    } else if (phase === 3 || phase === 4) {
       setHoveredRegion(null);
     }
   };
