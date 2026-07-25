@@ -1,6 +1,5 @@
 import { Province } from "@/domain/map/province.schema";
-import { COUNTRY_POLYGONS_CACHE } from "@/map-systems/test1/engine/grid-generator";
-import { isPointInCountry } from "@/map-systems/test1/engine/polygon-geometry";
+import { COUNTRY_POLYGONS_CACHE, isPointInCountry } from "./geometry";
 
 export function generateProvinces(
   countryCode: string,
@@ -17,8 +16,8 @@ export function generateProvinces(
   let capitalY = centerY;
 
   const vertices: [number, number][] = [];
-  polygons.forEach((poly) => {
-    poly.forEach((pt) => {
+  polygons.forEach((poly: [number, number][]) => {
+    poly.forEach((pt: [number, number]) => {
       vertices.push(pt);
     });
   });
