@@ -84,10 +84,10 @@ export function buildSpatialNeighbors(
       });
 
       if (
-        minX - 0.35 > bmaxX ||
-        bminX - 0.35 > maxX ||
-        minY - 0.35 > bmaxY ||
-        bminY - 0.35 > maxY
+        minX - 1.0 > bmaxX ||
+        bminX - 1.0 > maxX ||
+        minY - 1.0 > bmaxY ||
+        bminY - 1.0 > maxY
       ) {
         return;
       }
@@ -100,7 +100,7 @@ export function buildSpatialNeighbors(
           const p2 = reg2.coordinates[j];
           if (!p2) continue;
           const dist = Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
-          if (dist < 0.35) {
+          if (dist < 1.0) {
             isAdj = true;
             break;
           }

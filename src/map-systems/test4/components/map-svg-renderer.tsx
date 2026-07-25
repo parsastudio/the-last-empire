@@ -2,7 +2,6 @@ import React, { useMemo } from "react";
 import { Phase1Renderer } from "./phase1-renderer";
 import { Phase2Renderer } from "./phase2-renderer";
 import { Phase34Renderer } from "./phase3-4-renderer";
-import { Phase5Renderer } from "./phase5-renderer";
 import type {
   CountryPhase1,
   IslandPhase2,
@@ -10,7 +9,7 @@ import type {
 } from "../engine/types";
 
 interface MapSvgRendererProps {
-  phase: 1 | 2 | 3 | 4 | 5;
+  phase: 1 | 2 | 3 | 4;
   phase1Data: CountryPhase1[] | null;
   phase2Data: IslandPhase2[] | null;
   phase3Data: RegionPhase3[] | null;
@@ -109,16 +108,12 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
     );
   }, [phase, hoveredRegion, phase3Data, phase4Data]);
 
-  const activePhase5Overlay = useMemo(() => {
-    return null;
-  }, []);
-
   const handleMouseOver = (e: React.MouseEvent<SVGSVGElement>) => {
     const target = e.target as SVGElement;
     const code = target.getAttribute("data-code");
     const id = target.getAttribute("data-id");
 
-    if (phase === 1 || phase === 5) {
+    if (phase === 1) {
       if (code) setHoveredCountry(code);
     } else if (phase === 2) {
       if (id) setHoveredIsland(id);
@@ -128,7 +123,7 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
   };
 
   const handleMouseOut = () => {
-    if (phase === 1 || phase === 5) {
+    if (phase === 1) {
       setHoveredCountry(null);
     } else if (phase === 2) {
       setHoveredIsland(null);
@@ -169,20 +164,11 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
             getCountryColor={getCountryColor}
           />
         )}
-        {phase === 5 && phase4Data && (
-          <Phase5Renderer
-            data={phase4Data}
-            hoveredCountry={hoveredCountry}
-            setHoveredCountry={setHoveredCountry}
-            getCountryColor={getCountryColor}
-          />
-        )}
       </g>
 
       {phase === 1 && activeCountryOverlay}
       {phase === 2 && activeIslandOverlay}
       {(phase === 3 || phase === 4) && activeRegionOverlay}
-      {phase === 5 && activePhase5Overlay}
     </svg>
   );
 };

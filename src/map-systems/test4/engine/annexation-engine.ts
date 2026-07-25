@@ -101,29 +101,61 @@ export function partitionAndDissolveRegions(
 
   let changed = true;
   let limit = 0;
-  while (changed && limit < 40) {
+
+  while (changed && limit < 100) {
     changed = false;
     limit++;
 
+    const nextOwners = new Map<string, { code: string; name: string }>();
+
     for (const reg of phase4Regions) {
       const currentOwner = regionOwner.get(reg.id);
-      if (!currentOwner || !DELETED_CODES.has(currentOwner.code)) {
+      if (!currentOwner) continue;
+
+      if (!DELETED_CODES.has(currentOwner.code)) {
         continue;
       }
 
-      let annexedOwner: { code: string; name: string } | null = null;
-      for (const neighborId of reg.neighbors) {
+      const neighborOwnerVotes = new Map<
+        string,
+        { count: number; name: string }
+      >();
+      reg.neighbors.forEach((neighborId) => {
         const nOwner = regionOwner.get(neighborId);
         if (nOwner && !DELETED_CODES.has(nOwner.code)) {
-          annexedOwner = nOwner;
-          break;
+          const vote = neighborOwnerVotes.get(nOwner.code) || {
+            count: 0,
+            name: nOwner.name,
+          };
+          vote.count++;
+          neighborOwnerVotes.set(nOwner.code, vote);
+        }
+      });
+
+      if (neighborOwnerVotes.size > 0) {
+        let bestCode = "";
+        let bestName = "";
+        let maxVotes = -1;
+
+        neighborOwnerVotes.forEach((vote, code) => {
+          if (vote.count > maxVotes) {
+            maxVotes = vote.count;
+            bestCode = code;
+            bestName = vote.name;
+          }
+        });
+
+        if (bestCode) {
+          nextOwners.set(reg.id, { code: bestCode, name: bestName });
         }
       }
+    }
 
-      if (annexedOwner) {
-        regionOwner.set(reg.id, annexedOwner);
-        changed = true;
-      }
+    if (nextOwners.size > 0) {
+      nextOwners.forEach((owner, id) => {
+        regionOwner.set(id, owner);
+      });
+      changed = true;
     }
   }
 
