@@ -16,11 +16,19 @@ import { NextTurnButton } from "./components/next-turn-button";
 import { CountryStatusIndicator } from "./components/country-status-indicator";
 import { InteractionOverlay } from "./components/interaction-overlay";
 import { ResetSessionButton } from "./components/reset-session-button";
+import { SovereignControlHud } from "./components/sovereign-control-hud";
+import { EconomyAdjuster } from "./components/economy-adjuster";
+import { RecruitmentCenter } from "./components/recruitment-center";
+import { MarketPricesWidget } from "./components/market-prices-widget";
+import { ActiveWarsList } from "./components/active-wars-list";
 import { useNationSelector } from "./hooks/use-nation-selector";
 import { useTacticalAttack } from "./hooks/use-tactical-attack";
-import { useMapSimulationState } from "./hooks/use-map-simulation-state";
 import { useTurnProgression } from "./hooks/use-turn-progression";
 import { useSessionState } from "./hooks/use-session-state";
+import { useMapEngine } from "./hooks/use-map-engine";
+import { useLocalMarketTrade } from "./hooks/use-local-market-trade";
+import { useLocalRecruitment } from "./hooks/use-local-recruitment";
+import { useLocalEconomyControl } from "./hooks/use-local-economy-control";
 import { GridCombatBridge } from "./engine/grid-combat-bridge";
 
 export default function MapTest6Page() {
@@ -37,7 +45,6 @@ export default function MapTest6Page() {
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const gridState = GridStateProvider.getInstance();
   const bridge = useRef(new GridCombatBridge());
 
   const {
@@ -73,26 +80,49 @@ export default function MapTest6Page() {
     mapHeight,
   });
 
+  const { playerNationId, setPlayerNationId, resetSession } = useSessionState();
+
+  const {
+    gameState,
+    initializeGame,
+    dispatchAction,
+    processNextTurn,
+    gridState,
+  } = useMapEngine(playerNationId);
+
+  const { buyResource } = useLocalMarketTrade(playerNationId, dispatchAction);
+  const { recruitUnits } = useLocalRecruitment(playerNationId, dispatchAction);
+  const { updateTaxRate } = useLocalEconomyControl(
+    playerNationId,
+    dispatchAction,
+  );
+
   useMapGridRenderer(canvasDestRef, gridState, dataLoading, showHeatmap);
 
-  const { playerNationId, setPlayerNationId, resetSession } = useSessionState();
-  const { gameState, refreshState } = useMapSimulationState();
   const { selectNation } = useNationSelector((id) => {
     setPlayerNationId(id);
     setPendingSelection(null);
-    refreshState();
+    initializeGame(id);
   });
 
   const { executeAttack, isAttacking } = useTacticalAttack(
     playerNationId,
     () => {
-      refreshState();
+      if (playerNationId) {
+        initializeGame(playerNationId);
+      }
     },
   );
 
   const { advanceTurn, isAdvancing } = useTurnProgression(() => {
-    refreshState();
+    processNextTurn();
   });
+
+  useEffect(() => {
+    if (playerNationId && !gameState) {
+      initializeGame(playerNationId);
+    }
+  }, [playerNationId, gameState, initializeGame]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -178,6 +208,9 @@ export default function MapTest6Page() {
       executeAttack(hoveredCountry.code, gridCoord);
     }
   };
+
+  const humanNation =
+    gameState && playerNationId ? gameState.nations[playerNationId] : null;
 
   return (
     <div className="w-screen h-screen bg-slate-950 text-white flex flex-row overflow-hidden select-none font-sans text-left">
@@ -278,6 +311,27 @@ export default function MapTest6Page() {
               />
             )}
 
+          {gameState && playerNationId && humanNation && (
+            <div className="absolute top-20 right-4 w-72 space-y-3 z-40">
+              <EconomyAdjuster
+                currentTaxRate={humanNation.taxRate}
+                onTaxChange={updateTaxRate}
+              />
+              <RecruitmentCenter
+                onRecruit={recruitUnits}
+                infantryCost={1000}
+                airForceCost={1000}
+              />
+              <MarketPricesWidget
+                prices={gameState.marketPrices}
+                oilInventory={humanNation.resources.oil}
+                steelInventory={humanNation.resources.steel}
+                onBuyResource={buyResource}
+              />
+              <ActiveWarsList relations={humanNation.relations} />
+            </div>
+          )}
+
           <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
             <ResetSessionButton onReset={resetSession} />
             <button
@@ -306,6 +360,8 @@ export default function MapTest6Page() {
           {hoveredCountry && <MapHoverCard hoveredCountry={hoveredCountry} />}
 
           {gameState && <CampaignLogOverlay logs={gameState.turnLogs} />}
+
+          {humanNation && <SovereignControlHud nation={humanNation} />}
         </div>
       </div>
 
