@@ -1,8 +1,8 @@
 import { TraitManager } from "@/engine/politics/trait-manager";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { CombatContext } from "./combat-context";
-import { CombatStage } from "./combat-stage";
+import { CombatContext } from "@/engine/combat/stages/combat-context";
+import { CombatStage } from "@/engine/combat/stages/combat-stage";
 
 export class ScoreFormulationStage implements CombatStage {
   private traitManager = new TraitManager();

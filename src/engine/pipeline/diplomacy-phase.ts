@@ -6,7 +6,7 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import { RelationsManager } from "@/engine/diplomacy/relations-manager";
 import { CoalitionManager } from "@/engine/diplomacy/coalition-manager";
 import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
-import { TurnPhase, PipelineContext } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export class DiplomacyPhase implements TurnPhase {
   private opinionCalculator = new DiplomaticOpinionCalculator();

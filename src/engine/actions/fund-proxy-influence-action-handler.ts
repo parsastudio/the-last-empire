@@ -4,7 +4,7 @@ import type {
   FundProxyInfluenceAction,
 } from "@/domain/game/action.schema";
 import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class FundProxyInfluenceActionHandler implements ActionHandler {
   private proxyManager = new ProxyWarManager();

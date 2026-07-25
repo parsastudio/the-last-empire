@@ -1,5 +1,5 @@
 import React from "react";
-import type { ActivePowerNation } from "../active-powers-list";
+import type { ActivePowerNation } from "@/presentation/components/active-powers-list";
 
 interface ActivePowerItemProps {
   power: ActivePowerNation;

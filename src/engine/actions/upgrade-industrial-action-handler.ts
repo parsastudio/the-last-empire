@@ -1,7 +1,7 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction } from "@/domain/game/action.schema";
 import { IndustrialLevelManager } from "@/engine/economy/industrial-level-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class UpgradeIndustrialActionHandler implements ActionHandler {
   private industrialManager = new IndustrialLevelManager();

@@ -13,7 +13,7 @@ import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { TributeManager } from "@/engine/diplomacy/tribute-manager";
 import { MarketEngine } from "@/engine/economy/market-engine";
 import { ResourceDependencyManager } from "@/engine/economy/resource-dependency-manager";
-import { TurnPhase, PipelineContext } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export interface EconomyCalculators {
   gdpCalc: GdpCalculator;

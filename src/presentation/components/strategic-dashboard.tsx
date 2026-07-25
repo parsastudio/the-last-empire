@@ -1,9 +1,9 @@
 import React from "react";
 import type { Province } from "@/domain/map/province.schema";
-import { DashboardHeader } from "./dashboard/dashboard-header";
-import { EmpireStatsCard } from "./dashboard/empire-stats-card";
-import { NeighborsListCard } from "./dashboard/neighbors-list-card";
-import { ConquestsListCard } from "./dashboard/conquests-list-card";
+import { DashboardHeader } from "@/presentation/components/dashboard/dashboard-header";
+import { EmpireStatsCard } from "@/presentation/components/dashboard/empire-stats-card";
+import { NeighborsListCard } from "@/presentation/components/dashboard/neighbors-list-card";
+import { ConquestsListCard } from "@/presentation/components/dashboard/conquests-list-card";
 
 interface StrategicDashboardProps {
   playerCountryCode: string | null;

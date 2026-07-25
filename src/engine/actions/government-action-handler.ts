@@ -4,7 +4,7 @@ import type {
   ChangeGovernmentAction,
 } from "@/domain/game/action.schema";
 import { RegimeChangeManager } from "@/engine/politics/regime-change-manager";
-import { ActionHandler } from "./action-handler";
+import { ActionHandler } from "@/engine/actions/action-handler";
 
 export class GovernmentActionHandler implements ActionHandler {
   private manager = new RegimeChangeManager();

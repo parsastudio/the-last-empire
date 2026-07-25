@@ -1,6 +1,6 @@
-import { AirSuperiorityCalculator } from "../air-superiority";
-import { CombatContext } from "./combat-context";
-import { CombatStage } from "./combat-stage";
+import { AirSuperiorityCalculator } from "@/engine/combat/air-superiority";
+import { CombatContext } from "@/engine/combat/stages/combat-context";
+import { CombatStage } from "@/engine/combat/stages/combat-stage";
 
 export class AirSuperiorityStage implements CombatStage {
   private airCalc = new AirSuperiorityCalculator();

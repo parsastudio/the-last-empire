@@ -1,5 +1,5 @@
 import type { Province } from "@/domain/map/province.schema";
-import type { VectorProvince } from "@/engine/map/grid-generator";
+import type { VectorProvince } from "@/map-systems/test1/engine/grid-generator";
 
 export function processProvincesAndVectors(
   rawProvinces: Record<string, Province>,

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { ActivePowerItem } from "./active-powers/active-power-item";
+import { ActivePowerItem } from "@/presentation/components/active-powers/active-power-item";
 
 export interface ActivePowerNation {
   id: string;

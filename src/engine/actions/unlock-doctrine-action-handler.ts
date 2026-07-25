@@ -4,7 +4,7 @@ import type {
   UnlockDoctrineAction,
 } from "@/domain/game/action.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class UnlockDoctrineActionHandler implements ActionHandler {
   private doctrinesManager = new DoctrinesManager();

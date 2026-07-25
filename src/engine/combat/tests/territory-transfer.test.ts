@@ -1,4 +1,4 @@
-import { TerritoryOccupationManager } from "../territory-occupation-manager";
+import { TerritoryOccupationManager } from "@/engine/combat/territory-occupation-manager";
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { Province } from "@/domain/map/province.schema";
 

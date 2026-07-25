@@ -4,7 +4,7 @@ import type {
   DisbandUnitAction,
 } from "@/domain/game/action.schema";
 import { DisbandManager } from "@/engine/military/disband-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class DisbandActionHandler implements ActionHandler {
   private disbandManager = new DisbandManager();

@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { calculateStateHash } from "@/domain/shared/state-hash";
-import { SyncDeltaPacker } from "./sync-delta-packer";
+import { SyncDeltaPacker } from "@/infrastructure/sync/sync-delta-packer";
 
 export interface StateStorageAdapter {
   saveState(gameId: string, state: GameState): Promise<void>;

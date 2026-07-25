@@ -1,6 +1,6 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { GameEventChoice } from "@/domain/game/events.schema";
-import { ModifierManager } from "./modifier-manager";
+import { ModifierManager } from "@/engine/politics/modifier-manager";
 
 export class EventEffectsApplier {
   private modifierManager = new ModifierManager();

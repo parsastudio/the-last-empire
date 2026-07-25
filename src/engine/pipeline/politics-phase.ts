@@ -5,7 +5,7 @@ import { ElectionEngine } from "@/engine/politics/election-engine";
 import { TraitManager } from "@/engine/politics/trait-manager";
 import { DomesticCrisisManager } from "@/engine/politics/domestic-crisis-manager";
 import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
-import { TurnPhase, PipelineContext } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export interface PoliticsEngines {
   stabilityCalc: StabilityCalculator;

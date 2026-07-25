@@ -1,7 +1,7 @@
 import type { GameAction } from "@/domain/game/action.schema";
-import { AIRecruitmentPlanner } from "../ai-recruitment-planner";
-import { AIPlanner } from "./ai-planner";
-import { AIPlanningContext } from "./ai-planning-context";
+import { AIRecruitmentPlanner } from "@/engine/ai/ai-recruitment-planner";
+import { AIPlanner } from "@/engine/ai/planners/ai-planner";
+import { AIPlanningContext } from "@/engine/ai/planners/ai-planning-context";
 
 export class MilitaryPlanningStep implements AIPlanner {
   private recruitmentPlanner = new AIRecruitmentPlanner();

@@ -1,5 +1,5 @@
-import { SyncEngine } from "../sync-engine";
-import type { StateStorageAdapter } from "../sync-engine";
+import { SyncEngine } from "@/infrastructure/sync/sync-engine";
+import type { StateStorageAdapter } from "@/infrastructure/sync/sync-engine";
 import type { GameState } from "@/domain/game/game-state.schema";
 
 export function runSyncEngineTest(): boolean {

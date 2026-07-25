@@ -1,4 +1,4 @@
-import { StateSerializer } from "../state-serializer";
+import { StateSerializer } from "@/infrastructure/storage/state-serializer";
 import type { GameState } from "@/domain/game/game-state.schema";
 
 export function runSerializerCircularTest(): boolean {

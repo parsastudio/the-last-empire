@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameEvent } from "@/domain/game/events.schema";
-import { EventRegistry } from "./event-registry";
+import { EventRegistry } from "@/engine/politics/event-registry";
 import { EventLogger } from "@/engine/event-logger";
 
 export class EventEvaluator {

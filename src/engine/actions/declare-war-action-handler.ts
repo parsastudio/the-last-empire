@@ -4,7 +4,7 @@ import type {
   DeclareWarAction,
 } from "@/domain/game/action.schema";
 import { CoolOffManager } from "@/engine/diplomacy/cool-off-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class DeclareWarActionHandler implements ActionHandler {
   private coolOffManager = new CoolOffManager();

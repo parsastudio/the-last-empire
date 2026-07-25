@@ -1,6 +1,6 @@
-import { DroneStrikeCalculator } from "../drone-strike-calculator";
-import { CombatContext } from "./combat-context";
-import { CombatStage } from "./combat-stage";
+import { DroneStrikeCalculator } from "@/engine/combat/drone-strike-calculator";
+import { CombatContext } from "@/engine/combat/stages/combat-context";
+import { CombatStage } from "@/engine/combat/stages/combat-stage";
 
 export class DroneStrikeStage implements CombatStage {
   private droneCalc = new DroneStrikeCalculator();

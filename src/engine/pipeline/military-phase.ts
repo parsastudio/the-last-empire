@@ -1,7 +1,7 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { AttritionManager } from "@/engine/military/attrition-manager";
-import { TurnPhase, PipelineContext } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export class MilitaryPhase implements TurnPhase {
   private recruitmentQueue = new RecruitmentQueueManager();

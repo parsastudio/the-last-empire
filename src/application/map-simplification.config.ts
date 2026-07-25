@@ -1,2 +1,2 @@
-export { FAMOUS_COUNTRIES } from "./config/famous-countries";
-export { MINOR_MERGE_MAP } from "./config/minor-merge-map";
+export { FAMOUS_COUNTRIES } from "@/map-systems/test3/engine/famous-countries";
+export { MINOR_MERGE_MAP } from "@/map-systems/test3/engine/minor-merge-map";

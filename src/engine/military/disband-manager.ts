@@ -1,7 +1,7 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { UnitType } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/game-error";
-import { UnitCostCalculator } from "./unit-cost-calculator";
+import { UnitCostCalculator } from "@/engine/military/unit-cost-calculator";
 import { ManpowerManager } from "@/engine/economy/manpower-manager";
 
 export class DisbandManager {

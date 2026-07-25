@@ -1,5 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { StateSerializer } from "./state-serializer";
+import { StateSerializer } from "@/infrastructure/storage/state-serializer";
 
 export class IndexedDbAdapter {
   private serializer = new StateSerializer();

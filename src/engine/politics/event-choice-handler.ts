@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameEvent } from "@/domain/game/events.schema";
-import { EventEffectsApplier } from "./event-effects-applier";
+import { EventEffectsApplier } from "@/engine/politics/event-effects-applier";
 import { EventLogger } from "@/engine/event-logger";
 
 export class EventChoiceHandler {

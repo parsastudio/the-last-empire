@@ -1,4 +1,4 @@
-import { MarketEngine } from "../market-engine";
+import { MarketEngine } from "@/engine/economy/market-engine";
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 
