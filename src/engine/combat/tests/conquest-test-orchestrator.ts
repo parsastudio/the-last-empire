@@ -5,9 +5,13 @@ import { runIntegrationConquestFlowTest } from "@/engine/combat/tests/integratio
 import { runDynamicEnclaveSplittingTest } from "@/engine/combat/tests/dynamic-enclave-splitting.test";
 import { runCanalNavigationFlowTest } from "@/engine/combat/tests/canal-navigation-flow.test";
 import { runConquestEngineIntegrationTest } from "@/engine/combat/tests/conquest-engine-integration.test";
+import { runDynamicEnclaveConnectorTest } from "./dynamic-enclave-connector.test";
+import { runConquestCapperTest } from "./conquest-capper.test";
+import { runGridStateSerializerTest } from "./grid-state-serializer.test";
+import { runBattleValidatorTest } from "./battle-validator.test";
 
-export class SystemTestSuiteRunner {
-  public runAllSystemTests(): Record<string, boolean> {
+export class ConquestTestOrchestrator {
+  public executeAllVerificationTests(): Record<string, boolean> {
     return {
       gridConquest: runGridConquestTest(),
       completeWarScenario: runCompleteWarScenarioTest(),
@@ -16,6 +20,10 @@ export class SystemTestSuiteRunner {
       dynamicEnclaveSplitting: runDynamicEnclaveSplittingTest(),
       canalNavigationFlow: runCanalNavigationFlowTest(),
       conquestEngineIntegration: runConquestEngineIntegrationTest(),
+      dynamicEnclaveConnector: runDynamicEnclaveConnectorTest(),
+      conquestCapper: runConquestCapperTest(),
+      gridStateSerializer: runGridStateSerializerTest(),
+      battleValidator: runBattleValidatorTest(),
     };
   }
 }

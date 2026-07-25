@@ -16,11 +16,11 @@ export class EngineIntegration {
   }
 
   public integrateTurnPipeline(pipeline: TurnPipeline): TurnPipeline {
-    const currentPhases = (pipeline as { phases?: unknown }).phases;
+    const currentPhases = (pipeline as unknown as { phases?: unknown }).phases;
     if (Array.isArray(currentPhases)) {
       const updatedPhases =
         this.pipelineFacade.injectGridCombatPhase(currentPhases);
-      (pipeline as { phases: unknown }).phases = updatedPhases;
+      (pipeline as unknown as { phases: unknown }).phases = updatedPhases;
     }
     return pipeline;
   }

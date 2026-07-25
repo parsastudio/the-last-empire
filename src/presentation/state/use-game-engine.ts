@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameEngine } from "@/engine/game-engine";
-import { GridState } from "@/engine/combat/state/grid-state";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridStateGameSaveAdapter } from "@/engine/combat/persistence/grid-state-game-save-adapter";
 import { GridSyncCoordinator } from "@/engine/combat/persistence/grid-sync-coordinator";
@@ -19,8 +18,8 @@ export function useGameEngine(initialState: GameState | null) {
     if (!state) {
       return null;
     }
-    (state as { gridState?: GridState }).gridState = gridState;
-    return new GameEngine(state);
+    const cloned = { ...state, gridState };
+    return new GameEngine(cloned);
   }, [state, gridState]);
 
   useEffect(() => {

@@ -4,10 +4,12 @@ import { ActionHandler } from "@/engine/actions/action-handler";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { ConquestOrchestrator } from "@/engine/combat/orchestrator/conquest-orchestrator";
 import { GdpPopUpdater } from "@/engine/combat/state/gdp-pop-updater";
+import { ConquestLogWriter } from "@/engine/combat/orchestrator/conquest-log-writer";
 
 export class AttackConquestHandler implements ActionHandler {
   private orchestrator = new ConquestOrchestrator();
   private gdpPopUpdater = new GdpPopUpdater();
+  private logWriter = new ConquestLogWriter();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "ATTACK") {
@@ -38,13 +40,21 @@ export class AttackConquestHandler implements ActionHandler {
       allCells,
     );
 
+    const loggedState = this.logWriter.appendConquestLogs(
+      state,
+      attacker.id,
+      defender.id,
+      result.conqueredCells,
+      result.capitulatedCells,
+    );
+
     const updatedNations = this.gdpPopUpdater.syncGlobalStats(
-      state.nations,
+      loggedState.nations,
       allCells,
     );
 
     return {
-      ...state,
+      ...loggedState,
       nations: updatedNations,
     };
   }
