@@ -33,7 +33,6 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
   phase4Data,
   hoveredCountry,
   setHoveredCountry,
-  hoveredIsland: _hoveredIsland,
   setHoveredIsland,
   hoveredRegion,
   setHoveredRegion,
