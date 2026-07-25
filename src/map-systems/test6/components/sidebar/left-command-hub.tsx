@@ -10,6 +10,7 @@ import {
   Globe,
   TrendingUp,
   X,
+  Compass,
 } from "lucide-react";
 import { SovereignStatsPanel } from "../panel/sovereign-stats-panel";
 import { GlobalLeaderboardPanel } from "../panel/global-leaderboard-panel";
@@ -32,6 +33,7 @@ interface LeftCommandHubProps {
   onBuyResource: (type: "oil" | "steel", amt: number) => void;
   onPropose: (type: DiplomaticProposalType) => void;
   onDeclareWar: () => void;
+  onResetView: () => void;
 }
 
 type TabType = "STATS" | "ECONOMY" | "MILITARY" | "MARKET" | "DIPLOMACY" | null;
@@ -49,6 +51,7 @@ export function LeftCommandHub({
   onBuyResource,
   onPropose,
   onDeclareWar,
+  onResetView,
 }: LeftCommandHubProps) {
   const [activeTab, setActiveTab] = useState<TabType>(null);
 
@@ -58,56 +61,67 @@ export function LeftCommandHub({
 
   return (
     <div className="absolute top-0 left-0 h-screen flex flex-row z-40 pointer-events-none">
-      <div className="w-16 bg-slate-950/95 border-r border-slate-900 flex flex-col items-center py-6 gap-8 pointer-events-auto">
+      <div className="w-16 bg-slate-950/95 border-r border-slate-900 flex flex-col items-center py-6 pointer-events-auto">
+        <div className="flex flex-col items-center gap-8 w-full">
+          <button
+            onClick={() => toggleTab("STATS")}
+            className={`p-2.5 rounded-2xl transition-all ${
+              activeTab === "STATS"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                : "text-slate-500 hover:text-slate-200"
+            }`}
+          >
+            <Activity size={20} />
+          </button>
+          <button
+            onClick={() => toggleTab("ECONOMY")}
+            className={`p-2.5 rounded-2xl transition-all ${
+              activeTab === "ECONOMY"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                : "text-slate-500 hover:text-slate-200"
+            }`}
+          >
+            <TrendingUp size={20} />
+          </button>
+          <button
+            onClick={() => toggleTab("MILITARY")}
+            className={`p-2.5 rounded-2xl transition-all ${
+              activeTab === "MILITARY"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                : "text-slate-500 hover:text-slate-200"
+            }`}
+          >
+            <Swords size={20} />
+          </button>
+          <button
+            onClick={() => toggleTab("MARKET")}
+            className={`p-2.5 rounded-2xl transition-all ${
+              activeTab === "MARKET"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                : "text-slate-500 hover:text-slate-200"
+            }`}
+          >
+            <DollarSign size={20} />
+          </button>
+          <button
+            onClick={() => toggleTab("DIPLOMACY")}
+            className={`p-2.5 rounded-2xl transition-all ${
+              activeTab === "DIPLOMACY"
+                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
+                : "text-slate-500 hover:text-slate-200"
+            }`}
+          >
+            <Globe size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1" />
+
         <button
-          onClick={() => toggleTab("STATS")}
-          className={`p-2.5 rounded-2xl transition-all ${
-            activeTab === "STATS"
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-              : "text-slate-500 hover:text-slate-200"
-          }`}
+          onClick={onResetView}
+          className="p-2.5 rounded-2xl text-slate-500 hover:text-slate-200 transition-all mt-auto"
         >
-          <Activity size={20} />
-        </button>
-        <button
-          onClick={() => toggleTab("ECONOMY")}
-          className={`p-2.5 rounded-2xl transition-all ${
-            activeTab === "ECONOMY"
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-              : "text-slate-500 hover:text-slate-200"
-          }`}
-        >
-          <TrendingUp size={20} />
-        </button>
-        <button
-          onClick={() => toggleTab("MILITARY")}
-          className={`p-2.5 rounded-2xl transition-all ${
-            activeTab === "MILITARY"
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-              : "text-slate-500 hover:text-slate-200"
-          }`}
-        >
-          <Swords size={20} />
-        </button>
-        <button
-          onClick={() => toggleTab("MARKET")}
-          className={`p-2.5 rounded-2xl transition-all ${
-            activeTab === "MARKET"
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-              : "text-slate-500 hover:text-slate-200"
-          }`}
-        >
-          <DollarSign size={20} />
-        </button>
-        <button
-          onClick={() => toggleTab("DIPLOMACY")}
-          className={`p-2.5 rounded-2xl transition-all ${
-            activeTab === "DIPLOMACY"
-              ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-              : "text-slate-500 hover:text-slate-200"
-          }`}
-        >
-          <Globe size={20} />
+          <Compass size={20} />
         </button>
       </div>
 
