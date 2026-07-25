@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import { useState, useRef } from "react";
 
 export function useMapGesture() {
   const [scale, setScale] = useState<number>(1);
@@ -7,57 +7,68 @@ export function useMapGesture() {
     y: 0,
   });
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
+  const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button !== 0) return;
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-    },
-    [position],
-  );
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDragging) return;
-      setPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
-      });
-    },
-    [isDragging, dragStart],
-  );
+    const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
+    const nextScale = Math.max(1, Math.min(30, scale * zoomFactor));
 
-  const handleMouseUp = useCallback(() => {
+    if (nextScale === scale) {
+      return;
+    }
+
+    const nextPosition = {
+      x: mx - (mx - position.x) * (nextScale / scale),
+      y: my - (my - position.y) * (nextScale / scale),
+    };
+
+    setScale(nextScale);
+    setPosition(nextPosition);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) {
+      return;
+    }
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging) {
+      return;
+    }
+    setPosition({
+      x: e.clientX - dragStart.current.x,
+      y: e.clientY - dragStart.current.y,
+    });
+  };
+
+  const handleMouseUp = () => {
     setIsDragging(false);
-  }, []);
+  };
 
-  const zoomIn = useCallback(() => {
-    setScale((prev) => Math.min(prev + 0.5, 6));
-  }, []);
-
-  const zoomOut = useCallback(() => {
-    setScale((prev) => Math.max(prev - 0.5, 1));
-  }, []);
-
-  const resetView = useCallback(() => {
+  const handleResetView = () => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
-  }, []);
+  };
 
   return {
     scale,
     position,
     isDragging,
+    handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    zoomIn,
-    zoomOut,
-    resetView,
+    handleResetView,
   };
 }
