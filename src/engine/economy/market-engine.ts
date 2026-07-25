@@ -1,18 +1,16 @@
-import type { ResourceMarketPrice } from "@/domain/economy/economy.schema";
-import type { Nation } from "@/domain/nation/nation.schema";
-import { GameError } from "@/domain/shared/game-error";
-
-export interface TradeTransactionResult {
-  updatedNation: Nation;
-  updatedMarketPrices: ResourceMarketPrice;
-  totalCostOrRevenue: number;
-}
+import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { MarketPricingCalculator } from "./market/market-pricing.calculator";
+import {
+  BuyTransactionHandler,
+  TradeTransactionResult,
+} from "./market/buy-transaction.handler";
+import { SellTransactionHandler } from "./market/sell-transaction.handler";
 
 export class MarketEngine {
-  private readonly minPrice = 10;
-  private readonly maxPrice = 500;
-  private readonly feeRate = 0.1;
-  private readonly sellSpread = 0.85;
+  private pricingCalculator = new MarketPricingCalculator();
+  private buyHandler = new BuyTransactionHandler();
+  private sellHandler = new SellTransactionHandler();
 
   public updateMarketPrices(
     currentPrices: ResourceMarketPrice,
@@ -21,42 +19,13 @@ export class MarketEngine {
     totalSteelDemand: number,
     totalSteelSupply: number,
   ): ResourceMarketPrice {
-    const baseOilPrice = 100;
-    const baseSteelPrice = 100;
-    const passiveOilSupply = 150;
-    const passiveSteelSupply = 100;
-
-    const oilBalance = totalOilDemand - (totalOilSupply + passiveOilSupply);
-    const steelBalance =
-      totalSteelDemand - (totalSteelSupply + passiveSteelSupply);
-
-    const rawOilDelta = Math.floor(oilBalance * 0.05);
-    const rawSteelDelta = Math.floor(steelBalance * 0.05);
-
-    const oilGravity = Math.floor((baseOilPrice - currentPrices.oil) * 0.05);
-    const steelGravity = Math.floor(
-      (baseSteelPrice - currentPrices.steel) * 0.05,
+    return this.pricingCalculator.updateMarketPrices(
+      currentPrices,
+      totalOilDemand,
+      totalOilSupply,
+      totalSteelDemand,
+      totalSteelSupply,
     );
-
-    const oilDelta = Math.max(-20, Math.min(20, rawOilDelta + oilGravity));
-    const steelDelta = Math.max(
-      -20,
-      Math.min(20, rawSteelDelta + steelGravity),
-    );
-
-    const newOilPrice = Math.max(
-      this.minPrice,
-      Math.min(this.maxPrice, currentPrices.oil + oilDelta),
-    );
-    const newSteelPrice = Math.max(
-      this.minPrice,
-      Math.min(this.maxPrice, currentPrices.steel + steelDelta),
-    );
-
-    return {
-      oil: newOilPrice,
-      steel: newSteelPrice,
-    };
   }
 
   public predictBuyCost(
@@ -64,21 +33,7 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): number {
-    if (amount <= 0) {
-      return 0;
-    }
-    const currentPrice = marketPrices[resourceType];
-    const k = this.maxPrice - currentPrice;
-    let totalCost = 0;
-    if (amount <= k) {
-      totalCost = amount * currentPrice + (amount * (amount - 1)) / 2;
-    } else {
-      const variableCost = k * currentPrice + (k * (k - 1)) / 2;
-      const flatCost = (amount - k) * this.maxPrice;
-      totalCost = variableCost + flatCost;
-    }
-    const fee = Math.floor(totalCost * this.feeRate);
-    return totalCost + fee;
+    return this.buyHandler.predictBuyCost(marketPrices, resourceType, amount);
   }
 
   public calculateMaxAffordable(
@@ -86,23 +41,11 @@ export class MarketEngine {
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
   ): number {
-    if (treasury <= 0) {
-      return 0;
-    }
-    let low = 0;
-    let high = 1000000;
-    let result = 0;
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
-      const cost = this.predictBuyCost(marketPrices, resourceType, mid);
-      if (cost <= treasury) {
-        result = mid;
-        low = mid + 1;
-      } else {
-        high = mid - 1;
-      }
-    }
-    return result;
+    return this.buyHandler.calculateMaxAffordable(
+      treasury,
+      marketPrices,
+      resourceType,
+    );
   }
 
   public predictSellRevenue(
@@ -110,25 +53,11 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): number {
-    if (amount <= 0) {
-      return 0;
-    }
-    const currentPrice = marketPrices[resourceType];
-    const adjustedStartPrice = Math.max(
-      this.minPrice,
-      Math.floor(currentPrice * this.sellSpread),
+    return this.sellHandler.predictSellRevenue(
+      marketPrices,
+      resourceType,
+      amount,
     );
-    const k = adjustedStartPrice - this.minPrice;
-    let totalRevenue = 0;
-    if (amount <= k) {
-      totalRevenue = amount * adjustedStartPrice - (amount * (amount - 1)) / 2;
-    } else {
-      const variableRevenue = k * adjustedStartPrice - (k * (k - 1)) / 2;
-      const flatRevenue = (amount - k) * this.minPrice;
-      totalRevenue = variableRevenue + flatRevenue;
-    }
-    const fee = Math.floor(totalRevenue * this.feeRate);
-    return Math.max(0, totalRevenue - fee);
   }
 
   public buyResource(
@@ -137,47 +66,12 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): TradeTransactionResult {
-    if (amount <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Buy amount must be greater than zero",
-      );
-    }
-    const totalCostWithFee = this.predictBuyCost(
+    return this.buyHandler.buyResource(
+      nation,
       marketPrices,
       resourceType,
       amount,
     );
-    if (nation.treasury < totalCostWithFee) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "Not enough treasury to buy resources",
-      );
-    }
-    const currentPrice = marketPrices[resourceType];
-    const k = this.maxPrice - currentPrice;
-    const finalPrice =
-      amount <= k
-        ? currentPrice + Math.max(1, Math.floor(amount * 0.5))
-        : this.maxPrice;
-
-    const updatedNation: Nation = {
-      ...nation,
-      treasury: nation.treasury - totalCostWithFee,
-      resources: {
-        ...nation.resources,
-        [resourceType]: nation.resources[resourceType] + amount,
-      },
-    };
-    const updatedMarketPrices: ResourceMarketPrice = {
-      ...marketPrices,
-      [resourceType]: finalPrice,
-    };
-    return {
-      updatedNation,
-      updatedMarketPrices,
-      totalCostOrRevenue: totalCostWithFee,
-    };
   }
 
   public sellResource(
@@ -186,50 +80,11 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): TradeTransactionResult {
-    if (amount <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Sell amount must be greater than zero",
-      );
-    }
-    if (nation.resources[resourceType] < amount) {
-      throw new GameError(
-        "INSUFFICIENT_RESOURCES",
-        `Not enough ${resourceType} to sell`,
-      );
-    }
-    const netRevenue = this.predictSellRevenue(
+    return this.sellHandler.sellResource(
+      nation,
       marketPrices,
       resourceType,
       amount,
     );
-    const currentPrice = marketPrices[resourceType];
-    const adjustedStartPrice = Math.max(
-      this.minPrice,
-      Math.floor(currentPrice * this.sellSpread),
-    );
-    const k = adjustedStartPrice - this.minPrice;
-    const finalPrice =
-      amount <= k
-        ? adjustedStartPrice - Math.max(1, Math.floor(amount * 0.5))
-        : this.minPrice;
-
-    const updatedNation: Nation = {
-      ...nation,
-      treasury: nation.treasury + netRevenue,
-      resources: {
-        ...nation.resources,
-        [resourceType]: nation.resources[resourceType] - amount,
-      },
-    };
-    const updatedMarketPrices: ResourceMarketPrice = {
-      ...marketPrices,
-      [resourceType]: finalPrice,
-    };
-    return {
-      updatedNation,
-      updatedMarketPrices,
-      totalCostOrRevenue: netRevenue,
-    };
   }
 }
