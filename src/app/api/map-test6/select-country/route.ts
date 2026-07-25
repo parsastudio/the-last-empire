@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
-import { GameStateInitializer } from "@/map-systems/test6/engine/game-state-initializer";
+import { SimulationFacade } from "@/map-systems/test6/engine/simulation-facade";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -14,9 +13,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    const gridState = GridStateProvider.getInstance();
-    const initializer = new GameStateInitializer();
-    initializer.initializeSimulationForNation(nationId, gridState);
+    const facade = new SimulationFacade();
+    facade.selectPlayerNation(nationId);
 
     return NextResponse.json({ success: true });
   } catch (err) {
