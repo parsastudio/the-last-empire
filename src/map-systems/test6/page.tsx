@@ -41,8 +41,6 @@ export default function MapTest6Page() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    zoomIn,
-    zoomOut,
     handleResetView,
   } = useMapGesture();
 
@@ -188,6 +186,7 @@ export default function MapTest6Page() {
               onDeclareWar={() => {
                 if (hoveredCountry) declareWarDirectly(hoveredCountry.code);
               }}
+              onResetView={handleResetView}
             />
 
             <HoverTargetOverlay
