@@ -1,26 +1,25 @@
 "use client";
 
-import React, { useRef, useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useMapGesture } from "./hooks/use-map-gesture";
 import { MapControls } from "./components/map-controls";
 import { useMapData } from "./hooks/use-map-data";
 import { useMapMouse } from "./hooks/use-map-mouse";
+import { MapHeader } from "./components/map-header";
 import { useMapGridRenderer } from "./hooks/use-map-grid-renderer";
+import { SelectionModal } from "./components/selection-modal";
 import { TacticalSidePanel } from "./components/tactical-side-panel";
+import { SovereignControlSidebar } from "./components/sovereign-control-sidebar";
 import { TurnLogsTerminal } from "./components/turn-logs-terminal";
 import { GlobalRankingSidebar } from "./components/global-ranking-sidebar";
-import { SovereignControlSidebar } from "./components/sovereign-control-sidebar";
-import { MapCanvasContainer } from "./components/map-canvas-container";
-import { MapCanvasOverlays } from "./components/map-canvas-overlays";
-import { TacticalActionBar } from "./components/tactical-action-bar";
-import { LoadingStateOverlay } from "./components/loading-state-overlay";
-import { ErrorStateOverlay } from "./components/error-state-overlay";
-import { SelectionModalWrapper } from "./components/selection-modal-wrapper";
 import { useTacticalSimulationState } from "./hooks/use-tactical-simulation-state";
+import { useMapDimensions } from "./hooks/use-map-dimensions";
+import { MapCanvasContainer } from "./components/map-canvas-container";
+import { TacticalActionBar } from "./components/tactical-action-bar";
+import { GridCombatBridge } from "./engine/grid-combat-bridge";
+import { MapCanvasOverlays } from "./components/map-canvas-overlays";
 import { useCanvasRenderer } from "./hooks/use-canvas-renderer";
 import { useCanvasClickHandler } from "./hooks/use-canvas-click-handler";
-import { useMapDimensions } from "./hooks/use-map-dimensions";
-import { GridCombatBridge } from "./engine/grid-combat-bridge";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
@@ -55,6 +54,7 @@ export default function MapTest6Page() {
     countries,
     loading: dataLoading,
     error,
+    isCached,
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
@@ -125,8 +125,20 @@ export default function MapTest6Page() {
 
   return (
     <div className="w-screen h-screen bg-slate-950 text-white flex flex-row overflow-hidden select-none font-sans text-left">
-      <LoadingStateOverlay loading={dataLoading} />
-      <ErrorStateOverlay error={error} />
+      {dataLoading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400 font-medium">
+            Generating High-Fidelity 4K Tactical Map...
+          </p>
+        </div>
+      )}
+
+      {error && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 p-4 bg-red-950/80 border border-red-800/80 text-red-400 rounded-xl shadow-2xl z-50 text-xs font-mono">
+          {error}
+        </div>
+      )}
 
       {gameState && playerNationId && (
         <TacticalSidePanel state={gameState} humanNationId={playerNationId}>
@@ -178,8 +190,16 @@ export default function MapTest6Page() {
               hoveredCountry={hoveredCountry}
               forceSuccess={forceSuccess}
               onToggleForceSuccess={toggleForceSuccess}
-              onPropose={(type) => proposeDiplomacy(hoveredCountry.code, type)}
-              onDeclareWar={() => declareWarDirectly(hoveredCountry.code)}
+              onPropose={(type) => {
+                if (hoveredCountry) {
+                  proposeDiplomacy(hoveredCountry.code, type);
+                }
+              }}
+              onDeclareWar={() => {
+                if (hoveredCountry) {
+                  declareWarDirectly(hoveredCountry.code);
+                }
+              }}
               onTaxChange={updateTaxRate}
               onUpgradeInfra={upgradeInfrastructure}
               onUpgradeIndustrial={upgradeIndustrialLevel}
@@ -209,15 +229,16 @@ export default function MapTest6Page() {
 
       {gameState && <TurnLogsTerminal logs={filteredLogs} />}
 
-      <SelectionModalWrapper
-        pendingSelection={pendingSelection}
-        onConfirm={() => {
-          if (pendingSelection) {
-            selectNation(pendingSelection.id, pendingSelection.name);
+      {pendingSelection && (
+        <SelectionModal
+          countryName={pendingSelection.name}
+          countryCode={pendingSelection.id}
+          onConfirm={() =>
+            selectNation(pendingSelection.id, pendingSelection.name)
           }
-        }}
-        onCancel={() => setPendingSelection(null)}
-      />
+          onCancel={() => setPendingSelection(null)}
+        />
+      )}
     </div>
   );
 }

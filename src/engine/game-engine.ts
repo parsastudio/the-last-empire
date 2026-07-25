@@ -37,7 +37,14 @@ export class GameEngine {
   private stateSynchronizer = new StateSynchronizerFacade();
 
   constructor(initialState: GameState) {
-    this.currentState = deepClone(initialState);
+    const rawGridState = (initialState as { gridState?: GridState }).gridState;
+    const stateCopy: Omit<GameState, "gridState"> & { gridState?: unknown } = {
+      ...initialState,
+    };
+    if ("gridState" in stateCopy) {
+      delete stateCopy.gridState;
+    }
+    this.currentState = deepClone(stateCopy as GameState);
     this.actionQueue = new ActionQueue();
     this.eventLogger = new EventLogger();
     this.livenessManager = new NationLivenessManager();
@@ -47,9 +54,7 @@ export class GameEngine {
     this.aiEngine = new AIEngine();
     this.prng = new SeededRandom(initialState.seed);
     this.actionRouter = new ActionRouter();
-    this.gridState =
-      (this.currentState as { gridState?: GridState }).gridState ||
-      new GridState();
+    this.gridState = rawGridState || new GridState();
     this.stateHistory.saveSnapshot(this.currentState);
     this.gridHistory.captureTurn(
       this.stateHistory,
@@ -75,7 +80,8 @@ export class GameEngine {
     }
 
     try {
-      this.actionQueue.enqueue(this.currentState, action);
+      const stateWithGrid = { ...this.currentState, gridState: this.gridState };
+      this.actionQueue.enqueue(stateWithGrid, action);
       return {
         success: true,
         actionId: action.id,
@@ -99,10 +105,11 @@ export class GameEngine {
       return this.getState();
     }
 
-    const aiActions = this.aiEngine.generateTurnActions(this.currentState);
+    const stateWithGrid = { ...this.currentState, gridState: this.gridState };
+    const aiActions = this.aiEngine.generateTurnActions(stateWithGrid);
     for (const aiAction of aiActions) {
       try {
-        this.actionQueue.enqueue(this.currentState, aiAction);
+        this.actionQueue.enqueue(stateWithGrid, aiAction);
       } catch {
         continue;
       }
@@ -224,11 +231,20 @@ export class GameEngine {
     ];
 
     let state = this.currentState;
-    (state as { gridState?: GridState }).gridState = this.gridState;
 
     for (const action of sortedActions) {
       try {
-        state = this.actionRouter.route(state, action);
+        const stateWithGrid: GameState & { gridState?: GridState } = {
+          ...state,
+          gridState: this.gridState,
+        };
+        const routedState = this.actionRouter.route(stateWithGrid, action);
+        const cleanedRoutedState: GameState & { gridState?: unknown } = {
+          ...routedState,
+        };
+        delete cleanedRoutedState.gridState;
+        state = cleanedRoutedState as GameState;
+
         const logEntry = this.eventLogger.createEntry(
           state.currentTurn,
           action.nationId,
