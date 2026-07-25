@@ -169,9 +169,9 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
             getCountryColor={getCountryColor}
           />
         )}
-        {phase === 5 && phase1Data && (
+        {phase === 5 && phase4Data && (
           <Phase5Renderer
-            data={phase1Data}
+            data={phase4Data}
             hoveredCountry={hoveredCountry}
             setHoveredCountry={setHoveredCountry}
             getCountryColor={getCountryColor}
