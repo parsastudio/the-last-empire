@@ -1,40 +1,25 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import { useMapGesture } from "./hooks/use-map-gesture";
 import { MapControls } from "./components/map-controls";
 import { useMapData } from "./hooks/use-map-data";
 import { useMapMouse } from "./hooks/use-map-mouse";
-import { MapHeader } from "./components/map-header";
-import { MapHoverCard } from "./components/map-hover-card";
 import { useMapGridRenderer } from "./hooks/use-map-grid-renderer";
-import { SelectionModal } from "./components/selection-modal";
 import { TacticalSidePanel } from "./components/tactical-side-panel";
-import { NextTurnButton } from "./components/next-turn-button";
-import { CountryStatusIndicator } from "./components/country-status-indicator";
-import { InteractionOverlay } from "./components/interaction-overlay";
-import { ResetSessionButton } from "./components/reset-session-button";
-import { SovereignControlHud } from "./components/sovereign-control-hud";
-import { SovereignControlSidebar } from "./components/sovereign-control-sidebar";
 import { TurnLogsTerminal } from "./components/turn-logs-terminal";
 import { GlobalRankingSidebar } from "./components/global-ranking-sidebar";
-import { NationalTraitsBox } from "./components/national-traits-box";
-import { useNationSelector } from "./hooks/use-nation-selector";
-import { useTacticalAttack } from "./hooks/use-tactical-attack";
-import { useTurnProgression } from "./hooks/use-turn-progression";
-import { useSessionState } from "./hooks/use-session-state";
-import { useMapEngine } from "./hooks/use-map-engine";
-import { useLocalMarketTrade } from "./hooks/use-local-market-trade";
-import { useLocalRecruitment } from "./hooks/use-local-recruitment";
-import { useLocalEconomyControl } from "./hooks/use-local-economy-control";
-import { useDiplomacyActions } from "./hooks/use-diplomacy-actions";
-import { useStateUpgrades } from "./hooks/use-state-upgrades";
-import { useLocalDoctrines } from "./hooks/use-local-doctrines";
-import { useMapDimensions } from "./hooks/use-map-dimensions";
+import { SovereignControlSidebar } from "./components/sovereign-control-sidebar";
 import { MapCanvasContainer } from "./components/map-canvas-container";
-import { useGlobalRankings } from "./hooks/use-global-rankings";
-import { useTurnLogs } from "./hooks/use-turn-logs";
-import { useTacticalOptions } from "./hooks/use-tactical-options";
+import { MapCanvasOverlays } from "./components/map-canvas-overlays";
+import { TacticalActionBar } from "./components/tactical-action-bar";
+import { LoadingStateOverlay } from "./components/loading-state-overlay";
+import { ErrorStateOverlay } from "./components/error-state-overlay";
+import { SelectionModalWrapper } from "./components/selection-modal-wrapper";
+import { useTacticalSimulationState } from "./hooks/use-tactical-simulation-state";
+import { useCanvasRenderer } from "./hooks/use-canvas-renderer";
+import { useCanvasClickHandler } from "./hooks/use-canvas-click-handler";
+import { useMapDimensions } from "./hooks/use-map-dimensions";
 import { GridCombatBridge } from "./engine/grid-combat-bridge";
 
 export default function MapTest6Page() {
@@ -70,7 +55,6 @@ export default function MapTest6Page() {
     countries,
     loading: dataLoading,
     error,
-    isCached,
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
@@ -86,152 +70,63 @@ export default function MapTest6Page() {
     mapHeight,
   });
 
-  const { playerNationId, setPlayerNationId, resetSession } = useSessionState();
   const {
+    playerNationId,
+    resetSession,
     gameState,
-    initializeGame,
-    dispatchAction,
-    processNextTurn,
     gridState,
-  } = useMapEngine();
-
-  const { buyResource } = useLocalMarketTrade(playerNationId, dispatchAction);
-  const { recruitUnits } = useLocalRecruitment(playerNationId, dispatchAction);
-  const { updateTaxRate } = useLocalEconomyControl(
-    playerNationId,
-    dispatchAction,
-  );
-  const { proposeDiplomacy, declareWarDirectly } = useDiplomacyActions(
-    playerNationId,
-    dispatchAction,
-  );
-  const { upgradeInfrastructure, upgradeIndustrialLevel } = useStateUpgrades(
-    playerNationId,
-    dispatchAction,
-  );
-  const { unlockDoctrineType } = useLocalDoctrines(
-    playerNationId,
-    dispatchAction,
-  );
-  const { forceSuccess, toggleForceSuccess } = useTacticalOptions();
-
-  const rankings = useGlobalRankings(gameState);
-  const { filteredLogs } = useTurnLogs(gameState);
+    buyResource,
+    recruitUnits,
+    updateTaxRate,
+    proposeDiplomacy,
+    declareWarDirectly,
+    upgradeInfrastructure,
+    upgradeIndustrialLevel,
+    unlockDoctrineType,
+    forceSuccess,
+    toggleForceSuccess,
+    rankings,
+    filteredLogs,
+    selectNation,
+    executeAttack,
+    isAttacking,
+    advanceTurn,
+    isAdvancing,
+    humanNation,
+  } = useTacticalSimulationState(setPendingSelection);
 
   useMapGridRenderer(canvasDestRef, gridState, dataLoading, showHeatmap);
 
-  const { selectNation } = useNationSelector((id) => {
-    setPlayerNationId(id);
-    setPendingSelection(null);
-    initializeGame(id);
+  useCanvasRenderer({
+    canvasDestRef,
+    canvasShadedRef,
+    dataLoading,
+    dimensions,
+    position,
+    scale,
+    mapWidth,
+    mapHeight,
   });
 
-  const { executeAttack, isAttacking } = useTacticalAttack(
+  const handleCanvasClick = useCanvasClickHandler({
+    isDragging,
+    hoveredCountry,
+    dataLoading,
+    canvasDestRef,
+    position,
+    scale,
+    mapWidth,
+    mapHeight,
     playerNationId,
-    () => {
-      if (playerNationId) {
-        initializeGame(playerNationId);
-      }
-    },
-  );
-
-  const { advanceTurn, isAdvancing } = useTurnProgression(() => {
-    processNextTurn();
+    bridge,
+    onSelectPending: setPendingSelection,
+    onExecuteAttack: executeAttack,
   });
-
-  useEffect(() => {
-    if (playerNationId && !gameState) {
-      initializeGame(playerNationId);
-    }
-  }, [playerNationId, gameState, initializeGame]);
-
-  useEffect(() => {
-    const canvasDest = canvasDestRef.current;
-    const canvasShaded = canvasShadedRef.current;
-    if (!canvasDest || !canvasShaded || dataLoading) return;
-
-    const ctxDest = canvasDest.getContext("2d");
-    if (!ctxDest) return;
-
-    const dpr = window.devicePixelRatio || 1;
-
-    canvasDest.width = dimensions.width * dpr;
-    canvasDest.height = dimensions.height * dpr;
-
-    ctxDest.imageSmoothingEnabled = true;
-
-    const fx = mapWidth / dimensions.width;
-    const fy = mapHeight / dimensions.height;
-
-    const sx = (-position.x / scale) * fx;
-    const sy = (-position.y / scale) * fy;
-    const sWidth = (dimensions.width / scale) * fx;
-    const sHeight = (dimensions.height / scale) * fy;
-
-    ctxDest.fillStyle = "rgb(15, 20, 30)";
-    ctxDest.fillRect(0, 0, canvasDest.width, canvasDest.height);
-
-    ctxDest.drawImage(
-      canvasShaded,
-      sx,
-      sy,
-      sWidth,
-      sHeight,
-      0,
-      0,
-      canvasDest.width,
-      canvasDest.height,
-    );
-  }, [scale, position, dataLoading, countries, canvasShadedRef, dimensions]);
-
-  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging || !hoveredCountry || dataLoading) {
-      return;
-    }
-
-    const rect = canvasDestRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    const clientX = e.clientX - rect.left;
-    const clientY = e.clientY - rect.top;
-
-    const fx = mapWidth / rect.width;
-    const fy = mapHeight / rect.height;
-
-    const mapX = Math.floor(((clientX - position.x) / scale) * fx);
-    const mapY = Math.floor(((clientY - position.y) / scale) * fy);
-
-    const gridCoord = bridge.mapHighResToGridCell({ x: mapX, y: mapY });
-
-    if (!playerNationId) {
-      setPendingSelection({
-        id: hoveredCountry.code,
-        name: hoveredCountry.name,
-      });
-    } else if (hoveredCountry.code !== playerNationId) {
-      executeAttack(hoveredCountry.code, gridCoord);
-    }
-  };
-
-  const humanNation =
-    gameState && playerNationId ? gameState.nations[playerNationId] : null;
 
   return (
     <div className="w-screen h-screen bg-slate-950 text-white flex flex-row overflow-hidden select-none font-sans text-left">
-      {dataLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400 font-medium">
-            Generating High-Fidelity 4K Tactical Map...
-          </p>
-        </div>
-      )}
-
-      {error && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 p-4 bg-red-950/80 border border-red-800/80 text-red-400 rounded-xl shadow-2xl z-50 text-xs font-mono">
-          {error}
-        </div>
-      )}
+      <LoadingStateOverlay loading={dataLoading} />
+      <ErrorStateOverlay error={error} />
 
       {gameState && playerNationId && (
         <TacticalSidePanel state={gameState} humanNationId={playerNationId}>
@@ -260,49 +155,20 @@ export default function MapTest6Page() {
           onWheel={handleWheel}
           onClick={handleCanvasClick}
         >
-          {gameState && playerNationId && (
-            <CountryStatusIndicator
-              state={gameState}
-              humanNationId={playerNationId}
-            />
-          )}
-
-          {gameState &&
-            playerNationId &&
-            hoveredCountry &&
-            hoveredCountry.code !== playerNationId && (
-              <InteractionOverlay
-                targetCell={bridge.mapHighResToGridCell({
-                  x: Math.floor(
-                    ((dimensions.width / 2 - position.x) / scale) *
-                      (mapWidth / dimensions.width),
-                  ),
-                  y: Math.floor(
-                    ((dimensions.height / 2 - position.y) / scale) *
-                      (mapHeight / dimensions.height),
-                  ),
-                })}
-                targetCountryName={hoveredCountry.name}
-                targetCountryId={hoveredCountry.code}
-                onAttack={() => {
-                  const rect = canvasDestRef.current?.getBoundingClientRect();
-                  if (rect) {
-                    const cx = rect.width / 2;
-                    const cy = rect.height / 2;
-                    const fx = mapWidth / rect.width;
-                    const fy = mapHeight / rect.height;
-                    const mapX = Math.floor(((cx - position.x) / scale) * fx);
-                    const mapY = Math.floor(((cy - position.y) / scale) * fy);
-                    const gridCoord = bridge.mapHighResToGridCell({
-                      x: mapX,
-                      y: mapY,
-                    });
-                    executeAttack(hoveredCountry.code, gridCoord);
-                  }
-                }}
-                isAttacking={isAttacking}
-              />
-            )}
+          <MapCanvasOverlays
+            gameState={gameState}
+            playerNationId={playerNationId}
+            humanNation={humanNation}
+            hoveredCountry={hoveredCountry}
+            isAttacking={isAttacking}
+            dimensions={dimensions}
+            position={position}
+            scale={scale}
+            mapWidth={mapWidth}
+            mapHeight={mapHeight}
+            bridge={bridge}
+            onExecuteAttack={executeAttack}
+          />
 
           {gameState && playerNationId && humanNation && (
             <SovereignControlSidebar
@@ -323,23 +189,14 @@ export default function MapTest6Page() {
             />
           )}
 
-          <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
-            <ResetSessionButton onReset={resetSession} />
-            <button
-              onClick={() => setShowHeatmap((prev) => !prev)}
-              className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-colors"
-            >
-              {showHeatmap
-                ? "DISABLE TACTICAL HEATMAP"
-                : "ENABLE TACTICAL HEATMAP"}
-            </button>
-            {playerNationId && (
-              <NextTurnButton
-                onAdvance={advanceTurn}
-                isAdvancing={isAdvancing}
-              />
-            )}
-          </div>
+          <TacticalActionBar
+            playerNationId={playerNationId}
+            showHeatmap={showHeatmap}
+            isAdvancing={isAdvancing}
+            onResetSession={resetSession}
+            onToggleHeatmap={() => setShowHeatmap((prev) => !prev)}
+            onAdvanceTurn={advanceTurn}
+          />
 
           <MapControls
             scale={scale}
@@ -347,30 +204,20 @@ export default function MapTest6Page() {
             onZoomOut={zoomOut}
             onResetView={handleResetView}
           />
-
-          {hoveredCountry && <MapHoverCard hoveredCountry={hoveredCountry} />}
-
-          {humanNation && (
-            <div className="absolute bottom-20 left-4 z-40">
-              <NationalTraitsBox traits={humanNation.traits} />
-            </div>
-          )}
-          {humanNation && <SovereignControlHud nation={humanNation} />}
         </MapCanvasContainer>
       </div>
 
       {gameState && <TurnLogsTerminal logs={filteredLogs} />}
 
-      {pendingSelection && (
-        <SelectionModal
-          countryName={pendingSelection.name}
-          countryCode={pendingSelection.id}
-          onConfirm={() =>
-            selectNation(pendingSelection.id, pendingSelection.name)
+      <SelectionModalWrapper
+        pendingSelection={pendingSelection}
+        onConfirm={() => {
+          if (pendingSelection) {
+            selectNation(pendingSelection.id, pendingSelection.name);
           }
-          onCancel={() => setPendingSelection(null)}
-        />
-      )}
+        }}
+        onCancel={() => setPendingSelection(null)}
+      />
     </div>
   );
 }
