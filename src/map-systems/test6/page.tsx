@@ -15,17 +15,9 @@ import { CountryStatusIndicator } from "./components/country-status-indicator";
 import { InteractionOverlay } from "./components/interaction-overlay";
 import { ResetSessionButton } from "./components/reset-session-button";
 import { SovereignControlHud } from "./components/sovereign-control-hud";
-import { EconomyAdjuster } from "./components/economy-adjuster";
-import { RecruitmentCenter } from "./components/recruitment-center";
-import { MarketPricesWidget } from "./components/market-prices-widget";
-import { ActiveWarsList } from "./components/active-wars-list";
+import { SovereignControlSidebar } from "./components/sovereign-control-sidebar";
 import { TurnLogsTerminal } from "./components/turn-logs-terminal";
 import { GlobalRankingSidebar } from "./components/global-ranking-sidebar";
-import { GlobalSimulationControl } from "./components/global-simulation-control";
-import { DiplomacyControlPanel } from "./components/diplomacy-control-panel";
-import { StateUpgradeHub } from "./components/state-upgrade-hub";
-import { DoctrineUnlockedList } from "./components/doctrine-unlocked-list";
-import { AllianceMatrixWidget } from "./components/alliance-matrix-widget";
 import { NationalTraitsBox } from "./components/national-traits-box";
 import { useNationSelector } from "./hooks/use-nation-selector";
 import { useTacticalAttack } from "./hooks/use-tactical-attack";
@@ -84,7 +76,7 @@ export default function MapTest6Page() {
     maskDataRef,
   } = useMapData({ mapWidth, mapHeight });
 
-  const { hoveredCountry, handlePointerMove, setHoveredCountry } = useMapMouse({
+  const { hoveredCountry, handlePointerMove } = useMapMouse({
     canvasDestRef,
     maskDataRef,
     countries,
@@ -313,48 +305,22 @@ export default function MapTest6Page() {
             )}
 
           {gameState && playerNationId && humanNation && (
-            <div className="absolute top-20 right-4 w-72 space-y-3 z-40 max-h-[85vh] overflow-y-auto pr-1">
-              <GlobalSimulationControl
-                forceSuccess={forceSuccess}
-                onToggleForceSuccess={toggleForceSuccess}
-              />
-              {hoveredCountry && hoveredCountry.code !== playerNationId && (
-                <DiplomacyControlPanel
-                  targetCountryName={hoveredCountry.name}
-                  onPropose={(type) =>
-                    proposeDiplomacy(hoveredCountry.code, type)
-                  }
-                  onDeclareWar={() => declareWarDirectly(hoveredCountry.code)}
-                />
-              )}
-              <EconomyAdjuster
-                currentTaxRate={humanNation.taxRate}
-                onTaxChange={updateTaxRate}
-              />
-              <StateUpgradeHub
-                infraLevel={humanNation.geography.infrastructureLevel}
-                industrialLevel={humanNation.industrialLevel}
-                onUpgradeInfra={upgradeInfrastructure}
-                onUpgradeIndustrial={upgradeIndustrialLevel}
-              />
-              <DoctrineUnlockedList
-                doctrines={humanNation.doctrines}
-                onUnlock={unlockDoctrineType}
-              />
-              <RecruitmentCenter
-                onRecruit={recruitUnits}
-                infantryCost={1000}
-                airForceCost={1000}
-              />
-              <MarketPricesWidget
-                prices={gameState.marketPrices}
-                oilInventory={humanNation.resources.oil}
-                steelInventory={humanNation.resources.steel}
-                onBuyResource={buyResource}
-              />
-              <ActiveWarsList relations={humanNation.relations} />
-              <AllianceMatrixWidget relations={humanNation.relations} />
-            </div>
+            <SovereignControlSidebar
+              gameState={gameState}
+              playerNationId={playerNationId}
+              humanNation={humanNation}
+              hoveredCountry={hoveredCountry}
+              forceSuccess={forceSuccess}
+              onToggleForceSuccess={toggleForceSuccess}
+              onPropose={(type) => proposeDiplomacy(hoveredCountry.code, type)}
+              onDeclareWar={() => declareWarDirectly(hoveredCountry.code)}
+              onTaxChange={updateTaxRate}
+              onUpgradeInfra={upgradeInfrastructure}
+              onUpgradeIndustrial={upgradeIndustrialLevel}
+              onUnlockDoctrine={unlockDoctrineType}
+              onRecruit={recruitUnits}
+              onBuyResource={buyResource}
+            />
           )}
 
           <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
