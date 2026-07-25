@@ -84,23 +84,23 @@ export function buildSpatialNeighbors(
       });
 
       if (
-        minX - 0.25 > bmaxX ||
-        bminX - 0.25 > maxX ||
-        minY - 0.25 > bmaxY ||
-        bminY - 0.25 > maxY
+        minX - 0.35 > bmaxX ||
+        bminX - 0.35 > maxX ||
+        minY - 0.35 > bmaxY ||
+        bminY - 0.35 > maxY
       ) {
         return;
       }
 
       let isAdj = false;
-      for (let i = 0; i < reg1.coordinates.length; i += 3) {
+      for (let i = 0; i < reg1.coordinates.length; i++) {
         const p1 = reg1.coordinates[i];
         if (!p1) continue;
-        for (let j = 0; j < reg2.coordinates.length; j += 3) {
+        for (let j = 0; j < reg2.coordinates.length; j++) {
           const p2 = reg2.coordinates[j];
           if (!p2) continue;
           const dist = Math.hypot(p1[0] - p2[0], p1[1] - p2[1]);
-          if (dist < 0.15) {
+          if (dist < 0.35) {
             isAdj = true;
             break;
           }
