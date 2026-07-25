@@ -1,11 +1,11 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { ProxyBudgetManager } from "./proxy/proxy-budget.manager";
-import { ProxyStabilityImpactCalculator } from "./proxy/proxy-stability-impact.calculator";
+import {
+  ProxyStabilityImpactCalculator,
+  ProxyImpactResult,
+} from "./proxy/proxy-stability-impact.calculator";
 
-export interface ProxyImpactResult {
-  updatedTargetNation: Nation;
-  coupTriggered: boolean;
-}
+export { ProxyImpactResult };
 
 export class ProxyWarManager {
   private budgetManager = new ProxyBudgetManager();
