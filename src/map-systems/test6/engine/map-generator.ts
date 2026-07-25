@@ -11,6 +11,7 @@ export interface CountryMapping {
   code: string;
   name: string;
   color: [number, number, number];
+  areaSqKm: number;
 }
 
 export async function generateTest6Map(
@@ -33,7 +34,13 @@ export async function generateTest6Map(
   const writer = new MapWriter();
 
   const countries: CountryMapping[] = [];
-  countries.push({ id: 0, code: "WATER", name: "Ocean", color: [0, 0, 0] });
+  countries.push({
+    id: 0,
+    code: "WATER",
+    name: "Ocean",
+    color: [0, 0, 0],
+    areaSqKm: 0,
+  });
 
   const buffer = new Uint8Array(width * height);
   buffer.fill(0);
@@ -47,6 +54,7 @@ export async function generateTest6Map(
       code: feature.code,
       name: feature.name,
       color: [0, 0, nextId],
+      areaSqKm: 0,
     });
 
     const processRing = (ring: number[][]) => {
@@ -66,6 +74,39 @@ export async function generateTest6Map(
 
     nextId++;
   }
+
+  const pixelAreas = new Float64Array(nextId);
+  pixelAreas.fill(0);
+
+  const earthRadius = 6378137;
+  const totalSurfaceArea = 4 * Math.PI * earthRadius * earthRadius;
+  const totalSurfaceAreaSqKm = totalSurfaceArea / 1000000;
+
+  let totalWeight = 0;
+  const weights = new Float64Array(height);
+  for (let y = 0; y < height; y++) {
+    const latitudeRad = (0.5 - (y + 0.5) / height) * Math.PI;
+    weights[y] = Math.cos(latitudeRad);
+    totalWeight += weights[y] * width;
+  }
+
+  const areaPerWeightUnit = totalSurfaceAreaSqKm / totalWeight;
+
+  for (let y = 0; y < height; y++) {
+    const rowWeight = weights[y] * areaPerWeightUnit;
+    for (let x = 0; x < width; x++) {
+      const id = buffer[y * width + x]!;
+      if (id >= 11 && id < nextId) {
+        pixelAreas[id] += rowWeight;
+      }
+    }
+  }
+
+  countries.forEach((c) => {
+    if (c.id >= 11) {
+      c.areaSqKm = Math.round(pixelAreas[c.id] || 0);
+    }
+  });
 
   const dist = distanceTransform.calculate(buffer, width, height);
   distanceTransform.applySeaDepths(buffer, dist, width, height);
