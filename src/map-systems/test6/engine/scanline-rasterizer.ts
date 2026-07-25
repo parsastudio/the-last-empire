@@ -9,7 +9,7 @@ export function rasterizePolygon(
   height: number,
   colorId: number,
   buffer: Uint8Array,
-) {
+): void {
   if (polygon.length < 3) {
     return;
   }

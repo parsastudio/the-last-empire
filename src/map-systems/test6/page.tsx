@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMapGesture } from "./hooks/use-map-gesture";
 import { MapControls } from "../test1/components/map-controls";
 import { useMapData } from "./hooks/use-map-data";
@@ -11,8 +11,8 @@ import { MapHoverCard } from "./components/map-hover-card";
 export default function MapTest6Page() {
   const mapWidth = 4096;
   const mapHeight = 2048;
-  const displayWidth = 1200;
-  const displayHeight = 600;
+
+  const [dimensions, setDimensions] = useState({ width: 1200, height: 600 });
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -51,6 +51,23 @@ export default function MapTest6Page() {
   });
 
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setDimensions({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, [loading]);
+
+  useEffect(() => {
     const canvasDest = canvasDestRef.current;
     const canvasShaded = canvasShadedRef.current;
     if (!canvasDest || !canvasShaded || loading) return;
@@ -60,18 +77,18 @@ export default function MapTest6Page() {
 
     const dpr = window.devicePixelRatio || 1;
 
-    canvasDest.width = displayWidth * dpr;
-    canvasDest.height = displayHeight * dpr;
+    canvasDest.width = dimensions.width * dpr;
+    canvasDest.height = dimensions.height * dpr;
 
     ctxDest.imageSmoothingEnabled = true;
 
-    const fx = mapWidth / displayWidth;
-    const fy = mapHeight / displayHeight;
+    const fx = mapWidth / dimensions.width;
+    const fy = mapHeight / dimensions.height;
 
     const sx = (-position.x / scale) * fx;
     const sy = (-position.y / scale) * fy;
-    const sWidth = (displayWidth / scale) * fx;
-    const sHeight = (displayHeight / scale) * fy;
+    const sWidth = (dimensions.width / scale) * fx;
+    const sHeight = (dimensions.height / scale) * fy;
 
     ctxDest.fillStyle = "rgb(15, 20, 30)";
     ctxDest.fillRect(0, 0, canvasDest.width, canvasDest.height);
@@ -87,7 +104,7 @@ export default function MapTest6Page() {
       canvasDest.width,
       canvasDest.height,
     );
-  }, [scale, position, loading, countries, canvasShadedRef]);
+  }, [scale, position, loading, countries, canvasShadedRef, dimensions]);
 
   return (
     <div className="w-screen h-screen bg-slate-950 text-white flex flex-col overflow-hidden select-none font-sans text-left">
@@ -127,13 +144,11 @@ export default function MapTest6Page() {
       >
         <canvas ref={canvasSrcRef} className="hidden" />
 
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-full absolute inset-0">
           <canvas
             ref={canvasDestRef}
-            className="pointer-events-none"
+            className="pointer-events-none w-full h-full"
             style={{
-              width: `${displayWidth}px`,
-              height: `${displayHeight}px`,
               filter:
                 "drop-shadow(0 2px 4px rgba(25, 35, 55, 0.15)) drop-shadow(0 1px 2px rgba(25, 35, 55, 0.08))",
             }}
