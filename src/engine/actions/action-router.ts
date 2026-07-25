@@ -1,10 +1,10 @@
-import type { GameState } from "@/domain/game/game-state.schema";
-import type { GameAction } from "@/domain/game/action.schema";
+import { GameState } from "@/domain/game/game-state.schema";
+import { GameAction } from "@/domain/game/action.schema";
 import { TaxActionHandler } from "@/engine/actions/tax-action-handler";
 import { GovernmentActionHandler } from "@/engine/actions/government-action-handler";
 import { RecruitActionHandler } from "@/engine/actions/recruit-action-handler";
 import { DeclareWarActionHandler } from "@/engine/actions/declare-war-action-handler";
-import { AttackActionHandler } from "@/engine/actions/attack-action-handler";
+import { AttackConquestHandler } from "@/engine/combat/actions/attack-conquest-handler";
 import { UpgradeIndustrialActionHandler } from "@/engine/actions/upgrade-industrial-action-handler";
 import { InvestInfrastructureActionHandler } from "@/engine/actions/invest-infrastructure-action-handler";
 import { TradeActionHandler } from "@/engine/actions/trade-action-handler";
@@ -18,7 +18,7 @@ import { ImfLoanActionHandler } from "@/engine/actions/imf-loan-action-handler";
 import { CancelRecruitmentActionHandler } from "@/engine/actions/cancel-recruitment-action-handler";
 import { InvestResearchActionHandler } from "@/engine/actions/invest-research-action-handler";
 import { AntiCorruptionActionHandler } from "@/engine/actions/anti-corruption-action-handler";
-import type { ActionHandler } from "@/engine/actions/action-handler";
+import { ActionHandler } from "@/engine/actions/action-handler";
 
 export class ActionRouter {
   private handlers: Map<string, ActionHandler> = new Map();
@@ -44,7 +44,7 @@ export class ActionRouter {
     this.register("CHANGE_GOVERNMENT", new GovernmentActionHandler());
     this.register("RECRUIT_UNIT", new RecruitActionHandler());
     this.register("DECLARE_WAR", new DeclareWarActionHandler());
-    this.register("ATTACK", new AttackActionHandler());
+    this.register("ATTACK", new AttackConquestHandler());
     this.register(
       "UPGRADE_INDUSTRIAL_LEVEL",
       new UpgradeIndustrialActionHandler(),

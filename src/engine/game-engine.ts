@@ -1,8 +1,5 @@
-import type {
-  GameAction,
-  ActionResult,
-} from "@/domain/game/action.schema";
-import type { GameState } from "@/domain/game/game-state.schema";
+import { GameAction, ActionResult } from "@/domain/game/action.schema";
+import { GameState } from "@/domain/game/game-state.schema";
 import { deepClone } from "@/domain/shared/deep-clone";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 import { GameError } from "@/domain/shared/game-error";
@@ -14,6 +11,12 @@ import { StateHistory } from "@/application/state-history";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionRouter } from "@/engine/actions/action-router";
+import { GridState } from "@/engine/combat/state/grid-state";
+import { GridHistoryAdapter } from "@/engine/combat/history/grid-history-adapter";
+import { GridEnclaveConnector } from "@/engine/combat/state/grid-enclave-connector";
+import { GridStateCleanup } from "@/engine/combat/state/grid-state-cleanup";
+import { EnclaveRegistry } from "@/engine/combat/registry/enclave-registry";
+import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 
 export class GameEngine {
   private currentState: GameState;
@@ -26,6 +29,12 @@ export class GameEngine {
   private aiEngine: AIEngine;
   private prng: SeededRandom;
   private actionRouter: ActionRouter;
+  private gridState: GridState;
+  private gridHistory = new GridHistoryAdapter();
+  private gridConnector = new GridEnclaveConnector();
+  private gridCleanup = new GridStateCleanup();
+  private enclaveRegistry = new EnclaveRegistry();
+  private stateSynchronizer = new StateSynchronizerFacade();
 
   constructor(initialState: GameState) {
     this.currentState = deepClone(initialState);
@@ -38,11 +47,21 @@ export class GameEngine {
     this.aiEngine = new AIEngine();
     this.prng = new SeededRandom(initialState.seed);
     this.actionRouter = new ActionRouter();
+    this.gridState =
+      (this.currentState as { gridState?: GridState }).gridState ||
+      new GridState();
     this.stateHistory.saveSnapshot(this.currentState);
+    this.gridHistory.captureTurn(
+      this.stateHistory,
+      this.currentState.currentTurn,
+      this.gridState,
+    );
   }
 
   public getState(): Readonly<GameState> {
-    return Object.freeze(deepClone(this.currentState));
+    const cloned = deepClone(this.currentState);
+    (cloned as { gridState?: GridState }).gridState = this.gridState;
+    return Object.freeze(cloned);
   }
 
   public dispatchAction(action: GameAction): ActionResult {
@@ -96,6 +115,25 @@ export class GameEngine {
     );
 
     this.currentState = this.pipeline.processTurn(this.currentState, this.prng);
+
+    const allCells = this.gridState.getAllCells();
+    const activeNationsIds = Object.keys(this.currentState.nations).filter(
+      (id) => this.currentState.nations[id]?.isAlive,
+    );
+
+    for (const id of activeNationsIds) {
+      this.gridConnector.regroupEnclaves(id, allCells);
+      this.gridCleanup.cleanupEnclaveRegistry(
+        allCells,
+        id,
+        this.enclaveRegistry,
+      );
+    }
+
+    this.currentState = this.stateSynchronizer.synchronizeAll(
+      this.currentState,
+      this.gridState,
+    );
     this.currentState = this.livenessManager.updateLiveness(this.currentState);
 
     let peacefulCount = this.currentState.peacefulTurnsCount ?? 0;
@@ -127,12 +165,22 @@ export class GameEngine {
 
     this.actionQueue.clear();
     this.stateHistory.saveSnapshot(this.currentState);
+    this.gridHistory.captureTurn(
+      this.stateHistory,
+      this.currentState.currentTurn,
+      this.gridState,
+    );
 
     return this.getState();
   }
 
   public getTurnHistory(turnNumber: number): GameState | undefined {
-    return this.stateHistory.getTurnHistory(turnNumber);
+    const state = this.stateHistory.getTurnHistory(turnNumber);
+    if (state) {
+      this.gridHistory.rollbackTurn(turnNumber, this.gridState);
+      (state as { gridState?: GridState }).gridState = this.gridState;
+    }
+    return state;
   }
 
   private processActionQueue(): void {
@@ -176,6 +224,8 @@ export class GameEngine {
     ];
 
     let state = this.currentState;
+    (state as { gridState?: GridState }).gridState = this.gridState;
+
     for (const action of sortedActions) {
       try {
         state = this.actionRouter.route(state, action);
