@@ -10,10 +10,10 @@ export function ActiveWarsList({ relations }: ActiveWarsListProps) {
 
   return (
     <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-850 space-y-2">
-      <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-        Active Theater Conflicts
+      <h3 className="text-[10px] font-bold text-rose-400 uppercase tracking-wider font-mono">
+        Active Conflicts
       </h3>
-      <div className="space-y-1.5 max-h-24 overflow-y-auto">
+      <div className="space-y-1.5 max-h-24 overflow-y-auto pr-1">
         {activeWars.length === 0 ? (
           <div className="text-[11px] text-slate-500 italic">
             No active conflicts.
