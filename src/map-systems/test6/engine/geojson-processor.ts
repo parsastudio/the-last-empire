@@ -26,21 +26,47 @@ export class GeoJsonProcessor {
   }): ProcessedFeature[] {
     const features: ProcessedFeature[] = [];
     for (const feature of geoJson.features) {
-      const rawCode =
-        feature.properties?.adm0_a3 ||
-        feature.properties?.ISO_A3 ||
-        feature.properties?.iso_a3 ||
-        feature.id ||
-        "";
-      const code = rawCode.toString().toUpperCase();
-      if (!code || code === "-99" || code === "ATA") {
+      let code = "";
+      if (feature.properties) {
+        const keys = [
+          "ADM0_A3",
+          "adm0_a3",
+          "ISO_A3",
+          "iso_a3",
+          "ADM0_A3_IS",
+          "adm0_a3_is",
+          "SOV_A3",
+          "sov_a3",
+          "ISO_A3_EH",
+          "iso_a3_eh",
+        ];
+        for (const key of keys) {
+          const val = feature.properties[key];
+          if (val) {
+            const str = val.toString().toUpperCase();
+            if (str && str !== "-99" && str !== "-99.00") {
+              code = str;
+              break;
+            }
+          }
+        }
+      }
+      if (!code && feature.id) {
+        code = feature.id.toString().toUpperCase();
+      }
+
+      if (!code || code === "-99" || code === "-99.00" || code === "ATA") {
         continue;
       }
+
       const name = (
         feature.properties?.name ||
         feature.properties?.NAME ||
+        feature.properties?.name_en ||
+        feature.properties?.NAME_EN ||
         code
       ).toString();
+
       features.push({
         code,
         name,

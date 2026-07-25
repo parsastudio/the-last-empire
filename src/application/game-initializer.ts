@@ -21,6 +21,7 @@ export class GameInitializer {
     "FRAGILE_ECONOMY",
     "INDUSTRIAL_HUB",
     "ISOLATED_SOCIETY",
+    "SOVEREIGN_FORTRESS",
   ];
 
   private profiles: Record<string, AbstractProfile> = {
@@ -104,6 +105,14 @@ export class GameInitializer {
           assignedTraits.push(trait2);
         }
       }
+
+      if (
+        nextTerritory < 1000 &&
+        !assignedTraits.includes("SOVEREIGN_FORTRESS")
+      ) {
+        assignedTraits.push("SOVEREIGN_FORTRESS");
+      }
+
       const updatedRelations = { ...nation.relations };
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         updatedRelations[targetId] = {
