@@ -19,11 +19,11 @@ export function GlobalLeaderboardPanel({
   humanNationId,
 }: GlobalLeaderboardPanelProps) {
   return (
-    <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-850 space-y-3 flex-1 flex flex-col min-h-0">
-      <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono border-b border-slate-800 pb-2">
-        Global Sovereignties
+    <div className="bg-slate-950/30 p-4 rounded-2xl border border-slate-950 space-y-3">
+      <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+        Global Rankings
       </h3>
-      <div className="space-y-2 overflow-y-auto max-h-56 pr-1">
+      <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
         {ranks.map((item) => {
           const details = nations[item.id];
           if (!details) return null;
@@ -32,19 +32,17 @@ export function GlobalLeaderboardPanel({
           return (
             <div
               key={item.id}
-              className={`flex justify-between items-center p-2 rounded-xl text-[11px] border font-mono transition-all ${
+              className={`flex justify-between items-center p-2 rounded-xl text-[10px] font-mono border transition-all ${
                 isPlayer
-                  ? "bg-emerald-950/20 border-emerald-800/40 text-emerald-300"
-                  : "bg-slate-900/40 border-slate-800/50 text-slate-300 hover:border-slate-700"
+                  ? "bg-emerald-950/20 border-emerald-900/30 text-emerald-300"
+                  : "bg-slate-900/20 border-transparent text-slate-400 hover:border-slate-850"
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-500">#{item.rank}</span>
-                <span className="font-semibold truncate max-w-[120px]">
-                  {details.name}
-                </span>
+                <span className="text-slate-600 font-bold">#{item.rank}</span>
+                <span className="truncate max-w-[100px]">{details.name}</span>
               </div>
-              <span className="font-bold text-white">
+              <span className="text-white font-bold">
                 ${(details.gdp / 1e9).toFixed(1)}B
               </span>
             </div>
