@@ -9,10 +9,10 @@ export function buildTest5Topology(regions: ConsolidatedRegion[]): void {
       maxX = -Infinity,
       minY = Infinity,
       maxY = -Infinity;
-    reg.coordinates.forEach((pt) => {
+    reg.coordinates.forEach((pt: [number, number]) => {
       if (pt[0] < minX) minX = pt[0];
-      if (pt[0] > maxX) maxX = pt[0];
       if (pt[1] < minY) minY = pt[1];
+      if (pt[0] > maxX) maxX = pt[0];
       if (pt[1] > maxY) maxY = pt[1];
     });
 
@@ -38,10 +38,10 @@ export function buildTest5Topology(regions: ConsolidatedRegion[]): void {
       maxX = -Infinity,
       minY = Infinity,
       maxY = -Infinity;
-    reg1.coordinates.forEach((pt) => {
+    reg1.coordinates.forEach((pt: [number, number]) => {
       if (pt[0] < minX) minX = pt[0];
-      if (pt[0] > maxX) maxX = pt[0];
       if (pt[1] < minY) minY = pt[1];
+      if (pt[0] > maxX) maxX = pt[0];
       if (pt[1] > maxY) maxY = pt[1];
     });
 
