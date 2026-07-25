@@ -33,7 +33,7 @@ export async function generateTest6Map(
   const buffer = new Uint8Array(width * height);
   buffer.fill(0);
 
-  let nextId = 1;
+  let nextId = 11;
   for (const feature of geoJson.features) {
     const rawCode =
       feature.properties?.adm0_a3 ||
@@ -74,9 +74,44 @@ export async function generateTest6Map(
     nextId++;
   }
 
-  const palette: [number, number, number][] = countries.map((c) => c.color);
-  while (palette.length < 256) {
-    palette.push([0, 0, palette.length]);
+  const dist = new Int32Array(width * height);
+  dist.fill(9999);
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = y * width + x;
+      if (buffer[idx]! >= 11) {
+        dist[idx] = 0;
+      } else {
+        if (x > 0) dist[idx] = Math.min(dist[idx]!, dist[idx - 1]! + 1);
+        if (y > 0) dist[idx] = Math.min(dist[idx]!, dist[idx - width]! + 1);
+      }
+    }
+  }
+
+  for (let y = height - 1; y >= 0; y--) {
+    for (let x = width - 1; x >= 0; x--) {
+      const idx = y * width + x;
+      if (x < width - 1) dist[idx] = Math.min(dist[idx]!, dist[idx + 1]! + 1);
+      if (y < height - 1)
+        dist[idx] = Math.min(dist[idx]!, dist[idx + width]! + 1);
+    }
+  }
+
+  for (let i = 0; i < width * height; i++) {
+    if (buffer[i]! < 11) {
+      const d = dist[i]!;
+      const depthIndex = Math.max(
+        0,
+        Math.min(10, 10 - Math.floor(Math.sqrt(d) * 0.8)),
+      );
+      buffer[i] = depthIndex;
+    }
+  }
+
+  const palette: [number, number, number][] = [];
+  for (let i = 0; i < 256; i++) {
+    palette.push([0, 0, i]);
   }
 
   const pngBuffer = encodePng(width, height, buffer, palette);

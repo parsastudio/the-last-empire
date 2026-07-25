@@ -3,22 +3,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useMapGesture } from "@/map-systems/test4/hooks/use-map-gesture";
 import { MapControls } from "@/map-systems/test1/components/map-controls";
-import { OCEAN_COLOR, MAP_PALETTE_172 } from "./engine/color-palette";
+import { OCEAN_DEPTH_PALETTE, MAP_PALETTE_172 } from "./engine/color-palette";
 import type { CountryMapping } from "./engine/map-generator";
-
-function hslToRgb(h: number, s: number, l: number): [number, number, number] {
-  s /= 100;
-  l /= 100;
-  const k = (n: number) => (n + h / 30) % 12;
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) =>
-    l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
-  return [
-    Math.round(255 * f(0)),
-    Math.round(255 * f(8)),
-    Math.round(255 * f(4)),
-  ];
-}
 
 export default function MapTest6Page() {
   const [countries, setCountries] = useState<CountryMapping[]>([]);
@@ -87,7 +73,7 @@ export default function MapTest6Page() {
 
     const palette: Record<number, [number, number, number]> = {};
     countryList.forEach((c, index) => {
-      if (c.id > 0) {
+      if (c.id >= 11) {
         const assignedColor = shuffledPalette[index % shuffledPalette.length];
         if (assignedColor) {
           palette[c.id] = assignedColor;
@@ -104,11 +90,18 @@ export default function MapTest6Page() {
         const idx = (y * mapWidth + x) * 4;
         const id = srcData[idx + 2] || 0;
 
-        let r = OCEAN_COLOR[0];
-        let g = OCEAN_COLOR[1];
-        let b = OCEAN_COLOR[2];
+        let r = OCEAN_DEPTH_PALETTE[0]?.[0] || 33;
+        let g = OCEAN_DEPTH_PALETTE[0]?.[1] || 44;
+        let b = OCEAN_DEPTH_PALETTE[0]?.[2] || 71;
 
-        if (id > 0) {
+        if (id < 11) {
+          const oceanCol = OCEAN_DEPTH_PALETTE[id];
+          if (oceanCol) {
+            r = oceanCol[0];
+            g = oceanCol[1];
+            b = oceanCol[2];
+          }
+        } else {
           const col = palette[id];
           if (col) {
             r = col[0];
@@ -122,20 +115,24 @@ export default function MapTest6Page() {
         if (x < mapWidth - 1) {
           const rightId = srcData[idx + 4 + 2] || 0;
           if (rightId !== id) {
-            isBorder = true;
+            if (id >= 11 || rightId >= 11) {
+              isBorder = true;
+            }
           }
         }
         if (y < mapHeight - 1) {
           const bottomId = srcData[idx + mapWidth * 4 + 2] || 0;
           if (bottomId !== id) {
-            isBorder = true;
+            if (id >= 11 || bottomId >= 11) {
+              isBorder = true;
+            }
           }
         }
 
         if (isBorder) {
-          r = 45;
-          g = 65;
-          b = 90;
+          r = 25;
+          g = 35;
+          b = 55;
         }
 
         destData[idx] = r;
@@ -193,7 +190,7 @@ export default function MapTest6Page() {
         const pixel = ctxSrc.getImageData(mapX, mapY, 1, 1).data;
         const id = pixel[2];
 
-        if (id !== undefined && id > 0) {
+        if (id !== undefined && id >= 11) {
           const matched = countries.find((c) => c.id === id);
           if (matched) {
             setHoveredCountry(matched);
@@ -228,8 +225,8 @@ export default function MapTest6Page() {
             Pristine 4K Board-Game Map - Test 6
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Zero blurring. 1px precise deep navy borders. Soft marine ocean
-            theme.
+            1px precise deep navy borders. Continuous 11-tier satin ocean floor
+            gradient.
           </p>
         </div>
         <div className="text-right flex items-center gap-4">
@@ -272,7 +269,7 @@ export default function MapTest6Page() {
               width: `${displayWidth}px`,
               height: `${displayHeight}px`,
               filter:
-                "drop-shadow(0 2px 4px rgba(45, 65, 90, 0.15)) drop-shadow(0 1px 2px rgba(45, 65, 90, 0.08))",
+                "drop-shadow(0 2px 4px rgba(25, 35, 55, 0.15)) drop-shadow(0 1px 2px rgba(25, 35, 55, 0.08))",
             }}
           />
         </div>
