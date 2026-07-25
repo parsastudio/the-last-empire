@@ -1,14 +1,19 @@
+import { MainlandAnalyzer } from "./connectivity/mainland-analyzer";
+import {
+  IsolatedPocketIdentifier,
+  IsolatedPocketResult,
+} from "./connectivity/isolated-pocket-identifier";
+
 export interface AnalyzeConnectivityResult {
   contiguousMainlandSize: number;
   contiguousMainlandIds: string[];
-  isolatedPockets: {
-    id: string;
-    territorySize: number;
-    territoryIds: string[];
-  }[];
+  isolatedPockets: IsolatedPocketResult[];
 }
 
 export class ConnectivityGraph {
+  private mainlandAnalyzer = new MainlandAnalyzer();
+  private pocketIdentifier = new IsolatedPocketIdentifier();
+
   public analyzeConnectivity(
     ownedTerritories: { id: string; size: number }[],
     neighborsMap: Record<string, string[]>,
@@ -33,14 +38,15 @@ export class ConnectivityGraph {
         visited.add(territory.id);
 
         while (queue.length > 0) {
-          const current = queue.shift()!;
-          component.push(current);
-
-          const neighbors = neighborsMap[current] || [];
-          for (const neighbor of neighbors) {
-            if (ownedSet.has(neighbor) && !visited.has(neighbor)) {
-              visited.add(neighbor);
-              queue.push(neighbor);
+          const current = queue.shift();
+          if (current) {
+            component.push(current);
+            const neighbors = neighborsMap[current] || [];
+            for (const neighbor of neighbors) {
+              if (ownedSet.has(neighbor) && !visited.has(neighbor)) {
+                visited.add(neighbor);
+                queue.push(neighbor);
+              }
             }
           }
         }
@@ -48,26 +54,12 @@ export class ConnectivityGraph {
       }
     }
 
-    let mainlandIndex = -1;
-    if (capitalId && ownedSet.has(capitalId)) {
-      mainlandIndex = components.findIndex((comp) => comp.includes(capitalId));
-    }
-
-    if (mainlandIndex === -1) {
-      let maxArea = -1;
-      for (let i = 0; i < components.length; i++) {
-        const comp = components[i]!;
-        const compArea = comp.reduce((acc, tId) => {
-          const found = ownedTerritories.find((t) => t.id === tId);
-          return acc + (found ? found.size : 0);
-        }, 0);
-
-        if (compArea > maxArea) {
-          maxArea = compArea;
-          mainlandIndex = i;
-        }
-      }
-    }
+    const mainlandIndex = this.mainlandAnalyzer.findMainlandIndex(
+      components,
+      ownedSet,
+      capitalId,
+      ownedTerritories,
+    );
 
     const mainlandIds = components[mainlandIndex] || [];
     const pocketComponents = components.filter(
@@ -79,18 +71,10 @@ export class ConnectivityGraph {
       return acc + (found ? found.size : 0);
     }, 0);
 
-    const isolatedPockets = pocketComponents.map((comp, idx) => {
-      const territorySize = comp.reduce((acc, tId) => {
-        const found = ownedTerritories.find((t) => t.id === tId);
-        return acc + (found ? found.size : 0);
-      }, 0);
-
-      return {
-        id: `pocket-${idx}-${Date.now()}`,
-        territorySize,
-        territoryIds: comp,
-      };
-    });
+    const isolatedPockets = this.pocketIdentifier.identifyPockets(
+      pocketComponents,
+      ownedTerritories,
+    );
 
     return {
       contiguousMainlandSize,
