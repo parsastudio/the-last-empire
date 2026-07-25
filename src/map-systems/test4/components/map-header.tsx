@@ -1,8 +1,8 @@
 import React from "react";
 
 interface MapHeaderProps {
-  phase: 1 | 2 | 3 | 4;
-  setPhase: (phase: 1 | 2 | 3 | 4) => void;
+  phase: 1 | 2 | 3 | 4 | 5;
+  setPhase: (phase: 1 | 2 | 3 | 4 | 5) => void;
   onResetView: () => void;
 }
 
@@ -18,8 +18,8 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
           Advanced Geopolitical Atlas Engine - Stage 4
         </h1>
         <p className="text-xs text-slate-400 mt-0.5">
-          Use mouse wheel to zoom dynamically centered on cursor. Phase 4
-          redistributes deleted countries and dissolves isolated islands.
+          Use mouse wheel to zoom dynamically centered on cursor. Phase 5
+          dissolves grid lines into a seamless geopolitical map.
         </p>
       </div>
       <div className="flex items-center gap-3">
@@ -68,6 +68,16 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
           }`}
         >
           Phase 4: Partition
+        </button>
+        <button
+          onClick={() => setPhase(5)}
+          className={`px-4 py-2 rounded-lg text-xs font-mono border transition-all ${
+            phase === 5
+              ? "bg-orange-600 border-orange-500 text-white"
+              : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
+          }`}
+        >
+          Phase 5: Seamless
         </button>
       </div>
     </div>
