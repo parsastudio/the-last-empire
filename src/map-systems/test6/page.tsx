@@ -8,7 +8,6 @@ import { useMapMouse } from "./hooks/use-map-mouse";
 import { MapHeader } from "./components/map-header";
 import { MapHoverCard } from "./components/map-hover-card";
 import { useMapGridRenderer } from "./hooks/use-map-grid-renderer";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { SelectionModal } from "./components/selection-modal";
 import { TacticalSidePanel } from "./components/tactical-side-panel";
 import { NextTurnButton } from "./components/next-turn-button";
@@ -23,6 +22,11 @@ import { ActiveWarsList } from "./components/active-wars-list";
 import { TurnLogsTerminal } from "./components/turn-logs-terminal";
 import { GlobalRankingSidebar } from "./components/global-ranking-sidebar";
 import { GlobalSimulationControl } from "./components/global-simulation-control";
+import { DiplomacyControlPanel } from "./components/diplomacy-control-panel";
+import { StateUpgradeHub } from "./components/state-upgrade-hub";
+import { DoctrineUnlockedList } from "./components/doctrine-unlocked-list";
+import { AllianceMatrixWidget } from "./components/alliance-matrix-widget";
+import { NationalTraitsBox } from "./components/national-traits-box";
 import { useNationSelector } from "./hooks/use-nation-selector";
 import { useTacticalAttack } from "./hooks/use-tactical-attack";
 import { useTurnProgression } from "./hooks/use-turn-progression";
@@ -31,6 +35,9 @@ import { useMapEngine } from "./hooks/use-map-engine";
 import { useLocalMarketTrade } from "./hooks/use-local-market-trade";
 import { useLocalRecruitment } from "./hooks/use-local-recruitment";
 import { useLocalEconomyControl } from "./hooks/use-local-economy-control";
+import { useDiplomacyActions } from "./hooks/use-diplomacy-actions";
+import { useStateUpgrades } from "./hooks/use-state-upgrades";
+import { useLocalDoctrines } from "./hooks/use-local-doctrines";
 import { useMapDimensions } from "./hooks/use-map-dimensions";
 import { MapCanvasContainer } from "./components/map-canvas-container";
 import { useGlobalRankings } from "./hooks/use-global-rankings";
@@ -99,6 +106,18 @@ export default function MapTest6Page() {
   const { buyResource } = useLocalMarketTrade(playerNationId, dispatchAction);
   const { recruitUnits } = useLocalRecruitment(playerNationId, dispatchAction);
   const { updateTaxRate } = useLocalEconomyControl(
+    playerNationId,
+    dispatchAction,
+  );
+  const { proposeDiplomacy, declareWarDirectly } = useDiplomacyActions(
+    playerNationId,
+    dispatchAction,
+  );
+  const { upgradeInfrastructure, upgradeIndustrialLevel } = useStateUpgrades(
+    playerNationId,
+    dispatchAction,
+  );
+  const { unlockDoctrineType } = useLocalDoctrines(
     playerNationId,
     dispatchAction,
   );
@@ -294,14 +313,33 @@ export default function MapTest6Page() {
             )}
 
           {gameState && playerNationId && humanNation && (
-            <div className="absolute top-20 right-4 w-72 space-y-3 z-40">
+            <div className="absolute top-20 right-4 w-72 space-y-3 z-40 max-h-[85vh] overflow-y-auto pr-1">
               <GlobalSimulationControl
                 forceSuccess={forceSuccess}
                 onToggleForceSuccess={toggleForceSuccess}
               />
+              {hoveredCountry && hoveredCountry.code !== playerNationId && (
+                <DiplomacyControlPanel
+                  targetCountryName={hoveredCountry.name}
+                  onPropose={(type) =>
+                    proposeDiplomacy(hoveredCountry.code, type)
+                  }
+                  onDeclareWar={() => declareWarDirectly(hoveredCountry.code)}
+                />
+              )}
               <EconomyAdjuster
                 currentTaxRate={humanNation.taxRate}
                 onTaxChange={updateTaxRate}
+              />
+              <StateUpgradeHub
+                infraLevel={humanNation.geography.infrastructureLevel}
+                industrialLevel={humanNation.industrialLevel}
+                onUpgradeInfra={upgradeInfrastructure}
+                onUpgradeIndustrial={upgradeIndustrialLevel}
+              />
+              <DoctrineUnlockedList
+                doctrines={humanNation.doctrines}
+                onUnlock={unlockDoctrineType}
               />
               <RecruitmentCenter
                 onRecruit={recruitUnits}
@@ -315,6 +353,7 @@ export default function MapTest6Page() {
                 onBuyResource={buyResource}
               />
               <ActiveWarsList relations={humanNation.relations} />
+              <AllianceMatrixWidget relations={humanNation.relations} />
             </div>
           )}
 
@@ -345,6 +384,11 @@ export default function MapTest6Page() {
 
           {hoveredCountry && <MapHoverCard hoveredCountry={hoveredCountry} />}
 
+          {humanNation && (
+            <div className="absolute bottom-20 left-4 z-40">
+              <NationalTraitsBox traits={humanNation.traits} />
+            </div>
+          )}
           {humanNation && <SovereignControlHud nation={humanNation} />}
         </MapCanvasContainer>
       </div>
