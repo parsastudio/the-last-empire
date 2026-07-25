@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useMapGesture } from "./hooks/use-map-gesture";
 import { MapControls } from "./components/map-controls";
 import { useMapData } from "./hooks/use-map-data";
@@ -8,7 +8,6 @@ import { useMapMouse } from "./hooks/use-map-mouse";
 import { MapHeader } from "./components/map-header";
 import { MapHoverCard } from "./components/map-hover-card";
 import { useMapGridRenderer } from "./hooks/use-map-grid-renderer";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { SelectionModal } from "./components/selection-modal";
 import { TacticalSidePanel } from "./components/tactical-side-panel";
 import { CampaignLogOverlay } from "./components/campaign-log-overlay";
@@ -29,13 +28,14 @@ import { useMapEngine } from "./hooks/use-map-engine";
 import { useLocalMarketTrade } from "./hooks/use-local-market-trade";
 import { useLocalRecruitment } from "./hooks/use-local-recruitment";
 import { useLocalEconomyControl } from "./hooks/use-local-economy-control";
+import { useMapDimensions } from "./hooks/use-map-dimensions";
+import { MapCanvasContainer } from "./components/map-canvas-container";
 import { GridCombatBridge } from "./engine/grid-combat-bridge";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
   const mapHeight = 2048;
 
-  const [dimensions, setDimensions] = useState({ width: 1200, height: 600 });
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [pendingSelection, setPendingSelection] = useState<{
     id: string;
@@ -45,7 +45,8 @@ export default function MapTest6Page() {
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const bridge = useRef(new GridCombatBridge());
+  const bridge = useMemo(() => new GridCombatBridge(), []);
+  const dimensions = useMapDimensions(containerRef);
 
   const {
     scale,
@@ -81,14 +82,13 @@ export default function MapTest6Page() {
   });
 
   const { playerNationId, setPlayerNationId, resetSession } = useSessionState();
-
   const {
     gameState,
     initializeGame,
     dispatchAction,
     processNextTurn,
     gridState,
-  } = useMapEngine(playerNationId);
+  } = useMapEngine();
 
   const { buyResource } = useLocalMarketTrade(playerNationId, dispatchAction);
   const { recruitUnits } = useLocalRecruitment(playerNationId, dispatchAction);
@@ -123,23 +123,6 @@ export default function MapTest6Page() {
       initializeGame(playerNationId);
     }
   }, [playerNationId, gameState, initializeGame]);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setDimensions({
-          width: entry.contentRect.width,
-          height: entry.contentRect.height,
-        });
-      }
-    });
-
-    resizeObserver.observe(container);
-    return () => resizeObserver.disconnect();
-  }, [dataLoading]);
 
   useEffect(() => {
     const canvasDest = canvasDestRef.current;
@@ -197,7 +180,7 @@ export default function MapTest6Page() {
     const mapX = Math.floor(((clientX - position.x) / scale) * fx);
     const mapY = Math.floor(((clientY - position.y) / scale) * fy);
 
-    const gridCoord = bridge.current.mapHighResToGridCell({ x: mapX, y: mapY });
+    const gridCoord = bridge.mapHighResToGridCell({ x: mapX, y: mapY });
 
     if (!playerNationId) {
       setPendingSelection({
@@ -236,37 +219,20 @@ export default function MapTest6Page() {
       <div className="flex-1 flex flex-col relative h-full">
         <MapHeader isCached={isCached} countriesCount={countries.length} />
 
-        <div
-          ref={containerRef}
-          className={`flex-1 relative bg-slate-950 overflow-hidden cursor-grab ${
-            isDragging ? "cursor-grabbing" : ""
-          }`}
+        <MapCanvasContainer
+          containerRef={containerRef}
+          canvasDestRef={canvasDestRef}
+          canvasSrcRef={canvasSrcRef}
+          isDragging={isDragging}
           onMouseDown={handleMouseDown}
           onMouseMove={(e) => {
             handleMouseMove(e);
             handlePointerMove(e);
           }}
           onMouseUp={handleMouseUp}
-          onMouseLeave={() => {
-            handleMouseUp();
-            setHoveredCountry(null);
-          }}
           onWheel={handleWheel}
           onClick={handleCanvasClick}
         >
-          <canvas ref={canvasSrcRef} className="hidden" />
-
-          <div className="w-full h-full absolute inset-0">
-            <canvas
-              ref={canvasDestRef}
-              className="pointer-events-none w-full h-full"
-              style={{
-                filter:
-                  "drop-shadow(0 2px 4px rgba(25, 35, 55, 0.15)) drop-shadow(0 1px 2px rgba(25, 35, 55, 0.08))",
-              }}
-            />
-          </div>
-
           {gameState && playerNationId && (
             <CountryStatusIndicator
               state={gameState}
@@ -279,7 +245,7 @@ export default function MapTest6Page() {
             hoveredCountry &&
             hoveredCountry.code !== playerNationId && (
               <InteractionOverlay
-                targetCell={bridge.current.mapHighResToGridCell({
+                targetCell={bridge.mapHighResToGridCell({
                   x: Math.floor(
                     ((dimensions.width / 2 - position.x) / scale) *
                       (mapWidth / dimensions.width),
@@ -300,7 +266,7 @@ export default function MapTest6Page() {
                     const fy = mapHeight / rect.height;
                     const mapX = Math.floor(((cx - position.x) / scale) * fx);
                     const mapY = Math.floor(((cy - position.y) / scale) * fy);
-                    const gridCoord = bridge.current.mapHighResToGridCell({
+                    const gridCoord = bridge.mapHighResToGridCell({
                       x: mapX,
                       y: mapY,
                     });
@@ -362,7 +328,7 @@ export default function MapTest6Page() {
           {gameState && <CampaignLogOverlay logs={gameState.turnLogs} />}
 
           {humanNation && <SovereignControlHud nation={humanNation} />}
-        </div>
+        </MapCanvasContainer>
       </div>
 
       {pendingSelection && (
