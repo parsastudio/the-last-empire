@@ -16,7 +16,7 @@ export async function GET() {
         cached: true,
       });
     } catch {
-      const result = await generateTest6Map(1200, 600);
+      const result = await generateTest6Map(4096, 2048);
       await fs.writeFile(
         mappingsPath,
         JSON.stringify(result, null, 2),

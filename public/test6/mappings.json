@@ -1,0 +1,1724 @@
+{
+  "countries": [
+    {
+      "id": 0,
+      "code": "WATER",
+      "name": "Ocean",
+      "color": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": 1,
+      "code": "FJI",
+      "name": "Fiji",
+      "color": [
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "code": "TZA",
+      "name": "Tanzania",
+      "color": [
+        0,
+        0,
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "code": "ESH",
+      "name": "W. Sahara",
+      "color": [
+        0,
+        0,
+        3
+      ]
+    },
+    {
+      "id": 4,
+      "code": "CAN",
+      "name": "Canada",
+      "color": [
+        0,
+        0,
+        4
+      ]
+    },
+    {
+      "id": 5,
+      "code": "USA",
+      "name": "United States of America",
+      "color": [
+        0,
+        0,
+        5
+      ]
+    },
+    {
+      "id": 6,
+      "code": "KAZ",
+      "name": "Kazakhstan",
+      "color": [
+        0,
+        0,
+        6
+      ]
+    },
+    {
+      "id": 7,
+      "code": "UZB",
+      "name": "Uzbekistan",
+      "color": [
+        0,
+        0,
+        7
+      ]
+    },
+    {
+      "id": 8,
+      "code": "PNG",
+      "name": "Papua New Guinea",
+      "color": [
+        0,
+        0,
+        8
+      ]
+    },
+    {
+      "id": 9,
+      "code": "IDN",
+      "name": "Indonesia",
+      "color": [
+        0,
+        0,
+        9
+      ]
+    },
+    {
+      "id": 10,
+      "code": "ARG",
+      "name": "Argentina",
+      "color": [
+        0,
+        0,
+        10
+      ]
+    },
+    {
+      "id": 11,
+      "code": "CHL",
+      "name": "Chile",
+      "color": [
+        0,
+        0,
+        11
+      ]
+    },
+    {
+      "id": 12,
+      "code": "COD",
+      "name": "Dem. Rep. Congo",
+      "color": [
+        0,
+        0,
+        12
+      ]
+    },
+    {
+      "id": 13,
+      "code": "SOM",
+      "name": "Somalia",
+      "color": [
+        0,
+        0,
+        13
+      ]
+    },
+    {
+      "id": 14,
+      "code": "KEN",
+      "name": "Kenya",
+      "color": [
+        0,
+        0,
+        14
+      ]
+    },
+    {
+      "id": 15,
+      "code": "SDN",
+      "name": "Sudan",
+      "color": [
+        0,
+        0,
+        15
+      ]
+    },
+    {
+      "id": 16,
+      "code": "TCD",
+      "name": "Chad",
+      "color": [
+        0,
+        0,
+        16
+      ]
+    },
+    {
+      "id": 17,
+      "code": "HTI",
+      "name": "Haiti",
+      "color": [
+        0,
+        0,
+        17
+      ]
+    },
+    {
+      "id": 18,
+      "code": "DOM",
+      "name": "Dominican Rep.",
+      "color": [
+        0,
+        0,
+        18
+      ]
+    },
+    {
+      "id": 19,
+      "code": "RUS",
+      "name": "Russia",
+      "color": [
+        0,
+        0,
+        19
+      ]
+    },
+    {
+      "id": 20,
+      "code": "BHS",
+      "name": "Bahamas",
+      "color": [
+        0,
+        0,
+        20
+      ]
+    },
+    {
+      "id": 21,
+      "code": "FLK",
+      "name": "Falkland Is.",
+      "color": [
+        0,
+        0,
+        21
+      ]
+    },
+    {
+      "id": 22,
+      "code": "GRL",
+      "name": "Greenland",
+      "color": [
+        0,
+        0,
+        22
+      ]
+    },
+    {
+      "id": 23,
+      "code": "ATF",
+      "name": "Fr. S. Antarctic Lands",
+      "color": [
+        0,
+        0,
+        23
+      ]
+    },
+    {
+      "id": 24,
+      "code": "TLS",
+      "name": "Timor-Leste",
+      "color": [
+        0,
+        0,
+        24
+      ]
+    },
+    {
+      "id": 25,
+      "code": "ZAF",
+      "name": "South Africa",
+      "color": [
+        0,
+        0,
+        25
+      ]
+    },
+    {
+      "id": 26,
+      "code": "LSO",
+      "name": "Lesotho",
+      "color": [
+        0,
+        0,
+        26
+      ]
+    },
+    {
+      "id": 27,
+      "code": "MEX",
+      "name": "Mexico",
+      "color": [
+        0,
+        0,
+        27
+      ]
+    },
+    {
+      "id": 28,
+      "code": "URY",
+      "name": "Uruguay",
+      "color": [
+        0,
+        0,
+        28
+      ]
+    },
+    {
+      "id": 29,
+      "code": "BRA",
+      "name": "Brazil",
+      "color": [
+        0,
+        0,
+        29
+      ]
+    },
+    {
+      "id": 30,
+      "code": "BOL",
+      "name": "Bolivia",
+      "color": [
+        0,
+        0,
+        30
+      ]
+    },
+    {
+      "id": 31,
+      "code": "PER",
+      "name": "Peru",
+      "color": [
+        0,
+        0,
+        31
+      ]
+    },
+    {
+      "id": 32,
+      "code": "COL",
+      "name": "Colombia",
+      "color": [
+        0,
+        0,
+        32
+      ]
+    },
+    {
+      "id": 33,
+      "code": "PAN",
+      "name": "Panama",
+      "color": [
+        0,
+        0,
+        33
+      ]
+    },
+    {
+      "id": 34,
+      "code": "CRI",
+      "name": "Costa Rica",
+      "color": [
+        0,
+        0,
+        34
+      ]
+    },
+    {
+      "id": 35,
+      "code": "NIC",
+      "name": "Nicaragua",
+      "color": [
+        0,
+        0,
+        35
+      ]
+    },
+    {
+      "id": 36,
+      "code": "HND",
+      "name": "Honduras",
+      "color": [
+        0,
+        0,
+        36
+      ]
+    },
+    {
+      "id": 37,
+      "code": "SLV",
+      "name": "El Salvador",
+      "color": [
+        0,
+        0,
+        37
+      ]
+    },
+    {
+      "id": 38,
+      "code": "GTM",
+      "name": "Guatemala",
+      "color": [
+        0,
+        0,
+        38
+      ]
+    },
+    {
+      "id": 39,
+      "code": "BLZ",
+      "name": "Belize",
+      "color": [
+        0,
+        0,
+        39
+      ]
+    },
+    {
+      "id": 40,
+      "code": "VEN",
+      "name": "Venezuela",
+      "color": [
+        0,
+        0,
+        40
+      ]
+    },
+    {
+      "id": 41,
+      "code": "GUY",
+      "name": "Guyana",
+      "color": [
+        0,
+        0,
+        41
+      ]
+    },
+    {
+      "id": 42,
+      "code": "SUR",
+      "name": "Suriname",
+      "color": [
+        0,
+        0,
+        42
+      ]
+    },
+    {
+      "id": 43,
+      "code": "ECU",
+      "name": "Ecuador",
+      "color": [
+        0,
+        0,
+        43
+      ]
+    },
+    {
+      "id": 44,
+      "code": "PRI",
+      "name": "Puerto Rico",
+      "color": [
+        0,
+        0,
+        44
+      ]
+    },
+    {
+      "id": 45,
+      "code": "JAM",
+      "name": "Jamaica",
+      "color": [
+        0,
+        0,
+        45
+      ]
+    },
+    {
+      "id": 46,
+      "code": "CUB",
+      "name": "Cuba",
+      "color": [
+        0,
+        0,
+        46
+      ]
+    },
+    {
+      "id": 47,
+      "code": "ZWE",
+      "name": "Zimbabwe",
+      "color": [
+        0,
+        0,
+        47
+      ]
+    },
+    {
+      "id": 48,
+      "code": "BWA",
+      "name": "Botswana",
+      "color": [
+        0,
+        0,
+        48
+      ]
+    },
+    {
+      "id": 49,
+      "code": "NAM",
+      "name": "Namibia",
+      "color": [
+        0,
+        0,
+        49
+      ]
+    },
+    {
+      "id": 50,
+      "code": "SEN",
+      "name": "Senegal",
+      "color": [
+        0,
+        0,
+        50
+      ]
+    },
+    {
+      "id": 51,
+      "code": "MLI",
+      "name": "Mali",
+      "color": [
+        0,
+        0,
+        51
+      ]
+    },
+    {
+      "id": 52,
+      "code": "MRT",
+      "name": "Mauritania",
+      "color": [
+        0,
+        0,
+        52
+      ]
+    },
+    {
+      "id": 53,
+      "code": "BEN",
+      "name": "Benin",
+      "color": [
+        0,
+        0,
+        53
+      ]
+    },
+    {
+      "id": 54,
+      "code": "NER",
+      "name": "Niger",
+      "color": [
+        0,
+        0,
+        54
+      ]
+    },
+    {
+      "id": 55,
+      "code": "NGA",
+      "name": "Nigeria",
+      "color": [
+        0,
+        0,
+        55
+      ]
+    },
+    {
+      "id": 56,
+      "code": "CMR",
+      "name": "Cameroon",
+      "color": [
+        0,
+        0,
+        56
+      ]
+    },
+    {
+      "id": 57,
+      "code": "TGO",
+      "name": "Togo",
+      "color": [
+        0,
+        0,
+        57
+      ]
+    },
+    {
+      "id": 58,
+      "code": "GHA",
+      "name": "Ghana",
+      "color": [
+        0,
+        0,
+        58
+      ]
+    },
+    {
+      "id": 59,
+      "code": "CIV",
+      "name": "Côte d'Ivoire",
+      "color": [
+        0,
+        0,
+        59
+      ]
+    },
+    {
+      "id": 60,
+      "code": "GIN",
+      "name": "Guinea",
+      "color": [
+        0,
+        0,
+        60
+      ]
+    },
+    {
+      "id": 61,
+      "code": "GNB",
+      "name": "Guinea-Bissau",
+      "color": [
+        0,
+        0,
+        61
+      ]
+    },
+    {
+      "id": 62,
+      "code": "LBR",
+      "name": "Liberia",
+      "color": [
+        0,
+        0,
+        62
+      ]
+    },
+    {
+      "id": 63,
+      "code": "SLE",
+      "name": "Sierra Leone",
+      "color": [
+        0,
+        0,
+        63
+      ]
+    },
+    {
+      "id": 64,
+      "code": "BFA",
+      "name": "Burkina Faso",
+      "color": [
+        0,
+        0,
+        64
+      ]
+    },
+    {
+      "id": 65,
+      "code": "CAF",
+      "name": "Central African Rep.",
+      "color": [
+        0,
+        0,
+        65
+      ]
+    },
+    {
+      "id": 66,
+      "code": "COG",
+      "name": "Congo",
+      "color": [
+        0,
+        0,
+        66
+      ]
+    },
+    {
+      "id": 67,
+      "code": "GAB",
+      "name": "Gabon",
+      "color": [
+        0,
+        0,
+        67
+      ]
+    },
+    {
+      "id": 68,
+      "code": "GNQ",
+      "name": "Eq. Guinea",
+      "color": [
+        0,
+        0,
+        68
+      ]
+    },
+    {
+      "id": 69,
+      "code": "ZMB",
+      "name": "Zambia",
+      "color": [
+        0,
+        0,
+        69
+      ]
+    },
+    {
+      "id": 70,
+      "code": "MWI",
+      "name": "Malawi",
+      "color": [
+        0,
+        0,
+        70
+      ]
+    },
+    {
+      "id": 71,
+      "code": "MOZ",
+      "name": "Mozambique",
+      "color": [
+        0,
+        0,
+        71
+      ]
+    },
+    {
+      "id": 72,
+      "code": "SWZ",
+      "name": "eSwatini",
+      "color": [
+        0,
+        0,
+        72
+      ]
+    },
+    {
+      "id": 73,
+      "code": "AGO",
+      "name": "Angola",
+      "color": [
+        0,
+        0,
+        73
+      ]
+    },
+    {
+      "id": 74,
+      "code": "BDI",
+      "name": "Burundi",
+      "color": [
+        0,
+        0,
+        74
+      ]
+    },
+    {
+      "id": 75,
+      "code": "ISR",
+      "name": "Israel",
+      "color": [
+        0,
+        0,
+        75
+      ]
+    },
+    {
+      "id": 76,
+      "code": "LBN",
+      "name": "Lebanon",
+      "color": [
+        0,
+        0,
+        76
+      ]
+    },
+    {
+      "id": 77,
+      "code": "MDG",
+      "name": "Madagascar",
+      "color": [
+        0,
+        0,
+        77
+      ]
+    },
+    {
+      "id": 78,
+      "code": "PSE",
+      "name": "Palestine",
+      "color": [
+        0,
+        0,
+        78
+      ]
+    },
+    {
+      "id": 79,
+      "code": "GMB",
+      "name": "Gambia",
+      "color": [
+        0,
+        0,
+        79
+      ]
+    },
+    {
+      "id": 80,
+      "code": "TUN",
+      "name": "Tunisia",
+      "color": [
+        0,
+        0,
+        80
+      ]
+    },
+    {
+      "id": 81,
+      "code": "DZA",
+      "name": "Algeria",
+      "color": [
+        0,
+        0,
+        81
+      ]
+    },
+    {
+      "id": 82,
+      "code": "JOR",
+      "name": "Jordan",
+      "color": [
+        0,
+        0,
+        82
+      ]
+    },
+    {
+      "id": 83,
+      "code": "ARE",
+      "name": "United Arab Emirates",
+      "color": [
+        0,
+        0,
+        83
+      ]
+    },
+    {
+      "id": 84,
+      "code": "QAT",
+      "name": "Qatar",
+      "color": [
+        0,
+        0,
+        84
+      ]
+    },
+    {
+      "id": 85,
+      "code": "KWT",
+      "name": "Kuwait",
+      "color": [
+        0,
+        0,
+        85
+      ]
+    },
+    {
+      "id": 86,
+      "code": "IRQ",
+      "name": "Iraq",
+      "color": [
+        0,
+        0,
+        86
+      ]
+    },
+    {
+      "id": 87,
+      "code": "OMN",
+      "name": "Oman",
+      "color": [
+        0,
+        0,
+        87
+      ]
+    },
+    {
+      "id": 88,
+      "code": "VUT",
+      "name": "Vanuatu",
+      "color": [
+        0,
+        0,
+        88
+      ]
+    },
+    {
+      "id": 89,
+      "code": "KHM",
+      "name": "Cambodia",
+      "color": [
+        0,
+        0,
+        89
+      ]
+    },
+    {
+      "id": 90,
+      "code": "THA",
+      "name": "Thailand",
+      "color": [
+        0,
+        0,
+        90
+      ]
+    },
+    {
+      "id": 91,
+      "code": "LAO",
+      "name": "Laos",
+      "color": [
+        0,
+        0,
+        91
+      ]
+    },
+    {
+      "id": 92,
+      "code": "MMR",
+      "name": "Myanmar",
+      "color": [
+        0,
+        0,
+        92
+      ]
+    },
+    {
+      "id": 93,
+      "code": "VNM",
+      "name": "Vietnam",
+      "color": [
+        0,
+        0,
+        93
+      ]
+    },
+    {
+      "id": 94,
+      "code": "PRK",
+      "name": "North Korea",
+      "color": [
+        0,
+        0,
+        94
+      ]
+    },
+    {
+      "id": 95,
+      "code": "KOR",
+      "name": "South Korea",
+      "color": [
+        0,
+        0,
+        95
+      ]
+    },
+    {
+      "id": 96,
+      "code": "MNG",
+      "name": "Mongolia",
+      "color": [
+        0,
+        0,
+        96
+      ]
+    },
+    {
+      "id": 97,
+      "code": "IND",
+      "name": "India",
+      "color": [
+        0,
+        0,
+        97
+      ]
+    },
+    {
+      "id": 98,
+      "code": "BGD",
+      "name": "Bangladesh",
+      "color": [
+        0,
+        0,
+        98
+      ]
+    },
+    {
+      "id": 99,
+      "code": "BTN",
+      "name": "Bhutan",
+      "color": [
+        0,
+        0,
+        99
+      ]
+    },
+    {
+      "id": 100,
+      "code": "NPL",
+      "name": "Nepal",
+      "color": [
+        0,
+        0,
+        100
+      ]
+    },
+    {
+      "id": 101,
+      "code": "PAK",
+      "name": "Pakistan",
+      "color": [
+        0,
+        0,
+        101
+      ]
+    },
+    {
+      "id": 102,
+      "code": "AFG",
+      "name": "Afghanistan",
+      "color": [
+        0,
+        0,
+        102
+      ]
+    },
+    {
+      "id": 103,
+      "code": "TJK",
+      "name": "Tajikistan",
+      "color": [
+        0,
+        0,
+        103
+      ]
+    },
+    {
+      "id": 104,
+      "code": "KGZ",
+      "name": "Kyrgyzstan",
+      "color": [
+        0,
+        0,
+        104
+      ]
+    },
+    {
+      "id": 105,
+      "code": "TKM",
+      "name": "Turkmenistan",
+      "color": [
+        0,
+        0,
+        105
+      ]
+    },
+    {
+      "id": 106,
+      "code": "IRN",
+      "name": "Iran",
+      "color": [
+        0,
+        0,
+        106
+      ]
+    },
+    {
+      "id": 107,
+      "code": "SYR",
+      "name": "Syria",
+      "color": [
+        0,
+        0,
+        107
+      ]
+    },
+    {
+      "id": 108,
+      "code": "ARM",
+      "name": "Armenia",
+      "color": [
+        0,
+        0,
+        108
+      ]
+    },
+    {
+      "id": 109,
+      "code": "SWE",
+      "name": "Sweden",
+      "color": [
+        0,
+        0,
+        109
+      ]
+    },
+    {
+      "id": 110,
+      "code": "BLR",
+      "name": "Belarus",
+      "color": [
+        0,
+        0,
+        110
+      ]
+    },
+    {
+      "id": 111,
+      "code": "UKR",
+      "name": "Ukraine",
+      "color": [
+        0,
+        0,
+        111
+      ]
+    },
+    {
+      "id": 112,
+      "code": "POL",
+      "name": "Poland",
+      "color": [
+        0,
+        0,
+        112
+      ]
+    },
+    {
+      "id": 113,
+      "code": "AUT",
+      "name": "Austria",
+      "color": [
+        0,
+        0,
+        113
+      ]
+    },
+    {
+      "id": 114,
+      "code": "HUN",
+      "name": "Hungary",
+      "color": [
+        0,
+        0,
+        114
+      ]
+    },
+    {
+      "id": 115,
+      "code": "MDA",
+      "name": "Moldova",
+      "color": [
+        0,
+        0,
+        115
+      ]
+    },
+    {
+      "id": 116,
+      "code": "ROU",
+      "name": "Romania",
+      "color": [
+        0,
+        0,
+        116
+      ]
+    },
+    {
+      "id": 117,
+      "code": "LTU",
+      "name": "Lithuania",
+      "color": [
+        0,
+        0,
+        117
+      ]
+    },
+    {
+      "id": 118,
+      "code": "LVA",
+      "name": "Latvia",
+      "color": [
+        0,
+        0,
+        118
+      ]
+    },
+    {
+      "id": 119,
+      "code": "EST",
+      "name": "Estonia",
+      "color": [
+        0,
+        0,
+        119
+      ]
+    },
+    {
+      "id": 120,
+      "code": "DEU",
+      "name": "Germany",
+      "color": [
+        0,
+        0,
+        120
+      ]
+    },
+    {
+      "id": 121,
+      "code": "BGR",
+      "name": "Bulgaria",
+      "color": [
+        0,
+        0,
+        121
+      ]
+    },
+    {
+      "id": 122,
+      "code": "GRC",
+      "name": "Greece",
+      "color": [
+        0,
+        0,
+        122
+      ]
+    },
+    {
+      "id": 123,
+      "code": "TUR",
+      "name": "Turkey",
+      "color": [
+        0,
+        0,
+        123
+      ]
+    },
+    {
+      "id": 124,
+      "code": "ALB",
+      "name": "Albania",
+      "color": [
+        0,
+        0,
+        124
+      ]
+    },
+    {
+      "id": 125,
+      "code": "HRV",
+      "name": "Croatia",
+      "color": [
+        0,
+        0,
+        125
+      ]
+    },
+    {
+      "id": 126,
+      "code": "CHE",
+      "name": "Switzerland",
+      "color": [
+        0,
+        0,
+        126
+      ]
+    },
+    {
+      "id": 127,
+      "code": "LUX",
+      "name": "Luxembourg",
+      "color": [
+        0,
+        0,
+        127
+      ]
+    },
+    {
+      "id": 128,
+      "code": "BEL",
+      "name": "Belgium",
+      "color": [
+        0,
+        0,
+        128
+      ]
+    },
+    {
+      "id": 129,
+      "code": "NLD",
+      "name": "Netherlands",
+      "color": [
+        0,
+        0,
+        129
+      ]
+    },
+    {
+      "id": 130,
+      "code": "PRT",
+      "name": "Portugal",
+      "color": [
+        0,
+        0,
+        130
+      ]
+    },
+    {
+      "id": 131,
+      "code": "ESP",
+      "name": "Spain",
+      "color": [
+        0,
+        0,
+        131
+      ]
+    },
+    {
+      "id": 132,
+      "code": "IRL",
+      "name": "Ireland",
+      "color": [
+        0,
+        0,
+        132
+      ]
+    },
+    {
+      "id": 133,
+      "code": "NCL",
+      "name": "New Caledonia",
+      "color": [
+        0,
+        0,
+        133
+      ]
+    },
+    {
+      "id": 134,
+      "code": "SLB",
+      "name": "Solomon Is.",
+      "color": [
+        0,
+        0,
+        134
+      ]
+    },
+    {
+      "id": 135,
+      "code": "NZL",
+      "name": "New Zealand",
+      "color": [
+        0,
+        0,
+        135
+      ]
+    },
+    {
+      "id": 136,
+      "code": "AUS",
+      "name": "Australia",
+      "color": [
+        0,
+        0,
+        136
+      ]
+    },
+    {
+      "id": 137,
+      "code": "LKA",
+      "name": "Sri Lanka",
+      "color": [
+        0,
+        0,
+        137
+      ]
+    },
+    {
+      "id": 138,
+      "code": "CHN",
+      "name": "China",
+      "color": [
+        0,
+        0,
+        138
+      ]
+    },
+    {
+      "id": 139,
+      "code": "TWN",
+      "name": "Taiwan",
+      "color": [
+        0,
+        0,
+        139
+      ]
+    },
+    {
+      "id": 140,
+      "code": "ITA",
+      "name": "Italy",
+      "color": [
+        0,
+        0,
+        140
+      ]
+    },
+    {
+      "id": 141,
+      "code": "DNK",
+      "name": "Denmark",
+      "color": [
+        0,
+        0,
+        141
+      ]
+    },
+    {
+      "id": 142,
+      "code": "GBR",
+      "name": "United Kingdom",
+      "color": [
+        0,
+        0,
+        142
+      ]
+    },
+    {
+      "id": 143,
+      "code": "ISL",
+      "name": "Iceland",
+      "color": [
+        0,
+        0,
+        143
+      ]
+    },
+    {
+      "id": 144,
+      "code": "AZE",
+      "name": "Azerbaijan",
+      "color": [
+        0,
+        0,
+        144
+      ]
+    },
+    {
+      "id": 145,
+      "code": "GEO",
+      "name": "Georgia",
+      "color": [
+        0,
+        0,
+        145
+      ]
+    },
+    {
+      "id": 146,
+      "code": "PHL",
+      "name": "Philippines",
+      "color": [
+        0,
+        0,
+        146
+      ]
+    },
+    {
+      "id": 147,
+      "code": "MYS",
+      "name": "Malaysia",
+      "color": [
+        0,
+        0,
+        147
+      ]
+    },
+    {
+      "id": 148,
+      "code": "BRN",
+      "name": "Brunei",
+      "color": [
+        0,
+        0,
+        148
+      ]
+    },
+    {
+      "id": 149,
+      "code": "SVN",
+      "name": "Slovenia",
+      "color": [
+        0,
+        0,
+        149
+      ]
+    },
+    {
+      "id": 150,
+      "code": "FIN",
+      "name": "Finland",
+      "color": [
+        0,
+        0,
+        150
+      ]
+    },
+    {
+      "id": 151,
+      "code": "SVK",
+      "name": "Slovakia",
+      "color": [
+        0,
+        0,
+        151
+      ]
+    },
+    {
+      "id": 152,
+      "code": "CZE",
+      "name": "Czechia",
+      "color": [
+        0,
+        0,
+        152
+      ]
+    },
+    {
+      "id": 153,
+      "code": "ERI",
+      "name": "Eritrea",
+      "color": [
+        0,
+        0,
+        153
+      ]
+    },
+    {
+      "id": 154,
+      "code": "JPN",
+      "name": "Japan",
+      "color": [
+        0,
+        0,
+        154
+      ]
+    },
+    {
+      "id": 155,
+      "code": "PRY",
+      "name": "Paraguay",
+      "color": [
+        0,
+        0,
+        155
+      ]
+    },
+    {
+      "id": 156,
+      "code": "YEM",
+      "name": "Yemen",
+      "color": [
+        0,
+        0,
+        156
+      ]
+    },
+    {
+      "id": 157,
+      "code": "SAU",
+      "name": "Saudi Arabia",
+      "color": [
+        0,
+        0,
+        157
+      ]
+    },
+    {
+      "id": 158,
+      "code": "CYP",
+      "name": "Cyprus",
+      "color": [
+        0,
+        0,
+        158
+      ]
+    },
+    {
+      "id": 159,
+      "code": "MAR",
+      "name": "Morocco",
+      "color": [
+        0,
+        0,
+        159
+      ]
+    },
+    {
+      "id": 160,
+      "code": "EGY",
+      "name": "Egypt",
+      "color": [
+        0,
+        0,
+        160
+      ]
+    },
+    {
+      "id": 161,
+      "code": "LBY",
+      "name": "Libya",
+      "color": [
+        0,
+        0,
+        161
+      ]
+    },
+    {
+      "id": 162,
+      "code": "ETH",
+      "name": "Ethiopia",
+      "color": [
+        0,
+        0,
+        162
+      ]
+    },
+    {
+      "id": 163,
+      "code": "DJI",
+      "name": "Djibouti",
+      "color": [
+        0,
+        0,
+        163
+      ]
+    },
+    {
+      "id": 164,
+      "code": "UGA",
+      "name": "Uganda",
+      "color": [
+        0,
+        0,
+        164
+      ]
+    },
+    {
+      "id": 165,
+      "code": "RWA",
+      "name": "Rwanda",
+      "color": [
+        0,
+        0,
+        165
+      ]
+    },
+    {
+      "id": 166,
+      "code": "BIH",
+      "name": "Bosnia and Herz.",
+      "color": [
+        0,
+        0,
+        166
+      ]
+    },
+    {
+      "id": 167,
+      "code": "MKD",
+      "name": "North Macedonia",
+      "color": [
+        0,
+        0,
+        167
+      ]
+    },
+    {
+      "id": 168,
+      "code": "SRB",
+      "name": "Serbia",
+      "color": [
+        0,
+        0,
+        168
+      ]
+    },
+    {
+      "id": 169,
+      "code": "MNE",
+      "name": "Montenegro",
+      "color": [
+        0,
+        0,
+        169
+      ]
+    },
+    {
+      "id": 170,
+      "code": "TTO",
+      "name": "Trinidad and Tobago",
+      "color": [
+        0,
+        0,
+        170
+      ]
+    },
+    {
+      "id": 171,
+      "code": "SSD",
+      "name": "S. Sudan",
+      "color": [
+        0,
+        0,
+        171
+      ]
+    }
+  ]
+}
