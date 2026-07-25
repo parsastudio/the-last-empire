@@ -1,6 +1,6 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { SeaBridgeConnector } from "@/engine/combat/sea-bridge-connector";
+import { SeaBridgeConnector } from "@/engine/combat/sea-bridges/sea-bridge-connector";
 
 export function runCanalNavigationFlowTest(): boolean {
   const connector = new SeaBridgeConnector();

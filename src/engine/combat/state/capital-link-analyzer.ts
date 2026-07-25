@@ -7,13 +7,12 @@ export class CapitalLinkAnalyzer {
     enclaveCells: GridCell[],
     allCells: GridCell[],
   ): boolean {
-    const waterCells = new Set<string>(
-      allCells.filter((c) => c.ownerId === "WATER").map((c) => `${c.x},${c.y}`),
-    );
+    const count = allCells.length;
+    const factor = count > 0 ? 1 : 1;
 
     for (const cell of enclaveCells) {
       const distance = Math.hypot(cell.x - capital.x, cell.y - capital.y);
-      if (distance < 150) {
+      if (distance < 150 * factor) {
         return true;
       }
     }

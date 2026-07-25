@@ -1,5 +1,3 @@
-import { GridCell } from "@/domain/map/grid-cell.schema";
-
 export class MinimapRenderer {
   public drawMinimapBorder(
     ctx: CanvasRenderingContext2D,

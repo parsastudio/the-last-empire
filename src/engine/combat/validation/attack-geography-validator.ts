@@ -1,5 +1,4 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
-import { GridCell } from "@/domain/map/grid-cell.schema";
 
 export class AttackGeographyValidator {
   public isGeographicallyReachable(
