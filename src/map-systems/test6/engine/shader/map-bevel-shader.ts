@@ -17,9 +17,9 @@ export class MapBevelShader {
     const ratio = (x / width + y / height) * 0.5;
     const invRatio = 1.0 - ratio;
 
-    let finalR = Math.floor(pair.r1 * invRatio + pair.r2 * ratio);
-    let finalG = Math.floor(pair.g1 * invRatio + pair.g2 * ratio);
-    let finalB = Math.floor(pair.b1 * invRatio + pair.b2 * ratio);
+    const finalR = Math.floor(pair.r1 * invRatio + pair.r2 * ratio);
+    const finalG = Math.floor(pair.g1 * invRatio + pair.g2 * ratio);
+    const finalB = Math.floor(pair.b1 * invRatio + pair.b2 * ratio);
 
     const idLeft = x > 2 ? srcData[idx - 8 + 2] || 0 : id;
     const idTop = y > 2 ? srcData[idx - width * 8 + 2] || 0 : id;

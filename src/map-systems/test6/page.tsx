@@ -18,6 +18,7 @@ import { HoverTargetOverlay } from "./components/overlay/hover-target-overlay";
 import { SelectionModal } from "./components/selection-modal";
 import { TacticalActionBar } from "./components/tactical-action-bar";
 import { MapControls } from "./components/map-controls";
+import { MapHeader } from "./components/map-header";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
@@ -152,6 +153,7 @@ export default function MapTest6Page() {
       )}
 
       <div className="flex-1 flex flex-col relative h-full">
+        <MapHeader isCached={isCached} countriesCount={countries.length} />
         <TacticalViewport
           containerRef={containerRef}
           canvasDestRef={canvasDestRef}
