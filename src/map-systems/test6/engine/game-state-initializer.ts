@@ -1,14 +1,30 @@
 import { GridState } from "@/engine/combat/state/grid-state";
 import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 import { GameState } from "@/domain/game/game-state.schema";
+import { GridNationDetector } from "./grid-nation-detector";
+import { GlobalAiInitializer } from "./global-ai-initializer";
 
 export class GameStateInitializer {
+  private detector = new GridNationDetector();
+  private aiInitializer = new GlobalAiInitializer();
   private synchronizer = new StateSynchronizerFacade();
 
   public initializeSimulationForNation(
     nationId: string,
     gridState: GridState,
   ): GameState {
+    const cells = gridState.getAllCells();
+    const detectedNations = this.detector.detectUniqueNations(cells);
+
+    if (!detectedNations.includes(nationId)) {
+      detectedNations.push(nationId);
+    }
+
+    const populatedNations = this.aiInitializer.initializeAllNations(
+      detectedNations,
+      nationId,
+    );
+
     const baseState: GameState = {
       gameId: `test6_game_${Date.now()}`,
       currentTurn: 1,
@@ -17,68 +33,7 @@ export class GameStateInitializer {
       humanNationId: nationId,
       globalThreatLevel: 0,
       marketPrices: { oil: 100, steel: 100 },
-      nations: {
-        [nationId]: {
-          id: nationId,
-          name: nationId,
-          isAi: false,
-          isAlive: true,
-          flagCode: "US",
-          gdp: 20000000,
-          taxRate: 15,
-          tariffRate: 10,
-          treasury: 500000,
-          nationalDebt: 50000,
-          population: 300000000,
-          warExhaustion: 0,
-          industrialLevel: 1,
-          adminBurdenMultiplier: 1.0,
-          consecutiveDeficitTurns: 0,
-          government: {
-            type: "DEMOCRACY",
-            stability: 80,
-            corruption: 5,
-            socialFreedom: 80,
-            turnsInPower: 5,
-          },
-          resources: { oil: 1000, steel: 2000, manpower: 500 },
-          upkeep: {
-            infantryUpkeep: 1,
-            airForceUpkeep: 1,
-            droneMissileUpkeep: 1,
-            infrastructureUpkeep: 1,
-          },
-          military: {
-            infantry: 100,
-            airForce: 20,
-            droneMissile: 5,
-            experience: 10,
-            techLevel: 1,
-            mobility: 1,
-          },
-          recruitmentQueue: [],
-          geography: {
-            landNeighbors: [],
-            seaNeighbors: [],
-            hasSeaAccess: true,
-            territorySize: 9000,
-            infrastructureLevel: 1,
-            contiguousMainlandSize: 9000,
-            isolatedPockets: [],
-            coordinates: [],
-          },
-          relations: {},
-          activeModifiers: [],
-          traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
-          globalReputation: 50,
-          globalAggression: 0,
-          doctrines: {
-            doctrinePoints: 0,
-            unlockedDoctrines: [],
-          },
-          proxyInfluenceBudget: {},
-        },
-      },
+      nations: populatedNations,
       provinces: {},
       turnLogs: [],
       eventFlags: {},

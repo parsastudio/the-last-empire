@@ -8,9 +8,9 @@ import { useMapMouse } from "./hooks/use-map-mouse";
 import { MapHeader } from "./components/map-header";
 import { MapHoverCard } from "./components/map-hover-card";
 import { useMapGridRenderer } from "./hooks/use-map-grid-renderer";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { SelectionModal } from "./components/selection-modal";
 import { TacticalSidePanel } from "./components/tactical-side-panel";
-import { CampaignLogOverlay } from "./components/campaign-log-overlay";
 import { NextTurnButton } from "./components/next-turn-button";
 import { CountryStatusIndicator } from "./components/country-status-indicator";
 import { InteractionOverlay } from "./components/interaction-overlay";
@@ -20,6 +20,9 @@ import { EconomyAdjuster } from "./components/economy-adjuster";
 import { RecruitmentCenter } from "./components/recruitment-center";
 import { MarketPricesWidget } from "./components/market-prices-widget";
 import { ActiveWarsList } from "./components/active-wars-list";
+import { TurnLogsTerminal } from "./components/turn-logs-terminal";
+import { GlobalRankingSidebar } from "./components/global-ranking-sidebar";
+import { GlobalSimulationControl } from "./components/global-simulation-control";
 import { useNationSelector } from "./hooks/use-nation-selector";
 import { useTacticalAttack } from "./hooks/use-tactical-attack";
 import { useTurnProgression } from "./hooks/use-turn-progression";
@@ -30,6 +33,9 @@ import { useLocalRecruitment } from "./hooks/use-local-recruitment";
 import { useLocalEconomyControl } from "./hooks/use-local-economy-control";
 import { useMapDimensions } from "./hooks/use-map-dimensions";
 import { MapCanvasContainer } from "./components/map-canvas-container";
+import { useGlobalRankings } from "./hooks/use-global-rankings";
+import { useTurnLogs } from "./hooks/use-turn-logs";
+import { useTacticalOptions } from "./hooks/use-tactical-options";
 import { GridCombatBridge } from "./engine/grid-combat-bridge";
 
 export default function MapTest6Page() {
@@ -96,6 +102,10 @@ export default function MapTest6Page() {
     playerNationId,
     dispatchAction,
   );
+  const { forceSuccess, toggleForceSuccess } = useTacticalOptions();
+
+  const rankings = useGlobalRankings(gameState);
+  const { filteredLogs } = useTurnLogs(gameState);
 
   useMapGridRenderer(canvasDestRef, gridState, dataLoading, showHeatmap);
 
@@ -213,7 +223,13 @@ export default function MapTest6Page() {
       )}
 
       {gameState && playerNationId && (
-        <TacticalSidePanel state={gameState} humanNationId={playerNationId} />
+        <TacticalSidePanel state={gameState} humanNationId={playerNationId}>
+          <GlobalRankingSidebar
+            ranks={rankings}
+            nations={gameState.nations}
+            humanNationId={playerNationId}
+          />
+        </TacticalSidePanel>
       )}
 
       <div className="flex-1 flex flex-col relative h-full">
@@ -279,6 +295,10 @@ export default function MapTest6Page() {
 
           {gameState && playerNationId && humanNation && (
             <div className="absolute top-20 right-4 w-72 space-y-3 z-40">
+              <GlobalSimulationControl
+                forceSuccess={forceSuccess}
+                onToggleForceSuccess={toggleForceSuccess}
+              />
               <EconomyAdjuster
                 currentTaxRate={humanNation.taxRate}
                 onTaxChange={updateTaxRate}
@@ -325,11 +345,11 @@ export default function MapTest6Page() {
 
           {hoveredCountry && <MapHoverCard hoveredCountry={hoveredCountry} />}
 
-          {gameState && <CampaignLogOverlay logs={gameState.turnLogs} />}
-
           {humanNation && <SovereignControlHud nation={humanNation} />}
         </MapCanvasContainer>
       </div>
+
+      {gameState && <TurnLogsTerminal logs={filteredLogs} />}
 
       {pendingSelection && (
         <SelectionModal
