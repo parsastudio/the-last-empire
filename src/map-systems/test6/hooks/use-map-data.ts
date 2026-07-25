@@ -6,6 +6,7 @@ interface CountryMapping {
   code: string;
   name: string;
   color: [number, number, number];
+  areaSqKm?: number;
 }
 
 interface UseMapDataProps {
