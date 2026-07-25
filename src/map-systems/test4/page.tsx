@@ -27,7 +27,7 @@ export default function MapTest4Page() {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
 
   const activeHoveredCountryDetails = useMemo(() => {
-    if (phase !== 1) return null;
+    if (phase !== 1 && phase !== 5) return null;
     if (!hoveredCountry || !data?.phase1) return null;
     return data.phase1.find((c) => c.code === hoveredCountry) || null;
   }, [hoveredCountry, data, phase]);

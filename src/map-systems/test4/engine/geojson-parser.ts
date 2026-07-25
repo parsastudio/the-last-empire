@@ -1,6 +1,5 @@
 import { getCountryCode } from "./island-extractor";
 import { calculatePolygonArea } from "@/map-systems/test2/engine/geometry-utils";
-import { smoothPolygonChaikin } from "./polygon-smoother";
 import type { GeoJsonData } from "@/map-systems/test2/engine/types";
 import type { CountryPhase1 } from "./types";
 
@@ -39,12 +38,10 @@ export function parseGeoJsonCountries(geoJson: GeoJsonData): CountryPhase1[] {
         countryArea += calculatePolygonArea(ring);
       });
 
-      const smoothedRings = rings.map((ring) => smoothPolygonChaikin(ring, 3));
-
       return {
         code,
         name,
-        rings: smoothedRings,
+        rings,
         area: countryArea,
       };
     });

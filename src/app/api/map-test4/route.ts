@@ -4,7 +4,6 @@ import path from "path";
 import { parseGeoJsonCountries } from "@/map-systems/test4/engine/geojson-parser";
 import { extractIsolatedPolygons } from "@/map-systems/test4/engine/island-extractor";
 import { subdivideSinglePolygon } from "@/map-systems/test4/engine/polygon-subdivider";
-import { smoothPolygonChaikin } from "@/map-systems/test4/engine/polygon-smoother";
 import { buildSpatialNeighbors } from "@/map-systems/test4/engine/spatial-index";
 import { partitionAndDissolveRegions } from "@/map-systems/test4/engine/annexation-engine";
 import { calculatePolygonArea } from "@/map-systems/test2/engine/geometry-utils";
@@ -36,12 +35,7 @@ export async function GET() {
     const geoJson = JSON.parse(fileContent) as GeoJsonData;
     const phase1Countries = parseGeoJsonCountries(geoJson);
 
-    const phase2Islands = extractIsolatedPolygons(geoJson.features).map(
-      (island) => ({
-        ...island,
-        coordinates: smoothPolygonChaikin(island.coordinates, 3),
-      }),
-    );
+    const phase2Islands = extractIsolatedPolygons(geoJson.features);
 
     const totalWeightTarget = 3000;
     const totalAreaSqrt = phase1Countries.reduce(
