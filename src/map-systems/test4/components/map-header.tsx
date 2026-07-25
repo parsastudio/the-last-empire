@@ -1,8 +1,8 @@
 import React from "react";
 
 interface MapHeaderProps {
-  phase: 1 | 2 | 3;
-  setPhase: (phase: 1 | 2 | 3) => void;
+  phase: 1 | 2 | 3 | 4;
+  setPhase: (phase: 1 | 2 | 3 | 4) => void;
   onResetView: () => void;
 }
 
@@ -18,8 +18,8 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
           Advanced Geopolitical Atlas Engine - Stage 4
         </h1>
         <p className="text-xs text-slate-400 mt-0.5">
-          Use mouse wheel to zoom dynamically centered on cursor. Phase 3 splits
-          the world into ~10,000 equal-sized smooth sectors.
+          Use mouse wheel to zoom dynamically centered on cursor. Phase 4
+          redistributes deleted countries and dissolves isolated islands.
         </p>
       </div>
       <div className="flex items-center gap-3">
@@ -37,7 +37,7 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
               : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
           }`}
         >
-          Phase 1: Complete Countries
+          Phase 1: Standard
         </button>
         <button
           onClick={() => setPhase(2)}
@@ -47,7 +47,7 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
               : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
           }`}
         >
-          Phase 2: Island Areas
+          Phase 2: Islands
         </button>
         <button
           onClick={() => setPhase(3)}
@@ -57,7 +57,17 @@ export const MapHeader: React.FC<MapHeaderProps> = ({
               : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
           }`}
         >
-          Phase 3: Global 10K Regions
+          Phase 3: 3K Grid
+        </button>
+        <button
+          onClick={() => setPhase(4)}
+          className={`px-4 py-2 rounded-lg text-xs font-mono border transition-all ${
+            phase === 4
+              ? "bg-purple-600 border-purple-500 text-white"
+              : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
+          }`}
+        >
+          Phase 4: Partition
         </button>
       </div>
     </div>

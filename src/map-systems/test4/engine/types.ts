@@ -29,6 +29,7 @@ export interface ApiResponse {
   phase1: CountryPhase1[];
   phase2: IslandPhase2[];
   phase3: RegionPhase3[];
+  phase4: RegionPhase3[];
   error?: string;
 }
 

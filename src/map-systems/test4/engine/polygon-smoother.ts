@@ -1,6 +1,6 @@
 export function smoothPolygonChaikin(
   poly: [number, number][],
-  iterations = 2,
+  iterations = 3,
 ): [number, number][] {
   if (poly.length < 3) {
     return poly;
