@@ -5,7 +5,7 @@ import {
   ProxyImpactResult,
 } from "./proxy/proxy-stability-impact.calculator";
 
-export { ProxyImpactResult };
+export type { ProxyImpactResult };
 
 export class ProxyWarManager {
   private budgetManager = new ProxyBudgetManager();
