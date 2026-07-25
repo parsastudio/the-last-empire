@@ -10,9 +10,18 @@ export async function GET(): Promise<NextResponse> {
 
     try {
       const cached = await fs.readFile(mappingsPath, "utf-8");
+      const parsed = JSON.parse(cached);
+      const countries = parsed.countries || [];
+      const hasArea = countries.some(
+        (c: { id: number; areaSqKm?: number }) =>
+          c.id >= 11 && c.areaSqKm !== undefined,
+      );
+      if (!hasArea) {
+        throw new Error("Outdated cache structure");
+      }
       return NextResponse.json({
         success: true,
-        data: JSON.parse(cached),
+        data: parsed,
         cached: true,
       });
     } catch {

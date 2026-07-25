@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useMapGesture } from "./hooks/use-map-gesture";
-import { MapControls } from "../test1/components/map-controls";
+import { MapControls } from "./components/map-controls";
 import { useMapData } from "./hooks/use-map-data";
 import { useMapMouse } from "./hooks/use-map-mouse";
 import { MapHeader } from "./components/map-header";
