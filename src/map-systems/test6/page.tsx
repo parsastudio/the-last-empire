@@ -6,6 +6,20 @@ import { MapControls } from "@/map-systems/test1/components/map-controls";
 import { OCEAN_COLOR, MAP_PALETTE_172 } from "./engine/color-palette";
 import type { CountryMapping } from "./engine/map-generator";
 
+function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+  s /= 100;
+  l /= 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) =>
+    l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+  return [
+    Math.round(255 * f(0)),
+    Math.round(255 * f(8)),
+    Math.round(255 * f(4)),
+  ];
+}
+
 export default function MapTest6Page() {
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [hoveredCountry, setHoveredCountry] = useState<CountryMapping | null>(
@@ -56,7 +70,7 @@ export default function MapTest6Page() {
     if (!ctxSrc || !ctxDest) return;
 
     ctxSrc.imageSmoothingEnabled = false;
-    ctxDest.imageSmoothingEnabled = false;
+    ctxDest.imageSmoothingEnabled = true;
 
     ctxSrc.drawImage(img, 0, 0, mapWidth, mapHeight);
 
@@ -119,9 +133,9 @@ export default function MapTest6Page() {
         }
 
         if (isBorder) {
-          r = 15;
-          g = 23;
-          b = 42;
+          r = 45;
+          g = 65;
+          b = 90;
         }
 
         destData[idx] = r;
@@ -214,7 +228,7 @@ export default function MapTest6Page() {
             Pristine 4K Board-Game Map - Test 6
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Zero blurring. 1px precise deep navy borders. Light slate ocean
+            Zero blurring. 1px precise deep navy borders. Soft marine ocean
             theme.
           </p>
         </div>
@@ -257,7 +271,8 @@ export default function MapTest6Page() {
             style={{
               width: `${displayWidth}px`,
               height: `${displayHeight}px`,
-              imageRendering: "pixelated",
+              filter:
+                "drop-shadow(0 2px 4px rgba(45, 65, 90, 0.15)) drop-shadow(0 1px 2px rgba(45, 65, 90, 0.08))",
             }}
           />
         </div>
