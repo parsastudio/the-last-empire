@@ -8,15 +8,14 @@ import { EventLogger } from "@/engine/event-logger";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { StateHistory } from "@/application/state-history";
-import { TurnPipeline } from "@/engine/turn-pipeline";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { GridHistoryAdapter } from "@/engine/combat/history/grid-history-adapter";
-import { GridEnclaveConnector } from "@/engine/combat/state/grid-enclave-connector";
-import { GridStateCleanup } from "@/engine/combat/state/grid-state-cleanup";
-import { EnclaveRegistry } from "@/engine/combat/registry/enclave-registry";
-import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
+import { ActionPrioritySorter } from "./orchestrator/action-priority-sorter";
+import { PeaceTracker } from "./orchestrator/peace-tracker";
+import { GridPostTurnCleanup } from "./orchestrator/grid-post-turn-cleanup";
+import { TurnPhaseOrchestrator } from "./orchestrator/turn-phase-orchestrator";
 
 export class GameEngine {
   private currentState: GameState;
@@ -25,16 +24,16 @@ export class GameEngine {
   private livenessManager: NationLivenessManager;
   private victoryChecker: VictoryChecker;
   private stateHistory: StateHistory;
-  private pipeline: TurnPipeline;
   private aiEngine: AIEngine;
   private prng: SeededRandom;
   private actionRouter: ActionRouter;
   private gridState: GridState;
   private gridHistory = new GridHistoryAdapter();
-  private gridConnector = new GridEnclaveConnector();
-  private gridCleanup = new GridStateCleanup();
-  private enclaveRegistry = new EnclaveRegistry();
-  private stateSynchronizer = new StateSynchronizerFacade();
+
+  private prioritySorter = new ActionPrioritySorter();
+  private peaceTracker = new PeaceTracker();
+  private gridPostCleanup = new GridPostTurnCleanup();
+  private turnOrchestrator = new TurnPhaseOrchestrator();
 
   constructor(initialState: GameState) {
     const rawGridState = (initialState as { gridState?: GridState }).gridState;
@@ -50,7 +49,6 @@ export class GameEngine {
     this.livenessManager = new NationLivenessManager();
     this.victoryChecker = new VictoryChecker();
     this.stateHistory = new StateHistory();
-    this.pipeline = new TurnPipeline();
     this.aiEngine = new AIEngine();
     this.prng = new SeededRandom(initialState.seed);
     this.actionRouter = new ActionRouter();
@@ -117,39 +115,19 @@ export class GameEngine {
 
     this.processActionQueue();
 
-    const activeWars = Object.values(this.currentState.nations).some((n) =>
-      Object.values(n.relations).some((r) => r.stance === "WAR"),
+    this.currentState = this.turnOrchestrator.executePhases(
+      this.currentState,
+      this.prng,
     );
-
-    this.currentState = this.pipeline.processTurn(this.currentState, this.prng);
-
-    const allCells = this.gridState.getAllCells();
-    const activeNationsIds = Object.keys(this.currentState.nations).filter(
-      (id) => this.currentState.nations[id]?.isAlive,
-    );
-
-    for (const id of activeNationsIds) {
-      this.gridConnector.regroupEnclaves(id, allCells);
-      this.gridCleanup.cleanupEnclaveRegistry(
-        allCells,
-        id,
-        this.enclaveRegistry,
-      );
-    }
-
-    this.currentState = this.stateSynchronizer.synchronizeAll(
+    this.currentState = this.gridPostCleanup.cleanupAndSynchronize(
       this.currentState,
       this.gridState,
     );
     this.currentState = this.livenessManager.updateLiveness(this.currentState);
 
-    let peacefulCount = this.currentState.peacefulTurnsCount ?? 0;
-    if (!activeWars) {
-      peacefulCount += 1;
-    } else {
-      peacefulCount = 0;
-    }
-
+    const peacefulCount = this.peaceTracker.updatePeacefulTurns(
+      this.currentState,
+    );
     this.currentState = {
       ...this.currentState,
       peacefulTurnsCount: peacefulCount,
@@ -191,44 +169,8 @@ export class GameEngine {
   }
 
   private processActionQueue(): void {
-    const rawQueue = [...this.actionQueue.getQueue()];
-
-    const priority1 = rawQueue.filter((a) =>
-      ["DECLARE_WAR", "CHANGE_GOVERNMENT", "ACTIVATE_ABILITY"].includes(a.type),
-    );
-    const priority2 = rawQueue.filter((a) => a.type === "TRADE_RESOURCES");
-    const priority3 = rawQueue.filter((a) =>
-      [
-        "RECRUIT_UNIT",
-        "INVEST_INFRASTRUCTURE",
-        "UPGRADE_INDUSTRIAL_LEVEL",
-        "UNLOCK_DOCTRINE",
-        "INVEST_RESEARCH",
-        "ANTI_CORRUPTION_DRIVE",
-        "REPAY_DEBT",
-        "REQUEST_LOAN",
-        "CANCEL_RECRUITMENT",
-        "DISBAND_UNIT",
-        "DIPLOMATIC_PROPOSAL",
-        "FUND_PROXY_INFLUENCE",
-      ].includes(a.type),
-    );
-    const priority4 = rawQueue.filter((a) => a.type === "ATTACK");
-
-    const shuffledTrades = [...priority2];
-    for (let i = shuffledTrades.length - 1; i > 0; i--) {
-      const j = Math.floor(this.prng.nextFloat() * (i + 1));
-      const temp = shuffledTrades[i];
-      shuffledTrades[i] = shuffledTrades[j];
-      shuffledTrades[j] = temp;
-    }
-
-    const sortedActions = [
-      ...priority1,
-      ...shuffledTrades,
-      ...priority3,
-      ...priority4,
-    ];
+    const rawQueue = this.actionQueue.getQueue();
+    const sortedActions = this.prioritySorter.sortActions(rawQueue, this.prng);
 
     let state = this.currentState;
 
