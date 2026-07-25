@@ -7,15 +7,20 @@ import { useMapData } from "./hooks/use-map-data";
 import { useMapMouse } from "./hooks/use-map-mouse";
 import { MapHeader } from "./components/map-header";
 import { MapHoverCard } from "./components/map-hover-card";
+import { useMapGridRenderer } from "./hooks/use-map-grid-renderer";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
   const mapHeight = 2048;
 
   const [dimensions, setDimensions] = useState({ width: 1200, height: 600 });
+  const [showHeatmap, setShowHeatmap] = useState(false);
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const gridState = GridStateProvider.getInstance();
 
   const {
     scale,
@@ -49,6 +54,8 @@ export default function MapTest6Page() {
     mapWidth,
     mapHeight,
   });
+
+  useMapGridRenderer(canvasDestRef, gridState, loading, showHeatmap);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -153,6 +160,17 @@ export default function MapTest6Page() {
                 "drop-shadow(0 2px 4px rgba(25, 35, 55, 0.15)) drop-shadow(0 1px 2px rgba(25, 35, 55, 0.08))",
             }}
           />
+        </div>
+
+        <div className="absolute top-4 right-4 z-50">
+          <button
+            onClick={() => setShowHeatmap((prev) => !prev)}
+            className="px-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono font-bold hover:bg-slate-800 transition-colors"
+          >
+            {showHeatmap
+              ? "DISABLE TACTICAL HEATMAP"
+              : "ENABLE TACTICAL HEATMAP"}
+          </button>
         </div>
 
         <MapControls
