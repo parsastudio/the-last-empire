@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import { generateTest6Map } from "@/map-systems/test6/engine/map-generator";
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   try {
     const publicDir = path.join(process.cwd(), "public");
     const mappingsPath = path.join(publicDir, "test6", "mappings.json");

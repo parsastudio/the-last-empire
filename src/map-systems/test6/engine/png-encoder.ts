@@ -20,7 +20,7 @@ const crcTable = (() => {
   return table;
 })();
 
-function writeChunk(chunks: Buffer[], type: string, data: Buffer) {
+function writeChunk(chunks: Buffer[], type: string, data: Buffer): void {
   const len = Buffer.alloc(4);
   len.writeUInt32BE(data.length, 0);
   const typeBuf = Buffer.from(type, "ascii");
