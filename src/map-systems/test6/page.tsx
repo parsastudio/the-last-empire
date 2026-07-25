@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { useMapGesture } from "@/map-systems/test4/hooks/use-map-gesture";
-import { MapControls } from "@/map-systems/test1/components/map-controls";
+import { useMapGesture } from "./hooks/use-map-gesture";
+import { MapControls } from "../test1/components/map-controls";
 import { OCEAN_DEPTH_PALETTE, MAP_PALETTE_172 } from "./engine/color-palette";
 import type { CountryMapping } from "./engine/map-generator";
 

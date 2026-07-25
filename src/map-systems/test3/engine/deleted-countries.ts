@@ -1,7 +1,0 @@
-export const DELETED_COUNTRIES = new Set([
-  "LSO", "SWZ", "AND", "MCO", "SMR", "VAT", "LIE", "LUX", "MLT", "CYP", "SGP", "BRN",
-  "BHR", "MDV", "SYC", "MUS", "COM", "STP", "CPV", "BRB", "DMA", "GRD", "LCA", "VCT",
-  "ATG", "KNA", "BHS", "FJI", "SLB", "VUT", "WSM", "TON", "TUV", "KIR", "MHL", "FSM",
-  "PLW", "NRU", "TLS", "DJI", "GMB", "GNB", "GNQ", "KOS", "PSE", "ESH", "BTN", "MNE",
-  "PRT", "MDA"
-]);
