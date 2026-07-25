@@ -1,4 +1,4 @@
-export const OCEAN_COLOR: [number, number, number] = [238, 242, 246];
+export const OCEAN_COLOR: [number, number, number] = [190, 215, 240];
 
 export const MAP_PALETTE_172: [number, number, number][] = [
   [211, 148, 142],
