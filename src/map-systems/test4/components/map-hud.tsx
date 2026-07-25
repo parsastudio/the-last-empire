@@ -86,27 +86,25 @@ export const MapHud: React.FC<MapHudProps> = ({
             {activeHoveredRegionDetails.center[0].toFixed(2)},{" "}
             {activeHoveredRegionDetails.center[1].toFixed(2)}
           </div>
-          {phase !== 5 && (
-            <div>
-              <span className="text-slate-500">Adjacent Sectors:</span>
-              <div className="max-h-20 overflow-y-auto mt-1 flex flex-wrap gap-1">
-                {activeHoveredRegionDetails.neighbors.length === 0 ? (
-                  <span className="text-slate-600 italic">
-                    None (Isolated Island)
+          <div>
+            <span className="text-slate-500">Adjacent Sectors:</span>
+            <div className="max-h-20 overflow-y-auto mt-1 flex flex-wrap gap-1">
+              {activeHoveredRegionDetails.neighbors.length === 0 ? (
+                <span className="text-slate-600 italic">
+                  None (Isolated Island)
+                </span>
+              ) : (
+                activeHoveredRegionDetails.neighbors.map((n) => (
+                  <span
+                    key={n}
+                    className="px-1.5 py-0.5 bg-slate-950 border border-slate-800 rounded text-[9px] text-slate-300"
+                  >
+                    {n}
                   </span>
-                ) : (
-                  activeHoveredRegionDetails.neighbors.map((n) => (
-                    <span
-                      key={n}
-                      className="px-1.5 py-0.5 bg-slate-950 border border-slate-800 rounded text-[9px] text-slate-300"
-                    >
-                      {n}
-                    </span>
-                  ))
-                )}
-              </div>
+                ))
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
     </>

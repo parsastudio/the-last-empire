@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { Phase1Renderer } from "./phase1-renderer";
 import { Phase2Renderer } from "./phase2-renderer";
 import { Phase34Renderer } from "./phase3-4-renderer";
-import { PolygonDissolver } from "@/map-systems/test1/engine/polygon-dissolver";
+import { Phase5Renderer } from "./phase5-renderer";
 import type {
   CountryPhase1,
   IslandPhase2,
@@ -34,7 +34,7 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
   phase4Data,
   hoveredCountry,
   setHoveredCountry,
-  hoveredIsland,
+  hoveredIsland: _hoveredIsland,
   setHoveredIsland,
   hoveredRegion,
   setHoveredRegion,
@@ -49,59 +49,6 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
     const b = (Math.abs(hash & 0x0000ff) % 120) + 40;
     return `rgb(${r}, ${g}, ${b})`;
   };
-
-  const staticPhase5 = useMemo(() => {
-    if (!phase4Data) return null;
-
-    const grouped = new Map<
-      string,
-      { countryName: string; polygons: [number, number][][] }
-    >();
-    phase4Data.forEach((region) => {
-      if (!grouped.has(region.countryCode)) {
-        grouped.set(region.countryCode, {
-          countryName: region.countryName,
-          polygons: [],
-        });
-      }
-      grouped.get(region.countryCode)!.polygons.push(region.coordinates);
-    });
-
-    const countriesList: {
-      countryCode: string;
-      countryName: string;
-      pathData: string;
-    }[] = [];
-    const dissolver = new PolygonDissolver();
-
-    grouped.forEach((data, code) => {
-      const dissolved = dissolver.dissolve(data.polygons);
-      const pathData = dissolver.buildPath(dissolved);
-      countriesList.push({
-        countryCode: code,
-        countryName: data.countryName,
-        pathData,
-      });
-    });
-
-    return countriesList.map((country) => {
-      const color = getCountryColor(country.countryCode);
-      const isHovered = hoveredCountry === country.countryCode;
-
-      return (
-        <path
-          key={`p5-${country.countryCode}`}
-          d={country.pathData}
-          fill={color}
-          fillOpacity={isHovered ? 0.8 : 1}
-          stroke="rgba(10, 15, 30, 0.5)"
-          strokeWidth="0.8"
-          data-code={country.countryCode}
-          className="transition-all duration-100 cursor-pointer"
-        />
-      );
-    });
-  }, [phase4Data, hoveredCountry]);
 
   const activeCountryOverlay = useMemo(() => {
     return null;
@@ -222,7 +169,14 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
             getCountryColor={getCountryColor}
           />
         )}
-        {phase === 5 && staticPhase5}
+        {phase === 5 && phase1Data && (
+          <Phase5Renderer
+            data={phase1Data}
+            hoveredCountry={hoveredCountry}
+            setHoveredCountry={setHoveredCountry}
+            getCountryColor={getCountryColor}
+          />
+        )}
       </g>
 
       {phase === 1 && activeCountryOverlay}
