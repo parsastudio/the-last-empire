@@ -56,7 +56,7 @@ export class ScoreFormulationStage implements CombatStage {
       govTraitsAttacker.militaryPowerMultiplier *
       attackerOilPenalty;
 
-    const defenderBase =
+    let defenderBase =
       (context.defenderInfantryAfterDrone * 1.0 +
         context.defenderMilitary.airForce * 3.0) *
       (1 + context.defenderMilitary.techLevel * 0.15) *
@@ -65,6 +65,10 @@ export class ScoreFormulationStage implements CombatStage {
       context.defenderDebuffMultiplier *
       govTraitsDefender.militaryPowerMultiplier *
       defenderOilPenalty;
+
+    if (this.traitManager.hasTrait(context.defender, "SOVEREIGN_FORTRESS")) {
+      defenderBase *= 2.0;
+    }
 
     const rngFactorAttacker = 0.9 + context.prng.nextFloat() * 0.2;
     const rngFactorDefender = 0.9 + context.prng.nextFloat() * 0.2;

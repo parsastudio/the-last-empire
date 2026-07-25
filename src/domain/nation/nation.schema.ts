@@ -18,6 +18,7 @@ export const NationTraitSchema = z.enum([
   "FRAGILE_ECONOMY",
   "INDUSTRIAL_HUB",
   "ISOLATED_SOCIETY",
+  "SOVEREIGN_FORTRESS",
 ]);
 
 export const CoordinateSchema = z.object({
