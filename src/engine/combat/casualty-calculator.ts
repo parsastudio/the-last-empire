@@ -1,7 +1,6 @@
 import { MilitaryStack } from "@/domain/military/military.schema";
 import { AttackerCasualtyCalculator } from "./casualty/attacker-casualty.calculator";
 import { DefenderCasualtyCalculator } from "./casualty/defender-casualty.calculator";
-import { CasualtyReport } from "./casualty-calculator";
 
 export interface CasualtyReport {
   attackerKilledInfantry: number;
