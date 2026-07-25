@@ -1,4 +1,9 @@
-import type { GameState } from "@/domain/game/game-state.schema";
+import { GameState } from "@/domain/game/game-state.schema";
+import { VictoryCondition } from "./victory/victory-condition.interface";
+import { ConquestVictoryChecker } from "./victory/conquest-victory.checker";
+import { TerritorialVictoryChecker } from "./victory/territorial-victory.checker";
+import { EconomicVictoryChecker } from "./victory/economic-victory.checker";
+import { DiplomaticVictoryChecker } from "./victory/diplomatic-victory.checker";
 
 export interface VictoryStatus {
   isGameOver: boolean;
@@ -7,105 +12,18 @@ export interface VictoryStatus {
 }
 
 export class VictoryChecker {
+  private checkers: VictoryCondition[] = [
+    new ConquestVictoryChecker(),
+    new TerritorialVictoryChecker(),
+    new EconomicVictoryChecker(),
+    new DiplomaticVictoryChecker(),
+  ];
+
   public checkVictory(state: GameState): VictoryStatus {
-    const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
-
-    if (aliveNations.length === 0) {
-      return {
-        isGameOver: true,
-        reason: "ALL_NATIONS_DESTROYED",
-      };
-    }
-
-    if (aliveNations.length === 1) {
-      return {
-        isGameOver: true,
-        winnerNationId: aliveNations[0].id,
-        reason: "WORLD_CONQUEST",
-      };
-    }
-
-    const humanNation = state.nations[state.humanNationId];
-    if (humanNation && !humanNation.isAlive) {
-      return {
-        isGameOver: true,
-        reason: "HUMAN_PLAYER_DEFEATED",
-      };
-    }
-
-    const totalProvinces = Object.keys(state.provinces).length;
-    if (totalProvinces > 0) {
-      for (const nation of aliveNations) {
-        const nationProvinces = Object.values(state.provinces).filter(
-          (p) => p.ownerNationId === nation.id,
-        ).length;
-        const share = nationProvinces / totalProvinces;
-        if (share >= 0.6) {
-          return {
-            isGameOver: true,
-            winnerNationId: nation.id,
-            reason: "TERRITORIAL_DOMINANCE",
-          };
-        }
-      }
-    }
-
-    const totalGlobalGdp = aliveNations.reduce((sum, n) => sum + n.gdp, 0);
-    if (totalGlobalGdp > 0) {
-      for (const nation of aliveNations) {
-        const share = nation.gdp / totalGlobalGdp;
-        if (share >= 0.6) {
-          return {
-            isGameOver: true,
-            winnerNationId: nation.id,
-            reason: "ECONOMIC_DOMINANCE",
-          };
-        }
-      }
-    }
-
-    const peacefulTurns = state.peacefulTurnsCount ?? 0;
-    if (peacefulTurns >= 30) {
-      const totalPopulation = aliveNations.reduce(
-        (sum, n) => sum + n.population,
-        0,
-      );
-      if (totalPopulation > 0) {
-        for (const nation of aliveNations) {
-          let coalitionPopulation = nation.population;
-          let maxPartnerPop = 0;
-          for (const [targetId, rel] of Object.entries(nation.relations)) {
-            if (rel.stance === "ALLIANCE") {
-              const partner = state.nations[targetId];
-              if (partner && partner.isAlive) {
-                coalitionPopulation += partner.population;
-                maxPartnerPop = Math.max(maxPartnerPop, partner.population);
-              }
-            }
-          }
-
-          const isHumanInCoalition =
-            nation.id === state.humanNationId ||
-            nation.relations[state.humanNationId]?.stance === "ALLIANCE";
-
-          let isHumanDominant = false;
-          if (isHumanInCoalition && humanNation) {
-            if (humanNation.population >= maxPartnerPop) {
-              isHumanDominant = true;
-            }
-          }
-
-          if (coalitionPopulation / totalPopulation >= 0.7) {
-            return {
-              isGameOver: true,
-              winnerNationId:
-                isHumanInCoalition && isHumanDominant
-                  ? state.humanNationId
-                  : nation.id,
-              reason: "DIPLOMATIC_HEGEMONY",
-            };
-          }
-        }
+    for (const checker of this.checkers) {
+      const result = checker.evaluate(state);
+      if (result) {
+        return result;
       }
     }
 

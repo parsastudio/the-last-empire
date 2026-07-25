@@ -1,4 +1,7 @@
-import type { MilitaryStack } from "@/domain/military/military.schema";
+import { MilitaryStack } from "@/domain/military/military.schema";
+import { AttackerCasualtyCalculator } from "./casualty/attacker-casualty.calculator";
+import { DefenderCasualtyCalculator } from "./casualty/defender-casualty.calculator";
+import { CasualtyReport } from "./casualty-calculator";
 
 export interface CasualtyReport {
   attackerKilledInfantry: number;
@@ -10,6 +13,9 @@ export interface CasualtyReport {
 }
 
 export class CasualtyCalculator {
+  private attackerCalc = new AttackerCasualtyCalculator();
+  private defenderCalc = new DefenderCasualtyCalculator();
+
   public calculateCasualties(
     attackerScore: number,
     defenderScore: number,
@@ -42,38 +48,24 @@ export class CasualtyCalculator {
       attackerBaseRate = attackerBaseRate * powerAdvantageFactor;
     }
 
-    const attackerKilledInfantry = Math.floor(
-      attackerMilitary.infantry * Math.min(0.8, attackerBaseRate),
-    );
-    const attackerKilledAirForce = Math.floor(
-      attackerMilitary.airForce * Math.min(0.5, attackerBaseRate * 0.5),
-    );
-    const attackerKilledDrones = Math.floor(
-      attackerMilitary.droneMissile * Math.min(0.7, attackerBaseRate * 0.8),
+    const attackerLosses = this.attackerCalc.calculateAttackerLosses(
+      attackerMilitary,
+      attackerBaseRate,
     );
 
-    const maxDefenderLoss = Math.floor(attackerPower * 10.0);
-    const rawDefenderKilledInfantry = Math.floor(
-      defenderMilitary.infantry * Math.min(0.9, defenderBaseRate),
-    );
-    const defenderKilledInfantry = Math.min(
-      maxDefenderLoss,
-      rawDefenderKilledInfantry,
-    );
-    const defenderKilledAirForce = Math.floor(
-      defenderMilitary.airForce * Math.min(0.6, defenderBaseRate * 0.5),
-    );
-    const defenderKilledDrones = Math.floor(
-      defenderMilitary.droneMissile * Math.min(0.7, defenderBaseRate * 0.8),
+    const defenderLosses = this.defenderCalc.calculateDefenderLosses(
+      defenderMilitary,
+      defenderBaseRate,
+      attackerPower,
     );
 
     return {
-      attackerKilledInfantry,
-      attackerKilledAirForce,
-      attackerKilledDrones,
-      defenderKilledInfantry,
-      defenderKilledAirForce,
-      defenderKilledDrones,
+      attackerKilledInfantry: attackerLosses.killedInfantry,
+      attackerKilledAirForce: attackerLosses.killedAirForce,
+      attackerKilledDrones: attackerLosses.killedDrones,
+      defenderKilledInfantry: defenderLosses.killedInfantry,
+      defenderKilledAirForce: defenderLosses.killedAirForce,
+      defenderKilledDrones: defenderLosses.killedDrones,
     };
   }
 }
