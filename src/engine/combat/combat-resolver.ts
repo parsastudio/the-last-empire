@@ -1,12 +1,12 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { MilitaryStack } from "@/domain/military/military.schema";
 import { SeededRandom } from "@/domain/shared/seeded-random";
-import { CombatContext } from "./stages/combat-context";
-import { CombatStage } from "./stages/combat-stage";
-import { AirSuperiorityStage } from "./stages/air-superiority-stage";
-import { DroneStrikeStage } from "./stages/drone-strike-stage";
-import { ScoreFormulationStage } from "./stages/score-formulation-stage";
-import { CasualtyStage } from "./stages/casualty-stage";
+import { CombatContext } from "@/engine/combat/stages/combat-context";
+import { CombatStage } from "@/engine/combat/stages/combat-stage";
+import { AirSuperiorityStage } from "@/engine/combat/stages/air-superiority-stage";
+import { DroneStrikeStage } from "@/engine/combat/stages/drone-strike-stage";
+import { ScoreFormulationStage } from "@/engine/combat/stages/score-formulation-stage";
+import { CasualtyStage } from "@/engine/combat/stages/casualty-stage";
 
 export interface CombatResult {
   attackerWon: boolean;

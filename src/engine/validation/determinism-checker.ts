@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction } from "@/domain/game/action.schema";
-import { GameEngine } from "../game-engine";
+import { GameEngine } from "@/engine/game-engine";
 import { calculateStateHash } from "@/domain/shared/state-hash";
 
 export class DeterminismChecker {

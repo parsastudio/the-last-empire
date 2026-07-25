@@ -4,7 +4,7 @@ import type {
   CancelRecruitmentAction,
 } from "@/domain/game/action.schema";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class CancelRecruitmentActionHandler implements ActionHandler {
   private recruitmentManager = new RecruitmentQueueManager();

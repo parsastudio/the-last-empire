@@ -4,7 +4,7 @@ import type {
   RecruitmentOrder,
 } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/game-error";
-import { UnitCostCalculator } from "./unit-cost-calculator";
+import { UnitCostCalculator } from "@/engine/military/unit-cost-calculator";
 import { ManpowerManager } from "@/engine/economy/manpower-manager";
 import { ResourceDependencyManager } from "@/engine/economy/resource-dependency-manager";
 

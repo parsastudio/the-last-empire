@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import {
-  subdivideWorld,
-  InputFeature,
-} from "@/engine/world-divider/world-divider";
-import { consolidateWorldMap } from "@/engine/world-divider/world-consolidator";
+import { subdivideWorld } from "@/map-systems/test2/engine/world-divider";
+import type { InputFeature } from "@/map-systems/test2/engine/types";
+import { consolidateWorldMap } from "@/map-systems/test3/engine/world-consolidator";
 import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 
 export async function GET(request: Request) {

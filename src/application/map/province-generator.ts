@@ -1,6 +1,6 @@
 import { Province } from "@/domain/map/province.schema";
-import { COUNTRY_POLYGONS_CACHE } from "@/engine/map/grid-generator";
-import { isPointInCountry } from "@/engine/map/utils/polygon-geometry";
+import { COUNTRY_POLYGONS_CACHE } from "@/map-systems/test1/engine/grid-generator";
+import { isPointInCountry } from "@/map-systems/test1/engine/polygon-geometry";
 
 export function generateProvinces(
   countryCode: string,

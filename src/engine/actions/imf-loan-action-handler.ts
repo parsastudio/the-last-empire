@@ -4,7 +4,7 @@ import type {
   RequestLoanAction,
 } from "@/domain/game/action.schema";
 import { ImfLoanManager } from "@/engine/economy/imf-loan-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class ImfLoanActionHandler implements ActionHandler {
   private imfLoanManager = new ImfLoanManager();

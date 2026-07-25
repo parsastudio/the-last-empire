@@ -1,8 +1,8 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction } from "@/domain/game/action.schema";
-import { StateValidator } from "./validation/state-validator";
-import { ActionConcurrencyChecker } from "./validation/action-concurrency-checker";
-import { ActionRouter } from "./actions/action-router";
+import { StateValidator } from "@/engine/validation/state-validator";
+import { ActionConcurrencyChecker } from "@/engine/validation/action-concurrency-checker";
+import { ActionRouter } from "@/engine/actions/action-router";
 import { deepClone } from "@/domain/shared/deep-clone";
 
 export class ActionQueue {

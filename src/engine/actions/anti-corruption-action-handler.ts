@@ -4,7 +4,7 @@ import type {
   AntiCorruptionDriveAction,
 } from "@/domain/game/action.schema";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class AntiCorruptionActionHandler implements ActionHandler {
   private corruptionManager = new CorruptionManager();

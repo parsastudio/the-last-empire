@@ -1,4 +1,4 @@
-import type { GeoJsonData } from "@/engine/map/grid-generator";
+import type { GeoJsonData } from "@/map-systems/test1/engine/grid-generator";
 
 export const FALLBACK_WORLD_MAP: GeoJsonData = {
   type: "FeatureCollection",

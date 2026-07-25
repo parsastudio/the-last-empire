@@ -1,7 +1,7 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction } from "@/domain/game/action.schema";
 import type { AIPersonalityType } from "@/domain/ai/ai.schema";
-import { AIActionGenerator } from "./ai-action-generator";
+import { AIActionGenerator } from "@/engine/ai/ai-action-generator";
 
 export class AIEngine {
   private actionGenerator = new AIActionGenerator();

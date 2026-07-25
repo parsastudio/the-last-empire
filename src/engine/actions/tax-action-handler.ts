@@ -3,7 +3,7 @@ import type {
   GameAction,
   SetTaxRateAction,
 } from "@/domain/game/action.schema";
-import { ActionHandler } from "./action-handler";
+import { ActionHandler } from "@/engine/actions/action-handler";
 
 export class TaxActionHandler implements ActionHandler {
   public execute(state: GameState, action: GameAction): GameState {

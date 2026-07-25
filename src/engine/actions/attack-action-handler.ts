@@ -7,8 +7,8 @@ import { GameError } from "@/domain/shared/game-error";
 import { CoolOffManager } from "@/engine/diplomacy/cool-off-manager";
 import { PocketCombatCalculator } from "@/engine/diplomacy/pocket-combat-calculator";
 import { NavalTransportCostCalculator } from "@/engine/military/naval-transport-cost-calculator";
-import { AttackResultProcessor } from "./attack-result-processor";
-import type { ActionHandler } from "./action-handler";
+import { AttackResultProcessor } from "@/engine/actions/attack-result-processor";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class AttackActionHandler implements ActionHandler {
   private combatResolver = new CombatResolver();

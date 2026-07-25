@@ -1,5 +1,5 @@
 import type { Nation } from "@/domain/nation/nation.schema";
-import { IntelLevelEvaluator } from "./intel-level-evaluator";
+import { IntelLevelEvaluator } from "@/engine/diplomacy/intel-level-evaluator";
 
 export class IntelMasker {
   private evaluator = new IntelLevelEvaluator();

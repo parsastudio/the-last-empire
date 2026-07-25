@@ -1,7 +1,7 @@
-import { CasualtyCalculator } from "../casualty-calculator";
+import { CasualtyCalculator } from "@/engine/combat/casualty-calculator";
 import { ExperienceManager } from "@/engine/military/experience-manager";
-import { CombatContext } from "./combat-context";
-import { CombatStage } from "./combat-stage";
+import { CombatContext } from "@/engine/combat/stages/combat-context";
+import { CombatStage } from "@/engine/combat/stages/combat-stage";
 
 export class CasualtyStage implements CombatStage {
   private casualtyCalc = new CasualtyCalculator();

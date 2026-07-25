@@ -1,5 +1,5 @@
 import type { Nation } from "@/domain/nation/nation.schema";
-import type { BudgetAllocation } from "../ai-budget-balancer";
+import type { BudgetAllocation } from "@/engine/ai/ai-budget-balancer";
 
 export class AIBudgetStrategy {
   public applyTraitFocus(

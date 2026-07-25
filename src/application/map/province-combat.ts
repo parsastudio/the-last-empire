@@ -1,7 +1,7 @@
 import { Province } from "@/domain/map/province.schema";
-import { STATIC_ADJACENCY_LIST } from "../map-data.config";
-import { COUNTRY_POLYGONS_CACHE } from "@/engine/map/grid-generator";
-import { getBoundingBox } from "@/engine/map/utils/polygon-geometry";
+import { STATIC_ADJACENCY_LIST } from "@/application/map-data.config";
+import { COUNTRY_POLYGONS_CACHE } from "@/map-systems/test1/engine/grid-generator";
+import { getBoundingBox } from "@/map-systems/test1/engine/polygon-geometry";
 
 export function executeProvinceAttack(
   targetCountryCode: string,

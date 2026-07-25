@@ -3,7 +3,7 @@ import type {
   AIPersonalityWeights,
   AINeedEvaluation,
 } from "@/domain/ai/ai.schema";
-import type { BudgetAllocation } from "../ai-budget-balancer";
+import type { BudgetAllocation } from "@/engine/ai/ai-budget-balancer";
 
 export interface AIPlanningContext {
   nation: Nation;

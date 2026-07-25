@@ -6,14 +6,14 @@ import type { GameState } from "@/domain/game/game-state.schema";
 import { deepClone } from "@/domain/shared/deep-clone";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 import { GameError } from "@/domain/shared/game-error";
-import { ActionQueue } from "./action-queue";
-import { EventLogger } from "./event-logger";
-import { NationLivenessManager } from "./politics/nation-liveness-manager";
-import { VictoryChecker } from "./politics/victory-checker";
+import { ActionQueue } from "@/engine/action-queue";
+import { EventLogger } from "@/engine/event-logger";
+import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
+import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { StateHistory } from "@/application/state-history";
-import { TurnPipeline } from "./turn-pipeline";
+import { TurnPipeline } from "@/engine/turn-pipeline";
 import { AIEngine } from "@/engine/ai/ai-engine";
-import { ActionRouter } from "./actions/action-router";
+import { ActionRouter } from "@/engine/actions/action-router";
 
 export class GameEngine {
   private currentState: GameState;

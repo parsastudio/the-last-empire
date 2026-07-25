@@ -1,7 +1,7 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction } from "@/domain/game/action.schema";
 import { InfrastructureManager } from "@/engine/economy/infrastructure-manager";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class InvestInfrastructureActionHandler implements ActionHandler {
   private infraManager = new InfrastructureManager();

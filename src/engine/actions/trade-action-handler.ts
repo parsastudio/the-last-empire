@@ -5,7 +5,7 @@ import type {
 } from "@/domain/game/action.schema";
 import { MarketEngine } from "@/engine/economy/market-engine";
 import { GameError } from "@/domain/shared/game-error";
-import type { ActionHandler } from "./action-handler";
+import type { ActionHandler } from "@/engine/actions/action-handler";
 
 export class TradeActionHandler implements ActionHandler {
   private marketEngine = new MarketEngine();

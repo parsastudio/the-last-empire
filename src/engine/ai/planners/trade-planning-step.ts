@@ -1,6 +1,6 @@
 import type { GameAction } from "@/domain/game/action.schema";
-import { AIPlanner } from "./ai-planner";
-import { AIPlanningContext } from "./ai-planning-context";
+import { AIPlanner } from "@/engine/ai/planners/ai-planner";
+import { AIPlanningContext } from "@/engine/ai/planners/ai-planning-context";
 
 export class TradePlanningStep implements AIPlanner {
   public plan(context: AIPlanningContext): GameAction[] {

@@ -1,6 +1,6 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
-import { GovernmentSystem } from "./government-system";
+import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export class StabilityCalculator {
   private governmentSystem = new GovernmentSystem();

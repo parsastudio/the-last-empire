@@ -2,7 +2,7 @@ import type { GameState } from "@/domain/game/game-state.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { EspionageManager } from "@/engine/diplomacy/espionage-manager";
 import { CoolOffManager } from "@/engine/diplomacy/cool-off-manager";
-import { TurnPhase, PipelineContext } from "./turn-phase";
+import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export class ModifiersPhase implements TurnPhase {
   private modifierManager = new ModifierManager();
