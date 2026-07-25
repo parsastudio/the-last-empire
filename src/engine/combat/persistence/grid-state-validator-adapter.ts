@@ -1,16 +1,22 @@
-import { GridCell, GridCellSchema } from "@/domain/map/grid-cell.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GridCell } from "@/domain/map/grid-cell.schema";
 
-export class GridStateValidatorAdapter {
-  public validateCells(cells: GridCell[]): void {
+export class GridStateValidator {
+  public validateDimensions(
+    cells: GridCell[],
+    width = 1024,
+    height = 512,
+  ): boolean {
+    const expectedCount = width * height;
+    if (cells.length !== expectedCount) {
+      return false;
+    }
+
     for (const cell of cells) {
-      const result = GridCellSchema.safeParse(cell);
-      if (!result.success) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Grid state validation mismatch during persistence operations",
-        );
+      if (cell.x < 0 || cell.x >= width || cell.y < 0 || cell.y >= height) {
+        return false;
       }
     }
+
+    return true;
   }
 }
