@@ -28,7 +28,7 @@ export function TacticalViewport({
   return (
     <div
       ref={containerRef}
-      className={`w-full h-full relative bg-slate-950 overflow-hidden cursor-grab ${
+      className={`w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden cursor-grab ${
         isDragging ? "cursor-grabbing" : ""
       }`}
       onMouseDown={onMouseDown}
@@ -39,15 +39,10 @@ export function TacticalViewport({
       onClick={onClick}
     >
       <canvas ref={canvasSrcRef} className="hidden" />
-      <div className="absolute inset-0 w-full h-full">
-        <canvas
-          ref={canvasDestRef}
-          className="pointer-events-none w-full h-full"
-          style={{
-            filter: "drop-shadow(0 4px 12px rgba(15, 23, 42, 0.4))",
-          }}
-        />
-      </div>
+      <canvas
+        ref={canvasDestRef}
+        className="pointer-events-none absolute inset-0 w-full h-full block"
+      />
       {children}
     </div>
   );

@@ -11,14 +11,11 @@ import { useCanvasRenderer } from "./hooks/use-canvas-renderer";
 import { useCanvasClickHandler } from "./hooks/use-canvas-click-handler";
 import { GridCombatBridge } from "./engine/grid-combat-bridge";
 import { TacticalViewport } from "./components/layout/tactical-viewport";
-import { LeftSovereignSidebar } from "./components/sidebar/left-sovereign-sidebar";
-import { RightContextSidebar } from "./components/sidebar/right-context-sidebar";
+import { LeftCommandHub } from "./components/sidebar/left-command-hub";
 import { TurnEventsTerminal } from "./components/terminal/turn-events-terminal";
 import { HoverTargetOverlay } from "./components/overlay/hover-target-overlay";
 import { SelectionModal } from "./components/selection-modal";
-import { TacticalActionBar } from "./components/tactical-action-bar";
-import { MapControls } from "./components/map-controls";
-import { MapHeader } from "./components/map-header";
+import { MinimalHeader } from "./components/layout/minimal-header";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
@@ -53,7 +50,6 @@ export default function MapTest6Page() {
     countries,
     loading: dataLoading,
     error,
-    isCached,
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
@@ -136,7 +132,7 @@ export default function MapTest6Page() {
   }, [dimensions, position, scale, bridge, mapWidth, mapHeight]);
 
   return (
-    <div className="w-screen h-screen bg-slate-950 text-white flex flex-row overflow-hidden select-none font-sans text-left">
+    <div className="w-screen h-screen bg-slate-950 text-white flex flex-row overflow-hidden select-none font-sans text-left relative">
       {dataLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
           <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
@@ -152,80 +148,61 @@ export default function MapTest6Page() {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col relative h-full">
-        <MapHeader isCached={isCached} countriesCount={countries.length} />
-        <TacticalViewport
-          containerRef={containerRef}
-          canvasDestRef={canvasDestRef}
-          canvasSrcRef={canvasSrcRef}
-          isDragging={isDragging}
-          onMouseDown={handleMouseDown}
-          onMouseMove={(e) => {
-            handleMouseMove(e);
-            handlePointerMove(e);
-          }}
-          onMouseUp={handleMouseUp}
-          onWheel={handleWheel}
-          onClick={handleCanvasClick}
-        >
-          {gameState && playerNationId && humanNation && (
-            <>
-              <LeftSovereignSidebar
-                humanNation={humanNation}
-                rankings={rankings}
-                nations={gameState.nations}
-              />
-              <RightContextSidebar
-                gameState={gameState}
-                playerNationId={playerNationId}
-                humanNation={humanNation}
-                hoveredCountry={hoveredCountry}
-                forceSuccess={forceSuccess}
-                onToggleForceSuccess={toggleForceSuccess}
-                onPropose={(type) => {
-                  if (hoveredCountry)
-                    proposeDiplomacy(hoveredCountry.code, type);
-                }}
-                onDeclareWar={() => {
-                  if (hoveredCountry) declareWarDirectly(hoveredCountry.code);
-                }}
-                onTaxChange={updateTaxRate}
-                onUpgradeInfra={upgradeInfrastructure}
-                onUpgradeIndustrial={upgradeIndustrialLevel}
-                onUnlockDoctrine={unlockDoctrineType}
-                onRecruit={recruitUnits}
-                onBuyResource={buyResource}
-              />
-              <HoverTargetOverlay
-                targetCell={targetCell}
-                hoveredCountry={hoveredCountry}
-                onAttack={() => {
-                  if (hoveredCountry)
-                    executeAttack(hoveredCountry.code, targetCell);
-                }}
-                isAttacking={isAttacking}
-                playerNationId={playerNationId}
-              />
-            </>
-          )}
+      <TacticalViewport
+        containerRef={containerRef}
+        canvasDestRef={canvasDestRef}
+        canvasSrcRef={canvasSrcRef}
+        isDragging={isDragging}
+        onMouseDown={handleMouseDown}
+        onMouseMove={(e) => {
+          handleMouseMove(e);
+          handlePointerMove(e);
+        }}
+        onMouseUp={handleMouseUp}
+        onWheel={handleWheel}
+        onClick={handleCanvasClick}
+      >
+        {gameState && playerNationId && humanNation && (
+          <>
+            <MinimalHeader
+              currentTurn={gameState.currentTurn}
+              onResetSession={resetSession}
+              onAdvanceTurn={advanceTurn}
+              isAdvancing={isAdvancing}
+            />
 
-          <TacticalActionBar
-            playerNationId={playerNationId}
-            showHeatmap={showHeatmap}
-            isAdvancing={isAdvancing}
-            onResetSession={resetSession}
-            onToggleHeatmap={() => setShowHeatmap((prev) => !prev)}
-            onAdvanceTurn={advanceTurn}
-          />
+            <LeftCommandHub
+              gameState={gameState}
+              humanNation={humanNation}
+              playerNationId={playerNationId}
+              rankings={rankings}
+              onTaxChange={updateTaxRate}
+              onUpgradeInfra={upgradeInfrastructure}
+              onUpgradeIndustrial={upgradeIndustrialLevel}
+              onUnlockDoctrine={unlockDoctrineType}
+              onRecruit={recruitUnits}
+              onBuyResource={buyResource}
+              onPropose={(type) => {
+                if (hoveredCountry) proposeDiplomacy(hoveredCountry.code, type);
+              }}
+              onDeclareWar={() => {
+                if (hoveredCountry) declareWarDirectly(hoveredCountry.code);
+              }}
+            />
 
-          <MapControls
-            scale={scale}
-            onZoomIn={zoomIn}
-            onZoomOut={zoomOut}
-            onResetView={handleResetView}
-          />
-        </TacticalViewport>
-      </div>
+            <HoverTargetOverlay
+              targetCell={targetCell}
+              hoveredCountry={hoveredCountry}
+              onAttack={() => {
+                if (hoveredCountry)
+                  executeAttack(hoveredCountry.code, targetCell);
+              }}
+              isAttacking={isAttacking}
+              playerNationId={playerNationId}
+            />
+          </>
+        )}
+      </TacticalViewport>
 
       {gameState && <TurnEventsTerminal logs={filteredLogs} />}
 
