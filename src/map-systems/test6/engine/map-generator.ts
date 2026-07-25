@@ -5,6 +5,7 @@ import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { GeoJsonProcessor } from "./geojson-processor";
 import { DistanceTransform } from "./distance-transform";
 import { MapWriter } from "./map-writer";
+import { AreaWeightCalculator } from "./generator/area-weight-calculator";
 
 export interface CountryMapping {
   id: number;
@@ -32,6 +33,7 @@ export async function generateTest6Map(
   const processor = new GeoJsonProcessor();
   const distanceTransform = new DistanceTransform();
   const writer = new MapWriter();
+  const areaCalculator = new AreaWeightCalculator();
 
   const countries: CountryMapping[] = [];
   countries.push({
@@ -78,18 +80,11 @@ export async function generateTest6Map(
   const pixelAreas = new Float64Array(nextId);
   pixelAreas.fill(0);
 
-  const earthRadius = 6378137;
-  const totalSurfaceArea = 4 * Math.PI * earthRadius * earthRadius;
-  const totalSurfaceAreaSqKm = totalSurfaceArea / 1000000;
-
-  let totalWeight = 0;
-  const weights = new Float64Array(height);
-  for (let y = 0; y < height; y++) {
-    const latitudeRad = (0.5 - (y + 0.5) / height) * Math.PI;
-    weights[y] = Math.cos(latitudeRad);
-    totalWeight += weights[y] * width;
-  }
-
+  const totalSurfaceAreaSqKm = areaCalculator.calculateTotalSurfaceAreaSqKm();
+  const { weights, totalWeight } = areaCalculator.generateRowWeights(
+    height,
+    width,
+  );
   const areaPerWeightUnit = totalSurfaceAreaSqKm / totalWeight;
 
   for (let y = 0; y < height; y++) {
