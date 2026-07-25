@@ -6,10 +6,11 @@ import type {
 } from "../engine/types";
 
 interface MapSvgRendererProps {
-  phase: 1 | 2 | 3;
+  phase: 1 | 2 | 3 | 4;
   phase1Data: CountryPhase1[] | null;
   phase2Data: IslandPhase2[] | null;
   phase3Data: RegionPhase3[] | null;
+  phase4Data: RegionPhase3[] | null;
   hoveredCountry: string | null;
   setHoveredCountry: (code: string | null) => void;
   hoveredIsland: string | null;
@@ -26,6 +27,7 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
   phase1Data,
   phase2Data,
   phase3Data,
+  phase4Data,
   hoveredCountry,
   setHoveredCountry,
   hoveredIsland,
@@ -139,6 +141,37 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
     });
   }, [phase3Data]);
 
+  const staticPhase4 = useMemo(() => {
+    if (!phase4Data) return null;
+    return phase4Data.map((region) => {
+      const color = getNationColor(region.countryCode);
+      let dPath = "";
+      let ringPath = "";
+      region.coordinates.forEach((pt, idx) => {
+        const x = ((pt[0] + 180) / 360) * mapWidth;
+        const y = ((90 - pt[1]) / 180) * mapHeight;
+        if (idx === 0) {
+          ringPath += `M ${x.toFixed(1)},${y.toFixed(1)}`;
+        } else {
+          ringPath += ` L ${x.toFixed(1)},${y.toFixed(1)}`;
+        }
+      });
+      if (ringPath) ringPath += " Z";
+      dPath += ringPath + " ";
+
+      return (
+        <path
+          key={region.id}
+          d={dPath.trim()}
+          fill={color}
+          stroke="rgba(10, 15, 30, 0.4)"
+          strokeWidth="0.45"
+          data-id={region.id}
+        />
+      );
+    });
+  }, [phase4Data]);
+
   const activeCountryOverlay = useMemo(() => {
     if (phase !== 1 || !hoveredCountry || !phase1Data) return null;
     const country = phase1Data.find((c) => c.code === hoveredCountry);
@@ -165,10 +198,7 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
         d={dPath.trim()}
         fill="none"
         stroke="#ffffff"
-        strokeWidth="2.5"
-        style={{
-          filter: "drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.95))",
-        }}
+        strokeWidth="1.2"
         className="pointer-events-none"
       />
     );
@@ -198,21 +228,24 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
         d={dPath.trim()}
         fill="rgb(244, 63, 94)"
         stroke="#ffffff"
-        strokeWidth="1.8"
-        style={{
-          filter: "drop-shadow(0px 0px 10px rgba(244, 63, 94, 0.95))",
-        }}
+        strokeWidth="1.0"
         className="pointer-events-none"
       />
     );
   }, [phase, hoveredIsland, phase2Data]);
 
   const activeRegionOverlay = useMemo(() => {
-    if (phase !== 3 || !hoveredRegion || !phase3Data) return null;
-    const hoveredReg = phase3Data.find((r) => r.id === hoveredRegion);
+    const isPhase3 = phase === 3;
+    const isPhase4 = phase === 4;
+    if (!isPhase3 && !isPhase4) return null;
+
+    const sourceData = isPhase3 ? phase3Data : phase4Data;
+    if (!hoveredRegion || !sourceData) return null;
+
+    const hoveredReg = sourceData.find((r) => r.id === hoveredRegion);
     if (!hoveredReg) return null;
 
-    const activeCountryRegions = phase3Data.filter(
+    const activeCountryRegions = sourceData.filter(
       (r) => r.countryCode === hoveredReg.countryCode,
     );
 
@@ -234,29 +267,19 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
           if (ringPath) ringPath += " Z";
           dPath += ringPath + " ";
 
-          const xCentroid = ((region.center[0] + 180) / 360) * mapWidth;
-          const yCentroid = ((90 - region.center[1]) / 180) * mapHeight;
-
           return (
             <path
               key={`overlay-${region.id}`}
               d={dPath.trim()}
               fill={isHovered ? "rgb(239, 68, 68)" : "none"}
-              stroke={isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.85)"}
-              strokeWidth={isHovered ? "2.2" : "1.4"}
-              style={{
-                transform: isHovered ? "scale(1.04)" : "none",
-                transformOrigin: `${xCentroid}px ${yCentroid}px`,
-                filter: isHovered
-                  ? "drop-shadow(0px 0px 14px rgba(239, 68, 68, 0.95))"
-                  : "drop-shadow(0px 0px 5px rgba(255,255,255,0.45))",
-              }}
+              stroke={isHovered ? "#ffffff" : "rgba(255, 255, 255, 0.45)"}
+              strokeWidth={isHovered ? "1.2" : "0.7"}
             />
           );
         })}
       </g>
     );
-  }, [phase, hoveredRegion, phase3Data]);
+  }, [phase, hoveredRegion, phase3Data, phase4Data]);
 
   const handleMouseOver = (e: React.MouseEvent<SVGSVGElement>) => {
     const target = e.target as SVGElement;
@@ -267,7 +290,7 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
       if (code) setHoveredCountry(code);
     } else if (phase === 2) {
       if (id) setHoveredIsland(id);
-    } else if (phase === 3) {
+    } else if (phase === 3 || phase === 4) {
       if (id) setHoveredRegion(id);
     }
   };
@@ -277,7 +300,7 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
       setHoveredCountry(null);
     } else if (phase === 2) {
       setHoveredIsland(null);
-    } else if (phase === 3) {
+    } else if (phase === 3 || phase === 4) {
       setHoveredRegion(null);
     }
   };
@@ -292,12 +315,18 @@ export const MapSvgRenderer: React.FC<MapSvgRendererProps> = ({
       <rect width={mapWidth} height={mapHeight} fill="rgb(10, 15, 30)" />
 
       <g>
-        {phase === 1 ? staticPhase1 : phase === 2 ? staticPhase2 : staticPhase3}
+        {phase === 1
+          ? staticPhase1
+          : phase === 2
+            ? staticPhase2
+            : phase === 3
+              ? staticPhase3
+              : staticPhase4}
       </g>
 
       {phase === 1 && activeCountryOverlay}
       {phase === 2 && activeIslandOverlay}
-      {phase === 3 && activeRegionOverlay}
+      {(phase === 3 || phase === 4) && activeRegionOverlay}
     </svg>
   );
 };

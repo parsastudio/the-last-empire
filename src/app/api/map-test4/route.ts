@@ -12,6 +12,91 @@ import { calculatePolygonArea } from "@/map-systems/test2/engine/geometry-utils"
 import type { GeoJsonData } from "@/map-systems/test2/engine/types";
 import type { RegionPhase3 } from "@/map-systems/test4/engine/types";
 
+const DELETED_CODES = new Set([
+  "BHS",
+  "BLZ",
+  "SLV",
+  "GTM",
+  "HND",
+  "NIC",
+  "CRI",
+  "PAN",
+  "HTI",
+  "DOM",
+  "JAM",
+  "PRI",
+  "TTO",
+  "SUR",
+  "GUY",
+  "PRY",
+  "URY",
+  "FLK",
+  "MDA",
+  "EST",
+  "LVA",
+  "LTU",
+  "SVK",
+  "SVN",
+  "HRV",
+  "BIH",
+  "MKD",
+  "MNE",
+  "ALB",
+  "KOS",
+  "LUX",
+  "CYP",
+  "CYN",
+  "BLR",
+  "BRN",
+  "LAO",
+  "KHM",
+  "TLS",
+  "BTN",
+  "MMR",
+  "PNG",
+  "SLB",
+  "VUT",
+  "FJI",
+  "NCL",
+  "ATF",
+  "ERI",
+  "SOM",
+  "RWA",
+  "BDI",
+  "UGA",
+  "MWI",
+  "MOZ",
+  "ZMB",
+  "ZWE",
+  "BWA",
+  "NAM",
+  "LSO",
+  "SWZ",
+  "BEN",
+  "TGO",
+  "BFA",
+  "CIV",
+  "LBR",
+  "SLE",
+  "GIN",
+  "GNB",
+  "GMB",
+  "MRT",
+  "MLI",
+  "TCD",
+  "CAF",
+  "GAB",
+  "GNQ",
+  "CMR",
+  "SSD",
+  "ESH",
+  "SEN",
+  "GHA",
+  "TZA",
+  "AGO",
+  "PSX",
+]);
+
 export async function GET() {
   try {
     const filePath = path.join(
@@ -69,15 +154,22 @@ export async function GET() {
           countryArea += calculatePolygonArea(ring);
         });
 
+        const smoothedRings = rings.map((ring) =>
+          smoothPolygonChaikin(ring, 3),
+        );
+
         return {
           code,
           name,
-          rings,
+          rings: smoothedRings,
           area: countryArea,
         };
       });
 
-    const phase2Islands = extractIsolatedPolygons(features);
+    const phase2Islands = extractIsolatedPolygons(features).map((island) => ({
+      ...island,
+      coordinates: smoothPolygonChaikin(island.coordinates, 3),
+    }));
 
     const totalWeightTarget = 3000;
     const totalAreaSqrt = phase1Countries.reduce(
@@ -174,11 +266,70 @@ export async function GET() {
 
     buildSpatialNeighbors(phase3Regions);
 
+    const phase4Regions: RegionPhase3[] = phase3Regions.map((r) => ({
+      ...r,
+      coordinates: r.coordinates.map((pt) => [pt[0], pt[1]]),
+      neighbors: [...r.neighbors],
+    }));
+
+    const regionOwner = new Map<string, { code: string; name: string }>();
+    phase4Regions.forEach((r) => {
+      regionOwner.set(r.id, { code: r.countryCode, name: r.countryName });
+    });
+
+    let changed = true;
+    let limit = 0;
+    while (changed && limit < 40) {
+      changed = false;
+      limit++;
+
+      for (const reg of phase4Regions) {
+        const currentOwner = regionOwner.get(reg.id);
+        if (!currentOwner || !DELETED_CODES.has(currentOwner.code)) {
+          continue;
+        }
+
+        let annexedOwner: { code: string; name: string } | null = null;
+        for (const neighborId of reg.neighbors) {
+          const nOwner = regionOwner.get(neighborId);
+          if (nOwner && !DELETED_CODES.has(nOwner.code)) {
+            annexedOwner = nOwner;
+            break;
+          }
+        }
+
+        if (annexedOwner) {
+          regionOwner.set(reg.id, annexedOwner);
+          changed = true;
+        }
+      }
+    }
+
+    const filteredPhase4 = phase4Regions
+      .filter((reg) => {
+        const owner = regionOwner.get(reg.id);
+        return owner && !DELETED_CODES.has(owner.code);
+      })
+      .map((reg) => {
+        const owner = regionOwner.get(reg.id)!;
+        return {
+          ...reg,
+          countryCode: owner.code,
+          countryName: owner.name,
+        };
+      });
+
+    const validIds = new Set(filteredPhase4.map((r) => r.id));
+    filteredPhase4.forEach((r) => {
+      r.neighbors = r.neighbors.filter((nId) => validIds.has(nId));
+    });
+
     return NextResponse.json({
       success: true,
       phase1: phase1Countries,
       phase2: phase2Islands,
       phase3: phase3Regions,
+      phase4: filteredPhase4,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Processing failed";

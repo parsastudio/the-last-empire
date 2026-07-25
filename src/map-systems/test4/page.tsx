@@ -8,7 +8,7 @@ import { MapHud } from "./components/map-hud";
 import { MapSvgRenderer } from "./components/map-svg-renderer";
 
 export default function MapTest4Page() {
-  const [phase, setPhase] = useState<1 | 2 | 3>(1);
+  const [phase, setPhase] = useState<1 | 2 | 3 | 4>(1);
   const { data, loading, error } = useMapData();
 
   const {
@@ -39,9 +39,14 @@ export default function MapTest4Page() {
   }, [hoveredIsland, data, phase]);
 
   const activeHoveredRegionDetails = useMemo(() => {
-    if (phase !== 3) return null;
-    if (!hoveredRegion || !data?.phase3) return null;
-    const found = data.phase3.find((r) => r.id === hoveredRegion);
+    const isPhase3 = phase === 3;
+    const isPhase4 = phase === 4;
+    if (!isPhase3 && !isPhase4) return null;
+
+    const sourceData = isPhase3 ? data?.phase3 : data?.phase4;
+    if (!hoveredRegion || !sourceData || !data?.phase1) return null;
+
+    const found = sourceData.find((r) => r.id === hoveredRegion);
     if (!found) return null;
 
     const parentCountry = data.phase1.find((c) => c.code === found.countryCode);
@@ -102,6 +107,7 @@ export default function MapTest4Page() {
               phase1Data={data.phase1}
               phase2Data={data.phase2}
               phase3Data={data.phase3}
+              phase4Data={data.phase4}
               hoveredCountry={hoveredCountry}
               setHoveredCountry={setHoveredCountry}
               hoveredIsland={hoveredIsland}

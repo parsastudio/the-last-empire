@@ -6,7 +6,7 @@ import type {
 } from "../engine/types";
 
 interface MapHudProps {
-  phase: 1 | 2 | 3;
+  phase: 1 | 2 | 3 | 4;
   activeHoveredCountryDetails: CountryPhase1 | null;
   activeHoveredIslandDetails: IslandPhase2 | null;
   activeHoveredRegionDetails:
@@ -61,7 +61,7 @@ export const MapHud: React.FC<MapHudProps> = ({
         </div>
       )}
 
-      {phase === 3 && activeHoveredRegionDetails && (
+      {(phase === 3 || phase === 4) && activeHoveredRegionDetails && (
         <div className="absolute bottom-6 left-6 p-4 bg-slate-900/95 border border-slate-800 rounded-xl shadow-2xl z-40 max-w-md pointer-events-none font-mono text-xs space-y-1.5 backdrop-blur-sm">
           <div className="text-slate-400">Active Map Sector</div>
           <div className="text-sm font-bold text-white">
