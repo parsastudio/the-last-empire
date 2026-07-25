@@ -28,7 +28,7 @@ export async function generateTest6Map(
   }
 
   const countries: CountryMapping[] = [];
-  countries.push({ id: 0, code: "WATER", name: "Ocean", color: [10, 15, 30] });
+  countries.push({ id: 0, code: "WATER", name: "Ocean", color: [0, 0, 0] });
 
   const buffer = new Uint8Array(width * height);
   buffer.fill(0);
@@ -47,11 +47,7 @@ export async function generateTest6Map(
     }
     const name = feature.properties?.name || feature.properties?.NAME || code;
 
-    const r = Math.abs((nextId * 17) % 200) + 55;
-    const g = Math.abs((nextId * 31) % 200) + 55;
-    const b = Math.abs((nextId * 47) % 200) + 55;
-
-    countries.push({ id: nextId, code, name, color: [r, g, b] });
+    countries.push({ id: nextId, code, name, color: [0, 0, nextId] });
 
     const geom = feature.geometry;
     const processRing = (ring: number[][]) => {
@@ -80,7 +76,7 @@ export async function generateTest6Map(
 
   const palette: [number, number, number][] = countries.map((c) => c.color);
   while (palette.length < 256) {
-    palette.push([0, 0, 0]);
+    palette.push([0, 0, palette.length]);
   }
 
   const pngBuffer = encodePng(width, height, buffer, palette);
