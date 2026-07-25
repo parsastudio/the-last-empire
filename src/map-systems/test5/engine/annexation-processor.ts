@@ -4,6 +4,7 @@ import {
 } from "./voronoi-partitioner";
 import { calculatePolygonArea } from "@/map-systems/test2/engine/geometry-utils";
 import { buildTest5Topology } from "./topology-builder";
+import { DELETED_CODES } from "./deleted-codes";
 
 export interface GeoJsonCountryFeature {
   type: "Feature";
@@ -23,100 +24,6 @@ export interface ConsolidatedRegion {
   center: [number, number];
   neighbors: string[];
 }
-
-const DELETED_CODES = new Set([
-  "BHS",
-  "BLZ",
-  "SLV",
-  "GTM",
-  "HND",
-  "NIC",
-  "CRI",
-  "PAN",
-  "HTI",
-  "DOM",
-  "JAM",
-  "PRI",
-  "TTO",
-  "SUR",
-  "GUY",
-  "PRY",
-  "URY",
-  "FLK",
-  "MDA",
-  "EST",
-  "LVA",
-  "LTU",
-  "SVK",
-  "SVN",
-  "HRV",
-  "BIH",
-  "MKD",
-  "MNE",
-  "ALB",
-  "KOS",
-  "LUX",
-  "CYP",
-  "CYN",
-  "BLR",
-  "BRN",
-  "LAO",
-  "KHM",
-  "TLS",
-  "BGD",
-  "SGP",
-  "TJK",
-  "KGZ",
-  "UZB",
-  "TKM",
-  "BTN",
-  "MMR",
-  "PNG",
-  "SLB",
-  "VUT",
-  "FJI",
-  "NCL",
-  "ATF",
-  "ERI",
-  "SOM",
-  "RWA",
-  "BDI",
-  "UGA",
-  "MWI",
-  "MOZ",
-  "ZMB",
-  "ZWE",
-  "BWA",
-  "NAM",
-  "LSO",
-  "SWZ",
-  "MDG",
-  "BEN",
-  "TGO",
-  "BFA",
-  "CIV",
-  "LBR",
-  "SLE",
-  "GIN",
-  "GNB",
-  "GMB",
-  "MRT",
-  "MLI",
-  "TCD",
-  "CAF",
-  "GAB",
-  "GNQ",
-  "CMR",
-  "SSD",
-  "ESH",
-  "SEN",
-  "GHA",
-  "TZA",
-  "AGO",
-  "PSX",
-  "TUN",
-  "LBY",
-]);
 
 function getCountryCode(properties: Record<string, unknown>): string {
   if (!properties) return "";
@@ -256,7 +163,6 @@ export function processConsolidationTest5(
 
   cellsToAnnex.forEach((cell, index) => {
     let bestSurvivorCode = "";
-    let bestSurvivorName = "";
     let minDistance = Infinity;
 
     let cellSumX = 0,
@@ -270,15 +176,16 @@ export function processConsolidationTest5(
       cellSumY / cell.poly.length,
     ];
 
-    regions.forEach((surv) => {
-      for (const pt of surv.coordinates) {
-        const dist = Math.hypot(pt[0] - cellCenter[0], pt[1] - cellCenter[1]);
-        if (dist < minDistance) {
-          minDistance = dist;
-          bestSurvivorCode = surv.countryCode;
-          bestSurvivorName = surv.countryName;
+    survivorCountries.forEach((surv) => {
+      surv.polys.forEach((poly) => {
+        for (const pt of poly) {
+          const dist = Math.hypot(pt[0] - cellCenter[0], pt[1] - cellCenter[1]);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestSurvivorCode = surv.code;
+          }
         }
-      }
+      });
     });
 
     if (bestSurvivorCode) {
@@ -286,7 +193,7 @@ export function processConsolidationTest5(
       regions.push({
         id: `ANNEXED_${cell.originalCode}_${index + 1}`,
         countryCode: bestSurvivorCode,
-        countryName: bestSurvivorName,
+        countryName: bestSurvivorCode,
         coordinates: cell.poly,
         area,
         center: cellCenter,
