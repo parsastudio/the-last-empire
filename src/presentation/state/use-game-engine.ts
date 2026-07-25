@@ -1,32 +1,33 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import type { GameState } from "@/domain/game/game-state.schema";
-import type {
-  GameAction,
-  ActionResult,
-} from "@/domain/game/action.schema";
+import type { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameEngine } from "@/engine/game-engine";
-import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
-import { SyncEngine } from "@/infrastructure/sync/sync-engine";
+import { GridState } from "@/engine/combat/state/grid-state";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { GridStateGameSaveAdapter } from "@/engine/combat/persistence/grid-state-game-save-adapter";
+import { GridSyncCoordinator } from "@/engine/combat/persistence/grid-sync-coordinator";
 
 export function useGameEngine(initialState: GameState | null) {
   const [state, setState] = useState<GameState | null>(initialState);
   const [error, setError] = useState<string | null>(null);
 
-  const dbAdapter = useMemo(() => new IndexedDbAdapter(), []);
-  const syncEngine = useMemo(() => new SyncEngine(dbAdapter), [dbAdapter]);
+  const gridState = useMemo(() => GridStateProvider.getInstance(), []);
+  const dbAdapter = useMemo(() => new GridStateGameSaveAdapter(), []);
+  const syncCoordinator = useMemo(() => new GridSyncCoordinator(), []);
 
   const engine = useMemo(() => {
     if (!state) {
       return null;
     }
+    (state as { gridState?: GridState }).gridState = gridState;
     return new GameEngine(state);
-  }, [state]);
+  }, [state, gridState]);
 
   useEffect(() => {
     if (state) {
-      syncEngine.queueStateSync(state);
+      syncCoordinator.queueGridSync(state.gameId, gridState);
     }
-  }, [state, syncEngine]);
+  }, [state, gridState, syncCoordinator]);
 
   const dispatch = useCallback(
     (action: GameAction): ActionResult => {
@@ -60,7 +61,7 @@ export function useGameEngine(initialState: GameState | null) {
   const loadSavedGame = useCallback(
     async (gameId: string) => {
       try {
-        const loaded = await dbAdapter.loadState(gameId);
+        const loaded = await dbAdapter.loadCompleteGame(gameId, gridState);
         if (loaded) {
           setState(loaded);
           setError(null);
@@ -71,11 +72,12 @@ export function useGameEngine(initialState: GameState | null) {
         setError("Failed to load game save file");
       }
     },
-    [dbAdapter],
+    [dbAdapter, gridState],
   );
 
   return {
     state,
+    gridState,
     error,
     dispatch,
     processNextTurn,
