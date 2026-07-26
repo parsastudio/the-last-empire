@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
-import { GridDownsampler } from "@/map-systems/test6/engine/grid-downsampler";
+import { GridDownsampler } from "@/application/map-rendering/grid-downsampler";
 
 export class StateGridMigration {
   private downsampler = new GridDownsampler();

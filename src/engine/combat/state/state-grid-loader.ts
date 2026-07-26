@@ -1,6 +1,6 @@
 import { GridState } from "@/engine/combat/state/grid-state";
 import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
-import { GridDownsampler } from "@/map-systems/test6/engine/grid-downsampler";
+import { GridDownsampler } from "@/application/map-rendering/grid-downsampler";
 
 export class StateGridLoader {
   private dataProvider = new MapDataProvider();
