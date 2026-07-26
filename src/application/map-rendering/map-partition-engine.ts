@@ -28,9 +28,9 @@ export class MapPartitionEngine {
       return resultBuffer;
     }
 
-    const seeds: number[] = [];
-    const seedOwner = new Uint8Array(width * height);
     const visited = new Uint8Array(width * height);
+    const frontiers = new Map<number, number[]>();
+    const seedOwner = new Uint8Array(width * height);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -47,7 +47,10 @@ export class MapPartitionEngine {
             if (nIdx !== -1) {
               const nId = resultBuffer[nIdx]!;
               if (nId >= 11 && !removedIds.has(nId)) {
-                seeds.push(idx);
+                if (!frontiers.has(nId)) {
+                  frontiers.set(nId, []);
+                }
+                frontiers.get(nId)!.push(idx);
                 seedOwner[idx] = nId;
                 visited[idx] = 1;
                 break;
@@ -58,31 +61,49 @@ export class MapPartitionEngine {
       }
     }
 
-    let head = 0;
-    while (head < seeds.length) {
-      const idx = seeds[head]!;
-      head++;
+    const activeNeighbors = Array.from(frontiers.keys());
+    if (activeNeighbors.length === 0) {
+      return resultBuffer;
+    }
 
-      const owner = seedOwner[idx]!;
-      resultBuffer[idx] = owner;
+    const growthPerTurn = 120;
+    let hasActiveFrontier = true;
 
-      const x = idx % width;
-      const y = Math.floor(idx / width);
+    while (hasActiveFrontier) {
+      hasActiveFrontier = false;
 
-      const neighbors = [
-        x > 0 ? idx - 1 : -1,
-        x < width - 1 ? idx + 1 : -1,
-        y > 0 ? idx - width : -1,
-        y < height - 1 ? idx + width : -1,
-      ];
+      for (const neighborId of activeNeighbors) {
+        const queue = frontiers.get(neighborId)!;
+        if (queue.length === 0) {
+          continue;
+        }
 
-      for (const nIdx of neighbors) {
-        if (nIdx !== -1 && visited[nIdx] === 0) {
-          const nId = resultBuffer[nIdx]!;
-          if (removedIds.has(nId)) {
-            visited[nIdx] = 1;
-            seedOwner[nIdx] = owner;
-            seeds.push(nIdx);
+        hasActiveFrontier = true;
+        const limit = Math.min(queue.length, growthPerTurn);
+
+        for (let i = 0; i < limit; i++) {
+          const idx = queue.shift()!;
+          resultBuffer[idx] = neighborId;
+
+          const x = idx % width;
+          const y = Math.floor(idx / width);
+
+          const neighbors = [
+            x > 0 ? idx - 1 : -1,
+            x < width - 1 ? idx + 1 : -1,
+            y > 0 ? idx - width : -1,
+            y < height - 1 ? idx + width : -1,
+          ];
+
+          for (const nIdx of neighbors) {
+            if (nIdx !== -1 && visited[nIdx] === 0) {
+              const nId = resultBuffer[nIdx]!;
+              if (removedIds.has(nId)) {
+                visited[nIdx] = 1;
+                seedOwner[nIdx] = neighborId;
+                queue.push(nIdx);
+              }
+            }
           }
         }
       }

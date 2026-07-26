@@ -12,13 +12,13 @@ interface CountryMapping {
 interface UseMapDataProps {
   mapWidth: number;
   mapHeight: number;
-  useEdited?: boolean;
+  mapMode?: "default" | "edited" | "partition";
 }
 
 export function useMapData({
   mapWidth,
   mapHeight,
-  useEdited = false,
+  mapMode = "default",
 }: UseMapDataProps) {
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,25 +33,44 @@ export function useMapData({
     let active = true;
     async function fetchMapAndProcess() {
       try {
-        const apiPath = useEdited
-          ? "/api/map-generator?type=edited"
-          : "/api/map-generator";
+        const apiPath =
+          mapMode === "partition"
+            ? "/partition-mask/mappings.json"
+            : mapMode === "edited"
+              ? "/api/map-generator?type=edited"
+              : "/api/map-generator";
+
         const res = await fetch(apiPath);
         const json = await res.json();
         if (!active) return;
-        if (!json.success) {
-          setError(json.error || "Failed to load map data.");
-          setLoading(false);
-          return;
+
+        let countriesData: CountryMapping[] = [];
+        let cachedStatus = false;
+
+        if (mapMode === "partition") {
+          countriesData = json.countries || [];
+          cachedStatus = true;
+        } else {
+          if (!json.success) {
+            setError(json.error || "Failed to load map data.");
+            setLoading(false);
+            return;
+          }
+          countriesData = json.data.countries || [];
+          cachedStatus = !!json.cached;
         }
 
-        setCountries(json.data.countries);
-        setIsCached(!!json.cached);
+        setCountries(countriesData);
+        setIsCached(cachedStatus);
 
         const img = new Image();
-        img.src = useEdited
-          ? "/edited-mask/world-mask.png"
-          : "/test6/world-mask.png";
+        img.src =
+          mapMode === "partition"
+            ? "/partition-mask/world-mask.png"
+            : mapMode === "edited"
+              ? "/edited-mask/world-mask.png"
+              : "/test6/world-mask.png";
+
         img.onload = () => {
           if (typeof window === "undefined" || !active) return;
 
@@ -102,7 +121,7 @@ export function useMapData({
               mapWidth,
               mapHeight,
               maskDataRef.current,
-              json.data.countries,
+              countriesData,
             );
 
             ctxShaded.putImageData(destImage, 0, 0);
@@ -121,7 +140,7 @@ export function useMapData({
     return () => {
       active = false;
     };
-  }, [mapWidth, mapHeight, useEdited]);
+  }, [mapWidth, mapHeight, mapMode]);
 
   return {
     countries,

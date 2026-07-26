@@ -47,7 +47,6 @@ export default function MapGeneratorPage() {
         if (mapType === "edited") {
           apiPath = "/api/map-generator?type=edited";
         } else if (mapType === "partition") {
-          apiPath = "/api/map-generator?type=edited&source=partition";
           const res = await fetch("/api/map-generator");
           const json = await res.json();
           if (active && json.success) {
@@ -117,17 +116,13 @@ export default function MapGeneratorPage() {
     }
   };
 
-  const handlePartitionCompile = async () => {
+  const handlePartitionCompile = async (source: "default" | "edited") => {
     setPartitionStatus("compiling");
     setErrorMessage("");
     try {
-      const targetSource = mapType === "edited" ? "edited" : "default";
-      const res = await fetch(
-        `/api/map-generator/partition?source=${targetSource}`,
-        {
-          method: "POST",
-        },
-      );
+      const res = await fetch(`/api/map-generator/partition?source=${source}`, {
+        method: "POST",
+      });
       const json = await res.json();
       if (json.success) {
         setCountries(json.data.countries || []);
@@ -340,6 +335,18 @@ export default function MapGeneratorPage() {
                 </div>
               </div>
             )}
+
+            {status === "error" && (
+              <div className="p-4 bg-rose-950/15 border border-rose-900/40 rounded-2xl flex gap-3 text-rose-400 text-xs">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold">Rasterization Error</div>
+                  <div className="text-[10px] text-rose-500/90 mt-1">
+                    {errorMessage}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="bg-slate-900/40 border border-slate-900 p-6 rounded-3xl space-y-5">
@@ -373,21 +380,38 @@ export default function MapGeneratorPage() {
                   ))}
                 </div>
               </div>
-              <button
-                onClick={handlePartitionCompile}
-                disabled={partitionStatus === "compiling"}
-                className="w-full py-3 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 text-white rounded-2xl font-bold transition-all border border-rose-500/20 shadow-lg shadow-rose-950/20 text-xs uppercase tracking-wider font-mono flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Globe
-                  size={14}
-                  className={
-                    partitionStatus === "compiling" ? "animate-spin" : ""
-                  }
-                />
-                {partitionStatus === "compiling"
-                  ? "Partitioning Map..."
-                  : `Partition Active Map (${mapType === "edited" ? "Edited" : "Default"})`}
-              </button>
+              <div className="grid grid-cols-1 gap-2.5">
+                <button
+                  onClick={() => handlePartitionCompile("default")}
+                  disabled={partitionStatus === "compiling"}
+                  className="w-full py-3 bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 text-white rounded-2xl font-bold transition-all border border-rose-500/20 shadow-lg shadow-rose-950/20 text-xs uppercase tracking-wider font-mono flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Globe
+                    size={14}
+                    className={
+                      partitionStatus === "compiling" ? "animate-spin" : ""
+                    }
+                  />
+                  {partitionStatus === "compiling"
+                    ? "Compiling..."
+                    : "Partition Default Map"}
+                </button>
+                <button
+                  onClick={() => handlePartitionCompile("edited")}
+                  disabled={partitionStatus === "compiling"}
+                  className="w-full py-3 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 text-white rounded-2xl font-bold transition-all border border-amber-500/20 shadow-lg shadow-amber-950/20 text-xs uppercase tracking-wider font-mono flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Globe
+                    size={14}
+                    className={
+                      partitionStatus === "compiling" ? "animate-spin" : ""
+                    }
+                  />
+                  {partitionStatus === "compiling"
+                    ? "Compiling..."
+                    : "Partition Edited Map"}
+                </button>
+              </div>
             </div>
 
             {partitionStatus === "success" && (
