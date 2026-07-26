@@ -65,6 +65,79 @@ export class MapStateSynchronizer {
       return cellArea;
     };
 
+    const landNeighborsMap = new Map<string, Set<string>>();
+    const seaNeighborsMap = new Map<string, Set<string>>();
+    const oceanAccessMap = new Map<string, boolean>();
+    const gulfTouchMap = new Map<string, Set<string>>();
+
+    for (const nationId of Object.keys(state.nations)) {
+      landNeighborsMap.set(nationId, new Set<string>());
+      seaNeighborsMap.set(nationId, new Set<string>());
+      oceanAccessMap.set(nationId, false);
+      gulfTouchMap.set(nationId, new Set<string>());
+    }
+
+    for (let y = 0; y < HEIGHT; y++) {
+      for (let x = 0; x < WIDTH; x++) {
+        const cell = gridState.getCell(x, y);
+        if (
+          !cell ||
+          cell.ownerId === "WATER" ||
+          cell.ownerId.startsWith("GULF_")
+        ) {
+          continue;
+        }
+
+        const nationId =
+          cell.isOccupied && cell.occupierId ? cell.occupierId : cell.ownerId;
+        const neighbors = [
+          gridState.getCell(x + 1, y),
+          gridState.getCell(x - 1, y),
+          gridState.getCell(x, y + 1),
+          gridState.getCell(x, y - 1),
+        ];
+
+        for (const neighbor of neighbors) {
+          if (!neighbor) continue;
+          if (neighbor.ownerId === "WATER") {
+            oceanAccessMap.set(nationId, true);
+          } else if (neighbor.ownerId.startsWith("GULF_")) {
+            gulfTouchMap.get(nationId)?.add(neighbor.ownerId);
+          } else {
+            const neighborNationId =
+              neighbor.isOccupied && neighbor.occupierId
+                ? neighbor.occupierId
+                : neighbor.ownerId;
+            if (neighborNationId !== nationId) {
+              landNeighborsMap.get(nationId)?.add(neighborNationId);
+            }
+          }
+        }
+      }
+    }
+
+    const nationIds = Object.keys(state.nations);
+    for (const nA of nationIds) {
+      for (const nB of nationIds) {
+        if (nA !== nB) {
+          const gulfsA = gulfTouchMap.get(nA);
+          const gulfsB = gulfTouchMap.get(nB);
+          if (gulfsA && gulfsB) {
+            let sharedGulf = false;
+            for (const g of gulfsA) {
+              if (gulfsB.has(g)) {
+                sharedGulf = true;
+                break;
+              }
+            }
+            if (sharedGulf) {
+              seaNeighborsMap.get(nA)?.add(nB);
+            }
+          }
+        }
+      }
+    }
+
     for (const [id, nation] of Object.entries(updatedNations)) {
       const ownedCells = allCells.filter(
         (c) =>
@@ -78,6 +151,9 @@ export class MapStateSynchronizer {
       }
 
       const roundedArea = Math.round(totalCalibratedArea);
+      const lNeighbors = Array.from(landNeighborsMap.get(id) || []);
+      const sNeighbors = Array.from(seaNeighborsMap.get(id) || []);
+      const hasAccess = oceanAccessMap.get(id) || false;
 
       updatedNations[id] = {
         ...nation,
@@ -85,6 +161,9 @@ export class MapStateSynchronizer {
           ...nation.geography,
           territorySize: roundedArea,
           contiguousMainlandSize: roundedArea,
+          landNeighbors: lNeighbors,
+          seaNeighbors: sNeighbors,
+          hasSeaAccess: hasAccess,
         },
       };
     }

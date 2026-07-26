@@ -1,9 +1,6 @@
 import { GridState } from "@/engine/combat/state/grid-state";
-import { GridBuilder } from "@/engine/combat/state/grid-builder";
 
 export class GridDownsampler {
-  private builder = new GridBuilder();
-
   public downsampleMask(
     maskBuffer: Uint8Array,
     highResWidth: number,
@@ -18,6 +15,7 @@ export class GridDownsampler {
       for (let gx = 0; gx < lowResWidth; gx++) {
         const countryIds: string[] = [];
         const enclaveIds: number[] = [];
+        const waterCounts = new Int32Array(11);
 
         for (let sy = 0; sy < scaleFactor; sy++) {
           for (let sx = 0; sx < scaleFactor; sx++) {
@@ -26,14 +24,53 @@ export class GridDownsampler {
             const idx = hy * highResWidth + hx;
             const val = maskBuffer[idx];
 
-            if (val !== undefined && val >= 11) {
-              countryIds.push(`NATION_${val}`);
-              enclaveIds.push(0);
+            if (val !== undefined) {
+              if (val >= 11) {
+                countryIds.push(`NATION_${val}`);
+                enclaveIds.push(0);
+              } else {
+                waterCounts[val]++;
+              }
             }
           }
         }
 
-        const cell = this.builder.buildGridCell(gx, gy, countryIds, enclaveIds);
+        let cellOwner = "WATER";
+        if (countryIds.length > 0) {
+          const counts = new Map<string, number>();
+          for (const id of countryIds) {
+            counts.set(id, (counts.get(id) || 0) + 1);
+          }
+          let maxCount = 0;
+          for (const [id, count] of counts.entries()) {
+            if (count > maxCount) {
+              maxCount = count;
+              cellOwner = id;
+            }
+          }
+        } else {
+          let maxWaterId = 0;
+          let maxWaterCount = 0;
+          for (let w = 0; w < 11; w++) {
+            if (waterCounts[w] > maxWaterCount) {
+              maxWaterCount = waterCounts[w];
+              maxWaterId = w;
+            }
+          }
+          if (maxWaterId > 0) {
+            cellOwner = `GULF_${maxWaterId}`;
+          }
+        }
+
+        const cell = {
+          x: gx,
+          y: gy,
+          ownerId: cellOwner,
+          isOccupied: false,
+          occupierId: null,
+          highResPixelCount: countryIds.length,
+          enclaveId: 0,
+        };
 
         gridState.setCell(gx, gy, cell);
       }
