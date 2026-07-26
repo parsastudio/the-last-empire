@@ -1,29 +1,30 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { findCountryProfileById } from "@/domain/map/countries";
 
 export class NationProfileAssigner {
   public buildStartingNation(id: string, isHuman: boolean): Nation {
-    const isTier1 = id.endsWith("11") || id.endsWith("12") || id.endsWith("13");
-    const isTier2 =
-      id.endsWith("14") ||
-      id.endsWith("15") ||
-      id.endsWith("16") ||
-      id.endsWith("17");
+    const numericId = parseInt(id.replace("NATION_", ""), 10);
+    const profile = findCountryProfileById(numericId);
 
-    const gdp = isTier1 ? 25000000 : isTier2 ? 10000000 : 5000000;
-    const population = isTier1 ? 300000000 : isTier2 ? 150000000 : 80000000;
-    const treasury = isTier1 ? 500000 : isTier2 ? 300000 : 100000;
-    const traits = isTier1
-      ? ["INDUSTRIAL_HUB" as const, "MILITARISTIC" as const]
-      : isTier2
-        ? ["OIL_RICH" as const]
-        : ["FRAGILE_ECONOMY" as const];
+    const gdp = profile ? profile.gdp : 5000000000;
+    const population = profile ? profile.population : 80000000;
+    const treasury = profile ? profile.startingTreasury : 100000;
+    const traits = profile ? profile.traits : ["FRAGILE_ECONOMY" as const];
+    const name = profile
+      ? `کشور ${profile.nameFa}`
+      : `قلمرو مستقل ${numericId}`;
+    const flagCode = profile ? profile.flagCode : "US";
+    const areaSqKm = profile ? profile.areaSqKm : 5000;
+
+    const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
+    const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
 
     return {
       id,
-      name: `Sovereign ${id.replace("NATION_", "Territory ")}`,
+      name,
       isAi: !isHuman,
       isAlive: true,
-      flagCode: "US",
+      flagCode,
       gdp,
       taxRate: 15,
       tariffRate: 10,
@@ -65,9 +66,9 @@ export class NationProfileAssigner {
         landNeighbors: [],
         seaNeighbors: [],
         hasSeaAccess: true,
-        territorySize: isTier1 ? 9000 : 5000,
+        territorySize: areaSqKm,
         infrastructureLevel: 1,
-        contiguousMainlandSize: isTier1 ? 9000 : 5000,
+        contiguousMainlandSize: areaSqKm,
         isolatedPockets: [],
         coordinates: [],
       },
