@@ -18,8 +18,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const publicDir = path.join(process.cwd(), "public");
-    const test6Dir = path.join(publicDir, "test6");
-    await fs.mkdir(test6Dir, { recursive: true });
+    const editedDir = path.join(publicDir, "edited-mask");
+    await fs.mkdir(editedDir, { recursive: true });
 
     const palette: [number, number, number][] = [];
     for (let i = 0; i < 256; i++) {
@@ -27,12 +27,14 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const pngBuffer = encodePng(4096, 2048, bytes, palette);
-    await fs.writeFile(path.join(test6Dir, "world-mask.png"), pngBuffer);
+    await fs.writeFile(path.join(editedDir, "world-mask.png"), pngBuffer);
+    await fs.writeFile(path.join(editedDir, "world-mask.bin"), bytes);
 
-    const mappingsPath = path.join(test6Dir, "mappings.json");
+    const defaultMappingsPath = path.join(publicDir, "test6", "mappings.json");
+    const editedMappingsPath = path.join(editedDir, "mappings.json");
     let mappings = { countries: [] };
     try {
-      const current = await fs.readFile(mappingsPath, "utf-8");
+      const current = await fs.readFile(defaultMappingsPath, "utf-8");
       mappings = JSON.parse(current);
     } catch {}
 
@@ -66,7 +68,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     await fs.writeFile(
-      mappingsPath,
+      editedMappingsPath,
       JSON.stringify(mappings, null, 2),
       "utf-8",
     );

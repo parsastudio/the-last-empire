@@ -12,9 +12,14 @@ interface CountryMapping {
 interface UseMapDataProps {
   mapWidth: number;
   mapHeight: number;
+  useEdited?: boolean;
 }
 
-export function useMapData({ mapWidth, mapHeight }: UseMapDataProps) {
+export function useMapData({
+  mapWidth,
+  mapHeight,
+  useEdited = false,
+}: UseMapDataProps) {
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,10 +30,15 @@ export function useMapData({ mapWidth, mapHeight }: UseMapDataProps) {
   const maskDataRef = useRef<Uint8Array | null>(null);
 
   useEffect(() => {
+    let active = true;
     async function fetchMapAndProcess() {
       try {
-        const res = await fetch("/api/map-generator");
+        const apiPath = useEdited
+          ? "/api/map-generator?type=edited"
+          : "/api/map-generator";
+        const res = await fetch(apiPath);
         const json = await res.json();
+        if (!active) return;
         if (!json.success) {
           setError(json.error || "Failed to load map data.");
           setLoading(false);
@@ -39,9 +49,11 @@ export function useMapData({ mapWidth, mapHeight }: UseMapDataProps) {
         setIsCached(!!json.cached);
 
         const img = new Image();
-        img.src = "/test6/world-mask.png";
+        img.src = useEdited
+          ? "/edited-mask/world-mask.png"
+          : "/test6/world-mask.png";
         img.onload = () => {
-          if (typeof window === "undefined") return;
+          if (typeof window === "undefined" || !active) return;
 
           const tempCanvas = document.createElement("canvas");
           tempCanvas.width = mapWidth;
@@ -98,13 +110,18 @@ export function useMapData({ mapWidth, mapHeight }: UseMapDataProps) {
           setLoading(false);
         };
       } catch {
-        setError("Error fetching map test 6 metadata.");
-        setLoading(false);
+        if (active) {
+          setError("Error fetching map metadata.");
+          setLoading(false);
+        }
       }
     }
 
     fetchMapAndProcess();
-  }, [mapWidth, mapHeight]);
+    return () => {
+      active = false;
+    };
+  }, [mapWidth, mapHeight, useEdited]);
 
   return {
     countries,
