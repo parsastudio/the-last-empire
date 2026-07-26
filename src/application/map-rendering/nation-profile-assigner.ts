@@ -58,7 +58,6 @@ export class NationProfileAssigner {
         droneMissile: isTier1 ? 5 : 0,
         experience: 10,
         techLevel: 1,
-        mobility: 1,
       },
       recruitmentQueue: [],
       geography: {

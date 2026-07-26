@@ -12,7 +12,6 @@ export const MilitaryStackSchema = z.object({
   droneMissile: z.number().nonnegative(),
   experience: z.number().min(0).max(100),
   techLevel: z.number().positive(),
-  mobility: z.number().nonnegative(),
 });
 
 export const RecruitmentOrderSchema = z.object({
