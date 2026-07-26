@@ -15,6 +15,14 @@ interface CountryMapping {
   areaSqKm: number;
 }
 
+interface PartitionMetrics {
+  readTimeMs: number;
+  partitionTimeMs: number;
+  areaRecalcTimeMs: number;
+  writeTimeMs: number;
+  totalTimeMs: number;
+}
+
 export default function MapGeneratorPage() {
   const [status, setStatus] = useState<
     "idle" | "generating" | "success" | "error"
@@ -22,6 +30,8 @@ export default function MapGeneratorPage() {
   const [partitionStatus, setPartitionStatus] = useState<
     "idle" | "compiling" | "success" | "error"
   >("idle");
+  const [partitionMetrics, setPartitionMetrics] =
+    useState<PartitionMetrics | null>(null);
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCached, setIsCached] = useState(false);
@@ -119,6 +129,7 @@ export default function MapGeneratorPage() {
       const json = await res.json();
       if (json.success) {
         setCountries(json.data.countries || []);
+        setPartitionMetrics(json.metrics || null);
         setMapType("partition");
         setPartitionStatus("success");
       } else {
@@ -241,6 +252,7 @@ export default function MapGeneratorPage() {
           <PartitionCard
             partitionStatus={partitionStatus}
             errorMessage={errorMessage}
+            metrics={partitionMetrics}
             onPartitionCompile={handlePartitionCompile}
           />
 

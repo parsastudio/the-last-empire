@@ -62,11 +62,17 @@ export class MapShader {
         const grain = this.noiseApplier.getNoiseGrain(x, y);
 
         if (id < 11) {
-          const d = dist[y * width + x] || 0;
-          const oceanColor = this.shadowCalculator.calculateOceanColor(d);
-          r = oceanColor.r;
-          g = oceanColor.g;
-          b = oceanColor.b;
+          if (id === 1) {
+            r = 16;
+            g = 185;
+            b = 129;
+          } else {
+            const d = dist[y * width + x] || 0;
+            const oceanColor = this.shadowCalculator.calculateOceanColor(d);
+            r = oceanColor.r;
+            g = oceanColor.g;
+            b = oceanColor.b;
+          }
         } else {
           const pair = palette[id];
           if (pair) {
