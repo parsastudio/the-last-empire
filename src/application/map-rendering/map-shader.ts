@@ -61,7 +61,7 @@ export class MapShader {
 
         const grain = this.noiseApplier.getNoiseGrain(x, y);
 
-        if (id >= 250 && id <= 255) {
+        if (id >= 251 && id <= 255) {
           r = 16;
           g = 185;
           b = 129;

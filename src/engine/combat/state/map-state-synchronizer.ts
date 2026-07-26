@@ -83,7 +83,7 @@ export class MapStateSynchronizer {
         if (
           !cell ||
           cell.ownerId === "WATER" ||
-          cell.ownerId.startsWith("GULF_")
+          cell.ownerId === "CLOSED_SEA"
         ) {
           continue;
         }
@@ -101,8 +101,8 @@ export class MapStateSynchronizer {
           if (!neighbor) continue;
           if (neighbor.ownerId === "WATER") {
             oceanAccessMap.set(nationId, true);
-          } else if (neighbor.ownerId.startsWith("GULF_")) {
-            gulfTouchMap.get(nationId)?.add(neighbor.ownerId);
+          } else if (neighbor.ownerId === "CLOSED_SEA") {
+            gulfTouchMap.get(nationId)?.add("CLOSED_SEA");
           } else {
             const neighborNationId =
               neighbor.isOccupied && neighbor.occupierId

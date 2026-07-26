@@ -17,7 +17,7 @@ export class NavalPathResolver {
       if (cell) {
         if (
           cell.ownerId === "WATER" ||
-          cell.ownerId.startsWith("GULF_") ||
+          cell.ownerId === "CLOSED_SEA" ||
           cell.isOccupied
         ) {
           traversable[(cell.y << 10) | cell.x] = 1;
