@@ -47,6 +47,15 @@ export class CountryPaletteGenerator {
       }
     });
 
+    palette[250] = {
+      r1: 205,
+      g1: 198,
+      b1: 185,
+      r2: 180,
+      g2: 173,
+      b2: 160,
+    };
+
     return palette;
   }
 }
