@@ -22,7 +22,9 @@ export default function MapTest6Page() {
   const mapHeight = 2048;
 
   const [showHeatmap] = useState(false);
-  const [useEdited, setUseEdited] = useState(false);
+  const [activeMapMode, setMapMode] = useState<
+    "default" | "edited" | "partition"
+  >("default");
   const [pendingSelection, setPendingSelection] = useState<{
     id: string;
     name: string;
@@ -52,7 +54,7 @@ export default function MapTest6Page() {
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
-  } = useMapData({ mapWidth, mapHeight, useEdited });
+  } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
 
   const { hoveredCountry, handlePointerMove } = useMapMouse({
     canvasDestRef,
@@ -170,16 +172,22 @@ export default function MapTest6Page() {
 
             <div className="absolute top-4 left-36 z-40 bg-slate-950/90 border border-slate-900 rounded-2xl p-0.5 flex text-[10px] font-mono shadow-xl pointer-events-auto">
               <button
-                onClick={() => setUseEdited(false)}
-                className={`px-3 py-1.5 rounded-xl transition-all ${!useEdited ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
+                onClick={() => setMapMode("default")}
+                className={`px-3 py-1.5 rounded-xl transition-all ${activeMapMode === "default" ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
               >
-                DEFAULT TOPOLOGY
+                DEFAULT
               </button>
               <button
-                onClick={() => setUseEdited(true)}
-                className={`px-3 py-1.5 rounded-xl transition-all ${useEdited ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
+                onClick={() => setMapMode("edited")}
+                className={`px-3 py-1.5 rounded-xl transition-all ${activeMapMode === "edited" ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
               >
-                EDITED MASK
+                EDITED
+              </button>
+              <button
+                onClick={() => setMapMode("partition")}
+                className={`px-3 py-1.5 rounded-xl transition-all ${activeMapMode === "partition" ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
+              >
+                PARTITIONED
               </button>
             </div>
 
