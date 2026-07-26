@@ -6,7 +6,7 @@ import { GeoJsonProcessor } from "./geojson-processor";
 import { DistanceTransform } from "./distance-transform";
 import { MapWriter } from "./map-writer";
 import { AreaWeightCalculator } from "./generator/area-weight-calculator";
-import { REAL_WORLD_COUNTRY_AREAS } from "../../domain/map/country-area-calibration.config";
+import { GLOBAL_DEVIATION_FACTOR } from "../../domain/map/country-area-calibration.config";
 
 export interface CountryMapping {
   id: number;
@@ -125,13 +125,9 @@ export async function generateTest6Map(
   }
   countries.forEach((c) => {
     if (c.id >= 11) {
-      const calibratedArea =
-        REAL_WORLD_COUNTRY_AREAS[c.code] ||
-        REAL_WORLD_COUNTRY_AREAS[c.id.toString()] ||
-        REAL_WORLD_COUNTRY_AREAS[`NATION_${c.id}`];
-      c.areaSqKm = calibratedArea
-        ? calibratedArea
-        : Math.round(pixelAreas[c.id] || 0);
+      c.areaSqKm = Math.round(
+        (pixelAreas[c.id] || 0) * GLOBAL_DEVIATION_FACTOR,
+      );
     }
   });
   const dist = distanceTransform.calculate(buffer, width, height);
