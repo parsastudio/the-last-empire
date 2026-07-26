@@ -26,11 +26,9 @@ export class GridDownsampler {
             const val = maskBuffer[idx];
 
             if (val !== undefined) {
-              if (val === 1) {
+              if (val === 254) {
                 hasHighway = true;
-              }
-
-              if (val >= 11) {
+              } else if (val >= 11) {
                 countryIds.push(`NATION_${val}`);
                 enclaveIds.push(0);
               } else {

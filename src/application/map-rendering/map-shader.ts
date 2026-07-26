@@ -32,7 +32,7 @@ export class MapShader {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
         const val = maskData[idx];
-        if (val && val >= 11) {
+        if (val && val >= 11 && val < 250) {
           dist[idx] = 0;
         } else {
           if (x > 0) dist[idx] = Math.min(dist[idx], dist[idx - 1] + 1);
@@ -61,18 +61,16 @@ export class MapShader {
 
         const grain = this.noiseApplier.getNoiseGrain(x, y);
 
-        if (id < 11) {
-          if (id === 1) {
-            r = 16;
-            g = 185;
-            b = 129;
-          } else {
-            const d = dist[y * width + x] || 0;
-            const oceanColor = this.shadowCalculator.calculateOceanColor(d);
-            r = oceanColor.r;
-            g = oceanColor.g;
-            b = oceanColor.b;
-          }
+        if (id >= 250 && id <= 255) {
+          r = 16;
+          g = 185;
+          b = 129;
+        } else if (id < 11) {
+          const d = dist[y * width + x] || 0;
+          const oceanColor = this.shadowCalculator.calculateOceanColor(d);
+          r = oceanColor.r;
+          g = oceanColor.g;
+          b = oceanColor.b;
         } else {
           const pair = palette[id];
           if (pair) {
@@ -97,13 +95,19 @@ export class MapShader {
         let isBorder = false;
         if (x < width - 1) {
           const rightId = srcData[idx + 4 + 2] || 0;
-          if (rightId !== id && (id >= 11 || rightId >= 11)) {
+          if (
+            rightId !== id &&
+            ((id >= 11 && id < 250) || (rightId >= 11 && rightId < 250))
+          ) {
             isBorder = true;
           }
         }
         if (y < height - 1) {
           const bottomId = srcData[idx + width * 4 + 2] || 0;
-          if (bottomId !== id && (id >= 11 || bottomId >= 11)) {
+          if (
+            bottomId !== id &&
+            ((id >= 11 && id < 250) || (bottomId >= 11 && bottomId < 250))
+          ) {
             isBorder = true;
           }
         }
