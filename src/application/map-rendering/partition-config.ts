@@ -76,4 +76,5 @@ export const PARTITION_COUNTRIES_LIST = [
   "PNG",
   "PRI",
   "NCL",
+  "ATF",
 ];
