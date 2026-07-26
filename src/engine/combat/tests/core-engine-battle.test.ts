@@ -57,7 +57,6 @@ export function runCoreEngineBattleTest(): boolean {
           droneMissile: 5,
           experience: 10,
           techLevel: 1,
-          mobility: 1,
         },
         recruitmentQueue: [],
         geography: {
@@ -102,7 +101,6 @@ export function runCoreEngineBattleTest(): boolean {
           droneMissile: 5,
           experience: 10,
           techLevel: 1,
-          mobility: 1,
         },
         recruitmentQueue: [],
         geography: {

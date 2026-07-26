@@ -82,7 +82,6 @@ export function runDeterminismTest(): boolean {
           droneMissile: 5,
           experience: 10,
           techLevel: 1,
-          mobility: 1,
         },
         recruitmentQueue: [],
         geography: {
@@ -152,7 +151,6 @@ export function runDeterminismTest(): boolean {
           droneMissile: 1,
           experience: 5,
           techLevel: 1,
-          mobility: 1,
         },
         recruitmentQueue: [],
         geography: {

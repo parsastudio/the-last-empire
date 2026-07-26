@@ -128,7 +128,6 @@ export class AttackActionHandler implements ActionHandler {
       droneMissile: Math.floor(droneMissile * combatStrengthMultiplier),
       experience: attacker.military.experience,
       techLevel: attacker.military.techLevel,
-      mobility: attacker.military.mobility,
     };
 
     const updatedAttackerNation = {
