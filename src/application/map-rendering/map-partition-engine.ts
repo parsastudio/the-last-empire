@@ -63,6 +63,11 @@ export class MapPartitionEngine {
 
     const activeNeighbors = Array.from(frontiers.keys());
     if (activeNeighbors.length === 0) {
+      for (let i = 0; i < resultBuffer.length; i++) {
+        if (removedIds.has(resultBuffer[i]!)) {
+          resultBuffer[i] = 250;
+        }
+      }
       return resultBuffer;
     }
 
@@ -106,6 +111,12 @@ export class MapPartitionEngine {
             }
           }
         }
+      }
+    }
+
+    for (let i = 0; i < resultBuffer.length; i++) {
+      if (removedIds.has(resultBuffer[i]!)) {
+        resultBuffer[i] = 250;
       }
     }
 
