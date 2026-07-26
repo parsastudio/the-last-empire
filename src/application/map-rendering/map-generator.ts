@@ -86,7 +86,7 @@ export async function generateTest6Map(
     height,
     width,
   );
-  const areaPerWeightUnit = totalSurfaceAreaSqKm / totalWeight;
+  const areaPerUnit = totalSurfaceAreaSqKm / totalWeight;
 
   for (let y = 0; y < height; y++) {
     const rowWeight = weights[y] * areaPerUnit;
@@ -115,6 +115,61 @@ export async function generateTest6Map(
 
   await writer.saveMaskImage(width, height, buffer, publicDir);
   await fs.writeFile(path.join(publicDir, "test6", "world-mask.bin"), buffer);
+
+  const lowResWidth = 1024;
+  const lowResHeight = 512;
+  const scale = 4;
+  const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 3);
+
+  for (let gy = 0; gy < lowResHeight; gy++) {
+    for (let gx = 0; gx < lowResWidth; gx++) {
+      const countryCounts = new Map<number, number>();
+      const waterCounts = new Int32Array(11);
+
+      for (let sy = 0; sy < scale; sy++) {
+        for (let sx = 0; sx < scale; sx++) {
+          const hx = gx * scale + sx;
+          const hy = gy * scale + sy;
+          const val = buffer[hy * width + hx] ?? 0;
+          if (val >= 11) {
+            countryCounts.set(val, (countryCounts.get(val) ?? 0) + 1);
+          } else {
+            waterCounts[val]++;
+          }
+        }
+      }
+
+      let finalB = 0;
+      let maxCountryCount = 0;
+      for (const [id, count] of countryCounts.entries()) {
+        if (count > maxCountryCount) {
+          maxCountryCount = count;
+          finalB = id;
+        }
+      }
+
+      let finalR = 0;
+      if (finalB === 0) {
+        let maxWaterCount = 0;
+        for (let w = 0; w < 11; w++) {
+          if (waterCounts[w] > maxWaterCount) {
+            maxWaterCount = waterCounts[w];
+            finalR = w;
+          }
+        }
+      }
+
+      const pIdx = (gy * lowResWidth + gx) * 3;
+      packed1024[pIdx] = finalR;
+      packed1024[pIdx + 1] = 0;
+      packed1024[pIdx + 2] = finalB;
+    }
+  }
+
+  await fs.writeFile(
+    path.join(publicDir, "test6", "world-mask-1024.bin"),
+    packed1024,
+  );
 
   return { countries };
 }
