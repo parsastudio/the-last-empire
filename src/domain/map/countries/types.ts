@@ -7,7 +7,6 @@ export interface CountryProfile {
   nameFa: string;
   gdp: number;
   population: number;
-  areaSqKm: number;
   traits: NationTrait[];
   flagCode: string;
   startingTreasury: number;

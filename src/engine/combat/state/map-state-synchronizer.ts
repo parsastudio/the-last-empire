@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { REAL_WORLD_COUNTRY_AREAS } from "../../../domain/map/country-area-calibration.config";
+import { GLOBAL_DEVIATION_FACTOR } from "../../../domain/map/country-area-calibration.config";
 
 const EARTH_RADIUS = 6378137;
 const TOTAL_SURFACE_AREA_SQ_KM =
@@ -29,41 +29,12 @@ export class MapStateSynchronizer {
     const allCells = gridState.getAllCells();
     const updatedNations = { ...state.nations };
 
-    const originalAreas: Record<string, number> = {};
-    for (const id of Object.keys(state.nations)) {
-      const originalCells = allCells.filter((c) => c.ownerId === id);
-      let originalWeightedArea = 0;
-      for (const cell of originalCells) {
-        if (cell.y >= 0 && cell.y < HEIGHT) {
-          const w = this.weights[cell.y] || 0;
-          originalWeightedArea +=
-            w * this.areaPerWeightUnit * (cell.highResPixelCount / 16);
-        }
-      }
-      originalAreas[id] = originalWeightedArea;
-    }
-
     const getCalibratedCellArea = (cell: GridCell): number => {
       if (cell.y < 0 || cell.y >= HEIGHT) return 0;
       const w = this.weights[cell.y] || 0;
       const cellArea =
         w * this.areaPerWeightUnit * (cell.highResPixelCount / 16);
-
-      const originalOwner = cell.ownerId;
-      const originalWeightedArea = originalAreas[originalOwner];
-      if (!originalWeightedArea || originalWeightedArea === 0) {
-        return cellArea;
-      }
-
-      const realArea =
-        REAL_WORLD_COUNTRY_AREAS[originalOwner] ||
-        REAL_WORLD_COUNTRY_AREAS[originalOwner.replace("NATION_", "")] ||
-        REAL_WORLD_COUNTRY_AREAS[originalOwner.replace("NATION_", "NATION_")];
-
-      if (realArea) {
-        return cellArea * (realArea / originalWeightedArea);
-      }
-      return cellArea;
+      return cellArea * GLOBAL_DEVIATION_FACTOR;
     };
 
     const landNeighborsMap = new Map<string, Set<string>>();

@@ -14,7 +14,6 @@ export class NationProfileAssigner {
       ? `کشور ${profile.nameFa}`
       : `قلمرو مستقل ${numericId}`;
     const flagCode = profile ? profile.flagCode : "US";
-    const areaSqKm = profile ? profile.areaSqKm : 5000;
 
     const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
     const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
@@ -66,9 +65,9 @@ export class NationProfileAssigner {
         landNeighbors: [],
         seaNeighbors: [],
         hasSeaAccess: true,
-        territorySize: areaSqKm,
+        territorySize: 1000,
         infrastructureLevel: 1,
-        contiguousMainlandSize: areaSqKm,
+        contiguousMainlandSize: 1000,
         isolatedPockets: [],
         coordinates: [],
       },
