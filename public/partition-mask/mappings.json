@@ -251,7 +251,7 @@
         0,
         43
       ],
-      "areaSqKm": 1267239
+      "areaSqKm": 1178260
     },
     {
       "id": 49,
@@ -262,7 +262,7 @@
         0,
         49
       ],
-      "areaSqKm": 412715
+      "areaSqKm": 384030
     },
     {
       "id": 51,
@@ -296,17 +296,6 @@
         55
       ],
       "areaSqKm": 252842
-    },
-    {
-      "id": 56,
-      "code": "PRI",
-      "name": "Puerto Rico",
-      "color": [
-        0,
-        0,
-        56
-      ],
-      "areaSqKm": 9185
     },
     {
       "id": 58,
@@ -826,17 +815,6 @@
       "areaSqKm": 58387
     },
     {
-      "id": 145,
-      "code": "NCL",
-      "name": "New Caledonia",
-      "color": [
-        0,
-        0,
-        145
-      ],
-      "areaSqKm": 23544
-    },
-    {
       "id": 147,
       "code": "NZL",
       "name": "New Zealand",
@@ -1076,7 +1054,7 @@
         0,
         173
       ],
-      "areaSqKm": 1809160
+      "areaSqKm": 1808166
     },
     {
       "id": 174,

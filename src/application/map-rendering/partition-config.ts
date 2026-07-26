@@ -74,4 +74,6 @@ export const PARTITION_COUNTRIES_LIST = [
   "SLB",
   "VUT",
   "PNG",
+  "PRI",
+  "NCL",
 ];
