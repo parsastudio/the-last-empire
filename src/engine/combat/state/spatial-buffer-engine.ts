@@ -62,8 +62,8 @@ export class SpatialBufferEngine {
         let ownerId = "WATER";
         if (data.nationId >= 11) {
           ownerId = `NATION_${data.nationId}`;
-        } else if (data.seaAccess > 1) {
-          ownerId = `GULF_${data.seaAccess}`;
+        } else if (data.seaAccess === 2) {
+          ownerId = "CLOSED_SEA";
         }
 
         const cell: GridCell = {

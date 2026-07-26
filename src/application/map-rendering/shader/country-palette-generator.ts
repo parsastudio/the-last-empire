@@ -48,12 +48,12 @@ export class CountryPaletteGenerator {
     });
 
     palette[250] = {
-      r1: 205,
-      g1: 198,
-      b1: 185,
-      r2: 180,
-      g2: 173,
-      b2: 160,
+      r1: 158,
+      g1: 150,
+      b1: 140,
+      r2: 138,
+      g2: 130,
+      b2: 120,
     };
 
     return palette;

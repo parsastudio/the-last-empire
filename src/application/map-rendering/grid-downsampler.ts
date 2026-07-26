@@ -14,23 +14,14 @@ export class GridDownsampler {
     for (let gy = 0; gy < lowResHeight; gy++) {
       for (let gx = 0; gx < lowResWidth; gx++) {
         const countryIds: string[] = [];
-        const enclaveIds: number[] = [];
-        const waterCounts = new Int32Array(11);
-
         for (let sy = 0; sy < scaleFactor; sy++) {
           for (let sx = 0; sx < scaleFactor; sx++) {
             const hx = gx * scaleFactor + sx;
             const hy = gy * scaleFactor + sy;
             const idx = hy * highResWidth + hx;
             const val = maskBuffer[idx];
-
-            if (val !== undefined) {
-              if (val >= 11) {
-                countryIds.push(`NATION_${val}`);
-                enclaveIds.push(0);
-              } else {
-                waterCounts[val]++;
-              }
+            if (val !== undefined && val >= 11) {
+              countryIds.push(`NATION_${val}`);
             }
           }
         }
@@ -48,18 +39,6 @@ export class GridDownsampler {
               cellOwner = id;
             }
           }
-        } else {
-          let maxWaterId = 0;
-          let maxWaterCount = 0;
-          for (let w = 0; w < 11; w++) {
-            if (waterCounts[w] > maxWaterCount) {
-              maxWaterCount = waterCounts[w];
-              maxWaterId = w;
-            }
-          }
-          if (maxWaterId > 0) {
-            cellOwner = `GULF_${maxWaterId}`;
-          }
         }
 
         const cell = {
@@ -71,8 +50,71 @@ export class GridDownsampler {
           highResPixelCount: countryIds.length,
           enclaveId: 0,
         };
-
         gridState.setCell(gx, gy, cell);
+      }
+    }
+
+    const allCells = gridState.getAllCells();
+    const visited = new Uint8Array(lowResWidth * lowResHeight);
+
+    for (let gy = 0; gy < lowResHeight; gy++) {
+      for (let gx = 0; gx < lowResWidth; gx++) {
+        const startIdx = gy * lowResWidth + gx;
+        const cell = gridState.getCell(gx, gy);
+        if (cell && cell.ownerId === "WATER" && visited[startIdx] === 0) {
+          const component: (typeof cell)[] = [];
+          const queue: number[] = [startIdx];
+          visited[startIdx] = 1;
+          let head = 0;
+
+          while (head < queue.length) {
+            const curr = queue[head++];
+            if (curr !== undefined) {
+              const cx = curr % lowResWidth;
+              const cy = Math.floor(curr / lowResWidth);
+              const cCell = gridState.getCell(cx, cy);
+              if (cCell) {
+                component.push(cCell);
+              }
+
+              const neighbors = [
+                { x: cx + 1, y: cy },
+                { x: cx - 1, y: cy },
+                { x: cx, y: cy + 1 },
+                { x: cx, y: cy - 1 },
+              ];
+
+              for (const n of neighbors) {
+                let nx = n.x;
+                if (nx < 0) {
+                  nx = lowResWidth - 1;
+                } else if (nx >= lowResWidth) {
+                  nx = 0;
+                }
+
+                const ny = n.y;
+                if (ny >= 0 && ny < lowResHeight) {
+                  const nIdx = ny * lowResWidth + nx;
+                  const nCell = gridState.getCell(nx, ny);
+                  if (
+                    nCell &&
+                    nCell.ownerId === "WATER" &&
+                    visited[nIdx] === 0
+                  ) {
+                    visited[nIdx] = 1;
+                    queue.push(nIdx);
+                  }
+                }
+              }
+            }
+          }
+
+          if (component.length < 500) {
+            for (const c of component) {
+              c.ownerId = "CLOSED_SEA";
+            }
+          }
+        }
       }
     }
 
