@@ -1,10 +1,7 @@
 import { EnclaveMeta } from "@/domain/nation/enclave.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { GridEnclaveMetadataBuilder } from "@/engine/combat/state/grid-enclave-metadata-builder";
 
 export class GridEnclaveMetadataUpdater {
-  private builder = new GridEnclaveMetadataBuilder();
-
   public updateEnclavesMetadata(
     countryId: string,
     allCells: GridCell[],
@@ -18,7 +15,25 @@ export class GridEnclaveMetadataUpdater {
 
     return enclaveIds.map((id) => {
       const enclaveCells = countryCells.filter((c) => c.enclaveId === id);
-      return this.builder.buildMetadata(id, countryId, enclaveCells);
+      let sumX = 0;
+      let sumY = 0;
+
+      enclaveCells.forEach((c) => {
+        sumX += c.x;
+        sumY += c.y;
+      });
+
+      const count = enclaveCells.length || 1;
+
+      return {
+        enclaveId: id,
+        originalCountryId: countryId,
+        originalName: `${countryId} Region ${id}`,
+        centerCoordinate: {
+          x: Math.floor(sumX / count),
+          y: Math.floor(sumY / count),
+        },
+      };
     });
   }
 }

@@ -1,10 +1,25 @@
 import { GridState } from "@/engine/combat/state/grid-state";
-import { GridStateFactory } from "./grid-state-factory";
+import { GridCell } from "@/domain/map/grid-cell.schema";
 
 export class GridStateFactoryService {
-  private factory = new GridStateFactory();
+  public buildDefaultGridState(width = 1024, height = 512): GridState {
+    const gridState = new GridState();
 
-  public buildDefaultGridState(): GridState {
-    return this.factory.createEmptyGrid();
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const cell: GridCell = {
+          x,
+          y,
+          ownerId: "WATER",
+          isOccupied: false,
+          occupierId: null,
+          highResPixelCount: 0,
+          enclaveId: 0,
+        };
+        gridState.setCell(x, y, cell);
+      }
+    }
+
+    return gridState;
   }
 }

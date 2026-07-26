@@ -1,9 +1,12 @@
-import { GridStateIntegrityChecker } from "./grid-state-integrity-checker";
-
 export class GridStateIntegrityAnalyzer {
-  private checker = new GridStateIntegrityChecker();
-
   public verifyState(serialized: string): boolean {
-    return this.checker.isIntegrityValid(serialized);
+    if (!serialized) {
+      return false;
+    }
+    const parts = serialized.split("|");
+    return parts.every((p) => {
+      const segments = p.split(":");
+      return segments.length === 6;
+    });
   }
 }
