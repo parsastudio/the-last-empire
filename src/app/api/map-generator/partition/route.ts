@@ -158,17 +158,17 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     }
 
-    for (let y = 1; y < 2048 - 1; y++) {
+    for (let y = 150; y < 2048 - 150; y++) {
       for (let x = 1; x < 4096 - 1; x++) {
         const idx = y * 4096 + x;
         const val = partitionedBuffer[idx]!;
         if (val < 11) {
           const d = dist[idx]!;
-          if (d >= 2) {
-            const hMax = d >= dist[idx - 1]! && d >= dist[idx + 1]!;
-            const vMax = d >= dist[idx - 4096]! && d >= dist[idx + 4096]!;
+          if (d >= 4 && d <= 120) {
+            const hMax = d > dist[idx - 1]! && d >= dist[idx + 1]!;
+            const vMax = d > dist[idx - 4096]! && d >= dist[idx + 4096]!;
             if (hMax || vMax) {
-              partitionedBuffer[idx] = 1;
+              partitionedBuffer[idx] = 254;
             }
           }
         }
