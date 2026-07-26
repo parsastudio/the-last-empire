@@ -16,13 +16,46 @@ export interface CountryMapping {
   areaSqKm: number;
 }
 
+function drawWaterLine(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  buffer: Uint8Array,
+  width: number,
+  height: number,
+  color: number,
+) {
+  const dx = Math.abs(x2 - x1);
+  const dy = Math.abs(y2 - y1);
+  const sx = x1 < x2 ? 1 : -1;
+  const sy = y1 < y2 ? 1 : -1;
+  let err = dx - dy;
+  let cx = x1;
+  let cy = y1;
+  while (true) {
+    if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
+      buffer[cy * width + cx] = color;
+    }
+    if (cx === x2 && cy === y2) break;
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      cx += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      cy += sy;
+    }
+  }
+}
+
 export async function generateTest6Map(
   width: number,
   height: number,
 ): Promise<{ countries: CountryMapping[] }> {
   const publicDir = path.join(process.cwd(), "public");
   const geojsonPath = path.join(publicDir, "ne_110m_admin_0_countries.geojson");
-
   let geoJson: typeof FALLBACK_WORLD_MAP;
   try {
     const raw = await fs.readFile(geojsonPath, "utf-8");
@@ -30,12 +63,10 @@ export async function generateTest6Map(
   } catch {
     geoJson = FALLBACK_WORLD_MAP;
   }
-
   const processor = new GeoJsonProcessor();
   const distanceTransform = new DistanceTransform();
   const writer = new MapWriter();
   const areaCalculator = new AreaWeightCalculator();
-
   const countries: CountryMapping[] = [];
   countries.push({
     id: 0,
@@ -44,13 +75,10 @@ export async function generateTest6Map(
     color: [0, 0, 0],
     areaSqKm: 0,
   });
-
   const buffer = new Uint8Array(width * height);
   buffer.fill(0);
-
   const features = processor.extractFeatures(geoJson);
   let nextId = 11;
-
   for (const feature of features) {
     countries.push({
       id: nextId,
@@ -59,12 +87,10 @@ export async function generateTest6Map(
       color: [0, 0, nextId],
       areaSqKm: 0,
     });
-
     const processRing = (ring: number[][]) => {
       const points = processor.getPolygonPoints(ring, width, height);
       rasterizePolygon(points, width, height, nextId, buffer);
     };
-
     if (feature.geometry.type === "Polygon") {
       const rings = feature.geometry.coordinates as number[][][];
       rings.forEach((ring) => processRing(ring));
@@ -74,20 +100,20 @@ export async function generateTest6Map(
         polygonCoords.forEach((ring) => processRing(ring));
       });
     }
-
     nextId++;
   }
 
+  drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
+  drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
+
   const pixelAreas = new Float64Array(nextId);
   pixelAreas.fill(0);
-
   const totalSurfaceAreaSqKm = areaCalculator.calculateTotalSurfaceAreaSqKm();
   const { weights, totalWeight } = areaCalculator.generateRowWeights(
     height,
     width,
   );
   const areaPerUnit = totalSurfaceAreaSqKm / totalWeight;
-
   for (let y = 0; y < height; y++) {
     const rowWeight = weights[y] * areaPerUnit;
     for (let x = 0; x < width; x++) {
@@ -97,7 +123,6 @@ export async function generateTest6Map(
       }
     }
   }
-
   countries.forEach((c) => {
     if (c.id >= 11) {
       const calibratedArea =
@@ -109,10 +134,9 @@ export async function generateTest6Map(
         : Math.round(pixelAreas[c.id] || 0);
     }
   });
-
   const dist = distanceTransform.calculate(buffer, width, height);
-  distanceTransform.applySeaDepths(buffer, dist, width, height);
 
+  distanceTransform.applySeaDepths(buffer, dist, width, height);
   await writer.saveMaskImage(width, height, buffer, publicDir);
   await fs.writeFile(path.join(publicDir, "test6", "world-mask.bin"), buffer);
 
@@ -120,12 +144,10 @@ export async function generateTest6Map(
   const lowResHeight = 512;
   const scale = 4;
   const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 3);
-
   for (let gy = 0; gy < lowResHeight; gy++) {
     for (let gx = 0; gx < lowResWidth; gx++) {
       const countryCounts = new Map<number, number>();
       const waterCounts = new Int32Array(11);
-
       for (let sy = 0; sy < scale; sy++) {
         for (let sx = 0; sx < scale; sx++) {
           const hx = gx * scale + sx;
@@ -138,7 +160,6 @@ export async function generateTest6Map(
           }
         }
       }
-
       let finalB = 0;
       let maxCountryCount = 0;
       for (const [id, count] of countryCounts.entries()) {
@@ -147,7 +168,6 @@ export async function generateTest6Map(
           finalB = id;
         }
       }
-
       let finalR = 0;
       if (finalB === 0) {
         let maxWaterCount = 0;
@@ -158,18 +178,15 @@ export async function generateTest6Map(
           }
         }
       }
-
       const pIdx = (gy * lowResWidth + gx) * 3;
       packed1024[pIdx] = finalR;
       packed1024[pIdx + 1] = 0;
       packed1024[pIdx + 2] = finalB;
     }
   }
-
   await fs.writeFile(
     path.join(publicDir, "test6", "world-mask-1024.bin"),
     packed1024,
   );
-
   return { countries };
 }

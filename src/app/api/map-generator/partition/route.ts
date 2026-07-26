@@ -29,16 +29,13 @@ function decodeOurIndexedPng(
   ) {
     throw new Error("Invalid PNG signature");
   }
-
   const idatChunks: Buffer[] = [];
   let pos = 8;
-
   while (pos < pngBuffer.length) {
     if (pos + 8 > pngBuffer.length) break;
     const length = pngBuffer.readUInt32BE(pos);
     const type = pngBuffer.toString("ascii", pos + 4, pos + 8);
     pos += 8;
-
     if (pos + length > pngBuffer.length) break;
     if (type === "IDAT") {
       idatChunks.push(pngBuffer.subarray(pos, pos + length));
@@ -47,27 +44,56 @@ function decodeOurIndexedPng(
     }
     pos += length + 4;
   }
-
   if (idatChunks.length === 0) {
     throw new Error("No IDAT chunk found in PNG");
   }
-
   const compressedIdat = Buffer.concat(idatChunks);
   const decompressed = zlib.inflateSync(compressedIdat);
-
   const scanlineSize = width + 1;
   if (decompressed.length !== height * scanlineSize) {
     throw new Error("Unexpected decompressed size");
   }
-
   const rawPixels = new Uint8Array(width * height);
   for (let y = 0; y < height; y++) {
     const srcPos = y * scanlineSize + 1;
     const destPos = y * width;
     rawPixels.set(decompressed.subarray(srcPos, srcPos + width), destPos);
   }
-
   return rawPixels;
+}
+
+function drawWaterLine(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  buffer: Uint8Array,
+  width: number,
+  height: number,
+  color: number,
+) {
+  const dx = Math.abs(x2 - x1);
+  const dy = Math.abs(y2 - y1);
+  const sx = x1 < x2 ? 1 : -1;
+  const sy = y1 < y2 ? 1 : -1;
+  let err = dx - dy;
+  let cx = x1;
+  let cy = y1;
+  while (true) {
+    if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
+      buffer[cy * width + cx] = color;
+    }
+    if (cx === x2 && cy === y2) break;
+    const e2 = 2 * err;
+    if (e2 > -dy) {
+      err -= dy;
+      cx += sx;
+    }
+    if (e2 < dx) {
+      err += dx;
+      cy += sy;
+    }
+  }
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -75,12 +101,10 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const source = searchParams.get("source") || "default";
-
     const publicDir = path.join(process.cwd(), "public");
     const sourceDirName = source === "edited" ? "edited-mask" : "test6";
     const sourceBinPath = path.join(publicDir, sourceDirName, "world-mask.bin");
     const sourceJsonPath = path.join(publicDir, sourceDirName, "mappings.json");
-
     let mappingsData: { countries: CountryMapping[] };
     try {
       const jsonStr = await fs.readFile(sourceJsonPath, "utf-8");
@@ -100,7 +124,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         );
       }
     }
-
     let binBuffer: Uint8Array;
     try {
       const fileBytes = await fs.readFile(sourceBinPath);
@@ -125,9 +148,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         );
       }
     }
-
     const tReadEnd = performance.now();
-
     const engine = new MapPartitionEngine();
     const partitionedBuffer = engine.applyPartition(
       binBuffer,
@@ -136,47 +157,10 @@ export async function POST(request: Request): Promise<NextResponse> {
       mappingsData.countries,
     );
 
-    const dist = new Int32Array(4096 * 2048);
-    dist.fill(9999);
-    for (let y = 0; y < 2048; y++) {
-      for (let x = 0; x < 4096; x++) {
-        const idx = y * 4096 + x;
-        const val = partitionedBuffer[idx]!;
-        if (val >= 11) {
-          dist[idx] = 0;
-        } else {
-          if (x > 0) dist[idx] = Math.min(dist[idx], dist[idx - 1] + 1);
-          if (y > 0) dist[idx] = Math.min(dist[idx], dist[idx - 4096] + 1);
-        }
-      }
-    }
-    for (let y = 2048 - 1; y >= 0; y--) {
-      for (let x = 4096 - 1; x >= 0; x--) {
-        const idx = y * 4096 + x;
-        if (x < 4096 - 1) dist[idx] = Math.min(dist[idx], dist[idx + 1] + 1);
-        if (y < 2048 - 1) dist[idx] = Math.min(dist[idx], dist[idx + 4096] + 1);
-      }
-    }
-
-    for (let y = 150; y < 2048 - 150; y++) {
-      for (let x = 1; x < 4096 - 1; x++) {
-        const idx = y * 4096 + x;
-        const val = partitionedBuffer[idx]!;
-        if (val < 11) {
-          const d = dist[idx]!;
-          if (d >= 4 && d <= 120) {
-            const hMax = d > dist[idx - 1]! && d >= dist[idx + 1]!;
-            const vMax = d > dist[idx - 4096]! && d >= dist[idx + 4096]!;
-            if (hMax || vMax) {
-              partitionedBuffer[idx] = 254;
-            }
-          }
-        }
-      }
-    }
+    drawWaterLine(2414, 676, 2419, 687, partitionedBuffer, 4096, 2048, 0);
+    drawWaterLine(1136, 915, 1145, 925, partitionedBuffer, 4096, 2048, 0);
 
     const tPartitionEnd = performance.now();
-
     const areaCalculator = new AreaWeightCalculator();
     const totalSurfaceArea = areaCalculator.calculateTotalSurfaceAreaSqKm();
     const { weights, totalWeight } = areaCalculator.generateRowWeights(
@@ -184,10 +168,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       4096,
     );
     const areaPerUnit = totalSurfaceArea / totalWeight;
-
     const pixelAreas = new Float64Array(256);
     pixelAreas.fill(0);
-
     for (let y = 0; y < 2048; y++) {
       const rowWeight = weights[y] * areaPerUnit;
       for (let x = 0; x < 4096; x++) {
@@ -197,7 +179,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         }
       }
     }
-
     const updatedCountries = mappingsData.countries
       .filter((c) => !PARTITION_COUNTRIES_LIST.includes(c.code))
       .map((c) => {
@@ -206,34 +187,26 @@ export async function POST(request: Request): Promise<NextResponse> {
         }
         return c;
       });
-
     const newMappings = { countries: updatedCountries };
-
     const tAreaEnd = performance.now();
-
     const partitionDir = path.join(publicDir, "partition-mask");
     await fs.mkdir(partitionDir, { recursive: true });
-
     const palette: [number, number, number][] = [];
     for (let i = 0; i < 256; i++) {
       palette.push([0, 0, i]);
     }
-
     const pngBuffer = encodePng(4096, 2048, partitionedBuffer, palette);
     await fs.writeFile(path.join(partitionDir, "world-mask.png"), pngBuffer);
     await fs.writeFile(
       path.join(partitionDir, "world-mask.bin"),
       partitionedBuffer,
     );
-
     await fs.writeFile(
       path.join(partitionDir, "mappings.json"),
       JSON.stringify(newMappings, null, 2),
       "utf-8",
     );
-
     const tWriteEnd = performance.now();
-
     const metrics = {
       readTimeMs: Math.round(tReadEnd - tStart),
       partitionTimeMs: Math.round(tPartitionEnd - tReadEnd),
@@ -241,7 +214,6 @@ export async function POST(request: Request): Promise<NextResponse> {
       writeTimeMs: Math.round(tWriteEnd - tAreaEnd),
       totalTimeMs: Math.round(tWriteEnd - tStart),
     };
-
     return NextResponse.json({ success: true, data: newMappings, metrics });
   } catch (err) {
     const msg =

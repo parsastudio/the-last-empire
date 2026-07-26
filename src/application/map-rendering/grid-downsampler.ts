@@ -16,7 +16,6 @@ export class GridDownsampler {
         const countryIds: string[] = [];
         const enclaveIds: number[] = [];
         const waterCounts = new Int32Array(11);
-        let hasHighway = false;
 
         for (let sy = 0; sy < scaleFactor; sy++) {
           for (let sx = 0; sx < scaleFactor; sx++) {
@@ -26,9 +25,7 @@ export class GridDownsampler {
             const val = maskBuffer[idx];
 
             if (val !== undefined) {
-              if (val === 254) {
-                hasHighway = true;
-              } else if (val >= 11) {
+              if (val >= 11) {
                 countryIds.push(`NATION_${val}`);
                 enclaveIds.push(0);
               } else {
@@ -50,10 +47,6 @@ export class GridDownsampler {
               maxCount = count;
               cellOwner = id;
             }
-          }
-
-          if (hasHighway) {
-            cellOwner = "WATER";
           }
         } else {
           let maxWaterId = 0;

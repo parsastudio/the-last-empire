@@ -7,27 +7,56 @@ export class NavalPathResolver {
     target: Coordinate,
     allCells: GridCell[],
   ): boolean {
-    const obstacleCells = new Set<string>(
-      allCells
-        .filter((c) => c.ownerId !== "WATER" && !c.isOccupied)
-        .map((c) => `${c.x},${c.y}`),
-    );
-
-    const steps = Math.max(
-      Math.abs(origin.x - target.x),
-      Math.abs(origin.y - target.y),
-    );
-    if (steps === 0) return false;
-
-    for (let i = 1; i < steps; i++) {
-      const t = i / steps;
-      const cx = Math.round(origin.x + (target.x - origin.x) * t);
-      const cy = Math.round(origin.y + (target.y - origin.y) * t);
-      if (obstacleCells.has(`${cx},${cy}`)) {
-        return true;
+    const traversable = new Set<string>();
+    for (const cell of allCells) {
+      if (
+        cell.ownerId === "WATER" ||
+        cell.ownerId.startsWith("GULF_") ||
+        cell.isOccupied
+      ) {
+        traversable.add(`${cell.x},${cell.y}`);
       }
     }
 
-    return false;
+    traversable.add(`${origin.x},${origin.y}`);
+    traversable.add(`${target.x},${target.y}`);
+
+    const queue: Coordinate[] = [origin];
+    const visited = new Set<string>([`${origin.x},${origin.y}`]);
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (current.x === target.x && current.y === target.y) {
+        return false;
+      }
+
+      const neighbors = [
+        { x: current.x + 1, y: current.y },
+        { x: current.x - 1, y: current.y },
+        { x: current.x, y: current.y + 1 },
+        { x: current.x, y: current.y - 1 },
+        { x: current.x + 1, y: current.y + 1 },
+        { x: current.x - 1, y: current.y - 1 },
+        { x: current.x + 1, y: current.y - 1 },
+        { x: current.x - 1, y: current.y + 1 },
+      ];
+
+      for (const n of neighbors) {
+        let nx = n.x;
+        if (nx < 0) nx = 1023;
+        if (nx >= 1024) nx = 0;
+
+        const ny = n.y;
+        if (ny >= 0 && ny < 512) {
+          const key = `${nx},${ny}`;
+          if (traversable.has(key) && !visited.has(key)) {
+            visited.add(key);
+            queue.push({ x: nx, y: ny });
+          }
+        }
+      }
+    }
+
+    return true;
   }
 }
