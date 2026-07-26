@@ -22,6 +22,7 @@ export default function MapTest6Page() {
   const mapHeight = 2048;
 
   const [showHeatmap] = useState(false);
+  const [useEdited, setUseEdited] = useState(false);
   const [pendingSelection, setPendingSelection] = useState<{
     id: string;
     name: string;
@@ -51,7 +52,7 @@ export default function MapTest6Page() {
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
-  } = useMapData({ mapWidth, mapHeight });
+  } = useMapData({ mapWidth, mapHeight, useEdited });
 
   const { hoveredCountry, handlePointerMove } = useMapMouse({
     canvasDestRef,
@@ -166,6 +167,21 @@ export default function MapTest6Page() {
               onAdvanceTurn={advanceTurn}
               isAdvancing={isAdvancing}
             />
+
+            <div className="absolute top-4 left-36 z-40 bg-slate-950/90 border border-slate-900 rounded-2xl p-0.5 flex text-[10px] font-mono shadow-xl pointer-events-auto">
+              <button
+                onClick={() => setUseEdited(false)}
+                className={`px-3 py-1.5 rounded-xl transition-all ${!useEdited ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
+              >
+                DEFAULT TOPOLOGY
+              </button>
+              <button
+                onClick={() => setUseEdited(true)}
+                className={`px-3 py-1.5 rounded-xl transition-all ${useEdited ? "bg-emerald-600 text-white font-bold" : "text-slate-400 hover:text-slate-200"}`}
+              >
+                EDITED MASK
+              </button>
+            </div>
 
             <LeftCommandHub
               gameState={gameState}
