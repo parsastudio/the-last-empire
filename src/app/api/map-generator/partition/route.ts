@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import zlib from "zlib";
 import { MapPartitionEngine } from "@/application/map-rendering/map-partition-engine";
 import { encodePng } from "@/application/map-rendering/png-encoder";
 import { AreaWeightCalculator } from "@/application/map-rendering/generator/area-weight-calculator";
 import { PARTITION_COUNTRIES_LIST } from "@/application/map-rendering/partition-config";
 import { generateTest6Map } from "@/application/map-rendering/map-generator";
+import { PngDecoder } from "@/application/map-rendering/utils/png-decoder";
+import { GeometryDraw } from "@/application/map-rendering/utils/geometry-draw";
 
 interface CountryMapping {
   id: number;
@@ -14,86 +15,6 @@ interface CountryMapping {
   name: string;
   color: [number, number, number];
   areaSqKm: number;
-}
-
-function decodeOurIndexedPng(
-  pngBuffer: Buffer,
-  width = 4096,
-  height = 2048,
-): Uint8Array {
-  if (
-    pngBuffer[0] !== 0x89 ||
-    pngBuffer[1] !== 0x50 ||
-    pngBuffer[2] !== 0x4e ||
-    pngBuffer[3] !== 0x47
-  ) {
-    throw new Error("Invalid PNG signature");
-  }
-  const idatChunks: Buffer[] = [];
-  let pos = 8;
-  while (pos < pngBuffer.length) {
-    if (pos + 8 > pngBuffer.length) break;
-    const length = pngBuffer.readUInt32BE(pos);
-    const type = pngBuffer.toString("ascii", pos + 4, pos + 8);
-    pos += 8;
-    if (pos + length > pngBuffer.length) break;
-    if (type === "IDAT") {
-      idatChunks.push(pngBuffer.subarray(pos, pos + length));
-    } else if (type === "IEND") {
-      break;
-    }
-    pos += length + 4;
-  }
-  if (idatChunks.length === 0) {
-    throw new Error("No IDAT chunk found in PNG");
-  }
-  const compressedIdat = Buffer.concat(idatChunks);
-  const decompressed = zlib.inflateSync(compressedIdat);
-  const scanlineSize = width + 1;
-  if (decompressed.length !== height * scanlineSize) {
-    throw new Error("Unexpected decompressed size");
-  }
-  const rawPixels = new Uint8Array(width * height);
-  for (let y = 0; y < height; y++) {
-    const srcPos = y * scanlineSize + 1;
-    const destPos = y * width;
-    rawPixels.set(decompressed.subarray(srcPos, srcPos + width), destPos);
-  }
-  return rawPixels;
-}
-
-function drawWaterLine(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  buffer: Uint8Array,
-  width: number,
-  height: number,
-  color: number,
-) {
-  const dx = Math.abs(x2 - x1);
-  const dy = Math.abs(y2 - y1);
-  const sx = x1 < x2 ? 1 : -1;
-  const sy = y1 < y2 ? 1 : -1;
-  let err = dx - dy;
-  let cx = x1;
-  let cy = y1;
-  while (true) {
-    if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
-      buffer[cy * width + cx] = color;
-    }
-    if (cx === x2 && cy === y2) break;
-    const e2 = 2 * err;
-    if (e2 > -dy) {
-      err -= dy;
-      cx += sx;
-    }
-    if (e2 < dx) {
-      err += dx;
-      cy += sy;
-    }
-  }
 }
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -136,7 +57,8 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
       try {
         const pngBytes = await fs.readFile(sourcePngPath);
-        binBuffer = decodeOurIndexedPng(pngBytes, 4096, 2048);
+        const decoder = new PngDecoder();
+        binBuffer = decoder.decodeOurIndexedPng(pngBytes, 4096, 2048);
         await fs.writeFile(sourceBinPath, binBuffer);
       } catch {
         return NextResponse.json(
@@ -157,13 +79,14 @@ export async function POST(request: Request): Promise<NextResponse> {
       mappingsData.countries,
     );
 
-    drawWaterLine(2414, 676, 2419, 687, partitionedBuffer, 4096, 2048, 0);
-    drawWaterLine(1136, 915, 1145, 925, partitionedBuffer, 4096, 2048, 0);
+    const draw = new GeometryDraw();
+    draw.drawWaterLine(2414, 676, 2419, 687, partitionedBuffer, 4096, 2048, 0);
+    draw.drawWaterLine(1136, 915, 1145, 925, partitionedBuffer, 4096, 2048, 0);
 
     const tPartitionEnd = performance.now();
     const areaCalculator = new AreaWeightCalculator();
     const totalSurfaceArea = areaCalculator.calculateTotalSurfaceAreaSqKm();
-    const { weights, totalWeight } = areaCalculator.generateRowWeights(
+    const { weights, totalWeight = 0 } = areaCalculator.generateRowWeights(
       2048,
       4096,
     );
