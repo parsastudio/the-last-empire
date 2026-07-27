@@ -67,7 +67,7 @@ export function NationDetailsPanel({
       <div className="pt-4 border-t border-border">
         <button
           onClick={onStartCampaign}
-          className="w-full py-4 px-8 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-emerald-950/10 text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-4 px-8 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold transition-all shadow-lg shadow-gdp/10 text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
         >
           <Zap size={16} fill="currentColor" />
           <span>شروع امپراتوری {nation.name}</span>
