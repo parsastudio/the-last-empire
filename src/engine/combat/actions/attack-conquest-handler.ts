@@ -159,7 +159,7 @@ export class AttackConquestHandler implements ActionHandler {
     if (attacker.treasury < totalCampaignCost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        `Insufficient sovereign treasury to finance this campaign. Required: $${totalCampaignCost.toLocaleString()} (Internal Logistics: $${baseLogisticsCost.toLocaleString()}, Naval Transit: $${navalTransitCost.toLocaleString()}).`,
+        `Insufficient sovereign treasury to finance this campaign. Required: $${totalCampaignCost.toLocaleString()}`,
       );
     }
 
