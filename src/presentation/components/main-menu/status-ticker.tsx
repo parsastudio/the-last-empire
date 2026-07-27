@@ -9,20 +9,20 @@ export function StatusTicker() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
         </span>
-        <span>بخش‌های محاسباتی فعال و آماده نبرد</span>
+        <span>سیستم کنترل ترافیک شبکه دفاعی همگام است</span>
       </div>
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-2">
           <Globe size={13} className="text-primary/70" />
-          <span>فشار ژئوپلیتیک جهانی: ۵۲٪</span>
+          <span>فرکانس همگام‌سازی شبکه فرماندهی: ۳۴.۸ مگاهرتز</span>
         </div>
         <div className="flex items-center gap-2">
           <ShieldAlert size={13} className="text-military/80" />
-          <span>پروتکل دفاعی: زرد (سطح متوسط)</span>
+          <span>یکپارچگی لایه ترافیک جغرافیایی: ۹۹.۹۸٪</span>
         </div>
         <div className="flex items-center gap-2">
           <Cpu size={13} className="text-gdp/80" />
-          <span>بار پردازشی هسته: ۲.۴۳ گیگاهرتز</span>
+          <span>توازن ترانزیت لوجستیک مرزی: برقرار</span>
         </div>
       </div>
     </footer>
