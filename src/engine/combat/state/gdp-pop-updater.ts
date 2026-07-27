@@ -38,17 +38,8 @@ export class GdpPopUpdater {
       const numericId = parseInt(id.replace("NATION_", ""), 10);
       const profile = findCountryProfileById(numericId);
 
-      let baseGdp = profile ? profile.gdp : 5000000000;
-      let basePop = profile ? profile.population : 80000000;
-
-      const defaultArea = profile ? profile.territorySize : 1000;
-      const currentMaxArea = nation.geography.territorySize;
-      const areaScaleFactor = Math.sqrt(
-        Math.max(1, currentMaxArea) / Math.max(1, defaultArea),
-      );
-
-      baseGdp = Math.round(baseGdp * areaScaleFactor);
-      basePop = Math.round(basePop * areaScaleFactor);
+      const baseGdp = profile ? profile.gdp : 5000000000;
+      const basePop = profile ? profile.population : 80000000;
 
       const totalPixels = totalPixelsMap.get(id) || 1;
       const freePixels = freePixelsMap.get(id) || 0;
@@ -63,24 +54,10 @@ export class GdpPopUpdater {
           const victimNumericId = parseInt(victimId.replace("NATION_", ""), 10);
           const victimProfile = findCountryProfileById(victimNumericId);
 
-          let victimBaseGdp = victimProfile ? victimProfile.gdp : 5000000000;
-          let victimBasePop = victimProfile
+          const victimBaseGdp = victimProfile ? victimProfile.gdp : 5000000000;
+          const victimBasePop = victimProfile
             ? victimProfile.population
             : 80000000;
-
-          const victimNation = updated[victimId];
-          const victimMaxArea = victimNation
-            ? victimNation.geography.territorySize
-            : 1000;
-          const victimDefaultArea = victimProfile
-            ? victimProfile.territorySize
-            : 1000;
-          const victimScale = Math.sqrt(
-            Math.max(1, victimMaxArea) / Math.max(1, victimDefaultArea),
-          );
-
-          victimBaseGdp = Math.round(victimBaseGdp * victimScale);
-          victimBasePop = Math.round(victimBasePop * victimScale);
 
           const victimTotalPixels = totalPixelsMap.get(victimId) || 1;
           const lootRatio = pixels / victimTotalPixels;
