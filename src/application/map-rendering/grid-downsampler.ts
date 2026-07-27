@@ -59,7 +59,6 @@ export class GridDownsampler {
       }
     }
 
-    const allCells = gridState.getAllCells();
     const visited = new Uint8Array(lowResWidth * lowResHeight);
 
     for (let gy = 0; gy < lowResHeight; gy++) {

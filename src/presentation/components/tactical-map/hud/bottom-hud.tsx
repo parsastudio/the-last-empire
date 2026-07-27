@@ -1,6 +1,6 @@
 import React from "react";
 import { findCountryProfileByCode } from "@/domain/map/countries";
-import { Shield, Map, Activity, Users, Globe } from "lucide-react";
+import { Trophy, Globe, Map, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface CountryMapping {
@@ -14,99 +14,92 @@ interface CountryMapping {
 interface BottomHudProps {
   hoveredCountry: CountryMapping | null;
   playerNationId: string | null;
+  rankings?: { id: string; score: number; rank: number }[];
 }
 
-export function BottomHud({ hoveredCountry, playerNationId }: BottomHudProps) {
+export function BottomHud({
+  hoveredCountry,
+  playerNationId,
+  rankings = [],
+}: BottomHudProps) {
   const profile = hoveredCountry
     ? findCountryProfileByCode(hoveredCountry.code)
     : null;
 
   const isPlayer = playerNationId && hoveredCountry?.code === playerNationId;
+  const isColony = hoveredCountry
+    ? hoveredCountry.id >= 40 && hoveredCountry.id !== 118
+    : false;
+
+  const countryRank = hoveredCountry
+    ? rankings.find((r) => r.id === hoveredCountry.code)?.rank || 12
+    : null;
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-lg px-4 pointer-events-none">
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-sm px-4 pointer-events-none">
       <AnimatePresence mode="wait">
         {hoveredCountry && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 15, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="pointer-events-auto w-full bg-slate-950/80 backdrop-blur-xl border border-slate-900 rounded-3xl p-5 shadow-2xl shadow-black/50 dir-rtl text-right font-sans flex flex-col gap-4"
+            exit={{ opacity: 0, y: 10, scale: 0.97 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="pointer-events-auto w-full bg-slate-950/85 backdrop-blur-2xl border border-slate-900 rounded-2xl px-4 py-3 shadow-2xl flex items-center justify-between gap-4 dir-rtl text-right font-sans"
           >
-            <div className="flex items-center justify-between border-b border-slate-900 pb-3">
-              <div className="flex items-center gap-3.5">
-                {profile?.flagCode ? (
-                  <span className="text-2xl shadow-lg">
-                    {String.fromCodePoint(
-                      ...profile.flagCode
-                        .toUpperCase()
-                        .split("")
-                        .map((char) => 127397 + char.charCodeAt(0)),
-                    )}
-                  </span>
-                ) : (
-                  <Globe className="text-emerald-500 w-5 h-5 animate-pulse" />
-                )}
-                <div>
-                  <h3 className="text-sm font-bold text-slate-100 tracking-tight">
-                    {profile?.nameFa || hoveredCountry.name}
-                  </h3>
-                  <p className="text-[10px] text-slate-500 font-mono mt-0.5 tracking-wider">
-                    {hoveredCountry.code} • شناسه بین‌المللی {hoveredCountry.id}
-                  </p>
-                </div>
-              </div>
+            <div className="flex items-center gap-2.5">
+              {profile?.flagCode ? (
+                <span className="text-xl">
+                  {String.fromCodePoint(
+                    ...profile.flagCode
+                      .toUpperCase()
+                      .split("")
+                      .map((char) => 127397 + char.charCodeAt(0)),
+                  )}
+                </span>
+              ) : (
+                <Globe className="text-emerald-500 w-4 h-4" />
+              )}
               <div>
-                {isPlayer ? (
-                  <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold rounded-full font-mono uppercase tracking-widest">
-                    قلمرو شما
-                  </span>
-                ) : (
-                  <span className="px-3 py-1 bg-slate-900/80 border border-slate-800 text-slate-400 text-[9px] font-bold rounded-full font-mono uppercase tracking-widest">
-                    دولت مستقل
-                  </span>
-                )}
+                <h3 className="text-xs font-black text-slate-100 flex items-center gap-1.5">
+                  <span>{profile?.nameFa || hoveredCountry.name}</span>
+                  {isColony ? (
+                    <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded-md">
+                      (مستعمره شماره {hoveredCountry.id})
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-slate-500">
+                      ({isPlayer ? "قلمرو خودی" : "مستقل"})
+                    </span>
+                  )}
+                </h3>
+                <div className="flex items-center gap-3 text-[10px] text-slate-500 mt-1">
+                  <div className="flex items-center gap-1">
+                    <Map size={10} />
+                    <span>
+                      {hoveredCountry.areaSqKm
+                        ? `${new Intl.NumberFormat("fa-IR").format(hoveredCountry.areaSqKm)} km²`
+                        : "۰ km²"}
+                    </span>
+                  </div>
+                  {countryRank && (
+                    <div className="flex items-center gap-1 text-amber-500/80">
+                      <Trophy size={10} />
+                      <span>
+                        رتبه{" "}
+                        {new Intl.NumberFormat("fa-IR").format(countryRank)}{" "}
+                        جهان
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-slate-950/50 border border-slate-900 p-3 rounded-2xl flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <Map size={11} className="text-slate-400" />
-                  <span className="text-[10px] font-bold">وسعت قلمرو</span>
-                </div>
-                <span className="text-xs font-bold text-slate-200 font-mono mt-1">
-                  {hoveredCountry.areaSqKm
-                    ? `${new Intl.NumberFormat("fa-IR").format(hoveredCountry.areaSqKm)} کیلومتر مربع`
-                    : "محاسبه نشده"}
-                </span>
+            {profile?.traits?.includes("INDUSTRIAL_HUB") && (
+              <div className="bg-slate-900/60 p-1.5 rounded-xl border border-slate-850">
+                <Sparkles size={11} className="text-emerald-400" />
               </div>
-
-              <div className="bg-slate-950/50 border border-slate-900 p-3 rounded-2xl flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <Users size={11} className="text-slate-400" />
-                  <span className="text-[10px] font-bold">جمعیت تخمینی</span>
-                </div>
-                <span className="text-xs font-bold text-slate-200 font-mono mt-1">
-                  {profile?.population
-                    ? `${(profile.population / 1e6).toFixed(1)} میلیون نفر`
-                    : "نامشخص"}
-                </span>
-              </div>
-
-              <div className="bg-slate-950/50 border border-slate-900 p-3 rounded-2xl flex flex-col gap-1">
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <Shield size={11} className="text-slate-400" />
-                  <span className="text-[10px] font-bold">دکترین نظامی</span>
-                </div>
-                <span className="text-xs font-bold text-slate-200 mt-1">
-                  {profile?.traits?.includes("MILITARISTIC")
-                    ? "میلیتاریستی"
-                    : "پدافند غیرعامل"}
-                </span>
-              </div>
-            </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

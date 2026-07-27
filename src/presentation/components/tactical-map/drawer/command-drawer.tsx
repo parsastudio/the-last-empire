@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { findCountryProfileByCode } from "@/domain/map/countries";
-import { Shield, Landmark, Globe, Coins, Swords, X } from "lucide-react";
+import { Globe, Swords, X } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface CommandDrawerProps {
@@ -12,7 +12,7 @@ interface CommandDrawerProps {
     unitType: "INFANTRY" | "AIR_FORCE" | "DRONE_MISSILE",
     qty: number,
   ) => void;
-  onTrade: (resourceType: "oil" | "steel", isBuy: boolean, qty: number) => void;
+  onTrade: (resourceType: "oil" | "steel", qty: number) => void;
   onTaxChange: (rate: number) => void;
   onDeclareWar: () => void;
 }
@@ -152,18 +152,12 @@ export function CommandDrawer({
                       خرید با نرخ بازار
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1">
                     <button
-                      onClick={() => onTrade("oil", true, 20)}
+                      onClick={() => onTrade("oil", 20)}
                       className="py-2.5 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold rounded-xl transition-all cursor-pointer"
                     >
-                      خرید ۲۰ بشکه
-                    </button>
-                    <button
-                      onClick={() => onTrade("oil", false, 20)}
-                      className="py-2.5 bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-500/20 text-[10px] font-bold rounded-xl transition-all cursor-pointer"
-                    >
-                      فروش ۲۰ بشکه
+                      خرید ۲۰ بشکه نفت خام
                     </button>
                   </div>
                 </div>
