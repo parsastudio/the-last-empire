@@ -41,39 +41,4 @@ export class PowerScoreCalculator {
       powerScore,
     };
   }
-
-  public rankNations(
-    nations: {
-      id: string;
-      gdp: number;
-      treasury: number;
-      infantry: number;
-      airForce: number;
-      drone: number;
-      militaryPowerMultiplier?: number;
-    }[],
-  ): { id: string; score: number; rank: number }[] {
-    const scores = nations.map((n) => {
-      const details = this.calculatePowerScore(
-        n.gdp,
-        n.treasury,
-        n.infantry,
-        n.airForce,
-        n.drone,
-        n.militaryPowerMultiplier ?? 1.0,
-      );
-      return {
-        id: n.id,
-        score: details.powerScore,
-      };
-    });
-
-    scores.sort((a, b) => b.score - a.score);
-
-    return scores.map((item, index) => ({
-      id: item.id,
-      score: item.score,
-      rank: index + 1,
-    }));
-  }
 }

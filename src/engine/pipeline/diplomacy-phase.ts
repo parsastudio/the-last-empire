@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { GlobalIntelligenceUpdater } from "@/engine/diplomacy/global-intelligence-updater";
-import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
+import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { CoalitionManager } from "@/engine/diplomacy/coalition-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
@@ -9,7 +9,7 @@ import { OpinionFrictionHandler } from "./diplomacy/opinion-friction-handler";
 
 export class DiplomacyPhase implements TurnPhase {
   private intelligenceUpdater = new GlobalIntelligenceUpdater();
-  private powerCalculator = new PowerScoreCalculator();
+  private powerRanker = new PowerScoreRanker();
   private governmentSystem = new GovernmentSystem();
   private coalitionManager = new CoalitionManager();
   private reputationDecayHandler = new ReputationDecayHandler();
@@ -34,7 +34,7 @@ export class DiplomacyPhase implements TurnPhase {
         };
       });
 
-    this.powerCalculator.rankNations(rawNationsList);
+    this.powerRanker.rankNations(rawNationsList);
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
