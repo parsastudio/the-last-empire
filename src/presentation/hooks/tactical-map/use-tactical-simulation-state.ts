@@ -13,6 +13,7 @@ import { useTacticalAttack } from "./use-tactical-attack";
 import { useTurnProgression } from "./use-turn-progression";
 import { useGlobalRankings } from "./use-global-rankings";
 import { useTurnLogs } from "./use-turn-logs";
+import { findCountryProfileByCode } from "@/domain/map/countries";
 
 export function useTacticalSimulationState(
   onSelectionPending: (pending: { id: string; name: string } | null) => void,
@@ -26,22 +27,35 @@ export function useTacticalSimulationState(
     gridState,
   } = useMapEngine();
 
-  const { buyResource } = useLocalMarketTrade(playerNationId, dispatchAction);
-  const { recruitUnits } = useLocalRecruitment(playerNationId, dispatchAction);
+  const mappedPlayerNationId = useMemo(() => {
+    if (!playerNationId) return null;
+    if (playerNationId.startsWith("NATION_")) return playerNationId;
+    const profile = findCountryProfileByCode(playerNationId);
+    return profile ? `NATION_${profile.id}` : playerNationId;
+  }, [playerNationId]);
+
+  const { buyResource } = useLocalMarketTrade(
+    mappedPlayerNationId,
+    dispatchAction,
+  );
+  const { recruitUnits } = useLocalRecruitment(
+    mappedPlayerNationId,
+    dispatchAction,
+  );
   const { updateTaxRate } = useLocalEconomyControl(
-    playerNationId,
+    mappedPlayerNationId,
     dispatchAction,
   );
   const { proposeDiplomacy, declareWarDirectly } = useDiplomacyActions(
-    playerNationId,
+    mappedPlayerNationId,
     dispatchAction,
   );
   const { upgradeInfrastructure, upgradeIndustrialLevel } = useStateUpgrades(
-    playerNationId,
+    mappedPlayerNationId,
     dispatchAction,
   );
   const { unlockDoctrineType } = useLocalDoctrines(
-    playerNationId,
+    mappedPlayerNationId,
     dispatchAction,
   );
   const { forceSuccess, toggleForceSuccess } = useTacticalOptions();
@@ -56,10 +70,10 @@ export function useTacticalSimulationState(
   });
 
   const { executeAttack, isAttacking } = useTacticalAttack(
-    playerNationId,
+    mappedPlayerNationId,
     () => {
-      if (playerNationId) {
-        initializeGame(playerNationId);
+      if (mappedPlayerNationId) {
+        initializeGame(mappedPlayerNationId);
       }
     },
   );
@@ -69,20 +83,20 @@ export function useTacticalSimulationState(
   });
 
   useEffect(() => {
-    if (playerNationId && !gameState) {
-      initializeGame(playerNationId);
+    if (mappedPlayerNationId && !gameState) {
+      initializeGame(mappedPlayerNationId);
     }
-  }, [playerNationId, gameState, initializeGame]);
+  }, [mappedPlayerNationId, gameState, initializeGame]);
 
   const humanNation = useMemo(() => {
-    if (!gameState || !playerNationId) {
+    if (!gameState || !mappedPlayerNationId) {
       return null;
     }
-    return gameState.nations[playerNationId] || null;
-  }, [gameState, playerNationId]);
+    return gameState.nations[mappedPlayerNationId] || null;
+  }, [gameState, mappedPlayerNationId]);
 
   return {
-    playerNationId,
+    playerNationId: mappedPlayerNationId,
     setPlayerNationId,
     resetSession,
     gameState,
