@@ -1,33 +1,15 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
-import { ElectionEngine } from "@/engine/politics/election-engine";
-import { TraitManager } from "@/engine/politics/trait-manager";
-import { DomesticCrisisManager } from "@/engine/politics/domestic-crisis-manager";
-import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
-
-export interface PoliticsEngines {
-  stabilityCalc: StabilityCalculator;
-  corruptionManager: CorruptionManager;
-  domesticCrisisManager: DomesticCrisisManager;
-  electionEngine: ElectionEngine;
-  traitManager: TraitManager;
-}
+import { ProxyImpactHandler } from "./politics/proxy-impact-handler";
+import { StabilityDoctrinesHandler } from "./politics/stability-doctrines-handler";
+import { ElectionCrisisHandler } from "./politics/election-crisis-handler";
 
 export class PoliticsPhase implements TurnPhase {
-  private engines: PoliticsEngines;
-  private proxyManager = new ProxyWarManager();
-
-  constructor(engines?: PoliticsEngines) {
-    this.engines = engines ?? {
-      stabilityCalc: new StabilityCalculator(),
-      corruptionManager: new CorruptionManager(),
-      domesticCrisisManager: new DomesticCrisisManager(),
-      electionEngine: new ElectionEngine(),
-      traitManager: new TraitManager(),
-    };
-  }
+  private corruptionManager = new CorruptionManager();
+  private proxyImpactHandler = new ProxyImpactHandler();
+  private stabilityDoctrinesHandler = new StabilityDoctrinesHandler();
+  private electionCrisisHandler = new ElectionCrisisHandler();
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
@@ -45,18 +27,8 @@ export class PoliticsPhase implements TurnPhase {
         },
       };
 
-      let accumulatedProxyBudget = 0;
-      for (const other of Object.values(nations)) {
-        if (other.isAlive && other.id !== id) {
-          accumulatedProxyBudget += other.proxyInfluenceBudget[id] || 0;
-        }
-      }
-
-      const proxyResult = this.proxyManager.processTurnProxyImpact(
-        updated,
-        accumulatedProxyBudget,
-      );
-      updated = proxyResult.updatedTargetNation;
+      const proxyResult = this.proxyImpactHandler.handle(id, updated, nations);
+      updated = proxyResult.updated;
 
       if (proxyResult.coupTriggered) {
         for (const otherId of Object.keys(nations)) {
@@ -67,38 +39,18 @@ export class PoliticsPhase implements TurnPhase {
       }
 
       updated.government.corruption =
-        this.engines.corruptionManager.updateCorruptionLevel(updated);
+        this.corruptionManager.updateCorruptionLevel(updated);
 
-      let stability =
-        this.engines.stabilityCalc.calculateTurnStability(updated);
-      stability = Math.max(
-        0,
-        Math.min(
-          100,
-          stability + this.engines.traitManager.getBaseStabilityDelta(updated),
-        ),
-      );
-      updated.government.stability = stability;
+      updated = this.stabilityDoctrinesHandler.handle(updated);
 
-      const pointsEarned = 0.1 + (stability / 100) * 0.1;
-      updated.doctrines.doctrinePoints = Number(
-        (updated.doctrines.doctrinePoints + pointsEarned).toFixed(2),
-      );
-
-      const electionResult = this.engines.electionEngine.processElection(
+      const crisisResult = this.electionCrisisHandler.handle(
         updated,
         nextState.currentTurn,
         context.prng.nextInt(1, 1000000),
       );
-      if (electionResult.electionHeld) {
-        updated = electionResult.updatedNation;
-      }
+      updated = crisisResult.updated;
 
-      const crisisResult =
-        this.engines.domesticCrisisManager.checkAndProcessCrisis(updated);
-      updated = crisisResult.updatedNation;
-
-      if (crisisResult.status === "COUP") {
+      if (crisisResult.coupOrCrisisTriggered) {
         for (const otherId of Object.keys(nations)) {
           if (nations[otherId]?.proxyInfluenceBudget) {
             nations[otherId].proxyInfluenceBudget[id] = 0;
