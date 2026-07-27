@@ -6,6 +6,7 @@ import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dime
 import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
 import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
+import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
@@ -14,6 +15,7 @@ export default function MapTest6Page() {
   const [activeMapMode] = useState<"default" | "edited" | "partition">(
     "partition",
   );
+  const [isSidebarOpen] = useState<boolean>(true);
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -49,7 +51,7 @@ export default function MapTest6Page() {
 
   return (
     <div
-      className="w-screen h-screen bg-slate-950 overflow-hidden relative"
+      className="w-screen h-screen bg-background overflow-hidden relative"
       dir="rtl"
     >
       <TacticalViewport
@@ -64,10 +66,12 @@ export default function MapTest6Page() {
         onClick={() => {}}
       />
 
+      <SidebarContainer isOpen={isSidebarOpen} />
+
       {dataLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400 font-medium font-sans">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">
+          <div className="w-12 h-12 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground font-medium font-sans">
             در حال بارگذاری نقشه تاکتیکی...
           </p>
         </div>
