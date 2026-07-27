@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  AlertCircle,
-  ShieldAlert,
-  TrendingDown,
-  Swords,
-  BellRing,
-} from "lucide-react";
+import { AlertCircle, ShieldAlert, Swords, BellRing } from "lucide-react";
 
 export interface FeedMessage {
   id: string;
@@ -22,9 +16,9 @@ export function BriefingFeedItem({ message }: BriefingFeedItemProps) {
   const getIcon = () => {
     switch (message.type) {
       case "danger":
-        return <ShieldAlert size={14} className="text-rose-500 shrink-0" />;
+        return <ShieldAlert size={14} className="text-military shrink-0" />;
       case "warning":
-        return <AlertCircle size={14} className="text-amber-500 shrink-0" />;
+        return <AlertCircle size={14} className="text-treasury shrink-0" />;
       case "combat":
         return <Swords size={14} className="text-military shrink-0" />;
       default:

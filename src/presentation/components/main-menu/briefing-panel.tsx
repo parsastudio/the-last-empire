@@ -174,7 +174,7 @@ export function BriefingPanel() {
             گزارش‌های آن‌لاین فرماندهی
           </span>
         </div>
-        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+        <span className="w-2 h-2 rounded-full bg-gdp animate-ping" />
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 pl-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent text-right">
