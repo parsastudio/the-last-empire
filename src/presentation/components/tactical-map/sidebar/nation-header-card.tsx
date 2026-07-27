@@ -3,21 +3,23 @@ import React from "react";
 interface NationHeaderCardProps {
   name: string;
   code: string;
-  leaderTitle: string;
+  flagCode: string;
   governmentType: string;
+  population: number;
 }
 
 export function NationHeaderCard({
   name,
   code,
-  leaderTitle,
+  flagCode,
   governmentType,
+  population,
 }: NationHeaderCardProps) {
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex items-center gap-3.5 shadow-inner">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`/flags/${code.toLowerCase()}.png`}
+        src={`/flags/${flagCode.toLowerCase()}.png`}
         alt={name}
         className="w-12 h-9 object-cover rounded-xl shadow-sm border border-border shrink-0"
         onError={(e) => {
@@ -34,7 +36,7 @@ export function NationHeaderCard({
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground truncate">
-          {leaderTitle} - {governmentType}
+          نظام: {governmentType} | جمعیت: {(population / 1e6).toFixed(1)}م
         </p>
       </div>
     </div>

@@ -1,6 +1,14 @@
-import React from "react";
-import { ArrowRight, Swords, CheckCircle2, Handshake } from "lucide-react";
+import React, { useState } from "react";
+import {
+  ArrowRight,
+  Swords,
+  CheckCircle2,
+  Handshake,
+  Eye,
+  MapPin,
+} from "lucide-react";
 import { DiplomacyActionButtons } from "./diplomacy-action-buttons";
+import { DiplomacyIntelView } from "./diplomacy-intel-view";
 
 export interface DiplomaticRelation {
   code: string;
@@ -8,6 +16,13 @@ export interface DiplomaticRelation {
   stance: "PEACE" | "WAR" | "ALLIANCE" | "NON_AGGRESSION_PACT";
   opinion: number;
   description: string;
+  intelData: {
+    gdp: string;
+    population: string;
+    militaryStrength: string;
+    techLevel: number;
+    stabilityDesc: string;
+  };
 }
 
 interface DiplomacyDetailViewProps {
@@ -19,6 +34,8 @@ export function DiplomacyDetailView({
   relation,
   onBack,
 }: DiplomacyDetailViewProps) {
+  const [showIntel, setShowIntel] = useState(false);
+
   const getStanceBadge = (stance: string) => {
     switch (stance) {
       case "WAR":
@@ -48,6 +65,15 @@ export function DiplomacyDetailView({
     }
   };
 
+  if (showIntel) {
+    return (
+      <DiplomacyIntelView
+        relation={relation}
+        onBack={() => setShowIntel(false)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
       <button
@@ -76,6 +102,28 @@ export function DiplomacyDetailView({
         <p className="text-[11px] text-foreground/90 bg-secondary/40 p-3 rounded-xl">
           {relation.description}
         </p>
+
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <button
+            onClick={() =>
+              alert(
+                `دوربین نقشه روی مختصات استراتژیک کشور ${relation.name} متمرکز شد.`,
+              )
+            }
+            className="py-2 px-3 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-[10px] font-bold transition-all border border-border flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <MapPin size={13} className="text-military" />
+            <span>نمایش روی نقشه</span>
+          </button>
+
+          <button
+            onClick={() => setShowIntel(true)}
+            className="py-2 px-3 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-[10px] font-bold transition-all border border-border flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Eye size={13} className="text-gdp" />
+            <span>اطلاعات کلی (جاسوسی)</span>
+          </button>
+        </div>
       </div>
 
       <DiplomacyActionButtons targetName={relation.name} />
