@@ -9,7 +9,7 @@ export class ProxyImpactHandler {
     nation: Nation,
     nations: Record<string, Nation>,
   ): { updated: Nation; coupTriggered: boolean } {
-    let updated = { ...nation };
+    const updated = { ...nation };
     let accumulatedProxyBudget = 0;
 
     for (const other of Object.values(nations)) {

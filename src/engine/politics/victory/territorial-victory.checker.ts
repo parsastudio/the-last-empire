@@ -2,6 +2,10 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { VictoryCondition } from "./victory-condition.interface";
 import { VictoryStatus } from "../victory-checker";
 
+interface ProvinceLike {
+  ownerNationId?: string;
+}
+
 export class TerritorialVictoryChecker implements VictoryCondition {
   public evaluate(state: GameState): VictoryStatus | null {
     const totalProvinces = Object.keys(state.provinces).length;
@@ -10,10 +14,11 @@ export class TerritorialVictoryChecker implements VictoryCondition {
     }
 
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
+    const provincesList = Object.values(state.provinces) as ProvinceLike[];
 
     for (const nation of aliveNations) {
-      const nationProvinces = Object.values(state.provinces).filter(
-        (p) => p.ownerNationId === nation.id,
+      const nationProvinces = provincesList.filter(
+        (p) => p && p.ownerNationId === nation.id,
       ).length;
       const share = nationProvinces / totalProvinces;
       if (share >= 0.6) {

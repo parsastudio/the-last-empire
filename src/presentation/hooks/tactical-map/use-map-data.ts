@@ -12,6 +12,9 @@ interface UseMapDataProps {
   mapMode?: "default" | "edited" | "partition";
 }
 
+const apiHelper = new MapDataApiHelper();
+const renderingHelper = new MaskRenderingHelper();
+
 export function useMapData({
   mapWidth,
   mapHeight,
@@ -25,9 +28,6 @@ export function useMapData({
   const canvasSrcRef = useRef<HTMLCanvasElement | null>(null);
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
   const maskDataRef = useRef<Uint8Array | null>(null);
-
-  const apiHelper = new MapDataApiHelper();
-  const renderingHelper = new MaskRenderingHelper();
 
   useEffect(() => {
     let active = true;
