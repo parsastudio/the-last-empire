@@ -76,7 +76,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const lowResWidth = 1024;
     const lowResHeight = 512;
     const scale = 4;
-    const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 3);
+    const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 2);
     for (let gy = 0; gy < lowResHeight; gy++) {
       for (let gx = 0; gx < lowResWidth; gx++) {
         let hasForcedPassage = false;
@@ -119,10 +119,9 @@ export async function POST(request: Request): Promise<NextResponse> {
             }
           }
         }
-        const pIdx = (gy * lowResWidth + gx) * 3;
-        packed1024[pIdx] = finalR;
-        packed1024[pIdx + 1] = 0;
-        packed1024[pIdx + 2] = finalB;
+        const pIdx = (gy * lowResWidth + gx) * 2;
+        packed1024[pIdx] = (0 << 2) | (finalR & 0x3);
+        packed1024[pIdx + 1] = finalB;
       }
     }
 
@@ -130,8 +129,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     for (let gy = 0; gy < lowResHeight; gy++) {
       for (let gx = 0; gx < lowResWidth; gx++) {
         const startIdx = gy * lowResWidth + gx;
-        const pIdx = startIdx * 3;
-        const finalB = packed1024[pIdx + 2];
+        const pIdx = startIdx * 2;
+        const finalB = packed1024[pIdx + 1];
         if (finalB === 0 && waterVisited[startIdx] === 0) {
           const component: number[] = [];
           const queue: number[] = [startIdx];
@@ -159,8 +158,8 @@ export async function POST(request: Request): Promise<NextResponse> {
                 const ny = n.y;
                 if (ny >= 0 && ny < lowResHeight) {
                   const nIdx = ny * lowResWidth + nx;
-                  const nPIdx = nIdx * 3;
-                  const nB = packed1024[nPIdx + 2];
+                  const nPIdx = nIdx * 2;
+                  const nB = packed1024[nPIdx + 1];
                   if (nB === 0 && waterVisited[nIdx] === 0) {
                     waterVisited[nIdx] = 1;
                     queue.push(nIdx);
@@ -171,12 +170,12 @@ export async function POST(request: Request): Promise<NextResponse> {
           }
           const isClosed = component.length < 500;
           for (const idx of component) {
-            const cpIdx = idx * 3;
+            const cpIdx = idx * 2;
             if (isClosed) {
-              packed1024[cpIdx] = 2;
+              packed1024[cpIdx] = (0 << 2) | 2;
             } else {
-              const originalR = packed1024[cpIdx]!;
-              packed1024[cpIdx] = originalR <= 1 ? 1 : 0;
+              const originalR = packed1024[cpIdx]! & 0x3;
+              packed1024[cpIdx] = (0 << 2) | (originalR <= 1 ? 1 : 0);
             }
           }
         }
