@@ -24,39 +24,27 @@ export function NationDetailsPanel({
 }: NationDetailsPanelProps) {
   return (
     <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-3xl p-6 overflow-y-auto shadow-sm h-full space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border">
-        <div className="flex items-center gap-4">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/flags/${nation.code.toLowerCase()}.png`}
-            alt={nation.name}
-            className="w-14 h-10 object-cover rounded-xl shadow-md border border-border"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = "none";
-            }}
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-extrabold text-foreground">
-                {nation.name}
-              </h1>
-              <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
-                {nation.id}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {nation.power}
-            </p>
+      <div className="flex items-center gap-4 pb-5 border-b border-border">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`/flags/${nation.code.toLowerCase()}.png`}
+          alt={nation.name}
+          className="w-14 h-10 object-cover rounded-xl shadow-md border border-border"
+          onError={(e) => {
+            (e.target as HTMLElement).style.display = "none";
+          }}
+        />
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-extrabold text-foreground">
+              {nation.name}
+            </h1>
+            <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
+              {nation.id}
+            </span>
           </div>
+          <p className="text-xs text-muted-foreground mt-0.5">{nation.power}</p>
         </div>
-
-        <button
-          onClick={onStartCampaign}
-          className="py-3 px-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-emerald-950/10 text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Zap size={15} fill="currentColor" />
-          <span>آغاز حکومت و ورود به نقشه</span>
-        </button>
       </div>
 
       <NationOverviewStats nation={nation} />
@@ -75,6 +63,16 @@ export function NationDetailsPanel({
         selectedType={selectedGovernment}
         onSelect={onSelectGovernment}
       />
+
+      <div className="pt-4 border-t border-border">
+        <button
+          onClick={onStartCampaign}
+          className="w-full py-4 px-8 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-emerald-950/10 text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <Zap size={16} fill="currentColor" />
+          <span>شروع امپراتوری {nation.name}</span>
+        </button>
+      </div>
     </div>
   );
 }
