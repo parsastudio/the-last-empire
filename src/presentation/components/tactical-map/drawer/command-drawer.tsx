@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { findCountryProfileByCode } from "@/domain/map/countries";
+import {
+  findCountryProfileByCode,
+  findCountryProfileById,
+} from "@/domain/map/countries";
 import { Globe, Swords, X } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -27,7 +30,11 @@ export function CommandDrawer({
   onTaxChange,
   onDeclareWar,
 }: CommandDrawerProps) {
-  const profile = findCountryProfileByCode(countryCode);
+  const numericId = parseInt(countryCode.replace("NATION_", ""), 10);
+  const profile = isNaN(numericId)
+    ? findCountryProfileByCode(countryCode)
+    : findCountryProfileById(numericId);
+
   const [activeTab, setActiveTab] = useState<
     "military" | "economy" | "diplomacy"
   >("military");
@@ -60,7 +67,7 @@ export function CommandDrawer({
               {profile?.nameFa || countryName}
             </h2>
             <p className="text-[10px] text-slate-500 font-mono tracking-wider mt-0.5">
-              {countryCode}
+              {profile?.code || countryCode}
             </p>
           </div>
         </div>

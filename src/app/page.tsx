@@ -22,6 +22,7 @@ import { TurnProgression } from "@/presentation/components/tactical-map/hud/turn
 import { AssetRibbon } from "@/presentation/components/tactical-map/hud/asset-ribbon";
 import { IntelligenceFeed } from "@/presentation/components/tactical-map/hud/intelligence-feed";
 
+import { Play } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 
 export default function MapTest6Page() {
@@ -29,7 +30,7 @@ export default function MapTest6Page() {
   const mapHeight = 2048;
 
   const [activeMapMode] = useState<"default" | "edited" | "partition">(
-    "default",
+    "partition",
   );
   const [selectedCountry, setSelectedCountry] = useState<{
     code: string;
@@ -90,7 +91,14 @@ export default function MapTest6Page() {
     isAdvancing,
     humanNation,
     rankings,
-  } = useTacticalSimulationState(setPendingSelection);
+  } = useTacticalSimulationState((pending) => {
+    if (pending) {
+      const matched = countries.find((c) => c.code === pending.id);
+      if (matched) {
+        setPendingSelection({ id: `NATION_${matched.id}`, name: matched.name });
+      }
+    }
+  });
 
   useMapGridRenderer(canvasDestRef, gridState, dataLoading, false);
 
@@ -118,9 +126,21 @@ export default function MapTest6Page() {
     bridge,
     onSelectPending: (pending) => {
       if (!playerNationId && pending) {
-        setPendingSelection(pending);
+        const matched = countries.find((c) => c.code === pending.id);
+        if (matched) {
+          setPendingSelection({
+            id: `NATION_${matched.id}`,
+            name: matched.name,
+          });
+        }
       } else if (playerNationId && pending) {
-        setSelectedCountry({ code: pending.id, name: pending.name });
+        const matched = countries.find((c) => c.code === pending.id);
+        if (matched) {
+          setSelectedCountry({
+            code: `NATION_${matched.id}`,
+            name: matched.name,
+          });
+        }
       }
     },
     onExecuteAttack: executeAttack,
@@ -149,12 +169,7 @@ export default function MapTest6Page() {
       <LoadingStateOverlay loading={dataLoading} />
       <ErrorStateOverlay error={dataError} />
 
-      <TurnProgression
-        currentTurn={gameState?.currentTurn || 1}
-        globalThreatLevel={gameState?.globalThreatLevel || 0}
-        onAdvanceTurn={advanceTurn}
-        isAdvancing={isAdvancing}
-      />
+      <TurnProgression currentTurn={gameState?.currentTurn || 1} />
 
       <AssetRibbon nation={humanNation} />
 
@@ -165,6 +180,21 @@ export default function MapTest6Page() {
       />
 
       <IntelligenceFeed logs={filteredLogs || []} />
+
+      <div className="absolute bottom-6 left-6 z-40 pointer-events-none">
+        <button
+          onClick={advanceTurn}
+          disabled={isAdvancing}
+          className="pointer-events-auto px-5 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 text-white rounded-2xl font-bold transition-all border border-emerald-500/20 shadow-lg shadow-emerald-950/20 text-xs font-sans flex items-center gap-2.5 cursor-pointer"
+        >
+          {isAdvancing ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Play size={13} className="fill-current rotate-180" />
+          )}
+          <span>{isAdvancing ? "محاسبه زمان..." : "پایان نوبت"}</span>
+        </button>
+      </div>
 
       <AnimatePresence>
         {selectedCountry && (

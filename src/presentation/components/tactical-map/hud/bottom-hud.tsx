@@ -9,6 +9,7 @@ interface CountryMapping {
   name: string;
   color: [number, number, number];
   areaSqKm?: number;
+  enclaveId?: number;
 }
 
 interface BottomHudProps {
@@ -27,12 +28,12 @@ export function BottomHud({
     : null;
 
   const isPlayer = playerNationId && hoveredCountry?.code === playerNationId;
-  const isColony = hoveredCountry
-    ? hoveredCountry.id >= 40 && hoveredCountry.id !== 118
-    : false;
+  const enclaveId = hoveredCountry?.enclaveId || 0;
+  const isColony = enclaveId > 0;
 
-  const countryRank = hoveredCountry
-    ? rankings.find((r) => r.id === hoveredCountry.code)?.rank || 12
+  const nationKey = profile ? `NATION_${profile.id}` : null;
+  const countryRank = nationKey
+    ? rankings.find((r) => r.id === nationKey)?.rank
     : null;
 
   return (
@@ -64,7 +65,7 @@ export function BottomHud({
                   <span>{profile?.nameFa || hoveredCountry.name}</span>
                   {isColony ? (
                     <span className="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded-md">
-                      (مستعمره شماره {hoveredCountry.id})
+                      (مستعمره شماره {enclaveId})
                     </span>
                   ) : (
                     <span className="text-[9px] font-bold text-slate-500">
