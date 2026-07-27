@@ -5,9 +5,15 @@ export class MapDataProvider {
   public async loadRawMaskBuffer(): Promise<Uint8Array | null> {
     try {
       const publicDir = path.join(process.cwd(), "public");
-      const maskPath = path.join(publicDir, "test6", "world-mask.png");
-      const buffer = await fs.readFile(maskPath);
-      return new Uint8Array(buffer);
+      try {
+        const maskPath = path.join(publicDir, "edited-mask", "world-mask.bin");
+        const buffer = await fs.readFile(maskPath);
+        return new Uint8Array(buffer);
+      } catch {
+        const maskPath = path.join(publicDir, "test6", "world-mask.png");
+        const buffer = await fs.readFile(maskPath);
+        return new Uint8Array(buffer);
+      }
     } catch {
       return null;
     }
@@ -16,9 +22,19 @@ export class MapDataProvider {
   public async load1024PackedBuffer(): Promise<Uint8Array | null> {
     try {
       const publicDir = path.join(process.cwd(), "public");
-      const maskPath = path.join(publicDir, "test6", "world-mask-1024.bin");
-      const buffer = await fs.readFile(maskPath);
-      return new Uint8Array(buffer);
+      try {
+        const maskPath = path.join(
+          publicDir,
+          "edited-mask",
+          "world-mask-1024.bin",
+        );
+        const buffer = await fs.readFile(maskPath);
+        return new Uint8Array(buffer);
+      } catch {
+        const maskPath = path.join(publicDir, "test6", "world-mask-1024.bin");
+        const buffer = await fs.readFile(maskPath);
+        return new Uint8Array(buffer);
+      }
     } catch {
       return null;
     }
