@@ -1,71 +1,51 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
+import { useMapZoom } from "./use-map-zoom";
+import { useMapDrag } from "./use-map-drag";
 
 export function useMapGesture() {
-  const [scale, setScale] = useState<number>(1);
   const [position, setPosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
   });
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const { scale, setScale, calculateZoom, zoomIn, zoomOut, resetScale } =
+    useMapZoom();
+
+  const {
+    isDragging,
+    handleMouseDown: dragMouseDown,
+    handleMouseMove: dragMouseMove,
+    handleMouseUp: dragMouseUp,
+  } = useMapDrag(position, setPosition);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
-    const mx = e.clientX - rect.left;
-    const my = e.clientY - rect.top;
-
-    const zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-    const nextScale = Math.max(1, Math.min(30, scale * zoomFactor));
-
-    if (nextScale === scale) {
-      return;
-    }
-
-    const nextPosition = {
-      x: mx - (mx - position.x) * (nextScale / scale),
-      y: my - (my - position.y) * (nextScale / scale),
-    };
-
-    setScale(nextScale);
+    const { nextPosition } = calculateZoom(
+      e.deltaY,
+      rect,
+      e.clientX,
+      e.clientY,
+      position,
+    );
     setPosition(nextPosition);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) {
-      return;
-    }
-    setIsDragging(true);
-    dragStart.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
-    };
+    if (e.button !== 0) return;
+    dragMouseDown(e.clientX, e.clientY);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) {
-      return;
-    }
-    setPosition({
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
-    });
+    dragMouseMove(e.clientX, e.clientY);
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const zoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.5, 30));
-  };
-
-  const zoomOut = () => {
-    setScale((prev) => Math.max(prev - 0.5, 1));
+    dragMouseUp();
   };
 
   const resetView = () => {
-    setScale(1);
+    resetScale();
     setPosition({ x: 0, y: 0 });
   };
 
