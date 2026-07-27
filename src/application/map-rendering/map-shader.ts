@@ -61,7 +61,12 @@ export class MapShader {
 
         const grain = this.noiseApplier.getNoiseGrain(x, y);
 
-        if (id >= 251 && id <= 255) {
+        if (id === 254) {
+          const oceanColor = this.shadowCalculator.calculateOceanColor(4);
+          r = oceanColor.r;
+          g = oceanColor.g;
+          b = oceanColor.b;
+        } else if (id >= 251 && id <= 255) {
           r = 16;
           g = 185;
           b = 129;

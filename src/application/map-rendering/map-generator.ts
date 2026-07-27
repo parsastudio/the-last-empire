@@ -142,6 +142,7 @@ export async function generateTest6Map(
   const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 3);
   for (let gy = 0; gy < lowResHeight; gy++) {
     for (let gx = 0; gx < lowResWidth; gx++) {
+      let hasForcedPassage = false;
       const countryCounts = new Map<number, number>();
       const waterCounts = new Int32Array(11);
       for (let sy = 0; sy < scale; sy++) {
@@ -149,7 +150,9 @@ export async function generateTest6Map(
           const hx = gx * scale + sx;
           const hy = gy * scale + sy;
           const val = buffer[hy * width + hx] ?? 0;
-          if (val >= 11) {
+          if (val === 254) {
+            hasForcedPassage = true;
+          } else if (val >= 11) {
             countryCounts.set(val, (countryCounts.get(val) ?? 0) + 1);
           } else {
             waterCounts[val]++;
@@ -157,20 +160,25 @@ export async function generateTest6Map(
         }
       }
       let finalB = 0;
-      let maxCountryCount = 0;
-      for (const [id, count] of countryCounts.entries()) {
-        if (count > maxCountryCount) {
-          maxCountryCount = count;
-          finalB = id;
-        }
-      }
       let finalR = 0;
-      if (finalB === 0) {
-        let maxWaterCount = 0;
-        for (let w = 0; w < 11; w++) {
-          if (waterCounts[w] > maxWaterCount) {
-            maxWaterCount = waterCounts[w];
-            finalR = w;
+      if (hasForcedPassage) {
+        finalB = 0;
+        finalR = 1;
+      } else {
+        let maxCountryCount = 0;
+        for (const [id, count] of countryCounts.entries()) {
+          if (count > maxCountryCount) {
+            maxCountryCount = count;
+            finalB = id;
+          }
+        }
+        if (finalB === 0) {
+          let maxWaterCount = 0;
+          for (let w = 0; w < 11; w++) {
+            if (waterCounts[w] > maxWaterCount) {
+              maxWaterCount = waterCounts[w];
+              finalR = w;
+            }
           }
         }
       }
