@@ -41,7 +41,7 @@ export class GameEngine {
         success: false,
         actionId: action.id,
         message: "Action rejected: Game is already over",
-        error: "STATE_FROZEN",
+        error: "GAME_OVER",
       };
     }
 
