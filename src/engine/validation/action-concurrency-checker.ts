@@ -1,176 +1,22 @@
 import type { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { MilitaryConcurrencyRules } from "./rules/military-concurrency-rules";
+import { FinancialConcurrencyRules } from "./rules/financial-concurrency-rules";
+import { DiplomaticConcurrencyRules } from "./rules/diplomatic-concurrency-rules";
+import { EconomicConcurrencyRules } from "./rules/economic-concurrency-rules";
 
 export class ActionConcurrencyChecker {
+  private militaryRules = new MilitaryConcurrencyRules();
+  private financialRules = new FinancialConcurrencyRules();
+  private diplomaticRules = new DiplomaticConcurrencyRules();
+  private economicRules = new EconomicConcurrencyRules();
+
   public verifyConcurrencies(
     actionList: GameAction[],
     newAction: GameAction,
   ): void {
-    if (newAction.type === "ATTACK") {
-      const target = newAction.targetNationId;
-      const hasWarDeclaredThisTurn = actionList.some(
-        (a) =>
-          a.type === "DECLARE_WAR" &&
-          a.nationId === newAction.nationId &&
-          a.targetNationId === target,
-      );
-      if (hasWarDeclaredThisTurn) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot declare war and attack the same nation in the same turn",
-        );
-      }
-
-      const hasAttackThisTurnOnTarget = actionList.some(
-        (a) =>
-          a.type === "ATTACK" &&
-          a.nationId === newAction.nationId &&
-          a.targetNationId === target,
-      );
-      if (hasAttackThisTurnOnTarget) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot launch multiple attacks on the same nation in a single turn",
-        );
-      }
-    }
-
-    if (newAction.type === "DECLARE_WAR") {
-      const target = newAction.targetNationId;
-      const hasAttackThisTurn = actionList.some(
-        (a) =>
-          a.type === "ATTACK" &&
-          a.nationId === newAction.nationId &&
-          a.targetNationId === target,
-      );
-      if (hasAttackThisTurn) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot declare war and attack the same nation in the same turn",
-        );
-      }
-    }
-
-    if (newAction.type === "REQUEST_LOAN") {
-      const hasLoanThisTurn = actionList.some(
-        (a) => a.type === "REQUEST_LOAN" && a.nationId === newAction.nationId,
-      );
-      if (hasLoanThisTurn) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot request multiple loans in a single turn",
-        );
-      }
-      const hasTaxRateChangeThisTurn = actionList.some(
-        (a) => a.type === "SET_TAX_RATE" && a.nationId === newAction.nationId,
-      );
-      if (hasTaxRateChangeThisTurn) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot change tax rate and request a loan in the same turn",
-        );
-      }
-    }
-
-    if (newAction.type === "SET_TAX_RATE") {
-      const hasLoanThisTurn = actionList.some(
-        (a) => a.type === "REQUEST_LOAN" && a.nationId === newAction.nationId,
-      );
-      if (hasLoanThisTurn) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot change tax rate and request a loan in the same turn",
-        );
-      }
-    }
-
-    if (newAction.type === "DIPLOMATIC_PROPOSAL") {
-      const isDuplicateProposal = actionList.some(
-        (a) =>
-          a.type === "DIPLOMATIC_PROPOSAL" &&
-          a.nationId === newAction.nationId &&
-          a.targetNationId === newAction.targetNationId &&
-          a.proposalType === newAction.proposalType,
-      );
-      if (isDuplicateProposal) {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Already enqueued a diplomatic proposal of this type to the target nation this turn",
-        );
-      }
-    }
-
-    const hasConflictingTrade =
-      newAction.type === "TRADE_RESOURCES" &&
-      actionList.some(
-        (a) =>
-          a.type === "TRADE_RESOURCES" &&
-          a.nationId === newAction.nationId &&
-          a.resourceType === newAction.resourceType &&
-          a.isBuy !== newAction.isBuy,
-      );
-    if (hasConflictingTrade) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Conflicting trade operations queued for the same resource in a single turn",
-      );
-    }
-
-    const isDuplicateTrade =
-      newAction.type === "TRADE_RESOURCES" &&
-      actionList.some(
-        (a) =>
-          a.type === "TRADE_RESOURCES" &&
-          a.nationId === newAction.nationId &&
-          a.resourceType === newAction.resourceType &&
-          a.isBuy === newAction.isBuy,
-      );
-    if (isDuplicateTrade) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Already enqueued a trade operation for this resource this turn",
-      );
-    }
-
-    const isDuplicateGov =
-      newAction.type === "CHANGE_GOVERNMENT" &&
-      actionList.some(
-        (a) =>
-          a.type === "CHANGE_GOVERNMENT" && a.nationId === newAction.nationId,
-      );
-    if (isDuplicateGov) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Cannot trigger multiple government regime changes in a single turn",
-      );
-    }
-
-    const isDuplicateInfra =
-      newAction.type === "INVEST_INFRASTRUCTURE" &&
-      actionList.some(
-        (a) =>
-          a.type === "INVEST_INFRASTRUCTURE" &&
-          a.nationId === newAction.nationId,
-      );
-    if (isDuplicateInfra) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Already enqueued infrastructure upgrade for this turn",
-      );
-    }
-
-    const isDuplicateIndustry =
-      newAction.type === "UPGRADE_INDUSTRIAL_LEVEL" &&
-      actionList.some(
-        (a) =>
-          a.type === "UPGRADE_INDUSTRIAL_LEVEL" &&
-          a.nationId === newAction.nationId,
-      );
-    if (isDuplicateIndustry) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Already enqueued industrial level upgrade for this turn",
-      );
-    }
+    this.militaryRules.verify(actionList, newAction);
+    this.financialRules.verify(actionList, newAction);
+    this.diplomaticRules.verify(actionList, newAction);
+    this.economicRules.verify(actionList, newAction);
   }
 }
