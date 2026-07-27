@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface CountryMapping {
   id: number;
@@ -6,6 +7,7 @@ interface CountryMapping {
   name: string;
   color: [number, number, number];
   areaSqKm?: number;
+  enclaveId?: number;
 }
 
 interface UseMapMouseProps {
@@ -52,7 +54,16 @@ export function useMapMouse({
         if (id !== undefined && id >= 11) {
           const matched = countries.find((c) => c.id === id);
           if (matched) {
-            setHoveredCountry(matched);
+            const gridX = Math.floor(mapX / 4);
+            const gridY = Math.floor(mapY / 4);
+            const gridState = GridStateProvider.getInstance();
+            const cell = gridState.getCell(gridX, gridY);
+            const enclaveId = cell?.enclaveId || 0;
+
+            setHoveredCountry({
+              ...matched,
+              enclaveId,
+            });
             return;
           }
         }
