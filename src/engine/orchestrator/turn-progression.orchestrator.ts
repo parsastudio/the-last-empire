@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { AIEngine } from "@/engine/ai/ai-engine";
-import { ActionQueue } from "./game-action.queue";
+import { ActionQueue } from "./action-queue";
 import { TurnPhaseOrchestrator } from "./turn-phase-orchestrator";
 import { GridPostTurnCleanup } from "./grid-post-turn-cleanup";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
