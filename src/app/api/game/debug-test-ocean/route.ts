@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { DistanceTransformAlgorithms } from "@/application/map-rendering/utils/distance-transform-algorithms";
+import { HighwayStreakDetector } from "@/application/map-rendering/utils/highway-streak-detector";
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -10,183 +12,38 @@ export async function GET(): Promise<NextResponse> {
     const buffer = new Uint8Array(fileBytes);
     const width = 4096;
     const height = 2048;
-    const l1Dist = new Int32Array(width * height);
-    l1Dist.fill(9999);
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
-        if (buffer[idx]! >= 11 && buffer[idx]! < 250) {
-          l1Dist[idx] = 0;
-        } else {
-          if (x > 0) l1Dist[idx] = Math.min(l1Dist[idx]!, l1Dist[idx - 1]! + 1);
-          if (y > 0)
-            l1Dist[idx] = Math.min(l1Dist[idx]!, l1Dist[idx - width]! + 1);
-        }
-      }
-    }
-    for (let y = height - 1; y >= 0; y--) {
-      for (let x = width - 1; x >= 0; x--) {
-        const idx = y * width + x;
-        if (x < width - 1) {
-          l1Dist[idx] = Math.min(l1Dist[idx]!, l1Dist[idx + 1]! + 1);
-        }
-        if (y < height - 1) {
-          l1Dist[idx] = Math.min(l1Dist[idx]!, l1Dist[idx + width]! + 1);
-        }
-      }
-    }
-    let l1HighwayCount = 0;
-    const l1Streaks: Array<{
-      y: number;
-      startX: number;
-      endX: number;
-      length: number;
-    }> = [];
-    for (let y = 150; y < height - 150; y++) {
-      let streakStart = -1;
-      for (let x = 1; x < width - 1; x++) {
-        const idx = y * width + x;
-        const val = buffer[idx]!;
-        if (val < 11 || val === 254) {
-          const d = l1Dist[idx]!;
-          if (d >= 3 && d <= 120) {
-            const hMax = d > l1Dist[idx - 1]! && d >= l1Dist[idx + 1]!;
-            const vMax = d > l1Dist[idx - width]! && d >= l1Dist[idx + width]!;
-            if (hMax || vMax) {
-              l1HighwayCount++;
-              if (streakStart === -1) {
-                streakStart = x;
-              }
-            } else {
-              if (streakStart !== -1) {
-                const len = x - streakStart;
-                if (len > 50) {
-                  l1Streaks.push({
-                    y,
-                    startX: streakStart,
-                    endX: x - 1,
-                    length: len,
-                  });
-                }
-                streakStart = -1;
-              }
-            }
-          } else {
-            if (streakStart !== -1) {
-              const len = x - streakStart;
-              if (len > 50) {
-                l1Streaks.push({
-                  y,
-                  startX: streakStart,
-                  endX: x - 1,
-                  length: len,
-                });
-              }
-              streakStart = -1;
-            }
-          }
-        }
-      }
-    }
-    const chamferDist = new Int32Array(width * height);
-    chamferDist.fill(99999);
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
-        if (buffer[idx]! >= 11 && buffer[idx]! < 250) {
-          chamferDist[idx] = 0;
-        } else {
-          let m = chamferDist[idx]!;
-          if (x > 0) m = Math.min(m, chamferDist[idx - 1]! + 3);
-          if (y > 0) m = Math.min(m, chamferDist[idx - width]! + 3);
-          if (x > 0 && y > 0)
-            m = Math.min(m, chamferDist[idx - width - 1]! + 4);
-          if (x < width - 1 && y > 0)
-            m = Math.min(m, chamferDist[idx - width + 1]! + 4);
-          chamferDist[idx] = m;
-        }
-      }
-    }
-    for (let y = height - 1; y >= 0; y--) {
-      for (let x = width - 1; x >= 0; x--) {
-        const idx = y * width + x;
-        let m = chamferDist[idx]!;
-        if (x < width - 1) m = Math.min(m, chamferDist[idx + 1]! + 3);
-        if (y < height - 1) m = Math.min(m, chamferDist[idx + width]! + 3);
-        if (x < width - 1 && y < height - 1)
-          m = Math.min(m, chamferDist[idx + width + 1]! + 4);
-        if (x > 0 && y < height - 1)
-          m = Math.min(m, chamferDist[idx + width - 1]! + 4);
-        chamferDist[idx] = m;
-      }
-    }
-    let chamferHighwayCount = 0;
-    const chamferStreaks: Array<{
-      y: number;
-      startX: number;
-      endX: number;
-      length: number;
-    }> = [];
-    for (let y = 150; y < height - 150; y++) {
-      let streakStart = -1;
-      for (let x = 1; x < width - 1; x++) {
-        const idx = y * width + x;
-        const val = buffer[idx]!;
-        if (val < 11 || val === 254) {
-          const d = chamferDist[idx]!;
-          if (d >= 9 && d <= 360) {
-            const hMax =
-              d > chamferDist[idx - 1]! && d >= chamferDist[idx + 1]!;
-            const vMax =
-              d > chamferDist[idx - width]! && d >= chamferDist[idx + width]!;
-            if (hMax || vMax) {
-              chamferHighwayCount++;
-              if (streakStart === -1) {
-                streakStart = x;
-              }
-            } else {
-              if (streakStart !== -1) {
-                const len = x - streakStart;
-                if (len > 50) {
-                  chamferStreaks.push({
-                    y,
-                    startX: streakStart,
-                    endX: x - 1,
-                    length: len,
-                  });
-                }
-                streakStart = -1;
-              }
-            }
-          } else {
-            if (streakStart !== -1) {
-              const len = x - streakStart;
-              if (len > 50) {
-                chamferStreaks.push({
-                  y,
-                  startX: streakStart,
-                  endX: x - 1,
-                  length: len,
-                });
-              }
-              streakStart = -1;
-            }
-          }
-        }
-      }
-    }
+
+    const algorithms = new DistanceTransformAlgorithms();
+    const l1Dist = algorithms.calculateL1(buffer, width, height);
+
+    const streakDetector = new HighwayStreakDetector();
+    const l1Result = streakDetector.detectL1Streaks(
+      buffer,
+      l1Dist,
+      width,
+      height,
+    );
+
+    const chamferDist = algorithms.calculateChamfer(buffer, width, height);
+    const chamferResult = streakDetector.detectChamferStreaks(
+      buffer,
+      chamferDist,
+      width,
+      height,
+    );
+
     const report = {
       resolution: `${width}x${height}`,
       totalPixels: buffer.length,
       l1: {
-        totalHighwayPixels: l1HighwayCount,
-        streakCountGreaterThan50px: l1Streaks.length,
-        longestStreaksSample: l1Streaks.slice(0, 15),
+        totalHighwayPixels: l1Result.totalHighwayPixels,
+        streakCountGreaterThan50px: l1Result.streaks.length,
+        longestStreaksSample: l1Result.streaks.slice(0, 15),
       },
       chamfer: {
-        totalHighwayPixels: chamferHighwayCount,
-        streakCountGreaterThan50px: chamferStreaks.length,
-        longestStreaksSample: chamferStreaks.slice(0, 15),
+        totalHighwayPixels: chamferResult.totalHighwayPixels,
+        streakCountGreaterThan50px: chamferResult.streaks.length,
+        longestStreaksSample: chamferResult.streaks.slice(0, 15),
       },
     };
     await fs.writeFile(

@@ -3,6 +3,8 @@ import fs from "fs/promises";
 import path from "path";
 import { encodePng } from "@/application/map-rendering/png-encoder";
 import { AreaWeightCalculator } from "@/application/map-rendering/generator/area-weight-calculator";
+import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
+import { ClosedSeaDetector } from "@/application/map-rendering/utils/closed-sea-detector";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -40,7 +42,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const areaCalculator = new AreaWeightCalculator();
     const totalSurfaceArea = areaCalculator.calculateTotalSurfaceAreaSqKm();
-    const { weights, totalWeight } = areaCalculator.generateRowWeights(
+    const { weights, totalWeight = 0 } = areaCalculator.generateRowWeights(
       2048,
       4096,
     );
@@ -73,114 +75,11 @@ export async function POST(request: Request): Promise<NextResponse> {
       "utf-8",
     );
 
-    const lowResWidth = 1024;
-    const lowResHeight = 512;
-    const scale = 4;
-    const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 2);
-    for (let gy = 0; gy < lowResHeight; gy++) {
-      for (let gx = 0; gx < lowResWidth; gx++) {
-        let hasForcedPassage = false;
-        const countryCounts = new Map<number, number>();
-        const waterCounts = new Int32Array(11);
-        for (let sy = 0; sy < scale; sy++) {
-          for (let sx = 0; sx < scale; sx++) {
-            const hx = gx * scale + sx;
-            const hy = gy * scale + sy;
-            const val = bytes[hy * 4096 + hx] ?? 0;
-            if (val === 254) {
-              hasForcedPassage = true;
-            } else if (val >= 11) {
-              countryCounts.set(val, (countryCounts.get(val) ?? 0) + 1);
-            } else {
-              waterCounts[val]++;
-            }
-          }
-        }
-        let finalB = 0;
-        let finalR = 0;
-        if (hasForcedPassage) {
-          finalB = 0;
-          finalR = 1;
-        } else {
-          let maxCountryCount = 0;
-          for (const [id, count] of countryCounts.entries()) {
-            if (count > maxCountryCount) {
-              maxCountryCount = count;
-              finalB = id;
-            }
-          }
-          if (finalB === 0) {
-            let maxWaterCount = 0;
-            for (let w = 0; w < 11; w++) {
-              if (waterCounts[w] > maxWaterCount) {
-                maxWaterCount = waterCounts[w];
-                finalR = w;
-              }
-            }
-          }
-        }
-        const pIdx = (gy * lowResWidth + gx) * 2;
-        packed1024[pIdx] = (0 << 2) | (finalR & 0x3);
-        packed1024[pIdx + 1] = finalB;
-      }
-    }
+    const packer = new LowResPacker();
+    const packed1024 = packer.pack4KTo1024(bytes, 1024, 512, 4);
 
-    const waterVisited = new Uint8Array(lowResWidth * lowResHeight);
-    for (let gy = 0; gy < lowResHeight; gy++) {
-      for (let gx = 0; gx < lowResWidth; gx++) {
-        const startIdx = gy * lowResWidth + gx;
-        const pIdx = startIdx * 2;
-        const finalB = packed1024[pIdx + 1];
-        if (finalB === 0 && waterVisited[startIdx] === 0) {
-          const component: number[] = [];
-          const queue: number[] = [startIdx];
-          waterVisited[startIdx] = 1;
-          let head = 0;
-          while (head < queue.length) {
-            const curr = queue[head++];
-            if (curr !== undefined) {
-              component.push(curr);
-              const cx = curr % lowResWidth;
-              const cy = Math.floor(curr / lowResWidth);
-              const neighbors = [
-                { x: cx + 1, y: cy },
-                { x: cx - 1, y: cy },
-                { x: cx, y: cy + 1 },
-                { x: cx, y: cy - 1 },
-              ];
-              for (const n of neighbors) {
-                let nx = n.x;
-                if (nx < 0) {
-                  nx = lowResWidth - 1;
-                } else if (nx >= lowResWidth) {
-                  nx = 0;
-                }
-                const ny = n.y;
-                if (ny >= 0 && ny < lowResHeight) {
-                  const nIdx = ny * lowResWidth + nx;
-                  const nPIdx = nIdx * 2;
-                  const nB = packed1024[nPIdx + 1];
-                  if (nB === 0 && waterVisited[nIdx] === 0) {
-                    waterVisited[nIdx] = 1;
-                    queue.push(nIdx);
-                  }
-                }
-              }
-            }
-          }
-          const isClosed = component.length < 500;
-          for (const idx of component) {
-            const cpIdx = idx * 2;
-            if (isClosed) {
-              packed1024[cpIdx] = (0 << 2) | 2;
-            } else {
-              const originalR = packed1024[cpIdx]! & 0x3;
-              packed1024[cpIdx] = (0 << 2) | (originalR <= 1 ? 1 : 0);
-            }
-          }
-        }
-      }
-    }
+    const seaDetector = new ClosedSeaDetector();
+    seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
     await fs.writeFile(path.join(editedDir, "world-mask-1024.bin"), packed1024);
 

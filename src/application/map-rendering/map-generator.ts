@@ -7,6 +7,9 @@ import { DistanceTransform } from "./distance-transform";
 import { MapWriter } from "./map-writer";
 import { AreaWeightCalculator } from "./generator/area-weight-calculator";
 import { GLOBAL_DEVIATION_FACTOR } from "../../domain/map/country-area-calibration.config";
+import { GeometryDraw } from "./utils/geometry-draw";
+import { LowResPacker } from "./utils/low-res-packer";
+import { ClosedSeaDetector } from "./utils/closed-sea-detector";
 
 export interface CountryMapping {
   id: number;
@@ -14,40 +17,6 @@ export interface CountryMapping {
   name: string;
   color: [number, number, number];
   areaSqKm: number;
-}
-
-function drawWaterLine(
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  buffer: Uint8Array,
-  width: number,
-  height: number,
-  color: number,
-) {
-  const dx = Math.abs(x2 - x1);
-  const dy = Math.abs(y2 - y1);
-  const sx = x1 < x2 ? 1 : -1;
-  const sy = y1 < y2 ? 1 : -1;
-  let err = dx - dy;
-  let cx = x1;
-  let cy = y1;
-  while (true) {
-    if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
-      buffer[cy * width + cx] = color;
-    }
-    if (cx === x2 && cy === y2) break;
-    const e2 = 2 * err;
-    if (e2 > -dy) {
-      err -= dy;
-      cx += sx;
-    }
-    if (e2 < dx) {
-      err += dx;
-      cy += sy;
-    }
-  }
 }
 
 export async function generateTest6Map(
@@ -103,13 +72,14 @@ export async function generateTest6Map(
     nextId++;
   }
 
-  drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
-  drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
+  const draw = new GeometryDraw();
+  draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
+  draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
 
   const pixelAreas = new Float64Array(nextId);
   pixelAreas.fill(0);
   const totalSurfaceAreaSqKm = areaCalculator.calculateTotalSurfaceAreaSqKm();
-  const { weights, totalWeight } = areaCalculator.generateRowWeights(
+  const { weights, totalWeight = 0 } = areaCalculator.generateRowWeights(
     height,
     width,
   );
@@ -136,114 +106,11 @@ export async function generateTest6Map(
   await writer.saveMaskImage(width, height, buffer, publicDir);
   await fs.writeFile(path.join(publicDir, "test6", "world-mask.bin"), buffer);
 
-  const lowResWidth = 1024;
-  const lowResHeight = 512;
-  const scale = 4;
-  const packed1024 = new Uint8Array(lowResWidth * lowResHeight * 2);
-  for (let gy = 0; gy < lowResHeight; gy++) {
-    for (let gx = 0; gx < lowResWidth; gx++) {
-      let hasForcedPassage = false;
-      const countryCounts = new Map<number, number>();
-      const waterCounts = new Int32Array(11);
-      for (let sy = 0; sy < scale; sy++) {
-        for (let sx = 0; sx < scale; sx++) {
-          const hx = gx * scale + sx;
-          const hy = gy * scale + sy;
-          const val = buffer[hy * width + hx] ?? 0;
-          if (val === 254) {
-            hasForcedPassage = true;
-          } else if (val >= 11) {
-            countryCounts.set(val, (countryCounts.get(val) ?? 0) + 1);
-          } else {
-            waterCounts[val]++;
-          }
-        }
-      }
-      let finalB = 0;
-      let finalR = 0;
-      if (hasForcedPassage) {
-        finalB = 0;
-        finalR = 1;
-      } else {
-        let maxCountryCount = 0;
-        for (const [id, count] of countryCounts.entries()) {
-          if (count > maxCountryCount) {
-            maxCountryCount = count;
-            finalB = id;
-          }
-        }
-        if (finalB === 0) {
-          let maxWaterCount = 0;
-          for (let w = 0; w < 11; w++) {
-            if (waterCounts[w] > maxWaterCount) {
-              maxWaterCount = waterCounts[w];
-              finalR = w;
-            }
-          }
-        }
-      }
-      const pIdx = (gy * lowResWidth + gx) * 2;
-      packed1024[pIdx] = (0 << 2) | (finalR & 0x3);
-      packed1024[pIdx + 1] = finalB;
-    }
-  }
+  const packer = new LowResPacker();
+  const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
 
-  const waterVisited = new Uint8Array(lowResWidth * lowResHeight);
-  for (let gy = 0; gy < lowResHeight; gy++) {
-    for (let gx = 0; gx < lowResWidth; gx++) {
-      const startIdx = gy * lowResWidth + gx;
-      const pIdx = startIdx * 2;
-      const finalB = packed1024[pIdx + 1];
-      if (finalB === 0 && waterVisited[startIdx] === 0) {
-        const component: number[] = [];
-        const queue: number[] = [startIdx];
-        waterVisited[startIdx] = 1;
-        let head = 0;
-        while (head < queue.length) {
-          const curr = queue[head++];
-          if (curr !== undefined) {
-            component.push(curr);
-            const cx = curr % lowResWidth;
-            const cy = Math.floor(curr / lowResWidth);
-            const neighbors = [
-              { x: cx + 1, y: cy },
-              { x: cx - 1, y: cy },
-              { x: cx, y: cy + 1 },
-              { x: cx, y: cy - 1 },
-            ];
-            for (const n of neighbors) {
-              let nx = n.x;
-              if (nx < 0) {
-                nx = lowResWidth - 1;
-              } else if (nx >= lowResWidth) {
-                nx = 0;
-              }
-              const ny = n.y;
-              if (ny >= 0 && ny < lowResHeight) {
-                const nIdx = ny * lowResWidth + nx;
-                const nPIdx = nIdx * 2;
-                const nB = packed1024[nPIdx + 1];
-                if (nB === 0 && waterVisited[nIdx] === 0) {
-                  waterVisited[nIdx] = 1;
-                  queue.push(nIdx);
-                }
-              }
-            }
-          }
-        }
-        const isClosed = component.length < 500;
-        for (const idx of component) {
-          const cpIdx = idx * 2;
-          if (isClosed) {
-            packed1024[cpIdx] = (0 << 2) | 2;
-          } else {
-            const originalR = packed1024[cpIdx]! & 0x3;
-            packed1024[cpIdx] = (0 << 2) | (originalR <= 1 ? 1 : 0);
-          }
-        }
-      }
-    }
-  }
+  const seaDetector = new ClosedSeaDetector();
+  seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
   await fs.writeFile(
     path.join(publicDir, "test6", "world-mask-1024.bin"),
