@@ -1,77 +1,87 @@
 "use client";
 
-import React, { useState, useRef } from "react";
-import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
-import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
-import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
-import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
-import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AmbientTacticalGrid } from "@/presentation/components/main-menu/ambient-tactical-grid";
+import { CommandConsole } from "@/presentation/components/main-menu/command-console";
+import { BriefingPanel } from "@/presentation/components/main-menu/briefing-panel";
+import { StatusTicker } from "@/presentation/components/main-menu/status-ticker";
+import { NationSelectorModal } from "@/presentation/components/main-menu/nation-selector-modal";
 
-export default function MapTest6Page() {
-  const mapWidth = 4096;
-  const mapHeight = 2048;
+export default function MainMenuPage() {
+  const router = useRouter();
+  const [hasSavedCampaign, setHasSavedCampaign] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [activeMapMode] = useState<"default" | "edited" | "partition">(
-    "partition",
-  );
+  useEffect(() => {
+    const saved = localStorage.getItem("test6_human_nation_id");
+    if (saved) {
+      setHasSavedCampaign(true);
+    }
+  }, []);
 
-  const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const handleNewCampaign = () => {
+    setIsModalOpen(true);
+  };
 
-  const dimensions = useMapDimensions(containerRef);
+  const handleLoadCampaign = () => {
+    router.push("/play");
+  };
 
-  const {
-    scale,
-    position,
-    isDragging,
-    handleWheel,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-  } = useMapGesture();
-
-  const {
-    loading: dataLoading,
-    canvasSrcRef,
-    canvasShadedRef,
-  } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
-
-  useCanvasRenderer({
-    canvasDestRef,
-    canvasShadedRef,
-    dataLoading,
-    dimensions,
-    position,
-    scale,
-    mapWidth,
-    mapHeight,
-  });
+  const handleSelectNation = async (nationId: string) => {
+    try {
+      const res = await fetch("/api/game/select-country", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nationId }),
+      });
+      if (res.ok) {
+        router.push("/play");
+      }
+    } catch {
+      alert("خطا در ایجاد کمپین جدید");
+    }
+  };
 
   return (
     <div
-      className="w-screen h-screen bg-slate-950 overflow-hidden relative"
+      className="w-screen h-screen bg-background overflow-hidden relative flex flex-col justify-between items-center select-none"
       dir="rtl"
     >
-      <TacticalViewport
-        containerRef={containerRef}
-        canvasDestRef={canvasDestRef}
-        canvasSrcRef={canvasSrcRef}
-        isDragging={isDragging}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onWheel={handleWheel}
-        onClick={() => {}}
-      />
+      <AmbientTacticalGrid />
 
-      {dataLoading && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
-          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400 font-medium font-sans">
-            در حال بارگذاری نقشه تاکتیکی...
+      <main className="flex-1 flex flex-col items-center justify-center gap-12 w-full max-w-4xl px-6 z-10 py-12">
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary border border-border/80 rounded-full text-[9px] font-mono text-muted-foreground uppercase tracking-widest">
+            <span>نسخه آزمایشی راهبردی | Ver 1.4</span>
+          </div>
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-foreground transition-all duration-500 hover:tracking-wide">
+            آخرین امپراتوری
+          </h1>
+          <p className="text-xs md:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+            شبیه‌ساز فوق‌پیشرفته ژئوپلیتیک، جنگ ناهمگام و دیپلماسی راهبردی جهانی
           </p>
         </div>
-      )}
+
+        <div className="w-full flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+          <CommandConsole
+            hasSavedCampaign={hasSavedCampaign}
+            onNewCampaign={handleNewCampaign}
+            onLoadCampaign={handleLoadCampaign}
+          />
+          <BriefingPanel />
+        </div>
+      </main>
+
+      <StatusTicker />
+
+      <NationSelectorModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleSelectNation}
+      />
     </div>
   );
 }
