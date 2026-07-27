@@ -13,6 +13,7 @@ export class GridDownsampler {
 
     for (let gy = 0; gy < lowResHeight; gy++) {
       for (let gx = 0; gx < lowResWidth; gx++) {
+        let hasForcedPassage = false;
         const countryIds: string[] = [];
         for (let sy = 0; sy < scaleFactor; sy++) {
           for (let sx = 0; sx < scaleFactor; sx++) {
@@ -20,14 +21,18 @@ export class GridDownsampler {
             const hy = gy * scaleFactor + sy;
             const idx = hy * highResWidth + hx;
             const val = maskBuffer[idx];
-            if (val !== undefined && val >= 11) {
+            if (val === 254) {
+              hasForcedPassage = true;
+            } else if (val !== undefined && val >= 11) {
               countryIds.push(`NATION_${val}`);
             }
           }
         }
 
         let cellOwner = "WATER";
-        if (countryIds.length > 0) {
+        if (hasForcedPassage) {
+          cellOwner = "WATER";
+        } else if (countryIds.length > 0) {
           const counts = new Map<string, number>();
           for (const id of countryIds) {
             counts.set(id, (counts.get(id) || 0) + 1);
