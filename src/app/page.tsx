@@ -55,17 +55,17 @@ export default function MainMenuPage() {
           <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 pointer-events-none" />
 
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary border border-border/80 rounded-full text-[9px] font-mono text-muted-foreground uppercase tracking-widest relative z-10">
-            <span>پروتکل نهایی حاکمیت | Ver 1.4</span>
+            <span>Version 1.4</span>
           </div>
 
-          <div className="relative inline-block z-10 px-10 py-5 border-y border-border/40">
+          <div className="relative inline-block z-10 px-10 pt-10 pb-6 border-y border-border/40">
             <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-emerald-500" />
             <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-emerald-500" />
             <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-emerald-500" />
             <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-emerald-500" />
             <div className="absolute inset-0 bg-emerald-500/5 blur-2xl rounded-full scale-110 pointer-events-none opacity-40 animate-pulse" />
 
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-slate-950 via-slate-800 to-slate-950 drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-widest bg-clip-text text-transparent bg-gradient-to-b from-slate-950 via-slate-800 to-slate-950 drop-shadow-[0_2px_8px_rgba(0,0,0,0.06)] leading-none">
               آخرین امپراتوری
             </h1>
           </div>
