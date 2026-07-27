@@ -1,52 +1,61 @@
-import React from "react";
-import { Users, Shield, Swords, Coins } from "lucide-react";
+import React, { useState } from "react";
+import {
+  DiplomaticRelation,
+  DiplomacyDetailView,
+} from "./diplomacy/diplomacy-detail-view";
+import { DiplomacyListView } from "./diplomacy/diplomacy-list-view";
+
+const MOCK_DIPLOMATIC_RELATIONS: DiplomaticRelation[] = [
+  {
+    code: "USA",
+    name: "ایالات متحده آمریکا",
+    stance: "WAR",
+    opinion: -75,
+    description: "تنش راهبردی شدید و تحریم‌های همه‌جانبه مالی.",
+  },
+  {
+    code: "CHN",
+    name: "چین",
+    stance: "ALLIANCE",
+    opinion: 85,
+    description: "پیمان مشارکت راهبردی و همکاری‌های تجاری انرژی.",
+  },
+  {
+    code: "RUS",
+    name: "روسیه",
+    stance: "NON_AGGRESSION_PACT",
+    opinion: 60,
+    description: "پیمان عدم تخاصم و توافقات ترانزیت امنیتی.",
+  },
+  {
+    code: "DEU",
+    name: "آلمان",
+    stance: "PEACE",
+    opinion: 10,
+    description: "روابط دیپلماتیک عادی و سرد بدون تعهد خاص.",
+  },
+];
 
 export function DiplomacyTab() {
-  const relations = [
-    { code: "USA", name: "ایالات متحده آمریکا", stance: "PEACE", opinion: 45 },
-    { code: "CHN", name: "چین", stance: "ALLIANCE", opinion: 85 },
-    { code: "RUS", name: "روسیه", stance: "ALLIANCE", opinion: 75 },
-    { code: "DEU", name: "آلمان", stance: "WAR", opinion: -40 },
-  ];
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRelation, setSelectedRelation] =
+    useState<DiplomaticRelation | null>(null);
+
+  if (selectedRelation) {
+    return (
+      <DiplomacyDetailView
+        relation={selectedRelation}
+        onBack={() => setSelectedRelation(null)}
+      />
+    );
+  }
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
-      <div className="space-y-2.5">
-        <div className="flex items-center gap-2 px-1">
-          <Users size={13} className="text-diplomacy" />
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            وضعیت روابط و معاهدات جهانی
-          </span>
-        </div>
-
-        <div className="space-y-2">
-          {relations.map((rel) => (
-            <div
-              key={rel.code}
-              className="bg-background/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between gap-3"
-            >
-              <div className="space-y-0.5 text-right">
-                <span className="text-xs font-bold text-foreground block">
-                  {rel.name}
-                </span>
-                <span className="text-[9px] font-mono text-muted-foreground">
-                  وضعیت: {rel.stance} | نظر: {rel.opinion}°
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() =>
-                    alert(`ارسال پیشنهاد دیپلماتیک به ${rel.name}`)
-                  }
-                  className="px-2.5 py-1.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-[10px] font-bold border border-border cursor-pointer"
-                >
-                  تعامل
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <DiplomacyListView
+      relations={MOCK_DIPLOMATIC_RELATIONS}
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      onSelectRelation={setSelectedRelation}
+    />
   );
 }
