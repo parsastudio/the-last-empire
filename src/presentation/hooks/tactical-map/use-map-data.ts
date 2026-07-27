@@ -81,7 +81,7 @@ export function useMapData({
           tempCanvas.height = mapHeight;
 
           const tempCtx = tempCanvas.getContext("2d");
-          let raw = new Uint8Array(mapWidth * mapHeight);
+          const raw = new Uint8Array(mapWidth * mapHeight);
           if (tempCtx) {
             tempCtx.drawImage(img, 0, 0);
             const imgData = tempCtx.getImageData(0, 0, mapWidth, mapHeight);

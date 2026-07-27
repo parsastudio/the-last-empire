@@ -1,5 +1,3 @@
-import { EquirectangularProjection } from "./projection";
-
 export interface GeoJsonPoint {
   x: number;
   y: number;
@@ -15,8 +13,6 @@ export interface ProcessedFeature {
 }
 
 export class GeoJsonProcessor {
-  private projection = new EquirectangularProjection();
-
   public extractFeatures(geoJson: {
     features: Array<{
       properties?: Record<string, unknown>;
@@ -84,7 +80,9 @@ export class GeoJsonProcessor {
     return ring.map((pt) => {
       const lng = pt[0] ?? 0;
       const lat = pt[1] ?? 0;
-      return this.projection.project(lng, lat, width, height);
+      const x = ((lng + 180) / 360) * width;
+      const y = ((90 - lat) / 180) * height;
+      return { x, y };
     });
   }
 }
