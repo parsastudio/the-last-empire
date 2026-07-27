@@ -1,5 +1,5 @@
 import React from "react";
-import { Swords, Shield, Plane, Radio, Award } from "lucide-react";
+import { Swords, Shield, Plane, Radio } from "lucide-react";
 
 interface MilitaryForcesSectionProps {
   infantry: number;
