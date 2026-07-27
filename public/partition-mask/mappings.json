@@ -144,17 +144,6 @@
       "areaSqKm": 17097498
     },
     {
-      "id": 31,
-      "code": "FLK",
-      "name": "Falkland Is.",
-      "color": [
-        0,
-        0,
-        31
-      ],
-      "areaSqKm": 16413
-    },
-    {
       "id": 32,
       "code": "NOR",
       "name": "Norway",
@@ -1110,17 +1099,6 @@
         184
       ],
       "areaSqKm": 34483
-    },
-    {
-      "id": 185,
-      "code": "TTO",
-      "name": "Trinidad and Tobago",
-      "color": [
-        0,
-        0,
-        185
-      ],
-      "areaSqKm": 7627
     },
     {
       "id": 186,

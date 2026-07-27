@@ -77,4 +77,6 @@ export const PARTITION_COUNTRIES_LIST = [
   "PRI",
   "NCL",
   "ATF",
+  "FLK",
+  "TTO",
 ];

@@ -11,7 +11,7 @@ export interface PixelSovereignty {
 export class SpatialBufferEngine {
   private readonly width = 1024;
   private readonly height = 512;
-  private readonly stride = 3;
+  private readonly stride = 2;
   private buffer: Uint8Array;
 
   constructor(initialBuffer?: Uint8Array) {
@@ -32,26 +32,31 @@ export class SpatialBufferEngine {
 
   public getPixel(x: number, y: number): PixelSovereignty {
     const offset = this.getOffset(x, y);
+    const geoByte = this.buffer[offset] ?? 0;
     return {
-      seaAccess: this.buffer[offset] ?? 0,
-      enclaveId: this.buffer[offset + 1] ?? 0,
-      nationId: this.buffer[offset + 2] ?? 0,
+      seaAccess: geoByte & 0x3,
+      enclaveId: geoByte >> 2,
+      nationId: this.buffer[offset + 1] ?? 0,
     };
   }
 
   public setNationId(x: number, y: number, nationId: number): void {
     const offset = this.getOffset(x, y);
-    this.buffer[offset + 2] = nationId;
+    this.buffer[offset + 1] = nationId;
   }
 
   public setEnclaveId(x: number, y: number, enclaveId: number): void {
     const offset = this.getOffset(x, y);
-    this.buffer[offset + 1] = enclaveId;
+    const geoByte = this.buffer[offset] ?? 0;
+    const seaAccess = geoByte & 0x3;
+    this.buffer[offset] = (enclaveId << 2) | seaAccess;
   }
 
   public setSeaAccess(x: number, y: number, accessType: number): void {
     const offset = this.getOffset(x, y);
-    this.buffer[offset] = accessType;
+    const geoByte = this.buffer[offset] ?? 0;
+    const enclaveId = geoByte >> 2;
+    this.buffer[offset] = (enclaveId << 2) | (accessType & 0x3);
   }
 
   public parseToGridState(): GridState {
@@ -97,7 +102,7 @@ export class SpatialBufferEngine {
       if (!current) continue;
 
       const offset = this.getOffset(current.x, current.y);
-      const currentNation = this.buffer[offset + 2] ?? 0;
+      const currentNation = this.buffer[offset + 1] ?? 0;
 
       if (currentNation === targetNationId) {
         conquered.push(current);
@@ -116,7 +121,7 @@ export class SpatialBufferEngine {
           if (visited[vIdx] === 0) {
             visited[vIdx] = 1;
             const nOffset = this.getOffset(n.x, n.y);
-            if (this.buffer[nOffset + 2] === targetNationId) {
+            if (this.buffer[nOffset + 1] === targetNationId) {
               queue.push(n);
             }
           }
