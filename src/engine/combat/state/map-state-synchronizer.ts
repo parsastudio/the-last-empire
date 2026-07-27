@@ -140,11 +140,14 @@ export class MapStateSynchronizer {
 
       for (const n of neighbors) {
         let nx = n.nx;
-        if (nx < 0) nx = WIDTH - 1;
-        else if (nx >= WIDTH) nx = 0;
+        if (nx < 0) {
+          nx = 1023;
+        } else if (nx >= 1024) {
+          nx = 0;
+        }
 
         const ny = n.ny;
-        if (ny >= 0 && ny < HEIGHT) {
+        if (ny >= 0 && ny < 512) {
           const nCell = gridState.getCell(nx, ny);
           if (
             nCell &&

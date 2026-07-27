@@ -20,7 +20,7 @@ export class ActionQueue {
     this.validator = validator ?? new StateValidator();
   }
 
-  public enqueue(state: GameState, action: GameAction): void {
+  public navigate(state: GameState, action: GameAction): void {
     const rawGridState = (state as { gridState?: GridState }).gridState;
     if (
       !this.projectedState ||
@@ -58,6 +58,10 @@ export class ActionQueue {
 
   public getQueue(): readonly GameAction[] {
     return Object.freeze([...this.queue]);
+  }
+
+  public enqueue(state: GameState, action: GameAction): void {
+    this.navigate(state, action);
   }
 
   public clear(): void {
