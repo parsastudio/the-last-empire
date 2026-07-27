@@ -18,6 +18,35 @@ export class NationProfileAssigner {
     const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
     const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
 
+    const govType = profile?.startingGovernment ?? "DEMOCRACY";
+
+    let stability = 80;
+    let corruption = 5;
+    let socialFreedom = 80;
+
+    if (govType === "MONARCHY") {
+      stability = 85;
+      corruption = 15;
+      socialFreedom = 50;
+    } else if (govType === "COMMUNISM") {
+      stability = 75;
+      corruption = 25;
+      socialFreedom = 30;
+    } else if (govType === "DICTATORSHIP") {
+      stability = 60;
+      corruption = 35;
+      socialFreedom = 20;
+    } else if (govType === "FASCISM") {
+      stability = 65;
+      corruption = 30;
+      socialFreedom = 10;
+    }
+
+    const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
+    const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
+    const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
+    const techLevel = profile?.startingTechLevel ?? 1;
+
     return {
       id,
       name,
@@ -35,10 +64,10 @@ export class NationProfileAssigner {
       adminBurdenMultiplier: 1.0,
       consecutiveDeficitTurns: 0,
       government: {
-        type: "DEMOCRACY" as const,
-        stability: 80,
-        corruption: 5,
-        socialFreedom: 80,
+        type: govType,
+        stability,
+        corruption,
+        socialFreedom,
         turnsInPower: 5,
       },
       resources: {
@@ -53,11 +82,11 @@ export class NationProfileAssigner {
         infrastructureUpkeep: 1,
       },
       military: {
-        infantry: isTier1 ? 100 : 40,
-        airForce: isTier1 ? 20 : 5,
-        droneMissile: isTier1 ? 5 : 0,
+        infantry,
+        airForce,
+        droneMissile,
         experience: 10,
-        techLevel: 1,
+        techLevel,
       },
       recruitmentQueue: [],
       geography: {
