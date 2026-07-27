@@ -1,15 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { MapShader } from "@/application/map-rendering/map-shader";
 import { GridDownsampler } from "@/application/map-rendering/grid-downsampler";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { MapDataApiHelper } from "./map-data-api-helper";
+import { MaskRenderingHelper, CountryMapping } from "./mask-rendering-helper";
 
-interface CountryMapping {
-  id: number;
-  code: string;
-  name: string;
-  color: [number, number, number];
-  areaSqKm?: number;
-}
+export type { CountryMapping };
 
 interface UseMapDataProps {
   mapWidth: number;
@@ -31,17 +26,14 @@ export function useMapData({
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
   const maskDataRef = useRef<Uint8Array | null>(null);
 
+  const apiHelper = new MapDataApiHelper();
+  const renderingHelper = new MaskRenderingHelper();
+
   useEffect(() => {
     let active = true;
     async function fetchMapAndProcess() {
       try {
-        const apiPath =
-          mapMode === "partition"
-            ? "/partition-mask/mappings.json"
-            : mapMode === "edited"
-              ? "/api/map-generator?type=edited"
-              : "/api/map-generator";
-
+        const apiPath = apiHelper.getApiPath(mapMode);
         const res = await fetch(apiPath);
         const json = await res.json();
         if (!active) return;
@@ -66,30 +58,10 @@ export function useMapData({
         setIsCached(cachedStatus);
 
         const img = new Image();
-        img.src =
-          mapMode === "partition"
-            ? "/partition-mask/world-mask.png"
-            : mapMode === "edited"
-              ? "/edited-mask/world-mask.png"
-              : "/test6/world-mask.png";
+        img.src = apiHelper.getImageSource(mapMode);
 
         img.onload = () => {
           if (typeof window === "undefined" || !active) return;
-
-          const tempCanvas = document.createElement("canvas");
-          tempCanvas.width = mapWidth;
-          tempCanvas.height = mapHeight;
-
-          const tempCtx = tempCanvas.getContext("2d");
-          const raw = new Uint8Array(mapWidth * mapHeight);
-          if (tempCtx) {
-            tempCtx.drawImage(img, 0, 0);
-            const imgData = tempCtx.getImageData(0, 0, mapWidth, mapHeight);
-            for (let i = 0; i < raw.length; i++) {
-              raw[i] = imgData.data[i * 4 + 2] || 0;
-            }
-            maskDataRef.current = raw;
-          }
 
           if (!canvasSrcRef.current) {
             canvasSrcRef.current = document.createElement("canvas");
@@ -98,48 +70,29 @@ export function useMapData({
             canvasShadedRef.current = document.createElement("canvas");
           }
 
-          const canvasSrc = canvasSrcRef.current;
-          const canvasShaded = canvasShadedRef.current;
-
-          canvasSrc.width = mapWidth;
-          canvasSrc.height = mapHeight;
-          canvasShaded.width = mapWidth;
-          canvasShaded.height = mapHeight;
-
-          const ctxSrc = canvasSrc.getContext("2d");
-          const ctxShaded = canvasShaded.getContext("2d");
-
-          if (ctxSrc && ctxShaded && maskDataRef.current) {
-            ctxSrc.imageSmoothingEnabled = false;
-            ctxShaded.imageSmoothingEnabled = true;
-            ctxSrc.drawImage(img, 0, 0, mapWidth, mapHeight);
-
-            const srcData = ctxSrc.getImageData(0, 0, mapWidth, mapHeight).data;
-            const destImage = ctxShaded.createImageData(mapWidth, mapHeight);
-
-            MapShader.applyShading(
-              srcData,
-              destImage.data,
-              mapWidth,
-              mapHeight,
-              maskDataRef.current,
-              countriesData,
-            );
-
-            ctxShaded.putImageData(destImage, 0, 0);
-          }
-
-          const downsampler = new GridDownsampler();
-          const localGridState = downsampler.downsampleMask(
-            raw,
+          renderingHelper.renderMask(
+            img,
             mapWidth,
             mapHeight,
-            4,
+            canvasSrcRef.current,
+            canvasShadedRef.current,
+            countriesData,
+            maskDataRef,
           );
-          const globalGridState = GridStateProvider.getInstance();
-          globalGridState.clear();
-          for (const cell of localGridState.getAllCells()) {
-            globalGridState.setCell(cell.x, cell.y, cell);
+
+          if (maskDataRef.current) {
+            const downsampler = new GridDownsampler();
+            const localGridState = downsampler.downsampleMask(
+              maskDataRef.current,
+              mapWidth,
+              mapHeight,
+              4,
+            );
+            const globalGridState = GridStateProvider.getInstance();
+            globalGridState.clear();
+            for (const cell of localGridState.getAllCells()) {
+              globalGridState.setCell(cell.x, cell.y, cell);
+            }
           }
 
           setLoading(false);

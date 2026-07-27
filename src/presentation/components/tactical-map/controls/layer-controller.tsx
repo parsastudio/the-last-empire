@@ -1,5 +1,6 @@
 import React from "react";
-import { Eye, Coins, Swords, Layers } from "lucide-react";
+import { Layers } from "lucide-react";
+import { LAYER_OPTIONS } from "./layer-options.config";
 
 export type TacticalLayer = "political" | "gdp" | "military";
 
@@ -12,27 +13,6 @@ export function LayerController({
   activeLayer,
   onChangeLayer,
 }: LayerControllerProps) {
-  const options = [
-    {
-      id: "political" as const,
-      label: "نمای سیاسی",
-      icon: Eye,
-      color: "text-emerald-400",
-    },
-    {
-      id: "gdp" as const,
-      label: "پایش لوجستیک (GDP)",
-      icon: Coins,
-      color: "text-amber-400",
-    },
-    {
-      id: "military" as const,
-      label: "خطوط مقدم نبرد",
-      icon: Swords,
-      color: "text-rose-400",
-    },
-  ];
-
   return (
     <div className="absolute top-6 right-6 z-40 flex flex-col gap-3">
       <div className="bg-slate-950/80 backdrop-blur-md border border-slate-900 rounded-3xl p-2.5 shadow-2xl flex flex-col gap-1.5">
@@ -42,7 +22,7 @@ export function LayerController({
             لایه‌های اطلاعات تاکتیکی
           </span>
         </div>
-        {options.map((opt) => {
+        {LAYER_OPTIONS.map((opt) => {
           const Icon = opt.icon;
           const isActive = activeLayer === opt.id;
           return (
