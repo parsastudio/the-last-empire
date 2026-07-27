@@ -1,11 +1,12 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { StateSerializer } from "@/infrastructure/storage/state-serializer";
+import { INDEXED_DB_CONFIG } from "./indexed-db-config";
 
 export class IndexedDbAdapter {
   private serializer = new StateSerializer();
-  private dbName = "GeopoliticsEngineDB";
-  private storeName = "saves";
-  private version = 1;
+  private dbName = INDEXED_DB_CONFIG.DB_NAME;
+  private storeName = INDEXED_DB_CONFIG.STORE_NAME;
+  private version = INDEXED_DB_CONFIG.VERSION;
 
   private getDb(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {

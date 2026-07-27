@@ -6,12 +6,14 @@ import { GameActionQueue } from "./orchestrator/game-action.queue";
 import { TurnProgressionOrchestrator } from "./orchestrator/turn-progression.orchestrator";
 import { HistoryManager } from "./orchestrator/history.manager";
 import { GridState } from "@/engine/combat/state/grid-state";
+import { GameEngineDispatcher } from "./orchestrator/game-engine-dispatcher";
 
 export class GameEngine {
   private currentState: GameState;
   private actionQueue = new GameActionQueue();
   private progressionOrchestrator = new TurnProgressionOrchestrator();
   private historyManager = new HistoryManager();
+  private dispatcher = new GameEngineDispatcher();
   private prng: SeededRandom;
   private gridState: GridState;
 
@@ -36,32 +38,12 @@ export class GameEngine {
   }
 
   public dispatchAction(action: GameAction): ActionResult {
-    if (this.currentState.isGameOver) {
-      return {
-        success: false,
-        actionId: action.id,
-        message: "Action rejected: Game is already over",
-        error: "GAME_OVER",
-      };
-    }
-
-    try {
-      this.actionQueue.enqueue(this.currentState, this.gridState, action);
-      return {
-        success: true,
-        actionId: action.id,
-        message: "Action enqueued successfully",
-      };
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Unknown action error";
-      return {
-        success: false,
-        actionId: action.id,
-        message: errorMessage,
-        error: "INVALID_ACTION",
-      };
-    }
+    return this.dispatcher.dispatch(
+      this.currentState,
+      this.actionQueue,
+      this.gridState,
+      action,
+    );
   }
 
   public nextTurn(): GameState {
