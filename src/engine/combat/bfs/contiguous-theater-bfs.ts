@@ -2,9 +2,11 @@ import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { SeaBridgeConnector } from "@/engine/combat/sea-bridges/sea-bridge-connector";
 import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
+import { BfsStartCellFinder } from "./bfs-start-cell-finder";
 
 export class ContiguousTheaterBfs {
   private connector = new SeaBridgeConnector();
+  private startCellFinder = new BfsStartCellFinder();
 
   public findTheaterCells(
     targetCountryId: string,
@@ -17,17 +19,11 @@ export class ContiguousTheaterBfs {
       cellMap.set(`${c.x},${c.y}`, c);
     }
 
-    let startCell = cellMap.get(`${entryPoint.x},${entryPoint.y}`);
-    if (!startCell) {
-      let minDist = Infinity;
-      for (const c of countryCells) {
-        const dist = Math.hypot(c.x - entryPoint.x, c.y - entryPoint.y);
-        if (dist < minDist) {
-          minDist = dist;
-          startCell = c;
-        }
-      }
-    }
+    const startCell = this.startCellFinder.findStartCell(
+      entryPoint,
+      countryCells,
+      cellMap,
+    );
 
     if (!startCell) {
       return [];

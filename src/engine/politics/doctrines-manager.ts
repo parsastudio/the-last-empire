@@ -1,51 +1,10 @@
 import type { DoctrinesState } from "@/domain/politics/doctrines.schema";
+import { DEFAULT_DOCTRINES, Doctrine } from "./doctrines-list.config";
 
-export interface Doctrine {
-  id: string;
-  name: string;
-  branch: "INDUSTRIAL_TECH" | "ASYMMETRIC_MILITARY" | "DIPLOMATIC_HEGEMONY";
-  cost: number;
-}
+export type { Doctrine };
 
 export class DoctrinesManager {
-  private readonly doctrines: Doctrine[] = [
-    {
-      id: "gdp-booster",
-      name: "Automation Pipelines",
-      branch: "INDUSTRIAL_TECH",
-      cost: 3,
-    },
-    {
-      id: "low-upkeep",
-      name: "Green Logistics Grid",
-      branch: "INDUSTRIAL_TECH",
-      cost: 5,
-    },
-    {
-      id: "border-fortification",
-      name: "Garrison Protocols",
-      branch: "ASYMMETRIC_MILITARY",
-      cost: 3,
-    },
-    {
-      id: "drone-swarm",
-      name: "Networked Munitions",
-      branch: "ASYMMETRIC_MILITARY",
-      cost: 5,
-    },
-    {
-      id: "global-influence",
-      name: "Cultural Radiance",
-      branch: "DIPLOMATIC_HEGEMONY",
-      cost: 3,
-    },
-    {
-      id: "reputation-recovery",
-      name: "Media Hegemony",
-      branch: "DIPLOMATIC_HEGEMONY",
-      cost: 5,
-    },
-  ];
+  private readonly doctrines: Doctrine[] = DEFAULT_DOCTRINES;
 
   public getAvailableDoctrines(): Doctrine[] {
     return [...this.doctrines];

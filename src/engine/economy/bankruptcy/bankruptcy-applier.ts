@@ -1,32 +1,13 @@
-import { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import {
+  BANKRUPTCY_STRUCTURAL_DECAY,
+  BANKRUPTCY_DEBT_HOLIDAY,
+  BANKRUPTCY_BAD_CREDIT,
+} from "./bankruptcy-modifiers.config";
 
 export class BankruptcyApplier {
   public applyBankruptcy(nation: Nation): Nation {
     const debtRatio = nation.gdp > 0 ? nation.nationalDebt / nation.gdp : 1;
-
-    const decayModifier: ActiveModifier = {
-      id: "bankruptcy-structural-decay",
-      name: "Bankruptcy Economic Decay",
-      effectType: "GDP_GROWTH_MULT",
-      magnitude: -0.25,
-      turnsRemaining: 9999,
-    };
-
-    const restructuringHoliday: ActiveModifier = {
-      id: "bankruptcy-debt-holiday",
-      name: "Debt Restructuring Period",
-      effectType: "BANKRUPTCY_HOLIDAY",
-      magnitude: 0,
-      turnsRemaining: 15,
-    };
-
-    const badCreditModifier: ActiveModifier = {
-      id: "bankruptcy-bad-credit",
-      name: "Ruined Credit Rating",
-      effectType: "CREDIT_RATING_MULT",
-      magnitude: -95,
-      turnsRemaining: 40,
-    };
 
     const existingModifiers = nation.activeModifiers.filter(
       (m) =>
@@ -79,9 +60,9 @@ export class BankruptcyApplier {
       recruitmentQueue: [],
       activeModifiers: [
         ...existingModifiers,
-        decayModifier,
-        restructuringHoliday,
-        badCreditModifier,
+        { ...BANKRUPTCY_STRUCTURAL_DECAY },
+        { ...BANKRUPTCY_DEBT_HOLIDAY },
+        { ...BANKRUPTCY_BAD_CREDIT },
       ],
     };
   }
