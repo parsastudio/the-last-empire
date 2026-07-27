@@ -1,0 +1,77 @@
+"use client";
+
+import React, { useState, useRef } from "react";
+import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
+import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
+import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
+import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
+import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
+
+export default function MapTest6Page() {
+  const mapWidth = 4096;
+  const mapHeight = 2048;
+
+  const [activeMapMode] = useState<"default" | "edited" | "partition">(
+    "partition",
+  );
+
+  const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const dimensions = useMapDimensions(containerRef);
+
+  const {
+    scale,
+    position,
+    isDragging,
+    handleWheel,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+  } = useMapGesture();
+
+  const {
+    loading: dataLoading,
+    canvasSrcRef,
+    canvasShadedRef,
+  } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
+
+  useCanvasRenderer({
+    canvasDestRef,
+    canvasShadedRef,
+    dataLoading,
+    dimensions,
+    position,
+    scale,
+    mapWidth,
+    mapHeight,
+  });
+
+  return (
+    <div
+      className="w-screen h-screen bg-slate-950 overflow-hidden relative"
+      dir="rtl"
+    >
+      <TacticalViewport
+        containerRef={containerRef}
+        canvasDestRef={canvasDestRef}
+        canvasSrcRef={canvasSrcRef}
+        isDragging={isDragging}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onWheel={handleWheel}
+        onClick={() => {}}
+      />
+
+      {dataLoading && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-slate-950 z-50">
+          <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400 font-medium font-sans">
+            در حال بارگذاری نقشه تاکتیکی...
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
