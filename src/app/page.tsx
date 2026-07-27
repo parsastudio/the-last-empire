@@ -177,6 +177,24 @@ export default function MapTest6Page() {
         hoveredCountry={hoveredCountry}
         playerNationId={playerNationId}
         rankings={rankings || []}
+        onAttack={() => {
+          if (hoveredCountry) {
+            executeAttack(hoveredCountry.code, { x: 0, y: 0 });
+          }
+        }}
+        onDeclareWar={() => {
+          if (hoveredCountry) {
+            declareWarDirectly(`NATION_${hoveredCountry.id}`);
+          }
+        }}
+        onManage={() => {
+          if (hoveredCountry) {
+            setSelectedCountry({
+              code: `NATION_${hoveredCountry.id}`,
+              name: hoveredCountry.name,
+            });
+          }
+        }}
       />
 
       <IntelligenceFeed logs={filteredLogs || []} />

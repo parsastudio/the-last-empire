@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MapShader } from "@/application/map-rendering/map-shader";
+import { GridDownsampler } from "@/application/map-rendering/grid-downsampler";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface CountryMapping {
   id: number;
@@ -79,10 +81,10 @@ export function useMapData({
           tempCanvas.height = mapHeight;
 
           const tempCtx = tempCanvas.getContext("2d");
+          let raw = new Uint8Array(mapWidth * mapHeight);
           if (tempCtx) {
             tempCtx.drawImage(img, 0, 0);
             const imgData = tempCtx.getImageData(0, 0, mapWidth, mapHeight);
-            const raw = new Uint8Array(mapWidth * mapHeight);
             for (let i = 0; i < raw.length; i++) {
               raw[i] = imgData.data[i * 4 + 2] || 0;
             }
@@ -126,6 +128,20 @@ export function useMapData({
 
             ctxShaded.putImageData(destImage, 0, 0);
           }
+
+          const downsampler = new GridDownsampler();
+          const localGridState = downsampler.downsampleMask(
+            raw,
+            mapWidth,
+            mapHeight,
+            4,
+          );
+          const globalGridState = GridStateProvider.getInstance();
+          globalGridState.clear();
+          for (const cell of localGridState.getAllCells()) {
+            globalGridState.setCell(cell.x, cell.y, cell);
+          }
+
           setLoading(false);
         };
       } catch {
