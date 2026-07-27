@@ -1,8 +1,11 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
+import { BfsStartCellFinder } from "./bfs-start-cell-finder";
 
 export class SovereignHopBfs {
+  private startCellFinder = new BfsStartCellFinder();
+
   public executeHopBfs(
     targetCountryId: string,
     entryPoint: Coordinate,
@@ -26,17 +29,11 @@ export class SovereignHopBfs {
     const queue = new BfsQueue<GridCell>();
     const visited = new Set<string>();
 
-    let startCell = cellMap.get(`${entryPoint.x},${entryPoint.y}`);
-    if (!startCell) {
-      let minDist = Infinity;
-      for (const c of targetCells) {
-        const dist = Math.hypot(c.x - entryPoint.x, c.y - entryPoint.y);
-        if (dist < minDist) {
-          minDist = dist;
-          startCell = c;
-        }
-      }
-    }
+    const startCell = this.startCellFinder.findStartCell(
+      entryPoint,
+      targetCells,
+      cellMap,
+    );
 
     if (!startCell) {
       return [];

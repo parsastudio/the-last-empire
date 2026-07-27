@@ -1,6 +1,7 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { GridCell } from "@/domain/map/grid-cell.schema";
+import { SpatialBfsConquest } from "./spatial-bfs-conquest";
 
 export interface PixelSovereignty {
   seaAccess: number;
@@ -13,6 +14,7 @@ export class SpatialBufferEngine {
   private readonly height = 512;
   private readonly stride = 2;
   private buffer: Uint8Array;
+  private bfsConquest = new SpatialBfsConquest();
 
   constructor(initialBuffer?: Uint8Array) {
     if (initialBuffer) {
@@ -91,44 +93,15 @@ export class SpatialBufferEngine {
     targetNationId: number,
     pixelLimit: number,
   ): Coordinate[] {
-    const conquered: Coordinate[] = [];
-    const visited = new Uint8Array(this.width * this.height);
-    const queue: Coordinate[] = [start];
-
-    visited[start.y * this.width + start.x] = 1;
-
-    while (queue.length > 0 && conquered.length < pixelLimit) {
-      const current = queue.shift();
-      if (!current) continue;
-
-      const offset = this.getOffset(current.x, current.y);
-      const currentNation = this.buffer[offset + 1] ?? 0;
-
-      if (currentNation === targetNationId) {
-        conquered.push(current);
-      }
-
-      const neighbors = [
-        { x: current.x + 1, y: current.y },
-        { x: current.x - 1, y: current.y },
-        { x: current.x, y: current.y + 1 },
-        { x: current.x, y: current.y - 1 },
-      ];
-
-      for (const n of neighbors) {
-        if (n.x >= 0 && n.x < this.width && n.y >= 0 && n.y < this.height) {
-          const vIdx = n.y * this.width + n.x;
-          if (visited[vIdx] === 0) {
-            visited[vIdx] = 1;
-            const nOffset = this.getOffset(n.x, n.y);
-            if (this.buffer[nOffset + 1] === targetNationId) {
-              queue.push(n);
-            }
-          }
-        }
-      }
-    }
-
-    return conquered;
+    return this.bfsConquest.execute(
+      start,
+      targetNationId,
+      pixelLimit,
+      this.width,
+      this.height,
+      this.stride,
+      this.buffer,
+      this.getOffset.bind(this),
+    );
   }
 }
