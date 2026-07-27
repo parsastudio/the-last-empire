@@ -8,8 +8,7 @@ export function useMapGesture() {
     y: 0,
   });
 
-  const { scale, setScale, calculateZoom, zoomIn, zoomOut, resetScale } =
-    useMapZoom();
+  const { scale, calculateZoom, zoomIn, zoomOut, resetScale } = useMapZoom();
 
   const {
     isDragging,

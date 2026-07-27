@@ -32,7 +32,7 @@ export class MaritimeRangeBfs {
         { nx: cx + 1, ny: cy },
         { nx: cx - 1, ny: cy },
         { nx: cx, ny: cy + 1 },
-        { nx: nx, ny: cy - 1 },
+        { nx: cx, ny: cy - 1 },
       ];
 
       for (const n of neighbors) {
