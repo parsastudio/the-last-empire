@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Search, ChevronLeft, Shield, Globe, Award } from "lucide-react";
+import { X, Search, ChevronLeft, Shield, Award } from "lucide-react";
 
 interface Nation {
   id: string;
