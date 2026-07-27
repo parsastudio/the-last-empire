@@ -1,15 +1,18 @@
-import React from "react";
-import { NationHeaderCard } from "./nation-header-card";
-import { EconomyStatsSection } from "./economy-stats-section";
-import { ResourcesSection } from "./resources-section";
-import { MilitaryForcesSection } from "./military-forces-section";
-import { GovernmentStatusSection } from "./government-status-section";
+import React, { useState } from "react";
+import { SidebarTabs, SidebarTabType } from "./sidebar-tabs";
+import { OverviewTab } from "./tabs/overview-tab";
+import { MilitaryTab } from "./tabs/military-tab";
+import { PoliticsTab } from "./tabs/politics-tab";
+import { DiplomacyTab } from "./tabs/diplomacy-tab";
+import { ResearchTab } from "./tabs/research-tab";
 
 interface SidebarContainerProps {
   isOpen: boolean;
 }
 
 export function SidebarContainer({ isOpen }: SidebarContainerProps) {
+  const [activeTab, setActiveTab] = useState<SidebarTabType>("overview");
+
   if (!isOpen) return null;
 
   const realSchemaNation = {
@@ -52,51 +55,26 @@ export function SidebarContainer({ isOpen }: SidebarContainerProps) {
       className="absolute top-0 right-0 h-screen w-[22vw] min-w-[320px] max-w-[420px] bg-card/90 backdrop-blur-xl border-l border-border z-40 flex flex-col shadow-2xl select-none"
       dir="rtl"
     >
-      <div className="p-5 border-b border-border shrink-0">
-        <span className="text-[10px] font-bold text-gdp uppercase tracking-widest font-mono block mb-2">
+      <div className="p-4 border-b border-border shrink-0 space-y-3">
+        <span className="text-[10px] font-bold text-gdp uppercase tracking-widest font-mono block">
           مرکز فرماندهی کل قوا
         </span>
-        <NationHeaderCard
-          name={realSchemaNation.name}
-          code={realSchemaNation.code}
-          flagCode={realSchemaNation.flagCode}
-          governmentType={realSchemaNation.government.type}
-          population={realSchemaNation.population}
-        />
+        <SidebarTabs activeTab={activeTab} onChangeTab={setActiveTab} />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-        <EconomyStatsSection
-          gdp={realSchemaNation.gdp}
-          treasury={realSchemaNation.treasury}
-          taxRate={realSchemaNation.taxRate}
-          nationalDebt={realSchemaNation.nationalDebt}
-          tariffRate={realSchemaNation.tariffRate}
-        />
-
-        <ResourcesSection
-          oil={realSchemaNation.resources.oil}
-          steel={realSchemaNation.resources.steel}
-          manpower={realSchemaNation.resources.manpower}
-          industrialLevel={realSchemaNation.industrialLevel}
-        />
-
-        <MilitaryForcesSection
-          infantry={realSchemaNation.military.infantry}
-          airForce={realSchemaNation.military.airForce}
-          droneMissile={realSchemaNation.military.droneMissile}
-          techLevel={realSchemaNation.military.techLevel}
-          experience={realSchemaNation.military.experience}
-        />
-
-        <GovernmentStatusSection
-          stability={realSchemaNation.government.stability}
-          corruption={realSchemaNation.government.corruption}
-          warExhaustion={realSchemaNation.warExhaustion}
-          reputation={realSchemaNation.globalReputation}
-          globalAggression={realSchemaNation.globalAggression}
-          socialFreedom={realSchemaNation.government.socialFreedom}
-        />
+      <div className="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        {activeTab === "overview" && <OverviewTab nation={realSchemaNation} />}
+        {activeTab === "military" && (
+          <MilitaryTab military={realSchemaNation.military} />
+        )}
+        {activeTab === "politics" && (
+          <PoliticsTab
+            taxRate={realSchemaNation.taxRate}
+            governmentType={realSchemaNation.government.type}
+          />
+        )}
+        {activeTab === "diplomacy" && <DiplomacyTab />}
+        {activeTab === "research" && <ResearchTab />}
       </div>
     </aside>
   );
