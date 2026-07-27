@@ -1,9 +1,12 @@
 import { StateHistory } from "@/application/state-history";
 import { GridState } from "@/engine/combat/state/grid-state";
-import { GridHistoryManager } from "@/engine/combat/history/grid-history-manager";
+import { GridStateSerializer } from "@/engine/combat/persistence/grid-state-serializer";
+import { GridStateDeserializer } from "@/engine/combat/persistence/grid-state-deserializer";
 
 export class GridHistoryAdapter {
-  private manager = new GridHistoryManager();
+  private serializer = new GridStateSerializer();
+  private deserializer = new GridStateDeserializer();
+  private historyStore = new Map<number, string>();
 
   public captureTurn(
     stateHistory: StateHistory,
@@ -11,10 +14,18 @@ export class GridHistoryAdapter {
     gridState: GridState,
   ): void {
     stateHistory.getSavedTurns();
-    this.manager.saveTurnSnapshot(turnNumber, gridState);
+    const serialized = this.serializer.serialize(gridState.getAllCells());
+    this.historyStore.set(turnNumber, serialized);
   }
 
   public rollbackTurn(turnNumber: number, gridState: GridState): void {
-    this.manager.restoreTurnGrid(turnNumber, gridState);
+    const serialized = this.historyStore.get(turnNumber);
+    if (serialized) {
+      gridState.clear();
+      const cells = this.deserializer.deserialize(serialized);
+      for (const cell of cells) {
+        gridState.setCell(cell.x, cell.y, cell);
+      }
+    }
   }
 }
