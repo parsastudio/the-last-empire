@@ -1,10 +1,11 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { GameAction } from "@/domain/game/action.schema";
-import type { AIPersonalityType } from "@/domain/ai/ai.schema";
 import { AIActionGenerator } from "@/engine/ai/ai-action-generator";
+import { PersonalityResolver } from "./personality-resolver";
 
 export class AIEngine {
   private actionGenerator = new AIActionGenerator();
+  private personalityResolver = new PersonalityResolver();
 
   public generateTurnActions(state: GameState): GameAction[] {
     const actions: GameAction[] = [];
@@ -16,7 +17,7 @@ export class AIEngine {
         continue;
       }
 
-      const personality = this.getDeterministicPersonality(
+      const personality = this.personalityResolver.resolveDeterministic(
         id,
         state.gameId,
         state.seed,
@@ -31,26 +32,5 @@ export class AIEngine {
     }
 
     return actions;
-  }
-
-  private getDeterministicPersonality(
-    nationId: string,
-    gameId: string,
-    seed: number,
-  ): AIPersonalityType {
-    const list: AIPersonalityType[] = [
-      "AGGRESSIVE",
-      "PACIFIST",
-      "ECONOMIC",
-      "ISOLATIONIST",
-    ];
-    let hash = seed;
-    for (let i = 0; i < gameId.length; i++) {
-      hash += gameId.charCodeAt(i);
-    }
-    for (let i = 0; i < nationId.length; i++) {
-      hash += nationId.charCodeAt(i);
-    }
-    return list[Math.abs(hash) % list.length] || "ECONOMIC";
   }
 }
