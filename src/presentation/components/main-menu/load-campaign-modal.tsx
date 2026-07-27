@@ -18,21 +18,21 @@ interface LoadCampaignModalProps {
 const FAKE_SAVES: FakeSave[] = [
   {
     id: "save-1",
-    title: "کمپین خاورمیانه جدید - حاکمیت ایران (IRN)",
+    title: "بازی ذخیره‌شده ۱ - حاکمیت ایران (IRN)",
     date: "۶ مرداد ۱۴۰۵ - ۱۵:۴۲",
     playtime: "۶ ساعت و ۱۲ دقیقه",
     turn: 42,
   },
   {
     id: "save-2",
-    title: "حاکمیت ایالات متحده (USA) - تقسیم متقارن اوراسیا",
+    title: "بازی ذخیره‌شده ۲ - حاکمیت ایالات متحده (USA)",
     date: "۴ مرداد ۱۴۰۵ - ۱۱:۲۰",
     playtime: "۳ ساعت و ۴۵ دقیقه",
     turn: 19,
   },
   {
     id: "save-3",
-    title: "اروپای متحد - حاکمیت آلمان (DEU)",
+    title: "بازی ذخیره‌شده ۳ - حاکمیت آلمان (DEU)",
     date: "۲۸ تیر ۱۴۰۵ - ۲۲:۰۵",
     playtime: "۱۲ ساعت و ۳۰ دقیقه",
     turn: 89,
@@ -49,10 +49,10 @@ export function LoadCampaignModal({
 
   const handleSelect = (saveId: string) => {
     setLoadingSaveId(saveId);
-    setLoadingSaveStep("در حال بازخوانی پرونده حاکمیتی...");
+    setLoadingSaveStep("در حال بازخوانی پرونده بازی...");
 
     setTimeout(() => {
-      setLoadingSaveStep("همگام‌سازی ماتریس دیپلماتیک همسایگان...");
+      setLoadingSaveStep("همگام‌سازی اطلاعات نقشه...");
     }, 800);
 
     setTimeout(() => {
@@ -90,14 +90,14 @@ export function LoadCampaignModal({
 
             <div className="space-y-1 mb-6 text-right">
               <span className="text-[10px] font-bold text-gdp uppercase tracking-widest">
-                پایگاه داده اسناد فرماندهی
+                پایگاه داده اسناد بازی
               </span>
               <h3 className="text-lg font-bold text-foreground">
-                بازیابی کمپین‌های ذخیره‌شده
+                بارگذاری بازی‌های ذخیره‌شده
               </h3>
               <p className="text-xs text-muted-foreground">
-                یکی از اسناد ذخیره‌شده زیر را برای بازیابی کل موازنه قدرت و
-                موقعیت استراتژیک کمپین انتخاب کنید.
+                یکی از بازی‌های ذخیره‌شده زیر را برای بازیابی اطلاعات نقشه و
+                موقعیت استراتژیک حاکمیت خود انتخاب کنید.
               </p>
             </div>
 
