@@ -65,7 +65,7 @@ export function NationSelectorModal({
 
         <div className="space-y-1 mb-6 text-right">
           <span className="text-[10px] font-bold text-gdp uppercase tracking-widest">
-            تنظیمات اولیه کمپین راهبردی
+            تنظیمات اولیه بازی جدید
           </span>
           <h3 className="text-lg font-bold text-foreground">
             انتخاب قدرت حاکمیتی
@@ -86,6 +86,7 @@ export function NationSelectorModal({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`/flags/${nation.code.toLowerCase()}.png`}
                       alt={nation.name}
