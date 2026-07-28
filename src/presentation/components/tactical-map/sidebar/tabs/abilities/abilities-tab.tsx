@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Zap } from "lucide-react";
 import { REGIME_ABILITIES, AbilityItem } from "./abilities.config";
 import { AbilityCard } from "./ability-card";
-import { AbilityTargetModal } from "../../modals/ability-target-modal";
+import { AbilityTargetModal } from "../../../modals/ability-target-modal";
 
 interface AbilitiesTabProps {
   currentGovernment: string;

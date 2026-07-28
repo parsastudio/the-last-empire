@@ -23,7 +23,7 @@ export function DoctrineTreeView({
   const handleUnlock = async (docId: string, name: string) => {
     await dispatchAction(
       {
-        id: `doc-${Date.now()}`,
+        id: `unlock-${docId}`,
         nationId,
         type: "UNLOCK_DOCTRINE",
         doctrineId: docId,

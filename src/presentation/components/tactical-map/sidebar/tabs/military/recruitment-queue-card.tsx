@@ -19,7 +19,7 @@ export function RecruitmentQueueCard({
   const handleCancelOrder = async (orderId: string) => {
     await dispatchAction(
       {
-        id: `cancel-${Date.now()}`,
+        id: `cancel-${orderId}`,
         nationId,
         type: "CANCEL_RECRUITMENT",
         orderId,
