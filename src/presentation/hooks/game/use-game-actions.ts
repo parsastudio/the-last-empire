@@ -1,0 +1,42 @@
+"use client";
+
+import { useCallback } from "react";
+import { GameAction } from "@/domain/game/action.schema";
+import { useToast } from "@/presentation/context/toast-context";
+
+export function useGameActions() {
+  const { showToast } = useToast();
+
+  const dispatchAction = useCallback(
+    async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
+      try {
+        const res = await fetch("/api/game/action", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(action),
+        });
+
+        const json = await res.json();
+        if (json.success) {
+          if (onSuccessMessage) {
+            showToast("دستور صادر شد", onSuccessMessage, "success");
+          }
+          return true;
+        } else {
+          showToast(
+            "خطا در اجرای دستور",
+            json.message || "امکان ثبت این اکشن وجود ندارد.",
+            "error",
+          );
+          return false;
+        }
+      } catch {
+        showToast("خطای شبکه", "ارتباط با سیستم مرکزی برقرار نشد.", "error");
+        return false;
+      }
+    },
+    [showToast],
+  );
+
+  return { dispatchAction };
+}

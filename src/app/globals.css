@@ -9,8 +9,22 @@
   }
 }
 
+@keyframes pulseGlow {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
 .animate-fade-smooth {
   animation: fadeInOpacity 0.15s ease-in-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @font-face {
@@ -22,32 +36,32 @@
 }
 
 :root {
-  --background: #fcfcfc;
-  --foreground: #09090b;
-  --card: #ffffff;
-  --card-foreground: #09090b;
-  --popover: #ffffff;
-  --popover-foreground: #09090b;
-  --primary: #18181b;
+  --background: #090d16;
+  --foreground: #f4f4f5;
+  --card: #111827;
+  --card-foreground: #f4f4f5;
+  --popover: #111827;
+  --popover-foreground: #f4f4f5;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #52525b;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --secondary: #1f2937;
+  --secondary-foreground: #f4f4f5;
+  --muted: #1f2937;
+  --muted-foreground: #9ca3af;
+  --accent: #1f2937;
+  --accent-foreground: #f4f4f5;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #18181b;
-  --radius: 0.75rem;
+  --border: #374151;
+  --input: #374151;
+  --ring: #3b82f6;
+  --radius: 0.875rem;
 
-  --gdp: #059669;
-  --military: #dc2626;
-  --treasury: #d97706;
-  --diplomacy: #4f46e5;
-  --sovereign: #0f172a;
+  --gdp: #10b981;
+  --military: #f43f5e;
+  --treasury: #f59e0b;
+  --diplomacy: #6366f1;
+  --sovereign: #0b0f19;
 
   --font-vazirmatn: "Vazirmatn", system-ui, sans-serif;
 }
@@ -59,17 +73,17 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
-  --color-card-foreground: var(--color-card-foreground);
+  --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
-  --color-popover-foreground: var(--color-popover-foreground);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--color-muted-foreground);
+  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
-  --color-accent-foreground: var(--color-accent-foreground);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
@@ -87,4 +101,5 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-vazirmatn);
+  overflow: hidden;
 }
