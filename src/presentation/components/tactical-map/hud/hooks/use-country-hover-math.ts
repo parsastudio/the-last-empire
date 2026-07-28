@@ -55,7 +55,17 @@ export function useCountryHoverMath({
     }
 
     const pixelIndex = mapY * mapWidth + mapX;
-    const nationIdNumber = maskDataRef.current[pixelIndex];
+    const maskBuffer = maskDataRef.current;
+
+    let greenChannelVal = 0;
+    let nationIdNumber = 0;
+
+    if (maskBuffer.length === mapWidth * mapHeight * 2) {
+      greenChannelVal = maskBuffer[pixelIndex * 2] || 0;
+      nationIdNumber = maskBuffer[pixelIndex * 2 + 1] || 0;
+    } else {
+      nationIdNumber = maskBuffer[pixelIndex] || 0;
+    }
 
     if (!nationIdNumber || nationIdNumber < 11 || nationIdNumber >= 250) {
       setHoverData(null);
@@ -95,6 +105,11 @@ export function useCountryHoverMath({
       }
     }
 
+    let regionLabel = "";
+    if (greenChannelVal > 0) {
+      regionLabel = `(منطقه ${greenChannelVal.toLocaleString("fa-IR")})`;
+    }
+
     setHoverData({
       name: realName,
       code: matchedCountry.code,
@@ -102,7 +117,7 @@ export function useCountryHoverMath({
       rank: cachedRank,
       stance: "صلح و دیپلماسی عادی",
       gdp: `$${gdpFormatted} میلیارد دلار`,
-      regionName: "خاک اصلی",
+      regionName: regionLabel,
       regionArea: `${Math.round(areaVal).toLocaleString("fa-IR")} km²`,
     });
   }, [
