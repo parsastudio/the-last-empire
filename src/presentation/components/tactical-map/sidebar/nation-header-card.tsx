@@ -1,5 +1,6 @@
 import React from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface NationHeaderCardProps {
   name: string;
@@ -7,6 +8,7 @@ interface NationHeaderCardProps {
   flagCode: string;
   governmentType: string;
   population: number;
+  territorySize?: number;
   rank?: number;
   regions?: RegionDemographics[];
 }
@@ -17,21 +19,31 @@ export function NationHeaderCard({
   flagCode,
   governmentType,
   population,
+  territorySize = 377975,
   rank = 1,
 }: NationHeaderCardProps) {
+  const flagEmoji = getFlagEmoji(flagCode || code);
+
+  const formattedArea = Math.round(territorySize).toLocaleString("fa-IR");
+
+  let formattedPopulation = (population / 1e6).toFixed(1);
+  if (population >= 1e9) {
+    formattedPopulation = `${(population / 1e9).toFixed(2)} میلیارد`;
+  } else {
+    formattedPopulation = `${formattedPopulation} میلیون`;
+  }
+
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`/flags/${flagCode.toLowerCase()}.png`}
-            alt={name}
-            className="w-12 h-9 object-cover rounded-xl shadow-sm border border-border shrink-0"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = "none";
-            }}
-          />
+          <span
+            className="text-3xl select-none shrink-0"
+            role="img"
+            aria-label={name}
+          >
+            {flagEmoji}
+          </span>
           <div className="space-y-0.5 text-right">
             <div className="flex items-center gap-2">
               <span className="text-xs font-extrabold text-foreground">
@@ -60,16 +72,16 @@ export function NationHeaderCard({
           <span className="text-[9px] text-muted-foreground block">
             جمعیت کل قلمروها
           </span>
-          <span className="text-xs font-bold text-foreground block">
-            {(population / 1e6).toFixed(1)} میلیون نفر
+          <span className="text-xs font-bold text-foreground block font-mono">
+            {formattedPopulation} نفر
           </span>
         </div>
         <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
           <span className="text-[9px] text-muted-foreground block">
             مساحت کل
           </span>
-          <span className="text-xs font-bold text-foreground block">
-            ۱,۶۴۸,۱۹۵ km²
+          <span className="text-xs font-bold text-foreground block font-mono">
+            {formattedArea} km²
           </span>
         </div>
       </div>

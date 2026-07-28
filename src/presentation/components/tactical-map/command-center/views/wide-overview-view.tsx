@@ -21,6 +21,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           flagCode={nation.flagCode}
           governmentType={nation.government.type}
           population={nation.population}
+          territorySize={nation.geography.territorySize}
           rank={rank}
           regions={nation.regionsDemographics}
         />

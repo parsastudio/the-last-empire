@@ -46,10 +46,23 @@ export class GdpPopUpdater {
       const numericId = parseInt(id.replace("NATION_", ""), 10);
       const profile = findCountryProfileById(numericId);
 
-      const baseGdp = profile ? profile.gdp : 5000000000;
-      const basePop = profile ? profile.population : 80000000;
+      const baseGdp = profile ? profile.gdp : nation.gdp || 5000000000;
+      const basePop = profile
+        ? profile.population
+        : nation.population || 80000000;
 
-      const totalPixels = totalPixelsMap.get(id) || 1;
+      const totalPixels = totalPixelsMap.get(id) || 0;
+
+      if (totalPixels === 0) {
+        updated[id] = {
+          ...nation,
+          gdp: nation.gdp > 0 ? nation.gdp : baseGdp,
+          population: nation.population > 0 ? nation.population : basePop,
+          isAlive: true,
+        };
+        continue;
+      }
+
       const freePixels = freePixelsMap.get(id) || 0;
       const freeRatio = freePixels / totalPixels;
 
