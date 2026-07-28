@@ -3,6 +3,7 @@ import { CountryHoverHud } from "./country-hover-hud";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCountryHoverRankings } from "./hooks/use-country-hover-rankings";
 import { useCountryHoverMath } from "./hooks/use-country-hover-math";
+import { Nation } from "@/domain/nation/nation.schema";
 
 export interface HoverCountryInfo {
   name: string;
@@ -24,6 +25,8 @@ interface CountryHoverContainerProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   scale: number;
   position: { x: number; y: number };
+  nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
 }
 
 export function CountryHoverContainer({
@@ -35,6 +38,8 @@ export function CountryHoverContainer({
   containerRef,
   scale,
   position,
+  nationsMap,
+  humanNationId,
 }: CountryHoverContainerProps) {
   const rankingsMap = useCountryHoverRankings(countries);
   const { hoverData, cursorPos, handleMouseMove, handleMouseLeave } =
@@ -48,6 +53,8 @@ export function CountryHoverContainer({
       scale,
       position,
       rankingsMap,
+      nationsMap,
+      humanNationId,
     });
 
   return (

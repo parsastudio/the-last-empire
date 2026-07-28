@@ -4,7 +4,10 @@ import { useCallback } from "react";
 import { GameAction } from "@/domain/game/action.schema";
 import { useToast } from "@/presentation/context/toast-context";
 
-export function useGameActions(customGameId?: string) {
+export function useGameActions(
+  customGameId?: string,
+  onActionExecuted?: () => void,
+) {
   const { showToast } = useToast();
 
   const dispatchAction = useCallback(
@@ -22,6 +25,9 @@ export function useGameActions(customGameId?: string) {
           if (onSuccessMessage) {
             showToast("دستور صادر شد", onSuccessMessage, "success");
           }
+          if (onActionExecuted) {
+            onActionExecuted();
+          }
           return true;
         } else {
           showToast(
@@ -36,7 +42,7 @@ export function useGameActions(customGameId?: string) {
         return false;
       }
     },
-    [customGameId, showToast],
+    [customGameId, onActionExecuted, showToast],
   );
 
   return { dispatchAction };

@@ -11,12 +11,14 @@ import { Nation } from "@/domain/nation/nation.schema";
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
   nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
   onFocusCountry?: (code: string) => void;
 }
 
 export function WideDiplomacyView({
   selectedTargetCode,
   nationsMap,
+  humanNationId = "NATION_118",
 }: WideDiplomacyViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCode, setActiveCode] = useState<string>(
@@ -24,9 +26,18 @@ export function WideDiplomacyView({
   );
 
   const relationsList = nationsMap
-    ? Object.values(nationsMap).map((n) =>
-        resolveProfileRelation(n.flagCode || n.id),
-      )
+    ? Object.values(nationsMap).map((n) => {
+        const rel = resolveProfileRelation(n.flagCode || n.id);
+        const humanNation = nationsMap[humanNationId];
+        if (humanNation) {
+          const directRel = humanNation.relations[n.id];
+          if (directRel) {
+            rel.stance = directRel.stance;
+            rel.opinion = directRel.opinion;
+          }
+        }
+        return rel;
+      })
     : ALL_COUNTRY_PROFILES.slice(0, 15).map((p) =>
         resolveProfileRelation(p.code),
       );
@@ -75,7 +86,11 @@ export function WideDiplomacyView({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <CountryProfileStats data={selectedRelation.profileData} />
-          <AdvancedDiplomacyActions targetName={selectedRelation.name} />
+          <AdvancedDiplomacyActions
+            targetName={selectedRelation.name}
+            targetNationId={`NATION_${selectedRelation.code}`}
+            nationId={humanNationId}
+          />
         </div>
       </div>
     </div>

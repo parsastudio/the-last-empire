@@ -122,6 +122,8 @@ function MapTest6Content() {
           containerRef={containerRef}
           scale={scale}
           position={position}
+          nationsMap={gameState?.nations}
+          humanNationId={gameState?.humanNationId}
         />
 
         <TacticalMapOverlay
