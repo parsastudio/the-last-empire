@@ -5,8 +5,7 @@ import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { GeoJsonProcessor } from "./geojson-processor";
 import { DistanceTransform } from "./distance-transform";
 import { MapWriter } from "./map-writer";
-import { AreaWeightCalculator } from "./generator/area-weight-calculator";
-import { GLOBAL_DEVIATION_FACTOR } from "../../domain/map/country-area-calibration.config";
+import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
 import { GeometryDraw } from "./utils/geometry-draw";
 import { LowResPacker } from "./utils/low-res-packer";
 import { ClosedSeaDetector } from "./utils/closed-sea-detector";
@@ -35,7 +34,7 @@ export async function generateTest6Map(
   const processor = new GeoJsonProcessor();
   const distanceTransform = new DistanceTransform();
   const writer = new MapWriter();
-  const areaCalculator = new AreaWeightCalculator();
+  const areaCounter = new MapAreaPixelCounter();
   const countries: CountryMapping[] = [];
   countries.push({
     id: 0,
@@ -76,30 +75,9 @@ export async function generateTest6Map(
   draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
   draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
 
-  const pixelAreas = new Float64Array(nextId);
-  pixelAreas.fill(0);
-  const totalSurfaceAreaSqKm = areaCalculator.calculateTotalSurfaceAreaSqKm();
-  const { weights, totalWeight = 0 } = areaCalculator.generateRowWeights(
-    height,
-    width,
-  );
-  const areaPerUnit = totalSurfaceAreaSqKm / totalWeight;
-  for (let y = 0; y < height; y++) {
-    const rowWeight = weights[y] * areaPerUnit;
-    for (let x = 0; x < width; x++) {
-      const id = buffer[y * width + x]!;
-      if (id >= 11 && id < nextId) {
-        pixelAreas[id] += rowWeight;
-      }
-    }
-  }
-  countries.forEach((c) => {
-    if (c.id >= 11) {
-      c.areaSqKm = Math.round(
-        (pixelAreas[c.id] || 0) * GLOBAL_DEVIATION_FACTOR,
-      );
-    }
-  });
+  const pixelAreas = areaCounter.calculateAreas(buffer, width, height, nextId);
+  areaCounter.applyCalibratedAreas(countries, pixelAreas);
+
   const dist = distanceTransform.calculate(buffer, width, height);
 
   distanceTransform.applySeaDepths(buffer, dist, width, height);

@@ -8,6 +8,7 @@ import { EditorCard } from "@/presentation/components/map-generator/editor-card"
 import { InsightsCard } from "@/presentation/components/map-generator/insights-card";
 import { TerritoryDatabase } from "@/presentation/components/map-generator/territory-database";
 import { FlatMapExporter } from "@/presentation/components/map-generator/utils/flat-map-exporter";
+import { useMapGeneratorHandlers } from "@/presentation/components/map-generator/hooks/use-map-generator-handlers";
 
 interface CountryMapping {
   id: number;
@@ -16,33 +17,26 @@ interface CountryMapping {
   areaSqKm: number;
 }
 
-interface PartitionMetrics {
-  readTimeMs: number;
-  partitionTimeMs: number;
-  areaRecalcTimeMs: number;
-  writeTimeMs: number;
-  totalTimeMs: number;
-}
-
 export default function MapGeneratorPage() {
-  const [status, setStatus] = useState<
-    "idle" | "generating" | "success" | "error"
-  >("idle");
-  const [partitionStatus, setPartitionStatus] = useState<
-    "idle" | "compiling" | "success" | "error"
-  >("idle");
-  const [partitionMetrics, setPartitionMetrics] =
-    useState<PartitionMetrics | null>(null);
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCached, setIsCached] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isImporting, setIsImporting] = useState(false);
   const [mapType, setMapType] = useState<"default" | "edited" | "partition">(
     "default",
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const flatMapExporter = new FlatMapExporter();
+
+  const {
+    status,
+    partitionStatus,
+    partitionMetrics,
+    errorMessage,
+    isImporting,
+    setIsImporting,
+    handleGenerate,
+    handlePartitionCompile,
+  } = useMapGeneratorHandlers(setCountries, setIsCached, setMapType);
 
   useEffect(() => {
     let active = true;
@@ -87,7 +81,6 @@ export default function MapGeneratorPage() {
         }
       } catch {
         if (active) {
-          setErrorMessage("Failed to check active map status");
         }
       }
     }
@@ -96,55 +89,6 @@ export default function MapGeneratorPage() {
       active = false;
     };
   }, [mapType]);
-
-  const handleGenerate = async () => {
-    setStatus("generating");
-    setErrorMessage("");
-    try {
-      const res = await fetch("/api/map-generator?rebuild=true", {
-        method: "GET",
-        headers: { pragma: "no-cache", "cache-control": "no-cache" },
-      });
-      const json = await res.json();
-      if (json.success) {
-        setCountries(json.data.countries || []);
-        setIsCached(false);
-        setStatus("success");
-        setMapType("default");
-      } else {
-        setStatus("error");
-        setErrorMessage(json.error || "Generation process failed");
-      }
-    } catch {
-      setStatus("error");
-      setErrorMessage("Network communication error during 4K build");
-    }
-  };
-
-  const handlePartitionCompile = async (source: "default" | "edited") => {
-    setPartitionStatus("compiling");
-    setErrorMessage("");
-    try {
-      const res = await fetch(`/api/map-generator/partition?source=${source}`, {
-        method: "POST",
-      });
-      const json = await res.json();
-      if (json.success) {
-        setCountries(json.data.countries || []);
-        setPartitionMetrics(json.metrics || null);
-        setMapType("partition");
-        setPartitionStatus("success");
-      } else {
-        setPartitionStatus("error");
-        setErrorMessage(json.error || "Symmetric partition process failed");
-      }
-    } catch {
-      setPartitionStatus("error");
-      setErrorMessage(
-        "Network communication error during dynamic partition compiler",
-      );
-    }
-  };
 
   const handleExportFlatMap = () => {
     flatMapExporter.exportFlatMap(mapType);

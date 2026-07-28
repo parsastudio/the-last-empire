@@ -1,16 +1,7 @@
 import React from "react";
-import {
-  CombatReport,
-  ReportSeverity,
-} from "@/domain/reports/combat-report.schema";
-import {
-  FileText,
-  ChevronLeft,
-  ShieldAlert,
-  Award,
-  AlertTriangle,
-  Info,
-} from "lucide-react";
+import { CombatReport } from "@/domain/reports/combat-report.schema";
+import { FileText, ChevronLeft } from "lucide-react";
+import { getSeverityStyle } from "./utils/report-severity-style";
 
 interface ReportsSidebarTabProps {
   reports: CombatReport[];
@@ -21,37 +12,6 @@ export function ReportsSidebarTab({
   reports,
   onSelectReport,
 }: ReportsSidebarTabProps) {
-  const getSeverityStyle = (severity: ReportSeverity) => {
-    switch (severity) {
-      case "CRITICAL_DEFEAT":
-      case "DEFEAT":
-        return {
-          bg: "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30",
-          badge: "bg-rose-500/20 text-rose-400 border-rose-500/30",
-          icon: ShieldAlert,
-        };
-      case "CRUSHING_VICTORY":
-      case "VICTORY":
-        return {
-          bg: "bg-emerald-500/10 hover:bg-emerald-500/20 border-emerald-500/30",
-          badge: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
-          icon: Award,
-        };
-      case "PYRRHIC_VICTORY":
-        return {
-          bg: "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30",
-          badge: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-          icon: AlertTriangle,
-        };
-      default:
-        return {
-          bg: "bg-sky-500/10 hover:bg-sky-500/20 border-sky-500/30",
-          badge: "bg-sky-500/20 text-sky-400 border-sky-500/30",
-          icon: Info,
-        };
-    }
-  };
-
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl">
       <div className="flex items-center gap-2 px-1">
