@@ -1,19 +1,26 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { findCountryProfileById } from "@/domain/map/countries";
+import {
+  findCountryProfileById,
+  findCountryProfileByCode,
+} from "@/domain/map/countries";
 
 export class NationProfileAssigner {
   public buildStartingNation(id: string, isHuman: boolean): Nation {
-    const numericId = parseInt(id.replace("NATION_", ""), 10);
-    const profile = findCountryProfileById(numericId);
+    let numericId = parseInt(id.replace("NATION_", ""), 10);
+    let profile = isNaN(numericId)
+      ? findCountryProfileByCode(id)
+      : findCountryProfileById(numericId);
+
+    if (!profile && isNaN(numericId)) {
+      profile = findCountryProfileById(118);
+    }
 
     const gdp = profile ? profile.gdp : 5000000000;
     const population = profile ? profile.population : 80000000;
     const treasury = profile ? profile.startingTreasury : 100000;
     const traits = profile ? profile.traits : ["FRAGILE_ECONOMY" as const];
-    const name = profile
-      ? `کشور ${profile.nameFa}`
-      : `قلمرو مستقل ${numericId}`;
-    const flagCode = profile ? profile.flagCode : "US";
+    const name = profile ? profile.nameFa : `قلمرو مستقل ${id}`;
+    const flagCode = profile ? profile.flagCode : "IR";
 
     const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
     const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;

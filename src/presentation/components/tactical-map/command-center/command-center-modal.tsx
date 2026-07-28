@@ -39,8 +39,8 @@ export function CommandCenterModal({
 }: CommandCenterModalProps) {
   if (!activeTab) return null;
 
-  const fallbackNation: Nation = nation || {
-    id: "IRN",
+  const fallbackNation: Nation = {
+    id: "NATION_118",
     name: "ایران",
     isAi: false,
     isAlive: true,
@@ -155,7 +155,7 @@ export function CommandCenterModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-card/95 border border-border w-[88vw] h-[85vh] max-w-6xl rounded-3xl p-6 shadow-2xl flex flex-col space-y-5 dir-rtl overflow-hidden text-foreground backdrop-blur-md cursor-default"
+        className="bg-card/95 border border-border w-[88vw] h-[85vh] max-w-6xl rounded-3xl p-6 shadow-2xl flex flex-col space-y-5 dir-rtl overflow-hidden text-foreground backdrop-blur-md cursor-default text-right"
       >
         <CommandCenterHeader
           title={meta.title}

@@ -38,7 +38,20 @@ export function useGameResources(
       };
     }
 
-    const nation = gameState.nations[gameState.humanNationId] || null;
+    const humanId = gameState.humanNationId;
+    let nation = gameState.nations[humanId] || null;
+
+    if (!nation) {
+      const matchKey = Object.keys(gameState.nations).find(
+        (key) =>
+          key.toUpperCase() === humanId.toUpperCase() ||
+          gameState.nations[key]?.name === humanId,
+      );
+      if (matchKey) {
+        nation = gameState.nations[matchKey] || null;
+      }
+    }
+
     if (!nation) {
       return {
         nation: null,
