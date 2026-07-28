@@ -15,6 +15,7 @@ export interface CountryProfileData {
   governmentType: string;
   stability: number;
   corruption: number;
+  militaryStrength?: string;
 }
 
 interface CountryProfileStatsProps {

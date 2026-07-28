@@ -23,6 +23,10 @@ export function resolveProfileRelation(code: string): DiplomaticRelation {
   else if (govType === "MONARCHY") govLabel = "پادشاهی";
   else if (govType === "FASCISM") govLabel = "فاشیسم";
 
+  const infantry = profile?.startingInfantry ?? 50;
+  const airForce = profile?.startingAirForce ?? 10;
+  const militaryPower = infantry + airForce * 3;
+
   return {
     code: code.toUpperCase(),
     name,
@@ -37,6 +41,7 @@ export function resolveProfileRelation(code: string): DiplomaticRelation {
       governmentType: govLabel,
       stability: 80,
       corruption: 10,
+      militaryStrength: `${militaryPower.toLocaleString("fa-IR")} یگان`,
     },
   };
 }
