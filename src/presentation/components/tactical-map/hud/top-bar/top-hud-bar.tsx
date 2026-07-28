@@ -9,9 +9,10 @@ import { ThreatRadarBadge } from "./threat-radar-badge";
 
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
+  onOpenPending?: () => void;
 }
 
-export function TopHudBar({ metrics }: TopHudBarProps) {
+export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
   const formattedTreasury = `$${(metrics.treasury / 1000).toFixed(0)}k`;
   const formattedIncome =
     metrics.netIncomePerTurn >= 0
@@ -68,15 +69,16 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
 
       <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">
         {metrics.pendingDecisionsCount > 0 && (
-          <div
-            className="relative flex items-center justify-center p-1.5 rounded-xl bg-treasury/15 text-treasury border border-treasury/30 animate-pulse cursor-pointer"
+          <button
+            onClick={onOpenPending}
+            className="relative flex items-center justify-center p-1.5 rounded-xl bg-treasury/15 text-treasury border border-treasury/30 animate-pulse cursor-pointer transition-transform active:scale-95"
             title={`${metrics.pendingDecisionsCount} تصمیم معوق نیازمند اقدام`}
           >
             <Bell size={14} />
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-treasury text-primary-foreground rounded-full text-[9px] font-mono font-bold flex items-center justify-center">
               {metrics.pendingDecisionsCount}
             </span>
-          </div>
+          </button>
         )}
 
         <div className="flex flex-col items-center leading-none font-mono px-2 py-1 bg-secondary/60 rounded-xl border border-border/60">

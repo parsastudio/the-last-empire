@@ -78,6 +78,7 @@ export function useGameResources(
     if (nation.doctrines.doctrinePoints >= 3) pendingCount++;
     if (nation.recruitmentQueue.length === 0) pendingCount++;
     if (nation.resources.oil < 20) pendingCount++;
+    if (nation.government.stability < 35) pendingCount++;
 
     return {
       nation,

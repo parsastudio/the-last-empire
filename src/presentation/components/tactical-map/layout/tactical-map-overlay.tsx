@@ -29,6 +29,7 @@ interface TacticalMapOverlayProps {
   onSelectAction: (action: ContextActionType) => void;
   onCloseContextMenu: () => void;
   onCloseAttackModal: () => void;
+  onOpenPendingDecisions?: () => void;
 }
 
 export function TacticalMapOverlay({
@@ -40,10 +41,11 @@ export function TacticalMapOverlay({
   onSelectAction,
   onCloseContextMenu,
   onCloseAttackModal,
+  onOpenPendingDecisions,
 }: TacticalMapOverlayProps) {
   return (
     <>
-      <TopHudBar metrics={metrics} />
+      <TopHudBar metrics={metrics} onOpenPending={onOpenPendingDecisions} />
 
       <StrategicToastContainer />
 
