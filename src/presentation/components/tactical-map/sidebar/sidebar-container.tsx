@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { SidebarTabType } from "./sidebar-tabs";
 import { CommandRail } from "../command-rail/command-rail";
 import { CommandCenterModal } from "../command-center/command-center-modal";
@@ -24,13 +24,17 @@ export function SidebarContainer({
   selectedTargetCode,
   onFocusCountry,
 }: SidebarContainerProps) {
-  const [activeTab, setActiveTab] = useState<SidebarTabType | null>(null);
+  const [internalActiveTab, setInternalActiveTab] =
+    useState<SidebarTabType | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
   const { showToast } = useToast();
   const { gameState, advanceNextTurn } = useGeopoliticsGame();
+
+  const activeTab =
+    externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
 
   const realReports = useRealCombatReports(gameState);
 
@@ -40,12 +44,6 @@ export function SidebarContainer({
       : null;
 
   const currentTurn = gameState ? gameState.currentTurn : 1;
-
-  useEffect(() => {
-    if (externalActiveTab) {
-      setActiveTab(externalActiveTab);
-    }
-  }, [externalActiveTab]);
 
   const [stagedActions, setStagedActions] = useState<
     Array<{ id: string; typeLabel: string; cost: number }>
@@ -134,7 +132,7 @@ export function SidebarContainer({
         activeTab={activeTab}
         isCollapsed={isRailCollapsed}
         currentTurn={currentTurn}
-        onSelectTab={setActiveTab}
+        onSelectTab={setInternalActiveTab}
         onToggleCollapse={() => setIsRailCollapsed((prev) => !prev)}
         onNextTurn={handleNextTurn}
       />
@@ -153,7 +151,7 @@ export function SidebarContainer({
         selectedTargetCode={selectedTargetCode}
         nation={humanNation}
         mockReports={realReports}
-        onClose={() => setActiveTab(null)}
+        onClose={() => setInternalActiveTab(null)}
         onFocusCountry={onFocusCountry}
         onSelectReport={(report) => {
           setModalReports([report]);

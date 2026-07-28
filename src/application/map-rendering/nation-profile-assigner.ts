@@ -6,7 +6,7 @@ import {
 
 export class NationProfileAssigner {
   public buildStartingNation(id: string, isHuman: boolean): Nation {
-    let numericId = parseInt(id.replace("NATION_", ""), 10);
+    const numericId = parseInt(id.replace("NATION_", ""), 10);
     let profile = isNaN(numericId)
       ? findCountryProfileByCode(id)
       : findCountryProfileById(numericId);

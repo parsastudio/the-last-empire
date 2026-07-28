@@ -1,9 +1,16 @@
 import React from "react";
 import { Calendar, Clock, ChevronLeft } from "lucide-react";
-import { FakeSave } from "./config/fake-saves.config";
+
+export interface SaveItemData {
+  id: string;
+  title: string;
+  date: string;
+  playtime: string;
+  turn: number;
+}
 
 interface SaveItemCardProps {
-  save: FakeSave;
+  save: SaveItemData;
   onSelect: (id: string) => void;
 }
 
@@ -11,7 +18,7 @@ export function SaveItemCard({ save, onSelect }: SaveItemCardProps) {
   return (
     <button
       onClick={() => onSelect(save.id)}
-      className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer"
+      className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer dir-rtl"
     >
       <div className="space-y-2">
         <span className="text-xs font-bold text-foreground block">
