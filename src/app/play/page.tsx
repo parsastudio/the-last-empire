@@ -5,9 +5,11 @@ import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
+import { useTacticalMapInteraction } from "@/presentation/hooks/tactical-map/use-tactical-map-interaction";
 import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
 import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
 import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
+import { TacticalMapOverlay } from "@/presentation/components/tactical-map/layout/tactical-map-overlay";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
@@ -27,6 +29,7 @@ export default function MapTest6Page() {
     scale,
     position,
     isDragging,
+    hasDraggedRef,
     handleWheel,
     handleMouseDown,
     handleMouseMove,
@@ -40,6 +43,19 @@ export default function MapTest6Page() {
     canvasShadedRef,
     maskDataRef,
   } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
+
+  const interaction = useTacticalMapInteraction({
+    mapWidth,
+    mapHeight,
+    countries,
+    maskDataRef,
+    containerRef,
+    dimensions,
+    scale,
+    position,
+    isDragging,
+    hasDraggedRef,
+  });
 
   useCanvasRenderer({
     canvasDestRef,
@@ -66,7 +82,7 @@ export default function MapTest6Page() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
-        onClick={() => {}}
+        onClick={interaction.handleMapClick}
       >
         <CountryHoverContainer
           countries={countries}
@@ -77,9 +93,22 @@ export default function MapTest6Page() {
           scale={scale}
           position={position}
         />
+
+        <TacticalMapOverlay
+          contextMenuState={interaction.contextMenuState}
+          activeScreenPos={interaction.activeScreenPos}
+          attackModalState={interaction.attackModalState}
+          onSelectAction={interaction.handleSelectContextAction}
+          onCloseContextMenu={interaction.closeContextMenu}
+          onCloseAttackModal={interaction.closeAttackModal}
+        />
       </TacticalViewport>
 
-      <SidebarContainer isOpen={isSidebarOpen} />
+      <SidebarContainer
+        isOpen={isSidebarOpen}
+        externalActiveTab={interaction.externalSidebarTab}
+        selectedTargetCode={interaction.selectedTargetCode}
+      />
 
       {dataLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">

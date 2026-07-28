@@ -12,6 +12,7 @@ export function useMapGesture() {
 
   const {
     isDragging,
+    hasDraggedRef,
     handleMouseDown: dragMouseDown,
     handleMouseMove: dragMouseMove,
     handleMouseUp: dragMouseUp,
@@ -52,6 +53,7 @@ export function useMapGesture() {
     scale,
     position,
     isDragging,
+    hasDraggedRef,
     handleWheel,
     handleMouseDown,
     handleMouseMove,

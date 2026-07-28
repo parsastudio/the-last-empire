@@ -12,7 +12,7 @@ export function DiplomacyIntelView({
   onBack,
 }: DiplomacyIntelViewProps) {
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl">
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -28,7 +28,7 @@ export function DiplomacyIntelView({
               {relation.name}
             </span>
             <span className="text-[10px] font-mono text-muted-foreground">
-              گزارش اطلاعاتی سازمان جاسوسی
+              شناسنامه رسمی حاکمیت
             </span>
           </div>
           <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
@@ -38,52 +38,53 @@ export function DiplomacyIntelView({
 
         <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
           <div className="bg-secondary/40 p-3 rounded-xl space-y-1">
-            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
               <Coins size={12} className="text-gdp" />
               <span>تولید ناخالص (GDP)</span>
             </div>
             <span className="font-bold text-foreground block">
-              {relation.intelData.gdp}
+              {relation.profileData.gdp}
             </span>
           </div>
 
           <div className="bg-secondary/40 p-3 rounded-xl space-y-1">
-            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
               <Users size={12} className="text-primary" />
               <span>جمعیت کل</span>
             </div>
             <span className="font-bold text-foreground block">
-              {relation.intelData.population}
+              {relation.profileData.population}
             </span>
           </div>
 
           <div className="bg-secondary/40 p-3 rounded-xl space-y-1">
-            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
               <Shield size={12} className="text-military" />
-              <span>قدرت تخمینی ارتش</span>
+              <span>قدرت ارتش</span>
             </div>
             <span className="font-bold text-foreground block">
-              {relation.intelData.militaryStrength}
+              {relation.profileData.militaryStrength}
             </span>
           </div>
 
           <div className="bg-secondary/40 p-3 rounded-xl space-y-1">
-            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
               <Award size={12} className="text-amber-500" />
               <span>سطح فناوری</span>
             </div>
             <span className="font-bold text-foreground block">
-              لِوِل {relation.intelData.techLevel}
+              لِوِل {relation.profileData.techLevel}
             </span>
           </div>
         </div>
 
         <div className="bg-secondary/30 p-3 rounded-xl space-y-1 text-right">
           <span className="text-[10px] font-bold text-muted-foreground block font-mono">
-            وضعیت عمومی ثبات و حکومت
+            نظام سیاسی و حاکمیت
           </span>
           <p className="text-xs text-foreground font-medium">
-            {relation.intelData.stabilityDesc}
+            {relation.profileData.governmentType} با ثبات{" "}
+            {relation.profileData.stability}%
           </p>
         </div>
       </div>
