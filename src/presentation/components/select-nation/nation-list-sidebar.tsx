@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Search } from "lucide-react";
 import { NationDetail, NationListItem } from "./nation-list-item";
+import { NationDatabaseProvider } from "./utils/nation-database-provider";
 
 interface NationListSidebarProps {
   nations: NationDetail[];
@@ -17,7 +18,11 @@ export function NationListSidebar({
   onSearchChange,
   onSelectNation,
 }: NationListSidebarProps) {
-  const filtered = nations.filter(
+  const provider = useMemo(() => new NationDatabaseProvider(), []);
+  const allNations =
+    nations.length > 0 ? nations : provider.getAllSelectableNations();
+
+  const filtered = allNations.filter(
     (n) =>
       n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       n.id.toLowerCase().includes(searchQuery.toLowerCase()),

@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import { rasterizePolygon } from "./scanline-rasterizer";
 import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { GeoJsonProcessor } from "./geojson-processor";
 import { DistanceTransform } from "./distance-transform";
@@ -9,6 +8,7 @@ import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
 import { GeometryDraw } from "./utils/geometry-draw";
 import { LowResPacker } from "./utils/low-res-packer";
 import { ClosedSeaDetector } from "./utils/closed-sea-detector";
+import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
 
 export interface CountryMapping {
   id: number;
@@ -31,21 +31,27 @@ export async function generateTest6Map(
   } catch {
     geoJson = FALLBACK_WORLD_MAP;
   }
+
   const processor = new GeoJsonProcessor();
   const distanceTransform = new DistanceTransform();
   const writer = new MapWriter();
   const areaCounter = new MapAreaPixelCounter();
-  const countries: CountryMapping[] = [];
-  countries.push({
-    id: 0,
-    code: "WATER",
-    name: "Ocean",
-    color: [0, 0, 0],
-    areaSqKm: 0,
-  });
+  const polygonRasterizer = new PolygonFeatureRasterizer();
+
+  const countries: CountryMapping[] = [
+    {
+      id: 0,
+      code: "WATER",
+      name: "Ocean",
+      color: [0, 0, 0],
+      areaSqKm: 0,
+    },
+  ];
+
   const buffer = new Uint8Array(width * height);
   buffer.fill(0);
   const features = processor.extractFeatures(geoJson);
+
   let nextId = 11;
   for (const feature of features) {
     countries.push({
@@ -55,21 +61,17 @@ export async function generateTest6Map(
       color: [0, 0, nextId],
       areaSqKm: 0,
     });
-    const processRing = (ring: number[][]) => {
-      const points = processor.getPolygonPoints(ring, width, height);
-      rasterizePolygon(points, width, height, nextId, buffer);
-    };
-    if (feature.geometry.type === "Polygon") {
-      const rings = feature.geometry.coordinates as number[][][];
-      rings.forEach((ring) => processRing(ring));
-    } else if (feature.geometry.type === "MultiPolygon") {
-      const multiRings = feature.geometry.coordinates as number[][][][];
-      multiRings.forEach((polygonCoords) => {
-        polygonCoords.forEach((ring) => processRing(ring));
-      });
-    }
     nextId++;
   }
+
+  polygonRasterizer.rasterizeFeatures(
+    features,
+    processor,
+    width,
+    height,
+    buffer,
+    11,
+  );
 
   const draw = new GeometryDraw();
   draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
@@ -79,8 +81,8 @@ export async function generateTest6Map(
   areaCounter.applyCalibratedAreas(countries, pixelAreas);
 
   const dist = distanceTransform.calculate(buffer, width, height);
-
   distanceTransform.applySeaDepths(buffer, dist, width, height);
+
   await writer.saveMaskImage(width, height, buffer, publicDir);
   await fs.writeFile(path.join(publicDir, "test6", "world-mask.bin"), buffer);
 
@@ -94,5 +96,6 @@ export async function generateTest6Map(
     path.join(publicDir, "test6", "world-mask-1024.bin"),
     packed1024,
   );
+
   return { countries };
 }

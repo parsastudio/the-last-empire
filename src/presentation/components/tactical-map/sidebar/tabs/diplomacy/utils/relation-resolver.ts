@@ -1,21 +1,44 @@
 import { findCountryProfileByCode } from "@/domain/map/countries";
 import { DiplomaticRelation } from "../diplomacy-detail-view";
+import { Nation } from "@/domain/nation/nation.schema";
 
-export function resolveProfileRelation(code: string): DiplomaticRelation {
+export function resolveProfileRelation(
+  code: string,
+  liveNation?: Nation | null,
+): DiplomaticRelation {
   const profile = findCountryProfileByCode(code);
-  const rawGdp = profile ? profile.gdp / 1e9 : 50;
-  const gdpBillion = Number.isInteger(rawGdp)
-    ? rawGdp.toString()
-    : rawGdp.toFixed(1);
 
-  const rawPop = profile ? profile.population / 1e6 : 10;
-  const popMillion = Number.isInteger(rawPop)
-    ? rawPop.toString()
-    : rawPop.toFixed(1);
+  const realGdpNum = liveNation
+    ? liveNation.gdp / 1e9
+    : profile
+      ? profile.gdp / 1e9
+      : 50;
+  const gdpBillion = Number.isInteger(realGdpNum)
+    ? realGdpNum.toString()
+    : realGdpNum.toFixed(1);
 
-  const name = profile ? profile.nameFa : `کشور ${code}`;
-  const flagCode = profile ? profile.flagCode : code;
-  const govType = profile?.startingGovernment ?? "DEMOCRACY";
+  const realPopNum = liveNation
+    ? liveNation.population / 1e6
+    : profile
+      ? profile.population / 1e6
+      : 10;
+  const popMillion = Number.isInteger(realPopNum)
+    ? realPopNum.toString()
+    : realPopNum.toFixed(1);
+
+  const name = liveNation
+    ? liveNation.name
+    : profile
+      ? profile.nameFa
+      : `کشور ${code}`;
+  const flagCode = liveNation
+    ? liveNation.flagCode
+    : profile
+      ? profile.flagCode
+      : code;
+  const govType = liveNation
+    ? liveNation.government.type
+    : (profile?.startingGovernment ?? "DEMOCRACY");
 
   let govLabel = "دموکراسی";
   if (govType === "DICTATORSHIP") govLabel = "حکومت دیکتاتوری";
@@ -23,9 +46,11 @@ export function resolveProfileRelation(code: string): DiplomaticRelation {
   else if (govType === "MONARCHY") govLabel = "پادشاهی";
   else if (govType === "FASCISM") govLabel = "فاشیسم";
 
-  const infantry = profile?.startingInfantry ?? 50;
-  const airForce = profile?.startingAirForce ?? 10;
-  const militaryPower = infantry + airForce * 3;
+  const militaryPower = liveNation
+    ? liveNation.military.infantry * 1 +
+      liveNation.military.airForce * 3 +
+      liveNation.military.droneMissile * 2.5
+    : (profile?.startingInfantry ?? 50) + (profile?.startingAirForce ?? 10) * 3;
 
   return {
     code: code.toUpperCase(),
@@ -37,11 +62,13 @@ export function resolveProfileRelation(code: string): DiplomaticRelation {
     profileData: {
       gdp: `$${gdpBillion} میلیارد دلار`,
       population: `${popMillion} میلیون نفر`,
-      techLevel: profile?.startingTechLevel ?? 1,
+      techLevel: liveNation
+        ? liveNation.military.techLevel
+        : (profile?.startingTechLevel ?? 1),
       governmentType: govLabel,
-      stability: 80,
-      corruption: 10,
-      militaryStrength: `${militaryPower.toLocaleString("fa-IR")} یگان`,
+      stability: liveNation ? liveNation.government.stability : 80,
+      corruption: liveNation ? liveNation.government.corruption : 10,
+      militaryStrength: `${Math.round(militaryPower).toLocaleString("fa-IR")} یگان`,
     },
   };
 }
