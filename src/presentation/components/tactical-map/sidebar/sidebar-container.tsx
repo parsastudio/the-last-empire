@@ -12,6 +12,7 @@ interface SidebarContainerProps {
   isOpen: boolean;
   externalActiveTab?: SidebarTabType | null;
   selectedTargetCode?: string | null;
+  onClearExternalTab?: () => void;
   onFocusCountry?: (code: string) => void;
 }
 
@@ -19,9 +20,10 @@ export function SidebarContainer({
   isOpen,
   externalActiveTab,
   selectedTargetCode,
+  onClearExternalTab,
   onFocusCountry,
 }: SidebarContainerProps) {
-  const actions = useSidebarTurnActions(externalActiveTab);
+  const actions = useSidebarTurnActions(externalActiveTab, onClearExternalTab);
 
   if (!isOpen) return null;
 
@@ -50,7 +52,7 @@ export function SidebarContainer({
         selectedTargetCode={selectedTargetCode}
         nation={actions.humanNation}
         reports={actions.realReports}
-        onClose={() => actions.setInternalActiveTab(null)}
+        onClose={actions.handleCloseActiveModal}
         onFocusCountry={onFocusCountry}
         onSelectReport={(report) => {
           actions.setModalReports([report]);

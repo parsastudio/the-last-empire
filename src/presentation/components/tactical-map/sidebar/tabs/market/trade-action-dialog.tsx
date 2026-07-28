@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { X, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 
 interface TradeActionDialogProps {
   isOpen: boolean;
@@ -56,25 +57,14 @@ export function TradeActionDialog({
   };
 
   return (
-    <div className="fixed inset-0 bg-background/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-smooth">
-      <div className="bg-card border border-border w-full max-w-sm rounded-3xl p-5 space-y-4 text-right shadow-2xl relative dir-rtl">
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl cursor-pointer"
-        >
-          <X size={14} />
-        </button>
-
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-gdp font-mono">
-            <ShoppingBag size={14} />
-            <span>ثبت سفارش معامله کالا</span>
-          </div>
-          <h3 className="text-sm font-bold text-foreground">
-            {mode === "buy" ? "خرید" : "فروش"} {resourceName}
-          </h3>
-        </div>
-
+    <UnifiedModalShell
+      isOpen={isOpen}
+      title={`${mode === "buy" ? "خرید" : "فروش"} ${resourceName}`}
+      subtitle="ثبت سفارش معامله کالا در بورس جهانی"
+      maxWidthClass="max-w-sm"
+      onClose={onClose}
+    >
+      <div className="space-y-4 text-right dir-rtl">
         <div className="space-y-3 font-mono text-xs">
           <div className="space-y-1">
             <div className="flex justify-between text-[10px]">
@@ -119,11 +109,12 @@ export function TradeActionDialog({
 
         <button
           onClick={handleExecuteTrade}
-          className="w-full py-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md"
+          className="w-full py-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md flex items-center justify-center gap-2"
         >
-          تایید و اجرای معامله
+          <ShoppingBag size={14} />
+          <span>تایید و اجرای معامله</span>
         </button>
       </div>
-    </div>
+    </UnifiedModalShell>
   );
 }

@@ -1,10 +1,10 @@
 import React from "react";
 import { SidebarTabType } from "../sidebar/sidebar-tabs";
-import { CommandCenterHeader } from "./command-center-header";
 import { CommandCenterTabRouter } from "./command-center-tab-router";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
+import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
@@ -85,32 +85,22 @@ export function CommandCenterModal({
   const meta = getTitleAndSubtitle();
 
   return (
-    <div
-      onClick={onClose}
-      className="fixed inset-0 bg-black/20 backdrop-blur-xs z-50 flex items-center justify-center p-6 animate-fade-smooth cursor-pointer"
+    <UnifiedModalShell
+      isOpen={activeTab !== null}
+      title={meta.title}
+      subtitle={meta.subtitle}
+      maxWidthClass="max-w-6xl"
+      onClose={onClose}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-card/95 border border-border w-[88vw] h-[85vh] max-w-6xl rounded-3xl p-6 shadow-2xl flex flex-col space-y-5 dir-rtl overflow-hidden text-foreground backdrop-blur-md cursor-default text-right"
-      >
-        <CommandCenterHeader
-          title={meta.title}
-          subtitle={meta.subtitle}
-          onClose={onClose}
-        />
-
-        <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          <CommandCenterTabRouter
-            activeTab={activeTab}
-            selectedTargetCode={selectedTargetCode}
-            nation={nation}
-            gameState={gameState}
-            reports={reports}
-            onFocusCountry={onFocusCountry}
-            onOpenTrade={onOpenTrade}
-          />
-        </div>
-      </div>
-    </div>
+      <CommandCenterTabRouter
+        activeTab={activeTab}
+        selectedTargetCode={selectedTargetCode}
+        nation={nation}
+        gameState={gameState}
+        reports={reports}
+        onFocusCountry={onFocusCountry}
+        onOpenTrade={onOpenTrade}
+      />
+    </UnifiedModalShell>
   );
 }

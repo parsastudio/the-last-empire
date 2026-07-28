@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
-import { X, Zap, Search } from "lucide-react";
+import { Zap, Search } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
+import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 
 interface AbilityTargetModalProps {
   isOpen: boolean;
@@ -53,23 +54,14 @@ export function AbilityTargetModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-background/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-smooth">
-      <div className="bg-card border border-border w-full max-w-sm rounded-3xl p-5 space-y-4 text-right shadow-2xl relative dir-rtl">
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl cursor-pointer"
-        >
-          <X size={14} />
-        </button>
-
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-treasury font-mono">
-            <Zap size={14} />
-            <span>انتخاب کشور هدف توانمندی</span>
-          </div>
-          <h3 className="text-sm font-bold text-foreground">{abilityName}</h3>
-        </div>
-
+    <UnifiedModalShell
+      isOpen={isOpen}
+      title={abilityName}
+      subtitle="انتخاب کشور هدف توانمندی ویژه"
+      maxWidthClass="max-w-sm"
+      onClose={onClose}
+    >
+      <div className="space-y-4 text-right dir-rtl">
         <div className="relative">
           <Search
             size={13}
@@ -105,11 +97,12 @@ export function AbilityTargetModal({
 
         <button
           onClick={handleExecuteAbility}
-          className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md"
+          className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md flex items-center justify-center gap-2"
         >
-          اجرای توانمندی روی هدف
+          <Zap size={14} />
+          <span>اجرای توانمندی روی هدف</span>
         </button>
       </div>
-    </div>
+    </UnifiedModalShell>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { SidebarTabType } from "../sidebar-tabs";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useToast } from "@/presentation/context/toast-context";
@@ -16,6 +16,7 @@ export interface TradeDialogState {
 
 export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
+  onClearExternalTab?: () => void,
 ) {
   const [internalActiveTab, setInternalActiveTab] =
     useState<SidebarTabType | null>(null);
@@ -46,6 +47,13 @@ export function useSidebarTurnActions(
       : null;
 
   const currentTurn = gameState ? gameState.currentTurn : 1;
+
+  const handleCloseActiveModal = useCallback(() => {
+    setInternalActiveTab(null);
+    if (onClearExternalTab) {
+      onClearExternalTab();
+    }
+  }, [onClearExternalTab]);
 
   const handleNextTurn = async () => {
     const nextState = await advanceNextTurn();
@@ -152,6 +160,7 @@ export function useSidebarTurnActions(
     setModalReports,
     setStagedActions,
     setTradeDialog,
+    handleCloseActiveModal,
     handleNextTurn,
     handleOpenTrade,
   };

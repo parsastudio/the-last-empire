@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { findCountryProfileById } from "@/domain/map/countries";
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
@@ -135,6 +135,11 @@ export function useTacticalMapInteraction({
     setExternalSidebarTab("research");
   };
 
+  const clearExternalTab = useCallback(() => {
+    setExternalSidebarTab(null);
+    setSelectedTargetCode(null);
+  }, []);
+
   const activeScreenPos = contextMenuState
     ? getScreenPosition(contextMenuState.coordinate)
     : { x: 0, y: 0 };
@@ -148,6 +153,7 @@ export function useTacticalMapInteraction({
     handleMapClick,
     handleSelectContextAction,
     handleOpenPendingTab,
+    clearExternalTab,
     closeContextMenu: () => setContextMenuState(null),
     closeAttackModal: () => setAttackModalState(null),
   };
