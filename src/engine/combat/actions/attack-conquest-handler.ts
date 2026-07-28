@@ -9,6 +9,7 @@ import { ClosestBaseFinder } from "@/engine/combat/routing/closest-base-finder";
 import { NavalPathResolver } from "@/engine/combat/routing/naval-path-resolver";
 import { CoastalPixelLocator } from "./coastal-pixel-locator";
 import { CampaignLogisticsEvaluator } from "./campaign-logistics-evaluator";
+import { AttackPowerCalculator } from "./attack-power-calculator";
 
 export class AttackConquestHandler implements ActionHandler {
   private orchestrator = new ConquestOrchestrator();
@@ -18,6 +19,7 @@ export class AttackConquestHandler implements ActionHandler {
   private pathResolver = new NavalPathResolver();
   private coastalLocator = new CoastalPixelLocator();
   private logisticsEvaluator = new CampaignLogisticsEvaluator();
+  private powerCalculator = new AttackPowerCalculator();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "ATTACK") {
@@ -73,19 +75,12 @@ export class AttackConquestHandler implements ActionHandler {
       pixelPathLength,
     );
 
-    const baseAttackerPower =
-      attackAction.infantry * 1.0 +
-      attackAction.airForce * 3.0 +
-      attackAction.droneMissile * 2.5;
-
-    const finalAttackerPower = Math.floor(
-      baseAttackerPower * evalResult.supplyDeficitPenaltyMultiplier,
+    const finalAttackerPower = this.powerCalculator.calculateAttackerPower(
+      attackAction,
+      evalResult.supplyDeficitPenaltyMultiplier,
     );
 
-    const defenderPower =
-      defender.military.infantry * 1.0 +
-      defender.military.airForce * 3.0 +
-      defender.military.droneMissile * 2.5;
+    const defenderPower = this.powerCalculator.calculateDefenderPower(defender);
 
     const outcome = this.orchestrator.executeAttack({
       attackerId: attacker.id,

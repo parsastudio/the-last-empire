@@ -8,6 +8,7 @@ import {
   ShieldAlert,
   RotateCcw,
 } from "lucide-react";
+import { CasualtyRow } from "./casualty-row";
 
 interface CasualtyTableProps {
   attackerName: string;
@@ -38,73 +39,51 @@ export function CasualtyTable({
         <span className="text-rose-500 truncate">{defenderName}</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
-        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
-          <Shield size={13} className="text-primary" />
-          <span>تلفات پیاده‌نظام</span>
-        </div>
-        <span className="font-bold text-foreground">
-          {attackerCasualties.infantryLost.toLocaleString("fa-IR")} یگان
-        </span>
-        <span className="font-bold text-foreground">
-          {defenderCasualties.infantryLost.toLocaleString("fa-IR")} یگان
-        </span>
-      </div>
+      <CasualtyRow
+        icon={Shield}
+        iconColor="text-primary"
+        label="تلفات پیاده‌نظام"
+        attackerValue={`${attackerCasualties.infantryLost.toLocaleString("fa-IR")} یگان`}
+        defenderValue={`${defenderCasualties.infantryLost.toLocaleString("fa-IR")} یگان`}
+      />
 
-      <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
-        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
-          <RotateCcw size={13} className="text-gdp" />
-          <span>نیروهای عقب‌نشینی‌کرده</span>
-        </div>
-        <span className="font-bold text-gdp">
-          {(attackerCasualties.infantryRetreated || 0).toLocaleString("fa-IR")}{" "}
-          یگان
-        </span>
-        <span className="font-bold text-gdp">
-          {(defenderCasualties.infantryRetreated || 0).toLocaleString("fa-IR")}{" "}
-          یگان
-        </span>
-      </div>
+      <CasualtyRow
+        icon={RotateCcw}
+        iconColor="text-gdp"
+        label="نیروهای عقب‌نشینی‌کرده"
+        attackerValue={`${(attackerCasualties.infantryRetreated || 0).toLocaleString("fa-IR")} یگان`}
+        defenderValue={`${(defenderCasualties.infantryRetreated || 0).toLocaleString("fa-IR")} یگان`}
+        attackerColor="text-gdp"
+        defenderColor="text-gdp"
+      />
 
       {defenderCasualties.militiaGarrisonPower !== undefined && (
-        <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
-          <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
-            <ShieldAlert size={13} className="text-treasury" />
-            <span>پادگان و میلیشیای وطن</span>
-          </div>
-          <span className="text-muted-foreground text-[10px]">-</span>
-          <span className="font-bold text-treasury">
-            {defenderCasualties.militiaGarrisonPower.toLocaleString("fa-IR")}{" "}
-            یگان
-          </span>
-        </div>
+        <CasualtyRow
+          icon={ShieldAlert}
+          iconColor="text-treasury"
+          label="پادگان و میلیشیای وطن"
+          attackerValue="-"
+          defenderValue={`${defenderCasualties.militiaGarrisonPower.toLocaleString("fa-IR")} یگان`}
+          attackerColor="text-muted-foreground"
+          defenderColor="text-treasury"
+        />
       )}
 
-      <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
-        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
-          <Plane size={13} className="text-gdp" />
-          <span>انحدام جنگنده‌ها</span>
-        </div>
-        <span className="font-bold text-foreground">
-          {attackerCasualties.airForceLost.toLocaleString("fa-IR")} فروند
-        </span>
-        <span className="font-bold text-foreground">
-          {defenderCasualties.airForceLost.toLocaleString("fa-IR")} فروند
-        </span>
-      </div>
+      <CasualtyRow
+        icon={Plane}
+        iconColor="text-gdp"
+        label="انحدام جنگنده‌ها"
+        attackerValue={`${attackerCasualties.airForceLost.toLocaleString("fa-IR")} فروند`}
+        defenderValue={`${defenderCasualties.airForceLost.toLocaleString("fa-IR")} فروند`}
+      />
 
-      <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
-        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
-          <Radio size={13} className="text-treasury" />
-          <span>رهگیری موشک/پهپاد</span>
-        </div>
-        <span className="font-bold text-foreground">
-          {attackerCasualties.droneMissileLost.toLocaleString("fa-IR")} یگان
-        </span>
-        <span className="font-bold text-foreground">
-          {defenderCasualties.droneMissileLost.toLocaleString("fa-IR")} یگان
-        </span>
-      </div>
+      <CasualtyRow
+        icon={Radio}
+        iconColor="text-treasury"
+        label="رهگیری موشک/پهپاد"
+        attackerValue={`${attackerCasualties.droneMissileLost.toLocaleString("fa-IR")} یگان`}
+        defenderValue={`${defenderCasualties.droneMissileLost.toLocaleString("fa-IR")} یگان`}
+      />
 
       <div className="grid grid-cols-3 gap-2 items-center text-center pt-1">
         <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
