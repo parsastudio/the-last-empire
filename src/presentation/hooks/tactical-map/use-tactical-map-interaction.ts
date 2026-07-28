@@ -125,7 +125,7 @@ export function useTacticalMapInteraction({
         targetCode,
         coordinate: targetCoord,
       });
-    } else if (action === "profile") {
+    } else {
       setSelectedTargetCode(targetCode);
       setExternalSidebarTab("diplomacy");
     }

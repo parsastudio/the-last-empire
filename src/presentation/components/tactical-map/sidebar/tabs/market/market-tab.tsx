@@ -9,12 +9,14 @@ interface MarketTabProps {
   marketPrices?: ResourceMarketPrice;
   oilStock?: number;
   steelStock?: number;
+  userTreasury?: number;
 }
 
 export function MarketTab({
   marketPrices = { oil: 105, steel: 92 },
   oilStock = 5000,
   steelStock = 2000,
+  userTreasury = 100000,
 }: MarketTabProps) {
   const [tradeModal, setTradeModal] = useState<{
     isOpen: boolean;
@@ -38,13 +40,18 @@ export function MarketTab({
     mode: "buy" | "sell",
     price: number,
   ) => {
+    const stock = name.includes("نفت") ? oilStock : steelStock;
+    const maxAffordable = Math.max(1, Math.floor(userTreasury / (price * 1.1)));
+    const maxAmount =
+      mode === "buy" ? Math.min(1000, maxAffordable) : Math.max(1, stock);
+
     setTradeModal({
       isOpen: true,
       resourceName: name,
       unit,
       mode,
       unitPrice: price,
-      maxAmount: mode === "buy" ? 200 : 50,
+      maxAmount,
     });
   };
 

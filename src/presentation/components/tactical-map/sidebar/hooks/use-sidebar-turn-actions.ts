@@ -118,13 +118,22 @@ export function useSidebarTurnActions(
     mode: "buy" | "sell",
     price: number,
   ) => {
+    const treasury = humanNation ? humanNation.treasury : 100000;
+    const oilStock = humanNation ? humanNation.resources.oil : 1000;
+    const steelStock = humanNation ? humanNation.resources.steel : 1000;
+
+    const stock = name.includes("نفت") ? oilStock : steelStock;
+    const maxAffordable = Math.max(1, Math.floor(treasury / (price * 1.1)));
+    const maxAmount =
+      mode === "buy" ? Math.min(1000, maxAffordable) : Math.max(1, stock);
+
     setTradeDialog({
       isOpen: true,
       resourceName: name,
       unit,
       mode,
       unitPrice: price,
-      maxAmount: mode === "buy" ? 200 : 50,
+      maxAmount,
     });
   };
 

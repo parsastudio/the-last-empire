@@ -4,13 +4,13 @@ import { TrendingUp, AlertCircle } from "lucide-react";
 interface PredictiveImpactBoxProps {
   currentTaxRate: number;
   newTaxRate: number;
-  baseGdp?: number;
+  baseGdp: number;
 }
 
 export function PredictiveImpactBox({
   currentTaxRate,
   newTaxRate,
-  baseGdp = 450000000000,
+  baseGdp,
 }: PredictiveImpactBoxProps) {
   const deltaRate = newTaxRate - currentTaxRate;
   const projectedIncome = Math.floor(baseGdp * (newTaxRate / 100));
