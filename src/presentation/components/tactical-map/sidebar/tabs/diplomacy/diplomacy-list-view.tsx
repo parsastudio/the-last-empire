@@ -1,6 +1,7 @@
 import React from "react";
-import { Users, Search, Swords, CheckCircle2, Handshake } from "lucide-react";
+import { Users, Search } from "lucide-react";
 import { DiplomaticRelation } from "./diplomacy-detail-view";
+import { DiplomacyListItem } from "./diplomacy-list-item";
 
 interface DiplomacyListViewProps {
   relations: DiplomaticRelation[];
@@ -20,35 +21,6 @@ export function DiplomacyListView({
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.code.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  const getStanceBadge = (stance: string) => {
-    switch (stance) {
-      case "WAR":
-        return (
-          <span className="px-2 py-0.5 rounded-md bg-military/20 text-military text-[9px] font-bold flex items-center gap-1">
-            <Swords size={10} /> در حال جنگ
-          </span>
-        );
-      case "ALLIANCE":
-        return (
-          <span className="px-2 py-0.5 rounded-md bg-gdp/20 text-gdp text-[9px] font-bold flex items-center gap-1">
-            <CheckCircle2 size={10} /> اتحاد کامل
-          </span>
-        );
-      case "NON_AGGRESSION_PACT":
-        return (
-          <span className="px-2 py-0.5 rounded-md bg-treasury/20 text-treasury text-[9px] font-bold flex items-center gap-1">
-            <Handshake size={10} /> عدم تخاصم
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2 py-0.5 rounded-md bg-secondary text-muted-foreground text-[9px] font-bold">
-            صلح و آرام
-          </span>
-        );
-    }
-  };
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200">
@@ -77,26 +49,11 @@ export function DiplomacyListView({
 
       <div className="space-y-2">
         {filtered.map((rel) => (
-          <button
+          <DiplomacyListItem
             key={rel.code}
-            onClick={() => onSelectRelation(rel)}
-            className="w-full bg-background/40 hover:bg-secondary/50 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-right transition-all cursor-pointer"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-foreground">
-                  {rel.name}
-                </span>
-                <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-                  {rel.code}
-                </span>
-              </div>
-              <div>{getStanceBadge(rel.stance)}</div>
-            </div>
-            <div className="text-left font-mono text-[10px] text-muted-foreground">
-              <span>نظر: {rel.opinion}°</span>
-            </div>
-          </button>
+            relation={rel}
+            onSelect={onSelectRelation}
+          />
         ))}
       </div>
     </div>

@@ -1,17 +1,9 @@
 import React from "react";
-import {
-  X,
-  Swords,
-  AlertTriangle,
-  ShieldAlert,
-  Coins,
-  Fuel,
-  MapPin,
-  ArrowLeft,
-  Globe2,
-  Receipt,
-} from "lucide-react";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { X, Swords } from "lucide-react";
+import { AttackTheaterHeader } from "./attack/attack-theater-header";
+import { AttackCoordinatesBox } from "./attack/attack-coordinates-box";
+import { AttackLogisticsTable } from "./attack/attack-logistics-table";
+import { AttackWarningsContainer } from "./attack/attack-warnings-container";
 
 interface AttackPlanningModalProps {
   isOpen: boolean;
@@ -44,8 +36,6 @@ export function AttackPlanningModal({
 }: AttackPlanningModalProps) {
   if (!isOpen) return null;
 
-  const attackerFlag = getFlagEmoji(attackerCode);
-  const targetFlag = getFlagEmoji(targetCode);
   const isAtWar = stance === "WAR";
   const isOilDeficit = userOilStock < 20;
   const isBudgetDeficit = userTreasury < estimatedCost;
@@ -73,118 +63,23 @@ export function AttackPlanningModal({
           </h2>
         </div>
 
-        <div className="bg-secondary/40 border border-border/80 p-4 rounded-2xl flex items-center justify-between font-sans">
-          <div className="flex items-center gap-2 text-sm font-bold">
-            <span className="text-2xl">{attackerFlag}</span>
-            <span>{attackerName}</span>
-          </div>
+        <AttackTheaterHeader
+          attackerName={attackerName}
+          attackerCode={attackerCode}
+          targetName={targetName}
+          targetCode={targetCode}
+        />
 
-          <div className="flex flex-col items-center gap-1">
-            <ArrowLeft size={18} className="text-military animate-pulse" />
-            <span className="text-[9px] font-mono text-muted-foreground">
-              تئاتر عملیاتی
-            </span>
-          </div>
+        <AttackCoordinatesBox coordinate={coordinate} />
 
-          <div className="flex items-center gap-2 text-sm font-bold">
-            <span>{targetName}</span>
-            <span className="text-2xl">{targetFlag}</span>
-          </div>
-        </div>
+        <AttackWarningsContainer
+          isAtWar={isAtWar}
+          isBudgetDeficit={isBudgetDeficit}
+          isOilDeficit={isOilDeficit}
+          emergencyDebt={emergencyDebt}
+        />
 
-        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-          <div className="flex items-center gap-2 bg-background/50 border border-border p-3 rounded-xl">
-            <MapPin size={14} className="text-military shrink-0" />
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground block font-sans">
-                مختصات نقطه‌کوبی:
-              </span>
-              <span className="font-bold text-foreground dir-ltr font-mono block">
-                X: {coordinate.x} | Y: {coordinate.y}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 bg-background/50 border border-border p-3 rounded-xl">
-            <Globe2 size={14} className="text-primary shrink-0" />
-            <div className="space-y-0.5">
-              <span className="text-[9px] text-muted-foreground block font-sans">
-                محدوده نبرد:
-              </span>
-              <span className="font-bold text-foreground font-sans block text-[11px]">
-                تئاتر ایزوله منطقه
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {!isAtWar && (
-          <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-rose-500">
-            <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <span className="font-bold block">هشدار وضعیت دیپلماتیک</span>
-              <p className="text-[11px] text-foreground/80 leading-relaxed">
-                شما در وضعیت صلح هستید! حمله مستقیم بدون اعلام جنگ باعث افت شدید
-                ثبات سیاسی (-۳۰٪) و صدمه به اعتبار جهانی خواهد شد.
-              </p>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2.5">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            برآورد هزینه‌ها و لجستیک عملیات
-          </span>
-
-          <div className="bg-background/40 border border-border/80 p-3.5 rounded-2xl space-y-2 font-mono text-xs">
-            <div className="flex justify-between items-center pb-2 border-b border-border/40">
-              <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
-                <Coins size={13} className="text-gdp" />
-                هزینه ترانزیت و عملیات
-              </span>
-              <span className="font-bold text-foreground">
-                ${estimatedCost.toLocaleString("fa-IR")} دلار
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center pt-0.5">
-              <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
-                <Fuel size={13} className="text-primary" />
-                سوخت و نفت مورد نیاز سوخت‌رسانی
-              </span>
-              <span className="font-bold text-foreground">۵۰ بشکه</span>
-            </div>
-          </div>
-        </div>
-
-        {isBudgetDeficit && (
-          <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-rose-500">
-            <Receipt size={16} className="shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <span className="font-bold block">
-                هشدار کسر بودجه و ایجاد بدهی ملی
-              </span>
-              <p className="text-[11px] text-foreground/80 leading-relaxed">
-                موجودی خزانه کافی نیست! انجام نبرد باعث ایجاد $
-                {emergencyDebt.toLocaleString("fa-IR")} بدهی اضطراری ملی و اعمال
-                ضریب منفی به قدرت رزمی خواهد شد.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {isOilDeficit && (
-          <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-amber-500">
-            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <span className="font-bold block">هشدار کمبود سوخت</span>
-              <p className="text-[11px] text-foreground/80 leading-relaxed">
-                ذخایر نفت کافی نیست! انجام حمله بدون سوخت کافی، ضریب منفی به
-                قدرت رزمی یگان‌ها اعمال خواهد کرد.
-              </p>
-            </div>
-          </div>
-        )}
+        <AttackLogisticsTable estimatedCost={estimatedCost} />
 
         <div className="pt-2 border-t border-border">
           <button
