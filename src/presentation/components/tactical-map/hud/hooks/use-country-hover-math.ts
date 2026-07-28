@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { findCountryProfileById } from "@/domain/map/countries";
 import { HoverCountryInfo } from "../country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
+import { useHoverProjectionMath } from "./use-hover-projection-math";
+import { useHoverNationResolver } from "./use-hover-nation-resolver";
 
 interface UseCountryHoverMathProps {
   countries: CountryMapping[];
@@ -40,137 +41,46 @@ export function useCountryHoverMath({
     null,
   );
 
+  const { projectCoordinates } = useHoverProjectionMath({
+    containerRef,
+    maskDataRef,
+    packed1024Ref,
+    mapWidth,
+    mapHeight,
+    scale,
+    position,
+  });
+
+  const { resolveHoverInfo } = useHoverNationResolver({
+    countries,
+    rankingsMap,
+    nationsMap,
+    humanNationId,
+  });
+
   const processMouseMove = useCallback(() => {
     rafIdRef.current = null;
     const lastPos = lastMousePosRef.current;
-    const container = containerRef.current;
-    if (!lastPos || !container || !maskDataRef.current) {
+    if (!lastPos) {
       setHoverData(null);
       setCursorPos(null);
       return;
     }
 
     setCursorPos({ x: lastPos.clientX, y: lastPos.clientY });
+    const projection = projectCoordinates(lastPos.clientX, lastPos.clientY);
 
-    const rect = container.getBoundingClientRect();
-    const clientX = lastPos.clientX - rect.left;
-    const clientY = lastPos.clientY - rect.top;
-
-    const fx = mapWidth / rect.width;
-    const fy = mapHeight / rect.height;
-
-    const mapX = Math.floor(((clientX - position.x) / scale) * fx);
-    const mapY = Math.floor(((clientY - position.y) / scale) * fy);
-
-    if (mapX < 0 || mapX >= mapWidth || mapY < 0 || mapY >= mapHeight) {
+    if (!projection) {
       setHoverData(null);
       return;
     }
 
-    const pixelIndex = mapY * mapWidth + mapX;
-    const nationIdNumber = maskDataRef.current[pixelIndex] || 0;
-
-    if (!nationIdNumber || nationIdNumber < 11 || nationIdNumber >= 250) {
-      setHoverData(null);
-      return;
-    }
-
-    const matchedCountry = countries.find((c) => c.id === nationIdNumber);
-    if (!matchedCountry) {
-      setHoverData(null);
-      return;
-    }
-
-    let greenChannelVal = 0;
-    if (
-      packed1024Ref?.current &&
-      packed1024Ref.current.length === 1024 * 512 * 2
-    ) {
-      const gx = Math.floor((mapX / mapWidth) * 1024);
-      const gy = Math.floor((mapY / mapHeight) * 512);
-      const pIdx = (gy * 1024 + gx) * 2;
-      const geoByte = packed1024Ref.current[pIdx] || 0;
-      greenChannelVal = geoByte >> 2;
-    }
-
-    const fullNationId = `NATION_${matchedCountry.id}`;
-    const liveNation = nationsMap ? nationsMap[fullNationId] : null;
-
-    const profile = findCountryProfileById(matchedCountry.id);
-    const realName = liveNation
-      ? liveNation.name
-      : profile
-        ? profile.nameFa
-        : matchedCountry.name;
-
-    const realGdp = liveNation
-      ? liveNation.gdp
-      : profile
-        ? profile.gdp
-        : (matchedCountry.areaSqKm ?? 50000) * 1500;
-
-    const gdpBillionsNum = realGdp / 1e9;
-    const gdpFormatted = Number.isInteger(gdpBillionsNum)
-      ? gdpBillionsNum.toString()
-      : gdpBillionsNum.toFixed(1);
-
-    const flagCode = profile ? profile.flagCode : matchedCountry.code;
-
-    let stanceLabel = "دیپلماسی صلح‌آمیز";
-    if (humanNationId && nationsMap && nationsMap[humanNationId]) {
-      const humanNation = nationsMap[humanNationId];
-      const relation = humanNation.relations[fullNationId];
-      if (relation) {
-        if (relation.stance === "WAR") stanceLabel = "در حال جنگ مستقیم";
-        else if (relation.stance === "ALLIANCE") stanceLabel = "متحد استراتژیک";
-        else if (relation.stance === "NON_AGGRESSION_PACT")
-          stanceLabel = "پیمان عدم تخاصم";
-      }
-    }
-
-    const possibleKeys = [
-      fullNationId,
-      matchedCountry.code.toUpperCase(),
-      matchedCountry.code.toLowerCase(),
-      matchedCountry.id.toString(),
-    ];
-
-    let cachedRank = rankingsMap.size > 0 ? rankingsMap.size : 99;
-    for (const key of possibleKeys) {
-      if (rankingsMap.has(key)) {
-        cachedRank = rankingsMap.get(key)!;
-        break;
-      }
-    }
-
-    let regionLabel = "";
-    if (greenChannelVal > 0) {
-      regionLabel = `منطقه ${greenChannelVal.toLocaleString("fa-IR")}`;
-    }
-
-    setHoverData({
-      name: realName,
-      code: matchedCountry.code,
-      flagCode: flagCode,
-      rank: cachedRank,
-      stance: stanceLabel,
-      gdp: `$${gdpFormatted}B`,
-      regionName: regionLabel,
-      regionArea: `${Math.round(matchedCountry.areaSqKm ?? 50000).toLocaleString("fa-IR")} km²`,
-    });
-  }, [
-    countries,
-    maskDataRef,
-    packed1024Ref,
-    mapWidth,
-    mapHeight,
-    containerRef,
-    scale,
-    position,
-    rankingsMap,
-    nationsMap,
-    humanNationId,
-  ]);
+    const info = resolveHoverInfo(
+      projection.nationIdNumber,
+      projection.greenChannelVal,
+    );
+    setHoverData(info);
+  }, [projectCoordinates, resolveHoverInfo]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     lastMousePosRef.current = { clientX: e.clientX, clientY: e.clientY };
@@ -189,10 +99,5 @@ export function useCountryHoverMath({
     setCursorPos(null);
   };
 
-  return {
-    hoverData,
-    cursorPos,
-    handleMouseMove,
-    handleMouseLeave,
-  };
+  return { hoverData, cursorPos, handleMouseMove, handleMouseLeave };
 }

@@ -1,0 +1,86 @@
+import React from "react";
+import { SidebarTabType } from "../sidebar/sidebar-tabs";
+import { WideOverviewView } from "./views/wide-overview-view";
+import { WideMarketView } from "./views/wide-market-view";
+import { WideMilitaryView } from "./views/wide-military-view";
+import { WidePoliticsView } from "./views/wide-politics-view";
+import { WideDiplomacyView } from "./views/wide-diplomacy-view";
+import { WideResearchView } from "./views/wide-research-view";
+import { WideAbilitiesView } from "./views/wide-abilities-view";
+import { WideReportsView } from "./views/wide-reports-view";
+import { CombatReport } from "@/domain/reports/combat-report.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { GameState } from "@/domain/game/game-state.schema";
+
+interface CommandCenterTabRouterProps {
+  activeTab: SidebarTabType;
+  selectedTargetCode?: string | null;
+  nation: Nation;
+  gameState?: GameState | null;
+  reports: CombatReport[];
+  onFocusCountry?: (code: string) => void;
+  onOpenTrade: (
+    name: string,
+    unit: string,
+    mode: "buy" | "sell",
+    price: number,
+  ) => void;
+}
+
+export function CommandCenterTabRouter({
+  activeTab,
+  selectedTargetCode,
+  nation,
+  gameState,
+  reports,
+  onFocusCountry,
+  onOpenTrade,
+}: CommandCenterTabRouterProps) {
+  switch (activeTab) {
+    case "overview":
+      return <WideOverviewView nation={nation} />;
+    case "market":
+      return (
+        <WideMarketView
+          marketPrices={gameState?.marketPrices}
+          oilStock={nation.resources.oil}
+          steelStock={nation.resources.steel}
+          onOpenTrade={onOpenTrade}
+        />
+      );
+    case "military":
+      return <WideMilitaryView military={nation.military} />;
+    case "politics":
+      return (
+        <WidePoliticsView
+          taxRate={nation.taxRate}
+          governmentType={nation.government.type}
+          tariffRate={nation.tariffRate}
+          industrialLevel={nation.industrialLevel}
+          infrastructureLevel={nation.geography.infrastructureLevel}
+          activeModifiers={nation.activeModifiers}
+        />
+      );
+    case "diplomacy":
+      return (
+        <WideDiplomacyView
+          selectedTargetCode={selectedTargetCode}
+          nationsMap={gameState?.nations}
+          onFocusCountry={onFocusCountry}
+        />
+      );
+    case "research":
+      return (
+        <WideResearchView
+          unlockedDoctrines={nation.doctrines.unlockedDoctrines}
+          doctrinePoints={nation.doctrines.doctrinePoints}
+        />
+      );
+    case "abilities":
+      return <WideAbilitiesView currentGovernment={nation.government.type} />;
+    case "reports":
+      return <WideReportsView reports={reports} />;
+    default:
+      return null;
+  }
+}

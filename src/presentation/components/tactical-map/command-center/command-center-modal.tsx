@@ -1,14 +1,7 @@
 import React from "react";
 import { SidebarTabType } from "../sidebar/sidebar-tabs";
 import { CommandCenterHeader } from "./command-center-header";
-import { WideOverviewView } from "./views/wide-overview-view";
-import { WideMarketView } from "./views/wide-market-view";
-import { WideMilitaryView } from "./views/wide-military-view";
-import { WidePoliticsView } from "./views/wide-politics-view";
-import { WideDiplomacyView } from "./views/wide-diplomacy-view";
-import { WideResearchView } from "./views/wide-research-view";
-import { WideAbilitiesView } from "./views/wide-abilities-view";
-import { WideReportsView } from "./views/wide-reports-view";
+import { CommandCenterTabRouter } from "./command-center-tab-router";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -18,7 +11,7 @@ interface CommandCenterModalProps {
   selectedTargetCode?: string | null;
   nation: Nation | null;
   gameState?: GameState | null;
-  mockReports: CombatReport[];
+  reports: CombatReport[];
   onClose: () => void;
   onFocusCountry?: (code: string) => void;
   onSelectReport: (report: CombatReport) => void;
@@ -35,7 +28,7 @@ export function CommandCenterModal({
   selectedTargetCode,
   nation,
   gameState,
-  mockReports,
+  reports,
   onClose,
   onFocusCountry,
   onOpenTrade,
@@ -107,52 +100,15 @@ export function CommandCenterModal({
         />
 
         <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {activeTab === "overview" && <WideOverviewView nation={nation} />}
-
-          {activeTab === "market" && (
-            <WideMarketView
-              marketPrices={gameState?.marketPrices}
-              oilStock={nation.resources.oil}
-              steelStock={nation.resources.steel}
-              onOpenTrade={onOpenTrade}
-            />
-          )}
-
-          {activeTab === "military" && (
-            <WideMilitaryView military={nation.military} />
-          )}
-
-          {activeTab === "politics" && (
-            <WidePoliticsView
-              taxRate={nation.taxRate}
-              governmentType={nation.government.type}
-              tariffRate={nation.tariffRate}
-              industrialLevel={nation.industrialLevel}
-              infrastructureLevel={nation.geography.infrastructureLevel}
-              activeModifiers={nation.activeModifiers}
-            />
-          )}
-
-          {activeTab === "diplomacy" && (
-            <WideDiplomacyView
-              selectedTargetCode={selectedTargetCode}
-              nationsMap={gameState?.nations}
-              onFocusCountry={onFocusCountry}
-            />
-          )}
-
-          {activeTab === "research" && (
-            <WideResearchView
-              unlockedDoctrines={nation.doctrines.unlockedDoctrines}
-              doctrinePoints={nation.doctrines.doctrinePoints}
-            />
-          )}
-
-          {activeTab === "abilities" && (
-            <WideAbilitiesView currentGovernment={nation.government.type} />
-          )}
-
-          {activeTab === "reports" && <WideReportsView reports={mockReports} />}
+          <CommandCenterTabRouter
+            activeTab={activeTab}
+            selectedTargetCode={selectedTargetCode}
+            nation={nation}
+            gameState={gameState}
+            reports={reports}
+            onFocusCountry={onFocusCountry}
+            onOpenTrade={onOpenTrade}
+          />
         </div>
       </div>
     </div>
