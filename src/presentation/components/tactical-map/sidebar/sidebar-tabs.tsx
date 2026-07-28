@@ -1,12 +1,20 @@
 import React from "react";
-import { LayoutDashboard, Swords, Landmark, Users, Cpu } from "lucide-react";
+import {
+  LayoutDashboard,
+  Swords,
+  Landmark,
+  Users,
+  Cpu,
+  Zap,
+} from "lucide-react";
 
 export type SidebarTabType =
   | "overview"
   | "military"
   | "politics"
   | "diplomacy"
-  | "research";
+  | "research"
+  | "abilities";
 
 interface SidebarTabsProps {
   activeTab: SidebarTabType;
@@ -22,12 +30,13 @@ export function SidebarTabs({ activeTab, onChangeTab }: SidebarTabsProps) {
     { id: "overview", label: "نما", icon: LayoutDashboard },
     { id: "military", label: "ارتش", icon: Swords },
     { id: "politics", label: "سیاست", icon: Landmark },
+    { id: "abilities", label: "توانمندی", icon: Zap },
     { id: "diplomacy", label: "دیپلماسی", icon: Users },
     { id: "research", label: "پژوهش", icon: Cpu },
   ];
 
   return (
-    <div className="flex bg-secondary/80 border border-border p-1 rounded-2xl gap-1 shrink-0">
+    <div className="flex bg-secondary/80 border border-border p-1 rounded-2xl gap-1 shrink-0 overflow-x-auto scrollbar-none">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -35,14 +44,16 @@ export function SidebarTabs({ activeTab, onChangeTab }: SidebarTabsProps) {
           <button
             key={tab.id}
             onClick={() => onChangeTab(tab.id)}
-            className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all gap-1 cursor-pointer ${
+            className={`flex-1 min-w-[48px] flex flex-col items-center justify-center py-2 rounded-xl transition-all gap-1 cursor-pointer ${
               isActive
                 ? "bg-card text-foreground shadow-sm border border-border/60"
                 : "text-muted-foreground hover:text-foreground hover:bg-card/40 border border-transparent"
             }`}
           >
             <Icon size={14} />
-            <span className="text-[9px] font-bold font-sans">{tab.label}</span>
+            <span className="text-[9px] font-bold font-sans whitespace-nowrap">
+              {tab.label}
+            </span>
           </button>
         );
       })}
