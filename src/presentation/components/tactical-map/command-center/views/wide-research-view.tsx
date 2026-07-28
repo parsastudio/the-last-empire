@@ -1,18 +1,20 @@
 import React from "react";
 import { DoctrineBranchColumn } from "./components/doctrine-branch-column";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { DEFAULT_DOCTRINES } from "@/engine/politics/doctrines-list.config";
 
 interface WideResearchViewProps {
   unlockedDoctrines?: string[];
   doctrinePoints?: number;
+  nationId?: string;
 }
 
 export function WideResearchView({
   unlockedDoctrines = ["gdp-booster"],
   doctrinePoints = 0,
+  nationId = "NATION_118",
 }: WideResearchViewProps) {
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   const industrialDoctrines = DEFAULT_DOCTRINES.filter(
     (d) => d.branch === "INDUSTRIAL_TECH",
@@ -41,19 +43,19 @@ export function WideResearchView({
     unlocked: unlockedDoctrines.includes(d.id),
   }));
 
-  const handleUnlock = (doc: { name: string; cost: number }) => {
-    if (doctrinePoints < doc.cost) {
-      showToast(
-        "کمبود امتیاز دکترین",
-        `برای آنلاک این دکترین به ${doc.cost} امتیاز نیاز دارید.`,
-        "error",
-      );
-      return;
-    }
-    showToast(
-      "آنلاک دکترین",
-      `درخواست آنلاک دکترین ${doc.name} با موفقیت ثبت شد.`,
-      "success",
+  const handleUnlock = async (doc: {
+    id: string;
+    name: string;
+    cost: number;
+  }) => {
+    await dispatchAction(
+      {
+        id: `unlock-${Date.now()}`,
+        nationId,
+        type: "UNLOCK_DOCTRINE",
+        doctrineId: doc.id,
+      },
+      `آنلاک دکترین ${doc.name} انجام شد.`,
     );
   };
 

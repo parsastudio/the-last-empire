@@ -1,47 +1,70 @@
 import React from "react";
 import { Swords, Handshake, CheckCircle2, Shield, Coins } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
+  targetNationId?: string;
+  nationId?: string;
   onOpenTributeModal?: () => void;
 }
 
 export function AdvancedDiplomacyActions({
   targetName,
+  targetNationId = "NATION_15",
+  nationId = "NATION_118",
   onOpenTributeModal,
 }: AdvancedDiplomacyActionsProps) {
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
-  const handleDeclareWar = () => {
-    showToast(
-      "اعلام جنگ رسمی",
+  const handleDeclareWar = async () => {
+    await dispatchAction(
+      {
+        id: `war-${Date.now()}`,
+        nationId,
+        type: "DECLARE_WAR",
+        targetNationId,
+      },
       `بیانیه رسمی اعلام جنگ به ${targetName} صادر شد.`,
-      "error",
     );
   };
 
-  const handleMilitaryAccess = () => {
-    showToast(
-      "درخواست حق عبور",
+  const handleMilitaryAccess = async () => {
+    await dispatchAction(
+      {
+        id: `access-${Date.now()}`,
+        nationId,
+        type: "DIPLOMATIC_PROPOSAL",
+        targetNationId,
+        proposalType: "MILITARY_ACCESS",
+      },
       `درخواست ترانزیت نظامی به ${targetName} ارسال گردید.`,
-      "info",
     );
   };
 
-  const handleNonAggression = () => {
-    showToast(
-      "پیشنهاد عدم تخاصم",
-      `پیشنهاد رسمی پیمان عدم تخاصم به ${targetName} ابلاغ گردید.`,
-      "info",
+  const handleNonAggression = async () => {
+    await dispatchAction(
+      {
+        id: `nap-${Date.now()}`,
+        nationId,
+        type: "DIPLOMATIC_PROPOSAL",
+        targetNationId,
+        proposalType: "NON_AGGRESSION_PACT",
+      },
+      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید.`,
     );
   };
 
-  const handleAlliance = () => {
-    showToast(
-      "درخواست اتحاد کامل",
+  const handleAlliance = async () => {
+    await dispatchAction(
+      {
+        id: `alliance-${Date.now()}`,
+        nationId,
+        type: "DIPLOMATIC_PROPOSAL",
+        targetNationId,
+        proposalType: "FULL_ALLIANCE",
+      },
       `پیشنهاد معاهده دفاعی مشترک به ${targetName} ارسال گردید.`,
-      "success",
     );
   };
 
@@ -86,12 +109,6 @@ export function AdvancedDiplomacyActions({
           onClick={() => {
             if (onOpenTributeModal) {
               onOpenTributeModal();
-            } else {
-              showToast(
-                "مطالبه باج",
-                `درخواست باج از ${targetName}`,
-                "warning",
-              );
             }
           }}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"

@@ -4,7 +4,7 @@ import { AttackTheaterHeader } from "./attack/attack-theater-header";
 import { AttackCoordinatesBox } from "./attack/attack-coordinates-box";
 import { AttackLogisticsTable } from "./attack/attack-logistics-table";
 import { AttackWarningsContainer } from "./attack/attack-warnings-container";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface AttackPlanningModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export function AttackPlanningModal({
   onClose,
   onConfirmAttack,
 }: AttackPlanningModalProps) {
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   if (!isOpen) return null;
 
@@ -46,13 +46,27 @@ export function AttackPlanningModal({
     ? estimatedCost - Math.max(0, userTreasury)
     : 0;
 
-  const handleConfirm = () => {
-    showToast(
-      "صدور دستور حمله تهاجمی",
-      `فرمان حمله به نیروهای ${targetName} در مختصات (${coordinate.x}, ${coordinate.y}) با موفقیت صادر گردید.`,
-      "warning",
+  const handleConfirm = async () => {
+    const success = await dispatchAction(
+      {
+        id: `attack-${Date.now()}`,
+        nationId: attackerCode.startsWith("NATION_")
+          ? attackerCode
+          : `NATION_${attackerCode}`,
+        type: "ATTACK",
+        targetNationId: targetCode.startsWith("NATION_")
+          ? targetCode
+          : `NATION_${targetCode}`,
+        infantry: coordinate.x,
+        airForce: coordinate.y,
+        droneMissile: 0,
+      },
+      `فرمان حمله به نیروهای ${targetName} صادر گردید.`,
     );
-    onConfirmAttack();
+
+    if (success) {
+      onConfirmAttack();
+    }
   };
 
   return (

@@ -1,19 +1,51 @@
 import React from "react";
 import { AbilityItem } from "./abilities.config";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface AbilityCardProps {
   ability: AbilityItem;
   currentGovernment: string;
+  nationId?: string;
   onActivate: (ability: AbilityItem) => void;
 }
 
 export function AbilityCard({
   ability,
   currentGovernment,
+  nationId = "NATION_118",
   onActivate,
 }: AbilityCardProps) {
   const Icon = ability.icon;
   const isCompatible = ability.requiredGov === currentGovernment;
+  const { dispatchAction } = useGameActions();
+
+  const handleActivateClick = async () => {
+    if (!isCompatible) {
+      return;
+    }
+
+    if (ability.id === "DIPLOMATIC_SUMMIT") {
+      onActivate(ability);
+      return;
+    }
+
+    type AbilityEnum =
+      | "DIPLOMATIC_SUMMIT"
+      | "MARTIAL_LAW"
+      | "INDUSTRIAL_MOBILIZATION"
+      | "ROYAL_DECREE"
+      | "WAR_ALERT";
+
+    await dispatchAction(
+      {
+        id: `ability-${Date.now()}`,
+        nationId,
+        type: "ACTIVATE_ABILITY",
+        abilityType: ability.id as AbilityEnum,
+      },
+      `توانمندی ${ability.name} با موفقیت فعال گردید.`,
+    );
+  };
 
   return (
     <div
@@ -50,7 +82,7 @@ export function AbilityCard({
           {ability.cooldown}
         </span>
         <button
-          onClick={() => onActivate(ability)}
+          onClick={handleActivateClick}
           disabled={!isCompatible}
           className={`py-2 px-4 rounded-xl text-[10px] font-bold transition-all shadow-sm ${
             isCompatible

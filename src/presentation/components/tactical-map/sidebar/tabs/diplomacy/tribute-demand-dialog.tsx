@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { X, Coins } from "lucide-react";
 import { TributeSliderBox } from "./tribute-slider-box";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface TributeDemandDialogProps {
   isOpen: boolean;
   targetName: string;
   targetTreasury: number;
+  targetNationId?: string;
+  nationId?: string;
   onClose: () => void;
   onConfirm: (amount: number) => void;
 }
@@ -15,6 +17,8 @@ export function TributeDemandDialog({
   isOpen,
   targetName,
   targetTreasury,
+  targetNationId = "NATION_15",
+  nationId = "NATION_118",
   onClose,
   onConfirm,
 }: TributeDemandDialogProps) {
@@ -22,17 +26,26 @@ export function TributeDemandDialog({
   const [amount, setAmount] = useState<number>(
     Math.max(1000, Math.floor(maxAllowed * 0.5)),
   );
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   if (!isOpen) return null;
 
-  const handleSendTribute = () => {
-    showToast(
-      "ارسال اولتیماتوم باج",
-      `درخواست دریافت سالانه $${amount.toLocaleString("fa-IR")} باج به ${targetName} ابلاغ گردید.`,
-      "warning",
+  const handleSendTribute = async () => {
+    const success = await dispatchAction(
+      {
+        id: `tribute-${Date.now()}`,
+        nationId,
+        type: "DIPLOMATIC_PROPOSAL",
+        targetNationId,
+        proposalType: "DEMAND_TRIBUTE",
+        tributeAmount: amount,
+      },
+      `اولتیماتوم دریافت $${amount.toLocaleString("fa-IR")} باج به ${targetName} ابلاغ گردید.`,
     );
-    onConfirm(amount);
+
+    if (success) {
+      onConfirm(amount);
+    }
   };
 
   return (
