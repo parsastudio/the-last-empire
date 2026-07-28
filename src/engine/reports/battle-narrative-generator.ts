@@ -28,11 +28,15 @@ export class BattleNarrativeGenerator {
       isVictory,
       severity,
       conqueredAreaSqKm,
+      defenderCasualties,
     } = input;
 
     const formattedArea = new Intl.NumberFormat("fa-IR").format(
       Math.round(conqueredAreaSqKm),
     );
+
+    const defenderRetreated = defenderCasualties.infantryRetreated || 0;
+    const militiaPower = defenderCasualties.militiaGarrisonPower || 0;
 
     let title = "";
     let summary = "";
@@ -40,27 +44,27 @@ export class BattleNarrativeGenerator {
 
     if (isVictory) {
       if (severity === "CRUSHING_VICTORY") {
-        title = `برد قاطع در جبهه ${defenderNameFa}! دفاع دشمن کلا پاشید`;
-        summary = `نیروهای ${attackerNameFa} با یک حمله سریع و سنگین دفاع ${defenderNameFa} رو نابود کردن و ${formattedArea} کیلومتر مربع از خاکشون رو گرفتن.`;
-        strategicAssessment = `تحلیل اتاق جنگ: هماهنگی عالی نیروها باعث شد کمترین تلفات رو بدیم. دشمن کلا گیج شده.`;
+        title = `برد قاطع در جبهه ${defenderNameFa}! خطوط دفاعی فروپاشید`;
+        summary = `نیروهای ${attackerNameFa} با حمله سنگین دفاع ${defenderNameFa} را درهم شکستند. ${formattedArea} km² تصرف شد و ${defenderRetreated.toLocaleString("fa-IR")} یگان دشمن عقب‌نشینی کردند.`;
+        strategicAssessment = `تحلیل اتاق جنگ: هماهنگی نیروها مانع تلفات کسر شد. نیروهای پادگان مردمی (${militiaPower} یگان) نیز نتوانستند مانع پیشروی شوند.`;
       } else if (severity === "PYRRHIC_VICTORY") {
         title = `پیشروی پرهزینه در جبهه ${defenderNameFa}`;
-        summary = `تونستیم ${formattedArea} کیلومتر مربع از خاک ${defenderNameFa} رو تصرف کنیم، اما پدافند سنگینشون تلفات زیادی روی دستمون گذاشت.`;
-        strategicAssessment = `تحلیل اتاق جنگ: آتش سنگین دشمن به تجهیزات آسیب زده. باید سریع‌تر نیروها رو جایگزین کنیم.`;
+        summary = `توانستیم ${formattedArea} km² از اراضی ${defenderNameFa} را تصرف کنیم. مابقی نیروهای دشمن به خطوط پشتی عقب‌نشینی کردند.`;
+        strategicAssessment = `تحلیل اتاق جنگ: پدافند دشمن و نیروهای پادگان محلی تلفات قابل توجهی وارد ساختند. نیاز به تسریع در بازسازی یگان‌ها است.`;
       } else {
         title = `پیشروی موفقیت‌آمیز در خاک ${defenderNameFa}`;
-        summary = `حمله نیروهای ما به جبهه ${defenderNameFa} جواب داد و ${formattedArea} کیلومتر مربع از اراضیشون تحت کنترل درآمد.`;
-        strategicAssessment = `تحلیل اتاق جنگ: مواضع جدید تثبیت شده و نیروها آماده دستورات بعدی هستند.`;
+        summary = `پیشروی نیروها در جبهه ${defenderNameFa} تثبیت شد و ${formattedArea} km² تحت کنترل درآمد.`;
+        strategicAssessment = `تحلیل اتاق جنگ: مواضع جدید مستحکم شده و نیروهای دشمن عقب‌نشینی سازمانی انجام دادند.`;
       }
     } else {
       if (severity === "CRITICAL_DEFEAT") {
-        title = `شکست سنگین در حمله به ${defenderNameFa}! تلفات بالا`;
-        summary = `فرمانده! متاسفانه عملیات علیه ${defenderNameFa} به دیوار سخت پدافند حریف خورد. نیروهای ما با تلفات سنگین مجبور به عقب‌نشینی شدن.`;
-        strategicAssessment = `تحلیل اتاق جنگ: پدافند هوایی و خطوط دفاعی دشمن خیلی قوی‌تر از حد انتظار بود. نیاز به بازسازی سریع ارتش داریم.`;
+        title = `عقب‌نشینی سنگین در حمله به ${defenderNameFa}!`;
+        summary = `عملیات علیه ${defenderNameFa} با مقاومت شدید ارتش و نیروهای پادگان مردمی مواجه شد. نیروهای ما پس از متحمل شدن تلفات عقب‌نشینی کردند.`;
+        strategicAssessment = `تحلیل اتاق جنگ: قدرت پادگان محلی و کمبود احتمالی لجستیک عامل اصلی عدم موفقیت بود. بازسازی فوری نیروها ضروری است.`;
       } else {
-        title = `عقب‌نشینی نیروها از خاک ${defenderNameFa}`;
-        summary = `حمله نیروهای پیشرو به ${defenderNameFa} موفقیت‌آمیز نبود و برای جلوگیری از تلفات بیشتر، دستور عقب‌نشینی صادر شد.`;
-        strategicAssessment = `تحلیل اتاق جنگ: پیشنهاد میشه اول با پهپادها پدافندشون رو ضعیف کنیم بعد دوباره حمله کنیم.`;
+        title = `عقب‌نشینی تاکتیکی نیروها از خاک ${defenderNameFa}`;
+        summary = `برای جلوگیری از تلفات بیشتر، دستور عقب‌نشینی منظم نیروها صادر شد و اکثریت یگان‌ها به پادگان بازگشتند.`;
+        strategicAssessment = `تحلیل اتاق جنگ: پیشنهاد می‌شود پیش از تهاجم مجدد، با حملات موشکی و پهپادی خطوط پادگانی دشمن تضعیف شود.`;
       }
     }
 

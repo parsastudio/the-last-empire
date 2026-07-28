@@ -1,6 +1,13 @@
 import React from "react";
 import { CasualtyMetrics } from "@/domain/reports/combat-report.schema";
-import { Shield, Plane, Radio, MapPin } from "lucide-react";
+import {
+  Shield,
+  Plane,
+  Radio,
+  MapPin,
+  ShieldAlert,
+  RotateCcw,
+} from "lucide-react";
 
 interface CasualtyTableProps {
   attackerName: string;
@@ -43,6 +50,35 @@ export function CasualtyTable({
           {defenderCasualties.infantryLost.toLocaleString("fa-IR")} یگان
         </span>
       </div>
+
+      <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
+        <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
+          <RotateCcw size={13} className="text-gdp" />
+          <span>نیروهای عقب‌نشینی‌کرده</span>
+        </div>
+        <span className="font-bold text-gdp">
+          {(attackerCasualties.infantryRetreated || 0).toLocaleString("fa-IR")}{" "}
+          یگان
+        </span>
+        <span className="font-bold text-gdp">
+          {(defenderCasualties.infantryRetreated || 0).toLocaleString("fa-IR")}{" "}
+          یگان
+        </span>
+      </div>
+
+      {defenderCasualties.militiaGarrisonPower !== undefined && (
+        <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
+            <ShieldAlert size={13} className="text-treasury" />
+            <span>پادگان و میلیشیای وطن</span>
+          </div>
+          <span className="text-muted-foreground text-[10px]">-</span>
+          <span className="font-bold text-treasury">
+            {defenderCasualties.militiaGarrisonPower.toLocaleString("fa-IR")}{" "}
+            یگان
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
         <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">

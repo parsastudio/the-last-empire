@@ -1,5 +1,5 @@
 import React from "react";
-import { Swords, Shield, Plane, Radio } from "lucide-react";
+import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
 
 interface MilitaryForcesSectionProps {
   infantry: number;
@@ -7,6 +7,7 @@ interface MilitaryForcesSectionProps {
   droneMissile: number;
   techLevel: number;
   experience: number;
+  militiaGarrisonPower?: number;
 }
 
 export function MilitaryForcesSection({
@@ -15,6 +16,7 @@ export function MilitaryForcesSection({
   droneMissile,
   techLevel,
   experience,
+  militiaGarrisonPower = 280,
 }: MilitaryForcesSectionProps) {
   return (
     <div className="space-y-2.5">
@@ -32,7 +34,17 @@ export function MilitaryForcesSection({
             <span>پیاده‌نظام رزمی</span>
           </div>
           <span className="text-xs font-bold text-foreground">
-            {infantry.toLocaleString()} یگان
+            {infantry.toLocaleString("fa-IR")} یگان
+          </span>
+        </div>
+
+        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldAlert size={13} className="text-treasury" />
+            <span>پادگان و میلیشیای وطن</span>
+          </div>
+          <span className="text-xs font-bold text-treasury">
+            {militiaGarrisonPower.toLocaleString("fa-IR")} یگان
           </span>
         </div>
 
@@ -42,7 +54,7 @@ export function MilitaryForcesSection({
             <span>نیروی هوایی و جنگنده</span>
           </div>
           <span className="text-xs font-bold text-foreground">
-            {airForce} فروند
+            {airForce.toLocaleString("fa-IR")} فروند
           </span>
         </div>
 
@@ -52,7 +64,7 @@ export function MilitaryForcesSection({
             <span>پهپاد و تسلیحات موشکی</span>
           </div>
           <span className="text-xs font-bold text-foreground">
-            {droneMissile} یگان
+            {droneMissile.toLocaleString("fa-IR")} یگان
           </span>
         </div>
 
