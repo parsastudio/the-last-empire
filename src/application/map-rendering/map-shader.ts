@@ -1,8 +1,11 @@
 import { CountryPaletteGenerator } from "./shader/country-palette-generator";
 import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator";
-import { MapBevelShader } from "./shader/map-bevel-shader";
 import { NoiseGrainApplier } from "./shader/noise-grain-applier";
-import { findCountryProfileById } from "@/domain/map/countries";
+import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache";
+import { GdpLayerShader } from "./shader/gdp-layer-shader";
+import { MilitaryLayerShader } from "./shader/military-layer-shader";
+import { PoliticalLayerShader } from "./shader/political-layer-shader";
+import { BorderDetector } from "./shader/border-detector";
 
 interface Country {
   id: number;
@@ -15,8 +18,13 @@ interface Country {
 export class MapShader {
   private static paletteGenerator = new CountryPaletteGenerator();
   private static shadowCalculator = new ShorelineShadowCalculator();
-  private static bevelShader = new MapBevelShader();
   private static noiseApplier = new NoiseGrainApplier();
+  private static lookupCache = new CountryProfileLookupCache();
+
+  private static gdpShader = new GdpLayerShader();
+  private static militaryShader = new MilitaryLayerShader();
+  private static politicalShader = new PoliticalLayerShader();
+  private static borderDetector = new BorderDetector();
 
   public static applyShading(
     srcData: Uint8ClampedArray,
@@ -38,8 +46,8 @@ export class MapShader {
         if (val && val >= 11 && val < 250) {
           dist[idx] = 0;
         } else {
-          if (x > 0) dist[idx] = Math.min(dist[idx], dist[idx - 1] + 1);
-          if (y > 0) dist[idx] = Math.min(dist[idx], dist[idx - width] + 1);
+          if (x > 0) dist[idx] = Math.min(dist[idx]!, dist[idx - 1]! + 1);
+          if (y > 0) dist[idx] = Math.min(dist[idx]!, dist[idx - width]! + 1);
         }
       }
     }
@@ -47,9 +55,9 @@ export class MapShader {
     for (let y = height - 1; y >= 0; y--) {
       for (let x = width - 1; x >= 0; x--) {
         const idx = y * width + x;
-        if (x < width - 1) dist[idx] = Math.min(dist[idx], dist[idx + 1] + 1);
+        if (x < width - 1) dist[idx] = Math.min(dist[idx]!, dist[idx + 1]! + 1);
         if (y < height - 1)
-          dist[idx] = Math.min(dist[idx], dist[idx + width] + 1);
+          dist[idx] = Math.min(dist[idx]!, dist[idx + width]! + 1);
       }
     }
 
@@ -83,72 +91,49 @@ export class MapShader {
           const pair = palette[id];
           if (pair) {
             if (activeLayer === "gdp") {
-              const profile = findCountryProfileById(id);
-              const realGdp = profile ? profile.gdp : 10000000000;
-              const logGdp = Math.log10(Math.max(1000000, realGdp));
-              const normalizedScale = Math.max(
-                0,
-                Math.min(1.0, (logGdp - 9.0) / 4.5),
+              const color = this.gdpShader.calculateGdpColor(
+                id,
+                this.lookupCache,
               );
-
-              r = Math.floor(10 + (1.0 - normalizedScale) * 180);
-              g = Math.floor(80 + normalizedScale * 160);
-              b = Math.floor(50 + normalizedScale * 50);
+              r = color.r;
+              g = color.g;
+              b = color.b;
             } else if (activeLayer === "military") {
-              const profile = findCountryProfileById(id);
-              const infantry = profile?.startingInfantry || 40;
-              const isStrong = infantry > 300;
-
-              if (isStrong) {
-                r = 220;
-                g = 38;
-                b = 38;
-              } else {
-                r = 71;
-                g = 85;
-                b = 105;
-              }
+              const color = this.militaryShader.calculateMilitaryColor(
+                id,
+                this.lookupCache,
+              );
+              r = color.r;
+              g = color.g;
+              b = color.b;
             } else {
-              const countryColor = this.bevelShader.calculateBevel(
-                r,
-                g,
-                b,
+              const color = this.politicalShader.calculatePoliticalColor(
+                id,
                 pair,
                 x,
                 y,
                 width,
                 height,
-                id,
                 srcData,
               );
-              r = countryColor.r;
-              g = countryColor.g;
-              b = countryColor.b;
+              r = color.r;
+              g = color.g;
+              b = color.b;
             }
           }
         }
 
-        let isBorder = false;
-        if (x < width - 1) {
-          const rightId = srcData[idx + 4 + 2] || 0;
-          if (
-            rightId !== id &&
-            ((id >= 11 && id < 250) || (rightId >= 11 && rightId < 250))
-          ) {
-            isBorder = true;
-          }
-        }
-        if (y < height - 1) {
-          const bottomId = srcData[idx + width * 4 + 2] || 0;
-          if (
-            bottomId !== id &&
-            ((id >= 11 && id < 250) || (bottomId >= 11 && bottomId < 250))
-          ) {
-            isBorder = true;
-          }
-        }
-
-        if (isBorder) {
+        if (
+          this.borderDetector.isSovereignBorder(
+            x,
+            y,
+            width,
+            height,
+            id,
+            idx,
+            srcData,
+          )
+        ) {
           r = 80;
           g = 72;
           b = 65;
