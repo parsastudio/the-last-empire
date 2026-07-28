@@ -4,7 +4,7 @@ import {
   DoctrineBranch,
 } from "./doctrine-branch-selector";
 import { CheckCircle } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface DoctrineNode {
   id: string;
@@ -14,10 +14,16 @@ interface DoctrineNode {
   unlocked: boolean;
 }
 
-export function DoctrineTreeView() {
+interface DoctrineTreeViewProps {
+  nationId?: string;
+}
+
+export function DoctrineTreeView({
+  nationId = "NATION_118",
+}: DoctrineTreeViewProps) {
   const [activeBranch, setActiveBranch] =
     useState<DoctrineBranch>("INDUSTRIAL_TECH");
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   const doctrinesList: DoctrineNode[] = [
     {
@@ -57,11 +63,15 @@ export function DoctrineTreeView() {
     },
   ];
 
-  const handleUnlock = (name: string, cost: number) => {
-    showToast(
-      "آنلاک دکترین راهبردی",
-      `دکترین ${name} با موفقیت و صرف ${cost} امتیاز پژوهش فعال گردید.`,
-      "success",
+  const handleUnlock = async (docId: string, name: string) => {
+    await dispatchAction(
+      {
+        id: `doc-${Date.now()}`,
+        nationId,
+        type: "UNLOCK_DOCTRINE",
+        doctrineId: docId,
+      },
+      `دکترین ${name} با موفقیت فعال گردید.`,
     );
   };
 
@@ -96,7 +106,7 @@ export function DoctrineTreeView() {
               </span>
             ) : (
               <button
-                onClick={() => handleUnlock(doc.name, doc.cost)}
+                onClick={() => handleUnlock(doc.id, doc.name)}
                 className="px-3 py-1.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[10px] font-bold shadow-sm cursor-pointer"
               >
                 باز کردن

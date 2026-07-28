@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { X, ShoppingBag } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface TradeActionDialogProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface TradeActionDialogProps {
   mode: "buy" | "sell";
   unitPrice: number;
   maxAmount: number;
+  nationId?: string;
   onClose: () => void;
   onConfirm: (amount: number) => void;
 }
@@ -20,11 +21,12 @@ export function TradeActionDialog({
   mode,
   unitPrice,
   maxAmount,
+  nationId = "NATION_118",
   onClose,
   onConfirm,
 }: TradeActionDialogProps) {
   const [amount, setAmount] = useState<number>(10);
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   if (!isOpen) return null;
 
@@ -32,13 +34,25 @@ export function TradeActionDialog({
   const fee = Math.floor(totalCost * 0.1);
   const finalTotal = mode === "buy" ? totalCost + fee : totalCost - fee;
 
-  const handleExecuteTrade = () => {
-    showToast(
-      "معامله بورس کالا",
-      `سفارش ${mode === "buy" ? "خرید" : "فروش"} ${amount} ${unit} ${resourceName} با ارزش $${finalTotal.toLocaleString("fa-IR")} ثبت شد.`,
-      "success",
+  const handleExecuteTrade = async () => {
+    const resType = resourceName.includes("نفت") ? "oil" : "steel";
+    const isBuy = mode === "buy";
+
+    const success = await dispatchAction(
+      {
+        id: `trade-${Date.now()}`,
+        nationId,
+        type: "TRADE_RESOURCES",
+        resourceType: resType,
+        isBuy,
+        amount,
+      },
+      `سفارش ${isBuy ? "خرید" : "فروش"} ${amount} ${unit} ${resourceName} اجرا شد.`,
     );
-    onConfirm(amount);
+
+    if (success) {
+      onConfirm(amount);
+    }
   };
 
   return (

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { X, Zap } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface AbilityTargetModalProps {
   isOpen: boolean;
   abilityName: string;
+  nationId?: string;
   onClose: () => void;
   onConfirmTarget: (targetCode: string) => void;
 }
@@ -12,27 +13,34 @@ interface AbilityTargetModalProps {
 export function AbilityTargetModal({
   isOpen,
   abilityName,
+  nationId = "NATION_118",
   onClose,
   onConfirmTarget,
 }: AbilityTargetModalProps) {
-  const [selectedCode, setSelectedCode] = useState<string>("USA");
-  const { showToast } = useToast();
+  const [selectedCode, setSelectedCode] = useState<string>("NATION_15");
+  const { dispatchAction } = useGameActions();
 
   if (!isOpen) return null;
 
   const targetOptions = [
-    { code: "USA", name: "ایالات متحده آمریکا" },
-    { code: "CHN", name: "چین" },
-    { code: "RUS", name: "روسیه" },
-    { code: "DEU", name: "آلمان" },
+    { code: "NATION_15", name: "ایالات متحده آمریکا" },
+    { code: "NATION_150", name: "چین" },
+    { code: "NATION_29", name: "روسیه" },
+    { code: "NATION_132", name: "آلمان" },
   ];
 
-  const handleExecuteAbility = () => {
-    showToast(
-      "اجرای فرمان حکومتی",
-      `قابلیت ${abilityName} با موفقیت روی کشور ${selectedCode} اجرا گردید.`,
-      "success",
+  const handleExecuteAbility = async () => {
+    await dispatchAction(
+      {
+        id: `ability-target-${Date.now()}`,
+        nationId,
+        type: "ACTIVATE_ABILITY",
+        abilityType: "DIPLOMATIC_SUMMIT",
+        targetNationId: selectedCode,
+      },
+      `قابلیت ${abilityName} با موفقیت روی کشور هدف اجرا گردید.`,
     );
+
     onConfirmTarget(selectedCode);
   };
 
