@@ -5,10 +5,10 @@ import { WideOverviewView } from "./views/wide-overview-view";
 import { WideMarketView } from "./views/wide-market-view";
 import { WideMilitaryView } from "./views/wide-military-view";
 import { WidePoliticsView } from "./views/wide-politics-view";
-import { DiplomacyTab } from "../sidebar/tabs/diplomacy-tab";
-import { ResearchTab } from "../sidebar/tabs/research/research-tab";
-import { AbilitiesTab } from "../sidebar/tabs/abilities/abilities-tab";
-import { ReportsSidebarTab } from "../reports/reports-sidebar-tab";
+import { WideDiplomacyView } from "./views/wide-diplomacy-view";
+import { WideResearchView } from "./views/wide-research-view";
+import { WideAbilitiesView } from "./views/wide-abilities-view";
+import { WideReportsView } from "./views/wide-reports-view";
 import { MOCK_SCHEMA_NATION } from "../sidebar/config/mock-nation.config";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 
@@ -33,7 +33,6 @@ export function CommandCenterModal({
   mockReports,
   onClose,
   onFocusCountry,
-  onSelectReport,
   onOpenTrade,
 }: CommandCenterModalProps) {
   if (!activeTab) return null;
@@ -117,26 +116,21 @@ export function CommandCenterModal({
           )}
 
           {activeTab === "diplomacy" && (
-            <DiplomacyTab
+            <WideDiplomacyView
               selectedTargetCode={selectedTargetCode}
               onFocusCountry={onFocusCountry}
             />
           )}
 
-          {activeTab === "research" && <ResearchTab />}
+          {activeTab === "research" && <WideResearchView />}
 
           {activeTab === "abilities" && (
-            <AbilitiesTab
+            <WideAbilitiesView
               currentGovernment={MOCK_SCHEMA_NATION.government.type}
             />
           )}
 
-          {activeTab === "reports" && (
-            <ReportsSidebarTab
-              reports={mockReports}
-              onSelectReport={onSelectReport}
-            />
-          )}
+          {activeTab === "reports" && <WideReportsView reports={mockReports} />}
         </div>
       </div>
     </div>
