@@ -1,11 +1,21 @@
 import React, { useState } from "react";
 import { UserMinus } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 export function DisbandUnitCard() {
   const [disbandCount, setDisbandAmount] = useState<number>(5);
+  const { showToast } = useToast();
+
+  const handleDisband = () => {
+    showToast(
+      "انحلال یگان‌های نظامی",
+      `${disbandCount} یگان منحل شد و ۴۰٪ نیروی انسانی به مخازن ملی بازگشت.`,
+      "info",
+    );
+  };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
         <UserMinus size={13} className="text-military" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -31,11 +41,7 @@ export function DisbandUnitCard() {
         />
 
         <button
-          onClick={() =>
-            alert(
-              `${disbandCount} یگان پیاده‌نظام منحل شد و ۴۰٪ نیروی انسانی به مخازن ملی بازگشت.`,
-            )
-          }
+          onClick={handleDisband}
           className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
         >
           انحلال و بازیابی نیرو

@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock, X } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface RecruitmentOrderItem {
   id: string;
@@ -9,6 +10,8 @@ interface RecruitmentOrderItem {
 }
 
 export function RecruitmentQueueCard() {
+  const { showToast } = useToast();
+
   const queue: RecruitmentOrderItem[] = [
     {
       id: "ord-1",
@@ -20,8 +23,16 @@ export function RecruitmentQueueCard() {
 
   if (queue.length === 0) return null;
 
+  const handleCancelOrder = (id: string) => {
+    showToast(
+      "لغو سفارش ساخت",
+      `سفارش ${id} لغو شد و ۷۵٪ هزینه پرداختی مسترد گردید.`,
+      "warning",
+    );
+  };
+
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
         <Clock size={13} className="text-treasury" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -45,7 +56,7 @@ export function RecruitmentQueueCard() {
             </div>
 
             <button
-              onClick={() => alert("سفارش ساخت لغو و ۷۵٪ هزینه مسترد شد.")}
+              onClick={() => handleCancelOrder(item.id)}
               className="p-1.5 hover:bg-rose-500/10 text-rose-500 rounded-lg transition-colors cursor-pointer"
               title="لغو سفارش"
             >

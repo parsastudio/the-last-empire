@@ -1,5 +1,6 @@
 import React from "react";
 import { Swords, Handshake, CheckCircle2, Shield, Coins } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
@@ -10,19 +11,49 @@ export function AdvancedDiplomacyActions({
   targetName,
   onOpenTributeModal,
 }: AdvancedDiplomacyActionsProps) {
+  const { showToast } = useToast();
+
+  const handleDeclareWar = () => {
+    showToast(
+      "اعلام جنگ رسمی",
+      `بیانیه رسمی اعلام جنگ به ${targetName} صادر شد.`,
+      "error",
+    );
+  };
+
+  const handleMilitaryAccess = () => {
+    showToast(
+      "درخواست حق عبور",
+      `درخواست ترانزیت نظامی به ${targetName} ارسال گردید.`,
+      "info",
+    );
+  };
+
+  const handleNonAggression = () => {
+    showToast(
+      "پیشنهاد عدم تخاصم",
+      `پیشنهاد رسمی پیمان عدم تخاصم به ${targetName} ابلاغ گردید.`,
+      "info",
+    );
+  };
+
+  const handleAlliance = () => {
+    showToast(
+      "درخواست اتحاد کامل",
+      `پیشنهاد معاهده دفاعی مشترک به ${targetName} ارسال گردید.`,
+      "success",
+    );
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 dir-rtl text-right">
       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
         گزینه‌های تعامل و دیپلماسی پیشرفته
       </span>
 
       <div className="space-y-2">
         <button
-          onClick={() =>
-            alert(
-              `اعلام جنگ به ${targetName}: باعث افت ثبات داخلی و شوک اقتصادی خواهد شد.`,
-            )
-          }
+          onClick={handleDeclareWar}
           className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">
@@ -37,9 +68,7 @@ export function AdvancedDiplomacyActions({
         </button>
 
         <button
-          onClick={() =>
-            alert(`درخواست حق عبور نظامی به ${targetName} ارسال شد.`)
-          }
+          onClick={handleMilitaryAccess}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">
@@ -58,7 +87,11 @@ export function AdvancedDiplomacyActions({
             if (onOpenTributeModal) {
               onOpenTributeModal();
             } else {
-              alert(`مطالبه باج از ${targetName}`);
+              showToast(
+                "مطالبه باج",
+                `درخواست باج از ${targetName}`,
+                "warning",
+              );
             }
           }}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
@@ -75,9 +108,7 @@ export function AdvancedDiplomacyActions({
         </button>
 
         <button
-          onClick={() =>
-            alert(`ارسال پیشنهاد پیمان عدم تخاصم به ${targetName}`)
-          }
+          onClick={handleNonAggression}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">
@@ -89,7 +120,7 @@ export function AdvancedDiplomacyActions({
         </button>
 
         <button
-          onClick={() => alert(`ارسال درخواست اتحاد کامل به ${targetName}`)}
+          onClick={handleAlliance}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">

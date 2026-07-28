@@ -4,6 +4,7 @@ import {
   DoctrineBranch,
 } from "./doctrine-branch-selector";
 import { CheckCircle } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface DoctrineNode {
   id: string;
@@ -16,6 +17,7 @@ interface DoctrineNode {
 export function DoctrineTreeView() {
   const [activeBranch, setActiveBranch] =
     useState<DoctrineBranch>("INDUSTRIAL_TECH");
+  const { showToast } = useToast();
 
   const doctrinesList: DoctrineNode[] = [
     {
@@ -55,10 +57,18 @@ export function DoctrineTreeView() {
     },
   ];
 
+  const handleUnlock = (name: string, cost: number) => {
+    showToast(
+      "آنلاک دکترین راهبردی",
+      `دکترین ${name} با موفقیت و صرف ${cost} امتیاز پژوهش فعال گردید.`,
+      "success",
+    );
+  };
+
   const filtered = doctrinesList.filter((d) => d.branch === activeBranch);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 dir-rtl text-right">
       <DoctrineBranchSelector
         activeBranch={activeBranch}
         onChangeBranch={setActiveBranch}
@@ -86,7 +96,7 @@ export function DoctrineTreeView() {
               </span>
             ) : (
               <button
-                onClick={() => alert(`آنلاک دکترین ${doc.name}`)}
+                onClick={() => handleUnlock(doc.name, doc.cost)}
                 className="px-3 py-1.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[10px] font-bold shadow-sm cursor-pointer"
               >
                 باز کردن

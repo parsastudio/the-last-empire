@@ -13,7 +13,7 @@ export function NextTurnButton({
   return (
     <button
       onClick={onNextTurn}
-      className="w-full py-3.5 px-4 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold transition-all shadow-lg shadow-gdp/10 hover:shadow-xl hover:translate-y-[-1px] text-xs uppercase tracking-wider flex items-center justify-between gap-2 cursor-pointer border border-gdp/20"
+      className="w-full py-3.5 px-4 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold transition-all shadow-lg shadow-gdp/10 hover:shadow-xl hover:translate-y-[-1px] text-xs uppercase tracking-wider flex items-center justify-between gap-2 cursor-pointer border border-gdp/20 dir-rtl"
     >
       <div className="flex items-center gap-2">
         <Play size={15} fill="currentColor" />
