@@ -11,6 +11,8 @@ export interface HoverCountryInfo {
   rank: number;
   stance: string;
   gdp: string;
+  regionName?: string;
+  regionArea?: string;
 }
 
 interface CountryHoverContainerProps {

@@ -8,6 +8,7 @@ import {
   Fuel,
   MapPin,
   ArrowLeft,
+  Globe2,
 } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
@@ -57,7 +58,7 @@ export function AttackPlanningModal({
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-[10px] font-bold text-military font-mono uppercase tracking-wider">
             <Swords size={13} />
-            <span>اتاق عملیات | برنامه‌ریزی تهاجم نظامی</span>
+            <span>اتاق عملیات | برنامه‌ریزی تهاجم ایزوله</span>
           </div>
           <h2 className="text-lg font-extrabold text-foreground">
             طرح حمله استراتژیک به {targetName}
@@ -83,12 +84,30 @@ export function AttackPlanningModal({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono bg-background/50 border border-border p-3 rounded-xl">
-          <MapPin size={14} className="text-military shrink-0" />
-          <span className="text-muted-foreground">مختصات دقیق نقطه‌کوبی:</span>
-          <span className="font-bold text-foreground dir-ltr font-mono">
-            X: {coordinate.x} | Y: {coordinate.y}
-          </span>
+        <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+          <div className="flex items-center gap-2 bg-background/50 border border-border p-3 rounded-xl">
+            <MapPin size={14} className="text-military shrink-0" />
+            <div className="space-y-0.5">
+              <span className="text-[9px] text-muted-foreground block font-sans">
+                مختصات نقطه‌کوبی:
+              </span>
+              <span className="font-bold text-foreground dir-ltr font-mono block">
+                X: {coordinate.x} | Y: {coordinate.y}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-background/50 border border-border p-3 rounded-xl">
+            <Globe2 size={14} className="text-primary shrink-0" />
+            <div className="space-y-0.5">
+              <span className="text-[9px] text-muted-foreground block font-sans">
+                محدوده نبرد:
+              </span>
+              <span className="font-bold text-foreground font-sans block text-[11px]">
+                تئاتر ایزوله منطقه
+              </span>
+            </div>
+          </div>
         </div>
 
         {!isAtWar && (

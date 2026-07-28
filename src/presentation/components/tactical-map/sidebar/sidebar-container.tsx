@@ -142,6 +142,16 @@ export function SidebarContainer({
     },
     globalReputation: 50,
     globalAggression: 0,
+    regionsDemographics: [
+      {
+        regionId: 0,
+        name: "خاک اصلی",
+        pixelCount: 1800,
+        areaSqKm: 1648195,
+        population: 88000000,
+        gdp: 450000000000,
+      },
+    ],
   };
 
   return (

@@ -102,6 +102,8 @@ export function useCountryHoverMath({
       rank: cachedRank,
       stance: "صلح و دیپلماسی عادی",
       gdp: `$${gdpFormatted} میلیارد دلار`,
+      regionName: "خاک اصلی",
+      regionArea: `${Math.round(areaVal).toLocaleString("fa-IR")} km²`,
     });
   }, [
     countries,

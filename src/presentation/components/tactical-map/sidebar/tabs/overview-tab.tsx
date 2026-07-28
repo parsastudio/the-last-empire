@@ -3,6 +3,8 @@ import { NationHeaderCard } from "../nation-header-card";
 import { EconomyStatsSection } from "../economy-stats-section";
 import { ResourcesSection } from "../resources-section";
 import { GovernmentStatusSection } from "../government-status-section";
+import { RegionBreakdownCard } from "../region-breakdown-card";
+import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 
 interface OverviewTabProps {
   nation: {
@@ -30,6 +32,7 @@ interface OverviewTabProps {
     };
     globalReputation: number;
     globalAggression: number;
+    regionsDemographics?: RegionDemographics[];
   };
 }
 
@@ -42,7 +45,10 @@ export function OverviewTab({ nation }: OverviewTabProps) {
         flagCode={nation.flagCode}
         governmentType={nation.government.type}
         population={nation.population}
+        regions={nation.regionsDemographics}
       />
+
+      <RegionBreakdownCard regions={nation.regionsDemographics} />
 
       <EconomyStatsSection
         gdp={nation.gdp}
