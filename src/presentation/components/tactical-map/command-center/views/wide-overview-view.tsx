@@ -8,9 +8,10 @@ import { Nation } from "@/domain/nation/nation.schema";
 
 interface WideOverviewViewProps {
   nation: Nation;
+  rank?: number;
 }
 
-export function WideOverviewView({ nation }: WideOverviewViewProps) {
+export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
@@ -20,6 +21,7 @@ export function WideOverviewView({ nation }: WideOverviewViewProps) {
           flagCode={nation.flagCode}
           governmentType={nation.government.type}
           population={nation.population}
+          rank={rank}
           regions={nation.regionsDemographics}
         />
 

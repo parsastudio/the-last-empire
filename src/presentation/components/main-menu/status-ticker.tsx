@@ -3,7 +3,7 @@ import { Globe, ShieldAlert, Cpu } from "lucide-react";
 
 export function StatusTicker() {
   return (
-    <footer className="w-full border-t border-border bg-background/50 backdrop-blur-md py-4 px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-muted-foreground z-10">
+    <footer className="w-full border-t border-border bg-background/50 backdrop-blur-md py-4 px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-muted-foreground z-10 dir-rtl">
       <div className="flex items-center gap-2">
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gdp opacity-75"></span>

@@ -9,8 +9,10 @@ export class LocalStorageAdapter {
     if (typeof window === "undefined") {
       return;
     }
-    const serialized = this.serializer.serialize(state);
-    localStorage.setItem(`${this.keyPrefix}${gameId}`, serialized);
+    try {
+      const serialized = this.serializer.serialize(state);
+      localStorage.setItem(`${this.keyPrefix}${gameId}`, serialized);
+    } catch {}
   }
 
   public loadState(gameId: string): GameState | null {
@@ -32,6 +34,8 @@ export class LocalStorageAdapter {
     if (typeof window === "undefined") {
       return;
     }
-    localStorage.removeItem(`${this.keyPrefix}${gameId}`);
+    try {
+      localStorage.removeItem(`${this.keyPrefix}${gameId}`);
+    } catch {}
   }
 }

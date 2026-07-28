@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Shield, Coins, Users } from "lucide-react";
 import { HoverCountryInfo } from "./country-hover-container";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { HoverHudPositionCalculator } from "./utils/hover-hud-position.calculator";
 
 interface CountryHoverHudProps {
   info: HoverCountryInfo | null;
@@ -9,19 +10,14 @@ interface CountryHoverHudProps {
 }
 
 export function CountryHoverHud({ info, cursorPos }: CountryHoverHudProps) {
+  const calculator = useMemo(() => new HoverHudPositionCalculator(), []);
+
   if (!info) {
     return null;
   }
 
   const flagSymbol = getFlagEmoji(info.flagCode || info.code);
-
-  const stylePosition = cursorPos
-    ? {
-        left: `${Math.min(window.innerWidth - 320, cursorPos.x + 15)}px`,
-        top: `${Math.min(window.innerHeight - 180, cursorPos.y + 15)}px`,
-      }
-    : { left: "1.5rem", bottom: "1.5rem" };
-
+  const stylePosition = calculator.calculatePosition(cursorPos);
   const isWar = info.stance.includes("جنگ");
 
   return (

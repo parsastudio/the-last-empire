@@ -8,9 +8,10 @@ import { Nation } from "@/domain/nation/nation.schema";
 
 interface OverviewTabProps {
   nation: Nation;
+  rank?: number;
 }
 
-export function OverviewTab({ nation }: OverviewTabProps) {
+export function OverviewTab({ nation, rank = 1 }: OverviewTabProps) {
   return (
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <NationHeaderCard
@@ -19,6 +20,7 @@ export function OverviewTab({ nation }: OverviewTabProps) {
         flagCode={nation.flagCode}
         governmentType={nation.government.type}
         population={nation.population}
+        rank={rank}
         regions={nation.regionsDemographics}
       />
 

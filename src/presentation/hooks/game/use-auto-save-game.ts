@@ -3,11 +3,13 @@
 import { useEffect, useRef, useCallback } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
+import { LocalStorageAdapter } from "@/infrastructure/storage/local-storage-adapter";
 import { useToast } from "@/presentation/context/toast-context";
 
 export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
   const { showToast } = useToast();
   const dbAdapterRef = useRef(new IndexedDbAdapter());
+  const localStorageRef = useRef(new LocalStorageAdapter());
   const lastSavedTurnRef = useRef<number | null>(null);
 
   const saveStateToDb = useCallback(
@@ -25,7 +27,13 @@ export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
             "info",
           );
         }
-      } catch {}
+      } catch {
+        try {
+          localStorageRef.current.saveState(gameId, state);
+          localStorageRef.current.saveState("active_game", state);
+          lastSavedTurnRef.current = state.currentTurn;
+        } catch {}
+      }
     },
     [gameId, showToast],
   );
