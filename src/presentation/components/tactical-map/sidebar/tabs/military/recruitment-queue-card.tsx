@@ -1,33 +1,30 @@
 import React from "react";
 import { Clock, X } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { RecruitmentOrder } from "@/domain/military/military.schema";
 
-interface RecruitmentOrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  turnsRemaining: number;
+interface RecruitmentQueueCardProps {
+  queue?: RecruitmentOrder[];
+  nationId?: string;
 }
 
-export function RecruitmentQueueCard() {
-  const { showToast } = useToast();
+export function RecruitmentQueueCard({
+  queue = [],
+  nationId = "NATION_118",
+}: RecruitmentQueueCardProps) {
+  const { dispatchAction } = useGameActions();
 
-  const queue: RecruitmentOrderItem[] = [
-    {
-      id: "ord-1",
-      name: "پیاده‌نظام رزمی",
-      quantity: 10,
-      turnsRemaining: 1,
-    },
-  ];
+  if (!queue || queue.length === 0) return null;
 
-  if (queue.length === 0) return null;
-
-  const handleCancelOrder = (id: string) => {
-    showToast(
-      "لغو سفارش ساخت",
-      `سفارش ${id} لغو شد و ۷۵٪ هزینه پرداختی مسترد گردید.`,
-      "warning",
+  const handleCancelOrder = async (orderId: string) => {
+    await dispatchAction(
+      {
+        id: `cancel-${Date.now()}`,
+        nationId,
+        type: "CANCEL_RECRUITMENT",
+        orderId,
+      },
+      "سفارش لغو شد و هزینه پرداختی مسترد گردید.",
     );
   };
 
@@ -48,7 +45,7 @@ export function RecruitmentQueueCard() {
           >
             <div className="space-y-0.5 text-right">
               <span className="text-xs font-bold text-foreground block font-sans">
-                {item.name} ({item.quantity} یگان)
+                {item.unitType} ({item.quantity} یگان)
               </span>
               <span className="text-[9px] text-treasury block font-sans">
                 {item.turnsRemaining} نوبت تا آمادگی کامل

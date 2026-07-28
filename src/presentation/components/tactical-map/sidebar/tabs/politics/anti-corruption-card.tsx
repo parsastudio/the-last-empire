@@ -1,15 +1,25 @@
 import React from "react";
 import { ShieldCheck } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
-export function AntiCorruptionCard() {
-  const { showToast } = useToast();
+interface AntiCorruptionCardProps {
+  nationId?: string;
+}
 
-  const handleAntiCorruption = () => {
-    showToast(
-      "پویش ضدفساد ملی",
-      "مبلغ $25,000 به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری ۵٪ کاهش یافت.",
-      "success",
+export function AntiCorruptionCard({
+  nationId = "NATION_118",
+}: AntiCorruptionCardProps) {
+  const { dispatchAction } = useGameActions();
+
+  const handleAntiCorruption = async () => {
+    await dispatchAction(
+      {
+        id: `anti-corr-${Date.now()}`,
+        nationId,
+        type: "ANTI_CORRUPTION_DRIVE",
+        amount: 25000,
+      },
+      "مبلغ $25,000 به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری کاهش یافت.",
     );
   };
 

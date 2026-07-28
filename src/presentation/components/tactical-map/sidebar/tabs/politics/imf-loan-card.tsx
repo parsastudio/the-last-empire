@@ -1,25 +1,43 @@
 import React from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
-export function ImfLoanCard() {
+interface ImfLoanCardProps {
+  nationId?: string;
+  nationalDebt?: number;
+}
+
+export function ImfLoanCard({
+  nationId = "NATION_118",
+  nationalDebt = 0,
+}: ImfLoanCardProps) {
   const creditRating = 85;
-  const currentDebt = 0;
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
-  const handleRequestLoan = () => {
-    showToast(
-      "تسهیلات اعتباری IMF",
-      "وام اضطراری $۵۰,۰۰۰ با نرخ سود ۵٪ به خزانه ملی واریز شد.",
-      "success",
+  const handleRequestLoan = async () => {
+    await dispatchAction(
+      {
+        id: `loan-${Date.now()}`,
+        nationId,
+        type: "REQUEST_LOAN",
+        amount: 50000,
+      },
+      "وام اضطراری $۵۰,۰۰۰ به خزانه ملی واریز شد.",
     );
   };
 
-  const handleRepayDebt = () => {
-    showToast(
-      "تسویه بدهی",
-      "هیچ بدهی معوقه‌ای برای بازپرداخت وجود ندارد.",
-      "info",
+  const handleRepayDebt = async () => {
+    if (nationalDebt <= 0) {
+      return;
+    }
+    await dispatchAction(
+      {
+        id: `repay-${Date.now()}`,
+        nationId,
+        type: "REPAY_DEBT",
+        amount: Math.min(25000, nationalDebt),
+      },
+      "بخشی از بدهی ملی تسویه گردید.",
     );
   };
 
@@ -46,7 +64,7 @@ export function ImfLoanCard() {
               بدهی معوق فعلی
             </span>
             <span className="font-bold text-military block">
-              ${currentDebt.toLocaleString("fa-IR")}
+              ${nationalDebt.toLocaleString("fa-IR")}
             </span>
           </div>
 

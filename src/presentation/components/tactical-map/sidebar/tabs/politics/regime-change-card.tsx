@@ -1,19 +1,31 @@
 import React from "react";
 import { RefreshCw, Zap, AlertTriangle } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { GovernmentType } from "@/domain/politics/politics.schema";
 
 interface RegimeChangeCardProps {
   governmentType: string;
+  nationId?: string;
 }
 
-export function RegimeChangeCard({ governmentType }: RegimeChangeCardProps) {
-  const { showToast } = useToast();
+export function RegimeChangeCard({
+  governmentType,
+  nationId = "NATION_118",
+}: RegimeChangeCardProps) {
+  const { dispatchAction } = useGameActions();
 
-  const handleRegimeChange = () => {
-    showToast(
-      "درخواست تغییر رژیم",
-      "فرآیند برگزاری همه‌پرسی تغییر حکومت آغاز شد. -۴۰٪ جریمه ثبات سیاسی اعمال گردید.",
-      "warning",
+  const handleRegimeChange = async () => {
+    const targetType: GovernmentType =
+      governmentType === "DEMOCRACY" ? "DICTATORSHIP" : "DEMOCRACY";
+
+    await dispatchAction(
+      {
+        id: `regime-${Date.now()}`,
+        nationId,
+        type: "CHANGE_GOVERNMENT",
+        newGovernment: targetType,
+      },
+      "فرآیند برگزاری همه‌پرسی و تغییر حکومت آغاز شد.",
     );
   };
 

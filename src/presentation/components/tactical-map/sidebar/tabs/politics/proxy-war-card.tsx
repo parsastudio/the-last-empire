@@ -1,21 +1,34 @@
 import React, { useState } from "react";
 import { Zap, ShieldAlert } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
-export function ProxyWarCard() {
+interface ProxyWarCardProps {
+  nationId?: string;
+  targetNationId?: string;
+}
+
+export function ProxyWarCard({
+  nationId = "NATION_118",
+  targetNationId = "NATION_15",
+}: ProxyWarCardProps) {
   const [budget, setBudget] = useState<number>(15000);
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   const estimatedStabilityDrain = Math.min(
     15,
     Math.max(1, Math.floor(Math.log10(budget) * 3)),
   );
 
-  const handleApplyProxy = () => {
-    showToast(
-      "عملیات پنهان نفوذ",
+  const handleApplyProxy = async () => {
+    await dispatchAction(
+      {
+        id: `proxy-${Date.now()}`,
+        nationId,
+        type: "FUND_PROXY_INFLUENCE",
+        targetNationId,
+        budget,
+      },
       `مبلغ $${budget.toLocaleString("fa-IR")} جهت تضعیف ثبات سیاسی کشور رقیب اختصاص یافت.`,
-      "warning",
     );
   };
 
