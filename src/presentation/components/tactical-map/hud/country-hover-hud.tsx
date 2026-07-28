@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Award, MapPin } from "lucide-react";
+import { Shield, Award } from "lucide-react";
 import { HoverCountryInfo } from "./country-hover-container";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
@@ -29,26 +29,19 @@ export function CountryHoverHud({ info }: CountryHoverHudProps) {
         </span>
         <div className="flex-1 flex items-center justify-between gap-4 font-mono">
           <div className="space-y-0.5 text-right overflow-hidden">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-xs font-extrabold text-foreground font-sans truncate">
                 {info.name}
               </span>
+              {info.regionName && (
+                <span className="text-xs font-bold text-primary font-sans">
+                  {info.regionName}
+                </span>
+              )}
               <span className="text-[9px] bg-secondary px-1.5 py-0.5 rounded text-muted-foreground shrink-0">
                 {info.code}
               </span>
             </div>
-
-            {info.regionName && (
-              <div className="flex items-center gap-1 text-[9px] text-primary font-sans font-bold">
-                <MapPin size={10} />
-                <span>{info.regionName}</span>
-                {info.regionArea && (
-                  <span className="text-muted-foreground font-mono">
-                    ({info.regionArea})
-                  </span>
-                )}
-              </div>
-            )}
 
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1 shrink-0">
