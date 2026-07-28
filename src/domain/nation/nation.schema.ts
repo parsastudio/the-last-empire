@@ -10,6 +10,7 @@ import {
 } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesStateSchema } from "@/domain/politics/doctrines.schema";
+import { RegionDemographicsSchema } from "./region-demographics.schema";
 
 export const NationTraitSchema = z.enum([
   "OIL_RICH",
@@ -81,6 +82,7 @@ export const NationSchema = z.object({
   globalAggression: z.number().min(0).max(100),
   doctrines: DoctrinesStateSchema,
   proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
+  regionsDemographics: z.array(RegionDemographicsSchema).optional(),
 });
 
 export type NationTrait = z.infer<typeof NationTraitSchema>;

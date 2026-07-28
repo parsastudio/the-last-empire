@@ -109,6 +109,7 @@ export class NationProfileAssigner {
         unlockedDoctrines: [],
       },
       proxyInfluenceBudget: {},
+      regionsDemographics: [],
     };
   }
 }

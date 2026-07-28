@@ -8,12 +8,16 @@ export class SovereignHopBfs {
 
   public executeHopBfs(
     targetCountryId: string,
+    targetEnclaveId: number,
     entryPoint: Coordinate,
     allCells: GridCell[],
     pixelLimit: number,
   ): GridCell[] {
     const targetCells = allCells.filter(
-      (c) => c.ownerId === targetCountryId && !c.isOccupied,
+      (c) =>
+        c.ownerId === targetCountryId &&
+        c.enclaveId === targetEnclaveId &&
+        !c.isOccupied,
     );
 
     if (targetCells.length === 0 || pixelLimit <= 0) {
