@@ -33,8 +33,7 @@ export function SidebarContainer({
   const { showToast } = useToast();
   const { gameState, advanceNextTurn } = useGeopoliticsGame();
 
-  const activeTab =
-    externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
+  const activeTab = externalActiveTab || internalActiveTab;
 
   const realReports = useRealCombatReports(gameState);
 
