@@ -1,5 +1,5 @@
 import React from "react";
-import { FolderAlert, Home, PlusCircle } from "lucide-react";
+import { FolderX, Home, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface CampaignNotFoundModalProps {
@@ -20,7 +20,7 @@ export function CampaignNotFoundModal({
       <div className="bg-card border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5">
         <div className="flex flex-col items-center justify-center gap-3 text-center">
           <div className="w-14 h-14 rounded-2xl bg-military/15 border border-military/30 text-military flex items-center justify-center shadow-lg">
-            <FolderAlert size={28} />
+            <FolderX size={28} />
           </div>
           <h2 className="text-lg font-extrabold text-foreground">
             پرونده کمپین یافت نشد

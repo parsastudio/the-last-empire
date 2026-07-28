@@ -40,73 +40,13 @@ export function CommandCenterModal({
   onFocusCountry,
   onOpenTrade,
 }: CommandCenterModalProps) {
-  if (!activeTab) return null;
-
-  const fallbackNation: Nation = {
-    id: "NATION_118",
-    name: "ایران",
-    isAi: false,
-    isAlive: true,
-    flagCode: "IR",
-    gdp: 450000000000,
-    taxRate: 15,
-    tariffRate: 10,
-    treasury: 350000,
-    nationalDebt: 0,
-    population: 88000000,
-    warExhaustion: 0,
-    industrialLevel: 1,
-    adminBurdenMultiplier: 1.0,
-    consecutiveDeficitTurns: 0,
-    government: {
-      type: "DICTATORSHIP",
-      stability: 80,
-      corruption: 10,
-      socialFreedom: 30,
-      turnsInPower: 5,
-    },
-    resources: { oil: 5000, steel: 2000, manpower: 500 },
-    upkeep: {
-      infantryUpkeep: 1,
-      airForceUpkeep: 1,
-      droneMissileUpkeep: 1,
-      infrastructureUpkeep: 1,
-    },
-    military: {
-      infantry: 450,
-      airForce: 40,
-      droneMissile: 60,
-      experience: 10,
-      techLevel: 3,
-    },
-    recruitmentQueue: [],
-    geography: {
-      landNeighbors: [],
-      seaNeighbors: [],
-      hasSeaAccess: true,
-      territorySize: 1000,
-      infrastructureLevel: 1,
-      contiguousMainlandSize: 1000,
-      isolatedPockets: [],
-      coordinates: [],
-    },
-    relations: {},
-    activeModifiers: [],
-    traits: ["OIL_RICH"],
-    globalReputation: 50,
-    globalAggression: 0,
-    doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
-    proxyInfluenceBudget: {},
-    regionsDemographics: [],
-  };
-
-  const currentNation = nation || fallbackNation;
+  if (!activeTab || !nation) return null;
 
   const getTitleAndSubtitle = () => {
     switch (activeTab) {
       case "overview":
         return {
-          title: `شناسنامه و وضعیت عمومی ${currentNation.name}`,
+          title: `شناسنامه و وضعیت عمومی ${nation.name}`,
           subtitle: "پایش زنده اقتصاد، جمعیت، منابع و پایداری داخلی کشور",
         };
       case "market":
@@ -167,31 +107,29 @@ export function CommandCenterModal({
         />
 
         <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {activeTab === "overview" && (
-            <WideOverviewView nation={currentNation} />
-          )}
+          {activeTab === "overview" && <WideOverviewView nation={nation} />}
 
           {activeTab === "market" && (
             <WideMarketView
               marketPrices={gameState?.marketPrices}
-              oilStock={currentNation.resources.oil}
-              steelStock={currentNation.resources.steel}
+              oilStock={nation.resources.oil}
+              steelStock={nation.resources.steel}
               onOpenTrade={onOpenTrade}
             />
           )}
 
           {activeTab === "military" && (
-            <WideMilitaryView military={currentNation.military} />
+            <WideMilitaryView military={nation.military} />
           )}
 
           {activeTab === "politics" && (
             <WidePoliticsView
-              taxRate={currentNation.taxRate}
-              governmentType={currentNation.government.type}
-              tariffRate={currentNation.tariffRate}
-              industrialLevel={currentNation.industrialLevel}
-              infrastructureLevel={currentNation.geography.infrastructureLevel}
-              activeModifiers={currentNation.activeModifiers}
+              taxRate={nation.taxRate}
+              governmentType={nation.government.type}
+              tariffRate={nation.tariffRate}
+              industrialLevel={nation.industrialLevel}
+              infrastructureLevel={nation.geography.infrastructureLevel}
+              activeModifiers={nation.activeModifiers}
             />
           )}
 
@@ -205,15 +143,13 @@ export function CommandCenterModal({
 
           {activeTab === "research" && (
             <WideResearchView
-              unlockedDoctrines={currentNation.doctrines.unlockedDoctrines}
-              doctrinePoints={currentNation.doctrines.doctrinePoints}
+              unlockedDoctrines={nation.doctrines.unlockedDoctrines}
+              doctrinePoints={nation.doctrines.doctrinePoints}
             />
           )}
 
           {activeTab === "abilities" && (
-            <WideAbilitiesView
-              currentGovernment={currentNation.government.type}
-            />
+            <WideAbilitiesView currentGovernment={nation.government.type} />
           )}
 
           {activeTab === "reports" && <WideReportsView reports={mockReports} />}
