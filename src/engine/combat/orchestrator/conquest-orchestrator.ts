@@ -20,22 +20,24 @@ export class ConquestOrchestrator {
     conqueredCells: GridCell[];
     capitulatedCells: GridCell[];
   } {
+    const targetCellMatch = allCells.find(
+      (c) => c.x === targetPixel.x && c.y === targetPixel.y,
+    );
+    const targetEnclaveId = targetCellMatch ? targetCellMatch.enclaveId : 0;
+
     const theaterCells = this.theaterBfs.findTheaterCells(
       targetCountryId,
       targetPixel,
       allCells,
     );
-    const globalDefenderCells = allCells.filter(
-      (c) => c.ownerId === targetCountryId,
-    );
 
     const targetPixelLimit = this.capper.calculateCappedTarget(
-      globalDefenderCells.length,
       theaterCells.length,
     );
 
     const conqueredCells = this.hopBfs.executeHopBfs(
       targetCountryId,
+      targetEnclaveId,
       targetPixel,
       allCells,
       targetPixelLimit,

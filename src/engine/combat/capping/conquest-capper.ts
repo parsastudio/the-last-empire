@@ -1,9 +1,14 @@
 export class ConquestCapper {
-  public calculateCappedTarget(
-    globalDefenderPixels: number,
-    targetTheaterPixels: number,
-  ): number {
-    const targetLimit = Math.floor(globalDefenderPixels * 0.25);
-    return Math.min(targetLimit, targetTheaterPixels);
+  private readonly sqKmPerPixel = 86.3;
+  private readonly minConquestAreaSqKm = 50000;
+
+  public calculateCappedTarget(targetTheaterPixels: number): number {
+    const quarterPixels = Math.floor(targetTheaterPixels * 0.25);
+    const minPixelsNeeded = Math.ceil(
+      this.minConquestAreaSqKm / this.sqKmPerPixel,
+    );
+
+    const calculatedTarget = Math.max(quarterPixels, minPixelsNeeded);
+    return Math.min(calculatedTarget, targetTheaterPixels);
   }
 }

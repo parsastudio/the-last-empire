@@ -13,7 +13,19 @@ export class ContiguousTheaterBfs {
     entryPoint: Coordinate,
     allCells: GridCell[],
   ): GridCell[] {
-    const countryCells = allCells.filter((c) => c.ownerId === targetCountryId);
+    const initialMatch = allCells.find(
+      (c) =>
+        c.x === entryPoint.x &&
+        c.y === entryPoint.y &&
+        c.ownerId === targetCountryId,
+    );
+
+    const targetEnclaveId = initialMatch ? initialMatch.enclaveId : 0;
+
+    const countryCells = allCells.filter(
+      (c) => c.ownerId === targetCountryId && c.enclaveId === targetEnclaveId,
+    );
+
     const cellMap = new Map<string, GridCell>();
     for (const c of countryCells) {
       cellMap.set(`${c.x},${c.y}`, c);

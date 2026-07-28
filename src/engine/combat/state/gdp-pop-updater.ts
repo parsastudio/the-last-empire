@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { findCountryProfileById } from "@/domain/map/countries";
+import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 
 export class GdpPopUpdater {
   public syncGlobalStats(
@@ -11,6 +12,7 @@ export class GdpPopUpdater {
 
     const totalPixelsMap = new Map<string, number>();
     const freePixelsMap = new Map<string, number>();
+    const regionPixelsMap = new Map<string, Map<number, number>>();
     const occupiedLootMap = new Map<string, Map<string, number>>();
 
     for (const cell of allCells) {
@@ -21,6 +23,12 @@ export class GdpPopUpdater {
 
       const pixels = cell.highResPixelCount;
       totalPixelsMap.set(owner, (totalPixelsMap.get(owner) || 0) + pixels);
+
+      if (!regionPixelsMap.has(owner)) {
+        regionPixelsMap.set(owner, new Map<number, number>());
+      }
+      const rMap = regionPixelsMap.get(owner)!;
+      rMap.set(cell.enclaveId, (rMap.get(cell.enclaveId) || 0) + pixels);
 
       if (!cell.isOccupied) {
         freePixelsMap.set(owner, (freePixelsMap.get(owner) || 0) + pixels);
@@ -67,11 +75,32 @@ export class GdpPopUpdater {
         }
       }
 
+      const regionsDemographics: RegionDemographics[] = [];
+      const rMap = regionPixelsMap.get(id);
+      if (rMap) {
+        for (const [rId, rPixels] of rMap.entries()) {
+          const rShare = rPixels / totalPixels;
+          const rPop = Math.round(basePop * rShare);
+          const rGdp = Math.round(baseGdp * rShare);
+          const name = rId === 0 ? "خاک اصلی" : `منطقه فرامرزی ${rId}`;
+
+          regionsDemographics.push({
+            regionId: rId,
+            name,
+            pixelCount: rPixels,
+            areaSqKm: Math.round(rPixels * 86.3),
+            population: rPop,
+            gdp: rGdp,
+          });
+        }
+      }
+
       updated[id] = {
         ...nation,
         gdp: Math.max(0, currentGdp),
         population: Math.max(0, currentPop),
         isAlive: currentPop > 0 || freePixels > 0,
+        regionsDemographics,
       };
     }
 
