@@ -20,6 +20,7 @@ export function OverviewTab({ nation, rank = 1 }: OverviewTabProps) {
         flagCode={nation.flagCode}
         governmentType={nation.government.type}
         population={nation.population}
+        territorySize={nation.geography.territorySize}
         rank={rank}
         regions={nation.regionsDemographics}
       />

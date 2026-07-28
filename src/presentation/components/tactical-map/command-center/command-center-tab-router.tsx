@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { SidebarTabType } from "../sidebar/sidebar-tabs";
 import { WideOverviewView } from "./views/wide-overview-view";
 import { WideMarketView } from "./views/wide-market-view";
@@ -11,6 +11,7 @@ import { WideReportsView } from "./views/wide-reports-view";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
+import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
@@ -36,9 +37,30 @@ export function CommandCenterTabRouter({
   onFocusCountry,
   onOpenTrade,
 }: CommandCenterTabRouterProps) {
+  const ranker = useMemo(() => new PowerScoreRanker(), []);
+
+  const realRank = useMemo(() => {
+    if (!gameState || !gameState.nations) return 1;
+    const nationsList = Object.values(gameState.nations)
+      .filter((n) => n.isAlive)
+      .map((n) => ({
+        id: n.id,
+        gdp: n.gdp,
+        treasury: n.treasury,
+        infantry: n.military.infantry,
+        airForce: n.military.airForce,
+        drone: n.military.droneMissile,
+        techLevel: n.military.techLevel,
+      }));
+
+    const ranked = ranker.rankNations(nationsList);
+    const found = ranked.find((r) => r.id === nation.id);
+    return found ? found.rank : 1;
+  }, [gameState, nation.id, ranker]);
+
   switch (activeTab) {
     case "overview":
-      return <WideOverviewView nation={nation} />;
+      return <WideOverviewView nation={nation} rank={realRank} />;
     case "market":
       return (
         <WideMarketView
@@ -53,6 +75,8 @@ export function CommandCenterTabRouter({
     case "politics":
       return (
         <WidePoliticsView
+          nationId={nation.id}
+          gdp={nation.gdp}
           taxRate={nation.taxRate}
           governmentType={nation.government.type}
           tariffRate={nation.tariffRate}
@@ -72,12 +96,18 @@ export function CommandCenterTabRouter({
     case "research":
       return (
         <WideResearchView
+          nationId={nation.id}
           unlockedDoctrines={nation.doctrines.unlockedDoctrines}
           doctrinePoints={nation.doctrines.doctrinePoints}
         />
       );
     case "abilities":
-      return <WideAbilitiesView currentGovernment={nation.government.type} />;
+      return (
+        <WideAbilitiesView
+          currentGovernment={nation.government.type}
+          nationId={nation.id}
+        />
+      );
     case "reports":
       return <WideReportsView reports={reports} />;
     default:

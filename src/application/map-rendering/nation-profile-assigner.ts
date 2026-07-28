@@ -54,6 +54,8 @@ export class NationProfileAssigner {
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
     const techLevel = profile?.startingTechLevel ?? 1;
 
+    const territorySize = profile ? Math.round(profile.gdp / 1000000) : 377975;
+
     return {
       id,
       name,
@@ -100,9 +102,9 @@ export class NationProfileAssigner {
         landNeighbors: [],
         seaNeighbors: [],
         hasSeaAccess: true,
-        territorySize: 1000,
+        territorySize,
         infrastructureLevel: 1,
-        contiguousMainlandSize: 1000,
+        contiguousMainlandSize: territorySize,
         isolatedPockets: [],
         coordinates: [],
       },
