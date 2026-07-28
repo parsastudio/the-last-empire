@@ -1,0 +1,94 @@
+import React from "react";
+import {
+  LayoutDashboard,
+  Swords,
+  Landmark,
+  ShoppingBag,
+  Zap,
+  FileText,
+  Users,
+  Cpu,
+} from "lucide-react";
+import { SidebarTabType } from "../sidebar/sidebar-tabs";
+import { RailTabButton } from "./rail-tab-button";
+import { RailToggleButton } from "./rail-toggle-button";
+import { NextTurnButton } from "../sidebar/next-turn-button";
+
+interface CommandRailProps {
+  activeTab: SidebarTabType | null;
+  isCollapsed: boolean;
+  currentTurn: number;
+  onSelectTab: (tab: SidebarTabType) => void;
+  onToggleCollapse: () => void;
+  onNextTurn: () => void;
+}
+
+export function CommandRail({
+  activeTab,
+  isCollapsed,
+  currentTurn,
+  onSelectTab,
+  onToggleCollapse,
+  onNextTurn,
+}: CommandRailProps) {
+  const tabs = [
+    { id: "overview" as const, label: "نما", icon: LayoutDashboard },
+    { id: "military" as const, label: "ارتش", icon: Swords },
+    { id: "politics" as const, label: "سیاست", icon: Landmark },
+    { id: "market" as const, label: "بازار", icon: ShoppingBag },
+    { id: "abilities" as const, label: "توانمندی", icon: Zap },
+    { id: "reports" as const, label: "گزارش‌ها", icon: FileText },
+    { id: "diplomacy" as const, label: "دیپلماسی", icon: Users },
+    { id: "research" as const, label: "پژوهش", icon: Cpu },
+  ];
+
+  return (
+    <aside
+      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl ${
+        isCollapsed ? "w-16" : "w-48"
+      }`}
+    >
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <RailToggleButton
+            isCollapsed={isCollapsed}
+            onToggle={onToggleCollapse}
+          />
+          {!isCollapsed && (
+            <span className="text-[10px] font-mono font-bold text-gdp">
+              اتاق فرماندهی
+            </span>
+          )}
+        </div>
+
+        <nav className="space-y-1">
+          {tabs.map((tab) => (
+            <RailTabButton
+              key={tab.id}
+              id={tab.id}
+              label={tab.label}
+              icon={tab.icon}
+              isActive={activeTab === tab.id}
+              isCollapsed={isCollapsed}
+              onClick={onSelectTab}
+            />
+          ))}
+        </nav>
+      </div>
+
+      <div className="pt-2 border-t border-border">
+        {isCollapsed ? (
+          <button
+            onClick={onNextTurn}
+            className="w-full py-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center cursor-pointer"
+            title={`پایان نوبت ${currentTurn}`}
+          >
+            {currentTurn}
+          </button>
+        ) : (
+          <NextTurnButton currentTurn={currentTurn} onNextTurn={onNextTurn} />
+        )}
+      </div>
+    </aside>
+  );
+}

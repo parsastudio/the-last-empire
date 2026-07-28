@@ -1,18 +1,11 @@
 import React, { useState } from "react";
-import { SidebarTabs, SidebarTabType } from "./sidebar-tabs";
-import { NextTurnButton } from "./next-turn-button";
-import { OverviewTab } from "./tabs/overview-tab";
-import { MilitaryTab } from "./tabs/military/military-tab";
-import { PoliticsTab } from "./tabs/politics/politics-tab";
-import { DiplomacyTab } from "./tabs/diplomacy-tab";
-import { ResearchTab } from "./tabs/research/research-tab";
-import { AbilitiesTab } from "./tabs/abilities/abilities-tab";
-import { MarketTab } from "./tabs/market/market-tab";
-import { ReportsSidebarTab } from "../reports/reports-sidebar-tab";
+import { SidebarTabType } from "./sidebar-tabs";
+import { CommandRail } from "../command-rail/command-rail";
+import { CommandCenterModal } from "../command-center/command-center-modal";
 import { TurnSummaryModal } from "../reports/turn-summary-modal";
 import { EventDecisionModal } from "../modals/event-decision-modal";
+import { TradeActionDialog } from "./tabs/market/trade-action-dialog";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { MOCK_SCHEMA_NATION } from "./config/mock-nation.config";
 import { useSidebarReports } from "./hooks/use-sidebar-reports";
 
 interface SidebarContainerProps {
@@ -28,19 +21,28 @@ export function SidebarContainer({
   selectedTargetCode,
   onFocusCountry,
 }: SidebarContainerProps) {
-  const [activeTab, setActiveTab] = useState<SidebarTabType>("overview");
-  const [prevExternalTab, setPrevExternalTab] = useState<SidebarTabType | null>(
-    null,
-  );
+  const [activeTab, setActiveTab] = useState<SidebarTabType | null>(null);
+  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [currentTurn, setCurrentTurn] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
 
-  if (externalActiveTab && externalActiveTab !== prevExternalTab) {
-    setPrevExternalTab(externalActiveTab);
-    setActiveTab(externalActiveTab);
-  }
+  const [tradeDialog, setTradeDialog] = useState<{
+    isOpen: boolean;
+    resourceName: string;
+    unit: string;
+    mode: "buy" | "sell";
+    unitPrice: number;
+    maxAmount: number;
+  }>({
+    isOpen: false,
+    resourceName: "",
+    unit: "",
+    mode: "buy",
+    unitPrice: 100,
+    maxAmount: 100,
+  });
 
   const mockAllReports = useSidebarReports(currentTurn);
 
@@ -58,9 +60,20 @@ export function SidebarContainer({
     }
   };
 
-  const handleSelectReportInSidebar = (report: CombatReport) => {
-    setModalReports([report]);
-    setIsModalOpen(true);
+  const handleOpenTrade = (
+    name: string,
+    unit: string,
+    mode: "buy" | "sell",
+    price: number,
+  ) => {
+    setTradeDialog({
+      isOpen: true,
+      resourceName: name,
+      unit,
+      mode,
+      unitPrice: price,
+      maxAmount: mode === "buy" ? 200 : 50,
+    });
   };
 
   const sampleEvent = {
@@ -89,52 +102,27 @@ export function SidebarContainer({
 
   return (
     <>
-      <aside
-        className="absolute top-0 right-0 h-screen w-[22vw] min-w-[320px] max-w-[420px] bg-card/90 backdrop-blur-xl border-l border-border z-40 flex flex-col shadow-2xl select-none"
-        dir="rtl"
-      >
-        <div className="p-4 border-b border-border shrink-0 space-y-3">
-          <NextTurnButton
-            currentTurn={currentTurn}
-            onNextTurn={handleNextTurn}
-          />
-          <SidebarTabs activeTab={activeTab} onChangeTab={setActiveTab} />
-        </div>
+      <CommandRail
+        activeTab={activeTab}
+        isCollapsed={isRailCollapsed}
+        currentTurn={currentTurn}
+        onSelectTab={setActiveTab}
+        onToggleCollapse={() => setIsRailCollapsed((prev) => !prev)}
+        onNextTurn={handleNextTurn}
+      />
 
-        <div className="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {activeTab === "overview" && (
-            <OverviewTab nation={MOCK_SCHEMA_NATION} />
-          )}
-          {activeTab === "military" && (
-            <MilitaryTab military={MOCK_SCHEMA_NATION.military} />
-          )}
-          {activeTab === "politics" && (
-            <PoliticsTab
-              taxRate={MOCK_SCHEMA_NATION.taxRate}
-              governmentType={MOCK_SCHEMA_NATION.government.type}
-            />
-          )}
-          {activeTab === "market" && <MarketTab />}
-          {activeTab === "abilities" && (
-            <AbilitiesTab
-              currentGovernment={MOCK_SCHEMA_NATION.government.type}
-            />
-          )}
-          {activeTab === "reports" && (
-            <ReportsSidebarTab
-              reports={mockAllReports}
-              onSelectReport={handleSelectReportInSidebar}
-            />
-          )}
-          {activeTab === "diplomacy" && (
-            <DiplomacyTab
-              selectedTargetCode={selectedTargetCode}
-              onFocusCountry={onFocusCountry}
-            />
-          )}
-          {activeTab === "research" && <ResearchTab />}
-        </div>
-      </aside>
+      <CommandCenterModal
+        activeTab={activeTab}
+        selectedTargetCode={selectedTargetCode}
+        mockReports={mockAllReports}
+        onClose={() => setActiveTab(null)}
+        onFocusCountry={onFocusCountry}
+        onSelectReport={(report) => {
+          setModalReports([report]);
+          setIsModalOpen(true);
+        }}
+        onOpenTrade={handleOpenTrade}
+      />
 
       <TurnSummaryModal
         isOpen={isModalOpen}
@@ -150,6 +138,22 @@ export function SidebarContainer({
         onSelectChoice={(choiceId) => {
           alert(`تصمیم انتخابی شما (${choiceId}) اعمال گردید.`);
           setIsEventModalOpen(false);
+        }}
+      />
+
+      <TradeActionDialog
+        isOpen={tradeDialog.isOpen}
+        resourceName={tradeDialog.resourceName}
+        unit={tradeDialog.unit}
+        mode={tradeDialog.mode}
+        unitPrice={tradeDialog.unitPrice}
+        maxAmount={tradeDialog.maxAmount}
+        onClose={() => setTradeDialog((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={(amount) => {
+          alert(
+            `معامله ${tradeDialog.mode === "buy" ? "خرید" : "فروش"} ${amount} ${tradeDialog.unit} ${tradeDialog.resourceName} ثبت شد.`,
+          );
+          setTradeDialog((prev) => ({ ...prev, isOpen: false }));
         }}
       />
     </>
