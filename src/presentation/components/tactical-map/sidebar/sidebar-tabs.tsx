@@ -6,6 +6,7 @@ import {
   Users,
   Cpu,
   Zap,
+  FileText,
 } from "lucide-react";
 
 export type SidebarTabType =
@@ -14,7 +15,8 @@ export type SidebarTabType =
   | "politics"
   | "diplomacy"
   | "research"
-  | "abilities";
+  | "abilities"
+  | "reports";
 
 interface SidebarTabsProps {
   activeTab: SidebarTabType;
@@ -31,12 +33,13 @@ export function SidebarTabs({ activeTab, onChangeTab }: SidebarTabsProps) {
     { id: "military", label: "ارتش", icon: Swords },
     { id: "politics", label: "سیاست", icon: Landmark },
     { id: "abilities", label: "توانمندی", icon: Zap },
+    { id: "reports", label: "گزارش‌ها", icon: FileText },
     { id: "diplomacy", label: "دیپلماسی", icon: Users },
     { id: "research", label: "پژوهش", icon: Cpu },
   ];
 
   return (
-    <div className="flex bg-secondary/80 border border-border p-1 rounded-2xl gap-1 shrink-0 overflow-x-auto scrollbar-none">
+    <div className="grid grid-cols-4 bg-secondary/80 border border-border p-1.5 rounded-2xl gap-1 shrink-0">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -44,14 +47,14 @@ export function SidebarTabs({ activeTab, onChangeTab }: SidebarTabsProps) {
           <button
             key={tab.id}
             onClick={() => onChangeTab(tab.id)}
-            className={`flex-1 min-w-[48px] flex flex-col items-center justify-center py-2 rounded-xl transition-all gap-1 cursor-pointer ${
+            className={`flex flex-col items-center justify-center py-2 rounded-xl transition-all gap-1 cursor-pointer ${
               isActive
-                ? "bg-card text-foreground shadow-sm border border-border/60"
-                : "text-muted-foreground hover:text-foreground hover:bg-card/40 border border-transparent"
+                ? "bg-card text-foreground shadow-sm border border-border/60 font-extrabold"
+                : "text-muted-foreground hover:text-foreground hover:bg-card/40 border border-transparent font-medium"
             }`}
           >
             <Icon size={14} />
-            <span className="text-[9px] font-bold font-sans whitespace-nowrap">
+            <span className="text-[9px] font-sans whitespace-nowrap">
               {tab.label}
             </span>
           </button>

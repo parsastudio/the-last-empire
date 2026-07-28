@@ -28,51 +28,59 @@ export class MapPartitionEngine {
       return resultBuffer;
     }
 
-    const visited = new Uint8Array(width * height);
+    const totalPixels = width * height;
+    const visited = new Uint8Array(totalPixels);
     const frontiers = new Map<number, number[]>();
-    const seedOwner = new Uint8Array(width * height);
+
+    const maxSearchRadius = 3;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
         const id = resultBuffer[idx]!;
+
         if (removedIds.has(id)) {
-          const neighbors = [
-            x > 0 ? idx - 1 : -1,
-            x < width - 1 ? idx + 1 : -1,
-            y > 0 ? idx - width : -1,
-            y < height - 1 ? idx + width : -1,
-          ];
-          for (const nIdx of neighbors) {
-            if (nIdx !== -1) {
+          let closestOwner = 0;
+          let minSqDist = Infinity;
+
+          for (let dy = -maxSearchRadius; dy <= maxSearchRadius; dy++) {
+            const ny = y + dy;
+            if (ny < 0 || ny >= height) continue;
+
+            for (let dx = -maxSearchRadius; dx <= maxSearchRadius; dx++) {
+              const nx = x + dx;
+              if (nx < 0 || nx >= width) continue;
+
+              const nIdx = ny * width + nx;
               const nId = resultBuffer[nIdx]!;
-              if (nId >= 11 && !removedIds.has(nId)) {
-                if (!frontiers.has(nId)) {
-                  frontiers.set(nId, []);
+
+              if (nId >= 11 && nId < 250 && !removedIds.has(nId)) {
+                const sqDist = dx * dx + dy * dy;
+                if (sqDist < minSqDist) {
+                  minSqDist = sqDist;
+                  closestOwner = nId;
                 }
-                frontiers.get(nId)!.push(idx);
-                seedOwner[idx] = nId;
-                visited[idx] = 1;
-                break;
               }
             }
+          }
+
+          if (
+            closestOwner > 0 &&
+            minSqDist <= maxSearchRadius * maxSearchRadius + 1
+          ) {
+            if (!frontiers.has(closestOwner)) {
+              frontiers.set(closestOwner, []);
+            }
+            frontiers.get(closestOwner)!.push(idx);
+            visited[idx] = 1;
           }
         }
       }
     }
 
     const activeNeighbors = Array.from(frontiers.keys());
-    if (activeNeighbors.length === 0) {
-      for (let i = 0; i < resultBuffer.length; i++) {
-        if (removedIds.has(resultBuffer[i]!)) {
-          resultBuffer[i] = 250;
-        }
-      }
-      return resultBuffer;
-    }
-
-    const growthPerTurn = 120;
-    let hasActiveFrontier = true;
+    const growthPerTurn = 150;
+    let hasActiveFrontier = activeNeighbors.length > 0;
 
     while (hasActiveFrontier) {
       hasActiveFrontier = false;
@@ -93,20 +101,22 @@ export class MapPartitionEngine {
           const x = idx % width;
           const y = Math.floor(idx / width);
 
-          const neighbors = [
-            x > 0 ? idx - 1 : -1,
-            x < width - 1 ? idx + 1 : -1,
-            y > 0 ? idx - width : -1,
-            y < height - 1 ? idx + width : -1,
-          ];
+          for (let dy = -1; dy <= 1; dy++) {
+            const ny = y + dy;
+            if (ny < 0 || ny >= height) continue;
 
-          for (const nIdx of neighbors) {
-            if (nIdx !== -1 && visited[nIdx] === 0) {
-              const nId = resultBuffer[nIdx]!;
-              if (removedIds.has(nId)) {
-                visited[nIdx] = 1;
-                seedOwner[nIdx] = neighborId;
-                queue.push(nIdx);
+            for (let dx = -1; dx <= 1; dx++) {
+              if (dx === 0 && dy === 0) continue;
+              const nx = x + dx;
+              if (nx < 0 || nx >= width) continue;
+
+              const nIdx = ny * width + nx;
+              if (visited[nIdx] === 0) {
+                const nId = resultBuffer[nIdx]!;
+                if (removedIds.has(nId)) {
+                  visited[nIdx] = 1;
+                  queue.push(nIdx);
+                }
               }
             }
           }
@@ -114,9 +124,41 @@ export class MapPartitionEngine {
       }
     }
 
-    for (let i = 0; i < resultBuffer.length; i++) {
-      if (removedIds.has(resultBuffer[i]!)) {
-        resultBuffer[i] = 250;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x;
+        if (removedIds.has(resultBuffer[idx]!)) {
+          let closestOwner = 0;
+          let minSqDist = Infinity;
+
+          const fallbackRadius = 15;
+          for (let dy = -fallbackRadius; dy <= fallbackRadius; dy++) {
+            const ny = y + dy;
+            if (ny < 0 || ny >= height) continue;
+
+            for (let dx = -fallbackRadius; dx <= fallbackRadius; dx++) {
+              const nx = x + dx;
+              if (nx < 0 || nx >= width) continue;
+
+              const nIdx = ny * width + nx;
+              const nId = resultBuffer[nIdx]!;
+
+              if (nId >= 11 && nId < 250 && !removedIds.has(nId)) {
+                const sqDist = dx * dx + dy * dy;
+                if (sqDist < minSqDist) {
+                  minSqDist = sqDist;
+                  closestOwner = nId;
+                }
+              }
+            }
+          }
+
+          if (closestOwner > 0) {
+            resultBuffer[idx] = closestOwner;
+          } else {
+            resultBuffer[idx] = 250;
+          }
+        }
       }
     }
 
