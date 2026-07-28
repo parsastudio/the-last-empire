@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Search } from "lucide-react";
 import { NationDetail, NationListItem } from "./nation-list-item";
-import { NationDatabaseProvider } from "./utils/nation-database-provider";
 
 interface NationListSidebarProps {
   nations: NationDetail[];
@@ -18,11 +17,7 @@ export function NationListSidebar({
   onSearchChange,
   onSelectNation,
 }: NationListSidebarProps) {
-  const provider = useMemo(() => new NationDatabaseProvider(), []);
-  const allNations =
-    nations.length > 0 ? nations : provider.getAllSelectableNations();
-
-  const filtered = allNations.filter(
+  const filtered = nations.filter(
     (n) =>
       n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       n.id.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -30,10 +25,15 @@ export function NationListSidebar({
 
   return (
     <div className="lg:col-span-4 flex flex-col bg-card border border-border rounded-3xl overflow-hidden shadow-sm h-full">
-      <div className="p-4 border-b border-border space-y-3 shrink-0">
-        <h2 className="text-sm font-bold text-foreground">
-          فهرست قدرت‌های جهانی
-        </h2>
+      <div className="p-4 border-b border-border space-y-3 shrink-0 dir-rtl text-right">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-foreground">
+            فهرست قدرت‌های جهانی
+          </h2>
+          <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
+            {nations.length} کشور
+          </span>
+        </div>
         <div className="relative">
           <Search
             size={14}
@@ -41,7 +41,7 @@ export function NationListSidebar({
           />
           <input
             type="text"
-            placeholder="جستجوی کشور..."
+            placeholder="جستجوی نام کشور یا نماد..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"

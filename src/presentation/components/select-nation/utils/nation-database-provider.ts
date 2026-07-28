@@ -6,8 +6,19 @@ export class NationDatabaseProvider {
     const sorted = [...ALL_COUNTRY_PROFILES].sort((a, b) => b.gdp - a.gdp);
 
     return sorted.map((profile: CountryProfile, index: number) => {
-      const gdpBillion = (profile.gdp / 1e9).toFixed(1);
-      const popMillion = (profile.population / 1e6).toFixed(1);
+      let gdpText = "";
+      if (profile.gdp >= 1e12) {
+        gdpText = `${(profile.gdp / 1e12).toFixed(1)} تریلیون دلار`;
+      } else {
+        gdpText = `${(profile.gdp / 1e9).toFixed(1)} میلیارد دلار`;
+      }
+
+      let popText = "";
+      if (profile.population >= 1e9) {
+        popText = `${(profile.population / 1e9).toFixed(2)} میلیارد نفر`;
+      } else {
+        popText = `${(profile.population / 1e6).toFixed(1)} میلیون نفر`;
+      }
 
       let power = "قدرت منطقه‌ای";
       if (profile.gdp >= 10e12) power = "ابرقدرت جهانی";
@@ -17,13 +28,13 @@ export class NationDatabaseProvider {
       return {
         id: `NATION_${profile.id}`,
         name: profile.nameFa,
-        code: profile.flagCode.toLowerCase(),
+        code: profile.flagCode.toUpperCase(),
         rank: index + 1,
         power,
-        gdp: `${gdpBillion} میلیارد دلار`,
-        population: `${popMillion} میلیون نفر`,
+        gdp: gdpText,
+        population: popText,
         treasury: `$${profile.startingTreasury.toLocaleString("fa-IR")}`,
-        desc: `شناسنامه استراتژیک ${profile.nameFa} با ساختار اقتصادی و دفاعی اختصاصی.`,
+        desc: `شناسنامه استراتژیک رسمی ${profile.nameFa} با ساختار اقتصادی به ارزش ${gdpText} و جمعیت ${popText}.`,
         defaultGovernment: profile.startingGovernment ?? "DEMOCRACY",
       };
     });

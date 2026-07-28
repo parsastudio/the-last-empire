@@ -1,64 +1,6 @@
+import { NationDatabaseProvider } from "../utils/nation-database-provider";
 import { NationDetail } from "../nation-list-item";
 
-export const NATIONS_DATABASE: NationDetail[] = [
-  {
-    id: "USA",
-    name: "ایالات متحده آمریکا",
-    code: "us",
-    rank: 1,
-    power: "ابرقدرت جهانی",
-    gdp: "۲۶.۸ تریلیون دلار",
-    population: "۳۳۵ میلیون نفر",
-    treasury: "$1,000,000",
-    desc: "بزرگترین اقتصاد دنیا، فناوری پیشرفته دفاعی و چتر امنیتی جهانی با زیرساخت‌های صنعتی پیشرفته.",
-    defaultGovernment: "DEMOCRACY",
-  },
-  {
-    id: "CHN",
-    name: "چین",
-    code: "cn",
-    rank: 2,
-    power: "پیشران صنعتی و تجاری",
-    gdp: "۱۸.۰ تریلیون دلار",
-    population: "۱.۴ میلیارد نفر",
-    treasury: "$900,000",
-    desc: "قطب عظیم تولید صنعتی جهان، نیروی انسانی عظیم و توانمندی‌های گسترده لجستیکی.",
-    defaultGovernment: "COMMUNISM",
-  },
-  {
-    id: "RUS",
-    name: "روسیه",
-    code: "ru",
-    rank: 3,
-    power: "قطب بزرگ نظامی",
-    gdp: "۱.۷ تریلیون دلار",
-    population: "۱۴۴ میلیون نفر",
-    treasury: "$500,000",
-    desc: "بزرگترین پهنه سرزمینی جهان، صنایع سنگین تسلیحاتی و منابع سرشار نفت و گاز.",
-    defaultGovernment: "DICTATORSHIP",
-  },
-  {
-    id: "IRN",
-    name: "ایران",
-    code: "ir",
-    rank: 14,
-    power: "قدرت فرامنطقه‌ای",
-    gdp: "۴۵۰ میلیارد دلار",
-    population: "۸۸ میلیون نفر",
-    treasury: "$350,000",
-    desc: "ذخایر استراتژیک هیدروکربن، موقعیت ژئوپلیتیک بی‌بدیل در خاورمیانه و توان موشکی بازدارنده.",
-    defaultGovernment: "DICTATORSHIP",
-  },
-  {
-    id: "DEU",
-    name: "آلمان",
-    code: "de",
-    rank: 4,
-    power: "اقتصاد برتر قاره‌ای",
-    gdp: "۴.۳ تریلیون دلار",
-    population: "۸۴ میلیون نفر",
-    treasury: "$750,000",
-    desc: "صنایع فوق‌پیشرفته مهندسی، ثبات عمیق مالی و نفوذ دیپلماتیک ساختاری در اتحادیه اروپا.",
-    defaultGovernment: "DEMOCRACY",
-  },
-];
+const provider = new NationDatabaseProvider();
+export const NATIONS_DATABASE: NationDetail[] =
+  provider.getAllSelectableNations();

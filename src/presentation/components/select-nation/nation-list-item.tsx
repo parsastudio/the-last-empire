@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeft } from "lucide-react";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 export interface NationDetail {
   id: string;
@@ -25,6 +26,8 @@ export function NationListItem({
   isSelected,
   onSelect,
 }: NationListItemProps) {
+  const flagEmoji = getFlagEmoji(nation.code);
+
   return (
     <button
       onClick={() => onSelect(nation)}
@@ -35,21 +38,19 @@ export function NationListItem({
       }`}
     >
       <div className="flex items-center gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/flags/${nation.code.toLowerCase()}.png`}
-          alt={nation.name}
-          className="w-7 h-5 object-cover rounded shadow-sm border border-border shrink-0"
-          onError={(e) => {
-            (e.target as HTMLElement).style.display = "none";
-          }}
-        />
+        <span
+          className="text-2xl select-none shrink-0"
+          role="img"
+          aria-label={nation.name}
+        >
+          {flagEmoji}
+        </span>
         <div>
           <span className="text-xs font-bold text-foreground block">
             {nation.name}
           </span>
           <span className="text-[10px] text-muted-foreground font-mono">
-            رتبه جهانی: {nation.rank}
+            رتبه جهانی: #{nation.rank}
           </span>
         </div>
       </div>
