@@ -155,7 +155,7 @@ export function useMapData({
     return () => {
       active = false;
     };
-  }, [mapWidth, mapHeight, mapMode]);
+  }, [mapWidth, mapHeight, mapMode, activeLayer]);
 
   return {
     countries,
