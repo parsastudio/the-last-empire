@@ -1,31 +1,22 @@
-import React from "react";
+import React, { useState } from "react";
 import { Zap } from "lucide-react";
 import { REGIME_ABILITIES, AbilityItem } from "./abilities.config";
 import { AbilityCard } from "./ability-card";
-import { useToast } from "@/presentation/context/toast-context";
+import { AbilityTargetModal } from "../../modals/ability-target-modal";
 
 interface AbilitiesTabProps {
   currentGovernment: string;
+  nationId?: string;
 }
 
-export function AbilitiesTab({ currentGovernment }: AbilitiesTabProps) {
-  const { showToast } = useToast();
+export function AbilitiesTab({
+  currentGovernment,
+  nationId = "NATION_118",
+}: AbilitiesTabProps) {
+  const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
 
-  const handleActivate = (ability: AbilityItem) => {
-    if (ability.requiredGov !== currentGovernment) {
-      showToast(
-        "عدم تطابق نظام سیاسی",
-        `این قابلیت اختصاصی رژیم '${ability.govLabel}' است.`,
-        "error",
-      );
-      return;
-    }
-
-    showToast(
-      "فعال‌سازی توانمندی راهبردی",
-      `قابلیت «${ability.name}» با موفقیت فعال گردید.`,
-      "success",
-    );
+  const handleOpenTargetModal = (ability: AbilityItem) => {
+    setSelectedAbility(ability.name);
   };
 
   return (
@@ -43,10 +34,21 @@ export function AbilitiesTab({ currentGovernment }: AbilitiesTabProps) {
             key={ab.id}
             ability={ab}
             currentGovernment={currentGovernment}
-            onActivate={handleActivate}
+            nationId={nationId}
+            onActivate={handleOpenTargetModal}
           />
         ))}
       </div>
+
+      <AbilityTargetModal
+        isOpen={selectedAbility !== null}
+        abilityName={selectedAbility || ""}
+        nationId={nationId}
+        onClose={() => setSelectedAbility(null)}
+        onConfirmTarget={() => {
+          setSelectedAbility(null);
+        }}
+      />
     </div>
   );
 }

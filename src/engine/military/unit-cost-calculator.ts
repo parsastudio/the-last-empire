@@ -28,7 +28,7 @@ export class UnitCostCalculator {
         };
       case "DRONE_MISSILE":
         return {
-          moneyCost: 120,
+          moneyCost: 1200,
           manpowerCost: 1,
           buildTurns: 1,
         };
