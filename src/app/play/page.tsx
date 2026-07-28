@@ -55,7 +55,12 @@ function MapTest6Content() {
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
-  } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
+  } = useMapData({
+    mapWidth,
+    mapHeight,
+    mapMode: activeMapMode,
+    activeLayer,
+  });
 
   const { focusOnCountry } = useMapCameraFocus({
     mapWidth,
@@ -89,6 +94,7 @@ function MapTest6Content() {
     scale,
     mapWidth,
     mapHeight,
+    activeLayer,
   });
 
   return (

@@ -9,6 +9,7 @@ interface UseCanvasRendererProps {
   scale: number;
   mapWidth: number;
   mapHeight: number;
+  activeLayer?: "political" | "gdp" | "military";
 }
 
 export function useCanvasRenderer({
@@ -20,6 +21,7 @@ export function useCanvasRenderer({
   scale,
   mapWidth,
   mapHeight,
+  activeLayer = "political",
 }: UseCanvasRendererProps) {
   useEffect(() => {
     const canvasDest = canvasDestRef.current;
@@ -67,5 +69,6 @@ export function useCanvasRenderer({
     canvasDestRef,
     mapWidth,
     mapHeight,
+    activeLayer,
   ]);
 }

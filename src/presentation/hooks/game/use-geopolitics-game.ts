@@ -8,9 +8,17 @@ export function useGeopoliticsGame() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const getStoredNationId = (): string => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("test6_human_nation_id") || "IRN";
+    }
+    return "IRN";
+  };
+
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch("/api/game/status");
+      const nationId = getStoredNationId();
+      const res = await fetch(`/api/game/status?nationId=${nationId}`);
       const json = await res.json();
       if (json.success && json.data) {
         setGameState(json.data);
@@ -43,7 +51,8 @@ export function useGeopoliticsGame() {
 
     async function loadInitialStatus() {
       try {
-        const res = await fetch("/api/game/status");
+        const nationId = getStoredNationId();
+        const res = await fetch(`/api/game/status?nationId=${nationId}`);
         const json = await res.json();
         if (active) {
           if (json.success && json.data) {
