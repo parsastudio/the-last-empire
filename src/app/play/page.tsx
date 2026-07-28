@@ -44,6 +44,7 @@ export default function MapTest6Page() {
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
+    packed1024Ref,
   } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
 
   const { focusOnCountry } = useMapCameraFocus({
@@ -99,6 +100,7 @@ export default function MapTest6Page() {
         <CountryHoverContainer
           countries={countries}
           maskDataRef={maskDataRef}
+          packed1024Ref={packed1024Ref}
           mapWidth={mapWidth}
           mapHeight={mapHeight}
           containerRef={containerRef}

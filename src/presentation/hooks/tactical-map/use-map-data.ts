@@ -28,6 +28,7 @@ export function useMapData({
   const canvasSrcRef = useRef<HTMLCanvasElement | null>(null);
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
   const maskDataRef = useRef<Uint8Array | null>(null);
+  const packed1024Ref = useRef<Uint8Array | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -56,6 +57,21 @@ export function useMapData({
 
         setCountries(countriesData);
         setIsCached(cachedStatus);
+
+        const binPath =
+          mapMode === "partition"
+            ? "/partition-mask/world-mask-1024.bin"
+            : mapMode === "edited"
+              ? "/edited-mask/world-mask-1024.bin"
+              : "/test6/world-mask-1024.bin";
+
+        try {
+          const binRes = await fetch(binPath);
+          if (binRes.ok) {
+            const arrayBuf = await binRes.arrayBuffer();
+            packed1024Ref.current = new Uint8Array(arrayBuf);
+          }
+        } catch {}
 
         const img = new Image();
         img.src = apiHelper.getImageSource(mapMode);
@@ -119,5 +135,6 @@ export function useMapData({
     canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
+    packed1024Ref,
   };
 }

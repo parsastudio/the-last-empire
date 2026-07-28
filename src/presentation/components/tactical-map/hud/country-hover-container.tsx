@@ -18,6 +18,7 @@ export interface HoverCountryInfo {
 interface CountryHoverContainerProps {
   countries: CountryMapping[];
   maskDataRef: React.RefObject<Uint8Array | null>;
+  packed1024Ref?: React.RefObject<Uint8Array | null>;
   mapWidth: number;
   mapHeight: number;
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -28,6 +29,7 @@ interface CountryHoverContainerProps {
 export function CountryHoverContainer({
   countries,
   maskDataRef,
+  packed1024Ref,
   mapWidth,
   mapHeight,
   containerRef,
@@ -38,6 +40,7 @@ export function CountryHoverContainer({
   const { hoverData, handleMouseMove, handleMouseLeave } = useCountryHoverMath({
     countries,
     maskDataRef,
+    packed1024Ref,
     mapWidth,
     mapHeight,
     containerRef,

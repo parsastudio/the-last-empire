@@ -23,13 +23,12 @@ export class MaskRenderingHelper {
     tempCanvas.height = mapHeight;
 
     const tempCtx = tempCanvas.getContext("2d");
-    const raw = new Uint8Array(mapWidth * mapHeight * 2);
+    const raw = new Uint8Array(mapWidth * mapHeight);
     if (tempCtx) {
       tempCtx.drawImage(img, 0, 0);
       const imgData = tempCtx.getImageData(0, 0, mapWidth, mapHeight);
       for (let i = 0; i < mapWidth * mapHeight; i++) {
-        raw[i * 2] = imgData.data[i * 4 + 1] || 0;
-        raw[i * 2 + 1] = imgData.data[i * 4 + 2] || 0;
+        raw[i] = imgData.data[i * 4 + 2] || 0;
       }
       maskDataRef.current = raw;
     }
@@ -50,17 +49,12 @@ export class MaskRenderingHelper {
       const srcData = ctxSrc.getImageData(0, 0, mapWidth, mapHeight).data;
       const destImage = ctxShaded.createImageData(mapWidth, mapHeight);
 
-      const nationMaskOnly = new Uint8Array(mapWidth * mapHeight);
-      for (let i = 0; i < mapWidth * mapHeight; i++) {
-        nationMaskOnly[i] = maskDataRef.current[i * 2 + 1] || 0;
-      }
-
       MapShader.applyShading(
         srcData,
         destImage.data,
         mapWidth,
         mapHeight,
-        nationMaskOnly,
+        maskDataRef.current,
         countriesData,
       );
 

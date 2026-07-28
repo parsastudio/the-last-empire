@@ -7,7 +7,6 @@ import { GdpPopUpdater } from "@/engine/combat/state/gdp-pop-updater";
 import { ConquestLogWriter } from "@/engine/combat/orchestrator/conquest-log-writer";
 import { ClosestBaseFinder } from "@/engine/combat/routing/closest-base-finder";
 import { NavalPathResolver } from "@/engine/combat/routing/naval-path-resolver";
-import { GameError } from "@/domain/shared/game-error";
 import { CoastalPixelLocator } from "./coastal-pixel-locator";
 import { CampaignLogisticsEvaluator } from "./campaign-logistics-evaluator";
 
@@ -55,10 +54,7 @@ export class AttackConquestHandler implements ActionHandler {
     );
 
     if (!closestBase) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Operational military command base not found to initiate theater deployment.",
-      );
+      return state;
     }
 
     const isLandNeighbor = attacker.geography.landNeighbors.includes(
@@ -71,40 +67,43 @@ export class AttackConquestHandler implements ActionHandler {
       allCells,
     );
 
-    const totalCampaignCost =
-      this.logisticsEvaluator.calculateTotalCampaignCost(
-        attacker,
-        isLandNeighbor,
-        pixelPathLength,
-      );
+    const evalResult = this.logisticsEvaluator.evaluateCampaignLogistics(
+      attacker,
+      isLandNeighbor,
+      pixelPathLength,
+    );
 
-    if (totalCampaignCost === -1) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Target is geographically unreachable. No valid land or naval transit routes detected.",
-      );
-    }
+    const baseAttackerPower =
+      attackAction.infantry * 1.0 +
+      attackAction.airForce * 3.0 +
+      attackAction.droneMissile * 2.5;
 
-    if (attacker.treasury < totalCampaignCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        `Insufficient sovereign treasury to finance this campaign. Required: $${totalCampaignCost.toLocaleString()}`,
-      );
-    }
+    const finalAttackerPower = Math.floor(
+      baseAttackerPower * evalResult.supplyDeficitPenaltyMultiplier,
+    );
 
-    const result = this.orchestrator.executeAttack(
-      attacker.id,
-      defender.id,
+    const defenderPower =
+      defender.military.infantry * 1.0 +
+      defender.military.airForce * 3.0 +
+      defender.military.droneMissile * 2.5;
+
+    const outcome = this.orchestrator.executeAttack({
+      attackerId: attacker.id,
+      targetCountryId: defender.id,
       targetPixel,
       allCells,
-    );
+      attackerForcePower: finalAttackerPower,
+      defenderForcePower: defenderPower,
+      defenderPopulation: defender.population,
+      defenderStability: defender.government.stability,
+    });
 
     const loggedState = this.logWriter.appendConquestLogs(
       state,
       attacker.id,
       defender.id,
-      result.conqueredCells,
-      result.capitulatedCells,
+      outcome.conqueredCells,
+      outcome.capitulatedCells,
     );
 
     const updatedNations = this.gdpPopUpdater.syncGlobalStats(
@@ -114,9 +113,33 @@ export class AttackConquestHandler implements ActionHandler {
 
     const finalAttacker = updatedNations[attacker.id];
     if (finalAttacker) {
+      const remainingTreasury = finalAttacker.treasury - evalResult.totalCost;
       updatedNations[attacker.id] = {
         ...finalAttacker,
-        treasury: finalAttacker.treasury - totalCampaignCost,
+        treasury: Math.max(0, remainingTreasury),
+        nationalDebt:
+          finalAttacker.nationalDebt + evalResult.emergencyDebtRequired,
+        military: {
+          ...finalAttacker.military,
+          infantry: Math.max(
+            0,
+            finalAttacker.military.infantry - outcome.attackerLost,
+          ),
+        },
+      };
+    }
+
+    const finalDefender = updatedNations[defender.id];
+    if (finalDefender) {
+      updatedNations[defender.id] = {
+        ...finalDefender,
+        military: {
+          ...finalDefender.military,
+          infantry: Math.max(
+            0,
+            finalDefender.military.infantry - outcome.defenderLost,
+          ),
+        },
       };
     }
 

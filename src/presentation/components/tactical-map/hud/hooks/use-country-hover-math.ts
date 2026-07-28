@@ -6,6 +6,7 @@ import { HoverCountryInfo } from "../country-hover-container";
 interface UseCountryHoverMathProps {
   countries: CountryMapping[];
   maskDataRef: React.RefObject<Uint8Array | null>;
+  packed1024Ref?: React.RefObject<Uint8Array | null>;
   mapWidth: number;
   mapHeight: number;
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -17,6 +18,7 @@ interface UseCountryHoverMathProps {
 export function useCountryHoverMath({
   countries,
   maskDataRef,
+  packed1024Ref,
   mapWidth,
   mapHeight,
   containerRef,
@@ -55,17 +57,7 @@ export function useCountryHoverMath({
     }
 
     const pixelIndex = mapY * mapWidth + mapX;
-    const maskBuffer = maskDataRef.current;
-
-    let greenChannelVal = 0;
-    let nationIdNumber = 0;
-
-    if (maskBuffer.length === mapWidth * mapHeight * 2) {
-      greenChannelVal = maskBuffer[pixelIndex * 2] || 0;
-      nationIdNumber = maskBuffer[pixelIndex * 2 + 1] || 0;
-    } else {
-      nationIdNumber = maskBuffer[pixelIndex] || 0;
-    }
+    const nationIdNumber = maskDataRef.current[pixelIndex] || 0;
 
     if (!nationIdNumber || nationIdNumber < 11 || nationIdNumber >= 250) {
       setHoverData(null);
@@ -76,6 +68,18 @@ export function useCountryHoverMath({
     if (!matchedCountry) {
       setHoverData(null);
       return;
+    }
+
+    let greenChannelVal = 0;
+    if (
+      packed1024Ref?.current &&
+      packed1024Ref.current.length === 1024 * 512 * 2
+    ) {
+      const gx = Math.floor((mapX / mapWidth) * 1024);
+      const gy = Math.floor((mapY / mapHeight) * 512);
+      const pIdx = (gy * 1024 + gx) * 2;
+      const geoByte = packed1024Ref.current[pIdx] || 0;
+      greenChannelVal = geoByte >> 2;
     }
 
     const profile = findCountryProfileById(matchedCountry.id);
@@ -123,6 +127,7 @@ export function useCountryHoverMath({
   }, [
     countries,
     maskDataRef,
+    packed1024Ref,
     mapWidth,
     mapHeight,
     containerRef,

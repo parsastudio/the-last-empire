@@ -1,12 +1,17 @@
 import { useState, useRef } from "react";
 
+export interface MapDragPosition {
+  x: number;
+  y: number;
+}
+
 export function useMapDrag(
-  position: { x: number; y: number },
-  setPosition: (pos: { x: number; y: number }) => void,
+  position: MapDragPosition,
+  setPosition: (pos: MapDragPosition) => void,
 ) {
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const mouseDownPos = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragStart = useRef<MapDragPosition>({ x: 0, y: 0 });
+  const mouseDownPos = useRef<MapDragPosition>({ x: 0, y: 0 });
   const hasDraggedRef = useRef<boolean>(false);
 
   const handleMouseDown = (clientX: number, clientY: number) => {
