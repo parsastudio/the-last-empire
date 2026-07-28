@@ -4,7 +4,7 @@ import { DoctrineTreeView } from "./doctrine-tree-view";
 
 export function ResearchTab() {
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-2.5">
         <div className="flex items-center gap-2 px-1">
           <Cpu size={13} className="text-primary" />

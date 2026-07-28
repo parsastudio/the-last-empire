@@ -11,11 +11,13 @@ import { WideAbilitiesView } from "./views/wide-abilities-view";
 import { WideReportsView } from "./views/wide-reports-view";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
+import { GameState } from "@/domain/game/game-state.schema";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
   selectedTargetCode?: string | null;
   nation: Nation | null;
+  gameState?: GameState | null;
   mockReports: CombatReport[];
   onClose: () => void;
   onFocusCountry?: (code: string) => void;
@@ -32,6 +34,7 @@ export function CommandCenterModal({
   activeTab,
   selectedTargetCode,
   nation,
+  gameState,
   mockReports,
   onClose,
   onFocusCountry,
@@ -169,7 +172,12 @@ export function CommandCenterModal({
           )}
 
           {activeTab === "market" && (
-            <WideMarketView onOpenTrade={onOpenTrade} />
+            <WideMarketView
+              marketPrices={gameState?.marketPrices}
+              oilStock={currentNation.resources.oil}
+              steelStock={currentNation.resources.steel}
+              onOpenTrade={onOpenTrade}
+            />
           )}
 
           {activeTab === "military" && (
@@ -180,17 +188,27 @@ export function CommandCenterModal({
             <WidePoliticsView
               taxRate={currentNation.taxRate}
               governmentType={currentNation.government.type}
+              tariffRate={currentNation.tariffRate}
+              industrialLevel={currentNation.industrialLevel}
+              infrastructureLevel={currentNation.geography.infrastructureLevel}
+              activeModifiers={currentNation.activeModifiers}
             />
           )}
 
           {activeTab === "diplomacy" && (
             <WideDiplomacyView
               selectedTargetCode={selectedTargetCode}
+              nationsMap={gameState?.nations}
               onFocusCountry={onFocusCountry}
             />
           )}
 
-          {activeTab === "research" && <WideResearchView />}
+          {activeTab === "research" && (
+            <WideResearchView
+              unlockedDoctrines={currentNation.doctrines.unlockedDoctrines}
+              doctrinePoints={currentNation.doctrines.doctrinePoints}
+            />
+          )}
 
           {activeTab === "abilities" && (
             <WideAbilitiesView

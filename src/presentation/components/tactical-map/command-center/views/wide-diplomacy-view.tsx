@@ -6,28 +6,35 @@ import { CountryProfileStats } from "../../sidebar/tabs/diplomacy/country-profil
 import { AdvancedDiplomacyActions } from "../../sidebar/tabs/diplomacy/advanced-diplomacy-actions";
 import { DiplomacyTargetCard } from "./components/diplomacy-target-card";
 import { Search } from "lucide-react";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
+  nationsMap?: Record<string, Nation>;
   onFocusCountry?: (code: string) => void;
 }
 
 export function WideDiplomacyView({
   selectedTargetCode,
+  nationsMap,
 }: WideDiplomacyViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCode, setActiveCode] = useState<string>(
     selectedTargetCode || "USA",
   );
 
-  const relationsList = ALL_COUNTRY_PROFILES.slice(0, 15).map((p) =>
-    resolveProfileRelation(p.code),
-  );
+  const relationsList = nationsMap
+    ? Object.values(nationsMap).map((n) =>
+        resolveProfileRelation(n.flagCode || n.id),
+      )
+    : ALL_COUNTRY_PROFILES.slice(0, 15).map((p) =>
+        resolveProfileRelation(p.code),
+      );
 
   const selectedRelation = resolveProfileRelation(activeCode);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
         <div className="relative">
           <Search
