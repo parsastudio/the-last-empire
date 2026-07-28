@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
 import { normalizeNationId } from "@/application/map-rendering/game-state-initializer";
+import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -21,9 +22,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     const facade = new SimulationFacade();
     const state = facade.selectPlayerNation(normalized);
 
-    if (gameId && state) {
-      state.gameId = gameId;
+    const activeGameId = gameId || `game_${normalized}_${Date.now()}`;
+    if (state) {
+      state.gameId = activeGameId;
     }
+
+    serverGameSessionStore.initSession(activeGameId, state);
 
     return NextResponse.json({ success: true, data: state });
   } catch (err) {

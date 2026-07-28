@@ -4,13 +4,14 @@ import { useCallback } from "react";
 import { GameAction } from "@/domain/game/action.schema";
 import { useToast } from "@/presentation/context/toast-context";
 
-export function useGameActions() {
+export function useGameActions(customGameId?: string) {
   const { showToast } = useToast();
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
       try {
-        const res = await fetch("/api/game/action", {
+        const gameIdQuery = customGameId ? `?gameId=${customGameId}` : "";
+        const res = await fetch(`/api/game/action${gameIdQuery}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(action),
@@ -35,7 +36,7 @@ export function useGameActions() {
         return false;
       }
     },
-    [showToast],
+    [customGameId, showToast],
   );
 
   return { dispatchAction };

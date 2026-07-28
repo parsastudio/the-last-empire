@@ -1,21 +1,24 @@
 import { NextResponse } from "next/server";
 import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
 import { normalizeNationId } from "@/application/map-rendering/game-state-initializer";
+import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const nationIdParam = searchParams.get("nationId") || "IRN";
-    const gameIdParam = searchParams.get("gameId");
+    const gameIdParam = searchParams.get("gameId") || "default_game";
     const normalizedHumanId = normalizeNationId(nationIdParam);
 
-    const facade = new SimulationFacade();
-    const state = facade.selectPlayerNation(normalizedHumanId);
-
-    if (gameIdParam && state) {
-      state.gameId = gameIdParam;
+    let engine = serverGameSessionStore.getEngine(gameIdParam);
+    if (!engine) {
+      const facade = new SimulationFacade();
+      const initialState = facade.selectPlayerNation(normalizedHumanId);
+      initialState.gameId = gameIdParam;
+      engine = serverGameSessionStore.initSession(gameIdParam, initialState);
     }
 
+    const state = engine.getState();
     return NextResponse.json({ success: true, data: state });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal error";

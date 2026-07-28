@@ -1,0 +1,111 @@
+import { useState } from "react";
+import { SidebarTabType } from "../sidebar-tabs";
+import { CombatReport } from "@/domain/reports/combat-report.schema";
+import { useToast } from "@/presentation/context/toast-context";
+import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
+import { useRealCombatReports } from "./use-real-combat-reports";
+
+export interface StagedActionItem {
+  id: string;
+  typeLabel: string;
+  cost: number;
+}
+
+export interface TradeDialogState {
+  isOpen: boolean;
+  resourceName: string;
+  unit: string;
+  mode: "buy" | "sell";
+  unitPrice: number;
+  maxAmount: number;
+}
+
+export function useSidebarTurnActions(
+  externalActiveTab?: SidebarTabType | null,
+) {
+  const [internalActiveTab, setInternalActiveTab] =
+    useState<SidebarTabType | null>(null);
+  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
+  const [modalReports, setModalReports] = useState<CombatReport[]>([]);
+  const [stagedActions, setStagedActions] = useState<StagedActionItem[]>([]);
+
+  const [tradeDialog, setTradeDialog] = useState<TradeDialogState>({
+    isOpen: false,
+    resourceName: "",
+    unit: "",
+    mode: "buy",
+    unitPrice: 100,
+    maxAmount: 100,
+  });
+
+  const { showToast } = useToast();
+  const { gameState, advanceNextTurn } = useGeopoliticsGame();
+
+  const activeTab = externalActiveTab || internalActiveTab;
+  const realReports = useRealCombatReports(gameState);
+  const humanNation =
+    gameState && gameState.humanNationId
+      ? gameState.nations[gameState.humanNationId] || null
+      : null;
+
+  const currentTurn = gameState ? gameState.currentTurn : 1;
+
+  const handleNextTurn = async () => {
+    const nextState = await advanceNextTurn();
+    setModalReports(realReports);
+    setIsModalOpen(true);
+    setStagedActions([]);
+
+    showToast(
+      "نوبت جدید آغاز شد",
+      `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} با موفقیت انجام شد.`,
+      "info",
+    );
+
+    if (currentTurn % 3 === 0) {
+      setTimeout(() => {
+        setIsEventModalOpen(true);
+      }, 500);
+    }
+  };
+
+  const handleOpenTrade = (
+    name: string,
+    unit: string,
+    mode: "buy" | "sell",
+    price: number,
+  ) => {
+    setTradeDialog({
+      isOpen: true,
+      resourceName: name,
+      unit,
+      mode,
+      unitPrice: price,
+      maxAmount: mode === "buy" ? 200 : 50,
+    });
+  };
+
+  return {
+    activeTab,
+    isRailCollapsed,
+    isModalOpen,
+    isEventModalOpen,
+    modalReports,
+    stagedActions,
+    tradeDialog,
+    humanNation,
+    currentTurn,
+    realReports,
+    setIsRailCollapsed,
+    setInternalActiveTab,
+    setIsModalOpen,
+    setIsEventModalOpen,
+    setModalReports,
+    setStagedActions,
+    setTradeDialog,
+    handleNextTurn,
+    handleOpenTrade,
+  };
+}
