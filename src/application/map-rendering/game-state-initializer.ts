@@ -43,7 +43,6 @@ export class GameStateInitializer {
       globalThreatLevel: 0,
       marketPrices: { oil: 100, steel: 100 },
       nations: populatedNations,
-      provinces: {},
       turnLogs: [],
       eventFlags: {},
     };

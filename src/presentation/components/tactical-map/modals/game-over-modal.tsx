@@ -7,6 +7,10 @@ interface GameOverModalProps {
   isVictory: boolean;
   winnerName: string;
   reason: string;
+  turnsPlayed: number;
+  finalGdp: string;
+  finalPopulation: string;
+  conqueredArea: string;
   onRestart: () => void;
 }
 
@@ -15,6 +19,10 @@ export function GameOverModal({
   isVictory,
   winnerName,
   reason,
+  turnsPlayed,
+  finalGdp,
+  finalPopulation,
+  conqueredArea,
   onRestart,
 }: GameOverModalProps) {
   if (!isOpen) return null;
@@ -48,10 +56,10 @@ export function GameOverModal({
         </div>
 
         <VictoryStatsCard
-          turnsPlayed={42}
-          finalGdp="$850 میلیارد"
-          finalPopulation="120M نفر"
-          conqueredArea="2,150,000 km²"
+          turnsPlayed={turnsPlayed}
+          finalGdp={finalGdp}
+          finalPopulation={finalPopulation}
+          conqueredArea={conqueredArea}
         />
 
         <button

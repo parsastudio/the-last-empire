@@ -1,65 +1,51 @@
 import { useMemo } from "react";
-import { CombatReportEngine } from "@/engine/reports/combat-report-engine";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
+import { GameState } from "@/domain/game/game-state.schema";
 
-export function useSidebarReports(currentTurn: number) {
+export function useSidebarReports(gameState: GameState | null): CombatReport[] {
   return useMemo(() => {
-    const reportEngine = new CombatReportEngine();
+    if (!gameState || !gameState.turnLogs) {
+      return [];
+    }
 
-    const mockDefeatReport = reportEngine.createReport({
-      attackerId: "IRN",
-      attackerNameFa: "ایران",
-      defenderId: "USA",
-      defenderNameFa: "ایالات متحده آمریکا",
-      turn: currentTurn,
+    const combatLogs = gameState.turnLogs.filter(
+      (log) => log.level === "COMBAT",
+    );
+
+    return combatLogs.map((log) => ({
+      id: log.id,
+      turn: log.turn,
+      timestamp: log.timestamp,
+      severity: "VICTORY" as const,
+      title: `گزارش عملیات نوبت ${log.turn}`,
+      summary: log.message,
+      attackerNationId: log.sourceNationId,
+      attackerName:
+        gameState.nations[log.sourceNationId]?.name || log.sourceNationId,
+      defenderNationId: log.targetNationId || "DEFENDER",
+      defenderName: log.targetNationId
+        ? gameState.nations[log.targetNationId]?.name || log.targetNationId
+        : "دشمن",
       attackerCasualties: {
-        infantryEngaged: 450,
-        infantryLost: 135,
-        airForceEngaged: 40,
-        airForceLost: 18,
-        droneMissileEngaged: 60,
-        droneMissileLost: 45,
+        infantryEngaged: 100,
+        infantryLost: 10,
+        airForceEngaged: 10,
+        airForceLost: 1,
+        droneMissileEngaged: 5,
+        droneMissileLost: 0,
       },
       defenderCasualties: {
-        infantryEngaged: 1000,
-        infantryLost: 80,
-        airForceEngaged: 250,
-        airForceLost: 12,
-        droneMissileEngaged: 80,
-        droneMissileLost: 10,
+        infantryEngaged: 100,
+        infantryLost: 35,
+        airForceEngaged: 10,
+        airForceLost: 4,
+        droneMissileEngaged: 0,
+        droneMissileLost: 0,
       },
-      conqueredPixelsCount: 0,
-      capitulatedPixelsCount: 0,
-      governmentType: "DICTATORSHIP",
-    });
-
-    const mockVictoryReport = reportEngine.createReport({
-      attackerId: "IRN",
-      attackerNameFa: "ایران",
-      defenderId: "ISR",
-      defenderNameFa: "اسرائیل",
-      turn: currentTurn,
-      attackerCasualties: {
-        infantryEngaged: 450,
-        infantryLost: 45,
-        airForceEngaged: 40,
-        airForceLost: 6,
-        droneMissileEngaged: 60,
-        droneMissileLost: 15,
-      },
-      defenderCasualties: {
-        infantryEngaged: 200,
-        infantryLost: 110,
-        airForceEngaged: 75,
-        airForceLost: 28,
-        droneMissileEngaged: 35,
-        droneMissileLost: 25,
-      },
-      conqueredPixelsCount: 48,
-      capitulatedPixelsCount: 12,
-      governmentType: "DICTATORSHIP",
-    });
-
-    return [mockDefeatReport, mockVictoryReport] as CombatReport[];
-  }, [currentTurn]);
+      conqueredAreaSqKm: 12500,
+      capitulatedAreaSqKm: 0,
+      strategicAssessment: "ارزیابی ستاد کل: تثبیت کامل خطوط پیشروی نبرد.",
+      isVictory: true,
+    }));
+  }, [gameState]);
 }

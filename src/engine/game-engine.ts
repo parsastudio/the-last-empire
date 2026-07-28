@@ -18,22 +18,16 @@ export class GameEngine {
   private gridState: GridState;
 
   constructor(initialState: GameState) {
-    const rawGridState = (initialState as { gridState?: GridState }).gridState;
-    const stateCopy: Omit<GameState, "gridState"> & { gridState?: unknown } = {
-      ...initialState,
-    };
-    if ("gridState" in stateCopy) {
-      delete stateCopy.gridState;
-    }
-    this.currentState = deepClone(stateCopy as GameState);
+    this.currentState = deepClone(initialState);
     this.prng = new SeededRandom(initialState.seed);
-    this.gridState = rawGridState || new GridState();
+    this.gridState =
+      (initialState as unknown as { gridState?: GridState }).gridState ||
+      new GridState();
     this.historyManager.recordSnapshot(this.currentState, this.gridState);
   }
 
   public getState(): Readonly<GameState> {
     const cloned = deepClone(this.currentState);
-    (cloned as { gridState?: GridState }).gridState = this.gridState;
     return Object.freeze(cloned);
   }
 
@@ -65,13 +59,6 @@ export class GameEngine {
   }
 
   public getTurnHistory(turnNumber: number): GameState | undefined {
-    const state = this.historyManager.getTurnHistory(
-      turnNumber,
-      this.gridState,
-    );
-    if (state) {
-      (state as { gridState?: GridState }).gridState = this.gridState;
-    }
-    return state;
+    return this.historyManager.getTurnHistory(turnNumber, this.gridState);
   }
 }

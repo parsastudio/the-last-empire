@@ -45,7 +45,7 @@ export function VictoryStatsCard({
       <div className="bg-secondary/40 p-3 rounded-2xl space-y-1 border border-border/40">
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
           <Globe2 size={12} className="text-military" />
-          <span>مساحت تصرف‌شده</span>
+          <span>مساحت تحت کنترل</span>
         </div>
         <span className="font-bold text-foreground block">{conqueredArea}</span>
       </div>

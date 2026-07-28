@@ -7,9 +7,12 @@ import { AttackPlanningModal } from "../modals/attack-planning-modal";
 import { TopHudBar } from "../hud/top-bar/top-hud-bar";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
 import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
+import { GameOverDialogWrapper } from "../modals/game-over-dialog-wrapper";
+import { GameState } from "@/domain/game/game-state.schema";
 
 interface TacticalMapOverlayProps {
   metrics: HumanResourceMetrics;
+  gameState?: GameState | null;
   contextMenuState: {
     coordinate: { x: number; y: number };
     countryId: number;
@@ -30,6 +33,7 @@ interface TacticalMapOverlayProps {
 
 export function TacticalMapOverlay({
   metrics,
+  gameState = null,
   contextMenuState,
   activeScreenPos,
   attackModalState,
@@ -42,6 +46,8 @@ export function TacticalMapOverlay({
       <TopHudBar metrics={metrics} />
 
       <StrategicToastContainer />
+
+      <GameOverDialogWrapper gameState={gameState} />
 
       {contextMenuState && (
         <div

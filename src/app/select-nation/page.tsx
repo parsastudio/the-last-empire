@@ -31,6 +31,10 @@ export default function SelectNationPage() {
         selectedNation.id,
       );
 
+      if (typeof window !== "undefined") {
+        localStorage.setItem("test6_human_nation_id", selectedNation.id);
+      }
+
       const res = await fetch("/api/game/select-country", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

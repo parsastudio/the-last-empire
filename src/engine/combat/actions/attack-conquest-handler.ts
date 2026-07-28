@@ -10,6 +10,7 @@ import { NavalPathResolver } from "@/engine/combat/routing/naval-path-resolver";
 import { CoastalPixelLocator } from "./coastal-pixel-locator";
 import { CampaignLogisticsEvaluator } from "./campaign-logistics-evaluator";
 import { AttackPowerCalculator } from "./attack-power-calculator";
+import { AttackTreasurySettler } from "./attack-treasury-settler";
 
 export class AttackConquestHandler implements ActionHandler {
   private orchestrator = new ConquestOrchestrator();
@@ -20,6 +21,7 @@ export class AttackConquestHandler implements ActionHandler {
   private coastalLocator = new CoastalPixelLocator();
   private logisticsEvaluator = new CampaignLogisticsEvaluator();
   private powerCalculator = new AttackPowerCalculator();
+  private treasurySettler = new AttackTreasurySettler();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "ATTACK") {
@@ -101,46 +103,23 @@ export class AttackConquestHandler implements ActionHandler {
       outcome.capitulatedCells,
     );
 
-    const updatedNations = this.gdpPopUpdater.syncGlobalStats(
+    const syncedNations = this.gdpPopUpdater.syncGlobalStats(
       loggedState.nations,
       allCells,
     );
 
-    const finalAttacker = updatedNations[attacker.id];
-    if (finalAttacker) {
-      const remainingTreasury = finalAttacker.treasury - evalResult.totalCost;
-      updatedNations[attacker.id] = {
-        ...finalAttacker,
-        treasury: Math.max(0, remainingTreasury),
-        nationalDebt:
-          finalAttacker.nationalDebt + evalResult.emergencyDebtRequired,
-        military: {
-          ...finalAttacker.military,
-          infantry: Math.max(
-            0,
-            finalAttacker.military.infantry - outcome.attackerLost,
-          ),
-        },
-      };
-    }
-
-    const finalDefender = updatedNations[defender.id];
-    if (finalDefender) {
-      updatedNations[defender.id] = {
-        ...finalDefender,
-        military: {
-          ...finalDefender.military,
-          infantry: Math.max(
-            0,
-            finalDefender.military.infantry - outcome.defenderLost,
-          ),
-        },
-      };
-    }
+    const finalNations = this.treasurySettler.settlePostAttackStates(
+      syncedNations,
+      attacker.id,
+      defender.id,
+      evalResult,
+      outcome.attackerLost,
+      outcome.defenderLost,
+    );
 
     return {
       ...loggedState,
-      nations: updatedNations,
+      nations: finalNations,
     };
   }
 }
