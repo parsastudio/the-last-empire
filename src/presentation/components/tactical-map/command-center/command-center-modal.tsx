@@ -87,15 +87,15 @@ export function CommandCenterModal({
   const meta = getTitleAndSubtitle();
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center p-6 z-50 animate-fade-smooth">
-      <div className="bg-card/95 border border-border w-[88vw] h-[85vh] max-w-6xl rounded-3xl p-6 shadow-2xl flex flex-col space-y-5 dir-rtl overflow-hidden">
+    <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-md flex items-center justify-center p-6 z-50 animate-fade-smooth">
+      <div className="bg-slate-950/90 border border-slate-800/80 w-[85vw] h-[85vh] max-w-6xl rounded-3xl p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col space-y-5 dir-rtl overflow-hidden backdrop-blur-2xl text-slate-100">
         <CommandCenterHeader
           title={meta.title}
           subtitle={meta.subtitle}
           onClose={onClose}
         />
 
-        <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
           {activeTab === "overview" && (
             <WideOverviewView nation={MOCK_SCHEMA_NATION} />
           )}
