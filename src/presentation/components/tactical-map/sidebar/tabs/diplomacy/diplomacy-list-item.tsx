@@ -14,7 +14,7 @@ export function DiplomacyListItem({
   return (
     <button
       onClick={() => onSelect(relation)}
-      className="w-full bg-background/40 hover:bg-secondary/50 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-right transition-all cursor-pointer"
+      className="w-full bg-background/40 hover:bg-secondary/50 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3 text-right transition-all cursor-pointer dir-rtl"
     >
       <div className="space-y-1">
         <div className="flex items-center gap-2">

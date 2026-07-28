@@ -6,6 +6,7 @@ import { CountryProfileStats } from "./country-profile-stats";
 import { FocusMapButton } from "./focus-map-button";
 import { TributeDemandDialog } from "./tribute-demand-dialog";
 import { TributeStatusBadge } from "./tribute-status-badge";
+import { useToast } from "@/presentation/context/toast-context";
 
 export interface DiplomaticRelation {
   code: string;
@@ -27,17 +28,20 @@ export interface DiplomaticRelation {
 
 interface DiplomacyDetailViewProps {
   relation: DiplomaticRelation;
+  targetTreasury?: number;
   onBack: () => void;
   onFocusCountry?: (code: string) => void;
 }
 
 export function DiplomacyDetailView({
   relation,
+  targetTreasury = 350000,
   onBack,
   onFocusCountry,
 }: DiplomacyDetailViewProps) {
   const [isTributeModalOpen, setIsTributeModalOpen] = useState(false);
   const [currentTribute, setCurrentTribute] = useState(0);
+  const { showToast } = useToast();
 
   const flagEmoji = getFlagEmoji(relation.flagCode || relation.code);
 
@@ -72,14 +76,16 @@ export function DiplomacyDetailView({
 
   const handleConfirmTribute = (amount: number) => {
     setCurrentTribute(amount);
-    alert(
+    showToast(
+      "ارسال اولتیماتوم باج",
       `درخواست باج سالانه به مبلغ $${amount.toLocaleString("fa-IR")} به ${relation.name} ارسال شد.`,
+      "warning",
     );
     setIsTributeModalOpen(false);
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
       <button
         onClick={onBack}
         className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -141,7 +147,7 @@ export function DiplomacyDetailView({
       <TributeDemandDialog
         isOpen={isTributeModalOpen}
         targetName={relation.name}
-        targetTreasury={350000}
+        targetTreasury={targetTreasury}
         onClose={() => setIsTributeModalOpen(false)}
         onConfirm={handleConfirmTribute}
       />
