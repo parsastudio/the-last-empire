@@ -37,13 +37,73 @@ export function CommandCenterModal({
   onFocusCountry,
   onOpenTrade,
 }: CommandCenterModalProps) {
-  if (!activeTab || !nation) return null;
+  if (!activeTab) return null;
+
+  const fallbackNation: Nation = nation || {
+    id: "IRN",
+    name: "ایران",
+    isAi: false,
+    isAlive: true,
+    flagCode: "IR",
+    gdp: 450000000000,
+    taxRate: 15,
+    tariffRate: 10,
+    treasury: 350000,
+    nationalDebt: 0,
+    population: 88000000,
+    warExhaustion: 0,
+    industrialLevel: 1,
+    adminBurdenMultiplier: 1.0,
+    consecutiveDeficitTurns: 0,
+    government: {
+      type: "DICTATORSHIP",
+      stability: 80,
+      corruption: 10,
+      socialFreedom: 30,
+      turnsInPower: 5,
+    },
+    resources: { oil: 5000, steel: 2000, manpower: 500 },
+    upkeep: {
+      infantryUpkeep: 1,
+      airForceUpkeep: 1,
+      droneMissileUpkeep: 1,
+      infrastructureUpkeep: 1,
+    },
+    military: {
+      infantry: 450,
+      airForce: 40,
+      droneMissile: 60,
+      experience: 10,
+      techLevel: 3,
+    },
+    recruitmentQueue: [],
+    geography: {
+      landNeighbors: [],
+      seaNeighbors: [],
+      hasSeaAccess: true,
+      territorySize: 1000,
+      infrastructureLevel: 1,
+      contiguousMainlandSize: 1000,
+      isolatedPockets: [],
+      coordinates: [],
+    },
+    relations: {},
+    activeModifiers: [],
+    traits: ["OIL_RICH"],
+    globalReputation: 50,
+    globalAggression: 0,
+    doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
+    proxyInfluenceBudget: {},
+    regionsDemographics: [],
+  };
+
+  const currentNation = nation || fallbackNation;
 
   const getTitleAndSubtitle = () => {
     switch (activeTab) {
       case "overview":
         return {
-          title: `شناسنامه و وضعیت عمومی ${nation.name}`,
+          title: `شناسنامه و وضعیت عمومی ${currentNation.name}`,
           subtitle: "پایش زنده اقتصاد، جمعیت، منابع و پایداری داخلی کشور",
         };
       case "market":
@@ -104,20 +164,22 @@ export function CommandCenterModal({
         />
 
         <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {activeTab === "overview" && <WideOverviewView nation={nation} />}
+          {activeTab === "overview" && (
+            <WideOverviewView nation={currentNation} />
+          )}
 
           {activeTab === "market" && (
             <WideMarketView onOpenTrade={onOpenTrade} />
           )}
 
           {activeTab === "military" && (
-            <WideMilitaryView military={nation.military} />
+            <WideMilitaryView military={currentNation.military} />
           )}
 
           {activeTab === "politics" && (
             <WidePoliticsView
-              taxRate={nation.taxRate}
-              governmentType={nation.government.type}
+              taxRate={currentNation.taxRate}
+              governmentType={currentNation.government.type}
             />
           )}
 
@@ -131,7 +193,9 @@ export function CommandCenterModal({
           {activeTab === "research" && <WideResearchView />}
 
           {activeTab === "abilities" && (
-            <WideAbilitiesView currentGovernment={nation.government.type} />
+            <WideAbilitiesView
+              currentGovernment={currentNation.government.type}
+            />
           )}
 
           {activeTab === "reports" && <WideReportsView reports={mockReports} />}

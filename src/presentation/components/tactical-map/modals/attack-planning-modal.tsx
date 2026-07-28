@@ -4,6 +4,7 @@ import { AttackTheaterHeader } from "./attack/attack-theater-header";
 import { AttackCoordinatesBox } from "./attack/attack-coordinates-box";
 import { AttackLogisticsTable } from "./attack/attack-logistics-table";
 import { AttackWarningsContainer } from "./attack/attack-warnings-container";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface AttackPlanningModalProps {
   isOpen: boolean;
@@ -34,6 +35,8 @@ export function AttackPlanningModal({
   onClose,
   onConfirmAttack,
 }: AttackPlanningModalProps) {
+  const { showToast } = useToast();
+
   if (!isOpen) return null;
 
   const isAtWar = stance === "WAR";
@@ -43,9 +46,18 @@ export function AttackPlanningModal({
     ? estimatedCost - Math.max(0, userTreasury)
     : 0;
 
+  const handleConfirm = () => {
+    showToast(
+      "صدور دستور حمله تهاجمی",
+      `فرمان حمله به نیروهای ${targetName} در مختصات (${coordinate.x}, ${coordinate.y}) با موفقیت صادر گردید.`,
+      "warning",
+    );
+    onConfirmAttack();
+  };
+
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center p-4 z-50 animate-fade-smooth">
-      <div className="bg-card/95 backdrop-blur-xl border border-border/90 w-full max-w-lg rounded-3xl p-6 shadow-2xl relative space-y-5 dir-rtl overflow-hidden pointer-events-auto">
+      <div className="bg-card/95 backdrop-blur-xl border border-border/90 w-full max-w-lg rounded-3xl p-6 shadow-2xl relative space-y-5 dir-rtl text-right overflow-hidden pointer-events-auto">
         <button
           onClick={onClose}
           className="absolute top-4 left-4 p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer"
@@ -83,7 +95,7 @@ export function AttackPlanningModal({
 
         <div className="pt-2 border-t border-border">
           <button
-            onClick={onConfirmAttack}
+            onClick={handleConfirm}
             className="w-full py-3.5 bg-military hover:bg-military/90 text-primary-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-military/10"
           >
             <Swords size={16} />

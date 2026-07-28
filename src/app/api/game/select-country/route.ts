@@ -14,9 +14,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const facade = new SimulationFacade();
-    facade.selectPlayerNation(nationId);
+    const state = facade.selectPlayerNation(nationId);
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, data: state });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Internal error";
     return NextResponse.json(

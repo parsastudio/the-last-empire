@@ -8,6 +8,7 @@ interface Country {
   code: string;
   name: string;
   color: [number, number, number];
+  areaSqKm?: number;
 }
 
 export class MapShader {
@@ -23,6 +24,7 @@ export class MapShader {
     height: number,
     maskData: Uint8Array,
     countries: Country[],
+    activeLayer: "political" | "gdp" | "military" = "political",
   ): void {
     const palette = this.paletteGenerator.generatePalette(countries);
     const dist = new Int32Array(width * height);
@@ -79,21 +81,41 @@ export class MapShader {
         } else {
           const pair = palette[id];
           if (pair) {
-            const countryColor = this.bevelShader.calculateBevel(
-              r,
-              g,
-              b,
-              pair,
-              x,
-              y,
-              width,
-              height,
-              id,
-              srcData,
-            );
-            r = countryColor.r;
-            g = countryColor.g;
-            b = countryColor.b;
+            if (activeLayer === "gdp") {
+              const matched = countries.find((c) => c.id === id);
+              const area = matched?.areaSqKm || 50000;
+              const gdpScale = Math.min(1.0, area / 1000000);
+              r = Math.floor(20 + gdpScale * 40);
+              g = Math.floor(120 + gdpScale * 110);
+              b = Math.floor(60 + gdpScale * 80);
+            } else if (activeLayer === "military") {
+              const matched = countries.find((c) => c.id === id);
+              if (matched && matched.code === "USA") {
+                r = 220;
+                g = 38;
+                b = 38;
+              } else {
+                r = 100;
+                g = 110;
+                b = 120;
+              }
+            } else {
+              const countryColor = this.bevelShader.calculateBevel(
+                r,
+                g,
+                b,
+                pair,
+                x,
+                y,
+                width,
+                height,
+                id,
+                srcData,
+              );
+              r = countryColor.r;
+              g = countryColor.g;
+              b = countryColor.b;
+            }
           }
         }
 

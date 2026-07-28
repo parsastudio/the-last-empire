@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { GridDownsampler } from "@/application/map-rendering/grid-downsampler";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { MapDataApiHelper } from "./map-data-api-helper";
@@ -10,6 +10,7 @@ interface UseMapDataProps {
   mapWidth: number;
   mapHeight: number;
   mapMode?: "default" | "edited" | "partition";
+  activeLayer?: "political" | "gdp" | "military";
 }
 
 const apiHelper = new MapDataApiHelper();
@@ -19,6 +20,7 @@ export function useMapData({
   mapWidth,
   mapHeight,
   mapMode = "default",
+  activeLayer = "political",
 }: UseMapDataProps) {
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +31,31 @@ export function useMapData({
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
   const maskDataRef = useRef<Uint8Array | null>(null);
   const packed1024Ref = useRef<Uint8Array | null>(null);
+  const loadedImgRef = useRef<HTMLImageElement | null>(null);
+
+  const reRenderLayer = useCallback(() => {
+    if (
+      loadedImgRef.current &&
+      canvasSrcRef.current &&
+      canvasShadedRef.current &&
+      countries.length > 0
+    ) {
+      renderingHelper.renderMask(
+        loadedImgRef.current,
+        mapWidth,
+        mapHeight,
+        canvasSrcRef.current,
+        canvasShadedRef.current,
+        countries,
+        maskDataRef,
+        activeLayer,
+      );
+    }
+  }, [activeLayer, countries, mapHeight, mapWidth]);
+
+  useEffect(() => {
+    reRenderLayer();
+  }, [activeLayer, reRenderLayer]);
 
   useEffect(() => {
     let active = true;
@@ -79,6 +106,8 @@ export function useMapData({
         img.onload = () => {
           if (typeof window === "undefined" || !active) return;
 
+          loadedImgRef.current = img;
+
           if (!canvasSrcRef.current) {
             canvasSrcRef.current = document.createElement("canvas");
           }
@@ -94,6 +123,7 @@ export function useMapData({
             canvasShadedRef.current,
             countriesData,
             maskDataRef,
+            activeLayer,
           );
 
           if (maskDataRef.current) {

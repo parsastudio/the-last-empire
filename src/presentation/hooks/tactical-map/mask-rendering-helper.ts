@@ -17,6 +17,7 @@ export class MaskRenderingHelper {
     canvasShaded: HTMLCanvasElement,
     countriesData: CountryMapping[],
     maskDataRef: { current: Uint8Array | null },
+    activeLayer: "political" | "gdp" | "military" = "political",
   ): void {
     const tempCanvas = document.createElement("canvas");
     tempCanvas.width = mapWidth;
@@ -56,6 +57,7 @@ export class MaskRenderingHelper {
         mapHeight,
         maskDataRef.current,
         countriesData,
+        activeLayer,
       );
 
       ctxShaded.putImageData(destImage, 0, 0);
