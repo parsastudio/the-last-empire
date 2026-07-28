@@ -33,7 +33,7 @@ export class BattleValidationFacade {
       return {
         isValid: false,
         errorMessage:
-          "No accessible military bases found to launch this invasion",
+          "هیچ پایگاه نظامی فعالی برای آغاز تهاجم از این مبدا یافت نشد.",
         closestBaseCoordinate: null,
         distance: 0,
         logisticsCost: 0,
@@ -52,7 +52,7 @@ export class BattleValidationFacade {
       isValid,
       errorMessage: isValid
         ? null
-        : "Target region is out of reach or origin base is too small",
+        : "منطقه هدف خارج از شعاع ترانزیت پایگاه اولیه بوده یا پایگاه کوچک است.",
       closestBaseCoordinate: { x: closestBase.x, y: closestBase.y },
       distance: logistics.distance,
       logisticsCost: logistics.finalCost,

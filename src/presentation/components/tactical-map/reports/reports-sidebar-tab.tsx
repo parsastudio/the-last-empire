@@ -13,7 +13,7 @@ export function ReportsSidebarTab({
   onSelectReport,
 }: ReportsSidebarTabProps) {
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
         <FileText size={13} className="text-diplomacy" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">

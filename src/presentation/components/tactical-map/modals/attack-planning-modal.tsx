@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from "react";
-import { X, Swords, Shield, Plane, Radio } from "lucide-react";
+import { X, Swords, Shield, Plane, Radio, AlertTriangle } from "lucide-react";
 import { AttackTheaterHeader } from "./attack/attack-theater-header";
 import { AttackCoordinatesBox } from "./attack/attack-coordinates-box";
 import { AttackLogisticsTable } from "./attack/attack-logistics-table";
 import { AttackWarningsContainer } from "./attack/attack-warnings-container";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { AttackForceEstimator } from "./attack/attack-force-estimator";
+import { useBattleValidation } from "@/presentation/hooks/game/use-battle-validation";
 
 interface AttackPlanningModalProps {
   isOpen: boolean;
@@ -41,28 +42,45 @@ export function AttackPlanningModal({
   const { dispatchAction } = useGameActions();
   const estimator = useMemo(() => new AttackForceEstimator(), []);
 
+  const fullAttackerId = attackerCode.startsWith("NATION_")
+    ? attackerCode
+    : `NATION_${attackerCode}`;
+
+  const { validationResult, loading: isValidationLoading } =
+    useBattleValidation(fullAttackerId, coordinate, isOpen);
+
   if (!isOpen) return null;
+
+  const distMultiplier = validationResult?.distance
+    ? Math.max(1, Math.floor(validationResult.distance / 10))
+    : 1;
 
   const logistics = estimator.calculateLogisticsCost({
     infantry,
     airForce,
     droneMissile,
+    distanceMultiplier: distMultiplier,
   });
+
+  const finalCost = validationResult?.logisticsCost
+    ? validationResult.logisticsCost + logistics.estimatedMoneyCost
+    : logistics.estimatedMoneyCost;
 
   const isAtWar = stance === "WAR";
   const isOilDeficit = userOilStock < logistics.requiredOil;
-  const isBudgetDeficit = userTreasury < logistics.estimatedMoneyCost;
+  const isBudgetDeficit = userTreasury < finalCost;
   const emergencyDebt = isBudgetDeficit
-    ? logistics.estimatedMoneyCost - Math.max(0, userTreasury)
+    ? finalCost - Math.max(0, userTreasury)
     : 0;
+
+  const isServerInvalid =
+    validationResult !== null && validationResult.isValid === false;
 
   const handleConfirm = async () => {
     const success = await dispatchAction(
       {
         id: `attack-${Date.now()}`,
-        nationId: attackerCode.startsWith("NATION_")
-          ? attackerCode
-          : `NATION_${attackerCode}`,
+        nationId: fullAttackerId,
         type: "ATTACK",
         targetNationId: targetCode.startsWith("NATION_")
           ? targetCode
@@ -107,6 +125,16 @@ export function AttackPlanningModal({
         />
 
         <AttackCoordinatesBox coordinate={coordinate} />
+
+        {isServerInvalid && (
+          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-2 text-xs text-rose-500 font-bold">
+            <AlertTriangle size={15} className="shrink-0" />
+            <span>
+              {validationResult?.errorMessage ||
+                "منطقه هدف خارج از برد ترانزیت پایگاه‌های نظامی موجود است."}
+            </span>
+          </div>
+        )}
 
         <div className="space-y-2.5 bg-background/50 border border-border/80 p-3.5 rounded-2xl font-mono text-xs">
           <span className="text-[10px] font-bold text-muted-foreground uppercase font-sans block">
@@ -177,7 +205,7 @@ export function AttackPlanningModal({
         />
 
         <AttackLogisticsTable
-          estimatedCost={logistics.estimatedMoneyCost}
+          estimatedCost={finalCost}
           requiredOil={logistics.requiredOil}
           requiredSteel={logistics.requiredSteel}
         />
@@ -185,10 +213,15 @@ export function AttackPlanningModal({
         <div className="pt-2 border-t border-border">
           <button
             onClick={handleConfirm}
-            className="w-full py-3.5 bg-military hover:bg-military/90 text-primary-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-military/10"
+            disabled={isServerInvalid || isValidationLoading}
+            className="w-full py-3.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-military/10"
           >
             <Swords size={16} />
-            <span>تایید و صدور دستور حمله به {targetName}</span>
+            <span>
+              {isValidationLoading
+                ? "در حال استعلام لژستیک سرور..."
+                : `تایید و صدور دستور حمله به ${targetName}`}
+            </span>
           </button>
         </div>
       </div>

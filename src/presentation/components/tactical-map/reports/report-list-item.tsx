@@ -15,7 +15,7 @@ export function ReportListItem({ report, onSelect }: ReportListItemProps) {
   return (
     <button
       onClick={() => onSelect(report)}
-      className={`w-full border p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer ${style.bg}`}
+      className={`w-full border p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer dir-rtl ${style.bg}`}
     >
       <div className="flex items-center gap-3 overflow-hidden">
         <div
