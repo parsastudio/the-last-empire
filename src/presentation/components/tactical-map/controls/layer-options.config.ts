@@ -11,20 +11,20 @@ export interface LayerOption {
 export const LAYER_OPTIONS: LayerOption[] = [
   {
     id: "political",
-    label: "نمای سیاسی",
+    label: "نقشه سیاسی",
     icon: Eye,
-    color: "text-emerald-400",
+    color: "text-gdp",
   },
   {
     id: "gdp",
-    label: "پایش لوجستیک (GDP)",
+    label: "پایش اقتصاد GDP",
     icon: Coins,
-    color: "text-amber-400",
+    color: "text-treasury",
   },
   {
     id: "military",
-    label: "خطوط مقدم نبرد",
+    label: "جبهه‌های نبرد",
     icon: Swords,
-    color: "text-rose-400",
+    color: "text-military",
   },
 ];

@@ -1,7 +1,14 @@
 import React from "react";
-import { X } from "lucide-react";
+import { Swords, Coins, Handshake, Shield, Flame, X } from "lucide-react";
+import { QuickActionButton } from "./quick-action-button";
 
-export type ContextActionType = "attack" | "profile";
+export type ContextActionType =
+  | "attack"
+  | "tribute"
+  | "pact"
+  | "access"
+  | "proxy"
+  | "profile";
 
 interface MapContextMenuProps {
   position: { x: number; y: number };
@@ -14,45 +21,65 @@ interface MapContextMenuProps {
 export function MapContextMenu({
   position,
   countryName,
+  countryCode,
   onSelectAction,
   onClose,
 }: MapContextMenuProps) {
   return (
     <div
-      className="absolute z-50 -translate-x-1/2 -translate-y-full mb-3 pointer-events-auto animate-fade-smooth"
+      className="absolute z-50 -translate-x-1/2 -translate-y-full mb-3 pointer-events-auto animate-fade-smooth dir-rtl"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
-      dir="rtl"
     >
-      <div className="bg-card/95 backdrop-blur-xl border border-border/80 rounded-2xl shadow-2xl p-1.5 flex items-center gap-1">
-        <button
+      <div className="bg-card/95 backdrop-blur-xl border border-border/80 rounded-2xl shadow-2xl p-2 flex items-center gap-1 max-w-md overflow-x-auto scrollbar-none">
+        <div className="px-2 py-1 text-[10px] font-mono font-bold text-muted-foreground border-l border-border/60 shrink-0">
+          {countryName} ({countryCode})
+        </div>
+
+        <QuickActionButton
+          icon={Swords}
+          label="حمله"
+          colorClass="text-military"
+          bgHoverClass="hover:bg-military/15"
           onClick={() => onSelectAction("attack")}
-          className="px-3.5 py-2 hover:bg-rose-500/15 text-rose-500 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer group"
-          title={`طرح حمله به ${countryName}`}
-        >
-          <span className="text-sm group-hover:scale-110 transition-transform">
-            ⚔️
-          </span>
-          <span className="text-[11px] font-bold">حمله</span>
-        </button>
+        />
 
-        <div className="w-[1px] h-5 bg-border/60" />
+        <QuickActionButton
+          icon={Coins}
+          label="طلب باج"
+          colorClass="text-treasury"
+          bgHoverClass="hover:bg-treasury/15"
+          onClick={() => onSelectAction("tribute")}
+        />
 
-        <button
-          onClick={() => onSelectAction("profile")}
-          className="px-3.5 py-2 hover:bg-sky-500/15 text-sky-500 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer group"
-          title={`مشاهده نمایه ${countryName}`}
-        >
-          <span className="text-sm group-hover:scale-110 transition-transform">
-            📊
-          </span>
-          <span className="text-[11px] font-bold">نمایه</span>
-        </button>
+        <QuickActionButton
+          icon={Handshake}
+          label="پیمان"
+          colorClass="text-gdp"
+          bgHoverClass="hover:bg-gdp/15"
+          onClick={() => onSelectAction("pact")}
+        />
+
+        <QuickActionButton
+          icon={Shield}
+          label="حق عبور"
+          colorClass="text-primary"
+          bgHoverClass="hover:bg-primary/15"
+          onClick={() => onSelectAction("access")}
+        />
+
+        <QuickActionButton
+          icon={Flame}
+          label="جنگ نیابتی"
+          colorClass="text-military"
+          bgHoverClass="hover:bg-military/15"
+          onClick={() => onSelectAction("proxy")}
+        />
 
         <button
           onClick={onClose}
-          className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors mr-1 cursor-pointer"
+          className="p-1 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-lg transition-colors cursor-pointer mr-1 shrink-0"
         >
-          <X size={12} />
+          <X size={13} />
         </button>
       </div>
 

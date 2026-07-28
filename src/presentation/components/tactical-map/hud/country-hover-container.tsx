@@ -37,17 +37,18 @@ export function CountryHoverContainer({
   position,
 }: CountryHoverContainerProps) {
   const rankingsMap = useCountryHoverRankings(countries);
-  const { hoverData, handleMouseMove, handleMouseLeave } = useCountryHoverMath({
-    countries,
-    maskDataRef,
-    packed1024Ref,
-    mapWidth,
-    mapHeight,
-    containerRef,
-    scale,
-    position,
-    rankingsMap,
-  });
+  const { hoverData, cursorPos, handleMouseMove, handleMouseLeave } =
+    useCountryHoverMath({
+      countries,
+      maskDataRef,
+      packed1024Ref,
+      mapWidth,
+      mapHeight,
+      containerRef,
+      scale,
+      position,
+      rankingsMap,
+    });
 
   return (
     <div
@@ -55,7 +56,7 @@ export function CountryHoverContainer({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      <CountryHoverHud info={hoverData} />
+      <CountryHoverHud info={hoverData} cursorPos={cursorPos} />
     </div>
   );
 }

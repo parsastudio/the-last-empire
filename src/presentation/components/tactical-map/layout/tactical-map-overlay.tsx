@@ -4,8 +4,12 @@ import {
   ContextActionType,
 } from "../context-menu/map-context-menu";
 import { AttackPlanningModal } from "../modals/attack-planning-modal";
+import { TopHudBar } from "../hud/top-bar/top-hud-bar";
+import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
+import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 
 interface TacticalMapOverlayProps {
+  metrics: HumanResourceMetrics;
   contextMenuState: {
     coordinate: { x: number; y: number };
     countryId: number;
@@ -25,6 +29,7 @@ interface TacticalMapOverlayProps {
 }
 
 export function TacticalMapOverlay({
+  metrics,
   contextMenuState,
   activeScreenPos,
   attackModalState,
@@ -34,9 +39,13 @@ export function TacticalMapOverlay({
 }: TacticalMapOverlayProps) {
   return (
     <>
+      <TopHudBar metrics={metrics} />
+
+      <StrategicToastContainer />
+
       {contextMenuState && (
         <div
-          className="absolute pointer-events-none z-40 w-5 h-5 rounded-full bg-rose-600/60 border-2 border-rose-500 shadow-[0_0_15px_rgba(225,29,72,0.8)] animate-ping -translate-x-1/2 -translate-y-1/2"
+          className="absolute pointer-events-none z-40 w-5 h-5 rounded-full bg-military/60 border-2 border-military shadow-lg animate-ping -translate-x-1/2 -translate-y-1/2"
           style={{
             left: `${activeScreenPos.x}px`,
             top: `${activeScreenPos.y}px`,
@@ -57,18 +66,16 @@ export function TacticalMapOverlay({
       {attackModalState && (
         <AttackPlanningModal
           isOpen={attackModalState.isOpen}
-          attackerName="ایران"
-          attackerCode="IRN"
+          attackerName={metrics.nation?.name || "ایران"}
+          attackerCode={metrics.nation?.flagCode || "IRN"}
           targetName={attackModalState.targetName}
           targetCode={attackModalState.targetCode}
           coordinate={attackModalState.coordinate}
           stance="PEACE"
-          userOilStock={20}
+          userOilStock={metrics.oil}
+          userTreasury={metrics.treasury}
           onClose={onCloseAttackModal}
           onConfirmAttack={() => {
-            alert(
-              `دستور حمله رسمی به کشور ${attackModalState.targetName} صادر شد!`,
-            );
             onCloseAttackModal();
           }}
         />
