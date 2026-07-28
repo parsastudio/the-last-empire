@@ -7,6 +7,7 @@ import {
   Cpu,
   Zap,
   FileText,
+  ShoppingBag,
 } from "lucide-react";
 
 export type SidebarTabType =
@@ -16,7 +17,8 @@ export type SidebarTabType =
   | "diplomacy"
   | "research"
   | "abilities"
-  | "reports";
+  | "reports"
+  | "market";
 
 interface SidebarTabsProps {
   activeTab: SidebarTabType;
@@ -32,6 +34,7 @@ export function SidebarTabs({ activeTab, onChangeTab }: SidebarTabsProps) {
     { id: "overview", label: "نما", icon: LayoutDashboard },
     { id: "military", label: "ارتش", icon: Swords },
     { id: "politics", label: "سیاست", icon: Landmark },
+    { id: "market", label: "بازار", icon: ShoppingBag },
     { id: "abilities", label: "توانمندی", icon: Zap },
     { id: "reports", label: "گزارش‌ها", icon: FileText },
     { id: "diplomacy", label: "دیپلماسی", icon: Users },

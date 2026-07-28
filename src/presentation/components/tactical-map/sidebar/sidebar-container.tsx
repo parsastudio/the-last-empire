@@ -7,8 +7,10 @@ import { PoliticsTab } from "./tabs/politics/politics-tab";
 import { DiplomacyTab } from "./tabs/diplomacy-tab";
 import { ResearchTab } from "./tabs/research/research-tab";
 import { AbilitiesTab } from "./tabs/abilities/abilities-tab";
+import { MarketTab } from "./tabs/market/market-tab";
 import { ReportsSidebarTab } from "../reports/reports-sidebar-tab";
 import { TurnSummaryModal } from "../reports/turn-summary-modal";
+import { EventDecisionModal } from "../modals/event-decision-modal";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { MOCK_SCHEMA_NATION } from "./config/mock-nation.config";
 import { useSidebarReports } from "./hooks/use-sidebar-reports";
@@ -32,6 +34,7 @@ export function SidebarContainer({
   );
   const [currentTurn, setCurrentTurn] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
 
   if (externalActiveTab && externalActiveTab !== prevExternalTab) {
@@ -47,11 +50,41 @@ export function SidebarContainer({
     setCurrentTurn((prev) => prev + 1);
     setModalReports(mockAllReports);
     setIsModalOpen(true);
+
+    if ((currentTurn + 1) % 3 === 0) {
+      setTimeout(() => {
+        setIsEventModalOpen(true);
+      }, 500);
+    }
   };
 
   const handleSelectReportInSidebar = (report: CombatReport) => {
     setModalReports([report]);
     setIsModalOpen(true);
+  };
+
+  const sampleEvent = {
+    title: "بحران کمبود انرژی و سوخت استراتژیک",
+    description:
+      "ذخایر نفت خام کشور به دلیل مصرف بالای جنگنده‌ها کاهش یافته است. صنایع کشور نیازمند تصمیم‌گیری فوری دولتی هستند.",
+    choices: [
+      {
+        id: "c1",
+        description: "سهمیه‌بندی سوخت صنایع و تخصیص به ارتش",
+        effectsSummary: [
+          { label: "ثبات", value: "-۵٪", isPositive: false },
+          { label: "خزانه", value: "+$۱۰,۰۰۰", isPositive: true },
+        ],
+      },
+      {
+        id: "c2",
+        description: "تزریق سوبسید سنگین مالی به نیروگاه‌ها",
+        effectsSummary: [
+          { label: "ثبات", value: "+۵٪", isPositive: true },
+          { label: "خزانه", value: "-$۳۰,۰۰۰", isPositive: false },
+        ],
+      },
+    ],
   };
 
   return (
@@ -81,6 +114,7 @@ export function SidebarContainer({
               governmentType={MOCK_SCHEMA_NATION.government.type}
             />
           )}
+          {activeTab === "market" && <MarketTab />}
           {activeTab === "abilities" && (
             <AbilitiesTab
               currentGovernment={MOCK_SCHEMA_NATION.government.type}
@@ -106,6 +140,17 @@ export function SidebarContainer({
         isOpen={isModalOpen}
         reports={modalReports}
         onClose={() => setIsModalOpen(false)}
+      />
+
+      <EventDecisionModal
+        isOpen={isEventModalOpen}
+        title={sampleEvent.title}
+        description={sampleEvent.description}
+        choices={sampleEvent.choices}
+        onSelectChoice={(choiceId) => {
+          alert(`تصمیم انتخابی شما (${choiceId}) اعمال گردید.`);
+          setIsEventModalOpen(false);
+        }}
       />
     </>
   );
