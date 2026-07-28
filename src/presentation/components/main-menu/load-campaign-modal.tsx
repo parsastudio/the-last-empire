@@ -24,11 +24,11 @@ export function LoadCampaignModal({
 
     setTimeout(() => {
       setLoadingSaveStep("همگام‌سازی اطلاعات نقشه و ساختار شبکه...");
-    }, 500);
+    }, 400);
 
     setTimeout(() => {
       onSelectSave(saveId);
-    }, 1000);
+    }, 800);
   };
 
   if (!isOpen) return null;
