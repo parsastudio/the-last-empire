@@ -14,14 +14,22 @@ export function rasterizePolygon(
     return;
   }
 
-  let yMin = Math.floor(Math.min(...polygon.map((p) => p.y)));
-  let yMax = Math.ceil(Math.max(...polygon.map((p) => p.y)));
+  let yMin = height - 1;
+  let yMax = 0;
 
-  yMin = Math.max(0, yMin);
-  yMax = Math.min(height - 1, yMax);
+  for (let i = 0; i < polygon.length; i++) {
+    const py = polygon[i]?.y ?? 0;
+    if (py < yMin) yMin = py;
+    if (py > yMax) yMax = py;
+  }
+
+  yMin = Math.max(0, Math.floor(yMin));
+  yMax = Math.min(height - 1, Math.ceil(yMax));
+
+  const intersections: number[] = [];
 
   for (let y = yMin; y <= yMax; y++) {
-    const intersections: number[] = [];
+    intersections.length = 0;
 
     for (let i = 0; i < polygon.length; i++) {
       const p1 = polygon[i];

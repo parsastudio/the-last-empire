@@ -22,7 +22,7 @@ export function TributeDemandDialog({
   onClose,
   onConfirm,
 }: TributeDemandDialogProps) {
-  const maxAllowed = Math.floor(targetTreasury * 0.1);
+  const maxAllowed = Math.max(1000, Math.floor(targetTreasury * 0.1));
   const [amount, setAmount] = useState<number>(
     Math.max(1000, Math.floor(maxAllowed * 0.5)),
   );

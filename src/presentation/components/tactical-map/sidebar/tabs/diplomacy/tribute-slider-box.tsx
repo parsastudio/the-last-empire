@@ -13,7 +13,7 @@ export function TributeSliderBox({
   onChangeAmount,
 }: TributeSliderBoxProps) {
   return (
-    <div className="space-y-3 font-mono text-xs">
+    <div className="space-y-3 font-mono text-xs dir-rtl">
       <div className="space-y-1">
         <div className="flex justify-between text-[10px]">
           <span className="text-muted-foreground font-sans">
