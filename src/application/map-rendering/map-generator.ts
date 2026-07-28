@@ -63,7 +63,7 @@ export async function generateTest6Map(
       const rings = feature.geometry.coordinates as number[][][];
       rings.forEach((ring) => processRing(ring));
     } else if (feature.geometry.type === "MultiPolygon") {
-      const multiRings = feature.geometry.coordinates as number[][][];
+      const multiRings = feature.geometry.coordinates as number[][][][];
       multiRings.forEach((polygonCoords) => {
         polygonCoords.forEach((ring) => processRing(ring));
       });

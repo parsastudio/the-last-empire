@@ -13,11 +13,13 @@ export class CampaignCheatResolver {
     conqueredCells: GridCell[];
     capitulatedCells: GridCell[];
   } {
-    return this.orchestrator.executeAttack(
+    return this.orchestrator.executeAttack({
       attackerId,
       targetCountryId,
       targetPixel,
       allCells,
-    );
+      attackerForcePower: 999999,
+      defenderForcePower: 0,
+    });
   }
 }
