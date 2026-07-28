@@ -3,10 +3,12 @@ import { Swords, Handshake, CheckCircle2, Shield, Coins } from "lucide-react";
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
+  onOpenTributeModal?: () => void;
 }
 
 export function AdvancedDiplomacyActions({
   targetName,
+  onOpenTributeModal,
 }: AdvancedDiplomacyActionsProps) {
   return (
     <div className="space-y-2">
@@ -18,7 +20,7 @@ export function AdvancedDiplomacyActions({
         <button
           onClick={() =>
             alert(
-              `اعلام جنگ به ${targetName}: باعث افت شدید ثبات داخلی و شوک اقتصادی خواهد شد.`,
+              `اعلام جنگ به ${targetName}: باعث افت ثبات داخلی و شوک اقتصادی خواهد شد.`,
             )
           }
           className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"
@@ -30,7 +32,7 @@ export function AdvancedDiplomacyActions({
             <Swords size={13} className="text-military" />
           </div>
           <p className="text-[9px] text-muted-foreground">
-            هزینه: افت شدید ثبات سیاسی و افزایش فرسایش جنگی.
+            هزینه: افت ثبات سیاسی (+۳ افزایش پرخاشگری جهانی).
           </p>
         </button>
 
@@ -52,11 +54,13 @@ export function AdvancedDiplomacyActions({
         </button>
 
         <button
-          onClick={() =>
-            alert(
-              `مطالبه ۵٪ از تولید ناخالص ملی ${targetName} به عنوان باج سالانه.`,
-            )
-          }
+          onClick={() => {
+            if (onOpenTributeModal) {
+              onOpenTributeModal();
+            } else {
+              alert(`مطالبه باج از ${targetName}`);
+            }
+          }}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">
@@ -66,7 +70,7 @@ export function AdvancedDiplomacyActions({
             <Coins size={13} className="text-gdp" />
           </div>
           <p className="text-[9px] text-muted-foreground">
-            الزام طرف ضعیف‌تر به پرداخت سهمی از درآمد خزانه در هر نوبت.
+            تعیین مبلغ باج نوبتی تا سقف ۱۰٪ از کل خزانه کشور هدف.
           </p>
         </button>
 

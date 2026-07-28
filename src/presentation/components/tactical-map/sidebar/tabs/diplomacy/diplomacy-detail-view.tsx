@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { AdvancedDiplomacyActions } from "./advanced-diplomacy-actions";
 import { CountryProfileStats } from "./country-profile-stats";
 import { FocusMapButton } from "./focus-map-button";
+import { TributeDemandDialog } from "./tribute-demand-dialog";
+import { TributeStatusBadge } from "./tribute-status-badge";
 
 export interface DiplomaticRelation {
   code: string;
@@ -34,6 +36,9 @@ export function DiplomacyDetailView({
   onBack,
   onFocusCountry,
 }: DiplomacyDetailViewProps) {
+  const [isTributeModalOpen, setIsTributeModalOpen] = useState(false);
+  const [currentTribute, setCurrentTribute] = useState(0);
+
   const flagEmoji = getFlagEmoji(relation.flagCode || relation.code);
 
   const getStanceBadge = (stance: string) => {
@@ -63,6 +68,14 @@ export function DiplomacyDetailView({
           </span>
         );
     }
+  };
+
+  const handleConfirmTribute = (amount: number) => {
+    setCurrentTribute(amount);
+    alert(
+      `درخواست باج سالانه به مبلغ $${amount.toLocaleString("fa-IR")} به ${relation.name} ارسال شد.`,
+    );
+    setIsTributeModalOpen(false);
   };
 
   return (
@@ -103,6 +116,8 @@ export function DiplomacyDetailView({
           {getStanceBadge(relation.stance)}
         </div>
 
+        <TributeStatusBadge tributePerTurn={currentTribute} />
+
         <p className="text-xs text-foreground/90 bg-secondary/30 border border-border/40 p-3.5 rounded-2xl leading-relaxed font-sans">
           {relation.description}
         </p>
@@ -118,7 +133,18 @@ export function DiplomacyDetailView({
         )}
       </div>
 
-      <AdvancedDiplomacyActions targetName={relation.name} />
+      <AdvancedDiplomacyActions
+        targetName={relation.name}
+        onOpenTributeModal={() => setIsTributeModalOpen(true)}
+      />
+
+      <TributeDemandDialog
+        isOpen={isTributeModalOpen}
+        targetName={relation.name}
+        targetTreasury={350000}
+        onClose={() => setIsTributeModalOpen(false)}
+        onConfirm={handleConfirmTribute}
+      />
     </div>
   );
 }

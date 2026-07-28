@@ -10,6 +10,7 @@ import { LoanRequestValidator } from "./validators/loan-request.validator";
 import { RecruitmentCancelValidator } from "./validators/recruitment-cancel.validator";
 import { AntiCorruptionValidator } from "./validators/anti-corruption.validator";
 import { AttackActionValidator } from "./validators/attack-action.validator";
+import { TributeAmountValidator } from "./validators/tribute-amount.validator";
 
 export class CompositeActionValidator {
   private validators: ActionValidator[] = [
@@ -22,6 +23,7 @@ export class CompositeActionValidator {
     new RecruitmentCancelValidator(),
     new AntiCorruptionValidator(),
     new AttackActionValidator(),
+    new TributeAmountValidator(),
   ];
 
   public validate(state: GameState, action: GameAction): void {

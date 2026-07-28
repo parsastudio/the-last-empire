@@ -1,6 +1,9 @@
 import type { Nation } from "@/domain/nation/nation.schema";
+import { TributeCapCalculator } from "./tribute-cap-calculator";
 
 export class TributeManager {
+  private capCalc = new TributeCapCalculator();
+
   public setTributeDemand(
     nation: Nation,
     targetId: string,
@@ -32,9 +35,10 @@ export class TributeManager {
       return { nation, targetNation };
     }
 
+    const maxTributeCap = this.capCalc.calculateMaxTribute(targetNation);
     const actualAmount = Math.max(
       0,
-      Math.min(targetNation.treasury, relation.tributePerTurn),
+      Math.min(targetNation.treasury, relation.tributePerTurn, maxTributeCap),
     );
 
     const updatedTarget: Nation = {
