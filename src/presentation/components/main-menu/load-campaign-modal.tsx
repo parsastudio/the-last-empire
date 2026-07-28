@@ -1,43 +1,13 @@
 import React, { useState } from "react";
-import { X, Calendar, Clock, ChevronLeft } from "lucide-react";
-
-interface FakeSave {
-  id: string;
-  title: string;
-  date: string;
-  playtime: string;
-  turn: number;
-}
+import { X } from "lucide-react";
+import { FAKE_SAVES } from "./config/fake-saves.config";
+import { SaveItemCard } from "./save-item-card";
 
 interface LoadCampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectSave: (saveId: string) => void;
 }
-
-const FAKE_SAVES: FakeSave[] = [
-  {
-    id: "save-1",
-    title: "بازی ذخیره‌شده ۱ - حاکمیت ایران (IRN)",
-    date: "۶ مرداد ۱۴۰۵ - ۱۵:۴۲",
-    playtime: "۶ ساعت و ۱۲ دقیقه",
-    turn: 42,
-  },
-  {
-    id: "save-2",
-    title: "بازی ذخیره‌شده ۲ - حاکمیت ایالات متحده (USA)",
-    date: "۴ مرداد ۱۴۰۵ - ۱۱:۲۰",
-    playtime: "۳ ساعت و ۴۵ دقیقه",
-    turn: 19,
-  },
-  {
-    id: "save-3",
-    title: "بازی ذخیره‌شده ۳ - حاکمیت آلمان (DEU)",
-    date: "۲۸ تیر ۱۴۰۵ - ۲۲:۰۵",
-    playtime: "۱۲ ساعت و ۳۰ دقیقه",
-    turn: 89,
-  },
-];
 
 export function LoadCampaignModal({
   isOpen,
@@ -103,34 +73,11 @@ export function LoadCampaignModal({
 
             <div className="space-y-3">
               {FAKE_SAVES.map((save) => (
-                <button
+                <SaveItemCard
                   key={save.id}
-                  onClick={() => handleSelect(save.id)}
-                  className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer"
-                >
-                  <div className="space-y-2">
-                    <span className="text-xs font-bold text-foreground block">
-                      {save.title}
-                    </span>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar size={11} />
-                        <span>{save.date}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock size={11} />
-                        <span>زمان: {save.playtime}</span>
-                      </div>
-                      <div className="font-mono bg-secondary/80 px-1.5 py-0.5 rounded text-[9px]">
-                        نوبت: {save.turn}
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronLeft
-                    size={14}
-                    className="text-muted-foreground group-hover:translate-x-[-2px] transition-transform shrink-0"
-                  />
-                </button>
+                  save={save}
+                  onSelect={handleSelect}
+                />
               ))}
             </div>
           </>
