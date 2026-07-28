@@ -12,7 +12,6 @@ export class DiplomaticMatrixGenerator {
         opinion: 0,
         tributePerTurn: 0,
         militaryAccess: false,
-        intelLevel: 0,
         coolOffTurnsRemaining: 0,
       };
     }

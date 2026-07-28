@@ -1,5 +1,4 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { GlobalIntelligenceUpdater } from "@/engine/diplomacy/global-intelligence-updater";
 import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { CoalitionManager } from "@/engine/diplomacy/coalition-manager";
@@ -8,7 +7,6 @@ import { ReputationDecayHandler } from "./diplomacy/reputation-decay-handler";
 import { OpinionFrictionHandler } from "./diplomacy/opinion-friction-handler";
 
 export class DiplomacyPhase implements TurnPhase {
-  private intelligenceUpdater = new GlobalIntelligenceUpdater();
   private powerRanker = new PowerScoreRanker();
   private governmentSystem = new GovernmentSystem();
   private coalitionManager = new CoalitionManager();
@@ -42,10 +40,7 @@ export class DiplomacyPhase implements TurnPhase {
         continue;
       }
 
-      let updated = this.intelligenceUpdater.updatePassiveIntel(
-        nation,
-        nations,
-      );
+      let updated = { ...nation };
 
       updated = this.reputationDecayHandler.handle(updated);
       updated = this.opinionFrictionHandler.handle(updated, nations);
