@@ -15,7 +15,7 @@ export function VictoryStatsCard({
   conqueredArea,
 }: VictoryStatsCardProps) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 font-mono text-xs">
+    <div className="grid grid-cols-2 gap-2.5 font-mono text-xs dir-rtl">
       <div className="bg-secondary/40 p-3 rounded-2xl space-y-1 border border-border/40">
         <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
           <Award size={12} className="text-amber-500" />
