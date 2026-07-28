@@ -14,10 +14,12 @@ export class PowerScoreCalculator {
     infantry: number,
     airForce: number,
     drone: number,
+    techLevel = 1,
     militaryPowerMultiplier = 1.0,
   ): number {
     const baseStrength = infantry * 1.0 + airForce * 3.0 + drone * 2.5;
-    return baseStrength * militaryPowerMultiplier * 500000;
+    const techMultiplier = 1 + (techLevel - 1) * 0.2;
+    return baseStrength * techMultiplier * militaryPowerMultiplier;
   }
 
   public calculatePowerScore(
@@ -26,6 +28,7 @@ export class PowerScoreCalculator {
     infantry: number,
     airForce: number,
     drone: number,
+    techLevel = 1,
     militaryPowerMultiplier = 1.0,
   ): PowerScoreDetails {
     const economicScore = this.calculateEconomicScore(gdp, treasury);
@@ -33,6 +36,7 @@ export class PowerScoreCalculator {
       infantry,
       airForce,
       drone,
+      techLevel,
       militaryPowerMultiplier,
     );
     const powerScore = Number((economicScore + militaryScore).toFixed(4));

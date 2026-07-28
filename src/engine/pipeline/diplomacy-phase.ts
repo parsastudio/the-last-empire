@@ -30,6 +30,7 @@ export class DiplomacyPhase implements TurnPhase {
           infantry: n.military.infantry,
           airForce: n.military.airForce,
           drone: n.military.droneMissile,
+          techLevel: n.military.techLevel,
           militaryPowerMultiplier: govTraits.militaryPowerMultiplier,
         };
       });
