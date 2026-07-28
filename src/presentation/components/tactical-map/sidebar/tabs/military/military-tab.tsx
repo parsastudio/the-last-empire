@@ -5,15 +5,33 @@ import { RecruitmentQueueCard } from "./recruitment-queue-card";
 import { DisbandUnitCard } from "./disband-unit-card";
 import { PlusCircle, ShieldAlert, Swords } from "lucide-react";
 import { MilitaryStack } from "@/domain/military/military.schema";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface MilitaryTabProps {
   military: MilitaryStack;
+  nationId?: string;
 }
 
-export function MilitaryTab({ military }: MilitaryTabProps) {
+export function MilitaryTab({
+  military,
+  nationId = "NATION_118",
+}: MilitaryTabProps) {
   const [currentSubView, setCurrentSubView] = useState<
     "overview" | "expansion"
   >("overview");
+
+  const { dispatchAction } = useGameActions();
+
+  const handleUpgradeTech = async () => {
+    await dispatchAction(
+      {
+        id: `research-${Date.now()}`,
+        nationId,
+        type: "INVEST_RESEARCH",
+      },
+      "تحقیق سطح جدید فناوری نظامی با موفقیت ثبت شد.",
+    );
+  };
 
   if (currentSubView === "expansion") {
     return (
@@ -24,7 +42,7 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
         >
           <span>← بازگشت به نمای ارتش</span>
         </button>
-        <MilitaryExpansionView />
+        <MilitaryExpansionView nationId={nationId} />
       </div>
     );
   }
@@ -39,7 +57,7 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
         experience={military.experience}
       />
 
-      <RecruitmentQueueCard />
+      <RecruitmentQueueCard nationId={nationId} />
 
       <div className="space-y-2.5">
         <div className="flex items-center gap-2 px-1">
@@ -76,7 +94,7 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
             <span className="font-bold text-gdp">$100,000</span>
           </div>
           <button
-            onClick={() => {}}
+            onClick={handleUpgradeTech}
             className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer"
           >
             <ShieldAlert size={14} className="text-amber-500" />
@@ -85,7 +103,7 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
         </div>
       </div>
 
-      <DisbandUnitCard />
+      <DisbandUnitCard nationId={nationId} />
     </div>
   );
 }

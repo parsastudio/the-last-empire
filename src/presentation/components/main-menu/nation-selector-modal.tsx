@@ -1,14 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { X, Search, ChevronLeft, Shield, Award } from "lucide-react";
-
-interface Nation {
-  id: string;
-  name: string;
-  code: string;
-  rank: number;
-  power: string;
-  gdp: string;
-}
+import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
 
 interface NationSelectorModalProps {
   isOpen: boolean;
@@ -16,66 +8,28 @@ interface NationSelectorModalProps {
   onSelect: (nationId: string) => void;
 }
 
-const ALL_NATIONS: Nation[] = [
-  {
-    id: "USA",
-    name: "ایالات متحده آمریکا",
-    code: "us",
-    rank: 1,
-    power: "ابرقدرت جهانی",
-    gdp: "۲۶.۸ تریلیون دلار",
-  },
-  {
-    id: "CHN",
-    name: "چین",
-    code: "cn",
-    rank: 2,
-    power: "پیشران صنعتی و تجاری",
-    gdp: "۱۸.۰ تریلیون دلار",
-  },
-  {
-    id: "RUS",
-    name: "روسیه",
-    code: "ru",
-    rank: 3,
-    power: "قطب بزرگ نظامی",
-    gdp: "۱.۷ تریلیون دلار",
-  },
-  {
-    id: "IRN",
-    name: "ایران",
-    code: "ir",
-    rank: 14,
-    power: "قدرت فرامنطقه‌ای",
-    gdp: "۴۵۰ میلیارد دلار",
-  },
-  {
-    id: "DEU",
-    name: "آلمان",
-    code: "de",
-    rank: 4,
-    power: "اقتصاد برتر قاره‌ای",
-    gdp: "۴.۳ تریلیون دلار",
-  },
-];
-
 export function NationSelectorModal({
   isOpen,
   onClose,
   onSelect,
 }: NationSelectorModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const provider = useMemo(() => new NationDatabaseProvider(), []);
+  const allNations = useMemo(
+    () => provider.getAllSelectableNations(),
+    [provider],
+  );
 
   if (!isOpen) return null;
 
-  const filteredNations = ALL_NATIONS.filter(
+  const filteredNations = allNations.filter(
     (n) =>
       n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       n.id.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
-    <div className="fixed inset-0 bg-background/60 backdrop-blur-lg flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-background/60 backdrop-blur-lg flex items-center justify-center p-4 z-50 dir-rtl text-right">
       <div className="bg-card border border-border w-full max-w-xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[85vh]">
         <button
           onClick={onClose}
@@ -92,7 +46,7 @@ export function NationSelectorModal({
             انتخاب کشور هدف برای شروع کمپین
           </h3>
           <p className="text-xs text-muted-foreground">
-            قدرت حاکمیتی خود را از فهرست زیر انتخاب کنید یا نام کشور مورد نظر را
+            قدرت حاکمیتی خود را از فهرست ۱۷۰+ کشور جهان انتخاب کرده یا نام آن را
             جستجو کنید.
           </p>
         </div>
@@ -104,7 +58,7 @@ export function NationSelectorModal({
           />
           <input
             type="text"
-            placeholder="جستجوی نام کشور یا نماد (مثل ایران، USA)..."
+            placeholder="جستجوی نام کشور یا نماد..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-background border border-border rounded-2xl py-2.5 pr-10 pl-4 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors text-right"

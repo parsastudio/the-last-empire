@@ -1,16 +1,10 @@
 import { GridCell } from "@/domain/map/grid-cell.schema";
-
-interface ClusterComponent {
-  cells: GridCell[];
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
-  pixelCount: number;
-}
+import { ClusterComponent } from "./cluster-distance-evaluator";
+import { ComponentMergeEngine } from "./component-merge-engine";
 
 export class RegionClusteringEngine {
   private readonly bufferSearchPixelRadius = 38;
+  private mergeEngine = new ComponentMergeEngine();
 
   public clusterNationRegions(
     countryId: string,
@@ -85,7 +79,11 @@ export class RegionClusteringEngine {
       });
     }
 
-    const mergedClusters = this.mergeNearComponents(rawComponents, gridWidth);
+    const mergedClusters = this.mergeEngine.mergeNearComponents(
+      rawComponents,
+      gridWidth,
+      this.bufferSearchPixelRadius,
+    );
 
     mergedClusters.sort((a, b) => b.pixelCount - a.pixelCount);
 
@@ -100,112 +98,5 @@ export class RegionClusteringEngine {
     });
 
     return regionAssignmentMap;
-  }
-
-  private mergeNearComponents(
-    components: ClusterComponent[],
-    gridWidth: number,
-  ): ClusterComponent[] {
-    const parent = components.map((_, i) => i);
-
-    const find = (i: number): number => {
-      if (parent[i] === i) return i;
-      parent[i] = find(parent[i]!);
-      return parent[i]!;
-    };
-
-    const union = (i: number, j: number) => {
-      const rootI = find(i);
-      const rootJ = find(j);
-      if (rootI !== rootJ) {
-        parent[rootI] = rootJ;
-      }
-    };
-
-    for (let i = 0; i < components.length; i++) {
-      for (let j = i + 1; j < components.length; j++) {
-        const c1 = components[i]!;
-        const c2 = components[j]!;
-
-        if (this.areComponentsClose(c1, c2, gridWidth)) {
-          union(i, j);
-        }
-      }
-    }
-
-    const groups = new Map<number, ClusterComponent[]>();
-    for (let i = 0; i < components.length; i++) {
-      const root = find(i);
-      if (!groups.has(root)) {
-        groups.set(root, []);
-      }
-      groups.get(root)!.push(components[i]!);
-    }
-
-    const result: ClusterComponent[] = [];
-    for (const group of groups.values()) {
-      const allCells = group.flatMap((g) => g.cells);
-      const totalPixels = allCells.reduce(
-        (sum, c) => sum + c.highResPixelCount,
-        0,
-      );
-
-      result.push({
-        cells: allCells,
-        minX: Math.min(...group.map((g) => g.minX)),
-        maxX: Math.max(...group.map((g) => g.maxX)),
-        minY: Math.min(...group.map((g) => g.minY)),
-        maxY: Math.max(...group.map((g) => g.maxY)),
-        pixelCount: totalPixels,
-      });
-    }
-
-    return result;
-  }
-
-  private areComponentsClose(
-    c1: ClusterComponent,
-    c2: ClusterComponent,
-    gridWidth: number,
-  ): boolean {
-    const bboxXDist = Math.max(
-      0,
-      Math.max(c1.minX - c2.maxX, c2.minX - c1.maxX),
-    );
-    const bboxYDist = Math.max(
-      0,
-      Math.max(c1.minY - c2.maxY, c2.minY - c1.maxY),
-    );
-
-    let effectiveXDist = bboxXDist;
-    if (gridWidth - bboxXDist < effectiveXDist) {
-      effectiveXDist = gridWidth - bboxXDist;
-    }
-
-    if (
-      effectiveXDist > this.bufferSearchPixelRadius ||
-      bboxYDist > this.bufferSearchPixelRadius
-    ) {
-      return false;
-    }
-
-    for (const cell1 of c1.cells) {
-      for (const cell2 of c2.cells) {
-        let dx = Math.abs(cell1.x - cell2.x);
-        if (dx > gridWidth / 2) {
-          dx = gridWidth - dx;
-        }
-        const dy = Math.abs(cell1.y - cell2.y);
-
-        if (
-          dx <= this.bufferSearchPixelRadius &&
-          dy <= this.bufferSearchPixelRadius
-        ) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 }
