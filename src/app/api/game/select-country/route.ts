@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
+import { normalizeNationId } from "@/application/map-rendering/game-state-initializer";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -13,8 +14,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
+    const normalized = normalizeNationId(nationId);
     const facade = new SimulationFacade();
-    const state = facade.selectPlayerNation(nationId);
+    const state = facade.selectPlayerNation(normalized);
 
     return NextResponse.json({ success: true, data: state });
   } catch (err) {

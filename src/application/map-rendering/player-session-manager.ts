@@ -1,6 +1,7 @@
 import { NationId } from "@/domain/shared/primitives";
+import { normalizeNationId } from "./game-state-initializer";
 
-let serverFallbackNationId: NationId = "IRN";
+let serverFallbackNationId: NationId = "NATION_118";
 
 export class PlayerSessionManager {
   private readonly storageKey = "test6_human_nation_id";
@@ -8,15 +9,16 @@ export class PlayerSessionManager {
   public getPlayerNationId(): NationId {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(this.storageKey);
-      if (stored) return stored;
+      if (stored) return normalizeNationId(stored);
     }
     return serverFallbackNationId;
   }
 
   public setPlayerNationId(nationId: NationId): void {
-    serverFallbackNationId = nationId;
+    const normalized = normalizeNationId(nationId);
+    serverFallbackNationId = normalized;
     if (typeof window !== "undefined") {
-      localStorage.setItem(this.storageKey, nationId);
+      localStorage.setItem(this.storageKey, normalized);
     }
   }
 

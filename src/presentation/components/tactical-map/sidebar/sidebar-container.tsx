@@ -33,10 +33,12 @@ export function SidebarContainer({
   const { gameState, advanceNextTurn } = useGeopoliticsGame();
 
   const realReports = useRealCombatReports(gameState);
+
   const humanNation =
     gameState && gameState.humanNationId
       ? gameState.nations[gameState.humanNationId] || null
       : null;
+
   const currentTurn = gameState ? gameState.currentTurn : 1;
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export function SidebarContainer({
 
     showToast(
       "نوبت جدید آغاز شد",
-      `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} انجام گردید.`,
+      `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} با موفقیت انجام شد.`,
       "info",
     );
 

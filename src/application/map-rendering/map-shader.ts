@@ -2,6 +2,7 @@ import { CountryPaletteGenerator } from "./shader/country-palette-generator";
 import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator";
 import { MapBevelShader } from "./shader/map-bevel-shader";
 import { NoiseGrainApplier } from "./shader/noise-grain-applier";
+import { findCountryProfileById } from "@/domain/map/countries";
 
 interface Country {
   id: number;
@@ -82,22 +83,30 @@ export class MapShader {
           const pair = palette[id];
           if (pair) {
             if (activeLayer === "gdp") {
-              const matched = countries.find((c) => c.id === id);
-              const area = matched?.areaSqKm || 50000;
-              const gdpScale = Math.min(1.0, area / 1000000);
-              r = Math.floor(20 + gdpScale * 40);
-              g = Math.floor(120 + gdpScale * 110);
-              b = Math.floor(60 + gdpScale * 80);
+              const profile = findCountryProfileById(id);
+              const realGdp = profile ? profile.gdp : 10000000000;
+              const logGdp = Math.log10(Math.max(1000000, realGdp));
+              const normalizedScale = Math.max(
+                0,
+                Math.min(1.0, (logGdp - 9.0) / 4.5),
+              );
+
+              r = Math.floor(10 + (1.0 - normalizedScale) * 180);
+              g = Math.floor(80 + normalizedScale * 160);
+              b = Math.floor(50 + normalizedScale * 50);
             } else if (activeLayer === "military") {
-              const matched = countries.find((c) => c.id === id);
-              if (matched && matched.code === "USA") {
+              const profile = findCountryProfileById(id);
+              const infantry = profile?.startingInfantry || 40;
+              const isStrong = infantry > 300;
+
+              if (isStrong) {
                 r = 220;
                 g = 38;
                 b = 38;
               } else {
-                r = 100;
-                g = 110;
-                b = 120;
+                r = 71;
+                g = 85;
+                b = 105;
               }
             } else {
               const countryColor = this.bevelShader.calculateBevel(
