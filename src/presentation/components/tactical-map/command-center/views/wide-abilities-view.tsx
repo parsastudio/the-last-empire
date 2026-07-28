@@ -13,7 +13,7 @@ export function WideAbilitiesView({
   const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {REGIME_ABILITIES.map((ab) => (
           <AbilityCard
@@ -29,10 +29,7 @@ export function WideAbilitiesView({
         isOpen={selectedAbility !== null}
         abilityName={selectedAbility || ""}
         onClose={() => setSelectedAbility(null)}
-        onConfirmTarget={(targetCode) => {
-          alert(
-            `توانمندی ${selectedAbility} با موفقیت بر روی کشور ${targetCode} اجرا شد.`,
-          );
+        onConfirmTarget={() => {
           setSelectedAbility(null);
         }}
       />

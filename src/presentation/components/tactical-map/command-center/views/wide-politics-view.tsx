@@ -19,7 +19,7 @@ export function WidePoliticsView({
   governmentType,
 }: WidePoliticsViewProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard />
         <TaxControlCard taxRate={taxRate} />

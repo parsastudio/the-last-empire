@@ -4,51 +4,19 @@ import { EconomyStatsSection } from "../../sidebar/economy-stats-section";
 import { ResourcesSection } from "../../sidebar/resources-section";
 import { GovernmentStatusSection } from "../../sidebar/government-status-section";
 import { RegionBreakdownCard } from "../../sidebar/region-breakdown-card";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface WideOverviewViewProps {
-  nation: {
-    name: string;
-    code: string;
-    flagCode: string;
-    gdp: number;
-    taxRate: number;
-    tariffRate: number;
-    treasury: number;
-    nationalDebt: number;
-    population: number;
-    warExhaustion: number;
-    industrialLevel: number;
-    government: {
-      type: string;
-      stability: number;
-      corruption: number;
-      socialFreedom: number;
-    };
-    resources: {
-      oil: number;
-      steel: number;
-      manpower: number;
-    };
-    globalReputation: number;
-    globalAggression: number;
-    regionsDemographics?: Array<{
-      regionId: number;
-      name: string;
-      pixelCount: number;
-      areaSqKm: number;
-      population: number;
-      gdp: number;
-    }>;
-  };
+  nation: Nation;
 }
 
 export function WideOverviewView({ nation }: WideOverviewViewProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <NationHeaderCard
           name={nation.name}
-          code={nation.code}
+          code={nation.id}
           flagCode={nation.flagCode}
           governmentType={nation.government.type}
           population={nation.population}
