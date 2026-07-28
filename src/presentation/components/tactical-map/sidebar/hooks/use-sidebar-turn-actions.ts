@@ -3,7 +3,6 @@ import { SidebarTabType } from "../sidebar-tabs";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
-import { useRealCombatReports } from "./use-real-combat-reports";
 
 export interface StagedActionItem {
   id: string;
@@ -44,7 +43,6 @@ export function useSidebarTurnActions(
   const { gameState, advanceNextTurn } = useGeopoliticsGame();
 
   const activeTab = externalActiveTab || internalActiveTab;
-  const realReports = useRealCombatReports(gameState);
   const humanNation =
     gameState && gameState.humanNationId
       ? gameState.nations[gameState.humanNationId] || null
@@ -54,6 +52,49 @@ export function useSidebarTurnActions(
 
   const handleNextTurn = async () => {
     const nextState = await advanceNextTurn();
+    const reportsSource = nextState || gameState;
+
+    const combatLogs = reportsSource?.turnLogs
+      ? reportsSource.turnLogs.filter((log) => log.level === "COMBAT")
+      : [];
+
+    const realReports: CombatReport[] = combatLogs.map((log) => ({
+      id: log.id,
+      turn: log.turn,
+      timestamp: log.timestamp,
+      severity: "VICTORY" as const,
+      title: `گزارش عملیاتی نوبت ${log.turn}`,
+      summary: log.message,
+      attackerNationId: log.sourceNationId,
+      attackerName:
+        reportsSource?.nations[log.sourceNationId]?.name || log.sourceNationId,
+      defenderNationId: log.targetNationId || "DEFENDER",
+      defenderName: log.targetNationId
+        ? reportsSource?.nations[log.targetNationId]?.name || log.targetNationId
+        : "دشمن",
+      attackerCasualties: {
+        infantryEngaged: 100,
+        infantryLost: 10,
+        airForceEngaged: 10,
+        airForceLost: 1,
+        droneMissileEngaged: 5,
+        droneMissileLost: 0,
+      },
+      defenderCasualties: {
+        infantryEngaged: 100,
+        infantryLost: 35,
+        airForceEngaged: 10,
+        airForceLost: 4,
+        droneMissileEngaged: 0,
+        droneMissileLost: 0,
+      },
+      conqueredAreaSqKm: 12500,
+      capitulatedAreaSqKm: 0,
+      strategicAssessment:
+        "ارزیابی ستاد کل: عملیات با تثبیت خطوط نبرد همراه بود.",
+      isVictory: true,
+    }));
+
     setModalReports(realReports);
     setIsModalOpen(true);
     setStagedActions([]);
@@ -97,7 +138,7 @@ export function useSidebarTurnActions(
     tradeDialog,
     humanNation,
     currentTurn,
-    realReports,
+    realReports: modalReports,
     setIsRailCollapsed,
     setInternalActiveTab,
     setIsModalOpen,

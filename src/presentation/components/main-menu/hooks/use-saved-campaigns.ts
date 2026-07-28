@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
+import { StateSerializer } from "@/infrastructure/storage/state-serializer";
 
 export interface SavedCampaignMeta {
   id: string;
@@ -19,20 +20,32 @@ export function useSavedCampaigns() {
     async function loadSavesFromDb() {
       try {
         const adapter = new IndexedDbAdapter();
-        const mainState = await adapter.loadState("active_game");
-        if (active && mainState) {
-          const humanNation = mainState.nations[mainState.humanNationId];
-          const nationName = humanNation
-            ? humanNation.name
-            : mainState.humanNationId;
-          const meta: SavedCampaignMeta = {
-            id: mainState.gameId,
-            title: `کمپین ${mainState.gameId} - ${nationName}`,
-            turn: mainState.currentTurn,
-            date: new Date().toLocaleDateString("fa-IR"),
-            humanNationId: mainState.humanNationId,
-          };
-          setSaves([meta]);
+        const serializer = new StateSerializer();
+        const records = await adapter.getAllSaves();
+
+        if (active) {
+          const mapped: SavedCampaignMeta[] = [];
+
+          for (const rec of records) {
+            if (rec.gameId === "active_game") continue;
+            try {
+              const state = serializer.deserialize(rec.data);
+              const humanNation = state.nations[state.humanNationId];
+              const nationName = humanNation
+                ? humanNation.name
+                : state.humanNationId;
+
+              mapped.push({
+                id: state.gameId,
+                title: `کمپین ${state.gameId} - ${nationName}`,
+                turn: state.currentTurn,
+                date: new Date(rec.timestamp).toLocaleDateString("fa-IR"),
+                humanNationId: state.humanNationId,
+              });
+            } catch {}
+          }
+
+          setSaves(mapped);
         }
       } catch {
       } finally {

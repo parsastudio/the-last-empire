@@ -2,6 +2,12 @@ import type { GameState } from "@/domain/game/game-state.schema";
 import { StateSerializer } from "@/infrastructure/storage/state-serializer";
 import { INDEXED_DB_CONFIG } from "./indexed-db-config";
 
+export interface SavedRecord {
+  gameId: string;
+  data: string;
+  timestamp: number;
+}
+
 export class IndexedDbAdapter {
   private serializer = new StateSerializer();
   private dbName = INDEXED_DB_CONFIG.DB_NAME;
@@ -64,6 +70,19 @@ export class IndexedDbAdapter {
         }
       };
 
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  public async getAllSaves(): Promise<SavedRecord[]> {
+    const db = await this.getDb();
+
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(this.storeName, "readonly");
+      const store = transaction.objectStore(this.storeName);
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result || []);
       request.onerror = () => reject(request.error);
     });
   }
