@@ -11,7 +11,7 @@ interface UseCountryHoverMathProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   scale: number;
   position: { x: number; y: number };
-  rankingsCacheRef: Map<string, number>;
+  rankingsMap: Map<string, number>;
 }
 
 export function useCountryHoverMath({
@@ -22,7 +22,7 @@ export function useCountryHoverMath({
   containerRef,
   scale,
   position,
-  rankingsCacheRef,
+  rankingsMap,
 }: UseCountryHoverMathProps) {
   const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);
   const rafIdRef = useRef<number | null>(null);
@@ -79,12 +79,21 @@ export function useCountryHoverMath({
       : gdpBillionsNum.toFixed(1);
 
     const flagCode = profile ? profile.flagCode : matchedCountry.code;
-    const nationKey = `NATION_${matchedCountry.id}`;
 
-    const cachedRank =
-      rankingsCacheRef.get(nationKey) ??
-      rankingsCacheRef.get(matchedCountry.code) ??
-      99;
+    const possibleKeys = [
+      `NATION_${matchedCountry.id}`,
+      matchedCountry.code.toUpperCase(),
+      matchedCountry.code.toLowerCase(),
+      matchedCountry.id.toString(),
+    ];
+
+    let cachedRank = rankingsMap.size > 0 ? rankingsMap.size : 99;
+    for (const key of possibleKeys) {
+      if (rankingsMap.has(key)) {
+        cachedRank = rankingsMap.get(key)!;
+        break;
+      }
+    }
 
     setHoverData({
       name: realName,
@@ -102,7 +111,7 @@ export function useCountryHoverMath({
     containerRef,
     scale,
     position,
-    rankingsCacheRef,
+    rankingsMap,
   ]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {

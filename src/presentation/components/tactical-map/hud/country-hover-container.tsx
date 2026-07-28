@@ -32,7 +32,7 @@ export function CountryHoverContainer({
   scale,
   position,
 }: CountryHoverContainerProps) {
-  const rankingsCache = useCountryHoverRankings();
+  const rankingsMap = useCountryHoverRankings(countries);
   const { hoverData, handleMouseMove, handleMouseLeave } = useCountryHoverMath({
     countries,
     maskDataRef,
@@ -41,7 +41,7 @@ export function CountryHoverContainer({
     containerRef,
     scale,
     position,
-    rankingsCacheRef: rankingsCache,
+    rankingsMap,
   });
 
   return (

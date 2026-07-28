@@ -7,6 +7,7 @@ export interface NationRankInput {
   infantry: number;
   airForce: number;
   drone: number;
+  techLevel?: number;
   militaryPowerMultiplier?: number;
 }
 
@@ -27,6 +28,7 @@ export class PowerScoreRanker {
         n.infantry,
         n.airForce,
         n.drone,
+        n.techLevel ?? 1,
         n.militaryPowerMultiplier ?? 1.0,
       );
       return {

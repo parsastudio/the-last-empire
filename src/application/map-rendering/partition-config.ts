@@ -4,7 +4,6 @@ export const PARTITION_COUNTRIES_LIST = [
   "HND",
   "NIC",
   "CRI",
-  "PAN",
   "GUY",
   "SUR",
   "PRY",
@@ -79,4 +78,6 @@ export const PARTITION_COUNTRIES_LIST = [
   "ATF",
   "FLK",
   "TTO",
+  "SAH",
+  "PAN",
 ];
