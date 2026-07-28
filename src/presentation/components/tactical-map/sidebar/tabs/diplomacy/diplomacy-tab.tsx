@@ -23,8 +23,9 @@ export function DiplomacyTab({
   onFocusCountry,
 }: DiplomacyTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRelation, setSelectedRelation] =
-    useState<DiplomaticRelation | null>(null);
+  const [selectedRelationCode, setSelectedRelationCode] = useState<
+    string | null
+  >(null);
 
   const idResolver = useMemo(() => new NationIdResolver(), []);
 
@@ -48,31 +49,25 @@ export function DiplomacyTab({
     );
   }, [humanNationId, nationsMap]);
 
-  React.useEffect(() => {
-    if (selectedTargetCode) {
-      const matched = relationsList.find(
-        (r) => r.code.toUpperCase() === selectedTargetCode.toUpperCase(),
-      );
-      if (matched) {
-        setSelectedRelation(matched);
-      }
-    }
-  }, [selectedTargetCode, relationsList]);
-
-  if (selectedRelation) {
-    const targetNationId = idResolver.resolveFullNationId(
-      selectedRelation.code,
+  const activeCode = selectedTargetCode || selectedRelationCode;
+  const activeRelation = useMemo(() => {
+    if (!activeCode) return null;
+    return (
+      relationsList.find(
+        (r) => r.code.toUpperCase() === activeCode.toUpperCase(),
+      ) || null
     );
+  }, [activeCode, relationsList]);
+
+  if (activeRelation) {
+    const targetNationId = idResolver.resolveFullNationId(activeRelation.code);
     const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
 
     return (
       <DiplomacyDetailView
-        relation={resolveProfileRelation(
-          selectedRelation.code,
-          targetLiveNation,
-        )}
+        relation={resolveProfileRelation(activeRelation.code, targetLiveNation)}
         targetTreasury={targetLiveNation ? targetLiveNation.treasury : 350000}
-        onBack={() => setSelectedRelation(null)}
+        onBack={() => setSelectedRelationCode(null)}
         onFocusCountry={onFocusCountry}
       />
     );
@@ -83,7 +78,9 @@ export function DiplomacyTab({
       relations={relationsList}
       searchQuery={searchQuery}
       onSearchChange={setSearchQuery}
-      onSelectRelation={setSelectedRelation}
+      onSelectRelation={(rel: DiplomaticRelation) =>
+        setSelectedRelationCode(rel.code)
+      }
     />
   );
 }
