@@ -20,7 +20,7 @@ export function EventChoiceButton({
   return (
     <button
       onClick={() => onSelect(option.id)}
-      className="w-full bg-background/60 hover:bg-secondary/60 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex flex-col gap-2 group cursor-pointer"
+      className="w-full bg-background/60 hover:bg-secondary/60 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex flex-col gap-2 group cursor-pointer dir-rtl"
     >
       <div className="flex items-center justify-between w-full">
         <span className="text-xs font-bold text-foreground leading-relaxed">

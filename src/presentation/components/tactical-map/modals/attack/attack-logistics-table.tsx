@@ -1,15 +1,19 @@
 import React from "react";
-import { Coins, Fuel } from "lucide-react";
+import { Coins, Fuel, Wrench } from "lucide-react";
 
 interface AttackLogisticsTableProps {
   estimatedCost: number;
+  requiredOil?: number;
+  requiredSteel?: number;
 }
 
 export function AttackLogisticsTable({
   estimatedCost,
+  requiredOil = 50,
+  requiredSteel = 0,
 }: AttackLogisticsTableProps) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 dir-rtl text-right">
       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
         برآورد هزینه‌ها و لجستیک عملیات
       </span>
@@ -30,8 +34,22 @@ export function AttackLogisticsTable({
             <Fuel size={13} className="text-primary" />
             سوخت و نفت مورد نیاز سوخت‌رسانی
           </span>
-          <span className="font-bold text-foreground">۵۰ بشکه</span>
+          <span className="font-bold text-foreground">
+            {requiredOil.toLocaleString("fa-IR")} بشکه
+          </span>
         </div>
+
+        {requiredSteel > 0 && (
+          <div className="flex justify-between items-center pt-2 border-t border-border/40">
+            <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
+              <Wrench size={13} className="text-treasury" />
+              قطعات فولاد صنعتی مصرفی
+            </span>
+            <span className="font-bold text-foreground">
+              {requiredSteel.toLocaleString("fa-IR")} تن
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
