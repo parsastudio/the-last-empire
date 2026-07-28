@@ -30,7 +30,7 @@ export function CasualtyTable({
   );
 
   return (
-    <div className="bg-secondary/40 border border-border/80 rounded-2xl p-4 space-y-3 font-mono text-xs dir-rtl">
+    <div className="bg-secondary/40 border border-border/80 rounded-2xl p-4 space-y-3 font-mono text-xs dir-rtl text-right">
       <div className="grid grid-cols-3 gap-2 pb-2 border-b border-border/60 text-center font-bold font-sans">
         <span className="text-muted-foreground text-[10px] uppercase">
           شاخص نبرد

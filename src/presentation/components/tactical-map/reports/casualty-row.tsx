@@ -21,7 +21,7 @@ export function CasualtyRow({
   defenderColor = "text-foreground",
 }: CasualtyRowProps) {
   return (
-    <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40">
+    <div className="grid grid-cols-3 gap-2 items-center text-center py-1 border-b border-border/40 dir-rtl">
       <div className="flex items-center gap-1.5 text-muted-foreground text-[11px] justify-start font-sans">
         <Icon size={13} className={iconColor} />
         <span>{label}</span>

@@ -13,7 +13,7 @@ export function ReportDetailsView({ report, onBack }: ReportDetailsViewProps) {
   const style = getSeverityStyle(report.severity);
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
