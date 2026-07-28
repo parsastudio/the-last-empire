@@ -11,20 +11,30 @@ import { TacticalViewport } from "@/presentation/components/tactical-map/layout/
 import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
 import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
 import { TacticalMapOverlay } from "@/presentation/components/tactical-map/layout/tactical-map-overlay";
+import {
+  LayerController,
+  TacticalLayer,
+} from "@/presentation/components/tactical-map/controls/layer-controller";
+import { ToastProvider } from "@/presentation/context/toast-context";
+import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
+import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 
-export default function MapTest6Page() {
+function MapTest6Content() {
   const mapWidth = 4096;
   const mapHeight = 2048;
 
   const [activeMapMode] = useState<"default" | "edited" | "partition">(
     "partition",
   );
+  const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isSidebarOpen] = useState<boolean>(true);
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const dimensions = useMapDimensions(containerRef);
+  const { gameState } = useGeopoliticsGame();
+  const metrics = useGameResources(gameState);
 
   const {
     scale,
@@ -109,6 +119,7 @@ export default function MapTest6Page() {
         />
 
         <TacticalMapOverlay
+          metrics={metrics}
           contextMenuState={interaction.contextMenuState}
           activeScreenPos={interaction.activeScreenPos}
           attackModalState={interaction.attackModalState}
@@ -117,6 +128,11 @@ export default function MapTest6Page() {
           onCloseAttackModal={interaction.closeAttackModal}
         />
       </TacticalViewport>
+
+      <LayerController
+        activeLayer={activeLayer}
+        onChangeLayer={setActiveLayer}
+      />
 
       <SidebarContainer
         isOpen={isSidebarOpen}
@@ -134,5 +150,13 @@ export default function MapTest6Page() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MapTest6Page() {
+  return (
+    <ToastProvider>
+      <MapTest6Content />
+    </ToastProvider>
   );
 }

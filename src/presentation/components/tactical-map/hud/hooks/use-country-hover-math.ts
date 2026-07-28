@@ -27,6 +27,9 @@ export function useCountryHoverMath({
   rankingsMap,
 }: UseCountryHoverMathProps) {
   const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
   const rafIdRef = useRef<number | null>(null);
   const lastMousePosRef = useRef<{ clientX: number; clientY: number } | null>(
     null,
@@ -38,8 +41,11 @@ export function useCountryHoverMath({
     const container = containerRef.current;
     if (!lastPos || !container || !maskDataRef.current) {
       setHoverData(null);
+      setCursorPos(null);
       return;
     }
+
+    setCursorPos({ x: lastPos.clientX, y: lastPos.clientY });
 
     const rect = container.getBoundingClientRect();
     const clientX = lastPos.clientX - rect.left;
@@ -111,7 +117,7 @@ export function useCountryHoverMath({
 
     let regionLabel = "";
     if (greenChannelVal > 0) {
-      regionLabel = `(منطقه ${greenChannelVal.toLocaleString("fa-IR")})`;
+      regionLabel = `منطقه ${greenChannelVal.toLocaleString("fa-IR")}`;
     }
 
     setHoverData({
@@ -119,8 +125,8 @@ export function useCountryHoverMath({
       code: matchedCountry.code,
       flagCode: flagCode,
       rank: cachedRank,
-      stance: "صلح و دیپلماسی عادی",
-      gdp: `$${gdpFormatted} میلیارد دلار`,
+      stance: "دیپلماسی صلح‌آمیز",
+      gdp: `$${gdpFormatted}B`,
       regionName: regionLabel,
       regionArea: `${Math.round(areaVal).toLocaleString("fa-IR")} km²`,
     });
@@ -150,10 +156,12 @@ export function useCountryHoverMath({
     }
     lastMousePosRef.current = null;
     setHoverData(null);
+    setCursorPos(null);
   };
 
   return {
     hoverData,
+    cursorPos,
     handleMouseMove,
     handleMouseLeave,
   };

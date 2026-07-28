@@ -14,14 +14,15 @@ export function LayerController({
   onChangeLayer,
 }: LayerControllerProps) {
   return (
-    <div className="absolute top-6 right-6 z-40 flex flex-col gap-3">
-      <div className="bg-slate-950/80 backdrop-blur-md border border-slate-900 rounded-3xl p-2.5 shadow-2xl flex flex-col gap-1.5">
-        <div className="flex items-center gap-2 px-3 py-1.5 border-b border-slate-900 mb-1">
-          <Layers size={13} className="text-slate-500" />
-          <span className="text-[10px] font-extrabold text-slate-400 tracking-wider font-sans uppercase">
-            لایه‌های اطلاعات تاکتیکی
+    <div className="fixed bottom-6 left-6 z-40 flex flex-col gap-2">
+      <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1 dir-rtl">
+        <div className="p-2 text-muted-foreground border-l border-border/60 flex items-center gap-1.5">
+          <Layers size={14} />
+          <span className="text-[10px] font-extrabold font-sans hidden sm:inline">
+            لایه‌ها:
           </span>
         </div>
+
         {LAYER_OPTIONS.map((opt) => {
           const Icon = opt.icon;
           const isActive = activeLayer === opt.id;
@@ -29,17 +30,17 @@ export function LayerController({
             <button
               key={opt.id}
               onClick={() => onChangeLayer(opt.id)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[11px] font-bold transition-all text-right dir-rtl cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 isActive
-                  ? "bg-slate-900 text-white border border-slate-800 shadow-inner"
-                  : "text-slate-400 hover:bg-slate-900/40 hover:text-slate-200 border border-transparent"
+                  ? "bg-secondary text-foreground shadow-sm border border-border/60"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
               }`}
             >
               <Icon
-                size={14}
-                className={isActive ? opt.color : "text-slate-500"}
+                size={13}
+                className={isActive ? opt.color : "text-muted-foreground"}
               />
-              <span className="font-sans">{opt.label}</span>
+              <span className="font-sans text-[11px]">{opt.label}</span>
             </button>
           );
         })}
