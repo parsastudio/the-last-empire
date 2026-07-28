@@ -16,7 +16,6 @@ export class RegionClusteringEngine {
     countryId: string,
     allCells: GridCell[],
     gridWidth = 1024,
-    _gridHeight = 512,
   ): Map<string, number> {
     const countryCells = allCells.filter((c) => c.ownerId === countryId);
     if (countryCells.length === 0) {

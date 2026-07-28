@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { MilitaryForcesSection } from "../../military-forces-section";
 import { MilitaryExpansionView } from "./military-expansion-view";
+import { RecruitmentQueueCard } from "./recruitment-queue-card";
+import { DisbandUnitCard } from "./disband-unit-card";
 import { PlusCircle, ShieldAlert, Swords } from "lucide-react";
 
 interface MilitaryTabProps {
@@ -41,6 +43,8 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
         techLevel={military.techLevel}
         experience={military.experience}
       />
+
+      <RecruitmentQueueCard />
 
       <div className="space-y-2.5">
         <div className="flex items-center gap-2 px-1">
@@ -85,6 +89,8 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
           </button>
         </div>
       </div>
+
+      <DisbandUnitCard />
     </div>
   );
 }

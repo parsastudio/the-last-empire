@@ -1,25 +1,8 @@
 import React from "react";
 import { Cpu } from "lucide-react";
-import { DoctrineListView } from "./doctrine-list-view";
+import { DoctrineTreeView } from "./doctrine-tree-view";
 
 export function ResearchTab() {
-  const doctrines = [
-    { id: "gdp-booster", name: "خطوط تولید اتوماتیک", cost: 3, unlocked: true },
-    { id: "low-upkeep", name: "شبکه لجستیک سبز", cost: 5, unlocked: false },
-    {
-      id: "border-fortification",
-      name: "پروتکل‌های استقرار مرزی",
-      cost: 3,
-      unlocked: false,
-    },
-    {
-      id: "drone-swarm",
-      name: "تسلیحات شبکه‌ای پهپادی",
-      cost: 5,
-      unlocked: false,
-    },
-  ];
-
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       <div className="space-y-2.5">
@@ -30,7 +13,7 @@ export function ResearchTab() {
           </span>
         </div>
 
-        <DoctrineListView doctrines={doctrines} />
+        <DoctrineTreeView />
       </div>
     </div>
   );

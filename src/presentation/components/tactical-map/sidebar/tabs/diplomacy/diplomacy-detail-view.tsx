@@ -1,11 +1,8 @@
 import React from "react";
 import { ArrowRight } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { DiplomacyActionButtons } from "./diplomacy-action-buttons";
-import {
-  CountryProfileStats,
-  CountryProfileData,
-} from "./country-profile-stats";
+import { AdvancedDiplomacyActions } from "./advanced-diplomacy-actions";
+import { CountryProfileStats } from "./country-profile-stats";
 import { FocusMapButton } from "./focus-map-button";
 
 export interface DiplomaticRelation {
@@ -15,7 +12,15 @@ export interface DiplomaticRelation {
   stance: "PEACE" | "WAR" | "ALLIANCE" | "NON_AGGRESSION_PACT";
   opinion: number;
   description: string;
-  profileData: CountryProfileData;
+  profileData: {
+    gdp: string;
+    population: string;
+    techLevel: number;
+    governmentType: string;
+    stability: number;
+    corruption: number;
+    militaryStrength?: string;
+  };
 }
 
 interface DiplomacyDetailViewProps {
@@ -113,7 +118,7 @@ export function DiplomacyDetailView({
         )}
       </div>
 
-      <DiplomacyActionButtons targetName={relation.name} />
+      <AdvancedDiplomacyActions targetName={relation.name} />
     </div>
   );
 }
