@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 import { Landmark } from "lucide-react";
 import { TaxSlider } from "./tax-slider";
+import { PredictiveImpactBox } from "./predictive-impact-box";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface TaxControlCardProps {
   taxRate: number;
@@ -12,16 +14,18 @@ export function TaxControlCard({
   const [taxRate, setTaxRate] = useState<number>(initialTaxRate);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { showToast } = useToast();
 
   const handleApplyTax = () => {
-    alert(
-      `نرخ مالیات جدید با موفقیت روی ${taxRate}% تنظیم شد و در چرخه اقتصادی نوبت بعدی اعمال خواهد شد.`,
+    showToast(
+      "بروزرسانی نرخ مالیات",
+      `نرخ مالیات جدید روی ${taxRate}% تنظیم شد و در چرخه بعدی اعمال می‌شود.`,
+      "success",
     );
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = Number(e.target.value);
-    setTaxRate(newValue);
+    setTaxRate(Number(e.target.value));
   };
 
   return (
@@ -33,12 +37,12 @@ export function TaxControlCard({
         </span>
       </div>
 
-      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-4">
+      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3.5">
         <div className="flex items-center justify-between text-xs">
           <span className="font-mono font-extrabold text-foreground text-sm">
             {taxRate}%
           </span>
-          <span className="text-muted-foreground">نرخ مالیات فعلی</span>
+          <span className="text-muted-foreground">نرخ مالیات جدید</span>
         </div>
 
         <TaxSlider
@@ -48,6 +52,11 @@ export function TaxControlCard({
           onChange={handleSliderChange}
           onDragStart={() => setIsDragging(true)}
           onDragEnd={() => setIsDragging(false)}
+        />
+
+        <PredictiveImpactBox
+          currentTaxRate={initialTaxRate}
+          newTaxRate={taxRate}
         />
 
         <button

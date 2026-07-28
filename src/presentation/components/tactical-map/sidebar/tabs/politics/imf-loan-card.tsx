@@ -1,9 +1,27 @@
 import React from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 export function ImfLoanCard() {
   const creditRating = 85;
   const currentDebt = 0;
+  const { showToast } = useToast();
+
+  const handleRequestLoan = () => {
+    showToast(
+      "تسهیلات اعتباری IMF",
+      "وام اضطراری $۵۰,۰۰۰ با نرخ سود ۵٪ به خزانه ملی واریز شد.",
+      "success",
+    );
+  };
+
+  const handleRepayDebt = () => {
+    showToast(
+      "تسویه بدهی",
+      "هیچ بدهی معوقه‌ای برای بازپرداخت وجود ندارد.",
+      "info",
+    );
+  };
 
   return (
     <div className="space-y-2.5">
@@ -14,9 +32,11 @@ export function ImfLoanCard() {
         </span>
       </div>
 
-      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3">
+      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
         <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-muted-foreground">رتبه اعتبار ملی:</span>
+          <span className="text-muted-foreground font-sans">
+            رتبه اعتبار ملی:
+          </span>
           <span className="font-bold text-gdp">{creditRating} / ۱۰۰</span>
         </div>
 
@@ -40,19 +60,15 @@ export function ImfLoanCard() {
 
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
-            onClick={() =>
-              alert("درخواست وام اضطراری ۵۰,۰۰۰ دلاری به IMF ارسال شد.")
-            }
+            onClick={handleRequestLoan}
             className="py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
           >
             <ArrowUpRight size={13} className="text-gdp" />
-            <span>درخواست وام اضطراری</span>
+            <span>وام اضطراری</span>
           </button>
 
           <button
-            onClick={() =>
-              alert("هیچ بدهی معوقه‌ای برای بازپرداخت وجود ندارد.")
-            }
+            onClick={handleRepayDebt}
             className="py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
           >
             <ArrowDownRight size={13} className="text-military" />

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, ShoppingBag } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface TradeActionDialogProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ export function TradeActionDialog({
   onConfirm,
 }: TradeActionDialogProps) {
   const [amount, setAmount] = useState<number>(10);
+  const { showToast } = useToast();
 
   if (!isOpen) return null;
 
@@ -30,9 +32,18 @@ export function TradeActionDialog({
   const fee = Math.floor(totalCost * 0.1);
   const finalTotal = mode === "buy" ? totalCost + fee : totalCost - fee;
 
+  const handleExecuteTrade = () => {
+    showToast(
+      "معامله بورس کالا",
+      `سفارش ${mode === "buy" ? "خرید" : "فروش"} ${amount} ${unit} ${resourceName} با ارزش $${finalTotal.toLocaleString("fa-IR")} ثبت شد.`,
+      "success",
+    );
+    onConfirm(amount);
+  };
+
   return (
     <div className="fixed inset-0 bg-background/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-smooth">
-      <div className="bg-card border border-border w-full max-w-sm rounded-3xl p-5 space-y-4 text-right shadow-2xl relative">
+      <div className="bg-card border border-border w-full max-w-sm rounded-3xl p-5 space-y-4 text-right shadow-2xl relative dir-rtl">
         <button
           onClick={onClose}
           className="absolute top-4 left-4 p-1.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl cursor-pointer"
@@ -93,7 +104,7 @@ export function TradeActionDialog({
         </div>
 
         <button
-          onClick={() => onConfirm(amount)}
+          onClick={handleExecuteTrade}
           className="w-full py-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md"
         >
           تایید و اجرای معامله

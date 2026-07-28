@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, Zap } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface AbilityTargetModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export function AbilityTargetModal({
   onConfirmTarget,
 }: AbilityTargetModalProps) {
   const [selectedCode, setSelectedCode] = useState<string>("USA");
+  const { showToast } = useToast();
 
   if (!isOpen) return null;
 
@@ -24,6 +26,15 @@ export function AbilityTargetModal({
     { code: "RUS", name: "روسیه" },
     { code: "DEU", name: "آلمان" },
   ];
+
+  const handleExecuteAbility = () => {
+    showToast(
+      "اجرای فرمان حکومتی",
+      `قابلیت ${abilityName} با موفقیت روی کشور ${selectedCode} اجرا گردید.`,
+      "success",
+    );
+    onConfirmTarget(selectedCode);
+  };
 
   return (
     <div className="fixed inset-0 bg-background/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-smooth">
@@ -63,7 +74,7 @@ export function AbilityTargetModal({
         </div>
 
         <button
-          onClick={() => onConfirmTarget(selectedCode)}
+          onClick={handleExecuteAbility}
           className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md"
         >
           اجرای توانمندی روی هدف

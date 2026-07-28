@@ -2,26 +2,34 @@ import React from "react";
 import { Zap } from "lucide-react";
 import { REGIME_ABILITIES, AbilityItem } from "./abilities.config";
 import { AbilityCard } from "./ability-card";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface AbilitiesTabProps {
   currentGovernment: string;
 }
 
 export function AbilitiesTab({ currentGovernment }: AbilitiesTabProps) {
+  const { showToast } = useToast();
+
   const handleActivate = (ability: AbilityItem) => {
     if (ability.requiredGov !== currentGovernment) {
-      alert(
-        `خطا: این قابلیت اختصاصی رژیم '${ability.govLabel}' است. نظام سیاسی فعلی شما مطابقت ندارد.`,
+      showToast(
+        "عدم تطابق نظام سیاسی",
+        `این قابلیت اختصاصی رژیم '${ability.govLabel}' است.`,
+        "error",
       );
       return;
     }
-    alert(
-      `قابلیت راهبردی «${ability.name}» با موفقیت فعال شد و اثرات آن در نوبت بعدی اعمال خواهد شد.`,
+
+    showToast(
+      "فعال‌سازی توانمندی راهبردی",
+      `قابلیت «${ability.name}» با موفقیت فعال گردید.`,
+      "success",
     );
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl">
       <div className="flex items-center gap-2 px-1">
         <Zap size={13} className="text-treasury" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
