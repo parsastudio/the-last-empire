@@ -31,7 +31,7 @@ export function SaveItemCard({ save, onSelect }: SaveItemCardProps) {
           </div>
           <div className="flex items-center gap-1">
             <Clock size={11} />
-            <span>زمان: {save.playtime}</span>
+            <span>شناسه: {save.id}</span>
           </div>
           <div className="font-mono bg-secondary/80 px-1.5 py-0.5 rounded text-[9px]">
             نوبت: {save.turn}

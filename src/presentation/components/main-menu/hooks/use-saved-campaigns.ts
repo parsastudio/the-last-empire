@@ -27,7 +27,7 @@ export function useSavedCampaigns() {
             : mainState.humanNationId;
           const meta: SavedCampaignMeta = {
             id: mainState.gameId,
-            title: `کمپین فعال - حاکمیت ${nationName}`,
+            title: `کمپین ${mainState.gameId} - ${nationName}`,
             turn: mainState.currentTurn,
             date: new Date().toLocaleDateString("fa-IR"),
             humanNationId: mainState.humanNationId,
