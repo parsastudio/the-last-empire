@@ -12,58 +12,33 @@ export class CoastalPixelLocator {
     }
 
     const coastalCells: GridCell[] = [];
-    const cellMap = new Map<string, GridCell>();
-    allCells.forEach((c) => cellMap.set(`${c.x},${c.y}`, c));
 
-    for (const cell of defenderCells) {
-      const neighbors = [
-        { x: cell.x + 1, y: cell.y },
-        { x: cell.x - 1, y: cell.y },
-        { x: cell.x, y: cell.y + 1 },
-        { x: cell.x, y: cell.y - 1 },
-      ];
-      let isCoastal = false;
-      for (const n of neighbors) {
-        const nCell = cellMap.get(`${n.x},${n.y}`);
-        if (
-          nCell &&
-          (nCell.ownerId === "WATER" || nCell.ownerId === "CLOSED_SEA")
-        ) {
-          isCoastal = true;
-          break;
-        }
-      }
+    for (let i = 0; i < defenderCells.length; i++) {
+      const cell = defenderCells[i]!;
+      const isCoastal = allCells.some(
+        (n) =>
+          Math.abs(n.x - cell.x) + Math.abs(n.y - cell.y) === 1 &&
+          (n.ownerId === "WATER" || n.ownerId === "CLOSED_SEA"),
+      );
+
       if (isCoastal) {
         coastalCells.push(cell);
       }
     }
 
-    if (coastalCells.length === 0) {
-      let closestCell = defenderCells[0]!;
-      let minDist = Infinity;
-      for (const cell of defenderCells) {
-        const dist = Math.hypot(
-          cell.x - clickedPixel.x,
-          cell.y - clickedPixel.y,
-        );
-        if (dist < minDist) {
-          minDist = dist;
-          closestCell = cell;
-        }
-      }
-      return { x: closestCell.x, y: closestCell.y };
-    }
-
-    let closestCoastal = coastalCells[0]!;
+    const candidates = coastalCells.length > 0 ? coastalCells : defenderCells;
+    let closestCell = candidates[0]!;
     let minDist = Infinity;
-    for (const cell of coastalCells) {
+
+    for (let i = 0; i < candidates.length; i++) {
+      const cell = candidates[i]!;
       const dist = Math.hypot(cell.x - clickedPixel.x, cell.y - clickedPixel.y);
       if (dist < minDist) {
         minDist = dist;
-        closestCoastal = cell;
+        closestCell = cell;
       }
     }
 
-    return { x: closestCoastal.x, y: closestCoastal.y };
+    return { x: closestCell.x, y: closestCell.y };
   }
 }

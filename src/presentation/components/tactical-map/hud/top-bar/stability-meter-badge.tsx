@@ -10,13 +10,13 @@ export function StabilityMeterBadge({
   stability,
   corruption,
 }: StabilityMeterBadgeProps) {
-  const getStabilityColor = (val: number) => {
-    if (val >= 70) return "text-gdp bg-gdp";
-    if (val >= 40) return "text-treasury bg-treasury";
-    return "text-military bg-military";
+  const getStyle = (val: number) => {
+    if (val >= 70) return { text: "text-gdp", bg: "bg-gdp" };
+    if (val >= 40) return { text: "text-treasury", bg: "bg-treasury" };
+    return { text: "text-military", bg: "bg-military" };
   };
 
-  const colorClass = getStabilityColor(stability);
+  const style = getStyle(stability);
 
   return (
     <div
@@ -25,10 +25,10 @@ export function StabilityMeterBadge({
     >
       <Landmark size={14} className="text-diplomacy shrink-0" />
       <div className="flex items-center gap-2">
-        <span className="font-bold text-foreground">{stability}%</span>
+        <span className={`font-bold ${style.text}`}>{stability}%</span>
         <div className="w-12 h-1.5 bg-background/80 rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${colorClass.split(" ")[1]}`}
+            className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
             style={{ width: `${stability}%` }}
           />
         </div>
