@@ -131,6 +131,10 @@ export function useTacticalMapInteraction({
     }
   };
 
+  const handleOpenPendingTab = () => {
+    setExternalSidebarTab("research");
+  };
+
   const activeScreenPos = contextMenuState
     ? getScreenPosition(contextMenuState.coordinate)
     : { x: 0, y: 0 };
@@ -143,6 +147,7 @@ export function useTacticalMapInteraction({
     activeScreenPos,
     handleMapClick,
     handleSelectContextAction,
+    handleOpenPendingTab,
     closeContextMenu: () => setContextMenuState(null),
     closeAttackModal: () => setAttackModalState(null),
   };

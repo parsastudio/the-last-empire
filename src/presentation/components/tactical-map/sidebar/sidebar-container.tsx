@@ -49,7 +49,7 @@ export function SidebarContainer({
         activeTab={actions.activeTab}
         selectedTargetCode={selectedTargetCode}
         nation={actions.humanNation}
-        mockReports={actions.realReports}
+        reports={actions.realReports}
         onClose={() => actions.setInternalActiveTab(null)}
         onFocusCountry={onFocusCountry}
         onSelectReport={(report) => {
