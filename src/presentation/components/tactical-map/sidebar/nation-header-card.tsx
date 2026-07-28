@@ -7,6 +7,7 @@ interface NationHeaderCardProps {
   flagCode: string;
   governmentType: string;
   population: number;
+  rank?: number;
   regions?: RegionDemographics[];
 }
 
@@ -16,9 +17,10 @@ export function NationHeaderCard({
   flagCode,
   governmentType,
   population,
+  rank = 1,
 }: NationHeaderCardProps) {
   return (
-    <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner">
+    <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -48,7 +50,7 @@ export function NationHeaderCard({
         <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1.5 rounded-xl">
           <span className="text-sm">🏆</span>
           <span className="text-xs font-extrabold font-mono text-amber-500">
-            رتبه ۱۴
+            رتبه {rank}
           </span>
         </div>
       </div>

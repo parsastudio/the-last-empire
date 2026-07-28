@@ -15,20 +15,11 @@ export function LoadCampaignModal({
   onSelectSave,
 }: LoadCampaignModalProps) {
   const [loadingSaveId, setLoadingSaveId] = useState<string | null>(null);
-  const [loadingStep, setLoadingSaveStep] = useState<string>("");
   const { saves, loading: isDbLoading } = useSavedCampaigns();
 
   const handleSelect = (saveId: string) => {
     setLoadingSaveId(saveId);
-    setLoadingSaveStep("در حال بازخوانی پرونده کمپین از IndexedDB...");
-
-    setTimeout(() => {
-      setLoadingSaveStep("همگام‌سازی اطلاعات نقشه و ساختار شبکه...");
-    }, 400);
-
-    setTimeout(() => {
-      onSelectSave(saveId);
-    }, 800);
+    onSelectSave(saveId);
   };
 
   if (!isOpen) return null;
@@ -40,7 +31,9 @@ export function LoadCampaignModal({
           <div className="py-12 flex flex-col items-center justify-center gap-6 text-center">
             <div className="w-10 h-10 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
             <div className="space-y-1">
-              <p className="text-xs font-bold text-foreground">{loadingStep}</p>
+              <p className="text-xs font-bold text-foreground">
+                در حال بازخوانی اطلاعات کمپین...
+              </p>
               <p className="text-[10px] text-muted-foreground font-mono">
                 INDEXED_DB: READ_STATE | SYNC_OK
               </p>
