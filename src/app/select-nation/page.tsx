@@ -8,6 +8,7 @@ import { NationDetailsPanel } from "@/presentation/components/select-nation/nati
 import { NATIONS_DATABASE } from "@/presentation/components/select-nation/config/nations-database.config";
 import { GOVERNMENT_OPTIONS } from "@/presentation/components/select-nation/config/government-options.config";
 import { SelectNationHeader } from "@/presentation/components/select-nation/select-nation-header";
+import { GameIdGenerator } from "@/domain/shared/game-id-generator";
 
 export default function SelectNationPage() {
   const router = useRouter();
@@ -26,16 +27,22 @@ export default function SelectNationPage() {
 
   const handleStartCampaign = async () => {
     try {
+      const uniqueGameId = GameIdGenerator.generateCampaignId(
+        selectedNation.id,
+      );
+
       const res = await fetch("/api/game/select-country", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nationId: selectedNation.id,
           governmentType: selectedGovernment,
+          gameId: uniqueGameId,
         }),
       });
+
       if (res.ok) {
-        router.push("/play");
+        router.push(`/play/${uniqueGameId}`);
       }
     } catch {
       alert("خطا در راه‌اندازی کمپین بازی");
@@ -44,7 +51,7 @@ export default function SelectNationPage() {
 
   return (
     <div
-      className="w-screen h-screen bg-background text-foreground flex flex-col overflow-hidden select-none"
+      className="w-screen h-screen bg-background text-foreground flex flex-col overflow-hidden select-none dir-rtl"
       dir="rtl"
     >
       <SelectNationHeader onBack={() => router.push("/")} />

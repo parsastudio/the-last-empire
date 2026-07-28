@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 
-export function useGeopoliticsGame() {
+export function useGeopoliticsGame(customGameId?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,10 @@ export function useGeopoliticsGame() {
   const fetchStatus = useCallback(async () => {
     try {
       const nationId = getStoredNationId();
-      const res = await fetch(`/api/game/status?nationId=${nationId}`);
+      const gameIdQuery = customGameId ? `&gameId=${customGameId}` : "";
+      const res = await fetch(
+        `/api/game/status?nationId=${nationId}${gameIdQuery}`,
+      );
       const json = await res.json();
       if (json.success && json.data) {
         setGameState(json.data);
@@ -30,7 +33,7 @@ export function useGeopoliticsGame() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [customGameId]);
 
   const advanceNextTurn = useCallback(async () => {
     try {
@@ -52,7 +55,10 @@ export function useGeopoliticsGame() {
     async function loadInitialStatus() {
       try {
         const nationId = getStoredNationId();
-        const res = await fetch(`/api/game/status?nationId=${nationId}`);
+        const gameIdQuery = customGameId ? `&gameId=${customGameId}` : "";
+        const res = await fetch(
+          `/api/game/status?nationId=${nationId}${gameIdQuery}`,
+        );
         const json = await res.json();
         if (active) {
           if (json.success && json.data) {
@@ -75,7 +81,7 @@ export function useGeopoliticsGame() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [customGameId]);
 
   return {
     gameState,

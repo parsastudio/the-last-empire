@@ -20,15 +20,15 @@ export function LoadCampaignModal({
 
   const handleSelect = (saveId: string) => {
     setLoadingSaveId(saveId);
-    setLoadingSaveStep("در حال بازخوانی پرونده بازی از دیتابیس محلی...");
+    setLoadingSaveStep("در حال بازخوانی پرونده کمپین از IndexedDB...");
 
     setTimeout(() => {
       setLoadingSaveStep("همگام‌سازی اطلاعات نقشه و ساختار شبکه...");
-    }, 600);
+    }, 500);
 
     setTimeout(() => {
       onSelectSave(saveId);
-    }, 1200);
+    }, 1000);
   };
 
   if (!isOpen) return null;

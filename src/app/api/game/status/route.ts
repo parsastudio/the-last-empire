@@ -6,10 +6,15 @@ export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const nationIdParam = searchParams.get("nationId") || "IRN";
+    const gameIdParam = searchParams.get("gameId");
     const normalizedHumanId = normalizeNationId(nationIdParam);
 
     const facade = new SimulationFacade();
     const state = facade.selectPlayerNation(normalizedHumanId);
+
+    if (gameIdParam && state) {
+      state.gameId = gameIdParam;
+    }
 
     return NextResponse.json({ success: true, data: state });
   } catch (err) {

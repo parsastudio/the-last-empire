@@ -4,8 +4,11 @@ import { normalizeNationId } from "@/application/map-rendering/game-state-initia
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const body = (await request.json()) as { nationId?: string };
-    const { nationId } = body;
+    const body = (await request.json()) as {
+      nationId?: string;
+      gameId?: string;
+    };
+    const { nationId, gameId } = body;
 
     if (!nationId) {
       return NextResponse.json(
@@ -17,6 +20,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     const normalized = normalizeNationId(nationId);
     const facade = new SimulationFacade();
     const state = facade.selectPlayerNation(normalized);
+
+    if (gameId && state) {
+      state.gameId = gameId;
+    }
 
     return NextResponse.json({ success: true, data: state });
   } catch (err) {

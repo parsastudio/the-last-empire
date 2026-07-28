@@ -1,0 +1,55 @@
+import React from "react";
+import { FolderAlert, Home, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+interface CampaignNotFoundModalProps {
+  isOpen: boolean;
+  gameId: string;
+}
+
+export function CampaignNotFoundModal({
+  isOpen,
+  gameId,
+}: CampaignNotFoundModalProps) {
+  const router = useRouter();
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fade-smooth dir-rtl text-right">
+      <div className="bg-card border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5">
+        <div className="flex flex-col items-center justify-center gap-3 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-military/15 border border-military/30 text-military flex items-center justify-center shadow-lg">
+            <FolderAlert size={28} />
+          </div>
+          <h2 className="text-lg font-extrabold text-foreground">
+            پرونده کمپین یافت نشد
+          </h2>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            هیچ اطلاعات ذخیره‌شده‌ای برای آدرس شناسه{" "}
+            <strong className="font-mono text-foreground">{gameId}</strong> در
+            حافظه مرورگر این دستگاه وجود ندارد.
+          </p>
+        </div>
+
+        <div className="space-y-2.5 pt-2">
+          <button
+            onClick={() => router.push("/select-nation")}
+            className="w-full py-3.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-gdp/10"
+          >
+            <PlusCircle size={15} />
+            <span>شروع کمپین جدید</span>
+          </button>
+
+          <button
+            onClick={() => router.push("/")}
+            className="w-full py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <Home size={15} />
+            <span>بازگشت به منوی اصلی</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
