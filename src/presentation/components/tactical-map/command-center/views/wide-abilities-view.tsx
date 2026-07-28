@@ -5,10 +5,12 @@ import { AbilityTargetModal } from "../../modals/ability-target-modal";
 
 interface WideAbilitiesViewProps {
   currentGovernment: string;
+  nationId?: string;
 }
 
 export function WideAbilitiesView({
   currentGovernment,
+  nationId = "NATION_118",
 }: WideAbilitiesViewProps) {
   const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
 
@@ -20,6 +22,7 @@ export function WideAbilitiesView({
             key={ab.id}
             ability={ab}
             currentGovernment={currentGovernment}
+            nationId={nationId}
             onActivate={(ability) => setSelectedAbility(ability.name)}
           />
         ))}
@@ -28,6 +31,7 @@ export function WideAbilitiesView({
       <AbilityTargetModal
         isOpen={selectedAbility !== null}
         abilityName={selectedAbility || ""}
+        nationId={nationId}
         onClose={() => setSelectedAbility(null)}
         onConfirmTarget={() => {
           setSelectedAbility(null);

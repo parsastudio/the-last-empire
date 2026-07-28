@@ -7,9 +7,13 @@ import { MilitaryStack } from "@/domain/military/military.schema";
 
 interface WideMilitaryViewProps {
   military: MilitaryStack;
+  nationId?: string;
 }
 
-export function WideMilitaryView({ military }: WideMilitaryViewProps) {
+export function WideMilitaryView({
+  military,
+  nationId = "NATION_118",
+}: WideMilitaryViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
@@ -21,12 +25,12 @@ export function WideMilitaryView({ military }: WideMilitaryViewProps) {
           experience={military.experience}
         />
 
-        <RecruitmentQueueCard />
-        <DisbandUnitCard />
+        <RecruitmentQueueCard nationId={nationId} />
+        <DisbandUnitCard nationId={nationId} />
       </div>
 
       <div className="space-y-5">
-        <MilitaryExpansionView />
+        <MilitaryExpansionView nationId={nationId} />
       </div>
     </div>
   );
