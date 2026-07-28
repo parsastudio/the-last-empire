@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Award } from "lucide-react";
+import { Shield, Award, MapPin } from "lucide-react";
 import { HoverCountryInfo } from "./country-hover-container";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
@@ -16,7 +16,7 @@ export function CountryHoverHud({ info }: CountryHoverHudProps) {
 
   return (
     <div
-      className="absolute top-6 left-1/2 -translate-x-1/2 z-40 pointer-events-none w-[360px] animate-fade-smooth"
+      className="absolute top-6 left-1/2 -translate-x-1/2 z-40 pointer-events-none w-[380px] animate-fade-smooth"
       dir="rtl"
     >
       <div className="bg-card/90 backdrop-blur-xl border border-border/80 px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 w-full">
@@ -37,6 +37,19 @@ export function CountryHoverHud({ info }: CountryHoverHudProps) {
                 {info.code}
               </span>
             </div>
+
+            {info.regionName && (
+              <div className="flex items-center gap-1 text-[9px] text-primary font-sans font-bold">
+                <MapPin size={10} />
+                <span>{info.regionName}</span>
+                {info.regionArea && (
+                  <span className="text-muted-foreground font-mono">
+                    ({info.regionArea})
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
               <span className="flex items-center gap-1 shrink-0">
                 <Award size={11} className="text-amber-500" />

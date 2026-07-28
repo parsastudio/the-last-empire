@@ -1,4 +1,5 @@
 import React from "react";
+import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 
 interface NationHeaderCardProps {
   name: string;
@@ -6,6 +7,7 @@ interface NationHeaderCardProps {
   flagCode: string;
   governmentType: string;
   population: number;
+  regions?: RegionDemographics[];
 }
 
 export function NationHeaderCard({
@@ -54,7 +56,7 @@ export function NationHeaderCard({
       <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/60 text-right font-mono">
         <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
           <span className="text-[9px] text-muted-foreground block">
-            جمعیت کل
+            جمعیت کل قلمروها
           </span>
           <span className="text-xs font-bold text-foreground block">
             {(population / 1e6).toFixed(1)} میلیون نفر
