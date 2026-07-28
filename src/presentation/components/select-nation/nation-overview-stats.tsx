@@ -8,7 +8,7 @@ interface NationOverviewStatsProps {
 
 export function NationOverviewStats({ nation }: NationOverviewStatsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 dir-rtl text-right">
       <div className="bg-background/50 border border-border/80 p-4 rounded-2xl space-y-1">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono">
           <Award size={13} className="text-amber-500" />

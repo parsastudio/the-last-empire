@@ -27,6 +27,7 @@ export class AIActionGenerator {
     nation: Nation,
     allNations: Record<string, Nation>,
     personalityType: "AGGRESSIVE" | "PACIFIST" | "ECONOMIC" | "ISOLATIONIST",
+    currentTurn = 1,
   ): GameAction[] {
     const weights =
       this.personalityManager.getPersonalityWeights(personalityType);
@@ -44,6 +45,7 @@ export class AIActionGenerator {
       needs,
       risk,
       budget: allocation,
+      currentTurn,
     };
 
     const actions: GameAction[] = [];
