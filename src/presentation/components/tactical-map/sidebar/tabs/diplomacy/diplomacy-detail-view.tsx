@@ -1,14 +1,17 @@
 import React from "react";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { DiplomacyActionButtons } from "./diplomacy-action-buttons";
 import {
   CountryProfileStats,
   CountryProfileData,
 } from "./country-profile-stats";
+import { FocusMapButton } from "./focus-map-button";
 
 export interface DiplomaticRelation {
   code: string;
   name: string;
+  flagCode: string;
   stance: "PEACE" | "WAR" | "ALLIANCE" | "NON_AGGRESSION_PACT";
   opinion: number;
   description: string;
@@ -18,36 +21,40 @@ export interface DiplomaticRelation {
 interface DiplomacyDetailViewProps {
   relation: DiplomaticRelation;
   onBack: () => void;
+  onFocusCountry?: (code: string) => void;
 }
 
 export function DiplomacyDetailView({
   relation,
   onBack,
+  onFocusCountry,
 }: DiplomacyDetailViewProps) {
+  const flagEmoji = getFlagEmoji(relation.flagCode || relation.code);
+
   const getStanceBadge = (stance: string) => {
     switch (stance) {
       case "WAR":
         return (
-          <span className="px-2 py-0.5 rounded-md bg-military/20 text-military text-[9px] font-bold">
+          <span className="px-2.5 py-1 rounded-lg bg-military/15 text-military border border-military/30 text-[10px] font-bold whitespace-nowrap shrink-0">
             در حال جنگ
           </span>
         );
       case "ALLIANCE":
         return (
-          <span className="px-2 py-0.5 rounded-md bg-gdp/20 text-gdp text-[9px] font-bold">
+          <span className="px-2.5 py-1 rounded-lg bg-gdp/15 text-gdp border border-gdp/30 text-[10px] font-bold whitespace-nowrap shrink-0">
             اتحاد کامل
           </span>
         );
       case "NON_AGGRESSION_PACT":
         return (
-          <span className="px-2 py-0.5 rounded-md bg-treasury/20 text-treasury text-[9px] font-bold">
+          <span className="px-2.5 py-1 rounded-lg bg-treasury/15 text-treasury border border-treasury/30 text-[10px] font-bold whitespace-nowrap shrink-0">
             عدم تخاصم
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded-md bg-secondary text-muted-foreground text-[9px] font-bold">
-            صلح و دیپلماسی عادی
+          <span className="px-2.5 py-1 rounded-lg bg-secondary border border-border/80 text-muted-foreground text-[10px] font-bold whitespace-nowrap shrink-0">
+            دیپلماسی عادی
           </span>
         );
     }
@@ -63,39 +70,47 @@ export function DiplomacyDetailView({
         <span>بازگشت به فهرست کشورها</span>
       </button>
 
-      <div className="bg-background/40 border border-border/80 p-4 rounded-2xl space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-border/60">
-          <div>
-            <h2 className="text-sm font-extrabold text-foreground">
-              {relation.name}
-            </h2>
-            <span className="text-[10px] text-muted-foreground font-mono">
-              شناسنامه رسمی حاکمیت
+      <div className="bg-background/40 border border-border/80 p-4 rounded-3xl space-y-4">
+        <div className="flex items-start justify-between gap-2 pb-3 border-b border-border/60">
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className="text-3xl select-none shrink-0"
+              role="img"
+              aria-label={relation.name}
+            >
+              {flagEmoji}
             </span>
+            <div className="space-y-0.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-extrabold text-foreground truncate">
+                  {relation.name}
+                </h2>
+                <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground shrink-0">
+                  {relation.code}
+                </span>
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono block">
+                شناسنامه رسمی حاکمیت
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {getStanceBadge(relation.stance)}
-            <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
-              {relation.code}
-            </span>
-          </div>
+
+          {getStanceBadge(relation.stance)}
         </div>
 
-        <p className="text-[11px] text-foreground/90 bg-secondary/30 p-3 rounded-xl leading-relaxed">
+        <p className="text-xs text-foreground/90 bg-secondary/30 border border-border/40 p-3.5 rounded-2xl leading-relaxed font-sans">
           {relation.description}
         </p>
 
         <CountryProfileStats data={relation.profileData} />
 
-        <button
-          onClick={() =>
-            alert(`دوربین نقشه روی مرکز استراتژیک ${relation.name} متمرکز شد.`)
-          }
-          className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <MapPin size={14} className="text-military" />
-          <span>تمرکز دوربین روی نقشه</span>
-        </button>
+        {onFocusCountry && (
+          <FocusMapButton
+            countryCode={relation.code}
+            countryName={relation.name}
+            onFocus={onFocusCountry}
+          />
+        )}
       </div>
 
       <DiplomacyActionButtons targetName={relation.name} />

@@ -16,12 +16,14 @@ interface SidebarContainerProps {
   isOpen: boolean;
   externalActiveTab?: SidebarTabType | null;
   selectedTargetCode?: string | null;
+  onFocusCountry?: (code: string) => void;
 }
 
 export function SidebarContainer({
   isOpen,
   externalActiveTab,
   selectedTargetCode,
+  onFocusCountry,
 }: SidebarContainerProps) {
   const [activeTab, setActiveTab] = useState<SidebarTabType>("overview");
   const [prevExternalTab, setPrevExternalTab] = useState<SidebarTabType | null>(
@@ -181,7 +183,10 @@ export function SidebarContainer({
             />
           )}
           {activeTab === "diplomacy" && (
-            <DiplomacyTab selectedTargetCode={selectedTargetCode} />
+            <DiplomacyTab
+              selectedTargetCode={selectedTargetCode}
+              onFocusCountry={onFocusCountry}
+            />
           )}
           {activeTab === "research" && <ResearchTab />}
         </div>

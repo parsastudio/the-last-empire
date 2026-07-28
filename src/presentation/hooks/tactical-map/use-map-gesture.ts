@@ -52,6 +52,7 @@ export function useMapGesture() {
   return {
     scale,
     position,
+    setPosition,
     isDragging,
     hasDraggedRef,
     handleWheel,
