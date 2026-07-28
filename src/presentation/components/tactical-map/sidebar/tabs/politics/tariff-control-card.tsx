@@ -1,11 +1,27 @@
 import React, { useState } from "react";
 import { Coins } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
-export function TariffControlCard() {
-  const [tariffRate, setTariffRate] = useState<number>(10);
+interface TariffControlCardProps {
+  initialTariffRate?: number;
+}
+
+export function TariffControlCard({
+  initialTariffRate = 10,
+}: TariffControlCardProps) {
+  const [tariffRate, setTariffRate] = useState<number>(initialTariffRate);
+  const { showToast } = useToast();
+
+  const handleApplyTariff = () => {
+    showToast(
+      "بروزرسانی تعرفه گمرک",
+      `تعرفه تجاری گمرک بر روی ${tariffRate}% تنظیم گردید.`,
+      "success",
+    );
+  };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
         <Coins size={13} className="text-gdp" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -31,7 +47,7 @@ export function TariffControlCard() {
         />
 
         <button
-          onClick={() => alert(`تعرفه گمرکی روی ${tariffRate}% تنظیم شد.`)}
+          onClick={handleApplyTariff}
           className="w-full py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
           اعمال نرخ جدید تعرفه

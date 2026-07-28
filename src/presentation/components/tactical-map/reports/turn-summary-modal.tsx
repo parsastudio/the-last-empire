@@ -19,7 +19,7 @@ export function TurnSummaryModal({
     null,
   );
 
-  if (!isOpen || reports.length === 0) return null;
+  if (!isOpen) return null;
 
   const handleClose = () => {
     setSelectedReport(null);
@@ -28,7 +28,7 @@ export function TurnSummaryModal({
 
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center p-4 z-50 animate-fade-smooth">
-      <div className="bg-card/95 backdrop-blur-xl border border-border/90 w-full max-w-2xl rounded-3xl p-6 shadow-2xl relative space-y-5 dir-rtl overflow-hidden pointer-events-auto">
+      <div className="bg-card/95 backdrop-blur-xl border border-border/90 w-full max-w-2xl rounded-3xl p-6 shadow-2xl relative space-y-5 dir-rtl text-right overflow-hidden pointer-events-auto">
         <button
           onClick={handleClose}
           className="absolute top-4 left-4 p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer"
@@ -56,15 +56,21 @@ export function TurnSummaryModal({
               </p>
             </div>
 
-            <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border">
-              {reports.map((rep) => (
-                <ReportListItem
-                  key={rep.id}
-                  report={rep}
-                  onSelect={setSelectedReport}
-                />
-              ))}
-            </div>
+            {reports.length === 0 ? (
+              <div className="py-12 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
+                در این نوبت هیچ عملیات نظامی یا درگیری رخ نداده است.
+              </div>
+            ) : (
+              <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border">
+                {reports.map((rep) => (
+                  <ReportListItem
+                    key={rep.id}
+                    report={rep}
+                    onSelect={setSelectedReport}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="pt-2 border-t border-border">
               <button

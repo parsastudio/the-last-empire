@@ -2,8 +2,12 @@ import React from "react";
 import { MarketHeader } from "../../sidebar/tabs/market/market-header";
 import { CommodityCard } from "../../sidebar/tabs/market/commodity-card";
 import { Fuel, Wrench } from "lucide-react";
+import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 
 interface WideMarketViewProps {
+  marketPrices?: ResourceMarketPrice;
+  oilStock?: number;
+  steelStock?: number;
   onOpenTrade: (
     name: string,
     unit: string,
@@ -12,9 +16,14 @@ interface WideMarketViewProps {
   ) => void;
 }
 
-export function WideMarketView({ onOpenTrade }: WideMarketViewProps) {
+export function WideMarketView({
+  marketPrices = { oil: 105, steel: 92 },
+  oilStock = 5000,
+  steelStock = 2000,
+  onOpenTrade,
+}: WideMarketViewProps) {
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
       <MarketHeader />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -23,10 +32,12 @@ export function WideMarketView({ onOpenTrade }: WideMarketViewProps) {
           unit="بشکه"
           icon={Fuel}
           colorClass="text-treasury"
-          stock={5000}
-          currentPrice={105}
+          stock={oilStock}
+          currentPrice={marketPrices.oil}
           priceTrend="up"
-          onTrade={(mode) => onOpenTrade("نفت خام", "بشکه", mode, 105)}
+          onTrade={(mode) =>
+            onOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
+          }
         />
 
         <CommodityCard
@@ -34,10 +45,12 @@ export function WideMarketView({ onOpenTrade }: WideMarketViewProps) {
           unit="تن"
           icon={Wrench}
           colorClass="text-primary"
-          stock={2000}
-          currentPrice={92}
+          stock={steelStock}
+          currentPrice={marketPrices.steel}
           priceTrend="down"
-          onTrade={(mode) => onOpenTrade("فولاد صنعتی", "تن", mode, 92)}
+          onTrade={(mode) =>
+            onOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
+          }
         />
       </div>
     </div>
