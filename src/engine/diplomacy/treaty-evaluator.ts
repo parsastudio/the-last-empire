@@ -17,11 +17,13 @@ export class TreatyEvaluator {
     sender: Nation,
     receiver: Nation,
     proposalType: DiplomaticProposalType,
+    requestedTributeAmount?: number,
   ): ProposalEvaluation {
     return this.proposalEvaluator.evaluateProposal(
       sender,
       receiver,
       proposalType,
+      requestedTributeAmount,
     );
   }
 

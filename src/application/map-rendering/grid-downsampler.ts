@@ -72,7 +72,6 @@ export class GridDownsampler {
         ownerId,
         allCells,
         lowResWidth,
-        lowResHeight,
       );
     }
 

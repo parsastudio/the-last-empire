@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SidebarTabType } from "./sidebar-tabs";
 import { CommandRail } from "../command-rail/command-rail";
 import { CommandCenterModal } from "../command-center/command-center-modal";
@@ -30,6 +30,12 @@ export function SidebarContainer({
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
   const { showToast } = useToast();
+
+  useEffect(() => {
+    if (externalActiveTab) {
+      setActiveTab(externalActiveTab);
+    }
+  }, [externalActiveTab]);
 
   const [stagedActions, setStagedActions] = useState<
     Array<{ id: string; typeLabel: string; cost: number }>
@@ -179,7 +185,7 @@ export function SidebarContainer({
         unitPrice={tradeDialog.unitPrice}
         maxAmount={tradeDialog.maxAmount}
         onClose={() => setTradeDialog((prev) => ({ ...prev, isOpen: false }))}
-        onConfirm={(amount) => {
+        onConfirm={() => {
           setTradeDialog((prev) => ({ ...prev, isOpen: false }));
         }}
       />
