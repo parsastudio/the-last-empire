@@ -5,9 +5,11 @@ import type {
 } from "@/domain/game/action.schema";
 import { TreatyEvaluator } from "@/engine/diplomacy/treaty-evaluator";
 import type { ActionHandler } from "@/engine/actions/action-handler";
+import { TributeCapCalculator } from "@/engine/diplomacy/tribute-cap-calculator";
 
 export class DiplomacyActionHandler implements ActionHandler {
   private evaluator = new TreatyEvaluator();
+  private tributeCapCalc = new TributeCapCalculator();
 
   public execute(state: GameState, action: GameAction): GameState {
     if (action.type !== "DIPLOMATIC_PROPOSAL") {
@@ -24,6 +26,7 @@ export class DiplomacyActionHandler implements ActionHandler {
       sender,
       receiver,
       diploAction.proposalType,
+      diploAction.tributeAmount,
     );
     if (evalResult.accepted) {
       const senderRelation = sender.relations[diploAction.targetNationId];
@@ -64,15 +67,18 @@ export class DiplomacyActionHandler implements ActionHandler {
         }
 
         if (diploAction.proposalType === "DEMAND_TRIBUTE") {
-          const tributeAmount =
-            diploAction.tributeAmount || Math.floor(receiver.gdp * 0.005);
+          const maxAllowed = this.tributeCapCalc.calculateMaxTribute(receiver);
+          const requested = diploAction.tributeAmount || maxAllowed;
+          const finalTribute = Math.min(requested, maxAllowed);
+
           const updatedSender = {
             ...sender,
+            globalAggression: Math.min(100, sender.globalAggression + 3),
             relations: {
               ...sender.relations,
               [diploAction.targetNationId]: {
                 ...senderRelation,
-                tributePerTurn: tributeAmount,
+                tributePerTurn: finalTribute,
                 stance: "PEACE" as const,
               },
             },
@@ -84,7 +90,7 @@ export class DiplomacyActionHandler implements ActionHandler {
               ...receiver.relations,
               [action.nationId]: {
                 ...receiverRelation,
-                opinion: Math.max(-100, receiverRelation.opinion - 30),
+                opinion: Math.max(-100, receiverRelation.opinion - 15),
                 stance: "PEACE" as const,
               },
             },
