@@ -22,7 +22,6 @@ export const RelationProfileSchema = z.object({
   opinion: z.number().min(-100).max(100),
   tributePerTurn: z.number().nonnegative(),
   militaryAccess: z.boolean(),
-  intelLevel: z.number().min(0).max(2),
   coolOffTurnsRemaining: z.number().nonnegative(),
   coolOffTargetStance: DiplomaticStanceSchema.optional(),
 });
