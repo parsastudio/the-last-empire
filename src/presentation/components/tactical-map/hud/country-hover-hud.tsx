@@ -9,13 +9,7 @@ interface CountryHoverHudProps {
 
 export function CountryHoverHud({ info }: CountryHoverHudProps) {
   if (!info) {
-    return (
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 pointer-events-none w-[360px] animate-fade-smooth">
-        <div className="bg-card/60 backdrop-blur-md border border-border/60 px-4 py-2.5 rounded-2xl shadow-sm text-[10px] font-mono text-muted-foreground text-center">
-          نشانگر ماوس را روی یکی از قلمروهای نقشه ببرید...
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const flagSymbol = getFlagEmoji(info.flagCode || info.code);
