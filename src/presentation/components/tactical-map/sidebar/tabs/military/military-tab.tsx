@@ -4,15 +4,10 @@ import { MilitaryExpansionView } from "./military-expansion-view";
 import { RecruitmentQueueCard } from "./recruitment-queue-card";
 import { DisbandUnitCard } from "./disband-unit-card";
 import { PlusCircle, ShieldAlert, Swords } from "lucide-react";
+import { MilitaryStack } from "@/domain/military/military.schema";
 
 interface MilitaryTabProps {
-  military: {
-    infantry: number;
-    airForce: number;
-    droneMissile: number;
-    experience: number;
-    techLevel: number;
-  };
+  military: MilitaryStack;
 }
 
 export function MilitaryTab({ military }: MilitaryTabProps) {
@@ -22,7 +17,7 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
 
   if (currentSubView === "expansion") {
     return (
-      <div className="space-y-4 animate-in fade-in duration-200">
+      <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
         <button
           onClick={() => setCurrentSubView("overview")}
           className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
@@ -35,7 +30,7 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
   }
 
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <MilitaryForcesSection
         infantry={military.infantry}
         airForce={military.airForce}
@@ -74,14 +69,14 @@ export function MilitaryTab({ military }: MilitaryTabProps) {
         </button>
 
         <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">
+          <div className="flex items-center justify-between text-xs font-mono">
+            <span className="text-muted-foreground font-sans">
               ارتقای سطح فناوری نظامی
             </span>
-            <span className="font-mono font-bold text-gdp">$100,000</span>
+            <span className="font-bold text-gdp">$100,000</span>
           </div>
           <button
-            onClick={() => alert("پژوهش نظامی آغاز شد.")}
+            onClick={() => {}}
             className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer"
           >
             <ShieldAlert size={14} className="text-amber-500" />

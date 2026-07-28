@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { FAKE_SAVES } from "./config/fake-saves.config";
 import { SaveItemCard } from "./save-item-card";
+import { useSavedCampaigns } from "./hooks/use-saved-campaigns";
 
 interface LoadCampaignModalProps {
   isOpen: boolean;
@@ -16,28 +16,25 @@ export function LoadCampaignModal({
 }: LoadCampaignModalProps) {
   const [loadingSaveId, setLoadingSaveId] = useState<string | null>(null);
   const [loadingStep, setLoadingSaveStep] = useState<string>("");
+  const { saves, loading: isDbLoading } = useSavedCampaigns();
 
   const handleSelect = (saveId: string) => {
     setLoadingSaveId(saveId);
-    setLoadingSaveStep("در حال بازخوانی پرونده بازی...");
+    setLoadingSaveStep("در حال بازخوانی پرونده بازی از دیتابیس محلی...");
 
     setTimeout(() => {
-      setLoadingSaveStep("همگام‌سازی اطلاعات نقشه...");
-    }, 800);
-
-    setTimeout(() => {
-      setLoadingSaveStep("بارگذاری نهایی شبکه لوجستیک و مالی...");
-    }, 1600);
+      setLoadingSaveStep("همگام‌سازی اطلاعات نقشه و ساختار شبکه...");
+    }, 600);
 
     setTimeout(() => {
       onSelectSave(saveId);
-    }, 2400);
+    }, 1200);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/60 backdrop-blur-lg flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-background/60 backdrop-blur-lg flex items-center justify-center p-4 z-50 dir-rtl text-right">
       <div className="bg-card border border-border w-full max-w-lg rounded-3xl p-6 shadow-2xl relative">
         {loadingSaveId ? (
           <div className="py-12 flex flex-col items-center justify-center gap-6 text-center">
@@ -45,7 +42,7 @@ export function LoadCampaignModal({
             <div className="space-y-1">
               <p className="text-xs font-bold text-foreground">{loadingStep}</p>
               <p className="text-[10px] text-muted-foreground font-mono">
-                SYS_LOADER: ACTIVE | DATA_SYNC
+                INDEXED_DB: READ_STATE | SYNC_OK
               </p>
             </div>
           </div>
@@ -59,27 +56,43 @@ export function LoadCampaignModal({
             </button>
 
             <div className="space-y-1 mb-6 text-right">
-              <span className="text-[10px] font-bold text-gdp uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-gdp uppercase tracking-widest font-mono">
                 پایگاه داده اسناد بازی
               </span>
               <h3 className="text-lg font-bold text-foreground">
                 بارگذاری بازی‌های ذخیره‌شده
               </h3>
               <p className="text-xs text-muted-foreground">
-                یکی از بازی‌های ذخیره‌شده زیر را برای بازیابی اطلاعات نقشه و
-                موقعیت استراتژیک حاکمیت خود انتخاب کنید.
+                پرونده‌های ذخیره‌شده حقیقی در مرورگر جهت بازیابی موقعیت
+                استراتژیک.
               </p>
             </div>
 
-            <div className="space-y-3">
-              {FAKE_SAVES.map((save) => (
-                <SaveItemCard
-                  key={save.id}
-                  save={save}
-                  onSelect={handleSelect}
-                />
-              ))}
-            </div>
+            {isDbLoading ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">
+                در حال جستجوی ذخیره‌ها در IndexedDB...
+              </div>
+            ) : saves.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
+                هیچ بازی ذخیره‌شده‌ای یافت نشد. یک کمپین جدید شروع کنید.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {saves.map((save) => (
+                  <SaveItemCard
+                    key={save.id}
+                    save={{
+                      id: save.id,
+                      title: save.title,
+                      date: save.date,
+                      playtime: "کمپین فعال",
+                      turn: save.turn,
+                    }}
+                    onSelect={handleSelect}
+                  />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

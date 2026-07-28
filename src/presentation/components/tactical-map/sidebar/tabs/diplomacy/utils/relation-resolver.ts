@@ -31,8 +31,8 @@ export function resolveProfileRelation(code: string): DiplomaticRelation {
     code: code.toUpperCase(),
     name,
     flagCode,
-    stance: code.toUpperCase() === "USA" ? "WAR" : "PEACE",
-    opinion: code.toUpperCase() === "USA" ? -75 : 0,
+    stance: "PEACE",
+    opinion: 0,
     description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
     profileData: {
       gdp: `$${gdpBillion} میلیارد دلار`,

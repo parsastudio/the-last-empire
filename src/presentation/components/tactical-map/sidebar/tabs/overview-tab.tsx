@@ -4,44 +4,18 @@ import { EconomyStatsSection } from "../economy-stats-section";
 import { ResourcesSection } from "../resources-section";
 import { GovernmentStatusSection } from "../government-status-section";
 import { RegionBreakdownCard } from "../region-breakdown-card";
-import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface OverviewTabProps {
-  nation: {
-    name: string;
-    code: string;
-    flagCode: string;
-    gdp: number;
-    taxRate: number;
-    tariffRate: number;
-    treasury: number;
-    nationalDebt: number;
-    population: number;
-    warExhaustion: number;
-    industrialLevel: number;
-    government: {
-      type: string;
-      stability: number;
-      corruption: number;
-      socialFreedom: number;
-    };
-    resources: {
-      oil: number;
-      steel: number;
-      manpower: number;
-    };
-    globalReputation: number;
-    globalAggression: number;
-    regionsDemographics?: RegionDemographics[];
-  };
+  nation: Nation;
 }
 
 export function OverviewTab({ nation }: OverviewTabProps) {
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <NationHeaderCard
         name={nation.name}
-        code={nation.code}
+        code={nation.id}
         flagCode={nation.flagCode}
         governmentType={nation.government.type}
         population={nation.population}

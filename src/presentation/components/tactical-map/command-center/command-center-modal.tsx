@@ -9,12 +9,13 @@ import { WideDiplomacyView } from "./views/wide-diplomacy-view";
 import { WideResearchView } from "./views/wide-research-view";
 import { WideAbilitiesView } from "./views/wide-abilities-view";
 import { WideReportsView } from "./views/wide-reports-view";
-import { MOCK_SCHEMA_NATION } from "../sidebar/config/mock-nation.config";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
   selectedTargetCode?: string | null;
+  nation: Nation | null;
   mockReports: CombatReport[];
   onClose: () => void;
   onFocusCountry?: (code: string) => void;
@@ -30,18 +31,19 @@ interface CommandCenterModalProps {
 export function CommandCenterModal({
   activeTab,
   selectedTargetCode,
+  nation,
   mockReports,
   onClose,
   onFocusCountry,
   onOpenTrade,
 }: CommandCenterModalProps) {
-  if (!activeTab) return null;
+  if (!activeTab || !nation) return null;
 
   const getTitleAndSubtitle = () => {
     switch (activeTab) {
       case "overview":
         return {
-          title: "شناسنامه و وضعیت عمومی امپراتوری",
+          title: `شناسنامه و وضعیت عمومی ${nation.name}`,
           subtitle: "پایش زنده اقتصاد، جمعیت، منابع و پایداری داخلی کشور",
         };
       case "market":
@@ -102,22 +104,20 @@ export function CommandCenterModal({
         />
 
         <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {activeTab === "overview" && (
-            <WideOverviewView nation={MOCK_SCHEMA_NATION} />
-          )}
+          {activeTab === "overview" && <WideOverviewView nation={nation} />}
 
           {activeTab === "market" && (
             <WideMarketView onOpenTrade={onOpenTrade} />
           )}
 
           {activeTab === "military" && (
-            <WideMilitaryView military={MOCK_SCHEMA_NATION.military} />
+            <WideMilitaryView military={nation.military} />
           )}
 
           {activeTab === "politics" && (
             <WidePoliticsView
-              taxRate={MOCK_SCHEMA_NATION.taxRate}
-              governmentType={MOCK_SCHEMA_NATION.government.type}
+              taxRate={nation.taxRate}
+              governmentType={nation.government.type}
             />
           )}
 
@@ -131,9 +131,7 @@ export function CommandCenterModal({
           {activeTab === "research" && <WideResearchView />}
 
           {activeTab === "abilities" && (
-            <WideAbilitiesView
-              currentGovernment={MOCK_SCHEMA_NATION.government.type}
-            />
+            <WideAbilitiesView currentGovernment={nation.government.type} />
           )}
 
           {activeTab === "reports" && <WideReportsView reports={mockReports} />}

@@ -8,23 +8,25 @@ import { ProxyWarCard } from "./proxy-war-card";
 import { RegimeChangeCard } from "./regime-change-card";
 import { AntiCorruptionCard } from "./anti-corruption-card";
 import { ActiveModifiersCard } from "./active-modifiers-card";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface PoliticsTabProps {
-  taxRate: number;
-  governmentType: string;
+  nation: Nation;
 }
 
-export function PoliticsTab({ taxRate, governmentType }: PoliticsTabProps) {
+export function PoliticsTab({ nation }: PoliticsTabProps) {
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
+    <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <ActiveModifiersCard />
-      <TaxControlCard taxRate={taxRate} />
+      <TaxControlCard taxRate={nation.taxRate} />
       <TariffControlCard />
       <ImfLoanCard />
-      <IndustrialUpgradeCard />
-      <InfrastructureUpgradeCard />
+      <IndustrialUpgradeCard currentLevel={nation.industrialLevel} />
+      <InfrastructureUpgradeCard
+        currentLevel={nation.geography.infrastructureLevel}
+      />
       <ProxyWarCard />
-      <RegimeChangeCard governmentType={governmentType} />
+      <RegimeChangeCard governmentType={nation.government.type} />
       <AntiCorruptionCard />
     </div>
   );
