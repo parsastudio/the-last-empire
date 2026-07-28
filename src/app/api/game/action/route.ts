@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
+import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameAction } from "@/domain/game/action.schema";
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -13,12 +13,21 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    const facade = new SimulationFacade();
-    const currentState = facade.getActiveSessionState();
+    const { searchParams } = new URL(request.url);
+    const gameId = searchParams.get("gameId") || "default_game";
 
-    if (!currentState) {
+    const result = serverGameSessionStore.dispatchAction(gameId, action);
+
+    if (!result) {
       return NextResponse.json(
-        { success: false, message: "هیچ نشست فعال بازی یافت نشد." },
+        { success: false, message: "نشست فعال بازی یافت نشد." },
+        { status: 404 },
+      );
+    }
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, message: result.message, error: result.error },
         { status: 400 },
       );
     }
@@ -26,6 +35,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({
       success: true,
       message: `دستور ${action.type} با موفقیت ثبت شد.`,
+      data: result,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "خطای داخلی سیستم";

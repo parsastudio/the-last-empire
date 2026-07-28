@@ -37,7 +37,10 @@ export function useGeopoliticsGame(customGameId?: string) {
 
   const advanceNextTurn = useCallback(async () => {
     try {
-      const res = await fetch("/api/game/next-turn", { method: "POST" });
+      const gameIdQuery = customGameId ? `?gameId=${customGameId}` : "";
+      const res = await fetch(`/api/game/next-turn${gameIdQuery}`, {
+        method: "POST",
+      });
       const json = await res.json();
       if (json.success && json.data) {
         setGameState(json.data);
@@ -47,7 +50,7 @@ export function useGeopoliticsGame(customGameId?: string) {
       return null;
     }
     return null;
-  }, []);
+  }, [customGameId]);
 
   useEffect(() => {
     let active = true;
