@@ -112,18 +112,22 @@ export function useTacticalMapInteraction({
   const handleSelectContextAction = (action: ContextActionType) => {
     if (!contextMenuState) return;
 
+    const targetCode = contextMenuState.countryCode;
+    const targetName = contextMenuState.countryName;
+    const targetCoord = contextMenuState.coordinate;
+
+    setContextMenuState(null);
+
     if (action === "attack") {
       setAttackModalState({
         isOpen: true,
-        targetName: contextMenuState.countryName,
-        targetCode: contextMenuState.countryCode,
-        coordinate: contextMenuState.coordinate,
+        targetName,
+        targetCode,
+        coordinate: targetCoord,
       });
-      setContextMenuState(null);
     } else if (action === "profile") {
-      setSelectedTargetCode(contextMenuState.countryCode);
+      setSelectedTargetCode(targetCode);
       setExternalSidebarTab("diplomacy");
-      setContextMenuState(null);
     }
   };
 

@@ -6,6 +6,7 @@ import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dime
 import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
 import { useTacticalMapInteraction } from "@/presentation/hooks/tactical-map/use-tactical-map-interaction";
+import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
 import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
 import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
@@ -28,6 +29,7 @@ export default function MapTest6Page() {
   const {
     scale,
     position,
+    setPosition,
     isDragging,
     hasDraggedRef,
     handleWheel,
@@ -43,6 +45,16 @@ export default function MapTest6Page() {
     canvasShadedRef,
     maskDataRef,
   } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
+
+  const { focusOnCountry } = useMapCameraFocus({
+    mapWidth,
+    mapHeight,
+    dimensions,
+    scale,
+    countries,
+    maskDataRef,
+    setPosition,
+  });
 
   const interaction = useTacticalMapInteraction({
     mapWidth,
@@ -108,6 +120,7 @@ export default function MapTest6Page() {
         isOpen={isSidebarOpen}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
+        onFocusCountry={focusOnCountry}
       />
 
       {dataLoading && (
