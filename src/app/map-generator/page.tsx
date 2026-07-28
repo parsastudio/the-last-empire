@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { MapGeneratorHeader } from "@/presentation/components/map-generator/map-generator-header";
 import { CompilationCard } from "@/presentation/components/map-generator/compilation-card";
 import { PartitionCard } from "@/presentation/components/map-generator/partition-card";
@@ -8,6 +8,7 @@ import { EditorCard } from "@/presentation/components/map-generator/editor-card"
 import { InsightsCard } from "@/presentation/components/map-generator/insights-card";
 import { TerritoryDatabase } from "@/presentation/components/map-generator/territory-database";
 import { FlatMapExporter } from "@/presentation/components/map-generator/utils/flat-map-exporter";
+import { FlatMapImporter } from "@/presentation/components/map-generator/utils/flat-map-importer";
 import { useMapGeneratorHandlers } from "@/presentation/components/map-generator/hooks/use-map-generator-handlers";
 
 interface CountryMapping {
@@ -25,7 +26,9 @@ export default function MapGeneratorPage() {
     "default",
   );
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const flatMapExporter = new FlatMapExporter();
+
+  const flatMapExporter = useMemo(() => new FlatMapExporter(), []);
+  const flatMapImporter = useMemo(() => new FlatMapImporter(), []);
 
   const {
     status,
@@ -40,6 +43,7 @@ export default function MapGeneratorPage() {
 
   useEffect(() => {
     let active = true;
+
     async function load() {
       try {
         let apiPath = "/api/map-generator";
@@ -66,8 +70,10 @@ export default function MapGeneratorPage() {
             }
           }
         }
+
         const res = await fetch(apiPath);
         const json = await res.json();
+
         if (active && json.success) {
           setCountries(json.data.countries || []);
           setIsCached(!!json.cached);
@@ -84,7 +90,9 @@ export default function MapGeneratorPage() {
         }
       }
     }
+
     load();
+
     return () => {
       active = false;
     };
@@ -99,50 +107,19 @@ export default function MapGeneratorPage() {
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     setIsImporting(true);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = async () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 4096;
-        canvas.height = 2048;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          setIsImporting(false);
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        const imgData = ctx.getImageData(0, 0, 4096, 2048);
-        const data = imgData.data;
-        const raw = new Uint8Array(4096 * 2048);
-        for (let i = 0; i < raw.length; i++) {
-          raw[i] = data[i * 4 + 2] || 0;
-        }
-        try {
-          const res = await fetch("/api/map-generator/import-raw", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/octet-stream",
-            },
-            body: raw,
-          });
-          const json = await res.json();
-          if (json.success) {
-            setMapType("edited");
-            window.location.reload();
-          } else {
-            alert(json.error || "Import failed");
-          }
-        } catch {
-          alert("Network error during import");
-        } finally {
-          setIsImporting(false);
-        }
-      };
-    };
-    reader.readAsDataURL(file);
+    await flatMapImporter.importFlatMap(
+      file,
+      () => {
+        setMapType("edited");
+        window.location.reload();
+      },
+      (msg) => {
+        alert(msg);
+        setIsImporting(false);
+      },
+    );
   };
 
   const totalArea = countries.reduce((acc, c) => acc + c.areaSqKm, 0);

@@ -8,7 +8,11 @@ export function useBriefingFeed() {
   );
 
   useEffect(() => {
+    let active = true;
+
     const interval = setInterval(() => {
+      if (!active) return;
+
       const dynamicTexts: { type: FeedMessage["type"]; text: string }[] = [
         {
           type: "combat",
@@ -27,6 +31,7 @@ export function useBriefingFeed() {
           text: "پژوهشکده ملی: پیشرفت تازه در تحقیقات فناوری‌های دفاعی و صنعتی.",
         },
       ];
+
       const randomItem =
         dynamicTexts[Math.floor(Math.random() * dynamicTexts.length)];
       if (!randomItem) return;
@@ -41,7 +46,10 @@ export function useBriefingFeed() {
       setMessages((prev) => [newMessage, ...prev.slice(0, 19)]);
     }, 6000);
 
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return { messages };
