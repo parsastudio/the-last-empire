@@ -17,7 +17,7 @@ export function AbilityCard({
 
   return (
     <div
-      className={`p-4 rounded-2xl border transition-all space-y-3 text-right ${
+      className={`p-4 rounded-2xl border transition-all space-y-3 text-right dir-rtl ${
         isCompatible
           ? "bg-background/60 border-primary/40 shadow-sm"
           : "bg-background/20 border-border/40 opacity-60"

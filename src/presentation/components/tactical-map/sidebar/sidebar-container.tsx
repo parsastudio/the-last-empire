@@ -7,6 +7,8 @@ import { EventDecisionModal } from "../modals/event-decision-modal";
 import { TradeActionDialog } from "./tabs/market/trade-action-dialog";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useSidebarReports } from "./hooks/use-sidebar-reports";
+import { TurnStagingLedger } from "./staging/turn-staging-ledger";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -27,6 +29,14 @@ export function SidebarContainer({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
+  const { showToast } = useToast();
+
+  const [stagedActions, setStagedActions] = useState<
+    Array<{ id: string; typeLabel: string; cost: number }>
+  >([
+    { id: "1", typeLabel: "سفارش ساخت ۱۰ پیاده‌نظام", cost: 1000 },
+    { id: "2", typeLabel: "تزریق بودجه عملیات پنهان", cost: 15000 },
+  ]);
 
   const [tradeDialog, setTradeDialog] = useState<{
     isOpen: boolean;
@@ -52,6 +62,13 @@ export function SidebarContainer({
     setCurrentTurn((prev) => prev + 1);
     setModalReports(mockAllReports);
     setIsModalOpen(true);
+    setStagedActions([]);
+
+    showToast(
+      "نوبت جدید آغاز شد",
+      `محاسبات نوبت ${currentTurn + 1} با موفقیت انجام شد.`,
+      "info",
+    );
 
     if ((currentTurn + 1) % 3 === 0) {
       setTimeout(() => {
@@ -111,6 +128,15 @@ export function SidebarContainer({
         onNextTurn={handleNextTurn}
       />
 
+      {!isRailCollapsed && (
+        <div className="fixed bottom-20 right-4 w-48 z-40">
+          <TurnStagingLedger
+            stagedActions={stagedActions}
+            onClearStaged={() => setStagedActions([])}
+          />
+        </div>
+      )}
+
       <CommandCenterModal
         activeTab={activeTab}
         selectedTargetCode={selectedTargetCode}
@@ -136,7 +162,11 @@ export function SidebarContainer({
         description={sampleEvent.description}
         choices={sampleEvent.choices}
         onSelectChoice={(choiceId) => {
-          alert(`تصمیم انتخابی شما (${choiceId}) اعمال گردید.`);
+          showToast(
+            "تصمیم حاکمیتی ثبت شد",
+            `گزینه ${choiceId} اعمال گردید.`,
+            "success",
+          );
           setIsEventModalOpen(false);
         }}
       />
@@ -150,9 +180,6 @@ export function SidebarContainer({
         maxAmount={tradeDialog.maxAmount}
         onClose={() => setTradeDialog((prev) => ({ ...prev, isOpen: false }))}
         onConfirm={(amount) => {
-          alert(
-            `معامله ${tradeDialog.mode === "buy" ? "خرید" : "فروش"} ${amount} ${tradeDialog.unit} ${tradeDialog.resourceName} ثبت شد.`,
-          );
           setTradeDialog((prev) => ({ ...prev, isOpen: false }));
         }}
       />

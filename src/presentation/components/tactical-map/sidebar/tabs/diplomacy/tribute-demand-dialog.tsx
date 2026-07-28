@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { X, Coins } from "lucide-react";
 import { TributeSliderBox } from "./tribute-slider-box";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface TributeDemandDialogProps {
   isOpen: boolean;
@@ -21,8 +22,18 @@ export function TributeDemandDialog({
   const [amount, setAmount] = useState<number>(
     Math.max(1000, Math.floor(maxAllowed * 0.5)),
   );
+  const { showToast } = useToast();
 
   if (!isOpen) return null;
+
+  const handleSendTribute = () => {
+    showToast(
+      "ارسال اولتیماتوم باج",
+      `درخواست دریافت سالانه $${amount.toLocaleString("fa-IR")} باج به ${targetName} ابلاغ گردید.`,
+      "warning",
+    );
+    onConfirm(amount);
+  };
 
   return (
     <div className="fixed inset-0 bg-background/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-smooth">
@@ -56,7 +67,7 @@ export function TributeDemandDialog({
         />
 
         <button
-          onClick={() => onConfirm(amount)}
+          onClick={handleSendTribute}
           className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md"
         >
           ارسال اولتیماتوم و دریافت باج
