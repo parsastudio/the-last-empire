@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { UserMinus } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { UnitType } from "@/domain/military/military.schema";
 
 interface DisbandUnitCardProps {
   nationId?: string;
@@ -9,19 +10,26 @@ interface DisbandUnitCardProps {
 export function DisbandUnitCard({
   nationId = "NATION_118",
 }: DisbandUnitCardProps) {
+  const [selectedUnitType, setSelectedUnitType] =
+    useState<UnitType>("INFANTRY");
   const [disbandCount, setDisbandAmount] = useState<number>(5);
   const { dispatchAction } = useGameActions();
 
   const handleDisband = async () => {
+    let typeLabel = "یگان پیاده‌نظام";
+    if (selectedUnitType === "AIR_FORCE") typeLabel = "فروند جنگنده";
+    else if (selectedUnitType === "DRONE_MISSILE")
+      typeLabel = "یگان موشکی/پهپادی";
+
     await dispatchAction(
       {
         id: `disband-${Date.now()}`,
         nationId,
         type: "DISBAND_UNIT",
-        unitType: "INFANTRY",
+        unitType: selectedUnitType,
         quantity: disbandCount,
       },
-      `${disbandCount} یگان منحل شد و نیروی انسانی به مخازن ملی بازگشت.`,
+      `${disbandCount} ${typeLabel} منحل شد و نیروی انسانی به مخازن ملی بازگشت.`,
     );
   };
 
@@ -35,8 +43,41 @@ export function DisbandUnitCard({
       </div>
 
       <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 text-right">
+        <div className="grid grid-cols-3 gap-1 bg-secondary/60 p-1 rounded-xl text-[10px] font-bold">
+          <button
+            onClick={() => setSelectedUnitType("INFANTRY")}
+            className={`py-1.5 rounded-lg transition-all ${
+              selectedUnitType === "INFANTRY"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            پیاده‌نظام
+          </button>
+          <button
+            onClick={() => setSelectedUnitType("AIR_FORCE")}
+            className={`py-1.5 rounded-lg transition-all ${
+              selectedUnitType === "AIR_FORCE"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            جنگنده
+          </button>
+          <button
+            onClick={() => setSelectedUnitType("DRONE_MISSILE")}
+            className={`py-1.5 rounded-lg transition-all ${
+              selectedUnitType === "DRONE_MISSILE"
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            پهپاد/موشک
+          </button>
+        </div>
+
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">تعداد پیاده‌نظام:</span>
+          <span className="text-muted-foreground">تعداد انحلال:</span>
           <span className="font-mono font-bold text-foreground">
             {disbandCount} یگان
           </span>

@@ -18,16 +18,27 @@ export function PoliticsTab({ nation }: PoliticsTabProps) {
   return (
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <ActiveModifiersCard modifiers={nation.activeModifiers} />
-      <TaxControlCard taxRate={nation.taxRate} />
+      <TaxControlCard
+        taxRate={nation.taxRate}
+        baseGdp={nation.gdp}
+        nationId={nation.id}
+      />
       <TariffControlCard initialTariffRate={nation.tariffRate} />
-      <ImfLoanCard />
-      <IndustrialUpgradeCard currentLevel={nation.industrialLevel} />
+      <ImfLoanCard nationId={nation.id} nationalDebt={nation.nationalDebt} />
+      <IndustrialUpgradeCard
+        currentLevel={nation.industrialLevel}
+        nationId={nation.id}
+      />
       <InfrastructureUpgradeCard
         currentLevel={nation.geography.infrastructureLevel}
+        nationId={nation.id}
       />
-      <ProxyWarCard />
-      <RegimeChangeCard governmentType={nation.government.type} />
-      <AntiCorruptionCard />
+      <ProxyWarCard nationId={nation.id} />
+      <RegimeChangeCard
+        governmentType={nation.government.type}
+        nationId={nation.id}
+      />
+      <AntiCorruptionCard nationId={nation.id} />
     </div>
   );
 }

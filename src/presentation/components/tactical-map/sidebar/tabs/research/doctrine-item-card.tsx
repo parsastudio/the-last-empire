@@ -1,10 +1,16 @@
 import React from "react";
 import { CheckCircle } from "lucide-react";
-import { DoctrineItem } from "./doctrines.config";
+
+export interface DoctrineItemViewModel {
+  id: string;
+  name: string;
+  cost: number;
+  unlocked: boolean;
+}
 
 interface DoctrineItemCardProps {
-  doctrine: DoctrineItem;
-  onUnlock: (doctrine: DoctrineItem) => void;
+  doctrine: DoctrineItemViewModel;
+  onUnlock: (doctrine: { id: string; name: string }) => void;
 }
 
 export function DoctrineItemCard({
@@ -12,7 +18,7 @@ export function DoctrineItemCard({
   onUnlock,
 }: DoctrineItemCardProps) {
   return (
-    <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3">
+    <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3 dir-rtl">
       <div className="space-y-1 text-right">
         <span className="text-xs font-bold text-foreground block">
           {doctrine.name}
@@ -21,6 +27,7 @@ export function DoctrineItemCard({
           هزینه: {doctrine.cost} امتیاز دکترین
         </span>
       </div>
+
       {doctrine.unlocked ? (
         <span className="flex items-center gap-1 text-[10px] font-bold text-gdp">
           <CheckCircle size={13} />
@@ -28,7 +35,7 @@ export function DoctrineItemCard({
         </span>
       ) : (
         <button
-          onClick={() => onUnlock(doctrine)}
+          onClick={() => onUnlock({ id: doctrine.id, name: doctrine.name })}
           className="px-3 py-1.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[10px] font-bold shadow-sm cursor-pointer"
         >
           باز کردن
