@@ -1,5 +1,6 @@
 import React from "react";
 import { Wrench } from "lucide-react";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface InfrastructureUpgradeCardProps {
   currentLevel?: number;
@@ -9,6 +10,15 @@ export function InfrastructureUpgradeCard({
   currentLevel = 1,
 }: InfrastructureUpgradeCardProps) {
   const upgradeCost = Math.floor(30000 * Math.pow(1.25, currentLevel - 1));
+  const { showToast } = useToast();
+
+  const handleUpgradeInfra = () => {
+    showToast(
+      "نوسازی زیرساخت‌ها",
+      `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد.`,
+      "success",
+    );
+  };
 
   return (
     <div className="space-y-2.5">
@@ -19,7 +29,7 @@ export function InfrastructureUpgradeCard({
         </span>
       </div>
 
-      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 text-right">
+      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 text-right dir-rtl">
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">سطح زیرساخت فعلی:</span>
           <span className="font-mono font-bold text-primary">
@@ -35,7 +45,7 @@ export function InfrastructureUpgradeCard({
         </div>
 
         <button
-          onClick={() => alert("پروژه نوسازی شبکه مواصلاتی آغاز شد.")}
+          onClick={handleUpgradeInfra}
           className="w-full py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
           نوسازی زیرساخت مرزی
