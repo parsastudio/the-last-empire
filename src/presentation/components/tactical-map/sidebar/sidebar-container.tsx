@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { SidebarTabs, SidebarTabType } from "./sidebar-tabs";
+import { NextTurnButton } from "./next-turn-button";
 import { OverviewTab } from "./tabs/overview-tab";
-import { MilitaryTab } from "./tabs/military-tab";
-import { PoliticsTab } from "./tabs/politics-tab";
+import { MilitaryTab } from "./tabs/military/military-tab";
+import { PoliticsTab } from "./tabs/politics/politics-tab";
 import { DiplomacyTab } from "./tabs/diplomacy-tab";
-import { ResearchTab } from "./tabs/research-tab";
+import { ResearchTab } from "./tabs/research/research-tab";
+import { AbilitiesTab } from "./tabs/abilities/abilities-tab";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -12,8 +14,16 @@ interface SidebarContainerProps {
 
 export function SidebarContainer({ isOpen }: SidebarContainerProps) {
   const [activeTab, setActiveTab] = useState<SidebarTabType>("overview");
+  const [currentTurn, setCurrentTurn] = useState<number>(1);
 
   if (!isOpen) return null;
+
+  const handleNextTurn = () => {
+    setCurrentTurn((prev) => prev + 1);
+    alert(
+      `نوبت ${currentTurn} پایان یافت. موتور بازی در حال پردازش اقتصاد، ارتش و هوش مصنوعی است...`,
+    );
+  };
 
   const realSchemaNation = {
     name: "جمهوری اسلامی ایران",
@@ -56,9 +66,7 @@ export function SidebarContainer({ isOpen }: SidebarContainerProps) {
       dir="rtl"
     >
       <div className="p-4 border-b border-border shrink-0 space-y-3">
-        <span className="text-[10px] font-bold text-gdp uppercase tracking-widest font-mono block">
-          مرکز فرماندهی کل قوا
-        </span>
+        <NextTurnButton currentTurn={currentTurn} onNextTurn={handleNextTurn} />
         <SidebarTabs activeTab={activeTab} onChangeTab={setActiveTab} />
       </div>
 
@@ -72,6 +80,9 @@ export function SidebarContainer({ isOpen }: SidebarContainerProps) {
             taxRate={realSchemaNation.taxRate}
             governmentType={realSchemaNation.government.type}
           />
+        )}
+        {activeTab === "abilities" && (
+          <AbilitiesTab currentGovernment={realSchemaNation.government.type} />
         )}
         {activeTab === "diplomacy" && <DiplomacyTab />}
         {activeTab === "research" && <ResearchTab />}

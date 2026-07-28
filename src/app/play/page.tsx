@@ -7,6 +7,7 @@ import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
 import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
 import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
+import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
 
 export default function MapTest6Page() {
   const mapWidth = 4096;
@@ -33,9 +34,11 @@ export default function MapTest6Page() {
   } = useMapGesture();
 
   const {
+    countries,
     loading: dataLoading,
     canvasSrcRef,
     canvasShadedRef,
+    maskDataRef,
   } = useMapData({ mapWidth, mapHeight, mapMode: activeMapMode });
 
   useCanvasRenderer({
@@ -64,7 +67,17 @@ export default function MapTest6Page() {
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
         onClick={() => {}}
-      />
+      >
+        <CountryHoverContainer
+          countries={countries}
+          maskDataRef={maskDataRef}
+          mapWidth={mapWidth}
+          mapHeight={mapHeight}
+          containerRef={containerRef}
+          scale={scale}
+          position={position}
+        />
+      </TacticalViewport>
 
       <SidebarContainer isOpen={isSidebarOpen} />
 
