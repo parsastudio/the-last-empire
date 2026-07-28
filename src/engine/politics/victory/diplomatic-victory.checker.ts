@@ -4,11 +4,6 @@ import { VictoryStatus } from "../victory-checker";
 
 export class DiplomaticVictoryChecker implements VictoryCondition {
   public evaluate(state: GameState): VictoryStatus | null {
-    const peacefulTurns = state.peacefulTurnsCount ?? 0;
-    if (peacefulTurns < 30) {
-      return null;
-    }
-
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
     const totalPopulation = aliveNations.reduce(
       (sum, n) => sum + n.population,
