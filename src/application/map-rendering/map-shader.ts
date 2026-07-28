@@ -6,6 +6,7 @@ import { GdpLayerShader } from "./shader/gdp-layer-shader";
 import { MilitaryLayerShader } from "./shader/military-layer-shader";
 import { PoliticalLayerShader } from "./shader/political-layer-shader";
 import { BorderDetector } from "./shader/border-detector";
+import { ShorelineDistanceCache } from "./shader/shoreline-distance-cache";
 
 interface Country {
   id: number;
@@ -36,30 +37,11 @@ export class MapShader {
     activeLayer: "political" | "gdp" | "military" = "political",
   ): void {
     const palette = this.paletteGenerator.generatePalette(countries);
-    const dist = new Int32Array(width * height);
-    dist.fill(9999);
-
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
-        const val = maskData[idx];
-        if (val && val >= 11 && val < 250) {
-          dist[idx] = 0;
-        } else {
-          if (x > 0) dist[idx] = Math.min(dist[idx]!, dist[idx - 1]! + 1);
-          if (y > 0) dist[idx] = Math.min(dist[idx]!, dist[idx - width]! + 1);
-        }
-      }
-    }
-
-    for (let y = height - 1; y >= 0; y--) {
-      for (let x = width - 1; x >= 0; x--) {
-        const idx = y * width + x;
-        if (x < width - 1) dist[idx] = Math.min(dist[idx]!, dist[idx + 1]! + 1);
-        if (y < height - 1)
-          dist[idx] = Math.min(dist[idx]!, dist[idx + width]! + 1);
-      }
-    }
+    const dist = ShorelineDistanceCache.getOrCreateDistanceTransform(
+      maskData,
+      width,
+      height,
+    );
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {

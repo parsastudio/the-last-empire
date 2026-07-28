@@ -3,12 +3,7 @@ import { SidebarTabType } from "../sidebar-tabs";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
-
-export interface StagedActionItem {
-  id: string;
-  typeLabel: string;
-  cost: number;
-}
+import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 
 export interface TradeDialogState {
   isOpen: boolean;
@@ -28,7 +23,9 @@ export function useSidebarTurnActions(
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
-  const [stagedActions, setStagedActions] = useState<StagedActionItem[]>([]);
+
+  const { stagedActions, setStagedActions, clearStagedActions } =
+    useActionStagingTracker();
 
   const [tradeDialog, setTradeDialog] = useState<TradeDialogState>({
     isOpen: false,
@@ -97,7 +94,7 @@ export function useSidebarTurnActions(
 
     setModalReports(realReports);
     setIsModalOpen(true);
-    setStagedActions([]);
+    clearStagedActions();
 
     showToast(
       "نوبت جدید آغاز شد",
