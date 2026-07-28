@@ -9,6 +9,7 @@ import {
   MapPin,
   ArrowLeft,
   Globe2,
+  Receipt,
 } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
@@ -21,6 +22,8 @@ interface AttackPlanningModalProps {
   coordinate: { x: number; y: number };
   stance: string;
   userOilStock?: number;
+  userTreasury?: number;
+  estimatedCost?: number;
   onClose: () => void;
   onConfirmAttack: () => void;
 }
@@ -34,6 +37,8 @@ export function AttackPlanningModal({
   coordinate,
   stance = "PEACE",
   userOilStock = 20,
+  userTreasury = 10000,
+  estimatedCost = 19000,
   onClose,
   onConfirmAttack,
 }: AttackPlanningModalProps) {
@@ -42,8 +47,11 @@ export function AttackPlanningModal({
   const attackerFlag = getFlagEmoji(attackerCode);
   const targetFlag = getFlagEmoji(targetCode);
   const isAtWar = stance === "WAR";
-  const requiredOil = 50;
-  const isOilDeficit = userOilStock < requiredOil;
+  const isOilDeficit = userOilStock < 20;
+  const isBudgetDeficit = userTreasury < estimatedCost;
+  const emergencyDebt = isBudgetDeficit
+    ? estimatedCost - Math.max(0, userTreasury)
+    : 0;
 
   return (
     <div className="fixed inset-0 pointer-events-none flex items-center justify-center p-4 z-50 animate-fade-smooth">
@@ -132,17 +140,11 @@ export function AttackPlanningModal({
             <div className="flex justify-between items-center pb-2 border-b border-border/40">
               <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
                 <Coins size={13} className="text-gdp" />
-                ترانزیت نیروها تا مرز
+                هزینه ترانزیت و عملیات
               </span>
-              <span className="font-bold text-foreground">$۴,۰۰۰ دلار</span>
-            </div>
-
-            <div className="flex justify-between items-center pb-2 border-b border-border/40">
-              <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
-                <Coins size={13} className="text-treasury" />
-                ترابری متقاطع و پشتیبانی سنگین
+              <span className="font-bold text-foreground">
+                ${estimatedCost.toLocaleString("fa-IR")} دلار
               </span>
-              <span className="font-bold text-foreground">$۱۵,۰۰۰ دلار</span>
             </div>
 
             <div className="flex justify-between items-center pt-0.5">
@@ -155,13 +157,29 @@ export function AttackPlanningModal({
           </div>
         </div>
 
+        {isBudgetDeficit && (
+          <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-rose-500">
+            <Receipt size={16} className="shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="font-bold block">
+                هشدار کسر بودجه و ایجاد بدهی ملی
+              </span>
+              <p className="text-[11px] text-foreground/80 leading-relaxed">
+                موجودی خزانه کافی نیست! انجام نبرد باعث ایجاد $
+                {emergencyDebt.toLocaleString("fa-IR")} بدهی اضطراری ملی و اعمال
+                ضریب منفی به قدرت رزمی خواهد شد.
+              </p>
+            </div>
+          </div>
+        )}
+
         {isOilDeficit && (
           <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-2.5 text-xs text-amber-500">
             <AlertTriangle size={16} className="shrink-0 mt-0.5" />
             <div className="space-y-0.5">
               <span className="font-bold block">هشدار کمبود سوخت</span>
               <p className="text-[11px] text-foreground/80 leading-relaxed">
-                ذخایر نفت کافی نیست! انجام حمله بدون سوخت کافی، ضریب منفی ۴۰٪ به
+                ذخایر نفت کافی نیست! انجام حمله بدون سوخت کافی، ضریب منفی به
                 قدرت رزمی یگان‌ها اعمال خواهد کرد.
               </p>
             </div>
