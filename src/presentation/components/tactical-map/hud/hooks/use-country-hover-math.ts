@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 import { findCountryProfileById } from "@/domain/map/countries";
 import { HoverCountryInfo } from "../country-hover-container";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface UseCountryHoverMathProps {
   countries: CountryMapping[];
@@ -13,6 +14,8 @@ interface UseCountryHoverMathProps {
   scale: number;
   position: { x: number; y: number };
   rankingsMap: Map<string, number>;
+  nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
 }
 
 export function useCountryHoverMath({
@@ -25,6 +28,8 @@ export function useCountryHoverMath({
   scale,
   position,
   rankingsMap,
+  nationsMap,
+  humanNationId = "NATION_118",
 }: UseCountryHoverMathProps) {
   const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(
@@ -88,10 +93,21 @@ export function useCountryHoverMath({
       greenChannelVal = geoByte >> 2;
     }
 
+    const fullNationId = `NATION_${matchedCountry.id}`;
+    const liveNation = nationsMap ? nationsMap[fullNationId] : null;
+
     const profile = findCountryProfileById(matchedCountry.id);
-    const realName = profile ? profile.nameFa : matchedCountry.name;
-    const areaVal = matchedCountry.areaSqKm ?? 50000;
-    const realGdp = profile ? profile.gdp : areaVal * 1500;
+    const realName = liveNation
+      ? liveNation.name
+      : profile
+        ? profile.nameFa
+        : matchedCountry.name;
+
+    const realGdp = liveNation
+      ? liveNation.gdp
+      : profile
+        ? profile.gdp
+        : (matchedCountry.areaSqKm ?? 50000) * 1500;
 
     const gdpBillionsNum = realGdp / 1e9;
     const gdpFormatted = Number.isInteger(gdpBillionsNum)
@@ -100,8 +116,20 @@ export function useCountryHoverMath({
 
     const flagCode = profile ? profile.flagCode : matchedCountry.code;
 
+    let stanceLabel = "دیپلماسی صلح‌آمیز";
+    if (humanNationId && nationsMap && nationsMap[humanNationId]) {
+      const humanNation = nationsMap[humanNationId];
+      const relation = humanNation.relations[fullNationId];
+      if (relation) {
+        if (relation.stance === "WAR") stanceLabel = "در حال جنگ مستقیم";
+        else if (relation.stance === "ALLIANCE") stanceLabel = "متحد استراتژیک";
+        else if (relation.stance === "NON_AGGRESSION_PACT")
+          stanceLabel = "پیمان عدم تخاصم";
+      }
+    }
+
     const possibleKeys = [
-      `NATION_${matchedCountry.id}`,
+      fullNationId,
       matchedCountry.code.toUpperCase(),
       matchedCountry.code.toLowerCase(),
       matchedCountry.id.toString(),
@@ -125,10 +153,10 @@ export function useCountryHoverMath({
       code: matchedCountry.code,
       flagCode: flagCode,
       rank: cachedRank,
-      stance: "دیپلماسی صلح‌آمیز",
+      stance: stanceLabel,
       gdp: `$${gdpFormatted}B`,
       regionName: regionLabel,
-      regionArea: `${Math.round(areaVal).toLocaleString("fa-IR")} km²`,
+      regionArea: `${Math.round(matchedCountry.areaSqKm ?? 50000).toLocaleString("fa-IR")} km²`,
     });
   }, [
     countries,
@@ -140,6 +168,8 @@ export function useCountryHoverMath({
     scale,
     position,
     rankingsMap,
+    nationsMap,
+    humanNationId,
   ]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
