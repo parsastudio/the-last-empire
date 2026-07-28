@@ -1,13 +1,19 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { GameAction } from "@/domain/game/action.schema";
+import { DeterministicIdGenerator } from "./utils/deterministic-id-generator";
 
 export class AIDiplomacyLogic {
+  private idGenerator = new DeterministicIdGenerator();
+
   public planDiplomacy(
     nation: Nation,
     allNations: Record<string, Nation>,
     personality: string,
+    currentTurn = 1,
   ): GameAction[] {
     const actions: GameAction[] = [];
+    let seq = 1;
+
     for (const [targetId, relation] of Object.entries(nation.relations)) {
       if (actions.length >= 2) {
         break;
@@ -36,7 +42,12 @@ export class AIDiplomacyLogic {
         relativePower >= 2.0
       ) {
         actions.push({
-          id: `ai-backstab-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          id: this.idGenerator.generateActionId(
+            "DECLARE_WAR",
+            nation.id,
+            currentTurn,
+            seq++,
+          ),
           nationId: nation.id,
           type: "DECLARE_WAR",
           targetNationId: targetId,
@@ -51,7 +62,12 @@ export class AIDiplomacyLogic {
         relation.stance !== "WAR"
       ) {
         actions.push({
-          id: `ai-diplomacy-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          id: this.idGenerator.generateActionId(
+            "DIPLOMATIC_PROPOSAL",
+            nation.id,
+            currentTurn,
+            seq++,
+          ),
           nationId: nation.id,
           type: "DIPLOMATIC_PROPOSAL",
           targetNationId: targetId,

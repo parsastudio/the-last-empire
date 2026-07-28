@@ -2,12 +2,18 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import type { RecruitUnitAction } from "@/domain/game/action.schema";
 import { UpkeepCalculator } from "@/engine/economy/upkeep-calculator";
 import { TaxCalculator } from "@/engine/economy/tax-calculator";
+import { DeterministicIdGenerator } from "./utils/deterministic-id-generator";
 
 export class AIRecruitmentPlanner {
   private upkeepCalculator = new UpkeepCalculator();
   private taxCalculator = new TaxCalculator();
+  private idGenerator = new DeterministicIdGenerator();
 
-  public planRecruitment(nation: Nation, budget: number): RecruitUnitAction[] {
+  public planRecruitment(
+    nation: Nation,
+    budget: number,
+    currentTurn = 1,
+  ): RecruitUnitAction[] {
     const actions: RecruitUnitAction[] = [];
 
     const upkeep = this.upkeepCalculator.calculateUpkeep(nation);
@@ -21,6 +27,7 @@ export class AIRecruitmentPlanner {
     let remainingBudget = budget;
     let remainingManpower = nation.resources.manpower;
     let remainingSteel = nation.resources.steel;
+    let seq = 1;
 
     const maxInfantryCost = 100;
     const maxAirForceCost = 500;
@@ -43,7 +50,12 @@ export class AIRecruitmentPlanner {
 
       if (qty > 0) {
         actions.push({
-          id: `ai-recruit-air-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          id: this.idGenerator.generateActionId(
+            "RECRUIT_UNIT",
+            nation.id,
+            currentTurn,
+            seq++,
+          ),
           nationId: nation.id,
           type: "RECRUIT_UNIT",
           unitType: "AIR_FORCE",
@@ -64,7 +76,12 @@ export class AIRecruitmentPlanner {
 
       if (qty > 0) {
         actions.push({
-          id: `ai-recruit-inf-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          id: this.idGenerator.generateActionId(
+            "RECRUIT_UNIT",
+            nation.id,
+            currentTurn,
+            seq++,
+          ),
           nationId: nation.id,
           type: "RECRUIT_UNIT",
           unitType: "INFANTRY",
