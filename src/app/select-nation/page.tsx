@@ -1,23 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { NationListSidebar } from "@/presentation/components/select-nation/nation-list-sidebar";
 import { NationDetailsPanel } from "@/presentation/components/select-nation/nation-details-panel";
-import { NATIONS_DATABASE } from "@/presentation/components/select-nation/config/nations-database.config";
 import { GOVERNMENT_OPTIONS } from "@/presentation/components/select-nation/config/government-options.config";
 import { SelectNationHeader } from "@/presentation/components/select-nation/select-nation-header";
 import { GameIdGenerator } from "@/domain/shared/game-id-generator";
+import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
 
 export default function SelectNationPage() {
   const router = useRouter();
+  const provider = useMemo(() => new NationDatabaseProvider(), []);
+  const allNations = useMemo(
+    () => provider.getAllSelectableNations(),
+    [provider],
+  );
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedNation, setSelectedNation] = useState<NationDetail>(
-    NATIONS_DATABASE[0]!,
+    allNations[0]!,
   );
   const [selectedGovernment, setSelectedGovernment] = useState<string>(
-    NATIONS_DATABASE[0]!.defaultGovernment,
+    allNations[0]!.defaultGovernment,
   );
 
   const handleSelectNationCard = (nation: NationDetail) => {
@@ -62,7 +68,7 @@ export default function SelectNationPage() {
 
       <main className="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
         <NationListSidebar
-          nations={NATIONS_DATABASE}
+          nations={allNations}
           selectedId={selectedNation.id}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}

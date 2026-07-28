@@ -6,6 +6,7 @@ import {
   GovernmentTypeSelector,
   GovernmentOption,
 } from "./government-type-selector";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface NationDetailsPanelProps {
   nation: NationDetail;
@@ -22,18 +23,18 @@ export function NationDetailsPanel({
   onSelectGovernment,
   onStartCampaign,
 }: NationDetailsPanelProps) {
+  const flagEmoji = getFlagEmoji(nation.code);
+
   return (
     <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-3xl p-6 overflow-y-auto shadow-sm h-full space-y-6 dir-rtl text-right">
       <div className="flex items-center gap-4 pb-5 border-b border-border">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/flags/${nation.code.toLowerCase()}.png`}
-          alt={nation.name}
-          className="w-14 h-10 object-cover rounded-xl shadow-md border border-border"
-          onError={(e) => {
-            (e.target as HTMLElement).style.display = "none";
-          }}
-        />
+        <span
+          className="text-4xl select-none shrink-0"
+          role="img"
+          aria-label={nation.name}
+        >
+          {flagEmoji}
+        </span>
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-extrabold text-foreground">
