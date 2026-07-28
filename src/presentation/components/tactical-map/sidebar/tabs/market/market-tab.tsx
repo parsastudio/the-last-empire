@@ -3,8 +3,19 @@ import { Fuel, Wrench } from "lucide-react";
 import { MarketHeader } from "./market-header";
 import { CommodityCard } from "./commodity-card";
 import { TradeActionDialog } from "./trade-action-dialog";
+import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 
-export function MarketTab() {
+interface MarketTabProps {
+  marketPrices?: ResourceMarketPrice;
+  oilStock?: number;
+  steelStock?: number;
+}
+
+export function MarketTab({
+  marketPrices = { oil: 105, steel: 92 },
+  oilStock = 5000,
+  steelStock = 2000,
+}: MarketTabProps) {
   const [tradeModal, setTradeModal] = useState<{
     isOpen: boolean;
     resourceName: string;
@@ -37,15 +48,8 @@ export function MarketTab() {
     });
   };
 
-  const handleConfirmTrade = (amount: number) => {
-    alert(
-      `معامله ${tradeModal.mode === "buy" ? "خرید" : "فروش"} ${amount} ${tradeModal.unit} ${tradeModal.resourceName} با موفقیت در بازار ثبت گردید.`,
-    );
-    setTradeModal((prev) => ({ ...prev, isOpen: false }));
-  };
-
   return (
-    <div className="space-y-4 animate-in fade-in duration-200">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
       <MarketHeader />
 
       <div className="space-y-3">
@@ -54,10 +58,12 @@ export function MarketTab() {
           unit="بشکه"
           icon={Fuel}
           colorClass="text-treasury"
-          stock={5000}
-          currentPrice={105}
+          stock={oilStock}
+          currentPrice={marketPrices.oil}
           priceTrend="up"
-          onTrade={(mode) => handleOpenTrade("نفت خام", "بشکه", mode, 105)}
+          onTrade={(mode) =>
+            handleOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
+          }
         />
 
         <CommodityCard
@@ -65,10 +71,12 @@ export function MarketTab() {
           unit="تن"
           icon={Wrench}
           colorClass="text-primary"
-          stock={2000}
-          currentPrice={92}
+          stock={steelStock}
+          currentPrice={marketPrices.steel}
           priceTrend="down"
-          onTrade={(mode) => handleOpenTrade("فولاد صنعتی", "تن", mode, 92)}
+          onTrade={(mode) =>
+            handleOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
+          }
         />
       </div>
 
@@ -80,7 +88,9 @@ export function MarketTab() {
         unitPrice={tradeModal.unitPrice}
         maxAmount={tradeModal.maxAmount}
         onClose={() => setTradeModal((prev) => ({ ...prev, isOpen: false }))}
-        onConfirm={handleConfirmTrade}
+        onConfirm={() => {
+          setTradeModal((prev) => ({ ...prev, isOpen: false }));
+        }}
       />
     </div>
   );

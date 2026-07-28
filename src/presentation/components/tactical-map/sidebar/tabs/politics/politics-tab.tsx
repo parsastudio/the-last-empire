@@ -17,9 +17,9 @@ interface PoliticsTabProps {
 export function PoliticsTab({ nation }: PoliticsTabProps) {
   return (
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
-      <ActiveModifiersCard />
+      <ActiveModifiersCard modifiers={nation.activeModifiers} />
       <TaxControlCard taxRate={nation.taxRate} />
-      <TariffControlCard />
+      <TariffControlCard initialTariffRate={nation.tariffRate} />
       <ImfLoanCard />
       <IndustrialUpgradeCard currentLevel={nation.industrialLevel} />
       <InfrastructureUpgradeCard

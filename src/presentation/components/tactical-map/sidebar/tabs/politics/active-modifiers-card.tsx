@@ -1,20 +1,18 @@
 import React from "react";
 import { ShieldAlert } from "lucide-react";
+import { ActiveModifier } from "@/domain/nation/nation.schema";
 
-export function ActiveModifiersCard() {
-  const modifiers = [
-    {
-      id: "1",
-      name: "حکومت نظامی فعال",
-      type: "افزایش ثبات داخلی",
-      turns: 3,
-    },
-  ];
+interface ActiveModifiersCardProps {
+  modifiers?: ActiveModifier[];
+}
 
-  if (modifiers.length === 0) return null;
+export function ActiveModifiersCard({
+  modifiers = [],
+}: ActiveModifiersCardProps) {
+  if (!modifiers || modifiers.length === 0) return null;
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
         <ShieldAlert size={13} className="text-military" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -33,11 +31,12 @@ export function ActiveModifiersCard() {
                 {mod.name}
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                {mod.type}
+                {mod.effectType}:{" "}
+                {mod.magnitude > 0 ? `+${mod.magnitude}` : mod.magnitude}
               </span>
             </div>
             <span className="text-[10px] bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground">
-              {mod.turns} نوبت دیگر
+              {mod.turnsRemaining} نوبت
             </span>
           </div>
         ))}

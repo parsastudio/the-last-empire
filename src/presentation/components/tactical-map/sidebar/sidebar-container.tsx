@@ -6,9 +6,10 @@ import { TurnSummaryModal } from "../reports/turn-summary-modal";
 import { EventDecisionModal } from "../modals/event-decision-modal";
 import { TradeActionDialog } from "./tabs/market/trade-action-dialog";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { useSidebarReports } from "./hooks/use-sidebar-reports";
 import { TurnStagingLedger } from "./staging/turn-staging-ledger";
 import { useToast } from "@/presentation/context/toast-context";
+import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
+import { useRealCombatReports } from "./hooks/use-real-combat-reports";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -25,11 +26,18 @@ export function SidebarContainer({
 }: SidebarContainerProps) {
   const [activeTab, setActiveTab] = useState<SidebarTabType | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
-  const [currentTurn, setCurrentTurn] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
   const { showToast } = useToast();
+  const { gameState, advanceNextTurn } = useGeopoliticsGame();
+
+  const realReports = useRealCombatReports(gameState);
+  const humanNation =
+    gameState && gameState.humanNationId
+      ? gameState.nations[gameState.humanNationId] || null
+      : null;
+  const currentTurn = gameState ? gameState.currentTurn : 1;
 
   useEffect(() => {
     if (externalActiveTab) {
@@ -39,10 +47,7 @@ export function SidebarContainer({
 
   const [stagedActions, setStagedActions] = useState<
     Array<{ id: string; typeLabel: string; cost: number }>
-  >([
-    { id: "1", typeLabel: "سفارش ساخت ۱۰ پیاده‌نظام", cost: 1000 },
-    { id: "2", typeLabel: "تزریق بودجه عملیات پنهان", cost: 15000 },
-  ]);
+  >([]);
 
   const [tradeDialog, setTradeDialog] = useState<{
     isOpen: boolean;
@@ -60,23 +65,21 @@ export function SidebarContainer({
     maxAmount: 100,
   });
 
-  const mockAllReports = useSidebarReports(currentTurn);
-
   if (!isOpen) return null;
 
-  const handleNextTurn = () => {
-    setCurrentTurn((prev) => prev + 1);
-    setModalReports(mockAllReports);
+  const handleNextTurn = async () => {
+    const nextState = await advanceNextTurn();
+    setModalReports(realReports);
     setIsModalOpen(true);
     setStagedActions([]);
 
     showToast(
       "نوبت جدید آغاز شد",
-      `محاسبات نوبت ${currentTurn + 1} با موفقیت انجام شد.`,
+      `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} انجام گردید.`,
       "info",
     );
 
-    if ((currentTurn + 1) % 3 === 0) {
+    if (currentTurn % 3 === 0) {
       setTimeout(() => {
         setIsEventModalOpen(true);
       }, 500);
@@ -146,7 +149,8 @@ export function SidebarContainer({
       <CommandCenterModal
         activeTab={activeTab}
         selectedTargetCode={selectedTargetCode}
-        mockReports={mockAllReports}
+        nation={humanNation}
+        mockReports={realReports}
         onClose={() => setActiveTab(null)}
         onFocusCountry={onFocusCountry}
         onSelectReport={(report) => {

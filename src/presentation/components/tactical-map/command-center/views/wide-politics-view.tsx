@@ -8,28 +8,37 @@ import { ProxyWarCard } from "../../sidebar/tabs/politics/proxy-war-card";
 import { RegimeChangeCard } from "../../sidebar/tabs/politics/regime-change-card";
 import { AntiCorruptionCard } from "../../sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifiers-card";
+import { ActiveModifier } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
   taxRate: number;
   governmentType: string;
+  tariffRate?: number;
+  industrialLevel?: number;
+  infrastructureLevel?: number;
+  activeModifiers?: ActiveModifier[];
 }
 
 export function WidePoliticsView({
   taxRate,
   governmentType,
+  tariffRate = 10,
+  industrialLevel = 1,
+  infrastructureLevel = 1,
+  activeModifiers = [],
 }: WidePoliticsViewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
-        <ActiveModifiersCard />
+        <ActiveModifiersCard modifiers={activeModifiers} />
         <TaxControlCard taxRate={taxRate} />
-        <TariffControlCard />
+        <TariffControlCard initialTariffRate={tariffRate} />
       </div>
 
       <div className="space-y-5">
         <ImfLoanCard />
-        <IndustrialUpgradeCard />
-        <InfrastructureUpgradeCard />
+        <IndustrialUpgradeCard currentLevel={industrialLevel} />
+        <InfrastructureUpgradeCard currentLevel={infrastructureLevel} />
       </div>
 
       <div className="space-y-5">
