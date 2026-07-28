@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 import { resolveProfileRelation } from "../../sidebar/tabs/diplomacy/utils/relation-resolver";
 import { DiplomacyListItem } from "../../sidebar/tabs/diplomacy/diplomacy-list-item";
@@ -7,6 +7,7 @@ import { AdvancedDiplomacyActions } from "../../sidebar/tabs/diplomacy/advanced-
 import { DiplomacyTargetCard } from "./components/diplomacy-target-card";
 import { Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { NationIdResolver } from "../../sidebar/tabs/diplomacy/utils/nation-id-resolver";
 
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
@@ -25,9 +26,11 @@ export function WideDiplomacyView({
     selectedTargetCode || "USA",
   );
 
+  const idResolver = useMemo(() => new NationIdResolver(), []);
+
   const relationsList = nationsMap
     ? Object.values(nationsMap).map((n) => {
-        const rel = resolveProfileRelation(n.flagCode || n.id);
+        const rel = resolveProfileRelation(n.flagCode || n.id, n);
         const humanNation = nationsMap[humanNationId];
         if (humanNation) {
           const directRel = humanNation.relations[n.id];
@@ -42,7 +45,9 @@ export function WideDiplomacyView({
         resolveProfileRelation(p.code),
       );
 
-  const selectedRelation = resolveProfileRelation(activeCode);
+  const targetNationId = idResolver.resolveFullNationId(activeCode);
+  const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
+  const selectedRelation = resolveProfileRelation(activeCode, targetLiveNation);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -88,7 +93,7 @@ export function WideDiplomacyView({
           <CountryProfileStats data={selectedRelation.profileData} />
           <AdvancedDiplomacyActions
             targetName={selectedRelation.name}
-            targetNationId={`NATION_${selectedRelation.code}`}
+            targetNationId={targetNationId}
             nationId={humanNationId}
           />
         </div>

@@ -6,11 +6,13 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface TaxControlCardProps {
   taxRate: number;
+  baseGdp: number;
   nationId?: string;
 }
 
 export function TaxControlCard({
   taxRate: initialTaxRate,
+  baseGdp,
   nationId = "NATION_118",
 }: TaxControlCardProps) {
   const [taxRate, setTaxRate] = useState<number>(initialTaxRate);
@@ -63,6 +65,7 @@ export function TaxControlCard({
         <PredictiveImpactBox
           currentTaxRate={initialTaxRate}
           newTaxRate={taxRate}
+          baseGdp={baseGdp}
         />
 
         <button

@@ -11,6 +11,8 @@ import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifier
 import { ActiveModifier } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
+  nationId?: string;
+  gdp?: number;
   taxRate: number;
   governmentType: string;
   tariffRate?: number;
@@ -20,6 +22,8 @@ interface WidePoliticsViewProps {
 }
 
 export function WidePoliticsView({
+  nationId = "NATION_118",
+  gdp = 450000000000,
   taxRate,
   governmentType,
   tariffRate = 10,
@@ -31,20 +35,26 @@ export function WidePoliticsView({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard modifiers={activeModifiers} />
-        <TaxControlCard taxRate={taxRate} />
+        <TaxControlCard taxRate={taxRate} baseGdp={gdp} nationId={nationId} />
         <TariffControlCard initialTariffRate={tariffRate} />
       </div>
 
       <div className="space-y-5">
-        <ImfLoanCard />
-        <IndustrialUpgradeCard currentLevel={industrialLevel} />
-        <InfrastructureUpgradeCard currentLevel={infrastructureLevel} />
+        <ImfLoanCard nationId={nationId} />
+        <IndustrialUpgradeCard
+          currentLevel={industrialLevel}
+          nationId={nationId}
+        />
+        <InfrastructureUpgradeCard
+          currentLevel={infrastructureLevel}
+          nationId={nationId}
+        />
       </div>
 
       <div className="space-y-5">
-        <ProxyWarCard />
-        <RegimeChangeCard governmentType={governmentType} />
-        <AntiCorruptionCard />
+        <ProxyWarCard nationId={nationId} />
+        <RegimeChangeCard governmentType={governmentType} nationId={nationId} />
+        <AntiCorruptionCard nationId={nationId} />
       </div>
     </div>
   );
