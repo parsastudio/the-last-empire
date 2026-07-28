@@ -10,7 +10,8 @@ import { AbilitiesTab } from "./tabs/abilities/abilities-tab";
 import { ReportsSidebarTab } from "../reports/reports-sidebar-tab";
 import { TurnSummaryModal } from "../reports/turn-summary-modal";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { CombatReportEngine } from "@/engine/reports/combat-report-engine";
+import { MOCK_SCHEMA_NATION } from "./config/mock-nation.config";
+import { useSidebarReports } from "./hooks/use-sidebar-reports";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -38,63 +39,7 @@ export function SidebarContainer({
     setActiveTab(externalActiveTab);
   }
 
-  const reportEngine = new CombatReportEngine();
-
-  const mockDefeatReport = reportEngine.createReport({
-    attackerId: "IRN",
-    attackerNameFa: "ایران",
-    defenderId: "USA",
-    defenderNameFa: "ایالات متحده آمریکا",
-    turn: currentTurn,
-    attackerCasualties: {
-      infantryEngaged: 450,
-      infantryLost: 135,
-      airForceEngaged: 40,
-      airForceLost: 18,
-      droneMissileEngaged: 60,
-      droneMissileLost: 45,
-    },
-    defenderCasualties: {
-      infantryEngaged: 1000,
-      infantryLost: 80,
-      airForceEngaged: 250,
-      airForceLost: 12,
-      droneMissileEngaged: 80,
-      droneMissileLost: 10,
-    },
-    conqueredPixelsCount: 0,
-    capitulatedPixelsCount: 0,
-    governmentType: "DICTATORSHIP",
-  });
-
-  const mockVictoryReport = reportEngine.createReport({
-    attackerId: "IRN",
-    attackerNameFa: "ایران",
-    defenderId: "ISR",
-    defenderNameFa: "اسرائیل",
-    turn: currentTurn,
-    attackerCasualties: {
-      infantryEngaged: 450,
-      infantryLost: 45,
-      airForceEngaged: 40,
-      airForceLost: 6,
-      droneMissileEngaged: 60,
-      droneMissileLost: 15,
-    },
-    defenderCasualties: {
-      infantryEngaged: 200,
-      infantryLost: 110,
-      airForceEngaged: 75,
-      airForceLost: 28,
-      droneMissileEngaged: 35,
-      droneMissileLost: 25,
-    },
-    conqueredPixelsCount: 48,
-    capitulatedPixelsCount: 12,
-    governmentType: "DICTATORSHIP",
-  });
-
-  const mockAllReports = [mockDefeatReport, mockVictoryReport];
+  const mockAllReports = useSidebarReports(currentTurn);
 
   if (!isOpen) return null;
 
@@ -107,51 +52,6 @@ export function SidebarContainer({
   const handleSelectReportInSidebar = (report: CombatReport) => {
     setModalReports([report]);
     setIsModalOpen(true);
-  };
-
-  const realSchemaNation = {
-    name: "ایران",
-    code: "IRN",
-    flagCode: "ir",
-    gdp: 450000000000,
-    taxRate: 15,
-    tariffRate: 10,
-    treasury: 350000,
-    nationalDebt: 0,
-    population: 88000000,
-    warExhaustion: 0,
-    industrialLevel: 1,
-    government: {
-      type: "DICTATORSHIP",
-      stability: 80,
-      corruption: 5,
-      socialFreedom: 80,
-      turnsInPower: 5,
-    },
-    resources: {
-      oil: 5000,
-      steel: 2000,
-      manpower: 500,
-    },
-    military: {
-      infantry: 450,
-      airForce: 40,
-      droneMissile: 60,
-      experience: 10,
-      techLevel: 3,
-    },
-    globalReputation: 50,
-    globalAggression: 0,
-    regionsDemographics: [
-      {
-        regionId: 0,
-        name: "خاک اصلی",
-        pixelCount: 1800,
-        areaSqKm: 1648195,
-        population: 88000000,
-        gdp: 450000000000,
-      },
-    ],
   };
 
   return (
@@ -170,20 +70,20 @@ export function SidebarContainer({
 
         <div className="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
           {activeTab === "overview" && (
-            <OverviewTab nation={realSchemaNation} />
+            <OverviewTab nation={MOCK_SCHEMA_NATION} />
           )}
           {activeTab === "military" && (
-            <MilitaryTab military={realSchemaNation.military} />
+            <MilitaryTab military={MOCK_SCHEMA_NATION.military} />
           )}
           {activeTab === "politics" && (
             <PoliticsTab
-              taxRate={realSchemaNation.taxRate}
-              governmentType={realSchemaNation.government.type}
+              taxRate={MOCK_SCHEMA_NATION.taxRate}
+              governmentType={MOCK_SCHEMA_NATION.government.type}
             />
           )}
           {activeTab === "abilities" && (
             <AbilitiesTab
-              currentGovernment={realSchemaNation.government.type}
+              currentGovernment={MOCK_SCHEMA_NATION.government.type}
             />
           )}
           {activeTab === "reports" && (
