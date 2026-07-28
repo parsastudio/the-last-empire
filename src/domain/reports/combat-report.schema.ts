@@ -12,10 +12,12 @@ export const ReportSeveritySchema = z.enum([
 export const CasualtyMetricsSchema = z.object({
   infantryEngaged: z.number().nonnegative(),
   infantryLost: z.number().nonnegative(),
+  infantryRetreated: z.number().nonnegative().optional(),
   airForceEngaged: z.number().nonnegative(),
   airForceLost: z.number().nonnegative(),
   droneMissileEngaged: z.number().nonnegative(),
   droneMissileLost: z.number().nonnegative(),
+  militiaGarrisonPower: z.number().nonnegative().optional(),
 });
 
 export const CombatReportSchema = z.object({
@@ -35,6 +37,7 @@ export const CombatReportSchema = z.object({
   capitulatedAreaSqKm: z.number().nonnegative(),
   strategicAssessment: z.string(),
   isVictory: z.boolean(),
+  supplyShortagePenaltyApplied: z.boolean().optional(),
 });
 
 export const TurnSummaryReportSchema = z.object({

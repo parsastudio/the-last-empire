@@ -6,13 +6,11 @@ interface ClusterComponent {
   maxX: number;
   minY: number;
   maxY: number;
-  centerPixelX: number;
-  centerPixelY: number;
   pixelCount: number;
 }
 
 export class RegionClusteringEngine {
-  private readonly kmPerPixelEquator = 15.2;
+  private readonly bufferSearchPixelRadius = 38;
 
   public clusterNationRegions(
     countryId: string,
@@ -21,6 +19,10 @@ export class RegionClusteringEngine {
     gridHeight = 512,
   ): Map<string, number> {
     const countryCells = allCells.filter((c) => c.ownerId === countryId);
+    if (countryCells.length === 0) {
+      return new Map();
+    }
+
     const cellMap = new Map<string, GridCell>();
     countryCells.forEach((c) => cellMap.set(`${c.x},${c.y}`, c));
 
@@ -39,8 +41,6 @@ export class RegionClusteringEngine {
         maxX = cell.x;
       let minY = cell.y,
         maxY = cell.y;
-      let sumX = 0,
-        sumY = 0;
 
       let head = 0;
       while (head < queue.length) {
@@ -52,14 +52,15 @@ export class RegionClusteringEngine {
         minY = Math.min(minY, curr.y);
         maxY = Math.max(maxY, curr.y);
 
-        sumX += curr.x;
-        sumY += curr.y;
-
         const neighbors = [
           { x: curr.x + 1, y: curr.y },
           { x: curr.x - 1, y: curr.y },
           { x: curr.x, y: curr.y + 1 },
           { x: curr.x, y: curr.y - 1 },
+          { x: curr.x + 1, y: curr.y + 1 },
+          { x: curr.x - 1, y: curr.y - 1 },
+          { x: curr.x + 1, y: curr.y - 1 },
+          { x: curr.x - 1, y: curr.y + 1 },
         ];
 
         for (const n of neighbors) {
@@ -81,17 +82,11 @@ export class RegionClusteringEngine {
         maxX,
         minY,
         maxY,
-        centerPixelX: sumX / compCells.length,
-        centerPixelY: sumY / compCells.length,
         pixelCount: compCells.length,
       });
     }
 
-    const mergedClusters = this.mergeNearComponents(
-      rawComponents,
-      100,
-      gridHeight,
-    );
+    const mergedClusters = this.mergeNearComponents(rawComponents, gridWidth);
 
     mergedClusters.sort((a, b) => b.pixelCount - a.pixelCount);
 
@@ -110,8 +105,7 @@ export class RegionClusteringEngine {
 
   private mergeNearComponents(
     components: ClusterComponent[],
-    maxDistanceKm: number,
-    gridHeight: number,
+    gridWidth: number,
   ): ClusterComponent[] {
     const parent = components.map((_, i) => i);
 
@@ -134,15 +128,7 @@ export class RegionClusteringEngine {
         const c1 = components[i]!;
         const c2 = components[j]!;
 
-        const midY = (c1.centerPixelY + c2.centerPixelY) / 2;
-        const latRad = (0.5 - midY / gridHeight) * Math.PI;
-        const scaleKm = this.kmPerPixelEquator * Math.cos(latRad);
-
-        const dx = Math.abs(c1.centerPixelX - c2.centerPixelX);
-        const dy = Math.abs(c1.centerPixelY - c2.centerPixelY);
-        const distKm = Math.hypot(dx, dy) * scaleKm;
-
-        if (distKm <= maxDistanceKm) {
+        if (this.areComponentsClose(c1, c2, gridWidth)) {
           union(i, j);
         }
       }
@@ -171,16 +157,56 @@ export class RegionClusteringEngine {
         maxX: Math.max(...group.map((g) => g.maxX)),
         minY: Math.min(...group.map((g) => g.minY)),
         maxY: Math.max(...group.map((g) => g.maxY)),
-        centerPixelX:
-          group.reduce((s, g) => s + g.centerPixelX * g.pixelCount, 0) /
-          group.reduce((s, g) => s + g.pixelCount, 0),
-        centerPixelY:
-          group.reduce((s, g) => s + g.centerPixelY * g.pixelCount, 0) /
-          group.reduce((s, g) => s + g.pixelCount, 0),
         pixelCount: totalPixels,
       });
     }
 
     return result;
+  }
+
+  private areComponentsClose(
+    c1: ClusterComponent,
+    c2: ClusterComponent,
+    gridWidth: number,
+  ): boolean {
+    const bboxXDist = Math.max(
+      0,
+      Math.max(c1.minX - c2.maxX, c2.minX - c1.maxX),
+    );
+    const bboxYDist = Math.max(
+      0,
+      Math.max(c1.minY - c2.maxY, c2.minY - c1.maxY),
+    );
+
+    let effectiveXDist = bboxXDist;
+    if (gridWidth - bboxXDist < effectiveXDist) {
+      effectiveXDist = gridWidth - bboxXDist;
+    }
+
+    if (
+      effectiveXDist > this.bufferSearchPixelRadius ||
+      bboxYDist > this.bufferSearchPixelRadius
+    ) {
+      return false;
+    }
+
+    for (const cell1 of c1.cells) {
+      for (const cell2 of c2.cells) {
+        let dx = Math.abs(cell1.x - cell2.x);
+        if (dx > gridWidth / 2) {
+          dx = gridWidth - dx;
+        }
+        const dy = Math.abs(cell1.y - cell2.y);
+
+        if (
+          dx <= this.bufferSearchPixelRadius &&
+          dy <= this.bufferSearchPixelRadius
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }

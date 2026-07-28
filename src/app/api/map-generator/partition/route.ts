@@ -8,6 +8,8 @@ import { PARTITION_COUNTRIES_LIST } from "@/application/map-rendering/partition-
 import { generateTest6Map } from "@/application/map-rendering/map-generator";
 import { PngDecoder } from "@/application/map-rendering/utils/png-decoder";
 import { GeometryDraw } from "@/application/map-rendering/utils/geometry-draw";
+import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
+import { ClosedSeaDetector } from "@/application/map-rendering/utils/closed-sea-detector";
 
 interface CountryMapping {
   id: number;
@@ -129,6 +131,18 @@ export async function POST(request: Request): Promise<NextResponse> {
       JSON.stringify(newMappings, null, 2),
       "utf-8",
     );
+
+    const packer = new LowResPacker();
+    const packed1024 = packer.pack4KTo1024(partitionedBuffer, 1024, 512, 4);
+
+    const seaDetector = new ClosedSeaDetector();
+    seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
+
+    await fs.writeFile(
+      path.join(partitionDir, "world-mask-1024.bin"),
+      packed1024,
+    );
+
     const tWriteEnd = performance.now();
     const metrics = {
       readTimeMs: Math.round(tReadEnd - tStart),
