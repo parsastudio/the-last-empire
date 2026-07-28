@@ -2,7 +2,15 @@ import React from "react";
 import { Cpu } from "lucide-react";
 import { DoctrineTreeView } from "./doctrine-tree-view";
 
-export function ResearchTab() {
+interface ResearchTabProps {
+  nationId?: string;
+  unlockedDoctrines?: string[];
+}
+
+export function ResearchTab({
+  nationId = "NATION_118",
+  unlockedDoctrines = [],
+}: ResearchTabProps) {
   return (
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-2.5">
@@ -13,7 +21,10 @@ export function ResearchTab() {
           </span>
         </div>
 
-        <DoctrineTreeView />
+        <DoctrineTreeView
+          nationId={nationId}
+          unlockedDoctrines={unlockedDoctrines}
+        />
       </div>
     </div>
   );

@@ -1,9 +1,42 @@
 import React from "react";
 import { Swords, PlusCircle, ShieldAlert } from "lucide-react";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
-export function MilitaryActionsCard() {
+interface MilitaryActionsCardProps {
+  nationId?: string;
+}
+
+export function MilitaryActionsCard({
+  nationId = "NATION_118",
+}: MilitaryActionsCardProps) {
+  const { dispatchAction } = useGameActions();
+
+  const handleRecruitInfantry = async () => {
+    await dispatchAction(
+      {
+        id: `recruit-${Date.now()}`,
+        nationId,
+        type: "RECRUIT_UNIT",
+        unitType: "INFANTRY",
+        quantity: 1,
+      },
+      "سفارش استخدام ۱۰ هزار پیاده‌نظام در صف قرار گرفت.",
+    );
+  };
+
+  const handleResearchTech = async () => {
+    await dispatchAction(
+      {
+        id: `research-${Date.now()}`,
+        nationId,
+        type: "INVEST_RESEARCH",
+      },
+      "پژوهش برای ارتقای لول فناوری نظامی آغاز گردید.",
+    );
+  };
+
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
         <Swords size={13} className="text-military" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -19,7 +52,7 @@ export function MilitaryActionsCard() {
           <span className="font-mono font-bold text-foreground">$100,000</span>
         </div>
         <button
-          onClick={() => alert("سفارش استخدام ثبت شد.")}
+          onClick={handleRecruitInfantry}
           className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer"
         >
           <PlusCircle size={14} className="text-gdp" />
@@ -33,7 +66,7 @@ export function MilitaryActionsCard() {
           <span className="font-mono font-bold text-gdp">$100,000</span>
         </div>
         <button
-          onClick={() => alert("پژوهش نظامی آغاز شد.")}
+          onClick={handleResearchTech}
           className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer"
         >
           <ShieldAlert size={14} className="text-amber-500" />
