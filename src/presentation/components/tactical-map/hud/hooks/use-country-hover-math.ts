@@ -11,7 +11,7 @@ interface UseCountryHoverMathProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   scale: number;
   position: { x: number; y: number };
-  rankingsCacheRef: React.RefObject<Map<string, number>>;
+  rankingsCacheRef: Map<string, number>;
 }
 
 export function useCountryHoverMath({
@@ -80,8 +80,11 @@ export function useCountryHoverMath({
 
     const flagCode = profile ? profile.flagCode : matchedCountry.code;
     const nationKey = `NATION_${matchedCountry.id}`;
+
     const cachedRank =
-      rankingsCacheRef.current?.get(nationKey) ?? matchedCountry.id;
+      rankingsCacheRef.get(nationKey) ??
+      rankingsCacheRef.get(matchedCountry.code) ??
+      99;
 
     setHoverData({
       name: realName,
