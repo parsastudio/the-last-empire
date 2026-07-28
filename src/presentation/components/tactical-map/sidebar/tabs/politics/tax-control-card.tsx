@@ -2,25 +2,31 @@ import React, { useState, useRef } from "react";
 import { Landmark } from "lucide-react";
 import { TaxSlider } from "./tax-slider";
 import { PredictiveImpactBox } from "./predictive-impact-box";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface TaxControlCardProps {
   taxRate: number;
+  nationId?: string;
 }
 
 export function TaxControlCard({
   taxRate: initialTaxRate,
+  nationId = "NATION_118",
 }: TaxControlCardProps) {
   const [taxRate, setTaxRate] = useState<number>(initialTaxRate);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
-  const handleApplyTax = () => {
-    showToast(
-      "بروزرسانی نرخ مالیات",
-      `نرخ مالیات جدید روی ${taxRate}% تنظیم شد و در چرخه بعدی اعمال می‌شود.`,
-      "success",
+  const handleApplyTax = async () => {
+    await dispatchAction(
+      {
+        id: `tax-${Date.now()}`,
+        nationId,
+        type: "SET_TAX_RATE",
+        newRate: taxRate,
+      },
+      `نرخ مالیات جدید روی ${taxRate}% تنظیم شد.`,
     );
   };
 

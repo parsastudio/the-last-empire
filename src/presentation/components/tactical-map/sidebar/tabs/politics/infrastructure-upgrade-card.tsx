@@ -1,22 +1,27 @@
 import React from "react";
 import { Wrench } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface InfrastructureUpgradeCardProps {
   currentLevel?: number;
+  nationId?: string;
 }
 
 export function InfrastructureUpgradeCard({
   currentLevel = 1,
+  nationId = "NATION_118",
 }: InfrastructureUpgradeCardProps) {
   const upgradeCost = Math.floor(30000 * Math.pow(1.25, currentLevel - 1));
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
-  const handleUpgradeInfra = () => {
-    showToast(
-      "نوسازی زیرساخت‌ها",
+  const handleUpgradeInfra = async () => {
+    await dispatchAction(
+      {
+        id: `infra-up-${Date.now()}`,
+        nationId,
+        type: "INVEST_INFRASTRUCTURE",
+      },
       `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد.`,
-      "success",
     );
   };
 

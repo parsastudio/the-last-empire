@@ -1,22 +1,27 @@
 import React from "react";
 import { Cpu } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface IndustrialUpgradeCardProps {
   currentLevel?: number;
+  nationId?: string;
 }
 
 export function IndustrialUpgradeCard({
   currentLevel = 1,
+  nationId = "NATION_118",
 }: IndustrialUpgradeCardProps) {
   const upgradeCost = Math.floor(50000 * Math.pow(1.3, currentLevel - 1));
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
-  const handleUpgrade = () => {
-    showToast(
-      "ارتقای توسعه صنعتی",
-      `پروژه ارتقای صنایع سنگین به سطح ${currentLevel + 1} با موفقیت کلید خورد.`,
-      "success",
+  const handleUpgrade = async () => {
+    await dispatchAction(
+      {
+        id: `ind-up-${Date.now()}`,
+        nationId,
+        type: "UPGRADE_INDUSTRIAL_LEVEL",
+      },
+      `پروژه ارتقای صنایع سنگین به سطح ${currentLevel + 1} کلید خورد.`,
     );
   };
 

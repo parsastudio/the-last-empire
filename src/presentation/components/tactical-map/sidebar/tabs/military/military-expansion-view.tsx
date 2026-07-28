@@ -2,10 +2,17 @@ import React, { useState } from "react";
 import { Swords } from "lucide-react";
 import { RECRUITABLE_UNITS, UnitConfig } from "./recruitable-units.config";
 import { UnitRecruitmentCard } from "./unit-recruitment-card";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { UnitType } from "@/domain/military/military.schema";
 
-export function MilitaryExpansionView() {
-  const { showToast } = useToast();
+interface MilitaryExpansionViewProps {
+  nationId?: string;
+}
+
+export function MilitaryExpansionView({
+  nationId = "NATION_118",
+}: MilitaryExpansionViewProps) {
+  const { dispatchAction } = useGameActions();
   const [quantities, setQuantities] = useState<Record<string, number>>({
     INFANTRY: 1,
     AIR_FORCE: 1,
@@ -20,14 +27,18 @@ export function MilitaryExpansionView() {
     });
   };
 
-  const handleRecruit = (unit: UnitConfig) => {
+  const handleRecruit = async (unit: UnitConfig) => {
     const qty = quantities[unit.type] || 1;
-    const totalMoney = unit.moneyCost * qty;
 
-    showToast(
-      "ثبت سفارش ساخت ارتش",
-      `سفارش ساخت ${qty} یگان ${unit.name} با هزینه $${totalMoney.toLocaleString("fa-IR")} در صف قرار گرفت.`,
-      "success",
+    await dispatchAction(
+      {
+        id: `recruit-${Date.now()}`,
+        nationId,
+        type: "RECRUIT_UNIT",
+        unitType: unit.type as UnitType,
+        quantity: qty,
+      },
+      `سفارش ساخت ${qty} یگان ${unit.name} در صف قرار گرفت.`,
     );
   };
 

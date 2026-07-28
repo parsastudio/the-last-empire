@@ -1,16 +1,27 @@
 import React, { useState } from "react";
 import { UserMinus } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
-export function DisbandUnitCard() {
+interface DisbandUnitCardProps {
+  nationId?: string;
+}
+
+export function DisbandUnitCard({
+  nationId = "NATION_118",
+}: DisbandUnitCardProps) {
   const [disbandCount, setDisbandAmount] = useState<number>(5);
-  const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
-  const handleDisband = () => {
-    showToast(
-      "انحلال یگان‌های نظامی",
-      `${disbandCount} یگان منحل شد و ۴۰٪ نیروی انسانی به مخازن ملی بازگشت.`,
-      "info",
+  const handleDisband = async () => {
+    await dispatchAction(
+      {
+        id: `disband-${Date.now()}`,
+        nationId,
+        type: "DISBAND_UNIT",
+        unitType: "INFANTRY",
+        quantity: disbandCount,
+      },
+      `${disbandCount} یگان منحل شد و نیروی انسانی به مخازن ملی بازگشت.`,
     );
   };
 
