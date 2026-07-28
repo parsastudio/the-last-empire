@@ -1,12 +1,11 @@
-import { useRef, useEffect } from "react";
+import { useMemo } from "react";
 import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 
-export function useCountryHoverRankings() {
-  const rankingsCacheRef = useRef<Map<string, number>>(new Map());
-
-  useEffect(() => {
+export function useCountryHoverRankings(): Map<string, number> {
+  return useMemo(() => {
+    const cache = new Map<string, number>();
     try {
       const facade = new SimulationFacade();
       const gameState = facade.getActiveSessionState();
@@ -46,7 +45,6 @@ export function useCountryHoverRankings() {
 
       const ranker = new PowerScoreRanker();
       const ranked = ranker.rankNations(rawList);
-      const cache = new Map<string, number>();
 
       for (const r of ranked) {
         cache.set(r.id, r.rank);
@@ -58,9 +56,7 @@ export function useCountryHoverRankings() {
           cache.set(profile.code, r.rank);
         }
       }
-      rankingsCacheRef.current = cache;
     } catch {}
+    return cache;
   }, []);
-
-  return rankingsCacheRef;
 }
