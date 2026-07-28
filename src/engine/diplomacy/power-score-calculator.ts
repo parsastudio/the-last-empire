@@ -6,7 +6,8 @@ export interface PowerScoreDetails {
 
 export class PowerScoreCalculator {
   public calculateEconomicScore(gdp: number, treasury: number): number {
-    return gdp / 100000 + treasury / 10000;
+    const rawEco = gdp + treasury * 0.1;
+    return rawEco / 1000000000;
   }
 
   public calculateMilitaryScore(
@@ -16,7 +17,7 @@ export class PowerScoreCalculator {
     militaryPowerMultiplier = 1.0,
   ): number {
     const baseStrength = infantry * 1.0 + airForce * 3.0 + drone * 2.5;
-    return baseStrength * militaryPowerMultiplier;
+    return baseStrength * militaryPowerMultiplier * 500000;
   }
 
   public calculatePowerScore(

@@ -26,7 +26,7 @@ export function SidebarContainer({ isOpen }: SidebarContainerProps) {
   };
 
   const realSchemaNation = {
-    name: "جمهوری اسلامی ایران",
+    name: "ایران",
     code: "IRN",
     flagCode: "ir",
     gdp: 450000000000,

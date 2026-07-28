@@ -1,30 +1,66 @@
-import { useMemo } from "react";
+import { useRef, useEffect } from "react";
+import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
+import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 
 export function useCountryHoverRankings() {
-  return useMemo(() => {
-    const scoredList = ALL_COUNTRY_PROFILES.map((profile) => {
-      const gdpScore = profile.gdp / 100000 + profile.startingTreasury / 10000;
-      const milScore =
-        (profile.startingInfantry ?? 50) * 1.0 +
-        (profile.startingAirForce ?? 10) * 3.0 +
-        (profile.startingDroneMissile ?? 0) * 2.5;
+  const rankingsCacheRef = useRef<Map<string, number>>(new Map());
 
-      return {
-        id: `NATION_${profile.id}`,
-        code: profile.code,
-        score: gdpScore + milScore,
-      };
-    });
+  useEffect(() => {
+    try {
+      const facade = new SimulationFacade();
+      const gameState = facade.getActiveSessionState();
 
-    scoredList.sort((a, b) => b.score - a.score);
+      let rawList: Array<{
+        id: string;
+        gdp: number;
+        treasury: number;
+        infantry: number;
+        airForce: number;
+        drone: number;
+      }> = [];
 
-    const rankMap = new Map<string, number>();
-    scoredList.forEach((item, index) => {
-      rankMap.set(item.id, index + 1);
-      rankMap.set(item.code, index + 1);
-    });
+      if (
+        gameState &&
+        gameState.nations &&
+        Object.keys(gameState.nations).length > 0
+      ) {
+        rawList = Object.entries(gameState.nations).map(([id, n]) => ({
+          id,
+          gdp: n.gdp,
+          treasury: n.treasury,
+          infantry: n.military.infantry,
+          airForce: n.military.airForce,
+          drone: n.military.droneMissile,
+        }));
+      } else {
+        rawList = ALL_COUNTRY_PROFILES.map((p) => ({
+          id: `NATION_${p.id}`,
+          gdp: p.gdp,
+          treasury: p.startingTreasury,
+          infantry: p.startingInfantry ?? 50,
+          airForce: p.startingAirForce ?? 10,
+          drone: p.startingDroneMissile ?? 0,
+        }));
+      }
 
-    return rankMap;
+      const ranker = new PowerScoreRanker();
+      const ranked = ranker.rankNations(rawList);
+      const cache = new Map<string, number>();
+
+      for (const r of ranked) {
+        cache.set(r.id, r.rank);
+        const numericMatch = r.id.replace("NATION_", "");
+        const profile = ALL_COUNTRY_PROFILES.find(
+          (p) => p.id.toString() === numericMatch,
+        );
+        if (profile) {
+          cache.set(profile.code, r.rank);
+        }
+      }
+      rankingsCacheRef.current = cache;
+    } catch {}
   }, []);
+
+  return rankingsCacheRef;
 }
