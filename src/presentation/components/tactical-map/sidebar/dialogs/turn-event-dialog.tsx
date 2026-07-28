@@ -1,14 +1,21 @@
 import React from "react";
 import { EventDecisionModal } from "../../modals/event-decision-modal";
 import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface TurnEventDialogProps {
   isOpen: boolean;
+  nationId?: string;
   onClose: () => void;
 }
 
-export function TurnEventDialog({ isOpen, onClose }: TurnEventDialogProps) {
+export function TurnEventDialog({
+  isOpen,
+  nationId = "NATION_118",
+  onClose,
+}: TurnEventDialogProps) {
   const { showToast } = useToast();
+  const { dispatchAction } = useGameActions();
 
   const sampleEvent = {
     title: "بحران کمبود انرژی و سوخت استراتژیک",
@@ -34,20 +41,34 @@ export function TurnEventDialog({ isOpen, onClose }: TurnEventDialogProps) {
     ],
   };
 
+  const handleSelectChoice = async (choiceId: string) => {
+    if (choiceId === "c1") {
+      await dispatchAction(
+        {
+          id: `event-choice-${Date.now()}`,
+          nationId,
+          type: "ANTI_CORRUPTION_DRIVE",
+          amount: 10000,
+        },
+        "سهمیه‌بندی سوخت صنایع اعمال گردید.",
+      );
+    } else {
+      showToast(
+        "تصمیم حاکمیتی ثبت شد",
+        "تزریق سوبسید به نیروگاه‌ها با موفقیت صورت گرفت.",
+        "success",
+      );
+    }
+    onClose();
+  };
+
   return (
     <EventDecisionModal
       isOpen={isOpen}
       title={sampleEvent.title}
       description={sampleEvent.description}
       choices={sampleEvent.choices}
-      onSelectChoice={(choiceId) => {
-        showToast(
-          "تصمیم حاکمیتی ثبت شد",
-          `گزینه ${choiceId} اعمال گردید.`,
-          "success",
-        );
-        onClose();
-      }}
+      onSelectChoice={handleSelectChoice}
     />
   );
 }

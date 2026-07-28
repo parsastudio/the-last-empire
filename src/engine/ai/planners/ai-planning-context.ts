@@ -12,4 +12,5 @@ export interface AIPlanningContext {
   needs: AINeedEvaluation;
   risk: number;
   budget: BudgetAllocation;
+  currentTurn?: number;
 }

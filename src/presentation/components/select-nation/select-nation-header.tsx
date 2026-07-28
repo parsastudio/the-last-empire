@@ -7,7 +7,7 @@ interface SelectNationHeaderProps {
 
 export function SelectNationHeader({ onBack }: SelectNationHeaderProps) {
   return (
-    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-md px-8 flex items-center justify-between shrink-0">
+    <header className="h-16 border-b border-border bg-card/50 backdrop-blur-md px-8 flex items-center justify-between shrink-0 dir-rtl">
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}

@@ -18,7 +18,7 @@ export function GovernmentTypeSelector({
   onSelect,
 }: GovernmentTypeSelectorProps) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 dir-rtl text-right">
       <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
         انتخاب نوع نظام سیاسی
       </span>
