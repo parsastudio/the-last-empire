@@ -71,7 +71,9 @@ export function CommandCenterTabRouter({
         />
       );
     case "military":
-      return <WideMilitaryView military={nation.military} />;
+      return (
+        <WideMilitaryView military={nation.military} nationId={nation.id} />
+      );
     case "politics":
       return (
         <WidePoliticsView
