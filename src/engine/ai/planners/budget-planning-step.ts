@@ -1,16 +1,26 @@
 import type { GameAction } from "@/domain/game/action.schema";
 import { AIPlanner } from "@/engine/ai/planners/ai-planner";
 import { AIPlanningContext } from "@/engine/ai/planners/ai-planning-context";
+import { DeterministicIdGenerator } from "../utils/deterministic-id-generator";
 
 export class BudgetPlanningStep implements AIPlanner {
+  private idGenerator = new DeterministicIdGenerator();
+
   public plan(context: AIPlanningContext): GameAction[] {
     const actions: GameAction[] = [];
     const nation = context.nation;
     const allocation = context.budget;
+    const turn = context.currentTurn ?? 1;
+    let seq = 1;
 
     if (nation.doctrines.doctrinePoints >= 3) {
       actions.push({
-        id: `ai-unlock-doctrine-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        id: this.idGenerator.generateActionId(
+          "UNLOCK_DOCTRINE",
+          nation.id,
+          turn,
+          seq++,
+        ),
         nationId: nation.id,
         type: "UNLOCK_DOCTRINE",
         doctrineId: "gdp-booster",
@@ -24,7 +34,12 @@ export class BudgetPlanningStep implements AIPlanner {
       const targetRival = rivals[0];
       if (targetRival) {
         actions.push({
-          id: `ai-fund-proxy-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          id: this.idGenerator.generateActionId(
+            "FUND_PROXY_INFLUENCE",
+            nation.id,
+            turn,
+            seq++,
+          ),
           nationId: nation.id,
           type: "FUND_PROXY_INFLUENCE",
           targetNationId: targetRival,
@@ -38,7 +53,12 @@ export class BudgetPlanningStep implements AIPlanner {
       allocation.antiCorruptionBudget > 10000
     ) {
       actions.push({
-        id: `ai-anti-corruption-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        id: this.idGenerator.generateActionId(
+          "ANTI_CORRUPTION_DRIVE",
+          nation.id,
+          turn,
+          seq++,
+        ),
         nationId: nation.id,
         type: "ANTI_CORRUPTION_DRIVE",
         amount: Math.min(allocation.antiCorruptionBudget, 15000),
@@ -47,7 +67,12 @@ export class BudgetPlanningStep implements AIPlanner {
 
     if (allocation.infrastructureBudget > 30000) {
       actions.push({
-        id: `ai-upgrade-infra-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        id: this.idGenerator.generateActionId(
+          "INVEST_INFRASTRUCTURE",
+          nation.id,
+          turn,
+          seq++,
+        ),
         nationId: nation.id,
         type: "INVEST_INFRASTRUCTURE",
       });
@@ -55,7 +80,12 @@ export class BudgetPlanningStep implements AIPlanner {
 
     if (allocation.researchBudget > 100000) {
       actions.push({
-        id: `ai-research-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        id: this.idGenerator.generateActionId(
+          "INVEST_RESEARCH",
+          nation.id,
+          turn,
+          seq++,
+        ),
         nationId: nation.id,
         type: "INVEST_RESEARCH",
       });

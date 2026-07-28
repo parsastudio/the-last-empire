@@ -4,6 +4,8 @@ import type {
 } from "@/domain/game/game-state.schema";
 
 export class EventLogger {
+  private logSequence = 0;
+
   public createEntry(
     turn: number,
     sourceNationId: string,
@@ -12,10 +14,14 @@ export class EventLogger {
     targetNationId?: string,
     metadata?: Record<string, string | number | boolean>,
   ): TurnLogEntry {
+    this.logSequence++;
+    const cleanNation = sourceNationId.replace("NATION_", "");
+    const id = `log-${cleanNation}-t${turn}-s${this.logSequence}`;
+
     return {
-      id: `${turn}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id,
       turn,
-      timestamp: Date.now(),
+      timestamp: 1700000000000 + turn * 1000 + this.logSequence,
       sourceNationId,
       targetNationId,
       level,

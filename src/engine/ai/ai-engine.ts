@@ -22,10 +22,12 @@ export class AIEngine {
         state.gameId,
         state.seed,
       );
+
       const aiActions = this.actionGenerator.generateActions(
         nation,
         state.nations,
         personality,
+        state.currentTurn,
       );
 
       actions.push(...aiActions);
