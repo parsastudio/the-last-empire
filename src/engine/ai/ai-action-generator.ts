@@ -4,11 +4,11 @@ import { AIPersonality } from "@/engine/ai/ai-personality";
 import { NeedEvaluator } from "@/engine/ai/need-evaluator";
 import { RiskAssessor } from "@/engine/ai/risk-assessor";
 import { AIBudgetBalancer } from "@/engine/ai/ai-budget-balancer";
-import { AIPlanner } from "@/engine/ai/planners/ai-planner";
-import { BudgetPlanningStep } from "@/engine/ai/planners/budget-planning-step";
-import { MilitaryPlanningStep } from "@/engine/ai/planners/military-planning-step";
-import { DiplomacyPlanningStep } from "@/engine/ai/planners/diplomacy-planning-step";
-import { TradePlanningStep } from "@/engine/ai/planners/trade-planning-step";
+import { AIPlanner } from "./planners/ai-planner.interface";
+import { BudgetPlanningStep } from "./planners/budget-planning-step";
+import { MilitaryPlanningStep } from "./planners/military-planning-step";
+import { DiplomacyPlanningStep } from "./planners/diplomacy-planning-step";
+import { TradePlanningStep } from "./planners/trade-planning-step";
 
 export class AIActionGenerator {
   private personalityManager = new AIPersonality();
