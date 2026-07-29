@@ -19,7 +19,7 @@ export function useSidebarTurnActions(
   onClearExternalTab?: () => void,
   customGameId?: string,
 ) {
-  const [internalActiveTab, setInternalActiveTab] =
+  const [internalActiveTab, setInternalActiveTabState] =
     useState<SidebarTabType | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -50,8 +50,18 @@ export function useSidebarTurnActions(
 
   const currentTurn = gameState ? gameState.currentTurn : 1;
 
+  const setInternalActiveTab = useCallback(
+    (tab: SidebarTabType | null) => {
+      setInternalActiveTabState(tab);
+      if (onClearExternalTab) {
+        onClearExternalTab();
+      }
+    },
+    [onClearExternalTab],
+  );
+
   const handleCloseActiveModal = useCallback(() => {
-    setInternalActiveTab(null);
+    setInternalActiveTabState(null);
     if (onClearExternalTab) {
       onClearExternalTab();
     }

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { X, Search, ChevronLeft, Shield, Award } from "lucide-react";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -21,6 +21,19 @@ export function NationSelectorModal({
     [provider],
   );
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const filteredNations = allNations.filter(
@@ -30,8 +43,14 @@ export function NationSelectorModal({
   );
 
   return (
-    <div className="fixed inset-0 bg-background/60 backdrop-blur-lg flex items-center justify-center p-4 z-50 dir-rtl text-right">
-      <div className="bg-card border border-border w-full max-w-xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[85vh]">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 bg-background/60 backdrop-blur-lg flex items-center justify-center p-4 z-50 dir-rtl text-right cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-card border border-border w-full max-w-xl rounded-3xl p-6 shadow-2xl relative flex flex-col max-h-[85vh] cursor-default"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 left-4 p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer z-10"

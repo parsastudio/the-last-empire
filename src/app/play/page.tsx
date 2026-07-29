@@ -149,6 +149,7 @@ function MapTest6Content() {
         gameId={gameState?.gameId}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
+        onClearExternalTab={interaction.clearExternalTab}
         onFocusCountry={focusOnCountry}
       />
 

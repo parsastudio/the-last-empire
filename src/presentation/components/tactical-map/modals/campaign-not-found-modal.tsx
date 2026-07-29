@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FolderX, Home, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -13,11 +13,30 @@ export function CampaignNotFoundModal({
 }: CampaignNotFoundModalProps) {
   const router = useRouter();
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        router.push("/");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, router]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fade-smooth dir-rtl text-right">
-      <div className="bg-card border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5">
+    <div
+      onClick={() => router.push("/")}
+      className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fade-smooth dir-rtl text-right cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-card border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5 cursor-default"
+      >
         <div className="flex flex-col items-center justify-center gap-3 text-center">
           <div className="w-14 h-14 rounded-2xl bg-military/15 border border-military/30 text-military flex items-center justify-center shadow-lg">
             <FolderX size={28} />

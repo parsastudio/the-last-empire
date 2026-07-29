@@ -163,6 +163,7 @@ function MapTest6Content({ gameId }: { gameId: string }) {
         gameId={gameId}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
+        onClearExternalTab={interaction.clearExternalTab}
         onFocusCountry={focusOnCountry}
       />
 
