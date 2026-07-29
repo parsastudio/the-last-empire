@@ -127,7 +127,7 @@ export function useTacticalMapInteraction({
       });
     } else if (action === "proxy") {
       setSelectedTargetCode(`NATION_${contextMenuState.countryId}`);
-      setExternalSidebarTab("politics");
+      setExternalSidebarTab("proxy");
     } else {
       setSelectedTargetCode(targetCode);
       setExternalSidebarTab("diplomacy");

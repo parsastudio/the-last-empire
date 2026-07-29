@@ -4,6 +4,7 @@ import { WideOverviewView } from "./views/wide-overview-view";
 import { WideMarketView } from "./views/wide-market-view";
 import { WideMilitaryView } from "./views/wide-military-view";
 import { WidePoliticsView } from "./views/wide-politics-view";
+import { WideProxyView } from "./views/wide-proxy-view";
 import { WideDiplomacyView } from "./views/wide-diplomacy-view";
 import { WideResearchView } from "./views/wide-research-view";
 import { WideAbilitiesView } from "./views/wide-abilities-view";
@@ -100,6 +101,14 @@ export function CommandCenterTabRouter({
           infrastructureLevel={nation.geography.infrastructureLevel}
           activeModifiers={nation.activeModifiers}
           nationsMap={gameState?.nations}
+        />
+      );
+    case "proxy":
+      return (
+        <WideProxyView
+          nation={nation}
+          nationsMap={gameState?.nations}
+          selectedTargetCode={selectedTargetCode}
         />
       );
     case "diplomacy":
