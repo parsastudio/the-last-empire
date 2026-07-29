@@ -2,6 +2,7 @@ import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 import { findCountryProfileById } from "@/domain/map/countries";
 import { HoverCountryInfo } from "../country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
+import { useHoverStance } from "./use-hover-stance";
 
 interface UseHoverNationResolverProps {
   countries: CountryMapping[];
@@ -16,6 +17,8 @@ export function useHoverNationResolver({
   nationsMap,
   humanNationId,
 }: UseHoverNationResolverProps) {
+  const { resolveStanceLabel } = useHoverStance();
+
   const resolveHoverInfo = (
     nationIdNumber: number,
     greenChannelVal: number,
@@ -46,20 +49,12 @@ export function useHoverNationResolver({
 
     const flagCode = profile ? profile.flagCode : matchedCountry.code;
 
-    let stanceLabel = "دیپلماسی صلح‌آمیز";
-    if (humanNationId && nationsMap && nationsMap[humanNationId]) {
-      const humanNation = nationsMap[humanNationId];
-      const relation =
-        humanNation.relations[fullNationId] ||
-        humanNation.relations[matchedCountry.code.toUpperCase()];
-
-      if (relation) {
-        if (relation.stance === "WAR") stanceLabel = "در حال جنگ مستقیم";
-        else if (relation.stance === "ALLIANCE") stanceLabel = "متحد استراتژیک";
-        else if (relation.stance === "NON_AGGRESSION_PACT")
-          stanceLabel = "پیمان عدم تخاصم";
-      }
-    }
+    const stanceLabel = resolveStanceLabel(
+      humanNationId,
+      fullNationId,
+      matchedCountry.code,
+      nationsMap,
+    );
 
     const possibleKeys = [
       fullNationId,
