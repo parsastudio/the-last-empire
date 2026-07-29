@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Fuel, Wrench } from "lucide-react";
 import { MarketHeader } from "./market-header";
 import { CommodityCard } from "./commodity-card";
 import { TradeActionDialog } from "./trade-action-dialog";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
+import { useMarketTrade } from "./hooks/use-market-trade";
 
 interface MarketTabProps {
   marketPrices?: ResourceMarketPrice;
@@ -18,52 +19,12 @@ export function MarketTab({
   steelStock = 2000,
   userTreasury = 100000,
 }: MarketTabProps) {
-  const [tradeModal, setTradeModal] = useState<{
-    isOpen: boolean;
-    resourceName: string;
-    unit: string;
-    mode: "buy" | "sell";
-    unitPrice: number;
-    maxAmount: number;
-  }>({
-    isOpen: false,
-    resourceName: "",
-    unit: "",
-    mode: "buy",
-    unitPrice: 100,
-    maxAmount: 100,
+  const trade = useMarketTrade({
+    marketPrices,
+    oilStock,
+    steelStock,
+    userTreasury,
   });
-
-  const oilTrend: "up" | "down" | "stable" =
-    marketPrices.oil > 100 ? "up" : marketPrices.oil < 100 ? "down" : "stable";
-
-  const steelTrend: "up" | "down" | "stable" =
-    marketPrices.steel > 100
-      ? "up"
-      : marketPrices.steel < 100
-        ? "down"
-        : "stable";
-
-  const handleOpenTrade = (
-    name: string,
-    unit: string,
-    mode: "buy" | "sell",
-    price: number,
-  ) => {
-    const stock = name.includes("نفت") ? oilStock : steelStock;
-    const maxAffordable = Math.max(1, Math.floor(userTreasury / (price * 1.1)));
-    const maxAmount =
-      mode === "buy" ? Math.min(1000, maxAffordable) : Math.max(1, stock);
-
-    setTradeModal({
-      isOpen: true,
-      resourceName: name,
-      unit,
-      mode,
-      unitPrice: price,
-      maxAmount,
-    });
-  };
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
@@ -77,9 +38,9 @@ export function MarketTab({
           colorClass="text-treasury"
           stock={oilStock}
           currentPrice={marketPrices.oil}
-          priceTrend={oilTrend}
+          priceTrend={trade.oilTrend}
           onTrade={(mode) =>
-            handleOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
+            trade.handleOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
           }
         />
 
@@ -90,24 +51,22 @@ export function MarketTab({
           colorClass="text-primary"
           stock={steelStock}
           currentPrice={marketPrices.steel}
-          priceTrend={steelTrend}
+          priceTrend={trade.steelTrend}
           onTrade={(mode) =>
-            handleOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
+            trade.handleOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
           }
         />
       </div>
 
       <TradeActionDialog
-        isOpen={tradeModal.isOpen}
-        resourceName={tradeModal.resourceName}
-        unit={tradeModal.unit}
-        mode={tradeModal.mode}
-        unitPrice={tradeModal.unitPrice}
-        maxAmount={tradeModal.maxAmount}
-        onClose={() => setTradeModal((prev) => ({ ...prev, isOpen: false }))}
-        onConfirm={() => {
-          setTradeModal((prev) => ({ ...prev, isOpen: false }));
-        }}
+        isOpen={trade.tradeModal.isOpen}
+        resourceName={trade.tradeModal.resourceName}
+        unit={trade.tradeModal.unit}
+        mode={trade.tradeModal.mode}
+        unitPrice={trade.tradeModal.unitPrice}
+        maxAmount={trade.tradeModal.maxAmount}
+        onClose={trade.closeTradeModal}
+        onConfirm={trade.closeTradeModal}
       />
     </div>
   );

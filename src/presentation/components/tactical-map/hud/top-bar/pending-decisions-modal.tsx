@@ -2,8 +2,9 @@
 
 import React from "react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Cpu, Swords, Fuel, Landmark, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
+import { usePendingDecisions } from "./hooks/use-pending-decisions";
 
 interface PendingDecisionsModalProps {
   isOpen: boolean;
@@ -18,54 +19,9 @@ export function PendingDecisionsModal({
   onClose,
   onNavigateTab,
 }: PendingDecisionsModalProps) {
+  const pendingItems = usePendingDecisions(metrics);
+
   if (!isOpen) return null;
-
-  const nation = metrics.nation;
-  const pendingItems = [];
-
-  if (nation && nation.doctrines.doctrinePoints >= 3) {
-    pendingItems.push({
-      id: "doctrines",
-      title: "امتیاز دکترین راهبردی آماده تخصیص",
-      desc: `شما ${metrics.nation?.doctrines.doctrinePoints.toFixed(1)} امتیاز دکترین دارید. برای ارتقای توانمندی‌های صنعتی یا نظامی اقدام کنید.`,
-      icon: Cpu,
-      color: "text-gdp",
-      tab: "research",
-    });
-  }
-
-  if (nation && nation.recruitmentQueue.length === 0) {
-    pendingItems.push({
-      id: "military-queue",
-      title: "صف ساخت و تجهیز ارتش خالی است",
-      desc: "هیچ یگان نظامی در حال ساخت نیست. برای تقویت خطوط پادگانی و هوایی نیرو سفارش دهید.",
-      icon: Swords,
-      color: "text-military",
-      tab: "military",
-    });
-  }
-
-  if (metrics.oil < metrics.oilRequiredPerTurn) {
-    pendingItems.push({
-      id: "oil-deficit",
-      title: "هشدار کسری ذخایر نفت استراتژیک",
-      desc: `مصرف نوبتی (${metrics.oilRequiredPerTurn} بشکه) بیشتر از ذخایر موجود است. جهت جلوگیری از افت جریمه نبرد از بورس نفت بخرید.`,
-      icon: Fuel,
-      color: "text-treasury",
-      tab: "market",
-    });
-  }
-
-  if (metrics.stability < 35) {
-    pendingItems.push({
-      id: "stability-warning",
-      title: "بحران ثبات سیاسی داخلی",
-      desc: `ثبات سیاسی کشور به ${metrics.stability}% افت کرده است. از بخش سیاست برای کنترل مالیات یا طرح ضدفساد استفاده کنید.`,
-      icon: Landmark,
-      color: "text-military",
-      tab: "politics",
-    });
-  }
 
   const handleAction = (tab: string) => {
     onNavigateTab(tab);

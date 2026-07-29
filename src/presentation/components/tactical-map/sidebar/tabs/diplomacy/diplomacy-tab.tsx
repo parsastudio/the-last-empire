@@ -1,13 +1,12 @@
-import React, { useState, useMemo } from "react";
-import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
-import { resolveProfileRelation } from "./utils/relation-resolver";
+import React from "react";
 import { DiplomacyListView } from "./diplomacy-list-view";
 import {
   DiplomacyDetailView,
   DiplomaticRelation,
 } from "./diplomacy-detail-view";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "./utils/nation-id-resolver";
+import { resolveProfileRelation } from "./utils/relation-resolver";
+import { useDiplomacyTab } from "./hooks/use-diplomacy-tab";
 
 interface DiplomacyTabProps {
   nationsMap?: Record<string, Nation>;
@@ -22,52 +21,26 @@ export function DiplomacyTab({
   selectedTargetCode,
   onFocusCountry,
 }: DiplomacyTabProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRelationCode, setSelectedRelationCode] = useState<
-    string | null
-  >(null);
+  const diplomacy = useDiplomacyTab({
+    nationsMap,
+    humanNationId,
+    selectedTargetCode,
+  });
 
-  const idResolver = useMemo(() => new NationIdResolver(), []);
-
-  const relationsList = useMemo(() => {
-    if (nationsMap) {
-      return Object.values(nationsMap).map((n) => {
-        const rel = resolveProfileRelation(n.flagCode || n.id, n);
-        const humanNation = nationsMap[humanNationId];
-        if (humanNation) {
-          const directRel = humanNation.relations[n.id];
-          if (directRel) {
-            rel.stance = directRel.stance;
-            rel.opinion = directRel.opinion;
-          }
-        }
-        return rel;
-      });
-    }
-    return ALL_COUNTRY_PROFILES.slice(0, 15).map((p) =>
-      resolveProfileRelation(p.code),
+  if (diplomacy.activeRelation) {
+    const targetNationId = diplomacy.idResolver.resolveFullNationId(
+      diplomacy.activeRelation.code,
     );
-  }, [humanNationId, nationsMap]);
-
-  const activeCode = selectedTargetCode || selectedRelationCode;
-  const activeRelation = useMemo(() => {
-    if (!activeCode) return null;
-    return (
-      relationsList.find(
-        (r) => r.code.toUpperCase() === activeCode.toUpperCase(),
-      ) || null
-    );
-  }, [activeCode, relationsList]);
-
-  if (activeRelation) {
-    const targetNationId = idResolver.resolveFullNationId(activeRelation.code);
     const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
 
     return (
       <DiplomacyDetailView
-        relation={resolveProfileRelation(activeRelation.code, targetLiveNation)}
+        relation={resolveProfileRelation(
+          diplomacy.activeRelation.code,
+          targetLiveNation,
+        )}
         targetTreasury={targetLiveNation ? targetLiveNation.treasury : 350000}
-        onBack={() => setSelectedRelationCode(null)}
+        onBack={() => diplomacy.setSelectedRelationCode(null)}
         onFocusCountry={onFocusCountry}
       />
     );
@@ -75,11 +48,11 @@ export function DiplomacyTab({
 
   return (
     <DiplomacyListView
-      relations={relationsList}
-      searchQuery={searchQuery}
-      onSearchChange={setSearchQuery}
+      relations={diplomacy.relationsList}
+      searchQuery={diplomacy.searchQuery}
+      onSearchChange={diplomacy.setSearchQuery}
       onSelectRelation={(rel: DiplomaticRelation) =>
-        setSelectedRelationCode(rel.code)
+        diplomacy.setSelectedRelationCode(rel.code)
       }
     />
   );
