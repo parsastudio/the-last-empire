@@ -129,7 +129,7 @@ export function MilitaryTab({
         </div>
       </div>
 
-      <DisbandUnitCard nationId={nationId} />
+      <DisbandUnitCard nationId={nationId} military={military} />
     </div>
   );
 }

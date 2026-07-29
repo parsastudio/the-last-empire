@@ -48,7 +48,7 @@ export function WideMilitaryView({
         />
 
         <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
-        <DisbandUnitCard nationId={nationId} />
+        <DisbandUnitCard nationId={nationId} military={military} />
       </div>
 
       <div className="space-y-5">
