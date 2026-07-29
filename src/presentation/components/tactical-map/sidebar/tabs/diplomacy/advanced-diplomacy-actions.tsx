@@ -1,5 +1,12 @@
 import React from "react";
-import { Swords, Handshake, CheckCircle2, Shield, Coins } from "lucide-react";
+import {
+  Swords,
+  Handshake,
+  CheckCircle2,
+  Shield,
+  Coins,
+  Flame,
+} from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 
@@ -8,6 +15,7 @@ interface AdvancedDiplomacyActionsProps {
   targetNationId?: string;
   nationId?: string;
   onOpenTributeModal?: () => void;
+  onOpenProxyCenter?: () => void;
 }
 
 export function AdvancedDiplomacyActions({
@@ -15,6 +23,7 @@ export function AdvancedDiplomacyActions({
   targetNationId = "NATION_15",
   nationId = "NATION_118",
   onOpenTributeModal,
+  onOpenProxyCenter,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
 
@@ -81,6 +90,25 @@ export function AdvancedDiplomacyActions({
           </div>
           <p className="text-[9px] text-muted-foreground">
             هزینه: افت ثبات سیاسی (+۳ افزایش پرخاشگری جهانی).
+          </p>
+        </button>
+
+        <button
+          onClick={() => {
+            if (onOpenProxyCenter) {
+              onOpenProxyCenter();
+            }
+          }}
+          className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-military">
+              راه‌اندازی عملیات و جنگ نیابتی
+            </span>
+            <Flame size={13} className="text-military" />
+          </div>
+          <p className="text-[9px] text-muted-foreground">
+            ورود به مرکز اختصاص بودجه نفوذ برای تضعیف ثبات سیاسی {targetName}.
           </p>
         </button>
 

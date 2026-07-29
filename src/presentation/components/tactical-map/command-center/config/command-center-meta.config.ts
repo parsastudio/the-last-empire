@@ -30,6 +30,12 @@ export function getCommandCenterMeta(
         title: "دیوان عالی سیاست و قوانین",
         subtitle: "تنظیم مالیات، تعرفه‌ها، وام‌های بین‌المللی و تغییر رژیم",
       };
+    case "proxy":
+      return {
+        title: "مرکز عملیات‌های نیابتی و جنگ نفوذ",
+        subtitle:
+          "مدیریت عملیات پنهان، بودجه‌دهی نیابتی و پایش تخریب ثبات دشمنان",
+      };
     case "diplomacy":
       return {
         title: "وزارت امور خارجه و دیپلماسی",
