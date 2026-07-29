@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameAction } from "@/domain/game/action.schema";
+import { GameState } from "@/domain/game/game-state.schema";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const action = (await request.json()) as GameAction;
+    const body = (await request.json()) as {
+      action?: GameAction;
+      state?: GameState;
+    } & GameAction;
+
+    const action: GameAction = body.action || body;
+    const currentState: GameState | undefined = body.state;
 
     if (!action || !action.type || !action.nationId) {
       return NextResponse.json(
@@ -15,6 +22,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get("gameId") || "default_game";
+
+    let engine = serverGameSessionStore.getEngine(gameId);
+    if (!engine && currentState) {
+      engine = serverGameSessionStore.initSession(gameId, currentState);
+    }
 
     const result = serverGameSessionStore.dispatchAction(gameId, action);
 

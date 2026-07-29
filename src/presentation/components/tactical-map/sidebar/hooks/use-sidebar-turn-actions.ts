@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { SidebarTabType } from "../sidebar-tabs";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useToast } from "@/presentation/context/toast-context";
-import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
 
@@ -43,14 +42,9 @@ export function useSidebarTurnActions(
   });
 
   const { showToast } = useToast();
-  const fallbackGame = useGeopoliticsGame(customGameId);
 
-  const gameState =
-    overrideGameState !== undefined
-      ? overrideGameState
-      : fallbackGame.gameState;
-  const advanceNextTurn =
-    overrideAdvanceNextTurn || fallbackGame.advanceNextTurn;
+  const gameState = overrideGameState ?? null;
+  const advanceNextTurn = overrideAdvanceNextTurn;
 
   const activeTab = externalActiveTab || internalActiveTab;
   const humanNation =
@@ -78,15 +72,23 @@ export function useSidebarTurnActions(
   }, [onClearExternalTab]);
 
   const handleNextTurn = async () => {
-    if (isProcessingTurn) return;
+    if (isProcessingTurn || !advanceNextTurn) return;
 
     try {
       setIsProcessingTurn(true);
       const nextState = await advanceNextTurn();
-      const reportsSource = nextState || gameState;
 
-      const combatLogs = reportsSource?.turnLogs
-        ? reportsSource.turnLogs.filter((log) => log.level === "COMBAT")
+      if (!nextState) {
+        showToast(
+          "خطا در ثبت نوبت",
+          "امکان دریافت اطلاعات نوبت جدید از سرور وجود ندارد.",
+          "error",
+        );
+        return;
+      }
+
+      const combatLogs = nextState.turnLogs
+        ? nextState.turnLogs.filter((log) => log.level === "COMBAT")
         : [];
 
       const realReports: CombatReport[] = combatLogs.map((log) => {
@@ -119,12 +121,10 @@ export function useSidebarTurnActions(
           summary: log.message,
           attackerNationId: log.sourceNationId,
           attackerName:
-            reportsSource?.nations[log.sourceNationId]?.name ||
-            log.sourceNationId,
+            nextState.nations[log.sourceNationId]?.name || log.sourceNationId,
           defenderNationId: log.targetNationId || "DEFENDER",
           defenderName: log.targetNationId
-            ? reportsSource?.nations[log.targetNationId]?.name ||
-              log.targetNationId
+            ? nextState.nations[log.targetNationId]?.name || log.targetNationId
             : "دشمن",
           attackerCasualties: {
             infantryEngaged: attackerLost + attackerRetreated + 10,
@@ -159,11 +159,11 @@ export function useSidebarTurnActions(
 
       showToast(
         "نوبت جدید آغاز شد",
-        `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} با موفقیت انجام شد.`,
+        `محاسبات نوبت ${nextState.currentTurn} با موفقیت انجام شد.`,
         "info",
       );
 
-      if (currentTurn % 3 === 0) {
+      if (nextState.currentTurn % 3 === 0) {
         setTimeout(() => {
           setIsEventModalOpen(true);
         }, 500);
