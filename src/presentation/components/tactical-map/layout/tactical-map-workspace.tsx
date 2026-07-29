@@ -138,6 +138,7 @@ export function TacticalMapWorkspace({
           position={position}
           nationsMap={gameState?.nations}
           humanNationId={gameState?.humanNationId}
+          isDragging={isDragging}
         />
 
         <TacticalMapOverlay
