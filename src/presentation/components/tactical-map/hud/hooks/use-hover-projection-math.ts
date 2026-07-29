@@ -29,7 +29,7 @@ export function useHoverProjectionMath({
   const projectCoordinates = useCallback(
     (clientX: number, clientY: number): MapProjectionResult | null => {
       const container = containerRef.current;
-      if (!container || !maskDataRef.current) return null;
+      if (!container) return null;
 
       const rect = container.getBoundingClientRect();
       const relativeX = clientX - rect.left;
@@ -45,14 +45,9 @@ export function useHoverProjectionMath({
         return null;
       }
 
-      const pixelIndex = mapY * mapWidth + mapX;
-      const nationIdNumber = maskDataRef.current[pixelIndex] || 0;
-
-      if (!nationIdNumber || nationIdNumber < 11 || nationIdNumber >= 250) {
-        return null;
-      }
-
+      let nationIdNumber = 0;
       let greenChannelVal = 0;
+
       if (
         packed1024Ref?.current &&
         packed1024Ref.current.length === 1024 * 512 * 2
@@ -61,7 +56,21 @@ export function useHoverProjectionMath({
         const gy = Math.floor((mapY / mapHeight) * 512);
         const pIdx = (gy * 1024 + gx) * 2;
         const geoByte = packed1024Ref.current[pIdx] || 0;
+        nationIdNumber = packed1024Ref.current[pIdx + 1] || 0;
         greenChannelVal = geoByte >> 2;
+      }
+
+      if (
+        (!nationIdNumber || nationIdNumber < 11) &&
+        maskDataRef?.current &&
+        maskDataRef.current.length === mapWidth * mapHeight
+      ) {
+        const pixelIndex = mapY * mapWidth + mapX;
+        nationIdNumber = maskDataRef.current[pixelIndex] || 0;
+      }
+
+      if (!nationIdNumber || nationIdNumber < 11 || nationIdNumber >= 250) {
+        return null;
       }
 
       return { mapX, mapY, nationIdNumber, greenChannelVal };

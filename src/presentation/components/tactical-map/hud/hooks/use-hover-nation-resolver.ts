@@ -26,43 +26,63 @@ export function useHoverNationResolver({
       greenChannelVal: number,
     ): HoverCountryInfo | null => {
       const matchedCountry = countries.find((c) => c.id === nationIdNumber);
-      if (!matchedCountry) return null;
 
-      const fullNationId = `NATION_${matchedCountry.id}`;
-      const liveNation = nationsMap ? nationsMap[fullNationId] : null;
+      const fullNationId = `NATION_${nationIdNumber}`;
+      let liveNation = nationsMap ? nationsMap[fullNationId] : null;
 
-      const profile = findCountryProfileById(matchedCountry.id);
+      if (!liveNation && nationsMap && matchedCountry) {
+        liveNation =
+          nationsMap[matchedCountry.code.toUpperCase()] ||
+          nationsMap[matchedCountry.code.toLowerCase()] ||
+          null;
+      }
+
+      const profile = findCountryProfileById(nationIdNumber);
       const realName = liveNation
         ? liveNation.name
         : profile
           ? profile.nameFa
-          : matchedCountry.name;
+          : matchedCountry
+            ? matchedCountry.name
+            : `کشور ${nationIdNumber}`;
 
       const realGdp = liveNation
         ? liveNation.gdp
         : profile
           ? profile.gdp
-          : (matchedCountry.areaSqKm ?? 50000) * 1500;
+          : matchedCountry?.areaSqKm
+            ? matchedCountry.areaSqKm * 1500
+            : 50000000000;
 
       const gdpBillionsNum = realGdp / 1e9;
       const gdpFormatted = Number.isInteger(gdpBillionsNum)
         ? gdpBillionsNum.toString()
         : gdpBillionsNum.toFixed(1);
 
-      const flagCode = profile ? profile.flagCode : matchedCountry.code;
+      const flagCode = profile
+        ? profile.flagCode
+        : matchedCountry
+          ? matchedCountry.code
+          : "IR";
+
+      const countryCode = matchedCountry
+        ? matchedCountry.code
+        : profile
+          ? profile.code
+          : `${nationIdNumber}`;
 
       const stanceLabel = resolveStanceLabel(
         humanNationId,
         fullNationId,
-        matchedCountry.code,
+        countryCode,
         nationsMap,
       );
 
       const possibleKeys = [
         fullNationId,
-        matchedCountry.code.toUpperCase(),
-        matchedCountry.code.toLowerCase(),
-        matchedCountry.id.toString(),
+        countryCode.toUpperCase(),
+        countryCode.toLowerCase(),
+        nationIdNumber.toString(),
       ];
 
       let cachedRank = rankingsMap.size > 0 ? rankingsMap.size : 99;
@@ -78,15 +98,17 @@ export function useHoverNationResolver({
         regionLabel = `منطقه ${greenChannelVal.toLocaleString("fa-IR")}`;
       }
 
+      const areaSqKm = matchedCountry?.areaSqKm ?? 50000;
+
       return {
         name: realName,
-        code: matchedCountry.code,
+        code: countryCode,
         flagCode,
         rank: cachedRank,
         stance: stanceLabel,
         gdp: `$${gdpFormatted}B`,
         regionName: regionLabel,
-        regionArea: `${Math.round(matchedCountry.areaSqKm ?? 50000).toLocaleString("fa-IR")} km²`,
+        regionArea: `${Math.round(areaSqKm).toLocaleString("fa-IR")} km²`,
       };
     },
     [countries, rankingsMap, nationsMap, humanNationId, resolveStanceLabel],

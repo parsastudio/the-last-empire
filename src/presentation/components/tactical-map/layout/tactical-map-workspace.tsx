@@ -32,6 +32,7 @@ export function TacticalMapWorkspace({
   );
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isSidebarOpen] = useState<boolean>(true);
+  const [isHoveringCountry, setIsHoveringCountry] = useState<boolean>(false);
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -121,6 +122,7 @@ export function TacticalMapWorkspace({
         canvasDestRef={canvasDestRef}
         canvasSrcRef={canvasSrcRef}
         isDragging={isDragging}
+        isHoveringCountry={isHoveringCountry}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -139,6 +141,7 @@ export function TacticalMapWorkspace({
           nationsMap={gameState?.nations}
           humanNationId={gameState?.humanNationId}
           isDragging={isDragging}
+          onHoverStateChange={setIsHoveringCountry}
         />
 
         <TacticalMapOverlay
