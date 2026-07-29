@@ -11,7 +11,7 @@ export class ClosestBaseFinder {
     let minDistance = Infinity;
 
     for (const cell of gridCells) {
-      if (cell.ownerId === attackerId || cell.occupierId === attackerId) {
+      if (cell.ownerId === attackerId) {
         const dist = Math.hypot(cell.x - target.x, cell.y - target.y);
         if (dist < minDistance) {
           minDistance = dist;

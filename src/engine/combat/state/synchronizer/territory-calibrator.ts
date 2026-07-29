@@ -23,11 +23,7 @@ export class TerritoryCalibrator {
     const updated = { ...nations };
 
     for (const [id, nation] of Object.entries(updated)) {
-      const ownedCells = allCells.filter(
-        (c) =>
-          (c.ownerId === id && !c.isOccupied) ||
-          (c.isOccupied && c.occupierId === id),
-      );
+      const ownedCells = allCells.filter((c) => c.ownerId === id);
 
       let totalCalibratedArea = 0;
       for (const cell of ownedCells) {

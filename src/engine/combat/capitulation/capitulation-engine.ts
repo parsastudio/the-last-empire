@@ -15,17 +15,16 @@ export class CapitulationEngine {
       return [];
     }
 
-    const occupiedCount = countryCells.filter(
-      (c) => c.isOccupied && c.occupierId === conquerorId,
+    const conqueredCount = countryCells.filter(
+      (c) => c.ownerId === conquerorId,
     ).length;
-    const ratio = occupiedCount / totalCellsCount;
+    const ratio = conqueredCount / totalCellsCount;
 
     if (ratio >= this.capitulationThreshold) {
       const capitulatedCells: GridCell[] = [];
       for (const cell of countryCells) {
-        if (!cell.isOccupied) {
-          cell.isOccupied = true;
-          cell.occupierId = conquerorId;
+        if (cell.ownerId === countryId) {
+          cell.ownerId = conquerorId;
           capitulatedCells.push(cell);
         }
       }

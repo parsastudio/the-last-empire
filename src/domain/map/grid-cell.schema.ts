@@ -4,10 +4,9 @@ export const GridCellSchema = z.object({
   x: z.number().nonnegative(),
   y: z.number().nonnegative(),
   ownerId: z.string(),
-  isOccupied: z.boolean(),
-  occupierId: z.string().nullable(),
   highResPixelCount: z.number().nonnegative(),
   enclaveId: z.number().nonnegative(),
+  seaAccess: z.number().min(0).max(2).default(0),
 });
 
 export type GridCell = z.infer<typeof GridCellSchema>;

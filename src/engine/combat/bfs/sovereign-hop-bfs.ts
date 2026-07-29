@@ -14,10 +14,7 @@ export class SovereignHopBfs {
     pixelLimit: number,
   ): GridCell[] {
     const targetCells = allCells.filter(
-      (c) =>
-        c.ownerId === targetCountryId &&
-        c.enclaveId === targetEnclaveId &&
-        !c.isOccupied,
+      (c) => c.ownerId === targetCountryId && c.enclaveId === targetEnclaveId,
     );
 
     if (targetCells.length === 0 || pixelLimit <= 0) {
