@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { LogisticsEvaluationResult } from "./campaign-logistics-evaluator";
+import { DetailedCasualtyResult } from "../math/combat-casualty-calculator";
 
 export class AttackTreasurySettler {
   public settlePostAttackStates(
@@ -7,8 +8,7 @@ export class AttackTreasurySettler {
     attackerId: string,
     defenderId: string,
     evalResult: LogisticsEvaluationResult,
-    attackerLost: number,
-    defenderLost: number,
+    casualtyDetails: DetailedCasualtyResult,
   ): Record<string, Nation> {
     const updatedNations = { ...nations };
 
@@ -18,10 +18,23 @@ export class AttackTreasurySettler {
       updatedNations[attackerId] = {
         ...attacker,
         treasury: Math.max(0, remainingTreasury),
-        nationalDebt: attacker.nationalDebt + evalResult.emergencyDebtRequired,
         military: {
           ...attacker.military,
-          infantry: Math.max(0, attacker.military.infantry - attackerLost),
+          infantry: Math.max(
+            0,
+            attacker.military.infantry -
+              casualtyDetails.attackerLostStack.infantry,
+          ),
+          airForce: Math.max(
+            0,
+            attacker.military.airForce -
+              casualtyDetails.attackerLostStack.airForce,
+          ),
+          droneMissile: Math.max(
+            0,
+            attacker.military.droneMissile -
+              casualtyDetails.attackerLostStack.droneMissile,
+          ),
         },
       };
     }
@@ -32,7 +45,21 @@ export class AttackTreasurySettler {
         ...defender,
         military: {
           ...defender.military,
-          infantry: Math.max(0, defender.military.infantry - defenderLost),
+          infantry: Math.max(
+            0,
+            defender.military.infantry -
+              casualtyDetails.defenderLostStack.infantry,
+          ),
+          airForce: Math.max(
+            0,
+            defender.military.airForce -
+              casualtyDetails.defenderLostStack.airForce,
+          ),
+          droneMissile: Math.max(
+            0,
+            defender.military.droneMissile -
+              casualtyDetails.defenderLostStack.droneMissile,
+          ),
         },
       };
     }
