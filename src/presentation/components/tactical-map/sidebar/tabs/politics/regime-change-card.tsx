@@ -3,6 +3,7 @@ import { RefreshCw, Zap, AlertTriangle, Lock } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface RegimeChangeCardProps {
   governmentType: string;
@@ -67,7 +68,7 @@ export function RegimeChangeCard({
         <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
           <span>هزینه همه‌پرسی:</span>
           <span className="font-bold text-gdp">
-            ${changeCost.toLocaleString("fa-IR")}
+            {PersianNumberFormatter.formatCurrency(changeCost)}
           </span>
         </div>
 
@@ -103,7 +104,9 @@ export function RegimeChangeCard({
           <div className="bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-xl flex items-center gap-2 text-[10px] text-amber-500 font-mono">
             <Lock size={13} className="shrink-0" />
             <span className="font-sans">
-              تغییر حکومت قفل است ({turnsRemaining} نوبت ماندگاری لازم).
+              تغییر حکومت قفل است (
+              {PersianNumberFormatter.toPersianDigits(turnsRemaining)} نوبت
+              ماندگاری لازم).
             </span>
           </div>
         ) : (
@@ -125,7 +128,7 @@ export function RegimeChangeCard({
           <Zap size={14} className="text-treasury" />
           <span>
             {isLocked
-              ? `قفل تغییر حکومت (${turnsRemaining} نوبت)`
+              ? `قفل تغییر حکومت (${PersianNumberFormatter.toPersianDigits(turnsRemaining)} نوبت)`
               : !canAfford
                 ? "خزانه ناکافی جهت همه‌پرسی"
                 : `تغییر حکومت به ${selectedTargetGov}`}

@@ -2,6 +2,7 @@ import React from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ImfLoanCardProps {
   nationId?: string;
@@ -33,7 +34,7 @@ export function ImfLoanCard({
     const action = ActionFactory.requestLoan(nationId, amountToRequest);
     await dispatchAction(
       action,
-      `وام اضطراری $${amountToRequest.toLocaleString("fa-IR")} به خزانه ملی واریز شد.`,
+      `وام اضطراری ${PersianNumberFormatter.formatCurrency(amountToRequest)} به خزانه ملی واریز شد.`,
     );
   };
 
@@ -44,7 +45,7 @@ export function ImfLoanCard({
     const action = ActionFactory.repayDebt(nationId, amountToRepay);
     await dispatchAction(
       action,
-      `مبلغ $${amountToRepay.toLocaleString("fa-IR")} از بدهی ملی تسویه گردید.`,
+      `مبلغ ${PersianNumberFormatter.formatCurrency(amountToRepay)} از بدهی ملی تسویه گردید.`,
     );
   };
 
@@ -62,7 +63,9 @@ export function ImfLoanCard({
           <span className="text-muted-foreground font-sans">
             رتبه اعتبار ملی:
           </span>
-          <span className="font-bold text-gdp">{creditRating} / ۱۰۰</span>
+          <span className="font-bold text-gdp">
+            {PersianNumberFormatter.toPersianDigits(creditRating)} / ۱۰۰
+          </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
@@ -71,7 +74,7 @@ export function ImfLoanCard({
               بدهی معوق فعلی
             </span>
             <span className="font-bold text-military block">
-              ${nationalDebt.toLocaleString("fa-IR")}
+              {PersianNumberFormatter.formatCurrency(nationalDebt)}
             </span>
           </div>
 
@@ -80,7 +83,7 @@ export function ImfLoanCard({
               اعتبار وام آزاد
             </span>
             <span className="font-bold text-gdp block">
-              ${availableLoan.toLocaleString("fa-IR")}
+              {PersianNumberFormatter.formatCurrency(availableLoan)}
             </span>
           </div>
         </div>

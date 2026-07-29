@@ -4,6 +4,7 @@ import { TaxSlider } from "./tax-slider";
 import { PredictiveImpactBox } from "./predictive-impact-box";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface TaxControlCardProps {
   taxRate: number;
@@ -31,7 +32,10 @@ export function TaxControlCard({
 
   const handleApplyTax = async () => {
     const action = ActionFactory.setTaxRate(nationId, taxRate);
-    await dispatchAction(action, `نرخ مالیات جدید روی ${taxRate}% تنظیم شد.`);
+    await dispatchAction(
+      action,
+      `نرخ مالیات جدید روی ${PersianNumberFormatter.toPersianDigits(taxRate)}٪ تنظیم شد.`,
+    );
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,7 +54,7 @@ export function TaxControlCard({
       <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3.5">
         <div className="flex items-center justify-between text-xs">
           <span className="font-mono font-extrabold text-foreground text-sm">
-            {taxRate}%
+            {PersianNumberFormatter.toPersianDigits(taxRate)}٪
           </span>
           <span className="text-muted-foreground">نرخ مالیات جدید</span>
         </div>
@@ -74,7 +78,8 @@ export function TaxControlCard({
           onClick={handleApplyTax}
           className="w-full py-2.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
         >
-          اعمال نرخ جدید مالیات ({taxRate}%)
+          اعمال نرخ جدید مالیات (
+          {PersianNumberFormatter.toPersianDigits(taxRate)}٪)
         </button>
       </div>
     </div>
