@@ -8,14 +8,18 @@ interface WideProxyViewProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
   selectedTargetCode?: string | null;
+  activeSubTab?: string | null;
 }
 
 export function WideProxyView({
   nation,
   nationsMap,
   selectedTargetCode,
+  activeSubTab,
 }: WideProxyViewProps) {
-  const [activeTab, setActiveTab] = useState<"active" | "allocate">("allocate");
+  const [activeTab, setActiveTab] = useState<"active" | "allocate">(
+    activeSubTab === "active" ? "active" : "allocate",
+  );
 
   const proxy = useWideProxy({
     nation,

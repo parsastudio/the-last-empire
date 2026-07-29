@@ -23,6 +23,7 @@ interface WidePoliticsViewProps {
   infrastructureLevel?: number;
   activeModifiers?: ActiveModifier[];
   nationsMap?: Record<string, Nation>;
+  activeSubTab?: string | null;
 }
 
 export function WidePoliticsView({

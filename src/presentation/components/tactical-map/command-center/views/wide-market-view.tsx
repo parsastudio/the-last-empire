@@ -10,6 +10,7 @@ interface WideMarketViewProps {
   oilStock?: number;
   steelStock?: number;
   userTreasury?: number;
+  activeSubTab?: string | null;
   onOpenTrade: (
     name: string,
     unit: string,

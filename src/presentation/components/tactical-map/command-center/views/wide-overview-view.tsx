@@ -9,6 +9,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 interface WideOverviewViewProps {
   nation: Nation;
   rank?: number;
+  activeSubTab?: string | null;
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
