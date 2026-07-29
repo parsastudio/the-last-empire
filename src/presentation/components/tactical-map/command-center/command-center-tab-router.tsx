@@ -55,7 +55,12 @@ export function CommandCenterTabRouter({
       }));
 
     const ranked = ranker.rankNations(nationsList);
-    const found = ranked.find((r) => r.id === nation.id);
+    const targetId = nation.id.startsWith("NATION_")
+      ? nation.id
+      : `NATION_${nation.id}`;
+    const found = ranked.find(
+      (r) => r.id.toUpperCase() === targetId.toUpperCase(),
+    );
     return found ? found.rank : 1;
   }, [gameState, nation.id, ranker]);
 

@@ -116,16 +116,29 @@ export function useCountryHoverRankings(
       const rank = r.rank;
       const rawItem = rawList.find((item) => item.id === r.id);
 
+      const numericId = parseInt(r.id.replace("NATION_", ""), 10);
+
       cache.set(r.id, rank);
       cache.set(r.id.toUpperCase(), rank);
+      cache.set(r.id.toLowerCase(), rank);
+
+      if (!isNaN(numericId)) {
+        cache.set(numericId.toString(), rank);
+        cache.set(`NATION_${numericId}`, rank);
+        cache.set(`nation_${numericId}`, rank);
+
+        const profile = findCountryProfileById(numericId);
+        if (profile) {
+          cache.set(profile.code.toUpperCase(), rank);
+          cache.set(profile.code.toLowerCase(), rank);
+          cache.set(profile.flagCode.toUpperCase(), rank);
+          cache.set(profile.flagCode.toLowerCase(), rank);
+        }
+      }
 
       if (rawItem) {
         cache.set(rawItem.code.toUpperCase(), rank);
         cache.set(rawItem.code.toLowerCase(), rank);
-        if (rawItem.numericId > 0) {
-          cache.set(rawItem.numericId.toString(), rank);
-          cache.set(`NATION_${rawItem.numericId}`, rank);
-        }
       }
     }
 

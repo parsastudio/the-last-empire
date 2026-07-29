@@ -11,16 +11,16 @@ export function useNationSelector(isOpen: boolean, onClose: () => void) {
 
     let active = true;
 
-    async function loadPresentMapIds() {
+    async function loadManifest() {
       try {
-        const res = await fetch("/maps/map1/partition-mappings.json");
+        const res = await fetch("/api/map-manifest?mode=partition");
         if (res.ok) {
           const json = await res.json();
-          if (active && json.countries && Array.isArray(json.countries)) {
+          if (active && json.nations && Array.isArray(json.nations)) {
             const validSet = new Set<number>();
-            for (const c of json.countries) {
-              if (c.id >= 11) {
-                validSet.add(c.id);
+            for (const item of json.nations) {
+              if (typeof item.numericId === "number") {
+                validSet.add(item.numericId);
               }
             }
             if (validSet.size > 0) {
@@ -32,14 +32,14 @@ export function useNationSelector(isOpen: boolean, onClose: () => void) {
       } catch {}
 
       try {
-        const resDef = await fetch("/maps/map1/default-mappings.json");
+        const resDef = await fetch("/api/map-manifest?mode=default");
         if (resDef.ok) {
           const jsonDef = await resDef.json();
-          if (active && jsonDef.countries && Array.isArray(jsonDef.countries)) {
+          if (active && jsonDef.nations && Array.isArray(jsonDef.nations)) {
             const validSet = new Set<number>();
-            for (const c of jsonDef.countries) {
-              if (c.id >= 11) {
-                validSet.add(c.id);
+            for (const item of jsonDef.nations) {
+              if (typeof item.numericId === "number") {
+                validSet.add(item.numericId);
               }
             }
             if (validSet.size > 0) {
@@ -50,7 +50,7 @@ export function useNationSelector(isOpen: boolean, onClose: () => void) {
       } catch {}
     }
 
-    loadPresentMapIds();
+    loadManifest();
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
