@@ -10,20 +10,37 @@ export class CombatCasualtyCalculator {
     attackerEngaged: number,
     defenderEngaged: number,
     isAttackerVictory: boolean,
+    isFullTerritoryCaptured = false,
   ): CasualtyCalculationResult {
-    let attackerLossRate = 0.2;
-    let defenderLossRate = 0.4;
-
-    if (isAttackerVictory) {
-      attackerLossRate = 0.18;
-      defenderLossRate = 0.38;
-    } else {
-      attackerLossRate = 0.42;
-      defenderLossRate = 0.22;
+    if (attackerEngaged <= 0 || defenderEngaged <= 0) {
+      return {
+        attackerLost: 0,
+        defenderLost: 0,
+        attackerRetreated: attackerEngaged,
+        defenderRetreated: defenderEngaged,
+      };
     }
 
-    const attackerLost = Math.floor(attackerEngaged * attackerLossRate);
-    const defenderLost = Math.floor(defenderEngaged * defenderLossRate);
+    const smallerForce = Math.min(attackerEngaged, defenderEngaged);
+
+    let attackerLost = Math.floor(smallerForce * 0.4);
+    let defenderLost = Math.floor(smallerForce * 0.3);
+
+    if (isAttackerVictory) {
+      if (isFullTerritoryCaptured) {
+        defenderLost = defenderEngaged;
+      } else {
+        defenderLost = Math.min(
+          defenderEngaged,
+          Math.max(defenderLost, Math.floor(smallerForce * 0.5)),
+        );
+      }
+    } else {
+      attackerLost = Math.min(
+        attackerEngaged,
+        Math.max(attackerLost, Math.floor(smallerForce * 0.5)),
+      );
+    }
 
     const attackerRetreated = Math.max(0, attackerEngaged - attackerLost);
     const defenderRetreated = Math.max(0, defenderEngaged - defenderLost);
