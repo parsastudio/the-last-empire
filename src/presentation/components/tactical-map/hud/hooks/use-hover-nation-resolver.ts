@@ -19,10 +19,7 @@ export function useHoverNationResolver({
   const { resolveStanceLabel } = useHoverStance();
 
   const resolveHoverInfo = useCallback(
-    (
-      nationIdNumber: number,
-      greenChannelVal: number,
-    ): HoverCountryInfo | null => {
+    (nationIdNumber: number, enclaveIdVal: number): HoverCountryInfo | null => {
       const matchedCountry = countries.find((c) => c.id === nationIdNumber);
 
       const fullNationId = `NATION_${nationIdNumber}`;
@@ -79,8 +76,10 @@ export function useHoverNationResolver({
       const realRank = liveNation ? liveNation.rank : 99;
 
       let regionLabel = "";
-      if (greenChannelVal > 0) {
-        regionLabel = `منطقه ${greenChannelVal.toLocaleString("fa-IR")}`;
+      if (enclaveIdVal >= 1 && enclaveIdVal <= 10) {
+        regionLabel = `منطقه ${enclaveIdVal.toLocaleString("fa-IR")}`;
+      } else if (enclaveIdVal >= 11) {
+        regionLabel = `مستعمره ${(enclaveIdVal - 10).toLocaleString("fa-IR")}`;
       }
 
       const areaSqKm = matchedCountry?.areaSqKm ?? 50000;

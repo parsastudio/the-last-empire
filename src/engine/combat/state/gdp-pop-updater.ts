@@ -11,9 +11,7 @@ export class GdpPopUpdater {
     const updated = { ...nations };
 
     const totalPixelsMap = new Map<string, number>();
-    const freePixelsMap = new Map<string, number>();
     const regionPixelsMap = new Map<string, Map<number, number>>();
-    const occupiedLootMap = new Map<string, Map<string, number>>();
 
     for (const cell of allCells) {
       const owner = cell.ownerId;
@@ -29,17 +27,6 @@ export class GdpPopUpdater {
       }
       const rMap = regionPixelsMap.get(owner)!;
       rMap.set(cell.enclaveId, (rMap.get(cell.enclaveId) || 0) + pixels);
-
-      if (!cell.isOccupied) {
-        freePixelsMap.set(owner, (freePixelsMap.get(owner) || 0) + pixels);
-      } else if (cell.occupierId) {
-        const occupier = cell.occupierId;
-        if (!occupiedLootMap.has(occupier)) {
-          occupiedLootMap.set(occupier, new Map<string, number>());
-        }
-        const nationLoot = occupiedLootMap.get(occupier)!;
-        nationLoot.set(owner, (nationLoot.get(owner) || 0) + pixels);
-      }
     }
 
     for (const [id, nation] of Object.entries(updated)) {
@@ -51,51 +38,42 @@ export class GdpPopUpdater {
         ? profile.population
         : nation.population || 80000000;
 
-      const totalPixels = totalPixelsMap.get(id) || 0;
+      const ownedPixels = totalPixelsMap.get(id) || 0;
 
-      if (totalPixels === 0) {
+      if (ownedPixels === 0) {
         updated[id] = {
           ...nation,
-          gdp: nation.gdp > 0 ? nation.gdp : baseGdp,
-          population: nation.population > 0 ? nation.population : basePop,
-          isAlive: true,
+          gdp: 0,
+          population: 0,
+          isAlive: false,
+          regionsDemographics: [],
         };
         continue;
       }
 
-      const freePixels = freePixelsMap.get(id) || 0;
-      const freeRatio = freePixels / totalPixels;
+      const initialTotalPixels = Math.max(
+        1,
+        Math.round(baseGdp / 1000000 / 86.3) || ownedPixels,
+      );
+      const areaRatio = ownedPixels / initialTotalPixels;
 
-      let currentGdp = Math.round(baseGdp * freeRatio);
-      let currentPop = Math.round(basePop * freeRatio);
-
-      const loot = occupiedLootMap.get(id);
-      if (loot) {
-        for (const [victimId, pixels] of loot.entries()) {
-          const victimNumericId = parseInt(victimId.replace("NATION_", ""), 10);
-          const victimProfile = findCountryProfileById(victimNumericId);
-
-          const victimBaseGdp = victimProfile ? victimProfile.gdp : 5000000000;
-          const victimBasePop = victimProfile
-            ? victimProfile.population
-            : 80000000;
-
-          const victimTotalPixels = totalPixelsMap.get(victimId) || 1;
-          const lootRatio = pixels / victimTotalPixels;
-
-          currentGdp += Math.round(victimBaseGdp * lootRatio);
-          currentPop += Math.round(victimBasePop * lootRatio);
-        }
-      }
+      const currentGdp = Math.round(baseGdp * areaRatio);
+      const currentPop = Math.round(basePop * areaRatio);
 
       const regionsDemographics: RegionDemographics[] = [];
       const rMap = regionPixelsMap.get(id);
       if (rMap) {
         for (const [rId, rPixels] of rMap.entries()) {
-          const rShare = rPixels / totalPixels;
-          const rPop = Math.round(basePop * rShare);
-          const rGdp = Math.round(baseGdp * rShare);
-          const name = rId === 0 ? "خاک اصلی" : `منطقه فرامرزی ${rId}`;
+          const rShare = rPixels / ownedPixels;
+          const rPop = Math.round(currentPop * rShare);
+          const rGdp = Math.round(currentGdp * rShare);
+
+          let name = "خاک اصلی";
+          if (rId >= 1 && rId <= 10) {
+            name = `منطقه فرامرزی ${rId}`;
+          } else if (rId >= 11) {
+            name = `مستعمره ${rId - 10}`;
+          }
 
           regionsDemographics.push({
             regionId: rId,
@@ -112,7 +90,7 @@ export class GdpPopUpdater {
         ...nation,
         gdp: Math.max(0, currentGdp),
         population: Math.max(0, currentPop),
-        isAlive: currentPop > 0 || freePixels > 0,
+        isAlive: ownedPixels > 0,
         regionsDemographics,
       };
     }

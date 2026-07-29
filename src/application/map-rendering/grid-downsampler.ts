@@ -17,7 +17,7 @@ export class GridDownsampler {
     for (let gy = 0; gy < lowResHeight; gy++) {
       for (let gx = 0; gx < lowResWidth; gx++) {
         let hasForcedPassage = false;
-        const countryIds: string[] = [];
+        const countryCounts = new Map<number, number>();
         for (let sy = 0; sy < scaleFactor; sy++) {
           for (let sx = 0; sx < scaleFactor; sx++) {
             const hx = gx * scaleFactor + sx;
@@ -27,7 +27,7 @@ export class GridDownsampler {
             if (val === 254) {
               hasForcedPassage = true;
             } else if (val !== undefined && val >= 11) {
-              countryIds.push(`NATION_${val}`);
+              countryCounts.set(val, (countryCounts.get(val) ?? 0) + 1);
             }
           }
         }
@@ -35,16 +35,12 @@ export class GridDownsampler {
         let cellOwner = "WATER";
         if (hasForcedPassage) {
           cellOwner = "WATER";
-        } else if (countryIds.length > 0) {
-          const counts = new Map<string, number>();
-          for (const id of countryIds) {
-            counts.set(id, (counts.get(id) || 0) + 1);
-          }
+        } else if (countryCounts.size > 0) {
           let maxCount = 0;
-          for (const [id, count] of counts.entries()) {
+          for (const [id, count] of countryCounts.entries()) {
             if (count > maxCount) {
               maxCount = count;
-              cellOwner = id;
+              cellOwner = `NATION_${id}`;
             }
           }
         }
@@ -53,10 +49,9 @@ export class GridDownsampler {
           x: gx,
           y: gy,
           ownerId: cellOwner,
-          isOccupied: false,
-          occupierId: null,
-          highResPixelCount: countryIds.length,
+          highResPixelCount: countryCounts.size > 0 ? 16 : 0,
           enclaveId: 0,
+          seaAccess: 0,
         };
         gridState.setCell(gx, gy, cell);
       }

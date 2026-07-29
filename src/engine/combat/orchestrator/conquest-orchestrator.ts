@@ -98,9 +98,19 @@ export class ConquestOrchestrator {
       targetPixelLimit,
     );
 
+    const attackerCells = allCells.filter((c) => c.ownerId === attackerId);
+    const existingColonyIds = new Set(
+      attackerCells.filter((c) => c.enclaveId >= 11).map((c) => c.enclaveId),
+    );
+
+    let colonyId = 11;
+    while (existingColonyIds.has(colonyId)) {
+      colonyId++;
+    }
+
     for (const cell of conqueredCells) {
-      cell.isOccupied = true;
-      cell.occupierId = attackerId;
+      cell.ownerId = attackerId;
+      cell.enclaveId = colonyId;
     }
 
     const capitulatedCells = this.capitulation.processCapitulation(
@@ -108,6 +118,11 @@ export class ConquestOrchestrator {
       attackerId,
       allCells,
     );
+
+    for (const cell of capitulatedCells) {
+      cell.ownerId = attackerId;
+      cell.enclaveId = colonyId;
+    }
 
     return {
       conqueredCells,

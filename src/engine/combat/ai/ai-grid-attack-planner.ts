@@ -12,17 +12,13 @@ export class AiGridAttackPlanner {
     defenderId: string,
     allCells: GridCell[],
   ): Coordinate | null {
-    const defenderCells = allCells.filter(
-      (c) => c.ownerId === defenderId && !c.isOccupied,
-    );
+    const defenderCells = allCells.filter((c) => c.ownerId === defenderId);
 
     if (defenderCells.length === 0) {
       return null;
     }
 
-    const attackerCells = allCells.filter(
-      (c) => c.ownerId === attackerId || c.occupierId === attackerId,
-    );
+    const attackerCells = allCells.filter((c) => c.ownerId === attackerId);
 
     for (const cell of defenderCells) {
       const target = { x: cell.x, y: cell.y };

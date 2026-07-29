@@ -77,10 +77,9 @@ export class SpatialBufferEngine {
           x,
           y,
           ownerId,
-          isOccupied: false,
-          occupierId: null,
           highResPixelCount: data.nationId >= 11 ? 16 : 0,
           enclaveId: data.enclaveId,
+          seaAccess: data.seaAccess,
         };
         gridState.setCell(x, y, cell);
       }
