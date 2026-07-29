@@ -17,9 +17,26 @@ export class ConquestActionValidator {
       (state as { gridState?: GridState }).gridState || new GridState();
     const allCells = gridState.getAllCells();
 
+    let x = 0;
+    let y = 0;
+
+    if (attackAction.targetCoordinate) {
+      x = attackAction.targetCoordinate.x;
+      y = attackAction.targetCoordinate.y;
+    } else if (
+      attackAction.targetX !== undefined &&
+      attackAction.targetY !== undefined
+    ) {
+      x = attackAction.targetX;
+      y = attackAction.targetY;
+    } else {
+      x = Math.floor(attackAction.infantry % 1024);
+      y = Math.floor(attackAction.airForce % 512);
+    }
+
     const targetPixel = {
-      x: Math.floor(attackAction.infantry % 1024),
-      y: Math.floor(attackAction.airForce % 512),
+      x: Math.floor(x % 1024),
+      y: Math.floor(y % 512),
     };
 
     const isValid = this.validator.validateAttackOpportunity(

@@ -3,6 +3,11 @@ import { GovernmentTypeSchema } from "@/domain/politics/politics.schema";
 import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
 
+export const CoordinateSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+
 export const SetTaxRateActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -45,6 +50,9 @@ export const AttackActionSchema = z.object({
   infantry: z.number().nonnegative(),
   airForce: z.number().nonnegative(),
   droneMissile: z.number().nonnegative(),
+  targetX: z.number().optional(),
+  targetY: z.number().optional(),
+  targetCoordinate: CoordinateSchema.optional(),
 });
 
 export const DiplomaticProposalActionSchema = z.object({
