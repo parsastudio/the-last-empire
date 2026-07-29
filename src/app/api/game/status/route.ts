@@ -21,7 +21,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     const state = engine.getState();
     return NextResponse.json({ success: true, data: state });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal error";
+    const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 },
