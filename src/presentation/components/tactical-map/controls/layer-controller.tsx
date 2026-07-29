@@ -14,7 +14,11 @@ export function LayerController({
   onChangeLayer,
 }: LayerControllerProps) {
   return (
-    <div className="fixed bottom-6 left-6 z-40 flex flex-col gap-2">
+    <div
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      className="fixed bottom-6 left-6 z-40 flex flex-col gap-2 pointer-events-auto"
+    >
       <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1 dir-rtl">
         <div className="p-2 text-muted-foreground border-l border-border/60 flex items-center gap-1.5">
           <Layers size={14} />
