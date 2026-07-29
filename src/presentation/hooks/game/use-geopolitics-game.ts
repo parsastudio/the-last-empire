@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
+import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
+import { LocalStorageAdapter } from "@/infrastructure/storage/local-storage-adapter";
 
 export function useGeopoliticsGame(customGameId?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -58,6 +60,31 @@ export function useGeopoliticsGame(customGameId?: string) {
     async function loadInitialStatus() {
       try {
         const nationId = getStoredNationId();
+
+        if (customGameId) {
+          try {
+            const dbAdapter = new IndexedDbAdapter();
+            let savedState = await dbAdapter.loadState(customGameId);
+
+            if (!savedState) {
+              const localAdapter = new LocalStorageAdapter();
+              savedState = localAdapter.loadState(customGameId);
+            }
+
+            if (savedState && active) {
+              await fetch("/api/game/sync-state", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ state: savedState }),
+              });
+
+              setGameState(savedState);
+              setLoading(false);
+              return;
+            }
+          } catch {}
+        }
+
         const gameIdQuery = customGameId ? `&gameId=${customGameId}` : "";
         const res = await fetch(
           `/api/game/status?nationId=${nationId}${gameIdQuery}`,

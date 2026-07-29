@@ -1,6 +1,7 @@
 import { GridState } from "@/engine/combat/state/grid-state";
 import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 import { GameState } from "@/domain/game/game-state.schema";
+import { GovernmentType } from "@/domain/politics/politics.schema";
 import { GridNationDetector } from "./grid-nation-detector";
 import { GlobalAiInitializer } from "./global-ai-initializer";
 import { findCountryProfileByCode } from "@/domain/map/countries";
@@ -20,6 +21,7 @@ export class GameStateInitializer {
   public initializeSimulationForNation(
     nationId: string,
     gridState: GridState,
+    governmentType?: GovernmentType | string,
   ): GameState {
     const normalizedHumanId = normalizeNationId(nationId);
     const cells = gridState.getAllCells();
@@ -32,6 +34,7 @@ export class GameStateInitializer {
     const populatedNations = this.aiInitializer.initializeAllNations(
       detectedNations,
       normalizedHumanId,
+      governmentType,
     );
 
     const baseState: GameState = {

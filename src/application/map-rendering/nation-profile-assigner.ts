@@ -1,11 +1,16 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { GovernmentType } from "@/domain/politics/politics.schema";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/map/countries";
 
 export class NationProfileAssigner {
-  public buildStartingNation(id: string, isHuman: boolean): Nation {
+  public buildStartingNation(
+    id: string,
+    isHuman: boolean,
+    customGovType?: GovernmentType | string,
+  ): Nation {
     const numericId = parseInt(id.replace("NATION_", ""), 10);
     let profile = isNaN(numericId)
       ? findCountryProfileByCode(id)
@@ -25,7 +30,21 @@ export class NationProfileAssigner {
     const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
     const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
 
-    const govType = profile?.startingGovernment ?? "DEMOCRACY";
+    const validGovTypes: GovernmentType[] = [
+      "DEMOCRACY",
+      "DICTATORSHIP",
+      "MONARCHY",
+      "COMMUNISM",
+      "FASCISM",
+    ];
+
+    let govType: GovernmentType = profile?.startingGovernment ?? "DEMOCRACY";
+    if (
+      customGovType &&
+      validGovTypes.includes(customGovType as GovernmentType)
+    ) {
+      govType = customGovType as GovernmentType;
+    }
 
     let stability = 80;
     let corruption = 5;

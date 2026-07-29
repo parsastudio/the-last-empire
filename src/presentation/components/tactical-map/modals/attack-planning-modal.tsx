@@ -89,6 +89,9 @@ export function AttackPlanningModal({
         infantry,
         airForce,
         droneMissile,
+        targetX: coordinate.x,
+        targetY: coordinate.y,
+        targetCoordinate: coordinate,
       },
       `فرمان حمله به نیروهای ${targetName} صادر گردید.`,
     );

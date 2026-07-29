@@ -1,4 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
+import { GovernmentType } from "@/domain/politics/politics.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GameStateInitializer } from "./game-state-initializer";
 import { PlayerSessionManager } from "./player-session-manager";
@@ -34,9 +35,16 @@ export class SimulationFacade {
     return engine.nextTurn();
   }
 
-  public selectPlayerNation(nationId: string): GameState {
+  public selectPlayerNation(
+    nationId: string,
+    governmentType?: GovernmentType | string,
+  ): GameState {
     this.sessionManager.setPlayerNationId(nationId);
     const gridState = GridStateProvider.getInstance();
-    return this.initializer.initializeSimulationForNation(nationId, gridState);
+    return this.initializer.initializeSimulationForNation(
+      nationId,
+      gridState,
+      governmentType,
+    );
   }
 }

@@ -12,6 +12,7 @@ export function useBattleValidation(
 
   useEffect(() => {
     if (!isOpen || !attackerId || !coordinate) {
+      setValidationResult(null);
       return;
     }
 

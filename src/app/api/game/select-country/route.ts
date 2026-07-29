@@ -7,9 +7,10 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const body = (await request.json()) as {
       nationId?: string;
+      governmentType?: string;
       gameId?: string;
     };
-    const { nationId, gameId } = body;
+    const { nationId, governmentType, gameId } = body;
 
     if (!nationId) {
       return NextResponse.json(
@@ -20,7 +21,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const normalized = normalizeNationId(nationId);
     const facade = new SimulationFacade();
-    const state = facade.selectPlayerNation(normalized);
+    const state = facade.selectPlayerNation(normalized, governmentType);
 
     const activeGameId = gameId || `game_${normalized}_${Date.now()}`;
     if (state) {
