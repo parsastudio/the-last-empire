@@ -5,6 +5,7 @@ import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-st
 import { GameState } from "@/domain/game/game-state.schema";
 import { useTurnExecution } from "./use-turn-execution";
 import { useNavigationQueryState } from "../../navigation/hooks/use-navigation-query-state";
+import { MarketEngine } from "@/engine/economy/market-engine";
 
 export interface TradeDialogState {
   isOpen: boolean;
@@ -113,12 +114,24 @@ export function useSidebarTurnActions(
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
       const treasury = humanNation ? humanNation.treasury : 100000;
-      const oilStock = humanNation ? humanNation.resources.oil : 1000;
-      const steelStock = humanNation ? humanNation.resources.steel : 1000;
+      const isOil = name.includes("نفت");
+      const stock = isOil
+        ? humanNation
+          ? humanNation.resources.oil
+          : 0
+        : humanNation
+          ? humanNation.resources.steel
+          : 0;
 
-      const stock = name.includes("نفت") ? oilStock : steelStock;
-      const maxAffordable = Math.max(1, Math.floor(treasury / (price * 1.1)));
-      const maxAmount = mode === "buy" ? maxAffordable : Math.max(1, stock);
+      const currentPrice = price || 100;
+      const marketEngine = new MarketEngine();
+      const maxAffordable = marketEngine.calculateMaxAffordable(
+        treasury,
+        { oil: currentPrice, steel: currentPrice },
+        isOil ? "oil" : "steel",
+      );
+
+      const maxAmount = mode === "buy" ? maxAffordable : Math.max(0, stock);
 
       setTradeDialog({
         isOpen: true,
