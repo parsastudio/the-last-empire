@@ -17,6 +17,7 @@ export interface TradeDialogState {
 export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
   onClearExternalTab?: () => void,
+  customGameId?: string,
 ) {
   const [internalActiveTab, setInternalActiveTab] =
     useState<SidebarTabType | null>(null);
@@ -39,7 +40,7 @@ export function useSidebarTurnActions(
   });
 
   const { showToast } = useToast();
-  const { gameState, advanceNextTurn } = useGeopoliticsGame();
+  const { gameState, advanceNextTurn } = useGeopoliticsGame(customGameId);
 
   const activeTab = externalActiveTab || internalActiveTab;
   const humanNation =
@@ -187,6 +188,7 @@ export function useSidebarTurnActions(
     stagedActions,
     tradeDialog,
     humanNation,
+    gameState,
     currentTurn,
     realReports: modalReports,
     setIsRailCollapsed,

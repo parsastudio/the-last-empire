@@ -1,6 +1,10 @@
 import React from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import {
+  findCountryProfileById,
+  findCountryProfileByCode,
+} from "@/domain/map/countries";
 
 interface NationHeaderCardProps {
   name: string;
@@ -19,12 +23,21 @@ export function NationHeaderCard({
   flagCode,
   governmentType,
   population,
-  territorySize = 377975,
+  territorySize,
   rank = 1,
 }: NationHeaderCardProps) {
   const flagEmoji = getFlagEmoji(flagCode || code);
 
-  const formattedArea = Math.round(territorySize).toLocaleString("fa-IR");
+  let realTerritory = territorySize && territorySize > 0 ? territorySize : 0;
+  if (!realTerritory) {
+    const numericId = parseInt(code.replace("NATION_", ""), 10);
+    const profile = !isNaN(numericId)
+      ? findCountryProfileById(numericId)
+      : findCountryProfileByCode(code);
+    realTerritory = profile ? Math.round(profile.gdp / 1000000) : 377975;
+  }
+
+  const formattedArea = Math.round(realTerritory).toLocaleString("fa-IR");
 
   let formattedPopulation = (population / 1e6).toFixed(1);
   if (population >= 1e9) {
