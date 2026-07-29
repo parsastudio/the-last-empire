@@ -55,6 +55,8 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
 
   if (!isOpen) return null;
 
+  const isLandAttack = planning.validationResult?.isLandAttack ?? true;
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
@@ -71,7 +73,10 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
           targetCode={targetCode}
         />
 
-        <AttackCoordinatesBox coordinate={coordinate} />
+        <AttackCoordinatesBox
+          coordinate={coordinate}
+          isLandAttack={isLandAttack}
+        />
 
         {planning.isServerInvalid && (
           <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-2 text-xs text-rose-500 font-bold">
@@ -187,7 +192,9 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
           estimatedCost={planning.finalCost}
           landTransitCost={planning.logistics.landTransitCost}
           heavyTransitCost={planning.logistics.heavyTransitCost}
-          distanceKm={planning.logistics.distanceKm}
+          distanceKm={
+            planning.validationResult?.distance ?? planning.logistics.distanceKm
+          }
           requiredOil={planning.logistics.requiredOil}
           requiredSteel={planning.logistics.requiredSteel}
         />
@@ -198,7 +205,8 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
             disabled={
               planning.isServerInvalid ||
               planning.isValidationLoading ||
-              planning.totalForceSelected === 0
+              planning.totalForceSelected === 0 ||
+              planning.isBudgetDeficit
             }
             className="w-full py-3.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-bold transition-all text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-military/10"
           >
@@ -206,9 +214,11 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
             <span>
               {planning.isValidationLoading
                 ? "در حال استعلام لژستیک سرور..."
-                : planning.totalForceSelected === 0
-                  ? "حداقل یک یگان رزمی انتخاب کنید"
-                  : `تایید و صدور دستور حمله به ${targetName}`}
+                : planning.isBudgetDeficit
+                  ? "موجودی خزانه برای لژستیک نبرد کافی نیست"
+                  : planning.totalForceSelected === 0
+                    ? "حداقل یک یگان رزمی انتخاب کنید"
+                    : `تایید و صدور دستور حمله به ${targetName}`}
             </span>
           </button>
         </div>

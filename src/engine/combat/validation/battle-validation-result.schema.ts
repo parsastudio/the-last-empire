@@ -3,6 +3,7 @@ import { CoordinateSchema } from "@/domain/map/coordinate.schema";
 
 export const BattleValidationResultSchema = z.object({
   isValid: z.boolean(),
+  isLandAttack: z.boolean(),
   errorMessage: z.string().nullable(),
   closestBaseCoordinate: CoordinateSchema.nullable(),
   distance: z.number().nonnegative(),
