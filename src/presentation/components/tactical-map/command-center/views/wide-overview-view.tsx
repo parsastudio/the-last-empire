@@ -13,6 +13,22 @@ interface WideOverviewViewProps {
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
+  const isOilRich = nation.traits.includes("OIL_RICH");
+  const isIndustrialHub = nation.traits.includes("INDUSTRIAL_HUB");
+  const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
+
+  const oilProducedPerTurn = isOilRich
+    ? 300 + territoryFactor * 25
+    : Math.max(10, territoryFactor * 5);
+
+  const steelProducedPerTurn = isIndustrialHub
+    ? 150 + territoryFactor * 15
+    : Math.max(10, territoryFactor * 5);
+
+  const oilRequiredPerTurn = Math.ceil(
+    (nation.military.airForce + nation.military.droneMissile) * 0.5,
+  );
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
@@ -41,6 +57,9 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           manpower={nation.resources.manpower}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
+          oilRequiredPerTurn={oilRequiredPerTurn}
+          oilProducedPerTurn={oilProducedPerTurn}
+          steelProducedPerTurn={steelProducedPerTurn}
         />
       </div>
 
