@@ -13,17 +13,29 @@ export class ProxyInfluenceValidator implements ActionValidator {
 
   public validate(state: GameState, action: GameAction): void {
     const proxyAction = action as FundProxyInfluenceAction;
-    if (proxyAction.budget <= 0) {
+    const sourceNation = state.nations[action.nationId];
+    const targetNation = state.nations[proxyAction.targetNationId];
+
+    if (!sourceNation) {
+      throw new GameError("NATION_NOT_FOUND", "Source nation does not exist");
+    }
+
+    if (!targetNation || !targetNation.isAlive) {
       throw new GameError(
-        "INVALID_ACTION",
-        "Proxy war budget must be positive",
+        "NATION_NOT_FOUND",
+        "Target nation does not exist or is not alive",
       );
     }
-    const sourceNation = state.nations[action.nationId];
-    if (sourceNation && sourceNation.treasury < proxyAction.budget) {
+
+    const drainAmount = 2;
+    const requiredBudget = Math.floor(
+      targetNation.gdp * (drainAmount / 2) * 0.01,
+    );
+
+    if (sourceNation.treasury < requiredBudget) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        "Insufficient funds to sponsor proxy influence",
+        `Insufficient treasury to fund proxy operation. Required: ${requiredBudget}`,
       );
     }
   }

@@ -1,47 +1,37 @@
 import React from "react";
 import { Search, Zap, Coins, ShieldAlert, Crosshair } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-
-interface TargetOption {
-  id: string;
-  name: string;
-  flagCode: string;
-  stability: number;
-}
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { TargetCountryOption } from "./hooks/use-wide-proxy";
 
 interface ProxyAllocationSectionProps {
   searchQuery: string;
   selectedTargetId: string;
-  allocatedBudget: number;
+  desiredDrain: number;
+  requiredBudget: number;
   userTreasury: number;
-  filteredTargetOptions: TargetOption[];
-  selectedTargetNation: TargetOption | null;
-  predictedStabilityDrain: number;
+  filteredTargetOptions: TargetCountryOption[];
+  selectedTargetNation: TargetCountryOption | null;
   onSearchChange: (query: string) => void;
   onSelectTarget: (id: string) => void;
-  onBudgetChange: (budget: number) => void;
+  onDrainChange: (drain: number) => void;
   onConfirmAllocation: () => void;
 }
 
 export function ProxyAllocationSection({
   searchQuery,
   selectedTargetId,
-  allocatedBudget,
+  desiredDrain,
+  requiredBudget,
   userTreasury,
   filteredTargetOptions,
   selectedTargetNation,
-  predictedStabilityDrain,
   onSearchChange,
   onSelectTarget,
-  onBudgetChange,
+  onDrainChange,
   onConfirmAllocation,
 }: ProxyAllocationSectionProps) {
-  const maxAffordable = Math.min(100000, userTreasury);
-
-  const handlePercentageClick = (pct: number) => {
-    const target = Math.max(5000, Math.floor(userTreasury * pct));
-    onBudgetChange(target);
-  };
+  const canAfford = userTreasury >= requiredBudget;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 dir-rtl text-right">
@@ -92,7 +82,8 @@ export function ProxyAllocationSection({
                   <span>{target.name}</span>
                 </div>
                 <span className="font-mono text-[9px] bg-background px-2 py-0.5 rounded text-muted-foreground">
-                  ثبات: {target.stability}%
+                  ثبات:{" "}
+                  {PersianNumberFormatter.toPersianDigits(target.stability)}٪
                 </span>
               </button>
             );
@@ -114,102 +105,124 @@ export function ProxyAllocationSection({
                 </span>
                 <div>
                   <h3 className="text-sm font-extrabold text-foreground">
-                    تخصیص بودجه نفوذ برای {selectedTargetNation.name}
+                    عملیات نفوذ پنهان علیه {selectedTargetNation.name}
                   </h3>
                   <span className="text-[10px] text-muted-foreground font-mono">
-                    ثبات سیاسی فعلی: {selectedTargetNation.stability}%
+                    ثبات سیاسی فعلی:{" "}
+                    {PersianNumberFormatter.toPersianDigits(
+                      selectedTargetNation.stability,
+                    )}
+                    ٪ | تولید ناخالص:{" "}
+                    {PersianNumberFormatter.formatCurrency(
+                      selectedTargetNation.gdp,
+                    )}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3 font-mono text-xs">
+            <div className="space-y-4 font-mono text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground font-sans">
-                  مبلغ بودجه عملیات:
+                  میزان افت ثبات مورد نظر:
                 </span>
-                <span className="font-bold text-gdp text-sm flex items-center gap-1">
-                  <Coins size={14} />${allocatedBudget.toLocaleString("fa-IR")}
+                <span className="font-bold text-military text-sm">
+                  -{PersianNumberFormatter.toPersianDigits(desiredDrain)}٪
                 </span>
               </div>
 
               <input
                 type="range"
-                min="5000"
-                max={Math.max(5000, maxAffordable)}
-                step="5000"
-                value={allocatedBudget}
-                onChange={(e) => onBudgetChange(Number(e.target.value))}
+                min="1"
+                max="15"
+                step="1"
+                value={desiredDrain}
+                onChange={(e) => onDrainChange(Number(e.target.value))}
                 className="w-full accent-rose-600 cursor-pointer h-2 bg-secondary rounded-lg"
               />
 
-              <div className="grid grid-cols-4 gap-2 pt-1 font-sans">
+              <div className="grid grid-cols-4 gap-2 font-sans">
                 <button
                   type="button"
-                  onClick={() => handlePercentageClick(0.1)}
-                  className="py-1.5 bg-secondary hover:bg-secondary/80 border border-border/60 rounded-xl text-[10px] font-bold cursor-pointer"
+                  onClick={() => onDrainChange(2)}
+                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
+                    desiredDrain === 2
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-secondary hover:bg-secondary/80 border-border/60"
+                  }`}
                 >
-                  ۱۰٪ خزانه
+                  -۲٪ (۱٪ GDP)
                 </button>
                 <button
                   type="button"
-                  onClick={() => handlePercentageClick(0.25)}
-                  className="py-1.5 bg-secondary hover:bg-secondary/80 border border-border/60 rounded-xl text-[10px] font-bold cursor-pointer"
+                  onClick={() => onDrainChange(5)}
+                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
+                    desiredDrain === 5
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-secondary hover:bg-secondary/80 border-border/60"
+                  }`}
                 >
-                  ۲۵٪ خزانه
+                  -۵٪ (۲.۵٪ GDP)
                 </button>
                 <button
                   type="button"
-                  onClick={() => handlePercentageClick(0.5)}
-                  className="py-1.5 bg-secondary hover:bg-secondary/80 border border-border/60 rounded-xl text-[10px] font-bold cursor-pointer"
+                  onClick={() => onDrainChange(10)}
+                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
+                    desiredDrain === 10
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-secondary hover:bg-secondary/80 border-border/60"
+                  }`}
                 >
-                  ۵۰٪ خزانه
+                  -۱۰٪ (۵٪ GDP)
                 </button>
                 <button
                   type="button"
-                  onClick={() => handlePercentageClick(1.0)}
-                  className="py-1.5 bg-gdp/20 hover:bg-gdp/30 border border-gdp/40 text-gdp rounded-xl text-[10px] font-bold cursor-pointer"
+                  onClick={() => onDrainChange(15)}
+                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
+                    desiredDrain === 15
+                      ? "bg-rose-600 text-white border-rose-500"
+                      : "bg-secondary hover:bg-secondary/80 border-border/60 text-rose-500"
+                  }`}
                 >
-                  حداکثر
+                  -۱۵٪ (حداکثر)
                 </button>
               </div>
 
-              <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-2 text-right">
-                <div className="flex justify-between items-center">
+              <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl space-y-2 text-right font-sans">
+                <div className="flex justify-between items-center text-xs font-mono">
                   <span className="text-muted-foreground font-sans">
-                    پیش‌بینی تخریب ثبات هدف:
+                    هزینه محاسباتی بر اساس GDP هدف:
                   </span>
-                  <span className="font-bold text-military text-sm">
-                    -{predictedStabilityDrain}% / نوبت
+                  <span className="font-bold text-gdp text-sm flex items-center gap-1">
+                    <Coins size={14} />
+                    {PersianNumberFormatter.formatCurrency(requiredBudget)}
                   </span>
                 </div>
-                <div className="flex justify-between items-center text-[10px]">
-                  <span className="text-muted-foreground font-sans">
-                    فرسایش نوبتی بودجه (Decay):
-                  </span>
-                  <span className="text-treasury">۲۵٪ در پایان هر نوبت</span>
-                </div>
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  هزینه نفوذ مستقیماً با اقتصاد و ساختار امنیتی کشور هدف سنجیده
+                  می‌شود.
+                </p>
               </div>
 
               <div className="p-3 bg-military/10 border border-military/30 rounded-2xl flex items-center gap-2 text-[10px] text-military font-sans">
                 <ShieldAlert size={14} className="shrink-0" />
                 <span>
-                  افت ثبات هدف به زیر ۱۰٪ باعث وقوع کودتا، تغییر حکومت به
-                  دیکتاتوری و نابودی ۴۰٪ خزانه آن خواهد شد.
+                  افت ثبات هدف به زیر ۱۰٪ باعث وقوع فوری کودتای نظامی و سرنگونی
+                  رژیم سیاسی آن خواهد شد.
                 </span>
               </div>
             </div>
 
             <button
               onClick={onConfirmAllocation}
-              disabled={allocatedBudget <= 0 || userTreasury < allocatedBudget}
+              disabled={requiredBudget <= 0 || !canAfford}
               className="w-full py-3.5 bg-military hover:bg-military/90 disabled:opacity-40 text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg shadow-military/10 flex items-center justify-center gap-2"
             >
               <Zap size={15} />
               <span>
-                {userTreasury < allocatedBudget
-                  ? "موجود نیست (خزانه ناکافی)"
-                  : `تایید و اختصاص $${allocatedBudget.toLocaleString("fa-IR")} به جنگ نیابتی`}
+                {!canAfford
+                  ? "خزانه ناکافی جهت اجرای عملیات"
+                  : `اجرای عملیات و کاهش -${PersianNumberFormatter.toPersianDigits(desiredDrain)}٪ ثبات ${selectedTargetNation.name}`}
               </span>
             </button>
           </>

@@ -15,21 +15,32 @@ export class FundProxyInfluenceActionHandler implements ActionHandler {
     }
     const proxyAction = action as FundProxyInfluenceAction;
     const source = state.nations[action.nationId];
-    if (!source) {
+    const target = state.nations[proxyAction.targetNationId];
+
+    if (!source || !target || !target.isAlive) {
       return state;
     }
 
-    const updatedSource = this.proxyManager.addProxyBudget(
+    const drainAmount = Math.max(
+      1,
+      Math.min(
+        15,
+        Math.floor((proxyAction.budget / (target.gdp * 0.01 || 1)) * 2),
+      ),
+    );
+
+    const result = this.proxyManager.executeProxyOperation(
       source,
-      proxyAction.targetNationId,
-      proxyAction.budget,
+      target,
+      drainAmount,
     );
 
     return {
       ...state,
       nations: {
         ...state.nations,
-        [action.nationId]: updatedSource,
+        [action.nationId]: result.updatedSourceNation,
+        [proxyAction.targetNationId]: result.updatedTargetNation,
       },
     };
   }
