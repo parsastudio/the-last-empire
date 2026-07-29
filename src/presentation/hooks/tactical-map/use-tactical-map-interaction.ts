@@ -134,9 +134,10 @@ export function useTacticalMapInteraction({
     }
   };
 
-  const handleOpenPendingTab = () => {
-    setExternalSidebarTab("research");
-  };
+  const handleOpenPendingTab = useCallback((tab?: string) => {
+    const targetTab = (tab as SidebarTabType) || "research";
+    setExternalSidebarTab(targetTab);
+  }, []);
 
   const clearExternalTab = useCallback(() => {
     setExternalSidebarTab(null);

@@ -1,5 +1,6 @@
 import React from "react";
 import { ShieldAlert } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ThreatRadarBadgeProps {
   globalAggression: number;
@@ -23,11 +24,11 @@ export function ThreatRadarBadge({ globalAggression }: ThreatRadarBadgeProps) {
           isHighThreat ? "animate-pulse text-military" : "text-muted-foreground"
         }
       />
-      <div className="flex items-center gap-1">
-        <span className="text-[10px] font-sans font-medium hidden md:inline">
-          ائتلاف:
+      <div className="flex items-center gap-1 whitespace-nowrap">
+        <span className="text-[10px] font-sans font-medium">ائتلاف:</span>
+        <span className="font-bold">
+          {PersianNumberFormatter.toPersianDigits(globalAggression)}%
         </span>
-        <span className="font-bold">{globalAggression}%</span>
       </div>
     </div>
   );
