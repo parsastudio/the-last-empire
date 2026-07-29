@@ -10,6 +10,7 @@ import { PngDecoder } from "@/application/map-rendering/utils/png-decoder";
 import { GeometryDraw } from "@/application/map-rendering/utils/geometry-draw";
 import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
 import { ClosedSeaDetector } from "@/application/map-rendering/utils/closed-sea-detector";
+import { MapManifestBuilder } from "@/application/map-rendering/generator/map-manifest-builder";
 
 interface CountryMapping {
   id: number;
@@ -138,6 +139,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     await fs.writeFile(
       path.join(map1Dir, "partition-mask-1024.bin"),
       packed1024,
+    );
+
+    const manifestBuilder = new MapManifestBuilder();
+    await manifestBuilder.buildAndSaveManifest(
+      "map1",
+      updatedCountries,
+      "partition-manifest.json",
     );
 
     const tWriteEnd = performance.now();

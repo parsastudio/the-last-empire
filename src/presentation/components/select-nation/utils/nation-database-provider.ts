@@ -1,7 +1,46 @@
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/map/countries";
 import { NationDetail } from "../nation-list-item";
+import { ManifestNationItem } from "@/application/map-rendering/generator/map-manifest-builder";
 
 export class NationDatabaseProvider {
+  public getNationsFromManifest(
+    manifestNations: ManifestNationItem[],
+  ): NationDetail[] {
+    return manifestNations.map((item) => {
+      let gdpText = "";
+      if (item.gdp >= 1e12) {
+        gdpText = `${(item.gdp / 1e12).toFixed(1)} تریلیون دلار`;
+      } else {
+        gdpText = `${(item.gdp / 1e9).toFixed(1)} میلیارد دلار`;
+      }
+
+      let popText = "";
+      if (item.population >= 1e9) {
+        popText = `${(item.population / 1e9).toFixed(2)} میلیارد نفر`;
+      } else {
+        popText = `${(item.population / 1e6).toFixed(1)} میلیون نفر`;
+      }
+
+      let power = "قدرت منطقه‌ای";
+      if (item.gdp >= 10e12) power = "ابرقدرت جهانی";
+      else if (item.gdp >= 1e12) power = "قدرت برتر صنعتی";
+      else if (item.gdp >= 200e9) power = "قدرت فرامنطقه‌ای";
+
+      return {
+        id: item.id,
+        name: item.nameFa,
+        code: item.flagCode.toUpperCase(),
+        rank: item.initialRank,
+        power,
+        gdp: gdpText,
+        population: popText,
+        treasury: `$${item.startingTreasury.toLocaleString("fa-IR")}`,
+        desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}، ساختار اقتصادی به ارزش ${gdpText} و مساحت ${item.territorySize.toLocaleString("fa-IR")} km².`,
+        defaultGovernment: item.defaultGovernment,
+      };
+    });
+  }
+
   public getAllSelectableNations(
     presentCountryIds?: Set<number> | number[],
   ): NationDetail[] {

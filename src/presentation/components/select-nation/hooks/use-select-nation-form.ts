@@ -5,6 +5,7 @@ import { NationDatabaseProvider } from "../utils/nation-database-provider";
 import { GameIdGenerator } from "@/domain/shared/game-id-generator";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { useToast } from "@/presentation/context/toast-context";
+import { MapManifest } from "@/application/map-rendering/generator/map-manifest-builder";
 
 export function useSelectNationForm() {
   const router = useRouter();
@@ -12,83 +13,76 @@ export function useSelectNationForm() {
   const provider = useMemo(() => new NationDatabaseProvider(), []);
   const apiService = useMemo(() => new GameStateApiService(), []);
 
-  const [presentIds, setPresentIds] = useState<Set<number> | null>(null);
+  const [manifest, setManifest] = useState<MapManifest | null>(null);
 
   useEffect(() => {
     let active = true;
 
-    async function loadPresentMapIds() {
+    async function loadManifest() {
       try {
-        const res = await fetch("/maps/map1/partition-mappings.json");
+        const res = await fetch("/maps/map1/partition-manifest.json");
         if (res.ok) {
           const json = await res.json();
-          if (active && json.countries && Array.isArray(json.countries)) {
-            const validSet = new Set<number>();
-            for (const c of json.countries) {
-              if (c.id >= 11) {
-                validSet.add(c.id);
-              }
-            }
-            if (validSet.size > 0) {
-              setPresentIds(validSet);
-              return;
-            }
+          if (active && json.nations) {
+            setManifest(json);
+            return;
           }
         }
       } catch {}
 
       try {
-        const resDef = await fetch("/maps/map1/default-mappings.json");
+        const resDef = await fetch("/maps/map1/default-manifest.json");
         if (resDef.ok) {
           const jsonDef = await resDef.json();
-          if (active && jsonDef.countries && Array.isArray(jsonDef.countries)) {
-            const validSet = new Set<number>();
-            for (const c of jsonDef.countries) {
-              if (c.id >= 11) {
-                validSet.add(c.id);
-              }
-            }
-            if (validSet.size > 0) {
-              setPresentIds(validSet);
-            }
+          if (active && jsonDef.nations) {
+            setManifest(jsonDef);
           }
         }
       } catch {}
     }
 
-    loadPresentMapIds();
+    loadManifest();
 
     return () => {
       active = false;
     };
   }, []);
 
-  const allNations = useMemo(
-    () => provider.getAllSelectableNations(presentIds || undefined),
-    [provider, presentIds],
-  );
+  const allNations = useMemo(() => {
+    if (manifest && manifest.nations) {
+      return provider.getNationsFromManifest(manifest.nations);
+    }
+    return provider.getAllSelectableNations();
+  }, [provider, manifest]);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedNation, setSelectedNation] = useState<NationDetail>(
-    allNations[0]!,
-  );
-  const [selectedGovernment, setSelectedGovernment] = useState<string>(
-    allNations[0]?.defaultGovernment || "DEMOCRACY",
-  );
+  const [selectedNationId, setSelectedNationId] = useState<string | null>(null);
+  const [userSelectedGovernment, setUserSelectedGovernment] = useState<
+    string | null
+  >(null);
 
-  useEffect(() => {
-    if (
-      allNations.length > 0 &&
-      !allNations.some((n) => n.id === selectedNation?.id)
-    ) {
-      setSelectedNation(allNations[0]!);
-      setSelectedGovernment(allNations[0]!.defaultGovernment);
+  const selectedNation = useMemo(() => {
+    if (selectedNationId) {
+      const found = allNations.find((n) => n.id === selectedNationId);
+      if (found) return found;
     }
-  }, [allNations, selectedNation?.id]);
+    return allNations[0]!;
+  }, [allNations, selectedNationId]);
+
+  const selectedGovernment = useMemo(() => {
+    if (userSelectedGovernment) {
+      return userSelectedGovernment;
+    }
+    return selectedNation ? selectedNation.defaultGovernment : "DEMOCRACY";
+  }, [userSelectedGovernment, selectedNation]);
 
   const handleSelectNationCard = useCallback((nation: NationDetail) => {
-    setSelectedNation(nation);
-    setSelectedGovernment(nation.defaultGovernment);
+    setSelectedNationId(nation.id);
+    setUserSelectedGovernment(nation.defaultGovernment);
+  }, []);
+
+  const setSelectedGovernment = useCallback((gov: string) => {
+    setUserSelectedGovernment(gov);
   }, []);
 
   const handleStartCampaign = useCallback(async () => {
@@ -130,7 +124,7 @@ export function useSelectNationForm() {
   return {
     allNations,
     searchQuery,
-    selectedNation: selectedNation || allNations[0]!,
+    selectedNation,
     selectedGovernment,
     setSearchQuery,
     setSelectedGovernment,
