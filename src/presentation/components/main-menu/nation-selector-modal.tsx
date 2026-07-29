@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { X, Search, ChevronLeft, Shield, Award } from "lucide-react";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface NationSelectorModalProps {
   isOpen: boolean;
@@ -78,15 +79,13 @@ export function NationSelectorModal({
                 className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-3.5 rounded-2xl transition-all flex items-center justify-between gap-4 group cursor-pointer text-right"
               >
                 <div className="flex items-center gap-3.5">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/flags/${nation.code.toLowerCase()}.png`}
-                    alt={nation.name}
-                    className="w-8 h-6 object-cover rounded shadow-sm border border-border shrink-0"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = "none";
-                    }}
-                  />
+                  <span
+                    className="text-2xl select-none shrink-0"
+                    role="img"
+                    aria-label={nation.name}
+                  >
+                    {getFlagEmoji(nation.code)}
+                  </span>
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">

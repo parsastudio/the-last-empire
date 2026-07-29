@@ -22,6 +22,16 @@ export function WideMarketView({
   steelStock = 2000,
   onOpenTrade,
 }: WideMarketViewProps) {
+  const oilTrend: "up" | "down" | "stable" =
+    marketPrices.oil > 100 ? "up" : marketPrices.oil < 100 ? "down" : "stable";
+
+  const steelTrend: "up" | "down" | "stable" =
+    marketPrices.steel > 100
+      ? "up"
+      : marketPrices.steel < 100
+        ? "down"
+        : "stable";
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
       <MarketHeader />
@@ -34,7 +44,7 @@ export function WideMarketView({
           colorClass="text-treasury"
           stock={oilStock}
           currentPrice={marketPrices.oil}
-          priceTrend="up"
+          priceTrend={oilTrend}
           onTrade={(mode) =>
             onOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
           }
@@ -47,7 +57,7 @@ export function WideMarketView({
           colorClass="text-primary"
           stock={steelStock}
           currentPrice={marketPrices.steel}
-          priceTrend="down"
+          priceTrend={steelTrend}
           onTrade={(mode) =>
             onOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
           }

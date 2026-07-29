@@ -34,6 +34,16 @@ export function MarketTab({
     maxAmount: 100,
   });
 
+  const oilTrend: "up" | "down" | "stable" =
+    marketPrices.oil > 100 ? "up" : marketPrices.oil < 100 ? "down" : "stable";
+
+  const steelTrend: "up" | "down" | "stable" =
+    marketPrices.steel > 100
+      ? "up"
+      : marketPrices.steel < 100
+        ? "down"
+        : "stable";
+
   const handleOpenTrade = (
     name: string,
     unit: string,
@@ -67,7 +77,7 @@ export function MarketTab({
           colorClass="text-treasury"
           stock={oilStock}
           currentPrice={marketPrices.oil}
-          priceTrend="up"
+          priceTrend={oilTrend}
           onTrade={(mode) =>
             handleOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
           }
@@ -80,7 +90,7 @@ export function MarketTab({
           colorClass="text-primary"
           stock={steelStock}
           currentPrice={marketPrices.steel}
-          priceTrend="down"
+          priceTrend={steelTrend}
           onTrade={(mode) =>
             handleOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
           }
