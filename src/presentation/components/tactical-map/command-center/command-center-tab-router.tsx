@@ -26,6 +26,7 @@ interface CommandCenterTabRouterProps {
     mode: "buy" | "sell",
     price: number,
   ) => void;
+  onNavigateTab?: (tab: SidebarTabType, targetCode?: string) => void;
 }
 
 export function CommandCenterTabRouter({
@@ -36,6 +37,7 @@ export function CommandCenterTabRouter({
   reports,
   onFocusCountry,
   onOpenTrade,
+  onNavigateTab,
 }: CommandCenterTabRouterProps) {
   switch (activeTab) {
     case "overview":
@@ -96,6 +98,7 @@ export function CommandCenterTabRouter({
           nationsMap={gameState?.nations}
           humanNationId={nation.id}
           onFocusCountry={onFocusCountry}
+          onNavigateTab={onNavigateTab}
         />
       );
     case "research":

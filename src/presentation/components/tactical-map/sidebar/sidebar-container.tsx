@@ -40,6 +40,8 @@ export function SidebarContainer({
 
   if (!isOpen) return null;
 
+  const effectiveTargetCode = actions.selectedTargetCode || selectedTargetCode;
+
   return (
     <>
       <CommandRail
@@ -63,13 +65,16 @@ export function SidebarContainer({
 
       <CommandCenterModal
         activeTab={actions.activeTab}
-        selectedTargetCode={selectedTargetCode}
+        selectedTargetCode={effectiveTargetCode}
         nation={actions.humanNation}
         gameState={actions.gameState}
         reports={actions.realReports}
         onClose={actions.handleCloseActiveModal}
         onFocusCountry={onFocusCountry}
         onOpenTrade={actions.handleOpenTrade}
+        onNavigateTab={(tab, targetCode) =>
+          actions.handleNavigateTab(tab, targetCode)
+        }
       />
 
       <TurnSummaryModal

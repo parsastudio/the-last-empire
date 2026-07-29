@@ -6,6 +6,7 @@ import { DiplomacyTargetCard } from "./components/diplomacy-target-card";
 import { FocusMapButton } from "../../sidebar/tabs/diplomacy/focus-map-button";
 import { Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { SidebarTabType } from "../../sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "./hooks/use-wide-diplomacy";
 
 interface WideDiplomacyViewProps {
@@ -13,6 +14,7 @@ interface WideDiplomacyViewProps {
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   onFocusCountry?: (code: string) => void;
+  onNavigateTab?: (tab: SidebarTabType, targetCode?: string) => void;
 }
 
 export function WideDiplomacyView({
@@ -20,12 +22,19 @@ export function WideDiplomacyView({
   nationsMap,
   humanNationId = "NATION_118",
   onFocusCountry,
+  onNavigateTab,
 }: WideDiplomacyViewProps) {
   const diplomacy = useWideDiplomacy({
     selectedTargetCode,
     nationsMap,
     humanNationId,
   });
+
+  const handleOpenProxyCenter = () => {
+    if (onNavigateTab) {
+      onNavigateTab("proxy", diplomacy.targetNationId);
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -83,6 +92,7 @@ export function WideDiplomacyView({
             targetName={diplomacy.selectedRelation.name}
             targetNationId={diplomacy.targetNationId}
             nationId={humanNationId}
+            onOpenProxyCenter={handleOpenProxyCenter}
           />
         </div>
       </div>

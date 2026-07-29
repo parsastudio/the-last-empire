@@ -21,6 +21,7 @@ interface CommandCenterModalProps {
     mode: "buy" | "sell",
     price: number,
   ) => void;
+  onNavigateTab?: (tab: SidebarTabType, targetCode?: string) => void;
 }
 
 export function CommandCenterModal({
@@ -32,6 +33,7 @@ export function CommandCenterModal({
   onClose,
   onFocusCountry,
   onOpenTrade,
+  onNavigateTab,
 }: CommandCenterModalProps) {
   if (!activeTab || !nation) return null;
 
@@ -53,6 +55,7 @@ export function CommandCenterModal({
         reports={reports}
         onFocusCountry={onFocusCountry}
         onOpenTrade={onOpenTrade}
+        onNavigateTab={onNavigateTab}
       />
     </UnifiedModalShell>
   );

@@ -17,12 +17,13 @@ export interface TradeDialogState {
 export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
   onClearExternalTab?: () => void,
-  customGameId?: string,
+  _customGameId?: string,
   overrideGameState?: GameState | null,
   overrideAdvanceNextTurn?: () => Promise<GameState | null>,
 ) {
   const [internalActiveTab, setInternalActiveTabState] =
     useState<SidebarTabType | null>(null);
+  const [targetCodeState, setTargetCodeState] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
@@ -76,8 +77,22 @@ export function useSidebarTurnActions(
     [onClearExternalTab],
   );
 
+  const handleNavigateTab = useCallback(
+    (tab: SidebarTabType, targetCode?: string) => {
+      setInternalActiveTabState(tab);
+      if (targetCode) {
+        setTargetCodeState(targetCode);
+      }
+      if (onClearExternalTab) {
+        onClearExternalTab();
+      }
+    },
+    [onClearExternalTab],
+  );
+
   const handleCloseActiveModal = useCallback(() => {
     setInternalActiveTabState(null);
+    setTargetCodeState(null);
     if (onClearExternalTab) {
       onClearExternalTab();
     }
@@ -108,6 +123,7 @@ export function useSidebarTurnActions(
 
   return {
     activeTab,
+    selectedTargetCode: targetCodeState,
     isRailCollapsed,
     isModalOpen,
     isEventModalOpen,
@@ -127,6 +143,7 @@ export function useSidebarTurnActions(
     setModalReports,
     setStagedActions,
     setTradeDialog,
+    handleNavigateTab,
     handleCloseActiveModal,
     handleNextTurn,
     handleOpenTrade,

@@ -31,6 +31,7 @@ interface DiplomacyDetailViewProps {
   targetTreasury?: number;
   onBack: () => void;
   onFocusCountry?: (code: string) => void;
+  onOpenProxyCenter?: () => void;
 }
 
 export function DiplomacyDetailView({
@@ -38,6 +39,7 @@ export function DiplomacyDetailView({
   targetTreasury = 350000,
   onBack,
   onFocusCountry,
+  onOpenProxyCenter,
 }: DiplomacyDetailViewProps) {
   const [isTributeModalOpen, setIsTributeModalOpen] = useState(false);
   const [currentTribute, setCurrentTribute] = useState(0);
@@ -142,6 +144,7 @@ export function DiplomacyDetailView({
       <AdvancedDiplomacyActions
         targetName={relation.name}
         onOpenTributeModal={() => setIsTributeModalOpen(true)}
+        onOpenProxyCenter={onOpenProxyCenter}
       />
 
       <TributeDemandDialog

@@ -4,7 +4,6 @@ import { TariffControlCard } from "./tariff-control-card";
 import { ImfLoanCard } from "./imf-loan-card";
 import { IndustrialUpgradeCard } from "./industrial-upgrade-card";
 import { InfrastructureUpgradeCard } from "./infrastructure-upgrade-card";
-import { ProxyWarCard } from "./proxy-war-card";
 import { RegimeChangeCard } from "./regime-change-card";
 import { AntiCorruptionCard } from "./anti-corruption-card";
 import { ActiveModifiersCard } from "./active-modifiers-card";
@@ -33,7 +32,6 @@ export function PoliticsTab({ nation }: PoliticsTabProps) {
         currentLevel={nation.geography.infrastructureLevel}
         nationId={nation.id}
       />
-      <ProxyWarCard nationId={nation.id} />
       <RegimeChangeCard
         governmentType={nation.government.type}
         nationId={nation.id}
