@@ -1,7 +1,7 @@
 import type { GameAction } from "@/domain/game/action.schema";
 import { AIRecruitmentPlanner } from "@/engine/ai/ai-recruitment-planner";
-import { AIPlanner } from "@/engine/ai/planners/ai-planner";
-import { AIPlanningContext } from "@/engine/ai/planners/ai-planning-context";
+import { AIPlanner } from "./ai-planner.interface";
+import { AIPlanningContext } from "./ai-planning-context.interface";
 import { DeterministicIdGenerator } from "../utils/deterministic-id-generator";
 import { AiGridAttackPlanner } from "@/engine/combat/ai/ai-grid-attack-planner";
 import { GridState } from "@/engine/combat/state/grid-state";

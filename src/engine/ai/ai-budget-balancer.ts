@@ -1,5 +1,5 @@
 import type { Nation } from "@/domain/nation/nation.schema";
-import { AIBudgetStrategy } from "@/engine/ai/planners/ai-budget-strategy";
+import { AIBudgetStrategy } from "./planners/ai-budget-strategy";
 
 export interface BudgetAllocation {
   researchBudget: number;

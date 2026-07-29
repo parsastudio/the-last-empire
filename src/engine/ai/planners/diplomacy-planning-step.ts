@@ -1,7 +1,7 @@
 import type { GameAction } from "@/domain/game/action.schema";
 import { AIDiplomacyLogic } from "@/engine/ai/ai-diplomacy-logic";
-import { AIPlanner } from "@/engine/ai/planners/ai-planner";
-import { AIPlanningContext } from "@/engine/ai/planners/ai-planning-context";
+import { AIPlanner } from "./ai-planner.interface";
+import { AIPlanningContext } from "./ai-planning-context.interface";
 
 export class DiplomacyPlanningStep implements AIPlanner {
   private diplomacyLogic = new AIDiplomacyLogic();
