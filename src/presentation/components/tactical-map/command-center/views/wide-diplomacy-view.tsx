@@ -3,6 +3,7 @@ import { DiplomacyListItem } from "../../sidebar/tabs/diplomacy/diplomacy-list-i
 import { CountryProfileStats } from "../../sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "../../sidebar/tabs/diplomacy/advanced-diplomacy-actions";
 import { DiplomacyTargetCard } from "./components/diplomacy-target-card";
+import { FocusMapButton } from "../../sidebar/tabs/diplomacy/focus-map-button";
 import { Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useWideDiplomacy } from "./hooks/use-wide-diplomacy";
@@ -18,6 +19,7 @@ export function WideDiplomacyView({
   selectedTargetCode,
   nationsMap,
   humanNationId = "NATION_118",
+  onFocusCountry,
 }: WideDiplomacyViewProps) {
   const diplomacy = useWideDiplomacy({
     selectedTargetCode,
@@ -66,6 +68,14 @@ export function WideDiplomacyView({
           flagCode={diplomacy.selectedRelation.flagCode}
           stance={diplomacy.selectedRelation.stance}
         />
+
+        {onFocusCountry && (
+          <FocusMapButton
+            countryCode={diplomacy.selectedRelation.code}
+            countryName={diplomacy.selectedRelation.name}
+            onFocus={onFocusCountry}
+          />
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <CountryProfileStats data={diplomacy.selectedRelation.profileData} />

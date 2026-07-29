@@ -3,7 +3,6 @@ import React from "react";
 interface TaxSliderProps {
   taxRate: number;
   isDragging: boolean;
-  inputRef: React.RefObject<HTMLInputElement | null>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDragStart: () => void;
   onDragEnd: () => void;
@@ -12,7 +11,6 @@ interface TaxSliderProps {
 export function TaxSlider({
   taxRate,
   isDragging,
-  inputRef,
   onChange,
   onDragStart,
   onDragEnd,
@@ -31,7 +29,6 @@ export function TaxSlider({
         </div>
 
         <input
-          ref={inputRef}
           type="range"
           min="0"
           max="100"
