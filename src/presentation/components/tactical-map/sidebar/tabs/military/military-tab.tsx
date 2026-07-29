@@ -16,6 +16,9 @@ interface MilitaryTabProps {
   stability?: number;
   recruitmentQueue?: RecruitmentOrder[];
   nationId?: string;
+  treasury?: number;
+  manpower?: number;
+  steel?: number;
 }
 
 export function MilitaryTab({
@@ -24,6 +27,9 @@ export function MilitaryTab({
   stability = 70,
   recruitmentQueue = [],
   nationId = "NATION_118",
+  treasury = 100000,
+  manpower = 500,
+  steel = 1000,
 }: MilitaryTabProps) {
   const [currentSubView, setCurrentSubView] = useState<
     "overview" | "expansion"
@@ -56,7 +62,12 @@ export function MilitaryTab({
         >
           <span>← بازگشت به نمای ارتش</span>
         </button>
-        <MilitaryExpansionView nationId={nationId} />
+        <MilitaryExpansionView
+          nationId={nationId}
+          treasury={treasury}
+          manpower={manpower}
+          steel={steel}
+        />
       </div>
     );
   }

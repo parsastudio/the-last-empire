@@ -7,10 +7,16 @@ import { UnitType } from "@/domain/military/military.schema";
 
 interface MilitaryExpansionViewProps {
   nationId?: string;
+  treasury?: number;
+  manpower?: number;
+  steel?: number;
 }
 
 export function MilitaryExpansionView({
   nationId = "NATION_118",
+  treasury = 100000,
+  manpower = 500,
+  steel = 1000,
 }: MilitaryExpansionViewProps) {
   const { dispatchAction } = useGameActions();
   const [quantities, setQuantities] = useState<Record<string, number>>({
@@ -19,16 +25,26 @@ export function MilitaryExpansionView({
     DRONE_MISSILE: 1,
   });
 
-  const handleQuantityChange = (type: string, delta: number) => {
-    setQuantities((prev) => {
-      const current = prev[type] || 1;
-      const next = Math.max(1, current + delta);
-      return { ...prev, [type]: next };
-    });
+  const handleQuantitySet = (type: string, amount: number) => {
+    setQuantities((prev) => ({ ...prev, [type]: amount }));
+  };
+
+  const calculateMaxAffordable = (unit: UnitConfig): number => {
+    const maxMoney =
+      unit.moneyCost > 0 ? Math.floor(treasury / unit.moneyCost) : Infinity;
+    const maxManpower =
+      unit.manpowerCost > 0
+        ? Math.floor(manpower / unit.manpowerCost)
+        : Infinity;
+    const maxSteel =
+      unit.steelCost > 0 ? Math.floor(steel / unit.steelCost) : Infinity;
+
+    return Math.max(0, Math.min(maxMoney, maxManpower, maxSteel));
   };
 
   const handleRecruit = async (unit: UnitConfig) => {
-    const qty = quantities[unit.type] || 1;
+    const qty = quantities[unit.type] || 0;
+    if (qty <= 0) return;
 
     await dispatchAction(
       {
@@ -38,7 +54,7 @@ export function MilitaryExpansionView({
         unitType: unit.type as UnitType,
         quantity: qty,
       },
-      `سفارش ساخت ${qty} یگان ${unit.name} در صف قرار گرفت.`,
+      `سفارش ساخت ${qty.toLocaleString("fa-IR")} یگان ${unit.name} در صف قرار گرفت.`,
     );
   };
 
@@ -52,15 +68,24 @@ export function MilitaryExpansionView({
       </div>
 
       <div className="space-y-3">
-        {RECRUITABLE_UNITS.map((unit) => (
-          <UnitRecruitmentCard
-            key={unit.type}
-            unit={unit}
-            quantity={quantities[unit.type] || 1}
-            onQuantityChange={handleQuantityChange}
-            onRecruit={handleRecruit}
-          />
-        ))}
+        {RECRUITABLE_UNITS.map((unit) => {
+          const maxAffordable = calculateMaxAffordable(unit);
+          const currentQty = Math.min(
+            quantities[unit.type] ?? 1,
+            maxAffordable,
+          );
+
+          return (
+            <UnitRecruitmentCard
+              key={unit.type}
+              unit={unit}
+              quantity={currentQty}
+              maxAffordable={maxAffordable}
+              onQuantitySet={handleQuantitySet}
+              onRecruit={handleRecruit}
+            />
+          );
+        })}
       </div>
     </div>
   );

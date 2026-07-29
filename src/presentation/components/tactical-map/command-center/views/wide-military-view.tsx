@@ -14,6 +14,9 @@ interface WideMilitaryViewProps {
   stability?: number;
   recruitmentQueue?: RecruitmentOrder[];
   nationId?: string;
+  treasury?: number;
+  manpower?: number;
+  steel?: number;
 }
 
 export function WideMilitaryView({
@@ -22,6 +25,9 @@ export function WideMilitaryView({
   stability = 70,
   recruitmentQueue = [],
   nationId = "NATION_118",
+  treasury = 100000,
+  manpower = 500,
+  steel = 1000,
 }: WideMilitaryViewProps) {
   const militiaGarrisonPower = Math.max(
     10,
@@ -45,7 +51,12 @@ export function WideMilitaryView({
       </div>
 
       <div className="space-y-5">
-        <MilitaryExpansionView nationId={nationId} />
+        <MilitaryExpansionView
+          nationId={nationId}
+          treasury={treasury}
+          manpower={manpower}
+          steel={steel}
+        />
       </div>
     </div>
   );

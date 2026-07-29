@@ -79,6 +79,9 @@ export function CommandCenterTabRouter({
           stability={nation.government.stability}
           recruitmentQueue={nation.recruitmentQueue}
           nationId={nation.id}
+          treasury={nation.treasury}
+          manpower={nation.resources.manpower}
+          steel={nation.resources.steel}
         />
       );
     case "politics":
