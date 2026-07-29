@@ -4,14 +4,18 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface AntiCorruptionCardProps {
   nationId?: string;
+  treasury?: number;
 }
 
 export function AntiCorruptionCard({
   nationId = "NATION_118",
+  treasury = 100000,
 }: AntiCorruptionCardProps) {
+  const canAfford = treasury >= 25000;
   const { dispatchAction } = useGameActions();
 
   const handleAntiCorruption = async () => {
+    if (!canAfford) return;
     await dispatchAction(
       {
         id: `anti-corr-${Date.now()}`,
@@ -41,9 +45,12 @@ export function AntiCorruptionCard({
         </div>
         <button
           onClick={handleAntiCorruption}
-          className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
+          disabled={!canAfford}
+          className="w-full py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
-          تزریق بودجه مبارزه با فساد (-۵٪ فساد)
+          {canAfford
+            ? "تزریق بودجه مبارزه با فساد (-۵٪ فساد)"
+            : "خزانه ناکافی جهت طرح ضدفساد"}
         </button>
       </div>
     </div>
