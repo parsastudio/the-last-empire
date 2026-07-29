@@ -1,5 +1,6 @@
 import React from "react";
 import { Landmark } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface StabilityMeterBadgeProps {
   stability: number;
@@ -21,11 +22,13 @@ export function StabilityMeterBadge({
   return (
     <div
       className="flex items-center gap-2 bg-secondary/40 border border-border/60 px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors hover:bg-secondary/60 cursor-default shrink-0"
-      title={`ثبات سیاسی: ${stability}% | فساد اداری: ${corruption}%`}
+      title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}% | فساد اداری: ${PersianNumberFormatter.toPersianDigits(corruption)}%`}
     >
       <Landmark size={14} className="text-diplomacy shrink-0" />
       <div className="flex items-center gap-2">
-        <span className={`font-bold ${style.text}`}>{stability}%</span>
+        <span className={`font-bold ${style.text}`}>
+          {PersianNumberFormatter.toPersianDigits(stability)}%
+        </span>
         <div className="w-12 h-1.5 bg-background/80 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
