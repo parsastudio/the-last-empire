@@ -50,9 +50,9 @@ export function TurnSummaryModal({
             </div>
           ) : (
             <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border">
-              {reports.map((rep) => (
+              {reports.map((rep, index) => (
                 <ReportListItem
-                  key={rep.id}
+                  key={`${rep.id}-${index}`}
                   report={rep}
                   onSelect={setSelectedReport}
                 />
