@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Coins } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
@@ -22,13 +23,9 @@ export function TariffControlCard({
   }
 
   const handleApplyTariff = async () => {
+    const action = ActionFactory.setTariffRate(nationId, tariffRate);
     await dispatchAction(
-      {
-        id: `tariff-${Date.now()}`,
-        nationId,
-        type: "SET_TARIFF_RATE",
-        newRate: tariffRate,
-      },
+      action,
       `تعرفه تجاری گمرک بر روی ${tariffRate}% تنظیم گردید.`,
     );
   };

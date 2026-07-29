@@ -1,6 +1,7 @@
 import React from "react";
 import { Swords, PlusCircle, ShieldAlert } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface MilitaryActionsCardProps {
   nationId?: string;
@@ -12,25 +13,17 @@ export function MilitaryActionsCard({
   const { dispatchAction } = useGameActions();
 
   const handleRecruitInfantry = async () => {
+    const action = ActionFactory.recruitUnit(nationId, "INFANTRY", 1);
     await dispatchAction(
-      {
-        id: `recruit-${Date.now()}`,
-        nationId,
-        type: "RECRUIT_UNIT",
-        unitType: "INFANTRY",
-        quantity: 1,
-      },
+      action,
       "سفارش استخدام ۱۰ هزار پیاده‌نظام در صف قرار گرفت.",
     );
   };
 
   const handleResearchTech = async () => {
+    const action = ActionFactory.investResearch(nationId);
     await dispatchAction(
-      {
-        id: `research-${Date.now()}`,
-        nationId,
-        type: "INVEST_RESEARCH",
-      },
+      action,
       "پژوهش برای ارتقای لول فناوری نظامی آغاز گردید.",
     );
   };

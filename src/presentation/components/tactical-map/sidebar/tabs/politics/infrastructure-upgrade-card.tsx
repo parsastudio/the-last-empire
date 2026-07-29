@@ -1,6 +1,7 @@
 import React from "react";
 import { Wrench } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface InfrastructureUpgradeCardProps {
   currentLevel?: number;
@@ -19,12 +20,10 @@ export function InfrastructureUpgradeCard({
 
   const handleUpgradeInfra = async () => {
     if (!canAfford) return;
+
+    const action = ActionFactory.investInfrastructure(nationId);
     await dispatchAction(
-      {
-        id: `infra-up-${Date.now()}`,
-        nationId,
-        type: "INVEST_INFRASTRUCTURE",
-      },
+      action,
       `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد.`,
     );
   };

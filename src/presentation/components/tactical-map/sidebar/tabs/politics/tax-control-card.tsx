@@ -3,6 +3,7 @@ import { Landmark } from "lucide-react";
 import { TaxSlider } from "./tax-slider";
 import { PredictiveImpactBox } from "./predictive-impact-box";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface TaxControlCardProps {
   taxRate: number;
@@ -30,15 +31,8 @@ export function TaxControlCard({
   }
 
   const handleApplyTax = async () => {
-    await dispatchAction(
-      {
-        id: `tax-${Date.now()}`,
-        nationId,
-        type: "SET_TAX_RATE",
-        newRate: taxRate,
-      },
-      `نرخ مالیات جدید روی ${taxRate}% تنظیم شد.`,
-    );
+    const action = ActionFactory.setTaxRate(nationId, taxRate);
+    await dispatchAction(action, `نرخ مالیات جدید روی ${taxRate}% تنظیم شد.`);
   };
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {

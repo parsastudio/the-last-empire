@@ -2,6 +2,7 @@ import React from "react";
 import { Clock, X } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { RecruitmentOrder } from "@/domain/military/military.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface RecruitmentQueueCardProps {
   queue?: RecruitmentOrder[];
@@ -17,15 +18,8 @@ export function RecruitmentQueueCard({
   if (!queue || queue.length === 0) return null;
 
   const handleCancelOrder = async (orderId: string) => {
-    await dispatchAction(
-      {
-        id: `cancel-${orderId}`,
-        nationId,
-        type: "CANCEL_RECRUITMENT",
-        orderId,
-      },
-      "سفارش لغو شد و هزینه پرداختی مسترد گردید.",
-    );
+    const action = ActionFactory.cancelRecruitment(nationId, orderId);
+    await dispatchAction(action, "سفارش لغو شد و هزینه پرداختی مسترد گردید.");
   };
 
   const getUnitNameFa = (type: string) => {

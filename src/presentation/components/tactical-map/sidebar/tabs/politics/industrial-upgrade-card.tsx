@@ -1,6 +1,7 @@
 import React from "react";
 import { Cpu } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface IndustrialUpgradeCardProps {
   currentLevel?: number;
@@ -19,12 +20,10 @@ export function IndustrialUpgradeCard({
 
   const handleUpgrade = async () => {
     if (!canAfford) return;
+
+    const action = ActionFactory.upgradeIndustrialLevel(nationId);
     await dispatchAction(
-      {
-        id: `ind-up-${Date.now()}`,
-        nationId,
-        type: "UPGRADE_INDUSTRIAL_LEVEL",
-      },
+      action,
       `پروژه ارتقای صنایع سنگین به سطح ${currentLevel + 1} کلید خورد.`,
     );
   };
