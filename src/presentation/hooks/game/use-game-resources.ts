@@ -9,6 +9,7 @@ export interface HumanResourceMetrics {
   treasury: number;
   netIncomePerTurn: number;
   oil: number;
+  oilRequiredPerTurn: number;
   steel: number;
   manpower: number;
   stability: number;
@@ -28,6 +29,7 @@ export function useGameResources(
         treasury: 0,
         netIncomePerTurn: 0,
         oil: 0,
+        oilRequiredPerTurn: 0,
         steel: 0,
         manpower: 0,
         stability: 0,
@@ -58,6 +60,7 @@ export function useGameResources(
         treasury: 0,
         netIncomePerTurn: 0,
         oil: 0,
+        oilRequiredPerTurn: 0,
         steel: 0,
         manpower: 0,
         stability: 0,
@@ -74,10 +77,14 @@ export function useGameResources(
     );
     const netIncome = grossTax - corruptionLoss;
 
+    const oilRequired = Math.ceil(
+      (nation.military.airForce + nation.military.droneMissile) * 0.5,
+    );
+
     let pendingCount = 0;
     if (nation.doctrines.doctrinePoints >= 3) pendingCount++;
     if (nation.recruitmentQueue.length === 0) pendingCount++;
-    if (nation.resources.oil < 20) pendingCount++;
+    if (nation.resources.oil < oilRequired) pendingCount++;
     if (nation.government.stability < 35) pendingCount++;
 
     return {
@@ -85,6 +92,7 @@ export function useGameResources(
       treasury: nation.treasury,
       netIncomePerTurn: netIncome,
       oil: nation.resources.oil,
+      oilRequiredPerTurn: oilRequired,
       steel: nation.resources.steel,
       manpower: nation.resources.manpower,
       stability: nation.government.stability,
