@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { CountryHoverHud } from "./country-hover-hud";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { useCountryHoverRankings } from "./hooks/use-country-hover-rankings";
 import { useCountryHoverMath } from "./hooks/use-country-hover-math";
 import { Nation } from "@/domain/nation/nation.schema";
 
@@ -45,7 +44,6 @@ export function CountryHoverContainer({
   isDragging = false,
   onHoverStateChange,
 }: CountryHoverContainerProps) {
-  const rankingsMap = useCountryHoverRankings(countries, nationsMap);
   const { hoverData, cursorPos } = useCountryHoverMath({
     countries,
     maskDataRef,
@@ -55,7 +53,6 @@ export function CountryHoverContainer({
     containerRef,
     scale,
     position,
-    rankingsMap,
     nationsMap,
     humanNationId,
     isDragging,

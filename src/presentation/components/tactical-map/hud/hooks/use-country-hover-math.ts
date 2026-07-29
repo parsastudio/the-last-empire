@@ -14,7 +14,6 @@ interface UseCountryHoverMathProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   scale: number;
   position: { x: number; y: number };
-  rankingsMap: Map<string, number>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   isDragging?: boolean;
@@ -29,7 +28,6 @@ export function useCountryHoverMath({
   containerRef,
   scale,
   position,
-  rankingsMap,
   nationsMap,
   humanNationId = "NATION_118",
   isDragging = false,
@@ -55,7 +53,6 @@ export function useCountryHoverMath({
 
   const { resolveHoverInfo } = useHoverNationResolver({
     countries,
-    rankingsMap,
     nationsMap,
     humanNationId,
   });

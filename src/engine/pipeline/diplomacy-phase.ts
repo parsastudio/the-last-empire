@@ -33,7 +33,16 @@ export class DiplomacyPhase implements TurnPhase {
         };
       });
 
-    this.powerRanker.rankNations(rawNationsList);
+    const ranked = this.powerRanker.rankNations(rawNationsList);
+
+    for (const r of ranked) {
+      if (nations[r.id]) {
+        nations[r.id] = {
+          ...nations[r.id],
+          rank: r.rank,
+        };
+      }
+    }
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
