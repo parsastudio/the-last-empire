@@ -20,8 +20,8 @@ export default function MainMenuPage() {
     setIsLoadGameModalOpen(true);
   };
 
-  const handleSelectSave = () => {
-    router.push("/play");
+  const handleSelectSave = (saveId: string) => {
+    router.push(`/play/${saveId}`);
   };
 
   return (
