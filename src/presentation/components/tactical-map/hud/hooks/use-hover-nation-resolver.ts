@@ -80,12 +80,16 @@ export function useHoverNationResolver({
 
       const possibleKeys = [
         fullNationId,
+        fullNationId.toUpperCase(),
+        fullNationId.toLowerCase(),
         countryCode.toUpperCase(),
         countryCode.toLowerCase(),
+        flagCode.toUpperCase(),
+        flagCode.toLowerCase(),
         nationIdNumber.toString(),
       ];
 
-      let cachedRank = rankingsMap.size > 0 ? rankingsMap.size : 99;
+      let cachedRank = 99;
       for (const key of possibleKeys) {
         if (rankingsMap.has(key)) {
           cachedRank = rankingsMap.get(key)!;

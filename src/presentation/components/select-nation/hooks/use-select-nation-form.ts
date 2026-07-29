@@ -20,7 +20,7 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const res = await fetch("/maps/map1/partition-manifest.json");
+        const res = await fetch("/api/map-manifest?mode=partition");
         if (res.ok) {
           const json = await res.json();
           if (active && json.nations) {
@@ -31,7 +31,7 @@ export function useSelectNationForm() {
       } catch {}
 
       try {
-        const resDef = await fetch("/maps/map1/default-manifest.json");
+        const resDef = await fetch("/api/map-manifest?mode=default");
         if (resDef.ok) {
           const jsonDef = await resDef.json();
           if (active && jsonDef.nations) {
