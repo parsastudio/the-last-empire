@@ -68,10 +68,13 @@ export class NationProfileAssigner {
       socialFreedom = 10;
     }
 
+    const techLevel = profile?.startingTechLevel ?? 1;
+    const industrialLevel = Math.max(1, Math.min(5, techLevel));
+    const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
+
     const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
     const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
-    const techLevel = profile?.startingTechLevel ?? 1;
 
     const territorySize = profile ? Math.round(profile.gdp / 1000000) : 377975;
 
@@ -88,7 +91,7 @@ export class NationProfileAssigner {
       nationalDebt: isTier1 ? 50000 : 0,
       population,
       warExhaustion: 0,
-      industrialLevel: 1,
+      industrialLevel,
       adminBurdenMultiplier: 1.0,
       consecutiveDeficitTurns: 0,
       government: {
@@ -122,7 +125,7 @@ export class NationProfileAssigner {
         seaNeighbors: [],
         hasSeaAccess: true,
         territorySize,
-        infrastructureLevel: 1,
+        infrastructureLevel,
         contiguousMainlandSize: territorySize,
         isolatedPockets: [],
         coordinates: [],

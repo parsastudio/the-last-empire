@@ -42,7 +42,11 @@ export function WidePoliticsView({
       </div>
 
       <div className="space-y-5">
-        <ImfLoanCard nationId={nationId} nationalDebt={nationalDebt} />
+        <ImfLoanCard
+          nationId={nationId}
+          nationalDebt={nationalDebt}
+          gdp={gdp}
+        />
         <IndustrialUpgradeCard
           currentLevel={industrialLevel}
           nationId={nationId}

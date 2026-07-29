@@ -67,6 +67,7 @@ export function CommandCenterTabRouter({
           marketPrices={gameState?.marketPrices}
           oilStock={nation.resources.oil}
           steelStock={nation.resources.steel}
+          userTreasury={nation.treasury}
           onOpenTrade={onOpenTrade}
         />
       );
@@ -99,6 +100,7 @@ export function CommandCenterTabRouter({
         <WideDiplomacyView
           selectedTargetCode={selectedTargetCode}
           nationsMap={gameState?.nations}
+          humanNationId={nation.id}
           onFocusCountry={onFocusCountry}
         />
       );

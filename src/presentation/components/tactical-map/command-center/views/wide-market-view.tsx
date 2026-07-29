@@ -8,6 +8,7 @@ interface WideMarketViewProps {
   marketPrices?: ResourceMarketPrice;
   oilStock?: number;
   steelStock?: number;
+  userTreasury?: number;
   onOpenTrade: (
     name: string,
     unit: string,
@@ -20,6 +21,7 @@ export function WideMarketView({
   marketPrices = { oil: 105, steel: 92 },
   oilStock = 5000,
   steelStock = 2000,
+  userTreasury = 100000,
   onOpenTrade,
 }: WideMarketViewProps) {
   const oilTrend: "up" | "down" | "stable" =
