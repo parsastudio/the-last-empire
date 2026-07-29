@@ -6,7 +6,9 @@ export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
 ): DiplomaticRelation {
-  const profile = findCountryProfileByCode(code);
+  const profile =
+    findCountryProfileByCode(code) ||
+    (liveNation ? findCountryProfileByCode(liveNation.id) : undefined);
 
   const realGdpNum = liveNation
     ? liveNation.gdp / 1e9
@@ -26,16 +28,22 @@ export function resolveProfileRelation(
     ? realPopNum.toString()
     : realPopNum.toFixed(1);
 
-  const name = liveNation
-    ? liveNation.name
-    : profile
-      ? profile.nameFa
+  const name = profile
+    ? profile.nameFa
+    : liveNation
+      ? liveNation.name
       : `کشور ${code}`;
-  const flagCode = liveNation
-    ? liveNation.flagCode
-    : profile
-      ? profile.flagCode
+  const displayCode = profile
+    ? profile.code
+    : liveNation
+      ? liveNation.id
       : code;
+  const flagCode = profile
+    ? profile.flagCode
+    : liveNation
+      ? liveNation.flagCode
+      : code;
+
   const govType = liveNation
     ? liveNation.government.type
     : (profile?.startingGovernment ?? "DEMOCRACY");
@@ -53,7 +61,7 @@ export function resolveProfileRelation(
     : (profile?.startingInfantry ?? 50) + (profile?.startingAirForce ?? 10) * 3;
 
   return {
-    code: code.toUpperCase(),
+    code: displayCode.toUpperCase(),
     name,
     flagCode,
     stance: "PEACE",

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Swords, Shield, Plane, Radio, AlertTriangle } from "lucide-react";
 import { AttackTheaterHeader } from "./attack/attack-theater-header";
 import { AttackCoordinatesBox } from "./attack/attack-coordinates-box";
@@ -59,13 +59,17 @@ export function AttackPlanningModal({
     Math.min(5, Math.max(0, maxDroneMissile)),
   );
 
-  useEffect(() => {
-    if (isOpen) {
-      setInfantry(Math.min(50, Math.max(1, maxInfantry)));
-      setAirForce(Math.min(10, Math.max(0, maxAirForce)));
-      setDroneMissile(Math.min(5, Math.max(0, maxDroneMissile)));
-    }
-  }, [isOpen, maxInfantry, maxAirForce, maxDroneMissile]);
+  const [prevCoordinate, setPrevCoordinate] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+
+  if (coordinate !== prevCoordinate) {
+    setPrevCoordinate(coordinate);
+    setInfantry(Math.min(50, Math.max(1, maxInfantry)));
+    setAirForce(Math.min(10, Math.max(0, maxAirForce)));
+    setDroneMissile(Math.min(5, Math.max(0, maxDroneMissile)));
+  }
 
   const { dispatchAction } = useGameActions();
   const estimator = useMemo(() => new AttackForceEstimator(), []);

@@ -18,8 +18,14 @@ export const ALL_COUNTRY_PROFILES: CountryProfile[] = [
 export function findCountryProfileByCode(
   code: string,
 ): CountryProfile | undefined {
+  if (!code) return undefined;
+  const clean = code.toUpperCase().replace("NATION_", "").trim();
+
   return ALL_COUNTRY_PROFILES.find(
-    (c) => c.code.toUpperCase() === code.toUpperCase(),
+    (c) =>
+      c.code.toUpperCase() === clean ||
+      c.flagCode.toUpperCase() === clean ||
+      c.id.toString() === clean,
   );
 }
 

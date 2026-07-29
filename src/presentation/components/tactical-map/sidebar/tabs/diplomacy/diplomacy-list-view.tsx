@@ -16,10 +16,14 @@ export function DiplomacyListView({
   onSearchChange,
   onSelectRelation,
 }: DiplomacyListViewProps) {
+  const query = searchQuery.trim().toLowerCase();
+
   const filtered = relations.filter(
     (r) =>
-      r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.code.toLowerCase().includes(searchQuery.toLowerCase()),
+      !query ||
+      r.name.toLowerCase().includes(query) ||
+      r.code.toLowerCase().includes(query) ||
+      r.flagCode.toLowerCase().includes(query),
   );
 
   return (
@@ -48,13 +52,19 @@ export function DiplomacyListView({
       </div>
 
       <div className="space-y-2">
-        {filtered.map((rel) => (
-          <DiplomacyListItem
-            key={rel.code}
-            relation={rel}
-            onSelect={onSelectRelation}
-          />
-        ))}
+        {filtered.length === 0 ? (
+          <div className="py-12 text-center text-xs text-muted-foreground italic">
+            هیچ کشوری با این مشخصات یافت نشد.
+          </div>
+        ) : (
+          filtered.map((rel) => (
+            <DiplomacyListItem
+              key={rel.code}
+              relation={rel}
+              onSelect={onSelectRelation}
+            />
+          ))
+        )}
       </div>
     </div>
   );
