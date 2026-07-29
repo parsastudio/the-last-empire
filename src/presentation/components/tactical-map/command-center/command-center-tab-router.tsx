@@ -86,13 +86,17 @@ export function CommandCenterTabRouter({
         <WidePoliticsView
           nationId={nation.id}
           gdp={nation.gdp}
+          treasury={nation.treasury}
+          turnsInPower={nation.government.turnsInPower}
           taxRate={nation.taxRate}
+          corruption={nation.government.corruption}
           governmentType={nation.government.type}
           nationalDebt={nation.nationalDebt}
           tariffRate={nation.tariffRate}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
           activeModifiers={nation.activeModifiers}
+          nationsMap={gameState?.nations}
         />
       );
     case "diplomacy":

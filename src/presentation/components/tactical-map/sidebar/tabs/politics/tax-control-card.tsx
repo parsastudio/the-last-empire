@@ -7,18 +7,27 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 interface TaxControlCardProps {
   taxRate: number;
   baseGdp: number;
+  corruption?: number;
   nationId?: string;
 }
 
 export function TaxControlCard({
   taxRate: initialTaxRate,
   baseGdp,
+  corruption = 0,
   nationId = "NATION_118",
 }: TaxControlCardProps) {
   const [taxRate, setTaxRate] = useState<number>(initialTaxRate);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [prevInitialRate, setPrevInitialRate] =
+    useState<number>(initialTaxRate);
   const inputRef = useRef<HTMLInputElement>(null);
   const { dispatchAction } = useGameActions();
+
+  if (initialTaxRate !== prevInitialRate) {
+    setPrevInitialRate(initialTaxRate);
+    setTaxRate(initialTaxRate);
+  }
 
   const handleApplyTax = async () => {
     await dispatchAction(
@@ -66,6 +75,7 @@ export function TaxControlCard({
           currentTaxRate={initialTaxRate}
           newTaxRate={taxRate}
           baseGdp={baseGdp}
+          corruption={corruption}
         />
 
         <button

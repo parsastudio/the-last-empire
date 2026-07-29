@@ -16,6 +16,14 @@ export const SetTaxRateActionSchema = z.object({
   newRate: z.number().min(0).max(100),
 });
 
+export const SetTariffRateActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("SET_TARIFF_RATE"),
+  newRate: z.number().min(0).max(100),
+});
+
 export const ChangeGovernmentActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -171,6 +179,7 @@ export const AntiCorruptionDriveActionSchema = z.object({
 
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
+  SetTariffRateActionSchema,
   ChangeGovernmentActionSchema,
   RecruitUnitActionSchema,
   DeclareWarActionSchema,
@@ -198,6 +207,7 @@ export const ActionResultSchema = z.object({
 });
 
 export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;
+export type SetTariffRateAction = z.infer<typeof SetTariffRateActionSchema>;
 export type ChangeGovernmentAction = z.infer<
   typeof ChangeGovernmentActionSchema
 >;

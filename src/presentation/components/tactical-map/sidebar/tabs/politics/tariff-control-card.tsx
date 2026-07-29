@@ -1,22 +1,35 @@
 import React, { useState } from "react";
 import { Coins } from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
+  nationId?: string;
 }
 
 export function TariffControlCard({
   initialTariffRate = 10,
+  nationId = "NATION_118",
 }: TariffControlCardProps) {
   const [tariffRate, setTariffRate] = useState<number>(initialTariffRate);
-  const { showToast } = useToast();
+  const [prevInitialTariff, setPrevInitialTariff] =
+    useState<number>(initialTariffRate);
+  const { dispatchAction } = useGameActions();
 
-  const handleApplyTariff = () => {
-    showToast(
-      "بروزرسانی تعرفه گمرک",
+  if (initialTariffRate !== prevInitialTariff) {
+    setPrevInitialTariff(initialTariffRate);
+    setTariffRate(initialTariffRate);
+  }
+
+  const handleApplyTariff = async () => {
+    await dispatchAction(
+      {
+        id: `tariff-${Date.now()}`,
+        nationId,
+        type: "SET_TARIFF_RATE",
+        newRate: tariffRate,
+      },
       `تعرفه تجاری گمرک بر روی ${tariffRate}% تنظیم گردید.`,
-      "success",
     );
   };
 
@@ -50,7 +63,7 @@ export function TariffControlCard({
           onClick={handleApplyTariff}
           className="w-full py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
-          اعمال نرخ جدید تعرفه
+          اعمال نرخ جدید تعرفه ({tariffRate}%)
         </button>
       </div>
     </div>

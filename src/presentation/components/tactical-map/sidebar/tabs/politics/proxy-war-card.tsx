@@ -1,28 +1,32 @@
 import React, { useState, useMemo } from "react";
 import { Zap, ShieldAlert, Crosshair } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface ProxyWarCardProps {
   nationId?: string;
-  targetNationId?: string;
+  nationsMap?: Record<string, Nation>;
 }
 
 export function ProxyWarCard({
   nationId = "NATION_118",
-  targetNationId = "NATION_15",
+  nationsMap,
 }: ProxyWarCardProps) {
-  const [budget, setBudget] = useState<number>(15000);
-  const [currentTargetId, setCurrentTargetId] =
-    useState<string>(targetNationId);
   const { dispatchAction } = useGameActions();
 
   const countryOptions = useMemo(() => {
-    return ALL_COUNTRY_PROFILES.map((p) => ({
-      id: `NATION_${p.id}`,
-      name: p.nameFa,
-    })).filter((c) => c.id !== nationId);
-  }, [nationId]);
+    if (!nationsMap) return [];
+    return Object.values(nationsMap)
+      .filter((n) => n.id !== nationId && n.isAlive)
+      .map((n) => ({
+        id: n.id,
+        name: n.name,
+      }));
+  }, [nationId, nationsMap]);
+
+  const defaultTarget = countryOptions[0]?.id || "NATION_15";
+  const [currentTargetId, setCurrentTargetId] = useState<string>(defaultTarget);
+  const [budget, setBudget] = useState<number>(15000);
 
   const estimatedStabilityDrain = Math.min(
     15,
@@ -31,6 +35,11 @@ export function ProxyWarCard({
 
   const targetName =
     countryOptions.find((c) => c.id === currentTargetId)?.name || "کشور هدف";
+
+  const currentAllocatedBudget =
+    nationsMap && nationsMap[nationId]
+      ? nationsMap[nationId].proxyInfluenceBudget[currentTargetId] || 0
+      : 0;
 
   const handleApplyProxy = async () => {
     await dispatchAction(
@@ -77,8 +86,19 @@ export function ProxyWarCard({
           </select>
         </div>
 
+        {currentAllocatedBudget > 0 && (
+          <div className="bg-secondary/40 p-2 rounded-xl text-[10px] font-mono flex justify-between">
+            <span className="text-muted-foreground font-sans">
+              بودجه جاری فعال:
+            </span>
+            <span className="font-bold text-gdp">
+              ${currentAllocatedBudget.toLocaleString("fa-IR")}
+            </span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">بودجه اختصاصی عملیات:</span>
+          <span className="text-muted-foreground">افزایش بودجه عملیات:</span>
           <span className="font-mono font-bold text-foreground">
             ${budget.toLocaleString("fa-IR")}
           </span>
