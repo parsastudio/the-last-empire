@@ -43,6 +43,12 @@ export function TacticalMapOverlay({
   onCloseAttackModal,
   onOpenPendingDecisions,
 }: TacticalMapOverlayProps) {
+  const targetRelation = attackModalState
+    ? metrics.nation?.relations[attackModalState.targetCode]
+    : null;
+
+  const currentStance = targetRelation?.stance || "PEACE";
+
   return (
     <>
       <TopHudBar metrics={metrics} onOpenPending={onOpenPendingDecisions} />
@@ -74,14 +80,15 @@ export function TacticalMapOverlay({
       {attackModalState && (
         <AttackPlanningModal
           isOpen={attackModalState.isOpen}
-          attackerName={metrics.nation?.name || "ایران"}
-          attackerCode={metrics.nation?.flagCode || "IRN"}
+          attackerName={metrics.nation?.name || "کشور شما"}
+          attackerCode={metrics.nation?.id || "NATION_118"}
           targetName={attackModalState.targetName}
           targetCode={attackModalState.targetCode}
           coordinate={attackModalState.coordinate}
-          stance="PEACE"
+          stance={currentStance}
           userOilStock={metrics.oil}
           userTreasury={metrics.treasury}
+          availableMilitary={metrics.nation?.military}
           onClose={onCloseAttackModal}
           onConfirmAttack={() => {
             onCloseAttackModal();
