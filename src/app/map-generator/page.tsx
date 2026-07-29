@@ -126,7 +126,7 @@ export default function MapGeneratorPage() {
   const statesCount = countries.length > 0 ? countries.length - 1 : 0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans text-left flex flex-col">
+    <div className="h-screen w-screen bg-slate-950 text-white font-sans text-left flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
       <MapGeneratorHeader
         isCached={isCached}
         mapType={mapType}
