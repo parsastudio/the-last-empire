@@ -69,8 +69,7 @@ export function useMarketTrade({
         1,
         Math.floor(userTreasury / (price * 1.1)),
       );
-      const maxAmount =
-        mode === "buy" ? Math.min(1000, maxAffordable) : Math.max(1, stock);
+      const maxAmount = mode === "buy" ? maxAffordable : Math.max(1, stock);
 
       setTradeModal({
         isOpen: true,

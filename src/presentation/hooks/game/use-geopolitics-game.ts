@@ -42,6 +42,25 @@ export function useGeopoliticsGame(customGameId?: string) {
   }, [apiService, customGameId, gameState]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleStateUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<GameState>;
+      if (customEvent.detail) {
+        setGameState(customEvent.detail);
+      }
+    };
+
+    window.addEventListener("geopolitics-state-updated", handleStateUpdate);
+    return () => {
+      window.removeEventListener(
+        "geopolitics-state-updated",
+        handleStateUpdate,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
     let active = true;
 
     async function loadInitialStatus() {
