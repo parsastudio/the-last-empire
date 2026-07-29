@@ -135,7 +135,9 @@ function MapTest6Content() {
           onSelectAction={interaction.handleSelectContextAction}
           onCloseContextMenu={interaction.closeContextMenu}
           onCloseAttackModal={interaction.closeAttackModal}
-          onOpenPendingDecisions={() => interaction.handleOpenPendingTab()}
+          onOpenPendingDecisions={(tab) =>
+            interaction.handleOpenPendingTab(tab)
+          }
         />
       </TacticalViewport>
 
