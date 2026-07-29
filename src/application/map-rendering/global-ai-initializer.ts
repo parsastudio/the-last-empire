@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import { NationProfileAssigner } from "./nation-profile-assigner";
 import { DiplomaticMatrixGenerator } from "./diplomatic-matrix-generator";
+import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 
 export class GlobalAiInitializer {
   private profileAssigner = new NationProfileAssigner();
@@ -14,7 +15,12 @@ export class GlobalAiInitializer {
   ): Record<string, Nation> {
     const nations: Record<string, Nation> = {};
 
-    for (const id of detectedNationsList) {
+    const allProfileIds = ALL_COUNTRY_PROFILES.map((p) => `NATION_${p.id}`);
+    const fullNationsList = Array.from(
+      new Set([...detectedNationsList, ...allProfileIds, humanNationId]),
+    );
+
+    for (const id of fullNationsList) {
       const isHuman = id === humanNationId;
       const govToApply = isHuman ? humanGovType : undefined;
       const nation = this.profileAssigner.buildStartingNation(
@@ -23,7 +29,7 @@ export class GlobalAiInitializer {
         govToApply,
       );
 
-      const relativeList = detectedNationsList.filter((nId) => nId !== id);
+      const relativeList = fullNationsList.filter((nId) => nId !== id);
       nation.relations =
         this.relationsGenerator.generateBlankRelations(relativeList);
 
