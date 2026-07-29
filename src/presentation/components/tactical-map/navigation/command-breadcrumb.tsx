@@ -41,7 +41,7 @@ export function CommandBreadcrumb({
   };
 
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-muted-foreground dir-rtl select-none overflow-x-auto scrollbar-none py-1">
+    <nav className="flex items-center gap-1.5 text-xs text-muted-foreground dir-rtl select-none overflow-x-auto scrollbar-none py-0.5">
       <button
         onClick={() => onNavigateTab("overview")}
         className="flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer shrink-0 font-medium"

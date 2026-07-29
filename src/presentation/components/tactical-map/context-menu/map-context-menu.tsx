@@ -1,14 +1,8 @@
 import React from "react";
-import { Swords, Coins, Handshake, Shield, Flame, X } from "lucide-react";
+import { Info, Swords, X } from "lucide-react";
 import { QuickActionButton } from "./quick-action-button";
 
-export type ContextActionType =
-  | "attack"
-  | "tribute"
-  | "pact"
-  | "access"
-  | "proxy"
-  | "profile";
+export type ContextActionType = "profile" | "attack";
 
 interface MapContextMenuProps {
   position: { x: number; y: number };
@@ -31,48 +25,24 @@ export function MapContextMenu({
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
       <div className="bg-card/95 backdrop-blur-xl border border-border/80 rounded-2xl shadow-2xl p-2 flex items-center gap-1 max-w-md overflow-x-auto scrollbar-none">
-        <div className="px-2 py-1 text-[10px] font-mono font-bold text-muted-foreground border-l border-border/60 shrink-0">
+        <div className="px-2.5 py-1 text-[10px] font-mono font-bold text-muted-foreground border-l border-border/60 shrink-0">
           {countryName} ({countryCode})
         </div>
 
         <QuickActionButton
+          icon={Info}
+          label="نمایش اطلاعات"
+          colorClass="text-primary"
+          bgHoverClass="hover:bg-primary/15"
+          onClick={() => onSelectAction("profile")}
+        />
+
+        <QuickActionButton
           icon={Swords}
-          label="حمله"
+          label="حمله سریع"
           colorClass="text-military"
           bgHoverClass="hover:bg-military/15"
           onClick={() => onSelectAction("attack")}
-        />
-
-        <QuickActionButton
-          icon={Coins}
-          label="طلب باج"
-          colorClass="text-treasury"
-          bgHoverClass="hover:bg-treasury/15"
-          onClick={() => onSelectAction("tribute")}
-        />
-
-        <QuickActionButton
-          icon={Handshake}
-          label="پیمان"
-          colorClass="text-gdp"
-          bgHoverClass="hover:bg-gdp/15"
-          onClick={() => onSelectAction("pact")}
-        />
-
-        <QuickActionButton
-          icon={Shield}
-          label="حق عبور"
-          colorClass="text-primary"
-          bgHoverClass="hover:bg-primary/15"
-          onClick={() => onSelectAction("access")}
-        />
-
-        <QuickActionButton
-          icon={Flame}
-          label="جنگ نیابتی"
-          colorClass="text-military"
-          bgHoverClass="hover:bg-military/15"
-          onClick={() => onSelectAction("proxy")}
         />
 
         <button
