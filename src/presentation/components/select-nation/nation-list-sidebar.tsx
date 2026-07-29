@@ -1,6 +1,7 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { NationDetail, NationListItem } from "./nation-list-item";
+import { useNationSearch } from "./hooks/use-nation-search";
 
 interface NationListSidebarProps {
   nations: NationDetail[];
@@ -17,11 +18,7 @@ export function NationListSidebar({
   onSearchChange,
   onSelectNation,
 }: NationListSidebarProps) {
-  const filtered = nations.filter(
-    (n) =>
-      n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.id.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const { filteredNations } = useNationSearch(nations, searchQuery);
 
   return (
     <div className="lg:col-span-4 flex flex-col bg-card border border-border rounded-3xl overflow-hidden shadow-sm h-full">
@@ -50,7 +47,7 @@ export function NationListSidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-2 scrollbar-thin scrollbar-thumb-border">
-        {filtered.map((nation) => (
+        {filteredNations.map((nation) => (
           <NationListItem
             key={nation.id}
             nation={nation}

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { REGIME_ABILITIES } from "../../sidebar/tabs/abilities/abilities.config";
 import { AbilityCard } from "../../sidebar/tabs/abilities/ability-card";
 import { AbilityTargetModal } from "../../modals/ability-target-modal";
+import { useWideAbilities } from "./hooks/use-wide-abilities";
 
 interface WideAbilitiesViewProps {
   currentGovernment: string;
@@ -12,7 +13,7 @@ export function WideAbilitiesView({
   currentGovernment,
   nationId = "NATION_118",
 }: WideAbilitiesViewProps) {
-  const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
+  const abilities = useWideAbilities();
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
@@ -23,19 +24,17 @@ export function WideAbilitiesView({
             ability={ab}
             currentGovernment={currentGovernment}
             nationId={nationId}
-            onActivate={(ability) => setSelectedAbility(ability.name)}
+            onActivate={(ability) => abilities.openAbilityModal(ability.name)}
           />
         ))}
       </div>
 
       <AbilityTargetModal
-        isOpen={selectedAbility !== null}
-        abilityName={selectedAbility || ""}
+        isOpen={abilities.selectedAbility !== null}
+        abilityName={abilities.selectedAbility || ""}
         nationId={nationId}
-        onClose={() => setSelectedAbility(null)}
-        onConfirmTarget={() => {
-          setSelectedAbility(null);
-        }}
+        onClose={abilities.closeAbilityModal}
+        onConfirmTarget={abilities.closeAbilityModal}
       />
     </div>
   );

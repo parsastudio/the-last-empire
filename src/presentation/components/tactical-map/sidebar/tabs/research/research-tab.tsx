@@ -1,6 +1,6 @@
 import React from "react";
 import { Cpu } from "lucide-react";
-import { DoctrineTreeView } from "./doctrine-tree-view";
+import { DoctrineListView } from "./doctrine-list-view";
 
 interface ResearchTabProps {
   nationId?: string;
@@ -21,7 +21,7 @@ export function ResearchTab({
           </span>
         </div>
 
-        <DoctrineTreeView
+        <DoctrineListView
           nationId={nationId}
           unlockedDoctrines={unlockedDoctrines}
         />

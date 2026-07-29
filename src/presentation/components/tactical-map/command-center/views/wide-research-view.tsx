@@ -1,7 +1,6 @@
 import React from "react";
 import { DoctrineBranchColumn } from "./components/doctrine-branch-column";
-import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { DEFAULT_DOCTRINES } from "@/engine/politics/doctrines-list.config";
+import { useWideResearch } from "./hooks/use-wide-research";
 
 interface WideResearchViewProps {
   unlockedDoctrines?: string[];
@@ -14,50 +13,10 @@ export function WideResearchView({
   doctrinePoints = 0,
   nationId = "NATION_118",
 }: WideResearchViewProps) {
-  const { dispatchAction } = useGameActions();
-
-  const industrialDoctrines = DEFAULT_DOCTRINES.filter(
-    (d) => d.branch === "INDUSTRIAL_TECH",
-  ).map((d) => ({
-    id: d.id,
-    name: d.name,
-    cost: d.cost,
-    unlocked: unlockedDoctrines.includes(d.id),
-  }));
-
-  const asymmetricDoctrines = DEFAULT_DOCTRINES.filter(
-    (d) => d.branch === "ASYMMETRIC_MILITARY",
-  ).map((d) => ({
-    id: d.id,
-    name: d.name,
-    cost: d.cost,
-    unlocked: unlockedDoctrines.includes(d.id),
-  }));
-
-  const diplomaticDoctrines = DEFAULT_DOCTRINES.filter(
-    (d) => d.branch === "DIPLOMATIC_HEGEMONY",
-  ).map((d) => ({
-    id: d.id,
-    name: d.name,
-    cost: d.cost,
-    unlocked: unlockedDoctrines.includes(d.id),
-  }));
-
-  const handleUnlock = async (doc: {
-    id: string;
-    name: string;
-    cost: number;
-  }) => {
-    await dispatchAction(
-      {
-        id: `unlock-${Date.now()}`,
-        nationId,
-        type: "UNLOCK_DOCTRINE",
-        doctrineId: doc.id,
-      },
-      `آنلاک دکترین ${doc.name} انجام شد.`,
-    );
-  };
+  const research = useWideResearch({
+    unlockedDoctrines,
+    nationId,
+  });
 
   return (
     <div className="space-y-4 dir-rtl text-right">
@@ -73,18 +32,18 @@ export function WideResearchView({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-in fade-in duration-200">
         <DoctrineBranchColumn
           title="شاخه‌ صنعت و لجستیک"
-          doctrines={industrialDoctrines}
-          onUnlock={handleUnlock}
+          doctrines={research.industrialDoctrines}
+          onUnlock={research.handleUnlock}
         />
         <DoctrineBranchColumn
           title="شاخه‌ دفاع ناهمگون نظامی"
-          doctrines={asymmetricDoctrines}
-          onUnlock={handleUnlock}
+          doctrines={research.asymmetricDoctrines}
+          onUnlock={research.handleUnlock}
         />
         <DoctrineBranchColumn
           title="شاخه‌ هژمونی دیپلماتیک"
-          doctrines={diplomaticDoctrines}
-          onUnlock={handleUnlock}
+          doctrines={research.diplomaticDoctrines}
+          onUnlock={research.handleUnlock}
         />
       </div>
     </div>
