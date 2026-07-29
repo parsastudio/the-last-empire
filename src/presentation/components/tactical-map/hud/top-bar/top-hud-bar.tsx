@@ -28,9 +28,11 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
   const formattedOil = PersianNumberFormatter.toPersianDigits(
     metrics.oil.toLocaleString("en-US"),
   );
-  const formattedOilUsage = PersianNumberFormatter.toPersianDigits(
-    metrics.oilRequiredPerTurn,
-  );
+
+  const formattedOilUsage =
+    metrics.oilRequiredPerTurn > 0
+      ? `-${PersianNumberFormatter.toPersianDigits(metrics.oilRequiredPerTurn)}/نوبت`
+      : "بدون مصرف";
 
   const formattedSteel = PersianNumberFormatter.toPersianDigits(
     metrics.steel.toLocaleString("en-US"),
@@ -76,7 +78,7 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
             iconColor={isOilDeficit ? "text-military" : "text-treasury"}
             label="ذخایر نفت خام و مصرف نوبتی"
             value={formattedOil}
-            subValue={`-${formattedOilUsage}/نوبت`}
+            subValue={formattedOilUsage}
             subValueColor={isOilDeficit ? "text-military" : "text-treasury"}
           />
 

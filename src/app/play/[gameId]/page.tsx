@@ -123,7 +123,6 @@ function MapTest6Content({ gameId }: { gameId: string }) {
         canvasSrcRef={canvasSrcRef}
         isDragging={isDragging}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
         onClick={interaction.handleMapClick}
@@ -150,7 +149,9 @@ function MapTest6Content({ gameId }: { gameId: string }) {
           onSelectAction={interaction.handleSelectContextAction}
           onCloseContextMenu={interaction.closeContextMenu}
           onCloseAttackModal={interaction.closeAttackModal}
-          onOpenPendingDecisions={() => interaction.handleOpenPendingTab()}
+          onOpenPendingDecisions={(tab) =>
+            interaction.handleOpenPendingTab(tab)
+          }
         />
       </TacticalViewport>
 

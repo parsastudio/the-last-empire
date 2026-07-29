@@ -57,6 +57,6 @@ export class PersianNumberFormatter {
   public static formatSignedIncome(value: number): string {
     const compactText = this.formatCompactNumber(Math.abs(value));
     const sign = value >= 0 ? "+" : "-";
-    return `(${sign}$${compactText})`;
+    return `${sign}$${compactText}`;
   }
 }
