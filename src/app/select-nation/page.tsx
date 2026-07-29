@@ -1,63 +1,16 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { NationListSidebar } from "@/presentation/components/select-nation/nation-list-sidebar";
 import { NationDetailsPanel } from "@/presentation/components/select-nation/nation-details-panel";
 import { GOVERNMENT_OPTIONS } from "@/presentation/components/select-nation/config/government-options.config";
 import { SelectNationHeader } from "@/presentation/components/select-nation/select-nation-header";
-import { GameIdGenerator } from "@/domain/shared/game-id-generator";
-import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
+import { useSelectNationForm } from "@/presentation/components/select-nation/hooks/use-select-nation-form";
 
 export default function SelectNationPage() {
   const router = useRouter();
-  const provider = useMemo(() => new NationDatabaseProvider(), []);
-  const allNations = useMemo(
-    () => provider.getAllSelectableNations(),
-    [provider],
-  );
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedNation, setSelectedNation] = useState<NationDetail>(
-    allNations[0]!,
-  );
-  const [selectedGovernment, setSelectedGovernment] = useState<string>(
-    allNations[0]!.defaultGovernment,
-  );
-
-  const handleSelectNationCard = (nation: NationDetail) => {
-    setSelectedNation(nation);
-    setSelectedGovernment(nation.defaultGovernment);
-  };
-
-  const handleStartCampaign = async () => {
-    try {
-      const uniqueGameId = GameIdGenerator.generateCampaignId(
-        selectedNation.id,
-      );
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("test6_human_nation_id", selectedNation.id);
-      }
-
-      const res = await fetch("/api/game/select-country", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nationId: selectedNation.id,
-          governmentType: selectedGovernment,
-          gameId: uniqueGameId,
-        }),
-      });
-
-      if (res.ok) {
-        router.push(`/play/${uniqueGameId}`);
-      }
-    } catch {
-      alert("خطا در راه‌اندازی کمپین بازی");
-    }
-  };
+  const form = useSelectNationForm();
 
   return (
     <div
@@ -68,19 +21,19 @@ export default function SelectNationPage() {
 
       <main className="flex-1 max-w-7xl mx-auto w-full p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
         <NationListSidebar
-          nations={allNations}
-          selectedId={selectedNation.id}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onSelectNation={handleSelectNationCard}
+          nations={form.allNations}
+          selectedId={form.selectedNation.id}
+          searchQuery={form.searchQuery}
+          onSearchChange={form.setSearchQuery}
+          onSelectNation={form.handleSelectNationCard}
         />
 
         <NationDetailsPanel
-          nation={selectedNation}
+          nation={form.selectedNation}
           governmentOptions={GOVERNMENT_OPTIONS}
-          selectedGovernment={selectedGovernment}
-          onSelectGovernment={setSelectedGovernment}
-          onStartCampaign={handleStartCampaign}
+          selectedGovernment={form.selectedGovernment}
+          onSelectGovernment={form.setSelectedGovernment}
+          onStartCampaign={form.handleStartCampaign}
         />
       </main>
     </div>

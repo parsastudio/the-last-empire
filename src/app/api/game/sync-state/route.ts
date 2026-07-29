@@ -9,7 +9,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if (!state || !state.gameId) {
       return NextResponse.json(
-        { success: false, error: "Invalid state data provided" },
+        { success: false, error: "اطلاعات وضعیت معتبر نیست." },
         { status: 400 },
       );
     }
@@ -18,11 +18,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({
       success: true,
-      message: "State synchronized with server session store",
+      message: "همگام‌سازی وضعیت با سرور انجام شد.",
       gameId: state.gameId,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal error";
+    const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 },

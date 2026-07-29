@@ -14,7 +14,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if (!nationId) {
       return NextResponse.json(
-        { success: false, error: "Nation ID is required" },
+        { success: false, error: "شناسه کشور الزامی است." },
         { status: 400 },
       );
     }
@@ -32,7 +32,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({ success: true, data: state });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Internal error";
+    const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 },

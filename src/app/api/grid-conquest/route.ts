@@ -16,7 +16,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     if (!attackerId || x === undefined || y === undefined) {
       return NextResponse.json(
-        { success: false, error: "Missing required parameters" },
+        { success: false, error: "پارامترهای ورودی کامل نیستند." },
         { status: 400 },
       );
     }
@@ -101,7 +101,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       data: result,
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Internal server error";
+    const msg = err instanceof Error ? err.message : "خطای داخلی سیستم";
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
