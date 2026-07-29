@@ -5,6 +5,7 @@ interface TacticalViewportProps {
   canvasDestRef: React.RefObject<HTMLCanvasElement | null>;
   canvasSrcRef: React.RefObject<HTMLCanvasElement | null>;
   isDragging: boolean;
+  isHoveringCountry?: boolean;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
   onMouseUp: () => void;
@@ -18,6 +19,7 @@ export function TacticalViewport({
   canvasDestRef,
   canvasSrcRef,
   isDragging,
+  isHoveringCountry = false,
   onMouseDown,
   onMouseMove,
   onMouseUp,
@@ -25,12 +27,16 @@ export function TacticalViewport({
   onClick,
   children,
 }: TacticalViewportProps) {
+  const getCursorClass = () => {
+    if (isDragging) return "cursor-grabbing";
+    if (isHoveringCountry) return "cursor-pointer";
+    return "cursor-default";
+  };
+
   return (
     <div
       ref={containerRef}
-      className={`w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden cursor-grab ${
-        isDragging ? "cursor-grabbing" : ""
-      }`}
+      className={`w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden ${getCursorClass()}`}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}

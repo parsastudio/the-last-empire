@@ -82,7 +82,6 @@ export function useCountryHoverMath({
             return;
           }
 
-          setCursorPos({ x: lastPos.clientX, y: lastPos.clientY });
           const projection = projectCoordinates(
             lastPos.clientX,
             lastPos.clientY,
@@ -90,9 +89,11 @@ export function useCountryHoverMath({
 
           if (!projection) {
             setHoverData(null);
+            setCursorPos(null);
             return;
           }
 
+          setCursorPos({ x: lastPos.clientX, y: lastPos.clientY });
           const info = resolveHoverInfo(
             projection.nationIdNumber,
             projection.greenChannelVal,
@@ -120,6 +121,7 @@ export function useCountryHoverMath({
       container.removeEventListener("mouseleave", handlePointerLeave);
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
       }
     };
   }, [containerRef, isDragging, projectCoordinates, resolveHoverInfo]);
