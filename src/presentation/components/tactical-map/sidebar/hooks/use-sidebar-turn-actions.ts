@@ -4,6 +4,7 @@ import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
+import { GameState } from "@/domain/game/game-state.schema";
 
 export interface TradeDialogState {
   isOpen: boolean;
@@ -18,6 +19,8 @@ export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
   onClearExternalTab?: () => void,
   customGameId?: string,
+  overrideGameState?: GameState | null,
+  overrideAdvanceNextTurn?: () => Promise<GameState | null>,
 ) {
   const [internalActiveTab, setInternalActiveTabState] =
     useState<SidebarTabType | null>(null);
@@ -40,7 +43,14 @@ export function useSidebarTurnActions(
   });
 
   const { showToast } = useToast();
-  const { gameState, advanceNextTurn } = useGeopoliticsGame(customGameId);
+  const fallbackGame = useGeopoliticsGame(customGameId);
+
+  const gameState =
+    overrideGameState !== undefined
+      ? overrideGameState
+      : fallbackGame.gameState;
+  const advanceNextTurn =
+    overrideAdvanceNextTurn || fallbackGame.advanceNextTurn;
 
   const activeTab = externalActiveTab || internalActiveTab;
   const humanNation =

@@ -41,6 +41,7 @@ function MapTest6Content({ gameId }: { gameId: string }) {
   const dimensions = useMapDimensions(containerRef);
   const {
     gameState,
+    advanceNextTurn,
     loading: isGameLoading,
     error,
   } = useGeopoliticsGame(gameId);
@@ -161,6 +162,8 @@ function MapTest6Content({ gameId }: { gameId: string }) {
       <SidebarContainer
         isOpen={isSidebarOpen}
         gameId={gameId}
+        gameState={gameState}
+        advanceNextTurn={advanceNextTurn}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
         onClearExternalTab={interaction.clearExternalTab}
