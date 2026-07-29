@@ -1,10 +1,6 @@
 import React from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import {
-  findCountryProfileById,
-  findCountryProfileByCode,
-} from "@/domain/map/countries";
+import { useNationHeaderFormatter } from "./hooks/use-nation-header-formatter";
 
 interface NationHeaderCardProps {
   name: string;
@@ -26,25 +22,12 @@ export function NationHeaderCard({
   territorySize,
   rank = 1,
 }: NationHeaderCardProps) {
-  const flagEmoji = getFlagEmoji(flagCode || code);
-
-  let realTerritory = territorySize && territorySize > 0 ? territorySize : 0;
-  if (!realTerritory) {
-    const numericId = parseInt(code.replace("NATION_", ""), 10);
-    const profile = !isNaN(numericId)
-      ? findCountryProfileById(numericId)
-      : findCountryProfileByCode(code);
-    realTerritory = profile ? Math.round(profile.gdp / 1000000) : 377975;
-  }
-
-  const formattedArea = Math.round(realTerritory).toLocaleString("fa-IR");
-
-  let formattedPopulation = (population / 1e6).toFixed(1);
-  if (population >= 1e9) {
-    formattedPopulation = `${(population / 1e9).toFixed(2)} میلیارد`;
-  } else {
-    formattedPopulation = `${formattedPopulation} میلیون`;
-  }
+  const formatted = useNationHeaderFormatter({
+    code,
+    flagCode,
+    population,
+    territorySize,
+  });
 
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
@@ -55,7 +38,7 @@ export function NationHeaderCard({
             role="img"
             aria-label={name}
           >
-            {flagEmoji}
+            {formatted.flagEmoji}
           </span>
           <div className="space-y-0.5 text-right">
             <div className="flex items-center gap-2">
@@ -86,7 +69,7 @@ export function NationHeaderCard({
             جمعیت کل قلمروها
           </span>
           <span className="text-xs font-bold text-foreground block font-mono">
-            {formattedPopulation} نفر
+            {formatted.formattedPopulation} نفر
           </span>
         </div>
         <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
@@ -94,7 +77,7 @@ export function NationHeaderCard({
             مساحت کل
           </span>
           <span className="text-xs font-bold text-foreground block font-mono">
-            {formattedArea} km²
+            {formatted.formattedArea} km²
           </span>
         </div>
       </div>
