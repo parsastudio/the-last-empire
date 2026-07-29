@@ -38,11 +38,17 @@ export function UnifiedModalShell({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 md:p-6 animate-fade-smooth cursor-pointer dir-rtl"
+      onWheel={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6 animate-fade-smooth cursor-pointer dir-rtl pointer-events-auto"
       dir="rtl"
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
         className={`bg-card/95 border border-border w-full ${maxWidthClass} max-h-[88vh] rounded-3xl p-6 shadow-2xl flex flex-col space-y-4 text-foreground backdrop-blur-md cursor-default text-right overflow-hidden relative`}
       >
         <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">

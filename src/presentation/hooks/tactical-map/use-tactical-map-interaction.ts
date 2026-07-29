@@ -104,7 +104,7 @@ export function useTacticalMapInteraction({
     setContextMenuState({
       coordinate: { x: mapX, y: mapY },
       countryId: matchedCountry.id,
-      countryCode: matchedCountry.code,
+      countryCode: `NATION_${matchedCountry.id}`,
       countryName,
     });
   };
