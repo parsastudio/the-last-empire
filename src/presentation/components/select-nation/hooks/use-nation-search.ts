@@ -1,9 +1,7 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { NationDetail } from "../nation-list-item";
 
-export function useNationSearch(nations: NationDetail[], initialQuery = "") {
-  const [searchQuery, setSearchQuery] = useState(initialQuery);
-
+export function useNationSearch(nations: NationDetail[], searchQuery = "") {
   const filteredNations = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return nations;
@@ -17,8 +15,6 @@ export function useNationSearch(nations: NationDetail[], initialQuery = "") {
   }, [nations, searchQuery]);
 
   return {
-    searchQuery,
-    setSearchQuery,
     filteredNations,
   };
 }
