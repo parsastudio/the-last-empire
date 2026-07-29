@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useParams } from "next/navigation";
 import { GameAction } from "@/domain/game/action.schema";
 import { useToast } from "@/presentation/context/toast-context";
 
@@ -9,11 +10,15 @@ export function useGameActions(
   onActionExecuted?: () => void,
 ) {
   const { showToast } = useToast();
+  const params = useParams();
+
+  const routeGameId = params?.gameId as string | undefined;
+  const activeGameId = customGameId || routeGameId;
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
       try {
-        const gameIdQuery = customGameId ? `?gameId=${customGameId}` : "";
+        const gameIdQuery = activeGameId ? `?gameId=${activeGameId}` : "";
         const res = await fetch(`/api/game/action${gameIdQuery}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -42,7 +47,7 @@ export function useGameActions(
         return false;
       }
     },
-    [customGameId, onActionExecuted, showToast],
+    [activeGameId, onActionExecuted, showToast],
   );
 
   return { dispatchAction };

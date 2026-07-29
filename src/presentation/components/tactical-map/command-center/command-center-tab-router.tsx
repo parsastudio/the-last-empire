@@ -74,6 +74,8 @@ export function CommandCenterTabRouter({
       return (
         <WideMilitaryView
           military={nation.military}
+          population={nation.population}
+          stability={nation.government.stability}
           recruitmentQueue={nation.recruitmentQueue}
           nationId={nation.id}
         />
