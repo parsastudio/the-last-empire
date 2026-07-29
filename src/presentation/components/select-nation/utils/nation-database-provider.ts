@@ -1,15 +1,18 @@
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/map/countries";
 import { NationDetail } from "../nation-list-item";
 import { ManifestNationItem } from "@/application/map-rendering/generator/map-manifest-builder";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export class NationDatabaseProvider {
   public getNationsFromManifest(
     manifestNations: ManifestNationItem[],
   ): NationDetail[] {
     return manifestNations.map((item) => {
+      const computedTreasury = Math.floor(item.gdp * 0.05);
+
       let gdpText = "";
       if (item.gdp >= 1e12) {
-        gdpText = `${(item.gdp / 1e12).toFixed(1)} تریلیون دلار`;
+        gdpText = `${(item.gdp / 1e12).toFixed(1)} تریلیارد دلار`;
       } else {
         gdpText = `${(item.gdp / 1e9).toFixed(1)} میلیارد دلار`;
       }
@@ -34,7 +37,7 @@ export class NationDatabaseProvider {
         power,
         gdp: gdpText,
         population: popText,
-        treasury: `$${item.startingTreasury.toLocaleString("fa-IR")}`,
+        treasury: PersianNumberFormatter.formatCurrency(computedTreasury),
         desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}، ساختار اقتصادی به ارزش ${gdpText} و مساحت ${item.territorySize.toLocaleString("fa-IR")} km².`,
         defaultGovernment: item.defaultGovernment,
       };
@@ -58,9 +61,11 @@ export class NationDatabaseProvider {
     const sorted = profiles.sort((a, b) => b.gdp - a.gdp);
 
     return sorted.map((profile: CountryProfile, index: number) => {
+      const computedTreasury = Math.floor(profile.gdp * 0.05);
+
       let gdpText = "";
       if (profile.gdp >= 1e12) {
-        gdpText = `${(profile.gdp / 1e12).toFixed(1)} تریلیون دلار`;
+        gdpText = `${(profile.gdp / 1e12).toFixed(1)} تریلیارد دلار`;
       } else {
         gdpText = `${(profile.gdp / 1e9).toFixed(1)} میلیارد دلار`;
       }
@@ -85,7 +90,7 @@ export class NationDatabaseProvider {
         power,
         gdp: gdpText,
         population: popText,
-        treasury: `$${profile.startingTreasury.toLocaleString("fa-IR")}`,
+        treasury: PersianNumberFormatter.formatCurrency(computedTreasury),
         desc: `شناسنامه استراتژیک رسمی ${profile.nameFa} با ساختار اقتصادی به ارزش ${gdpText} و جمعیت ${popText}.`,
         defaultGovernment: profile.startingGovernment ?? "DEMOCRACY",
       };

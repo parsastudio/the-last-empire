@@ -51,9 +51,11 @@ export class MapManifestBuilder {
       const govType = p.startingGovernment ?? "DEMOCRACY";
       const govTraits = this.governmentSystem.getTraits(govType);
 
+      const computedTreasury = Math.floor(p.gdp * 0.05);
+
       const powerDetails = this.powerCalculator.calculatePowerScore(
         p.gdp,
-        p.startingTreasury,
+        computedTreasury,
         p.startingInfantry ?? 50,
         p.startingAirForce ?? 10,
         p.startingDroneMissile ?? 0,
@@ -65,6 +67,7 @@ export class MapManifestBuilder {
         profile: p,
         territorySize,
         powerScore: powerDetails.powerScore,
+        computedTreasury,
       };
     });
 
@@ -81,7 +84,7 @@ export class MapManifestBuilder {
         gdp: item.profile.gdp,
         population: item.profile.population,
         territorySize: item.territorySize,
-        startingTreasury: item.profile.startingTreasury,
+        startingTreasury: item.computedTreasury,
         initialRank: index + 1,
         powerScore: item.powerScore,
         defaultGovernment: item.profile.startingGovernment ?? "DEMOCRACY",
