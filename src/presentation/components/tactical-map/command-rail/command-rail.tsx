@@ -51,24 +51,24 @@ export function CommandRail({
     <aside
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl pointer-events-auto ${
+      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl pointer-events-auto overflow-hidden ${
         isCollapsed ? "w-16" : "w-48"
       }`}
     >
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
+      <div className="space-y-3 overflow-x-hidden">
+        <div className="flex items-center justify-between px-0.5">
           <RailToggleButton
             isCollapsed={isCollapsed}
             onToggle={onToggleCollapse}
           />
           {!isCollapsed && (
-            <span className="text-[10px] font-mono font-bold text-gdp">
+            <span className="text-[10px] font-mono font-bold text-gdp truncate">
               اتاق فرماندهی
             </span>
           )}
         </div>
 
-        <nav className="space-y-1 overflow-y-auto max-h-[calc(100vh-160px)] scrollbar-none">
+        <nav className="space-y-1 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-160px)] scrollbar-none">
           {tabs.map((tab) => (
             <RailTabButton
               key={tab.id}
@@ -83,7 +83,7 @@ export function CommandRail({
         </nav>
       </div>
 
-      <div className="pt-2 border-t border-border">
+      <div className="pt-2 border-t border-border overflow-x-hidden">
         {isCollapsed ? (
           <button
             onClick={onNextTurn}

@@ -22,7 +22,9 @@ export function RailTabButton({
   return (
     <button
       onClick={() => onClick(id)}
-      className={`relative group flex items-center gap-3 p-3 rounded-2xl transition-all cursor-pointer ${
+      className={`relative group flex items-center rounded-2xl transition-all cursor-pointer ${
+        isCollapsed ? "justify-center p-2.5 w-full" : "gap-3 p-3 w-full"
+      } ${
         isActive
           ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 font-bold"
           : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
@@ -31,7 +33,9 @@ export function RailTabButton({
     >
       <Icon size={18} className="shrink-0" />
       {!isCollapsed && (
-        <span className="text-xs font-sans whitespace-nowrap">{label}</span>
+        <span className="text-xs font-sans whitespace-nowrap truncate">
+          {label}
+        </span>
       )}
 
       {isCollapsed && (
