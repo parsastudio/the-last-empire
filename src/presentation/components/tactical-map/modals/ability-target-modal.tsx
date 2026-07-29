@@ -3,6 +3,7 @@ import { Zap, Search } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface AbilityTargetModalProps {
   isOpen: boolean;
@@ -41,14 +42,14 @@ export function AbilityTargetModal({
   );
 
   const handleExecuteAbility = async () => {
+    const action = ActionFactory.activateAbility(
+      nationId,
+      "DIPLOMATIC_SUMMIT",
+      selectedCode,
+    );
+
     await dispatchAction(
-      {
-        id: `ability-target-${Date.now()}`,
-        nationId,
-        type: "ACTIVATE_ABILITY",
-        abilityType: "DIPLOMATIC_SUMMIT",
-        targetNationId: selectedCode,
-      },
+      action,
       `قابلیت ${abilityName} با موفقیت روی کشور هدف اجرا گردید.`,
     );
 

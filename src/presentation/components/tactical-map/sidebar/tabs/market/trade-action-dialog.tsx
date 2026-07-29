@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface TradeActionDialogProps {
   isOpen: boolean;
@@ -39,15 +40,15 @@ export function TradeActionDialog({
     const resType = resourceName.includes("نفت") ? "oil" : "steel";
     const isBuy = mode === "buy";
 
+    const action = ActionFactory.tradeResources(
+      nationId,
+      resType,
+      isBuy,
+      amount,
+    );
+
     const success = await dispatchAction(
-      {
-        id: `trade-${Date.now()}`,
-        nationId,
-        type: "TRADE_RESOURCES",
-        resourceType: resType,
-        isBuy,
-        amount,
-      },
+      action,
       `سفارش ${isBuy ? "خرید" : "فروش"} ${amount} ${unit} ${resourceName} اجرا شد.`,
     );
 
