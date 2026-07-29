@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
+import { MarketEngine } from "@/engine/economy/market-engine";
 
 interface UseMarketTradeProps {
   marketPrices?: ResourceMarketPrice;
@@ -64,12 +65,17 @@ export function useMarketTrade({
         return;
       }
 
-      const stock = name.includes("نفت") ? oilStock : steelStock;
-      const maxAffordable = Math.max(
-        1,
-        Math.floor(userTreasury / (price * 1.1)),
+      const isOil = name.includes("نفت");
+      const stock = isOil ? oilStock : steelStock;
+      const currentPrice = price || 100;
+      const marketEngine = new MarketEngine();
+      const maxAffordable = marketEngine.calculateMaxAffordable(
+        userTreasury,
+        { oil: currentPrice, steel: currentPrice },
+        isOil ? "oil" : "steel",
       );
-      const maxAmount = mode === "buy" ? maxAffordable : Math.max(1, stock);
+
+      const maxAmount = mode === "buy" ? maxAffordable : Math.max(0, stock);
 
       setTradeModal({
         isOpen: true,
