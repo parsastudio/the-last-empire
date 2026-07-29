@@ -114,8 +114,15 @@ export class AttackConquestHandler implements ActionHandler {
       state,
       attacker.id,
       defender.id,
-      outcome.conqueredCells,
-      outcome.capitulatedCells,
+      {
+        conquered: outcome.conqueredCells,
+        capitulated: outcome.capitulatedCells,
+        attackerLost: outcome.attackerLost,
+        defenderLost: outcome.defenderLost,
+        attackerRetreated: outcome.attackerRetreated,
+        defenderRetreated: outcome.defenderRetreated,
+        isVictory: outcome.isVictory,
+      },
     );
 
     const syncedNations = this.gdpPopUpdater.syncGlobalStats(

@@ -3,6 +3,16 @@ import { GridCell } from "@/domain/map/grid-cell.schema";
 import { CombatEventLogger } from "@/engine/combat/orchestrator/combat-event-logger";
 import { AttackConquestResultProcessor } from "@/engine/combat/actions/attack-conquest-result-processor";
 
+export interface ConquestLogData {
+  conquered: GridCell[];
+  capitulated: GridCell[];
+  attackerLost: number;
+  defenderLost: number;
+  attackerRetreated: number;
+  defenderRetreated: number;
+  isVictory: boolean;
+}
+
 export class ConquestLogWriter {
   private logger = new CombatEventLogger();
   private processor = new AttackConquestResultProcessor();
@@ -11,15 +21,26 @@ export class ConquestLogWriter {
     state: GameState,
     attackerId: string,
     defenderId: string,
-    conquered: GridCell[],
-    capitulated: GridCell[],
+    data: ConquestLogData,
   ): GameState {
     const message = this.processor.formatConquestSummary(
       attackerId,
       defenderId,
-      conquered,
-      capitulated,
+      data.conquered,
+      data.capitulated,
     );
+
+    const totalPixels = data.conquered.length + data.capitulated.length;
+    const conqueredAreaSqKm = Math.round(totalPixels * 86.3);
+
+    const metadata: Record<string, string | number | boolean> = {
+      attackerLost: data.attackerLost,
+      defenderLost: data.defenderLost,
+      attackerRetreated: data.attackerRetreated,
+      defenderRetreated: data.defenderRetreated,
+      conqueredAreaSqKm,
+      isVictory: data.isVictory,
+    };
 
     const entry = this.logger.createLogEntry(
       state.currentTurn,
@@ -27,6 +48,8 @@ export class ConquestLogWriter {
       defenderId,
       message,
     );
+
+    entry.metadata = metadata;
 
     return {
       ...state,

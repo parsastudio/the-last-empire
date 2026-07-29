@@ -24,11 +24,13 @@ export function AbilityTargetModal({
   const { dispatchAction } = useGameActions();
 
   const targetOptions = useMemo(() => {
-    return ALL_COUNTRY_PROFILES.map((p) => ({
+    return ALL_COUNTRY_PROFILES.filter(
+      (p) => `NATION_${p.id}` !== nationId,
+    ).map((p) => ({
       code: `NATION_${p.id}`,
       name: p.nameFa,
     }));
-  }, []);
+  }, [nationId]);
 
   if (!isOpen) return null;
 
