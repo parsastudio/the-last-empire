@@ -26,19 +26,19 @@ export class PersianNumberFormatter {
 
     if (absValue >= 1e12) {
       const formatted = (absValue / 1e12).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toPersianDigits(formatted)}T`;
+      return `${sign}${this.toPersianDigits(formatted)} تریلیارد`;
     }
     if (absValue >= 1e9) {
       const formatted = (absValue / 1e9).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toPersianDigits(formatted)}B`;
+      return `${sign}${this.toPersianDigits(formatted)} میلیارد`;
     }
     if (absValue >= 1e6) {
       const formatted = (absValue / 1e6).toFixed(1).replace(/\.0$/, "");
-      return `${sign}${this.toPersianDigits(formatted)}M`;
+      return `${sign}${this.toPersianDigits(formatted)} میلیون`;
     }
     if (absValue >= 1e3) {
-      const formatted = (absValue / 1e3).toFixed(0);
-      return `${sign}${this.toPersianDigits(formatted)}k`;
+      const formatted = (absValue / 1e3).toFixed(1).replace(/\.0$/, "");
+      return `${sign}${this.toPersianDigits(formatted)} هزار`;
     }
 
     return `${sign}${this.toPersianDigits(Math.round(absValue))}`;
@@ -47,16 +47,17 @@ export class PersianNumberFormatter {
   public static formatCurrency(value: number, compact = true): string {
     if (compact) {
       const compactText = this.formatCompactNumber(value);
-      return `$${compactText}`;
+      return `${compactText} دلار`;
     }
 
     const formattedWithCommas = Math.round(value).toLocaleString("en-US");
-    return `$${this.toPersianDigits(formattedWithCommas)}`;
+    return `${this.toPersianDigits(formattedWithCommas)} دلار`;
   }
 
   public static formatSignedIncome(value: number): string {
-    const compactText = this.formatCompactNumber(Math.abs(value));
+    const absValue = Math.abs(value);
+    const compactText = this.formatCurrency(absValue, true);
     const sign = value >= 0 ? "+" : "-";
-    return `${sign}$${compactText}`;
+    return `${sign}${compactText}`;
   }
 }
