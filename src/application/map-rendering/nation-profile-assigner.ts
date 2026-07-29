@@ -84,6 +84,7 @@ export class NationProfileAssigner {
       isAi: !isHuman,
       isAlive: true,
       flagCode,
+      rank: 1,
       gdp,
       taxRate: 15,
       tariffRate: 10,

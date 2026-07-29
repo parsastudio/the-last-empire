@@ -3,10 +3,12 @@ import { GovernmentType } from "@/domain/politics/politics.schema";
 import { NationProfileAssigner } from "./nation-profile-assigner";
 import { DiplomaticMatrixGenerator } from "./diplomatic-matrix-generator";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
+import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 
 export class GlobalAiInitializer {
   private profileAssigner = new NationProfileAssigner();
   private relationsGenerator = new DiplomaticMatrixGenerator();
+  private ranker = new PowerScoreRanker();
 
   public initializeAllNations(
     detectedNationsList: string[],
@@ -34,6 +36,24 @@ export class GlobalAiInitializer {
         this.relationsGenerator.generateBlankRelations(relativeList);
 
       nations[id] = nation;
+    }
+
+    const rawList = Object.values(nations).map((n) => ({
+      id: n.id,
+      gdp: n.gdp,
+      treasury: n.treasury,
+      infantry: n.military.infantry,
+      airForce: n.military.airForce,
+      drone: n.military.droneMissile,
+      techLevel: n.military.techLevel,
+    }));
+
+    const ranked = this.ranker.rankNations(rawList);
+
+    for (const item of ranked) {
+      if (nations[item.id]) {
+        nations[item.id].rank = item.rank;
+      }
     }
 
     return nations;

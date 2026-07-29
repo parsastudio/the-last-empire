@@ -7,14 +7,12 @@ import { useHoverStance } from "./use-hover-stance";
 
 interface UseHoverNationResolverProps {
   countries: CountryMapping[];
-  rankingsMap: Map<string, number>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
 }
 
 export function useHoverNationResolver({
   countries,
-  rankingsMap,
   nationsMap,
   humanNationId,
 }: UseHoverNationResolverProps) {
@@ -78,24 +76,7 @@ export function useHoverNationResolver({
         nationsMap,
       );
 
-      const possibleKeys = [
-        fullNationId,
-        fullNationId.toUpperCase(),
-        fullNationId.toLowerCase(),
-        countryCode.toUpperCase(),
-        countryCode.toLowerCase(),
-        flagCode.toUpperCase(),
-        flagCode.toLowerCase(),
-        nationIdNumber.toString(),
-      ];
-
-      let cachedRank = 99;
-      for (const key of possibleKeys) {
-        if (rankingsMap.has(key)) {
-          cachedRank = rankingsMap.get(key)!;
-          break;
-        }
-      }
+      const realRank = liveNation ? liveNation.rank : 99;
 
       let regionLabel = "";
       if (greenChannelVal > 0) {
@@ -108,14 +89,14 @@ export function useHoverNationResolver({
         name: realName,
         code: countryCode,
         flagCode,
-        rank: cachedRank,
+        rank: realRank,
         stance: stanceLabel,
         gdp: `$${gdpFormatted}B`,
         regionName: regionLabel,
         regionArea: `${Math.round(areaSqKm).toLocaleString("fa-IR")} km²`,
       };
     },
-    [countries, rankingsMap, nationsMap, humanNationId, resolveStanceLabel],
+    [countries, nationsMap, humanNationId, resolveStanceLabel],
   );
 
   return { resolveHoverInfo };
