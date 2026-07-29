@@ -2,6 +2,7 @@ import { z } from "zod";
 import { GovernmentTypeSchema } from "@/domain/politics/politics.schema";
 import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
+import { GameStateSchema } from "./game-state.schema";
 
 export const CoordinateSchema = z.object({
   x: z.number(),
@@ -204,6 +205,7 @@ export const ActionResultSchema = z.object({
   actionId: z.string(),
   message: z.string(),
   error: z.string().optional(),
+  newState: GameStateSchema.optional(),
 });
 
 export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;

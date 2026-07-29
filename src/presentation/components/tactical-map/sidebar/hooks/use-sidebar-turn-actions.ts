@@ -118,8 +118,7 @@ export function useSidebarTurnActions(
 
       const stock = name.includes("نفت") ? oilStock : steelStock;
       const maxAffordable = Math.max(1, Math.floor(treasury / (price * 1.1)));
-      const maxAmount =
-        mode === "buy" ? Math.min(1000, maxAffordable) : Math.max(1, stock);
+      const maxAmount = mode === "buy" ? maxAffordable : Math.max(1, stock);
 
       setTradeDialog({
         isOpen: true,

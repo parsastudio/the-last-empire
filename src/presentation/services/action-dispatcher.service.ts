@@ -27,6 +27,7 @@ export class ActionDispatcherService {
           success: true,
           actionId: action.id,
           message: json.message || "دستور با موفقیت ثبت گردید.",
+          newState: json.data?.newState,
         };
       }
 
