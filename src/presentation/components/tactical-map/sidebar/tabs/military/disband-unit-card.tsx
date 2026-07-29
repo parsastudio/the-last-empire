@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { UserMinus } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType } from "@/domain/military/military.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface DisbandUnitCardProps {
   nationId?: string;
@@ -21,14 +22,14 @@ export function DisbandUnitCard({
     else if (selectedUnitType === "DRONE_MISSILE")
       typeLabel = "یگان موشکی/پهپادی";
 
+    const action = ActionFactory.disbandUnit(
+      nationId,
+      selectedUnitType,
+      disbandCount,
+    );
+
     await dispatchAction(
-      {
-        id: `disband-${Date.now()}`,
-        nationId,
-        type: "DISBAND_UNIT",
-        unitType: selectedUnitType,
-        quantity: disbandCount,
-      },
+      action,
       `${disbandCount} ${typeLabel} منحل شد و نیروی انسانی به مخازن ملی بازگشت.`,
     );
   };

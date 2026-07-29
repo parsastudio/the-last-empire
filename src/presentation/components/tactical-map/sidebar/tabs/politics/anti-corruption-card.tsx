@@ -1,6 +1,7 @@
 import React from "react";
 import { ShieldCheck } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface AntiCorruptionCardProps {
   nationId?: string;
@@ -16,13 +17,10 @@ export function AntiCorruptionCard({
 
   const handleAntiCorruption = async () => {
     if (!canAfford) return;
+
+    const action = ActionFactory.antiCorruptionDrive(nationId, 25000);
     await dispatchAction(
-      {
-        id: `anti-corr-${Date.now()}`,
-        nationId,
-        type: "ANTI_CORRUPTION_DRIVE",
-        amount: 25000,
-      },
+      action,
       "مبلغ $25,000 به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری کاهش یافت.",
     );
   };
