@@ -47,7 +47,9 @@ export function CommandRail({
 
   return (
     <aside
-      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl ${
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl pointer-events-auto ${
         isCollapsed ? "w-16" : "w-48"
       }`}
     >

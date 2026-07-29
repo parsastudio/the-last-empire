@@ -15,6 +15,7 @@ export function useBattleValidation(
       return;
     }
 
+    const currentCoord = coordinate;
     let active = true;
 
     async function validateAttackOnServer() {
@@ -25,8 +26,8 @@ export function useBattleValidation(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             attackerId,
-            x: coordinate.x,
-            y: coordinate.y,
+            x: currentCoord.x,
+            y: currentCoord.y,
           }),
         });
 
@@ -55,5 +56,5 @@ export function useBattleValidation(
   const effectiveValidationResult =
     !isOpen || !attackerId || !coordinate ? null : validationResult;
 
-  return { validationResult: effectiveResult, loading };
+  return { validationResult: effectiveValidationResult, loading };
 }

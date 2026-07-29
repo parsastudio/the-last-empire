@@ -21,7 +21,9 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
 
   return (
     <header
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-40 bg-card/85 backdrop-blur-xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl flex items-center justify-between gap-3 text-foreground select-none max-w-5xl w-[92vw] md:w-auto dir-rtl transition-all"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-40 bg-card/85 backdrop-blur-xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl flex items-center justify-between gap-3 text-foreground select-none max-w-5xl w-[92vw] md:w-auto dir-rtl transition-all pointer-events-auto"
       dir="rtl"
     >
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
