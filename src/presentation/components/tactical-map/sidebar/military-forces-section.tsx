@@ -21,9 +21,7 @@ export function MilitaryForcesSection({
 }: MilitaryForcesSectionProps) {
   const infantryMoneyUpkeep = Math.floor(infantry * 12 * techLevel);
   const airForceMoneyUpkeep = Math.floor(airForce * 36 * techLevel);
-  const airForceOilUpkeep = Math.ceil(airForce * 0.5);
   const droneMoneyUpkeep = Math.floor(droneMissile * 2.4 * techLevel);
-  const droneOilUpkeep = Math.ceil(droneMissile * 0.5);
 
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -43,11 +41,8 @@ export function MilitaryForcesSection({
                 پیاده‌نظام رزمی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                نگهداری: $
-                {PersianNumberFormatter.toPersianDigits(
-                  infantryMoneyUpkeep.toLocaleString("en-US"),
-                )}{" "}
-                | بدون مصرف سوخت
+                نگهداری نوبتی:{" "}
+                {PersianNumberFormatter.formatCurrency(infantryMoneyUpkeep)}
               </span>
             </div>
           </div>
@@ -87,15 +82,9 @@ export function MilitaryForcesSection({
                 نیروی هوایی و جنگنده
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                نگهداری: $
-                {PersianNumberFormatter.toPersianDigits(
-                  airForceMoneyUpkeep.toLocaleString("en-US"),
-                )}{" "}
-                |{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  airForceOilUpkeep.toLocaleString("en-US"),
-                )}{" "}
-                بشکه نفت/نوبت
+                نگهداری نوبتی:{" "}
+                {PersianNumberFormatter.formatCurrency(airForceMoneyUpkeep)} |
+                مصرف سوخت فقط هنگام نبرد
               </span>
             </div>
           </div>
@@ -115,15 +104,9 @@ export function MilitaryForcesSection({
                 پهپاد و تسلیحات موشکی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                نگهداری: $
-                {PersianNumberFormatter.toPersianDigits(
-                  droneMoneyUpkeep.toLocaleString("en-US"),
-                )}{" "}
-                |{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  droneOilUpkeep.toLocaleString("en-US"),
-                )}{" "}
-                بشکه نفت/نوبت
+                نگهداری نوبتی:{" "}
+                {PersianNumberFormatter.formatCurrency(droneMoneyUpkeep)} | مصرف
+                سوخت فقط هنگام نبرد
               </span>
             </div>
           </div>

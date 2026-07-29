@@ -19,7 +19,6 @@ export function ResourcesSection({
   manpower,
   industrialLevel,
   infrastructureLevel = 1,
-  oilRequiredPerTurn = 0,
   oilProducedPerTurn = 0,
   steelProducedPerTurn = 0,
 }: ResourcesSectionProps) {
@@ -65,15 +64,9 @@ export function ResourcesSection({
                 بشکه
               </span>
             )}
-            {oilRequiredPerTurn > 0 && (
-              <span className="text-[9px] text-muted-foreground block font-sans">
-                مصرف نوبتی:{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  oilRequiredPerTurn.toLocaleString("en-US"),
-                )}{" "}
-                بشکه
-              </span>
-            )}
+            <span className="text-[9px] text-muted-foreground block font-sans">
+              مصرف نوبتی: بدون مصرف در صلح
+            </span>
           </div>
         </div>
 

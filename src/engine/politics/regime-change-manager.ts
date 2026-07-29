@@ -18,7 +18,7 @@ export class RegimeChangeManager {
         `Must wait at least 15 turns between government regime changes. Current turns in power: ${nation.government.turnsInPower}`,
       );
     }
-    const changeCost = Math.min(250000, Math.floor(nation.gdp * 0.05));
+    const changeCost = Math.floor(nation.gdp * 0.01);
     if (nation.treasury < changeCost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",

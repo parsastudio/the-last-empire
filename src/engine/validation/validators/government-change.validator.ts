@@ -33,7 +33,7 @@ export class GovernmentChangeValidator implements ActionValidator {
       );
     }
 
-    const changeCost = Math.min(250000, Math.floor(sourceNation.gdp * 0.05));
+    const changeCost = Math.floor(sourceNation.gdp * 0.01);
 
     if (sourceNation.treasury < changeCost) {
       throw new GameError(

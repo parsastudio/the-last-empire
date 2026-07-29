@@ -20,37 +20,10 @@ export class ResourceDependencyManager {
   }
 
   public applyOilScarcityPenalty(nation: Nation, baseUpkeep: number): number {
-    const requiredOilPerTurn = Math.ceil(
-      (nation.military.airForce + nation.military.droneMissile) * 0.5,
-    );
-
-    if (requiredOilPerTurn <= 0) {
-      return baseUpkeep;
-    }
-
-    if (nation.resources.oil < requiredOilPerTurn) {
-      const availableRatio = nation.resources.oil / requiredOilPerTurn;
-      const penaltyMultiplier = 1.0 + (1.0 - availableRatio) * 2.0;
-      return Math.floor(baseUpkeep * penaltyMultiplier);
-    }
-
     return baseUpkeep;
   }
 
   public consumeTurnResources(nation: Nation): Nation {
-    const requiredOil = Math.ceil(
-      (nation.military.airForce + nation.military.droneMissile) * 0.5,
-    );
-
-    const availableOil = nation.resources.oil;
-    const newOil = Math.max(0, availableOil - requiredOil);
-
-    return {
-      ...nation,
-      resources: {
-        ...nation.resources,
-        oil: newOil,
-      },
-    };
+    return nation;
   }
 }
