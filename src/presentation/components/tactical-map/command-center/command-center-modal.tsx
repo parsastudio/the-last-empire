@@ -15,7 +15,6 @@ interface CommandCenterModalProps {
   reports: CombatReport[];
   onClose: () => void;
   onFocusCountry?: (code: string) => void;
-  onSelectReport: (report: CombatReport) => void;
   onOpenTrade: (
     name: string,
     unit: string,

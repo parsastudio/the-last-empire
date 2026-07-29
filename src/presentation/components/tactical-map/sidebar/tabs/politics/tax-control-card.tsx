@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Landmark } from "lucide-react";
 import { TaxSlider } from "./tax-slider";
 import { PredictiveImpactBox } from "./predictive-impact-box";
@@ -22,7 +22,6 @@ export function TaxControlCard({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [prevInitialRate, setPrevInitialRate] =
     useState<number>(initialTaxRate);
-  const inputRef = useRef<HTMLInputElement>(null);
   const { dispatchAction } = useGameActions();
 
   if (initialTaxRate !== prevInitialRate) {
@@ -59,7 +58,6 @@ export function TaxControlCard({
         <TaxSlider
           taxRate={taxRate}
           isDragging={isDragging}
-          inputRef={inputRef}
           onChange={handleSliderChange}
           onDragStart={() => setIsDragging(true)}
           onDragEnd={() => setIsDragging(false)}

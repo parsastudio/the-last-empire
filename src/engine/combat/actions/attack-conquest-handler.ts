@@ -40,24 +40,10 @@ export class AttackConquestHandler implements ActionHandler {
       (state as { gridState?: GridState }).gridState || new GridState();
     const allCells = gridState.getAllCells();
 
-    let targetX = 0;
-    let targetY = 0;
-
-    if (attackAction.targetCoordinate) {
-      targetX = attackAction.targetCoordinate.x;
-      targetY = attackAction.targetCoordinate.y;
-    } else if (
-      attackAction.targetX !== undefined &&
-      attackAction.targetY !== undefined
-    ) {
-      targetX = attackAction.targetX;
-      targetY = attackAction.targetY;
-    } else {
-      targetX = Math.floor(attackAction.infantry % 1024);
-      targetY = Math.floor(attackAction.airForce % 512);
-    }
-
-    const clickedPixel = { x: targetX, y: targetY };
+    const clickedPixel = attackAction.targetCoordinate ?? {
+      x: attackAction.targetX ?? Math.floor(attackAction.infantry % 1024),
+      y: attackAction.targetY ?? Math.floor(attackAction.airForce % 512),
+    };
 
     const targetPixel = this.coastalLocator.locateClosest(
       defender.id,

@@ -2,12 +2,13 @@ import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "../nation-list-item";
 import { NationDatabaseProvider } from "../utils/nation-database-provider";
-
 import { GameIdGenerator } from "@/domain/shared/game-id-generator";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
+import { useToast } from "@/presentation/context/toast-context";
 
 export function useSelectNationForm() {
   const router = useRouter();
+  const { showToast } = useToast();
   const provider = useMemo(() => new NationDatabaseProvider(), []);
   const apiService = useMemo(() => new GameStateApiService(), []);
 
@@ -48,12 +49,20 @@ export function useSelectNationForm() {
       if (result.success) {
         router.push(`/play/${uniqueGameId}`);
       } else {
-        alert(result.error || "خطا در راه‌اندازی کمپین بازی");
+        showToast(
+          "خطا در ایجاد کمپین",
+          result.error || "خطا در راه‌اندازی کمپین جدید بازی",
+          "error",
+        );
       }
     } catch {
-      alert("خطا در راه‌اندازی کمپین بازی");
+      showToast(
+        "خطای شبکه",
+        "ارتباط با سرور جهت ایجاد کمپین جدید برقرار نشد.",
+        "error",
+      );
     }
-  }, [selectedNation.id, selectedGovernment, apiService, router]);
+  }, [selectedNation.id, selectedGovernment, apiService, router, showToast]);
 
   return {
     allNations,
