@@ -47,10 +47,10 @@ export function TurnEventDialog({
         {
           id: `event-choice-${Date.now()}`,
           nationId,
-          type: "ANTI_CORRUPTION_DRIVE",
-          amount: 10000,
+          type: "SET_TAX_RATE",
+          newRate: 20,
         },
-        "سهمیه‌بندی سوخت صنایع اعمال گردید.",
+        "سهمیه‌بندی سوخت صنایع و تنظیم مجدد مالیات اعمال گردید.",
       );
     } else {
       showToast(
