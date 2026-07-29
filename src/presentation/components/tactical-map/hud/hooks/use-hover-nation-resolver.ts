@@ -49,7 +49,10 @@ export function useHoverNationResolver({
     let stanceLabel = "دیپلماسی صلح‌آمیز";
     if (humanNationId && nationsMap && nationsMap[humanNationId]) {
       const humanNation = nationsMap[humanNationId];
-      const relation = humanNation.relations[fullNationId];
+      const relation =
+        humanNation.relations[fullNationId] ||
+        humanNation.relations[matchedCountry.code.toUpperCase()];
+
       if (relation) {
         if (relation.stance === "WAR") stanceLabel = "در حال جنگ مستقیم";
         else if (relation.stance === "ALLIANCE") stanceLabel = "متحد استراتژیک";
