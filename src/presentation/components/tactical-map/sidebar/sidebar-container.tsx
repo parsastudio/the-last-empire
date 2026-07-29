@@ -69,10 +69,6 @@ export function SidebarContainer({
         reports={actions.realReports}
         onClose={actions.handleCloseActiveModal}
         onFocusCountry={onFocusCountry}
-        onSelectReport={(report) => {
-          actions.setModalReports([report]);
-          actions.setIsModalOpen(true);
-        }}
         onOpenTrade={actions.handleOpenTrade}
       />
 
