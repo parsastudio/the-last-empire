@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Coins, Fuel, Wrench, Users, Bell, Search } from "lucide-react";
+import { Coins, Fuel, Wrench, Users, Bell } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
 import { ResourceBadge } from "./resource-badge";
 import { StabilityMeterBadge } from "./stability-meter-badge";
@@ -13,14 +13,9 @@ import { useTopHudMetrics } from "./hooks/use-top-hud-metrics";
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
   onOpenPending?: (tab?: string) => void;
-  onOpenCommandPalette?: () => void;
 }
 
-export function TopHudBar({
-  metrics,
-  onOpenPending,
-  onOpenCommandPalette,
-}: TopHudBarProps) {
+export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
   const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
   const formatted = useTopHudMetrics(metrics);
 
@@ -92,17 +87,6 @@ export function TopHudBar({
         </div>
 
         <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">
-          {onOpenCommandPalette && (
-            <button
-              onClick={onOpenCommandPalette}
-              className="flex items-center gap-1 px-2 py-1 rounded-xl bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground text-[10px] font-mono border border-border/60 cursor-pointer"
-              title="جستجوی سریع (Ctrl+K)"
-            >
-              <Search size={12} />
-              <span className="hidden md:inline">Ctrl+K</span>
-            </button>
-          )}
-
           {metrics.pendingDecisionsCount > 0 && (
             <button
               onClick={handleOpenPending}

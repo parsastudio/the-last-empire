@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { SidebarTabType } from "./sidebar-tabs";
 import { CommandRail } from "../command-rail/command-rail";
 import { CommandCenterModal } from "../command-center/command-center-modal";
@@ -8,11 +8,6 @@ import { TurnEventDialog } from "./dialogs/turn-event-dialog";
 import { MarketTradeDialogWrapper } from "./dialogs/market-trade-dialog-wrapper";
 import { useSidebarTurnActions } from "./hooks/use-sidebar-turn-actions";
 import { GameState } from "@/domain/game/game-state.schema";
-import { CommandPaletteModal } from "../navigation/command-palette-modal";
-import { GameSettingsModal } from "../modals/game-settings-modal";
-import { GameGuideModal } from "../modals/game-guide-modal";
-import { OverviewTreeModal } from "../navigation/overview-tree-modal";
-import { useModalKeyboardListener } from "../navigation/hooks/use-modal-keyboard-listener";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -43,24 +38,9 @@ export function SidebarContainer({
     advanceNextTurn,
   );
 
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
-  const [isOverviewTreeOpen, setIsOverviewTreeOpen] = useState(false);
-
-  useModalKeyboardListener({
-    onOpenCommandPalette: () => setIsCommandPaletteOpen(true),
-    onOpenSettings: () => setIsSettingsOpen(true),
-    onOpenGuide: () => setIsGuideOpen(true),
-  });
-
   if (!isOpen) return null;
 
   const effectiveTargetCode = actions.selectedTargetCode || selectedTargetCode;
-
-  const handleSelectTreeNode = (tab: SidebarTabType, subTab?: string) => {
-    actions.handleNavigateTab(tab, subTab, effectiveTargetCode || undefined);
-  };
 
   return (
     <>
@@ -72,8 +52,6 @@ export function SidebarContainer({
         onSelectTab={actions.setInternalActiveTab}
         onToggleCollapse={() => actions.setIsRailCollapsed((prev) => !prev)}
         onNextTurn={actions.handleNextTurn}
-        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {!actions.isRailCollapsed && (
@@ -98,10 +76,6 @@ export function SidebarContainer({
         onNavigateTab={(tab, subTab, targetCode) =>
           actions.handleNavigateTab(tab, subTab, targetCode)
         }
-        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenGuide={() => setIsGuideOpen(true)}
-        onOpenOverviewTree={() => setIsOverviewTreeOpen(true)}
       />
 
       <TurnSummaryModal
@@ -123,28 +97,6 @@ export function SidebarContainer({
         onConfirm={() =>
           actions.setTradeDialog((prev) => ({ ...prev, isOpen: false }))
         }
-      />
-
-      <CommandPaletteModal
-        isOpen={isCommandPaletteOpen}
-        onClose={() => setIsCommandPaletteOpen(false)}
-        onSelectNode={handleSelectTreeNode}
-      />
-
-      <GameSettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
-
-      <GameGuideModal
-        isOpen={isGuideOpen}
-        onClose={() => setIsGuideOpen(false)}
-      />
-
-      <OverviewTreeModal
-        isOpen={isOverviewTreeOpen}
-        onClose={() => setIsOverviewTreeOpen(false)}
-        onSelectNode={handleSelectTreeNode}
       />
     </>
   );
