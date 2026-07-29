@@ -142,6 +142,7 @@ function MapTest6Content({ gameId }: { gameId: string }) {
 
         <TacticalMapOverlay
           metrics={metrics}
+          gameState={gameState}
           contextMenuState={interaction.contextMenuState}
           activeScreenPos={interaction.activeScreenPos}
           attackModalState={interaction.attackModalState}
@@ -159,6 +160,7 @@ function MapTest6Content({ gameId }: { gameId: string }) {
 
       <SidebarContainer
         isOpen={isSidebarOpen}
+        gameId={gameId}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
         onFocusCountry={focusOnCountry}

@@ -34,7 +34,11 @@ export class TerritoryCalibrator {
         totalCalibratedArea += this.calibrator.getCalibratedCellArea(cell);
       }
 
-      const roundedArea = Math.round(totalCalibratedArea);
+      let roundedArea = Math.round(totalCalibratedArea);
+      if (roundedArea === 0 && nation.geography.territorySize > 0) {
+        roundedArea = nation.geography.territorySize;
+      }
+
       const lNeighbors = Array.from(landNeighborsMap.get(id) || []);
       const sNeighbors = Array.from(seaNeighborsMap.get(id) || []);
       const hasAccess = oceanAccessMap.get(id) || false;

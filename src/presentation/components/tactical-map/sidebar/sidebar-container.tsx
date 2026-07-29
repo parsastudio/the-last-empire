@@ -10,6 +10,7 @@ import { useSidebarTurnActions } from "./hooks/use-sidebar-turn-actions";
 
 interface SidebarContainerProps {
   isOpen: boolean;
+  gameId?: string;
   externalActiveTab?: SidebarTabType | null;
   selectedTargetCode?: string | null;
   onClearExternalTab?: () => void;
@@ -18,12 +19,17 @@ interface SidebarContainerProps {
 
 export function SidebarContainer({
   isOpen,
+  gameId,
   externalActiveTab,
   selectedTargetCode,
   onClearExternalTab,
   onFocusCountry,
 }: SidebarContainerProps) {
-  const actions = useSidebarTurnActions(externalActiveTab, onClearExternalTab);
+  const actions = useSidebarTurnActions(
+    externalActiveTab,
+    onClearExternalTab,
+    gameId,
+  );
 
   if (!isOpen) return null;
 
@@ -52,6 +58,7 @@ export function SidebarContainer({
         activeTab={actions.activeTab}
         selectedTargetCode={selectedTargetCode}
         nation={actions.humanNation}
+        gameState={actions.gameState}
         reports={actions.realReports}
         onClose={actions.handleCloseActiveModal}
         onFocusCountry={onFocusCountry}
