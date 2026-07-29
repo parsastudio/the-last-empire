@@ -40,6 +40,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           steel={nation.resources.steel}
           manpower={nation.resources.manpower}
           industrialLevel={nation.industrialLevel}
+          infrastructureLevel={nation.geography.infrastructureLevel}
         />
       </div>
 
