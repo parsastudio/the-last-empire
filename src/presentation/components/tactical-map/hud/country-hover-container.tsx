@@ -27,6 +27,7 @@ interface CountryHoverContainerProps {
   position: { x: number; y: number };
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
+  isDragging?: boolean;
 }
 
 export function CountryHoverContainer({
@@ -40,30 +41,23 @@ export function CountryHoverContainer({
   position,
   nationsMap,
   humanNationId,
+  isDragging = false,
 }: CountryHoverContainerProps) {
   const rankingsMap = useCountryHoverRankings(countries, nationsMap);
-  const { hoverData, cursorPos, handleMouseMove, handleMouseLeave } =
-    useCountryHoverMath({
-      countries,
-      maskDataRef,
-      packed1024Ref,
-      mapWidth,
-      mapHeight,
-      containerRef,
-      scale,
-      position,
-      rankingsMap,
-      nationsMap,
-      humanNationId,
-    });
+  const { hoverData, cursorPos } = useCountryHoverMath({
+    countries,
+    maskDataRef,
+    packed1024Ref,
+    mapWidth,
+    mapHeight,
+    containerRef,
+    scale,
+    position,
+    rankingsMap,
+    nationsMap,
+    humanNationId,
+    isDragging,
+  });
 
-  return (
-    <div
-      className="absolute inset-0 pointer-events-none z-30"
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <CountryHoverHud info={hoverData} cursorPos={cursorPos} />
-    </div>
-  );
+  return <CountryHoverHud info={hoverData} cursorPos={cursorPos} />;
 }
