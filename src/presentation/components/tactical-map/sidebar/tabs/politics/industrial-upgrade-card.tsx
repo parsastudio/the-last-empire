@@ -5,16 +5,20 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 interface IndustrialUpgradeCardProps {
   currentLevel?: number;
   nationId?: string;
+  treasury?: number;
 }
 
 export function IndustrialUpgradeCard({
   currentLevel = 1,
   nationId = "NATION_118",
+  treasury = 100000,
 }: IndustrialUpgradeCardProps) {
   const upgradeCost = Math.floor(50000 * Math.pow(1.3, currentLevel - 1));
+  const canAfford = treasury >= upgradeCost;
   const { dispatchAction } = useGameActions();
 
   const handleUpgrade = async () => {
+    if (!canAfford) return;
     await dispatchAction(
       {
         id: `ind-up-${Date.now()}`,
@@ -51,9 +55,12 @@ export function IndustrialUpgradeCard({
 
         <button
           onClick={handleUpgrade}
-          className="w-full py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
+          disabled={!canAfford}
+          className="w-full py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
-          ارتقا به سطح {currentLevel + 1}
+          {canAfford
+            ? `ارتقا به سطح ${currentLevel + 1}`
+            : "خزانه ناکافی جهت ارتقای صنعت"}
         </button>
       </div>
     </div>

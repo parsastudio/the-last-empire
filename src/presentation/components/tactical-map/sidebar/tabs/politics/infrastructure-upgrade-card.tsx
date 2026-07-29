@@ -5,16 +5,20 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 interface InfrastructureUpgradeCardProps {
   currentLevel?: number;
   nationId?: string;
+  treasury?: number;
 }
 
 export function InfrastructureUpgradeCard({
   currentLevel = 1,
   nationId = "NATION_118",
+  treasury = 100000,
 }: InfrastructureUpgradeCardProps) {
   const upgradeCost = Math.floor(30000 * Math.pow(1.25, currentLevel - 1));
+  const canAfford = treasury >= upgradeCost;
   const { dispatchAction } = useGameActions();
 
   const handleUpgradeInfra = async () => {
+    if (!canAfford) return;
     await dispatchAction(
       {
         id: `infra-up-${Date.now()}`,
@@ -51,9 +55,12 @@ export function InfrastructureUpgradeCard({
 
         <button
           onClick={handleUpgradeInfra}
-          className="w-full py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
+          disabled={!canAfford}
+          className="w-full py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
-          نوسازی زیرساخت مرزی
+          {canAfford
+            ? `نوسازی زیرساخت مرزی (سطح ${currentLevel + 1})`
+            : "خزانه ناکافی جهت نوسازی زیرساخت"}
         </button>
       </div>
     </div>
