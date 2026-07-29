@@ -4,8 +4,134 @@ import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/map/countries";
+import { ManifestNationItem } from "./generator/map-manifest-builder";
 
 export class NationProfileAssigner {
+  public buildNationFromManifest(
+    item: ManifestNationItem,
+    isHuman: boolean,
+    customGovType?: GovernmentType | string,
+  ): Nation {
+    const numericId = item.numericId;
+    const profile = findCountryProfileById(numericId);
+
+    const validGovTypes: GovernmentType[] = [
+      "DEMOCRACY",
+      "DICTATORSHIP",
+      "MONARCHY",
+      "COMMUNISM",
+      "FASCISM",
+    ];
+
+    let govType: GovernmentType =
+      (item.defaultGovernment as GovernmentType) ?? "DEMOCRACY";
+    if (
+      customGovType &&
+      validGovTypes.includes(customGovType as GovernmentType)
+    ) {
+      govType = customGovType as GovernmentType;
+    }
+
+    let stability = 80;
+    let corruption = 5;
+    let socialFreedom = 80;
+
+    if (govType === "MONARCHY") {
+      stability = 85;
+      corruption = 15;
+      socialFreedom = 50;
+    } else if (govType === "COMMUNISM") {
+      stability = 75;
+      corruption = 25;
+      socialFreedom = 30;
+    } else if (govType === "DICTATORSHIP") {
+      stability = 60;
+      corruption = 35;
+      socialFreedom = 20;
+    } else if (govType === "FASCISM") {
+      stability = 65;
+      corruption = 30;
+      socialFreedom = 10;
+    }
+
+    const techLevel = profile?.startingTechLevel ?? 1;
+    const industrialLevel = Math.max(1, Math.min(5, techLevel));
+    const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
+
+    const isTier1 = item.gdp >= 1000000000000;
+    const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
+
+    const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
+    const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
+    const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
+
+    return {
+      id: item.id,
+      name: item.nameFa,
+      isAi: !isHuman,
+      isAlive: true,
+      flagCode: item.flagCode,
+      rank: item.initialRank,
+      gdp: item.gdp,
+      taxRate: 15,
+      tariffRate: 10,
+      treasury: item.startingTreasury,
+      nationalDebt: isTier1 ? 50000 : 0,
+      population: item.population,
+      warExhaustion: 0,
+      industrialLevel,
+      adminBurdenMultiplier: 1.0,
+      consecutiveDeficitTurns: 0,
+      government: {
+        type: govType,
+        stability,
+        corruption,
+        socialFreedom,
+        turnsInPower: 5,
+      },
+      resources: {
+        oil: isTier2 ? 5000 : 1000,
+        steel: isTier1 ? 2000 : 1000,
+        manpower: 500,
+      },
+      upkeep: {
+        infantryUpkeep: 1,
+        airForceUpkeep: 1,
+        droneMissileUpkeep: 1,
+        infrastructureUpkeep: 1,
+      },
+      military: {
+        infantry,
+        airForce,
+        droneMissile,
+        experience: 10,
+        techLevel,
+      },
+      recruitmentQueue: [],
+      geography: {
+        landNeighbors: [],
+        seaNeighbors: [],
+        hasSeaAccess: true,
+        territorySize: item.territorySize,
+        infrastructureLevel,
+        contiguousMainlandSize: item.territorySize,
+        isolatedPockets: [],
+        coordinates: [],
+      },
+      relations: {},
+      activeModifiers: [],
+      traits: profile ? profile.traits : ["FRAGILE_ECONOMY"],
+      globalReputation: 50,
+      globalAggression: 0,
+      doctrines: {
+        doctrinePoints: 0,
+        unlockedDoctrines: [],
+      },
+      proxyInfluenceBudget: {},
+      regionsDemographics: [],
+    };
+  }
+
   public buildStartingNation(
     id: string,
     isHuman: boolean,
