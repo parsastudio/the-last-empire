@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ToastProvider } from "@/presentation/context/toast-context";
+import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 
 export const metadata: Metadata = {
   title: "آخرین امپراتوری | بازی آنلاین استراتژیک ژئوپلیتیک",
@@ -15,7 +17,10 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <ToastProvider>
+          {children}
+          <StrategicToastContainer />
+        </ToastProvider>
       </body>
     </html>
   );
