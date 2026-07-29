@@ -22,28 +22,48 @@ export function WideDiplomacyView({
   humanNationId = "NATION_118",
 }: WideDiplomacyViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeCode, setActiveCode] = useState<string>(
-    selectedTargetCode || "USA",
-  );
 
   const idResolver = useMemo(() => new NationIdResolver(), []);
 
-  const relationsList = nationsMap
-    ? Object.values(nationsMap).map((n) => {
-        const rel = resolveProfileRelation(n.flagCode || n.id, n);
-        const humanNation = nationsMap[humanNationId];
-        if (humanNation) {
-          const directRel = humanNation.relations[n.id];
-          if (directRel) {
-            rel.stance = directRel.stance;
-            rel.opinion = directRel.opinion;
+  const relationsList = useMemo(() => {
+    if (nationsMap) {
+      return Object.values(nationsMap)
+        .filter((n) => n.id !== humanNationId && n.isAlive)
+        .map((n) => {
+          const rel = resolveProfileRelation(n.id, n);
+          const humanNation = nationsMap[humanNationId];
+          if (humanNation) {
+            const directRel = humanNation.relations[n.id];
+            if (directRel) {
+              rel.stance = directRel.stance;
+              rel.opinion = directRel.opinion;
+            }
           }
-        }
-        return rel;
-      })
-    : ALL_COUNTRY_PROFILES.slice(0, 15).map((p) =>
-        resolveProfileRelation(p.code),
-      );
+          return rel;
+        });
+    }
+
+    return ALL_COUNTRY_PROFILES.filter(
+      (p) => `NATION_${p.id}` !== humanNationId,
+    ).map((p) => resolveProfileRelation(p.code));
+  }, [humanNationId, nationsMap]);
+
+  const defaultCode = relationsList[0]?.code || "USA";
+  const [activeCode, setActiveCode] = useState<string>(
+    selectedTargetCode || defaultCode,
+  );
+
+  const filteredRelations = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return relationsList;
+
+    return relationsList.filter(
+      (r) =>
+        r.name.toLowerCase().includes(query) ||
+        r.code.toLowerCase().includes(query) ||
+        r.flagCode.toLowerCase().includes(query),
+    );
+  }, [relationsList, searchQuery]);
 
   const targetNationId = idResolver.resolveFullNationId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
@@ -59,7 +79,7 @@ export function WideDiplomacyView({
           />
           <input
             type="text"
-            placeholder="جستجوی کشور..."
+            placeholder="جستجوی نام یا نماد کشور..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right"
@@ -67,17 +87,19 @@ export function WideDiplomacyView({
         </div>
 
         <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin">
-          {relationsList
-            .filter((r) =>
-              r.name.toLowerCase().includes(searchQuery.toLowerCase()),
-            )
-            .map((rel) => (
+          {filteredRelations.length === 0 ? (
+            <div className="py-12 text-center text-xs text-muted-foreground italic">
+              هیچ کشوری با این عبارت یافت نشد.
+            </div>
+          ) : (
+            filteredRelations.map((rel) => (
               <DiplomacyListItem
                 key={rel.code}
                 relation={rel}
                 onSelect={(selected) => setActiveCode(selected.code)}
               />
-            ))}
+            ))
+          )}
         </div>
       </div>
 
