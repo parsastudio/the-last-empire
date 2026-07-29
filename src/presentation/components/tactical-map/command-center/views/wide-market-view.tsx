@@ -1,7 +1,7 @@
 import React from "react";
 import { MarketHeader } from "../../sidebar/tabs/market/market-header";
 import { CommodityCard } from "../../sidebar/tabs/market/commodity-card";
-import { Fuel, Wrench } from "lucide-react";
+import { Fuel, Wrench, Coins } from "lucide-react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 
 interface WideMarketViewProps {
@@ -37,6 +37,16 @@ export function WideMarketView({
   return (
     <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
       <MarketHeader />
+
+      <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between font-mono text-xs">
+        <span className="text-muted-foreground font-sans flex items-center gap-1.5">
+          <Coins size={14} className="text-gdp" />
+          موجودی خزانه ملی جهت معامله:
+        </span>
+        <span className="font-bold text-gdp text-sm">
+          ${userTreasury.toLocaleString("fa-IR")}
+        </span>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <CommodityCard
