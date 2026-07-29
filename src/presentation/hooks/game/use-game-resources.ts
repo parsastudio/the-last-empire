@@ -3,6 +3,10 @@
 import { useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
+import { TaxCalculator } from "@/engine/economy/tax-calculator";
+import { UpkeepCalculator } from "@/engine/economy/upkeep-calculator";
+import { TradeRouteManager } from "@/engine/economy/trade-route-manager";
+import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -18,6 +22,11 @@ export interface HumanResourceMetrics {
   currentTurn: number;
   pendingDecisionsCount: number;
 }
+
+const taxCalculator = new TaxCalculator();
+const upkeepCalculator = new UpkeepCalculator();
+const tradeRouteManager = new TradeRouteManager();
+const tariffCalculator = new TariffCalculator();
 
 export function useGameResources(
   gameState: GameState | null,
@@ -71,11 +80,22 @@ export function useGameResources(
       };
     }
 
-    const grossTax = Math.floor(nation.gdp * (nation.taxRate / 100));
-    const corruptionLoss = Math.floor(
-      grossTax * (nation.government.corruption / 100),
+    const taxResult = taxCalculator.evaluateTaxPolicy(nation);
+    const upkeepBreakdown = upkeepCalculator.calculateUpkeep(nation);
+    const tradeRevenue = tradeRouteManager.calculateTotalTradeRevenue(
+      nation,
+      gameState.nations,
     );
-    const netIncome = grossTax - corruptionLoss;
+    const tariffResult = tariffCalculator.calculateTariffEffects(
+      nation,
+      tradeRevenue,
+    );
+
+    const totalIncome =
+      taxResult.taxIncome + tradeRevenue + tariffResult.tariffRevenue;
+    const totalExpenses =
+      upkeepBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
+    const netIncome = totalIncome - totalExpenses;
 
     const oilRequired = Math.ceil(
       (nation.military.airForce + nation.military.droneMissile) * 0.5,
