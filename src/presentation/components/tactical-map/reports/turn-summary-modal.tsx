@@ -7,12 +7,14 @@ import { UnifiedModalShell } from "@/presentation/components/common/unified-moda
 interface TurnSummaryModalProps {
   isOpen: boolean;
   reports: CombatReport[];
+  humanNationId?: string;
   onClose: () => void;
 }
 
 export function TurnSummaryModal({
   isOpen,
   reports,
+  humanNationId,
   onClose,
 }: TurnSummaryModalProps) {
   const [selectedReport, setSelectedReport] = useState<CombatReport | null>(
@@ -37,13 +39,14 @@ export function TurnSummaryModal({
       {selectedReport ? (
         <ReportDetailsView
           report={selectedReport}
+          humanNationId={humanNationId}
           onBack={() => setSelectedReport(null)}
         />
       ) : (
         <div className="space-y-4">
           {reports.length === 0 ? (
             <div className="py-12 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
-              در این نوبت هیچ عملیات نظامی یا درگیری رخ نداده است.
+              در این نوبت هیچ رویداد یا عملیات نظامی خاصی ثبت نشده است.
             </div>
           ) : (
             <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border">
