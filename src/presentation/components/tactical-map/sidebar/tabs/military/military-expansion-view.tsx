@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Swords } from "lucide-react";
 import { RECRUITABLE_UNITS, UnitConfig } from "./recruitable-units.config";
 import { UnitRecruitmentCard } from "./unit-recruitment-card";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType } from "@/domain/military/military.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface MilitaryExpansionViewProps {
   nationId?: string;
@@ -19,42 +20,19 @@ export function MilitaryExpansionView({
   steel = 1000,
 }: MilitaryExpansionViewProps) {
   const { dispatchAction } = useGameActions();
-  const [quantities, setQuantities] = useState<Record<string, number>>({
-    INFANTRY: 1,
-    AIR_FORCE: 1,
-    DRONE_MISSILE: 1,
-  });
 
-  const handleQuantitySet = (type: string, amount: number) => {
-    setQuantities((prev) => ({ ...prev, [type]: amount }));
-  };
+  const handleRecruit = async (unit: UnitConfig, quantity: number) => {
+    if (quantity <= 0) return;
 
-  const calculateMaxAffordable = (unit: UnitConfig): number => {
-    const maxMoney =
-      unit.moneyCost > 0 ? Math.floor(treasury / unit.moneyCost) : Infinity;
-    const maxManpower =
-      unit.manpowerCost > 0
-        ? Math.floor(manpower / unit.manpowerCost)
-        : Infinity;
-    const maxSteel =
-      unit.steelCost > 0 ? Math.floor(steel / unit.steelCost) : Infinity;
-
-    return Math.max(0, Math.min(maxMoney, maxManpower, maxSteel));
-  };
-
-  const handleRecruit = async (unit: UnitConfig) => {
-    const qty = quantities[unit.type] || 0;
-    if (qty <= 0) return;
+    const action = ActionFactory.recruitUnit(
+      nationId,
+      unit.type as UnitType,
+      quantity,
+    );
 
     await dispatchAction(
-      {
-        id: `recruit-${Date.now()}`,
-        nationId,
-        type: "RECRUIT_UNIT",
-        unitType: unit.type as UnitType,
-        quantity: qty,
-      },
-      `سفارش ساخت ${qty.toLocaleString("fa-IR")} یگان ${unit.name} در صف قرار گرفت.`,
+      action,
+      `سفارش ساخت ${quantity.toLocaleString("fa-IR")} یگان ${unit.name} در صف قرار گرفت.`,
     );
   };
 
@@ -68,24 +46,16 @@ export function MilitaryExpansionView({
       </div>
 
       <div className="space-y-3">
-        {RECRUITABLE_UNITS.map((unit) => {
-          const maxAffordable = calculateMaxAffordable(unit);
-          const currentQty = Math.min(
-            quantities[unit.type] ?? 1,
-            maxAffordable,
-          );
-
-          return (
-            <UnitRecruitmentCard
-              key={unit.type}
-              unit={unit}
-              quantity={currentQty}
-              maxAffordable={maxAffordable}
-              onQuantitySet={handleQuantitySet}
-              onRecruit={handleRecruit}
-            />
-          );
-        })}
+        {RECRUITABLE_UNITS.map((unit) => (
+          <UnitRecruitmentCard
+            key={unit.type}
+            unit={unit}
+            treasury={treasury}
+            manpower={manpower}
+            steel={steel}
+            onRecruit={handleRecruit}
+          />
+        ))}
       </div>
     </div>
   );
