@@ -39,7 +39,13 @@ export class CorruptionManager {
         "Not enough treasury to fund anti-corruption drive",
       );
     }
-    const corruptionReduction = Math.floor(investmentAmount / 5000);
+
+    const baseCost = Math.floor(nation.gdp * 0.01);
+    const corruptionReduction = Math.max(
+      5,
+      Math.floor((investmentAmount / (baseCost || 1)) * 5),
+    );
+
     const newCorruption = Math.max(
       0,
       nation.government.corruption - corruptionReduction,

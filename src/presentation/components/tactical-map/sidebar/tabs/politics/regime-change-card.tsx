@@ -27,7 +27,7 @@ export function RegimeChangeCard({
 
   const isLocked = turnsInPower < 15;
   const turnsRemaining = Math.max(0, 15 - turnsInPower);
-  const changeCost = Math.min(250000, Math.floor(gdp * 0.05));
+  const changeCost = Math.floor(gdp * 0.01);
   const canAfford = treasury >= changeCost;
 
   const govOptions: { type: GovernmentType; name: string }[] = [
@@ -66,7 +66,7 @@ export function RegimeChangeCard({
         </div>
 
         <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
-          <span>هزینه همه‌پرسی:</span>
+          <span>هزینه همه‌پرسی (۱٪ GDP):</span>
           <span className="font-bold text-gdp">
             {PersianNumberFormatter.formatCurrency(changeCost)}
           </span>

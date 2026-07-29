@@ -7,22 +7,28 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 interface AntiCorruptionCardProps {
   nationId?: string;
   treasury?: number;
+  gdp?: number;
 }
 
 export function AntiCorruptionCard({
   nationId = "NATION_118",
   treasury = 100000,
+  gdp = 450000000000,
 }: AntiCorruptionCardProps) {
-  const canAfford = treasury >= 25000;
+  const antiCorruptionCost = Math.floor(gdp * 0.01);
+  const canAfford = treasury >= antiCorruptionCost;
   const { dispatchAction } = useGameActions();
 
   const handleAntiCorruption = async () => {
     if (!canAfford) return;
 
-    const action = ActionFactory.antiCorruptionDrive(nationId, 25000);
+    const action = ActionFactory.antiCorruptionDrive(
+      nationId,
+      antiCorruptionCost,
+    );
     await dispatchAction(
       action,
-      `مبلغ ${PersianNumberFormatter.formatCurrency(25000)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری کاهش یافت.`,
+      `مبلغ ${PersianNumberFormatter.formatCurrency(antiCorruptionCost)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری کاهش یافت.`,
     );
   };
 
@@ -38,10 +44,10 @@ export function AntiCorruptionCard({
       <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
         <div className="flex items-center justify-between text-xs font-mono">
           <span className="text-muted-foreground font-sans">
-            بودجه بازرسی ملی:
+            بودجه طرح ضدفساد (۱٪ GDP):
           </span>
           <span className="font-bold text-gdp">
-            {PersianNumberFormatter.formatCurrency(25000)}
+            {PersianNumberFormatter.formatCurrency(antiCorruptionCost)}
           </span>
         </div>
         <button

@@ -16,14 +16,7 @@ export function useTopHudMetrics(metrics: HumanResourceMetrics) {
       metrics.oil.toLocaleString("en-US"),
     );
 
-    const isOilDeficit = metrics.oil < metrics.oilRequiredPerTurn;
-
-    let formattedOilUsage = "بدون مصرف";
-    if (isOilDeficit) {
-      formattedOilUsage = `کافی نیست (نیاز: ${PersianNumberFormatter.toPersianDigits(metrics.oilRequiredPerTurn)}/نوبت)`;
-    } else if (metrics.oilRequiredPerTurn > 0) {
-      formattedOilUsage = `${PersianNumberFormatter.toPersianDigits(metrics.oilRequiredPerTurn)}/نوبت`;
-    }
+    const formattedOilUsage = "بدون مصرف در صلح";
 
     const formattedSteel = PersianNumberFormatter.toPersianDigits(
       metrics.steel.toLocaleString("en-US"),
@@ -39,7 +32,7 @@ export function useTopHudMetrics(metrics: HumanResourceMetrics) {
       formattedOilUsage,
       formattedSteel,
       formattedManpower,
-      isOilDeficit,
+      isOilDeficit: false,
     };
   }, [metrics]);
 }
