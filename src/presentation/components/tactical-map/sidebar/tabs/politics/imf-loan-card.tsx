@@ -6,12 +6,14 @@ interface ImfLoanCardProps {
   nationId?: string;
   nationalDebt?: number;
   gdp?: number;
+  treasury?: number;
 }
 
 export function ImfLoanCard({
   nationId = "NATION_118",
   nationalDebt = 0,
   gdp = 450000000000,
+  treasury = 100000,
 }: ImfLoanCardProps) {
   const debtToGdpRatio = gdp > 0 ? nationalDebt / gdp : 0;
   const creditRating = Math.max(
@@ -20,23 +22,28 @@ export function ImfLoanCard({
   );
   const { dispatchAction } = useGameActions();
 
+  const maxCreditLimit = Math.floor(gdp * 0.2 * (creditRating / 100));
+  const availableLoan = Math.max(0, maxCreditLimit - nationalDebt);
+
   const handleRequestLoan = async () => {
+    if (availableLoan < 10000) return;
+    const amountToRequest = Math.min(50000, availableLoan);
+
     await dispatchAction(
       {
         id: `loan-${Date.now()}`,
         nationId,
         type: "REQUEST_LOAN",
-        amount: 50000,
+        amount: amountToRequest,
       },
-      "وام اضطراری $۵۰,۰۰۰ به خزانه ملی واریز شد.",
+      `وام اضطراری $${amountToRequest.toLocaleString("fa-IR")} به خزانه ملی واریز شد.`,
     );
   };
 
   const handleRepayDebt = async () => {
-    if (nationalDebt <= 0) {
-      return;
-    }
-    const amountToRepay = Math.min(25000, nationalDebt);
+    if (nationalDebt <= 0 || treasury <= 0) return;
+    const amountToRepay = Math.min(25000, nationalDebt, treasury);
+
     await dispatchAction(
       {
         id: `repay-${Date.now()}`,
@@ -77,16 +84,19 @@ export function ImfLoanCard({
 
           <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
             <span className="text-muted-foreground block font-sans">
-              نرخ سود سالانه
+              اعتبار وام آزاد
             </span>
-            <span className="font-bold text-foreground block">۵.۰٪</span>
+            <span className="font-bold text-gdp block">
+              ${availableLoan.toLocaleString("fa-IR")}
+            </span>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2 pt-1">
           <button
             onClick={handleRequestLoan}
-            className="py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+            disabled={availableLoan < 10000}
+            className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
           >
             <ArrowUpRight size={13} className="text-gdp" />
             <span>وام اضطراری</span>
@@ -94,7 +104,7 @@ export function ImfLoanCard({
 
           <button
             onClick={handleRepayDebt}
-            disabled={nationalDebt <= 0}
+            disabled={nationalDebt <= 0 || treasury <= 0}
             className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
           >
             <ArrowDownRight size={13} className="text-military" />

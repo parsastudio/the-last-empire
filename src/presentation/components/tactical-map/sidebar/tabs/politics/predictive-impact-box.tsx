@@ -5,19 +5,23 @@ interface PredictiveImpactBoxProps {
   currentTaxRate: number;
   newTaxRate: number;
   baseGdp: number;
+  corruption?: number;
 }
 
 export function PredictiveImpactBox({
   currentTaxRate,
   newTaxRate,
   baseGdp,
+  corruption = 0,
 }: PredictiveImpactBoxProps) {
   const deltaRate = newTaxRate - currentTaxRate;
-  const projectedIncome = Math.floor(baseGdp * (newTaxRate / 100));
+  const grossTax = baseGdp * (newTaxRate / 100);
+  const corruptionLoss = grossTax * (corruption / 100);
+  const projectedIncome = Math.floor(grossTax - corruptionLoss);
 
   let stabilityImpact = 0;
-  if (newTaxRate > 20) {
-    stabilityImpact = -Math.floor((newTaxRate - 20) * 0.5);
+  if (newTaxRate > 25) {
+    stabilityImpact = -Math.floor((newTaxRate - 25) * 0.5);
   } else if (newTaxRate <= 10) {
     stabilityImpact = 1;
   }
@@ -32,7 +36,7 @@ export function PredictiveImpactBox({
       <div className="grid grid-cols-2 gap-2 text-[10px]">
         <div className="bg-background/60 p-2 rounded-lg space-y-0.5 border border-border/40">
           <span className="text-muted-foreground block font-sans">
-            درآمد مالیاتی تخمینی:
+            درآمد مالیاتی خالص تخمینی:
           </span>
           <span className="font-bold text-gdp">
             ${(projectedIncome / 1e6).toFixed(1)}M

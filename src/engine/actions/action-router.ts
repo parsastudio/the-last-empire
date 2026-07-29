@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { TaxActionHandler } from "@/engine/actions/tax-action-handler";
+import { SetTariffRateActionHandler } from "@/engine/actions/set-tariff-rate-action-handler";
 import { GovernmentActionHandler } from "@/engine/actions/government-action-handler";
 import { RecruitActionHandler } from "@/engine/actions/recruit-action-handler";
 import { DeclareWarActionHandler } from "@/engine/actions/declare-war-action-handler";
@@ -41,6 +42,7 @@ export class ActionRouter {
 
   private registerDefaultHandlers(): void {
     this.register("SET_TAX_RATE", new TaxActionHandler());
+    this.register("SET_TARIFF_RATE", new SetTariffRateActionHandler());
     this.register("CHANGE_GOVERNMENT", new GovernmentActionHandler());
     this.register("RECRUIT_UNIT", new RecruitActionHandler());
     this.register("DECLARE_WAR", new DeclareWarActionHandler());
