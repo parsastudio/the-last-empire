@@ -6,6 +6,7 @@ interface ResourcesSectionProps {
   steel: number;
   manpower: number;
   industrialLevel: number;
+  oilRequiredPerTurn?: number;
 }
 
 export function ResourcesSection({
@@ -13,6 +14,7 @@ export function ResourcesSection({
   steel,
   manpower,
   industrialLevel,
+  oilRequiredPerTurn = 0,
 }: ResourcesSectionProps) {
   return (
     <div className="space-y-2.5">
@@ -30,8 +32,13 @@ export function ResourcesSection({
             <span>ذخایر نفت خام</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
-            {oil.toLocaleString()} بشکه
+            {oil.toLocaleString("fa-IR")} بشکه
           </span>
+          {oilRequiredPerTurn > 0 && (
+            <span className="text-[9px] text-muted-foreground block font-sans">
+              مصرف نوبتی: {oilRequiredPerTurn} بشکه
+            </span>
+          )}
         </div>
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
@@ -39,7 +46,7 @@ export function ResourcesSection({
             <span>ذخایر فولاد</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
-            {steel.toLocaleString()} تن
+            {steel.toLocaleString("fa-IR")} تن
           </span>
         </div>
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
@@ -48,11 +55,11 @@ export function ResourcesSection({
             <span>نیروی انسانی آماده</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
-            {manpower.toLocaleString()} نفر
+            {manpower.toLocaleString("fa-IR")} نفر
           </span>
         </div>
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
-          <span className="text-[9px] text-muted-foreground block">
+          <span className="text-[9px] text-muted-foreground block font-sans">
             سطح توسعه صنعتی
           </span>
           <span className="text-xs font-bold text-gdp block">

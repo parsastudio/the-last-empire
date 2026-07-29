@@ -1,9 +1,12 @@
 import { useState, useCallback } from "react";
 import { SidebarTabType } from "../sidebar-tabs";
-import { CombatReport } from "@/domain/reports/combat-report.schema";
+import {
+  CombatReport,
+  ReportSeverity,
+} from "@/domain/reports/combat-report.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 
 export interface TradeDialogState {
   isOpen: boolean;
@@ -26,6 +29,15 @@ export function useSidebarTurnActions(
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
+  const [activeEventData, setActiveEventData] = useState<{
+    title: string;
+    description: string;
+    choices: {
+      id: string;
+      description: string;
+      effectsSummary: { label: string; value: string; isPositive: boolean }[];
+    }[];
+  } | null>(null);
   const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
 
@@ -71,6 +83,79 @@ export function useSidebarTurnActions(
     }
   }, [onClearExternalTab]);
 
+  const mapLogToReport = (
+    log: TurnLogEntry,
+    state: GameState,
+  ): CombatReport => {
+    const meta = log.metadata || {};
+    const isCombat = log.level === "COMBAT";
+    const isVictory =
+      typeof meta.isVictory === "boolean" ? meta.isVictory : true;
+
+    let severity: ReportSeverity = "INFO";
+    if (isCombat) {
+      severity = isVictory ? "VICTORY" : "DEFEAT";
+    } else if (log.level === "CRITICAL") {
+      severity = "CRITICAL_DEFEAT";
+    } else if (log.level === "WARNING") {
+      severity = "PYRRHIC_VICTORY";
+    }
+
+    const sourceName =
+      state.nations[log.sourceNationId]?.name || log.sourceNationId;
+    const targetName = log.targetNationId
+      ? state.nations[log.targetNationId]?.name || log.targetNationId
+      : "سیستم مرکزی";
+
+    const attackerLost =
+      typeof meta.attackerLost === "number" ? meta.attackerLost : 0;
+    const defenderLost =
+      typeof meta.defenderLost === "number" ? meta.defenderLost : 0;
+    const conqueredAreaSqKm =
+      typeof meta.conqueredAreaSqKm === "number" ? meta.conqueredAreaSqKm : 0;
+
+    return {
+      id: log.id,
+      turn: log.turn,
+      timestamp: log.timestamp,
+      severity,
+      title: isCombat
+        ? `گزارش عملیات نبرد نوبت ${log.turn}`
+        : `گزارش رویداد و حاکمیت نوبت ${log.turn}`,
+      summary: log.message,
+      attackerNationId: log.sourceNationId,
+      attackerName: sourceName,
+      defenderNationId: log.targetNationId || "SYSTEM",
+      defenderName: targetName,
+      attackerCasualties: {
+        infantryEngaged: attackerLost > 0 ? attackerLost + 10 : 0,
+        infantryLost: attackerLost,
+        infantryRetreated: 0,
+        airForceEngaged: 0,
+        airForceLost: 0,
+        droneMissileEngaged: 0,
+        droneMissileLost: 0,
+      },
+      defenderCasualties: {
+        infantryEngaged: defenderLost > 0 ? defenderLost + 10 : 0,
+        infantryLost: defenderLost,
+        infantryRetreated: 0,
+        airForceEngaged: 0,
+        airForceLost: 0,
+        droneMissileEngaged: 0,
+        droneMissileLost: 0,
+      },
+      conqueredAreaSqKm,
+      capitulatedAreaSqKm: 0,
+      strategicAssessment: isCombat
+        ? isVictory
+          ? "ارزیابی ستاد کل: عملیات با تثبیت خطوط نبرد همراه بود."
+          : "ارزیابی ستاد کل: عقب‌نشینی تاکتیکی جهت تجدید قوا."
+        : "ارزیابی ستاد کل: ثبت رویداد در دفتر وقایع رسمی کشور.",
+      isVictory,
+    };
+  };
+
   const handleNextTurn = async () => {
     if (isProcessingTurn || !advanceNextTurn) return;
 
@@ -87,71 +172,17 @@ export function useSidebarTurnActions(
         return;
       }
 
-      const combatLogs = nextState.turnLogs
-        ? nextState.turnLogs.filter((log) => log.level === "COMBAT")
-        : [];
+      const turnLogs = nextState.turnLogs || [];
+      const recentTurnLogs = turnLogs.filter(
+        (log) => log.turn === nextState.currentTurn - 1,
+      );
 
-      const realReports: CombatReport[] = combatLogs.map((log) => {
-        const meta = log.metadata || {};
-        const attackerLost =
-          typeof meta.attackerLost === "number" ? meta.attackerLost : 10;
-        const defenderLost =
-          typeof meta.defenderLost === "number" ? meta.defenderLost : 35;
-        const attackerRetreated =
-          typeof meta.attackerRetreated === "number"
-            ? meta.attackerRetreated
-            : 0;
-        const defenderRetreated =
-          typeof meta.defenderRetreated === "number"
-            ? meta.defenderRetreated
-            : 0;
-        const conqueredAreaSqKm =
-          typeof meta.conqueredAreaSqKm === "number"
-            ? meta.conqueredAreaSqKm
-            : 12500;
-        const isVictory =
-          typeof meta.isVictory === "boolean" ? meta.isVictory : true;
+      const logsToProcess =
+        recentTurnLogs.length > 0 ? recentTurnLogs : turnLogs.slice(-10);
 
-        return {
-          id: log.id,
-          turn: log.turn,
-          timestamp: log.timestamp,
-          severity: isVictory ? "VICTORY" : "DEFEAT",
-          title: `گزارش عملیاتی نوبت ${log.turn}`,
-          summary: log.message,
-          attackerNationId: log.sourceNationId,
-          attackerName:
-            nextState.nations[log.sourceNationId]?.name || log.sourceNationId,
-          defenderNationId: log.targetNationId || "DEFENDER",
-          defenderName: log.targetNationId
-            ? nextState.nations[log.targetNationId]?.name || log.targetNationId
-            : "دشمن",
-          attackerCasualties: {
-            infantryEngaged: attackerLost + attackerRetreated + 10,
-            infantryLost: attackerLost,
-            infantryRetreated: attackerRetreated,
-            airForceEngaged: 10,
-            airForceLost: Math.min(5, Math.floor(attackerLost * 0.1)),
-            droneMissileEngaged: 5,
-            droneMissileLost: 0,
-          },
-          defenderCasualties: {
-            infantryEngaged: defenderLost + defenderRetreated + 20,
-            infantryLost: defenderLost,
-            infantryRetreated: defenderRetreated,
-            airForceEngaged: 10,
-            airForceLost: Math.min(10, Math.floor(defenderLost * 0.1)),
-            droneMissileEngaged: 0,
-            droneMissileLost: 0,
-          },
-          conqueredAreaSqKm,
-          capitulatedAreaSqKm: 0,
-          strategicAssessment: isVictory
-            ? "ارزیابی ستاد کل: عملیات با تثبیت خطوط نبرد همراه بود."
-            : "ارزیابی ستاد کل: عقب‌نشینی تاکتیکی جهت تجدید قوا.",
-          isVictory,
-        };
-      });
+      const realReports: CombatReport[] = logsToProcess.map((log) =>
+        mapLogToReport(log, nextState),
+      );
 
       setModalReports(realReports);
       setIsModalOpen(true);
@@ -163,10 +194,35 @@ export function useSidebarTurnActions(
         "info",
       );
 
-      if (nextState.currentTurn % 3 === 0) {
-        setTimeout(() => {
-          setIsEventModalOpen(true);
-        }, 500);
+      const pendingEventLog = recentTurnLogs.find(
+        (log) => log.level === "WARNING" && log.metadata?.hasChoices === true,
+      );
+
+      if (pendingEventLog) {
+        setActiveEventData({
+          title: "بحران ملی | تصمیم‌گیری راهبردی",
+          description: pendingEventLog.message,
+          choices: [
+            {
+              id: "c1",
+              description: "مدیریت اضطراری و کنترل منابع",
+              effectsSummary: [
+                { label: "ثبات", value: "+۵٪", isPositive: true },
+              ],
+            },
+            {
+              id: "c2",
+              description: "حفظ وضعیت موجود",
+              effectsSummary: [
+                { label: "ثبات", value: "-۵٪", isPositive: false },
+              ],
+            },
+          ],
+        });
+        setIsEventModalOpen(true);
+      } else {
+        setIsEventModalOpen(false);
+        setActiveEventData(null);
       }
     } finally {
       setIsProcessingTurn(false);
@@ -203,6 +259,7 @@ export function useSidebarTurnActions(
     isRailCollapsed,
     isModalOpen,
     isEventModalOpen,
+    activeEventData,
     isProcessingTurn,
     modalReports,
     stagedActions,

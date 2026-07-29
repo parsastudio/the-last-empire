@@ -19,6 +19,8 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
       ? `+$${(metrics.netIncomePerTurn / 1000).toFixed(0)}k`
       : `-$${(Math.abs(metrics.netIncomePerTurn) / 1000).toFixed(0)}k`;
 
+  const isOilDeficit = metrics.oil < metrics.oilRequiredPerTurn;
+
   return (
     <header
       onClick={(e) => e.stopPropagation()}
@@ -40,9 +42,11 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
 
         <ResourceBadge
           icon={Fuel}
-          iconColor="text-treasury"
-          label="ذخایر نفت خام"
+          iconColor={isOilDeficit ? "text-military" : "text-treasury"}
+          label="ذخایر نفت خام و مصرف نوبتی"
           value={`${metrics.oil.toLocaleString("fa-IR")}`}
+          subValue={`-${metrics.oilRequiredPerTurn}/نوبت`}
+          subValueColor={isOilDeficit ? "text-military" : "text-treasury"}
         />
 
         <ResourceBadge
