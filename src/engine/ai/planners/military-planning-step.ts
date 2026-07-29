@@ -3,10 +3,13 @@ import { AIRecruitmentPlanner } from "@/engine/ai/ai-recruitment-planner";
 import { AIPlanner } from "@/engine/ai/planners/ai-planner";
 import { AIPlanningContext } from "@/engine/ai/planners/ai-planning-context";
 import { DeterministicIdGenerator } from "../utils/deterministic-id-generator";
+import { AiGridAttackPlanner } from "@/engine/combat/ai/ai-grid-attack-planner";
+import { GridState } from "@/engine/combat/state/grid-state";
 
 export class MilitaryPlanningStep implements AIPlanner {
   private recruitmentPlanner = new AIRecruitmentPlanner();
   private idGenerator = new DeterministicIdGenerator();
+  private attackPlanner = new AiGridAttackPlanner();
 
   public plan(context: AIPlanningContext): GameAction[] {
     const actions: GameAction[] = [];
@@ -30,6 +33,11 @@ export class MilitaryPlanningStep implements AIPlanner {
       );
     }
 
+    const gridState = (
+      context.allNations as unknown as { gridState?: GridState }
+    ).gridState;
+    const allCells = gridState ? gridState.getAllCells() : [];
+
     for (const [targetId, relation] of Object.entries(nation.relations)) {
       const target = context.allNations[targetId];
       if (target && target.isAlive && relation.stance === "WAR") {
@@ -48,20 +56,34 @@ export class MilitaryPlanningStep implements AIPlanner {
           const droneDeploy = Math.floor(nation.military.droneMissile * 0.6);
 
           if (infantryDeploy > 0 || airForceDeploy > 0 || droneDeploy > 0) {
-            actions.push({
-              id: this.idGenerator.generateActionId(
-                "ATTACK",
-                nation.id,
-                turn,
-                seq++,
-              ),
-              nationId: nation.id,
-              type: "ATTACK",
-              targetNationId: targetId,
-              infantry: infantryDeploy,
-              airForce: airForceDeploy,
-              droneMissile: droneDeploy,
-            });
+            const targetPixel =
+              allCells.length > 0
+                ? this.attackPlanner.planBestTargetPixel(
+                    nation.id,
+                    targetId,
+                    allCells,
+                  )
+                : null;
+
+            if (targetPixel) {
+              actions.push({
+                id: this.idGenerator.generateActionId(
+                  "ATTACK",
+                  nation.id,
+                  turn,
+                  seq++,
+                ),
+                nationId: nation.id,
+                type: "ATTACK",
+                targetNationId: targetId,
+                infantry: infantryDeploy,
+                airForce: airForceDeploy,
+                droneMissile: droneDeploy,
+                targetX: targetPixel.x,
+                targetY: targetPixel.y,
+                targetCoordinate: targetPixel,
+              });
+            }
           }
         }
       }

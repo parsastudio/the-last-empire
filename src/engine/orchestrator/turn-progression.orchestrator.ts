@@ -36,14 +36,6 @@ export class TurnProgressionOrchestrator {
       }
     }
 
-    const aiQueue = this.internalActionQueue.getQueue();
-    const tempQueue = new ActionQueue();
-    for (const act of aiQueue) {
-      tempQueue.enqueue(
-        { ...nextState, gridState } as unknown as GameState,
-        act,
-      );
-    }
     this.internalActionQueue.clear();
 
     nextState = actionQueueProcessor(nextState);

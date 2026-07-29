@@ -1,7 +1,4 @@
-import type {
-  Nation,
-  ActiveModifier,
-} from "@/domain/nation/nation.schema";
+import type { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
 import type { GameModifier } from "@/domain/game/events.schema";
 
 export class ModifierManager {
@@ -14,11 +11,12 @@ export class ModifierManager {
       turnsRemaining: modifier.duration,
     };
 
-    const existingIndex = nation.activeModifiers.findIndex(
+    const currentModifiers = nation.activeModifiers || [];
+    const existingIndex = currentModifiers.findIndex(
       (m) => m.id === modifier.id,
     );
 
-    const updatedModifiers = [...nation.activeModifiers];
+    const updatedModifiers = [...currentModifiers];
     if (existingIndex > -1) {
       updatedModifiers[existingIndex] = active;
     } else {
@@ -34,14 +32,14 @@ export class ModifierManager {
   public removeModifier(nation: Nation, modifierId: string): Nation {
     return {
       ...nation,
-      activeModifiers: nation.activeModifiers.filter(
+      activeModifiers: (nation.activeModifiers || []).filter(
         (m) => m.id !== modifierId,
       ),
     };
   }
 
   public updateActiveModifiers(nation: Nation): Nation {
-    const nextModifiers = nation.activeModifiers
+    const nextModifiers = (nation.activeModifiers || [])
       .map((m) => ({
         ...m,
         turnsRemaining: m.turnsRemaining - 1,
@@ -55,7 +53,7 @@ export class ModifierManager {
   }
 
   public getModifierImpact(nation: Nation, effectType: string): number {
-    return nation.activeModifiers
+    return (nation.activeModifiers || [])
       .filter((m) => m.effectType === effectType)
       .reduce((sum, m) => sum + m.magnitude, 0);
   }
