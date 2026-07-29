@@ -6,6 +6,7 @@ import { AttackLogisticsTable } from "./attack/attack-logistics-table";
 import { AttackWarningsContainer } from "./attack/attack-warnings-container";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { MilitaryStack } from "@/domain/military/military.schema";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { useAttackPlanning } from "./hooks/use-attack-planning";
 
 interface AttackPlanningModalProps {
@@ -105,9 +106,18 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
               onChange={(e) => planning.setInfantry(Number(e.target.value))}
               className="w-full accent-blue-600 cursor-pointer h-1.5 bg-secondary rounded-lg disabled:opacity-30"
             />
+            <div className="flex justify-between items-center text-[9px] text-muted-foreground font-sans pt-0.5">
+              <span>مصرف سوخت این یگان:</span>
+              <span className="font-mono text-treasury font-bold">
+                {PersianNumberFormatter.toPersianDigits(
+                  planning.logistics.infantryOil,
+                )}{" "}
+                بشکه
+              </span>
+            </div>
           </div>
 
-          <div className="space-y-1.5 pt-1 border-t border-border/40">
+          <div className="space-y-1.5 pt-1.5 border-t border-border/40">
             <div className="flex justify-between items-center text-[10px]">
               <span className="text-muted-foreground flex items-center gap-1 font-sans">
                 <Plane size={12} className="text-gdp" /> جنگنده و پوشش هوایی:
@@ -125,9 +135,18 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
               onChange={(e) => planning.setAirForce(Number(e.target.value))}
               className="w-full accent-emerald-600 cursor-pointer h-1.5 bg-secondary rounded-lg disabled:opacity-30"
             />
+            <div className="flex justify-between items-center text-[9px] text-muted-foreground font-sans pt-0.5">
+              <span>مصرف سوخت این یگان:</span>
+              <span className="font-mono text-treasury font-bold">
+                {PersianNumberFormatter.toPersianDigits(
+                  planning.logistics.airForceOil,
+                )}{" "}
+                بشکه
+              </span>
+            </div>
           </div>
 
-          <div className="space-y-1.5 pt-1 border-t border-border/40">
+          <div className="space-y-1.5 pt-1.5 border-t border-border/40">
             <div className="flex justify-between items-center text-[10px]">
               <span className="text-muted-foreground flex items-center gap-1 font-sans">
                 <Radio size={12} className="text-treasury" /> پهپاد و موشک:
@@ -145,6 +164,15 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
               onChange={(e) => planning.setDroneMissile(Number(e.target.value))}
               className="w-full accent-amber-500 cursor-pointer h-1.5 bg-secondary rounded-lg disabled:opacity-30"
             />
+            <div className="flex justify-between items-center text-[9px] text-muted-foreground font-sans pt-0.5">
+              <span>مصرف سوخت این یگان:</span>
+              <span className="font-mono text-treasury font-bold">
+                {PersianNumberFormatter.toPersianDigits(
+                  planning.logistics.droneOil,
+                )}{" "}
+                بشکه
+              </span>
+            </div>
           </div>
         </div>
 
@@ -157,6 +185,9 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
 
         <AttackLogisticsTable
           estimatedCost={planning.finalCost}
+          landTransitCost={planning.logistics.landTransitCost}
+          heavyTransitCost={planning.logistics.heavyTransitCost}
+          distanceKm={planning.logistics.distanceKm}
           requiredOil={planning.logistics.requiredOil}
           requiredSteel={planning.logistics.requiredSteel}
         />

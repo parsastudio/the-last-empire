@@ -76,11 +76,14 @@ export function useAttackPlanning({
     ? Math.max(1, Math.floor(validationResult.distance / 10))
     : 1;
 
+  const distScore = validationResult?.distance ?? 30;
+
   const logistics = estimator.calculateLogisticsCost({
     infantry,
     airForce,
     droneMissile,
     distanceMultiplier: distMultiplier,
+    distanceScore: distScore,
   });
 
   const finalCost = validationResult?.logisticsCost
