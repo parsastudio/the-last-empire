@@ -4,8 +4,12 @@ import { ContiguousTheaterBfs } from "@/engine/combat/bfs/contiguous-theater-bfs
 import { ConquestCapper } from "@/engine/combat/capping/conquest-capper";
 import { SovereignHopBfs } from "@/engine/combat/bfs/sovereign-hop-bfs";
 import { CapitulationEngine } from "@/engine/combat/capitulation/capitulation-engine";
-import { CombatCasualtyCalculator } from "../math/combat-casualty-calculator";
+import {
+  CombatCasualtyCalculator,
+  DetailedCasualtyResult,
+} from "../math/combat-casualty-calculator";
 import { HomelandMilitiaCalculator } from "../math/homeland-militia-calculator";
+import { MilitaryStack } from "@/domain/military/military.schema";
 
 export interface ExecutionAttackParams {
   attackerId: string;
@@ -14,6 +18,8 @@ export interface ExecutionAttackParams {
   allCells: GridCell[];
   attackerForcePower: number;
   defenderForcePower: number;
+  attackerMilitary: MilitaryStack;
+  defenderMilitary: MilitaryStack;
   defenderPopulation?: number;
   defenderStability?: number;
 }
@@ -29,10 +35,7 @@ export class ConquestOrchestrator {
   public executeAttack(params: ExecutionAttackParams): {
     conqueredCells: GridCell[];
     capitulatedCells: GridCell[];
-    attackerLost: number;
-    defenderLost: number;
-    attackerRetreated: number;
-    defenderRetreated: number;
+    casualtyDetails: DetailedCasualtyResult;
     isVictory: boolean;
   } {
     const {
@@ -42,6 +45,8 @@ export class ConquestOrchestrator {
       allCells,
       attackerForcePower,
       defenderForcePower,
+      attackerMilitary,
+      defenderMilitary,
       defenderPopulation = 10000000,
       defenderStability = 70,
     } = params;
@@ -71,9 +76,11 @@ export class ConquestOrchestrator {
 
     const isFullTheaterTarget = targetPixelLimit >= theaterCells.length;
 
-    const casualties = this.casualtyCalculator.calculateCappedCasualties(
+    const casualtyDetails = this.casualtyCalculator.calculateDetailedCasualties(
+      attackerMilitary,
+      defenderMilitary,
       attackerForcePower,
-      defenderForcePower,
+      effectiveDefenderPower,
       isVictory,
       isVictory && isFullTheaterTarget,
     );
@@ -82,10 +89,7 @@ export class ConquestOrchestrator {
       return {
         conqueredCells: [],
         capitulatedCells: [],
-        attackerLost: casualties.attackerLost,
-        defenderLost: casualties.defenderLost,
-        attackerRetreated: casualties.attackerRetreated,
-        defenderRetreated: casualties.defenderRetreated,
+        casualtyDetails,
         isVictory: false,
       };
     }
@@ -127,10 +131,7 @@ export class ConquestOrchestrator {
     return {
       conqueredCells,
       capitulatedCells,
-      attackerLost: casualties.attackerLost,
-      defenderLost: casualties.defenderLost,
-      attackerRetreated: casualties.attackerRetreated,
-      defenderRetreated: casualties.defenderRetreated,
+      casualtyDetails,
       isVictory: true,
     };
   }

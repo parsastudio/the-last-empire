@@ -41,6 +41,22 @@ export class AttackActionValidator implements ActionValidator {
           "Target is geographically unreachable for direct attack. Max attack range is 6.",
         );
       }
+
+      const internalDistanceFactor = Math.sqrt(
+        sourceNation.geography.territorySize || 100,
+      );
+      const infrastructureBonus =
+        1.0 + sourceNation.geography.infrastructureLevel * 0.15;
+      const estimatedLogisticsCost = Math.floor(
+        (12000 * internalDistanceFactor) / infrastructureBonus,
+      );
+
+      if (sourceNation.treasury < estimatedLogisticsCost) {
+        throw new GameError(
+          "INSUFFICIENT_FUNDS",
+          `Insufficient treasury to fund military attack logistics. Required: $${estimatedLogisticsCost.toLocaleString("fa-IR")}`,
+        );
+      }
     }
   }
 }

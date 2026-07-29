@@ -92,6 +92,14 @@ export class AttackConquestHandler implements ActionHandler {
       allCells,
       attackerForcePower: finalAttackerPower,
       defenderForcePower: defenderPower,
+      attackerMilitary: {
+        infantry: attackAction.infantry,
+        airForce: attackAction.airForce,
+        droneMissile: attackAction.droneMissile,
+        experience: attacker.military.experience,
+        techLevel: attacker.military.techLevel,
+      },
+      defenderMilitary: defender.military,
       defenderPopulation: defender.population,
       defenderStability: defender.government.stability,
     });
@@ -103,10 +111,12 @@ export class AttackConquestHandler implements ActionHandler {
       {
         conquered: outcome.conqueredCells,
         capitulated: outcome.capitulatedCells,
-        attackerLost: outcome.attackerLost,
-        defenderLost: outcome.defenderLost,
-        attackerRetreated: outcome.attackerRetreated,
-        defenderRetreated: outcome.defenderRetreated,
+        attackerLost: outcome.casualtyDetails.attackerLostStack.infantry,
+        defenderLost: outcome.casualtyDetails.defenderLostStack.infantry,
+        attackerRetreated:
+          outcome.casualtyDetails.attackerRetreatedStack.infantry,
+        defenderRetreated:
+          outcome.casualtyDetails.defenderRetreatedStack.infantry,
         isVictory: outcome.isVictory,
       },
     );
@@ -121,8 +131,7 @@ export class AttackConquestHandler implements ActionHandler {
       attacker.id,
       defender.id,
       evalResult,
-      outcome.attackerLost,
-      outcome.defenderLost,
+      outcome.casualtyDetails,
     );
 
     return {
