@@ -7,9 +7,11 @@ import {
 } from "@/domain/map/countries";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { Nation } from "@/domain/nation/nation.schema";
 
 export function useCountryHoverRankings(
   countries: CountryMapping[],
+  nationsMap?: Record<string, Nation>,
 ): Map<string, number> {
   const governmentSystem = useMemo(() => new GovernmentSystem(), []);
 
@@ -17,33 +19,71 @@ export function useCountryHoverRankings(
     const cache = new Map<string, number>();
     const processedIds = new Set<number>();
 
-    const rawList = ALL_COUNTRY_PROFILES.map((p) => {
-      processedIds.add(p.id);
-      const matchedCountry = countries.find(
-        (c) => c.id === p.id || c.code.toUpperCase() === p.code.toUpperCase(),
-      );
-      const gdp =
-        p.gdp ||
-        (matchedCountry?.areaSqKm
-          ? matchedCountry.areaSqKm * 1500
-          : 5000000000);
+    let rawList: {
+      id: string;
+      numericId: number;
+      code: string;
+      gdp: number;
+      treasury: number;
+      infantry: number;
+      airForce: number;
+      drone: number;
+      techLevel: number;
+      militaryPowerMultiplier: number;
+    }[] = [];
 
-      const govType = p.startingGovernment ?? "DEMOCRACY";
-      const govTraits = governmentSystem.getTraits(govType);
+    if (nationsMap && Object.keys(nationsMap).length > 0) {
+      rawList = Object.values(nationsMap)
+        .filter((n) => n.isAlive)
+        .map((n) => {
+          const numericId = parseInt(n.id.replace("NATION_", ""), 10);
+          if (!isNaN(numericId)) {
+            processedIds.add(numericId);
+          }
+          const govTraits = governmentSystem.getTraits(n.government.type);
 
-      return {
-        id: `NATION_${p.id}`,
-        numericId: p.id,
-        code: p.code,
-        gdp,
-        treasury: p.startingTreasury,
-        infantry: p.startingInfantry ?? 50,
-        airForce: p.startingAirForce ?? 10,
-        drone: p.startingDroneMissile ?? 0,
-        techLevel: p.startingTechLevel ?? 1,
-        militaryPowerMultiplier: govTraits.militaryPowerMultiplier,
-      };
-    });
+          return {
+            id: n.id,
+            numericId: !isNaN(numericId) ? numericId : 0,
+            code: n.flagCode || n.id,
+            gdp: n.gdp,
+            treasury: n.treasury,
+            infantry: n.military.infantry,
+            airForce: n.military.airForce,
+            drone: n.military.droneMissile,
+            techLevel: n.military.techLevel,
+            militaryPowerMultiplier: govTraits.militaryPowerMultiplier,
+          };
+        });
+    } else {
+      rawList = ALL_COUNTRY_PROFILES.map((p) => {
+        processedIds.add(p.id);
+        const matchedCountry = countries.find(
+          (c) => c.id === p.id || c.code.toUpperCase() === p.code.toUpperCase(),
+        );
+        const gdp =
+          p.gdp ||
+          (matchedCountry?.areaSqKm
+            ? matchedCountry.areaSqKm * 1500
+            : 5000000000);
+
+        const govType = p.startingGovernment ?? "DEMOCRACY";
+        const govTraits = governmentSystem.getTraits(govType);
+
+        return {
+          id: `NATION_${p.id}`,
+          numericId: p.id,
+          code: p.code,
+          gdp,
+          treasury: p.startingTreasury,
+          infantry: p.startingInfantry ?? 50,
+          airForce: p.startingAirForce ?? 10,
+          drone: p.startingDroneMissile ?? 0,
+          techLevel: p.startingTechLevel ?? 1,
+          militaryPowerMultiplier: govTraits.militaryPowerMultiplier,
+        };
+      });
+    }
 
     for (const c of countries) {
       if (c.id <= 0 || c.id >= 250 || processedIds.has(c.id)) {
@@ -82,11 +122,13 @@ export function useCountryHoverRankings(
       if (rawItem) {
         cache.set(rawItem.code.toUpperCase(), rank);
         cache.set(rawItem.code.toLowerCase(), rank);
-        cache.set(rawItem.numericId.toString(), rank);
-        cache.set(`NATION_${rawItem.numericId}`, rank);
+        if (rawItem.numericId > 0) {
+          cache.set(rawItem.numericId.toString(), rank);
+          cache.set(`NATION_${rawItem.numericId}`, rank);
+        }
       }
     }
 
     return cache;
-  }, [countries, governmentSystem]);
+  }, [countries, governmentSystem, nationsMap]);
 }

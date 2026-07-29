@@ -123,6 +123,7 @@ function MapTest6Content({ gameId }: { gameId: string }) {
         canvasSrcRef={canvasSrcRef}
         isDragging={isDragging}
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
         onClick={interaction.handleMapClick}

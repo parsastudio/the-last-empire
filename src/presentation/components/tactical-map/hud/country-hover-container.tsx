@@ -41,7 +41,7 @@ export function CountryHoverContainer({
   nationsMap,
   humanNationId,
 }: CountryHoverContainerProps) {
-  const rankingsMap = useCountryHoverRankings(countries);
+  const rankingsMap = useCountryHoverRankings(countries, nationsMap);
   const { hoverData, cursorPos, handleMouseMove, handleMouseLeave } =
     useCountryHoverMath({
       countries,
@@ -59,7 +59,7 @@ export function CountryHoverContainer({
 
   return (
     <div
-      className="absolute inset-0 pointer-events-auto z-30"
+      className="absolute inset-0 pointer-events-none z-30"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
