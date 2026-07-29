@@ -1,8 +1,18 @@
 import { ISO3_TO_ISO2_MAP } from "./flag/iso-code-mapping.config";
+import { findCountryProfileById } from "@/domain/map/countries";
 
 export function getFlagEmoji(code: string): string {
   if (!code) return "🌐";
-  const cleanCode = code.trim().toUpperCase();
+
+  let cleanCode = code.trim().toUpperCase().replace("NATION_", "");
+
+  if (/^\d+$/.test(cleanCode)) {
+    const numericId = parseInt(cleanCode, 10);
+    const profile = findCountryProfileById(numericId);
+    if (profile) {
+      cleanCode = profile.flagCode || profile.code;
+    }
+  }
 
   let alpha2 = cleanCode;
   if (cleanCode.length === 3) {
