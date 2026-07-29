@@ -58,7 +58,9 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
             value={formatted.formattedOil}
             subValue={formatted.formattedOilUsage}
             subValueColor={
-              formatted.isOilDeficit ? "text-military" : "text-treasury"
+              formatted.isOilDeficit
+                ? "text-military font-bold"
+                : "text-treasury"
             }
           />
 

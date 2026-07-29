@@ -49,19 +49,17 @@ export function CommandCenterModal({
   return (
     <UnifiedModalShell
       isOpen={activeTab !== null}
-      title=""
+      title={meta.title}
+      subtitle={meta.subtitle}
       maxWidthClass="max-w-6xl"
       onClose={onClose}
     >
       <div className="space-y-4">
         <CommandCenterHeader
-          title={meta.title}
-          subtitle={meta.subtitle}
           activeTab={activeTab}
           subTabLabel={activeSubTab}
           targetName={selectedTargetCode}
           onNavigateTab={onNavigateTab}
-          onClose={onClose}
         />
 
         <CommandCenterTabRouter

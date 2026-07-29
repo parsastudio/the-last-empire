@@ -43,9 +43,11 @@ export function UnifiedModalShell({
       >
         <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
           <div className="space-y-0.5 text-right">
-            <h2 className="text-lg md:text-xl font-extrabold text-foreground">
-              {title}
-            </h2>
+            {title && (
+              <h2 className="text-lg md:text-xl font-extrabold text-foreground">
+                {title}
+              </h2>
+            )}
             {subtitle && (
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             )}
