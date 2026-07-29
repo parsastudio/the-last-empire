@@ -25,9 +25,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const source = searchParams.get("source") || "default";
     const publicDir = path.join(process.cwd(), "public");
-    const sourceDirName = source === "edited" ? "edited-mask" : "test6";
-    const sourceBinPath = path.join(publicDir, sourceDirName, "world-mask.bin");
-    const sourceJsonPath = path.join(publicDir, sourceDirName, "mappings.json");
+    const map1Dir = path.join(publicDir, "maps", "map1");
+    const sourcePrefix = source === "edited" ? "edited" : "default";
+    const sourceBinPath = path.join(map1Dir, `${sourcePrefix}-mask.bin`);
+    const sourceJsonPath = path.join(map1Dir, `${sourcePrefix}-mappings.json`);
+
     let mappingsData: { countries: CountryMapping[] };
     try {
       const jsonStr = await fs.readFile(sourceJsonPath, "utf-8");
@@ -52,11 +54,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       const fileBytes = await fs.readFile(sourceBinPath);
       binBuffer = new Uint8Array(fileBytes);
     } catch {
-      const sourcePngPath = path.join(
-        publicDir,
-        sourceDirName,
-        "world-mask.png",
-      );
+      const sourcePngPath = path.join(map1Dir, `${sourcePrefix}-mask.png`);
       try {
         const pngBytes = await fs.readFile(sourcePngPath);
         const decoder = new PngDecoder();
@@ -66,7 +64,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         return NextResponse.json(
           {
             success: false,
-            error: `Source map mask image (world-mask.png) not found for: ${source}`,
+            error: `Source map mask image (${sourcePrefix}-mask.png) not found`,
           },
           { status: 404 },
         );
@@ -114,20 +112,19 @@ export async function POST(request: Request): Promise<NextResponse> {
       });
     const newMappings = { countries: updatedCountries };
     const tAreaEnd = performance.now();
-    const partitionDir = path.join(publicDir, "partition-mask");
-    await fs.mkdir(partitionDir, { recursive: true });
+    await fs.mkdir(map1Dir, { recursive: true });
     const palette: [number, number, number][] = [];
     for (let i = 0; i < 256; i++) {
       palette.push([0, 0, i]);
     }
     const pngBuffer = encodePng(4096, 2048, partitionedBuffer, palette);
-    await fs.writeFile(path.join(partitionDir, "world-mask.png"), pngBuffer);
+    await fs.writeFile(path.join(map1Dir, "partition-mask.png"), pngBuffer);
     await fs.writeFile(
-      path.join(partitionDir, "world-mask.bin"),
+      path.join(map1Dir, "partition-mask.bin"),
       partitionedBuffer,
     );
     await fs.writeFile(
-      path.join(partitionDir, "mappings.json"),
+      path.join(map1Dir, "partition-mappings.json"),
       JSON.stringify(newMappings, null, 2),
       "utf-8",
     );
@@ -139,7 +136,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
     await fs.writeFile(
-      path.join(partitionDir, "world-mask-1024.bin"),
+      path.join(map1Dir, "partition-mask-1024.bin"),
       packed1024,
     );
 

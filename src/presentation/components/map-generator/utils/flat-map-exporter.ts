@@ -1,11 +1,11 @@
 export class FlatMapExporter {
   public exportFlatMap(mapType: "default" | "edited" | "partition"): void {
     const img = new Image();
-    let srcPath = "/test6/world-mask.png";
+    let srcPath = "/maps/map1/default-mask.png";
     if (mapType === "edited") {
-      srcPath = "/edited-mask/world-mask.png";
+      srcPath = "/maps/map1/edited-mask.png";
     } else if (mapType === "partition") {
-      srcPath = "/partition-mask/world-mask.png";
+      srcPath = "/maps/map1/partition-mask.png";
     }
     img.src = srcPath;
     img.crossOrigin = "anonymous";

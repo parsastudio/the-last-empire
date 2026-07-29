@@ -10,13 +10,16 @@ export async function GET(request: Request): Promise<NextResponse> {
     const useEdited = searchParams.get("type") === "edited";
 
     const publicDir = path.join(process.cwd(), "public");
-    const dirName = useEdited ? "edited-mask" : "test6";
-    const mappingsPath = path.join(publicDir, dirName, "mappings.json");
+    const map1Dir = path.join(publicDir, "maps", "map1");
+    const fileName = useEdited
+      ? "edited-mappings.json"
+      : "default-mappings.json";
+    const mappingsPath = path.join(map1Dir, fileName);
 
     if (forceRebuild) {
       const result = await generateTest6Map(4096, 2048);
       await fs.writeFile(
-        path.join(publicDir, "test6", "mappings.json"),
+        path.join(map1Dir, "default-mappings.json"),
         JSON.stringify(result, null, 2),
         "utf-8",
       );

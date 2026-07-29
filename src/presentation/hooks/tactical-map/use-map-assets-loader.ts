@@ -51,10 +51,10 @@ export function useMapAssetsLoader({
 
         const binPath =
           mapMode === "partition"
-            ? "/partition-mask/world-mask-1024.bin"
+            ? "/maps/map1/partition-mask-1024.bin"
             : mapMode === "edited"
-              ? "/edited-mask/world-mask-1024.bin"
-              : "/test6/world-mask-1024.bin";
+              ? "/maps/map1/edited-mask-1024.bin"
+              : "/maps/map1/default-mask-1024.bin";
 
         try {
           const binRes = await fetch(binPath);
