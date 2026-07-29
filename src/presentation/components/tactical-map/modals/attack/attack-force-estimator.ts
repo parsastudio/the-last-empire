@@ -48,7 +48,6 @@ export class AttackForceEstimator {
     const droneOil = Math.ceil(droneMissile * 3.0 * distanceMultiplier);
 
     const requiredOil = Math.max(10, infantryOil + airForceOil + droneOil);
-    const requiredSteel = Math.ceil(droneMissile * 1.5);
 
     return {
       landTransitCost,
@@ -58,7 +57,7 @@ export class AttackForceEstimator {
       infantryOil,
       airForceOil,
       droneOil,
-      requiredSteel,
+      requiredSteel: 0,
       distanceKm,
     };
   }

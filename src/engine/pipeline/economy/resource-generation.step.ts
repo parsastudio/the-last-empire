@@ -7,19 +7,27 @@ export class ResourceGenerationStep implements EconomyStep {
       if (!nation.isAlive) {
         continue;
       }
-      const resourceIncomeFactor = Math.floor(
-        nation.geography.territorySize / 1000,
-      );
-      if (resourceIncomeFactor > 0) {
-        nations[id] = {
-          ...nation,
-          resources: {
-            ...nation.resources,
-            oil: nation.resources.oil + resourceIncomeFactor * 5,
-            steel: nation.resources.steel + resourceIncomeFactor * 5,
-          },
-        };
-      }
+
+      const isOilRich = nation.traits.includes("OIL_RICH");
+      const isIndustrialHub = nation.traits.includes("INDUSTRIAL_HUB");
+      const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
+
+      const oilIncome = isOilRich
+        ? 300 + territoryFactor * 25
+        : Math.max(10, territoryFactor * 5);
+
+      const steelIncome = isIndustrialHub
+        ? 150 + territoryFactor * 15
+        : Math.max(10, territoryFactor * 5);
+
+      nations[id] = {
+        ...nation,
+        resources: {
+          ...nation.resources,
+          oil: nation.resources.oil + oilIncome,
+          steel: nation.resources.steel + steelIncome,
+        },
+      };
     }
   }
 }

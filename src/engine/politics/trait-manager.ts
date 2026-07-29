@@ -1,7 +1,4 @@
-import type {
-  Nation,
-  NationTrait,
-} from "@/domain/nation/nation.schema";
+import type { Nation, NationTrait } from "@/domain/nation/nation.schema";
 
 export class TraitManager {
   public hasTrait(nation: Nation, trait: NationTrait): boolean {
@@ -10,9 +7,6 @@ export class TraitManager {
 
   public getGdpGrowthModifier(nation: Nation): number {
     let modifier = 0;
-    if (this.hasTrait(nation, "OIL_RICH")) {
-      modifier += 0.04;
-    }
     if (this.hasTrait(nation, "FRAGILE_ECONOMY")) {
       modifier -= 0.05;
     }

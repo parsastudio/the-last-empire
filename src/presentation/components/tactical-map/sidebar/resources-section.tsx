@@ -9,6 +9,8 @@ interface ResourcesSectionProps {
   industrialLevel: number;
   infrastructureLevel?: number;
   oilRequiredPerTurn?: number;
+  oilProducedPerTurn?: number;
+  steelProducedPerTurn?: number;
 }
 
 export function ResourcesSection({
@@ -18,6 +20,8 @@ export function ResourcesSection({
   industrialLevel,
   infrastructureLevel = 1,
   oilRequiredPerTurn = 0,
+  oilProducedPerTurn = 0,
+  steelProducedPerTurn = 0,
 }: ResourcesSectionProps) {
   const formattedOil = PersianNumberFormatter.toPersianDigits(
     oil.toLocaleString("en-US"),
@@ -51,12 +55,26 @@ export function ResourcesSection({
           <span className="text-xs font-bold text-foreground block">
             {formattedOil} بشکه
           </span>
-          {oilRequiredPerTurn > 0 && (
-            <span className="text-[9px] text-muted-foreground block font-sans">
-              مصرف نوبتی:{" "}
-              {PersianNumberFormatter.toPersianDigits(oilRequiredPerTurn)} بشکه
-            </span>
-          )}
+          <div className="space-y-0.5 pt-0.5">
+            {oilProducedPerTurn > 0 && (
+              <span className="text-[9px] text-gdp block font-sans">
+                تولید نوبتی: +
+                {PersianNumberFormatter.toPersianDigits(
+                  oilProducedPerTurn.toLocaleString("en-US"),
+                )}{" "}
+                بشکه
+              </span>
+            )}
+            {oilRequiredPerTurn > 0 && (
+              <span className="text-[9px] text-muted-foreground block font-sans">
+                مصرف نوبتی:{" "}
+                {PersianNumberFormatter.toPersianDigits(
+                  oilRequiredPerTurn.toLocaleString("en-US"),
+                )}{" "}
+                بشکه
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
@@ -67,6 +85,15 @@ export function ResourcesSection({
           <span className="text-xs font-bold text-foreground block">
             {formattedSteel} تن
           </span>
+          {steelProducedPerTurn > 0 && (
+            <span className="text-[9px] text-gdp block font-sans pt-0.5">
+              تولید نوبتی: +
+              {PersianNumberFormatter.toPersianDigits(
+                steelProducedPerTurn.toLocaleString("en-US"),
+              )}{" "}
+              تن
+            </span>
+          )}
         </div>
 
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">

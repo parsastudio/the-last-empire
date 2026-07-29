@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, Fuel, Wrench, Navigation, Anchor } from "lucide-react";
+import { Coins, Fuel, Navigation, Anchor } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface AttackLogisticsTableProps {
@@ -17,7 +17,6 @@ export function AttackLogisticsTable({
   heavyTransitCost,
   distanceKm,
   requiredOil = 50,
-  requiredSteel = 0,
 }: AttackLogisticsTableProps) {
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -92,21 +91,6 @@ export function AttackLogisticsTable({
             بشکه
           </span>
         </div>
-
-        {requiredSteel > 0 && (
-          <div className="flex justify-between items-center pt-2 border-t border-border/40">
-            <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
-              <Wrench size={13} className="text-primary" />
-              قطعات فولاد صنعتی مصرفی
-            </span>
-            <span className="font-bold text-foreground">
-              {PersianNumberFormatter.toPersianDigits(
-                requiredSteel.toLocaleString("en-US"),
-              )}{" "}
-              تن
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
