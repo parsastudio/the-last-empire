@@ -12,12 +12,10 @@ export function useBattleValidation(
 
   useEffect(() => {
     if (!isOpen || !attackerId || !coordinate) {
-      setValidationResult(null);
       return;
     }
 
     let active = true;
-    const currentCoord = coordinate;
 
     async function validateAttackOnServer() {
       try {
@@ -27,8 +25,8 @@ export function useBattleValidation(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             attackerId,
-            x: currentCoord.x,
-            y: currentCoord.y,
+            x: coordinate.x,
+            y: coordinate.y,
           }),
         });
 
@@ -54,5 +52,8 @@ export function useBattleValidation(
     };
   }, [attackerId, coordinate, isOpen]);
 
-  return { validationResult, loading };
+  const effectiveValidationResult =
+    !isOpen || !attackerId || !coordinate ? null : validationResult;
+
+  return { validationResult: effectiveResult, loading };
 }
