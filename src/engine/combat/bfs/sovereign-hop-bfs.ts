@@ -43,32 +43,7 @@ export class SovereignHopBfs {
     queue.enqueue(startCell);
     visited.add(`${startCell.x},${startCell.y}`);
 
-    while (conquered.length < pixelLimit) {
-      if (queue.isEmpty()) {
-        let closestUnvisited: GridCell | undefined = undefined;
-        let minDist = Infinity;
-
-        for (const c of targetCells) {
-          const key = `${c.x},${c.y}`;
-          if (!visited.has(key)) {
-            for (const active of conquered) {
-              const dist = Math.hypot(c.x - active.x, c.y - active.y);
-              if (dist < minDist) {
-                minDist = dist;
-                closestUnvisited = c;
-              }
-            }
-          }
-        }
-
-        if (!closestUnvisited) {
-          break;
-        }
-
-        queue.enqueue(closestUnvisited);
-        visited.add(`${closestUnvisited.x},${closestUnvisited.y}`);
-      }
-
+    while (conquered.length < pixelLimit && !queue.isEmpty()) {
       const current = queue.dequeue();
       if (!current) continue;
 
