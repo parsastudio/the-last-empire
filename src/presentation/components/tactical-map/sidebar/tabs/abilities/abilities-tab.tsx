@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Zap } from "lucide-react";
-import { REGIME_ABILITIES, AbilityItem } from "./abilities.config";
+import { REGIME_ABILITIES } from "./abilities.config";
 import { AbilityCard } from "./ability-card";
-import { AbilityTargetModal } from "../../../modals/ability-target-modal";
+import { AbilityTargetModal } from "../../modals/ability-target-modal";
+import { useWideAbilities } from "../../command-center/views/hooks/use-wide-abilities";
 
 interface AbilitiesTabProps {
   currentGovernment: string;
@@ -13,11 +14,7 @@ export function AbilitiesTab({
   currentGovernment,
   nationId = "NATION_118",
 }: AbilitiesTabProps) {
-  const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
-
-  const handleOpenTargetModal = (ability: AbilityItem) => {
-    setSelectedAbility(ability.name);
-  };
+  const abilities = useWideAbilities();
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
@@ -35,19 +32,17 @@ export function AbilitiesTab({
             ability={ab}
             currentGovernment={currentGovernment}
             nationId={nationId}
-            onActivate={handleOpenTargetModal}
+            onActivate={(ability) => abilities.openAbilityModal(ability.name)}
           />
         ))}
       </div>
 
       <AbilityTargetModal
-        isOpen={selectedAbility !== null}
-        abilityName={selectedAbility || ""}
+        isOpen={abilities.selectedAbility !== null}
+        abilityName={abilities.selectedAbility || ""}
         nationId={nationId}
-        onClose={() => setSelectedAbility(null)}
-        onConfirmTarget={() => {
-          setSelectedAbility(null);
-        }}
+        onClose={abilities.closeAbilityModal}
+        onConfirmTarget={abilities.closeAbilityModal}
       />
     </div>
   );

@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React from "react";
 import { X, Search, ChevronLeft, Shield, Award } from "lucide-react";
-import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { useNationSelector } from "./hooks/use-nation-selector";
 
 interface NationSelectorModalProps {
   isOpen: boolean;
@@ -14,33 +14,9 @@ export function NationSelectorModal({
   onClose,
   onSelect,
 }: NationSelectorModalProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const provider = useMemo(() => new NationDatabaseProvider(), []);
-  const allNations = useMemo(
-    () => provider.getAllSelectableNations(),
-    [provider],
-  );
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const selector = useNationSelector(isOpen, onClose);
 
   if (!isOpen) return null;
-
-  const filteredNations = allNations.filter(
-    (n) =>
-      n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.id.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
 
   return (
     <div
@@ -79,19 +55,19 @@ export function NationSelectorModal({
           <input
             type="text"
             placeholder="جستجوی نام کشور یا نماد..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={selector.searchQuery}
+            onChange={(e) => selector.setSearchQuery(e.target.value)}
             className="w-full bg-background border border-border rounded-2xl py-2.5 pr-10 pl-4 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary transition-colors text-right"
           />
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 pl-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-          {filteredNations.length === 0 ? (
+          {selector.filteredNations.length === 0 ? (
             <div className="py-12 text-center text-xs text-muted-foreground italic">
               هیچ کشوری با این مشخصات یافت نشد.
             </div>
           ) : (
-            filteredNations.map((nation) => (
+            selector.filteredNations.map((nation) => (
               <button
                 key={nation.id}
                 onClick={() => onSelect(nation.id)}

@@ -1,41 +1,42 @@
-import React, { useState } from "react";
+import React from "react";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { ReportsSidebarTab } from "../../reports/reports-sidebar-tab";
 import { CasualtyTable } from "../../reports/casualty-table";
 import { ReportNarrativeBox } from "./components/report-narrative-box";
+import { useWideReports } from "./hooks/use-wide-reports";
 
 interface WideReportsViewProps {
   reports: CombatReport[];
 }
 
 export function WideReportsView({ reports }: WideReportsViewProps) {
-  const [selectedReport, setSelectedReport] = useState<CombatReport | null>(
-    reports[0] || null,
-  );
+  const reportsView = useWideReports(reports);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl">
       <div className="lg:col-span-5 bg-background/30 p-4 border border-border/60 rounded-3xl">
         <ReportsSidebarTab
           reports={reports}
-          onSelectReport={setSelectedReport}
+          onSelectReport={reportsView.selectReport}
         />
       </div>
 
       <div className="lg:col-span-7 space-y-4">
-        {selectedReport ? (
+        {reportsView.selectedReport ? (
           <>
             <ReportNarrativeBox
-              summary={selectedReport.summary}
-              strategicAssessment={selectedReport.strategicAssessment}
+              summary={reportsView.selectedReport.summary}
+              strategicAssessment={
+                reportsView.selectedReport.strategicAssessment
+              }
             />
 
             <CasualtyTable
-              attackerName={selectedReport.attackerName}
-              defenderName={selectedReport.defenderName}
-              attackerCasualties={selectedReport.attackerCasualties}
-              defenderCasualties={selectedReport.defenderCasualties}
-              conqueredAreaSqKm={selectedReport.conqueredAreaSqKm}
+              attackerName={reportsView.selectedReport.attackerName}
+              defenderName={reportsView.selectedReport.defenderName}
+              attackerCasualties={reportsView.selectedReport.attackerCasualties}
+              defenderCasualties={reportsView.selectedReport.defenderCasualties}
+              conqueredAreaSqKm={reportsView.selectedReport.conqueredAreaSqKm}
             />
           </>
         ) : (
