@@ -16,6 +16,9 @@ interface CasualtyTableProps {
   attackerCasualties: CasualtyMetrics;
   defenderCasualties: CasualtyMetrics;
   conqueredAreaSqKm: number;
+  attackerNationId?: string;
+  defenderNationId?: string;
+  humanNationId?: string;
 }
 
 export function CasualtyTable({
@@ -24,10 +27,23 @@ export function CasualtyTable({
   attackerCasualties,
   defenderCasualties,
   conqueredAreaSqKm,
+  attackerNationId,
+  defenderNationId,
+  humanNationId,
 }: CasualtyTableProps) {
   const formattedArea = new Intl.NumberFormat("fa-IR").format(
     Math.round(conqueredAreaSqKm),
   );
+
+  const isAttackerHuman = attackerNationId === humanNationId;
+  const isDefenderHuman = defenderNationId === humanNationId;
+
+  const displayAttacker = isAttackerHuman
+    ? `${attackerName} (شما)`
+    : attackerName;
+  const displayDefender = isDefenderHuman
+    ? `${defenderName} (شما)`
+    : defenderName;
 
   return (
     <div className="bg-secondary/40 border border-border/80 rounded-2xl p-4 space-y-3 font-mono text-xs dir-rtl text-right">
@@ -35,8 +51,8 @@ export function CasualtyTable({
         <span className="text-muted-foreground text-[10px] uppercase">
           شاخص نبرد
         </span>
-        <span className="text-emerald-500 truncate">{attackerName} (شما)</span>
-        <span className="text-rose-500 truncate">{defenderName}</span>
+        <span className="text-emerald-500 truncate">{displayAttacker}</span>
+        <span className="text-rose-500 truncate">{displayDefender}</span>
       </div>
 
       <CasualtyRow
