@@ -1,16 +1,12 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { BattleValidator } from "@/engine/combat/validation/battle-validator";
-import { ClosestBaseFinder } from "@/engine/combat/routing/closest-base-finder";
-import { ConquestLogisticsCalculator } from "@/engine/combat/routing/conquest-logistics-calculator";
-import { EnclaveRegistry } from "@/engine/combat/registry/enclave-registry";
-import { BattleValidationResult } from "@/engine/combat/validation/battle-validation-result.schema";
+import { FastTransitCalculator } from "@/engine/combat/routing/fast-transit-calculator";
+import { BattleValidationResult } from "@/domain/game/battle-validation-result.schema";
 
 export class BattleValidationFacade {
   private validator = new BattleValidator();
-  private baseFinder = new ClosestBaseFinder();
-  private calculator = new ConquestLogisticsCalculator();
-  private registry = new EnclaveRegistry();
+  private transitCalculator = new FastTransitCalculator();
 
   public validateAttackForUI(
     attackerId: string,
@@ -18,46 +14,36 @@ export class BattleValidationFacade {
     gridState: GridState,
   ): BattleValidationResult {
     const allCells = gridState.getAllCells();
+    const targetCell = gridState.getCell(targetPixel.x, targetPixel.y);
+    const targetNationId = targetCell ? targetCell.ownerId : "WATER";
+
     const isValid = this.validator.validateAttackOpportunity(
       attackerId,
       targetPixel,
       allCells,
     );
-    const closestBase = this.baseFinder.findClosestBase(
+
+    const transit = this.transitCalculator.calculateTransit(
       attackerId,
+      targetNationId,
       targetPixel,
       allCells,
     );
 
-    if (!closestBase) {
-      return {
-        isValid: false,
-        errorMessage:
-          "هیچ پایگاه نظامی فعالی برای آغاز تهاجم از این مبدا یافت نشد.",
-        closestBaseCoordinate: null,
-        distance: 0,
-        logisticsCost: 0,
-        surchargeMultiplier: 1.0,
-        enclaveOriginalName: null,
-      };
-    }
-
-    const logistics = this.calculator.calculateLogistics(
-      closestBase,
-      targetPixel,
-      this.registry,
-    );
+    const baseCostPerKm = transit.isLandAttack ? 15 : 45;
+    const logisticsCost = Math.floor(transit.distanceInKm * baseCostPerKm);
 
     return {
       isValid,
+      isLandAttack: transit.isLandAttack,
       errorMessage: isValid
         ? null
-        : "منطقه هدف خارج از شعاع ترانزیت پایگاه اولیه بوده یا پایگاه کوچک است.",
-      closestBaseCoordinate: { x: closestBase.x, y: closestBase.y },
-      distance: logistics.distance,
-      logisticsCost: logistics.finalCost,
-      surchargeMultiplier: logistics.isEnclave ? 0.7 : 1.0,
-      enclaveOriginalName: logistics.enclaveName,
+        : "منطقه هدف خارج از برد ترانزیت پایگاه‌های موجود است.",
+      closestBaseCoordinate: transit.originCoordinate,
+      distance: transit.distanceInKm,
+      logisticsCost,
+      surchargeMultiplier: transit.isLandAttack ? 1.0 : 1.5,
+      enclaveOriginalName: null,
     };
   }
 }
