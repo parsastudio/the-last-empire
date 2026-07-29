@@ -82,7 +82,7 @@ export function LoadCampaignModal({
 
             {isDbLoading ? (
               <div className="py-8 text-center text-xs text-muted-foreground">
-                در حال جستجوی ذخیره‌ها در IndexedDB...
+                در حال جستجوی ذخیره‌ها در دیتابیس محلی...
               </div>
             ) : saves.length === 0 ? (
               <div className="py-8 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
