@@ -2,14 +2,14 @@ import { useState, useMemo, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
-export interface ActiveProxyOperation {
-  targetId: string;
-  targetName: string;
-  targetFlagCode: string;
-  currentBudget: number;
-  stabilityDrainPerTurn: number;
-  targetStability: number;
+export interface TargetCountryOption {
+  id: string;
+  name: string;
+  flagCode: string;
+  stability: number;
+  gdp: number;
 }
 
 interface UseWideProxyProps {
@@ -24,10 +24,10 @@ export function useWideProxy({
   selectedTargetCode,
 }: UseWideProxyProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [allocatedBudget, setAllocatedBudget] = useState<number>(15000);
+  const [desiredDrain, setDesiredDrain] = useState<number>(2);
   const { dispatchAction } = useGameActions();
 
-  const countryOptions = useMemo(() => {
+  const countryOptions = useMemo<TargetCountryOption[]>(() => {
     if (!nationsMap) return [];
     const query = searchQuery.trim().toLowerCase();
 
@@ -38,6 +38,7 @@ export function useWideProxy({
         name: n.name,
         flagCode: n.flagCode || "IR",
         stability: n.government.stability,
+        gdp: n.gdp,
       }))
       .filter(
         (c) =>
@@ -64,62 +65,35 @@ export function useWideProxy({
   const [selectedTargetId, setSelectedTargetId] =
     useState<string>(defaultTarget);
 
-  const activeOperations = useMemo<ActiveProxyOperation[]>(() => {
-    if (!nation.proxyInfluenceBudget) return [];
-
-    const list: ActiveProxyOperation[] = [];
-    for (const [tId, budget] of Object.entries(nation.proxyInfluenceBudget)) {
-      if (budget > 0) {
-        const targetNation = nationsMap?.[tId];
-        const targetName = targetNation ? targetNation.name : tId;
-        const targetFlagCode = targetNation ? targetNation.flagCode : "IR";
-        const targetStability = targetNation
-          ? targetNation.government.stability
-          : 50;
-
-        const rawDrain = Math.floor(Math.log10(budget) * 3);
-        const stabilityDrainPerTurn = Math.max(1, Math.min(15, rawDrain));
-
-        list.push({
-          targetId: tId,
-          targetName,
-          targetFlagCode,
-          currentBudget: budget,
-          stabilityDrainPerTurn,
-          targetStability,
-        });
-      }
-    }
-    return list;
-  }, [nation.proxyInfluenceBudget, nationsMap]);
-
   const selectedTargetNation = useMemo(() => {
     return countryOptions.find((c) => c.id === selectedTargetId) || null;
   }, [countryOptions, selectedTargetId]);
 
-  const predictedStabilityDrain = useMemo(() => {
-    if (allocatedBudget <= 0) return 0;
-    const rawDrain = Math.floor(Math.log10(allocatedBudget) * 3);
-    return Math.max(1, Math.min(15, rawDrain));
-  }, [allocatedBudget]);
+  const requiredBudget = useMemo(() => {
+    if (!selectedTargetNation) return 0;
+    return Math.floor(selectedTargetNation.gdp * (desiredDrain / 2) * 0.01);
+  }, [selectedTargetNation, desiredDrain]);
 
   const handleFundProxy = useCallback(async () => {
-    if (!selectedTargetNation || allocatedBudget <= 0) return;
+    if (!selectedTargetNation || requiredBudget <= 0) return;
 
     const action = ActionFactory.fundProxyInfluence(
       nation.id,
       selectedTargetId,
-      allocatedBudget,
+      requiredBudget,
     );
+
+    const formattedCost = PersianNumberFormatter.formatCurrency(requiredBudget);
 
     await dispatchAction(
       action,
-      `مبلغ $${allocatedBudget.toLocaleString("fa-IR")} جهت توسعه جنگ نیابتی علیه ${selectedTargetNation.name} اختصاص یافت.`,
+      `عملیات پنهان علیه ${selectedTargetNation.name} با موفقیت اجرا شد. ثبات کشور هدف به میزان -${PersianNumberFormatter.toPersianDigits(desiredDrain)}٪ کاهش یافت. (هزینه: ${formattedCost})`,
     );
   }, [
     nation.id,
     selectedTargetId,
-    allocatedBudget,
+    requiredBudget,
+    desiredDrain,
     selectedTargetNation,
     dispatchAction,
   ]);
@@ -129,12 +103,11 @@ export function useWideProxy({
     setSearchQuery,
     selectedTargetId,
     setSelectedTargetId,
-    allocatedBudget,
-    setAllocatedBudget,
+    desiredDrain,
+    setDesiredDrain,
+    requiredBudget,
     filteredTargetOptions: countryOptions,
     selectedTargetNation,
-    predictedStabilityDrain,
-    activeOperations,
     handleFundProxy,
   };
 }
