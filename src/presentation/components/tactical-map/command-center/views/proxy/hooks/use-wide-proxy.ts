@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 export interface ActiveProxyOperation {
   targetId: string;
@@ -27,17 +28,11 @@ export function useWideProxy({
   const [allocatedBudget, setAllocatedBudget] = useState<number>(15000);
   const { dispatchAction } = useGameActions();
 
-  const countryOptions = useMemo(() => {
-    if (!nationsMap) return [];
-    return Object.values(nationsMap)
-      .filter((n) => n.id !== nation.id && n.isAlive)
-      .map((n) => ({
-        id: n.id,
-        name: n.name,
-        flagCode: n.flagCode,
-        stability: n.government.stability,
-      }));
-  }, [nation.id, nationsMap]);
+  const { filteredNations: countryOptions } = useLiveNations({
+    nationsMap,
+    excludeNationId: nation.id,
+    searchQuery,
+  });
 
   const defaultTarget = useMemo(() => {
     if (selectedTargetCode && nationsMap?.[selectedTargetCode]) {
@@ -48,17 +43,6 @@ export function useWideProxy({
 
   const [selectedTargetId, setSelectedTargetId] =
     useState<string>(defaultTarget);
-
-  const filteredTargetOptions = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return countryOptions;
-    return countryOptions.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.id.toLowerCase().includes(q) ||
-        c.flagCode.toLowerCase().includes(q),
-    );
-  }, [countryOptions, searchQuery]);
 
   const activeOperations = useMemo<ActiveProxyOperation[]>(() => {
     if (!nation.proxyInfluenceBudget) return [];
@@ -127,7 +111,7 @@ export function useWideProxy({
     setSelectedTargetId,
     allocatedBudget,
     setAllocatedBudget,
-    filteredTargetOptions,
+    filteredTargetOptions: countryOptions,
     selectedTargetNation,
     predictedStabilityDrain,
     activeOperations,

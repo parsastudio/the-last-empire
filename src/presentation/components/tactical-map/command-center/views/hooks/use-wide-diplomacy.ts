@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
-import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 import { resolveProfileRelation } from "../../../sidebar/tabs/diplomacy/utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "../../../sidebar/tabs/diplomacy/utils/nation-id-resolver";
+import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 interface UseWideDiplomacyProps {
   selectedTargetCode?: string | null;
@@ -18,45 +18,31 @@ export function useWideDiplomacy({
   const [searchQuery, setSearchQuery] = useState("");
   const idResolver = useMemo(() => new NationIdResolver(), []);
 
-  const relationsList = useMemo(() => {
-    if (nationsMap) {
-      return Object.values(nationsMap)
-        .filter((n) => n.id !== humanNationId && n.isAlive)
-        .map((n) => {
-          const rel = resolveProfileRelation(n.id, n);
-          const humanNation = nationsMap[humanNationId];
-          if (humanNation) {
-            const directRel = humanNation.relations[n.id];
-            if (directRel) {
-              rel.stance = directRel.stance;
-              rel.opinion = directRel.opinion;
-            }
-          }
-          return rel;
-        });
-    }
+  const { filteredNations: liveNationsList } = useLiveNations({
+    nationsMap,
+    excludeNationId: humanNationId,
+    searchQuery,
+  });
 
-    return ALL_COUNTRY_PROFILES.filter(
-      (p) => `NATION_${p.id}` !== humanNationId,
-    ).map((p) => resolveProfileRelation(p.code));
-  }, [humanNationId, nationsMap]);
+  const relationsList = useMemo(() => {
+    return liveNationsList.map((item) => {
+      const rel = resolveProfileRelation(item.id, item.rawNation);
+      const humanNation = nationsMap ? nationsMap[humanNationId] : null;
+      if (humanNation) {
+        const directRel = humanNation.relations[item.id];
+        if (directRel) {
+          rel.stance = directRel.stance;
+          rel.opinion = directRel.opinion;
+        }
+      }
+      return rel;
+    });
+  }, [liveNationsList, nationsMap, humanNationId]);
 
   const defaultCode = relationsList[0]?.code || "USA";
   const [activeCode, setActiveCode] = useState<string>(
     selectedTargetCode || defaultCode,
   );
-
-  const filteredRelations = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return relationsList;
-
-    return relationsList.filter(
-      (r) =>
-        r.name.toLowerCase().includes(query) ||
-        r.code.toLowerCase().includes(query) ||
-        r.flagCode.toLowerCase().includes(query),
-    );
-  }, [relationsList, searchQuery]);
 
   const targetNationId = idResolver.resolveFullNationId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
@@ -67,7 +53,7 @@ export function useWideDiplomacy({
     setSearchQuery,
     activeCode,
     setActiveCode,
-    filteredRelations,
+    filteredRelations: relationsList,
     selectedRelation,
     targetNationId,
   };
