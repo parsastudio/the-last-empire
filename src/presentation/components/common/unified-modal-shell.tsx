@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { X } from "lucide-react";
+import { useModalKeyboardShortcut } from "./hooks/use-modal-keyboard-shortcut";
 
 interface UnifiedModalShellProps {
   isOpen: boolean;
@@ -20,18 +21,7 @@ export function UnifiedModalShell({
   onClose,
   children,
 }: UnifiedModalShellProps) {
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useModalKeyboardShortcut(isOpen, onClose);
 
   if (!isOpen) return null;
 

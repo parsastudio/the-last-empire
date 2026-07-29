@@ -1,6 +1,7 @@
 import React from "react";
-import { CheckCircle2, AlertTriangle, XCircle, Info, X } from "lucide-react";
+import { X } from "lucide-react";
 import { StrategicToast } from "@/presentation/context/toast-context";
+import { useToastItemStyle } from "./hooks/use-toast-item-style";
 
 interface StrategicToastItemProps {
   toast: StrategicToast;
@@ -11,40 +12,7 @@ export function StrategicToastItem({
   toast,
   onClose,
 }: StrategicToastItemProps) {
-  const getStyle = () => {
-    switch (toast.type) {
-      case "success":
-        return {
-          border: "border-gdp/40",
-          bg: "bg-card/90",
-          iconBg: "bg-gdp/15 text-gdp",
-          icon: CheckCircle2,
-        };
-      case "error":
-        return {
-          border: "border-military/40",
-          bg: "bg-card/90",
-          iconBg: "bg-military/15 text-military",
-          icon: XCircle,
-        };
-      case "warning":
-        return {
-          border: "border-treasury/40",
-          bg: "bg-card/90",
-          iconBg: "bg-treasury/15 text-treasury",
-          icon: AlertTriangle,
-        };
-      default:
-        return {
-          border: "border-primary/40",
-          bg: "bg-card/90",
-          iconBg: "bg-primary/15 text-primary",
-          icon: Info,
-        };
-    }
-  };
-
-  const style = getStyle();
+  const style = useToastItemStyle(toast.type);
   const Icon = style.icon;
 
   return (

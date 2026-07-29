@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { AlertCircle, X } from "lucide-react";
 import {
   EventChoiceButton,
   EventChoiceOption,
 } from "./event/event-choice-button";
+import { useModalKeyboardShortcut } from "@/presentation/components/common/hooks/use-modal-keyboard-shortcut";
 
 interface EventDecisionModalProps {
   isOpen: boolean;
@@ -22,18 +23,7 @@ export function EventDecisionModal({
   onSelectChoice,
   onClose,
 }: EventDecisionModalProps) {
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && onClose) {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useModalKeyboardShortcut(isOpen, onClose || (() => {}));
 
   if (!isOpen) return null;
 
