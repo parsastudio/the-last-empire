@@ -12,12 +12,16 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface MilitaryTabProps {
   military: MilitaryStack;
+  population?: number;
+  stability?: number;
   recruitmentQueue?: RecruitmentOrder[];
   nationId?: string;
 }
 
 export function MilitaryTab({
   military,
+  population = 80000000,
+  stability = 70,
   recruitmentQueue = [],
   nationId = "NATION_118",
 }: MilitaryTabProps) {
@@ -26,6 +30,11 @@ export function MilitaryTab({
   >("overview");
 
   const { dispatchAction } = useGameActions();
+
+  const militiaGarrisonPower = Math.max(
+    10,
+    Math.floor((population / 100000) * (stability / 100)),
+  );
 
   const handleUpgradeTech = async () => {
     await dispatchAction(
@@ -60,6 +69,7 @@ export function MilitaryTab({
         droneMissile={military.droneMissile}
         techLevel={military.techLevel}
         experience={military.experience}
+        militiaGarrisonPower={militiaGarrisonPower}
       />
 
       <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
