@@ -10,8 +10,6 @@ import {
   Cpu,
   Loader2,
   Flame,
-  Search,
-  Settings,
 } from "lucide-react";
 import { SidebarTabType } from "../sidebar/sidebar-tabs";
 import { RailTabButton } from "./rail-tab-button";
@@ -26,8 +24,6 @@ interface CommandRailProps {
   onSelectTab: (tab: SidebarTabType) => void;
   onToggleCollapse: () => void;
   onNextTurn: () => void;
-  onOpenCommandPalette?: () => void;
-  onOpenSettings?: () => void;
 }
 
 export function CommandRail({
@@ -38,8 +34,6 @@ export function CommandRail({
   onSelectTab,
   onToggleCollapse,
   onNextTurn,
-  onOpenCommandPalette,
-  onOpenSettings,
 }: CommandRailProps) {
   const tabs = [
     { id: "overview" as const, label: "نما", icon: LayoutDashboard },
@@ -68,26 +62,9 @@ export function CommandRail({
             onToggle={onToggleCollapse}
           />
           {!isCollapsed && (
-            <div className="flex items-center gap-1.5">
-              {onOpenCommandPalette && (
-                <button
-                  onClick={onOpenCommandPalette}
-                  className="p-1.5 hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                  title="جستجوی سریع (Ctrl+K)"
-                >
-                  <Search size={14} />
-                </button>
-              )}
-              {onOpenSettings && (
-                <button
-                  onClick={onOpenSettings}
-                  className="p-1.5 hover:bg-secondary rounded-xl text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                  title="تنظیمات"
-                >
-                  <Settings size={14} />
-                </button>
-              )}
-            </div>
+            <span className="text-[10px] font-mono font-bold text-gdp">
+              اتاق فرماندهی
+            </span>
           )}
         </div>
 

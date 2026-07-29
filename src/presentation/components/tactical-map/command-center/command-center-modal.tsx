@@ -28,10 +28,6 @@ interface CommandCenterModalProps {
     mode: "buy" | "sell",
     price: number,
   ) => void;
-  onOpenCommandPalette: () => void;
-  onOpenSettings: () => void;
-  onOpenGuide: () => void;
-  onOpenOverviewTree: () => void;
 }
 
 export function CommandCenterModal({
@@ -45,10 +41,6 @@ export function CommandCenterModal({
   onNavigateTab,
   onFocusCountry,
   onOpenTrade,
-  onOpenCommandPalette,
-  onOpenSettings,
-  onOpenGuide,
-  onOpenOverviewTree,
 }: CommandCenterModalProps) {
   if (!activeTab || !nation) return null;
 
@@ -70,10 +62,6 @@ export function CommandCenterModal({
           targetName={selectedTargetCode}
           onNavigateTab={onNavigateTab}
           onClose={onClose}
-          onOpenCommandPalette={onOpenCommandPalette}
-          onOpenSettings={onOpenSettings}
-          onOpenGuide={onOpenGuide}
-          onOpenOverviewTree={onOpenOverviewTree}
         />
 
         <CommandCenterTabRouter
