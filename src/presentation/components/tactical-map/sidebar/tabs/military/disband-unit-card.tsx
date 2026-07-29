@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { UserMinus, Zap } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
@@ -35,13 +35,19 @@ export function DisbandUnitCard({
     Math.min(5, Math.max(1, maxAvailable)),
   );
 
-  useEffect(() => {
+  const [prevUnitType, setPrevUnitType] = useState<UnitType>(selectedUnitType);
+  const [prevMaxAvailable, setPrevMaxAvailable] =
+    useState<number>(maxAvailable);
+
+  if (selectedUnitType !== prevUnitType || maxAvailable !== prevMaxAvailable) {
+    setPrevUnitType(selectedUnitType);
+    setPrevMaxAvailable(maxAvailable);
     if (maxAvailable === 0) {
       setDisbandAmount(0);
-    } else if (disbandCount > maxAvailable || disbandCount === 0) {
+    } else {
       setDisbandAmount(Math.min(5, maxAvailable) || 1);
     }
-  }, [selectedUnitType, maxAvailable]);
+  }
 
   const { dispatchAction } = useGameActions();
 
