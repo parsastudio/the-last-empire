@@ -23,6 +23,9 @@ export async function generateTest6Map(
   height: number,
 ): Promise<{ countries: CountryMapping[] }> {
   const publicDir = path.join(process.cwd(), "public");
+  const map1Dir = path.join(publicDir, "maps", "map1");
+  await fs.mkdir(map1Dir, { recursive: true });
+
   const geojsonPath = path.join(publicDir, "ne_110m_admin_0_countries.geojson");
   let geoJson: typeof FALLBACK_WORLD_MAP;
   try {
@@ -84,7 +87,7 @@ export async function generateTest6Map(
   distanceTransform.applySeaDepths(buffer, dist, width, height);
 
   await writer.saveMaskImage(width, height, buffer, publicDir);
-  await fs.writeFile(path.join(publicDir, "test6", "world-mask.bin"), buffer);
+  await fs.writeFile(path.join(map1Dir, "default-mask.bin"), buffer);
 
   const packer = new LowResPacker();
   const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
@@ -92,10 +95,7 @@ export async function generateTest6Map(
   const seaDetector = new ClosedSeaDetector();
   seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
-  await fs.writeFile(
-    path.join(publicDir, "test6", "world-mask-1024.bin"),
-    packed1024,
-  );
+  await fs.writeFile(path.join(map1Dir, "default-mask-1024.bin"), packed1024);
 
   return { countries };
 }

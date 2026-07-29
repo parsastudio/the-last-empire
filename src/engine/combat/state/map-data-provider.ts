@@ -6,13 +6,34 @@ export class MapDataProvider {
     try {
       const publicDir = path.join(process.cwd(), "public");
       try {
-        const maskPath = path.join(publicDir, "edited-mask", "world-mask.bin");
+        const maskPath = path.join(
+          publicDir,
+          "maps",
+          "map1",
+          "partition-mask.bin",
+        );
         const buffer = await fs.readFile(maskPath);
         return new Uint8Array(buffer);
       } catch {
-        const maskPath = path.join(publicDir, "test6", "world-mask.png");
-        const buffer = await fs.readFile(maskPath);
-        return new Uint8Array(buffer);
+        try {
+          const maskPath = path.join(
+            publicDir,
+            "maps",
+            "map1",
+            "edited-mask.bin",
+          );
+          const buffer = await fs.readFile(maskPath);
+          return new Uint8Array(buffer);
+        } catch {
+          const maskPath = path.join(
+            publicDir,
+            "maps",
+            "map1",
+            "default-mask.bin",
+          );
+          const buffer = await fs.readFile(maskPath);
+          return new Uint8Array(buffer);
+        }
       }
     } catch {
       return null;
@@ -25,15 +46,32 @@ export class MapDataProvider {
       try {
         const maskPath = path.join(
           publicDir,
-          "edited-mask",
-          "world-mask-1024.bin",
+          "maps",
+          "map1",
+          "partition-mask-1024.bin",
         );
         const buffer = await fs.readFile(maskPath);
         return new Uint8Array(buffer);
       } catch {
-        const maskPath = path.join(publicDir, "test6", "world-mask-1024.bin");
-        const buffer = await fs.readFile(maskPath);
-        return new Uint8Array(buffer);
+        try {
+          const maskPath = path.join(
+            publicDir,
+            "maps",
+            "map1",
+            "edited-mask-1024.bin",
+          );
+          const buffer = await fs.readFile(maskPath);
+          return new Uint8Array(buffer);
+        } catch {
+          const maskPath = path.join(
+            publicDir,
+            "maps",
+            "map1",
+            "default-mask-1024.bin",
+          );
+          const buffer = await fs.readFile(maskPath);
+          return new Uint8Array(buffer);
+        }
       }
     } catch {
       return null;

@@ -2,8 +2,21 @@ import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/map/countries";
 import { NationDetail } from "../nation-list-item";
 
 export class NationDatabaseProvider {
-  public getAllSelectableNations(): NationDetail[] {
-    const sorted = [...ALL_COUNTRY_PROFILES].sort((a, b) => b.gdp - a.gdp);
+  public getAllSelectableNations(
+    presentCountryIds?: Set<number> | number[],
+  ): NationDetail[] {
+    let profiles = [...ALL_COUNTRY_PROFILES];
+
+    if (presentCountryIds) {
+      const validSet = new Set(
+        Array.isArray(presentCountryIds)
+          ? presentCountryIds
+          : Array.from(presentCountryIds),
+      );
+      profiles = profiles.filter((p) => validSet.has(p.id));
+    }
+
+    const sorted = profiles.sort((a, b) => b.gdp - a.gdp);
 
     return sorted.map((profile: CountryProfile, index: number) => {
       let gdpText = "";

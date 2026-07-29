@@ -54,7 +54,7 @@ export default function MapGeneratorPage() {
           const json = await res.json();
           if (active && json.success) {
             try {
-              const resPart = await fetch("/partition-mask/mappings.json");
+              const resPart = await fetch("/maps/map1/partition-mappings.json");
               const jsonPart = await resPart.json();
               if (active) {
                 setCountries(jsonPart.countries || []);

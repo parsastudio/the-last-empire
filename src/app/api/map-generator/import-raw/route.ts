@@ -20,8 +20,8 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const publicDir = path.join(process.cwd(), "public");
-    const editedDir = path.join(publicDir, "edited-mask");
-    await fs.mkdir(editedDir, { recursive: true });
+    const map1Dir = path.join(publicDir, "maps", "map1");
+    await fs.mkdir(map1Dir, { recursive: true });
 
     const palette: [number, number, number][] = [];
     for (let i = 0; i < 256; i++) {
@@ -29,11 +29,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const pngBuffer = encodePng(4096, 2048, bytes, palette);
-    await fs.writeFile(path.join(editedDir, "world-mask.png"), pngBuffer);
-    await fs.writeFile(path.join(editedDir, "world-mask.bin"), bytes);
+    await fs.writeFile(path.join(map1Dir, "edited-mask.png"), pngBuffer);
+    await fs.writeFile(path.join(map1Dir, "edited-mask.bin"), bytes);
 
-    const defaultMappingsPath = path.join(publicDir, "test6", "mappings.json");
-    const editedMappingsPath = path.join(editedDir, "mappings.json");
+    const defaultMappingsPath = path.join(map1Dir, "default-mappings.json");
+    const editedMappingsPath = path.join(map1Dir, "edited-mappings.json");
     let mappings = { countries: [] };
     try {
       const current = await fs.readFile(defaultMappingsPath, "utf-8");
@@ -81,7 +81,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const seaDetector = new ClosedSeaDetector();
     seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
-    await fs.writeFile(path.join(editedDir, "world-mask-1024.bin"), packed1024);
+    await fs.writeFile(path.join(map1Dir, "edited-mask-1024.bin"), packed1024);
 
     return NextResponse.json({ success: true });
   } catch (err) {

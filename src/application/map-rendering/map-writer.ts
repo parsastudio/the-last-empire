@@ -15,8 +15,8 @@ export class MapWriter {
     }
 
     const pngBuffer = encodePng(width, height, buffer, palette);
-    const test6Dir = path.join(publicDir, "test6");
-    await fs.mkdir(test6Dir, { recursive: true });
-    await fs.writeFile(path.join(test6Dir, "world-mask.png"), pngBuffer);
+    const map1Dir = path.join(publicDir, "maps", "map1");
+    await fs.mkdir(map1Dir, { recursive: true });
+    await fs.writeFile(path.join(map1Dir, "default-mask.png"), pngBuffer);
   }
 }
