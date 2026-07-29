@@ -7,10 +7,13 @@ import { TurnStagingLedger } from "./staging/turn-staging-ledger";
 import { TurnEventDialog } from "./dialogs/turn-event-dialog";
 import { MarketTradeDialogWrapper } from "./dialogs/market-trade-dialog-wrapper";
 import { useSidebarTurnActions } from "./hooks/use-sidebar-turn-actions";
+import { GameState } from "@/domain/game/game-state.schema";
 
 interface SidebarContainerProps {
   isOpen: boolean;
   gameId?: string;
+  gameState?: GameState | null;
+  advanceNextTurn?: () => Promise<GameState | null>;
   externalActiveTab?: SidebarTabType | null;
   selectedTargetCode?: string | null;
   onClearExternalTab?: () => void;
@@ -20,6 +23,8 @@ interface SidebarContainerProps {
 export function SidebarContainer({
   isOpen,
   gameId,
+  gameState,
+  advanceNextTurn,
   externalActiveTab,
   selectedTargetCode,
   onClearExternalTab,
@@ -29,6 +34,8 @@ export function SidebarContainer({
     externalActiveTab,
     onClearExternalTab,
     gameId,
+    gameState,
+    advanceNextTurn,
   );
 
   if (!isOpen) return null;

@@ -33,7 +33,7 @@ function MapTest6Content() {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const dimensions = useMapDimensions(containerRef);
-  const { gameState } = useGeopoliticsGame();
+  const { gameState, advanceNextTurn } = useGeopoliticsGame();
   const metrics = useGameResources(gameState);
 
   const {
@@ -147,6 +147,8 @@ function MapTest6Content() {
       <SidebarContainer
         isOpen={isSidebarOpen}
         gameId={gameState?.gameId}
+        gameState={gameState}
+        advanceNextTurn={advanceNextTurn}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
         onClearExternalTab={interaction.clearExternalTab}
