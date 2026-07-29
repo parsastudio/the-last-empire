@@ -1,6 +1,7 @@
 import React from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface ImfLoanCardProps {
   nationId?: string;
@@ -29,13 +30,9 @@ export function ImfLoanCard({
     if (availableLoan < 10000) return;
     const amountToRequest = Math.min(50000, availableLoan);
 
+    const action = ActionFactory.requestLoan(nationId, amountToRequest);
     await dispatchAction(
-      {
-        id: `loan-${Date.now()}`,
-        nationId,
-        type: "REQUEST_LOAN",
-        amount: amountToRequest,
-      },
+      action,
       `وام اضطراری $${amountToRequest.toLocaleString("fa-IR")} به خزانه ملی واریز شد.`,
     );
   };
@@ -44,13 +41,9 @@ export function ImfLoanCard({
     if (nationalDebt <= 0 || treasury <= 0) return;
     const amountToRepay = Math.min(25000, nationalDebt, treasury);
 
+    const action = ActionFactory.repayDebt(nationId, amountToRepay);
     await dispatchAction(
-      {
-        id: `repay-${Date.now()}`,
-        nationId,
-        type: "REPAY_DEBT",
-        amount: amountToRepay,
-      },
+      action,
       `مبلغ $${amountToRepay.toLocaleString("fa-IR")} از بدهی ملی تسویه گردید.`,
     );
   };

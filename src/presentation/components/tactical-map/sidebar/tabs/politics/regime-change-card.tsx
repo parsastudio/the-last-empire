@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { RefreshCw, Zap, AlertTriangle, Lock } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { GovernmentType } from "@/domain/politics/politics.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface RegimeChangeCardProps {
   governmentType: string;
@@ -41,13 +42,9 @@ export function RegimeChangeCard({
       return;
     }
 
+    const action = ActionFactory.changeGovernment(nationId, selectedTargetGov);
     await dispatchAction(
-      {
-        id: `regime-${Date.now()}`,
-        nationId,
-        type: "CHANGE_GOVERNMENT",
-        newGovernment: selectedTargetGov,
-      },
+      action,
       "فرآیند برگزاری همه‌پرسی و تغییر حکومت آغاز شد.",
     );
   };

@@ -6,6 +6,7 @@ import {
 import { CheckCircle } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { PRESENTATION_DOCTRINES } from "./doctrines.config";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface DoctrineTreeViewProps {
   nationId?: string;
@@ -21,15 +22,8 @@ export function DoctrineTreeView({
   const { dispatchAction } = useGameActions();
 
   const handleUnlock = async (docId: string, name: string) => {
-    await dispatchAction(
-      {
-        id: `unlock-${docId}`,
-        nationId,
-        type: "UNLOCK_DOCTRINE",
-        doctrineId: docId,
-      },
-      `دکترین ${name} با موفقیت فعال گردید.`,
-    );
+    const action = ActionFactory.unlockDoctrine(nationId, docId);
+    await dispatchAction(action, `دکترین ${name} با موفقیت فعال گردید.`);
   };
 
   const filtered = PRESENTATION_DOCTRINES.filter(

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Coins } from "lucide-react";
 import { TributeSliderBox } from "./tribute-slider-box";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface TributeDemandDialogProps {
   isOpen: boolean;
@@ -31,15 +32,15 @@ export function TributeDemandDialog({
   if (!isOpen) return null;
 
   const handleSendTribute = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "DEMAND_TRIBUTE",
+      amount,
+    );
+
     const success = await dispatchAction(
-      {
-        id: `tribute-${Date.now()}`,
-        nationId,
-        type: "DIPLOMATIC_PROPOSAL",
-        targetNationId,
-        proposalType: "DEMAND_TRIBUTE",
-        tributeAmount: amount,
-      },
+      action,
       `اولتیماتوم دریافت $${amount.toLocaleString("fa-IR")} باج به ${targetName} ابلاغ گردید.`,
     );
 

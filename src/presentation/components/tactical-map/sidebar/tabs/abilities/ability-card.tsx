@@ -1,6 +1,7 @@
 import React from "react";
 import { AbilityItem } from "./abilities.config";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface AbilityCardProps {
   ability: AbilityItem;
@@ -36,13 +37,13 @@ export function AbilityCard({
       | "ROYAL_DECREE"
       | "WAR_ALERT";
 
+    const action = ActionFactory.activateAbility(
+      nationId,
+      ability.id as AbilityEnum,
+    );
+
     await dispatchAction(
-      {
-        id: `ability-${Date.now()}`,
-        nationId,
-        type: "ACTIVATE_ABILITY",
-        abilityType: ability.id as AbilityEnum,
-      },
+      action,
       `توانمندی ${ability.name} با موفقیت فعال گردید.`,
     );
   };

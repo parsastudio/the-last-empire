@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { Zap, ShieldAlert, Crosshair } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { Nation } from "@/domain/nation/nation.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface ProxyWarCardProps {
   nationId?: string;
@@ -42,14 +43,13 @@ export function ProxyWarCard({
       : 0;
 
   const handleApplyProxy = async () => {
+    const action = ActionFactory.fundProxyInfluence(
+      nationId,
+      currentTargetId,
+      budget,
+    );
     await dispatchAction(
-      {
-        id: `proxy-${Date.now()}`,
-        nationId,
-        type: "FUND_PROXY_INFLUENCE",
-        targetNationId: currentTargetId,
-        budget,
-      },
+      action,
       `مبلغ $${budget.toLocaleString("fa-IR")} جهت تضعیف ثبات سیاسی ${targetName} اختصاص یافت.`,
     );
   };

@@ -1,6 +1,7 @@
 import React from "react";
 import { Swords, Handshake, CheckCircle2, Shield, Coins } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
@@ -18,52 +19,45 @@ export function AdvancedDiplomacyActions({
   const { dispatchAction } = useGameActions();
 
   const handleDeclareWar = async () => {
+    const action = ActionFactory.declareWar(nationId, targetNationId);
     await dispatchAction(
-      {
-        id: `war-${Date.now()}`,
-        nationId,
-        type: "DECLARE_WAR",
-        targetNationId,
-      },
+      action,
       `بیانیه رسمی اعلام جنگ به ${targetName} صادر شد.`,
     );
   };
 
   const handleMilitaryAccess = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "MILITARY_ACCESS",
+    );
     await dispatchAction(
-      {
-        id: `access-${Date.now()}`,
-        nationId,
-        type: "DIPLOMATIC_PROPOSAL",
-        targetNationId,
-        proposalType: "MILITARY_ACCESS",
-      },
+      action,
       `درخواست ترانزیت نظامی به ${targetName} ارسال گردید.`,
     );
   };
 
   const handleNonAggression = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "NON_AGGRESSION_PACT",
+    );
     await dispatchAction(
-      {
-        id: `nap-${Date.now()}`,
-        nationId,
-        type: "DIPLOMATIC_PROPOSAL",
-        targetNationId,
-        proposalType: "NON_AGGRESSION_PACT",
-      },
+      action,
       `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید.`,
     );
   };
 
   const handleAlliance = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "FULL_ALLIANCE",
+    );
     await dispatchAction(
-      {
-        id: `alliance-${Date.now()}`,
-        nationId,
-        type: "DIPLOMATIC_PROPOSAL",
-        targetNationId,
-        proposalType: "FULL_ALLIANCE",
-      },
+      action,
       `پیشنهاد معاهده دفاعی مشترک به ${targetName} ارسال گردید.`,
     );
   };
