@@ -4,6 +4,7 @@ import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/map/countries";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface UseNationHeaderFormatterProps {
   code: string;
@@ -30,7 +31,9 @@ export function useNationHeaderFormatter({
       realTerritory = profile ? Math.round(profile.gdp / 1000000) : 377975;
     }
 
-    const formattedArea = Math.round(realTerritory).toLocaleString("fa-IR");
+    const formattedArea = PersianNumberFormatter.toPersianDigits(
+      Math.round(realTerritory).toLocaleString("en-US"),
+    );
 
     let formattedPopulation = (population / 1e6).toFixed(1);
     if (population >= 1e9) {
@@ -38,6 +41,9 @@ export function useNationHeaderFormatter({
     } else {
       formattedPopulation = `${formattedPopulation} میلیون`;
     }
+
+    formattedPopulation =
+      PersianNumberFormatter.toPersianDigits(formattedPopulation);
 
     return {
       flagEmoji,

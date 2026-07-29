@@ -1,6 +1,7 @@
 import React from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { useNationHeaderFormatter } from "./hooks/use-nation-header-formatter";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface NationHeaderCardProps {
   name: string;
@@ -29,6 +30,23 @@ export function NationHeaderCard({
     territorySize,
   });
 
+  const getGovLabel = (type: string) => {
+    switch (type) {
+      case "DEMOCRACY":
+        return "دموکراسی";
+      case "DICTATORSHIP":
+        return "حکومت دیکتاتوری";
+      case "MONARCHY":
+        return "پادشاهی";
+      case "COMMUNISM":
+        return "کمونیسم";
+      case "FASCISM":
+        return "فاشیسم";
+      default:
+        return type;
+    }
+  };
+
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
       <div className="flex items-center justify-between">
@@ -45,12 +63,9 @@ export function NationHeaderCard({
               <span className="text-xs font-extrabold text-foreground">
                 {name}
               </span>
-              <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-                {code}
-              </span>
             </div>
             <p className="text-[10px] text-muted-foreground font-mono">
-              نوع حکومت: {governmentType}
+              نوع حکومت: {getGovLabel(governmentType)}
             </p>
           </div>
         </div>
@@ -58,7 +73,7 @@ export function NationHeaderCard({
         <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1.5 rounded-xl">
           <span className="text-sm">🏆</span>
           <span className="text-xs font-extrabold font-mono text-amber-500">
-            رتبه {rank}
+            رتبه {PersianNumberFormatter.toPersianDigits(rank)}
           </span>
         </div>
       </div>
