@@ -17,6 +17,7 @@ interface WideMilitaryViewProps {
   treasury?: number;
   manpower?: number;
   steel?: number;
+  activeSubTab?: string | null;
 }
 
 export function WideMilitaryView({

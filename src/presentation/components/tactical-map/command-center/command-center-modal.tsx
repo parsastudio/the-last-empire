@@ -6,14 +6,21 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { getCommandCenterMeta } from "./config/command-center-meta.config";
+import { CommandCenterHeader } from "./command-center-header";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
+  activeSubTab?: string | null;
   selectedTargetCode?: string | null;
   nation: Nation | null;
   gameState?: GameState | null;
   reports: CombatReport[];
   onClose: () => void;
+  onNavigateTab: (
+    tab: SidebarTabType,
+    subTab?: string,
+    targetCode?: string,
+  ) => void;
   onFocusCountry?: (code: string) => void;
   onOpenTrade: (
     name: string,
@@ -21,19 +28,27 @@ interface CommandCenterModalProps {
     mode: "buy" | "sell",
     price: number,
   ) => void;
-  onNavigateTab?: (tab: SidebarTabType, targetCode?: string) => void;
+  onOpenCommandPalette: () => void;
+  onOpenSettings: () => void;
+  onOpenGuide: () => void;
+  onOpenOverviewTree: () => void;
 }
 
 export function CommandCenterModal({
   activeTab,
+  activeSubTab,
   selectedTargetCode,
   nation,
   gameState,
   reports,
   onClose,
+  onNavigateTab,
   onFocusCountry,
   onOpenTrade,
-  onNavigateTab,
+  onOpenCommandPalette,
+  onOpenSettings,
+  onOpenGuide,
+  onOpenOverviewTree,
 }: CommandCenterModalProps) {
   if (!activeTab || !nation) return null;
 
@@ -42,21 +57,37 @@ export function CommandCenterModal({
   return (
     <UnifiedModalShell
       isOpen={activeTab !== null}
-      title={meta.title}
-      subtitle={meta.subtitle}
+      title=""
       maxWidthClass="max-w-6xl"
       onClose={onClose}
     >
-      <CommandCenterTabRouter
-        activeTab={activeTab}
-        selectedTargetCode={selectedTargetCode}
-        nation={nation}
-        gameState={gameState}
-        reports={reports}
-        onFocusCountry={onFocusCountry}
-        onOpenTrade={onOpenTrade}
-        onNavigateTab={onNavigateTab}
-      />
+      <div className="space-y-4">
+        <CommandCenterHeader
+          title={meta.title}
+          subtitle={meta.subtitle}
+          activeTab={activeTab}
+          subTabLabel={activeSubTab}
+          targetName={selectedTargetCode}
+          onNavigateTab={onNavigateTab}
+          onClose={onClose}
+          onOpenCommandPalette={onOpenCommandPalette}
+          onOpenSettings={onOpenSettings}
+          onOpenGuide={onOpenGuide}
+          onOpenOverviewTree={onOpenOverviewTree}
+        />
+
+        <CommandCenterTabRouter
+          activeTab={activeTab}
+          activeSubTab={activeSubTab}
+          selectedTargetCode={selectedTargetCode}
+          nation={nation}
+          gameState={gameState}
+          reports={reports}
+          onFocusCountry={onFocusCountry}
+          onOpenTrade={onOpenTrade}
+          onNavigateTab={onNavigateTab}
+        />
+      </div>
     </UnifiedModalShell>
   );
 }

@@ -4,6 +4,7 @@ import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useTurnExecution } from "./use-turn-execution";
+import { useNavigationQueryState } from "../../navigation/hooks/use-navigation-query-state";
 
 export interface TradeDialogState {
   isOpen: boolean;
@@ -21,6 +22,7 @@ export function useSidebarTurnActions(
   overrideGameState?: GameState | null,
   overrideAdvanceNextTurn?: () => Promise<GameState | null>,
 ) {
+  const queryState = useNavigationQueryState();
   const [internalActiveTab, setInternalActiveTabState] =
     useState<SidebarTabType | null>(null);
   const [targetCodeState, setTargetCodeState] = useState<string | null>(null);
@@ -42,7 +44,10 @@ export function useSidebarTurnActions(
 
   const gameState = overrideGameState ?? null;
 
-  const activeTab = externalActiveTab || internalActiveTab;
+  const activeTab =
+    queryState.activeTab || externalActiveTab || internalActiveTab;
+  const activeSubTab = queryState.activeSubTab;
+
   const humanNation =
     gameState && gameState.humanNationId
       ? gameState.nations[gameState.humanNationId] || null
@@ -69,16 +74,22 @@ export function useSidebarTurnActions(
 
   const setInternalActiveTab = useCallback(
     (tab: SidebarTabType | null) => {
+      if (tab) {
+        queryState.navigateToTab(tab);
+      } else {
+        queryState.clearNavigation();
+      }
       setInternalActiveTabState(tab);
       if (onClearExternalTab) {
         onClearExternalTab();
       }
     },
-    [onClearExternalTab],
+    [queryState, onClearExternalTab],
   );
 
   const handleNavigateTab = useCallback(
-    (tab: SidebarTabType, targetCode?: string) => {
+    (tab: SidebarTabType, subTab?: string, targetCode?: string) => {
+      queryState.navigateToTab(tab, subTab, targetCode);
       setInternalActiveTabState(tab);
       if (targetCode) {
         setTargetCodeState(targetCode);
@@ -87,16 +98,17 @@ export function useSidebarTurnActions(
         onClearExternalTab();
       }
     },
-    [onClearExternalTab],
+    [queryState, onClearExternalTab],
   );
 
   const handleCloseActiveModal = useCallback(() => {
+    queryState.clearNavigation();
     setInternalActiveTabState(null);
     setTargetCodeState(null);
     if (onClearExternalTab) {
       onClearExternalTab();
     }
-  }, [onClearExternalTab]);
+  }, [queryState, onClearExternalTab]);
 
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
@@ -123,7 +135,8 @@ export function useSidebarTurnActions(
 
   return {
     activeTab,
-    selectedTargetCode: targetCodeState,
+    activeSubTab,
+    selectedTargetCode: queryState.activeTarget || targetCodeState,
     isRailCollapsed,
     isModalOpen,
     isEventModalOpen,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, Suspense } from "react";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
@@ -21,7 +21,7 @@ interface TacticalMapWorkspaceProps {
   gameId?: string;
 }
 
-export function TacticalMapWorkspace({
+function WorkspaceContent({
   gameId = "default_game",
 }: TacticalMapWorkspaceProps) {
   const mapWidth = 4096;
@@ -186,5 +186,19 @@ export function TacticalMapWorkspace({
         </div>
       )}
     </div>
+  );
+}
+
+export function TacticalMapWorkspace(props: TacticalMapWorkspaceProps) {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-screen h-screen bg-background flex items-center justify-center text-muted-foreground text-xs font-mono">
+          در حال راه‌اندازی سیستم ناوبری...
+        </div>
+      }
+    >
+      <WorkspaceContent {...props} />
+    </Suspense>
   );
 }
