@@ -72,7 +72,11 @@ export function CommandCenterTabRouter({
       );
     case "military":
       return (
-        <WideMilitaryView military={nation.military} nationId={nation.id} />
+        <WideMilitaryView
+          military={nation.military}
+          recruitmentQueue={nation.recruitmentQueue}
+          nationId={nation.id}
+        />
       );
     case "politics":
       return (
@@ -81,6 +85,7 @@ export function CommandCenterTabRouter({
           gdp={nation.gdp}
           taxRate={nation.taxRate}
           governmentType={nation.government.type}
+          nationalDebt={nation.nationalDebt}
           tariffRate={nation.tariffRate}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}

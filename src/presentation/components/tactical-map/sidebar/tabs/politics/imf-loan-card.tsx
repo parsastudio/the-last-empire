@@ -11,7 +11,10 @@ export function ImfLoanCard({
   nationId = "NATION_118",
   nationalDebt = 0,
 }: ImfLoanCardProps) {
-  const creditRating = 85;
+  const creditRating = Math.max(
+    0,
+    Math.min(100, 100 - Math.floor(nationalDebt / 10000)),
+  );
   const { dispatchAction } = useGameActions();
 
   const handleRequestLoan = async () => {
@@ -30,14 +33,15 @@ export function ImfLoanCard({
     if (nationalDebt <= 0) {
       return;
     }
+    const amountToRepay = Math.min(25000, nationalDebt);
     await dispatchAction(
       {
         id: `repay-${Date.now()}`,
         nationId,
         type: "REPAY_DEBT",
-        amount: Math.min(25000, nationalDebt),
+        amount: amountToRepay,
       },
-      "بخشی از بدهی ملی تسویه گردید.",
+      `مبلغ $${amountToRepay.toLocaleString("fa-IR")} از بدهی ملی تسویه گردید.`,
     );
   };
 
@@ -87,7 +91,8 @@ export function ImfLoanCard({
 
           <button
             onClick={handleRepayDebt}
-            className="py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+            disabled={nationalDebt <= 0}
+            className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
           >
             <ArrowDownRight size={13} className="text-military" />
             <span>تسویه بدهی</span>

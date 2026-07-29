@@ -28,6 +28,13 @@ export function RecruitmentQueueCard({
     );
   };
 
+  const getUnitNameFa = (type: string) => {
+    if (type === "INFANTRY") return "پیاده‌نظام رزمی";
+    if (type === "AIR_FORCE") return "جنگنده هوایی";
+    if (type === "DRONE_MISSILE") return "یگان پهپاد/موشک";
+    return type;
+  };
+
   return (
     <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
@@ -45,7 +52,7 @@ export function RecruitmentQueueCard({
           >
             <div className="space-y-0.5 text-right">
               <span className="text-xs font-bold text-foreground block font-sans">
-                {item.unitType} ({item.quantity} یگان)
+                {getUnitNameFa(item.unitType)} ({item.quantity} یگان)
               </span>
               <span className="text-[9px] text-treasury block font-sans">
                 {item.turnsRemaining} نوبت تا آمادگی کامل

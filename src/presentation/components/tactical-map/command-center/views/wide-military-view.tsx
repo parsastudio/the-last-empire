@@ -3,15 +3,20 @@ import { MilitaryForcesSection } from "../../sidebar/military-forces-section";
 import { RecruitmentQueueCard } from "../../sidebar/tabs/military/recruitment-queue-card";
 import { DisbandUnitCard } from "../../sidebar/tabs/military/disband-unit-card";
 import { MilitaryExpansionView } from "../../sidebar/tabs/military/military-expansion-view";
-import { MilitaryStack } from "@/domain/military/military.schema";
+import {
+  MilitaryStack,
+  RecruitmentOrder,
+} from "@/domain/military/military.schema";
 
 interface WideMilitaryViewProps {
   military: MilitaryStack;
+  recruitmentQueue?: RecruitmentOrder[];
   nationId?: string;
 }
 
 export function WideMilitaryView({
   military,
+  recruitmentQueue = [],
   nationId = "NATION_118",
 }: WideMilitaryViewProps) {
   return (
@@ -25,7 +30,7 @@ export function WideMilitaryView({
           experience={military.experience}
         />
 
-        <RecruitmentQueueCard nationId={nationId} />
+        <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
         <DisbandUnitCard nationId={nationId} />
       </div>
 
