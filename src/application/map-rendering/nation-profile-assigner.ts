@@ -65,6 +65,8 @@ export class NationProfileAssigner {
     const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
+    const calculatedTreasury = Math.floor(item.gdp * 0.05);
+
     return {
       id: item.id,
       name: item.nameFa,
@@ -75,7 +77,7 @@ export class NationProfileAssigner {
       gdp: item.gdp,
       taxRate: 15,
       tariffRate: 10,
-      treasury: item.startingTreasury,
+      treasury: calculatedTreasury,
       nationalDebt: isTier1 ? 50000 : 0,
       population: item.population,
       warExhaustion: 0,
@@ -148,7 +150,7 @@ export class NationProfileAssigner {
 
     const gdp = profile ? profile.gdp : 5000000000;
     const population = profile ? profile.population : 80000000;
-    const treasury = profile ? profile.startingTreasury : 100000;
+    const treasury = Math.floor(gdp * 0.05);
     const traits = profile ? profile.traits : ["FRAGILE_ECONOMY" as const];
     const name = profile ? profile.nameFa : `قلمرو مستقل ${id}`;
     const flagCode = profile ? profile.flagCode : "IR";
