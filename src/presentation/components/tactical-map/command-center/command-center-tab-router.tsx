@@ -13,6 +13,7 @@ import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
+import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
@@ -41,20 +42,39 @@ export function CommandCenterTabRouter({
   const ranker = useMemo(() => new PowerScoreRanker(), []);
 
   const realRank = useMemo(() => {
-    if (!gameState || !gameState.nations) return 1;
-    const nationsList = Object.values(gameState.nations)
-      .filter((n) => n.isAlive)
-      .map((n) => ({
-        id: n.id,
-        gdp: n.gdp,
-        treasury: n.treasury,
-        infantry: n.military.infantry,
-        airForce: n.military.airForce,
-        drone: n.military.droneMissile,
-        techLevel: n.military.techLevel,
-      }));
+    const rawList = ALL_COUNTRY_PROFILES.map((profile) => {
+      const fullId = `NATION_${profile.id}`;
+      const liveNation = gameState?.nations ? gameState.nations[fullId] : null;
 
-    const ranked = ranker.rankNations(nationsList);
+      const gdp = liveNation ? liveNation.gdp : profile.gdp;
+      const treasury = liveNation
+        ? liveNation.treasury
+        : profile.startingTreasury;
+      const infantry = liveNation
+        ? liveNation.military.infantry
+        : (profile.startingInfantry ?? 50);
+      const airForce = liveNation
+        ? liveNation.military.airForce
+        : (profile.startingAirForce ?? 10);
+      const drone = liveNation
+        ? liveNation.military.droneMissile
+        : (profile.startingDroneMissile ?? 0);
+      const techLevel = liveNation
+        ? liveNation.military.techLevel
+        : (profile.startingTechLevel ?? 1);
+
+      return {
+        id: fullId,
+        gdp,
+        treasury,
+        infantry,
+        airForce,
+        drone,
+        techLevel,
+      };
+    });
+
+    const ranked = ranker.rankNations(rawList);
     const targetId = nation.id.startsWith("NATION_")
       ? nation.id
       : `NATION_${nation.id}`;
