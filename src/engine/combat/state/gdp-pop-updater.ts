@@ -83,8 +83,8 @@ export class GdpPopUpdater {
           const victimTotalPixels = totalPixelsMap.get(victimId) || 1;
           const lootRatio = pixels / victimTotalPixels;
 
-          currentGdp += Math.round(victimBaseGdp * lootRatio * 0.5);
-          currentPop += Math.round(victimBasePop * lootRatio * 0.5);
+          currentGdp += Math.round(victimBaseGdp * lootRatio);
+          currentPop += Math.round(victimBasePop * lootRatio);
         }
       }
 

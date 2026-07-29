@@ -54,24 +54,6 @@ export class ConquestOrchestrator {
     const effectiveDefenderPower = defenderForcePower + militiaPower;
     const isVictory = attackerForcePower > effectiveDefenderPower;
 
-    const casualties = this.casualtyCalculator.calculateCappedCasualties(
-      attackerForcePower,
-      defenderForcePower,
-      isVictory,
-    );
-
-    if (!isVictory) {
-      return {
-        conqueredCells: [],
-        capitulatedCells: [],
-        attackerLost: casualties.attackerLost,
-        defenderLost: casualties.defenderLost,
-        attackerRetreated: casualties.attackerRetreated,
-        defenderRetreated: casualties.defenderRetreated,
-        isVictory: false,
-      };
-    }
-
     const targetCellMatch = allCells.find(
       (c) => c.x === targetPixel.x && c.y === targetPixel.y,
     );
@@ -86,6 +68,27 @@ export class ConquestOrchestrator {
     const targetPixelLimit = this.capper.calculateCappedTarget(
       theaterCells.length,
     );
+
+    const isFullTheaterTarget = targetPixelLimit >= theaterCells.length;
+
+    const casualties = this.casualtyCalculator.calculateCappedCasualties(
+      attackerForcePower,
+      defenderForcePower,
+      isVictory,
+      isVictory && isFullTheaterTarget,
+    );
+
+    if (!isVictory) {
+      return {
+        conqueredCells: [],
+        capitulatedCells: [],
+        attackerLost: casualties.attackerLost,
+        defenderLost: casualties.defenderLost,
+        attackerRetreated: casualties.attackerRetreated,
+        defenderRetreated: casualties.defenderRetreated,
+        isVictory: false,
+      };
+    }
 
     const conqueredCells = this.hopBfs.executeHopBfs(
       targetCountryId,
