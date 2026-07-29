@@ -3,6 +3,7 @@ import { MarketHeader } from "../../sidebar/tabs/market/market-header";
 import { CommodityCard } from "../../sidebar/tabs/market/commodity-card";
 import { Fuel, Wrench, Coins } from "lucide-react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
+import { useMarketTrade } from "../../sidebar/tabs/market/hooks/use-market-trade";
 
 interface WideMarketViewProps {
   marketPrices?: ResourceMarketPrice;
@@ -24,15 +25,13 @@ export function WideMarketView({
   userTreasury = 100000,
   onOpenTrade,
 }: WideMarketViewProps) {
-  const oilTrend: "up" | "down" | "stable" =
-    marketPrices.oil > 100 ? "up" : marketPrices.oil < 100 ? "down" : "stable";
-
-  const steelTrend: "up" | "down" | "stable" =
-    marketPrices.steel > 100
-      ? "up"
-      : marketPrices.steel < 100
-        ? "down"
-        : "stable";
+  const trade = useMarketTrade({
+    marketPrices,
+    oilStock,
+    steelStock,
+    userTreasury,
+    onOpenTradeExternal: onOpenTrade,
+  });
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -56,9 +55,9 @@ export function WideMarketView({
           colorClass="text-treasury"
           stock={oilStock}
           currentPrice={marketPrices.oil}
-          priceTrend={oilTrend}
+          priceTrend={trade.oilTrend}
           onTrade={(mode) =>
-            onOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
+            trade.handleOpenTrade("نفت خام", "بشکه", mode, marketPrices.oil)
           }
         />
 
@@ -69,9 +68,9 @@ export function WideMarketView({
           colorClass="text-primary"
           stock={steelStock}
           currentPrice={marketPrices.steel}
-          priceTrend={steelTrend}
+          priceTrend={trade.steelTrend}
           onTrade={(mode) =>
-            onOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
+            trade.handleOpenTrade("فولاد صنعتی", "تن", mode, marketPrices.steel)
           }
         />
       </div>

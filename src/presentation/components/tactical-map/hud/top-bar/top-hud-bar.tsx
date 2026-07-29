@@ -8,6 +8,7 @@ import { StabilityMeterBadge } from "./stability-meter-badge";
 import { ThreatRadarBadge } from "./threat-radar-badge";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { PendingDecisionsModal } from "./pending-decisions-modal";
+import { useTopHudMetrics } from "./hooks/use-top-hud-metrics";
 
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
@@ -16,32 +17,7 @@ interface TopHudBarProps {
 
 export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
   const [isPendingModalOpen, setIsPendingModalOpen] = useState(false);
-
-  const formattedTreasury = PersianNumberFormatter.formatCurrency(
-    metrics.treasury,
-    true,
-  );
-  const formattedIncome = PersianNumberFormatter.formatSignedIncome(
-    metrics.netIncomePerTurn,
-  );
-
-  const formattedOil = PersianNumberFormatter.toPersianDigits(
-    metrics.oil.toLocaleString("en-US"),
-  );
-
-  const formattedOilUsage =
-    metrics.oilRequiredPerTurn > 0
-      ? `-${PersianNumberFormatter.toPersianDigits(metrics.oilRequiredPerTurn)}/نوبت`
-      : "بدون مصرف";
-
-  const formattedSteel = PersianNumberFormatter.toPersianDigits(
-    metrics.steel.toLocaleString("en-US"),
-  );
-  const formattedManpower = PersianNumberFormatter.toPersianDigits(
-    metrics.manpower.toLocaleString("en-US"),
-  );
-
-  const isOilDeficit = metrics.oil < metrics.oilRequiredPerTurn;
+  const formatted = useTopHudMetrics(metrics);
 
   const handleOpenPending = () => {
     setIsPendingModalOpen(true);
@@ -66,8 +42,8 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
             icon={Coins}
             iconColor="text-gdp"
             label="خزانه ملی و سود نوبتی"
-            value={formattedTreasury}
-            subValue={formattedIncome}
+            value={formatted.formattedTreasury}
+            subValue={formatted.formattedIncome}
             subValueColor={
               metrics.netIncomePerTurn >= 0 ? "text-gdp" : "text-military"
             }
@@ -75,25 +51,29 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
 
           <ResourceBadge
             icon={Fuel}
-            iconColor={isOilDeficit ? "text-military" : "text-treasury"}
+            iconColor={
+              formatted.isOilDeficit ? "text-military" : "text-treasury"
+            }
             label="ذخایر نفت خام و مصرف نوبتی"
-            value={formattedOil}
-            subValue={formattedOilUsage}
-            subValueColor={isOilDeficit ? "text-military" : "text-treasury"}
+            value={formatted.formattedOil}
+            subValue={formatted.formattedOilUsage}
+            subValueColor={
+              formatted.isOilDeficit ? "text-military" : "text-treasury"
+            }
           />
 
           <ResourceBadge
             icon={Wrench}
             iconColor="text-primary"
             label="ذخایر فولاد صنعتی"
-            value={formattedSteel}
+            value={formatted.formattedSteel}
           />
 
           <ResourceBadge
             icon={Users}
             iconColor="text-primary"
             label="نیروی انسانی آماده"
-            value={formattedManpower}
+            value={formatted.formattedManpower}
           />
 
           <div className="w-[1px] h-6 bg-border/80 shrink-0 hidden sm:block" />
