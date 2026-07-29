@@ -23,6 +23,7 @@ export function useSidebarTurnActions(
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState<boolean>(false);
+  const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
   const [modalReports, setModalReports] = useState<CombatReport[]>([]);
 
   const { stagedActions, setStagedActions, clearStagedActions } =
@@ -56,64 +57,98 @@ export function useSidebarTurnActions(
   }, [onClearExternalTab]);
 
   const handleNextTurn = async () => {
-    const nextState = await advanceNextTurn();
-    const reportsSource = nextState || gameState;
+    if (isProcessingTurn) return;
 
-    const combatLogs = reportsSource?.turnLogs
-      ? reportsSource.turnLogs.filter((log) => log.level === "COMBAT")
-      : [];
+    try {
+      setIsProcessingTurn(true);
+      const nextState = await advanceNextTurn();
+      const reportsSource = nextState || gameState;
 
-    const realReports: CombatReport[] = combatLogs.map((log) => ({
-      id: log.id,
-      turn: log.turn,
-      timestamp: log.timestamp,
-      severity: "VICTORY" as const,
-      title: `گزارش عملیاتی نوبت ${log.turn}`,
-      summary: log.message,
-      attackerNationId: log.sourceNationId,
-      attackerName:
-        reportsSource?.nations[log.sourceNationId]?.name || log.sourceNationId,
-      defenderNationId: log.targetNationId || "DEFENDER",
-      defenderName: log.targetNationId
-        ? reportsSource?.nations[log.targetNationId]?.name || log.targetNationId
-        : "دشمن",
-      attackerCasualties: {
-        infantryEngaged: 100,
-        infantryLost: 10,
-        airForceEngaged: 10,
-        airForceLost: 1,
-        droneMissileEngaged: 5,
-        droneMissileLost: 0,
-      },
-      defenderCasualties: {
-        infantryEngaged: 100,
-        infantryLost: 35,
-        airForceEngaged: 10,
-        airForceLost: 4,
-        droneMissileEngaged: 0,
-        droneMissileLost: 0,
-      },
-      conqueredAreaSqKm: 12500,
-      capitulatedAreaSqKm: 0,
-      strategicAssessment:
-        "ارزیابی ستاد کل: عملیات با تثبیت خطوط نبرد همراه بود.",
-      isVictory: true,
-    }));
+      const combatLogs = reportsSource?.turnLogs
+        ? reportsSource.turnLogs.filter((log) => log.level === "COMBAT")
+        : [];
 
-    setModalReports(realReports);
-    setIsModalOpen(true);
-    clearStagedActions();
+      const realReports: CombatReport[] = combatLogs.map((log) => {
+        const meta = log.metadata || {};
+        const attackerLost =
+          typeof meta.attackerLost === "number" ? meta.attackerLost : 10;
+        const defenderLost =
+          typeof meta.defenderLost === "number" ? meta.defenderLost : 35;
+        const attackerRetreated =
+          typeof meta.attackerRetreated === "number"
+            ? meta.attackerRetreated
+            : 0;
+        const defenderRetreated =
+          typeof meta.defenderRetreated === "number"
+            ? meta.defenderRetreated
+            : 0;
+        const conqueredAreaSqKm =
+          typeof meta.conqueredAreaSqKm === "number"
+            ? meta.conqueredAreaSqKm
+            : 12500;
+        const isVictory =
+          typeof meta.isVictory === "boolean" ? meta.isVictory : true;
 
-    showToast(
-      "نوبت جدید آغاز شد",
-      `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} با موفقیت انجام شد.`,
-      "info",
-    );
+        return {
+          id: log.id,
+          turn: log.turn,
+          timestamp: log.timestamp,
+          severity: isVictory ? "VICTORY" : "DEFEAT",
+          title: `گزارش عملیاتی نوبت ${log.turn}`,
+          summary: log.message,
+          attackerNationId: log.sourceNationId,
+          attackerName:
+            reportsSource?.nations[log.sourceNationId]?.name ||
+            log.sourceNationId,
+          defenderNationId: log.targetNationId || "DEFENDER",
+          defenderName: log.targetNationId
+            ? reportsSource?.nations[log.targetNationId]?.name ||
+              log.targetNationId
+            : "دشمن",
+          attackerCasualties: {
+            infantryEngaged: attackerLost + attackerRetreated + 10,
+            infantryLost: attackerLost,
+            infantryRetreated: attackerRetreated,
+            airForceEngaged: 10,
+            airForceLost: Math.min(5, Math.floor(attackerLost * 0.1)),
+            droneMissileEngaged: 5,
+            droneMissileLost: 0,
+          },
+          defenderCasualties: {
+            infantryEngaged: defenderLost + defenderRetreated + 20,
+            infantryLost: defenderLost,
+            infantryRetreated: defenderRetreated,
+            airForceEngaged: 10,
+            airForceLost: Math.min(10, Math.floor(defenderLost * 0.1)),
+            droneMissileEngaged: 0,
+            droneMissileLost: 0,
+          },
+          conqueredAreaSqKm,
+          capitulatedAreaSqKm: 0,
+          strategicAssessment: isVictory
+            ? "ارزیابی ستاد کل: عملیات با تثبیت خطوط نبرد همراه بود."
+            : "ارزیابی ستاد کل: عقب‌نشینی تاکتیکی جهت تجدید قوا.",
+          isVictory,
+        };
+      });
 
-    if (currentTurn % 3 === 0) {
-      setTimeout(() => {
-        setIsEventModalOpen(true);
-      }, 500);
+      setModalReports(realReports);
+      setIsModalOpen(true);
+      clearStagedActions();
+
+      showToast(
+        "نوبت جدید آغاز شد",
+        `محاسبات نوبت ${nextState ? nextState.currentTurn : currentTurn + 1} با موفقیت انجام شد.`,
+        "info",
+      );
+
+      if (currentTurn % 3 === 0) {
+        setTimeout(() => {
+          setIsEventModalOpen(true);
+        }, 500);
+      }
+    } finally {
+      setIsProcessingTurn(false);
     }
   };
 
@@ -147,6 +182,7 @@ export function useSidebarTurnActions(
     isRailCollapsed,
     isModalOpen,
     isEventModalOpen,
+    isProcessingTurn,
     modalReports,
     stagedActions,
     tradeDialog,

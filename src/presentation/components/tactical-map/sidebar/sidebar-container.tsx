@@ -33,6 +33,7 @@ export function SidebarContainer({
         activeTab={actions.activeTab}
         isCollapsed={actions.isRailCollapsed}
         currentTurn={actions.currentTurn}
+        isProcessingTurn={actions.isProcessingTurn}
         onSelectTab={actions.setInternalActiveTab}
         onToggleCollapse={() => actions.setIsRailCollapsed((prev) => !prev)}
         onNextTurn={actions.handleNextTurn}

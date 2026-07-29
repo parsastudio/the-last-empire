@@ -8,6 +8,7 @@ import {
   FileText,
   Users,
   Cpu,
+  Loader2,
 } from "lucide-react";
 import { SidebarTabType } from "../sidebar/sidebar-tabs";
 import { RailTabButton } from "./rail-tab-button";
@@ -18,6 +19,7 @@ interface CommandRailProps {
   activeTab: SidebarTabType | null;
   isCollapsed: boolean;
   currentTurn: number;
+  isProcessingTurn?: boolean;
   onSelectTab: (tab: SidebarTabType) => void;
   onToggleCollapse: () => void;
   onNextTurn: () => void;
@@ -27,6 +29,7 @@ export function CommandRail({
   activeTab,
   isCollapsed,
   currentTurn,
+  isProcessingTurn = false,
   onSelectTab,
   onToggleCollapse,
   onNextTurn,
@@ -80,13 +83,22 @@ export function CommandRail({
         {isCollapsed ? (
           <button
             onClick={onNextTurn}
-            className="w-full py-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center cursor-pointer"
+            disabled={isProcessingTurn}
+            className="w-full py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center cursor-pointer"
             title={`پایان نوبت ${currentTurn}`}
           >
-            {currentTurn}
+            {isProcessingTurn ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              currentTurn
+            )}
           </button>
         ) : (
-          <NextTurnButton currentTurn={currentTurn} onNextTurn={onNextTurn} />
+          <NextTurnButton
+            currentTurn={currentTurn}
+            isProcessing={isProcessingTurn}
+            onNextTurn={onNextTurn}
+          />
         )}
       </div>
     </aside>
