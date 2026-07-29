@@ -27,13 +27,13 @@ export function ReportsSidebarTab({
             هیچ گزارش نظامی ثبت نشده است.
           </div>
         ) : (
-          reports.map((report) => {
+          reports.map((report, index) => {
             const style = getSeverityStyle(report.severity);
             const Icon = style.icon;
 
             return (
               <button
-                key={report.id}
+                key={`${report.id}-${index}`}
                 onClick={() => onSelectReport(report)}
                 className={`w-full border p-3.5 rounded-2xl text-right transition-all flex items-center justify-between gap-3 group cursor-pointer ${style.bg}`}
               >

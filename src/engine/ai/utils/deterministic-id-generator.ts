@@ -16,6 +16,7 @@ export class DeterministicIdGenerator {
     sequenceIndex: number,
   ): string {
     const cleanNation = sourceNationId.replace("NATION_", "");
-    return `log-${cleanNation}-t${turn}-s${sequenceIndex}`;
+    const randomSuffix = Math.random().toString(36).substring(2, 7);
+    return `log-${cleanNation}-t${turn}-s${sequenceIndex}-${randomSuffix}`;
   }
 }

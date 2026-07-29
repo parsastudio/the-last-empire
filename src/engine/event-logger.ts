@@ -16,7 +16,8 @@ export class EventLogger {
   ): TurnLogEntry {
     this.logSequence++;
     const cleanNation = sourceNationId.replace("NATION_", "");
-    const id = `log-${cleanNation}-t${turn}-s${this.logSequence}`;
+    const randomSuffix = Math.random().toString(36).substring(2, 7);
+    const id = `log-${cleanNation}-t${turn}-s${this.logSequence}-${randomSuffix}`;
 
     return {
       id,

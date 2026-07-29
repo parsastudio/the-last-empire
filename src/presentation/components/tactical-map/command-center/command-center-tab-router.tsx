@@ -15,6 +15,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
+  activeSubTab?: string | null;
   selectedTargetCode?: string | null;
   nation: Nation;
   gameState?: GameState | null;
@@ -31,6 +32,7 @@ interface CommandCenterTabRouterProps {
 
 export function CommandCenterTabRouter({
   activeTab,
+  activeSubTab,
   selectedTargetCode,
   nation,
   gameState,
@@ -89,6 +91,7 @@ export function CommandCenterTabRouter({
           nation={nation}
           nationsMap={gameState?.nations}
           selectedTargetCode={selectedTargetCode}
+          activeSubTab={activeSubTab}
         />
       );
     case "diplomacy":
