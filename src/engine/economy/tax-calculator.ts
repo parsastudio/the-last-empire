@@ -31,8 +31,8 @@ export class TaxCalculator {
     );
 
     let stabilityImpact = 0;
-    if (nation.taxRate > 20) {
-      stabilityImpact = -Math.floor((nation.taxRate - 20) * 0.5);
+    if (nation.taxRate > 25) {
+      stabilityImpact = -Math.floor((nation.taxRate - 25) * 0.5);
     } else if (nation.taxRate <= 10) {
       stabilityImpact = 1;
     }
