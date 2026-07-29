@@ -26,7 +26,7 @@ export function NationDetailsPanel({
   const flagEmoji = getFlagEmoji(nation.code);
 
   return (
-    <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-3xl p-6 overflow-y-auto shadow-sm h-full space-y-6 dir-rtl text-right">
+    <div className="lg:col-span-8 flex flex-col bg-card border border-border rounded-3xl p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent shadow-sm h-full space-y-6 dir-rtl text-right">
       <div className="flex items-center gap-4 pb-5 border-b border-border">
         <span
           className="text-4xl select-none shrink-0"
