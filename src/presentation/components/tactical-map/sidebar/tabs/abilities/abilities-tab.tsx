@@ -2,8 +2,8 @@ import React from "react";
 import { Zap } from "lucide-react";
 import { REGIME_ABILITIES } from "./abilities.config";
 import { AbilityCard } from "./ability-card";
-import { AbilityTargetModal } from "../../modals/ability-target-modal";
-import { useWideAbilities } from "../../command-center/views/hooks/use-wide-abilities";
+import { AbilityTargetModal } from "@/presentation/components/tactical-map/modals/ability-target-modal";
+import { useWideAbilities } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-abilities";
 
 interface AbilitiesTabProps {
   currentGovernment: string;

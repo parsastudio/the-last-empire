@@ -25,7 +25,7 @@ export function TurnEventDialog({
 
   if (!isOpen || !eventData) return null;
 
-  const handleSelectChoice = (_choiceId: string) => {
+  const handleSelectChoice = () => {
     showToast(
       "تصمیم حاکمیتی ثبت شد",
       "فرمان جدید با موفقیت ابلاغ گردید.",

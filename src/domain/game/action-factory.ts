@@ -1,5 +1,4 @@
 import {
-  GameAction,
   SetTaxRateAction,
   SetTariffRateAction,
   ChangeGovernmentAction,
@@ -19,7 +18,6 @@ import {
   CancelRecruitmentAction,
   InvestResearchAction,
   AntiCorruptionDriveAction,
-  Coordinate,
 } from "./action.schema";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import { UnitType } from "@/domain/military/military.schema";
@@ -98,7 +96,7 @@ export class ActionFactory {
     infantry: number,
     airForce: number,
     droneMissile: number,
-    targetCoordinate?: Coordinate,
+    targetCoordinate?: { x: number; y: number },
   ): AttackAction {
     return {
       id: this.createId("attack"),
