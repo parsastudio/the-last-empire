@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 export interface ActiveProxyOperation {
   targetId: string;
@@ -28,18 +27,39 @@ export function useWideProxy({
   const [allocatedBudget, setAllocatedBudget] = useState<number>(15000);
   const { dispatchAction } = useGameActions();
 
-  const { filteredNations: countryOptions } = useLiveNations({
-    nationsMap,
-    excludeNationId: nation.id,
-    searchQuery,
-  });
+  const countryOptions = useMemo(() => {
+    if (!nationsMap) return [];
+    const query = searchQuery.trim().toLowerCase();
+
+    return Object.values(nationsMap)
+      .filter((n) => n.id !== nation.id && n.isAlive)
+      .map((n) => ({
+        id: n.id,
+        name: n.name,
+        flagCode: n.flagCode || "IR",
+        stability: n.government.stability,
+      }))
+      .filter(
+        (c) =>
+          !query ||
+          c.name.toLowerCase().includes(query) ||
+          c.id.toLowerCase().includes(query) ||
+          c.flagCode.toLowerCase().includes(query),
+      );
+  }, [nationsMap, nation.id, searchQuery]);
 
   const defaultTarget = useMemo(() => {
-    if (selectedTargetCode && nationsMap?.[selectedTargetCode]) {
-      return selectedTargetCode;
+    if (selectedTargetCode) {
+      const cleanCode = selectedTargetCode.toUpperCase();
+      const matched = countryOptions.find(
+        (c) =>
+          c.id.toUpperCase() === cleanCode ||
+          c.flagCode.toUpperCase() === cleanCode,
+      );
+      if (matched) return matched.id;
     }
     return countryOptions[0]?.id || "NATION_15";
-  }, [selectedTargetCode, nationsMap, countryOptions]);
+  }, [selectedTargetCode, countryOptions]);
 
   const [selectedTargetId, setSelectedTargetId] =
     useState<string>(defaultTarget);

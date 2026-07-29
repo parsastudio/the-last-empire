@@ -6,6 +6,7 @@ import {
 } from "./diplomacy-detail-view";
 import { Nation } from "@/domain/nation/nation.schema";
 import { resolveProfileRelation } from "./utils/relation-resolver";
+import { SidebarTabType } from "../../sidebar-tabs";
 import { useDiplomacyTab } from "./hooks/use-diplomacy-tab";
 
 interface DiplomacyTabProps {
@@ -13,6 +14,7 @@ interface DiplomacyTabProps {
   humanNationId?: string;
   selectedTargetCode?: string | null;
   onFocusCountry?: (code: string) => void;
+  onNavigateTab?: (tab: SidebarTabType, targetCode?: string) => void;
 }
 
 export function DiplomacyTab({
@@ -20,6 +22,7 @@ export function DiplomacyTab({
   humanNationId = "NATION_118",
   selectedTargetCode,
   onFocusCountry,
+  onNavigateTab,
 }: DiplomacyTabProps) {
   const diplomacy = useDiplomacyTab({
     nationsMap,
@@ -42,6 +45,11 @@ export function DiplomacyTab({
         targetTreasury={targetLiveNation ? targetLiveNation.treasury : 350000}
         onBack={() => diplomacy.setSelectedRelationCode(null)}
         onFocusCountry={onFocusCountry}
+        onOpenProxyCenter={() => {
+          if (onNavigateTab) {
+            onNavigateTab("proxy", targetNationId);
+          }
+        }}
       />
     );
   }
