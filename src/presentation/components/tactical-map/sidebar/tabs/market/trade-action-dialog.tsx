@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { ShoppingBag, TrendingDown, Zap } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
@@ -31,10 +31,12 @@ export function TradeActionDialog({
 }: TradeActionDialogProps) {
   const safeMax = Math.max(0, maxAmount);
   const [amount, setAmount] = useState<number>(1);
-  const { dispatchAction } = useGameActions();
-  const marketEngine = useMemo(() => new MarketEngine(), []);
+  const [prevTradeKey, setPrevTradeKey] = useState<string>("");
 
-  useEffect(() => {
+  const currentTradeKey = `${mode}-${resourceName}-${isOpen}-${safeMax}`;
+
+  if (currentTradeKey !== prevTradeKey) {
+    setPrevTradeKey(currentTradeKey);
     if (isOpen) {
       if (safeMax <= 0) {
         setAmount(0);
@@ -46,7 +48,10 @@ export function TradeActionDialog({
         setAmount(defaultInitial);
       }
     }
-  }, [isOpen, safeMax, mode]);
+  }
+
+  const { dispatchAction } = useGameActions();
+  const marketEngine = useMemo(() => new MarketEngine(), []);
 
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
 
