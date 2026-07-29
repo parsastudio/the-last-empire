@@ -57,6 +57,15 @@ export class GovernmentSystem {
           tradeMultiplier: 0.8,
           militaryPowerMultiplier: 1.5,
         };
+      default:
+        return {
+          economicGrowthBonus: 0.0,
+          warExhaustionMultiplier: 1.0,
+          militaryUpkeepMultiplier: 1.0,
+          baseStability: 70,
+          tradeMultiplier: 1.0,
+          militaryPowerMultiplier: 1.0,
+        };
     }
   }
 }
