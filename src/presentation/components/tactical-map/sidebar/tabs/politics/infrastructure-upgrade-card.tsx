@@ -2,6 +2,7 @@ import React from "react";
 import { Wrench } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface InfrastructureUpgradeCardProps {
   currentLevel?: number;
@@ -41,14 +42,14 @@ export function InfrastructureUpgradeCard({
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">سطح زیرساخت فعلی:</span>
           <span className="font-mono font-bold text-primary">
-            سطح {currentLevel}
+            سطح {PersianNumberFormatter.toPersianDigits(currentLevel)}
           </span>
         </div>
 
         <div className="flex items-center justify-between text-[11px] font-mono">
           <span className="text-muted-foreground font-sans">هزینه نوسازی:</span>
           <span className="font-bold text-foreground">
-            ${upgradeCost.toLocaleString("fa-IR")}
+            {PersianNumberFormatter.formatCurrency(upgradeCost)}
           </span>
         </div>
 
@@ -58,7 +59,7 @@ export function InfrastructureUpgradeCard({
           className="w-full py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
           {canAfford
-            ? `نوسازی زیرساخت مرزی (سطح ${currentLevel + 1})`
+            ? `نوسازی زیرساخت مرزی (سطح ${PersianNumberFormatter.toPersianDigits(currentLevel + 1)})`
             : "خزانه ناکافی جهت نوسازی زیرساخت"}
         </button>
       </div>

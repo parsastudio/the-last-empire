@@ -2,6 +2,7 @@ import React from "react";
 import { ShieldCheck } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface AntiCorruptionCardProps {
   nationId?: string;
@@ -21,7 +22,7 @@ export function AntiCorruptionCard({
     const action = ActionFactory.antiCorruptionDrive(nationId, 25000);
     await dispatchAction(
       action,
-      "مبلغ $25,000 به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری کاهش یافت.",
+      `مبلغ ${PersianNumberFormatter.formatCurrency(25000)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری کاهش یافت.`,
     );
   };
 
@@ -39,7 +40,9 @@ export function AntiCorruptionCard({
           <span className="text-muted-foreground font-sans">
             بودجه بازرسی ملی:
           </span>
-          <span className="font-bold text-gdp">$25,000</span>
+          <span className="font-bold text-gdp">
+            {PersianNumberFormatter.formatCurrency(25000)}
+          </span>
         </div>
         <button
           onClick={handleAntiCorruption}

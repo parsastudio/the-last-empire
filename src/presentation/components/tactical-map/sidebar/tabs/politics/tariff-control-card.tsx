@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Coins } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
@@ -26,7 +27,7 @@ export function TariffControlCard({
     const action = ActionFactory.setTariffRate(nationId, tariffRate);
     await dispatchAction(
       action,
-      `تعرفه تجاری گمرک بر روی ${tariffRate}% تنظیم گردید.`,
+      `تعرفه تجاری گمرک بر روی ${PersianNumberFormatter.toPersianDigits(tariffRate)}٪ تنظیم گردید.`,
     );
   };
 
@@ -42,7 +43,7 @@ export function TariffControlCard({
       <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3">
         <div className="flex items-center justify-between text-xs">
           <span className="font-mono font-extrabold text-foreground text-sm">
-            {tariffRate}%
+            {PersianNumberFormatter.toPersianDigits(tariffRate)}٪
           </span>
           <span className="text-muted-foreground">نرخ تعرفه واردات</span>
         </div>
@@ -60,7 +61,8 @@ export function TariffControlCard({
           onClick={handleApplyTariff}
           className="w-full py-2 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
         >
-          اعمال نرخ جدید تعرفه ({tariffRate}%)
+          اعمال نرخ جدید تعرفه (
+          {PersianNumberFormatter.toPersianDigits(tariffRate)}٪)
         </button>
       </div>
     </div>

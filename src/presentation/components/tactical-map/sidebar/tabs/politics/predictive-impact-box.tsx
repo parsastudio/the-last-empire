@@ -1,5 +1,6 @@
 import React from "react";
 import { TrendingUp, AlertCircle } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface PredictiveImpactBoxProps {
   currentTaxRate: number;
@@ -39,7 +40,7 @@ export function PredictiveImpactBox({
             درآمد مالیاتی خالص تخمینی:
           </span>
           <span className="font-bold text-gdp">
-            ${(projectedIncome / 1e6).toFixed(1)}M
+            {PersianNumberFormatter.formatCurrency(projectedIncome)}
           </span>
         </div>
 
@@ -57,8 +58,8 @@ export function PredictiveImpactBox({
             }`}
           >
             {stabilityImpact > 0
-              ? `+${stabilityImpact}%`
-              : `${stabilityImpact}%`}
+              ? `+${PersianNumberFormatter.toPersianDigits(stabilityImpact)}٪`
+              : `${PersianNumberFormatter.toPersianDigits(stabilityImpact)}٪`}
           </span>
         </div>
       </div>
