@@ -15,6 +15,7 @@ interface WidePoliticsViewProps {
   gdp?: number;
   taxRate: number;
   governmentType: string;
+  nationalDebt?: number;
   tariffRate?: number;
   industrialLevel?: number;
   infrastructureLevel?: number;
@@ -26,6 +27,7 @@ export function WidePoliticsView({
   gdp = 450000000000,
   taxRate,
   governmentType,
+  nationalDebt = 0,
   tariffRate = 10,
   industrialLevel = 1,
   infrastructureLevel = 1,
@@ -40,7 +42,7 @@ export function WidePoliticsView({
       </div>
 
       <div className="space-y-5">
-        <ImfLoanCard nationId={nationId} />
+        <ImfLoanCard nationId={nationId} nationalDebt={nationalDebt} />
         <IndustrialUpgradeCard
           currentLevel={industrialLevel}
           nationId={nationId}

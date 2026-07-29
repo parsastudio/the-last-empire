@@ -4,16 +4,21 @@ import { MilitaryExpansionView } from "./military-expansion-view";
 import { RecruitmentQueueCard } from "./recruitment-queue-card";
 import { DisbandUnitCard } from "./disband-unit-card";
 import { PlusCircle, ShieldAlert, Swords } from "lucide-react";
-import { MilitaryStack } from "@/domain/military/military.schema";
+import {
+  MilitaryStack,
+  RecruitmentOrder,
+} from "@/domain/military/military.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 
 interface MilitaryTabProps {
   military: MilitaryStack;
+  recruitmentQueue?: RecruitmentOrder[];
   nationId?: string;
 }
 
 export function MilitaryTab({
   military,
+  recruitmentQueue = [],
   nationId = "NATION_118",
 }: MilitaryTabProps) {
   const [currentSubView, setCurrentSubView] = useState<
@@ -57,7 +62,7 @@ export function MilitaryTab({
         experience={military.experience}
       />
 
-      <RecruitmentQueueCard nationId={nationId} />
+      <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
 
       <div className="space-y-2.5">
         <div className="flex items-center gap-2 px-1">

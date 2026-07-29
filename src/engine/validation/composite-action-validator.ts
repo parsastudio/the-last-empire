@@ -11,6 +11,10 @@ import { RecruitmentCancelValidator } from "./validators/recruitment-cancel.vali
 import { AntiCorruptionValidator } from "./validators/anti-corruption.validator";
 import { AttackActionValidator } from "./validators/attack-action.validator";
 import { TributeAmountValidator } from "./validators/tribute-amount.validator";
+import { TradeActionValidator } from "./validators/trade-action.validator";
+import { RepayDebtValidator } from "./validators/repay-debt.validator";
+import { GovernmentChangeValidator } from "./validators/government-change.validator";
+import { ActivateAbilityValidator } from "./validators/activate-ability.validator";
 
 export class CompositeActionValidator {
   private validators: ActionValidator[] = [
@@ -24,6 +28,10 @@ export class CompositeActionValidator {
     new AntiCorruptionValidator(),
     new AttackActionValidator(),
     new TributeAmountValidator(),
+    new TradeActionValidator(),
+    new RepayDebtValidator(),
+    new GovernmentChangeValidator(),
+    new ActivateAbilityValidator(),
   ];
 
   public validate(state: GameState, action: GameAction): void {
