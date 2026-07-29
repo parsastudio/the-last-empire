@@ -5,15 +5,18 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 interface ImfLoanCardProps {
   nationId?: string;
   nationalDebt?: number;
+  gdp?: number;
 }
 
 export function ImfLoanCard({
   nationId = "NATION_118",
   nationalDebt = 0,
+  gdp = 450000000000,
 }: ImfLoanCardProps) {
+  const debtToGdpRatio = gdp > 0 ? nationalDebt / gdp : 0;
   const creditRating = Math.max(
     0,
-    Math.min(100, 100 - Math.floor(nationalDebt / 10000)),
+    Math.min(100, Math.floor(100 - debtToGdpRatio * 200)),
   );
   const { dispatchAction } = useGameActions();
 
