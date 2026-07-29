@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FolderX, Home, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useModalKeyboardShortcut } from "@/presentation/components/common/hooks/use-modal-keyboard-shortcut";
 
 interface CampaignNotFoundModalProps {
   isOpen: boolean;
@@ -13,18 +14,7 @@ export function CampaignNotFoundModal({
 }: CampaignNotFoundModalProps) {
   const router = useRouter();
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        router.push("/");
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, router]);
+  useModalKeyboardShortcut(isOpen, () => router.push("/"));
 
   if (!isOpen) return null;
 

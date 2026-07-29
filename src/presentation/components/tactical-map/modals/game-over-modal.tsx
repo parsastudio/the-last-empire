@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Trophy, RefreshCw } from "lucide-react";
-import confetti from "canvas-confetti";
 import { VictoryStatsCard } from "./victory/victory-stats-card";
+import { useGameOverConfetti } from "./hooks/use-game-over-confetti";
 
 interface GameOverModalProps {
   isOpen: boolean;
@@ -26,17 +26,7 @@ export function GameOverModal({
   conqueredArea,
   onRestart,
 }: GameOverModalProps) {
-  useEffect(() => {
-    if (isOpen && isVictory) {
-      try {
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.6 },
-        });
-      } catch {}
-    }
-  }, [isOpen, isVictory]);
+  useGameOverConfetti(isOpen, isVictory);
 
   if (!isOpen) return null;
 
