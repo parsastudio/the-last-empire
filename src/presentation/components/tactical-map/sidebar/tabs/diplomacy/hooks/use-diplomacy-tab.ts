@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 import { resolveProfileRelation } from "../utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "../utils/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 interface UseDiplomacyTabProps {
   nationsMap?: Record<string, Nation>;
