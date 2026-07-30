@@ -2,7 +2,7 @@ import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-res
 
 export class MapDataApiHelper {
   public getManifestUrl(mapMode: "default" | "edited" | "partition"): string {
-    return MapPathResolver.getMapClientUrl("map1", mapMode, "manifest.json");
+    return `/api/map-preprocessing/manifest?mode=${mapMode}`;
   }
 
   public getMask4KUrl(mapMode: "default" | "edited" | "partition"): string {
