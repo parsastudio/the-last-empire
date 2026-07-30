@@ -69,14 +69,16 @@ export function useAttackPlanning({
   const fullAttackerId = NationIdResolver.resolveCanonicalId(attackerCode);
 
   const { validationResult, loading: isValidationLoading } =
-    useBattleValidation(fullAttackerId, coordinate, isOpen);
+    useBattleValidation(fullAttackerId, targetCode, coordinate, isOpen);
 
   const distScore = validationResult?.distance ?? 50;
+  const isLandAttack = validationResult?.isLandAttack ?? true;
 
   const logistics = estimator.calculateLogisticsCost({
     infantry,
     airForce,
     droneMissile,
+    isLandAttack,
     distanceMultiplier: validationResult?.surchargeMultiplier ?? 1.0,
     distanceScore: distScore,
   });

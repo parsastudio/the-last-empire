@@ -10,8 +10,6 @@ export interface FastTransitResult {
 }
 
 export class FastTransitCalculator {
-  private readonly width = 1024;
-  private readonly height = 512;
   private readonly sqKmPerPixel = 86.3;
 
   public calculateTransit(
@@ -21,21 +19,36 @@ export class FastTransitCalculator {
     allCells: GridCell[],
   ): FastTransitResult {
     const scaledTargetPixel: Coordinate = {
-      x: targetPixel.x > 1024 ? Math.floor(targetPixel.x / 4) : targetPixel.x,
-      y: targetPixel.y > 512 ? Math.floor(targetPixel.y / 4) : targetPixel.y,
+      x: targetPixel.x >= 1024 ? Math.floor(targetPixel.x / 4) : targetPixel.x,
+      y: targetPixel.y >= 512 ? Math.floor(targetPixel.y / 4) : targetPixel.y,
     };
 
     const isWaterTarget =
-      targetNationId === "WATER" || targetNationId === "CLOSED_SEA";
+      !targetNationId ||
+      targetNationId === "WATER" ||
+      targetNationId === "CLOSED_SEA";
 
     const attackerCells: GridCell[] = [];
+    const targetCells: GridCell[] = [];
+
     for (let i = 0; i < allCells.length; i++) {
-      if (allCells[i]!.ownerId === attackerId) {
-        attackerCells.push(allCells[i]!);
+      const c = allCells[i]!;
+      if (c.ownerId === attackerId) {
+        attackerCells.push(c);
+      } else if (c.ownerId === targetNationId) {
+        targetCells.push(c);
       }
     }
 
-    const closestAttackerCell = this.findClosestAttackerCell(
+    let isLandNeighbor = false;
+    if (!isWaterTarget && attackerCells.length > 0 && targetCells.length > 0) {
+      isLandNeighbor = this.checkLandBorderAdjacency(
+        attackerCells,
+        targetCells,
+      );
+    }
+
+    const closestAttackerCell = this.findClosestCell(
       attackerCells,
       scaledTargetPixel,
     );
@@ -44,80 +57,72 @@ export class FastTransitCalculator {
       ? { x: closestAttackerCell.x, y: closestAttackerCell.y }
       : scaledTargetPixel;
 
-    const isLandNeighbor =
-      !isWaterTarget && closestAttackerCell
-        ? this.checkDirectBorder(closestAttackerCell, targetNationId, allCells)
-        : false;
+    const pixelDist = Math.hypot(
+      originCoord.x - scaledTargetPixel.x,
+      originCoord.y - scaledTargetPixel.y,
+    );
+
+    const kmFactor = Math.sqrt(this.sqKmPerPixel);
 
     if (isLandNeighbor) {
-      const pixelDist = Math.hypot(
-        originCoord.x - scaledTargetPixel.x,
-        originCoord.y - scaledTargetPixel.y,
-      );
-      const distanceInKm = Math.round(pixelDist * Math.sqrt(this.sqKmPerPixel));
+      const distanceInKm = Math.round(pixelDist * kmFactor);
 
       return {
         isLandAttack: true,
-        distanceInKm: Math.max(30, Math.min(300, distanceInKm)),
+        distanceInKm: Math.max(30, Math.min(350, distanceInKm)),
         originCoordinate: originCoord,
         targetCoordinate: scaledTargetPixel,
         pixelSteps: Math.ceil(pixelDist),
       };
     }
 
-    const singlePassResult = this.runSingleSourceSeaBfs(
-      attackerId,
-      scaledTargetPixel,
-      allCells,
-    );
-
-    const kmDist = Math.round(
-      singlePassResult.pixelSteps * Math.sqrt(this.sqKmPerPixel),
-    );
+    const distanceInKm = Math.round(pixelDist * kmFactor * 1.8);
 
     return {
       isLandAttack: false,
-      distanceInKm: Math.max(120, kmDist),
-      originCoordinate: singlePassResult.originCoord,
+      distanceInKm: Math.max(200, Math.min(3000, distanceInKm)),
+      originCoordinate: originCoord,
       targetCoordinate: scaledTargetPixel,
-      pixelSteps: singlePassResult.pixelSteps,
+      pixelSteps: Math.ceil(pixelDist),
     };
   }
 
-  private checkDirectBorder(
-    originCell: GridCell,
-    targetNationId: string,
-    allCells: GridCell[],
+  private checkLandBorderAdjacency(
+    attackerCells: GridCell[],
+    targetCells: GridCell[],
   ): boolean {
-    const neighbors = [
-      { x: (originCell.x + 1) % this.width, y: originCell.y },
-      { x: (originCell.x - 1 + this.width) % this.width, y: originCell.y },
-      { x: originCell.x, y: Math.min(this.height - 1, originCell.y + 1) },
-      { x: originCell.x, y: Math.max(0, originCell.y - 1) },
-    ];
+    const targetSet = new Set<string>();
+    for (let i = 0; i < targetCells.length; i++) {
+      const c = targetCells[i]!;
+      targetSet.add(`${c.x},${c.y}`);
+    }
 
-    for (let i = 0; i < neighbors.length; i++) {
-      const n = neighbors[i]!;
-      for (let j = 0; j < allCells.length; j++) {
-        const c = allCells[j]!;
-        if (c.x === n.x && c.y === n.y && c.ownerId === targetNationId) {
-          return true;
-        }
+    for (let i = 0; i < attackerCells.length; i++) {
+      const c = attackerCells[i]!;
+      if (
+        targetSet.has(`${c.x + 1},${c.y}`) ||
+        targetSet.has(`${c.x - 1},${c.y}`) ||
+        targetSet.has(`${c.x},${c.y + 1}`) ||
+        targetSet.has(`${c.x},${c.y - 1}`) ||
+        targetSet.has(`${c.x + 1},${c.y + 1}`) ||
+        targetSet.has(`${c.x - 1},${c.y - 1}`)
+      ) {
+        return true;
       }
     }
 
     return false;
   }
 
-  private findClosestAttackerCell(
-    attackerCells: GridCell[],
+  private findClosestCell(
+    cells: GridCell[],
     targetPixel: Coordinate,
   ): GridCell | undefined {
     let closest: GridCell | undefined = undefined;
     let minSquareDist = Infinity;
 
-    for (let i = 0; i < attackerCells.length; i++) {
-      const cell = attackerCells[i]!;
+    for (let i = 0; i < cells.length; i++) {
+      const cell = cells[i]!;
       const sqDist =
         Math.pow(cell.x - targetPixel.x, 2) +
         Math.pow(cell.y - targetPixel.y, 2);
@@ -128,66 +133,5 @@ export class FastTransitCalculator {
     }
 
     return closest;
-  }
-
-  private runSingleSourceSeaBfs(
-    attackerId: string,
-    targetPixel: Coordinate,
-    allCells: GridCell[],
-  ): { originCoord: Coordinate; pixelSteps: number } {
-    const cellMap = new Map<number, GridCell>();
-    for (let i = 0; i < allCells.length; i++) {
-      const cell = allCells[i]!;
-      cellMap.set(cell.y * this.width + cell.x, cell);
-    }
-
-    const queue: { x: number; y: number; steps: number }[] = [
-      { x: targetPixel.x, y: targetPixel.y, steps: 0 },
-    ];
-    const visited = new Uint8Array(this.width * this.height);
-    visited[targetPixel.y * this.width + targetPixel.x] = 1;
-
-    let head = 0;
-
-    while (head < queue.length) {
-      const current = queue[head++]!;
-
-      const currentCell = cellMap.get(current.y * this.width + current.x);
-      if (currentCell && currentCell.ownerId === attackerId) {
-        return {
-          originCoord: { x: current.x, y: current.y },
-          pixelSteps: current.steps,
-        };
-      }
-
-      const neighbors = [
-        { x: (current.x + 1) % this.width, y: current.y },
-        { x: (current.x - 1 + this.width) % this.width, y: current.y },
-        { x: current.x, y: Math.min(this.height - 1, current.y + 1) },
-        { x: current.x, y: Math.max(0, current.y - 1) },
-      ];
-
-      for (let i = 0; i < neighbors.length; i++) {
-        const n = neighbors[i]!;
-        const vIdx = n.y * this.width + n.x;
-        if (visited[vIdx] === 0) {
-          const cell = cellMap.get(vIdx);
-          if (
-            cell &&
-            (cell.ownerId === "WATER" ||
-              cell.ownerId === "CLOSED_SEA" ||
-              cell.ownerId === attackerId)
-          ) {
-            visited[vIdx] = 1;
-            queue.push({ x: n.x, y: n.y, steps: current.steps + 1 });
-          }
-        }
-      }
-    }
-
-    return {
-      originCoord: targetPixel,
-      pixelSteps: 25,
-    };
   }
 }
