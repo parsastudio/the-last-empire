@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const middleEastProfiles: CountryProfile[] = [
   {
-    id: 87,
     code: "ISR",
     nameEn: "Israel",
     nameFa: "اسرائیل",
@@ -10,7 +9,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 9500000,
     traits: ["SOVEREIGN_FORTRESS", "MILITARISTIC"],
     flagCode: "IL",
-    startingTreasury: 350000,
     startingInfantry: 200,
     startingAirForce: 75,
     startingDroneMissile: 35,
@@ -18,7 +16,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 88,
     code: "LBN",
     nameEn: "Lebanon",
     nameFa: "لبنان",
@@ -26,7 +23,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 5500000,
     traits: ["SOVEREIGN_FORTRESS", "FRAGILE_ECONOMY"],
     flagCode: "LB",
-    startingTreasury: 70000,
     startingInfantry: 70,
     startingAirForce: 15,
     startingDroneMissile: 5,
@@ -34,7 +30,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 94,
     code: "JOR",
     nameEn: "Jordan",
     nameFa: "اردن",
@@ -42,7 +37,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 11000000,
     traits: ["FRAGILE_ECONOMY"],
     flagCode: "JO",
-    startingTreasury: 100000,
     startingInfantry: 100,
     startingAirForce: 30,
     startingDroneMissile: 5,
@@ -50,7 +44,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 95,
     code: "ARE",
     nameEn: "United Arab Emirates",
     nameFa: "امارات متحده عربی",
@@ -58,7 +51,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 10000000,
     traits: ["OIL_RICH", "INDUSTRIAL_HUB"],
     flagCode: "AE",
-    startingTreasury: 550000,
     startingInfantry: 110,
     startingAirForce: 55,
     startingDroneMissile: 15,
@@ -66,7 +58,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 96,
     code: "QAT",
     nameEn: "Qatar",
     nameFa: "قطر",
@@ -74,7 +65,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 2700000,
     traits: ["SOVEREIGN_FORTRESS", "OIL_RICH"],
     flagCode: "QA",
-    startingTreasury: 480000,
     startingInfantry: 50,
     startingAirForce: 30,
     startingDroneMissile: 10,
@@ -82,7 +72,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 97,
     code: "KWT",
     nameEn: "Kuwait",
     nameFa: "کویت",
@@ -90,7 +79,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 4300000,
     traits: ["SOVEREIGN_FORTRESS", "OIL_RICH"],
     flagCode: "KW",
-    startingTreasury: 380000,
     startingInfantry: 60,
     startingAirForce: 30,
     startingDroneMissile: 5,
@@ -98,7 +86,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 98,
     code: "IRQ",
     nameEn: "Iraq",
     nameFa: "عراق",
@@ -106,7 +93,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 44000000,
     traits: ["OIL_RICH", "FRAGILE_ECONOMY"],
     flagCode: "IQ",
-    startingTreasury: 220000,
     startingInfantry: 150,
     startingAirForce: 20,
     startingDroneMissile: 5,
@@ -114,7 +100,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 99,
     code: "OMN",
     nameEn: "Oman",
     nameFa: "عمان",
@@ -122,7 +107,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 4600000,
     traits: ["OIL_RICH"],
     flagCode: "OM",
-    startingTreasury: 180000,
     startingInfantry: 80,
     startingAirForce: 30,
     startingDroneMissile: 5,
@@ -130,7 +114,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 118,
     code: "IRN",
     nameEn: "Iran",
     nameFa: "ایران",
@@ -138,7 +121,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 88000000,
     traits: ["OIL_RICH", "MILITARISTIC"],
     flagCode: "IR",
-    startingTreasury: 350000,
     startingInfantry: 450,
     startingAirForce: 40,
     startingDroneMissile: 60,
@@ -146,7 +128,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    id: 119,
     code: "SYR",
     nameEn: "Syria",
     nameFa: "سوریه",
@@ -154,7 +135,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 22000000,
     traits: ["FRAGILE_ECONOMY", "ISOLATED_SOCIETY"],
     flagCode: "SY",
-    startingTreasury: 60000,
     startingInfantry: 180,
     startingAirForce: 20,
     startingDroneMissile: 15,
@@ -162,7 +142,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    id: 168,
     code: "YEM",
     nameEn: "Yemen",
     nameFa: "یمن",
@@ -170,7 +149,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 33000000,
     traits: ["FRAGILE_ECONOMY", "ISOLATED_SOCIETY"],
     flagCode: "YE",
-    startingTreasury: 40000,
     startingInfantry: 90,
     startingAirForce: 10,
     startingDroneMissile: 5,
@@ -178,7 +156,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    id: 169,
     code: "SAU",
     nameEn: "Saudi Arabia",
     nameFa: "عربستان سعودی",
@@ -186,7 +163,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 36000000,
     traits: ["OIL_RICH", "MILITARISTIC"],
     flagCode: "SA",
-    startingTreasury: 600000,
     startingInfantry: 250,
     startingAirForce: 80,
     startingDroneMissile: 20,
@@ -194,7 +170,6 @@ export const middleEastProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 170,
     code: "CYN",
     nameEn: "N. Cyprus",
     nameFa: "قبرس شمالی",
@@ -202,7 +177,6 @@ export const middleEastProfiles: CountryProfile[] = [
     population: 380000,
     traits: ["SOVEREIGN_FORTRESS", "ISOLATED_SOCIETY"],
     flagCode: "CY",
-    startingTreasury: 60000,
     startingInfantry: 20,
     startingAirForce: 5,
     startingDroneMissile: 0,

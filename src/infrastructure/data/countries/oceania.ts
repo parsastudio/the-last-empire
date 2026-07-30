@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const oceaniaProfiles: CountryProfile[] = [
   {
-    id: 34,
     code: "ATF",
     nameEn: "Fr. S. Antarctic Lands",
     nameFa: "سرزمین‌های قطب جنوب فرانسه",
@@ -10,7 +9,6 @@ export const oceaniaProfiles: CountryProfile[] = [
     population: 200,
     traits: ["ISLAND_FORTRESS", "ISOLATED_SOCIETY"],
     flagCode: "TF",
-    startingTreasury: 50000,
     startingInfantry: 1,
     startingAirForce: 0,
     startingDroneMissile: 0,
@@ -18,7 +16,6 @@ export const oceaniaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 147,
     code: "NZL",
     nameEn: "New Zealand",
     nameFa: "نیوزیلند",
@@ -26,7 +23,6 @@ export const oceaniaProfiles: CountryProfile[] = [
     population: 5200000,
     traits: ["ISLAND_FORTRESS"],
     flagCode: "NZ",
-    startingTreasury: 230000,
     startingInfantry: 30,
     startingAirForce: 15,
     startingDroneMissile: 2,
@@ -34,7 +30,6 @@ export const oceaniaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 148,
     code: "AUS",
     nameEn: "Australia",
     nameFa: "استرالیا",
@@ -42,7 +37,6 @@ export const oceaniaProfiles: CountryProfile[] = [
     population: 26000000,
     traits: ["ISLAND_FORTRESS", "INDUSTRIAL_HUB"],
     flagCode: "AU",
-    startingTreasury: 480000,
     startingInfantry: 120,
     startingAirForce: 50,
     startingDroneMissile: 15,

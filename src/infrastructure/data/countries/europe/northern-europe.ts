@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const northernEuropeProfiles: CountryProfile[] = [
   {
-    id: 32,
     code: "NOR",
     nameEn: "Norway",
     nameFa: "نروژ",
@@ -10,7 +9,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 5500000,
     traits: ["OIL_RICH", "INDUSTRIAL_HUB"],
     flagCode: "NO",
-    startingTreasury: 450000,
     startingInfantry: 70,
     startingAirForce: 40,
     startingDroneMissile: 10,
@@ -18,7 +16,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 121,
     code: "SWE",
     nameEn: "Sweden",
     nameFa: "سوئد",
@@ -26,7 +23,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 10500000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "SE",
-    startingTreasury: 350000,
     startingInfantry: 80,
     startingAirForce: 45,
     startingDroneMissile: 10,
@@ -34,7 +30,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 144,
     code: "IRL",
     nameEn: "Ireland",
     nameFa: "ایرلند",
@@ -42,7 +37,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 5100000,
     traits: ["ISLAND_FORTRESS"],
     flagCode: "IE",
-    startingTreasury: 250000,
     startingInfantry: 40,
     startingAirForce: 15,
     startingDroneMissile: 0,
@@ -50,7 +44,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 153,
     code: "DNK",
     nameEn: "Denmark",
     nameFa: "دانمارک",
@@ -58,7 +51,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 5900000,
     traits: ["ISLAND_FORTRESS"],
     flagCode: "DK",
-    startingTreasury: 310000,
     startingInfantry: 45,
     startingAirForce: 25,
     startingDroneMissile: 2,
@@ -66,7 +58,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 154,
     code: "GBR",
     nameEn: "United Kingdom",
     nameFa: "بریتانیا",
@@ -74,7 +65,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 67000000,
     traits: ["ISLAND_FORTRESS", "MILITARISTIC"],
     flagCode: "GB",
-    startingTreasury: 650000,
     startingInfantry: 180,
     startingAirForce: 65,
     startingDroneMissile: 20,
@@ -82,7 +72,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 155,
     code: "ISL",
     nameEn: "Iceland",
     nameFa: "ایسلند",
@@ -90,7 +79,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 380000,
     traits: ["ISLAND_FORTRESS", "ISOLATED_SOCIETY"],
     flagCode: "IS",
-    startingTreasury: 150000,
     startingInfantry: 10,
     startingAirForce: 0,
     startingDroneMissile: 0,
@@ -98,7 +86,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 162,
     code: "FIN",
     nameEn: "Finland",
     nameFa: "فنلاند",
@@ -106,7 +93,6 @@ export const northernEuropeProfiles: CountryProfile[] = [
     population: 5600000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "FI",
-    startingTreasury: 250000,
     startingInfantry: 90,
     startingAirForce: 35,
     startingDroneMissile: 10,

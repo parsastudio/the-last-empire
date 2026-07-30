@@ -22,13 +22,12 @@ export function findCountryProfileByCode(
   const clean = code.toUpperCase().replace("NATION_", "").trim();
 
   return ALL_COUNTRY_PROFILES.find(
-    (c) =>
-      c.code.toUpperCase() === clean ||
-      c.flagCode.toUpperCase() === clean ||
-      c.id.toString() === clean,
+    (c) => c.code.toUpperCase() === clean || c.flagCode.toUpperCase() === clean,
   );
 }
 
-export function findCountryProfileById(id: number): CountryProfile | undefined {
-  return ALL_COUNTRY_PROFILES.find((c) => c.id === id);
+export function findCountryProfileById(
+  id: number | string,
+): CountryProfile | undefined {
+  return findCountryProfileByCode(id.toString());
 }

@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const centralAsiaProfiles: CountryProfile[] = [
   {
-    id: 16,
     code: "KAZ",
     nameEn: "Kazakhstan",
     nameFa: "قزاقستان",
@@ -10,7 +9,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     population: 20000000,
     traits: ["OIL_RICH"],
     flagCode: "KZ",
-    startingTreasury: 250000,
     startingInfantry: 110,
     startingAirForce: 30,
     startingDroneMissile: 5,
@@ -18,7 +16,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 17,
     code: "UZB",
     nameEn: "Uzbekistan",
     nameFa: "ازبکستان",
@@ -26,7 +23,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     population: 36000000,
     traits: ["FRAGILE_ECONOMY"],
     flagCode: "UZ",
-    startingTreasury: 110000,
     startingInfantry: 90,
     startingAirForce: 25,
     startingDroneMissile: 5,
@@ -34,7 +30,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 108,
     code: "MNG",
     nameEn: "Mongolia",
     nameFa: "مغولستان",
@@ -42,7 +37,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     population: 3400000,
     traits: ["ISOLATED_SOCIETY"],
     flagCode: "MN",
-    startingTreasury: 80000,
     startingInfantry: 50,
     startingAirForce: 10,
     startingDroneMissile: 0,
@@ -50,7 +44,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 115,
     code: "TJK",
     nameEn: "Tajikistan",
     nameFa: "تاجیکستان",
@@ -58,7 +51,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     population: 10000000,
     traits: ["FRAGILE_ECONOMY"],
     flagCode: "TJ",
-    startingTreasury: 60000,
     startingInfantry: 45,
     startingAirForce: 10,
     startingDroneMissile: 0,
@@ -66,7 +58,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 116,
     code: "KGZ",
     nameEn: "Kyrgyzstan",
     nameFa: "قرقیزستان",
@@ -74,7 +65,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     population: 7000000,
     traits: ["FRAGILE_ECONOMY"],
     flagCode: "KG",
-    startingTreasury: 60000,
     startingInfantry: 40,
     startingAirForce: 10,
     startingDroneMissile: 0,
@@ -82,7 +72,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 117,
     code: "TKM",
     nameEn: "Turkmenistan",
     nameFa: "ترکمنستان",
@@ -90,7 +79,6 @@ export const centralAsiaProfiles: CountryProfile[] = [
     population: 6500000,
     traits: ["OIL_RICH", "ISOLATED_SOCIETY"],
     flagCode: "TM",
-    startingTreasury: 140000,
     startingInfantry: 60,
     startingAirForce: 15,
     startingDroneMissile: 0,

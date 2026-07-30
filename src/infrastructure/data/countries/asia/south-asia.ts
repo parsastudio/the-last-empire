@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const southAsiaProfiles: CountryProfile[] = [
   {
-    id: 109,
     code: "IND",
     nameEn: "India",
     nameFa: "هند",
@@ -10,7 +9,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     population: 1400000000,
     traits: ["MILITARISTIC", "INDUSTRIAL_HUB"],
     flagCode: "IN",
-    startingTreasury: 800000,
     startingInfantry: 900,
     startingAirForce: 120,
     startingDroneMissile: 40,
@@ -18,7 +16,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 110,
     code: "BGD",
     nameEn: "Bangladesh",
     nameFa: "بنگلادش",
@@ -26,7 +23,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     population: 170000000,
     traits: ["FRAGILE_ECONOMY"],
     flagCode: "BD",
-    startingTreasury: 180000,
     startingInfantry: 160,
     startingAirForce: 25,
     startingDroneMissile: 5,
@@ -34,7 +30,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 113,
     code: "PAK",
     nameEn: "Pakistan",
     nameFa: "پاکستان",
@@ -42,7 +37,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     population: 240000000,
     traits: ["MILITARISTIC", "FRAGILE_ECONOMY"],
     flagCode: "PK",
-    startingTreasury: 210000,
     startingInfantry: 500,
     startingAirForce: 70,
     startingDroneMissile: 25,
@@ -50,7 +44,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 114,
     code: "AFG",
     nameEn: "Afghanistan",
     nameFa: "افغانستان",
@@ -58,7 +51,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     population: 41000000,
     traits: ["ISOLATED_SOCIETY", "FRAGILE_ECONOMY"],
     flagCode: "AF",
-    startingTreasury: 50000,
     startingInfantry: 120,
     startingAirForce: 10,
     startingDroneMissile: 5,
@@ -66,7 +58,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    id: 149,
     code: "LKA",
     nameEn: "Sri Lanka",
     nameFa: "سری‌لانکا",
@@ -74,7 +65,6 @@ export const southAsiaProfiles: CountryProfile[] = [
     population: 22000000,
     traits: ["ISLAND_FORTRESS", "FRAGILE_ECONOMY"],
     flagCode: "LK",
-    startingTreasury: 110000,
     startingInfantry: 110,
     startingAirForce: 15,
     startingDroneMissile: 0,
