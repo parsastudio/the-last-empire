@@ -2,6 +2,8 @@ import "server-only";
 import { GameEngine } from "@/engine/game-engine";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
 class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
@@ -15,6 +17,9 @@ class ServerGameSessionStore {
   }
 
   public initSession(gameId: string, initialState: GameState): GameEngine {
+    const gridState = GridStateProvider.getInstance();
+    GridLoaderService.ensureGridLoaded(gridState);
+
     const engine = new GameEngine(initialState);
     this.engines.set(gameId, engine);
     return engine;
@@ -32,6 +37,9 @@ class ServerGameSessionStore {
     if (!engine) {
       return null;
     }
+    const gridState = GridStateProvider.getInstance();
+    GridLoaderService.ensureGridLoaded(gridState);
+
     return engine.dispatchAction(action);
   }
 
@@ -40,6 +48,9 @@ class ServerGameSessionStore {
     if (!engine) {
       return null;
     }
+    const gridState = GridStateProvider.getInstance();
+    GridLoaderService.ensureGridLoaded(gridState);
+
     return engine.nextTurn();
   }
 }
