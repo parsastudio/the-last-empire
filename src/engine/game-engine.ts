@@ -4,7 +4,7 @@ import { deepClone } from "@/domain/shared/deep-clone";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 import { GameActionQueue } from "./orchestrator/game-action.queue";
 import { TurnProgressionOrchestrator } from "./orchestrator/turn-progression.orchestrator";
-import { HistoryManager } from "./orchestrator/history.manager";
+import { StateHistory } from "@/application/state-history";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GameEngineDispatcher } from "./orchestrator/game-engine-dispatcher";
@@ -13,7 +13,7 @@ export class GameEngine {
   private currentState: GameState;
   private actionQueue = new GameActionQueue();
   private progressionOrchestrator = new TurnProgressionOrchestrator();
-  private historyManager = new HistoryManager();
+  private stateHistory = new StateHistory();
   private dispatcher = new GameEngineDispatcher();
   private prng: SeededRandom;
   private gridState: GridState;
@@ -22,7 +22,7 @@ export class GameEngine {
     this.currentState = deepClone(initialState);
     this.prng = new SeededRandom(initialState.seed);
     this.gridState = GridStateProvider.getInstance();
-    this.historyManager.recordSnapshot(this.currentState, this.gridState);
+    this.stateHistory.saveSnapshot(this.currentState);
   }
 
   public getState(): Readonly<GameState> {
@@ -52,12 +52,12 @@ export class GameEngine {
         this.actionQueue.processActions(state, this.gridState, this.prng),
     );
 
-    this.historyManager.recordSnapshot(this.currentState, this.gridState);
+    this.stateHistory.saveSnapshot(this.currentState);
 
     return this.getState();
   }
 
   public getTurnHistory(turnNumber: number): GameState | undefined {
-    return this.historyManager.getTurnHistory(turnNumber, this.gridState);
+    return this.stateHistory.getTurnHistory(turnNumber);
   }
 }
