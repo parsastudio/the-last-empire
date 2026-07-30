@@ -28,32 +28,9 @@ export class CoolOffManager {
   }
 
   public checkViolation(
-    currentStance: DiplomaticStance,
-    actionType: "ATTACK" | "DECLARE_WAR",
-    coolOffTurnsRemaining = 0,
+    _currentStance: DiplomaticStance,
+    _coolOffTurnsRemaining = 0,
   ): ViolationPenalties {
-    let stabilityPenalty = 0;
-    let reputationPenalty = 0;
-
-    if (coolOffTurnsRemaining > 0) {
-      stabilityPenalty += 25;
-      reputationPenalty += 35;
-    }
-
-    if (
-      (actionType === "ATTACK" || actionType === "DECLARE_WAR") &&
-      currentStance === "ALLIANCE"
-    ) {
-      stabilityPenalty += 40;
-      reputationPenalty += 50;
-    } else if (
-      (actionType === "ATTACK" || actionType === "DECLARE_WAR") &&
-      currentStance === "NON_AGGRESSION_PACT"
-    ) {
-      stabilityPenalty += 20;
-      reputationPenalty += 30;
-    }
-
-    return { stabilityPenalty, reputationPenalty };
+    return { stabilityPenalty: 0, reputationPenalty: 0 };
   }
 }
