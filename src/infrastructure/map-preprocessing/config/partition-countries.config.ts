@@ -21,7 +21,7 @@ export const PARTITION_COUNTRIES_LIST: string[] = [
   "LVA",
   "LTU",
   "MDA",
-  "CYP",
+  "CYN",
   "LUX",
   "PSX",
   "LSO",

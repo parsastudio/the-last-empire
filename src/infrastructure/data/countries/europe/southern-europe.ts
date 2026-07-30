@@ -99,4 +99,18 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
+  {
+    code: "CYP",
+    nameEn: "Cyprus",
+    nameFa: "قبرس",
+    gdp: 30000000000,
+    population: 1200000,
+    traits: ["ISLAND_FORTRESS"],
+    flagCode: "CY",
+    startingInfantry: 20,
+    startingAirForce: 5,
+    startingDroneMissile: 0,
+    startingTechLevel: 3,
+    startingGovernment: "DEMOCRACY",
+  },
 ];
