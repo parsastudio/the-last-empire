@@ -108,7 +108,7 @@ export class ConquestOrchestrator {
     );
 
     let colonyId = 11;
-    while (existingColonyIds.has(colonyId)) {
+    while (existingColonyIds.has(colonyId) && colonyId < 63) {
       colonyId++;
     }
 
