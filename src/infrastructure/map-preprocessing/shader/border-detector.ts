@@ -5,16 +5,21 @@ export class BorderDetector {
     width: number,
     height: number,
     id: number,
-    idx: number,
-    srcData: Uint8ClampedArray,
+    maskData: Uint8Array,
     dynamicIds?: Uint16Array | null,
   ): boolean {
     const getOwnerAt = (px: number, py: number): number => {
-      if (dynamicIds && dynamicIds[py * width + px]! > 0) {
-        return dynamicIds[py * width + px]!;
+      const pIdx = py * width + px;
+      const original = maskData[pIdx] || 0;
+      if (
+        dynamicIds &&
+        dynamicIds[pIdx]! > 0 &&
+        original >= 11 &&
+        original < 250
+      ) {
+        return dynamicIds[pIdx]!;
       }
-      const pIdx = (py * width + px) * 4;
-      return srcData[pIdx + 2] || 0;
+      return original;
     };
 
     const currentOwner = getOwnerAt(x, y);

@@ -27,7 +27,6 @@ export class MapShader {
   private static borderDetector = new BorderDetector();
 
   public static applyShading(
-    srcData: Uint8ClampedArray,
     destData: Uint8ClampedArray,
     width: number,
     height: number,
@@ -58,15 +57,7 @@ export class MapShader {
           if (cell && cell.ownerId.startsWith("NATION_")) {
             const dynamicId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
             if (!isNaN(dynamicId) && dynamicId >= 11) {
-              const pIdx = (y * width + x) * 4;
-              const originalMaskId = srcData[pIdx + 2] || 0;
-              if (
-                originalMaskId >= 11 &&
-                originalMaskId < 250 &&
-                dynamicId !== originalMaskId
-              ) {
-                dynamicIds[y * width + x] = dynamicId;
-              }
+              dynamicIds[y * width + x] = dynamicId;
             }
           }
         }
@@ -75,12 +66,18 @@ export class MapShader {
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const idx = (y * width + x) * 4;
-        const originalMaskId = srcData[idx + 2] || 0;
+        const pixelIdx = y * width + x;
+        const idx = pixelIdx * 4;
+        const originalMaskId = maskData[pixelIdx] || 0;
         let id = originalMaskId;
 
-        if (dynamicIds && dynamicIds[y * width + x]! > 0) {
-          id = dynamicIds[y * width + x]!;
+        if (
+          dynamicIds &&
+          dynamicIds[pixelIdx]! > 0 &&
+          originalMaskId >= 11 &&
+          originalMaskId < 250
+        ) {
+          id = dynamicIds[pixelIdx]!;
         }
 
         let r = 255;
@@ -99,7 +96,7 @@ export class MapShader {
           g = 185;
           b = 129;
         } else if (id < 11) {
-          const d = dist[y * width + x] || 0;
+          const d = dist[pixelIdx] || 0;
           const oceanColor = this.shadowCalculator.calculateOceanColor(d);
           r = oceanColor.r;
           g = oceanColor.g;
@@ -123,7 +120,7 @@ export class MapShader {
                 y,
                 width,
                 height,
-                srcData,
+                maskData,
               );
               r = color.r;
               g = color.g;
@@ -139,8 +136,7 @@ export class MapShader {
             width,
             height,
             id,
-            idx,
-            srcData,
+            maskData,
             dynamicIds,
           )
         ) {

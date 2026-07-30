@@ -11,19 +11,16 @@ export class PoliticalLayerShader {
     y: number,
     width: number,
     height: number,
-    srcData: Uint8ClampedArray,
+    maskData: Uint8Array,
   ): { r: number; g: number; b: number } {
     return this.bevelShader.calculateBevel(
-      255,
-      255,
-      255,
       pair,
       x,
       y,
       width,
       height,
       id,
-      srcData,
+      maskData,
     );
   }
 }

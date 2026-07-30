@@ -25,6 +25,13 @@ export interface MapManifest {
   mapId: string;
   totalNationsCount: number;
   nations: ManifestNationItem[];
+  countries: {
+    id: number;
+    code: string;
+    name: string;
+    color: [number, number, number];
+    areaSqKm: number;
+  }[];
 }
 
 export class MapManifestBuilder {
@@ -33,7 +40,13 @@ export class MapManifestBuilder {
 
   public async buildAndSaveManifest(
     mapId: string,
-    mappingsCountries: { id: number; areaSqKm: number; code: string }[],
+    mappingsCountries: {
+      id: number;
+      areaSqKm: number;
+      code: string;
+      name: string;
+      color: [number, number, number];
+    }[],
     outputFileName: string,
     mode = "partition",
   ): Promise<MapManifest> {
@@ -97,6 +110,7 @@ export class MapManifestBuilder {
       mapId,
       totalNationsCount: manifestNations.length,
       nations: manifestNations,
+      countries: mappingsCountries,
     };
 
     const targetDir = MapPathResolver.getMapServerDir(mapId, mode);

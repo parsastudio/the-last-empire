@@ -3,7 +3,6 @@ import React from "react";
 interface TacticalViewportProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
   canvasDestRef: React.RefObject<HTMLCanvasElement | null>;
-  canvasSrcRef: React.RefObject<HTMLCanvasElement | null>;
   isDragging: boolean;
   isHoveringCountry?: boolean;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -17,7 +16,6 @@ interface TacticalViewportProps {
 export function TacticalViewport({
   containerRef,
   canvasDestRef,
-  canvasSrcRef,
   isDragging,
   isHoveringCountry = false,
   onMouseDown,
@@ -44,7 +42,6 @@ export function TacticalViewport({
       onWheel={onWheel}
       onClick={onClick}
     >
-      <canvas ref={canvasSrcRef} className="hidden" />
       <canvas
         ref={canvasDestRef}
         className="pointer-events-none absolute inset-0 w-full h-full block"

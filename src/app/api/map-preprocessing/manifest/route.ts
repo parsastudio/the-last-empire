@@ -4,52 +4,43 @@ import path from "path";
 import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
-import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") || "partition";
 
-    const tempDir = MapPathResolver.getMapServerDir("map1", mode);
-    await fs.mkdir(tempDir, { recursive: true });
+    const targetDir = MapPathResolver.getMapServerDir("map1", mode);
+    await fs.mkdir(targetDir, { recursive: true });
 
-    const mappingsFileName = `${mode}-mappings.json`;
-    const mappingsPath = path.join(tempDir, mappingsFileName);
+    const manifestPath = path.join(targetDir, "manifest.json");
 
-    let mappingsExists = false;
+    let manifestExists = false;
     try {
-      await fs.access(mappingsPath);
-      mappingsExists = true;
+      await fs.access(manifestPath);
+      manifestExists = true;
     } catch {}
 
-    if (!mappingsExists) {
-      const provider = new MapDataProvider();
-      provider.clearCache();
+    if (!manifestExists) {
       const generated = await generateTest6Map(4096, 2048, mode);
-      await fs.writeFile(
-        mappingsPath,
-        JSON.stringify(generated, null, 2),
-        "utf-8",
+      const builder = new MapManifestBuilder();
+      const manifest = await builder.buildAndSaveManifest(
+        "map1",
+        generated.countries.map((c) => ({
+          id: c.id,
+          code: c.code,
+          name: c.name,
+          color: c.color,
+          areaSqKm: c.areaSqKm,
+        })),
+        "manifest.json",
+        mode,
       );
+      return NextResponse.json(manifest);
     }
 
-    let mappingsData: {
-      countries: { id: number; areaSqKm: number; code: string }[];
-    } = { countries: [] };
-
-    const jsonStr = await fs.readFile(mappingsPath, "utf-8");
-    mappingsData = JSON.parse(jsonStr);
-
-    const manifestFileName = `${mode}-manifest.json`;
-    const builder = new MapManifestBuilder();
-    const manifest = await builder.buildAndSaveManifest(
-      "map1",
-      mappingsData.countries || [],
-      manifestFileName,
-      mode,
-    );
-
+    const raw = await fs.readFile(manifestPath, "utf-8");
+    const manifest = JSON.parse(raw);
     return NextResponse.json(manifest);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to load manifest";
