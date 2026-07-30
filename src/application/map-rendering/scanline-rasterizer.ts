@@ -10,14 +10,15 @@ export function rasterizePolygon(
   colorId: number,
   buffer: Uint8Array,
 ): void {
-  if (polygon.length < 3) {
+  const len = polygon.length;
+  if (len < 3) {
     return;
   }
 
   let yMin = height - 1;
   let yMax = 0;
 
-  for (let i = 0; i < polygon.length; i++) {
+  for (let i = 0; i < len; i++) {
     const py = polygon[i]?.y ?? 0;
     if (py < yMin) yMin = py;
     if (py > yMax) yMax = py;
@@ -31,15 +32,13 @@ export function rasterizePolygon(
   for (let y = yMin; y <= yMax; y++) {
     intersections.length = 0;
 
-    for (let i = 0; i < polygon.length; i++) {
-      const p1 = polygon[i];
-      const p2 = polygon[(i + 1) % polygon.length];
+    for (let i = 0; i < len; i++) {
+      const p1 = polygon[i]!;
+      const p2 = polygon[(i + 1) % len]!;
 
-      if (p1 && p2) {
-        if ((p1.y < y && p2.y >= y) || (p2.y < y && p1.y >= y)) {
-          const x = p1.x + ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y);
-          intersections.push(x);
-        }
+      if ((p1.y < y && p2.y >= y) || (p2.y < y && p1.y >= y)) {
+        const x = p1.x + ((y - p1.y) * (p2.x - p1.x)) / (p2.y - p1.y);
+        intersections.push(x);
       }
     }
 
@@ -52,11 +51,8 @@ export function rasterizePolygon(
       const i1 = intersections[i];
       const i2 = intersections[i + 1];
       if (i1 !== undefined && i2 !== undefined) {
-        let xStart = Math.ceil(i1);
-        let xEnd = Math.floor(i2);
-
-        xStart = Math.max(0, xStart);
-        xEnd = Math.min(width - 1, xEnd);
+        let xStart = Math.max(0, Math.ceil(i1));
+        let xEnd = Math.min(width - 1, Math.floor(i2));
 
         for (let x = xStart; x <= xEnd; x++) {
           buffer[y * width + x] = colorId;
