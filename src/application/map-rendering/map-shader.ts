@@ -1,7 +1,4 @@
-import {
-  CountryPaletteGenerator,
-  ColorPair,
-} from "./shader/country-palette-generator";
+import { CountryPaletteGenerator } from "./shader/country-palette-generator";
 import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator";
 import { NoiseGrainApplier } from "./shader/noise-grain-applier";
 import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache";

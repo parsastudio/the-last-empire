@@ -18,21 +18,12 @@ export interface ColorPair {
 
 export class CountryPaletteGenerator {
   public generatePalette(countries: Country[]): Record<number, ColorPair> {
-    const shuffledPalette = [...MAP_PALETTE_172];
-    for (let i = shuffledPalette.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const temp = shuffledPalette[i];
-      const target = shuffledPalette[j];
-      if (temp && target) {
-        shuffledPalette[i] = target;
-        shuffledPalette[j] = temp;
-      }
-    }
-
     const palette: Record<number, ColorPair> = {};
-    countries.forEach((c, index) => {
+
+    countries.forEach((c) => {
       if (c.id >= 11) {
-        const base = shuffledPalette[index % shuffledPalette.length];
+        const index = (c.id * 37) % MAP_PALETTE_172.length;
+        const base = MAP_PALETTE_172[index];
         if (base) {
           const r1 = base[0];
           const g1 = base[1];

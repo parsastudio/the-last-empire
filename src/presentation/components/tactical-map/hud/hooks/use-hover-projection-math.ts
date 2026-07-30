@@ -1,4 +1,5 @@
 import { RefObject, useCallback } from "react";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface UseHoverProjectionMathProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -48,12 +49,28 @@ export function useHoverProjectionMath({
       let nationIdNumber = 0;
       let greenChannelVal = 0;
 
+      const gx = Math.floor((mapX / mapWidth) * 1024);
+      const gy = Math.floor((mapY / mapHeight) * 512);
+
+      const gridState = GridStateProvider.getInstance();
+      const dynamicCell = gridState.getCell(gx, gy);
+
+      if (dynamicCell && dynamicCell.ownerId.startsWith("NATION_")) {
+        const parsedId = parseInt(
+          dynamicCell.ownerId.replace("NATION_", ""),
+          10,
+        );
+        if (!isNaN(parsedId) && parsedId >= 11) {
+          nationIdNumber = parsedId;
+          greenChannelVal = dynamicCell.enclaveId;
+        }
+      }
+
       if (
+        !nationIdNumber &&
         packed1024Ref?.current &&
         packed1024Ref.current.length === 1024 * 512 * 2
       ) {
-        const gx = Math.floor((mapX / mapWidth) * 1024);
-        const gy = Math.floor((mapY / mapHeight) * 512);
         const pIdx = (gy * 1024 + gx) * 2;
         const geoByte = packed1024Ref.current[pIdx] || 0;
         nationIdNumber = packed1024Ref.current[pIdx + 1] || 0;
