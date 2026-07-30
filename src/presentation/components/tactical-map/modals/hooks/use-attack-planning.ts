@@ -4,6 +4,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useBattleValidation } from "@/presentation/hooks/game/use-battle-validation";
 import { AttackForceEstimator } from "../attack/attack-force-estimator";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 interface UseAttackPlanningProps {
   isOpen: boolean;
@@ -65,24 +66,18 @@ export function useAttackPlanning({
   const { dispatchAction } = useGameActions();
   const estimator = useMemo(() => new AttackForceEstimator(), []);
 
-  const fullAttackerId = attackerCode.startsWith("NATION_")
-    ? attackerCode
-    : `NATION_${attackerCode}`;
+  const fullAttackerId = NationIdResolver.resolveCanonicalId(attackerCode);
 
   const { validationResult, loading: isValidationLoading } =
     useBattleValidation(fullAttackerId, coordinate, isOpen);
 
-  const distMultiplier = validationResult?.distance
-    ? Math.max(1, Math.floor(validationResult.distance / 10))
-    : 1;
-
-  const distScore = validationResult?.distance ?? 30;
+  const distScore = validationResult?.distance ?? 50;
 
   const logistics = estimator.calculateLogisticsCost({
     infantry,
     airForce,
     droneMissile,
-    distanceMultiplier: distMultiplier,
+    distanceMultiplier: validationResult?.surchargeMultiplier ?? 1.0,
     distanceScore: distScore,
   });
 
@@ -103,11 +98,9 @@ export function useAttackPlanning({
   const totalForceSelected = infantry + airForce + droneMissile;
 
   const handleConfirm = async () => {
-    if (totalForceSelected <= 0) return;
+    if (totalForceSelected <= 0 || isBudgetDeficit) return;
 
-    const fullTargetId = targetCode.startsWith("NATION_")
-      ? targetCode
-      : `NATION_${targetCode}`;
+    const fullTargetId = NationIdResolver.resolveCanonicalId(targetCode);
 
     const attackAction = ActionFactory.attack(
       fullAttackerId,

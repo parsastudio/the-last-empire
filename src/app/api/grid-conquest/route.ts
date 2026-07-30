@@ -4,6 +4,7 @@ import { BattleValidationFacade } from "@/engine/combat/validation/battle-valida
 import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
 import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
 import { GridCell } from "@/domain/map/grid-cell.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -20,6 +21,11 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 400 },
       );
     }
+
+    const canonicalAttackerId = NationIdResolver.resolveCanonicalId(attackerId);
+
+    const scaledX = x > 1024 ? Math.floor(x / 4) : x;
+    const scaledY = y > 512 ? Math.floor(y / 4) : y;
 
     const gridState = GridStateProvider.getInstance();
 
@@ -91,8 +97,8 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const validator = new BattleValidationFacade();
     const result = validator.validateAttackForUI(
-      attackerId,
-      { x, y },
+      canonicalAttackerId,
+      { x: scaledX, y: scaledY },
       gridState,
     );
 

@@ -30,12 +30,12 @@ export class AttackForceEstimator {
       distanceScore = 30,
     } = input;
 
-    const distanceKm = Math.max(120, Math.round(distanceScore * 18));
+    const distanceKm = Math.max(30, Math.round(distanceScore));
 
-    const baseLandCost = infantry * 120;
+    const baseLandCost = infantry * 15;
     const landTransitCost = Math.floor(baseLandCost * distanceMultiplier);
 
-    const baseHeavyCost = airForce * 750 + droneMissile * 1100;
+    const baseHeavyCost = airForce * 45 + droneMissile * 60;
     const heavyTransitCost = Math.floor(baseHeavyCost * distanceMultiplier);
 
     const estimatedMoneyCost = Math.max(
@@ -43,9 +43,9 @@ export class AttackForceEstimator {
       landTransitCost + heavyTransitCost,
     );
 
-    const infantryOil = Math.ceil(infantry * 0.1 * distanceMultiplier);
-    const airForceOil = Math.ceil(airForce * 2.0 * distanceMultiplier);
-    const droneOil = Math.ceil(droneMissile * 3.0 * distanceMultiplier);
+    const infantryOil = Math.ceil(infantry * 0.1 * (distanceKm / 100));
+    const airForceOil = Math.ceil(airForce * 1.5 * (distanceKm / 100));
+    const droneOil = Math.ceil(droneMissile * 2.0 * (distanceKm / 100));
 
     const requiredOil = Math.max(10, infantryOil + airForceOil + droneOil);
 
