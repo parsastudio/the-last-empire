@@ -15,7 +15,8 @@ export class BfsStartCellFinder {
     let closestCell: GridCell | undefined = undefined;
     let minDist = Infinity;
 
-    for (const c of targetCells) {
+    for (let i = 0; i < targetCells.length; i++) {
+      const c = targetCells[i]!;
       const dist = Math.hypot(c.x - entryPoint.x, c.y - entryPoint.y);
       if (dist < minDist) {
         minDist = dist;

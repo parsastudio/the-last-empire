@@ -8,21 +8,29 @@ export class CapitulationEngine {
     conquerorId: string,
     allCells: GridCell[],
   ): GridCell[] {
-    const countryCells = allCells.filter((c) => c.ownerId === countryId);
-    const totalCellsCount = countryCells.length;
+    const countryCells: GridCell[] = [];
+    let conqueredCount = 0;
 
+    for (let i = 0; i < allCells.length; i++) {
+      const c = allCells[i]!;
+      if (c.ownerId === countryId) {
+        countryCells.push(c);
+      } else if (c.ownerId === conquerorId && c.isOccupied) {
+        conqueredCount++;
+      }
+    }
+
+    const totalCellsCount = countryCells.length + conqueredCount;
     if (totalCellsCount === 0) {
       return [];
     }
 
-    const conqueredCount = countryCells.filter(
-      (c) => c.ownerId === conquerorId,
-    ).length;
     const ratio = conqueredCount / totalCellsCount;
 
     if (ratio >= this.capitulationThreshold) {
       const capitulatedCells: GridCell[] = [];
-      for (const cell of countryCells) {
+      for (let i = 0; i < countryCells.length; i++) {
+        const cell = countryCells[i]!;
         if (cell.ownerId === countryId) {
           cell.ownerId = conquerorId;
           capitulatedCells.push(cell);

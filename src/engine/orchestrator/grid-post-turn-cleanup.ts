@@ -20,7 +20,8 @@ export class GridPostTurnCleanup {
       (id) => state.nations[id]?.isAlive,
     );
 
-    for (const id of activeNationsIds) {
+    for (let i = 0; i < activeNationsIds.length; i++) {
+      const id = activeNationsIds[i]!;
       this.gridConnector.regroupEnclaves(id, allCells);
       this.gridCleanup.cleanupEnclaveRegistry(
         allCells,

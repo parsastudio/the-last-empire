@@ -11,7 +11,13 @@ export class RegionClusteringEngine {
     allCells: GridCell[],
     gridWidth = 1024,
   ): Map<string, number> {
-    const countryCells = allCells.filter((c) => c.ownerId === countryId);
+    const countryCells: GridCell[] = [];
+    for (let i = 0; i < allCells.length; i++) {
+      if (allCells[i]!.ownerId === countryId) {
+        countryCells.push(allCells[i]!);
+      }
+    }
+
     if (countryCells.length === 0) {
       return new Map();
     }
