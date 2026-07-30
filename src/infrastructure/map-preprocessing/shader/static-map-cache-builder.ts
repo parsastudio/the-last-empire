@@ -5,6 +5,7 @@ export interface StaticMapCache {
   ocean32: Uint32Array;
   borderMask: Uint8Array;
   bevelCase: Uint8Array;
+  landIndices: Uint32Array;
 }
 
 export class StaticMapCacheBuilder {
@@ -35,6 +36,24 @@ export class StaticMapCacheBuilder {
       height,
     );
 
+    const neighbors = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
+
+    let landCount = 0;
+    for (let i = 0; i < totalPixels; i++) {
+      const id = maskData[i] || 0;
+      if (id >= 11 && id < 251) {
+        landCount++;
+      }
+    }
+
+    const landIndices = new Uint32Array(landCount);
+    let landIdxCursor = 0;
+
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const pixelIdx = y * width + x;
@@ -46,16 +65,30 @@ export class StaticMapCacheBuilder {
           continue;
         }
 
+        if (id >= 11 && id < 251) {
+          landIndices[landIdxCursor++] = pixelIdx;
+        }
+
         let isBorder = false;
 
-        if (x < width - 1 && maskData[pixelIdx + 1] !== id) {
-          isBorder = true;
-        } else if (x > 0 && maskData[pixelIdx - 1] !== id) {
-          isBorder = true;
-        } else if (y < height - 1 && maskData[pixelIdx + width] !== id) {
-          isBorder = true;
-        } else if (y > 0 && maskData[pixelIdx - width] !== id) {
-          isBorder = true;
+        for (let k = 0; k < 4; k++) {
+          const nx = x + neighbors[k]!.dx;
+          const ny = y + neighbors[k]!.dy;
+
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const nIdx = ny * width + nx;
+            const nId = maskData[nIdx] || 0;
+
+            if (nId !== id) {
+              if (nId < 11 || nId === 254) {
+                isBorder = true;
+                break;
+              } else if (id < nId && nId >= 11 && nId < 250) {
+                isBorder = true;
+                break;
+              }
+            }
+          }
         }
 
         if (isBorder) {
@@ -98,6 +131,7 @@ export class StaticMapCacheBuilder {
       ocean32,
       borderMask,
       bevelCase,
+      landIndices,
     };
 
     StaticMapCacheBuilder.cachedMaskRef = maskData;

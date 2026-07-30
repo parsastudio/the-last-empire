@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MapDataApiHelper } from "./map-data-api-helper";
 import { CountryMapping } from "./mask-rendering-helper";
+import { StaticMapCacheBuilder } from "@/infrastructure/map-preprocessing/shader/static-map-cache-builder";
 
 interface UseMapAssetsLoaderProps {
   apiHelper: MapDataApiHelper;
@@ -65,6 +66,10 @@ export function useMapAssetsLoader({ apiHelper }: UseMapAssetsLoaderProps) {
         if (mask4KRes.ok) {
           const raw4KBuf = await mask4KRes.arrayBuffer();
           maskDataRef.current = new Uint8Array(raw4KBuf);
+
+          const staticCacheBuilder = new StaticMapCacheBuilder();
+          staticCacheBuilder.buildOrGetCache(maskDataRef.current, 4096, 2048);
+
           if (active) {
             setLoading(false);
           }
