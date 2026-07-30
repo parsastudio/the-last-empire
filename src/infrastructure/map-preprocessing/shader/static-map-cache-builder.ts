@@ -52,15 +52,11 @@ export class StaticMapCacheBuilder {
           const rightIdx = pixelIdx + 1;
           const rightOwner = maskData[rightIdx] || 0;
           if (rightOwner !== id) {
-            isBorder = true;
-          }
-        }
-
-        if (!isBorder && x > 0) {
-          const leftIdx = pixelIdx - 1;
-          const leftOwner = maskData[leftIdx] || 0;
-          if (leftOwner !== id) {
-            isBorder = true;
+            if (rightOwner < 11) {
+              isBorder = true;
+            } else if (rightOwner > id) {
+              isBorder = true;
+            }
           }
         }
 
@@ -68,6 +64,18 @@ export class StaticMapCacheBuilder {
           const bottomIdx = pixelIdx + width;
           const bottomOwner = maskData[bottomIdx] || 0;
           if (bottomOwner !== id) {
+            if (bottomOwner < 11) {
+              isBorder = true;
+            } else if (bottomOwner > id) {
+              isBorder = true;
+            }
+          }
+        }
+
+        if (!isBorder && x > 0) {
+          const leftIdx = pixelIdx - 1;
+          const leftOwner = maskData[leftIdx] || 0;
+          if (leftOwner < 11) {
             isBorder = true;
           }
         }
@@ -75,7 +83,7 @@ export class StaticMapCacheBuilder {
         if (!isBorder && y > 0) {
           const topIdx = pixelIdx - width;
           const topOwner = maskData[topIdx] || 0;
-          if (topOwner !== id) {
+          if (topOwner < 11) {
             isBorder = true;
           }
         }

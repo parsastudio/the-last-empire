@@ -15,7 +15,7 @@ export class TacticalMapProfiler {
     if (typeof window !== "undefined" && this.mainStart > 0) {
       const now = performance.now();
       const delta = now - this.lastSubTime;
-      this.subDurations[subName] = delta;
+      this.subDurations[subName] = Number(delta.toFixed(2));
       this.lastSubTime = now;
     }
   }
@@ -23,18 +23,23 @@ export class TacticalMapProfiler {
   public static end(phaseName: string, details?: string): number {
     if (typeof window === "undefined" || this.mainStart === 0) return 0;
     const now = performance.now();
+
+    if (this.lastSubTime > this.mainStart) {
+      const finalDelta = now - this.lastSubTime;
+      this.subDurations["6.ImageDataUpload"] = Number(finalDelta.toFixed(2));
+    }
+
     const total = now - this.mainStart;
+    const formattedTotal = total.toFixed(2);
 
     const entries = Object.entries(this.subDurations);
     let subBreakdown = "";
     if (entries.length > 0) {
-      subBreakdown = entries
-        .map(([k, d]) => `${k}: ${d.toFixed(2)}ms`)
-        .join(" | ");
+      subBreakdown = entries.map(([k, d]) => `${k}: ${d}ms`).join(" | ");
     }
 
     console.log(
-      `%c[TacticalMap Profiler] ${phaseName}: ${total.toFixed(2)}ms ${details ? `(${details})` : ""} \n   └─ [Sub-Breakdown] ${subBreakdown}`,
+      `%c[TacticalMap Profiler] ${phaseName}: ${formattedTotal}ms ${details ? `(${details})` : ""} \n   └─ [Sub-Breakdown] ${subBreakdown}`,
       "color: #10b981; font-weight: bold; font-family: monospace;",
     );
 
