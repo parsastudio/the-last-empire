@@ -62,6 +62,7 @@ function WorkspaceContent({
     countries,
     loading: dataLoading,
     isLayerRendering,
+    renderVersion,
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
@@ -113,6 +114,7 @@ function WorkspaceContent({
     mapWidth,
     mapHeight,
     activeLayer,
+    renderVersion,
   });
 
   const isNotFound = !isGameLoading && (error !== null || !gameState);

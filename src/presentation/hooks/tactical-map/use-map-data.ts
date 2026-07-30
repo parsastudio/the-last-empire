@@ -23,6 +23,7 @@ export function useMapData({
 }: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
   const [isLayerRendering, setIsLayerRendering] = useState<boolean>(false);
+  const [renderVersion, setRenderVersion] = useState<number>(0);
 
   const { countries, loading, error, maskDataRef, packed1024Ref } =
     useMapAssetsLoader({ apiHelper });
@@ -42,6 +43,7 @@ export function useMapData({
               maskDataRef,
               activeLayer,
             );
+            setRenderVersion((v) => v + 1);
           }
           setIsLayerRendering(false);
         });
@@ -77,6 +79,7 @@ export function useMapData({
     loading,
     error,
     isLayerRendering,
+    renderVersion,
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
