@@ -34,6 +34,7 @@ export class MapShader {
     countries: Country[],
     activeLayer: "political" | "gdp" = "political",
   ): void {
+    const dest32 = new Uint32Array(destData.buffer);
     const palette = this.paletteGenerator.generatePalette(countries);
     const dist = ShorelineDistanceCache.getOrCreateDistanceTransform(
       maskData,
@@ -78,10 +79,13 @@ export class MapShader {
       }
     }
 
+    const borderR = 80;
+    const borderG = 72;
+    const borderB = 65;
+
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const pixelIdx = y * width + x;
-        const idx = pixelIdx * 4;
         const originalMaskId = maskData[pixelIdx] || 0;
         let id = originalMaskId;
 
@@ -154,15 +158,17 @@ export class MapShader {
             dynamicIds,
           )
         ) {
-          r = 80;
-          g = 72;
-          b = 65;
+          r = borderR;
+          g = borderG;
+          b = borderB;
         }
 
-        destData[idx] = Math.max(0, Math.min(255, r + grain));
-        destData[idx + 1] = Math.max(0, Math.min(255, g + grain));
-        destData[idx + 2] = Math.max(0, Math.min(255, b + grain));
-        destData[idx + 3] = 255;
+        const finalR = Math.max(0, Math.min(255, r + grain));
+        const finalG = Math.max(0, Math.min(255, g + grain));
+        const finalB = Math.max(0, Math.min(255, b + grain));
+
+        dest32[pixelIdx] =
+          (255 << 24) | (finalB << 16) | (finalG << 8) | finalR;
       }
     }
   }

@@ -1,16 +1,18 @@
 import React from "react";
-import { Layers } from "lucide-react";
+import { Layers, Loader2 } from "lucide-react";
 import { LAYER_OPTIONS } from "./layer-options.config";
 
 export type TacticalLayer = "political" | "gdp";
 
 interface LayerControllerProps {
   activeLayer: TacticalLayer;
+  isRendering?: boolean;
   onChangeLayer: (layer: TacticalLayer) => void;
 }
 
 export function LayerController({
   activeLayer,
+  isRendering = false,
   onChangeLayer,
 }: LayerControllerProps) {
   return (
@@ -21,9 +23,13 @@ export function LayerController({
     >
       <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1 dir-rtl">
         <div className="p-2 text-muted-foreground border-l border-border/60 flex items-center gap-1.5">
-          <Layers size={14} />
+          {isRendering ? (
+            <Loader2 size={14} className="animate-spin text-primary" />
+          ) : (
+            <Layers size={14} />
+          )}
           <span className="text-[10px] font-extrabold font-sans hidden sm:inline">
-            لایه‌ها:
+            {isRendering ? "در حال به‌روزرسانی..." : "لایه‌ها:"}
           </span>
         </div>
 
@@ -33,8 +39,9 @@ export function LayerController({
           return (
             <button
               key={opt.id}
+              disabled={isRendering}
               onClick={() => onChangeLayer(opt.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-50 ${
                 isActive
                   ? "bg-secondary text-foreground shadow-sm border border-border/60"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"

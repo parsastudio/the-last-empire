@@ -61,6 +61,7 @@ function WorkspaceContent({
   const {
     countries,
     loading: dataLoading,
+    isLayerRendering,
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
@@ -162,6 +163,7 @@ function WorkspaceContent({
 
       <LayerController
         activeLayer={activeLayer}
+        isRendering={isLayerRendering}
         onChangeLayer={setActiveLayer}
       />
 
