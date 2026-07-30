@@ -9,6 +9,7 @@ import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
 import { ClosedSeaDetector } from "@/application/map-rendering/utils/closed-sea-detector";
 import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
 import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+import { TerritoryPartitioner } from "./generator/territory-partitioner";
 
 export interface CountryMapping {
   id: number;
@@ -21,8 +22,9 @@ export interface CountryMapping {
 export async function generateTest6Map(
   width: number,
   height: number,
+  mode = "default",
 ): Promise<{ countries: CountryMapping[] }> {
-  const essentialDir = MapPathResolver.getMapServerDir("map1", "default");
+  const essentialDir = MapPathResolver.getMapServerDir("map1", mode);
   await fs.mkdir(essentialDir, { recursive: true });
 
   const geojsonPath = MapPathResolver.getGeoJsonServerPath();
@@ -45,6 +47,7 @@ export async function generateTest6Map(
   const writer = new MapWriter();
   const areaCounter = new MapAreaPixelCounter();
   const polygonRasterizer = new PolygonFeatureRasterizer();
+  const partitioner = new TerritoryPartitioner();
 
   const countries: CountryMapping[] = [
     {
@@ -60,6 +63,8 @@ export async function generateTest6Map(
   buffer.fill(0);
   const features = processor.extractFeatures(geoJson);
 
+  const idToCodeMap = new Map<number, string>();
+
   let nextId = 11;
   for (const feature of features) {
     countries.push({
@@ -69,6 +74,7 @@ export async function generateTest6Map(
       color: [0, 0, nextId],
       areaSqKm: 0,
     });
+    idToCodeMap.set(nextId, feature.code);
     nextId++;
   }
 
@@ -81,6 +87,10 @@ export async function generateTest6Map(
     11,
   );
 
+  if (mode === "partition") {
+    partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
+  }
+
   const draw = new GeometryDraw();
   draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
   draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
@@ -91,8 +101,15 @@ export async function generateTest6Map(
   const dist = distanceTransform.calculate(buffer, width, height);
   distanceTransform.applySeaDepths(buffer, dist, width, height);
 
-  await writer.saveMaskImage(width, height, buffer, "map1", "default");
-  await fs.writeFile(path.join(essentialDir, "default-mask.bin"), buffer);
+  const maskName =
+    mode === "edited"
+      ? "edited"
+      : mode === "partition"
+        ? "partition"
+        : "default";
+
+  await writer.saveMaskImage(width, height, buffer, "map1", maskName);
+  await fs.writeFile(path.join(essentialDir, `${maskName}-mask.bin`), buffer);
 
   const packer = new LowResPacker();
   const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
@@ -101,7 +118,7 @@ export async function generateTest6Map(
   seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
   await fs.writeFile(
-    path.join(essentialDir, "default-mask-1024.bin"),
+    path.join(essentialDir, `${maskName}-mask-1024.bin`),
     packed1024,
   );
 
