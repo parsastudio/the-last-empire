@@ -8,6 +8,7 @@ import { GeometryDraw } from "./utils/geometry-draw";
 import { LowResPacker } from "./utils/low-res-packer";
 import { ClosedSeaDetector } from "./utils/closed-sea-detector";
 import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
+import { MapPathResolver } from "./map-path-resolver";
 
 export interface CountryMapping {
   id: number;
@@ -21,11 +22,10 @@ export async function generateTest6Map(
   width: number,
   height: number,
 ): Promise<{ countries: CountryMapping[] }> {
-  const publicDir = path.join(process.cwd(), "public");
-  const map1Dir = path.join(publicDir, "maps", "map1");
-  await fs.mkdir(map1Dir, { recursive: true });
+  const essentialDir = MapPathResolver.getMapServerDir("map1", "default");
+  await fs.mkdir(essentialDir, { recursive: true });
 
-  const geojsonPath = path.join(publicDir, "ne_110m_admin_0_countries.geojson");
+  const geojsonPath = MapPathResolver.getGeoJsonServerPath();
   let geoJson: {
     features: Array<{
       properties?: Record<string, unknown>;
@@ -91,8 +91,8 @@ export async function generateTest6Map(
   const dist = distanceTransform.calculate(buffer, width, height);
   distanceTransform.applySeaDepths(buffer, dist, width, height);
 
-  await writer.saveMaskImage(width, height, buffer, publicDir);
-  await fs.writeFile(path.join(map1Dir, "default-mask.bin"), buffer);
+  await writer.saveMaskImage(width, height, buffer, "map1", "default");
+  await fs.writeFile(path.join(essentialDir, "default-mask.bin"), buffer);
 
   const packer = new LowResPacker();
   const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
@@ -100,7 +100,10 @@ export async function generateTest6Map(
   const seaDetector = new ClosedSeaDetector();
   seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
-  await fs.writeFile(path.join(map1Dir, "default-mask-1024.bin"), packed1024);
+  await fs.writeFile(
+    path.join(essentialDir, "default-mask-1024.bin"),
+    packed1024,
+  );
 
   return { countries };
 }

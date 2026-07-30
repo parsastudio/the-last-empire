@@ -3,6 +3,7 @@ import path from "path";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { MapPathResolver } from "../map-path-resolver";
 
 export interface ManifestNationItem {
   id: string;
@@ -34,6 +35,7 @@ export class MapManifestBuilder {
     mapId: string,
     mappingsCountries: { id: number; areaSqKm: number; code: string }[],
     outputFileName: string,
+    mode = "partition",
   ): Promise<MapManifest> {
     const activeCountryIds = new Set(
       mappingsCountries.filter((c) => c.id >= 11).map((c) => c.id),
@@ -97,11 +99,10 @@ export class MapManifestBuilder {
       nations: manifestNations,
     };
 
-    const publicDir = path.join(process.cwd(), "public");
-    const map1Dir = path.join(publicDir, "maps", mapId);
-    await fs.mkdir(map1Dir, { recursive: true });
+    const targetDir = MapPathResolver.getMapServerDir(mapId, mode);
+    await fs.mkdir(targetDir, { recursive: true });
     await fs.writeFile(
-      path.join(map1Dir, outputFileName),
+      path.join(targetDir, outputFileName),
       JSON.stringify(manifest, null, 2),
       "utf-8",
     );

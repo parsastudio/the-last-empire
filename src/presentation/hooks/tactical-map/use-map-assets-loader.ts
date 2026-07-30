@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MapDataApiHelper } from "./map-data-api-helper";
 import { CountryMapping } from "./mask-rendering-helper";
+import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
 
 interface UseMapAssetsLoaderProps {
   mapMode: "default" | "edited" | "partition";
@@ -49,12 +50,18 @@ export function useMapAssetsLoader({
         setCountries(countriesData);
         setIsCached(cachedStatus);
 
-        const binPath =
+        const binFileName =
           mapMode === "partition"
-            ? "/maps/map1/partition-mask-1024.bin"
+            ? "partition-mask-1024.bin"
             : mapMode === "edited"
-              ? "/maps/map1/edited-mask-1024.bin"
-              : "/maps/map1/default-mask-1024.bin";
+              ? "edited-mask-1024.bin"
+              : "default-mask-1024.bin";
+
+        const binPath = MapPathResolver.getMapClientUrl(
+          "map1",
+          mapMode,
+          binFileName,
+        );
 
         try {
           const binRes = await fetch(binPath);

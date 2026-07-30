@@ -1,7 +1,13 @@
+import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+
 export class MapDataApiHelper {
   public getApiPath(mapMode: "default" | "edited" | "partition"): string {
     if (mapMode === "partition") {
-      return "/maps/map1/partition-mappings.json";
+      return MapPathResolver.getMapClientUrl(
+        "map1",
+        mapMode,
+        "partition-mappings.json",
+      );
     }
     if (mapMode === "edited") {
       return "/api/map-generator?type=edited";
@@ -11,11 +17,19 @@ export class MapDataApiHelper {
 
   public getImageSource(mapMode: "default" | "edited" | "partition"): string {
     if (mapMode === "partition") {
-      return "/maps/map1/partition-mask.png";
+      return MapPathResolver.getMapClientUrl(
+        "map1",
+        mapMode,
+        "partition-mask.png",
+      );
     }
     if (mapMode === "edited") {
-      return "/maps/map1/edited-mask.png";
+      return MapPathResolver.getMapClientUrl(
+        "map1",
+        mapMode,
+        "edited-mask.png",
+      );
     }
-    return "/maps/map1/default-mask.png";
+    return MapPathResolver.getMapClientUrl("map1", mapMode, "default-mask.png");
   }
 }
