@@ -49,25 +49,19 @@ export class MapManifestBuilder {
     }[],
     outputFileName: string,
   ): Promise<MapManifest> {
-    const activeCountryCodes = new Set(
+    const activeCountryIds = new Set(
       mappingsCountries
         .filter((c) => c.id >= 11 && c.areaSqKm > 0)
-        .map((c) => c.code.toUpperCase()),
+        .map((c) => c.id),
     );
 
-    const activeProfiles = ALL_COUNTRY_PROFILES.filter(
-      (p) =>
-        activeCountryCodes.has(p.code.toUpperCase()) ||
-        activeCountryCodes.has(p.flagCode.toUpperCase()),
+    const activeProfiles = ALL_COUNTRY_PROFILES.filter((p) =>
+      activeCountryIds.has(p.id ?? 0),
     );
 
     const rawNationsWithScores = activeProfiles.map((p) => {
-      const mapping = mappingsCountries.find(
-        (c) =>
-          c.code.toUpperCase() === p.code.toUpperCase() ||
-          c.code.toUpperCase() === p.flagCode.toUpperCase(),
-      );
-      const numericId = mapping ? mapping.id : 0;
+      const mapping = mappingsCountries.find((c) => c.id === p.id);
+      const numericId = p.id ?? (mapping ? mapping.id : 0);
       const territorySize = mapping
         ? mapping.areaSqKm
         : Math.round(p.gdp / 1000000);
@@ -100,7 +94,7 @@ export class MapManifestBuilder {
     const manifestNations: ManifestNationItem[] = rawNationsWithScores.map(
       (item, index) => ({
         id: `NATION_${item.profile.code}`,
-        numericId: item.numericId || index + 11,
+        numericId: item.numericId,
         code: item.profile.code,
         flagCode: item.profile.flagCode,
         nameFa: item.profile.nameFa,
