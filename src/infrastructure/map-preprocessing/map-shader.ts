@@ -58,7 +58,15 @@ export class MapShader {
           if (cell && cell.ownerId.startsWith("NATION_")) {
             const dynamicId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
             if (!isNaN(dynamicId) && dynamicId >= 11) {
-              dynamicIds[y * width + x] = dynamicId;
+              const pIdx = (y * width + x) * 4;
+              const originalMaskId = srcData[pIdx + 2] || 0;
+              if (
+                originalMaskId >= 11 &&
+                originalMaskId < 250 &&
+                dynamicId !== originalMaskId
+              ) {
+                dynamicIds[y * width + x] = dynamicId;
+              }
             }
           }
         }
@@ -71,12 +79,7 @@ export class MapShader {
         const originalMaskId = srcData[idx + 2] || 0;
         let id = originalMaskId;
 
-        if (
-          dynamicIds &&
-          dynamicIds[y * width + x]! > 0 &&
-          originalMaskId >= 11 &&
-          originalMaskId < 250
-        ) {
+        if (dynamicIds && dynamicIds[y * width + x]! > 0) {
           id = dynamicIds[y * width + x]!;
         }
 

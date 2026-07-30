@@ -32,7 +32,7 @@ export class MapBevelShader {
     const idLeft = x > 2 ? getOwner(x - 2, y) : id;
     const idTop = y > 2 ? getOwner(x, y - 2) : id;
     const idRight = x < width - 2 ? getOwner(x + 2, y) : id;
-    const idBottom = y < height - 2 ? getOwner(x, y + 2) : id;
+    const idBottom = y < height - 2 ? getOwner(x + 2, y) : id;
 
     let bevel = 1.0;
     if (idLeft !== id || idTop !== id) {
