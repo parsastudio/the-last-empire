@@ -10,6 +10,8 @@ export interface CountryMapping {
 }
 
 export class MaskRenderingHelper {
+  private persistentImageData: ImageData | null = null;
+
   public renderMask(
     mapWidth: number,
     mapHeight: number,
@@ -22,17 +24,26 @@ export class MaskRenderingHelper {
 
     TacticalMapProfiler.start();
 
-    canvasShaded.width = mapWidth;
-    canvasShaded.height = mapHeight;
+    if (canvasShaded.width !== mapWidth || canvasShaded.height !== mapHeight) {
+      canvasShaded.width = mapWidth;
+      canvasShaded.height = mapHeight;
+      this.persistentImageData = null;
+    }
 
     const ctxShaded = canvasShaded.getContext("2d");
 
     if (ctxShaded) {
       ctxShaded.imageSmoothingEnabled = true;
-      const destImage = ctxShaded.createImageData(mapWidth, mapHeight);
+
+      if (!this.persistentImageData) {
+        this.persistentImageData = ctxShaded.createImageData(
+          mapWidth,
+          mapHeight,
+        );
+      }
 
       MapShader.applyShading(
-        destImage.data,
+        this.persistentImageData.data,
         mapWidth,
         mapHeight,
         maskDataRef.current,
@@ -40,7 +51,8 @@ export class MaskRenderingHelper {
         activeLayer,
       );
 
-      ctxShaded.putImageData(destImage, 0, 0);
+      TacticalMapProfiler.markSub("6.ImageDataUpload");
+      ctxShaded.putImageData(this.persistentImageData, 0, 0);
     }
 
     TacticalMapProfiler.end("Map Layer Shading", `Layer: ${activeLayer}`);
