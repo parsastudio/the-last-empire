@@ -9,6 +9,7 @@ import { ClosedSeaDetector } from "./utils/closed-sea-detector";
 import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
 import { MapPathResolver } from "./map-path-resolver";
 import { TerritoryPartitioner } from "./generator/territory-partitioner";
+import { BoundarySmoother } from "./generator/boundary-smoother";
 import { PngDecoder } from "./encoders/png-decoder";
 
 export interface CountryMapping {
@@ -47,6 +48,7 @@ export async function generateTest6Map(
   const areaCounter = new MapAreaPixelCounter();
   const polygonRasterizer = new PolygonFeatureRasterizer();
   const partitioner = new TerritoryPartitioner();
+  const boundarySmoother = new BoundarySmoother();
 
   const countries: CountryMapping[] = [
     {
@@ -96,6 +98,8 @@ export async function generateTest6Map(
 
   if (mode === "partition") {
     partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
+  } else {
+    boundarySmoother.smoothBoundaries(buffer, width, height);
   }
 
   const pixelAreas = areaCounter.calculateAreas(buffer, width, height, nextId);

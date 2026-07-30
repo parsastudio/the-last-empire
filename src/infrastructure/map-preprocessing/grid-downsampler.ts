@@ -50,6 +50,7 @@ export class GridDownsampler {
           x: gx,
           y: gy,
           ownerId: cellOwner,
+          initialOwnerId: cellOwner,
           highResPixelCount: countryCounts.size > 0 ? 16 : 0,
           enclaveId: 0,
           seaAccess: 0,

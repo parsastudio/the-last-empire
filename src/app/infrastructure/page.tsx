@@ -1,34 +1,32 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import {
-  RefreshCw,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-  ArrowRight,
-} from "lucide-react";
-import { useToast } from "@/presentation/context/toast-context";
-import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
-import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
+import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
+import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
+import { useTacticalMapInteraction } from "@/presentation/hooks/tactical-map/use-tactical-map-interaction";
 import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
+import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
+import {
+  LayerController,
+  TacticalLayer,
+} from "@/presentation/components/tactical-map/controls/layer-controller";
+import { RefreshCw, CheckCircle2, ShieldAlert } from "lucide-react";
 
 export default function InfrastructurePage() {
   const mapWidth = 4096;
   const mapHeight = 2048;
 
-  const router = useRouter();
-  const { showToast } = useToast();
-  const [activeMode, setActiveMode] = useState<
-    "partition" | "edited" | "default"
+  const [activeMapMode, setActiveMapMode] = useState<
+    "default" | "edited" | "partition"
   >("partition");
+  const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isRebuilding, setIsRebuilding] = useState(false);
+  const [rebuildStatus, setRebuildStatus] = useState<string | null>(null);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const dimensions = useMapDimensions(containerRef);
 
@@ -36,20 +34,39 @@ export default function InfrastructurePage() {
     scale,
     position,
     isDragging,
+    hasDraggedRef,
     handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    zoomIn,
-    zoomOut,
-    resetView,
   } = useMapGesture();
 
-  const { loading, canvasSrcRef, canvasShadedRef } = useMapData({
+  const {
+    countries,
+    loading,
+    error,
+    canvasShadedRef,
+    maskDataRef,
+    packed1024Ref,
+    reRenderLayer,
+  } = useMapData({
     mapWidth,
     mapHeight,
-    mapMode: activeMode,
-    activeLayer: "political",
+    mapMode: activeMapMode,
+    activeLayer,
+  });
+
+  const interaction = useTacticalMapInteraction({
+    mapWidth,
+    mapHeight,
+    countries,
+    maskDataRef,
+    containerRef,
+    dimensions,
+    scale,
+    position,
+    isDragging,
+    hasDraggedRef,
   });
 
   useCanvasRenderer({
@@ -61,39 +78,24 @@ export default function InfrastructurePage() {
     scale,
     mapWidth,
     mapHeight,
-    activeLayer: "political",
+    activeLayer,
   });
 
-  const handleRebuildAll = async () => {
+  const handleRebuild = async () => {
+    setIsRebuilding(true);
+    setRebuildStatus("در حال بازسازی فایل‌های باینری و مانیفست...");
     try {
-      setIsRebuilding(true);
-      const res = await fetch("/api/map-preprocessing/rebuild", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "all" }),
-      });
-
-      const json = await res.json();
-      if (json.success) {
-        showToast(
-          "بازسازی موفق",
-          "تمام فایل‌های نقشه با موفقیت از صفر بازتولید گردیدند.",
-          "success",
-        );
-        window.location.reload();
+      const res = await fetch(
+        "/api/map-preprocessing/manifest?mode=" + activeMapMode,
+      );
+      if (res.ok) {
+        setRebuildStatus("بازسازی مانیفست با موفقیت انجام شد.");
+        reRenderLayer();
       } else {
-        showToast(
-          "خطا در بازسازی",
-          json.error || "مشکلی در تولید فایل‌ها رخ داد.",
-          "error",
-        );
+        setRebuildStatus("خطا در بازسازی مانیفست.");
       }
     } catch {
-      showToast(
-        "خطای شبکه",
-        "ارتباط با سرور برای بازسازی نقشه برقرار نشد.",
-        "error",
-      );
+      setRebuildStatus("خطا در ارتباط با سرور.");
     } finally {
       setIsRebuilding(false);
     }
@@ -101,119 +103,111 @@ export default function InfrastructurePage() {
 
   return (
     <div
-      className="w-screen h-screen bg-background text-foreground flex flex-col select-none dir-rtl overflow-hidden"
+      className="w-screen h-screen bg-background overflow-hidden relative flex flex-col"
       dir="rtl"
     >
-      <header className="h-16 border-b border-border bg-card/60 backdrop-blur-md px-6 flex items-center justify-between shrink-0 z-20">
+      <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md px-6 flex items-center justify-between z-40 shrink-0">
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/")}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold"
-          >
-            <ArrowRight size={15} />
-            <span>منوی اصلی</span>
-          </button>
-          <div className="h-4 w-[1px] bg-border" />
           <h1 className="text-sm font-extrabold text-foreground">
-            اتاق کنترل زیرساخت و پایش نقشه
+            پانل زیرساخت و تست لایه‌های نقشه
           </h1>
+          <div className="flex items-center gap-1 bg-secondary px-2.5 py-1 rounded-xl text-xs font-mono">
+            <span>حالت فعال:</span>
+            <span className="font-bold text-gdp">{activeMapMode}</span>
+          </div>
         </div>
 
-        <button
-          onClick={handleRebuildAll}
-          disabled={isRebuilding}
-          className="px-4 py-2 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 cursor-pointer"
-        >
-          <RefreshCw size={14} className={isRebuilding ? "animate-spin" : ""} />
-          <span>
-            {isRebuilding
-              ? "در حال بازسازی فایل‌ها..."
-              : "بازسازی کامل تمام نقشه‌ها"}
-          </span>
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 bg-secondary/60 p-1 rounded-xl text-xs">
+            <button
+              onClick={() => setActiveMapMode("partition")}
+              className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                activeMapMode === "partition"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground"
+              }`}
+            >
+              پارتیشن (اصلی)
+            </button>
+            <button
+              onClick={() => setActiveMapMode("edited")}
+              className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                activeMapMode === "edited"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground"
+              }`}
+            >
+              ادیت شده
+            </button>
+            <button
+              onClick={() => setActiveMapMode("default")}
+              className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                activeMapMode === "default"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground"
+              }`}
+            >
+              دیفالت
+            </button>
+          </div>
+
+          <button
+            onClick={handleRebuild}
+            disabled={isRebuilding}
+            className="px-4 py-2 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md"
+          >
+            <RefreshCw
+              size={14}
+              className={isRebuilding ? "animate-spin" : ""}
+            />
+            <span>بازسازی نقشه</span>
+          </button>
+        </div>
       </header>
 
-      <main className="flex-1 relative overflow-hidden flex flex-col">
-        <div className="absolute top-4 right-4 z-30 bg-card/85 backdrop-blur-xl border border-border p-1.5 rounded-2xl shadow-xl flex items-center gap-1">
-          <button
-            onClick={() => setActiveMode("partition")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeMode === "partition"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            پارتیشن‌شده (Partition)
-          </button>
-          <button
-            onClick={() => setActiveMode("edited")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeMode === "edited"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            دستکاری‌شده (Edited)
-          </button>
-          <button
-            onClick={() => setActiveMode("default")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeMode === "default"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            پیش‌فرض (Default)
-          </button>
+      {rebuildStatus && (
+        <div className="bg-secondary/90 border-b border-border px-6 py-2 text-xs flex items-center gap-2 z-40">
+          <CheckCircle2 size={14} className="text-gdp" />
+          <span className="text-foreground font-mono">{rebuildStatus}</span>
         </div>
+      )}
 
-        <div className="absolute top-4 left-4 z-30 bg-card/85 backdrop-blur-xl border border-border p-1.5 rounded-2xl shadow-xl flex items-center gap-1">
-          <button
-            onClick={zoomIn}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer"
-            title="بزرگ‌نمایی"
-          >
-            <ZoomIn size={16} />
-          </button>
-          <button
-            onClick={zoomOut}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer"
-            title="کوچک‌نمایی"
-          >
-            <ZoomOut size={16} />
-          </button>
-          <button
-            onClick={resetView}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer"
-            title="بازنشانی"
-          >
-            <RotateCcw size={16} />
-          </button>
+      {error && (
+        <div className="bg-military/15 border-b border-military/40 px-6 py-2 text-xs flex items-center gap-2 text-military z-40">
+          <ShieldAlert size={14} />
+          <span className="font-mono">{error}</span>
         </div>
+      )}
 
-        <div className="w-full h-full flex-1 relative">
-          <TacticalViewport
+      <div className="flex-1 relative overflow-hidden">
+        <TacticalViewport
+          containerRef={containerRef}
+          canvasDestRef={canvasDestRef}
+          isDragging={isDragging}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onWheel={handleWheel}
+          onClick={interaction.handleMapClick}
+        >
+          <CountryHoverContainer
+            countries={countries}
+            maskDataRef={maskDataRef}
+            packed1024Ref={packed1024Ref}
+            mapWidth={mapWidth}
+            mapHeight={mapHeight}
             containerRef={containerRef}
-            canvasDestRef={canvasDestRef}
-            canvasSrcRef={canvasSrcRef}
+            scale={scale}
+            position={position}
             isDragging={isDragging}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onWheel={handleWheel}
-            onClick={() => {}}
           />
-        </div>
+        </TacticalViewport>
 
-        {loading && (
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-40 flex flex-col items-center justify-center gap-3">
-            <div className="w-10 h-10 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs font-bold text-foreground">
-              در حال بارگذاری نقشه...
-            </span>
-          </div>
-        )}
-      </main>
+        <LayerController
+          activeLayer={activeLayer}
+          onChangeLayer={setActiveLayer}
+        />
+      </div>
     </div>
   );
 }
