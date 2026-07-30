@@ -51,8 +51,12 @@ export class MaskRenderingHelper {
         activeLayer,
       );
 
-      TacticalMapProfiler.markSub("6.ImageDataUpload");
+      const uploadStart = performance.now();
       ctxShaded.putImageData(this.persistentImageData, 0, 0);
+      TacticalMapProfiler.recordPhase(
+        "6.CanvasGPUUpload",
+        performance.now() - uploadStart,
+      );
     }
 
     TacticalMapProfiler.end("Map Layer Shading", `Layer: ${activeLayer}`);

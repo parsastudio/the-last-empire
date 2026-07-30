@@ -48,44 +48,14 @@ export class StaticMapCacheBuilder {
 
         let isBorder = false;
 
-        if (x < width - 1) {
-          const rightIdx = pixelIdx + 1;
-          const rightOwner = maskData[rightIdx] || 0;
-          if (rightOwner !== id) {
-            if (rightOwner < 11) {
-              isBorder = true;
-            } else if (rightOwner > id) {
-              isBorder = true;
-            }
-          }
-        }
-
-        if (!isBorder && y < height - 1) {
-          const bottomIdx = pixelIdx + width;
-          const bottomOwner = maskData[bottomIdx] || 0;
-          if (bottomOwner !== id) {
-            if (bottomOwner < 11) {
-              isBorder = true;
-            } else if (bottomOwner > id) {
-              isBorder = true;
-            }
-          }
-        }
-
-        if (!isBorder && x > 0) {
-          const leftIdx = pixelIdx - 1;
-          const leftOwner = maskData[leftIdx] || 0;
-          if (leftOwner < 11) {
-            isBorder = true;
-          }
-        }
-
-        if (!isBorder && y > 0) {
-          const topIdx = pixelIdx - width;
-          const topOwner = maskData[topIdx] || 0;
-          if (topOwner < 11) {
-            isBorder = true;
-          }
+        if (x < width - 1 && maskData[pixelIdx + 1] !== id) {
+          isBorder = true;
+        } else if (x > 0 && maskData[pixelIdx - 1] !== id) {
+          isBorder = true;
+        } else if (y < height - 1 && maskData[pixelIdx + width] !== id) {
+          isBorder = true;
+        } else if (y > 0 && maskData[pixelIdx - width] !== id) {
+          isBorder = true;
         }
 
         if (isBorder) {
