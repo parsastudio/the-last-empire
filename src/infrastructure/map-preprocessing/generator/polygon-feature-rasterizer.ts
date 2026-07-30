@@ -11,16 +11,15 @@ export class PolygonFeatureRasterizer {
     width: number,
     height: number,
     buffer: Uint8Array,
-    startId = 11,
-  ): number {
-    let nextId = startId;
-
+    getCountryId: (code: string) => number,
+  ): void {
     for (let i = 0; i < features.length; i++) {
       const feature = features[i]!;
+      const countryId = getCountryId(feature.code);
 
       const processRing = (ring: number[][]) => {
         const points = processor.getPolygonPoints(ring, width, height);
-        rasterizePolygon(points, width, height, nextId, buffer);
+        rasterizePolygon(points, width, height, countryId, buffer);
       };
 
       if (feature.geometry.type === "Polygon") {
@@ -37,9 +36,6 @@ export class PolygonFeatureRasterizer {
           }
         }
       }
-      nextId++;
     }
-
-    return nextId;
   }
 }

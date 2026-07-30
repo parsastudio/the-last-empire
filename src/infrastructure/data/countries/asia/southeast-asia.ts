@@ -1,4 +1,4 @@
-import { CountryProfile } from "../types";
+import { CountryProfile } from "@/domain/map/countries/types";
 
 export const southeastAsiaProfiles: CountryProfile[] = [
   {
