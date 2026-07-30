@@ -17,12 +17,16 @@ export class RegionClusteringEngine {
     }
 
     const cellMap = new Map<string, GridCell>();
-    countryCells.forEach((c) => cellMap.set(`${c.x},${c.y}`, c));
+    for (let i = 0; i < countryCells.length; i++) {
+      const c = countryCells[i]!;
+      cellMap.set(`${c.x},${c.y}`, c);
+    }
 
     const visited = new Set<string>();
     const rawComponents: ClusterComponent[] = [];
 
-    for (const cell of countryCells) {
+    for (let i = 0; i < countryCells.length; i++) {
+      const cell = countryCells[i]!;
       const key = `${cell.x},${cell.y}`;
       if (visited.has(key)) continue;
 
@@ -56,15 +60,18 @@ export class RegionClusteringEngine {
           { x: curr.x - 1, y: curr.y + 1 },
         ];
 
-        for (const n of neighbors) {
-          let nx = n.x;
+        for (let j = 0; j < 8; j++) {
+          let nx = neighbors[j]!.x;
           if (nx < 0) nx = gridWidth - 1;
           else if (nx >= gridWidth) nx = 0;
 
-          const nKey = `${nx},${n.y}`;
-          if (!visited.has(nKey) && cellMap.has(nKey)) {
-            visited.add(nKey);
-            queue.push(cellMap.get(nKey)!);
+          const nKey = `${nx},${neighbors[j]!.y}`;
+          if (!visited.has(nKey)) {
+            const match = cellMap.get(nKey);
+            if (match) {
+              visited.add(nKey);
+              queue.push(match);
+            }
           }
         }
       }
@@ -89,13 +96,15 @@ export class RegionClusteringEngine {
 
     const regionAssignmentMap = new Map<string, number>();
 
-    mergedClusters.forEach((cluster, index) => {
-      const regionId = Math.min(index, 10);
-      cluster.cells.forEach((c) => {
+    for (let i = 0; i < mergedClusters.length; i++) {
+      const cluster = mergedClusters[i]!;
+      const regionId = Math.min(i, 10);
+      for (let j = 0; j < cluster.cells.length; j++) {
+        const c = cluster.cells[j]!;
         c.enclaveId = regionId;
         regionAssignmentMap.set(`${c.x},${c.y}`, regionId);
-      });
-    });
+      }
+    }
 
     return regionAssignmentMap;
   }

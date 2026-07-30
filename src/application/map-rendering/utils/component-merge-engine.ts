@@ -50,10 +50,12 @@ export class ComponentMergeEngine {
     const groups = new Map<number, ClusterComponent[]>();
     for (let i = 0; i < components.length; i++) {
       const root = find(i);
-      if (!groups.has(root)) {
-        groups.set(root, []);
+      let list = groups.get(root);
+      if (!list) {
+        list = [];
+        groups.set(root, list);
       }
-      groups.get(root)!.push(components[i]!);
+      list.push(components[i]!);
     }
 
     const result: ClusterComponent[] = [];

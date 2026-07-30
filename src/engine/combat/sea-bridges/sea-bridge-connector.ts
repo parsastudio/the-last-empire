@@ -11,7 +11,9 @@ export class SeaBridgeConnector {
   ): boolean {
     const radians = (latitude * Math.PI) / 180;
     const kmPerPixel = this.kmPerPixelAtEquator * Math.cos(radians);
-    const pixelDistance = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    const pixelDistance = Math.sqrt(dx * dx + dy * dy);
     const actualDistanceKm = pixelDistance * kmPerPixel;
     return actualDistanceKm <= this.maxBridgeDistanceKm;
   }
