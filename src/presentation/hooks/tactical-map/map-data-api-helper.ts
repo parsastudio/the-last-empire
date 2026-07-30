@@ -1,4 +1,4 @@
-import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export class MapDataApiHelper {
   public getApiPath(mapMode: "default" | "edited" | "partition"): string {

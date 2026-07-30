@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { SimulationFacade } from "@/application/map-rendering/simulation-facade";
-import { normalizeNationId } from "@/application/map-rendering/game-state-initializer";
+import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
+import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 
 export async function GET(request: Request): Promise<NextResponse> {

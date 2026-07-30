@@ -1,6 +1,6 @@
 import { GridState } from "@/engine/combat/state/grid-state";
 import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
-import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
+import { LowResPacker } from "@/infrastructure/map-preprocessing/utils/low-res-packer";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 
 export class GridLoaderService {

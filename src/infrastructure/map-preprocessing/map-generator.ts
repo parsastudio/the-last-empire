@@ -1,15 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
 import { GeoJsonProcessor } from "./rasterizer/geojson-processor";
-import { DistanceTransform } from "@/application/map-rendering/distance-transform";
+import { DistanceTransform } from "./distance-transform";
 import { MapWriter } from "./encoders/map-writer";
 import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
-import { GeometryDraw } from "@/application/map-rendering/utils/geometry-draw";
-import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
-import { ClosedSeaDetector } from "@/application/map-rendering/utils/closed-sea-detector";
+import { GeometryDraw } from "./utils/geometry-draw";
+import { LowResPacker } from "./utils/low-res-packer";
+import { ClosedSeaDetector } from "./utils/closed-sea-detector";
 import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
-import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+import { MapPathResolver } from "./map-path-resolver";
 import { TerritoryPartitioner } from "./generator/territory-partitioner";
+import { PngDecoder } from "./encoders/png-decoder";
 
 export interface CountryMapping {
   id: number;
@@ -22,10 +23,10 @@ export interface CountryMapping {
 export async function generateTest6Map(
   width: number,
   height: number,
-  mode = "default",
+  mode = "partition",
 ): Promise<{ countries: CountryMapping[] }> {
-  const essentialDir = MapPathResolver.getMapServerDir("map1", mode);
-  await fs.mkdir(essentialDir, { recursive: true });
+  const tempDir = MapPathResolver.getMapServerDir("map1", "temp");
+  await fs.mkdir(tempDir, { recursive: true });
 
   const geojsonPath = MapPathResolver.getGeoJsonServerPath();
   let geoJson: {
@@ -59,10 +60,8 @@ export async function generateTest6Map(
     },
   ];
 
-  const buffer = new Uint8Array(width * height);
-  buffer.fill(0);
+  let buffer = new Uint8Array(width * height);
   const features = processor.extractFeatures(geoJson);
-
   const idToCodeMap = new Map<number, string>();
 
   let nextId = 11;
@@ -78,18 +77,24 @@ export async function generateTest6Map(
     nextId++;
   }
 
-  polygonRasterizer.rasterizeFeatures(
-    features,
-    processor,
-    width,
-    height,
-    buffer,
-    11,
-  );
+  const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
+  const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
 
-  const draw = new GeometryDraw();
-  draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 254);
-  draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 254);
+  if (decodedMask && decodedMask.buffer.length === width * height) {
+    buffer = decodedMask.buffer;
+  } else {
+    polygonRasterizer.rasterizeFeatures(
+      features,
+      processor,
+      width,
+      height,
+      buffer,
+      11,
+    );
+    const draw = new GeometryDraw();
+    draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 254);
+    draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 254);
+  }
 
   if (mode === "partition") {
     partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
@@ -101,15 +106,10 @@ export async function generateTest6Map(
   const dist = distanceTransform.calculate(buffer, width, height);
   distanceTransform.applySeaDepths(buffer, dist, width, height);
 
-  const maskName =
-    mode === "edited"
-      ? "edited"
-      : mode === "partition"
-        ? "partition"
-        : "default";
+  const maskName = mode;
 
   await writer.saveMaskImage(width, height, buffer, "map1", maskName);
-  await fs.writeFile(path.join(essentialDir, `${maskName}-mask.bin`), buffer);
+  await fs.writeFile(path.join(tempDir, `${maskName}-mask.bin`), buffer);
 
   const packer = new LowResPacker();
   const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
@@ -118,7 +118,7 @@ export async function generateTest6Map(
   seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
   await fs.writeFile(
-    path.join(essentialDir, `${maskName}-mask-1024.bin`),
+    path.join(tempDir, `${maskName}-mask-1024.bin`),
     packed1024,
   );
 
