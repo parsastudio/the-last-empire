@@ -47,24 +47,33 @@ export class MapShader {
     const gridState = GridStateProvider.getInstance();
     const hasGridCells = gridState.getAllCells().length > 0;
 
-    const scaleX = width / 1024;
-    const scaleY = height / 512;
+    const dynamicIds = hasGridCells ? new Uint16Array(width * height) : null;
 
-    for (let y = 0; y < height; y++) {
-      const gy = Math.floor(y / scaleY);
-      for (let x = 0; x < width; x++) {
-        const idx = (y * width + x) * 4;
-        let id = srcData[idx + 2] || 0;
-
-        if (hasGridCells && id >= 11 && id < 250) {
+    if (hasGridCells && dynamicIds) {
+      const scaleX = width / 1024;
+      const scaleY = height / 512;
+      for (let y = 0; y < height; y++) {
+        const gy = Math.floor(y / scaleY);
+        for (let x = 0; x < width; x++) {
           const gx = Math.floor(x / scaleX);
           const cell = gridState.getCell(gx, gy);
           if (cell && cell.ownerId.startsWith("NATION_")) {
             const dynamicId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
             if (!isNaN(dynamicId) && dynamicId >= 11) {
-              id = dynamicId;
+              dynamicIds[y * width + x] = dynamicId;
             }
           }
+        }
+      }
+    }
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = (y * width + x) * 4;
+        let id = srcData[idx + 2] || 0;
+
+        if (dynamicIds && dynamicIds[y * width + x]! > 0) {
+          id = dynamicIds[y * width + x]!;
         }
 
         let r = 255;
@@ -133,6 +142,7 @@ export class MapShader {
             id,
             idx,
             srcData,
+            dynamicIds,
           )
         ) {
           r = 80;

@@ -1,8 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import type {
-  GameAction,
-  DeclareWarAction,
-} from "@/domain/game/action.schema";
+import type { GameAction, DeclareWarAction } from "@/domain/game/action.schema";
 import { CoolOffManager } from "@/engine/diplomacy/cool-off-manager";
 import type { ActionHandler } from "@/engine/actions/action-handler";
 

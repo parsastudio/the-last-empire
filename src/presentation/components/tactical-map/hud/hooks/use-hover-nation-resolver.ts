@@ -75,9 +75,9 @@ export function useHoverNationResolver({
 
       const realRank = liveNation ? liveNation.rank : 99;
 
-      let regionLabel = "";
+      let regionLabel = "خاک اصلی";
       if (enclaveIdVal >= 1 && enclaveIdVal <= 10) {
-        regionLabel = `منطقه ${enclaveIdVal.toLocaleString("fa-IR")}`;
+        regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
       } else if (enclaveIdVal >= 11) {
         regionLabel = `مستعمره ${(enclaveIdVal - 10).toLocaleString("fa-IR")}`;
       }

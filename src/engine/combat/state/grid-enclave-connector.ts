@@ -4,6 +4,8 @@ import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
 export class GridEnclaveConnector {
   public regroupEnclaves(countryId: string, allCells: GridCell[]): void {
     const countryCells = allCells.filter((c) => c.ownerId === countryId);
+    if (countryCells.length === 0) return;
+
     const visited = new Set<string>();
     let enclaveIdCounter = 1;
 

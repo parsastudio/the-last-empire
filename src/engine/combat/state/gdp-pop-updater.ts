@@ -17,7 +17,8 @@ export class GdpPopUpdater {
     const totalPixelsMap = new Map<string, number>();
     const regionPixelsMap = new Map<string, Map<number, number>>();
 
-    for (const cell of allCells) {
+    for (let i = 0; i < allCells.length; i++) {
+      const cell = allCells[i]!;
       const owner = cell.ownerId;
       if (owner === "WATER" || owner === "CLOSED_SEA") {
         continue;
@@ -31,10 +32,11 @@ export class GdpPopUpdater {
         (totalPixelsMap.get(canonicalOwner) || 0) + pixels,
       );
 
-      if (!regionPixelsMap.has(canonicalOwner)) {
-        regionPixelsMap.set(canonicalOwner, new Map<number, number>());
+      let rMap = regionPixelsMap.get(canonicalOwner);
+      if (!rMap) {
+        rMap = new Map<number, number>();
+        regionPixelsMap.set(canonicalOwner, rMap);
       }
-      const rMap = regionPixelsMap.get(canonicalOwner)!;
       rMap.set(cell.enclaveId, (rMap.get(cell.enclaveId) || 0) + pixels);
     }
 
