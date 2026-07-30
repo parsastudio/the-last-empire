@@ -3,7 +3,7 @@ import { GovernmentType } from "@/domain/politics/politics.schema";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
-} from "@/domain/map/countries";
+} from "@/infrastructure/data/countries";
 import { ManifestNationItem } from "./generator/map-manifest-builder";
 
 export class NationProfileAssigner {

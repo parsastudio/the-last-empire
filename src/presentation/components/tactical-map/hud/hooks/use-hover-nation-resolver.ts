@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { findCountryProfileById } from "@/domain/map/countries";
+import { findCountryProfileById } from "@/infrastructure/data/countries";
 import { HoverCountryInfo } from "../country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useHoverStance } from "./use-hover-stance";

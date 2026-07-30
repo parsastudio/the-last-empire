@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import path from "path";
-import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
+import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
 import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { MapPathResolver } from "../map-path-resolver";
 
 export interface ManifestNationItem {
   id: string;
