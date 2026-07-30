@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const easternEuropeProfiles: CountryProfile[] = [
   {
-    id: 29,
     code: "RUS",
     nameEn: "Russia",
     nameFa: "روسیه",
@@ -10,7 +9,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 144000000,
     traits: ["OIL_RICH", "MILITARISTIC"],
     flagCode: "RU",
-    startingTreasury: 500000,
     startingInfantry: 800,
     startingAirForce: 150,
     startingDroneMissile: 60,
@@ -18,7 +16,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    id: 122,
     code: "BLR",
     nameEn: "Belarus",
     nameFa: "بلاروس",
@@ -26,7 +23,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 9300000,
     traits: ["ISOLATED_SOCIETY"],
     flagCode: "BY",
-    startingTreasury: 120000,
     startingInfantry: 80,
     startingAirForce: 20,
     startingDroneMissile: 5,
@@ -34,7 +30,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    id: 123,
     code: "UKR",
     nameEn: "Ukraine",
     nameFa: "اوکراین",
@@ -42,7 +37,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 38000000,
     traits: ["MILITARISTIC", "FRAGILE_ECONOMY"],
     flagCode: "UA",
-    startingTreasury: 180000,
     startingInfantry: 550,
     startingAirForce: 50,
     startingDroneMissile: 40,
@@ -50,7 +44,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 124,
     code: "POL",
     nameEn: "Poland",
     nameFa: "لهستان",
@@ -58,7 +51,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 38000000,
     traits: ["MILITARISTIC", "INDUSTRIAL_HUB"],
     flagCode: "PL",
-    startingTreasury: 380000,
     startingInfantry: 220,
     startingAirForce: 50,
     startingDroneMissile: 20,
@@ -66,7 +58,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 126,
     code: "HUN",
     nameEn: "Hungary",
     nameFa: "مجارستان",
@@ -74,7 +65,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 9700000,
     traits: ["ISOLATED_SOCIETY"],
     flagCode: "HU",
-    startingTreasury: 170000,
     startingInfantry: 60,
     startingAirForce: 20,
     startingDroneMissile: 5,
@@ -82,7 +72,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 128,
     code: "ROU",
     nameEn: "Romania",
     nameFa: "رومانی",
@@ -90,7 +79,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 19000000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "RO",
-    startingTreasury: 220000,
     startingInfantry: 110,
     startingAirForce: 30,
     startingDroneMissile: 5,
@@ -98,7 +86,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 133,
     code: "BGR",
     nameEn: "Bulgaria",
     nameFa: "بلغارستان",
@@ -106,7 +93,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 6800000,
     traits: ["FRAGILE_ECONOMY"],
     flagCode: "BG",
-    startingTreasury: 100000,
     startingInfantry: 45,
     startingAirForce: 15,
     startingDroneMissile: 2,
@@ -114,7 +100,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 163,
     code: "SVK",
     nameEn: "Slovakia",
     nameFa: "اسلواکی",
@@ -122,7 +107,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 5400000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "SK",
-    startingTreasury: 140000,
     startingInfantry: 45,
     startingAirForce: 15,
     startingDroneMissile: 2,
@@ -130,7 +114,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 164,
     code: "CZE",
     nameEn: "Czechia",
     nameFa: "جمهوری چک",
@@ -138,7 +121,6 @@ export const easternEuropeProfiles: CountryProfile[] = [
     population: 10500000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "CZ",
-    startingTreasury: 210000,
     startingInfantry: 65,
     startingAirForce: 25,
     startingDroneMissile: 5,

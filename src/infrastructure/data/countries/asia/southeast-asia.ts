@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const southeastAsiaProfiles: CountryProfile[] = [
   {
-    id: 19,
     code: "IDN",
     nameEn: "Indonesia",
     nameFa: "اندونزی",
@@ -10,7 +9,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     population: 275000000,
     traits: ["ISLAND_FORTRESS", "OIL_RICH"],
     flagCode: "ID",
-    startingTreasury: 450000,
     startingInfantry: 320,
     startingAirForce: 45,
     startingDroneMissile: 12,
@@ -18,7 +16,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 102,
     code: "THA",
     nameEn: "Thailand",
     nameFa: "تایلند",
@@ -26,7 +23,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     population: 71000000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "TH",
-    startingTreasury: 320000,
     startingInfantry: 180,
     startingAirForce: 35,
     startingDroneMissile: 5,
@@ -34,7 +30,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "MONARCHY",
   },
   {
-    id: 105,
     code: "VNM",
     nameEn: "Vietnam",
     nameFa: "ویتنام",
@@ -42,7 +37,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     population: 98000000,
     traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
     flagCode: "VN",
-    startingTreasury: 290000,
     startingInfantry: 350,
     startingAirForce: 40,
     startingDroneMissile: 15,
@@ -50,7 +44,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "COMMUNISM",
   },
   {
-    id: 158,
     code: "PHL",
     nameEn: "Philippines",
     nameFa: "فیلیپین",
@@ -58,7 +51,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     population: 114000000,
     traits: ["ISLAND_FORTRESS"],
     flagCode: "PH",
-    startingTreasury: 280000,
     startingInfantry: 160,
     startingAirForce: 25,
     startingDroneMissile: 5,
@@ -66,7 +58,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 159,
     code: "MYS",
     nameEn: "Malaysia",
     nameFa: "مالزی",
@@ -74,7 +65,6 @@ export const southeastAsiaProfiles: CountryProfile[] = [
     population: 33000000,
     traits: ["INDUSTRIAL_HUB", "OIL_RICH"],
     flagCode: "MY",
-    startingTreasury: 310000,
     startingInfantry: 130,
     startingAirForce: 30,
     startingDroneMissile: 5,

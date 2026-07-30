@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const eastAsiaProfiles: CountryProfile[] = [
   {
-    id: 106,
     code: "PRK",
     nameEn: "North Korea",
     nameFa: "کره شمالی",
@@ -10,7 +9,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     population: 26000000,
     traits: ["MILITARISTIC", "ISOLATED_SOCIETY"],
     flagCode: "KP",
-    startingTreasury: 150000,
     startingInfantry: 700,
     startingAirForce: 40,
     startingDroneMissile: 50,
@@ -18,7 +16,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "COMMUNISM",
   },
   {
-    id: 107,
     code: "KOR",
     nameEn: "South Korea",
     nameFa: "کره جنوبی",
@@ -26,7 +23,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     population: 51000000,
     traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
     flagCode: "KR",
-    startingTreasury: 550000,
     startingInfantry: 450,
     startingAirForce: 90,
     startingDroneMissile: 30,
@@ -34,7 +30,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 150,
     code: "CHN",
     nameEn: "China",
     nameFa: "چین",
@@ -42,7 +37,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     population: 1400000000,
     traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
     flagCode: "CN",
-    startingTreasury: 900000,
     startingInfantry: 1200,
     startingAirForce: 200,
     startingDroneMissile: 70,
@@ -50,7 +44,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "COMMUNISM",
   },
   {
-    id: 151,
     code: "TWN",
     nameEn: "Taiwan",
     nameFa: "تایوان",
@@ -58,7 +51,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     population: 23900000,
     traits: ["ISLAND_FORTRESS", "INDUSTRIAL_HUB"],
     flagCode: "TW",
-    startingTreasury: 380000,
     startingInfantry: 200,
     startingAirForce: 65,
     startingDroneMissile: 20,
@@ -66,7 +58,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 166,
     code: "JPN",
     nameEn: "Japan",
     nameFa: "ژاپن",
@@ -74,7 +65,6 @@ export const eastAsiaProfiles: CountryProfile[] = [
     population: 124000000,
     traits: ["ISLAND_FORTRESS", "INDUSTRIAL_HUB"],
     flagCode: "JP",
-    startingTreasury: 750000,
     startingInfantry: 250,
     startingAirForce: 75,
     startingDroneMissile: 20,

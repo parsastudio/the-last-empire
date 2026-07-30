@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const southernEuropeProfiles: CountryProfile[] = [
   {
-    id: 134,
     code: "GRC",
     nameEn: "Greece",
     nameFa: "یونان",
@@ -10,7 +9,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 10400000,
     traits: ["ISLAND_FORTRESS", "MILITARISTIC"],
     flagCode: "GR",
-    startingTreasury: 150000,
     startingInfantry: 150,
     startingAirForce: 45,
     startingDroneMissile: 10,
@@ -18,7 +16,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 135,
     code: "TUR",
     nameEn: "Turkey",
     nameFa: "ترکیه",
@@ -26,7 +23,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 85000000,
     traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
     flagCode: "TR",
-    startingTreasury: 380000,
     startingInfantry: 400,
     startingAirForce: 60,
     startingDroneMissile: 45,
@@ -34,7 +30,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 137,
     code: "HRV",
     nameEn: "Croatia",
     nameFa: "کرواسی",
@@ -42,7 +37,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 3800000,
     traits: ["ISLAND_FORTRESS"],
     flagCode: "HR",
-    startingTreasury: 120000,
     startingInfantry: 40,
     startingAirForce: 15,
     startingDroneMissile: 2,
@@ -50,7 +44,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 142,
     code: "PRT",
     nameEn: "Portugal",
     nameFa: "پرتغال",
@@ -58,7 +51,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 10300000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "PT",
-    startingTreasury: 220000,
     startingInfantry: 50,
     startingAirForce: 20,
     startingDroneMissile: 2,
@@ -66,7 +58,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 143,
     code: "ESP",
     nameEn: "Spain",
     nameFa: "اسپانیا",
@@ -74,7 +65,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 47000000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "ES",
-    startingTreasury: 390000,
     startingInfantry: 140,
     startingAirForce: 45,
     startingDroneMissile: 10,
@@ -82,7 +72,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 152,
     code: "ITA",
     nameEn: "Italy",
     nameFa: "ایتالیا",
@@ -90,7 +79,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 59000000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "IT",
-    startingTreasury: 480000,
     startingInfantry: 160,
     startingAirForce: 55,
     startingDroneMissile: 15,
@@ -98,7 +86,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 182,
     code: "SRB",
     nameEn: "Serbia",
     nameFa: "صربستان",
@@ -106,7 +93,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 6800000,
     traits: ["MILITARISTIC"],
     flagCode: "RS",
-    startingTreasury: 110000,
     startingInfantry: 65,
     startingAirForce: 20,
     startingDroneMissile: 5,
@@ -114,7 +100,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 184,
     code: "KOS",
     nameEn: "Kosovo",
     nameFa: "کوزوو",
@@ -122,7 +107,6 @@ export const southernEuropeProfiles: CountryProfile[] = [
     population: 1800000,
     traits: ["SOVEREIGN_FORTRESS", "FRAGILE_ECONOMY"],
     flagCode: "XK",
-    startingTreasury: 60000,
     startingInfantry: 20,
     startingAirForce: 0,
     startingDroneMissile: 0,

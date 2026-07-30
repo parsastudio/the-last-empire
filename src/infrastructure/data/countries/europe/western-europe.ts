@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const westernEuropeProfiles: CountryProfile[] = [
   {
-    id: 54,
     code: "FRA",
     nameEn: "France",
     nameFa: "فرانسه",
@@ -10,7 +9,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     population: 68000000,
     traits: ["INDUSTRIAL_HUB", "MILITARISTIC"],
     flagCode: "FR",
-    startingTreasury: 620000,
     startingInfantry: 220,
     startingAirForce: 70,
     startingDroneMissile: 25,
@@ -18,7 +16,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 125,
     code: "AUT",
     nameEn: "Austria",
     nameFa: "اتریش",
@@ -26,7 +23,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     population: 9000000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "AT",
-    startingTreasury: 310000,
     startingInfantry: 50,
     startingAirForce: 20,
     startingDroneMissile: 2,
@@ -34,7 +30,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 132,
     code: "DEU",
     nameEn: "Germany",
     nameFa: "آلمان",
@@ -42,7 +37,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     population: 84000000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "DE",
-    startingTreasury: 750000,
     startingInfantry: 150,
     startingAirForce: 55,
     startingDroneMissile: 15,
@@ -50,7 +44,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 138,
     code: "CHE",
     nameEn: "Switzerland",
     nameFa: "سوئیس",
@@ -58,7 +51,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     population: 8800000,
     traits: ["SOVEREIGN_FORTRESS", "INDUSTRIAL_HUB"],
     flagCode: "CH",
-    startingTreasury: 480000,
     startingInfantry: 60,
     startingAirForce: 35,
     startingDroneMissile: 5,
@@ -66,7 +58,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 140,
     code: "BEL",
     nameEn: "Belgium",
     nameFa: "بلژیک",
@@ -74,7 +65,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     population: 11700000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "BE",
-    startingTreasury: 350000,
     startingInfantry: 50,
     startingAirForce: 30,
     startingDroneMissile: 5,
@@ -82,7 +72,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     startingGovernment: "DEMOCRACY",
   },
   {
-    id: 141,
     code: "NLD",
     nameEn: "Netherlands",
     nameFa: "هلند",
@@ -90,7 +79,6 @@ export const westernEuropeProfiles: CountryProfile[] = [
     population: 17800000,
     traits: ["INDUSTRIAL_HUB"],
     flagCode: "NL",
-    startingTreasury: 420000,
     startingInfantry: 80,
     startingAirForce: 40,
     startingDroneMissile: 10,
