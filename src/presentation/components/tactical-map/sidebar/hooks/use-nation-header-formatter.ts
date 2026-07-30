@@ -35,9 +35,18 @@ export function useNationHeaderFormatter({
       Math.round(realTerritory).toLocaleString("en-US"),
     );
 
-    let formattedPopulation = (population / 1e6).toFixed(1);
-    if (population >= 1e9) {
-      formattedPopulation = `${(population / 1e9).toFixed(2)} میلیارد`;
+    let realPop = population;
+    if (!realPop || realPop <= 0) {
+      const numericId = parseInt(code.replace("NATION_", ""), 10);
+      const profile = !isNaN(numericId)
+        ? findCountryProfileById(numericId)
+        : findCountryProfileByCode(code);
+      realPop = profile ? profile.population : 80000000;
+    }
+
+    let formattedPopulation = (realPop / 1e6).toFixed(1);
+    if (realPop >= 1e9) {
+      formattedPopulation = `${(realPop / 1e9).toFixed(2)} میلیارد`;
     } else {
       formattedPopulation = `${formattedPopulation} میلیون`;
     }
