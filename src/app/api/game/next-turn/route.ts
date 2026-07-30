@@ -33,8 +33,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const nextState = engine.nextTurn();
+    const updatedGridCells = gridState.getAllCells();
 
-    return NextResponse.json({ success: true, data: nextState });
+    return NextResponse.json({
+      success: true,
+      data: nextState,
+      gridCells: updatedGridCells,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
     return NextResponse.json(

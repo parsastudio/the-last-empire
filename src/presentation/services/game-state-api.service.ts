@@ -1,4 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { GridCell } from "@/domain/map/grid-cell.schema";
 
 export class GameStateApiService {
   public async fetchStatus(
@@ -33,8 +35,17 @@ export class GameStateApiService {
       const json = (await res.json()) as {
         success: boolean;
         data?: GameState;
+        gridCells?: GridCell[];
         error?: string;
       };
+
+      if (json.success && json.gridCells && json.gridCells.length > 0) {
+        const clientGrid = GridStateProvider.getInstance();
+        for (const cell of json.gridCells) {
+          clientGrid.setCell(cell.x, cell.y, cell);
+        }
+      }
+
       return json;
     } catch {
       return { success: false, error: "خطای شبکه در پیشبرد نوبت" };
