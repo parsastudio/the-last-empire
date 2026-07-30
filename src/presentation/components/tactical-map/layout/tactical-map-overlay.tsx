@@ -3,7 +3,6 @@ import {
   MapContextMenu,
   ContextActionType,
 } from "../context-menu/map-context-menu";
-import { AttackPlanningModal } from "../modals/attack-planning-modal";
 import { TopHudBar } from "../hud/top-bar/top-hud-bar";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
 import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
@@ -20,15 +19,8 @@ interface TacticalMapOverlayProps {
     countryName: string;
   } | null;
   activeScreenPos: { x: number; y: number };
-  attackModalState: {
-    isOpen: boolean;
-    targetName: string;
-    targetCode: string;
-    coordinate: { x: number; y: number };
-  } | null;
   onSelectAction: (action: ContextActionType) => void;
   onCloseContextMenu: () => void;
-  onCloseAttackModal: () => void;
   onOpenPendingDecisions?: (tab?: string) => void;
 }
 
@@ -37,18 +29,10 @@ export function TacticalMapOverlay({
   gameState = null,
   contextMenuState,
   activeScreenPos,
-  attackModalState,
   onSelectAction,
   onCloseContextMenu,
-  onCloseAttackModal,
   onOpenPendingDecisions,
 }: TacticalMapOverlayProps) {
-  const targetRelation = attackModalState
-    ? metrics.nation?.relations[attackModalState.targetCode]
-    : null;
-
-  const currentStance = targetRelation?.stance || "PEACE";
-
   return (
     <>
       <TopHudBar
@@ -77,25 +61,6 @@ export function TacticalMapOverlay({
           countryCode={contextMenuState.countryCode}
           onSelectAction={onSelectAction}
           onClose={onCloseContextMenu}
-        />
-      )}
-
-      {attackModalState && (
-        <AttackPlanningModal
-          isOpen={attackModalState.isOpen}
-          attackerName={metrics.nation?.name || "کشور شما"}
-          attackerCode={metrics.nation?.id || "NATION_118"}
-          targetName={attackModalState.targetName}
-          targetCode={attackModalState.targetCode}
-          coordinate={attackModalState.coordinate}
-          stance={currentStance}
-          userOilStock={metrics.oil}
-          userTreasury={metrics.treasury}
-          availableMilitary={metrics.nation?.military}
-          onClose={onCloseAttackModal}
-          onConfirmAttack={() => {
-            onCloseAttackModal();
-          }}
         />
       )}
     </>

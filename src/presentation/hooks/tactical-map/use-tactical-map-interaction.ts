@@ -36,13 +36,6 @@ export function useTacticalMapInteraction({
     countryName: string;
   } | null>(null);
 
-  const [attackModalState, setAttackModalState] = useState<{
-    isOpen: boolean;
-    targetName: string;
-    targetCode: string;
-    coordinate: { x: number; y: number };
-  } | null>(null);
-
   const [externalSidebarTab, setExternalSidebarTab] =
     useState<SidebarTabType | null>(null);
   const [selectedTargetCode, setSelectedTargetCode] = useState<string | null>(
@@ -113,19 +106,10 @@ export function useTacticalMapInteraction({
     if (!contextMenuState) return;
 
     const targetCode = contextMenuState.countryCode;
-    const targetName = contextMenuState.countryName;
-    const targetCoord = contextMenuState.coordinate;
 
     setContextMenuState(null);
 
-    if (action === "attack") {
-      setAttackModalState({
-        isOpen: true,
-        targetName,
-        targetCode,
-        coordinate: targetCoord,
-      });
-    } else if (action === "profile") {
+    if (action === "attack" || action === "profile") {
       setSelectedTargetCode(targetCode);
       setExternalSidebarTab("diplomacy");
     }
@@ -147,7 +131,6 @@ export function useTacticalMapInteraction({
 
   return {
     contextMenuState,
-    attackModalState,
     externalSidebarTab,
     selectedTargetCode,
     activeScreenPos,
@@ -156,6 +139,5 @@ export function useTacticalMapInteraction({
     handleOpenPendingTab,
     clearExternalTab,
     closeContextMenu: () => setContextMenuState(null),
-    closeAttackModal: () => setAttackModalState(null),
   };
 }
