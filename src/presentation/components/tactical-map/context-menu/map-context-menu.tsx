@@ -1,8 +1,8 @@
 import React from "react";
-import { Info, Swords } from "lucide-react";
+import { Info } from "lucide-react";
 import { QuickActionButton } from "./quick-action-button";
 
-export type ContextActionType = "profile" | "attack";
+export type ContextActionType = "profile";
 
 interface MapContextMenuProps {
   position: { x: number; y: number };
@@ -33,14 +33,6 @@ export function MapContextMenu({
           colorClass="text-primary"
           bgHoverClass="hover:bg-primary/15"
           onClick={() => onSelectAction("profile")}
-        />
-
-        <QuickActionButton
-          icon={Swords}
-          label="حمله سریع"
-          colorClass="text-military"
-          bgHoverClass="hover:bg-military/15"
-          onClick={() => onSelectAction("attack")}
         />
       </div>
 

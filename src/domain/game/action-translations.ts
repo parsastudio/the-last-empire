@@ -11,8 +11,6 @@ export const ACTION_TRANSLATIONS: Record<string, string> = {
   CHANGE_GOVERNMENT: "برگزاری همه‌پرسی و تغییر رژیم سیاسی",
   ANTI_CORRUPTION_DRIVE: "تزریق بودجه به آژانس مبارزه با فساد اداری",
   FUND_PROXY_INFLUENCE: "تخصیص بودجه برای عملیات نفوذ پنهان",
-  DECLARE_WAR: "بیانیه رسمی اعلام جنگ",
-  ATTACK: "صدور فرمان تهاجم نظامی به هدف",
   DISBAND_UNIT: "انحلال یگان نظامی و بازگرداندن نیروها",
   CANCEL_RECRUITMENT: "لغو سفارش ساخت در صف ارتش",
   INVEST_RESEARCH: "تزریق بودجه پژوهشی ارتقای فناوری نظامی",

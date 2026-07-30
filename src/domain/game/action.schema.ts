@@ -42,28 +42,6 @@ export const RecruitUnitActionSchema = z.object({
   quantity: z.number().positive(),
 });
 
-export const DeclareWarActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("DECLARE_WAR"),
-  targetNationId: z.string(),
-});
-
-export const AttackActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("ATTACK"),
-  targetNationId: z.string(),
-  infantry: z.number().nonnegative(),
-  airForce: z.number().nonnegative(),
-  droneMissile: z.number().nonnegative(),
-  targetX: z.number().optional(),
-  targetY: z.number().optional(),
-  targetCoordinate: CoordinateSchema.optional(),
-});
-
 export const DiplomaticProposalActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -183,8 +161,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   SetTariffRateActionSchema,
   ChangeGovernmentActionSchema,
   RecruitUnitActionSchema,
-  DeclareWarActionSchema,
-  AttackActionSchema,
   DiplomaticProposalActionSchema,
   TradeResourcesActionSchema,
   UpgradeIndustrialLevelActionSchema,
@@ -214,8 +190,6 @@ export type ChangeGovernmentAction = z.infer<
   typeof ChangeGovernmentActionSchema
 >;
 export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
-export type DeclareWarAction = z.infer<typeof DeclareWarActionSchema>;
-export type AttackAction = z.infer<typeof AttackActionSchema>;
 export type DiplomaticProposalAction = z.infer<
   typeof DiplomaticProposalActionSchema
 >;

@@ -8,7 +8,7 @@ export class AIDiplomacyLogic {
   public planDiplomacy(
     nation: Nation,
     allNations: Record<string, Nation>,
-    personality: string,
+    _personality: string,
     currentTurn = 1,
   ): GameAction[] {
     const actions: GameAction[] = [];
@@ -24,10 +24,6 @@ export class AIDiplomacyLogic {
         continue;
       }
 
-      const ownPower = this.calculatePower(nation);
-      const targetPower = this.calculatePower(target);
-      const relativePower = ownPower / (targetPower || 1);
-
       const isNeighbor =
         nation.geography.landNeighbors.includes(targetId) ||
         nation.geography.seaNeighbors.includes(targetId);
@@ -36,30 +32,9 @@ export class AIDiplomacyLogic {
       }
 
       if (
-        personality === "AGGRESSIVE" &&
-        relation.opinion < -40 &&
-        relation.stance !== "WAR" &&
-        relativePower >= 2.0
-      ) {
-        actions.push({
-          id: this.idGenerator.generateActionId(
-            "DECLARE_WAR",
-            nation.id,
-            currentTurn,
-            seq++,
-          ),
-          nationId: nation.id,
-          type: "DECLARE_WAR",
-          targetNationId: targetId,
-        });
-        break;
-      }
-
-      if (
         relation.opinion > 10 &&
         relation.opinion < 80 &&
-        nation.treasury > 20000 &&
-        relation.stance !== "WAR"
+        nation.treasury > 20000
       ) {
         actions.push({
           id: this.idGenerator.generateActionId(
@@ -79,13 +54,5 @@ export class AIDiplomacyLogic {
       }
     }
     return actions;
-  }
-
-  private calculatePower(nation: Nation): number {
-    return (
-      nation.military.infantry * 1.0 +
-      nation.military.airForce * 3.0 +
-      nation.military.droneMissile * 2.5
-    );
   }
 }

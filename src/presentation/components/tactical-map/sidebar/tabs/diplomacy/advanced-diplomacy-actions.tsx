@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Swords,
-  Handshake,
-  CheckCircle2,
-  Shield,
-  Coins,
-  Flame,
-} from "lucide-react";
+import { Handshake, CheckCircle2, Shield, Coins, Flame } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 
@@ -26,14 +19,6 @@ export function AdvancedDiplomacyActions({
   onOpenProxyCenter,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
-
-  const handleDeclareWar = async () => {
-    const action = ActionFactory.declareWar(nationId, targetNationId);
-    await dispatchAction(
-      action,
-      `بیانیه رسمی اعلام جنگ به ${targetName} صادر شد.`,
-    );
-  };
 
   const handleMilitaryAccess = async () => {
     const action = ActionFactory.diplomaticProposal(
@@ -78,21 +63,6 @@ export function AdvancedDiplomacyActions({
       </span>
 
       <div className="space-y-2">
-        <button
-          onClick={handleDeclareWar}
-          className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-military">
-              اعلام جنگ رسمی
-            </span>
-            <Swords size={13} className="text-military" />
-          </div>
-          <p className="text-[9px] text-muted-foreground">
-            هزینه: افت ثبات سیاسی (+۳ افزایش پرخاشگری جهانی).
-          </p>
-        </button>
-
         <button
           onClick={() => {
             if (onOpenProxyCenter) {

@@ -3,8 +3,6 @@ import {
   SetTariffRateAction,
   ChangeGovernmentAction,
   RecruitUnitAction,
-  DeclareWarAction,
-  AttackAction,
   DiplomaticProposalAction,
   TradeResourcesAction,
   UpgradeIndustrialLevelAction,
@@ -75,40 +73,6 @@ export class ActionFactory {
       type: "RECRUIT_UNIT",
       unitType,
       quantity,
-    };
-  }
-
-  public static declareWar(
-    nationId: string,
-    targetNationId: string,
-  ): DeclareWarAction {
-    return {
-      id: this.createId("war"),
-      nationId,
-      type: "DECLARE_WAR",
-      targetNationId,
-    };
-  }
-
-  public static attack(
-    nationId: string,
-    targetNationId: string,
-    infantry: number,
-    airForce: number,
-    droneMissile: number,
-    targetCoordinate?: { x: number; y: number },
-  ): AttackAction {
-    return {
-      id: this.createId("attack"),
-      nationId,
-      type: "ATTACK",
-      targetNationId,
-      infantry,
-      airForce,
-      droneMissile,
-      targetX: targetCoordinate?.x,
-      targetY: targetCoordinate?.y,
-      targetCoordinate,
     };
   }
 

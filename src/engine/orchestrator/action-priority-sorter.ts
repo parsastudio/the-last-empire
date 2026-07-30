@@ -10,7 +10,6 @@ export class ActionPrioritySorter {
 
     const priority1 = rawQueue.filter((a) =>
       [
-        "DECLARE_WAR",
         "CHANGE_GOVERNMENT",
         "ACTIVATE_ABILITY",
         "SET_TAX_RATE",
@@ -34,13 +33,11 @@ export class ActionPrioritySorter {
         "FUND_PROXY_INFLUENCE",
       ].includes(a.type),
     );
-    const priority4 = rawQueue.filter((a) => a.type === "ATTACK");
 
     const knownTypes = new Set([
       ...priority1.map((a) => a.type),
       ...priority2.map((a) => a.type),
       ...priority3.map((a) => a.type),
-      ...priority4.map((a) => a.type),
     ]);
 
     const fallback = rawQueue.filter((a) => !knownTypes.has(a.type));
@@ -56,12 +53,6 @@ export class ActionPrioritySorter {
       }
     }
 
-    return [
-      ...priority1,
-      ...shuffledTrades,
-      ...priority3,
-      ...fallback,
-      ...priority4,
-    ];
+    return [...priority1, ...shuffledTrades, ...priority3, ...fallback];
   }
 }
