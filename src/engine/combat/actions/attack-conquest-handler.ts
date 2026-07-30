@@ -111,12 +111,7 @@ export class AttackConquestHandler implements ActionHandler {
       {
         conquered: outcome.conqueredCells,
         capitulated: outcome.capitulatedCells,
-        attackerLost: outcome.casualtyDetails.attackerLostStack.infantry,
-        defenderLost: outcome.casualtyDetails.defenderLostStack.infantry,
-        attackerRetreated:
-          outcome.casualtyDetails.attackerRetreatedStack.infantry,
-        defenderRetreated:
-          outcome.casualtyDetails.defenderRetreatedStack.infantry,
+        casualtyDetails: outcome.casualtyDetails,
         isVictory: outcome.isVictory,
       },
     );
