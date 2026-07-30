@@ -158,10 +158,8 @@ function WorkspaceContent({
           gameState={gameState}
           contextMenuState={interaction.contextMenuState}
           activeScreenPos={interaction.activeScreenPos}
-          attackModalState={interaction.attackModalState}
           onSelectAction={interaction.handleSelectContextAction}
           onCloseContextMenu={interaction.closeContextMenu}
-          onCloseAttackModal={interaction.closeAttackModal}
           onOpenPendingDecisions={(tab) =>
             interaction.handleOpenPendingTab(tab)
           }
