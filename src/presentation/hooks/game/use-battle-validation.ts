@@ -3,6 +3,7 @@ import { BattleValidationResult } from "@/engine/combat/validation/battle-valida
 
 export function useBattleValidation(
   attackerId: string,
+  targetCode: string,
   coordinate: { x: number; y: number } | null,
   isOpen: boolean,
 ) {
@@ -26,6 +27,7 @@ export function useBattleValidation(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             attackerId,
+            targetCode,
             x: currentCoord.x,
             y: currentCoord.y,
           }),
@@ -51,7 +53,7 @@ export function useBattleValidation(
     return () => {
       active = false;
     };
-  }, [attackerId, coordinate, isOpen]);
+  }, [attackerId, targetCode, coordinate, isOpen]);
 
   const effectiveValidationResult =
     !isOpen || !attackerId || !coordinate ? null : validationResult;

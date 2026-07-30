@@ -8,10 +8,12 @@ export async function POST(request: Request): Promise<NextResponse> {
   try {
     const body = (await request.json()) as {
       attackerId?: string;
+      targetCode?: string;
+      targetNationId?: string;
       x?: number;
       y?: number;
     };
-    const { attackerId, x, y } = body;
+    const { attackerId, targetCode, targetNationId, x, y } = body;
 
     if (!attackerId || x === undefined || y === undefined) {
       return NextResponse.json(
@@ -21,9 +23,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const canonicalAttackerId = NationIdResolver.resolveCanonicalId(attackerId);
+    const resolvedTargetCode = targetCode || targetNationId || "";
+    const canonicalTargetId = resolvedTargetCode
+      ? NationIdResolver.resolveCanonicalId(resolvedTargetCode)
+      : "";
 
-    const scaledX = x > 1024 ? Math.floor(x / 4) : x;
-    const scaledY = y > 512 ? Math.floor(y / 4) : y;
+    const scaledX = Math.floor(x / 4);
+    const scaledY = Math.floor(y / 4);
 
     const gridState = GridStateProvider.getInstance();
     await GridLoaderService.ensureGridLoaded(gridState);
@@ -31,6 +37,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const validator = new BattleValidationFacade();
     const result = validator.validateAttackForUI(
       canonicalAttackerId,
+      canonicalTargetId,
       { x: scaledX, y: scaledY },
       gridState,
     );

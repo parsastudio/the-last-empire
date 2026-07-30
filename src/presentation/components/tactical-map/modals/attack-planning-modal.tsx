@@ -195,6 +195,7 @@ export function AttackPlanningModal(props: AttackPlanningModalProps) {
           distanceKm={
             planning.validationResult?.distance ?? planning.logistics.distanceKm
           }
+          isLandAttack={isLandAttack}
           requiredOil={planning.logistics.requiredOil}
           requiredSteel={planning.logistics.requiredSteel}
         />

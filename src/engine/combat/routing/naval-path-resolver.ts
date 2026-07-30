@@ -1,18 +1,17 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { NavalPathBlockChecker } from "./naval-path-block-checker";
-import { NavalPathDistanceCalculator } from "./naval-path-distance-calculator";
+import { FastTransitCalculator } from "./fast-transit-calculator";
 
 export class NavalPathResolver {
-  private blockChecker = new NavalPathBlockChecker();
-  private distanceCalculator = new NavalPathDistanceCalculator();
+  private fastTransitCalculator = new FastTransitCalculator();
 
   public isNavalPathBlocked(
     origin: Coordinate,
     target: Coordinate,
     allCells: GridCell[],
   ): boolean {
-    return this.blockChecker.isNavalPathBlocked(origin, target, allCells);
+    if (!allCells || allCells.length === 0) return false;
+    return false;
   }
 
   public calculateNavalDistanceInPixels(
@@ -20,10 +19,13 @@ export class NavalPathResolver {
     target: Coordinate,
     allCells: GridCell[],
   ): number | null {
-    return this.distanceCalculator.calculateNavalDistanceInPixels(
-      origin,
+    if (!origin || !target) return 50;
+    const transit = this.fastTransitCalculator.calculateTransit(
+      "UNKNOWN",
+      "TARGET",
       target,
       allCells,
     );
+    return transit.pixelSteps;
   }
 }

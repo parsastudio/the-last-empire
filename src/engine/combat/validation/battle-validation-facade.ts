@@ -10,12 +10,17 @@ export class BattleValidationFacade {
 
   public validateAttackForUI(
     attackerId: string,
+    targetNationId: string,
     targetPixel: Coordinate,
     gridState: GridState,
   ): BattleValidationResult {
     const allCells = gridState.getAllCells();
-    const targetCell = gridState.getCell(targetPixel.x, targetPixel.y);
-    const targetNationId = targetCell ? targetCell.ownerId : "WATER";
+    let resolvedTargetId = targetNationId;
+
+    if (!resolvedTargetId || resolvedTargetId === "WATER") {
+      const targetCell = gridState.getCell(targetPixel.x, targetPixel.y);
+      resolvedTargetId = targetCell ? targetCell.ownerId : "WATER";
+    }
 
     const isValid = this.validator.validateAttackOpportunity(
       attackerId,
@@ -25,7 +30,7 @@ export class BattleValidationFacade {
 
     const transit = this.transitCalculator.calculateTransit(
       attackerId,
-      targetNationId,
+      resolvedTargetId,
       targetPixel,
       allCells,
     );

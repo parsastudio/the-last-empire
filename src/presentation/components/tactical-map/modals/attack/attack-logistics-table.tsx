@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, Fuel, Navigation, Anchor } from "lucide-react";
+import { Coins, Fuel, Navigation, Anchor, Wrench } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface AttackLogisticsTableProps {
@@ -7,6 +7,7 @@ interface AttackLogisticsTableProps {
   landTransitCost: number;
   heavyTransitCost: number;
   distanceKm: number;
+  isLandAttack?: boolean;
   requiredOil?: number;
   requiredSteel?: number;
 }
@@ -16,6 +17,7 @@ export function AttackLogisticsTable({
   landTransitCost,
   heavyTransitCost,
   distanceKm,
+  isLandAttack = true,
   requiredOil = 50,
 }: AttackLogisticsTableProps) {
   return (
@@ -54,8 +56,14 @@ export function AttackLogisticsTable({
 
         <div className="flex justify-between items-center pb-2 border-b border-border/40">
           <span className="text-muted-foreground flex items-center gap-1.5 font-sans text-[11px]">
-            <Anchor size={13} className="text-amber-500" />
-            هزینه ترانزیت و ارسال دریایی تجهیزات
+            {isLandAttack ? (
+              <Wrench size={13} className="text-primary" />
+            ) : (
+              <Anchor size={13} className="text-amber-500" />
+            )}
+            {isLandAttack
+              ? "هزینه ترانزیت تجهیزات سنگین و هوایی"
+              : "هزینه ترانزیت و ارسال دریایی تجهیزات"}
           </span>
           <span className="font-bold text-foreground">
             $

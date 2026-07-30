@@ -34,9 +34,12 @@ export class ConquestActionValidator {
       y = Math.floor(attackAction.airForce % 512);
     }
 
+    const scaledX = Math.floor(x / 4);
+    const scaledY = Math.floor(y / 4);
+
     const targetPixel = {
-      x: Math.floor(x % 1024),
-      y: Math.floor(y % 512),
+      x: scaledX,
+      y: scaledY,
     };
 
     const isValid = this.validator.validateAttackOpportunity(
