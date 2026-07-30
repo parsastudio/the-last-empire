@@ -1,14 +1,14 @@
 import fs from "fs/promises";
 import path from "path";
-import { GeoJsonProcessor } from "./geojson-processor";
-import { DistanceTransform } from "./distance-transform";
-import { MapWriter } from "./map-writer";
+import { GeoJsonProcessor } from "./rasterizer/geojson-processor";
+import { DistanceTransform } from "@/application/map-rendering/distance-transform";
+import { MapWriter } from "./encoders/map-writer";
 import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
-import { GeometryDraw } from "./utils/geometry-draw";
-import { LowResPacker } from "./utils/low-res-packer";
-import { ClosedSeaDetector } from "./utils/closed-sea-detector";
+import { GeometryDraw } from "@/application/map-rendering/utils/geometry-draw";
+import { LowResPacker } from "@/application/map-rendering/utils/low-res-packer";
+import { ClosedSeaDetector } from "@/application/map-rendering/utils/closed-sea-detector";
 import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
-import { MapPathResolver } from "./map-path-resolver";
+import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
 
 export interface CountryMapping {
   id: number;

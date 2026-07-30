@@ -1,5 +1,8 @@
-import { rasterizePolygon } from "../scanline-rasterizer";
-import { GeoJsonProcessor, ProcessedFeature } from "../geojson-processor";
+import { rasterizePolygon } from "../rasterizer/scanline-rasterizer";
+import {
+  GeoJsonProcessor,
+  ProcessedFeature,
+} from "../rasterizer/geojson-processor";
 
 export class PolygonFeatureRasterizer {
   public rasterizeFeatures(

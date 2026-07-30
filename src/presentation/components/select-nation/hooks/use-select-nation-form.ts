@@ -5,7 +5,7 @@ import { NationDatabaseProvider } from "../utils/nation-database-provider";
 import { GameIdGenerator } from "@/domain/shared/game-id-generator";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { useToast } from "@/presentation/context/toast-context";
-import { MapManifest } from "@/application/map-rendering/generator/map-manifest-builder";
+import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 
 export function useSelectNationForm() {
   const router = useRouter();
@@ -20,7 +20,9 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const res = await fetch("/api/map-manifest?mode=partition");
+        const res = await fetch(
+          "/api/map-preprocessing/manifest?mode=partition",
+        );
         if (res.ok) {
           const json = await res.json();
           if (active && json.nations) {
@@ -31,7 +33,9 @@ export function useSelectNationForm() {
       } catch {}
 
       try {
-        const resDef = await fetch("/api/map-manifest?mode=default");
+        const resDef = await fetch(
+          "/api/map-preprocessing/manifest?mode=default",
+        );
         if (resDef.ok) {
           const jsonDef = await resDef.json();
           if (active && jsonDef.nations) {

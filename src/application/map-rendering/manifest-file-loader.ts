@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { MapManifest } from "./generator/map-manifest-builder";
+import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { MapPathResolver } from "./map-path-resolver";
 
 export class ManifestFileLoader {

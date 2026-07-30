@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import { MapManifestBuilder } from "@/application/map-rendering/generator/map-manifest-builder";
-import { generateTest6Map } from "@/application/map-rendering/map-generator";
+import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
 import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
 
 export async function GET(request: Request): Promise<NextResponse> {
