@@ -55,17 +55,18 @@ export async function generateTest6Map(
     },
   ];
 
-  let autoId = 11;
   for (const profile of ALL_COUNTRY_PROFILES) {
-    const profileId = autoId++;
-    countries.push({
-      id: profileId,
-      code: profile.code,
-      name: profile.nameFa,
-      color: [0, 0, profileId],
-      areaSqKm: 0,
-    });
-    activeIdToCodeMap.set(profileId, profile.code);
+    const profileId = profile.id ?? 0;
+    if (profileId > 0) {
+      countries.push({
+        id: profileId,
+        code: profile.code,
+        name: profile.nameFa,
+        color: [0, 0, profileId],
+        areaSqKm: 0,
+      });
+      activeIdToCodeMap.set(profileId, profile.code);
+    }
   }
 
   const buffer = new Uint8Array(width * height);
