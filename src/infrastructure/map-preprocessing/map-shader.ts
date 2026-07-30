@@ -3,8 +3,6 @@ import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator"
 import { NoiseGrainApplier } from "./shader/noise-grain-applier";
 import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache";
 import { GdpLayerShader } from "./shader/gdp-layer-shader";
-import { PoliticalLayerShader } from "./shader/political-layer-shader";
-import { BorderDetector } from "./shader/border-detector";
 import { ShorelineDistanceCache } from "./shader/shoreline-distance-cache";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
@@ -21,10 +19,7 @@ export class MapShader {
   private static shadowCalculator = new ShorelineShadowCalculator();
   private static noiseApplier = new NoiseGrainApplier();
   private static lookupCache = new CountryProfileLookupCache();
-
   private static gdpShader = new GdpLayerShader();
-  private static politicalShader = new PoliticalLayerShader();
-  private static borderDetector = new BorderDetector();
 
   public static applyShading(
     destData: Uint8ClampedArray,
@@ -79,9 +74,51 @@ export class MapShader {
       }
     }
 
-    const borderR = 80;
-    const borderG = 72;
-    const borderB = 65;
+    const landLut32 = new Uint32Array(256 * 3);
+
+    for (let id = 11; id < 250; id++) {
+      let baseR = 255;
+      let baseG = 255;
+      let baseB = 255;
+
+      if (activeLayer === "gdp") {
+        const color = this.gdpShader.calculateGdpColor(id, this.lookupCache);
+        baseR = color.r;
+        baseG = color.g;
+        baseB = color.b;
+      } else {
+        const pair = palette[id];
+        if (pair) {
+          baseR = pair.r1;
+          baseG = pair.g1;
+          baseB = pair.b1;
+        }
+      }
+
+      for (let bCase = 0; bCase < 3; bCase++) {
+        let bevelMult = 1.0;
+        if (bCase === 0) bevelMult = 0.98;
+        if (bCase === 2) bevelMult = 1.02;
+
+        const finalR = Math.max(
+          0,
+          Math.min(255, Math.floor(baseR * bevelMult)),
+        );
+        const finalG = Math.max(
+          0,
+          Math.min(255, Math.floor(baseG * bevelMult)),
+        );
+        const finalB = Math.max(
+          0,
+          Math.min(255, Math.floor(baseB * bevelMult)),
+        );
+
+        landLut32[id * 3 + bCase] =
+          (255 << 24) | (finalB << 16) | (finalG << 8) | finalR;
+      }
+    }
+
+    const borderUint32 = (255 << 24) | (65 << 16) | (72 << 8) | 80;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -98,77 +135,106 @@ export class MapShader {
           id = dynamicIds[pixelIdx]!;
         }
 
-        let r = 255;
-        let g = 255;
-        let b = 255;
+        if (id < 11 || id === 254) {
+          const d = id === 254 ? 4 : dist[pixelIdx] || 0;
+          dest32[pixelIdx] = this.shadowCalculator.getOceanUint32(d);
+          continue;
+        }
 
-        const grain = this.noiseApplier.getNoiseGrain(x, y);
+        if (id >= 251 && id <= 255) {
+          dest32[pixelIdx] = (255 << 24) | (129 << 16) | (185 << 8) | 16;
+          continue;
+        }
 
-        if (id === 254) {
-          const oceanColor = this.shadowCalculator.calculateOceanColor(4);
-          r = oceanColor.r;
-          g = oceanColor.g;
-          b = oceanColor.b;
-        } else if (id >= 251 && id <= 255) {
-          r = 16;
-          g = 185;
-          b = 129;
-        } else if (id < 11) {
-          const d = dist[pixelIdx] || 0;
-          const oceanColor = this.shadowCalculator.calculateOceanColor(d);
-          r = oceanColor.r;
-          g = oceanColor.g;
-          b = oceanColor.b;
-        } else {
-          const pair = palette[id];
-          if (pair) {
-            if (activeLayer === "gdp") {
-              const color = this.gdpShader.calculateGdpColor(
-                id,
-                this.lookupCache,
-              );
-              r = color.r;
-              g = color.g;
-              b = color.b;
-            } else {
-              const color = this.politicalShader.calculatePoliticalColor(
-                id,
-                pair,
-                x,
-                y,
-                width,
-                height,
-                maskData,
-              );
-              r = color.r;
-              g = color.g;
-              b = color.b;
-            }
+        let isBorder = false;
+
+        if (x < width - 1) {
+          const rightIdx = pixelIdx + 1;
+          let rightOwner = maskData[rightIdx] || 0;
+          if (
+            dynamicIds &&
+            dynamicIds[rightIdx]! > 0 &&
+            rightOwner >= 11 &&
+            rightOwner < 250
+          ) {
+            rightOwner = dynamicIds[rightIdx]!;
+          }
+          if (
+            rightOwner !== id &&
+            ((id >= 11 && id < 250) || (rightOwner >= 11 && rightOwner < 250))
+          ) {
+            isBorder = true;
           }
         }
 
-        if (
-          this.borderDetector.isSovereignBorder(
-            x,
-            y,
-            width,
-            height,
-            id,
-            maskData,
-            dynamicIds,
-          )
-        ) {
-          r = borderR;
-          g = borderG;
-          b = borderB;
+        if (!isBorder && y < height - 1) {
+          const bottomIdx = pixelIdx + width;
+          let bottomOwner = maskData[bottomIdx] || 0;
+          if (
+            dynamicIds &&
+            dynamicIds[bottomIdx]! > 0 &&
+            bottomOwner >= 11 &&
+            bottomOwner < 250
+          ) {
+            bottomOwner = dynamicIds[bottomIdx]!;
+          }
+          if (
+            bottomOwner !== id &&
+            ((id >= 11 && id < 250) || (bottomOwner >= 11 && bottomOwner < 250))
+          ) {
+            isBorder = true;
+          }
         }
 
-        const finalR = Math.max(0, Math.min(255, r + grain));
-        const finalG = Math.max(0, Math.min(255, g + grain));
-        const finalB = Math.max(0, Math.min(255, b + grain));
+        if (isBorder) {
+          dest32[pixelIdx] = borderUint32;
+          continue;
+        }
 
-        dest32[pixelIdx] =
-          (255 << 24) | (finalB << 16) | (finalG << 8) | finalR;
+        let idLeft = id;
+        if (x > 2) {
+          const leftIdx = pixelIdx - 2;
+          idLeft = maskData[leftIdx] || 0;
+          if (dynamicIds && dynamicIds[leftIdx]! > 0) {
+            idLeft = dynamicIds[leftIdx]!;
+          }
+        }
+
+        let idTop = id;
+        if (y > 2) {
+          const topIdx = pixelIdx - width * 2;
+          idTop = maskData[topIdx] || 0;
+          if (dynamicIds && dynamicIds[topIdx]! > 0) {
+            idTop = dynamicIds[topIdx]!;
+          }
+        }
+
+        let idRight = id;
+        if (x < width - 2) {
+          const rightIdx = pixelIdx + 2;
+          idRight = maskData[rightIdx] || 0;
+          if (dynamicIds && dynamicIds[rightIdx]! > 0) {
+            idRight = dynamicIds[rightIdx]!;
+          }
+        }
+
+        let idBottom = id;
+        if (y < height - 2) {
+          const bottomIdx = pixelIdx + width * 2;
+          idBottom = maskData[bottomIdx] || 0;
+          if (dynamicIds && dynamicIds[bottomIdx]! > 0) {
+            idBottom = dynamicIds[bottomIdx]!;
+          }
+        }
+
+        let bevelCase = 1;
+        if (idLeft !== id || idTop !== id) {
+          bevelCase = 2;
+        } else if (idRight !== id || idBottom !== id) {
+          bevelCase = 0;
+        }
+
+        dest32[pixelIdx] = landLut32[id * 3 + bevelCase] || 0xffffffff;
       }
     }
   }

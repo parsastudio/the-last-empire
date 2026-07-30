@@ -11,14 +11,13 @@ export class ShorelineShadowCalculator {
   private readonly deepG = 166;
   private readonly deepB = 180;
 
-  private lut: { r: number; g: number; b: number }[] = [];
+  private lut32 = new Uint32Array(256);
 
   constructor() {
     this.precomputeLut();
   }
 
   private precomputeLut(): void {
-    this.lut = new Array(256);
     for (let d = 0; d < 256; d++) {
       const t = 1.0 - Math.exp(-d * 0.12);
       let r = 255;
@@ -44,12 +43,12 @@ export class ShorelineShadowCalculator {
         b = Math.floor(b * shadow);
       }
 
-      this.lut[d] = { r, g, b };
+      this.lut32[d] = (255 << 24) | (b << 16) | (g << 8) | r;
     }
   }
 
-  public calculateOceanColor(d: number): { r: number; g: number; b: number } {
+  public getOceanUint32(d: number): number {
     const clampedDist = Math.max(0, Math.min(255, d));
-    return this.lut[clampedDist] || { r: 142, g: 166, b: 180 };
+    return this.lut32[clampedDist] || 0xffb4a68e;
   }
 }
