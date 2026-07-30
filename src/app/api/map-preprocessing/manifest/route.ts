@@ -3,18 +3,18 @@ import fs from "fs/promises";
 import path from "path";
 import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
-import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const mode = searchParams.get("mode") || "partition";
 
-    const targetDir = MapPathResolver.getMapServerDir("map1", mode);
-    await fs.mkdir(targetDir, { recursive: true });
+    const tempDir = MapPathResolver.getMapServerDir("map1", mode);
+    await fs.mkdir(tempDir, { recursive: true });
 
     const mappingsFileName = `${mode}-mappings.json`;
-    const mappingsPath = path.join(targetDir, mappingsFileName);
+    const mappingsPath = path.join(tempDir, mappingsFileName);
 
     let mappingsExists = false;
     try {

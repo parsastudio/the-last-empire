@@ -1,4 +1,4 @@
-import { MapShader } from "@/application/map-rendering/map-shader";
+import { MapShader } from "@/infrastructure/map-preprocessing/map-shader";
 
 export interface CountryMapping {
   id: number;

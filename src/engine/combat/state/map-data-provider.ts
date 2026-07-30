@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 let cached1024Buffer: Uint8Array | null = null;
 let cachedRawBuffer: Uint8Array | null = null;
