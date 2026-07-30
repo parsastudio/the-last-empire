@@ -11,6 +11,7 @@ import {
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesStateSchema } from "@/domain/politics/doctrines.schema";
 import { RegionDemographicsSchema } from "./region-demographics.schema";
+import { CoordinateSchema } from "@/domain/map/coordinate.schema";
 
 export const NationTraitSchema = z.enum([
   "OIL_RICH",
@@ -21,11 +22,6 @@ export const NationTraitSchema = z.enum([
   "ISOLATED_SOCIETY",
   "SOVEREIGN_FORTRESS",
 ]);
-
-export const CoordinateSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-});
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -87,7 +83,6 @@ export const NationSchema = z.object({
 });
 
 export type NationTrait = z.infer<typeof NationTraitSchema>;
-export type Coordinate = z.infer<typeof CoordinateSchema>;
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
 export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
