@@ -89,5 +89,7 @@ export async function generateTest6Map(
 
   await fs.writeFile(path.join(targetDir, "mask-1024.bin"), packed1024);
 
-  return { countries };
+  const validCountries = countries.filter((c) => c.id === 0 || c.areaSqKm > 0);
+
+  return { countries: validCountries };
 }

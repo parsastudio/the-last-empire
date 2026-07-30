@@ -78,6 +78,5 @@ export const PARTITION_COUNTRIES_LIST: string[] = [
   "ATF",
   "FLK",
   "TTO",
-  "SAH",
   "PAN",
 ];
