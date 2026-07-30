@@ -30,6 +30,9 @@ export class TerritoryPartitioner {
     const isPartitionedPixel = new Uint8Array(totalPixels);
     for (let i = 0; i < totalPixels; i++) {
       const val = buffer[i]!;
+      if (val === 254) {
+        continue;
+      }
       if (partitionedIds.has(val)) {
         isPartitionedPixel[i] = 1;
       }
@@ -138,7 +141,7 @@ export class TerritoryPartitioner {
 
     for (let i = 0; i < totalPixels; i++) {
       if (isPartitionedPixel[i] === 1 && visited[i] === 0) {
-        buffer[i] = 254;
+        buffer[i] = 250;
       }
     }
 
