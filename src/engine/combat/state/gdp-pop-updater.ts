@@ -2,14 +2,18 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { findCountryProfileById } from "@/domain/map/countries";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class GdpPopUpdater {
   public syncGlobalStats(
     nations: Record<string, Nation>,
     allCells: GridCell[],
   ): Record<string, Nation> {
-    const updated = { ...nations };
+    if (!allCells || allCells.length === 0) {
+      return nations;
+    }
 
+    const updated = { ...nations };
     const totalPixelsMap = new Map<string, number>();
     const regionPixelsMap = new Map<string, Map<number, number>>();
 
@@ -19,18 +23,28 @@ export class GdpPopUpdater {
         continue;
       }
 
-      const pixels = cell.highResPixelCount;
-      totalPixelsMap.set(owner, (totalPixelsMap.get(owner) || 0) + pixels);
+      const canonicalOwner = NationIdResolver.resolveCanonicalId(owner);
+      const pixels = cell.highResPixelCount > 0 ? cell.highResPixelCount : 16;
 
-      if (!regionPixelsMap.has(owner)) {
-        regionPixelsMap.set(owner, new Map<number, number>());
+      totalPixelsMap.set(
+        canonicalOwner,
+        (totalPixelsMap.get(canonicalOwner) || 0) + pixels,
+      );
+
+      if (!regionPixelsMap.has(canonicalOwner)) {
+        regionPixelsMap.set(canonicalOwner, new Map<number, number>());
       }
-      const rMap = regionPixelsMap.get(owner)!;
+      const rMap = regionPixelsMap.get(canonicalOwner)!;
       rMap.set(cell.enclaveId, (rMap.get(cell.enclaveId) || 0) + pixels);
     }
 
+    if (totalPixelsMap.size === 0) {
+      return nations;
+    }
+
     for (const [id, nation] of Object.entries(updated)) {
-      const numericId = parseInt(id.replace("NATION_", ""), 10);
+      const canonicalId = NationIdResolver.resolveCanonicalId(id);
+      const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
       const profile = findCountryProfileById(numericId);
 
       const baseGdp = profile ? profile.gdp : nation.gdp || 5000000000;
@@ -38,16 +52,18 @@ export class GdpPopUpdater {
         ? profile.population
         : nation.population || 80000000;
 
-      const ownedPixels = totalPixelsMap.get(id) || 0;
+      const ownedPixels = totalPixelsMap.get(canonicalId) || 0;
 
       if (ownedPixels === 0) {
-        updated[id] = {
-          ...nation,
-          gdp: 0,
-          population: 0,
-          isAlive: false,
-          regionsDemographics: [],
-        };
+        if (nation.geography.territorySize === 0) {
+          updated[id] = {
+            ...nation,
+            gdp: 0,
+            population: 0,
+            isAlive: false,
+            regionsDemographics: [],
+          };
+        }
         continue;
       }
 
@@ -55,13 +71,19 @@ export class GdpPopUpdater {
         1,
         Math.round(baseGdp / 1000000 / 86.3) || ownedPixels,
       );
-      const areaRatio = ownedPixels / initialTotalPixels;
+      const areaRatio = Math.max(0.01, ownedPixels / initialTotalPixels);
 
-      const currentGdp = Math.round(baseGdp * areaRatio);
-      const currentPop = Math.round(basePop * areaRatio);
+      const currentGdp = Math.max(
+        baseGdp * 0.1,
+        Math.round(baseGdp * areaRatio),
+      );
+      const currentPop = Math.max(
+        basePop * 0.1,
+        Math.round(basePop * areaRatio),
+      );
 
       const regionsDemographics: RegionDemographics[] = [];
-      const rMap = regionPixelsMap.get(id);
+      const rMap = regionPixelsMap.get(canonicalId);
       if (rMap) {
         for (const [rId, rPixels] of rMap.entries()) {
           const rShare = rPixels / ownedPixels;
@@ -88,9 +110,9 @@ export class GdpPopUpdater {
 
       updated[id] = {
         ...nation,
-        gdp: Math.max(0, currentGdp),
-        population: Math.max(0, currentPop),
-        isAlive: ownedPixels > 0,
+        gdp: currentGdp,
+        population: currentPop,
+        isAlive: true,
         regionsDemographics,
       };
     }
