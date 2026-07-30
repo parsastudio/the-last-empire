@@ -1,5 +1,5 @@
 import { AreaWeightCalculator } from "./area-weight-calculator";
-import { GLOBAL_DEVIATION_FACTOR } from "../../../domain/map/country-area-calibration.config";
+import { GLOBAL_DEVIATION_FACTOR } from "@/domain/map/country-area-calibration.config";
 
 export interface CountryAreaMapping {
   id: number;

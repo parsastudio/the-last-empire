@@ -28,7 +28,7 @@ export function useMapAssetsLoader({
         setLoading(true);
 
         try {
-          await fetch(`/api/map-manifest?mode=${mapMode}`);
+          await fetch(`/api/map-preprocessing/manifest?mode=${mapMode}`);
         } catch {}
 
         let apiPath = apiHelper.getApiPath(mapMode);

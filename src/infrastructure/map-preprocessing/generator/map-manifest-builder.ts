@@ -3,7 +3,7 @@ import path from "path";
 import { ALL_COUNTRY_PROFILES } from "@/domain/map/countries";
 import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { MapPathResolver } from "../map-path-resolver";
+import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
 
 export interface ManifestNationItem {
   id: string;

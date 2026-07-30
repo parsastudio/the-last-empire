@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { encodePng } from "./png-encoder";
-import { MapPathResolver } from "./map-path-resolver";
+import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
 
 export class MapWriter {
   public async saveMaskImage(
