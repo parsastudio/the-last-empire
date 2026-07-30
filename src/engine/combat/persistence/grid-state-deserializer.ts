@@ -11,18 +11,9 @@ export class GridStateDeserializer {
     const width = 1024;
 
     for (const part of parts) {
-      const [
-        ownerId,
-        occupiedStr,
-        occupierId,
-        enclaveStr,
-        pixelsStr,
-        countStr,
-      ] = part.split(":");
+      const [ownerId, enclaveStr, pixelsStr, countStr] = part.split(":");
       if (!ownerId || !countStr) continue;
 
-      const isOccupied = occupiedStr === "1";
-      const occupier = occupierId || null;
       const enclaveId = parseInt(enclaveStr || "0", 10);
       const highResPixelCount = parseInt(pixelsStr || "0", 10);
       const count = parseInt(countStr, 10);
@@ -32,8 +23,6 @@ export class GridStateDeserializer {
           x: currentX,
           y: currentY,
           ownerId,
-          isOccupied,
-          occupierId: occupier,
           highResPixelCount,
           enclaveId,
           seaAccess: 0,

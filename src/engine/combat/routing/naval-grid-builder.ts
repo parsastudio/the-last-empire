@@ -9,11 +9,7 @@ export class NavalGridBuilder {
     for (let i = 0; i < allCells.length; i++) {
       const cell = allCells[i];
       if (cell) {
-        if (
-          cell.ownerId === "WATER" ||
-          cell.ownerId === "CLOSED_SEA" ||
-          cell.isOccupied === true
-        ) {
+        if (cell.ownerId === "WATER" || cell.ownerId === "CLOSED_SEA") {
           traversable[(cell.y << 10) | cell.x] = 1;
         }
       }
