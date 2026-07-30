@@ -1,7 +1,7 @@
 import {
   findCountryProfileByCode,
   findCountryProfileById,
-} from "@/domain/map/countries";
+} from "@/infrastructure/data/countries";
 
 export class NationIdResolver {
   public static resolveCanonicalId(codeOrId: string): string {

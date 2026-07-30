@@ -1,5 +1,5 @@
 import { ISO3_TO_ISO2_MAP } from "./flag/iso-code-mapping.config";
-import { findCountryProfileById } from "@/domain/map/countries";
+import { findCountryProfileById } from "@/infrastructure/data/countries";
 
 export function getFlagEmoji(code: string): string {
   if (!code) return "🌐";

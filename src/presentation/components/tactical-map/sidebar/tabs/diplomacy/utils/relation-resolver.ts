@@ -1,4 +1,4 @@
-import { findCountryProfileByCode } from "@/domain/map/countries";
+import { findCountryProfileByCode } from "@/infrastructure/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "../country-profile-stats";
 

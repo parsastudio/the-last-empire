@@ -1,4 +1,7 @@
-import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/map/countries";
+import {
+  ALL_COUNTRY_PROFILES,
+  CountryProfile,
+} from "@/infrastructure/data/countries";
 import { NationDetail } from "../nation-list-item";
 import { ManifestNationItem } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
