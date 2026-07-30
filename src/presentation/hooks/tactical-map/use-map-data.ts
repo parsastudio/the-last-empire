@@ -50,6 +50,28 @@ export function useMapData({
     }
   }, [activeLayer, countries, loadedImgRef, mapHeight, mapWidth]);
 
+  const updateConqueredPixelsOnCanvas = useCallback(
+    (conqueredNumericId: number, targetNumericId: number) => {
+      if (!maskDataRef.current) return;
+      const mask = maskDataRef.current;
+      const totalPixels = mapWidth * mapHeight;
+
+      let changedCount = 0;
+      for (let i = 0; i < totalPixels; i++) {
+        if (mask[i] === targetNumericId) {
+          mask[i] = conqueredNumericId;
+          changedCount++;
+          if (changedCount >= 1200) break;
+        }
+      }
+
+      if (changedCount > 0) {
+        reRenderLayer();
+      }
+    },
+    [mapHeight, mapWidth, reRenderLayer],
+  );
+
   useEffect(() => {
     if (!loading && loadedImgRef.current) {
       if (!canvasSrcRef.current) {
@@ -88,5 +110,6 @@ export function useMapData({
     maskDataRef,
     packed1024Ref,
     reRenderLayer,
+    updateConqueredPixelsOnCanvas,
   };
 }

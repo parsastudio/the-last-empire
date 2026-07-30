@@ -6,6 +6,7 @@ import { GameActionQueue } from "./orchestrator/game-action.queue";
 import { TurnProgressionOrchestrator } from "./orchestrator/turn-progression.orchestrator";
 import { HistoryManager } from "./orchestrator/history.manager";
 import { GridState } from "@/engine/combat/state/grid-state";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GameEngineDispatcher } from "./orchestrator/game-engine-dispatcher";
 
 export class GameEngine {
@@ -20,9 +21,7 @@ export class GameEngine {
   constructor(initialState: GameState) {
     this.currentState = deepClone(initialState);
     this.prng = new SeededRandom(initialState.seed);
-    this.gridState =
-      (initialState as unknown as { gridState?: GridState }).gridState ||
-      new GridState();
+    this.gridState = GridStateProvider.getInstance();
     this.historyManager.recordSnapshot(this.currentState, this.gridState);
   }
 
