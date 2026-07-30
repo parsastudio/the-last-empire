@@ -9,7 +9,6 @@ import { ClosedSeaDetector } from "./utils/closed-sea-detector";
 import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
 import { MapPathResolver } from "./map-path-resolver";
 import { TerritoryPartitioner } from "./generator/territory-partitioner";
-import { BoundarySmoother } from "./generator/boundary-smoother";
 import { PngDecoder } from "./encoders/png-decoder";
 import {
   ALL_COUNTRY_PROFILES,
@@ -27,9 +26,8 @@ export interface CountryMapping {
 export async function generateTest6Map(
   width: number,
   height: number,
-  mode = "partition",
 ): Promise<{ countries: CountryMapping[] }> {
-  const targetDir = MapPathResolver.getMapServerDir("map1", mode);
+  const targetDir = MapPathResolver.getMapServerDir("map1");
   await fs.mkdir(targetDir, { recursive: true });
 
   const geojsonPath = MapPathResolver.getGeoJsonServerPath();
@@ -52,7 +50,6 @@ export async function generateTest6Map(
   const areaCounter = new MapAreaPixelCounter();
   const polygonRasterizer = new PolygonFeatureRasterizer();
   const partitioner = new TerritoryPartitioner();
-  const boundarySmoother = new BoundarySmoother();
 
   const idToCodeMap = new Map<number, string>();
   const codeToIdMap = new Map<string, number>();
@@ -121,13 +118,11 @@ export async function generateTest6Map(
   }
 
   let isEditedLoaded = false;
-  if (mode === "edited") {
-    const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
-    const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
-    if (decodedMask && decodedMask.buffer.length === width * height) {
-      buffer.set(decodedMask.buffer);
-      isEditedLoaded = true;
-    }
+  const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
+  const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
+  if (decodedMask && decodedMask.buffer.length === width * height) {
+    buffer.set(decodedMask.buffer);
+    isEditedLoaded = true;
   }
 
   if (!isEditedLoaded) {
@@ -144,11 +139,7 @@ export async function generateTest6Map(
     draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 254);
   }
 
-  if (mode === "partition") {
-    partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
-  } else if (mode !== "edited") {
-    boundarySmoother.smoothBoundaries(buffer, width, height);
-  }
+  partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
 
   const maxId = Math.max(...countries.map((c) => c.id), 255) + 1;
   const pixelAreas = areaCounter.calculateAreas(buffer, width, height, maxId);

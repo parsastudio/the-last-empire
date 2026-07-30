@@ -5,12 +5,9 @@ import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator
 import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
-export async function GET(request: Request): Promise<NextResponse> {
+export async function GET(): Promise<NextResponse> {
   try {
-    const { searchParams } = new URL(request.url);
-    const mode = searchParams.get("mode") || "partition";
-
-    const targetDir = MapPathResolver.getMapServerDir("map1", mode);
+    const targetDir = MapPathResolver.getMapServerDir("map1");
     await fs.mkdir(targetDir, { recursive: true });
 
     const manifestPath = path.join(targetDir, "manifest.json");
@@ -22,7 +19,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     } catch {}
 
     if (!manifestExists) {
-      const generated = await generateTest6Map(4096, 2048, mode);
+      const generated = await generateTest6Map(4096, 2048);
       const builder = new MapManifestBuilder();
       const manifest = await builder.buildAndSaveManifest(
         "map1",
@@ -34,7 +31,6 @@ export async function GET(request: Request): Promise<NextResponse> {
           areaSqKm: c.areaSqKm,
         })),
         "manifest.json",
-        mode,
       );
       return NextResponse.json(manifest);
     }

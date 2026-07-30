@@ -6,49 +6,35 @@ import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
 
-export async function POST(request: Request): Promise<NextResponse> {
+export async function POST(): Promise<NextResponse> {
   try {
-    const body = (await request.json().catch(() => ({}))) as {
-      mode?: "partition" | "edited" | "default" | "all";
-    };
-    const targetMode = body.mode || "partition";
-
-    const modesToBuild =
-      targetMode === "all" ? ["partition", "edited", "default"] : [targetMode];
-
     const provider = new MapDataProvider();
     provider.clearCache();
 
-    for (const mode of modesToBuild) {
-      const tempDir = MapPathResolver.getMapServerDir("map1", mode);
-      await fs.mkdir(tempDir, { recursive: true });
+    const tempDir = MapPathResolver.getMapServerDir("map1");
+    await fs.mkdir(tempDir, { recursive: true });
 
-      const generated = await generateTest6Map(4096, 2048, mode);
-      const mappingsFileName = `${mode}-mappings.json`;
-      const mappingsPath = path.join(tempDir, mappingsFileName);
+    const generated = await generateTest6Map(4096, 2048);
+    const mappingsPath = path.join(tempDir, "partition-mappings.json");
 
-      await fs.writeFile(
-        mappingsPath,
-        JSON.stringify(generated, null, 2),
-        "utf-8",
-      );
+    await fs.writeFile(
+      mappingsPath,
+      JSON.stringify(generated, null, 2),
+      "utf-8",
+    );
 
-      const manifestFileName = `${mode}-manifest.json`;
-      const builder = new MapManifestBuilder();
-      await builder.buildAndSaveManifest(
-        "map1",
-        generated.countries || [],
-        manifestFileName,
-        mode,
-      );
-    }
+    const builder = new MapManifestBuilder();
+    await builder.buildAndSaveManifest(
+      "map1",
+      generated.countries || [],
+      "manifest.json",
+    );
 
     provider.clearCache();
 
     return NextResponse.json({
       success: true,
       message: "بازسازی کامل فایل‌های نقشه با موفقیت انجام شد.",
-      rebuiltModes: modesToBuild,
       timestamp: Date.now(),
     });
   } catch (err) {

@@ -48,7 +48,6 @@ export class MapManifestBuilder {
       color: [number, number, number];
     }[],
     outputFileName: string,
-    mode = "partition",
   ): Promise<MapManifest> {
     const activeCountryCodes = new Set(
       mappingsCountries
@@ -123,7 +122,7 @@ export class MapManifestBuilder {
       countries: mappingsCountries,
     };
 
-    const targetDir = MapPathResolver.getMapServerDir(mapId, mode);
+    const targetDir = MapPathResolver.getMapServerDir(mapId);
     await fs.mkdir(targetDir, { recursive: true });
     await fs.writeFile(
       path.join(targetDir, outputFileName),
