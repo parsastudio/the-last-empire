@@ -22,8 +22,7 @@ export function EconomyStatsSection({
   );
   const compactTreasury = PersianNumberFormatter.formatCompactNumber(treasury);
 
-  const gdpInBillions = (gdp / 1e9).toFixed(1);
-  const formattedGdp = PersianNumberFormatter.toPersianDigits(gdpInBillions);
+  const formattedGdp = PersianNumberFormatter.formatCurrency(gdp, true);
 
   const formattedTax = PersianNumberFormatter.toPersianDigits(taxRate);
   const formattedTariff = PersianNumberFormatter.toPersianDigits(tariffRate);
@@ -46,7 +45,7 @@ export function EconomyStatsSection({
             تولید ناخالص (GDP)
           </span>
           <span className="text-xs font-bold text-foreground block">
-            ${formattedGdp} میلیارد
+            {formattedGdp}
           </span>
         </div>
 

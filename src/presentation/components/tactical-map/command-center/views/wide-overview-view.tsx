@@ -5,6 +5,7 @@ import { ResourcesSection } from "../../sidebar/resources-section";
 import { GovernmentStatusSection } from "../../sidebar/government-status-section";
 import { RegionBreakdownCard } from "../../sidebar/region-breakdown-card";
 import { Nation } from "@/domain/nation/nation.schema";
+import { findCountryProfileById } from "@/domain/map/countries";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -13,6 +14,16 @@ interface WideOverviewViewProps {
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
+  const numericId = parseInt(nation.id.replace("NATION_", ""), 10);
+  const profile = findCountryProfileById(numericId);
+
+  const effectiveGdp =
+    nation.gdp && nation.gdp > 0
+      ? nation.gdp
+      : profile
+        ? profile.gdp
+        : 5000000000;
+
   const isOilRich = nation.traits.includes("OIL_RICH");
   const isIndustrialHub = nation.traits.includes("INDUSTRIAL_HUB");
   const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
@@ -44,7 +55,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         />
 
         <EconomyStatsSection
-          gdp={nation.gdp}
+          gdp={effectiveGdp}
           treasury={nation.treasury}
           taxRate={nation.taxRate}
           nationalDebt={nation.nationalDebt}
