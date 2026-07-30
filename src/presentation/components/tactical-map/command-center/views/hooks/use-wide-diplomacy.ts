@@ -16,7 +16,6 @@ export function useWideDiplomacy({
   humanNationId = "NATION_118",
 }: UseWideDiplomacyProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const idResolver = useMemo(() => new NationIdResolver(), []);
 
   const { filteredNations: liveNationsList } = useLiveNations({
     nationsMap,
