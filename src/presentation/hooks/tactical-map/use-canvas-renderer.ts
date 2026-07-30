@@ -9,7 +9,7 @@ interface UseCanvasRendererProps {
   scale: number;
   mapWidth: number;
   mapHeight: number;
-  activeLayer?: "political" | "gdp" | "military";
+  activeLayer?: "political" | "gdp";
 }
 
 export function useCanvasRenderer({

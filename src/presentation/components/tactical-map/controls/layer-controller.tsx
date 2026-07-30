@@ -2,7 +2,7 @@ import React from "react";
 import { Layers } from "lucide-react";
 import { LAYER_OPTIONS } from "./layer-options.config";
 
-export type TacticalLayer = "political" | "gdp" | "military";
+export type TacticalLayer = "political" | "gdp";
 
 interface LayerControllerProps {
   activeLayer: TacticalLayer;

@@ -1,4 +1,4 @@
-import { Eye, Coins, Swords } from "lucide-react";
+import { Eye, Coins } from "lucide-react";
 import { TacticalLayer } from "./layer-controller";
 
 export interface LayerOption {
@@ -20,11 +20,5 @@ export const LAYER_OPTIONS: LayerOption[] = [
     label: "پایش اقتصاد GDP",
     icon: Coins,
     color: "text-treasury",
-  },
-  {
-    id: "military",
-    label: "پایش جغرافیای نظامی",
-    icon: Swords,
-    color: "text-military",
   },
 ];
