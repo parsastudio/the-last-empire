@@ -2,16 +2,13 @@ import { ColorPair } from "./country-palette-generator";
 
 export class MapBevelShader {
   public calculateBevel(
-    r: number,
-    g: number,
-    b: number,
     pair: ColorPair,
     x: number,
     y: number,
     width: number,
     height: number,
     id: number,
-    srcData: Uint8ClampedArray,
+    maskData: Uint8Array,
     dynamicIds?: Uint16Array | null,
   ): { r: number; g: number; b: number } {
     const ratio = (x / width + y / height) * 0.5;
@@ -22,11 +19,11 @@ export class MapBevelShader {
     const finalB = Math.floor(pair.b1 * invRatio + pair.b2 * ratio);
 
     const getOwner = (px: number, py: number): number => {
-      if (dynamicIds && dynamicIds[py * width + px]! > 0) {
-        return dynamicIds[py * width + px]!;
+      const pIdx = py * width + px;
+      if (dynamicIds && dynamicIds[pIdx]! > 0) {
+        return dynamicIds[pIdx]!;
       }
-      const pIdx = (py * width + px) * 4;
-      return srcData[pIdx + 2] || 0;
+      return maskData[pIdx] || 0;
     };
 
     const idLeft = x > 2 ? getOwner(x - 2, y) : id;

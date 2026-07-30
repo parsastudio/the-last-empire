@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MapDataApiHelper } from "./map-data-api-helper";
 import { CountryMapping } from "./mask-rendering-helper";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 interface UseMapAssetsLoaderProps {
   mapMode: "default" | "edited" | "partition";
@@ -15,10 +14,9 @@ export function useMapAssetsLoader({
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isCached, setIsCached] = useState(false);
 
+  const maskDataRef = useRef<Uint8Array | null>(null);
   const packed1024Ref = useRef<Uint8Array | null>(null);
-  const loadedImgRef = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -27,29 +25,21 @@ export function useMapAssetsLoader({
       try {
         setLoading(true);
 
-        try {
-          await fetch(`/api/map-preprocessing/manifest?mode=${mapMode}`);
-        } catch {}
+        const manifestUrl = apiHelper.getManifestUrl(mapMode);
+        let manifestRes = await fetch(manifestUrl);
 
-        const apiPath = apiHelper.getApiPath(mapMode);
-        const res = await fetch(apiPath);
-
-        if (!res.ok) {
-          throw new Error("Failed to load map mappings");
+        if (!manifestRes.ok) {
+          const fallbackUrl = apiHelper.getManifestUrl("default");
+          manifestRes = await fetch(fallbackUrl);
         }
 
-        const json = await res.json();
+        const json = await manifestRes.json();
         if (!active) return;
 
         let countriesData: CountryMapping[] = [];
-        let cachedStatus = false;
 
         if (json.countries) {
           countriesData = json.countries;
-          cachedStatus = true;
-        } else if (json.data && json.data.countries) {
-          countriesData = json.data.countries;
-          cachedStatus = !!json.cached;
         } else if (json.nations) {
           countriesData = json.nations.map(
             (n: {
@@ -65,43 +55,40 @@ export function useMapAssetsLoader({
               areaSqKm: n.territorySize,
             }),
           );
-          cachedStatus = true;
         }
 
         setCountries(countriesData);
-        setIsCached(cachedStatus);
 
-        const binFileName = `${mapMode}-mask-1024.bin`;
-        const binPath = MapPathResolver.getMapClientUrl(
-          "map1",
-          mapMode,
-          binFileName,
-        );
-
+        const mask1024Url = apiHelper.getMask1024Url(mapMode);
         try {
-          const binRes = await fetch(binPath);
+          let binRes = await fetch(mask1024Url);
+          if (!binRes.ok) {
+            binRes = await fetch(apiHelper.getMask1024Url("default"));
+          }
           if (binRes.ok) {
             const arrayBuf = await binRes.arrayBuffer();
             packed1024Ref.current = new Uint8Array(arrayBuf);
           }
         } catch {}
 
-        const img = new Image();
-        const imgSrc = apiHelper.getImageSource(mapMode);
+        const mask4KUrl = apiHelper.getMask4KUrl(mapMode);
+        let mask4KRes = await fetch(mask4KUrl);
+        if (!mask4KRes.ok) {
+          mask4KRes = await fetch(apiHelper.getMask4KUrl("default"));
+        }
 
-        img.onload = () => {
-          if (typeof window === "undefined" || !active) return;
-          loadedImgRef.current = img;
-          setLoading(false);
-        };
-
-        img.onerror = () => {
-          if (!active) return;
-          setError("خطا در بارگذاری تصویر نقشه");
-          setLoading(false);
-        };
-
-        img.src = imgSrc;
+        if (mask4KRes.ok) {
+          const raw4KBuf = await mask4KRes.arrayBuffer();
+          maskDataRef.current = new Uint8Array(raw4KBuf);
+          if (active) {
+            setLoading(false);
+          }
+        } else {
+          if (active) {
+            setError("خطا در بارگذاری دیتای نقشه");
+            setLoading(false);
+          }
+        }
       } catch {
         if (active) {
           setError("خطا در دریافت داده‌های نقشه");
@@ -121,8 +108,7 @@ export function useMapAssetsLoader({
     countries,
     loading,
     error,
-    isCached,
+    maskDataRef,
     packed1024Ref,
-    loadedImgRef,
   };
 }

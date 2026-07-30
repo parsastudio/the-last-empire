@@ -64,7 +64,6 @@ function WorkspaceContent({
   const {
     countries,
     loading: dataLoading,
-    canvasSrcRef,
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
@@ -129,7 +128,6 @@ function WorkspaceContent({
       <TacticalViewport
         containerRef={containerRef}
         canvasDestRef={canvasDestRef}
-        canvasSrcRef={canvasSrcRef}
         isDragging={isDragging}
         isHoveringCountry={isHoveringCountry}
         onMouseDown={handleMouseDown}

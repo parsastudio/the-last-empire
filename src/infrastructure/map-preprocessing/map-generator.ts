@@ -2,7 +2,6 @@ import fs from "fs/promises";
 import path from "path";
 import { GeoJsonProcessor } from "./rasterizer/geojson-processor";
 import { DistanceTransform } from "./distance-transform";
-import { MapWriter } from "./encoders/map-writer";
 import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
 import { GeometryDraw } from "./utils/geometry-draw";
 import { LowResPacker } from "./utils/low-res-packer";
@@ -25,8 +24,8 @@ export async function generateTest6Map(
   height: number,
   mode = "partition",
 ): Promise<{ countries: CountryMapping[] }> {
-  const tempDir = MapPathResolver.getMapServerDir("map1", "temp");
-  await fs.mkdir(tempDir, { recursive: true });
+  const targetDir = MapPathResolver.getMapServerDir("map1", mode);
+  await fs.mkdir(targetDir, { recursive: true });
 
   const geojsonPath = MapPathResolver.getGeoJsonServerPath();
   let geoJson: {
@@ -45,7 +44,6 @@ export async function generateTest6Map(
 
   const processor = new GeoJsonProcessor();
   const distanceTransform = new DistanceTransform();
-  const writer = new MapWriter();
   const areaCounter = new MapAreaPixelCounter();
   const polygonRasterizer = new PolygonFeatureRasterizer();
   const partitioner = new TerritoryPartitioner();
@@ -106,10 +104,7 @@ export async function generateTest6Map(
   const dist = distanceTransform.calculate(buffer, width, height);
   distanceTransform.applySeaDepths(buffer, dist, width, height);
 
-  const maskName = mode;
-
-  await writer.saveMaskImage(width, height, buffer, "map1", maskName);
-  await fs.writeFile(path.join(tempDir, `${maskName}-mask.bin`), buffer);
+  await fs.writeFile(path.join(targetDir, "mask-4k.bin"), buffer);
 
   const packer = new LowResPacker();
   const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
@@ -117,10 +112,7 @@ export async function generateTest6Map(
   const seaDetector = new ClosedSeaDetector();
   seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
 
-  await fs.writeFile(
-    path.join(tempDir, `${maskName}-mask-1024.bin`),
-    packed1024,
-  );
+  await fs.writeFile(path.join(targetDir, "mask-1024.bin"), packed1024);
 
   return { countries };
 }

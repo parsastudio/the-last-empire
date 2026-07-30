@@ -3,36 +3,32 @@ import path from "path";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 let cached1024Buffer: Uint8Array | null = null;
-let cachedRawBuffer: Uint8Array | null = null;
+let cached4KBuffer: Uint8Array | null = null;
 let cachedMode: string | null = null;
 
 export class MapDataProvider {
   public async loadRawMaskBuffer(
     mapMode = "partition",
   ): Promise<Uint8Array | null> {
-    if (cachedRawBuffer && cachedMode === mapMode) {
-      return cachedRawBuffer;
+    if (cached4KBuffer && cachedMode === mapMode) {
+      return cached4KBuffer;
     }
 
     try {
       const targetDir = MapPathResolver.getMapServerDir("map1", mapMode);
-      let filename = "partition-mask.bin";
-      if (mapMode === "edited") filename = "edited-mask.bin";
-      if (mapMode === "default") filename = "default-mask.bin";
-
-      const maskPath = path.join(targetDir, filename);
+      const maskPath = path.join(targetDir, "mask-4k.bin");
       const buffer = await fs.readFile(maskPath);
-      cachedRawBuffer = new Uint8Array(buffer);
+      cached4KBuffer = new Uint8Array(buffer);
       cachedMode = mapMode;
-      return cachedRawBuffer;
+      return cached4KBuffer;
     } catch {
       try {
         const defaultDir = MapPathResolver.getMapServerDir("map1", "default");
-        const defaultPath = path.join(defaultDir, "default-mask.bin");
+        const defaultPath = path.join(defaultDir, "mask-4k.bin");
         const buffer = await fs.readFile(defaultPath);
-        cachedRawBuffer = new Uint8Array(buffer);
+        cached4KBuffer = new Uint8Array(buffer);
         cachedMode = "default";
-        return cachedRawBuffer;
+        return cached4KBuffer;
       } catch {
         return null;
       }
@@ -48,11 +44,7 @@ export class MapDataProvider {
 
     try {
       const targetDir = MapPathResolver.getMapServerDir("map1", mapMode);
-      let filename = "partition-mask-1024.bin";
-      if (mapMode === "edited") filename = "edited-mask-1024.bin";
-      if (mapMode === "default") filename = "default-mask-1024.bin";
-
-      const maskPath = path.join(targetDir, filename);
+      const maskPath = path.join(targetDir, "mask-1024.bin");
       const buffer = await fs.readFile(maskPath);
       cached1024Buffer = new Uint8Array(buffer);
       cachedMode = mapMode;
@@ -60,7 +52,7 @@ export class MapDataProvider {
     } catch {
       try {
         const defaultDir = MapPathResolver.getMapServerDir("map1", "default");
-        const defaultPath = path.join(defaultDir, "default-mask-1024.bin");
+        const defaultPath = path.join(defaultDir, "mask-1024.bin");
         const buffer = await fs.readFile(defaultPath);
         cached1024Buffer = new Uint8Array(buffer);
         cachedMode = "default";
@@ -73,7 +65,7 @@ export class MapDataProvider {
 
   public clearCache(): void {
     cached1024Buffer = null;
-    cachedRawBuffer = null;
+    cached4KBuffer = null;
     cachedMode = null;
   }
 }

@@ -27,19 +27,22 @@ export class MapPathResolver {
     );
   }
 
-  public static getMapServerDir(mapId = "map1", mode = "partition"): string {
-    if (mode === "essential") {
-      return path.join(process.cwd(), "public", "maps", mapId, "essential");
-    }
-    return path.join(process.cwd(), "public", "maps", mapId, "temp");
+  public static getMapServerDir(
+    mapId = "map1",
+    mode = "partition",
+    sub?: string,
+  ): string {
+    const subFolder = sub === "essential" ? "essential" : "temp";
+    return path.join(process.cwd(), "public", "maps", mapId, subFolder, mode);
   }
 
   public static getMapClientUrl(
     mapId = "map1",
     mode = "partition",
     filename = "",
+    sub?: string,
   ): string {
-    const subFolder = mode === "essential" ? "essential" : "temp";
-    return `/maps/${mapId}/${subFolder}/${filename}`;
+    const subFolder = sub === "essential" ? "essential" : "temp";
+    return `/maps/${mapId}/${subFolder}/${mode}/${filename}`;
   }
 }

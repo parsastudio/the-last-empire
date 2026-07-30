@@ -1,19 +1,15 @@
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export class MapDataApiHelper {
-  public getApiPath(mapMode: "default" | "edited" | "partition"): string {
-    return MapPathResolver.getMapClientUrl(
-      "map1",
-      mapMode,
-      `${mapMode}-mappings.json`,
-    );
+  public getManifestUrl(mapMode: "default" | "edited" | "partition"): string {
+    return MapPathResolver.getMapClientUrl("map1", mapMode, "manifest.json");
   }
 
-  public getImageSource(mapMode: "default" | "edited" | "partition"): string {
-    return MapPathResolver.getMapClientUrl(
-      "map1",
-      mapMode,
-      `${mapMode}-mask.png`,
-    );
+  public getMask4KUrl(mapMode: "default" | "edited" | "partition"): string {
+    return MapPathResolver.getMapClientUrl("map1", mapMode, "mask-4k.bin");
+  }
+
+  public getMask1024Url(mapMode: "default" | "edited" | "partition"): string {
+    return MapPathResolver.getMapClientUrl("map1", mapMode, "mask-1024.bin");
   }
 }
