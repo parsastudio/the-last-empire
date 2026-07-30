@@ -4,10 +4,24 @@ import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GameStateInitializer } from "./game-state-initializer";
 import { PlayerSessionManager } from "./player-session-manager";
 import { GameEngine } from "@/engine/game-engine";
+import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
 export class SimulationFacade {
   private sessionManager = new PlayerSessionManager();
   private initializer = new GameStateInitializer();
+
+  public async getActiveSessionStateAsync(): Promise<GameState | null> {
+    const playerNationId = this.sessionManager.getPlayerNationId();
+    if (!playerNationId) {
+      return null;
+    }
+    const gridState = GridStateProvider.getInstance();
+    await GridLoaderService.ensureGridLoaded(gridState);
+    return this.initializer.initializeSimulationForNation(
+      playerNationId,
+      gridState,
+    );
+  }
 
   public getActiveSessionState(): GameState | null {
     const playerNationId = this.sessionManager.getPlayerNationId();
@@ -19,6 +33,21 @@ export class SimulationFacade {
       playerNationId,
       gridState,
     );
+  }
+
+  public async advanceTurnAsync(): Promise<GameState | null> {
+    const playerNationId = this.sessionManager.getPlayerNationId();
+    if (!playerNationId) {
+      return null;
+    }
+    const gridState = GridStateProvider.getInstance();
+    await GridLoaderService.ensureGridLoaded(gridState);
+    const baseState = this.initializer.initializeSimulationForNation(
+      playerNationId,
+      gridState,
+    );
+    const engine = new GameEngine(baseState);
+    return engine.nextTurn();
   }
 
   public advanceTurn(): GameState | null {

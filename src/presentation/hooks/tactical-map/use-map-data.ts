@@ -87,5 +87,6 @@ export function useMapData({
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
+    reRenderLayer,
   };
 }
