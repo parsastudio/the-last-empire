@@ -4,14 +4,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GridNationDetector } from "./grid-nation-detector";
 import { GlobalAiInitializer } from "./global-ai-initializer";
 import { ManifestFileLoader } from "./manifest-file-loader";
-import { findCountryProfileByCode } from "@/domain/map/countries";
-
-export function normalizeNationId(rawId: string): string {
-  if (rawId.startsWith("NATION_")) return rawId;
-  const profile = findCountryProfileByCode(rawId);
-  if (profile) return `NATION_${profile.id}`;
-  return rawId;
-}
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class GameStateInitializer {
   private detector = new GridNationDetector();
@@ -24,7 +17,7 @@ export class GameStateInitializer {
     gridState: GridState,
     governmentType?: string,
   ): GameState {
-    const normalizedHumanId = normalizeNationId(nationId);
+    const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
     const cells = gridState.getAllCells();
     const detectedNations = this.detector.detectUniqueNations(cells);
 
