@@ -6,6 +6,7 @@ import { GameIdGenerator } from "@/domain/shared/game-id-generator";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { useToast } from "@/presentation/context/toast-context";
 import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 
 export function useSelectNationForm() {
   const router = useRouter();
@@ -83,7 +84,7 @@ export function useSelectNationForm() {
       );
 
       if (typeof window !== "undefined") {
-        localStorage.setItem("test6_human_nation_id", selectedNation.id);
+        localStorage.setItem(STORAGE_KEYS.HUMAN_NATION_ID, selectedNation.id);
       }
 
       const result = await apiService.selectCountry(

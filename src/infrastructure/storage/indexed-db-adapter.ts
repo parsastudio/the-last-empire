@@ -1,6 +1,11 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { StateSerializer } from "@/infrastructure/storage/state-serializer";
-import { INDEXED_DB_CONFIG } from "./indexed-db-config";
+
+export const INDEXED_DB_CONFIG = {
+  DB_NAME: "GeopoliticsEngineDB",
+  STORE_NAME: "saves",
+  VERSION: 1,
+} as const;
 
 export interface SavedRecord {
   gameId: string;

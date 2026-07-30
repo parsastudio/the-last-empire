@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
+import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 
 export function useGeopoliticsGame(customGameId?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -15,7 +16,7 @@ export function useGeopoliticsGame(customGameId?: string) {
 
   const getStoredNationId = useCallback((): string => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("test6_human_nation_id") || "IRN";
+      return localStorage.getItem(STORAGE_KEYS.HUMAN_NATION_ID) || "IRN";
     }
     return "IRN";
   }, []);
