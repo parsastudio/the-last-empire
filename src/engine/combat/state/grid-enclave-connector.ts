@@ -3,13 +3,20 @@ import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
 
 export class GridEnclaveConnector {
   public regroupEnclaves(countryId: string, allCells: GridCell[]): void {
-    const countryCells = allCells.filter((c) => c.ownerId === countryId);
+    const countryCells: GridCell[] = [];
+    for (let i = 0; i < allCells.length; i++) {
+      if (allCells[i]!.ownerId === countryId) {
+        countryCells.push(allCells[i]!);
+      }
+    }
+
     if (countryCells.length === 0) return;
 
     const visited = new Set<string>();
     let enclaveIdCounter = 1;
 
-    for (const cell of countryCells) {
+    for (let i = 0; i < countryCells.length; i++) {
+      const cell = countryCells[i]!;
       const key = `${cell.x},${cell.y}`;
       if (!visited.has(key)) {
         const component: GridCell[] = [];
@@ -31,22 +38,30 @@ export class GridEnclaveConnector {
             { x: current.x, y: current.y - 1 },
           ];
 
-          for (const n of neighbors) {
+          for (let j = 0; j < 4; j++) {
+            const n = neighbors[j]!;
             const nKey = `${n.x},${n.y}`;
             if (!visited.has(nKey)) {
-              const match = countryCells.find(
-                (c) => c.x === n.x && c.y === n.y,
-              );
-              if (match) {
-                visited.add(nKey);
-                queue.enqueue(match);
+              for (let k = 0; k < countryCells.length; k++) {
+                const match = countryCells[k]!;
+                if (match.x === n.x && match.y === n.y) {
+                  visited.add(nKey);
+                  queue.enqueue(match);
+                  break;
+                }
               }
             }
           }
         }
 
         const isMainland = component.some((c) => c.enclaveId === 0);
-        const colonyCell = component.find((c) => c.enclaveId >= 11);
+        let colonyCell: GridCell | undefined = undefined;
+        for (let j = 0; j < component.length; j++) {
+          if (component[j]!.enclaveId >= 11) {
+            colonyCell = component[j];
+            break;
+          }
+        }
 
         let targetEnclaveId = 0;
         if (isMainland) {
@@ -57,8 +72,8 @@ export class GridEnclaveConnector {
           targetEnclaveId = Math.min(10, enclaveIdCounter++);
         }
 
-        for (const c of component) {
-          c.enclaveId = targetEnclaveId;
+        for (let j = 0; j < component.length; j++) {
+          component[j]!.enclaveId = targetEnclaveId;
         }
       }
     }

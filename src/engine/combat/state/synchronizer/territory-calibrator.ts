@@ -22,12 +22,26 @@ export class TerritoryCalibrator {
   ): Record<string, Nation> {
     const updated = { ...nations };
 
+    const nationCellsMap = new Map<string, GridCell[]>();
+    for (let i = 0; i < allCells.length; i++) {
+      const cell = allCells[i]!;
+      const owner = cell.ownerId;
+      let list = nationCellsMap.get(owner);
+      if (!list) {
+        list = [];
+        nationCellsMap.set(owner, list);
+      }
+      list.push(cell);
+    }
+
     for (const [id, nation] of Object.entries(updated)) {
-      const ownedCells = allCells.filter((c) => c.ownerId === id);
+      const ownedCells = nationCellsMap.get(id) || [];
 
       let totalCalibratedArea = 0;
-      for (const cell of ownedCells) {
-        totalCalibratedArea += this.calibrator.getCalibratedCellArea(cell);
+      for (let i = 0; i < ownedCells.length; i++) {
+        totalCalibratedArea += this.calibrator.getCalibratedCellArea(
+          ownedCells[i]!,
+        );
       }
 
       let roundedArea = Math.round(totalCalibratedArea);
