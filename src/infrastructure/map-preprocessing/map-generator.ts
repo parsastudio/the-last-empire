@@ -1,19 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
-import { GeoJsonProcessor } from "./rasterizer/geojson-processor";
 import { DistanceTransform } from "./distance-transform";
 import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
-import { GeometryDraw } from "./utils/geometry-draw";
 import { LowResPacker } from "./utils/low-res-packer";
 import { ClosedSeaDetector } from "./utils/closed-sea-detector";
-import { PolygonFeatureRasterizer } from "./generator/polygon-feature-rasterizer";
 import { MapPathResolver } from "./map-path-resolver";
 import { TerritoryPartitioner } from "./generator/territory-partitioner";
 import { PngDecoder } from "./encoders/png-decoder";
-import {
-  ALL_COUNTRY_PROFILES,
-  findCountryProfileByCode,
-} from "@/infrastructure/data/countries";
+import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
 
 export interface CountryMapping {
   id: number;
@@ -30,25 +24,17 @@ export async function generateTest6Map(
   const targetDir = MapPathResolver.getMapServerDir("map1");
   await fs.mkdir(targetDir, { recursive: true });
 
-  const geojsonPath = MapPathResolver.getGeoJsonServerPath();
-  let geoJson: {
-    features: Array<{
-      properties?: Record<string, unknown>;
-      id?: string;
-      geometry: { type: string; coordinates: unknown };
-    }>;
-  };
-  try {
-    const raw = await fs.readFile(geojsonPath, "utf-8");
-    geoJson = JSON.parse(raw);
-  } catch {
-    geoJson = { features: [] };
+  const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
+  const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
+
+  if (!decodedMask || decodedMask.buffer.length !== width * height) {
+    throw new Error(
+      "فایل ماسک ادیت‌شده (edited-mask.png) یافت نشد یا ابعاد آن با ۴۰۹۶×۲۰۴۸ مطابقت ندارد.",
+    );
   }
 
-  const processor = new GeoJsonProcessor();
   const distanceTransform = new DistanceTransform();
   const areaCounter = new MapAreaPixelCounter();
-  const polygonRasterizer = new PolygonFeatureRasterizer();
   const partitioner = new TerritoryPartitioner();
 
   const idToCodeMap = new Map<number, string>();
@@ -82,62 +68,7 @@ export async function generateTest6Map(
   }
 
   const buffer = new Uint8Array(width * height);
-  const features = processor.extractFeatures(geoJson);
-
-  let fallbackId = autoId;
-  const getCountryId = (code: string): number => {
-    const cleanCode = code.toUpperCase();
-    if (codeToIdMap.has(cleanCode)) {
-      return codeToIdMap.get(cleanCode)!;
-    }
-
-    const profile = findCountryProfileByCode(cleanCode);
-    let assignedId = fallbackId;
-    if (profile && codeToIdMap.has(profile.code.toUpperCase())) {
-      assignedId = codeToIdMap.get(profile.code.toUpperCase())!;
-    } else {
-      fallbackId++;
-    }
-
-    codeToIdMap.set(cleanCode, assignedId);
-    return assignedId;
-  };
-
-  for (const feature of features) {
-    const countryId = getCountryId(feature.code);
-    if (!idToCodeMap.has(countryId)) {
-      countries.push({
-        id: countryId,
-        code: feature.code,
-        name: feature.name,
-        color: [0, 0, countryId],
-        areaSqKm: 0,
-      });
-      idToCodeMap.set(countryId, feature.code);
-    }
-  }
-
-  let isEditedLoaded = false;
-  const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
-  const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
-  if (decodedMask && decodedMask.buffer.length === width * height) {
-    buffer.set(decodedMask.buffer);
-    isEditedLoaded = true;
-  }
-
-  if (!isEditedLoaded) {
-    polygonRasterizer.rasterizeFeatures(
-      features,
-      processor,
-      width,
-      height,
-      buffer,
-      getCountryId,
-    );
-    const draw = new GeometryDraw();
-    draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 254);
-    draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 254);
-  }
+  buffer.set(decodedMask.buffer);
 
   partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
 
