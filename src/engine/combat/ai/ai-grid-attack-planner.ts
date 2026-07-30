@@ -12,28 +12,68 @@ export class AiGridAttackPlanner {
     defenderId: string,
     allCells: GridCell[],
   ): Coordinate | null {
-    const defenderCells = allCells.filter((c) => c.ownerId === defenderId);
+    const defenderCells: GridCell[] = [];
+    const attackerCells: GridCell[] = [];
 
-    if (defenderCells.length === 0) {
+    for (let i = 0; i < allCells.length; i++) {
+      const cell = allCells[i]!;
+      if (cell.ownerId === defenderId) {
+        defenderCells.push(cell);
+      } else if (cell.ownerId === attackerId) {
+        attackerCells.push(cell);
+      }
+    }
+
+    if (defenderCells.length === 0 || attackerCells.length === 0) {
       return null;
     }
 
-    const attackerCells = allCells.filter((c) => c.ownerId === attackerId);
+    let attackerCentroidX = 0;
+    let attackerCentroidY = 0;
+    for (let i = 0; i < attackerCells.length; i++) {
+      attackerCentroidX += attackerCells[i]!.x;
+      attackerCentroidY += attackerCells[i]!.y;
+    }
+    attackerCentroidX = Math.floor(attackerCentroidX / attackerCells.length);
+    attackerCentroidY = Math.floor(attackerCentroidY / attackerCells.length);
 
-    for (const cell of defenderCells) {
-      const target = { x: cell.x, y: cell.y };
-      const closestBase = this.baseFinder.findClosestBase(
-        attackerId,
-        target,
-        allCells,
+    let bestTargetCell: GridCell | null = null;
+    let minDistToAttacker = Infinity;
+
+    const step = Math.max(1, Math.floor(defenderCells.length / 10));
+
+    for (let i = 0; i < defenderCells.length; i += step) {
+      const cell = defenderCells[i]!;
+      const dist = Math.hypot(
+        cell.x - attackerCentroidX,
+        cell.y - attackerCentroidY,
       );
 
-      if (
-        closestBase &&
-        this.validator.isValidOrigin(closestBase, attackerCells)
-      ) {
-        return target;
+      if (dist < minDistToAttacker) {
+        minDistToAttacker = dist;
+        bestTargetCell = cell;
       }
+    }
+
+    if (!bestTargetCell) {
+      bestTargetCell = defenderCells[0] || null;
+    }
+
+    if (!bestTargetCell) {
+      return null;
+    }
+
+    const target = { x: bestTargetCell.x, y: bestTargetCell.y };
+    const closestBase = this.baseFinder.findClosestBaseInList(
+      target,
+      attackerCells,
+    );
+
+    if (
+      closestBase &&
+      this.validator.isValidOrigin(closestBase, attackerCells)
+    ) {
+      return target;
     }
 
     return null;

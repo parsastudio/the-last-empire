@@ -11,14 +11,13 @@ export class AttackOriginValidator {
     const enclaveId = originCell.enclaveId;
     const countryId = originCell.ownerId;
 
-    const contiguousCells = attackerCells.filter(
-      (c) => c.ownerId === countryId && c.enclaveId === enclaveId,
-    );
-
-    const totalAreaSqKm = contiguousCells.reduce(
-      (sum, c) => sum + c.highResPixelCount * 86.3,
-      0,
-    );
+    let totalAreaSqKm = 0;
+    for (let i = 0; i < attackerCells.length; i++) {
+      const c = attackerCells[i]!;
+      if (c.ownerId === countryId && c.enclaveId === enclaveId) {
+        totalAreaSqKm += c.highResPixelCount * 86.3;
+      }
+    }
 
     return this.filter.isEligibleAsBase(totalAreaSqKm);
   }

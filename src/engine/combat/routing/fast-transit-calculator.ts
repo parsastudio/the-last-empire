@@ -28,10 +28,16 @@ export class FastTransitCalculator {
     const isWaterTarget =
       targetNationId === "WATER" || targetNationId === "CLOSED_SEA";
 
+    const attackerCells: GridCell[] = [];
+    for (let i = 0; i < allCells.length; i++) {
+      if (allCells[i]!.ownerId === attackerId) {
+        attackerCells.push(allCells[i]!);
+      }
+    }
+
     const closestAttackerCell = this.findClosestAttackerCell(
-      attackerId,
+      attackerCells,
       scaledTargetPixel,
-      allCells,
     );
 
     const originCoord = closestAttackerCell
@@ -90,10 +96,13 @@ export class FastTransitCalculator {
       { x: originCell.x, y: Math.max(0, originCell.y - 1) },
     ];
 
-    for (const n of neighbors) {
-      const match = allCells.find((c) => c.x === n.x && c.y === n.y);
-      if (match && match.ownerId === targetNationId) {
-        return true;
+    for (let i = 0; i < neighbors.length; i++) {
+      const n = neighbors[i]!;
+      for (let j = 0; j < allCells.length; j++) {
+        const c = allCells[j]!;
+        if (c.x === n.x && c.y === n.y && c.ownerId === targetNationId) {
+          return true;
+        }
       }
     }
 
@@ -101,23 +110,20 @@ export class FastTransitCalculator {
   }
 
   private findClosestAttackerCell(
-    attackerId: string,
+    attackerCells: GridCell[],
     targetPixel: Coordinate,
-    allCells: GridCell[],
   ): GridCell | undefined {
     let closest: GridCell | undefined = undefined;
     let minSquareDist = Infinity;
 
-    for (let i = 0; i < allCells.length; i++) {
-      const cell = allCells[i]!;
-      if (cell.ownerId === attackerId) {
-        const sqDist =
-          Math.pow(cell.x - targetPixel.x, 2) +
-          Math.pow(cell.y - targetPixel.y, 2);
-        if (sqDist < minSquareDist) {
-          minSquareDist = sqDist;
-          closest = cell;
-        }
+    for (let i = 0; i < attackerCells.length; i++) {
+      const cell = attackerCells[i]!;
+      const sqDist =
+        Math.pow(cell.x - targetPixel.x, 2) +
+        Math.pow(cell.y - targetPixel.y, 2);
+      if (sqDist < minSquareDist) {
+        minSquareDist = sqDist;
+        closest = cell;
       }
     }
 
@@ -161,7 +167,8 @@ export class FastTransitCalculator {
         { x: current.x, y: Math.max(0, current.y - 1) },
       ];
 
-      for (const n of neighbors) {
+      for (let i = 0; i < neighbors.length; i++) {
+        const n = neighbors[i]!;
         const vIdx = n.y * this.width + n.x;
         if (visited[vIdx] === 0) {
           const cell = cellMap.get(vIdx);

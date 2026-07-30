@@ -12,21 +12,29 @@ export class BattleValidator {
     targetPixel: Coordinate,
     allCells: GridCell[],
   ): boolean {
-    const closestBase = this.baseFinder.findClosestBase(
-      attackerId,
+    const attackerCells: GridCell[] = [];
+    for (let i = 0; i < allCells.length; i++) {
+      const c = allCells[i]!;
+      if (
+        c.ownerId === attackerId ||
+        (c.isOccupied && c.occupierId === attackerId)
+      ) {
+        attackerCells.push(c);
+      }
+    }
+
+    if (attackerCells.length === 0) {
+      return false;
+    }
+
+    const closestBase = this.baseFinder.findClosestBaseInList(
       targetPixel,
-      allCells,
+      attackerCells,
     );
 
     if (!closestBase) {
       return false;
     }
-
-    const attackerCells = allCells.filter(
-      (c) =>
-        c.ownerId === attackerId ||
-        (c.isOccupied && c.occupierId === attackerId),
-    );
 
     return this.originValidator.isValidOrigin(closestBase, attackerCells);
   }

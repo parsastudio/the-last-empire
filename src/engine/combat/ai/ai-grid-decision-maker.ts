@@ -14,9 +14,19 @@ export class AiGridDecisionMaker {
       (state as { gridState?: GridState }).gridState || new GridState();
     const allCells = gridState.getAllCells();
 
-    const activeNationsIds = Object.keys(state.nations).filter(
-      (id) => id !== attackerId && state.nations[id]?.isAlive,
-    );
+    const attackerNation = state.nations[attackerId];
+    if (!attackerNation) return [];
+
+    const activeNationsIds = Object.keys(state.nations).filter((id) => {
+      if (id === attackerId || !state.nations[id]?.isAlive) return false;
+      const rel = attackerNation.relations[id];
+      return (
+        rel?.stance === "WAR" ||
+        attackerNation.geography.landNeighbors.includes(id)
+      );
+    });
+
+    if (activeNationsIds.length === 0) return [];
 
     const campaigns = this.campaignGenerator.generateCampaignTargets(
       attackerId,
