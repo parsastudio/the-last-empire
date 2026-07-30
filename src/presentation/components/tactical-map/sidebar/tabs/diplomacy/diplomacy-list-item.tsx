@@ -1,5 +1,5 @@
 import React from "react";
-import { DiplomaticRelation } from "./diplomacy-detail-view";
+import { DiplomaticRelation } from "./utils/relation-resolver";
 import { DiplomaticStanceBadge } from "./diplomatic-stance-badge";
 
 interface DiplomacyListItemProps {

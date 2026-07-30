@@ -1,6 +1,16 @@
 import { findCountryProfileByCode } from "@/domain/map/countries";
-import { DiplomaticRelation } from "../diplomacy-detail-view";
 import { Nation } from "@/domain/nation/nation.schema";
+import { CountryProfileData } from "../country-profile-stats";
+
+export interface DiplomaticRelation {
+  code: string;
+  name: string;
+  flagCode: string;
+  stance: string;
+  opinion: number;
+  description: string;
+  profileData: CountryProfileData;
+}
 
 export function resolveProfileRelation(
   code: string,
