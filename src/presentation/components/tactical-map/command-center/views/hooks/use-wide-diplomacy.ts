@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { resolveProfileRelation } from "../../../sidebar/tabs/diplomacy/utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "../../../sidebar/tabs/diplomacy/utils/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 interface UseWideDiplomacyProps {
@@ -44,7 +44,7 @@ export function useWideDiplomacy({
     selectedTargetCode || defaultCode,
   );
 
-  const targetNationId = idResolver.resolveFullNationId(activeCode);
+  const targetNationId = NationIdResolver.resolveCanonicalId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
   const selectedRelation = resolveProfileRelation(activeCode, targetLiveNation);
 

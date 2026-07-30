@@ -6,6 +6,10 @@ import { GlobalAiInitializer } from "./global-ai-initializer";
 import { ManifestFileLoader } from "./manifest-file-loader";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
+export function normalizeNationId(nationId: string): string {
+  return NationIdResolver.resolveCanonicalId(nationId);
+}
+
 export class GameStateInitializer {
   private detector = new GridNationDetector();
   private aiInitializer = new GlobalAiInitializer();
