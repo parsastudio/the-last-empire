@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { BaseGdpCalculator } from "./gdp/base-gdp.calculator";
 import { GdpGrowthCalculator } from "./gdp/gdp-growth.calculator";
-import { findCountryProfileById } from "@/domain/map/countries";
+import { findCountryProfileById } from "@/infrastructure/data/countries";
 
 export class GdpCalculator {
   private baseGdpCalc = new BaseGdpCalculator();

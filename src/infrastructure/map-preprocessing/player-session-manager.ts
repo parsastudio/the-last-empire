@@ -1,6 +1,6 @@
 import { normalizeNationId } from "./game-state-initializer";
 
-let serverFallbackNationId: string = "NATION_118";
+let serverFallbackNationId = "NATION_118";
 
 export class PlayerSessionManager {
   private readonly storageKey = "test6_human_nation_id";

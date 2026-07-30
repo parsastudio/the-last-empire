@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationProfileAssigner } from "./nation-profile-assigner";
 import { DiplomaticMatrixGenerator } from "./diplomatic-matrix-generator";
-import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { MapManifest } from "./generator/map-manifest-builder";
 
 export class GlobalAiInitializer {
   private profileAssigner = new NationProfileAssigner();
