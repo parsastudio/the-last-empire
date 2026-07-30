@@ -34,10 +34,9 @@ export class TradeRouteManager {
         continue;
       }
 
-      const isPeaceful = relation.stance !== "WAR";
       const isOpinionAllowed = relation.opinion > -30;
 
-      if (isPeaceful && isOpinionAllowed) {
+      if (isOpinionAllowed) {
         const rawTradeValue = Math.floor((nation.gdp + neighbor.gdp) * 0.001);
         const tradeValue = Math.floor(
           rawTradeValue * govTraits.tradeMultiplier,
