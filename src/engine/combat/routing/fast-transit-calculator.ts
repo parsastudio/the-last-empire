@@ -20,41 +20,47 @@ export class FastTransitCalculator {
     targetPixel: Coordinate,
     allCells: GridCell[],
   ): FastTransitResult {
-    const isLandNeighbor = this.checkLandBorder(
-      attackerId,
-      targetNationId,
-      allCells,
-    );
+    const scaledTargetPixel: Coordinate = {
+      x: targetPixel.x > 1024 ? Math.floor(targetPixel.x / 4) : targetPixel.x,
+      y: targetPixel.y > 512 ? Math.floor(targetPixel.y / 4) : targetPixel.y,
+    };
+
+    const isWaterTarget =
+      targetNationId === "WATER" || targetNationId === "CLOSED_SEA";
+
+    const isLandNeighbor = !isWaterTarget
+      ? this.checkLandBorder(attackerId, targetNationId, allCells)
+      : false;
 
     const closestAttackerCell = this.findClosestAttackerCell(
       attackerId,
-      targetPixel,
+      scaledTargetPixel,
       allCells,
     );
 
     const originCoord = closestAttackerCell
       ? { x: closestAttackerCell.x, y: closestAttackerCell.y }
-      : targetPixel;
+      : scaledTargetPixel;
 
     if (isLandNeighbor) {
       const pixelDist = Math.hypot(
-        originCoord.x - targetPixel.x,
-        originCoord.y - targetPixel.y,
+        originCoord.x - scaledTargetPixel.x,
+        originCoord.y - scaledTargetPixel.y,
       );
       const distanceInKm = Math.round(pixelDist * Math.sqrt(this.sqKmPerPixel));
 
       return {
         isLandAttack: true,
-        distanceInKm: Math.max(15, distanceInKm),
+        distanceInKm: Math.max(30, Math.min(300, distanceInKm)),
         originCoordinate: originCoord,
-        targetCoordinate: targetPixel,
+        targetCoordinate: scaledTargetPixel,
         pixelSteps: Math.ceil(pixelDist),
       };
     }
 
     const singlePassResult = this.runSingleSourceSeaBfs(
       attackerId,
-      targetPixel,
+      scaledTargetPixel,
       allCells,
     );
 
@@ -64,9 +70,9 @@ export class FastTransitCalculator {
 
     return {
       isLandAttack: false,
-      distanceInKm: Math.max(50, kmDist),
+      distanceInKm: Math.max(120, kmDist),
       originCoordinate: singlePassResult.originCoord,
-      targetCoordinate: targetPixel,
+      targetCoordinate: scaledTargetPixel,
       pixelSteps: singlePassResult.pixelSteps,
     };
   }
@@ -84,10 +90,10 @@ export class FastTransitCalculator {
     for (const cell of allCells) {
       if (cell.ownerId === targetNationId) {
         const neighbors = [
-          { x: cell.x + 1, y: cell.y },
-          { x: cell.x - 1, y: cell.y },
-          { x: cell.x, y: cell.y + 1 },
-          { x: cell.x, y: cell.y - 1 },
+          { x: (cell.x + 1) % this.width, y: cell.y },
+          { x: (cell.x - 1 + this.width) % this.width, y: cell.y },
+          { x: cell.x, y: Math.min(this.height - 1, cell.y + 1) },
+          { x: cell.x, y: Math.max(0, cell.y - 1) },
         ];
 
         for (const n of neighbors) {
@@ -155,31 +161,24 @@ export class FastTransitCalculator {
       }
 
       const neighbors = [
-        { x: current.x + 1, y: current.y },
-        { x: current.x - 1, y: current.y },
-        { x: current.x, y: current.y + 1 },
-        { x: current.x, y: current.y - 1 },
+        { x: (current.x + 1) % this.width, y: current.y },
+        { x: (current.x - 1 + this.width) % this.width, y: current.y },
+        { x: current.x, y: Math.min(this.height - 1, current.y + 1) },
+        { x: current.x, y: Math.max(0, current.y - 1) },
       ];
 
       for (const n of neighbors) {
-        let nx = n.x;
-        if (nx < 0) nx = this.width - 1;
-        else if (nx >= this.width) nx = 0;
-
-        const ny = n.y;
-        if (ny >= 0 && ny < this.height) {
-          const vIdx = ny * this.width + nx;
-          if (visited[vIdx] === 0) {
-            const cell = cellMap.get(vIdx);
-            if (
-              cell &&
-              (cell.ownerId === "WATER" ||
-                cell.ownerId === "CLOSED_SEA" ||
-                cell.ownerId === attackerId)
-            ) {
-              visited[vIdx] = 1;
-              queue.push({ x: nx, y: ny, steps: current.steps + 1 });
-            }
+        const vIdx = n.y * this.width + n.x;
+        if (visited[vIdx] === 0) {
+          const cell = cellMap.get(vIdx);
+          if (
+            cell &&
+            (cell.ownerId === "WATER" ||
+              cell.ownerId === "CLOSED_SEA" ||
+              cell.ownerId === attackerId)
+          ) {
+            visited[vIdx] = 1;
+            queue.push({ x: n.x, y: n.y, steps: current.steps + 1 });
           }
         }
       }
@@ -187,7 +186,7 @@ export class FastTransitCalculator {
 
     return {
       originCoord: targetPixel,
-      pixelSteps: 15,
+      pixelSteps: 25,
     };
   }
 }
