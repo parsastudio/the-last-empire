@@ -53,8 +53,6 @@ export class GridDownsampler {
           highResPixelCount: countryCounts.size > 0 ? 16 : 0,
           enclaveId: 0,
           seaAccess: 0,
-          isOccupied: false,
-          occupierId: null,
         };
         gridState.setCell(gx, gy, cell);
       }

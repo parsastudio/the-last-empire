@@ -15,10 +15,7 @@ export class BattleValidator {
     const attackerCells: GridCell[] = [];
     for (let i = 0; i < allCells.length; i++) {
       const c = allCells[i]!;
-      if (
-        c.ownerId === attackerId ||
-        (c.isOccupied && c.occupierId === attackerId)
-      ) {
+      if (c.ownerId === attackerId) {
         attackerCells.push(c);
       }
     }

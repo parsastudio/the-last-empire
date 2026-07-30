@@ -15,7 +15,7 @@ export class CapitulationEngine {
       const c = allCells[i]!;
       if (c.ownerId === countryId) {
         countryCells.push(c);
-      } else if (c.ownerId === conquerorId && c.isOccupied) {
+      } else if (c.ownerId === conquerorId) {
         conqueredCount++;
       }
     }
