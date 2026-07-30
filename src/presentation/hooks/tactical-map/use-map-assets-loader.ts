@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MapDataApiHelper } from "./map-data-api-helper";
 import { CountryMapping } from "./mask-rendering-helper";
-import { MapPathResolver } from "@/application/map-rendering/map-path-resolver";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 interface UseMapAssetsLoaderProps {
   mapMode: "default" | "edited" | "partition";
