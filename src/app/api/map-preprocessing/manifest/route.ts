@@ -4,6 +4,7 @@ import path from "path";
 import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
@@ -23,6 +24,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     } catch {}
 
     if (!mappingsExists) {
+      const provider = new MapDataProvider();
+      provider.clearCache();
       const generated = await generateTest6Map(4096, 2048, mode);
       await fs.writeFile(
         mappingsPath,
