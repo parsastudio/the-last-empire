@@ -12,6 +12,15 @@ export interface TargetCountryOption {
   gdp: number;
 }
 
+export interface ActiveProxyOperation {
+  targetId: string;
+  targetName: string;
+  targetFlagCode: string;
+  currentBudget: number;
+  stabilityDrainPerTurn: number;
+  targetStability: number;
+}
+
 interface UseWideProxyProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
@@ -74,6 +83,35 @@ export function useWideProxy({
     return Math.floor(selectedTargetNation.gdp * (desiredDrain / 2) * 0.01);
   }, [selectedTargetNation, desiredDrain]);
 
+  const activeOperations = useMemo<ActiveProxyOperation[]>(() => {
+    if (!nationsMap) return [];
+    const ops: ActiveProxyOperation[] = [];
+
+    for (const [targetId, budget] of Object.entries(
+      nation.proxyInfluenceBudget || {},
+    )) {
+      if (budget > 0) {
+        const target = nationsMap[targetId];
+        if (target && target.isAlive) {
+          const drain = Math.max(
+            1,
+            Math.min(15, Math.floor(Math.log10(budget) * 3)),
+          );
+          ops.push({
+            targetId,
+            targetName: target.name,
+            targetFlagCode: target.flagCode || "IR",
+            currentBudget: budget,
+            stabilityDrainPerTurn: drain,
+            targetStability: target.government.stability,
+          });
+        }
+      }
+    }
+
+    return ops;
+  }, [nation.proxyInfluenceBudget, nationsMap]);
+
   const handleFundProxy = useCallback(async () => {
     if (!selectedTargetNation || requiredBudget <= 0) return;
 
@@ -108,6 +146,7 @@ export function useWideProxy({
     requiredBudget,
     filteredTargetOptions: countryOptions,
     selectedTargetNation,
+    activeOperations,
     handleFundProxy,
   };
 }

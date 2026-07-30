@@ -23,7 +23,9 @@ export class BattleValidator {
     }
 
     const attackerCells = allCells.filter(
-      (c) => c.ownerId === attackerId || c.occupierId === attackerId,
+      (c) =>
+        c.ownerId === attackerId ||
+        (c.isOccupied && c.occupierId === attackerId),
     );
 
     return this.originValidator.isValidOrigin(closestBase, attackerCells);

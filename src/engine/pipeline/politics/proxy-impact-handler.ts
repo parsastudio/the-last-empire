@@ -1,8 +1,8 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
+import { ProxyStabilityImpactCalculator } from "@/engine/politics/proxy/proxy-stability-impact.calculator";
 
 export class ProxyImpactHandler {
-  private proxyManager = new ProxyWarManager();
+  private impactCalculator = new ProxyStabilityImpactCalculator();
 
   public handle(
     id: string,
@@ -18,7 +18,7 @@ export class ProxyImpactHandler {
       }
     }
 
-    const proxyResult = this.proxyManager.processTurnProxyImpact(
+    const proxyResult = this.impactCalculator.processTurnProxyImpact(
       updated,
       accumulatedProxyBudget,
     );
