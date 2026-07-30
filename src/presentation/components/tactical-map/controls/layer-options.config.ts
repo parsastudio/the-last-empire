@@ -23,7 +23,7 @@ export const LAYER_OPTIONS: LayerOption[] = [
   },
   {
     id: "military",
-    label: "جبهه‌های نبرد",
+    label: "پایش جغرافیای نظامی",
     icon: Swords,
     color: "text-military",
   },

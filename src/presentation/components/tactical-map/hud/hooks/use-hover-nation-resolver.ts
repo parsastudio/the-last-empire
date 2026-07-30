@@ -79,7 +79,7 @@ export function useHoverNationResolver({
       if (enclaveIdVal >= 1 && enclaveIdVal <= 10) {
         regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
       } else if (enclaveIdVal >= 11) {
-        regionLabel = `مستعمره ${(enclaveIdVal - 10).toLocaleString("fa-IR")}`;
+        regionLabel = `قلمرو برون‌مرزی ${(enclaveIdVal - 10).toLocaleString("fa-IR")}`;
       }
 
       const areaSqKm = matchedCountry?.areaSqKm ?? 50000;
