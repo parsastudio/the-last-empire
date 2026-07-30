@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import { FALLBACK_WORLD_MAP } from "@/application/fallback-map.config";
 import { GeoJsonProcessor } from "./geojson-processor";
 import { DistanceTransform } from "./distance-transform";
 import { MapWriter } from "./map-writer";
@@ -27,12 +26,18 @@ export async function generateTest6Map(
   await fs.mkdir(map1Dir, { recursive: true });
 
   const geojsonPath = path.join(publicDir, "ne_110m_admin_0_countries.geojson");
-  let geoJson: typeof FALLBACK_WORLD_MAP;
+  let geoJson: {
+    features: Array<{
+      properties?: Record<string, unknown>;
+      id?: string;
+      geometry: { type: string; coordinates: unknown };
+    }>;
+  };
   try {
     const raw = await fs.readFile(geojsonPath, "utf-8");
     geoJson = JSON.parse(raw);
   } catch {
-    geoJson = FALLBACK_WORLD_MAP;
+    geoJson = { features: [] };
   }
 
   const processor = new GeoJsonProcessor();

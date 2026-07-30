@@ -4,10 +4,11 @@ import { CommandRail } from "../command-rail/command-rail";
 import { CommandCenterModal } from "../command-center/command-center-modal";
 import { TurnSummaryModal } from "../reports/turn-summary-modal";
 import { TurnStagingLedger } from "./staging/turn-staging-ledger";
-import { TurnEventDialog } from "./dialogs/turn-event-dialog";
-import { MarketTradeDialogWrapper } from "./dialogs/market-trade-dialog-wrapper";
+import { EventDecisionModal } from "../modals/event-decision-modal";
+import { TradeActionDialog } from "./tabs/market/trade-action-dialog";
 import { useSidebarTurnActions } from "./hooks/use-sidebar-turn-actions";
 import { GameState } from "@/domain/game/game-state.schema";
+import { useToast } from "@/presentation/context/toast-context";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export function SidebarContainer({
   onClearExternalTab,
   onFocusCountry,
 }: SidebarContainerProps) {
+  const { showToast } = useToast();
   const actions = useSidebarTurnActions(
     externalActiveTab,
     onClearExternalTab,
@@ -41,6 +43,15 @@ export function SidebarContainer({
   if (!isOpen) return null;
 
   const effectiveTargetCode = actions.selectedTargetCode || selectedTargetCode;
+
+  const handleEventChoice = () => {
+    showToast(
+      "تصمیم حاکمیتی ثبت شد",
+      "فرمان جدید با موفقیت ابلاغ گردید.",
+      "success",
+    );
+    actions.setIsEventModalOpen(false);
+  };
 
   return (
     <>
@@ -84,13 +95,24 @@ export function SidebarContainer({
         onClose={() => actions.setIsModalOpen(false)}
       />
 
-      <TurnEventDialog
-        isOpen={actions.isEventModalOpen}
-        onClose={() => actions.setIsEventModalOpen(false)}
-      />
+      {actions.activeEventData && (
+        <EventDecisionModal
+          isOpen={actions.isEventModalOpen}
+          title={actions.activeEventData.title}
+          description={actions.activeEventData.description}
+          choices={actions.activeEventData.choices}
+          onSelectChoice={handleEventChoice}
+          onClose={() => actions.setIsEventModalOpen(false)}
+        />
+      )}
 
-      <MarketTradeDialogWrapper
-        state={actions.tradeDialog}
+      <TradeActionDialog
+        isOpen={actions.tradeDialog.isOpen}
+        resourceName={actions.tradeDialog.resourceName}
+        unit={actions.tradeDialog.unit}
+        mode={actions.tradeDialog.mode}
+        unitPrice={actions.tradeDialog.unitPrice}
+        maxAmount={actions.tradeDialog.maxAmount}
         onClose={() =>
           actions.setTradeDialog((prev) => ({ ...prev, isOpen: false }))
         }

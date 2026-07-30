@@ -2,20 +2,18 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionQueue } from "./action-queue";
-import { TurnPhaseOrchestrator } from "./turn-phase-orchestrator";
+import { TurnPipeline } from "@/engine/turn-pipeline";
 import { GridPostTurnCleanup } from "./grid-post-turn-cleanup";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
-import { PeaceTracker } from "./peace-tracker";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 
 export class TurnProgressionOrchestrator {
   private aiEngine = new AIEngine();
   private internalActionQueue = new ActionQueue();
-  private turnOrchestrator = new TurnPhaseOrchestrator();
+  private pipeline = new TurnPipeline();
   private gridPostCleanup = new GridPostTurnCleanup();
   private livenessManager = new NationLivenessManager();
-  private peaceTracker = new PeaceTracker();
   private victoryChecker = new VictoryChecker();
 
   public advanceTurn(
@@ -40,14 +38,14 @@ export class TurnProgressionOrchestrator {
 
     nextState = actionQueueProcessor(nextState);
 
-    nextState = this.turnOrchestrator.executePhases(nextState, prng);
+    nextState = this.pipeline.processTurn(nextState, prng);
     nextState = this.gridPostCleanup.cleanupAndSynchronize(
       nextState,
       gridState,
     );
     nextState = this.livenessManager.updateLiveness(nextState);
 
-    const peacefulCount = this.peaceTracker.updatePeacefulTurns(nextState);
+    const peacefulCount = (nextState.peacefulTurnsCount ?? 0) + 1;
     nextState = {
       ...nextState,
       peacefulTurnsCount: peacefulCount,
