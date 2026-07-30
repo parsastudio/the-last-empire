@@ -17,7 +17,8 @@ export function useGameActions(
   const params = useParams();
 
   const routeGameId = params?.gameId as string | undefined;
-  const activeGameId = customGameId || routeGameId;
+  const activeGameId =
+    customGameId || routeGameId || currentState?.gameId || "default_game";
 
   const dispatcher = useMemo(() => new ActionDispatcherService(), []);
   const storageService = useMemo(() => new ClientStorageService(), []);
