@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { GridDownsampler } from "@/infrastructure/map-preprocessing/grid-downsampler";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { DirtyBoundingBox } from "@/infrastructure/map-preprocessing/shader/dirty-region-patch-engine";
 import { MapDataApiHelper } from "./map-data-api-helper";
 import { MaskRenderingHelper, CountryMapping } from "./mask-rendering-helper";
 import { useMapAssetsLoader } from "./use-map-assets-loader";
@@ -39,6 +40,24 @@ export function useMapData({
     }
   }, [activeLayer, countries, mapHeight, mapWidth, maskDataRef]);
 
+  const patchDirtyRegion = useCallback(
+    (dirtyBox: DirtyBoundingBox, dynamicIds?: Uint16Array | null) => {
+      if (canvasShadedRef.current && countries.length > 0) {
+        renderingHelper.patchMaskRegion(
+          mapWidth,
+          mapHeight,
+          canvasShadedRef.current,
+          countries,
+          maskDataRef,
+          dirtyBox,
+          dynamicIds,
+          activeLayer,
+        );
+      }
+    },
+    [activeLayer, countries, mapHeight, mapWidth, maskDataRef],
+  );
+
   useEffect(() => {
     if (!loading && maskDataRef.current) {
       if (!canvasShadedRef.current) {
@@ -70,5 +89,6 @@ export function useMapData({
     maskDataRef,
     packed1024Ref,
     reRenderLayer,
+    patchDirtyRegion,
   };
 }
