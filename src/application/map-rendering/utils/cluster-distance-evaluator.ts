@@ -34,8 +34,13 @@ export class ClusterDistanceEvaluator {
       return false;
     }
 
-    for (const cell1 of c1.cells) {
-      for (const cell2 of c2.cells) {
+    const len1 = c1.cells.length;
+    const len2 = c2.cells.length;
+
+    for (let i = 0; i < len1; i++) {
+      const cell1 = c1.cells[i]!;
+      for (let j = 0; j < len2; j++) {
+        const cell2 = c2.cells[j]!;
         let dx = Math.abs(cell1.x - cell2.x);
         if (dx > gridWidth / 2) {
           dx = gridWidth - dx;

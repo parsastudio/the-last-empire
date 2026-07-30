@@ -9,23 +9,23 @@ export class GridStateCleanup {
   ): void {
     const activeEnclaves = new Set<number>();
 
-    for (const cell of allCells) {
+    for (let i = 0; i < allCells.length; i++) {
+      const cell = allCells[i]!;
       if (cell.ownerId === countryId && cell.enclaveId > 0) {
         activeEnclaves.add(cell.enclaveId);
       }
     }
 
-    const registryList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-
-    for (const id of registryList) {
+    for (let id = 1; id <= 10; id++) {
       if (!activeEnclaves.has(id)) {
         const meta = registry.resolveEnclaveMeta(countryId, id);
         if (meta) {
-          allCells.forEach((c) => {
+          for (let i = 0; i < allCells.length; i++) {
+            const c = allCells[i]!;
             if (c.ownerId === countryId && c.enclaveId === id) {
               c.enclaveId = 0;
             }
-          });
+          }
         }
       }
     }
