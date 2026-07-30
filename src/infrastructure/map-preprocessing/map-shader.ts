@@ -35,35 +35,32 @@ export class MapShader {
     );
 
     const gridState = GridStateProvider.getInstance();
-    const hasGridCells = gridState.getAllCells().length > 0;
+    const allGridCells = gridState.getAllCells();
 
     let dynamicIds: Uint16Array | null = null;
 
-    if (hasGridCells) {
+    if (allGridCells.length > 0) {
       const scaleX = width / 1024;
       const scaleY = height / 512;
-      for (let gy = 0; gy < 512; gy++) {
-        for (let gx = 0; gx < 1024; gx++) {
-          const cell = gridState.getCell(gx, gy);
-          if (
-            cell &&
-            cell.initialOwnerId &&
-            cell.ownerId !== cell.initialOwnerId &&
-            cell.ownerId.startsWith("NATION_")
-          ) {
-            const dynamicId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
-            if (!isNaN(dynamicId) && dynamicId >= 11) {
-              if (!dynamicIds) {
-                dynamicIds = new Uint16Array(width * height);
-              }
-              const startX = gx * scaleX;
-              const startY = gy * scaleY;
-              for (let dy = 0; dy < scaleY; dy++) {
-                const py = startY + dy;
-                for (let dx = 0; dx < scaleX; dx++) {
-                  const px = startX + dx;
-                  dynamicIds[py * width + px] = dynamicId;
-                }
+      for (let i = 0; i < allGridCells.length; i++) {
+        const cell = allGridCells[i]!;
+        if (
+          cell.initialOwnerId &&
+          cell.ownerId !== cell.initialOwnerId &&
+          cell.ownerId.startsWith("NATION_")
+        ) {
+          const dynamicId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
+          if (!isNaN(dynamicId) && dynamicId >= 11) {
+            if (!dynamicIds) {
+              dynamicIds = new Uint16Array(width * height);
+            }
+            const startX = cell.x * scaleX;
+            const startY = cell.y * scaleY;
+            for (let dy = 0; dy < scaleY; dy++) {
+              const py = startY + dy;
+              for (let dx = 0; dx < scaleX; dx++) {
+                const px = startX + dx;
+                dynamicIds[py * width + px] = dynamicId;
               }
             }
           }
