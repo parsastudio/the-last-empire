@@ -1,6 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GridCell } from "@/domain/map/grid-cell.schema";
-import { findCountryProfileById } from "@/domain/map/countries";
+import { GridCell } from "./grid-state";
+import { findCountryProfileById } from "@/infrastructure/data/countries";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 

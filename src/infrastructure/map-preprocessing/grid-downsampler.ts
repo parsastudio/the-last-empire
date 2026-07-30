@@ -1,6 +1,6 @@
 import { GridState } from "@/engine/combat/state/grid-state";
-import { RegionClusteringEngine } from "./utils/region-clustering-engine";
 import { GridCell } from "@/domain/map/grid-cell.schema";
+import { RegionClusteringEngine } from "./utils/region-clustering-engine";
 
 export class GridDownsampler {
   private clusteringEngine = new RegionClusteringEngine();

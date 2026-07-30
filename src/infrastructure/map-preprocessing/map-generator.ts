@@ -14,7 +14,7 @@ import { PngDecoder } from "./encoders/png-decoder";
 import {
   ALL_COUNTRY_PROFILES,
   findCountryProfileByCode,
-} from "@/domain/map/countries";
+} from "@/infrastructure/data/countries";
 
 export interface CountryMapping {
   id: number;
