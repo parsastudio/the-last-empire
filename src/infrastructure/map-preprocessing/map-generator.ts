@@ -87,13 +87,13 @@ export async function generateTest6Map(
     11,
   );
 
+  const draw = new GeometryDraw();
+  draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 254);
+  draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 254);
+
   if (mode === "partition") {
     partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
   }
-
-  const draw = new GeometryDraw();
-  draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
-  draw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
 
   const pixelAreas = areaCounter.calculateAreas(buffer, width, height, nextId);
   areaCounter.applyCalibratedAreas(countries, pixelAreas);
