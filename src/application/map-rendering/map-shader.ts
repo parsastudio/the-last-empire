@@ -3,7 +3,6 @@ import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator"
 import { NoiseGrainApplier } from "./shader/noise-grain-applier";
 import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache";
 import { GdpLayerShader } from "./shader/gdp-layer-shader";
-import { MilitaryLayerShader } from "./shader/military-layer-shader";
 import { PoliticalLayerShader } from "./shader/political-layer-shader";
 import { BorderDetector } from "./shader/border-detector";
 import { ShorelineDistanceCache } from "./shader/shoreline-distance-cache";
@@ -24,7 +23,6 @@ export class MapShader {
   private static lookupCache = new CountryProfileLookupCache();
 
   private static gdpShader = new GdpLayerShader();
-  private static militaryShader = new MilitaryLayerShader();
   private static politicalShader = new PoliticalLayerShader();
   private static borderDetector = new BorderDetector();
 
@@ -35,7 +33,7 @@ export class MapShader {
     height: number,
     maskData: Uint8Array,
     countries: Country[],
-    activeLayer: "political" | "gdp" | "military" = "political",
+    activeLayer: "political" | "gdp" = "political",
   ): void {
     const palette = this.paletteGenerator.generatePalette(countries);
     const dist = ShorelineDistanceCache.getOrCreateDistanceTransform(
@@ -108,14 +106,6 @@ export class MapShader {
           if (pair) {
             if (activeLayer === "gdp") {
               const color = this.gdpShader.calculateGdpColor(
-                id,
-                this.lookupCache,
-              );
-              r = color.r;
-              g = color.g;
-              b = color.b;
-            } else if (activeLayer === "military") {
-              const color = this.militaryShader.calculateMilitaryColor(
                 id,
                 this.lookupCache,
               );

@@ -109,7 +109,7 @@ export function useTacticalMapInteraction({
 
     setContextMenuState(null);
 
-    if (action === "attack" || action === "profile") {
+    if (action === "profile") {
       setSelectedTargetCode(targetCode);
       setExternalSidebarTab("diplomacy");
     }

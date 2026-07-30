@@ -27,10 +27,7 @@ export class CoolOffManager {
     return Math.max(0, turnsRemaining - 1);
   }
 
-  public checkViolation(
-    _currentStance: DiplomaticStance,
-    _coolOffTurnsRemaining = 0,
-  ): ViolationPenalties {
+  public checkViolation(): ViolationPenalties {
     return { stabilityPenalty: 0, reputationPenalty: 0 };
   }
 }
