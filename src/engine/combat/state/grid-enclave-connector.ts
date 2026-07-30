@@ -44,7 +44,16 @@ export class GridEnclaveConnector {
         }
 
         const isMainland = component.some((c) => c.enclaveId === 0);
-        const targetEnclaveId = isMainland ? 0 : enclaveIdCounter++;
+        const colonyCell = component.find((c) => c.enclaveId >= 11);
+
+        let targetEnclaveId = 0;
+        if (isMainland) {
+          targetEnclaveId = 0;
+        } else if (colonyCell) {
+          targetEnclaveId = Math.min(63, colonyCell.enclaveId);
+        } else {
+          targetEnclaveId = Math.min(10, enclaveIdCounter++);
+        }
 
         for (const c of component) {
           c.enclaveId = targetEnclaveId;
