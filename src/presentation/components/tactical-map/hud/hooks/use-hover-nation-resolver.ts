@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { findCountryProfileById } from "@/infrastructure/data/countries";
+import { findCountryProfileByCode } from "@/infrastructure/data/countries";
 import { HoverCountryInfo } from "../country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useHoverStance } from "./use-hover-stance";
@@ -22,30 +22,33 @@ export function useHoverNationResolver({
     (nationIdNumber: number, enclaveIdVal: number): HoverCountryInfo | null => {
       const matchedCountry = countries.find((c) => c.id === nationIdNumber);
 
-      const fullNationId = `NATION_${nationIdNumber}`;
+      if (!matchedCountry) return null;
+
+      const countryCode = matchedCountry.code.toUpperCase();
+      const fullNationId = `NATION_${countryCode}`;
+
       let liveNation = nationsMap ? nationsMap[fullNationId] : null;
 
-      if (!liveNation && nationsMap && matchedCountry) {
+      if (!liveNation && nationsMap) {
         liveNation =
-          nationsMap[matchedCountry.code.toUpperCase()] ||
-          nationsMap[matchedCountry.code.toLowerCase()] ||
+          nationsMap[countryCode] ||
+          nationsMap[countryCode.toLowerCase()] ||
           null;
       }
 
-      const profile = findCountryProfileById(nationIdNumber);
+      const profile = findCountryProfileByCode(countryCode);
+
       const realName = liveNation
         ? liveNation.name
         : profile
           ? profile.nameFa
-          : matchedCountry
-            ? matchedCountry.name
-            : `کشور ${nationIdNumber}`;
+          : matchedCountry.name;
 
       const realGdp = liveNation
         ? liveNation.gdp
         : profile
           ? profile.gdp
-          : matchedCountry?.areaSqKm
+          : matchedCountry.areaSqKm
             ? matchedCountry.areaSqKm * 1500
             : 50000000000;
 
@@ -54,17 +57,7 @@ export function useHoverNationResolver({
         ? gdpBillionsNum.toString()
         : gdpBillionsNum.toFixed(1);
 
-      const flagCode = profile
-        ? profile.flagCode
-        : matchedCountry
-          ? matchedCountry.code
-          : "UN";
-
-      const countryCode = matchedCountry
-        ? matchedCountry.code
-        : profile
-          ? profile.code
-          : `${nationIdNumber}`;
+      const flagCode = profile ? profile.flagCode : matchedCountry.code;
 
       const stanceLabel = resolveStanceLabel(
         humanNationId,
@@ -82,7 +75,7 @@ export function useHoverNationResolver({
         regionLabel = `قلمرو برون‌مرزی ${(enclaveIdVal - 10).toLocaleString("fa-IR")}`;
       }
 
-      const areaSqKm = matchedCountry?.areaSqKm ?? 50000;
+      const areaSqKm = matchedCountry.areaSqKm ?? 50000;
 
       return {
         name: realName,
