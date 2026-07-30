@@ -1,9 +1,10 @@
 import { normalizeNationId } from "./game-state-initializer";
+import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 
 let serverFallbackNationId = "NATION_118";
 
 export class PlayerSessionManager {
-  private readonly storageKey = "test6_human_nation_id";
+  private readonly storageKey = STORAGE_KEYS.HUMAN_NATION_ID;
 
   public getPlayerNationId(): string {
     if (typeof window !== "undefined") {

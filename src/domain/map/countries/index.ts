@@ -3,4 +3,4 @@ export {
   ALL_COUNTRY_PROFILES,
   findCountryProfileByCode,
   findCountryProfileById,
-} from "@/infrastructure/data/countries";
+} from "@/domain/data/countries";
