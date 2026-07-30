@@ -23,13 +23,6 @@ export class AttackActionValidator implements ActionValidator {
     }
     const sourceNation = state.nations[action.nationId];
     if (sourceNation) {
-      const relation = sourceNation.relations[attackAction.targetNationId];
-      if (!relation || relation.stance !== "WAR") {
-        throw new GameError(
-          "INVALID_ACTION",
-          "Cannot attack a nation without first being in a state of war",
-        );
-      }
       const distance = this.distanceCalculator.calculateDistance(
         sourceNation.id,
         attackAction.targetNationId,
