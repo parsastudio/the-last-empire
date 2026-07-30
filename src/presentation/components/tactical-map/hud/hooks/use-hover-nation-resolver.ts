@@ -58,7 +58,7 @@ export function useHoverNationResolver({
         ? profile.flagCode
         : matchedCountry
           ? matchedCountry.code
-          : "IR";
+          : "UN";
 
       const countryCode = matchedCountry
         ? matchedCountry.code

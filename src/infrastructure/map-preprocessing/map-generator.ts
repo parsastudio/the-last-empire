@@ -11,6 +11,10 @@ import { MapPathResolver } from "./map-path-resolver";
 import { TerritoryPartitioner } from "./generator/territory-partitioner";
 import { BoundarySmoother } from "./generator/boundary-smoother";
 import { PngDecoder } from "./encoders/png-decoder";
+import {
+  ALL_COUNTRY_PROFILES,
+  findCountryProfileByCode,
+} from "@/domain/map/countries";
 
 export interface CountryMapping {
   id: number;
@@ -50,6 +54,9 @@ export async function generateTest6Map(
   const partitioner = new TerritoryPartitioner();
   const boundarySmoother = new BoundarySmoother();
 
+  const idToCodeMap = new Map<number, string>();
+  const codeToIdMap = new Map<string, number>();
+
   const countries: CountryMapping[] = [
     {
       id: 0,
@@ -60,21 +67,55 @@ export async function generateTest6Map(
     },
   ];
 
-  const buffer = new Uint8Array(width * height);
-  const features = processor.extractFeatures(geoJson);
-  const idToCodeMap = new Map<number, string>();
-
-  let nextId = 11;
-  for (const feature of features) {
+  for (const profile of ALL_COUNTRY_PROFILES) {
     countries.push({
-      id: nextId,
-      code: feature.code,
-      name: feature.name,
-      color: [0, 0, nextId],
+      id: profile.id,
+      code: profile.code,
+      name: profile.nameFa,
+      color: [0, 0, profile.id],
       areaSqKm: 0,
     });
-    idToCodeMap.set(nextId, feature.code);
-    nextId++;
+    idToCodeMap.set(profile.id, profile.code);
+    codeToIdMap.set(profile.code.toUpperCase(), profile.id);
+    if (profile.flagCode) {
+      codeToIdMap.set(profile.flagCode.toUpperCase(), profile.id);
+    }
+  }
+
+  const buffer = new Uint8Array(width * height);
+  const features = processor.extractFeatures(geoJson);
+
+  let fallbackId = 200;
+  const getCountryId = (code: string): number => {
+    const cleanCode = code.toUpperCase();
+    if (codeToIdMap.has(cleanCode)) {
+      return codeToIdMap.get(cleanCode)!;
+    }
+
+    const profile = findCountryProfileByCode(cleanCode);
+    let assignedId = fallbackId;
+    if (profile) {
+      assignedId = profile.id;
+    } else {
+      fallbackId++;
+    }
+
+    codeToIdMap.set(cleanCode, assignedId);
+    return assignedId;
+  };
+
+  for (const feature of features) {
+    const countryId = getCountryId(feature.code);
+    if (!idToCodeMap.has(countryId)) {
+      countries.push({
+        id: countryId,
+        code: feature.code,
+        name: feature.name,
+        color: [0, 0, countryId],
+        areaSqKm: 0,
+      });
+      idToCodeMap.set(countryId, feature.code);
+    }
   }
 
   const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
@@ -89,7 +130,7 @@ export async function generateTest6Map(
       width,
       height,
       buffer,
-      11,
+      getCountryId,
     );
     const draw = new GeometryDraw();
     draw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 254);
@@ -102,7 +143,8 @@ export async function generateTest6Map(
     boundarySmoother.smoothBoundaries(buffer, width, height);
   }
 
-  const pixelAreas = areaCounter.calculateAreas(buffer, width, height, nextId);
+  const maxId = Math.max(...countries.map((c) => c.id), 255) + 1;
+  const pixelAreas = areaCounter.calculateAreas(buffer, width, height, maxId);
   areaCounter.applyCalibratedAreas(countries, pixelAreas);
 
   const dist = distanceTransform.calculate(buffer, width, height);

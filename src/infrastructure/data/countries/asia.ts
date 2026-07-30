@@ -1,4 +1,4 @@
-import { CountryProfile } from "./types";
+import { CountryProfile } from "@/domain/map/countries/types";
 import { centralAsiaProfiles } from "./asia/central-asia";
 import { middleEastProfiles } from "./asia/middle-east";
 import { eastAsiaProfiles } from "./asia/east-asia";
