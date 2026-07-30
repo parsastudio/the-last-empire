@@ -1,7 +1,6 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { GridCell } from "./grid-state";
 import { findCountryProfileById } from "@/infrastructure/data/countries";
-import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class GdpPopUpdater {

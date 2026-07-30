@@ -10,8 +10,13 @@ import {
 } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesStateSchema } from "@/domain/politics/doctrines.schema";
-import { RegionDemographicsSchema } from "./region-demographics.schema";
+import {
+  RegionDemographicsSchema,
+  RegionDemographics,
+} from "./region-demographics.schema";
 import { CoordinateSchema } from "@/domain/map/coordinate.schema";
+
+export type { RegionDemographics };
 
 export const NationTraitSchema = z.enum([
   "OIL_RICH",
