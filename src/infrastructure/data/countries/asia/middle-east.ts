@@ -169,18 +169,4 @@ export const middleEastProfiles: CountryProfile[] = [
     startingTechLevel: 4,
     startingGovernment: "MONARCHY",
   },
-  {
-    code: "CYN",
-    nameEn: "N. Cyprus",
-    nameFa: "قبرس شمالی",
-    gdp: 4000000000,
-    population: 380000,
-    traits: ["SOVEREIGN_FORTRESS", "ISOLATED_SOCIETY"],
-    flagCode: "CY",
-    startingInfantry: 20,
-    startingAirForce: 5,
-    startingDroneMissile: 0,
-    startingTechLevel: 1,
-    startingGovernment: "DEMOCRACY",
-  },
 ];
