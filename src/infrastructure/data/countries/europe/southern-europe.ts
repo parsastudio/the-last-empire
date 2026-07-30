@@ -99,18 +99,4 @@ export const southernEuropeProfiles: CountryProfile[] = [
     startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
-  {
-    code: "KOS",
-    nameEn: "Kosovo",
-    nameFa: "کوزوو",
-    gdp: 9000000000,
-    population: 1800000,
-    traits: ["SOVEREIGN_FORTRESS", "FRAGILE_ECONOMY"],
-    flagCode: "XK",
-    startingInfantry: 20,
-    startingAirForce: 0,
-    startingDroneMissile: 0,
-    startingTechLevel: 1,
-    startingGovernment: "DEMOCRACY",
-  },
 ];

@@ -2,20 +2,6 @@ import { CountryProfile } from "@/domain/map/countries/types";
 
 export const oceaniaProfiles: CountryProfile[] = [
   {
-    code: "ATF",
-    nameEn: "Fr. S. Antarctic Lands",
-    nameFa: "سرزمین‌های قطب جنوب فرانسه",
-    gdp: 100000000,
-    population: 200,
-    traits: ["ISLAND_FORTRESS", "ISOLATED_SOCIETY"],
-    flagCode: "TF",
-    startingInfantry: 1,
-    startingAirForce: 0,
-    startingDroneMissile: 0,
-    startingTechLevel: 1,
-    startingGovernment: "DEMOCRACY",
-  },
-  {
     code: "NZL",
     nameEn: "New Zealand",
     nameFa: "نیوزیلند",
