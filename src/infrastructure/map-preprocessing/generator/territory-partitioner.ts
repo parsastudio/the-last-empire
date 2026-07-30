@@ -28,76 +28,107 @@ export class TerritoryPartitioner {
 
     const totalPixels = width * height;
     const isPartitionedPixel = new Uint8Array(totalPixels);
+
     for (let i = 0; i < totalPixels; i++) {
       const val = buffer[i]!;
-      if (val === 254) {
-        continue;
-      }
-      if (partitionedIds.has(val)) {
+      if (val !== 254 && partitionedIds.has(val)) {
         isPartitionedPixel[i] = 1;
       }
     }
 
-    const queueX = new Int32Array(totalPixels);
-    const queueY = new Int32Array(totalPixels);
-    const seedX = new Int32Array(totalPixels);
-    const seedY = new Int32Array(totalPixels);
-    const ownerIdBuf = new Uint8Array(totalPixels);
-    const visited = new Uint8Array(totalPixels);
-
-    let head = 0;
-    let tail = 0;
+    const ownerBuf = new Uint8Array(totalPixels);
+    const landQueue = new Int32Array(totalPixels);
+    let landHead = 0;
+    let landTail = 0;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
-        if (isPartitionedPixel[idx] === 1) {
-          continue;
+        const val = buffer[idx]!;
+        if (val >= 11 && val < 250 && !partitionedIds.has(val)) {
+          ownerBuf[idx] = val;
+          landQueue[landTail++] = idx;
         }
+      }
+    }
 
-        const currentVal = buffer[idx]!;
-        if (currentVal < 11 || currentVal >= 250) {
-          continue;
+    while (landHead < landTail) {
+      const currIdx = landQueue[landHead++]!;
+      const cx = currIdx % width;
+      const cy = Math.floor(currIdx / width);
+      const currOwner = ownerBuf[currIdx]!;
+
+      const neighbors = [
+        { nx: (cx + 1) % width, ny: cy },
+        { nx: (cx - 1 + width) % width, ny: cy },
+        { nx: cx, ny: Math.min(height - 1, cy + 1) },
+        { nx: cx, ny: Math.max(0, cy - 1) },
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        const n = neighbors[i]!;
+        const nIdx = n.ny * width + n.nx;
+        const nVal = buffer[nIdx]!;
+
+        if (nVal >= 11 && nVal !== 254 && ownerBuf[nIdx] === 0) {
+          ownerBuf[nIdx] = currOwner;
+          landQueue[landTail++] = nIdx;
         }
+      }
+    }
 
-        let isBorder = false;
-        const neighbors = [
-          { nx: (x + 1) % width, ny: y },
-          { nx: (x - 1 + width) % width, ny: y },
-          { nx: x, ny: Math.min(height - 1, y + 1) },
-          { nx: x, ny: Math.max(0, y - 1) },
-        ];
+    const waterQueueX = new Int32Array(totalPixels);
+    const waterQueueY = new Int32Array(totalPixels);
+    const waterSeedX = new Int32Array(totalPixels);
+    const waterSeedY = new Int32Array(totalPixels);
+    const waterOwnerBuf = new Uint8Array(totalPixels);
+    const waterVisited = new Uint8Array(totalPixels);
 
-        for (let i = 0; i < 4; i++) {
-          const n = neighbors[i]!;
-          const nIdx = n.ny * width + n.nx;
-          if (isPartitionedPixel[nIdx] === 1) {
-            isBorder = true;
-            break;
+    let wHead = 0;
+    let wTail = 0;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x;
+        const owner = ownerBuf[idx]!;
+        if (owner > 0) {
+          let isBorder = false;
+          const neighbors = [
+            { nx: (x + 1) % width, ny: y },
+            { nx: (x - 1 + width) % width, ny: y },
+            { nx: x, ny: Math.min(height - 1, y + 1) },
+            { nx: x, ny: Math.max(0, y - 1) },
+          ];
+          for (let i = 0; i < 4; i++) {
+            const n = neighbors[i]!;
+            const nIdx = n.ny * width + n.nx;
+            if (ownerBuf[nIdx] === 0) {
+              isBorder = true;
+              break;
+            }
           }
-        }
-
-        if (isBorder) {
-          queueX[tail] = x;
-          queueY[tail] = y;
-          seedX[tail] = x;
-          seedY[tail] = y;
-          ownerIdBuf[tail] = currentVal;
-          visited[idx] = 1;
-          tail++;
+          if (isBorder) {
+            waterQueueX[wTail] = x;
+            waterQueueY[wTail] = y;
+            waterSeedX[wTail] = x;
+            waterSeedY[wTail] = y;
+            waterOwnerBuf[wTail] = owner;
+            waterVisited[idx] = 1;
+            wTail++;
+          }
         }
       }
     }
 
     const kmPerPixelY = this.halfEarthMeridianKm / height;
 
-    while (head < tail) {
-      const cx = queueX[head]!;
-      const cy = queueY[head]!;
-      const sx = seedX[head]!;
-      const sy = seedY[head]!;
-      const owner = ownerIdBuf[head]!;
-      head++;
+    while (wHead < wTail) {
+      const cx = waterQueueX[wHead]!;
+      const cy = waterQueueY[wHead]!;
+      const sx = waterSeedX[wHead]!;
+      const sy = waterSeedY[wHead]!;
+      const owner = waterOwnerBuf[wHead]!;
+      wHead++;
 
       const neighbors = [
         { nx: (cx + 1) % width, ny: cy },
@@ -110,7 +141,7 @@ export class TerritoryPartitioner {
         const n = neighbors[i]!;
         const nIdx = n.ny * width + n.nx;
 
-        if (isPartitionedPixel[nIdx] === 1 && visited[nIdx] === 0) {
+        if (waterVisited[nIdx] === 0) {
           const dyKm = (n.ny - sy) * kmPerPixelY;
           const latRad = (0.5 - (n.ny + 0.5) / height) * Math.PI;
           const kmPerPixelX =
@@ -125,23 +156,30 @@ export class TerritoryPartitioner {
           const distKm = Math.sqrt(dxKm * dxKm + dyKm * dyKm);
 
           if (distKm <= this.maxDistanceKm) {
-            visited[nIdx] = 1;
-            buffer[nIdx] = owner;
+            waterVisited[nIdx] = 1;
 
-            queueX[tail] = n.nx;
-            queueY[tail] = n.ny;
-            seedX[tail] = sx;
-            seedY[tail] = sy;
-            ownerIdBuf[tail] = owner;
-            tail++;
+            if (isPartitionedPixel[nIdx] === 1 && ownerBuf[nIdx] === 0) {
+              ownerBuf[nIdx] = owner;
+            }
+
+            waterQueueX[wTail] = n.nx;
+            waterQueueY[wTail] = n.ny;
+            waterSeedX[wTail] = sx;
+            waterSeedY[wTail] = sy;
+            waterOwnerBuf[wTail] = owner;
+            wTail++;
           }
         }
       }
     }
 
     for (let i = 0; i < totalPixels; i++) {
-      if (isPartitionedPixel[i] === 1 && visited[i] === 0) {
-        buffer[i] = 250;
+      if (isPartitionedPixel[i] === 1) {
+        if (ownerBuf[i]! > 0) {
+          buffer[i] = ownerBuf[i]!;
+        } else {
+          buffer[i] = 250;
+        }
       }
     }
 
