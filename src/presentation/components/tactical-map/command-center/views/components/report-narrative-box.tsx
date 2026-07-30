@@ -19,7 +19,7 @@ export function ReportNarrativeBox({
       <div className="bg-secondary/30 border border-border/60 p-3.5 rounded-2xl space-y-1">
         <span className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 font-mono uppercase">
           <Swords size={12} className="text-diplomacy" />
-          ارزیابی ستاد کل فرماندهی
+          ارزیابی دبیرخانه حاکمیت
         </span>
         <p className="text-xs text-foreground/90 leading-relaxed">
           {strategicAssessment}

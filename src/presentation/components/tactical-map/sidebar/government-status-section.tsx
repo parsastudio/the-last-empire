@@ -52,7 +52,7 @@ export function GovernmentStatusSection({
         />
 
         <GovernmentMetricBar
-          label="فرسایش جنگی"
+          label="فرسایش ساختاری"
           value={warExhaustion}
           colorClass="text-treasury"
           bgClass="bg-treasury"

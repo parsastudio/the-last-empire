@@ -21,14 +21,6 @@ export class TreatyProposalEvaluator {
     if (receiver.globalReputation < -50) {
       return { accepted: false, reason: "LOW_SENDER_REPUTATION" };
     }
-    const receiverPower =
-      receiver.military.infantry * 1.0 +
-      receiver.military.airForce * 3.0 +
-      receiver.military.droneMissile * 2.5;
-    const senderPower =
-      sender.military.infantry * 1.0 +
-      sender.military.airForce * 3.0 +
-      sender.military.droneMissile * 2.5;
 
     switch (proposalType) {
       case "NON_AGGRESSION_PACT":
@@ -42,19 +34,16 @@ export class TreatyProposalEvaluator {
         }
         return { accepted: false, reason: "REQUIREMENTS_NOT_MET" };
       case "PEACE_TREATY":
-        if (receiver.warExhaustion > 40 || opinion > -20) {
+        if (opinion > -20) {
           return { accepted: true };
         }
-        return { accepted: false, reason: "WAR_EXHAUSTION_TOO_LOW" };
+        return { accepted: false, reason: "OPINION_TOO_LOW" };
       case "MILITARY_ACCESS":
         if (opinion >= 20) {
           return { accepted: true };
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
       case "DEMAND_TRIBUTE":
-        if (receiverPower >= senderPower * 0.25) {
-          return { accepted: false, reason: "DEFENSE_CAPABLE" };
-        }
         if (
           requestedTributeAmount &&
           !this.tributeCapCalculator.isWithinCap(
