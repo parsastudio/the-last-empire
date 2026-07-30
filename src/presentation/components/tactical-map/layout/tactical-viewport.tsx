@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface TacticalViewportProps {
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -25,6 +25,25 @@ export function TacticalViewport({
   onClick,
   children,
 }: TacticalViewportProps) {
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleNonPassiveWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const syntheticEvent = e as unknown as React.WheelEvent<HTMLDivElement>;
+      onWheel(syntheticEvent);
+    };
+
+    container.addEventListener("wheel", handleNonPassiveWheel, {
+      passive: false,
+    });
+
+    return () => {
+      container.removeEventListener("wheel", handleNonPassiveWheel);
+    };
+  }, [containerRef, onWheel]);
+
   const getCursorClass = () => {
     if (isDragging) return "cursor-grabbing";
     if (isHoveringCountry) return "cursor-pointer";
@@ -39,7 +58,6 @@ export function TacticalViewport({
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
-      onWheel={onWheel}
       onClick={onClick}
     >
       <canvas
