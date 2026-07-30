@@ -11,7 +11,7 @@ export class CellAreaCalibrator {
     for (let y = 0; y < height; y++) {
       const latitudeRad = (0.5 - (y + 0.5) / height) * Math.PI;
       this.weights[y] = Math.cos(latitudeRad);
-      totalWeight += this.weights[y] * width;
+      totalWeight += this.weights[y]! * width;
     }
     this.areaPerWeightUnit = totalSurfaceArea / totalWeight;
   }

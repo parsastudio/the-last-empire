@@ -28,10 +28,6 @@ export class FastTransitCalculator {
     const isWaterTarget =
       targetNationId === "WATER" || targetNationId === "CLOSED_SEA";
 
-    const isLandNeighbor = !isWaterTarget
-      ? this.checkLandBorder(attackerId, targetNationId, allCells)
-      : false;
-
     const closestAttackerCell = this.findClosestAttackerCell(
       attackerId,
       scaledTargetPixel,
@@ -41,6 +37,11 @@ export class FastTransitCalculator {
     const originCoord = closestAttackerCell
       ? { x: closestAttackerCell.x, y: closestAttackerCell.y }
       : scaledTargetPixel;
+
+    const isLandNeighbor =
+      !isWaterTarget && closestAttackerCell
+        ? this.checkDirectBorder(closestAttackerCell, targetNationId, allCells)
+        : false;
 
     if (isLandNeighbor) {
       const pixelDist = Math.hypot(
@@ -77,30 +78,22 @@ export class FastTransitCalculator {
     };
   }
 
-  private checkLandBorder(
-    attackerId: string,
+  private checkDirectBorder(
+    originCell: GridCell,
     targetNationId: string,
     allCells: GridCell[],
   ): boolean {
-    const attackerCells = allCells.filter((c) => c.ownerId === attackerId);
-    if (attackerCells.length === 0) return false;
+    const neighbors = [
+      { x: (originCell.x + 1) % this.width, y: originCell.y },
+      { x: (originCell.x - 1 + this.width) % this.width, y: originCell.y },
+      { x: originCell.x, y: Math.min(this.height - 1, originCell.y + 1) },
+      { x: originCell.x, y: Math.max(0, originCell.y - 1) },
+    ];
 
-    const attackerSet = new Set(attackerCells.map((c) => `${c.x},${c.y}`));
-
-    for (const cell of allCells) {
-      if (cell.ownerId === targetNationId) {
-        const neighbors = [
-          { x: (cell.x + 1) % this.width, y: cell.y },
-          { x: (cell.x - 1 + this.width) % this.width, y: cell.y },
-          { x: cell.x, y: Math.min(this.height - 1, cell.y + 1) },
-          { x: cell.x, y: Math.max(0, cell.y - 1) },
-        ];
-
-        for (const n of neighbors) {
-          if (attackerSet.has(`${n.x},${n.y}`)) {
-            return true;
-          }
-        }
+    for (const n of neighbors) {
+      const match = allCells.find((c) => c.x === n.x && c.y === n.y);
+      if (match && match.ownerId === targetNationId) {
+        return true;
       }
     }
 
@@ -115,7 +108,8 @@ export class FastTransitCalculator {
     let closest: GridCell | undefined = undefined;
     let minSquareDist = Infinity;
 
-    for (const cell of allCells) {
+    for (let i = 0; i < allCells.length; i++) {
+      const cell = allCells[i]!;
       if (cell.ownerId === attackerId) {
         const sqDist =
           Math.pow(cell.x - targetPixel.x, 2) +
@@ -136,9 +130,9 @@ export class FastTransitCalculator {
     allCells: GridCell[],
   ): { originCoord: Coordinate; pixelSteps: number } {
     const cellMap = new Map<number, GridCell>();
-    for (const cell of allCells) {
-      const idx = cell.y * this.width + cell.x;
-      cellMap.set(idx, cell);
+    for (let i = 0; i < allCells.length; i++) {
+      const cell = allCells[i]!;
+      cellMap.set(cell.y * this.width + cell.x, cell);
     }
 
     const queue: { x: number; y: number; steps: number }[] = [

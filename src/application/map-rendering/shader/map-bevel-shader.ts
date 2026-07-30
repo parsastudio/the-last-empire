@@ -12,8 +12,8 @@ export class MapBevelShader {
     height: number,
     id: number,
     srcData: Uint8ClampedArray,
+    dynamicIds?: Uint16Array | null,
   ): { r: number; g: number; b: number } {
-    const idx = (y * width + x) * 4;
     const ratio = (x / width + y / height) * 0.5;
     const invRatio = 1.0 - ratio;
 
@@ -21,10 +21,18 @@ export class MapBevelShader {
     const finalG = Math.floor(pair.g1 * invRatio + pair.g2 * ratio);
     const finalB = Math.floor(pair.b1 * invRatio + pair.b2 * ratio);
 
-    const idLeft = x > 2 ? srcData[idx - 8 + 2] || 0 : id;
-    const idTop = y > 2 ? srcData[idx - width * 8 + 2] || 0 : id;
-    const idRight = x < width - 2 ? srcData[idx + 8 + 2] || 0 : id;
-    const idBottom = y < height - 2 ? srcData[idx + width * 8 + 2] || 0 : id;
+    const getOwner = (px: number, py: number): number => {
+      if (dynamicIds && dynamicIds[py * width + px]! > 0) {
+        return dynamicIds[py * width + px]!;
+      }
+      const pIdx = (py * width + px) * 4;
+      return srcData[pIdx + 2] || 0;
+    };
+
+    const idLeft = x > 2 ? getOwner(x - 2, y) : id;
+    const idTop = y > 2 ? getOwner(x, y - 2) : id;
+    const idRight = x < width - 2 ? getOwner(x + 2, y) : id;
+    const idBottom = y < height - 2 ? getOwner(x, y + 2) : id;
 
     let bevel = 1.0;
     if (idLeft !== id || idTop !== id) {

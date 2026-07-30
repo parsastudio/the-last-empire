@@ -7,25 +7,43 @@ export class BorderDetector {
     id: number,
     idx: number,
     srcData: Uint8ClampedArray,
+    dynamicIds?: Uint16Array | null,
   ): boolean {
+    const currentOwner =
+      dynamicIds && dynamicIds[y * width + x]! > 0
+        ? dynamicIds[y * width + x]!
+        : id;
+
     if (x < width - 1) {
-      const rightId = srcData[idx + 4 + 2] || 0;
+      const rightOwner =
+        dynamicIds && dynamicIds[y * width + x + 1]! > 0
+          ? dynamicIds[y * width + x + 1]!
+          : srcData[idx + 4 + 2] || 0;
+
       if (
-        rightId !== id &&
-        ((id >= 11 && id < 250) || (rightId >= 11 && rightId < 250))
+        rightOwner !== currentOwner &&
+        ((currentOwner >= 11 && currentOwner < 250) ||
+          (rightOwner >= 11 && rightOwner < 250))
       ) {
         return true;
       }
     }
+
     if (y < height - 1) {
-      const bottomId = srcData[idx + width * 4 + 2] || 0;
+      const bottomOwner =
+        dynamicIds && dynamicIds[(y + 1) * width + x]! > 0
+          ? dynamicIds[(y + 1) * width + x]!
+          : srcData[idx + width * 4 + 2] || 0;
+
       if (
-        bottomId !== id &&
-        ((id >= 11 && id < 250) || (bottomId >= 11 && bottomId < 250))
+        bottomOwner !== currentOwner &&
+        ((currentOwner >= 11 && currentOwner < 250) ||
+          (bottomOwner >= 11 && bottomOwner < 250))
       ) {
         return true;
       }
     }
+
     return false;
   }
 }
