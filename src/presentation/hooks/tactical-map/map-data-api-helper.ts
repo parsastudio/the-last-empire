@@ -10,9 +10,17 @@ export class MapDataApiHelper {
       );
     }
     if (mapMode === "edited") {
-      return "/api/map-generator?type=edited";
+      return MapPathResolver.getMapClientUrl(
+        "map1",
+        mapMode,
+        "edited-mappings.json",
+      );
     }
-    return "/api/map-generator";
+    return MapPathResolver.getMapClientUrl(
+      "map1",
+      mapMode,
+      "default-mappings.json",
+    );
   }
 
   public getImageSource(mapMode: "default" | "edited" | "partition"): string {

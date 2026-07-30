@@ -26,25 +26,51 @@ export function useMapAssetsLoader({
     async function loadAssets() {
       try {
         setLoading(true);
-        const apiPath = apiHelper.getApiPath(mapMode);
-        const res = await fetch(apiPath);
+
+        try {
+          await fetch(`/api/map-manifest?mode=${mapMode}`);
+        } catch {}
+
+        let apiPath = apiHelper.getApiPath(mapMode);
+        let res = await fetch(apiPath);
+
+        if (!res.ok) {
+          apiPath = MapPathResolver.getMapClientUrl(
+            "map1",
+            "default",
+            "default-mappings.json",
+          );
+          res = await fetch(apiPath);
+        }
+
         const json = await res.json();
         if (!active) return;
 
         let countriesData: CountryMapping[] = [];
         let cachedStatus = false;
 
-        if (mapMode === "partition") {
-          countriesData = json.countries || [];
+        if (json.countries) {
+          countriesData = json.countries;
           cachedStatus = true;
-        } else {
-          if (!json.success) {
-            setError(json.error || "Failed to load map data.");
-            setLoading(false);
-            return;
-          }
-          countriesData = json.data.countries || [];
+        } else if (json.data && json.data.countries) {
+          countriesData = json.data.countries;
           cachedStatus = !!json.cached;
+        } else if (json.nations) {
+          countriesData = json.nations.map(
+            (n: {
+              numericId: number;
+              code: string;
+              nameFa: string;
+              territorySize: number;
+            }) => ({
+              id: n.numericId,
+              code: n.code,
+              name: n.nameFa,
+              color: [0, 0, n.numericId],
+              areaSqKm: n.territorySize,
+            }),
+          );
+          cachedStatus = true;
         }
 
         setCountries(countriesData);
@@ -57,14 +83,22 @@ export function useMapAssetsLoader({
               ? "edited-mask-1024.bin"
               : "default-mask-1024.bin";
 
-        const binPath = MapPathResolver.getMapClientUrl(
+        let binPath = MapPathResolver.getMapClientUrl(
           "map1",
           mapMode,
           binFileName,
         );
 
         try {
-          const binRes = await fetch(binPath);
+          let binRes = await fetch(binPath);
+          if (!binRes.ok) {
+            binPath = MapPathResolver.getMapClientUrl(
+              "map1",
+              "default",
+              "default-mask-1024.bin",
+            );
+            binRes = await fetch(binPath);
+          }
           if (binRes.ok) {
             const arrayBuf = await binRes.arrayBuffer();
             packed1024Ref.current = new Uint8Array(arrayBuf);
@@ -72,16 +106,39 @@ export function useMapAssetsLoader({
         } catch {}
 
         const img = new Image();
-        img.src = apiHelper.getImageSource(mapMode);
+        const imgSrc = apiHelper.getImageSource(mapMode);
 
         img.onload = () => {
           if (typeof window === "undefined" || !active) return;
           loadedImgRef.current = img;
           setLoading(false);
         };
+
+        img.onerror = () => {
+          if (!active) return;
+          const fallbackImg = new Image();
+          fallbackImg.src = MapPathResolver.getMapClientUrl(
+            "map1",
+            "default",
+            "default-mask.png",
+          );
+          fallbackImg.onload = () => {
+            if (typeof window === "undefined" || !active) return;
+            loadedImgRef.current = fallbackImg;
+            setLoading(false);
+          };
+          fallbackImg.onerror = () => {
+            if (active) {
+              setError("خطا در بارگذاری تصویر نقشه");
+              setLoading(false);
+            }
+          };
+        };
+
+        img.src = imgSrc;
       } catch {
         if (active) {
-          setError("Error fetching map metadata.");
+          setError("خطا در دریافت داده‌های نقشه");
           setLoading(false);
         }
       }

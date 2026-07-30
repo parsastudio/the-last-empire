@@ -26,7 +26,16 @@ export class MapDataProvider {
       cachedMode = mapMode;
       return cachedRawBuffer;
     } catch {
-      return null;
+      try {
+        const defaultDir = MapPathResolver.getMapServerDir("map1", "default");
+        const defaultPath = path.join(defaultDir, "default-mask.bin");
+        const buffer = await fs.readFile(defaultPath);
+        cachedRawBuffer = new Uint8Array(buffer);
+        cachedMode = "default";
+        return cachedRawBuffer;
+      } catch {
+        return null;
+      }
     }
   }
 
@@ -49,7 +58,16 @@ export class MapDataProvider {
       cachedMode = mapMode;
       return cached1024Buffer;
     } catch {
-      return null;
+      try {
+        const defaultDir = MapPathResolver.getMapServerDir("map1", "default");
+        const defaultPath = path.join(defaultDir, "default-mask-1024.bin");
+        const buffer = await fs.readFile(defaultPath);
+        cached1024Buffer = new Uint8Array(buffer);
+        cachedMode = "default";
+        return cached1024Buffer;
+      } catch {
+        return null;
+      }
     }
   }
 
