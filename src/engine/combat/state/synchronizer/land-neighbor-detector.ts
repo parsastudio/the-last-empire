@@ -50,8 +50,7 @@ export class LandNeighborDetector {
           continue;
         }
 
-        const nationId =
-          cell.isOccupied && cell.occupierId ? cell.occupierId : cell.ownerId;
+        const nationId = cell.ownerId;
 
         const neighbors = [
           { nx: x + 1, ny: y },
@@ -86,10 +85,7 @@ export class LandNeighborDetector {
                 tail++;
               }
             } else {
-              const neighborNationId =
-                nCell.isOccupied && nCell.occupierId
-                  ? nCell.occupierId
-                  : nCell.ownerId;
+              const neighborNationId = nCell.ownerId;
               if (neighborNationId !== nationId) {
                 landNeighborsMap.get(nationId)?.add(neighborNationId);
               }

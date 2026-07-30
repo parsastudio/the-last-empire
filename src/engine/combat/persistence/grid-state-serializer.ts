@@ -9,18 +9,13 @@ export class GridStateSerializer {
 
     const parts: string[] = [];
     let currentOwner = "";
-    let currentOccupied = false;
-    let currentOccupier = "";
     let currentEnclave = 0;
     let currentPixels = 0;
     let count = 0;
 
     for (const cell of sorted) {
-      const occupier = cell.occupierId || "";
       if (
         cell.ownerId === currentOwner &&
-        cell.isOccupied === currentOccupied &&
-        occupier === currentOccupier &&
         cell.enclaveId === currentEnclave &&
         cell.highResPixelCount === currentPixels
       ) {
@@ -28,12 +23,10 @@ export class GridStateSerializer {
       } else {
         if (count > 0) {
           parts.push(
-            `${currentOwner}:${currentOccupied ? 1 : 0}:${currentOccupier}:${currentEnclave}:${currentPixels}:${count}`,
+            `${currentOwner}:${currentEnclave}:${currentPixels}:${count}`,
           );
         }
         currentOwner = cell.ownerId;
-        currentOccupied = cell.isOccupied;
-        currentOccupier = occupier;
         currentEnclave = cell.enclaveId;
         currentPixels = cell.highResPixelCount;
         count = 1;
@@ -41,9 +34,7 @@ export class GridStateSerializer {
     }
 
     if (count > 0) {
-      parts.push(
-        `${currentOwner}:${currentOccupied ? 1 : 0}:${currentOccupier}:${currentEnclave}:${currentPixels}:${count}`,
-      );
+      parts.push(`${currentOwner}:${currentEnclave}:${currentPixels}:${count}`);
     }
 
     return parts.join("|");
