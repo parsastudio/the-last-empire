@@ -11,64 +11,32 @@ export async function GET(request: Request): Promise<NextResponse> {
     const mode = searchParams.get("mode") || "partition";
 
     const targetDir = MapPathResolver.getMapServerDir("map1", mode);
-    const essentialDir = MapPathResolver.getMapServerDir("map1", "default");
     await fs.mkdir(targetDir, { recursive: true });
-    await fs.mkdir(essentialDir, { recursive: true });
 
-    const defaultMappingsPath = path.join(
-      essentialDir,
-      "default-mappings.json",
-    );
-    let defaultExists = false;
+    const mappingsFileName = `${mode}-mappings.json`;
+    const mappingsPath = path.join(targetDir, mappingsFileName);
+
+    let mappingsExists = false;
     try {
-      await fs.access(defaultMappingsPath);
-      defaultExists = true;
+      await fs.access(mappingsPath);
+      mappingsExists = true;
     } catch {}
 
-    if (!defaultExists) {
-      const generated = await generateTest6Map(4096, 2048);
+    if (!mappingsExists) {
+      const generated = await generateTest6Map(4096, 2048, mode);
       await fs.writeFile(
-        defaultMappingsPath,
+        mappingsPath,
         JSON.stringify(generated, null, 2),
         "utf-8",
       );
     }
 
-    if (mode !== "default") {
-      const copyPairs = [
-        ["default-mappings.json", `${mode}-mappings.json`],
-        ["default-mask.png", `${mode}-mask.png`],
-        ["default-mask.bin", `${mode}-mask.bin`],
-        ["default-mask-1024.bin", `${mode}-mask-1024.bin`],
-      ];
-
-      for (const [srcName, destName] of copyPairs) {
-        const srcPath = path.join(essentialDir, srcName);
-        const destPath = path.join(targetDir, destName);
-        try {
-          await fs.access(destPath);
-        } catch {
-          try {
-            await fs.copyFile(srcPath, destPath);
-          } catch {}
-        }
-      }
-    }
-
-    const mappingsFileName = `${mode}-mappings.json`;
-    const mappingsPath = path.join(targetDir, mappingsFileName);
-
     let mappingsData: {
       countries: { id: number; areaSqKm: number; code: string }[];
     } = { countries: [] };
 
-    try {
-      const jsonStr = await fs.readFile(mappingsPath, "utf-8");
-      mappingsData = JSON.parse(jsonStr);
-    } catch {
-      const jsonStr = await fs.readFile(defaultMappingsPath, "utf-8");
-      mappingsData = JSON.parse(jsonStr);
-    }
+    const jsonStr = await fs.readFile(mappingsPath, "utf-8");
+    mappingsData = JSON.parse(jsonStr);
 
     const manifestFileName = `${mode}-manifest.json`;
     const builder = new MapManifestBuilder();
