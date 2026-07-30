@@ -20,7 +20,7 @@ export function usePendingDecisions(metrics: HumanResourceMetrics) {
       items.push({
         id: "doctrines",
         title: "امتیاز دکترین راهبردی آماده تخصیص",
-        desc: `شما ${metrics.nation?.doctrines.doctrinePoints.toFixed(1)} امتیاز دکترین دارید. برای ارتقای توانمندی‌های صنعتی یا نظامی اقدام کنید.`,
+        desc: `شما ${metrics.nation?.doctrines.doctrinePoints.toFixed(1)} امتیاز دکترین دارید. برای ارتقای توانمندی‌های صنعتی اقدام کنید.`,
         icon: Cpu,
         color: "text-gdp",
         tab: "research",
@@ -31,7 +31,7 @@ export function usePendingDecisions(metrics: HumanResourceMetrics) {
       items.push({
         id: "military-queue",
         title: "صف ساخت و تجهیز ارتش خالی است",
-        desc: "هیچ یگان نظامی در حال ساخت نیست. برای تقویت خطوط پادگانی و هوایی نیرو سفارش دهید.",
+        desc: "هیچ یگانی در حال ساخت نیست. جهت تقویت نیروهای پادگانی و هوایی سفارش دهید.",
         icon: Swords,
         color: "text-military",
         tab: "military",
@@ -42,7 +42,7 @@ export function usePendingDecisions(metrics: HumanResourceMetrics) {
       items.push({
         id: "oil-deficit",
         title: "هشدار کسری ذخایر نفت استراتژیک",
-        desc: `مصرف نوبتی (${metrics.oilRequiredPerTurn} بشکه) بیشتر از ذخایر موجود است. جهت جلوگیری از افت جریمه نبرد از بورس نفت بخرید.`,
+        desc: `مصرف نوبتی (${metrics.oilRequiredPerTurn} بشکه) بیشتر از ذخایر موجود است. جهت تامین انرژی صنایع کشوری از بورس نفت بخرید.`,
         icon: Fuel,
         color: "text-treasury",
         tab: "market",

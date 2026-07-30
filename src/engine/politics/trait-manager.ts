@@ -32,22 +32,6 @@ export class TraitManager {
     return multiplier;
   }
 
-  public getCombatAttackBonus(nation: Nation): number {
-    let bonus = 0;
-    if (this.hasTrait(nation, "MILITARISTIC")) {
-      bonus += 0.15;
-    }
-    return bonus;
-  }
-
-  public getCombatDefenseBonus(nation: Nation): number {
-    let bonus = 0;
-    if (this.hasTrait(nation, "ISLAND_FORTRESS")) {
-      bonus += 0.2;
-    }
-    return bonus;
-  }
-
   public getBaseStabilityDelta(nation: Nation): number {
     let delta = 0;
     if (this.hasTrait(nation, "ISOLATED_SOCIETY")) {

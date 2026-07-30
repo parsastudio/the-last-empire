@@ -15,8 +15,8 @@ export function useBriefingFeed() {
 
       const dynamicTexts: { type: FeedMessage["type"]; text: string }[] = [
         {
-          type: "combat",
-          text: "گزارش ارتش: تکمیل تولید و استقرار تجهیزات موشکی جدید در پایگاه‌ها.",
+          type: "info",
+          text: "گزارش ارتش: تکمیل تولید و استقرار تجهیزات جدید در پایگاه‌ها.",
         },
         {
           type: "warning",

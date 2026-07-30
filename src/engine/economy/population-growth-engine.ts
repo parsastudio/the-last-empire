@@ -1,17 +1,13 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 
 export class PopulationGrowthEngine {
-  public calculatePopulationChange(nation: Nation, isAtWar: boolean): number {
+  public calculatePopulationChange(nation: Nation): number {
     let growthRate = 0.012;
 
     if (nation.government.stability > 70) {
       growthRate += 0.005;
     } else if (nation.government.stability < 30) {
       growthRate -= 0.01;
-    }
-
-    if (isAtWar) {
-      growthRate -= 0.015;
     }
 
     const size = nation.geography.territorySize || 100;
@@ -23,8 +19,8 @@ export class PopulationGrowthEngine {
     return Math.floor(nation.population * growthRate);
   }
 
-  public updatePopulation(nation: Nation, isAtWar: boolean): number {
-    const change = this.calculatePopulationChange(nation, isAtWar);
+  public updatePopulation(nation: Nation): number {
+    const change = this.calculatePopulationChange(nation);
     return Math.max(1, nation.population + change);
   }
 }

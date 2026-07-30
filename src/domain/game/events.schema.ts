@@ -46,7 +46,6 @@ export const GameEventSchema = z.object({
   triggerCondition: z.object({
     minStability: z.number().optional(),
     maxStability: z.number().optional(),
-    isAtWar: z.boolean().optional(),
     minTreasury: z.number().optional(),
     maxTreasury: z.number().optional(),
     specificNationId: z.string().optional(),

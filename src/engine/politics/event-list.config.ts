@@ -36,7 +36,6 @@ export const DEFAULT_EVENTS_DATA: GameEvent[] = [
       "Our population is highly motivated by recent displays of defensive readiness.",
     triggerCondition: {
       minStability: 80,
-      isAtWar: false,
     },
     choices: [
       {

@@ -52,7 +52,7 @@ export default function MainMenuPage() {
           </div>
 
           <p className="text-xs md:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed relative z-10 font-bold">
-            با <span className="text-rose-600">جنگ</span>،{" "}
+            با <span className="text-primary font-extrabold">دیپلماسی</span>،{" "}
             <span className="text-amber-600">اقتصاد</span> یا{" "}
             <span className="text-rose-500 font-extrabold">سیاست</span> امپراتور
             جهان شو!

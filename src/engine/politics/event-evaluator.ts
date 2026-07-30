@@ -15,10 +15,6 @@ export class EventEvaluator {
         continue;
       }
 
-      const activeWar = Object.values(nation.relations).some(
-        (r) => r.stance === "WAR",
-      );
-
       for (const event of events) {
         let triggerChanceMultiplier = 1.0;
         if (nation.geography.territorySize > 1500) {
@@ -35,7 +31,6 @@ export class EventEvaluator {
             event,
             nation.government.stability,
             nation.treasury,
-            activeWar,
             id,
             state.eventFlags,
           )
@@ -72,7 +67,6 @@ export class EventEvaluator {
     event: GameEvent,
     stability: number,
     treasury: number,
-    isAtWar: boolean,
     nationId: string,
     eventFlags: Record<string, boolean>,
   ): boolean {
@@ -88,9 +82,6 @@ export class EventEvaluator {
       return false;
     }
     if (cond.maxTreasury !== undefined && treasury > cond.maxTreasury) {
-      return false;
-    }
-    if (cond.isAtWar !== undefined && isAtWar !== cond.isAtWar) {
       return false;
     }
     if (

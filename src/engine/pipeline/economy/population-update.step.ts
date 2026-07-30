@@ -18,10 +18,7 @@ export class PopulationUpdateStep implements EconomyStep {
         warExhaustion = Math.min(100, warExhaustion + 5);
       }
 
-      const activeWar = Object.values(nation.relations).some(
-        (r) => r.stance === "WAR",
-      );
-      const population = this.popEngine.updatePopulation(nation, activeWar);
+      const population = this.popEngine.updatePopulation(nation);
 
       let stability = nation.government.stability;
       const density = population / (nation.geography.territorySize || 1);
