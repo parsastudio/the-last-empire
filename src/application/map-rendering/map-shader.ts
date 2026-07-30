@@ -70,9 +70,15 @@ export class MapShader {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = (y * width + x) * 4;
-        let id = srcData[idx + 2] || 0;
+        const originalMaskId = srcData[idx + 2] || 0;
+        let id = originalMaskId;
 
-        if (dynamicIds && dynamicIds[y * width + x]! > 0) {
+        if (
+          dynamicIds &&
+          dynamicIds[y * width + x]! > 0 &&
+          originalMaskId >= 11 &&
+          originalMaskId < 250
+        ) {
           id = dynamicIds[y * width + x]!;
         }
 

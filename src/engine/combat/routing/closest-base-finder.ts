@@ -28,4 +28,28 @@ export class ClosestBaseFinder {
 
     return closestCell;
   }
+
+  public findClosestBaseInList(
+    target: Coordinate,
+    attackerCells: GridCell[],
+  ): GridCell | undefined {
+    let closestCell: GridCell | undefined = undefined;
+    let minSqDist = Infinity;
+
+    const targetX = target.x;
+    const targetY = target.y;
+
+    for (let i = 0; i < attackerCells.length; i++) {
+      const cell = attackerCells[i]!;
+      const dx = cell.x - targetX;
+      const dy = cell.y - targetY;
+      const sqDist = dx * dx + dy * dy;
+      if (sqDist < minSqDist) {
+        minSqDist = sqDist;
+        closestCell = cell;
+      }
+    }
+
+    return closestCell;
+  }
 }

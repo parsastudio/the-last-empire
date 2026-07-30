@@ -12,7 +12,8 @@ export class AiGridCampaignGenerator {
   ): Map<string, Coordinate> {
     const campaigns = new Map<string, Coordinate>();
 
-    for (const defenderId of allNationsIds) {
+    for (let i = 0; i < allNationsIds.length; i++) {
+      const defenderId = allNationsIds[i]!;
       if (defenderId !== attackerId) {
         const target = this.planner.planBestTargetPixel(
           attackerId,

@@ -9,17 +9,24 @@ export class BorderDetector {
     srcData: Uint8ClampedArray,
     dynamicIds?: Uint16Array | null,
   ): boolean {
-    const currentOwner =
-      dynamicIds && dynamicIds[y * width + x]! > 0
-        ? dynamicIds[y * width + x]!
-        : id;
+    const getOwnerAt = (px: number, py: number): number => {
+      const pIdx = (py * width + px) * 4;
+      const original = srcData[pIdx + 2] || 0;
+      if (
+        dynamicIds &&
+        dynamicIds[py * width + px]! > 0 &&
+        original >= 11 &&
+        original < 250
+      ) {
+        return dynamicIds[py * width + px]!;
+      }
+      return original;
+    };
+
+    const currentOwner = getOwnerAt(x, y);
 
     if (x < width - 1) {
-      const rightOwner =
-        dynamicIds && dynamicIds[y * width + x + 1]! > 0
-          ? dynamicIds[y * width + x + 1]!
-          : srcData[idx + 4 + 2] || 0;
-
+      const rightOwner = getOwnerAt(x + 1, y);
       if (
         rightOwner !== currentOwner &&
         ((currentOwner >= 11 && currentOwner < 250) ||
@@ -30,11 +37,7 @@ export class BorderDetector {
     }
 
     if (y < height - 1) {
-      const bottomOwner =
-        dynamicIds && dynamicIds[(y + 1) * width + x]! > 0
-          ? dynamicIds[(y + 1) * width + x]!
-          : srcData[idx + width * 4 + 2] || 0;
-
+      const bottomOwner = getOwnerAt(x, y + 1);
       if (
         bottomOwner !== currentOwner &&
         ((currentOwner >= 11 && currentOwner < 250) ||
