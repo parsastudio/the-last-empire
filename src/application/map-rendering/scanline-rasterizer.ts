@@ -51,8 +51,8 @@ export function rasterizePolygon(
       const i1 = intersections[i];
       const i2 = intersections[i + 1];
       if (i1 !== undefined && i2 !== undefined) {
-        let xStart = Math.max(0, Math.ceil(i1));
-        let xEnd = Math.min(width - 1, Math.floor(i2));
+        const xStart = Math.max(0, Math.ceil(i1));
+        const xEnd = Math.min(width - 1, Math.floor(i2));
 
         for (let x = xStart; x <= xEnd; x++) {
           buffer[y * width + x] = colorId;
