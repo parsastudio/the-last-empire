@@ -59,10 +59,10 @@ export function MilitaryForcesSection({
             <ShieldAlert size={13} className="text-treasury shrink-0" />
             <div className="space-y-0.5">
               <span className="text-treasury font-bold block font-sans">
-                پادگان و میلیشیای وطن
+                پادگان و نیروهای انتظامی ملی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                تامین از دفاع مردمی | بدون هزینه خزانه
+                تامین از نیروهای انتظامی | بدون هزینه مستقیم
               </span>
             </div>
           </div>
@@ -83,8 +83,7 @@ export function MilitaryForcesSection({
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
                 نگهداری نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(airForceMoneyUpkeep)} |
-                مصرف سوخت فقط هنگام نبرد
+                {PersianNumberFormatter.formatCurrency(airForceMoneyUpkeep)}
               </span>
             </div>
           </div>
@@ -105,8 +104,7 @@ export function MilitaryForcesSection({
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
                 نگهداری نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(droneMoneyUpkeep)} | مصرف
-                سوخت فقط هنگام نبرد
+                {PersianNumberFormatter.formatCurrency(droneMoneyUpkeep)}
               </span>
             </div>
           </div>
@@ -129,7 +127,7 @@ export function MilitaryForcesSection({
           </div>
           <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
             <span className="text-[10px] text-muted-foreground font-sans">
-              تجربه جنگی
+              آمادگی عملیاتی
             </span>
             <span className="text-xs font-bold text-amber-500">
               {PersianNumberFormatter.toPersianDigits(experience)}%

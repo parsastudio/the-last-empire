@@ -39,14 +39,6 @@ export class DoctrinesManager {
     return (unlocked || []).includes("low-upkeep") ? 0.9 : 1.0;
   }
 
-  public getHomelandDefenseBonus(unlocked?: string[]): number {
-    return (unlocked || []).includes("border-fortification") ? 0.25 : 0;
-  }
-
-  public getDroneMultiplier(unlocked?: string[]): number {
-    return (unlocked || []).includes("drone-swarm") ? 1.35 : 1.0;
-  }
-
   public getReputationGainMultiplier(unlocked?: string[]): number {
     return (unlocked || []).includes("reputation-recovery") ? 1.5 : 1.0;
   }

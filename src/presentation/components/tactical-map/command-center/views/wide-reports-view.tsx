@@ -1,7 +1,6 @@
 import React from "react";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { ReportsSidebarTab } from "../../reports/reports-sidebar-tab";
-import { CasualtyTable } from "../../reports/casualty-table";
 import { ReportNarrativeBox } from "./components/report-narrative-box";
 import { useWideReports } from "./hooks/use-wide-reports";
 
@@ -23,22 +22,10 @@ export function WideReportsView({ reports }: WideReportsViewProps) {
 
       <div className="lg:col-span-7 space-y-4">
         {reportsView.selectedReport ? (
-          <>
-            <ReportNarrativeBox
-              summary={reportsView.selectedReport.summary}
-              strategicAssessment={
-                reportsView.selectedReport.strategicAssessment
-              }
-            />
-
-            <CasualtyTable
-              attackerName={reportsView.selectedReport.attackerName}
-              defenderName={reportsView.selectedReport.defenderName}
-              attackerCasualties={reportsView.selectedReport.attackerCasualties}
-              defenderCasualties={reportsView.selectedReport.defenderCasualties}
-              conqueredAreaSqKm={reportsView.selectedReport.conqueredAreaSqKm}
-            />
-          </>
+          <ReportNarrativeBox
+            summary={reportsView.selectedReport.summary}
+            strategicAssessment={reportsView.selectedReport.strategicAssessment}
+          />
         ) : (
           <div className="py-20 text-center text-xs text-muted-foreground italic">
             برای مشاهده آمار کامل، یک گزارش را از لیست انتخاب کنید.
