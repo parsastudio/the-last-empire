@@ -6,6 +6,7 @@ export class GridState {
   private cells: Map<string, GridCell> = new Map();
   private gridArray: (GridCell | undefined)[] = new Array(1024 * 512);
   private ownerMap: Map<string, GridCell[]> = new Map();
+  private modifiedCells: GridCell[] = [];
   private cachedAllCells: GridCell[] | null = null;
 
   public setCell(x: number, y: number, cell: GridCell): void {
@@ -20,6 +21,16 @@ export class GridState {
         if (listIdx !== -1) {
           oldList.splice(listIdx, 1);
         }
+      }
+    }
+
+    if (
+      cell.initialOwnerId &&
+      cell.ownerId !== cell.initialOwnerId &&
+      cell.ownerId.startsWith("NATION_")
+    ) {
+      if (!this.modifiedCells.includes(cell)) {
+        this.modifiedCells.push(cell);
       }
     }
 
@@ -44,6 +55,10 @@ export class GridState {
     return this.ownerMap.get(ownerId) || [];
   }
 
+  public getModifiedCells(): readonly GridCell[] {
+    return this.modifiedCells;
+  }
+
   public getAllCells(): GridCell[] {
     if (!this.cachedAllCells) {
       this.cachedAllCells = Array.from(this.cells.values());
@@ -55,6 +70,7 @@ export class GridState {
     this.cells.clear();
     this.gridArray.fill(undefined);
     this.ownerMap.clear();
+    this.modifiedCells = [];
     this.cachedAllCells = null;
   }
 }
