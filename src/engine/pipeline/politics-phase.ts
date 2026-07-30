@@ -35,7 +35,7 @@ export class PoliticsPhase implements TurnPhase {
         nextState.currentTurn,
         context.prng.nextInt(1, 1000000),
       );
-      updated = crisisResult.updatedNation;
+      updated = crisisResult.updated;
 
       updated.government = {
         ...updated.government,

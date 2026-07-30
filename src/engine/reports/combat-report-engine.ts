@@ -63,7 +63,6 @@ export class CombatReportEngine {
       attackerCasualties: data.attackerCasualties,
       defenderCasualties: data.defenderCasualties,
       conqueredAreaSqKm,
-      governmentType: data.governmentType,
     });
 
     return {

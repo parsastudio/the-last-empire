@@ -12,7 +12,7 @@ export class NavalGridBuilder {
         if (
           cell.ownerId === "WATER" ||
           cell.ownerId === "CLOSED_SEA" ||
-          cell.isOccupied
+          cell.isOccupied === true
         ) {
           traversable[(cell.y << 10) | cell.x] = 1;
         }
