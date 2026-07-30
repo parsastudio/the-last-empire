@@ -19,12 +19,12 @@ export class NationIdResolver {
 
     const profileByCode = findCountryProfileByCode(clean);
     if (profileByCode) {
-      return `NATION_${profileByCode.id}`;
+      return `NATION_${profileByCode.code}`;
     }
 
     const profileById = findCountryProfileById(Number(clean));
     if (profileById) {
-      return `NATION_${profileById.id}`;
+      return `NATION_${profileById.code}`;
     }
 
     return `NATION_${clean}`;

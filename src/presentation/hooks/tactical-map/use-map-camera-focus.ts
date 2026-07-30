@@ -45,7 +45,11 @@ export function useMapCameraFocus({
           findCountryProfileByCode(countryCodeOrId.toString()) ||
           findCountryProfileById(Number(countryCodeOrId));
         if (profile) {
-          matchedCountry = countries.find((c) => c.id === profile.id);
+          matchedCountry = countries.find(
+            (c) =>
+              c.code.toUpperCase() === profile.code.toUpperCase() ||
+              c.code.toUpperCase() === profile.flagCode.toUpperCase(),
+          );
         }
       }
 

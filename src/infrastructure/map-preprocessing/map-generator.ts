@@ -67,25 +67,27 @@ export async function generateTest6Map(
     },
   ];
 
+  let autoId = 11;
   for (const profile of ALL_COUNTRY_PROFILES) {
+    const profileId = autoId++;
     countries.push({
-      id: profile.id,
+      id: profileId,
       code: profile.code,
       name: profile.nameFa,
-      color: [0, 0, profile.id],
+      color: [0, 0, profileId],
       areaSqKm: 0,
     });
-    idToCodeMap.set(profile.id, profile.code);
-    codeToIdMap.set(profile.code.toUpperCase(), profile.id);
+    idToCodeMap.set(profileId, profile.code);
+    codeToIdMap.set(profile.code.toUpperCase(), profileId);
     if (profile.flagCode) {
-      codeToIdMap.set(profile.flagCode.toUpperCase(), profile.id);
+      codeToIdMap.set(profile.flagCode.toUpperCase(), profileId);
     }
   }
 
   const buffer = new Uint8Array(width * height);
   const features = processor.extractFeatures(geoJson);
 
-  let fallbackId = 200;
+  let fallbackId = autoId;
   const getCountryId = (code: string): number => {
     const cleanCode = code.toUpperCase();
     if (codeToIdMap.has(cleanCode)) {
@@ -94,8 +96,8 @@ export async function generateTest6Map(
 
     const profile = findCountryProfileByCode(cleanCode);
     let assignedId = fallbackId;
-    if (profile) {
-      assignedId = profile.id;
+    if (profile && codeToIdMap.has(profile.code.toUpperCase())) {
+      assignedId = codeToIdMap.get(profile.code.toUpperCase())!;
     } else {
       fallbackId++;
     }
