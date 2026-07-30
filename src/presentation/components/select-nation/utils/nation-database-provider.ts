@@ -48,7 +48,7 @@ export class NationDatabaseProvider {
   }
 
   public getAllSelectableNations(
-    presentCountryIds?: Set<number> | number[],
+    presentCountryIds?: Set<number | string> | (number | string)[],
   ): NationDetail[] {
     let profiles = [...ALL_COUNTRY_PROFILES];
 
@@ -58,7 +58,12 @@ export class NationDatabaseProvider {
           ? presentCountryIds
           : Array.from(presentCountryIds),
       );
-      profiles = profiles.filter((p) => validSet.has(p.id));
+      profiles = profiles.filter(
+        (p) =>
+          validSet.has(p.code) ||
+          validSet.has(p.flagCode) ||
+          validSet.has(`NATION_${p.code}`),
+      );
     }
 
     const sorted = profiles.sort((a, b) => b.gdp - a.gdp);
@@ -86,7 +91,7 @@ export class NationDatabaseProvider {
       else if (profile.gdp >= 200e9) power = "قدرت فرامنطقه‌ای";
 
       return {
-        id: `NATION_${profile.id}`,
+        id: `NATION_${profile.code}`,
         name: profile.nameFa,
         code: profile.flagCode.toUpperCase(),
         rank: index + 1,

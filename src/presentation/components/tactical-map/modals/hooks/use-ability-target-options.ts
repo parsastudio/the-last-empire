@@ -4,9 +4,9 @@ import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
 export function useAbilityTargetOptions(nationId: string) {
   return useMemo(() => {
     return ALL_COUNTRY_PROFILES.filter(
-      (p) => `NATION_${p.id}` !== nationId,
+      (p) => `NATION_${p.code}` !== nationId && p.code !== nationId,
     ).map((p) => ({
-      code: `NATION_${p.id}`,
+      code: `NATION_${p.code}`,
       name: p.nameFa,
     }));
   }, [nationId]);
