@@ -32,8 +32,8 @@ export class ShorelineShadowCalculator {
       } else {
         const ratio = (t - 0.5) / 0.5;
         r = Math.floor(this.midR * (1.0 - ratio) + this.deepR * ratio);
-        g = Math.floor(this.shoreG * (1.0 - ratio) + this.deepG * ratio);
-        b = Math.floor(this.shoreB * (1.0 - ratio) + this.deepB * ratio);
+        g = Math.floor(this.midG * (1.0 - ratio) + this.deepG * ratio);
+        b = Math.floor(this.midB * (1.0 - ratio) + this.deepB * ratio);
       }
 
       if (d >= 1 && d <= 12) {
