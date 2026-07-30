@@ -29,11 +29,66 @@ export class AttackConquestHandler implements ActionHandler {
     }
 
     const attackAction = action as AttackAction;
-    const attacker = state.nations[action.nationId];
-    const defender = state.nations[attackAction.targetNationId];
+    let attacker = state.nations[action.nationId];
+    let defender = state.nations[attackAction.targetNationId];
 
     if (!attacker || !defender || !defender.isAlive) {
       return state;
+    }
+
+    const currentRelation = attacker.relations[defender.id];
+    const isSurpriseAttack =
+      !currentRelation || currentRelation.stance !== "WAR";
+
+    if (isSurpriseAttack) {
+      const updatedAttackerRelations = {
+        ...attacker.relations,
+        [defender.id]: {
+          targetNationId: defender.id,
+          stance: "WAR" as const,
+          opinion: -100,
+          tributePerTurn: 0,
+          militaryAccess: false,
+          coolOffTurnsRemaining: 0,
+        },
+      };
+
+      const updatedDefenderRelations = {
+        ...defender.relations,
+        [attacker.id]: {
+          targetNationId: attacker.id,
+          stance: "WAR" as const,
+          opinion: -100,
+          tributePerTurn: 0,
+          militaryAccess: false,
+          coolOffTurnsRemaining: 0,
+        },
+      };
+
+      attacker = {
+        ...attacker,
+        government: {
+          ...attacker.government,
+          stability: Math.max(0, attacker.government.stability - 30),
+        },
+        globalReputation: Math.max(-100, attacker.globalReputation - 25),
+        globalAggression: Math.min(100, attacker.globalAggression + 20),
+        relations: updatedAttackerRelations,
+      };
+
+      defender = {
+        ...defender,
+        relations: updatedDefenderRelations,
+      };
+
+      state = {
+        ...state,
+        nations: {
+          ...state.nations,
+          [attacker.id]: attacker,
+          [defender.id]: defender,
+        },
+      };
     }
 
     const gridState: GridState =

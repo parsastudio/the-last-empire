@@ -113,7 +113,9 @@ export function useAttackPlanning({
 
     const success = await dispatchAction(
       attackAction,
-      `فرمان حمله به نیروهای ${targetName} صادر گردید.`,
+      isAtWar
+        ? `فرمان حمله به نیروهای ${targetName} صادر گردید.`
+        : `حمله مستقیم و غافلگیرانه به ${targetName} صادر شد (افت ۳۰٪ ثبات سیاسی و اعتبار جهانی).`,
     );
 
     if (success) {
