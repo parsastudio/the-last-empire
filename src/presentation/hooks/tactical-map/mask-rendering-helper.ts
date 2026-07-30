@@ -3,6 +3,7 @@ import {
   DirtyRegionPatchEngine,
   DirtyBoundingBox,
 } from "@/infrastructure/map-preprocessing/shader/dirty-region-patch-engine";
+import { FastPaletteSwapEngine } from "@/infrastructure/map-preprocessing/shader/fast-palette-swap-engine";
 
 export interface CountryMapping {
   id: number;
@@ -14,6 +15,7 @@ export interface CountryMapping {
 
 export class MaskRenderingHelper {
   private patchEngine = new DirtyRegionPatchEngine();
+  private paletteSwapEngine = new FastPaletteSwapEngine();
 
   public renderMask(
     mapWidth: number,
@@ -45,6 +47,28 @@ export class MaskRenderingHelper {
 
       ctxShaded.putImageData(destImage, 0, 0);
     }
+  }
+
+  public swapLayerPaletteFast(
+    mapWidth: number,
+    mapHeight: number,
+    canvasShaded: HTMLCanvasElement,
+    countriesData: CountryMapping[],
+    maskDataRef: { current: Uint8Array | null },
+    activeLayer: "political" | "gdp",
+    dynamicIds?: Uint16Array | null,
+  ): void {
+    if (!maskDataRef.current) return;
+
+    this.paletteSwapEngine.swapLayerPalette(
+      canvasShaded,
+      mapWidth,
+      mapHeight,
+      maskDataRef.current,
+      countriesData,
+      activeLayer,
+      dynamicIds,
+    );
   }
 
   public patchMaskRegion(
