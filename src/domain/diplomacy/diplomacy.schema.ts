@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const DiplomaticStanceSchema = z.enum([
   "PEACE",
-  "WAR",
   "ALLIANCE",
   "NON_AGGRESSION_PACT",
 ]);

@@ -18,7 +18,6 @@ export function CountryHoverHud({ info, cursorPos }: CountryHoverHudProps) {
 
   const flagSymbol = getFlagEmoji(info.flagCode || info.code);
   const stylePosition = calculator.calculatePosition(cursorPos);
-  const isWar = info.stance.includes("جنگ");
 
   return (
     <div
@@ -64,17 +63,10 @@ export function CountryHoverHud({ info, cursorPos }: CountryHoverHudProps) {
 
         <div className="flex items-center justify-between text-[10px] bg-secondary/30 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground flex items-center gap-1">
-            <Shield
-              size={11}
-              className={isWar ? "text-military" : "text-diplomacy"}
-            />
+            <Shield size={11} className="text-diplomacy" />
             وضعیت سیاسی:
           </span>
-          <span
-            className={`font-bold ${isWar ? "text-military" : "text-foreground"}`}
-          >
-            {info.stance}
-          </span>
+          <span className="font-bold text-foreground">{info.stance}</span>
         </div>
       </div>
     </div>

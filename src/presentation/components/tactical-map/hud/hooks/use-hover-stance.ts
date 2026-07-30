@@ -19,7 +19,6 @@ export function useHoverStance() {
         humanNation.relations[countryCode.toUpperCase()];
 
       if (relation) {
-        if (relation.stance === "WAR") return "در حال جنگ مستقیم";
         if (relation.stance === "ALLIANCE") return "متحد استراتژیک";
         if (relation.stance === "NON_AGGRESSION_PACT") return "پیمان عدم تخاصم";
       }
