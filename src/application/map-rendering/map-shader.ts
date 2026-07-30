@@ -1,4 +1,7 @@
-import { CountryPaletteGenerator } from "./shader/country-palette-generator";
+import {
+  CountryPaletteGenerator,
+  ColorPair,
+} from "./shader/country-palette-generator";
 import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator";
 import { NoiseGrainApplier } from "./shader/noise-grain-applier";
 import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache";
@@ -7,6 +10,7 @@ import { MilitaryLayerShader } from "./shader/military-layer-shader";
 import { PoliticalLayerShader } from "./shader/political-layer-shader";
 import { BorderDetector } from "./shader/border-detector";
 import { ShorelineDistanceCache } from "./shader/shoreline-distance-cache";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface Country {
   id: number;
@@ -43,10 +47,28 @@ export class MapShader {
       height,
     );
 
+    const gridState = GridStateProvider.getInstance();
+    const hasGridCells = gridState.getAllCells().length > 0;
+
+    const scaleX = width / 1024;
+    const scaleY = height / 512;
+
     for (let y = 0; y < height; y++) {
+      const gy = Math.floor(y / scaleY);
       for (let x = 0; x < width; x++) {
         const idx = (y * width + x) * 4;
-        const id = srcData[idx + 2] || 0;
+        let id = srcData[idx + 2] || 0;
+
+        if (hasGridCells && id >= 11 && id < 250) {
+          const gx = Math.floor(x / scaleX);
+          const cell = gridState.getCell(gx, gy);
+          if (cell && cell.ownerId.startsWith("NATION_")) {
+            const dynamicId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
+            if (!isNaN(dynamicId) && dynamicId >= 11) {
+              id = dynamicId;
+            }
+          }
+        }
 
         let r = 255;
         let g = 255;

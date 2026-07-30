@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, Suspense } from "react";
+import React, { useState, useRef, Suspense, useCallback } from "react";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
@@ -40,7 +40,7 @@ function WorkspaceContent({
   const dimensions = useMapDimensions(containerRef);
   const {
     gameState,
-    advanceNextTurn,
+    advanceNextTurn: baseAdvanceTurn,
     loading: isGameLoading,
     error,
   } = useGeopoliticsGame(gameId);
@@ -68,12 +68,21 @@ function WorkspaceContent({
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
+    reRenderLayer,
   } = useMapData({
     mapWidth,
     mapHeight,
     mapMode: activeMapMode,
     activeLayer,
   });
+
+  const advanceNextTurn = useCallback(async () => {
+    const nextState = await baseAdvanceTurn();
+    if (nextState) {
+      reRenderLayer();
+    }
+    return nextState;
+  }, [baseAdvanceTurn, reRenderLayer]);
 
   const { focusOnCountry } = useMapCameraFocus({
     mapWidth,
@@ -120,7 +129,7 @@ function WorkspaceContent({
       <TacticalViewport
         containerRef={containerRef}
         canvasDestRef={canvasDestRef}
-        canvasSrcRef={canvasSrcRef}
+        canvasShadedRef={canvasShadedRef}
         isDragging={isDragging}
         isHoveringCountry={isHoveringCountry}
         onMouseDown={handleMouseDown}
