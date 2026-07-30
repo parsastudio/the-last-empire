@@ -1,7 +1,7 @@
 import { PARTITION_COUNTRIES_LIST } from "../config/partition-countries.config";
 
 export class TerritoryPartitioner {
-  private readonly maxDistanceKm = 30.0;
+  private readonly maxDistanceKm = 80.0;
   private readonly earthCircumferenceKm = 40075.0;
   private readonly halfEarthMeridianKm = 20015.0;
 
