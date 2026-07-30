@@ -56,6 +56,7 @@ export async function POST(request: Request): Promise<NextResponse> {
               occupierId: null,
               highResPixelCount: nationByte >= 11 ? 16 : 0,
               enclaveId,
+              seaAccess: geoByte & 0x3,
             };
             gridState.setCell(gx, gy, cell);
           }
@@ -87,6 +88,7 @@ export async function POST(request: Request): Promise<NextResponse> {
                 occupierId: null,
                 highResPixelCount: nationByte >= 11 ? 16 : 0,
                 enclaveId,
+                seaAccess: geoByte & 0x3,
               };
               gridState.setCell(gx, gy, cell);
             }

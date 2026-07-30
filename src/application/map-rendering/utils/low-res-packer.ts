@@ -68,6 +68,7 @@ export class LowResPacker {
           occupierId: null,
           highResPixelCount: finalB >= 11 ? 16 : 0,
           enclaveId: 0,
+          seaAccess: finalR & 0x3,
         };
         tempCells.push(cell);
 

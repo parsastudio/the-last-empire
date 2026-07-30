@@ -20,6 +20,20 @@ export class CampaignCheatResolver {
       allCells,
       attackerForcePower: 999999,
       defenderForcePower: 0,
+      attackerMilitary: {
+        infantry: 1000,
+        airForce: 500,
+        droneMissile: 500,
+        experience: 100,
+        techLevel: 5,
+      },
+      defenderMilitary: {
+        infantry: 0,
+        airForce: 0,
+        droneMissile: 0,
+        experience: 0,
+        techLevel: 1,
+      },
     });
   }
 }

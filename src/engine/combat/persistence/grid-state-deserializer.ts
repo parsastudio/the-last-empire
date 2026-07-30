@@ -34,8 +34,9 @@ export class GridStateDeserializer {
           ownerId,
           isOccupied,
           occupierId: occupier,
-          enclaveId,
           highResPixelCount,
+          enclaveId,
+          seaAccess: 0,
         });
 
         currentX++;
