@@ -1,5 +1,6 @@
 import { GridState } from "@/engine/combat/state/grid-state";
 import { RegionClusteringEngine } from "./utils/region-clustering-engine";
+import { GridCell } from "@/domain/map/grid-cell.schema";
 
 export class GridDownsampler {
   private clusteringEngine = new RegionClusteringEngine();
@@ -45,13 +46,15 @@ export class GridDownsampler {
           }
         }
 
-        const cell = {
+        const cell: GridCell = {
           x: gx,
           y: gy,
           ownerId: cellOwner,
           highResPixelCount: countryCounts.size > 0 ? 16 : 0,
           enclaveId: 0,
           seaAccess: 0,
+          isOccupied: false,
+          occupierId: null,
         };
         gridState.setCell(gx, gy, cell);
       }
