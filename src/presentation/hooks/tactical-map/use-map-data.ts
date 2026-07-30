@@ -11,7 +11,7 @@ interface UseMapDataProps {
   mapWidth: number;
   mapHeight: number;
   mapMode?: "default" | "edited" | "partition";
-  activeLayer?: "political" | "gdp" | "military";
+  activeLayer?: "political" | "gdp";
 }
 
 const apiHelper = new MapDataApiHelper();
