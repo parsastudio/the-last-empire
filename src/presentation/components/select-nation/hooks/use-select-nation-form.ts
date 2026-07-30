@@ -20,9 +20,7 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const res = await fetch(
-          "/api/map-preprocessing/manifest?mode=partition",
-        );
+        const res = await fetch("/api/map-preprocessing/manifest");
         if (res.ok) {
           const json = await res.json();
           if (active && json.nations) {

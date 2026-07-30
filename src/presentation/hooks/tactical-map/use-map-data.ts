@@ -10,7 +10,6 @@ export type { CountryMapping };
 interface UseMapDataProps {
   mapWidth: number;
   mapHeight: number;
-  mapMode?: "default" | "edited" | "partition";
   activeLayer?: "political" | "gdp";
 }
 
@@ -20,13 +19,12 @@ const renderingHelper = new MaskRenderingHelper();
 export function useMapData({
   mapWidth,
   mapHeight,
-  mapMode = "default",
   activeLayer = "political",
 }: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
 
   const { countries, loading, error, maskDataRef, packed1024Ref } =
-    useMapAssetsLoader({ mapMode, apiHelper });
+    useMapAssetsLoader({ apiHelper });
 
   const reRenderLayer = useCallback(() => {
     if (canvasShadedRef.current && countries.length > 0) {

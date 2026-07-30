@@ -9,7 +9,6 @@ export class MapWriter {
     height: number,
     buffer: Uint8Array,
     mapId = "map1",
-    mode = "default",
   ): Promise<void> {
     const palette: [number, number, number][] = [];
     for (let i = 0; i < 256; i++) {
@@ -17,10 +16,10 @@ export class MapWriter {
     }
 
     const pngBuffer = encodePng(width, height, buffer, palette);
-    const targetDir = MapPathResolver.getMapServerDir(mapId, mode);
+    const targetDir = MapPathResolver.getMapServerDir(mapId);
     await fs.mkdir(targetDir, { recursive: true });
 
-    const filename = `${mode}-mask.png`;
+    const filename = "partition-mask.png";
     await fs.writeFile(path.join(targetDir, filename), pngBuffer);
   }
 }

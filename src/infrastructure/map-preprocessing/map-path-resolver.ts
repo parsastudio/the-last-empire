@@ -1,8 +1,8 @@
 import path from "path";
 
 export class MapPathResolver {
-  public static getSubFolder(mode?: string): "essential" | "temp" {
-    return mode === "essential" ? "essential" : "temp";
+  public static getSubFolder(): "essential" | "temp" {
+    return "temp";
   }
 
   public static getGeoJsonServerPath(): string {
@@ -27,22 +27,18 @@ export class MapPathResolver {
     );
   }
 
-  public static getMapServerDir(
-    mapId = "map1",
-    mode = "partition",
-    sub?: string,
-  ): string {
-    const subFolder = sub === "essential" ? "essential" : "temp";
-    return path.join(process.cwd(), "public", "maps", mapId, subFolder, mode);
+  public static getMapServerDir(mapId = "map1"): string {
+    return path.join(
+      process.cwd(),
+      "public",
+      "maps",
+      mapId,
+      "temp",
+      "partition",
+    );
   }
 
-  public static getMapClientUrl(
-    mapId = "map1",
-    mode = "partition",
-    filename = "",
-    sub?: string,
-  ): string {
-    const subFolder = sub === "essential" ? "essential" : "temp";
-    return `/maps/${mapId}/${subFolder}/${mode}/${filename}`;
+  public static getMapClientUrl(mapId = "map1", filename = ""): string {
+    return `/maps/${mapId}/temp/partition/${filename}`;
   }
 }

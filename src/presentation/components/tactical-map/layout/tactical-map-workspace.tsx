@@ -27,9 +27,6 @@ function WorkspaceContent({
   const mapWidth = 4096;
   const mapHeight = 2048;
 
-  const [activeMapMode] = useState<"default" | "edited" | "partition">(
-    "partition",
-  );
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isSidebarOpen] = useState<boolean>(true);
   const [isHoveringCountry, setIsHoveringCountry] = useState<boolean>(false);
@@ -71,7 +68,6 @@ function WorkspaceContent({
   } = useMapData({
     mapWidth,
     mapHeight,
-    mapMode: activeMapMode,
     activeLayer,
   });
 

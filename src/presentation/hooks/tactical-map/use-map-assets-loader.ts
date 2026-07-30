@@ -3,14 +3,10 @@ import { MapDataApiHelper } from "./map-data-api-helper";
 import { CountryMapping } from "./mask-rendering-helper";
 
 interface UseMapAssetsLoaderProps {
-  mapMode: "default" | "edited" | "partition";
   apiHelper: MapDataApiHelper;
 }
 
-export function useMapAssetsLoader({
-  mapMode,
-  apiHelper,
-}: UseMapAssetsLoaderProps) {
+export function useMapAssetsLoader({ apiHelper }: UseMapAssetsLoaderProps) {
   const [countries, setCountries] = useState<CountryMapping[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,13 +21,8 @@ export function useMapAssetsLoader({
       try {
         setLoading(true);
 
-        const manifestUrl = apiHelper.getManifestUrl(mapMode);
-        let manifestRes = await fetch(manifestUrl);
-
-        if (!manifestRes.ok) {
-          const fallbackUrl = apiHelper.getManifestUrl("default");
-          manifestRes = await fetch(fallbackUrl);
-        }
+        const manifestUrl = apiHelper.getManifestUrl();
+        const manifestRes = await fetch(manifestUrl);
 
         const json = await manifestRes.json();
         if (!active) return;
@@ -59,23 +50,17 @@ export function useMapAssetsLoader({
 
         setCountries(countriesData);
 
-        const mask1024Url = apiHelper.getMask1024Url(mapMode);
+        const mask1024Url = apiHelper.getMask1024Url();
         try {
-          let binRes = await fetch(mask1024Url);
-          if (!binRes.ok) {
-            binRes = await fetch(apiHelper.getMask1024Url("default"));
-          }
+          const binRes = await fetch(mask1024Url);
           if (binRes.ok) {
             const arrayBuf = await binRes.arrayBuffer();
             packed1024Ref.current = new Uint8Array(arrayBuf);
           }
         } catch {}
 
-        const mask4KUrl = apiHelper.getMask4KUrl(mapMode);
-        let mask4KRes = await fetch(mask4KUrl);
-        if (!mask4KRes.ok) {
-          mask4KRes = await fetch(apiHelper.getMask4KUrl("default"));
-        }
+        const mask4KUrl = apiHelper.getMask4KUrl();
+        const mask4KRes = await fetch(mask4KUrl);
 
         if (mask4KRes.ok) {
           const raw4KBuf = await mask4KRes.arrayBuffer();
@@ -102,7 +87,7 @@ export function useMapAssetsLoader({
     return () => {
       active = false;
     };
-  }, [mapMode, apiHelper]);
+  }, [apiHelper]);
 
   return {
     countries,
