@@ -1,9 +1,7 @@
 import { CountryPaletteGenerator } from "./shader/country-palette-generator";
-import { ShorelineShadowCalculator } from "./shader/shoreline-shadow-calculator";
-import { NoiseGrainApplier } from "./shader/noise-grain-applier";
 import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache";
 import { GdpLayerShader } from "./shader/gdp-layer-shader";
-import { ShorelineDistanceCache } from "./shader/shoreline-distance-cache";
+import { StaticMapCacheBuilder } from "./shader/static-map-cache-builder";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface Country {
@@ -16,10 +14,9 @@ interface Country {
 
 export class MapShader {
   private static paletteGenerator = new CountryPaletteGenerator();
-  private static shadowCalculator = new ShorelineShadowCalculator();
-  private static noiseApplier = new NoiseGrainApplier();
   private static lookupCache = new CountryProfileLookupCache();
   private static gdpShader = new GdpLayerShader();
+  private static staticCacheBuilder = new StaticMapCacheBuilder();
 
   public static applyShading(
     destData: Uint8ClampedArray,
@@ -31,7 +28,7 @@ export class MapShader {
   ): void {
     const dest32 = new Uint32Array(destData.buffer);
     const palette = this.paletteGenerator.generatePalette(countries);
-    const dist = ShorelineDistanceCache.getOrCreateDistanceTransform(
+    const staticCache = this.staticCacheBuilder.buildOrGetCache(
       maskData,
       width,
       height,
@@ -74,7 +71,7 @@ export class MapShader {
       }
     }
 
-    const landLut32 = new Uint32Array(256 * 3);
+    const landLut32 = new Uint32Array(250 * 3);
 
     for (let id = 11; id < 250; id++) {
       let baseR = 255;
@@ -119,122 +116,64 @@ export class MapShader {
     }
 
     const borderUint32 = (255 << 24) | (65 << 16) | (72 << 8) | 80;
+    const ocean32 = staticCache.ocean32;
+    const borderMask = staticCache.borderMask;
+    const bevelCase = staticCache.bevelCase;
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const pixelIdx = y * width + x;
-        const originalMaskId = maskData[pixelIdx] || 0;
-        let id = originalMaskId;
+    const totalPixels = width * height;
 
-        if (
-          dynamicIds &&
-          dynamicIds[pixelIdx]! > 0 &&
-          originalMaskId >= 11 &&
-          originalMaskId < 250
-        ) {
-          id = dynamicIds[pixelIdx]!;
-        }
+    if (!dynamicIds) {
+      for (let i = 0; i < totalPixels; i++) {
+        const id = maskData[i] || 0;
 
         if (id < 11 || id === 254) {
-          const d = id === 254 ? 4 : dist[pixelIdx] || 0;
-          dest32[pixelIdx] = this.shadowCalculator.getOceanUint32(d);
+          dest32[i] = ocean32[i]!;
+          continue;
+        }
+
+        if (borderMask[i] === 1) {
+          dest32[i] = borderUint32;
           continue;
         }
 
         if (id >= 251 && id <= 255) {
-          dest32[pixelIdx] = (255 << 24) | (129 << 16) | (185 << 8) | 16;
+          dest32[i] = (255 << 24) | (129 << 16) | (185 << 8) | 16;
           continue;
         }
 
-        let isBorder = false;
+        const bCase = bevelCase[i]!;
+        dest32[i] = landLut32[id * 3 + bCase] || 0xffffffff;
+      }
+    } else {
+      for (let i = 0; i < totalPixels; i++) {
+        const originalMaskId = maskData[i] || 0;
+        let id = originalMaskId;
 
-        if (x < width - 1) {
-          const rightIdx = pixelIdx + 1;
-          let rightOwner = maskData[rightIdx] || 0;
-          if (
-            dynamicIds &&
-            dynamicIds[rightIdx]! > 0 &&
-            rightOwner >= 11 &&
-            rightOwner < 250
-          ) {
-            rightOwner = dynamicIds[rightIdx]!;
-          }
-          if (
-            rightOwner !== id &&
-            ((id >= 11 && id < 250) || (rightOwner >= 11 && rightOwner < 250))
-          ) {
-            isBorder = true;
-          }
+        if (
+          dynamicIds[i]! > 0 &&
+          originalMaskId >= 11 &&
+          originalMaskId < 250
+        ) {
+          id = dynamicIds[i]!;
         }
 
-        if (!isBorder && y < height - 1) {
-          const bottomIdx = pixelIdx + width;
-          let bottomOwner = maskData[bottomIdx] || 0;
-          if (
-            dynamicIds &&
-            dynamicIds[bottomIdx]! > 0 &&
-            bottomOwner >= 11 &&
-            bottomOwner < 250
-          ) {
-            bottomOwner = dynamicIds[bottomIdx]!;
-          }
-          if (
-            bottomOwner !== id &&
-            ((id >= 11 && id < 250) || (bottomOwner >= 11 && bottomOwner < 250))
-          ) {
-            isBorder = true;
-          }
-        }
-
-        if (isBorder) {
-          dest32[pixelIdx] = borderUint32;
+        if (id < 11 || id === 254) {
+          dest32[i] = ocean32[i]!;
           continue;
         }
 
-        let idLeft = id;
-        if (x > 2) {
-          const leftIdx = pixelIdx - 2;
-          idLeft = maskData[leftIdx] || 0;
-          if (dynamicIds && dynamicIds[leftIdx]! > 0) {
-            idLeft = dynamicIds[leftIdx]!;
-          }
+        if (borderMask[i] === 1 && id === originalMaskId) {
+          dest32[i] = borderUint32;
+          continue;
         }
 
-        let idTop = id;
-        if (y > 2) {
-          const topIdx = pixelIdx - width * 2;
-          idTop = maskData[topIdx] || 0;
-          if (dynamicIds && dynamicIds[topIdx]! > 0) {
-            idTop = dynamicIds[topIdx]!;
-          }
+        if (id >= 251 && id <= 255) {
+          dest32[i] = (255 << 24) | (129 << 16) | (185 << 8) | 16;
+          continue;
         }
 
-        let idRight = id;
-        if (x < width - 2) {
-          const rightIdx = pixelIdx + 2;
-          idRight = maskData[rightIdx] || 0;
-          if (dynamicIds && dynamicIds[rightIdx]! > 0) {
-            idRight = dynamicIds[rightIdx]!;
-          }
-        }
-
-        let idBottom = id;
-        if (y < height - 2) {
-          const bottomIdx = pixelIdx + width * 2;
-          idBottom = maskData[bottomIdx] || 0;
-          if (dynamicIds && dynamicIds[bottomIdx]! > 0) {
-            idBottom = dynamicIds[bottomIdx]!;
-          }
-        }
-
-        let bevelCase = 1;
-        if (idLeft !== id || idTop !== id) {
-          bevelCase = 2;
-        } else if (idRight !== id || idBottom !== id) {
-          bevelCase = 0;
-        }
-
-        dest32[pixelIdx] = landLut32[id * 3 + bevelCase] || 0xffffffff;
+        const bCase = bevelCase[i]!;
+        dest32[i] = landLut32[id * 3 + bCase] || 0xffffffff;
       }
     }
   }
