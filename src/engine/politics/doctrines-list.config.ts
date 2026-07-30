@@ -25,12 +25,6 @@ export const DEFAULT_DOCTRINES: Doctrine[] = [
     cost: 3,
   },
   {
-    id: "drone-swarm",
-    name: "Networked Munitions",
-    branch: "ASYMMETRIC_MILITARY",
-    cost: 5,
-  },
-  {
     id: "global-influence",
     name: "Cultural Radiance",
     branch: "DIPLOMATIC_HEGEMONY",

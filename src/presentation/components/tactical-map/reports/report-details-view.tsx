@@ -1,7 +1,6 @@
 import React from "react";
-import { ArrowRight, Award, ShieldAlert, Swords, FileText } from "lucide-react";
+import { ArrowRight, FileText, Swords } from "lucide-react";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { CasualtyTable } from "./casualty-table";
 import { getSeverityStyle } from "./utils/report-severity-style";
 
 interface ReportDetailsViewProps {
@@ -10,18 +9,8 @@ interface ReportDetailsViewProps {
   onBack: () => void;
 }
 
-export function ReportDetailsView({
-  report,
-  humanNationId,
-  onBack,
-}: ReportDetailsViewProps) {
+export function ReportDetailsView({ report, onBack }: ReportDetailsViewProps) {
   const style = getSeverityStyle(report.severity);
-
-  const isCombatReport =
-    report.attackerCasualties.infantryEngaged > 0 ||
-    report.defenderCasualties.infantryEngaged > 0 ||
-    report.conqueredAreaSqKm > 0 ||
-    report.title.includes("نبرد");
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
@@ -37,15 +26,7 @@ export function ReportDetailsView({
         <div
           className={`w-10 h-10 rounded-2xl flex items-center justify-center border ${style.badge}`}
         >
-          {isCombatReport ? (
-            report.isVictory ? (
-              <Award size={20} />
-            ) : (
-              <ShieldAlert size={20} />
-            )
-          ) : (
-            <FileText size={20} />
-          )}
+          <FileText size={20} />
         </div>
         <div>
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-mono">
@@ -65,19 +46,6 @@ export function ReportDetailsView({
           {report.summary}
         </p>
       </div>
-
-      {isCombatReport && (
-        <CasualtyTable
-          attackerName={report.attackerName}
-          defenderName={report.defenderName}
-          attackerCasualties={report.attackerCasualties}
-          defenderCasualties={report.defenderCasualties}
-          conqueredAreaSqKm={report.conqueredAreaSqKm}
-          attackerNationId={report.attackerNationId}
-          defenderNationId={report.defenderNationId}
-          humanNationId={humanNationId}
-        />
-      )}
 
       <div className="bg-secondary/30 border border-border/60 p-3.5 rounded-2xl space-y-1">
         <span className="text-[10px] font-bold text-muted-foreground flex items-center gap-1 font-mono uppercase">

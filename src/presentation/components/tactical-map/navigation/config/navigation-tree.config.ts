@@ -88,7 +88,7 @@ export const NAVIGATION_TREE_NODES: NavigationNode[] = [
     description: "مدیریت معاهدات، پیشنهاد عدم تخاصم و اتحاد",
     category: "دیپلماسی",
     iconName: "Users",
-    keywords: ["دیپلماسی", "صلح", "اتحاد", "جنگ", "پیمان"],
+    keywords: ["دیپلماسی", "صلح", "اتحاد", "پیمان"],
   },
   {
     id: "research-doctrines",
@@ -114,10 +114,10 @@ export const NAVIGATION_TREE_NODES: NavigationNode[] = [
     id: "reports-history",
     tab: "reports",
     subTab: "reports",
-    title: "گزارش‌های نبرد و حاکمیت",
-    description: "بایگانی آمار تلفات و ارزیابی عملیات‌های نظامی",
+    title: "گزارش‌های حاکمیت و رویدادهای ملی",
+    description: "بایگانی آمار رویدادها و ارزیابی‌های اطلاعاتی کشوری",
     category: "گزارش‌ها",
     iconName: "FileText",
-    keywords: ["گزارش", "آمار", "تلفات", "نبرد"],
+    keywords: ["گزارش", "آمار", "اطلاعات", "حاکمیت"],
   },
 ];

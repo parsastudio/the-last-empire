@@ -17,14 +17,14 @@ export function ReportsSidebarTab({
       <div className="flex items-center gap-2 px-1">
         <FileText size={13} className="text-diplomacy" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          بایگانی گزارش‌های اطلاعاتی و نبردها
+          بایگانی گزارش‌های اطلاعاتی و حاکمیتی
         </span>
       </div>
 
       <div className="space-y-2.5">
         {reports.length === 0 ? (
           <div className="py-12 text-center text-xs text-muted-foreground italic">
-            هیچ گزارش نظامی ثبت نشده است.
+            هیچ گزارش جدیدی ثبت نشده است.
           </div>
         ) : (
           reports.map((report, index) => {
@@ -49,14 +49,6 @@ export function ReportsSidebarTab({
                     </span>
                     <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-mono">
                       <span>نوبت: {report.turn}</span>
-                      {report.conqueredAreaSqKm > 0 && (
-                        <span>
-                          {new Intl.NumberFormat("fa-IR").format(
-                            Math.round(report.conqueredAreaSqKm),
-                          )}{" "}
-                          km²
-                        </span>
-                      )}
                     </div>
                   </div>
                 </div>

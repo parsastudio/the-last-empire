@@ -44,7 +44,7 @@ export function getCommandCenterMeta(
     case "research":
       return {
         title: "پژوهشکده دکترین‌های راهبردی",
-        subtitle: "توسعه شاخه‌های صنعتی، ناهمگون نظامی و هژمونی بین‌المللی",
+        subtitle: "توسعه شاخه‌های صنعتی و هژمونی بین‌المللی",
       };
     case "abilities":
       return {
@@ -53,8 +53,8 @@ export function getCommandCenterMeta(
       };
     case "reports":
       return {
-        title: "بایگانی گزارش‌های اطلاعاتی و نبرد",
-        subtitle: "ارزیابی نتایج عملیات‌های نظامی و آمار تلفات",
+        title: "بایگانی گزارش‌های اطلاعاتی و حاکمیت",
+        subtitle: "ارزیابی رویدادهای ملی و گزارش‌های پایش وضعیت",
       };
     default:
       return { title: "اتاق فرماندهی", subtitle: "" };
