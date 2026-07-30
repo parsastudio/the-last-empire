@@ -23,20 +23,33 @@ export function useMapData({
   activeLayer = "political",
 }: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
+  const isInitialRenderRef = useRef<boolean>(true);
 
   const { countries, loading, error, maskDataRef, packed1024Ref } =
     useMapAssetsLoader({ apiHelper });
 
   const reRenderLayer = useCallback(() => {
     if (canvasShadedRef.current && countries.length > 0) {
-      renderingHelper.renderMask(
-        mapWidth,
-        mapHeight,
-        canvasShadedRef.current,
-        countries,
-        maskDataRef,
-        activeLayer,
-      );
+      if (isInitialRenderRef.current) {
+        renderingHelper.renderMask(
+          mapWidth,
+          mapHeight,
+          canvasShadedRef.current,
+          countries,
+          maskDataRef,
+          activeLayer,
+        );
+        isInitialRenderRef.current = false;
+      } else {
+        renderingHelper.swapLayerPaletteFast(
+          mapWidth,
+          mapHeight,
+          canvasShadedRef.current,
+          countries,
+          maskDataRef,
+          activeLayer,
+        );
+      }
     }
   }, [activeLayer, countries, mapHeight, mapWidth, maskDataRef]);
 
