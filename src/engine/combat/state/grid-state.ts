@@ -1,5 +1,7 @@
 import { GridCell } from "@/domain/map/grid-cell.schema";
 
+export type { GridCell };
+
 export class GridState {
   private cells: Map<string, GridCell> = new Map();
   private ownerMap: Map<string, GridCell[]> = new Map();
