@@ -3,6 +3,7 @@ import { CountryProfileLookupCache } from "./shader/country-profile-lookup-cache
 import { GdpLayerShader } from "./shader/gdp-layer-shader";
 import { StaticMapCacheBuilder } from "./shader/static-map-cache-builder";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { TacticalMapProfiler } from "@/presentation/utils/tactical-map-profiler";
 
 interface Country {
   id: number;
@@ -27,13 +28,18 @@ export class MapShader {
     activeLayer: "political" | "gdp" = "political",
   ): void {
     const dest32 = new Uint32Array(destData.buffer);
+
+    TacticalMapProfiler.markSub("1.PaletteGen");
     const palette = this.paletteGenerator.generatePalette(countries);
+
+    TacticalMapProfiler.markSub("2.StaticCache");
     const staticCache = this.staticCacheBuilder.buildOrGetCache(
       maskData,
       width,
       height,
     );
 
+    TacticalMapProfiler.markSub("3.DynamicGrid");
     const gridState = GridStateProvider.getInstance();
     const allGridCells = gridState.getAllCells();
 
@@ -68,6 +74,7 @@ export class MapShader {
       }
     }
 
+    TacticalMapProfiler.markSub("4.LutBuild");
     const landLut32 = new Uint32Array(250 * 3);
 
     for (let id = 11; id < 250; id++) {
@@ -112,6 +119,7 @@ export class MapShader {
       }
     }
 
+    TacticalMapProfiler.markSub("5.PixelLoop");
     const borderUint32 = (255 << 24) | (65 << 16) | (72 << 8) | 80;
     const ocean32 = staticCache.ocean32;
     const borderMask = staticCache.borderMask;

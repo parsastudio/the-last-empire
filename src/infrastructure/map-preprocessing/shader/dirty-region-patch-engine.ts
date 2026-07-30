@@ -1,7 +1,4 @@
-import {
-  CountryPaletteGenerator,
-  ColorPair,
-} from "./country-palette-generator";
+import { CountryPaletteGenerator } from "./country-palette-generator";
 import { ShorelineShadowCalculator } from "./shoreline-shadow-calculator";
 import { NoiseGrainApplier } from "./noise-grain-applier";
 import { CountryProfileLookupCache } from "./country-profile-lookup-cache";
@@ -59,7 +56,7 @@ export class DirtyRegionPatchEngine {
     if (patchWidth <= 0 || patchHeight <= 0) return;
 
     const patchImageData = ctx.createImageData(patchWidth, patchHeight);
-    const destData = patchImageData.data;
+    const dest32 = new Uint32Array(patchImageData.data.buffer);
 
     const palette = this.paletteGenerator.generatePalette(countries);
     const dist = ShorelineDistanceCache.getOrCreateDistanceTransform(
@@ -68,12 +65,14 @@ export class DirtyRegionPatchEngine {
       mapHeight,
     );
 
+    const borderUint32 = (255 << 24) | (65 << 16) | (72 << 8) | 80;
+
     for (let localY = 0; localY < patchHeight; localY++) {
       const globalY = startY + localY;
       for (let localX = 0; localX < patchWidth; localX++) {
         const globalX = startX + localX;
         const pixelIdx = globalY * mapWidth + globalX;
-        const localIdx = (localY * patchWidth + localX) * 4;
+        const localIdx = localY * patchWidth + localX;
 
         const originalMaskId = maskData[pixelIdx] || 0;
         let id = originalMaskId;
@@ -87,53 +86,15 @@ export class DirtyRegionPatchEngine {
           id = dynamicIds[pixelIdx]!;
         }
 
-        let r = 255;
-        let g = 255;
-        let b = 255;
+        if (id < 11 || id === 254) {
+          const d = id === 254 ? 4 : dist[pixelIdx] || 0;
+          dest32[localIdx] = this.shadowCalculator.getOceanUint32(d);
+          continue;
+        }
 
-        const grain = this.noiseApplier.getNoiseGrain(globalX, globalY);
-
-        if (id === 254) {
-          const oceanColor = this.shadowCalculator.calculateOceanColor(4);
-          r = oceanColor.r;
-          g = oceanColor.g;
-          b = oceanColor.b;
-        } else if (id >= 251 && id <= 255) {
-          r = 16;
-          g = 185;
-          b = 129;
-        } else if (id < 11) {
-          const d = dist[pixelIdx] || 0;
-          const oceanColor = this.shadowCalculator.calculateOceanColor(d);
-          r = oceanColor.r;
-          g = oceanColor.g;
-          b = oceanColor.b;
-        } else {
-          const pair = palette[id];
-          if (pair) {
-            if (activeLayer === "gdp") {
-              const color = this.gdpShader.calculateGdpColor(
-                id,
-                this.lookupCache,
-              );
-              r = color.r;
-              g = color.g;
-              b = color.b;
-            } else {
-              const color = this.politicalShader.calculatePoliticalColor(
-                id,
-                pair,
-                globalX,
-                globalY,
-                mapWidth,
-                mapHeight,
-                maskData,
-              );
-              r = color.r;
-              g = color.g;
-              b = color.b;
-            }
-          }
+        if (id >= 251 && id <= 255) {
+          dest32[localIdx] = (255 << 24) | (129 << 16) | (185 << 8) | 16;
+          continue;
         }
 
         if (
@@ -147,15 +108,47 @@ export class DirtyRegionPatchEngine {
             dynamicIds,
           )
         ) {
-          r = 80;
-          g = 72;
-          b = 65;
+          dest32[localIdx] = borderUint32;
+          continue;
         }
 
-        destData[localIdx] = Math.max(0, Math.min(255, r + grain));
-        destData[localIdx + 1] = Math.max(0, Math.min(255, g + grain));
-        destData[localIdx + 2] = Math.max(0, Math.min(255, b + grain));
-        destData[localIdx + 3] = 255;
+        let r = 255;
+        let g = 255;
+        let b = 255;
+
+        const pair = palette[id];
+        if (pair) {
+          if (activeLayer === "gdp") {
+            const color = this.gdpShader.calculateGdpColor(
+              id,
+              this.lookupCache,
+            );
+            r = color.r;
+            g = color.g;
+            b = color.b;
+          } else {
+            const color = this.politicalShader.calculatePoliticalColor(
+              id,
+              pair,
+              globalX,
+              globalY,
+              mapWidth,
+              mapHeight,
+              maskData,
+            );
+            r = color.r;
+            g = color.g;
+            b = color.b;
+          }
+        }
+
+        const grain = this.noiseApplier.getNoiseGrain(globalX, globalY);
+        const finalR = Math.max(0, Math.min(255, r + grain));
+        const finalG = Math.max(0, Math.min(255, g + grain));
+        const finalB = Math.max(0, Math.min(255, b + grain));
+
+        dest32[localIdx] =
+          (255 << 24) | (finalB << 16) | (finalG << 8) | finalR;
       }
     }
 
