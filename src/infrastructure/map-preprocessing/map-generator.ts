@@ -120,12 +120,17 @@ export async function generateTest6Map(
     }
   }
 
-  const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
-  const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
+  let isEditedLoaded = false;
+  if (mode === "edited") {
+    const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
+    const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
+    if (decodedMask && decodedMask.buffer.length === width * height) {
+      buffer.set(decodedMask.buffer);
+      isEditedLoaded = true;
+    }
+  }
 
-  if (decodedMask && decodedMask.buffer.length === width * height) {
-    buffer.set(decodedMask.buffer);
-  } else {
+  if (!isEditedLoaded) {
     polygonRasterizer.rasterizeFeatures(
       features,
       processor,
@@ -141,7 +146,7 @@ export async function generateTest6Map(
 
   if (mode === "partition") {
     partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
-  } else {
+  } else if (mode !== "edited") {
     boundarySmoother.smoothBoundaries(buffer, width, height);
   }
 
