@@ -2,7 +2,7 @@ import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { BattleValidator } from "@/engine/combat/validation/battle-validator";
 import { FastTransitCalculator } from "@/engine/combat/routing/fast-transit-calculator";
-import { BattleValidationResult } from "@/domain/game/battle-validation-result.schema";
+import { BattleValidationResult } from "./battle-validation-result.schema";
 
 export class BattleValidationFacade {
   private validator = new BattleValidator();
