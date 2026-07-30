@@ -43,8 +43,7 @@ export async function generateTest6Map(
   const partitioner = new TerritoryPartitioner();
   const geometryDraw = new GeometryDraw();
 
-  const idToCodeMap = new Map<number, string>();
-  const codeToIdMap = new Map<string, number>();
+  const activeIdToCodeMap = new Map<number, string>();
 
   const countries: CountryMapping[] = [
     {
@@ -66,17 +65,13 @@ export async function generateTest6Map(
       color: [0, 0, profileId],
       areaSqKm: 0,
     });
-    idToCodeMap.set(profileId, profile.code);
-    codeToIdMap.set(profile.code.toUpperCase(), profileId);
-    if (profile.flagCode) {
-      codeToIdMap.set(profile.flagCode.toUpperCase(), profileId);
-    }
+    activeIdToCodeMap.set(profileId, profile.code);
   }
 
   const buffer = new Uint8Array(width * height);
   buffer.set(decodedMask.buffer);
 
-  partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
+  partitioner.partitionBuffer(buffer, width, height, activeIdToCodeMap);
 
   geometryDraw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
   geometryDraw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);

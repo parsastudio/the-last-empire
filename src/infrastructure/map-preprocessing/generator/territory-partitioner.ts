@@ -10,16 +10,27 @@ export class TerritoryPartitioner {
     buffer: Uint8Array,
     width: number,
     height: number,
-    idToCodeMap: Map<number, string>,
+    activeIdToCodeMap: Map<number, string>,
   ): Uint8Array {
     const partitionCodes = new Set(
       PARTITION_COUNTRIES_LIST.map((c) => c.toUpperCase()),
     );
 
+    const activeIdsSet = new Set(activeIdToCodeMap.keys());
     const removedIds = new Set<number>();
-    for (const [id, code] of idToCodeMap.entries()) {
-      if (partitionCodes.has(code.toUpperCase())) {
-        removedIds.add(id);
+
+    const totalPixels = width * height;
+    for (let i = 0; i < totalPixels; i++) {
+      const id = buffer[i]!;
+      if (id >= 11 && id < 250) {
+        if (!activeIdsSet.has(id)) {
+          removedIds.add(id);
+        } else {
+          const code = activeIdToCodeMap.get(id);
+          if (code && partitionCodes.has(code.toUpperCase())) {
+            removedIds.add(id);
+          }
+        }
       }
     }
 

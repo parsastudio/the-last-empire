@@ -31,8 +31,7 @@ export function findCountryProfileById(
 ): CountryProfile | undefined {
   if (typeof id === "number" || !isNaN(Number(id))) {
     const num = typeof id === "number" ? id : Number(id);
-    const matched = ALL_COUNTRY_PROFILES.find((_, idx) => idx + 11 === num);
-    if (matched) return matched;
+    return ALL_COUNTRY_PROFILES.find((_, idx) => idx + 11 === num);
   }
   return findCountryProfileByCode(id.toString());
 }
