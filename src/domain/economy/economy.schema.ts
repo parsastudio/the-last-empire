@@ -13,16 +13,6 @@ export const UpkeepRatesSchema = z.object({
   infrastructureUpkeep: z.number().nonnegative(),
 });
 
-export const EconomyStatsSchema = z.object({
-  baseGdp: z.number().nonnegative(),
-  gdpGrowth: z.number(),
-  gdpLossFromCorruption: z.number().nonnegative(),
-  netIncome: z.number(),
-  totalTaxRevenue: z.number().nonnegative(),
-  totalUpkeepCost: z.number().nonnegative(),
-  debtInterestPaid: z.number().nonnegative(),
-});
-
 export const ResourceMarketPriceSchema = z.object({
   oil: z.number().positive(),
   steel: z.number().positive(),
@@ -30,5 +20,4 @@ export const ResourceMarketPriceSchema = z.object({
 
 export type Resources = z.infer<typeof ResourcesSchema>;
 export type UpkeepRates = z.infer<typeof UpkeepRatesSchema>;
-export type EconomyStats = z.infer<typeof EconomyStatsSchema>;
 export type ResourceMarketPrice = z.infer<typeof ResourceMarketPriceSchema>;

@@ -3,11 +3,7 @@ import { GovernmentTypeSchema } from "@/domain/politics/politics.schema";
 import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { GameStateSchema } from "./game-state.schema";
-
-export const CoordinateSchema = z.object({
-  x: z.number(),
-  y: z.number(),
-});
+import { CoordinateSchema } from "@/domain/map/coordinate.schema";
 
 export const SetTaxRateActionSchema = z.object({
   id: z.string(),
@@ -217,3 +213,4 @@ export type AntiCorruptionDriveAction = z.infer<
 >;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;
+export { CoordinateSchema };

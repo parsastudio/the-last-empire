@@ -40,14 +40,6 @@ export const CombatReportSchema = z.object({
   supplyShortagePenaltyApplied: z.boolean().optional(),
 });
 
-export const TurnSummaryReportSchema = z.object({
-  id: z.string(),
-  turn: z.number().nonnegative(),
-  humanNationId: z.string(),
-  combatReports: z.array(CombatReportSchema),
-});
-
 export type ReportSeverity = z.infer<typeof ReportSeveritySchema>;
 export type CasualtyMetrics = z.infer<typeof CasualtyMetricsSchema>;
 export type CombatReport = z.infer<typeof CombatReportSchema>;
-export type TurnSummaryReport = z.infer<typeof TurnSummaryReportSchema>;
