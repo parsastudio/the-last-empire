@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { GridDownsampler } from "@/infrastructure/map-preprocessing/grid-downsampler";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { MapDataApiHelper } from "./map-data-api-helper";
@@ -22,20 +22,30 @@ export function useMapData({
   activeLayer = "political",
 }: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
+  const [isLayerRendering, setIsLayerRendering] = useState<boolean>(false);
 
   const { countries, loading, error, maskDataRef, packed1024Ref } =
     useMapAssetsLoader({ apiHelper });
 
   const reRenderLayer = useCallback(() => {
     if (canvasShadedRef.current && countries.length > 0) {
-      renderingHelper.renderMask(
-        mapWidth,
-        mapHeight,
-        canvasShadedRef.current,
-        countries,
-        maskDataRef,
-        activeLayer,
-      );
+      setIsLayerRendering(true);
+
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          if (canvasShadedRef.current) {
+            renderingHelper.renderMask(
+              mapWidth,
+              mapHeight,
+              canvasShadedRef.current,
+              countries,
+              maskDataRef,
+              activeLayer,
+            );
+          }
+          setIsLayerRendering(false);
+        });
+      }, 20);
     }
   }, [activeLayer, countries, mapHeight, mapWidth, maskDataRef]);
 
@@ -66,6 +76,7 @@ export function useMapData({
     countries,
     loading,
     error,
+    isLayerRendering,
     canvasShadedRef,
     maskDataRef,
     packed1024Ref,
