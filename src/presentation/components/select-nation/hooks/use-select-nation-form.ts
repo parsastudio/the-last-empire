@@ -27,19 +27,6 @@ export function useSelectNationForm() {
           const json = await res.json();
           if (active && json.nations) {
             setManifest(json);
-            return;
-          }
-        }
-      } catch {}
-
-      try {
-        const resDef = await fetch(
-          "/api/map-preprocessing/manifest?mode=default",
-        );
-        if (resDef.ok) {
-          const jsonDef = await resDef.json();
-          if (active && jsonDef.nations) {
-            setManifest(jsonDef);
           }
         }
       } catch {}
