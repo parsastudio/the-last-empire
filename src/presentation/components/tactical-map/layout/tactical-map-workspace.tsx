@@ -129,7 +129,7 @@ function WorkspaceContent({
       <TacticalViewport
         containerRef={containerRef}
         canvasDestRef={canvasDestRef}
-        canvasShadedRef={canvasShadedRef}
+        canvasSrcRef={canvasSrcRef}
         isDragging={isDragging}
         isHoveringCountry={isHoveringCountry}
         onMouseDown={handleMouseDown}
