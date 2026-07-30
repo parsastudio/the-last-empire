@@ -1,8 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 
 export class CoalitionManager {
-  private readonly threshold = 50;
-
   public processCoalitions(state: GameState): GameState {
     const nextState = { ...state };
     const nations = { ...nextState.nations };
@@ -15,28 +13,6 @@ export class CoalitionManager {
         0,
         updatedNation.globalAggression - 2,
       );
-
-      if (updatedNation.globalAggression >= this.threshold) {
-        for (const neighborId of updatedNation.geography.landNeighbors) {
-          const neighbor = nations[neighborId];
-          if (neighbor && neighbor.isAlive) {
-            const relationToAggressor = neighbor.relations[id];
-            if (relationToAggressor && relationToAggressor.stance !== "WAR") {
-              neighbor.relations[id] = {
-                ...relationToAggressor,
-                stance: "WAR",
-              };
-            }
-            const relationToNeighbor = updatedNation.relations[neighborId];
-            if (relationToNeighbor && relationToNeighbor.stance !== "WAR") {
-              updatedNation.relations[neighborId] = {
-                ...relationToNeighbor,
-                stance: "WAR",
-              };
-            }
-          }
-        }
-      }
       nations[id] = updatedNation;
     }
     nextState.nations = nations;

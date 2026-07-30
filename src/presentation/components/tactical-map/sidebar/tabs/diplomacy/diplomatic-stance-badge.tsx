@@ -1,5 +1,5 @@
 import React from "react";
-import { Swords, CheckCircle2, Handshake } from "lucide-react";
+import { CheckCircle2, Handshake } from "lucide-react";
 
 interface DiplomaticStanceBadgeProps {
   stance: string;
@@ -7,12 +7,6 @@ interface DiplomaticStanceBadgeProps {
 
 export function DiplomaticStanceBadge({ stance }: DiplomaticStanceBadgeProps) {
   switch (stance) {
-    case "WAR":
-      return (
-        <span className="px-2 py-0.5 rounded-md bg-military/20 text-military text-[9px] font-bold flex items-center gap-1">
-          <Swords size={10} /> در حال جنگ
-        </span>
-      );
     case "ALLIANCE":
       return (
         <span className="px-2 py-0.5 rounded-md bg-gdp/20 text-gdp text-[9px] font-bold flex items-center gap-1">

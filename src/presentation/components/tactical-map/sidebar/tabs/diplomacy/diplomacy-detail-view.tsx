@@ -12,7 +12,7 @@ export interface DiplomaticRelation {
   code: string;
   name: string;
   flagCode: string;
-  stance: "PEACE" | "WAR" | "ALLIANCE" | "NON_AGGRESSION_PACT";
+  stance: "PEACE" | "ALLIANCE" | "NON_AGGRESSION_PACT";
   opinion: number;
   description: string;
   profileData: {
@@ -49,12 +49,6 @@ export function DiplomacyDetailView({
 
   const getStanceBadge = (stance: string) => {
     switch (stance) {
-      case "WAR":
-        return (
-          <span className="px-2.5 py-1 rounded-lg bg-military/15 text-military border border-military/30 text-[10px] font-bold whitespace-nowrap shrink-0">
-            در حال جنگ
-          </span>
-        );
       case "ALLIANCE":
         return (
           <span className="px-2.5 py-1 rounded-lg bg-gdp/15 text-gdp border border-gdp/30 text-[10px] font-bold whitespace-nowrap shrink-0">
