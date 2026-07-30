@@ -51,7 +51,7 @@ export class MapManifestBuilder {
   ): Promise<MapManifest> {
     const activeCountryCodes = new Set(
       mappingsCountries
-        .filter((c) => c.id >= 11)
+        .filter((c) => c.id >= 11 && c.areaSqKm > 0)
         .map((c) => c.code.toUpperCase()),
     );
 
