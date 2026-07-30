@@ -20,7 +20,7 @@ export class MapWriter {
     const targetDir = MapPathResolver.getMapServerDir(mapId, mode);
     await fs.mkdir(targetDir, { recursive: true });
 
-    const filename = mode === "edited" ? "edited-mask.png" : "default-mask.png";
+    const filename = `${mode}-mask.png`;
     await fs.writeFile(path.join(targetDir, filename), pngBuffer);
   }
 }

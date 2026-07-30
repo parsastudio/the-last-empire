@@ -31,16 +31,11 @@ export function useMapAssetsLoader({
           await fetch(`/api/map-preprocessing/manifest?mode=${mapMode}`);
         } catch {}
 
-        let apiPath = apiHelper.getApiPath(mapMode);
-        let res = await fetch(apiPath);
+        const apiPath = apiHelper.getApiPath(mapMode);
+        const res = await fetch(apiPath);
 
         if (!res.ok) {
-          apiPath = MapPathResolver.getMapClientUrl(
-            "map1",
-            "default",
-            "default-mappings.json",
-          );
-          res = await fetch(apiPath);
+          throw new Error("Failed to load map mappings");
         }
 
         const json = await res.json();
@@ -76,29 +71,15 @@ export function useMapAssetsLoader({
         setCountries(countriesData);
         setIsCached(cachedStatus);
 
-        const binFileName =
-          mapMode === "partition"
-            ? "partition-mask-1024.bin"
-            : mapMode === "edited"
-              ? "edited-mask-1024.bin"
-              : "default-mask-1024.bin";
-
-        let binPath = MapPathResolver.getMapClientUrl(
+        const binFileName = `${mapMode}-mask-1024.bin`;
+        const binPath = MapPathResolver.getMapClientUrl(
           "map1",
           mapMode,
           binFileName,
         );
 
         try {
-          let binRes = await fetch(binPath);
-          if (!binRes.ok) {
-            binPath = MapPathResolver.getMapClientUrl(
-              "map1",
-              "default",
-              "default-mask-1024.bin",
-            );
-            binRes = await fetch(binPath);
-          }
+          const binRes = await fetch(binPath);
           if (binRes.ok) {
             const arrayBuf = await binRes.arrayBuffer();
             packed1024Ref.current = new Uint8Array(arrayBuf);
@@ -116,23 +97,8 @@ export function useMapAssetsLoader({
 
         img.onerror = () => {
           if (!active) return;
-          const fallbackImg = new Image();
-          fallbackImg.src = MapPathResolver.getMapClientUrl(
-            "map1",
-            "default",
-            "default-mask.png",
-          );
-          fallbackImg.onload = () => {
-            if (typeof window === "undefined" || !active) return;
-            loadedImgRef.current = fallbackImg;
-            setLoading(false);
-          };
-          fallbackImg.onerror = () => {
-            if (active) {
-              setError("خطا در بارگذاری تصویر نقشه");
-              setLoading(false);
-            }
-          };
+          setError("خطا در بارگذاری تصویر نقشه");
+          setLoading(false);
         };
 
         img.src = imgSrc;
