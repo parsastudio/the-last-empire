@@ -1,8 +1,8 @@
 import path from "path";
 
 export class MapPathResolver {
-  public static getSubFolder(_mode: string): "essential" | "temp" {
-    return "temp";
+  public static getSubFolder(mode?: string): "essential" | "temp" {
+    return mode === "essential" ? "essential" : "temp";
   }
 
   public static getGeoJsonServerPath(): string {
@@ -39,6 +39,7 @@ export class MapPathResolver {
     mode = "partition",
     filename = "",
   ): string {
-    return `/maps/${mapId}/temp/${filename}`;
+    const subFolder = mode === "essential" ? "essential" : "temp";
+    return `/maps/${mapId}/${subFolder}/${filename}`;
   }
 }

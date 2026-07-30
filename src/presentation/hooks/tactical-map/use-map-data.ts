@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { GridDownsampler } from "@/application/map-rendering/grid-downsampler";
+import { GridDownsampler } from "@/infrastructure/map-preprocessing/grid-downsampler";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { MapDataApiHelper } from "./map-data-api-helper";
 import { MaskRenderingHelper, CountryMapping } from "./mask-rendering-helper";

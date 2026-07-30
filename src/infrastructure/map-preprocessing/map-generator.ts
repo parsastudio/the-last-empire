@@ -60,7 +60,7 @@ export async function generateTest6Map(
     },
   ];
 
-  let buffer = new Uint8Array(width * height);
+  const buffer = new Uint8Array(width * height);
   const features = processor.extractFeatures(geoJson);
   const idToCodeMap = new Map<number, string>();
 
@@ -81,7 +81,7 @@ export async function generateTest6Map(
   const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
 
   if (decodedMask && decodedMask.buffer.length === width * height) {
-    buffer = decodedMask.buffer;
+    buffer.set(decodedMask.buffer);
   } else {
     polygonRasterizer.rasterizeFeatures(
       features,
