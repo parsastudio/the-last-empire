@@ -25,7 +25,7 @@ export class GameStateInitializer {
     const cells = gridState.getAllCells();
     const detectedNations = this.detector.detectUniqueNations(cells);
 
-    const manifest = this.manifestLoader.loadManifest("map1", "partition");
+    const manifest = this.manifestLoader.loadManifest("map1");
 
     if (!detectedNations.includes(normalizedHumanId)) {
       detectedNations.push(normalizedHumanId);
