@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { BaseGdpCalculator } from "./gdp/base-gdp.calculator";
 import { GdpGrowthCalculator } from "./gdp/gdp-growth.calculator";
+import { findCountryProfileById } from "@/domain/map/countries";
 
 export class GdpCalculator {
   private baseGdpCalc = new BaseGdpCalculator();
@@ -31,12 +32,20 @@ export class GdpCalculator {
       nation,
       peacefulNeighborsCount,
     );
+
+    const numericId = parseInt(nation.id.replace("NATION_", ""), 10);
+    const profile = findCountryProfileById(numericId);
+
     const previousGdp =
-      nation.gdp ||
-      this.baseGdpCalc.calculateBaseGdp(
-        nation.population,
-        nation.geography.infrastructureLevel,
-      );
+      nation.gdp && nation.gdp > 0
+        ? nation.gdp
+        : profile
+          ? profile.gdp
+          : this.baseGdpCalc.calculateBaseGdp(
+              nation.population,
+              nation.geography.infrastructureLevel,
+            );
+
     return Math.floor(previousGdp * growthMult);
   }
 }

@@ -47,10 +47,16 @@ export class GdpPopUpdater {
       const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
       const profile = findCountryProfileById(numericId);
 
-      const baseGdp = profile ? profile.gdp : nation.gdp || 5000000000;
+      const baseGdp = profile
+        ? profile.gdp
+        : nation.gdp > 0
+          ? nation.gdp
+          : 5000000000;
       const basePop = profile
         ? profile.population
-        : nation.population || 80000000;
+        : nation.population > 0
+          ? nation.population
+          : 80000000;
 
       const ownedPixels = totalPixelsMap.get(canonicalId) || 0;
 
@@ -67,11 +73,14 @@ export class GdpPopUpdater {
         continue;
       }
 
-      const initialTotalPixels = Math.max(
-        1,
-        Math.round(baseGdp / 1000000 / 86.3) || ownedPixels,
+      const expectedPixels = Math.max(
+        100,
+        Math.round(nation.geography.territorySize / 86.3) || ownedPixels,
       );
-      const areaRatio = Math.max(0.01, ownedPixels / initialTotalPixels);
+      const areaRatio = Math.min(
+        2.0,
+        Math.max(0.1, ownedPixels / expectedPixels),
+      );
 
       const currentGdp = Math.max(
         baseGdp * 0.1,
