@@ -7,6 +7,7 @@ import { ClosedSeaDetector } from "./utils/closed-sea-detector";
 import { MapPathResolver } from "./map-path-resolver";
 import { TerritoryPartitioner } from "./generator/territory-partitioner";
 import { PngDecoder } from "./encoders/png-decoder";
+import { GeometryDraw } from "./utils/geometry-draw";
 import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
 
 export interface CountryMapping {
@@ -25,7 +26,11 @@ export async function generateTest6Map(
   await fs.mkdir(targetDir, { recursive: true });
 
   const editedMaskPath = MapPathResolver.getEditedMaskServerPath();
-  const decodedMask = await PngDecoder.decodeIndexedPng(editedMaskPath);
+  const decodedMask = await PngDecoder.decodeIndexedPng(
+    editedMaskPath,
+    width,
+    height,
+  );
 
   if (!decodedMask || decodedMask.buffer.length !== width * height) {
     throw new Error(
@@ -36,6 +41,7 @@ export async function generateTest6Map(
   const distanceTransform = new DistanceTransform();
   const areaCounter = new MapAreaPixelCounter();
   const partitioner = new TerritoryPartitioner();
+  const geometryDraw = new GeometryDraw();
 
   const idToCodeMap = new Map<number, string>();
   const codeToIdMap = new Map<string, number>();
@@ -71,6 +77,9 @@ export async function generateTest6Map(
   buffer.set(decodedMask.buffer);
 
   partitioner.partitionBuffer(buffer, width, height, idToCodeMap);
+
+  geometryDraw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
+  geometryDraw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
 
   const maxId = Math.max(...countries.map((c) => c.id), 255) + 1;
   const pixelAreas = areaCounter.calculateAreas(buffer, width, height, maxId);
