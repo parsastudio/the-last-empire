@@ -30,7 +30,7 @@ export class NavalPathDistanceCalculator {
     dist[originIdx] = 0;
 
     while (head < tail) {
-      const currentIdx = queue[head++];
+      const currentIdx = queue[head++]!;
       const currentDist = dist[currentIdx]!;
 
       if (currentIdx === targetIdx) {
@@ -45,23 +45,15 @@ export class NavalPathDistanceCalculator {
         [cx - 1, cy],
         [cx, cy + 1],
         [cx, cy - 1],
-        [cx + 1, cy + 1],
-        [cx - 1, cy - 1],
-        [cx + 1, cy - 1],
-        [cx - 1, cy + 1],
       ];
 
-      for (let i = 0; i < 8; i++) {
-        const pair = offsets[i];
-        if (!pair) continue;
-        let nx = pair[0] ?? 0;
-        const ny = pair[1] ?? 0;
+      for (let i = 0; i < 4; i++) {
+        const pair = offsets[i]!;
+        let nx = pair[0]!;
+        const ny = pair[1]!;
 
-        if (nx < 0) {
-          nx = 1023;
-        } else if (nx >= 1024) {
-          nx = 0;
-        }
+        if (nx < 0) nx = 1023;
+        else if (nx >= 1024) nx = 0;
 
         if (ny >= 0 && ny < 512) {
           const nIdx = (ny << 10) | nx;

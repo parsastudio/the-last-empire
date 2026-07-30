@@ -12,7 +12,9 @@ export class PolygonFeatureRasterizer {
   ): number {
     let nextId = startId;
 
-    for (const feature of features) {
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i]!;
+
       const processRing = (ring: number[][]) => {
         const points = processor.getPolygonPoints(ring, width, height);
         rasterizePolygon(points, width, height, nextId, buffer);
@@ -20,12 +22,17 @@ export class PolygonFeatureRasterizer {
 
       if (feature.geometry.type === "Polygon") {
         const rings = feature.geometry.coordinates as number[][][];
-        rings.forEach((ring) => processRing(ring));
+        for (let r = 0; r < rings.length; r++) {
+          processRing(rings[r]!);
+        }
       } else if (feature.geometry.type === "MultiPolygon") {
         const multiRings = feature.geometry.coordinates as number[][][][];
-        multiRings.forEach((polygonCoords) => {
-          polygonCoords.forEach((ring) => processRing(ring));
-        });
+        for (let m = 0; m < multiRings.length; m++) {
+          const polygonCoords = multiRings[m]!;
+          for (let r = 0; r < polygonCoords.length; r++) {
+            processRing(polygonCoords[r]!);
+          }
+        }
       }
       nextId++;
     }

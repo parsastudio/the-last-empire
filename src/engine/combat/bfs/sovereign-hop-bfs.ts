@@ -1,10 +1,9 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
-import { BfsStartCellFinder } from "./bfs-start-cell-finder";
 
 export class SovereignHopBfs {
-  private startCellFinder = new BfsStartCellFinder();
+  private readonly width = 1024;
+  private readonly height = 512;
 
   public executeHopBfs(
     targetCountryId: string,
@@ -13,56 +12,77 @@ export class SovereignHopBfs {
     allCells: GridCell[],
     pixelLimit: number,
   ): GridCell[] {
-    const targetCells = allCells.filter(
-      (c) => c.ownerId === targetCountryId && c.enclaveId === targetEnclaveId,
-    );
-
-    if (targetCells.length === 0 || pixelLimit <= 0) {
+    if (pixelLimit <= 0 || allCells.length === 0) {
       return [];
     }
 
-    const cellMap = new Map<string, GridCell>();
-    for (const c of targetCells) {
-      cellMap.set(`${c.x},${c.y}`, c);
+    const totalPixels = this.width * this.height;
+    const gridLookup = new Array<GridCell | undefined>(totalPixels);
+    let startCell: GridCell | undefined = undefined;
+    let minEntryDist = Infinity;
+
+    for (let i = 0; i < allCells.length; i++) {
+      const c = allCells[i]!;
+      if (c.ownerId === targetCountryId && c.enclaveId === targetEnclaveId) {
+        const idx = c.y * this.width + c.x;
+        gridLookup[idx] = c;
+
+        const dist = Math.hypot(c.x - entryPoint.x, c.y - entryPoint.y);
+        if (dist < minEntryDist) {
+          minEntryDist = dist;
+          startCell = c;
+        }
+      }
     }
-
-    const conquered: GridCell[] = [];
-    const queue = new BfsQueue<GridCell>();
-    const visited = new Set<string>();
-
-    const startCell = this.startCellFinder.findStartCell(
-      entryPoint,
-      targetCells,
-      cellMap,
-    );
 
     if (!startCell) {
       return [];
     }
 
-    queue.enqueue(startCell);
-    visited.add(`${startCell.x},${startCell.y}`);
+    const conquered: GridCell[] = [];
+    const queueX = new Int16Array(pixelLimit + 1000);
+    const queueY = new Int16Array(pixelLimit + 1000);
+    const visited = new Uint8Array(totalPixels);
 
-    while (conquered.length < pixelLimit && !queue.isEmpty()) {
-      const current = queue.dequeue();
-      if (!current) continue;
+    let head = 0;
+    let tail = 0;
 
-      conquered.push(current);
+    const startIdx = startCell.y * this.width + startCell.x;
+    visited[startIdx] = 1;
+    queueX[tail] = startCell.x;
+    queueY[tail] = startCell.y;
+    tail++;
+
+    while (head < tail && conquered.length < pixelLimit) {
+      const cx = queueX[head]!;
+      const cy = queueY[head]!;
+      head++;
+
+      const currentCell = gridLookup[cy * this.width + cx];
+      if (currentCell) {
+        conquered.push(currentCell);
+      }
 
       const neighbors = [
-        { x: current.x + 1, y: current.y },
-        { x: current.x - 1, y: current.y },
-        { x: current.x, y: current.y + 1 },
-        { x: current.x, y: current.y - 1 },
+        { x: cx + 1, y: cy },
+        { x: cx - 1, y: cy },
+        { x: cx, y: cy + 1 },
+        { x: cx, y: cy - 1 },
       ];
 
-      for (const n of neighbors) {
-        const key = `${n.x},${n.y}`;
-        if (cellMap.has(key) && !visited.has(key)) {
-          visited.add(key);
-          const neighborCell = cellMap.get(key);
-          if (neighborCell) {
-            queue.enqueue(neighborCell);
+      for (let i = 0; i < 4; i++) {
+        let nx = neighbors[i]!.x;
+        if (nx < 0) nx = this.width - 1;
+        else if (nx >= this.width) nx = 0;
+
+        const ny = neighbors[i]!.y;
+        if (ny >= 0 && ny < this.height) {
+          const nIdx = ny * this.width + nx;
+          if (visited[nIdx] === 0 && gridLookup[nIdx] !== undefined) {
+            visited[nIdx] = 1;
+            queueX[tail] = nx;
+            queueY[tail] = ny;
+            tail++;
           }
         }
       }

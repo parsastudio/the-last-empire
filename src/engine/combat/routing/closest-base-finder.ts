@@ -8,13 +8,19 @@ export class ClosestBaseFinder {
     gridCells: GridCell[],
   ): GridCell | undefined {
     let closestCell: GridCell | undefined = undefined;
-    let minDistance = Infinity;
+    let minSqDist = Infinity;
 
-    for (const cell of gridCells) {
+    const targetX = target.x;
+    const targetY = target.y;
+
+    for (let i = 0; i < gridCells.length; i++) {
+      const cell = gridCells[i]!;
       if (cell.ownerId === attackerId) {
-        const dist = Math.hypot(cell.x - target.x, cell.y - target.y);
-        if (dist < minDistance) {
-          minDistance = dist;
+        const dx = cell.x - targetX;
+        const dy = cell.y - targetY;
+        const sqDist = dx * dx + dy * dy;
+        if (sqDist < minSqDist) {
+          minSqDist = sqDist;
           closestCell = cell;
         }
       }

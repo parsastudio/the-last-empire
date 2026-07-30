@@ -1,87 +1,96 @@
 import { Coordinate } from "@/domain/map/coordinate.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { SeaBridgeConnector } from "@/engine/combat/sea-bridges/sea-bridge-connector";
-import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
-import { BfsStartCellFinder } from "./bfs-start-cell-finder";
 
 export class ContiguousTheaterBfs {
-  private connector = new SeaBridgeConnector();
-  private startCellFinder = new BfsStartCellFinder();
+  private readonly width = 1024;
+  private readonly height = 512;
 
   public findTheaterCells(
     targetCountryId: string,
     entryPoint: Coordinate,
     allCells: GridCell[],
   ): GridCell[] {
-    const initialMatch = allCells.find(
-      (c) =>
+    const totalPixels = this.width * this.height;
+    const gridLookup = new Array<GridCell | undefined>(totalPixels);
+
+    let targetEnclaveId = 0;
+    let startCell: GridCell | undefined = undefined;
+    let minEntryDist = Infinity;
+
+    for (let i = 0; i < allCells.length; i++) {
+      const c = allCells[i]!;
+      if (
         c.x === entryPoint.x &&
         c.y === entryPoint.y &&
-        c.ownerId === targetCountryId,
-    );
-
-    const targetEnclaveId = initialMatch ? initialMatch.enclaveId : 0;
-
-    const countryCells = allCells.filter(
-      (c) => c.ownerId === targetCountryId && c.enclaveId === targetEnclaveId,
-    );
-
-    const cellMap = new Map<string, GridCell>();
-    for (const c of countryCells) {
-      cellMap.set(`${c.x},${c.y}`, c);
+        c.ownerId === targetCountryId
+      ) {
+        targetEnclaveId = c.enclaveId;
+        break;
+      }
     }
 
-    const startCell = this.startCellFinder.findStartCell(
-      entryPoint,
-      countryCells,
-      cellMap,
-    );
+    for (let i = 0; i < allCells.length; i++) {
+      const c = allCells[i]!;
+      if (c.ownerId === targetCountryId && c.enclaveId === targetEnclaveId) {
+        const idx = c.y * this.width + c.x;
+        gridLookup[idx] = c;
+
+        const dist = Math.hypot(c.x - entryPoint.x, c.y - entryPoint.y);
+        if (dist < minEntryDist) {
+          minEntryDist = dist;
+          startCell = c;
+        }
+      }
+    }
 
     if (!startCell) {
       return [];
     }
 
     const theaterCells: GridCell[] = [];
-    const queue = new BfsQueue<GridCell>();
-    const visited = new Set<string>();
+    const queueX = new Int16Array(totalPixels);
+    const queueY = new Int16Array(totalPixels);
+    const visited = new Uint8Array(totalPixels);
 
-    queue.enqueue(startCell);
-    visited.add(`${startCell.x},${startCell.y}`);
+    let head = 0;
+    let tail = 0;
 
-    const latitude = (0.5 - entryPoint.y / 512) * 180;
+    const startIdx = startCell.y * this.width + startCell.x;
+    visited[startIdx] = 1;
+    queueX[tail] = startCell.x;
+    queueY[tail] = startCell.y;
+    tail++;
 
-    while (!queue.isEmpty()) {
-      const current = queue.dequeue();
-      if (!current) continue;
+    while (head < tail) {
+      const cx = queueX[head]!;
+      const cy = queueY[head]!;
+      head++;
 
-      theaterCells.push(current);
-
-      const neighbors = [
-        { x: current.x + 1, y: current.y },
-        { x: current.x - 1, y: current.y },
-        { x: current.x, y: current.y + 1 },
-        { x: current.x, y: current.y - 1 },
-      ];
-
-      for (const n of neighbors) {
-        const key = `${n.x},${n.y}`;
-        if (cellMap.has(key) && !visited.has(key)) {
-          visited.add(key);
-          const neighborCell = cellMap.get(key);
-          if (neighborCell) {
-            queue.enqueue(neighborCell);
-          }
-        }
+      const currentCell = gridLookup[cy * this.width + cx];
+      if (currentCell) {
+        theaterCells.push(currentCell);
       }
 
-      for (const potential of countryCells) {
-        const key = `${potential.x},${potential.y}`;
-        if (!visited.has(key)) {
-          if (
-            this.connector.areConnectedBySeaBridge(current, potential, latitude)
-          ) {
-            visited.add(key);
-            queue.enqueue(potential);
+      const neighbors = [
+        { x: cx + 1, y: cy },
+        { x: cx - 1, y: cy },
+        { x: cx, y: cy + 1 },
+        { x: cx, y: cy - 1 },
+      ];
+
+      for (let i = 0; i < 4; i++) {
+        let nx = neighbors[i]!.x;
+        if (nx < 0) nx = this.width - 1;
+        else if (nx >= this.width) nx = 0;
+
+        const ny = neighbors[i]!.y;
+        if (ny >= 0 && ny < this.height) {
+          const nIdx = ny * this.width + nx;
+          if (visited[nIdx] === 0 && gridLookup[nIdx] !== undefined) {
+            visited[nIdx] = 1;
+            queueX[tail] = nx;
+            queueY[tail] = ny;
+            tail++;
           }
         }
       }
