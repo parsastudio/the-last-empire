@@ -41,7 +41,7 @@ export function ResourcesSection({
       <div className="flex items-center gap-2 px-1">
         <Cpu size={13} className="text-primary" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          منابع حیاتی و توسعه
+          منابع استراتژیک کلان و توسعه
         </span>
       </div>
 
@@ -49,10 +49,10 @@ export function ResourcesSection({
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
             <Fuel size={12} className="text-treasury" />
-            <span>ذخایر نفت خام</span>
+            <span>بلوک‌های نفت استراتژیک</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
-            {formattedOil} بشکه
+            {formattedOil} بلوک
           </span>
           <div className="space-y-0.5 pt-0.5">
             {oilProducedPerTurn > 0 && (
@@ -61,11 +61,11 @@ export function ResourcesSection({
                 {PersianNumberFormatter.toPersianDigits(
                   oilProducedPerTurn.toLocaleString("en-US"),
                 )}{" "}
-                بشکه
+                بلوک
               </span>
             )}
             <span className="text-[9px] text-muted-foreground block font-sans">
-              مصرف نوبتی: بدون مصرف در صلح
+              توضیح: هر بلوک = ۱۰M بشکه
             </span>
           </div>
         </div>
@@ -73,20 +73,25 @@ export function ResourcesSection({
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
             <Wrench size={12} className="text-primary" />
-            <span>ذخایر فولاد</span>
+            <span>بلوک‌های فولاد استراتژیک</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
-            {formattedSteel} تن
+            {formattedSteel} بلوک
           </span>
-          {steelProducedPerTurn > 0 && (
-            <span className="text-[9px] text-gdp block font-sans pt-0.5">
-              تولید نوبتی: +
-              {PersianNumberFormatter.toPersianDigits(
-                steelProducedPerTurn.toLocaleString("en-US"),
-              )}{" "}
-              تن
+          <div className="space-y-0.5 pt-0.5">
+            {steelProducedPerTurn > 0 && (
+              <span className="text-[9px] text-gdp block font-sans">
+                تولید نوبتی: +
+                {PersianNumberFormatter.toPersianDigits(
+                  steelProducedPerTurn.toLocaleString("en-US"),
+                )}{" "}
+                بلوک
+              </span>
+            )}
+            <span className="text-[9px] text-muted-foreground block font-sans">
+              توضیح: هر بلوک = ۱M تن
             </span>
-          )}
+          </div>
         </div>
 
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">

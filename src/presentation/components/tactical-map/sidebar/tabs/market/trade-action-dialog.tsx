@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { ShoppingBag, TrendingDown, Zap } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { MarketEngine } from "@/engine/economy/market-engine";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface TradeActionDialogProps {
@@ -51,39 +50,18 @@ export function TradeActionDialog({
   }
 
   const { dispatchAction } = useGameActions();
-  const marketEngine = useMemo(() => new MarketEngine(), []);
 
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
-  const resourceType = resourceName.includes("نفت") ? "oil" : "steel";
-  const currentPrice = unitPrice || 100;
+  const isOil = resourceName.includes("نفت");
+  const resourceType = isOil ? "oil" : "steel";
+  const buyUnitPrice = unitPrice || 25000000;
+  const sellUnitPrice = Math.floor(buyUnitPrice * (2 / 3));
+  const effectiveUnitPrice = mode === "buy" ? buyUnitPrice : sellUnitPrice;
 
-  const priceCalculation = useMemo(() => {
-    if (currentAmount <= 0) {
-      return { base: 0, fee: 0, finalTotal: 0 };
-    }
-
-    const marketPrices = { oil: currentPrice, steel: currentPrice };
-
-    if (mode === "buy") {
-      const finalTotal = marketEngine.predictBuyCost(
-        marketPrices,
-        resourceType,
-        currentAmount,
-      );
-      const base = Math.floor(finalTotal / 1.1);
-      const fee = finalTotal - base;
-      return { base, fee, finalTotal };
-    } else {
-      const finalTotal = marketEngine.predictSellRevenue(
-        marketPrices,
-        resourceType,
-        currentAmount,
-      );
-      const base = Math.floor(finalTotal / 0.9);
-      const fee = base - finalTotal;
-      return { base, fee, finalTotal };
-    }
-  }, [marketEngine, mode, currentPrice, resourceType, currentAmount]);
+  const totalCostOrRevenue = currentAmount * effectiveUnitPrice;
+  const subLabel = isOil
+    ? "(معادل ۱۰ میلیون بشکه نفت)"
+    : "(معادل ۱ میلیون تن فولاد)";
 
   if (!isOpen) return null;
 
@@ -101,7 +79,7 @@ export function TradeActionDialog({
 
     const success = await dispatchAction(
       action,
-      `سفارش ${isBuy ? "خرید" : "فروش"} ${PersianNumberFormatter.toPersianDigits(currentAmount)} ${unit} ${resourceName} اجرا شد.`,
+      `سفارش ${isBuy ? "خرید" : "فروش"} ${PersianNumberFormatter.toPersianDigits(currentAmount)} ${unit} ${resourceName} با موفقیت ثبت شد.`,
     );
 
     if (success) {
@@ -119,7 +97,7 @@ export function TradeActionDialog({
     <UnifiedModalShell
       isOpen={isOpen}
       title={`${isBuy ? "خرید" : "فروش"} ${resourceName}`}
-      subtitle={`ثبت سفارش ${isBuy ? "خرید" : "فروش"} کالا در بورس جهانی`}
+      subtitle={`معامله بورس کلان | ${subLabel}`}
       maxWidthClass="max-w-md"
       onClose={onClose}
     >
@@ -128,7 +106,7 @@ export function TradeActionDialog({
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground font-sans text-[11px]">
               {isBuy
-                ? "موجودی قابل سفارش (خرید):"
+                ? "حداکثر سقف خرید با خزانه فعلی:"
                 : "موجودی قابل فروش در انبار:"}
             </span>
             <span
@@ -144,12 +122,13 @@ export function TradeActionDialog({
           <div className="space-y-1 bg-background/40 p-3 rounded-2xl border border-border/60">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground font-sans">
-                حجم سفارش ({unit}):
+                تعداد بلوک‌های درخواستی:
               </span>
               <span className="font-bold text-foreground text-sm font-mono">
                 {PersianNumberFormatter.toPersianDigits(
                   currentAmount.toLocaleString("en-US"),
-                )}
+                )}{" "}
+                {unit}
               </span>
             </div>
 
@@ -209,39 +188,21 @@ export function TradeActionDialog({
           <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground font-sans">
-                مبلغ پایه معامله:
+                قیمت هر بلوک استراتژیک ({isBuy ? "خرید" : "فروش ۲/۳"}):
               </span>
               <span className="font-bold text-foreground">
-                $
-                {PersianNumberFormatter.toPersianDigits(
-                  priceCalculation.base.toLocaleString("en-US"),
-                )}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground font-sans">
-                کارمزد معامله (۱۰٪):
-              </span>
-              <span className="font-bold text-treasury">
-                $
-                {PersianNumberFormatter.toPersianDigits(
-                  priceCalculation.fee.toLocaleString("en-US"),
-                )}
+                {PersianNumberFormatter.formatCurrency(effectiveUnitPrice)}
               </span>
             </div>
 
             <div className="flex justify-between items-center font-bold border-t border-border/60 pt-2 text-xs">
               <span className="font-sans">
-                {isBuy ? "پرداختی نهایی از خزانه:" : "دریافتی خالص به خزانه:"}
+                {isBuy ? "پرداختی کل از خزانه:" : "دریافتی کل به خزانه:"}
               </span>
               <span
                 className={`text-sm ${isBuy ? "text-rose-500" : "text-gdp"}`}
               >
-                $
-                {PersianNumberFormatter.toPersianDigits(
-                  priceCalculation.finalTotal.toLocaleString("en-US"),
-                )}
+                {PersianNumberFormatter.formatCurrency(totalCostOrRevenue)}
               </span>
             </div>
           </div>
@@ -261,7 +222,7 @@ export function TradeActionDialog({
             {safeMax === 0
               ? isBuy
                 ? "خزانه ناکافی جهت معامله"
-                : "هیچ موجودی برای فروش در انبار وجود ندارد"
+                : "هیچ بلوک استراتژیکی برای فروش در انبار وجود ندارد"
               : isBuy
                 ? `تایید و خرید ${PersianNumberFormatter.toPersianDigits(currentAmount)} ${unit}`
                 : `تایید و فروش ${PersianNumberFormatter.toPersianDigits(currentAmount)} ${unit}`}
