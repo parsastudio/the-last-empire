@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import path from "path";
-import { DistanceTransform } from "@/infrastructure/map-preprocessing/distance-transform";
 import { MapAreaPixelCounter } from "@/infrastructure/map-preprocessing/generator/map-area-pixel-counter";
 import { LowResPacker } from "@/infrastructure/map-preprocessing/utils/low-res-packer";
 import { ClosedSeaDetector } from "@/infrastructure/map-preprocessing/utils/closed-sea-detector";
@@ -38,7 +37,6 @@ export async function generateTest6Map(
     );
   }
 
-  const distanceTransform = new DistanceTransform();
   const areaCounter = new MapAreaPixelCounter();
   const partitioner = new TerritoryPartitioner();
   const geometryDraw = new GeometryDraw();

@@ -35,13 +35,13 @@ export class BattleCalculator {
     let defenderRemainingInfantry = defender.military.infantry;
     let defenderRemainingAirForce = defender.military.airForce;
 
-    let infantryDestroyedByDrones = Math.min(
+    const infantryDestroyedByDrones = Math.min(
       defenderRemainingInfantry,
       droneCasualtiesInflicted,
     );
     defenderRemainingInfantry -= infantryDestroyedByDrones;
 
-    let remainingDroneCasualties =
+    const remainingDroneCasualties =
       droneCasualtiesInflicted - infantryDestroyedByDrones;
     let airForceDestroyedByDrones = 0;
     if (remainingDroneCasualties > 0 && defenderRemainingAirForce > 0) {
