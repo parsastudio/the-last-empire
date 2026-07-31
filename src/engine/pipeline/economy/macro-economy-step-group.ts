@@ -1,5 +1,4 @@
 import { EconomyStep, EconomyStepContext } from "./economy-step.interface";
-import { AdminBurdenStep } from "./admin-burden.step";
 import { ResourceGenerationStep } from "./resource-generation.step";
 import { GdpGrowthStep } from "./gdp-growth.step";
 import { PopulationUpdateStep } from "./population-update.step";
@@ -9,7 +8,6 @@ import { BankruptcyDeficitStep } from "./bankruptcy-deficit.step";
 
 export class MacroEconomyStepGroup implements EconomyStep {
   private steps: EconomyStep[] = [
-    new AdminBurdenStep(),
     new ResourceGenerationStep(),
     new GdpGrowthStep(),
     new PopulationUpdateStep(),

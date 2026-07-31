@@ -45,7 +45,6 @@ export class WarAlertHandler implements AbilityHandler {
     const updatedNations = { ...state.nations };
     updatedNations[nationId] = {
       ...nation,
-      warExhaustion: Math.max(0, nation.warExhaustion - 30),
       activeModifiers: [...nation.activeModifiers, alertDebuff, cooldown],
     };
 

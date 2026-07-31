@@ -34,24 +34,19 @@ export class NationProfileAssigner {
 
     let stability = 80;
     let corruption = 5;
-    let socialFreedom = 80;
 
     if (govType === "MONARCHY") {
       stability = 85;
       corruption = 15;
-      socialFreedom = 50;
     } else if (govType === "COMMUNISM") {
       stability = 75;
       corruption = 25;
-      socialFreedom = 30;
     } else if (govType === "DICTATORSHIP") {
       stability = 60;
       corruption = 35;
-      socialFreedom = 20;
     } else if (govType === "FASCISM") {
       stability = 65;
       corruption = 30;
-      socialFreedom = 10;
     }
 
     const techLevel = profile?.startingTechLevel ?? 1;
@@ -80,15 +75,12 @@ export class NationProfileAssigner {
       treasury: calculatedTreasury,
       nationalDebt: isTier1 ? 50000 : 0,
       population: item.population,
-      warExhaustion: 0,
       industrialLevel,
-      adminBurdenMultiplier: 1.0,
       consecutiveDeficitTurns: 0,
       government: {
         type: govType,
         stability,
         corruption,
-        socialFreedom,
         turnsInPower: 5,
       },
       resources: {
@@ -176,24 +168,19 @@ export class NationProfileAssigner {
 
     let stability = 80;
     let corruption = 5;
-    let socialFreedom = 80;
 
     if (govType === "MONARCHY") {
       stability = 85;
       corruption = 15;
-      socialFreedom = 50;
     } else if (govType === "COMMUNISM") {
       stability = 75;
       corruption = 25;
-      socialFreedom = 30;
     } else if (govType === "DICTATORSHIP") {
       stability = 60;
       corruption = 35;
-      socialFreedom = 20;
     } else if (govType === "FASCISM") {
       stability = 65;
       corruption = 30;
-      socialFreedom = 10;
     }
 
     const techLevel = profile?.startingTechLevel ?? 1;
@@ -219,15 +206,12 @@ export class NationProfileAssigner {
       treasury,
       nationalDebt: isTier1 ? 50000 : 0,
       population,
-      warExhaustion: 0,
       industrialLevel,
-      adminBurdenMultiplier: 1.0,
       consecutiveDeficitTurns: 0,
       government: {
         type: govType,
         stability,
         corruption,
-        socialFreedom,
         turnsInPower: 5,
       },
       resources: {

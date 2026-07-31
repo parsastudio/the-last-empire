@@ -10,8 +10,6 @@ export class InfrastructureUpkeepCalculator {
 
     const sizeFactor = 1 + Math.log10(nation.geography.territorySize + 1) * 0.5;
 
-    return Math.floor(
-      baseInfraUpkeep * sizeFactor * nation.adminBurdenMultiplier,
-    );
+    return Math.floor(baseInfraUpkeep * sizeFactor);
   }
 }
