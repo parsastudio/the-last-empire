@@ -61,8 +61,8 @@ export function PredictiveImpactBox({
         <div className="flex items-center gap-1.5 text-[10px] text-military bg-military/10 p-2 rounded-xl border border-military/30 font-sans">
           <ShieldAlert size={13} className="shrink-0" />
           <span>
-            مالیات بالای ۳۵٪ به دلیل کسر شدید ثبات نوبتی، کشور را در مسیر کودتای
-            حتمی قرار می‌دهد!
+            مالیات بالای ۳۵٪ به دلیل کاهش شدید و مداوم ثبات نوبتی، کشور را در
+            مسیر بحران سیاسی قرار می‌دهد!
           </span>
         </div>
       )}

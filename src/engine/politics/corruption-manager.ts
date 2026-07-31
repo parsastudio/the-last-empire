@@ -4,18 +4,20 @@ import { GameError } from "@/domain/shared/game-error";
 export class CorruptionManager {
   public updateCorruptionLevel(nation: Nation): number {
     const stability = nation.government.stability;
-    const baseGrowth = 0.5 + 3.0 * (1.0 - stability / 100);
+
+    const baseEntropyGrowth = 0.5 + (100 - stability) * 0.03;
 
     let regimePenalty = 0;
     if (nation.government.type === "DICTATORSHIP") {
       regimePenalty = 0.5;
+    } else if (nation.government.type === "FASCISM") {
+      regimePenalty = 0.3;
     }
 
     const current = nation.government.corruption;
-    return Math.max(
-      0,
-      Math.min(100, Math.floor(current + baseGrowth + regimePenalty)),
-    );
+    const newCorruption = current + baseEntropyGrowth + regimePenalty;
+
+    return Math.max(0, Math.min(100, Number(newCorruption.toFixed(2))));
   }
 
   public calculateTaxWastage(
@@ -54,7 +56,7 @@ export class CorruptionManager {
       treasury: nation.treasury - investmentAmount,
       government: {
         ...nation.government,
-        corruption: newCorruption,
+        corruption: Number(newCorruption.toFixed(2)),
       },
     };
   }

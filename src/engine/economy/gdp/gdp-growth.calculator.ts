@@ -12,20 +12,16 @@ export class GdpGrowthCalculator {
     nation: Nation,
     _peacefulNeighborsCount = 0,
   ): number {
-    let growthRate = 0.0;
-
     const currentStability = nation.government.stability;
-    if (currentStability >= 50) {
-      growthRate += ((currentStability - 50) / 50) * 0.025;
-    } else {
-      growthRate += ((currentStability - 50) / 50) * 0.05;
-    }
 
-    growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
+    let stabilityFactor = -0.05 + (currentStability / 100) * 0.075;
+
+    stabilityFactor += this.traitManager.getGdpGrowthModifier(nation);
+
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
-    growthRate += govTraits.economicGrowthBonus * 0.1;
+    stabilityFactor += govTraits.economicGrowthBonus;
 
-    growthRate += this.modifierManager.getModifierImpact(
+    stabilityFactor += this.modifierManager.getModifierImpact(
       nation,
       "GDP_GROWTH_MULT",
     );
@@ -34,9 +30,9 @@ export class GdpGrowthCalculator {
       (m) => m.id === "martial-law-active",
     );
     if (isMartialLawActive) {
-      growthRate -= 0.02;
+      stabilityFactor -= 0.02;
     }
 
-    return Math.max(0.9, 1.0 + growthRate);
+    return Math.max(0.85, 1.0 + stabilityFactor);
   }
 }

@@ -4,8 +4,8 @@ export const BANKRUPTCY_STRUCTURAL_DECAY: ActiveModifier = {
   id: "bankruptcy-structural-decay",
   name: "Bankruptcy Economic Decay",
   effectType: "GDP_GROWTH_MULT",
-  magnitude: -0.25,
-  turnsRemaining: 9999,
+  magnitude: -0.15,
+  turnsRemaining: 10,
 };
 
 export const BANKRUPTCY_DEBT_HOLIDAY: ActiveModifier = {
@@ -20,6 +20,6 @@ export const BANKRUPTCY_BAD_CREDIT: ActiveModifier = {
   id: "bankruptcy-bad-credit",
   name: "Ruined Credit Rating",
   effectType: "CREDIT_RATING_MULT",
-  magnitude: -95,
-  turnsRemaining: 40,
+  magnitude: -80,
+  turnsRemaining: 20,
 };

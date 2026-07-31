@@ -7,8 +7,6 @@ import {
 
 export class BankruptcyApplier {
   public applyBankruptcy(nation: Nation): Nation {
-    const debtRatio = nation.gdp > 0 ? nation.nationalDebt / nation.gdp : 1;
-
     const existingModifiers = nation.activeModifiers.filter(
       (m) =>
         m.id !== "bankruptcy-structural-decay" &&
@@ -17,47 +15,31 @@ export class BankruptcyApplier {
     );
 
     const restructuredDebt = Math.floor(nation.nationalDebt * 0.8);
-    const finalGdp = Math.floor(nation.gdp * 0.5);
-    const excessiveDebtPenalty = debtRatio > 3.0 ? 3 : 1;
+    const adjustedGdp = Math.floor(nation.gdp * 0.9);
 
     return {
       ...nation,
-      gdp: finalGdp,
+      gdp: adjustedGdp,
       treasury: 0,
       nationalDebt: restructuredDebt,
-      industrialLevel: Math.max(
-        1,
-        nation.industrialLevel - excessiveDebtPenalty,
-      ),
+      industrialLevel: Math.max(1, nation.industrialLevel - 1),
       geography: {
         ...nation.geography,
         infrastructureLevel: Math.max(
           1,
-          nation.geography.infrastructureLevel - excessiveDebtPenalty,
+          nation.geography.infrastructureLevel - 1,
         ),
       },
       government: {
         ...nation.government,
-        stability: 0,
+        stability: Math.max(10, nation.government.stability - 15),
       },
       military: {
         ...nation.military,
-        techLevel: Math.max(1, nation.military.techLevel - 2),
-        infantry: Math.floor(nation.military.infantry * 0.1),
-        airForce: Math.floor(nation.military.airForce * 0.05),
-        droneMissile: 0,
+        techLevel: Math.max(1, nation.military.techLevel - 1),
+        infantry: Math.floor(nation.military.infantry * 0.8),
+        airForce: Math.floor(nation.military.airForce * 0.8),
       },
-      doctrines: {
-        doctrinePoints: 0,
-        unlockedDoctrines: [],
-      },
-      resources: {
-        ...nation.resources,
-        oil: Math.floor(nation.resources.oil * 0.05),
-        steel: Math.floor(nation.resources.steel * 0.05),
-        manpower: Math.floor(nation.resources.manpower * 0.05),
-      },
-      recruitmentQueue: [],
       activeModifiers: [
         ...existingModifiers,
         { ...BANKRUPTCY_STRUCTURAL_DECAY },
