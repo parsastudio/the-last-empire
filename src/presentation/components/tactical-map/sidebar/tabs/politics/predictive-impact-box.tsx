@@ -14,8 +14,7 @@ export function PredictiveImpactBox({
   baseGdp,
   corruption = 0,
 }: PredictiveImpactBoxProps) {
-  const turnTaxFactor = 0.025;
-  const grossTax = baseGdp * turnTaxFactor * (newTaxRate / 100);
+  const grossTax = baseGdp * (newTaxRate / 100);
   const corruptionLoss = grossTax * (corruption / 100);
   const projectedIncome = Math.floor(grossTax - corruptionLoss);
 

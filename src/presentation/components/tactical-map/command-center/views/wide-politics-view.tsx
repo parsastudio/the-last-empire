@@ -66,7 +66,7 @@ export function WidePoliticsView({
           gdp={gdp}
           treasury={treasury}
         />
-        <AntiCorruptionCard nationId={nationId} treasury={treasury} />
+        <AntiCorruptionCard nationId={nationId} treasury={treasury} gdp={gdp} />
         <MilitaryTechUpgradeCard
           currentLevel={militaryTechLevel}
           nationId={nationId}

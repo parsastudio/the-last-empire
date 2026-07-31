@@ -10,7 +10,7 @@ export class TariffCalculator {
   public calculateTariffEffects(nation: Nation): TariffEffectResult {
     const tariffRate = nation.tariffRate;
     const seaAccessFactor = nation.geography.hasSeaAccess ? 1.0 : 0.5;
-    const baseTradeBase = nation.gdp * 0.05 * seaAccessFactor;
+    const baseTradeBase = nation.gdp * 0.15 * seaAccessFactor;
 
     const tradeVolumeFactor = Math.max(
       0.05,
