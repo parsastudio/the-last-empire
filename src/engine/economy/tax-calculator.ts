@@ -3,6 +3,7 @@ import type { Nation } from "@/domain/nation/nation.schema";
 export interface TaxCalculationResult {
   taxIncome: number;
   stabilityImpact: number;
+  gdpGrowthImpact: number;
 }
 
 export class TaxCalculator {
@@ -25,16 +26,17 @@ export class TaxCalculator {
       nation.government.corruption,
     );
 
-    let stabilityImpact = 0;
-    if (nation.taxRate > 25) {
-      stabilityImpact = -Math.floor((nation.taxRate - 25) * 0.5);
-    } else if (nation.taxRate <= 10) {
-      stabilityImpact = 1;
-    }
+    const stabilityImpact = Number(
+      (2.0 - (nation.taxRate / 100) * 14.0).toFixed(2),
+    );
+    const gdpGrowthImpact = Number(
+      (0.015 - (nation.taxRate / 100) * 0.06).toFixed(4),
+    );
 
     return {
       taxIncome: income,
       stabilityImpact,
+      gdpGrowthImpact,
     };
   }
 }

@@ -1,10 +1,14 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { TaxCalculator } from "@/engine/economy/tax-calculator";
+import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 
 export class StabilityCalculator {
   private governmentSystem = new GovernmentSystem();
   private modifierManager = new ModifierManager();
+  private taxCalc = new TaxCalculator();
+  private tariffCalc = new TariffCalculator();
 
   public calculateTurnStability(nation: Nation): number {
     const isMartialLawActive = nation.activeModifiers.some(
@@ -12,12 +16,10 @@ export class StabilityCalculator {
     );
     const currentStability = nation.government.stability;
 
-    let delta = 0;
-    if (nation.taxRate > 25) {
-      delta -= (nation.taxRate - 25) * 0.5;
-    } else if (nation.taxRate < 15) {
-      delta += (15 - nation.taxRate) * 0.4;
-    }
+    const taxResult = this.taxCalc.evaluateTaxPolicy(nation);
+    const tariffResult = this.tariffCalc.calculateTariffEffects(nation);
+
+    let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
 
     const stabilityModifier = this.modifierManager.getModifierImpact(
       nation,
@@ -34,15 +36,6 @@ export class StabilityCalculator {
     );
 
     if (isMartialLawActive && newStability < currentStability) {
-      const maxProtectedTax = 20;
-      if (nation.taxRate > maxProtectedTax) {
-        return Math.floor(
-          Math.max(
-            0,
-            currentStability - (nation.taxRate - maxProtectedTax) * 0.75,
-          ),
-        );
-      }
       return Math.floor((currentStability + newStability) / 2);
     }
 
