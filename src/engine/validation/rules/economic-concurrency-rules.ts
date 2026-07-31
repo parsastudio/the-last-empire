@@ -35,19 +35,6 @@ export class EconomicConcurrencyRules {
       );
     }
 
-    const isDuplicateGov =
-      newAction.type === "CHANGE_GOVERNMENT" &&
-      actionList.some(
-        (a) =>
-          a.type === "CHANGE_GOVERNMENT" && a.nationId === newAction.nationId,
-      );
-    if (isDuplicateGov) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "Cannot trigger multiple government regime changes in a single turn",
-      );
-    }
-
     const isDuplicateInfra =
       newAction.type === "INVEST_INFRASTRUCTURE" &&
       actionList.some(

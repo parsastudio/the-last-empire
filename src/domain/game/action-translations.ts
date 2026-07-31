@@ -8,7 +8,6 @@ export const ACTION_TRANSLATIONS: Record<string, string> = {
   UNLOCK_DOCTRINE: "آنلاک و فعال‌سازی دکترین راهبردی جدید",
   REQUEST_LOAN: "دریافت تسهیلات و وام اضطراری از بانک جهانی",
   REPAY_DEBT: "تسویه بخشی از بدهی معوق ملی",
-  CHANGE_GOVERNMENT: "برگزاری همه‌پرسی و تغییر رژیم سیاسی",
   ANTI_CORRUPTION_DRIVE: "تزریق بودجه به آژانس مبارزه با فساد اداری",
   FUND_PROXY_INFLUENCE: "تخصیص بودجه برای عملیات نفوذ پنهان",
   DISBAND_UNIT: "انحلال یگان نظامی و بازگرداندن نیروها",

@@ -1,55 +1,52 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import {
-  CrisisStatusEvaluator,
-  CrisisStatus,
-} from "./crisis/crisis-status.evaluator";
-import { RevoltCoupHandler } from "./crisis/revolt-coup.handler";
 
 export interface DomesticCrisisResult {
   hasTriggered: boolean;
-  status: CrisisStatus;
+  status: "STABLE" | "WARNING" | "COUP";
   updatedNation: Nation;
 }
 
 export class DomesticCrisisManager {
-  private evaluator = new CrisisStatusEvaluator();
-  private handler = new RevoltCoupHandler();
-
   public checkAndProcessCrisis(nation: Nation): DomesticCrisisResult {
-    const { status, rebelStrength } =
-      this.evaluator.evaluateCrisisStatus(nation);
+    const stability = nation.government.stability;
 
-    switch (status) {
-      case "COUP":
-        return {
-          hasTriggered: true,
-          status,
-          updatedNation: this.handler.applyCoup(nation),
-        };
-      case "REVOLT":
-        return {
-          hasTriggered: true,
-          status,
-          updatedNation: this.handler.applyRebellion(nation, rebelStrength),
-        };
-      case "CRISIS":
-        return {
-          hasTriggered: true,
-          status,
-          updatedNation: this.handler.applyCrisisPenalty(nation),
-        };
-      case "RESTLESS":
-        return {
-          hasTriggered: true,
-          status,
-          updatedNation: nation,
-        };
-      default:
-        return {
-          hasTriggered: false,
-          status,
-          updatedNation: nation,
-        };
+    if (stability < 10) {
+      const updatedNation: Nation = {
+        ...nation,
+        gdp: Math.floor(nation.gdp * 0.5),
+        treasury: Math.floor(nation.treasury * 0.5),
+        military: {
+          ...nation.military,
+          infantry: Math.floor(nation.military.infantry * 0.5),
+          airForce: Math.floor(nation.military.airForce * 0.5),
+          droneMissile: Math.floor(nation.military.droneMissile * 0.5),
+        },
+        government: {
+          ...nation.government,
+          stability: 30,
+          corruption: Math.min(100, nation.government.corruption + 20),
+        },
+      };
+
+      return {
+        hasTriggered: true,
+        status: "COUP",
+        updatedNation,
+      };
     }
+
+    if (stability < 30) {
+      return {
+        hasTriggered: true,
+        status: "WARNING",
+        updatedNation: nation,
+      };
+    }
+
+    return {
+      hasTriggered: false,
+      status: "STABLE",
+      updatedNation: nation,
+    };
   }
 }

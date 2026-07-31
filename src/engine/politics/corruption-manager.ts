@@ -12,9 +12,6 @@ export class CorruptionManager {
     } else if (nation.government.stability > 70) {
       delta -= 0.3;
     }
-    if (nation.adminBurdenMultiplier > 1.5) {
-      delta += Math.min(1.5, (nation.adminBurdenMultiplier - 1.5) * 0.15);
-    }
     const current = nation.government.corruption;
     return Math.max(0, Math.min(100, Math.floor(current + delta)));
   }
