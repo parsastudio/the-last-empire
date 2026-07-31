@@ -31,12 +31,16 @@ export class GameEngine {
   }
 
   public dispatchAction(action: GameAction): ActionResult {
-    return this.dispatcher.dispatch(
+    const result = this.dispatcher.dispatch(
       this.currentState,
       this.actionQueue,
       this.gridState,
       action,
     );
+    if (result.success && result.newState) {
+      this.currentState = deepClone(result.newState);
+    }
+    return result;
   }
 
   public nextTurn(): GameState {
@@ -48,8 +52,20 @@ export class GameEngine {
       this.currentState,
       this.gridState,
       this.prng,
-      (state) =>
-        this.actionQueue.processActions(state, this.gridState, this.prng),
+      (state, additionalActions) => {
+        if (additionalActions) {
+          for (const act of additionalActions) {
+            try {
+              this.actionQueue.enqueue(state, act);
+            } catch {}
+          }
+        }
+        return this.actionQueue.processActions(
+          state,
+          this.gridState,
+          this.prng,
+        );
+      },
     );
 
     this.stateHistory.saveSnapshot(this.currentState);

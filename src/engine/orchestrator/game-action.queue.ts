@@ -4,22 +4,23 @@ import { EventSystem } from "@/engine/politics/event-system";
 import { ActionPrioritySorter } from "./action-priority-sorter";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 import { ActionQueue } from "./action-queue";
+import { ActionRouter } from "@/engine/actions/action-router";
+import { StateValidator } from "@/engine/validation/state-validator";
+import { GridState } from "@/engine/combat/state/grid-state";
 
 export class GameActionQueue {
   private actionQueue = new ActionQueue();
   private prioritySorter = new ActionPrioritySorter();
+  private actionRouter = new ActionRouter();
+  private validator = new StateValidator();
 
-  public enqueue(
-    state: GameState,
-    gridState: unknown,
-    action: GameAction,
-  ): void {
+  public enqueue(state: GameState, action: GameAction): void {
     this.actionQueue.enqueue(state, action);
   }
 
   public processActions(
     state: GameState,
-    _gridState: unknown,
+    gridState: GridState,
     prng: SeededRandom,
   ): GameState {
     const rawQueue = this.actionQueue.getQueue();
@@ -28,16 +29,26 @@ export class GameActionQueue {
     let nextState = state;
 
     for (const action of sortedActions) {
-      const logEntry = EventSystem.createLogEntry(
-        nextState.currentTurn,
-        action.nationId,
-        "INFO",
-        `Action processed: ${action.type}`,
-      );
-      nextState = {
-        ...nextState,
-        turnLogs: [...nextState.turnLogs, logEntry],
-      };
+      try {
+        const stateWithGrid = { ...nextState, gridState } as GameState & {
+          gridState: GridState;
+        };
+        this.validator.validateAction(stateWithGrid, action);
+        nextState = this.actionRouter.route(nextState, action);
+
+        const logEntry = EventSystem.createLogEntry(
+          nextState.currentTurn,
+          action.nationId,
+          "INFO",
+          `Action processed: ${action.type}`,
+        );
+        nextState = {
+          ...nextState,
+          turnLogs: [...nextState.turnLogs, logEntry],
+        };
+      } catch {
+        continue;
+      }
     }
 
     this.actionQueue.clear();
