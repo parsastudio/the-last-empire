@@ -7,14 +7,6 @@ export class AIBudgetStrategy {
     baseAllocation: BudgetAllocation,
   ): BudgetAllocation {
     const adjusted = { ...baseAllocation };
-    if (nation.traits.includes("INDUSTRIAL_HUB")) {
-      const extraInfra = Math.floor(adjusted.reserveFunds * 0.4);
-      adjusted.infrastructureBudget += extraInfra;
-      adjusted.reserveFunds -= extraInfra;
-      const extraResearch = Math.floor(adjusted.reserveFunds * 0.2);
-      adjusted.researchBudget += extraResearch;
-      adjusted.reserveFunds -= extraResearch;
-    }
     if (nation.traits.includes("MILITARISTIC")) {
       const extraMilitary = Math.floor(adjusted.reserveFunds * 0.5);
       adjusted.recruitmentBudget += extraMilitary;

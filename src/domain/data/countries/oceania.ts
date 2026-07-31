@@ -21,7 +21,7 @@ export const oceaniaProfiles: CountryProfile[] = [
     nameFa: "استرالیا",
     gdp: 1700000000000,
     population: 26000000,
-    traits: ["ISLAND_FORTRESS", "INDUSTRIAL_HUB"],
+    traits: ["ISLAND_FORTRESS"],
     flagCode: "AU",
     startingInfantry: 120,
     startingAirForce: 50,

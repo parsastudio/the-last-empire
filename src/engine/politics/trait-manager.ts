@@ -10,9 +10,6 @@ export class TraitManager {
     if (this.hasTrait(nation, "FRAGILE_ECONOMY")) {
       modifier -= 0.05;
     }
-    if (this.hasTrait(nation, "INDUSTRIAL_HUB")) {
-      modifier += 0.02;
-    }
 
     if (nation.geography.territorySize > 2000) {
       modifier += 0.015;
@@ -25,9 +22,6 @@ export class TraitManager {
     let multiplier = 1.0;
     if (this.hasTrait(nation, "MILITARISTIC")) {
       multiplier -= 0.15;
-    }
-    if (this.hasTrait(nation, "INDUSTRIAL_HUB")) {
-      multiplier -= 0.05;
     }
     return multiplier;
   }

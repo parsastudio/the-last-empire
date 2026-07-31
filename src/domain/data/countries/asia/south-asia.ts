@@ -7,7 +7,7 @@ export const southAsiaProfiles: CountryProfile[] = [
     nameFa: "هند",
     gdp: 3700000000000,
     population: 1400000000,
-    traits: ["MILITARISTIC", "INDUSTRIAL_HUB"],
+    traits: ["MILITARISTIC"],
     flagCode: "IN",
     startingInfantry: 900,
     startingAirForce: 120,
