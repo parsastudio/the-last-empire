@@ -1,12 +1,9 @@
-import type { GameState } from "@/domain/game/game-state.schema";
-import type { GameAction } from "@/domain/game/action.schema";
-import { AIActionGenerator } from "@/engine/ai/ai-action-generator";
-import { PersonalityResolver } from "./personality-resolver";
+import { GameState } from "@/domain/game/game-state.schema";
+import { GameAction } from "@/domain/game/action.schema";
+import { AIPersonalityType } from "@/domain/ai/ai.schema";
+import { AIActionBuilder } from "./ai-action-builder";
 
 export class AIEngine {
-  private actionGenerator = new AIActionGenerator();
-  private personalityResolver = new PersonalityResolver();
-
   public generateTurnActions(state: GameState): GameAction[] {
     const actions: GameAction[] = [];
     const sortedIds = Object.keys(state.nations).sort();
@@ -17,13 +14,8 @@ export class AIEngine {
         continue;
       }
 
-      const personality = this.personalityResolver.resolveDeterministic(
-        id,
-        state.gameId,
-        state.seed,
-      );
-
-      const aiActions = this.actionGenerator.generateActions(
+      const personality = this.resolvePersonality(id, state.gameId, state.seed);
+      const aiActions = AIActionBuilder.buildNationActions(
         nation,
         state.nations,
         personality,
@@ -34,5 +26,26 @@ export class AIEngine {
     }
 
     return actions;
+  }
+
+  private resolvePersonality(
+    nationId: string,
+    gameId: string,
+    seed: number,
+  ): AIPersonalityType {
+    const personalities: AIPersonalityType[] = [
+      "AGGRESSIVE",
+      "PACIFIST",
+      "ECONOMIC",
+      "ISOLATIONIST",
+    ];
+    let hash = seed;
+    for (let i = 0; i < gameId.length; i++) {
+      hash += gameId.charCodeAt(i);
+    }
+    for (let i = 0; i < nationId.length; i++) {
+      hash += nationId.charCodeAt(i);
+    }
+    return personalities[Math.abs(hash) % personalities.length] || "ECONOMIC";
   }
 }
