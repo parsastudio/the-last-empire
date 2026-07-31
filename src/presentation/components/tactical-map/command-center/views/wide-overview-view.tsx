@@ -79,6 +79,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           stability={nation.government.stability}
           corruption={nation.government.corruption}
           reputation={nation.globalReputation}
+          nation={nation}
         />
 
         <RegionBreakdownCard regions={nation.regionsDemographics} />

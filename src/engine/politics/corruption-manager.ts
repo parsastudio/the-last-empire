@@ -4,8 +4,7 @@ import { GameError } from "@/domain/shared/game-error";
 export class CorruptionManager {
   public updateCorruptionLevel(nation: Nation): number {
     const stability = nation.government.stability;
-
-    const baseEntropyGrowth = 0.5 + (100 - stability) * 0.03;
+    const baseEntropyGrowth = 5.0 * (1.0 - stability / 100);
 
     let regimePenalty = 0;
     if (nation.government.type === "DICTATORSHIP") {
@@ -41,10 +40,8 @@ export class CorruptionManager {
       );
     }
 
-    const baseCost = Math.floor(nation.gdp * 0.01);
-    const corruptionReduction = Math.max(
-      5,
-      Math.floor((investmentAmount / (baseCost || 1)) * 5),
+    const corruptionReduction = Math.floor(
+      (investmentAmount / (nation.gdp || 1)) * 100,
     );
 
     const newCorruption = Math.max(

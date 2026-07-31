@@ -2,18 +2,47 @@ import React from "react";
 import { Landmark } from "lucide-react";
 import { GovernmentMetricBar } from "./government-metric-bar";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { Nation } from "@/domain/nation/nation.schema";
+import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 interface GovernmentStatusSectionProps {
   stability: number;
   corruption: number;
   reputation: number;
+  nation?: Nation | null;
 }
 
 export function GovernmentStatusSection({
   stability,
   corruption,
   reputation,
+  nation,
 }: GovernmentStatusSectionProps) {
+  const stabilityCalc = new StabilityCalculator();
+  const stabilityDelta = nation
+    ? stabilityCalc.calculateTurnStabilityDelta(nation)
+    : 0;
+
+  const stabilityDeltaText =
+    stabilityDelta >= 0
+      ? `+${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ / نوبت`
+      : `${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ / نوبت`;
+
+  const corruptionGrowth = nation
+    ? Number(
+        (
+          5.0 * (1.0 - nation.government.stability / 100) +
+          (nation.government.type === "DICTATORSHIP"
+            ? 0.5
+            : nation.government.type === "FASCISM"
+              ? 0.3
+              : 0)
+        ).toFixed(2),
+      )
+    : 0;
+
+  const corruptionDeltaText = `+${PersianNumberFormatter.toPersianDigits(corruptionGrowth)}٪ انتروپی / نوبت`;
+
   return (
     <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
@@ -27,13 +56,15 @@ export function GovernmentStatusSection({
         <GovernmentMetricBar
           label="ثبات سیاسی داخلی"
           value={stability}
-          colorClass="text-gdp"
-          bgClass="bg-gdp"
+          deltaText={stabilityDeltaText}
+          colorClass={stabilityDelta >= 0 ? "text-gdp" : "text-military"}
+          bgClass={stabilityDelta >= 0 ? "bg-gdp" : "bg-military"}
         />
 
         <GovernmentMetricBar
           label="شاخص فساد اداری"
           value={corruption}
+          deltaText={corruptionDeltaText}
           colorClass="text-military"
           bgClass="bg-military"
         />
