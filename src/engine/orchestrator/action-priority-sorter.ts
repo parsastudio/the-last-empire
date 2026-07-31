@@ -26,6 +26,7 @@ export class ActionPrioritySorter {
         "DISBAND_UNIT",
         "DIPLOMATIC_PROPOSAL",
         "FUND_PROXY_INFLUENCE",
+        "INVEST_DIPLOMACY",
       ].includes(a.type),
     );
 
