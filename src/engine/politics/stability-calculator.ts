@@ -4,6 +4,7 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import { TaxCalculator } from "@/engine/economy/tax-calculator";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 import { TraitManager } from "@/engine/politics/trait-manager";
+import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export class StabilityCalculator {
   private governmentSystem = new GovernmentSystem();
@@ -11,12 +12,20 @@ export class StabilityCalculator {
   private modifierManager = new ModifierManager();
   private taxCalc = new TaxCalculator();
   private tariffCalc = new TariffCalculator();
+  private popWelfareCalc = new PopulationWelfareCalculator();
 
   public calculateTurnStabilityDelta(nation: Nation): number {
     const taxResult = this.taxCalc.evaluateTaxPolicy(nation);
     const tariffResult = this.tariffCalc.calculateTariffEffects(nation);
 
     let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
+
+    const welfareMetrics = this.popWelfareCalc.evaluateWelfare(
+      nation.population,
+      nation.resources.oil,
+      nation.resources.steel,
+    );
+    delta += welfareMetrics.totalStabilityImpact;
 
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     delta += govTraits.stabilityDeltaPerTurn;

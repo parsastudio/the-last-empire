@@ -7,6 +7,7 @@ import { InfrastructureUpgradeCard } from "../../sidebar/tabs/politics/infrastru
 import { MilitaryTechUpgradeCard } from "../../sidebar/tabs/politics/military-tech-upgrade-card";
 import { AntiCorruptionCard } from "../../sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifiers-card";
+import { PopulationWelfareCard } from "../../sidebar/tabs/politics/population-welfare-card";
 import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
@@ -26,6 +27,9 @@ interface WidePoliticsViewProps {
   activeModifiers?: ActiveModifier[];
   nationsMap?: Record<string, Nation>;
   activeSubTab?: string | null;
+  population?: number;
+  oilStock?: number;
+  steelStock?: number;
 }
 
 export function WidePoliticsView({
@@ -41,11 +45,19 @@ export function WidePoliticsView({
   militaryTechLevel = 1,
   hasSeaAccess = true,
   activeModifiers = [],
+  population = 80000000,
+  oilStock = 1000,
+  steelStock = 1000,
 }: WidePoliticsViewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard modifiers={activeModifiers} />
+        <PopulationWelfareCard
+          population={population}
+          oilStock={oilStock}
+          steelStock={steelStock}
+        />
         <TaxControlCard
           taxRate={taxRate}
           baseGdp={gdp}

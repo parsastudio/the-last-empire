@@ -85,6 +85,9 @@ export function CommandCenterTabRouter({
           hasSeaAccess={nation.geography.hasSeaAccess}
           activeModifiers={nation.activeModifiers}
           nationsMap={gameState?.nations}
+          population={nation.population}
+          oilStock={nation.resources.oil}
+          steelStock={nation.resources.steel}
         />
       );
     case "proxy":
