@@ -8,29 +8,20 @@ export class MapStateSynchronizer {
   private territoryCalibrator = new TerritoryCalibrator();
 
   public syncStateToGrid(state: GameState, gridState: GridState): GameState {
-    const t0 = performance.now();
+    const allCells = gridState.getAllCells();
     const nationsKeys = Object.keys(state.nations);
 
-    const tDetectStart = performance.now();
     const neighborResult = this.neighborDetector.detectNeighbors(
       nationsKeys,
       gridState,
     );
-    const tDetect = performance.now() - tDetectStart;
 
-    const tCalibStart = performance.now();
     const updatedNations = this.territoryCalibrator.calibrateNationsTerritory(
       state.nations,
       gridState,
       neighborResult.landNeighborsMap,
       neighborResult.seaNeighborsMap,
       neighborResult.oceanAccessMap,
-    );
-    const tCalib = performance.now() - tCalibStart;
-
-    const totalSync = performance.now() - t0;
-    console.log(
-      `[MAP STATE SYNC TIMING] Total: ${totalSync.toFixed(2)}ms | DetectNeighbors: ${tDetect.toFixed(2)}ms | CalibrateTerritory: ${tCalib.toFixed(2)}ms`,
     );
 
     return {
