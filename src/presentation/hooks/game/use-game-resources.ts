@@ -6,6 +6,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { TaxCalculator } from "@/engine/economy/tax-calculator";
 import { UpkeepCalculator } from "@/engine/economy/upkeep-calculator";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
+import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -24,6 +25,7 @@ export interface HumanResourceMetrics {
 const taxCalculator = new TaxCalculator();
 const upkeepCalculator = new UpkeepCalculator();
 const tariffCalculator = new TariffCalculator();
+const popWelfareCalculator = new PopulationWelfareCalculator();
 
 export function useGameResources(
   gameState: GameState | null,
@@ -84,9 +86,13 @@ export function useGameResources(
       upkeepBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
     const netIncome = totalIncome - totalExpenses;
 
-    const oilRequired = Math.ceil(
-      (nation.military.airForce + nation.military.droneMissile) * 0.5,
+    const welfareMetrics = popWelfareCalculator.evaluateWelfare(
+      nation.population,
+      nation.resources.oil,
+      nation.resources.steel,
+      nation.gdp,
     );
+    const oilRequired = welfareMetrics.oilDemand;
 
     let pendingCount = 0;
     if (nation.doctrines.doctrinePoints >= 3) pendingCount++;
