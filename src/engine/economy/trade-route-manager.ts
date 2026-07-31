@@ -10,53 +10,30 @@ export interface ActiveTradeRoute {
 export class TradeRouteManager {
   private governmentSystem = new GovernmentSystem();
 
-  public getActiveTradeRoutes(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-  ): ActiveTradeRoute[] {
-    const routes: ActiveTradeRoute[] = [];
-    const neighbors = [
-      ...nation.geography.landNeighbors,
-      ...nation.geography.seaNeighbors,
-    ];
-    const uniqueNeighbors = Array.from(new Set(neighbors));
-
-    const govTraits = this.governmentSystem.getTraits(nation.government.type);
-
-    for (const neighborId of uniqueNeighbors) {
-      const neighbor = allNations[neighborId];
-      if (!neighbor || !neighbor.isAlive) {
-        continue;
-      }
-
-      const relation = nation.relations[neighborId];
-      if (!relation) {
-        continue;
-      }
-
-      const isOpinionAllowed = relation.opinion > -30;
-
-      if (isOpinionAllowed) {
-        const rawTradeValue = Math.floor((nation.gdp + neighbor.gdp) * 0.001);
-        const tradeValue = Math.floor(
-          rawTradeValue * govTraits.tradeMultiplier,
-        );
-        routes.push({
-          partnerId: neighborId,
-          isPeaceful: true,
-          baseTradeValue: tradeValue,
-        });
-      }
-    }
-
-    return routes;
-  }
-
   public calculateTotalTradeRevenue(
     nation: Nation,
-    allNations: Record<string, Nation>,
+    _allNations?: Record<string, Nation>,
   ): number {
-    const routes = this.getActiveTradeRoutes(nation, allNations);
-    return routes.reduce((sum, r) => sum + r.baseTradeValue, 0);
+    const govTraits = this.governmentSystem.getTraits(nation.government.type);
+    const baseCommerce = Math.floor(
+      nation.gdp * 0.2 * govTraits.tradeMultiplier,
+    );
+    const seaModifier = nation.geography.hasSeaAccess ? 1.0 : 0.5;
+
+    return Math.floor(baseCommerce * seaModifier);
+  }
+
+  public getActiveTradeRoutes(
+    nation: Nation,
+    _allNations?: Record<string, Nation>,
+  ): ActiveTradeRoute[] {
+    const totalTrade = this.calculateTotalTradeRevenue(nation);
+    return [
+      {
+        partnerId: "GLOBAL_MARKET",
+        isPeaceful: true,
+        baseTradeValue: totalTrade,
+      },
+    ];
   }
 }

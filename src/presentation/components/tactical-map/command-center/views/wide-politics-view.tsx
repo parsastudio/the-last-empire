@@ -21,6 +21,7 @@ interface WidePoliticsViewProps {
   tariffRate?: number;
   industrialLevel?: number;
   infrastructureLevel?: number;
+  hasSeaAccess?: boolean;
   activeModifiers?: ActiveModifier[];
   nationsMap?: Record<string, Nation>;
   activeSubTab?: string | null;
@@ -38,6 +39,7 @@ export function WidePoliticsView({
   tariffRate = 10,
   industrialLevel = 1,
   infrastructureLevel = 1,
+  hasSeaAccess = true,
   activeModifiers = [],
 }: WidePoliticsViewProps) {
   return (
@@ -50,7 +52,11 @@ export function WidePoliticsView({
           corruption={corruption}
           nationId={nationId}
         />
-        <TariffControlCard initialTariffRate={tariffRate} nationId={nationId} />
+        <TariffControlCard
+          initialTariffRate={tariffRate}
+          nationId={nationId}
+          hasSeaAccess={hasSeaAccess}
+        />
       </div>
 
       <div className="space-y-5">
