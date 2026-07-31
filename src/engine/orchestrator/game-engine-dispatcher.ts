@@ -33,13 +33,11 @@ export class GameEngineDispatcher {
       };
       delete cleanedState.gridState;
 
-      Object.assign(currentState, cleanedState);
-
       return {
         success: true,
         actionId: action.id,
         message: "Action executed instantly",
-        newState: currentState,
+        newState: cleanedState,
       };
     } catch (err) {
       const errorMessage =

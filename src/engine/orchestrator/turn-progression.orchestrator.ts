@@ -1,4 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
+import { GameAction } from "@/domain/game/action.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionQueue } from "./action-queue";
@@ -20,7 +21,10 @@ export class TurnProgressionOrchestrator {
     state: GameState,
     gridState: GridState,
     prng: SeededRandom,
-    actionQueueProcessor: (state: GameState) => GameState,
+    actionQueueProcessor: (
+      state: GameState,
+      additionalActions?: readonly GameAction[],
+    ) => GameState,
   ): GameState {
     let nextState = state;
 
@@ -34,9 +38,10 @@ export class TurnProgressionOrchestrator {
       }
     }
 
+    const validAiActions = this.internalActionQueue.getQueue();
     this.internalActionQueue.clear();
 
-    nextState = actionQueueProcessor(nextState);
+    nextState = actionQueueProcessor(nextState, validAiActions);
     nextState = this.pipeline.processTurn(nextState, prng);
     nextState = this.gridPostCleanup.cleanupAndSynchronize(
       nextState,

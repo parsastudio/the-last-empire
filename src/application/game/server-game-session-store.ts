@@ -7,6 +7,7 @@ import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
 class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
+  private engines = new Map<string, GameEngine>();
 
   public static getInstance(): ServerGameSessionStore {
     if (!ServerGameSessionStore.instance) {
@@ -18,39 +19,55 @@ class ServerGameSessionStore {
   public initSession(gameId: string, initialState: GameState): GameEngine {
     const gridState = GridStateProvider.getInstance();
     GridLoaderService.ensureGridLoaded(gridState);
-    return new GameEngine(initialState);
+    const engine = new GameEngine(initialState);
+    this.engines.set(gameId, engine);
+    return engine;
   }
 
-  public getEngine(_gameId: string): GameEngine | undefined {
-    return undefined;
+  public getEngine(gameId: string): GameEngine | undefined {
+    return this.engines.get(gameId);
   }
 
   public dispatchAction(
-    _gameId: string,
+    gameId: string,
     action: GameAction,
     currentState?: GameState,
   ): ActionResult | null {
-    if (!currentState) {
+    let engine = this.engines.get(gameId);
+    if (!engine && currentState) {
+      engine = this.initSession(gameId, currentState);
+    } else if (engine && currentState) {
+      if (engine.getState().currentTurn !== currentState.currentTurn) {
+        engine = this.initSession(gameId, currentState);
+      }
+    }
+    if (!engine) {
       return null;
     }
+
     const gridState = GridStateProvider.getInstance();
     GridLoaderService.ensureGridLoaded(gridState);
-
-    const engine = new GameEngine(currentState);
     return engine.dispatchAction(action);
   }
 
   public advanceTurn(
-    _gameId: string,
+    gameId: string,
     currentState?: GameState,
   ): GameState | null {
-    if (!currentState) {
+    let engine = this.engines.get(gameId);
+    if (!engine && currentState) {
+      engine = this.initSession(gameId, currentState);
+    } else if (engine && currentState) {
+      if (engine.getState().currentTurn !== currentState.currentTurn) {
+        engine = this.initSession(gameId, currentState);
+      }
+    }
+    if (!engine) {
       return null;
     }
+
     const gridState = GridStateProvider.getInstance();
     GridLoaderService.ensureGridLoaded(gridState);
-
-    const engine = new GameEngine(currentState);
     return engine.nextTurn();
   }
 }
