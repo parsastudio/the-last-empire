@@ -1,5 +1,4 @@
 import { MapShader } from "@/infrastructure/map-preprocessing/map-shader";
-import { TacticalMapProfiler } from "@/presentation/utils/tactical-map-profiler";
 
 export interface CountryMapping {
   id: number;
@@ -21,8 +20,6 @@ export class MaskRenderingHelper {
     activeLayer: "political" | "gdp" = "political",
   ): void {
     if (!maskDataRef.current) return;
-
-    TacticalMapProfiler.start();
 
     if (canvasShaded.width !== mapWidth || canvasShaded.height !== mapHeight) {
       canvasShaded.width = mapWidth;
@@ -51,14 +48,7 @@ export class MaskRenderingHelper {
         activeLayer,
       );
 
-      const uploadStart = performance.now();
       ctxShaded.putImageData(this.persistentImageData, 0, 0);
-      TacticalMapProfiler.recordPhase(
-        "6.CanvasGPUUpload",
-        performance.now() - uploadStart,
-      );
     }
-
-    TacticalMapProfiler.end("Map Layer Shading", `Layer: ${activeLayer}`);
   }
 }
