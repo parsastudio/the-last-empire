@@ -83,6 +83,7 @@ export function SidebarContainer({
         mode={actions.tradeDialog.mode}
         unitPrice={actions.tradeDialog.unitPrice}
         maxAmount={actions.tradeDialog.maxAmount}
+        nationId={actions.humanNation?.id}
         onClose={() =>
           actions.setTradeDialog((prev) => ({ ...prev, isOpen: false }))
         }

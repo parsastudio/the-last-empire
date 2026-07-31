@@ -11,7 +11,7 @@ interface WideAbilitiesViewProps {
 
 export function WideAbilitiesView({
   currentGovernment,
-  nationId = "NATION_118",
+  nationId = "NATION_USA",
 }: WideAbilitiesViewProps) {
   const abilities = useWideAbilities();
 
