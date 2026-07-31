@@ -1,8 +1,9 @@
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 
 export class MarketPricingCalculator {
-  private readonly minPrice = 10;
-  private readonly maxPrice = 500;
+  private readonly basePrice = 25000000;
+  private readonly minPrice = 5000000;
+  private readonly maxPrice = 100000000;
 
   public updateMarketPrices(
     currentPrices: ResourceMarketPrice,
@@ -11,27 +12,24 @@ export class MarketPricingCalculator {
     totalSteelDemand: number,
     totalSteelSupply: number,
   ): ResourceMarketPrice {
-    const baseOilPrice = 100;
-    const baseSteelPrice = 100;
-    const passiveOilSupply = 150;
-    const passiveSteelSupply = 100;
+    const oilBalance = totalOilDemand - totalOilSupply;
+    const steelBalance = totalSteelDemand - totalSteelSupply;
 
-    const oilBalance = totalOilDemand - (totalOilSupply + passiveOilSupply);
-    const steelBalance =
-      totalSteelDemand - (totalSteelSupply + passiveSteelSupply);
+    const rawOilDelta = Math.floor(oilBalance * 500000);
+    const rawSteelDelta = Math.floor(steelBalance * 500000);
 
-    const rawOilDelta = Math.floor(oilBalance * 0.05);
-    const rawSteelDelta = Math.floor(steelBalance * 0.05);
-
-    const oilGravity = Math.floor((baseOilPrice - currentPrices.oil) * 0.05);
+    const oilGravity = Math.floor((this.basePrice - currentPrices.oil) * 0.05);
     const steelGravity = Math.floor(
-      (baseSteelPrice - currentPrices.steel) * 0.05,
+      (this.basePrice - currentPrices.steel) * 0.05,
     );
 
-    const oilDelta = Math.max(-20, Math.min(20, rawOilDelta + oilGravity));
+    const oilDelta = Math.max(
+      -5000000,
+      Math.min(5000000, rawOilDelta + oilGravity),
+    );
     const steelDelta = Math.max(
-      -20,
-      Math.min(20, rawSteelDelta + steelGravity),
+      -5000000,
+      Math.min(5000000, rawSteelDelta + steelGravity),
     );
 
     const newOilPrice = Math.max(

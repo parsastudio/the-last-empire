@@ -9,14 +9,16 @@ export interface PopulationWelfareMetrics {
 }
 
 export class PopulationWelfareCalculator {
-  public calculateOilDemand(population: number): number {
+  public calculateOilDemand(population: number, gdp = 10000000000): number {
     if (population <= 0) return 0;
-    return Math.ceil(population / 400000);
+    const gdpFactor = Math.max(1, Math.floor(gdp / 10000000000));
+    return Math.max(1, Math.ceil((population / 20000000) * gdpFactor));
   }
 
-  public calculateSteelDemand(population: number): number {
+  public calculateSteelDemand(population: number, gdp = 10000000000): number {
     if (population <= 0) return 0;
-    return Math.ceil(population / 800000);
+    const gdpFactor = Math.max(1, Math.floor(gdp / 15000000000));
+    return Math.max(1, Math.ceil((population / 30000000) * gdpFactor));
   }
 
   public calculateFulfillment(stock: number, demand: number): number {
@@ -35,9 +37,10 @@ export class PopulationWelfareCalculator {
     population: number,
     oilStock: number,
     steelStock: number,
+    gdp = 10000000000,
   ): PopulationWelfareMetrics {
-    const oilDemand = this.calculateOilDemand(population);
-    const steelDemand = this.calculateSteelDemand(population);
+    const oilDemand = this.calculateOilDemand(population, gdp);
+    const steelDemand = this.calculateSteelDemand(population, gdp);
 
     const oilFulfillment = this.calculateFulfillment(oilStock, oilDemand);
     const steelFulfillment = this.calculateFulfillment(steelStock, steelDemand);
