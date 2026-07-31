@@ -66,9 +66,7 @@ export function IndustrialUpgradeCard({
         </div>
 
         <div className="flex items-center justify-between text-[11px] font-mono">
-          <span className="text-muted-foreground font-sans">
-            هزینه ارتقا (۸٪ GDP):
-          </span>
+          <span className="text-muted-foreground font-sans">هزینه ارتقا:</span>
           <span className="font-bold text-foreground">
             {PersianNumberFormatter.formatCurrency(upgradeCost)}
           </span>
