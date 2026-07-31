@@ -11,10 +11,12 @@ export class MilitaryUpkeepCalculator {
       nation.military.airForce * 3.0 +
       nation.military.droneMissile * 0.2;
 
+    const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.2;
+
     return Math.floor(
       baseWeight *
         12 *
-        nation.military.techLevel *
+        techMultiplier *
         traitMultiplier *
         militaryUpkeepMultiplier,
     );

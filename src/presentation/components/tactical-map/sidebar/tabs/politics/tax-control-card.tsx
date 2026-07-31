@@ -19,7 +19,7 @@ export function TaxControlCard({
   corruption = 0,
   nationId = "NATION_118",
 }: TaxControlCardProps) {
-  const [taxRate, setTaxRate] = useState<number>(initialTaxRate);
+  const [taxRate, setTaxRate] = useState<number>(Math.min(50, initialTaxRate));
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [prevInitialRate, setPrevInitialRate] =
     useState<number>(initialTaxRate);
@@ -27,7 +27,7 @@ export function TaxControlCard({
 
   if (initialTaxRate !== prevInitialRate) {
     setPrevInitialRate(initialTaxRate);
-    setTaxRate(initialTaxRate);
+    setTaxRate(Math.min(50, initialTaxRate));
   }
 
   const handleApplyTax = async () => {

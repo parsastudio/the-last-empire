@@ -10,10 +10,10 @@ export class TaxRateValidator implements ActionValidator {
 
   public validate(state: GameState, action: GameAction): void {
     const taxAction = action as SetTaxRateAction;
-    if (taxAction.newRate < 0 || taxAction.newRate > 100) {
+    if (taxAction.newRate < 0 || taxAction.newRate > 50) {
       throw new GameError(
         "INVALID_ACTION",
-        "Tax rate must be between 0 and 100",
+        "Tax rate must be between 0 and 50",
       );
     }
   }
