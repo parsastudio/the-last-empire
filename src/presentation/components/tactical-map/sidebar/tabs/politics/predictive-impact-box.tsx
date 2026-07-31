@@ -1,5 +1,5 @@
 import React from "react";
-import { TrendingUp, Landmark, ShieldAlert } from "lucide-react";
+import { TrendingUp, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface PredictiveImpactBoxProps {
