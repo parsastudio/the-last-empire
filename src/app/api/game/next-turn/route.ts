@@ -3,6 +3,8 @@ import { serverGameSessionStore } from "@/application/game/server-game-session-s
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
+import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
+import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -26,10 +28,12 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     if (!engine) {
-      return NextResponse.json(
-        { success: false, error: "نشست فعالی برای انجام نوبت بعدی یافت نشد" },
-        { status: 400 },
-      );
+      const rawNationCode = gameId.split("-")[0] || "IRN";
+      const normalizedNation = normalizeNationId(rawNationCode);
+      const facade = new SimulationFacade();
+      const restoredState = facade.selectPlayerNation(normalizedNation);
+      restoredState.gameId = gameId;
+      engine = serverGameSessionStore.initSession(gameId, restoredState);
     }
 
     const nextState = engine.nextTurn();

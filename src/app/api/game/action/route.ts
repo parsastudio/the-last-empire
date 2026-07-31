@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
+import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
+import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -24,8 +26,18 @@ export async function POST(request: Request): Promise<NextResponse> {
     const gameId = searchParams.get("gameId") || "default_game";
 
     let engine = serverGameSessionStore.getEngine(gameId);
+
     if (!engine && currentState) {
       engine = serverGameSessionStore.initSession(gameId, currentState);
+    }
+
+    if (!engine) {
+      const rawNationCode = gameId.split("-")[0] || action.nationId || "IRN";
+      const normalizedNation = normalizeNationId(rawNationCode);
+      const facade = new SimulationFacade();
+      const restoredState = facade.selectPlayerNation(normalizedNation);
+      restoredState.gameId = gameId;
+      engine = serverGameSessionStore.initSession(gameId, restoredState);
     }
 
     const result = serverGameSessionStore.dispatchAction(gameId, action);
