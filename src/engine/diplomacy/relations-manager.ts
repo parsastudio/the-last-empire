@@ -1,18 +1,28 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GovernmentFrictionCalculator } from "./relations/government-friction.calculator";
-import { RelationsImprovementHandler } from "./relations/relations-improvement.handler";
-import { InsultActionHandler } from "./relations/insult-action.handler";
+import { GameError } from "@/domain/shared/game-error";
 
 export class RelationsManager {
-  private frictionCalculator = new GovernmentFrictionCalculator();
-  private improvementHandler = new RelationsImprovementHandler();
-  private insultHandler = new InsultActionHandler();
-
   public calculateGovernmentFriction(nationA: Nation, nationB: Nation): number {
-    return this.frictionCalculator.calculateGovernmentFriction(
-      nationA,
-      nationB,
-    );
+    const typeA = nationA.government.type;
+    const typeB = nationB.government.type;
+
+    if (typeA === typeB) return 1;
+
+    if (
+      (typeA === "DEMOCRACY" && typeB === "FASCISM") ||
+      (typeA === "FASCISM" && typeB === "DEMOCRACY")
+    ) {
+      return -3;
+    }
+
+    if (
+      (typeA === "DEMOCRACY" && typeB === "COMMUNISM") ||
+      (typeA === "COMMUNISM" && typeB === "DEMOCRACY")
+    ) {
+      return -2;
+    }
+
+    return 0;
   }
 
   public improveRelations(
@@ -20,10 +30,31 @@ export class RelationsManager {
     targetId: string,
     cost = 10000,
   ): Nation {
-    return this.improvementHandler.improveRelations(nationA, targetId, cost);
-  }
+    if (nationA.treasury < cost) {
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "Not enough treasury to improve relations",
+      );
+    }
 
-  public sendInsult(nationA: Nation, targetId: string): Nation {
-    return this.insultHandler.sendInsult(nationA, targetId);
+    const relation = nationA.relations[targetId];
+    if (!relation) {
+      throw new GameError(
+        "NATION_NOT_FOUND",
+        `Target nation ${targetId} relation not found`,
+      );
+    }
+
+    return {
+      ...nationA,
+      treasury: nationA.treasury - cost,
+      relations: {
+        ...nationA.relations,
+        [targetId]: {
+          ...relation,
+          opinion: Math.min(100, relation.opinion + 15),
+        },
+      },
+    };
   }
 }

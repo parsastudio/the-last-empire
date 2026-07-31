@@ -1,19 +1,18 @@
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { MarketPricingCalculator } from "@/engine/economy/market/market-pricing.calculator";
-import {
-  BuyTransactionHandler,
-  TradeTransactionResult,
-} from "@/engine/economy/market/buy-transaction.handler";
-import { SellTransactionHandler } from "@/engine/economy/market/sell-transaction.handler";
+import { GameError } from "@/domain/shared/game-error";
+
+export interface TradeTransactionResult {
+  updatedNation: Nation;
+  updatedMarketPrices: ResourceMarketPrice;
+  totalCostOrRevenue: number;
+}
 
 export class MarketEngine {
-  private pricingCalculator = new MarketPricingCalculator();
-  private buyHandler = new BuyTransactionHandler();
-  private sellHandler = new SellTransactionHandler();
+  private readonly basePrice = 25000000;
 
   public updateMarketPrices(): ResourceMarketPrice {
-    return this.pricingCalculator.updateMarketPrices();
+    return { oil: this.basePrice, steel: this.basePrice };
   }
 
   public predictBuyCost(
@@ -21,7 +20,9 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): number {
-    return this.buyHandler.predictBuyCost(marketPrices, resourceType, amount);
+    if (amount <= 0) return 0;
+    const unitPrice = marketPrices[resourceType] || this.basePrice;
+    return amount * unitPrice;
   }
 
   public calculateMaxAffordable(
@@ -29,11 +30,9 @@ export class MarketEngine {
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
   ): number {
-    return this.buyHandler.calculateMaxAffordable(
-      treasury,
-      marketPrices,
-      resourceType,
-    );
+    if (treasury <= 0) return 0;
+    const unitPrice = marketPrices[resourceType] || this.basePrice;
+    return Math.floor(treasury / unitPrice);
   }
 
   public predictSellRevenue(
@@ -41,11 +40,9 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): number {
-    return this.sellHandler.predictSellRevenue(
-      marketPrices,
-      resourceType,
-      amount,
-    );
+    if (amount <= 0) return 0;
+    const buyPrice = marketPrices[resourceType] || this.basePrice;
+    return amount * Math.floor(buyPrice * (2 / 3));
   }
 
   public buyResource(
@@ -54,12 +51,26 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): TradeTransactionResult {
-    return this.buyHandler.buyResource(
-      nation,
-      marketPrices,
-      resourceType,
-      amount,
-    );
+    if (amount <= 0) {
+      throw new GameError("INVALID_ACTION", "Buy amount must be positive");
+    }
+    const totalCost = this.predictBuyCost(marketPrices, resourceType, amount);
+    if (nation.treasury < totalCost) {
+      throw new GameError("INSUFFICIENT_FUNDS", "Insufficient treasury");
+    }
+
+    return {
+      updatedNation: {
+        ...nation,
+        treasury: nation.treasury - totalCost,
+        resources: {
+          ...nation.resources,
+          [resourceType]: nation.resources[resourceType] + amount,
+        },
+      },
+      updatedMarketPrices: marketPrices,
+      totalCostOrRevenue: totalCost,
+    };
   }
 
   public sellResource(
@@ -68,11 +79,30 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
     amount: number,
   ): TradeTransactionResult {
-    return this.sellHandler.sellResource(
-      nation,
+    if (amount <= 0) {
+      throw new GameError("INVALID_ACTION", "Sell amount must be positive");
+    }
+    if (nation.resources[resourceType] < amount) {
+      throw new GameError("INSUFFICIENT_RESOURCES", "Insufficient stock");
+    }
+
+    const totalRevenue = this.predictSellRevenue(
       marketPrices,
       resourceType,
       amount,
     );
+
+    return {
+      updatedNation: {
+        ...nation,
+        treasury: nation.treasury + totalRevenue,
+        resources: {
+          ...nation.resources,
+          [resourceType]: nation.resources[resourceType] - amount,
+        },
+      },
+      updatedMarketPrices: marketPrices,
+      totalCostOrRevenue: totalRevenue,
+    };
   }
 }

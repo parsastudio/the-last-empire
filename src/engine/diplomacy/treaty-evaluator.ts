@@ -3,34 +3,70 @@ import {
   RelationProfile,
   DiplomaticProposalType,
 } from "@/domain/diplomacy/diplomacy.schema";
-import {
-  TreatyProposalEvaluator,
-  ProposalEvaluation,
-} from "./treaty/treaty-proposal.evaluator";
-import { TreatyStanceApplier } from "./treaty/treaty-stance.applier";
+
+export interface ProposalEvaluation {
+  accepted: boolean;
+  reason?: string;
+}
 
 export class TreatyEvaluator {
-  private proposalEvaluator = new TreatyProposalEvaluator();
-  private stanceApplier = new TreatyStanceApplier();
-
   public evaluateProposal(
     sender: Nation,
     receiver: Nation,
     proposalType: DiplomaticProposalType,
     requestedTributeAmount?: number,
   ): ProposalEvaluation {
-    return this.proposalEvaluator.evaluateProposal(
-      sender,
-      receiver,
-      proposalType,
-      requestedTributeAmount,
-    );
+    const relation = receiver.relations[sender.id];
+    const opinion = relation ? relation.opinion : 0;
+
+    switch (proposalType) {
+      case "SEVER_TRADE_RELATIONS":
+        return { accepted: true };
+      case "NON_AGGRESSION_PACT":
+        if (opinion >= -10) return { accepted: true };
+        return { accepted: false, reason: "OPINION_TOO_LOW" };
+      case "FULL_ALLIANCE":
+        if (opinion >= 60 && sender.globalReputation >= 20)
+          return { accepted: true };
+        return { accepted: false, reason: "REQUIREMENTS_NOT_MET" };
+      case "PEACE_TREATY":
+        if (opinion > -20) return { accepted: true };
+        return { accepted: false, reason: "OPINION_TOO_LOW" };
+      case "IMPROVE_RELATIONS":
+        if (sender.treasury < (requestedTributeAmount || 10000)) {
+          return { accepted: false, reason: "INSUFFICIENT_SENDER_FUNDS" };
+        }
+        if (opinion >= 40)
+          return { accepted: false, reason: "OPINION_ALREADY_HIGH" };
+        return { accepted: true };
+      default:
+        return { accepted: false, reason: "UNKNOWN_PROPOSAL" };
+    }
   }
 
   public applyTreatyStance(
     profile: RelationProfile,
     newType: DiplomaticProposalType,
   ): RelationProfile {
-    return this.stanceApplier.applyTreatyStance(profile, newType);
+    switch (newType) {
+      case "NON_AGGRESSION_PACT":
+        return {
+          ...profile,
+          stance: "NON_AGGRESSION_PACT",
+          coolOffTurnsRemaining: 0,
+        };
+      case "FULL_ALLIANCE":
+        return { ...profile, stance: "ALLIANCE", coolOffTurnsRemaining: 0 };
+      case "PEACE_TREATY":
+        return { ...profile, stance: "PEACE", coolOffTurnsRemaining: 10 };
+      case "SEVER_TRADE_RELATIONS":
+        return {
+          ...profile,
+          isTradeEmbargoed: true,
+          opinion: Math.min(profile.opinion, -30),
+        };
+      default:
+        return profile;
+    }
   }
 }
