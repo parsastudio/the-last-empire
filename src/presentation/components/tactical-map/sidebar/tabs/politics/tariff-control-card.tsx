@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Coins,
-  TrendingUp,
-  AlertCircle,
-  Zap,
-  Anchor,
-  Compass,
-} from "lucide-react";
+import { Coins, TrendingUp, Zap, Anchor, Compass } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -40,13 +33,16 @@ export function TariffControlCard({
     );
   };
 
-  const tradeVolumePercentage = Math.max(
-    20,
-    Math.round((1.0 - (tariffRate / 100) * 0.8) * 100),
+  const tradeVolumeFactor = Math.max(
+    0.05,
+    1.0 - Math.pow(tariffRate / 100, 1.1),
   );
+  const tradeVolumePercentage = Math.round(tradeVolumeFactor * 100);
 
-  const gdpPenalty =
-    tariffRate > 10 ? ((tariffRate - 10) * 0.1).toFixed(1) : "0";
+  const gdpGrowthPenalty = Number(
+    (((tariffRate / 100) * 0.038 - 0.008) * 100).toFixed(2),
+  );
+  const stabilityImpact = Number(((10 - tariffRate) * 0.08).toFixed(2));
 
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -140,9 +136,9 @@ export function TariffControlCard({
             <span>پیش‌بینی اثرات گمرک ملی</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-1.5">
             <div className="bg-background/60 p-2 rounded-lg space-y-0.5 border border-border/40">
-              <span className="text-muted-foreground block font-sans">
+              <span className="text-muted-foreground block font-sans text-[9px]">
                 حجم تجارت فعال:
               </span>
               <span className="font-bold text-foreground">
@@ -151,30 +147,44 @@ export function TariffControlCard({
             </div>
 
             <div className="bg-background/60 p-2 rounded-lg space-y-0.5 border border-border/40">
-              <span className="text-muted-foreground block font-sans">
-                جریمه رشد GDP:
+              <span className="text-muted-foreground block font-sans text-[9px]">
+                اثر بر رشد GDP:
               </span>
               <span
                 className={`font-bold ${
-                  Number(gdpPenalty) > 0 ? "text-military" : "text-gdp"
+                  gdpGrowthPenalty > 0
+                    ? "text-military"
+                    : gdpGrowthPenalty < 0
+                      ? "text-gdp"
+                      : "text-foreground"
                 }`}
               >
-                {Number(gdpPenalty) > 0
-                  ? `-${PersianNumberFormatter.toPersianDigits(gdpPenalty)}٪`
-                  : "بدون جریمه"}
+                {gdpGrowthPenalty < 0 ? "+" : "-"}
+                {PersianNumberFormatter.toPersianDigits(
+                  Math.abs(gdpGrowthPenalty),
+                )}
+                ٪
+              </span>
+            </div>
+
+            <div className="bg-background/60 p-2 rounded-lg space-y-0.5 border border-border/40">
+              <span className="text-muted-foreground block font-sans text-[9px]">
+                نوسان ثبات نوبتی:
+              </span>
+              <span
+                className={`font-bold ${
+                  stabilityImpact > 0
+                    ? "text-gdp"
+                    : stabilityImpact < 0
+                      ? "text-military"
+                      : "text-foreground"
+                }`}
+              >
+                {stabilityImpact > 0 ? "+" : ""}
+                {PersianNumberFormatter.toPersianDigits(stabilityImpact)}٪
               </span>
             </div>
           </div>
-
-          {tariffRate > 10 && (
-            <div className="flex items-center gap-1.5 text-military bg-military/10 p-2 rounded-lg border border-military/30 font-sans">
-              <AlertCircle size={12} className="shrink-0" />
-              <span>
-                تعرفه بالای ۱۰٪ باعث گران شدن واردات صنعتی و کند شدن رشد تولید
-                ناخالص ملی می‌شود.
-              </span>
-            </div>
-          )}
         </div>
 
         <button

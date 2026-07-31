@@ -1,11 +1,13 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { TraitManager } from "@/engine/politics/trait-manager";
+import { TaxCalculator } from "@/engine/economy/tax-calculator";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 
 export class GdpGrowthCalculator {
   private traitManager = new TraitManager();
+  private taxCalculator = new TaxCalculator();
   private tariffCalculator = new TariffCalculator();
   private governmentSystem = new GovernmentSystem();
   private modifierManager = new ModifierManager();
@@ -15,11 +17,13 @@ export class GdpGrowthCalculator {
     peacefulNeighborsCount: number,
   ): number {
     let growthRate = 0.0;
-    if (nation.taxRate < 15) {
-      growthRate += 0.003;
-    } else if (nation.taxRate > 25) {
-      growthRate -= (nation.taxRate - 25) * 0.0008;
-    }
+
+    const taxResult = this.taxCalculator.evaluateTaxPolicy(nation);
+    growthRate += taxResult.gdpGrowthImpact;
+
+    const tariffResult = this.tariffCalculator.calculateTariffEffects(nation);
+    growthRate -= tariffResult.gdpGrowthPenalty;
+
     if (nation.government.stability > 70) {
       growthRate += 0.002;
     } else if (nation.government.stability < 30) {
@@ -34,15 +38,12 @@ export class GdpGrowthCalculator {
       0,
       peacefulNeighborsCount - activeEmbargoesCount,
     );
-    const tradeBonus = netTradeNeighbors * 0.0015;
-    growthRate += tradeBonus;
+    growthRate += netTradeNeighbors * 0.0015;
 
     if (activeEmbargoesCount > 0) {
       growthRate -= activeEmbargoesCount * 0.002;
     }
 
-    const tariffResult = this.tariffCalculator.calculateTariffEffects(nation);
-    growthRate -= tariffResult.gdpGrowthPenalty;
     growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     growthRate += govTraits.economicGrowthBonus * 0.1;
