@@ -88,7 +88,12 @@ export function WidePoliticsView({
           gdp={gdp}
           treasury={treasury}
         />
-        <AntiCorruptionCard nationId={nationId} treasury={treasury} gdp={gdp} />
+        <AntiCorruptionCard
+          nationId={nationId}
+          treasury={treasury}
+          gdp={gdp}
+          currentCorruption={corruption}
+        />
       </div>
 
       <div className="space-y-5">
