@@ -18,7 +18,6 @@ export interface HumanResourceMetrics {
   manpower: number;
   stability: number;
   corruption: number;
-  globalAggression: number;
   currentTurn: number;
   pendingDecisionsCount: number;
 }
@@ -43,7 +42,6 @@ export function useGameResources(
         manpower: 0,
         stability: 0,
         corruption: 0,
-        globalAggression: 0,
         currentTurn: 1,
         pendingDecisionsCount: 0,
       };
@@ -74,7 +72,6 @@ export function useGameResources(
         manpower: 0,
         stability: 0,
         corruption: 0,
-        globalAggression: 0,
         currentTurn: gameState.currentTurn,
         pendingDecisionsCount: 0,
       };
@@ -117,7 +114,6 @@ export function useGameResources(
       manpower: nation.resources.manpower,
       stability: nation.government.stability,
       corruption: nation.government.corruption,
-      globalAggression: nation.globalAggression,
       currentTurn: gameState.currentTurn,
       pendingDecisionsCount: pendingCount,
     };
