@@ -4,7 +4,6 @@ import {
 } from "@/infrastructure/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "../country-profile-stats";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export interface DiplomaticRelation {
   code: string;
@@ -21,7 +20,6 @@ export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
 ): DiplomaticRelation {
-  const canonicalId = NationIdResolver.resolveCanonicalId(code);
   const numericId = parseInt(code.replace("NATION_", ""), 10);
 
   const profile =
