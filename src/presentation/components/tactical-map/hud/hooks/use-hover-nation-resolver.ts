@@ -7,6 +7,7 @@ import {
 import { HoverCountryInfo } from "../country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useHoverStance } from "./use-hover-stance";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface UseHoverNationResolverProps {
   countries: CountryMapping[];
@@ -57,14 +58,9 @@ export function useHoverNationResolver({
         ? liveNation.gdp
         : profile
           ? profile.gdp
-          : matchedCountry?.areaSqKm
-            ? matchedCountry.areaSqKm * 1500
-            : 50000000000;
+          : 50000000000;
 
-      const gdpBillionsNum = realGdp / 1e9;
-      const gdpFormatted = Number.isInteger(gdpBillionsNum)
-        ? gdpBillionsNum.toString()
-        : gdpBillionsNum.toFixed(1);
+      const gdpFormatted = PersianNumberFormatter.formatCurrency(realGdp, true);
 
       const flagCode = profile
         ? profile.flagCode
@@ -94,7 +90,7 @@ export function useHoverNationResolver({
         flagCode,
         rank: realRank,
         stance: stanceLabel,
-        gdp: `$${gdpFormatted}B`,
+        gdp: gdpFormatted,
         regionName: regionLabel,
         regionArea: `${Math.round(areaSqKm).toLocaleString("fa-IR")} km²`,
       };

@@ -3,6 +3,7 @@ import { Shield, Coins, Users } from "lucide-react";
 import { HoverCountryInfo } from "./country-hover-container";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { HoverHudPositionCalculator } from "./utils/hover-hud-position.calculator";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface CountryHoverHudProps {
   info: HoverCountryInfo | null;
@@ -45,7 +46,7 @@ export function CountryHoverHud({ info, cursorPos }: CountryHoverHudProps) {
           </div>
 
           <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg border border-border/60">
-            رتبه: #{info.rank}
+            رتبه: #{PersianNumberFormatter.toPersianDigits(info.rank)}
           </span>
         </div>
 
