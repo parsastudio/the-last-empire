@@ -13,7 +13,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     } & GameAction;
 
     const action: GameAction = body.action || body;
-    const currentState: GameState | undefined = body.state;
+    let currentState: GameState | undefined = body.state;
 
     if (!action || !action.type || !action.nationId) {
       return NextResponse.json(
@@ -25,33 +25,27 @@ export async function POST(request: Request): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get("gameId") || "default_game";
 
-    let engine = serverGameSessionStore.getEngine(gameId);
-
-    if (!engine && currentState) {
-      engine = serverGameSessionStore.initSession(gameId, currentState);
-    }
-
-    if (!engine) {
+    if (!currentState) {
       const rawNationCode = gameId.split("-")[0] || action.nationId || "IRN";
       const normalizedNation = normalizeNationId(rawNationCode);
       const facade = new SimulationFacade();
-      const restoredState = facade.selectPlayerNation(normalizedNation);
-      restoredState.gameId = gameId;
-      engine = serverGameSessionStore.initSession(gameId, restoredState);
+      currentState = facade.selectPlayerNation(normalizedNation);
+      currentState.gameId = gameId;
     }
 
-    const result = serverGameSessionStore.dispatchAction(gameId, action);
+    const result = serverGameSessionStore.dispatchAction(
+      gameId,
+      action,
+      currentState,
+    );
 
-    if (!result) {
+    if (!result || !result.success) {
       return NextResponse.json(
-        { success: false, message: "نشست فعال بازی یافت نشد." },
-        { status: 404 },
-      );
-    }
-
-    if (!result.success) {
-      return NextResponse.json(
-        { success: false, message: result.message, error: result.error },
+        {
+          success: false,
+          message: result?.message || "امکان ثبت اکشن وجود ندارد.",
+          error: result?.error,
+        },
         { status: 400 },
       );
     }

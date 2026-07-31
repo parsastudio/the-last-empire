@@ -5,15 +5,6 @@ import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
-interface GlobalSessionStore {
-  engines?: Map<string, GameEngine>;
-}
-
-const globalStore = globalThis as unknown as GlobalSessionStore;
-if (!globalStore.engines) {
-  globalStore.engines = new Map<string, GameEngine>();
-}
-
 class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
 
@@ -27,38 +18,39 @@ class ServerGameSessionStore {
   public initSession(gameId: string, initialState: GameState): GameEngine {
     const gridState = GridStateProvider.getInstance();
     GridLoaderService.ensureGridLoaded(gridState);
-
-    const engine = new GameEngine(initialState);
-    globalStore.engines!.set(gameId, engine);
-    return engine;
+    return new GameEngine(initialState);
   }
 
-  public getEngine(gameId: string): GameEngine | undefined {
-    return globalStore.engines!.get(gameId);
+  public getEngine(_gameId: string): GameEngine | undefined {
+    return undefined;
   }
 
   public dispatchAction(
-    gameId: string,
+    _gameId: string,
     action: GameAction,
+    currentState?: GameState,
   ): ActionResult | null {
-    const engine = globalStore.engines!.get(gameId);
-    if (!engine) {
+    if (!currentState) {
       return null;
     }
     const gridState = GridStateProvider.getInstance();
     GridLoaderService.ensureGridLoaded(gridState);
 
+    const engine = new GameEngine(currentState);
     return engine.dispatchAction(action);
   }
 
-  public advanceTurn(gameId: string): GameState | null {
-    const engine = globalStore.engines!.get(gameId);
-    if (!engine) {
+  public advanceTurn(
+    _gameId: string,
+    currentState?: GameState,
+  ): GameState | null {
+    if (!currentState) {
       return null;
     }
     const gridState = GridStateProvider.getInstance();
     GridLoaderService.ensureGridLoaded(gridState);
 
+    const engine = new GameEngine(currentState);
     return engine.nextTurn();
   }
 }

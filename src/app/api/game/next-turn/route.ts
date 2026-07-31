@@ -22,21 +22,23 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     } catch {}
 
-    let engine = serverGameSessionStore.getEngine(gameId);
-    if (!engine && bodyState) {
-      engine = serverGameSessionStore.initSession(gameId, bodyState);
-    }
-
-    if (!engine) {
+    if (!bodyState) {
       const rawNationCode = gameId.split("-")[0] || "IRN";
       const normalizedNation = normalizeNationId(rawNationCode);
       const facade = new SimulationFacade();
-      const restoredState = facade.selectPlayerNation(normalizedNation);
-      restoredState.gameId = gameId;
-      engine = serverGameSessionStore.initSession(gameId, restoredState);
+      bodyState = facade.selectPlayerNation(normalizedNation);
+      bodyState.gameId = gameId;
     }
 
-    const nextState = engine.nextTurn();
+    const nextState = serverGameSessionStore.advanceTurn(gameId, bodyState);
+
+    if (!nextState) {
+      return NextResponse.json(
+        { success: false, error: "پیشبرد نوبت انجام نشد." },
+        { status: 400 },
+      );
+    }
+
     const updatedGridCells = gridState.getModifiedCells();
 
     return NextResponse.json({

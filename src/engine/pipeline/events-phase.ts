@@ -1,11 +1,11 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { EventEvaluator } from "@/engine/politics/event-evaluator";
+import { EventSystem } from "@/engine/politics/event-system";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export class EventsPhase implements TurnPhase {
-  private eventEvaluator = new EventEvaluator();
+  private eventSystem = new EventSystem();
 
   public execute(context: PipelineContext): GameState {
-    return this.eventEvaluator.evaluateTurnEvents(context.state);
+    return this.eventSystem.evaluateTurnEvents(context.state);
   }
 }
