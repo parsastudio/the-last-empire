@@ -11,7 +11,7 @@ export class GameEngineDispatcher {
 
   public dispatch(
     currentState: GameState,
-    actionQueue: GameActionQueue,
+    _actionQueue: GameActionQueue,
     gridState: GridState,
     action: GameAction,
   ): ActionResult {
@@ -25,30 +25,21 @@ export class GameEngineDispatcher {
     }
 
     try {
-      if (action.type === "TRADE_RESOURCES") {
-        const stateWithGrid = { ...currentState, gridState };
-        this.validator.validateAction(stateWithGrid, action);
-        const routedState = this.router.route(stateWithGrid, action);
-        const cleanedState: GameState & { gridState?: unknown } = {
-          ...routedState,
-        };
-        delete cleanedState.gridState;
+      const stateWithGrid = { ...currentState, gridState };
+      this.validator.validateAction(stateWithGrid, action);
+      const routedState = this.router.route(stateWithGrid, action);
+      const cleanedState: GameState & { gridState?: unknown } = {
+        ...routedState,
+      };
+      delete cleanedState.gridState;
 
-        Object.assign(currentState, cleanedState);
+      Object.assign(currentState, cleanedState);
 
-        return {
-          success: true,
-          actionId: action.id,
-          message: "Transaction executed instantly",
-          newState: currentState,
-        };
-      }
-
-      actionQueue.enqueue(currentState, gridState, action);
       return {
         success: true,
         actionId: action.id,
-        message: "Action enqueued successfully",
+        message: "Action executed instantly",
+        newState: currentState,
       };
     } catch (err) {
       const errorMessage =

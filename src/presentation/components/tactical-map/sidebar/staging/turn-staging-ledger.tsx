@@ -25,13 +25,13 @@ export function TurnStagingLedger({
       <div className="flex items-center justify-between border-b border-border/40 pb-2">
         <div className="flex items-center gap-1.5 font-sans font-bold text-foreground">
           <ClipboardList size={14} className="text-gdp" />
-          <span>پیش‌نویس تصمیمات نوبت جاری</span>
+          <span>تاریخچه اقدامات این نوبت</span>
         </div>
         <button
           onClick={onClearStaged}
           className="text-[10px] text-military hover:underline cursor-pointer font-sans"
         >
-          پاکسازی همه
+          پاکسازی
         </button>
       </div>
 
@@ -53,7 +53,7 @@ export function TurnStagingLedger({
 
       <div className="flex justify-between items-center pt-1 border-t border-border/40 text-[11px] font-bold">
         <span className="font-sans text-muted-foreground">
-          مجموع هزینه‌های نوبت:
+          مجموع هزینه‌های کسرشده:
         </span>
         <span className="text-gdp flex items-center gap-1">
           <Coins size={12} />${totalCost.toLocaleString("fa-IR")}
