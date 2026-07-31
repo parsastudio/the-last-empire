@@ -1,11 +1,9 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@/domain/shared/game-error";
-import { CompositeActionValidator } from "./composite-action-validator";
+import { ActionRuleEvaluator } from "./action-rule-evaluator";
 
 export class StateValidator {
-  private compositeValidator = new CompositeActionValidator();
-
   public validateAction(state: GameState, action: GameAction): void {
     if (state.isGameOver) {
       throw new GameError(
@@ -32,6 +30,55 @@ export class StateValidator {
       }
     }
 
-    this.compositeValidator.validate(state, action);
+    ActionRuleEvaluator.evaluate(state, action);
+  }
+
+  public verifyConcurrency(
+    actionList: readonly GameAction[],
+    newAction: GameAction,
+  ): void {
+    if (newAction.type === "REQUEST_LOAN") {
+      if (
+        actionList.some(
+          (a) => a.type === "REQUEST_LOAN" && a.nationId === newAction.nationId,
+        )
+      ) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Cannot request multiple loans in a single turn",
+        );
+      }
+    }
+
+    if (newAction.type === "TRADE_RESOURCES") {
+      const hasConflict = actionList.some(
+        (a) =>
+          a.type === "TRADE_RESOURCES" &&
+          a.nationId === newAction.nationId &&
+          a.resourceType === newAction.resourceType,
+      );
+      if (hasConflict) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Trade operation already queued for this resource this turn",
+        );
+      }
+    }
+
+    if (
+      newAction.type === "INVEST_INFRASTRUCTURE" ||
+      newAction.type === "UPGRADE_INDUSTRIAL_LEVEL"
+    ) {
+      if (
+        actionList.some(
+          (a) => a.type === newAction.type && a.nationId === newAction.nationId,
+        )
+      ) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "Upgrade already queued for this turn",
+        );
+      }
+    }
   }
 }
