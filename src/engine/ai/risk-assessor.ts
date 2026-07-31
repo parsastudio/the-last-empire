@@ -8,16 +8,14 @@ export class RiskAssessor {
     let threatLevel = 0;
 
     for (const [id, relation] of Object.entries(nation.relations)) {
-      const target = allNations[id];
-      if (!target || !target.isAlive) {
-        continue;
-      }
-
       if (relation.opinion < -40) {
-        threatLevel += 10;
+        const target = allNations[id];
+        if (target && target.isAlive) {
+          threatLevel += 10;
+        }
       }
     }
 
-    return Math.min(100, Math.max(0, threatLevel));
+    return Math.min(100, threatLevel);
   }
 }

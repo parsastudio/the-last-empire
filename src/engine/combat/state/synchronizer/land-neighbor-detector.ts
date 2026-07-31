@@ -9,11 +9,19 @@ export interface NeighborDetectionResult {
 export class LandNeighborDetector {
   private readonly width = 1024;
   private readonly height = 512;
+  private cachedResult: NeighborDetectionResult | null = null;
+  private lastModifiedCount = -1;
 
   public detectNeighbors(
     nationsKeys: string[],
     gridState: GridState,
   ): NeighborDetectionResult {
+    const currentModifiedCount = gridState.getModifiedCells().length;
+
+    if (this.cachedResult && currentModifiedCount === this.lastModifiedCount) {
+      return this.cachedResult;
+    }
+
     const landNeighborsMap = new Map<string, Set<string>>();
     const seaNeighborsMap = new Map<string, Set<string>>();
     const oceanAccessMap = new Map<string, boolean>();
@@ -68,6 +76,10 @@ export class LandNeighborDetector {
       }
     }
 
-    return { landNeighborsMap, seaNeighborsMap, oceanAccessMap };
+    const result = { landNeighborsMap, seaNeighborsMap, oceanAccessMap };
+    this.cachedResult = result;
+    this.lastModifiedCount = currentModifiedCount;
+
+    return result;
   }
 }
