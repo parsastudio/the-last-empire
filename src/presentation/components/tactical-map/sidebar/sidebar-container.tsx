@@ -2,13 +2,10 @@ import React from "react";
 import { SidebarTabType } from "./sidebar-tabs";
 import { CommandRail } from "../command-rail/command-rail";
 import { CommandCenterModal } from "../command-center/command-center-modal";
-import { TurnSummaryModal } from "../reports/turn-summary-modal";
 import { TurnStagingLedger } from "./staging/turn-staging-ledger";
-import { EventDecisionModal } from "../modals/event-decision-modal";
 import { TradeActionDialog } from "./tabs/market/trade-action-dialog";
 import { useSidebarTurnActions } from "./hooks/use-sidebar-turn-actions";
 import { GameState } from "@/domain/game/game-state.schema";
-import { useToast } from "@/presentation/context/toast-context";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -31,7 +28,6 @@ export function SidebarContainer({
   onClearExternalTab,
   onFocusCountry,
 }: SidebarContainerProps) {
-  const { showToast } = useToast();
   const actions = useSidebarTurnActions(
     externalActiveTab,
     onClearExternalTab,
@@ -43,15 +39,6 @@ export function SidebarContainer({
   if (!isOpen) return null;
 
   const effectiveTargetCode = actions.selectedTargetCode || selectedTargetCode;
-
-  const handleEventChoice = () => {
-    showToast(
-      "تصمیم حاکمیتی ثبت شد",
-      "فرمان جدید با موفقیت ابلاغ گردید.",
-      "success",
-    );
-    actions.setIsEventModalOpen(false);
-  };
 
   return (
     <>
@@ -69,7 +56,7 @@ export function SidebarContainer({
         <div className="fixed bottom-20 right-4 w-48 z-40">
           <TurnStagingLedger
             stagedActions={actions.stagedActions}
-            onClearStaged={() => actions.setStagedActions([])}
+            onClearStaged={() => {}}
           />
         </div>
       )}
@@ -88,23 +75,6 @@ export function SidebarContainer({
           actions.handleNavigateTab(tab, subTab, targetCode)
         }
       />
-
-      <TurnSummaryModal
-        isOpen={actions.isModalOpen}
-        reports={actions.modalReports}
-        onClose={() => actions.setIsModalOpen(false)}
-      />
-
-      {actions.activeEventData && (
-        <EventDecisionModal
-          isOpen={actions.isEventModalOpen}
-          title={actions.activeEventData.title}
-          description={actions.activeEventData.description}
-          choices={actions.activeEventData.choices}
-          onSelectChoice={handleEventChoice}
-          onClose={() => actions.setIsEventModalOpen(false)}
-        />
-      )}
 
       <TradeActionDialog
         isOpen={actions.tradeDialog.isOpen}

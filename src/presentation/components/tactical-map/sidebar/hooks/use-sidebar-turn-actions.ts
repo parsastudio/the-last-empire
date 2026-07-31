@@ -28,11 +28,8 @@ export function useSidebarTurnActions(
     useState<SidebarTabType | null>(null);
   const [targetCodeState, setTargetCodeState] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [modalReports, setModalReports] = useState<CombatReport[]>([]);
 
-  const { stagedActions, setStagedActions, clearStagedActions } =
-    useActionStagingTracker();
+  const { stagedActions, setStagedActions } = useActionStagingTracker();
 
   const [tradeDialog, setTradeDialog] = useState<TradeDialogState>({
     isOpen: false,
@@ -56,22 +53,9 @@ export function useSidebarTurnActions(
 
   const currentTurn = gameState ? gameState.currentTurn : 1;
 
-  const handleTurnComplete = useCallback(
-    (reports: CombatReport[]) => {
-      setModalReports(reports);
-      setIsModalOpen(true);
-      clearStagedActions();
-    },
-    [clearStagedActions],
+  const { isProcessingTurn, handleNextTurn } = useTurnExecution(
+    overrideAdvanceNextTurn,
   );
-
-  const {
-    isProcessingTurn,
-    isEventModalOpen,
-    activeEventData,
-    setIsEventModalOpen,
-    handleNextTurn,
-  } = useTurnExecution(overrideAdvanceNextTurn, handleTurnComplete);
 
   const setInternalActiveTab = useCallback(
     (tab: SidebarTabType | null) => {
@@ -145,28 +129,22 @@ export function useSidebarTurnActions(
     [humanNation],
   );
 
+  const realReports: CombatReport[] = [];
+
   return {
     activeTab,
     activeSubTab,
     selectedTargetCode: queryState.activeTarget || targetCodeState,
     isRailCollapsed,
-    isModalOpen,
-    isEventModalOpen,
-    activeEventData,
     isProcessingTurn,
-    modalReports,
     stagedActions,
     tradeDialog,
     humanNation,
     gameState,
     currentTurn,
-    realReports: modalReports,
+    realReports,
     setIsRailCollapsed,
     setInternalActiveTab,
-    setIsModalOpen,
-    setIsEventModalOpen,
-    setModalReports,
-    setStagedActions,
     setTradeDialog,
     handleNavigateTab,
     handleCloseActiveModal,
