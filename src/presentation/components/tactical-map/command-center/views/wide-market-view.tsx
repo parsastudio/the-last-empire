@@ -26,8 +26,12 @@ export function WideMarketView({
   userTreasury = 100000000,
   onOpenTrade,
 }: WideMarketViewProps) {
+  const safeOil = marketPrices.oil < 1000000 ? 25000000 : marketPrices.oil;
+  const safeSteel =
+    marketPrices.steel < 1000000 ? 25000000 : marketPrices.steel;
+
   const trade = useMarketTrade({
-    marketPrices,
+    marketPrices: { oil: safeOil, steel: safeSteel },
     oilStock,
     steelStock,
     userTreasury,
@@ -55,14 +59,14 @@ export function WideMarketView({
           icon={Fuel}
           colorClass="text-treasury"
           stock={oilStock}
-          currentPrice={marketPrices.oil}
+          currentPrice={safeOil}
           priceTrend={trade.oilTrend}
           onTrade={(mode) =>
             trade.handleOpenTrade(
               "نفت خام استراتژیک",
               "بلوک استراتژیک",
               mode,
-              marketPrices.oil,
+              safeOil,
             )
           }
         />
@@ -73,14 +77,14 @@ export function WideMarketView({
           icon={Wrench}
           colorClass="text-primary"
           stock={steelStock}
-          currentPrice={marketPrices.steel}
+          currentPrice={safeSteel}
           priceTrend={trade.steelTrend}
           onTrade={(mode) =>
             trade.handleOpenTrade(
               "فولاد صنعتی سنگین",
               "بلوک استراتژیک",
               mode,
-              marketPrices.steel,
+              safeSteel,
             )
           }
         />

@@ -12,16 +12,19 @@ export class MarketPricingCalculator {
     totalSteelDemand: number,
     totalSteelSupply: number,
   ): ResourceMarketPrice {
+    const safeOil =
+      currentPrices.oil < 1000000 ? this.basePrice : currentPrices.oil;
+    const safeSteel =
+      currentPrices.steel < 1000000 ? this.basePrice : currentPrices.steel;
+
     const oilBalance = totalOilDemand - totalOilSupply;
     const steelBalance = totalSteelDemand - totalSteelSupply;
 
     const rawOilDelta = Math.floor(oilBalance * 500000);
     const rawSteelDelta = Math.floor(steelBalance * 500000);
 
-    const oilGravity = Math.floor((this.basePrice - currentPrices.oil) * 0.05);
-    const steelGravity = Math.floor(
-      (this.basePrice - currentPrices.steel) * 0.05,
-    );
+    const oilGravity = Math.floor((this.basePrice - safeOil) * 0.05);
+    const steelGravity = Math.floor((this.basePrice - safeSteel) * 0.05);
 
     const oilDelta = Math.max(
       -5000000,
@@ -34,11 +37,11 @@ export class MarketPricingCalculator {
 
     const newOilPrice = Math.max(
       this.minPrice,
-      Math.min(this.maxPrice, currentPrices.oil + oilDelta),
+      Math.min(this.maxPrice, safeOil + oilDelta),
     );
     const newSteelPrice = Math.max(
       this.minPrice,
-      Math.min(this.maxPrice, currentPrices.steel + steelDelta),
+      Math.min(this.maxPrice, safeSteel + steelDelta),
     );
 
     return {
