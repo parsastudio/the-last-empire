@@ -2,7 +2,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 
 export interface TariffEffectResult {
   tariffRevenue: number;
-  gdpGrowthPenalty: number;
   stabilityImpact: number;
   tradeVolumePercentage: number;
 }
@@ -22,14 +21,10 @@ export class TariffCalculator {
     const effectiveTradeValue = baseTradeBase * tradeVolumeFactor;
     const tariffRevenue = Math.floor(effectiveTradeValue * (tariffRate / 100));
 
-    const gdpGrowthPenalty = Number(
-      ((tariffRate / 100) * 0.038 - 0.008).toFixed(4),
-    );
     const stabilityImpact = Number(((10 - tariffRate) * 0.08).toFixed(2));
 
     return {
       tariffRevenue,
-      gdpGrowthPenalty,
       stabilityImpact,
       tradeVolumePercentage,
     };

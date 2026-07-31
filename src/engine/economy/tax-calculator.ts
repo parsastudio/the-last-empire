@@ -3,7 +3,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 export interface TaxCalculationResult {
   taxIncome: number;
   stabilityImpact: number;
-  gdpGrowthImpact: number;
 }
 
 export class TaxCalculator {
@@ -29,14 +28,10 @@ export class TaxCalculator {
     const stabilityImpact = Number(
       (2.0 - (nation.taxRate / 100) * 14.0).toFixed(2),
     );
-    const gdpGrowthImpact = Number(
-      (0.015 - (nation.taxRate / 100) * 0.06).toFixed(4),
-    );
 
     return {
       taxIncome: income,
       stabilityImpact,
-      gdpGrowthImpact,
     };
   }
 }

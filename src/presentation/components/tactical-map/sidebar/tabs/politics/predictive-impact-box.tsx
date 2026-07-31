@@ -20,9 +20,6 @@ export function PredictiveImpactBox({
   const projectedIncome = Math.floor(grossTax - corruptionLoss);
 
   const stabilityImpact = Number((2.0 - (newTaxRate / 100) * 14.0).toFixed(2));
-  const gdpGrowthImpact = Number(
-    ((0.015 - (newTaxRate / 100) * 0.06) * 100).toFixed(2),
-  );
 
   return (
     <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs dir-rtl text-right">
@@ -31,31 +28,13 @@ export function PredictiveImpactBox({
         <span>پایش زنده اثرات مالیاتی</span>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 text-[10px]">
+      <div className="grid grid-cols-2 gap-2 text-[10px]">
         <div className="bg-background/60 p-2 rounded-xl space-y-0.5 border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
             درآمد مالیاتی نوبتی:
           </span>
           <span className="font-bold text-gdp text-[11px]">
             {PersianNumberFormatter.formatCurrency(projectedIncome)}
-          </span>
-        </div>
-
-        <div className="bg-background/60 p-2 rounded-xl space-y-0.5 border border-border/40">
-          <span className="text-muted-foreground block font-sans text-[9px]">
-            اثر بر رشد GDP:
-          </span>
-          <span
-            className={`font-bold text-[11px] ${
-              gdpGrowthImpact > 0
-                ? "text-gdp"
-                : gdpGrowthImpact < 0
-                  ? "text-military"
-                  : "text-foreground"
-            }`}
-          >
-            {gdpGrowthImpact > 0 ? "+" : ""}
-            {PersianNumberFormatter.toPersianDigits(gdpGrowthImpact)}٪
           </span>
         </div>
 
