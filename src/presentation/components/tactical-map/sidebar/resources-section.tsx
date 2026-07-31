@@ -19,6 +19,7 @@ export function ResourcesSection({
   manpower,
   industrialLevel,
   infrastructureLevel = 1,
+  oilRequiredPerTurn = 0,
   oilProducedPerTurn = 0,
   steelProducedPerTurn = 0,
 }: ResourcesSectionProps) {
@@ -49,7 +50,7 @@ export function ResourcesSection({
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
             <Fuel size={12} className="text-treasury" />
-            <span>بلوک‌های نفت استراتژیک</span>
+            <span>ذخایر نفت استراتژیک</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
             {formattedOil} بلوک
@@ -65,7 +66,9 @@ export function ResourcesSection({
               </span>
             )}
             <span className="text-[9px] text-muted-foreground block font-sans">
-              توضیح: هر بلوک = ۱۰M بشکه
+              مصرف نوبتی:{" "}
+              {PersianNumberFormatter.toPersianDigits(oilRequiredPerTurn)} بلوک
+              (سوخت شهرها)
             </span>
           </div>
         </div>
@@ -73,7 +76,7 @@ export function ResourcesSection({
         <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans">
             <Wrench size={12} className="text-primary" />
-            <span>بلوک‌های فولاد استراتژیک</span>
+            <span>ذخایر فولاد استراتژیک</span>
           </div>
           <span className="text-xs font-bold text-foreground block">
             {formattedSteel} بلوک
@@ -89,7 +92,7 @@ export function ResourcesSection({
               </span>
             )}
             <span className="text-[9px] text-muted-foreground block font-sans">
-              توضیح: هر بلوک = ۱M تن
+              توضیح: ساخت سلاح و توسعه شهرها
             </span>
           </div>
         </div>
