@@ -2,21 +2,10 @@ import type { Nation } from "@/domain/nation/nation.schema";
 
 export class PopulationGrowthEngine {
   public calculatePopulationChange(nation: Nation): number {
-    let growthRate = 0.012;
+    const stability = Math.max(0, Math.min(100, nation.government.stability));
+    const growthRate = stability / 50 - 0.01;
 
-    if (nation.government.stability > 70) {
-      growthRate += 0.005;
-    } else if (nation.government.stability < 30) {
-      growthRate -= 0.01;
-    }
-
-    const size = nation.geography.territorySize || 100;
-    const density = nation.population / size;
-    if (density > 1500) {
-      growthRate -= 0.006;
-    }
-
-    return Math.floor(nation.population * growthRate);
+    return Math.trunc(nation.population * growthRate);
   }
 
   public updatePopulation(nation: Nation): number {

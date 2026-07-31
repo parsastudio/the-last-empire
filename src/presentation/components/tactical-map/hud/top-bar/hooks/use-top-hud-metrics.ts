@@ -16,7 +16,7 @@ export function useTopHudMetrics(metrics: HumanResourceMetrics) {
       metrics.oil.toLocaleString("en-US"),
     );
 
-    const formattedOilUsage = "بدون مصرف در صلح";
+    const formattedOilUsage = `${PersianNumberFormatter.toPersianDigits(metrics.oilRequiredPerTurn)} مصرف`;
 
     const formattedSteel = PersianNumberFormatter.toPersianDigits(
       metrics.steel.toLocaleString("en-US"),
@@ -32,7 +32,7 @@ export function useTopHudMetrics(metrics: HumanResourceMetrics) {
       formattedOilUsage,
       formattedSteel,
       formattedManpower,
-      isOilDeficit: false,
+      isOilDeficit: metrics.oil < metrics.oilRequiredPerTurn,
     };
   }, [metrics]);
 }
