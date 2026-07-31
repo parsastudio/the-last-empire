@@ -16,7 +16,6 @@ interface UseMarketTradeProps {
 }
 
 export function useMarketTrade({
-  marketPrices = { oil: 25000000, steel: 25000000 },
   oilStock = 50,
   steelStock = 20,
   userTreasury = 100000000,

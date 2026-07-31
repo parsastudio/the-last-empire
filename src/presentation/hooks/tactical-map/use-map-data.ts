@@ -82,7 +82,7 @@ export function useMapData({
     if (!loading && maskDataRef.current) {
       reRenderLayer();
     }
-  }, [loading, reRenderLayer]);
+  }, [loading, maskDataRef, reRenderLayer]);
 
   return {
     countries,

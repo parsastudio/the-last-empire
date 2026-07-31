@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@/domain/shared/game-error";
+import { Nation } from "@/domain/nation/nation.schema";
 
 export class ActionRuleEvaluator {
   public static evaluate(state: GameState, action: GameAction): void {
