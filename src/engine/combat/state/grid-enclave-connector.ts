@@ -2,15 +2,14 @@ import { GridCell } from "@/domain/map/grid-cell.schema";
 import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
 
 export class GridEnclaveConnector {
-  public regroupEnclaves(countryId: string, allCells: GridCell[]): void {
-    const countryCells: GridCell[] = [];
-    for (let i = 0; i < allCells.length; i++) {
-      if (allCells[i]!.ownerId === countryId) {
-        countryCells.push(allCells[i]!);
-      }
-    }
+  public regroupEnclaves(countryId: string, countryCells: GridCell[]): void {
+    if (!countryCells || countryCells.length === 0) return;
 
-    if (countryCells.length === 0) return;
+    const cellMap = new Map<string, GridCell>();
+    for (let i = 0; i < countryCells.length; i++) {
+      const c = countryCells[i]!;
+      cellMap.set(`${c.x},${c.y}`, c);
+    }
 
     const visited = new Set<string>();
     let enclaveIdCounter = 1;
@@ -42,13 +41,10 @@ export class GridEnclaveConnector {
             const n = neighbors[j]!;
             const nKey = `${n.x},${n.y}`;
             if (!visited.has(nKey)) {
-              for (let k = 0; k < countryCells.length; k++) {
-                const match = countryCells[k]!;
-                if (match.x === n.x && match.y === n.y) {
-                  visited.add(nKey);
-                  queue.enqueue(match);
-                  break;
-                }
+              const match = cellMap.get(nKey);
+              if (match) {
+                visited.add(nKey);
+                queue.enqueue(match);
               }
             }
           }
