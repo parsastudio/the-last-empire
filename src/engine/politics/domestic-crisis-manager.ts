@@ -13,18 +13,17 @@ export class DomesticCrisisManager {
     if (stability < 10) {
       const updatedNation: Nation = {
         ...nation,
-        gdp: Math.floor(nation.gdp * 0.5),
-        treasury: Math.floor(nation.treasury * 0.5),
+        treasury: Math.floor(nation.treasury * 0.6),
         military: {
           ...nation.military,
-          infantry: Math.floor(nation.military.infantry * 0.5),
-          airForce: Math.floor(nation.military.airForce * 0.5),
-          droneMissile: Math.floor(nation.military.droneMissile * 0.5),
+          infantry: Math.floor(nation.military.infantry * 0.7),
+          airForce: Math.floor(nation.military.airForce * 0.7),
+          droneMissile: Math.floor(nation.military.droneMissile * 0.7),
         },
         government: {
           ...nation.government,
-          stability: 30,
-          corruption: Math.min(100, nation.government.corruption + 20),
+          stability: 20,
+          corruption: Math.min(100, nation.government.corruption + 15),
         },
       };
 

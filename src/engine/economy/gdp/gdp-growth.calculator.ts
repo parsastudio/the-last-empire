@@ -2,13 +2,11 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { TraitManager } from "@/engine/politics/trait-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class GdpGrowthCalculator {
   private traitManager = new TraitManager();
   private governmentSystem = new GovernmentSystem();
   private modifierManager = new ModifierManager();
-  private doctrinesManager = new DoctrinesManager();
 
   public calculateGdpGrowthMultiplier(
     nation: Nation,
@@ -17,16 +15,15 @@ export class GdpGrowthCalculator {
     let growthRate = 0.0;
 
     const currentStability = nation.government.stability;
-    const stabilityImpact = ((currentStability - 50) / 50) * 0.05;
-    growthRate += stabilityImpact;
+    if (currentStability >= 50) {
+      growthRate += ((currentStability - 50) / 50) * 0.025;
+    } else {
+      growthRate += ((currentStability - 50) / 50) * 0.05;
+    }
 
     growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
     growthRate += govTraits.economicGrowthBonus * 0.1;
-
-    growthRate += this.doctrinesManager.getGdpGrowthModifier(
-      nation.doctrines.unlockedDoctrines,
-    );
 
     growthRate += this.modifierManager.getModifierImpact(
       nation,
@@ -40,6 +37,6 @@ export class GdpGrowthCalculator {
       growthRate -= 0.02;
     }
 
-    return Math.max(0.95, 1.0 + growthRate);
+    return Math.max(0.9, 1.0 + growthRate);
   }
 }

@@ -3,7 +3,7 @@ import type { GovernmentType } from "@/domain/politics/politics.schema";
 export interface GovernmentTraits {
   economicGrowthBonus: number;
   militaryUpkeepMultiplier: number;
-  baseStability: number;
+  stabilityDeltaPerTurn: number;
   tradeMultiplier: number;
   militaryPowerMultiplier: number;
 }
@@ -15,7 +15,7 @@ export class GovernmentSystem {
         return {
           economicGrowthBonus: 0.15,
           militaryUpkeepMultiplier: 1.0,
-          baseStability: 70,
+          stabilityDeltaPerTurn: 1.0,
           tradeMultiplier: 1.25,
           militaryPowerMultiplier: 0.85,
         };
@@ -23,7 +23,7 @@ export class GovernmentSystem {
         return {
           economicGrowthBonus: -0.05,
           militaryUpkeepMultiplier: 0.9,
-          baseStability: 50,
+          stabilityDeltaPerTurn: -0.5,
           tradeMultiplier: 0.9,
           militaryPowerMultiplier: 1.25,
         };
@@ -31,7 +31,7 @@ export class GovernmentSystem {
         return {
           economicGrowthBonus: 0.05,
           militaryUpkeepMultiplier: 1.0,
-          baseStability: 80,
+          stabilityDeltaPerTurn: 0.5,
           tradeMultiplier: 1.0,
           militaryPowerMultiplier: 1.0,
         };
@@ -39,7 +39,7 @@ export class GovernmentSystem {
         return {
           economicGrowthBonus: 0.0,
           militaryUpkeepMultiplier: 0.75,
-          baseStability: 60,
+          stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 0.7,
           militaryPowerMultiplier: 1.0,
         };
@@ -47,7 +47,7 @@ export class GovernmentSystem {
         return {
           economicGrowthBonus: -0.1,
           militaryUpkeepMultiplier: 1.1,
-          baseStability: 55,
+          stabilityDeltaPerTurn: -1.0,
           tradeMultiplier: 0.8,
           militaryPowerMultiplier: 1.5,
         };
@@ -55,7 +55,7 @@ export class GovernmentSystem {
         return {
           economicGrowthBonus: 0.0,
           militaryUpkeepMultiplier: 1.0,
-          baseStability: 70,
+          stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 1.0,
           militaryPowerMultiplier: 1.0,
         };

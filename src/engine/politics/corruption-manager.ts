@@ -3,17 +3,19 @@ import { GameError } from "@/domain/shared/game-error";
 
 export class CorruptionManager {
   public updateCorruptionLevel(nation: Nation): number {
-    let delta = 0;
+    const stability = nation.government.stability;
+    const baseGrowth = 0.5 + 3.0 * (1.0 - stability / 100);
+
+    let regimePenalty = 0;
     if (nation.government.type === "DICTATORSHIP") {
-      delta += 0.5;
+      regimePenalty = 0.5;
     }
-    if (nation.government.stability < 40) {
-      delta += 0.8;
-    } else if (nation.government.stability > 70) {
-      delta -= 0.3;
-    }
+
     const current = nation.government.corruption;
-    return Math.max(0, Math.min(100, Math.floor(current + delta)));
+    return Math.max(
+      0,
+      Math.min(100, Math.floor(current + baseGrowth + regimePenalty)),
+    );
   }
 
   public calculateTaxWastage(
