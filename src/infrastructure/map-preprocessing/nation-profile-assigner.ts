@@ -116,7 +116,6 @@ export class NationProfileAssigner {
       activeModifiers: [],
       traits: profile ? profile.traits : ["FRAGILE_ECONOMY"],
       globalReputation: 50,
-      globalAggression: 0,
       doctrines: {
         doctrinePoints: 0,
         unlockedDoctrines: [],
@@ -247,7 +246,6 @@ export class NationProfileAssigner {
       activeModifiers: [],
       traits,
       globalReputation: 50,
-      globalAggression: 0,
       doctrines: {
         doctrinePoints: 0,
         unlockedDoctrines: [],

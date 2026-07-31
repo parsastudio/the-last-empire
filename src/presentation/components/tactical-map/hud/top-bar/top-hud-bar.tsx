@@ -85,7 +85,9 @@ export function TopHudBar({ metrics, onOpenPending }: TopHudBarProps) {
             corruption={metrics.corruption}
           />
 
-          <ThreatRadarBadge globalAggression={metrics.globalAggression} />
+          <ThreatRadarBadge
+            globalReputation={metrics.nation?.globalReputation ?? 50}
+          />
         </div>
 
         <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">

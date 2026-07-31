@@ -24,7 +24,6 @@ export class OpinionFrictionHandler {
         const nextOpinion = this.opinionCalculator.calculateOpinion(
           relation.opinion,
           updated.globalReputation,
-          updated.globalAggression,
           relation.stance,
           isLandNeighbor,
           frictionValue,

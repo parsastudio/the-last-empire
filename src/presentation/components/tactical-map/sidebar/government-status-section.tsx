@@ -7,14 +7,12 @@ interface GovernmentStatusSectionProps {
   stability: number;
   corruption: number;
   reputation: number;
-  globalAggression: number;
 }
 
 export function GovernmentStatusSection({
   stability,
   corruption,
   reputation,
-  globalAggression,
 }: GovernmentStatusSectionProps) {
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -40,23 +38,22 @@ export function GovernmentStatusSection({
           bgClass="bg-military"
         />
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex flex-col gap-1">
-            <span className="text-[9px] text-muted-foreground font-sans">
-              اعتبار جهانی
-            </span>
-            <span className="text-xs font-bold text-foreground">
-              {PersianNumberFormatter.toPersianDigits(reputation)} امتیاز
-            </span>
-          </div>
-          <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex flex-col gap-1">
-            <span className="text-[9px] text-muted-foreground font-sans">
-              پرخاشگری جهانی
-            </span>
-            <span className="text-xs font-bold text-military">
-              {PersianNumberFormatter.toPersianDigits(globalAggression)}٪
-            </span>
-          </div>
+        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex flex-col gap-1">
+          <span className="text-[9px] text-muted-foreground font-sans">
+            اعتبار و پرستیژ جهانی
+          </span>
+          <span
+            className={`text-xs font-bold ${
+              reputation < 0
+                ? "text-military"
+                : reputation > 0
+                  ? "text-gdp"
+                  : "text-foreground"
+            }`}
+          >
+            {reputation > 0 ? "+" : ""}
+            {PersianNumberFormatter.toPersianDigits(reputation)} امتیاز
+          </span>
         </div>
       </div>
     </div>

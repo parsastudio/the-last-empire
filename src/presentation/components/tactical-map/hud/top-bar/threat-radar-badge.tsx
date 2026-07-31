@@ -1,33 +1,41 @@
 import React from "react";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Globe } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ThreatRadarBadgeProps {
-  globalAggression: number;
+  globalReputation: number;
 }
 
-export function ThreatRadarBadge({ globalAggression }: ThreatRadarBadgeProps) {
-  const isHighThreat = globalAggression >= 50;
+export function ThreatRadarBadge({ globalReputation }: ThreatRadarBadgeProps) {
+  const isHighThreat = globalReputation <= -30;
+  const isPositive = globalReputation > 0;
 
   return (
     <div
       className={`flex items-center gap-2 border px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors cursor-default shrink-0 ${
         isHighThreat
           ? "bg-military/15 border-military/40 text-military"
-          : "bg-secondary/40 border-border/60 text-muted-foreground"
+          : isPositive
+            ? "bg-gdp/15 border-gdp/40 text-gdp"
+            : "bg-secondary/40 border-border/60 text-muted-foreground"
       }`}
-      title="شاخص پرخاشگری جهانی و احتمال تشکیل ائتلاف متخاصم"
+      title="شاخص پرستیژ و جایگاه بین‌المللی کشور"
     >
-      <ShieldAlert
-        size={14}
-        className={
-          isHighThreat ? "animate-pulse text-military" : "text-muted-foreground"
-        }
-      />
+      {isHighThreat ? (
+        <ShieldAlert size={14} className="animate-pulse text-military" />
+      ) : (
+        <Globe
+          size={14}
+          className={isPositive ? "text-gdp" : "text-muted-foreground"}
+        />
+      )}
       <div className="flex items-center gap-1 whitespace-nowrap">
-        <span className="text-[10px] font-sans font-medium">ائتلاف:</span>
+        <span className="text-[10px] font-sans font-medium">
+          {isHighThreat ? "خطر ائتلاف:" : "اعتبار:"}
+        </span>
         <span className="font-bold">
-          {PersianNumberFormatter.toPersianDigits(globalAggression)}%
+          {globalReputation > 0 ? "+" : ""}
+          {PersianNumberFormatter.toPersianDigits(globalReputation)}
         </span>
       </div>
     </div>
