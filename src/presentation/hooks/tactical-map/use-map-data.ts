@@ -1,9 +1,12 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { GridDownsampler } from "@/infrastructure/map-preprocessing/grid-downsampler";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
-import { MapDataApiHelper } from "./map-data-api-helper";
-import { MaskRenderingHelper, CountryMapping } from "./mask-rendering-helper";
-import { useMapAssetsLoader } from "./use-map-assets-loader";
+import { MapDataApiHelper } from "@/presentation/hooks/tactical-map/map-data-api-helper";
+import {
+  MaskRenderingHelper,
+  CountryMapping,
+} from "@/presentation/hooks/tactical-map/mask-rendering-helper";
+import { useMapAssetsLoader } from "@/presentation/hooks/tactical-map/use-map-assets-loader";
 
 export type { CountryMapping };
 
@@ -22,6 +25,7 @@ export function useMapData({
   activeLayer = "political",
 }: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
+  const hasDownsampledRef = useRef<boolean>(false);
   const [isLayerRendering, setIsLayerRendering] = useState<boolean>(false);
   const [renderVersion, setRenderVersion] = useState<number>(0);
 
@@ -47,17 +51,17 @@ export function useMapData({
           }
           setIsLayerRendering(false);
         });
-      }, 20);
+      }, 16);
     }
   }, [activeLayer, countries, mapHeight, mapWidth, maskDataRef]);
 
   useEffect(() => {
-    if (!loading && maskDataRef.current) {
+    if (!loading && maskDataRef.current && !hasDownsampledRef.current) {
+      hasDownsampledRef.current = true;
+
       if (!canvasShadedRef.current) {
         canvasShadedRef.current = document.createElement("canvas");
       }
-
-      reRenderLayer();
 
       const downsampler = new GridDownsampler();
       const localGridState = downsampler.downsampleMask(
@@ -72,7 +76,13 @@ export function useMapData({
         globalGridState.setCell(cell.x, cell.y, cell);
       }
     }
-  }, [loading, mapWidth, mapHeight, maskDataRef, reRenderLayer]);
+  }, [loading, mapWidth, mapHeight, maskDataRef]);
+
+  useEffect(() => {
+    if (!loading && maskDataRef.current) {
+      reRenderLayer();
+    }
+  }, [loading, reRenderLayer]);
 
   return {
     countries,
