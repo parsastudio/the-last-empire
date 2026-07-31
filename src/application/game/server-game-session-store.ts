@@ -5,9 +5,17 @@ import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
+interface GlobalSessionStore {
+  engines?: Map<string, GameEngine>;
+}
+
+const globalStore = globalThis as unknown as GlobalSessionStore;
+if (!globalStore.engines) {
+  globalStore.engines = new Map<string, GameEngine>();
+}
+
 class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
-  private engines: Map<string, GameEngine> = new Map();
 
   public static getInstance(): ServerGameSessionStore {
     if (!ServerGameSessionStore.instance) {
@@ -21,19 +29,19 @@ class ServerGameSessionStore {
     GridLoaderService.ensureGridLoaded(gridState);
 
     const engine = new GameEngine(initialState);
-    this.engines.set(gameId, engine);
+    globalStore.engines!.set(gameId, engine);
     return engine;
   }
 
   public getEngine(gameId: string): GameEngine | undefined {
-    return this.engines.get(gameId);
+    return globalStore.engines!.get(gameId);
   }
 
   public dispatchAction(
     gameId: string,
     action: GameAction,
   ): ActionResult | null {
-    const engine = this.engines.get(gameId);
+    const engine = globalStore.engines!.get(gameId);
     if (!engine) {
       return null;
     }
@@ -44,7 +52,7 @@ class ServerGameSessionStore {
   }
 
   public advanceTurn(gameId: string): GameState | null {
-    const engine = this.engines.get(gameId);
+    const engine = globalStore.engines!.get(gameId);
     if (!engine) {
       return null;
     }
