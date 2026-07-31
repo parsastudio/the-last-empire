@@ -15,6 +15,16 @@ export class GdpPopUpdater {
     }
 
     const updated = { ...nations };
+    const canonicalCache = new Map<string, string>();
+
+    const getCanonical = (id: string): string => {
+      let cached = canonicalCache.get(id);
+      if (!cached) {
+        cached = NationIdResolver.resolveCanonicalId(id);
+        canonicalCache.set(id, cached);
+      }
+      return cached;
+    };
 
     if (!this.initialPixelsMapCache) {
       const initialPixelsMap = new Map<string, number>();
@@ -24,7 +34,7 @@ export class GdpPopUpdater {
         if (initOwner === "WATER" || initOwner === "CLOSED_SEA") {
           continue;
         }
-        const canonicalInit = NationIdResolver.resolveCanonicalId(initOwner);
+        const canonicalInit = getCanonical(initOwner);
         const pixels = cell.highResPixelCount > 0 ? cell.highResPixelCount : 16;
         initialPixelsMap.set(
           canonicalInit,
@@ -38,7 +48,7 @@ export class GdpPopUpdater {
     const popDensityMap = new Map<string, number>();
 
     for (const [id, nation] of Object.entries(updated)) {
-      const canonicalId = NationIdResolver.resolveCanonicalId(id);
+      const canonicalId = getCanonical(id);
       const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
       const profile = findCountryProfileById(numericId);
 
@@ -87,10 +97,9 @@ export class GdpPopUpdater {
         continue;
       }
 
-      const canonicalCurrent =
-        NationIdResolver.resolveCanonicalId(currentOwner);
+      const canonicalCurrent = getCanonical(currentOwner);
       const initOwner = cell.initialOwnerId || currentOwner;
-      const canonicalInit = NationIdResolver.resolveCanonicalId(initOwner);
+      const canonicalInit = getCanonical(initOwner);
 
       const pixels = cell.highResPixelCount > 0 ? cell.highResPixelCount : 16;
 
@@ -116,21 +125,23 @@ export class GdpPopUpdater {
       }
 
       const enclaveId = cell.enclaveId;
-      const existingR = rMap.get(enclaveId) || {
-        pixelCount: 0,
-        gdp: 0,
-        pop: 0,
-      };
+      const existingR = rMap.get(enclaveId);
 
-      rMap.set(enclaveId, {
-        pixelCount: existingR.pixelCount + pixels,
-        gdp: existingR.gdp + cellGdp,
-        pop: existingR.pop + cellPop,
-      });
+      if (existingR) {
+        existingR.pixelCount += pixels;
+        existingR.gdp += cellGdp;
+        existingR.pop += cellPop;
+      } else {
+        rMap.set(enclaveId, {
+          pixelCount: pixels,
+          gdp: cellGdp,
+          pop: cellPop,
+        });
+      }
     }
 
     for (const [id, nation] of Object.entries(updated)) {
-      const canonicalId = NationIdResolver.resolveCanonicalId(id);
+      const canonicalId = getCanonical(id);
       const totalGdp = currentGdpMap.get(canonicalId);
       const totalPop = currentPopMap.get(canonicalId);
 

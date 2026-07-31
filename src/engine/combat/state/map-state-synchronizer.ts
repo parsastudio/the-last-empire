@@ -9,7 +9,6 @@ export class MapStateSynchronizer {
 
   public syncStateToGrid(state: GameState, gridState: GridState): GameState {
     const t0 = performance.now();
-    const allCells = gridState.getAllCells();
     const nationsKeys = Object.keys(state.nations);
 
     const tDetectStart = performance.now();
@@ -22,7 +21,7 @@ export class MapStateSynchronizer {
     const tCalibStart = performance.now();
     const updatedNations = this.territoryCalibrator.calibrateNationsTerritory(
       state.nations,
-      allCells,
+      gridState,
       neighborResult.landNeighborsMap,
       neighborResult.seaNeighborsMap,
       neighborResult.oceanAccessMap,
