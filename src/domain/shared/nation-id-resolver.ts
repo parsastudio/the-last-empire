@@ -5,26 +5,25 @@ import {
 
 export class NationIdResolver {
   public static resolveCanonicalId(codeOrId: string): string {
-    if (!codeOrId) return "NATION_118";
+    if (!codeOrId) return "NATION_IRN";
 
     const clean = codeOrId.trim().toUpperCase();
+
+    let profile = findCountryProfileByCode(clean);
+    if (!profile) {
+      const rawNum = clean.replace("NATION_", "");
+      const numericId = parseInt(rawNum, 10);
+      if (!isNaN(numericId)) {
+        profile = findCountryProfileById(numericId);
+      }
+    }
+
+    if (profile) {
+      return `NATION_${profile.code.toUpperCase()}`;
+    }
+
     if (clean.startsWith("NATION_")) {
       return clean;
-    }
-
-    const numericId = parseInt(clean, 10);
-    if (!isNaN(numericId)) {
-      return `NATION_${numericId}`;
-    }
-
-    const profileByCode = findCountryProfileByCode(clean);
-    if (profileByCode) {
-      return `NATION_${profileByCode.code}`;
-    }
-
-    const profileById = findCountryProfileById(Number(clean));
-    if (profileById) {
-      return `NATION_${profileById.code}`;
     }
 
     return `NATION_${clean}`;

@@ -42,6 +42,16 @@ export function useWideDiplomacy({
   const [activeCode, setActiveCode] = useState<string>(
     selectedTargetCode || defaultCode,
   );
+  const [prevTargetCode, setPrevTargetCode] = useState<
+    string | null | undefined
+  >(selectedTargetCode);
+
+  if (selectedTargetCode !== prevTargetCode) {
+    setPrevTargetCode(selectedTargetCode);
+    if (selectedTargetCode) {
+      setActiveCode(selectedTargetCode);
+    }
+  }
 
   const targetNationId = NationIdResolver.resolveCanonicalId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
