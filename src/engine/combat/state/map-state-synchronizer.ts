@@ -1,14 +1,13 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
-import { LandNeighborDetector } from "./synchronizer/land-neighbor-detector";
-import { TerritoryCalibrator } from "./synchronizer/territory-calibrator";
+import { LandNeighborDetector } from "@/engine/combat/state/synchronizer/land-neighbor-detector";
+import { TerritoryCalibrator } from "@/engine/combat/state/synchronizer/territory-calibrator";
 
 export class MapStateSynchronizer {
   private neighborDetector = new LandNeighborDetector();
   private territoryCalibrator = new TerritoryCalibrator();
 
   public syncStateToGrid(state: GameState, gridState: GridState): GameState {
-    const allCells = gridState.getAllCells();
     const nationsKeys = Object.keys(state.nations);
 
     const neighborResult = this.neighborDetector.detectNeighbors(

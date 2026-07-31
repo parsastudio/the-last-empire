@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
-import { SidebarTabType } from "../sidebar-tabs";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
-import { useTurnExecution } from "./use-turn-execution";
-import { useNavigationQueryState } from "../../navigation/hooks/use-navigation-query-state";
+import { useTurnExecution } from "@/presentation/components/tactical-map/sidebar/hooks/use-turn-execution";
+import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
 import { MarketEngine } from "@/engine/economy/market-engine";
 
 export interface TradeDialogState {
@@ -29,7 +29,7 @@ export function useSidebarTurnActions(
   const [targetCodeState, setTargetCodeState] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
 
-  const { stagedActions, setStagedActions } = useActionStagingTracker();
+  const { stagedActions } = useActionStagingTracker();
 
   const [tradeDialog, setTradeDialog] = useState<TradeDialogState>({
     isOpen: false,
