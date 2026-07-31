@@ -14,11 +14,10 @@ export class TreatyProposalEvaluator {
   ): ProposalEvaluation {
     const relation = receiver.relations[sender.id];
     const opinion = relation ? relation.opinion : 0;
-    if (receiver.globalReputation < -50) {
-      return { accepted: false, reason: "LOW_SENDER_REPUTATION" };
-    }
 
     switch (proposalType) {
+      case "SEVER_TRADE_RELATIONS":
+        return { accepted: true };
       case "NON_AGGRESSION_PACT":
         if (opinion >= -10) {
           return { accepted: true };

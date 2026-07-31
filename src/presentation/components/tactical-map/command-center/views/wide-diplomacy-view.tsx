@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { DiplomacyListItem } from "../../sidebar/tabs/diplomacy/diplomacy-list-item";
 import { CountryProfileStats } from "../../sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "../../sidebar/tabs/diplomacy/advanced-diplomacy-actions";
@@ -8,6 +8,7 @@ import { Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { SidebarTabType } from "../../sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "./hooks/use-wide-diplomacy";
+import { ProxyAllocationModal } from "../../modals/proxy-allocation-modal";
 
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
@@ -22,80 +23,104 @@ export function WideDiplomacyView({
   nationsMap,
   humanNationId = "NATION_118",
   onFocusCountry,
-  onNavigateTab,
 }: WideDiplomacyViewProps) {
+  const [isProxyModalOpen, setIsProxyModalOpen] = useState(false);
   const diplomacy = useWideDiplomacy({
     selectedTargetCode,
     nationsMap,
     humanNationId,
   });
 
-  const handleOpenProxyCenter = () => {
-    if (onNavigateTab) {
-      onNavigateTab("proxy", diplomacy.targetNationId);
-    }
-  };
+  const humanNation = nationsMap ? nationsMap[humanNationId] : null;
+  const userTreasury = humanNation ? humanNation.treasury : 100000;
+
+  const targetLiveNation = nationsMap
+    ? nationsMap[diplomacy.targetNationId]
+    : null;
+  const targetStability = targetLiveNation
+    ? targetLiveNation.government.stability
+    : diplomacy.selectedRelation.profileData.stability;
+  const targetGdp = targetLiveNation ? targetLiveNation.gdp : 50000000000;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
-      <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
-        <div className="relative">
-          <Search
-            size={14}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="text"
-            placeholder="جستجوی نام یا نماد کشور..."
-            value={diplomacy.searchQuery}
-            onChange={(e) => diplomacy.setSearchQuery(e.target.value)}
-            className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right"
-          />
+    <>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
+        <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
+          <div className="relative">
+            <Search
+              size={14}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              type="text"
+              placeholder="جستجوی نام یا نماد کشور..."
+              value={diplomacy.searchQuery}
+              onChange={(e) => diplomacy.setSearchQuery(e.target.value)}
+              className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right"
+            />
+          </div>
+
+          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin">
+            {diplomacy.filteredRelations.length === 0 ? (
+              <div className="py-12 text-center text-xs text-muted-foreground italic">
+                هیچ کشوری با این عبارت یافت نشد.
+              </div>
+            ) : (
+              diplomacy.filteredRelations.map((rel) => (
+                <DiplomacyListItem
+                  key={rel.code}
+                  relation={rel}
+                  onSelect={(selected) =>
+                    diplomacy.setActiveCode(selected.code)
+                  }
+                />
+              ))
+            )}
+          </div>
         </div>
 
-        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin">
-          {diplomacy.filteredRelations.length === 0 ? (
-            <div className="py-12 text-center text-xs text-muted-foreground italic">
-              هیچ کشوری با این عبارت یافت نشد.
-            </div>
-          ) : (
-            diplomacy.filteredRelations.map((rel) => (
-              <DiplomacyListItem
-                key={rel.code}
-                relation={rel}
-                onSelect={(selected) => diplomacy.setActiveCode(selected.code)}
-              />
-            ))
+        <div className="lg:col-span-8 space-y-5">
+          <DiplomacyTargetCard
+            name={diplomacy.selectedRelation.name}
+            code={diplomacy.selectedRelation.code}
+            flagCode={diplomacy.selectedRelation.flagCode}
+            stance={diplomacy.selectedRelation.stance}
+          />
+
+          {onFocusCountry && (
+            <FocusMapButton
+              countryCode={diplomacy.selectedRelation.code}
+              countryName={diplomacy.selectedRelation.name}
+              onFocus={onFocusCountry}
+            />
           )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <CountryProfileStats
+              data={diplomacy.selectedRelation.profileData}
+            />
+            <AdvancedDiplomacyActions
+              targetName={diplomacy.selectedRelation.name}
+              targetNationId={diplomacy.targetNationId}
+              nationId={humanNationId}
+              isTradeEmbargoed={diplomacy.selectedRelation.isTradeEmbargoed}
+              onOpenProxyModal={() => setIsProxyModalOpen(true)}
+            />
+          </div>
         </div>
       </div>
 
-      <div className="lg:col-span-8 space-y-5">
-        <DiplomacyTargetCard
-          name={diplomacy.selectedRelation.name}
-          code={diplomacy.selectedRelation.code}
-          flagCode={diplomacy.selectedRelation.flagCode}
-          stance={diplomacy.selectedRelation.stance}
-        />
-
-        {onFocusCountry && (
-          <FocusMapButton
-            countryCode={diplomacy.selectedRelation.code}
-            countryName={diplomacy.selectedRelation.name}
-            onFocus={onFocusCountry}
-          />
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <CountryProfileStats data={diplomacy.selectedRelation.profileData} />
-          <AdvancedDiplomacyActions
-            targetName={diplomacy.selectedRelation.name}
-            targetNationId={diplomacy.targetNationId}
-            nationId={humanNationId}
-            onOpenProxyCenter={handleOpenProxyCenter}
-          />
-        </div>
-      </div>
-    </div>
+      <ProxyAllocationModal
+        isOpen={isProxyModalOpen}
+        targetNationId={diplomacy.targetNationId}
+        targetName={diplomacy.selectedRelation.name}
+        targetFlagCode={diplomacy.selectedRelation.flagCode}
+        targetStability={targetStability}
+        targetGdp={targetGdp}
+        userTreasury={userTreasury}
+        nationId={humanNationId}
+        onClose={() => setIsProxyModalOpen(false)}
+      />
+    </>
   );
 }

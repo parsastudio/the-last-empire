@@ -11,6 +11,7 @@ export const DiplomaticProposalTypeSchema = z.enum([
   "NON_AGGRESSION_PACT",
   "FULL_ALLIANCE",
   "IMPROVE_RELATIONS",
+  "SEVER_TRADE_RELATIONS",
 ]);
 
 export const RelationProfileSchema = z.object({
@@ -19,6 +20,7 @@ export const RelationProfileSchema = z.object({
   opinion: z.number().min(-100).max(100),
   coolOffTurnsRemaining: z.number().nonnegative(),
   coolOffTargetStance: DiplomaticStanceSchema.optional(),
+  isTradeEmbargoed: z.boolean().optional(),
 });
 
 export type DiplomaticStance = z.infer<typeof DiplomaticStanceSchema>;

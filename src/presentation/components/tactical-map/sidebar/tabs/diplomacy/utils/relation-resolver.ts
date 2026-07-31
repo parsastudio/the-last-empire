@@ -13,6 +13,7 @@ export interface DiplomaticRelation {
   stance: string;
   opinion: number;
   description: string;
+  isTradeEmbargoed?: boolean;
   profileData: CountryProfileData;
 }
 
@@ -90,6 +91,7 @@ export function resolveProfileRelation(
     flagCode,
     stance: "PEACE",
     opinion: 0,
+    isTradeEmbargoed: false,
     description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
     profileData: {
       gdp: `$${gdpBillion} میلیارد دلار`,

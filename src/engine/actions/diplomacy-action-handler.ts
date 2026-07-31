@@ -29,6 +29,44 @@ export class DiplomacyActionHandler implements ActionHandler {
       const senderRelation = sender.relations[diploAction.targetNationId];
       const receiverRelation = receiver.relations[action.nationId];
       if (senderRelation && receiverRelation) {
+        if (diploAction.proposalType === "SEVER_TRADE_RELATIONS") {
+          const updatedSenderRelation = {
+            ...senderRelation,
+            isTradeEmbargoed: true,
+            opinion: Math.min(senderRelation.opinion, -30),
+          };
+          const updatedReceiverRelation = {
+            ...receiverRelation,
+            isTradeEmbargoed: true,
+            opinion: Math.min(receiverRelation.opinion, -30),
+          };
+
+          const updatedSender = {
+            ...sender,
+            relations: {
+              ...sender.relations,
+              [diploAction.targetNationId]: updatedSenderRelation,
+            },
+          };
+
+          const updatedReceiver = {
+            ...receiver,
+            relations: {
+              ...receiver.relations,
+              [action.nationId]: updatedReceiverRelation,
+            },
+          };
+
+          return {
+            ...state,
+            nations: {
+              ...state.nations,
+              [action.nationId]: updatedSender,
+              [diploAction.targetNationId]: updatedReceiver,
+            },
+          };
+        }
+
         if (diploAction.proposalType === "IMPROVE_RELATIONS") {
           const updatedSender = {
             ...sender,

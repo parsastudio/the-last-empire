@@ -32,6 +32,7 @@ export function useWideDiplomacy({
         if (directRel) {
           rel.stance = directRel.stance;
           rel.opinion = directRel.opinion;
+          rel.isTradeEmbargoed = directRel.isTradeEmbargoed ?? false;
         }
       }
       return rel;
@@ -56,6 +57,16 @@ export function useWideDiplomacy({
   const targetNationId = NationIdResolver.resolveCanonicalId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
   const selectedRelation = resolveProfileRelation(activeCode, targetLiveNation);
+
+  const humanNation = nationsMap ? nationsMap[humanNationId] : null;
+  if (humanNation) {
+    const directRel = humanNation.relations[targetNationId];
+    if (directRel) {
+      selectedRelation.stance = directRel.stance;
+      selectedRelation.opinion = directRel.opinion;
+      selectedRelation.isTradeEmbargoed = directRel.isTradeEmbargoed ?? false;
+    }
+  }
 
   return {
     searchQuery,
