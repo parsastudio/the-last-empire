@@ -24,7 +24,7 @@ export function TradeActionDialog({
   mode,
   unitPrice,
   maxAmount,
-  nationId = "NATION_118",
+  nationId,
   onClose,
   onConfirm,
 }: TradeActionDialogProps) {
@@ -63,7 +63,7 @@ export function TradeActionDialog({
     ? "(معادل ۱۰ میلیون بشکه نفت)"
     : "(معادل ۱ میلیون تن فولاد)";
 
-  if (!isOpen) return null;
+  if (!isOpen || !nationId) return null;
 
   const isBuy = mode === "buy";
 

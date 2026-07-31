@@ -21,17 +21,19 @@ interface WideDiplomacyViewProps {
 export function WideDiplomacyView({
   selectedTargetCode,
   nationsMap,
-  humanNationId = "NATION_118",
+  humanNationId,
   onFocusCountry,
 }: WideDiplomacyViewProps) {
   const [isProxyModalOpen, setIsProxyModalOpen] = useState(false);
+  const activeHumanId = humanNationId || "NATION_USA";
+
   const diplomacy = useWideDiplomacy({
     selectedTargetCode,
     nationsMap,
-    humanNationId,
+    humanNationId: activeHumanId,
   });
 
-  const humanNation = nationsMap ? nationsMap[humanNationId] : null;
+  const humanNation = nationsMap ? nationsMap[activeHumanId] : null;
   const userTreasury = humanNation ? humanNation.treasury : 100000;
 
   const targetLiveNation = nationsMap
@@ -102,7 +104,7 @@ export function WideDiplomacyView({
             <AdvancedDiplomacyActions
               targetName={diplomacy.selectedRelation.name}
               targetNationId={diplomacy.targetNationId}
-              nationId={humanNationId}
+              nationId={activeHumanId}
               isTradeEmbargoed={diplomacy.selectedRelation.isTradeEmbargoed}
               onOpenProxyModal={() => setIsProxyModalOpen(true)}
             />
@@ -118,7 +120,7 @@ export function WideDiplomacyView({
         targetStability={targetStability}
         targetGdp={targetGdp}
         userTreasury={userTreasury}
-        nationId={humanNationId}
+        nationId={activeHumanId}
         onClose={() => setIsProxyModalOpen(false)}
       />
     </>
