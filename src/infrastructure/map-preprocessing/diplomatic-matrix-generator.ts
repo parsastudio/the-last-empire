@@ -10,7 +10,6 @@ export class DiplomaticMatrixGenerator {
         targetNationId: targetId,
         stance: "PEACE" as const,
         opinion: 0,
-        tributePerTurn: 0,
         coolOffTurnsRemaining: 0,
       };
     }

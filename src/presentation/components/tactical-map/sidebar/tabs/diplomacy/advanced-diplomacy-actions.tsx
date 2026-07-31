@@ -1,5 +1,5 @@
 import React from "react";
-import { Handshake, CheckCircle2, Coins, Flame } from "lucide-react";
+import { Handshake, CheckCircle2, Flame } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 
@@ -7,7 +7,6 @@ interface AdvancedDiplomacyActionsProps {
   targetName: string;
   targetNationId?: string;
   nationId?: string;
-  onOpenTributeModal?: () => void;
   onOpenProxyCenter?: () => void;
 }
 
@@ -15,7 +14,6 @@ export function AdvancedDiplomacyActions({
   targetName,
   targetNationId = "NATION_15",
   nationId = "NATION_118",
-  onOpenTributeModal,
   onOpenProxyCenter,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
@@ -67,25 +65,6 @@ export function AdvancedDiplomacyActions({
           </div>
           <p className="text-[9px] text-muted-foreground">
             ورود به مرکز اختصاص بودجه نفوذ برای تضعیف ثبات سیاسی {targetName}.
-          </p>
-        </button>
-
-        <button
-          onClick={() => {
-            if (onOpenTributeModal) {
-              onOpenTributeModal();
-            }
-          }}
-          className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground">
-              مطالبه باج و باج‌گیری اقتصادی
-            </span>
-            <Coins size={13} className="text-gdp" />
-          </div>
-          <p className="text-[9px] text-muted-foreground">
-            تعیین مبلغ باج نوبتی تا سقف ۱۰٪ از کل خزانه کشور هدف.
           </p>
         </button>
 

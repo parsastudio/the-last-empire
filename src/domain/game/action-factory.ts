@@ -66,7 +66,6 @@ export class ActionFactory {
     nationId: string,
     targetNationId: string,
     proposalType: DiplomaticProposalType,
-    tributeAmount?: number,
   ): DiplomaticProposalAction {
     return {
       id: this.createId("diplomacy"),
@@ -74,7 +73,6 @@ export class ActionFactory {
       type: "DIPLOMATIC_PROPOSAL",
       targetNationId,
       proposalType,
-      tributeAmount,
     };
   }
 
