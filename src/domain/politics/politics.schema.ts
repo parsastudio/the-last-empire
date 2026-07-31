@@ -13,7 +13,6 @@ export const GovernmentStateSchema = z.object({
   stability: z.number().min(0).max(100),
   corruption: z.number().min(0).max(100),
   turnsInPower: z.number().nonnegative(),
-  lastElectionTurn: z.number().optional(),
 });
 
 export type GovernmentType = z.infer<typeof GovernmentTypeSchema>;
