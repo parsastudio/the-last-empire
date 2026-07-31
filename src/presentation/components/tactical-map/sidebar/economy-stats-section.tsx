@@ -17,11 +17,7 @@ export function EconomyStatsSection({
   nationalDebt,
   tariffRate,
 }: EconomyStatsSectionProps) {
-  const fullTreasury = PersianNumberFormatter.toPersianDigits(
-    Math.round(treasury).toLocaleString("en-US"),
-  );
-  const compactTreasury = PersianNumberFormatter.formatCompactNumber(treasury);
-
+  const compactTreasury = PersianNumberFormatter.formatCurrency(treasury, true);
   const formattedGdp = PersianNumberFormatter.formatCurrency(gdp, true);
 
   const formattedTax = PersianNumberFormatter.toPersianDigits(taxRate);
@@ -53,11 +49,8 @@ export function EconomyStatsSection({
           <span className="text-[9px] text-muted-foreground block font-sans">
             موجودی خزانه
           </span>
-          <span
-            className="text-xs font-bold text-gdp block truncate"
-            title={`$${fullTreasury} (${compactTreasury})`}
-          >
-            ${fullTreasury} ({compactTreasury})
+          <span className="text-xs font-bold text-gdp block truncate">
+            {compactTreasury}
           </span>
         </div>
 
