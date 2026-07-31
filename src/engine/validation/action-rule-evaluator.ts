@@ -173,6 +173,29 @@ export class ActionRuleEvaluator {
       case "ACTIVATE_ABILITY":
         this.evaluateAbility(source, action.abilityType);
         break;
+
+      case "INITIATE_BATTLE": {
+        if (action.nationId === action.targetNationId) {
+          throw new GameError("INVALID_ACTION", "Cannot attack self");
+        }
+        const target = state.nations[action.targetNationId];
+        if (!target || !target.isAlive) {
+          throw new GameError("NATION_NOT_FOUND", "Target nation not alive");
+        }
+        if (source.military.infantry <= 0) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "Requires at least 1 infantry unit to launch an attack",
+          );
+        }
+        if (action.dronesToLaunch > source.military.droneMissile) {
+          throw new GameError(
+            "INSUFFICIENT_RESOURCES",
+            "Drones to launch exceeds available stock",
+          );
+        }
+        break;
+      }
     }
   }
 

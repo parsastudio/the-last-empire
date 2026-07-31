@@ -16,6 +16,7 @@ import {
   InvestResearchAction,
   AntiCorruptionDriveAction,
   InvestDiplomacyAction,
+  InitiateBattleAction,
 } from "./action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
@@ -234,6 +235,20 @@ export class ActionFactory {
       nationId,
       type: "INVEST_DIPLOMACY",
       amount,
+    };
+  }
+
+  public static initiateBattle(
+    nationId: string,
+    targetNationId: string,
+    dronesToLaunch: number,
+  ): InitiateBattleAction {
+    return {
+      id: this.createId("battle"),
+      nationId,
+      type: "INITIATE_BATTLE",
+      targetNationId,
+      dronesToLaunch,
     };
   }
 }

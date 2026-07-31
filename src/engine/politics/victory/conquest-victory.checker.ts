@@ -22,6 +22,25 @@ export class ConquestVictoryChecker implements VictoryCondition {
       };
     }
 
+    const totalWorldTerritory = aliveNations.reduce(
+      (sum, n) => sum + n.geography.territorySize,
+      0,
+    );
+
+    if (totalWorldTerritory > 0) {
+      for (const nation of aliveNations) {
+        const territoryShare =
+          nation.geography.territorySize / totalWorldTerritory;
+        if (territoryShare >= 0.8) {
+          return {
+            isGameOver: true,
+            winnerNationId: nation.id,
+            reason: "TERRITORIAL_DOMINANCE",
+          };
+        }
+      }
+    }
+
     const humanNation = state.nations[state.humanNationId];
     if (humanNation && !humanNation.isAlive) {
       return {
