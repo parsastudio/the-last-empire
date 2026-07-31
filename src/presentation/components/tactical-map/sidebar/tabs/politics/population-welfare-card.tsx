@@ -7,18 +7,20 @@ interface PopulationWelfareCardProps {
   population?: number;
   oilStock?: number;
   steelStock?: number;
+  gdp?: number;
 }
 
 export function PopulationWelfareCard({
   population = 80000000,
   oilStock = 1000,
   steelStock = 1000,
+  gdp = 10000000000,
 }: PopulationWelfareCardProps) {
   const welfareCalc = useMemo(() => new PopulationWelfareCalculator(), []);
 
   const metrics = useMemo(() => {
-    return welfareCalc.evaluateWelfare(population, oilStock, steelStock);
-  }, [welfareCalc, population, oilStock, steelStock]);
+    return welfareCalc.evaluateWelfare(population, oilStock, steelStock, gdp);
+  }, [welfareCalc, population, oilStock, steelStock, gdp]);
 
   const formattedPop = useMemo(() => {
     if (population >= 1e9) {
@@ -78,7 +80,7 @@ export function PopulationWelfareCard({
                 {PersianNumberFormatter.toPersianDigits(
                   metrics.oilDemand.toLocaleString("en-US"),
                 )}{" "}
-                بشکه / نوبت
+                بلوک / نوبت
               </span>
             </div>
             <div className="flex items-center justify-between text-[10px]">
@@ -121,7 +123,7 @@ export function PopulationWelfareCard({
                 {PersianNumberFormatter.toPersianDigits(
                   metrics.steelDemand.toLocaleString("en-US"),
                 )}{" "}
-                تن / نوبت
+                بلوک / نوبت
               </span>
             </div>
             <div className="flex items-center justify-between text-[10px]">
