@@ -1,6 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
-import { TributeCapCalculator } from "../tribute-cap-calculator";
 
 export interface ProposalEvaluation {
   accepted: boolean;
@@ -8,13 +7,10 @@ export interface ProposalEvaluation {
 }
 
 export class TreatyProposalEvaluator {
-  private tributeCapCalculator = new TributeCapCalculator();
-
   public evaluateProposal(
     sender: Nation,
     receiver: Nation,
     proposalType: DiplomaticProposalType,
-    requestedTributeAmount?: number,
   ): ProposalEvaluation {
     const relation = receiver.relations[sender.id];
     const opinion = relation ? relation.opinion : 0;
@@ -38,17 +34,6 @@ export class TreatyProposalEvaluator {
           return { accepted: true };
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
-      case "DEMAND_TRIBUTE":
-        if (
-          requestedTributeAmount &&
-          !this.tributeCapCalculator.isWithinCap(
-            receiver,
-            requestedTributeAmount,
-          )
-        ) {
-          return { accepted: false, reason: "EXCEEDS_TREASURY_CAP" };
-        }
-        return { accepted: true };
       case "IMPROVE_RELATIONS":
         if (sender.treasury < 10000) {
           return { accepted: false, reason: "INSUFFICIENT_SENDER_FUNDS" };

@@ -36,7 +36,6 @@ export const DiplomaticProposalActionSchema = z.object({
   type: z.literal("DIPLOMATIC_PROPOSAL"),
   targetNationId: z.string(),
   proposalType: DiplomaticProposalTypeSchema,
-  tributeAmount: z.number().nonnegative().optional(),
 });
 
 export const TradeResourcesActionSchema = z.object({
