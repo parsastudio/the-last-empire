@@ -22,7 +22,7 @@ export function TaxSlider({
           <div
             className="absolute top-0 h-full bg-gdp transition-all duration-75 right-0"
             style={{
-              width: `${taxRate}%`,
+              width: `${(taxRate / 50) * 100}%`,
               transition: isDragging ? "none" : "width 0.1s ease-out",
             }}
           />
@@ -31,7 +31,7 @@ export function TaxSlider({
         <input
           type="range"
           min="0"
-          max="100"
+          max="50"
           value={taxRate}
           onChange={onChange}
           onMouseDown={onDragStart}
@@ -44,8 +44,8 @@ export function TaxSlider({
 
       <div className="flex justify-between text-[9px] font-mono text-muted-foreground px-0.5">
         <span>0% (آزاد)</span>
-        <span>50% (متعادل)</span>
-        <span>100% (حداکثری)</span>
+        <span>25% (متعادل)</span>
+        <span>50% (حداکثری)</span>
       </div>
     </div>
   );

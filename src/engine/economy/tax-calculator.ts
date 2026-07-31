@@ -11,7 +11,8 @@ export class TaxCalculator {
     taxRate: number,
     corruption: number,
   ): number {
-    const grossIncome = gdp * (taxRate / 100);
+    const effectiveTaxRate = Math.min(50, Math.max(0, taxRate));
+    const grossIncome = gdp * (effectiveTaxRate / 100);
     const corruptionLoss = grossIncome * (corruption / 100);
     const baseIncome = grossIncome - corruptionLoss;
     return Math.floor(baseIncome);
@@ -24,8 +25,9 @@ export class TaxCalculator {
       nation.government.corruption,
     );
 
+    const clampedRate = Math.min(50, Math.max(0, nation.taxRate));
     const stabilityImpact = Number(
-      (2.0 - (nation.taxRate / 100) * 14.0).toFixed(2),
+      (2.0 - (clampedRate / 50) * 10.0).toFixed(2),
     );
 
     return {

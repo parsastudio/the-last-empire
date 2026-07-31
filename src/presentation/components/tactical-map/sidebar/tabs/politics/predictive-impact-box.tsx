@@ -14,11 +14,12 @@ export function PredictiveImpactBox({
   baseGdp,
   corruption = 0,
 }: PredictiveImpactBoxProps) {
-  const grossTax = baseGdp * (newTaxRate / 100);
+  const clampedRate = Math.min(50, Math.max(0, newTaxRate));
+  const grossTax = baseGdp * (clampedRate / 100);
   const corruptionLoss = grossTax * (corruption / 100);
   const projectedIncome = Math.floor(grossTax - corruptionLoss);
 
-  const stabilityImpact = Number((2.0 - (newTaxRate / 100) * 14.0).toFixed(2));
+  const stabilityImpact = Number((2.0 - (clampedRate / 50) * 10.0).toFixed(2));
 
   return (
     <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs dir-rtl text-right">
@@ -56,11 +57,11 @@ export function PredictiveImpactBox({
         </div>
       </div>
 
-      {newTaxRate > 35 && (
+      {newTaxRate > 30 && (
         <div className="flex items-center gap-1.5 text-[10px] text-military bg-military/10 p-2 rounded-xl border border-military/30 font-sans">
           <ShieldAlert size={13} className="shrink-0" />
           <span>
-            مالیات بالای ۳۵٪ به دلیل کاهش شدید و مداوم ثبات نوبتی، کشور را در
+            مالیات بالای ۳۰٪ به دلیل کاهش شدید و مداوم ثبات نوبتی، کشور را در
             مسیر بحران سیاسی قرار می‌دهد!
           </span>
         </div>

@@ -9,7 +9,7 @@ export const SetTaxRateActionSchema = z.object({
   nationId: z.string(),
   signature: z.string().optional(),
   type: z.literal("SET_TAX_RATE"),
-  newRate: z.number().min(0).max(100),
+  newRate: z.number().min(0).max(50),
 });
 
 export const SetTariffRateActionSchema = z.object({

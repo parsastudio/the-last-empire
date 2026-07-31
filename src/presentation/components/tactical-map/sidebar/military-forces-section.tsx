@@ -19,9 +19,10 @@ export function MilitaryForcesSection({
   experience,
   militiaGarrisonPower = 280,
 }: MilitaryForcesSectionProps) {
-  const infantryMoneyUpkeep = Math.floor(infantry * 12 * techLevel);
-  const airForceMoneyUpkeep = Math.floor(airForce * 36 * techLevel);
-  const droneMoneyUpkeep = Math.floor(droneMissile * 2.4 * techLevel);
+  const techMultiplier = 1 + (techLevel - 1) * 0.2;
+  const infantryMoneyUpkeep = Math.floor(infantry * 12 * techMultiplier);
+  const airForceMoneyUpkeep = Math.floor(airForce * 36 * techMultiplier);
+  const droneMoneyUpkeep = Math.floor(droneMissile * 2.4 * techMultiplier);
 
   const bonusPercent = (techLevel - 1) * 20;
 

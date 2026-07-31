@@ -28,13 +28,18 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
   const isIndustrialHub = nation.traits.includes("INDUSTRIAL_HUB");
   const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
 
-  const oilProducedPerTurn = isOilRich
+  const baseOil = isOilRich
     ? 300 + territoryFactor * 25
     : Math.max(10, territoryFactor * 5);
 
-  const steelProducedPerTurn = isIndustrialHub
+  const baseSteel = isIndustrialHub
     ? 150 + territoryFactor * 15
     : Math.max(10, territoryFactor * 5);
+
+  const industrialMultiplier = 1.0 + (nation.industrialLevel - 1) * 0.2;
+
+  const oilProducedPerTurn = Math.floor(baseOil * industrialMultiplier);
+  const steelProducedPerTurn = Math.floor(baseSteel * industrialMultiplier);
 
   const oilRequiredPerTurn = Math.ceil(
     (nation.military.airForce + nation.military.droneMissile) * 0.5,
