@@ -16,7 +16,7 @@ export class GdpCalculator {
 
   public calculateGdpGrowthMultiplier(
     nation: Nation,
-    peacefulNeighborsCount: number,
+    peacefulNeighborsCount = 0,
   ): number {
     return this.growthCalc.calculateGdpGrowthMultiplier(
       nation,
@@ -24,10 +24,7 @@ export class GdpCalculator {
     );
   }
 
-  public updateNationGdp(
-    nation: Nation,
-    peacefulNeighborsCount: number,
-  ): number {
+  public updateNationGdp(nation: Nation, peacefulNeighborsCount = 0): number {
     const growthMult = this.growthCalc.calculateGdpGrowthMultiplier(
       nation,
       peacefulNeighborsCount,
