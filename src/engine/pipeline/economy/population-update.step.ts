@@ -10,13 +10,6 @@ export class PopulationUpdateStep implements EconomyStep {
       if (!nation.isAlive) {
         continue;
       }
-      const isMartialLawActive = nation.activeModifiers.some(
-        (m) => m.id === "martial-law-active",
-      );
-      let warExhaustion = nation.warExhaustion;
-      if (isMartialLawActive) {
-        warExhaustion = Math.min(100, warExhaustion + 5);
-      }
 
       const population = this.popEngine.updatePopulation(nation);
 
@@ -28,7 +21,6 @@ export class PopulationUpdateStep implements EconomyStep {
 
       nations[id] = {
         ...nation,
-        warExhaustion,
         population,
         government: {
           ...nation.government,

@@ -10,16 +10,11 @@ export class TaxCalculator {
     gdp: number,
     taxRate: number,
     corruption: number,
-    adminBurdenMultiplier = 1.0,
   ): number {
     const grossIncome = gdp * (taxRate / 100);
     const corruptionLoss = grossIncome * (corruption / 100);
     const baseIncome = grossIncome - corruptionLoss;
-    const adminLoss =
-      adminBurdenMultiplier > 1.5
-        ? baseIncome * Math.min(0.3, (adminBurdenMultiplier - 1.5) * 0.05)
-        : 0;
-    return Math.floor(baseIncome - adminLoss);
+    return Math.floor(baseIncome);
   }
 
   public evaluateTaxPolicy(nation: Nation): TaxCalculationResult {
@@ -27,7 +22,6 @@ export class TaxCalculator {
       nation.gdp,
       nation.taxRate,
       nation.government.corruption,
-      nation.adminBurdenMultiplier,
     );
 
     let stabilityImpact = 0;

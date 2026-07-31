@@ -6,19 +6,15 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 interface GovernmentStatusSectionProps {
   stability: number;
   corruption: number;
-  warExhaustion: number;
   reputation: number;
   globalAggression: number;
-  socialFreedom: number;
 }
 
 export function GovernmentStatusSection({
   stability,
   corruption,
-  warExhaustion,
   reputation,
   globalAggression,
-  socialFreedom,
 }: GovernmentStatusSectionProps) {
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -42,20 +38,6 @@ export function GovernmentStatusSection({
           value={corruption}
           colorClass="text-military"
           bgClass="bg-military"
-        />
-
-        <GovernmentMetricBar
-          label="شاخص آزادی اجتماعی"
-          value={socialFreedom}
-          colorClass="text-primary"
-          bgClass="bg-primary"
-        />
-
-        <GovernmentMetricBar
-          label="فرسایش ساختاری"
-          value={warExhaustion}
-          colorClass="text-treasury"
-          bgClass="bg-treasury"
         />
 
         <div className="grid grid-cols-2 gap-2">
