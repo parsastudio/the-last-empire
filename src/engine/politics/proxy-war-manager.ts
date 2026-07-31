@@ -36,7 +36,7 @@ export class ProxyWarManager {
     );
 
     let coupTriggered = false;
-    let updatedTarget: Nation = {
+    const updatedTarget: Nation = {
       ...targetNation,
       government: {
         ...targetNation.government,
@@ -46,16 +46,6 @@ export class ProxyWarManager {
 
     if (newStability < 10) {
       coupTriggered = true;
-      updatedTarget = {
-        ...updatedTarget,
-        gdp: Math.floor(updatedTarget.gdp * 0.75),
-        treasury: Math.floor(updatedTarget.treasury * 0.6),
-        government: {
-          ...updatedTarget.government,
-          stability: 20,
-          corruption: Math.min(100, updatedTarget.government.corruption + 15),
-        },
-      };
     }
 
     return {

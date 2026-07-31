@@ -10,16 +10,13 @@ export class GdpGrowthCalculator {
 
   public calculateGdpGrowthMultiplier(
     nation: Nation,
-    peacefulNeighborsCount = 0,
+    _peacefulNeighborsCount = 0,
   ): number {
     let growthRate = 0.0;
 
     const currentStability = nation.government.stability;
-    if (currentStability >= 70) {
-      growthRate += 0.005 + ((currentStability - 70) / 100) * 0.015;
-    } else if (currentStability < 50) {
-      growthRate -= 0.005 + ((50 - currentStability) / 100) * 0.02;
-    }
+    const stabilityImpact = ((currentStability - 50) / 50) * 0.05;
+    growthRate += stabilityImpact;
 
     growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
