@@ -23,6 +23,8 @@ export function MilitaryForcesSection({
   const airForceMoneyUpkeep = Math.floor(airForce * 36 * techLevel);
   const droneMoneyUpkeep = Math.floor(droneMissile * 2.4 * techLevel);
 
+  const bonusPercent = (techLevel - 1) * 20;
+
   return (
     <div className="space-y-2.5 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
@@ -121,8 +123,13 @@ export function MilitaryForcesSection({
             <span className="text-[10px] text-muted-foreground font-sans">
               فناوری نظامی
             </span>
-            <span className="text-xs font-bold text-foreground">
-              لِوِل {PersianNumberFormatter.toPersianDigits(techLevel)}
+            <span className="text-xs font-bold text-amber-500">
+              سطح {PersianNumberFormatter.toPersianDigits(techLevel)}{" "}
+              {bonusPercent > 0 && (
+                <span className="text-[10px] text-gdp font-mono">
+                  (+{PersianNumberFormatter.toPersianDigits(bonusPercent)}٪)
+                </span>
+              )}
             </span>
           </div>
           <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">

@@ -4,6 +4,7 @@ import { TariffControlCard } from "../../sidebar/tabs/politics/tariff-control-ca
 import { ImfLoanCard } from "../../sidebar/tabs/politics/imf-loan-card";
 import { IndustrialUpgradeCard } from "../../sidebar/tabs/politics/industrial-upgrade-card";
 import { InfrastructureUpgradeCard } from "../../sidebar/tabs/politics/infrastructure-upgrade-card";
+import { MilitaryTechUpgradeCard } from "../../sidebar/tabs/politics/military-tech-upgrade-card";
 import { AntiCorruptionCard } from "../../sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifiers-card";
 import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
@@ -20,6 +21,7 @@ interface WidePoliticsViewProps {
   tariffRate?: number;
   industrialLevel?: number;
   infrastructureLevel?: number;
+  militaryTechLevel?: number;
   hasSeaAccess?: boolean;
   activeModifiers?: ActiveModifier[];
   nationsMap?: Record<string, Nation>;
@@ -36,6 +38,7 @@ export function WidePoliticsView({
   tariffRate = 10,
   industrialLevel = 1,
   infrastructureLevel = 1,
+  militaryTechLevel = 1,
   hasSeaAccess = true,
   activeModifiers = [],
 }: WidePoliticsViewProps) {
@@ -64,6 +67,12 @@ export function WidePoliticsView({
           treasury={treasury}
         />
         <AntiCorruptionCard nationId={nationId} treasury={treasury} />
+        <MilitaryTechUpgradeCard
+          currentLevel={militaryTechLevel}
+          nationId={nationId}
+          treasury={treasury}
+          gdp={gdp}
+        />
       </div>
 
       <div className="space-y-5">
