@@ -39,7 +39,7 @@ export function getCommandCenterMeta(
     case "diplomacy":
       return {
         title: "وزارت امور خارجه و دیپلماسی",
-        subtitle: "روابط بین‌المللی، معاهدات دفاعی، حق عبور و مطالبه باج",
+        subtitle: "روابط بین‌المللی، معاهدات دفاعی و ائتلاف‌های استراتژیک",
       };
     case "research":
       return {

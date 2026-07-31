@@ -1,6 +1,10 @@
-import { findCountryProfileByCode } from "@/infrastructure/data/countries";
+import {
+  findCountryProfileByCode,
+  findCountryProfileById,
+} from "@/infrastructure/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "../country-profile-stats";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export interface DiplomaticRelation {
   code: string;
@@ -16,9 +20,17 @@ export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
 ): DiplomaticRelation {
+  const canonicalId = NationIdResolver.resolveCanonicalId(code);
+  const numericId = parseInt(code.replace("NATION_", ""), 10);
+
   const profile =
     findCountryProfileByCode(code) ||
-    (liveNation ? findCountryProfileByCode(liveNation.id) : undefined);
+    findCountryProfileById(code) ||
+    (!isNaN(numericId) ? findCountryProfileById(numericId) : undefined) ||
+    (liveNation
+      ? findCountryProfileByCode(liveNation.id) ||
+        findCountryProfileById(liveNation.id)
+      : undefined);
 
   const realGdpNum = liveNation
     ? liveNation.gdp / 1e9
@@ -38,16 +50,18 @@ export function resolveProfileRelation(
     ? realPopNum.toString()
     : realPopNum.toFixed(1);
 
-  const name = profile
-    ? profile.nameFa
-    : liveNation
-      ? liveNation.name
+  const name = liveNation
+    ? liveNation.name
+    : profile
+      ? profile.nameFa
       : `کشور ${code}`;
+
   const displayCode = profile
     ? profile.code
     : liveNation
-      ? liveNation.id
+      ? liveNation.id.replace("NATION_", "")
       : code;
+
   const flagCode = profile
     ? profile.flagCode
     : liveNation

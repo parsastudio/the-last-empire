@@ -1,8 +1,12 @@
 import { useState, useCallback } from "react";
-import { findCountryProfileById } from "@/domain/map/countries";
+import {
+  findCountryProfileById,
+  findCountryProfileByCode,
+} from "@/domain/map/countries";
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CountryMapping } from "./use-map-data";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 interface UseTacticalMapInteractionProps {
   mapWidth: number;
@@ -91,13 +95,19 @@ export function useTacticalMapInteraction({
       return;
     }
 
-    const profile = findCountryProfileById(matchedCountry.id);
+    const profile =
+      findCountryProfileById(matchedCountry.id) ||
+      findCountryProfileByCode(matchedCountry.code);
+
     const countryName = profile ? profile.nameFa : matchedCountry.name;
+    const canonicalCode = NationIdResolver.resolveCanonicalId(
+      profile ? profile.code : matchedCountry.code || String(matchedCountry.id),
+    );
 
     setContextMenuState({
       coordinate: { x: mapX, y: mapY },
       countryId: matchedCountry.id,
-      countryCode: `NATION_${matchedCountry.id}`,
+      countryCode: canonicalCode,
       countryName,
     });
   };
