@@ -14,10 +14,6 @@ export class TraitManager {
       modifier += 0.02;
     }
 
-    if (nation.geography.territorySize > 2000) {
-      modifier += 0.015;
-    }
-
     return modifier;
   }
 
