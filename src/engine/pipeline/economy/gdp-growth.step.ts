@@ -12,9 +12,8 @@ export class GdpGrowthStep implements EconomyStep {
       if (!nation.isAlive) {
         continue;
       }
-      const peacefulNeighbors = nation.geography.landNeighbors.length;
 
-      const rawGdp = this.gdpCalc.updateNationGdp(nation, peacefulNeighbors);
+      const rawGdp = this.gdpCalc.updateNationGdp(nation);
       const doctrineGdpBonus = this.doctrinesManager.getGdpGrowthModifier(
         nation.doctrines.unlockedDoctrines,
       );
