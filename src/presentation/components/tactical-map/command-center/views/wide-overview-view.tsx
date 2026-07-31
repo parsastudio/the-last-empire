@@ -6,6 +6,8 @@ import { GovernmentStatusSection } from "../../sidebar/government-status-section
 import { RegionBreakdownCard } from "../../sidebar/region-breakdown-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { findCountryProfileById } from "@/domain/map/countries";
+import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
+import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -24,23 +26,18 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         ? profile.gdp
         : 5000000000;
 
-  const isOilRich = nation.traits.includes("OIL_RICH");
-  const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
+  const { oilProducedPerTurn, steelProducedPerTurn } =
+    ResourceGenerationStep.calculateResourceGeneration(nation);
 
-  const baseOil = isOilRich
-    ? 300 + territoryFactor * 25
-    : Math.max(10, territoryFactor * 5);
-
-  const baseSteel = Math.max(10, territoryFactor * 5);
-
-  const industrialMultiplier = 1.0 + (nation.industrialLevel - 1) * 0.2;
-
-  const oilProducedPerTurn = Math.floor(baseOil * industrialMultiplier);
-  const steelProducedPerTurn = Math.floor(baseSteel * industrialMultiplier);
-
-  const oilRequiredPerTurn = Math.ceil(
-    (nation.military.airForce + nation.military.droneMissile) * 0.5,
+  const popWelfareCalc = new PopulationWelfareCalculator();
+  const welfareMetrics = popWelfareCalc.evaluateWelfare(
+    nation.population,
+    nation.resources.oil,
+    nation.resources.steel,
+    effectiveGdp,
   );
+
+  const oilRequiredPerTurn = welfareMetrics.oilDemand;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
