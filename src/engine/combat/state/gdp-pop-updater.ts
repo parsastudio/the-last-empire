@@ -3,6 +3,18 @@ import { GridCell } from "@/domain/map/grid-cell.schema";
 import { findCountryProfileById } from "@/domain/map/countries";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
+interface OwnerAccumulator {
+  canonicalId: string;
+  totalGdp: number;
+  totalPop: number;
+  rMap: Map<number, { pixelCount: number; gdp: number; pop: number }>;
+}
+
+interface InitOwnerConfig {
+  gdpDensity: number;
+  popDensity: number;
+}
+
 export class GdpPopUpdater {
   private initialPixelsMapCache: Map<string, number> | null = null;
 
@@ -44,51 +56,56 @@ export class GdpPopUpdater {
       this.initialPixelsMapCache = initialPixelsMap;
     }
 
-    const gdpDensityMap = new Map<string, number>();
-    const popDensityMap = new Map<string, number>();
+    const initConfigCache = new Map<string, InitOwnerConfig>();
 
-    for (const [id, nation] of Object.entries(updated)) {
-      const canonicalId = getCanonical(id);
-      const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
-      const profile = findCountryProfileById(numericId);
+    const getInitConfig = (ownerId: string): InitOwnerConfig => {
+      let config = initConfigCache.get(ownerId);
+      if (!config) {
+        const canonicalId = getCanonical(ownerId);
+        const nation = updated[canonicalId] || updated[ownerId];
+        const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
+        const profile = findCountryProfileById(numericId);
 
-      const baseGdp =
-        nation.gdp && nation.gdp > 0
-          ? nation.gdp
-          : profile
-            ? profile.gdp
-            : 5000000000;
+        const baseGdp =
+          nation && nation.gdp > 0
+            ? nation.gdp
+            : profile
+              ? profile.gdp
+              : 5000000000;
 
-      const basePop =
-        nation.population && nation.population > 0
-          ? nation.population
-          : profile
-            ? profile.population
-            : 80000000;
+        const basePop =
+          nation && nation.population > 0
+            ? nation.population
+            : profile
+              ? profile.population
+              : 80000000;
 
-      const initPixels = this.initialPixelsMapCache.get(canonicalId) || 0;
-      if (initPixels > 0) {
-        gdpDensityMap.set(canonicalId, baseGdp / initPixels);
-        popDensityMap.set(canonicalId, basePop / initPixels);
-      } else {
-        gdpDensityMap.set(canonicalId, 0);
-        popDensityMap.set(canonicalId, 0);
+        const initPixels = this.initialPixelsMapCache!.get(canonicalId) || 0;
+        const gdpDensity = initPixels > 0 ? baseGdp / initPixels : 0;
+        const popDensity = initPixels > 0 ? basePop / initPixels : 0;
+
+        config = { gdpDensity, popDensity };
+        initConfigCache.set(ownerId, config);
       }
-    }
+      return config;
+    };
 
-    const currentGdpMap = new Map<string, number>();
-    const currentPopMap = new Map<string, number>();
-    const regionDataMap = new Map<
-      string,
-      Map<
-        number,
-        {
-          pixelCount: number;
-          gdp: number;
-          pop: number;
-        }
-      >
-    >();
+    const accumulatorsMap = new Map<string, OwnerAccumulator>();
+
+    const getAccumulator = (ownerId: string): OwnerAccumulator => {
+      let acc = accumulatorsMap.get(ownerId);
+      if (!acc) {
+        const canonicalId = getCanonical(ownerId);
+        acc = {
+          canonicalId,
+          totalGdp: 0,
+          totalPop: 0,
+          rMap: new Map(),
+        };
+        accumulatorsMap.set(ownerId, acc);
+      }
+      return acc;
+    };
 
     for (let i = 0; i < allCells.length; i++) {
       const cell = allCells[i]!;
@@ -97,46 +114,60 @@ export class GdpPopUpdater {
         continue;
       }
 
-      const canonicalCurrent = getCanonical(currentOwner);
       const initOwner = cell.initialOwnerId || currentOwner;
-      const canonicalInit = getCanonical(initOwner);
+      const initConfig = getInitConfig(initOwner);
+      const acc = getAccumulator(currentOwner);
 
       const pixels = cell.highResPixelCount > 0 ? cell.highResPixelCount : 16;
+      const cellGdp = pixels * initConfig.gdpDensity;
+      const cellPop = pixels * initConfig.popDensity;
 
-      const cellGdpDensity = gdpDensityMap.get(canonicalInit) || 0;
-      const cellPopDensity = popDensityMap.get(canonicalInit) || 0;
-
-      const cellGdp = pixels * cellGdpDensity;
-      const cellPop = pixels * cellPopDensity;
-
-      currentGdpMap.set(
-        canonicalCurrent,
-        (currentGdpMap.get(canonicalCurrent) || 0) + cellGdp,
-      );
-      currentPopMap.set(
-        canonicalCurrent,
-        (currentPopMap.get(canonicalCurrent) || 0) + cellPop,
-      );
-
-      let rMap = regionDataMap.get(canonicalCurrent);
-      if (!rMap) {
-        rMap = new Map();
-        regionDataMap.set(canonicalCurrent, rMap);
-      }
+      acc.totalGdp += cellGdp;
+      acc.totalPop += cellPop;
 
       const enclaveId = cell.enclaveId;
-      const existingR = rMap.get(enclaveId);
+      const existingR = acc.rMap.get(enclaveId);
 
       if (existingR) {
         existingR.pixelCount += pixels;
         existingR.gdp += cellGdp;
         existingR.pop += cellPop;
       } else {
-        rMap.set(enclaveId, {
+        acc.rMap.set(enclaveId, {
           pixelCount: pixels,
           gdp: cellGdp,
           pop: cellPop,
         });
+      }
+    }
+
+    const currentGdpMap = new Map<string, number>();
+    const currentPopMap = new Map<string, number>();
+    const regionDataMap = new Map<
+      string,
+      Map<number, { pixelCount: number; gdp: number; pop: number }>
+    >();
+
+    for (const acc of accumulatorsMap.values()) {
+      const cId = acc.canonicalId;
+      currentGdpMap.set(cId, (currentGdpMap.get(cId) || 0) + acc.totalGdp);
+      currentPopMap.set(cId, (currentPopMap.get(cId) || 0) + acc.totalPop);
+
+      let targetRMap = regionDataMap.get(cId);
+      if (!targetRMap) {
+        targetRMap = new Map();
+        regionDataMap.set(cId, targetRMap);
+      }
+
+      for (const [rId, rData] of acc.rMap.entries()) {
+        const existing = targetRMap.get(rId);
+        if (existing) {
+          existing.pixelCount += rData.pixelCount;
+          existing.gdp += rData.gdp;
+          existing.pop += rData.pop;
+        } else {
+          targetRMap.set(rId, { ...rData });
+        }
       }
     }
 
