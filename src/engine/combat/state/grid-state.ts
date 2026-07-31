@@ -1,4 +1,5 @@
 import { GridCell } from "@/domain/map/grid-cell.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export type { GridCell };
 
@@ -52,7 +53,16 @@ export class GridState {
   }
 
   public getCellsByOwner(ownerId: string): GridCell[] {
-    return this.ownerMap.get(ownerId) || [];
+    const canonical = NationIdResolver.resolveCanonicalId(ownerId);
+    const direct = this.ownerMap.get(ownerId) || [];
+    const canonicalList =
+      ownerId !== canonical ? this.ownerMap.get(canonical) || [] : [];
+
+    if (direct.length === 0) return canonicalList;
+    if (canonicalList.length === 0) return direct;
+
+    const set = new Set([...direct, ...canonicalList]);
+    return Array.from(set);
   }
 
   public getModifiedCells(): readonly GridCell[] {

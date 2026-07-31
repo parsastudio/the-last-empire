@@ -1,4 +1,5 @@
 import { GridState } from "@/engine/combat/state/grid-state";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export interface NeighborDetectionResult {
   landNeighborsMap: Map<string, Set<string>>;
@@ -27,10 +28,14 @@ export class LandNeighborDetector {
     const oceanAccessMap = new Map<string, boolean>();
 
     for (let i = 0; i < nationsKeys.length; i++) {
-      const nationId = nationsKeys[i]!;
-      landNeighborsMap.set(nationId, new Set<string>());
-      seaNeighborsMap.set(nationId, new Set<string>());
-      oceanAccessMap.set(nationId, false);
+      const rawKey = nationsKeys[i]!;
+      const canonicalKey = NationIdResolver.resolveCanonicalId(rawKey);
+      landNeighborsMap.set(canonicalKey, new Set<string>());
+      seaNeighborsMap.set(canonicalKey, new Set<string>());
+      oceanAccessMap.set(canonicalKey, false);
+      landNeighborsMap.set(rawKey, new Set<string>());
+      seaNeighborsMap.set(rawKey, new Set<string>());
+      oceanAccessMap.set(rawKey, false);
     }
 
     const allCells = gridState.getAllCells();
@@ -44,32 +49,43 @@ export class LandNeighborDetector {
       gridArray[cell.y * this.width + cell.x] = cell.ownerId;
     }
 
-    for (let y = 0; y < this.height; y += 2) {
-      for (let x = 0; x < this.width; x += 2) {
+    const neighborsOffset = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
+
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
         const ownerId = gridArray[y * this.width + x];
         if (!ownerId || ownerId === "WATER" || ownerId === "CLOSED_SEA") {
           continue;
         }
 
-        const rightX = (x + 1) % this.width;
-        const rightOwner = gridArray[y * this.width + rightX];
-        if (rightOwner && rightOwner !== ownerId) {
-          if (rightOwner === "WATER" || rightOwner === "CLOSED_SEA") {
-            oceanAccessMap.set(ownerId, true);
-          } else {
-            landNeighborsMap.get(ownerId)?.add(rightOwner);
-            landNeighborsMap.get(rightOwner)?.add(ownerId);
-          }
-        }
+        const canonicalOwner = NationIdResolver.resolveCanonicalId(ownerId);
 
-        if (y < this.height - 1) {
-          const bottomOwner = gridArray[(y + 1) * this.width + x];
-          if (bottomOwner && bottomOwner !== ownerId) {
-            if (bottomOwner === "WATER" || bottomOwner === "CLOSED_SEA") {
-              oceanAccessMap.set(ownerId, true);
-            } else {
-              landNeighborsMap.get(ownerId)?.add(bottomOwner);
-              landNeighborsMap.get(bottomOwner)?.add(ownerId);
+        for (let k = 0; k < 4; k++) {
+          const nx = (x + neighborsOffset[k]!.dx + this.width) % this.width;
+          const ny = y + neighborsOffset[k]!.dy;
+
+          if (ny < 0 || ny >= this.height) continue;
+
+          const neighborOwner = gridArray[ny * this.width + nx];
+          if (!neighborOwner) continue;
+
+          if (neighborOwner === "WATER") {
+            oceanAccessMap.set(canonicalOwner, true);
+            oceanAccessMap.set(ownerId, true);
+          } else if (
+            neighborOwner !== ownerId &&
+            neighborOwner !== "CLOSED_SEA"
+          ) {
+            const canonicalNeighbor =
+              NationIdResolver.resolveCanonicalId(neighborOwner);
+            if (canonicalNeighbor !== canonicalOwner) {
+              landNeighborsMap.get(canonicalOwner)?.add(canonicalNeighbor);
+              landNeighborsMap.get(ownerId)?.add(neighborOwner);
             }
           }
         }
