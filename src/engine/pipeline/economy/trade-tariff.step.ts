@@ -1,9 +1,7 @@
 import { EconomyStep, EconomyStepContext } from "./economy-step.interface";
-import { TradeRouteManager } from "@/engine/economy/trade-route-manager";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 
 export class TradeTariffStep implements EconomyStep {
-  private tradeRouteManager = new TradeRouteManager();
   private tariffCalculator = new TariffCalculator();
 
   public execute(context: EconomyStepContext): void {
@@ -12,14 +10,7 @@ export class TradeTariffStep implements EconomyStep {
       if (!nation.isAlive) {
         continue;
       }
-      const totalTradeValue = this.tradeRouteManager.calculateTotalTradeRevenue(
-        nation,
-        nations,
-      );
-      const tariffResult = this.tariffCalculator.calculateTariffEffects(
-        nation,
-        totalTradeValue,
-      );
+      const tariffResult = this.tariffCalculator.calculateTariffEffects(nation);
 
       if (tariffResult.tariffRevenue > 0) {
         nations[id] = {
