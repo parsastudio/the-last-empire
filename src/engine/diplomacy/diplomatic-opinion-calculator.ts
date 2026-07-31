@@ -5,9 +5,13 @@ export class DiplomaticOpinionCalculator {
     currentOpinion: number,
     globalReputation: number,
     stance: DiplomaticStance,
+    isLandNeighbor: boolean,
     govFrictionValue = 0,
   ): number {
     let treatyModifier = 0;
+    if (isLandNeighbor) {
+      treatyModifier -= 10;
+    }
     if (stance === "NON_AGGRESSION_PACT") {
       treatyModifier += 30;
     } else if (stance === "ALLIANCE") {
