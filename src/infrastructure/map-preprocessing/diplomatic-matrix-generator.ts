@@ -11,7 +11,6 @@ export class DiplomaticMatrixGenerator {
         stance: "PEACE" as const,
         opinion: 0,
         tributePerTurn: 0,
-        militaryAccess: false,
         coolOffTurnsRemaining: 0,
       };
     }

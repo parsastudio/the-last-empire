@@ -1,5 +1,5 @@
 import React from "react";
-import { Handshake, CheckCircle2, Shield, Coins, Flame } from "lucide-react";
+import { Handshake, CheckCircle2, Coins, Flame } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 
@@ -19,18 +19,6 @@ export function AdvancedDiplomacyActions({
   onOpenProxyCenter,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
-
-  const handleMilitaryAccess = async () => {
-    const action = ActionFactory.diplomaticProposal(
-      nationId,
-      targetNationId,
-      "MILITARY_ACCESS",
-    );
-    await dispatchAction(
-      action,
-      `درخواست ترانزیت نظامی به ${targetName} ارسال گردید.`,
-    );
-  };
 
   const handleNonAggression = async () => {
     const action = ActionFactory.diplomaticProposal(
@@ -79,21 +67,6 @@ export function AdvancedDiplomacyActions({
           </div>
           <p className="text-[9px] text-muted-foreground">
             ورود به مرکز اختصاص بودجه نفوذ برای تضعیف ثبات سیاسی {targetName}.
-          </p>
-        </button>
-
-        <button
-          onClick={handleMilitaryAccess}
-          className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground">
-              درخواست حق عبور نظامی
-            </span>
-            <Shield size={13} className="text-primary" />
-          </div>
-          <p className="text-[9px] text-muted-foreground">
-            اجازه ترانزیت یگان‌ها از خاک یا آب‌های سرزمینی طرف مقابل.
           </p>
         </button>
 
