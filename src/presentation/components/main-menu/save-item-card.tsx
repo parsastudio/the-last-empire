@@ -1,5 +1,5 @@
-import React from "react";
-import { Calendar, Clock, ChevronLeft, Trash2 } from "lucide-react";
+import React, { useState } from "react";
+import { Calendar, Clock, ChevronLeft, Trash2, Check, X } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export interface SaveItemData {
@@ -18,6 +18,8 @@ interface SaveItemCardProps {
 }
 
 export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState<boolean>(false);
+
   return (
     <div
       onClick={() => onSelect(save.id)}
@@ -43,21 +45,56 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(save.id);
-          }}
-          className="p-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
-          title="حذف پرونده ذخیره‌شده"
-        >
-          <Trash2 size={15} />
-        </button>
-        <ChevronLeft
-          size={14}
-          className="text-muted-foreground group-hover:-translate-x-0.5 transition-transform shrink-0"
-        />
+        {isConfirmingDelete ? (
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 p-1.5 rounded-xl text-[10px] animate-fade-smooth"
+          >
+            <span className="text-rose-400 font-bold font-sans px-1">
+              تایید حذف؟
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(save.id);
+              }}
+              className="p-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition-all cursor-pointer flex items-center justify-center"
+              title="تایید حذف"
+            >
+              <Check size={13} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsConfirmingDelete(false);
+              }}
+              className="p-1 bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground rounded-lg transition-all cursor-pointer flex items-center justify-center"
+              title="انصراف"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsConfirmingDelete(true);
+              }}
+              className="p-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+              title="حذف پرونده ذخیره‌شده"
+            >
+              <Trash2 size={15} />
+            </button>
+            <ChevronLeft
+              size={14}
+              className="text-muted-foreground group-hover:-translate-x-0.5 transition-transform shrink-0"
+            />
+          </>
+        )}
       </div>
     </div>
   );
