@@ -1,10 +1,12 @@
 import React from "react";
-import { Calendar, Clock, ChevronLeft } from "lucide-react";
+import { Calendar, Clock, ChevronLeft, Trash2 } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export interface SaveItemData {
   id: string;
   title: string;
   date: string;
+  time: string;
   playtime: string;
   turn: number;
 }
@@ -12,11 +14,12 @@ export interface SaveItemData {
 interface SaveItemCardProps {
   save: SaveItemData;
   onSelect: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export function SaveItemCard({ save, onSelect }: SaveItemCardProps) {
+export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
   return (
-    <button
+    <div
       onClick={() => onSelect(save.id)}
       className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer dir-rtl"
     >
@@ -24,24 +27,38 @@ export function SaveItemCard({ save, onSelect }: SaveItemCardProps) {
         <span className="text-xs font-bold text-foreground block">
           {save.title}
         </span>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <Calendar size={11} />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-1 font-mono">
+            <Calendar size={11} className="text-primary" />
             <span>{save.date}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Clock size={11} />
-            <span>شناسه: {save.id}</span>
+          <div className="flex items-center gap-1 font-mono">
+            <Clock size={11} className="text-treasury" />
+            <span>{save.time}</span>
           </div>
-          <div className="font-mono bg-secondary/80 px-1.5 py-0.5 rounded text-[9px]">
-            نوبت: {save.turn}
+          <div className="font-mono bg-secondary/80 px-2 py-0.5 rounded-md text-[9px] font-bold text-foreground">
+            نوبت: {PersianNumberFormatter.toPersianDigits(save.turn)}
           </div>
         </div>
       </div>
-      <ChevronLeft
-        size={14}
-        className="text-muted-foreground group-hover:translate-x-[-2px] transition-transform shrink-0"
-      />
-    </button>
+
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(save.id);
+          }}
+          className="p-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+          title="حذف پرونده ذخیره‌شده"
+        >
+          <Trash2 size={15} />
+        </button>
+        <ChevronLeft
+          size={14}
+          className="text-muted-foreground group-hover:-translate-x-0.5 transition-transform shrink-0"
+        />
+      </div>
+    </div>
   );
 }

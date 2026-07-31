@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Database } from "lucide-react";
 import { SaveItemCard } from "./save-item-card";
 import { useSavedCampaigns } from "./hooks/use-saved-campaigns";
 
@@ -15,7 +15,7 @@ export function LoadCampaignModal({
   onSelectSave,
 }: LoadCampaignModalProps) {
   const [loadingSaveId, setLoadingSaveId] = useState<string | null>(null);
-  const { saves, loading: isDbLoading } = useSavedCampaigns();
+  const { saves, loading: isDbLoading, deleteSave } = useSavedCampaigns();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -35,6 +35,10 @@ export function LoadCampaignModal({
     onSelectSave(saveId);
   };
 
+  const handleDelete = async (saveId: string) => {
+    await deleteSave(saveId);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -44,7 +48,7 @@ export function LoadCampaignModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-card border border-border w-full max-w-lg rounded-3xl p-6 shadow-2xl relative cursor-default"
+        className="bg-card border border-border w-full max-w-lg max-h-[85vh] rounded-3xl p-6 shadow-2xl relative cursor-default flex flex-col overflow-hidden"
       >
         {loadingSaveId ? (
           <div className="py-12 flex flex-col items-center justify-center gap-6 text-center">
@@ -60,36 +64,37 @@ export function LoadCampaignModal({
           </div>
         ) : (
           <>
-            <button
-              onClick={onClose}
-              className="absolute top-4 left-4 p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer"
-            >
-              <X size={16} />
-            </button>
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-border/80 shrink-0">
+              <div className="space-y-1 text-right">
+                <div className="flex items-center gap-2">
+                  <Database size={15} className="text-gdp" />
+                  <span className="text-[10px] font-bold text-gdp uppercase tracking-widest font-mono">
+                    پایگاه داده اسناد بازی
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-foreground">
+                  بارگذاری بازی‌های ذخیره‌شده
+                </h3>
+              </div>
 
-            <div className="space-y-1 mb-6 text-right">
-              <span className="text-[10px] font-bold text-gdp uppercase tracking-widest font-mono">
-                پایگاه داده اسناد بازی
-              </span>
-              <h3 className="text-lg font-bold text-foreground">
-                بارگذاری بازی‌های ذخیره‌شده
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                پرونده‌های ذخیره‌شده حقیقی در مرورگر جهت بازیابی موقعیت
-                استراتژیک.
-              </p>
+              <button
+                onClick={onClose}
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors cursor-pointer shrink-0"
+              >
+                <X size={16} />
+              </button>
             </div>
 
             {isDbLoading ? (
-              <div className="py-8 text-center text-xs text-muted-foreground">
+              <div className="py-12 text-center text-xs text-muted-foreground">
                 در حال جستجوی ذخیره‌ها در دیتابیس محلی...
               </div>
             ) : saves.length === 0 ? (
-              <div className="py-8 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
+              <div className="py-12 text-center text-xs text-muted-foreground italic bg-secondary/30 rounded-2xl border border-border/40 p-4">
                 هیچ بازی ذخیره‌شده‌ای یافت نشد. یک کمپین جدید شروع کنید.
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="flex-1 overflow-y-auto pr-1 space-y-3 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                 {saves.map((save) => (
                   <SaveItemCard
                     key={save.id}
@@ -97,10 +102,12 @@ export function LoadCampaignModal({
                       id: save.id,
                       title: save.title,
                       date: save.date,
+                      time: save.time,
                       playtime: "کمپین فعال",
                       turn: save.turn,
                     }}
                     onSelect={handleSelect}
+                    onDelete={handleDelete}
                   />
                 ))}
               </div>
