@@ -47,15 +47,6 @@ export function LoanActionDialog({
     setBillionAmount(target);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value, 10);
-    if (isNaN(val)) {
-      setBillionAmount(0);
-      return;
-    }
-    setBillionAmount(Math.max(0, Math.min(maxBillion, val)));
-  };
-
   const handleExecuteLoan = async () => {
     if (absoluteValue <= 0) return;
 

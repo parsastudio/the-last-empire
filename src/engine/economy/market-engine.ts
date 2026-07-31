@@ -1,31 +1,19 @@
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { MarketPricingCalculator } from "./market/market-pricing.calculator";
+import { MarketPricingCalculator } from "@/engine/economy/market/market-pricing.calculator";
 import {
   BuyTransactionHandler,
   TradeTransactionResult,
-} from "./market/buy-transaction.handler";
-import { SellTransactionHandler } from "./market/sell-transaction.handler";
+} from "@/engine/economy/market/buy-transaction.handler";
+import { SellTransactionHandler } from "@/engine/economy/market/sell-transaction.handler";
 
 export class MarketEngine {
   private pricingCalculator = new MarketPricingCalculator();
   private buyHandler = new BuyTransactionHandler();
   private sellHandler = new SellTransactionHandler();
 
-  public updateMarketPrices(
-    currentPrices: ResourceMarketPrice,
-    totalOilDemand: number,
-    totalOilSupply: number,
-    totalSteelDemand: number,
-    totalSteelSupply: number,
-  ): ResourceMarketPrice {
-    return this.pricingCalculator.updateMarketPrices(
-      currentPrices,
-      totalOilDemand,
-      totalOilSupply,
-      totalSteelDemand,
-      totalSteelSupply,
-    );
+  public updateMarketPrices(): ResourceMarketPrice {
+    return this.pricingCalculator.updateMarketPrices();
   }
 
   public predictBuyCost(

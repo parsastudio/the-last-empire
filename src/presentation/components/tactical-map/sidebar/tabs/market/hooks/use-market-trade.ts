@@ -22,10 +22,6 @@ export function useMarketTrade({
   userTreasury = 100000000,
   onOpenTradeExternal,
 }: UseMarketTradeProps) {
-  const safeOilPrice = marketPrices.oil < 1000000 ? 25000000 : marketPrices.oil;
-  const safeSteelPrice =
-    marketPrices.steel < 1000000 ? 25000000 : marketPrices.steel;
-
   const [tradeModal, setTradeModal] = useState<{
     isOpen: boolean;
     resourceName: string;
@@ -42,25 +38,9 @@ export function useMarketTrade({
     maxAmount: 10,
   });
 
-  const oilTrend: "up" | "down" | "stable" = useMemo(
-    () =>
-      safeOilPrice > 25000000
-        ? "up"
-        : safeOilPrice < 25000000
-          ? "down"
-          : "stable",
-    [safeOilPrice],
-  );
+  const oilTrend: "up" | "down" | "stable" = useMemo(() => "stable", []);
 
-  const steelTrend: "up" | "down" | "stable" = useMemo(
-    () =>
-      safeSteelPrice > 25000000
-        ? "up"
-        : safeSteelPrice < 25000000
-          ? "down"
-          : "stable",
-    [safeSteelPrice],
-  );
+  const steelTrend: "up" | "down" | "stable" = useMemo(() => "stable", []);
 
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {

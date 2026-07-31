@@ -8,10 +8,7 @@ export class GdpGrowthCalculator {
   private governmentSystem = new GovernmentSystem();
   private modifierManager = new ModifierManager();
 
-  public calculateGdpGrowthMultiplier(
-    nation: Nation,
-    _peacefulNeighborsCount = 0,
-  ): number {
+  public calculateGdpGrowthMultiplier(nation: Nation): number {
     const currentStability = nation.government.stability;
 
     let stabilityFactor = -0.05 + (currentStability / 100) * 0.075;
