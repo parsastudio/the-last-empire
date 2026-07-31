@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-        "files": "python3 debug/file_collector.py",
+    "files": "python3 debug/file_collector.py",
     "tree": "python3 debug/tree_generator.py",
     "errors": "python3 debug/error_checker.py",
     "lint": "eslint"
@@ -14,7 +14,6 @@
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.42.2",
     "lucide-react": "^1.25.0",
     "next": "16.2.10",
     "react": "19.2.4",
