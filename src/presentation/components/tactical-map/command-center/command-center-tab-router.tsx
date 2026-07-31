@@ -81,6 +81,7 @@ export function CommandCenterTabRouter({
           tariffRate={nation.tariffRate}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
+          hasSeaAccess={nation.geography.hasSeaAccess}
           activeModifiers={nation.activeModifiers}
           nationsMap={gameState?.nations}
         />
