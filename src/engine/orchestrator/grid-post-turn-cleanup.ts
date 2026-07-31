@@ -15,19 +15,25 @@ export class GridPostTurnCleanup {
     state: GameState,
     gridState: GridState,
   ): GameState {
-    const activeNationsIds = Object.keys(state.nations).filter(
-      (id) => state.nations[id]?.isAlive,
-    );
+    const modifiedCells = gridState.getModifiedCells();
 
-    for (let i = 0; i < activeNationsIds.length; i++) {
-      const id = activeNationsIds[i]!;
-      const countryCells = gridState.getCellsByOwner(id);
-      this.gridConnector.regroupEnclaves(id, countryCells);
-      this.gridCleanup.cleanupEnclaveRegistry(
-        countryCells,
-        id,
-        this.enclaveRegistry,
+    if (modifiedCells.length > 0) {
+      const activeNationsIds = Object.keys(state.nations).filter(
+        (id) => state.nations[id]?.isAlive,
       );
+
+      for (let i = 0; i < activeNationsIds.length; i++) {
+        const id = activeNationsIds[i]!;
+        const countryCells = gridState.getCellsByOwner(id);
+        if (countryCells.length > 0) {
+          this.gridConnector.regroupEnclaves(id, countryCells);
+          this.gridCleanup.cleanupEnclaveRegistry(
+            countryCells,
+            id,
+            this.enclaveRegistry,
+          );
+        }
+      }
     }
 
     return this.stateSynchronizer.synchronizeAll(state, gridState);
