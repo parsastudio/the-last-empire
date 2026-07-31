@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GridCell } from "@/domain/map/grid-cell.schema";
+import { GridState } from "@/engine/combat/state/grid-state";
 import { CellAreaCalibrator } from "../cell-area-calibrator";
 
 const EARTH_RADIUS = 6378137;
@@ -15,27 +15,15 @@ export class TerritoryCalibrator {
 
   public calibrateNationsTerritory(
     nations: Record<string, Nation>,
-    allCells: GridCell[],
+    gridState: GridState,
     landNeighborsMap: Map<string, Set<string>>,
     seaNeighborsMap: Map<string, Set<string>>,
     oceanAccessMap: Map<string, boolean>,
   ): Record<string, Nation> {
     const updated = { ...nations };
 
-    const nationCellsMap = new Map<string, GridCell[]>();
-    for (let i = 0; i < allCells.length; i++) {
-      const cell = allCells[i]!;
-      const owner = cell.ownerId;
-      let list = nationCellsMap.get(owner);
-      if (!list) {
-        list = [];
-        nationCellsMap.set(owner, list);
-      }
-      list.push(cell);
-    }
-
     for (const [id, nation] of Object.entries(updated)) {
-      const ownedCells = nationCellsMap.get(id) || [];
+      const ownedCells = gridState.getCellsByOwner(id);
 
       let totalCalibratedArea = 0;
       for (let i = 0; i < ownedCells.length; i++) {
