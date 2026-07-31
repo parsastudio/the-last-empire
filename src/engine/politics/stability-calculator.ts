@@ -3,9 +3,11 @@ import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { TaxCalculator } from "@/engine/economy/tax-calculator";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
+import { TraitManager } from "@/engine/politics/trait-manager";
 
 export class StabilityCalculator {
   private governmentSystem = new GovernmentSystem();
+  private traitManager = new TraitManager();
   private modifierManager = new ModifierManager();
   private taxCalc = new TaxCalculator();
   private tariffCalc = new TariffCalculator();
@@ -21,19 +23,18 @@ export class StabilityCalculator {
 
     let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
 
+    const govTraits = this.governmentSystem.getTraits(nation.government.type);
+    delta += govTraits.stabilityDeltaPerTurn;
+
+    delta += this.traitManager.getStabilityDeltaPerTurn(nation);
+
     const stabilityModifier = this.modifierManager.getModifierImpact(
       nation,
       "STABILITY_DELTA",
     );
     delta += stabilityModifier;
 
-    const govTraits = this.governmentSystem.getTraits(nation.government.type);
-    const targetStability = govTraits.baseStability;
-    const alignmentFactor = (targetStability - currentStability) * 0.05;
-    const newStability = Math.max(
-      0,
-      Math.min(100, currentStability + delta + alignmentFactor),
-    );
+    const newStability = Math.max(0, Math.min(100, currentStability + delta));
 
     if (isMartialLawActive && newStability < currentStability) {
       return Math.floor((currentStability + newStability) / 2);

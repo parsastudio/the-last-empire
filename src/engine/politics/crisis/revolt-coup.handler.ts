@@ -4,7 +4,10 @@ export class RevoltCoupHandler {
   public applyCrisisPenalty(nation: Nation): Nation {
     return {
       ...nation,
-      gdp: Math.floor(nation.gdp * 0.95),
+      government: {
+        ...nation.government,
+        stability: Math.max(0, nation.government.stability - 5),
+      },
     };
   }
 
@@ -29,18 +32,17 @@ export class RevoltCoupHandler {
   public applyCoup(nation: Nation): Nation {
     return {
       ...nation,
-      gdp: Math.floor(nation.gdp * 0.5),
-      treasury: Math.floor(nation.treasury * 0.5),
+      treasury: Math.floor(nation.treasury * 0.6),
       military: {
         ...nation.military,
-        infantry: Math.floor(nation.military.infantry * 0.5),
-        airForce: Math.floor(nation.military.airForce * 0.5),
-        droneMissile: Math.floor(nation.military.droneMissile * 0.5),
+        infantry: Math.floor(nation.military.infantry * 0.7),
+        airForce: Math.floor(nation.military.airForce * 0.7),
+        droneMissile: Math.floor(nation.military.droneMissile * 0.7),
       },
       government: {
         ...nation.government,
-        stability: 30,
-        corruption: Math.min(100, nation.government.corruption + 25),
+        stability: 20,
+        corruption: Math.min(100, nation.government.corruption + 15),
       },
     };
   }

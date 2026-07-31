@@ -13,7 +13,7 @@ export class StabilityDoctrinesHandler {
       0,
       Math.min(
         100,
-        stability + this.traitManager.getBaseStabilityDelta(updated),
+        stability + this.traitManager.getStabilityDeltaPerTurn(updated),
       ),
     );
     updated.government.stability = stability;

@@ -14,6 +14,10 @@ export class TraitManager {
       modifier += 0.02;
     }
 
+    if (nation.geography.territorySize > 2000) {
+      modifier += 0.015;
+    }
+
     return modifier;
   }
 
@@ -28,13 +32,13 @@ export class TraitManager {
     return multiplier;
   }
 
-  public getBaseStabilityDelta(nation: Nation): number {
+  public getStabilityDeltaPerTurn(nation: Nation): number {
     let delta = 0;
     if (this.hasTrait(nation, "ISOLATED_SOCIETY")) {
-      delta += 5;
+      delta += 0.5;
     }
     if (this.hasTrait(nation, "FRAGILE_ECONOMY")) {
-      delta -= 5;
+      delta -= 0.5;
     }
     return delta;
   }
