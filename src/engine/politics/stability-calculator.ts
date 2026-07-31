@@ -12,12 +12,7 @@ export class StabilityCalculator {
   private taxCalc = new TaxCalculator();
   private tariffCalc = new TariffCalculator();
 
-  public calculateTurnStability(nation: Nation): number {
-    const isMartialLawActive = nation.activeModifiers.some(
-      (m) => m.id === "martial-law-active",
-    );
-    const currentStability = nation.government.stability;
-
+  public calculateTurnStabilityDelta(nation: Nation): number {
     const taxResult = this.taxCalc.evaluateTaxPolicy(nation);
     const tariffResult = this.tariffCalc.calculateTariffEffects(nation);
 
@@ -34,13 +29,15 @@ export class StabilityCalculator {
     );
     delta += stabilityModifier;
 
+    return Number(delta.toFixed(2));
+  }
+
+  public calculateTurnStability(nation: Nation): number {
+    const delta = this.calculateTurnStabilityDelta(nation);
+    const currentStability = nation.government.stability;
     const newStability = Math.max(0, Math.min(100, currentStability + delta));
 
-    if (isMartialLawActive && newStability < currentStability) {
-      return Math.floor((currentStability + newStability) / 2);
-    }
-
-    return Math.floor(newStability);
+    return Number(newStability.toFixed(2));
   }
 
   public getTaxIncomePenaltyMultiplier(stability: number): number {

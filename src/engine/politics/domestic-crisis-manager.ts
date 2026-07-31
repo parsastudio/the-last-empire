@@ -11,19 +11,19 @@ export class DomesticCrisisManager {
     const stability = nation.government.stability;
 
     if (stability < 10) {
+      const infantryAttrition = Math.floor(nation.military.infantry * 0.05);
+      const airForceAttrition = Math.floor(nation.military.airForce * 0.05);
+
       const updatedNation: Nation = {
         ...nation,
-        treasury: Math.floor(nation.treasury * 0.6),
         military: {
           ...nation.military,
-          infantry: Math.floor(nation.military.infantry * 0.7),
-          airForce: Math.floor(nation.military.airForce * 0.7),
-          droneMissile: Math.floor(nation.military.droneMissile * 0.7),
+          infantry: Math.max(0, nation.military.infantry - infantryAttrition),
+          airForce: Math.max(0, nation.military.airForce - airForceAttrition),
         },
         government: {
           ...nation.government,
-          stability: 20,
-          corruption: Math.min(100, nation.government.corruption + 15),
+          corruption: Math.min(100, nation.government.corruption + 2.0),
         },
       };
 

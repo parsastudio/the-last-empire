@@ -13,7 +13,7 @@ export class GovernmentSystem {
     switch (type) {
       case "DEMOCRACY":
         return {
-          economicGrowthBonus: 0.15,
+          economicGrowthBonus: 0.02,
           militaryUpkeepMultiplier: 1.0,
           stabilityDeltaPerTurn: 1.0,
           tradeMultiplier: 1.25,
@@ -21,7 +21,7 @@ export class GovernmentSystem {
         };
       case "DICTATORSHIP":
         return {
-          economicGrowthBonus: -0.05,
+          economicGrowthBonus: -0.01,
           militaryUpkeepMultiplier: 0.9,
           stabilityDeltaPerTurn: -0.5,
           tradeMultiplier: 0.9,
@@ -29,7 +29,7 @@ export class GovernmentSystem {
         };
       case "MONARCHY":
         return {
-          economicGrowthBonus: 0.05,
+          economicGrowthBonus: 0.01,
           militaryUpkeepMultiplier: 1.0,
           stabilityDeltaPerTurn: 0.5,
           tradeMultiplier: 1.0,
@@ -45,7 +45,7 @@ export class GovernmentSystem {
         };
       case "FASCISM":
         return {
-          economicGrowthBonus: -0.1,
+          economicGrowthBonus: -0.02,
           militaryUpkeepMultiplier: 1.1,
           stabilityDeltaPerTurn: -1.0,
           tradeMultiplier: 0.8,
