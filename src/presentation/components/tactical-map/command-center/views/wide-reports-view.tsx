@@ -28,7 +28,7 @@ export function WideReportsView({ reports }: WideReportsViewProps) {
           />
         ) : (
           <div className="py-20 text-center text-xs text-muted-foreground italic">
-            برای مشاهده آمار کامل، یک گزارش را از لیست انتخاب کنید.
+            هیچ گزارش جدیدی ثبت نشده است.
           </div>
         )}
       </div>
