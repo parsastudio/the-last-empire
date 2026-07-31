@@ -2,6 +2,7 @@ import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { findCountryProfileById } from "@/domain/map/countries";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface OwnerAccumulator {
   canonicalId: string;
@@ -27,6 +28,43 @@ export class GdpPopUpdater {
     }
 
     const updated = { ...nations };
+    const gridState = GridStateProvider.getInstance();
+
+    if (gridState && gridState.getModifiedCells().length === 0) {
+      for (const [id, nation] of Object.entries(updated)) {
+        if (
+          !nation.regionsDemographics ||
+          nation.regionsDemographics.length === 0
+        ) {
+          continue;
+        }
+        const totalRegionGdp = nation.regionsDemographics.reduce(
+          (sum, r) => sum + r.gdp,
+          0,
+        );
+        const totalRegionPop = nation.regionsDemographics.reduce(
+          (sum, r) => sum + r.population,
+          0,
+        );
+
+        const gdpScale = totalRegionGdp > 0 ? nation.gdp / totalRegionGdp : 1;
+        const popScale =
+          totalRegionPop > 0 ? nation.population / totalRegionPop : 1;
+
+        const updatedRegions = nation.regionsDemographics.map((r) => ({
+          ...r,
+          gdp: Math.round(r.gdp * gdpScale),
+          population: Math.round(r.population * popScale),
+        }));
+
+        updated[id] = {
+          ...nation,
+          regionsDemographics: updatedRegions,
+        };
+      }
+      return updated;
+    }
+
     const canonicalCache = new Map<string, string>();
 
     const getCanonical = (id: string): string => {
