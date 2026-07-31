@@ -27,6 +27,12 @@ export class TreatyStanceApplier {
           stance: "PEACE",
           coolOffTurnsRemaining: 10,
         };
+      case "SEVER_TRADE_RELATIONS":
+        return {
+          ...profile,
+          isTradeEmbargoed: true,
+          opinion: Math.min(profile.opinion, -30),
+        };
       default:
         return profile;
     }

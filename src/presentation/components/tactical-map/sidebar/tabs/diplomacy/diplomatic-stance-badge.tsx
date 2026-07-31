@@ -1,11 +1,23 @@
 import React from "react";
-import { CheckCircle2, Handshake } from "lucide-react";
+import { CheckCircle2, Handshake, Ban } from "lucide-react";
 
 interface DiplomaticStanceBadgeProps {
   stance: string;
+  isTradeEmbargoed?: boolean;
 }
 
-export function DiplomaticStanceBadge({ stance }: DiplomaticStanceBadgeProps) {
+export function DiplomaticStanceBadge({
+  stance,
+  isTradeEmbargoed = false,
+}: DiplomaticStanceBadgeProps) {
+  if (isTradeEmbargoed) {
+    return (
+      <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-500 text-[9px] font-bold flex items-center gap-1">
+        <Ban size={10} /> تحریم تجاری
+      </span>
+    );
+  }
+
   switch (stance) {
     case "ALLIANCE":
       return (

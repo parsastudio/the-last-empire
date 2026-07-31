@@ -1,5 +1,5 @@
 import React from "react";
-import { Handshake, CheckCircle2, Flame } from "lucide-react";
+import { Handshake, CheckCircle2, Flame, Ban } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 
@@ -7,14 +7,16 @@ interface AdvancedDiplomacyActionsProps {
   targetName: string;
   targetNationId?: string;
   nationId?: string;
-  onOpenProxyCenter?: () => void;
+  isTradeEmbargoed?: boolean;
+  onOpenProxyModal?: () => void;
 }
 
 export function AdvancedDiplomacyActions({
   targetName,
   targetNationId = "NATION_15",
   nationId = "NATION_118",
-  onOpenProxyCenter,
+  isTradeEmbargoed = false,
+  onOpenProxyModal,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
 
@@ -42,6 +44,18 @@ export function AdvancedDiplomacyActions({
     );
   };
 
+  const handleSeverTrade = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "SEVER_TRADE_RELATIONS",
+    );
+    await dispatchAction(
+      action,
+      `قطع روابط تجاری و تحریم اقتصادی علیه ${targetName} اعمال گردید. نظر دو کشور به ۳۰- افت کرد.`,
+    );
+  };
+
   return (
     <div className="space-y-2 dir-rtl text-right">
       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -50,9 +64,32 @@ export function AdvancedDiplomacyActions({
 
       <div className="space-y-2">
         <button
+          onClick={handleSeverTrade}
+          disabled={isTradeEmbargoed}
+          className={`w-full p-3 rounded-xl border text-right transition-all cursor-pointer space-y-1 ${
+            isTradeEmbargoed
+              ? "bg-rose-500/10 border-rose-500/30 text-rose-500 opacity-60 cursor-not-allowed"
+              : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-500"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold">
+              {isTradeEmbargoed
+                ? "روابط تجاری با این کشور قطع است"
+                : "قطع روابط تجاری و تحریم اقتصادی"}
+            </span>
+            <Ban size={13} className="text-rose-500" />
+          </div>
+          <p className="text-[9px] text-muted-foreground">
+            افت فوری نظر هر دو کشور به ۳۰- و اعمال تحریم تجاری بدون نقض
+            پیمان‌ها.
+          </p>
+        </button>
+
+        <button
           onClick={() => {
-            if (onOpenProxyCenter) {
-              onOpenProxyCenter();
+            if (onOpenProxyModal) {
+              onOpenProxyModal();
             }
           }}
           className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"

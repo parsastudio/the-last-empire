@@ -25,12 +25,23 @@ export class GdpGrowthCalculator {
     } else if (nation.government.stability < 30) {
       growthRate -= 0.005;
     }
-    const tradeBonus = peacefulNeighborsCount * 0.0015;
-    growthRate += tradeBonus;
-    const tariffResult = this.tariffCalculator.calculateTariffEffects(
-      nation,
-      100000,
+
+    const activeEmbargoesCount = Object.values(nation.relations).filter(
+      (rel) => rel.isTradeEmbargoed === true,
+    ).length;
+
+    const netTradeNeighbors = Math.max(
+      0,
+      peacefulNeighborsCount - activeEmbargoesCount,
     );
+    const tradeBonus = netTradeNeighbors * 0.0015;
+    growthRate += tradeBonus;
+
+    if (activeEmbargoesCount > 0) {
+      growthRate -= activeEmbargoesCount * 0.002;
+    }
+
+    const tariffResult = this.tariffCalculator.calculateTariffEffects(nation);
     growthRate -= tariffResult.gdpGrowthPenalty;
     growthRate += this.traitManager.getGdpGrowthModifier(nation) * 0.1;
     const govTraits = this.governmentSystem.getTraits(nation.government.type);

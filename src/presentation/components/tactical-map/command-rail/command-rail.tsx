@@ -9,7 +9,6 @@ import {
   Users,
   Cpu,
   Loader2,
-  Flame,
 } from "lucide-react";
 import { SidebarTabType } from "../sidebar/sidebar-tabs";
 import { RailTabButton } from "./rail-tab-button";
@@ -39,7 +38,6 @@ export function CommandRail({
     { id: "overview" as const, label: "نما", icon: LayoutDashboard },
     { id: "military" as const, label: "ارتش", icon: Swords },
     { id: "politics" as const, label: "سیاست", icon: Landmark },
-    { id: "proxy" as const, label: "عملیات نیابتی", icon: Flame },
     { id: "market" as const, label: "بازار", icon: ShoppingBag },
     { id: "abilities" as const, label: "توانمندی", icon: Zap },
     { id: "reports" as const, label: "گزارش‌ها", icon: FileText },
