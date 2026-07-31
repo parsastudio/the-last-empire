@@ -1,21 +1,30 @@
 import React from "react";
-import { Cpu } from "lucide-react";
+import { Cpu, Zap } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { IndustrialLevelManager } from "@/engine/economy/industrial-level-manager";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface IndustrialUpgradeCardProps {
   currentLevel?: number;
   nationId?: string;
   treasury?: number;
+  gdp?: number;
 }
 
 export function IndustrialUpgradeCard({
   currentLevel = 1,
   nationId = "NATION_118",
   treasury = 100000,
+  gdp = 450000000000,
 }: IndustrialUpgradeCardProps) {
-  const upgradeCost = Math.floor(50000 * Math.pow(1.3, currentLevel - 1));
+  const manager = new IndustrialLevelManager();
+  const mockNation = {
+    gdp,
+    industrialLevel: currentLevel,
+  } as unknown as Parameters<typeof manager.getUpgradeCost>[0];
+
+  const upgradeCost = manager.getUpgradeCost(mockNation);
   const canAfford = treasury >= upgradeCost;
   const { dispatchAction } = useGameActions();
 
@@ -34,7 +43,7 @@ export function IndustrialUpgradeCard({
       <div className="flex items-center gap-2 px-1">
         <Cpu size={13} className="text-gdp" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          توسعه صنعتی و تولیدی
+          توسعه صنعتی و ظرفیت تولید
         </span>
       </div>
 
@@ -46,8 +55,20 @@ export function IndustrialUpgradeCard({
           </span>
         </div>
 
+        <div className="bg-secondary/40 border border-border/40 p-2.5 rounded-xl space-y-1 text-[10px] font-mono">
+          <span className="text-muted-foreground block font-sans font-bold">
+            سود ارتقا به سطح{" "}
+            {PersianNumberFormatter.toPersianDigits(currentLevel + 1)}:
+          </span>
+          <span className="text-gdp font-bold block font-sans">
+            • ۲۰+٪ افزایش نرخ تولید نوبتی نفت و فولاد
+          </span>
+        </div>
+
         <div className="flex items-center justify-between text-[11px] font-mono">
-          <span className="text-muted-foreground font-sans">هزینه ارتقا:</span>
+          <span className="text-muted-foreground font-sans">
+            هزینه ارتقا (۸٪ GDP):
+          </span>
           <span className="font-bold text-foreground">
             {PersianNumberFormatter.formatCurrency(upgradeCost)}
           </span>
@@ -56,11 +77,14 @@ export function IndustrialUpgradeCard({
         <button
           onClick={handleUpgrade}
           disabled={!canAfford}
-          className="w-full py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border cursor-pointer"
+          className="w-full py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
         >
-          {canAfford
-            ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(currentLevel + 1)}`
-            : "خزانه ناکافی جهت ارتقای صنعت"}
+          <Zap size={13} />
+          <span>
+            {canAfford
+              ? `ارتقای سطح صنعت (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
+              : "خزانه ناکافی جهت ارتقای صنعت"}
+          </span>
         </button>
       </div>
     </div>

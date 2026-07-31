@@ -12,13 +12,18 @@ export class ResourceGenerationStep implements EconomyStep {
       const isIndustrialHub = nation.traits.includes("INDUSTRIAL_HUB");
       const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
 
-      const oilIncome = isOilRich
+      const baseOil = isOilRich
         ? 300 + territoryFactor * 25
         : Math.max(10, territoryFactor * 5);
 
-      const steelIncome = isIndustrialHub
+      const baseSteel = isIndustrialHub
         ? 150 + territoryFactor * 15
         : Math.max(10, territoryFactor * 5);
+
+      const industrialMultiplier = 1.0 + (nation.industrialLevel - 1) * 0.2;
+
+      const oilIncome = Math.floor(baseOil * industrialMultiplier);
+      const steelIncome = Math.floor(baseSteel * industrialMultiplier);
 
       nations[id] = {
         ...nation,
