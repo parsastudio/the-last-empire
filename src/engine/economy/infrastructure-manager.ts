@@ -7,8 +7,7 @@ export interface InfrastructureUpgradeResult {
 
 export class InfrastructureManager {
   public getUpgradeCost(nation: Nation): number {
-    const level = Math.max(1, nation.geography.infrastructureLevel);
-    const baseCost = Math.floor(nation.gdp * 0.1 * Math.pow(1.25, level - 1));
+    const baseCost = Math.floor(nation.gdp * 0.1);
     return Math.max(1000000000, baseCost);
   }
 

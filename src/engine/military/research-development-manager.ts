@@ -3,8 +3,7 @@ import { GameError } from "@/domain/shared/game-error";
 
 export class ResearchDevelopmentManager {
   public getResearchCost(nation: Nation): number {
-    const level = Math.max(1, nation.military.techLevel);
-    const baseCost = Math.floor(nation.gdp * 0.12 * Math.pow(1.25, level - 1));
+    const baseCost = Math.floor(nation.gdp * 0.12);
     return Math.max(1500000000, baseCost);
   }
 
