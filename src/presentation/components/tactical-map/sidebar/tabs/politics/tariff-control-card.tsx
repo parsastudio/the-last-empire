@@ -39,9 +39,6 @@ export function TariffControlCard({
   );
   const tradeVolumePercentage = Math.round(tradeVolumeFactor * 100);
 
-  const gdpGrowthPenalty = Number(
-    (((tariffRate / 100) * 0.038 - 0.008) * 100).toFixed(2),
-  );
   const stabilityImpact = Number(((10 - tariffRate) * 0.08).toFixed(2));
 
   return (
@@ -136,34 +133,13 @@ export function TariffControlCard({
             <span>پیش‌بینی اثرات گمرک ملی</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-2 gap-2">
             <div className="bg-background/60 p-2 rounded-lg space-y-0.5 border border-border/40">
               <span className="text-muted-foreground block font-sans text-[9px]">
                 حجم تجارت فعال:
               </span>
               <span className="font-bold text-foreground">
                 {PersianNumberFormatter.toPersianDigits(tradeVolumePercentage)}٪
-              </span>
-            </div>
-
-            <div className="bg-background/60 p-2 rounded-lg space-y-0.5 border border-border/40">
-              <span className="text-muted-foreground block font-sans text-[9px]">
-                اثر بر رشد GDP:
-              </span>
-              <span
-                className={`font-bold ${
-                  gdpGrowthPenalty > 0
-                    ? "text-military"
-                    : gdpGrowthPenalty < 0
-                      ? "text-gdp"
-                      : "text-foreground"
-                }`}
-              >
-                {gdpGrowthPenalty < 0 ? "+" : "-"}
-                {PersianNumberFormatter.toPersianDigits(
-                  Math.abs(gdpGrowthPenalty),
-                )}
-                ٪
               </span>
             </div>
 

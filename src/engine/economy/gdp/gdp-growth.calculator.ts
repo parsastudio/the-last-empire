@@ -1,14 +1,10 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { TraitManager } from "@/engine/politics/trait-manager";
-import { TaxCalculator } from "@/engine/economy/tax-calculator";
-import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 
 export class GdpGrowthCalculator {
   private traitManager = new TraitManager();
-  private taxCalculator = new TaxCalculator();
-  private tariffCalculator = new TariffCalculator();
   private governmentSystem = new GovernmentSystem();
   private modifierManager = new ModifierManager();
 
@@ -18,16 +14,11 @@ export class GdpGrowthCalculator {
   ): number {
     let growthRate = 0.0;
 
-    const taxResult = this.taxCalculator.evaluateTaxPolicy(nation);
-    growthRate += taxResult.gdpGrowthImpact;
-
-    const tariffResult = this.tariffCalculator.calculateTariffEffects(nation);
-    growthRate -= tariffResult.gdpGrowthPenalty;
-
-    if (nation.government.stability > 70) {
-      growthRate += 0.002;
-    } else if (nation.government.stability < 30) {
-      growthRate -= 0.005;
+    const currentStability = nation.government.stability;
+    if (currentStability >= 70) {
+      growthRate += 0.005 + ((currentStability - 70) / 100) * 0.015;
+    } else if (currentStability < 50) {
+      growthRate -= 0.005 + ((50 - currentStability) / 100) * 0.02;
     }
 
     const activeEmbargoesCount = Object.values(nation.relations).filter(
