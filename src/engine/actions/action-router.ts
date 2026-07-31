@@ -1,40 +1,37 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { ActionHandler } from "@/engine/actions/action-handler";
-import { getEconomyActionHandlers } from "./groups/economy-action-handlers";
-import { getMilitaryActionHandlers } from "./groups/military-action-handlers";
-import { getPoliticsActionHandlers } from "./groups/politics-action-handlers";
-import { getDiplomacyActionHandlers } from "./groups/diplomacy-action-handlers";
+import { EconomyActionExecutor } from "./economy-action-executor";
+import { MilitaryActionExecutor } from "./military-action-executor";
+import { PoliticsActionExecutor } from "./politics-action-executor";
 
 export class ActionRouter {
-  private handlers: Map<string, ActionHandler> = new Map();
-
-  constructor() {
-    this.registerDefaultHandlers();
-  }
-
-  public register(actionType: string, handler: ActionHandler): void {
-    this.handlers.set(actionType, handler);
-  }
-
   public route(state: GameState, action: GameAction): GameState {
-    const handler = this.handlers.get(action.type);
-    if (handler) {
-      return handler.execute(state, action);
-    }
-    return state;
-  }
+    switch (action.type) {
+      case "SET_TAX_RATE":
+      case "SET_TARIFF_RATE":
+      case "REQUEST_LOAN":
+      case "REPAY_DEBT":
+      case "INVEST_INFRASTRUCTURE":
+      case "UPGRADE_INDUSTRIAL_LEVEL":
+      case "TRADE_RESOURCES":
+        return EconomyActionExecutor.execute(state, action);
 
-  private registerDefaultHandlers(): void {
-    const allGroups = [
-      ...getEconomyActionHandlers(),
-      ...getMilitaryActionHandlers(),
-      ...getPoliticsActionHandlers(),
-      ...getDiplomacyActionHandlers(),
-    ];
+      case "RECRUIT_UNIT":
+      case "CANCEL_RECRUITMENT":
+      case "DISBAND_UNIT":
+      case "INVEST_RESEARCH":
+        return MilitaryActionExecutor.execute(state, action);
 
-    for (const [actionType, handler] of allGroups) {
-      this.register(actionType, handler);
+      case "ACTIVATE_ABILITY":
+      case "UNLOCK_DOCTRINE":
+      case "ANTI_CORRUPTION_DRIVE":
+      case "INVEST_DIPLOMACY":
+      case "FUND_PROXY_INFLUENCE":
+      case "DIPLOMATIC_PROPOSAL":
+        return PoliticsActionExecutor.execute(state, action);
+
+      default:
+        return state;
     }
   }
 }
