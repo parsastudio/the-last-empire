@@ -37,22 +37,4 @@ export class DistanceTransform {
     }
     return dist;
   }
-
-  public applySeaDepths(
-    buffer: Uint8Array,
-    dist: Int32Array,
-    width: number,
-    height: number,
-  ): void {
-    for (let i = 0; i < width * height; i++) {
-      if (buffer[i]! < 11) {
-        const d = dist[i]! / 3.0;
-        const depthIndex = Math.max(
-          0,
-          Math.min(10, 10 - Math.floor(Math.sqrt(d) * 0.8)),
-        );
-        buffer[i] = depthIndex;
-      }
-    }
-  }
 }
