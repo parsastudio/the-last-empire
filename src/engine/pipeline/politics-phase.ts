@@ -2,12 +2,12 @@ import type { GameState } from "@/domain/game/game-state.schema";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 import { StabilityDoctrinesHandler } from "./politics/stability-doctrines-handler";
-import { ElectionCrisisHandler } from "./politics/election-crisis-handler";
+import { DomesticCrisisHandler } from "./politics/domestic-crisis-handler";
 
 export class PoliticsPhase implements TurnPhase {
   private corruptionManager = new CorruptionManager();
   private stabilityDoctrinesHandler = new StabilityDoctrinesHandler();
-  private electionCrisisHandler = new ElectionCrisisHandler();
+  private domesticCrisisHandler = new DomesticCrisisHandler();
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
@@ -30,11 +30,7 @@ export class PoliticsPhase implements TurnPhase {
 
       updated = this.stabilityDoctrinesHandler.handle(updated);
 
-      const crisisResult = this.electionCrisisHandler.handle(
-        updated,
-        nextState.currentTurn,
-        context.prng.nextInt(1, 1000000),
-      );
+      const crisisResult = this.domesticCrisisHandler.handle(updated);
       updated = crisisResult.updated;
 
       updated.government = {
