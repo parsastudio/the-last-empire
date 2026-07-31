@@ -1,6 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { DiplomaticOpinionCalculator } from "@/engine/diplomacy/diplomatic-opinion-calculator";
-import { RelationsManager } from "@/engine/diplomacy/relations-manager";
+import { RelationsManager } from "@/engine/relations-manager";
 
 export class OpinionFrictionHandler {
   private opinionCalculator = new DiplomaticOpinionCalculator();
@@ -13,9 +13,6 @@ export class OpinionFrictionHandler {
     for (const [targetId, relation] of Object.entries(updatedRelations)) {
       const target = nations[targetId];
       if (target && target.isAlive) {
-        const isLandNeighbor =
-          updated.geography.landNeighbors.includes(targetId);
-
         const frictionValue = this.relationsManager.calculateGovernmentFriction(
           updated,
           target,
@@ -25,7 +22,6 @@ export class OpinionFrictionHandler {
           relation.opinion,
           updated.globalReputation,
           relation.stance,
-          isLandNeighbor,
           frictionValue,
         );
 
