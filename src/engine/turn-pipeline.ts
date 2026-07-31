@@ -10,29 +10,47 @@ import { DiplomacyPhase } from "@/engine/pipeline/diplomacy-phase";
 import { EventsPhase } from "@/engine/pipeline/events-phase";
 
 export class TurnPipeline {
-  private phases: TurnPhase[];
+  private phases: { name: string; phase: TurnPhase }[];
 
   constructor(phases?: TurnPhase[]) {
-    this.phases = phases ?? [
-      new ModifiersPhase(),
-      new EconomyPhase(),
-      new MilitaryPhase(),
-      new PoliticsPhase(),
-      new DiplomacyPhase(),
-      new EventsPhase(),
-    ];
+    if (phases) {
+      this.phases = phases.map((p) => ({
+        name: p.constructor.name,
+        phase: p,
+      }));
+    } else {
+      this.phases = [
+        { name: "ModifiersPhase", phase: new ModifiersPhase() },
+        { name: "EconomyPhase", phase: new EconomyPhase() },
+        { name: "MilitaryPhase", phase: new MilitaryPhase() },
+        { name: "PoliticsPhase", phase: new PoliticsPhase() },
+        { name: "DiplomacyPhase", phase: new DiplomacyPhase() },
+        { name: "EventsPhase", phase: new EventsPhase() },
+      ];
+    }
   }
 
   public processTurn(state: GameState, prng: SeededRandom): GameState {
+    const t0 = performance.now();
     const nextState = deepClone(state);
     const context: PipelineContext = {
       state: nextState,
       prng,
     };
 
-    for (const phase of this.phases) {
-      context.state = phase.execute(context);
+    const phaseTimes: string[] = [];
+
+    for (const item of this.phases) {
+      const tpStart = performance.now();
+      context.state = item.phase.execute(context);
+      const tpDuration = performance.now() - tpStart;
+      phaseTimes.push(`${item.name}: ${tpDuration.toFixed(2)}ms`);
     }
+
+    const totalPipeline = performance.now() - t0;
+    console.log(
+      `[PIPELINE TIMING] Total: ${totalPipeline.toFixed(2)}ms | ${phaseTimes.join(" | ")}`,
+    );
 
     return context.state;
   }
