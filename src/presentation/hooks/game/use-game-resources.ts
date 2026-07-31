@@ -5,7 +5,6 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { TaxCalculator } from "@/engine/economy/tax-calculator";
 import { UpkeepCalculator } from "@/engine/economy/upkeep-calculator";
-import { TradeRouteManager } from "@/engine/economy/trade-route-manager";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 
 export interface HumanResourceMetrics {
@@ -24,7 +23,6 @@ export interface HumanResourceMetrics {
 
 const taxCalculator = new TaxCalculator();
 const upkeepCalculator = new UpkeepCalculator();
-const tradeRouteManager = new TradeRouteManager();
 const tariffCalculator = new TariffCalculator();
 
 export function useGameResources(
@@ -79,17 +77,9 @@ export function useGameResources(
 
     const taxResult = taxCalculator.evaluateTaxPolicy(nation);
     const upkeepBreakdown = upkeepCalculator.calculateUpkeep(nation);
-    const tradeRevenue = tradeRouteManager.calculateTotalTradeRevenue(
-      nation,
-      gameState.nations,
-    );
-    const tariffResult = tariffCalculator.calculateTariffEffects(
-      nation,
-      tradeRevenue,
-    );
+    const tariffResult = tariffCalculator.calculateTariffEffects(nation);
 
-    const totalIncome =
-      taxResult.taxIncome + tradeRevenue + tariffResult.tariffRevenue;
+    const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
     const totalExpenses =
       upkeepBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
     const netIncome = totalIncome - totalExpenses;
