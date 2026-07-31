@@ -2,13 +2,11 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { GridEnclaveConnector } from "@/engine/combat/state/grid-enclave-connector";
 import { GridStateCleanup } from "@/engine/combat/state/grid-state-cleanup";
-import { EnclaveRegistry } from "@/engine/combat/registry/enclave-registry";
 import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 
 export class GridPostTurnCleanup {
   private gridConnector = new GridEnclaveConnector();
   private gridCleanup = new GridStateCleanup();
-  private enclaveRegistry = new EnclaveRegistry();
   private stateSynchronizer = new StateSynchronizerFacade();
 
   public cleanupAndSynchronize(
@@ -27,11 +25,7 @@ export class GridPostTurnCleanup {
         const countryCells = gridState.getCellsByOwner(id);
         if (countryCells.length > 0) {
           this.gridConnector.regroupEnclaves(id, countryCells);
-          this.gridCleanup.cleanupEnclaveRegistry(
-            countryCells,
-            id,
-            this.enclaveRegistry,
-          );
+          this.gridCleanup.cleanupEnclaves(countryCells);
         }
       }
     }

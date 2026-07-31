@@ -4,14 +4,12 @@ import { ActionValidator } from "./validators/action-validator.interface";
 import { getEconomyValidators } from "./groups/economy-validators";
 import { getMilitaryValidators } from "./groups/military-validators";
 import { getPoliticsValidators } from "./groups/politics-validators";
-import { getDiplomacyValidators } from "./groups/diplomacy-validators";
 
 export class CompositeActionValidator {
   private validators: ActionValidator[] = [
     ...getEconomyValidators(),
     ...getMilitaryValidators(),
     ...getPoliticsValidators(),
-    ...getDiplomacyValidators(),
   ];
 
   public validate(state: GameState, action: GameAction): void {
