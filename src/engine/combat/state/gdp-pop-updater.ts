@@ -4,6 +4,8 @@ import { findCountryProfileById } from "@/domain/map/countries";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class GdpPopUpdater {
+  private initialPixelsMapCache: Map<string, number> | null = null;
+
   public syncGlobalStats(
     nations: Record<string, Nation>,
     allCells: GridCell[],
@@ -14,19 +16,22 @@ export class GdpPopUpdater {
 
     const updated = { ...nations };
 
-    const initialPixelsMap = new Map<string, number>();
-    for (let i = 0; i < allCells.length; i++) {
-      const cell = allCells[i]!;
-      const initOwner = cell.initialOwnerId || cell.ownerId;
-      if (initOwner === "WATER" || initOwner === "CLOSED_SEA") {
-        continue;
+    if (!this.initialPixelsMapCache) {
+      const initialPixelsMap = new Map<string, number>();
+      for (let i = 0; i < allCells.length; i++) {
+        const cell = allCells[i]!;
+        const initOwner = cell.initialOwnerId || cell.ownerId;
+        if (initOwner === "WATER" || initOwner === "CLOSED_SEA") {
+          continue;
+        }
+        const canonicalInit = NationIdResolver.resolveCanonicalId(initOwner);
+        const pixels = cell.highResPixelCount > 0 ? cell.highResPixelCount : 16;
+        initialPixelsMap.set(
+          canonicalInit,
+          (initialPixelsMap.get(canonicalInit) || 0) + pixels,
+        );
       }
-      const canonicalInit = NationIdResolver.resolveCanonicalId(initOwner);
-      const pixels = cell.highResPixelCount > 0 ? cell.highResPixelCount : 16;
-      initialPixelsMap.set(
-        canonicalInit,
-        (initialPixelsMap.get(canonicalInit) || 0) + pixels,
-      );
+      this.initialPixelsMapCache = initialPixelsMap;
     }
 
     const gdpDensityMap = new Map<string, number>();
@@ -51,7 +56,7 @@ export class GdpPopUpdater {
             ? profile.population
             : 80000000;
 
-      const initPixels = initialPixelsMap.get(canonicalId) || 0;
+      const initPixels = this.initialPixelsMapCache.get(canonicalId) || 0;
       if (initPixels > 0) {
         gdpDensityMap.set(canonicalId, baseGdp / initPixels);
         popDensityMap.set(canonicalId, basePop / initPixels);

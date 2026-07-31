@@ -33,7 +33,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const nextState = engine.nextTurn();
-    const updatedGridCells = gridState.getAllCells();
+    const updatedGridCells = gridState.getModifiedCells();
 
     return NextResponse.json({
       success: true,

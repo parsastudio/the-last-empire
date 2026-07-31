@@ -15,16 +15,16 @@ export class GridPostTurnCleanup {
     state: GameState,
     gridState: GridState,
   ): GameState {
-    const allCells = gridState.getAllCells();
     const activeNationsIds = Object.keys(state.nations).filter(
       (id) => state.nations[id]?.isAlive,
     );
 
     for (let i = 0; i < activeNationsIds.length; i++) {
       const id = activeNationsIds[i]!;
-      this.gridConnector.regroupEnclaves(id, allCells);
+      const countryCells = gridState.getCellsByOwner(id);
+      this.gridConnector.regroupEnclaves(id, countryCells);
       this.gridCleanup.cleanupEnclaveRegistry(
-        allCells,
+        countryCells,
         id,
         this.enclaveRegistry,
       );
