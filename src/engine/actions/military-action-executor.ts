@@ -1,0 +1,85 @@
+import { GameState } from "@/domain/game/game-state.schema";
+import { GameAction } from "@/domain/game/action.schema";
+import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
+
+export class MilitaryActionExecutor {
+  private static recruitmentManager = new RecruitmentQueueManager();
+
+  public static execute(state: GameState, action: GameAction): GameState {
+    const nation = state.nations[action.nationId];
+    if (!nation) return state;
+
+    switch (action.type) {
+      case "RECRUIT_UNIT":
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: this.recruitmentManager.enqueueOrder(
+              nation,
+              action.unitType,
+              action.quantity,
+            ),
+          },
+        };
+
+      case "CANCEL_RECRUITMENT":
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: this.recruitmentManager.cancelOrder(
+              nation,
+              action.orderId,
+            ),
+          },
+        };
+
+      case "DISBAND_UNIT": {
+        const military = { ...nation.military };
+        if (action.unitType === "INFANTRY")
+          military.infantry -= action.quantity;
+        else if (action.unitType === "AIR_FORCE")
+          military.airForce -= action.quantity;
+        else if (action.unitType === "DRONE_MISSILE")
+          military.droneMissile -= action.quantity;
+
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: {
+              ...nation,
+              military,
+              resources: {
+                ...nation.resources,
+                manpower: nation.resources.manpower + action.quantity * 4,
+              },
+            },
+          },
+        };
+      }
+
+      case "INVEST_RESEARCH": {
+        const cost = Math.max(1500000000, Math.floor(nation.gdp * 0.12));
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: {
+              ...nation,
+              treasury: nation.treasury - cost,
+              military: {
+                ...nation.military,
+                techLevel: nation.military.techLevel + 1,
+              },
+            },
+          },
+        };
+      }
+
+      default:
+        return state;
+    }
+  }
+}
