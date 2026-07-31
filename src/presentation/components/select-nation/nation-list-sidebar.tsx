@@ -1,7 +1,10 @@
 import React from "react";
 import { Search } from "lucide-react";
-import { NationDetail, NationListItem } from "./nation-list-item";
-import { useNationSearch } from "./hooks/use-nation-search";
+import {
+  NationDetail,
+  NationListItem,
+} from "@/presentation/components/select-nation/nation-list-item";
+import { useNationSearch } from "@/presentation/components/select-nation/hooks/use-nation-search";
 
 interface NationListSidebarProps {
   nations: NationDetail[];

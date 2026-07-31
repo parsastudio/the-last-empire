@@ -21,17 +21,6 @@ export function useGeopoliticsGame(customGameId?: string) {
     return "IRN";
   }, []);
 
-  const fetchStatus = useCallback(async () => {
-    const nationId = getStoredNationId();
-    const result = await apiService.fetchStatus(nationId, customGameId);
-    if (result.success && result.data) {
-      setGameState(result.data);
-    } else {
-      setError(result.error || "خطا در دریافت وضعیت بازی");
-    }
-    setLoading(false);
-  }, [apiService, customGameId, getStoredNationId]);
-
   const advanceNextTurn = useCallback(async (): Promise<GameState | null> => {
     const activeId = customGameId || gameState?.gameId;
     const result = await apiService.advanceTurn(activeId, gameState);
@@ -102,7 +91,6 @@ export function useGeopoliticsGame(customGameId?: string) {
     setGameState,
     loading,
     error,
-    refreshStatus: fetchStatus,
     advanceNextTurn,
   };
 }

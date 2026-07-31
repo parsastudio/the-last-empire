@@ -5,11 +5,6 @@ export interface CoolOffTransitionResult {
   turnsRemaining: number;
 }
 
-export interface ViolationPenalties {
-  stabilityPenalty: number;
-  reputationPenalty: number;
-}
-
 export class CoolOffManager {
   public initiateDowngrade(
     currentStance: DiplomaticStance,
@@ -25,9 +20,5 @@ export class CoolOffManager {
 
   public processTurnTick(turnsRemaining: number): number {
     return Math.max(0, turnsRemaining - 1);
-  }
-
-  public checkViolation(): ViolationPenalties {
-    return { stabilityPenalty: 0, reputationPenalty: 0 };
   }
 }

@@ -3,11 +3,11 @@
 import React from "react";
 import { Coins, Fuel, BrickWall, Users } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
-import { ResourceBadge } from "./resource-badge";
-import { StabilityMeterBadge } from "./stability-meter-badge";
-import { ThreatRadarBadge } from "./threat-radar-badge";
+import { ResourceBadge } from "@/presentation/components/tactical-map/hud/top-bar/resource-badge";
+import { StabilityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/stability-meter-badge";
+import { ThreatRadarBadge } from "@/presentation/components/tactical-map/hud/top-bar/threat-radar-badge";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { useTopHudMetrics } from "./hooks/use-top-hud-metrics";
+import { useTopHudMetrics } from "@/presentation/components/tactical-map/hud/top-bar/hooks/use-top-hud-metrics";
 
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
