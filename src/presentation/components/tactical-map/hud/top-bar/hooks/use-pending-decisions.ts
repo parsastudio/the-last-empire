@@ -42,7 +42,7 @@ export function usePendingDecisions(metrics: HumanResourceMetrics) {
       items.push({
         id: "oil-deficit",
         title: "هشدار کسری ذخایر نفت استراتژیک",
-        desc: `مصرف نوبتی (${metrics.oilRequiredPerTurn} بشکه) بیشتر از ذخایر موجود است. جهت تامین انرژی صنایع کشوری از بورس نفت بخرید.`,
+        desc: `مصرف نوبتی (${metrics.oilRequiredPerTurn} بلوک) بیشتر از ذخایر موجود است. جهت تامین انرژی صنایع کشوری از بورس نفت بخرید.`,
         icon: Fuel,
         color: "text-treasury",
         tab: "market",
