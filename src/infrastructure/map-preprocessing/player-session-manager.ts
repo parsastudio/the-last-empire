@@ -1,4 +1,4 @@
-import { normalizeNationId } from "./game-state-initializer";
+import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 
 let serverFallbackNationId = "NATION_118";
@@ -19,12 +19,6 @@ export class PlayerSessionManager {
     serverFallbackNationId = normalized;
     if (typeof window !== "undefined") {
       localStorage.setItem(this.storageKey, normalized);
-    }
-  }
-
-  public clearSession(): void {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(this.storageKey);
     }
   }
 }

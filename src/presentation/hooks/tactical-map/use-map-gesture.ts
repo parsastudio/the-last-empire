@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useMapZoom } from "./use-map-zoom";
-import { useMapDrag } from "./use-map-drag";
+import { useMapZoom } from "@/presentation/hooks/tactical-map/use-map-zoom";
+import { useMapDrag } from "@/presentation/hooks/tactical-map/use-map-drag";
 
 export function useMapGesture() {
   const [position, setPosition] = useState<{ x: number; y: number }>({
@@ -8,7 +8,7 @@ export function useMapGesture() {
     y: 0,
   });
 
-  const { scale, calculateZoom, zoomIn, zoomOut, resetScale } = useMapZoom();
+  const { scale, calculateZoom } = useMapZoom();
 
   const {
     isDragging,
@@ -44,11 +44,6 @@ export function useMapGesture() {
     dragMouseUp();
   };
 
-  const resetView = () => {
-    resetScale();
-    setPosition({ x: 0, y: 0 });
-  };
-
   return {
     scale,
     position,
@@ -59,9 +54,5 @@ export function useMapGesture() {
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    zoomIn,
-    zoomOut,
-    resetView,
-    handleResetView: resetView,
   };
 }

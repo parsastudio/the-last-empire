@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { NationDetail } from "../nation-list-item";
-import { NationDatabaseProvider } from "../utils/nation-database-provider";
+import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
+import { NationDatabaseProvider } from "@/presentation/components/select-nation/utils/nation-database-provider";
 import { GameIdGenerator } from "@/domain/shared/game-id-generator";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { useToast } from "@/presentation/context/toast-context";

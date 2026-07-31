@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { IndexedDbAdapter, SavedRecord } from "./indexed-db-adapter";
-import { LocalStorageAdapter } from "./local-storage-adapter";
+import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
+import { LocalStorageAdapter } from "@/infrastructure/storage/local-storage-adapter";
 
 export class ClientStorageService {
   private indexedDb = new IndexedDbAdapter();
@@ -25,14 +25,6 @@ export class ClientStorageService {
     } catch {}
 
     return this.localStorage.loadState(gameId);
-  }
-
-  public async getAllSavedCampaigns(): Promise<SavedRecord[]> {
-    try {
-      return await this.indexedDb.getAllSaves();
-    } catch {
-      return [];
-    }
   }
 
   public async removeGameState(gameId: string): Promise<void> {

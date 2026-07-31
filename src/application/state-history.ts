@@ -12,12 +12,4 @@ export class StateHistory {
     const found = this.history.get(turnNumber);
     return found ? deepClone(found) : undefined;
   }
-
-  public clear(): void {
-    this.history.clear();
-  }
-
-  public getSavedTurns(): number[] {
-    return Array.from(this.history.keys()).sort((a, b) => a - b);
-  }
 }

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { DiplomacyListItem } from "../../sidebar/tabs/diplomacy/diplomacy-list-item";
-import { CountryProfileStats } from "../../sidebar/tabs/diplomacy/country-profile-stats";
-import { AdvancedDiplomacyActions } from "../../sidebar/tabs/diplomacy/advanced-diplomacy-actions";
-import { DiplomacyTargetCard } from "./components/diplomacy-target-card";
-import { FocusMapButton } from "../../sidebar/tabs/diplomacy/focus-map-button";
+import { DiplomacyListItem } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomacy-list-item";
+import { CountryProfileStats } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
+import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/advanced-diplomacy-actions";
+import { DiplomacyTargetCard } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-target-card";
+import { FocusMapButton } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/focus-map-button";
 import { Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
-import { SidebarTabType } from "../../sidebar/sidebar-tabs";
-import { useWideDiplomacy } from "./hooks/use-wide-diplomacy";
-import { ProxyAllocationModal } from "../../modals/proxy-allocation-modal";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
+import { ProxyAllocationModal } from "@/presentation/components/tactical-map/modals/proxy-allocation-modal";
 
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;

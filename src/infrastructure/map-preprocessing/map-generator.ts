@@ -1,13 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
-import { DistanceTransform } from "./distance-transform";
-import { MapAreaPixelCounter } from "./generator/map-area-pixel-counter";
-import { LowResPacker } from "./utils/low-res-packer";
-import { ClosedSeaDetector } from "./utils/closed-sea-detector";
-import { MapPathResolver } from "./map-path-resolver";
-import { TerritoryPartitioner } from "./generator/territory-partitioner";
-import { PngDecoder } from "./encoders/png-decoder";
-import { GeometryDraw } from "./utils/geometry-draw";
+import { DistanceTransform } from "@/infrastructure/map-preprocessing/distance-transform";
+import { MapAreaPixelCounter } from "@/infrastructure/map-preprocessing/generator/map-area-pixel-counter";
+import { LowResPacker } from "@/infrastructure/map-preprocessing/utils/low-res-packer";
+import { ClosedSeaDetector } from "@/infrastructure/map-preprocessing/utils/closed-sea-detector";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { TerritoryPartitioner } from "@/infrastructure/map-preprocessing/generator/territory-partitioner";
+import { PngDecoder } from "@/infrastructure/map-preprocessing/encoders/png-decoder";
+import { GeometryDraw } from "@/infrastructure/map-preprocessing/utils/geometry-draw";
 import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
 
 export interface CountryMapping {
@@ -80,9 +80,6 @@ export async function generateTest6Map(
   const maxId = Math.max(...countries.map((c) => c.id), 255) + 1;
   const pixelAreas = areaCounter.calculateAreas(buffer, width, height, maxId);
   areaCounter.applyCalibratedAreas(countries, pixelAreas);
-
-  const dist = distanceTransform.calculate(buffer, width, height);
-  distanceTransform.applySeaDepths(buffer, dist, width, height);
 
   await fs.writeFile(path.join(targetDir, "mask-4k.bin"), buffer);
 

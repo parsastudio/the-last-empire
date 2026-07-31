@@ -78,5 +78,5 @@ export function useSavedCampaigns() {
     } catch {}
   }, []);
 
-  return { saves, loading, deleteSave, refreshSaves: loadSavesFromDb };
+  return { saves, loading, deleteSave };
 }

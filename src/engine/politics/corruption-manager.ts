@@ -19,13 +19,6 @@ export class CorruptionManager {
     return Math.max(0, Math.min(100, Number(newCorruption.toFixed(2))));
   }
 
-  public calculateTaxWastage(
-    grossTaxIncome: number,
-    corruptionLevel: number,
-  ): number {
-    return Math.floor(grossTaxIncome * (corruptionLevel / 100));
-  }
-
   public antiCorruptionDrive(nation: Nation, investmentAmount: number): Nation {
     if (investmentAmount <= 0) {
       throw new GameError(
