@@ -52,10 +52,8 @@ export class ProxyWarManager {
         treasury: Math.floor(updatedTarget.treasury * 0.6),
         government: {
           ...updatedTarget.government,
-          type: "DICTATORSHIP",
           stability: 20,
           corruption: Math.min(100, updatedTarget.government.corruption + 15),
-          turnsInPower: 0,
         },
       };
     }

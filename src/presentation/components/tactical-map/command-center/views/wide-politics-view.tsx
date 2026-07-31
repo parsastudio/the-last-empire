@@ -4,7 +4,6 @@ import { TariffControlCard } from "../../sidebar/tabs/politics/tariff-control-ca
 import { ImfLoanCard } from "../../sidebar/tabs/politics/imf-loan-card";
 import { IndustrialUpgradeCard } from "../../sidebar/tabs/politics/industrial-upgrade-card";
 import { InfrastructureUpgradeCard } from "../../sidebar/tabs/politics/infrastructure-upgrade-card";
-import { RegimeChangeCard } from "../../sidebar/tabs/politics/regime-change-card";
 import { AntiCorruptionCard } from "../../sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifiers-card";
 import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
@@ -31,10 +30,8 @@ export function WidePoliticsView({
   nationId = "NATION_118",
   gdp = 450000000000,
   treasury = 100000,
-  turnsInPower = 15,
   taxRate,
   corruption = 0,
-  governmentType,
   nationalDebt = 0,
   tariffRate = 10,
   industrialLevel = 1,
@@ -66,6 +63,10 @@ export function WidePoliticsView({
           gdp={gdp}
           treasury={treasury}
         />
+        <AntiCorruptionCard nationId={nationId} treasury={treasury} />
+      </div>
+
+      <div className="space-y-5">
         <IndustrialUpgradeCard
           currentLevel={industrialLevel}
           nationId={nationId}
@@ -76,17 +77,6 @@ export function WidePoliticsView({
           nationId={nationId}
           treasury={treasury}
         />
-      </div>
-
-      <div className="space-y-5">
-        <RegimeChangeCard
-          governmentType={governmentType}
-          turnsInPower={turnsInPower}
-          gdp={gdp}
-          treasury={treasury}
-          nationId={nationId}
-        />
-        <AntiCorruptionCard nationId={nationId} treasury={treasury} />
       </div>
     </div>
   );

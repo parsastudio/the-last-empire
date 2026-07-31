@@ -33,16 +33,14 @@ export class RevoltCoupHandler {
       treasury: Math.floor(nation.treasury * 0.5),
       military: {
         ...nation.military,
-        infantry: 0,
-        airForce: 0,
-        droneMissile: 0,
+        infantry: Math.floor(nation.military.infantry * 0.5),
+        airForce: Math.floor(nation.military.airForce * 0.5),
+        droneMissile: Math.floor(nation.military.droneMissile * 0.5),
       },
       government: {
         ...nation.government,
-        type: "DICTATORSHIP",
-        stability: 20,
+        stability: 30,
         corruption: Math.min(100, nation.government.corruption + 25),
-        turnsInPower: 0,
       },
     };
   }

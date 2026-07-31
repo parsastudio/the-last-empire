@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { GovernmentTypeSchema } from "@/domain/politics/politics.schema";
 import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { GameStateSchema } from "./game-state.schema";
@@ -19,14 +18,6 @@ export const SetTariffRateActionSchema = z.object({
   signature: z.string().optional(),
   type: z.literal("SET_TARIFF_RATE"),
   newRate: z.number().min(0).max(100),
-});
-
-export const ChangeGovernmentActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("CHANGE_GOVERNMENT"),
-  newGovernment: GovernmentTypeSchema,
 });
 
 export const RecruitUnitActionSchema = z.object({
@@ -155,7 +146,6 @@ export const AntiCorruptionDriveActionSchema = z.object({
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   SetTariffRateActionSchema,
-  ChangeGovernmentActionSchema,
   RecruitUnitActionSchema,
   DiplomaticProposalActionSchema,
   TradeResourcesActionSchema,
@@ -182,9 +172,6 @@ export const ActionResultSchema = z.object({
 
 export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;
 export type SetTariffRateAction = z.infer<typeof SetTariffRateActionSchema>;
-export type ChangeGovernmentAction = z.infer<
-  typeof ChangeGovernmentActionSchema
->;
 export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
 export type DiplomaticProposalAction = z.infer<
   typeof DiplomaticProposalActionSchema

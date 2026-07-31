@@ -1,7 +1,6 @@
 import {
   SetTaxRateAction,
   SetTariffRateAction,
-  ChangeGovernmentAction,
   RecruitUnitAction,
   DiplomaticProposalAction,
   TradeResourcesAction,
@@ -17,7 +16,6 @@ import {
   InvestResearchAction,
   AntiCorruptionDriveAction,
 } from "./action.schema";
-import { GovernmentType } from "@/domain/politics/politics.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
 
@@ -47,18 +45,6 @@ export class ActionFactory {
       nationId,
       type: "SET_TARIFF_RATE",
       newRate,
-    };
-  }
-
-  public static changeGovernment(
-    nationId: string,
-    newGovernment: GovernmentType,
-  ): ChangeGovernmentAction {
-    return {
-      id: this.createId("government"),
-      nationId,
-      type: "CHANGE_GOVERNMENT",
-      newGovernment,
     };
   }
 
