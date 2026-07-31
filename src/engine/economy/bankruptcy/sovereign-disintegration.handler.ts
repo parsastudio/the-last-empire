@@ -21,32 +21,6 @@ export class SovereignDisintegrationHandler {
       consecutiveDeficitTurns: 0,
     };
 
-    const updatedAllNations = { ...allNations };
-    const aliveLandNeighbors = nation.geography.landNeighbors.filter(
-      (id) => allNations[id] && allNations[id].isAlive,
-    );
-
-    if (aliveLandNeighbors.length > 0) {
-      const refugeesPerNeighbor = Math.floor(
-        (popLoss * 0.05) / aliveLandNeighbors.length,
-      );
-
-      for (const neighborId of aliveLandNeighbors) {
-        const neighbor = updatedAllNations[neighborId];
-        if (neighbor) {
-          updatedAllNations[neighborId] = {
-            ...neighbor,
-            population: neighbor.population + refugeesPerNeighbor,
-            government: {
-              ...neighbor.government,
-              stability: Math.max(10, neighbor.government.stability - 15),
-              corruption: Math.min(100, neighbor.government.corruption + 10),
-            },
-          };
-        }
-      }
-    }
-
-    return { updatedNation, updatedAllNations };
+    return { updatedNation, updatedAllNations: allNations };
   }
 }
