@@ -1,14 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ActionFactory } from "@/domain/game/action-factory";
+import { LoanManager } from "@/engine/economy/loan-manager";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { LoanActionDialog } from "./loan-action-dialog";
+import { RepayActionDialog } from "./repay-action-dialog";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface ImfLoanCardProps {
   nationId?: string;
   nationalDebt?: number;
   gdp?: number;
   treasury?: number;
+  nation?: Nation;
 }
 
 export function ImfLoanCard({
@@ -16,98 +19,106 @@ export function ImfLoanCard({
   nationalDebt = 0,
   gdp = 450000000000,
   treasury = 100000,
+  nation,
 }: ImfLoanCardProps) {
-  const debtToGdpRatio = gdp > 0 ? nationalDebt / gdp : 0;
-  const creditRating = Math.max(
-    0,
-    Math.min(100, Math.floor(100 - debtToGdpRatio * 200)),
+  const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
+  const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
+
+  const loanManager = new LoanManager();
+  const mockNation =
+    nation ||
+    ({
+      gdp,
+      nationalDebt,
+      treasury,
+      government: { stability: 80 },
+      activeModifiers: [],
+    } as unknown as Nation);
+
+  const creditRating = loanManager.calculateCreditRating(mockNation);
+  const effectiveTaxRateForCredit = 20;
+  const taxIncome = gdp * (effectiveTaxRateForCredit / 100);
+  const maxDebtLimit = Math.min(
+    Math.floor(gdp * 0.2 * (creditRating / 100)),
+    Math.floor(taxIncome * 5 * (creditRating / 100)),
   );
-  const { dispatchAction } = useGameActions();
-
-  const maxCreditLimit = Math.floor(gdp * 0.2 * (creditRating / 100));
-  const availableLoan = Math.max(0, maxCreditLimit - nationalDebt);
-
-  const handleRequestLoan = async () => {
-    if (availableLoan < 10000) return;
-    const amountToRequest = Math.min(50000, availableLoan);
-
-    const action = ActionFactory.requestLoan(nationId, amountToRequest);
-    await dispatchAction(
-      action,
-      `وام اضطراری ${PersianNumberFormatter.formatCurrency(amountToRequest)} به خزانه ملی واریز شد.`,
-    );
-  };
-
-  const handleRepayDebt = async () => {
-    if (nationalDebt <= 0 || treasury <= 0) return;
-    const amountToRepay = Math.min(25000, nationalDebt, treasury);
-
-    const action = ActionFactory.repayDebt(nationId, amountToRepay);
-    await dispatchAction(
-      action,
-      `مبلغ ${PersianNumberFormatter.formatCurrency(amountToRepay)} از بدهی ملی تسویه گردید.`,
-    );
-  };
+  const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 
   return (
-    <div className="space-y-2.5">
-      <div className="flex items-center gap-2 px-1">
-        <Landmark size={13} className="text-treasury" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          بانک جهانی و تسهیلات اعتباری
-        </span>
-      </div>
-
-      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
-        <div className="flex items-center justify-between text-xs font-mono">
-          <span className="text-muted-foreground font-sans">
-            رتبه اعتبار ملی:
-          </span>
-          <span className="font-bold text-gdp">
-            {PersianNumberFormatter.toPersianDigits(creditRating)} / ۱۰۰
+    <>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2 px-1">
+          <Landmark size={13} className="text-treasury" />
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+            بانک جهانی و تسهیلات اعتباری
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-          <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
-            <span className="text-muted-foreground block font-sans">
-              بدهی معوق فعلی
+        <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
+          <div className="flex items-center justify-between text-xs font-mono">
+            <span className="text-muted-foreground font-sans">
+              رتبه اعتبار ملی:
             </span>
-            <span className="font-bold text-military block">
-              {PersianNumberFormatter.formatCurrency(nationalDebt)}
-            </span>
-          </div>
-
-          <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
-            <span className="text-muted-foreground block font-sans">
-              اعتبار وام آزاد
-            </span>
-            <span className="font-bold text-gdp block">
-              {PersianNumberFormatter.formatCurrency(availableLoan)}
+            <span className="font-bold text-gdp">
+              {PersianNumberFormatter.toPersianDigits(creditRating)} / ۱۰۰
             </span>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-2 pt-1">
-          <button
-            onClick={handleRequestLoan}
-            disabled={availableLoan < 10000}
-            className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
-          >
-            <ArrowUpRight size={13} className="text-gdp" />
-            <span>وام اضطراری</span>
-          </button>
+          <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+            <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
+              <span className="text-muted-foreground block font-sans">
+                بدهی معوق فعلی
+              </span>
+              <span className="font-bold text-military block">
+                {PersianNumberFormatter.formatCurrency(nationalDebt)}
+              </span>
+            </div>
 
-          <button
-            onClick={handleRepayDebt}
-            disabled={nationalDebt <= 0 || treasury <= 0}
-            className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
-          >
-            <ArrowDownRight size={13} className="text-military" />
-            <span>تسویه بدهی</span>
-          </button>
+            <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
+              <span className="text-muted-foreground block font-sans">
+                اعتبار وام آزاد
+              </span>
+              <span className="font-bold text-gdp block">
+                {PersianNumberFormatter.formatCurrency(availableLoan)}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <button
+              onClick={() => setIsLoanModalOpen(true)}
+              className="py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <ArrowUpRight size={13} className="text-gdp" />
+              <span>درخواست وام</span>
+            </button>
+
+            <button
+              onClick={() => setIsRepayModalOpen(true)}
+              disabled={nationalDebt <= 0 || treasury <= 0}
+              className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+            >
+              <ArrowDownRight size={13} className="text-military" />
+              <span>تسویه بدهی</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <LoanActionDialog
+        isOpen={isLoanModalOpen}
+        maxAvailableLoan={availableLoan}
+        nationId={nationId}
+        onClose={() => setIsLoanModalOpen(false)}
+      />
+
+      <RepayActionDialog
+        isOpen={isRepayModalOpen}
+        nationalDebt={nationalDebt}
+        userTreasury={treasury}
+        nationId={nationId}
+        onClose={() => setIsRepayModalOpen(false)}
+      />
+    </>
   );
 }
