@@ -54,7 +54,6 @@ export function TradeActionDialog({
   const marketEngine = useMemo(() => new MarketEngine(), []);
 
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
-
   const resourceType = resourceName.includes("نفت") ? "oil" : "steel";
   const currentPrice = unitPrice || 100;
 
@@ -63,40 +62,26 @@ export function TradeActionDialog({
       return { base: 0, fee: 0, finalTotal: 0 };
     }
 
+    const marketPrices = { oil: currentPrice, steel: currentPrice };
+
     if (mode === "buy") {
-      const totalWithFee = marketEngine.predictBuyCost(
-        { oil: currentPrice, steel: currentPrice },
+      const finalTotal = marketEngine.predictBuyCost(
+        marketPrices,
         resourceType,
         currentAmount,
       );
-      const fee = Math.floor(totalWithFee * (0.1 / 1.1));
-      const base = totalWithFee - fee;
-      return { base, fee, finalTotal: totalWithFee };
+      const base = Math.floor(finalTotal / 1.1);
+      const fee = finalTotal - base;
+      return { base, fee, finalTotal };
     } else {
-      const netRevenue = marketEngine.predictSellRevenue(
-        { oil: currentPrice, steel: currentPrice },
+      const finalTotal = marketEngine.predictSellRevenue(
+        marketPrices,
         resourceType,
         currentAmount,
       );
-      const minPrice = 10;
-      const sellSpread = 0.85;
-      const adjustedStartPrice = Math.max(
-        minPrice,
-        Math.floor(currentPrice * sellSpread),
-      );
-      const k = adjustedStartPrice - minPrice;
-      let baseRevenue = 0;
-      if (currentAmount <= k) {
-        baseRevenue =
-          currentAmount * adjustedStartPrice -
-          (currentAmount * (currentAmount - 1)) / 2;
-      } else {
-        const variableRevenue = k * adjustedStartPrice - (k * (k - 1)) / 2;
-        const flatRevenue = (currentAmount - k) * minPrice;
-        baseRevenue = variableRevenue + flatRevenue;
-      }
-      const fee = Math.floor(baseRevenue * 0.1);
-      return { base: baseRevenue, fee, finalTotal: netRevenue };
+      const base = Math.floor(finalTotal / 0.9);
+      const fee = base - finalTotal;
+      return { base, fee, finalTotal };
     }
   }, [marketEngine, mode, currentPrice, resourceType, currentAmount]);
 

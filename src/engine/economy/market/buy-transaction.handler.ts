@@ -1,5 +1,5 @@
-import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
-import { Nation } from "@/domain/nation/nation.schema";
+import type { ResourceMarketPrice } from "@/domain/economy/economy.schema";
+import type { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/game-error";
 
 export interface TradeTransactionResult {
@@ -9,8 +9,13 @@ export interface TradeTransactionResult {
 }
 
 export class BuyTransactionHandler {
-  private readonly maxPrice = 500;
+  private readonly maxPrice = 1000;
   private readonly feeRate = 0.1;
+
+  public calculateSlippageFactor(amount: number): number {
+    if (amount <= 0) return 0;
+    return Math.min(0.25, (amount / (amount + 500000)) * 0.25);
+  }
 
   public predictBuyCost(
     marketPrices: ResourceMarketPrice,
@@ -21,17 +26,14 @@ export class BuyTransactionHandler {
       return 0;
     }
     const currentPrice = marketPrices[resourceType];
-    const k = this.maxPrice - currentPrice;
-    let totalCost = 0;
-    if (amount <= k) {
-      totalCost = amount * currentPrice + (amount * (amount - 1)) / 2;
-    } else {
-      const variableCost = k * currentPrice + (k * (k - 1)) / 2;
-      const flatCost = (amount - k) * this.maxPrice;
-      totalCost = variableCost + flatCost;
-    }
-    const fee = Math.floor(totalCost * this.feeRate);
-    return totalCost + fee;
+    const slippage = this.calculateSlippageFactor(amount);
+    const avgUnitPrice = Math.min(
+      this.maxPrice,
+      currentPrice * (1.0 + slippage),
+    );
+    const grossCost = amount * avgUnitPrice;
+    const fee = Math.floor(grossCost * this.feeRate);
+    return Math.floor(grossCost + fee);
   }
 
   public calculateMaxAffordable(
@@ -43,7 +45,7 @@ export class BuyTransactionHandler {
       return 0;
     }
     let low = 0;
-    let high = 1000000;
+    let high = 10000000000;
     let result = 0;
     while (low <= high) {
       const mid = Math.floor((low + high) / 2);
@@ -82,11 +84,11 @@ export class BuyTransactionHandler {
       );
     }
     const currentPrice = marketPrices[resourceType];
-    const k = this.maxPrice - currentPrice;
-    const finalPrice =
-      amount <= k
-        ? currentPrice + Math.max(1, Math.floor(amount * 0.5))
-        : this.maxPrice;
+    const slippage = this.calculateSlippageFactor(amount);
+    const newPrice = Math.min(
+      this.maxPrice,
+      Math.floor(currentPrice * (1.0 + slippage)),
+    );
 
     const updatedNation: Nation = {
       ...nation,
@@ -98,7 +100,7 @@ export class BuyTransactionHandler {
     };
     const updatedMarketPrices: ResourceMarketPrice = {
       ...marketPrices,
-      [resourceType]: finalPrice,
+      [resourceType]: newPrice,
     };
     return {
       updatedNation,
