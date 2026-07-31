@@ -36,7 +36,7 @@ export function useSidebarTurnActions(
     resourceName: "",
     unit: "",
     mode: "buy",
-    unitPrice: 100,
+    unitPrice: 25000000,
     maxAmount: 100,
   });
 
@@ -97,7 +97,7 @@ export function useSidebarTurnActions(
 
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
-      const treasury = humanNation ? humanNation.treasury : 100000;
+      const treasury = humanNation ? humanNation.treasury : 100000000;
       const isOil = name.includes("نفت");
       const stock = isOil
         ? humanNation
@@ -107,7 +107,7 @@ export function useSidebarTurnActions(
           ? humanNation.resources.steel
           : 0;
 
-      const currentPrice = price || 100;
+      const currentPrice = price && price >= 1000000 ? price : 25000000;
       const marketEngine = new MarketEngine();
       const maxAffordable = marketEngine.calculateMaxAffordable(
         treasury,
@@ -122,7 +122,7 @@ export function useSidebarTurnActions(
         resourceName: name,
         unit,
         mode,
-        unitPrice: price,
+        unitPrice: currentPrice,
         maxAmount,
       });
     },
