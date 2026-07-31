@@ -8,6 +8,7 @@ import { MilitaryTechUpgradeCard } from "../../sidebar/tabs/politics/military-te
 import { AntiCorruptionCard } from "../../sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifiers-card";
 import { PopulationWelfareCard } from "../../sidebar/tabs/politics/population-welfare-card";
+import { DiplomaticCampaignCard } from "../../sidebar/tabs/politics/diplomatic-campaign-card";
 import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
@@ -30,6 +31,7 @@ interface WidePoliticsViewProps {
   population?: number;
   oilStock?: number;
   steelStock?: number;
+  globalReputation?: number;
 }
 
 export function WidePoliticsView({
@@ -48,11 +50,18 @@ export function WidePoliticsView({
   population = 80000000,
   oilStock = 1000,
   steelStock = 1000,
+  globalReputation = 50,
 }: WidePoliticsViewProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard modifiers={activeModifiers} />
+        <DiplomaticCampaignCard
+          nationId={nationId}
+          treasury={treasury}
+          gdp={gdp}
+          currentReputation={globalReputation}
+        />
         <PopulationWelfareCard
           population={population}
           oilStock={oilStock}
@@ -64,14 +73,14 @@ export function WidePoliticsView({
           corruption={corruption}
           nationId={nationId}
         />
+      </div>
+
+      <div className="space-y-5">
         <TariffControlCard
           initialTariffRate={tariffRate}
           nationId={nationId}
           hasSeaAccess={hasSeaAccess}
         />
-      </div>
-
-      <div className="space-y-5">
         <ImfLoanCard
           nationId={nationId}
           nationalDebt={nationalDebt}
@@ -79,15 +88,15 @@ export function WidePoliticsView({
           treasury={treasury}
         />
         <AntiCorruptionCard nationId={nationId} treasury={treasury} gdp={gdp} />
+      </div>
+
+      <div className="space-y-5">
         <MilitaryTechUpgradeCard
           currentLevel={militaryTechLevel}
           nationId={nationId}
           treasury={treasury}
           gdp={gdp}
         />
-      </div>
-
-      <div className="space-y-5">
         <IndustrialUpgradeCard
           currentLevel={industrialLevel}
           nationId={nationId}

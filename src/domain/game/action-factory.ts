@@ -15,6 +15,7 @@ import {
   CancelRecruitmentAction,
   InvestResearchAction,
   AntiCorruptionDriveAction,
+  InvestDiplomacyAction,
 } from "./action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
@@ -220,6 +221,18 @@ export class ActionFactory {
       id: this.createId("anticorrupt"),
       nationId,
       type: "ANTI_CORRUPTION_DRIVE",
+      amount,
+    };
+  }
+
+  public static investDiplomacy(
+    nationId: string,
+    amount: number,
+  ): InvestDiplomacyAction {
+    return {
+      id: this.createId("diplomacy-campaign"),
+      nationId,
+      type: "INVEST_DIPLOMACY",
       amount,
     };
   }
