@@ -6,11 +6,14 @@ import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
+    const t0 = performance.now();
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get("gameId") || "default_game";
 
     const gridState = GridStateProvider.getInstance();
+    const tGridLoadStart = performance.now();
     await GridLoaderService.ensureGridLoaded(gridState);
+    const tGridLoad = performance.now() - tGridLoadStart;
 
     let bodyState: GameState | null = null;
     try {
@@ -32,14 +35,28 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
+    const tEngineStart = performance.now();
     const nextState = engine.nextTurn();
-    const updatedGridCells = gridState.getModifiedCells();
+    const tEngine = performance.now() - tEngineStart;
 
-    return NextResponse.json({
+    const tModifiedStart = performance.now();
+    const updatedGridCells = gridState.getModifiedCells();
+    const tModified = performance.now() - tModifiedStart;
+
+    const tJsonStart = performance.now();
+    const response = NextResponse.json({
       success: true,
       data: nextState,
       gridCells: updatedGridCells,
     });
+    const tJson = performance.now() - tJsonStart;
+
+    const totalServer = performance.now() - t0;
+    console.log(
+      `[SERVER PERFORMANCE NEXT-TURN] Total: ${totalServer.toFixed(2)}ms | GridLoad: ${tGridLoad.toFixed(2)}ms | EngineNextTurn: ${tEngine.toFixed(2)}ms | GetModifiedCells: ${tModified.toFixed(2)}ms | JsonSerialize: ${tJson.toFixed(2)}ms`,
+    );
+
+    return response;
   } catch (err) {
     const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
     return NextResponse.json(

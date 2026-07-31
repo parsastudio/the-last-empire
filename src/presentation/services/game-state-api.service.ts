@@ -26,25 +26,37 @@ export class GameStateApiService {
     currentState?: GameState | null,
   ): Promise<{ success: boolean; data?: GameState; error?: string }> {
     try {
+      const t0 = performance.now();
       const query = gameId ? `?gameId=${gameId}` : "";
       const res = await fetch(`/api/game/next-turn${query}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state: currentState }),
       });
+      const tFetch = performance.now() - t0;
+
+      const tJsonStart = performance.now();
       const json = (await res.json()) as {
         success: boolean;
         data?: GameState;
         gridCells?: GridCell[];
         error?: string;
       };
+      const tJson = performance.now() - tJsonStart;
 
+      const tClientGridStart = performance.now();
       if (json.success && json.gridCells && json.gridCells.length > 0) {
         const clientGrid = GridStateProvider.getInstance();
         for (const cell of json.gridCells) {
           clientGrid.setCell(cell.x, cell.y, cell);
         }
       }
+      const tClientGrid = performance.now() - tClientGridStart;
+
+      const totalClient = performance.now() - t0;
+      console.log(
+        `[CLIENT PERFORMANCE ADVANCE-TURN] Total: ${totalClient.toFixed(2)}ms | NetworkFetch: ${tFetch.toFixed(2)}ms | JsonParse: ${tJson.toFixed(2)}ms | ClientGridApply: ${tClientGrid.toFixed(2)}ms (cells: ${json.gridCells?.length || 0})`,
+      );
 
       return json;
     } catch {
