@@ -9,18 +9,22 @@ export class ResourceGenerationStep implements EconomyStep {
       }
 
       const isOilRich = nation.traits.includes("OIL_RICH");
-      const territoryFactor = Math.floor(nation.geography.territorySize / 1000);
+      const gdpScale = Math.max(1, Math.floor(nation.gdp / 10000000000));
+      const industrialMultiplier = 1.0 + (nation.industrialLevel - 1) * 0.25;
 
-      const baseOil = isOilRich
-        ? 300 + territoryFactor * 25
-        : Math.max(10, territoryFactor * 5);
+      const baseOilLots = isOilRich
+        ? Math.max(3, gdpScale * 2)
+        : Math.max(1, Math.floor(gdpScale * 0.5));
+      const baseSteelLots = Math.max(1, Math.floor(gdpScale * 0.8));
 
-      const baseSteel = Math.max(10, territoryFactor * 5);
-
-      const industrialMultiplier = 1.0 + (nation.industrialLevel - 1) * 0.2;
-
-      const oilIncome = Math.floor(baseOil * industrialMultiplier);
-      const steelIncome = Math.floor(baseSteel * industrialMultiplier);
+      const oilIncome = Math.max(
+        1,
+        Math.ceil(baseOilLots * industrialMultiplier),
+      );
+      const steelIncome = Math.max(
+        1,
+        Math.ceil(baseSteelLots * industrialMultiplier),
+      );
 
       nations[id] = {
         ...nation,

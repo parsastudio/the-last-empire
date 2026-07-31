@@ -4,31 +4,15 @@ import { GameError } from "@/domain/shared/game-error";
 import type { TradeTransactionResult } from "./buy-transaction.handler";
 
 export class SellTransactionHandler {
-  private readonly minPrice = 10;
-  private readonly feeRate = 0.1;
-
-  public calculateSlippageFactor(amount: number): number {
-    if (amount <= 0) return 0;
-    return Math.min(0.2, (amount / (amount + 500000)) * 0.2);
-  }
-
   public predictSellRevenue(
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
     amount: number,
   ): number {
-    if (amount <= 0) {
-      return 0;
-    }
-    const currentPrice = marketPrices[resourceType];
-    const slippage = this.calculateSlippageFactor(amount);
-    const avgUnitPrice = Math.max(
-      this.minPrice,
-      currentPrice * (1.0 - slippage),
-    );
-    const grossRevenue = amount * avgUnitPrice;
-    const fee = Math.floor(grossRevenue * this.feeRate);
-    return Math.max(0, Math.floor(grossRevenue - fee));
+    if (amount <= 0) return 0;
+    const buyPrice = marketPrices[resourceType] || 25000000;
+    const sellUnitPrice = Math.floor(buyPrice * (2 / 3));
+    return amount * sellUnitPrice;
   }
 
   public sellResource(
@@ -46,37 +30,29 @@ export class SellTransactionHandler {
     if (nation.resources[resourceType] < amount) {
       throw new GameError(
         "INSUFFICIENT_RESOURCES",
-        `Not enough ${resourceType} to sell`,
+        `Not enough ${resourceType} in stock to sell`,
       );
     }
-    const netRevenue = this.predictSellRevenue(
+
+    const totalRevenue = this.predictSellRevenue(
       marketPrices,
       resourceType,
       amount,
     );
-    const currentPrice = marketPrices[resourceType];
-    const slippage = this.calculateSlippageFactor(amount);
-    const newPrice = Math.max(
-      this.minPrice,
-      Math.floor(currentPrice * (1.0 - slippage)),
-    );
 
     const updatedNation: Nation = {
       ...nation,
-      treasury: nation.treasury + netRevenue,
+      treasury: nation.treasury + totalRevenue,
       resources: {
         ...nation.resources,
         [resourceType]: nation.resources[resourceType] - amount,
       },
     };
-    const updatedMarketPrices: ResourceMarketPrice = {
-      ...marketPrices,
-      [resourceType]: newPrice,
-    };
+
     return {
       updatedNation,
-      updatedMarketPrices,
-      totalCostOrRevenue: netRevenue,
+      updatedMarketPrices: marketPrices,
+      totalCostOrRevenue: totalRevenue,
     };
   }
 }
