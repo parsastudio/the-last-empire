@@ -12,15 +12,18 @@ export function useTopHudMetrics(metrics: HumanResourceMetrics) {
       metrics.netIncomePerTurn,
     );
 
-    const formattedOil = PersianNumberFormatter.toPersianDigits(
+    const formattedOil = `${PersianNumberFormatter.toPersianDigits(
       metrics.oil.toLocaleString("en-US"),
-    );
+    )} بلوک`;
 
-    const formattedOilUsage = `${PersianNumberFormatter.toPersianDigits(metrics.oilRequiredPerTurn)} مصرف`;
+    const formattedOilUsage = `${PersianNumberFormatter.toPersianDigits(
+      metrics.oilRequiredPerTurn,
+    )} مصرف`;
 
-    const formattedSteel = PersianNumberFormatter.toPersianDigits(
+    const formattedSteel = `${PersianNumberFormatter.toPersianDigits(
       metrics.steel.toLocaleString("en-US"),
-    );
+    )} بلوک`;
+
     const formattedManpower = PersianNumberFormatter.toPersianDigits(
       metrics.manpower.toLocaleString("en-US"),
     );

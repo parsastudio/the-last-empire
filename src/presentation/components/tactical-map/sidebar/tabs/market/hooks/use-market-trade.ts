@@ -16,10 +16,10 @@ interface UseMarketTradeProps {
 }
 
 export function useMarketTrade({
-  marketPrices = { oil: 105, steel: 92 },
-  oilStock = 5000,
-  steelStock = 2000,
-  userTreasury = 100000,
+  marketPrices = { oil: 25000000, steel: 25000000 },
+  oilStock = 50,
+  steelStock = 20,
+  userTreasury = 100000000,
   onOpenTradeExternal,
 }: UseMarketTradeProps) {
   const [tradeModal, setTradeModal] = useState<{
@@ -32,17 +32,17 @@ export function useMarketTrade({
   }>({
     isOpen: false,
     resourceName: "",
-    unit: "",
+    unit: "بلوک استراتژیک",
     mode: "buy",
-    unitPrice: 100,
-    maxAmount: 100,
+    unitPrice: 25000000,
+    maxAmount: 10,
   });
 
   const oilTrend: "up" | "down" | "stable" = useMemo(
     () =>
-      marketPrices.oil > 100
+      marketPrices.oil > 25000000
         ? "up"
-        : marketPrices.oil < 100
+        : marketPrices.oil < 25000000
           ? "down"
           : "stable",
     [marketPrices.oil],
@@ -50,9 +50,9 @@ export function useMarketTrade({
 
   const steelTrend: "up" | "down" | "stable" = useMemo(
     () =>
-      marketPrices.steel > 100
+      marketPrices.steel > 25000000
         ? "up"
-        : marketPrices.steel < 100
+        : marketPrices.steel < 25000000
           ? "down"
           : "stable",
     [marketPrices.steel],
@@ -67,7 +67,7 @@ export function useMarketTrade({
 
       const isOil = name.includes("نفت");
       const stock = isOil ? oilStock : steelStock;
-      const currentPrice = price || 100;
+      const currentPrice = price || 25000000;
       const marketEngine = new MarketEngine();
       const maxAffordable = marketEngine.calculateMaxAffordable(
         userTreasury,
