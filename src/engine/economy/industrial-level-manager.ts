@@ -6,12 +6,14 @@ export interface UpgradeCostResult {
 }
 
 export class IndustrialLevelManager {
-  public getUpgradeCost(currentLevel: number): number {
-    return Math.floor(50000 * Math.pow(1.3, currentLevel - 1));
+  public getUpgradeCost(nation: Nation): number {
+    const level = Math.max(1, nation.industrialLevel);
+    const baseCost = Math.floor(nation.gdp * 0.08 * Math.pow(1.25, level - 1));
+    return Math.max(1000000000, baseCost);
   }
 
   public evaluateUpgrade(nation: Nation): UpgradeCostResult {
-    const cost = this.getUpgradeCost(nation.industrialLevel);
+    const cost = this.getUpgradeCost(nation);
     return {
       cost,
       canAfford: nation.treasury >= cost,

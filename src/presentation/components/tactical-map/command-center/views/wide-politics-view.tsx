@@ -71,11 +71,13 @@ export function WidePoliticsView({
           currentLevel={industrialLevel}
           nationId={nationId}
           treasury={treasury}
+          gdp={gdp}
         />
         <InfrastructureUpgradeCard
           currentLevel={infrastructureLevel}
           nationId={nationId}
           treasury={treasury}
+          gdp={gdp}
         />
       </div>
     </div>

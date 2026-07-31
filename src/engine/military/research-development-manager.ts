@@ -2,12 +2,14 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/game-error";
 
 export class ResearchDevelopmentManager {
-  public getResearchCost(currentTechLevel: number): number {
-    return Math.floor(100000 * Math.pow(2.0, currentTechLevel - 1));
+  public getResearchCost(nation: Nation): number {
+    const level = Math.max(1, nation.military.techLevel);
+    const baseCost = Math.floor(nation.gdp * 0.12 * Math.pow(1.25, level - 1));
+    return Math.max(1500000000, baseCost);
   }
 
   public investInResearch(nation: Nation): Nation {
-    const cost = this.getResearchCost(nation.military.techLevel);
+    const cost = this.getResearchCost(nation);
 
     if (nation.treasury < cost) {
       throw new GameError(

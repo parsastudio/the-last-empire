@@ -9,26 +9,24 @@ export interface UnitCostDetails {
 export class UnitCostCalculator {
   public getUnitDetails(
     unitType: UnitType,
-    industrialLevel: number,
+    _industrialLevel: number,
   ): UnitCostDetails {
-    const timeReduction = Math.max(0, Math.floor((industrialLevel - 1) / 2));
-
     switch (unitType) {
       case "INFANTRY":
         return {
-          moneyCost: 100,
+          moneyCost: 250000000,
           manpowerCost: 10,
-          buildTurns: Math.max(1, 2 - timeReduction),
+          buildTurns: 2,
         };
       case "AIR_FORCE":
         return {
-          moneyCost: 500,
+          moneyCost: 1000000000,
           manpowerCost: 5,
-          buildTurns: Math.max(1, 4 - timeReduction),
+          buildTurns: 4,
         };
       case "DRONE_MISSILE":
         return {
-          moneyCost: 1200,
+          moneyCost: 1500000000,
           manpowerCost: 1,
           buildTurns: 1,
         };

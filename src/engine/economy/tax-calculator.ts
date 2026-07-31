@@ -11,7 +11,8 @@ export class TaxCalculator {
     taxRate: number,
     corruption: number,
   ): number {
-    const grossIncome = gdp * (taxRate / 100);
+    const turnTaxFactor = 0.025;
+    const grossIncome = gdp * turnTaxFactor * (taxRate / 100);
     const corruptionLoss = grossIncome * (corruption / 100);
     const baseIncome = grossIncome - corruptionLoss;
     return Math.floor(baseIncome);
