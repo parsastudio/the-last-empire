@@ -14,6 +14,7 @@ export const ACTION_TRANSLATIONS: Record<string, string> = {
   CANCEL_RECRUITMENT: "لغو سفارش ساخت در صف ارتش",
   INVEST_RESEARCH: "تزریق بودجه پژوهشی ارتقای فناوری نظامی",
   ACTIVATE_ABILITY: "فعال‌سازی توانمندی ویژه حکومتی",
+  INVEST_DIPLOMACY: "اجرای پویش بین‌المللی و ارتقای پرستیژ دیپلماتیک",
 };
 
 export function translateActionLogMessage(message: string): string {

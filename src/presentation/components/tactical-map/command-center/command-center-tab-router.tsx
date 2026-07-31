@@ -88,6 +88,7 @@ export function CommandCenterTabRouter({
           population={nation.population}
           oilStock={nation.resources.oil}
           steelStock={nation.resources.steel}
+          globalReputation={nation.globalReputation}
         />
       );
     case "proxy":

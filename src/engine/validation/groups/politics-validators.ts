@@ -3,6 +3,7 @@ import { ProxyInfluenceValidator } from "../validators/proxy-influence.validator
 import { DoctrineUnlockValidator } from "../validators/doctrine-unlock.validator";
 import { AntiCorruptionValidator } from "../validators/anti-corruption.validator";
 import { ActivateAbilityValidator } from "../validators/activate-ability.validator";
+import { InvestDiplomacyValidator } from "../validators/invest-diplomacy.validator";
 
 export function getPoliticsValidators(): ActionValidator[] {
   return [
@@ -10,5 +11,6 @@ export function getPoliticsValidators(): ActionValidator[] {
     new DoctrineUnlockValidator(),
     new AntiCorruptionValidator(),
     new ActivateAbilityValidator(),
+    new InvestDiplomacyValidator(),
   ];
 }
