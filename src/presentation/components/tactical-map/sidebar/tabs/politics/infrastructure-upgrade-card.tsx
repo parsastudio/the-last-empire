@@ -34,7 +34,7 @@ export function InfrastructureUpgradeCard({
     const action = ActionFactory.investInfrastructure(nationId);
     await dispatchAction(
       action,
-      `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد.`,
+      `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد و GDP کشور افزایش یافت.`,
     );
   };
 
@@ -55,13 +55,9 @@ export function InfrastructureUpgradeCard({
           </span>
         </div>
 
-        <div className="bg-secondary/40 border border-border/40 p-2.5 rounded-xl space-y-1 text-[10px] font-mono">
-          <span className="text-muted-foreground block font-sans font-bold">
-            سود ارتقا به سطح{" "}
-            {PersianNumberFormatter.toPersianDigits(currentLevel + 1)}:
-          </span>
+        <div className="bg-secondary/40 border border-border/40 p-2.5 rounded-xl text-xs font-mono">
           <span className="text-gdp font-bold block font-sans">
-            • ۵+٪ افزایش تولید ناخالص ملی پایه (GDP)
+            +۲ درصد رشد GDP
           </span>
         </div>
 

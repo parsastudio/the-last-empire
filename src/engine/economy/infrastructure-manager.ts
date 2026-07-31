@@ -25,9 +25,12 @@ export class InfrastructureManager {
       return nation;
     }
 
+    const newGdp = Math.floor(nation.gdp * 1.02);
+
     return {
       ...nation,
       treasury: nation.treasury - cost,
+      gdp: newGdp,
       geography: {
         ...nation.geography,
         infrastructureLevel: nation.geography.infrastructureLevel + 1,
