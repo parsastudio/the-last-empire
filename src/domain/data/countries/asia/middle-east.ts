@@ -49,7 +49,7 @@ export const middleEastProfiles: CountryProfile[] = [
     nameFa: "امارات متحده عربی",
     gdp: 500000000000,
     population: 10000000,
-    traits: ["OIL_RICH", "INDUSTRIAL_HUB"],
+    traits: ["OIL_RICH"],
     flagCode: "AE",
     startingInfantry: 110,
     startingAirForce: 55,

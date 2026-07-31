@@ -23,7 +23,6 @@ export const NationTraitSchema = z.enum([
   "ISLAND_FORTRESS",
   "MILITARISTIC",
   "FRAGILE_ECONOMY",
-  "INDUSTRIAL_HUB",
   "ISOLATED_SOCIETY",
   "SOVEREIGN_FORTRESS",
 ]);
