@@ -27,11 +27,6 @@ export class TreatyStanceApplier {
           stance: "PEACE",
           coolOffTurnsRemaining: 10,
         };
-      case "MILITARY_ACCESS":
-        return {
-          ...profile,
-          militaryAccess: true,
-        };
       default:
         return profile;
     }

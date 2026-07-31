@@ -10,7 +10,6 @@ export const DiplomaticProposalTypeSchema = z.enum([
   "PEACE_TREATY",
   "NON_AGGRESSION_PACT",
   "FULL_ALLIANCE",
-  "MILITARY_ACCESS",
   "IMPROVE_RELATIONS",
   "DEMAND_TRIBUTE",
 ]);
@@ -20,7 +19,6 @@ export const RelationProfileSchema = z.object({
   stance: DiplomaticStanceSchema,
   opinion: z.number().min(-100).max(100),
   tributePerTurn: z.number().nonnegative(),
-  militaryAccess: z.boolean(),
   coolOffTurnsRemaining: z.number().nonnegative(),
   coolOffTargetStance: DiplomaticStanceSchema.optional(),
 });

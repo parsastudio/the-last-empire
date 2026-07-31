@@ -38,11 +38,6 @@ export class TreatyProposalEvaluator {
           return { accepted: true };
         }
         return { accepted: false, reason: "OPINION_TOO_LOW" };
-      case "MILITARY_ACCESS":
-        if (opinion >= 20) {
-          return { accepted: true };
-        }
-        return { accepted: false, reason: "OPINION_TOO_LOW" };
       case "DEMAND_TRIBUTE":
         if (
           requestedTributeAmount &&
