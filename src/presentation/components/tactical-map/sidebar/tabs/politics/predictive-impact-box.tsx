@@ -19,7 +19,7 @@ export function PredictiveImpactBox({
   const corruptionLoss = grossTax * (corruption / 100);
   const projectedIncome = Math.floor(grossTax - corruptionLoss);
 
-  const stabilityImpact = Number((2.0 - (clampedRate / 50) * 10.0).toFixed(2));
+  const stabilityImpact = Number(((15 - clampedRate) * 0.2).toFixed(2));
 
   return (
     <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs dir-rtl text-right">
