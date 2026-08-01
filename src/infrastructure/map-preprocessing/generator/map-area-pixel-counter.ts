@@ -1,5 +1,6 @@
 import { AreaWeightCalculator } from "./area-weight-calculator";
-import { GLOBAL_DEVIATION_FACTOR } from "@/domain/map/country-area-calibration.config";
+
+const GLOBAL_DEVIATION_FACTOR = 1.15;
 
 export interface CountryAreaMapping {
   id: number;
@@ -27,7 +28,7 @@ export class MapAreaPixelCounter {
     const areaPerUnit = totalSurfaceAreaSqKm / totalWeight;
 
     for (let y = 0; y < height; y++) {
-      const rowWeight = weights[y] * areaPerUnit;
+      const rowWeight = weights[y]! * areaPerUnit;
       for (let x = 0; x < width; x++) {
         const id = buffer[y * width + x]!;
         if (id >= 11 && id < maxId) {
