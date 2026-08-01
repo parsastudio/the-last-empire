@@ -6,10 +6,14 @@ import { GridTerritoryCapturer } from "./grid-territory-capturer";
 import { StateSynchronizerFacade } from "./state/state-synchronizer-facade";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { TurnLogBuilder } from "@/domain/game/turn-log-builder";
+import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomatic-betrayal-calculator";
+import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
 
 export class BattleExecutionEngine {
   private territoryCapturer = new GridTerritoryCapturer();
   private synchronizer = new StateSynchronizerFacade();
+  private betrayalCalculator = new DiplomaticBetrayalCalculator();
+  private reputationManager = new ReputationManager();
 
   public executeBattle(
     state: GameState,
@@ -22,6 +26,12 @@ export class BattleExecutionEngine {
     if (!attacker || !defender || !attacker.isAlive || !defender.isAlive) {
       return state;
     }
+
+    const currentRelation = attacker.relations[defender.id];
+    const currentStance = currentRelation ? currentRelation.stance : "PEACE";
+
+    const betrayalResult =
+      this.betrayalCalculator.calculatePenalty(currentStance);
 
     const oilPrice = state.marketPrices?.oil || 25000000;
 
@@ -52,7 +62,7 @@ export class BattleExecutionEngine {
       attacker.resources.oil - calcResult.deploymentOilCost,
     );
 
-    const updatedAttacker = {
+    let updatedAttacker = {
       ...attacker,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
       resources: {
@@ -79,6 +89,25 @@ export class BattleExecutionEngine {
       },
     };
 
+    if (betrayalResult.hasBetrayed) {
+      updatedAttacker = this.reputationManager.applyReputationPenalty(
+        updatedAttacker,
+        betrayalResult.reputationPenalty,
+      );
+    }
+
+    const attackerRelToDefender = updatedAttacker.relations[defender.id];
+    if (attackerRelToDefender) {
+      updatedAttacker.relations = {
+        ...updatedAttacker.relations,
+        [defender.id]: {
+          ...attackerRelToDefender,
+          stance: "PEACE",
+          opinion: Math.min(-50, attackerRelToDefender.opinion - 40),
+        },
+      };
+    }
+
     const updatedDefender = {
       ...defender,
       treasury: defender.treasury - calcResult.treasuryLooted,
@@ -98,17 +127,34 @@ export class BattleExecutionEngine {
       },
     };
 
+    const defenderRelToAttacker = updatedDefender.relations[attacker.id];
+    if (defenderRelToAttacker) {
+      updatedDefender.relations = {
+        ...updatedDefender.relations,
+        [attacker.id]: {
+          ...defenderRelToAttacker,
+          stance: "PEACE",
+          opinion: -100,
+        },
+      };
+    }
+
     const reportTitle = calcResult.isAttackerVictory
       ? isFullCapitulation
         ? `فتح کامل و تسلیم ${defender.name}`
         : `پیروزی در تهاجم به قلمرو ${defender.name}`
       : `عقب‌نشینی نیروها در نبرد با ${defender.name}`;
 
+    let betrayalText = "";
+    if (betrayalResult.hasBetrayed) {
+      betrayalText = ` [جریمه خیانت دیپلماتیک: -${betrayalResult.reputationPenalty} پرستیژ جهانی به دلیل نادیده گرفتن ${betrayalResult.skippedSteps} گام دیپلماتیک]`;
+    }
+
     const reportSummary = calcResult.isAttackerVictory
       ? isFullCapitulation
-        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.`
-        : `نیروهای ${attacker.name} با موفقیت توانستند مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.`
-      : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.`;
+        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.${betrayalText}`
+        : `نیروهای ${attacker.name} با موفقیت توانستند مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.${betrayalText}`
+      : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalText}`;
 
     const report: CombatReport = {
       id: `report-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,

@@ -105,6 +105,7 @@ export function WideDiplomacyView({
               targetName={diplomacy.selectedRelation.name}
               targetNationId={diplomacy.targetNationId}
               nationId={activeHumanId}
+              currentStance={diplomacy.selectedRelation.stance}
               isTradeEmbargoed={diplomacy.selectedRelation.isTradeEmbargoed}
               onOpenProxyModal={() => setIsProxyModalOpen(true)}
             />
