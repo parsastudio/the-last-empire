@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from "react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { DEFAULT_DOCTRINES } from "@/engine/politics/doctrines-list.config";
+import { COMPREHENSIVE_RESEARCH_TREE } from "@/domain/politics/research-tree.config";
 import { ActionFactory } from "@/domain/game/action-factory";
 
 interface UseWideResearchProps {
@@ -14,43 +14,49 @@ export function useWideResearch({
 }: UseWideResearchProps) {
   const { dispatchAction } = useGameActions();
 
+  const mapNodeToView = useCallback(
+    (node: (typeof COMPREHENSIVE_RESEARCH_TREE)[number]) => {
+      const unlocked = unlockedDoctrines.includes(node.id);
+      const prereqsMet = node.prerequisites.every((req) =>
+        unlockedDoctrines.includes(req),
+      );
+
+      return {
+        id: node.id,
+        name: node.nameFa,
+        desc: node.desc,
+        tier: node.tier,
+        cost: node.cost,
+        unlocked,
+        canUnlock: !unlocked && prereqsMet,
+        prerequisites: node.prerequisites,
+      };
+    },
+    [unlockedDoctrines],
+  );
+
   const industrialDoctrines = useMemo(() => {
-    return DEFAULT_DOCTRINES.filter((d) => d.branch === "INDUSTRIAL_TECH").map(
-      (d) => ({
-        id: d.id,
-        name: d.name,
-        cost: d.cost,
-        unlocked: unlockedDoctrines.includes(d.id),
-      }),
-    );
-  }, [unlockedDoctrines]);
+    return COMPREHENSIVE_RESEARCH_TREE.filter(
+      (d) => d.branch === "INDUSTRIAL_TECH",
+    ).map(mapNodeToView);
+  }, [mapNodeToView]);
 
   const asymmetricDoctrines = useMemo(() => {
-    return DEFAULT_DOCTRINES.filter(
+    return COMPREHENSIVE_RESEARCH_TREE.filter(
       (d) => d.branch === "ASYMMETRIC_MILITARY",
-    ).map((d) => ({
-      id: d.id,
-      name: d.name,
-      cost: d.cost,
-      unlocked: unlockedDoctrines.includes(d.id),
-    }));
-  }, [unlockedDoctrines]);
+    ).map(mapNodeToView);
+  }, [mapNodeToView]);
 
   const diplomaticDoctrines = useMemo(() => {
-    return DEFAULT_DOCTRINES.filter(
+    return COMPREHENSIVE_RESEARCH_TREE.filter(
       (d) => d.branch === "DIPLOMATIC_HEGEMONY",
-    ).map((d) => ({
-      id: d.id,
-      name: d.name,
-      cost: d.cost,
-      unlocked: unlockedDoctrines.includes(d.id),
-    }));
-  }, [unlockedDoctrines]);
+    ).map(mapNodeToView);
+  }, [mapNodeToView]);
 
   const handleUnlock = useCallback(
     async (doc: { id: string; name: string; cost: number }) => {
       const action = ActionFactory.unlockDoctrine(nationId, doc.id);
-      await dispatchAction(action, `آنلاک دکترین ${doc.name} انجام شد.`);
+      await dispatchAction(action, `آنلاک فناوری ${doc.name} انجام شد.`);
     },
     [dispatchAction, nationId],
   );

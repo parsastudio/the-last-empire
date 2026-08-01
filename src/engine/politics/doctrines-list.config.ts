@@ -1,3 +1,8 @@
+import {
+  COMPREHENSIVE_RESEARCH_TREE,
+  ResearchNode,
+} from "@/domain/politics/research-tree.config";
+
 export interface Doctrine {
   id: string;
   name: string;
@@ -5,35 +10,14 @@ export interface Doctrine {
   cost: number;
 }
 
-export const DEFAULT_DOCTRINES: Doctrine[] = [
-  {
-    id: "gdp-booster",
-    name: "Automation Pipelines",
-    branch: "INDUSTRIAL_TECH",
-    cost: 3,
-  },
-  {
-    id: "low-upkeep",
-    name: "Green Logistics Grid",
-    branch: "INDUSTRIAL_TECH",
-    cost: 5,
-  },
-  {
-    id: "border-fortification",
-    name: "Garrison Protocols",
-    branch: "ASYMMETRIC_MILITARY",
-    cost: 3,
-  },
-  {
-    id: "global-influence",
-    name: "Cultural Radiance",
-    branch: "DIPLOMATIC_HEGEMONY",
-    cost: 3,
-  },
-  {
-    id: "reputation-recovery",
-    name: "Media Hegemony",
-    branch: "DIPLOMATIC_HEGEMONY",
-    cost: 5,
-  },
-];
+export const DEFAULT_DOCTRINES: Doctrine[] = COMPREHENSIVE_RESEARCH_TREE.map(
+  (node) => ({
+    id: node.id,
+    name: node.nameFa,
+    branch: node.branch,
+    cost: node.cost,
+  }),
+);
+
+export { COMPREHENSIVE_RESEARCH_TREE };
+export type { ResearchNode };
