@@ -1,128 +1,179 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { MarketEngine } from "@/engine/economy/market-engine";
+import { TreatyEvaluator } from "@/engine/diplomacy/treaty-evaluator";
+import { ResearchManager } from "@/engine/politics/research-manager";
+import { AbilityExecutor } from "./ability-executor";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
-export class EconomyActionExecutor {
-  private static marketEngine = new MarketEngine();
+export class PoliticsActionExecutor {
+  private static treatyEvaluator = new TreatyEvaluator();
+  private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
-    const nation = state.nations[action.nationId];
+    const canonicalNationId = NationIdResolver.resolveCanonicalId(
+      action.nationId,
+    );
+    const nation =
+      state.nations[action.nationId] || state.nations[canonicalNationId];
     if (!nation) return state;
 
     switch (action.type) {
-      case "SET_TAX_RATE": {
-        const delta = Math.abs(action.newRate - nation.taxRate);
-        const penalty = delta > 15 ? Math.floor(delta * 0.8) : 0;
+      case "SET_RESEARCH_BUDGET": {
+        const updatedNation = this.researchManager.setResearchBudget(
+          nation,
+          action.newRate,
+        );
         return {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [nation.id]: updatedNation,
+          },
+        };
+      }
+
+      case "ACTIVATE_ABILITY":
+        return AbilityExecutor.execute(state, action);
+
+      case "UNLOCK_DOCTRINE":
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [nation.id]: {
               ...nation,
-              taxRate: action.newRate,
+              doctrines: {
+                doctrinePoints: nation.doctrines.doctrinePoints - 3,
+                unlockedDoctrines: [
+                  ...nation.doctrines.unlockedDoctrines,
+                  action.doctrineId,
+                ],
+              },
+            },
+          },
+        };
+
+      case "ANTI_CORRUPTION_DRIVE": {
+        const reduction = Math.floor((action.amount / (nation.gdp || 1)) * 100);
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [nation.id]: {
+              ...nation,
+              treasury: nation.treasury - action.amount,
               government: {
                 ...nation.government,
-                stability: Math.max(0, nation.government.stability - penalty),
+                corruption: Math.max(
+                  0,
+                  nation.government.corruption - reduction,
+                ),
               },
             },
           },
         };
       }
 
-      case "SET_TARIFF_RATE":
+      case "INVEST_DIPLOMACY":
         return {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: { ...nation, tariffRate: action.newRate },
-          },
-        };
-
-      case "REQUEST_LOAN": {
-        const totalDebt = action.amount + Math.floor(action.amount * 0.05);
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [action.nationId]: {
+            [nation.id]: {
               ...nation,
-              treasury: nation.treasury + action.amount,
-              nationalDebt: nation.nationalDebt + totalDebt,
+              treasury: nation.treasury - action.amount,
+              globalReputation: Math.min(100, nation.globalReputation + 15),
             },
           },
         };
-      }
 
-      case "REPAY_DEBT": {
-        const repayAmount = Math.min(action.amount, nation.nationalDebt);
+      case "FUND_PROXY_INFLUENCE": {
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+          action.targetNationId,
+        );
+        const target =
+          state.nations[action.targetNationId] ||
+          state.nations[canonicalTargetId];
+        if (!target) return state;
+        const drain = Math.max(
+          1,
+          Math.min(
+            15,
+            Math.floor((action.budget / (target.gdp * 0.01 || 1)) * 2),
+          ),
+        );
         return {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [nation.id]: {
               ...nation,
-              treasury: nation.treasury - repayAmount,
-              nationalDebt: nation.nationalDebt - repayAmount,
+              treasury: nation.treasury - action.budget,
             },
-          },
-        };
-      }
-
-      case "INVEST_INFRASTRUCTURE": {
-        const cost = Math.max(1000000000, Math.floor(nation.gdp * 0.1));
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [action.nationId]: {
-              ...nation,
-              treasury: nation.treasury - cost,
-              gdp: Math.floor(nation.gdp * 1.02),
-              geography: {
-                ...nation.geography,
-                infrastructureLevel: nation.geography.infrastructureLevel + 1,
+            [target.id]: {
+              ...target,
+              government: {
+                ...target.government,
+                stability: Math.max(0, target.government.stability - drain),
               },
             },
           },
         };
       }
 
-      case "UPGRADE_INDUSTRIAL_LEVEL": {
-        const cost = Math.max(2000000000, Math.floor(nation.gdp * 0.15));
+      case "DIPLOMATIC_PROPOSAL": {
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+          action.targetNationId,
+        );
+        const receiver =
+          state.nations[action.targetNationId] ||
+          state.nations[canonicalTargetId];
+        if (!receiver) return state;
+        const result = this.treatyEvaluator.evaluateProposal(
+          nation,
+          receiver,
+          action.proposalType,
+        );
+        if (!result.accepted) return state;
+
+        const senderRelKey = nation.relations[receiver.id]
+          ? receiver.id
+          : action.targetNationId;
+        const receiverRelKey = receiver.relations[nation.id]
+          ? nation.id
+          : action.nationId;
+
+        const senderRel = nation.relations[senderRelKey];
+        const receiverRel = receiver.relations[receiverRelKey];
+        if (!senderRel || !receiverRel) return state;
+
+        const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
+          senderRel,
+          action.proposalType,
+        );
+        const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
+          receiverRel,
+          action.proposalType,
+        );
+
         return {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [nation.id]: {
               ...nation,
-              treasury: nation.treasury - cost,
-              industrialLevel: nation.industrialLevel + 1,
+              relations: {
+                ...nation.relations,
+                [senderRelKey]: updatedSenderRel,
+              },
             },
-          },
-        };
-      }
-
-      case "TRADE_RESOURCES": {
-        const res = action.isBuy
-          ? this.marketEngine.buyResource(
-              nation,
-              state.marketPrices,
-              action.resourceType,
-              action.amount,
-            )
-          : this.marketEngine.sellResource(
-              nation,
-              state.marketPrices,
-              action.resourceType,
-              action.amount,
-            );
-
-        return {
-          ...state,
-          marketPrices: res.updatedMarketPrices,
-          nations: {
-            ...state.nations,
-            [action.nationId]: res.updatedNation,
+            [receiver.id]: {
+              ...receiver,
+              relations: {
+                ...receiver.relations,
+                [receiverRelKey]: updatedReceiverRel,
+              },
+            },
           },
         };
       }

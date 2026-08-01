@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { VictoryCondition } from "./victory-condition.interface";
 import { VictoryStatus } from "../victory-checker";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class ConquestVictoryChecker implements VictoryCondition {
   public evaluate(state: GameState): VictoryStatus | null {
@@ -23,14 +24,14 @@ export class ConquestVictoryChecker implements VictoryCondition {
     }
 
     const totalWorldTerritory = aliveNations.reduce(
-      (sum, n) => sum + n.geography.territorySize,
+      (sum, n) => sum + (n.geography?.territorySize || 0),
       0,
     );
 
     if (totalWorldTerritory > 0) {
       for (const nation of aliveNations) {
         const territoryShare =
-          nation.geography.territorySize / totalWorldTerritory;
+          (nation.geography?.territorySize || 0) / totalWorldTerritory;
         if (territoryShare >= 0.8) {
           return {
             isGameOver: true,
@@ -41,7 +42,11 @@ export class ConquestVictoryChecker implements VictoryCondition {
       }
     }
 
-    const humanNation = state.nations[state.humanNationId];
+    const humanCanonicalId = NationIdResolver.resolveCanonicalId(
+      state.humanNationId,
+    );
+    const humanNation =
+      state.nations[state.humanNationId] || state.nations[humanCanonicalId];
     if (humanNation && !humanNation.isAlive) {
       return {
         isGameOver: true,
