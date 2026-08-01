@@ -118,7 +118,7 @@ export class AIActionBuilder {
           type: "DIPLOMATIC_PROPOSAL",
           targetNationId: target.id,
           proposalType:
-            relation.stance === "PEACE"
+            relation.stance === "NORMAL_DIPLOMACY"
               ? "NON_AGGRESSION_PACT"
               : "FULL_ALLIANCE",
         });
