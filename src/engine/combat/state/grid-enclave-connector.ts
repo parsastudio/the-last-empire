@@ -1,6 +1,11 @@
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { BfsQueue } from "@/engine/combat/bfs/bfs-queue";
 
+interface ConnectedComponent {
+  cells: GridCell[];
+  hasOriginalMainland: boolean;
+}
+
 export class GridEnclaveConnector {
   public regroupEnclaves(countryId: string, countryCells: GridCell[]): void {
     if (!countryCells || countryCells.length === 0) return;
@@ -12,23 +17,28 @@ export class GridEnclaveConnector {
     }
 
     const visited = new Set<string>();
-    let enclaveIdCounter = 1;
+    const components: ConnectedComponent[] = [];
 
     for (let i = 0; i < countryCells.length; i++) {
       const cell = countryCells[i]!;
       const key = `${cell.x},${cell.y}`;
       if (!visited.has(key)) {
-        const component: GridCell[] = [];
+        const componentCells: GridCell[] = [];
         const queue = new BfsQueue<GridCell>();
 
         queue.enqueue(cell);
         visited.add(key);
 
+        let hasOriginalMainland = false;
+
         while (!queue.isEmpty()) {
           const current = queue.dequeue();
           if (!current) continue;
 
-          component.push(current);
+          componentCells.push(current);
+          if (current.enclaveId === 0) {
+            hasOriginalMainland = true;
+          }
 
           const neighbors = [
             { x: current.x + 1, y: current.y },
@@ -50,27 +60,36 @@ export class GridEnclaveConnector {
           }
         }
 
-        const isMainland = component.some((c) => c.enclaveId === 0);
-        let colonyCell: GridCell | undefined = undefined;
-        for (let j = 0; j < component.length; j++) {
-          if (component[j]!.enclaveId >= 11) {
-            colonyCell = component[j];
-            break;
-          }
-        }
+        components.push({
+          cells: componentCells,
+          hasOriginalMainland,
+        });
+      }
+    }
 
-        let targetEnclaveId = 0;
-        if (isMainland) {
-          targetEnclaveId = 0;
-        } else if (colonyCell) {
-          targetEnclaveId = Math.min(63, colonyCell.enclaveId);
-        } else {
-          targetEnclaveId = Math.min(10, enclaveIdCounter++);
-        }
+    const hasAnyMainlandLeft = components.some(
+      (comp) => comp.hasOriginalMainland,
+    );
 
-        for (let j = 0; j < component.length; j++) {
-          component[j]!.enclaveId = targetEnclaveId;
-        }
+    components.sort((a, b) => b.cells.length - a.cells.length);
+
+    let enclaveIdCounter = 1;
+
+    for (let i = 0; i < components.length; i++) {
+      const comp = components[i]!;
+
+      let targetEnclaveId = 0;
+
+      if (comp.hasOriginalMainland) {
+        targetEnclaveId = 0;
+      } else if (!hasAnyMainlandLeft && i === 0) {
+        targetEnclaveId = 0;
+      } else {
+        targetEnclaveId = Math.min(10, enclaveIdCounter++);
+      }
+
+      for (let j = 0; j < comp.cells.length; j++) {
+        comp.cells[j]!.enclaveId = targetEnclaveId;
       }
     }
   }

@@ -13,20 +13,11 @@ export class GridTerritoryCapturer {
   ): number {
     if (targetAreaSqKm <= 0) return 0;
 
-    const defenderCells = gridState.getCellsByOwner(defenderId);
-    if (defenderCells.length === 0) return 0;
+    const allDefenderCells = gridState.getCellsByOwner(defenderId);
+    if (allDefenderCells.length === 0) return 0;
 
-    const defenderSet = new Set<string>();
-    const cellMap = new Map<string, GridCell>();
-
-    for (let i = 0; i < defenderCells.length; i++) {
-      const c = defenderCells[i]!;
-      const key = `${c.x},${c.y}`;
-      defenderSet.add(key);
-      cellMap.set(key, c);
-    }
-
-    const frontierQueue: GridCell[] = [];
+    let targetEnclaveId = 0;
+    const frontierCells: GridCell[] = [];
 
     const neighbors = [
       { dx: 1, dy: 0 },
@@ -35,8 +26,8 @@ export class GridTerritoryCapturer {
       { dx: 0, dy: -1 },
     ];
 
-    for (let i = 0; i < defenderCells.length; i++) {
-      const c = defenderCells[i]!;
+    for (let i = 0; i < allDefenderCells.length; i++) {
+      const c = allDefenderCells[i]!;
       let isFrontier = false;
 
       for (let k = 0; k < 4; k++) {
@@ -53,19 +44,79 @@ export class GridTerritoryCapturer {
       }
 
       if (isFrontier) {
-        frontierQueue.push(c);
+        frontierCells.push(c);
       }
     }
 
+    if (frontierCells.length > 0) {
+      targetEnclaveId = frontierCells[0]!.enclaveId;
+    } else {
+      targetEnclaveId = allDefenderCells[0]!.enclaveId;
+    }
+
+    const scopedDefenderCells = allDefenderCells.filter(
+      (c) => c.enclaveId === targetEnclaveId,
+    );
+
+    if (scopedDefenderCells.length === 0) return 0;
+
+    const defenderSet = new Set<string>();
+    const cellMap = new Map<string, GridCell>();
+
+    for (let i = 0; i < scopedDefenderCells.length; i++) {
+      const c = scopedDefenderCells[i]!;
+      const key = `${c.x},${c.y}`;
+      defenderSet.add(key);
+      cellMap.set(key, c);
+    }
+
+    const frontierQueue: GridCell[] = frontierCells.filter(
+      (c) => c.enclaveId === targetEnclaveId,
+    );
+
     if (frontierQueue.length === 0) {
-      frontierQueue.push(...defenderCells.slice(0, 10));
+      frontierQueue.push(...scopedDefenderCells.slice(0, 10));
     }
 
     let capturedArea = 0;
     const capturedCells = new Set<GridCell>();
-
     let head = 0;
-    while (head < frontierQueue.length && capturedArea < targetAreaSqKm) {
+
+    while (
+      capturedArea < targetAreaSqKm &&
+      capturedCells.size < scopedDefenderCells.length
+    ) {
+      if (head >= frontierQueue.length) {
+        let closestUncaptured: GridCell | null = null;
+        let minSqDist = Infinity;
+
+        for (let i = 0; i < scopedDefenderCells.length; i++) {
+          const candidate = scopedDefenderCells[i]!;
+          if (!capturedCells.has(candidate)) {
+            if (frontierQueue.length === 0) {
+              closestUncaptured = candidate;
+              break;
+            }
+            const lastCaptured = frontierQueue[frontierQueue.length - 1]!;
+            let dx = Math.abs(candidate.x - lastCaptured.x);
+            if (dx > 512) dx = 1024 - dx;
+            const dy = Math.abs(candidate.y - lastCaptured.y);
+            const sqDist = dx * dx + dy * dy;
+
+            if (sqDist < minSqDist) {
+              minSqDist = sqDist;
+              closestUncaptured = candidate;
+            }
+          }
+        }
+
+        if (closestUncaptured) {
+          frontierQueue.push(closestUncaptured);
+        } else {
+          break;
+        }
+      }
+
       const current = frontierQueue[head++]!;
       if (capturedCells.has(current)) continue;
 
