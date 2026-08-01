@@ -118,8 +118,7 @@ export class PoliticsActionExecutor {
         if (
           (action.proposalType === "NON_AGGRESSION_PACT" ||
             action.proposalType === "FULL_ALLIANCE") &&
-          nation.isAi &&
-          !receiver.isAi
+          nation.isAi
         ) {
           return state;
         }
