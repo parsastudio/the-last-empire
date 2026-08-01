@@ -9,10 +9,11 @@ export interface TradeTransactionResult {
 }
 
 export class MarketEngine {
-  private readonly basePrice = 25000000;
+  private readonly fixedBuyPrice = 25000000;
+  private readonly fixedSellPrice = 20000000;
 
   public updateMarketPrices(): ResourceMarketPrice {
-    return { oil: this.basePrice, steel: this.basePrice };
+    return { oil: this.fixedBuyPrice, steel: this.fixedBuyPrice };
   }
 
   public predictBuyCost(
@@ -21,7 +22,7 @@ export class MarketEngine {
     amount: number,
   ): number {
     if (amount <= 0) return 0;
-    const unitPrice = marketPrices[resourceType] || this.basePrice;
+    const unitPrice = marketPrices[resourceType] || this.fixedBuyPrice;
     return amount * unitPrice;
   }
 
@@ -31,18 +32,17 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
   ): number {
     if (treasury <= 0) return 0;
-    const unitPrice = marketPrices[resourceType] || this.basePrice;
+    const unitPrice = marketPrices[resourceType] || this.fixedBuyPrice;
     return Math.floor(treasury / unitPrice);
   }
 
   public predictSellRevenue(
-    marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    _marketPrices: ResourceMarketPrice,
+    _resourceType: "oil" | "steel",
     amount: number,
   ): number {
     if (amount <= 0) return 0;
-    const buyPrice = marketPrices[resourceType] || this.basePrice;
-    return amount * Math.floor(buyPrice * (2 / 3));
+    return amount * this.fixedSellPrice;
   }
 
   public buyResource(
