@@ -68,6 +68,16 @@ export function useWideDiplomacy({
     }
   }
 
+  const isLandNeighbor = useMemo(() => {
+    if (!humanNation || !humanNation.geography?.landNeighbors) return false;
+    const targetCanonical = NationIdResolver.resolveCanonicalId(targetNationId);
+    return humanNation.geography.landNeighbors.some(
+      (neighbor) =>
+        neighbor === targetNationId ||
+        NationIdResolver.resolveCanonicalId(neighbor) === targetCanonical,
+    );
+  }, [humanNation, targetNationId]);
+
   return {
     searchQuery,
     setSearchQuery,
@@ -76,5 +86,6 @@ export function useWideDiplomacy({
     filteredRelations: relationsList,
     selectedRelation,
     targetNationId,
+    isLandNeighbor,
   };
 }

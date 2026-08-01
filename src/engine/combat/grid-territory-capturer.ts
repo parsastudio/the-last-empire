@@ -48,11 +48,11 @@ export class GridTerritoryCapturer {
       }
     }
 
-    if (frontierCells.length > 0) {
-      targetEnclaveId = frontierCells[0]!.enclaveId;
-    } else {
-      targetEnclaveId = allDefenderCells[0]!.enclaveId;
+    if (frontierCells.length === 0) {
+      return 0;
     }
+
+    targetEnclaveId = frontierCells[0]!.enclaveId;
 
     const scopedDefenderCells = allDefenderCells.filter(
       (c) => c.enclaveId === targetEnclaveId,
@@ -75,7 +75,7 @@ export class GridTerritoryCapturer {
     );
 
     if (frontierQueue.length === 0) {
-      frontierQueue.push(...scopedDefenderCells.slice(0, 10));
+      return 0;
     }
 
     let capturedArea = 0;
@@ -87,34 +87,7 @@ export class GridTerritoryCapturer {
       capturedCells.size < scopedDefenderCells.length
     ) {
       if (head >= frontierQueue.length) {
-        let closestUncaptured: GridCell | null = null;
-        let minSqDist = Infinity;
-
-        for (let i = 0; i < scopedDefenderCells.length; i++) {
-          const candidate = scopedDefenderCells[i]!;
-          if (!capturedCells.has(candidate)) {
-            if (frontierQueue.length === 0) {
-              closestUncaptured = candidate;
-              break;
-            }
-            const lastCaptured = frontierQueue[frontierQueue.length - 1]!;
-            let dx = Math.abs(candidate.x - lastCaptured.x);
-            if (dx > 512) dx = 1024 - dx;
-            const dy = Math.abs(candidate.y - lastCaptured.y);
-            const sqDist = dx * dx + dy * dy;
-
-            if (sqDist < minSqDist) {
-              minSqDist = sqDist;
-              closestUncaptured = candidate;
-            }
-          }
-        }
-
-        if (closestUncaptured) {
-          frontierQueue.push(closestUncaptured);
-        } else {
-          break;
-        }
+        break;
       }
 
       const current = frontierQueue[head++]!;
