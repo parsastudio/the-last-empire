@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { EventSystem } from "@/engine/politics/event-system";
+import { TurnLogBuilder } from "@/domain/game/turn-log-builder";
 import { ActionPrioritySorter } from "./action-priority-sorter";
 import { SeededRandom } from "@/domain/shared/seeded-random";
 import { ActionQueue } from "./action-queue";
@@ -36,7 +36,7 @@ export class GameActionQueue {
         this.validator.validateAction(stateWithGrid, action);
         nextState = this.actionRouter.route(nextState, action);
 
-        const logEntry = EventSystem.createLogEntry(
+        const logEntry = TurnLogBuilder.createLogEntry(
           nextState.currentTurn,
           action.nationId,
           "INFO",

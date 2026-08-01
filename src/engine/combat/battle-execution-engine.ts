@@ -5,7 +5,7 @@ import { BattleCalculator } from "./battle-calculator";
 import { GridTerritoryCapturer } from "./grid-territory-capturer";
 import { StateSynchronizerFacade } from "./state/state-synchronizer-facade";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { EventSystem } from "@/engine/politics/event-system";
+import { TurnLogBuilder } from "@/domain/game/turn-log-builder";
 
 export class BattleExecutionEngine {
   private territoryCapturer = new GridTerritoryCapturer();
@@ -129,7 +129,7 @@ export class BattleExecutionEngine {
       isVictory: calcResult.isAttackerVictory,
     };
 
-    const logEntry = EventSystem.createLogEntry(
+    const logEntry = TurnLogBuilder.createLogEntry(
       state.currentTurn,
       attacker.id,
       calcResult.isAttackerVictory ? "INFO" : "WARNING",

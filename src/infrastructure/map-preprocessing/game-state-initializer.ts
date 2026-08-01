@@ -48,7 +48,6 @@ export class GameStateInitializer {
       marketPrices: { oil: 25000000, steel: 25000000 },
       nations: populatedNations,
       turnLogs: [],
-      eventFlags: {},
     };
 
     return this.synchronizer.synchronizeAll(baseState, gridState);
