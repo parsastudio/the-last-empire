@@ -67,7 +67,7 @@ export function LoanActionDialog({
     <UnifiedModalShell
       isOpen={isOpen}
       title="دریافت تسهیلات اضطراری از بانک جهانی"
-      subtitle="تامین نقدینگی فوری خزانه با پشتوانه اعتبار ملی"
+      subtitle="پرداخت نوبتی ۵٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
       maxWidthClass="max-w-md"
       onClose={onClose}
     >
@@ -85,7 +85,7 @@ export function LoanActionDialog({
           <div className="space-y-2 bg-background/40 p-3.5 rounded-2xl border border-border/60">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground font-sans">
-                میزبان وام درخواستی (میلیارد دلار):
+                مبلغ وام درخواستی (میلیارد دلار):
               </span>
               <span className="font-bold text-foreground text-sm font-mono">
                 {PersianNumberFormatter.toPersianDigits(currentBillion)} میلیارد
@@ -143,10 +143,11 @@ export function LoanActionDialog({
           <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60 font-sans">
             <div className="flex justify-between items-center font-mono">
               <span className="text-muted-foreground">
-                بازپرداخت کل (با ۵٪ کارمزد):
+                بهره نوبتی کسرشده از خزانه (۵٪):
               </span>
               <span className="font-bold text-treasury">
-                {PersianNumberFormatter.formatCurrency(absoluteValue * 1.05)}
+                {PersianNumberFormatter.formatCurrency(absoluteValue * 0.05)} /
+                نوبت
               </span>
             </div>
           </div>

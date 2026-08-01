@@ -101,12 +101,11 @@ export class AutoTradeEngine {
           const loanAmount = Math.ceil(missingCash / 1e9) * 1e9;
 
           loanTakenAmount = loanAmount;
-          const totalDebtAdded = loanAmount + Math.floor(loanAmount * 0.05);
 
           currentNation = {
             ...currentNation,
             treasury: currentNation.treasury + loanAmount,
-            nationalDebt: currentNation.nationalDebt + totalDebtAdded,
+            nationalDebt: currentNation.nationalDebt + loanAmount,
           };
         }
 

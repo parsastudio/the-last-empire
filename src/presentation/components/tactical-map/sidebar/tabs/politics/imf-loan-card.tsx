@@ -45,24 +45,24 @@ export function ImfLoanCard({
         <div className="flex items-center gap-2 px-1">
           <Landmark size={13} className="text-treasury" />
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            بانک جهانی و تسهیلات اعتباری
+            صندوق بین‌المللی پول (IMF) و وام‌ها
           </span>
         </div>
 
         <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
           <div className="flex items-center justify-between text-xs font-mono">
             <span className="text-muted-foreground font-sans">
-              رتبه اعتبار ملی:
+              اعتبار وام آزاد:
             </span>
             <span className="font-bold text-gdp">
-              {PersianNumberFormatter.toPersianDigits(creditRating)} / ۱۰۰
+              {PersianNumberFormatter.formatCurrency(availableLoan)}
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
             <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
               <span className="text-muted-foreground block font-sans">
-                بدهی معوق فعلی
+                کل وام‌های معوق
               </span>
               <span className="font-bold text-military block">
                 {PersianNumberFormatter.formatCurrency(nationalDebt)}
@@ -71,10 +71,12 @@ export function ImfLoanCard({
 
             <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
               <span className="text-muted-foreground block font-sans">
-                اعتبار وام آزاد
+                بهره نوبتی (۵٪)
               </span>
-              <span className="font-bold text-gdp block">
-                {PersianNumberFormatter.formatCurrency(availableLoan)}
+              <span className="font-bold text-treasury block">
+                {PersianNumberFormatter.formatCurrency(
+                  Math.floor(nationalDebt * 0.05),
+                )}
               </span>
             </div>
           </div>

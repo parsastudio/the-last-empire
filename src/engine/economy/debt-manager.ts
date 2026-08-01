@@ -9,16 +9,15 @@ export interface FinancialUpdateResult {
 }
 
 export class DebtManager {
-  private readonly interestRate = 0.003;
+  private readonly interestRate = 0.05;
 
   public processFinancials(
     nation: Nation,
     totalIncome: number,
     totalUpkeep: number,
   ): FinancialUpdateResult {
-    let netIncome = totalIncome - totalUpkeep;
-    const interestPaid = Math.floor(nation.nationalDebt * this.interestRate);
-    netIncome -= interestPaid;
+    const interestDue = Math.floor(nation.nationalDebt * this.interestRate);
+    const netIncome = totalIncome - totalUpkeep - interestDue;
 
     let treasury = nation.treasury + netIncome;
     let nationalDebt = nation.nationalDebt;
@@ -38,7 +37,7 @@ export class DebtManager {
       netIncome,
       newTreasury: treasury,
       newDebt: nationalDebt,
-      interestPaid,
+      interestPaid: interestDue,
       updatedNation,
     };
   }
