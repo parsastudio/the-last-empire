@@ -107,37 +107,18 @@ export class AIActionBuilder {
       const target = allNations[targetId] || allNations[canonicalTargetId];
       if (!target || !target.isAlive) continue;
 
-      if (!target.isAi) {
-        if (
-          relation.opinion < -30 &&
-          relation.stance !== "SEVERED_RELATIONS" &&
-          relation.stance !== "WAR"
-        ) {
-          actions.push({
-            id: makeId("diplomacy-proposal"),
-            nationId: nation.id,
-            type: "DIPLOMATIC_PROPOSAL",
-            targetNationId: target.id,
-            proposalType: "SEVER_TRADE_RELATIONS",
-          });
-        }
-      } else {
-        if (
-          relation.opinion > 20 &&
-          relation.opinion < 80 &&
-          nation.treasury > 20000
-        ) {
-          actions.push({
-            id: makeId("diplomacy-proposal"),
-            nationId: nation.id,
-            type: "DIPLOMATIC_PROPOSAL",
-            targetNationId: target.id,
-            proposalType:
-              relation.stance === "NORMAL_DIPLOMACY"
-                ? "NON_AGGRESSION_PACT"
-                : "FULL_ALLIANCE",
-          });
-        }
+      if (
+        relation.opinion < -30 &&
+        relation.stance !== "SEVERED_RELATIONS" &&
+        relation.stance !== "WAR"
+      ) {
+        actions.push({
+          id: makeId("diplomacy-proposal"),
+          nationId: nation.id,
+          type: "DIPLOMATIC_PROPOSAL",
+          targetNationId: target.id,
+          proposalType: "SEVER_TRADE_RELATIONS",
+        });
       }
     }
 
