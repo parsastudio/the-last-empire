@@ -23,10 +23,13 @@ export class BattleExecutionEngine {
       return state;
     }
 
+    const oilPrice = state.marketPrices?.oil || 25000000;
+
     const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
       action.dronesToLaunch,
+      oilPrice,
     );
 
     let actualConqueredArea = 0;
@@ -42,9 +45,20 @@ export class BattleExecutionEngine {
     const isFullCapitulation =
       actualConqueredArea >= defender.geography.territorySize;
 
+    const attackerTreasuryAfterDeployment =
+      attacker.treasury - calcResult.deploymentMoneyCost;
+    const attackerOilAfterDeployment = Math.max(
+      0,
+      attacker.resources.oil - calcResult.deploymentOilCost,
+    );
+
     const updatedAttacker = {
       ...attacker,
-      treasury: attacker.treasury + calcResult.treasuryLooted,
+      treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
+      resources: {
+        ...attacker.resources,
+        oil: attackerOilAfterDeployment,
+      },
       military: {
         ...attacker.military,
         infantry: Math.max(
@@ -111,7 +125,7 @@ export class BattleExecutionEngine {
       defenderCasualties: calcResult.defenderCasualties,
       conqueredAreaSqKm: actualConqueredArea,
       capitulatedAreaSqKm: isFullCapitulation ? actualConqueredArea : 0,
-      strategicAssessment: `پهپادهای شلیک‌شده: ${calcResult.dronesUsed} | ضریب پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
+      strategicAssessment: `هزینه اعزام لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} + ${calcResult.deploymentOilCost.toLocaleString("fa-IR")} بلوک نفت | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
       isVictory: calcResult.isAttackerVictory,
     };
 

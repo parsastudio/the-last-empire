@@ -195,6 +195,33 @@ export class ActionRuleEvaluator {
             "Drones to launch exceeds available stock",
           );
         }
+
+        const totalForceCost =
+          source.military.infantry * 250000000 +
+          source.military.airForce * 1000000000 +
+          action.dronesToLaunch * 1500000000;
+
+        const deploymentFivePct = totalForceCost * 0.05;
+        const deploymentMoneyCost = Math.floor(deploymentFivePct);
+        const oilPrice = state.marketPrices?.oil || 25000000;
+        const deploymentOilCost = Math.max(
+          1,
+          Math.ceil(deploymentFivePct / oilPrice),
+        );
+
+        if (source.treasury < deploymentMoneyCost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            `Insufficient treasury for troop deployment. Required: $${deploymentMoneyCost.toLocaleString("en-US")}`,
+          );
+        }
+
+        if (source.resources.oil < deploymentOilCost) {
+          throw new GameError(
+            "INSUFFICIENT_RESOURCES",
+            `Insufficient oil blocks for troop deployment. Required: ${deploymentOilCost} oil blocks`,
+          );
+        }
         break;
       }
     }
