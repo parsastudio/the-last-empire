@@ -79,6 +79,9 @@ export const NationSchema = z.object({
   traits: z.array(NationTraitSchema),
   globalReputation: z.number().min(-100).max(100),
   doctrines: DoctrinesStateSchema,
+  researchBudgetRate: z.number().min(0).max(30).default(0),
+  accumulatedResearchCost: z.number().nonnegative().default(0),
+  researchCycleTurn: z.number().min(0).max(3).default(0),
   proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
   regionsDemographics: z.array(RegionDemographicsSchema).optional(),
 });

@@ -120,6 +120,9 @@ export class NationProfileAssigner {
         doctrinePoints: 0,
         unlockedDoctrines: [],
       },
+      researchBudgetRate: 1,
+      accumulatedResearchCost: 0,
+      researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [],
     };
@@ -250,6 +253,9 @@ export class NationProfileAssigner {
         doctrinePoints: 0,
         unlockedDoctrines: [],
       },
+      researchBudgetRate: 1,
+      accumulatedResearchCost: 0,
+      researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [],
     };

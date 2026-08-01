@@ -1,16 +1,32 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { TreatyEvaluator } from "@/engine/diplomacy/treaty-evaluator";
+import { ResearchManager } from "@/engine/politics/research-manager";
 import { AbilityExecutor } from "./ability-executor";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
+  private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
     const nation = state.nations[action.nationId];
     if (!nation) return state;
 
     switch (action.type) {
+      case "SET_RESEARCH_BUDGET": {
+        const updatedNation = this.researchManager.setResearchBudget(
+          nation,
+          action.newRate,
+        );
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: updatedNation,
+          },
+        };
+      }
+
       case "ACTIVATE_ABILITY":
         return AbilityExecutor.execute(state, action);
 

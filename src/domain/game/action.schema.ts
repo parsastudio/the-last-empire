@@ -3,6 +3,7 @@ import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { GameStateSchema } from "./game-state.schema";
 import { CoordinateSchema } from "@/domain/map/coordinate.schema";
+import { SetResearchBudgetActionSchema } from "@/domain/politics/research.schema";
 
 export const SetTaxRateActionSchema = z.object({
   id: z.string(),
@@ -162,6 +163,7 @@ export const InitiateBattleActionSchema = z.object({
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   SetTariffRateActionSchema,
+  SetResearchBudgetActionSchema,
   RecruitUnitActionSchema,
   DiplomaticProposalActionSchema,
   TradeResourcesActionSchema,
@@ -190,6 +192,9 @@ export const ActionResultSchema = z.object({
 
 export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;
 export type SetTariffRateAction = z.infer<typeof SetTariffRateActionSchema>;
+export type SetResearchBudgetAction = z.infer<
+  typeof SetResearchBudgetActionSchema
+>;
 export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
 export type DiplomaticProposalAction = z.infer<
   typeof DiplomaticProposalActionSchema

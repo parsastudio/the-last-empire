@@ -27,6 +27,15 @@ export class ActionRuleEvaluator {
         }
         break;
 
+      case "SET_RESEARCH_BUDGET":
+        if (action.newRate < 0 || action.newRate > 30) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "Research budget rate must be between 0 and 30",
+          );
+        }
+        break;
+
       case "RECRUIT_UNIT":
         if (action.quantity <= 0) {
           throw new GameError(
