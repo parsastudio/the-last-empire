@@ -59,7 +59,7 @@ export class DoctrinesManager {
     return unlocked.includes("low-upkeep") ? 0.85 : 1.0;
   }
 
-  public getUpkeepMultiplier(unlocked?: string[]): number {
+  public getMilitaryPayrollMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
     return unlocked.includes("cybernetic-automation") ? 0.8 : 1.0;
   }

@@ -1,7 +1,7 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 
 export class AttritionManager {
-  public applyUpkeepDeficitAttrition(
+  public applyMilitaryDeficitAttrition(
     nation: Nation,
     attritionRate = 0.05,
   ): Nation {

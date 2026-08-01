@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { TaxCalculator } from "@/engine/economy/tax-calculator";
-import { UpkeepCalculator } from "@/engine/economy/upkeep-calculator";
+import { MilitaryPayrollCalculator } from "@/engine/economy/military-payroll-calculator";
 import { TariffCalculator } from "@/engine/economy/tariff-calculator";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
@@ -23,7 +23,7 @@ export interface HumanResourceMetrics {
 }
 
 const taxCalculator = new TaxCalculator();
-const upkeepCalculator = new UpkeepCalculator();
+const payrollCalculator = new MilitaryPayrollCalculator();
 const tariffCalculator = new TariffCalculator();
 const popWelfareCalculator = new PopulationWelfareCalculator();
 
@@ -78,12 +78,12 @@ export function useGameResources(
     }
 
     const taxResult = taxCalculator.evaluateTaxPolicy(nation);
-    const upkeepBreakdown = upkeepCalculator.calculateUpkeep(nation);
+    const payrollBreakdown = payrollCalculator.calculatePayroll(nation);
     const tariffResult = tariffCalculator.calculateTariffEffects(nation);
 
     const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
     const totalExpenses =
-      upkeepBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
+      payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
     const netIncome = totalIncome - totalExpenses;
 
     const welfareMetrics = popWelfareCalculator.evaluateWelfare(

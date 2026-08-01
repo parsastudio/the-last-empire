@@ -18,7 +18,7 @@ export class MilitaryPhase implements TurnPhase {
 
       let updated = { ...nation };
       updated = this.recruitmentQueue.processTurnQueue(updated);
-      updated = this.attritionManager.applyUpkeepDeficitAttrition(updated);
+      updated = this.attritionManager.applyMilitaryDeficitAttrition(updated);
 
       nations[id] = updated;
     }

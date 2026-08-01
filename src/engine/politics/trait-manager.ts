@@ -18,7 +18,7 @@ export class TraitManager {
     return modifier;
   }
 
-  public getUpkeepMultiplier(nation: Nation): number {
+  public getMilitaryPayrollMultiplier(nation: Nation): number {
     let multiplier = 1.0;
     if (this.hasTrait(nation, "MILITARISTIC")) {
       multiplier -= 0.15;

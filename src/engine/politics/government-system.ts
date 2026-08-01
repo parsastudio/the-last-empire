@@ -2,7 +2,7 @@ import type { GovernmentType } from "@/domain/politics/politics.schema";
 
 export interface GovernmentTraits {
   economicGrowthBonus: number;
-  militaryUpkeepMultiplier: number;
+  militaryPayrollMultiplier: number;
   stabilityDeltaPerTurn: number;
   tradeMultiplier: number;
   militaryPowerMultiplier: number;
@@ -14,7 +14,7 @@ export class GovernmentSystem {
       case "DEMOCRACY":
         return {
           economicGrowthBonus: 0.01,
-          militaryUpkeepMultiplier: 1.0,
+          militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 1.0,
           tradeMultiplier: 1.25,
           militaryPowerMultiplier: 0.85,
@@ -22,7 +22,7 @@ export class GovernmentSystem {
       case "DICTATORSHIP":
         return {
           economicGrowthBonus: -0.005,
-          militaryUpkeepMultiplier: 0.9,
+          militaryPayrollMultiplier: 0.9,
           stabilityDeltaPerTurn: -0.5,
           tradeMultiplier: 0.9,
           militaryPowerMultiplier: 1.25,
@@ -30,7 +30,7 @@ export class GovernmentSystem {
       case "MONARCHY":
         return {
           economicGrowthBonus: 0.005,
-          militaryUpkeepMultiplier: 1.0,
+          militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 0.5,
           tradeMultiplier: 1.0,
           militaryPowerMultiplier: 1.0,
@@ -38,7 +38,7 @@ export class GovernmentSystem {
       case "COMMUNISM":
         return {
           economicGrowthBonus: 0.0,
-          militaryUpkeepMultiplier: 0.75,
+          militaryPayrollMultiplier: 0.75,
           stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 0.7,
           militaryPowerMultiplier: 1.0,
@@ -46,7 +46,7 @@ export class GovernmentSystem {
       case "FASCISM":
         return {
           economicGrowthBonus: -0.01,
-          militaryUpkeepMultiplier: 1.1,
+          militaryPayrollMultiplier: 1.1,
           stabilityDeltaPerTurn: -1.0,
           tradeMultiplier: 0.8,
           militaryPowerMultiplier: 1.5,
@@ -54,7 +54,7 @@ export class GovernmentSystem {
       default:
         return {
           economicGrowthBonus: 0.0,
-          militaryUpkeepMultiplier: 1.0,
+          militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 1.0,
           militaryPowerMultiplier: 1.0,
