@@ -3,6 +3,7 @@ import {
   CasualtyMetrics,
   ReportSeverity,
 } from "@/domain/reports/combat-report.schema";
+import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -19,6 +20,8 @@ export interface BattleCalculationResult {
 }
 
 export class BattleCalculator {
+  private static governmentSystem = new GovernmentSystem();
+
   public static calculateBattle(
     attacker: Nation,
     defender: Nation,
@@ -42,9 +45,26 @@ export class BattleCalculator {
       Math.max(0, dronesToLaunch),
     );
 
+    const attackerGovTraits = this.governmentSystem.getTraits(
+      attacker.government.type,
+    );
+    const defenderGovTraits = this.governmentSystem.getTraits(
+      defender.government.type,
+    );
+
+    let attackerGovMult = attackerGovTraits.militaryPowerMultiplier;
+    let defenderGovMult = defenderGovTraits.militaryPowerMultiplier;
+
+    if (attacker.traits.includes("MILITARISTIC")) {
+      attackerGovMult *= 1.15;
+    }
+    if (defender.traits.includes("MILITARISTIC")) {
+      defenderGovMult *= 1.15;
+    }
+
     const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.25;
     const droneCasualtiesInflicted = Math.floor(
-      dronesUsed * 3 * techMultiplier,
+      dronesUsed * 3 * techMultiplier * attackerGovMult,
     );
 
     let defenderRemainingInfantry = defender.military.infantry;
@@ -70,12 +90,14 @@ export class BattleCalculator {
     const attackerAirPower =
       attacker.military.airForce *
       (1 + (attacker.military.techLevel - 1) * 0.2) *
-      (1 + attacker.military.experience / 100);
+      (1 + attacker.military.experience / 100) *
+      attackerGovMult;
 
     const defenderAirPower =
       defenderRemainingAirForce *
       (1 + (defender.military.techLevel - 1) * 0.2) *
-      (1 + defender.military.experience / 100);
+      (1 + defender.military.experience / 100) *
+      defenderGovMult;
 
     const totalAirPower = attackerAirPower + defenderAirPower;
 
@@ -115,12 +137,14 @@ export class BattleCalculator {
       attacker.military.infantry *
       (1 + (attacker.military.techLevel - 1) * 0.2) *
       (1 + attacker.military.experience / 100) *
-      airSupportMultiplier;
+      airSupportMultiplier *
+      attackerGovMult;
 
     const defenderGroundPower =
       (defenderRemainingInfantry + militiaGarrison) *
       (1 + (defender.military.techLevel - 1) * 0.2) *
-      (1 + defender.military.experience / 100);
+      (1 + defender.military.experience / 100) *
+      defenderGovMult;
 
     const totalGroundPower = attackerGroundPower + defenderGroundPower;
 
