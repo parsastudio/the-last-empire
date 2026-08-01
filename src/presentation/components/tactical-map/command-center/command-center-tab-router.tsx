@@ -111,13 +111,7 @@ export function CommandCenterTabRouter({
         />
       );
     case "research":
-      return (
-        <WideResearchView
-          nationId={nation.id}
-          unlockedDoctrines={nation.doctrines.unlockedDoctrines}
-          doctrinePoints={nation.doctrines.doctrinePoints}
-        />
-      );
+      return <WideResearchView nation={nation} />;
     case "abilities":
       return (
         <WideAbilitiesView
