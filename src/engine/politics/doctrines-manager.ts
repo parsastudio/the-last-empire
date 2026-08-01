@@ -1,12 +1,15 @@
 import type { DoctrinesState } from "@/domain/politics/doctrines.schema";
-import { DEFAULT_DOCTRINES, Doctrine } from "./doctrines-list.config";
+import {
+  COMPREHENSIVE_RESEARCH_TREE,
+  ResearchNode,
+} from "@/domain/politics/research-tree.config";
 
-export type { Doctrine };
+export type { ResearchNode as Doctrine };
 
 export class DoctrinesManager {
-  private readonly doctrines: Doctrine[] = DEFAULT_DOCTRINES;
+  private readonly doctrines: ResearchNode[] = COMPREHENSIVE_RESEARCH_TREE;
 
-  public getAvailableDoctrines(): Doctrine[] {
+  public getAvailableDoctrines(): ResearchNode[] {
     return [...this.doctrines];
   }
 
@@ -25,6 +28,13 @@ export class DoctrinesManager {
       throw new Error("INSUFFICIENT_DOCTRINE_POINTS");
     }
 
+    const missingPrereqs = doctrine.prerequisites.filter(
+      (req) => !(state.unlockedDoctrines || []).includes(req),
+    );
+    if (missingPrereqs.length > 0) {
+      throw new Error("PREREQUISITES_NOT_MET");
+    }
+
     return {
       doctrinePoints: state.doctrinePoints - doctrine.cost,
       unlockedDoctrines: [...(state.unlockedDoctrines || []), doctrineId],
@@ -32,14 +42,20 @@ export class DoctrinesManager {
   }
 
   public getGdpGrowthModifier(unlocked?: string[]): number {
-    return (unlocked || []).includes("gdp-booster") ? 0.05 : 0;
+    if (!unlocked) return 0;
+    let bonus = 0;
+    if (unlocked.includes("gdp-booster")) bonus += 0.05;
+    if (unlocked.includes("cybernetic-automation")) bonus += 0.15;
+    return bonus;
   }
 
   public getUpkeepMultiplier(unlocked?: string[]): number {
-    return (unlocked || []).includes("low-upkeep") ? 0.9 : 1.0;
+    if (!unlocked) return 1.0;
+    return unlocked.includes("low-upkeep") ? 0.9 : 1.0;
   }
 
   public getReputationGainMultiplier(unlocked?: string[]): number {
-    return (unlocked || []).includes("reputation-recovery") ? 1.5 : 1.0;
+    if (!unlocked) return 1.0;
+    return unlocked.includes("reputation-recovery") ? 1.5 : 1.0;
   }
 }
