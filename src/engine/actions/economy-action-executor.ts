@@ -88,7 +88,7 @@ export class EconomyActionExecutor {
       }
 
       case "UPGRADE_INDUSTRIAL_LEVEL": {
-        const cost = Math.max(1000000000, Math.floor(nation.gdp * 0.08));
+        const cost = Math.max(2000000000, Math.floor(nation.gdp * 0.15));
         return {
           ...state,
           nations: {

@@ -22,6 +22,7 @@ export function IndustrialUpgradeCard({
   const mockNation = {
     gdp,
     industrialLevel: currentLevel,
+    treasury,
   } as unknown as Parameters<typeof manager.getUpgradeCost>[0];
 
   const upgradeCost = manager.getUpgradeCost(mockNation);
@@ -57,16 +58,21 @@ export function IndustrialUpgradeCard({
 
         <div className="bg-secondary/40 border border-border/40 p-2.5 rounded-xl space-y-1 text-[10px] font-mono">
           <span className="text-muted-foreground block font-sans font-bold">
-            سود ارتقا به سطح{" "}
+            مزایای ارتقا به سطح{" "}
             {PersianNumberFormatter.toPersianDigits(currentLevel + 1)}:
           </span>
           <span className="text-gdp font-bold block font-sans">
             • ۲۰+٪ افزایش نرخ تولید نوبتی نفت و فولاد
           </span>
+          <span className="text-amber-500 font-bold block font-sans">
+            • ۱۰+٪ افزایش بازدهی تولید امتیاز پژوهش در هر چرخه
+          </span>
         </div>
 
         <div className="flex items-center justify-between text-[11px] font-mono">
-          <span className="text-muted-foreground font-sans">هزینه ارتقا:</span>
+          <span className="text-muted-foreground font-sans">
+            هزینه ارتقا (۱۵٪ GDP):
+          </span>
           <span className="font-bold text-foreground">
             {PersianNumberFormatter.formatCurrency(upgradeCost)}
           </span>

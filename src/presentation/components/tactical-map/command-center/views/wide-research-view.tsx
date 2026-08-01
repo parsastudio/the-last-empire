@@ -1,35 +1,56 @@
 import React from "react";
 import { DoctrineBranchColumn } from "./components/doctrine-branch-column";
 import { useWideResearch } from "./hooks/use-wide-research";
+import { ResearchBudgetCard } from "../../sidebar/tabs/politics/research-budget-card";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface WideResearchViewProps {
   unlockedDoctrines?: string[];
   doctrinePoints?: number;
   nationId?: string;
+  nation?: Nation | null;
 }
 
 export function WideResearchView({
   unlockedDoctrines = ["gdp-booster"],
   doctrinePoints = 0,
   nationId = "NATION_118",
+  nation,
 }: WideResearchViewProps) {
   const research = useWideResearch({
-    unlockedDoctrines,
-    nationId,
+    unlockedDoctrines: nation
+      ? nation.doctrines.unlockedDoctrines
+      : unlockedDoctrines,
+    nationId: nation ? nation.id : nationId,
   });
 
+  const activePoints = nation
+    ? nation.doctrines.doctrinePoints
+    : doctrinePoints;
+  const activeNationId = nation ? nation.id : nationId;
+
   return (
-    <div className="space-y-4 dir-rtl text-right">
+    <div className="space-y-5 dir-rtl text-right animate-in fade-in duration-200">
+      <ResearchBudgetCard
+        nationId={activeNationId}
+        gdp={nation?.gdp}
+        treasury={nation?.treasury}
+        currentBudgetRate={nation?.researchBudgetRate}
+        accumulatedCost={nation?.accumulatedResearchCost}
+        cycleTurn={nation?.researchCycleTurn}
+        industrialLevel={nation?.industrialLevel}
+      />
+
       <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between font-mono text-xs">
         <span className="text-muted-foreground font-sans">
-          موجودی امتیاز دکترین راهبردی:
+          موجودی امتیاز پژوهش آماده خرج:
         </span>
         <span className="font-bold text-gdp text-sm">
-          {doctrinePoints.toFixed(1)} امتیاز
+          {activePoints.toFixed(1)} امتیاز
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 animate-in fade-in duration-200">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <DoctrineBranchColumn
           title="شاخه‌ صنعت و لجستیک"
           doctrines={research.industrialDoctrines}

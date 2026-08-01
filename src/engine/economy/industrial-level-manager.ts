@@ -7,8 +7,8 @@ export interface UpgradeCostResult {
 
 export class IndustrialLevelManager {
   public getUpgradeCost(nation: Nation): number {
-    const baseCost = Math.floor(nation.gdp * 0.08);
-    return Math.max(1000000000, baseCost);
+    const baseCost = Math.floor(nation.gdp * 0.15);
+    return Math.max(2000000000, baseCost);
   }
 
   public evaluateUpgrade(nation: Nation): UpgradeCostResult {
