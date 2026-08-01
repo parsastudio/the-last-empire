@@ -1,3 +1,5 @@
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+
 export interface PopulationWelfareMetrics {
   oilDemand: number;
   steelDemand: number;
@@ -9,10 +11,22 @@ export interface PopulationWelfareMetrics {
 }
 
 export class PopulationWelfareCalculator {
-  public calculateOilDemand(population: number, gdp = 10000000000): number {
+  private doctrinesManager = new DoctrinesManager();
+
+  public calculateOilDemand(
+    population: number,
+    gdp = 10000000000,
+    unlockedDoctrines?: string[],
+  ): number {
     if (population <= 0) return 0;
     const gdpFactor = Math.max(1, Math.floor(gdp / 10000000000));
-    return Math.max(1, Math.ceil((population / 20000000) * gdpFactor));
+    const baseDemand = Math.max(
+      1,
+      Math.ceil((population / 20000000) * gdpFactor),
+    );
+    const discount =
+      this.doctrinesManager.getOilDemandDiscount(unlockedDoctrines);
+    return Math.max(1, Math.ceil(baseDemand * discount));
   }
 
   public calculateSteelDemand(population: number, gdp = 10000000000): number {
@@ -38,8 +52,13 @@ export class PopulationWelfareCalculator {
     oilStock: number,
     steelStock: number,
     gdp = 10000000000,
+    unlockedDoctrines?: string[],
   ): PopulationWelfareMetrics {
-    const oilDemand = this.calculateOilDemand(population, gdp);
+    const oilDemand = this.calculateOilDemand(
+      population,
+      gdp,
+      unlockedDoctrines,
+    );
     const steelDemand = this.calculateSteelDemand(population, gdp);
 
     const oilFulfillment = this.calculateFulfillment(oilStock, oilDemand);
