@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
-} from "@/domain/map/countries";
+} from "@/domain/data/countries";
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { CountryMapping } from "./use-map-data";
+import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 interface UseTacticalMapInteractionProps {

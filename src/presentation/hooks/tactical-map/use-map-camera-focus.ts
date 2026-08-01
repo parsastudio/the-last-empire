@@ -2,8 +2,8 @@ import { useCallback } from "react";
 import {
   findCountryProfileByCode,
   findCountryProfileById,
-} from "@/domain/map/countries";
-import { CountryMapping } from "./use-map-data";
+} from "@/domain/data/countries";
+import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 
 interface UseMapCameraFocusProps {
   mapWidth: number;

@@ -3,7 +3,7 @@ import { Zap, Search } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { useAbilityTargetOptions } from "./hooks/use-ability-target-options";
+import { useAbilityTargetOptions } from "@/presentation/components/tactical-map/modals/hooks/use-ability-target-options";
 
 interface AbilityTargetModalProps {
   isOpen: boolean;
@@ -28,7 +28,7 @@ export function AbilityTargetModal({
   if (!isOpen) return null;
 
   const filteredOptions = targetOptions.filter(
-    (opt) =>
+    (opt: { name: string; code: string }) =>
       opt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       opt.code.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -72,7 +72,7 @@ export function AbilityTargetModal({
         </div>
 
         <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
-          {filteredOptions.map((opt) => (
+          {filteredOptions.map((opt: { name: string; code: string }) => (
             <button
               key={opt.code}
               onClick={() => setSelectedCode(opt.code)}

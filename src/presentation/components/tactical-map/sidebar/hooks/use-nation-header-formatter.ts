@@ -3,7 +3,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
-} from "@/infrastructure/data/countries";
+} from "@/domain/data/countries";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface UseNationHeaderFormatterProps {

@@ -1,4 +1,4 @@
-import { findCountryProfileById } from "@/infrastructure/data/countries";
+import { findCountryProfileById } from "@/domain/data/countries";
 
 export class CountryProfileLookupCache {
   private gdpCache = new Float32Array(256);
