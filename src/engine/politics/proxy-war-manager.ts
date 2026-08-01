@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/game-error";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
 
 export interface ProxyOperationResult {
   updatedSourceNation: Nation;
@@ -17,8 +18,9 @@ export class ProxyWarManager {
     drainAmount: number,
   ): ProxyOperationResult {
     const clampedDrain = Math.max(1, Math.min(15, drainAmount));
-    let requiredBudget = Math.floor(
-      targetNation.gdp * (clampedDrain / 2) * 0.01,
+    let requiredBudget = calculateProxyOperationBudget(
+      targetNation.gdp,
+      clampedDrain,
     );
 
     const discount = this.doctrinesManager.getProxyCostDiscount(

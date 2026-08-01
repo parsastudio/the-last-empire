@@ -1,5 +1,6 @@
 import React from "react";
 import { ClipboardList, Coins } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface StagedAction {
   id: string;
@@ -45,7 +46,7 @@ export function TurnStagingLedger({
               {act.typeLabel}
             </span>
             <span className="font-bold text-treasury">
-              ${act.cost.toLocaleString("fa-IR")}
+              {PersianNumberFormatter.formatCurrency(act.cost, true)}
             </span>
           </div>
         ))}
@@ -56,7 +57,8 @@ export function TurnStagingLedger({
           مجموع هزینه‌های کسرشده:
         </span>
         <span className="text-gdp flex items-center gap-1">
-          <Coins size={12} />${totalCost.toLocaleString("fa-IR")}
+          <Coins size={12} />
+          {PersianNumberFormatter.formatCurrency(totalCost, true)}
         </span>
       </div>
     </div>

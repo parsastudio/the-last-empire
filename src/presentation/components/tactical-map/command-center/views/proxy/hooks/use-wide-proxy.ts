@@ -3,6 +3,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
 
 export interface TargetCountryOption {
   id: string;
@@ -80,7 +81,10 @@ export function useWideProxy({
 
   const requiredBudget = useMemo(() => {
     if (!selectedTargetNation) return 0;
-    return Math.floor(selectedTargetNation.gdp * (desiredDrain / 2) * 0.01);
+    return calculateProxyOperationBudget(
+      selectedTargetNation.gdp,
+      desiredDrain,
+    );
   }, [selectedTargetNation, desiredDrain]);
 
   const activeOperations = useMemo<ActiveProxyOperation[]>(() => {
