@@ -1,7 +1,7 @@
 import { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
 
 export class BankruptcyManager {
-  private readonly debtToGdpLimitRatio = 2.5;
+  private readonly debtToGdpLimitRatio = 1.0;
 
   public hasReachedDebtLimit(nation: Nation): boolean {
     if (
@@ -41,14 +41,14 @@ export class BankruptcyManager {
         name: "Debt Restructuring Period",
         effectType: "BANKRUPTCY_HOLIDAY",
         magnitude: 0,
-        turnsRemaining: 15,
+        turnsRemaining: 10,
       },
       {
         id: "bankruptcy-bad-credit",
         name: "Ruined Credit Rating",
         effectType: "CREDIT_RATING_MULT",
         magnitude: -80,
-        turnsRemaining: 20,
+        turnsRemaining: 10,
       },
     ];
 
@@ -56,7 +56,7 @@ export class BankruptcyManager {
       ...nation,
       gdp: Math.floor(nation.gdp * 0.9),
       treasury: 0,
-      nationalDebt: Math.floor(nation.nationalDebt * 0.8),
+      nationalDebt: Math.floor(nation.nationalDebt * 0.75),
       industrialLevel: Math.max(1, nation.industrialLevel - 1),
       geography: {
         ...nation.geography,
