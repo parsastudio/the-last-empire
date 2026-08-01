@@ -1,1 +1,0 @@
-export const GLOBAL_DEVIATION_FACTOR = 1.15;

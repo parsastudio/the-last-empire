@@ -21,14 +21,7 @@ export function TaxControlCard({
 }: TaxControlCardProps) {
   const [taxRate, setTaxRate] = useState<number>(Math.min(50, initialTaxRate));
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [prevInitialRate, setPrevInitialRate] =
-    useState<number>(initialTaxRate);
   const { dispatchAction } = useGameActions();
-
-  if (initialTaxRate !== prevInitialRate) {
-    setPrevInitialRate(initialTaxRate);
-    setTaxRate(Math.min(50, initialTaxRate));
-  }
 
   const handleApplyTax = async () => {
     const action = ActionFactory.setTaxRate(nationId, taxRate);
@@ -68,7 +61,6 @@ export function TaxControlCard({
         />
 
         <PredictiveImpactBox
-          currentTaxRate={initialTaxRate}
           newTaxRate={taxRate}
           baseGdp={baseGdp}
           corruption={corruption}

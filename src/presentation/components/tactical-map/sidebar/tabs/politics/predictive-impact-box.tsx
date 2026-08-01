@@ -3,7 +3,6 @@ import { TrendingUp, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface PredictiveImpactBoxProps {
-  currentTaxRate: number;
   newTaxRate: number;
   baseGdp: number;
   corruption?: number;

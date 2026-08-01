@@ -31,28 +31,14 @@ export function DisbandUnitCard({
     }
   }, [military, selectedUnitType]);
 
-  const [disbandCount, setDisbandAmount] = useState<number>(
-    Math.min(5, Math.max(1, maxAvailable)),
-  );
+  const [disbandCount, setDisbandCount] = useState<number>(1);
 
-  const [prevUnitType, setPrevUnitType] = useState<UnitType>(selectedUnitType);
-  const [prevMaxAvailable, setPrevMaxAvailable] =
-    useState<number>(maxAvailable);
-
-  if (selectedUnitType !== prevUnitType || maxAvailable !== prevMaxAvailable) {
-    setPrevUnitType(selectedUnitType);
-    setPrevMaxAvailable(maxAvailable);
-    if (maxAvailable === 0) {
-      setDisbandAmount(0);
-    } else {
-      setDisbandAmount(Math.min(5, maxAvailable) || 1);
-    }
-  }
+  const effectiveCount = Math.min(disbandCount, Math.max(0, maxAvailable));
 
   const { dispatchAction } = useGameActions();
 
   const handleDisband = async () => {
-    if (disbandCount <= 0 || disbandCount > maxAvailable) return;
+    if (effectiveCount <= 0 || effectiveCount > maxAvailable) return;
 
     let typeLabel = "یگان پیاده‌نظام";
     if (selectedUnitType === "AIR_FORCE") typeLabel = "فروند جنگنده";
@@ -62,19 +48,19 @@ export function DisbandUnitCard({
     const action = ActionFactory.disbandUnit(
       nationId,
       selectedUnitType,
-      disbandCount,
+      effectiveCount,
     );
 
     await dispatchAction(
       action,
-      `${PersianNumberFormatter.toPersianDigits(disbandCount)} ${typeLabel} منحل شد و نیروی انسانی به مخازن ملی بازگشت.`,
+      `${PersianNumberFormatter.toPersianDigits(effectiveCount)} ${typeLabel} منحل شد و نیروی انسانی به مخازن ملی بازگشت.`,
     );
   };
 
   const handlePercentageSelect = (pct: number) => {
     if (maxAvailable <= 0) return;
     const target = Math.max(1, Math.floor(maxAvailable * pct));
-    setDisbandAmount(target);
+    setDisbandCount(target);
   };
 
   return (
@@ -138,7 +124,7 @@ export function DisbandUnitCard({
           </span>
           <span className="font-bold text-rose-500">
             {PersianNumberFormatter.toPersianDigits(
-              disbandCount.toLocaleString("en-US"),
+              effectiveCount.toLocaleString("en-US"),
             )}{" "}
             یگان
           </span>
@@ -149,8 +135,8 @@ export function DisbandUnitCard({
           min={maxAvailable > 0 ? 1 : 0}
           max={Math.max(0, maxAvailable)}
           disabled={maxAvailable === 0}
-          value={disbandCount}
-          onChange={(e) => setDisbandAmount(Number(e.target.value))}
+          value={effectiveCount}
+          onChange={(e) => setDisbandCount(Number(e.target.value))}
           className="w-full accent-rose-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
         />
 
@@ -192,12 +178,12 @@ export function DisbandUnitCard({
 
         <button
           onClick={handleDisband}
-          disabled={maxAvailable === 0 || disbandCount <= 0}
+          disabled={maxAvailable === 0 || effectiveCount <= 0}
           className="w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-secondary disabled:text-muted-foreground text-rose-500 border border-rose-500/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
         >
           {maxAvailable === 0
             ? "هیچ یگانی از این نوع برای انحلال وجود ندارد"
-            : `انحلال ${PersianNumberFormatter.toPersianDigits(disbandCount.toLocaleString("en-US"))} یگان و بازیابی نیروی انسانی`}
+            : `انحلال ${PersianNumberFormatter.toPersianDigits(effectiveCount.toLocaleString("en-US"))} یگان و بازیابی نیروی انسانی`}
         </button>
       </div>
     </div>

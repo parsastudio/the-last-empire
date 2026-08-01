@@ -1,6 +1,5 @@
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { findCountryProfileById } from "@/domain/map/countries";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
@@ -101,22 +100,10 @@ export class GdpPopUpdater {
       if (!config) {
         const canonicalId = getCanonical(ownerId);
         const nation = updated[canonicalId] || updated[ownerId];
-        const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
-        const profile = findCountryProfileById(numericId);
 
-        const baseGdp =
-          nation && nation.gdp > 0
-            ? nation.gdp
-            : profile
-              ? profile.gdp
-              : 5000000000;
-
+        const baseGdp = nation && nation.gdp > 0 ? nation.gdp : 5000000000;
         const basePop =
-          nation && nation.population > 0
-            ? nation.population
-            : profile
-              ? profile.population
-              : 80000000;
+          nation && nation.population > 0 ? nation.population : 80000000;
 
         const initPixels = this.initialPixelsMapCache!.get(canonicalId) || 0;
         const gdpDensity = initPixels > 0 ? baseGdp / initPixels : 0;

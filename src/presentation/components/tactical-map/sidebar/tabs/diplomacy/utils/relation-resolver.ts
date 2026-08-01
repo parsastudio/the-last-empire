@@ -1,13 +1,14 @@
 import {
   findCountryProfileByCode,
   findCountryProfileById,
-} from "@/infrastructure/data/countries";
+} from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
-import { CountryProfileData } from "../country-profile-stats";
+import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
 
 export interface DiplomaticRelation {
   code: string;
@@ -19,6 +20,8 @@ export interface DiplomaticRelation {
   isTradeEmbargoed?: boolean;
   profileData: CountryProfileData;
 }
+
+const powerCalculator = new PowerScoreCalculator();
 
 export function resolveProfileRelation(
   code: string,
@@ -74,11 +77,21 @@ export function resolveProfileRelation(
 
   const govLabel = getGovernmentTypeLabel(govType);
 
-  const militaryPower = liveNation
-    ? liveNation.military.infantry * 1 +
-      liveNation.military.airForce * 3 +
-      liveNation.military.droneMissile * 2.5
-    : (profile?.startingInfantry ?? 50) + (profile?.startingAirForce ?? 10) * 3;
+  const infantry = liveNation
+    ? liveNation.military.infantry
+    : (profile?.startingInfantry ?? 50);
+  const airForce = liveNation
+    ? liveNation.military.airForce
+    : (profile?.startingAirForce ?? 10);
+  const drone = liveNation ? liveNation.military.droneMissile : 0;
+  const techLevel = liveNation ? liveNation.military.techLevel : 1;
+
+  const militaryPower = powerCalculator.calculateMilitaryScore(
+    infantry,
+    airForce,
+    drone,
+    techLevel,
+  );
 
   return {
     code: displayCode.toUpperCase(),
@@ -91,9 +104,7 @@ export function resolveProfileRelation(
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: `${PersianNumberFormatter.toPersianDigits(popMillion)} میلیون نفر`,
-      techLevel: liveNation
-        ? liveNation.military.techLevel
-        : (profile?.startingTechLevel ?? 1),
+      techLevel,
       governmentType: govLabel,
       stability: liveNation ? liveNation.government.stability : 80,
       corruption: liveNation ? liveNation.government.corruption : 10,

@@ -1,6 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { findCountryProfileById } from "@/infrastructure/data/countries";
 
 export class GdpCalculator {
   private governmentSystem = new GovernmentSystem();
@@ -43,18 +42,14 @@ export class GdpCalculator {
 
   public updateNationGdp(nation: Nation): number {
     const growthMult = this.calculateGdpGrowthMultiplier(nation);
-    const numericId = parseInt(nation.id.replace("NATION_", ""), 10);
-    const profile = findCountryProfileById(numericId);
 
     const previousGdp =
       nation.gdp && nation.gdp > 0
         ? nation.gdp
-        : profile
-          ? profile.gdp
-          : this.calculateBaseGdp(
-              nation.population,
-              nation.geography.infrastructureLevel,
-            );
+        : this.calculateBaseGdp(
+            nation.population,
+            nation.geography.infrastructureLevel,
+          );
 
     return Math.floor(previousGdp * growthMult);
   }

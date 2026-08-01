@@ -5,9 +5,7 @@ import { ResourcesSection } from "../../sidebar/resources-section";
 import { GovernmentStatusSection } from "../../sidebar/government-status-section";
 import { RegionBreakdownCard } from "../../sidebar/region-breakdown-card";
 import { Nation } from "@/domain/nation/nation.schema";
-import { findCountryProfileById } from "@/domain/map/countries";
-import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
-import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
+import { findCountryProfileById } from "@/domain/data/countries";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -26,18 +24,29 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         ? profile.gdp
         : 5000000000;
 
-  const { oilProducedPerTurn, steelProducedPerTurn } =
-    ResourceGenerationStep.calculateResourceGeneration(nation);
+  const gdpScale = Math.max(1, Math.floor(effectiveGdp / 10000000000));
+  const industrialMultiplier = 1.0 + ((nation.industrialLevel || 1) - 1) * 0.25;
+  const isOilRich = nation.traits.includes("OIL_RICH");
 
-  const popWelfareCalc = new PopulationWelfareCalculator();
-  const welfareMetrics = popWelfareCalc.evaluateWelfare(
-    nation.population,
-    nation.resources.oil,
-    nation.resources.steel,
-    effectiveGdp,
+  const baseOilLots = isOilRich
+    ? Math.max(3, gdpScale * 2)
+    : Math.max(1, Math.floor(gdpScale * 0.5));
+  const baseSteelLots = Math.max(1, Math.floor(gdpScale * 0.8));
+
+  const oilProducedPerTurn = Math.max(
+    1,
+    Math.ceil(baseOilLots * industrialMultiplier),
+  );
+  const steelProducedPerTurn = Math.max(
+    1,
+    Math.ceil(baseSteelLots * industrialMultiplier),
   );
 
-  const oilRequiredPerTurn = welfareMetrics.oilDemand;
+  const gdpFactor = Math.max(1, Math.floor(effectiveGdp / 10000000000));
+  const oilRequiredPerTurn = Math.max(
+    1,
+    Math.ceil((nation.population / 20000000) * gdpFactor),
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">

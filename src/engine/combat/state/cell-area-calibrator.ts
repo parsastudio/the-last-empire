@@ -1,5 +1,6 @@
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { GLOBAL_DEVIATION_FACTOR } from "@/domain/map/country-area-calibration.config";
+
+const GLOBAL_DEVIATION_FACTOR = 1.15;
 
 export class CellAreaCalibrator {
   private weights: Float64Array;
