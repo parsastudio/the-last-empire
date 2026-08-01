@@ -36,12 +36,7 @@ export function ImfLoanCard({
     } as unknown as Nation);
 
   const creditRating = loanManager.calculateCreditRating(mockNation);
-  const effectiveTaxRateForCredit = 20;
-  const taxIncome = gdp * (effectiveTaxRateForCredit / 100);
-  const maxDebtLimit = Math.min(
-    Math.floor(gdp * 0.2 * (creditRating / 100)),
-    Math.floor(taxIncome * 5 * (creditRating / 100)),
-  );
+  const maxDebtLimit = Math.floor(gdp * 1.0 * (creditRating / 100));
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 
   return (
