@@ -38,7 +38,11 @@ export class CoalitionManager {
               : canonicalB;
             const relA = nationA.relations?.[relAKey];
 
-            if (relA && relA.stance === "PEACE" && relA.opinion >= 0) {
+            if (
+              relA &&
+              relA.stance === "NORMAL_DIPLOMACY" &&
+              relA.opinion >= 0
+            ) {
               const updatedA = updatedNations[nationA.id] || nationA;
               const updatedB = updatedNations[nationB.id] || nationB;
 

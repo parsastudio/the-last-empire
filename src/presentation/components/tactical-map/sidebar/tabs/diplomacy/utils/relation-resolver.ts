@@ -4,12 +4,13 @@ import {
 } from "@/infrastructure/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "../country-profile-stats";
+import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 export interface DiplomaticRelation {
   code: string;
   name: string;
   flagCode: string;
-  stance: string;
+  stance: DiplomaticStance;
   opinion: number;
   description: string;
   isTradeEmbargoed?: boolean;
@@ -87,7 +88,7 @@ export function resolveProfileRelation(
     code: displayCode.toUpperCase(),
     name,
     flagCode,
-    stance: "PEACE",
+    stance: "NORMAL_DIPLOMACY",
     opinion: 0,
     isTradeEmbargoed: false,
     description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,

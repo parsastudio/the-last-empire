@@ -1,11 +1,13 @@
 import React from "react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { DiplomaticStanceBadge } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomatic-stance-badge";
+import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface DiplomacyTargetCardProps {
   name: string;
   code: string;
   flagCode: string;
-  stance: string;
+  stance: DiplomaticStance | string;
 }
 
 export function DiplomacyTargetCard({
@@ -35,9 +37,7 @@ export function DiplomacyTargetCard({
         </div>
       </div>
 
-      <span className="px-2.5 py-1 rounded-lg bg-secondary border border-border/80 text-muted-foreground text-[10px] font-bold">
-        {stance === "WAR" ? "در حال جنگ" : "دیپلماسی عادی"}
-      </span>
+      <DiplomaticStanceBadge stance={stance as DiplomaticStance} />
     </div>
   );
 }

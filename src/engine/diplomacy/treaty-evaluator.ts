@@ -67,10 +67,15 @@ export class TreatyEvaluator {
       case "FULL_ALLIANCE":
         return { ...profile, stance: "ALLIANCE", coolOffTurnsRemaining: 0 };
       case "PEACE_TREATY":
-        return { ...profile, stance: "PEACE", coolOffTurnsRemaining: 10 };
+        return {
+          ...profile,
+          stance: "NORMAL_DIPLOMACY",
+          coolOffTurnsRemaining: 5,
+        };
       case "SEVER_TRADE_RELATIONS":
         return {
           ...profile,
+          stance: "SEVERED_RELATIONS",
           isTradeEmbargoed: true,
           opinion: Math.min(profile.opinion, -30),
         };

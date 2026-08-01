@@ -5,18 +5,19 @@ import {
   Flame,
   Ban,
   Swords,
-  ShieldCheck,
+  Globe,
 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomatic-betrayal-calculator";
 import { BetrayalConfirmModal } from "./betrayal-confirm-modal";
+import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
   targetNationId?: string;
   nationId?: string;
-  currentStance?: string;
+  currentStance?: DiplomaticStance | string;
   isTradeEmbargoed?: boolean;
   onOpenProxyModal?: () => void;
 }
@@ -25,7 +26,7 @@ export function AdvancedDiplomacyActions({
   targetName,
   targetNationId = "NATION_15",
   nationId = "NATION_118",
-  currentStance = "PEACE",
+  currentStance = "NORMAL_DIPLOMACY",
   isTradeEmbargoed = false,
   onOpenProxyModal,
 }: AdvancedDiplomacyActionsProps) {
@@ -44,10 +45,13 @@ export function AdvancedDiplomacyActions({
     pendingAction: async () => {},
   });
 
+  const isWar = currentStance === "WAR";
+  const isSevered = currentStance === "SEVERED_RELATIONS" || isTradeEmbargoed;
   const isAlliance = currentStance === "ALLIANCE";
   const isNonAggression = currentStance === "NON_AGGRESSION_PACT";
-  const isPeace =
-    currentStance === "PEACE" || (!isAlliance && !isNonAggression);
+  const isNormal =
+    currentStance === "NORMAL_DIPLOMACY" ||
+    (!isWar && !isSevered && !isAlliance && !isNonAggression);
 
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
@@ -55,7 +59,7 @@ export function AdvancedDiplomacyActions({
   ) => {
     if (requiresBetrayalCheck) {
       const evaluation = betrayalCalculator.calculatePenalty(
-        currentStance as "ALLIANCE" | "NON_AGGRESSION_PACT" | "PEACE",
+        currentStance as DiplomaticStance,
       );
       if (evaluation.hasBetrayed) {
         setConfirmModal({
@@ -170,11 +174,11 @@ export function AdvancedDiplomacyActions({
             </button>
           )}
 
-          {isPeace ? (
+          {isNormal ? (
             <div className="w-full p-3 rounded-xl bg-secondary/60 border border-border/60 text-muted-foreground flex items-center justify-between text-xs font-bold">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck size={14} />
-                دیپلماسی و صلح عادی
+                <Globe size={14} />
+                وضعیت پایه و دیپلماسی عادی (فعال)
               </span>
               <span className="text-[9px] font-mono bg-background px-2 py-0.5 rounded text-muted-foreground">
                 وضعیت فعلی
@@ -184,31 +188,37 @@ export function AdvancedDiplomacyActions({
 
           <button
             onClick={() => executeOrConfirm(handleInitiateBattle, true)}
-            className="w-full p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-right transition-all cursor-pointer space-y-1"
+            className={`w-full p-3 rounded-xl border text-right transition-all cursor-pointer space-y-1 ${
+              isWar
+                ? "bg-rose-600/20 border-rose-500/40 text-rose-500 font-bold"
+                : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-500"
+            }`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-rose-500">
-                اعلان نبرد و تهاجم مستقیم
+              <span className="text-xs font-bold">
+                {isWar ? "در حال نبرد نظامی فعال" : "اعلان نبرد و تهاجم مستقیم"}
               </span>
-              <Swords size={13} className="text-rose-500" />
+              <Swords size={13} />
             </div>
-            <p className="text-[9px] text-muted-foreground">
-              ورود به فاز اقدام نظامی مستقیم علیه قلمرو این کشور.
-            </p>
+            {!isWar && (
+              <p className="text-[9px] text-muted-foreground">
+                ورود به فاز اقدام نظامی مستقیم علیه قلمرو این کشور.
+              </p>
+            )}
           </button>
 
           <button
             onClick={handleSeverTrade}
-            disabled={isTradeEmbargoed}
+            disabled={isSevered || isWar}
             className={`w-full p-3 rounded-xl border text-right transition-all cursor-pointer space-y-1 ${
-              isTradeEmbargoed
+              isSevered
                 ? "bg-rose-500/10 border-rose-500/30 text-rose-500 opacity-60 cursor-not-allowed"
                 : "bg-secondary hover:bg-secondary/80 border-border text-foreground"
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold">
-                {isTradeEmbargoed
+                {isSevered
                   ? "روابط تجاری قطع است"
                   : "قطع روابط تجاری و تحریم اقتصادی"}
               </span>
