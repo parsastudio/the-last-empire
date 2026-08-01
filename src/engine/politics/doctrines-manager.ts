@@ -41,21 +41,79 @@ export class DoctrinesManager {
     };
   }
 
-  public getGdpGrowthModifier(unlocked?: string[]): number {
-    if (!unlocked) return 0;
+  public getGdpTaxRevenueMultiplier(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
     let bonus = 0;
     if (unlocked.includes("gdp-booster")) bonus += 0.05;
     if (unlocked.includes("cybernetic-automation")) bonus += 0.15;
-    return bonus;
+    return 1.0 + bonus;
+  }
+
+  public getOilDemandDiscount(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
+    return unlocked.includes("low-upkeep") ? 0.85 : 1.0;
   }
 
   public getUpkeepMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
-    return unlocked.includes("low-upkeep") ? 0.9 : 1.0;
+    return unlocked.includes("cybernetic-automation") ? 0.8 : 1.0;
   }
 
-  public getReputationGainMultiplier(unlocked?: string[]): number {
+  public getSteelProductionBonus(unlocked?: string[]): number {
+    if (!unlocked) return 0;
+    return unlocked.includes("heavy-metallurgy") ? 2 : 0;
+  }
+
+  public getOilProductionBonus(unlocked?: string[]): number {
+    if (!unlocked) return 0;
+    return unlocked.includes("deep-refining") ? 3 : 0;
+  }
+
+  public getMilitiaPowerMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
-    return unlocked.includes("reputation-recovery") ? 1.5 : 1.0;
+    return unlocked.includes("border-fortification") ? 1.25 : 1.0;
+  }
+
+  public getDronePowerMultiplier(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
+    let bonus = 0;
+    if (unlocked.includes("tactical-drones")) bonus += 0.2;
+    if (unlocked.includes("precision-missiles")) bonus += 0.25;
+    return 1.0 + bonus;
+  }
+
+  public getAirDefenseInterceptionRate(unlocked?: string[]): number {
+    if (!unlocked) return 0;
+    return unlocked.includes("integrated-air-defense") ? 0.3 : 0;
+  }
+
+  public getPrecisionMissileDirectDamage(unlocked?: string[]): number {
+    if (!unlocked) return 0;
+    return unlocked.includes("precision-missiles") ? 0.3 : 0;
+  }
+
+  public getElectronicWarfareEvasion(unlocked?: string[]): boolean {
+    if (!unlocked) return false;
+    return unlocked.includes("electronic-warfare");
+  }
+
+  public getTariffRevenueMultiplier(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
+    return unlocked.includes("global-influence") ? 1.15 : 1.0;
+  }
+
+  public getProxyCostDiscount(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
+    return unlocked.includes("proxy-network") ? 0.75 : 1.0;
+  }
+
+  public getTaxStabilityPenaltyDiscount(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
+    return unlocked.includes("reputation-recovery") ? 0.5 : 1.0;
+  }
+
+  public getDiplomaticOpinionThresholdBonus(unlocked?: string[]): number {
+    if (!unlocked) return 0;
+    return unlocked.includes("security-alliance") ? 30 : 0;
   }
 }

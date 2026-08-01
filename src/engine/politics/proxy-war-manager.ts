@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/game-error";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export interface ProxyOperationResult {
   updatedSourceNation: Nation;
@@ -8,15 +9,22 @@ export interface ProxyOperationResult {
 }
 
 export class ProxyWarManager {
+  private doctrinesManager = new DoctrinesManager();
+
   public executeProxyOperation(
     sourceNation: Nation,
     targetNation: Nation,
     drainAmount: number,
   ): ProxyOperationResult {
     const clampedDrain = Math.max(1, Math.min(15, drainAmount));
-    const requiredBudget = Math.floor(
+    let requiredBudget = Math.floor(
       targetNation.gdp * (clampedDrain / 2) * 0.01,
     );
+
+    const discount = this.doctrinesManager.getProxyCostDiscount(
+      sourceNation.doctrines?.unlockedDoctrines,
+    );
+    requiredBudget = Math.floor(requiredBudget * discount);
 
     if (sourceNation.treasury < requiredBudget) {
       throw new GameError(

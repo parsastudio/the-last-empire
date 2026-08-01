@@ -1,7 +1,13 @@
-import { EconomyStep, EconomyStepContext } from "./economy-step.interface";
+import {
+  EconomyStep,
+  EconomyStepContext,
+} from "@/engine/pipeline/economy/economy-step.interface";
 import { Nation } from "@/domain/nation/nation.schema";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class ResourceGenerationStep implements EconomyStep {
+  private static doctrinesManager = new DoctrinesManager();
+
   public static calculateResourceGeneration(nation: Nation): {
     oilProducedPerTurn: number;
     steelProducedPerTurn: number;
@@ -16,14 +22,17 @@ export class ResourceGenerationStep implements EconomyStep {
       : Math.max(1, Math.floor(gdpScale * 0.5));
     const baseSteelLots = Math.max(1, Math.floor(gdpScale * 0.8));
 
-    const oilProducedPerTurn = Math.max(
-      1,
-      Math.ceil(baseOilLots * industrialMultiplier),
+    const steelBonus = this.doctrinesManager.getSteelProductionBonus(
+      nation.doctrines?.unlockedDoctrines,
     );
-    const steelProducedPerTurn = Math.max(
-      1,
-      Math.ceil(baseSteelLots * industrialMultiplier),
+    const oilBonus = this.doctrinesManager.getOilProductionBonus(
+      nation.doctrines?.unlockedDoctrines,
     );
+
+    const oilProducedPerTurn =
+      Math.max(1, Math.ceil(baseOilLots * industrialMultiplier)) + oilBonus;
+    const steelProducedPerTurn =
+      Math.max(1, Math.ceil(baseSteelLots * industrialMultiplier)) + steelBonus;
 
     return { oilProducedPerTurn, steelProducedPerTurn };
   }

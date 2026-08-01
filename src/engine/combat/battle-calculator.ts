@@ -4,6 +4,7 @@ import {
   ReportSeverity,
 } from "@/domain/reports/combat-report.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -21,6 +22,7 @@ export interface BattleCalculationResult {
 
 export class BattleCalculator {
   private static governmentSystem = new GovernmentSystem();
+  private static doctrinesManager = new DoctrinesManager();
 
   public static calculateBattle(
     attacker: Nation,
@@ -63,12 +65,40 @@ export class BattleCalculator {
     }
 
     const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.25;
-    const droneCasualtiesInflicted = Math.floor(
-      dronesUsed * 3 * techMultiplier * attackerGovMult,
+    const droneMult = this.doctrinesManager.getDronePowerMultiplier(
+      attacker.doctrines?.unlockedDoctrines,
     );
+
+    let droneCasualtiesInflicted = Math.floor(
+      dronesUsed * 3 * techMultiplier * attackerGovMult * droneMult,
+    );
+
+    const defenderAirDefenseRate =
+      this.doctrinesManager.getAirDefenseInterceptionRate(
+        defender.doctrines?.unlockedDoctrines,
+      );
+    if (defenderAirDefenseRate > 0) {
+      droneCasualtiesInflicted = Math.floor(
+        droneCasualtiesInflicted * (1.0 - defenderAirDefenseRate),
+      );
+    }
 
     let defenderRemainingInfantry = defender.military.infantry;
     let defenderRemainingAirForce = defender.military.airForce;
+
+    const precisionDamageRatio =
+      this.doctrinesManager.getPrecisionMissileDirectDamage(
+        attacker.doctrines?.unlockedDoctrines,
+      );
+    if (precisionDamageRatio > 0 && dronesUsed > 0) {
+      const directInfantryDestroyed = Math.floor(
+        defenderRemainingInfantry * precisionDamageRatio * 0.1,
+      );
+      defenderRemainingInfantry = Math.max(
+        0,
+        defenderRemainingInfantry - directInfantryDestroyed,
+      );
+    }
 
     const infantryDestroyedByDrones = Math.min(
       defenderRemainingInfantry,
@@ -93,11 +123,19 @@ export class BattleCalculator {
       (1 + attacker.military.experience / 100) *
       attackerGovMult;
 
-    const defenderAirPower =
+    let defenderAirPower =
       defenderRemainingAirForce *
       (1 + (defender.military.techLevel - 1) * 0.2) *
       (1 + defender.military.experience / 100) *
       defenderGovMult;
+
+    if (
+      this.doctrinesManager.getElectronicWarfareEvasion(
+        attacker.doctrines?.unlockedDoctrines,
+      )
+    ) {
+      defenderAirPower *= 0.5;
+    }
 
     const totalAirPower = attackerAirPower + defenderAirPower;
 
@@ -105,8 +143,16 @@ export class BattleCalculator {
     let defenderAirLoss = 0;
 
     if (totalAirPower > 0) {
-      const attackerAirLossPct = (defenderAirPower / totalAirPower) * 0.2;
+      let attackerAirLossPct = (defenderAirPower / totalAirPower) * 0.2;
       const defenderAirLossPct = (attackerAirPower / totalAirPower) * 0.2;
+
+      if (
+        this.doctrinesManager.getElectronicWarfareEvasion(
+          attacker.doctrines?.unlockedDoctrines,
+        )
+      ) {
+        attackerAirLossPct *= 0.8;
+      }
 
       attackerAirLoss = Math.min(
         attacker.military.airForce,
@@ -126,11 +172,18 @@ export class BattleCalculator {
       airSupportMultiplier = 0.7;
     }
 
-    const militiaGarrison = Math.max(
-      10,
-      Math.floor(
-        (defender.population / 100000) * (defender.government.stability / 100),
-      ),
+    const militiaMult = this.doctrinesManager.getMilitiaPowerMultiplier(
+      defender.doctrines?.unlockedDoctrines,
+    );
+
+    const militiaGarrison = Math.floor(
+      Math.max(
+        10,
+        Math.floor(
+          (defender.population / 100000) *
+            (defender.government.stability / 100),
+        ),
+      ) * militiaMult,
     );
 
     const attackerGroundPower =

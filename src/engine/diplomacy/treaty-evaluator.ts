@@ -3,6 +3,7 @@ import {
   RelationProfile,
   DiplomaticProposalType,
 } from "@/domain/diplomacy/diplomacy.schema";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export interface ProposalEvaluation {
   accepted: boolean;
@@ -10,6 +11,8 @@ export interface ProposalEvaluation {
 }
 
 export class TreatyEvaluator {
+  private doctrinesManager = new DoctrinesManager();
+
   public evaluateProposal(
     sender: Nation,
     receiver: Nation,
@@ -17,7 +20,13 @@ export class TreatyEvaluator {
     requestedTributeAmount?: number,
   ): ProposalEvaluation {
     const relation = receiver.relations[sender.id];
-    const opinion = relation ? relation.opinion : 0;
+    let opinion = relation ? relation.opinion : 0;
+
+    const thresholdBonus =
+      this.doctrinesManager.getDiplomaticOpinionThresholdBonus(
+        sender.doctrines?.unlockedDoctrines,
+      );
+    opinion += thresholdBonus;
 
     switch (proposalType) {
       case "SEVER_TRADE_RELATIONS":
