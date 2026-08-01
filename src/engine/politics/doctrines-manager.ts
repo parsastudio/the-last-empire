@@ -49,6 +49,11 @@ export class DoctrinesManager {
     return 1.0 + bonus;
   }
 
+  public getReputationGainMultiplier(unlocked?: string[]): number {
+    if (!unlocked) return 1.0;
+    return unlocked.includes("trade-diplomacy") ? 1.25 : 1.0;
+  }
+
   public getOilDemandDiscount(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
     return unlocked.includes("low-upkeep") ? 0.85 : 1.0;
