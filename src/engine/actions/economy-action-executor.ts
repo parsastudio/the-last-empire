@@ -44,7 +44,6 @@ export class EconomyActionExecutor {
         };
 
       case "REQUEST_LOAN": {
-        const totalDebt = action.amount + Math.floor(action.amount * 0.05);
         return {
           ...state,
           nations: {
@@ -52,7 +51,7 @@ export class EconomyActionExecutor {
             [nation.id]: {
               ...nation,
               treasury: nation.treasury + action.amount,
-              nationalDebt: nation.nationalDebt + totalDebt,
+              nationalDebt: nation.nationalDebt + action.amount,
             },
           },
         };

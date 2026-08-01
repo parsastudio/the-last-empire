@@ -119,6 +119,12 @@ export class NationProfileAssigner {
       researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [],
+      autoTradeSettings: {
+        autoBuyDeficit: false,
+        autoSellOilPercent: 0,
+        autoSellSteelPercent: 0,
+        allowEmergencyLoans: true,
+      },
     };
   }
 
@@ -246,6 +252,12 @@ export class NationProfileAssigner {
       researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [],
+      autoTradeSettings: {
+        autoBuyDeficit: false,
+        autoSellOilPercent: 0,
+        autoSellSteelPercent: 0,
+        allowEmergencyLoans: true,
+      },
     };
   }
 }
