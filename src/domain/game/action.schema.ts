@@ -160,6 +160,18 @@ export const InitiateBattleActionSchema = z.object({
   dronesToLaunch: z.number().nonnegative(),
 });
 
+export const ConfigureAutoTradeActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  signature: z.string().optional(),
+  type: z.literal("CONFIGURE_AUTO_TRADE"),
+  autoBuyDeficit: z.boolean(),
+  autoSellOilPercent: z.number().min(0).max(100),
+  autoSellSteelPercent: z.number().min(0).max(100),
+  allowEmergencyLoans: z.boolean(),
+  maxDebtRatioLimit: z.number().min(0.1).max(2.0),
+});
+
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   SetTariffRateActionSchema,
@@ -180,6 +192,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   AntiCorruptionDriveActionSchema,
   InvestDiplomacyActionSchema,
   InitiateBattleActionSchema,
+  ConfigureAutoTradeActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
@@ -223,6 +236,9 @@ export type AntiCorruptionDriveAction = z.infer<
 >;
 export type InvestDiplomacyAction = z.infer<typeof InvestDiplomacyActionSchema>;
 export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
+export type ConfigureAutoTradeAction = z.infer<
+  typeof ConfigureAutoTradeActionSchema
+>;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;
 export { CoordinateSchema };

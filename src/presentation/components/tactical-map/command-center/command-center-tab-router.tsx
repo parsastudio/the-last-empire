@@ -51,6 +51,7 @@ export function CommandCenterTabRouter({
           oilStock={nation.resources.oil}
           steelStock={nation.resources.steel}
           userTreasury={nation.treasury}
+          nation={nation}
           onOpenTrade={onOpenTrade}
         />
       );

@@ -18,6 +18,7 @@ import {
   AntiCorruptionDriveAction,
   InvestDiplomacyAction,
   InitiateBattleAction,
+  ConfigureAutoTradeAction,
 } from "./action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
@@ -262,6 +263,26 @@ export class ActionFactory {
       type: "INITIATE_BATTLE",
       targetNationId,
       dronesToLaunch,
+    };
+  }
+
+  public static configureAutoTrade(
+    nationId: string,
+    autoBuyDeficit: boolean,
+    autoSellOilPercent: number,
+    autoSellSteelPercent: number,
+    allowEmergencyLoans: boolean,
+    maxDebtRatioLimit: number,
+  ): ConfigureAutoTradeAction {
+    return {
+      id: this.createId("autotrade"),
+      nationId,
+      type: "CONFIGURE_AUTO_TRADE",
+      autoBuyDeficit,
+      autoSellOilPercent,
+      autoSellSteelPercent,
+      allowEmergencyLoans,
+      maxDebtRatioLimit,
     };
   }
 }
