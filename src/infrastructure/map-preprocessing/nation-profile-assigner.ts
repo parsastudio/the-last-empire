@@ -88,12 +88,6 @@ export class NationProfileAssigner {
         steel: isTier1 ? 2000 : 1000,
         manpower: 500,
       },
-      upkeep: {
-        infantryUpkeep: 1,
-        airForceUpkeep: 1,
-        droneMissileUpkeep: 1,
-        infrastructureUpkeep: 1,
-      },
       military: {
         infantry,
         airForce,
@@ -220,12 +214,6 @@ export class NationProfileAssigner {
         oil: isTier2 ? 5000 : 1000,
         steel: isTier1 ? 2000 : 1000,
         manpower: 500,
-      },
-      upkeep: {
-        infantryUpkeep: 1,
-        airForceUpkeep: 1,
-        droneMissileUpkeep: 1,
-        infrastructureUpkeep: 1,
       },
       military: {
         infantry,

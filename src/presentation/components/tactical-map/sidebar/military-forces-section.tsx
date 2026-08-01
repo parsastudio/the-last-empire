@@ -21,16 +21,23 @@ export function MilitaryForcesSection({
   militiaGarrisonPower = 280,
 }: MilitaryForcesSectionProps) {
   const techMultiplier = 1 + (techLevel - 1) * 0.2;
-  const infantryMoneyUpkeep = Math.floor(
-    infantry * MILITARY_UNIT_STATS.INFANTRY.moneyUpkeepBase * techMultiplier,
+  const infantryPayroll = Math.floor(
+    infantry *
+      MILITARY_UNIT_STATS.INFANTRY.moneyPayrollBase *
+      techMultiplier *
+      1000000,
   );
-  const airForceMoneyUpkeep = Math.floor(
-    airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyUpkeepBase * techMultiplier,
+  const airForcePayroll = Math.floor(
+    airForce *
+      MILITARY_UNIT_STATS.AIR_FORCE.moneyPayrollBase *
+      techMultiplier *
+      1000000,
   );
-  const droneMoneyUpkeep = Math.floor(
+  const dronePayroll = Math.floor(
     droneMissile *
-      MILITARY_UNIT_STATS.DRONE_MISSILE.moneyUpkeepBase *
-      techMultiplier,
+      MILITARY_UNIT_STATS.DRONE_MISSILE.moneyPayrollBase *
+      techMultiplier *
+      1000000,
   );
 
   const bonusPercent = (techLevel - 1) * 20;
@@ -40,7 +47,7 @@ export function MilitaryForcesSection({
       <div className="flex items-center gap-2 px-1">
         <Swords size={13} className="text-military" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          قدرت ارتش و تفکیک هزینه نگهداری
+          قدرت ارتش و حقوق و پشتیبانی نوبتی یگان‌ها
         </span>
       </div>
 
@@ -53,8 +60,8 @@ export function MilitaryForcesSection({
                 پیاده‌نظام رزمی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                نگهداری نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(infantryMoneyUpkeep)}
+                حقوق و پشتیبانی نوبتی:{" "}
+                {PersianNumberFormatter.formatCurrency(infantryPayroll)}
               </span>
             </div>
           </div>
@@ -94,8 +101,8 @@ export function MilitaryForcesSection({
                 نیروی هوایی و جنگنده
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                نگهداری نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(airForceMoneyUpkeep)}
+                حقوق و پشتیبانی نوبتی:{" "}
+                {PersianNumberFormatter.formatCurrency(airForcePayroll)}
               </span>
             </div>
           </div>
@@ -115,8 +122,8 @@ export function MilitaryForcesSection({
                 پهپاد و تسلیحات موشکی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                نگهداری نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(droneMoneyUpkeep)}
+                حقوق و پشتیبانی نوبتی:{" "}
+                {PersianNumberFormatter.formatCurrency(dronePayroll)}
               </span>
             </div>
           </div>

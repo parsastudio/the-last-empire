@@ -6,11 +6,10 @@ export const ResourcesSchema = z.object({
   manpower: z.number().nonnegative(),
 });
 
-export const UpkeepRatesSchema = z.object({
-  infantryUpkeep: z.number().nonnegative(),
-  airForceUpkeep: z.number().nonnegative(),
-  droneMissileUpkeep: z.number().nonnegative(),
-  infrastructureUpkeep: z.number().nonnegative(),
+export const MilitaryPayrollRatesSchema = z.object({
+  infantryPayroll: z.number().nonnegative(),
+  airForcePayroll: z.number().nonnegative(),
+  droneMissilePayroll: z.number().nonnegative(),
 });
 
 export const ResourceMarketPriceSchema = z.object({
@@ -19,5 +18,5 @@ export const ResourceMarketPriceSchema = z.object({
 });
 
 export type Resources = z.infer<typeof ResourcesSchema>;
-export type UpkeepRates = z.infer<typeof UpkeepRatesSchema>;
+export type MilitaryPayrollRates = z.infer<typeof MilitaryPayrollRatesSchema>;
 export type ResourceMarketPrice = z.infer<typeof ResourceMarketPriceSchema>;

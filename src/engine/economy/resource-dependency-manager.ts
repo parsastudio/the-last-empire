@@ -22,19 +22,6 @@ export class ResourceDependencyManager {
     }
   }
 
-  public applyOilScarcityPenalty(nation: Nation, baseUpkeep: number): number {
-    const demand = this.popWelfareCalc.calculateOilDemand(
-      nation.population,
-      nation.gdp,
-    );
-    if (demand > 0 && nation.resources.oil < demand) {
-      const deficitRatio = (demand - nation.resources.oil) / demand;
-      const penaltyMultiplier = 1.0 + deficitRatio * 0.25;
-      return Math.floor(baseUpkeep * penaltyMultiplier);
-    }
-    return baseUpkeep;
-  }
-
   public consumeTurnResources(nation: Nation): Nation {
     const metrics = this.popWelfareCalc.evaluateWelfare(
       nation.population,
