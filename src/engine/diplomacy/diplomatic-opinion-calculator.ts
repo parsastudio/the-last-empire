@@ -8,16 +8,30 @@ export class DiplomaticOpinionCalculator {
     isLandNeighbor: boolean,
     govFrictionValue = 0,
   ): number {
-    let treatyModifier = 0;
+    let stanceModifier = 0;
     if (isLandNeighbor) {
-      treatyModifier -= 10;
+      stanceModifier -= 10;
     }
-    if (stance === "NON_AGGRESSION_PACT") {
-      treatyModifier += 30;
-    } else if (stance === "ALLIANCE") {
-      treatyModifier += 50;
+
+    switch (stance) {
+      case "WAR":
+        stanceModifier -= 80;
+        break;
+      case "SEVERED_RELATIONS":
+        stanceModifier -= 30;
+        break;
+      case "NON_AGGRESSION_PACT":
+        stanceModifier += 30;
+        break;
+      case "ALLIANCE":
+        stanceModifier += 50;
+        break;
+      case "NORMAL_DIPLOMACY":
+      default:
+        break;
     }
-    const baseline = globalReputation + treatyModifier + govFrictionValue * 5;
+
+    const baseline = globalReputation + stanceModifier + govFrictionValue * 5;
     const target = Math.max(-100, Math.min(100, baseline));
     const nextOpinion = currentOpinion + (target - currentOpinion) * 0.2;
     return Math.max(-100, Math.min(100, Math.round(nextOpinion)));

@@ -10,7 +10,7 @@ export function useHoverStance() {
       nationsMap?: Record<string, Nation>,
     ): string => {
       if (!humanNationId || !nationsMap || !nationsMap[humanNationId]) {
-        return "دیپلماسی صلح‌آمیز";
+        return "دیپلماسی عادی";
       }
 
       const humanNation = nationsMap[humanNationId];
@@ -19,11 +19,17 @@ export function useHoverStance() {
         humanNation.relations[countryCode.toUpperCase()];
 
       if (relation) {
+        if (relation.stance === "WAR") return "وضعیت نبرد";
+        if (
+          relation.stance === "SEVERED_RELATIONS" ||
+          relation.isTradeEmbargoed
+        )
+          return "قطع روابط تجاری";
         if (relation.stance === "ALLIANCE") return "متحد استراتژیک";
         if (relation.stance === "NON_AGGRESSION_PACT") return "پیمان عدم تخاصم";
       }
 
-      return "دیپلماسی صلح‌آمیز";
+      return "دیپلماسی عادی";
     },
     [],
   );

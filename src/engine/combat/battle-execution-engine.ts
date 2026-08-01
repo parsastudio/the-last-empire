@@ -28,7 +28,9 @@ export class BattleExecutionEngine {
     }
 
     const currentRelation = attacker.relations[defender.id];
-    const currentStance = currentRelation ? currentRelation.stance : "PEACE";
+    const currentStance = currentRelation
+      ? currentRelation.stance
+      : "NORMAL_DIPLOMACY";
 
     const betrayalResult =
       this.betrayalCalculator.calculatePenalty(currentStance);
@@ -102,7 +104,8 @@ export class BattleExecutionEngine {
         ...updatedAttacker.relations,
         [defender.id]: {
           ...attackerRelToDefender,
-          stance: "PEACE",
+          stance: "WAR",
+          isTradeEmbargoed: true,
           opinion: Math.min(-50, attackerRelToDefender.opinion - 40),
         },
       };
@@ -133,7 +136,8 @@ export class BattleExecutionEngine {
         ...updatedDefender.relations,
         [attacker.id]: {
           ...defenderRelToAttacker,
-          stance: "PEACE",
+          stance: "WAR",
+          isTradeEmbargoed: true,
           opinion: -100,
         },
       };

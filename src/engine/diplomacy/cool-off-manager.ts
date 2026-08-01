@@ -13,9 +13,12 @@ export class CoolOffManager {
       return { nextStance: "NON_AGGRESSION_PACT", turnsRemaining: 1 };
     }
     if (currentStance === "NON_AGGRESSION_PACT") {
-      return { nextStance: "PEACE", turnsRemaining: 1 };
+      return { nextStance: "NORMAL_DIPLOMACY", turnsRemaining: 1 };
     }
-    return { nextStance: "PEACE", turnsRemaining: 0 };
+    if (currentStance === "SEVERED_RELATIONS" || currentStance === "WAR") {
+      return { nextStance: "NORMAL_DIPLOMACY", turnsRemaining: 2 };
+    }
+    return { nextStance: "NORMAL_DIPLOMACY", turnsRemaining: 0 };
   }
 
   public processTurnTick(turnsRemaining: number): number {

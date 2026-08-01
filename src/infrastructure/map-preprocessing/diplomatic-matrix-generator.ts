@@ -8,7 +8,7 @@ export class DiplomaticMatrixGenerator {
     for (const targetId of nationsList) {
       relations[targetId] = {
         targetNationId: targetId,
-        stance: "PEACE" as const,
+        stance: "NORMAL_DIPLOMACY" as const,
         opinion: 0,
         coolOffTurnsRemaining: 0,
       };
