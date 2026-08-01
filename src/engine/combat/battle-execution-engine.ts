@@ -101,13 +101,13 @@ export class BattleExecutionEngine {
     const reportTitle = calcResult.isAttackerVictory
       ? isFullCapitulation
         ? `فتح کامل و تسلیم ${defender.name}`
-        : `پیروزی در تهاجم به ${defender.name}`
+        : `پیروزی در تهاجم به قلمرو ${defender.name}`
       : `عقب‌نشینی نیروها در نبرد با ${defender.name}`;
 
     const reportSummary = calcResult.isAttackerVictory
       ? isFullCapitulation
-        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل ساختار دفاعی ${defender.name}، تمام خاک قلمرو آن را فتح کردند.`
-        : `نیروهای ${attacker.name} با موفقیت توانستند مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع از خاک ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.`
+        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.`
+        : `نیروهای ${attacker.name} با موفقیت توانستند مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.`
       : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.`;
 
     const report: CombatReport = {
