@@ -30,6 +30,10 @@ export class CoalitionManager {
             const nationA = threatened[i]!;
             const nationB = threatened[j]!;
 
+            if (!nationA.isAi || !nationB.isAi) {
+              continue;
+            }
+
             const canonicalB = NationIdResolver.resolveCanonicalId(nationB.id);
             const canonicalA = NationIdResolver.resolveCanonicalId(nationA.id);
 
