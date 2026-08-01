@@ -4,6 +4,7 @@ import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/map/countries";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export interface LiveNationItem {
   id: string;
@@ -33,16 +34,25 @@ export function useLiveNations({
   const allLiveNations = useMemo<LiveNationItem[]>(() => {
     if (!nationsMap) return [];
 
+    const canonicalExclude = excludeNationId
+      ? NationIdResolver.resolveCanonicalId(excludeNationId)
+      : null;
+
     return Object.values(nationsMap)
-      .filter((n) => n.isAlive && n.id !== excludeNationId)
+      .filter((n) => {
+        if (!n.isAlive) return false;
+        const canonical = NationIdResolver.resolveCanonicalId(n.id);
+        return canonical !== canonicalExclude && n.id !== excludeNationId;
+      })
       .map((n) => {
-        const numericId = parseInt(n.id.replace("NATION_", ""), 10);
+        const canonical = NationIdResolver.resolveCanonicalId(n.id);
+        const numericId = parseInt(canonical.replace("NATION_", ""), 10);
         const profile = !isNaN(numericId)
           ? findCountryProfileById(numericId)
           : findCountryProfileByCode(n.flagCode || n.id);
 
         const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
-        const code = profile ? profile.code : n.id.replace("NATION_", "");
+        const code = profile ? profile.code : canonical.replace("NATION_", "");
 
         return {
           id: n.id,

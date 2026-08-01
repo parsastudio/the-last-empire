@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export function useGameOverMetrics(gameState: GameState | null) {
   return useMemo(() => {
@@ -18,14 +19,15 @@ export function useGameOverMetrics(gameState: GameState | null) {
     const winnerName = winnerNation ? winnerNation.name : "قدرت برتر";
 
     const turnsPlayed = gameState.currentTurn;
-    const finalGdpNum = humanNation ? humanNation.gdp / 1e9 : 0;
-    const finalGdp = `$${finalGdpNum.toFixed(1)} میلیارد`;
+    const finalGdp = humanNation
+      ? PersianNumberFormatter.formatCurrency(humanNation.gdp, true)
+      : PersianNumberFormatter.formatCurrency(0, true);
 
     const finalPopNum = humanNation ? humanNation.population / 1e6 : 0;
-    const finalPopulation = `${finalPopNum.toFixed(1)}M نفر`;
+    const finalPopulation = `${PersianNumberFormatter.toPersianDigits(finalPopNum.toFixed(1))}M نفر`;
 
     const areaSqKm = humanNation ? humanNation.geography.territorySize : 0;
-    const conqueredArea = `${areaSqKm.toLocaleString("fa-IR")} km²`;
+    const conqueredArea = `${PersianNumberFormatter.toPersianDigits(areaSqKm.toLocaleString("en-US"))} km²`;
 
     let reasonText = "پایان چرخه زمانی و استراتژیک کمپین";
     if (isVictory) {

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { X, Database } from "lucide-react";
 import { SaveItemCard } from "./save-item-card";
 import { useSavedCampaigns } from "./hooks/use-saved-campaigns";
+import { useModalKeyboardShortcut } from "@/presentation/components/common/hooks/use-modal-keyboard-shortcut";
 
 interface LoadCampaignModalProps {
   isOpen: boolean;
@@ -17,18 +18,7 @@ export function LoadCampaignModal({
   const [loadingSaveId, setLoadingSaveId] = useState<string | null>(null);
   const { saves, loading: isDbLoading, deleteSave } = useSavedCampaigns();
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  useModalKeyboardShortcut(isOpen, onClose);
 
   const handleSelect = (saveId: string) => {
     setLoadingSaveId(saveId);

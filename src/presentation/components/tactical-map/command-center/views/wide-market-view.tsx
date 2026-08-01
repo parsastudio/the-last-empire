@@ -4,6 +4,7 @@ import { CommodityCard } from "../../sidebar/tabs/market/commodity-card";
 import { Fuel, Wrench, Coins } from "lucide-react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { useMarketTrade } from "../../sidebar/tabs/market/hooks/use-market-trade";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface WideMarketViewProps {
   marketPrices?: ResourceMarketPrice;
@@ -48,7 +49,7 @@ export function WideMarketView({
           موجودی خزانه ملی جهت معامله:
         </span>
         <span className="font-bold text-gdp text-sm">
-          ${userTreasury.toLocaleString("fa-IR")}
+          {PersianNumberFormatter.formatCurrency(userTreasury)}
         </span>
       </div>
 

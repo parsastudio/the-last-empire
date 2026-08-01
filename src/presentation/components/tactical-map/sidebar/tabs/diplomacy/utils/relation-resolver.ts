@@ -5,6 +5,9 @@ import {
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "../country-profile-stats";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export interface DiplomaticRelation {
   code: string;
@@ -21,7 +24,8 @@ export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
 ): DiplomaticRelation {
-  const numericId = parseInt(code.replace("NATION_", ""), 10);
+  const canonicalId = NationIdResolver.resolveCanonicalId(code);
+  const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
 
   const profile =
     findCountryProfileByCode(code) ||
@@ -33,22 +37,18 @@ export function resolveProfileRelation(
       : undefined);
 
   const realGdpNum = liveNation
-    ? liveNation.gdp / 1e9
+    ? liveNation.gdp
     : profile
-      ? profile.gdp / 1e9
-      : 50;
-  const gdpBillion = Number.isInteger(realGdpNum)
-    ? realGdpNum.toString()
-    : realGdpNum.toFixed(1);
+      ? profile.gdp
+      : 50000000000;
 
   const realPopNum = liveNation
-    ? liveNation.population / 1e6
+    ? liveNation.population
     : profile
-      ? profile.population / 1e6
-      : 10;
-  const popMillion = Number.isInteger(realPopNum)
-    ? realPopNum.toString()
-    : realPopNum.toFixed(1);
+      ? profile.population
+      : 10000000;
+
+  const popMillion = (realPopNum / 1e6).toFixed(1);
 
   const name = liveNation
     ? liveNation.name
@@ -72,11 +72,7 @@ export function resolveProfileRelation(
     ? liveNation.government.type
     : (profile?.startingGovernment ?? "DEMOCRACY");
 
-  let govLabel = "دموکراسی";
-  if (govType === "DICTATORSHIP") govLabel = "حکومت دیکتاتوری";
-  else if (govType === "COMMUNISM") govLabel = "کمونیسم";
-  else if (govType === "MONARCHY") govLabel = "پادشاهی";
-  else if (govType === "FASCISM") govLabel = "فاشیسم";
+  const govLabel = getGovernmentTypeLabel(govType);
 
   const militaryPower = liveNation
     ? liveNation.military.infantry * 1 +
@@ -93,15 +89,15 @@ export function resolveProfileRelation(
     isTradeEmbargoed: false,
     description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
     profileData: {
-      gdp: `$${gdpBillion} میلیارد دلار`,
-      population: `${popMillion} میلیون نفر`,
+      gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
+      population: `${PersianNumberFormatter.toPersianDigits(popMillion)} میلیون نفر`,
       techLevel: liveNation
         ? liveNation.military.techLevel
         : (profile?.startingTechLevel ?? 1),
       governmentType: govLabel,
       stability: liveNation ? liveNation.government.stability : 80,
       corruption: liveNation ? liveNation.government.corruption : 10,
-      militaryStrength: `${Math.round(militaryPower).toLocaleString("fa-IR")} یگان`,
+      militaryStrength: `${PersianNumberFormatter.toPersianDigits(Math.round(militaryPower).toLocaleString("en-US"))} یگان`,
     },
   };
 }

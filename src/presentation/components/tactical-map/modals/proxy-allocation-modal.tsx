@@ -5,6 +5,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
 
 interface ProxyAllocationModalProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ export function ProxyAllocationModal({
 
   if (!isOpen) return null;
 
-  const requiredBudget = Math.floor(targetGdp * (desiredDrain / 2) * 0.01);
+  const requiredBudget = calculateProxyOperationBudget(targetGdp, desiredDrain);
   const canAfford = userTreasury >= requiredBudget;
   const flagEmoji = getFlagEmoji(targetFlagCode || targetNationId);
   const resultingStability = Math.max(0, targetStability - desiredDrain);

@@ -3,6 +3,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@/domain/shared/game-error";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
 
 export class ActionRuleEvaluator {
   public static evaluate(state: GameState, action: GameAction): void {
@@ -127,7 +128,7 @@ export class ActionRuleEvaluator {
             "Target nation is not available",
           );
         }
-        const reqBudget = Math.floor(target.gdp * 0.01);
+        const reqBudget = calculateProxyOperationBudget(target.gdp, 2);
         if (source.treasury < reqBudget) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
