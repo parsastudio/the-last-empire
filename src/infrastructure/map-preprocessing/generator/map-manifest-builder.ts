@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import path from "path";
-import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
+import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { MapPathResolver } from "../map-path-resolver";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export interface ManifestNationItem {
   id: string;
@@ -51,16 +51,20 @@ export class MapManifestBuilder {
   ): Promise<MapManifest> {
     const activeCountryIds = new Set(
       mappingsCountries
-        .filter((c) => c.id >= 11 && c.areaSqKm > 0)
-        .map((c) => c.id),
+        .filter(
+          (c: { id: number; areaSqKm: number }) => c.id >= 11 && c.areaSqKm > 0,
+        )
+        .map((c: { id: number }) => c.id),
     );
 
-    const activeProfiles = ALL_COUNTRY_PROFILES.filter((p) =>
+    const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) =>
       activeCountryIds.has(p.id ?? 0),
     );
 
-    const rawNationsWithScores = activeProfiles.map((p) => {
-      const mapping = mappingsCountries.find((c) => c.id === p.id);
+    const rawNationsWithScores = activeProfiles.map((p: CountryProfile) => {
+      const mapping = mappingsCountries.find(
+        (c: { id: number }) => c.id === p.id,
+      );
       const numericId = p.id ?? (mapping ? mapping.id : 0);
       const territorySize = mapping
         ? mapping.areaSqKm
@@ -89,10 +93,22 @@ export class MapManifestBuilder {
       };
     });
 
-    rawNationsWithScores.sort((a, b) => b.powerScore - a.powerScore);
+    rawNationsWithScores.sort(
+      (a: { powerScore: number }, b: { powerScore: number }) =>
+        b.powerScore - a.powerScore,
+    );
 
     const manifestNations: ManifestNationItem[] = rawNationsWithScores.map(
-      (item, index) => ({
+      (
+        item: {
+          profile: CountryProfile;
+          numericId: number;
+          territorySize: number;
+          powerScore: number;
+          computedTreasury: number;
+        },
+        index: number,
+      ) => ({
         id: `NATION_${item.profile.code}`,
         numericId: item.numericId,
         code: item.profile.code,

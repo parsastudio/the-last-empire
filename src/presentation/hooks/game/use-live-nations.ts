@@ -3,7 +3,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
-} from "@/domain/map/countries";
+} from "@/domain/data/countries";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export interface LiveNationItem {

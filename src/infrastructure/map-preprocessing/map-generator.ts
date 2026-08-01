@@ -7,7 +7,7 @@ import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-res
 import { TerritoryPartitioner } from "@/infrastructure/map-preprocessing/generator/territory-partitioner";
 import { PngDecoder } from "@/infrastructure/map-preprocessing/encoders/png-decoder";
 import { GeometryDraw } from "@/infrastructure/map-preprocessing/utils/geometry-draw";
-import { ALL_COUNTRY_PROFILES } from "@/infrastructure/data/countries";
+import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 
 export interface CountryMapping {
   id: number;
