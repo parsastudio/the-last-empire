@@ -55,7 +55,7 @@ export function TradeActionDialog({
   const isOil = resourceName.includes("نفت");
   const resourceType = isOil ? "oil" : "steel";
   const buyUnitPrice = unitPrice || 25000000;
-  const sellUnitPrice = Math.floor(buyUnitPrice * (2 / 3));
+  const sellUnitPrice = 20000000;
   const effectiveUnitPrice = mode === "buy" ? buyUnitPrice : sellUnitPrice;
 
   const totalCostOrRevenue = currentAmount * effectiveUnitPrice;
@@ -188,7 +188,7 @@ export function TradeActionDialog({
           <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground font-sans">
-                قیمت هر بلوک استراتژیک ({isBuy ? "خرید" : "فروش ۲/۳"}):
+                قیمت هر بلوک استراتژیک ({isBuy ? "خرید ۲۵M" : "فروش ۲۰M"}):
               </span>
               <span className="font-bold text-foreground">
                 {PersianNumberFormatter.formatCurrency(effectiveUnitPrice)}

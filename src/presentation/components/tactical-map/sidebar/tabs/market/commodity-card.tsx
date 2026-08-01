@@ -20,12 +20,12 @@ export function CommodityCard({
   colorClass,
   stock,
   currentPrice,
-  priceTrend,
   onTrade,
 }: CommodityCardProps) {
   const isOil = title.includes("نفت");
   const subLabel = isOil ? "(هر بلوک = ۱۰M بشکه)" : "(هر بلوک = ۱M تن)";
-  const sellPrice = Math.floor(currentPrice * (2 / 3));
+  const buyPrice = currentPrice || 25000000;
+  const sellPrice = 20000000;
 
   return (
     <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
@@ -41,20 +41,8 @@ export function CommodityCard({
             </span>
           </div>
         </div>
-        <span
-          className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-bold ${
-            priceTrend === "up"
-              ? "bg-emerald-500/15 text-emerald-500"
-              : priceTrend === "down"
-                ? "bg-rose-500/15 text-rose-500"
-                : "bg-secondary text-muted-foreground"
-          }`}
-        >
-          {priceTrend === "up"
-            ? "▲ صعودی"
-            : priceTrend === "down"
-              ? "▼ نزولی"
-              : "● باثبات"}
+        <span className="text-[9px] font-mono px-2 py-0.5 rounded-md font-bold bg-secondary text-muted-foreground">
+          ● نرخ ثابت
         </span>
       </div>
 
@@ -73,10 +61,10 @@ export function CommodityCard({
 
         <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
           <span className="text-[9px] text-muted-foreground block font-sans">
-            قیمت خرید / فروش
+            خرید ۲۵M / فروش ۲۰M
           </span>
           <span className="font-bold text-gdp block text-[11px]">
-            {PersianNumberFormatter.formatCurrency(currentPrice, true)} /{" "}
+            {PersianNumberFormatter.formatCurrency(buyPrice, true)} /{" "}
             {PersianNumberFormatter.formatCurrency(sellPrice, true)}
           </span>
         </div>
@@ -87,13 +75,13 @@ export function CommodityCard({
           onClick={() => onTrade("buy")}
           className="py-2 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[10px] font-bold transition-all cursor-pointer shadow-sm"
         >
-          خرید بلوک استراتژیک
+          خرید به نرخ ۲۵M
         </button>
         <button
           onClick={() => onTrade("sell")}
           className="py-2 bg-secondary hover:bg-secondary/80 text-foreground border border-border rounded-xl text-[10px] font-bold transition-all cursor-pointer"
         >
-          فروش با نرخ ۲/۳
+          فروش به نرخ ۲۰M
         </button>
       </div>
     </div>
