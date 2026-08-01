@@ -12,6 +12,8 @@ export interface BattleCalculationResult {
   defenderCasualties: CasualtyMetrics;
   conqueredAreaSqKm: number;
   treasuryLooted: number;
+  deploymentMoneyCost: number;
+  deploymentOilCost: number;
   airSupportMultiplier: number;
   severity: ReportSeverity;
 }
@@ -21,7 +23,20 @@ export class BattleCalculator {
     attacker: Nation,
     defender: Nation,
     dronesToLaunch: number,
+    oilPrice = 25000000,
   ): BattleCalculationResult {
+    const totalForceCost =
+      attacker.military.infantry * 250000000 +
+      attacker.military.airForce * 1000000000 +
+      dronesToLaunch * 1500000000;
+
+    const deploymentFivePct = totalForceCost * 0.05;
+    const deploymentMoneyCost = Math.floor(deploymentFivePct);
+    const deploymentOilCost = Math.max(
+      1,
+      Math.ceil(deploymentFivePct / (oilPrice || 25000000)),
+    );
+
     const dronesUsed = Math.min(
       attacker.military.droneMissile,
       Math.max(0, dronesToLaunch),
@@ -208,6 +223,8 @@ export class BattleCalculator {
       defenderCasualties,
       conqueredAreaSqKm,
       treasuryLooted,
+      deploymentMoneyCost,
+      deploymentOilCost,
       airSupportMultiplier,
       severity,
     };
