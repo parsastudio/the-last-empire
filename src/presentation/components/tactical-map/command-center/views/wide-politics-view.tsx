@@ -47,11 +47,14 @@ export function WidePoliticsView({
   militaryTechLevel = 1,
   hasSeaAccess = true,
   activeModifiers = [],
+  nationsMap,
   population = 80000000,
   oilStock = 1000,
   steelStock = 1000,
   globalReputation = 50,
 }: WidePoliticsViewProps) {
+  const currentNation = nationsMap ? nationsMap[nationId] : undefined;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
@@ -81,6 +84,9 @@ export function WidePoliticsView({
           initialTariffRate={tariffRate}
           nationId={nationId}
           hasSeaAccess={hasSeaAccess}
+          gdp={gdp}
+          nationsMap={nationsMap}
+          nation={currentNation}
         />
         <ImfLoanCard
           nationId={nationId}

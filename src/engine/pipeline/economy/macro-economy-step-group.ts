@@ -3,7 +3,9 @@ import { ResourceGenerationStep } from "./resource-generation.step";
 import { GdpGrowthStep } from "./gdp-growth.step";
 import { PopulationUpdateStep } from "./population-update.step";
 import { ManpowerGrowthStep } from "./manpower-growth.step";
+import { TradeTariffStep } from "./trade-tariff.step";
 import { UpkeepTaxStep } from "./upkeep-tax.step";
+import { AutoTradeStep } from "./auto-trade.step";
 import { BankruptcyDeficitStep } from "./bankruptcy-deficit.step";
 
 export class MacroEconomyStepGroup implements EconomyStep {
@@ -12,7 +14,9 @@ export class MacroEconomyStepGroup implements EconomyStep {
     new GdpGrowthStep(),
     new PopulationUpdateStep(),
     new ManpowerGrowthStep(),
+    new TradeTariffStep(),
     new UpkeepTaxStep(),
+    new AutoTradeStep(),
     new BankruptcyDeficitStep(),
   ];
 
