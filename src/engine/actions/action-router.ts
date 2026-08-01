@@ -35,6 +35,7 @@ export class ActionRouter {
       case "INVEST_DIPLOMACY":
       case "FUND_PROXY_INFLUENCE":
       case "DIPLOMATIC_PROPOSAL":
+      case "CONFIGURE_AUTO_TRADE":
         return PoliticsActionExecutor.execute(state, action);
 
       default:
