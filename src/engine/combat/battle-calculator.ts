@@ -135,25 +135,33 @@ export class BattleCalculator {
       const powerDiffRatio =
         (attackerGroundPower - defenderGroundPower) /
         (attackerGroundPower || 1);
-      const medianCountryBenchmarkArea = 200000;
 
-      const conquestSpeedSqKm = Math.floor(
-        medianCountryBenchmarkArea * Math.min(1.0, powerDiffRatio + 0.1),
+      const defenderTotalTerritory = defender.geography.territorySize;
+
+      let conquestRatio = 0.25 + powerDiffRatio * 0.25;
+      conquestRatio = Math.max(0.25, Math.min(0.5, conquestRatio));
+
+      let calculatedConquest = Math.floor(
+        defenderTotalTerritory * conquestRatio,
       );
+      calculatedConquest = Math.max(50000, calculatedConquest);
 
-      conqueredAreaSqKm = Math.min(
-        defender.geography.territorySize,
-        Math.max(1000, conquestSpeedSqKm),
-      );
+      if (
+        defenderTotalTerritory <= 50000 ||
+        calculatedConquest >= defenderTotalTerritory ||
+        defenderTotalTerritory - calculatedConquest <= 15000
+      ) {
+        conqueredAreaSqKm = defenderTotalTerritory;
+      } else {
+        conqueredAreaSqKm = calculatedConquest;
+      }
 
-      const conquestRatio =
-        defender.geography.territorySize > 0
-          ? Math.min(1.0, conqueredAreaSqKm / defender.geography.territorySize)
+      const actualRatio =
+        defenderTotalTerritory > 0
+          ? Math.min(1.0, conqueredAreaSqKm / defenderTotalTerritory)
           : 1.0;
 
-      treasuryLooted = Math.floor(
-        Math.max(0, defender.treasury) * conquestRatio,
-      );
+      treasuryLooted = Math.floor(Math.max(0, defender.treasury) * actualRatio);
     }
 
     let severity: ReportSeverity = "INFO";
