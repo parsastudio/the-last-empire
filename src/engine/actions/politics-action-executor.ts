@@ -82,6 +82,24 @@ export class PoliticsActionExecutor {
           },
         };
 
+      case "CONFIGURE_AUTO_TRADE":
+        return {
+          ...state,
+          nations: {
+            ...state.nations,
+            [action.nationId]: {
+              ...nation,
+              autoTradeSettings: {
+                autoBuyDeficit: action.autoBuyDeficit,
+                autoSellOilPercent: action.autoSellOilPercent,
+                autoSellSteelPercent: action.autoSellSteelPercent,
+                allowEmergencyLoans: action.allowEmergencyLoans,
+                maxDebtRatioLimit: action.maxDebtRatioLimit,
+              },
+            },
+          },
+        };
+
       case "FUND_PROXY_INFLUENCE": {
         const target = state.nations[action.targetNationId];
         if (!target) return state;

@@ -53,6 +53,14 @@ export const GeographySchema = z.object({
   coordinates: z.array(CoordinateSchema),
 });
 
+export const AutoTradeSettingsSchema = z.object({
+  autoBuyDeficit: z.boolean().default(false),
+  autoSellOilPercent: z.number().min(0).max(100).default(0),
+  autoSellSteelPercent: z.number().min(0).max(100).default(0),
+  allowEmergencyLoans: z.boolean().default(true),
+  maxDebtRatioLimit: z.number().min(0.1).max(2.0).default(0.8),
+});
+
 export const NationSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -84,10 +92,18 @@ export const NationSchema = z.object({
   researchCycleTurn: z.number().min(0).max(3).default(0),
   proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
   regionsDemographics: z.array(RegionDemographicsSchema).optional(),
+  autoTradeSettings: AutoTradeSettingsSchema.default({
+    autoBuyDeficit: false,
+    autoSellOilPercent: 0,
+    autoSellSteelPercent: 0,
+    allowEmergencyLoans: true,
+    maxDebtRatioLimit: 0.8,
+  }),
 });
 
 export type NationTrait = z.infer<typeof NationTraitSchema>;
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
 export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
+export type AutoTradeSettings = z.infer<typeof AutoTradeSettingsSchema>;
 export type Nation = z.infer<typeof NationSchema>;
