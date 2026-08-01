@@ -2,6 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@/domain/shared/game-error";
 import { Nation } from "@/domain/nation/nation.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class ActionRuleEvaluator {
   public static evaluate(state: GameState, action: GameAction): void {
@@ -186,22 +187,40 @@ export class ActionRuleEvaluator {
 
       case "INITIATE_BATTLE": {
         if (action.nationId === action.targetNationId) {
-          throw new GameError("INVALID_ACTION", "Cannot attack self");
+          throw new GameError(
+            "INVALID_ACTION",
+            "امکان تهاجم به کشور خودی وجود ندارد.",
+          );
         }
         const target = state.nations[action.targetNationId];
         if (!target || !target.isAlive) {
-          throw new GameError("NATION_NOT_FOUND", "Target nation not alive");
+          throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
         }
+
+        const isLandNeighbor = source.geography.landNeighbors.some(
+          (neighborId) =>
+            neighborId === target.id ||
+            NationIdResolver.resolveCanonicalId(neighborId) ===
+              NationIdResolver.resolveCanonicalId(target.id),
+        );
+
+        if (!isLandNeighbor) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "امکان تهاجم زمینی وجود ندارد: کشور هدف دارای مرز خاکی مشترک با شما نیست.",
+          );
+        }
+
         if (source.military.infantry <= 0) {
           throw new GameError(
             "INVALID_ACTION",
-            "Requires at least 1 infantry unit to launch an attack",
+            "برای آغاز تهاجم زمینی حداقل به ۱ یگان پیاده‌نظام نیاز است.",
           );
         }
         if (action.dronesToLaunch > source.military.droneMissile) {
           throw new GameError(
             "INSUFFICIENT_RESOURCES",
-            "Drones to launch exceeds available stock",
+            "تعداد پهپادهای درخواستی بیشتر از موجودی انبار است.",
           );
         }
 
@@ -221,14 +240,14 @@ export class ActionRuleEvaluator {
         if (source.treasury < deploymentMoneyCost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
-            `Insufficient treasury for troop deployment. Required: $${deploymentMoneyCost.toLocaleString("en-US")}`,
+            `موجودی خزانه برای اعزام نیرو کافی نیست. نیازمند: ${deploymentMoneyCost.toLocaleString("fa-IR")} دلار`,
           );
         }
 
         if (source.resources.oil < deploymentOilCost) {
           throw new GameError(
             "INSUFFICIENT_RESOURCES",
-            `Insufficient oil blocks for troop deployment. Required: ${deploymentOilCost} oil blocks`,
+            `ذخایر نفت برای اعزام نیرو کافی نیست. نیازمند: ${deploymentOilCost.toLocaleString("fa-IR")} بلوک نفت`,
           );
         }
         break;

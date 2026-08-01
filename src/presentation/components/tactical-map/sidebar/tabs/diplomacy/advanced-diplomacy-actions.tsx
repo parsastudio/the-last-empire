@@ -19,6 +19,7 @@ interface AdvancedDiplomacyActionsProps {
   nationId?: string;
   currentStance?: DiplomaticStance | string;
   isTradeEmbargoed?: boolean;
+  isLandNeighbor?: boolean;
   onOpenProxyModal?: () => void;
 }
 
@@ -28,6 +29,7 @@ export function AdvancedDiplomacyActions({
   nationId = "NATION_118",
   currentStance = "NORMAL_DIPLOMACY",
   isTradeEmbargoed = false,
+  isLandNeighbor = false,
   onOpenProxyModal,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
@@ -188,21 +190,30 @@ export function AdvancedDiplomacyActions({
 
           <button
             onClick={() => executeOrConfirm(handleInitiateBattle, true)}
-            className={`w-full p-3 rounded-xl border text-right transition-all cursor-pointer space-y-1 ${
+            disabled={!isLandNeighbor && !isWar}
+            className={`w-full p-3 rounded-xl border text-right transition-all space-y-1 ${
               isWar
-                ? "bg-rose-600/20 border-rose-500/40 text-rose-500 font-bold"
-                : "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-500"
+                ? "bg-rose-600/20 border-rose-500/40 text-rose-500 font-bold cursor-pointer"
+                : isLandNeighbor
+                  ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-500 cursor-pointer"
+                  : "bg-secondary/40 border-border/40 text-muted-foreground opacity-50 cursor-not-allowed"
             }`}
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold">
-                {isWar ? "در حال نبرد نظامی فعال" : "اعلان نبرد و تهاجم مستقیم"}
+                {isWar
+                  ? "در حال نبرد نظامی فعال"
+                  : isLandNeighbor
+                    ? "اعلان نبرد و تهاجم مستقیم زمینی"
+                    : "نیازمند مرز خاکی مشترک برای تهاجم زمینی"}
               </span>
               <Swords size={13} />
             </div>
             {!isWar && (
               <p className="text-[9px] text-muted-foreground">
-                ورود به فاز اقدام نظامی مستقیم علیه قلمرو این کشور.
+                {isLandNeighbor
+                  ? "ورود به فاز اقدام نظامی مستقیم علیه قلمرو این کشور."
+                  : "تنها امکان تهاجم به کشورهایی وجود دارد که دارای مرز زمینی مستقیم با کشور شما هستند."}
               </p>
             )}
           </button>
