@@ -39,20 +39,12 @@ export class BattleExecutionEngine {
       );
     }
 
-    const attackerWoundedRecovered = Math.floor(
-      calcResult.attackerCasualties.infantryLost * 0.4,
-    );
-    const defenderWoundedRecovered = Math.floor(
-      calcResult.defenderCasualties.infantryLost * 0.4,
-    );
+    const isFullCapitulation =
+      actualConqueredArea >= defender.geography.territorySize;
 
     const updatedAttacker = {
       ...attacker,
       treasury: attacker.treasury + calcResult.treasuryLooted,
-      resources: {
-        ...attacker.resources,
-        manpower: attacker.resources.manpower + attackerWoundedRecovered,
-      },
       military: {
         ...attacker.military,
         infantry: Math.max(
@@ -76,10 +68,6 @@ export class BattleExecutionEngine {
     const updatedDefender = {
       ...defender,
       treasury: defender.treasury - calcResult.treasuryLooted,
-      resources: {
-        ...defender.resources,
-        manpower: defender.resources.manpower + defenderWoundedRecovered,
-      },
       military: {
         ...defender.military,
         infantry: Math.max(
@@ -96,17 +84,25 @@ export class BattleExecutionEngine {
       },
     };
 
+    const reportTitle = calcResult.isAttackerVictory
+      ? isFullCapitulation
+        ? `فتح کامل و تسلیم ${defender.name}`
+        : `پیروزی در تهاجم به ${defender.name}`
+      : `عقب‌نشینی نیروها در نبرد با ${defender.name}`;
+
+    const reportSummary = calcResult.isAttackerVictory
+      ? isFullCapitulation
+        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل ساختار دفاعی ${defender.name}، تمام خاک قلمرو آن را فتح کردند.`
+        : `نیروهای ${attacker.name} با موفقیت توانستند مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع از خاک ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.`
+      : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.`;
+
     const report: CombatReport = {
       id: `report-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       turn: state.currentTurn,
       timestamp: Date.now(),
-      severity: calcResult.severity,
-      title: calcResult.isAttackerVictory
-        ? `پیروزی در تهاجم به ${defender.name}`
-        : `عقب‌نشینی نیروها در نبرد با ${defender.name}`,
-      summary: calcResult.isAttackerVictory
-        ? `نیروهای ${attacker.name} موفق به شکست خطوط دفاعی ${defender.name} شدند و مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع به همراه ${calcResult.treasuryLooted.toLocaleString("fa-IR")} دلار غنیمت کسب کردند.`
-        : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.`,
+      severity: isFullCapitulation ? "CRUSHING_VICTORY" : calcResult.severity,
+      title: reportTitle,
+      summary: reportSummary,
       attackerNationId: attacker.id,
       attackerName: attacker.name,
       defenderNationId: defender.id,
@@ -114,7 +110,7 @@ export class BattleExecutionEngine {
       attackerCasualties: calcResult.attackerCasualties,
       defenderCasualties: calcResult.defenderCasualties,
       conqueredAreaSqKm: actualConqueredArea,
-      capitulatedAreaSqKm: 0,
+      capitulatedAreaSqKm: isFullCapitulation ? actualConqueredArea : 0,
       strategicAssessment: `پهپادهای شلیک‌شده: ${calcResult.dronesUsed} | ضریب پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
       isVictory: calcResult.isAttackerVictory,
     };
