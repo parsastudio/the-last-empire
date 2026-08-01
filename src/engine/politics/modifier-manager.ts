@@ -1,8 +1,15 @@
 import type { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
-import type { GameModifier } from "@/domain/game/events.schema";
+
+export interface ModifierInput {
+  id: string;
+  name: string;
+  effectType: string;
+  magnitude: number;
+  duration: number;
+}
 
 export class ModifierManager {
-  public addModifier(nation: Nation, modifier: GameModifier): Nation {
+  public addModifier(nation: Nation, modifier: ModifierInput): Nation {
     const active: ActiveModifier = {
       id: modifier.id,
       name: modifier.name,

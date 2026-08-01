@@ -7,7 +7,6 @@ import { EconomyPhase } from "@/engine/pipeline/economy-phase";
 import { MilitaryPhase } from "@/engine/pipeline/military-phase";
 import { PoliticsPhase } from "@/engine/pipeline/politics-phase";
 import { DiplomacyPhase } from "@/engine/pipeline/diplomacy-phase";
-import { EventsPhase } from "@/engine/pipeline/events-phase";
 
 export class TurnPipeline {
   private phases: TurnPhase[];
@@ -19,7 +18,6 @@ export class TurnPipeline {
       new MilitaryPhase(),
       new PoliticsPhase(),
       new DiplomacyPhase(),
-      new EventsPhase(),
     ];
   }
 
