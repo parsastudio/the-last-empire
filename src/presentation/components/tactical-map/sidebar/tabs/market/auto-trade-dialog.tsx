@@ -32,6 +32,19 @@ export function AutoTradeDialog({
     initialSettings?.allowEmergencyLoans ?? true,
   );
 
+  const [prevKey, setPrevKey] = useState<string>("");
+  const currentKey = `${isOpen}-${initialSettings?.autoBuyDeficit}-${initialSettings?.autoSellOilPercent}-${initialSettings?.autoSellSteelPercent}-${initialSettings?.allowEmergencyLoans}`;
+
+  if (currentKey !== prevKey) {
+    setPrevKey(currentKey);
+    if (isOpen && initialSettings) {
+      setAutoBuyDeficit(initialSettings.autoBuyDeficit ?? false);
+      setAutoSellOilPercent(initialSettings.autoSellOilPercent ?? 0);
+      setAutoSellSteelPercent(initialSettings.autoSellSteelPercent ?? 0);
+      setAllowEmergencyLoans(initialSettings.allowEmergencyLoans ?? true);
+    }
+  }
+
   const { dispatchAction } = useGameActions();
 
   if (!isOpen) return null;

@@ -9,7 +9,12 @@ export class ActionPrioritySorter {
     const rawQueue = [...actions];
 
     const priority1 = rawQueue.filter((a) =>
-      ["ACTIVATE_ABILITY", "SET_TAX_RATE", "SET_TARIFF_RATE"].includes(a.type),
+      [
+        "ACTIVATE_ABILITY",
+        "SET_TAX_RATE",
+        "SET_TARIFF_RATE",
+        "CONFIGURE_AUTO_TRADE",
+      ].includes(a.type),
     );
     const priority2 = rawQueue.filter((a) => a.type === "TRADE_RESOURCES");
     const priority3 = rawQueue.filter((a) =>
