@@ -23,7 +23,6 @@ export class AutoTradeEngine {
       autoSellOilPercent: 0,
       autoSellSteelPercent: 0,
       allowEmergencyLoans: true,
-      maxDebtRatioLimit: 0.8,
     };
 
     let currentNation = { ...nation };
@@ -98,24 +97,17 @@ export class AutoTradeEngine {
           currentNation.treasury < neededFunds &&
           config.allowEmergencyLoans
         ) {
-          const currentDebtRatio =
-            currentNation.gdp > 0
-              ? currentNation.nationalDebt / currentNation.gdp
-              : 1;
+          const missingCash = neededFunds - currentNation.treasury;
+          const loanAmount = Math.ceil(missingCash / 1e9) * 1e9;
 
-          if (currentDebtRatio < config.maxDebtRatioLimit) {
-            const missingCash = neededFunds - currentNation.treasury;
-            const loanAmount = Math.ceil(missingCash / 1e9) * 1e9;
+          loanTakenAmount = loanAmount;
+          const totalDebtAdded = loanAmount + Math.floor(loanAmount * 0.05);
 
-            loanTakenAmount = loanAmount;
-            const totalDebtAdded = loanAmount + Math.floor(loanAmount * 0.05);
-
-            currentNation = {
-              ...currentNation,
-              treasury: currentNation.treasury + loanAmount,
-              nationalDebt: currentNation.nationalDebt + totalDebtAdded,
-            };
-          }
+          currentNation = {
+            ...currentNation,
+            treasury: currentNation.treasury + loanAmount,
+            nationalDebt: currentNation.nationalDebt + totalDebtAdded,
+          };
         }
 
         if (oilDeficit > 0) {

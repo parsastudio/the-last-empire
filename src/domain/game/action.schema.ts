@@ -169,7 +169,6 @@ export const ConfigureAutoTradeActionSchema = z.object({
   autoSellOilPercent: z.number().min(0).max(100),
   autoSellSteelPercent: z.number().min(0).max(100),
   allowEmergencyLoans: z.boolean(),
-  maxDebtRatioLimit: z.number().min(0.1).max(2.0),
 });
 
 export const GameActionSchema = z.discriminatedUnion("type", [

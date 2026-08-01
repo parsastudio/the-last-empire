@@ -94,7 +94,6 @@ export class PoliticsActionExecutor {
                 autoSellOilPercent: action.autoSellOilPercent,
                 autoSellSteelPercent: action.autoSellSteelPercent,
                 allowEmergencyLoans: action.allowEmergencyLoans,
-                maxDebtRatioLimit: action.maxDebtRatioLimit,
               },
             },
           },
