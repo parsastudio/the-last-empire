@@ -7,6 +7,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { ActionDispatcherService } from "@/presentation/services/action-dispatcher.service";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
+import { ActionRouter } from "@/engine/actions/action-router";
 
 export function useGameActions(
   customGameId?: string,
@@ -25,6 +26,21 @@ export function useGameActions(
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
+      if (currentState) {
+        try {
+          const router = new ActionRouter();
+          const optimisticState = router.route(currentState, action);
+          storageService.saveGameState(activeGameId, optimisticState);
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(
+              new CustomEvent("geopolitics-state-updated", {
+                detail: optimisticState,
+              }),
+            );
+          }
+        } catch {}
+      }
+
       const result = await dispatcher.dispatch(
         action,
         activeGameId,

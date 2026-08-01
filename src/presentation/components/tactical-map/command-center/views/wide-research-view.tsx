@@ -54,16 +54,19 @@ export function WideResearchView({
         <DoctrineBranchColumn
           title="شاخه‌ صنعت و لجستیک"
           doctrines={research.industrialDoctrines}
+          activePoints={activePoints}
           onUnlock={research.handleUnlock}
         />
         <DoctrineBranchColumn
           title="شاخه‌ دفاع ناهمگون نظامی"
           doctrines={research.asymmetricDoctrines}
+          activePoints={activePoints}
           onUnlock={research.handleUnlock}
         />
         <DoctrineBranchColumn
           title="شاخه‌ هژمونی دیپلماتیک"
           doctrines={research.diplomaticDoctrines}
+          activePoints={activePoints}
           onUnlock={research.handleUnlock}
         />
       </div>
