@@ -1,5 +1,6 @@
 import React from "react";
 import { Shield, Plane, Radio } from "lucide-react";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export interface UnitConfig {
   type: string;
@@ -14,32 +15,32 @@ export interface UnitConfig {
 
 export const RECRUITABLE_UNITS: UnitConfig[] = [
   {
-    type: "INFANTRY",
-    name: "پیاده‌نظام رزمی (۱۰ هزار نفر)",
-    moneyCost: 250000000,
-    manpowerCost: 10,
-    steelCost: 0,
-    buildTurns: 2,
+    type: MILITARY_UNIT_STATS.INFANTRY.type,
+    name: MILITARY_UNIT_STATS.INFANTRY.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.INFANTRY.moneyCost,
+    manpowerCost: MILITARY_UNIT_STATS.INFANTRY.manpowerCost,
+    steelCost: MILITARY_UNIT_STATS.INFANTRY.steelCost,
+    buildTurns: MILITARY_UNIT_STATS.INFANTRY.buildTurns,
     icon: Shield,
     color: "text-primary",
   },
   {
-    type: "AIR_FORCE",
-    name: "نیروی هوایی (۱۰ فروند جنگنده)",
-    moneyCost: 1000000000,
-    manpowerCost: 5,
-    steelCost: 20,
-    buildTurns: 4,
+    type: MILITARY_UNIT_STATS.AIR_FORCE.type,
+    name: MILITARY_UNIT_STATS.AIR_FORCE.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
+    manpowerCost: MILITARY_UNIT_STATS.AIR_FORCE.manpowerCost,
+    steelCost: MILITARY_UNIT_STATS.AIR_FORCE.steelCost,
+    buildTurns: MILITARY_UNIT_STATS.AIR_FORCE.buildTurns,
     icon: Plane,
     color: "text-gdp",
   },
   {
-    type: "DRONE_MISSILE",
-    name: "یگان موشکی و پهپادی (۱۰ یگان)",
-    moneyCost: 1500000000,
-    manpowerCost: 1,
-    steelCost: 25,
-    buildTurns: 1,
+    type: MILITARY_UNIT_STATS.DRONE_MISSILE.type,
+    name: MILITARY_UNIT_STATS.DRONE_MISSILE.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost,
+    manpowerCost: MILITARY_UNIT_STATS.DRONE_MISSILE.manpowerCost,
+    steelCost: MILITARY_UNIT_STATS.DRONE_MISSILE.steelCost,
+    buildTurns: MILITARY_UNIT_STATS.DRONE_MISSILE.buildTurns,
     icon: Radio,
     color: "text-treasury",
   },

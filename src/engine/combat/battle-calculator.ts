@@ -5,6 +5,7 @@ import {
 } from "@/domain/reports/combat-report.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -31,9 +32,9 @@ export class BattleCalculator {
     oilPrice = 25000000,
   ): BattleCalculationResult {
     const totalForceCost =
-      attacker.military.infantry * 250000000 +
-      attacker.military.airForce * 1000000000 +
-      dronesToLaunch * 1500000000;
+      attacker.military.infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
+      attacker.military.airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
+      dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const deploymentFivePct = totalForceCost * 0.05;
     const deploymentMoneyCost = Math.floor(deploymentFivePct);

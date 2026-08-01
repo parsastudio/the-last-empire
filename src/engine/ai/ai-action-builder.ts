@@ -2,6 +2,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { AIPersonalityType } from "@/domain/ai/ai.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -60,16 +61,19 @@ export class AIActionBuilder {
       ? nation.treasury * 0.4
       : nation.treasury * 0.2;
 
+    const airStats = MILITARY_UNIT_STATS.AIR_FORCE;
+    const infStats = MILITARY_UNIT_STATS.INFANTRY;
+
     if (
       nation.resources &&
-      recruitBudget >= 1000000000 &&
-      nation.resources.manpower >= 5 &&
-      nation.resources.steel >= 2
+      recruitBudget >= airStats.moneyCost &&
+      nation.resources.manpower >= airStats.manpowerCost &&
+      nation.resources.steel >= airStats.steelCost
     ) {
       const airQty = Math.min(
-        Math.floor(recruitBudget / 1000000000),
-        Math.floor(nation.resources.manpower / 5),
-        Math.floor(nation.resources.steel / 2),
+        Math.floor(recruitBudget / airStats.moneyCost),
+        Math.floor(nation.resources.manpower / airStats.manpowerCost),
+        Math.floor(nation.resources.steel / airStats.steelCost),
       );
       if (airQty > 0) {
         actions.push({
@@ -82,12 +86,12 @@ export class AIActionBuilder {
       }
     } else if (
       nation.resources &&
-      recruitBudget >= 250000000 &&
-      nation.resources.manpower >= 10
+      recruitBudget >= infStats.moneyCost &&
+      nation.resources.manpower >= infStats.manpowerCost
     ) {
       const infQty = Math.min(
-        Math.floor(recruitBudget / 250000000),
-        Math.floor(nation.resources.manpower / 10),
+        Math.floor(recruitBudget / infStats.moneyCost),
+        Math.floor(nation.resources.manpower / infStats.manpowerCost),
       );
       if (infQty > 0) {
         actions.push({

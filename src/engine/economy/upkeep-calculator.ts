@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export interface BreakdownUpkeep {
   infantry: number;
@@ -21,9 +22,10 @@ export class UpkeepCalculator {
     const govTraits = this.governmentSystem.getTraits(nation.government.type);
 
     const baseMilitaryWeight =
-      nation.military.infantry * 1.0 +
-      nation.military.airForce * 3.0 +
-      nation.military.droneMissile * 0.2;
+      nation.military.infantry * MILITARY_UNIT_STATS.INFANTRY.weightPower +
+      nation.military.airForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower +
+      nation.military.droneMissile *
+        MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower;
 
     const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.2;
 

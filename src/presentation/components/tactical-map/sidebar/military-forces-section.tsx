@@ -1,6 +1,7 @@
 import React from "react";
 import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 interface MilitaryForcesSectionProps {
   infantry: number;
@@ -20,9 +21,17 @@ export function MilitaryForcesSection({
   militiaGarrisonPower = 280,
 }: MilitaryForcesSectionProps) {
   const techMultiplier = 1 + (techLevel - 1) * 0.2;
-  const infantryMoneyUpkeep = Math.floor(infantry * 12 * techMultiplier);
-  const airForceMoneyUpkeep = Math.floor(airForce * 36 * techMultiplier);
-  const droneMoneyUpkeep = Math.floor(droneMissile * 2.4 * techMultiplier);
+  const infantryMoneyUpkeep = Math.floor(
+    infantry * MILITARY_UNIT_STATS.INFANTRY.moneyUpkeepBase * techMultiplier,
+  );
+  const airForceMoneyUpkeep = Math.floor(
+    airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyUpkeepBase * techMultiplier,
+  );
+  const droneMoneyUpkeep = Math.floor(
+    droneMissile *
+      MILITARY_UNIT_STATS.DRONE_MISSILE.moneyUpkeepBase *
+      techMultiplier,
+  );
 
   const bonusPercent = (techLevel - 1) * 20;
 
