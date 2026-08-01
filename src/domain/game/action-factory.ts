@@ -272,7 +272,6 @@ export class ActionFactory {
     autoSellOilPercent: number,
     autoSellSteelPercent: number,
     allowEmergencyLoans: boolean,
-    maxDebtRatioLimit: number,
   ): ConfigureAutoTradeAction {
     return {
       id: this.createId("autotrade"),
@@ -282,7 +281,6 @@ export class ActionFactory {
       autoSellOilPercent,
       autoSellSteelPercent,
       allowEmergencyLoans,
-      maxDebtRatioLimit,
     };
   }
 }

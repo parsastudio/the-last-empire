@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bot, ShoppingBag, TrendingDown, ShieldAlert, Zap } from "lucide-react";
+import { Bot, ShoppingBag, TrendingDown, ShieldAlert } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -31,9 +31,6 @@ export function AutoTradeDialog({
   const [allowEmergencyLoans, setAllowEmergencyLoans] = useState<boolean>(
     initialSettings?.allowEmergencyLoans ?? true,
   );
-  const [maxDebtRatioLimit, setMaxDebtRatioLimit] = useState<number>(
-    initialSettings?.maxDebtRatioLimit ?? 0.8,
-  );
 
   const { dispatchAction } = useGameActions();
 
@@ -46,7 +43,6 @@ export function AutoTradeDialog({
       autoSellOilPercent,
       autoSellSteelPercent,
       allowEmergencyLoans,
-      maxDebtRatioLimit,
     );
 
     const success = await dispatchAction(
@@ -98,45 +94,16 @@ export function AutoTradeDialog({
           </div>
 
           {autoBuyDeficit && (
-            <div className="pt-2 border-t border-border/40 space-y-2 text-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground text-[11px]">
-                  دریافت وام اضطراری در صورت کسری خزانه:
-                </span>
-                <input
-                  type="checkbox"
-                  checked={allowEmergencyLoans}
-                  onChange={(e) => setAllowEmergencyLoans(e.target.checked)}
-                  className="accent-gdp cursor-pointer w-4 h-4"
-                />
-              </div>
-
-              {allowEmergencyLoans && (
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono">
-                    <span className="text-muted-foreground">
-                      سقف مجاز بدهی به GDP:
-                    </span>
-                    <span className="font-bold text-amber-500">
-                      {PersianNumberFormatter.toPersianDigits(
-                        Math.round(maxDebtRatioLimit * 100),
-                      )}
-                      ٪
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0.2"
-                    max="1.5"
-                    step="0.1"
-                    value={maxDebtRatioLimit}
-                    onChange={(e) =>
-                      setMaxDebtRatioLimit(Number(e.target.value))
-                    }
-                    className="w-full accent-amber-500 cursor-pointer h-1.5 bg-secondary rounded-lg"
-                  />
-                </div>
-              )}
+            <div className="pt-2 border-t border-border/40 flex items-center justify-between text-xs">
+              <span className="text-muted-foreground text-[11px]">
+                دریافت وام اضطراری در صورت کسری خزانه:
+              </span>
+              <input
+                type="checkbox"
+                checked={allowEmergencyLoans}
+                onChange={(e) => setAllowEmergencyLoans(e.target.checked)}
+                className="accent-gdp cursor-pointer w-4 h-4"
+              />
             </div>
           )}
         </div>

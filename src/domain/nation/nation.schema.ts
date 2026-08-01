@@ -58,7 +58,6 @@ export const AutoTradeSettingsSchema = z.object({
   autoSellOilPercent: z.number().min(0).max(100).default(0),
   autoSellSteelPercent: z.number().min(0).max(100).default(0),
   allowEmergencyLoans: z.boolean().default(true),
-  maxDebtRatioLimit: z.number().min(0.1).max(2.0).default(0.8),
 });
 
 export const NationSchema = z.object({
@@ -97,7 +96,6 @@ export const NationSchema = z.object({
     autoSellOilPercent: 0,
     autoSellSteelPercent: 0,
     allowEmergencyLoans: true,
-    maxDebtRatioLimit: 0.8,
   }),
 });
 
