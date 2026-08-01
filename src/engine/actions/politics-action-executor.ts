@@ -114,6 +114,16 @@ export class PoliticsActionExecutor {
       case "DIPLOMATIC_PROPOSAL": {
         const receiver = state.nations[action.targetNationId];
         if (!receiver) return state;
+
+        if (
+          (action.proposalType === "NON_AGGRESSION_PACT" ||
+            action.proposalType === "FULL_ALLIANCE") &&
+          nation.isAi &&
+          !receiver.isAi
+        ) {
+          return state;
+        }
+
         const result = this.treatyEvaluator.evaluateProposal(
           nation,
           receiver,
