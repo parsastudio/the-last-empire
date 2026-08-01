@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 import { DiplomaticOpinionCalculator } from "@/engine/diplomacy/diplomatic-opinion-calculator";
 import { RelationsManager } from "@/engine/diplomacy/relations-manager";
 
@@ -8,13 +9,18 @@ export class OpinionFrictionHandler {
 
   public handle(nation: Nation, nations: Record<string, Nation>): Nation {
     const updated = { ...nation };
-    const updatedRelations = { ...updated.relations };
+    const updatedRelations = { ...(updated.relations || {}) };
 
     for (const [targetId, relation] of Object.entries(updatedRelations)) {
-      const target = nations[targetId];
+      if (!relation) continue;
+      const canonicalTargetId = NationIdResolver.resolveCanonicalId(targetId);
+      const target = nations[targetId] || nations[canonicalTargetId];
+
       if (target && target.isAlive) {
+        const landNeighbors = updated.geography?.landNeighbors || [];
         const isLandNeighbor =
-          updated.geography.landNeighbors.includes(targetId);
+          landNeighbors.includes(targetId) ||
+          landNeighbors.includes(canonicalTargetId);
 
         const frictionValue = this.relationsManager.calculateGovernmentFriction(
           updated,

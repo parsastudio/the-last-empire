@@ -1,6 +1,7 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { AIPersonalityType } from "@/domain/ai/ai.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -16,7 +17,7 @@ export class AIActionBuilder {
     const makeId = (type: string) =>
       `ai-${type}-${cleanNation}-t${currentTurn}-s${seq++}`;
 
-    if (nation.doctrines.doctrinePoints >= 3) {
+    if (nation.doctrines && nation.doctrines.doctrinePoints >= 3) {
       actions.push({
         id: makeId("unlock-doctrine"),
         nationId: nation.id,
@@ -25,7 +26,11 @@ export class AIActionBuilder {
       });
     }
 
-    if (nation.government.corruption > 35 && nation.treasury > 20000) {
+    if (
+      nation.government &&
+      nation.government.corruption > 35 &&
+      nation.treasury > 20000
+    ) {
       actions.push({
         id: makeId("anti-corruption"),
         nationId: nation.id,
@@ -56,6 +61,7 @@ export class AIActionBuilder {
       : nation.treasury * 0.2;
 
     if (
+      nation.resources &&
       recruitBudget >= 1000000000 &&
       nation.resources.manpower >= 5 &&
       nation.resources.steel >= 2
@@ -74,7 +80,11 @@ export class AIActionBuilder {
           quantity: airQty,
         });
       }
-    } else if (recruitBudget >= 250000000 && nation.resources.manpower >= 10) {
+    } else if (
+      nation.resources &&
+      recruitBudget >= 250000000 &&
+      nation.resources.manpower >= 10
+    ) {
       const infQty = Math.min(
         Math.floor(recruitBudget / 250000000),
         Math.floor(nation.resources.manpower / 10),
@@ -90,9 +100,11 @@ export class AIActionBuilder {
       }
     }
 
-    for (const [targetId, relation] of Object.entries(nation.relations)) {
+    for (const [targetId, relation] of Object.entries(nation.relations || {})) {
       if (actions.length >= 6) break;
-      const target = allNations[targetId];
+      if (!relation) continue;
+      const canonicalTargetId = NationIdResolver.resolveCanonicalId(targetId);
+      const target = allNations[targetId] || allNations[canonicalTargetId];
       if (!target || !target.isAlive) continue;
 
       if (
@@ -104,7 +116,7 @@ export class AIActionBuilder {
           id: makeId("diplomacy-proposal"),
           nationId: nation.id,
           type: "DIPLOMATIC_PROPOSAL",
-          targetNationId: targetId,
+          targetNationId: target.id,
           proposalType:
             relation.stance === "PEACE"
               ? "NON_AGGRESSION_PACT"
@@ -113,7 +125,11 @@ export class AIActionBuilder {
       }
     }
 
-    if (nation.resources.oil < 10 && nation.treasury > 50000000) {
+    if (
+      nation.resources &&
+      nation.resources.oil < 10 &&
+      nation.treasury > 50000000
+    ) {
       actions.push({
         id: makeId("trade-oil"),
         nationId: nation.id,

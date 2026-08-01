@@ -1,4 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class CoalitionManager {
   public processCoalitions(state: GameState): GameState {
@@ -14,12 +15,14 @@ export class CoalitionManager {
     const updatedNations = { ...state.nations };
 
     for (const threat of globalThreats) {
-      const threatened = aliveNations.filter(
-        (n) =>
-          n.id !== threat.id &&
-          n.relations[threat.id] &&
-          n.relations[threat.id].opinion < -20,
-      );
+      const canonicalThreatId = NationIdResolver.resolveCanonicalId(threat.id);
+
+      const threatened = aliveNations.filter((n) => {
+        if (n.id === threat.id || n.id === canonicalThreatId) return false;
+        const rel =
+          n.relations?.[threat.id] || n.relations?.[canonicalThreatId];
+        return rel && rel.opinion < -20;
+      });
 
       if (threatened.length >= 2) {
         for (let i = 0; i < threatened.length; i++) {
@@ -27,7 +30,14 @@ export class CoalitionManager {
             const nationA = threatened[i]!;
             const nationB = threatened[j]!;
 
-            const relA = nationA.relations[nationB.id];
+            const canonicalB = NationIdResolver.resolveCanonicalId(nationB.id);
+            const canonicalA = NationIdResolver.resolveCanonicalId(nationA.id);
+
+            const relAKey = nationA.relations?.[nationB.id]
+              ? nationB.id
+              : canonicalB;
+            const relA = nationA.relations?.[relAKey];
+
             if (relA && relA.stance === "PEACE" && relA.opinion >= 0) {
               const updatedA = updatedNations[nationA.id] || nationA;
               const updatedB = updatedNations[nationB.id] || nationB;
@@ -36,20 +46,24 @@ export class CoalitionManager {
                 ...updatedA,
                 relations: {
                   ...updatedA.relations,
-                  [nationB.id]: {
+                  [relAKey]: {
                     ...relA,
                     stance: "NON_AGGRESSION_PACT",
                   },
                 },
               };
 
-              const relB = nationB.relations[nationA.id];
+              const relBKey = updatedB.relations?.[nationA.id]
+                ? nationA.id
+                : canonicalA;
+              const relB = updatedB.relations?.[relBKey];
+
               if (relB) {
                 updatedNations[nationB.id] = {
                   ...updatedB,
                   relations: {
                     ...updatedB.relations,
-                    [nationA.id]: {
+                    [relBKey]: {
                       ...relB,
                       stance: "NON_AGGRESSION_PACT",
                     },
