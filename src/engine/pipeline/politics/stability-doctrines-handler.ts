@@ -1,11 +1,13 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { ResearchManager } from "@/engine/politics/research-manager";
 
 export class StabilityDoctrinesHandler {
   private stabilityCalc = new StabilityCalculator();
+  private researchManager = new ResearchManager();
 
   public handle(nation: Nation): Nation {
-    const updated = { ...nation };
+    let updated = { ...nation };
     const newStability = this.stabilityCalc.calculateTurnStability(updated);
 
     updated.government = {
@@ -13,13 +15,7 @@ export class StabilityDoctrinesHandler {
       stability: newStability,
     };
 
-    const pointsEarned = 0.1 + (newStability / 100) * 0.1;
-    updated.doctrines = {
-      ...updated.doctrines,
-      doctrinePoints: Number(
-        (updated.doctrines.doctrinePoints + pointsEarned).toFixed(2),
-      ),
-    };
+    updated = this.researchManager.processTurnResearch(updated);
 
     return updated;
   }

@@ -28,6 +28,7 @@ export class ActionRouter {
       case "INITIATE_BATTLE":
         return MilitaryActionExecutor.execute(state, action, gridState);
 
+      case "SET_RESEARCH_BUDGET":
       case "ACTIVATE_ABILITY":
       case "UNLOCK_DOCTRINE":
       case "ANTI_CORRUPTION_DRIVE":
