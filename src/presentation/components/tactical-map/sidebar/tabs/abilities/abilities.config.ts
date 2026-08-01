@@ -1,5 +1,6 @@
 import React from "react";
 import { Zap, ShieldAlert, Landmark, Flame, Globe2 } from "lucide-react";
+import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 
 export interface AbilityItem {
   id: string;
@@ -17,7 +18,7 @@ export const REGIME_ABILITIES: AbilityItem[] = [
     id: "DIPLOMATIC_SUMMIT",
     name: "نشست دیپلماتیک",
     requiredGov: "DEMOCRACY",
-    govLabel: "دموکراسی",
+    govLabel: getGovernmentTypeLabel("DEMOCRACY"),
     desc: "افزایش فوری ۲۰+ امتیاز نظر با یک کشور هدف و بهبود اعتبار جهانی.",
     cooldown: "۱۲ نوبت خنک‌سازی",
     icon: Globe2,
@@ -27,7 +28,7 @@ export const REGIME_ABILITIES: AbilityItem[] = [
     id: "MARTIAL_LAW",
     name: "اعلام حکومت نظامی",
     requiredGov: "DICTATORSHIP",
-    govLabel: "دیکتاتوری",
+    govLabel: getGovernmentTypeLabel("DICTATORSHIP"),
     desc: "سرکوب ناآرامی‌ها و افزایش فوری ۱۵+ درصد ثبات داخلی کشور.",
     cooldown: "۲۰ نوبت خنک‌سازی",
     icon: ShieldAlert,
@@ -37,7 +38,7 @@ export const REGIME_ABILITIES: AbilityItem[] = [
     id: "INDUSTRIAL_MOBILIZATION",
     name: "بسیج صنعتی",
     requiredGov: "COMMUNISM",
-    govLabel: "کمونیسم",
+    govLabel: getGovernmentTypeLabel("COMMUNISM"),
     desc: "افزایش ۵+ درصدی ضریب رشد اقتصاد به مدت ۵ نوبت با قربانی کردن بخشی از نیروی انسانی.",
     cooldown: "۲۵ نوبت خنک‌سازی",
     icon: Zap,
@@ -47,7 +48,7 @@ export const REGIME_ABILITIES: AbilityItem[] = [
     id: "WAR_ALERT",
     name: "هشدار امنیتی ارتش",
     requiredGov: "FASCISM",
-    govLabel: "فاشیسم",
+    govLabel: getGovernmentTypeLabel("FASCISM"),
     desc: "کاهش فوری ۳۰ واحدی فرسایش ساختاری ارتش و نیروها.",
     cooldown: "۲۰ نوبت خنک‌سازی",
     icon: Flame,
@@ -57,7 +58,7 @@ export const REGIME_ABILITIES: AbilityItem[] = [
     id: "ROYAL_DECREE",
     name: "فرمان سلطنتی",
     requiredGov: "MONARCHY",
-    govLabel: "پادشاهی",
+    govLabel: getGovernmentTypeLabel("MONARCHY"),
     desc: "هزینه ۴۰,۰۰۰ از خزانه برای جهش فوری ۱۵ واحدی اعتبار جهانی کشور.",
     cooldown: "۲۰ نوبت خنک‌سازی",
     icon: Landmark,

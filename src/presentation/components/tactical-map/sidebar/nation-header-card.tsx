@@ -2,6 +2,7 @@ import React from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { useNationHeaderFormatter } from "./hooks/use-nation-header-formatter";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 
 interface NationHeaderCardProps {
   name: string;
@@ -30,23 +31,6 @@ export function NationHeaderCard({
     territorySize,
   });
 
-  const getGovLabel = (type: string) => {
-    switch (type) {
-      case "DEMOCRACY":
-        return "دموکراسی";
-      case "DICTATORSHIP":
-        return "حکومت دیکتاتوری";
-      case "MONARCHY":
-        return "پادشاهی";
-      case "COMMUNISM":
-        return "کمونیسم";
-      case "FASCISM":
-        return "فاشیسم";
-      default:
-        return type;
-    }
-  };
-
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
       <div className="flex items-center justify-between">
@@ -65,7 +49,7 @@ export function NationHeaderCard({
               </span>
             </div>
             <p className="text-[10px] text-muted-foreground font-mono">
-              نوع حکومت: {getGovLabel(governmentType)}
+              نوع حکومت: {getGovernmentTypeLabel(governmentType)}
             </p>
           </div>
         </div>

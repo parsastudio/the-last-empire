@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/game-error";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class RecruitmentQueueManager {
   public enqueueOrder(
@@ -8,8 +9,10 @@ export class RecruitmentQueueManager {
     unitType: UnitType,
     quantity: number,
   ): Nation {
-    if (unitType === "AIR_FORCE" || unitType === "DRONE_MISSILE") {
-      const requiredSteel = quantity * 2;
+    const stats = MILITARY_UNIT_STATS[unitType];
+
+    if (stats.steelCost > 0) {
+      const requiredSteel = quantity * stats.steelCost;
       if (nation.resources.steel < requiredSteel) {
         throw new GameError(
           "INSUFFICIENT_RESOURCES",
@@ -19,22 +22,8 @@ export class RecruitmentQueueManager {
     }
 
     const discount = Math.max(0.7, 1 - (nation.industrialLevel - 1) * 0.05);
-    let moneyCostUnit = 250000000;
-    let manpowerUnit = 10;
-    let buildTurns = 2;
-
-    if (unitType === "AIR_FORCE") {
-      moneyCostUnit = 1000000000;
-      manpowerUnit = 5;
-      buildTurns = 4;
-    } else if (unitType === "DRONE_MISSILE") {
-      moneyCostUnit = 1500000000;
-      manpowerUnit = 1;
-      buildTurns = 1;
-    }
-
-    const totalMoney = Math.floor(moneyCostUnit * discount) * quantity;
-    const totalManpower = manpowerUnit * quantity;
+    const totalMoney = Math.floor(stats.moneyCost * discount) * quantity;
+    const totalManpower = stats.manpowerCost * quantity;
 
     if (nation.treasury < totalMoney) {
       throw new GameError(
@@ -53,14 +42,14 @@ export class RecruitmentQueueManager {
       id: `${unitType}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       unitType,
       quantity,
-      turnsRemaining: buildTurns,
+      turnsRemaining: stats.buildTurns,
       totalCost: totalMoney,
       manpowerRequired: totalManpower,
     };
 
     let finalSteel = nation.resources.steel;
-    if (unitType === "AIR_FORCE" || unitType === "DRONE_MISSILE") {
-      finalSteel = Math.max(0, finalSteel - quantity * 2);
+    if (stats.steelCost > 0) {
+      finalSteel = Math.max(0, finalSteel - quantity * stats.steelCost);
     }
 
     return {
@@ -120,9 +109,10 @@ export class RecruitmentQueueManager {
       nation.resources.manpower + manpowerRefund,
     );
 
+    const stats = MILITARY_UNIT_STATS[order.unitType];
     let finalSteel = nation.resources.steel;
-    if (order.unitType === "AIR_FORCE" || order.unitType === "DRONE_MISSILE") {
-      finalSteel = finalSteel + order.quantity * 2;
+    if (stats.steelCost > 0) {
+      finalSteel = finalSteel + order.quantity * stats.steelCost;
     }
 
     return {
