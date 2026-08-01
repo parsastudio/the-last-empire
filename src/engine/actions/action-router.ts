@@ -1,8 +1,8 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { EconomyActionExecutor } from "./economy-action-executor";
-import { MilitaryActionExecutor } from "./military-action-executor";
-import { PoliticsActionExecutor } from "./politics-action-executor";
+import { EconomyActionExecutor } from "@/engine/actions/economy-action-executor";
+import { MilitaryActionExecutor } from "@/engine/actions/military-action-executor";
+import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executor";
 import { GridState } from "@/engine/combat/state/grid-state";
 
 export class ActionRouter {
