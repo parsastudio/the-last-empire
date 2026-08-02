@@ -1,4 +1,6 @@
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { Nation } from "@/domain/nation/nation.schema";
+import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
 
 export interface PopulationWelfareMetrics {
   oilDemand: number;
@@ -45,6 +47,50 @@ export class PopulationWelfareCalculator {
     const clamped = Math.max(0, Math.min(1, fulfillment));
     const impact = clamped * 2 - 1;
     return Number(impact.toFixed(2));
+  }
+
+  public calculateEffectiveResources(nation: Nation): {
+    effectiveOil: number;
+    effectiveSteel: number;
+  } {
+    const { oilProducedPerTurn, steelProducedPerTurn } =
+      ResourceGenerationStep.calculateResourceGeneration(nation);
+
+    const oilDemand = this.calculateOilDemand(
+      nation.population,
+      nation.gdp,
+      nation.doctrines?.unlockedDoctrines,
+    );
+    const steelDemand = this.calculateSteelDemand(
+      nation.population,
+      nation.gdp,
+    );
+
+    const autoTrade = nation.autoTradeSettings;
+    const isAutoBuy = autoTrade?.autoBuyDeficit ?? false;
+
+    let effectiveOil = nation.resources.oil + oilProducedPerTurn;
+    let effectiveSteel = nation.resources.steel + steelProducedPerTurn;
+
+    if (isAutoBuy && nation.isAlive) {
+      effectiveOil = Math.max(oilDemand, effectiveOil);
+      effectiveSteel = Math.max(steelDemand, effectiveSteel);
+    }
+
+    return { effectiveOil, effectiveSteel };
+  }
+
+  public evaluateWelfareForNation(nation: Nation): PopulationWelfareMetrics {
+    const { effectiveOil, effectiveSteel } =
+      this.calculateEffectiveResources(nation);
+
+    return this.evaluateWelfare(
+      nation.population,
+      effectiveOil,
+      effectiveSteel,
+      nation.gdp,
+      nation.doctrines?.unlockedDoctrines,
+    );
   }
 
   public evaluateWelfare(

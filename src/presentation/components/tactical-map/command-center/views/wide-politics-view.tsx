@@ -70,6 +70,7 @@ export function WidePoliticsView({
           oilStock={oilStock}
           steelStock={steelStock}
           gdp={gdp}
+          nation={currentNation}
         />
         <TaxControlCard
           taxRate={taxRate}
