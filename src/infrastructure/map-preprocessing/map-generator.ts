@@ -72,10 +72,8 @@ export async function generateTest6Map(
 
   partitioner.partitionBuffer(buffer, width, height, activeIdToCodeMap);
 
-  geometryDraw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 254);
-  geometryDraw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 254);
-  geometryDraw.drawWaterLine(2688, 720, 2692, 725, buffer, width, height, 254);
-  geometryDraw.drawWaterLine(2538, 878, 2542, 882, buffer, width, height, 254);
+  geometryDraw.drawWaterLine(2414, 676, 2419, 687, buffer, width, height, 0);
+  geometryDraw.drawWaterLine(1136, 915, 1145, 925, buffer, width, height, 0);
 
   const maxId = Math.max(...countries.map((c) => c.id), 255) + 1;
   const pixelAreas = areaCounter.calculateAreas(buffer, width, height, maxId);
