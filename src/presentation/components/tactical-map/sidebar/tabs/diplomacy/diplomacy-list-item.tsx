@@ -1,6 +1,11 @@
 import React from "react";
-import { DiplomaticRelation } from "./utils/relation-resolver";
+import {
+  DiplomaticRelation,
+  getQualitativeOpinionLabel,
+  getQualitativeOpinionColor,
+} from "./utils/relation-resolver";
 import { DiplomaticStanceBadge } from "./diplomatic-stance-badge";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DiplomacyListItemProps {
   relation: DiplomaticRelation;
@@ -11,6 +16,9 @@ export function DiplomacyListItem({
   relation,
   onSelect,
 }: DiplomacyListItemProps) {
+  const opinionLabel = getQualitativeOpinionLabel(relation.opinion);
+  const opinionColor = getQualitativeOpinionColor(relation.opinion);
+
   return (
     <button
       onClick={() => onSelect(relation)}
@@ -24,6 +32,9 @@ export function DiplomacyListItem({
           <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
             {relation.code}
           </span>
+          <span className="text-[9px] font-mono bg-amber-500/10 text-amber-500 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
+            #{PersianNumberFormatter.toPersianDigits(relation.rank)}
+          </span>
         </div>
         <div>
           <DiplomaticStanceBadge
@@ -32,8 +43,11 @@ export function DiplomacyListItem({
           />
         </div>
       </div>
-      <div className="text-left font-mono text-[10px] text-muted-foreground">
-        <span>نظر: {relation.opinion}°</span>
+      <div className="text-left font-sans text-[10px]">
+        <span className="text-muted-foreground block text-[9px]">
+          دیدگاه دوجانبه:
+        </span>
+        <span className={`block ${opinionColor}`}>{opinionLabel}</span>
       </div>
     </button>
   );

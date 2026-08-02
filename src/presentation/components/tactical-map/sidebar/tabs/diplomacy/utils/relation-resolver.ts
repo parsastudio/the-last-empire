@@ -14,6 +14,7 @@ export interface DiplomaticRelation {
   code: string;
   name: string;
   flagCode: string;
+  rank: number;
   stance: DiplomaticStance;
   opinion: number;
   description: string;
@@ -22,6 +23,22 @@ export interface DiplomaticRelation {
 }
 
 const powerCalculator = new PowerScoreCalculator();
+
+export function getQualitativeOpinionLabel(opinion: number): string {
+  if (opinion >= 60) return "بسیار دوستانه";
+  if (opinion >= 20) return "دوستانه و همسو";
+  if (opinion >= -19) return "بی‌طرف و متعادل";
+  if (opinion >= -59) return "سرد و بدبین";
+  return "خصمانه و متخاصم";
+}
+
+export function getQualitativeOpinionColor(opinion: number): string {
+  if (opinion >= 60) return "text-emerald-500 font-bold";
+  if (opinion >= 20) return "text-emerald-400 font-semibold";
+  if (opinion >= -19) return "text-muted-foreground font-medium";
+  if (opinion >= -59) return "text-amber-500 font-semibold";
+  return "text-rose-500 font-bold";
+}
 
 export function resolveProfileRelation(
   code: string,
@@ -93,10 +110,13 @@ export function resolveProfileRelation(
     techLevel,
   );
 
+  const realRank = liveNation ? liveNation.rank : 99;
+
   return {
     code: displayCode.toUpperCase(),
     name,
     flagCode,
+    rank: realRank,
     stance: "NORMAL_DIPLOMACY",
     opinion: 0,
     isTradeEmbargoed: false,

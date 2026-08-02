@@ -24,7 +24,7 @@ export function useWideDiplomacy({
   });
 
   const relationsList = useMemo(() => {
-    return liveNationsList.map((item) => {
+    const list = liveNationsList.map((item) => {
       const rel = resolveProfileRelation(item.id, item.rawNation);
       const humanNation = nationsMap ? nationsMap[humanNationId] : null;
       if (humanNation) {
@@ -37,6 +37,8 @@ export function useWideDiplomacy({
       }
       return rel;
     });
+
+    return list.sort((a, b) => a.rank - b.rank);
   }, [liveNationsList, nationsMap, humanNationId]);
 
   const defaultCode = relationsList[0]?.code || "USA";
