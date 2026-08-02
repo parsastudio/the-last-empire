@@ -3,8 +3,6 @@ import { serverGameSessionStore } from "@/application/game/server-game-session-s
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
-import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
-import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -14,21 +12,13 @@ export async function POST(request: Request): Promise<NextResponse> {
     const gridState = GridStateProvider.getInstance();
     await GridLoaderService.ensureGridLoaded(gridState);
 
-    let bodyState: GameState | null = null;
+    let bodyState: GameState | undefined = undefined;
     try {
       const body = (await request.json()) as { state?: GameState };
       if (body && body.state) {
         bodyState = body.state;
       }
     } catch {}
-
-    if (!bodyState) {
-      const rawNationCode = gameId.split("-")[0] || "IRN";
-      const normalizedNation = normalizeNationId(rawNationCode);
-      const facade = new SimulationFacade();
-      bodyState = facade.selectPlayerNation(normalizedNation);
-      bodyState.gameId = gameId;
-    }
 
     const nextState = serverGameSessionStore.advanceTurn(gameId, bodyState);
 
