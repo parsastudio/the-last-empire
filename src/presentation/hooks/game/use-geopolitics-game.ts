@@ -25,11 +25,14 @@ export function useGeopoliticsGame(customGameId?: string) {
     const activeId = customGameId || gameState?.gameId;
     const result = await apiService.advanceTurn(activeId, gameState);
     if (result.success && result.data) {
+      if (activeId) {
+        await storageService.saveGameState(activeId, result.data);
+      }
       setGameState(result.data);
       return result.data;
     }
     return null;
-  }, [apiService, customGameId, gameState]);
+  }, [apiService, customGameId, gameState, storageService]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

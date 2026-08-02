@@ -37,6 +37,8 @@ export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
       gameState.currentTurn !== lastSavedTurnRef.current
     ) {
       saveStateToDb(gameState, true);
+    } else {
+      saveStateToDb(gameState, false);
     }
   }, [gameState, saveStateToDb]);
 
