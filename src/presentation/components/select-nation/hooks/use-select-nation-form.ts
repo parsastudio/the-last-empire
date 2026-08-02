@@ -7,12 +7,15 @@ import { GameStateApiService } from "@/presentation/services/game-state-api.serv
 import { useToast } from "@/presentation/context/toast-context";
 import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
+import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
+import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 export function useSelectNationForm() {
   const router = useRouter();
   const { showToast } = useToast();
   const provider = useMemo(() => new NationDatabaseProvider(), []);
   const apiService = useMemo(() => new GameStateApiService(), []);
+  const storageService = useMemo(() => new ClientStorageService(), []);
 
   const [manifest, setManifest] = useState<MapManifest | null>(null);
 
@@ -93,7 +96,9 @@ export function useSelectNationForm() {
         uniqueGameId,
       );
 
-      if (result.success) {
+      if (result.success && result.data) {
+        GridStateProvider.getInstance().clear();
+        await storageService.saveGameState(uniqueGameId, result.data);
         router.push(`/play/${uniqueGameId}`);
       } else {
         showToast(
@@ -109,7 +114,14 @@ export function useSelectNationForm() {
         "error",
       );
     }
-  }, [selectedNation, selectedGovernment, apiService, router, showToast]);
+  }, [
+    selectedNation,
+    selectedGovernment,
+    apiService,
+    storageService,
+    router,
+    showToast,
+  ]);
 
   return {
     allNations,

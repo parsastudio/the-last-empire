@@ -9,10 +9,8 @@ export class ClientStorageService {
   public async saveGameState(gameId: string, state: GameState): Promise<void> {
     try {
       await this.indexedDb.saveState(gameId, state);
-      await this.indexedDb.saveState("active_game", state);
     } catch {
       this.localStorage.saveState(gameId, state);
-      this.localStorage.saveState("active_game", state);
     }
   }
 

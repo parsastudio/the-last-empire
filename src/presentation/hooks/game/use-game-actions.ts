@@ -38,10 +38,6 @@ export function useGameActions(
         effectiveState = await storageService.loadGameState(activeGameId);
       }
 
-      if (!effectiveState) {
-        effectiveState = await storageService.loadGameState("active_game");
-      }
-
       if (effectiveState) {
         try {
           const optimisticState = actionRouter.route(effectiveState, action);

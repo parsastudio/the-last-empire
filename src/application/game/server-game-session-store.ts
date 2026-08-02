@@ -18,6 +18,7 @@ class ServerGameSessionStore {
 
   public initSession(gameId: string, initialState: GameState): GameEngine {
     const gridState = GridStateProvider.getInstance();
+    gridState.clear();
     GridLoaderService.ensureGridLoaded(gridState);
     const engine = new GameEngine(initialState);
     this.engines.set(gameId, engine);
