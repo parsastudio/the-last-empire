@@ -18,19 +18,34 @@ export function useGameActions(
   const params = useParams();
 
   const routeGameId = params?.gameId as string | undefined;
-  const activeGameId =
-    customGameId || routeGameId || currentState?.gameId || "default_game";
 
   const dispatcher = useMemo(() => new ActionDispatcherService(), []);
   const storageService = useMemo(() => new ClientStorageService(), []);
+  const actionRouter = useMemo(() => new ActionRouter(), []);
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
-      if (currentState) {
+      const activeGameId =
+        customGameId ||
+        routeGameId ||
+        currentState?.gameId ||
+        action.nationId ||
+        "default_game";
+
+      let effectiveState: GameState | null = currentState || null;
+
+      if (!effectiveState) {
+        effectiveState = await storageService.loadGameState(activeGameId);
+      }
+
+      if (!effectiveState) {
+        effectiveState = await storageService.loadGameState("active_game");
+      }
+
+      if (effectiveState) {
         try {
-          const router = new ActionRouter();
-          const optimisticState = router.route(currentState, action);
-          storageService.saveGameState(activeGameId, optimisticState);
+          const optimisticState = actionRouter.route(effectiveState, action);
+          await storageService.saveGameState(activeGameId, optimisticState);
           if (typeof window !== "undefined") {
             window.dispatchEvent(
               new CustomEvent("geopolitics-state-updated", {
@@ -38,20 +53,19 @@ export function useGameActions(
               }),
             );
           }
+          effectiveState = optimisticState;
         } catch {}
       }
 
       const result = await dispatcher.dispatch(
         action,
         activeGameId,
-        currentState,
+        effectiveState,
       );
 
       if (result.success) {
         if (result.newState) {
-          if (activeGameId) {
-            storageService.saveGameState(activeGameId, result.newState);
-          }
+          await storageService.saveGameState(activeGameId, result.newState);
           if (typeof window !== "undefined") {
             window.dispatchEvent(
               new CustomEvent("geopolitics-state-updated", {
@@ -78,10 +92,12 @@ export function useGameActions(
       return false;
     },
     [
-      dispatcher,
-      activeGameId,
+      customGameId,
+      routeGameId,
       currentState,
+      dispatcher,
       storageService,
+      actionRouter,
       showToast,
       onActionExecuted,
     ],

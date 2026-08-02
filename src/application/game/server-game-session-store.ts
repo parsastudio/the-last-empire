@@ -34,13 +34,16 @@ class ServerGameSessionStore {
     currentState?: GameState,
   ): ActionResult | null {
     let engine = this.engines.get(gameId);
-    if (!engine && currentState) {
-      engine = this.initSession(gameId, currentState);
-    } else if (engine && currentState) {
-      if (engine.getState().currentTurn !== currentState.currentTurn) {
+
+    if (currentState) {
+      if (
+        !engine ||
+        engine.getState().currentTurn !== currentState.currentTurn
+      ) {
         engine = this.initSession(gameId, currentState);
       }
     }
+
     if (!engine) {
       return null;
     }
@@ -55,13 +58,16 @@ class ServerGameSessionStore {
     currentState?: GameState,
   ): GameState | null {
     let engine = this.engines.get(gameId);
-    if (!engine && currentState) {
-      engine = this.initSession(gameId, currentState);
-    } else if (engine && currentState) {
-      if (engine.getState().currentTurn !== currentState.currentTurn) {
+
+    if (currentState) {
+      if (
+        !engine ||
+        engine.getState().currentTurn !== currentState.currentTurn
+      ) {
         engine = this.initSession(gameId, currentState);
       }
     }
+
     if (!engine) {
       return null;
     }
