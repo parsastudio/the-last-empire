@@ -37,10 +37,12 @@ export class LowResPacker {
         let finalB = 0;
         let finalR = 0;
 
-        if (hasForcedPassage) {
-          finalB = 0;
-          finalR = 1;
-        } else {
+        let totalLandCount = 0;
+        for (const count of countryCounts.values()) {
+          totalLandCount += count;
+        }
+
+        if (!hasForcedPassage && totalLandCount >= 9) {
           let maxCountryCount = 0;
           for (const [id, count] of countryCounts.entries()) {
             if (count > maxCountryCount) {
@@ -48,13 +50,13 @@ export class LowResPacker {
               finalB = id;
             }
           }
-          if (finalB === 0) {
-            let maxWaterCount = 0;
-            for (let w = 0; w < 11; w++) {
-              if (waterCounts[w] > maxWaterCount) {
-                maxWaterCount = waterCounts[w];
-                finalR = w;
-              }
+        } else {
+          finalB = 0;
+          let maxWaterCount = 0;
+          for (let w = 0; w < 11; w++) {
+            if (waterCounts[w] > maxWaterCount) {
+              maxWaterCount = waterCounts[w];
+              finalR = w;
             }
           }
         }
