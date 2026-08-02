@@ -1,4 +1,4 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import {
   findCountryProfileById,
@@ -62,6 +62,15 @@ export class NationProfileAssigner {
 
     const calculatedTreasury = Math.floor(item.gdp * 0.05);
 
+    const defaultRegion: RegionDemographics = {
+      regionId: 0,
+      name: `خاک اصلی ${item.nameFa}`,
+      pixelCount: Math.round(item.territorySize / 86.3),
+      areaSqKm: item.territorySize,
+      population: item.population,
+      gdp: item.gdp,
+    };
+
     return {
       id: item.id,
       name: item.nameFa,
@@ -118,7 +127,7 @@ export class NationProfileAssigner {
       accumulatedResearchCost: 0,
       researchCycleTurn: 0,
       proxyInfluenceBudget: {},
-      regionsDemographics: [],
+      regionsDemographics: [defaultRegion],
       autoTradeSettings: {
         autoBuyDeficit: false,
         autoSellOilPercent: 0,
@@ -195,6 +204,15 @@ export class NationProfileAssigner {
 
     const territorySize = profile ? Math.round(profile.gdp / 1000000) : 377975;
 
+    const defaultRegion: RegionDemographics = {
+      regionId: 0,
+      name: `خاک اصلی ${name}`,
+      pixelCount: Math.round(territorySize / 86.3),
+      areaSqKm: territorySize,
+      population,
+      gdp,
+    };
+
     return {
       id,
       name,
@@ -251,7 +269,7 @@ export class NationProfileAssigner {
       accumulatedResearchCost: 0,
       researchCycleTurn: 0,
       proxyInfluenceBudget: {},
-      regionsDemographics: [],
+      regionsDemographics: [defaultRegion],
       autoTradeSettings: {
         autoBuyDeficit: false,
         autoSellOilPercent: 0,

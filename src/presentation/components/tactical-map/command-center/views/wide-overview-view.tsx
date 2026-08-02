@@ -90,7 +90,13 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           nation={nation}
         />
 
-        <RegionBreakdownCard regions={nation.regionsDemographics} />
+        <RegionBreakdownCard
+          regions={nation.regionsDemographics}
+          nationName={nation.name}
+          totalArea={nation.geography.territorySize}
+          totalPopulation={nation.population}
+          totalGdp={effectiveGdp}
+        />
       </div>
     </div>
   );
