@@ -71,6 +71,9 @@ export function useGeopoliticsGame(customGameId?: string) {
       const result = await apiService.fetchStatus(nationId, customGameId);
       if (active) {
         if (result.success && result.data) {
+          if (customGameId) {
+            await storageService.saveGameState(customGameId, result.data);
+          }
           setGameState(result.data);
         } else {
           setError(result.error || "خطا در دریافت وضعیت بازی");
