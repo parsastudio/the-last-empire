@@ -86,12 +86,8 @@ export function useGameResources(
       payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
     const netIncome = totalIncome - totalExpenses;
 
-    const welfareMetrics = popWelfareCalculator.evaluateWelfare(
-      nation.population,
-      nation.resources.oil,
-      nation.resources.steel,
-      nation.gdp,
-    );
+    const welfareMetrics =
+      popWelfareCalculator.evaluateWelfareForNation(nation);
     const oilRequired = welfareMetrics.oilDemand;
 
     let pendingCount = 0;

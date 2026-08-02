@@ -20,11 +20,7 @@ export class StabilityCalculator {
 
     let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
 
-    const welfareMetrics = this.popWelfareCalc.evaluateWelfare(
-      nation.population,
-      nation.resources.oil,
-      nation.resources.steel,
-    );
+    const welfareMetrics = this.popWelfareCalc.evaluateWelfareForNation(nation);
     delta += welfareMetrics.totalStabilityImpact;
 
     const govTraits = this.governmentSystem.getTraits(nation.government.type);

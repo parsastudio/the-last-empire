@@ -2,12 +2,14 @@ import React, { useMemo } from "react";
 import { Users, Fuel, Wrench, HeartPulse } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface PopulationWelfareCardProps {
   population?: number;
   oilStock?: number;
   steelStock?: number;
   gdp?: number;
+  nation?: Nation;
 }
 
 export function PopulationWelfareCard({
@@ -15,12 +17,16 @@ export function PopulationWelfareCard({
   oilStock = 1000,
   steelStock = 1000,
   gdp = 10000000000,
+  nation,
 }: PopulationWelfareCardProps) {
   const welfareCalc = useMemo(() => new PopulationWelfareCalculator(), []);
 
   const metrics = useMemo(() => {
+    if (nation) {
+      return welfareCalc.evaluateWelfareForNation(nation);
+    }
     return welfareCalc.evaluateWelfare(population, oilStock, steelStock, gdp);
-  }, [welfareCalc, population, oilStock, steelStock, gdp]);
+  }, [welfareCalc, nation, population, oilStock, steelStock, gdp]);
 
   const formattedPop = useMemo(() => {
     if (population >= 1e9) {
