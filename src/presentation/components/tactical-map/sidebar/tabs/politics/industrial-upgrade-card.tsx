@@ -1,5 +1,5 @@
-import React from "react";
-import { Cpu, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Cpu, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { IndustrialLevelManager } from "@/engine/economy/industrial-level-manager";
@@ -18,6 +18,7 @@ export function IndustrialUpgradeCard({
   treasury = 100000,
   gdp = 450000000000,
 }: IndustrialUpgradeCardProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const manager = new IndustrialLevelManager();
   const mockNation = {
     gdp,
@@ -30,13 +31,18 @@ export function IndustrialUpgradeCard({
   const { dispatchAction } = useGameActions();
 
   const handleUpgrade = async () => {
-    if (!canAfford) return;
+    if (!canAfford || isSubmitting) return;
 
-    const action = ActionFactory.upgradeIndustrialLevel(nationId);
-    await dispatchAction(
-      action,
-      `پروژه ارتقای صنایع سنگین به سطح ${currentLevel + 1} کلید خورد.`,
-    );
+    try {
+      setIsSubmitting(true);
+      const action = ActionFactory.upgradeIndustrialLevel(nationId);
+      await dispatchAction(
+        action,
+        `پروژه ارتقای صنایع سنگین به سطح ${currentLevel + 1} کلید خورد.`,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,14 +86,20 @@ export function IndustrialUpgradeCard({
 
         <button
           onClick={handleUpgrade}
-          disabled={!canAfford}
-          className="w-full py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
+          disabled={!canAfford || isSubmitting}
+          className="w-full py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <Zap size={13} />
+          {isSubmitting ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Zap size={13} />
+          )}
           <span>
-            {canAfford
-              ? `ارتقای سطح صنعت (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
-              : "خزانه ناکافی جهت ارتقای صنعت"}
+            {isSubmitting
+              ? "در حال ثبت ارتقا..."
+              : canAfford
+                ? `ارتقای سطح صنعت (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
+                : "خزانه ناکافی جهت ارتقای صنعت"}
           </span>
         </button>
       </div>

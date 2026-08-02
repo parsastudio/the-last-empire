@@ -1,5 +1,5 @@
-import React from "react";
-import { Award, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Award, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { ResearchDevelopmentManager } from "@/engine/military/research-development-manager";
@@ -18,6 +18,7 @@ export function MilitaryTechUpgradeCard({
   treasury = 100000,
   gdp = 450000000000,
 }: MilitaryTechUpgradeCardProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const manager = new ResearchDevelopmentManager();
   const mockNation = {
     gdp,
@@ -29,13 +30,18 @@ export function MilitaryTechUpgradeCard({
   const { dispatchAction } = useGameActions();
 
   const handleUpgradeTech = async () => {
-    if (!canAfford) return;
+    if (!canAfford || isSubmitting) return;
 
-    const action = ActionFactory.investResearch(nationId);
-    await dispatchAction(
-      action,
-      `پروژه ارتقای فناوری نظامی به سطح ${currentLevel + 1} آغاز گردید.`,
-    );
+    try {
+      setIsSubmitting(true);
+      const action = ActionFactory.investResearch(nationId);
+      await dispatchAction(
+        action,
+        `پروژه ارتقای فناوری نظامی به سطح ${currentLevel + 1} آغاز گردید.`,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -74,14 +80,20 @@ export function MilitaryTechUpgradeCard({
 
         <button
           onClick={handleUpgradeTech}
-          disabled={!canAfford}
-          className="w-full py-2.5 bg-amber-500 hover:bg-amber-500/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
+          disabled={!canAfford || isSubmitting}
+          className="w-full py-2.5 bg-amber-500 hover:bg-amber-500/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <Zap size={13} />
+          {isSubmitting ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Zap size={13} />
+          )}
           <span>
-            {canAfford
-              ? `ارتقای فناوری نظامی (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
-              : "خزانه ناکافی جهت ارتقای فناوری نظامی"}
+            {isSubmitting
+              ? "در حال ثبت ارتقا..."
+              : canAfford
+                ? `ارتقای فناوری نظامی (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
+                : "خزانه ناکافی جهت ارتقای فناوری نظامی"}
           </span>
         </button>
       </div>

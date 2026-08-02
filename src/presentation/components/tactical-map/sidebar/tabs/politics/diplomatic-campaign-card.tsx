@@ -1,5 +1,5 @@
-import React from "react";
-import { Globe, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Globe, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -17,18 +17,24 @@ export function DiplomaticCampaignCard({
   gdp = 450000000000,
   currentReputation = 50,
 }: DiplomaticCampaignCardProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const campaignCost = Math.floor(gdp * 0.05);
   const canAfford = treasury >= campaignCost;
   const { dispatchAction } = useGameActions();
 
   const handleLaunchCampaign = async () => {
-    if (!canAfford) return;
+    if (!canAfford || isSubmitting) return;
 
-    const action = ActionFactory.investDiplomacy(nationId, campaignCost);
-    await dispatchAction(
-      action,
-      `پویش دیپلماتیک بین‌المللی با هزینه ${PersianNumberFormatter.formatCurrency(campaignCost)} اجرا شد و پرستیژ جهانی ۱۵ واحد ارتقا یافت.`,
-    );
+    try {
+      setIsSubmitting(true);
+      const action = ActionFactory.investDiplomacy(nationId, campaignCost);
+      await dispatchAction(
+        action,
+        `پویش دیپلماتیک بین‌المللی با هزینه ${PersianNumberFormatter.formatCurrency(campaignCost)} اجرا شد و پرستیژ جهانی ۱۵ واحد ارتقا یافت.`,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -82,16 +88,22 @@ export function DiplomaticCampaignCard({
 
         <button
           onClick={handleLaunchCampaign}
-          disabled={!canAfford || currentReputation >= 100}
+          disabled={!canAfford || currentReputation >= 100 || isSubmitting}
           className="w-full py-2.5 bg-diplomacy hover:bg-diplomacy/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <Zap size={14} />
+          {isSubmitting ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Zap size={14} />
+          )}
           <span>
-            {currentReputation >= 100
-              ? "پرستیژ جهانی در حداکثر سقف ممکن (۱۰۰) قرار دارد"
-              : canAfford
-                ? `اجرای پویش دیپلماتیک (${PersianNumberFormatter.formatCurrency(campaignCost)})`
-                : "خزانه ناکافی جهت اجرای پویش دیپلماتیک"}
+            {isSubmitting
+              ? "در حال اجرای پویش..."
+              : currentReputation >= 100
+                ? "پرستیژ جهانی در حداکثر سقف ممکن (۱۰۰) قرار دارد"
+                : canAfford
+                  ? `اجرای پویش دیپلماتیک (${PersianNumberFormatter.formatCurrency(campaignCost)})`
+                  : "خزانه ناکافی جهت اجرای پویش دیپلماتیک"}
           </span>
         </button>
       </div>

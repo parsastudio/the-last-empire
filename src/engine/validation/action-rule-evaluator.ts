@@ -38,6 +38,39 @@ export class ActionRuleEvaluator {
         }
         break;
 
+      case "UPGRADE_INDUSTRIAL_LEVEL": {
+        const cost = Math.max(2000000000, Math.floor(source.gdp * 0.15));
+        if (source.treasury < cost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای ارتقای سطح صنعت کافی نیست.",
+          );
+        }
+        break;
+      }
+
+      case "INVEST_INFRASTRUCTURE": {
+        const cost = Math.max(1000000000, Math.floor(source.gdp * 0.1));
+        if (source.treasury < cost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای نوسازی زیرساخت کافی نیست.",
+          );
+        }
+        break;
+      }
+
+      case "INVEST_RESEARCH": {
+        const cost = Math.max(1500000000, Math.floor(source.gdp * 0.12));
+        if (source.treasury < cost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای پژوهش فناوری نظامی کافی نیست.",
+          );
+        }
+        break;
+      }
+
       case "RECRUIT_UNIT":
         if (action.quantity <= 0) {
           throw new GameError(

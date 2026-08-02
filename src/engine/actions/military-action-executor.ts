@@ -69,6 +69,7 @@ export class MilitaryActionExecutor {
 
       case "INVEST_RESEARCH": {
         const cost = Math.max(1500000000, Math.floor(nation.gdp * 0.12));
+        if (nation.treasury < cost) return state;
         return {
           ...state,
           nations: {
