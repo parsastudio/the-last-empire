@@ -74,6 +74,7 @@ export class EconomyActionExecutor {
 
       case "INVEST_INFRASTRUCTURE": {
         const cost = Math.max(1000000000, Math.floor(nation.gdp * 0.1));
+        if (nation.treasury < cost) return state;
         return {
           ...state,
           nations: {
@@ -93,6 +94,7 @@ export class EconomyActionExecutor {
 
       case "UPGRADE_INDUSTRIAL_LEVEL": {
         const cost = Math.max(2000000000, Math.floor(nation.gdp * 0.15));
+        if (nation.treasury < cost) return state;
         return {
           ...state,
           nations: {

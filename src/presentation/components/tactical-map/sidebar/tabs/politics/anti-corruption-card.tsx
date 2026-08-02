@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShieldCheck, Zap } from "lucide-react";
+import { ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -17,6 +17,7 @@ export function AntiCorruptionCard({
   gdp = 450000000000,
   currentCorruption = 0,
 }: AntiCorruptionCardProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const roundedCorruption = Math.round(currentCorruption);
   const maxReducible = Math.max(1, Math.min(100, roundedCorruption));
 
@@ -36,16 +37,27 @@ export function AntiCorruptionCard({
   const { dispatchAction } = useGameActions();
 
   const handleAntiCorruption = async () => {
-    if (!canAfford || targetReduction <= 0 || roundedCorruption <= 0) return;
+    if (
+      !canAfford ||
+      targetReduction <= 0 ||
+      roundedCorruption <= 0 ||
+      isSubmitting
+    )
+      return;
 
-    const action = ActionFactory.antiCorruptionDrive(
-      nationId,
-      antiCorruptionCost,
-    );
-    await dispatchAction(
-      action,
-      `مبلغ ${PersianNumberFormatter.formatCurrency(antiCorruptionCost)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری ${PersianNumberFormatter.toPersianDigits(targetReduction)}٪ کاهش یافت.`,
-    );
+    try {
+      setIsSubmitting(true);
+      const action = ActionFactory.antiCorruptionDrive(
+        nationId,
+        antiCorruptionCost,
+      );
+      await dispatchAction(
+        action,
+        `مبلغ ${PersianNumberFormatter.formatCurrency(antiCorruptionCost)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری ${PersianNumberFormatter.toPersianDigits(targetReduction)}٪ کاهش یافت.`,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePercentageSelect = (percentage: number) => {
@@ -163,14 +175,20 @@ export function AntiCorruptionCard({
 
             <button
               onClick={handleAntiCorruption}
-              disabled={!canAfford || targetReduction <= 0}
+              disabled={!canAfford || targetReduction <= 0 || isSubmitting}
               className="w-full py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <Zap size={14} />
+              {isSubmitting ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Zap size={14} />
+              )}
               <span>
-                {canAfford
-                  ? `تزریق بودجه ضدفساد (-${PersianNumberFormatter.toPersianDigits(targetReduction)}٪ فساد)`
-                  : "خزانه ناکافی جهت اجرای طرح ضدفساد"}
+                {isSubmitting
+                  ? "در حال اجرای طرح ضدفساد..."
+                  : canAfford
+                    ? `تزریق بودجه ضدفساد (-${PersianNumberFormatter.toPersianDigits(targetReduction)}٪ فساد)`
+                    : "خزانه ناکافی جهت اجرای طرح ضدفساد"}
               </span>
             </button>
           </>

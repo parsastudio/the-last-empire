@@ -1,5 +1,5 @@
-import React from "react";
-import { Wrench, Zap } from "lucide-react";
+import React, { useState } from "react";
+import { Wrench, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { InfrastructureManager } from "@/engine/economy/infrastructure-manager";
@@ -18,6 +18,7 @@ export function InfrastructureUpgradeCard({
   treasury = 100000,
   gdp = 450000000000,
 }: InfrastructureUpgradeCardProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const manager = new InfrastructureManager();
   const mockNation = {
     gdp,
@@ -29,13 +30,18 @@ export function InfrastructureUpgradeCard({
   const { dispatchAction } = useGameActions();
 
   const handleUpgradeInfra = async () => {
-    if (!canAfford) return;
+    if (!canAfford || isSubmitting) return;
 
-    const action = ActionFactory.investInfrastructure(nationId);
-    await dispatchAction(
-      action,
-      `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد و GDP کشور افزایش یافت.`,
-    );
+    try {
+      setIsSubmitting(true);
+      const action = ActionFactory.investInfrastructure(nationId);
+      await dispatchAction(
+        action,
+        `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${currentLevel + 1} آغاز شد و GDP کشور افزایش یافت.`,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -70,14 +76,20 @@ export function InfrastructureUpgradeCard({
 
         <button
           onClick={handleUpgradeInfra}
-          disabled={!canAfford}
-          className="w-full py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
+          disabled={!canAfford || isSubmitting}
+          className="w-full py-2.5 bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
         >
-          <Zap size={13} />
+          {isSubmitting ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <Zap size={13} />
+          )}
           <span>
-            {canAfford
-              ? `نوسازی زیرساخت (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
-              : "خزانه ناکافی جهت نوسازی زیرساخت"}
+            {isSubmitting
+              ? "در حال ثبت نوسازی..."
+              : canAfford
+                ? `نوسازی زیرساخت (${PersianNumberFormatter.formatCurrency(upgradeCost)})`
+                : "خزانه ناکافی جهت نوسازی زیرساخت"}
           </span>
         </button>
       </div>
