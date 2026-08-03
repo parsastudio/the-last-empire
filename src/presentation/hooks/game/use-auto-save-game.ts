@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useCallback, useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
@@ -20,7 +18,7 @@ export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
         if (isAutoSave) {
           showToast(
             "ذخیره‌سازی خودکار",
-            `اطلاعات نوبت ${state.currentTurn} در دیتابیس بروزرسانی شد.`,
+            `چک‌پوینت نوبت ${state.currentTurn} در ذخیره‌سازی رویدادمحور به‌روز شد.`,
             "info",
           );
         }
@@ -40,16 +38,6 @@ export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
     } else {
       saveStateToDb(gameState, false);
     }
-  }, [gameState, saveStateToDb]);
-
-  useEffect(() => {
-    if (!gameState) return;
-
-    const interval = setInterval(() => {
-      saveStateToDb(gameState, false);
-    }, 30000);
-
-    return () => clearInterval(interval);
   }, [gameState, saveStateToDb]);
 
   return { saveStateToDb };
