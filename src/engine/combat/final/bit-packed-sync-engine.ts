@@ -60,6 +60,25 @@ export class BitPackedSyncEngine {
       const isAlive = territorySize > 0;
       const hasSeaAccess = nationCoastalMap.get(numericId) ?? false;
 
+      const previousArea = nation.geography.territorySize || 1;
+      const areaRatio = isAlive ? totalCalibratedArea / previousArea : 0;
+
+      const updatedGdp =
+        isAlive && areaRatio > 0 && previousArea > 0
+          ? Math.round(nation.gdp * Math.min(2.5, Math.max(0.1, areaRatio)))
+          : isAlive
+            ? nation.gdp
+            : 0;
+
+      const updatedPopulation =
+        isAlive && areaRatio > 0 && previousArea > 0
+          ? Math.round(
+              nation.population * Math.min(2.5, Math.max(0.1, areaRatio)),
+            )
+          : isAlive
+            ? nation.population
+            : 0;
+
       const enclaveMap = nationEnclaveAreaMap.get(numericId);
       const regionsDemographics: RegionDemographics[] = [];
 
@@ -74,8 +93,8 @@ export class BitPackedSyncEngine {
           const ratio =
             totalCalibratedArea > 0 ? regionAreaRaw / totalCalibratedArea : 1;
 
-          const regionPop = Math.round(nation.population * ratio);
-          const regionGdp = Math.round(nation.gdp * ratio);
+          const regionPop = Math.round(updatedPopulation * ratio);
+          const regionGdp = Math.round(updatedGdp * ratio);
 
           let name = `خاک اصلی ${nation.name}`;
           if (rId === 1 && (canonical === "NATION_USA" || key === "USA")) {
@@ -104,6 +123,8 @@ export class BitPackedSyncEngine {
 
       updated[key] = {
         ...nation,
+        gdp: updatedGdp,
+        population: updatedPopulation,
         isAlive,
         geography: {
           ...nation.geography,

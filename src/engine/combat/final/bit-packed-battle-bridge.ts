@@ -5,13 +5,12 @@ import { NationIdResolver } from "@/domain/shared/domain-utilities";
 export class BitPackedBattleBridge {
   private facade = new BitPackedStateFacade();
 
-  public bridgeConquest(
-    state: GameState,
+  public conquerAndGetActualArea(
     attackerNationId: string,
     defenderNationId: string,
     conqueredAreaSqKm: number,
-  ): GameState {
-    if (conqueredAreaSqKm <= 0) return state;
+  ): number {
+    if (conqueredAreaSqKm <= 0) return 0;
 
     const canonicalAttacker =
       NationIdResolver.resolveCanonicalId(attackerNationId);
@@ -22,15 +21,17 @@ export class BitPackedBattleBridge {
     const defenderNum = parseInt(canonicalDefender.replace("NATION_", ""), 10);
 
     if (isNaN(attackerNum) || isNaN(defenderNum)) {
-      return state;
+      return 0;
     }
 
-    this.facade.conquerAndRefreshed(
+    return this.facade.conquerAndRefreshed(
       attackerNum,
       defenderNum,
       conqueredAreaSqKm,
     );
+  }
 
+  public syncGameState(state: GameState): GameState {
     return this.facade.syncGameState(state);
   }
 }
