@@ -3,7 +3,6 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 
@@ -13,7 +12,6 @@ export function useBitPackedGame(gameId = "default_game") {
   const [error, setError] = useState<string | null>(null);
 
   const apiService = useMemo(() => new GameStateApiService(), []);
-  const orchestrator = useMemo(() => new BitPackedTurnOrchestrator(), []);
   const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
   const clientStorage = useMemo(() => new ClientStorageService(), []);
 
@@ -61,15 +59,17 @@ export function useBitPackedGame(gameId = "default_game") {
   const advanceNextTurn = useCallback(async (): Promise<GameState | null> => {
     if (!gameState) return null;
 
-    const nextState = orchestrator.processPostTurn(gameState);
-    setGameState(nextState);
+    const res = await apiService.advanceTurn(gameId, gameState);
+    if (res.success && res.data) {
+      setGameState(res.data);
+      const gridState = BitPackedGridState.getInstance();
+      await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
+      await clientStorage.saveGameState(gameId, res.data);
+      return res.data;
+    }
 
-    const gridState = BitPackedGridState.getInstance();
-    await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
-    await clientStorage.saveGameState(gameId, nextState);
-
-    return nextState;
-  }, [gameState, orchestrator, storageAdapter, clientStorage, gameId]);
+    return null;
+  }, [gameState, apiService, storageAdapter, clientStorage, gameId]);
 
   return {
     gameState,

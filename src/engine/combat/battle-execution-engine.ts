@@ -150,7 +150,7 @@ export class BattleExecutionEngine {
     if (defenderRelToAttacker) {
       updatedDefender.relations = {
         ...updatedDefender.relations,
-        [defenderRelKey]: {
+        [attacker.id]: {
           ...defenderRelToAttacker,
           stance: "WAR",
           isTradeEmbargoed: true,
