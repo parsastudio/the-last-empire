@@ -44,8 +44,8 @@ export function useWebGLInteraction({
     const rx = clientX - rect.left;
     const ry = clientY - rect.top;
 
-    const mapX = Math.floor(((rx - position.x) / scale) * (4096 / rect.width));
-    const mapY = Math.floor(((ry - position.y) / scale) * (2048 / rect.height));
+    const mapX = Math.floor((rx - position.x) / scale);
+    const mapY = Math.floor((ry - position.y) / scale);
 
     const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
     if (inspected) {
@@ -67,8 +67,8 @@ export function useWebGLInteraction({
     const rx = e.clientX - rect.left;
     const ry = e.clientY - rect.top;
 
-    const mapX = Math.floor(((rx - position.x) / scale) * (4096 / rect.width));
-    const mapY = Math.floor(((ry - position.y) / scale) * (2048 / rect.height));
+    const mapX = Math.floor((rx - position.x) / scale);
+    const mapY = Math.floor((ry - position.y) / scale);
 
     const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
     if (!inspected || inspected.nationId < 11 || inspected.nationId >= 250) {

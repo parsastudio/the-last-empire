@@ -1,18 +1,44 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export interface MapDragPosition {
   x: number;
   y: number;
 }
 
-export function useMapGesture() {
+export function useMapGesture(
+  containerWidth = 1200,
+  containerHeight = 600,
+  mapWidth = 4096,
+  mapHeight = 2048,
+) {
   const [position, setPosition] = useState<MapDragPosition>({ x: 0, y: 0 });
-  const [scale, setScale] = useState<number>(1);
+  const [scale, setScale] = useState<number>(0.5);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStart = useRef<MapDragPosition>({ x: 0, y: 0 });
   const mouseDownPos = useRef<MapDragPosition>({ x: 0, y: 0 });
   const hasDraggedRef = useRef<boolean>(false);
+
+  const fitToScreen = useCallback(() => {
+    if (containerWidth <= 0 || containerHeight <= 0) return;
+    const scaleX = containerWidth / mapWidth;
+    const scaleY = containerHeight / mapHeight;
+    const fitScale = Math.min(scaleX, scaleY);
+
+    const initialX = (containerWidth - mapWidth * fitScale) / 2;
+    const initialY = (containerHeight - mapHeight * fitScale) / 2;
+
+    setScale(fitScale);
+    setPosition({ x: initialX, y: initialY });
+  }, [containerWidth, containerHeight, mapWidth, mapHeight]);
+
+  useEffect(() => {
+    if (!isInitialized && containerWidth > 0 && containerHeight > 0) {
+      fitToScreen();
+      setIsInitialized(true);
+    }
+  }, [containerWidth, containerHeight, isInitialized, fitToScreen]);
 
   const calculateZoom = (
     deltaY: number,
@@ -25,7 +51,13 @@ export function useMapGesture() {
     const my = clientY - rect.top;
 
     const zoomFactor = deltaY < 0 ? 1.15 : 0.85;
-    const nextScale = Math.max(1, Math.min(30, scale * zoomFactor));
+    const minAllowedScale = 0.05;
+    const maxAllowedScale = 35.0;
+
+    const nextScale = Math.max(
+      minAllowedScale,
+      Math.min(maxAllowedScale, scale * zoomFactor),
+    );
 
     if (nextScale === scale) {
       return { nextScale, nextPosition: currentPos };
@@ -83,9 +115,9 @@ export function useMapGesture() {
     setIsDragging(false);
   };
 
-  const zoomIn = () => setScale((prev) => Math.min(prev + 0.5, 30));
-  const zoomOut = () => setScale((prev) => Math.max(prev - 0.5, 1));
-  const resetScale = () => setScale(1);
+  const zoomIn = () => setScale((prev) => Math.min(prev * 1.25, 35));
+  const zoomOut = () => setScale((prev) => Math.max(prev * 0.8, 0.05));
+  const resetScale = () => fitToScreen();
 
   return {
     scale,
@@ -101,5 +133,6 @@ export function useMapGesture() {
     zoomIn,
     zoomOut,
     resetScale,
+    fitToScreen,
   };
 }
