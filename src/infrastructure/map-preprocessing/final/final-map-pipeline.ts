@@ -1,0 +1,106 @@
+import fs from "fs/promises";
+import path from "path";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { TerrainTextureGenerator } from "@/infrastructure/map-preprocessing/final/terrain-texture-generator";
+import { FinalManifestBuilder } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+
+export class FinalMapPipeline {
+  private manifestBuilder = new FinalManifestBuilder();
+
+  public async buildFinalAssets(
+    mapId = "map1",
+    width = 4096,
+    height = 2048,
+  ): Promise<{ success: boolean; byteLength: number }> {
+    const finalDir = MapPathResolver.getMapFinalServerDir(mapId);
+    await fs.mkdir(finalDir, { recursive: true });
+
+    const partitionDir = MapPathResolver.getMapServerDir(mapId);
+    const mask4KPath = path.join(partitionDir, "mask-4k.bin");
+
+    const raw4K = await fs.readFile(mask4KPath);
+    const maskBuffer = new Uint8Array(raw4K.buffer);
+
+    const packedBuffer = new BitPackedBuffer(width, height);
+    const activeCountryIds = new Set<number>();
+
+    const neighbors = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x;
+        const val = maskBuffer[idx] || 0;
+
+        if (val >= 11 && val < 250) {
+          activeCountryIds.add(val);
+          packedBuffer.setNationId(x, y, val);
+
+          let isFrontier = 0;
+          for (let k = 0; k < 4; k++) {
+            const nx = (x + neighbors[k]!.dx + width) % width;
+            const ny = y + neighbors[k]!.dy;
+            if (ny >= 0 && ny < height) {
+              const nVal = maskBuffer[ny * width + nx] || 0;
+              if (nVal >= 11 && nVal < 250 && nVal !== val) {
+                isFrontier = 1;
+                break;
+              }
+            }
+          }
+          packedBuffer.setFrontier(x, y, isFrontier);
+
+          let coastal = 0;
+          for (let k = 0; k < 4; k++) {
+            const nx = (x + neighbors[k]!.dx + width) % width;
+            const ny = y + neighbors[k]!.dy;
+            if (ny >= 0 && ny < height) {
+              const nVal = maskBuffer[ny * width + nx] || 0;
+              if (nVal === 0) {
+                coastal = 1;
+                break;
+              } else if (nVal === 254) {
+                coastal = 2;
+                break;
+              }
+            }
+          }
+          packedBuffer.setCoastalAccess(x, y, coastal);
+        }
+      }
+    }
+
+    const uint8ArrayData = packedBuffer.toUint8ArrayBuffer();
+    await fs.writeFile(
+      path.join(finalDir, "live-state.bin"),
+      Buffer.from(uint8ArrayData.buffer),
+    );
+
+    const terrainPngBuffer = TerrainTextureGenerator.generateStaticTerrain(
+      maskBuffer,
+      width,
+      height,
+    );
+    await fs.writeFile(
+      path.join(finalDir, "base_map_terrain.png"),
+      terrainPngBuffer,
+    );
+
+    await this.manifestBuilder.buildAndSave(
+      mapId,
+      activeCountryIds,
+      width,
+      height,
+    );
+
+    return {
+      success: true,
+      byteLength: uint8ArrayData.byteLength,
+    };
+  }
+}
