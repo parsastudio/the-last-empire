@@ -226,7 +226,7 @@ export const asiaWestProfiles: CountryProfile[] = [
     startingGovernment: "DICTATORSHIP",
   },
   {
-    code: "YE",
+    code: "YEM",
     nameEn: "Yemen",
     nameFa: "یمن",
     gdp: 20000000000,

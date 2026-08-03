@@ -12,6 +12,24 @@ export class FinalStateLoader {
     }
 
     try {
+      if (typeof window === "undefined") {
+        const fs = await import("fs/promises");
+        const path = await import("path");
+        const finalDir = MapPathResolver.getMapFinalServerDir(mapId);
+        const binPath = path.join(finalDir, "live-state.bin");
+        const fileBuffer = await fs.readFile(binPath);
+
+        const bitBuffer = new BitPackedBuffer(4096, 2048);
+        bitBuffer.loadArrayBuffer(
+          fileBuffer.buffer.slice(
+            fileBuffer.byteOffset,
+            fileBuffer.byteOffset + fileBuffer.byteLength,
+          ),
+        );
+        this.cachedBuffer = bitBuffer;
+        return this.cachedBuffer;
+      }
+
       const url = MapPathResolver.getMapFinalClientUrl(mapId, "live-state.bin");
       const res = await fetch(url);
 

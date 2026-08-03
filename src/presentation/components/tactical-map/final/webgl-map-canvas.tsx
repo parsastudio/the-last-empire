@@ -56,6 +56,7 @@ export function WebGLMapCanvas({
     hoverData,
     contextMenuState,
     handlePointerMove,
+    handlePointerLeave,
     handleMapClick,
     closeContextMenu,
   } = useWebGLInteraction({
@@ -88,6 +89,7 @@ export function WebGLMapCanvas({
       onMouseDown={handleMouseDown}
       onMouseMove={onMouseMoveCombined}
       onMouseUp={handleMouseUp}
+      onMouseLeave={handlePointerLeave}
       onWheel={handleWheel}
       onClick={handleMapClick}
     >
