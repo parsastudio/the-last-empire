@@ -16,6 +16,7 @@ export class CorruptionManager {
     const current = nation.government.corruption;
     const newCorruption = current + baseEntropyGrowth + regimePenalty;
 
+    if (newCorruption <= 0.01) return 0;
     return Math.max(0, Math.min(100, Number(newCorruption.toFixed(2))));
   }
 
@@ -33,20 +34,21 @@ export class CorruptionManager {
       );
     }
 
-    const corruptionReduction = Math.floor(
+    const exactReduction = Math.round(
       (investmentAmount / (nation.gdp || 1)) * 100,
     );
+    const corruptionReduction = Math.max(1, exactReduction);
 
-    const newCorruption = Math.max(
-      0,
-      nation.government.corruption - corruptionReduction,
-    );
+    const rawCorruption = nation.government.corruption - corruptionReduction;
+    const newCorruption =
+      rawCorruption <= 0.01 ? 0 : Number(rawCorruption.toFixed(2));
+
     return {
       ...nation,
       treasury: nation.treasury - investmentAmount,
       government: {
         ...nation.government,
-        corruption: Number(newCorruption.toFixed(2)),
+        corruption: Math.max(0, newCorruption),
       },
     };
   }
