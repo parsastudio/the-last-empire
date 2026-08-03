@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -22,85 +22,70 @@ export function useGameActions(
   const dispatcher = useMemo(() => new ActionDispatcherService(), []);
   const storageService = useMemo(() => new ClientStorageService(), []);
   const actionRouter = useMemo(() => new ActionRouter(), []);
-  const isDispatchingRef = useRef<boolean>(false);
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
-      if (isDispatchingRef.current) {
+      const activeGameId =
+        customGameId ||
+        routeGameId ||
+        currentState?.gameId ||
+        action.nationId ||
+        "default_game";
+
+      let latestLocalState: GameState | null = currentState || null;
+
+      if (!latestLocalState) {
+        latestLocalState = await storageService.loadGameState(activeGameId);
+      }
+
+      if (!latestLocalState) {
+        showToast("خطا", "اطلاعات بازی یافت نشد.", "error");
         return false;
       }
 
-      isDispatchingRef.current = true;
-
+      let newLocalState: GameState;
       try {
-        const activeGameId =
-          customGameId ||
-          routeGameId ||
-          currentState?.gameId ||
-          action.nationId ||
-          "default_game";
-
-        let effectiveState: GameState | null = currentState || null;
-
-        if (!effectiveState) {
-          effectiveState = await storageService.loadGameState(activeGameId);
-        }
-
-        if (effectiveState) {
-          try {
-            const optimisticState = actionRouter.route(effectiveState, action);
-            await storageService.saveGameState(activeGameId, optimisticState);
-            if (typeof window !== "undefined") {
-              window.dispatchEvent(
-                new CustomEvent("geopolitics-state-updated", {
-                  detail: optimisticState,
-                }),
-              );
-            }
-            effectiveState = optimisticState;
-          } catch {}
-        }
-
-        const result = await dispatcher.dispatch(
-          action,
-          activeGameId,
-          effectiveState,
-        );
-
-        if (result.success) {
-          if (result.newState && typeof window !== "undefined") {
-            const latestState =
-              await storageService.loadGameState(activeGameId);
-            const currentTurn = latestState ? latestState.currentTurn : 1;
-
-            if (result.newState.currentTurn >= currentTurn) {
-              await storageService.saveGameState(activeGameId, result.newState);
-              window.dispatchEvent(
-                new CustomEvent("geopolitics-state-updated", {
-                  detail: result.newState,
-                }),
-              );
-            }
-          }
-
-          if (onSuccessMessage) {
-            showToast("دستور صادر شد", onSuccessMessage, "success");
-          }
-          if (onActionExecuted) {
-            onActionExecuted();
-          }
-          return true;
-        }
-
-        showToast(
-          "خطا در اجرای دستور",
-          result.message || "امکان ثبت این اکشن وجود ندارد.",
-          "error",
-        );
+        newLocalState = actionRouter.route(latestLocalState, action);
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : "امکان انجام این دستور وجود ندارد.";
+        showToast("خطا در اجرای دستور", errorMsg, "error");
         return false;
-      } finally {
-        isDispatchingRef.current = false;
       }
+
+      await storageService.saveGameState(activeGameId, newLocalState);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("geopolitics-state-updated", {
+            detail: newLocalState,
+          }),
+        );
+      }
+
+      if (onSuccessMessage) {
+        showToast("دستور صادر شد", onSuccessMessage, "success");
+      }
+      if (onActionExecuted) {
+        onActionExecuted();
+      }
+
+      dispatcher
+        .dispatch(action, activeGameId, newLocalState)
+        .then((result) => {
+          if (!result.success) {
+            showToast(
+              "خطا در سرور",
+              result.message || "دستور در سرور تایید نشد.",
+              "error",
+            );
+          }
+        })
+        .catch(() => {});
+
+      return true;
     },
     [
       customGameId,

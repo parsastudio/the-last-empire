@@ -34,12 +34,7 @@ class ServerGameSessionStore {
     let engine = this.engines.get(gameId);
 
     if (currentState) {
-      if (
-        !engine ||
-        engine.getState().currentTurn !== currentState.currentTurn
-      ) {
-        engine = this.initSession(gameId, currentState);
-      }
+      engine = this.initSession(gameId, currentState);
     }
 
     if (!engine) {
@@ -61,12 +56,7 @@ class ServerGameSessionStore {
     let engine = this.engines.get(gameId);
 
     if (currentState) {
-      if (
-        !engine ||
-        engine.getState().currentTurn !== currentState.currentTurn
-      ) {
-        engine = this.initSession(gameId, currentState);
-      }
+      engine = this.initSession(gameId, currentState);
     }
 
     if (!engine) {
