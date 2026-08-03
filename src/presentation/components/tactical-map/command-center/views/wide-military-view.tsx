@@ -1,8 +1,8 @@
 import React from "react";
-import { MilitaryForcesSection } from "../../sidebar/military-forces-section";
-import { RecruitmentQueueCard } from "../../sidebar/tabs/military/recruitment-queue-card";
-import { DisbandUnitCard } from "../../sidebar/tabs/military/disband-unit-card";
-import { MilitaryExpansionView } from "../../sidebar/tabs/military/military-expansion-view";
+import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
+import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
+import { DisbandUnitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/disband-unit-card";
+import { MilitaryExpansionView } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-expansion-view";
 import {
   MilitaryStack,
   RecruitmentOrder,
@@ -13,11 +13,10 @@ interface WideMilitaryViewProps {
   population?: number;
   stability?: number;
   recruitmentQueue?: RecruitmentOrder[];
-  nationId?: string;
+  nationId: string;
   treasury?: number;
   manpower?: number;
   steel?: number;
-  activeSubTab?: string | null;
 }
 
 export function WideMilitaryView({
@@ -25,7 +24,7 @@ export function WideMilitaryView({
   population = 80000000,
   stability = 70,
   recruitmentQueue = [],
-  nationId = "NATION_118",
+  nationId,
   treasury = 100000,
   manpower = 500,
   steel = 1000,

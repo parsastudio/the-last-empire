@@ -7,7 +7,6 @@ export interface SaveItemData {
   title: string;
   date: string;
   time: string;
-  playtime: string;
   turn: number;
 }
 

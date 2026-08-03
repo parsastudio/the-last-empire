@@ -1,7 +1,6 @@
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 
 interface OwnerAccumulator {
   canonicalId: string;
@@ -27,43 +26,6 @@ export class GdpPopUpdater {
     }
 
     const updated = { ...nations };
-    const gridState = GridStateProvider.getInstance();
-
-    if (gridState && gridState.getModifiedCells().length === 0) {
-      for (const [id, nation] of Object.entries(updated)) {
-        if (
-          !nation.regionsDemographics ||
-          nation.regionsDemographics.length === 0
-        ) {
-          continue;
-        }
-        const totalRegionGdp = nation.regionsDemographics.reduce(
-          (sum, r) => sum + r.gdp,
-          0,
-        );
-        const totalRegionPop = nation.regionsDemographics.reduce(
-          (sum, r) => sum + r.population,
-          0,
-        );
-
-        const gdpScale = totalRegionGdp > 0 ? nation.gdp / totalRegionGdp : 1;
-        const popScale =
-          totalRegionPop > 0 ? nation.population / totalRegionPop : 1;
-
-        const updatedRegions = nation.regionsDemographics.map((r) => ({
-          ...r,
-          gdp: Math.round(r.gdp * gdpScale),
-          population: Math.round(r.population * popScale),
-        }));
-
-        updated[id] = {
-          ...nation,
-          regionsDemographics: updatedRegions,
-        };
-      }
-      return updated;
-    }
-
     const canonicalCache = new Map<string, string>();
 
     const getCanonical = (id: string): string => {
@@ -221,31 +183,107 @@ export class GdpPopUpdater {
       const rMap = regionDataMap.get(canonicalId);
 
       if (rMap) {
-        for (const [rId, rData] of rMap.entries()) {
+        const sortedEnclaveIds = Array.from(rMap.keys()).sort((a, b) => a - b);
+
+        let totalPixels = 0;
+        for (const rId of sortedEnclaveIds) {
+          totalPixels += rMap.get(rId)!.pixelCount;
+        }
+
+        const nationTotalArea =
+          nation.geography.territorySize > 0
+            ? nation.geography.territorySize
+            : Math.round(totalPixels * 86.3);
+
+        const nationTotalPop = roundedPop > 0 ? roundedPop : nation.population;
+        const nationTotalGdp = roundedGdp > 0 ? roundedGdp : nation.gdp;
+
+        let totalGdpWeightedArea = 0;
+        let totalPopWeightedArea = 0;
+
+        for (const rId of sortedEnclaveIds) {
+          const rData = rMap.get(rId)!;
+          const areaFraction =
+            totalPixels > 0 ? rData.pixelCount / totalPixels : 1;
+
+          let gdpWeight = 1.15;
+          let popWeight = 1.1;
+
+          if (rId === 1) {
+            gdpWeight = 0.75;
+            popWeight = 0.8;
+          } else if (rId === 2) {
+            gdpWeight = 0.65;
+            popWeight = 0.7;
+          } else if (rId >= 3) {
+            gdpWeight = 0.5;
+            popWeight = 0.6;
+          }
+
+          totalGdpWeightedArea += areaFraction * gdpWeight;
+          totalPopWeightedArea += areaFraction * popWeight;
+        }
+
+        for (const rId of sortedEnclaveIds) {
+          const rData = rMap.get(rId)!;
           let name = "خاک اصلی";
           if (rId >= 1 && rId <= 10) {
-            name = `منطقه فرامرزی ${rId}`;
+            name = `منطقه فرامرزی ${rId.toLocaleString("fa-IR")}`;
           } else if (rId >= 11) {
-            name = `مستعمره ${rId - 10}`;
+            name = `قلمرو برون‌مرزی ${(rId - 10).toLocaleString("fa-IR")}`;
           }
+
+          const areaFraction =
+            totalPixels > 0 ? rData.pixelCount / totalPixels : 1;
+
+          let gdpWeight = 1.15;
+          let popWeight = 1.1;
+
+          if (rId === 1) {
+            gdpWeight = 0.75;
+            popWeight = 0.8;
+          } else if (rId === 2) {
+            gdpWeight = 0.65;
+            popWeight = 0.7;
+          } else if (rId >= 3) {
+            gdpWeight = 0.5;
+            popWeight = 0.6;
+          }
+
+          const areaShare = areaFraction;
+          const gdpShare =
+            totalGdpWeightedArea > 0
+              ? (areaFraction * gdpWeight) / totalGdpWeightedArea
+              : areaFraction;
+          const popShare =
+            totalPopWeightedArea > 0
+              ? (areaFraction * popWeight) / totalPopWeightedArea
+              : areaFraction;
+
+          const regionAreaSqKm = Math.round(nationTotalArea * areaShare);
+          const regionPop = Math.round(nationTotalPop * popShare);
+          const regionGdp = Math.round(nationTotalGdp * gdpShare);
 
           regionsDemographics.push({
             regionId: rId,
             name,
             pixelCount: rData.pixelCount,
-            areaSqKm: Math.round(rData.pixelCount * 86.3),
-            population: Math.round(rData.pop),
-            gdp: Math.round(rData.gdp),
+            areaSqKm: regionAreaSqKm,
+            population: regionPop,
+            gdp: regionGdp,
           });
         }
       }
 
       updated[id] = {
         ...nation,
-        gdp: roundedGdp,
-        population: roundedPop,
-        isAlive: roundedGdp > 0 && roundedPop > 0,
-        regionsDemographics,
+        gdp: roundedGdp > 0 ? roundedGdp : nation.gdp,
+        population: roundedPop > 0 ? roundedPop : nation.population,
+        isAlive: (roundedGdp > 0 ? roundedGdp : nation.gdp) > 0,
+        regionsDemographics:
+          regionsDemographics.length > 0
+            ? regionsDemographics
+            : nation.regionsDemographics,
       };
     }
 

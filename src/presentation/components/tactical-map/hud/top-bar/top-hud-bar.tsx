@@ -11,7 +11,6 @@ import { useTopHudMetrics } from "@/presentation/components/tactical-map/hud/top
 
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
-  onOpenPending?: (tab?: string) => void;
 }
 
 export function TopHudBar({ metrics }: TopHudBarProps) {
