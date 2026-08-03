@@ -8,7 +8,7 @@ import { useAbilityTargetOptions } from "@/presentation/components/tactical-map/
 interface AbilityTargetModalProps {
   isOpen: boolean;
   abilityName: string;
-  nationId?: string;
+  nationId: string;
   onClose: () => void;
   onConfirmTarget: (targetCode: string) => void;
 }
@@ -16,14 +16,16 @@ interface AbilityTargetModalProps {
 export function AbilityTargetModal({
   isOpen,
   abilityName,
-  nationId = "NATION_118",
+  nationId,
   onClose,
   onConfirmTarget,
 }: AbilityTargetModalProps) {
-  const [selectedCode, setSelectedCode] = useState<string>("NATION_15");
+  const targetOptions = useAbilityTargetOptions(nationId);
+  const [selectedCode, setSelectedCode] = useState<string>(
+    targetOptions[0]?.code || "",
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const { dispatchAction } = useGameActions();
-  const targetOptions = useAbilityTargetOptions(nationId);
 
   if (!isOpen) return null;
 
@@ -34,6 +36,8 @@ export function AbilityTargetModal({
   );
 
   const handleExecuteAbility = async () => {
+    if (!selectedCode) return;
+
     const action = ActionFactory.activateAbility(
       nationId,
       "DIPLOMATIC_SUMMIT",
@@ -92,7 +96,8 @@ export function AbilityTargetModal({
 
         <button
           onClick={handleExecuteAbility}
-          className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-bold text-xs cursor-pointer shadow-md flex items-center justify-center gap-2"
+          disabled={!selectedCode}
+          className="w-full py-3 bg-primary text-primary-foreground disabled:opacity-40 rounded-2xl font-bold text-xs cursor-pointer shadow-md flex items-center justify-center gap-2"
         >
           <Zap size={14} />
           <span>اجرای توانمندی روی هدف</span>

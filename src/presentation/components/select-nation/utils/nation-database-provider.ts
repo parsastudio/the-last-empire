@@ -16,19 +16,8 @@ export class NationDatabaseProvider {
   ): NationDetail {
     const computedTreasury = Math.floor(gdp * 0.05);
 
-    let gdpText = "";
-    if (gdp >= 1e12) {
-      gdpText = `${(gdp / 1e12).toFixed(1)} تریلیارد دلار`;
-    } else {
-      gdpText = `${(gdp / 1e9).toFixed(1)} میلیارد دلار`;
-    }
-
-    let popText = "";
-    if (population >= 1e9) {
-      popText = `${(population / 1e9).toFixed(2)} میلیارد نفر`;
-    } else {
-      popText = `${(population / 1e6).toFixed(1)} میلیون نفر`;
-    }
+    const gdpText = PersianNumberFormatter.formatCurrency(gdp, true);
+    const popText = PersianNumberFormatter.formatCompactNumber(population);
 
     let power = "قدرت منطقه‌ای";
     if (gdp >= 10e12) power = "ابرقدرت جهانی";
@@ -57,14 +46,12 @@ export class NationDatabaseProvider {
     manifestNations: ManifestNationItem[],
   ): NationDetail[] {
     return manifestNations.map((item) => {
-      let gdpText = "";
-      if (item.gdp >= 1e12) {
-        gdpText = `${(item.gdp / 1e12).toFixed(1)} تریلیارد دلار`;
-      } else {
-        gdpText = `${(item.gdp / 1e9).toFixed(1)} میلیارد دلار`;
-      }
+      const gdpText = PersianNumberFormatter.formatCurrency(item.gdp, true);
+      const areaText = PersianNumberFormatter.toPersianDigits(
+        item.territorySize.toLocaleString("en-US"),
+      );
 
-      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}، ساختار اقتصادی به ارزش ${gdpText} و مساحت ${item.territorySize.toLocaleString("fa-IR")} km².`;
+      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}، ساختار اقتصادی به ارزش ${gdpText} و مساحت ${areaText} km².`;
 
       return this.formatNationDetail(
         item.id,

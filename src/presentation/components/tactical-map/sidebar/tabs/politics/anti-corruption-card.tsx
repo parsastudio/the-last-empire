@@ -3,16 +3,17 @@ import { ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface AntiCorruptionCardProps {
-  nationId?: string;
+  nationId: string;
   treasury?: number;
   gdp?: number;
   currentCorruption?: number;
 }
 
 export function AntiCorruptionCard({
-  nationId = "NATION_118",
+  nationId,
   treasury = 100000,
   gdp = 450000000000,
   currentCorruption = 0,
@@ -131,37 +132,16 @@ export function AntiCorruptionCard({
                 />
               </div>
 
-              <div className="grid grid-cols-4 gap-1.5 pt-1 font-sans">
-                <button
-                  type="button"
-                  onClick={() => handlePercentageSelect(0.25)}
-                  className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                >
-                  ۲۵٪
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePercentageSelect(0.5)}
-                  className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                >
-                  ۵۰٪
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePercentageSelect(0.75)}
-                  className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                >
-                  ۷۵٪
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePercentageSelect(1.0)}
-                  className="py-1 rounded-lg bg-gdp/20 hover:bg-gdp/30 border border-gdp/40 text-[9px] font-mono font-bold text-gdp transition-all cursor-pointer flex items-center justify-center gap-1"
-                >
-                  <Zap size={10} />
-                  <span>۱۰۰٪ (پاکسازی)</span>
-                </button>
-              </div>
+              <PercentageSelector
+                options={[
+                  { pct: 0.25, label: "۲۵٪" },
+                  { pct: 0.5, label: "۵۰٪" },
+                  { pct: 0.75, label: "۷۵٪" },
+                  { pct: 1.0, label: "۱۰۰٪ (پاکسازی)", isMax: true },
+                ]}
+                onSelect={handlePercentageSelect}
+                colorVariant="gdp"
+              />
             </div>
 
             <div className="bg-secondary/40 border border-border/40 p-3 rounded-xl flex items-center justify-between text-xs font-mono">

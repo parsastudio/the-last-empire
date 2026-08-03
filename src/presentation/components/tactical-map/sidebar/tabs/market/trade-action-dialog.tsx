@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { ShoppingBag, TrendingDown, Zap } from "lucide-react";
+import { ShoppingBag, TrendingDown } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 interface TradeActionDialogProps {
   isOpen: boolean;
@@ -54,8 +56,8 @@ export function TradeActionDialog({
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
   const isOil = resourceName.includes("نفت");
   const resourceType = isOil ? "oil" : "steel";
-  const buyUnitPrice = unitPrice || 25000000;
-  const sellUnitPrice = 20000000;
+  const buyUnitPrice = unitPrice || MARKET_CONFIG.FIXED_BUY_PRICE;
+  const sellUnitPrice = MARKET_CONFIG.FIXED_SELL_PRICE;
   const effectiveUnitPrice = mode === "buy" ? buyUnitPrice : sellUnitPrice;
 
   const totalCostOrRevenue = currentAmount * effectiveUnitPrice;
@@ -144,45 +146,11 @@ export function TradeActionDialog({
               }`}
             />
 
-            <div className="grid grid-cols-4 gap-1.5 pt-2 font-sans">
-              <button
-                type="button"
-                disabled={safeMax === 0}
-                onClick={() => handlePercentageSelect(0.25)}
-                className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-              >
-                ۲۵٪
-              </button>
-              <button
-                type="button"
-                disabled={safeMax === 0}
-                onClick={() => handlePercentageSelect(0.5)}
-                className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-              >
-                ۵۰٪
-              </button>
-              <button
-                type="button"
-                disabled={safeMax === 0}
-                onClick={() => handlePercentageSelect(0.75)}
-                className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-              >
-                ۷۵٪
-              </button>
-              <button
-                type="button"
-                disabled={safeMax === 0}
-                onClick={() => handlePercentageSelect(1.0)}
-                className={`py-1 rounded-lg border text-[9px] font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1 disabled:opacity-30 ${
-                  isBuy
-                    ? "bg-gdp/20 hover:bg-gdp/30 border-gdp/40 text-gdp"
-                    : "bg-rose-500/20 hover:bg-rose-500/30 border-rose-500/40 text-rose-500"
-                }`}
-              >
-                <Zap size={10} />
-                <span>۱۰۰٪ (حداکثر)</span>
-              </button>
-            </div>
+            <PercentageSelector
+              disabled={safeMax === 0}
+              onSelect={handlePercentageSelect}
+              colorVariant={isBuy ? "gdp" : "military"}
+            />
           </div>
 
           <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60">
