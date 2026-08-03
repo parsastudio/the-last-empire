@@ -64,7 +64,7 @@ export class BitPackedNeighborDetector {
     const result: string[] = [];
 
     for (const numId of numericNeighbors) {
-      const canonical = NationIdResolver.resolveCanonicalId(`NATION_${numId}`);
+      const canonical = NationIdResolver.resolveCanonicalId(numId);
       if (nations[canonical] || nations[`NATION_${numId}`]) {
         result.push(canonical);
       }

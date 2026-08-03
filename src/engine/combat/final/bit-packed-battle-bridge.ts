@@ -12,15 +12,10 @@ export class BitPackedBattleBridge {
   ): number {
     if (conqueredAreaSqKm <= 0) return 0;
 
-    const canonicalAttacker =
-      NationIdResolver.resolveCanonicalId(attackerNationId);
-    const canonicalDefender =
-      NationIdResolver.resolveCanonicalId(defenderNationId);
+    const attackerNum = NationIdResolver.resolveNumericId(attackerNationId);
+    const defenderNum = NationIdResolver.resolveNumericId(defenderNationId);
 
-    const attackerNum = parseInt(canonicalAttacker.replace("NATION_", ""), 10);
-    const defenderNum = parseInt(canonicalDefender.replace("NATION_", ""), 10);
-
-    if (isNaN(attackerNum) || isNaN(defenderNum)) {
+    if (attackerNum === 0 || defenderNum === 0) {
       return 0;
     }
 

@@ -51,9 +51,7 @@ export class BitPackedSyncEngine {
     const updated = { ...nations };
 
     for (const [key, nation] of Object.entries(updated)) {
-      const canonical = NationIdResolver.resolveCanonicalId(key);
-      const numericId = parseInt(canonical.replace("NATION_", ""), 10);
-
+      const numericId = NationIdResolver.resolveNumericId(key);
       const totalCalibratedArea = nationAreaMap.get(numericId) || 0;
       const territorySize = Math.round(totalCalibratedArea);
       const isAlive = territorySize > 0;
@@ -102,12 +100,9 @@ export class BitPackedSyncEngine {
           const regionGdp = Math.round(updatedGdp * ratio);
 
           let name = `خاک اصلی ${nation.name}`;
-          if (rId === 1 && (canonical === "NATION_USA" || key === "USA")) {
+          if (rId === 1 && (key === "NATION_USA" || key === "USA")) {
             name = "جزایر هاوایی (منطقه فرامرزی ۱)";
-          } else if (
-            rId === 1 &&
-            (canonical === "NATION_FRA" || key === "FRA")
-          ) {
+          } else if (rId === 1 && (key === "NATION_FRA" || key === "FRA")) {
             name = "گویان فرانسه (منطقه فرامرزی ۱)";
           } else if (rId >= 1 && rId <= 10) {
             name = `منطقه فرامرزی ${rId.toLocaleString("fa-IR")}`;
