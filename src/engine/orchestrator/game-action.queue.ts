@@ -5,7 +5,7 @@ import { ActionPrioritySorter } from "@/engine/orchestrator/action-priority-sort
 import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
-import { GridState } from "@/engine/combat/state/grid-state";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class GameActionQueue {
   private actionQueue = new ActionQueue();
@@ -19,7 +19,7 @@ export class GameActionQueue {
 
   public processActions(
     state: GameState,
-    gridState: GridState,
+    _gridState: BitPackedGridState,
     prng: SeededRandom,
   ): GameState {
     const rawQueue = this.actionQueue.getQueue();
@@ -29,10 +29,7 @@ export class GameActionQueue {
 
     for (const action of sortedActions) {
       try {
-        const stateWithGrid = { ...nextState, gridState } as GameState & {
-          gridState: GridState;
-        };
-        this.validator.validateAction(stateWithGrid, action);
+        this.validator.validateAction(nextState, action);
         nextState = this.actionRouter.route(nextState, action);
 
         const logEntry = TurnLogBuilder.createLogEntry(
