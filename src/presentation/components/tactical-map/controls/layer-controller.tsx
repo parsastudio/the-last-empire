@@ -1,8 +1,29 @@
 import React from "react";
-import { Layers, Loader2 } from "lucide-react";
-import { LAYER_OPTIONS } from "./layer-options.config";
+import { Layers, Loader2, Eye, Coins } from "lucide-react";
 
 export type TacticalLayer = "political" | "gdp";
+
+export interface LayerOption {
+  id: TacticalLayer;
+  label: string;
+  icon: React.ComponentType<{ size: number; className?: string }>;
+  color: string;
+}
+
+export const LAYER_OPTIONS: LayerOption[] = [
+  {
+    id: "political",
+    label: "نقشه سیاسی",
+    icon: Eye,
+    color: "text-gdp",
+  },
+  {
+    id: "gdp",
+    label: "پایش اقتصاد GDP",
+    icon: Coins,
+    color: "text-treasury",
+  },
+];
 
 interface LayerControllerProps {
   activeLayer: TacticalLayer;
