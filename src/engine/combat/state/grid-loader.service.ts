@@ -6,6 +6,12 @@ export class GridLoaderService {
 
   public static async ensureGridLoaded(): Promise<BitPackedGridState> {
     const gridState = BitPackedGridState.getInstance();
+    const raw = gridState.getBuffer().getRawBuffer();
+
+    if (raw[1000] !== 0) {
+      return gridState;
+    }
+
     if (this.isLoading) {
       return gridState;
     }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
 import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
+import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
 export async function GET(request: Request): Promise<NextResponse> {
   try {
@@ -9,6 +10,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     const nationIdParam = searchParams.get("nationId") || "IRN";
     const gameIdParam = searchParams.get("gameId") || "default_game";
     const normalizedHumanId = normalizeNationId(nationIdParam);
+
+    await GridLoaderService.ensureGridLoaded();
 
     let engine = serverGameSessionStore.getEngine(gameIdParam);
     if (!engine) {

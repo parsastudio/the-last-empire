@@ -6,6 +6,7 @@ import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export function normalizeNationId(nationId: string): string {
   return NationIdResolver.resolveCanonicalId(nationId);
@@ -35,6 +36,30 @@ export class GameStateInitializer {
     nationId: string,
     governmentType?: string,
   ): GameState {
+    if (typeof window === "undefined") {
+      const gridState = BitPackedGridState.getInstance();
+      const raw = gridState.getBuffer().getRawBuffer();
+      if (raw[1000] === 0) {
+        try {
+          const binPath = path.join(
+            MapPathResolver.getMapFinalServerDir("map1"),
+            "live-state.bin",
+          );
+          if (fs.existsSync(binPath)) {
+            const fileBuf = fs.readFileSync(binPath);
+            gridState
+              .getBuffer()
+              .loadArrayBuffer(
+                fileBuf.buffer.slice(
+                  fileBuf.byteOffset,
+                  fileBuf.byteOffset + fileBuf.byteLength,
+                ),
+              );
+          }
+        } catch {}
+      }
+    }
+
     const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
     const manifest = this.manifestLoader.loadManifest("map1");
 

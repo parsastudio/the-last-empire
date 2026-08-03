@@ -77,6 +77,11 @@ export function useWebGLInteraction({
     setHoverData(null);
   };
 
+  const handlePointerLeave = () => {
+    setHoverPos(null);
+    setHoverData(null);
+  };
+
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDragging || hasDraggedRef.current || !containerRef.current) {
       return;
@@ -121,6 +126,7 @@ export function useWebGLInteraction({
     hoverData,
     contextMenuState,
     handlePointerMove,
+    handlePointerLeave,
     handleMapClick,
     closeContextMenu,
   };

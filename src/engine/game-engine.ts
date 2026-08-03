@@ -4,15 +4,15 @@ import { deepClone, SeededRandom } from "@/domain/shared/domain-utilities";
 import { GameActionQueue } from "@/engine/orchestrator/game-action.queue";
 import { StateHistory } from "@/application/state-history";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { GameEngineDispatcher } from "@/engine/orchestrator/game-engine-dispatcher";
+import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
 
 export class GameEngine {
   private currentState: GameState;
   private actionQueue = new GameActionQueue();
   private stateHistory = new StateHistory();
   private dispatcher = new GameEngineDispatcher();
-  private turnOrchestrator = new BitPackedTurnOrchestrator();
+  private progressionOrchestrator = new TurnProgressionOrchestrator();
   private prng: SeededRandom;
   private gridState: BitPackedGridState;
 
@@ -48,9 +48,23 @@ export class GameEngine {
       return this.getState();
     }
 
-    this.currentState = this.turnOrchestrator.processPostTurn(
+    this.currentState = this.progressionOrchestrator.advanceTurn(
       this.currentState,
+      this.prng,
+      (state, additionalActions) => {
+        if (additionalActions) {
+          for (const action of additionalActions) {
+            this.actionQueue.enqueue(state, action);
+          }
+        }
+        return this.actionQueue.processActions(
+          state,
+          this.gridState,
+          this.prng,
+        );
+      },
     );
+
     this.stateHistory.saveSnapshot(this.currentState);
 
     return this.getState();

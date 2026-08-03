@@ -40,7 +40,7 @@ export class BitPackedNeighborDetector {
           if (ny >= 0 && ny < height) {
             const neighborNation = buffer.getNationId(nx, ny);
 
-            if (neighborNation === 0) {
+            if (neighborNation === 0 || neighborNation === 254) {
               oceanAccessMap.set(nationId, true);
             } else if (
               neighborNation >= 11 &&

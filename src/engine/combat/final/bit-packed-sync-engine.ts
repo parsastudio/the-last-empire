@@ -51,8 +51,7 @@ export class BitPackedSyncEngine {
     const updated = { ...nations };
 
     for (const [key, nation] of Object.entries(updated)) {
-      const canonical = NationIdResolver.resolveCanonicalId(key);
-      const numericId = parseInt(canonical.replace("NATION_", ""), 10);
+      const numericId = NationIdResolver.resolveNumericId(key);
 
       const totalCalibratedArea = nationAreaMap.get(numericId) || 0;
       const territorySize = Math.round(totalCalibratedArea);
@@ -82,6 +81,7 @@ export class BitPackedSyncEngine {
           const regionPop = Math.round(nation.population * ratio);
           const regionGdp = Math.round(nation.gdp * ratio);
 
+          const canonical = NationIdResolver.resolveCanonicalId(key);
           let name = `خاک اصلی ${nation.name}`;
           if (rId === 1 && (canonical === "NATION_USA" || key === "USA")) {
             name = "جزایر هاوایی (منطقه فرامرزی ۱)";

@@ -34,14 +34,20 @@ export function RegionBreakdownCard({
 
   return (
     <div className="space-y-3 dir-rtl text-right">
-      <div className="flex items-center gap-2 px-1">
-        <Globe size={14} className="text-primary" />
-        <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
-          تفکیک قلمروها و مناطق فرامرزی
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Globe size={14} className="text-primary" />
+          <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
+            تفکیک قلمروها و مناطق فرامرزی
+          </span>
+        </div>
+        <span className="text-[9px] font-mono bg-secondary px-2 py-0.5 rounded text-muted-foreground">
+          {PersianNumberFormatter.toPersianDigits(effectiveRegions.length)}{" "}
+          اقلیم
         </span>
       </div>
 
-      <div className="space-y-2.5 font-mono text-xs">
+      <div className="space-y-2.5 font-mono text-xs max-h-60 overflow-y-auto pr-1 scrollbar-thin">
         {effectiveRegions.map((reg) => {
           const formattedArea = PersianNumberFormatter.toPersianDigits(
             Math.round(reg.areaSqKm).toLocaleString("en-US"),
