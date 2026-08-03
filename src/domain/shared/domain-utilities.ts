@@ -44,10 +44,10 @@ export class GameIdGenerator {
 }
 
 export class NationIdResolver {
-  public static resolveCanonicalId(codeOrId: string): string {
-    if (!codeOrId) return "";
+  public static resolveCanonicalId(codeOrId: string | number): string {
+    if (!codeOrId && codeOrId !== 0) return "";
 
-    const clean = codeOrId.trim().toUpperCase();
+    const clean = codeOrId.toString().trim().toUpperCase();
 
     let profile = findCountryProfileByCode(clean);
     if (!profile) {
@@ -67,6 +67,29 @@ export class NationIdResolver {
     }
 
     return `NATION_${clean}`;
+  }
+
+  public static resolveNumericId(codeOrId: string | number): number {
+    if (typeof codeOrId === "number") {
+      return codeOrId;
+    }
+    if (!codeOrId) return 0;
+
+    const clean = codeOrId.toString().trim().toUpperCase();
+    const rawNum = clean.replace("NATION_", "");
+    const parsedDirect = parseInt(rawNum, 10);
+    if (!isNaN(parsedDirect) && parsedDirect > 0 && parsedDirect < 255) {
+      const checkProfile = findCountryProfileById(parsedDirect);
+      if (checkProfile) return checkProfile.id ?? parsedDirect;
+    }
+
+    const profile =
+      findCountryProfileByCode(clean) || findCountryProfileById(clean);
+    if (profile && profile.id) {
+      return profile.id;
+    }
+
+    return isNaN(parsedDirect) ? 0 : parsedDirect;
   }
 }
 

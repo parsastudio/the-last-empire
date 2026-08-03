@@ -1,5 +1,6 @@
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GridCell } from "@/domain/map/grid-cell.schema";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export type { GridCell };
 
@@ -7,8 +8,8 @@ export class GridState {
   private packedGrid = BitPackedGridState.getInstance();
 
   public setCell(x: number, y: number, cell: GridCell): void {
-    const nationId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
-    if (!isNaN(nationId)) {
+    const nationId = NationIdResolver.resolveNumericId(cell.ownerId);
+    if (nationId > 0) {
       this.packedGrid.setNationId(x, y, nationId);
     }
   }

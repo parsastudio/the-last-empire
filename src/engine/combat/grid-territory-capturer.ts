@@ -9,13 +9,10 @@ export class GridTerritoryCapturer {
     defenderId: string,
     targetAreaSqKm: number,
   ): number {
-    const canonicalAttacker = NationIdResolver.resolveCanonicalId(attackerId);
-    const canonicalDefender = NationIdResolver.resolveCanonicalId(defenderId);
+    const attackerNum = NationIdResolver.resolveNumericId(attackerId);
+    const defenderNum = NationIdResolver.resolveNumericId(defenderId);
 
-    const attackerNum = parseInt(canonicalAttacker.replace("NATION_", ""), 10);
-    const defenderNum = parseInt(canonicalDefender.replace("NATION_", ""), 10);
-
-    if (isNaN(attackerNum) || isNaN(defenderNum)) {
+    if (attackerNum === 0 || defenderNum === 0) {
       return 0;
     }
 
