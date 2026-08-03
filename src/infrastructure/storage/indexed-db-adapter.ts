@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { StateSerializer } from "@/infrastructure/storage/state-serializer";
-import { DomainEvent, DeltaPatch } from "@/domain/events/domain-event.schema";
+import { DomainEvent } from "@/domain/events/domain-event.schema";
 
 export const INDEXED_DB_CONFIG = {
   DB_NAME: "GeopoliticsEngineDB",
