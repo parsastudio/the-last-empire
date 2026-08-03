@@ -3,14 +3,9 @@ import { GameAction } from "@/domain/game/action.schema";
 import { EconomyActionExecutor } from "@/engine/actions/economy-action-executor";
 import { MilitaryActionExecutor } from "@/engine/actions/military-action-executor";
 import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executor";
-import { GridState } from "@/engine/combat/state/grid-state";
 
 export class ActionRouter {
-  public route(
-    state: GameState,
-    action: GameAction,
-    gridState?: GridState,
-  ): GameState {
+  public route(state: GameState, action: GameAction): GameState {
     switch (action.type) {
       case "SET_TAX_RATE":
       case "SET_TARIFF_RATE":
@@ -26,7 +21,7 @@ export class ActionRouter {
       case "DISBAND_UNIT":
       case "INVEST_RESEARCH":
       case "INITIATE_BATTLE":
-        return MilitaryActionExecutor.execute(state, action, gridState);
+        return MilitaryActionExecutor.execute(state, action);
 
       case "SET_RESEARCH_BUDGET":
       case "ACTIVATE_ABILITY":

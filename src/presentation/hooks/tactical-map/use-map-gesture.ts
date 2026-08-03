@@ -11,34 +11,53 @@ export function useMapGesture(
   mapWidth = 4096,
   mapHeight = 2048,
 ) {
-  const [position, setPosition] = useState<MapDragPosition>({ x: 0, y: 0 });
-  const [scale, setScale] = useState<number>(0.5);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const computeInitial = useCallback(
+    (w: number, h: number) => {
+      if (w <= 0 || h <= 0) {
+        return { scale: 0.5, pos: { x: 0, y: 0 } };
+      }
+      const scaleX = w / mapWidth;
+      const scaleY = h / mapHeight;
+      const fitScale = Math.min(scaleX, scaleY);
+      const initialX = (w - mapWidth * fitScale) / 2;
+      const initialY = (h - mapHeight * fitScale) / 2;
+      return { scale: fitScale, pos: { x: initialX, y: initialY } };
+    },
+    [mapWidth, mapHeight],
+  );
+
+  const [position, setPosition] = useState<MapDragPosition>(
+    () => computeInitial(containerWidth, containerHeight).pos,
+  );
+  const [scale, setScale] = useState<number>(
+    () => computeInitial(containerWidth, containerHeight).scale,
+  );
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStart = useRef<MapDragPosition>({ x: 0, y: 0 });
   const mouseDownPos = useRef<MapDragPosition>({ x: 0, y: 0 });
   const hasDraggedRef = useRef<boolean>(false);
 
-  const fitToScreen = useCallback(() => {
-    if (containerWidth <= 0 || containerHeight <= 0) return;
-    const scaleX = containerWidth / mapWidth;
-    const scaleY = containerHeight / mapHeight;
-    const fitScale = Math.min(scaleX, scaleY);
-
-    const initialX = (containerWidth - mapWidth * fitScale) / 2;
-    const initialY = (containerHeight - mapHeight * fitScale) / 2;
-
-    setScale(fitScale);
-    setPosition({ x: initialX, y: initialY });
-  }, [containerWidth, containerHeight, mapWidth, mapHeight]);
+  const lastDimensionsRef = useRef({ w: containerWidth, h: containerHeight });
 
   useEffect(() => {
-    if (!isInitialized && containerWidth > 0 && containerHeight > 0) {
-      fitToScreen();
-      setIsInitialized(true);
+    if (
+      containerWidth > 0 &&
+      containerHeight > 0 &&
+      (lastDimensionsRef.current.w !== containerWidth ||
+        lastDimensionsRef.current.h !== containerHeight)
+    ) {
+      lastDimensionsRef.current = { w: containerWidth, h: containerHeight };
+      const { scale: fitScale, pos } = computeInitial(
+        containerWidth,
+        containerHeight,
+      );
+      requestAnimationFrame(() => {
+        setScale(fitScale);
+        setPosition(pos);
+      });
     }
-  }, [containerWidth, containerHeight, isInitialized, fitToScreen]);
+  }, [containerWidth, containerHeight, computeInitial]);
 
   const calculateZoom = (
     deltaY: number,
@@ -117,7 +136,14 @@ export function useMapGesture(
 
   const zoomIn = () => setScale((prev) => Math.min(prev * 1.25, 35));
   const zoomOut = () => setScale((prev) => Math.max(prev * 0.8, 0.05));
-  const resetScale = () => fitToScreen();
+  const resetScale = () => {
+    const { scale: fitScale, pos } = computeInitial(
+      containerWidth,
+      containerHeight,
+    );
+    setScale(fitScale);
+    setPosition(pos);
+  };
 
   return {
     scale,
@@ -133,6 +159,5 @@ export function useMapGesture(
     zoomIn,
     zoomOut,
     resetScale,
-    fitToScreen,
   };
 }
