@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/game-error";
-import { ActionRuleEvaluator } from "./action-rule-evaluator";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { ActionRuleEvaluator } from "@/engine/validation/action-rule-evaluator";
 
 export class StateValidator {
   public validateAction(state: GameState, action: GameAction): void {

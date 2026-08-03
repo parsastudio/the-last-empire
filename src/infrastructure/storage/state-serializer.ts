@@ -1,6 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { GameStateSchema } from "@/domain/game/game-state.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 
 export class StateSerializer {
   public serialize(state: GameState): string {

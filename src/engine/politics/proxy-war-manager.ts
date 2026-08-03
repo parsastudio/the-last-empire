@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
+import { calculateProxyOperationBudget } from "@/domain/politics/government-label.utility";
 
 export interface ProxyOperationResult {
   updatedSourceNation: Nation;
