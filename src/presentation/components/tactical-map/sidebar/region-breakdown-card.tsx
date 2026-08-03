@@ -33,15 +33,15 @@ export function RegionBreakdownCard({
         ];
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right">
+    <div className="space-y-3 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
-        <Globe size={13} className="text-primary" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+        <Globe size={14} className="text-primary" />
+        <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
           تفکیک قلمروها و مناطق فرامرزی
         </span>
       </div>
 
-      <div className="space-y-2 font-mono text-xs">
+      <div className="space-y-2.5 font-mono text-xs">
         {effectiveRegions.map((reg) => {
           const formattedArea = PersianNumberFormatter.toPersianDigits(
             Math.round(reg.areaSqKm).toLocaleString("en-US"),
@@ -57,11 +57,11 @@ export function RegionBreakdownCard({
           return (
             <div
               key={reg.regionId}
-              className="bg-background/40 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between gap-3"
+              className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between gap-3 shadow-inner"
             >
               <div className="space-y-1 text-right">
                 <div className="flex items-center gap-1.5">
-                  <MapPin size={13} className="text-primary shrink-0" />
+                  <MapPin size={14} className="text-primary shrink-0" />
                   <span className="text-xs font-bold text-foreground block font-sans">
                     {reg.name}
                   </span>
@@ -71,12 +71,12 @@ export function RegionBreakdownCard({
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 text-[10px]">
-                <div className="flex items-center gap-1 text-muted-foreground bg-secondary/40 px-2.5 py-1 rounded-xl border border-border/40">
+              <div className="flex items-center gap-2.5 text-[10px]">
+                <div className="flex items-center gap-1.5 text-muted-foreground bg-secondary/60 px-2.5 py-1 rounded-xl border border-border/50">
                   <Users size={12} className="text-primary shrink-0" />
-                  <span>{formattedPop} نفر</span>
+                  <span>{formattedPop}</span>
                 </div>
-                <div className="flex items-center gap-1 text-muted-foreground bg-secondary/40 px-2.5 py-1 rounded-xl border border-border/40">
+                <div className="flex items-center gap-1.5 text-muted-foreground bg-secondary/60 px-2.5 py-1 rounded-xl border border-border/50">
                   <Coins size={12} className="text-gdp shrink-0" />
                   <span>{formattedGdp}</span>
                 </div>

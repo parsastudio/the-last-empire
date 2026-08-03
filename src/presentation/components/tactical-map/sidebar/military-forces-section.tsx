@@ -43,29 +43,29 @@ export function MilitaryForcesSection({
   const bonusPercent = (techLevel - 1) * 20;
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right">
+    <div className="space-y-3 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
-        <Swords size={13} className="text-military" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+        <Swords size={14} className="text-military" />
+        <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
           قدرت ارتش و حقوق و پشتیبانی نوبتی یگان‌ها
         </span>
       </div>
 
-      <div className="space-y-2 font-mono">
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Shield size={13} className="text-primary shrink-0" />
+      <div className="space-y-2.5 font-mono">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <Shield size={14} className="text-primary shrink-0" />
             <div className="space-y-0.5">
               <span className="text-foreground font-bold block font-sans">
                 پیاده‌نظام رزمی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                حقوق و پشتیبانی نوبتی:{" "}
+                حقوق نوبتی:{" "}
                 {PersianNumberFormatter.formatCurrency(infantryPayroll)}
               </span>
             </div>
           </div>
-          <span className="text-xs font-bold text-foreground">
+          <span className="text-xs font-extrabold text-foreground">
             {PersianNumberFormatter.toPersianDigits(
               infantry.toLocaleString("en-US"),
             )}{" "}
@@ -73,9 +73,9 @@ export function MilitaryForcesSection({
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldAlert size={13} className="text-treasury shrink-0" />
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <ShieldAlert size={14} className="text-treasury shrink-0" />
             <div className="space-y-0.5">
               <span className="text-treasury font-bold block font-sans">
                 پادگان و نیروهای انتظامی ملی
@@ -85,7 +85,7 @@ export function MilitaryForcesSection({
               </span>
             </div>
           </div>
-          <span className="text-xs font-bold text-treasury">
+          <span className="text-xs font-extrabold text-treasury">
             {PersianNumberFormatter.toPersianDigits(
               militiaGarrisonPower.toLocaleString("en-US"),
             )}{" "}
@@ -93,20 +93,20 @@ export function MilitaryForcesSection({
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Plane size={13} className="text-gdp shrink-0" />
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <Plane size={14} className="text-gdp shrink-0" />
             <div className="space-y-0.5">
               <span className="text-foreground font-bold block font-sans">
                 نیروی هوایی و جنگنده
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                حقوق و پشتیبانی نوبتی:{" "}
+                حقوق نوبتی:{" "}
                 {PersianNumberFormatter.formatCurrency(airForcePayroll)}
               </span>
             </div>
           </div>
-          <span className="text-xs font-bold text-foreground">
+          <span className="text-xs font-extrabold text-foreground">
             {PersianNumberFormatter.toPersianDigits(
               airForce.toLocaleString("en-US"),
             )}{" "}
@@ -114,20 +114,20 @@ export function MilitaryForcesSection({
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Radio size={13} className="text-treasury shrink-0" />
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <Radio size={14} className="text-treasury shrink-0" />
             <div className="space-y-0.5">
               <span className="text-foreground font-bold block font-sans">
                 پهپاد و تسلیحات موشکی
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
-                حقوق و پشتیبانی نوبتی:{" "}
+                حقوق نوبتی:{" "}
                 {PersianNumberFormatter.formatCurrency(dronePayroll)}
               </span>
             </div>
           </div>
-          <span className="text-xs font-bold text-foreground">
+          <span className="text-xs font-extrabold text-foreground">
             {PersianNumberFormatter.toPersianDigits(
               droneMissile.toLocaleString("en-US"),
             )}{" "}
@@ -135,9 +135,9 @@ export function MilitaryForcesSection({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground font-sans">
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="bg-background/50 border border-border/70 p-3 rounded-2xl flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-sans font-bold">
               فناوری نظامی
             </span>
             <span className="text-xs font-bold text-amber-500">
@@ -149,8 +149,8 @@ export function MilitaryForcesSection({
               )}
             </span>
           </div>
-          <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex items-center justify-between">
-            <span className="text-[10px] text-muted-foreground font-sans">
+          <div className="bg-background/50 border border-border/70 p-3 rounded-2xl flex items-center justify-between">
+            <span className="text-[10px] text-muted-foreground font-sans font-bold">
               آمادگی عملیاتی
             </span>
             <span className="text-xs font-bold text-amber-500">
