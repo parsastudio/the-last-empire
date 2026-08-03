@@ -1,13 +1,44 @@
+import fs from "fs";
+import path from "path";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 import { GameState } from "@/domain/game/game-state.schema";
-import { GridNationDetector } from "./grid-nation-detector";
+import { GridCell } from "@/domain/map/grid-cell.schema";
 import { GlobalAiInitializer } from "./global-ai-initializer";
-import { ManifestFileLoader } from "./manifest-file-loader";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { MapManifest } from "./generator/map-manifest-builder";
+import { MapPathResolver } from "./map-path-resolver";
 
 export function normalizeNationId(nationId: string): string {
   return NationIdResolver.resolveCanonicalId(nationId);
+}
+
+export class GridNationDetector {
+  public detectUniqueNations(cells: GridCell[]): string[] {
+    const nations = new Set<string>();
+    for (const cell of cells) {
+      const owner = cell.ownerId;
+      if (owner && owner !== "WATER") {
+        nations.add(owner);
+      }
+    }
+    return Array.from(nations).sort();
+  }
+}
+
+export class ManifestFileLoader {
+  public loadManifest(mapId = "map1"): MapManifest | null {
+    try {
+      const targetDir = MapPathResolver.getMapServerDir(mapId);
+      const manifestPath = path.join(targetDir, "manifest.json");
+
+      if (fs.existsSync(manifestPath)) {
+        const raw = fs.readFileSync(manifestPath, "utf-8");
+        return JSON.parse(raw) as MapManifest;
+      }
+    } catch {}
+    return null;
+  }
 }
 
 export class GameStateInitializer {

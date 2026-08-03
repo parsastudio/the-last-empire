@@ -1,7 +1,24 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { NationProfileAssigner } from "./nation-profile-assigner";
-import { DiplomaticMatrixGenerator } from "./diplomatic-matrix-generator";
 import { MapManifest } from "./generator/map-manifest-builder";
+
+export class DiplomaticMatrixGenerator {
+  public generateBlankRelations(
+    nationsList: string[],
+  ): Record<string, RelationProfile> {
+    const relations: Record<string, RelationProfile> = {};
+    for (const targetId of nationsList) {
+      relations[targetId] = {
+        targetNationId: targetId,
+        stance: "NORMAL_DIPLOMACY" as const,
+        opinion: 0,
+        coolOffTurnsRemaining: 0,
+      };
+    }
+    return relations;
+  }
+}
 
 export class GlobalAiInitializer {
   private profileAssigner = new NationProfileAssigner();
