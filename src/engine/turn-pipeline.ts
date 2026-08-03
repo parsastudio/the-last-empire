@@ -1,6 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { SeededRandom } from "@/domain/shared/seeded-random";
-import { deepClone } from "@/domain/shared/deep-clone";
+import { SeededRandom, deepClone } from "@/domain/shared/domain-utilities";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 import { ModifiersPhase } from "@/engine/pipeline/modifiers-phase";
 import { EconomyPhase } from "@/engine/pipeline/economy-phase";

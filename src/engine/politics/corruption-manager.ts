@@ -1,5 +1,5 @@
 import type { Nation } from "@/domain/nation/nation.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 
 export class CorruptionManager {
   public updateCorruptionLevel(nation: Nation): number {

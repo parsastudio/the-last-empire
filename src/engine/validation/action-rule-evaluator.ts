@@ -1,9 +1,8 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
-import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
+import { calculateProxyOperationBudget } from "@/domain/politics/government-label.utility";
 
 export class ActionRuleEvaluator {
   public static evaluate(state: GameState, action: GameAction): void {

@@ -1,5 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { SeededRandom } from "@/domain/shared/seeded-random";
+import { SeededRandom } from "@/domain/shared/domain-utilities";
 
 export interface PipelineContext {
   state: GameState;

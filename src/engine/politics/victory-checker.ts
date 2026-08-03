@@ -1,5 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export interface VictoryStatus {
   isGameOver: boolean;

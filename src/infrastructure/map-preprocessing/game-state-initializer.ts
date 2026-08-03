@@ -4,10 +4,10 @@ import { GridState } from "@/engine/combat/state/grid-state";
 import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { GlobalAiInitializer } from "./global-ai-initializer";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
-import { MapManifest } from "./generator/map-manifest-builder";
-import { MapPathResolver } from "./map-path-resolver";
+import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export function normalizeNationId(nationId: string): string {
   return NationIdResolver.resolveCanonicalId(nationId);
