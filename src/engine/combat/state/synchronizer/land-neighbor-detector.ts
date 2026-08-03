@@ -1,5 +1,5 @@
 import { GridState } from "@/engine/combat/state/grid-state";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export interface NeighborDetectionResult {
   landNeighborsMap: Map<string, Set<string>>;

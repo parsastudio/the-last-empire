@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ActivateAbilityAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 
 export class AbilityExecutor {
   public static execute(

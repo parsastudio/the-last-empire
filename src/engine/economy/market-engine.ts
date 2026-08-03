@@ -1,6 +1,6 @@
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 export interface TradeTransactionResult {

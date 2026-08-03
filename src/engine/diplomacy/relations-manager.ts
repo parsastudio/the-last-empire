@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 
 export class RelationsManager {
   public calculateGovernmentFriction(nationA: Nation, nationB: Nation): number {

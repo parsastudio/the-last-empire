@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
-import { CellAreaCalibrator } from "../cell-area-calibrator";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 const EARTH_RADIUS = 6378137;
 const TOTAL_SURFACE_AREA_SQ_KM =

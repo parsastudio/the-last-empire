@@ -1,5 +1,5 @@
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export type { GridCell };
 
