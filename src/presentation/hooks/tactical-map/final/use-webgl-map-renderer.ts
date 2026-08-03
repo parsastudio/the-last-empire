@@ -11,6 +11,7 @@ interface UseWebGLMapRendererProps {
   position: { x: number; y: number };
   scale: number;
   countries: CountryMapping[];
+  activeLayer?: "political" | "gdp";
 }
 
 export function useWebGLMapRenderer({
@@ -19,6 +20,7 @@ export function useWebGLMapRenderer({
   position,
   scale,
   countries,
+  activeLayer = "political",
 }: UseWebGLMapRendererProps) {
   const rendererRef = useRef<WebGLMapRenderer | null>(null);
 
@@ -68,6 +70,7 @@ export function useWebGLMapRenderer({
           { x: position.x * dpr, y: position.y * dpr },
           scale * dpr,
           time,
+          activeLayer,
         );
       }
       animFrameId = requestAnimationFrame(renderLoop);
@@ -78,7 +81,7 @@ export function useWebGLMapRenderer({
     return () => {
       cancelAnimationFrame(animFrameId);
     };
-  }, [gl, dimensions, position, scale]);
+  }, [gl, dimensions, position, scale, activeLayer]);
 
   return rendererRef;
 }
