@@ -7,7 +7,7 @@ import { useHoverNationResolver } from "@/presentation/components/tactical-map/h
 
 interface UseCountryHoverMathProps {
   countries: CountryMapping[];
-  maskDataRef: React.RefObject<Uint8Array | null>;
+  maskDataRef?: React.RefObject<Uint8Array | null>;
   packed1024Ref?: React.RefObject<Uint8Array | null>;
   mapWidth: number;
   mapHeight: number;
@@ -21,8 +21,6 @@ interface UseCountryHoverMathProps {
 
 export function useCountryHoverMath({
   countries,
-  maskDataRef,
-  packed1024Ref,
   mapWidth,
   mapHeight,
   containerRef,
@@ -43,8 +41,6 @@ export function useCountryHoverMath({
 
   const { projectCoordinates } = useHoverProjectionMath({
     containerRef,
-    maskDataRef,
-    packed1024Ref,
     mapWidth,
     mapHeight,
     scale,
