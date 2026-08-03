@@ -40,6 +40,7 @@ export function useMapData() {
     code: p.code,
     name: p.nameFa,
     color: [0, 0, p.id ?? 0] as [number, number, number],
+    areaSqKm: Math.round(p.gdp / 1000000),
   }));
 
   useEffect(() => {

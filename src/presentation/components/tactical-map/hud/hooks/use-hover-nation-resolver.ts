@@ -99,13 +99,29 @@ export function useHoverNationResolver({
       const realRank = liveNation ? liveNation.rank : 99;
 
       let regionLabel = "خاک اصلی";
-      if (enclaveIdVal >= 1 && enclaveIdVal <= 10) {
+      let displayAreaKm2 = liveNation
+        ? liveNation.geography.territorySize
+        : profile
+          ? Math.round(profile.gdp / 1000000)
+          : 50000;
+
+      if (liveNation && liveNation.regionsDemographics) {
+        const matchedRegion = liveNation.regionsDemographics.find(
+          (r) => r.regionId === enclaveIdVal,
+        );
+        if (matchedRegion) {
+          regionLabel = matchedRegion.name;
+          displayAreaKm2 = matchedRegion.areaSqKm;
+        } else if (enclaveIdVal > 0) {
+          regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
+        }
+      } else if (enclaveIdVal > 0) {
         regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
-      } else if (enclaveIdVal >= 11) {
-        regionLabel = `قلمرو برون‌مرزی ${(enclaveIdVal - 10).toLocaleString("fa-IR")}`;
       }
 
-      const areaSqKm = matchedCountry?.areaSqKm ?? 50000;
+      const formattedAreaText = `${PersianNumberFormatter.toPersianDigits(
+        Math.round(displayAreaKm2).toLocaleString("en-US"),
+      )} km²`;
 
       return {
         name: realName,
@@ -115,7 +131,7 @@ export function useHoverNationResolver({
         stance: stanceLabel,
         gdp: gdpFormatted,
         regionName: regionLabel,
-        regionArea: `${Math.round(areaSqKm).toLocaleString("fa-IR")} km²`,
+        regionArea: formattedAreaText,
       };
     },
     [countries, nationsMap, humanNationId],
