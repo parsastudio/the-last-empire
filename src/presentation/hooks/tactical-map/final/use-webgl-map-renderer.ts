@@ -55,7 +55,7 @@ export function useWebGLMapRenderer({
 
   useEffect(() => {
     let animFrameId: number;
-    let startTime = performance.now();
+    const startTime = performance.now();
 
     const renderLoop = () => {
       if (rendererRef.current && gl) {

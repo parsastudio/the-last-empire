@@ -30,6 +30,7 @@ import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/mo
 import { useGameHistoryReplay } from "@/presentation/hooks/game/use-game-history-replay";
 import { EventReplayBar } from "@/presentation/components/tactical-map/history/event-replay-bar";
 import { DeltaInspectorModal } from "@/presentation/components/tactical-map/history/delta-inspector-modal";
+import { MapEngineToggle } from "@/presentation/components/tactical-map/final/controls/map-engine-toggle";
 import { DomainEvent } from "@/domain/events/domain-event.schema";
 
 function TacticalViewport({
@@ -241,6 +242,7 @@ function WorkspaceContent({
         />
 
         <TopHudBar metrics={metrics} />
+        <MapEngineToggle currentEngine="canvas2d" gameId={gameId} />
 
         <StrategicToastContainer />
 

@@ -37,7 +37,7 @@ export function MapEngineToggle({
         <Eye size={13} />
         <span>
           {currentEngine === "canvas2d"
-            title "سوییچ به WebGL2"
+            ? "سوییچ به WebGL2"
             : "سوییچ به Canvas2D"}
         </span>
       </button>
