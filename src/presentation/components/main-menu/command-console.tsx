@@ -11,21 +11,21 @@ export function CommandConsole({
   onLoadCampaign,
 }: CommandConsoleProps) {
   return (
-    <div className="flex flex-col gap-3.5 max-w-sm w-full">
+    <div className="flex flex-col gap-4 max-w-sm w-full">
       <button
         onClick={onNewCampaign}
-        className="w-full py-4 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-bold transition-all border border-gdp/20 shadow-lg shadow-gdp/10 hover:shadow-xl hover:translate-y-[-1px] text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full py-4.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-black transition-all border border-gdp/30 shadow-xl shadow-gdp/20 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99] text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 cursor-pointer"
       >
-        <Play size={15} fill="currentColor" />
-        <span>شروع بازی جدید</span>
+        <Play size={16} fill="currentColor" />
+        <span>شروع امپراتوری جدید</span>
       </button>
 
       <button
         onClick={onLoadCampaign}
-        className="w-full py-4 bg-primary hover:bg-primary/90 border border-border text-primary-foreground rounded-2xl font-semibold transition-all shadow-md hover:shadow-lg hover:translate-y-[-1px] text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+        className="w-full py-4.5 bg-secondary/80 hover:bg-secondary border border-border text-foreground rounded-2xl font-bold transition-all shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] text-xs tracking-wider flex items-center justify-center gap-2.5 cursor-pointer backdrop-blur-md"
       >
-        <RotateCcw size={15} />
-        <span>بارگذاری بازی</span>
+        <RotateCcw size={16} className="text-primary" />
+        <span>بازخوانی پرونده کمپین</span>
       </button>
     </div>
   );

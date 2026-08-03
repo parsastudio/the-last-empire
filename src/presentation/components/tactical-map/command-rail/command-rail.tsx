@@ -40,20 +40,20 @@ function RailTabButton({
         isCollapsed ? "justify-center p-2.5 w-full" : "gap-3 p-3 w-full"
       } ${
         isActive
-          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 font-bold"
-          : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25 font-bold"
+          : "text-muted-foreground hover:text-foreground hover:bg-secondary/70"
       }`}
       title={isCollapsed ? label : undefined}
     >
       <Icon size={18} className="shrink-0" />
       {!isCollapsed && (
-        <span className="text-xs font-sans whitespace-nowrap truncate">
+        <span className="text-xs font-sans whitespace-nowrap truncate font-semibold">
           {label}
         </span>
       )}
 
       {isCollapsed && (
-        <span className="absolute right-full mr-3 px-2.5 py-1 bg-card border border-border text-foreground text-[10px] rounded-xl shadow-xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap">
+        <span className="absolute right-full mr-3 px-2.5 py-1 bg-card/95 border border-border text-foreground text-[10px] rounded-xl shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap font-sans font-bold">
           {label}
         </span>
       )}
@@ -113,7 +113,7 @@ export function CommandRail({
     <aside
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/90 backdrop-blur-xl border border-border rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl pointer-events-auto overflow-hidden ${
+      className={`fixed top-4 right-4 bottom-4 z-40 bg-card/95 backdrop-blur-2xl border border-border/80 rounded-3xl shadow-2xl flex flex-col justify-between p-2.5 transition-all duration-300 dir-rtl pointer-events-auto overflow-hidden ${
         isCollapsed ? "w-16" : "w-48"
       }`}
     >
@@ -124,7 +124,7 @@ export function CommandRail({
             onToggle={onToggleCollapse}
           />
           {!isCollapsed && (
-            <span className="text-[10px] font-mono font-bold text-gdp truncate">
+            <span className="text-[10px] font-mono font-black text-gdp truncate uppercase tracking-widest">
               اتاق فرماندهی
             </span>
           )}
@@ -145,12 +145,12 @@ export function CommandRail({
         </nav>
       </div>
 
-      <div className="pt-2 border-t border-border overflow-x-hidden">
+      <div className="pt-2 border-t border-border/80 overflow-x-hidden">
         {isCollapsed ? (
           <button
             onClick={onNextTurn}
             disabled={isProcessingTurn}
-            className="w-full py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-mono text-xs font-bold transition-all shadow-md flex items-center justify-center cursor-pointer"
+            className="w-full py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-mono text-xs font-bold transition-all shadow-lg shadow-gdp/20 flex items-center justify-center cursor-pointer"
             title={`پایان نوبت ${currentTurn}`}
           >
             {isProcessingTurn ? (
