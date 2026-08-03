@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
+import { BitPackedActionAdapter } from "@/engine/actions/final/bit-packed-action-adapter";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -38,6 +39,11 @@ export async function POST(request: Request): Promise<NextResponse> {
         },
         { status: 400 },
       );
+    }
+
+    if (result.newState) {
+      const adapter = new BitPackedActionAdapter();
+      result.newState = adapter.executeAction(result.newState, action);
     }
 
     return NextResponse.json({

@@ -10,9 +10,11 @@ import {
 } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
+import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class NationDatabaseProvider {
   private formatNationDetail(
@@ -100,6 +102,7 @@ export function useSelectNationForm() {
   const provider = useMemo(() => new NationDatabaseProvider(), []);
   const apiService = useMemo(() => new GameStateApiService(), []);
   const storageService = useMemo(() => new ClientStorageService(), []);
+  const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
 
   const [manifest, setManifest] = useState<MapManifest | null>(null);
 
@@ -108,7 +111,7 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const res = await fetch("/api/map-preprocessing/manifest");
+        const res = await fetch("/api/map-preprocessing/final-manifest");
         if (res.ok) {
           const json = await res.json();
           if (active && json.nations) {
@@ -174,6 +177,10 @@ export function useSelectNationForm() {
         localStorage.setItem(STORAGE_KEYS.HUMAN_NATION_ID, selectedNation.id);
       }
 
+      await BitPackedInitService.initializeBitPackedSession(uniqueGameId);
+      const gridState = BitPackedGridState.getInstance();
+      await storageAdapter.saveBitBuffer(uniqueGameId, gridState.getBuffer());
+
       const result = await apiService.selectCountry(
         selectedNation.id,
         selectedGovernment,
@@ -181,7 +188,6 @@ export function useSelectNationForm() {
       );
 
       if (result.success && result.data) {
-        GridStateProvider.getInstance().clear();
         await storageService.saveGameState(uniqueGameId, result.data);
         router.push(`/play/${uniqueGameId}`);
       } else {
@@ -203,6 +209,7 @@ export function useSelectNationForm() {
     selectedGovernment,
     apiService,
     storageService,
+    storageAdapter,
     router,
     showToast,
   ]);

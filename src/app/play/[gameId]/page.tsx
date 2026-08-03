@@ -1,7 +1,7 @@
 "use client";
 
 import React, { use } from "react";
-import { TacticalMapWorkspace } from "@/presentation/components/tactical-map/layout/tactical-map-workspace";
+import { WebGLTacticalWorkspace } from "@/presentation/components/tactical-map/final/layout/webgl-tactical-workspace";
 
 interface PlayPageProps {
   params: Promise<{ gameId: string }>;
@@ -9,5 +9,5 @@ interface PlayPageProps {
 
 export default function DynamicPlayPage({ params }: PlayPageProps) {
   const resolvedParams = use(params);
-  return <TacticalMapWorkspace gameId={resolvedParams.gameId} />;
+  return <WebGLTacticalWorkspace gameId={resolvedParams.gameId} />;
 }
