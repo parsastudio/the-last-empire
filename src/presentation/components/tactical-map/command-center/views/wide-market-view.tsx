@@ -57,33 +57,33 @@ export function WideMarketView({
       <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
         <div className="space-y-2 dir-rtl text-right">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[10px] font-bold text-gdp font-mono uppercase tracking-wider">
-              <TrendingUp size={13} />
+            <div className="flex items-center gap-2 text-[10px] font-extrabold text-gdp font-mono uppercase tracking-wider">
+              <TrendingUp size={14} />
               <span>بورس بین‌المللی بلوک‌های کلان استراتژیک</span>
             </div>
 
             <button
               onClick={() => setIsAutoTradeOpen(true)}
-              className="px-3 py-1.5 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+              className="px-3.5 py-2 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
             >
-              <Bot size={14} />
+              <Bot size={15} />
               <span>تنظیمات بازرگانی خودکار</span>
             </button>
           </div>
 
-          <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
             معامله مستقیم بلوک‌های کلان انرژی و فولاد صنعتی در بازار آزاد جهانی.
             نرخ ثابت خرید ۲۵ میلیون دلار و نرخ ثابت فروش ۲۰ میلیون دلار تنظیم
             گردیده است.
           </p>
         </div>
 
-        <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between font-mono text-xs">
-          <span className="text-muted-foreground font-sans flex items-center gap-1.5">
-            <Coins size={14} className="text-gdp" />
+        <div className="bg-secondary/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between font-mono text-xs">
+          <span className="text-muted-foreground font-sans font-bold flex items-center gap-1.5">
+            <Coins size={15} className="text-gdp" />
             موجودی خزانه ملی جهت معامله:
           </span>
-          <span className="font-bold text-gdp text-sm">
+          <span className="font-extrabold text-gdp text-sm">
             {PersianNumberFormatter.formatCurrency(userTreasury)}
           </span>
         </div>

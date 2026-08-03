@@ -42,11 +42,11 @@ export function WideResearchView({
         industrialLevel={nation?.industrialLevel}
       />
 
-      <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between font-mono text-xs">
-        <span className="text-muted-foreground font-sans">
+      <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between font-mono text-xs">
+        <span className="text-muted-foreground font-sans font-bold">
           موجودی امتیاز پژوهش آماده خرج:
         </span>
-        <span className="font-bold text-gdp text-sm">
+        <span className="font-extrabold text-gdp text-sm">
           {activePoints.toFixed(1)} امتیاز
         </span>
       </div>
