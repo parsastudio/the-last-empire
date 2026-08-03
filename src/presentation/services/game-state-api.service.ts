@@ -1,5 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GridCell } from "@/domain/map/grid-cell.schema";
 
 export class GameStateApiService {
@@ -41,9 +41,12 @@ export class GameStateApiService {
       };
 
       if (json.success && json.gridCells && json.gridCells.length > 0) {
-        const clientGrid = GridStateProvider.getInstance();
+        const clientGrid = BitPackedGridState.getInstance();
         for (const cell of json.gridCells) {
-          clientGrid.setCell(cell.x, cell.y, cell);
+          const nationId = parseInt(cell.ownerId.replace("NATION_", ""), 10);
+          if (!isNaN(nationId)) {
+            clientGrid.setNationId(cell.x, cell.y, nationId);
+          }
         }
       }
 

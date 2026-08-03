@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback, useState } from "react";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export interface CountryMapping {
   id: number;
@@ -12,27 +11,13 @@ export interface CountryMapping {
   areaSqKm?: number;
 }
 
-export class MapDataApiHelper {
-  public getManifestUrl(): string {
-    return "/api/map-preprocessing/final-manifest";
-  }
-
-  public getMask4KUrl(): string {
-    return MapPathResolver.getMapFinalClientUrl("map1", "live-state.bin");
-  }
-
-  public getMask1024Url(): string {
-    return MapPathResolver.getMapFinalClientUrl("map1", "live-state.bin");
-  }
-}
-
 interface UseMapDataProps {
-  mapWidth: number;
-  mapHeight: number;
+  mapWidth?: number;
+  mapHeight?: number;
   activeLayer?: "political" | "gdp";
 }
 
-export function useMapData({ mapWidth, mapHeight }: UseMapDataProps) {
+export function useMapData(_props?: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
   const [isLayerRendering, setIsLayerRendering] = useState<boolean>(false);
   const [renderVersion, setRenderVersion] = useState<number>(0);

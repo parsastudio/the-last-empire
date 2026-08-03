@@ -1,11 +1,9 @@
 import { RefObject, useCallback } from "react";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { MAP_CONFIG } from "@/domain/map/map.config";
 
 interface UseHoverProjectionMathProps {
   containerRef: RefObject<HTMLDivElement | null>;
-  maskDataRef: RefObject<Uint8Array | null>;
-  packed1024Ref?: RefObject<Uint8Array | null>;
   mapWidth: number;
   mapHeight: number;
   scale: number;
@@ -21,8 +19,6 @@ export interface MapProjectionResult {
 
 export function useHoverProjectionMath({
   containerRef,
-  maskDataRef,
-  packed1024Ref,
   mapWidth,
   mapHeight,
   scale,
@@ -47,46 +43,11 @@ export function useHoverProjectionMath({
         return null;
       }
 
-      let nationIdNumber = 0;
-      let greenChannelVal = 0;
+      const gridState = BitPackedGridState.getInstance();
+      const buffer = gridState.getBuffer();
 
-      const gx = Math.floor((mapX / mapWidth) * MAP_CONFIG.LOW_RES_WIDTH);
-      const gy = Math.floor((mapY / mapHeight) * MAP_CONFIG.LOW_RES_HEIGHT);
-
-      const gridState = GridStateProvider.getInstance();
-      const dynamicCell = gridState.getCell(gx, gy);
-
-      if (dynamicCell && dynamicCell.ownerId.startsWith("NATION_")) {
-        const parsedId = parseInt(
-          dynamicCell.ownerId.replace("NATION_", ""),
-          10,
-        );
-        if (!isNaN(parsedId) && parsedId >= MAP_CONFIG.MIN_NATION_ID) {
-          nationIdNumber = parsedId;
-          greenChannelVal = dynamicCell.enclaveId;
-        }
-      }
-
-      if (
-        !nationIdNumber &&
-        packed1024Ref?.current &&
-        packed1024Ref.current.length ===
-          MAP_CONFIG.LOW_RES_WIDTH * MAP_CONFIG.LOW_RES_HEIGHT * 2
-      ) {
-        const pIdx = (gy * MAP_CONFIG.LOW_RES_WIDTH + gx) * 2;
-        const geoByte = packed1024Ref.current[pIdx] || 0;
-        nationIdNumber = packed1024Ref.current[pIdx + 1] || 0;
-        greenChannelVal = geoByte >> 2;
-      }
-
-      if (
-        (!nationIdNumber || nationIdNumber < MAP_CONFIG.MIN_NATION_ID) &&
-        maskDataRef?.current &&
-        maskDataRef.current.length === mapWidth * mapHeight
-      ) {
-        const pixelIndex = mapY * mapWidth + mapX;
-        nationIdNumber = maskDataRef.current[pixelIndex] || 0;
-      }
+      const nationIdNumber = buffer.getNationId(mapX, mapY);
+      const greenChannelVal = buffer.getEnclaveId(mapX, mapY);
 
       if (
         !nationIdNumber ||
@@ -98,15 +59,7 @@ export function useHoverProjectionMath({
 
       return { mapX, mapY, nationIdNumber, greenChannelVal };
     },
-    [
-      containerRef,
-      maskDataRef,
-      packed1024Ref,
-      mapWidth,
-      mapHeight,
-      scale,
-      position,
-    ],
+    [containerRef, mapWidth, mapHeight, scale, position],
   );
 
   return { projectCoordinates };
