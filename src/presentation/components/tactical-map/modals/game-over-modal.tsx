@@ -1,7 +1,56 @@
-import React from "react";
-import { Trophy, RefreshCw } from "lucide-react";
-import { VictoryStatsCard } from "./victory/victory-stats-card";
-import { useGameOverConfetti } from "./hooks/use-game-over-confetti";
+import React, { useEffect } from "react";
+import { Trophy, RefreshCw, Award, Globe2, Coins, Users } from "lucide-react";
+import confetti from "canvas-confetti";
+
+function VictoryStatsCard({
+  turnsPlayed,
+  finalGdp,
+  finalPopulation,
+  conqueredArea,
+}: {
+  turnsPlayed: number;
+  finalGdp: string;
+  finalPopulation: string;
+  conqueredArea: string;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2.5 font-mono text-xs dir-rtl">
+      <div className="bg-secondary/40 p-3 rounded-2xl space-y-1 border border-border/40">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
+          <Award size={12} className="text-amber-500" />
+          <span>تعداد نوبت‌ها</span>
+        </div>
+        <span className="font-bold text-foreground block">{turnsPlayed}</span>
+      </div>
+
+      <div className="bg-secondary/40 p-3 rounded-2xl space-y-1 border border-border/40">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
+          <Coins size={12} className="text-gdp" />
+          <span>تولید ناخالص نهایی</span>
+        </div>
+        <span className="font-bold text-foreground block">{finalGdp}</span>
+      </div>
+
+      <div className="bg-secondary/40 p-3 rounded-2xl space-y-1 border border-border/40">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
+          <Users size={12} className="text-primary" />
+          <span>جمعیت کل امپراتوری</span>
+        </div>
+        <span className="font-bold text-foreground block">
+          {finalPopulation}
+        </span>
+      </div>
+
+      <div className="bg-secondary/40 p-3 rounded-2xl space-y-1 border border-border/40">
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
+          <Globe2 size={12} className="text-military" />
+          <span>مساحت تحت کنترل</span>
+        </div>
+        <span className="font-bold text-foreground block">{conqueredArea}</span>
+      </div>
+    </div>
+  );
+}
 
 interface GameOverModalProps {
   isOpen: boolean;
@@ -26,7 +75,17 @@ export function GameOverModal({
   conqueredArea,
   onRestart,
 }: GameOverModalProps) {
-  useGameOverConfetti(isOpen, isVictory);
+  useEffect(() => {
+    if (isOpen && isVictory) {
+      try {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+        });
+      } catch {}
+    }
+  }, [isOpen, isVictory]);
 
   if (!isOpen) return null;
 
