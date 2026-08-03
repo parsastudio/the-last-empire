@@ -1,6 +1,6 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
-import { GridState } from "@/engine/combat/state/grid-state";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GameActionQueue } from "./game-action.queue";
 import { StateValidator } from "@/engine/validation/state-validator";
 import { ActionRouter } from "@/engine/actions/action-router";
@@ -12,7 +12,7 @@ export class GameEngineDispatcher {
   public dispatch(
     currentState: GameState,
     _actionQueue: GameActionQueue,
-    gridState: GridState,
+    _gridState: BitPackedGridState,
     action: GameAction,
   ): ActionResult {
     if (currentState.isGameOver) {
@@ -25,19 +25,14 @@ export class GameEngineDispatcher {
     }
 
     try {
-      const stateWithGrid = { ...currentState, gridState };
-      this.validator.validateAction(stateWithGrid, action);
-      const routedState = this.router.route(stateWithGrid, action);
-      const cleanedState: GameState & { gridState?: unknown } = {
-        ...routedState,
-      };
-      delete cleanedState.gridState;
+      this.validator.validateAction(currentState, action);
+      const routedState = this.router.route(currentState, action);
 
       return {
         success: true,
         actionId: action.id,
         message: "Action executed instantly",
-        newState: cleanedState,
+        newState: routedState,
       };
     } catch (err) {
       const errorMessage =
