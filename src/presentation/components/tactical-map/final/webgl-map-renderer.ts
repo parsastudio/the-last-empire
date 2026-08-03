@@ -15,6 +15,7 @@ export class WebGLMapRenderer {
   private uScaleLoc: WebGLUniformLocation | null = null;
   private uTimeLoc: WebGLUniformLocation | null = null;
   private uOverlayOpacityLoc: WebGLUniformLocation | null = null;
+  private uTexelSizeLoc: WebGLUniformLocation | null = null;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
@@ -54,6 +55,7 @@ export class WebGLMapRenderer {
     this.uScaleLoc = gl.getUniformLocation(prog, "u_scale");
     this.uTimeLoc = gl.getUniformLocation(prog, "u_time");
     this.uOverlayOpacityLoc = gl.getUniformLocation(prog, "u_overlayOpacity");
+    this.uTexelSizeLoc = gl.getUniformLocation(prog, "u_texelSize");
 
     const uTerrainLoc = gl.getUniformLocation(prog, "u_terrainTexture");
     const uLiveStateLoc = gl.getUniformLocation(prog, "u_liveStateTexture");
@@ -172,6 +174,7 @@ export class WebGLMapRenderer {
     gl.uniform1f(this.uScaleLoc, scale);
     gl.uniform1f(this.uTimeLoc, time);
     gl.uniform1f(this.uOverlayOpacityLoc, overlayOpacity);
+    gl.uniform2f(this.uTexelSizeLoc, 1.0 / 4096.0, 1.0 / 2048.0);
 
     if (this.terrainTexture) {
       gl.activeTexture(gl.TEXTURE0);

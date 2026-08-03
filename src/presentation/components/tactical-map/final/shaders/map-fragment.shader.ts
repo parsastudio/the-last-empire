@@ -11,6 +11,7 @@ uniform sampler2D u_paletteTexture;
 
 uniform float u_time;
 uniform float u_overlayOpacity;
+uniform vec2 u_texelSize;
 
 void main() {
   vec4 terrainColor = texture(u_terrainTexture, v_texCoord);
@@ -19,7 +20,18 @@ void main() {
   uint nationId = rawState & 255u;
   uint frontierBit = (rawState >> 13u) & 1u;
 
+  uint nLeft = texture(u_liveStateTexture, v_texCoord + vec2(-u_texelSize.x, 0.0)).r & 255u;
+  uint nRight = texture(u_liveStateTexture, v_texCoord + vec2(u_texelSize.x, 0.0)).r & 255u;
+  uint nUp = texture(u_liveStateTexture, v_texCoord + vec2(0.0, -u_texelSize.y)).r & 255u;
+  uint nDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 255u;
+
+  bool isBorder = (nationId != nLeft) || (nationId != nRight) || (nationId != nUp) || (nationId != nDown);
+
   if (nationId == 0u) {
+    if (isBorder && (nLeft >= 11u || nRight >= 11u || nUp >= 11u || nDown >= 11u)) {
+      fragColor = vec4(0.12, 0.15, 0.20, 1.0);
+      return;
+    }
     fragColor = terrainColor;
     return;
   }
@@ -28,6 +40,10 @@ void main() {
   vec4 nationColor = texture(u_paletteTexture, vec2(uCoord, 0.5));
 
   vec3 blendedColor = mix(terrainColor.rgb, nationColor.rgb, u_overlayOpacity);
+
+  if (isBorder) {
+    blendedColor = mix(blendedColor, vec3(0.12, 0.15, 0.20), 0.75);
+  }
 
   if (frontierBit == 1u) {
     float pulse = 0.5 + 0.5 * sin(u_time * 6.0);
