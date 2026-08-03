@@ -237,14 +237,14 @@ export class BattleCalculator {
       let calculatedConquest = Math.floor(
         defenderTotalTerritory * conquestRatio,
       );
-      calculatedConquest = Math.max(50000, calculatedConquest);
+      calculatedConquest = Math.max(10000, calculatedConquest);
 
-      if (defenderTotalTerritory <= 50000) {
+      if (defenderTotalTerritory <= 10000) {
         conqueredAreaSqKm = defenderTotalTerritory;
       } else {
         const remainingTerritory = defenderTotalTerritory - calculatedConquest;
         if (
-          remainingTerritory < 10000 ||
+          remainingTerritory < 5000 ||
           calculatedConquest >= defenderTotalTerritory
         ) {
           conqueredAreaSqKm = defenderTotalTerritory;
