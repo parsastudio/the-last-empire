@@ -1,5 +1,5 @@
 import type { Nation } from "@/domain/nation/nation.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 
 export class ResearchDevelopmentManager {
   public getResearchCost(nation: Nation): number {

@@ -1,5 +1,5 @@
 import { GameAction } from "@/domain/game/action.schema";
-import { SeededRandom } from "@/domain/shared/seeded-random";
+import { SeededRandom } from "@/domain/shared/domain-utilities";
 
 export class ActionPrioritySorter {
   public sortActions(

@@ -1,9 +1,8 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { TurnLogBuilder } from "@/domain/game/turn-log-builder";
-import { ActionPrioritySorter } from "./action-priority-sorter";
-import { SeededRandom } from "@/domain/shared/seeded-random";
-import { ActionQueue } from "./action-queue";
+import { TurnLogBuilder, SeededRandom } from "@/domain/shared/domain-utilities";
+import { ActionPrioritySorter } from "@/engine/orchestrator/action-priority-sorter";
+import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
 import { GridState } from "@/engine/combat/state/grid-state";

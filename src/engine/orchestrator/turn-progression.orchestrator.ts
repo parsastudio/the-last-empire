@@ -2,12 +2,12 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { AIEngine } from "@/engine/ai/ai-engine";
-import { ActionQueue } from "./action-queue";
+import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { TurnPipeline } from "@/engine/turn-pipeline";
-import { GridPostTurnCleanup } from "./grid-post-turn-cleanup";
+import { GridPostTurnCleanup } from "@/engine/orchestrator/grid-post-turn-cleanup";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
-import { SeededRandom } from "@/domain/shared/seeded-random";
+import { SeededRandom } from "@/domain/shared/domain-utilities";
 
 export class TurnProgressionOrchestrator {
   private aiEngine = new AIEngine();

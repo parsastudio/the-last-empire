@@ -1,6 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class RecruitmentQueueManager {
