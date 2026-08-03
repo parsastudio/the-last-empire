@@ -3,7 +3,6 @@ import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/s
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
-import { useTurnExecution } from "@/presentation/components/tactical-map/sidebar/hooks/use-turn-execution";
 import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
 import { MarketEngine } from "@/engine/economy/market-engine";
 import { MARKET_CONFIG } from "@/domain/economy/market.config";
@@ -28,6 +27,7 @@ export function useSidebarTurnActions(
     useState<SidebarTabType | null>(null);
   const [targetCodeState, setTargetCodeState] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
+  const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
 
   const { stagedActions } = useActionStagingTracker();
 
@@ -53,9 +53,16 @@ export function useSidebarTurnActions(
 
   const currentTurn = gameState ? gameState.currentTurn : 1;
 
-  const { isProcessingTurn, handleNextTurn } = useTurnExecution(
-    overrideAdvanceNextTurn,
-  );
+  const handleNextTurn = useCallback(async () => {
+    if (isProcessingTurn || !overrideAdvanceNextTurn) return;
+
+    try {
+      setIsProcessingTurn(true);
+      await overrideAdvanceNextTurn();
+    } finally {
+      setIsProcessingTurn(false);
+    }
+  }, [isProcessingTurn, overrideAdvanceNextTurn]);
 
   const setInternalActiveTab = useCallback(
     (tab: SidebarTabType | null) => {

@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
-import { useNationHeaderFormatter } from "./hooks/use-nation-header-formatter";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import {
+  findCountryProfileById,
+  findCountryProfileByCode,
+} from "@/domain/data/countries";
 
 interface NationHeaderCardProps {
   name: string;
@@ -24,12 +28,47 @@ export function NationHeaderCard({
   territorySize,
   rank = 1,
 }: NationHeaderCardProps) {
-  const formatted = useNationHeaderFormatter({
-    code,
-    flagCode,
-    population,
-    territorySize,
-  });
+  const formatted = useMemo(() => {
+    const flagEmoji = getFlagEmoji(flagCode || code);
+
+    let realTerritory = territorySize && territorySize > 0 ? territorySize : 0;
+    if (!realTerritory) {
+      const numericId = parseInt(code.replace("NATION_", ""), 10);
+      const profile = !isNaN(numericId)
+        ? findCountryProfileById(numericId)
+        : findCountryProfileByCode(code);
+      realTerritory = profile ? Math.round(profile.gdp / 1000000) : 377975;
+    }
+
+    const formattedArea = PersianNumberFormatter.toPersianDigits(
+      Math.round(realTerritory).toLocaleString("en-US"),
+    );
+
+    let realPop = population;
+    if (!realPop || realPop <= 0) {
+      const numericId = parseInt(code.replace("NATION_", ""), 10);
+      const profile = !isNaN(numericId)
+        ? findCountryProfileById(numericId)
+        : findCountryProfileByCode(code);
+      realPop = profile ? profile.population : 80000000;
+    }
+
+    let formattedPopulation = (realPop / 1e6).toFixed(1);
+    if (realPop >= 1e9) {
+      formattedPopulation = `${(realPop / 1e9).toFixed(2)} میلیارد`;
+    } else {
+      formattedPopulation = `${formattedPopulation} میلیون`;
+    }
+
+    formattedPopulation =
+      PersianNumberFormatter.toPersianDigits(formattedPopulation);
+
+    return {
+      flagEmoji,
+      formattedArea,
+      formattedPopulation,
+    };
+  }, [code, flagCode, population, territorySize]);
 
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">

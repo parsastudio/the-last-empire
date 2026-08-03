@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Zap, Search } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { useAbilityTargetOptions } from "@/presentation/components/tactical-map/modals/hooks/use-ability-target-options";
+import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 
 interface AbilityTargetModalProps {
   isOpen: boolean;
@@ -20,7 +20,16 @@ export function AbilityTargetModal({
   onClose,
   onConfirmTarget,
 }: AbilityTargetModalProps) {
-  const targetOptions = useAbilityTargetOptions(nationId);
+  const targetOptions = useMemo(() => {
+    return ALL_COUNTRY_PROFILES.filter(
+      (p: CountryProfile) =>
+        `NATION_${p.code}` !== nationId && p.code !== nationId,
+    ).map((p: CountryProfile) => ({
+      code: `NATION_${p.code}`,
+      name: p.nameFa,
+    }));
+  }, [nationId]);
+
   const [selectedCode, setSelectedCode] = useState<string>(
     targetOptions[0]?.code || "",
   );
