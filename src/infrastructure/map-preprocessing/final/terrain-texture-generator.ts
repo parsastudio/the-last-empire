@@ -1,4 +1,10 @@
 import { PngEncoder } from "@/infrastructure/map-preprocessing/encoders/png-encoder";
+import {
+  ShorelineDistanceCache,
+  ShorelineShadowCalculator,
+} from "@/infrastructure/map-preprocessing/shader/static-map-cache-builder";
+import { CountryPaletteGenerator } from "@/infrastructure/map-preprocessing/shader/country-palette-generator";
+import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 
 export class TerrainTextureGenerator {
   public static generateStaticTerrain(
@@ -7,18 +13,22 @@ export class TerrainTextureGenerator {
     height: number,
   ): Buffer {
     const rgbBuffer = new Uint8Array(width * height * 3);
+    const dist = ShorelineDistanceCache.getOrCreateDistanceTransform(
+      maskBuffer,
+      width,
+      height,
+    );
+    const shadowCalculator = new ShorelineShadowCalculator();
 
-    const oceanR = 15;
-    const oceanG = 25;
-    const oceanB = 40;
+    const countries = ALL_COUNTRY_PROFILES.map((p) => ({
+      id: p.id ?? 0,
+      code: p.code,
+      name: p.nameFa,
+      color: [0, 0, p.id ?? 0] as [number, number, number],
+    }));
 
-    const landR = 30;
-    const landG = 38;
-    const landB = 52;
-
-    const coastR = 45;
-    const coastG = 60;
-    const coastB = 80;
+    const paletteGenerator = new CountryPaletteGenerator();
+    const palette = paletteGenerator.generatePalette(countries);
 
     const totalPixels = width * height;
 
@@ -26,18 +36,23 @@ export class TerrainTextureGenerator {
       const val = maskBuffer[i] || 0;
       const rgbIndex = i * 3;
 
-      if (val === 0) {
-        rgbBuffer[rgbIndex] = oceanR;
-        rgbBuffer[rgbIndex + 1] = oceanG;
-        rgbBuffer[rgbIndex + 2] = oceanB;
-      } else if (val === 254) {
-        rgbBuffer[rgbIndex] = coastR;
-        rgbBuffer[rgbIndex + 1] = coastG;
-        rgbBuffer[rgbIndex + 2] = coastB;
+      if (val < 11 || val === 254) {
+        const d = val === 254 ? 4 : dist[i] || 0;
+        const [r, g, b] = shadowCalculator.getOceanRgb(d);
+        rgbBuffer[rgbIndex] = r;
+        rgbBuffer[rgbIndex + 1] = g;
+        rgbBuffer[rgbIndex + 2] = b;
       } else {
-        rgbBuffer[rgbIndex] = landR;
-        rgbBuffer[rgbIndex + 1] = landG;
-        rgbBuffer[rgbIndex + 2] = landB;
+        const colorPair = palette[val];
+        if (colorPair) {
+          rgbBuffer[rgbIndex] = colorPair.r1;
+          rgbBuffer[rgbIndex + 1] = colorPair.g1;
+          rgbBuffer[rgbIndex + 2] = colorPair.b1;
+        } else {
+          rgbBuffer[rgbIndex] = 228;
+          rgbBuffer[rgbIndex + 1] = 224;
+          rgbBuffer[rgbIndex + 2] = 214;
+        }
       }
     }
 

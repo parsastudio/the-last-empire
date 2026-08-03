@@ -89,7 +89,7 @@ export class ShorelineShadowCalculator {
         const ratio = (t - 0.5) / 0.5;
         r = Math.floor(this.midR * (1.0 - ratio) + this.deepR * ratio);
         g = Math.floor(this.midG * (1.0 - ratio) + this.deepG * ratio);
-        b = Math.floor(this.midB * (1.0 - ratio) + this.deepB * ratio);
+        b = Math.floor(this.deepB * (1.0 - ratio) + this.deepB * ratio);
       }
 
       if (d >= 1 && d <= 12) {
@@ -106,6 +106,15 @@ export class ShorelineShadowCalculator {
   public getOceanUint32(d: number): number {
     const clampedDist = Math.max(0, Math.min(255, d));
     return this.lut32[clampedDist] || 0xffb4a68e;
+  }
+
+  public getOceanRgb(d: number): [number, number, number] {
+    const clampedDist = Math.max(0, Math.min(255, d));
+    const val = this.lut32[clampedDist] || 0xffb4a68e;
+    const r = val & 0xff;
+    const g = (val >> 8) & 0xff;
+    const b = (val >> 16) & 0xff;
+    return [r, g, b];
   }
 }
 
