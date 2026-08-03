@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 interface UseWideDiplomacyProps {
