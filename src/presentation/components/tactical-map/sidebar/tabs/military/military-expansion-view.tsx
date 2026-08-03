@@ -3,8 +3,8 @@ import { Swords } from "lucide-react";
 import {
   RECRUITABLE_UNITS,
   UnitConfig,
-} from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitable-units.config";
-import { UnitRecruitmentCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/unit-recruitment-card";
+  UnitRecruitmentCard,
+} from "@/presentation/components/tactical-map/sidebar/tabs/military/unit-recruitment-card";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
