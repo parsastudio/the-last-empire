@@ -33,32 +33,34 @@ export function UnifiedModalShell({
       onMouseUp={(e) => e.stopPropagation()}
       onTouchStart={(e) => e.stopPropagation()}
       onTouchMove={(e) => e.stopPropagation()}
-      className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6 animate-fade-smooth cursor-pointer dir-rtl pointer-events-auto"
+      className="fixed inset-0 bg-background/70 backdrop-blur-xl z-50 flex items-center justify-center p-4 md:p-6 animate-fade-smooth cursor-pointer dir-rtl pointer-events-auto"
       dir="rtl"
     >
       <div
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
-        className={`bg-card/95 border border-border w-full ${maxWidthClass} max-h-[88vh] rounded-3xl p-6 shadow-2xl flex flex-col space-y-4 text-foreground backdrop-blur-md cursor-default text-right overflow-hidden relative`}
+        className={`bg-card/95 border border-border/80 w-full ${maxWidthClass} max-h-[88vh] rounded-3xl p-6 shadow-2xl flex flex-col space-y-4 text-foreground backdrop-blur-2xl cursor-default text-right overflow-hidden relative border-t-primary/30`}
       >
-        <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
+        <div className="flex items-center justify-between pb-3.5 border-b border-border/80 shrink-0">
           <div className="space-y-0.5 text-right">
             {title && (
-              <h2 className="text-lg md:text-xl font-extrabold text-foreground">
+              <h2 className="text-lg md:text-xl font-black text-foreground tracking-tight">
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
+              <p className="text-xs text-muted-foreground font-sans">
+                {subtitle}
+              </p>
             )}
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-2xl transition-colors cursor-pointer shrink-0"
+            className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-2xl transition-colors cursor-pointer shrink-0 border border-border/60"
             title="بستن پنجره"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
 

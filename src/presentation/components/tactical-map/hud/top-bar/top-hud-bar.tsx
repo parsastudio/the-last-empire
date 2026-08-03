@@ -33,7 +33,7 @@ function ResourceBadge({
 }: ResourceBadgeProps) {
   return (
     <div
-      className="flex items-center gap-2 bg-secondary/40 border border-border/60 px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors hover:bg-secondary/60 cursor-default shrink-0"
+      className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 hover:border-border cursor-default shrink-0"
       title={label}
     >
       <Icon size={14} className={`${iconColor} shrink-0`} />
@@ -64,7 +64,7 @@ function StabilityMeterBadge({
 
   return (
     <div
-      className="flex items-center gap-2 bg-secondary/40 border border-border/60 px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors hover:bg-secondary/60 cursor-default shrink-0"
+      className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 cursor-default shrink-0"
       title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}% | فساد اداری: ${PersianNumberFormatter.toPersianDigits(corruption)}%`}
     >
       <Landmark size={14} className="text-diplomacy shrink-0" />
@@ -72,7 +72,7 @@ function StabilityMeterBadge({
         <span className={`font-bold ${style.text}`}>
           {PersianNumberFormatter.toPersianDigits(stability)}%
         </span>
-        <div className="w-12 h-1.5 bg-background/80 rounded-full overflow-hidden">
+        <div className="w-12 h-1.5 bg-background/80 rounded-full overflow-hidden border border-border/40">
           <div
             className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
             style={{ width: `${stability}%` }}
@@ -89,12 +89,12 @@ function ThreatRadarBadge({ globalReputation }: { globalReputation: number }) {
 
   return (
     <div
-      className={`flex items-center gap-2 border px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors cursor-default shrink-0 ${
+      className={`flex items-center gap-2 border px-3 py-1.5 rounded-2xl font-mono text-xs transition-all cursor-default shrink-0 ${
         isHighThreat
-          ? "bg-military/15 border-military/40 text-military"
+          ? "bg-military/15 border-military/50 text-military"
           : isPositive
-            ? "bg-gdp/15 border-gdp/40 text-gdp"
-            : "bg-secondary/40 border-border/60 text-muted-foreground"
+            ? "bg-gdp/15 border-gdp/50 text-gdp"
+            : "bg-secondary/50 border-border/70 text-muted-foreground"
       }`}
       title="شاخص پرستیژ و جایگاه بین‌المللی کشور"
     >
@@ -167,7 +167,7 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       onMouseMove={(e) => e.stopPropagation()}
       onMouseEnter={(e) => e.stopPropagation()}
       onMouseOver={(e) => e.stopPropagation()}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-card/95 backdrop-blur-xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl flex items-center justify-between gap-3 text-foreground select-none w-max max-w-[95vw] dir-rtl transition-all pointer-events-auto"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-card/95 backdrop-blur-2xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl flex items-center justify-between gap-3 text-foreground select-none w-max max-w-[95vw] dir-rtl transition-all pointer-events-auto"
       dir="rtl"
     >
       <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 shrink-0">
@@ -220,7 +220,7 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">
-        <div className="flex flex-col items-center leading-none font-mono px-2.5 py-1 bg-secondary/60 rounded-xl border border-border/60">
+        <div className="flex flex-col items-center leading-none font-mono px-2.5 py-1 bg-secondary/80 rounded-xl border border-border/80">
           <span className="text-[9px] text-muted-foreground font-sans">
             نوبت
           </span>
