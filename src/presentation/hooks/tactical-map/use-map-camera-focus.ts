@@ -4,6 +4,7 @@ import {
   findCountryProfileById,
 } from "@/domain/data/countries";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 interface UseMapCameraFocusProps {
   mapWidth: number;
@@ -11,7 +12,6 @@ interface UseMapCameraFocusProps {
   dimensions: { width: number; height: number };
   scale: number;
   countries: CountryMapping[];
-  maskDataRef: React.RefObject<Uint8Array | null>;
   setPosition: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
 }
 
@@ -21,16 +21,11 @@ export function useMapCameraFocus({
   dimensions,
   scale,
   countries,
-  maskDataRef,
   setPosition,
 }: UseMapCameraFocusProps) {
   const focusOnCountry = useCallback(
     (countryCodeOrId: string | number) => {
-      if (
-        !maskDataRef.current ||
-        dimensions.width === 0 ||
-        dimensions.height === 0
-      ) {
+      if (dimensions.width === 0 || dimensions.height === 0) {
         return;
       }
 
@@ -56,17 +51,16 @@ export function useMapCameraFocus({
       if (!matchedCountry) return;
 
       const targetId = matchedCountry.id;
-      const mask = maskDataRef.current;
+      const buffer = BitPackedGridState.getInstance().getBuffer();
 
       let sumX = 0;
       let sumY = 0;
       let count = 0;
 
-      const step = 4;
+      const step = 8;
       for (let y = 0; y < mapHeight; y += step) {
         for (let x = 0; x < mapWidth; x += step) {
-          const idx = y * mapWidth + x;
-          if (mask[idx] === targetId) {
+          if (buffer.getNationId(x, y) === targetId) {
             sumX += x;
             sumY += y;
             count++;
@@ -87,15 +81,7 @@ export function useMapCameraFocus({
 
       setPosition({ x: targetPosX, y: targetPosY });
     },
-    [
-      countries,
-      dimensions,
-      mapHeight,
-      mapWidth,
-      maskDataRef,
-      scale,
-      setPosition,
-    ],
+    [countries, dimensions, mapHeight, mapWidth, scale, setPosition],
   );
 
   return { focusOnCountry };

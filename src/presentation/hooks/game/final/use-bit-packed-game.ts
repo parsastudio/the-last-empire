@@ -5,6 +5,7 @@ import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 
 export function useBitPackedGame(gameId = "default_game") {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -14,6 +15,7 @@ export function useBitPackedGame(gameId = "default_game") {
   const apiService = useMemo(() => new GameStateApiService(), []);
   const orchestrator = useMemo(() => new BitPackedTurnOrchestrator(), []);
   const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
+  const clientStorage = useMemo(() => new ClientStorageService(), []);
 
   useEffect(() => {
     let active = true;
@@ -64,9 +66,10 @@ export function useBitPackedGame(gameId = "default_game") {
 
     const gridState = BitPackedGridState.getInstance();
     await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
+    await clientStorage.saveGameState(gameId, nextState);
 
     return nextState;
-  }, [gameState, orchestrator, storageAdapter, gameId]);
+  }, [gameState, orchestrator, storageAdapter, clientStorage, gameId]);
 
   return {
     gameState,
