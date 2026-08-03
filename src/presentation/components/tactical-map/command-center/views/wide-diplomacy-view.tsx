@@ -3,12 +3,31 @@ import { DiplomacyListItem } from "@/presentation/components/tactical-map/sideba
 import { CountryProfileStats } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/advanced-diplomacy-actions";
 import { DiplomacyTargetCard } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-target-card";
-import { FocusMapButton } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/focus-map-button";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
 import { ProxyAllocationModal } from "@/presentation/components/tactical-map/modals/proxy-allocation-modal";
+
+function FocusMapButton({
+  countryCode,
+  countryName,
+  onFocus,
+}: {
+  countryCode: string;
+  countryName: string;
+  onFocus: (countryCode: string) => void;
+}) {
+  return (
+    <button
+      onClick={() => onFocus(countryCode)}
+      className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98"
+    >
+      <MapPin size={14} className="text-military" />
+      <span>تمرکز دوربین روی {countryName}</span>
+    </button>
+  );
+}
 
 interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
