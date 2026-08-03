@@ -1,6 +1,6 @@
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { GridCell } from "@/domain/map/grid-cell.schema";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 interface OwnerAccumulator {
   canonicalId: string;
@@ -233,32 +233,16 @@ export class GdpPopUpdater {
             name = `قلمرو برون‌مرزی ${(rId - 10).toLocaleString("fa-IR")}`;
           }
 
-          const areaFraction =
+          const areaShare =
             totalPixels > 0 ? rData.pixelCount / totalPixels : 1;
-
-          let gdpWeight = 1.15;
-          let popWeight = 1.1;
-
-          if (rId === 1) {
-            gdpWeight = 0.75;
-            popWeight = 0.8;
-          } else if (rId === 2) {
-            gdpWeight = 0.65;
-            popWeight = 0.7;
-          } else if (rId >= 3) {
-            gdpWeight = 0.5;
-            popWeight = 0.6;
-          }
-
-          const areaShare = areaFraction;
           const gdpShare =
             totalGdpWeightedArea > 0
-              ? (areaFraction * gdpWeight) / totalGdpWeightedArea
-              : areaFraction;
+              ? (areaShare * 1.15) / totalGdpWeightedArea
+              : areaShare;
           const popShare =
             totalPopWeightedArea > 0
-              ? (areaFraction * popWeight) / totalPopWeightedArea
-              : areaFraction;
+              ? (areaShare * 1.1) / totalPopWeightedArea
+              : areaShare;
 
           const regionAreaSqKm = Math.round(nationTotalArea * areaShare);
           const regionPop = Math.round(nationTotalPop * popShare);

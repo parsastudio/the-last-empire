@@ -1,4 +1,4 @@
-import { FeedMessage } from "../briefing-feed-item";
+import { FeedMessage } from "@/presentation/components/main-menu/briefing-panel";
 
 export const INITIAL_BRIEFING_MESSAGES: FeedMessage[] = [
   {
