@@ -2,7 +2,8 @@ import React from "react";
 import { Search, Zap, Coins, ShieldAlert, Crosshair } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { TargetCountryOption } from "./hooks/use-wide-proxy";
+import { TargetCountryOption } from "@/presentation/components/tactical-map/command-center/views/proxy/hooks/use-wide-proxy";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface ProxyAllocationSectionProps {
   searchQuery: string;
@@ -141,52 +142,16 @@ export function ProxyAllocationSection({
                 className="w-full accent-rose-600 cursor-pointer h-2 bg-secondary rounded-lg"
               />
 
-              <div className="grid grid-cols-4 gap-2 font-sans">
-                <button
-                  type="button"
-                  onClick={() => onDrainChange(2)}
-                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
-                    desiredDrain === 2
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-secondary hover:bg-secondary/80 border-border/60"
-                  }`}
-                >
-                  -۲٪ (۱٪ GDP)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDrainChange(5)}
-                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
-                    desiredDrain === 5
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-secondary hover:bg-secondary/80 border-border/60"
-                  }`}
-                >
-                  -۵٪ (۲.۵٪ GDP)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDrainChange(10)}
-                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
-                    desiredDrain === 10
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-secondary hover:bg-secondary/80 border-border/60"
-                  }`}
-                >
-                  -۱۰٪ (۵٪ GDP)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDrainChange(15)}
-                  className={`py-1.5 rounded-xl text-[10px] font-bold border transition-all cursor-pointer ${
-                    desiredDrain === 15
-                      ? "bg-rose-600 text-white border-rose-500"
-                      : "bg-secondary hover:bg-secondary/80 border-border/60 text-rose-500"
-                  }`}
-                >
-                  -۱۵٪ (حداکثر)
-                </button>
-              </div>
+              <PercentageSelector
+                options={[
+                  { pct: 2, label: "-۲٪ (۱٪ GDP)" },
+                  { pct: 5, label: "-۵٪ (۲.۵٪ GDP)" },
+                  { pct: 10, label: "-۱۰٪ (۵٪ GDP)" },
+                  { pct: 15, label: "-۱۵٪ (حداکثر)", isMax: true },
+                ]}
+                onSelect={(val) => onDrainChange(val)}
+                colorVariant="military"
+              />
 
               <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl space-y-2 text-right font-sans">
                 <div className="flex justify-between items-center text-xs font-mono">

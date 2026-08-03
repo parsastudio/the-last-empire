@@ -1,7 +1,8 @@
 import React from "react";
-import { Clock, Coins, Users, Wrench, Zap } from "lucide-react";
-import { UnitConfig } from "./recruitable-units.config";
-import { useUnitRecruitmentCalculator } from "./hooks/use-unit-recruitment-calculator";
+import { Clock, Coins, Users, Wrench } from "lucide-react";
+import { UnitConfig } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitable-units.config";
+import { useUnitRecruitmentCalculator } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-unit-recruitment-calculator";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface UnitRecruitmentCardProps {
   unit: UnitConfig;
@@ -106,41 +107,11 @@ export function UnitRecruitmentCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-1.5 pt-1">
-          <button
-            type="button"
-            disabled={calc.maxAffordable === 0}
-            onClick={() => calc.handlePercentageSelect(0.25)}
-            className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-          >
-            ۲۵٪
-          </button>
-          <button
-            type="button"
-            disabled={calc.maxAffordable === 0}
-            onClick={() => calc.handlePercentageSelect(0.5)}
-            className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-          >
-            ۵۰٪
-          </button>
-          <button
-            type="button"
-            disabled={calc.maxAffordable === 0}
-            onClick={() => calc.handlePercentageSelect(0.75)}
-            className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-          >
-            ۷۵٪
-          </button>
-          <button
-            type="button"
-            disabled={calc.maxAffordable === 0}
-            onClick={() => calc.handlePercentageSelect(1.0)}
-            className="py-1 rounded-lg bg-gdp/20 hover:bg-gdp/30 border border-gdp/40 text-[9px] font-mono font-bold text-gdp transition-all cursor-pointer flex items-center justify-center gap-1 disabled:opacity-30"
-          >
-            <Zap size={10} />
-            <span>۱۰۰٪ (حداکثر)</span>
-          </button>
-        </div>
+        <PercentageSelector
+          disabled={calc.maxAffordable === 0}
+          onSelect={calc.handlePercentageSelect}
+          colorVariant="gdp"
+        />
       </div>
 
       <button

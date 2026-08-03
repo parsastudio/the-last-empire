@@ -1,24 +1,22 @@
 import React, { useState, useMemo } from "react";
-import { UserMinus, Zap } from "lucide-react";
+import { UserMinus } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface DisbandUnitCardProps {
-  nationId?: string;
+  nationId: string;
   military?: MilitaryStack;
 }
 
-export function DisbandUnitCard({
-  nationId = "NATION_118",
-  military,
-}: DisbandUnitCardProps) {
+export function DisbandUnitCard({ nationId, military }: DisbandUnitCardProps) {
   const [selectedUnitType, setSelectedUnitType] =
     useState<UnitType>("INFANTRY");
 
   const maxAvailable = useMemo(() => {
-    if (!military) return 50;
+    if (!military) return 0;
     switch (selectedUnitType) {
       case "INFANTRY":
         return military.infantry;
@@ -140,41 +138,11 @@ export function DisbandUnitCard({
           className="w-full accent-rose-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
         />
 
-        <div className="grid grid-cols-4 gap-1.5 pt-1 font-sans">
-          <button
-            type="button"
-            disabled={maxAvailable === 0}
-            onClick={() => handlePercentageSelect(0.25)}
-            className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-          >
-            ۲۵٪
-          </button>
-          <button
-            type="button"
-            disabled={maxAvailable === 0}
-            onClick={() => handlePercentageSelect(0.5)}
-            className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-          >
-            ۵۰٪
-          </button>
-          <button
-            type="button"
-            disabled={maxAvailable === 0}
-            onClick={() => handlePercentageSelect(0.75)}
-            className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-          >
-            ۷۵٪
-          </button>
-          <button
-            type="button"
-            disabled={maxAvailable === 0}
-            onClick={() => handlePercentageSelect(1.0)}
-            className="py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-[9px] font-mono font-bold text-rose-500 transition-all cursor-pointer flex items-center justify-center gap-1 disabled:opacity-30"
-          >
-            <Zap size={10} />
-            <span>۱۰۰٪ (کل)</span>
-          </button>
-        </div>
+        <PercentageSelector
+          disabled={maxAvailable === 0}
+          onSelect={handlePercentageSelect}
+          colorVariant="military"
+        />
 
         <button
           onClick={handleDisband}

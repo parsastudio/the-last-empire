@@ -1,21 +1,22 @@
 import React, { useState } from "react";
-import { ArrowUpRight, Zap } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface LoanActionDialogProps {
   isOpen: boolean;
   maxAvailableLoan: number;
-  nationId?: string;
+  nationId: string;
   onClose: () => void;
 }
 
 export function LoanActionDialog({
   isOpen,
   maxAvailableLoan,
-  nationId = "NATION_118",
+  nationId,
   onClose,
 }: LoanActionDialogProps) {
   const safeMax = Math.max(0, maxAvailableLoan);
@@ -103,41 +104,11 @@ export function LoanActionDialog({
               className="w-full cursor-pointer h-2 bg-secondary rounded-lg accent-emerald-500 disabled:opacity-30"
             />
 
-            <div className="grid grid-cols-4 gap-1.5 pt-2 font-sans">
-              <button
-                type="button"
-                disabled={maxBillion === 0}
-                onClick={() => handlePercentageSelect(0.25)}
-                className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-              >
-                ۲۵٪
-              </button>
-              <button
-                type="button"
-                disabled={maxBillion === 0}
-                onClick={() => handlePercentageSelect(0.5)}
-                className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-              >
-                ۵۰٪
-              </button>
-              <button
-                type="button"
-                disabled={maxBillion === 0}
-                onClick={() => handlePercentageSelect(0.75)}
-                className="py-1 rounded-lg bg-secondary/60 hover:bg-secondary border border-border/40 text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-              >
-                ۷۵٪
-              </button>
-              <button
-                type="button"
-                disabled={maxBillion === 0}
-                onClick={() => handlePercentageSelect(1.0)}
-                className="py-1 rounded-lg bg-gdp/20 hover:bg-gdp/30 border border-gdp/40 text-[9px] font-mono font-bold text-gdp transition-all cursor-pointer flex items-center justify-center gap-1 disabled:opacity-30"
-              >
-                <Zap size={10} />
-                <span>۱۰۰٪ (سقف)</span>
-              </button>
-            </div>
+            <PercentageSelector
+              disabled={maxBillion === 0}
+              onSelect={handlePercentageSelect}
+              colorVariant="gdp"
+            />
           </div>
 
           <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60 font-sans">

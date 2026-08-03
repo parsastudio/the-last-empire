@@ -1,6 +1,7 @@
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/game-error";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 export interface TradeTransactionResult {
   updatedNation: Nation;
@@ -9,11 +10,11 @@ export interface TradeTransactionResult {
 }
 
 export class MarketEngine {
-  private readonly fixedBuyPrice = 25000000;
-  private readonly fixedSellPrice = 20000000;
-
   public updateMarketPrices(): ResourceMarketPrice {
-    return { oil: this.fixedBuyPrice, steel: this.fixedBuyPrice };
+    return {
+      oil: MARKET_CONFIG.FIXED_BUY_PRICE,
+      steel: MARKET_CONFIG.FIXED_BUY_PRICE,
+    };
   }
 
   public predictBuyCost(
@@ -22,7 +23,8 @@ export class MarketEngine {
     amount: number,
   ): number {
     if (amount <= 0) return 0;
-    const unitPrice = marketPrices[resourceType] || this.fixedBuyPrice;
+    const unitPrice =
+      marketPrices[resourceType] || MARKET_CONFIG.FIXED_BUY_PRICE;
     return amount * unitPrice;
   }
 
@@ -32,7 +34,8 @@ export class MarketEngine {
     resourceType: "oil" | "steel",
   ): number {
     if (treasury <= 0) return 0;
-    const unitPrice = marketPrices[resourceType] || this.fixedBuyPrice;
+    const unitPrice =
+      marketPrices[resourceType] || MARKET_CONFIG.FIXED_BUY_PRICE;
     return Math.floor(treasury / unitPrice);
   }
 
@@ -42,7 +45,7 @@ export class MarketEngine {
     amount: number,
   ): number {
     if (amount <= 0) return 0;
-    return amount * this.fixedSellPrice;
+    return amount * MARKET_CONFIG.FIXED_SELL_PRICE;
   }
 
   public buyResource(

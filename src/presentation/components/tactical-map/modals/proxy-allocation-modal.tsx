@@ -6,6 +6,7 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface ProxyAllocationModalProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ interface ProxyAllocationModalProps {
   targetStability: number;
   targetGdp: number;
   userTreasury: number;
-  nationId?: string;
+  nationId: string;
   onClose: () => void;
 }
 
@@ -27,7 +28,7 @@ export function ProxyAllocationModal({
   targetStability,
   targetGdp,
   userTreasury,
-  nationId = "NATION_118",
+  nationId,
   onClose,
 }: ProxyAllocationModalProps) {
   const [desiredDrain, setDesiredDrain] = useState<number>(2);
@@ -120,52 +121,16 @@ export function ProxyAllocationModal({
             className="w-full accent-rose-600 cursor-pointer h-2 bg-secondary rounded-lg"
           />
 
-          <div className="grid grid-cols-4 gap-1.5 font-sans">
-            <button
-              type="button"
-              onClick={() => setDesiredDrain(2)}
-              className={`py-1 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-                desiredDrain === 2
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-secondary/60 hover:bg-secondary border-border/60"
-              }`}
-            >
-              -۲٪
-            </button>
-            <button
-              type="button"
-              onClick={() => setDesiredDrain(5)}
-              className={`py-1 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-                desiredDrain === 5
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-secondary/60 hover:bg-secondary border-border/60"
-              }`}
-            >
-              -۵٪
-            </button>
-            <button
-              type="button"
-              onClick={() => setDesiredDrain(10)}
-              className={`py-1 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-                desiredDrain === 10
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-secondary/60 hover:bg-secondary border-border/60"
-              }`}
-            >
-              -۱۰٪
-            </button>
-            <button
-              type="button"
-              onClick={() => setDesiredDrain(15)}
-              className={`py-1 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-                desiredDrain === 15
-                  ? "bg-rose-600 text-white border-rose-500"
-                  : "bg-secondary/60 hover:bg-secondary border-border/60 text-rose-500"
-              }`}
-            >
-              -۱۵٪
-            </button>
-          </div>
+          <PercentageSelector
+            options={[
+              { pct: 2, label: "-۲٪" },
+              { pct: 5, label: "-۵٪" },
+              { pct: 10, label: "-۱۰٪" },
+              { pct: 15, label: "-۱۵٪", isMax: true },
+            ]}
+            onSelect={(val) => setDesiredDrain(val)}
+            colorVariant="military"
+          />
 
           <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl space-y-1.5 text-right font-sans">
             <div className="flex justify-between items-center text-xs font-mono">
