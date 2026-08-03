@@ -1,17 +1,17 @@
 import React from "react";
-import { REGIME_ABILITIES } from "../../sidebar/tabs/abilities/abilities.config";
-import { AbilityCard } from "../../sidebar/tabs/abilities/ability-card";
-import { AbilityTargetModal } from "../../modals/ability-target-modal";
-import { useWideAbilities } from "./hooks/use-wide-abilities";
+import { REGIME_ABILITIES } from "@/presentation/components/tactical-map/sidebar/tabs/abilities/abilities.config";
+import { AbilityCard } from "@/presentation/components/tactical-map/sidebar/tabs/abilities/ability-card";
+import { AbilityTargetModal } from "@/presentation/components/tactical-map/modals/ability-target-modal";
+import { useWideAbilities } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-abilities";
 
 interface WideAbilitiesViewProps {
   currentGovernment: string;
-  nationId?: string;
+  nationId: string;
 }
 
 export function WideAbilitiesView({
   currentGovernment,
-  nationId = "NATION_USA",
+  nationId,
 }: WideAbilitiesViewProps) {
   const abilities = useWideAbilities();
 

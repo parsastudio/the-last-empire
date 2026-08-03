@@ -6,12 +6,12 @@ import { ActionFactory } from "@/domain/game/action-factory";
 
 interface RecruitmentQueueCardProps {
   queue?: RecruitmentOrder[];
-  nationId?: string;
+  nationId: string;
 }
 
 export function RecruitmentQueueCard({
   queue = [],
-  nationId = "NATION_118",
+  nationId,
 }: RecruitmentQueueCardProps) {
   const { dispatchAction } = useGameActions();
 

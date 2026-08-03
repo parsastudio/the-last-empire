@@ -1,20 +1,23 @@
 import React from "react";
 import { Swords } from "lucide-react";
-import { RECRUITABLE_UNITS, UnitConfig } from "./recruitable-units.config";
-import { UnitRecruitmentCard } from "./unit-recruitment-card";
+import {
+  RECRUITABLE_UNITS,
+  UnitConfig,
+} from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitable-units.config";
+import { UnitRecruitmentCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/unit-recruitment-card";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
 
 interface MilitaryExpansionViewProps {
-  nationId?: string;
+  nationId: string;
   treasury?: number;
   manpower?: number;
   steel?: number;
 }
 
 export function MilitaryExpansionView({
-  nationId = "NATION_118",
+  nationId,
   treasury = 100000,
   manpower = 500,
   steel = 1000,

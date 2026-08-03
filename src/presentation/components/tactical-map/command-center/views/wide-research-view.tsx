@@ -1,33 +1,34 @@
 import React from "react";
-import { DoctrineBranchColumn } from "./components/doctrine-branch-column";
-import { useWideResearch } from "./hooks/use-wide-research";
-import { ResearchBudgetCard } from "../../sidebar/tabs/politics/research-budget-card";
+import { DoctrineBranchColumn } from "@/presentation/components/tactical-map/command-center/views/components/doctrine-branch-column";
+import { useWideResearch } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-research";
+import { ResearchBudgetCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/research-budget-card";
 import { Nation } from "@/domain/nation/nation.schema";
 
 interface WideResearchViewProps {
   unlockedDoctrines?: string[];
   doctrinePoints?: number;
-  nationId?: string;
+  nationId: string;
   nation?: Nation | null;
 }
 
 export function WideResearchView({
   unlockedDoctrines = ["gdp-booster"],
   doctrinePoints = 0,
-  nationId = "NATION_118",
+  nationId,
   nation,
 }: WideResearchViewProps) {
+  const activeNationId = nation ? nation.id : nationId;
+
   const research = useWideResearch({
     unlockedDoctrines: nation
       ? nation.doctrines.unlockedDoctrines
       : unlockedDoctrines,
-    nationId: nation ? nation.id : nationId,
+    nationId: activeNationId,
   });
 
   const activePoints = nation
     ? nation.doctrines.doctrinePoints
     : doctrinePoints;
-  const activeNationId = nation ? nation.id : nationId;
 
   return (
     <div className="space-y-5 dir-rtl text-right animate-in fade-in duration-200">

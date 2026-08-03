@@ -5,14 +5,14 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DiplomaticCampaignCardProps {
-  nationId?: string;
+  nationId: string;
   treasury?: number;
   gdp?: number;
   currentReputation?: number;
 }
 
 export function DiplomaticCampaignCard({
-  nationId = "NATION_118",
+  nationId,
   treasury = 100000,
   gdp = 450000000000,
   currentReputation = 50,

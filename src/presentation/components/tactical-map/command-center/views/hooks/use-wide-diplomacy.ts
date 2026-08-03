@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { resolveProfileRelation } from "../../../sidebar/tabs/diplomacy/utils/relation-resolver";
+import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
@@ -7,13 +7,13 @@ import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 interface UseWideDiplomacyProps {
   selectedTargetCode?: string | null;
   nationsMap?: Record<string, Nation>;
-  humanNationId?: string;
+  humanNationId: string;
 }
 
 export function useWideDiplomacy({
   selectedTargetCode,
   nationsMap,
-  humanNationId = "NATION_118",
+  humanNationId,
 }: UseWideDiplomacyProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -41,7 +41,7 @@ export function useWideDiplomacy({
     return list.sort((a, b) => a.rank - b.rank);
   }, [liveNationsList, nationsMap, humanNationId]);
 
-  const defaultCode = relationsList[0]?.code || "USA";
+  const defaultCode = relationsList[0]?.code || "";
   const [activeCode, setActiveCode] = useState<string>(
     selectedTargetCode || defaultCode,
   );

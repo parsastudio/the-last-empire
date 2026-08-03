@@ -5,7 +5,7 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ResearchBudgetCardProps {
-  nationId?: string;
+  nationId: string;
   gdp?: number;
   treasury?: number;
   currentBudgetRate?: number;
@@ -15,7 +15,7 @@ interface ResearchBudgetCardProps {
 }
 
 export function ResearchBudgetCard({
-  nationId = "NATION_118",
+  nationId,
   gdp = 450000000000,
   treasury = 100000000,
   currentBudgetRate = 1,
