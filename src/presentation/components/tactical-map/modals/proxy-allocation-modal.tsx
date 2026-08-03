@@ -5,7 +5,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { calculateProxyOperationBudget } from "@/domain/politics/proxy-operation-cost.utility";
+import { calculateProxyOperationBudget } from "@/domain/politics/government-label.utility";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface ProxyAllocationModalProps {

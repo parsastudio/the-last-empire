@@ -6,8 +6,33 @@ import {
 } from "@/domain/data/countries";
 import { HoverCountryInfo } from "../country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
-import { useHoverStance } from "./use-hover-stance";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+
+export function resolveStanceLabel(
+  humanNationId: string | undefined,
+  fullNationId: string,
+  countryCode: string,
+  nationsMap?: Record<string, Nation>,
+): string {
+  if (!humanNationId || !nationsMap || !nationsMap[humanNationId]) {
+    return "دیپلماسی عادی";
+  }
+
+  const humanNation = nationsMap[humanNationId];
+  const relation =
+    humanNation.relations[fullNationId] ||
+    humanNation.relations[countryCode.toUpperCase()];
+
+  if (relation) {
+    if (relation.stance === "WAR") return "وضعیت نبرد";
+    if (relation.stance === "SEVERED_RELATIONS" || relation.isTradeEmbargoed)
+      return "قطع روابط تجاری";
+    if (relation.stance === "ALLIANCE") return "متحد استراتژیک";
+    if (relation.stance === "NON_AGGRESSION_PACT") return "پیمان عدم تخاصم";
+  }
+
+  return "دیپلماسی عادی";
+}
 
 interface UseHoverNationResolverProps {
   countries: CountryMapping[];
@@ -20,8 +45,6 @@ export function useHoverNationResolver({
   nationsMap,
   humanNationId,
 }: UseHoverNationResolverProps) {
-  const { resolveStanceLabel } = useHoverStance();
-
   const resolveHoverInfo = useCallback(
     (nationIdNumber: number, enclaveIdVal: number): HoverCountryInfo | null => {
       const matchedCountry = countries.find((c) => c.id === nationIdNumber);
@@ -95,7 +118,7 @@ export function useHoverNationResolver({
         regionArea: `${Math.round(areaSqKm).toLocaleString("fa-IR")} km²`,
       };
     },
-    [countries, nationsMap, humanNationId, resolveStanceLabel],
+    [countries, nationsMap, humanNationId],
   );
 
   return { resolveHoverInfo };
