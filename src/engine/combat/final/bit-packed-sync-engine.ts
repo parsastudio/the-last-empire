@@ -2,9 +2,11 @@ import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-pa
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
+import { BitPackedNeighborDetector } from "@/engine/combat/final/bit-packed-neighbor-detector";
 
 export class BitPackedSyncEngine {
   private calibrator = new CellAreaCalibrator(2048, 4096);
+  private neighborDetector = new BitPackedNeighborDetector();
 
   public syncNationsFromBuffer(
     nations: Record<string, Nation>,
@@ -15,7 +17,6 @@ export class BitPackedSyncEngine {
 
     const nationAreaMap = new Map<number, number>();
     const nationEnclaveAreaMap = new Map<number, Map<number, number>>();
-    const nationCoastalMap = new Map<number, boolean>();
 
     for (let y = 0; y < height; y++) {
       const pixelArea = this.calibrator.getCalibratedPixelArea(y);
@@ -40,14 +41,12 @@ export class BitPackedSyncEngine {
             enclaveId,
             (enclaveMap.get(enclaveId) || 0) + pixelArea,
           );
-
-          const coastalAccess = buffer.getCoastalAccess(x, y);
-          if (coastalAccess === 1) {
-            nationCoastalMap.set(nationId, true);
-          }
         }
       }
     }
+
+    const { landNeighborsMap, oceanAccessMap } =
+      this.neighborDetector.detectNeighbors(buffer);
 
     const updated = { ...nations };
 
@@ -58,7 +57,13 @@ export class BitPackedSyncEngine {
       const totalCalibratedArea = nationAreaMap.get(numericId) || 0;
       const territorySize = Math.round(totalCalibratedArea);
       const isAlive = territorySize > 0;
-      const hasSeaAccess = nationCoastalMap.get(numericId) ?? false;
+
+      const hasSeaAccess = oceanAccessMap.get(numericId) ?? false;
+      const rawLandNeighbors = landNeighborsMap.get(numericId) || new Set();
+      const landNeighbors = this.neighborDetector.resolveCanonicalNeighbors(
+        rawLandNeighbors,
+        updated,
+      );
 
       const previousArea = nation.geography.territorySize || 1;
       const areaRatio = isAlive ? totalCalibratedArea / previousArea : 0;
@@ -131,6 +136,10 @@ export class BitPackedSyncEngine {
           territorySize: isAlive ? territorySize : 0,
           contiguousMainlandSize: isAlive ? territorySize : 0,
           hasSeaAccess,
+          landNeighbors:
+            landNeighbors.length > 0
+              ? landNeighbors
+              : nation.geography.landNeighbors,
         },
         regionsDemographics:
           regionsDemographics.length > 0

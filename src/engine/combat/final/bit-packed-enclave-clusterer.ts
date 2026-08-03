@@ -40,7 +40,7 @@ export class BitPackedEnclaveClusterer {
       { dx: -1, dy: 1 },
     ];
 
-    for (const [nationId, pixelIndices] of nationPixelsMap.entries()) {
+    for (const [_, pixelIndices] of nationPixelsMap.entries()) {
       const nationPixelSet = new Set<number>(pixelIndices);
       const rawComponents: LandClusterComponent[] = [];
 

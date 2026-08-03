@@ -9,6 +9,7 @@ export class WebGLMapRenderer {
   private terrainTexture: WebGLTexture | null = null;
   private liveStateTexture: WebGLTexture | null = null;
   private paletteTexture: WebGLTexture | null = null;
+  private gdpPaletteTexture: WebGLTexture | null = null;
 
   private uResolutionLoc: WebGLUniformLocation | null = null;
   private uPositionLoc: WebGLUniformLocation | null = null;
@@ -16,6 +17,7 @@ export class WebGLMapRenderer {
   private uTimeLoc: WebGLUniformLocation | null = null;
   private uOverlayOpacityLoc: WebGLUniformLocation | null = null;
   private uTexelSizeLoc: WebGLUniformLocation | null = null;
+  private uActiveLayerLoc: WebGLUniformLocation | null = null;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
@@ -56,15 +58,18 @@ export class WebGLMapRenderer {
     this.uTimeLoc = gl.getUniformLocation(prog, "u_time");
     this.uOverlayOpacityLoc = gl.getUniformLocation(prog, "u_overlayOpacity");
     this.uTexelSizeLoc = gl.getUniformLocation(prog, "u_texelSize");
+    this.uActiveLayerLoc = gl.getUniformLocation(prog, "u_activeLayer");
 
     const uTerrainLoc = gl.getUniformLocation(prog, "u_terrainTexture");
     const uLiveStateLoc = gl.getUniformLocation(prog, "u_liveStateTexture");
     const uPaletteLoc = gl.getUniformLocation(prog, "u_paletteTexture");
+    const uGdpPaletteLoc = gl.getUniformLocation(prog, "u_gdpPaletteTexture");
 
     gl.useProgram(prog);
     if (uTerrainLoc) gl.uniform1i(uTerrainLoc, 0);
     if (uLiveStateLoc) gl.uniform1i(uLiveStateLoc, 1);
     if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
+    if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
   }
 
   private compileShader(type: number, source: string): WebGLShader | null {
@@ -155,12 +160,17 @@ export class WebGLMapRenderer {
     this.paletteTexture = paletteTexture;
   }
 
+  public setGdpPaletteTexture(gdpPaletteTexture: WebGLTexture): void {
+    this.gdpPaletteTexture = gdpPaletteTexture;
+  }
+
   public render(
     width: number,
     height: number,
     position: { x: number; y: number },
     scale: number,
     time: number,
+    activeLayer: "political" | "gdp" = "political",
     overlayOpacity = 0.4,
   ): void {
     const gl = this.gl;
@@ -175,6 +185,7 @@ export class WebGLMapRenderer {
     gl.uniform1f(this.uTimeLoc, time);
     gl.uniform1f(this.uOverlayOpacityLoc, overlayOpacity);
     gl.uniform2f(this.uTexelSizeLoc, 1.0 / 4096.0, 1.0 / 2048.0);
+    gl.uniform1i(this.uActiveLayerLoc, activeLayer === "gdp" ? 1 : 0);
 
     if (this.terrainTexture) {
       gl.activeTexture(gl.TEXTURE0);
@@ -189,6 +200,11 @@ export class WebGLMapRenderer {
     if (this.paletteTexture) {
       gl.activeTexture(gl.TEXTURE2);
       gl.bindTexture(gl.TEXTURE_2D, this.paletteTexture);
+    }
+
+    if (this.gdpPaletteTexture) {
+      gl.activeTexture(gl.TEXTURE3);
+      gl.bindTexture(gl.TEXTURE_2D, this.gdpPaletteTexture);
     }
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);

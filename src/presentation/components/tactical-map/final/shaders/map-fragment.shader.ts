@@ -8,10 +8,12 @@ out vec4 fragColor;
 uniform sampler2D u_terrainTexture;
 uniform usampler2D u_liveStateTexture;
 uniform sampler2D u_paletteTexture;
+uniform sampler2D u_gdpPaletteTexture;
 
 uniform float u_time;
 uniform float u_overlayOpacity;
 uniform vec2 u_texelSize;
+uniform int u_activeLayer;
 
 void main() {
   vec4 terrainColor = texture(u_terrainTexture, v_texCoord);
@@ -37,7 +39,13 @@ void main() {
   }
 
   float uCoord = (float(nationId) + 0.5) / 256.0;
-  vec4 nationColor = texture(u_paletteTexture, vec2(uCoord, 0.5));
+  vec4 nationColor;
+
+  if (u_activeLayer == 1) {
+    nationColor = texture(u_gdpPaletteTexture, vec2(uCoord, 0.5));
+  } else {
+    nationColor = texture(u_paletteTexture, vec2(uCoord, 0.5));
+  }
 
   vec3 blendedColor = mix(terrainColor.rgb, nationColor.rgb, 0.70);
 

@@ -14,6 +14,7 @@ interface WebGLMapCanvasProps {
   countries: CountryMapping[];
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
+  activeLayer?: "political" | "gdp";
   onSelectCountryContext?: (code: string) => void;
 }
 
@@ -21,6 +22,7 @@ export function WebGLMapCanvas({
   countries,
   nationsMap,
   humanNationId,
+  activeLayer = "political",
   onSelectCountryContext,
 }: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +48,7 @@ export function WebGLMapCanvas({
     position,
     scale,
     countries,
+    activeLayer,
   });
 
   const {
