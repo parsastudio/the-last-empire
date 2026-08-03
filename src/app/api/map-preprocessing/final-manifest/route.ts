@@ -10,14 +10,17 @@ export async function GET(): Promise<NextResponse> {
     await fs.mkdir(finalDir, { recursive: true });
 
     const manifestPath = path.join(finalDir, "manifest.json");
+    const terrainPath = path.join(finalDir, "base_map_terrain.png");
 
-    let manifestExists = false;
+    let needsBuild = false;
     try {
       await fs.access(manifestPath);
-      manifestExists = true;
-    } catch {}
+      await fs.access(terrainPath);
+    } catch {
+      needsBuild = true;
+    }
 
-    if (!manifestExists) {
+    if (needsBuild) {
       const pipeline = new FinalMapPipeline();
       await pipeline.buildFinalAssets("map1", 4096, 2048);
     }
