@@ -42,7 +42,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({
       success: true,
-      message: `دستور ${action.type} با موفقیت ثبت شد.`,
+      message: result.message || `دستور ${action.type} با موفقیت ثبت شد.`,
       data: result,
     });
   } catch (err) {

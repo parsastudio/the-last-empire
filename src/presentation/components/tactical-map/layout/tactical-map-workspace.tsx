@@ -27,6 +27,10 @@ import { MapContextMenu } from "@/presentation/components/tactical-map/context-m
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
+import { useGameHistoryReplay } from "@/presentation/hooks/game/use-game-history-replay";
+import { EventReplayBar } from "@/presentation/components/tactical-map/history/event-replay-bar";
+import { DeltaInspectorModal } from "@/presentation/components/tactical-map/history/delta-inspector-modal";
+import { DomainEvent } from "@/domain/events/domain-event.schema";
 
 function TacticalViewport({
   containerRef,
@@ -107,21 +111,29 @@ function WorkspaceContent({
 
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isHoveringCountry, setIsHoveringCountry] = useState<boolean>(false);
+  const [inspectedEvent, setInspectedEvent] = useState<DomainEvent | null>(
+    null,
+  );
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const dimensions = useMapDimensions(containerRef);
   const {
-    gameState,
+    gameState: baseGameState,
     advanceNextTurn: baseAdvanceTurn,
     loading: isGameLoading,
     error,
   } = useGeopoliticsGame(gameId);
 
-  const metrics = useGameResources(gameState);
+  const historyReplay = useGameHistoryReplay(gameId);
+  const effectiveGameState = historyReplay.isReplaying
+    ? historyReplay.replayedState || baseGameState
+    : baseGameState;
 
-  useAutoSaveGame(gameId, gameState);
+  const metrics = useGameResources(effectiveGameState);
+
+  useAutoSaveGame(gameId, baseGameState);
 
   const {
     scale,
@@ -154,9 +166,10 @@ function WorkspaceContent({
     const nextState = await baseAdvanceTurn();
     if (nextState) {
       reRenderLayer();
+      historyReplay.loadEventHistory();
     }
     return nextState;
-  }, [baseAdvanceTurn, reRenderLayer]);
+  }, [baseAdvanceTurn, reRenderLayer, historyReplay]);
 
   const { focusOnCountry } = useMapCameraFocus({
     mapWidth,
@@ -194,7 +207,7 @@ function WorkspaceContent({
     renderVersion,
   });
 
-  const isNotFound = !isGameLoading && (error !== null || !gameState);
+  const isNotFound = !isGameLoading && (error !== null || !baseGameState);
 
   return (
     <div
@@ -221,8 +234,8 @@ function WorkspaceContent({
           containerRef={containerRef}
           scale={scale}
           position={position}
-          nationsMap={gameState?.nations}
-          humanNationId={gameState?.humanNationId}
+          nationsMap={effectiveGameState?.nations}
+          humanNationId={effectiveGameState?.humanNationId}
           isDragging={isDragging}
           onHoverStateChange={setIsHoveringCountry}
         />
@@ -231,17 +244,7 @@ function WorkspaceContent({
 
         <StrategicToastContainer />
 
-        <GameOverDialogWrapper gameState={gameState} />
-
-        {interaction.contextMenuState && (
-          <div
-            className="absolute pointer-events-none z-40 w-5 h-5 rounded-full bg-military/60 border-2 border-military shadow-lg animate-ping -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: `${interaction.activeScreenPos.x}px`,
-              top: `${interaction.activeScreenPos.y}px`,
-            }}
-          />
-        )}
+        <GameOverDialogWrapper gameState={effectiveGameState} />
 
         {interaction.contextMenuState && (
           <MapContextMenu
@@ -258,12 +261,34 @@ function WorkspaceContent({
         activeLayer={activeLayer}
         isRendering={isLayerRendering}
         onChangeLayer={setActiveLayer}
+        eventsCount={historyReplay.events.length}
+        isReplayingHistory={historyReplay.isReplaying}
+        onToggleHistoryReplay={() => {
+          if (historyReplay.isReplaying) {
+            historyReplay.stopReplay();
+          } else {
+            historyReplay.startReplay();
+          }
+        }}
       />
+
+      {historyReplay.isReplaying && (
+        <EventReplayBar
+          events={historyReplay.events}
+          currentSequence={historyReplay.currentSequence}
+          isPlaying={false}
+          onTogglePlay={() => {}}
+          onNext={historyReplay.nextEvent}
+          onPrev={historyReplay.prevEvent}
+          onJump={historyReplay.jumpToSequence}
+          onCloseReplay={historyReplay.stopReplay}
+        />
+      )}
 
       <SidebarContainer
         isOpen={true}
         gameId={gameId}
-        gameState={gameState}
+        gameState={effectiveGameState}
         advanceNextTurn={advanceNextTurn}
         externalActiveTab={interaction.externalSidebarTab}
         selectedTargetCode={interaction.selectedTargetCode}
@@ -272,6 +297,12 @@ function WorkspaceContent({
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />
+
+      <DeltaInspectorModal
+        isOpen={inspectedEvent !== null}
+        event={inspectedEvent}
+        onClose={() => setInspectedEvent(null)}
+      />
 
       {dataLoading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">
