@@ -1,16 +1,20 @@
 "use client";
 
-import React, { useState, useRef, Suspense, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  Suspense,
+  useCallback,
+  useEffect,
+} from "react";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
 import { useTacticalMapInteraction } from "@/presentation/hooks/tactical-map/use-tactical-map-interaction";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
-import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
 import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
 import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
-import { TacticalMapOverlay } from "@/presentation/components/tactical-map/layout/tactical-map-overlay";
 import {
   LayerController,
   TacticalLayer,
@@ -19,6 +23,80 @@ import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-ga
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { useAutoSaveGame } from "@/presentation/hooks/game/use-auto-save-game";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
+import {
+  MapContextMenu,
+  ContextActionType,
+} from "@/presentation/components/tactical-map/context-menu/map-context-menu";
+import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
+import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
+import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
+
+function TacticalViewport({
+  containerRef,
+  canvasDestRef,
+  isDragging,
+  isHoveringCountry = false,
+  onMouseDown,
+  onMouseMove,
+  onMouseUp,
+  onWheel,
+  onClick,
+  children,
+}: {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  canvasDestRef: React.RefObject<HTMLCanvasElement | null>;
+  isDragging: boolean;
+  isHoveringCountry?: boolean;
+  onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onMouseUp: () => void;
+  onWheel: (e: React.WheelEvent<HTMLDivElement>) => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  children?: React.ReactNode;
+}) {
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleNonPassiveWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const syntheticEvent = e as unknown as React.WheelEvent<HTMLDivElement>;
+      onWheel(syntheticEvent);
+    };
+
+    container.addEventListener("wheel", handleNonPassiveWheel, {
+      passive: false,
+    });
+
+    return () => {
+      container.removeEventListener("wheel", handleNonPassiveWheel);
+    };
+  }, [containerRef, onWheel]);
+
+  const getCursorClass = () => {
+    if (isDragging) return "cursor-grabbing";
+    if (isHoveringCountry) return "cursor-pointer";
+    return "cursor-default";
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={`w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden ${getCursorClass()}`}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+      onClick={onClick}
+    >
+      <canvas
+        ref={canvasDestRef}
+        className="pointer-events-none absolute inset-0 w-full h-full block"
+      />
+      {children}
+    </div>
+  );
+}
 
 interface TacticalMapWorkspaceProps {
   gameId?: string;
@@ -152,17 +230,31 @@ function WorkspaceContent({
           onHoverStateChange={setIsHoveringCountry}
         />
 
-        <TacticalMapOverlay
-          metrics={metrics}
-          gameState={gameState}
-          contextMenuState={interaction.contextMenuState}
-          activeScreenPos={interaction.activeScreenPos}
-          onSelectAction={interaction.handleSelectContextAction}
-          onCloseContextMenu={interaction.closeContextMenu}
-          onOpenPendingDecisions={(tab) =>
-            interaction.handleOpenPendingTab(tab)
-          }
-        />
+        <TopHudBar metrics={metrics} />
+
+        <StrategicToastContainer />
+
+        <GameOverDialogWrapper gameState={gameState} />
+
+        {interaction.contextMenuState && (
+          <div
+            className="absolute pointer-events-none z-40 w-5 h-5 rounded-full bg-military/60 border-2 border-military shadow-lg animate-ping -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${interaction.activeScreenPos.x}px`,
+              top: `${interaction.activeScreenPos.y}px`,
+            }}
+          />
+        )}
+
+        {interaction.contextMenuState && (
+          <MapContextMenu
+            position={interaction.activeScreenPos}
+            countryName={interaction.contextMenuState.countryName}
+            countryCode={interaction.contextMenuState.countryCode}
+            onSelectAction={interaction.handleSelectContextAction}
+            onClose={interaction.closeContextMenu}
+          />
+        )}
       </TacticalViewport>
 
       <LayerController
