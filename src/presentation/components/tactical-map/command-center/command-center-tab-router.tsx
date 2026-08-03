@@ -1,21 +1,20 @@
 import React from "react";
-import { SidebarTabType } from "../sidebar/sidebar-tabs";
-import { WideOverviewView } from "./views/wide-overview-view";
-import { WideMarketView } from "./views/wide-market-view";
-import { WideMilitaryView } from "./views/wide-military-view";
-import { WidePoliticsView } from "./views/wide-politics-view";
-import { WideProxyView } from "./views/wide-proxy-view";
-import { WideDiplomacyView } from "./views/wide-diplomacy-view";
-import { WideResearchView } from "./views/wide-research-view";
-import { WideAbilitiesView } from "./views/wide-abilities-view";
-import { WideReportsView } from "./views/wide-reports-view";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+import { WideOverviewView } from "@/presentation/components/tactical-map/command-center/views/wide-overview-view";
+import { WideMarketView } from "@/presentation/components/tactical-map/command-center/views/wide-market-view";
+import { WideMilitaryView } from "@/presentation/components/tactical-map/command-center/views/wide-military-view";
+import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
+import { WideProxyView } from "@/presentation/components/tactical-map/command-center/views/wide-proxy-view";
+import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
+import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
+import { WideAbilitiesView } from "@/presentation/components/tactical-map/command-center/views/wide-abilities-view";
+import { WideReportsView } from "@/presentation/components/tactical-map/command-center/views/wide-reports-view";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
-  activeSubTab?: string | null;
   selectedTargetCode?: string | null;
   nation: Nation;
   gameState?: GameState | null;
@@ -32,7 +31,6 @@ interface CommandCenterTabRouterProps {
 
 export function CommandCenterTabRouter({
   activeTab,
-  activeSubTab,
   selectedTargetCode,
   nation,
   gameState,
@@ -98,7 +96,6 @@ export function CommandCenterTabRouter({
           nation={nation}
           nationsMap={gameState?.nations}
           selectedTargetCode={selectedTargetCode}
-          activeSubTab={activeSubTab}
         />
       );
     case "diplomacy":
@@ -112,7 +109,7 @@ export function CommandCenterTabRouter({
         />
       );
     case "research":
-      return <WideResearchView nation={nation} />;
+      return <WideResearchView nationId={nation.id} nation={nation} />;
     case "abilities":
       return (
         <WideAbilitiesView

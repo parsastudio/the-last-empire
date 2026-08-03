@@ -1,12 +1,12 @@
 import React from "react";
-import { SidebarTabType } from "../sidebar/sidebar-tabs";
-import { CommandCenterTabRouter } from "./command-center-tab-router";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+import { CommandCenterTabRouter } from "@/presentation/components/tactical-map/command-center/command-center-tab-router";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { getCommandCenterMeta } from "./config/command-center-meta.config";
-import { CommandCenterHeader } from "./command-center-header";
+import { getCommandCenterMeta } from "@/presentation/components/tactical-map/command-center/config/command-center-meta.config";
+import { CommandCenterHeader } from "@/presentation/components/tactical-map/command-center/command-center-header";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
@@ -64,7 +64,6 @@ export function CommandCenterModal({
 
         <CommandCenterTabRouter
           activeTab={activeTab}
-          activeSubTab={activeSubTab}
           selectedTargetCode={selectedTargetCode}
           nation={nation}
           gameState={gameState}

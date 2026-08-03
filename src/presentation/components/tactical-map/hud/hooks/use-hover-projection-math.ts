@@ -1,5 +1,6 @@
 import { RefObject, useCallback } from "react";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { MAP_CONFIG } from "@/domain/map/map.config";
 
 interface UseHoverProjectionMathProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -49,8 +50,8 @@ export function useHoverProjectionMath({
       let nationIdNumber = 0;
       let greenChannelVal = 0;
 
-      const gx = Math.floor((mapX / mapWidth) * 1024);
-      const gy = Math.floor((mapY / mapHeight) * 512);
+      const gx = Math.floor((mapX / mapWidth) * MAP_CONFIG.LOW_RES_WIDTH);
+      const gy = Math.floor((mapY / mapHeight) * MAP_CONFIG.LOW_RES_HEIGHT);
 
       const gridState = GridStateProvider.getInstance();
       const dynamicCell = gridState.getCell(gx, gy);
@@ -60,7 +61,7 @@ export function useHoverProjectionMath({
           dynamicCell.ownerId.replace("NATION_", ""),
           10,
         );
-        if (!isNaN(parsedId) && parsedId >= 11) {
+        if (!isNaN(parsedId) && parsedId >= MAP_CONFIG.MIN_NATION_ID) {
           nationIdNumber = parsedId;
           greenChannelVal = dynamicCell.enclaveId;
         }
@@ -69,16 +70,17 @@ export function useHoverProjectionMath({
       if (
         !nationIdNumber &&
         packed1024Ref?.current &&
-        packed1024Ref.current.length === 1024 * 512 * 2
+        packed1024Ref.current.length ===
+          MAP_CONFIG.LOW_RES_WIDTH * MAP_CONFIG.LOW_RES_HEIGHT * 2
       ) {
-        const pIdx = (gy * 1024 + gx) * 2;
+        const pIdx = (gy * MAP_CONFIG.LOW_RES_WIDTH + gx) * 2;
         const geoByte = packed1024Ref.current[pIdx] || 0;
         nationIdNumber = packed1024Ref.current[pIdx + 1] || 0;
         greenChannelVal = geoByte >> 2;
       }
 
       if (
-        (!nationIdNumber || nationIdNumber < 11) &&
+        (!nationIdNumber || nationIdNumber < MAP_CONFIG.MIN_NATION_ID) &&
         maskDataRef?.current &&
         maskDataRef.current.length === mapWidth * mapHeight
       ) {
@@ -86,7 +88,11 @@ export function useHoverProjectionMath({
         nationIdNumber = maskDataRef.current[pixelIndex] || 0;
       }
 
-      if (!nationIdNumber || nationIdNumber < 11 || nationIdNumber >= 250) {
+      if (
+        !nationIdNumber ||
+        nationIdNumber < MAP_CONFIG.MIN_NATION_ID ||
+        nationIdNumber >= MAP_CONFIG.MAX_NATION_ID
+      ) {
         return null;
       }
 

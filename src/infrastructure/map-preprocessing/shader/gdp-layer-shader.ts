@@ -1,4 +1,4 @@
-import { CountryProfileLookupCache } from "./country-profile-lookup-cache";
+import { CountryProfileLookupCache } from "@/infrastructure/map-preprocessing/shader/country-profile-lookup-cache";
 
 export class GdpLayerShader {
   public calculateGdpColor(

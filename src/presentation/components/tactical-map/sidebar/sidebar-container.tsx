@@ -1,11 +1,11 @@
 import React from "react";
-import { SidebarTabType } from "./sidebar-tabs";
-import { CommandRail } from "../command-rail/command-rail";
-import { CommandCenterModal } from "../command-center/command-center-modal";
-import { TurnStagingLedger } from "./staging/turn-staging-ledger";
-import { TradeActionDialog } from "./tabs/market/trade-action-dialog";
-import { useSidebarTurnActions } from "./hooks/use-sidebar-turn-actions";
+import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";
+import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
+import { TurnStagingLedger } from "@/presentation/components/tactical-map/sidebar/staging/turn-staging-ledger";
+import { TradeActionDialog } from "@/presentation/components/tactical-map/sidebar/tabs/market/trade-action-dialog";
+import { useSidebarTurnActions } from "@/presentation/components/tactical-map/sidebar/hooks/use-sidebar-turn-actions";
 import { GameState } from "@/domain/game/game-state.schema";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 
 interface SidebarContainerProps {
   isOpen: boolean;
@@ -20,7 +20,6 @@ interface SidebarContainerProps {
 
 export function SidebarContainer({
   isOpen,
-  gameId,
   gameState,
   advanceNextTurn,
   externalActiveTab,
@@ -31,7 +30,6 @@ export function SidebarContainer({
   const actions = useSidebarTurnActions(
     externalActiveTab,
     onClearExternalTab,
-    gameId,
     gameState,
     advanceNextTurn,
   );
@@ -54,10 +52,7 @@ export function SidebarContainer({
 
       {!actions.isRailCollapsed && (
         <div className="fixed bottom-20 right-4 w-48 z-40">
-          <TurnStagingLedger
-            stagedActions={actions.stagedActions}
-            onClearStaged={() => {}}
-          />
+          <TurnStagingLedger stagedActions={actions.stagedActions} />
         </div>
       )}
 

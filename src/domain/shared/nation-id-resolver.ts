@@ -5,7 +5,7 @@ import {
 
 export class NationIdResolver {
   public static resolveCanonicalId(codeOrId: string): string {
-    if (!codeOrId) return "NATION_IRN";
+    if (!codeOrId) return "";
 
     const clean = codeOrId.trim().toUpperCase();
 
