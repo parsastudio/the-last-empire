@@ -22,11 +22,6 @@ export class BitPackedTurnOrchestrator {
     }
 
     this.frontierManager.updateAllFrontiers(buffer);
-    const updatedState = this.facade.syncGameState(state);
-
-    return {
-      ...updatedState,
-      currentTurn: updatedState.currentTurn + 1,
-    };
+    return this.facade.syncGameState(state);
   }
 }

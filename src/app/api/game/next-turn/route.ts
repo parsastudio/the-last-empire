@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameState } from "@/domain/game/game-state.schema";
-import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -16,13 +15,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     } catch {}
 
-    const orchestrator = new BitPackedTurnOrchestrator();
-
-    let nextState = serverGameSessionStore.advanceTurn(gameId, bodyState);
-
-    if (nextState) {
-      nextState = orchestrator.processPostTurn(nextState);
-    }
+    const nextState = serverGameSessionStore.advanceTurn(gameId, bodyState);
 
     if (!nextState) {
       return NextResponse.json(
