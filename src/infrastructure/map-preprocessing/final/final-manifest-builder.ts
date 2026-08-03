@@ -34,6 +34,7 @@ export class FinalManifestBuilder {
   public async buildAndSave(
     mapId: string,
     activeCountryIds: Set<number>,
+    pixelAreaMap: Map<number, number>,
     width: number,
     height: number,
   ): Promise<FinalMapManifest> {
@@ -43,7 +44,11 @@ export class FinalManifestBuilder {
 
     const rawNationsWithScores = activeProfiles.map((p: CountryProfile) => {
       const numericId = p.id ?? 0;
-      const territorySize = Math.round(p.gdp / 1000000);
+      const measuredArea = pixelAreaMap.get(numericId) || 0;
+      const territorySize =
+        measuredArea > 0
+          ? Math.round(measuredArea)
+          : Math.round(p.gdp / 10000000);
       const computedTreasury = Math.floor(p.gdp * 0.05);
 
       const powerDetails = this.powerCalculator.calculatePowerScore(

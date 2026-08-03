@@ -5,10 +5,12 @@ import { TerrainTextureGenerator } from "@/infrastructure/map-preprocessing/fina
 import { FinalManifestBuilder } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { BitPackedEnclaveClusterer } from "@/engine/combat/final/bit-packed-enclave-clusterer";
+import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
 
 export class FinalMapPipeline {
   private manifestBuilder = new FinalManifestBuilder();
   private enclaveClusterer = new BitPackedEnclaveClusterer();
+  private calibrator = new CellAreaCalibrator(2048, 4096);
 
   public async buildFinalAssets(
     mapId = "map1",
@@ -26,6 +28,7 @@ export class FinalMapPipeline {
 
     const packedBuffer = new BitPackedBuffer(width, height);
     const activeCountryIds = new Set<number>();
+    const pixelAreaMap = new Map<number, number>();
 
     const neighbors = [
       { dx: 1, dy: 0 },
@@ -35,6 +38,8 @@ export class FinalMapPipeline {
     ];
 
     for (let y = 0; y < height; y++) {
+      const pixelArea = this.calibrator.getCalibratedPixelArea(y);
+
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
         const val = maskBuffer[idx] || 0;
@@ -42,6 +47,8 @@ export class FinalMapPipeline {
         if (val >= 11 && val < 250) {
           activeCountryIds.add(val);
           packedBuffer.setNationId(x, y, val);
+
+          pixelAreaMap.set(val, (pixelAreaMap.get(val) || 0) + pixelArea);
 
           let isFrontier = 0;
           for (let k = 0; k < 4; k++) {
@@ -98,6 +105,7 @@ export class FinalMapPipeline {
     await this.manifestBuilder.buildAndSave(
       mapId,
       activeCountryIds,
+      pixelAreaMap,
       width,
       height,
     );
