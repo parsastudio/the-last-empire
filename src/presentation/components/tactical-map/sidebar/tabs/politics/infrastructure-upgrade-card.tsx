@@ -7,14 +7,14 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 
 interface InfrastructureUpgradeCardProps {
   currentLevel?: number;
-  nationId?: string;
+  nationId: string;
   treasury?: number;
   gdp?: number;
 }
 
 export function InfrastructureUpgradeCard({
   currentLevel = 1,
-  nationId = "NATION_118",
+  nationId,
   treasury = 100000,
   gdp = 450000000000,
 }: InfrastructureUpgradeCardProps) {

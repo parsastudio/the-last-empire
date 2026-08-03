@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { HoverCountryInfo } from "../country-hover-container";
+import { HoverCountryInfo } from "@/presentation/components/tactical-map/hud/country-hover-container";
 import { Nation } from "@/domain/nation/nation.schema";
-import { useHoverProjectionMath } from "./use-hover-projection-math";
-import { useHoverNationResolver } from "./use-hover-nation-resolver";
+import { useHoverProjectionMath } from "@/presentation/components/tactical-map/hud/hooks/use-hover-projection-math";
+import { useHoverNationResolver } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
 
 interface UseCountryHoverMathProps {
   countries: CountryMapping[];
@@ -29,7 +29,7 @@ export function useCountryHoverMath({
   scale,
   position,
   nationsMap,
-  humanNationId = "NATION_118",
+  humanNationId,
   isDragging = false,
 }: UseCountryHoverMathProps) {
   const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);

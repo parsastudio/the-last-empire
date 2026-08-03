@@ -5,12 +5,12 @@ import { ActionFactory } from "@/domain/game/action-factory";
 
 interface UseWideResearchProps {
   unlockedDoctrines?: string[];
-  nationId?: string;
+  nationId: string;
 }
 
 export function useWideResearch({
   unlockedDoctrines = ["gdp-booster"],
-  nationId = "NATION_118",
+  nationId,
 }: UseWideResearchProps) {
   const { dispatchAction } = useGameActions();
 
