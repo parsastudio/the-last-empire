@@ -30,7 +30,7 @@ export function WebGLTacticalWorkspace({
   gameId = "default_game",
 }: WebGLTacticalWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [, setPosition] = useState({ x: 0, y: 0 });
   const [scale] = useState(1);
 
   const {

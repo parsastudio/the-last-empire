@@ -1,16 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  MapDataApiHelper,
-  CountryMapping,
-} from "@/presentation/hooks/tactical-map/use-map-data";
+import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 
-interface UseMapAssetsLoaderProps {
-  apiHelper?: MapDataApiHelper;
-}
-
-export function useMapAssetsLoader(_props?: UseMapAssetsLoaderProps) {
-  const [countries, setCountries] = useState<CountryMapping[]>([]);
+export function useMapAssetsLoader() {
+  const [countries] = useState<CountryMapping[]>([]);
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
 
