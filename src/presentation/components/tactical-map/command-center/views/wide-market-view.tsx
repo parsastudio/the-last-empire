@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { MarketHeader } from "@/presentation/components/tactical-map/sidebar/tabs/market/market-header";
+import { TrendingUp, Bot, Fuel, Wrench, Coins } from "lucide-react";
 import { CommodityCard } from "@/presentation/components/tactical-map/sidebar/tabs/market/commodity-card";
-import { Fuel, Wrench, Coins } from "lucide-react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { useMarketTrade } from "@/presentation/components/tactical-map/sidebar/tabs/market/hooks/use-market-trade";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -56,7 +55,28 @@ export function WideMarketView({
   return (
     <>
       <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
-        <MarketHeader onOpenAutoTradeModal={() => setIsAutoTradeOpen(true)} />
+        <div className="space-y-2 dir-rtl text-right">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-gdp font-mono uppercase tracking-wider">
+              <TrendingUp size={13} />
+              <span>بورس بین‌المللی بلوک‌های کلان استراتژیک</span>
+            </div>
+
+            <button
+              onClick={() => setIsAutoTradeOpen(true)}
+              className="px-3 py-1.5 bg-primary/15 hover:bg-primary/25 text-primary border border-primary/30 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+            >
+              <Bot size={14} />
+              <span>تنظیمات بازرگانی خودکار</span>
+            </button>
+          </div>
+
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            معامله مستقیم بلوک‌های کلان انرژی و فولاد صنعتی در بازار آزاد جهانی.
+            نرخ ثابت خرید ۲۵ میلیون دلار و نرخ ثابت فروش ۲۰ میلیون دلار تنظیم
+            گردیده است.
+          </p>
+        </div>
 
         <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between font-mono text-xs">
           <span className="text-muted-foreground font-sans flex items-center gap-1.5">
