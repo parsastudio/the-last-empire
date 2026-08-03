@@ -34,7 +34,7 @@ export class BattleCalculator {
     const totalForceCost =
       attacker.military.infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
       attacker.military.airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
+      (dronesToLaunch || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const deploymentFivePct = totalForceCost * 0.05;
     const deploymentMoneyCost = Math.floor(deploymentFivePct);
@@ -45,7 +45,7 @@ export class BattleCalculator {
 
     const dronesUsed = Math.min(
       attacker.military.droneMissile,
-      Math.max(0, dronesToLaunch),
+      Math.max(0, dronesToLaunch || 0),
     );
 
     const attackerGovTraits = this.governmentSystem.getTraits(
