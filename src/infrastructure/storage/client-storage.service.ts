@@ -1,9 +1,8 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
-import { StateSerializer } from "@/infrastructure/storage/state-serializer";
+import { EventStoreService } from "@/infrastructure/storage/event-store.service";
 
 export class LocalStorageAdapter {
-  private serializer = new StateSerializer();
   private keyPrefix = "geopolitics_game_";
 
   public saveState(gameId: string, state: GameState): void {
@@ -11,7 +10,7 @@ export class LocalStorageAdapter {
       return;
     }
     try {
-      const serialized = this.serializer.serialize(state);
+      const serialized = JSON.stringify(state);
       localStorage.setItem(`${this.keyPrefix}${gameId}`, serialized);
     } catch {}
   }
@@ -25,7 +24,7 @@ export class LocalStorageAdapter {
       return null;
     }
     try {
-      return this.serializer.deserialize(stored);
+      return JSON.parse(stored) as GameState;
     } catch {
       return null;
     }
@@ -44,10 +43,25 @@ export class LocalStorageAdapter {
 export class ClientStorageService {
   private indexedDb = new IndexedDbAdapter();
   private localStorage = new LocalStorageAdapter();
+  private eventStore = new EventStoreService();
 
-  public async saveGameState(gameId: string, state: GameState): Promise<void> {
+  public async saveGameState(
+    gameId: string,
+    state: GameState,
+    lastActionPayload?: Record<string, unknown>,
+    prevState?: GameState | null,
+  ): Promise<void> {
     try {
       await this.indexedDb.saveState(gameId, state);
+
+      if (lastActionPayload && prevState) {
+        await this.eventStore.appendEvent(
+          gameId,
+          lastActionPayload,
+          prevState,
+          state,
+        );
+      }
     } catch {
       this.localStorage.saveState(gameId, state);
     }
@@ -55,6 +69,11 @@ export class ClientStorageService {
 
   public async loadGameState(gameId: string): Promise<GameState | null> {
     try {
+      const reconstructed = await this.eventStore.reconstructState(gameId);
+      if (reconstructed) {
+        return reconstructed;
+      }
+
       const stateFromDb = await this.indexedDb.loadState(gameId);
       if (stateFromDb) {
         return stateFromDb;
@@ -69,5 +88,9 @@ export class ClientStorageService {
       await this.indexedDb.deleteState(gameId);
     } catch {}
     this.localStorage.removeState(gameId);
+  }
+
+  public getEventStore(): EventStoreService {
+    return this.eventStore;
   }
 }
