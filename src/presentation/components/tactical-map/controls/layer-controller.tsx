@@ -1,5 +1,6 @@
 import React from "react";
 import { Layers, Loader2, Eye, Coins } from "lucide-react";
+import { HistoryHudTrigger } from "@/presentation/components/tactical-map/history/history-hud-trigger";
 
 export type TacticalLayer = "political" | "gdp";
 
@@ -29,12 +30,18 @@ interface LayerControllerProps {
   activeLayer: TacticalLayer;
   isRendering?: boolean;
   onChangeLayer: (layer: TacticalLayer) => void;
+  eventsCount?: number;
+  isReplayingHistory?: boolean;
+  onToggleHistoryReplay?: () => void;
 }
 
 export function LayerController({
   activeLayer,
   isRendering = false,
   onChangeLayer,
+  eventsCount = 0,
+  isReplayingHistory = false,
+  onToggleHistoryReplay,
 }: LayerControllerProps) {
   return (
     <div
@@ -42,7 +49,7 @@ export function LayerController({
       onMouseDown={(e) => e.stopPropagation()}
       className="fixed bottom-6 left-6 z-40 flex flex-col gap-2 pointer-events-auto"
     >
-      <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1 dir-rtl">
+      <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1.5 dir-rtl">
         <div className="p-2 text-muted-foreground border-l border-border/60 flex items-center gap-1.5">
           {isRendering ? (
             <Loader2 size={14} className="animate-spin text-primary" />
@@ -76,6 +83,14 @@ export function LayerController({
             </button>
           );
         })}
+
+        {onToggleHistoryReplay && (
+          <HistoryHudTrigger
+            eventsCount={eventsCount}
+            isReplaying={isReplayingHistory}
+            onToggleReplay={onToggleHistoryReplay}
+          />
+        )}
       </div>
     </div>
   );
