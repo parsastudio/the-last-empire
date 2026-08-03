@@ -277,14 +277,14 @@ export class ActionRuleEvaluator {
         const totalForceCost =
           source.military.infantry * 250000000 +
           source.military.airForce * 1000000000 +
-          action.dronesToLaunch * 1500000000;
+          (action.dronesToLaunch || 0) * 1500000000;
 
         const deploymentFivePct = totalForceCost * 0.05;
         const deploymentMoneyCost = Math.floor(deploymentFivePct);
         const oilPrice = state.marketPrices?.oil || 25000000;
         const deploymentOilCost = Math.max(
           1,
-          Math.ceil(deploymentFivePct / oilPrice),
+          Math.ceil(deploymentFivePct / (oilPrice || 25000000)),
         );
 
         if (source.treasury < deploymentMoneyCost) {

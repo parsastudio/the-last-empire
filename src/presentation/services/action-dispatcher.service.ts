@@ -23,10 +23,14 @@ export class ActionDispatcherService {
     if (effectiveState) {
       try {
         optimisticState = this.actionRouter.route(effectiveState, action);
+        const actionPayload = JSON.parse(JSON.stringify(action)) as Record<
+          string,
+          unknown
+        >;
         await this.storageService.saveGameState(
           activeGameId,
           optimisticState,
-          action as unknown as Record<string, unknown>,
+          actionPayload,
           effectiveState,
         );
 
@@ -58,10 +62,14 @@ export class ActionDispatcherService {
       if (json.success) {
         const finalState = json.data?.newState || optimisticState;
         if (finalState) {
+          const actionPayload = JSON.parse(JSON.stringify(action)) as Record<
+            string,
+            unknown
+          >;
           await this.storageService.saveGameState(
             activeGameId,
             finalState,
-            action as unknown as Record<string, unknown>,
+            actionPayload,
             effectiveState,
           );
         }
