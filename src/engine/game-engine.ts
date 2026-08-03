@@ -2,25 +2,24 @@ import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { deepClone, SeededRandom } from "@/domain/shared/domain-utilities";
 import { GameActionQueue } from "@/engine/orchestrator/game-action.queue";
-import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
 import { StateHistory } from "@/application/state-history";
-import { GridState } from "@/engine/combat/state/grid-state";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { GameEngineDispatcher } from "@/engine/orchestrator/game-engine-dispatcher";
 
 export class GameEngine {
   private currentState: GameState;
   private actionQueue = new GameActionQueue();
-  private progressionOrchestrator = new TurnProgressionOrchestrator();
   private stateHistory = new StateHistory();
   private dispatcher = new GameEngineDispatcher();
+  private turnOrchestrator = new BitPackedTurnOrchestrator();
   private prng: SeededRandom;
-  private gridState: GridState;
+  private gridState: BitPackedGridState;
 
   constructor(initialState: GameState) {
     this.currentState = deepClone(initialState);
     this.prng = new SeededRandom(initialState.seed);
-    this.gridState = GridStateProvider.getInstance();
+    this.gridState = BitPackedGridState.getInstance();
     this.stateHistory.saveSnapshot(this.currentState);
   }
 
@@ -33,7 +32,9 @@ export class GameEngine {
     const result = this.dispatcher.dispatch(
       this.currentState,
       this.actionQueue,
-      this.gridState,
+      this.gridState as unknown as Parameters<
+        GameEngineDispatcher["dispatch"]
+      >[2],
       action,
     );
     if (result.success && result.newState) {
@@ -47,26 +48,9 @@ export class GameEngine {
       return this.getState();
     }
 
-    this.currentState = this.progressionOrchestrator.advanceTurn(
+    this.currentState = this.turnOrchestrator.processPostTurn(
       this.currentState,
-      this.gridState,
-      this.prng,
-      (state, additionalActions) => {
-        if (additionalActions) {
-          for (const act of additionalActions) {
-            try {
-              this.actionQueue.enqueue(state, act);
-            } catch {}
-          }
-        }
-        return this.actionQueue.processActions(
-          state,
-          this.gridState,
-          this.prng,
-        );
-      },
     );
-
     this.stateHistory.saveSnapshot(this.currentState);
 
     return this.getState();
