@@ -6,7 +6,7 @@ import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
 import { DiplomaticOpinionCalculator } from "@/engine/diplomacy/diplomatic-opinion-calculator";
 import { RelationsManager } from "@/engine/diplomacy/relations-manager";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class DiplomacyPhase implements TurnPhase {
   private powerRanker = new PowerScoreRanker();

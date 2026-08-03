@@ -1,6 +1,6 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import type { UnitType } from "@/domain/military/military.schema";
-import { GameError } from "@/domain/shared/game-error";
+import { GameError } from "@/domain/shared/domain-utilities";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export class ResourceDependencyManager {

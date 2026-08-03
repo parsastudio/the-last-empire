@@ -1,13 +1,12 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
-import { deepClone } from "@/domain/shared/deep-clone";
-import { SeededRandom } from "@/domain/shared/seeded-random";
-import { GameActionQueue } from "./orchestrator/game-action.queue";
-import { TurnProgressionOrchestrator } from "./orchestrator/turn-progression.orchestrator";
+import { deepClone, SeededRandom } from "@/domain/shared/domain-utilities";
+import { GameActionQueue } from "@/engine/orchestrator/game-action.queue";
+import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
 import { StateHistory } from "@/application/state-history";
 import { GridState } from "@/engine/combat/state/grid-state";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
-import { GameEngineDispatcher } from "./orchestrator/game-engine-dispatcher";
+import { GameEngineDispatcher } from "@/engine/orchestrator/game-engine-dispatcher";
 
 export class GameEngine {
   private currentState: GameState;
