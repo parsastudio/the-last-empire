@@ -1,6 +1,10 @@
 import { useState, useRef, RefObject } from "react";
 import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 import { findCountryProfileById } from "@/domain/data/countries";
+import { HoverCountryInfo } from "@/presentation/components/tactical-map/hud/country-hover-container";
+import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { Nation } from "@/domain/nation/nation.schema";
+import { useHoverNationResolver } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -15,6 +19,9 @@ interface UseWebGLInteractionProps {
   scale: number;
   isDragging: boolean;
   hasDraggedRef: RefObject<boolean>;
+  countries: CountryMapping[];
+  nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
 }
 
 export function useWebGLInteraction({
@@ -23,14 +30,23 @@ export function useWebGLInteraction({
   scale,
   isDragging,
   hasDraggedRef,
+  countries,
+  nationsMap,
+  humanNationId,
 }: UseWebGLInteractionProps) {
   const facadeRef = useRef(new BitPackedStateFacade());
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
     null,
   );
-  const [hoverData, setHoverData] = useState<unknown | null>(null);
+  const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
+
+  const { resolveHoverInfo } = useHoverNationResolver({
+    countries,
+    nationsMap,
+    humanNationId,
+  });
 
   const handlePointerMove = (clientX: number, clientY: number) => {
     const container = containerRef.current;
@@ -48,13 +64,17 @@ export function useWebGLInteraction({
     const mapY = Math.floor((ry - position.y) / scale);
 
     const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
-    if (inspected) {
-      setHoverPos({ x: clientX, y: clientY });
-      setHoverData(inspected);
-    } else {
-      setHoverPos(null);
-      setHoverData(null);
+    if (inspected && inspected.nationId >= 11 && inspected.nationId < 250) {
+      const info = resolveHoverInfo(inspected.nationId, inspected.enclaveId);
+      if (info) {
+        setHoverPos({ x: clientX, y: clientY });
+        setHoverData(info);
+        return;
+      }
     }
+
+    setHoverPos(null);
+    setHoverData(null);
   };
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {

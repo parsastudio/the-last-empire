@@ -8,14 +8,19 @@ import { WebGLHoverHud } from "@/presentation/components/tactical-map/final/hud/
 import { WebGLContextMenuWrapper } from "@/presentation/components/tactical-map/final/hud/webgl-context-menu-wrapper";
 import { useWebGLInteraction } from "@/presentation/hooks/tactical-map/final/use-webgl-interaction";
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface WebGLMapCanvasProps {
   countries: CountryMapping[];
+  nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
   onSelectCountryContext?: (code: string) => void;
 }
 
 export function WebGLMapCanvas({
   countries,
+  nationsMap,
+  humanNationId,
   onSelectCountryContext,
 }: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -56,6 +61,9 @@ export function WebGLMapCanvas({
     scale,
     isDragging,
     hasDraggedRef,
+    countries,
+    nationsMap,
+    humanNationId,
   });
 
   const onMouseMoveCombined = (e: React.MouseEvent<HTMLDivElement>) => {
