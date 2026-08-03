@@ -1,5 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { deepClone } from "@/domain/shared/deep-clone";
+import { deepClone } from "@/domain/shared/domain-utilities";
 
 export class StateHistory {
   private history: Map<number, GameState> = new Map();

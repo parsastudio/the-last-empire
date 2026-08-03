@@ -1,7 +1,7 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { AIPersonalityType } from "@/domain/ai/ai.schema";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class AIActionBuilder {

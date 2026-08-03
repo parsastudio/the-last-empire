@@ -1,11 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { GridState } from "@/engine/combat/state/grid-state";
-import { BattleCalculator } from "./battle-calculator";
-import { GridTerritoryCapturer } from "./grid-territory-capturer";
-import { StateSynchronizerFacade } from "./state/state-synchronizer-facade";
+import { BattleCalculator } from "@/engine/combat/battle-calculator";
+import { GridTerritoryCapturer } from "@/engine/combat/grid-territory-capturer";
+import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { TurnLogBuilder } from "@/domain/game/turn-log-builder";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomatic-betrayal-calculator";
 import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
 
