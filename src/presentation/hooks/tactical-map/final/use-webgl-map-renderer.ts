@@ -48,6 +48,14 @@ export function useWebGLMapRenderer({
       if (paletteTex) {
         renderer.setPaletteTexture(paletteTex);
       }
+
+      const gdpPaletteTex = WebGLPaletteTextureManager.createGdpPaletteTexture(
+        gl,
+        countries,
+      );
+      if (gdpPaletteTex) {
+        renderer.setGdpPaletteTexture(gdpPaletteTex);
+      }
     }
 
     const gridState = BitPackedGridState.getInstance();
