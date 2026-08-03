@@ -3,8 +3,6 @@ import {
   ShorelineDistanceCache,
   ShorelineShadowCalculator,
 } from "@/infrastructure/map-preprocessing/shader/static-map-cache-builder";
-import { CountryPaletteGenerator } from "@/infrastructure/map-preprocessing/shader/country-palette-generator";
-import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 
 export class TerrainTextureGenerator {
   public static generateStaticTerrain(
@@ -20,16 +18,6 @@ export class TerrainTextureGenerator {
     );
     const shadowCalculator = new ShorelineShadowCalculator();
 
-    const countries = ALL_COUNTRY_PROFILES.map((p) => ({
-      id: p.id ?? 0,
-      code: p.code,
-      name: p.nameFa,
-      color: [0, 0, p.id ?? 0] as [number, number, number],
-    }));
-
-    const paletteGenerator = new CountryPaletteGenerator();
-    const palette = paletteGenerator.generatePalette(countries);
-
     const totalPixels = width * height;
 
     for (let i = 0; i < totalPixels; i++) {
@@ -43,16 +31,9 @@ export class TerrainTextureGenerator {
         rgbBuffer[rgbIndex + 1] = g;
         rgbBuffer[rgbIndex + 2] = b;
       } else {
-        const colorPair = palette[val];
-        if (colorPair) {
-          rgbBuffer[rgbIndex] = colorPair.r1;
-          rgbBuffer[rgbIndex + 1] = colorPair.g1;
-          rgbBuffer[rgbIndex + 2] = colorPair.b1;
-        } else {
-          rgbBuffer[rgbIndex] = 228;
-          rgbBuffer[rgbIndex + 1] = 224;
-          rgbBuffer[rgbIndex + 2] = 214;
-        }
+        rgbBuffer[rgbIndex] = 255;
+        rgbBuffer[rgbIndex + 1] = 255;
+        rgbBuffer[rgbIndex + 2] = 255;
       }
     }
 

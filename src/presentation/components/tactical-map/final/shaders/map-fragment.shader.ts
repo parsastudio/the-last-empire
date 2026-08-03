@@ -29,7 +29,7 @@ void main() {
 
   if (nationId == 0u) {
     if (isBorder && (nLeft >= 11u || nRight >= 11u || nUp >= 11u || nDown >= 11u)) {
-      fragColor = vec4(0.08, 0.10, 0.14, 1.0);
+      fragColor = vec4(0.10, 0.12, 0.16, 1.0);
       return;
     }
     fragColor = terrainColor;
@@ -39,7 +39,7 @@ void main() {
   float uCoord = (float(nationId) + 0.5) / 256.0;
   vec4 nationColor = texture(u_paletteTexture, vec2(uCoord, 0.5));
 
-  vec3 blendedColor = mix(terrainColor.rgb, nationColor.rgb, 0.55);
+  vec3 blendedColor = mix(terrainColor.rgb, nationColor.rgb, 0.70);
 
   if (isBorder) {
     blendedColor = mix(blendedColor, vec3(0.08, 0.10, 0.14), 0.85);
