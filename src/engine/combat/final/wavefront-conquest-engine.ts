@@ -1,4 +1,5 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
 
 export interface ConquestExecutionResult {
   capturedPixelsCount: number;
@@ -7,7 +8,7 @@ export interface ConquestExecutionResult {
 }
 
 export class WavefrontConquestEngine {
-  private readonly pixelAreaKm2 = 86.3;
+  private calibrator = new CellAreaCalibrator(2048, 4096);
 
   public conquerTerritory(
     buffer: BitPackedBuffer,
@@ -25,7 +26,6 @@ export class WavefrontConquestEngine {
 
     const width = buffer.getWidth();
     const height = buffer.getHeight();
-    const targetPixelsToCapture = Math.ceil(targetAreaSqKm / this.pixelAreaKm2);
 
     const queueX: number[] = [];
     const queueY: number[] = [];
@@ -71,12 +71,10 @@ export class WavefrontConquestEngine {
     }
 
     let capturedPixelsCount = 0;
+    let accumulatedAreaKm2 = 0;
     let head = 0;
 
-    while (
-      head < queueX.length &&
-      capturedPixelsCount < targetPixelsToCapture
-    ) {
+    while (head < queueX.length && accumulatedAreaKm2 < targetAreaSqKm) {
       const cx = queueX[head]!;
       const cy = queueY[head]!;
       head++;
@@ -84,6 +82,9 @@ export class WavefrontConquestEngine {
       if (buffer.getNationId(cx, cy) === defenderNationId) {
         buffer.setNationId(cx, cy, attackerNationId);
         capturedPixelsCount++;
+
+        const pixelArea = this.calibrator.getCalibratedPixelArea(cy);
+        accumulatedAreaKm2 += pixelArea;
 
         for (let k = 0; k < 4; k++) {
           const nx = (cx + neighbors[k]!.dx + width) % width;
@@ -104,14 +105,12 @@ export class WavefrontConquestEngine {
       }
     }
 
-    const capturedAreaSqKm = Math.round(
-      capturedPixelsCount * this.pixelAreaKm2,
-    );
+    const capturedAreaSqKm = Math.round(accumulatedAreaKm2);
 
     return {
       capturedPixelsCount,
       capturedAreaSqKm,
-      conquestCompleted: capturedPixelsCount >= targetPixelsToCapture,
+      conquestCompleted: capturedAreaSqKm >= targetAreaSqKm,
     };
   }
 }
