@@ -3,6 +3,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { GridState } from "@/engine/combat/state/grid-state";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
@@ -13,8 +14,14 @@ export class MilitaryActionExecutor {
     action: GameAction,
     gridState?: GridState,
   ): GameState {
-    const nation = state.nations[action.nationId];
+    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+      action.nationId,
+    );
+    const nation =
+      state.nations[action.nationId] || state.nations[canonicalSourceId];
     if (!nation) return state;
+
+    const sourceKey = nation.id;
 
     switch (action.type) {
       case "RECRUIT_UNIT":
@@ -22,7 +29,7 @@ export class MilitaryActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: this.recruitmentManager.enqueueOrder(
+            [sourceKey]: this.recruitmentManager.enqueueOrder(
               nation,
               action.unitType,
               action.quantity,
@@ -35,7 +42,7 @@ export class MilitaryActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: this.recruitmentManager.cancelOrder(
+            [sourceKey]: this.recruitmentManager.cancelOrder(
               nation,
               action.orderId,
             ),
@@ -55,7 +62,7 @@ export class MilitaryActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               military,
               resources: {
@@ -74,7 +81,7 @@ export class MilitaryActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               treasury: nation.treasury - cost,
               military: {

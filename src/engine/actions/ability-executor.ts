@@ -1,33 +1,45 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ActivateAbilityAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class AbilityExecutor {
   public static execute(
     state: GameState,
     action: ActivateAbilityAction,
   ): GameState {
-    const nationId = action.nationId;
-    const nation = state.nations[nationId];
+    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+      action.nationId,
+    );
+    const nation =
+      state.nations[action.nationId] || state.nations[canonicalSourceId];
     if (!nation || !nation.isAlive) {
       return state;
     }
 
+    const sourceKey = nation.id;
     const updatedNations = { ...state.nations };
 
     switch (action.abilityType) {
       case "DIPLOMATIC_SUMMIT": {
-        const targetId = action.targetNationId;
-        if (!targetId || !nation.relations[targetId]) {
+        const targetId = action.targetNationId
+          ? NationIdResolver.resolveCanonicalId(action.targetNationId)
+          : undefined;
+
+        const relKey =
+          targetId &&
+          (nation.relations[targetId] ? targetId : action.targetNationId);
+        const rel = relKey ? nation.relations[relKey] : undefined;
+
+        if (!relKey || !rel) {
           throw new GameError("INVALID_ACTION", "Target nation required");
         }
-        const rel = nation.relations[targetId]!;
+
         const updatedRel = { ...rel, opinion: Math.min(100, rel.opinion + 20) };
-        updatedNations[nationId] = {
+        updatedNations[sourceKey] = {
           ...nation,
           treasury: nation.treasury - 20000,
           globalReputation: Math.min(100, nation.globalReputation + 10),
-          relations: { ...nation.relations, [targetId]: updatedRel },
+          relations: { ...nation.relations, [relKey]: updatedRel },
           activeModifiers: [
             ...nation.activeModifiers,
             {
@@ -43,7 +55,7 @@ export class AbilityExecutor {
       }
 
       case "MARTIAL_LAW": {
-        updatedNations[nationId] = {
+        updatedNations[sourceKey] = {
           ...nation,
           government: {
             ...nation.government,
@@ -65,7 +77,7 @@ export class AbilityExecutor {
 
       case "INDUSTRIAL_MOBILIZATION": {
         const sacManpower = Math.floor(nation.resources.manpower * 0.15);
-        updatedNations[nationId] = {
+        updatedNations[sourceKey] = {
           ...nation,
           resources: {
             ...nation.resources,
@@ -90,7 +102,7 @@ export class AbilityExecutor {
       }
 
       case "ROYAL_DECREE": {
-        updatedNations[nationId] = {
+        updatedNations[sourceKey] = {
           ...nation,
           treasury: nation.treasury - 40000,
           globalReputation: Math.min(100, nation.globalReputation + 15),
@@ -109,7 +121,7 @@ export class AbilityExecutor {
       }
 
       case "WAR_ALERT": {
-        updatedNations[nationId] = {
+        updatedNations[sourceKey] = {
           ...nation,
           activeModifiers: [
             ...nation.activeModifiers,

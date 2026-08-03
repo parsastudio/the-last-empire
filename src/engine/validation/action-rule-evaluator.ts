@@ -6,7 +6,11 @@ import { calculateProxyOperationBudget } from "@/domain/politics/government-labe
 
 export class ActionRuleEvaluator {
   public static evaluate(state: GameState, action: GameAction): void {
-    const source = state.nations[action.nationId];
+    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+      action.nationId,
+    );
+    const source =
+      state.nations[action.nationId] || state.nations[canonicalSourceId];
     if (!source) return;
 
     switch (action.type) {
@@ -153,7 +157,12 @@ export class ActionRuleEvaluator {
         break;
 
       case "FUND_PROXY_INFLUENCE": {
-        const target = state.nations[action.targetNationId];
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+          action.targetNationId,
+        );
+        const target =
+          state.nations[action.targetNationId] ||
+          state.nations[canonicalTargetId];
         if (!target || !target.isAlive) {
           throw new GameError(
             "NATION_NOT_FOUND",
@@ -219,13 +228,21 @@ export class ActionRuleEvaluator {
         break;
 
       case "INITIATE_BATTLE": {
-        if (action.nationId === action.targetNationId) {
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+          action.targetNationId,
+        );
+        if (
+          action.nationId === action.targetNationId ||
+          canonicalSourceId === canonicalTargetId
+        ) {
           throw new GameError(
             "INVALID_ACTION",
             "امکان تهاجم به کشور خودی وجود ندارد.",
           );
         }
-        const target = state.nations[action.targetNationId];
+        const target =
+          state.nations[action.targetNationId] ||
+          state.nations[canonicalTargetId];
         if (!target || !target.isAlive) {
           throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
         }
