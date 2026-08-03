@@ -2,7 +2,7 @@ import React from "react";
 import { DomainEvent } from "@/domain/events/domain-event.schema";
 import { EventLoggerUtility } from "@/domain/events/event-logger.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { Eye, FileCode } from "lucide-react";
+import { FileCode } from "lucide-react";
 
 interface EventCardItemProps {
   event: DomainEvent;
