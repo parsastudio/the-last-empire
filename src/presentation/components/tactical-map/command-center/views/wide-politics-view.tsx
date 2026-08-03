@@ -1,18 +1,18 @@
 import React from "react";
-import { TaxControlCard } from "../../sidebar/tabs/politics/tax-control-card";
-import { TariffControlCard } from "../../sidebar/tabs/politics/tariff-control-card";
-import { ImfLoanCard } from "../../sidebar/tabs/politics/imf-loan-card";
-import { IndustrialUpgradeCard } from "../../sidebar/tabs/politics/industrial-upgrade-card";
-import { InfrastructureUpgradeCard } from "../../sidebar/tabs/politics/infrastructure-upgrade-card";
-import { MilitaryTechUpgradeCard } from "../../sidebar/tabs/politics/military-tech-upgrade-card";
-import { AntiCorruptionCard } from "../../sidebar/tabs/politics/anti-corruption-card";
-import { ActiveModifiersCard } from "../../sidebar/tabs/politics/active-modifiers-card";
-import { PopulationWelfareCard } from "../../sidebar/tabs/politics/population-welfare-card";
-import { DiplomaticCampaignCard } from "../../sidebar/tabs/politics/diplomatic-campaign-card";
+import { TaxControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tax-control-card";
+import { TariffControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tariff-control-card";
+import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/imf-loan-card";
+import { IndustrialUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industrial-upgrade-card";
+import { InfrastructureUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/infrastructure-upgrade-card";
+import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/military-tech-upgrade-card";
+import { AntiCorruptionCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/anti-corruption-card";
+import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
+import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
+import { DiplomaticCampaignCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/diplomatic-campaign-card";
 import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
-  nationId?: string;
+  nationId: string;
   gdp?: number;
   treasury?: number;
   turnsInPower?: number;
@@ -27,7 +27,6 @@ interface WidePoliticsViewProps {
   hasSeaAccess?: boolean;
   activeModifiers?: ActiveModifier[];
   nationsMap?: Record<string, Nation>;
-  activeSubTab?: string | null;
   population?: number;
   oilStock?: number;
   steelStock?: number;
@@ -35,7 +34,7 @@ interface WidePoliticsViewProps {
 }
 
 export function WidePoliticsView({
-  nationId = "NATION_118",
+  nationId,
   gdp = 450000000000,
   treasury = 100000,
   taxRate,

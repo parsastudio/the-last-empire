@@ -1,13 +1,12 @@
 import React from "react";
 import { Nation } from "@/domain/nation/nation.schema";
-import { useWideProxy } from "./proxy/hooks/use-wide-proxy";
-import { ProxyAllocationSection } from "./proxy/proxy-allocation-section";
+import { useWideProxy } from "@/presentation/components/tactical-map/command-center/views/proxy/hooks/use-wide-proxy";
+import { ProxyAllocationSection } from "@/presentation/components/tactical-map/command-center/views/proxy/proxy-allocation-section";
 
 interface WideProxyViewProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
   selectedTargetCode?: string | null;
-  activeSubTab?: string | null;
 }
 
 export function WideProxyView({

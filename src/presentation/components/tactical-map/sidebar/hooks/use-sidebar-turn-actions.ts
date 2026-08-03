@@ -6,6 +6,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { useTurnExecution } from "@/presentation/components/tactical-map/sidebar/hooks/use-turn-execution";
 import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
 import { MarketEngine } from "@/engine/economy/market-engine";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 export interface TradeDialogState {
   isOpen: boolean;
@@ -19,7 +20,6 @@ export interface TradeDialogState {
 export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
   onClearExternalTab?: () => void,
-  _customGameId?: string,
   overrideGameState?: GameState | null,
   overrideAdvanceNextTurn?: () => Promise<GameState | null>,
 ) {
@@ -36,7 +36,7 @@ export function useSidebarTurnActions(
     resourceName: "",
     unit: "",
     mode: "buy",
-    unitPrice: 25000000,
+    unitPrice: MARKET_CONFIG.FIXED_BUY_PRICE,
     maxAmount: 100,
   });
 
@@ -97,7 +97,9 @@ export function useSidebarTurnActions(
 
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
-      const treasury = humanNation ? humanNation.treasury : 100000000;
+      const treasury = humanNation
+        ? humanNation.treasury
+        : MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK;
       const isOil = name.includes("نفت");
       const stock = isOil
         ? humanNation
@@ -107,7 +109,8 @@ export function useSidebarTurnActions(
           ? humanNation.resources.steel
           : 0;
 
-      const currentPrice = price && price >= 1000000 ? price : 25000000;
+      const currentPrice =
+        price && price >= 1000000 ? price : MARKET_CONFIG.FIXED_BUY_PRICE;
       const marketEngine = new MarketEngine();
       const maxAffordable = marketEngine.calculateMaxAffordable(
         treasury,

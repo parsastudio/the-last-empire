@@ -1,16 +1,17 @@
 import React from "react";
-import { NationHeaderCard } from "../../sidebar/nation-header-card";
-import { EconomyStatsSection } from "../../sidebar/economy-stats-section";
-import { ResourcesSection } from "../../sidebar/resources-section";
-import { GovernmentStatusSection } from "../../sidebar/government-status-section";
-import { RegionBreakdownCard } from "../../sidebar/region-breakdown-card";
+import { NationHeaderCard } from "@/presentation/components/tactical-map/sidebar/nation-header-card";
+import { EconomyStatsSection } from "@/presentation/components/tactical-map/sidebar/economy-stats-section";
+import { ResourcesSection } from "@/presentation/components/tactical-map/sidebar/resources-section";
+import { GovernmentStatusSection } from "@/presentation/components/tactical-map/sidebar/government-status-section";
+import { RegionBreakdownCard } from "@/presentation/components/tactical-map/sidebar/region-breakdown-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { findCountryProfileById } from "@/domain/data/countries";
+import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
+import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 interface WideOverviewViewProps {
   nation: Nation;
   rank?: number;
-  activeSubTab?: string | null;
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
@@ -24,28 +25,14 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         ? profile.gdp
         : 5000000000;
 
-  const gdpScale = Math.max(1, Math.floor(effectiveGdp / 10000000000));
-  const industrialMultiplier = 1.0 + ((nation.industrialLevel || 1) - 1) * 0.25;
-  const isOilRich = nation.traits.includes("OIL_RICH");
+  const { oilProducedPerTurn, steelProducedPerTurn } =
+    ResourceGenerationStep.calculateResourceGeneration(nation);
 
-  const baseOilLots = isOilRich
-    ? Math.max(3, gdpScale * 2)
-    : Math.max(1, Math.floor(gdpScale * 0.5));
-  const baseSteelLots = Math.max(1, Math.floor(gdpScale * 0.8));
-
-  const oilProducedPerTurn = Math.max(
-    1,
-    Math.ceil(baseOilLots * industrialMultiplier),
-  );
-  const steelProducedPerTurn = Math.max(
-    1,
-    Math.ceil(baseSteelLots * industrialMultiplier),
-  );
-
-  const gdpFactor = Math.max(1, Math.floor(effectiveGdp / 10000000000));
-  const oilRequiredPerTurn = Math.max(
-    1,
-    Math.ceil((nation.population / 20000000) * gdpFactor),
+  const welfareCalc = new PopulationWelfareCalculator();
+  const oilRequiredPerTurn = welfareCalc.calculateOilDemand(
+    nation.population,
+    effectiveGdp,
+    nation.doctrines?.unlockedDoctrines,
   );
 
   return (

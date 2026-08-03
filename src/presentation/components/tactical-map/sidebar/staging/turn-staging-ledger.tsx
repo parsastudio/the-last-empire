@@ -10,7 +10,7 @@ interface StagedAction {
 
 interface TurnStagingLedgerProps {
   stagedActions: StagedAction[];
-  onClearStaged: () => void;
+  onClearStaged?: () => void;
 }
 
 export function TurnStagingLedger({
@@ -28,12 +28,14 @@ export function TurnStagingLedger({
           <ClipboardList size={14} className="text-gdp" />
           <span>تاریخچه اقدامات این نوبت</span>
         </div>
-        <button
-          onClick={onClearStaged}
-          className="text-[10px] text-military hover:underline cursor-pointer font-sans"
-        >
-          پاکسازی
-        </button>
+        {onClearStaged && (
+          <button
+            onClick={onClearStaged}
+            className="text-[10px] text-military hover:underline cursor-pointer font-sans"
+          >
+            پاکسازی
+          </button>
+        )}
       </div>
 
       <div className="space-y-1.5 max-h-28 overflow-y-auto pr-1 scrollbar-thin">

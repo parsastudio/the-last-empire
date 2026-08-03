@@ -7,15 +7,18 @@ import { useMapData } from "@/presentation/hooks/tactical-map/use-map-data";
 import { useCanvasRenderer } from "@/presentation/hooks/tactical-map/use-canvas-renderer";
 import { useTacticalMapInteraction } from "@/presentation/hooks/tactical-map/use-tactical-map-interaction";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
-import { TacticalViewport } from "./tactical-viewport";
-import { SidebarContainer } from "../sidebar/sidebar-container";
-import { CountryHoverContainer } from "../hud/country-hover-container";
-import { TacticalMapOverlay } from "./tactical-map-overlay";
-import { LayerController, TacticalLayer } from "../controls/layer-controller";
+import { TacticalViewport } from "@/presentation/components/tactical-map/layout/tactical-viewport";
+import { SidebarContainer } from "@/presentation/components/tactical-map/sidebar/sidebar-container";
+import { CountryHoverContainer } from "@/presentation/components/tactical-map/hud/country-hover-container";
+import { TacticalMapOverlay } from "@/presentation/components/tactical-map/layout/tactical-map-overlay";
+import {
+  LayerController,
+  TacticalLayer,
+} from "@/presentation/components/tactical-map/controls/layer-controller";
 import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-game";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { useAutoSaveGame } from "@/presentation/hooks/game/use-auto-save-game";
-import { CampaignNotFoundModal } from "../modals/campaign-not-found-modal";
+import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
 
 interface TacticalMapWorkspaceProps {
   gameId?: string;
@@ -28,7 +31,6 @@ function WorkspaceContent({
   const mapHeight = 2048;
 
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
-  const [isSidebarOpen] = useState<boolean>(true);
   const [isHoveringCountry, setIsHoveringCountry] = useState<boolean>(false);
 
   const canvasDestRef = useRef<HTMLCanvasElement | null>(null);
@@ -170,7 +172,7 @@ function WorkspaceContent({
       />
 
       <SidebarContainer
-        isOpen={isSidebarOpen}
+        isOpen={true}
         gameId={gameId}
         gameState={gameState}
         advanceNextTurn={advanceNextTurn}

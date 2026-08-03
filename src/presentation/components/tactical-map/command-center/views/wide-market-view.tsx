@@ -1,19 +1,19 @@
 import React, { useState } from "react";
-import { MarketHeader } from "../../sidebar/tabs/market/market-header";
-import { CommodityCard } from "../../sidebar/tabs/market/commodity-card";
+import { MarketHeader } from "@/presentation/components/tactical-map/sidebar/tabs/market/market-header";
+import { CommodityCard } from "@/presentation/components/tactical-map/sidebar/tabs/market/commodity-card";
 import { Fuel, Wrench, Coins } from "lucide-react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
-import { useMarketTrade } from "../../sidebar/tabs/market/hooks/use-market-trade";
+import { useMarketTrade } from "@/presentation/components/tactical-map/sidebar/tabs/market/hooks/use-market-trade";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { AutoTradeDialog } from "../../sidebar/tabs/market/auto-trade-dialog";
+import { AutoTradeDialog } from "@/presentation/components/tactical-map/sidebar/tabs/market/auto-trade-dialog";
 import { Nation } from "@/domain/nation/nation.schema";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 interface WideMarketViewProps {
   marketPrices?: ResourceMarketPrice;
   oilStock?: number;
   steelStock?: number;
   userTreasury?: number;
-  activeSubTab?: string | null;
   nation?: Nation | null;
   onOpenTrade: (
     name: string,
@@ -24,18 +24,26 @@ interface WideMarketViewProps {
 }
 
 export function WideMarketView({
-  marketPrices = { oil: 25000000, steel: 25000000 },
+  marketPrices = {
+    oil: MARKET_CONFIG.FIXED_BUY_PRICE,
+    steel: MARKET_CONFIG.FIXED_BUY_PRICE,
+  },
   oilStock = 50,
   steelStock = 20,
-  userTreasury = 100000000,
+  userTreasury = MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK,
   nation,
   onOpenTrade,
 }: WideMarketViewProps) {
   const [isAutoTradeOpen, setIsAutoTradeOpen] = useState<boolean>(false);
 
-  const safeOil = marketPrices.oil < 1000000 ? 25000000 : marketPrices.oil;
+  const safeOil =
+    marketPrices.oil < 1000000
+      ? MARKET_CONFIG.FIXED_BUY_PRICE
+      : marketPrices.oil;
   const safeSteel =
-    marketPrices.steel < 1000000 ? 25000000 : marketPrices.steel;
+    marketPrices.steel < 1000000
+      ? MARKET_CONFIG.FIXED_BUY_PRICE
+      : marketPrices.steel;
 
   const trade = useMarketTrade({
     marketPrices: { oil: safeOil, steel: safeSteel },
