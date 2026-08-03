@@ -19,7 +19,7 @@ import {
   InvestDiplomacyAction,
   InitiateBattleAction,
   ConfigureAutoTradeAction,
-} from "./action.schema";
+} from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
 
