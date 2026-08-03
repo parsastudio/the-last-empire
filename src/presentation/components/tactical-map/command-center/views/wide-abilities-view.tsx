@@ -1,6 +1,9 @@
 import React, { useState, useCallback } from "react";
-import { REGIME_ABILITIES } from "@/presentation/components/tactical-map/sidebar/tabs/abilities/abilities.config";
-import { AbilityCard } from "@/presentation/components/tactical-map/sidebar/tabs/abilities/ability-card";
+import {
+  REGIME_ABILITIES,
+  AbilityCard,
+  AbilityItem,
+} from "@/presentation/components/tactical-map/sidebar/tabs/abilities/ability-card";
 import { AbilityTargetModal } from "@/presentation/components/tactical-map/modals/ability-target-modal";
 
 interface WideAbilitiesViewProps {
@@ -25,13 +28,15 @@ export function WideAbilitiesView({
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {REGIME_ABILITIES.map((ab) => (
+        {REGIME_ABILITIES.map((ab: AbilityItem) => (
           <AbilityCard
             key={ab.id}
             ability={ab}
             currentGovernment={currentGovernment}
             nationId={nationId}
-            onActivate={(ability) => openAbilityModal(ability.name)}
+            onActivate={(ability: AbilityItem) =>
+              openAbilityModal(ability.name)
+            }
           />
         ))}
       </div>

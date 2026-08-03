@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { NationListSidebar } from "@/presentation/components/select-nation/nation-list-sidebar";
 import { NationDetailsPanel } from "@/presentation/components/select-nation/nation-details-panel";
-import { GOVERNMENT_OPTIONS } from "@/presentation/components/select-nation/config/government-options.config";
+import { GOVERNMENT_OPTIONS } from "@/presentation/components/select-nation/government-type-selector";
 import { SelectNationHeader } from "@/presentation/components/select-nation/select-nation-header";
 import { useSelectNationForm } from "@/presentation/components/select-nation/hooks/use-select-nation-form";
 

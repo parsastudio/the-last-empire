@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { MapDataApiHelper } from "./map-data-api-helper";
-import { CountryMapping } from "./mask-rendering-helper";
+import {
+  MapDataApiHelper,
+  CountryMapping,
+} from "@/presentation/hooks/tactical-map/use-map-data";
 import { StaticMapCacheBuilder } from "@/infrastructure/map-preprocessing/shader/static-map-cache-builder";
 
 interface UseMapAssetsLoaderProps {

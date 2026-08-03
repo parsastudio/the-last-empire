@@ -1,6 +1,8 @@
 import { CountryPaletteGenerator } from "@/infrastructure/map-preprocessing/shader/country-palette-generator";
-import { CountryProfileLookupCache } from "@/infrastructure/map-preprocessing/shader/country-profile-lookup-cache";
-import { GdpLayerShader } from "@/infrastructure/map-preprocessing/shader/gdp-layer-shader";
+import {
+  CountryProfileLookupCache,
+  GdpLayerShader,
+} from "@/infrastructure/map-preprocessing/shader/gdp-layer-shader";
 import { StaticMapCacheBuilder } from "@/infrastructure/map-preprocessing/shader/static-map-cache-builder";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 

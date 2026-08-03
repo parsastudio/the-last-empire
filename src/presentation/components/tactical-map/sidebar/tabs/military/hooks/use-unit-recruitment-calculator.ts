@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { UnitConfig } from "../recruitable-units.config";
+import { UnitConfig } from "@/presentation/components/tactical-map/sidebar/tabs/military/unit-recruitment-card";
 
 interface UseUnitRecruitmentCalculatorProps {
   unit: UnitConfig;
