@@ -1,11 +1,11 @@
 import React from "react";
 import { Zap } from "lucide-react";
-import { NationDetail } from "./nation-list-item";
-import { NationOverviewStats } from "./nation-overview-stats";
+import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
+import { NationOverviewStats } from "@/presentation/components/select-nation/nation-overview-stats";
 import {
   GovernmentTypeSelector,
   GovernmentOption,
-} from "./government-type-selector";
+} from "@/presentation/components/select-nation/government-type-selector";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface NationDetailsPanelProps {

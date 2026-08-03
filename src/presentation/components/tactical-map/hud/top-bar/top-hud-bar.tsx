@@ -1,20 +1,164 @@
 "use client";
 
-import React from "react";
-import { Coins, Fuel, BrickWall, Users } from "lucide-react";
+import React, { useMemo } from "react";
+import {
+  Coins,
+  Fuel,
+  BrickWall,
+  Users,
+  Landmark,
+  ShieldAlert,
+  Globe,
+  LucideIcon,
+} from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
-import { ResourceBadge } from "@/presentation/components/tactical-map/hud/top-bar/resource-badge";
-import { StabilityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/stability-meter-badge";
-import { ThreatRadarBadge } from "@/presentation/components/tactical-map/hud/top-bar/threat-radar-badge";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { useTopHudMetrics } from "@/presentation/components/tactical-map/hud/top-bar/hooks/use-top-hud-metrics";
+
+interface ResourceBadgeProps {
+  icon: LucideIcon;
+  iconColor: string;
+  label: string;
+  value: string | number;
+  subValue?: string;
+  subValueColor?: string;
+}
+
+function ResourceBadge({
+  icon: Icon,
+  iconColor,
+  label,
+  value,
+  subValue,
+  subValueColor = "text-gdp",
+}: ResourceBadgeProps) {
+  return (
+    <div
+      className="flex items-center gap-2 bg-secondary/40 border border-border/60 px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors hover:bg-secondary/60 cursor-default shrink-0"
+      title={label}
+    >
+      <Icon size={14} className={`${iconColor} shrink-0`} />
+      <div className="flex items-center gap-1.5 leading-none">
+        <span className="font-bold text-foreground">{value}</span>
+        {subValue && (
+          <span className={`text-[10px] font-semibold ${subValueColor}`}>
+            ({subValue})
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StabilityMeterBadge({
+  stability,
+  corruption,
+}: {
+  stability: number;
+  corruption: number;
+}) {
+  const style = useMemo(() => {
+    if (stability >= 70) return { text: "text-gdp", bg: "bg-gdp" };
+    if (stability >= 40) return { text: "text-treasury", bg: "bg-treasury" };
+    return { text: "text-military", bg: "bg-military" };
+  }, [stability]);
+
+  return (
+    <div
+      className="flex items-center gap-2 bg-secondary/40 border border-border/60 px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors hover:bg-secondary/60 cursor-default shrink-0"
+      title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}% | فساد اداری: ${PersianNumberFormatter.toPersianDigits(corruption)}%`}
+    >
+      <Landmark size={14} className="text-diplomacy shrink-0" />
+      <div className="flex items-center gap-2">
+        <span className={`font-bold ${style.text}`}>
+          {PersianNumberFormatter.toPersianDigits(stability)}%
+        </span>
+        <div className="w-12 h-1.5 bg-background/80 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
+            style={{ width: `${stability}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ThreatRadarBadge({ globalReputation }: { globalReputation: number }) {
+  const isHighThreat = globalReputation <= -30;
+  const isPositive = globalReputation > 0;
+
+  return (
+    <div
+      className={`flex items-center gap-2 border px-3 py-1.5 rounded-2xl font-mono text-xs transition-colors cursor-default shrink-0 ${
+        isHighThreat
+          ? "bg-military/15 border-military/40 text-military"
+          : isPositive
+            ? "bg-gdp/15 border-gdp/40 text-gdp"
+            : "bg-secondary/40 border-border/60 text-muted-foreground"
+      }`}
+      title="شاخص پرستیژ و جایگاه بین‌المللی کشور"
+    >
+      {isHighThreat ? (
+        <ShieldAlert size={14} className="animate-pulse text-military" />
+      ) : (
+        <Globe
+          size={14}
+          className={isPositive ? "text-gdp" : "text-muted-foreground"}
+        />
+      )}
+      <div className="flex items-center gap-1 whitespace-nowrap">
+        <span className="text-[10px] font-sans font-medium">
+          {isHighThreat ? "خطر ائتلاف:" : "اعتبار:"}
+        </span>
+        <span className="font-bold">
+          {globalReputation > 0 ? "+" : ""}
+          {PersianNumberFormatter.toPersianDigits(globalReputation)}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
 }
 
 export function TopHudBar({ metrics }: TopHudBarProps) {
-  const formatted = useTopHudMetrics(metrics);
+  const formatted = useMemo(() => {
+    const formattedTreasury = PersianNumberFormatter.formatCurrency(
+      metrics.treasury,
+      true,
+    );
+    const formattedIncome = PersianNumberFormatter.formatSignedIncome(
+      metrics.netIncomePerTurn,
+    );
+
+    const formattedOil = `${PersianNumberFormatter.toPersianDigits(
+      metrics.oil.toLocaleString("en-US"),
+    )} بلوک`;
+
+    const formattedOilUsage = `${PersianNumberFormatter.toPersianDigits(
+      metrics.oilRequiredPerTurn,
+    )} مصرف`;
+
+    const formattedSteel = `${PersianNumberFormatter.toPersianDigits(
+      metrics.steel.toLocaleString("en-US"),
+    )} بلوک`;
+
+    const formattedManpower = PersianNumberFormatter.toPersianDigits(
+      metrics.manpower.toLocaleString("en-US"),
+    );
+
+    return {
+      formattedTreasury,
+      formattedIncome,
+      formattedOil,
+      formattedOilUsage,
+      formattedSteel,
+      formattedManpower,
+      isOilDeficit: metrics.oil < metrics.oilRequiredPerTurn,
+    };
+  }, [metrics]);
 
   return (
     <header

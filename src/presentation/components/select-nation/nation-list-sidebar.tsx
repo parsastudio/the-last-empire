@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Search } from "lucide-react";
 import {
   NationDetail,
   NationListItem,
 } from "@/presentation/components/select-nation/nation-list-item";
-import { useNationSearch } from "@/presentation/components/select-nation/hooks/use-nation-search";
 
 interface NationListSidebarProps {
   nations: NationDetail[];
@@ -21,7 +20,17 @@ export function NationListSidebar({
   onSearchChange,
   onSelectNation,
 }: NationListSidebarProps) {
-  const { filteredNations } = useNationSearch(nations, searchQuery);
+  const filteredNations = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return nations;
+
+    return nations.filter(
+      (n) =>
+        n.name.toLowerCase().includes(query) ||
+        n.id.toLowerCase().includes(query) ||
+        n.code.toLowerCase().includes(query),
+    );
+  }, [nations, searchQuery]);
 
   return (
     <div className="lg:col-span-4 flex flex-col bg-card border border-border rounded-3xl overflow-hidden shadow-sm h-full">

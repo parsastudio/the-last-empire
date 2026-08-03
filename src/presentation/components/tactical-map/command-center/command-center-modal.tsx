@@ -6,7 +6,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { getCommandCenterMeta } from "@/presentation/components/tactical-map/command-center/config/command-center-meta.config";
-import { CommandCenterHeader } from "@/presentation/components/tactical-map/command-center/command-center-header";
+import { CommandBreadcrumb } from "@/presentation/components/tactical-map/navigation/command-breadcrumb";
 
 interface CommandCenterModalProps {
   activeTab: SidebarTabType | null;
@@ -55,12 +55,14 @@ export function CommandCenterModal({
       onClose={onClose}
     >
       <div className="space-y-4">
-        <CommandCenterHeader
-          activeTab={activeTab}
-          subTabLabel={activeSubTab}
-          targetName={selectedTargetCode}
-          onNavigateTab={onNavigateTab}
-        />
+        <div className="pb-2 text-right dir-rtl">
+          <CommandBreadcrumb
+            activeTab={activeTab}
+            subTabLabel={activeSubTab}
+            targetName={selectedTargetCode}
+            onNavigateTab={onNavigateTab}
+          />
+        </div>
 
         <CommandCenterTabRouter
           activeTab={activeTab}
