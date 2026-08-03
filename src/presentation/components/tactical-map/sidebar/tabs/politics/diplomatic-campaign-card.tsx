@@ -23,7 +23,7 @@ export function DiplomaticCampaignCard({
   const { dispatchAction } = useGameActions();
 
   const handleLaunchCampaign = async () => {
-    if (!canAfford || isSubmitting) return;
+    if (!canAfford || currentReputation >= 100 || isSubmitting) return;
 
     try {
       setIsSubmitting(true);

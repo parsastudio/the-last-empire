@@ -4,14 +4,10 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
-import { DeltaPatchEngine } from "@/engine/events/delta-patch-engine";
-import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
   private engines = new Map<string, GameEngine>();
-  private deltaEngine = new DeltaPatchEngine();
 
   public static getInstance(): ServerGameSessionStore {
     if (!ServerGameSessionStore.instance) {
@@ -21,9 +17,6 @@ class ServerGameSessionStore {
   }
 
   public initSession(gameId: string, initialState: GameState): GameEngine {
-    const gridState = GridStateProvider.getInstance();
-    gridState.clear();
-    GridLoaderService.ensureGridLoaded(gridState);
     const engine = new GameEngine(initialState);
     this.engines.set(gameId, engine);
     return engine;
@@ -47,31 +40,18 @@ class ServerGameSessionStore {
       ) {
         engine = this.initSession(gameId, currentState);
       }
-    } else if (!engine) {
-      const canonicalHumanId = NationIdResolver.resolveCanonicalId(
-        action.nationId,
-      );
-      const facade = new SimulationFacade();
-      const initialState = facade.selectPlayerNation(canonicalHumanId);
-      initialState.gameId = gameId;
-      engine = this.initSession(gameId, initialState);
     }
 
     if (!engine) {
       return null;
     }
 
-    const prevState = engine.getState();
-    const gridState = GridStateProvider.getInstance();
-    GridLoaderService.ensureGridLoaded(gridState);
-    const result = engine.dispatchAction(action);
-
-    if (result.success && result.newState) {
-      const patches = this.deltaEngine.createDiff(prevState, result.newState);
-      result.message = `${result.message} (${patches.length} تغییر دلتا)`;
+    if (action.type === "INITIATE_BATTLE") {
+      const gridState = GridStateProvider.getInstance();
+      GridLoaderService.ensureGridLoaded(gridState);
     }
 
-    return result;
+    return engine.dispatchAction(action);
   }
 
   public advanceTurn(
