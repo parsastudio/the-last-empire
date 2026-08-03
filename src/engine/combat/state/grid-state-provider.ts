@@ -1,16 +1,12 @@
-import { GridState } from "@/engine/combat/state/grid-state";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class GridStateProvider {
-  private static instance: GridState | null = null;
-
-  public static getInstance(): GridState {
-    if (!GridStateProvider.instance) {
-      GridStateProvider.instance = new GridState();
-    }
-    return GridStateProvider.instance;
+  public static getInstance(): BitPackedGridState {
+    return BitPackedGridState.getInstance();
   }
 
   public static clearInstance(): void {
-    GridStateProvider.instance = null;
+    const instance = BitPackedGridState.getInstance();
+    instance.clearModifiedIndices();
   }
 }

@@ -1,35 +1,20 @@
 import fs from "fs";
 import path from "path";
-import { GridState } from "@/engine/combat/state/grid-state";
-import { StateSynchronizerFacade } from "@/engine/combat/state/state-synchronizer-facade";
 import { GameState } from "@/domain/game/game-state.schema";
-import { GridCell } from "@/domain/map/grid-cell.schema";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 
 export function normalizeNationId(nationId: string): string {
   return NationIdResolver.resolveCanonicalId(nationId);
 }
 
-export class GridNationDetector {
-  public detectUniqueNations(cells: GridCell[]): string[] {
-    const nations = new Set<string>();
-    for (const cell of cells) {
-      const owner = cell.ownerId;
-      if (owner && owner !== "WATER") {
-        nations.add(owner);
-      }
-    }
-    return Array.from(nations).sort();
-  }
-}
-
 export class ManifestFileLoader {
   public loadManifest(mapId = "map1"): MapManifest | null {
     try {
-      const targetDir = MapPathResolver.getMapServerDir(mapId);
+      const targetDir = MapPathResolver.getMapFinalServerDir(mapId);
       const manifestPath = path.join(targetDir, "manifest.json");
 
       if (fs.existsSync(manifestPath)) {
@@ -42,21 +27,20 @@ export class ManifestFileLoader {
 }
 
 export class GameStateInitializer {
-  private detector = new GridNationDetector();
   private aiInitializer = new GlobalAiInitializer();
-  private synchronizer = new StateSynchronizerFacade();
   private manifestLoader = new ManifestFileLoader();
+  private bitFacade = new BitPackedStateFacade();
 
   public initializeSimulationForNation(
     nationId: string,
-    gridState: GridState,
     governmentType?: string,
   ): GameState {
     const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
-    const cells = gridState.getAllCells();
-    const detectedNations = this.detector.detectUniqueNations(cells);
-
     const manifest = this.manifestLoader.loadManifest("map1");
+
+    const detectedNations = manifest
+      ? manifest.nations.map((n) => n.id)
+      : [normalizedHumanId];
 
     if (!detectedNations.includes(normalizedHumanId)) {
       detectedNations.push(normalizedHumanId);
@@ -81,6 +65,6 @@ export class GameStateInitializer {
       turnLogs: [],
     };
 
-    return this.synchronizer.synchronizeAll(baseState, gridState);
+    return this.bitFacade.syncGameState(baseState);
   }
 }
