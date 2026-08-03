@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { WebGLMapCanvas } from "@/presentation/components/tactical-map/final/webgl-map-canvas";
@@ -26,6 +26,9 @@ export function WebGLTacticalWorkspace({
 
   const metrics = useGameResources(gameState);
   const [activeTab, setActiveTab] = useState<SidebarTabType | null>(null);
+  const [selectedTargetCode, setSelectedTargetCode] = useState<string | null>(
+    null,
+  );
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
 
   const countriesData = ALL_COUNTRY_PROFILES.map((p) => ({
@@ -40,6 +43,16 @@ export function WebGLTacticalWorkspace({
       ? gameState.nations[gameState.humanNationId] || null
       : null;
 
+  const handleSelectCountryContext = useCallback((code: string) => {
+    setSelectedTargetCode(code);
+    setActiveTab("diplomacy");
+  }, []);
+
+  const handleCloseCenterModal = useCallback(() => {
+    setActiveTab(null);
+    setSelectedTargetCode(null);
+  }, []);
+
   const isNotFound = !loading && (error !== null || !gameState);
 
   return (
@@ -47,7 +60,10 @@ export function WebGLTacticalWorkspace({
       className="w-screen h-screen bg-background overflow-hidden relative"
       dir="rtl"
     >
-      <WebGLMapCanvas countries={countriesData} />
+      <WebGLMapCanvas
+        countries={countriesData}
+        onSelectCountryContext={handleSelectCountryContext}
+      />
 
       <TopHudBar metrics={metrics} />
       <MapEngineToggle currentEngine="webgl2" gameId={gameId} />
@@ -66,12 +82,18 @@ export function WebGLTacticalWorkspace({
 
       <CommandCenterModal
         activeTab={activeTab}
+        selectedTargetCode={selectedTargetCode}
         nation={humanNation}
         gameState={gameState}
         reports={[]}
-        onClose={() => setActiveTab(null)}
+        onClose={handleCloseCenterModal}
         onOpenTrade={() => {}}
-        onNavigateTab={(tab) => setActiveTab(tab)}
+        onNavigateTab={(tab, _subTab, targetCode) => {
+          setActiveTab(tab);
+          if (targetCode) {
+            setSelectedTargetCode(targetCode);
+          }
+        }}
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />

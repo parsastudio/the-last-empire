@@ -1,17 +1,23 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { useWebGLContext } from "@/presentation/hooks/tactical-map/final/use-webgl-context";
 import { useWebGLMapRenderer } from "@/presentation/hooks/tactical-map/final/use-webgl-map-renderer";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 import { WebGLHoverHud } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
+import { WebGLContextMenuWrapper } from "@/presentation/components/tactical-map/final/hud/webgl-context-menu-wrapper";
+import { useWebGLInteraction } from "@/presentation/hooks/tactical-map/final/use-webgl-interaction";
+import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 
 interface WebGLMapCanvasProps {
   countries: CountryMapping[];
+  onSelectCountryContext?: (code: string) => void;
 }
 
-export function WebGLMapCanvas({ countries }: WebGLMapCanvasProps) {
+export function WebGLMapCanvas({
+  countries,
+  onSelectCountryContext,
+}: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -21,6 +27,8 @@ export function WebGLMapCanvas({ countries }: WebGLMapCanvasProps) {
   const {
     scale,
     position,
+    isDragging,
+    hasDraggedRef,
     handleWheel,
     handleMouseDown,
     handleMouseMove,
@@ -35,32 +43,30 @@ export function WebGLMapCanvas({ countries }: WebGLMapCanvasProps) {
     countries,
   });
 
-  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
-    null,
-  );
-  const [hoverData, setHoverData] = useState<unknown | null>(null);
-  const facadeRef = useRef(new BitPackedStateFacade());
+  const {
+    hoverPos,
+    hoverData,
+    contextMenuState,
+    handlePointerMove,
+    handleMapClick,
+    closeContextMenu,
+  } = useWebGLInteraction({
+    containerRef,
+    position,
+    scale,
+    isDragging,
+    hasDraggedRef,
+  });
 
-  const handlePointerMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const onMouseMoveCombined = (e: React.MouseEvent<HTMLDivElement>) => {
     handleMouseMove(e);
+    handlePointerMove(e.clientX, e.clientY);
+  };
 
-    const container = containerRef.current;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    const rx = e.clientX - rect.left;
-    const ry = e.clientY - rect.top;
-
-    const mapX = Math.floor(((rx - position.x) / scale) * (4096 / rect.width));
-    const mapY = Math.floor(((ry - position.y) / scale) * (2048 / rect.height));
-
-    const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
-    if (inspected) {
-      setHoverPos({ x: e.clientX, y: e.clientY });
-      setHoverData(inspected);
-    } else {
-      setHoverPos(null);
-      setHoverData(null);
+  const handleSelectContext = (action: ContextActionType, code: string) => {
+    closeContextMenu();
+    if (action === "profile" && onSelectCountryContext) {
+      onSelectCountryContext(code);
     }
   };
 
@@ -69,15 +75,21 @@ export function WebGLMapCanvas({ countries }: WebGLMapCanvasProps) {
       ref={containerRef}
       className="w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden cursor-crosshair select-none"
       onMouseDown={handleMouseDown}
-      onMouseMove={handlePointerMove}
+      onMouseMove={onMouseMoveCombined}
       onMouseUp={handleMouseUp}
       onWheel={handleWheel}
+      onClick={handleMapClick}
     >
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 w-full h-full block"
       />
       <WebGLHoverHud hoverPos={hoverPos} hoverData={hoverData} />
+      <WebGLContextMenuWrapper
+        contextMenuState={contextMenuState}
+        onSelectAction={handleSelectContext}
+        onClose={closeContextMenu}
+      />
     </div>
   );
 }
