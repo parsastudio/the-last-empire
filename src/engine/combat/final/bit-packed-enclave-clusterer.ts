@@ -1,11 +1,12 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-
-interface LandComponent {
-  pixelIndices: number[];
-  size: number;
-}
+import {
+  ComponentMergeEngine,
+  LandClusterComponent,
+} from "@/engine/combat/final/component-merge-engine";
 
 export class BitPackedEnclaveClusterer {
+  private mergeEngine = new ComponentMergeEngine();
+
   public clusterNationEnclaves(
     buffer: BitPackedBuffer,
     width = 4096,
@@ -41,7 +42,7 @@ export class BitPackedEnclaveClusterer {
 
     for (const [nationId, pixelIndices] of nationPixelsMap.entries()) {
       const nationPixelSet = new Set<number>(pixelIndices);
-      const components: LandComponent[] = [];
+      const rawComponents: LandClusterComponent[] = [];
 
       for (let k = 0; k < pixelIndices.length; k++) {
         const startIdx = pixelIndices[k]!;
@@ -51,6 +52,11 @@ export class BitPackedEnclaveClusterer {
         const queue: number[] = [startIdx];
         visited[startIdx] = 1;
 
+        let minX = startIdx % width;
+        let maxX = minX;
+        let minY = Math.floor(startIdx / width);
+        let maxY = minY;
+
         let head = 0;
         while (head < queue.length) {
           const currIdx = queue[head++]!;
@@ -58,6 +64,11 @@ export class BitPackedEnclaveClusterer {
 
           const cx = currIdx % width;
           const cy = Math.floor(currIdx / width);
+
+          minX = Math.min(minX, cx);
+          maxX = Math.max(maxX, cx);
+          minY = Math.min(minY, cy);
+          maxY = Math.max(maxY, cy);
 
           for (let i = 0; i < 8; i++) {
             let nx = cx + neighbors[i]!.dx;
@@ -75,16 +86,26 @@ export class BitPackedEnclaveClusterer {
           }
         }
 
-        components.push({
+        rawComponents.push({
           pixelIndices: compIndices,
+          minX,
+          maxX,
+          minY,
+          maxY,
           size: compIndices.length,
         });
       }
 
-      components.sort((a, b) => b.size - a.size);
+      const mergedComponents = this.mergeEngine.mergeNearComponents(
+        rawComponents,
+        width,
+        150,
+      );
 
-      for (let cIdx = 0; cIdx < components.length; cIdx++) {
-        const comp = components[cIdx]!;
+      mergedComponents.sort((a, b) => b.size - a.size);
+
+      for (let cIdx = 0; cIdx < mergedComponents.length; cIdx++) {
+        const comp = mergedComponents[cIdx]!;
         const enclaveId = Math.min(31, cIdx);
 
         for (let pIdx = 0; pIdx < comp.pixelIndices.length; pIdx++) {

@@ -1,5 +1,4 @@
-const GLOBAL_DEVIATION_FACTOR = 1.15;
-const EARTH_SURFACE_AREA_KM2 = 510072000;
+const TOTAL_LAND_SURFACE_AREA_KM2 = 148940000;
 
 export class CellAreaCalibrator {
   private weights: Float64Array;
@@ -15,12 +14,14 @@ export class CellAreaCalibrator {
       totalWeight += this.weights[y]! * width;
     }
 
-    this.areaPerWeightUnit = EARTH_SURFACE_AREA_KM2 / totalWeight;
+    const estimatedLandWeightRatio = 0.29;
+    this.areaPerWeightUnit =
+      TOTAL_LAND_SURFACE_AREA_KM2 / (totalWeight * estimatedLandWeightRatio);
   }
 
   public getCalibratedPixelArea(y: number): number {
     if (y < 0 || y >= this.weights.length) return 0;
     const w = this.weights[y] || 0;
-    return w * this.areaPerWeightUnit * GLOBAL_DEVIATION_FACTOR;
+    return w * this.areaPerWeightUnit;
   }
 }
