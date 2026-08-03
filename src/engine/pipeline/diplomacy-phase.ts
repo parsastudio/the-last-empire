@@ -3,15 +3,18 @@ import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { CoalitionManager } from "@/engine/diplomacy/coalition-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
-import { ReputationDecayHandler } from "./diplomacy/reputation-decay-handler";
-import { OpinionFrictionHandler } from "./diplomacy/opinion-friction-handler";
+import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
+import { DiplomaticOpinionCalculator } from "@/engine/diplomacy/diplomatic-opinion-calculator";
+import { RelationsManager } from "@/engine/diplomacy/relations-manager";
+import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
 
 export class DiplomacyPhase implements TurnPhase {
   private powerRanker = new PowerScoreRanker();
   private governmentSystem = new GovernmentSystem();
   private coalitionManager = new CoalitionManager();
-  private reputationDecayHandler = new ReputationDecayHandler();
-  private opinionFrictionHandler = new OpinionFrictionHandler();
+  private reputationManager = new ReputationManager();
+  private opinionCalculator = new DiplomaticOpinionCalculator();
+  private relationsManager = new RelationsManager();
 
   public execute(context: PipelineContext): GameState {
     let nextState = { ...context.state };
@@ -51,9 +54,40 @@ export class DiplomacyPhase implements TurnPhase {
 
       let updated = { ...nation };
 
-      updated = this.reputationDecayHandler.handle(updated);
-      updated = this.opinionFrictionHandler.handle(updated, nations);
+      updated = this.reputationManager.applyReputationGain(updated, 2);
 
+      const updatedRelations = { ...(updated.relations || {}) };
+
+      for (const [targetId, relation] of Object.entries(updatedRelations)) {
+        if (!relation) continue;
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(targetId);
+        const target = nations[targetId] || nations[canonicalTargetId];
+
+        if (target && target.isAlive) {
+          const landNeighbors = updated.geography?.landNeighbors || [];
+          const isLandNeighbor =
+            landNeighbors.includes(targetId) ||
+            landNeighbors.includes(canonicalTargetId);
+
+          const frictionValue =
+            this.relationsManager.calculateGovernmentFriction(updated, target);
+
+          const nextOpinion = this.opinionCalculator.calculateOpinion(
+            relation.opinion,
+            updated.globalReputation,
+            relation.stance,
+            isLandNeighbor,
+            frictionValue,
+          );
+
+          updatedRelations[targetId] = {
+            ...relation,
+            opinion: nextOpinion,
+          };
+        }
+      }
+
+      updated.relations = updatedRelations;
       nations[id] = updated;
     }
 

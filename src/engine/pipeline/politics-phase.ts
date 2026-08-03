@@ -1,13 +1,15 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
-import { StabilityDoctrinesHandler } from "./politics/stability-doctrines-handler";
-import { DomesticCrisisHandler } from "./politics/domestic-crisis-handler";
+import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { ResearchManager } from "@/engine/politics/research-manager";
+import { DomesticCrisisManager } from "@/engine/politics/domestic-crisis-manager";
 
 export class PoliticsPhase implements TurnPhase {
   private corruptionManager = new CorruptionManager();
-  private stabilityDoctrinesHandler = new StabilityDoctrinesHandler();
-  private domesticCrisisHandler = new DomesticCrisisHandler();
+  private stabilityCalc = new StabilityCalculator();
+  private researchManager = new ResearchManager();
+  private domesticCrisisManager = new DomesticCrisisManager();
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
@@ -28,10 +30,17 @@ export class PoliticsPhase implements TurnPhase {
       updated.government.corruption =
         this.corruptionManager.updateCorruptionLevel(updated);
 
-      updated = this.stabilityDoctrinesHandler.handle(updated);
+      const newStability = this.stabilityCalc.calculateTurnStability(updated);
+      updated.government = {
+        ...updated.government,
+        stability: newStability,
+      };
 
-      const crisisResult = this.domesticCrisisHandler.handle(updated);
-      updated = crisisResult.updated;
+      updated = this.researchManager.processTurnResearch(updated);
+
+      const crisisResult =
+        this.domesticCrisisManager.checkAndProcessCrisis(updated);
+      updated = crisisResult.updatedNation;
 
       updated.government = {
         ...updated.government,
