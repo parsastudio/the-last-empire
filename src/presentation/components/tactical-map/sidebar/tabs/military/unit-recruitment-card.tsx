@@ -1,8 +1,61 @@
 import React from "react";
-import { Clock, Coins, Users, Wrench } from "lucide-react";
-import { UnitConfig } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitable-units.config";
+import {
+  Clock,
+  Coins,
+  Users,
+  Wrench,
+  Shield,
+  Plane,
+  Radio,
+  LucideIcon,
+} from "lucide-react";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { useUnitRecruitmentCalculator } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-unit-recruitment-calculator";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+
+export interface UnitConfig {
+  type: string;
+  name: string;
+  moneyCost: number;
+  manpowerCost: number;
+  steelCost: number;
+  buildTurns: number;
+  icon: LucideIcon;
+  color: string;
+}
+
+export const RECRUITABLE_UNITS: UnitConfig[] = [
+  {
+    type: MILITARY_UNIT_STATS.INFANTRY.type,
+    name: MILITARY_UNIT_STATS.INFANTRY.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.INFANTRY.moneyCost,
+    manpowerCost: MILITARY_UNIT_STATS.INFANTRY.manpowerCost,
+    steelCost: MILITARY_UNIT_STATS.INFANTRY.steelCost,
+    buildTurns: MILITARY_UNIT_STATS.INFANTRY.buildTurns,
+    icon: Shield,
+    color: "text-primary",
+  },
+  {
+    type: MILITARY_UNIT_STATS.AIR_FORCE.type,
+    name: MILITARY_UNIT_STATS.AIR_FORCE.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
+    manpowerCost: MILITARY_UNIT_STATS.AIR_FORCE.manpowerCost,
+    steelCost: MILITARY_UNIT_STATS.AIR_FORCE.steelCost,
+    buildTurns: MILITARY_UNIT_STATS.AIR_FORCE.buildTurns,
+    icon: Plane,
+    color: "text-gdp",
+  },
+  {
+    type: MILITARY_UNIT_STATS.DRONE_MISSILE.type,
+    name: MILITARY_UNIT_STATS.DRONE_MISSILE.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost,
+    manpowerCost: MILITARY_UNIT_STATS.DRONE_MISSILE.manpowerCost,
+    steelCost: MILITARY_UNIT_STATS.DRONE_MISSILE.steelCost,
+    buildTurns: MILITARY_UNIT_STATS.DRONE_MISSILE.buildTurns,
+    icon: Radio,
+    color: "text-treasury",
+  },
+];
 
 interface UnitRecruitmentCardProps {
   unit: UnitConfig;
