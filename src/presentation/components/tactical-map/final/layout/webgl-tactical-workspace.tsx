@@ -61,6 +61,8 @@ export function WebGLTacticalWorkspace({
     >
       <WebGLMapCanvas
         countries={countriesData}
+        nationsMap={gameState?.nations}
+        humanNationId={gameState?.humanNationId}
         onSelectCountryContext={handleSelectCountryContext}
       />
 

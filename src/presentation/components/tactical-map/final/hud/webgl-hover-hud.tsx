@@ -1,76 +1,106 @@
-import React from "react";
-import { ShieldAlert, MapPin } from "lucide-react";
+import React, { useMemo } from "react";
+import { Shield, Coins, Users } from "lucide-react";
+import { HoverCountryInfo } from "@/presentation/components/tactical-map/hud/country-hover-container";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+
+class HoverHudPositionCalculator {
+  private readonly hudWidth = 288;
+  private readonly hudHeight = 160;
+  private readonly offset = 15;
+
+  public calculatePosition(
+    cursorPos: { x: number; y: number } | null,
+  ): React.CSSProperties {
+    if (!cursorPos || typeof window === "undefined") {
+      return { left: "1.5rem", bottom: "1.5rem" };
+    }
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let left = cursorPos.x + this.offset;
+    let top = cursorPos.y + this.offset;
+
+    if (left + this.hudWidth > windowWidth - 20) {
+      left = Math.max(10, cursorPos.x - this.hudWidth - this.offset);
+    }
+
+    if (top + this.hudHeight > windowHeight - 20) {
+      top = Math.max(10, cursorPos.y - this.hudHeight - this.offset);
+    }
+
+    return {
+      left: `${left}px`,
+      top: `${top}px`,
+    };
+  }
+}
 
 interface WebGLHoverHudProps {
   hoverPos: { x: number; y: number } | null;
-  hoverData: unknown | null;
+  hoverData: HoverCountryInfo | null;
 }
 
 export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
+  const calculator = useMemo(() => new HoverHudPositionCalculator(), []);
+
   if (!hoverPos || !hoverData) return null;
 
-  const data = hoverData as {
-    nationId: number;
-    enclaveId: number;
-    isFrontier: boolean;
-    coastalAccess: number;
-  };
-
-  const getCoastalLabel = (access: number) => {
-    if (access === 1) return "ساحل آب آزاد";
-    if (access === 2) return "دریاچه بسته";
-    return "درون خشکی";
-  };
+  const flagSymbol = getFlagEmoji(hoverData.flagCode || hoverData.code);
+  const stylePosition = calculator.calculatePosition(hoverPos);
 
   return (
     <div
-      className="fixed z-50 pointer-events-none w-64 bg-card/90 backdrop-blur-xl border border-border p-3 rounded-2xl shadow-2xl space-y-2 text-right dir-rtl animate-fade-smooth font-sans"
-      style={{
-        left: `${hoverPos.x + 15}px`,
-        top: `${hoverPos.y + 15}px`,
-      }}
+      className="fixed z-50 pointer-events-none w-72 animate-fade-smooth dir-rtl text-right"
+      style={stylePosition}
     >
-      <div className="flex items-center justify-between border-b border-border/60 pb-1.5">
-        <div className="flex items-center gap-2">
-          <MapPin size={14} className="text-primary" />
-          <span className="text-xs font-bold text-foreground">
-            شناسنامه پیکسل WebGL
+      <div className="bg-card/90 backdrop-blur-xl border border-border/80 p-3.5 rounded-2xl shadow-2xl space-y-2.5 text-foreground font-sans">
+        <div className="flex items-center justify-between border-b border-border/60 pb-2">
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xl select-none"
+              role="img"
+              aria-label={hoverData.name}
+            >
+              {flagSymbol}
+            </span>
+            <div>
+              <h4 className="text-xs font-extrabold text-foreground leading-none">
+                {hoverData.name}
+              </h4>
+              <span className="text-[9px] font-mono text-muted-foreground block mt-0.5">
+                {hoverData.code}{" "}
+                {hoverData.regionName && `| ${hoverData.regionName}`}
+              </span>
+            </div>
+          </div>
+
+          <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg border border-border/60">
+            رتبه: #{PersianNumberFormatter.toPersianDigits(hoverData.rank)}
           </span>
         </div>
-        <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg border border-border/60">
-          کد #{PersianNumberFormatter.toPersianDigits(data.nationId)}
-        </span>
+
+        <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+          <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
+            <Coins size={12} className="text-gdp shrink-0" />
+            <span className="truncate">{hoverData.gdp}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
+            <Users size={12} className="text-primary shrink-0" />
+            <span className="truncate">{hoverData.regionArea || "---"}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-[10px] bg-secondary/30 p-2 rounded-xl border border-border/40">
+          <span className="text-muted-foreground flex items-center gap-1">
+            <Shield size={11} className="text-diplomacy" />
+            وضعیت سیاسی:
+          </span>
+          <span className="font-bold text-foreground">{hoverData.stance}</span>
+        </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-        <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
-          <span className="text-muted-foreground block font-sans">
-            اقلیم برون‌مرزی
-          </span>
-          <span className="font-bold text-foreground block">
-            {data.enclaveId === 0
-              ? "خاک اصلی"
-              : `منطقه ${PersianNumberFormatter.toPersianDigits(data.enclaveId)}`}
-          </span>
-        </div>
-
-        <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
-          <span className="text-muted-foreground block font-sans">
-            وضعیت ساحلی
-          </span>
-          <span className="font-bold text-treasury block">
-            {getCoastalLabel(data.coastalAccess)}
-          </span>
-        </div>
-      </div>
-
-      {data.isFrontier && (
-        <div className="flex items-center gap-1.5 text-[10px] text-military bg-military/15 border border-military/30 p-2 rounded-xl font-bold animate-pulse">
-          <ShieldAlert size={13} />
-          <span>خط نبرد درگیری مستقیم فعال (Frontier Bit = 1)</span>
-        </div>
-      )}
     </div>
   );
 }
