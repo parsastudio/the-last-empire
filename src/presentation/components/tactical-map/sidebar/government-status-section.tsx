@@ -18,12 +18,14 @@ function GovernmentMetricBar({
   bgClass: string;
 }) {
   return (
-    <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1.5 dir-rtl text-right">
+    <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-2 dir-rtl text-right">
       <div className="flex justify-between items-center text-[10px]">
-        <span className="text-muted-foreground font-sans">{label}</span>
+        <span className="text-muted-foreground font-sans font-bold">
+          {label}
+        </span>
         <div className="flex items-center gap-1.5 font-mono">
           {deltaText && (
-            <span className="text-[9px] text-muted-foreground font-sans bg-secondary/80 px-1.5 py-0.5 rounded">
+            <span className="text-[9px] text-muted-foreground font-sans bg-secondary/80 px-2 py-0.5 rounded-lg border border-border/40">
               {deltaText}
             </span>
           )}
@@ -32,9 +34,9 @@ function GovernmentMetricBar({
           </span>
         </div>
       </div>
-      <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
+      <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/40">
         <div
-          className={`${bgClass} h-full rounded-full transition-all`}
+          className={`${bgClass} h-full rounded-full transition-all duration-300`}
           style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
         />
       </div>
@@ -81,15 +83,15 @@ export function GovernmentStatusSection({
   const corruptionDeltaText = `+${PersianNumberFormatter.toPersianDigits(corruptionGrowth)}٪ انتروپی / نوبت`;
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right">
+    <div className="space-y-3 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
-        <Landmark size={13} className="text-diplomacy" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+        <Landmark size={14} className="text-diplomacy" />
+        <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
           وضعیت حکومت و پایداری داخلی
         </span>
       </div>
 
-      <div className="space-y-2 font-mono text-xs">
+      <div className="space-y-2.5 font-mono text-xs">
         <GovernmentMetricBar
           label="ثبات سیاسی داخلی"
           value={stability}
@@ -106,17 +108,17 @@ export function GovernmentStatusSection({
           bgClass="bg-military"
         />
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl flex flex-col gap-1">
-          <span className="text-[9px] text-muted-foreground font-sans">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground font-sans font-bold">
             اعتبار و پرستیژ جهانی
           </span>
           <span
-            className={`text-xs font-bold ${
+            className={`text-xs font-bold font-mono px-3 py-1 rounded-xl border ${
               reputation < 0
-                ? "text-military"
+                ? "bg-military/10 border-military/30 text-military"
                 : reputation > 0
-                  ? "text-gdp"
-                  : "text-foreground"
+                  ? "bg-gdp/10 border-gdp/30 text-gdp"
+                  : "bg-secondary border-border text-foreground"
             }`}
           >
             {reputation > 0 ? "+" : ""}

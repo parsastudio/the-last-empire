@@ -16,19 +16,23 @@ export function NextTurnButton({
     <button
       onClick={onNextTurn}
       disabled={isProcessing}
-      className="w-full py-3.5 px-4 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-bold transition-all shadow-lg shadow-gdp/10 hover:shadow-xl hover:translate-y-[-1px] text-xs uppercase tracking-wider flex items-center justify-between gap-2 cursor-pointer border border-gdp/20 dir-rtl"
+      className="w-full py-4 px-4 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-black transition-all shadow-xl shadow-gdp/20 hover:shadow-gdp/30 hover:scale-[1.01] active:scale-[0.99] text-xs uppercase tracking-wider flex items-center justify-between gap-2 cursor-pointer border border-gdp/30 dir-rtl"
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {isProcessing ? (
-          <Loader2 size={15} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin text-primary-foreground" />
         ) : (
-          <Play size={15} fill="currentColor" />
+          <Play
+            size={16}
+            fill="currentColor"
+            className="text-primary-foreground"
+          />
         )}
-        <span>
+        <span className="font-sans">
           {isProcessing ? "در حال محاسبه نوبت..." : "پایان نوبت و ثبت تصمیمات"}
         </span>
       </div>
-      <span className="font-mono bg-black/20 px-2.5 py-0.5 rounded-lg text-[10px]">
+      <span className="font-mono bg-black/25 px-2.5 py-1 rounded-xl text-[10px] font-bold">
         نوبت: {currentTurn}
       </span>
     </button>

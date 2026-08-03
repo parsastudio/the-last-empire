@@ -27,47 +27,47 @@ export function EconomyStatsSection({
   );
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right">
+    <div className="space-y-3 dir-rtl text-right">
       <div className="flex items-center gap-2 px-1">
-        <Coins size={13} className="text-gdp" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+        <Coins size={14} className="text-gdp" />
+        <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
           وضعیت اقتصادی و مالی
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 font-mono">
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
-          <span className="text-[9px] text-muted-foreground block font-sans">
+      <div className="grid grid-cols-2 gap-2.5 font-mono">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
+          <span className="text-[9px] text-muted-foreground block font-sans font-bold">
             تولید ناخالص (GDP)
           </span>
-          <span className="text-xs font-bold text-foreground block">
+          <span className="text-xs font-extrabold text-foreground block">
             {formattedGdp}
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
-          <span className="text-[9px] text-muted-foreground block font-sans">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
+          <span className="text-[9px] text-muted-foreground block font-sans font-bold">
             موجودی خزانه
           </span>
-          <span className="text-xs font-bold text-gdp block truncate">
+          <span className="text-xs font-extrabold text-gdp block truncate">
             {compactTreasury}
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
-          <span className="text-[9px] text-muted-foreground block font-sans">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
+          <span className="text-[9px] text-muted-foreground block font-sans font-bold">
             نرخ مالیات / تعرفه
           </span>
-          <span className="text-xs font-bold text-foreground block">
+          <span className="text-xs font-extrabold text-foreground block">
             {formattedTax}٪ / {formattedTariff}٪
           </span>
         </div>
 
-        <div className="bg-background/40 border border-border/60 p-3 rounded-xl space-y-1">
-          <span className="text-[9px] text-muted-foreground block font-sans">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
+          <span className="text-[9px] text-muted-foreground block font-sans font-bold">
             بدهی ملی
           </span>
-          <span className="text-xs font-bold text-military block">
+          <span className="text-xs font-extrabold text-military block">
             ${formattedDebt}
           </span>
         </div>

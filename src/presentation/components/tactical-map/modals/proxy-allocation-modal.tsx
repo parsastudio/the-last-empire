@@ -72,10 +72,10 @@ export function ProxyAllocationModal({
       onClose={onClose}
     >
       <div className="space-y-4 text-right dir-rtl">
-        <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+        <div className="bg-secondary/50 border border-border/80 p-3.5 rounded-2xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <span
-              className="text-2xl select-none"
+              className="text-3xl select-none"
               role="img"
               aria-label={targetName}
             >
@@ -92,7 +92,7 @@ export function ProxyAllocationModal({
           </div>
 
           <div className="text-left font-mono">
-            <span className="text-[9px] text-muted-foreground block font-sans">
+            <span className="text-[9px] text-muted-foreground block font-sans font-bold">
               ثبات فعلی
             </span>
             <span className="text-xs font-bold text-military">
@@ -103,7 +103,7 @@ export function ProxyAllocationModal({
 
         <div className="space-y-3 font-mono text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground font-sans text-[11px]">
+            <span className="text-muted-foreground font-sans text-[11px] font-bold">
               میزان کاهش ثبات:
             </span>
             <span className="font-bold text-military text-xs">
@@ -132,21 +132,21 @@ export function ProxyAllocationModal({
             colorVariant="military"
           />
 
-          <div className="bg-secondary/40 border border-border/60 p-3 rounded-2xl space-y-1.5 text-right font-sans">
+          <div className="bg-secondary/50 border border-border/70 p-3.5 rounded-2xl space-y-1.5 text-right font-sans">
             <div className="flex justify-between items-center text-xs font-mono">
-              <span className="text-muted-foreground font-sans text-[11px]">
+              <span className="text-muted-foreground font-sans text-[11px] font-bold">
                 هزینه عملیات:
               </span>
               <span className="font-bold text-gdp text-xs flex items-center gap-1">
-                <Coins size={13} />
+                <Coins size={14} />
                 {PersianNumberFormatter.formatCurrency(requiredBudget)}
               </span>
             </div>
           </div>
 
           {willTriggerCoup && (
-            <div className="p-2.5 bg-military/10 border border-military/30 rounded-xl flex items-center gap-2 text-[10px] text-military font-sans">
-              <ShieldAlert size={14} className="shrink-0" />
+            <div className="p-3 bg-military/15 border border-military/40 rounded-2xl flex items-center gap-2.5 text-[10px] text-military font-sans font-bold">
+              <ShieldAlert size={16} className="shrink-0" />
               <span>
                 هشدار: کاهش ثبات به زیر ۱۰٪ باعث کودتا و سرنگونی رژیم می‌شود.
               </span>
@@ -157,9 +157,9 @@ export function ProxyAllocationModal({
         <button
           onClick={handleFundProxy}
           disabled={requiredBudget <= 0 || !canAfford}
-          className="w-full py-3 bg-military hover:bg-military/90 disabled:opacity-40 text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+          className="w-full py-3.5 bg-military hover:bg-military/90 disabled:opacity-40 text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg shadow-military/20 flex items-center justify-center gap-2 border border-military/30"
         >
-          <Zap size={14} />
+          <Zap size={15} />
           <span>
             {!canAfford
               ? "خزانه ناکافی"
