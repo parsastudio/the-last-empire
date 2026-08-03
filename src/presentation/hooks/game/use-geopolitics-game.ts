@@ -5,6 +5,9 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
+import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 
 export function useGeopoliticsGame(customGameId?: string) {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -13,6 +16,7 @@ export function useGeopoliticsGame(customGameId?: string) {
 
   const apiService = useMemo(() => new GameStateApiService(), []);
   const storageService = useMemo(() => new ClientStorageService(), []);
+  const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
 
   const getStoredNationId = useCallback((): string => {
     if (typeof window !== "undefined") {
@@ -58,6 +62,17 @@ export function useGeopoliticsGame(customGameId?: string) {
 
     async function loadInitialStatus() {
       const nationId = getStoredNationId();
+      const activeGameId = customGameId || "default_game";
+
+      const gridState = BitPackedGridState.getInstance();
+      const loadedBitBuffer = await storageAdapter.loadBitBuffer(
+        activeGameId,
+        gridState.getBuffer(),
+      );
+
+      if (!loadedBitBuffer) {
+        await FinalStateLoader.loadLiveStateBuffer("map1");
+      }
 
       if (customGameId) {
         try {
@@ -90,7 +105,13 @@ export function useGeopoliticsGame(customGameId?: string) {
     return () => {
       active = false;
     };
-  }, [apiService, customGameId, getStoredNationId, storageService]);
+  }, [
+    apiService,
+    customGameId,
+    getStoredNationId,
+    storageService,
+    storageAdapter,
+  ]);
 
   return {
     gameState,

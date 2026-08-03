@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameState } from "@/domain/game/game-state.schema";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
-import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
+import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get("gameId") || "default_game";
-
-    const gridState = GridStateProvider.getInstance();
-    await GridLoaderService.ensureGridLoaded(gridState);
 
     let bodyState: GameState | undefined = undefined;
     try {
@@ -20,7 +16,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     } catch {}
 
-    const nextState = serverGameSessionStore.advanceTurn(gameId, bodyState);
+    const orchestrator = new BitPackedTurnOrchestrator();
+
+    let nextState = serverGameSessionStore.advanceTurn(gameId, bodyState);
+
+    if (nextState) {
+      nextState = orchestrator.processPostTurn(nextState);
+    }
 
     if (!nextState) {
       return NextResponse.json(
@@ -29,12 +31,9 @@ export async function POST(request: Request): Promise<NextResponse> {
       );
     }
 
-    const updatedGridCells = gridState.getModifiedCells();
-
     return NextResponse.json({
       success: true,
       data: nextState,
-      gridCells: updatedGridCells,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
