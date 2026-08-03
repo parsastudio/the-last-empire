@@ -3,14 +3,21 @@ import { GameAction } from "@/domain/game/action.schema";
 import { TreatyEvaluator } from "@/engine/diplomacy/treaty-evaluator";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
   private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
-    const nation = state.nations[action.nationId];
+    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+      action.nationId,
+    );
+    const nation =
+      state.nations[action.nationId] || state.nations[canonicalSourceId];
     if (!nation) return state;
+
+    const sourceKey = nation.id;
 
     switch (action.type) {
       case "SET_RESEARCH_BUDGET": {
@@ -22,7 +29,7 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: updatedNation,
+            [sourceKey]: updatedNation,
           },
         };
       }
@@ -35,7 +42,7 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               doctrines: {
                 doctrinePoints: nation.doctrines.doctrinePoints - 3,
@@ -60,7 +67,7 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               treasury: nation.treasury - action.amount,
               government: {
@@ -77,7 +84,7 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               treasury: nation.treasury - action.amount,
               globalReputation: Math.min(100, nation.globalReputation + 15),
@@ -90,7 +97,7 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               autoTradeSettings: {
                 autoBuyDeficit: action.autoBuyDeficit,
@@ -103,8 +110,15 @@ export class PoliticsActionExecutor {
         };
 
       case "FUND_PROXY_INFLUENCE": {
-        const target = state.nations[action.targetNationId];
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+          action.targetNationId,
+        );
+        const target =
+          state.nations[action.targetNationId] ||
+          state.nations[canonicalTargetId];
         if (!target) return state;
+        const targetKey = target.id;
+
         const drain = Math.max(
           1,
           Math.min(
@@ -116,11 +130,11 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               treasury: nation.treasury - action.budget,
             },
-            [action.targetNationId]: {
+            [targetKey]: {
               ...target,
               government: {
                 ...target.government,
@@ -132,8 +146,14 @@ export class PoliticsActionExecutor {
       }
 
       case "DIPLOMATIC_PROPOSAL": {
-        const receiver = state.nations[action.targetNationId];
+        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+          action.targetNationId,
+        );
+        const receiver =
+          state.nations[action.targetNationId] ||
+          state.nations[canonicalTargetId];
         if (!receiver) return state;
+        const targetKey = receiver.id;
 
         if (
           (action.proposalType === "NON_AGGRESSION_PACT" ||
@@ -150,8 +170,12 @@ export class PoliticsActionExecutor {
         );
         if (!result.accepted) return state;
 
-        const senderRel = nation.relations[action.targetNationId];
-        const receiverRel = receiver.relations[action.nationId];
+        const senderRel =
+          nation.relations[action.targetNationId] ||
+          nation.relations[canonicalTargetId];
+        const receiverRel =
+          receiver.relations[action.nationId] ||
+          receiver.relations[canonicalSourceId];
         if (!senderRel || !receiverRel) return state;
 
         const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
@@ -167,18 +191,18 @@ export class PoliticsActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [action.nationId]: {
+            [sourceKey]: {
               ...nation,
               relations: {
                 ...nation.relations,
-                [action.targetNationId]: updatedSenderRel,
+                [senderRel.targetNationId]: updatedSenderRel,
               },
             },
-            [action.targetNationId]: {
+            [targetKey]: {
               ...receiver,
               relations: {
                 ...receiver.relations,
-                [action.nationId]: updatedReceiverRel,
+                [receiverRel.targetNationId]: updatedReceiverRel,
               },
             },
           },

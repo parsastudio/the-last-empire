@@ -12,11 +12,11 @@ export class StateValidator {
       );
     }
 
-    const canonicalNationId = NationIdResolver.resolveCanonicalId(
+    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
       action.nationId,
     );
     const sourceNation =
-      state.nations[action.nationId] || state.nations[canonicalNationId];
+      state.nations[action.nationId] || state.nations[canonicalSourceId];
 
     if (!sourceNation || !sourceNation.isAlive) {
       throw new GameError(
@@ -32,7 +32,6 @@ export class StateValidator {
       const targetNation =
         state.nations[action.targetNationId] ||
         state.nations[canonicalTargetId];
-
       if (!targetNation || !targetNation.isAlive) {
         throw new GameError(
           "NATION_NOT_FOUND",
@@ -48,11 +47,19 @@ export class StateValidator {
     actionList: readonly GameAction[],
     newAction: GameAction,
   ): void {
+    const canonicalNewNationId = NationIdResolver.resolveCanonicalId(
+      newAction.nationId,
+    );
+
     if (newAction.type === "REQUEST_LOAN") {
       if (
-        actionList.some(
-          (a) => a.type === "REQUEST_LOAN" && a.nationId === newAction.nationId,
-        )
+        actionList.some((a) => {
+          const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+          return (
+            a.type === "REQUEST_LOAN" &&
+            (a.nationId === newAction.nationId || aId === canonicalNewNationId)
+          );
+        })
       ) {
         throw new GameError(
           "INVALID_ACTION",
@@ -62,12 +69,14 @@ export class StateValidator {
     }
 
     if (newAction.type === "TRADE_RESOURCES") {
-      const hasConflict = actionList.some(
-        (a) =>
+      const hasConflict = actionList.some((a) => {
+        const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+        return (
           a.type === "TRADE_RESOURCES" &&
-          a.nationId === newAction.nationId &&
-          a.resourceType === newAction.resourceType,
-      );
+          (a.nationId === newAction.nationId || aId === canonicalNewNationId) &&
+          a.resourceType === newAction.resourceType
+        );
+      });
       if (hasConflict) {
         throw new GameError(
           "INVALID_ACTION",
@@ -81,9 +90,13 @@ export class StateValidator {
       newAction.type === "UPGRADE_INDUSTRIAL_LEVEL"
     ) {
       if (
-        actionList.some(
-          (a) => a.type === newAction.type && a.nationId === newAction.nationId,
-        )
+        actionList.some((a) => {
+          const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+          return (
+            a.type === newAction.type &&
+            (a.nationId === newAction.nationId || aId === canonicalNewNationId)
+          );
+        })
       ) {
         throw new GameError(
           "INVALID_ACTION",
