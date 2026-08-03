@@ -16,8 +16,6 @@ export class EconomyActionExecutor {
 
     switch (action.type) {
       case "SET_TAX_RATE": {
-        const delta = Math.abs(action.newRate - nation.taxRate);
-        const penalty = delta > 15 ? Math.floor(delta * 0.8) : 0;
         return {
           ...state,
           nations: {
@@ -25,10 +23,6 @@ export class EconomyActionExecutor {
             [nation.id]: {
               ...nation,
               taxRate: action.newRate,
-              government: {
-                ...nation.government,
-                stability: Math.max(0, nation.government.stability - penalty),
-              },
             },
           },
         };

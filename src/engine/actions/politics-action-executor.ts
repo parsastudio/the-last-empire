@@ -2,7 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { TreatyEvaluator } from "@/engine/diplomacy/treaty-evaluator";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { AbilityExecutor } from "./ability-executor";
+import { AbilityExecutor } from "@/engine/actions/ability-executor";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -49,7 +49,13 @@ export class PoliticsActionExecutor {
         };
 
       case "ANTI_CORRUPTION_DRIVE": {
-        const reduction = Math.floor((action.amount / (nation.gdp || 1)) * 100);
+        const exactReduction = Math.round(
+          (action.amount / (nation.gdp || 1)) * 100,
+        );
+        const reduction = Math.max(1, exactReduction);
+        const rawCorruption = nation.government.corruption - reduction;
+        const newCorruption =
+          rawCorruption <= 0.01 ? 0 : Number(rawCorruption.toFixed(2));
         return {
           ...state,
           nations: {
@@ -59,10 +65,7 @@ export class PoliticsActionExecutor {
               treasury: nation.treasury - action.amount,
               government: {
                 ...nation.government,
-                corruption: Math.max(
-                  0,
-                  nation.government.corruption - reduction,
-                ),
+                corruption: Math.max(0, newCorruption),
               },
             },
           },

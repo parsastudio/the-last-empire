@@ -19,8 +19,9 @@ export function AntiCorruptionCard({
   currentCorruption = 0,
 }: AntiCorruptionCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const roundedCorruption = Math.round(currentCorruption);
-  const maxReducible = Math.max(1, Math.min(100, roundedCorruption));
+  const actualCorruption = Number((currentCorruption || 0).toFixed(2));
+  const roundedCorruption = Math.max(0, Math.ceil(actualCorruption));
+  const maxReducible = Math.min(100, Math.max(1, roundedCorruption));
 
   const [targetReduction, setTargetReduction] = useState<number>(
     Math.min(5, maxReducible),
@@ -33,7 +34,7 @@ export function AntiCorruptionCard({
     setTargetReduction(Math.min(5, maxReducible));
   }
 
-  const antiCorruptionCost = Math.floor(gdp * (targetReduction / 100));
+  const antiCorruptionCost = Math.ceil(gdp * (targetReduction / 100));
   const canAfford = treasury >= antiCorruptionCost;
   const { dispatchAction } = useGameActions();
 
@@ -41,7 +42,7 @@ export function AntiCorruptionCard({
     if (
       !canAfford ||
       targetReduction <= 0 ||
-      roundedCorruption <= 0 ||
+      actualCorruption <= 0.01 ||
       isSubmitting
     )
       return;
@@ -67,7 +68,9 @@ export function AntiCorruptionCard({
     setTargetReduction(target);
   };
 
-  const resultingCorruption = Math.max(0, roundedCorruption - targetReduction);
+  const resultingCorruption = Math.max(0, actualCorruption - targetReduction);
+  const displayResultingCorruption =
+    resultingCorruption <= 0.01 ? 0 : Number(resultingCorruption.toFixed(2));
 
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -84,11 +87,11 @@ export function AntiCorruptionCard({
             شاخص فعلی فساد:
           </span>
           <span className="font-bold text-military text-sm">
-            {PersianNumberFormatter.toPersianDigits(roundedCorruption)}٪
+            {PersianNumberFormatter.toPersianDigits(actualCorruption)}٪
           </span>
         </div>
 
-        {roundedCorruption <= 0 ? (
+        {actualCorruption <= 0.01 ? (
           <div className="p-3 bg-gdp/10 border border-gdp/30 rounded-xl text-center text-xs font-bold text-gdp">
             فساد اداری در کشور به طور کامل ریشه‌کن شده است.
           </div>
@@ -102,7 +105,9 @@ export function AntiCorruptionCard({
                 <span className="font-mono font-extrabold text-gdp text-xs">
                   -{PersianNumberFormatter.toPersianDigits(targetReduction)}٪
                   (نهایی:{" "}
-                  {PersianNumberFormatter.toPersianDigits(resultingCorruption)}
+                  {PersianNumberFormatter.toPersianDigits(
+                    displayResultingCorruption,
+                  )}
                   ٪)
                 </span>
               </div>
