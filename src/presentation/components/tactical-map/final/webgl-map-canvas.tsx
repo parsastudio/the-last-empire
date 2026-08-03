@@ -33,7 +33,7 @@ export function WebGLMapCanvas({
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-  } = useMapGesture();
+  } = useMapGesture(dimensions.width, dimensions.height, 4096, 2048);
 
   useWebGLMapRenderer({
     gl,

@@ -10,7 +10,6 @@ import { CommandCenterModal } from "@/presentation/components/tactical-map/comma
 import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
-import { MapEngineToggle } from "@/presentation/components/tactical-map/final/controls/map-engine-toggle";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 
@@ -66,7 +65,6 @@ export function WebGLTacticalWorkspace({
       />
 
       <TopHudBar metrics={metrics} />
-      <MapEngineToggle currentEngine="webgl2" gameId={gameId} />
 
       <StrategicToastContainer />
       <GameOverDialogWrapper gameState={gameState} />
