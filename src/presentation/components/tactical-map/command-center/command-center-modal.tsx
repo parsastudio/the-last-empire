@@ -115,7 +115,7 @@ export function CommandCenterModal({
       onClose={onClose}
     >
       <div className="space-y-4">
-        <div className="pb-2 text-right dir-rtl">
+        <div className="pb-2 text-right dir-rtl border-b border-border/40">
           <CommandBreadcrumb
             activeTab={activeTab}
             subTabLabel={activeSubTab}
