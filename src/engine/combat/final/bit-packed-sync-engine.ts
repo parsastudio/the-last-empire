@@ -1,9 +1,10 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
 
 export class BitPackedSyncEngine {
-  private readonly pixelAreaKm2 = 86.3;
+  private calibrator = new CellAreaCalibrator(2048, 4096);
 
   public syncNationsFromBuffer(
     nations: Record<string, Nation>,
@@ -12,28 +13,33 @@ export class BitPackedSyncEngine {
     const width = buffer.getWidth();
     const height = buffer.getHeight();
 
-    const nationPixelCounts = new Map<number, number>();
-    const nationEnclaveCounts = new Map<number, Map<number, number>>();
+    const nationAreaMap = new Map<number, number>();
+    const nationEnclaveAreaMap = new Map<number, Map<number, number>>();
     const nationCoastalMap = new Map<number, boolean>();
 
     for (let y = 0; y < height; y++) {
+      const pixelArea = this.calibrator.getCalibratedPixelArea(y);
+
       for (let x = 0; x < width; x++) {
         const nationId = buffer.getNationId(x, y);
 
         if (nationId >= 11 && nationId < 250) {
-          nationPixelCounts.set(
+          nationAreaMap.set(
             nationId,
-            (nationPixelCounts.get(nationId) || 0) + 1,
+            (nationAreaMap.get(nationId) || 0) + pixelArea,
           );
 
-          let enclaveMap = nationEnclaveCounts.get(nationId);
+          let enclaveMap = nationEnclaveAreaMap.get(nationId);
           if (!enclaveMap) {
             enclaveMap = new Map<number, number>();
-            nationEnclaveCounts.set(nationId, enclaveMap);
+            nationEnclaveAreaMap.set(nationId, enclaveMap);
           }
 
           const enclaveId = buffer.getEnclaveId(x, y);
-          enclaveMap.set(enclaveId, (enclaveMap.get(enclaveId) || 0) + 1);
+          enclaveMap.set(
+            enclaveId,
+            (enclaveMap.get(enclaveId) || 0) + pixelArea,
+          );
 
           const coastalAccess = buffer.getCoastalAccess(x, y);
           if (coastalAccess === 1) {
@@ -49,18 +55,25 @@ export class BitPackedSyncEngine {
       const canonical = NationIdResolver.resolveCanonicalId(key);
       const numericId = parseInt(canonical.replace("NATION_", ""), 10);
 
-      const pixels = nationPixelCounts.get(numericId) || 0;
-      const territorySize = Math.round(pixels * this.pixelAreaKm2);
-      const isAlive = pixels > 0;
+      const totalCalibratedArea = nationAreaMap.get(numericId) || 0;
+      const territorySize = Math.round(totalCalibratedArea);
+      const isAlive = territorySize > 0;
       const hasSeaAccess = nationCoastalMap.get(numericId) ?? false;
 
-      const enclaveMap = nationEnclaveCounts.get(numericId);
+      const enclaveMap = nationEnclaveAreaMap.get(numericId);
       const regionsDemographics: RegionDemographics[] = [];
 
       if (enclaveMap) {
-        for (const [rId, rPixels] of enclaveMap.entries()) {
-          const regionArea = Math.round(rPixels * this.pixelAreaKm2);
-          const ratio = pixels > 0 ? rPixels / pixels : 1;
+        const sortedEnclaveIds = Array.from(enclaveMap.keys()).sort(
+          (a, b) => a - b,
+        );
+
+        for (const rId of sortedEnclaveIds) {
+          const regionAreaRaw = enclaveMap.get(rId) || 0;
+          const regionArea = Math.round(regionAreaRaw);
+          const ratio =
+            totalCalibratedArea > 0 ? regionAreaRaw / totalCalibratedArea : 1;
+
           const regionPop = Math.round(nation.population * ratio);
           const regionGdp = Math.round(nation.gdp * ratio);
 
@@ -74,7 +87,7 @@ export class BitPackedSyncEngine {
           regionsDemographics.push({
             regionId: rId,
             name,
-            pixelCount: rPixels,
+            pixelCount: Math.round(regionArea / 86.3),
             areaSqKm: regionArea,
             population: regionPop,
             gdp: regionGdp,

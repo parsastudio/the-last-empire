@@ -4,9 +4,11 @@ import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-pa
 import { TerrainTextureGenerator } from "@/infrastructure/map-preprocessing/final/terrain-texture-generator";
 import { FinalManifestBuilder } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { BitPackedEnclaveClusterer } from "@/engine/combat/final/bit-packed-enclave-clusterer";
 
 export class FinalMapPipeline {
   private manifestBuilder = new FinalManifestBuilder();
+  private enclaveClusterer = new BitPackedEnclaveClusterer();
 
   public async buildFinalAssets(
     mapId = "map1",
@@ -74,6 +76,8 @@ export class FinalMapPipeline {
         }
       }
     }
+
+    this.enclaveClusterer.clusterNationEnclaves(packedBuffer, width, height);
 
     const uint8ArrayData = packedBuffer.toUint8ArrayBuffer();
     await fs.writeFile(
