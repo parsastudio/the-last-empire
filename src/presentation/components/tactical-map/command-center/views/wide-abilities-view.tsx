@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { REGIME_ABILITIES } from "@/presentation/components/tactical-map/sidebar/tabs/abilities/abilities.config";
 import { AbilityCard } from "@/presentation/components/tactical-map/sidebar/tabs/abilities/ability-card";
 import { AbilityTargetModal } from "@/presentation/components/tactical-map/modals/ability-target-modal";
-import { useWideAbilities } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-abilities";
 
 interface WideAbilitiesViewProps {
   currentGovernment: string;
@@ -13,7 +12,15 @@ export function WideAbilitiesView({
   currentGovernment,
   nationId,
 }: WideAbilitiesViewProps) {
-  const abilities = useWideAbilities();
+  const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
+
+  const openAbilityModal = useCallback((abilityName: string) => {
+    setSelectedAbility(abilityName);
+  }, []);
+
+  const closeAbilityModal = useCallback(() => {
+    setSelectedAbility(null);
+  }, []);
 
   return (
     <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
@@ -24,17 +31,17 @@ export function WideAbilitiesView({
             ability={ab}
             currentGovernment={currentGovernment}
             nationId={nationId}
-            onActivate={(ability) => abilities.openAbilityModal(ability.name)}
+            onActivate={(ability) => openAbilityModal(ability.name)}
           />
         ))}
       </div>
 
       <AbilityTargetModal
-        isOpen={abilities.selectedAbility !== null}
-        abilityName={abilities.selectedAbility || ""}
+        isOpen={selectedAbility !== null}
+        abilityName={selectedAbility || ""}
         nationId={nationId}
-        onClose={abilities.closeAbilityModal}
-        onConfirmTarget={abilities.closeAbilityModal}
+        onClose={closeAbilityModal}
+        onConfirmTarget={closeAbilityModal}
       />
     </div>
   );

@@ -1,7 +1,19 @@
 import { useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { SidebarTabType } from "../../sidebar/sidebar-tabs";
-import { NavigationUrlBuilder } from "../utils/navigation-url-builder";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+
+export function buildQueryString(
+  params: Record<string, string | number | undefined | null>,
+): string {
+  const searchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      searchParams.set(key, String(value));
+    }
+  }
+  const query = searchParams.toString();
+  return query ? `?${query}` : "";
+}
 
 export function useNavigationQueryState() {
   const router = useRouter();
@@ -15,7 +27,7 @@ export function useNavigationQueryState() {
 
   const navigateToTab = useCallback(
     (tab: SidebarTabType, subTab?: string, target?: string) => {
-      const query = NavigationUrlBuilder.buildQueryString({
+      const query = buildQueryString({
         tab,
         subTab,
         target: target || activeTarget || undefined,
@@ -28,7 +40,7 @@ export function useNavigationQueryState() {
 
   const setModal = useCallback(
     (modalName: string | null) => {
-      const query = NavigationUrlBuilder.buildQueryString({
+      const query = buildQueryString({
         tab: activeTab || undefined,
         subTab: activeSubTab || undefined,
         target: activeTarget || undefined,
