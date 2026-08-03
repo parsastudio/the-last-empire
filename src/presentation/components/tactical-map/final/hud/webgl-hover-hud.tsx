@@ -1,5 +1,5 @@
 import React from "react";
-import { ShieldAlert, MapPin, Compass } from "lucide-react";
+import { ShieldAlert, MapPin } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface WebGLHoverHudProps {
@@ -32,7 +32,7 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
       }}
     >
       <div className="flex items-center justify-between border-b border-border/60 pb-1.5">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <MapPin size={14} className="text-primary" />
           <span className="text-xs font-bold text-foreground">
             شناسنامه پیکسل WebGL
