@@ -6,7 +6,7 @@ import {
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 interface UseTacticalMapInteractionProps {
   mapWidth: number;

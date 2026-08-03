@@ -4,7 +4,7 @@ import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/data/countries";
-import { NationIdResolver } from "@/domain/shared/nation-id-resolver";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export interface LiveNationItem {
   id: string;

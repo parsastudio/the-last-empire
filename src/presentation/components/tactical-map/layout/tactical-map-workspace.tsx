@@ -23,10 +23,7 @@ import { useGeopoliticsGame } from "@/presentation/hooks/game/use-geopolitics-ga
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { useAutoSaveGame } from "@/presentation/hooks/game/use-auto-save-game";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
-import {
-  MapContextMenu,
-  ContextActionType,
-} from "@/presentation/components/tactical-map/context-menu/map-context-menu";
+import { MapContextMenu } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
