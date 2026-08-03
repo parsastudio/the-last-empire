@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 import { ActionRuleEvaluator } from "@/engine/validation/action-rule-evaluator";
 
 export class StateValidator {
@@ -12,7 +12,12 @@ export class StateValidator {
       );
     }
 
-    const sourceNation = state.nations[action.nationId];
+    const canonicalNationId = NationIdResolver.resolveCanonicalId(
+      action.nationId,
+    );
+    const sourceNation =
+      state.nations[action.nationId] || state.nations[canonicalNationId];
+
     if (!sourceNation || !sourceNation.isAlive) {
       throw new GameError(
         "NATION_NOT_FOUND",
@@ -21,7 +26,13 @@ export class StateValidator {
     }
 
     if ("targetNationId" in action && action.targetNationId) {
-      const targetNation = state.nations[action.targetNationId];
+      const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+        action.targetNationId,
+      );
+      const targetNation =
+        state.nations[action.targetNationId] ||
+        state.nations[canonicalTargetId];
+
       if (!targetNation || !targetNation.isAlive) {
         throw new GameError(
           "NATION_NOT_FOUND",
