@@ -4,12 +4,11 @@ import path from "path";
 import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
 import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
-import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
+import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 
 export async function POST(): Promise<NextResponse> {
   try {
-    const provider = new MapDataProvider();
-    provider.clearCache();
+    FinalStateLoader.clearCache();
 
     const tempDir = MapPathResolver.getMapServerDir("map1");
     await fs.mkdir(tempDir, { recursive: true });
@@ -30,7 +29,7 @@ export async function POST(): Promise<NextResponse> {
       "manifest.json",
     );
 
-    provider.clearCache();
+    FinalStateLoader.clearCache();
 
     return NextResponse.json({
       success: true,

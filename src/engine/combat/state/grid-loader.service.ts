@@ -1,49 +1,20 @@
-import { GridState } from "@/engine/combat/state/grid-state";
-import { MapDataProvider } from "@/engine/combat/state/map-data-provider";
-import { GridCell } from "@/domain/map/grid-cell.schema";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 
 export class GridLoaderService {
   private static isLoading = false;
 
-  public static async ensureGridLoaded(
-    gridState: GridState,
-  ): Promise<GridState> {
-    if (gridState.getAllCells().length > 0 || this.isLoading) {
+  public static async ensureGridLoaded(): Promise<BitPackedGridState> {
+    const gridState = BitPackedGridState.getInstance();
+    if (this.isLoading) {
       return gridState;
     }
 
     this.isLoading = true;
     try {
-      const mapProvider = new MapDataProvider();
-      const packedBuffer = await mapProvider.load1024PackedBuffer();
-
-      if (packedBuffer && packedBuffer.length === 1024 * 512 * 2) {
-        for (let gy = 0; gy < 512; gy++) {
-          for (let gx = 0; gx < 1024; gx++) {
-            const pIdx = (gy * 1024 + gx) * 2;
-            const geoByte = packedBuffer[pIdx] || 0;
-            const nationByte = packedBuffer[pIdx + 1] || 0;
-            const enclaveId = geoByte >> 2;
-
-            let ownerId = "WATER";
-            if (nationByte >= 11) {
-              ownerId = `NATION_${nationByte}`;
-            } else if ((geoByte & 0x3) === 2) {
-              ownerId = "CLOSED_SEA";
-            }
-
-            const cell: GridCell = {
-              x: gx,
-              y: gy,
-              ownerId,
-              initialOwnerId: ownerId,
-              highResPixelCount: nationByte >= 11 ? 16 : 0,
-              enclaveId,
-              seaAccess: geoByte & 0x3,
-            };
-            gridState.setCell(gx, gy, cell);
-          }
-        }
+      const bitBuffer = await FinalStateLoader.loadLiveStateBuffer("map1");
+      if (bitBuffer) {
+        gridState.getBuffer().getRawBuffer().set(bitBuffer.getRawBuffer());
       }
     } finally {
       this.isLoading = false;
