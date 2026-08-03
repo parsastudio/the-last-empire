@@ -32,20 +32,20 @@ export function useGameActions(
         action.nationId ||
         "default_game";
 
-      let latestLocalState: GameState | null = currentState || null;
+      let stateBeforeAction: GameState | null = currentState || null;
 
-      if (!latestLocalState) {
-        latestLocalState = await storageService.loadGameState(activeGameId);
+      if (!stateBeforeAction) {
+        stateBeforeAction = await storageService.loadGameState(activeGameId);
       }
 
-      if (!latestLocalState) {
+      if (!stateBeforeAction) {
         showToast("خطا", "اطلاعات بازی یافت نشد.", "error");
         return false;
       }
 
-      let newLocalState: GameState;
+      let stateAfterAction: GameState;
       try {
-        newLocalState = actionRouter.route(latestLocalState, action);
+        stateAfterAction = actionRouter.route(stateBeforeAction, action);
       } catch (err) {
         const errorMsg =
           err instanceof Error
@@ -55,12 +55,12 @@ export function useGameActions(
         return false;
       }
 
-      await storageService.saveGameState(activeGameId, newLocalState);
+      await storageService.saveGameState(activeGameId, stateAfterAction);
 
       if (typeof window !== "undefined") {
         window.dispatchEvent(
           new CustomEvent("geopolitics-state-updated", {
-            detail: newLocalState,
+            detail: stateAfterAction,
           }),
         );
       }
@@ -73,7 +73,7 @@ export function useGameActions(
       }
 
       dispatcher
-        .dispatch(action, activeGameId, newLocalState)
+        .dispatch(action, activeGameId, stateBeforeAction)
         .then((result) => {
           if (!result.success) {
             showToast(
