@@ -1,6 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GridState } from "@/engine/combat/state/grid-state";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { TurnPipeline } from "@/engine/turn-pipeline";
@@ -19,7 +18,6 @@ export class TurnProgressionOrchestrator {
 
   public advanceTurn(
     state: GameState,
-    gridState: GridState,
     prng: SeededRandom,
     actionQueueProcessor: (
       state: GameState,
@@ -28,11 +26,10 @@ export class TurnProgressionOrchestrator {
   ): GameState {
     let nextState = state;
 
-    const stateWithGrid = { ...nextState, gridState } as unknown as GameState;
-    const aiActions = this.aiEngine.generateTurnActions(stateWithGrid);
+    const aiActions = this.aiEngine.generateTurnActions(nextState);
     for (const aiAction of aiActions) {
       try {
-        this.internalActionQueue.enqueue(stateWithGrid, aiAction);
+        this.internalActionQueue.enqueue(nextState, aiAction);
       } catch {
         continue;
       }
@@ -43,10 +40,7 @@ export class TurnProgressionOrchestrator {
 
     nextState = actionQueueProcessor(nextState, validAiActions);
     nextState = this.pipeline.processTurn(nextState, prng);
-    nextState = this.gridPostCleanup.cleanupAndSynchronize(
-      nextState,
-      gridState,
-    );
+    nextState = this.gridPostCleanup.cleanupAndSynchronize(nextState);
     nextState = this.livenessManager.updateLiveness(nextState);
 
     const peacefulCount = (nextState.peacefulTurnsCount ?? 0) + 1;

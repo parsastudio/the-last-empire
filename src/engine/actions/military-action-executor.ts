@@ -2,18 +2,13 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
-import { GridState } from "@/engine/combat/state/grid-state";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
   private static battleEngine = new BattleExecutionEngine();
 
-  public static execute(
-    state: GameState,
-    action: GameAction,
-    gridState?: GridState,
-  ): GameState {
+  public static execute(state: GameState, action: GameAction): GameState {
     const canonicalSourceId = NationIdResolver.resolveCanonicalId(
       action.nationId,
     );
@@ -94,8 +89,7 @@ export class MilitaryActionExecutor {
       }
 
       case "INITIATE_BATTLE": {
-        if (!gridState) return state;
-        return this.battleEngine.executeBattle(state, action, gridState);
+        return this.battleEngine.executeBattle(state, action);
       }
 
       default:
