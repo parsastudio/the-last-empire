@@ -5,6 +5,8 @@ import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 import { DeltaPatchEngine } from "@/engine/events/delta-patch-engine";
+import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
@@ -45,6 +47,14 @@ class ServerGameSessionStore {
       ) {
         engine = this.initSession(gameId, currentState);
       }
+    } else if (!engine) {
+      const canonicalHumanId = NationIdResolver.resolveCanonicalId(
+        action.nationId,
+      );
+      const facade = new SimulationFacade();
+      const initialState = facade.selectPlayerNation(canonicalHumanId);
+      initialState.gameId = gameId;
+      engine = this.initSession(gameId, initialState);
     }
 
     if (!engine) {
