@@ -1,8 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { GridDownsampler } from "@/infrastructure/map-preprocessing/grid-downsampler";
-import { GridStateProvider } from "@/engine/combat/state/grid-state-provider";
-import { useMapAssetsLoader } from "@/presentation/hooks/tactical-map/use-map-assets-loader";
-import { MapShader } from "@/infrastructure/map-preprocessing/map-shader";
+import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export interface CountryMapping {
@@ -15,60 +14,15 @@ export interface CountryMapping {
 
 export class MapDataApiHelper {
   public getManifestUrl(): string {
-    return "/api/map-preprocessing/manifest";
+    return "/api/map-preprocessing/final-manifest";
   }
 
   public getMask4KUrl(): string {
-    return MapPathResolver.getMapClientUrl("map1", "mask-4k.bin");
+    return MapPathResolver.getMapFinalClientUrl("map1", "live-state.bin");
   }
 
   public getMask1024Url(): string {
-    return MapPathResolver.getMapClientUrl("map1", "mask-1024.bin");
-  }
-}
-
-export class MaskRenderingHelper {
-  private persistentImageData: ImageData | null = null;
-
-  public renderMask(
-    mapWidth: number,
-    mapHeight: number,
-    canvasShaded: HTMLCanvasElement,
-    countriesData: CountryMapping[],
-    maskDataRef: { current: Uint8Array | null },
-    activeLayer: "political" | "gdp" = "political",
-  ): void {
-    if (!maskDataRef.current) return;
-
-    if (canvasShaded.width !== mapWidth || canvasShaded.height !== mapHeight) {
-      canvasShaded.width = mapWidth;
-      canvasShaded.height = mapHeight;
-      this.persistentImageData = null;
-    }
-
-    const ctxShaded = canvasShaded.getContext("2d");
-
-    if (ctxShaded) {
-      ctxShaded.imageSmoothingEnabled = true;
-
-      if (!this.persistentImageData) {
-        this.persistentImageData = ctxShaded.createImageData(
-          mapWidth,
-          mapHeight,
-        );
-      }
-
-      MapShader.applyShading(
-        this.persistentImageData.data,
-        mapWidth,
-        mapHeight,
-        maskDataRef.current,
-        countriesData,
-        activeLayer,
-      );
-
-      ctxShaded.putImageData(this.persistentImageData, 0, 0);
-    }
+    return MapPathResolver.getMapFinalClientUrl("map1", "live-state.bin");
   }
 }
 
@@ -78,78 +32,57 @@ interface UseMapDataProps {
   activeLayer?: "political" | "gdp";
 }
 
-const apiHelper = new MapDataApiHelper();
-const renderingHelper = new MaskRenderingHelper();
-
-export function useMapData({
-  mapWidth,
-  mapHeight,
-  activeLayer = "political",
-}: UseMapDataProps) {
+export function useMapData({ mapWidth, mapHeight }: UseMapDataProps) {
   const canvasShadedRef = useRef<HTMLCanvasElement | null>(null);
-  const hasDownsampledRef = useRef<boolean>(false);
   const [isLayerRendering, setIsLayerRendering] = useState<boolean>(false);
   const [renderVersion, setRenderVersion] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const { countries, loading, error, maskDataRef, packed1024Ref } =
-    useMapAssetsLoader({ apiHelper });
+  const maskDataRef = useRef<Uint8Array | null>(null);
+  const packed1024Ref = useRef<Uint8Array | null>(null);
+
+  const countries: CountryMapping[] = ALL_COUNTRY_PROFILES.map((p) => ({
+    id: p.id ?? 0,
+    code: p.code,
+    name: p.nameFa,
+    color: [0, 0, p.id ?? 0] as [number, number, number],
+  }));
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadData() {
+      try {
+        const bitBuffer = await FinalStateLoader.loadLiveStateBuffer("map1");
+        if (bitBuffer && active) {
+          const gridState = BitPackedGridState.getInstance();
+          gridState.getBuffer().getRawBuffer().set(bitBuffer.getRawBuffer());
+          setLoading(false);
+        }
+      } catch {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const reRenderLayer = useCallback(() => {
-    if (canvasShadedRef.current && countries.length > 0) {
-      setIsLayerRendering(true);
-
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          if (canvasShadedRef.current) {
-            renderingHelper.renderMask(
-              mapWidth,
-              mapHeight,
-              canvasShadedRef.current,
-              countries,
-              maskDataRef,
-              activeLayer,
-            );
-            setRenderVersion((v) => v + 1);
-          }
-          setIsLayerRendering(false);
-        });
-      }, 16);
-    }
-  }, [activeLayer, countries, mapHeight, mapWidth, maskDataRef]);
-
-  useEffect(() => {
-    if (!loading && maskDataRef.current && !hasDownsampledRef.current) {
-      hasDownsampledRef.current = true;
-
-      if (!canvasShadedRef.current) {
-        canvasShadedRef.current = document.createElement("canvas");
-      }
-
-      const downsampler = new GridDownsampler();
-      const localGridState = downsampler.downsampleMask(
-        maskDataRef.current,
-        mapWidth,
-        mapHeight,
-        4,
-      );
-      const globalGridState = GridStateProvider.getInstance();
-      globalGridState.clear();
-      for (const cell of localGridState.getAllCells()) {
-        globalGridState.setCell(cell.x, cell.y, cell);
-      }
-    }
-  }, [loading, mapWidth, mapHeight, maskDataRef]);
-
-  useEffect(() => {
-    if (!loading && maskDataRef.current) {
-      reRenderLayer();
-    }
-  }, [loading, maskDataRef, reRenderLayer]);
+    setIsLayerRendering(true);
+    setTimeout(() => {
+      setRenderVersion((v) => v + 1);
+      setIsLayerRendering(false);
+    }, 16);
+  }, []);
 
   return {
     countries,
     loading,
-    error,
+    error: null,
     isLayerRendering,
     renderVersion,
     canvasShadedRef,

@@ -1,13 +1,12 @@
 import fs from "fs/promises";
 import path from "path";
 import { MapAreaPixelCounter } from "@/infrastructure/map-preprocessing/generator/map-area-pixel-counter";
-import { LowResPacker } from "@/infrastructure/map-preprocessing/utils/low-res-packer";
-import { ClosedSeaDetector } from "@/infrastructure/map-preprocessing/utils/closed-sea-detector";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { TerritoryPartitioner } from "@/infrastructure/map-preprocessing/generator/territory-partitioner";
 import { PngDecoder } from "@/infrastructure/map-preprocessing/encoders/png-decoder";
 import { GeometryDraw } from "@/infrastructure/map-preprocessing/utils/geometry-draw";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { FinalMapPipeline } from "@/infrastructure/map-preprocessing/final/final-map-pipeline";
 
 export interface CountryMapping {
   id: number;
@@ -81,13 +80,8 @@ export async function generateTest6Map(
 
   await fs.writeFile(path.join(targetDir, "mask-4k.bin"), buffer);
 
-  const packer = new LowResPacker();
-  const packed1024 = packer.pack4KTo1024(buffer, 1024, 512, 4);
-
-  const seaDetector = new ClosedSeaDetector();
-  seaDetector.detectAndMarkClosedSeas(packed1024, 1024, 512);
-
-  await fs.writeFile(path.join(targetDir, "mask-1024.bin"), packed1024);
+  const finalPipeline = new FinalMapPipeline();
+  await finalPipeline.buildFinalAssets("map1", width, height);
 
   const validCountries = countries.filter((c) => c.id === 0 || c.areaSqKm > 0);
 
