@@ -75,7 +75,8 @@ export function useWebGLMapRenderer({
         rendererRef.current.render(
           dimensions.width * dpr,
           dimensions.height * dpr,
-          { x: position.x * dpr, y: position.y * dpr },
+          position.x * dpr,
+          position.y * dpr,
           scale * dpr,
           time,
           activeLayer,
