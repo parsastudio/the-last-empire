@@ -35,6 +35,11 @@ export function useWebGLInteraction({
   humanNationId,
 }: UseWebGLInteractionProps) {
   const facadeRef = useRef(new BitPackedStateFacade());
+  const lastHoverNationIdRef = useRef<{
+    nationId: number;
+    enclaveId: number;
+  } | null>(null);
+
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
     null,
   );
@@ -51,8 +56,9 @@ export function useWebGLInteraction({
   const handlePointerMove = (clientX: number, clientY: number) => {
     const container = containerRef.current;
     if (!container || isDragging) {
-      setHoverPos(null);
-      setHoverData(null);
+      if (hoverPos !== null) setHoverPos(null);
+      if (hoverData !== null) setHoverData(null);
+      lastHoverNationIdRef.current = null;
       return;
     }
 
@@ -65,19 +71,36 @@ export function useWebGLInteraction({
 
     const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
     if (inspected && inspected.nationId >= 11 && inspected.nationId < 250) {
-      const info = resolveHoverInfo(inspected.nationId, inspected.enclaveId);
-      if (info) {
+      const last = lastHoverNationIdRef.current;
+      const isSameCell =
+        last &&
+        last.nationId === inspected.nationId &&
+        last.enclaveId === inspected.enclaveId;
+
+      if (!isSameCell || !hoverData) {
+        const info = resolveHoverInfo(inspected.nationId, inspected.enclaveId);
+        if (info) {
+          lastHoverNationIdRef.current = {
+            nationId: inspected.nationId,
+            enclaveId: inspected.enclaveId,
+          };
+          setHoverPos({ x: clientX, y: clientY });
+          setHoverData(info);
+          return;
+        }
+      } else {
         setHoverPos({ x: clientX, y: clientY });
-        setHoverData(info);
         return;
       }
     }
 
-    setHoverPos(null);
-    setHoverData(null);
+    lastHoverNationIdRef.current = null;
+    if (hoverPos !== null) setHoverPos(null);
+    if (hoverData !== null) setHoverData(null);
   };
 
   const handlePointerLeave = () => {
+    lastHoverNationIdRef.current = null;
     setHoverPos(null);
     setHoverData(null);
   };

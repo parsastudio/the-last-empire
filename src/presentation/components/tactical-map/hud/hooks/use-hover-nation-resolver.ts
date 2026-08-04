@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import {
   findCountryProfileByCode,
   findCountryProfileById,
+  CountryProfile,
 } from "@/domain/data/countries";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -45,16 +46,29 @@ export function useHoverNationResolver({
   nationsMap,
   humanNationId,
 }: UseHoverNationResolverProps) {
+  const profileCacheMap = useMemo(() => {
+    const map = new Map<
+      number,
+      { matchedCountry?: CountryMapping; profile?: CountryProfile }
+    >();
+    for (const c of countries) {
+      const profile =
+        findCountryProfileById(c.id) || findCountryProfileByCode(c.code);
+      map.set(c.id, { matchedCountry: c, profile });
+    }
+    return map;
+  }, [countries]);
+
   const resolveHoverInfo = useCallback(
     (nationIdNumber: number, enclaveIdVal: number): HoverCountryInfo | null => {
-      const matchedCountry = countries.find((c) => c.id === nationIdNumber);
+      let cached = profileCacheMap.get(nationIdNumber);
+      if (!cached) {
+        const profile = findCountryProfileById(nationIdNumber);
+        if (!profile) return null;
+        cached = { profile };
+      }
 
-      const profile =
-        findCountryProfileById(nationIdNumber) ||
-        (matchedCountry
-          ? findCountryProfileByCode(matchedCountry.code)
-          : undefined);
-
+      const { matchedCountry, profile } = cached;
       if (!matchedCountry && !profile) return null;
 
       const countryCode = profile
@@ -134,7 +148,7 @@ export function useHoverNationResolver({
         regionArea: formattedAreaText,
       };
     },
-    [countries, nationsMap, humanNationId],
+    [profileCacheMap, nationsMap, humanNationId],
   );
 
   return { resolveHoverInfo };
