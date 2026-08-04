@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
-import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
+import {
+  GameStateInitializer,
+  normalizeNationId,
+} from "@/infrastructure/map-preprocessing/game-state-initializer";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -20,8 +22,11 @@ export async function POST(request: Request): Promise<NextResponse> {
     }
 
     const normalized = normalizeNationId(nationId);
-    const facade = new SimulationFacade();
-    const state = facade.selectPlayerNation(normalized, governmentType);
+    const initializer = new GameStateInitializer();
+    const state = initializer.initializeSimulationForNation(
+      normalized,
+      governmentType,
+    );
 
     const activeGameId = gameId || `game_${normalized}_${Date.now()}`;
     if (state) {

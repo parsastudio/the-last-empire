@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { SimulationFacade } from "@/infrastructure/map-preprocessing/simulation-facade";
-import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
+import {
+  GameStateInitializer,
+  normalizeNationId,
+} from "@/infrastructure/map-preprocessing/game-state-initializer";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
@@ -15,8 +17,9 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     let engine = serverGameSessionStore.getEngine(gameIdParam);
     if (!engine) {
-      const facade = new SimulationFacade();
-      const initialState = facade.selectPlayerNation(normalizedHumanId);
+      const initializer = new GameStateInitializer();
+      const initialState =
+        initializer.initializeSimulationForNation(normalizedHumanId);
       initialState.gameId = gameIdParam;
       engine = serverGameSessionStore.initSession(gameIdParam, initialState);
     }
