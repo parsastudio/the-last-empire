@@ -1,4 +1,4 @@
-import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { TacticalPaletteGenerator } from "@/infrastructure/map-preprocessing/color-palette";
 import { findCountryProfileById } from "@/domain/data/countries";
 

@@ -1,8 +1,8 @@
 import { useState, useRef, RefObject } from "react";
 import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 import { findCountryProfileById } from "@/domain/data/countries";
-import { HoverCountryInfo } from "@/presentation/components/tactical-map/hud/country-hover-container";
-import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
+import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useHoverNationResolver } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
 

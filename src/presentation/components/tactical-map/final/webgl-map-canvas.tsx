@@ -3,7 +3,7 @@ import { useWebGLContext } from "@/presentation/hooks/tactical-map/final/use-web
 import { useWebGLMapRenderer } from "@/presentation/hooks/tactical-map/final/use-webgl-map-renderer";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
-import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { WebGLHoverHud } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { WebGLContextMenuWrapper } from "@/presentation/components/tactical-map/final/hud/webgl-context-menu-wrapper";
 import { useWebGLInteraction } from "@/presentation/hooks/tactical-map/final/use-webgl-interaction";

@@ -1,7 +1,6 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { CoalitionManager } from "@/engine/diplomacy/coalition-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
 import { DiplomaticOpinionCalculator } from "@/engine/diplomacy/diplomatic-opinion-calculator";
@@ -11,13 +10,12 @@ import { NationIdResolver } from "@/domain/shared/domain-utilities";
 export class DiplomacyPhase implements TurnPhase {
   private powerRanker = new PowerScoreRanker();
   private governmentSystem = new GovernmentSystem();
-  private coalitionManager = new CoalitionManager();
   private reputationManager = new ReputationManager();
   private opinionCalculator = new DiplomaticOpinionCalculator();
   private relationsManager = new RelationsManager();
 
   public execute(context: PipelineContext): GameState {
-    let nextState = { ...context.state };
+    const nextState = { ...context.state };
     const nations = { ...nextState.nations };
 
     const rawNationsList = Object.values(nations)
@@ -92,8 +90,6 @@ export class DiplomacyPhase implements TurnPhase {
     }
 
     nextState.nations = nations;
-    nextState = this.coalitionManager.processCoalitions(nextState);
-
     return nextState;
   }
 }

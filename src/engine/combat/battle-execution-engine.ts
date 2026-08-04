@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
-import { BitPackedBattleBridge } from "@/engine/combat/final/bit-packed-battle-bridge";
+import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import {
   TurnLogBuilder,
@@ -11,7 +11,7 @@ import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomatic-betr
 import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
 
 export class BattleExecutionEngine {
-  private battleBridge = new BitPackedBattleBridge();
+  private facade = new BitPackedStateFacade();
   private betrayalCalculator = new DiplomaticBetrayalCalculator();
   private reputationManager = new ReputationManager();
 
@@ -57,9 +57,9 @@ export class BattleExecutionEngine {
 
     let actualConqueredArea = 0;
     if (calcResult.isAttackerVictory && calcResult.conqueredAreaSqKm > 0) {
-      actualConqueredArea = this.battleBridge.conquerAndGetActualArea(
-        attacker.id,
-        defender.id,
+      actualConqueredArea = this.facade.conquerAndRefreshed(
+        NationIdResolver.resolveNumericId(attacker.id),
+        NationIdResolver.resolveNumericId(defender.id),
         calcResult.conqueredAreaSqKm,
       );
     }
@@ -214,6 +214,6 @@ export class BattleExecutionEngine {
       turnLogs: [...state.turnLogs, logEntry],
     };
 
-    return this.battleBridge.syncGameState(syncedState);
+    return this.facade.syncGameState(syncedState);
   }
 }

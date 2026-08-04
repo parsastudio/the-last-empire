@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
 import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
-import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 

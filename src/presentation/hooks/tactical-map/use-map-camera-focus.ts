@@ -3,7 +3,7 @@ import {
   findCountryProfileByCode,
   findCountryProfileById,
 } from "@/domain/data/countries";
-import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 interface UseMapCameraFocusProps {
