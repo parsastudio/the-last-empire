@@ -125,7 +125,6 @@ export function WebGLTacticalWorkspace({
         reports={[]}
         onClose={handleCloseCenterModal}
         onFocusCountry={focusOnCountry}
-        onOpenTrade={() => {}}
         onNavigateTab={(tab, _subTab, targetCode) => {
           setActiveTab(tab);
           if (targetCode) {

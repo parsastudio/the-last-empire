@@ -3,17 +3,6 @@ import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/s
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
-import { MarketEngine } from "@/engine/economy/market-engine";
-import { MARKET_CONFIG } from "@/domain/economy/market.config";
-
-export interface TradeDialogState {
-  isOpen: boolean;
-  resourceName: string;
-  unit: string;
-  mode: "buy" | "sell";
-  unitPrice: number;
-  maxAmount: number;
-}
 
 export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
@@ -26,15 +15,6 @@ export function useSidebarTurnActions(
   const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
 
   const { stagedActions } = useActionStagingTracker();
-
-  const [tradeDialog, setTradeDialog] = useState<TradeDialogState>({
-    isOpen: false,
-    resourceName: "",
-    unit: "",
-    mode: "buy",
-    unitPrice: MARKET_CONFIG.FIXED_BUY_PRICE,
-    maxAmount: 100,
-  });
 
   const gameState = overrideGameState ?? null;
 
@@ -91,43 +71,6 @@ export function useSidebarTurnActions(
     }
   }, [queryState, onClearExternalTab]);
 
-  const handleOpenTrade = useCallback(
-    (name: string, unit: string, mode: "buy" | "sell", price: number) => {
-      const treasury = humanNation
-        ? humanNation.treasury
-        : MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK;
-      const isOil = name.includes("نفت");
-      const stock = isOil
-        ? humanNation
-          ? humanNation.resources.oil
-          : 0
-        : humanNation
-          ? humanNation.resources.steel
-          : 0;
-
-      const currentPrice =
-        price && price >= 1000000 ? price : MARKET_CONFIG.FIXED_BUY_PRICE;
-      const marketEngine = new MarketEngine();
-      const maxAffordable = marketEngine.calculateMaxAffordable(
-        treasury,
-        { oil: currentPrice, steel: currentPrice },
-        isOil ? "oil" : "steel",
-      );
-
-      const maxAmount = mode === "buy" ? maxAffordable : Math.max(0, stock);
-
-      setTradeDialog({
-        isOpen: true,
-        resourceName: name,
-        unit,
-        mode,
-        unitPrice: currentPrice,
-        maxAmount,
-      });
-    },
-    [humanNation],
-  );
-
   return {
     activeTab,
     activeSubTab,
@@ -135,16 +78,13 @@ export function useSidebarTurnActions(
     isRailCollapsed,
     isProcessingTurn,
     stagedActions,
-    tradeDialog,
     humanNation,
     gameState,
     currentTurn,
     setIsRailCollapsed,
     setInternalActiveTab,
-    setTradeDialog,
     handleNavigateTab,
     handleCloseActiveModal,
     handleNextTurn,
-    handleOpenTrade,
   };
 }
