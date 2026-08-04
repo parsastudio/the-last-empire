@@ -3,10 +3,12 @@ import { GameAction } from "@/domain/game/action.schema";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { ResearchManager } from "@/engine/politics/research-manager";
 
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
   private static battleEngine = new BattleExecutionEngine();
+  private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
     const canonicalSourceId = NationIdResolver.resolveCanonicalId(
@@ -70,20 +72,11 @@ export class MilitaryActionExecutor {
       }
 
       case "INVEST_RESEARCH": {
-        const cost = Math.max(1500000000, Math.floor(nation.gdp * 0.12));
-        if (nation.treasury < cost) return state;
         return {
           ...state,
           nations: {
             ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              treasury: nation.treasury - cost,
-              military: {
-                ...nation.military,
-                techLevel: nation.military.techLevel + 1,
-              },
-            },
+            [sourceKey]: this.researchManager.investInMilitaryTech(nation),
           },
         };
       }

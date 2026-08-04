@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Award, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { ResearchDevelopmentManager } from "@/engine/military/research-development-manager";
+import { ResearchManager } from "@/engine/politics/research-manager";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface MilitaryTechUpgradeCardProps {
@@ -19,13 +19,14 @@ export function MilitaryTechUpgradeCard({
   gdp = 450000000000,
 }: MilitaryTechUpgradeCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const manager = new ResearchDevelopmentManager();
+  const manager = new ResearchManager();
   const mockNation = {
     gdp,
     military: { techLevel: currentLevel },
-  } as unknown as Parameters<typeof manager.getResearchCost>[0];
+    treasury,
+  } as unknown as Parameters<typeof manager.getMilitaryTechCost>[0];
 
-  const upgradeCost = manager.getResearchCost(mockNation);
+  const upgradeCost = manager.getMilitaryTechCost(mockNation);
   const canAfford = treasury >= upgradeCost;
   const { dispatchAction } = useGameActions();
 
