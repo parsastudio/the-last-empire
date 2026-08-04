@@ -1,16 +1,18 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
-import { GdpCalculator } from "@/engine/economy/gdp-calculator";
-import { PopulationGrowthEngine } from "@/engine/economy/population-growth-engine";
-import { ManpowerManager } from "@/engine/economy/manpower-manager";
-import { TariffCalculator } from "@/engine/economy/tariff-calculator";
+import {
+  GdpCalculator,
+  PopulationGrowthEngine,
+  ManpowerManager,
+  TariffCalculator,
+  TaxCalculator,
+  MilitaryPayrollCalculator,
+  ResourceDependencyManager,
+  DebtManager,
+  BankruptcyManager,
+} from "@/engine/economy/economy-domain.service";
 import { AutoTradeEngine } from "@/engine/economy/auto-trade/auto-trade.engine";
-import { TaxCalculator } from "@/engine/economy/tax-calculator";
-import { MilitaryPayrollCalculator } from "@/engine/economy/military-payroll-calculator";
-import { ResourceDependencyManager } from "@/engine/economy/resource-dependency-manager";
-import { DebtManager } from "@/engine/economy/debt-manager";
-import { BankruptcyManager } from "@/engine/economy/bankruptcy-manager";
 import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyPhase implements TurnPhase {

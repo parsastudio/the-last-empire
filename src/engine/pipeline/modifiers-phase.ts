@@ -1,7 +1,7 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import type { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
-import { CoolOffManager } from "@/engine/diplomacy/cool-off-manager";
+import { CoolOffManager } from "@/engine/diplomacy/diplomacy-domain.service";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export class ModifiersPhase implements TurnPhase {
