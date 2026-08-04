@@ -1,54 +1,105 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
-import {
-  EconomyStep,
-  EconomyStepContext,
-} from "./economy/economy-step.interface";
-import { ResourceGenerationStep } from "./economy/resource-generation.step";
-import { GdpGrowthStep } from "./economy/gdp-growth.step";
-import { PopulationUpdateStep } from "./economy/population-update.step";
-import { ManpowerGrowthStep } from "./economy/manpower-growth.step";
-import { TradeTariffStep } from "./economy/trade-tariff.step";
-import { AutoTradeStep } from "./economy/auto-trade.step";
-import { UpkeepTaxStep } from "./economy/upkeep-tax.step";
-import { BankruptcyDeficitStep } from "./economy/bankruptcy-deficit.step";
-import { MarketPriceStep } from "./economy/market-price.step";
+import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
+import { GdpCalculator } from "@/engine/economy/gdp-calculator";
+import { PopulationGrowthEngine } from "@/engine/economy/population-growth-engine";
+import { ManpowerManager } from "@/engine/economy/manpower-manager";
+import { TariffCalculator } from "@/engine/economy/tariff-calculator";
+import { AutoTradeEngine } from "@/engine/economy/auto-trade/auto-trade.engine";
+import { TaxCalculator } from "@/engine/economy/tax-calculator";
+import { MilitaryPayrollCalculator } from "@/engine/economy/military-payroll-calculator";
+import { ResourceDependencyManager } from "@/engine/economy/resource-dependency-manager";
+import { DebtManager } from "@/engine/economy/debt-manager";
+import { BankruptcyManager } from "@/engine/economy/bankruptcy-manager";
+import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyPhase implements TurnPhase {
-  private steps: EconomyStep[] = [
-    new ResourceGenerationStep(),
-    new GdpGrowthStep(),
-    new PopulationUpdateStep(),
-    new ManpowerGrowthStep(),
-    new TradeTariffStep(),
-    new AutoTradeStep(),
-    new UpkeepTaxStep(),
-    new BankruptcyDeficitStep(),
-    new MarketPriceStep(),
-  ];
+  private gdpCalc = new GdpCalculator();
+  private popEngine = new PopulationGrowthEngine();
+  private manpowerManager = new ManpowerManager();
+  private tariffCalculator = new TariffCalculator();
+  private autoTradeEngine = new AutoTradeEngine();
+  private taxCalc = new TaxCalculator();
+  private payrollCalc = new MilitaryPayrollCalculator();
+  private resourceDependencyManager = new ResourceDependencyManager();
+  private debtManager = new DebtManager();
+  private bankruptcyManager = new BankruptcyManager();
+  private marketEngine = new MarketEngine();
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
-    const tradeVolume = nextState.turnTradeVolume ?? {
+    const nations = { ...nextState.nations };
+    const marketPrices = nextState.marketPrices;
+
+    for (const [id, nation] of Object.entries(nations)) {
+      if (!nation.isAlive) {
+        continue;
+      }
+
+      const { oilProducedPerTurn, steelProducedPerTurn } =
+        ResourceGenerationStep.calculateResourceGeneration(nation);
+
+      let updated = {
+        ...nation,
+        resources: {
+          ...nation.resources,
+          oil: nation.resources.oil + oilProducedPerTurn,
+          steel: nation.resources.steel + steelProducedPerTurn,
+        },
+      };
+
+      const updatedGdp = this.gdpCalc.updateNationGdp(updated);
+      updated = { ...updated, gdp: updatedGdp };
+
+      const population = this.popEngine.updatePopulation(updated);
+      updated = { ...updated, population };
+
+      const manpowerGrowth = this.manpowerManager.calculateGrowth(updated);
+      updated = this.manpowerManager.restoreManpower(updated, manpowerGrowth);
+
+      const tariffResult =
+        this.tariffCalculator.calculateTariffEffects(updated);
+      if (tariffResult.tariffRevenue > 0) {
+        updated = {
+          ...updated,
+          treasury: updated.treasury + tariffResult.tariffRevenue,
+        };
+      }
+
+      const autoResult = this.autoTradeEngine.processNationAutoTrade(
+        updated,
+        marketPrices,
+      );
+      updated = autoResult.updatedNation;
+
+      const taxResult = this.taxCalc.evaluateTaxPolicy(updated);
+      const payrollBreakdown = this.payrollCalc.calculatePayroll(updated);
+
+      const financial = this.debtManager.processFinancials(
+        updated,
+        taxResult.taxIncome,
+        payrollBreakdown.total,
+      );
+
+      updated = financial.updatedNation;
+      updated = this.resourceDependencyManager.consumeTurnResources(updated);
+
+      if (this.bankruptcyManager.isBankrupt(updated)) {
+        updated = this.bankruptcyManager.applyBankruptcy(updated);
+      }
+
+      nations[id] = updated;
+    }
+
+    nextState.nations = nations;
+    nextState.marketPrices = this.marketEngine.updateMarketPrices();
+    nextState.turnTradeVolume = {
       oilBought: 0,
       oilSold: 0,
       steelBought: 0,
       steelSold: 0,
     };
 
-    const economyContext: EconomyStepContext = {
-      state: nextState,
-      prng: context.prng,
-      totalOilDemand: tradeVolume.oilBought,
-      totalOilSupply: tradeVolume.oilSold,
-      totalSteelDemand: tradeVolume.steelBought,
-      totalSteelSupply: tradeVolume.steelSold,
-    };
-
-    for (const step of this.steps) {
-      step.execute(economyContext);
-    }
-
-    return economyContext.state;
+    return nextState;
   }
 }

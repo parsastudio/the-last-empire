@@ -15,9 +15,13 @@ export interface SavedRecord {
 
 export class IndexedDbAdapter {
   private serializer = new StateSerializer();
+  private dbPromise: Promise<IDBDatabase> | null = null;
 
   private getDb(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
+    if (this.dbPromise) {
+      return this.dbPromise;
+    }
+    this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(
         INDEXED_DB_CONFIG.DB_NAME,
         INDEXED_DB_CONFIG.VERSION,
@@ -33,8 +37,12 @@ export class IndexedDbAdapter {
       };
 
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        this.dbPromise = null;
+        reject(request.error);
+      };
     });
+    return this.dbPromise;
   }
 
   public async saveState(gameId: string, state: GameState): Promise<void> {

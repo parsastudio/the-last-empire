@@ -1,7 +1,7 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { GameActionQueue } from "./game-action.queue";
+import { GameActionQueue } from "@/engine/orchestrator/game-action.queue";
 import { StateValidator } from "@/engine/validation/state-validator";
 import { ActionRouter } from "@/engine/actions/action-router";
 
