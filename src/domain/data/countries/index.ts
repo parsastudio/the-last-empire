@@ -23,23 +23,40 @@ export const ALL_COUNTRY_PROFILES: CountryProfile[] = rawProfiles.map(
   }),
 );
 
+const codeMap = new Map<string, CountryProfile>();
+const idMap = new Map<number, CountryProfile>();
+
+for (const profile of ALL_COUNTRY_PROFILES) {
+  codeMap.set(profile.code.toUpperCase(), profile);
+  if (profile.flagCode) {
+    codeMap.set(profile.flagCode.toUpperCase(), profile);
+  }
+  if (profile.id) {
+    idMap.set(profile.id, profile);
+  }
+}
+
 export function findCountryProfileByCode(
   code: string,
 ): CountryProfile | undefined {
   if (!code) return undefined;
   const clean = code.toUpperCase().replace("NATION_", "").trim();
-
-  return ALL_COUNTRY_PROFILES.find(
-    (c) => c.code.toUpperCase() === clean || c.flagCode.toUpperCase() === clean,
-  );
+  return codeMap.get(clean);
 }
 
 export function findCountryProfileById(
   id: number | string,
 ): CountryProfile | undefined {
-  if (typeof id === "number" || !isNaN(Number(id))) {
-    const num = typeof id === "number" ? id : parseInt(id.toString(), 10);
-    return ALL_COUNTRY_PROFILES.find((p) => p.id === num);
+  if (typeof id === "number") {
+    return idMap.get(id);
   }
+  if (!id) return undefined;
+
+  const num = parseInt(id.toString(), 10);
+  if (!isNaN(num)) {
+    const found = idMap.get(num);
+    if (found) return found;
+  }
+
   return findCountryProfileByCode(id.toString());
 }
