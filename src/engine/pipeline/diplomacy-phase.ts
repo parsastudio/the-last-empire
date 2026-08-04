@@ -1,10 +1,12 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { PowerScoreRanker } from "@/engine/diplomacy/power-score-ranker";
+import {
+  PowerScoreRanker,
+  ReputationManager,
+  DiplomaticOpinionCalculator,
+  RelationsManager,
+} from "@/engine/diplomacy/diplomacy-domain.service";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
-import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
-import { DiplomaticOpinionCalculator } from "@/engine/diplomacy/diplomatic-opinion-calculator";
-import { RelationsManager } from "@/engine/diplomacy/relations-manager";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class DiplomacyPhase implements TurnPhase {
