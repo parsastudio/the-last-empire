@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
 
@@ -13,8 +12,6 @@ export function useSidebarTurnActions(
   const queryState = useNavigationQueryState();
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
-
-  const { stagedActions } = useActionStagingTracker();
 
   const gameState = overrideGameState ?? null;
 
@@ -77,7 +74,6 @@ export function useSidebarTurnActions(
     selectedTargetCode,
     isRailCollapsed,
     isProcessingTurn,
-    stagedActions,
     humanNation,
     gameState,
     currentTurn,
