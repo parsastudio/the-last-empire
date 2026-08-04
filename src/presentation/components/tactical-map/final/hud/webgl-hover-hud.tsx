@@ -1,8 +1,18 @@
 import React, { useMemo } from "react";
 import { Shield, Coins, Users } from "lucide-react";
-import { HoverCountryInfo } from "@/presentation/components/tactical-map/hud/country-hover-container";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+
+export interface HoverCountryInfo {
+  name: string;
+  code: string;
+  flagCode: string;
+  rank: number;
+  stance: string;
+  gdp: string;
+  regionName?: string;
+  regionArea?: string;
+}
 
 class HoverHudPositionCalculator {
   private readonly hudWidth = 288;

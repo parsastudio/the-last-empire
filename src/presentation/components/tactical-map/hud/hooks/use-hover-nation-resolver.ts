@@ -1,10 +1,10 @@
 import { useCallback } from "react";
-import { CountryMapping } from "@/presentation/hooks/tactical-map/use-map-data";
+import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import {
   findCountryProfileByCode,
   findCountryProfileById,
 } from "@/domain/data/countries";
-import { HoverCountryInfo } from "../country-hover-container";
+import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 

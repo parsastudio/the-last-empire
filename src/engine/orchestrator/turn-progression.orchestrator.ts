@@ -3,7 +3,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { TurnPipeline } from "@/engine/turn-pipeline";
-import { GridPostTurnCleanup } from "@/engine/orchestrator/grid-post-turn-cleanup";
+import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
@@ -12,7 +12,7 @@ export class TurnProgressionOrchestrator {
   private aiEngine = new AIEngine();
   private internalActionQueue = new ActionQueue();
   private pipeline = new TurnPipeline();
-  private gridPostCleanup = new GridPostTurnCleanup();
+  private turnOrchestrator = new BitPackedTurnOrchestrator();
   private livenessManager = new NationLivenessManager();
   private victoryChecker = new VictoryChecker();
 
@@ -40,7 +40,7 @@ export class TurnProgressionOrchestrator {
 
     nextState = actionQueueProcessor(nextState, validAiActions);
     nextState = this.pipeline.processTurn(nextState, prng);
-    nextState = this.gridPostCleanup.cleanupAndSynchronize(nextState);
+    nextState = this.turnOrchestrator.processPostTurn(nextState);
     nextState = this.livenessManager.updateLiveness(nextState);
 
     const peacefulCount = (nextState.peacefulTurnsCount ?? 0) + 1;
