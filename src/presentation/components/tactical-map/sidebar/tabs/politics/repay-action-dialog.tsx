@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowDownRight } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
@@ -24,21 +24,17 @@ export function RepayActionDialog({
   const maxRepayable = Math.min(nationalDebt, userTreasury);
   const maxBillion = Math.floor(maxRepayable / 1e9);
   const [billionAmount, setBillionAmount] = useState<number>(1);
-  const [prevKey, setPrevKey] = useState<string>("");
 
-  const currentKey = `${isOpen}-${maxRepayable}`;
-  if (currentKey !== prevKey) {
-    setPrevKey(currentKey);
-    if (isOpen) {
-      if (maxBillion <= 0) {
-        setBillionAmount(0);
-      } else {
-        setBillionAmount(
-          Math.min(maxBillion, Math.max(1, Math.floor(maxBillion * 0.25))),
-        );
-      }
+  useEffect(() => {
+    if (!isOpen) return;
+    if (maxBillion <= 0) {
+      setBillionAmount(0);
+    } else {
+      setBillionAmount(
+        Math.min(maxBillion, Math.max(1, Math.floor(maxBillion * 0.25))),
+      );
     }
-  }
+  }, [isOpen, maxBillion]);
 
   const { dispatchAction } = useGameActions();
   const currentBillion = Math.max(0, Math.min(billionAmount, maxBillion));

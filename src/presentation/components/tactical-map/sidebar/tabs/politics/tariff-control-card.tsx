@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Coins, TrendingUp, Zap, Anchor, Compass, Globe } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -26,15 +26,12 @@ export function TariffControlCard({
   nation,
 }: TariffControlCardProps) {
   const [tariffRate, setTariffRate] = useState<number>(initialTariffRate);
-  const [prevInitialTariff, setPrevInitialTariff] =
-    useState<number>(initialTariffRate);
   const { dispatchAction } = useGameActions();
   const doctrinesManager = useMemo(() => new DoctrinesManager(), []);
 
-  if (initialTariffRate !== prevInitialTariff) {
-    setPrevInitialTariff(initialTariffRate);
+  useEffect(() => {
     setTariffRate(initialTariffRate);
-  }
+  }, [initialTariffRate]);
 
   const handleApplyTariff = async () => {
     const action = ActionFactory.setTariffRate(nationId, tariffRate);

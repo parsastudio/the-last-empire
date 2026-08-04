@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
@@ -45,16 +45,12 @@ export function useWideDiplomacy({
   const [activeCode, setActiveCode] = useState<string>(
     selectedTargetCode || defaultCode,
   );
-  const [prevTargetCode, setPrevTargetCode] = useState<
-    string | null | undefined
-  >(selectedTargetCode);
 
-  if (selectedTargetCode !== prevTargetCode) {
-    setPrevTargetCode(selectedTargetCode);
+  useEffect(() => {
     if (selectedTargetCode) {
       setActiveCode(selectedTargetCode);
     }
-  }
+  }, [selectedTargetCode]);
 
   const targetNationId = NationIdResolver.resolveCanonicalId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
