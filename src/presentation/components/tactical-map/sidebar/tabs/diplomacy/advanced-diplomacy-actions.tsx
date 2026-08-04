@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomatic-betrayal-calculator";
+import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-domain.service";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";

@@ -18,12 +18,13 @@ export class MarketEngine {
   }
 
   public static predictBuyCost(
-    _marketPrices: ResourceMarketPrice,
-    _resourceType: "oil" | "steel",
+    marketPrices: ResourceMarketPrice,
+    resourceType: "oil" | "steel",
     amount: number,
   ): number {
     if (amount <= 0) return 0;
-    return amount * MARKET_CONFIG.FIXED_BUY_PRICE;
+    const price = marketPrices[resourceType] ?? MARKET_CONFIG.FIXED_BUY_PRICE;
+    return amount * price;
   }
 
   public static calculateMaxAffordable(
@@ -36,11 +37,11 @@ export class MarketEngine {
   }
 
   public static predictSellRevenue(
-    _marketPrices: ResourceMarketPrice,
-    _resourceType: "oil" | "steel",
+    marketPrices: ResourceMarketPrice,
+    resourceType: "oil" | "steel",
     amount: number,
   ): number {
-    if (amount <= 0) return 0;
+    if (amount <= 0 || !marketPrices || !resourceType) return 0;
     return amount * MARKET_CONFIG.FIXED_SELL_PRICE;
   }
 

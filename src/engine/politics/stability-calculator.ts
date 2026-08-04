@@ -1,8 +1,10 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { TaxCalculator } from "@/engine/economy/tax-calculator";
-import { TariffCalculator } from "@/engine/economy/tariff-calculator";
+import {
+  TaxCalculator,
+  TariffCalculator,
+} from "@/engine/economy/economy-domain.service";
 import { TraitManager } from "@/engine/politics/trait-manager";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 

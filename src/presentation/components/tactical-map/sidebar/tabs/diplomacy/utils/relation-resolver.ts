@@ -8,7 +8,7 @@ import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
+import { PowerScoreCalculator } from "@/engine/diplomacy/diplomacy-domain.service";
 
 export interface DiplomaticRelation {
   code: string;

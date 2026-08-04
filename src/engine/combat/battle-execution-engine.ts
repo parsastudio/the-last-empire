@@ -7,8 +7,10 @@ import {
   TurnLogBuilder,
   NationIdResolver,
 } from "@/domain/shared/domain-utilities";
-import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomatic-betrayal-calculator";
-import { ReputationManager } from "@/engine/diplomacy/reputation-manager";
+import {
+  DiplomaticBetrayalCalculator,
+  ReputationManager,
+} from "@/engine/diplomacy/diplomacy-domain.service";
 
 export class BattleExecutionEngine {
   private facade = new BitPackedStateFacade();
