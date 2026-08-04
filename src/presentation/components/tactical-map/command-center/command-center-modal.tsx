@@ -82,12 +82,6 @@ interface CommandCenterModalProps {
     targetCode?: string,
   ) => void;
   onFocusCountry?: (code: string) => void;
-  onOpenTrade: (
-    name: string,
-    unit: string,
-    mode: "buy" | "sell",
-    price: number,
-  ) => void;
 }
 
 export function CommandCenterModal({
@@ -100,7 +94,6 @@ export function CommandCenterModal({
   onClose,
   onNavigateTab,
   onFocusCountry,
-  onOpenTrade,
 }: CommandCenterModalProps) {
   if (!activeTab || !nation) return null;
 
@@ -131,7 +124,6 @@ export function CommandCenterModal({
           gameState={gameState}
           reports={reports}
           onFocusCountry={onFocusCountry}
-          onOpenTrade={onOpenTrade}
           onNavigateTab={onNavigateTab}
         />
       </div>

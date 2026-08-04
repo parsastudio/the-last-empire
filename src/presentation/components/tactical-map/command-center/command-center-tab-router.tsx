@@ -21,12 +21,6 @@ interface CommandCenterTabRouterProps {
   gameState?: GameState | null;
   reports: CombatReport[];
   onFocusCountry?: (code: string) => void;
-  onOpenTrade: (
-    name: string,
-    unit: string,
-    mode: "buy" | "sell",
-    price: number,
-  ) => void;
   onNavigateTab?: (
     tab: SidebarTabType,
     subTab?: string,
@@ -40,7 +34,6 @@ export function CommandCenterTabRouter({
   nation,
   gameState,
   onFocusCountry,
-  onOpenTrade,
   onNavigateTab,
 }: CommandCenterTabRouterProps) {
   switch (activeTab) {
@@ -54,7 +47,6 @@ export function CommandCenterTabRouter({
           steelStock={nation.resources.steel}
           userTreasury={nation.treasury}
           nation={nation}
-          onOpenTrade={onOpenTrade}
         />
       );
     case "military":

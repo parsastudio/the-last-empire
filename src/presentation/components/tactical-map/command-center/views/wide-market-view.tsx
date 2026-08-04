@@ -5,6 +5,7 @@ import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { useMarketTrade } from "@/presentation/components/tactical-map/sidebar/tabs/market/hooks/use-market-trade";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { AutoTradeDialog } from "@/presentation/components/tactical-map/sidebar/tabs/market/auto-trade-dialog";
+import { TradeActionDialog } from "@/presentation/components/tactical-map/sidebar/tabs/market/trade-action-dialog";
 import { Nation } from "@/domain/nation/nation.schema";
 import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
@@ -14,12 +15,6 @@ interface WideMarketViewProps {
   steelStock?: number;
   userTreasury?: number;
   nation?: Nation | null;
-  onOpenTrade: (
-    name: string,
-    unit: string,
-    mode: "buy" | "sell",
-    price: number,
-  ) => void;
 }
 
 export function WideMarketView({
@@ -31,7 +26,6 @@ export function WideMarketView({
   steelStock = 20,
   userTreasury = MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK,
   nation,
-  onOpenTrade,
 }: WideMarketViewProps) {
   const [isAutoTradeOpen, setIsAutoTradeOpen] = useState<boolean>(false);
 
@@ -45,11 +39,9 @@ export function WideMarketView({
       : marketPrices.steel;
 
   const trade = useMarketTrade({
-    marketPrices: { oil: safeOil, steel: safeSteel },
     oilStock,
     steelStock,
     userTreasury,
-    onOpenTradeExternal: onOpenTrade,
   });
 
   return (
@@ -126,6 +118,18 @@ export function WideMarketView({
           />
         </div>
       </div>
+
+      <TradeActionDialog
+        isOpen={trade.tradeModal.isOpen}
+        resourceName={trade.tradeModal.resourceName}
+        unit={trade.tradeModal.unit}
+        mode={trade.tradeModal.mode}
+        unitPrice={trade.tradeModal.unitPrice}
+        maxAmount={trade.tradeModal.maxAmount}
+        nationId={nation?.id}
+        onClose={trade.closeTradeModal}
+        onConfirm={trade.closeTradeModal}
+      />
 
       {nation && (
         <AutoTradeDialog
