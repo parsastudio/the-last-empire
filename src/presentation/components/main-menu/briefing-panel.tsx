@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Radio,
   AlertCircle,
@@ -45,55 +45,6 @@ function BriefingFeedItem({ message }: { message: FeedMessage }) {
 }
 
 export function BriefingPanel() {
-  const [messages, setMessages] = useState<FeedMessage[]>(
-    INITIAL_BRIEFING_MESSAGES,
-  );
-
-  useEffect(() => {
-    let active = true;
-
-    const interval = setInterval(() => {
-      if (!active) return;
-
-      const dynamicTexts: { type: FeedMessage["type"]; text: string }[] = [
-        {
-          type: "info",
-          text: "گزارش ارتش: تکمیل تولید و استقرار تجهیزات جدید در پایگاه‌ها.",
-        },
-        {
-          type: "warning",
-          text: "وزارت اقتصاد: نوسان قیمت در بازار آزاد منابع انرژی و فولاد.",
-        },
-        {
-          type: "danger",
-          text: "هشدار امنیتی: افت شاخص ثبات سیاسی و افزایش خطر نارضایتی عمومی.",
-        },
-        {
-          type: "info",
-          text: "پژوهشکده ملی: پیشرفت تازه در تحقیقات فناوری‌های دفاعی و صنعتی.",
-        },
-      ];
-
-      const randomItem =
-        dynamicTexts[Math.floor(Math.random() * dynamicTexts.length)];
-      if (!randomItem) return;
-
-      const newMessage: FeedMessage = {
-        id: `msg-${Date.now()}`,
-        type: randomItem.type,
-        text: randomItem.text,
-        time: "همین الان",
-      };
-
-      setMessages((prev) => [newMessage, ...prev.slice(0, 19)]);
-    }, 6000);
-
-    return () => {
-      active = false;
-      clearInterval(interval);
-    };
-  }, []);
-
   return (
     <div className="bg-card/40 backdrop-blur-md border border-border rounded-3xl p-5 space-y-4 max-w-sm w-full shadow-lg flex flex-col h-[400px]">
       <div className="flex items-center justify-between pb-3 border-b border-border/80 shrink-0">
@@ -107,7 +58,7 @@ export function BriefingPanel() {
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 pl-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent text-right">
-        {messages.map((msg) => (
+        {INITIAL_BRIEFING_MESSAGES.map((msg) => (
           <BriefingFeedItem key={msg.id} message={msg} />
         ))}
       </div>
