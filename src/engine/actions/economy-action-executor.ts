@@ -4,8 +4,6 @@ import { MarketEngine } from "@/engine/economy/market-engine";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class EconomyActionExecutor {
-  private static marketEngine = new MarketEngine();
-
   public static execute(state: GameState, action: GameAction): GameState {
     const canonicalNationId = NationIdResolver.resolveCanonicalId(
       action.nationId,
@@ -104,13 +102,13 @@ export class EconomyActionExecutor {
 
       case "TRADE_RESOURCES": {
         const res = action.isBuy
-          ? this.marketEngine.buyResource(
+          ? MarketEngine.buyResource(
               nation,
               state.marketPrices,
               action.resourceType,
               action.amount,
             )
-          : this.marketEngine.sellResource(
+          : MarketEngine.sellResource(
               nation,
               state.marketPrices,
               action.resourceType,

@@ -1,10 +1,10 @@
 import type { GameState } from "@/domain/game/game-state.schema";
+import type { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { CoolOffManager } from "@/engine/diplomacy/cool-off-manager";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 
 export class ModifiersPhase implements TurnPhase {
-  private modifierManager = new ModifierManager();
   private coolOffManager = new CoolOffManager();
 
   public execute(context: PipelineContext): GameState {
@@ -15,11 +15,17 @@ export class ModifiersPhase implements TurnPhase {
       if (!nation.isAlive) {
         continue;
       }
-      const updated = this.modifierManager.updateActiveModifiers(nation);
+      const updated = ModifierManager.updateActiveModifiers(nation);
 
-      const updatedRelations = { ...updated.relations };
-      for (const [targetId, relation] of Object.entries(updatedRelations)) {
-        let currentRel = relation;
+      const updatedRelations: Record<string, RelationProfile> = {
+        ...(updated.relations || {}),
+      };
+
+      for (const [targetId, relation] of Object.entries(updatedRelations) as [
+        string,
+        RelationProfile,
+      ][]) {
+        let currentRel: RelationProfile = relation;
 
         if (currentRel.coolOffTurnsRemaining > 0) {
           const nextTurns = this.coolOffManager.processTurnTick(

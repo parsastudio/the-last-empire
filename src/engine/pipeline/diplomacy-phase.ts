@@ -9,7 +9,6 @@ import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class DiplomacyPhase implements TurnPhase {
   private powerRanker = new PowerScoreRanker();
-  private governmentSystem = new GovernmentSystem();
   private reputationManager = new ReputationManager();
   private opinionCalculator = new DiplomaticOpinionCalculator();
   private relationsManager = new RelationsManager();
@@ -21,7 +20,7 @@ export class DiplomacyPhase implements TurnPhase {
     const rawNationsList = Object.values(nations)
       .filter((n) => n.isAlive)
       .map((n) => {
-        const govTraits = this.governmentSystem.getTraits(n.government.type);
+        const govTraits = GovernmentSystem.getTraits(n.government.type);
         return {
           id: n.id,
           gdp: n.gdp,

@@ -10,8 +10,6 @@ export interface ProxyOperationResult {
 }
 
 export class ProxyWarManager {
-  private doctrinesManager = new DoctrinesManager();
-
   public executeProxyOperation(
     sourceNation: Nation,
     targetNation: Nation,
@@ -23,7 +21,7 @@ export class ProxyWarManager {
       clampedDrain,
     );
 
-    const discount = this.doctrinesManager.getProxyCostDiscount(
+    const discount = DoctrinesManager.getProxyCostDiscount(
       sourceNation.doctrines?.unlockedDoctrines,
     );
     requiredBudget = Math.floor(requiredBudget * discount);

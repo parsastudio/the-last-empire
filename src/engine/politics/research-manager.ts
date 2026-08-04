@@ -3,8 +3,6 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import { GameError } from "@/domain/shared/domain-utilities";
 
 export class ResearchManager {
-  private governmentSystem = new GovernmentSystem();
-
   public getMilitaryTechCost(nation: Nation): number {
     const baseCost = Math.floor(nation.gdp * 0.12);
     return Math.max(1500000000, baseCost);
@@ -75,7 +73,7 @@ export class ResearchManager {
     let finalTurn = currentTurn;
 
     if (currentTurn >= 3) {
-      const govTraits = this.governmentSystem.getTraits(nation.government.type);
+      const govTraits = GovernmentSystem.getTraits(nation.government.type);
       const industrialBonus = 1 + (nation.industrialLevel - 1) * 0.1;
       const basePoints = currentAccumulated / 10000000000;
 
