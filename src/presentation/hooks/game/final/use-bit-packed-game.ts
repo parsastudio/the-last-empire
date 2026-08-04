@@ -1,19 +1,17 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
-import { GameStateApiService } from "@/presentation/services/game-state-api.service";
+import { ClientGameService } from "@/presentation/services/client-game.service";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
-import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 
 export function useBitPackedGame(gameId = "default_game") {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const apiService = useMemo(() => new GameStateApiService(), []);
+  const gameService = useMemo(() => new ClientGameService(), []);
   const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
-  const clientStorage = useMemo(() => new ClientStorageService(), []);
 
   useEffect(() => {
     let active = true;
@@ -32,7 +30,7 @@ export function useBitPackedGame(gameId = "default_game") {
           await FinalStateLoader.loadLiveStateBuffer("map1");
         }
 
-        const res = await apiService.fetchStatus("IRN", gameId);
+        const res = await gameService.loadGameState(gameId);
         if (active) {
           if (res.success && res.data) {
             setGameState(res.data);
@@ -43,7 +41,7 @@ export function useBitPackedGame(gameId = "default_game") {
         }
       } catch {
         if (active) {
-          setError("خطای شبکه در راه‌اندازی کمپین WebGL");
+          setError("خطا در راه‌اندازی کمپین بازی");
           setLoading(false);
         }
       }
@@ -54,22 +52,21 @@ export function useBitPackedGame(gameId = "default_game") {
     return () => {
       active = false;
     };
-  }, [apiService, gameId, storageAdapter]);
+  }, [gameService, gameId, storageAdapter]);
 
   const advanceNextTurn = useCallback(async (): Promise<GameState | null> => {
     if (!gameState) return null;
 
-    const res = await apiService.advanceTurn(gameId, gameState);
+    const res = await gameService.advanceTurn(gameId, gameState);
     if (res.success && res.data) {
       setGameState(res.data);
       const gridState = BitPackedGridState.getInstance();
       await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
-      await clientStorage.saveGameState(gameId, res.data);
       return res.data;
     }
 
     return null;
-  }, [gameState, apiService, storageAdapter, clientStorage, gameId]);
+  }, [gameState, gameService, storageAdapter, gameId]);
 
   return {
     gameState,
