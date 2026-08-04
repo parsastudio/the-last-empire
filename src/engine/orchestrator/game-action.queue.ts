@@ -5,7 +5,6 @@ import { ActionPrioritySorter } from "@/engine/orchestrator/action-priority-sort
 import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class GameActionQueue {
   private actionQueue = new ActionQueue();
@@ -17,11 +16,7 @@ export class GameActionQueue {
     this.actionQueue.enqueue(state, action);
   }
 
-  public processActions(
-    state: GameState,
-    _gridState: BitPackedGridState,
-    prng: SeededRandom,
-  ): GameState {
+  public processActions(state: GameState, prng: SeededRandom): GameState {
     const rawQueue = this.actionQueue.getQueue();
     const sortedActions = this.prioritySorter.sortActions(rawQueue, prng);
 
