@@ -62,7 +62,7 @@ export function SidebarContainer({
         selectedTargetCode={effectiveTargetCode}
         nation={actions.humanNation}
         gameState={actions.gameState}
-        reports={actions.realReports}
+        reports={[]}
         onClose={actions.handleCloseActiveModal}
         onFocusCountry={onFocusCountry}
         onOpenTrade={actions.handleOpenTrade}

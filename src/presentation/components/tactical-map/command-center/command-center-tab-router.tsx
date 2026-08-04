@@ -8,7 +8,6 @@ import { WideProxyView } from "@/presentation/components/tactical-map/command-ce
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
 import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
 import { WideAbilitiesView } from "@/presentation/components/tactical-map/command-center/views/wide-abilities-view";
-import { WideReportsView } from "@/presentation/components/tactical-map/command-center/views/wide-reports-view";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -34,7 +33,6 @@ export function CommandCenterTabRouter({
   selectedTargetCode,
   nation,
   gameState,
-  reports,
   onFocusCountry,
   onOpenTrade,
   onNavigateTab,
@@ -118,7 +116,11 @@ export function CommandCenterTabRouter({
         />
       );
     case "reports":
-      return <WideReportsView reports={reports} />;
+      return (
+        <div className="py-20 text-center text-xs text-muted-foreground italic">
+          بایگانی گزارش‌ها غیرفعال است.
+        </div>
+      );
     default:
       return null;
   }

@@ -1,6 +1,5 @@
 import React from "react";
 import { Layers, Loader2, Eye, Coins } from "lucide-react";
-import { HistoryHudTrigger } from "@/presentation/components/tactical-map/history/history-hud-trigger";
 
 export type TacticalLayer = "political" | "gdp";
 
@@ -30,18 +29,12 @@ interface LayerControllerProps {
   activeLayer: TacticalLayer;
   isRendering?: boolean;
   onChangeLayer: (layer: TacticalLayer) => void;
-  eventsCount?: number;
-  isReplayingHistory?: boolean;
-  onToggleHistoryReplay?: () => void;
 }
 
 export function LayerController({
   activeLayer,
   isRendering = false,
   onChangeLayer,
-  eventsCount = 0,
-  isReplayingHistory = false,
-  onToggleHistoryReplay,
 }: LayerControllerProps) {
   return (
     <div
@@ -83,14 +76,6 @@ export function LayerController({
             </button>
           );
         })}
-
-        {onToggleHistoryReplay && (
-          <HistoryHudTrigger
-            eventsCount={eventsCount}
-            isReplaying={isReplayingHistory}
-            onToggleReplay={onToggleHistoryReplay}
-          />
-        )}
       </div>
     </div>
   );
