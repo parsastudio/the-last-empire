@@ -22,7 +22,7 @@ export class EconomyPhase implements TurnPhase {
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
     const nations = { ...nextState.nations };
-    const marketPrices = nextState.marketPrices;
+    const marketPrices = MarketEngine.updateMarketPrices();
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {
@@ -85,13 +85,7 @@ export class EconomyPhase implements TurnPhase {
     }
 
     nextState.nations = nations;
-    nextState.marketPrices = MarketEngine.updateMarketPrices();
-    nextState.turnTradeVolume = {
-      oilBought: 0,
-      oilSold: 0,
-      steelBought: 0,
-      steelSold: 0,
-    };
+    nextState.marketPrices = marketPrices;
 
     return nextState;
   }
