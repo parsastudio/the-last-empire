@@ -2,11 +2,10 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { GameIdGenerator } from "@/domain/shared/domain-utilities";
-import { GameStateApiService } from "@/presentation/services/game-state-api.service";
+import { ClientGameService } from "@/presentation/services/client-game.service";
 import { useToast } from "@/presentation/context/toast-context";
 import { FinalMapManifest as MapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
-import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
 import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
@@ -16,8 +15,7 @@ export function useSelectNationForm() {
   const router = useRouter();
   const { showToast } = useToast();
   const provider = useMemo(() => new NationDatabaseProvider(), []);
-  const apiService = useMemo(() => new GameStateApiService(), []);
-  const storageService = useMemo(() => new ClientStorageService(), []);
+  const gameService = useMemo(() => new ClientGameService(), []);
   const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
 
   const [manifest, setManifest] = useState<MapManifest | null>(null);
@@ -101,14 +99,14 @@ export function useSelectNationForm() {
       const gridState = BitPackedGridState.getInstance();
       await storageAdapter.saveBitBuffer(uniqueGameId, gridState.getBuffer());
 
-      const result = await apiService.selectCountry(
+      const result = await gameService.createCampaign(
         selectedNation.id,
         selectedGovernment,
         uniqueGameId,
+        manifest,
       );
 
       if (result.success && result.data) {
-        await storageService.saveGameState(uniqueGameId, result.data);
         router.push(`/play/${uniqueGameId}`);
       } else {
         showToast(
@@ -119,16 +117,16 @@ export function useSelectNationForm() {
       }
     } catch {
       showToast(
-        "خطای شبکه",
-        "ارتباط با سرور جهت ایجاد کمپین جدید برقرار نشد.",
+        "خطا در ایجاد کمپین",
+        "امکان ذخیره پرونده کمپین جدید در حافظه وجود ندارد.",
         "error",
       );
     }
   }, [
     selectedNation,
     selectedGovernment,
-    apiService,
-    storageService,
+    gameService,
+    manifest,
     storageAdapter,
     router,
     showToast,
