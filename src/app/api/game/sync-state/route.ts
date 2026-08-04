@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GameState } from "@/domain/game/game-state.schema";
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -13,8 +12,6 @@ export async function POST(request: Request): Promise<NextResponse> {
         { status: 400 },
       );
     }
-
-    serverGameSessionStore.initSession(state.gameId, state);
 
     return NextResponse.json({
       success: true,

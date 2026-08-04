@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  GameStateInitializer,
-  normalizeNationId,
-} from "@/infrastructure/map-preprocessing/game-state-initializer";
+import { normalizeNationId } from "@/infrastructure/map-preprocessing/game-state-initializer";
 import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
 
@@ -15,16 +12,11 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     await GridLoaderService.ensureGridLoaded();
 
-    let engine = serverGameSessionStore.getEngine(gameIdParam);
-    if (!engine) {
-      const initializer = new GameStateInitializer();
-      const initialState =
-        initializer.initializeSimulationForNation(normalizedHumanId);
-      initialState.gameId = gameIdParam;
-      engine = serverGameSessionStore.initSession(gameIdParam, initialState);
-    }
+    const state = serverGameSessionStore.getOrInitState(
+      gameIdParam,
+      normalizedHumanId,
+    );
 
-    const state = engine.getState();
     return NextResponse.json({ success: true, data: state });
   } catch (err) {
     const message = err instanceof Error ? err.message : "خطای داخلی سیستم";
