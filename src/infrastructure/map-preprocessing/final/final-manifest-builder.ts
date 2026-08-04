@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
-import { PowerScoreCalculator } from "@/engine/diplomacy/power-score-calculator";
+import { PowerScoreCalculator } from "@/engine/diplomacy/diplomacy-domain.service";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 
 export interface FinalManifestNation {

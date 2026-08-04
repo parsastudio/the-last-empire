@@ -6,7 +6,6 @@ import {
 } from "@/domain/diplomacy/diplomacy.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export interface BetrayalEvaluation {
   reputationPenalty: number;

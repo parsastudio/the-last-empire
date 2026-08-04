@@ -3,9 +3,11 @@
 import { useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { TaxCalculator } from "@/engine/economy/tax-calculator";
-import { MilitaryPayrollCalculator } from "@/engine/economy/military-payroll-calculator";
-import { TariffCalculator } from "@/engine/economy/tariff-calculator";
+import {
+  TaxCalculator,
+  MilitaryPayrollCalculator,
+  TariffCalculator,
+} from "@/engine/economy/economy-domain.service";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export interface HumanResourceMetrics {

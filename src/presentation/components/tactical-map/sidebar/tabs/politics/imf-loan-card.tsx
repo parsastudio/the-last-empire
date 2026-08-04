@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { LoanManager } from "@/engine/economy/loan-manager";
+import { LoanManager } from "@/engine/economy/economy-domain.service";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { LoanActionDialog } from "./loan-action-dialog";
 import { RepayActionDialog } from "./repay-action-dialog";

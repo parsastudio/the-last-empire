@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { TreatyEvaluator } from "@/engine/diplomacy/treaty-evaluator";
+import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-domain.service";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
