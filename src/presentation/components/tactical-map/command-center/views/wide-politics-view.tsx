@@ -2,13 +2,10 @@ import React from "react";
 import { TaxControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tax-control-card";
 import { TariffControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tariff-control-card";
 import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/imf-loan-card";
-import { IndustrialUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industrial-upgrade-card";
-import { InfrastructureUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/infrastructure-upgrade-card";
-import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/military-tech-upgrade-card";
 import { AntiCorruptionCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
 import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
-import { DiplomaticCampaignCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/diplomatic-campaign-card";
+import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
 import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
@@ -50,7 +47,6 @@ export function WidePoliticsView({
   population = 80000000,
   oilStock = 1000,
   steelStock = 1000,
-  globalReputation = 50,
 }: WidePoliticsViewProps) {
   const currentNation = nationsMap ? nationsMap[nationId] : undefined;
 
@@ -58,12 +54,6 @@ export function WidePoliticsView({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard modifiers={activeModifiers} />
-        <DiplomaticCampaignCard
-          nationId={nationId}
-          treasury={treasury}
-          gdp={gdp}
-          currentReputation={globalReputation}
-        />
         <PopulationWelfareCard
           population={population}
           oilStock={oilStock}
@@ -103,23 +93,13 @@ export function WidePoliticsView({
       </div>
 
       <div className="space-y-5">
-        <MilitaryTechUpgradeCard
-          currentLevel={militaryTechLevel}
+        <DevelopmentUpgradesSection
           nationId={nationId}
           treasury={treasury}
           gdp={gdp}
-        />
-        <IndustrialUpgradeCard
-          currentLevel={industrialLevel}
-          nationId={nationId}
-          treasury={treasury}
-          gdp={gdp}
-        />
-        <InfrastructureUpgradeCard
-          currentLevel={infrastructureLevel}
-          nationId={nationId}
-          treasury={treasury}
-          gdp={gdp}
+          industrialLevel={industrialLevel}
+          infrastructureLevel={infrastructureLevel}
+          militaryTechLevel={militaryTechLevel}
         />
       </div>
     </div>
