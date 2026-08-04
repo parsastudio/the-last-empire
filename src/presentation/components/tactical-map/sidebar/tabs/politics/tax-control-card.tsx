@@ -122,14 +122,14 @@ interface TaxControlCardProps {
   taxRate: number;
   baseGdp: number;
   corruption?: number;
-  nationId?: string;
+  nationId: string;
 }
 
 export function TaxControlCard({
   taxRate: initialTaxRate,
   baseGdp,
   corruption = 0,
-  nationId = "NATION_118",
+  nationId,
 }: TaxControlCardProps) {
   const [taxRate, setTaxRate] = useState<number>(Math.min(50, initialTaxRate));
   const [isDragging, setIsDragging] = useState<boolean>(false);

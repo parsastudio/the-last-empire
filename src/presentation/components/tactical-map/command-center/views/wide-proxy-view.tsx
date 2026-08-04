@@ -63,7 +63,7 @@ export function WideProxyView({
       );
       if (matched) return matched.id;
     }
-    return countryOptions[0]?.id || "NATION_15";
+    return countryOptions[0]?.id || "";
   }, [selectedTargetCode, countryOptions]);
 
   const [selectedTargetId, setSelectedTargetId] =
