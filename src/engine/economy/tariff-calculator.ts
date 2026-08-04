@@ -8,9 +8,7 @@ export interface TariffEffectResult {
 }
 
 export class TariffCalculator {
-  private doctrinesManager = new DoctrinesManager();
-
-  public calculateTariffEffects(nation: Nation): TariffEffectResult {
+  public static calculateTariffEffects(nation: Nation): TariffEffectResult {
     const tariffRate = nation.tariffRate;
     const seaAccessFactor = nation.geography.hasSeaAccess ? 1.0 : 0.5;
     const baseTradeBase = nation.gdp * 0.15 * seaAccessFactor;
@@ -24,7 +22,7 @@ export class TariffCalculator {
     const effectiveTradeValue = baseTradeBase * tradeVolumeFactor;
     let tariffRevenue = Math.floor(effectiveTradeValue * (tariffRate / 100));
 
-    const researchMultiplier = this.doctrinesManager.getTariffRevenueMultiplier(
+    const researchMultiplier = DoctrinesManager.getTariffRevenueMultiplier(
       nation.doctrines.unlockedDoctrines,
     );
     tariffRevenue = Math.floor(tariffRevenue * researchMultiplier);

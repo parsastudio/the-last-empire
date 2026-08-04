@@ -9,7 +9,7 @@ export interface GovernmentTraits {
 }
 
 export class GovernmentSystem {
-  public getTraits(type: GovernmentType): GovernmentTraits {
+  public static getTraits(type: GovernmentType): GovernmentTraits {
     switch (type) {
       case "DEMOCRACY":
         return {

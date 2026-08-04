@@ -22,11 +22,6 @@ export interface HumanResourceMetrics {
   pendingDecisionsCount: number;
 }
 
-const taxCalculator = new TaxCalculator();
-const payrollCalculator = new MilitaryPayrollCalculator();
-const tariffCalculator = new TariffCalculator();
-const popWelfareCalculator = new PopulationWelfareCalculator();
-
 export function useGameResources(
   gameState: GameState | null,
 ): HumanResourceMetrics {
@@ -77,9 +72,9 @@ export function useGameResources(
       };
     }
 
-    const taxResult = taxCalculator.evaluateTaxPolicy(nation);
-    const payrollBreakdown = payrollCalculator.calculatePayroll(nation);
-    const tariffResult = tariffCalculator.calculateTariffEffects(nation);
+    const taxResult = TaxCalculator.evaluateTaxPolicy(nation);
+    const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
+    const tariffResult = TariffCalculator.calculateTariffEffects(nation);
 
     const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
     const totalExpenses =
@@ -87,7 +82,7 @@ export function useGameResources(
     const netIncome = totalIncome - totalExpenses;
 
     const welfareMetrics =
-      popWelfareCalculator.evaluateWelfareForNation(nation);
+      PopulationWelfareCalculator.evaluateWelfareForNation(nation);
     const oilRequired = welfareMetrics.oilDemand;
 
     let pendingCount = 0;

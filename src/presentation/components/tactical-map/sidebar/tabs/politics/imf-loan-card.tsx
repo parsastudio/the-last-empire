@@ -24,7 +24,6 @@ export function ImfLoanCard({
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
 
-  const loanManager = new LoanManager();
   const mockNation =
     nation ||
     ({
@@ -35,7 +34,7 @@ export function ImfLoanCard({
       activeModifiers: [],
     } as unknown as Nation);
 
-  const creditRating = loanManager.calculateCreditRating(mockNation);
+  const creditRating = LoanManager.calculateCreditRating(mockNation);
   const maxDebtLimit = Math.floor(gdp * 1.0 * (creditRating / 100));
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 

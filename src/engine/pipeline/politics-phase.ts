@@ -6,8 +6,6 @@ import { ResearchManager } from "@/engine/politics/research-manager";
 import { DomesticCrisisManager } from "@/engine/politics/domestic-crisis-manager";
 
 export class PoliticsPhase implements TurnPhase {
-  private corruptionManager = new CorruptionManager();
-  private stabilityCalc = new StabilityCalculator();
   private researchManager = new ResearchManager();
   private domesticCrisisManager = new DomesticCrisisManager();
 
@@ -28,9 +26,9 @@ export class PoliticsPhase implements TurnPhase {
       };
 
       updated.government.corruption =
-        this.corruptionManager.updateCorruptionLevel(updated);
+        CorruptionManager.updateCorruptionLevel(updated);
 
-      const newStability = this.stabilityCalc.calculateTurnStability(updated);
+      const newStability = StabilityCalculator.calculateTurnStability(updated);
       updated.government = {
         ...updated.government,
         stability: newStability,

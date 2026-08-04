@@ -7,28 +7,22 @@ import { TraitManager } from "@/engine/politics/trait-manager";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export class StabilityCalculator {
-  private governmentSystem = new GovernmentSystem();
-  private traitManager = new TraitManager();
-  private modifierManager = new ModifierManager();
-  private taxCalc = new TaxCalculator();
-  private tariffCalc = new TariffCalculator();
-  private popWelfareCalc = new PopulationWelfareCalculator();
-
-  public calculateTurnStabilityDelta(nation: Nation): number {
-    const taxResult = this.taxCalc.evaluateTaxPolicy(nation);
-    const tariffResult = this.tariffCalc.calculateTariffEffects(nation);
+  public static calculateTurnStabilityDelta(nation: Nation): number {
+    const taxResult = TaxCalculator.evaluateTaxPolicy(nation);
+    const tariffResult = TariffCalculator.calculateTariffEffects(nation);
 
     let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
 
-    const welfareMetrics = this.popWelfareCalc.evaluateWelfareForNation(nation);
+    const welfareMetrics =
+      PopulationWelfareCalculator.evaluateWelfareForNation(nation);
     delta += welfareMetrics.totalStabilityImpact;
 
-    const govTraits = this.governmentSystem.getTraits(nation.government.type);
+    const govTraits = GovernmentSystem.getTraits(nation.government.type);
     delta += govTraits.stabilityDeltaPerTurn;
 
-    delta += this.traitManager.getStabilityDeltaPerTurn(nation);
+    delta += TraitManager.getStabilityDeltaPerTurn(nation);
 
-    const stabilityModifier = this.modifierManager.getModifierImpact(
+    const stabilityModifier = ModifierManager.getModifierImpact(
       nation,
       "STABILITY_DELTA",
     );
@@ -37,15 +31,15 @@ export class StabilityCalculator {
     return Number(delta.toFixed(2));
   }
 
-  public calculateTurnStability(nation: Nation): number {
-    const delta = this.calculateTurnStabilityDelta(nation);
+  public static calculateTurnStability(nation: Nation): number {
+    const delta = StabilityCalculator.calculateTurnStabilityDelta(nation);
     const currentStability = nation.government.stability;
     const newStability = Math.max(0, Math.min(100, currentStability + delta));
 
     return Number(newStability.toFixed(2));
   }
 
-  public getTaxIncomePenaltyMultiplier(stability: number): number {
+  public static getTaxIncomePenaltyMultiplier(stability: number): number {
     if (stability >= 30) {
       return 1.0;
     }

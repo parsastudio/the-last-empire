@@ -14,14 +14,8 @@ import { BankruptcyManager } from "@/engine/economy/bankruptcy-manager";
 import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyPhase implements TurnPhase {
-  private gdpCalc = new GdpCalculator();
   private popEngine = new PopulationGrowthEngine();
   private manpowerManager = new ManpowerManager();
-  private tariffCalculator = new TariffCalculator();
-  private autoTradeEngine = new AutoTradeEngine();
-  private taxCalc = new TaxCalculator();
-  private payrollCalc = new MilitaryPayrollCalculator();
-  private resourceDependencyManager = new ResourceDependencyManager();
   private debtManager = new DebtManager();
   private bankruptcyManager = new BankruptcyManager();
   private marketEngine = new MarketEngine();
@@ -48,7 +42,7 @@ export class EconomyPhase implements TurnPhase {
         },
       };
 
-      const updatedGdp = this.gdpCalc.updateNationGdp(updated);
+      const updatedGdp = GdpCalculator.updateNationGdp(updated);
       updated = { ...updated, gdp: updatedGdp };
 
       const population = this.popEngine.updatePopulation(updated);
@@ -57,8 +51,7 @@ export class EconomyPhase implements TurnPhase {
       const manpowerGrowth = this.manpowerManager.calculateGrowth(updated);
       updated = this.manpowerManager.restoreManpower(updated, manpowerGrowth);
 
-      const tariffResult =
-        this.tariffCalculator.calculateTariffEffects(updated);
+      const tariffResult = TariffCalculator.calculateTariffEffects(updated);
       if (tariffResult.tariffRevenue > 0) {
         updated = {
           ...updated,
@@ -66,14 +59,15 @@ export class EconomyPhase implements TurnPhase {
         };
       }
 
-      const autoResult = this.autoTradeEngine.processNationAutoTrade(
+      const autoResult = AutoTradeEngine.processNationAutoTrade(
         updated,
         marketPrices,
       );
       updated = autoResult.updatedNation;
 
-      const taxResult = this.taxCalc.evaluateTaxPolicy(updated);
-      const payrollBreakdown = this.payrollCalc.calculatePayroll(updated);
+      const taxResult = TaxCalculator.evaluateTaxPolicy(updated);
+      const payrollBreakdown =
+        MilitaryPayrollCalculator.calculatePayroll(updated);
 
       const financial = this.debtManager.processFinancials(
         updated,
@@ -82,7 +76,7 @@ export class EconomyPhase implements TurnPhase {
       );
 
       updated = financial.updatedNation;
-      updated = this.resourceDependencyManager.consumeTurnResources(updated);
+      updated = ResourceDependencyManager.consumeTurnResources(updated);
 
       if (this.bankruptcyManager.isBankrupt(updated)) {
         updated = this.bankruptcyManager.applyBankruptcy(updated);

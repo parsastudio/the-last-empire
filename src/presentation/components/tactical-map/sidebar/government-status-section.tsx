@@ -57,9 +57,8 @@ export function GovernmentStatusSection({
   reputation,
   nation,
 }: GovernmentStatusSectionProps) {
-  const stabilityCalc = new StabilityCalculator();
   const stabilityDelta = nation
-    ? stabilityCalc.calculateTurnStabilityDelta(nation)
+    ? StabilityCalculator.calculateTurnStabilityDelta(nation)
     : 0;
 
   const stabilityDeltaText =

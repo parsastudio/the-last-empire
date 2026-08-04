@@ -28,8 +28,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
   const { oilProducedPerTurn, steelProducedPerTurn } =
     ResourceGenerationStep.calculateResourceGeneration(nation);
 
-  const welfareCalc = new PopulationWelfareCalculator();
-  const oilRequiredPerTurn = welfareCalc.calculateOilDemand(
+  const oilRequiredPerTurn = PopulationWelfareCalculator.calculateOilDemand(
     nation.population,
     effectiveGdp,
     nation.doctrines?.unlockedDoctrines,

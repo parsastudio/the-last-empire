@@ -7,9 +7,7 @@ export interface TaxCalculationResult {
 }
 
 export class TaxCalculator {
-  private doctrinesManager = new DoctrinesManager();
-
-  public calculateTaxIncome(
+  public static calculateTaxIncome(
     gdp: number,
     taxRate: number,
     corruption: number,
@@ -21,13 +19,13 @@ export class TaxCalculator {
     const baseIncome = grossIncome - corruptionLoss;
 
     const researchMultiplier =
-      this.doctrinesManager.getGdpTaxRevenueMultiplier(unlockedDoctrines);
+      DoctrinesManager.getGdpTaxRevenueMultiplier(unlockedDoctrines);
 
     return Math.floor(baseIncome * researchMultiplier);
   }
 
-  public evaluateTaxPolicy(nation: Nation): TaxCalculationResult {
-    const income = this.calculateTaxIncome(
+  public static evaluateTaxPolicy(nation: Nation): TaxCalculationResult {
+    const income = TaxCalculator.calculateTaxIncome(
       nation.gdp,
       nation.taxRate,
       nation.government.corruption,
@@ -38,7 +36,7 @@ export class TaxCalculator {
     let stabilityImpact = Number(((15 - clampedRate) * 0.2).toFixed(2));
 
     if (stabilityImpact < 0) {
-      const discount = this.doctrinesManager.getTaxStabilityPenaltyDiscount(
+      const discount = DoctrinesManager.getTaxStabilityPenaltyDiscount(
         nation.doctrines.unlockedDoctrines,
       );
       stabilityImpact *= discount;

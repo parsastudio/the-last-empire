@@ -4,9 +4,7 @@ import { GameError } from "@/domain/shared/domain-utilities";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export class ResourceDependencyManager {
-  private popWelfareCalc = new PopulationWelfareCalculator();
-
-  public validateUnitRecruitmentResources(
+  public static validateUnitRecruitmentResources(
     nation: Nation,
     unitType: UnitType,
     quantity: number,
@@ -22,8 +20,8 @@ export class ResourceDependencyManager {
     }
   }
 
-  public consumeTurnResources(nation: Nation): Nation {
-    const metrics = this.popWelfareCalc.evaluateWelfare(
+  public static consumeTurnResources(nation: Nation): Nation {
+    const metrics = PopulationWelfareCalculator.evaluateWelfare(
       nation.population,
       nation.resources.oil,
       nation.resources.steel,

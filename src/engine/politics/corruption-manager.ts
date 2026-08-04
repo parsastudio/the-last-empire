@@ -2,7 +2,7 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 
 export class CorruptionManager {
-  public updateCorruptionLevel(nation: Nation): number {
+  public static updateCorruptionLevel(nation: Nation): number {
     const stability = nation.government.stability;
     const baseEntropyGrowth = 5.0 * (1.0 - stability / 100);
 
@@ -20,7 +20,10 @@ export class CorruptionManager {
     return Math.max(0, Math.min(100, Number(newCorruption.toFixed(2))));
   }
 
-  public antiCorruptionDrive(nation: Nation, investmentAmount: number): Nation {
+  public static antiCorruptionDrive(
+    nation: Nation,
+    investmentAmount: number,
+  ): Nation {
     if (investmentAmount <= 0) {
       throw new GameError(
         "INVALID_ACTION",

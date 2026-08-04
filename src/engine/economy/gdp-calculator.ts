@@ -2,9 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export class GdpCalculator {
-  private governmentSystem = new GovernmentSystem();
-
-  public calculateBaseGdp(
+  public static calculateBaseGdp(
     population: number,
     infrastructureLevel: number,
   ): number {
@@ -13,7 +11,7 @@ export class GdpCalculator {
     return Math.floor(population * basePerCapita * infraBonus);
   }
 
-  public calculateGdpGrowthMultiplier(nation: Nation): number {
+  public static calculateGdpGrowthMultiplier(nation: Nation): number {
     const currentStability = nation.government.stability;
     let stabilityFactor = -0.05 + (currentStability / 100) * 0.075;
 
@@ -24,7 +22,7 @@ export class GdpCalculator {
       stabilityFactor += 0.015;
     }
 
-    const govTraits = this.governmentSystem.getTraits(nation.government.type);
+    const govTraits = GovernmentSystem.getTraits(nation.government.type);
     stabilityFactor += govTraits.economicGrowthBonus;
 
     for (const mod of nation.activeModifiers) {
@@ -40,13 +38,13 @@ export class GdpCalculator {
     return Math.max(0.85, 1.0 + stabilityFactor);
   }
 
-  public updateNationGdp(nation: Nation): number {
-    const growthMult = this.calculateGdpGrowthMultiplier(nation);
+  public static updateNationGdp(nation: Nation): number {
+    const growthMult = GdpCalculator.calculateGdpGrowthMultiplier(nation);
 
     const previousGdp =
       nation.gdp && nation.gdp > 0
         ? nation.gdp
-        : this.calculateBaseGdp(
+        : GdpCalculator.calculateBaseGdp(
             nation.population,
             nation.geography.infrastructureLevel,
           );
