@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bot, ShoppingBag, TrendingDown, ShieldAlert } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -32,18 +32,14 @@ export function AutoTradeDialog({
     initialSettings?.allowEmergencyLoans ?? true,
   );
 
-  const [prevKey, setPrevKey] = useState<string>("");
-  const currentKey = `${isOpen}-${initialSettings?.autoBuyDeficit}-${initialSettings?.autoSellOilPercent}-${initialSettings?.autoSellSteelPercent}-${initialSettings?.allowEmergencyLoans}`;
-
-  if (currentKey !== prevKey) {
-    setPrevKey(currentKey);
+  useEffect(() => {
     if (isOpen && initialSettings) {
       setAutoBuyDeficit(initialSettings.autoBuyDeficit ?? false);
       setAutoSellOilPercent(initialSettings.autoSellOilPercent ?? 0);
       setAutoSellSteelPercent(initialSettings.autoSellSteelPercent ?? 0);
       setAllowEmergencyLoans(initialSettings.allowEmergencyLoans ?? true);
     }
-  }
+  }, [isOpen, initialSettings]);
 
   const { dispatchAction } = useGameActions();
 

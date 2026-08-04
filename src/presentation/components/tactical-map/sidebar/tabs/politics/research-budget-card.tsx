@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Cpu, Zap, AlertTriangle, Clock } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -24,13 +24,11 @@ export function ResearchBudgetCard({
   industrialLevel = 1,
 }: ResearchBudgetCardProps) {
   const [budgetRate, setBudgetRate] = useState<number>(currentBudgetRate);
-  const [prevRate, setPrevRate] = useState<number>(currentBudgetRate);
   const { dispatchAction } = useGameActions();
 
-  if (currentBudgetRate !== prevRate) {
-    setPrevRate(currentBudgetRate);
+  useEffect(() => {
     setBudgetRate(currentBudgetRate);
-  }
+  }, [currentBudgetRate]);
 
   const projectedTurnCost = Math.floor(gdp * (budgetRate / 100));
   const isRateChanged = budgetRate !== currentBudgetRate;

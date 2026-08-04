@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -27,12 +27,10 @@ export function AntiCorruptionCard({
     Math.min(5, maxReducible),
   );
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [prevMax, setPrevMax] = useState<number>(maxReducible);
 
-  if (maxReducible !== prevMax) {
-    setPrevMax(maxReducible);
+  useEffect(() => {
     setTargetReduction(Math.min(5, maxReducible));
-  }
+  }, [maxReducible]);
 
   const antiCorruptionCost = Math.ceil(gdp * (targetReduction / 100));
   const canAfford = treasury >= antiCorruptionCost;
