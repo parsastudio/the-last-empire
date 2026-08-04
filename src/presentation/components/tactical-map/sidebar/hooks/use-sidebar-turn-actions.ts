@@ -22,9 +22,6 @@ export function useSidebarTurnActions(
   overrideAdvanceNextTurn?: () => Promise<GameState | null>,
 ) {
   const queryState = useNavigationQueryState();
-  const [internalActiveTab, setInternalActiveTabState] =
-    useState<SidebarTabType | null>(null);
-  const [targetCodeState, setTargetCodeState] = useState<string | null>(null);
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
   const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
 
@@ -41,9 +38,9 @@ export function useSidebarTurnActions(
 
   const gameState = overrideGameState ?? null;
 
-  const activeTab =
-    queryState.activeTab || externalActiveTab || internalActiveTab;
+  const activeTab = externalActiveTab ?? queryState.activeTab;
   const activeSubTab = queryState.activeSubTab;
+  const selectedTargetCode = queryState.activeTarget;
 
   const humanNation =
     gameState && gameState.humanNationId
@@ -70,7 +67,6 @@ export function useSidebarTurnActions(
       } else {
         queryState.clearNavigation();
       }
-      setInternalActiveTabState(tab);
       if (onClearExternalTab) {
         onClearExternalTab();
       }
@@ -81,10 +77,6 @@ export function useSidebarTurnActions(
   const handleNavigateTab = useCallback(
     (tab: SidebarTabType, subTab?: string, targetCode?: string) => {
       queryState.navigateToTab(tab, subTab, targetCode);
-      setInternalActiveTabState(tab);
-      if (targetCode) {
-        setTargetCodeState(targetCode);
-      }
       if (onClearExternalTab) {
         onClearExternalTab();
       }
@@ -94,8 +86,6 @@ export function useSidebarTurnActions(
 
   const handleCloseActiveModal = useCallback(() => {
     queryState.clearNavigation();
-    setInternalActiveTabState(null);
-    setTargetCodeState(null);
     if (onClearExternalTab) {
       onClearExternalTab();
     }
@@ -141,7 +131,7 @@ export function useSidebarTurnActions(
   return {
     activeTab,
     activeSubTab,
-    selectedTargetCode: queryState.activeTarget || targetCodeState,
+    selectedTargetCode,
     isRailCollapsed,
     isProcessingTurn,
     stagedActions,
