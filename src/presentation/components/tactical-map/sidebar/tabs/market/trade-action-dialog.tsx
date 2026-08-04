@@ -45,10 +45,6 @@ function TradeActionForm({
   const effectiveUnitPrice = mode === "buy" ? buyUnitPrice : sellUnitPrice;
 
   const totalCostOrRevenue = currentAmount * effectiveUnitPrice;
-  const subLabel = isOil
-    ? "(معادل ۱۰ میلیون بشکه نفت)"
-    : "(معادل ۱ میلیون تن فولاد)";
-
   const isBuy = mode === "buy";
 
   const handleExecuteTrade = async () => {

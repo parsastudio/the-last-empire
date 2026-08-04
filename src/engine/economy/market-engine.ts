@@ -10,14 +10,14 @@ export interface TradeTransactionResult {
 }
 
 export class MarketEngine {
-  public updateMarketPrices(): ResourceMarketPrice {
+  public static updateMarketPrices(): ResourceMarketPrice {
     return {
       oil: MARKET_CONFIG.FIXED_BUY_PRICE,
       steel: MARKET_CONFIG.FIXED_BUY_PRICE,
     };
   }
 
-  public predictBuyCost(
+  public static predictBuyCost(
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
     amount: number,
@@ -28,7 +28,7 @@ export class MarketEngine {
     return amount * unitPrice;
   }
 
-  public calculateMaxAffordable(
+  public static calculateMaxAffordable(
     treasury: number,
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
@@ -39,7 +39,7 @@ export class MarketEngine {
     return Math.floor(treasury / unitPrice);
   }
 
-  public predictSellRevenue(
+  public static predictSellRevenue(
     _marketPrices: ResourceMarketPrice,
     _resourceType: "oil" | "steel",
     amount: number,
@@ -48,7 +48,7 @@ export class MarketEngine {
     return amount * MARKET_CONFIG.FIXED_SELL_PRICE;
   }
 
-  public buyResource(
+  public static buyResource(
     nation: Nation,
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
@@ -57,7 +57,11 @@ export class MarketEngine {
     if (amount <= 0) {
       throw new GameError("INVALID_ACTION", "Buy amount must be positive");
     }
-    const totalCost = this.predictBuyCost(marketPrices, resourceType, amount);
+    const totalCost = MarketEngine.predictBuyCost(
+      marketPrices,
+      resourceType,
+      amount,
+    );
     if (nation.treasury < totalCost) {
       throw new GameError("INSUFFICIENT_FUNDS", "Insufficient treasury");
     }
@@ -76,7 +80,7 @@ export class MarketEngine {
     };
   }
 
-  public sellResource(
+  public static sellResource(
     nation: Nation,
     marketPrices: ResourceMarketPrice,
     resourceType: "oil" | "steel",
@@ -89,7 +93,7 @@ export class MarketEngine {
       throw new GameError("INSUFFICIENT_RESOURCES", "Insufficient stock");
     }
 
-    const totalRevenue = this.predictSellRevenue(
+    const totalRevenue = MarketEngine.predictSellRevenue(
       marketPrices,
       resourceType,
       amount,

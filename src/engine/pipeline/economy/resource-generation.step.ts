@@ -2,8 +2,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class ResourceGenerationStep {
-  private static doctrinesManager = new DoctrinesManager();
-
   public static calculateResourceGeneration(nation: Nation): {
     oilProducedPerTurn: number;
     steelProducedPerTurn: number;
@@ -18,10 +16,10 @@ export class ResourceGenerationStep {
       : Math.max(1, Math.floor(gdpScale * 0.5));
     const baseSteelLots = Math.max(1, Math.floor(gdpScale * 0.8));
 
-    const steelBonus = this.doctrinesManager.getSteelProductionBonus(
+    const steelBonus = DoctrinesManager.getSteelProductionBonus(
       nation.doctrines?.unlockedDoctrines,
     );
-    const oilBonus = this.doctrinesManager.getOilProductionBonus(
+    const oilBonus = DoctrinesManager.getOilProductionBonus(
       nation.doctrines?.unlockedDoctrines,
     );
 

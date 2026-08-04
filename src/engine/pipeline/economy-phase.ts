@@ -18,7 +18,6 @@ export class EconomyPhase implements TurnPhase {
   private manpowerManager = new ManpowerManager();
   private debtManager = new DebtManager();
   private bankruptcyManager = new BankruptcyManager();
-  private marketEngine = new MarketEngine();
 
   public execute(context: PipelineContext): GameState {
     const nextState = { ...context.state };
@@ -86,7 +85,7 @@ export class EconomyPhase implements TurnPhase {
     }
 
     nextState.nations = nations;
-    nextState.marketPrices = this.marketEngine.updateMarketPrices();
+    nextState.marketPrices = MarketEngine.updateMarketPrices();
     nextState.turnTradeVolume = {
       oilBought: 0,
       oilSold: 0,

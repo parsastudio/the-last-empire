@@ -2,8 +2,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class ReputationManager {
-  private doctrinesManager = new DoctrinesManager();
-
   public applyReputationPenalty(nation: Nation, penaltyAmount: number): Nation {
     const newReputation = Math.max(
       -100,
@@ -16,7 +14,7 @@ export class ReputationManager {
   }
 
   public applyReputationGain(nation: Nation, gainAmount: number): Nation {
-    const multiplier = this.doctrinesManager.getReputationGainMultiplier(
+    const multiplier = DoctrinesManager.getReputationGainMultiplier(
       nation.doctrines.unlockedDoctrines,
     );
     const newReputation = Math.min(
