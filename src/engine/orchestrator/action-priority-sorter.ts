@@ -2,58 +2,38 @@ import { GameAction } from "@/domain/game/action.schema";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
 
 export class ActionPrioritySorter {
+  private static getActionPriority(type: string): number {
+    switch (type) {
+      case "ACTIVATE_ABILITY":
+      case "SET_TAX_RATE":
+      case "SET_TARIFF_RATE":
+      case "CONFIGURE_AUTO_TRADE":
+        return 1;
+      case "TRADE_RESOURCES":
+        return 2;
+      default:
+        return 3;
+    }
+  }
+
   public sortActions(
     actions: readonly GameAction[],
     prng: SeededRandom,
   ): GameAction[] {
-    const rawQueue = [...actions];
+    const sorted = [...actions];
 
-    const priority1 = rawQueue.filter((a) =>
-      [
-        "ACTIVATE_ABILITY",
-        "SET_TAX_RATE",
-        "SET_TARIFF_RATE",
-        "CONFIGURE_AUTO_TRADE",
-      ].includes(a.type),
-    );
-    const priority2 = rawQueue.filter((a) => a.type === "TRADE_RESOURCES");
-    const priority3 = rawQueue.filter((a) =>
-      [
-        "RECRUIT_UNIT",
-        "INVEST_INFRASTRUCTURE",
-        "UPGRADE_INDUSTRIAL_LEVEL",
-        "UNLOCK_DOCTRINE",
-        "INVEST_RESEARCH",
-        "ANTI_CORRUPTION_DRIVE",
-        "REPAY_DEBT",
-        "REQUEST_LOAN",
-        "CANCEL_RECRUITMENT",
-        "DISBAND_UNIT",
-        "DIPLOMATIC_PROPOSAL",
-        "FUND_PROXY_INFLUENCE",
-        "INVEST_DIPLOMACY",
-      ].includes(a.type),
-    );
-
-    const knownTypes = new Set([
-      ...priority1.map((a) => a.type),
-      ...priority2.map((a) => a.type),
-      ...priority3.map((a) => a.type),
-    ]);
-
-    const fallback = rawQueue.filter((a) => !knownTypes.has(a.type));
-
-    const shuffledTrades = [...priority2];
-    for (let i = shuffledTrades.length - 1; i > 0; i--) {
-      const j = Math.floor(prng.nextFloat() * (i + 1));
-      const temp = shuffledTrades[i];
-      const target = shuffledTrades[j];
-      if (temp && target) {
-        shuffledTrades[i] = target;
-        shuffledTrades[j] = temp;
+    sorted.sort((a, b) => {
+      const priorityA = ActionPrioritySorter.getActionPriority(a.type);
+      const priorityB = ActionPrioritySorter.getActionPriority(b.type);
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
       }
-    }
+      if (priorityA === 2) {
+        return prng.nextFloat() > 0.5 ? 1 : -1;
+      }
+      return 0;
+    });
 
-    return [...priority1, ...shuffledTrades, ...priority3, ...fallback];
+    return sorted;
   }
 }
