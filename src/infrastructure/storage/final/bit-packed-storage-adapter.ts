@@ -2,15 +2,24 @@ import { INDEXED_DB_CONFIG } from "@/infrastructure/storage/indexed-db-adapter";
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 
 export class BitPackedStorageAdapter {
+  private dbPromise: Promise<IDBDatabase> | null = null;
+
   private getDb(): Promise<IDBDatabase> {
-    return new Promise((resolve, reject) => {
+    if (this.dbPromise) {
+      return this.dbPromise;
+    }
+    this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(
         INDEXED_DB_CONFIG.DB_NAME,
         INDEXED_DB_CONFIG.VERSION,
       );
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        this.dbPromise = null;
+        reject(request.error);
+      };
     });
+    return this.dbPromise;
   }
 
   public async saveBitBuffer(

@@ -32,9 +32,7 @@ export class GameEngine {
     const result = this.dispatcher.dispatch(
       this.currentState,
       this.actionQueue,
-      this.gridState as unknown as Parameters<
-        GameEngineDispatcher["dispatch"]
-      >[2],
+      this.gridState,
       action,
     );
     if (result.success && result.newState) {

@@ -1,11 +1,7 @@
-import {
-  EconomyStep,
-  EconomyStepContext,
-} from "@/engine/pipeline/economy/economy-step.interface";
 import { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
-export class ResourceGenerationStep implements EconomyStep {
+export class ResourceGenerationStep {
   private static doctrinesManager = new DoctrinesManager();
 
   public static calculateResourceGeneration(nation: Nation): {
@@ -35,26 +31,5 @@ export class ResourceGenerationStep implements EconomyStep {
       Math.max(1, Math.ceil(baseSteelLots * industrialMultiplier)) + steelBonus;
 
     return { oilProducedPerTurn, steelProducedPerTurn };
-  }
-
-  public execute(context: EconomyStepContext): void {
-    const nations = context.state.nations;
-    for (const [id, nation] of Object.entries(nations)) {
-      if (!nation.isAlive) {
-        continue;
-      }
-
-      const { oilProducedPerTurn, steelProducedPerTurn } =
-        ResourceGenerationStep.calculateResourceGeneration(nation);
-
-      nations[id] = {
-        ...nation,
-        resources: {
-          ...nation.resources,
-          oil: nation.resources.oil + oilProducedPerTurn,
-          steel: nation.resources.steel + steelProducedPerTurn,
-        },
-      };
-    }
   }
 }
