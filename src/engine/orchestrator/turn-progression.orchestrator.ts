@@ -1,44 +1,55 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { GameAction } from "@/domain/game/action.schema";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionQueue } from "@/engine/orchestrator/action-queue";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
-import { SeededRandom } from "@/domain/shared/domain-utilities";
+import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { ActionRouter } from "@/engine/actions/action-router";
+import { StateValidator } from "@/engine/validation/state-validator";
 
 export class TurnProgressionOrchestrator {
   private aiEngine = new AIEngine();
-  private internalActionQueue = new ActionQueue();
+  private actionQueue = new ActionQueue();
   private pipeline = new TurnPipeline();
   private turnOrchestrator = new BitPackedTurnOrchestrator();
   private livenessManager = new NationLivenessManager();
   private victoryChecker = new VictoryChecker();
+  private router = new ActionRouter();
+  private validator = new StateValidator();
 
-  public advanceTurn(
-    state: GameState,
-    prng: SeededRandom,
-    actionQueueProcessor: (
-      state: GameState,
-      additionalActions?: readonly GameAction[],
-    ) => GameState,
-  ): GameState {
+  public advanceTurn(state: GameState, prng: SeededRandom): GameState {
     let nextState = state;
 
     const aiActions = this.aiEngine.generateTurnActions(nextState);
     for (const aiAction of aiActions) {
       try {
-        this.internalActionQueue.enqueue(nextState, aiAction);
-      } catch {
-        continue;
-      }
+        this.actionQueue.enqueue(nextState, aiAction);
+      } catch {}
     }
 
-    const validAiActions = this.internalActionQueue.getQueue();
-    this.internalActionQueue.clear();
+    const queuedActions = this.actionQueue.getQueue();
+    this.actionQueue.clear();
 
-    nextState = actionQueueProcessor(nextState, validAiActions);
+    for (const action of queuedActions) {
+      try {
+        this.validator.validateAction(nextState, action);
+        nextState = this.router.route(nextState, action);
+
+        const logEntry = TurnLogBuilder.createLogEntry(
+          nextState.currentTurn,
+          action.nationId,
+          "INFO",
+          `پردازش اکشن هوش مصنوعی: ${action.type}`,
+        );
+        nextState = {
+          ...nextState,
+          turnLogs: [...nextState.turnLogs, logEntry],
+        };
+      } catch {}
+    }
+
     nextState = this.pipeline.processTurn(nextState, prng);
     nextState = this.turnOrchestrator.processPostTurn(nextState);
     nextState = this.livenessManager.updateLiveness(nextState);

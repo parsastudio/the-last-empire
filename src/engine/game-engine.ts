@@ -1,16 +1,16 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { deepClone, SeededRandom } from "@/domain/shared/domain-utilities";
-import { GameActionQueue } from "@/engine/orchestrator/game-action.queue";
 import { StateHistory } from "@/application/state-history";
-import { GameEngineDispatcher } from "@/engine/orchestrator/game-engine-dispatcher";
+import { StateValidator } from "@/engine/validation/state-validator";
+import { ActionRouter } from "@/engine/actions/action-router";
 import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
 
 export class GameEngine {
   private currentState: GameState;
-  private actionQueue = new GameActionQueue();
   private stateHistory = new StateHistory();
-  private dispatcher = new GameEngineDispatcher();
+  private validator = new StateValidator();
+  private router = new ActionRouter();
   private progressionOrchestrator = new TurnProgressionOrchestrator();
   private prng: SeededRandom;
 
@@ -26,11 +26,36 @@ export class GameEngine {
   }
 
   public dispatchAction(action: GameAction): ActionResult {
-    const result = this.dispatcher.dispatch(this.currentState, action);
-    if (result.success && result.newState) {
-      this.currentState = deepClone(result.newState);
+    if (this.currentState.isGameOver) {
+      return {
+        success: false,
+        actionId: action.id,
+        message: "دستور رد شد: بازی به پایان رسیده است.",
+        error: "GAME_OVER",
+      };
     }
-    return result;
+
+    try {
+      this.validator.validateAction(this.currentState, action);
+      const routedState = this.router.route(this.currentState, action);
+      this.currentState = deepClone(routedState);
+
+      return {
+        success: true,
+        actionId: action.id,
+        message: "دستور با موفقیت صادر شد.",
+        newState: this.currentState,
+      };
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "خطا در اجرای دستور";
+      return {
+        success: false,
+        actionId: action.id,
+        message: errorMessage,
+        error: "INVALID_ACTION",
+      };
+    }
   }
 
   public nextTurn(): GameState {
@@ -41,14 +66,6 @@ export class GameEngine {
     this.currentState = this.progressionOrchestrator.advanceTurn(
       this.currentState,
       this.prng,
-      (state, additionalActions) => {
-        if (additionalActions) {
-          for (const action of additionalActions) {
-            this.actionQueue.enqueue(state, action);
-          }
-        }
-        return this.actionQueue.processActions(state, this.prng);
-      },
     );
 
     this.stateHistory.saveSnapshot(this.currentState);

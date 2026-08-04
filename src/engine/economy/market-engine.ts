@@ -18,25 +18,21 @@ export class MarketEngine {
   }
 
   public static predictBuyCost(
-    marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    _marketPrices: ResourceMarketPrice,
+    _resourceType: "oil" | "steel",
     amount: number,
   ): number {
     if (amount <= 0) return 0;
-    const unitPrice =
-      marketPrices[resourceType] || MARKET_CONFIG.FIXED_BUY_PRICE;
-    return amount * unitPrice;
+    return amount * MARKET_CONFIG.FIXED_BUY_PRICE;
   }
 
   public static calculateMaxAffordable(
     treasury: number,
-    marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    _marketPrices: ResourceMarketPrice,
+    _resourceType: "oil" | "steel",
   ): number {
     if (treasury <= 0) return 0;
-    const unitPrice =
-      marketPrices[resourceType] || MARKET_CONFIG.FIXED_BUY_PRICE;
-    return Math.floor(treasury / unitPrice);
+    return Math.floor(treasury / MARKET_CONFIG.FIXED_BUY_PRICE);
   }
 
   public static predictSellRevenue(
@@ -55,7 +51,7 @@ export class MarketEngine {
     amount: number,
   ): TradeTransactionResult {
     if (amount <= 0) {
-      throw new GameError("INVALID_ACTION", "Buy amount must be positive");
+      throw new GameError("INVALID_ACTION", "تعداد سفارش خرید باید مثبت باشد.");
     }
     const totalCost = MarketEngine.predictBuyCost(
       marketPrices,
@@ -63,7 +59,7 @@ export class MarketEngine {
       amount,
     );
     if (nation.treasury < totalCost) {
-      throw new GameError("INSUFFICIENT_FUNDS", "Insufficient treasury");
+      throw new GameError("INSUFFICIENT_FUNDS", "موجودی خزانه کافی نیست.");
     }
 
     return {
@@ -75,7 +71,10 @@ export class MarketEngine {
           [resourceType]: nation.resources[resourceType] + amount,
         },
       },
-      updatedMarketPrices: marketPrices,
+      updatedMarketPrices: {
+        oil: MARKET_CONFIG.FIXED_BUY_PRICE,
+        steel: MARKET_CONFIG.FIXED_BUY_PRICE,
+      },
       totalCostOrRevenue: totalCost,
     };
   }
@@ -87,10 +86,10 @@ export class MarketEngine {
     amount: number,
   ): TradeTransactionResult {
     if (amount <= 0) {
-      throw new GameError("INVALID_ACTION", "Sell amount must be positive");
+      throw new GameError("INVALID_ACTION", "تعداد سفارش فروش باید مثبت باشد.");
     }
     if (nation.resources[resourceType] < amount) {
-      throw new GameError("INSUFFICIENT_RESOURCES", "Insufficient stock");
+      throw new GameError("INSUFFICIENT_RESOURCES", "موجودی انبار کافی نیست.");
     }
 
     const totalRevenue = MarketEngine.predictSellRevenue(
@@ -108,7 +107,10 @@ export class MarketEngine {
           [resourceType]: nation.resources[resourceType] - amount,
         },
       },
-      updatedMarketPrices: marketPrices,
+      updatedMarketPrices: {
+        oil: MARKET_CONFIG.FIXED_BUY_PRICE,
+        steel: MARKET_CONFIG.FIXED_BUY_PRICE,
+      },
       totalCostOrRevenue: totalRevenue,
     };
   }
