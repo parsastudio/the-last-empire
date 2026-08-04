@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import { MapManifestBuilder } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
-import { generateTest6Map } from "@/infrastructure/map-preprocessing/map-generator";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { FinalMapPipeline } from "@/infrastructure/map-preprocessing/final/final-map-pipeline";
 
 export async function GET(): Promise<NextResponse> {
   try {
-    const targetDir = MapPathResolver.getMapServerDir("map1");
-    await fs.mkdir(targetDir, { recursive: true });
+    const finalDir = MapPathResolver.getMapFinalServerDir("map1");
+    await fs.mkdir(finalDir, { recursive: true });
 
-    const manifestPath = path.join(targetDir, "manifest.json");
+    const manifestPath = path.join(finalDir, "manifest.json");
 
     let manifestExists = false;
     try {
@@ -19,24 +18,12 @@ export async function GET(): Promise<NextResponse> {
     } catch {}
 
     if (!manifestExists) {
-      const generated = await generateTest6Map(4096, 2048);
-      const builder = new MapManifestBuilder();
-      const manifest = await builder.buildAndSaveManifest(
-        "map1",
-        generated.countries.map((c) => ({
-          id: c.id,
-          code: c.code,
-          name: c.name,
-          color: c.color,
-          areaSqKm: c.areaSqKm,
-        })),
-        "manifest.json",
-      );
-      return NextResponse.json(manifest);
+      const pipeline = new FinalMapPipeline();
+      await pipeline.buildFinalAssets("map1", 4096, 2048);
     }
 
     const raw = await fs.readFile(manifestPath, "utf-8");
-    const manifest = JSON.parse(raw);
+    const manifest = JSON.parse(raw) as unknown;
     return NextResponse.json(manifest);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to load manifest";
