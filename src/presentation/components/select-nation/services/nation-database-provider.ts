@@ -1,5 +1,5 @@
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
-import { ManifestNationItem } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 

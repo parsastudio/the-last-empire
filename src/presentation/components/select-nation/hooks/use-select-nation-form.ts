@@ -4,7 +4,7 @@ import { NationDetail } from "@/presentation/components/select-nation/nation-lis
 import { GameIdGenerator } from "@/domain/shared/domain-utilities";
 import { GameStateApiService } from "@/presentation/services/game-state-api.service";
 import { useToast } from "@/presentation/context/toast-context";
-import { MapManifest } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { FinalMapManifest as MapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
@@ -46,7 +46,11 @@ export function useSelectNationForm() {
 
   const allNations = useMemo(() => {
     if (manifest && manifest.nations) {
-      return provider.getNationsFromManifest(manifest.nations);
+      return provider.getNationsFromManifest(
+        manifest.nations as unknown as Parameters<
+          typeof provider.getNationsFromManifest
+        >[0],
+      );
     }
     return provider.getAllSelectableNations();
   }, [provider, manifest]);

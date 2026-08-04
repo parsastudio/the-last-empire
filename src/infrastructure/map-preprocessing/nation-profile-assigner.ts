@@ -4,7 +4,7 @@ import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/data/countries";
-import { ManifestNationItem } from "@/infrastructure/map-preprocessing/generator/map-manifest-builder";
+import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
 export class NationProfileAssigner {
   public buildNationFromManifest(
