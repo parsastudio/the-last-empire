@@ -1,7 +1,5 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { GameActionQueue } from "@/engine/orchestrator/game-action.queue";
 import { StateValidator } from "@/engine/validation/state-validator";
 import { ActionRouter } from "@/engine/actions/action-router";
 
@@ -9,12 +7,7 @@ export class GameEngineDispatcher {
   private validator = new StateValidator();
   private router = new ActionRouter();
 
-  public dispatch(
-    currentState: GameState,
-    _actionQueue: GameActionQueue,
-    _gridState: BitPackedGridState,
-    action: GameAction,
-  ): ActionResult {
+  public dispatch(currentState: GameState, action: GameAction): ActionResult {
     if (currentState.isGameOver) {
       return {
         success: false,
