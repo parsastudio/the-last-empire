@@ -1,5 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 
 export class LocalStorageAdapter {
   private keyPrefix = "geopolitics_game_";
@@ -40,12 +40,12 @@ export class LocalStorageAdapter {
 }
 
 export class ClientStorageService {
-  private indexedDb = new IndexedDbAdapter();
+  private storageAdapter = new GameStorageAdapter();
   private localStorage = new LocalStorageAdapter();
 
   public async saveGameState(gameId: string, state: GameState): Promise<void> {
     try {
-      await this.indexedDb.saveState(gameId, state);
+      await this.storageAdapter.saveGameState(gameId, state);
     } catch {
       this.localStorage.saveState(gameId, state);
     }
@@ -53,7 +53,7 @@ export class ClientStorageService {
 
   public async loadGameState(gameId: string): Promise<GameState | null> {
     try {
-      const stateFromDb = await this.indexedDb.loadState(gameId);
+      const stateFromDb = await this.storageAdapter.loadGameState(gameId);
       if (stateFromDb) {
         return stateFromDb;
       }
@@ -64,7 +64,7 @@ export class ClientStorageService {
 
   public async removeGameState(gameId: string): Promise<void> {
     try {
-      await this.indexedDb.deleteState(gameId);
+      await this.storageAdapter.deleteState(gameId);
     } catch {}
     this.localStorage.removeState(gameId);
   }

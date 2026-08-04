@@ -1,11 +1,9 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
-import { ActionRouter } from "@/engine/actions/action-router";
 
 export class ActionDispatcherService {
   private storageService = new ClientStorageService();
-  private actionRouter = new ActionRouter();
 
   public async dispatch(
     action: GameAction,
@@ -17,22 +15,6 @@ export class ActionDispatcherService {
     let effectiveState = currentState || null;
     if (!effectiveState) {
       effectiveState = await this.storageService.loadGameState(activeGameId);
-    }
-
-    let optimisticState: GameState | null = null;
-    if (effectiveState) {
-      try {
-        optimisticState = this.actionRouter.route(effectiveState, action);
-        await this.storageService.saveGameState(activeGameId, optimisticState);
-
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("geopolitics-state-updated", {
-              detail: optimisticState,
-            }),
-          );
-        }
-      } catch {}
     }
 
     try {
@@ -51,7 +33,7 @@ export class ActionDispatcherService {
       };
 
       if (json.success) {
-        const finalState = json.data?.newState || optimisticState;
+        const finalState = json.data?.newState || effectiveState;
         if (finalState) {
           await this.storageService.saveGameState(activeGameId, finalState);
         }
@@ -72,13 +54,13 @@ export class ActionDispatcherService {
       };
     } catch {
       return {
-        success: optimisticState !== null,
+        success: effectiveState !== null,
         actionId: action.id,
         message:
-          optimisticState !== null
+          effectiveState !== null
             ? "دستور در حالت آفلاین ثبت شد."
             : "ارتباط با سرور برقرار نشد.",
-        newState: optimisticState || undefined,
+        newState: effectiveState || undefined,
       };
     }
   }
