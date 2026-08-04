@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { Coins, TrendingUp, Zap, Anchor, Compass, Globe } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -25,13 +25,11 @@ export function TariffControlCard({
   nationsMap,
   nation,
 }: TariffControlCardProps) {
-  const [tariffRate, setTariffRate] = useState<number>(initialTariffRate);
+  const [userTariffRate, setUserTariffRate] = useState<number | null>(null);
   const { dispatchAction } = useGameActions();
   const doctrinesManager = useMemo(() => new DoctrinesManager(), []);
 
-  useEffect(() => {
-    setTariffRate(initialTariffRate);
-  }, [initialTariffRate]);
+  const tariffRate = userTariffRate ?? initialTariffRate;
 
   const handleApplyTariff = async () => {
     const action = ActionFactory.setTariffRate(nationId, tariffRate);
@@ -121,14 +119,14 @@ export function TariffControlCard({
           min="0"
           max="50"
           value={tariffRate}
-          onChange={(e) => setTariffRate(Number(e.target.value))}
+          onChange={(e) => setUserTariffRate(Number(e.target.value))}
           className="w-full accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg"
         />
 
         <div className="grid grid-cols-4 gap-1.5 font-sans">
           <button
             type="button"
-            onClick={() => setTariffRate(0)}
+            onClick={() => setUserTariffRate(0)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               tariffRate === 0
                 ? "bg-primary text-primary-foreground border-primary"
@@ -139,7 +137,7 @@ export function TariffControlCard({
           </button>
           <button
             type="button"
-            onClick={() => setTariffRate(10)}
+            onClick={() => setUserTariffRate(10)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               tariffRate === 10
                 ? "bg-gdp text-primary-foreground border-gdp"
@@ -150,7 +148,7 @@ export function TariffControlCard({
           </button>
           <button
             type="button"
-            onClick={() => setTariffRate(25)}
+            onClick={() => setUserTariffRate(25)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               tariffRate === 25
                 ? "bg-treasury text-primary-foreground border-treasury"
@@ -161,7 +159,7 @@ export function TariffControlCard({
           </button>
           <button
             type="button"
-            onClick={() => setTariffRate(50)}
+            onClick={() => setUserTariffRate(50)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               tariffRate === 50
                 ? "bg-military text-primary-foreground border-military"

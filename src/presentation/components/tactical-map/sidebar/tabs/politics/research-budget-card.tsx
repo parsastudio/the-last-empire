@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Cpu, Zap, AlertTriangle, Clock } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -23,12 +23,10 @@ export function ResearchBudgetCard({
   cycleTurn = 0,
   industrialLevel = 1,
 }: ResearchBudgetCardProps) {
-  const [budgetRate, setBudgetRate] = useState<number>(currentBudgetRate);
+  const [userBudgetRate, setUserBudgetRate] = useState<number | null>(null);
   const { dispatchAction } = useGameActions();
 
-  useEffect(() => {
-    setBudgetRate(currentBudgetRate);
-  }, [currentBudgetRate]);
+  const budgetRate = userBudgetRate ?? currentBudgetRate;
 
   const projectedTurnCost = Math.floor(gdp * (budgetRate / 100));
   const isRateChanged = budgetRate !== currentBudgetRate;
@@ -68,14 +66,14 @@ export function ResearchBudgetCard({
           max="30"
           step="1"
           value={budgetRate}
-          onChange={(e) => setBudgetRate(Number(e.target.value))}
+          onChange={(e) => setUserBudgetRate(Number(e.target.value))}
           className="w-full accent-primary cursor-pointer h-2 bg-secondary rounded-lg"
         />
 
         <div className="grid grid-cols-4 gap-1.5 font-sans">
           <button
             type="button"
-            onClick={() => setBudgetRate(0)}
+            onClick={() => setUserBudgetRate(0)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               budgetRate === 0
                 ? "bg-secondary text-foreground border-border"
@@ -86,7 +84,7 @@ export function ResearchBudgetCard({
           </button>
           <button
             type="button"
-            onClick={() => setBudgetRate(5)}
+            onClick={() => setUserBudgetRate(5)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               budgetRate === 5
                 ? "bg-primary text-primary-foreground border-primary"
@@ -97,7 +95,7 @@ export function ResearchBudgetCard({
           </button>
           <button
             type="button"
-            onClick={() => setBudgetRate(15)}
+            onClick={() => setUserBudgetRate(15)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               budgetRate === 15
                 ? "bg-primary text-primary-foreground border-primary"
@@ -108,7 +106,7 @@ export function ResearchBudgetCard({
           </button>
           <button
             type="button"
-            onClick={() => setBudgetRate(30)}
+            onClick={() => setUserBudgetRate(30)}
             className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
               budgetRate === 30
                 ? "bg-rose-600 text-white border-rose-500"

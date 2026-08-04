@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -23,14 +23,15 @@ export function AntiCorruptionCard({
   const roundedCorruption = Math.max(0, Math.ceil(actualCorruption));
   const maxReducible = Math.min(100, Math.max(1, roundedCorruption));
 
-  const [targetReduction, setTargetReduction] = useState<number>(
-    Math.min(5, maxReducible),
+  const [userTargetReduction, setUserTargetReduction] = useState<number | null>(
+    null,
   );
   const [isDragging, setIsDragging] = useState<boolean>(false);
 
-  useEffect(() => {
-    setTargetReduction(Math.min(5, maxReducible));
-  }, [maxReducible]);
+  const targetReduction = Math.min(
+    maxReducible,
+    userTargetReduction ?? Math.min(5, maxReducible),
+  );
 
   const antiCorruptionCost = Math.ceil(gdp * (targetReduction / 100));
   const canAfford = treasury >= antiCorruptionCost;
@@ -63,7 +64,7 @@ export function AntiCorruptionCard({
   const handlePercentageSelect = (percentage: number) => {
     if (maxReducible <= 0) return;
     const target = Math.max(1, Math.floor(maxReducible * percentage));
-    setTargetReduction(target);
+    setUserTargetReduction(target);
   };
 
   const resultingCorruption = Math.max(0, actualCorruption - targetReduction);
@@ -126,7 +127,9 @@ export function AntiCorruptionCard({
                   min="1"
                   max={maxReducible}
                   value={targetReduction}
-                  onChange={(e) => setTargetReduction(Number(e.target.value))}
+                  onChange={(e) =>
+                    setUserTargetReduction(Number(e.target.value))
+                  }
                   onMouseDown={() => setIsDragging(true)}
                   onMouseUp={() => setIsDragging(false)}
                   onTouchStart={() => setIsDragging(true)}
