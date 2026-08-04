@@ -78,14 +78,14 @@ export const REGIME_ABILITIES: AbilityItem[] = [
 interface AbilityCardProps {
   ability: AbilityItem;
   currentGovernment: string;
-  nationId?: string;
+  nationId: string;
   onActivate: (ability: AbilityItem) => void;
 }
 
 export function AbilityCard({
   ability,
   currentGovernment,
-  nationId = "NATION_118",
+  nationId,
   onActivate,
 }: AbilityCardProps) {
   const Icon = ability.icon;

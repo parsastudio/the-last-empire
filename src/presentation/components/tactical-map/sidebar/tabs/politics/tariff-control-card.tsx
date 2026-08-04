@@ -8,7 +8,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
-  nationId?: string;
+  nationId: string;
   hasSeaAccess?: boolean;
   gdp?: number;
   unlockedDoctrines?: string[];
@@ -18,7 +18,7 @@ interface TariffControlCardProps {
 
 export function TariffControlCard({
   initialTariffRate = 10,
-  nationId = "NATION_118",
+  nationId,
   hasSeaAccess = true,
   gdp = 450000000000,
   unlockedDoctrines = [],

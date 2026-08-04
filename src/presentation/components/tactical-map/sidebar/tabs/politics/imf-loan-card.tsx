@@ -7,7 +7,7 @@ import { RepayActionDialog } from "./repay-action-dialog";
 import { Nation } from "@/domain/nation/nation.schema";
 
 interface ImfLoanCardProps {
-  nationId?: string;
+  nationId: string;
   nationalDebt?: number;
   gdp?: number;
   treasury?: number;
@@ -15,7 +15,7 @@ interface ImfLoanCardProps {
 }
 
 export function ImfLoanCard({
-  nationId = "NATION_118",
+  nationId,
   nationalDebt = 0,
   gdp = 450000000000,
   treasury = 100000,

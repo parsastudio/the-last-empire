@@ -96,8 +96,8 @@ function BetrayalConfirmModal({
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
-  targetNationId?: string;
-  nationId?: string;
+  targetNationId: string;
+  nationId: string;
   currentStance?: DiplomaticStance | string;
   isTradeEmbargoed?: boolean;
   isLandNeighbor?: boolean;
@@ -106,8 +106,8 @@ interface AdvancedDiplomacyActionsProps {
 
 export function AdvancedDiplomacyActions({
   targetName,
-  targetNationId = "NATION_15",
-  nationId = "NATION_118",
+  targetNationId,
+  nationId,
   currentStance = "NORMAL_DIPLOMACY",
   isTradeEmbargoed = false,
   isLandNeighbor = false,
