@@ -1,7 +1,10 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { NationProfileAssigner } from "./nation-profile-assigner";
-import { MapManifest } from "./generator/map-manifest-builder";
+import {
+  FinalMapManifest as MapManifest,
+  FinalManifestNation,
+} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
 export class DiplomaticMatrixGenerator {
   public generateBlankRelations(
@@ -31,7 +34,7 @@ export class GlobalAiInitializer {
   ): Record<string, Nation> {
     const nations: Record<string, Nation> = {};
     const manifestItems = manifest.nations || [];
-    const allIds = manifestItems.map((item) => item.id);
+    const allIds = manifestItems.map((item: FinalManifestNation) => item.id);
 
     for (const item of manifestItems) {
       const isHuman = item.id === humanNationId;
@@ -42,7 +45,7 @@ export class GlobalAiInitializer {
         govToApply,
       );
 
-      const relativeList = allIds.filter((id) => id !== item.id);
+      const relativeList = allIds.filter((id: string) => id !== item.id);
       nation.relations =
         this.relationsGenerator.generateBlankRelations(relativeList);
 
