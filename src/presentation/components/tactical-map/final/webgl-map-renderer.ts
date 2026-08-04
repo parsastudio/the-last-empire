@@ -167,7 +167,8 @@ export class WebGLMapRenderer {
   public render(
     width: number,
     height: number,
-    position: { x: number; y: number },
+    posX: number,
+    posY: number,
     scale: number,
     time: number,
     activeLayer: "political" | "gdp" = "political",
@@ -180,7 +181,7 @@ export class WebGLMapRenderer {
     gl.bindVertexArray(this.vao);
 
     gl.uniform2f(this.uResolutionLoc, width, height);
-    gl.uniform2f(this.uPositionLoc, position.x, position.y);
+    gl.uniform2f(this.uPositionLoc, posX, posY);
     gl.uniform1f(this.uScaleLoc, scale);
     gl.uniform1f(this.uTimeLoc, time);
     gl.uniform1f(this.uOverlayOpacityLoc, overlayOpacity);
