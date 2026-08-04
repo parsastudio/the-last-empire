@@ -27,7 +27,7 @@ void main() {
   uint nUp = texture(u_liveStateTexture, v_texCoord + vec2(0.0, -u_texelSize.y)).r & 255u;
   uint nDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 255u;
 
-  bool isBorder = (nationId != nLeft) || (nationId != nRight) || (nationId != nUp) || (nationId != nDown);
+   bool isBorder = (nationId != nRight) || (nationId != nDown);
 
   if (nationId == 0u) {
     if (isBorder && (nLeft >= 11u || nRight >= 11u || nUp >= 11u || nDown >= 11u)) {
@@ -50,14 +50,10 @@ void main() {
   vec3 blendedColor = mix(terrainColor.rgb, nationColor.rgb, 0.70);
 
   if (isBorder) {
-    blendedColor = mix(blendedColor, vec3(0.08, 0.10, 0.14), 0.85);
+      blendedColor = mix(blendedColor, vec3(0.05, 0.08, 0.18), 0.75);
   }
 
-  if (frontierBit == 1u) {
-    float pulse = 0.5 + 0.5 * sin(u_time * 6.0);
-    vec3 fireColor = vec3(0.95, 0.2, 0.1);
-    blendedColor = mix(blendedColor, fireColor, 0.6 * pulse);
-  }
+
 
   fragColor = vec4(blendedColor, 1.0);
 }

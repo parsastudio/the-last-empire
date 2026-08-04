@@ -14,13 +14,9 @@ import {
   LayerController,
   TacticalLayer,
 } from "@/presentation/components/tactical-map/controls/layer-controller";
-import { EventReplayBar } from "@/presentation/components/tactical-map/history/event-replay-bar";
-import { DeltaInspectorModal } from "@/presentation/components/tactical-map/history/delta-inspector-modal";
-import { useGameHistoryReplay } from "@/presentation/hooks/game/use-game-history-replay";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { DomainEvent } from "@/domain/events/domain-event.schema";
 
 interface WebGLTacticalWorkspaceProps {
   gameId?: string;
@@ -34,16 +30,11 @@ export function WebGLTacticalWorkspace({
   const [scale] = useState(1);
 
   const {
-    gameState: baseGameState,
+    gameState: effectiveGameState,
     advanceNextTurn,
     loading,
     error,
   } = useBitPackedGame(gameId);
-
-  const historyReplay = useGameHistoryReplay(gameId);
-  const effectiveGameState = historyReplay.isReplaying
-    ? historyReplay.replayedState || baseGameState
-    : baseGameState;
 
   const metrics = useGameResources(effectiveGameState);
 
@@ -53,9 +44,6 @@ export function WebGLTacticalWorkspace({
     null,
   );
   const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
-  const [inspectedEvent, setInspectedEvent] = useState<DomainEvent | null>(
-    null,
-  );
 
   const countriesData = ALL_COUNTRY_PROFILES.map((p) => ({
     id: p.id ?? 0,
@@ -88,15 +76,12 @@ export function WebGLTacticalWorkspace({
     setSelectedTargetCode(null);
   }, []);
 
-  const handleNextTurnAndRefreshHistory = useCallback(async () => {
+  const handleNextTurnAndRefresh = useCallback(async () => {
     const nextState = await advanceNextTurn();
-    if (nextState) {
-      historyReplay.loadEventHistory();
-    }
     return nextState;
-  }, [advanceNextTurn, historyReplay]);
+  }, [advanceNextTurn]);
 
-  const isNotFound = !loading && (error !== null || !baseGameState);
+  const isNotFound = !loading && (error !== null || !effectiveGameState);
 
   return (
     <div
@@ -121,29 +106,7 @@ export function WebGLTacticalWorkspace({
         activeLayer={activeLayer}
         isRendering={false}
         onChangeLayer={setActiveLayer}
-        eventsCount={historyReplay.events.length}
-        isReplayingHistory={historyReplay.isReplaying}
-        onToggleHistoryReplay={() => {
-          if (historyReplay.isReplaying) {
-            historyReplay.stopReplay();
-          } else {
-            historyReplay.startReplay();
-          }
-        }}
       />
-
-      {historyReplay.isReplaying && (
-        <EventReplayBar
-          events={historyReplay.events}
-          currentSequence={historyReplay.currentSequence}
-          isPlaying={false}
-          onTogglePlay={() => {}}
-          onNext={historyReplay.nextEvent}
-          onPrev={historyReplay.prevEvent}
-          onJump={historyReplay.jumpToSequence}
-          onCloseReplay={historyReplay.stopReplay}
-        />
-      )}
 
       <CommandRail
         activeTab={activeTab}
@@ -151,7 +114,7 @@ export function WebGLTacticalWorkspace({
         currentTurn={effectiveGameState ? effectiveGameState.currentTurn : 1}
         onSelectTab={(tab) => setActiveTab(tab)}
         onToggleCollapse={() => setIsRailCollapsed((prev) => !prev)}
-        onNextTurn={handleNextTurnAndRefreshHistory}
+        onNextTurn={handleNextTurnAndRefresh}
       />
 
       <CommandCenterModal
@@ -172,12 +135,6 @@ export function WebGLTacticalWorkspace({
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />
-
-      <DeltaInspectorModal
-        isOpen={inspectedEvent !== null}
-        event={inspectedEvent}
-        onClose={() => setInspectedEvent(null)}
-      />
 
       {loading && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">

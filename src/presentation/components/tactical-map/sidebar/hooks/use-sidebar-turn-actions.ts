@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { useActionStagingTracker } from "@/presentation/hooks/game/use-action-staging-tracker";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
@@ -139,8 +138,6 @@ export function useSidebarTurnActions(
     [humanNation],
   );
 
-  const realReports: CombatReport[] = [];
-
   return {
     activeTab,
     activeSubTab,
@@ -152,7 +149,6 @@ export function useSidebarTurnActions(
     humanNation,
     gameState,
     currentTurn,
-    realReports,
     setIsRailCollapsed,
     setInternalActiveTab,
     setTradeDialog,

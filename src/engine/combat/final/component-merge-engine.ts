@@ -11,7 +11,7 @@ export class ComponentMergeEngine {
   public mergeNearComponents(
     components: LandClusterComponent[],
     width = 4096,
-    searchRadius = 150,
+    searchRadius = 1500000,
   ): LandClusterComponent[] {
     if (components.length <= 1) return components;
 

@@ -1,6 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
-import { EventStoreService } from "@/infrastructure/storage/event-store.service";
 
 export class LocalStorageAdapter {
   private keyPrefix = "geopolitics_game_";
@@ -43,25 +42,10 @@ export class LocalStorageAdapter {
 export class ClientStorageService {
   private indexedDb = new IndexedDbAdapter();
   private localStorage = new LocalStorageAdapter();
-  private eventStore = new EventStoreService();
 
-  public async saveGameState(
-    gameId: string,
-    state: GameState,
-    lastActionPayload?: Record<string, unknown>,
-    prevState?: GameState | null,
-  ): Promise<void> {
+  public async saveGameState(gameId: string, state: GameState): Promise<void> {
     try {
       await this.indexedDb.saveState(gameId, state);
-
-      if (lastActionPayload && prevState) {
-        await this.eventStore.appendEvent(
-          gameId,
-          lastActionPayload,
-          prevState,
-          state,
-        );
-      }
     } catch {
       this.localStorage.saveState(gameId, state);
     }
@@ -69,11 +53,6 @@ export class ClientStorageService {
 
   public async loadGameState(gameId: string): Promise<GameState | null> {
     try {
-      const reconstructed = await this.eventStore.reconstructState(gameId);
-      if (reconstructed) {
-        return reconstructed;
-      }
-
       const stateFromDb = await this.indexedDb.loadState(gameId);
       if (stateFromDb) {
         return stateFromDb;
@@ -88,9 +67,5 @@ export class ClientStorageService {
       await this.indexedDb.deleteState(gameId);
     } catch {}
     this.localStorage.removeState(gameId);
-  }
-
-  public getEventStore(): EventStoreService {
-    return this.eventStore;
   }
 }

@@ -81,16 +81,8 @@ export class BitPackedSyncEngine {
           const regionPop = Math.round(nation.population * ratio);
           const regionGdp = Math.round(nation.gdp * ratio);
 
-          const canonical = NationIdResolver.resolveCanonicalId(key);
           let name = `خاک اصلی ${nation.name}`;
-          if (rId === 1 && (canonical === "NATION_USA" || key === "USA")) {
-            name = "جزایر هاوایی (منطقه فرامرزی ۱)";
-          } else if (
-            rId === 1 &&
-            (canonical === "NATION_FRA" || key === "FRA")
-          ) {
-            name = "گویان فرانسه (منطقه فرامرزی ۱)";
-          } else if (rId >= 1 && rId <= 10) {
+          if (rId >= 1 && rId <= 10) {
             name = `منطقه فرامرزی ${rId.toLocaleString("fa-IR")}`;
           } else if (rId >= 11) {
             name = `قلمرو برون‌مرزی ${(rId - 10).toLocaleString("fa-IR")}`;
