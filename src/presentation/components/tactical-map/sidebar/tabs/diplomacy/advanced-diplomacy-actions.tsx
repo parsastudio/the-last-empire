@@ -101,7 +101,7 @@ interface AdvancedDiplomacyActionsProps {
   currentStance?: DiplomaticStance | string;
   isTradeEmbargoed?: boolean;
   isLandNeighbor?: boolean;
-  onOpenProxyModal?: () => void;
+  onOpenProxy?: () => void;
 }
 
 export function AdvancedDiplomacyActions({
@@ -111,7 +111,7 @@ export function AdvancedDiplomacyActions({
   currentStance = "NORMAL_DIPLOMACY",
   isTradeEmbargoed = false,
   isLandNeighbor = false,
-  onOpenProxyModal,
+  onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
   const betrayalCalculator = new DiplomaticBetrayalCalculator();
@@ -320,8 +320,8 @@ export function AdvancedDiplomacyActions({
 
           <button
             onClick={() => {
-              if (onOpenProxyModal) {
-                onOpenProxyModal();
+              if (onOpenProxy) {
+                onOpenProxy();
               }
             }}
             className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"

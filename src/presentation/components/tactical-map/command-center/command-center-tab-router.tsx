@@ -11,6 +11,8 @@ import { WideAbilitiesView } from "@/presentation/components/tactical-map/comman
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { FileText, ShieldAlert, Info } from "lucide-react";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
@@ -25,7 +27,11 @@ interface CommandCenterTabRouterProps {
     mode: "buy" | "sell",
     price: number,
   ) => void;
-  onNavigateTab?: (tab: SidebarTabType, targetCode?: string) => void;
+  onNavigateTab?: (
+    tab: SidebarTabType,
+    subTab?: string,
+    targetCode?: string,
+  ) => void;
 }
 
 export function CommandCenterTabRouter({
@@ -115,12 +121,57 @@ export function CommandCenterTabRouter({
           nationId={nation.id}
         />
       );
-    case "reports":
+    case "reports": {
+      const logs = gameState?.turnLogs || [];
+      if (logs.length === 0) {
+        return (
+          <div className="py-20 text-center text-xs text-muted-foreground italic">
+            هیچ گزارش یا لاگ ثبت‌شده‌ای در این کمپین یافت نشد.
+          </div>
+        );
+      }
       return (
-        <div className="py-20 text-center text-xs text-muted-foreground italic">
-          بایگانی گزارش‌ها غیرفعال است.
+        <div className="space-y-3 dir-rtl text-right animate-in fade-in duration-200">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+            <FileText size={16} className="text-primary" />
+            <span className="text-xs font-bold text-foreground">
+              بایگانی گزارش‌های امنیتی و نبردهای ثبت‌شده
+            </span>
+          </div>
+          <div className="space-y-2 max-h-[450px] overflow-y-auto pr-1 scrollbar-thin">
+            {logs
+              .slice()
+              .reverse()
+              .map((log) => (
+                <div
+                  key={log.id}
+                  className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-1.5 font-mono text-xs"
+                >
+                  <div className="flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-primary flex items-center gap-1 font-sans">
+                      {log.level === "COMBAT" || log.level === "CRITICAL" ? (
+                        <ShieldAlert size={12} className="text-military" />
+                      ) : (
+                        <Info size={12} className="text-primary" />
+                      )}
+                      نوبت {PersianNumberFormatter.toPersianDigits(log.turn)}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {new Date(log.timestamp).toLocaleTimeString("fa-IR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                  <p className="text-foreground font-sans text-xs leading-relaxed">
+                    {log.message}
+                  </p>
+                </div>
+              ))}
+          </div>
         </div>
       );
+    }
     default:
       return null;
   }
