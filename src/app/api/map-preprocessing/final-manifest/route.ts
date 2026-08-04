@@ -26,7 +26,7 @@ export async function GET(): Promise<NextResponse> {
     }
 
     const raw = await fs.readFile(manifestPath, "utf-8");
-    const manifest = JSON.parse(raw);
+    const manifest = JSON.parse(raw) as unknown;
     return NextResponse.json(manifest);
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Failed to load manifest";
