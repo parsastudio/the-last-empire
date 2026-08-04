@@ -6,8 +6,6 @@ import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { ActionDispatcherService } from "@/presentation/services/action-dispatcher.service";
-import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
-import { ActionRouter } from "@/engine/actions/action-router";
 
 export function useGameActions(
   customGameId?: string,
@@ -18,10 +16,7 @@ export function useGameActions(
   const params = useParams();
 
   const routeGameId = params?.gameId as string | undefined;
-
   const dispatcher = useMemo(() => new ActionDispatcherService(), []);
-  const storageService = useMemo(() => new ClientStorageService(), []);
-  const actionRouter = useMemo(() => new ActionRouter(), []);
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
@@ -32,68 +27,42 @@ export function useGameActions(
         action.nationId ||
         "default_game";
 
-      let stateBeforeAction: GameState | null = currentState || null;
+      const result = await dispatcher.dispatch(
+        action,
+        activeGameId,
+        currentState,
+      );
 
-      if (!stateBeforeAction) {
-        stateBeforeAction = await storageService.loadGameState(activeGameId);
+      if (result.success && result.newState) {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(
+            new CustomEvent("geopolitics-state-updated", {
+              detail: result.newState,
+            }),
+          );
+        }
+
+        if (onSuccessMessage) {
+          showToast("دستور صادر شد", onSuccessMessage, "success");
+        }
+        if (onActionExecuted) {
+          onActionExecuted();
+        }
+        return true;
       }
 
-      if (!stateBeforeAction) {
-        showToast("خطا", "اطلاعات بازی یافت نشد.", "error");
-        return false;
-      }
-
-      let stateAfterAction: GameState;
-      try {
-        stateAfterAction = actionRouter.route(stateBeforeAction, action);
-      } catch (err) {
-        const errorMsg =
-          err instanceof Error
-            ? err.message
-            : "امکان انجام این دستور وجود ندارد.";
-        showToast("خطا در اجرای دستور", errorMsg, "error");
-        return false;
-      }
-
-      await storageService.saveGameState(activeGameId, stateAfterAction);
-
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(
-          new CustomEvent("geopolitics-state-updated", {
-            detail: stateAfterAction,
-          }),
-        );
-      }
-
-      if (onSuccessMessage) {
-        showToast("دستور صادر شد", onSuccessMessage, "success");
-      }
-      if (onActionExecuted) {
-        onActionExecuted();
-      }
-
-      dispatcher
-        .dispatch(action, activeGameId, stateBeforeAction)
-        .then((result) => {
-          if (!result.success) {
-            showToast(
-              "خطا در سرور",
-              result.message || "دستور در سرور تایید نشد.",
-              "error",
-            );
-          }
-        })
-        .catch(() => {});
-
-      return true;
+      showToast(
+        "خطا در اجرای دستور",
+        result.message || "امکان انجام این دستور وجود ندارد.",
+        "error",
+      );
+      return false;
     },
     [
       customGameId,
       routeGameId,
       currentState,
       dispatcher,
-      storageService,
-      actionRouter,
       showToast,
       onActionExecuted,
     ],

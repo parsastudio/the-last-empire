@@ -1,9 +1,13 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
+import { ActionRouter } from "@/engine/actions/action-router";
+import { StateValidator } from "@/engine/validation/state-validator";
 
 export class ActionDispatcherService {
   private storageService = new ClientStorageService();
+  private router = new ActionRouter();
+  private validator = new StateValidator();
 
   public async dispatch(
     action: GameAction,
@@ -17,50 +21,35 @@ export class ActionDispatcherService {
       effectiveState = await this.storageService.loadGameState(activeGameId);
     }
 
-    try {
-      const query = activeGameId ? `?gameId=${activeGameId}` : "";
-      const response = await fetch(`/api/game/action${query}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, state: effectiveState }),
-      });
-
-      const json = (await response.json()) as {
-        success: boolean;
-        message?: string;
-        error?: string;
-        data?: ActionResult;
-      };
-
-      if (json.success) {
-        const finalState = json.data?.newState || effectiveState;
-        if (finalState) {
-          await this.storageService.saveGameState(activeGameId, finalState);
-        }
-
-        return {
-          success: true,
-          actionId: action.id,
-          message: json.message || "دستور با موفقیت ثبت گردید.",
-          newState: finalState || undefined,
-        };
-      }
-
+    if (!effectiveState) {
       return {
         success: false,
         actionId: action.id,
-        message: json.message || "خطا در اجرای دستور",
-        error: json.error || "EXECUTION_FAILED",
+        message: "اطلاعات پرونده بازی یافت نشد.",
+        error: "STATE_NOT_FOUND",
       };
-    } catch {
+    }
+
+    try {
+      this.validator.validateAction(effectiveState, action);
+      const newState = this.router.route(effectiveState, action);
+
+      await this.storageService.saveGameState(activeGameId, newState);
+
       return {
-        success: effectiveState !== null,
+        success: true,
         actionId: action.id,
-        message:
-          effectiveState !== null
-            ? "دستور در حالت آفلاین ثبت شد."
-            : "ارتباط با سرور برقرار نشد.",
-        newState: effectiveState || undefined,
+        message: "دستور با موفقیت صادر گردید.",
+        newState,
+      };
+    } catch (err) {
+      const errorMsg =
+        err instanceof Error ? err.message : "خطا در اجرای دستور";
+      return {
+        success: false,
+        actionId: action.id,
+        message: errorMsg,
+        error: "EXECUTION_FAILED",
       };
     }
   }
