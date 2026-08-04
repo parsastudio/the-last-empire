@@ -3,10 +3,10 @@ import { GameEngine } from "@/engine/game-engine";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GridLoaderService } from "@/engine/combat/state/grid-loader.service";
+import { GameStateInitializer } from "@/infrastructure/map-preprocessing/game-state-initializer";
 
-class ServerGameSessionStore {
+export class ServerGameSessionStore {
   private static instance: ServerGameSessionStore;
-  private engines = new Map<string, GameEngine>();
 
   public static getInstance(): ServerGameSessionStore {
     if (!ServerGameSessionStore.instance) {
@@ -15,35 +15,23 @@ class ServerGameSessionStore {
     return ServerGameSessionStore.instance;
   }
 
-  public initSession(gameId: string, initialState: GameState): GameEngine {
-    const engine = new GameEngine(initialState);
-    this.engines.set(gameId, engine);
-    return engine;
-  }
-
-  public getEngine(gameId: string): GameEngine | undefined {
-    return this.engines.get(gameId);
-  }
-
-  public dispatchAction(
+  public processAction(
     gameId: string,
     action: GameAction,
     currentState?: GameState,
-  ): ActionResult | null {
-    let engine = this.engines.get(gameId);
-
-    if (currentState) {
-      engine = this.initSession(gameId, currentState);
-    }
-
-    if (!engine) {
-      return null;
+  ): ActionResult {
+    let state = currentState;
+    if (!state) {
+      const initializer = new GameStateInitializer();
+      state = initializer.initializeSimulationForNation(action.nationId);
+      state.gameId = gameId;
     }
 
     if (action.type === "INITIATE_BATTLE") {
       GridLoaderService.ensureGridLoaded();
     }
 
+    const engine = new GameEngine(state);
     return engine.dispatchAction(action);
   }
 
@@ -51,18 +39,28 @@ class ServerGameSessionStore {
     gameId: string,
     currentState?: GameState,
   ): GameState | null {
-    let engine = this.engines.get(gameId);
-
-    if (currentState) {
-      engine = this.initSession(gameId, currentState);
-    }
-
-    if (!engine) {
+    if (!currentState) {
       return null;
     }
 
     GridLoaderService.ensureGridLoaded();
+    const engine = new GameEngine(currentState);
     return engine.nextTurn();
+  }
+
+  public getOrInitState(
+    gameId: string,
+    nationId: string,
+    currentState?: GameState,
+  ): GameState {
+    if (currentState) {
+      return currentState;
+    }
+
+    const initializer = new GameStateInitializer();
+    const initialState = initializer.initializeSimulationForNation(nationId);
+    initialState.gameId = gameId;
+    return initialState;
   }
 }
 

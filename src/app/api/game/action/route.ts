@@ -23,7 +23,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const gameId = searchParams.get("gameId") || "default_game";
 
-    const result = serverGameSessionStore.dispatchAction(
+    const result = serverGameSessionStore.processAction(
       gameId,
       action,
       currentState,

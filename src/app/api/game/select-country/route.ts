@@ -3,7 +3,6 @@ import {
   GameStateInitializer,
   normalizeNationId,
 } from "@/infrastructure/map-preprocessing/game-state-initializer";
-import { serverGameSessionStore } from "@/application/game/server-game-session-store";
 
 export async function POST(request: Request): Promise<NextResponse> {
   try {
@@ -32,8 +31,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (state) {
       state.gameId = activeGameId;
     }
-
-    serverGameSessionStore.initSession(activeGameId, state);
 
     return NextResponse.json({ success: true, data: state });
   } catch (err) {
