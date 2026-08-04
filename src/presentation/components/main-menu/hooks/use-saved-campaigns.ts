@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { IndexedDbAdapter } from "@/infrastructure/storage/indexed-db-adapter";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { StateSerializer } from "@/infrastructure/storage/state-serializer";
 
 export interface SavedCampaignMeta {
@@ -17,14 +17,15 @@ export function useSavedCampaigns() {
 
   const loadSavesFromDb = useCallback(async () => {
     try {
-      const adapter = new IndexedDbAdapter();
+      const adapter = new GameStorageAdapter();
       const serializer = new StateSerializer();
       const records = await adapter.getAllSaves();
 
       const mapped: SavedCampaignMeta[] = [];
 
       for (const rec of records) {
-        if (rec.gameId === "active_game") continue;
+        if (rec.gameId === "active_game" || typeof rec.data !== "string")
+          continue;
         try {
           const state = serializer.deserialize(rec.data);
           const humanNation = state.nations[state.humanNationId];
@@ -72,7 +73,7 @@ export function useSavedCampaigns() {
 
   const deleteSave = useCallback(async (gameId: string) => {
     try {
-      const adapter = new IndexedDbAdapter();
+      const adapter = new GameStorageAdapter();
       await adapter.deleteState(gameId);
       setSaves((prev) => prev.filter((s) => s.id !== gameId));
     } catch {}
