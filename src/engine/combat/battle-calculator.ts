@@ -22,9 +22,6 @@ export interface BattleCalculationResult {
 }
 
 export class BattleCalculator {
-  private static governmentSystem = new GovernmentSystem();
-  private static doctrinesManager = new DoctrinesManager();
-
   public static calculateBattle(
     attacker: Nation,
     defender: Nation,
@@ -48,10 +45,10 @@ export class BattleCalculator {
       Math.max(0, dronesToLaunch || 0),
     );
 
-    const attackerGovTraits = this.governmentSystem.getTraits(
+    const attackerGovTraits = GovernmentSystem.getTraits(
       attacker.government.type,
     );
-    const defenderGovTraits = this.governmentSystem.getTraits(
+    const defenderGovTraits = GovernmentSystem.getTraits(
       defender.government.type,
     );
 
@@ -66,7 +63,7 @@ export class BattleCalculator {
     }
 
     const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.25;
-    const droneMult = this.doctrinesManager.getDronePowerMultiplier(
+    const droneMult = DoctrinesManager.getDronePowerMultiplier(
       attacker.doctrines?.unlockedDoctrines,
     );
 
@@ -75,7 +72,7 @@ export class BattleCalculator {
     );
 
     const defenderAirDefenseRate =
-      this.doctrinesManager.getAirDefenseInterceptionRate(
+      DoctrinesManager.getAirDefenseInterceptionRate(
         defender.doctrines?.unlockedDoctrines,
       );
     if (defenderAirDefenseRate > 0) {
@@ -88,7 +85,7 @@ export class BattleCalculator {
     let defenderRemainingAirForce = defender.military.airForce;
 
     const precisionDamageRatio =
-      this.doctrinesManager.getPrecisionMissileDirectDamage(
+      DoctrinesManager.getPrecisionMissileDirectDamage(
         attacker.doctrines?.unlockedDoctrines,
       );
     if (precisionDamageRatio > 0 && dronesUsed > 0) {
@@ -131,7 +128,7 @@ export class BattleCalculator {
       defenderGovMult;
 
     if (
-      this.doctrinesManager.getElectronicWarfareEvasion(
+      DoctrinesManager.getElectronicWarfareEvasion(
         attacker.doctrines?.unlockedDoctrines,
       )
     ) {
@@ -148,7 +145,7 @@ export class BattleCalculator {
       const defenderAirLossPct = (attackerAirPower / totalAirPower) * 0.2;
 
       if (
-        this.doctrinesManager.getElectronicWarfareEvasion(
+        DoctrinesManager.getElectronicWarfareEvasion(
           attacker.doctrines?.unlockedDoctrines,
         )
       ) {
@@ -173,7 +170,7 @@ export class BattleCalculator {
       airSupportMultiplier = 0.7;
     }
 
-    const militiaMult = this.doctrinesManager.getMilitiaPowerMultiplier(
+    const militiaMult = DoctrinesManager.getMilitiaPowerMultiplier(
       defender.doctrines?.unlockedDoctrines,
     );
 

@@ -12,9 +12,7 @@ export interface AutoTradeEngineResult {
 }
 
 export class AutoTradeEngine {
-  private popWelfareCalc = new PopulationWelfareCalculator();
-
-  public processNationAutoTrade(
+  public static processNationAutoTrade(
     nation: Nation,
     marketPrices: ResourceMarketPrice,
   ): AutoTradeEngineResult {
@@ -36,12 +34,12 @@ export class AutoTradeEngine {
     const buyPriceSteel = marketPrices.steel || 25000000;
     const sellPrice = 20000000;
 
-    const oilDemand = this.popWelfareCalc.calculateOilDemand(
+    const oilDemand = PopulationWelfareCalculator.calculateOilDemand(
       currentNation.population,
       currentNation.gdp,
       currentNation.doctrines?.unlockedDoctrines,
     );
-    const steelDemand = this.popWelfareCalc.calculateSteelDemand(
+    const steelDemand = PopulationWelfareCalculator.calculateSteelDemand(
       currentNation.population,
       currentNation.gdp,
     );

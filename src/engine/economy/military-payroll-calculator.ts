@@ -12,18 +12,12 @@ export interface BreakdownMilitaryPayroll {
 }
 
 export class MilitaryPayrollCalculator {
-  private governmentSystem = new GovernmentSystem();
-  private doctrinesManager = new DoctrinesManager();
-  private traitManager = new TraitManager();
-
-  public calculatePayroll(nation: Nation): BreakdownMilitaryPayroll {
-    const traitMultiplier =
-      this.traitManager.getMilitaryPayrollMultiplier(nation);
-    const govTraits = this.governmentSystem.getTraits(nation.government.type);
-    const doctrineMultiplier =
-      this.doctrinesManager.getMilitaryPayrollMultiplier(
-        nation.doctrines?.unlockedDoctrines,
-      );
+  public static calculatePayroll(nation: Nation): BreakdownMilitaryPayroll {
+    const traitMultiplier = TraitManager.getMilitaryPayrollMultiplier(nation);
+    const govTraits = GovernmentSystem.getTraits(nation.government.type);
+    const doctrineMultiplier = DoctrinesManager.getMilitaryPayrollMultiplier(
+      nation.doctrines?.unlockedDoctrines,
+    );
 
     const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.2;
     const combinedMultiplier =

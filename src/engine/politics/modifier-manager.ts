@@ -9,7 +9,7 @@ export interface ModifierInput {
 }
 
 export class ModifierManager {
-  public addModifier(nation: Nation, modifier: ModifierInput): Nation {
+  public static addModifier(nation: Nation, modifier: ModifierInput): Nation {
     const active: ActiveModifier = {
       id: modifier.id,
       name: modifier.name,
@@ -36,7 +36,7 @@ export class ModifierManager {
     };
   }
 
-  public removeModifier(nation: Nation, modifierId: string): Nation {
+  public static removeModifier(nation: Nation, modifierId: string): Nation {
     return {
       ...nation,
       activeModifiers: (nation.activeModifiers || []).filter(
@@ -45,7 +45,7 @@ export class ModifierManager {
     };
   }
 
-  public updateActiveModifiers(nation: Nation): Nation {
+  public static updateActiveModifiers(nation: Nation): Nation {
     const nextModifiers = (nation.activeModifiers || [])
       .map((m) => ({
         ...m,
@@ -59,7 +59,7 @@ export class ModifierManager {
     };
   }
 
-  public getModifierImpact(nation: Nation, effectType: string): number {
+  public static getModifierImpact(nation: Nation, effectType: string): number {
     return (nation.activeModifiers || [])
       .filter((m) => m.effectType === effectType)
       .reduce((sum, m) => sum + m.magnitude, 0);

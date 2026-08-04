@@ -27,7 +27,6 @@ export function TariffControlCard({
 }: TariffControlCardProps) {
   const [userTariffRate, setUserTariffRate] = useState<number | null>(null);
   const { dispatchAction } = useGameActions();
-  const doctrinesManager = useMemo(() => new DoctrinesManager(), []);
 
   const tariffRate = userTariffRate ?? initialTariffRate;
 
@@ -76,7 +75,7 @@ export function TariffControlCard({
     effectiveGdp * 0.15 * seaAccessFactor * activeTradeRatio;
   const effectiveTradeValue = baseTradeBase * tradeVolumeFactor;
   const researchMultiplier =
-    doctrinesManager.getTariffRevenueMultiplier(effectiveDoctrines);
+    DoctrinesManager.getTariffRevenueMultiplier(effectiveDoctrines);
 
   const projectedTariffRevenue = Math.floor(
     effectiveTradeValue * (tariffRate / 100) * researchMultiplier,

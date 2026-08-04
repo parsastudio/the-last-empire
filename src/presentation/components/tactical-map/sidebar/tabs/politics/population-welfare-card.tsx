@@ -19,14 +19,17 @@ export function PopulationWelfareCard({
   gdp = 10000000000,
   nation,
 }: PopulationWelfareCardProps) {
-  const welfareCalc = useMemo(() => new PopulationWelfareCalculator(), []);
-
   const metrics = useMemo(() => {
     if (nation) {
-      return welfareCalc.evaluateWelfareForNation(nation);
+      return PopulationWelfareCalculator.evaluateWelfareForNation(nation);
     }
-    return welfareCalc.evaluateWelfare(population, oilStock, steelStock, gdp);
-  }, [welfareCalc, nation, population, oilStock, steelStock, gdp]);
+    return PopulationWelfareCalculator.evaluateWelfare(
+      population,
+      oilStock,
+      steelStock,
+      gdp,
+    );
+  }, [nation, population, oilStock, steelStock, gdp]);
 
   const formattedPop = useMemo(() => {
     if (population >= 1e9) {
