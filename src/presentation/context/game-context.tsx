@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useCallback, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
@@ -34,6 +40,9 @@ export function GameProvider({
     useBitPackedGame(gameId);
 
   const dispatcher = useMemo(() => new ActionDispatcherService(), []);
+  const turnPromiseQueueRef = useRef<Promise<GameState | null>>(
+    Promise.resolve(null),
+  );
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
@@ -59,6 +68,15 @@ export function GameProvider({
     [gameId, gameState, dispatcher, setGameState, showToast],
   );
 
+  const queueAdvanceNextTurn = useCallback((): Promise<GameState | null> => {
+    const nextPromise = turnPromiseQueueRef.current.then(async () => {
+      return await advanceNextTurn();
+    });
+
+    turnPromiseQueueRef.current = nextPromise.catch(() => null);
+    return nextPromise;
+  }, [advanceNextTurn]);
+
   return (
     <GameContext.Provider
       value={{
@@ -66,7 +84,7 @@ export function GameProvider({
         loading,
         error,
         dispatchAction,
-        advanceNextTurn,
+        advanceNextTurn: queueAdvanceNextTurn,
       }}
     >
       {children}

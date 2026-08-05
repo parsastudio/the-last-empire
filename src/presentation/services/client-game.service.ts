@@ -5,10 +5,12 @@ import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-a
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
 
 export class ClientGameService {
   private storageService = new ClientStorageService();
   private aiInitializer = new GlobalAiInitializer();
+  private saveQueue = AsyncSaveQueueService.getInstance();
 
   public async loadGameState(
     gameId: string,
@@ -34,7 +36,7 @@ export class ClientGameService {
     try {
       const engine = new GameEngine(currentState);
       const nextState = engine.nextTurn();
-      await this.storageService.saveGameState(gameId, nextState);
+      this.saveQueue.enqueueSave(gameId, nextState, false);
       return { success: true, data: nextState };
     } catch {
       return { success: false, error: "خطا در پیشبرد نوبت بازی." };
@@ -82,7 +84,7 @@ export class ClientGameService {
         turnLogs: [],
       };
 
-      await this.storageService.saveGameState(gameId, initialState);
+      this.saveQueue.enqueueSave(gameId, initialState, true);
       return { success: true, data: initialState };
     } catch {
       return { success: false, error: "خطا در ساخت کمپین جدید." };

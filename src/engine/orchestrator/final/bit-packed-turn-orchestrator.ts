@@ -19,9 +19,10 @@ export class BitPackedTurnOrchestrator {
         buffer.getWidth(),
         buffer.getHeight(),
       );
+      this.frontierManager.updateAllFrontiers(buffer);
+      gridState.clearModifiedIndices();
     }
 
-    this.frontierManager.updateAllFrontiers(buffer);
     return this.facade.syncGameState(state);
   }
 }
