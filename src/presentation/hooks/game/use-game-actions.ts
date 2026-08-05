@@ -9,7 +9,7 @@ import { ActionDispatcherService } from "@/presentation/services/action-dispatch
 
 export function useGameActions(
   customGameId?: string,
-  onActionExecuted?: () => void,
+  onActionExecuted?: (newState?: GameState) => void,
   currentState?: GameState | null,
 ) {
   const { showToast } = useToast();
@@ -34,19 +34,11 @@ export function useGameActions(
       );
 
       if (result.success && result.newState) {
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(
-            new CustomEvent("geopolitics-state-updated", {
-              detail: result.newState,
-            }),
-          );
-        }
-
         if (onSuccessMessage) {
           showToast("دستور صادر شد", onSuccessMessage, "success");
         }
         if (onActionExecuted) {
-          onActionExecuted();
+          onActionExecuted(result.newState);
         }
         return true;
       }

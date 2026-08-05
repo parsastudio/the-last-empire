@@ -19,14 +19,14 @@ export function AntiCorruptionCard({
   currentCorruption = 0,
 }: AntiCorruptionCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // حفظ دقیق عدد اعشاری (مثلاً ۷.۰۲)
   const actualCorruption = Number((currentCorruption || 0).toFixed(2));
-  const roundedCorruption = Math.max(0, Math.ceil(actualCorruption));
-  const maxReducible = Math.min(100, Math.max(1, roundedCorruption));
+  const maxReducible = Math.min(100, Math.max(0, actualCorruption));
 
   const [userTargetReduction, setUserTargetReduction] = useState<number | null>(
     null,
   );
-  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   const targetReduction = Math.min(
     maxReducible,
@@ -54,7 +54,7 @@ export function AntiCorruptionCard({
       );
       await dispatchAction(
         action,
-        `مبلغ ${PersianNumberFormatter.formatCurrency(antiCorruptionCost)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری ${PersianNumberFormatter.toPersianDigits(targetReduction)}٪ کاهش یافت.`,
+        `مبلغ ${PersianNumberFormatter.formatCurrency(antiCorruptionCost)} به آژانس بازرسی ملی تزریق شد و شاخص فساد اداری ${PersianNumberFormatter.toPersianDigits(Number(targetReduction.toFixed(2)))}٪ کاهش یافت.`,
       );
     } finally {
       setIsSubmitting(false);
@@ -63,13 +63,26 @@ export function AntiCorruptionCard({
 
   const handlePercentageSelect = (percentage: number) => {
     if (maxReducible <= 0) return;
-    const target = Math.max(1, Math.floor(maxReducible * percentage));
-    setUserTargetReduction(target);
+    if (percentage === 1) {
+      setUserTargetReduction(maxReducible);
+    } else {
+      const target = Number((maxReducible * percentage).toFixed(2));
+      setUserTargetReduction(Math.max(0.01, target));
+    }
   };
 
   const resultingCorruption = Math.max(0, actualCorruption - targetReduction);
   const displayResultingCorruption =
     resultingCorruption <= 0.01 ? 0 : Number(resultingCorruption.toFixed(2));
+
+  // محاسبه درصد دقیق برای پر کردن نوار اسلایدر
+  const sliderPercentage =
+    maxReducible > 0 ? (targetReduction / maxReducible) * 100 : 0;
+
+  const formatNum = (num: number) =>
+    PersianNumberFormatter.toPersianDigits(
+      Number.isInteger(num) ? num.toString() : num.toFixed(2),
+    );
 
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -86,7 +99,7 @@ export function AntiCorruptionCard({
             شاخص فعلی فساد:
           </span>
           <span className="font-bold text-military text-sm">
-            {PersianNumberFormatter.toPersianDigits(actualCorruption)}٪
+            {formatNum(actualCorruption)}٪
           </span>
         </div>
 
@@ -102,39 +115,25 @@ export function AntiCorruptionCard({
                   میزان کاهش درخواستی:
                 </span>
                 <span className="font-mono font-extrabold text-gdp text-xs">
-                  -{PersianNumberFormatter.toPersianDigits(targetReduction)}٪
-                  (نهایی:{" "}
-                  {PersianNumberFormatter.toPersianDigits(
-                    displayResultingCorruption,
-                  )}
-                  ٪)
+                  -{formatNum(targetReduction)}٪ (نهایی:{" "}
+                  {formatNum(displayResultingCorruption)}٪)
                 </span>
               </div>
 
               <div className="relative w-full flex items-center h-6">
-                <div className="absolute w-full h-2 bg-secondary rounded-lg overflow-hidden">
-                  <div
-                    className="absolute top-0 h-full bg-gdp transition-all duration-75 right-0"
-                    style={{
-                      width: `${(targetReduction / maxReducible) * 100}%`,
-                      transition: isDragging ? "none" : "width 0.1s ease-out",
-                    }}
-                  />
-                </div>
-
                 <input
                   type="range"
-                  min="1"
+                  min="0.01"
                   max={maxReducible}
+                  step="0.01"
                   value={targetReduction}
                   onChange={(e) =>
-                    setUserTargetReduction(Number(e.target.value))
+                    setUserTargetReduction(parseFloat(e.target.value))
                   }
-                  onMouseDown={() => setIsDragging(true)}
-                  onMouseUp={() => setIsDragging(false)}
-                  onTouchStart={() => setIsDragging(true)}
-                  onTouchEnd={() => setIsDragging(false)}
-                  className="w-full accent-emerald-600 cursor-pointer h-2 bg-transparent rounded-lg appearance-none relative z-10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-gdp [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-card [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-gdp [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-card [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to left, var(--color-gdp) 0%, var(--color-gdp) ${sliderPercentage}%, var(--color-secondary) ${sliderPercentage}%, var(--color-secondary) 100%)`,
+                  }}
+                  className="w-full cursor-pointer h-2 rounded-lg appearance-none relative z-10 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-gdp [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-card [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-gdp [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-card [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
                 />
               </div>
 
@@ -173,7 +172,7 @@ export function AntiCorruptionCard({
                 {isSubmitting
                   ? "در حال اجرای طرح ضدفساد..."
                   : canAfford
-                    ? `تزریق بودجه ضدفساد (-${PersianNumberFormatter.toPersianDigits(targetReduction)}٪ فساد)`
+                    ? `تزریق بودجه ضدفساد (-${formatNum(targetReduction)}٪ فساد)`
                     : "خزانه ناکافی جهت اجرای طرح ضدفساد"}
               </span>
             </button>
