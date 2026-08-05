@@ -4,6 +4,7 @@ import { ClientGameService } from "@/presentation/services/client-game.service";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
 
 export function useBitPackedGame(gameId = "default_game") {
   const [gameState, setGameState] = useState<GameState | null>(null);
@@ -12,6 +13,7 @@ export function useBitPackedGame(gameId = "default_game") {
 
   const gameService = useMemo(() => new ClientGameService(), []);
   const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
+  const saveQueue = useMemo(() => AsyncSaveQueueService.getInstance(), []);
 
   useEffect(() => {
     let active = true;
@@ -60,13 +62,12 @@ export function useBitPackedGame(gameId = "default_game") {
     const res = await gameService.advanceTurn(gameId, gameState);
     if (res.success && res.data) {
       setGameState(res.data);
-      const gridState = BitPackedGridState.getInstance();
-      await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
+      saveQueue.enqueueSave(gameId, res.data, true);
       return res.data;
     }
 
     return null;
-  }, [gameState, gameService, storageAdapter, gameId]);
+  }, [gameState, gameService, saveQueue, gameId]);
 
   return {
     gameState,

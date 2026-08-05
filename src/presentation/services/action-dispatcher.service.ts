@@ -3,11 +3,13 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
+import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
 
 export class ActionDispatcherService {
   private storageService = new ClientStorageService();
   private router = new ActionRouter();
   private validator = new StateValidator();
+  private saveQueue = AsyncSaveQueueService.getInstance();
 
   public async dispatch(
     action: GameAction,
@@ -34,7 +36,7 @@ export class ActionDispatcherService {
       this.validator.validateAction(effectiveState, action);
       const newState = this.router.route(effectiveState, action);
 
-      await this.storageService.saveGameState(activeGameId, newState);
+      this.saveQueue.enqueueSave(activeGameId, newState, false);
 
       return {
         success: true,
