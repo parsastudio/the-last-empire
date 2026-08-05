@@ -108,7 +108,7 @@ export class GdpCalculator {
     if (nation.traits.includes("FRAGILE_ECONOMY")) {
       stabilityFactor -= 0.05;
     }
-    if (nation.geography.territorySize > 2000) {
+    if (nation.geography.territoryPixelCount > 2000) {
       stabilityFactor += 0.015;
     }
 
