@@ -5,10 +5,15 @@ import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
 import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
+import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
 export function useBitPackedGame(gameId = "default_game") {
-  const [gameState, setGameState] = useState<GameState | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [gameState, setGameState] = useState<GameState | null>(() => {
+    return CampaignSessionCache.get(gameId);
+  });
+  const [loading, setLoading] = useState<boolean>(() => {
+    return !CampaignSessionCache.has(gameId);
+  });
   const [error, setError] = useState<string | null>(null);
 
   const gameService = useMemo(() => new ClientGameService(), []);
@@ -32,9 +37,19 @@ export function useBitPackedGame(gameId = "default_game") {
           await FinalStateLoader.loadLiveStateBuffer("map1");
         }
 
+        const cached = CampaignSessionCache.get(gameId);
+        if (cached) {
+          if (active) {
+            setGameState(cached);
+            setLoading(false);
+          }
+          return;
+        }
+
         const res = await gameService.loadGameState(gameId);
         if (active) {
           if (res.success && res.data) {
+            CampaignSessionCache.set(gameId, res.data);
             setGameState(res.data);
           } else {
             setError(res.error || "خطا در بارگذاری استیت");
@@ -61,6 +76,7 @@ export function useBitPackedGame(gameId = "default_game") {
 
     const res = await gameService.advanceTurn(gameId, gameState);
     if (res.success && res.data) {
+      CampaignSessionCache.set(gameId, res.data);
       setGameState(res.data);
       saveQueue.enqueueSave(gameId, res.data, true);
       return res.data;
