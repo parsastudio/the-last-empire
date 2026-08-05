@@ -6,6 +6,7 @@ import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
+import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
 export class ClientGameService {
   private storageService = new ClientStorageService();
@@ -15,6 +16,11 @@ export class ClientGameService {
   public async loadGameState(
     gameId: string,
   ): Promise<{ success: boolean; data?: GameState; error?: string }> {
+    const cachedState = CampaignSessionCache.get(gameId);
+    if (cachedState) {
+      return { success: true, data: cachedState };
+    }
+
     try {
       const state = await this.storageService.loadGameState(gameId);
       if (!state) {
@@ -36,6 +42,7 @@ export class ClientGameService {
     try {
       const engine = new GameEngine(currentState);
       const nextState = engine.nextTurn();
+      CampaignSessionCache.set(gameId, nextState);
       this.saveQueue.enqueueSave(gameId, nextState, false);
       return { success: true, data: nextState };
     } catch {
@@ -84,6 +91,7 @@ export class ClientGameService {
         turnLogs: [],
       };
 
+      CampaignSessionCache.set(gameId, initialState);
       this.saveQueue.enqueueSave(gameId, initialState, true);
       return { success: true, data: initialState };
     } catch {
