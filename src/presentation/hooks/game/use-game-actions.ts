@@ -6,12 +6,18 @@ import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { ActionDispatcherService } from "@/presentation/services/action-dispatcher.service";
+import { useGameContext } from "@/presentation/context/game-context";
 
 export function useGameActions(
   customGameId?: string,
   onActionExecuted?: (newState?: GameState) => void,
   currentState?: GameState | null,
 ) {
+  let context: ReturnType<typeof useGameContext> | undefined;
+  try {
+    context = useGameContext();
+  } catch {}
+
   const { showToast } = useToast();
   const params = useParams();
 
@@ -20,6 +26,10 @@ export function useGameActions(
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
+      if (context) {
+        return context.dispatchAction(action, onSuccessMessage);
+      }
+
       const activeGameId =
         customGameId ||
         routeGameId ||
@@ -51,6 +61,7 @@ export function useGameActions(
       return false;
     },
     [
+      context,
       customGameId,
       routeGameId,
       currentState,
