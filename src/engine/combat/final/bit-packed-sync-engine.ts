@@ -1,11 +1,9 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
-import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
 import { BitPackedNeighborDetector } from "@/engine/combat/final/bit-packed-neighbor-detector";
 
 export class BitPackedSyncEngine {
-  private calibrator = new CellAreaCalibrator(2048, 4096);
   private neighborDetector = new BitPackedNeighborDetector();
 
   public syncNationsFromBuffer(
@@ -15,32 +13,27 @@ export class BitPackedSyncEngine {
     const width = buffer.getWidth();
     const height = buffer.getHeight();
 
-    const nationAreaMap = new Map<number, number>();
-    const nationEnclaveAreaMap = new Map<number, Map<number, number>>();
+    const nationPixelsMap = new Map<number, number>();
+    const nationEnclavePixelsMap = new Map<number, Map<number, number>>();
 
     for (let y = 0; y < height; y++) {
-      const pixelArea = this.calibrator.getCalibratedPixelArea(y);
-
       for (let x = 0; x < width; x++) {
         const nationId = buffer.getNationId(x, y);
 
         if (nationId >= 11 && nationId < 250) {
-          nationAreaMap.set(
+          nationPixelsMap.set(
             nationId,
-            (nationAreaMap.get(nationId) || 0) + pixelArea,
+            (nationPixelsMap.get(nationId) || 0) + 1,
           );
 
-          let enclaveMap = nationEnclaveAreaMap.get(nationId);
+          let enclaveMap = nationEnclavePixelsMap.get(nationId);
           if (!enclaveMap) {
             enclaveMap = new Map<number, number>();
-            nationEnclaveAreaMap.set(nationId, enclaveMap);
+            nationEnclavePixelsMap.set(nationId, enclaveMap);
           }
 
           const enclaveId = buffer.getEnclaveId(x, y);
-          enclaveMap.set(
-            enclaveId,
-            (enclaveMap.get(enclaveId) || 0) + pixelArea,
-          );
+          enclaveMap.set(enclaveId, (enclaveMap.get(enclaveId) || 0) + 1);
         }
       }
     }
@@ -53,9 +46,8 @@ export class BitPackedSyncEngine {
     for (const [key, nation] of Object.entries(updated)) {
       const numericId = NationIdResolver.resolveNumericId(key);
 
-      const totalCalibratedArea = nationAreaMap.get(numericId) || 0;
-      const territorySize = Math.round(totalCalibratedArea);
-      const isAlive = territorySize > 0;
+      const totalPixels = nationPixelsMap.get(numericId) || 0;
+      const isAlive = totalPixels > 0;
 
       const hasSeaAccess = oceanAccessMap.get(numericId) ?? false;
       const rawLandNeighbors = landNeighborsMap.get(numericId) || new Set();
@@ -64,7 +56,7 @@ export class BitPackedSyncEngine {
         updated,
       );
 
-      const enclaveMap = nationEnclaveAreaMap.get(numericId);
+      const enclaveMap = nationEnclavePixelsMap.get(numericId);
       const regionsDemographics: RegionDemographics[] = [];
 
       if (enclaveMap) {
@@ -73,10 +65,8 @@ export class BitPackedSyncEngine {
         );
 
         for (const rId of sortedEnclaveIds) {
-          const regionAreaRaw = enclaveMap.get(rId) || 0;
-          const regionArea = Math.round(regionAreaRaw);
-          const ratio =
-            totalCalibratedArea > 0 ? regionAreaRaw / totalCalibratedArea : 1;
+          const regionPixels = enclaveMap.get(rId) || 0;
+          const ratio = totalPixels > 0 ? regionPixels / totalPixels : 1;
 
           const regionPop = Math.round(nation.population * ratio);
           const regionGdp = Math.round(nation.gdp * ratio);
@@ -91,8 +81,7 @@ export class BitPackedSyncEngine {
           regionsDemographics.push({
             regionId: rId,
             name,
-            pixelCount: Math.round(regionArea / 86.3),
-            areaSqKm: regionArea,
+            pixelCount: regionPixels,
             population: regionPop,
             gdp: regionGdp,
           });
@@ -104,8 +93,8 @@ export class BitPackedSyncEngine {
         isAlive,
         geography: {
           ...nation.geography,
-          territorySize: isAlive ? territorySize : 0,
-          contiguousMainlandSize: isAlive ? territorySize : 0,
+          territoryPixelCount: isAlive ? totalPixels : 0,
+          contiguousMainlandPixelCount: isAlive ? totalPixels : 0,
           hasSeaAccess,
           landNeighbors:
             landNeighbors.length > 0

@@ -65,8 +65,7 @@ export class NationProfileAssigner {
     const defaultRegion: RegionDemographics = {
       regionId: 0,
       name: `خاک اصلی ${item.nameFa}`,
-      pixelCount: Math.round(item.territorySize / 86.3),
-      areaSqKm: item.territorySize,
+      pixelCount: item.territoryPixelCount,
       population: item.population,
       gdp: item.gdp,
     };
@@ -109,9 +108,9 @@ export class NationProfileAssigner {
         landNeighbors: [],
         seaNeighbors: [],
         hasSeaAccess: true,
-        territorySize: item.territorySize,
+        territoryPixelCount: item.territoryPixelCount,
         infrastructureLevel,
-        contiguousMainlandSize: item.territorySize,
+        contiguousMainlandPixelCount: item.territoryPixelCount,
         isolatedPockets: [],
         coordinates: [],
       },
@@ -202,13 +201,14 @@ export class NationProfileAssigner {
     const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
-    const territorySize = profile ? Math.round(profile.gdp / 1000000) : 377975;
+    const territoryPixelCount = profile
+      ? Math.round(profile.gdp / 10000000)
+      : 4000;
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
       name: `خاک اصلی ${name}`,
-      pixelCount: Math.round(territorySize / 86.3),
-      areaSqKm: territorySize,
+      pixelCount: territoryPixelCount,
       population,
       gdp,
     };
@@ -251,9 +251,9 @@ export class NationProfileAssigner {
         landNeighbors: [],
         seaNeighbors: [],
         hasSeaAccess: true,
-        territorySize,
+        territoryPixelCount,
         infrastructureLevel,
-        contiguousMainlandSize: territorySize,
+        contiguousMainlandPixelCount: territoryPixelCount,
         isolatedPockets: [],
         coordinates: [],
       },

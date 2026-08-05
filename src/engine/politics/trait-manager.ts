@@ -11,7 +11,7 @@ export class TraitManager {
       modifier -= 0.05;
     }
 
-    if (nation.geography.territorySize > 2000) {
+    if (nation.geography.territoryPixelCount > 2000) {
       modifier += 0.015;
     }
 

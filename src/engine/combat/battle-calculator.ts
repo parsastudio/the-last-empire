@@ -13,7 +13,7 @@ export interface BattleCalculationResult {
   droneCasualtiesInflicted: number;
   attackerCasualties: CasualtyMetrics;
   defenderCasualties: CasualtyMetrics;
-  conqueredAreaSqKm: number;
+  conqueredPixelsCount: number;
   treasuryLooted: number;
   deploymentMoneyCost: number;
   deploymentOilCost: number;
@@ -218,7 +218,7 @@ export class BattleCalculator {
 
     const isAttackerVictory = attackerGroundPower > defenderGroundPower;
 
-    let conqueredAreaSqKm = 0;
+    let conqueredPixelsCount = 0;
     let treasuryLooted = 0;
 
     if (isAttackerVictory) {
@@ -226,33 +226,28 @@ export class BattleCalculator {
         (attackerGroundPower - defenderGroundPower) /
         (attackerGroundPower || 1);
 
-      const defenderTotalTerritory = defender.geography.territorySize;
+      const defenderTotalPixels = defender.geography.territoryPixelCount;
 
       let conquestRatio = 0.25 + powerDiffRatio * 0.25;
       conquestRatio = Math.max(0.25, Math.min(0.5, conquestRatio));
 
-      let calculatedConquest = Math.floor(
-        defenderTotalTerritory * conquestRatio,
-      );
-      calculatedConquest = Math.max(50000, calculatedConquest);
+      let calculatedConquest = Math.floor(defenderTotalPixels * conquestRatio);
+      calculatedConquest = Math.max(100, calculatedConquest);
 
-      if (defenderTotalTerritory <= 50000) {
-        conqueredAreaSqKm = defenderTotalTerritory;
+      if (defenderTotalPixels <= 100) {
+        conqueredPixelsCount = defenderTotalPixels;
       } else {
-        const remainingTerritory = defenderTotalTerritory - calculatedConquest;
-        if (
-          remainingTerritory < 10000 ||
-          calculatedConquest >= defenderTotalTerritory
-        ) {
-          conqueredAreaSqKm = defenderTotalTerritory;
+        const remainingPixels = defenderTotalPixels - calculatedConquest;
+        if (remainingPixels < 10 || calculatedConquest >= defenderTotalPixels) {
+          conqueredPixelsCount = defenderTotalPixels;
         } else {
-          conqueredAreaSqKm = calculatedConquest;
+          conqueredPixelsCount = calculatedConquest;
         }
       }
 
       const actualRatio =
-        defenderTotalTerritory > 0
-          ? Math.min(1.0, conqueredAreaSqKm / defenderTotalTerritory)
+        defenderTotalPixels > 0
+          ? Math.min(1.0, conqueredPixelsCount / defenderTotalPixels)
           : 1.0;
 
       treasuryLooted = Math.floor(Math.max(0, defender.treasury) * actualRatio);
@@ -261,7 +256,7 @@ export class BattleCalculator {
     let severity: ReportSeverity = "INFO";
     if (isAttackerVictory) {
       severity =
-        conqueredAreaSqKm >= defender.geography.territorySize
+        conqueredPixelsCount >= defender.geography.territoryPixelCount
           ? "CRUSHING_VICTORY"
           : "VICTORY";
     } else {
@@ -296,7 +291,7 @@ export class BattleCalculator {
       droneCasualtiesInflicted,
       attackerCasualties,
       defenderCasualties,
-      conqueredAreaSqKm,
+      conqueredPixelsCount,
       treasuryLooted,
       deploymentMoneyCost,
       deploymentOilCost,

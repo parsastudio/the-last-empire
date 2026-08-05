@@ -15,21 +15,21 @@ export class BitPackedStateFacade {
   public conquerAndRefreshed(
     attackerNationId: number,
     defenderNationId: number,
-    targetAreaSqKm: number,
+    targetPixelsCount: number,
   ): number {
     const buffer = this.gridState.getBuffer();
     const result = this.conquestEngine.conquerTerritory(
       buffer,
       attackerNationId,
       defenderNationId,
-      targetAreaSqKm,
+      targetPixelsCount,
     );
 
     if (result.capturedPixelsCount > 0) {
       this.frontierManager.updateAllFrontiers(buffer);
     }
 
-    return result.capturedAreaSqKm;
+    return result.capturedPixelsCount;
   }
 
   public inspectCoordinates(mapX: number, mapY: number) {
