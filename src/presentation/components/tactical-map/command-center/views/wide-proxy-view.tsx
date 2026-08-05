@@ -246,8 +246,8 @@ export function WideProxyView({
                 <div className="p-3 bg-military/10 border border-military/30 rounded-2xl flex items-center gap-2 text-[10px] text-military font-sans">
                   <ShieldAlert size={14} className="shrink-0" />
                   <span>
-                    افت ثبات هدف به زیر ۱۰٪ باعث وقوع فوری کودتای نظامی و
-                    سرنگونی رژیم سیاسی آن خواهد شد.
+                    افت ثبات هدف، رشد اقتصادی، درآمد مالیاتی و ساختار اداری کشور
+                    هدف را به شدت فلج خواهد کرد.
                   </span>
                 </div>
               </div>

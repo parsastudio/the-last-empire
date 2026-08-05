@@ -6,7 +6,6 @@ import { calculateProxyOperationBudget } from "@/domain/politics/government-labe
 export interface ProxyOperationResult {
   updatedSourceNation: Nation;
   updatedTargetNation: Nation;
-  coupTriggered: boolean;
 }
 
 export class ProxyWarManager {
@@ -43,7 +42,6 @@ export class ProxyWarManager {
       targetNation.government.stability - clampedDrain,
     );
 
-    let coupTriggered = false;
     const updatedTarget: Nation = {
       ...targetNation,
       government: {
@@ -52,14 +50,9 @@ export class ProxyWarManager {
       },
     };
 
-    if (newStability < 10) {
-      coupTriggered = true;
-    }
-
     return {
       updatedSourceNation: updatedSource,
       updatedTargetNation: updatedTarget,
-      coupTriggered,
     };
   }
 }
