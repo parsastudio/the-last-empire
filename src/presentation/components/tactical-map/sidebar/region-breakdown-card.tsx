@@ -6,7 +6,7 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 interface RegionBreakdownCardProps {
   regions?: RegionDemographics[];
   nationName?: string;
-  totalArea?: number;
+  totalPixels?: number;
   totalPopulation?: number;
   totalGdp?: number;
 }
@@ -14,7 +14,7 @@ interface RegionBreakdownCardProps {
 export function RegionBreakdownCard({
   regions,
   nationName = "این کشور",
-  totalArea = 0,
+  totalPixels = 0,
   totalPopulation = 0,
   totalGdp = 0,
 }: RegionBreakdownCardProps) {
@@ -25,8 +25,7 @@ export function RegionBreakdownCard({
           {
             regionId: 0,
             name: `خاک اصلی ${nationName}`,
-            pixelCount: 0,
-            areaSqKm: totalArea,
+            pixelCount: totalPixels,
             population: totalPopulation,
             gdp: totalGdp,
           },
@@ -49,8 +48,8 @@ export function RegionBreakdownCard({
 
       <div className="space-y-2.5 font-mono text-xs max-h-60 overflow-y-auto pr-1 scrollbar-thin">
         {effectiveRegions.map((reg) => {
-          const formattedArea = PersianNumberFormatter.toPersianDigits(
-            Math.round(reg.areaSqKm).toLocaleString("en-US"),
+          const formattedPixels = PersianNumberFormatter.toPersianDigits(
+            Math.round(reg.pixelCount).toLocaleString("en-US"),
           );
           const formattedPop = PersianNumberFormatter.formatCompactNumber(
             reg.population,
@@ -73,7 +72,7 @@ export function RegionBreakdownCard({
                   </span>
                 </div>
                 <span className="text-[10px] text-muted-foreground block font-sans">
-                  مساحت: {formattedArea} km²
+                  وسعت: {formattedPixels} پیکسل
                 </span>
               </div>
 

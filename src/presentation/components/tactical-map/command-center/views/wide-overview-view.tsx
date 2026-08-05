@@ -43,7 +43,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           flagCode={nation.flagCode}
           governmentType={nation.government.type}
           population={nation.population}
-          territorySize={nation.geography.territorySize}
+          territoryPixelCount={nation.geography.territoryPixelCount}
           rank={rank}
           regions={nation.regionsDemographics}
         />
@@ -79,7 +79,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         <RegionBreakdownCard
           regions={nation.regionsDemographics}
           nationName={nation.name}
-          totalArea={nation.geography.territorySize}
+          totalPixels={nation.geography.territoryPixelCount}
           totalPopulation={nation.population}
           totalGdp={effectiveGdp}
         />

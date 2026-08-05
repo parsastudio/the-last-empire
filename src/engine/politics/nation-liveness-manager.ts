@@ -9,7 +9,7 @@ export class NationLivenessManager {
         continue;
       }
 
-      const hasTerritory = nation.geography.territorySize > 0;
+      const hasTerritory = nation.geography.territoryPixelCount > 0;
       const hasPopulation = nation.population > 0;
 
       if (!hasTerritory || !hasPopulation) {

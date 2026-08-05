@@ -113,11 +113,11 @@ export function useHoverNationResolver({
       const realRank = liveNation ? liveNation.rank : 99;
 
       let regionLabel = "خاک اصلی";
-      let displayAreaKm2 = liveNation
-        ? liveNation.geography.territorySize
+      let displayPixelCount = liveNation
+        ? liveNation.geography.territoryPixelCount
         : profile
-          ? Math.round(profile.gdp / 1000000)
-          : 50000;
+          ? Math.round(profile.gdp / 10000000)
+          : 4000;
 
       if (liveNation && liveNation.regionsDemographics) {
         const matchedRegion = liveNation.regionsDemographics.find(
@@ -125,7 +125,7 @@ export function useHoverNationResolver({
         );
         if (matchedRegion) {
           regionLabel = matchedRegion.name;
-          displayAreaKm2 = matchedRegion.areaSqKm;
+          displayPixelCount = matchedRegion.pixelCount;
         } else if (enclaveIdVal > 0) {
           regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
         }
@@ -133,9 +133,9 @@ export function useHoverNationResolver({
         regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
       }
 
-      const formattedAreaText = `${PersianNumberFormatter.toPersianDigits(
-        Math.round(displayAreaKm2).toLocaleString("en-US"),
-      )} km²`;
+      const formattedPixelsText = `${PersianNumberFormatter.toPersianDigits(
+        Math.round(displayPixelCount).toLocaleString("en-US"),
+      )} پیکسل`;
 
       return {
         name: realName,
@@ -145,7 +145,7 @@ export function useHoverNationResolver({
         stance: stanceLabel,
         gdp: gdpFormatted,
         regionName: regionLabel,
-        regionArea: formattedAreaText,
+        regionPixels: formattedPixelsText,
       };
     },
     [profileCacheMap, nationsMap, humanNationId],
