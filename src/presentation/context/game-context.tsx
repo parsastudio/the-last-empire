@@ -18,7 +18,9 @@ interface GameContextType {
   advanceNextTurn: () => Promise<GameState | null>;
 }
 
-const GameContext = createContext<GameContextType | undefined>(undefined);
+export const GameContext = createContext<GameContextType | undefined>(
+  undefined,
+);
 
 export function GameProvider({
   gameId,

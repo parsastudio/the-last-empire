@@ -29,11 +29,12 @@ export class MarketEngine {
 
   public static calculateMaxAffordable(
     treasury: number,
-    _marketPrices: ResourceMarketPrice,
-    _resourceType: "oil" | "steel",
+    marketPrices: ResourceMarketPrice,
+    resourceType: "oil" | "steel",
   ): number {
     if (treasury <= 0) return 0;
-    return Math.floor(treasury / MARKET_CONFIG.FIXED_BUY_PRICE);
+    const price = marketPrices[resourceType] || MARKET_CONFIG.FIXED_BUY_PRICE;
+    return Math.floor(treasury / price);
   }
 
   public static predictSellRevenue(

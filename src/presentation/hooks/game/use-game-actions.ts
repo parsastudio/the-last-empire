@@ -1,23 +1,19 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useContext } from "react";
 import { useParams } from "next/navigation";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { ActionDispatcherService } from "@/presentation/services/action-dispatcher.service";
-import { useGameContext } from "@/presentation/context/game-context";
+import { GameContext } from "@/presentation/context/game-context";
 
 export function useGameActions(
   customGameId?: string,
   onActionExecuted?: (newState?: GameState) => void,
   currentState?: GameState | null,
 ) {
-  let context: ReturnType<typeof useGameContext> | undefined;
-  try {
-    context = useGameContext();
-  } catch {}
-
+  const gameContext = useContext(GameContext);
   const { showToast } = useToast();
   const params = useParams();
 
@@ -26,8 +22,8 @@ export function useGameActions(
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
-      if (context) {
-        return context.dispatchAction(action, onSuccessMessage);
+      if (gameContext) {
+        return gameContext.dispatchAction(action, onSuccessMessage);
       }
 
       const activeGameId =
@@ -61,7 +57,7 @@ export function useGameActions(
       return false;
     },
     [
-      context,
+      gameContext,
       customGameId,
       routeGameId,
       currentState,
