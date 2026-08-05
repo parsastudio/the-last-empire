@@ -37,7 +37,7 @@ export const ActiveModifierSchema = z.object({
 
 export const IsolatedPocketSchema = z.object({
   id: z.string(),
-  territorySize: z.number().nonnegative(),
+  pixelCount: z.number().nonnegative(),
   territoryIds: z.array(z.string()),
   coordinates: z.array(CoordinateSchema),
 });
@@ -46,9 +46,9 @@ export const GeographySchema = z.object({
   landNeighbors: z.array(z.string()),
   seaNeighbors: z.array(z.string()),
   hasSeaAccess: z.boolean(),
-  territorySize: z.number().nonnegative(),
+  territoryPixelCount: z.number().nonnegative(),
   infrastructureLevel: z.number().positive(),
-  contiguousMainlandSize: z.number().nonnegative(),
+  contiguousMainlandPixelCount: z.number().nonnegative(),
   isolatedPockets: z.array(IsolatedPocketSchema),
   coordinates: z.array(CoordinateSchema),
 });

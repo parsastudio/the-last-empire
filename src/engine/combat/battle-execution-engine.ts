@@ -57,17 +57,17 @@ export class BattleExecutionEngine {
       oilPrice,
     );
 
-    let actualConqueredArea = 0;
-    if (calcResult.isAttackerVictory && calcResult.conqueredAreaSqKm > 0) {
-      actualConqueredArea = this.facade.conquerAndRefreshed(
+    let actualConqueredPixels = 0;
+    if (calcResult.isAttackerVictory && calcResult.conqueredPixelsCount > 0) {
+      actualConqueredPixels = this.facade.conquerAndRefreshed(
         NationIdResolver.resolveNumericId(attacker.id),
         NationIdResolver.resolveNumericId(defender.id),
-        calcResult.conqueredAreaSqKm,
+        calcResult.conqueredPixelsCount,
       );
     }
 
     const isFullCapitulation =
-      actualConqueredArea >= defender.geography.territorySize;
+      actualConqueredPixels >= defender.geography.territoryPixelCount;
 
     const attackerTreasuryAfterDeployment =
       attacker.treasury - calcResult.deploymentMoneyCost;
@@ -175,7 +175,7 @@ export class BattleExecutionEngine {
     const reportSummary = calcResult.isAttackerVictory
       ? isFullCapitulation
         ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.${betrayalText}`
-        : `نیروهای ${attacker.name} با موفقیت توانستند مساحت ${actualConqueredArea.toLocaleString("fa-IR")} کیلومتر مربع از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.${betrayalText}`
+        : `نیروهای ${attacker.name} با موفقیت توانستند ${actualConqueredPixels.toLocaleString("fa-IR")} پیکسل از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.${betrayalText}`
       : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalText}`;
 
     const report: CombatReport = {
@@ -191,8 +191,8 @@ export class BattleExecutionEngine {
       defenderName: defender.name,
       attackerCasualties: calcResult.attackerCasualties,
       defenderCasualties: calcResult.defenderCasualties,
-      conqueredAreaSqKm: actualConqueredArea,
-      capitulatedAreaSqKm: isFullCapitulation ? actualConqueredArea : 0,
+      conqueredPixelsCount: actualConqueredPixels,
+      capitulatedPixelsCount: isFullCapitulation ? actualConqueredPixels : 0,
       strategicAssessment: `هزینه اعزام لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} + ${calcResult.deploymentOilCost.toLocaleString("fa-IR")} بلوک نفت | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
       isVictory: calcResult.isAttackerVictory,
     };

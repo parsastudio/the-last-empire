@@ -13,7 +13,7 @@ export interface FinalManifestNation {
   nameEn: string;
   gdp: number;
   population: number;
-  territorySize: number;
+  territoryPixelCount: number;
   startingTreasury: number;
   initialRank: number;
   powerScore: number;
@@ -44,10 +44,10 @@ export class FinalManifestBuilder {
 
     const rawNationsWithScores = activeProfiles.map((p: CountryProfile) => {
       const numericId = p.id ?? 0;
-      const measuredArea = pixelAreaMap.get(numericId) || 0;
-      const territorySize =
-        measuredArea > 0
-          ? Math.round(measuredArea)
+      const measuredPixels = pixelAreaMap.get(numericId) || 0;
+      const territoryPixelCount =
+        measuredPixels > 0
+          ? Math.round(measuredPixels)
           : Math.round(p.gdp / 10000000);
       const computedTreasury = Math.floor(p.gdp * 0.05);
 
@@ -64,7 +64,7 @@ export class FinalManifestBuilder {
       return {
         profile: p,
         numericId,
-        territorySize,
+        territoryPixelCount,
         powerScore: powerDetails.powerScore,
         computedTreasury,
       };
@@ -80,7 +80,7 @@ export class FinalManifestBuilder {
         item: {
           profile: CountryProfile;
           numericId: number;
-          territorySize: number;
+          territoryPixelCount: number;
           powerScore: number;
           computedTreasury: number;
         },
@@ -94,7 +94,7 @@ export class FinalManifestBuilder {
         nameEn: item.profile.nameEn,
         gdp: item.profile.gdp,
         population: item.profile.population,
-        territorySize: item.territorySize,
+        territoryPixelCount: item.territoryPixelCount,
         startingTreasury: item.computedTreasury,
         initialRank: index + 1,
         powerScore: item.powerScore,

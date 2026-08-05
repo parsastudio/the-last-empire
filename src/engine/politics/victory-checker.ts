@@ -32,14 +32,14 @@ export class ConquestVictoryChecker implements VictoryCondition {
     }
 
     const totalWorldTerritory = aliveNations.reduce(
-      (sum, n) => sum + (n.geography?.territorySize || 0),
+      (sum, n) => sum + (n.geography?.territoryPixelCount || 0),
       0,
     );
 
     if (totalWorldTerritory > 0) {
       for (const nation of aliveNations) {
         const territoryShare =
-          (nation.geography?.territorySize || 0) / totalWorldTerritory;
+          (nation.geography?.territoryPixelCount || 0) / totalWorldTerritory;
         if (territoryShare >= 0.8) {
           return {
             isGameOver: true,

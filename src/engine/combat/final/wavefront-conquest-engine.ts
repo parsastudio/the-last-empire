@@ -1,25 +1,20 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { CellAreaCalibrator } from "@/engine/combat/state/cell-area-calibrator";
 
 export interface ConquestExecutionResult {
   capturedPixelsCount: number;
-  capturedAreaSqKm: number;
   conquestCompleted: boolean;
 }
 
 export class WavefrontConquestEngine {
-  private calibrator = new CellAreaCalibrator(2048, 4096);
-
   public conquerTerritory(
     buffer: BitPackedBuffer,
     attackerNationId: number,
     defenderNationId: number,
-    targetAreaSqKm: number,
+    targetPixelsCount: number,
   ): ConquestExecutionResult {
-    if (targetAreaSqKm <= 0) {
+    if (targetPixelsCount <= 0) {
       return {
         capturedPixelsCount: 0,
-        capturedAreaSqKm: 0,
         conquestCompleted: false,
       };
     }
@@ -65,16 +60,14 @@ export class WavefrontConquestEngine {
     if (queueX.length === 0) {
       return {
         capturedPixelsCount: 0,
-        capturedAreaSqKm: 0,
         conquestCompleted: false,
       };
     }
 
     let capturedPixelsCount = 0;
-    let accumulatedAreaKm2 = 0;
     let head = 0;
 
-    while (head < queueX.length && accumulatedAreaKm2 < targetAreaSqKm) {
+    while (head < queueX.length && capturedPixelsCount < targetPixelsCount) {
       const cx = queueX[head]!;
       const cy = queueY[head]!;
       head++;
@@ -82,9 +75,6 @@ export class WavefrontConquestEngine {
       if (buffer.getNationId(cx, cy) === defenderNationId) {
         buffer.setNationId(cx, cy, attackerNationId);
         capturedPixelsCount++;
-
-        const pixelArea = this.calibrator.getCalibratedPixelArea(cy);
-        accumulatedAreaKm2 += pixelArea;
 
         for (let k = 0; k < 4; k++) {
           const nx = (cx + neighbors[k]!.dx + width) % width;
@@ -105,12 +95,9 @@ export class WavefrontConquestEngine {
       }
     }
 
-    const capturedAreaSqKm = Math.round(accumulatedAreaKm2);
-
     return {
       capturedPixelsCount,
-      capturedAreaSqKm,
-      conquestCompleted: capturedAreaSqKm >= targetAreaSqKm,
+      conquestCompleted: capturedPixelsCount >= targetPixelsCount,
     };
   }
 }
