@@ -11,7 +11,7 @@ export interface HoverCountryInfo {
   stance: string;
   gdp: string;
   regionName?: string;
-  regionArea?: string;
+  regionPixels?: string;
 }
 
 class HoverHudPositionCalculator {
@@ -99,7 +99,7 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
 
           <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
             <Users size={12} className="text-primary shrink-0" />
-            <span className="truncate">{hoverData.regionArea || "---"}</span>
+            <span className="truncate">{hoverData.regionPixels || "---"}</span>
           </div>
         </div>
 

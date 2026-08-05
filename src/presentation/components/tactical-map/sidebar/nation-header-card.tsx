@@ -14,7 +14,7 @@ interface NationHeaderCardProps {
   flagCode: string;
   governmentType: string;
   population: number;
-  territorySize?: number;
+  territoryPixelCount?: number;
   rank?: number;
   regions?: RegionDemographics[];
 }
@@ -25,23 +25,24 @@ export function NationHeaderCard({
   flagCode,
   governmentType,
   population,
-  territorySize,
+  territoryPixelCount,
   rank = 1,
 }: NationHeaderCardProps) {
   const formatted = useMemo(() => {
     const flagEmoji = getFlagEmoji(flagCode || code);
 
-    let realTerritory = territorySize && territorySize > 0 ? territorySize : 0;
-    if (!realTerritory) {
+    let realPixels =
+      territoryPixelCount && territoryPixelCount > 0 ? territoryPixelCount : 0;
+    if (!realPixels) {
       const numericId = parseInt(code.replace("NATION_", ""), 10);
       const profile = !isNaN(numericId)
         ? findCountryProfileById(numericId)
         : findCountryProfileByCode(code);
-      realTerritory = profile ? Math.round(profile.gdp / 1000000) : 377975;
+      realPixels = profile ? Math.round(profile.gdp / 10000000) : 4000;
     }
 
-    const formattedArea = PersianNumberFormatter.toPersianDigits(
-      Math.round(realTerritory).toLocaleString("en-US"),
+    const formattedPixels = PersianNumberFormatter.toPersianDigits(
+      Math.round(realPixels).toLocaleString("en-US"),
     );
 
     let realPop = population;
@@ -65,10 +66,10 @@ export function NationHeaderCard({
 
     return {
       flagEmoji,
-      formattedArea,
+      formattedPixels,
       formattedPopulation,
     };
-  }, [code, flagCode, population, territorySize]);
+  }, [code, flagCode, population, territoryPixelCount]);
 
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
@@ -112,10 +113,10 @@ export function NationHeaderCard({
         </div>
         <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
           <span className="text-[9px] text-muted-foreground block">
-            مساحت کل
+            وسعت قلمرو
           </span>
           <span className="text-xs font-bold text-foreground block font-mono">
-            {formatted.formattedArea} km²
+            {formatted.formattedPixels} پیکسل
           </span>
         </div>
       </div>

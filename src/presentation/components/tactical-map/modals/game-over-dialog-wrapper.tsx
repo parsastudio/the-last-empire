@@ -36,8 +36,10 @@ export function GameOverDialogWrapper({
     const finalPopNum = humanNation ? humanNation.population / 1e6 : 0;
     const finalPopulation = `${PersianNumberFormatter.toPersianDigits(finalPopNum.toFixed(1))}M نفر`;
 
-    const areaSqKm = humanNation ? humanNation.geography.territorySize : 0;
-    const conqueredArea = `${PersianNumberFormatter.toPersianDigits(areaSqKm.toLocaleString("en-US"))} km²`;
+    const pixelCount = humanNation
+      ? humanNation.geography.territoryPixelCount
+      : 0;
+    const conqueredPixels = `${PersianNumberFormatter.toPersianDigits(pixelCount.toLocaleString("en-US"))} پیکسل`;
 
     let reasonText = "پایان چرخه زمانی و استراتژیک کمپین";
     if (isVictory) {
@@ -52,7 +54,7 @@ export function GameOverDialogWrapper({
       turnsPlayed,
       finalGdp,
       finalPopulation,
-      conqueredArea,
+      conqueredPixels,
       reasonText,
     };
   }, [gameState]);
@@ -70,7 +72,7 @@ export function GameOverDialogWrapper({
       turnsPlayed={metrics.turnsPlayed}
       finalGdp={metrics.finalGdp}
       finalPopulation={metrics.finalPopulation}
-      conqueredArea={metrics.conqueredArea}
+      conqueredPixels={metrics.conqueredPixels}
       onRestart={() => router.push("/select-nation")}
     />
   );

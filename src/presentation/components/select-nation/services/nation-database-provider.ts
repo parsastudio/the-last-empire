@@ -47,11 +47,8 @@ export class NationDatabaseProvider {
   ): NationDetail[] {
     return manifestNations.map((item) => {
       const gdpText = PersianNumberFormatter.formatCurrency(item.gdp, true);
-      const areaText = PersianNumberFormatter.toPersianDigits(
-        item.territorySize.toLocaleString("en-US"),
-      );
 
-      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}، ساختار اقتصادی به ارزش ${gdpText} و مساحت ${areaText} km².`;
+      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank} و ساختار اقتصادی به ارزش ${gdpText}.`;
 
       return this.formatNationDetail(
         item.id,
