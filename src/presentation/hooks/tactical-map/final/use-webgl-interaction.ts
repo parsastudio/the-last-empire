@@ -47,6 +47,30 @@ export function useWebGLInteraction({
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
 
+  const [prevGestureState, setPrevGestureState] = useState({
+    posX: position.x,
+    posY: position.y,
+    scale,
+    isDragging,
+  });
+
+  if (
+    prevGestureState.posX !== position.x ||
+    prevGestureState.posY !== position.y ||
+    prevGestureState.scale !== scale ||
+    prevGestureState.isDragging !== isDragging
+  ) {
+    setPrevGestureState({
+      posX: position.x,
+      posY: position.y,
+      scale,
+      isDragging,
+    });
+    if (contextMenuState !== null) {
+      setContextMenuState(null);
+    }
+  }
+
   const { resolveHoverInfo } = useHoverNationResolver({
     countries,
     nationsMap,
