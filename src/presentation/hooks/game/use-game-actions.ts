@@ -1,70 +1,37 @@
 "use client";
 
-import { useCallback, useMemo, useContext } from "react";
-import { useParams } from "next/navigation";
+import { useCallback } from "react";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useToast } from "@/presentation/context/toast-context";
-import { ActionDispatcherService } from "@/presentation/services/action-dispatcher.service";
-import { GameContext } from "@/presentation/context/game-context";
+import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useGameActions(
-  customGameId?: string,
+  _customGameId?: string,
   onActionExecuted?: (newState?: GameState) => void,
-  currentState?: GameState | null,
 ) {
-  const gameContext = useContext(GameContext);
   const { showToast } = useToast();
-  const params = useParams();
-
-  const routeGameId = params?.gameId as string | undefined;
-  const dispatcher = useMemo(() => new ActionDispatcherService(), []);
+  const dispatchStoreAction = useGameStore((state) => state.dispatchAction);
 
   const dispatchAction = useCallback(
     async (action: GameAction, onSuccessMessage?: string): Promise<boolean> => {
-      if (gameContext) {
-        return gameContext.dispatchAction(action, onSuccessMessage);
-      }
+      const result = await dispatchStoreAction(action, onSuccessMessage);
 
-      const activeGameId =
-        customGameId ||
-        routeGameId ||
-        currentState?.gameId ||
-        action.nationId ||
-        "default_game";
-
-      const result = await dispatcher.dispatch(
-        action,
-        activeGameId,
-        currentState,
-      );
-
-      if (result.success && result.newState) {
+      if (result.success) {
         if (onSuccessMessage) {
-          showToast("دستور صادر شد", onSuccessMessage, "success");
+          showToast("دستور صادر شد", result.message, "success");
         }
         if (onActionExecuted) {
-          onActionExecuted(result.newState);
+          const currentGameState = useGameStore.getState().gameState;
+          onActionExecuted(currentGameState ?? undefined);
         }
         return true;
       }
 
-      showToast(
-        "خطا در اجرای دستور",
-        result.message || "امکان انجام این دستور وجود ندارد.",
-        "error",
-      );
+      showToast("خطا در اجرای دستور", result.message, "error");
       return false;
     },
-    [
-      gameContext,
-      customGameId,
-      routeGameId,
-      currentState,
-      dispatcher,
-      showToast,
-      onActionExecuted,
-    ],
+    [dispatchStoreAction, showToast, onActionExecuted],
   );
 
   return { dispatchAction };
