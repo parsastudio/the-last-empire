@@ -3,14 +3,11 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
-import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
-import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
 export class ActionDispatcherService {
   private storageAdapter = new GameStorageAdapter();
   private router = new ActionRouter();
   private validator = new StateValidator();
-  private saveQueue = AsyncSaveQueueService.getInstance();
 
   public async dispatch(
     action: GameAction,
@@ -20,9 +17,6 @@ export class ActionDispatcherService {
     const activeGameId = gameId || currentState?.gameId || "default_game";
 
     let effectiveState = currentState || null;
-    if (!effectiveState) {
-      effectiveState = CampaignSessionCache.get(activeGameId);
-    }
     if (!effectiveState) {
       effectiveState = await this.storageAdapter.loadGameState(activeGameId);
     }
@@ -40,8 +34,7 @@ export class ActionDispatcherService {
       this.validator.validateAction(effectiveState, action);
       const newState = this.router.route(effectiveState, action);
 
-      CampaignSessionCache.set(activeGameId, newState);
-      this.saveQueue.enqueueSave(activeGameId, newState, false);
+      await this.storageAdapter.saveGameState(activeGameId, newState);
 
       return {
         success: true,

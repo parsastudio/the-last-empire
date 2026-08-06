@@ -1,24 +1,20 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
-import { ClientGameService } from "@/presentation/services/client-game.service";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
-import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
-import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
+import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useBitPackedGame(gameId = "default_game") {
-  const [gameState, setGameState] = useState<GameState | null>(() => {
-    return CampaignSessionCache.get(gameId);
-  });
-  const [loading, setLoading] = useState<boolean>(() => {
-    return !CampaignSessionCache.has(gameId);
-  });
-  const [error, setError] = useState<string | null>(null);
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useGameStore((state) => state.loading);
+  const error = useGameStore((state) => state.error);
 
-  const gameService = useMemo(() => new ClientGameService(), []);
+  const setGameState = useGameStore((state) => state.setGameState);
+  const loadGame = useGameStore((state) => state.loadGame);
+  const advanceTurnAction = useGameStore((state) => state.advanceNextTurn);
+
   const storageAdapter = useMemo(() => new GameStorageAdapter(), []);
-  const saveQueue = useMemo(() => AsyncSaveQueueService.getInstance(), []);
 
   useEffect(() => {
     let active = true;
@@ -37,31 +33,10 @@ export function useBitPackedGame(gameId = "default_game") {
           await FinalStateLoader.loadLiveStateBuffer("map1");
         }
 
-        const cached = CampaignSessionCache.get(gameId);
-        if (cached) {
-          if (active) {
-            setGameState(cached);
-            setLoading(false);
-          }
-          return;
-        }
-
-        const res = await gameService.loadGameState(gameId);
         if (active) {
-          if (res.success && res.data) {
-            CampaignSessionCache.set(gameId, res.data);
-            setGameState(res.data);
-          } else {
-            setError(res.error || "خطا در بارگذاری استیت");
-          }
-          setLoading(false);
+          await loadGame(gameId);
         }
-      } catch {
-        if (active) {
-          setError("خطا در راه‌اندازی کمپین بازی");
-          setLoading(false);
-        }
-      }
+      } catch {}
     }
 
     init();
@@ -69,21 +44,16 @@ export function useBitPackedGame(gameId = "default_game") {
     return () => {
       active = false;
     };
-  }, [gameService, gameId, storageAdapter]);
+  }, [gameId, storageAdapter, loadGame]);
 
   const advanceNextTurn = useCallback(async (): Promise<GameState | null> => {
-    if (!gameState) return null;
-
-    const res = await gameService.advanceTurn(gameId, gameState);
-    if (res.success && res.data) {
-      CampaignSessionCache.set(gameId, res.data);
-      setGameState(res.data);
-      saveQueue.enqueueSave(gameId, res.data, true);
-      return res.data;
+    const nextState = await advanceTurnAction();
+    if (nextState) {
+      const gridState = BitPackedGridState.getInstance();
+      await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
     }
-
-    return null;
-  }, [gameState, gameService, saveQueue, gameId]);
+    return nextState;
+  }, [gameId, advanceTurnAction, storageAdapter]);
 
   return {
     gameState,

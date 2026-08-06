@@ -5,22 +5,14 @@ import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-a
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
-import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
-import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
 export class ClientGameService {
   private storageAdapter = new GameStorageAdapter();
   private aiInitializer = new GlobalAiInitializer();
-  private saveQueue = AsyncSaveQueueService.getInstance();
 
   public async loadGameState(
     gameId: string,
   ): Promise<{ success: boolean; data?: GameState; error?: string }> {
-    const cachedState = CampaignSessionCache.get(gameId);
-    if (cachedState) {
-      return { success: true, data: cachedState };
-    }
-
     try {
       const state = await this.storageAdapter.loadGameState(gameId);
       if (!state) {
@@ -42,8 +34,7 @@ export class ClientGameService {
     try {
       const engine = new GameEngine(currentState);
       const nextState = engine.nextTurn();
-      CampaignSessionCache.set(gameId, nextState);
-      this.saveQueue.enqueueSave(gameId, nextState, false);
+      await this.storageAdapter.saveGameState(gameId, nextState);
       return { success: true, data: nextState };
     } catch {
       return { success: false, error: "خطا در پیشبرد نوبت بازی." };
@@ -91,8 +82,7 @@ export class ClientGameService {
         turnLogs: [],
       };
 
-      CampaignSessionCache.set(gameId, initialState);
-      this.saveQueue.enqueueSave(gameId, initialState, true);
+      await this.storageAdapter.saveGameState(gameId, initialState);
       return { success: true, data: initialState };
     } catch {
       return { success: false, error: "خطا در ساخت کمپین جدید." };
