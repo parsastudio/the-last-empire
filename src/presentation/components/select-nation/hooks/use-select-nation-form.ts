@@ -7,7 +7,7 @@ import { useToast } from "@/presentation/context/toast-context";
 import { FinalMapManifest as MapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
-import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/services/nation-database-provider";
 
@@ -16,7 +16,7 @@ export function useSelectNationForm() {
   const { showToast } = useToast();
   const provider = useMemo(() => new NationDatabaseProvider(), []);
   const gameService = useMemo(() => new ClientGameService(), []);
-  const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
+  const storageAdapter = useMemo(() => new GameStorageAdapter(), []);
 
   const [manifest, setManifest] = useState<MapManifest | null>(null);
 
