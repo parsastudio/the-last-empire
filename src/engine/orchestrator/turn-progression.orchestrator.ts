@@ -6,8 +6,7 @@ import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packe
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
-import { ActionRouter } from "@/engine/actions/action-router";
-import { StateValidator } from "@/engine/validation/state-validator";
+import { ActionEngine } from "@/engine/actions/action-engine";
 
 export class TurnProgressionOrchestrator {
   private aiEngine = new AIEngine();
@@ -16,8 +15,6 @@ export class TurnProgressionOrchestrator {
   private turnOrchestrator = new BitPackedTurnOrchestrator();
   private livenessManager = new NationLivenessManager();
   private victoryChecker = new VictoryChecker();
-  private router = new ActionRouter();
-  private validator = new StateValidator();
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
     let nextState = state;
@@ -33,9 +30,9 @@ export class TurnProgressionOrchestrator {
     this.actionQueue.clear();
 
     for (const action of queuedActions) {
-      try {
-        this.validator.validateAction(nextState, action);
-        nextState = this.router.route(nextState, action);
+      const result = ActionEngine.execute(nextState, action);
+      if (result.success && result.newState) {
+        nextState = result.newState;
 
         const logEntry = TurnLogBuilder.createLogEntry(
           nextState.currentTurn,
@@ -47,7 +44,7 @@ export class TurnProgressionOrchestrator {
           ...nextState,
           turnLogs: [...nextState.turnLogs, logEntry],
         };
-      } catch {}
+      }
     }
 
     nextState = this.pipeline.processTurn(nextState, prng);

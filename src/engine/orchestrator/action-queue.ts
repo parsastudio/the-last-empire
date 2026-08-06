@@ -1,15 +1,53 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { StateValidator } from "@/engine/validation/state-validator";
+import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class ActionQueue {
   private queue: GameAction[] = [];
-  private validator = new StateValidator();
 
   public enqueue(state: GameState, action: GameAction): void {
-    this.validator.validateAction(state, action);
-    this.validator.verifyConcurrency(this.queue, action);
+    this.verifyConcurrency(action);
     this.queue.push(action);
+  }
+
+  private verifyConcurrency(newAction: GameAction): void {
+    const canonicalNewNationId = NationIdResolver.resolveCanonicalId(
+      newAction.nationId,
+    );
+
+    if (newAction.type === "REQUEST_LOAN") {
+      if (
+        this.queue.some((a) => {
+          const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+          return (
+            a.type === "REQUEST_LOAN" &&
+            (a.nationId === newAction.nationId || aId === canonicalNewNationId)
+          );
+        })
+      ) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "امکان دریافت چند وام در یک نوبت وجود ندارد.",
+        );
+      }
+    }
+
+    if (newAction.type === "TRADE_RESOURCES") {
+      const hasConflict = this.queue.some((a) => {
+        const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+        return (
+          a.type === "TRADE_RESOURCES" &&
+          (a.nationId === newAction.nationId || aId === canonicalNewNationId) &&
+          a.resourceType === newAction.resourceType
+        );
+      });
+      if (hasConflict) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "معامله این منبع قبلاً در این نوبت ثبت شده است.",
+        );
+      }
+    }
   }
 
   public getQueue(): readonly GameAction[] {

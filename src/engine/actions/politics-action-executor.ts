@@ -1,11 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
+import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-domain.service";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -23,6 +23,12 @@ export class PoliticsActionExecutor {
 
     switch (action.type) {
       case "SET_RESEARCH_BUDGET": {
+        if (action.newRate < 0 || action.newRate > 30) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "نرخ بودجه پژوهش باید بین ۰ تا ۳۰ درصد باشد.",
+          );
+        }
         const updatedNation = this.researchManager.setResearchBudget(
           nation,
           action.newRate,
@@ -39,7 +45,13 @@ export class PoliticsActionExecutor {
       case "ACTIVATE_ABILITY":
         return AbilityExecutor.execute(state, action);
 
-      case "UNLOCK_DOCTRINE":
+      case "UNLOCK_DOCTRINE": {
+        if (nation.doctrines.doctrinePoints < 3) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "امتیاز پژوهشی کافی برای آنلاک این دکترین وجود ندارد.",
+          );
+        }
         return {
           ...state,
           nations: {
@@ -56,8 +68,18 @@ export class PoliticsActionExecutor {
             },
           },
         };
+      }
 
       case "ANTI_CORRUPTION_DRIVE": {
+        if (action.amount <= 0) {
+          throw new GameError("INVALID_ACTION", "مبلغ بودجه باید مثبت باشد.");
+        }
+        if (nation.treasury < action.amount) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای طرح ضدفساد کافی نیست.",
+          );
+        }
         const reduction = CorruptionManager.calculateReduction(
           action.amount,
           nation.gdp,
@@ -81,7 +103,13 @@ export class PoliticsActionExecutor {
         };
       }
 
-      case "INVEST_DIPLOMACY":
+      case "INVEST_DIPLOMACY": {
+        if (action.amount <= 0) {
+          throw new GameError("INVALID_ACTION", "مبلغ بودجه باید مثبت باشد.");
+        }
+        if (nation.treasury < action.amount) {
+          throw new GameError("INSUFFICIENT_FUNDS", "موجودی خزانه کافی نیست.");
+        }
         return {
           ...state,
           nations: {
@@ -93,6 +121,7 @@ export class PoliticsActionExecutor {
             },
           },
         };
+      }
 
       case "CONFIGURE_AUTO_TRADE":
         return {
@@ -118,8 +147,18 @@ export class PoliticsActionExecutor {
         const target =
           state.nations[action.targetNationId] ||
           state.nations[canonicalTargetId];
-        if (!target) return state;
+        if (!target || !target.isAlive) {
+          throw new GameError("NATION_NOT_FOUND", "کشور هدف یافت نشد.");
+        }
         const targetKey = target.id;
+
+        const reqBudget = ProxyWarManager.calculateBudget(target.gdp, 2);
+        if (nation.treasury < reqBudget) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای اجرای عملیات نیابتی کافی نیست.",
+          );
+        }
 
         const drain = Math.max(
           1,
