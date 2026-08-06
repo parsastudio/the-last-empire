@@ -4,6 +4,7 @@ import { MAP_CONFIG } from "@/domain/map/map.config";
 export class BitPackedGridState {
   private static instance: BitPackedGridState | null = null;
   private buffer: BitPackedBuffer;
+  private activeGameId: string | null = null;
   private modifiedIndices = new Set<number>();
   private snapshots = new Map<string, Uint16Array>();
 
@@ -19,6 +20,17 @@ export class BitPackedGridState {
       BitPackedGridState.instance = new BitPackedGridState();
     }
     return BitPackedGridState.instance;
+  }
+
+  public getActiveGameId(): string | null {
+    return this.activeGameId;
+  }
+
+  public initializeSession(gameId: string): void {
+    if (this.activeGameId !== gameId) {
+      this.resetBuffer();
+      this.activeGameId = gameId;
+    }
   }
 
   public getBuffer(): BitPackedBuffer {
@@ -43,6 +55,7 @@ export class BitPackedGridState {
     raw.fill(0);
     this.clearModifiedIndices();
     this.snapshots.clear();
+    this.activeGameId = null;
   }
 
   public setNationId(x: number, y: number, nationId: number): void {
