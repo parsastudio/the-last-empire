@@ -1,5 +1,6 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { MAP_CONFIG } from "@/domain/map/map.config";
 
 export class FinalStateLoader {
   private static cachedBuffer: BitPackedBuffer | null = null;
@@ -19,7 +20,10 @@ export class FinalStateLoader {
         const binPath = path.join(finalDir, "live-state.bin");
         const fileBuffer = await fs.readFile(binPath);
 
-        const bitBuffer = new BitPackedBuffer(4096, 2048);
+        const bitBuffer = new BitPackedBuffer(
+          MAP_CONFIG.HIGH_RES_WIDTH,
+          MAP_CONFIG.HIGH_RES_HEIGHT,
+        );
         bitBuffer.loadArrayBuffer(
           fileBuffer.buffer.slice(
             fileBuffer.byteOffset,
@@ -38,7 +42,10 @@ export class FinalStateLoader {
       }
 
       const arrayBuf = await res.arrayBuffer();
-      const bitBuffer = new BitPackedBuffer(4096, 2048);
+      const bitBuffer = new BitPackedBuffer(
+        MAP_CONFIG.HIGH_RES_WIDTH,
+        MAP_CONFIG.HIGH_RES_HEIGHT,
+      );
       bitBuffer.loadArrayBuffer(arrayBuf);
 
       this.cachedBuffer = bitBuffer;

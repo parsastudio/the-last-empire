@@ -1,6 +1,7 @@
 import React from "react";
 import { LucideIcon } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 interface CommodityCardProps {
   title: string;
@@ -24,8 +25,8 @@ export function CommodityCard({
 }: CommodityCardProps) {
   const isOil = title.includes("نفت");
   const subLabel = isOil ? "(هر بلوک = ۱۰M بشکه)" : "(هر بلوک = ۱M تن)";
-  const buyPrice = currentPrice || 25000000;
-  const sellPrice = 20000000;
+  const buyPrice = currentPrice || MARKET_CONFIG.FIXED_BUY_PRICE;
+  const sellPrice = MARKET_CONFIG.FIXED_SELL_PRICE;
 
   return (
     <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">

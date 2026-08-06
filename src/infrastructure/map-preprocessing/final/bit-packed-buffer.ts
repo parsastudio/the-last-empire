@@ -1,11 +1,15 @@
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
+import { MAP_CONFIG } from "@/domain/map/map.config";
 
 export class BitPackedBuffer {
   private buffer: Uint16Array;
   private readonly width: number;
   private readonly height: number;
 
-  constructor(width = 4096, height = 2048) {
+  constructor(
+    width: number = MAP_CONFIG.HIGH_RES_WIDTH,
+    height: number = MAP_CONFIG.HIGH_RES_HEIGHT,
+  ) {
     this.width = width;
     this.height = height;
     this.buffer = new Uint16Array(width * height);
