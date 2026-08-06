@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { FinalMapPipeline } from "@/infrastructure/map-preprocessing/final/final-map-pipeline";
-import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export async function POST(): Promise<NextResponse> {
   try {
-    FinalStateLoader.clearCache();
+    ClientFinalStateLoader.clearCache();
     const pipeline = new FinalMapPipeline();
     const result = await pipeline.buildFinalAssets("map1", 4096, 2048);
-    FinalStateLoader.clearCache();
+    ClientFinalStateLoader.clearCache();
 
     return NextResponse.json({
       success: true,

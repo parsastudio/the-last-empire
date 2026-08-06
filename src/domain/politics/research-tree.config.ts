@@ -200,12 +200,3 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     magnitude: 30,
   },
 ];
-
-export const DEFAULT_DOCTRINES: Doctrine[] = COMPREHENSIVE_RESEARCH_TREE.map(
-  (node) => ({
-    id: node.id,
-    name: node.nameFa,
-    branch: node.branch,
-    cost: node.cost,
-  }),
-);
