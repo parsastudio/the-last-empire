@@ -1,11 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { MarketEngine } from "@/engine/economy/market-engine";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 import {
   IndustrialLevelManager,
   InfrastructureManager,
 } from "@/engine/economy/economy-domain.service";
+import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
@@ -18,6 +18,12 @@ export class EconomyActionExecutor {
 
     switch (action.type) {
       case "SET_TAX_RATE": {
+        if (action.newRate < 0 || action.newRate > 50) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "نرخ مالیات باید بین ۰ تا ۵۰ درصد باشد.",
+          );
+        }
         return {
           ...state,
           nations: {
@@ -30,7 +36,13 @@ export class EconomyActionExecutor {
         };
       }
 
-      case "SET_TARIFF_RATE":
+      case "SET_TARIFF_RATE": {
+        if (action.newRate < 0 || action.newRate > 100) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "نرخ تعرفه گمرک باید بین ۰ تا ۱۰۰ درصد باشد.",
+          );
+        }
         return {
           ...state,
           nations: {
@@ -38,8 +50,23 @@ export class EconomyActionExecutor {
             [nation.id]: { ...nation, tariffRate: action.newRate },
           },
         };
+      }
 
       case "REQUEST_LOAN": {
+        if (action.amount <= 0) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "مبلغ وام باید بزرگتر از صفر باشد.",
+          );
+        }
+        if (
+          nation.activeModifiers.some((m) => m.id === "bankruptcy-debt-holiday")
+        ) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "امکان دریافت وام در دوره تجدید ساختار ورشکستگی وجود ندارد.",
+          );
+        }
         return {
           ...state,
           nations: {
@@ -54,6 +81,18 @@ export class EconomyActionExecutor {
       }
 
       case "REPAY_DEBT": {
+        if (action.amount <= 0) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "مبلغ تسویه باید بزرگتر از صفر باشد.",
+          );
+        }
+        if (nation.nationalDebt <= 0) {
+          throw new GameError("INVALID_ACTION", "هیچ بدهی معوقی وجود ندارد.");
+        }
+        if (nation.treasury < action.amount) {
+          throw new GameError("INSUFFICIENT_FUNDS", "موجودی خزانه کافی نیست.");
+        }
         const repayAmount = Math.min(action.amount, nation.nationalDebt);
         return {
           ...state,
@@ -70,7 +109,12 @@ export class EconomyActionExecutor {
 
       case "INVEST_INFRASTRUCTURE": {
         const cost = InfrastructureManager.getUpgradeCost(nation);
-        if (nation.treasury < cost) return state;
+        if (nation.treasury < cost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای ارتقای زیرساخت کافی نیست.",
+          );
+        }
         return {
           ...state,
           nations: {
@@ -90,7 +134,12 @@ export class EconomyActionExecutor {
 
       case "UPGRADE_INDUSTRIAL_LEVEL": {
         const cost = IndustrialLevelManager.getUpgradeCost(nation);
-        if (nation.treasury < cost) return state;
+        if (nation.treasury < cost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای ارتقای سطح صنعت کافی نیست.",
+          );
+        }
         return {
           ...state,
           nations: {
@@ -105,6 +154,12 @@ export class EconomyActionExecutor {
       }
 
       case "TRADE_RESOURCES": {
+        if (action.amount <= 0) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "تعداد معامله باید بزرگتر از صفر باشد.",
+          );
+        }
         const res = action.isBuy
           ? MarketEngine.buyResource(
               nation,

@@ -2,15 +2,12 @@ import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { deepClone, SeededRandom } from "@/domain/shared/domain-utilities";
 import { StateHistory } from "@/application/state-history";
-import { StateValidator } from "@/engine/validation/state-validator";
-import { ActionRouter } from "@/engine/actions/action-router";
 import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
+import { ActionEngine } from "@/engine/actions/action-engine";
 
 export class GameEngine {
   private currentState: GameState;
   private stateHistory = new StateHistory();
-  private validator = new StateValidator();
-  private router = new ActionRouter();
   private progressionOrchestrator = new TurnProgressionOrchestrator();
   private prng: SeededRandom;
 
@@ -26,36 +23,13 @@ export class GameEngine {
   }
 
   public dispatchAction(action: GameAction): ActionResult {
-    if (this.currentState.isGameOver) {
-      return {
-        success: false,
-        actionId: action.id,
-        message: "دستور رد شد: بازی به پایان رسیده است.",
-        error: "GAME_OVER",
-      };
+    const result = ActionEngine.execute(this.currentState, action);
+
+    if (result.success && result.newState) {
+      this.currentState = deepClone(result.newState);
     }
 
-    try {
-      this.validator.validateAction(this.currentState, action);
-      const routedState = this.router.route(this.currentState, action);
-      this.currentState = deepClone(routedState);
-
-      return {
-        success: true,
-        actionId: action.id,
-        message: "دستور با موفقیت صادر شد.",
-        newState: this.currentState,
-      };
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "خطا در اجرای دستور";
-      return {
-        success: false,
-        actionId: action.id,
-        message: errorMessage,
-        error: "INVALID_ACTION",
-      };
-    }
+    return result;
   }
 
   public nextTurn(): GameState {

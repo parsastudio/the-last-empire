@@ -2,9 +2,10 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { ActionDispatcherService } from "@/presentation/services/action-dispatcher.service";
+import { ActionEngine } from "@/engine/actions/action-engine";
 import { ClientGameService } from "@/presentation/services/client-game.service";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -27,8 +28,8 @@ interface GameStoreState {
   advanceNextTurn: () => Promise<GameState | null>;
 }
 
-const dispatcher = new ActionDispatcherService();
 const gameService = new ClientGameService();
+const storageAdapter = new GameStorageAdapter();
 
 export const useGameStore = create<GameStoreState>()(
   immer((set, get) => ({
@@ -97,23 +98,25 @@ export const useGameStore = create<GameStoreState>()(
 
     dispatchAction: async (action, onSuccessMessage) => {
       const { activeGameId, gameState } = get();
-      const effectiveGameId = action.nationId
-        ? activeGameId
-        : (gameState?.gameId ?? activeGameId);
+      if (!gameState) {
+        return {
+          success: false,
+          message: "اطلاعات پرونده بازی یافت نشد.",
+        };
+      }
 
-      const result = await dispatcher.dispatch(
-        action,
-        effectiveGameId,
-        gameState,
-      );
+      const result = ActionEngine.execute(gameState, action);
 
       if (result.success && result.newState) {
         set((draft) => {
           draft.gameState = result.newState ?? null;
         });
+
+        await storageAdapter.saveGameState(activeGameId, result.newState);
+
         return {
           success: true,
-          message: onSuccessMessage ?? "دستور با موفقیت صادر شد.",
+          message: onSuccessMessage ?? result.message,
         };
       }
 
