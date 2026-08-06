@@ -14,7 +14,7 @@ export class ClientFinalStateLoader {
 
     try {
       const url = MapPathResolver.getMapFinalClientUrl(mapId, "live-state.bin");
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "force-cache" });
 
       if (!res.ok) {
         return null;

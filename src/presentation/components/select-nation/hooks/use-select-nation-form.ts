@@ -25,9 +25,11 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const res = await fetch("/api/map-preprocessing/final-manifest");
+        const res = await fetch("/maps/map1/temp/final/manifest.json", {
+          cache: "force-cache",
+        });
         if (res.ok) {
-          const json = await res.json();
+          const json = (await res.json()) as MapManifest;
           if (active && json.nations) {
             setManifest(json);
           }
