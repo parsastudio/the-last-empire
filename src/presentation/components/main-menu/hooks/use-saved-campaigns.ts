@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
-import { StateSerializer } from "@/infrastructure/storage/state-serializer";
 
 export interface SavedCampaignMeta {
   id: string;
@@ -18,34 +17,28 @@ export function useSavedCampaigns() {
   const loadSavesFromDb = useCallback(async () => {
     try {
       const adapter = new GameStorageAdapter();
-      const serializer = new StateSerializer();
       const records = await adapter.getAllSaves();
 
       const mapped: SavedCampaignMeta[] = [];
 
       for (const rec of records) {
-        if (rec.gameId === "active_game" || typeof rec.data !== "string")
-          continue;
-        try {
-          const state = serializer.deserialize(rec.data);
-          const humanNation = state.nations[state.humanNationId];
-          const nationName = humanNation
-            ? humanNation.name
-            : state.humanNationId;
-          const saveDate = new Date(rec.timestamp);
+        if (rec.gameId === "active_game") continue;
+        const state = rec.state;
+        const humanNation = state.nations[state.humanNationId];
+        const nationName = humanNation ? humanNation.name : state.humanNationId;
+        const saveDate = new Date(rec.timestamp);
 
-          mapped.push({
-            id: state.gameId,
-            title: `کمپین ${state.gameId} - ${nationName}`,
-            turn: state.currentTurn,
-            date: saveDate.toLocaleDateString("fa-IR"),
-            time: saveDate.toLocaleTimeString("fa-IR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            humanNationId: state.humanNationId,
-          });
-        } catch {}
+        mapped.push({
+          id: state.gameId,
+          title: `کمپین ${state.gameId} - ${nationName}`,
+          turn: state.currentTurn,
+          date: saveDate.toLocaleDateString("fa-IR"),
+          time: saveDate.toLocaleTimeString("fa-IR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          humanNationId: state.humanNationId,
+        });
       }
 
       setSaves(mapped);
