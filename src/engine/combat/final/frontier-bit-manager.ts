@@ -40,7 +40,7 @@ export class FrontierBitManager {
           }
         }
 
-        buffer.setFrontier(x, y, isFrontier);
+        buffer.setFrontier(x, y, 0);
         if (isFrontier === 1) {
           frontierCount++;
         }
@@ -64,7 +64,21 @@ export class FrontierBitManager {
       { dx: 0, dy: -1 },
     ];
 
+    const affectedIndices = new Set<number>();
     for (const idx of modifiedIndices) {
+      affectedIndices.add(idx);
+      const x = idx % width;
+      const y = Math.floor(idx / width);
+      for (let k = 0; k < 4; k++) {
+        const nx = (x + neighbors[k]!.dx + width) % width;
+        const ny = y + neighbors[k]!.dy;
+        if (ny >= 0 && ny < height) {
+          affectedIndices.add(ny * width + nx);
+        }
+      }
+    }
+
+    for (const idx of affectedIndices) {
       const x = idx % width;
       const y = Math.floor(idx / width);
 
