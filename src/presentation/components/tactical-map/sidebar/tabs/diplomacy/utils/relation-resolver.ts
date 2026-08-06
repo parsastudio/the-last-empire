@@ -7,8 +7,6 @@ import { CountryProfileData } from "@/presentation/components/tactical-map/sideb
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { PowerScoreCalculator } from "@/engine/diplomacy/diplomacy-domain.service";
-import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 export interface DiplomaticRelation {
   code: string;
@@ -21,8 +19,6 @@ export interface DiplomaticRelation {
   isTradeEmbargoed?: boolean;
   profileData: CountryProfileData;
 }
-
-const powerCalculator = new PowerScoreCalculator();
 
 export function getQualitativeOpinionLabel(opinion: number): string {
   if (opinion >= 60) return "بسیار دوستانه";
@@ -85,21 +81,6 @@ export function resolveProfileRelation(
       ? liveNation.flagCode
       : code;
 
-  const govType = liveNation
-    ? liveNation.government.type
-    : (profile?.startingGovernment ?? "DEMOCRACY");
-
-  const summary = NationPresentationMapper.formatNationSummary(
-    displayCode,
-    name,
-    displayCode,
-    flagCode,
-    liveNation ? liveNation.rank : 99,
-    realGdpNum,
-    realPopNum,
-    govType,
-  );
-
   const infantry = liveNation
     ? liveNation.military.infantry
     : (profile?.startingInfantry ?? 50);
@@ -109,27 +90,23 @@ export function resolveProfileRelation(
   const drone = liveNation ? liveNation.military.droneMissile : 0;
   const techLevel = liveNation ? liveNation.military.techLevel : 1;
 
-  const militaryPower = powerCalculator.calculateMilitaryScore(
-    infantry,
-    airForce,
-    drone,
-    techLevel,
-  );
+  const basePower = infantry * 1.0 + airForce * 3.0 + drone * 2.5;
+  const militaryPower = basePower * (1 + (techLevel - 1) * 0.2);
 
   return {
-    code: summary.code,
-    name: summary.name,
-    flagCode: summary.flagCode,
-    rank: summary.rank,
+    code: displayCode.toUpperCase(),
+    name,
+    flagCode: flagCode.toUpperCase(),
+    rank: liveNation ? liveNation.rank : 99,
     stance: "NORMAL_DIPLOMACY",
     opinion: 0,
     isTradeEmbargoed: false,
-    description: `شناسنامه رسمی و آمار دفتری کشور ${summary.name}.`,
+    description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
     profileData: {
-      gdp: summary.gdpText,
-      population: summary.populationText,
+      gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
+      population: `${PersianNumberFormatter.toPersianDigits((realPopNum / 1e6).toFixed(1))} میلیون نفر`,
       techLevel,
-      governmentType: summary.governmentLabel,
+      governmentType: liveNation ? liveNation.government.type : "DEMOCRACY",
       stability: liveNation ? liveNation.government.stability : 80,
       corruption: liveNation ? liveNation.government.corruption : 10,
       militaryStrength: `${PersianNumberFormatter.toPersianDigits(Math.round(militaryPower).toLocaleString("en-US"))} یگان`,

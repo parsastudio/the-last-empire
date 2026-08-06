@@ -2,10 +2,7 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { ActionEngine } from "@/engine/actions/action-engine";
 import { ClientGameService } from "@/presentation/services/client-game.service";
-import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
-import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -19,7 +16,7 @@ interface GameStoreState {
     nationId: string,
     governmentType: string,
     gameId: string,
-    manifest?: FinalMapManifest | null,
+    manifest?: Parameters<ClientGameService["createCampaign"]>[3],
   ) => Promise<boolean>;
   dispatchAction: (
     action: GameAction,
@@ -29,7 +26,6 @@ interface GameStoreState {
 }
 
 const gameService = new ClientGameService();
-const storageAdapter = new GameStorageAdapter();
 
 export const useGameStore = create<GameStoreState>()(
   immer((set, get) => ({
@@ -105,18 +101,21 @@ export const useGameStore = create<GameStoreState>()(
         };
       }
 
-      const result = ActionEngine.execute(gameState, action);
+      const result = await gameService.dispatchAction(
+        activeGameId,
+        gameState,
+        action,
+        onSuccessMessage,
+      );
 
       if (result.success && result.newState) {
         set((draft) => {
           draft.gameState = result.newState ?? null;
         });
 
-        await storageAdapter.saveGameState(activeGameId, result.newState);
-
         return {
           success: true,
-          message: onSuccessMessage ?? result.message,
+          message: result.message,
         };
       }
 

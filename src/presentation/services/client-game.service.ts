@@ -1,5 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
+import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameEngine } from "@/engine/game-engine";
+import { ActionEngine } from "@/engine/actions/action-engine";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
@@ -39,6 +41,25 @@ export class ClientGameService {
     } catch {
       return { success: false, error: "خطا در پیشبرد نوبت بازی." };
     }
+  }
+
+  public async dispatchAction(
+    gameId: string,
+    currentState: GameState,
+    action: GameAction,
+    onSuccessMessage?: string,
+  ): Promise<ActionResult> {
+    const result = ActionEngine.execute(currentState, action);
+    if (result.success && result.newState) {
+      await this.storageAdapter.saveGameState(gameId, result.newState);
+      if (onSuccessMessage) {
+        return {
+          ...result,
+          message: onSuccessMessage,
+        };
+      }
+    }
+    return result;
   }
 
   public async createCampaign(
