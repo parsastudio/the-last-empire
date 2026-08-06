@@ -9,8 +9,6 @@ import {
   FinalManifestNation,
 } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
-import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class ManifestFileLoader {
   public loadManifest(mapId = "map1"): MapManifest | null {
@@ -30,35 +28,11 @@ export class ManifestFileLoader {
 export class GameStateInitializer {
   private aiInitializer = new GlobalAiInitializer();
   private manifestLoader = new ManifestFileLoader();
-  private bitFacade = new BitPackedStateFacade();
 
   public initializeSimulationForNation(
     nationId: string,
     governmentType?: string,
   ): GameState {
-    const gridState = BitPackedGridState.getInstance();
-    const raw = gridState.getBuffer().getRawBuffer();
-
-    if (raw[1000] === 0) {
-      try {
-        const binPath = path.join(
-          MapPathResolver.getMapFinalServerDir("map1"),
-          "live-state.bin",
-        );
-        if (fs.existsSync(binPath)) {
-          const fileBuf = fs.readFileSync(binPath);
-          gridState
-            .getBuffer()
-            .loadArrayBuffer(
-              fileBuf.buffer.slice(
-                fileBuf.byteOffset,
-                fileBuf.byteOffset + fileBuf.byteLength,
-              ),
-            );
-        }
-      } catch {}
-    }
-
     const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
     const manifest = this.manifestLoader.loadManifest("map1");
 
@@ -77,7 +51,7 @@ export class GameStateInitializer {
       manifest,
     );
 
-    const baseState: GameState = {
+    return {
       gameId: `game_${normalizedHumanId}_${Date.now()}`,
       currentTurn: 1,
       seed: 554422,
@@ -88,7 +62,5 @@ export class GameStateInitializer {
       nations: populatedNations,
       turnLogs: [],
     };
-
-    return this.bitFacade.syncGameState(baseState);
   }
 }
