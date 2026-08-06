@@ -1,7 +1,7 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { GameState } from "@/domain/game/game-state.schema";
-import { useNavigationQueryState } from "@/presentation/components/tactical-map/navigation/hooks/use-navigation-query-state";
+import { useUiStore } from "@/presentation/stores/use-ui-store";
 
 export function useSidebarTurnActions(
   externalActiveTab?: SidebarTabType | null,
@@ -9,15 +9,13 @@ export function useSidebarTurnActions(
   overrideGameState?: GameState | null,
   overrideAdvanceNextTurn?: () => Promise<GameState | null>,
 ) {
-  const queryState = useNavigationQueryState();
-  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
-  const [isProcessingTurn, setIsProcessingTurn] = useState<boolean>(false);
+  const uiStore = useUiStore();
 
   const gameState = overrideGameState ?? null;
 
-  const activeTab = externalActiveTab ?? queryState.activeTab;
-  const activeSubTab = queryState.activeSubTab;
-  const selectedTargetCode = queryState.activeTarget;
+  const activeTab = externalActiveTab ?? uiStore.activeTab;
+  const activeSubTab = uiStore.activeSubTab;
+  const selectedTargetCode = uiStore.selectedTargetCode;
 
   const humanNation =
     gameState && gameState.humanNationId
@@ -27,57 +25,47 @@ export function useSidebarTurnActions(
   const currentTurn = gameState ? gameState.currentTurn : 1;
 
   const handleNextTurn = useCallback(async () => {
-    if (isProcessingTurn || !overrideAdvanceNextTurn) return;
-
-    try {
-      setIsProcessingTurn(true);
-      await overrideAdvanceNextTurn();
-    } finally {
-      setIsProcessingTurn(false);
-    }
-  }, [isProcessingTurn, overrideAdvanceNextTurn]);
+    if (!overrideAdvanceNextTurn) return;
+    await overrideAdvanceNextTurn();
+  }, [overrideAdvanceNextTurn]);
 
   const setInternalActiveTab = useCallback(
     (tab: SidebarTabType | null) => {
-      if (tab) {
-        queryState.navigateToTab(tab);
-      } else {
-        queryState.clearNavigation();
-      }
+      uiStore.setActiveTab(tab);
       if (onClearExternalTab) {
         onClearExternalTab();
       }
     },
-    [queryState, onClearExternalTab],
+    [uiStore, onClearExternalTab],
   );
 
   const handleNavigateTab = useCallback(
     (tab: SidebarTabType, subTab?: string, targetCode?: string) => {
-      queryState.navigateToTab(tab, subTab, targetCode);
+      uiStore.setActiveTab(tab, subTab, targetCode);
       if (onClearExternalTab) {
         onClearExternalTab();
       }
     },
-    [queryState, onClearExternalTab],
+    [uiStore, onClearExternalTab],
   );
 
   const handleCloseActiveModal = useCallback(() => {
-    queryState.clearNavigation();
+    uiStore.closeActiveTab();
     if (onClearExternalTab) {
       onClearExternalTab();
     }
-  }, [queryState, onClearExternalTab]);
+  }, [uiStore, onClearExternalTab]);
 
   return {
     activeTab,
     activeSubTab,
     selectedTargetCode,
-    isRailCollapsed,
-    isProcessingTurn,
+    isRailCollapsed: uiStore.isRailCollapsed,
+    isProcessingTurn: false,
     humanNation,
     gameState,
     currentTurn,
-    setIsRailCollapsed,
+    setIsRailCollapsed: uiStore.setIsRailCollapsed,
     setInternalActiveTab,
     handleNavigateTab,
     handleCloseActiveModal,
