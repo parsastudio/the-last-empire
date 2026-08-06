@@ -1,0 +1,209 @@
+import { CountryProfile } from "@/domain/data/countries/profile.type";
+import { africaProfiles } from "@/domain/data/countries/africa";
+import { americasProfiles } from "@/domain/data/countries/americas";
+import { asiaWestProfiles } from "@/domain/data/countries/asia-west";
+import { asiaEastProfiles } from "@/domain/data/countries/asia-east";
+import { europeWestProfiles } from "@/domain/data/countries/europe-west";
+import { europeEastProfiles } from "@/domain/data/countries/europe-east";
+import { oceaniaProfiles } from "@/domain/data/countries/oceania";
+
+const ID_MAPPING: Record<string, number> = {
+  TZA: 12,
+  SAH: 13,
+  COD: 22,
+  KEN: 24,
+  ZAF: 36,
+  NGA: 67,
+  CMR: 68,
+  BFA: 76,
+  MDG: 89,
+  DZA: 93,
+  MAR: 172,
+  EGY: 173,
+  LBY: 174,
+  ETH: 175,
+  DJI: 176,
+  SOL: 177,
+  SDS: 186,
+  CAN: 14,
+  USA: 15,
+  ARG: 20,
+  CHL: 21,
+  FLK: 31,
+  GRL: 33,
+  MEX: 38,
+  BRA: 40,
+  BOL: 41,
+  PER: 42,
+  COL: 43,
+  GTM: 49,
+  PAN: 50,
+  VEN: 51,
+  ECU: 55,
+  CUB: 58,
+  TTO: 185,
+  KAZ: 16,
+  UZB: 17,
+  MNG: 108,
+  TJK: 115,
+  KGZ: 116,
+  TKM: 117,
+  ISR: 87,
+  LBN: 88,
+  JOR: 94,
+  ARE: 95,
+  QAT: 96,
+  KWT: 97,
+  IRQ: 98,
+  OMN: 99,
+  IRN: 118,
+  SYR: 119,
+  YEM: 168,
+  SAU: 169,
+  CYN: 170,
+  CYP: 171,
+  ARM: 120,
+  AZE: 156,
+  PRK: 106,
+  KOR: 107,
+  CHN: 150,
+  TWN: 151,
+  JPN: 166,
+  IND: 109,
+  BGD: 110,
+  PAK: 113,
+  AFG: 114,
+  LKA: 149,
+  IDN: 19,
+  THA: 102,
+  VNM: 105,
+  PHL: 158,
+  MYS: 159,
+  RUS: 29,
+  BLR: 122,
+  UKR: 123,
+  POL: 124,
+  HUN: 126,
+  ROU: 128,
+  BGR: 133,
+  SVK: 163,
+  CZE: 164,
+  NOR: 32,
+  SWE: 121,
+  IRL: 144,
+  DNK: 153,
+  GBR: 154,
+  ISL: 155,
+  FIN: 162,
+  GRC: 134,
+  TUR: 135,
+  HRV: 137,
+  PRT: 142,
+  ESP: 143,
+  ITA: 152,
+  SRB: 182,
+  KOS: 184,
+  FRA: 54,
+  AUT: 125,
+  DEU: 132,
+  CHE: 138,
+  BEL: 140,
+  NLD: 141,
+  ATF: 34,
+  NZL: 147,
+  AUS: 148,
+};
+
+const rawProfiles: CountryProfile[] = [
+  ...africaProfiles,
+  ...americasProfiles,
+  ...asiaWestProfiles,
+  ...asiaEastProfiles,
+  ...europeWestProfiles,
+  ...europeEastProfiles,
+  ...oceaniaProfiles,
+];
+
+export const ALL_COUNTRY_PROFILES: CountryProfile[] = rawProfiles.map((p) => ({
+  ...p,
+  id: p.id ?? ID_MAPPING[p.code] ?? 0,
+}));
+
+export class CountryRegistry {
+  private static readonly byNumericId = new Map<number, CountryProfile>();
+  private static readonly byCode = new Map<string, CountryProfile>();
+  private static readonly byCanonicalId = new Map<string, CountryProfile>();
+
+  static {
+    for (const profile of ALL_COUNTRY_PROFILES) {
+      if (profile.id) {
+        this.byNumericId.set(profile.id, profile);
+      }
+      const iso3 = profile.code.toUpperCase();
+      this.byCode.set(iso3, profile);
+      if (profile.flagCode) {
+        this.byCode.set(profile.flagCode.toUpperCase(), profile);
+      }
+      const canonical = `NATION_${iso3}`;
+      this.byCanonicalId.set(canonical, profile);
+    }
+  }
+
+  public static getCountry(
+    identifier: string | number,
+  ): CountryProfile | undefined {
+    if (identifier === null || identifier === undefined || identifier === "") {
+      return undefined;
+    }
+
+    if (typeof identifier === "number") {
+      return this.byNumericId.get(identifier);
+    }
+
+    const clean = identifier.toString().trim().toUpperCase();
+
+    const canonicalMatch = this.byCanonicalId.get(clean);
+    if (canonicalMatch) return canonicalMatch;
+
+    const codeMatch = this.byCode.get(clean);
+    if (codeMatch) return codeMatch;
+
+    const rawNum = clean.replace("NATION_", "");
+    const parsedNum = parseInt(rawNum, 10);
+    if (!isNaN(parsedNum)) {
+      const numMatch = this.byNumericId.get(parsedNum);
+      if (numMatch) return numMatch;
+    }
+
+    return undefined;
+  }
+
+  public static resolveCanonicalId(identifier: string | number): string {
+    const profile = this.getCountry(identifier);
+    if (profile) {
+      return `NATION_${profile.code.toUpperCase()}`;
+    }
+    const clean = identifier.toString().trim().toUpperCase();
+    if (clean.startsWith("NATION_")) {
+      return clean;
+    }
+    return `NATION_${clean}`;
+  }
+
+  public static resolveNumericId(identifier: string | number): number {
+    if (typeof identifier === "number") {
+      return identifier;
+    }
+    const profile = this.getCountry(identifier);
+    if (profile && profile.id) {
+      return profile.id;
+    }
+    const clean = identifier
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace("NATION_", "");
+    const parsed = parseInt(clean, 10);
+    return isNaN(parsed) ? 0 : parsed;
+  }
+}
