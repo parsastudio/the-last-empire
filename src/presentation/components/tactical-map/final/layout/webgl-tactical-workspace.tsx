@@ -10,7 +10,6 @@ import { WebGLMapCanvas } from "@/presentation/components/tactical-map/final/web
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";
 import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
-import { StrategicToastContainer } from "@/presentation/components/common/strategic-toast-container";
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
 import {
@@ -52,7 +51,7 @@ function TacticalWorkspaceContent({
     id: p.id ?? 0,
     code: p.code,
     name: p.nameFa,
-    color: [0, 0, p.id ?? 0] as [number, number, number],
+    color: [0, 0, 0] as [number, number, number],
   }));
 
   const humanNation =
@@ -102,7 +101,6 @@ function TacticalWorkspaceContent({
 
       <TopHudBar metrics={metrics} />
 
-      <StrategicToastContainer />
       <GameOverDialogWrapper gameState={effectiveGameState} />
 
       <LayerController

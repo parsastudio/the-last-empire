@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { Trophy, RefreshCw, Award, Globe2, Coins, Users } from "lucide-react";
 import confetti from "canvas-confetti";
+import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 
 function VictoryStatsCard({
   turnsPlayed,
@@ -92,8 +93,18 @@ export function GameOverModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl flex items-center justify-center p-4 z-50 animate-fade-smooth">
-      <div className="bg-card/95 border border-border/80 w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5 text-right dir-rtl border-t-amber-500/40">
+    <UnifiedModalShell
+      isOpen={isOpen}
+      title={isVictory ? "پیروزی مطلق امپراتوری!" : "شکست و سقوط حاکمیت"}
+      subtitle={
+        isVictory
+          ? `امپراتوری ${winnerName} با موفقیت توانست بر مقدرات جهانی مسلط شود.`
+          : "کشور شما تحت فشار بحران‌های داخلی یا نظامی فروپاشید."
+      }
+      maxWidthClass="max-w-md"
+      onClose={onRestart}
+    >
+      <div className="space-y-5 text-right dir-rtl font-sans">
         <div className="flex flex-col items-center justify-center gap-2.5 text-center">
           <div
             className={`w-16 h-16 rounded-2xl flex items-center justify-center border shadow-xl ${
@@ -104,14 +115,6 @@ export function GameOverModal({
           >
             <Trophy size={32} />
           </div>
-          <h2 className="text-xl font-black text-foreground">
-            {isVictory ? "پیروزی مطلق امپراتوری!" : "شکست و سقوط حاکمیت"}
-          </h2>
-          <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-            {isVictory
-              ? `امپراتوری ${winnerName} با موفقیت توانست بر مقدرات جهانی مسلط شود.`
-              : `کشور شما تحت فشار بحران‌های داخلی یا نظامی فروپاشید.`}
-          </p>
         </div>
 
         <div className="bg-secondary/40 p-3.5 rounded-2xl border border-border/60 text-[11px] text-muted-foreground leading-relaxed font-sans">
@@ -134,6 +137,6 @@ export function GameOverModal({
           <span>شروع کمپین جدید</span>
         </button>
       </div>
-    </div>
+    </UnifiedModalShell>
   );
 }
