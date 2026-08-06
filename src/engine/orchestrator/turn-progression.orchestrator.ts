@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { AIEngine } from "@/engine/ai/ai-engine";
 import { ActionQueue } from "@/engine/orchestrator/action-queue";
+import { ActionPrioritySorter } from "@/engine/orchestrator/action-priority-sorter";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { BitPackedTurnOrchestrator } from "@/engine/orchestrator/final/bit-packed-turn-orchestrator";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
@@ -11,6 +12,7 @@ import { ActionEngine } from "@/engine/actions/action-engine";
 export class TurnProgressionOrchestrator {
   private aiEngine = new AIEngine();
   private actionQueue = new ActionQueue();
+  private prioritySorter = new ActionPrioritySorter();
   private pipeline = new TurnPipeline();
   private turnOrchestrator = new BitPackedTurnOrchestrator();
   private livenessManager = new NationLivenessManager();
@@ -29,7 +31,9 @@ export class TurnProgressionOrchestrator {
     const queuedActions = this.actionQueue.getQueue();
     this.actionQueue.clear();
 
-    for (const action of queuedActions) {
+    const sortedActions = this.prioritySorter.sortActions(queuedActions, prng);
+
+    for (const action of sortedActions) {
       const result = ActionEngine.execute(nextState, action);
       if (result.success && result.newState) {
         nextState = result.newState;
