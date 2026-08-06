@@ -1,12 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
-import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class AsyncSaveQueueService {
   private static instance: AsyncSaveQueueService | null = null;
   private storageService = new ClientStorageService();
-  private bitStorageAdapter = new BitPackedStorageAdapter();
+  private gameStorageAdapter = new GameStorageAdapter();
 
   private pendingStateMap = new Map<string, GameState>();
   private saveTimers = new Map<string, NodeJS.Timeout>();
@@ -62,7 +62,10 @@ export class AsyncSaveQueueService {
     try {
       await this.storageService.saveGameState(gameId, pendingState);
       const gridState = BitPackedGridState.getInstance();
-      await this.bitStorageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
+      await this.gameStorageAdapter.saveBitBuffer(
+        gameId,
+        gridState.getBuffer(),
+      );
     } catch {
     } finally {
       this.isProcessingMap.set(gameId, false);

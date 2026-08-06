@@ -3,7 +3,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { ClientGameService } from "@/presentation/services/client-game.service";
 import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { BitPackedStorageAdapter } from "@/infrastructure/storage/final/bit-packed-storage-adapter";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
 import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
@@ -17,7 +17,7 @@ export function useBitPackedGame(gameId = "default_game") {
   const [error, setError] = useState<string | null>(null);
 
   const gameService = useMemo(() => new ClientGameService(), []);
-  const storageAdapter = useMemo(() => new BitPackedStorageAdapter(), []);
+  const storageAdapter = useMemo(() => new GameStorageAdapter(), []);
   const saveQueue = useMemo(() => AsyncSaveQueueService.getInstance(), []);
 
   useEffect(() => {
