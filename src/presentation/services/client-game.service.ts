@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameEngine } from "@/engine/game-engine";
-import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
@@ -9,7 +9,7 @@ import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue
 import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
 export class ClientGameService {
-  private storageService = new ClientStorageService();
+  private storageAdapter = new GameStorageAdapter();
   private aiInitializer = new GlobalAiInitializer();
   private saveQueue = AsyncSaveQueueService.getInstance();
 
@@ -22,7 +22,7 @@ export class ClientGameService {
     }
 
     try {
-      const state = await this.storageService.loadGameState(gameId);
+      const state = await this.storageAdapter.loadGameState(gameId);
       if (!state) {
         return { success: false, error: "اطلاعات پرونده بازی یافت نشد." };
       }

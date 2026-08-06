@@ -1,13 +1,13 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
-import { ClientStorageService } from "@/infrastructure/storage/client-storage.service";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
 import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
 import { CampaignSessionCache } from "@/infrastructure/storage/campaign-session-cache";
 
 export class ActionDispatcherService {
-  private storageService = new ClientStorageService();
+  private storageAdapter = new GameStorageAdapter();
   private router = new ActionRouter();
   private validator = new StateValidator();
   private saveQueue = AsyncSaveQueueService.getInstance();
@@ -24,7 +24,7 @@ export class ActionDispatcherService {
       effectiveState = CampaignSessionCache.get(activeGameId);
     }
     if (!effectiveState) {
-      effectiveState = await this.storageService.loadGameState(activeGameId);
+      effectiveState = await this.storageAdapter.loadGameState(activeGameId);
     }
 
     if (!effectiveState) {
