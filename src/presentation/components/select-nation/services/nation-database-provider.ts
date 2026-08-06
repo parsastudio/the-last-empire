@@ -1,7 +1,7 @@
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 export class NationDatabaseProvider {
   private formatNationDetail(
@@ -14,29 +14,30 @@ export class NationDatabaseProvider {
     defaultGovernment: string,
     descriptionOverride?: string,
   ): NationDetail {
-    const computedTreasury = Math.floor(gdp * 0.05);
-
-    const gdpText = PersianNumberFormatter.formatCurrency(gdp, true);
-    const popText = PersianNumberFormatter.formatCompactNumber(population);
-
-    let power = "قدرت منطقه‌ای";
-    if (gdp >= 10e12) power = "ابرقدرت جهانی";
-    else if (gdp >= 1e12) power = "قدرت برتر صنعتی";
-    else if (gdp >= 200e9) power = "قدرت فرامنطقه‌ای";
+    const mapped = NationPresentationMapper.formatNationSummary(
+      id,
+      nameFa,
+      flagCode,
+      flagCode,
+      rank,
+      gdp,
+      population,
+      defaultGovernment,
+    );
 
     const desc =
       descriptionOverride ||
-      `شناسنامه استراتژیک رسمی ${nameFa} با ساختار اقتصادی به ارزش ${gdpText} و جمعیت ${popText}.`;
+      `شناسنامه استراتژیک رسمی ${nameFa} با ساختار اقتصادی به ارزش ${mapped.gdpText} و جمعیت ${mapped.populationText}.`;
 
     return {
       id,
-      name: nameFa,
-      code: flagCode.toUpperCase(),
-      rank,
-      power,
-      gdp: gdpText,
-      population: popText,
-      treasury: PersianNumberFormatter.formatCurrency(computedTreasury),
+      name: mapped.name,
+      code: mapped.code,
+      rank: mapped.rank,
+      power: mapped.powerLabel,
+      gdp: mapped.gdpText,
+      population: mapped.populationText,
+      treasury: mapped.treasuryText,
       desc,
       defaultGovernment,
     };
@@ -46,9 +47,18 @@ export class NationDatabaseProvider {
     manifestNations: ManifestNationItem[],
   ): NationDetail[] {
     return manifestNations.map((item) => {
-      const gdpText = PersianNumberFormatter.formatCurrency(item.gdp, true);
+      const mapped = NationPresentationMapper.formatNationSummary(
+        item.id,
+        item.nameFa,
+        item.flagCode,
+        item.flagCode,
+        item.initialRank,
+        item.gdp,
+        item.population,
+        item.defaultGovernment,
+      );
 
-      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank} و ساختار اقتصادی به ارزش ${gdpText}.`;
+      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank} و ساختار اقتصادی به ارزش ${mapped.gdpText}.`;
 
       return this.formatNationDetail(
         item.id,

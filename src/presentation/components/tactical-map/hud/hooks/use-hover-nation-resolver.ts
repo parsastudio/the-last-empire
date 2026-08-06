@@ -7,7 +7,7 @@ import {
 } from "@/domain/data/countries";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 export function resolveStanceLabel(
   humanNationId: string | undefined,
@@ -97,8 +97,6 @@ export function useHoverNationResolver({
           ? profile.gdp
           : 50000000000;
 
-      const gdpFormatted = PersianNumberFormatter.formatCurrency(realGdp, true);
-
       const flagCode = profile
         ? profile.flagCode
         : matchedCountry?.code || countryCode;
@@ -133,19 +131,27 @@ export function useHoverNationResolver({
         regionLabel = `منطقه فرامرزی ${enclaveIdVal.toLocaleString("fa-IR")}`;
       }
 
-      const formattedPixelsText = `${PersianNumberFormatter.toPersianDigits(
-        Math.round(displayPixelCount).toLocaleString("en-US"),
-      )} پیکسل`;
+      const summary = NationPresentationMapper.formatNationSummary(
+        countryCode,
+        realName,
+        countryCode,
+        flagCode,
+        realRank,
+        realGdp,
+        0,
+        "DEMOCRACY",
+      );
 
       return {
-        name: realName,
-        code: countryCode,
-        flagCode,
-        rank: realRank,
+        name: summary.name,
+        code: summary.code,
+        flagCode: summary.flagCode,
+        rank: summary.rank,
         stance: stanceLabel,
-        gdp: gdpFormatted,
+        gdp: summary.gdpText,
         regionName: regionLabel,
-        regionPixels: formattedPixelsText,
+        regionPixels:
+          NationPresentationMapper.formatTerritoryPixels(displayPixelCount),
       };
     },
     [profileCacheMap, nationsMap, humanNationId],

@@ -6,9 +6,9 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
-import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { PowerScoreCalculator } from "@/engine/diplomacy/diplomacy-domain.service";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 export interface DiplomaticRelation {
   code: string;
@@ -67,8 +67,6 @@ export function resolveProfileRelation(
       ? profile.population
       : 10000000;
 
-  const popMillion = (realPopNum / 1e6).toFixed(1);
-
   const name = liveNation
     ? liveNation.name
     : profile
@@ -91,7 +89,16 @@ export function resolveProfileRelation(
     ? liveNation.government.type
     : (profile?.startingGovernment ?? "DEMOCRACY");
 
-  const govLabel = getGovernmentTypeLabel(govType);
+  const summary = NationPresentationMapper.formatNationSummary(
+    displayCode,
+    name,
+    displayCode,
+    flagCode,
+    liveNation ? liveNation.rank : 99,
+    realGdpNum,
+    realPopNum,
+    govType,
+  );
 
   const infantry = liveNation
     ? liveNation.military.infantry
@@ -109,22 +116,20 @@ export function resolveProfileRelation(
     techLevel,
   );
 
-  const realRank = liveNation ? liveNation.rank : 99;
-
   return {
-    code: displayCode.toUpperCase(),
-    name,
-    flagCode,
-    rank: realRank,
+    code: summary.code,
+    name: summary.name,
+    flagCode: summary.flagCode,
+    rank: summary.rank,
     stance: "NORMAL_DIPLOMACY",
     opinion: 0,
     isTradeEmbargoed: false,
-    description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
+    description: `شناسنامه رسمی و آمار دفتری کشور ${summary.name}.`,
     profileData: {
-      gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
-      population: `${PersianNumberFormatter.toPersianDigits(popMillion)} میلیون نفر`,
+      gdp: summary.gdpText,
+      population: summary.populationText,
       techLevel,
-      governmentType: govLabel,
+      governmentType: summary.governmentLabel,
       stability: liveNation ? liveNation.government.stability : 80,
       corruption: liveNation ? liveNation.government.corruption : 10,
       militaryStrength: `${PersianNumberFormatter.toPersianDigits(Math.round(militaryPower).toLocaleString("en-US"))} یگان`,
