@@ -66,10 +66,4 @@ export class BitPackedSyncEngine {
 
     return regionsDemographics;
   }
-
-  public syncNationsFromBuffer(
-    nations: Record<string, Nation>,
-  ): Record<string, Nation> {
-    return nations;
-  }
 }
