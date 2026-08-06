@@ -1,12 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
-import { GameEngine } from "@/engine/game-engine";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { TurnWorkerService } from "@/presentation/services/turn-worker.service";
 
 export class ClientGameService {
   private storageAdapter = new GameStorageAdapter();
@@ -34,8 +34,7 @@ export class ClientGameService {
     currentState: GameState,
   ): Promise<{ success: boolean; data?: GameState; error?: string }> {
     try {
-      const engine = new GameEngine(currentState);
-      const nextState = engine.nextTurn();
+      const nextState = await TurnWorkerService.processTurn(currentState);
       await this.storageAdapter.saveGameState(gameId, nextState);
       return { success: true, data: nextState };
     } catch {
