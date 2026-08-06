@@ -1,13 +1,12 @@
 import React, { useMemo } from "react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/data/countries";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 interface NationHeaderCardProps {
   name: string;
@@ -30,8 +29,6 @@ export function NationHeaderCard({
   rank = 1,
 }: NationHeaderCardProps) {
   const formatted = useMemo(() => {
-    const flagEmoji = getFlagEmoji(flagCode || code);
-
     let realPixels =
       territoryPixelCount && territoryPixelCount > 0 ? territoryPixelCount : 0;
     if (!realPixels) {
@@ -41,10 +38,6 @@ export function NationHeaderCard({
       realPixels = profile ? Math.round(profile.gdp / 10000000) : 4000;
     }
 
-    const formattedPixels = PersianNumberFormatter.toPersianDigits(
-      Math.round(realPixels).toLocaleString("en-US"),
-    );
-
     let realPop = population;
     if (!realPop || realPop <= 0) {
       const numericId = NationIdResolver.resolveNumericId(code);
@@ -53,22 +46,33 @@ export function NationHeaderCard({
       realPop = profile ? profile.population : 80000000;
     }
 
-    let formattedPopulation = (realPop / 1e6).toFixed(1);
-    if (realPop >= 1e9) {
-      formattedPopulation = `${(realPop / 1e9).toFixed(2)} میلیارد`;
-    } else {
-      formattedPopulation = `${formattedPopulation} میلیون`;
-    }
-
-    formattedPopulation =
-      PersianNumberFormatter.toPersianDigits(formattedPopulation);
+    const summary = NationPresentationMapper.formatNationSummary(
+      code,
+      name,
+      code,
+      flagCode,
+      rank,
+      0,
+      realPop,
+      governmentType,
+    );
 
     return {
-      flagEmoji,
-      formattedPixels,
-      formattedPopulation,
+      flagEmoji: summary.flagEmoji,
+      formattedPixels:
+        NationPresentationMapper.formatTerritoryPixels(realPixels),
+      formattedPopulation: summary.populationText,
+      governmentLabel: summary.governmentLabel,
     };
-  }, [code, flagCode, population, territoryPixelCount]);
+  }, [
+    code,
+    flagCode,
+    name,
+    population,
+    territoryPixelCount,
+    rank,
+    governmentType,
+  ]);
 
   return (
     <div className="bg-background/60 border border-border/80 p-4 rounded-2xl flex flex-col gap-3 shadow-inner dir-rtl">
@@ -88,7 +92,7 @@ export function NationHeaderCard({
               </span>
             </div>
             <p className="text-[10px] text-muted-foreground font-mono">
-              نوع حکومت: {getGovernmentTypeLabel(governmentType)}
+              نوع حکومت: {formatted.governmentLabel}
             </p>
           </div>
         </div>
@@ -107,7 +111,7 @@ export function NationHeaderCard({
             جمعیت کل قلمروها
           </span>
           <span className="text-xs font-bold text-foreground block font-mono">
-            {formatted.formattedPopulation} نفر
+            {formatted.formattedPopulation}
           </span>
         </div>
         <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
@@ -115,7 +119,7 @@ export function NationHeaderCard({
             وسعت قلمرو
           </span>
           <span className="text-xs font-bold text-foreground block font-mono">
-            {formatted.formattedPixels} پیکسل
+            {formatted.formattedPixels}
           </span>
         </div>
       </div>

@@ -27,7 +27,7 @@ export class BattleCalculator {
     attacker: Nation,
     defender: Nation,
     dronesToLaunch: number,
-    oilPrice = MARKET_CONFIG.FIXED_BUY_PRICE,
+    oilPrice: number = MARKET_CONFIG.FIXED_BUY_PRICE,
   ): BattleCalculationResult {
     const totalForceCost =
       attacker.military.infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
