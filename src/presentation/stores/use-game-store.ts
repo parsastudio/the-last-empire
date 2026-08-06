@@ -2,7 +2,13 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { ClientGameService } from "@/presentation/services/client-game.service";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
+import { ActionEngine } from "@/engine/actions/action-engine";
+import { TurnWorkerService } from "@/presentation/services/turn-worker.service";
+import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -16,7 +22,7 @@ interface GameStoreState {
     nationId: string,
     governmentType: string,
     gameId: string,
-    manifest?: Parameters<ClientGameService["createCampaign"]>[3],
+    manifest?: FinalMapManifest | null,
   ) => Promise<boolean>;
   dispatchAction: (
     action: GameAction,
@@ -25,7 +31,8 @@ interface GameStoreState {
   advanceNextTurn: () => Promise<GameState | null>;
 }
 
-const gameService = new ClientGameService();
+const storageAdapter = new GameStorageAdapter();
+const aiInitializer = new GlobalAiInitializer();
 
 export const useGameStore = create<GameStoreState>()(
   immer((set, get) => ({
@@ -46,21 +53,28 @@ export const useGameStore = create<GameStoreState>()(
         draft.activeGameId = gameId;
       });
 
-      const res = await gameService.loadGameState(gameId);
+      try {
+        const state = await storageAdapter.loadGameState(gameId);
+        if (state) {
+          set((draft) => {
+            draft.gameState = state;
+            draft.loading = false;
+          });
+          return true;
+        }
 
-      if (res.success && res.data) {
         set((draft) => {
-          draft.gameState = res.data ?? null;
+          draft.error = "اطلاعات پرونده بازی یافت نشد.";
           draft.loading = false;
         });
-        return true;
+        return false;
+      } catch {
+        set((draft) => {
+          draft.error = "خطا در بارگذاری اطلاعات از حافظه محلی.";
+          draft.loading = false;
+        });
+        return false;
       }
-
-      set((draft) => {
-        draft.error = res.error ?? "خطا در بارگذاری اطلاعات بازی";
-        draft.loading = false;
-      });
-      return false;
     },
 
     createCampaign: async (nationId, governmentType, gameId, manifest) => {
@@ -70,26 +84,55 @@ export const useGameStore = create<GameStoreState>()(
         draft.activeGameId = gameId;
       });
 
-      const res = await gameService.createCampaign(
-        nationId,
-        governmentType,
-        gameId,
-        manifest,
-      );
+      try {
+        const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
+        let detectedNations: string[] = [];
 
-      if (res.success && res.data) {
+        if (manifest && manifest.nations) {
+          detectedNations = manifest.nations.map((n) => n.id);
+        } else {
+          detectedNations = ALL_COUNTRY_PROFILES.map(
+            (p) => `NATION_${p.code.toUpperCase()}`,
+          );
+        }
+
+        if (!detectedNations.includes(normalizedHumanId)) {
+          detectedNations.push(normalizedHumanId);
+        }
+
+        const populatedNations = aiInitializer.initializeAllNations(
+          detectedNations,
+          normalizedHumanId,
+          governmentType,
+          manifest,
+        );
+
+        const initialState: GameState = {
+          gameId,
+          currentTurn: 1,
+          seed: Math.floor(Math.random() * 1000000),
+          isGameOver: false,
+          humanNationId: normalizedHumanId,
+          globalThreatLevel: 0,
+          marketPrices: { oil: 25000000, steel: 25000000 },
+          nations: populatedNations,
+          turnLogs: [],
+        };
+
+        await storageAdapter.saveGameState(gameId, initialState);
+
         set((draft) => {
-          draft.gameState = res.data ?? null;
+          draft.gameState = initialState;
           draft.loading = false;
         });
         return true;
+      } catch {
+        set((draft) => {
+          draft.error = "خطا در ساخت کمپین جدید.";
+          draft.loading = false;
+        });
+        return false;
       }
-
-      set((draft) => {
-        draft.error = res.error ?? "خطا در ساخت کمپین جدید";
-        draft.loading = false;
-      });
-      return false;
     },
 
     dispatchAction: async (action, onSuccessMessage) => {
@@ -101,27 +144,22 @@ export const useGameStore = create<GameStoreState>()(
         };
       }
 
-      const result = await gameService.dispatchAction(
-        activeGameId,
-        gameState,
-        action,
-        onSuccessMessage,
-      );
-
+      const result = ActionEngine.execute(gameState, action);
       if (result.success && result.newState) {
+        await storageAdapter.saveGameState(activeGameId, result.newState);
         set((draft) => {
           draft.gameState = result.newState ?? null;
         });
 
         return {
           success: true,
-          message: result.message,
+          message: onSuccessMessage || result.message,
         };
       }
 
       return {
         success: false,
-        message: result.message ?? "امکان انجام این دستور وجود ندارد.",
+        message: result.message || "امکان انجام این دستور وجود ندارد.",
       };
     },
 
@@ -129,16 +167,16 @@ export const useGameStore = create<GameStoreState>()(
       const { activeGameId, gameState } = get();
       if (!gameState) return null;
 
-      const res = await gameService.advanceTurn(activeGameId, gameState);
-
-      if (res.success && res.data) {
+      try {
+        const nextState = await TurnWorkerService.processTurn(gameState);
+        await storageAdapter.saveGameState(activeGameId, nextState);
         set((draft) => {
-          draft.gameState = res.data ?? null;
+          draft.gameState = nextState;
         });
-        return res.data;
+        return nextState;
+      } catch {
+        return null;
       }
-
-      return null;
     },
   })),
 );

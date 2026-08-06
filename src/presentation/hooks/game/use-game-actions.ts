@@ -5,10 +5,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 
-export function useGameActions(
-  _customGameId?: string,
-  onActionExecuted?: () => void,
-) {
+export function useGameActions(onActionExecuted?: () => void) {
   const { showToast } = useToast();
   const dispatchStoreAction = useGameStore((state) => state.dispatchAction);
 
