@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { AIPersonalityType } from "@/domain/ai/ai.schema";
-import { AIActionBuilder } from "./ai-action-builder";
+import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 
 export class AIEngine {
   public generateTurnActions(state: GameState): GameAction[] {
@@ -19,7 +19,6 @@ export class AIEngine {
         nation,
         state.nations,
         personality,
-        state.currentTurn,
       );
 
       actions.push(...aiActions);

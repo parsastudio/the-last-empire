@@ -1,10 +1,6 @@
-import { Nation } from "@/domain/nation/nation.schema";
-import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
-import { NationProfileAssigner } from "./nation-profile-assigner";
-import {
-  FinalMapManifest as MapManifest,
-  FinalManifestNation,
-} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { Nation, RelationProfile } from "@/domain/nation/nation.schema";
+import { NationProfileAssigner } from "@/infrastructure/map-preprocessing/nation-profile-assigner";
+import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
 export class DiplomaticMatrixGenerator {
   public generateBlankRelations(
@@ -28,13 +24,13 @@ export class GlobalAiInitializer {
   private relationsGenerator = new DiplomaticMatrixGenerator();
 
   public initializeFromManifest(
-    manifest: MapManifest,
+    manifest: FinalMapManifest,
     humanNationId: string,
     humanGovType?: string,
   ): Record<string, Nation> {
     const nations: Record<string, Nation> = {};
     const manifestItems = manifest.nations || [];
-    const allIds = manifestItems.map((item: FinalManifestNation) => item.id);
+    const allIds = manifestItems.map((item) => item.id);
 
     for (const item of manifestItems) {
       const isHuman = item.id === humanNationId;
@@ -45,7 +41,7 @@ export class GlobalAiInitializer {
         govToApply,
       );
 
-      const relativeList = allIds.filter((id: string) => id !== item.id);
+      const relativeList = allIds.filter((id) => id !== item.id);
       nation.relations =
         this.relationsGenerator.generateBlankRelations(relativeList);
 
@@ -59,7 +55,7 @@ export class GlobalAiInitializer {
     detectedNationsList: string[],
     humanNationId: string,
     humanGovType?: string,
-    manifest?: MapManifest | null,
+    manifest?: FinalMapManifest | null,
   ): Record<string, Nation> {
     if (manifest && manifest.nations && manifest.nations.length > 0) {
       return this.initializeFromManifest(manifest, humanNationId, humanGovType);
