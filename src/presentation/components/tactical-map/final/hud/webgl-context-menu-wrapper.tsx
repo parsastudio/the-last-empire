@@ -3,7 +3,7 @@ import {
   MapContextMenu,
   ContextActionType,
 } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
-import { ContextMenuState } from "@/presentation/hooks/tactical-map/final/use-webgl-interaction";
+import { ContextMenuState } from "@/presentation/hooks/tactical-map/final/use-context-menu";
 
 interface WebGLContextMenuWrapperProps {
   contextMenuState: ContextMenuState | null;

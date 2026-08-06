@@ -1,22 +1,15 @@
-import { mapVertexShaderSource } from "./shaders/map-vertex.shader";
-import { mapFragmentShaderSource } from "./shaders/map-fragment.shader";
-import { pickingFragmentShaderSource } from "./shaders/picking-fragment.shader";
+import { mapVertexShaderSource } from "@/presentation/components/tactical-map/final/shaders/map-vertex.shader";
+import { mapFragmentShaderSource } from "@/presentation/components/tactical-map/final/shaders/map-fragment.shader";
 
 export class WebGLMapRenderer {
   private gl: WebGL2RenderingContext;
   private program: WebGLProgram | null = null;
-  private pickingProgram: WebGLProgram | null = null;
 
   private vao: WebGLVertexArrayObject | null = null;
   private terrainTexture: WebGLTexture | null = null;
   private liveStateTexture: WebGLTexture | null = null;
   private paletteTexture: WebGLTexture | null = null;
   private gdpPaletteTexture: WebGLTexture | null = null;
-
-  private pickingFbo: WebGLFramebuffer | null = null;
-  private pickingTexture: WebGLTexture | null = null;
-  private fboWidth = 0;
-  private fboHeight = 0;
 
   private uResolutionLoc: WebGLUniformLocation | null = null;
   private uPositionLoc: WebGLUniformLocation | null = null;
@@ -25,10 +18,6 @@ export class WebGLMapRenderer {
   private uOverlayOpacityLoc: WebGLUniformLocation | null = null;
   private uTexelSizeLoc: WebGLUniformLocation | null = null;
   private uActiveLayerLoc: WebGLUniformLocation | null = null;
-
-  private uPickResolutionLoc: WebGLUniformLocation | null = null;
-  private uPickPositionLoc: WebGLUniformLocation | null = null;
-  private uPickScaleLoc: WebGLUniformLocation | null = null;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
@@ -47,12 +36,8 @@ export class WebGLMapRenderer {
       gl.FRAGMENT_SHADER,
       mapFragmentShaderSource,
     );
-    const pickFragShader = this.compileShader(
-      gl.FRAGMENT_SHADER,
-      pickingFragmentShaderSource,
-    );
 
-    if (!vertShader || !fragShader || !pickFragShader) return;
+    if (!vertShader || !fragShader) return;
 
     const prog = gl.createProgram();
     if (prog) {
@@ -85,29 +70,6 @@ export class WebGLMapRenderer {
         if (uLiveStateLoc) gl.uniform1i(uLiveStateLoc, 1);
         if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
         if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
-      }
-    }
-
-    const pickProg = gl.createProgram();
-    if (pickProg) {
-      gl.attachShader(pickProg, vertShader);
-      gl.attachShader(pickProg, pickFragShader);
-      gl.linkProgram(pickProg);
-      if (gl.getProgramParameter(pickProg, gl.LINK_STATUS)) {
-        this.pickingProgram = pickProg;
-        this.uPickResolutionLoc = gl.getUniformLocation(
-          pickProg,
-          "u_resolution",
-        );
-        this.uPickPositionLoc = gl.getUniformLocation(pickProg, "u_position");
-        this.uPickScaleLoc = gl.getUniformLocation(pickProg, "u_scale");
-
-        const uPickLiveLoc = gl.getUniformLocation(
-          pickProg,
-          "u_liveStateTexture",
-        );
-        gl.useProgram(pickProg);
-        if (uPickLiveLoc) gl.uniform1i(uPickLiveLoc, 0);
       }
     }
   }
@@ -152,44 +114,6 @@ export class WebGLMapRenderer {
 
     gl.enableVertexAttribArray(aTexLoc);
     gl.vertexAttribPointer(aTexLoc, 2, gl.FLOAT, false, 16, 8);
-  }
-
-  private initPickingFramebuffer(width: number, height: number): void {
-    const gl = this.gl;
-
-    if (this.pickingFbo) gl.deleteFramebuffer(this.pickingFbo);
-    if (this.pickingTexture) gl.deleteTexture(this.pickingTexture);
-
-    this.fboWidth = width;
-    this.fboHeight = height;
-
-    this.pickingTexture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.pickingTexture);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      width,
-      height,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null,
-    );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-    this.pickingFbo = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingFbo);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      this.pickingTexture,
-      0,
-    );
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
   public setTerrainImage(image: HTMLImageElement): void {
@@ -240,66 +164,6 @@ export class WebGLMapRenderer {
 
   public setGdpPaletteTexture(gdpPaletteTexture: WebGLTexture): void {
     this.gdpPaletteTexture = gdpPaletteTexture;
-  }
-
-  public pickAtScreenPos(
-    screenX: number,
-    screenY: number,
-    clientWidth: number,
-    clientHeight: number,
-    posX: number,
-    posY: number,
-    scale: number,
-  ): { nationId: number; enclaveId: number } {
-    const gl = this.gl;
-    if (!this.pickingProgram || !this.vao) {
-      return { nationId: 0, enclaveId: 0 };
-    }
-
-    const dpr =
-      typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
-    const renderWidth = Math.floor(clientWidth * dpr);
-    const renderHeight = Math.floor(clientHeight * dpr);
-
-    if (this.fboWidth !== renderWidth || this.fboHeight !== renderHeight) {
-      this.initPickingFramebuffer(renderWidth, renderHeight);
-    }
-
-    if (!this.pickingFbo) {
-      return { nationId: 0, enclaveId: 0 };
-    }
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.pickingFbo);
-    gl.viewport(0, 0, renderWidth, renderHeight);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    gl.useProgram(this.pickingProgram);
-    gl.bindVertexArray(this.vao);
-
-    gl.uniform2f(this.uPickResolutionLoc, renderWidth, renderHeight);
-    gl.uniform2f(this.uPickPositionLoc, posX * dpr, posY * dpr);
-    gl.uniform1f(this.uPickScaleLoc, scale * dpr);
-
-    if (this.liveStateTexture) {
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.liveStateTexture);
-    }
-
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    const pixelX = Math.floor(screenX * dpr);
-    const pixelY = Math.floor((clientHeight - screenY) * dpr);
-
-    const pixelData = new Uint8Array(4);
-    gl.readPixels(pixelX, pixelY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixelData);
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-    return {
-      nationId: Math.round((pixelData[0]! / 255) * 255),
-      enclaveId: Math.round((pixelData[1]! / 255) * 255),
-    };
   }
 
   public render(

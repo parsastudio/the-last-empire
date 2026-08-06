@@ -10,6 +10,8 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
+export type { HoverCountryInfo };
+
 export function resolveStanceLabel(
   humanNationId: string | undefined,
   fullNationId: string,
