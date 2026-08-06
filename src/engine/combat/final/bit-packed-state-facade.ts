@@ -40,15 +40,6 @@ export class BitPackedStateFacade {
   }
 
   public syncGameState(gameState: GameState): GameState {
-    const buffer = this.gridState.getBuffer();
-    const updatedNations = this.syncEngine.syncNationsFromBuffer(
-      gameState.nations,
-      buffer,
-    );
-
-    return {
-      ...gameState,
-      nations: updatedNations,
-    };
+    return gameState;
   }
 }
