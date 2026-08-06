@@ -7,10 +7,12 @@ import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executo
 
 export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
+    const targetActionId = (action as { id: string }).id;
+
     if (state.isGameOver) {
       return {
         success: false,
-        actionId: action.id,
+        actionId: targetActionId,
         message: "دستور رد شد: بازی به پایان رسیده است.",
         error: "GAME_OVER",
       };
@@ -25,7 +27,7 @@ export class ActionEngine {
     if (!sourceNation || !sourceNation.isAlive) {
       return {
         success: false,
-        actionId: action.id,
+        actionId: targetActionId,
         message: `کشور صادرکننده دستور (${action.nationId}) فعال نیست.`,
         error: "NATION_NOT_FOUND",
       };
@@ -42,7 +44,7 @@ export class ActionEngine {
       if (!targetNation || !targetNation.isAlive) {
         return {
           success: false,
-          actionId: action.id,
+          actionId: targetActionId,
           message: `کشور هدف دستور (${action.targetNationId}) یافت نشد.`,
           error: "NATION_NOT_FOUND",
         };
@@ -85,7 +87,7 @@ export class ActionEngine {
         default:
           return {
             success: false,
-            actionId: action.id,
+            actionId: targetActionId,
             message: "دستور ناشناخته است.",
             error: "UNKNOWN_ACTION",
           };
@@ -93,7 +95,7 @@ export class ActionEngine {
 
       return {
         success: true,
-        actionId: action.id,
+        actionId: targetActionId,
         message: "دستور با موفقیت اجرا شد.",
         newState,
       };
@@ -107,7 +109,7 @@ export class ActionEngine {
 
       return {
         success: false,
-        actionId: action.id,
+        actionId: targetActionId,
         message: errorMsg,
         error: "EXECUTION_FAILED",
       };

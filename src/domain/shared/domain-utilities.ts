@@ -5,6 +5,9 @@ import {
 } from "@/domain/data/countries";
 import { TurnLogEntry, TurnLogLevel } from "@/domain/game/game-state.schema";
 
+export type { Nation } from "@/domain/nation/nation.schema";
+export type { AIPersonalityType } from "@/domain/ai/ai.schema";
+
 export type GameErrorCode =
   | "INVALID_ACTION"
   | "NATION_NOT_FOUND"

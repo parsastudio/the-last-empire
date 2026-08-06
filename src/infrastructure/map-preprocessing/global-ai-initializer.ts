@@ -1,4 +1,5 @@
-import { Nation, RelationProfile } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { NationProfileAssigner } from "@/infrastructure/map-preprocessing/nation-profile-assigner";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 

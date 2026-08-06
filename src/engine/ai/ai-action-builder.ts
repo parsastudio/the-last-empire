@@ -1,7 +1,10 @@
-import { GameAction, ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
-import { AIPersonalityType } from "@/domain/ai/ai.schema";
+import { GameAction } from "@/domain/game/action.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
+import {
+  Nation,
+  NationIdResolver,
+  AIPersonalityType,
+} from "@/domain/shared/domain-utilities";
 
 export class AIActionBuilder {
   public static buildNationActions(
