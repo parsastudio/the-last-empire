@@ -1,7 +1,7 @@
 import React from "react";
 import { FolderX, Home, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useModalKeyboardShortcut } from "@/presentation/components/common/hooks/use-modal-keyboard-shortcut";
+import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 
 interface CampaignNotFoundModalProps {
   isOpen: boolean;
@@ -14,26 +14,21 @@ export function CampaignNotFoundModal({
 }: CampaignNotFoundModalProps) {
   const router = useRouter();
 
-  useModalKeyboardShortcut(isOpen, () => router.push("/"));
-
   if (!isOpen) return null;
 
   return (
-    <div
-      onClick={() => router.push("/")}
-      className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fade-smooth dir-rtl text-right cursor-pointer"
+    <UnifiedModalShell
+      isOpen={isOpen}
+      title="پرونده کمپین یافت نشد"
+      subtitle={`شناسه پرونده: ${gameId}`}
+      maxWidthClass="max-w-md"
+      onClose={() => router.push("/")}
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-card border border-border w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-5 cursor-default"
-      >
+      <div className="space-y-5 text-right dir-rtl font-sans">
         <div className="flex flex-col items-center justify-center gap-3 text-center">
           <div className="w-14 h-14 rounded-2xl bg-military/15 border border-military/30 text-military flex items-center justify-center shadow-lg">
             <FolderX size={28} />
           </div>
-          <h2 className="text-lg font-extrabold text-foreground">
-            پرونده کمپین یافت نشد
-          </h2>
           <p className="text-xs text-muted-foreground leading-relaxed">
             هیچ اطلاعات ذخیره‌شده‌ای برای آدرس شناسه{" "}
             <strong className="font-mono text-foreground">{gameId}</strong> در
@@ -59,6 +54,6 @@ export function CampaignNotFoundModal({
           </button>
         </div>
       </div>
-    </div>
+    </UnifiedModalShell>
   );
 }
