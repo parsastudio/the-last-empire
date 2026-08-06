@@ -6,6 +6,7 @@ import {
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -26,7 +27,7 @@ export class BattleCalculator {
     attacker: Nation,
     defender: Nation,
     dronesToLaunch: number,
-    oilPrice = 25000000,
+    oilPrice = MARKET_CONFIG.FIXED_BUY_PRICE,
   ): BattleCalculationResult {
     const totalForceCost =
       attacker.military.infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
@@ -37,7 +38,9 @@ export class BattleCalculator {
     const deploymentMoneyCost = Math.floor(deploymentFivePct);
     const deploymentOilCost = Math.max(
       1,
-      Math.ceil(deploymentFivePct / (oilPrice || 25000000)),
+      Math.ceil(
+        deploymentFivePct / (oilPrice || MARKET_CONFIG.FIXED_BUY_PRICE),
+      ),
     );
 
     const dronesUsed = Math.min(

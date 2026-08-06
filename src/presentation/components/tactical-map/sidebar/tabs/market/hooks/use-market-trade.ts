@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { MarketEngine } from "@/engine/economy/market-engine";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 interface UseMarketTradeProps {
   oilStock?: number;
@@ -10,7 +11,7 @@ interface UseMarketTradeProps {
 export function useMarketTrade({
   oilStock = 50,
   steelStock = 20,
-  userTreasury = 100000000,
+  userTreasury = MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK,
 }: UseMarketTradeProps = {}) {
   const [tradeModal, setTradeModal] = useState<{
     isOpen: boolean;
@@ -24,7 +25,7 @@ export function useMarketTrade({
     resourceName: "",
     unit: "بلوک استراتژیک",
     mode: "buy",
-    unitPrice: 25000000,
+    unitPrice: MARKET_CONFIG.FIXED_BUY_PRICE,
     maxAmount: 10,
   });
 
@@ -33,7 +34,8 @@ export function useMarketTrade({
 
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
-      const realPrice = price && price >= 1000000 ? price : 25000000;
+      const realPrice =
+        price && price >= 1000000 ? price : MARKET_CONFIG.FIXED_BUY_PRICE;
       const isOil = name.includes("نفت");
       const stock = isOil ? oilStock : steelStock;
 

@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 export interface AutoTradeEngineResult {
   updatedNation: Nation;
@@ -30,9 +31,9 @@ export class AutoTradeEngine {
     let steelSold = 0;
     let loanTakenAmount = 0;
 
-    const buyPriceOil = marketPrices.oil || 25000000;
-    const buyPriceSteel = marketPrices.steel || 25000000;
-    const sellPrice = 20000000;
+    const buyPriceOil = marketPrices.oil || MARKET_CONFIG.FIXED_BUY_PRICE;
+    const buyPriceSteel = marketPrices.steel || MARKET_CONFIG.FIXED_BUY_PRICE;
+    const sellPrice = MARKET_CONFIG.FIXED_SELL_PRICE;
 
     const oilDemand = PopulationWelfareCalculator.calculateOilDemand(
       currentNation.population,

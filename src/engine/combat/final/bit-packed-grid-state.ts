@@ -1,4 +1,5 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { MAP_CONFIG } from "@/domain/map/map.config";
 
 export class BitPackedGridState {
   private static instance: BitPackedGridState | null = null;
@@ -6,7 +7,10 @@ export class BitPackedGridState {
   private modifiedIndices = new Set<number>();
   private snapshots = new Map<string, Uint16Array>();
 
-  constructor(width = 4096, height = 2048) {
+  constructor(
+    width: number = MAP_CONFIG.HIGH_RES_WIDTH,
+    height: number = MAP_CONFIG.HIGH_RES_HEIGHT,
+  ) {
     this.buffer = new BitPackedBuffer(width, height);
   }
 

@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { MAP_CONFIG } from "@/domain/map/map.config";
 
 export interface MapDragPosition {
   x: number;
@@ -8,8 +9,8 @@ export interface MapDragPosition {
 export function useMapGesture(
   containerWidth = 1200,
   containerHeight = 600,
-  mapWidth = 4096,
-  mapHeight = 2048,
+  mapWidth: number = MAP_CONFIG.HIGH_RES_WIDTH,
+  mapHeight: number = MAP_CONFIG.HIGH_RES_HEIGHT,
 ) {
   const computeInitial = useCallback(
     (w: number, h: number) => {
