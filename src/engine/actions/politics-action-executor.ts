@@ -128,13 +128,24 @@ export class PoliticsActionExecutor {
             Math.floor((action.budget / (target.gdp * 0.01 || 1)) * 2),
           ),
         );
+
+        const requiredBudget = ProxyWarManager.calculateBudget(
+          target.gdp,
+          drain,
+        );
+
+        const actualBudget = Math.min(
+          action.budget,
+          requiredBudget > 0 ? requiredBudget : action.budget,
+        );
+
         return {
           ...state,
           nations: {
             ...state.nations,
             [sourceKey]: {
               ...nation,
-              treasury: nation.treasury - action.budget,
+              treasury: nation.treasury - actualBudget,
             },
             [targetKey]: {
               ...target,

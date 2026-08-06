@@ -5,7 +5,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { calculateProxyOperationBudget } from "@/domain/politics/government-label.utility";
+import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 export interface TargetCountryOption {
@@ -75,7 +75,7 @@ export function WideProxyView({
 
   const requiredBudget = useMemo(() => {
     if (!selectedTargetNation) return 0;
-    return calculateProxyOperationBudget(
+    return ProxyWarManager.calculateBudget(
       selectedTargetNation.gdp,
       desiredDrain,
     );

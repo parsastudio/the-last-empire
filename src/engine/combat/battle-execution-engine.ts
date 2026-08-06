@@ -247,12 +247,10 @@ export class BattleExecutionEngine {
       [defender.id]: updatedDefender,
     };
 
-    const syncedState: GameState = {
+    return {
       ...state,
       nations: tempNations,
       turnLogs: [...state.turnLogs, logEntry],
     };
-
-    return this.facade.syncGameState(syncedState);
   }
 }
