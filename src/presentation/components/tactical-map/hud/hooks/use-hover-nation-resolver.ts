@@ -1,10 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { CountryMapping } from "@/domain/map/country-mapping.schema";
-import {
-  findCountryProfileByCode,
-  findCountryProfileById,
-  CountryProfile,
-} from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
@@ -45,38 +41,15 @@ interface UseHoverNationResolverProps {
 }
 
 export function useHoverNationResolver({
-  countries,
   nationsMap,
   humanNationId,
 }: UseHoverNationResolverProps) {
-  const profileCacheMap = useMemo(() => {
-    const map = new Map<
-      number,
-      { matchedCountry?: CountryMapping; profile?: CountryProfile }
-    >();
-    for (const c of countries) {
-      const profile =
-        findCountryProfileById(c.id) || findCountryProfileByCode(c.code);
-      map.set(c.id, { matchedCountry: c, profile });
-    }
-    return map;
-  }, [countries]);
-
   const resolveHoverInfo = useCallback(
     (nationIdNumber: number, enclaveIdVal: number): HoverCountryInfo | null => {
-      let cached = profileCacheMap.get(nationIdNumber);
-      if (!cached) {
-        const profile = findCountryProfileById(nationIdNumber);
-        if (!profile) return null;
-        cached = { profile };
-      }
+      const profile = CountryRegistry.getCountry(nationIdNumber);
+      if (!profile) return null;
 
-      const { matchedCountry, profile } = cached;
-      if (!matchedCountry && !profile) return null;
-
-      const countryCode = profile
-        ? profile.code.toUpperCase()
-        : matchedCountry!.code.toUpperCase();
+      const countryCode = profile.code.toUpperCase();
       const fullNationId = NationIdResolver.resolveCanonicalId(countryCode);
 
       let liveNation = nationsMap ? nationsMap[fullNationId] : null;
@@ -88,21 +61,9 @@ export function useHoverNationResolver({
           null;
       }
 
-      const realName = liveNation
-        ? liveNation.name
-        : profile
-          ? profile.nameFa
-          : matchedCountry!.name;
-
-      const realGdp = liveNation
-        ? liveNation.gdp
-        : profile
-          ? profile.gdp
-          : 50000000000;
-
-      const flagCode = profile
-        ? profile.flagCode
-        : matchedCountry?.code || countryCode;
+      const realName = liveNation ? liveNation.name : profile.nameFa;
+      const realGdp = liveNation ? liveNation.gdp : profile.gdp;
+      const flagCode = profile.flagCode || countryCode;
 
       const stanceLabel = resolveStanceLabel(
         humanNationId,
@@ -116,9 +77,7 @@ export function useHoverNationResolver({
       let regionLabel = "خاک اصلی";
       let displayPixelCount = liveNation
         ? liveNation.geography.territoryPixelCount
-        : profile
-          ? Math.round(profile.gdp / 10000000)
-          : 4000;
+        : Math.round(profile.gdp / 10000000);
 
       if (liveNation && liveNation.regionsDemographics) {
         const matchedRegion = liveNation.regionsDemographics.find(
@@ -157,7 +116,7 @@ export function useHoverNationResolver({
           NationPresentationMapper.formatTerritoryPixels(displayPixelCount),
       };
     },
-    [profileCacheMap, nationsMap, humanNationId],
+    [nationsMap, humanNationId],
   );
 
   return { resolveHoverInfo };

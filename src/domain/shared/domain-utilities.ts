@@ -1,8 +1,4 @@
-import {
-  ALL_COUNTRY_PROFILES,
-  findCountryProfileByCode,
-  findCountryProfileById,
-} from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogEntry, TurnLogLevel } from "@/domain/game/game-state.schema";
 
 export type { Nation } from "@/domain/nation/nation.schema";
@@ -47,86 +43,13 @@ export class GameIdGenerator {
   }
 }
 
-class NationIdCacheRegistry {
-  public static readonly canonicalCache = new Map<string, string>();
-  public static readonly numericCache = new Map<string, number>();
-
-  static {
-    for (const profile of ALL_COUNTRY_PROFILES) {
-      const canonical = `NATION_${profile.code.toUpperCase()}`;
-      const numeric = profile.id ?? 0;
-
-      this.canonicalCache.set(profile.code.toUpperCase(), canonical);
-      this.canonicalCache.set(canonical, canonical);
-
-      if (profile.flagCode) {
-        this.canonicalCache.set(profile.flagCode.toUpperCase(), canonical);
-      }
-
-      this.numericCache.set(canonical, numeric);
-      this.numericCache.set(profile.code.toUpperCase(), numeric);
-      this.numericCache.set(numeric.toString(), numeric);
-    }
-  }
-}
-
 export class NationIdResolver {
   public static resolveCanonicalId(codeOrId: string | number): string {
-    if (!codeOrId && codeOrId !== 0) return "";
-
-    const clean = codeOrId.toString().trim().toUpperCase();
-    const cached = NationIdCacheRegistry.canonicalCache.get(clean);
-    if (cached) return cached;
-
-    let profile = findCountryProfileByCode(clean);
-    if (!profile) {
-      const rawNum = clean.replace("NATION_", "");
-      const numericId = parseInt(rawNum, 10);
-      if (!isNaN(numericId)) {
-        profile = findCountryProfileById(numericId);
-      }
-    }
-
-    if (profile) {
-      const result = `NATION_${profile.code.toUpperCase()}`;
-      NationIdCacheRegistry.canonicalCache.set(clean, result);
-      return result;
-    }
-
-    if (clean.startsWith("NATION_")) {
-      return clean;
-    }
-
-    const fallback = `NATION_${clean}`;
-    NationIdCacheRegistry.canonicalCache.set(clean, fallback);
-    return fallback;
+    return CountryRegistry.resolveCanonicalId(codeOrId);
   }
 
   public static resolveNumericId(codeOrId: string | number): number {
-    if (typeof codeOrId === "number") {
-      return codeOrId;
-    }
-    if (!codeOrId) return 0;
-
-    const clean = codeOrId.toString().trim().toUpperCase();
-    const cached = NationIdCacheRegistry.numericCache.get(clean);
-    if (cached !== undefined) return cached;
-
-    const rawNum = clean.replace("NATION_", "");
-    const parsedDirect = parseInt(rawNum, 10);
-    if (!isNaN(parsedDirect) && parsedDirect > 0 && parsedDirect < 255) {
-      const checkProfile = findCountryProfileById(parsedDirect);
-      if (checkProfile) return checkProfile.id ?? parsedDirect;
-    }
-
-    const profile =
-      findCountryProfileByCode(clean) || findCountryProfileById(clean);
-    if (profile && profile.id) {
-      NationIdCacheRegistry.numericCache.set(clean, profile.id);
-      return profile.id;
-    }
-
-    return isNaN(parsedDirect) ? 0 : parsedDirect;
+    return CountryRegistry.resolveNumericId(codeOrId);
   }
 }
 
