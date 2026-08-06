@@ -8,6 +8,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { findCountryProfileById } from "@/domain/data/countries";
 import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -15,7 +16,7 @@ interface WideOverviewViewProps {
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
-  const numericId = parseInt(nation.id.replace("NATION_", ""), 10);
+  const numericId = NationIdResolver.resolveNumericId(nation.id);
   const profile = findCountryProfileById(numericId);
 
   const effectiveGdp =

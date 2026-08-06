@@ -8,6 +8,7 @@ import {
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export function resolveStanceLabel(
   humanNationId: string | undefined,
@@ -74,7 +75,7 @@ export function useHoverNationResolver({
       const countryCode = profile
         ? profile.code.toUpperCase()
         : matchedCountry!.code.toUpperCase();
-      const fullNationId = `NATION_${countryCode}`;
+      const fullNationId = NationIdResolver.resolveCanonicalId(countryCode);
 
       let liveNation = nationsMap ? nationsMap[fullNationId] : null;
 

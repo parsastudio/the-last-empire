@@ -46,10 +46,10 @@ export function useLiveNations({
       })
       .map((n) => {
         const canonical = NationIdResolver.resolveCanonicalId(n.id);
-        const numericId = parseInt(canonical.replace("NATION_", ""), 10);
-        const profile = !isNaN(numericId)
-          ? findCountryProfileById(numericId)
-          : findCountryProfileByCode(n.flagCode || n.id);
+        const numericId = NationIdResolver.resolveNumericId(canonical);
+        const profile =
+          findCountryProfileById(numericId) ||
+          findCountryProfileByCode(n.flagCode || n.id);
 
         const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
         const code = profile ? profile.code : canonical.replace("NATION_", "");
