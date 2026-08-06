@@ -45,12 +45,11 @@ export function resolveProfileRelation(
   liveNation?: Nation | null,
 ): DiplomaticRelation {
   const canonicalId = NationIdResolver.resolveCanonicalId(code);
-  const numericId = parseInt(canonicalId.replace("NATION_", ""), 10);
+  const numericId = NationIdResolver.resolveNumericId(canonicalId);
 
   const profile =
     findCountryProfileByCode(code) ||
-    findCountryProfileById(code) ||
-    (!isNaN(numericId) ? findCountryProfileById(numericId) : undefined) ||
+    findCountryProfileById(numericId) ||
     (liveNation
       ? findCountryProfileByCode(liveNation.id) ||
         findCountryProfileById(liveNation.id)

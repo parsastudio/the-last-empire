@@ -7,6 +7,7 @@ import {
   findCountryProfileById,
   findCountryProfileByCode,
 } from "@/domain/data/countries";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 interface NationHeaderCardProps {
   name: string;
@@ -34,10 +35,9 @@ export function NationHeaderCard({
     let realPixels =
       territoryPixelCount && territoryPixelCount > 0 ? territoryPixelCount : 0;
     if (!realPixels) {
-      const numericId = parseInt(code.replace("NATION_", ""), 10);
-      const profile = !isNaN(numericId)
-        ? findCountryProfileById(numericId)
-        : findCountryProfileByCode(code);
+      const numericId = NationIdResolver.resolveNumericId(code);
+      const profile =
+        findCountryProfileById(numericId) || findCountryProfileByCode(code);
       realPixels = profile ? Math.round(profile.gdp / 10000000) : 4000;
     }
 
@@ -47,10 +47,9 @@ export function NationHeaderCard({
 
     let realPop = population;
     if (!realPop || realPop <= 0) {
-      const numericId = parseInt(code.replace("NATION_", ""), 10);
-      const profile = !isNaN(numericId)
-        ? findCountryProfileById(numericId)
-        : findCountryProfileByCode(code);
+      const numericId = NationIdResolver.resolveNumericId(code);
+      const profile =
+        findCountryProfileById(numericId) || findCountryProfileByCode(code);
       realPop = profile ? profile.population : 80000000;
     }
 

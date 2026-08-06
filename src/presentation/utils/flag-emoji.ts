@@ -1,5 +1,9 @@
 import { ISO3_TO_ISO2_MAP } from "@/presentation/utils/flag/iso-code-mapping.config";
-import { findCountryProfileById } from "@/domain/data/countries";
+import {
+  findCountryProfileById,
+  findCountryProfileByCode,
+} from "@/domain/data/countries";
+import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 const flagCache = new Map<string, string>();
 
@@ -9,15 +13,13 @@ export function getFlagEmoji(code: string): string {
   const cached = flagCache.get(code);
   if (cached) return cached;
 
-  let cleanCode = code.trim().toUpperCase().replace("NATION_", "");
+  const profile =
+    findCountryProfileByCode(code) ||
+    findCountryProfileById(NationIdResolver.resolveNumericId(code));
 
-  if (/^\d+$/.test(cleanCode)) {
-    const numericId = parseInt(cleanCode, 10);
-    const profile = findCountryProfileById(numericId);
-    if (profile) {
-      cleanCode = profile.flagCode || profile.code;
-    }
-  }
+  const cleanCode = profile
+    ? profile.flagCode || profile.code
+    : code.trim().toUpperCase().replace("NATION_", "");
 
   let alpha2 = cleanCode;
   if (cleanCode.length === 3) {

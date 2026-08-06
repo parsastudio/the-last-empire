@@ -1,7 +1,8 @@
 import React from "react";
 import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { MilitaryPayrollCalculator } from "@/engine/economy/economy-domain.service";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface MilitaryForcesSectionProps {
   infantry: number;
@@ -20,26 +21,14 @@ export function MilitaryForcesSection({
   experience,
   militiaGarrisonPower = 280,
 }: MilitaryForcesSectionProps) {
-  const techMultiplier = 1 + (techLevel - 1) * 0.2;
-  const infantryPayroll = Math.floor(
-    infantry *
-      MILITARY_UNIT_STATS.INFANTRY.moneyPayrollBase *
-      techMultiplier *
-      1000000,
-  );
-  const airForcePayroll = Math.floor(
-    airForce *
-      MILITARY_UNIT_STATS.AIR_FORCE.moneyPayrollBase *
-      techMultiplier *
-      1000000,
-  );
-  const dronePayroll = Math.floor(
-    droneMissile *
-      MILITARY_UNIT_STATS.DRONE_MISSILE.moneyPayrollBase *
-      techMultiplier *
-      1000000,
-  );
+  const mockNation = {
+    military: { infantry, airForce, droneMissile, techLevel },
+    doctrines: { unlockedDoctrines: [] },
+    traits: [],
+    government: { type: "DEMOCRACY" },
+  } as unknown as Nation;
 
+  const payroll = MilitaryPayrollCalculator.calculatePayroll(mockNation);
   const bonusPercent = (techLevel - 1) * 20;
 
   return (
@@ -61,7 +50,7 @@ export function MilitaryForcesSection({
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
                 حقوق نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(infantryPayroll)}
+                {PersianNumberFormatter.formatCurrency(payroll.infantry)}
               </span>
             </div>
           </div>
@@ -102,7 +91,7 @@ export function MilitaryForcesSection({
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
                 حقوق نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(airForcePayroll)}
+                {PersianNumberFormatter.formatCurrency(payroll.airForce)}
               </span>
             </div>
           </div>
@@ -123,7 +112,7 @@ export function MilitaryForcesSection({
               </span>
               <span className="text-[9px] text-muted-foreground block font-sans">
                 حقوق نوبتی:{" "}
-                {PersianNumberFormatter.formatCurrency(dronePayroll)}
+                {PersianNumberFormatter.formatCurrency(payroll.droneMissile)}
               </span>
             </div>
           </div>
