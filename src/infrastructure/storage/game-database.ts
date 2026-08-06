@@ -9,7 +9,7 @@ export interface SavedGameStateRecord {
 
 export interface SavedBitBufferRecord {
   gameId: string;
-  buffer: ArrayBuffer;
+  buffer: ArrayBuffer | SharedArrayBuffer;
   timestamp: number;
 }
 

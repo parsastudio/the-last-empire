@@ -29,7 +29,7 @@ export class GameStorageAdapter {
       buffer: uint8ArrayData.buffer.slice(
         uint8ArrayData.byteOffset,
         uint8ArrayData.byteOffset + uint8ArrayData.byteLength,
-      ),
+      ) as ArrayBuffer,
       timestamp: Date.now(),
     });
   }
@@ -39,8 +39,12 @@ export class GameStorageAdapter {
     buffer: BitPackedBuffer,
   ): Promise<boolean> {
     const record = await db.bitBuffers.get(`${gameId}_bitstate`);
-    if (record && record.buffer instanceof ArrayBuffer) {
-      buffer.loadArrayBuffer(record.buffer);
+    if (
+      record &&
+      (record.buffer instanceof ArrayBuffer ||
+        record.buffer instanceof SharedArrayBuffer)
+    ) {
+      buffer.loadArrayBuffer(record.buffer as ArrayBuffer);
       return true;
     }
     return false;

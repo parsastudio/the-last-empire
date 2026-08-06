@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useMemo } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
-import { AsyncSaveQueueService } from "@/infrastructure/storage/async-save-queue.service";
+import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { useToast } from "@/presentation/context/toast-context";
 
 export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
   const { showToast } = useToast();
-  const saveQueue = useMemo(() => AsyncSaveQueueService.getInstance(), []);
   const lastSavedTurnRef = useRef<number | null>(null);
 
   const saveStateToDb = useCallback(
     (state: GameState, isAutoSave = false) => {
       if (!state || !gameId) return;
-      saveQueue.enqueueSave(gameId, state, isAutoSave);
+      const adapter = new GameStorageAdapter();
+      adapter.saveGameState(gameId, state);
       lastSavedTurnRef.current = state.currentTurn;
 
       if (isAutoSave) {
@@ -24,7 +24,7 @@ export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
         );
       }
     },
-    [gameId, saveQueue, showToast],
+    [gameId, showToast],
   );
 
   useEffect(() => {
