@@ -2,6 +2,21 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 
 export class CorruptionManager {
+  public static calculateCost(
+    gdp: number,
+    targetReductionPercent: number,
+  ): number {
+    return Math.ceil(gdp * (targetReductionPercent / 100));
+  }
+
+  public static calculateReduction(
+    investmentAmount: number,
+    gdp: number,
+  ): number {
+    const exactReduction = Math.round((investmentAmount / (gdp || 1)) * 100);
+    return Math.max(1, exactReduction);
+  }
+
   public static updateCorruptionLevel(nation: Nation): number {
     const stability = nation.government.stability;
     const baseEntropyGrowth = 5.0 * (1.0 - stability / 100);
@@ -37,10 +52,10 @@ export class CorruptionManager {
       );
     }
 
-    const exactReduction = Math.round(
-      (investmentAmount / (nation.gdp || 1)) * 100,
+    const corruptionReduction = CorruptionManager.calculateReduction(
+      investmentAmount,
+      nation.gdp,
     );
-    const corruptionReduction = Math.max(1, exactReduction);
 
     const rawCorruption = nation.government.corruption - corruptionReduction;
     const newCorruption =

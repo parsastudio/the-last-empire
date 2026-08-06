@@ -2,6 +2,10 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { MarketEngine } from "@/engine/economy/market-engine";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import {
+  IndustrialLevelManager,
+  InfrastructureManager,
+} from "@/engine/economy/economy-domain.service";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
@@ -65,7 +69,7 @@ export class EconomyActionExecutor {
       }
 
       case "INVEST_INFRASTRUCTURE": {
-        const cost = Math.max(1000000000, Math.floor(nation.gdp * 0.1));
+        const cost = InfrastructureManager.getUpgradeCost(nation);
         if (nation.treasury < cost) return state;
         return {
           ...state,
@@ -85,7 +89,7 @@ export class EconomyActionExecutor {
       }
 
       case "UPGRADE_INDUSTRIAL_LEVEL": {
-        const cost = Math.max(2000000000, Math.floor(nation.gdp * 0.15));
+        const cost = IndustrialLevelManager.getUpgradeCost(nation);
         if (nation.treasury < cost) return state;
         return {
           ...state,

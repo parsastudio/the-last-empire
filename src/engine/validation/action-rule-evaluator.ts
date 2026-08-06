@@ -2,7 +2,12 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
 import { Nation } from "@/domain/nation/nation.schema";
-import { calculateProxyOperationBudget } from "@/domain/politics/government-label.utility";
+import {
+  IndustrialLevelManager,
+  InfrastructureManager,
+} from "@/engine/economy/economy-domain.service";
+import { ResearchManager } from "@/engine/politics/research-manager";
+import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 
 export class ActionRuleEvaluator {
   public static evaluate(state: GameState, action: GameAction): void {
@@ -42,7 +47,7 @@ export class ActionRuleEvaluator {
         break;
 
       case "UPGRADE_INDUSTRIAL_LEVEL": {
-        const cost = Math.max(2000000000, Math.floor(source.gdp * 0.15));
+        const cost = IndustrialLevelManager.getUpgradeCost(source);
         if (source.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
@@ -53,7 +58,7 @@ export class ActionRuleEvaluator {
       }
 
       case "INVEST_INFRASTRUCTURE": {
-        const cost = Math.max(1000000000, Math.floor(source.gdp * 0.1));
+        const cost = InfrastructureManager.getUpgradeCost(source);
         if (source.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
@@ -64,7 +69,7 @@ export class ActionRuleEvaluator {
       }
 
       case "INVEST_RESEARCH": {
-        const cost = Math.max(1500000000, Math.floor(source.gdp * 0.12));
+        const cost = ResearchManager.getMilitaryTechCost(source);
         if (source.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
@@ -169,7 +174,7 @@ export class ActionRuleEvaluator {
             "Target nation is not available",
           );
         }
-        const reqBudget = calculateProxyOperationBudget(target.gdp, 2);
+        const reqBudget = ProxyWarManager.calculateBudget(target.gdp, 2);
         if (source.treasury < reqBudget) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
