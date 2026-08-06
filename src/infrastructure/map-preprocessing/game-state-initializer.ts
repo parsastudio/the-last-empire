@@ -11,10 +11,6 @@ import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-res
 import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
-export function normalizeNationId(nationId: string): string {
-  return NationIdResolver.resolveCanonicalId(nationId);
-}
-
 export class ManifestFileLoader {
   public loadManifest(mapId = "map1"): MapManifest | null {
     try {

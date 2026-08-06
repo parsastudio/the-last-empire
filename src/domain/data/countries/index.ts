@@ -1,18 +1,22 @@
 import { CountryProfile } from "@/domain/data/countries/profile.type";
-import { africaProfiles } from "./africa";
-import { americasProfiles } from "./americas";
-import { asiaProfiles } from "./asia";
-import { europeProfiles } from "./europe";
-import { oceaniaProfiles } from "./oceania";
-import { COUNTRY_ID_MAP } from "./id-mapping.config";
+import { africaProfiles } from "@/domain/data/countries/africa";
+import { americasProfiles } from "@/domain/data/countries/americas";
+import { asiaWestProfiles } from "@/domain/data/countries/asia-west";
+import { asiaEastProfiles } from "@/domain/data/countries/asia-east";
+import { europeWestProfiles } from "@/domain/data/countries/europe-west";
+import { europeEastProfiles } from "@/domain/data/countries/europe-east";
+import { oceaniaProfiles } from "@/domain/data/countries/oceania";
+import { COUNTRY_ID_MAP } from "@/domain/data/countries/id-mapping.config";
 
 export type { CountryProfile };
 
 const rawProfiles: CountryProfile[] = [
   ...africaProfiles,
   ...americasProfiles,
-  ...asiaProfiles,
-  ...europeProfiles,
+  ...asiaWestProfiles,
+  ...asiaEastProfiles,
+  ...europeWestProfiles,
+  ...europeEastProfiles,
   ...oceaniaProfiles,
 ];
 
