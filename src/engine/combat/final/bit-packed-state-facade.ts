@@ -26,7 +26,10 @@ export class BitPackedStateFacade {
     );
 
     if (result.capturedPixelsCount > 0) {
-      this.frontierManager.updateAllFrontiers(buffer);
+      this.frontierManager.updateModifiedFrontiers(
+        buffer,
+        this.gridState.getModifiedIndices(),
+      );
     }
 
     return result.capturedPixelsCount;

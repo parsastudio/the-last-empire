@@ -1,4 +1,5 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export interface ConquestExecutionResult {
   capturedPixelsCount: number;
@@ -21,6 +22,7 @@ export class WavefrontConquestEngine {
 
     const width = buffer.getWidth();
     const height = buffer.getHeight();
+    const gridState = BitPackedGridState.getInstance();
 
     const queueX: number[] = [];
     const queueY: number[] = [];
@@ -35,23 +37,48 @@ export class WavefrontConquestEngine {
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        if (buffer.getNationId(x, y) === defenderNationId) {
-          let isFrontier = false;
+        if (
+          buffer.getNationId(x, y) === defenderNationId &&
+          buffer.getFrontier(x, y) === 1
+        ) {
           for (let k = 0; k < 4; k++) {
             const nx = (x + neighbors[k]!.dx + width) % width;
             const ny = y + neighbors[k]!.dy;
             if (ny >= 0 && ny < height) {
               if (buffer.getNationId(nx, ny) === attackerNationId) {
-                isFrontier = true;
+                const idx = y * width + x;
+                if (!visited.has(idx)) {
+                  visited.add(idx);
+                  queueX.push(x);
+                  queueY.push(y);
+                }
                 break;
               }
             }
           }
+        }
+      }
+    }
 
-          if (isFrontier) {
-            queueX.push(x);
-            queueY.push(y);
-            visited.add(y * width + x);
+    if (queueX.length === 0) {
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          if (buffer.getNationId(x, y) === defenderNationId) {
+            for (let k = 0; k < 4; k++) {
+              const nx = (x + neighbors[k]!.dx + width) % width;
+              const ny = y + neighbors[k]!.dy;
+              if (ny >= 0 && ny < height) {
+                if (buffer.getNationId(nx, ny) === attackerNationId) {
+                  const idx = y * width + x;
+                  if (!visited.has(idx)) {
+                    visited.add(idx);
+                    queueX.push(x);
+                    queueY.push(y);
+                  }
+                  break;
+                }
+              }
+            }
           }
         }
       }
@@ -73,7 +100,7 @@ export class WavefrontConquestEngine {
       head++;
 
       if (buffer.getNationId(cx, cy) === defenderNationId) {
-        buffer.setNationId(cx, cy, attackerNationId);
+        gridState.setNationId(cx, cy, attackerNationId);
         capturedPixelsCount++;
 
         for (let k = 0; k < 4; k++) {
