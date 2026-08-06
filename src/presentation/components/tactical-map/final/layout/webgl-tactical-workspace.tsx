@@ -1,10 +1,6 @@
 "use client";
 
 import React, { useState, useCallback, useRef } from "react";
-import {
-  GameProvider,
-  useGameContext,
-} from "@/presentation/context/game-context";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { WebGLMapCanvas } from "@/presentation/components/tactical-map/final/webgl-map-canvas";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
@@ -19,12 +15,13 @@ import {
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 
 interface WebGLTacticalWorkspaceProps {
   gameId?: string;
 }
 
-function TacticalWorkspaceContent({
+export function WebGLTacticalWorkspace({
   gameId = "default_game",
 }: WebGLTacticalWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -36,7 +33,7 @@ function TacticalWorkspaceContent({
     advanceNextTurn,
     loading,
     error,
-  } = useGameContext();
+  } = useBitPackedGame(gameId);
 
   const metrics = useGameResources(effectiveGameState);
 
@@ -145,15 +142,5 @@ function TacticalWorkspaceContent({
         </div>
       )}
     </div>
-  );
-}
-
-export function WebGLTacticalWorkspace({
-  gameId = "default_game",
-}: WebGLTacticalWorkspaceProps) {
-  return (
-    <GameProvider gameId={gameId}>
-      <TacticalWorkspaceContent gameId={gameId} />
-    </GameProvider>
   );
 }

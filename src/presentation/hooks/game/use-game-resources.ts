@@ -9,6 +9,7 @@ import {
   TariffCalculator,
 } from "@/engine/economy/economy-domain.service";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
+import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -25,8 +26,12 @@ export interface HumanResourceMetrics {
 }
 
 export function useGameResources(
-  gameState: GameState | null,
+  overrideGameState?: GameState | null,
 ): HumanResourceMetrics {
+  const storeGameState = useGameStore((state) => state.gameState);
+  const gameState =
+    overrideGameState !== undefined ? overrideGameState : storeGameState;
+
   return useMemo(() => {
     if (!gameState || !gameState.humanNationId) {
       return {

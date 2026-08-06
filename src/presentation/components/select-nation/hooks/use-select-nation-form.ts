@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { GameIdGenerator } from "@/domain/shared/domain-utilities";
-import { ClientGameService } from "@/presentation/services/client-game.service";
 import { useToast } from "@/presentation/context/toast-context";
 import { FinalMapManifest as MapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
@@ -10,13 +9,14 @@ import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/b
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/services/nation-database-provider";
+import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useSelectNationForm() {
   const router = useRouter();
   const { showToast } = useToast();
   const provider = useMemo(() => new NationDatabaseProvider(), []);
-  const gameService = useMemo(() => new ClientGameService(), []);
   const storageAdapter = useMemo(() => new GameStorageAdapter(), []);
+  const createCampaignStore = useGameStore((state) => state.createCampaign);
 
   const [manifest, setManifest] = useState<MapManifest | null>(null);
 
@@ -99,19 +99,19 @@ export function useSelectNationForm() {
       const gridState = BitPackedGridState.getInstance();
       await storageAdapter.saveBitBuffer(uniqueGameId, gridState.getBuffer());
 
-      const result = await gameService.createCampaign(
+      const success = await createCampaignStore(
         selectedNation.id,
         selectedGovernment,
         uniqueGameId,
         manifest,
       );
 
-      if (result.success && result.data) {
+      if (success) {
         router.push(`/play/${uniqueGameId}`);
       } else {
         showToast(
           "خطا در ایجاد کمپین",
-          result.error || "خطا در راه‌اندازی کمپین جدید بازی",
+          "خطا در راه‌اندازی کمپین جدید بازی",
           "error",
         );
       }
@@ -125,7 +125,7 @@ export function useSelectNationForm() {
   }, [
     selectedNation,
     selectedGovernment,
-    gameService,
+    createCampaignStore,
     manifest,
     storageAdapter,
     router,
