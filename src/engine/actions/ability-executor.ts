@@ -1,13 +1,14 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ActivateAbilityAction } from "@/domain/game/action.schema";
-import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class AbilityExecutor {
   public static execute(
     state: GameState,
     action: ActivateAbilityAction,
   ): GameState {
-    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+    const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const nation =
@@ -22,7 +23,7 @@ export class AbilityExecutor {
     switch (action.abilityType) {
       case "DIPLOMATIC_SUMMIT": {
         const targetId = action.targetNationId
-          ? NationIdResolver.resolveCanonicalId(action.targetNationId)
+          ? CountryRegistry.resolveCanonicalId(action.targetNationId)
           : undefined;
 
         const relKey =

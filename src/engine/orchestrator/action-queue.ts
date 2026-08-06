@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class ActionQueue {
   private queue: GameAction[] = [];
@@ -11,14 +12,14 @@ export class ActionQueue {
   }
 
   private verifyConcurrency(newAction: GameAction): void {
-    const canonicalNewNationId = NationIdResolver.resolveCanonicalId(
+    const canonicalNewNationId = CountryRegistry.resolveCanonicalId(
       newAction.nationId,
     );
 
     if (newAction.type === "REQUEST_LOAN") {
       if (
         this.queue.some((a) => {
-          const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+          const aId = CountryRegistry.resolveCanonicalId(a.nationId);
           return (
             a.type === "REQUEST_LOAN" &&
             (a.nationId === newAction.nationId || aId === canonicalNewNationId)
@@ -34,7 +35,7 @@ export class ActionQueue {
 
     if (newAction.type === "TRADE_RESOURCES") {
       const hasConflict = this.queue.some((a) => {
-        const aId = NationIdResolver.resolveCanonicalId(a.nationId);
+        const aId = CountryRegistry.resolveCanonicalId(a.nationId);
         return (
           a.type === "TRADE_RESOURCES" &&
           (a.nationId === newAction.nationId || aId === canonicalNewNationId) &&

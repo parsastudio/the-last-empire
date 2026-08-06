@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
@@ -11,7 +12,7 @@ export class MilitaryActionExecutor {
   private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
-    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+    const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const nation =
@@ -132,7 +133,7 @@ export class MilitaryActionExecutor {
       }
 
       case "INITIATE_BATTLE": {
-        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,
         );
         if (
@@ -154,8 +155,8 @@ export class MilitaryActionExecutor {
         const isLandNeighbor = nation.geography.landNeighbors.some(
           (neighborId) =>
             neighborId === target.id ||
-            NationIdResolver.resolveCanonicalId(neighborId) ===
-              NationIdResolver.resolveCanonicalId(target.id),
+            CountryRegistry.resolveCanonicalId(neighborId) ===
+              CountryRegistry.resolveCanonicalId(target.id),
         );
 
         if (!isLandNeighbor) {

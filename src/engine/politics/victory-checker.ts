@@ -1,5 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface VictoryStatus {
   isGameOver: boolean;
@@ -50,7 +50,7 @@ export class ConquestVictoryChecker implements VictoryCondition {
       }
     }
 
-    const humanCanonicalId = NationIdResolver.resolveCanonicalId(
+    const humanCanonicalId = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
     const humanNation =
@@ -100,7 +100,7 @@ export class DiplomaticVictoryChecker implements VictoryCondition {
       return null;
     }
 
-    const humanCanonicalId = NationIdResolver.resolveCanonicalId(
+    const humanCanonicalId = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
     const humanNation =
@@ -113,7 +113,7 @@ export class DiplomaticVictoryChecker implements VictoryCondition {
         if (!rel) continue;
         if (rel.stance === "ALLIANCE") {
           const canonicalTargetId =
-            NationIdResolver.resolveCanonicalId(targetId);
+            CountryRegistry.resolveCanonicalId(targetId);
           const partner =
             state.nations[targetId] || state.nations[canonicalTargetId];
           if (partner && partner.isAlive) {

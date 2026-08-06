@@ -1,5 +1,5 @@
-import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogEntry, TurnLogLevel } from "@/domain/game/game-state.schema";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export type { Nation } from "@/domain/nation/nation.schema";
 export type { AIPersonalityType } from "@/domain/ai/ai.schema";
@@ -40,16 +40,6 @@ export class GameIdGenerator {
     }
     const cleanCountry = countryCode.toUpperCase().replace("NATION_", "");
     return `${cleanCountry}-${code}`;
-  }
-}
-
-export class NationIdResolver {
-  public static resolveCanonicalId(codeOrId: string | number): string {
-    return CountryRegistry.resolveCanonicalId(codeOrId);
-  }
-
-  public static resolveNumericId(codeOrId: string | number): number {
-    return CountryRegistry.resolveNumericId(codeOrId);
   }
 }
 
@@ -114,7 +104,7 @@ export class TurnLogBuilder {
     level: TurnLogLevel,
     message: string,
   ): TurnLogEntry {
-    const canonical = NationIdResolver.resolveCanonicalId(sourceNationId);
+    const canonical = CountryRegistry.resolveCanonicalId(sourceNationId);
     const cleanNation = canonical.replace("NATION_", "");
     const randomSuffix = Math.random().toString(36).substring(2, 7);
     return {

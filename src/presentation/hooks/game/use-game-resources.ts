@@ -10,7 +10,7 @@ import {
 } from "@/engine/economy/economy-domain.service";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 import { useGameStore } from "@/presentation/stores/use-game-store";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -49,7 +49,7 @@ export function useGameResources(
     }
 
     const humanId = gameState.humanNationId;
-    const canonicalHumanId = NationIdResolver.resolveCanonicalId(humanId);
+    const canonicalHumanId = CountryRegistry.resolveCanonicalId(humanId);
     const nation =
       gameState.nations[humanId] || gameState.nations[canonicalHumanId] || null;
 

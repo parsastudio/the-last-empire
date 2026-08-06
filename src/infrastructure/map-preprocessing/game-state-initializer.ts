@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import {
   FinalMapManifest as MapManifest,
   FinalManifestNation,
@@ -33,7 +33,7 @@ export class GameStateInitializer {
     nationId: string,
     governmentType?: string,
   ): GameState {
-    const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
+    const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
     const manifest = this.manifestLoader.loadManifest("map1");
 
     const detectedNations = manifest

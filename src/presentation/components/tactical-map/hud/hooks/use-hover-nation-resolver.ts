@@ -4,7 +4,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export type { HoverCountryInfo };
 
@@ -50,7 +49,7 @@ export function useHoverNationResolver({
       if (!profile) return null;
 
       const countryCode = profile.code.toUpperCase();
-      const fullNationId = NationIdResolver.resolveCanonicalId(countryCode);
+      const fullNationId = CountryRegistry.resolveCanonicalId(countryCode);
 
       let liveNation = nationsMap ? nationsMap[fullNationId] : null;
 

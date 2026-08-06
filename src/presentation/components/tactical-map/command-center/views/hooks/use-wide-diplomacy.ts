@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
 
 interface UseWideDiplomacyProps {
@@ -46,7 +46,7 @@ export function useWideDiplomacy({
 
   const activeCode = userSelectedCode || selectedTargetCode || defaultCode;
 
-  const targetNationId = NationIdResolver.resolveCanonicalId(activeCode);
+  const targetNationId = CountryRegistry.resolveCanonicalId(activeCode);
   const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
   const selectedRelation = resolveProfileRelation(activeCode, targetLiveNation);
 
@@ -62,11 +62,11 @@ export function useWideDiplomacy({
 
   const isLandNeighbor = useMemo(() => {
     if (!humanNation || !humanNation.geography?.landNeighbors) return false;
-    const targetCanonical = NationIdResolver.resolveCanonicalId(targetNationId);
+    const targetCanonical = CountryRegistry.resolveCanonicalId(targetNationId);
     return humanNation.geography.landNeighbors.some(
       (neighbor) =>
         neighbor === targetNationId ||
-        NationIdResolver.resolveCanonicalId(neighbor) === targetCanonical,
+        CountryRegistry.resolveCanonicalId(neighbor) === targetCanonical,
     );
   }, [humanNation, targetNationId]);
 

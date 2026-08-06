@@ -1,5 +1,5 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface BitPackedNeighborResult {
   landNeighborsMap: Map<number, Set<number>>;
@@ -64,7 +64,7 @@ export class BitPackedNeighborDetector {
     const result: string[] = [];
 
     for (const numId of numericNeighbors) {
-      const canonical = NationIdResolver.resolveCanonicalId(numId);
+      const canonical = CountryRegistry.resolveCanonicalId(numId);
       if (nations[canonical] || nations[`NATION_${numId}`]) {
         result.push(canonical);
       }

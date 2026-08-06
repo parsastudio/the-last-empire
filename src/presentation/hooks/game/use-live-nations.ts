@@ -3,8 +3,8 @@ import { Nation } from "@/domain/nation/nation.schema";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
+  CountryRegistry,
 } from "@/domain/data/countries";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
 export interface LiveNationItem {
   id: string;
@@ -35,18 +35,18 @@ export function useLiveNations({
     if (!nationsMap) return [];
 
     const canonicalExclude = excludeNationId
-      ? NationIdResolver.resolveCanonicalId(excludeNationId)
+      ? CountryRegistry.resolveCanonicalId(excludeNationId)
       : null;
 
     return Object.values(nationsMap)
       .filter((n) => {
         if (!n.isAlive) return false;
-        const canonical = NationIdResolver.resolveCanonicalId(n.id);
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
         return canonical !== canonicalExclude && n.id !== excludeNationId;
       })
       .map((n) => {
-        const canonical = NationIdResolver.resolveCanonicalId(n.id);
-        const numericId = NationIdResolver.resolveNumericId(canonical);
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
+        const numericId = CountryRegistry.resolveNumericId(canonical);
         const profile =
           findCountryProfileById(numericId) ||
           findCountryProfileByCode(n.flagCode || n.id);

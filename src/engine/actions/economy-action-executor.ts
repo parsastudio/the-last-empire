@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import {
   IndustrialLevelManager,
   InfrastructureManager,
@@ -9,7 +10,7 @@ import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
-    const canonicalNationId = NationIdResolver.resolveCanonicalId(
+    const canonicalNationId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const nation =
