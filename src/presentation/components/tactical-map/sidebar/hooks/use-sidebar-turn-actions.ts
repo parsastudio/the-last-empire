@@ -1,19 +1,14 @@
 import { useCallback } from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { GameState } from "@/domain/game/game-state.schema";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
+import { useGameStore } from "@/presentation/stores/use-game-store";
 
-export function useSidebarTurnActions(
-  externalActiveTab?: SidebarTabType | null,
-  onClearExternalTab?: () => void,
-  overrideGameState?: GameState | null,
-  overrideAdvanceNextTurn?: () => Promise<GameState | null>,
-) {
+export function useSidebarTurnActions() {
   const uiStore = useUiStore();
+  const gameState = useGameStore((state) => state.gameState);
+  const advanceNextTurn = useGameStore((state) => state.advanceNextTurn);
 
-  const gameState = overrideGameState ?? null;
-
-  const activeTab = externalActiveTab ?? uiStore.activeTab;
+  const activeTab = uiStore.activeTab;
   const activeSubTab = uiStore.activeSubTab;
   const selectedTargetCode = uiStore.selectedTargetCode;
 
@@ -25,36 +20,26 @@ export function useSidebarTurnActions(
   const currentTurn = gameState ? gameState.currentTurn : 1;
 
   const handleNextTurn = useCallback(async () => {
-    if (!overrideAdvanceNextTurn) return;
-    await overrideAdvanceNextTurn();
-  }, [overrideAdvanceNextTurn]);
+    await advanceNextTurn();
+  }, [advanceNextTurn]);
 
   const setInternalActiveTab = useCallback(
     (tab: SidebarTabType | null) => {
       uiStore.setActiveTab(tab);
-      if (onClearExternalTab) {
-        onClearExternalTab();
-      }
     },
-    [uiStore, onClearExternalTab],
+    [uiStore],
   );
 
   const handleNavigateTab = useCallback(
     (tab: SidebarTabType, subTab?: string, targetCode?: string) => {
       uiStore.setActiveTab(tab, subTab, targetCode);
-      if (onClearExternalTab) {
-        onClearExternalTab();
-      }
     },
-    [uiStore, onClearExternalTab],
+    [uiStore],
   );
 
   const handleCloseActiveModal = useCallback(() => {
     uiStore.closeActiveTab();
-    if (onClearExternalTab) {
-      onClearExternalTab();
-    }
-  }, [uiStore, onClearExternalTab]);
+  }, [uiStore]);
 
   return {
     activeTab,
