@@ -42,7 +42,7 @@ export function WebGLMapCanvas({
     handleMouseUp,
   } = useMapGesture(dimensions.width, dimensions.height, 4096, 2048);
 
-  useWebGLMapRenderer({
+  const rendererRef = useWebGLMapRenderer({
     gl,
     dimensions,
     positionRef,
@@ -61,6 +61,7 @@ export function WebGLMapCanvas({
     closeContextMenu,
   } = useWebGLInteraction({
     containerRef,
+    rendererRef,
     positionRef,
     scaleRef,
     isDraggingRef,
