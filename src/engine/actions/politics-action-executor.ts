@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-domain.service";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
@@ -12,7 +13,7 @@ export class PoliticsActionExecutor {
   private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
-    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+    const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const nation =
@@ -141,7 +142,7 @@ export class PoliticsActionExecutor {
         };
 
       case "FUND_PROXY_INFLUENCE": {
-        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,
         );
         const target =
@@ -198,7 +199,7 @@ export class PoliticsActionExecutor {
       }
 
       case "DIPLOMATIC_PROPOSAL": {
-        const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,
         );
         const receiver =

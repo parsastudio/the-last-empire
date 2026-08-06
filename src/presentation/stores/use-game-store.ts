@@ -6,8 +6,7 @@ import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapte
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { TurnWorkerService } from "@/presentation/services/turn-worker.service";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
-import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
 interface GameStoreState {
@@ -85,7 +84,7 @@ export const useGameStore = create<GameStoreState>()(
       });
 
       try {
-        const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);
+        const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
         let detectedNations: string[] = [];
 
         if (manifest && manifest.nations) {

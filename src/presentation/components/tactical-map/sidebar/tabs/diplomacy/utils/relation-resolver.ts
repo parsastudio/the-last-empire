@@ -1,11 +1,11 @@
 import {
   findCountryProfileByCode,
   findCountryProfileById,
+  CountryRegistry,
 } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export interface DiplomaticRelation {
@@ -40,8 +40,8 @@ export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
 ): DiplomaticRelation {
-  const canonicalId = NationIdResolver.resolveCanonicalId(code);
-  const numericId = NationIdResolver.resolveNumericId(canonicalId);
+  const canonicalId = CountryRegistry.resolveCanonicalId(code);
+  const numericId = CountryRegistry.resolveNumericId(canonicalId);
 
   const profile =
     findCountryProfileByCode(code) ||

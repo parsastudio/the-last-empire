@@ -3,10 +3,8 @@ import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
-import {
-  TurnLogBuilder,
-  NationIdResolver,
-} from "@/domain/shared/domain-utilities";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import {
   DiplomaticBetrayalCalculator,
   ReputationManager,
@@ -21,10 +19,10 @@ export class BattleExecutionEngine {
     state: GameState,
     action: InitiateBattleAction,
   ): GameState {
-    const canonicalAttackerId = NationIdResolver.resolveCanonicalId(
+    const canonicalAttackerId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
-    const canonicalDefenderId = NationIdResolver.resolveCanonicalId(
+    const canonicalDefenderId = CountryRegistry.resolveCanonicalId(
       action.targetNationId,
     );
 
@@ -65,8 +63,8 @@ export class BattleExecutionEngine {
     let actualConqueredPixels = 0;
     if (requestedTargetPixels > 0) {
       actualConqueredPixels = this.facade.conquerAndRefreshed(
-        NationIdResolver.resolveNumericId(attacker.id),
-        NationIdResolver.resolveNumericId(defender.id),
+        CountryRegistry.resolveNumericId(attacker.id),
+        CountryRegistry.resolveNumericId(defender.id),
         requestedTargetPixels,
       );
     }

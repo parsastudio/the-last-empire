@@ -1,21 +1,18 @@
 export class PersianNumberFormatter {
-  private static readonly englishToPersianMap: Record<string, string> = {
-    "0": "۰",
-    "1": "۱",
-    "2": "۲",
-    "3": "۳",
-    "4": "۴",
-    "5": "۵",
-    "6": "۶",
-    "7": "۷",
-    "8": "۸",
-    "9": "۹",
-  };
+  private static readonly digitFormatter = new Intl.NumberFormat("fa-IR", {
+    useGrouping: false,
+  });
+
+  private static readonly commaFormatter = new Intl.NumberFormat("fa-IR", {
+    useGrouping: true,
+  });
 
   public static toPersianDigits(input: number | string): string {
     if (input === null || input === undefined) return "۰";
-    const str = input.toString();
-    return str.replace(/[0-9]/g, (w) => this.englishToPersianMap[w] || w);
+    if (typeof input === "number") {
+      return this.digitFormatter.format(input);
+    }
+    return input.replace(/\d/g, (d) => this.digitFormatter.format(Number(d)));
   }
 
   public static formatCompactNumber(value: number): string {
@@ -50,8 +47,8 @@ export class PersianNumberFormatter {
       return `${compactText} دلار`;
     }
 
-    const formattedWithCommas = Math.round(value).toLocaleString("en-US");
-    return `${this.toPersianDigits(formattedWithCommas)} دلار`;
+    const formattedWithCommas = this.commaFormatter.format(Math.round(value));
+    return `${formattedWithCommas} دلار`;
   }
 
   public static formatSignedIncome(value: number): string {

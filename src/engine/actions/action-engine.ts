@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
-import { GameError, NationIdResolver } from "@/domain/shared/domain-utilities";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 import { EconomyActionExecutor } from "@/engine/actions/economy-action-executor";
 import { MilitaryActionExecutor } from "@/engine/actions/military-action-executor";
 import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executor";
@@ -18,7 +19,7 @@ export class ActionEngine {
       };
     }
 
-    const canonicalSourceId = NationIdResolver.resolveCanonicalId(
+    const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const sourceNation =
@@ -34,7 +35,7 @@ export class ActionEngine {
     }
 
     if ("targetNationId" in action && action.targetNationId) {
-      const canonicalTargetId = NationIdResolver.resolveCanonicalId(
+      const canonicalTargetId = CountryRegistry.resolveCanonicalId(
         action.targetNationId,
       );
       const targetNation =

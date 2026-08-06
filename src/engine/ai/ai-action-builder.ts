@@ -1,10 +1,8 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
-import {
-  Nation,
-  NationIdResolver,
-  AIPersonalityType,
-} from "@/domain/shared/domain-utilities";
+import { Nation } from "@/domain/nation/nation.schema";
+import { CountryRegistry } from "@/domain/data/countries";
+import { AIPersonalityType } from "@/domain/ai/ai.schema";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -79,7 +77,7 @@ export class AIActionBuilder {
       if (actions.length >= 6) break;
       if (!relation) continue;
 
-      const canonicalTargetId = NationIdResolver.resolveCanonicalId(targetId);
+      const canonicalTargetId = CountryRegistry.resolveCanonicalId(targetId);
       const target = allNations[targetId] || allNations[canonicalTargetId];
       if (!target || !target.isAlive) continue;
 

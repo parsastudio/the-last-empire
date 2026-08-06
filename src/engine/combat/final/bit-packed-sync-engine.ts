@@ -1,6 +1,6 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class BitPackedSyncEngine {
   public computeNationRegionsOnDemand(
@@ -9,7 +9,7 @@ export class BitPackedSyncEngine {
   ): RegionDemographics[] {
     const width = buffer.getWidth();
     const height = buffer.getHeight();
-    const numericId = NationIdResolver.resolveNumericId(nation.id);
+    const numericId = CountryRegistry.resolveNumericId(nation.id);
 
     const enclaveMap = new Map<number, number>();
     let totalPixels = 0;

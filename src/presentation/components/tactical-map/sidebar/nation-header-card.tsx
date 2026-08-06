@@ -4,8 +4,8 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import {
   findCountryProfileById,
   findCountryProfileByCode,
+  CountryRegistry,
 } from "@/domain/data/countries";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 interface NationHeaderCardProps {
@@ -32,7 +32,7 @@ export function NationHeaderCard({
     let realPixels =
       territoryPixelCount && territoryPixelCount > 0 ? territoryPixelCount : 0;
     if (!realPixels) {
-      const numericId = NationIdResolver.resolveNumericId(code);
+      const numericId = CountryRegistry.resolveNumericId(code);
       const profile =
         findCountryProfileById(numericId) || findCountryProfileByCode(code);
       realPixels = profile ? Math.round(profile.gdp / 10000000) : 4000;
@@ -40,7 +40,7 @@ export function NationHeaderCard({
 
     let realPop = population;
     if (!realPop || realPop <= 0) {
-      const numericId = NationIdResolver.resolveNumericId(code);
+      const numericId = CountryRegistry.resolveNumericId(code);
       const profile =
         findCountryProfileById(numericId) || findCountryProfileByCode(code);
       realPop = profile ? profile.population : 80000000;
