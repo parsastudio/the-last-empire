@@ -2,6 +2,8 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-domain.service";
 import { ResearchManager } from "@/engine/politics/research-manager";
+import { CorruptionManager } from "@/engine/politics/corruption-manager";
+import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
 import { NationIdResolver } from "@/domain/shared/domain-utilities";
 
@@ -56,10 +58,10 @@ export class PoliticsActionExecutor {
         };
 
       case "ANTI_CORRUPTION_DRIVE": {
-        const exactReduction = Math.round(
-          (action.amount / (nation.gdp || 1)) * 100,
+        const reduction = CorruptionManager.calculateReduction(
+          action.amount,
+          nation.gdp,
         );
-        const reduction = Math.max(1, exactReduction);
         const rawCorruption = nation.government.corruption - reduction;
         const newCorruption =
           rawCorruption <= 0.01 ? 0 : Number(rawCorruption.toFixed(2));

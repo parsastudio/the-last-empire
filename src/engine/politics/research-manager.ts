@@ -3,13 +3,18 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import { GameError } from "@/domain/shared/domain-utilities";
 
 export class ResearchManager {
-  public getMilitaryTechCost(nation: Nation): number {
-    const baseCost = Math.floor(nation.gdp * 0.12);
+  public static getMilitaryTechCost(gdpOrNation: number | Nation): number {
+    const gdp = typeof gdpOrNation === "number" ? gdpOrNation : gdpOrNation.gdp;
+    const baseCost = Math.floor(gdp * 0.12);
     return Math.max(1500000000, baseCost);
   }
 
+  public getMilitaryTechCost(gdpOrNation: number | Nation): number {
+    return ResearchManager.getMilitaryTechCost(gdpOrNation);
+  }
+
   public investInMilitaryTech(nation: Nation): Nation {
-    const cost = this.getMilitaryTechCost(nation);
+    const cost = ResearchManager.getMilitaryTechCost(nation);
 
     if (nation.treasury < cost) {
       throw new GameError(

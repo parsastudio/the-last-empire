@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Cpu, Wrench, Award, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { IndustrialLevelManager } from "@/engine/economy/economy-domain.service";
-import { InfrastructureManager } from "@/engine/economy/economy-domain.service";
+import {
+  IndustrialLevelManager,
+  InfrastructureManager,
+} from "@/engine/economy/economy-domain.service";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -27,21 +29,9 @@ export function DevelopmentUpgradesSection({
   const [activeUpgrade, setActiveUpgrade] = useState<string | null>(null);
   const { dispatchAction } = useGameActions();
 
-  const industrialManager = new IndustrialLevelManager();
-  const infraManager = new InfrastructureManager();
-  const researchManager = new ResearchManager();
-
-  const mockNation = {
-    gdp,
-    industrialLevel,
-    treasury,
-    military: { techLevel: militaryTechLevel },
-    geography: { infrastructureLevel },
-  } as unknown as Parameters<typeof industrialManager.getUpgradeCost>[0];
-
-  const industrialCost = industrialManager.getUpgradeCost(mockNation);
-  const infraCost = infraManager.getUpgradeCost(mockNation);
-  const techCost = researchManager.getMilitaryTechCost(mockNation);
+  const industrialCost = IndustrialLevelManager.getUpgradeCost(gdp);
+  const infraCost = InfrastructureManager.getUpgradeCost(gdp);
+  const techCost = ResearchManager.getMilitaryTechCost(gdp);
 
   const canAffordIndustrial = treasury >= industrialCost;
   const canAffordInfra = treasury >= infraCost;

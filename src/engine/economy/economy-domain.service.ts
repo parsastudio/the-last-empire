@@ -402,13 +402,18 @@ export interface InfrastructureUpgradeResult {
 }
 
 export class InfrastructureManager {
-  public getUpgradeCost(nation: Nation): number {
-    const baseCost = Math.floor(nation.gdp * 0.1);
+  public static getUpgradeCost(gdpOrNation: number | Nation): number {
+    const gdp = typeof gdpOrNation === "number" ? gdpOrNation : gdpOrNation.gdp;
+    const baseCost = Math.floor(gdp * 0.1);
     return Math.max(1000000000, baseCost);
   }
 
+  public getUpgradeCost(gdpOrNation: number | Nation): number {
+    return InfrastructureManager.getUpgradeCost(gdpOrNation);
+  }
+
   public evaluateUpgrade(nation: Nation): InfrastructureUpgradeResult {
-    const cost = this.getUpgradeCost(nation);
+    const cost = InfrastructureManager.getUpgradeCost(nation);
     return {
       cost,
       canAfford: nation.treasury >= cost,
@@ -441,13 +446,18 @@ export interface UpgradeCostResult {
 }
 
 export class IndustrialLevelManager {
-  public getUpgradeCost(nation: Nation): number {
-    const baseCost = Math.floor(nation.gdp * 0.15);
+  public static getUpgradeCost(gdpOrNation: number | Nation): number {
+    const gdp = typeof gdpOrNation === "number" ? gdpOrNation : gdpOrNation.gdp;
+    const baseCost = Math.floor(gdp * 0.15);
     return Math.max(2000000000, baseCost);
   }
 
+  public getUpgradeCost(gdpOrNation: number | Nation): number {
+    return IndustrialLevelManager.getUpgradeCost(gdpOrNation);
+  }
+
   public evaluateUpgrade(nation: Nation): UpgradeCostResult {
-    const cost = this.getUpgradeCost(nation);
+    const cost = IndustrialLevelManager.getUpgradeCost(nation);
     return {
       cost,
       canAfford: nation.treasury >= cost,

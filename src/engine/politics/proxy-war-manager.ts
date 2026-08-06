@@ -1,7 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import { calculateProxyOperationBudget } from "@/domain/politics/government-label.utility";
 
 export interface ProxyOperationResult {
   updatedSourceNation: Nation;
@@ -9,13 +8,21 @@ export interface ProxyOperationResult {
 }
 
 export class ProxyWarManager {
+  public static calculateBudget(
+    targetGdp: number,
+    desiredDrainPercent: number,
+  ): number {
+    if (targetGdp <= 0 || desiredDrainPercent <= 0) return 0;
+    return Math.floor(targetGdp * (desiredDrainPercent / 2) * 0.01);
+  }
+
   public executeProxyOperation(
     sourceNation: Nation,
     targetNation: Nation,
     drainAmount: number,
   ): ProxyOperationResult {
     const clampedDrain = Math.max(1, Math.min(15, drainAmount));
-    let requiredBudget = calculateProxyOperationBudget(
+    let requiredBudget = ProxyWarManager.calculateBudget(
       targetNation.gdp,
       clampedDrain,
     );
