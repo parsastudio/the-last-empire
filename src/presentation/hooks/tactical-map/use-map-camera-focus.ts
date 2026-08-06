@@ -1,27 +1,28 @@
-import { useCallback } from "react";
+import { useCallback, RefObject } from "react";
 import {
   findCountryProfileByCode,
   findCountryProfileById,
 } from "@/domain/data/countries";
 import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 interface UseMapCameraFocusProps {
   mapWidth: number;
   mapHeight: number;
   dimensions: { width: number; height: number };
-  scale: number;
+  scaleRef: RefObject<number>;
   countries: CountryMapping[];
-  setPosition: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  positionRef: RefObject<CameraPosition>;
 }
 
 export function useMapCameraFocus({
   mapWidth,
   mapHeight,
   dimensions,
-  scale,
+  scaleRef,
   countries,
-  setPosition,
+  positionRef,
 }: UseMapCameraFocusProps) {
   const focusOnCountry = useCallback(
     (countryCodeOrId: string | number) => {
@@ -75,13 +76,14 @@ export function useMapCameraFocus({
 
       const fx = mapWidth / dimensions.width;
       const fy = mapHeight / dimensions.height;
+      const currentScale = scaleRef.current || 1;
 
-      const targetPosX = dimensions.width / 2 - (centerX / fx) * scale;
-      const targetPosY = dimensions.height / 2 - (centerY / fy) * scale;
+      const targetPosX = dimensions.width / 2 - (centerX / fx) * currentScale;
+      const targetPosY = dimensions.height / 2 - (centerY / fy) * currentScale;
 
-      setPosition({ x: targetPosX, y: targetPosY });
+      positionRef.current = { x: targetPosX, y: targetPosY };
     },
-    [countries, dimensions, mapHeight, mapWidth, scale, setPosition],
+    [countries, dimensions, mapHeight, mapWidth, scaleRef, positionRef],
   );
 
   return { focusOnCountry };

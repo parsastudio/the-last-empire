@@ -38,6 +38,13 @@ export class BitPackedGridState {
     this.modifiedIndices.clear();
   }
 
+  public resetBuffer(): void {
+    const raw = this.buffer.getRawBuffer();
+    raw.fill(0);
+    this.clearModifiedIndices();
+    this.snapshots.clear();
+  }
+
   public setNationId(x: number, y: number, nationId: number): void {
     const oldVal = this.buffer.getNationId(x, y);
     if (oldVal !== nationId) {

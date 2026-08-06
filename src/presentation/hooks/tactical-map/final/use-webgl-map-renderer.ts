@@ -1,15 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, RefObject } from "react";
 import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
 import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
 import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 interface UseWebGLMapRendererProps {
   gl: WebGL2RenderingContext | null;
   dimensions: { width: number; height: number };
-  position: { x: number; y: number };
-  scale: number;
+  positionRef: RefObject<CameraPosition>;
+  scaleRef: RefObject<number>;
   countries: CountryMapping[];
   activeLayer?: "political" | "gdp";
 }
@@ -17,8 +18,8 @@ interface UseWebGLMapRendererProps {
 export function useWebGLMapRenderer({
   gl,
   dimensions,
-  position,
-  scale,
+  positionRef,
+  scaleRef,
   countries,
   activeLayer = "political",
 }: UseWebGLMapRendererProps) {
@@ -71,12 +72,14 @@ export function useWebGLMapRenderer({
       if (rendererRef.current && gl) {
         const time = (performance.now() - startTime) / 1000;
         const dpr = window.devicePixelRatio || 1;
+        const pos = positionRef.current || { x: 0, y: 0 };
+        const scale = scaleRef.current || 1;
 
         rendererRef.current.render(
           dimensions.width * dpr,
           dimensions.height * dpr,
-          position.x * dpr,
-          position.y * dpr,
+          pos.x * dpr,
+          pos.y * dpr,
           scale * dpr,
           time,
           activeLayer,
@@ -90,7 +93,7 @@ export function useWebGLMapRenderer({
     return () => {
       cancelAnimationFrame(animFrameId);
     };
-  }, [gl, dimensions, position, scale, activeLayer]);
+  }, [gl, dimensions, positionRef, scaleRef, activeLayer]);
 
   return rendererRef;
 }

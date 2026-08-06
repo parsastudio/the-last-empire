@@ -1,10 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { MAP_CONFIG } from "@/domain/map/map.config";
-
-export interface MapDragPosition {
-  x: number;
-  y: number;
-}
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 export function useMapGesture(
   containerWidth = 1200,
@@ -27,18 +23,15 @@ export function useMapGesture(
     [mapWidth, mapHeight],
   );
 
-  const [position, setPosition] = useState<MapDragPosition>(
-    () => computeInitial(containerWidth, containerHeight).pos,
-  );
-  const [scale, setScale] = useState<number>(
-    () => computeInitial(containerWidth, containerHeight).scale,
-  );
+  const initial = computeInitial(containerWidth, containerHeight);
 
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const dragStart = useRef<MapDragPosition>({ x: 0, y: 0 });
-  const mouseDownPos = useRef<MapDragPosition>({ x: 0, y: 0 });
+  const positionRef = useRef<CameraPosition>(initial.pos);
+  const scaleRef = useRef<number>(initial.scale);
+  const isDraggingRef = useRef<boolean>(false);
   const hasDraggedRef = useRef<boolean>(false);
 
+  const dragStart = useRef<CameraPosition>({ x: 0, y: 0 });
+  const mouseDownPos = useRef<CameraPosition>({ x: 0, y: 0 });
   const lastDimensionsRef = useRef({ w: containerWidth, h: containerHeight });
 
   useEffect(() => {
@@ -53,10 +46,8 @@ export function useMapGesture(
         containerWidth,
         containerHeight,
       );
-      requestAnimationFrame(() => {
-        setScale(fitScale);
-        setPosition(pos);
-      });
+      scaleRef.current = fitScale;
+      positionRef.current = pos;
     }
   }, [containerWidth, containerHeight, computeInitial]);
 
@@ -65,10 +56,12 @@ export function useMapGesture(
     rect: DOMRect,
     clientX: number,
     clientY: number,
-    currentPos: MapDragPosition,
   ) => {
     const mx = clientX - rect.left;
     const my = clientY - rect.top;
+
+    const currentScale = scaleRef.current;
+    const currentPos = positionRef.current;
 
     const zoomFactor = deltaY < 0 ? 1.15 : 0.85;
     const minAllowedScale = 0.05;
@@ -76,48 +69,41 @@ export function useMapGesture(
 
     const nextScale = Math.max(
       minAllowedScale,
-      Math.min(maxAllowedScale, scale * zoomFactor),
+      Math.min(maxAllowedScale, currentScale * zoomFactor),
     );
 
-    if (nextScale === scale) {
-      return { nextScale, nextPosition: currentPos };
+    if (nextScale === currentScale) {
+      return;
     }
 
     const nextPosition = {
-      x: mx - (mx - currentPos.x) * (nextScale / scale),
-      y: my - (my - currentPos.y) * (nextScale / scale),
+      x: mx - (mx - currentPos.x) * (nextScale / currentScale),
+      y: my - (my - currentPos.y) * (nextScale / currentScale),
     };
 
-    setScale(nextScale);
-    return { nextScale, nextPosition };
+    scaleRef.current = nextScale;
+    positionRef.current = nextPosition;
   };
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
-    const { nextPosition } = calculateZoom(
-      e.deltaY,
-      rect,
-      e.clientX,
-      e.clientY,
-      position,
-    );
-    setPosition(nextPosition);
+    calculateZoom(e.deltaY, rect, e.clientX, e.clientY);
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
-    setIsDragging(true);
+    isDraggingRef.current = true;
     hasDraggedRef.current = false;
     mouseDownPos.current = { x: e.clientX, y: e.clientY };
     dragStart.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y,
+      x: e.clientX - positionRef.current.x,
+      y: e.clientY - positionRef.current.y,
     };
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging) return;
+    if (!isDraggingRef.current) return;
     const dist = Math.hypot(
       e.clientX - mouseDownPos.current.x,
       e.clientY - mouseDownPos.current.y,
@@ -125,33 +111,37 @@ export function useMapGesture(
     if (dist > 5) {
       hasDraggedRef.current = true;
     }
-    setPosition({
+    positionRef.current = {
       x: e.clientX - dragStart.current.x,
       y: e.clientY - dragStart.current.y,
-    });
+    };
   };
 
   const handleMouseUp = () => {
-    setIsDragging(false);
+    isDraggingRef.current = false;
   };
 
-  const zoomIn = () => setScale((prev) => Math.min(prev * 1.25, 35));
-  const zoomOut = () => setScale((prev) => Math.max(prev * 0.8, 0.05));
+  const zoomIn = () => {
+    scaleRef.current = Math.min(scaleRef.current * 1.25, 35);
+  };
+
+  const zoomOut = () => {
+    scaleRef.current = Math.max(scaleRef.current * 0.8, 0.05);
+  };
+
   const resetScale = () => {
     const { scale: fitScale, pos } = computeInitial(
       containerWidth,
       containerHeight,
     );
-    setScale(fitScale);
-    setPosition(pos);
+    scaleRef.current = fitScale;
+    positionRef.current = pos;
   };
 
   return {
-    scale,
-    setScale,
-    position,
-    setPosition,
-    isDragging,
+    positionRef,
+    scaleRef,
+    isDraggingRef,
     hasDraggedRef,
     handleWheel,
     handleMouseDown,

@@ -5,6 +5,8 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { useToast } from "@/presentation/context/toast-context";
 
+const storageAdapter = new GameStorageAdapter();
+
 export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
   const { showToast } = useToast();
   const lastSavedTurnRef = useRef<number | null>(null);
@@ -12,8 +14,7 @@ export function useAutoSaveGame(gameId: string, gameState: GameState | null) {
   const saveStateToDb = useCallback(
     (state: GameState, isAutoSave = false) => {
       if (!state || !gameId) return;
-      const adapter = new GameStorageAdapter();
-      adapter.saveGameState(gameId, state);
+      storageAdapter.saveGameState(gameId, state);
       lastSavedTurnRef.current = state.currentTurn;
 
       if (isAutoSave) {
