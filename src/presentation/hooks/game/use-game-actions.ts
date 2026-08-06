@@ -2,13 +2,12 @@
 
 import { useCallback } from "react";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameState } from "@/domain/game/game-state.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useGameActions(
   _customGameId?: string,
-  onActionExecuted?: (newState?: GameState) => void,
+  onActionExecuted?: () => void,
 ) {
   const { showToast } = useToast();
   const dispatchStoreAction = useGameStore((state) => state.dispatchAction);
@@ -22,8 +21,7 @@ export function useGameActions(
           showToast("دستور صادر شد", result.message, "success");
         }
         if (onActionExecuted) {
-          const currentGameState = useGameStore.getState().gameState;
-          onActionExecuted(currentGameState ?? undefined);
+          onActionExecuted();
         }
         return true;
       }
