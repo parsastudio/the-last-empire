@@ -6,100 +6,68 @@ import { AntiCorruptionCard } from "@/presentation/components/tactical-map/sideb
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
 import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
 import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
-import { ActiveModifier, Nation } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface WidePoliticsViewProps {
-  nationId: string;
-  gdp?: number;
-  treasury?: number;
-  turnsInPower?: number;
-  taxRate: number;
-  corruption?: number;
-  governmentType: string;
-  nationalDebt?: number;
-  tariffRate?: number;
-  industrialLevel?: number;
-  infrastructureLevel?: number;
-  militaryTechLevel?: number;
-  hasSeaAccess?: boolean;
-  activeModifiers?: ActiveModifier[];
+  nation: Nation;
   nationsMap?: Record<string, Nation>;
-  population?: number;
-  oilStock?: number;
-  steelStock?: number;
-  globalReputation?: number;
 }
 
 export function WidePoliticsView({
-  nationId,
-  gdp = 450000000000,
-  treasury = 100000,
-  taxRate,
-  corruption = 0,
-  nationalDebt = 0,
-  tariffRate = 10,
-  industrialLevel = 1,
-  infrastructureLevel = 1,
-  militaryTechLevel = 1,
-  hasSeaAccess = true,
-  activeModifiers = [],
+  nation,
   nationsMap,
-  population = 80000000,
-  oilStock = 1000,
-  steelStock = 1000,
 }: WidePoliticsViewProps) {
-  const currentNation = nationsMap ? nationsMap[nationId] : undefined;
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
-        <ActiveModifiersCard modifiers={activeModifiers} />
+        <ActiveModifiersCard modifiers={nation.activeModifiers} />
         <PopulationWelfareCard
-          population={population}
-          oilStock={oilStock}
-          steelStock={steelStock}
-          gdp={gdp}
-          nation={currentNation}
+          population={nation.population}
+          oilStock={nation.resources.oil}
+          steelStock={nation.resources.steel}
+          gdp={nation.gdp}
+          nation={nation}
         />
         <TaxControlCard
-          taxRate={taxRate}
-          baseGdp={gdp}
-          corruption={corruption}
-          nationId={nationId}
+          taxRate={nation.taxRate}
+          baseGdp={nation.gdp}
+          corruption={nation.government.corruption}
+          nationId={nation.id}
         />
       </div>
 
       <div className="space-y-5">
         <TariffControlCard
-          initialTariffRate={tariffRate}
-          nationId={nationId}
-          hasSeaAccess={hasSeaAccess}
-          gdp={gdp}
+          initialTariffRate={nation.tariffRate}
+          nationId={nation.id}
+          hasSeaAccess={nation.geography.hasSeaAccess}
+          gdp={nation.gdp}
           nationsMap={nationsMap}
-          nation={currentNation}
+          nation={nation}
         />
         <ImfLoanCard
-          nationId={nationId}
-          nationalDebt={nationalDebt}
-          gdp={gdp}
-          treasury={treasury}
+          nationId={nation.id}
+          nationalDebt={nation.nationalDebt}
+          gdp={nation.gdp}
+          treasury={nation.treasury}
+          nation={nation}
         />
         <AntiCorruptionCard
-          nationId={nationId}
-          treasury={treasury}
-          gdp={gdp}
-          currentCorruption={corruption}
+          nationId={nation.id}
+          treasury={nation.treasury}
+          gdp={nation.gdp}
+          currentCorruption={nation.government.corruption}
         />
       </div>
 
       <div className="space-y-5">
         <DevelopmentUpgradesSection
-          nationId={nationId}
-          treasury={treasury}
-          gdp={gdp}
-          industrialLevel={industrialLevel}
-          infrastructureLevel={infrastructureLevel}
-          militaryTechLevel={militaryTechLevel}
+          nationId={nation.id}
+          treasury={nation.treasury}
+          gdp={nation.gdp}
+          industrialLevel={nation.industrialLevel}
+          infrastructureLevel={nation.geography.infrastructureLevel}
+          militaryTechLevel={nation.military.techLevel}
         />
       </div>
     </div>
