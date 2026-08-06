@@ -16,6 +16,7 @@ import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-cam
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
+import { useUiStore } from "@/presentation/stores/use-ui-store";
 
 interface WebGLTacticalWorkspaceProps {
   gameId?: string;
@@ -28,6 +29,14 @@ export function WebGLTacticalWorkspace({
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
 
+  const activeTab = useUiStore((state) => state.activeTab);
+  const selectedTargetCode = useUiStore((state) => state.selectedTargetCode);
+  const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
+
+  const setActiveTab = useUiStore((state) => state.setActiveTab);
+  const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
+  const closeActiveTab = useUiStore((state) => state.closeActiveTab);
+
   const {
     gameState: effectiveGameState,
     advanceNextTurn,
@@ -36,13 +45,7 @@ export function WebGLTacticalWorkspace({
   } = useBitPackedGame(gameId);
 
   const metrics = useGameResources(effectiveGameState);
-
-  const [activeTab, setActiveTab] = useState<SidebarTabType | null>(null);
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
-  const [selectedTargetCode, setSelectedTargetCode] = useState<string | null>(
-    null,
-  );
-  const [isRailCollapsed, setIsRailCollapsed] = useState<boolean>(true);
 
   const countriesData = ALL_COUNTRY_PROFILES.map((p) => ({
     id: p.id ?? 0,
@@ -65,15 +68,16 @@ export function WebGLTacticalWorkspace({
     positionRef,
   });
 
-  const handleSelectCountryContext = useCallback((code: string) => {
-    setSelectedTargetCode(code);
-    setActiveTab("diplomacy");
-  }, []);
+  const handleSelectCountryContext = useCallback(
+    (code: string) => {
+      setActiveTab("diplomacy", null, code);
+    },
+    [setActiveTab],
+  );
 
   const handleCloseCenterModal = useCallback(() => {
-    setActiveTab(null);
-    setSelectedTargetCode(null);
-  }, []);
+    closeActiveTab();
+  }, [closeActiveTab]);
 
   const handleNextTurnAndRefresh = useCallback(async () => {
     const nextState = await advanceNextTurn();
@@ -123,11 +127,8 @@ export function WebGLTacticalWorkspace({
         reports={[]}
         onClose={handleCloseCenterModal}
         onFocusCountry={focusOnCountry}
-        onNavigateTab={(tab, _subTab, targetCode) => {
-          setActiveTab(tab);
-          if (targetCode) {
-            setSelectedTargetCode(targetCode);
-          }
+        onNavigateTab={(tab, subTab, targetCode) => {
+          setActiveTab(tab, subTab, targetCode);
         }}
       />
 
