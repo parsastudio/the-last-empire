@@ -1,4 +1,5 @@
 import {
+  ALL_COUNTRY_PROFILES,
   findCountryProfileByCode,
   findCountryProfileById,
 } from "@/domain/data/countries";
@@ -43,11 +44,36 @@ export class GameIdGenerator {
   }
 }
 
+class NationIdCacheRegistry {
+  public static readonly canonicalCache = new Map<string, string>();
+  public static readonly numericCache = new Map<string, number>();
+
+  static {
+    for (const profile of ALL_COUNTRY_PROFILES) {
+      const canonical = `NATION_${profile.code.toUpperCase()}`;
+      const numeric = profile.id ?? 0;
+
+      this.canonicalCache.set(profile.code.toUpperCase(), canonical);
+      this.canonicalCache.set(canonical, canonical);
+
+      if (profile.flagCode) {
+        this.canonicalCache.set(profile.flagCode.toUpperCase(), canonical);
+      }
+
+      this.numericCache.set(canonical, numeric);
+      this.numericCache.set(profile.code.toUpperCase(), numeric);
+      this.numericCache.set(numeric.toString(), numeric);
+    }
+  }
+}
+
 export class NationIdResolver {
   public static resolveCanonicalId(codeOrId: string | number): string {
     if (!codeOrId && codeOrId !== 0) return "";
 
     const clean = codeOrId.toString().trim().toUpperCase();
+    const cached = NationIdCacheRegistry.canonicalCache.get(clean);
+    if (cached) return cached;
 
     let profile = findCountryProfileByCode(clean);
     if (!profile) {
@@ -59,14 +85,18 @@ export class NationIdResolver {
     }
 
     if (profile) {
-      return `NATION_${profile.code.toUpperCase()}`;
+      const result = `NATION_${profile.code.toUpperCase()}`;
+      NationIdCacheRegistry.canonicalCache.set(clean, result);
+      return result;
     }
 
     if (clean.startsWith("NATION_")) {
       return clean;
     }
 
-    return `NATION_${clean}`;
+    const fallback = `NATION_${clean}`;
+    NationIdCacheRegistry.canonicalCache.set(clean, fallback);
+    return fallback;
   }
 
   public static resolveNumericId(codeOrId: string | number): number {
@@ -76,6 +106,9 @@ export class NationIdResolver {
     if (!codeOrId) return 0;
 
     const clean = codeOrId.toString().trim().toUpperCase();
+    const cached = NationIdCacheRegistry.numericCache.get(clean);
+    if (cached !== undefined) return cached;
+
     const rawNum = clean.replace("NATION_", "");
     const parsedDirect = parseInt(rawNum, 10);
     if (!isNaN(parsedDirect) && parsedDirect > 0 && parsedDirect < 255) {
@@ -86,6 +119,7 @@ export class NationIdResolver {
     const profile =
       findCountryProfileByCode(clean) || findCountryProfileById(clean);
     if (profile && profile.id) {
+      NationIdCacheRegistry.numericCache.set(clean, profile.id);
       return profile.id;
     }
 
