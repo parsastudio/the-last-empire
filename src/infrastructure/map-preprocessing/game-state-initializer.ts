@@ -1,3 +1,4 @@
+import "server-only";
 import fs from "fs";
 import path from "path";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -35,28 +36,27 @@ export class GameStateInitializer {
     nationId: string,
     governmentType?: string,
   ): GameState {
-    if (typeof window === "undefined") {
-      const gridState = BitPackedGridState.getInstance();
-      const raw = gridState.getBuffer().getRawBuffer();
-      if (raw[1000] === 0) {
-        try {
-          const binPath = path.join(
-            MapPathResolver.getMapFinalServerDir("map1"),
-            "live-state.bin",
-          );
-          if (fs.existsSync(binPath)) {
-            const fileBuf = fs.readFileSync(binPath);
-            gridState
-              .getBuffer()
-              .loadArrayBuffer(
-                fileBuf.buffer.slice(
-                  fileBuf.byteOffset,
-                  fileBuf.byteOffset + fileBuf.byteLength,
-                ),
-              );
-          }
-        } catch {}
-      }
+    const gridState = BitPackedGridState.getInstance();
+    const raw = gridState.getBuffer().getRawBuffer();
+
+    if (raw[1000] === 0) {
+      try {
+        const binPath = path.join(
+          MapPathResolver.getMapFinalServerDir("map1"),
+          "live-state.bin",
+        );
+        if (fs.existsSync(binPath)) {
+          const fileBuf = fs.readFileSync(binPath);
+          gridState
+            .getBuffer()
+            .loadArrayBuffer(
+              fileBuf.buffer.slice(
+                fileBuf.byteOffset,
+                fileBuf.byteOffset + fileBuf.byteLength,
+              ),
+            );
+        }
+      } catch {}
     }
 
     const normalizedHumanId = NationIdResolver.resolveCanonicalId(nationId);

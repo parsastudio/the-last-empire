@@ -1,8 +1,8 @@
 import { useEffect, useCallback, useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
-import { FinalStateLoader } from "@/infrastructure/storage/final-state-loader";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useBitPackedGame(gameId = "default_game") {
@@ -22,15 +22,23 @@ export function useBitPackedGame(gameId = "default_game") {
     async function init() {
       try {
         const gridState = BitPackedGridState.getInstance();
-        const buffer = gridState.getBuffer();
+        gridState.initializeSession(gameId);
 
+        const buffer = gridState.getBuffer();
         const loadedFromStorage = await storageAdapter.loadBitBuffer(
           gameId,
           buffer,
         );
 
         if (!loadedFromStorage) {
-          await FinalStateLoader.loadLiveStateBuffer("map1");
+          const defaultBuffer =
+            await ClientFinalStateLoader.loadLiveStateBuffer("map1");
+          if (defaultBuffer) {
+            gridState
+              .getBuffer()
+              .getRawBuffer()
+              .set(defaultBuffer.getRawBuffer());
+          }
         }
 
         if (active) {
