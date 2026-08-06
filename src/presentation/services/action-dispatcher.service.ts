@@ -4,21 +4,22 @@ import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapte
 import { ActionRouter } from "@/engine/actions/action-router";
 import { StateValidator } from "@/engine/validation/state-validator";
 
-export class ActionDispatcherService {
-  private storageAdapter = new GameStorageAdapter();
-  private router = new ActionRouter();
-  private validator = new StateValidator();
+const storageAdapter = new GameStorageAdapter();
+const router = new ActionRouter();
+const validator = new StateValidator();
 
+export class ActionDispatcherService {
   public async dispatch(
     action: GameAction,
     gameId?: string,
     currentState?: GameState | null,
+    persistToStorage = false,
   ): Promise<ActionResult> {
     const activeGameId = gameId || currentState?.gameId || "default_game";
 
     let effectiveState = currentState || null;
     if (!effectiveState) {
-      effectiveState = await this.storageAdapter.loadGameState(activeGameId);
+      effectiveState = await storageAdapter.loadGameState(activeGameId);
     }
 
     if (!effectiveState) {
@@ -31,10 +32,12 @@ export class ActionDispatcherService {
     }
 
     try {
-      this.validator.validateAction(effectiveState, action);
-      const newState = this.router.route(effectiveState, action);
+      validator.validateAction(effectiveState, action);
+      const newState = router.route(effectiveState, action);
 
-      await this.storageAdapter.saveGameState(activeGameId, newState);
+      if (persistToStorage) {
+        await storageAdapter.saveGameState(activeGameId, newState);
+      }
 
       return {
         success: true,

@@ -32,9 +32,9 @@ export function WebGLMapCanvas({
   const gl = useWebGLContext(canvasRef, dimensions);
 
   const {
-    scale,
-    position,
-    isDragging,
+    scaleRef,
+    positionRef,
+    isDraggingRef,
     hasDraggedRef,
     handleWheel,
     handleMouseDown,
@@ -45,8 +45,8 @@ export function WebGLMapCanvas({
   useWebGLMapRenderer({
     gl,
     dimensions,
-    position,
-    scale,
+    positionRef,
+    scaleRef,
     countries,
     activeLayer,
   });
@@ -61,9 +61,9 @@ export function WebGLMapCanvas({
     closeContextMenu,
   } = useWebGLInteraction({
     containerRef,
-    position,
-    scale,
-    isDragging,
+    positionRef,
+    scaleRef,
+    isDraggingRef,
     hasDraggedRef,
     countries,
     nationsMap,

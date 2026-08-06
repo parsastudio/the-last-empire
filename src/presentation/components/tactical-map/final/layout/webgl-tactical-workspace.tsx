@@ -25,8 +25,8 @@ export function WebGLTacticalWorkspace({
   gameId = "default_game",
 }: WebGLTacticalWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [, setPosition] = useState({ x: 0, y: 0 });
-  const [scale] = useState(1);
+  const positionRef = useRef({ x: 0, y: 0 });
+  const scaleRef = useRef(1);
 
   const {
     gameState: effectiveGameState,
@@ -60,9 +60,9 @@ export function WebGLTacticalWorkspace({
     mapWidth: 4096,
     mapHeight: 2048,
     dimensions: { width: 1200, height: 600 },
-    scale,
+    scaleRef,
     countries: countriesData,
-    setPosition,
+    positionRef,
   });
 
   const handleSelectCountryContext = useCallback((code: string) => {

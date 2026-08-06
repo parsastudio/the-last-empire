@@ -5,6 +5,7 @@ import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/h
 import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useHoverNationResolver } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -15,9 +16,9 @@ export interface ContextMenuState {
 
 interface UseWebGLInteractionProps {
   containerRef: RefObject<HTMLDivElement | null>;
-  position: { x: number; y: number };
-  scale: number;
-  isDragging: boolean;
+  positionRef: RefObject<CameraPosition>;
+  scaleRef: RefObject<number>;
+  isDraggingRef: RefObject<boolean>;
   hasDraggedRef: RefObject<boolean>;
   countries: CountryMapping[];
   nationsMap?: Record<string, Nation>;
@@ -26,9 +27,9 @@ interface UseWebGLInteractionProps {
 
 export function useWebGLInteraction({
   containerRef,
-  position,
-  scale,
-  isDragging,
+  positionRef,
+  scaleRef,
+  isDraggingRef,
   hasDraggedRef,
   countries,
   nationsMap,
@@ -47,30 +48,6 @@ export function useWebGLInteraction({
   const [contextMenuState, setContextMenuState] =
     useState<ContextMenuState | null>(null);
 
-  const [prevGestureState, setPrevGestureState] = useState({
-    posX: position.x,
-    posY: position.y,
-    scale,
-    isDragging,
-  });
-
-  if (
-    prevGestureState.posX !== position.x ||
-    prevGestureState.posY !== position.y ||
-    prevGestureState.scale !== scale ||
-    prevGestureState.isDragging !== isDragging
-  ) {
-    setPrevGestureState({
-      posX: position.x,
-      posY: position.y,
-      scale,
-      isDragging,
-    });
-    if (contextMenuState !== null) {
-      setContextMenuState(null);
-    }
-  }
-
   const { resolveHoverInfo } = useHoverNationResolver({
     countries,
     nationsMap,
@@ -79,7 +56,7 @@ export function useWebGLInteraction({
 
   const handlePointerMove = (clientX: number, clientY: number) => {
     const container = containerRef.current;
-    if (!container || isDragging) {
+    if (!container || isDraggingRef.current) {
       if (hoverPos !== null) setHoverPos(null);
       if (hoverData !== null) setHoverData(null);
       lastHoverNationIdRef.current = null;
@@ -90,8 +67,11 @@ export function useWebGLInteraction({
     const rx = clientX - rect.left;
     const ry = clientY - rect.top;
 
-    const mapX = Math.floor((rx - position.x) / scale);
-    const mapY = Math.floor((ry - position.y) / scale);
+    const pos = positionRef.current || { x: 0, y: 0 };
+    const scale = scaleRef.current || 1;
+
+    const mapX = Math.floor((rx - pos.x) / scale);
+    const mapY = Math.floor((ry - pos.y) / scale);
 
     const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
     if (inspected && inspected.nationId >= 11 && inspected.nationId < 250) {
@@ -130,7 +110,11 @@ export function useWebGLInteraction({
   };
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDragging || hasDraggedRef.current || !containerRef.current) {
+    if (
+      isDraggingRef.current ||
+      hasDraggedRef.current ||
+      !containerRef.current
+    ) {
       return;
     }
 
@@ -139,8 +123,11 @@ export function useWebGLInteraction({
     const rx = e.clientX - rect.left;
     const ry = e.clientY - rect.top;
 
-    const mapX = Math.floor((rx - position.x) / scale);
-    const mapY = Math.floor((ry - position.y) / scale);
+    const pos = positionRef.current || { x: 0, y: 0 };
+    const scale = scaleRef.current || 1;
+
+    const mapX = Math.floor((rx - pos.x) / scale);
+    const mapY = Math.floor((ry - pos.y) / scale);
 
     const inspected = facadeRef.current.inspectCoordinates(mapX, mapY);
     if (!inspected || inspected.nationId < 11 || inspected.nationId >= 250) {
