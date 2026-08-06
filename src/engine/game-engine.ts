@@ -1,20 +1,17 @@
 import { GameAction, ActionResult } from "@/domain/game/action.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { deepClone, SeededRandom } from "@/domain/shared/domain-utilities";
-import { StateHistory } from "@/application/state-history";
 import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
 import { ActionEngine } from "@/engine/actions/action-engine";
 
 export class GameEngine {
   private currentState: GameState;
-  private stateHistory = new StateHistory();
   private progressionOrchestrator = new TurnProgressionOrchestrator();
   private prng: SeededRandom;
 
   constructor(initialState: GameState) {
     this.currentState = deepClone(initialState);
     this.prng = new SeededRandom(initialState.seed);
-    this.stateHistory.saveSnapshot(this.currentState);
   }
 
   public getState(): Readonly<GameState> {
@@ -42,12 +39,6 @@ export class GameEngine {
       this.prng,
     );
 
-    this.stateHistory.saveSnapshot(this.currentState);
-
     return this.getState();
-  }
-
-  public getTurnHistory(turnNumber: number): GameState | undefined {
-    return this.stateHistory.getTurnHistory(turnNumber);
   }
 }
