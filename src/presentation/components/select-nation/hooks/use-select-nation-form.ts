@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { GameIdGenerator } from "@/domain/shared/domain-utilities";
 import { useToast } from "@/presentation/context/toast-context";
-import { FinalMapManifest as MapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
-import { STORAGE_KEYS } from "@/infrastructure/storage/storage-keys.config";
 import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
-import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/services/nation-database-provider";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 
@@ -17,10 +13,9 @@ export function useSelectNationForm() {
   const router = useRouter();
   const { showToast } = useToast();
   const provider = useMemo(() => new NationDatabaseProvider(), []);
-  const storageAdapter = useMemo(() => new GameStorageAdapter(), []);
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
-  const [manifest, setManifest] = useState<MapManifest | null>(null);
+  const [manifest, setManifest] = useState<unknown | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -31,7 +26,7 @@ export function useSelectNationForm() {
           cache: "force-cache",
         });
         if (res.ok) {
-          const json = (await res.json()) as MapManifest;
+          const json = await res.json();
           if (
             active &&
             json &&
@@ -54,10 +49,18 @@ export function useSelectNationForm() {
   const allNations = useMemo(() => {
     if (
       manifest &&
-      Array.isArray(manifest.nations) &&
-      manifest.nations.length > 0
+      typeof manifest === "object" &&
+      "nations" in manifest &&
+      Array.isArray((manifest as { nations: unknown[] }).nations) &&
+      (manifest as { nations: unknown[] }).nations.length > 0
     ) {
-      return provider.getNationsFromManifest(manifest.nations);
+      return provider.getNationsFromManifest(
+        (
+          manifest as {
+            nations: Parameters<typeof provider.getNationsFromManifest>[0];
+          }
+        ).nations,
+      );
     }
     return provider.getAllSelectableNations();
   }, [provider, manifest]);
@@ -104,18 +107,16 @@ export function useSelectNationForm() {
       );
 
       if (typeof window !== "undefined") {
-        localStorage.setItem(STORAGE_KEYS.HUMAN_NATION_ID, selectedNation.id);
+        localStorage.setItem("human_nation_id", selectedNation.id);
       }
 
       await BitPackedInitService.initializeBitPackedSession(uniqueGameId);
-      const gridState = BitPackedGridState.getInstance();
-      await storageAdapter.saveBitBuffer(uniqueGameId, gridState.getBuffer());
 
       const success = await createCampaignStore(
         selectedNation.id,
         selectedGovernment,
         uniqueGameId,
-        manifest,
+        manifest as Parameters<typeof createCampaignStore>[3],
       );
 
       if (success) {
@@ -139,7 +140,6 @@ export function useSelectNationForm() {
     selectedGovernment,
     createCampaignStore,
     manifest,
-    storageAdapter,
     router,
     showToast,
   ]);
