@@ -7,32 +7,20 @@ import { ContextMenuState } from "@/presentation/hooks/tactical-map/final/use-co
 
 interface WebGLContextMenuWrapperProps {
   contextMenuState: ContextMenuState | null;
-  positionRef: React.RefObject<{ x: number; y: number }>;
-  scaleRef: React.RefObject<number>;
   onSelectAction: (action: ContextActionType, code: string) => void;
   onClose: () => void;
 }
 
 export function WebGLContextMenuWrapper({
   contextMenuState,
-  positionRef,
-  scaleRef,
   onSelectAction,
   onClose,
 }: WebGLContextMenuWrapperProps) {
   if (!contextMenuState) return null;
 
-  const currentScale = scaleRef.current || 1;
-  const currentPos = positionRef.current || { x: 0, y: 0 };
-
-  const currentScreenPos = {
-    x: contextMenuState.mapPos.x * currentScale + currentPos.x,
-    y: contextMenuState.mapPos.y * currentScale + currentPos.y,
-  };
-
   return (
     <MapContextMenu
-      position={currentScreenPos}
+      position={contextMenuState.screenPos}
       countryName={contextMenuState.countryName}
       countryCode={contextMenuState.countryCode}
       onSelectAction={(action) =>
