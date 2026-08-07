@@ -70,6 +70,13 @@ export function useWebGLMapRenderer({
 
     const renderLoop = () => {
       if (rendererRef.current && gl) {
+        const gridState = BitPackedGridState.getInstance();
+        if (gridState.getModifiedIndices().size > 0) {
+          rendererRef.current.updateLiveStateTexture(
+            gridState.getBuffer().getRawBuffer(),
+          );
+        }
+
         const time = (performance.now() - startTime) / 1000;
         const dpr = window.devicePixelRatio || 1;
         const pos = positionRef.current || { x: 0, y: 0 };

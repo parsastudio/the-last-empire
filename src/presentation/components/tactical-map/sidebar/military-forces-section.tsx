@@ -1,7 +1,7 @@
 import React from "react";
 import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { MilitaryPayrollCalculator } from "@/engine/economy/economy-calculators";
+import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { Nation } from "@/domain/nation/nation.schema";
 
 interface MilitaryForcesSectionProps {
@@ -21,12 +21,56 @@ export function MilitaryForcesSection({
   experience,
   militiaGarrisonPower = 280,
 }: MilitaryForcesSectionProps) {
-  const mockNation = {
-    military: { infantry, airForce, droneMissile, techLevel },
-    doctrines: { unlockedDoctrines: [] },
+  const mockNation: Nation = {
+    id: "NATION_MOCK",
+    name: "ملی",
+    isAi: false,
+    isAlive: true,
+    flagCode: "IR",
+    rank: 1,
+    gdp: 100000000000,
+    taxRate: 15,
+    tariffRate: 10,
+    treasury: 100000000,
+    nationalDebt: 0,
+    population: 80000000,
+    industrialLevel: 1,
+    consecutiveDeficitTurns: 0,
+    government: {
+      type: "DEMOCRACY",
+      stability: 80,
+      corruption: 5,
+      turnsInPower: 1,
+    },
+    resources: { oil: 1000, steel: 1000, manpower: 500 },
+    military: { infantry, airForce, droneMissile, experience, techLevel },
+    recruitmentQueue: [],
+    geography: {
+      landNeighbors: [],
+      seaNeighbors: [],
+      hasSeaAccess: true,
+      territoryPixelCount: 1000,
+      infrastructureLevel: 1,
+      contiguousMainlandPixelCount: 1000,
+      isolatedPockets: [],
+      coordinates: [],
+    },
+    relations: {},
+    activeModifiers: [],
     traits: [],
-    government: { type: "DEMOCRACY" },
-  } as unknown as Nation;
+    globalReputation: 50,
+    doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
+    researchBudgetRate: 1,
+    accumulatedResearchCost: 0,
+    researchCycleTurn: 0,
+    proxyInfluenceBudget: {},
+    autoTradeSettings: {
+      autoBuyDeficit: false,
+      autoSellOilPercent: 0,
+      autoSellSteelPercent: 0,
+      allowEmergencyLoans: true,
+    },
+  };
 
   const payroll = MilitaryPayrollCalculator.calculatePayroll(mockNation);
   const bonusPercent = (techLevel - 1) * 20;

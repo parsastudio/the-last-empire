@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { LoanManager } from "@/engine/economy/economy-calculators";
+import { LoanManager } from "@/engine/economy/calculators/debt-calculator";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -26,15 +26,62 @@ export function ImfLoanCard({
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
 
-  const mockNation =
-    nation ||
-    ({
-      gdp,
-      nationalDebt,
-      treasury,
-      government: { stability: 80 },
-      activeModifiers: [],
-    } as unknown as Nation);
+  const mockNation: Nation = nation || {
+    id: nationId,
+    name: "ملی",
+    isAi: false,
+    isAlive: true,
+    flagCode: "IR",
+    rank: 1,
+    gdp,
+    taxRate: 15,
+    tariffRate: 10,
+    treasury,
+    nationalDebt,
+    population: 80000000,
+    industrialLevel: 1,
+    consecutiveDeficitTurns: 0,
+    government: {
+      type: "DEMOCRACY",
+      stability: 80,
+      corruption: 5,
+      turnsInPower: 1,
+    },
+    resources: { oil: 1000, steel: 1000, manpower: 500 },
+    military: {
+      infantry: 100,
+      airForce: 20,
+      droneMissile: 5,
+      experience: 10,
+      techLevel: 1,
+    },
+    recruitmentQueue: [],
+    geography: {
+      landNeighbors: [],
+      seaNeighbors: [],
+      hasSeaAccess: true,
+      territoryPixelCount: 1000,
+      infrastructureLevel: 1,
+      contiguousMainlandPixelCount: 1000,
+      isolatedPockets: [],
+      coordinates: [],
+    },
+    relations: {},
+    activeModifiers: [],
+    traits: [],
+    globalReputation: 50,
+    doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
+    researchBudgetRate: 1,
+    accumulatedResearchCost: 0,
+    researchCycleTurn: 0,
+    proxyInfluenceBudget: {},
+    autoTradeSettings: {
+      autoBuyDeficit: false,
+      autoSellOilPercent: 0,
+      autoSellSteelPercent: 0,
+      allowEmergencyLoans: true,
+    },
+  };
 
   const creditRating = LoanManager.calculateCreditRating(mockNation);
   const maxDebtLimit = Math.floor(gdp * 1.0 * (creditRating / 100));

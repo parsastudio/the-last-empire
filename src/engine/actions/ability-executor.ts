@@ -36,13 +36,38 @@ export class AbilityExecutor {
         }
 
         const updatedRel = { ...rel, opinion: Math.min(100, rel.opinion + 20) };
+
+        const targetNation = updatedNations[relKey];
+        if (targetNation) {
+          const reverseRelKey = targetNation.relations[sourceKey]
+            ? sourceKey
+            : nation.id;
+          const reverseRel = targetNation.relations[reverseRelKey];
+          if (reverseRel) {
+            updatedNations[relKey] = {
+              ...targetNation,
+              relations: {
+                ...targetNation.relations,
+                [reverseRelKey]: {
+                  ...reverseRel,
+                  opinion: Math.min(100, reverseRel.opinion + 20),
+                },
+              },
+            };
+          }
+        }
+
+        const sourceNationCurrent = updatedNations[sourceKey] || nation;
         updatedNations[sourceKey] = {
-          ...nation,
-          treasury: nation.treasury - 20000,
-          globalReputation: Math.min(100, nation.globalReputation + 10),
-          relations: { ...nation.relations, [relKey]: updatedRel },
+          ...sourceNationCurrent,
+          treasury: sourceNationCurrent.treasury - 20000,
+          globalReputation: Math.min(
+            100,
+            sourceNationCurrent.globalReputation + 10,
+          ),
+          relations: { ...sourceNationCurrent.relations, [relKey]: updatedRel },
           activeModifiers: [
-            ...nation.activeModifiers,
+            ...sourceNationCurrent.activeModifiers,
             {
               id: "cooldown-diplomatic-summit",
               name: "Summit Cooldown",

@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeft, Home } from "lucide-react";
-import { SidebarTabType } from "../sidebar/sidebar-tabs";
+import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 
 interface CommandBreadcrumbProps {
   activeTab: SidebarTabType;

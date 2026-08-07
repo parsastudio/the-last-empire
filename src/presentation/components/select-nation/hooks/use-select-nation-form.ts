@@ -46,11 +46,7 @@ export function useSelectNationForm() {
 
   const allNations = useMemo(() => {
     if (manifest && manifest.nations) {
-      return provider.getNationsFromManifest(
-        manifest.nations as unknown as Parameters<
-          typeof provider.getNationsFromManifest
-        >[0],
-      );
+      return provider.getNationsFromManifest(manifest.nations);
     }
     return provider.getAllSelectableNations();
   }, [provider, manifest]);

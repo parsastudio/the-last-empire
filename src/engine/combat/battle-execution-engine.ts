@@ -69,8 +69,7 @@ export class BattleExecutionEngine {
       );
     }
 
-    const conqueredPixels =
-      actualConqueredPixels > 0 ? actualConqueredPixels : requestedTargetPixels;
+    const conqueredPixels = actualConqueredPixels;
 
     const conquestRatio =
       defenderPixels > 0

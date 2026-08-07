@@ -97,14 +97,12 @@ export class AutoTradeEngine {
           config.allowEmergencyLoans
         ) {
           const missingCash = neededFunds - currentNation.treasury;
-          const loanAmount = Math.ceil(missingCash / 1e9) * 1e9;
-
-          loanTakenAmount = loanAmount;
+          loanTakenAmount = missingCash;
 
           currentNation = {
             ...currentNation,
-            treasury: currentNation.treasury + loanAmount,
-            nationalDebt: currentNation.nationalDebt + loanAmount,
+            treasury: currentNation.treasury + missingCash,
+            nationalDebt: currentNation.nationalDebt + missingCash,
           };
         }
 
