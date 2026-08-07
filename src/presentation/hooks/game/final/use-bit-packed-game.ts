@@ -1,8 +1,6 @@
 import { useEffect, useCallback, useMemo } from "react";
-import { GameState } from "@/domain/game/game-state.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
-import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useBitPackedGame(gameId = "default_game") {
@@ -21,31 +19,29 @@ export function useBitPackedGame(gameId = "default_game") {
 
     async function init() {
       try {
+        console.group(`🚀 [DIAGNOSTIC] Session Init for gameId: ${gameId}`);
         const gridState = BitPackedGridState.getInstance();
         gridState.initializeSession(gameId);
 
         const buffer = gridState.getBuffer();
-        const loadedFromStorage = await storageAdapter.loadBitBuffer(
+        const success = await storageAdapter.ensureBitBufferLoaded(
           gameId,
           buffer,
         );
 
-        if (!loadedFromStorage) {
-          const defaultBuffer =
-            await ClientFinalStateLoader.loadLiveStateBuffer("map1");
-          if (defaultBuffer) {
-            gridState
-              .getBuffer()
-              .getRawBuffer()
-              .set(defaultBuffer.getRawBuffer());
-            gridState.markDirty();
-          }
-        }
+        console.info(
+          "Map bit buffer loading result:",
+          success ? "SUCCESS" : "FAILED",
+        );
+        console.groupEnd();
 
         if (active) {
           await loadGame(gameId);
         }
-      } catch {}
+      } catch (err) {
+        console.error("❌ ERROR initializing bit packed session:", err);
+        console.groupEnd();
+      }
     }
 
     init();
@@ -55,7 +51,7 @@ export function useBitPackedGame(gameId = "default_game") {
     };
   }, [gameId, storageAdapter, loadGame]);
 
-  const advanceNextTurn = useCallback(async (): Promise<GameState | null> => {
+  const advanceNextTurn = useCallback(async () => {
     const nextState = await advanceTurnAction();
     if (nextState) {
       const gridState = BitPackedGridState.getInstance();
