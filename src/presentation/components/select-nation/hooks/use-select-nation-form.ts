@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
@@ -30,7 +32,12 @@ export function useSelectNationForm() {
         });
         if (res.ok) {
           const json = (await res.json()) as MapManifest;
-          if (active && json.nations) {
+          if (
+            active &&
+            json &&
+            Array.isArray(json.nations) &&
+            json.nations.length > 0
+          ) {
             setManifest(json);
           }
         }
@@ -45,7 +52,11 @@ export function useSelectNationForm() {
   }, []);
 
   const allNations = useMemo(() => {
-    if (manifest && manifest.nations) {
+    if (
+      manifest &&
+      Array.isArray(manifest.nations) &&
+      manifest.nations.length > 0
+    ) {
       return provider.getNationsFromManifest(manifest.nations);
     }
     return provider.getAllSelectableNations();
@@ -57,12 +68,15 @@ export function useSelectNationForm() {
     string | null
   >(null);
 
-  const selectedNation = useMemo(() => {
+  const selectedNation = useMemo<NationDetail | null>(() => {
+    if (!allNations || allNations.length === 0) {
+      return null;
+    }
     if (selectedNationId) {
       const found = allNations.find((n) => n.id === selectedNationId);
       if (found) return found;
     }
-    return allNations[0]!;
+    return allNations[0] ?? null;
   }, [allNations, selectedNationId]);
 
   const selectedGovernment = useMemo(() => {
