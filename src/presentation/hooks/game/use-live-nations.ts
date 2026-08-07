@@ -1,10 +1,6 @@
 import { useMemo } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
-import {
-  findCountryProfileById,
-  findCountryProfileByCode,
-  CountryRegistry,
-} from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface LiveNationItem {
   id: string;
@@ -45,14 +41,14 @@ export function useLiveNations({
         return canonical !== canonicalExclude && n.id !== excludeNationId;
       })
       .map((n) => {
-        const canonical = CountryRegistry.resolveCanonicalId(n.id);
-        const numericId = CountryRegistry.resolveNumericId(canonical);
         const profile =
-          findCountryProfileById(numericId) ||
-          findCountryProfileByCode(n.flagCode || n.id);
+          CountryRegistry.getCountry(n.id) ||
+          CountryRegistry.getCountry(n.flagCode);
 
         const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
-        const code = profile ? profile.code : canonical.replace("NATION_", "");
+        const code = profile
+          ? profile.code
+          : CountryRegistry.resolveCanonicalId(n.id).replace("NATION_", "");
 
         return {
           id: n.id,

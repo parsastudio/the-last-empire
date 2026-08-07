@@ -13,14 +13,22 @@ export function resolveStanceLabel(
   countryCode: string,
   nationsMap?: Record<string, Nation>,
 ): string {
-  if (!humanNationId || !nationsMap || !nationsMap[humanNationId]) {
+  if (!humanNationId || !nationsMap) {
     return "دیپلماسی عادی";
   }
 
-  const humanNation = nationsMap[humanNationId];
+  const humanNation =
+    nationsMap[humanNationId] ||
+    nationsMap[CountryRegistry.resolveCanonicalId(humanNationId)];
+
+  if (!humanNation) {
+    return "دیپلماسی عادی";
+  }
+
   const relation =
     humanNation.relations[fullNationId] ||
-    humanNation.relations[countryCode.toUpperCase()];
+    humanNation.relations[countryCode.toUpperCase()] ||
+    humanNation.relations[`NATION_${countryCode.toUpperCase()}`];
 
   if (relation) {
     if (relation.stance === "WAR") return "وضعیت نبرد";
