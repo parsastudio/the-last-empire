@@ -3,8 +3,8 @@ import {
   DiplomaticRelation,
   getQualitativeOpinionLabel,
   getQualitativeOpinionColor,
-} from "./utils/relation-resolver";
-import { DiplomaticStanceBadge } from "./diplomatic-stance-badge";
+} from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
+import { DiplomaticStanceBadge } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomatic-stance-badge";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DiplomacyListItemProps {

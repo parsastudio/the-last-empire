@@ -153,8 +153,11 @@ export class PoliticsActionExecutor {
         }
         const targetKey = target.id;
 
-        const reqBudget = ProxyWarManager.calculateBudget(target.gdp, 2);
-        if (nation.treasury < reqBudget) {
+        if (action.budget <= 0) {
+          throw new GameError("INVALID_ACTION", "بودجه عملیات باید مثبت باشد.");
+        }
+
+        if (nation.treasury < action.budget) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
             "موجودی خزانه برای اجرای عملیات نیابتی کافی نیست.",
@@ -169,23 +172,13 @@ export class PoliticsActionExecutor {
           ),
         );
 
-        const requiredBudget = ProxyWarManager.calculateBudget(
-          target.gdp,
-          drain,
-        );
-
-        const actualBudget = Math.min(
-          action.budget,
-          requiredBudget > 0 ? requiredBudget : action.budget,
-        );
-
         return {
           ...state,
           nations: {
             ...state.nations,
             [sourceKey]: {
               ...nation,
-              treasury: nation.treasury - actualBudget,
+              treasury: nation.treasury - action.budget,
             },
             [targetKey]: {
               ...target,
