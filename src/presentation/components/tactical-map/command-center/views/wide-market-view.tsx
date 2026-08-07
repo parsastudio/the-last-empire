@@ -88,7 +88,6 @@ export function WideMarketView({
             colorClass="text-treasury"
             stock={oilStock}
             currentPrice={safeOil}
-            priceTrend={trade.oilTrend}
             onTrade={(mode) =>
               trade.handleOpenTrade(
                 "نفت خام استراتژیک",
@@ -106,7 +105,6 @@ export function WideMarketView({
             colorClass="text-primary"
             stock={steelStock}
             currentPrice={safeSteel}
-            priceTrend={trade.steelTrend}
             onTrade={(mode) =>
               trade.handleOpenTrade(
                 "فولاد صنعتی سنگین",
