@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { MarketEngine } from "@/engine/economy/market-engine";
 import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
@@ -28,9 +28,6 @@ export function useMarketTrade({
     unitPrice: MARKET_CONFIG.FIXED_BUY_PRICE,
     maxAmount: 10,
   });
-
-  const oilTrend: "up" | "down" | "stable" = useMemo(() => "stable", []);
-  const steelTrend: "up" | "down" | "stable" = useMemo(() => "stable", []);
 
   const handleOpenTrade = useCallback(
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
@@ -65,8 +62,6 @@ export function useMarketTrade({
 
   return {
     tradeModal,
-    oilTrend,
-    steelTrend,
     handleOpenTrade,
     closeTradeModal,
   };

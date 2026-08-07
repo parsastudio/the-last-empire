@@ -10,7 +10,6 @@ interface CommodityCardProps {
   colorClass: string;
   stock: number;
   currentPrice: number;
-  priceTrend: "up" | "down" | "stable";
   onTrade: (action: "buy" | "sell") => void;
 }
 

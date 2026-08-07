@@ -37,12 +37,8 @@ export class MarketEngine {
     return Math.floor(treasury / price);
   }
 
-  public static predictSellRevenue(
-    marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
-    amount: number,
-  ): number {
-    if (amount <= 0 || !marketPrices || !resourceType) return 0;
+  public static predictSellRevenue(amount: number): number {
+    if (amount <= 0) return 0;
     return amount * MARKET_CONFIG.FIXED_SELL_PRICE;
   }
 
@@ -73,10 +69,7 @@ export class MarketEngine {
           [resourceType]: nation.resources[resourceType] + amount,
         },
       },
-      updatedMarketPrices: {
-        oil: MARKET_CONFIG.FIXED_BUY_PRICE,
-        steel: MARKET_CONFIG.FIXED_BUY_PRICE,
-      },
+      updatedMarketPrices: MarketEngine.updateMarketPrices(),
       totalCostOrRevenue: totalCost,
     };
   }
@@ -94,11 +87,7 @@ export class MarketEngine {
       throw new GameError("INSUFFICIENT_RESOURCES", "موجودی انبار کافی نیست.");
     }
 
-    const totalRevenue = MarketEngine.predictSellRevenue(
-      marketPrices,
-      resourceType,
-      amount,
-    );
+    const totalRevenue = MarketEngine.predictSellRevenue(amount);
 
     return {
       updatedNation: {
@@ -109,10 +98,7 @@ export class MarketEngine {
           [resourceType]: nation.resources[resourceType] - amount,
         },
       },
-      updatedMarketPrices: {
-        oil: MARKET_CONFIG.FIXED_BUY_PRICE,
-        steel: MARKET_CONFIG.FIXED_BUY_PRICE,
-      },
+      updatedMarketPrices: MarketEngine.updateMarketPrices(),
       totalCostOrRevenue: totalRevenue,
     };
   }

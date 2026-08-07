@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { Cpu, Wrench, Award, Zap, Loader2 } from "lucide-react";
+import { Cpu, Wrench, Zap, Loader2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import {
   IndustrialLevelManager,
   InfrastructureManager,
 } from "@/engine/economy/economy-domain.service";
-import { ResearchManager } from "@/engine/politics/research-manager";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DevelopmentUpgradesSectionProps {
@@ -15,7 +14,6 @@ interface DevelopmentUpgradesSectionProps {
   gdp: number;
   industrialLevel: number;
   infrastructureLevel: number;
-  militaryTechLevel: number;
 }
 
 export function DevelopmentUpgradesSection({
@@ -24,20 +22,17 @@ export function DevelopmentUpgradesSection({
   gdp,
   industrialLevel,
   infrastructureLevel,
-  militaryTechLevel,
 }: DevelopmentUpgradesSectionProps) {
   const [activeUpgrade, setActiveUpgrade] = useState<string | null>(null);
   const { dispatchAction } = useGameActions();
 
   const industrialCost = IndustrialLevelManager.getUpgradeCost(gdp);
   const infraCost = InfrastructureManager.getUpgradeCost(gdp);
-  const techCost = ResearchManager.getMilitaryTechCost(gdp);
 
   const canAffordIndustrial = treasury >= industrialCost;
   const canAffordInfra = treasury >= infraCost;
-  const canAffordTech = treasury >= techCost;
 
-  const handleUpgrade = async (type: "industrial" | "infra" | "tech") => {
+  const handleUpgrade = async (type: "industrial" | "infra") => {
     if (activeUpgrade) return;
     setActiveUpgrade(type);
 
@@ -54,12 +49,6 @@ export function DevelopmentUpgradesSection({
           action,
           `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${infrastructureLevel + 1} آغاز شد.`,
         );
-      } else if (type === "tech" && canAffordTech) {
-        const action = ActionFactory.investResearch(nationId);
-        await dispatchAction(
-          action,
-          `پروژه ارتقای فناوری نظامی به سطح ${militaryTechLevel + 1} آغاز گردید.`,
-        );
       }
     } finally {
       setActiveUpgrade(null);
@@ -71,7 +60,7 @@ export function DevelopmentUpgradesSection({
       <div className="flex items-center gap-2 px-1">
         <Cpu size={14} className="text-gdp" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          پروژه‌های توسعه ملی و فناوری
+          پروژه‌های توسعه صنعتی و زیرساخت
         </span>
       </div>
 
@@ -135,38 +124,6 @@ export function DevelopmentUpgradesSection({
             <span>
               {canAffordInfra
                 ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(infrastructureLevel + 1)}`
-                : "موجودی ناکافی"}
-            </span>
-          </button>
-        </div>
-
-        <div className="bg-secondary/40 border border-border/40 p-3 rounded-xl space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-foreground flex items-center gap-1.5">
-              <Award size={14} className="text-amber-500" />
-              فناوری نظامی (سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(militaryTechLevel)})
-            </span>
-            <span className="font-mono text-[10px] text-muted-foreground">
-              {PersianNumberFormatter.formatCurrency(techCost)}
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            افزایش ۲۰٪ ضریب قدرتمندی کلیه یگان‌های رزمی و پدافند.
-          </p>
-          <button
-            onClick={() => handleUpgrade("tech")}
-            disabled={!canAffordTech || activeUpgrade !== null}
-            className="w-full py-2 bg-amber-500 hover:bg-amber-500/90 disabled:opacity-40 text-primary-foreground rounded-xl text-[10px] font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
-          >
-            {activeUpgrade === "tech" ? (
-              <Loader2 size={12} className="animate-spin" />
-            ) : (
-              <Zap size={12} />
-            )}
-            <span>
-              {canAffordTech
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(militaryTechLevel + 1)}`
                 : "موجودی ناکافی"}
             </span>
           </button>
