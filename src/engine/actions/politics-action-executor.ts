@@ -5,7 +5,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
-import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
 
 export class PoliticsActionExecutor {
