@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { CameraPosition } from "./map-camera-transform";
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 interface GridPickResult {
   nationId: number;
