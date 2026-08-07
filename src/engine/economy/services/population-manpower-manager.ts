@@ -79,23 +79,8 @@ export class ResourceDependencyManager {
   }
 
   public static consumeTurnResources(nation: Nation): Nation {
-    const metrics = PopulationWelfareCalculator.evaluateWelfare(
-      nation.population,
-      nation.resources.oil,
-      nation.resources.steel,
-      nation.gdp,
-    );
-
-    const newOil = Math.max(0, nation.resources.oil - metrics.oilDemand);
-    const newSteel = Math.max(0, nation.resources.steel - metrics.steelDemand);
-
-    return {
-      ...nation,
-      resources: {
-        ...nation.resources,
-        oil: newOil,
-        steel: newSteel,
-      },
-    };
+    const { updatedNation } =
+      PopulationWelfareCalculator.consumeTurnResources(nation);
+    return updatedNation;
   }
 }

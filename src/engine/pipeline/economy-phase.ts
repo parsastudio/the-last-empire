@@ -8,7 +8,7 @@ import {
   TariffCalculator,
   TaxCalculator,
   MilitaryPayrollCalculator,
-  ResourceDependencyManager,
+  PopulationWelfareCalculator,
   DebtManager,
   BankruptcyManager,
 } from "@/engine/economy/economy-domain.service";
@@ -77,7 +77,10 @@ export class EconomyPhase implements TurnPhase {
       );
 
       updated = financial.updatedNation;
-      updated = ResourceDependencyManager.consumeTurnResources(updated);
+
+      const { updatedNation } =
+        PopulationWelfareCalculator.consumeTurnResources(updated);
+      updated = updatedNation;
 
       if (this.bankruptcyManager.isBankrupt(updated)) {
         updated = this.bankruptcyManager.applyBankruptcy(updated);
