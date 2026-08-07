@@ -67,14 +67,22 @@ export function useWebGLMapRenderer({
   useEffect(() => {
     let animFrameId: number;
     const startTime = performance.now();
+    let lastVersion = -1;
 
     const renderLoop = () => {
       if (rendererRef.current && gl) {
         const gridState = BitPackedGridState.getInstance();
-        if (gridState.getModifiedIndices().size > 0) {
+        const currentVersion = gridState.getVersion();
+
+        if (
+          currentVersion !== lastVersion ||
+          gridState.getModifiedIndices().size > 0
+        ) {
           rendererRef.current.updateLiveStateTexture(
             gridState.getBuffer().getRawBuffer(),
           );
+          lastVersion = currentVersion;
+          gridState.clearModifiedIndices();
         }
 
         const time = (performance.now() - startTime) / 1000;

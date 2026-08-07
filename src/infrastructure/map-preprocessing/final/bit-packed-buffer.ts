@@ -1,5 +1,6 @@
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { MAP_CONFIG } from "@/domain/map/map.config";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class BitPackedBuffer {
   private buffer: Uint16Array;
@@ -98,6 +99,7 @@ export class BitPackedBuffer {
 
   public loadArrayBuffer(arrayBuffer: ArrayBuffer): void {
     this.buffer = new Uint16Array(arrayBuffer);
+    BitPackedGridState.getInstance().markDirty();
   }
 
   public toUint8ArrayBuffer(): Uint8Array {

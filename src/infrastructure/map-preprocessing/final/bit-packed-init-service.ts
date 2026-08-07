@@ -15,6 +15,7 @@ export class BitPackedInitService {
 
     if (loadedBuffer) {
       gridState.getBuffer().getRawBuffer().set(loadedBuffer.getRawBuffer());
+      gridState.markDirty();
     }
 
     gridState.saveSnapshot(`${gameId}_initial`);

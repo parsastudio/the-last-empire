@@ -1,6 +1,7 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { MAP_CONFIG } from "@/domain/map/map.config";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class ClientFinalStateLoader {
   private static cachedBuffer: BitPackedBuffer | null = null;
@@ -9,6 +10,7 @@ export class ClientFinalStateLoader {
     mapId = "map1",
   ): Promise<BitPackedBuffer | null> {
     if (this.cachedBuffer) {
+      BitPackedGridState.getInstance().markDirty();
       return this.cachedBuffer;
     }
 
@@ -28,6 +30,7 @@ export class ClientFinalStateLoader {
       bitBuffer.loadArrayBuffer(arrayBuf);
 
       this.cachedBuffer = bitBuffer;
+      BitPackedGridState.getInstance().markDirty();
       return this.cachedBuffer;
     } catch {
       return null;
