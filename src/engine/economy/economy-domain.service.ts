@@ -6,3 +6,4 @@ export * from "@/engine/economy/services/infrastructure-manager";
 export * from "@/engine/economy/services/industrial-manager";
 export * from "@/engine/economy/services/military-payroll-calculator";
 export * from "@/engine/economy/services/population-manpower-manager";
+export * from "@/engine/economy/population-welfare-calculator";
