@@ -1,11 +1,5 @@
 import { CountryProfile } from "@/domain/data/countries/profile.type";
-import { africaProfiles } from "@/domain/data/countries/africa";
-import { americasProfiles } from "@/domain/data/countries/americas";
-import { asiaWestProfiles } from "@/domain/data/countries/asia-west";
-import { asiaEastProfiles } from "@/domain/data/countries/asia-east";
-import { europeWestProfiles } from "@/domain/data/countries/europe-west";
-import { europeEastProfiles } from "@/domain/data/countries/europe-east";
-import { oceaniaProfiles } from "@/domain/data/countries/oceania";
+import { ALL_RAW_COUNTRY_PROFILES } from "@/domain/data/countries/country-profiles.data";
 
 const ID_MAPPING: Record<string, number> = {
   TZA: 12,
@@ -114,20 +108,11 @@ const ID_MAPPING: Record<string, number> = {
   AUS: 148,
 };
 
-const rawProfiles: CountryProfile[] = [
-  ...africaProfiles,
-  ...americasProfiles,
-  ...asiaWestProfiles,
-  ...asiaEastProfiles,
-  ...europeWestProfiles,
-  ...europeEastProfiles,
-  ...oceaniaProfiles,
-];
-
-export const ALL_COUNTRY_PROFILES: CountryProfile[] = rawProfiles.map((p) => ({
-  ...p,
-  id: p.id ?? ID_MAPPING[p.code] ?? 0,
-}));
+export const ALL_COUNTRY_PROFILES: CountryProfile[] =
+  ALL_RAW_COUNTRY_PROFILES.map((p) => ({
+    ...p,
+    id: p.id ?? ID_MAPPING[p.code] ?? 0,
+  }));
 
 export class CountryRegistry {
   private static readonly byNumericId = new Map<number, CountryProfile>();

@@ -1,7 +1,7 @@
 import React from "react";
 import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { MilitaryPayrollCalculator } from "@/engine/economy/economy-domain.service";
+import { MilitaryPayrollCalculator } from "@/engine/economy/economy-calculators";
 import { Nation } from "@/domain/nation/nation.schema";
 
 interface MilitaryForcesSectionProps {

@@ -5,7 +5,7 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import {
   IndustrialLevelManager,
   InfrastructureManager,
-} from "@/engine/economy/economy-domain.service";
+} from "@/engine/economy/economy-calculators";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DevelopmentUpgradesSectionProps {

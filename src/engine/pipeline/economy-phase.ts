@@ -11,7 +11,7 @@ import {
   PopulationWelfareCalculator,
   DebtManager,
   BankruptcyManager,
-} from "@/engine/economy/economy-domain.service";
+} from "@/engine/economy/economy-calculators";
 import { AutoTradeEngine } from "@/engine/economy/auto-trade/auto-trade.engine";
 import { MarketEngine } from "@/engine/economy/market-engine";
 
