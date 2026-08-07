@@ -4,6 +4,10 @@ export class BitPackedCellUtility {
   public static readonly FRONTIER_MASK = 0x2000;
   public static readonly COASTAL_MASK = 0xc000;
 
+  public static readonly COASTAL_NONE = 0;
+  public static readonly COASTAL_OPEN_WATER = 1;
+  public static readonly COASTAL_CLOSED_WATER = 2;
+
   public static pack(
     nationId: number,
     enclaveId: number,

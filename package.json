@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "build:map": "tsx scripts/build-map.ts",
     "files": "python3 debug/file_collector.py",
     "tree": "python3 debug/tree_generator.py",
     "errors": "python3 debug/error_checker.py",
@@ -29,11 +30,14 @@
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20.19.43",
+    "@types/pngjs": "^6.0.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "pngjs": "^7.0.0",
     "tailwindcss": "^4",
+    "tsx": "^4.19.3",
     "typescript": "^5"
   }
 }

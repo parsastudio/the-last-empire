@@ -1,4 +1,5 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export interface BitPackedNeighborResult {
@@ -33,6 +34,11 @@ export class BitPackedNeighborDetector {
           landNeighborsMap.set(nationId, new Set<number>());
         }
 
+        const coastalType = buffer.getCoastalAccess(x, y);
+        if (coastalType === BitPackedCellUtility.COASTAL_OPEN_WATER) {
+          oceanAccessMap.set(nationId, true);
+        }
+
         for (let k = 0; k < 4; k++) {
           const nx = (x + neighbors[k]!.dx + width) % width;
           const ny = y + neighbors[k]!.dy;
@@ -40,9 +46,7 @@ export class BitPackedNeighborDetector {
           if (ny >= 0 && ny < height) {
             const neighborNation = buffer.getNationId(nx, ny);
 
-            if (neighborNation === 0 || neighborNation === 254) {
-              oceanAccessMap.set(nationId, true);
-            } else if (
+            if (
               neighborNation >= 11 &&
               neighborNation < 250 &&
               neighborNation !== nationId
