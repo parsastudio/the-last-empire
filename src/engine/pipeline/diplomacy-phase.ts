@@ -7,7 +7,7 @@ import {
 } from "@/engine/diplomacy/diplomacy-domain.service";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
-import { NationIdResolver } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class DiplomacyPhase implements TurnPhase {
   private powerRanker = new PowerScoreRanker();
@@ -59,7 +59,7 @@ export class DiplomacyPhase implements TurnPhase {
 
       for (const [targetId, relation] of Object.entries(updatedRelations)) {
         if (!relation) continue;
-        const canonicalTargetId = NationIdResolver.resolveCanonicalId(targetId);
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(targetId);
         const target = nations[targetId] || nations[canonicalTargetId];
 
         if (target && target.isAlive) {

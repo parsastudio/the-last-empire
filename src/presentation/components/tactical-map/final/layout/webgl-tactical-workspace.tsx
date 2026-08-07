@@ -14,7 +14,6 @@ import {
 } from "@/presentation/components/tactical-map/controls/layer-controller";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
-import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 
