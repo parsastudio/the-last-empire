@@ -31,14 +31,6 @@ export class GameStorageAdapter {
       uint8ArrayData.byteOffset + uint8ArrayData.byteLength,
     ) as ArrayBuffer;
 
-    console.group("💾 [DIAGNOSTIC] GameStorageAdapter.saveBitBuffer");
-    console.info(
-      "Saving bit state to IndexedDB for key:",
-      `${gameId}_bitstate`,
-    );
-    console.info("Saving byte length:", rawArrayBuf.byteLength);
-    console.groupEnd();
-
     await db.bitBuffers.put({
       gameId: `${gameId}_bitstate`,
       buffer: rawArrayBuf,
@@ -50,22 +42,17 @@ export class GameStorageAdapter {
     gameId: string,
     buffer: BitPackedBuffer,
   ): Promise<boolean> {
-    console.group("📂 [DIAGNOSTIC] GameStorageAdapter.loadBitBuffer");
+    console.group("💾 [RUNTIME TEST 2] GameStorageAdapter.loadBitBuffer");
     const key = `${gameId}_bitstate`;
-    console.info("Reading IndexedDB for key:", key);
+    console.info("Reading IndexedDB record for key:", key);
 
     const record = await db.bitBuffers.get(key);
 
     if (!record) {
-      console.warn("⚠️ Record not found in IndexedDB for key:", key);
+      console.warn("⚠️ No record found in IndexedDB for key:", key);
       console.groupEnd();
       return false;
     }
-
-    console.info(
-      "Record retrieved from IndexedDB. Timestamp:",
-      new Date(record.timestamp).toISOString(),
-    );
 
     let rawBuffer: ArrayBuffer | null = null;
     if (
@@ -82,7 +69,7 @@ export class GameStorageAdapter {
     }
 
     if (!rawBuffer || rawBuffer.byteLength === 0) {
-      console.error("❌ Record buffer in IndexedDB is invalid or 0 bytes.");
+      console.error("❌ Invalid or 0-byte record found in IndexedDB.");
       console.groupEnd();
       return false;
     }
@@ -95,20 +82,18 @@ export class GameStorageAdapter {
       if ((raw[i]! & 0x00ff) > 0) nonZeroCount++;
     }
 
-    console.info(
-      "IndexedDB loaded buffer non-zero pixels count sample:",
-      nonZeroCount,
-    );
+    console.info("IndexedDB record non-zero pixel count:", nonZeroCount);
 
     if (nonZeroCount === 0) {
-      console.error(
-        "❌ IndexedDB record exists but contains ALL ZEROS! Discarding IndexedDB cache...",
+      console.warn(
+        "⚠️ IndexedDB record contains 0 nation pixels! Discarding stale zero cache...",
       );
+      await db.bitBuffers.delete(key);
       console.groupEnd();
       return false;
     }
 
-    console.info("✅ Valid non-zero map state restored from IndexedDB!");
+    console.info("✅ Valid non-zero bitbuffer loaded from IndexedDB!");
     console.groupEnd();
 
     BitPackedGridState.getInstance().markDirty();
@@ -119,26 +104,32 @@ export class GameStorageAdapter {
     gameId: string,
     buffer: BitPackedBuffer,
   ): Promise<boolean> {
+    console.group("🔄 [RUNTIME TEST 3] ensureBitBufferLoaded");
     const loadedFromDb = await this.loadBitBuffer(gameId, buffer);
     if (loadedFromDb) {
+      console.info("Loaded successfully from IndexedDB!");
+      console.groupEnd();
       return true;
     }
 
-    console.warn(
-      "⚠️ BitBuffer not found in IndexedDB or was empty. Attempting fallback to live-state.bin...",
-    );
+    console.warn("Attempting fallback fetch to live-state.bin from server...");
     const defaultBuffer =
       await ClientFinalStateLoader.loadLiveStateBuffer("map1");
     if (defaultBuffer) {
       buffer.getRawBuffer().set(defaultBuffer.getRawBuffer());
       BitPackedGridState.getInstance().markDirty();
-      console.info("✅ Fallback live-state.bin successfully set in gridState!");
+      await this.saveBitBuffer(gameId, buffer);
+      console.info(
+        "✅ Fallback live-state.bin successfully copied to gridState and saved to IndexedDB!",
+      );
+      console.groupEnd();
       return true;
     }
 
     console.error(
-      "❌ CRITICAL: Failed to load map buffer from both IndexedDB and live-state.bin!",
+      "❌ CRITICAL: Map buffer could not be loaded from IndexedDB nor live-state.bin!",
     );
+    console.groupEnd();
     return false;
   }
 

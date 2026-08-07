@@ -3,7 +3,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
-import { GameIdGenerator } from "@/domain/shared/domain-utilities";
 import { useToast } from "@/presentation/context/toast-context";
 import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/services/nation-database-provider";
@@ -102,25 +101,23 @@ export function useSelectNationForm() {
     if (!selectedNation) return;
 
     try {
-      const uniqueGameId = GameIdGenerator.generateCampaignId(
-        selectedNation.id,
-      );
-
       if (typeof window !== "undefined") {
         localStorage.setItem("human_nation_id", selectedNation.id);
       }
 
-      await BitPackedInitService.initializeBitPackedSession(uniqueGameId);
+      const { gameId } = await BitPackedInitService.initializeBitPackedSession(
+        selectedNation.id,
+      );
 
       const success = await createCampaignStore(
         selectedNation.id,
         selectedGovernment,
-        uniqueGameId,
+        gameId,
         manifest as Parameters<typeof createCampaignStore>[3],
       );
 
       if (success) {
-        router.push(`/play/${uniqueGameId}`);
+        router.push(`/play/${gameId}`);
       } else {
         showToast(
           "خطا در ایجاد کمپین",
