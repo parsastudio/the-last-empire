@@ -4,7 +4,7 @@ import {
   ReputationManager,
   DiplomaticOpinionCalculator,
   RelationsManager,
-} from "@/engine/diplomacy/diplomacy-domain.service";
+} from "@/engine/diplomacy/diplomacy-engine";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { TurnPhase, PipelineContext } from "@/engine/pipeline/turn-phase";
 import { CountryRegistry } from "@/domain/data/countries";

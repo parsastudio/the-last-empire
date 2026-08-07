@@ -4,7 +4,7 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import {
   TaxCalculator,
   TariffCalculator,
-} from "@/engine/economy/economy-domain.service";
+} from "@/engine/economy/economy-calculators";
 import { TraitManager } from "@/engine/politics/trait-manager";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 

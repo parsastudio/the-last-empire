@@ -8,7 +8,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import {
   DiplomaticBetrayalCalculator,
   ReputationManager,
-} from "@/engine/diplomacy/diplomacy-domain.service";
+} from "@/engine/diplomacy/diplomacy-engine";
 
 export class BattleExecutionEngine {
   private facade = new BitPackedStateFacade();

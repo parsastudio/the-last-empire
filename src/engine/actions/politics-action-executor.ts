@@ -2,7 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
-import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-domain.service";
+import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";

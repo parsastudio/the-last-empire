@@ -5,7 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import {
   IndustrialLevelManager,
   InfrastructureManager,
-} from "@/engine/economy/economy-domain.service";
+} from "@/engine/economy/economy-calculators";
 import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyActionExecutor {
