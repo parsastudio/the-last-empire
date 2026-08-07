@@ -3,6 +3,7 @@ import { findCountryProfileById } from "@/domain/data/countries";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
+  mapPos: { x: number; y: number };
   countryId: number;
   countryCode: string;
   countryName: string;
@@ -13,7 +14,13 @@ export function useContextMenu() {
     useState<ContextMenuState | null>(null);
 
   const openContextMenu = useCallback(
-    (screenX: number, screenY: number, nationId: number) => {
+    (
+      screenX: number,
+      screenY: number,
+      nationId: number,
+      mapX: number,
+      mapY: number,
+    ) => {
       if (nationId < 11 || nationId >= 250) {
         setContextMenuState(null);
         return;
@@ -27,6 +34,7 @@ export function useContextMenu() {
 
       setContextMenuState({
         screenPos: { x: screenX, y: screenY },
+        mapPos: { x: mapX, y: mapY },
         countryId: nationId,
         countryCode,
         countryName,

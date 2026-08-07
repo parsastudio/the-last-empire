@@ -5,9 +5,12 @@ import {
   useHoverNationResolver,
   HoverCountryInfo,
 } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
-import { CameraPosition } from "./map-camera-transform";
-import { useGridPicker } from "./use-grid-picker";
-import { useContextMenu, ContextMenuState } from "./use-context-menu";
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
+import { useGridPicker } from "@/presentation/hooks/tactical-map/final/use-grid-picker";
+import {
+  useContextMenu,
+  ContextMenuState,
+} from "@/presentation/hooks/tactical-map/final/use-context-menu";
 
 export type { ContextMenuState };
 
@@ -55,6 +58,9 @@ export function useWebGLInteraction({
   const handlePointerMove = (clientX: number, clientY: number) => {
     const container = containerRef.current;
     if (!container || isDraggingRef.current) {
+      if (hasDraggedRef.current && contextMenuState) {
+        closeContextMenu();
+      }
       if (hoverPos !== null) setHoverPos(null);
       if (hoverData !== null) setHoverData(null);
       lastHoverNationIdRef.current = null;
@@ -121,7 +127,10 @@ export function useWebGLInteraction({
       return;
     }
 
-    openContextMenu(e.clientX, e.clientY, nationId);
+    const mapX = Math.floor((rx - pos.x) / scale);
+    const mapY = Math.floor((ry - pos.y) / scale);
+
+    openContextMenu(e.clientX, e.clientY, nationId, mapX, mapY);
   };
 
   return {

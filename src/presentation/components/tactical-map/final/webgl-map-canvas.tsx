@@ -70,6 +70,11 @@ export function WebGLMapCanvas({
     humanNationId,
   });
 
+  const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {
+    closeContextMenu();
+    handleWheel(e);
+  };
+
   const onMouseMoveCombined = (e: React.MouseEvent<HTMLDivElement>) => {
     handleMouseMove(e);
     handlePointerMove(e.clientX, e.clientY);
@@ -90,7 +95,7 @@ export function WebGLMapCanvas({
       onMouseMove={onMouseMoveCombined}
       onMouseUp={handleMouseUp}
       onMouseLeave={handlePointerLeave}
-      onWheel={handleWheel}
+      onWheel={onWheelCombined}
       onClick={handleMapClick}
     >
       <canvas
@@ -100,6 +105,8 @@ export function WebGLMapCanvas({
       <WebGLHoverHud hoverPos={hoverPos} hoverData={hoverData} />
       <WebGLContextMenuWrapper
         contextMenuState={contextMenuState}
+        positionRef={positionRef}
+        scaleRef={scaleRef}
         onSelectAction={handleSelectContext}
         onClose={closeContextMenu}
       />

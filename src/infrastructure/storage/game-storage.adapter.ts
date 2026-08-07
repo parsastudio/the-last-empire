@@ -42,15 +42,10 @@ export class GameStorageAdapter {
     gameId: string,
     buffer: BitPackedBuffer,
   ): Promise<boolean> {
-    console.group("💾 [RUNTIME TEST 2] GameStorageAdapter.loadBitBuffer");
     const key = `${gameId}_bitstate`;
-    console.info("Reading IndexedDB record for key:", key);
-
     const record = await db.bitBuffers.get(key);
 
     if (!record) {
-      console.warn("⚠️ No record found in IndexedDB for key:", key);
-      console.groupEnd();
       return false;
     }
 
@@ -69,8 +64,6 @@ export class GameStorageAdapter {
     }
 
     if (!rawBuffer || rawBuffer.byteLength === 0) {
-      console.error("❌ Invalid or 0-byte record found in IndexedDB.");
-      console.groupEnd();
       return false;
     }
 
@@ -82,19 +75,9 @@ export class GameStorageAdapter {
       if ((raw[i]! & 0x00ff) > 0) nonZeroCount++;
     }
 
-    console.info("IndexedDB record non-zero pixel count:", nonZeroCount);
-
     if (nonZeroCount === 0) {
-      console.warn(
-        "⚠️ IndexedDB record contains 0 nation pixels! Discarding stale zero cache...",
-      );
-      await db.bitBuffers.delete(key);
-      console.groupEnd();
       return false;
     }
-
-    console.info("✅ Valid non-zero bitbuffer loaded from IndexedDB!");
-    console.groupEnd();
 
     BitPackedGridState.getInstance().markDirty();
     return true;
@@ -104,32 +87,19 @@ export class GameStorageAdapter {
     gameId: string,
     buffer: BitPackedBuffer,
   ): Promise<boolean> {
-    console.group("🔄 [RUNTIME TEST 3] ensureBitBufferLoaded");
     const loadedFromDb = await this.loadBitBuffer(gameId, buffer);
     if (loadedFromDb) {
-      console.info("Loaded successfully from IndexedDB!");
-      console.groupEnd();
       return true;
     }
 
-    console.warn("Attempting fallback fetch to live-state.bin from server...");
     const defaultBuffer =
       await ClientFinalStateLoader.loadLiveStateBuffer("map1");
     if (defaultBuffer) {
       buffer.getRawBuffer().set(defaultBuffer.getRawBuffer());
       BitPackedGridState.getInstance().markDirty();
-      await this.saveBitBuffer(gameId, buffer);
-      console.info(
-        "✅ Fallback live-state.bin successfully copied to gridState and saved to IndexedDB!",
-      );
-      console.groupEnd();
       return true;
     }
 
-    console.error(
-      "❌ CRITICAL: Map buffer could not be loaded from IndexedDB nor live-state.bin!",
-    );
-    console.groupEnd();
     return false;
   }
 
