@@ -4,7 +4,8 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { ActionEngine } from "@/engine/actions/action-engine";
-import { TurnWorkerService } from "@/presentation/services/turn-worker.service";
+import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
+import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
@@ -32,6 +33,7 @@ interface GameStoreState {
 
 const storageAdapter = new GameStorageAdapter();
 const aiInitializer = new GlobalAiInitializer();
+const orchestrator = new TurnProgressionOrchestrator();
 
 export const useGameStore = create<GameStoreState>()(
   immer((set, get) => ({
@@ -167,7 +169,11 @@ export const useGameStore = create<GameStoreState>()(
       if (!gameState) return null;
 
       try {
-        const nextState = await TurnWorkerService.processTurn(gameState);
+        const prng = new SeededRandom(
+          gameState.seed || Math.floor(Math.random() * 1000000),
+        );
+        const nextState = orchestrator.advanceTurn(gameState, prng);
+
         await storageAdapter.saveGameState(activeGameId, nextState);
         set((draft) => {
           draft.gameState = nextState;

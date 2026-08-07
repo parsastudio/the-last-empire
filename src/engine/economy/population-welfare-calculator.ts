@@ -144,4 +144,26 @@ export class PopulationWelfareCalculator {
       totalStabilityImpact,
     };
   }
+
+  public static consumeTurnResources(nation: Nation): {
+    updatedNation: Nation;
+    metrics: PopulationWelfareMetrics;
+  } {
+    const metrics = this.evaluateWelfareForNation(nation);
+
+    const newOil = Math.max(0, nation.resources.oil - metrics.oilDemand);
+    const newSteel = Math.max(0, nation.resources.steel - metrics.steelDemand);
+
+    return {
+      updatedNation: {
+        ...nation,
+        resources: {
+          ...nation.resources,
+          oil: newOil,
+          steel: newSteel,
+        },
+      },
+      metrics,
+    };
+  }
 }

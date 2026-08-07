@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { LoanManager } from "@/engine/economy/economy-domain.service";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { LoanActionDialog } from "./loan-action-dialog";
-import { RepayActionDialog } from "./repay-action-dialog";
+import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
 
 interface ImfLoanCardProps {
@@ -23,6 +24,7 @@ export function ImfLoanCard({
 }: ImfLoanCardProps) {
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
+  const { dispatchAction } = useGameActions();
 
   const mockNation =
     nation ||
@@ -37,6 +39,27 @@ export function ImfLoanCard({
   const creditRating = LoanManager.calculateCreditRating(mockNation);
   const maxDebtLimit = Math.floor(gdp * 1.0 * (creditRating / 100));
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
+
+  const availableLoanBillion = Math.floor(availableLoan / 1e9);
+  const maxRepayBillion = Math.floor(Math.min(nationalDebt, treasury) / 1e9);
+
+  const handleConfirmLoan = async (billionAmount: number) => {
+    const absoluteVal = billionAmount * 1e9;
+    const action = ActionFactory.requestLoan(nationId, absoluteVal);
+    await dispatchAction(
+      action,
+      `وام اضطراری به مبلغ ${PersianNumberFormatter.formatCurrency(absoluteVal)} دریافت شد.`,
+    );
+  };
+
+  const handleConfirmRepay = async (billionAmount: number) => {
+    const absoluteVal = billionAmount * 1e9;
+    const action = ActionFactory.repayDebt(nationId, absoluteVal);
+    await dispatchAction(
+      action,
+      `مبلغ ${PersianNumberFormatter.formatCurrency(absoluteVal)} از بدهی ملی تسویه شد.`,
+    );
+  };
 
   return (
     <>
@@ -101,19 +124,32 @@ export function ImfLoanCard({
         </div>
       </div>
 
-      <LoanActionDialog
+      <AmountActionDialog
         isOpen={isLoanModalOpen}
-        maxAvailableLoan={availableLoan}
-        nationId={nationId}
+        title="دریافت تسهیلات اضطراری از بانک جهانی"
+        subtitle="پرداخت نوبتی ۵٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
+        unitLabel="میلیارد دلار"
+        maxAmount={availableLoanBillion}
+        confirmLabel="دریافت وام"
+        colorVariant="gdp"
+        icon={ArrowUpRight}
+        emptyStateText="سقف اعتبار ملی تکمیل است."
         onClose={() => setIsLoanModalOpen(false)}
+        onConfirm={handleConfirmLoan}
       />
 
-      <RepayActionDialog
+      <AmountActionDialog
         isOpen={isRepayModalOpen}
-        nationalDebt={nationalDebt}
-        userTreasury={treasury}
-        nationId={nationId}
+        title="تسویه بدهی معوق ملی"
+        subtitle="پرداخت بخشی از بدهی به بانک جهانی از محل موجودی خزانه"
+        unitLabel="میلیارد دلار"
+        maxAmount={maxRepayBillion}
+        confirmLabel="تسویه بدهی"
+        colorVariant="military"
+        icon={ArrowDownRight}
+        emptyStateText="امکان تسویه وجود ندارد."
         onClose={() => setIsRepayModalOpen(false)}
+        onConfirm={handleConfirmRepay}
       />
     </>
   );
