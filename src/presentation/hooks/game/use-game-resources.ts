@@ -7,7 +7,7 @@ import {
   TaxCalculator,
   MilitaryPayrollCalculator,
   TariffCalculator,
-} from "@/engine/economy/economy-domain.service";
+} from "@/engine/economy/economy-calculators";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";

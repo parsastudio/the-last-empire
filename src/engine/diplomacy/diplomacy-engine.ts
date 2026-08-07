@@ -4,7 +4,6 @@ import {
   RelationProfile,
   DiplomaticProposalType,
 } from "@/domain/diplomacy/diplomacy.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export interface BetrayalEvaluation {
@@ -201,7 +200,7 @@ export class TreatyEvaluator {
     requestedTributeAmount?: number,
   ): ProposalEvaluation {
     const relation = receiver.relations[sender.id];
-    let opinion =
+    const opinion =
       (relation ? relation.opinion : 0) +
       DoctrinesManager.getDiplomaticOpinionThresholdBonus(
         sender.doctrines?.unlockedDoctrines,
