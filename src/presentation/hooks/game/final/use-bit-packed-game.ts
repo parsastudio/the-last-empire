@@ -38,6 +38,7 @@ export function useBitPackedGame(gameId = "default_game") {
               .getBuffer()
               .getRawBuffer()
               .set(defaultBuffer.getRawBuffer());
+            gridState.markDirty();
           }
         }
 

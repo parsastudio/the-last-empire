@@ -4,6 +4,7 @@ import {
   db,
   SavedGameStateRecord,
 } from "@/infrastructure/storage/game-database";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class GameStorageAdapter {
   public async saveGameState(gameId: string, state: GameState): Promise<void> {
@@ -45,6 +46,7 @@ export class GameStorageAdapter {
         record.buffer instanceof SharedArrayBuffer)
     ) {
       buffer.loadArrayBuffer(record.buffer as ArrayBuffer);
+      BitPackedGridState.getInstance().markDirty();
       return true;
     }
     return false;
