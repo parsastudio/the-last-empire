@@ -105,8 +105,6 @@ export function WebGLMapCanvas({
       <WebGLHoverHud hoverPos={hoverPos} hoverData={hoverData} />
       <WebGLContextMenuWrapper
         contextMenuState={contextMenuState}
-        positionRef={positionRef}
-        scaleRef={scaleRef}
         onSelectAction={handleSelectContext}
         onClose={closeContextMenu}
       />
