@@ -6,6 +6,7 @@ import { WaterBodyClassifier } from "@/infrastructure/map-preprocessing/final/wa
 import { FinalManifestBuilder } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { BitPackedEnclaveClusterer } from "@/engine/combat/final/bit-packed-enclave-clusterer";
 import { FrontierBitManager } from "@/engine/combat/final/frontier-bit-manager";
+import { LandPartitionEngine } from "@/infrastructure/map-preprocessing/final/land-partition-engine";
 
 export class MapBuildOrchestrator {
   private waterClassifier = new WaterBodyClassifier();
@@ -42,9 +43,7 @@ export class MapBuildOrchestrator {
     const width = png.width;
     const height = png.height;
     const bitBuffer = new BitPackedBuffer(width, height);
-
-    const pixelAreaMap = new Map<number, number>();
-    const activeCountryIds = new Set<number>();
+    const rawNationGrid = new Uint8Array(width * height);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -62,15 +61,17 @@ export class MapBuildOrchestrator {
           nationId = g;
         }
 
-        if (nationId >= 11 && nationId < 250) {
-          bitBuffer.setNationId(x, y, nationId);
-          activeCountryIds.add(nationId);
-          pixelAreaMap.set(nationId, (pixelAreaMap.get(nationId) || 0) + 1);
-        } else {
-          bitBuffer.setNationId(x, y, 0);
-        }
+        rawNationGrid[y * width + x] = nationId;
       }
     }
+
+    const { activeCountryIds, pixelAreaMap } =
+      LandPartitionEngine.partitionAndConsolidate(
+        rawNationGrid,
+        width,
+        height,
+        bitBuffer,
+      );
 
     this.waterClassifier.processFullMap(bitBuffer);
     this.enclaveClusterer.clusterNationEnclaves(bitBuffer, width, height);

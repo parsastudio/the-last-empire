@@ -35,6 +35,20 @@ export function useMapGesture(
   const lastDimensionsRef = useRef({ w: containerWidth, h: containerHeight });
 
   useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      isDraggingRef.current = false;
+    };
+
+    window.addEventListener("mouseup", handleGlobalMouseUp);
+    window.addEventListener("blur", handleGlobalMouseUp);
+
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalMouseUp);
+      window.removeEventListener("blur", handleGlobalMouseUp);
+    };
+  }, []);
+
+  useEffect(() => {
     if (
       containerWidth > 0 &&
       containerHeight > 0 &&
