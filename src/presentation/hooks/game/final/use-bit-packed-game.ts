@@ -19,7 +19,6 @@ export function useBitPackedGame(gameId = "default_game") {
 
     async function init() {
       try {
-        console.group(`🕹️ [RUNTIME TEST 5] Session Init for gameId: ${gameId}`);
         const gridState = BitPackedGridState.getInstance();
         gridState.initializeSession(gameId);
 
@@ -29,10 +28,7 @@ export function useBitPackedGame(gameId = "default_game") {
         if (active) {
           await loadGame(gameId);
         }
-      } catch (err) {
-        console.error("❌ ERROR initializing session:", err);
-        console.groupEnd();
-      }
+      } catch {}
     }
 
     init();
