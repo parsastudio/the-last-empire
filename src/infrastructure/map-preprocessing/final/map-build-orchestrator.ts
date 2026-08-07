@@ -50,11 +50,22 @@ export class MapBuildOrchestrator {
       for (let x = 0; x < width; x++) {
         const idx = (width * y + x) << 2;
         const r = png.data[idx]!;
+        const g = png.data[idx + 1]!;
+        const b = png.data[idx + 2]!;
 
-        if (r >= 11 && r < 250) {
-          bitBuffer.setNationId(x, y, r);
-          activeCountryIds.add(r);
-          pixelAreaMap.set(r, (pixelAreaMap.get(r) || 0) + 1);
+        let nationId = 0;
+        if (b >= 11 && b < 250) {
+          nationId = b;
+        } else if (r >= 11 && r < 250) {
+          nationId = r;
+        } else if (g >= 11 && g < 250) {
+          nationId = g;
+        }
+
+        if (nationId >= 11 && nationId < 250) {
+          bitBuffer.setNationId(x, y, nationId);
+          activeCountryIds.add(nationId);
+          pixelAreaMap.set(nationId, (pixelAreaMap.get(nationId) || 0) + 1);
         } else {
           bitBuffer.setNationId(x, y, 0);
         }

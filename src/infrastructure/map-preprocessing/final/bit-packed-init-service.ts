@@ -2,13 +2,15 @@ import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-pa
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
+import { GameIdGenerator } from "@/domain/shared/domain-utilities";
 
 export class BitPackedInitService {
   private static storageAdapter = new GameStorageAdapter();
 
   public static async initializeBitPackedSession(
-    gameId: string,
-  ): Promise<BitPackedBuffer> {
+    nationId: string,
+  ): Promise<{ gameId: string; buffer: BitPackedBuffer }> {
+    const gameId = GameIdGenerator.generateCampaignId(nationId);
     const gridState = BitPackedGridState.getInstance();
     gridState.initializeSession(gameId);
 
@@ -20,13 +22,9 @@ export class BitPackedInitService {
       gridState.getBuffer().getRawBuffer().set(loadedBuffer.getRawBuffer());
       gridState.markDirty();
       await this.storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
-    } else {
-      console.error(
-        "❌ Failed to load live-state.bin during campaign initialization!",
-      );
     }
 
     gridState.saveSnapshot(`${gameId}_initial`);
-    return buffer;
+    return { gameId, buffer };
   }
 }

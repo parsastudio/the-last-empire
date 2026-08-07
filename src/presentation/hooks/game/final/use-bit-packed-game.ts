@@ -19,27 +19,18 @@ export function useBitPackedGame(gameId = "default_game") {
 
     async function init() {
       try {
-        console.group(`🚀 [DIAGNOSTIC] Session Init for gameId: ${gameId}`);
+        console.group(`🕹️ [RUNTIME TEST 5] Session Init for gameId: ${gameId}`);
         const gridState = BitPackedGridState.getInstance();
         gridState.initializeSession(gameId);
 
         const buffer = gridState.getBuffer();
-        const success = await storageAdapter.ensureBitBufferLoaded(
-          gameId,
-          buffer,
-        );
-
-        console.info(
-          "Map bit buffer loading result:",
-          success ? "SUCCESS" : "FAILED",
-        );
-        console.groupEnd();
+        await storageAdapter.ensureBitBufferLoaded(gameId, buffer);
 
         if (active) {
           await loadGame(gameId);
         }
       } catch (err) {
-        console.error("❌ ERROR initializing bit packed session:", err);
+        console.error("❌ ERROR initializing session:", err);
         console.groupEnd();
       }
     }
