@@ -11,6 +11,7 @@ interface MilitaryForcesSectionProps {
   techLevel: number;
   experience: number;
   militiaGarrisonPower?: number;
+  nation?: Nation;
 }
 
 export function MilitaryForcesSection({
@@ -20,38 +21,39 @@ export function MilitaryForcesSection({
   techLevel,
   experience,
   militiaGarrisonPower = 280,
+  nation,
 }: MilitaryForcesSectionProps) {
-  const mockNation: Nation = {
-    id: "NATION_MOCK",
+  const activeNation: Nation = nation ?? {
+    id: "NATION_DEFAULT",
     name: "ملی",
     isAi: false,
     isAlive: true,
     flagCode: "IR",
     rank: 1,
-    gdp: 100000000000,
-    taxRate: 15,
-    tariffRate: 10,
-    treasury: 100000000,
+    gdp: 0,
+    taxRate: 0,
+    tariffRate: 0,
+    treasury: 0,
     nationalDebt: 0,
-    population: 80000000,
+    population: 0,
     industrialLevel: 1,
     consecutiveDeficitTurns: 0,
     government: {
       type: "DEMOCRACY",
       stability: 80,
-      corruption: 5,
+      corruption: 0,
       turnsInPower: 1,
     },
-    resources: { oil: 1000, steel: 1000, manpower: 500 },
+    resources: { oil: 0, steel: 0, manpower: 0 },
     military: { infantry, airForce, droneMissile, experience, techLevel },
     recruitmentQueue: [],
     geography: {
       landNeighbors: [],
       seaNeighbors: [],
       hasSeaAccess: true,
-      territoryPixelCount: 1000,
+      territoryPixelCount: 0,
       infrastructureLevel: 1,
-      contiguousMainlandPixelCount: 1000,
+      contiguousMainlandPixelCount: 0,
       isolatedPockets: [],
       coordinates: [],
     },
@@ -60,7 +62,7 @@ export function MilitaryForcesSection({
     traits: [],
     globalReputation: 50,
     doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
-    researchBudgetRate: 1,
+    researchBudgetRate: 0,
     accumulatedResearchCost: 0,
     researchCycleTurn: 0,
     proxyInfluenceBudget: {},
@@ -72,7 +74,7 @@ export function MilitaryForcesSection({
     },
   };
 
-  const payroll = MilitaryPayrollCalculator.calculatePayroll(mockNation);
+  const payroll = MilitaryPayrollCalculator.calculatePayroll(activeNation);
   const bonusPercent = (techLevel - 1) * 20;
 
   return (

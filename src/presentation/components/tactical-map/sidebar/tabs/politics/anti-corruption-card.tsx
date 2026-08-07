@@ -20,7 +20,6 @@ export function AntiCorruptionCard({
 }: AntiCorruptionCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // حفظ دقیق عدد اعشاری (مثلاً ۷.۰۲)
   const actualCorruption = Number((currentCorruption || 0).toFixed(2));
   const maxReducible = Math.min(100, Math.max(0, actualCorruption));
 
@@ -75,7 +74,6 @@ export function AntiCorruptionCard({
   const displayResultingCorruption =
     resultingCorruption <= 0.01 ? 0 : Number(resultingCorruption.toFixed(2));
 
-  // محاسبه درصد دقیق برای پر کردن نوار اسلایدر
   const sliderPercentage =
     maxReducible > 0 ? (targetReduction / maxReducible) * 100 : 0;
 

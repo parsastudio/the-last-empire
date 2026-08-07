@@ -27,7 +27,6 @@ export class WebGLMapRenderer {
 
   private initShaders(): void {
     const gl = this.gl;
-    console.group("🎨 [RUNTIME TEST 4] WebGLMapRenderer Shaders Init");
 
     const vertShader = this.compileShader(
       gl.VERTEX_SHADER,
@@ -39,8 +38,6 @@ export class WebGLMapRenderer {
     );
 
     if (!vertShader || !fragShader) {
-      console.error("❌ Failed to compile WebGL shaders!");
-      console.groupEnd();
       return;
     }
 
@@ -51,12 +48,7 @@ export class WebGLMapRenderer {
       gl.linkProgram(prog);
 
       if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-        console.error(
-          "❌ WebGL Program Link Error:",
-          gl.getProgramInfoLog(prog),
-        );
         gl.deleteProgram(prog);
-        console.groupEnd();
         return;
       }
 
@@ -79,10 +71,7 @@ export class WebGLMapRenderer {
       if (uLiveStateLoc) gl.uniform1i(uLiveStateLoc, 1);
       if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
       if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
-
-      console.info("✅ WebGL Shaders and Uniforms linked successfully!");
     }
-    console.groupEnd();
   }
 
   private compileShader(type: number, source: string): WebGLShader | null {
@@ -94,11 +83,6 @@ export class WebGLMapRenderer {
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const typeName = type === gl.VERTEX_SHADER ? "VERTEX" : "FRAGMENT";
-      console.error(
-        `❌ Shader Compilation Error [${typeName}]:`,
-        gl.getShaderInfoLog(shader),
-      );
       gl.deleteShader(shader);
       return null;
     }
@@ -143,7 +127,6 @@ export class WebGLMapRenderer {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    console.info("✅ Terrain Texture loaded into TEXTURE0");
   }
 
   public updateLiveStateTexture(
@@ -155,15 +138,6 @@ export class WebGLMapRenderer {
     if (!this.liveStateTexture) {
       this.liveStateTexture = gl.createTexture();
     }
-
-    let nonZero = 0;
-    for (let i = 0; i < uint16Data.length; i += 32) {
-      if ((uint16Data[i]! & 0x00ff) > 0) nonZero++;
-    }
-
-    console.info(
-      `🖥️ [WebGL] updateLiveStateTexture called. Array length: ${uint16Data.length}, Non-zero pixel sample: ${nonZero}`,
-    );
 
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.liveStateTexture);
@@ -186,12 +160,10 @@ export class WebGLMapRenderer {
 
   public setPaletteTexture(paletteTexture: WebGLTexture): void {
     this.paletteTexture = paletteTexture;
-    console.info("✅ Palette Texture set for TEXTURE2");
   }
 
   public setGdpPaletteTexture(gdpPaletteTexture: WebGLTexture): void {
     this.gdpPaletteTexture = gdpPaletteTexture;
-    console.info("✅ GDP Palette Texture set for TEXTURE3");
   }
 
   public render(

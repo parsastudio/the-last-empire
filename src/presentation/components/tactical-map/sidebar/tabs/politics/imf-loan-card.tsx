@@ -26,7 +26,7 @@ export function ImfLoanCard({
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
 
-  const mockNation: Nation = nation || {
+  const activeNation: Nation = nation || {
     id: nationId,
     name: "ملی",
     isAi: false,
@@ -83,7 +83,7 @@ export function ImfLoanCard({
     },
   };
 
-  const creditRating = LoanManager.calculateCreditRating(mockNation);
+  const creditRating = LoanManager.calculateCreditRating(activeNation);
   const maxDebtLimit = Math.floor(gdp * 1.0 * (creditRating / 100));
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 
