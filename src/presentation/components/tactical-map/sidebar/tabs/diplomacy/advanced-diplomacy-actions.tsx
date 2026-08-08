@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import {
   Handshake,
   CheckCircle2,
-  Flame,
   Ban,
   Swords,
   Globe,
   ShieldAlert,
   AlertTriangle,
+  Flame,
 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -110,7 +110,6 @@ export function AdvancedDiplomacyActions({
   nationId,
   currentStance = "NORMAL_DIPLOMACY",
   isTradeEmbargoed = false,
-  isLandNeighbor = false,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
@@ -181,14 +180,6 @@ export function AdvancedDiplomacyActions({
     );
   };
 
-  const handleInitiateBattle = async () => {
-    const action = ActionFactory.initiateBattle(nationId, targetNationId, 0);
-    await dispatchAction(
-      action,
-      `فرمان آغاز عملیات نظامی علیه ${targetName} صادر شد.`,
-    );
-  };
-
   const handleSeverTrade = async () => {
     const action = ActionFactory.diplomaticProposal(
       nationId,
@@ -201,122 +192,141 @@ export function AdvancedDiplomacyActions({
     );
   };
 
+  const handleDeclareWar = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "DECLARE_WAR",
+    );
+    await dispatchAction(
+      action,
+      `بیانیه رسمی اعلان جنگ به ${targetName} ابلاغ گردید و روابط به وضعیت متخاصم تغییر یافت.`,
+    );
+  };
+
   return (
     <>
-      <div className="space-y-2.5 dir-rtl text-right">
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          گزینه‌های تعامل و وضعیت سیاسی دوجانبه
-        </span>
-
+      <div className="space-y-4 dir-rtl text-right">
         <div className="space-y-2">
-          {isAlliance ? (
-            <div className="w-full p-3 rounded-xl bg-gdp/15 border border-gdp/40 text-gdp flex items-center justify-between text-xs font-bold">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 size={14} />
-                اتحاد نظامی کامل (فعال)
-              </span>
-              <span className="text-[9px] font-mono bg-gdp/20 px-2 py-0.5 rounded text-gdp">
-                وضعیت فعلی
-              </span>
-            </div>
-          ) : (
-            <button
-              onClick={() => executeOrConfirm(handleAlliance, false)}
-              className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-foreground">
-                  پیشنهاد اتحاد نظامی کامل
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+            وضعیت‌های سیاسی و معاهدات دوجانبه
+          </span>
+
+          <div className="space-y-2">
+            {isWar ? (
+              <div className="w-full p-3 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-500 flex items-center justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5">
+                  <Swords size={14} />
+                  در حال نبرد نظامی فعال (متخاصم)
                 </span>
-                <CheckCircle2 size={13} className="text-gdp" />
-              </div>
-            </button>
-          )}
-
-          {isNonAggression ? (
-            <div className="w-full p-3 rounded-xl bg-treasury/15 border border-treasury/40 text-treasury flex items-center justify-between text-xs font-bold">
-              <span className="flex items-center gap-1.5">
-                <Handshake size={14} />
-                پیمان عدم تخاصم (فعال)
-              </span>
-              <span className="text-[9px] font-mono bg-treasury/20 px-2 py-0.5 rounded text-treasury">
-                وضعیت فعلی
-              </span>
-            </div>
-          ) : (
-            <button
-              onClick={() => executeOrConfirm(handleNonAggression, false)}
-              className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-foreground">
-                  پیشنهاد پیمان عدم تخاصم
+                <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-400">
+                  وضعیت فعلی
                 </span>
-                <Handshake size={13} className="text-treasury" />
               </div>
-            </button>
-          )}
+            ) : isAlliance ? (
+              <div className="w-full p-3 rounded-xl bg-gdp/15 border border-gdp/40 text-gdp flex items-center justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 size={14} />
+                  اتحاد نظامی کامل (فعال)
+                </span>
+                <span className="text-[9px] font-mono bg-gdp/20 px-2 py-0.5 rounded text-gdp">
+                  وضعیت فعلی
+                </span>
+              </div>
+            ) : isNonAggression ? (
+              <div className="w-full p-3 rounded-xl bg-treasury/15 border border-treasury/40 text-treasury flex items-center justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5">
+                  <Handshake size={14} />
+                  پیمان عدم تخاصم (فعال)
+                </span>
+                <span className="text-[9px] font-mono bg-treasury/20 px-2 py-0.5 rounded text-treasury">
+                  وضعیت فعلی
+                </span>
+              </div>
+            ) : isSevered ? (
+              <div className="w-full p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5">
+                  <Ban size={14} />
+                  قطع روابط تجاری و تحریم (فعال)
+                </span>
+                <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-400">
+                  وضعیت فعلی
+                </span>
+              </div>
+            ) : isNormal ? (
+              <div className="w-full p-3 rounded-xl bg-secondary/60 border border-border/60 text-muted-foreground flex items-center justify-between text-xs font-bold">
+                <span className="flex items-center gap-1.5">
+                  <Globe size={14} />
+                  دیپلماسی عادی و بی‌طرف (فعال)
+                </span>
+                <span className="text-[9px] font-mono bg-background px-2 py-0.5 rounded text-muted-foreground">
+                  وضعیت فعلی
+                </span>
+              </div>
+            ) : null}
 
-          {isNormal ? (
-            <div className="w-full p-3 rounded-xl bg-secondary/60 border border-border/60 text-muted-foreground flex items-center justify-between text-xs font-bold">
-              <span className="flex items-center gap-1.5">
-                <Globe size={14} />
-                وضعیت پایه و دیپلماسی عادی (فعال)
-              </span>
-              <span className="text-[9px] font-mono bg-background px-2 py-0.5 rounded text-muted-foreground">
-                وضعیت فعلی
-              </span>
-            </div>
-          ) : null}
-
-          <button
-            onClick={() => executeOrConfirm(handleInitiateBattle, true)}
-            disabled={!isLandNeighbor && !isWar}
-            className={`w-full p-3 rounded-xl border text-right transition-all space-y-1 ${
-              isWar
-                ? "bg-rose-600/20 border-rose-500/40 text-rose-500 font-bold cursor-pointer"
-                : isLandNeighbor
-                  ? "bg-rose-500/10 hover:bg-rose-500/20 border-rose-500/30 text-rose-500 cursor-pointer"
-                  : "bg-secondary/40 border-border/40 text-muted-foreground opacity-50 cursor-not-allowed"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold">
-                {isWar
-                  ? "در حال نبرد نظامی فعال"
-                  : isLandNeighbor
-                    ? "اعلان نبرد و تهاجم مستقیم زمینی"
-                    : "نیازمند مرز خاکی مشترک برای تهاجم زمینی"}
-              </span>
-              <Swords size={13} />
-            </div>
-            {!isWar && (
-              <p className="text-[9px] text-muted-foreground">
-                {isLandNeighbor
-                  ? "ورود به فاز اقدام نظامی مستقیم علیه قلمرو این کشور."
-                  : "تنها امکان تهاجم به کشورهایی وجود دارد که دارای مرز زمینی مستقیم با کشور شما هستند."}
-              </p>
+            {!isNonAggression && (
+              <button
+                onClick={() => executeOrConfirm(handleNonAggression, false)}
+                disabled={isWar || isSevered}
+                className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 disabled:opacity-40 border border-border text-right transition-all cursor-pointer space-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground">
+                    پیمان عدم تخاصم
+                  </span>
+                  <Handshake size={13} className="text-treasury" />
+                </div>
+              </button>
             )}
-          </button>
 
-          <button
-            onClick={handleSeverTrade}
-            disabled={isSevered || isWar}
-            className={`w-full p-3 rounded-xl border text-right transition-all cursor-pointer space-y-1 ${
-              isSevered
-                ? "bg-rose-500/10 border-rose-500/30 text-rose-500 opacity-60 cursor-not-allowed"
-                : "bg-secondary hover:bg-secondary/80 border-border text-foreground"
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold">
-                {isSevered
-                  ? "روابط تجاری قطع است"
-                  : "قطع روابط تجاری و تحریم اقتصادی"}
-              </span>
-              <Ban size={13} className="text-rose-500" />
-            </div>
-          </button>
+            {!isAlliance && (
+              <button
+                onClick={() => executeOrConfirm(handleAlliance, false)}
+                disabled={isWar || isSevered}
+                className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 disabled:opacity-40 border border-border text-right transition-all cursor-pointer space-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground">
+                    پیمان اتحاد کامل
+                  </span>
+                  <CheckCircle2 size={13} className="text-gdp" />
+                </div>
+              </button>
+            )}
+
+            {!isSevered && !isWar && (
+              <button
+                onClick={handleSeverTrade}
+                className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-foreground">
+                    قطع روابط تجاری
+                  </span>
+                  <Ban size={13} className="text-rose-400" />
+                </div>
+              </button>
+            )}
+
+            {!isWar && (
+              <button
+                onClick={() => executeOrConfirm(handleDeclareWar, true)}
+                className="w-full p-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-500 text-right transition-all cursor-pointer space-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold">اعلان جنگ رسمی</span>
+                  <Swords size={13} />
+                </div>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="pt-3 border-t border-border/60 space-y-2">
+          <span className="text-[10px] font-bold text-military uppercase tracking-wider font-mono block">
+            عملیات اطلاعاتی و پنهان
+          </span>
 
           <button
             onClick={() => {
@@ -324,14 +334,18 @@ export function AdvancedDiplomacyActions({
                 onOpenProxy();
               }
             }}
-            className="w-full p-3 rounded-xl bg-military/10 hover:bg-military/20 border border-military/30 text-right transition-all cursor-pointer space-y-1"
+            className="w-full p-3.5 rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-right transition-all cursor-pointer space-y-1 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-military">
-                راه‌اندازی عملیات و جنگ نیابتی
+              <span className="text-xs font-extrabold text-military">
+                تلاش برای براندازی و نفوذ پنهان
               </span>
-              <Flame size={13} className="text-military" />
+              <Flame size={14} className="text-military" />
             </div>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              تزریق بودجه اطلاعاتی غیررسمی جهت تخریب ثبات سیاسی بدون تغییر وضعیت
+              دیپلماتیک رسمی.
+            </p>
           </button>
         </div>
       </div>
