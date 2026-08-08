@@ -28,10 +28,21 @@ export class BattleCalculator {
     defender: Nation,
     dronesToLaunch: number,
     oilPrice: number = MARKET_CONFIG.FIXED_BUY_PRICE,
+    infantryToDeploy?: number,
+    airForceToDeploy?: number,
   ): BattleCalculationResult {
+    const deployedInfantry = Math.min(
+      attacker.military.infantry,
+      Math.max(1, infantryToDeploy ?? attacker.military.infantry),
+    );
+    const deployedAirForce = Math.min(
+      attacker.military.airForce,
+      Math.max(0, airForceToDeploy ?? attacker.military.airForce),
+    );
+
     const totalForceCost =
-      attacker.military.infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      attacker.military.airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
+      deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
+      deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (dronesToLaunch || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const deploymentFivePct = totalForceCost * 0.05;
@@ -119,7 +130,7 @@ export class BattleCalculator {
     }
 
     const attackerAirPower =
-      attacker.military.airForce *
+      deployedAirForce *
       (1 + (attacker.military.techLevel - 1) * 0.2) *
       (1 + attacker.military.experience / 100) *
       attackerGovMult;
@@ -156,8 +167,8 @@ export class BattleCalculator {
       }
 
       attackerAirLoss = Math.min(
-        attacker.military.airForce,
-        Math.floor(attacker.military.airForce * attackerAirLossPct),
+        deployedAirForce,
+        Math.floor(deployedAirForce * attackerAirLossPct),
       );
       defenderAirLoss = Math.min(
         defenderRemainingAirForce,
@@ -188,7 +199,7 @@ export class BattleCalculator {
     );
 
     const attackerGroundPower =
-      attacker.military.infantry *
+      deployedInfantry *
       (1 + (attacker.military.techLevel - 1) * 0.2) *
       (1 + attacker.military.experience / 100) *
       airSupportMultiplier *
@@ -210,8 +221,8 @@ export class BattleCalculator {
       const defenderLossPct = (attackerGroundPower / totalGroundPower) * 0.25;
 
       attackerInfantryLoss = Math.min(
-        attacker.military.infantry,
-        Math.floor(attacker.military.infantry * attackerLossPct),
+        deployedInfantry,
+        Math.floor(deployedInfantry * attackerLossPct),
       );
       defenderInfantryLoss = Math.min(
         defenderRemainingInfantry,
@@ -264,15 +275,15 @@ export class BattleCalculator {
           : "VICTORY";
     } else {
       severity =
-        attackerInfantryLoss > attacker.military.infantry * 0.4
+        attackerInfantryLoss > deployedInfantry * 0.4
           ? "CRITICAL_DEFEAT"
           : "DEFEAT";
     }
 
     const attackerCasualties: CasualtyMetrics = {
-      infantryEngaged: attacker.military.infantry,
+      infantryEngaged: deployedInfantry,
       infantryLost: attackerInfantryLoss,
-      airForceEngaged: attacker.military.airForce,
+      airForceEngaged: deployedAirForce,
       airForceLost: attackerAirLoss,
       droneMissileEngaged: dronesUsed,
       droneMissileLost: dronesUsed,

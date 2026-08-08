@@ -53,6 +53,8 @@ export class BattleExecutionEngine {
       defender,
       action.dronesToLaunch,
       oilPrice,
+      action.infantryToDeploy,
+      action.airForceToDeploy,
     );
 
     const defenderPixels = defender.geography.territoryPixelCount;

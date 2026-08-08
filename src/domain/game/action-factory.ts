@@ -256,6 +256,8 @@ export class ActionFactory {
     nationId: string,
     targetNationId: string,
     dronesToLaunch: number,
+    infantryToDeploy?: number,
+    airForceToDeploy?: number,
   ): InitiateBattleAction {
     return {
       id: this.createId("battle"),
@@ -263,6 +265,8 @@ export class ActionFactory {
       type: "INITIATE_BATTLE",
       targetNationId,
       dronesToLaunch,
+      infantryToDeploy,
+      airForceToDeploy,
     };
   }
 

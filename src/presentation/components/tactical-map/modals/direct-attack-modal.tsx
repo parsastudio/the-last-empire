@@ -8,6 +8,8 @@ import {
   Zap,
   AlertTriangle,
   Radio,
+  Plane,
+  Shield,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -19,6 +21,8 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import { CountryRegistry } from "@/domain/data/countries";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MARKET_CONFIG } from "@/domain/economy/market.config";
+import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
 
 interface DirectAttackModalProps {
   isOpen: boolean;
@@ -37,9 +41,21 @@ export function DirectAttackModal({
   gameState,
   onClose,
 }: DirectAttackModalProps) {
+  const currentKey = `${humanNation?.id}-${isOpen}-${targetNationId}-${targetEnclaveId}`;
+  const [prevKey, setPrevKey] = useState<string | null>(null);
+
+  const [infantryToDeploy, setInfantryToDeploy] = useState<number>(0);
+  const [airForceToDeploy, setAirForceToDeploy] = useState<number>(0);
   const [dronesToLaunch, setDronesToLaunch] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { dispatchAction } = useGameActions();
+
+  if (currentKey !== prevKey) {
+    setPrevKey(currentKey);
+    setInfantryToDeploy(humanNation ? humanNation.military.infantry : 0);
+    setAirForceToDeploy(humanNation ? humanNation.military.airForce : 0);
+    setDronesToLaunch(0);
+  }
 
   const targetNation = useMemo(() => {
     if (!gameState || !targetNationId) return null;
@@ -51,12 +67,7 @@ export function DirectAttackModal({
 
   const isLandNeighbor = useMemo(() => {
     if (!humanNation || !targetNation) return false;
-    const targetCanonical = CountryRegistry.resolveCanonicalId(targetNation.id);
-    return humanNation.geography.landNeighbors.some(
-      (neighbor) =>
-        neighbor === targetNation.id ||
-        CountryRegistry.resolveCanonicalId(neighbor) === targetCanonical,
-    );
+    return LandNeighborResolver.isLandNeighbor(humanNation, targetNation);
   }, [humanNation, targetNation]);
 
   const isWarStance = useMemo(() => {
@@ -84,8 +95,8 @@ export function DirectAttackModal({
     if (!humanNation) return { moneyCost: 0, oilCost: 0 };
 
     const totalForceCost =
-      humanNation.military.infantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      humanNation.military.airForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
+      infantryToDeploy * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
+      airForceToDeploy * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const moneyCost = Math.floor(totalForceCost * 0.05);
@@ -94,15 +105,21 @@ export function DirectAttackModal({
     const oilCost = Math.max(1, Math.ceil(moneyCost / oilPrice));
 
     return { moneyCost, oilCost };
-  }, [humanNation, dronesToLaunch, gameState]);
+  }, [
+    humanNation,
+    infantryToDeploy,
+    airForceToDeploy,
+    dronesToLaunch,
+    gameState,
+  ]);
 
   if (!isOpen || !targetNation || !humanNation) return null;
 
   const canAffordMoney = humanNation.treasury >= deploymentCosts.moneyCost;
   const canAffordOil = humanNation.resources.oil >= deploymentCosts.oilCost;
-  const hasInfantry = humanNation.military.infantry > 0;
+  const hasSelectedInfantry = infantryToDeploy > 0;
   const canLaunchAttack =
-    isLandNeighbor && canAffordMoney && canAffordOil && hasInfantry;
+    isLandNeighbor && canAffordMoney && canAffordOil && hasSelectedInfantry;
 
   const handleExecuteAttack = async () => {
     if (!canLaunchAttack || isSubmitting) return;
@@ -113,6 +130,8 @@ export function DirectAttackModal({
         humanNation.id,
         targetNation.id,
         dronesToLaunch,
+        infantryToDeploy,
+        airForceToDeploy,
       );
 
       const success = await dispatchAction(
@@ -134,9 +153,9 @@ export function DirectAttackModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="اتاق عملیات تهاجم مستقیم زمینی"
-      subtitle={`برنامه‌ریزی حمله به ${targetNation.name}`}
-      maxWidthClass="max-w-lg"
+      title="اتاق فرماندهی و تهاجم مستقیم زمینی"
+      subtitle={`برنامه‌ریزی و تخصیص نیرو جهت حمله به ${targetNation.name}`}
+      maxWidthClass="max-w-xl"
       onClose={onClose}
     >
       <div className="space-y-4 text-right dir-rtl font-sans">
@@ -148,13 +167,13 @@ export function DirectAttackModal({
                 {humanNation.name}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono">
-                مهاجم (شما)
+                فرماندهی مهاجم (شما)
               </span>
             </div>
           </div>
 
-          <div className="p-2 bg-military/15 text-military border border-military/30 rounded-xl">
-            <Swords size={18} />
+          <div className="p-2.5 bg-military/15 text-military border border-military/30 rounded-2xl animate-pulse">
+            <Swords size={20} />
           </div>
 
           <div className="flex items-center gap-3 text-left dir-ltr">
@@ -164,7 +183,7 @@ export function DirectAttackModal({
                 {targetNation.name}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono">
-                مدافع (هدف)
+                مدافع (هدف تهاجم)
               </span>
             </div>
           </div>
@@ -175,7 +194,7 @@ export function DirectAttackModal({
             <MapPin size={14} className="text-primary" />
             اقلیم مورد تهاجم:
           </span>
-          <span className="font-extrabold text-foreground text-xs font-sans">
+          <span className="font-extrabold text-foreground text-xs font-sans bg-secondary/80 px-2.5 py-1 rounded-xl border border-border/60">
             {targetRegionName}
           </span>
         </div>
@@ -208,9 +227,45 @@ export function DirectAttackModal({
           </div>
         )}
 
+        <div className="space-y-3">
+          <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono block px-1">
+            تعیین ترکیب و میزان نیروهای اعزامی به میدان نبرد
+          </span>
+
+          <UnitDeploymentSlider
+            label="پیاده‌نظام رزمی و کماندویی"
+            unitName="یگان"
+            icon={Shield}
+            iconColorClass="text-primary"
+            availableCount={humanNation.military.infantry}
+            selectedCount={infantryToDeploy}
+            onChange={setInfantryToDeploy}
+          />
+
+          <UnitDeploymentSlider
+            label="جنگنده‌ها و پشتیبانی هوایی"
+            unitName="فروند"
+            icon={Plane}
+            iconColorClass="text-gdp"
+            availableCount={humanNation.military.airForce}
+            selectedCount={airForceToDeploy}
+            onChange={setAirForceToDeploy}
+          />
+
+          <UnitDeploymentSlider
+            label="پهپادها و موشک‌های نقطه‌زن"
+            unitName="یگان"
+            icon={Radio}
+            iconColorClass="text-treasury"
+            availableCount={humanNation.military.droneMissile}
+            selectedCount={dronesToLaunch}
+            onChange={setDronesToLaunch}
+          />
+        </div>
+
         <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl space-y-3 font-mono text-xs">
           <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-sans block">
-            پیش‌نمایش هزینه‌های لجیستیک اعزام نیرو
+            پیش‌نمایش هزینه‌های لجیستیک و پشتیبانی
           </span>
 
           <div className="grid grid-cols-2 gap-2.5">
@@ -247,51 +302,25 @@ export function DirectAttackModal({
               </span>
             </div>
           </div>
-
-          {humanNation.military.droneMissile > 0 && (
-            <div className="pt-2 border-t border-border/40 space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-sans">
-                <span className="text-muted-foreground flex items-center gap-1">
-                  <Radio size={13} className="text-treasury" />
-                  شلیک پهپاد/موشک پیش‌پشتیبانی:
-                </span>
-                <span className="font-bold font-mono text-foreground">
-                  {PersianNumberFormatter.toPersianDigits(dronesToLaunch)} از{" "}
-                  {PersianNumberFormatter.toPersianDigits(
-                    humanNation.military.droneMissile,
-                  )}
-                </span>
-              </div>
-
-              <input
-                type="range"
-                min="0"
-                max={humanNation.military.droneMissile}
-                value={dronesToLaunch}
-                onChange={(e) => setDronesToLaunch(Number(e.target.value))}
-                className="w-full accent-amber-500 cursor-pointer h-1.5 bg-secondary rounded-lg"
-              />
-            </div>
-          )}
         </div>
 
         <button
           onClick={handleExecuteAttack}
           disabled={!canLaunchAttack || isSubmitting}
-          className="w-full py-3.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg shadow-military/20 flex items-center justify-center gap-2"
+          className="w-full py-4 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-xl shadow-military/20 flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            <span>در حال آغاز عملیات...</span>
+            <span>در حال آغاز عملیات و گسیل نیروها...</span>
           ) : (
             <>
               <Zap size={16} />
               <span>
                 {!isLandNeighbor
                   ? "عدم مرز زمینی (غیرقابل حمله)"
-                  : !hasInfantry
-                    ? "عدم وجود پیاده‌نظام رزمی"
+                  : !hasSelectedInfantry
+                    ? "حداقل ۱ یگان پیاده‌نظام انتخاب کنید"
                     : !canAffordMoney || !canAffordOil
-                      ? "منابع مالی/نفتی ناکافی"
+                      ? "منابع مالی/نفتی ناکافی جهت اعزام"
                       : "صدور دستور تهاجم مستقیم و آغاز نبرد"}
               </span>
             </>
