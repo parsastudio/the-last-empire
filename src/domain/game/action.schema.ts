@@ -157,6 +157,8 @@ export const InitiateBattleActionSchema = z.object({
   type: z.literal("INITIATE_BATTLE"),
   targetNationId: z.string(),
   dronesToLaunch: z.number().nonnegative(),
+  infantryToDeploy: z.number().positive().optional(),
+  airForceToDeploy: z.number().nonnegative().optional(),
 });
 
 export const ConfigureAutoTradeActionSchema = z.object({

@@ -5,6 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
+import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
@@ -152,11 +153,9 @@ export class MilitaryActionExecutor {
           throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
         }
 
-        const isLandNeighbor = nation.geography.landNeighbors.some(
-          (neighborId) =>
-            neighborId === target.id ||
-            CountryRegistry.resolveCanonicalId(neighborId) ===
-              CountryRegistry.resolveCanonicalId(target.id),
+        const isLandNeighbor = LandNeighborResolver.isLandNeighbor(
+          nation,
+          target,
         );
 
         if (!isLandNeighbor) {
