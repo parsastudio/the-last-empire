@@ -209,6 +209,8 @@ export class TreatyEvaluator {
     switch (proposalType) {
       case "SEVER_TRADE_RELATIONS":
         return { accepted: true };
+      case "DECLARE_WAR":
+        return { accepted: true };
       case "NON_AGGRESSION_PACT":
         return opinion >= -10
           ? { accepted: true }
@@ -257,6 +259,13 @@ export class TreatyEvaluator {
           stance: "SEVERED_RELATIONS",
           isTradeEmbargoed: true,
           opinion: Math.min(profile.opinion, -30),
+        };
+      case "DECLARE_WAR":
+        return {
+          ...profile,
+          stance: "WAR",
+          isTradeEmbargoed: true,
+          opinion: -100,
         };
       default:
         return profile;
