@@ -120,7 +120,7 @@ export function useWebGLInteraction({
     const pos = positionRef.current || { x: 0, y: 0 };
     const scale = scaleRef.current || 1;
 
-    const { nationId } = pickAtScreenPos(rx, ry, pos, scale);
+    const { nationId, enclaveId } = pickAtScreenPos(rx, ry, pos, scale);
 
     if (nationId < 11 || nationId >= 250) {
       closeContextMenu();
@@ -130,7 +130,7 @@ export function useWebGLInteraction({
     const mapX = Math.floor((rx - pos.x) / scale);
     const mapY = Math.floor((ry - pos.y) / scale);
 
-    openContextMenu(e.clientX, e.clientY, nationId, mapX, mapY);
+    openContextMenu(e.clientX, e.clientY, nationId, mapX, mapY, enclaveId);
   };
 
   return {

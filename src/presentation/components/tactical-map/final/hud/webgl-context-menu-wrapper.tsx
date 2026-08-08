@@ -7,7 +7,11 @@ import { ContextMenuState } from "@/presentation/hooks/tactical-map/final/use-co
 
 interface WebGLContextMenuWrapperProps {
   contextMenuState: ContextMenuState | null;
-  onSelectAction: (action: ContextActionType, code: string) => void;
+  onSelectAction: (
+    action: ContextActionType,
+    code: string,
+    enclaveId?: number,
+  ) => void;
   onClose: () => void;
 }
 
@@ -24,7 +28,11 @@ export function WebGLContextMenuWrapper({
       countryName={contextMenuState.countryName}
       countryCode={contextMenuState.countryCode}
       onSelectAction={(action) =>
-        onSelectAction(action, contextMenuState.countryCode)
+        onSelectAction(
+          action,
+          contextMenuState.countryCode,
+          contextMenuState.enclaveId,
+        )
       }
       onClose={onClose}
     />
