@@ -99,7 +99,7 @@ export class BitPackedEnclaveClusterer {
       const mergedComponents = this.mergeEngine.mergeNearComponents(
         rawComponents,
         width,
-        1500000,
+        300,
       );
 
       mergedComponents.sort((a, b) => b.size - a.size);

@@ -235,9 +235,9 @@ export class BattleCalculator {
       conquestRatio = Math.max(0.25, Math.min(0.5, conquestRatio));
 
       let calculatedConquest = Math.floor(defenderTotalPixels * conquestRatio);
-      calculatedConquest = Math.max(100, calculatedConquest);
+      calculatedConquest = Math.max(1000, calculatedConquest);
 
-      if (defenderTotalPixels <= 100) {
+      if (defenderTotalPixels <= 1000) {
         conqueredPixelsCount = defenderTotalPixels;
       } else {
         const remainingPixels = defenderTotalPixels - calculatedConquest;
