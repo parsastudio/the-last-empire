@@ -11,7 +11,7 @@ export class ComponentMergeEngine {
   public mergeNearComponents(
     components: LandClusterComponent[],
     width = 4096,
-    searchRadius = 1500000,
+    searchRadius = 300,
   ): LandClusterComponent[] {
     if (components.length <= 1) return components;
 
@@ -36,21 +36,22 @@ export class ComponentMergeEngine {
         const c1 = components[i]!;
         const c2 = components[j]!;
 
-        const bboxXDist = Math.max(
+        const directXDist = Math.max(
           0,
           Math.max(c1.minX - c2.maxX, c2.minX - c1.maxX),
         );
-        const bboxYDist = Math.max(
+        const wrappedXDist1 = Math.max(0, width - c1.maxX + c2.minX);
+        const wrappedXDist2 = Math.max(0, width - c2.maxX + c1.minX);
+        const xDist = Math.min(directXDist, wrappedXDist1, wrappedXDist2);
+
+        const yDist = Math.max(
           0,
           Math.max(c1.minY - c2.maxY, c2.minY - c1.maxY),
         );
 
-        let effectiveXDist = bboxXDist;
-        if (width - bboxXDist < effectiveXDist) {
-          effectiveXDist = width - bboxXDist;
-        }
+        const distance = Math.hypot(xDist, yDist);
 
-        if (effectiveXDist <= searchRadius && bboxYDist <= searchRadius) {
+        if (distance <= searchRadius) {
           union(i, j);
         }
       }
