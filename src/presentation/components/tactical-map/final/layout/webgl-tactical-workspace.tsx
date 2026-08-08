@@ -8,6 +8,7 @@ import { CommandRail } from "@/presentation/components/tactical-map/command-rail
 import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
+import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
 import {
   LayerController,
   TacticalLayer,
@@ -45,6 +46,15 @@ export function WebGLTacticalWorkspace({
 
   const metrics = useGameResources(effectiveGameState);
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
+  const [directAttackState, setDirectAttackState] = useState<{
+    isOpen: boolean;
+    targetCode: string | null;
+    enclaveId: number;
+  }>({
+    isOpen: false,
+    targetCode: null,
+    enclaveId: 0,
+  });
 
   const countriesData = ALL_COUNTRY_PROFILES.map((p) => ({
     id: p.id ?? 0,
@@ -74,6 +84,17 @@ export function WebGLTacticalWorkspace({
     [setActiveTab],
   );
 
+  const handleSelectCountryAttackContext = useCallback(
+    (code: string, enclaveId = 0) => {
+      setDirectAttackState({
+        isOpen: true,
+        targetCode: code,
+        enclaveId,
+      });
+    },
+    [],
+  );
+
   const handleCloseCenterModal = useCallback(() => {
     closeActiveTab();
   }, [closeActiveTab]);
@@ -97,6 +118,7 @@ export function WebGLTacticalWorkspace({
         humanNationId={effectiveGameState?.humanNationId}
         activeLayer={activeLayer}
         onSelectCountryContext={handleSelectCountryContext}
+        onSelectCountryAttackContext={handleSelectCountryAttackContext}
       />
 
       <TopHudBar metrics={metrics} />
@@ -129,6 +151,17 @@ export function WebGLTacticalWorkspace({
         onNavigateTab={(tab, subTab, targetCode) => {
           setActiveTab(tab, subTab, targetCode);
         }}
+      />
+
+      <DirectAttackModal
+        isOpen={directAttackState.isOpen}
+        targetNationId={directAttackState.targetCode}
+        targetEnclaveId={directAttackState.enclaveId}
+        humanNation={humanNation}
+        gameState={effectiveGameState}
+        onClose={() =>
+          setDirectAttackState((prev) => ({ ...prev, isOpen: false }))
+        }
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />

@@ -7,6 +7,7 @@ export interface ContextMenuState {
   countryId: number;
   countryCode: string;
   countryName: string;
+  enclaveId: number;
 }
 
 export function useContextMenu() {
@@ -20,6 +21,7 @@ export function useContextMenu() {
       nationId: number,
       mapX: number,
       mapY: number,
+      enclaveId = 0,
     ) => {
       if (nationId < 11 || nationId >= 250) {
         setContextMenuState(null);
@@ -38,6 +40,7 @@ export function useContextMenu() {
         countryId: nationId,
         countryCode,
         countryName,
+        enclaveId,
       });
     },
     [],
