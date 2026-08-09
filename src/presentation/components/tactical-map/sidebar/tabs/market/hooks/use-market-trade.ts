@@ -4,13 +4,11 @@ import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 interface UseMarketTradeProps {
   oilStock?: number;
-  steelStock?: number;
   userTreasury?: number;
 }
 
 export function useMarketTrade({
   oilStock = 50,
-  steelStock = 20,
   userTreasury = MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK,
 }: UseMarketTradeProps = {}) {
   const [tradeModal, setTradeModal] = useState<{
@@ -33,13 +31,12 @@ export function useMarketTrade({
     (name: string, unit: string, mode: "buy" | "sell", price: number) => {
       const realPrice =
         price && price >= 1000000 ? price : MARKET_CONFIG.FIXED_BUY_PRICE;
-      const isOil = name.includes("نفت");
-      const stock = isOil ? oilStock : steelStock;
+      const stock = oilStock;
 
       const maxAffordable = MarketEngine.calculateMaxAffordable(
         userTreasury,
-        { oil: realPrice, steel: realPrice },
-        isOil ? "oil" : "steel",
+        { oil: realPrice },
+        "oil",
       );
 
       const maxAmount = mode === "buy" ? maxAffordable : Math.max(0, stock);
@@ -53,7 +50,7 @@ export function useMarketTrade({
         maxAmount,
       });
     },
-    [oilStock, steelStock, userTreasury],
+    [oilStock, userTreasury],
   );
 
   const closeTradeModal = useCallback(() => {

@@ -3,7 +3,6 @@ import {
   Clock,
   Coins,
   Users,
-  Wrench,
   Shield,
   Plane,
   Radio,
@@ -18,7 +17,6 @@ export interface UnitConfig {
   name: string;
   moneyCost: number;
   manpowerCost: number;
-  steelCost: number;
   buildTurns: number;
   icon: LucideIcon;
   color: string;
@@ -30,7 +28,6 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     name: MILITARY_UNIT_STATS.INFANTRY.nameFa,
     moneyCost: MILITARY_UNIT_STATS.INFANTRY.moneyCost,
     manpowerCost: MILITARY_UNIT_STATS.INFANTRY.manpowerCost,
-    steelCost: MILITARY_UNIT_STATS.INFANTRY.steelCost,
     buildTurns: MILITARY_UNIT_STATS.INFANTRY.buildTurns,
     icon: Shield,
     color: "text-primary",
@@ -40,7 +37,6 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     name: MILITARY_UNIT_STATS.AIR_FORCE.nameFa,
     moneyCost: MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
     manpowerCost: MILITARY_UNIT_STATS.AIR_FORCE.manpowerCost,
-    steelCost: MILITARY_UNIT_STATS.AIR_FORCE.steelCost,
     buildTurns: MILITARY_UNIT_STATS.AIR_FORCE.buildTurns,
     icon: Plane,
     color: "text-gdp",
@@ -50,7 +46,6 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     name: MILITARY_UNIT_STATS.DRONE_MISSILE.nameFa,
     moneyCost: MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost,
     manpowerCost: MILITARY_UNIT_STATS.DRONE_MISSILE.manpowerCost,
-    steelCost: MILITARY_UNIT_STATS.DRONE_MISSILE.steelCost,
     buildTurns: MILITARY_UNIT_STATS.DRONE_MISSILE.buildTurns,
     icon: Radio,
     color: "text-treasury",
@@ -61,7 +56,6 @@ interface UnitRecruitmentCardProps {
   unit: UnitConfig;
   treasury: number;
   manpower: number;
-  steel: number;
   onRecruit: (unit: UnitConfig, quantity: number) => void;
 }
 
@@ -69,14 +63,12 @@ export function UnitRecruitmentCard({
   unit,
   treasury,
   manpower,
-  steel,
   onRecruit,
 }: UnitRecruitmentCardProps) {
   const calc = useUnitRecruitmentCalculator({
     unit,
     treasury,
     manpower,
-    steel,
   });
 
   const Icon = unit.icon;
@@ -94,7 +86,7 @@ export function UnitRecruitmentCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 font-mono text-[10px]">
+      <div className="grid grid-cols-2 gap-2 font-mono text-[10px]">
         <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
           <Coins size={11} className="text-gdp" />
           <span>هزینه: ${calc.totalMoney.toLocaleString("fa-IR")}</span>
@@ -104,10 +96,6 @@ export function UnitRecruitmentCard({
           <span>
             نیروی انسانی: {calc.totalManpower.toLocaleString("fa-IR")}
           </span>
-        </div>
-        <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
-          <Wrench size={11} className="text-treasury" />
-          <span>فولاد: {calc.totalSteel.toLocaleString("fa-IR")} تن</span>
         </div>
       </div>
 

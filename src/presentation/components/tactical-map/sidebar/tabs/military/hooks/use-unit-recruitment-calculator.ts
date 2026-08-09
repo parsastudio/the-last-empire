@@ -5,14 +5,12 @@ interface UseUnitRecruitmentCalculatorProps {
   unit: UnitConfig;
   treasury: number;
   manpower: number;
-  steel: number;
 }
 
 export function useUnitRecruitmentCalculator({
   unit,
   treasury,
   manpower,
-  steel,
 }: UseUnitRecruitmentCalculatorProps) {
   const [quantity, setQuantity] = useState<number>(1);
 
@@ -23,17 +21,14 @@ export function useUnitRecruitmentCalculator({
       unit.manpowerCost > 0
         ? Math.floor(manpower / unit.manpowerCost)
         : Infinity;
-    const maxSteel =
-      unit.steelCost > 0 ? Math.floor(steel / unit.steelCost) : Infinity;
 
-    return Math.max(0, Math.min(maxMoney, maxManpower, maxSteel));
-  }, [treasury, manpower, steel, unit]);
+    return Math.max(0, Math.min(maxMoney, maxManpower));
+  }, [treasury, manpower, unit]);
 
   const currentQty = Math.min(quantity, maxAffordable);
 
   const totalMoney = unit.moneyCost * currentQty;
   const totalManpower = unit.manpowerCost * currentQty;
-  const totalSteel = unit.steelCost * currentQty;
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,7 +63,6 @@ export function useUnitRecruitmentCalculator({
     maxAffordable,
     totalMoney,
     totalManpower,
-    totalSteel,
     handleInputChange,
     handlePercentageSelect,
     setClampedQuantity,

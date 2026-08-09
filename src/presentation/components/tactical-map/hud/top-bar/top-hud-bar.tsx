@@ -1,21 +1,12 @@
 "use client";
 
 import React, { useMemo } from "react";
-import {
-  Coins,
-  Fuel,
-  BrickWall,
-  Users,
-  Landmark,
-  ShieldAlert,
-  Globe,
-  LucideIcon,
-} from "lucide-react";
+import { Coins, Fuel, Users, Landmark, ShieldAlert, Globe } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ResourceBadgeProps {
-  icon: LucideIcon;
+  icon: React.ElementType;
   iconColor: string;
   label: string;
   value: string | number;
@@ -141,10 +132,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       metrics.oilRequiredPerTurn,
     )} مصرف`;
 
-    const formattedSteel = `${PersianNumberFormatter.toPersianDigits(
-      metrics.steel.toLocaleString("en-US"),
-    )} بلوک`;
-
     const formattedManpower = PersianNumberFormatter.toPersianDigits(
       metrics.manpower.toLocaleString("en-US"),
     );
@@ -154,7 +141,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       formattedIncome,
       formattedOil,
       formattedOilUsage,
-      formattedSteel,
       formattedManpower,
       isOilDeficit: metrics.oil < metrics.oilRequiredPerTurn,
     };
@@ -191,13 +177,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
           subValueColor={
             formatted.isOilDeficit ? "text-military font-bold" : "text-treasury"
           }
-        />
-
-        <ResourceBadge
-          icon={BrickWall}
-          iconColor="text-primary"
-          label="ذخایر فولاد صنعتی"
-          value={formatted.formattedSteel}
         />
 
         <ResourceBadge

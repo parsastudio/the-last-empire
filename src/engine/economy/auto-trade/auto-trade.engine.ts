@@ -6,9 +6,7 @@ import { MARKET_CONFIG } from "@/domain/economy/market.config";
 export interface AutoTradeEngineResult {
   updatedNation: Nation;
   oilBought: number;
-  steelBought: number;
   oilSold: number;
-  steelSold: number;
   loanTakenAmount: number;
 }
 
@@ -20,29 +18,21 @@ export class AutoTradeEngine {
     const config = nation.autoTradeSettings || {
       autoBuyDeficit: false,
       autoSellOilPercent: 0,
-      autoSellSteelPercent: 0,
       allowEmergencyLoans: true,
     };
 
     let currentNation = { ...nation };
     let oilBought = 0;
-    let steelBought = 0;
     let oilSold = 0;
-    let steelSold = 0;
     let loanTakenAmount = 0;
 
     const buyPriceOil = marketPrices.oil || MARKET_CONFIG.FIXED_BUY_PRICE;
-    const buyPriceSteel = marketPrices.steel || MARKET_CONFIG.FIXED_BUY_PRICE;
     const sellPrice = MARKET_CONFIG.FIXED_SELL_PRICE;
 
     const oilDemand = PopulationWelfareCalculator.calculateOilDemand(
       currentNation.population,
       currentNation.gdp,
       currentNation.doctrines?.unlockedDoctrines,
-    );
-    const steelDemand = PopulationWelfareCalculator.calculateSteelDemand(
-      currentNation.population,
-      currentNation.gdp,
     );
 
     const oilSurplus = currentNation.resources.oil - oilDemand;
@@ -63,33 +53,10 @@ export class AutoTradeEngine {
       }
     }
 
-    const steelSurplus = currentNation.resources.steel - steelDemand;
-    if (steelSurplus > 0 && config.autoSellSteelPercent > 0) {
-      const sellAmount = Math.floor(
-        steelSurplus * (config.autoSellSteelPercent / 100),
-      );
-      if (sellAmount > 0) {
-        steelSold = sellAmount;
-        currentNation = {
-          ...currentNation,
-          treasury: currentNation.treasury + sellAmount * sellPrice,
-          resources: {
-            ...currentNation.resources,
-            steel: currentNation.resources.steel - sellAmount,
-          },
-        };
-      }
-    }
-
     if (config.autoBuyDeficit) {
       const oilDeficit = Math.max(0, oilDemand - currentNation.resources.oil);
-      const steelDeficit = Math.max(
-        0,
-        steelDemand - currentNation.resources.steel,
-      );
 
-      const neededFunds =
-        oilDeficit * buyPriceOil + steelDeficit * buyPriceSteel;
+      const neededFunds = oilDeficit * buyPriceOil;
 
       if (neededFunds > 0) {
         if (
@@ -122,34 +89,13 @@ export class AutoTradeEngine {
             };
           }
         }
-
-        if (steelDeficit > 0) {
-          const maxAffordSteel = Math.floor(
-            currentNation.treasury / buyPriceSteel,
-          );
-          const actualBuySteel = Math.min(steelDeficit, maxAffordSteel);
-          if (actualBuySteel > 0) {
-            steelBought = actualBuySteel;
-            const cost = actualBuySteel * buyPriceSteel;
-            currentNation = {
-              ...currentNation,
-              treasury: currentNation.treasury - cost,
-              resources: {
-                ...currentNation.resources,
-                steel: currentNation.resources.steel + actualBuySteel,
-              },
-            };
-          }
-        }
       }
     }
 
     return {
       updatedNation: currentNation,
       oilBought,
-      steelBought,
       oilSold,
-      steelSold,
       loanTakenAmount,
     };
   }

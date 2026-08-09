@@ -28,7 +28,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         ? profile.gdp
         : 5000000000;
 
-  const { oilProducedPerTurn, steelProducedPerTurn } =
+  const { oilProducedPerTurn } =
     ResourceGenerationStep.calculateResourceGeneration(nation);
 
   const oilRequiredPerTurn = PopulationWelfareCalculator.calculateOilDemand(
@@ -61,13 +61,11 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
 
         <ResourcesSection
           oil={nation.resources.oil}
-          steel={nation.resources.steel}
           manpower={nation.resources.manpower}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
           oilRequiredPerTurn={oilRequiredPerTurn}
           oilProducedPerTurn={oilProducedPerTurn}
-          steelProducedPerTurn={steelProducedPerTurn}
         />
       </div>
 

@@ -61,6 +61,7 @@ export class NationProfileAssigner {
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
     const calculatedTreasury = Math.floor(item.gdp * 0.05);
+    const initialOil = isTier2 ? 5000 : 1000;
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
@@ -92,8 +93,7 @@ export class NationProfileAssigner {
         turnsInPower: 5,
       },
       resources: {
-        oil: isTier2 ? 5000 : 1000,
-        steel: isTier1 ? 2000 : 1000,
+        oil: initialOil,
         manpower: 500,
       },
       military: {
@@ -130,7 +130,6 @@ export class NationProfileAssigner {
       autoTradeSettings: {
         autoBuyDeficit: false,
         autoSellOilPercent: 0,
-        autoSellSteelPercent: 0,
         allowEmergencyLoans: true,
       },
     };
@@ -204,6 +203,7 @@ export class NationProfileAssigner {
     const territoryPixelCount = profile
       ? Math.round(profile.gdp / 10000000)
       : 4000;
+    const initialOil = isTier2 ? 5000 : 1000;
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
@@ -235,8 +235,7 @@ export class NationProfileAssigner {
         turnsInPower: 5,
       },
       resources: {
-        oil: isTier2 ? 5000 : 1000,
-        steel: isTier1 ? 2000 : 1000,
+        oil: initialOil,
         manpower: 500,
       },
       military: {
@@ -273,7 +272,6 @@ export class NationProfileAssigner {
       autoTradeSettings: {
         autoBuyDeficit: false,
         autoSellOilPercent: 0,
-        autoSellSteelPercent: 0,
         allowEmergencyLoans: true,
       },
     };

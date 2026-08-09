@@ -4,11 +4,8 @@ import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-gener
 
 export interface PopulationWelfareMetrics {
   oilDemand: number;
-  steelDemand: number;
   oilFulfillment: number;
-  steelFulfillment: number;
   oilStabilityImpact: number;
-  steelStabilityImpact: number;
   totalStabilityImpact: number;
 }
 
@@ -22,19 +19,10 @@ export class PopulationWelfareCalculator {
     const gdpFactor = Math.max(1, Math.floor(gdp / 10000000000));
     const baseDemand = Math.max(
       1,
-      Math.ceil((population / 20000000) * gdpFactor),
+      Math.ceil((population / 10000000) * gdpFactor * 1.2),
     );
     const discount = DoctrinesManager.getOilDemandDiscount(unlockedDoctrines);
     return Math.max(1, Math.ceil(baseDemand * discount));
-  }
-
-  public static calculateSteelDemand(
-    population: number,
-    gdp = 10000000000,
-  ): number {
-    if (population <= 0) return 0;
-    const gdpFactor = Math.max(1, Math.floor(gdp / 15000000000));
-    return Math.max(1, Math.ceil((population / 30000000) * gdpFactor));
   }
 
   public static calculateFulfillment(stock: number, demand: number): number {
@@ -45,15 +33,14 @@ export class PopulationWelfareCalculator {
 
   public static calculateResourceStabilityImpact(fulfillment: number): number {
     const clamped = Math.max(0, Math.min(1, fulfillment));
-    const impact = clamped * 2 - 1;
+    const impact = (clamped * 2 - 1) * 1.5;
     return Number(impact.toFixed(2));
   }
 
   public static calculateEffectiveResources(nation: Nation): {
     effectiveOil: number;
-    effectiveSteel: number;
   } {
-    const { oilProducedPerTurn, steelProducedPerTurn } =
+    const { oilProducedPerTurn } =
       ResourceGenerationStep.calculateResourceGeneration(nation);
 
     const oilDemand = PopulationWelfareCalculator.calculateOilDemand(
@@ -61,35 +48,28 @@ export class PopulationWelfareCalculator {
       nation.gdp,
       nation.doctrines?.unlockedDoctrines,
     );
-    const steelDemand = PopulationWelfareCalculator.calculateSteelDemand(
-      nation.population,
-      nation.gdp,
-    );
 
     const autoTrade = nation.autoTradeSettings;
     const isAutoBuy = autoTrade?.autoBuyDeficit ?? false;
 
     let effectiveOil = nation.resources.oil + oilProducedPerTurn;
-    let effectiveSteel = nation.resources.steel + steelProducedPerTurn;
 
     if (isAutoBuy && nation.isAlive) {
       effectiveOil = Math.max(oilDemand, effectiveOil);
-      effectiveSteel = Math.max(steelDemand, effectiveSteel);
     }
 
-    return { effectiveOil, effectiveSteel };
+    return { effectiveOil };
   }
 
   public static evaluateWelfareForNation(
     nation: Nation,
   ): PopulationWelfareMetrics {
-    const { effectiveOil, effectiveSteel } =
+    const { effectiveOil } =
       PopulationWelfareCalculator.calculateEffectiveResources(nation);
 
     return PopulationWelfareCalculator.evaluateWelfare(
       nation.population,
       effectiveOil,
-      effectiveSteel,
       nation.gdp,
       nation.doctrines?.unlockedDoctrines,
     );
@@ -98,7 +78,6 @@ export class PopulationWelfareCalculator {
   public static evaluateWelfare(
     population: number,
     oilStock: number,
-    steelStock: number,
     gdp = 10000000000,
     unlockedDoctrines?: string[],
   ): PopulationWelfareMetrics {
@@ -107,40 +86,23 @@ export class PopulationWelfareCalculator {
       gdp,
       unlockedDoctrines,
     );
-    const steelDemand = PopulationWelfareCalculator.calculateSteelDemand(
-      population,
-      gdp,
-    );
 
     const oilFulfillment = PopulationWelfareCalculator.calculateFulfillment(
       oilStock,
       oilDemand,
-    );
-    const steelFulfillment = PopulationWelfareCalculator.calculateFulfillment(
-      steelStock,
-      steelDemand,
     );
 
     const oilStabilityImpact =
       PopulationWelfareCalculator.calculateResourceStabilityImpact(
         oilFulfillment,
       );
-    const steelStabilityImpact =
-      PopulationWelfareCalculator.calculateResourceStabilityImpact(
-        steelFulfillment,
-      );
 
-    const totalStabilityImpact = Number(
-      (oilStabilityImpact + steelStabilityImpact).toFixed(2),
-    );
+    const totalStabilityImpact = Number(oilStabilityImpact.toFixed(2));
 
     return {
       oilDemand,
-      steelDemand,
       oilFulfillment,
-      steelFulfillment,
       oilStabilityImpact,
-      steelStabilityImpact,
       totalStabilityImpact,
     };
   }
@@ -150,9 +112,7 @@ export class PopulationWelfareCalculator {
     metrics: PopulationWelfareMetrics;
   } {
     const metrics = this.evaluateWelfareForNation(nation);
-
     const newOil = Math.max(0, nation.resources.oil - metrics.oilDemand);
-    const newSteel = Math.max(0, nation.resources.steel - metrics.steelDemand);
 
     return {
       updatedNation: {
@@ -160,7 +120,6 @@ export class PopulationWelfareCalculator {
         resources: {
           ...nation.resources,
           oil: newOil,
-          steel: newSteel,
         },
       },
       metrics,

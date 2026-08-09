@@ -18,7 +18,6 @@ export interface HumanResourceMetrics {
   netIncomePerTurn: number;
   oil: number;
   oilRequiredPerTurn: number;
-  steel: number;
   manpower: number;
   stability: number;
   corruption: number;
@@ -40,7 +39,6 @@ export function useGameResources(
         netIncomePerTurn: 0,
         oil: 0,
         oilRequiredPerTurn: 0,
-        steel: 0,
         manpower: 0,
         stability: 0,
         corruption: 0,
@@ -60,7 +58,6 @@ export function useGameResources(
         netIncomePerTurn: 0,
         oil: 0,
         oilRequiredPerTurn: 0,
-        steel: 0,
         manpower: 0,
         stability: 0,
         corruption: 0,
@@ -86,7 +83,6 @@ export function useGameResources(
       netIncomePerTurn: netIncome,
       oil: nation.resources.oil,
       oilRequiredPerTurn: welfareMetrics.oilDemand,
-      steel: nation.resources.steel,
       manpower: nation.resources.manpower,
       stability: nation.government.stability,
       corruption: nation.government.corruption,
