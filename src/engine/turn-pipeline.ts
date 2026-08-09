@@ -27,7 +27,6 @@ import { AttritionManager } from "@/engine/military/attrition-manager";
 import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { GovernmentSystem } from "@/engine/politics/government-system";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { Nation } from "@/domain/nation/nation.schema";

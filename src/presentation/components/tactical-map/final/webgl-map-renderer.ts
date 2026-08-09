@@ -1,112 +1,215 @@
-import { useEffect, useRef, RefObject } from "react";
-import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
-import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
-import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { mapVertexShaderSource } from "@/presentation/components/tactical-map/final/shaders/map-vertex.shader";
+import { mapFragmentShaderSource } from "@/presentation/components/tactical-map/final/shaders/map-fragment.shader";
 
-interface UseWebGLMapRendererProps {
-  gl: WebGL2RenderingContext | null;
-  dimensions: { width: number; height: number };
-  positionRef: RefObject<CameraPosition>;
-  scaleRef: RefObject<number>;
-  provincesMap?: Record<string, Province>;
-  nationsMap?: Record<string, Nation>;
-  activeLayer?: "political" | "gdp";
-}
+export class WebGLMapRenderer {
+  private gl: WebGL2RenderingContext;
+  private program: WebGLProgram | null = null;
 
-export function useWebGLMapRenderer({
-  gl,
-  dimensions,
-  positionRef,
-  scaleRef,
-  provincesMap,
-  nationsMap,
-  activeLayer = "political",
-}: UseWebGLMapRendererProps) {
-  const rendererRef = useRef<WebGLMapRenderer | null>(null);
+  private vao: WebGLVertexArrayObject | null = null;
+  private terrainTexture: WebGLTexture | null = null;
+  private liveStateTexture: WebGLTexture | null = null;
+  private paletteTexture: WebGLTexture | null = null;
+  private gdpPaletteTexture: WebGLTexture | null = null;
 
-  useEffect(() => {
-    if (!gl) return;
+  private uResolutionLoc: WebGLUniformLocation | null = null;
+  private uPositionLoc: WebGLUniformLocation | null = null;
+  private uScaleLoc: WebGLUniformLocation | null = null;
+  private uTimeLoc: WebGLUniformLocation | null = null;
+  private uOverlayOpacityLoc: WebGLUniformLocation | null = null;
+  private uTexelSizeLoc: WebGLUniformLocation | null = null;
+  private uActiveLayerLoc: WebGLUniformLocation | null = null;
 
-    const renderer = new WebGLMapRenderer(gl);
-    rendererRef.current = renderer;
+  constructor(gl: WebGL2RenderingContext) {
+    this.gl = gl;
+    this.initShaders();
+    this.initBuffers();
+  }
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = MapPathResolver.getMapFinalClientUrl(
-      "map1",
-      "base_map_terrain.png",
+  private initShaders(): void {
+    const gl = this.gl;
+
+    const vertShader = this.compileShader(
+      gl.VERTEX_SHADER,
+      mapVertexShaderSource,
     );
-    img.onload = () => {
-      renderer.setTerrainImage(img);
-    };
-
-    const paletteTex = WebGLPaletteTextureManager.createPaletteTexture(
-      gl,
-      provincesMap,
-      nationsMap,
+    const fragShader = this.compileShader(
+      gl.FRAGMENT_SHADER,
+      mapFragmentShaderSource,
     );
-    if (paletteTex) {
-      renderer.setPaletteTexture(paletteTex);
+
+    if (!vertShader || !fragShader) {
+      return;
     }
 
-    const gdpPaletteTex = WebGLPaletteTextureManager.createGdpPaletteTexture(
-      gl,
-      provincesMap,
-    );
-    if (gdpPaletteTex) {
-      renderer.setGdpPaletteTexture(gdpPaletteTex);
-    }
+    const prog = gl.createProgram();
+    if (prog) {
+      gl.attachShader(prog, vertShader);
+      gl.attachShader(prog, fragShader);
+      gl.linkProgram(prog);
 
-    const gridState = BitPackedGridState.getInstance();
-    const rawBuffer = gridState.getBuffer().getRawBuffer();
-    renderer.updateLiveStateTexture(rawBuffer);
-  }, [gl, provincesMap, nationsMap]);
-
-  useEffect(() => {
-    let animFrameId: number;
-    const startTime = performance.now();
-    let lastVersion = -1;
-
-    const renderLoop = () => {
-      if (rendererRef.current && gl) {
-        const gridState = BitPackedGridState.getInstance();
-        const currentVersion = gridState.getVersion();
-
-        if (currentVersion !== lastVersion) {
-          rendererRef.current.updateLiveStateTexture(
-            gridState.getBuffer().getRawBuffer(),
-          );
-          lastVersion = currentVersion;
-        }
-
-        const time = (performance.now() - startTime) / 1000;
-        const dpr = window.devicePixelRatio || 1;
-        const pos = positionRef.current || { x: 0, y: 0 };
-        const scale = scaleRef.current || 1;
-
-        rendererRef.current.render(
-          dimensions.width * dpr,
-          dimensions.height * dpr,
-          pos.x * dpr,
-          pos.y * dpr,
-          scale * dpr,
-          time,
-          activeLayer,
-        );
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+        gl.deleteProgram(prog);
+        return;
       }
-      animFrameId = requestAnimationFrame(renderLoop);
-    };
 
-    renderLoop();
+      this.program = prog;
+      this.uResolutionLoc = gl.getUniformLocation(prog, "u_resolution");
+      this.uPositionLoc = gl.getUniformLocation(prog, "u_position");
+      this.uScaleLoc = gl.getUniformLocation(prog, "u_scale");
+      this.uTimeLoc = gl.getUniformLocation(prog, "u_time");
+      this.uOverlayOpacityLoc = gl.getUniformLocation(prog, "u_overlayOpacity");
+      this.uTexelSizeLoc = gl.getUniformLocation(prog, "u_texelSize");
+      this.uActiveLayerLoc = gl.getUniformLocation(prog, "u_activeLayer");
 
-    return () => {
-      cancelAnimationFrame(animFrameId);
-    };
-  }, [gl, dimensions, positionRef, scaleRef, activeLayer]);
+      const uTerrainLoc = gl.getUniformLocation(prog, "u_terrainTexture");
+      const uLiveStateLoc = gl.getUniformLocation(prog, "u_liveStateTexture");
+      const uPaletteLoc = gl.getUniformLocation(prog, "u_paletteTexture");
+      const uGdpPaletteLoc = gl.getUniformLocation(prog, "u_gdpPaletteTexture");
 
-  return rendererRef;
+      gl.useProgram(prog);
+      if (uTerrainLoc) gl.uniform1i(uTerrainLoc, 0);
+      if (uLiveStateLoc) gl.uniform1i(uLiveStateLoc, 1);
+      if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
+      if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
+    }
+  }
+
+  private compileShader(type: number, source: string): WebGLShader | null {
+    const gl = this.gl;
+    const shader = gl.createShader(type);
+    if (!shader) return null;
+
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      gl.deleteShader(shader);
+      return null;
+    }
+
+    return shader;
+  }
+
+  private initBuffers(): void {
+    const gl = this.gl;
+    if (!this.program) return;
+
+    this.vao = gl.createVertexArray();
+    gl.bindVertexArray(this.vao);
+
+    const positions = new Float32Array([
+      0, 0, 0, 0, 4096, 0, 1, 0, 0, 2048, 0, 1, 0, 2048, 0, 1, 4096, 0, 1, 0,
+      4096, 2048, 1, 1,
+    ]);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+    const aPosLoc = gl.getAttribLocation(this.program, "a_position");
+    const aTexLoc = gl.getAttribLocation(this.program, "a_texCoord");
+
+    gl.enableVertexAttribArray(aPosLoc);
+    gl.vertexAttribPointer(aPosLoc, 2, gl.FLOAT, false, 16, 0);
+
+    gl.enableVertexAttribArray(aTexLoc);
+    gl.vertexAttribPointer(aTexLoc, 2, gl.FLOAT, false, 16, 8);
+  }
+
+  public setTerrainImage(image: HTMLImageElement): void {
+    const gl = this.gl;
+    this.terrainTexture = gl.createTexture();
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.terrainTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  }
+
+  public updateLiveStateTexture(
+    uint16Data: Uint16Array,
+    width = 4096,
+    height = 2048,
+  ): void {
+    const gl = this.gl;
+    if (!this.liveStateTexture) {
+      this.liveStateTexture = gl.createTexture();
+    }
+
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.liveStateTexture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.R16UI,
+      width,
+      height,
+      0,
+      gl.RED_INTEGER,
+      gl.UNSIGNED_SHORT,
+      uint16Data,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  }
+
+  public setPaletteTexture(paletteTexture: WebGLTexture): void {
+    this.paletteTexture = paletteTexture;
+  }
+
+  public setGdpPaletteTexture(gdpPaletteTexture: WebGLTexture): void {
+    this.gdpPaletteTexture = gdpPaletteTexture;
+  }
+
+  public render(
+    width: number,
+    height: number,
+    posX: number,
+    posY: number,
+    scale: number,
+    time: number,
+    activeLayer: "political" | "gdp" = "political",
+    overlayOpacity = 0.4,
+  ): void {
+    const gl = this.gl;
+    if (!this.program || !this.vao) return;
+
+    gl.useProgram(this.program);
+    gl.bindVertexArray(this.vao);
+
+    gl.uniform2f(this.uResolutionLoc, width, height);
+    gl.uniform2f(this.uPositionLoc, posX, posY);
+    gl.uniform1f(this.uScaleLoc, scale);
+    gl.uniform1f(this.uTimeLoc, time);
+    gl.uniform1f(this.uOverlayOpacityLoc, overlayOpacity);
+    gl.uniform2f(this.uTexelSizeLoc, 1.0 / 4096.0, 1.0 / 2048.0);
+    gl.uniform1i(this.uActiveLayerLoc, activeLayer === "gdp" ? 1 : 0);
+
+    if (this.terrainTexture) {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.terrainTexture);
+    }
+
+    if (this.liveStateTexture) {
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, this.liveStateTexture);
+    }
+
+    if (this.paletteTexture) {
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, this.paletteTexture);
+    }
+
+    if (this.gdpPaletteTexture) {
+      gl.activeTexture(gl.TEXTURE3);
+      gl.bindTexture(gl.TEXTURE_2D, this.gdpPaletteTexture);
+    }
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }
 }

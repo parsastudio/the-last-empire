@@ -3,15 +3,15 @@ import { useWebGLContext } from "@/presentation/hooks/tactical-map/final/use-web
 import { useWebGLMapRenderer } from "@/presentation/hooks/tactical-map/final/use-webgl-map-renderer";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { useMapGesture } from "@/presentation/hooks/tactical-map/use-map-gesture";
-import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { WebGLHoverHud } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { WebGLContextMenuWrapper } from "@/presentation/components/tactical-map/final/hud/webgl-context-menu-wrapper";
 import { useWebGLInteraction } from "@/presentation/hooks/tactical-map/final/use-webgl-interaction";
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 
 interface WebGLMapCanvasProps {
-  countries: CountryMapping[];
+  provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   activeLayer?: "political" | "gdp";
@@ -20,7 +20,7 @@ interface WebGLMapCanvasProps {
 }
 
 export function WebGLMapCanvas({
-  countries,
+  provincesMap,
   nationsMap,
   humanNationId,
   activeLayer = "political",
@@ -47,7 +47,7 @@ export function WebGLMapCanvas({
     dimensions,
     positionRef,
     scaleRef,
-    countries,
+    provincesMap,
     nationsMap,
     activeLayer,
   });
@@ -66,7 +66,7 @@ export function WebGLMapCanvas({
     scaleRef,
     isDraggingRef: { current: false },
     hasDraggedRef: { current: false },
-    countries,
+    provincesMap,
     nationsMap,
     humanNationId,
   });

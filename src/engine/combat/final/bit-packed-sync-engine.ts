@@ -1,5 +1,6 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BitPackedNeighborDetector } from "@/engine/combat/final/bit-packed-neighbor-detector";
 
