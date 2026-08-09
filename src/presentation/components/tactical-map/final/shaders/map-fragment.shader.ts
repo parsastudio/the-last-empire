@@ -18,42 +18,33 @@ uniform int u_activeLayer;
 void main() {
   vec4 terrainColor = texture(u_terrainTexture, v_texCoord);
   uint rawState = texture(u_liveStateTexture, v_texCoord).r;
+  uint provinceId = rawState & 65535u;
 
-  uint nationId = rawState & 255u;
-  uint frontierBit = (rawState >> 13u) & 1u;
-
-  uint nLeft = texture(u_liveStateTexture, v_texCoord + vec2(-u_texelSize.x, 0.0)).r & 255u;
-  uint nRight = texture(u_liveStateTexture, v_texCoord + vec2(u_texelSize.x, 0.0)).r & 255u;
-  uint nUp = texture(u_liveStateTexture, v_texCoord + vec2(0.0, -u_texelSize.y)).r & 255u;
-  uint nDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 255u;
-
-   bool isBorder = (nationId != nRight) || (nationId != nDown);
-
-  if (nationId == 0u) {
-    if (isBorder && (nLeft >= 11u || nRight >= 11u || nUp >= 11u || nDown >= 11u)) {
-      fragColor = vec4(0.10, 0.12, 0.16, 1.0);
-      return;
-    }
+  if (provinceId == 0u) {
     fragColor = terrainColor;
     return;
   }
 
-  float uCoord = (float(nationId) + 0.5) / 256.0;
-  vec4 nationColor;
+  uint pRight = texture(u_liveStateTexture, v_texCoord + vec2(u_texelSize.x, 0.0)).r & 65535u;
+  uint pDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 65535u;
 
+  bool isBorder = (provinceId != pRight) || (provinceId != pDown);
+
+  float uCoord = (float(provinceId & 255u) + 0.5) / 256.0;
+  float vCoord = (float((provinceId >> 8u) & 255u) + 0.5) / 256.0;
+
+  vec4 landColor;
   if (u_activeLayer == 1) {
-    nationColor = texture(u_gdpPaletteTexture, vec2(uCoord, 0.5));
+    landColor = texture(u_gdpPaletteTexture, vec2(uCoord, vCoord));
   } else {
-    nationColor = texture(u_paletteTexture, vec2(uCoord, 0.5));
+    landColor = texture(u_paletteTexture, vec2(uCoord, vCoord));
   }
 
-  vec3 blendedColor = mix(terrainColor.rgb, nationColor.rgb, 0.70);
+  vec3 blendedColor = mix(terrainColor.rgb, landColor.rgb, 0.70);
 
   if (isBorder) {
-      blendedColor = mix(blendedColor, vec3(0.05, 0.08, 0.18), 0.75);
+    blendedColor = mix(blendedColor, vec3(0.05, 0.08, 0.18), 0.75);
   }
-
-
 
   fragColor = vec4(blendedColor, 1.0);
 }

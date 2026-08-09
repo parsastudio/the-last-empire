@@ -1,13 +1,14 @@
 import { useState, useCallback } from "react";
-import { findCountryProfileById } from "@/domain/data/countries";
+import { Province } from "@/domain/province/province.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
   mapPos: { x: number; y: number };
-  countryId: number;
+  provinceId: number;
+  provinceName: string;
   countryCode: string;
   countryName: string;
-  enclaveId: number;
 }
 
 export function useContextMenu() {
@@ -18,29 +19,34 @@ export function useContextMenu() {
     (
       screenX: number,
       screenY: number,
-      nationId: number,
+      provinceId: number,
       mapX: number,
       mapY: number,
-      enclaveId = 0,
+      provincesMap?: Record<string, Province>,
+      nationsMap?: Record<string, Nation>,
     ) => {
-      if (nationId < 11 || nationId >= 250) {
+      if (provinceId <= 0) {
         setContextMenuState(null);
         return;
       }
 
-      const profile = findCountryProfileById(nationId);
-      const countryName = profile ? profile.nameFa : `کشور #${nationId}`;
-      const countryCode = profile
-        ? `NATION_${profile.code.toUpperCase()}`
-        : `NATION_${nationId}`;
+      const province = provincesMap
+        ? provincesMap[provinceId.toString()]
+        : null;
+      const provinceName = province ? province.nameFa : `استان #${provinceId}`;
+
+      const ownerNation =
+        province && nationsMap ? nationsMap[province.ownerNationId] : null;
+      const countryName = ownerNation ? ownerNation.name : "نامشخص";
+      const countryCode = ownerNation ? ownerNation.id : "NATION_DEFAULT";
 
       setContextMenuState({
         screenPos: { x: screenX, y: screenY },
         mapPos: { x: mapX, y: mapY },
-        countryId: nationId,
+        provinceId,
+        provinceName,
         countryCode,
         countryName,
-        enclaveId,
       });
     },
     [],
