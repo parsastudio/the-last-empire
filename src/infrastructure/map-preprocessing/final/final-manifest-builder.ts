@@ -1,8 +1,21 @@
 import fs from "fs/promises";
 import path from "path";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
-import { PowerScoreCalculator } from "@/engine/diplomacy/diplomacy-engine";
+import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-partition-engine";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+
+export interface FinalManifestProvince {
+  provinceId: number;
+  nameFa: string;
+  countryId: string;
+  countryNumericId: number;
+  pixelCount: number;
+  hasSeaAccess: boolean;
+  landNeighbors: number[];
+  centerCoordinates: { x: number; y: number };
+  baseGdpShare: number;
+  basePopulationShare: number;
+}
 
 export interface FinalManifestNation {
   id: string;
@@ -14,99 +27,108 @@ export interface FinalManifestNation {
   gdp: number;
   population: number;
   territoryPixelCount: number;
+  provinceIds: number[];
   startingTreasury: number;
   initialRank: number;
-  powerScore: number;
   defaultGovernment: string;
 }
 
 export interface FinalMapManifest {
   mapId: string;
+  totalProvincesCount: number;
   totalNationsCount: number;
   width: number;
   height: number;
+  provinces: FinalManifestProvince[];
   nations: FinalManifestNation[];
 }
 
 export class FinalManifestBuilder {
-  private powerCalculator = new PowerScoreCalculator();
-
   public async buildAndSave(
     mapId: string,
-    activeCountryIds: Set<number>,
-    pixelAreaMap: Map<number, number>,
+    provinceMap: Map<number, ProvinceClusterInfo>,
     width: number,
     height: number,
   ): Promise<FinalMapManifest> {
+    const countryProvincesMap = new Map<number, ProvinceClusterInfo[]>();
+
+    for (const info of provinceMap.values()) {
+      let list = countryProvincesMap.get(info.countryNumericId);
+      if (!list) {
+        list = [];
+        countryProvincesMap.set(info.countryNumericId, list);
+      }
+      list.push(info);
+    }
+
+    const manifestProvinces: FinalManifestProvince[] = [];
+    const manifestNations: FinalManifestNation[] = [];
+
     const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) =>
-      activeCountryIds.has(p.id ?? 0),
+      countryProvincesMap.has(p.id ?? 0),
     );
 
-    const rawNationsWithScores = activeProfiles.map((p: CountryProfile) => {
-      const numericId = p.id ?? 0;
-      const measuredPixels = pixelAreaMap.get(numericId) || 0;
-      const territoryPixelCount =
-        measuredPixels > 0
-          ? Math.round(measuredPixels)
-          : Math.round(p.gdp / 10000000);
-      const computedTreasury = Math.floor(p.gdp * 0.05);
+    activeProfiles.sort((a, b) => b.gdp - a.gdp);
 
-      const powerDetails = this.powerCalculator.calculatePowerScore(
-        p.gdp,
-        computedTreasury,
-        p.startingInfantry ?? 50,
-        p.startingAirForce ?? 10,
-        p.startingDroneMissile ?? 0,
-        p.startingTechLevel ?? 1,
-        1.0,
+    for (let rankIndex = 0; rankIndex < activeProfiles.length; rankIndex++) {
+      const profile = activeProfiles[rankIndex]!;
+      const countryNumericId = profile.id ?? 0;
+      const countryId = `NATION_${profile.code.toUpperCase()}`;
+      const provList = countryProvincesMap.get(countryNumericId) || [];
+
+      const totalCountryPixels = provList.reduce(
+        (sum, p) => sum + p.pixelCount,
+        0,
       );
+      const provIds: number[] = [];
 
-      return {
-        profile: p,
-        numericId,
-        territoryPixelCount,
-        powerScore: powerDetails.powerScore,
-        computedTreasury,
-      };
-    });
+      for (let pIndex = 0; pIndex < provList.length; pIndex++) {
+        const pInfo = provList[pIndex]!;
+        provIds.push(pInfo.provinceId);
 
-    rawNationsWithScores.sort(
-      (a: { powerScore: number }, b: { powerScore: number }) =>
-        b.powerScore - a.powerScore,
-    );
+        const share =
+          totalCountryPixels > 0
+            ? pInfo.pixelCount / totalCountryPixels
+            : 1 / provList.length;
 
-    const manifestNations: FinalManifestNation[] = rawNationsWithScores.map(
-      (
-        item: {
-          profile: CountryProfile;
-          numericId: number;
-          territoryPixelCount: number;
-          powerScore: number;
-          computedTreasury: number;
-        },
-        index: number,
-      ) => ({
-        id: `NATION_${item.profile.code}`,
-        numericId: item.numericId,
-        code: item.profile.code,
-        flagCode: item.profile.flagCode,
-        nameFa: item.profile.nameFa,
-        nameEn: item.profile.nameEn,
-        gdp: item.profile.gdp,
-        population: item.profile.population,
-        territoryPixelCount: item.territoryPixelCount,
-        startingTreasury: item.computedTreasury,
-        initialRank: index + 1,
-        powerScore: item.powerScore,
-        defaultGovernment: item.profile.startingGovernment ?? "DEMOCRACY",
-      }),
-    );
+        manifestProvinces.push({
+          provinceId: pInfo.provinceId,
+          nameFa: `استان ${profile.nameFa} (${pIndex + 1})`,
+          countryId,
+          countryNumericId,
+          pixelCount: pInfo.pixelCount,
+          hasSeaAccess: pInfo.hasSeaAccess,
+          landNeighbors: Array.from(pInfo.landNeighbors),
+          centerCoordinates: pInfo.centerCoordinates,
+          baseGdpShare: Number(share.toFixed(4)),
+          basePopulationShare: Number(share.toFixed(4)),
+        });
+      }
+
+      manifestNations.push({
+        id: countryId,
+        numericId: countryNumericId,
+        code: profile.code,
+        flagCode: profile.flagCode,
+        nameFa: profile.nameFa,
+        nameEn: profile.nameEn,
+        gdp: profile.gdp,
+        population: profile.population,
+        territoryPixelCount: totalCountryPixels,
+        provinceIds: provIds,
+        startingTreasury: Math.floor(profile.gdp * 0.05),
+        initialRank: rankIndex + 1,
+        defaultGovernment: profile.startingGovernment ?? "DEMOCRACY",
+      });
+    }
 
     const manifest: FinalMapManifest = {
       mapId,
+      totalProvincesCount: manifestProvinces.length,
       totalNationsCount: manifestNations.length,
       width,
       height,
+      provinces: manifestProvinces,
       nations: manifestNations,
     };
 

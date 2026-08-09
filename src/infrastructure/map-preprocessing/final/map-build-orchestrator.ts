@@ -2,16 +2,11 @@ import fs from "fs/promises";
 import path from "path";
 import { PNG } from "pngjs";
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { WaterBodyClassifier } from "@/infrastructure/map-preprocessing/final/water-body-classifier";
 import { FinalManifestBuilder } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
-import { BitPackedEnclaveClusterer } from "@/engine/combat/final/bit-packed-enclave-clusterer";
-import { FrontierBitManager } from "@/engine/combat/final/frontier-bit-manager";
 import { LandPartitionEngine } from "@/infrastructure/map-preprocessing/final/land-partition-engine";
+import { ProvincePartitionEngine } from "@/infrastructure/map-preprocessing/final/province-partition-engine";
 
 export class MapBuildOrchestrator {
-  private waterClassifier = new WaterBodyClassifier();
-  private enclaveClusterer = new BitPackedEnclaveClusterer();
-  private frontierManager = new FrontierBitManager();
   private manifestBuilder = new FinalManifestBuilder();
 
   public async cleanOutputDirectory(targetDir: string): Promise<void> {
@@ -65,27 +60,23 @@ export class MapBuildOrchestrator {
       }
     }
 
-    const { activeCountryIds, pixelAreaMap } =
-      LandPartitionEngine.partitionAndConsolidate(
-        rawNationGrid,
-        width,
-        height,
-        bitBuffer,
-      );
+    LandPartitionEngine.partitionAndConsolidate(
+      rawNationGrid,
+      width,
+      height,
+      bitBuffer,
+    );
 
-    this.waterClassifier.processFullMap(bitBuffer);
-    this.enclaveClusterer.clusterNationEnclaves(bitBuffer, width, height);
-    this.frontierManager.updateAllFrontiers(bitBuffer);
+    const provinceMap = ProvincePartitionEngine.partitionProvinces(
+      rawNationGrid,
+      width,
+      height,
+      bitBuffer,
+    );
 
     const binPath = path.join(outputDir, "live-state.bin");
     await fs.writeFile(binPath, bitBuffer.toUint8ArrayBuffer());
 
-    await this.manifestBuilder.buildAndSave(
-      mapId,
-      activeCountryIds,
-      pixelAreaMap,
-      width,
-      height,
-    );
+    await this.manifestBuilder.buildAndSave(mapId, provinceMap, width, height);
   }
 }
