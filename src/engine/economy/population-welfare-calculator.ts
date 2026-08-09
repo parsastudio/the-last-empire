@@ -1,6 +1,7 @@
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { Nation } from "@/domain/nation/nation.schema";
 import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
+import { MARKET_CONFIG } from "@/domain/economy/market.config";
 
 export interface PopulationWelfareMetrics {
   oilDemand: number;
@@ -16,11 +17,11 @@ export class PopulationWelfareCalculator {
     unlockedDoctrines?: string[],
     industrialLevel = 1,
   ): number {
-    if (population <= 0) return 0;
-
-    const householdDemand = (population / 10000000) * 1.5;
-    const industrialDemand = (gdp / 20000000000) * 1.0;
-    const baseDemand = householdDemand + industrialDemand;
+    void population;
+    const safeGdp = Math.max(0, gdp);
+    const baseMoneyCost = safeGdp * 0.2;
+    const buyPrice = MARKET_CONFIG.FIXED_BUY_PRICE;
+    const baseDemandInBlocks = Math.ceil(baseMoneyCost / buyPrice);
 
     const efficiencyFactor = Math.max(
       0.3,
@@ -29,7 +30,10 @@ export class PopulationWelfareCalculator {
 
     const discount = DoctrinesManager.getOilDemandDiscount(unlockedDoctrines);
 
-    return Math.max(1, Math.ceil(baseDemand * efficiencyFactor * discount));
+    return Math.max(
+      1,
+      Math.ceil(baseDemandInBlocks * efficiencyFactor * discount),
+    );
   }
 
   public static calculateFulfillment(stock: number, demand: number): number {
