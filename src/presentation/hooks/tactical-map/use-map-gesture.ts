@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, RefObject } from "react";
 import { MAP_CONFIG } from "@/domain/map/map.config";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
@@ -7,6 +7,7 @@ export function useMapGesture(
   containerHeight = 600,
   mapWidth: number = MAP_CONFIG.HIGH_RES_WIDTH,
   mapHeight: number = MAP_CONFIG.HIGH_RES_HEIGHT,
+  containerRef?: RefObject<HTMLDivElement | null>,
 ) {
   const computeInitial = useCallback(
     (w: number, h: number) => {
@@ -98,6 +99,22 @@ export function useMapGesture(
     scaleRef.current = nextScale;
     positionRef.current = nextPosition;
   };
+
+  useEffect(() => {
+    const container = containerRef?.current;
+    if (!container) return;
+
+    const onNativeWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const rect = container.getBoundingClientRect();
+      calculateZoom(e.deltaY, rect, e.clientX, e.clientY);
+    };
+
+    container.addEventListener("wheel", onNativeWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", onNativeWheel);
+    };
+  }, [containerRef]);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     e.preventDefault();
