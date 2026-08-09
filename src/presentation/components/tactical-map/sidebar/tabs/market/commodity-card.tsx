@@ -22,8 +22,7 @@ export function CommodityCard({
   currentPrice,
   onTrade,
 }: CommodityCardProps) {
-  const isOil = title.includes("نفت");
-  const subLabel = isOil ? "(هر بلوک = ۱۰M بشکه)" : "(هر بلوک = ۱M تن)";
+  const subLabel = "(هر بلوک = ۱۰ میلیون بشکه)";
   const buyPrice = currentPrice || MARKET_CONFIG.FIXED_BUY_PRICE;
   const sellPrice = MARKET_CONFIG.FIXED_SELL_PRICE;
 

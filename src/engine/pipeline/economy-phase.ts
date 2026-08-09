@@ -31,7 +31,7 @@ export class EconomyPhase implements TurnPhase {
         continue;
       }
 
-      const { oilProducedPerTurn, steelProducedPerTurn } =
+      const { oilProducedPerTurn } =
         ResourceGenerationStep.calculateResourceGeneration(nation);
 
       let updated = {
@@ -39,7 +39,6 @@ export class EconomyPhase implements TurnPhase {
         resources: {
           ...nation.resources,
           oil: nation.resources.oil + oilProducedPerTurn,
-          steel: nation.resources.steel + steelProducedPerTurn,
         },
       };
 

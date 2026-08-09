@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TrendingUp, Bot, Fuel, Wrench, Coins } from "lucide-react";
+import { TrendingUp, Bot, Fuel, Coins } from "lucide-react";
 import { CommodityCard } from "@/presentation/components/tactical-map/sidebar/tabs/market/commodity-card";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { useMarketTrade } from "@/presentation/components/tactical-map/sidebar/tabs/market/hooks/use-market-trade";
@@ -12,7 +12,6 @@ import { MARKET_CONFIG } from "@/domain/economy/market.config";
 interface WideMarketViewProps {
   marketPrices?: ResourceMarketPrice;
   oilStock?: number;
-  steelStock?: number;
   userTreasury?: number;
   nation?: Nation | null;
 }
@@ -20,10 +19,8 @@ interface WideMarketViewProps {
 export function WideMarketView({
   marketPrices = {
     oil: MARKET_CONFIG.FIXED_BUY_PRICE,
-    steel: MARKET_CONFIG.FIXED_BUY_PRICE,
   },
   oilStock = 50,
-  steelStock = 20,
   userTreasury = MARKET_CONFIG.DEFAULT_TREASURY_FALLBACK,
   nation,
 }: WideMarketViewProps) {
@@ -33,14 +30,9 @@ export function WideMarketView({
     marketPrices.oil < 1000000
       ? MARKET_CONFIG.FIXED_BUY_PRICE
       : marketPrices.oil;
-  const safeSteel =
-    marketPrices.steel < 1000000
-      ? MARKET_CONFIG.FIXED_BUY_PRICE
-      : marketPrices.steel;
 
   const trade = useMarketTrade({
     oilStock,
-    steelStock,
     userTreasury,
   });
 
@@ -64,9 +56,8 @@ export function WideMarketView({
           </div>
 
           <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
-            معامله مستقیم بلوک‌های کلان انرژی و فولاد صنعتی در بازار آزاد جهانی.
-            نرخ ثابت خرید ۲۵ میلیون دلار و نرخ ثابت فروش ۲۰ میلیون دلار تنظیم
-            گردیده است.
+            معامله مستقیم بلوک‌های کلان انرژی در بازار آزاد جهانی. نرخ ثابت خرید
+            ۲۵ میلیون دلار و نرخ ثابت فروش ۲۰ میلیون دلار تنظیم گردیده است.
           </p>
         </div>
 
@@ -94,23 +85,6 @@ export function WideMarketView({
                 "بلوک استراتژیک",
                 mode,
                 safeOil,
-              )
-            }
-          />
-
-          <CommodityCard
-            title="فولاد صنعتی سنگین"
-            unit="بلوک استراتژیک"
-            icon={Wrench}
-            colorClass="text-primary"
-            stock={steelStock}
-            currentPrice={safeSteel}
-            onTrade={(mode) =>
-              trade.handleOpenTrade(
-                "فولاد صنعتی سنگین",
-                "بلوک استراتژیک",
-                mode,
-                safeSteel,
               )
             }
           />

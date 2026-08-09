@@ -67,14 +67,9 @@ export class DoctrinesManager {
     return unlocked.includes("cybernetic-automation") ? 0.8 : 1.0;
   }
 
-  public static getSteelProductionBonus(unlocked?: string[]): number {
-    if (!unlocked) return 0;
-    return unlocked.includes("heavy-metallurgy") ? 2 : 0;
-  }
-
   public static getOilProductionBonus(unlocked?: string[]): number {
     if (!unlocked) return 0;
-    return unlocked.includes("deep-refining") ? 3 : 0;
+    return unlocked.includes("deep-refining") ? 4 : 0;
   }
 
   public static getMilitiaPowerMultiplier(unlocked?: string[]): number {

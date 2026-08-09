@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { GovernmentStateSchema } from "@/domain/politics/politics.schema";
-import {
-  ResourcesSchema,
-  MilitaryPayrollRatesSchema,
-} from "@/domain/economy/economy.schema";
+import { MilitaryPayrollRatesSchema } from "@/domain/economy/economy.schema";
 import {
   MilitaryStackSchema,
   RecruitmentOrderSchema,
@@ -53,10 +50,14 @@ export const GeographySchema = z.object({
   coordinates: z.array(CoordinateSchema),
 });
 
+export const ResourcesSchema = z.object({
+  oil: z.number().nonnegative(),
+  manpower: z.number().nonnegative(),
+});
+
 export const AutoTradeSettingsSchema = z.object({
   autoBuyDeficit: z.boolean().default(false),
   autoSellOilPercent: z.number().min(0).max(100).default(0),
-  autoSellSteelPercent: z.number().min(0).max(100).default(0),
   allowEmergencyLoans: z.boolean().default(true),
 });
 
@@ -94,7 +95,6 @@ export const NationSchema = z.object({
   autoTradeSettings: AutoTradeSettingsSchema.default({
     autoBuyDeficit: false,
     autoSellOilPercent: 0,
-    autoSellSteelPercent: 0,
     allowEmergencyLoans: true,
   }),
 });
@@ -103,5 +103,6 @@ export type NationTrait = z.infer<typeof NationTraitSchema>;
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
 export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
+export type Resources = z.infer<typeof ResourcesSchema>;
 export type AutoTradeSettings = z.infer<typeof AutoTradeSettingsSchema>;
 export type Nation = z.infer<typeof NationSchema>;

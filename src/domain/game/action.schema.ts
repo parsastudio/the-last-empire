@@ -43,7 +43,7 @@ export const TradeResourcesActionSchema = z.object({
   nationId: z.string(),
   signature: z.string().optional(),
   type: z.literal("TRADE_RESOURCES"),
-  resourceType: z.enum(["oil", "steel"]),
+  resourceType: z.literal("oil"),
   isBuy: z.boolean(),
   amount: z.number().positive(),
 });
@@ -168,7 +168,6 @@ export const ConfigureAutoTradeActionSchema = z.object({
   type: z.literal("CONFIGURE_AUTO_TRADE"),
   autoBuyDeficit: z.boolean(),
   autoSellOilPercent: z.number().min(0).max(100),
-  autoSellSteelPercent: z.number().min(0).max(100),
   allowEmergencyLoans: z.boolean(),
 });
 

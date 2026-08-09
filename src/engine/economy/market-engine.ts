@@ -13,13 +13,12 @@ export class MarketEngine {
   public static updateMarketPrices(): ResourceMarketPrice {
     return {
       oil: MARKET_CONFIG.FIXED_BUY_PRICE,
-      steel: MARKET_CONFIG.FIXED_BUY_PRICE,
     };
   }
 
   public static predictBuyCost(
     marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    resourceType: "oil",
     amount: number,
   ): number {
     if (amount <= 0) return 0;
@@ -30,7 +29,7 @@ export class MarketEngine {
   public static calculateMaxAffordable(
     treasury: number,
     marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    resourceType: "oil",
   ): number {
     if (treasury <= 0) return 0;
     const price = marketPrices[resourceType] || MARKET_CONFIG.FIXED_BUY_PRICE;
@@ -45,7 +44,7 @@ export class MarketEngine {
   public static buyResource(
     nation: Nation,
     marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    resourceType: "oil",
     amount: number,
   ): TradeTransactionResult {
     if (amount <= 0) {
@@ -66,7 +65,7 @@ export class MarketEngine {
         treasury: nation.treasury - totalCost,
         resources: {
           ...nation.resources,
-          [resourceType]: nation.resources[resourceType] + amount,
+          oil: nation.resources.oil + amount,
         },
       },
       updatedMarketPrices: MarketEngine.updateMarketPrices(),
@@ -77,13 +76,13 @@ export class MarketEngine {
   public static sellResource(
     nation: Nation,
     marketPrices: ResourceMarketPrice,
-    resourceType: "oil" | "steel",
+    resourceType: "oil",
     amount: number,
   ): TradeTransactionResult {
     if (amount <= 0) {
       throw new GameError("INVALID_ACTION", "تعداد سفارش فروش باید مثبت باشد.");
     }
-    if (nation.resources[resourceType] < amount) {
+    if (nation.resources.oil < amount) {
       throw new GameError("INSUFFICIENT_RESOURCES", "موجودی انبار کافی نیست.");
     }
 
@@ -95,7 +94,7 @@ export class MarketEngine {
         treasury: nation.treasury + totalRevenue,
         resources: {
           ...nation.resources,
-          [resourceType]: nation.resources[resourceType] - amount,
+          oil: nation.resources.oil - amount,
         },
       },
       updatedMarketPrices: MarketEngine.updateMarketPrices(),

@@ -13,14 +13,12 @@ interface MilitaryExpansionViewProps {
   nationId: string;
   treasury?: number;
   manpower?: number;
-  steel?: number;
 }
 
 export function MilitaryExpansionView({
   nationId,
   treasury = 100000,
   manpower = 500,
-  steel = 1000,
 }: MilitaryExpansionViewProps) {
   const { dispatchAction } = useGameActions();
 
@@ -55,7 +53,6 @@ export function MilitaryExpansionView({
             unit={unit}
             treasury={treasury}
             manpower={manpower}
-            steel={steel}
             onRecruit={handleRecruit}
           />
         ))}

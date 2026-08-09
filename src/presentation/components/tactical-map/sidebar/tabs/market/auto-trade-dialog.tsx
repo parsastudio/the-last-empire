@@ -28,9 +28,6 @@ function AutoTradeForm({
   const [autoSellOilPercent, setAutoSellOilPercent] = useState<number>(
     initialSettings?.autoSellOilPercent ?? 0,
   );
-  const [autoSellSteelPercent, setAutoSellSteelPercent] = useState<number>(
-    initialSettings?.autoSellSteelPercent ?? 0,
-  );
   const [allowEmergencyLoans, setAllowEmergencyLoans] = useState<boolean>(
     initialSettings?.allowEmergencyLoans ?? true,
   );
@@ -42,7 +39,6 @@ function AutoTradeForm({
       nationId,
       autoBuyDeficit,
       autoSellOilPercent,
-      autoSellSteelPercent,
       allowEmergencyLoans,
     );
 
@@ -67,7 +63,7 @@ function AutoTradeForm({
                 خرید خودکار کسری رفاهی
               </span>
               <span className="text-[10px] text-muted-foreground block">
-                تامین خودکار سوخت و فولاد شهرها در انتهای نوبت
+                تامین خودکار سوخت شهرها در انتهای نوبت
               </span>
             </div>
           </div>
@@ -133,26 +129,6 @@ function AutoTradeForm({
               value={autoSellOilPercent}
               onChange={(e) => setAutoSellOilPercent(Number(e.target.value))}
               className="w-full accent-emerald-500 cursor-pointer h-1.5 bg-secondary rounded-lg"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-muted-foreground font-sans">
-                فروش مازاد فولاد صنعتی:
-              </span>
-              <span className="font-bold text-primary">
-                {PersianNumberFormatter.toPersianDigits(autoSellSteelPercent)}٪
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="5"
-              value={autoSellSteelPercent}
-              onChange={(e) => setAutoSellSteelPercent(Number(e.target.value))}
-              className="w-full accent-blue-500 cursor-pointer h-1.5 bg-secondary rounded-lg"
             />
           </div>
         </div>

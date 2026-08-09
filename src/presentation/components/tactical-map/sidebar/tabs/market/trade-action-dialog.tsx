@@ -34,8 +34,7 @@ export function TradeActionDialog({
   if (!isOpen || !nationId) return null;
 
   const isBuy = mode === "buy";
-  const isOil = resourceName.includes("نفت");
-  const resourceType = isOil ? "oil" : "steel";
+  const resourceType = "oil";
   const effectiveUnitPrice =
     mode === "buy"
       ? unitPrice || MARKET_CONFIG.FIXED_BUY_PRICE
@@ -61,9 +60,7 @@ export function TradeActionDialog({
     }
   };
 
-  const subLabel = isOil
-    ? "(معادل ۱۰ میلیون بشکه نفت)"
-    : "(معادل ۱ میلیون تن فولاد)";
+  const subLabel = "(معادل ۱۰ میلیون بشکه نفت)";
 
   return (
     <AmountActionDialog
