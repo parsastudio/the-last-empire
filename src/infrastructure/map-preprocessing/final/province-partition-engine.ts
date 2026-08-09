@@ -97,6 +97,7 @@ export class ProvincePartitionEngine {
     width: number,
     height: number,
   ): number[][] {
+    void height;
     const pixelSet = new Set<number>(pixelIndices);
     const visited = new Set<number>();
     const components: number[][] = [];
@@ -149,6 +150,7 @@ export class ProvincePartitionEngine {
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): number[] {
+    void height;
     const allMainPixels = components.flat();
     const assignedIds: number[] = [];
 
@@ -264,6 +266,7 @@ export class ProvincePartitionEngine {
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
+    void height;
     if (assignedProvinces.length === 0 || microIslands.length === 0) return;
 
     const fallbackPid = assignedProvinces[0]!;

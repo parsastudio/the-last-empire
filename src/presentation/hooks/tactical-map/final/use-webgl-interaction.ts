@@ -1,10 +1,8 @@
 import { useState, useRef, RefObject } from "react";
-import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import {
-  useHoverNationResolver,
-  HoverCountryInfo,
-} from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
+import { Province } from "@/domain/province/province.schema";
+import { useHoverNationResolver } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
+import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { useGridPicker } from "@/presentation/hooks/tactical-map/final/use-grid-picker";
 import {
@@ -20,7 +18,7 @@ interface UseWebGLInteractionProps {
   scaleRef: RefObject<number>;
   isDraggingRef: RefObject<boolean>;
   hasDraggedRef: RefObject<boolean>;
-  countries: CountryMapping[];
+  provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
 }
@@ -31,14 +29,11 @@ export function useWebGLInteraction({
   scaleRef,
   isDraggingRef,
   hasDraggedRef,
-  countries,
+  provincesMap,
   nationsMap,
   humanNationId,
 }: UseWebGLInteractionProps) {
-  const lastHoverNationIdRef = useRef<{
-    nationId: number;
-    enclaveId: number;
-  } | null>(null);
+  const lastHoverProvinceIdRef = useRef<number | null>(null);
 
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(
     null,
@@ -50,7 +45,7 @@ export function useWebGLInteraction({
     useContextMenu();
 
   const { resolveHoverInfo } = useHoverNationResolver({
-    countries,
+    provincesMap,
     nationsMap,
     humanNationId,
   });
@@ -63,7 +58,7 @@ export function useWebGLInteraction({
       }
       if (hoverPos !== null) setHoverPos(null);
       if (hoverData !== null) setHoverData(null);
-      lastHoverNationIdRef.current = null;
+      lastHoverProvinceIdRef.current = null;
       return;
     }
 
@@ -74,17 +69,13 @@ export function useWebGLInteraction({
     const pos = positionRef.current || { x: 0, y: 0 };
     const scale = scaleRef.current || 1;
 
-    const { nationId, enclaveId } = pickAtScreenPos(rx, ry, pos, scale);
+    const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
 
-    if (nationId >= 11 && nationId < 250) {
-      const last = lastHoverNationIdRef.current;
-      const isSameCell =
-        last && last.nationId === nationId && last.enclaveId === enclaveId;
-
-      if (!isSameCell || !hoverData) {
-        const info = resolveHoverInfo(nationId, enclaveId);
+    if (provinceId > 0) {
+      if (lastHoverProvinceIdRef.current !== provinceId || !hoverData) {
+        const info = resolveHoverInfo(provinceId);
         if (info) {
-          lastHoverNationIdRef.current = { nationId, enclaveId };
+          lastHoverProvinceIdRef.current = provinceId;
           setHoverPos({ x: clientX, y: clientY });
           setHoverData(info);
           return;
@@ -95,13 +86,13 @@ export function useWebGLInteraction({
       }
     }
 
-    lastHoverNationIdRef.current = null;
+    lastHoverProvinceIdRef.current = null;
     if (hoverPos !== null) setHoverPos(null);
     if (hoverData !== null) setHoverData(null);
   };
 
   const handlePointerLeave = () => {
-    lastHoverNationIdRef.current = null;
+    lastHoverProvinceIdRef.current = null;
     setHoverPos(null);
     setHoverData(null);
   };
@@ -120,9 +111,9 @@ export function useWebGLInteraction({
     const pos = positionRef.current || { x: 0, y: 0 };
     const scale = scaleRef.current || 1;
 
-    const { nationId, enclaveId } = pickAtScreenPos(rx, ry, pos, scale);
+    const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
 
-    if (nationId < 11 || nationId >= 250) {
+    if (provinceId <= 0) {
       closeContextMenu();
       return;
     }
@@ -130,7 +121,15 @@ export function useWebGLInteraction({
     const mapX = Math.floor((rx - pos.x) / scale);
     const mapY = Math.floor((ry - pos.y) / scale);
 
-    openContextMenu(e.clientX, e.clientY, nationId, mapX, mapY, enclaveId);
+    openContextMenu(
+      e.clientX,
+      e.clientY,
+      provinceId,
+      mapX,
+      mapY,
+      provincesMap,
+      nationsMap,
+    );
   };
 
   return {

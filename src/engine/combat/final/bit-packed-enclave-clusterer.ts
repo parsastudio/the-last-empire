@@ -25,9 +25,9 @@ export class BitPackedEnclaveClusterer {
     }
 
     for (let i = 0; i < totalPixels; i++) {
-      const nationId = rawBuffer[i]! & 0x00ff;
-      if (targetSet.has(nationId)) {
-        nationPixelsMap.get(nationId)!.push(i);
+      const nId = rawBuffer[i]! & 0x00ff;
+      if (targetSet.has(nId)) {
+        nationPixelsMap.get(nId)!.push(i);
       }
     }
 
@@ -42,7 +42,7 @@ export class BitPackedEnclaveClusterer {
       { dx: -1, dy: 1 },
     ];
 
-    for (const [nationId, pixelIndices] of nationPixelsMap.entries()) {
+    for (const [, pixelIndices] of nationPixelsMap.entries()) {
       if (pixelIndices.length === 0) continue;
 
       const nationPixelSet = new Set<number>(pixelIndices);

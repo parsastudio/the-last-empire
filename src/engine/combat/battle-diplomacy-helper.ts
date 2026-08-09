@@ -1,9 +1,9 @@
 import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
+import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import {
   DiplomaticBetrayalCalculator,
   ReputationManager,
-  DiplomaticStance,
 } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleCalculationResult } from "./battle-calculator";
 

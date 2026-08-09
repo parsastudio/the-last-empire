@@ -42,6 +42,15 @@ export class BitPackedBuffer {
     this.buffer[y * this.width + x] = value & 0xffff;
   }
 
+  public getProvinceId(x: number, y: number): number {
+    const val = this.getPixel(x, y);
+    return BitPackedCellUtility.getProvinceId(val);
+  }
+
+  public setProvinceId(x: number, y: number, provinceId: number): void {
+    this.setPixel(x, y, provinceId);
+  }
+
   public getNationId(x: number, y: number): number {
     const val = this.getPixel(x, y);
     return BitPackedCellUtility.getNationId(val);

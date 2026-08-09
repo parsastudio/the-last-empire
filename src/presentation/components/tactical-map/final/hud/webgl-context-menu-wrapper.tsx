@@ -25,13 +25,13 @@ export function WebGLContextMenuWrapper({
   return (
     <MapContextMenu
       position={contextMenuState.screenPos}
-      countryName={contextMenuState.countryName}
+      countryName={contextMenuState.provinceName}
       countryCode={contextMenuState.countryCode}
       onSelectAction={(action) =>
         onSelectAction(
           action,
           contextMenuState.countryCode,
-          contextMenuState.enclaveId,
+          contextMenuState.provinceId,
         )
       }
       onClose={onClose}

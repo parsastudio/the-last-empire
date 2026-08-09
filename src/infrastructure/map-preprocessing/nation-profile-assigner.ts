@@ -1,4 +1,5 @@
-import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import {
   findCountryProfileById,

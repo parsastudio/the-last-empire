@@ -80,6 +80,7 @@ export function ImfLoanCard({
     accumulatedResearchCost: 0,
     researchCycleTurn: 0,
     proxyInfluenceBudget: {},
+    provinceIds: [],
     autoTradeSettings: {
       autoBuyDeficit: false,
       autoSellOilPercent: 0,
