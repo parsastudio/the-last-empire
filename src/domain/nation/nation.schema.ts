@@ -7,13 +7,8 @@ import {
 } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesStateSchema } from "@/domain/politics/doctrines.schema";
-import {
-  RegionDemographicsSchema,
-  RegionDemographics,
-} from "./region-demographics.schema";
+import { RegionDemographicsSchema } from "./region-demographics.schema";
 import { CoordinateSchema } from "@/domain/map/coordinate.schema";
-
-export type { RegionDemographics };
 
 export const NationTraitSchema = z.enum([
   "OIL_RICH",
@@ -92,6 +87,7 @@ export const NationSchema = z.object({
   researchCycleTurn: z.number().min(0).max(3).default(0),
   proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
   regionsDemographics: z.array(RegionDemographicsSchema).optional(),
+  provinceIds: z.array(z.number()).default([]),
   autoTradeSettings: AutoTradeSettingsSchema.default({
     autoBuyDeficit: false,
     autoSellOilPercent: 0,
