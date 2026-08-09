@@ -100,8 +100,8 @@ export class FinalManifestBuilder {
           hasSeaAccess: pInfo.hasSeaAccess,
           landNeighbors: Array.from(pInfo.landNeighbors),
           centerCoordinates: pInfo.centerCoordinates,
-          baseGdpShare: Number(share.toFixed(4)),
-          basePopulationShare: Number(share.toFixed(4)),
+          baseGdpShare: Number(share.toFixed(6)),
+          basePopulationShare: Number(share.toFixed(6)),
         });
       }
 
