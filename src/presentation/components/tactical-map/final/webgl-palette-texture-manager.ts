@@ -9,7 +9,9 @@ export class WebGLPaletteTextureManager {
   ): WebGLTexture | null {
     const data = new Uint8Array(256 * 256 * 4);
 
-    if (provincesMap) {
+    const hasProvinces = provincesMap && Object.keys(provincesMap).length > 0;
+
+    if (hasProvinces) {
       for (const prov of Object.values(provincesMap)) {
         const pid = prov.provinceId;
         if (pid <= 0 || pid >= 65536) continue;
@@ -20,6 +22,20 @@ export class WebGLPaletteTextureManager {
           numId || 118,
         );
 
+        const u = pid & 255;
+        const v = (pid >> 8) & 255;
+        const idx = (v * 256 + u) * 4;
+
+        data[idx] = pair.r1;
+        data[idx + 1] = pair.g1;
+        data[idx + 2] = pair.b1;
+        data[idx + 3] = 255;
+      }
+    } else {
+      for (let pid = 1; pid < 4096; pid++) {
+        const pair = TacticalPaletteGenerator.generateColorForCountry(
+          (pid % 200) + 11,
+        );
         const u = pid & 255;
         const v = (pid >> 8) & 255;
         const idx = (v * 256 + u) * 4;
