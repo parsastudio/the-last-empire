@@ -351,14 +351,14 @@ export class ProvincePartitionEngine {
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
-        const p1 = raw[idx]!;
+        const p1 = raw[idx]! & 0x0fff;
 
         if (p1 === 0) continue;
 
         const info1 = provinceMap.get(p1);
 
         if (x + 1 < width) {
-          const p2 = raw[idx + 1]!;
+          const p2 = raw[idx + 1]! & 0x0fff;
           if (p2 === 0 && info1) {
             info1.hasSeaAccess = true;
           } else if (p2 > 0 && p2 !== p1) {
@@ -369,7 +369,7 @@ export class ProvincePartitionEngine {
         }
 
         if (y + 1 < height) {
-          const p3 = raw[idx + width]!;
+          const p3 = raw[idx + width]! & 0x0fff;
           if (p3 === 0 && info1) {
             info1.hasSeaAccess = true;
           } else if (p3 > 0 && p3 !== p1) {

@@ -1,8 +1,10 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
@@ -14,11 +16,20 @@ export function useHoverNationResolver({
   provincesMap,
   nationsMap,
 }: UseHoverNationResolverProps) {
+  const syncedProvincesMap = useMemo(() => {
+    if (!provincesMap) return {};
+    const buffer = BitPackedGridState.getInstance().getBuffer();
+    return ProvincePixelCalculator.syncProvincesMapPixelCounts(
+      buffer,
+      provincesMap,
+    );
+  }, [provincesMap]);
+
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
-      if (provinceId <= 0 || !provincesMap) return null;
+      if (provinceId <= 0 || !syncedProvincesMap) return null;
 
-      const province = provincesMap[provinceId.toString()];
+      const province = syncedProvincesMap[provinceId.toString()];
       if (!province) return null;
 
       const ownerNation = nationsMap
@@ -54,7 +65,7 @@ export function useHoverNationResolver({
         ),
       };
     },
-    [provincesMap, nationsMap],
+    [syncedProvincesMap, nationsMap],
   );
 
   return { resolveHoverInfo };

@@ -9,6 +9,8 @@ import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -82,6 +84,15 @@ export const useGameStore = create<GameStoreState>()(
             } catch {}
           }
 
+          const buffer = BitPackedGridState.getInstance().getBuffer();
+          state = {
+            ...state,
+            provinces: ProvincePixelCalculator.syncProvincesMapPixelCounts(
+              buffer,
+              state.provinces,
+            ),
+          };
+
           set((draft) => {
             draft.gameState = state;
             draft.loading = false;
@@ -146,6 +157,13 @@ export const useGameStore = create<GameStoreState>()(
           activeManifest,
         );
 
+        const buffer = BitPackedGridState.getInstance().getBuffer();
+        const syncedProvinces =
+          ProvincePixelCalculator.syncProvincesMapPixelCounts(
+            buffer,
+            initResult.provinces,
+          );
+
         const initialState: GameState = {
           gameId,
           currentTurn: 1,
@@ -154,7 +172,7 @@ export const useGameStore = create<GameStoreState>()(
           humanNationId: normalizedHumanId,
           globalThreatLevel: 0,
           marketPrices: { oil: 25000000 },
-          provinces: initResult.provinces,
+          provinces: syncedProvinces,
           nations: initResult.nations,
           turnLogs: [],
         };

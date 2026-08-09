@@ -2,6 +2,7 @@ import { useEffect, useCallback, useMemo } from "react";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { useGameStore } from "@/presentation/stores/use-game-store";
+import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 
 export function useBitPackedGame(gameId = "default_game") {
   const gameState = useGameStore((state) => state.gameState);
@@ -37,6 +38,24 @@ export function useBitPackedGame(gameId = "default_game") {
       active = false;
     };
   }, [gameId, storageAdapter, loadGame]);
+
+  useEffect(() => {
+    if (gameState && gameState.provinces) {
+      const buffer = BitPackedGridState.getInstance().getBuffer();
+      const updatedProvinces =
+        ProvincePixelCalculator.syncProvincesMapPixelCounts(
+          buffer,
+          gameState.provinces,
+        );
+
+      if (updatedProvinces !== gameState.provinces) {
+        setGameState({
+          ...gameState,
+          provinces: updatedProvinces,
+        });
+      }
+    }
+  }, [gameState, setGameState]);
 
   const advanceNextTurn = useCallback(async () => {
     let nextState = null;
