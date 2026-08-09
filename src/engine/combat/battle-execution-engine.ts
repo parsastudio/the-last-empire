@@ -1,19 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
-import { BattleCalculator } from "@/engine/combat/battle-calculator";
-import { BitPackedStateFacade } from "@/engine/combat/final/bit-packed-state-facade";
-import { CombatReport } from "@/domain/reports/combat-report.schema";
-import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
-import {
-  DiplomaticBetrayalCalculator,
-  ReputationManager,
-} from "@/engine/diplomacy/diplomacy-engine";
+import { BattleCalculator } from "./battle-calculator";
+import { BitPackedStateFacade } from "./final/bit-packed-state-facade";
+import { BattleDiplomacyHelper } from "./battle-diplomacy-helper";
 
 export class BattleExecutionEngine {
   private facade = new BitPackedStateFacade();
-  private betrayalCalculator = new DiplomaticBetrayalCalculator();
-  private reputationManager = new ReputationManager();
 
   public executeBattle(
     state: GameState,
@@ -44,7 +37,7 @@ export class BattleExecutionEngine {
       : "NORMAL_DIPLOMACY";
 
     const betrayalResult =
-      this.betrayalCalculator.calculatePenalty(currentStance);
+      BattleDiplomacyHelper.evaluateBetrayalPenalty(currentStance);
 
     const oilPrice = state.marketPrices?.oil || 25000000;
 
@@ -55,6 +48,7 @@ export class BattleExecutionEngine {
       oilPrice,
       action.infantryToDeploy,
       action.airForceToDeploy,
+      action.targetEnclaveId,
     );
 
     const defenderPixels = defender.geography.territoryPixelCount;
@@ -62,16 +56,21 @@ export class BattleExecutionEngine {
       ? Math.min(calcResult.conqueredPixelsCount, defenderPixels)
       : 0;
 
-    let actualConqueredPixels = 0;
-    if (requestedTargetPixels > 0) {
-      actualConqueredPixels = this.facade.conquerAndRefreshed(
-        CountryRegistry.resolveNumericId(attacker.id),
-        CountryRegistry.resolveNumericId(defender.id),
-        requestedTargetPixels,
-      );
-    }
+    const conquestFacadeResult = this.facade.conquerAndSync(
+      state,
+      CountryRegistry.resolveNumericId(attacker.id),
+      CountryRegistry.resolveNumericId(defender.id),
+      requestedTargetPixels,
+      attacker.id,
+      defender.id,
+      action.targetEnclaveId,
+    );
 
-    const conqueredPixels = actualConqueredPixels;
+    const conqueredPixels = conquestFacadeResult.capturedPixelsCount;
+    const syncedNations = conquestFacadeResult.updatedNations;
+
+    const updatedAttackerRef = syncedNations[attacker.id] || attacker;
+    const updatedDefenderRef = syncedNations[defender.id] || defender;
 
     const conquestRatio =
       defenderPixels > 0
@@ -81,64 +80,56 @@ export class BattleExecutionEngine {
     const popTransferred = Math.floor(defender.population * conquestRatio);
     const gdpTransferred = Math.floor(defender.gdp * conquestRatio);
 
-    const newDefenderPixels = Math.max(0, defenderPixels - conqueredPixels);
-    const newDefenderPop = Math.max(0, defender.population - popTransferred);
-    const newDefenderGdp = Math.max(0, defender.gdp - gdpTransferred);
-    const isDefenderAlive = newDefenderPixels > 0 && newDefenderPop > 0;
+    const isDefenderAlive =
+      updatedDefenderRef.geography.territoryPixelCount > 0 &&
+      defender.population - popTransferred > 0;
 
-    const isFullCapitulation = !isDefenderAlive || newDefenderPixels === 0;
+    const isFullCapitulation = !isDefenderAlive;
 
     const attackerTreasuryAfterDeployment =
-      attacker.treasury - calcResult.deploymentMoneyCost;
+      updatedAttackerRef.treasury - calcResult.deploymentMoneyCost;
     const attackerOilAfterDeployment = Math.max(
       0,
-      attacker.resources.oil - calcResult.deploymentOilCost,
+      updatedAttackerRef.resources.oil - calcResult.deploymentOilCost,
     );
 
     let updatedAttacker = {
-      ...attacker,
-      gdp: attacker.gdp + gdpTransferred,
-      population: attacker.population + popTransferred,
+      ...updatedAttackerRef,
+      gdp: updatedAttackerRef.gdp + gdpTransferred,
+      population: updatedAttackerRef.population + popTransferred,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
       resources: {
-        ...attacker.resources,
+        ...updatedAttackerRef.resources,
         oil: attackerOilAfterDeployment,
       },
-      geography: {
-        ...attacker.geography,
-        territoryPixelCount:
-          attacker.geography.territoryPixelCount + conqueredPixels,
-        contiguousMainlandPixelCount:
-          attacker.geography.contiguousMainlandPixelCount + conqueredPixels,
-      },
       military: {
-        ...attacker.military,
+        ...updatedAttackerRef.military,
         infantry: Math.max(
           0,
-          attacker.military.infantry -
+          updatedAttackerRef.military.infantry -
             calcResult.attackerCasualties.infantryLost,
         ),
         airForce: Math.max(
           0,
-          attacker.military.airForce -
+          updatedAttackerRef.military.airForce -
             calcResult.attackerCasualties.airForceLost,
         ),
         droneMissile: Math.max(
           0,
-          attacker.military.droneMissile - calcResult.dronesUsed,
+          updatedAttackerRef.military.droneMissile - calcResult.dronesUsed,
         ),
-        experience: Math.min(100, attacker.military.experience + 5),
+        experience: Math.min(100, updatedAttackerRef.military.experience + 5),
       },
     };
 
     if (betrayalResult.hasBetrayed) {
-      updatedAttacker = this.reputationManager.applyReputationPenalty(
+      updatedAttacker = BattleDiplomacyHelper.applyReputationPenalty(
         updatedAttacker,
         betrayalResult.reputationPenalty,
       );
     }
 
-    const attackerRelKey = attacker.relations[defender.id]
+    const attackerRelKey = updatedAttacker.relations[defender.id]
       ? defender.id
       : canonicalDefenderId;
     const attackerRelToDefender = updatedAttacker.relations[attackerRelKey];
@@ -155,40 +146,41 @@ export class BattleExecutionEngine {
     }
 
     const updatedDefender = {
-      ...defender,
+      ...updatedDefenderRef,
       isAlive: isDefenderAlive,
-      gdp: newDefenderGdp,
-      population: newDefenderPop,
+      gdp: isDefenderAlive ? Math.max(0, defender.gdp - gdpTransferred) : 0,
+      population: isDefenderAlive
+        ? Math.max(0, defender.population - popTransferred)
+        : 0,
       treasury: Math.max(0, defender.treasury - calcResult.treasuryLooted),
-      geography: {
-        ...defender.geography,
-        territoryPixelCount: newDefenderPixels,
-        contiguousMainlandPixelCount: newDefenderPixels,
-      },
       military: {
-        ...defender.military,
-        infantry: Math.max(
-          0,
-          defender.military.infantry -
-            calcResult.defenderCasualties.infantryLost,
-        ),
-        airForce: Math.max(
-          0,
-          defender.military.airForce -
-            calcResult.defenderCasualties.airForceLost,
-        ),
-        experience: Math.min(100, defender.military.experience + 3),
+        ...updatedDefenderRef.military,
+        infantry: isDefenderAlive
+          ? Math.max(
+              0,
+              updatedDefenderRef.military.infantry -
+                calcResult.defenderCasualties.infantryLost,
+            )
+          : 0,
+        airForce: isDefenderAlive
+          ? Math.max(
+              0,
+              updatedDefenderRef.military.airForce -
+                calcResult.defenderCasualties.airForceLost,
+            )
+          : 0,
+        experience: Math.min(100, updatedDefenderRef.military.experience + 3),
       },
     };
 
-    const defenderRelKey = defender.relations[attacker.id]
+    const defenderRelKey = updatedDefender.relations[attacker.id]
       ? attacker.id
       : canonicalAttackerId;
     const defenderRelToAttacker = updatedDefender.relations[defenderRelKey];
     if (defenderRelToAttacker) {
       updatedDefender.relations = {
         ...updatedDefender.relations,
-        [attacker.id]: {
+        [defenderRelKey]: {
           ...defenderRelToAttacker,
           stance: "WAR",
           isTradeEmbargoed: true,
@@ -197,51 +189,23 @@ export class BattleExecutionEngine {
       };
     }
 
-    const reportTitle = calcResult.isAttackerVictory
-      ? isFullCapitulation
-        ? `فتح کامل و تسلیم ${defender.name}`
-        : `پیروزی در تهاجم به قلمرو ${defender.name}`
-      : `عقب‌نشینی نیروها در نبرد با ${defender.name}`;
-
     let betrayalText = "";
     if (betrayalResult.hasBetrayed) {
       betrayalText = ` [جریمه خیانت دیپلماتیک: -${betrayalResult.reputationPenalty} پرستیژ جهانی]`;
     }
 
-    const reportSummary = calcResult.isAttackerVictory
-      ? isFullCapitulation
-        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.${betrayalText}`
-        : `نیروهای ${attacker.name} با موفقیت توانستند ${conqueredPixels.toLocaleString("fa-IR")} پیکسل از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.${betrayalText}`
-      : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalText}`;
-
-    const report: CombatReport = {
-      id: `report-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      turn: state.currentTurn,
-      timestamp: Date.now(),
-      severity: isFullCapitulation ? "CRUSHING_VICTORY" : calcResult.severity,
-      title: reportTitle,
-      summary: reportSummary,
-      attackerNationId: attacker.id,
-      attackerName: attacker.name,
-      defenderNationId: defender.id,
-      defenderName: defender.name,
-      attackerCasualties: calcResult.attackerCasualties,
-      defenderCasualties: calcResult.defenderCasualties,
-      conqueredPixelsCount: conqueredPixels,
-      capitulatedPixelsCount: isFullCapitulation ? conqueredPixels : 0,
-      strategicAssessment: `هزینه اعزام لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} + ${calcResult.deploymentOilCost.toLocaleString("fa-IR")} بلوک نفت | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
-      isVictory: calcResult.isAttackerVictory,
-    };
-
-    const logEntry = TurnLogBuilder.createLogEntry(
-      state.currentTurn,
-      attacker.id,
-      calcResult.isAttackerVictory ? "INFO" : "WARNING",
-      report.summary,
+    const { logEntry } = BattleDiplomacyHelper.buildBattleReportAndLog(
+      state,
+      attacker,
+      defender,
+      calcResult,
+      conqueredPixels,
+      isFullCapitulation,
+      betrayalText,
     );
 
     const tempNations = {
-      ...state.nations,
+      ...syncedNations,
       [attacker.id]: updatedAttacker,
       [defender.id]: updatedDefender,
     };

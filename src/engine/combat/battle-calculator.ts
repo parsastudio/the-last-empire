@@ -3,10 +3,9 @@ import {
   CasualtyMetrics,
   ReportSeverity,
 } from "@/domain/reports/combat-report.schema";
-import { GovernmentSystem } from "@/engine/politics/government-system";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { MARKET_CONFIG } from "@/domain/economy/market.config";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -27,9 +26,10 @@ export class BattleCalculator {
     attacker: Nation,
     defender: Nation,
     dronesToLaunch: number,
-    oilPrice: number = MARKET_CONFIG.FIXED_BUY_PRICE,
+    oilPrice = 25000000,
     infantryToDeploy?: number,
     airForceToDeploy?: number,
+    targetEnclaveId?: number,
   ): BattleCalculationResult {
     const deployedInfantry = Math.min(
       attacker.military.infantry,
@@ -45,55 +45,24 @@ export class BattleCalculator {
       deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (dronesToLaunch || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
-    const deploymentFivePct = totalForceCost * 0.05;
-    const deploymentMoneyCost = Math.floor(deploymentFivePct);
-    const deploymentOilCost = Math.max(
-      1,
-      Math.ceil(
-        deploymentFivePct / (oilPrice || MARKET_CONFIG.FIXED_BUY_PRICE),
-      ),
-    );
+    const { moneyCost: deploymentMoneyCost, oilCost: deploymentOilCost } =
+      CombatModifierResolver.calculateDeploymentCosts(totalForceCost, oilPrice);
 
     const dronesUsed = Math.min(
       attacker.military.droneMissile,
       Math.max(0, dronesToLaunch || 0),
     );
 
-    const attackerGovTraits = GovernmentSystem.getTraits(
-      attacker.government.type,
-    );
-    const defenderGovTraits = GovernmentSystem.getTraits(
-      defender.government.type,
-    );
+    const { attackerGovMult, defenderGovMult } =
+      CombatModifierResolver.getCombatPowerModifiers(attacker, defender);
 
-    let attackerGovMult = attackerGovTraits.militaryPowerMultiplier;
-    let defenderGovMult = defenderGovTraits.militaryPowerMultiplier;
-
-    if (attacker.traits.includes("MILITARISTIC")) {
-      attackerGovMult *= 1.15;
-    }
-    if (defender.traits.includes("MILITARISTIC")) {
-      defenderGovMult *= 1.15;
-    }
-
-    const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.25;
-    const droneMult = DoctrinesManager.getDronePowerMultiplier(
-      attacker.doctrines?.unlockedDoctrines,
-    );
-
-    let droneCasualtiesInflicted = Math.floor(
-      dronesUsed * 3 * techMultiplier * attackerGovMult * droneMult,
-    );
-
-    const defenderAirDefenseRate =
-      DoctrinesManager.getAirDefenseInterceptionRate(
-        defender.doctrines?.unlockedDoctrines,
+    const droneCasualtiesInflicted =
+      CombatModifierResolver.getDroneStrikeEffectiveness(
+        attacker,
+        defender,
+        dronesUsed,
+        attackerGovMult,
       );
-    if (defenderAirDefenseRate > 0) {
-      droneCasualtiesInflicted = Math.floor(
-        droneCasualtiesInflicted * (1.0 - defenderAirDefenseRate),
-      );
-    }
 
     let defenderRemainingInfantry = defender.military.infantry;
     let defenderRemainingAirForce = defender.military.airForce;
@@ -235,33 +204,45 @@ export class BattleCalculator {
     let conqueredPixelsCount = 0;
     let treasuryLooted = 0;
 
+    const targetRegion =
+      targetEnclaveId !== undefined && defender.regionsDemographics
+        ? defender.regionsDemographics.find(
+            (r) => r.regionId === targetEnclaveId,
+          )
+        : undefined;
+
+    const targetRegionPixels = targetRegion
+      ? targetRegion.pixelCount
+      : defender.geography.territoryPixelCount;
+
     if (isAttackerVictory) {
       const powerDiffRatio =
         (attackerGroundPower - defenderGroundPower) /
         (attackerGroundPower || 1);
 
-      const defenderTotalPixels = defender.geography.territoryPixelCount;
-
       let conquestRatio = 0.25 + powerDiffRatio * 0.25;
-      conquestRatio = Math.max(0.25, Math.min(0.5, conquestRatio));
+      conquestRatio = Math.max(0.25, Math.min(1.0, conquestRatio));
 
-      let calculatedConquest = Math.floor(defenderTotalPixels * conquestRatio);
-      calculatedConquest = Math.max(1000, calculatedConquest);
+      let calculatedConquest = Math.floor(targetRegionPixels * conquestRatio);
+      calculatedConquest = Math.max(500, calculatedConquest);
 
-      if (defenderTotalPixels <= 1000) {
-        conqueredPixelsCount = defenderTotalPixels;
+      if (targetRegionPixels <= 1000) {
+        conqueredPixelsCount = targetRegionPixels;
       } else {
-        const remainingPixels = defenderTotalPixels - calculatedConquest;
-        if (remainingPixels < 10 || calculatedConquest >= defenderTotalPixels) {
-          conqueredPixelsCount = defenderTotalPixels;
+        const remainingPixels = targetRegionPixels - calculatedConquest;
+        if (remainingPixels < 10 || calculatedConquest >= targetRegionPixels) {
+          conqueredPixelsCount = targetRegionPixels;
         } else {
           conqueredPixelsCount = calculatedConquest;
         }
       }
 
       const actualRatio =
-        defenderTotalPixels > 0
-          ? Math.min(1.0, conqueredPixelsCount / defenderTotalPixels)
+        defender.geography.territoryPixelCount > 0
+          ? Math.min(
+              1.0,
+              conqueredPixelsCount / defender.geography.territoryPixelCount,
+            )
           : 1.0;
 
       treasuryLooted = Math.floor(Math.max(0, defender.treasury) * actualRatio);
@@ -270,7 +251,7 @@ export class BattleCalculator {
     let severity: ReportSeverity = "INFO";
     if (isAttackerVictory) {
       severity =
-        conqueredPixelsCount >= defender.geography.territoryPixelCount
+        conqueredPixelsCount >= targetRegionPixels
           ? "CRUSHING_VICTORY"
           : "VICTORY";
     } else {

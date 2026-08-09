@@ -7,25 +7,27 @@ import {
 export class BitPackedEnclaveClusterer {
   private mergeEngine = new ComponentMergeEngine();
 
-  public clusterNationEnclaves(
+  public clusterTargetNations(
     buffer: BitPackedBuffer,
+    targetNationIds: number[],
     width = 4096,
     height = 2048,
   ): void {
+    if (targetNationIds.length === 0) return;
+
+    const targetSet = new Set<number>(targetNationIds);
+    const rawBuffer = buffer.getRawBuffer();
     const totalPixels = width * height;
-    const visited = new Uint8Array(totalPixels);
 
     const nationPixelsMap = new Map<number, number[]>();
+    for (let k = 0; k < targetNationIds.length; k++) {
+      nationPixelsMap.set(targetNationIds[k]!, []);
+    }
 
     for (let i = 0; i < totalPixels; i++) {
-      const nationId = buffer.getNationId(i % width, Math.floor(i / width));
-      if (nationId >= 11 && nationId < 250) {
-        let list = nationPixelsMap.get(nationId);
-        if (!list) {
-          list = [];
-          nationPixelsMap.set(nationId, list);
-        }
-        list.push(i);
+      const nationId = rawBuffer[i]! & 0x00ff;
+      if (targetSet.has(nationId)) {
+        nationPixelsMap.get(nationId)!.push(i);
       }
     }
 
@@ -40,17 +42,20 @@ export class BitPackedEnclaveClusterer {
       { dx: -1, dy: 1 },
     ];
 
-    for (const pixelIndices of nationPixelsMap.values()) {
+    for (const [nationId, pixelIndices] of nationPixelsMap.entries()) {
+      if (pixelIndices.length === 0) continue;
+
       const nationPixelSet = new Set<number>(pixelIndices);
+      const visitedInNation = new Set<number>();
       const rawComponents: LandClusterComponent[] = [];
 
       for (let k = 0; k < pixelIndices.length; k++) {
         const startIdx = pixelIndices[k]!;
-        if (visited[startIdx] === 1) continue;
+        if (visitedInNation.has(startIdx)) continue;
 
         const compIndices: number[] = [];
         const queue: number[] = [startIdx];
-        visited[startIdx] = 1;
+        visitedInNation.add(startIdx);
 
         let minX = startIdx % width;
         let maxX = minX;
@@ -78,8 +83,8 @@ export class BitPackedEnclaveClusterer {
             const ny = cy + neighbors[i]!.dy;
             if (ny >= 0 && ny < height) {
               const nIdx = ny * width + nx;
-              if (visited[nIdx] === 0 && nationPixelSet.has(nIdx)) {
-                visited[nIdx] = 1;
+              if (!visitedInNation.has(nIdx) && nationPixelSet.has(nIdx)) {
+                visitedInNation.add(nIdx);
                 queue.push(nIdx);
               }
             }

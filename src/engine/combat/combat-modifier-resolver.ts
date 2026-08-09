@@ -1,0 +1,70 @@
+import { Nation } from "@/domain/nation/nation.schema";
+import { GovernmentSystem } from "@/engine/politics/government-system";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+
+export class CombatModifierResolver {
+  public static calculateDeploymentCosts(
+    forceCost: number,
+    oilPrice: number,
+  ): { moneyCost: number; oilCost: number } {
+    const deploymentFivePct = forceCost * 0.05;
+    const moneyCost = Math.floor(deploymentFivePct);
+    const oilCost = Math.max(
+      1,
+      Math.ceil(deploymentFivePct / (oilPrice || 25000000)),
+    );
+    return { moneyCost, oilCost };
+  }
+
+  public static getCombatPowerModifiers(
+    attacker: Nation,
+    defender: Nation,
+  ): { attackerGovMult: number; defenderGovMult: number } {
+    const attackerGovTraits = GovernmentSystem.getTraits(
+      attacker.government.type,
+    );
+    const defenderGovTraits = GovernmentSystem.getTraits(
+      defender.government.type,
+    );
+
+    let attackerGovMult = attackerGovTraits.militaryPowerMultiplier;
+    let defenderGovMult = defenderGovTraits.militaryPowerMultiplier;
+
+    if (attacker.traits.includes("MILITARISTIC")) {
+      attackerGovMult *= 1.15;
+    }
+    if (defender.traits.includes("MILITARISTIC")) {
+      defenderGovMult *= 1.15;
+    }
+
+    return { attackerGovMult, defenderGovMult };
+  }
+
+  public static getDroneStrikeEffectiveness(
+    attacker: Nation,
+    defender: Nation,
+    dronesUsed: number,
+    attackerGovMult: number,
+  ): number {
+    const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.25;
+    const droneMult = DoctrinesManager.getDronePowerMultiplier(
+      attacker.doctrines?.unlockedDoctrines,
+    );
+
+    let droneCasualties = Math.floor(
+      dronesUsed * 3 * techMultiplier * attackerGovMult * droneMult,
+    );
+
+    const defenderAirDefenseRate =
+      DoctrinesManager.getAirDefenseInterceptionRate(
+        defender.doctrines?.unlockedDoctrines,
+      );
+    if (defenderAirDefenseRate > 0) {
+      droneCasualties = Math.floor(
+        droneCasualties * (1.0 - defenderAirDefenseRate),
+      );
+    }
+
+    return droneCasualties;
+  }
+}

@@ -5,6 +5,7 @@ import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface UseWebGLMapRendererProps {
   gl: WebGL2RenderingContext | null;
@@ -12,6 +13,7 @@ interface UseWebGLMapRendererProps {
   positionRef: RefObject<CameraPosition>;
   scaleRef: RefObject<number>;
   countries: CountryMapping[];
+  nationsMap?: Record<string, Nation>;
   activeLayer?: "political" | "gdp";
 }
 
@@ -21,9 +23,11 @@ export function useWebGLMapRenderer({
   positionRef,
   scaleRef,
   countries,
+  nationsMap,
   activeLayer = "political",
 }: UseWebGLMapRendererProps) {
   const rendererRef = useRef<WebGLMapRenderer | null>(null);
+  const gdpTextureRef = useRef<WebGLTexture | null>(null);
 
   useEffect(() => {
     if (!gl) return;
@@ -53,8 +57,10 @@ export function useWebGLMapRenderer({
       const gdpPaletteTex = WebGLPaletteTextureManager.createGdpPaletteTexture(
         gl,
         countries,
+        nationsMap,
       );
       if (gdpPaletteTex) {
+        gdpTextureRef.current = gdpPaletteTex;
         renderer.setGdpPaletteTexture(gdpPaletteTex);
       }
     }
@@ -63,6 +69,16 @@ export function useWebGLMapRenderer({
     const rawBuffer = gridState.getBuffer().getRawBuffer();
     renderer.updateLiveStateTexture(rawBuffer);
   }, [gl, countries]);
+
+  useEffect(() => {
+    if (!gl || !gdpTextureRef.current || countries.length === 0) return;
+    WebGLPaletteTextureManager.updateGdpPaletteTexture(
+      gl,
+      gdpTextureRef.current,
+      countries,
+      nationsMap,
+    );
+  }, [gl, countries, nationsMap]);
 
   useEffect(() => {
     let animFrameId: number;
