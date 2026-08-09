@@ -183,37 +183,90 @@ export class ProvincePartitionEngine {
       return assignedIds;
     }
 
-    const seeds: number[] = [];
-    const step = Math.floor(allMainPixels.length / totalK);
-    for (let i = 0; i < totalK; i++) {
-      const idx = allMainPixels[Math.min(i * step, allMainPixels.length - 1)]!;
-      seeds.push(idx);
-      assignedIds.push(startProvinceId + i);
+    const seedsX: number[] = [];
+    const seedsY: number[] = [];
+
+    const firstIdx = allMainPixels[Math.floor(allMainPixels.length / 2)]!;
+    seedsX.push(firstIdx % width);
+    seedsY.push(Math.floor(firstIdx / width));
+    assignedIds.push(startProvinceId);
+
+    while (seedsX.length < totalK) {
+      let maxDistSq = -1;
+      let bestPixelIdx = allMainPixels[0]!;
+
+      const sampleStep = Math.max(1, Math.floor(allMainPixels.length / 500));
+      for (let i = 0; i < allMainPixels.length; i += sampleStep) {
+        const pIdx = allMainPixels[i]!;
+        const px = pIdx % width;
+        const py = Math.floor(pIdx / width);
+
+        let minDistToSeedsSq = Infinity;
+        for (let s = 0; s < seedsX.length; s++) {
+          const dx = px - seedsX[s]!;
+          const dy = py - seedsY[s]!;
+          const dSq = dx * dx + dy * dy;
+          if (dSq < minDistToSeedsSq) {
+            minDistToSeedsSq = dSq;
+          }
+        }
+
+        if (minDistToSeedsSq > maxDistSq) {
+          maxDistSq = minDistToSeedsSq;
+          bestPixelIdx = pIdx;
+        }
+      }
+
+      seedsX.push(bestPixelIdx % width);
+      seedsY.push(Math.floor(bestPixelIdx / width));
+      assignedIds.push(startProvinceId + seedsX.length - 1);
     }
 
     const pixelToProvince = new Map<number, number>();
-    const queue: number[] = [];
 
-    for (let i = 0; i < seeds.length; i++) {
-      const seed = seeds[i]!;
-      const pid = assignedIds[i]!;
-      pixelToProvince.set(seed, pid);
-      queue.push(seed);
-    }
+    for (let iter = 0; iter < 3; iter++) {
+      pixelToProvince.clear();
 
-    const mainSet = new Set<number>(allMainPixels);
-    const dirs = [1, -1, width, -width];
+      for (const pIdx of allMainPixels) {
+        const px = pIdx % width;
+        const py = Math.floor(pIdx / width);
 
-    let head = 0;
-    while (head < queue.length) {
-      const curr = queue[head++]!;
-      const pid = pixelToProvince.get(curr)!;
+        let minDistSq = Infinity;
+        let bestPid = assignedIds[0]!;
 
-      for (const dir of dirs) {
-        const next = curr + dir;
-        if (mainSet.has(next) && !pixelToProvince.has(next)) {
-          pixelToProvince.set(next, pid);
-          queue.push(next);
+        for (let s = 0; s < seedsX.length; s++) {
+          const dx = px - seedsX[s]!;
+          const dy = py - seedsY[s]!;
+          const dSq = dx * dx + dy * dy;
+          if (dSq < minDistSq) {
+            minDistSq = dSq;
+            bestPid = assignedIds[s]!;
+          }
+        }
+
+        pixelToProvince.set(pIdx, bestPid);
+      }
+
+      if (iter < 2) {
+        const sumX = new Map<number, number>();
+        const sumY = new Map<number, number>();
+        const countMap = new Map<number, number>();
+
+        for (const pIdx of allMainPixels) {
+          const pid = pixelToProvince.get(pIdx)!;
+          const px = pIdx % width;
+          const py = Math.floor(pIdx / width);
+
+          sumX.set(pid, (sumX.get(pid) || 0) + px);
+          sumY.set(pid, (sumY.get(pid) || 0) + py);
+          countMap.set(pid, (countMap.get(pid) || 0) + 1);
+        }
+
+        for (let s = 0; s < assignedIds.length; s++) {
+          const pid = assignedIds[s]!;
+          const cnt = countMap.get(pid) || 1;
+          seedsX[s] = Math.floor((sumX.get(pid) || 0) / cnt);
+          seedsY[s] = Math.floor((sumY.get(pid) || 0) / cnt);
         }
       }
     }
