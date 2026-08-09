@@ -1,17 +1,15 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+import {
+  TopologicalComponentAnalyzer,
+  LandComponent,
+} from "@/infrastructure/map-preprocessing/final/topological-component-analyzer";
+import { AtomicIslandAssigner } from "@/infrastructure/map-preprocessing/final/atomic-island-assigner";
+import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/final/sliver-province-absorber";
 
-export interface ProvinceClusterInfo {
-  provinceId: number;
-  countryNumericId: number;
-  pixelCount: number;
-  hasSeaAccess: boolean;
-  centerCoordinates: { x: number; y: number };
-  landNeighbors: Set<number>;
-}
+export type { ProvinceClusterInfo };
 
 export class ProvincePartitionEngine {
-  private static readonly MIN_ISLAND_SIZE = 50;
-
   public static partitionProvinces(
     rawNationGrid: Uint8Array,
     width: number,
@@ -38,16 +36,17 @@ export class ProvincePartitionEngine {
 
     for (const [countryId, pixelIndices] of countryPixelsMap.entries()) {
       const k = this.calculateProvinceCount(pixelIndices.length);
-      const components = this.getConnectedComponents(
+      const components = TopologicalComponentAnalyzer.analyzeComponents(
         pixelIndices,
         width,
         height,
       );
-      const mainComponents: number[][] = [];
-      const microIslands: number[][] = [];
+
+      const mainComponents: LandComponent[] = [];
+      const microIslands: LandComponent[] = [];
 
       for (const comp of components) {
-        if (comp.length >= this.MIN_ISLAND_SIZE) {
+        if (!comp.isMicroIsland) {
           mainComponents.push(comp);
         } else {
           microIslands.push(comp);
@@ -71,7 +70,7 @@ export class ProvincePartitionEngine {
 
       globalProvinceCounter += assignedProvinces.length;
 
-      this.assignMicroIslands(
+      AtomicIslandAssigner.assignMicroIslandsAtomically(
         microIslands,
         assignedProvinces,
         width,
@@ -83,6 +82,13 @@ export class ProvincePartitionEngine {
 
     this.detectProvinceNeighbors(bitBuffer, width, height, provinceMap);
 
+    SliverProvinceAbsorber.absorbSliverProvinces(
+      bitBuffer,
+      width,
+      height,
+      provinceMap,
+    );
+
     return provinceMap;
   }
 
@@ -92,56 +98,8 @@ export class ProvincePartitionEngine {
     return Math.max(1, Math.min(32, val));
   }
 
-  private static getConnectedComponents(
-    pixelIndices: number[],
-    width: number,
-    height: number,
-  ): number[][] {
-    void height;
-    const pixelSet = new Set<number>(pixelIndices);
-    const visited = new Set<number>();
-    const components: number[][] = [];
-
-    const dirs = [
-      1,
-      -1,
-      width,
-      -width,
-      width + 1,
-      width - 1,
-      -width + 1,
-      -width - 1,
-    ];
-
-    for (const startIdx of pixelIndices) {
-      if (visited.has(startIdx)) continue;
-
-      const comp: number[] = [];
-      const queue: number[] = [startIdx];
-      visited.add(startIdx);
-
-      let head = 0;
-      while (head < queue.length) {
-        const curr = queue[head++]!;
-        comp.push(curr);
-
-        for (const dir of dirs) {
-          const next = curr + dir;
-          if (pixelSet.has(next) && !visited.has(next)) {
-            visited.add(next);
-            queue.push(next);
-          }
-        }
-      }
-      components.push(comp);
-    }
-
-    components.sort((a, b) => b.length - a.length);
-    return components;
-  }
-
   private static clusterMainlandProvinces(
-    components: number[][],
+    components: LandComponent[],
     totalK: number,
     countryNumericId: number,
     startProvinceId: number,
@@ -151,7 +109,7 @@ export class ProvincePartitionEngine {
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): number[] {
     void height;
-    const allMainPixels = components.flat();
+    const allMainPixels = components.flatMap((c) => c.pixelIndices);
     const assignedIds: number[] = [];
 
     if (totalK <= 1 || allMainPixels.length === 0) {
@@ -309,35 +267,6 @@ export class ProvincePartitionEngine {
     }
 
     return assignedIds;
-  }
-
-  private static assignMicroIslands(
-    microIslands: number[][],
-    assignedProvinces: number[],
-    width: number,
-    height: number,
-    bitBuffer: BitPackedBuffer,
-    provinceMap: Map<number, ProvinceClusterInfo>,
-  ): void {
-    void height;
-    if (assignedProvinces.length === 0 || microIslands.length === 0) return;
-
-    const fallbackPid = assignedProvinces[0]!;
-
-    for (const island of microIslands) {
-      const targetPid = fallbackPid;
-
-      for (const idx of island) {
-        const x = idx % width;
-        const y = Math.floor(idx / width);
-        bitBuffer.setPixel(x, y, targetPid);
-      }
-
-      const info = provinceMap.get(targetPid);
-      if (info) {
-        info.pixelCount += island.length;
-      }
-    }
   }
 
   private static detectProvinceNeighbors(
