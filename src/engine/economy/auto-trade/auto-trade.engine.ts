@@ -64,13 +64,14 @@ export class AutoTradeEngine {
           config.allowEmergencyLoans
         ) {
           const missingCash = neededFunds - currentNation.treasury;
-          loanTakenAmount = missingCash;
-
-          currentNation = {
-            ...currentNation,
-            treasury: currentNation.treasury + missingCash,
-            nationalDebt: currentNation.nationalDebt + missingCash,
-          };
+          if (missingCash > 0) {
+            loanTakenAmount = missingCash;
+            currentNation = {
+              ...currentNation,
+              treasury: currentNation.treasury + missingCash,
+              nationalDebt: currentNation.nationalDebt + missingCash,
+            };
+          }
         }
 
         if (oilDeficit > 0) {
