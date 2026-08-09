@@ -35,6 +35,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
     nation.population,
     effectiveGdp,
     nation.doctrines?.unlockedDoctrines,
+    nation.industrialLevel,
   );
 
   return (

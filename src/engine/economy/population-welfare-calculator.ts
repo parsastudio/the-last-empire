@@ -14,15 +14,22 @@ export class PopulationWelfareCalculator {
     population: number,
     gdp = 10000000000,
     unlockedDoctrines?: string[],
+    industrialLevel = 1,
   ): number {
     if (population <= 0) return 0;
-    const gdpFactor = Math.max(1, Math.floor(gdp / 10000000000));
-    const baseDemand = Math.max(
-      1,
-      Math.ceil((population / 10000000) * gdpFactor * 1.2),
+
+    const householdDemand = (population / 10000000) * 1.5;
+    const industrialDemand = (gdp / 20000000000) * 1.0;
+    const baseDemand = householdDemand + industrialDemand;
+
+    const efficiencyFactor = Math.max(
+      0.3,
+      1.0 / (1.0 + 0.1 * Math.max(0, industrialLevel - 1)),
     );
+
     const discount = DoctrinesManager.getOilDemandDiscount(unlockedDoctrines);
-    return Math.max(1, Math.ceil(baseDemand * discount));
+
+    return Math.max(1, Math.ceil(baseDemand * efficiencyFactor * discount));
   }
 
   public static calculateFulfillment(stock: number, demand: number): number {
@@ -47,6 +54,7 @@ export class PopulationWelfareCalculator {
       nation.population,
       nation.gdp,
       nation.doctrines?.unlockedDoctrines,
+      nation.industrialLevel,
     );
 
     const autoTrade = nation.autoTradeSettings;
@@ -72,6 +80,7 @@ export class PopulationWelfareCalculator {
       effectiveOil,
       nation.gdp,
       nation.doctrines?.unlockedDoctrines,
+      nation.industrialLevel,
     );
   }
 
@@ -80,11 +89,13 @@ export class PopulationWelfareCalculator {
     oilStock: number,
     gdp = 10000000000,
     unlockedDoctrines?: string[],
+    industrialLevel = 1,
   ): PopulationWelfareMetrics {
     const oilDemand = PopulationWelfareCalculator.calculateOilDemand(
       population,
       gdp,
       unlockedDoctrines,
+      industrialLevel,
     );
 
     const oilFulfillment = PopulationWelfareCalculator.calculateFulfillment(
