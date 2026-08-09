@@ -94,7 +94,7 @@ export class ActionFactory {
 
   public static tradeResources(
     nationId: string,
-    resourceType: "oil" | "steel",
+    resourceType: "oil",
     isBuy: boolean,
     amount: number,
   ): TradeResourcesAction {
@@ -274,7 +274,6 @@ export class ActionFactory {
     nationId: string,
     autoBuyDeficit: boolean,
     autoSellOilPercent: number,
-    autoSellSteelPercent: number,
     allowEmergencyLoans: boolean,
   ): ConfigureAutoTradeAction {
     return {
@@ -283,7 +282,6 @@ export class ActionFactory {
       type: "CONFIGURE_AUTO_TRADE",
       autoBuyDeficit,
       autoSellOilPercent,
-      autoSellSteelPercent,
       allowEmergencyLoans,
     };
   }

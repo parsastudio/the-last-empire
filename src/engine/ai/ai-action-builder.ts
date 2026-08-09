@@ -38,23 +38,20 @@ export class AIActionBuilder {
       ? nation.treasury * 0.4
       : nation.treasury * 0.2;
 
-    const airMoneyCost = 1000000000;
-    const airSteelCost = 20;
+    const airMoneyCost = 1400000000;
     const airManpowerCost = 5;
 
-    const infMoneyCost = 250000000;
+    const infMoneyCost = 350000000;
     const infManpowerCost = 10;
 
     if (
       nation.resources &&
       recruitBudget >= airMoneyCost &&
-      nation.resources.manpower >= airManpowerCost &&
-      nation.resources.steel >= airSteelCost
+      nation.resources.manpower >= airManpowerCost
     ) {
       const airQty = Math.min(
         Math.floor(recruitBudget / airMoneyCost),
         Math.floor(nation.resources.manpower / airManpowerCost),
-        Math.floor(nation.resources.steel / airSteelCost),
       );
       if (airQty > 0) {
         actions.push(ActionFactory.recruitUnit(nation.id, "AIR_FORCE", airQty));

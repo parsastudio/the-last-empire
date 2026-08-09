@@ -47,7 +47,7 @@ export function ImfLoanCard({
       corruption: 5,
       turnsInPower: 1,
     },
-    resources: { oil: 1000, steel: 1000, manpower: 500 },
+    resources: { oil: 1000, manpower: 500 },
     military: {
       infantry: 100,
       airForce: 20,
@@ -78,7 +78,6 @@ export function ImfLoanCard({
     autoTradeSettings: {
       autoBuyDeficit: false,
       autoSellOilPercent: 0,
-      autoSellSteelPercent: 0,
       allowEmergencyLoans: true,
     },
   };

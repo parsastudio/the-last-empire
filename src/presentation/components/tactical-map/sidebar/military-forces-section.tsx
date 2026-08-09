@@ -44,7 +44,7 @@ export function MilitaryForcesSection({
       corruption: 0,
       turnsInPower: 1,
     },
-    resources: { oil: 0, steel: 0, manpower: 0 },
+    resources: { oil: 0, manpower: 0 },
     military: { infantry, airForce, droneMissile, experience, techLevel },
     recruitmentQueue: [],
     geography: {
@@ -69,7 +69,6 @@ export function MilitaryForcesSection({
     autoTradeSettings: {
       autoBuyDeficit: false,
       autoSellOilPercent: 0,
-      autoSellSteelPercent: 0,
       allowEmergencyLoans: true,
     },
   };

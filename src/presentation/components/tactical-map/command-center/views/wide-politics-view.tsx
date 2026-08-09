@@ -24,7 +24,6 @@ export function WidePoliticsView({
         <PopulationWelfareCard
           population={nation.population}
           oilStock={nation.resources.oil}
-          steelStock={nation.resources.steel}
           gdp={nation.gdp}
           nation={nation}
         />
