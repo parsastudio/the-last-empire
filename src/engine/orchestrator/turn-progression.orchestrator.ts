@@ -19,20 +19,30 @@ export class TurnProgressionOrchestrator {
   private victoryChecker = new VictoryChecker();
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
+    console.time("orchestrator-advanceTurn-total");
+    console.log("[orchestrator] Starting turn advancement");
     let nextState = state;
 
+    console.time("aiActions");
     const aiActions = this.aiEngine.generateTurnActions(nextState);
+    console.timeEnd("aiActions");
+    console.log(`[orchestrator] Generated ${aiActions.length} AI actions`);
+
+    console.time("queue-ai-actions");
     for (const aiAction of aiActions) {
       try {
         this.actionQueue.enqueue(nextState, aiAction);
       } catch {}
     }
-
     const queuedActions = this.actionQueue.getQueue();
     this.actionQueue.clear();
+    console.timeEnd("queue-ai-actions");
 
+    console.time("sort-actions");
     const sortedActions = this.prioritySorter.sortActions(queuedActions, prng);
+    console.timeEnd("sort-actions");
 
+    console.time("execute-actions");
     for (const action of sortedActions) {
       const result = ActionEngine.execute(nextState, action);
       if (result.success && result.newState) {
@@ -43,16 +53,29 @@ export class TurnProgressionOrchestrator {
           "INFO",
           `پردازش اکشن هوش مصنوعی: ${action.type}`,
         );
-        nextState.turnLogs.push(logEntry);
-        if (nextState.turnLogs.length > 200) {
-          nextState.turnLogs.splice(0, nextState.turnLogs.length - 200);
+        const updatedLogs = [...nextState.turnLogs, logEntry];
+        if (updatedLogs.length > 200) {
+          updatedLogs.splice(0, updatedLogs.length - 200);
         }
+        nextState = {
+          ...nextState,
+          turnLogs: updatedLogs,
+        };
       }
     }
+    console.timeEnd("execute-actions");
 
+    console.time("pipeline");
     nextState = this.pipeline.processTurn(nextState, prng);
+    console.timeEnd("pipeline");
+
+    console.time("post-turn");
     nextState = this.turnOrchestrator.processPostTurn(nextState);
+    console.timeEnd("post-turn");
+
+    console.time("liveness");
     nextState = this.livenessManager.updateLiveness(nextState);
+    console.timeEnd("liveness");
 
     const peacefulCount = (nextState.peacefulTurnsCount ?? 0) + 1;
     nextState = {
@@ -60,7 +83,9 @@ export class TurnProgressionOrchestrator {
       peacefulTurnsCount: peacefulCount,
     };
 
+    console.time("victory-check");
     const victoryStatus = this.victoryChecker.checkVictory(nextState);
+    console.timeEnd("victory-check");
     if (victoryStatus.isGameOver) {
       nextState = {
         ...nextState,
@@ -75,6 +100,7 @@ export class TurnProgressionOrchestrator {
       seed: prng.getSeed(),
     };
 
+    console.timeEnd("orchestrator-advanceTurn-total");
     return nextState;
   }
 }
