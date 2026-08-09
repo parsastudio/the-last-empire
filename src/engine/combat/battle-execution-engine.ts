@@ -252,6 +252,10 @@ export class BattleExecutionEngine {
       turnLogs: [...state.turnLogs, logEntry],
     };
 
+    if (newState.turnLogs.length > 200) {
+      newState.turnLogs.splice(0, newState.turnLogs.length - 200);
+    }
+
     return newState;
   }
 }
