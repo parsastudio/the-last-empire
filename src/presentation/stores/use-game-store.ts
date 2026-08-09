@@ -165,21 +165,33 @@ export const useGameStore = create<GameStoreState>()(
     },
 
     advanceNextTurn: async () => {
+      console.time("store-advanceNextTurn");
+      console.log("[store] advanceNextTurn called");
       const { activeGameId, gameState } = get();
-      if (!gameState) return null;
-
+      if (!gameState) {
+        console.warn("[store] No gameState");
+        console.timeEnd("store-advanceNextTurn");
+        return null;
+      }
       try {
         const prng = new SeededRandom(
           gameState.seed || Math.floor(Math.random() * 1000000),
         );
+        console.time("orchestrator.advanceTurn");
         const nextState = orchestrator.advanceTurn(gameState, prng);
-
+        console.timeEnd("orchestrator.advanceTurn");
+        console.time("saveGameState");
         await storageAdapter.saveGameState(activeGameId, nextState);
+        console.timeEnd("saveGameState");
         set((draft) => {
           draft.gameState = nextState;
         });
+        console.log("[store] advanceNextTurn completed");
+        console.timeEnd("store-advanceNextTurn");
         return nextState;
-      } catch {
+      } catch (error) {
+        console.error("[store] Error in advanceNextTurn:", error);
+        console.timeEnd("store-advanceNextTurn");
         return null;
       }
     },

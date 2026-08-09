@@ -8,6 +8,7 @@ export class BitPackedGridState {
   private modifiedIndices = new Set<number>();
   private snapshots = new Map<string, Uint16Array>();
   private version = 0;
+  private dirtyStorage = false;
 
   constructor(
     width: number = MAP_CONFIG.HIGH_RES_WIDTH,
@@ -29,6 +30,18 @@ export class BitPackedGridState {
 
   public markDirty(): void {
     this.version++;
+  }
+
+  public markStorageDirty(): void {
+    this.dirtyStorage = true;
+  }
+
+  public isStorageDirty(): boolean {
+    return this.dirtyStorage;
+  }
+
+  public clearStorageDirty(): void {
+    this.dirtyStorage = false;
   }
 
   public getActiveGameId(): string | null {
@@ -53,6 +66,7 @@ export class BitPackedGridState {
   public markModified(x: number, y: number): void {
     const index = y * this.buffer.getWidth() + x;
     this.modifiedIndices.add(index);
+    this.dirtyStorage = true;
     this.markDirty();
   }
 
@@ -66,6 +80,7 @@ export class BitPackedGridState {
     this.clearModifiedIndices();
     this.snapshots.clear();
     this.activeGameId = null;
+    this.dirtyStorage = true;
     this.markDirty();
   }
 
@@ -89,6 +104,7 @@ export class BitPackedGridState {
     if (!snapshot) return false;
     this.buffer.getRawBuffer().set(snapshot);
     this.clearModifiedIndices();
+    this.dirtyStorage = true;
     this.markDirty();
     return true;
   }

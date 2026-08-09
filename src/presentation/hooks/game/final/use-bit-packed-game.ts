@@ -39,10 +39,32 @@ export function useBitPackedGame(gameId = "default_game") {
   }, [gameId, storageAdapter, loadGame]);
 
   const advanceNextTurn = useCallback(async () => {
-    const nextState = await advanceTurnAction();
-    if (nextState) {
-      const gridState = BitPackedGridState.getInstance();
-      await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
+    console.time("advanceNextTurn-total");
+    console.log("[advanceNextTurn] Starting...");
+    let nextState = null;
+    try {
+      console.time("advanceTurnAction-exec");
+      nextState = await advanceTurnAction();
+      console.timeEnd("advanceTurnAction-exec");
+      console.log(
+        "[advanceNextTurn] advanceTurnAction result:",
+        nextState ? "success" : "null",
+      );
+      if (nextState) {
+        const gridState = BitPackedGridState.getInstance();
+        if (gridState.isStorageDirty()) {
+          console.time("saveBitBuffer");
+          await storageAdapter.saveBitBuffer(gameId, gridState.getBuffer());
+          gridState.clearStorageDirty();
+          console.timeEnd("saveBitBuffer");
+        } else {
+          console.log("[BitBuffer] Skipped writing unchanged buffer to disk.");
+        }
+      }
+    } catch (error) {
+      console.error("[advanceNextTurn] Error:", error);
+    } finally {
+      console.timeEnd("advanceNextTurn-total");
     }
     return nextState;
   }, [gameId, advanceTurnAction, storageAdapter]);
