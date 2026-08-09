@@ -4,6 +4,7 @@ import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 export interface LandPartitionResult {
   activeCountryIds: Set<number>;
   pixelAreaMap: Map<number, number>;
+  consolidatedNationGrid: Uint8Array;
 }
 
 export class LandPartitionEngine {
@@ -124,7 +125,7 @@ export class LandPartitionEngine {
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const nationId = bitBuffer.getNationId(x, y);
+        const nationId = assignmentGrid[y * width + x]!;
         if (nationId >= 11 && nationId < 250) {
           activeCountryIds.add(nationId);
           pixelAreaMap.set(nationId, (pixelAreaMap.get(nationId) || 0) + 1);
@@ -132,7 +133,11 @@ export class LandPartitionEngine {
       }
     }
 
-    return { activeCountryIds, pixelAreaMap };
+    return {
+      activeCountryIds,
+      pixelAreaMap,
+      consolidatedNationGrid: assignmentGrid,
+    };
   }
 
   private static processIsolatedIslands(

@@ -60,15 +60,16 @@ export class MapBuildOrchestrator {
       }
     }
 
-    LandPartitionEngine.partitionAndConsolidate(
-      rawNationGrid,
-      width,
-      height,
-      bitBuffer,
-    );
+    const { consolidatedNationGrid } =
+      LandPartitionEngine.partitionAndConsolidate(
+        rawNationGrid,
+        width,
+        height,
+        bitBuffer,
+      );
 
     const provinceMap = ProvincePartitionEngine.partitionProvinces(
-      rawNationGrid,
+      consolidatedNationGrid,
       width,
       height,
       bitBuffer,

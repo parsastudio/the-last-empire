@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { WebGLMapCanvas } from "@/presentation/components/tactical-map/final/webgl-map-canvas";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
@@ -17,6 +17,7 @@ import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-cam
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 interface WebGLTacticalWorkspaceProps {
   gameId?: string;
@@ -55,6 +56,39 @@ export function WebGLTacticalWorkspace({
     targetCode: null,
     enclaveId: 0,
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (
+        window as unknown as { __GEOPOLITICS_DEBUG__: () => void }
+      ).__GEOPOLITICS_DEBUG__ = () => {
+        const gridState = BitPackedGridState.getInstance();
+        const buffer = gridState.getBuffer();
+        const raw = buffer.getRawBuffer();
+
+        let nonZeroCount = 0;
+        for (let i = 0; i < raw.length; i++) {
+          if (raw[i]! > 0) nonZeroCount++;
+        }
+
+        const report = {
+          gameId,
+          bufferSize: raw.length,
+          nonZeroPixels: nonZeroCount,
+          provincesLoaded: Object.keys(effectiveGameState?.provinces || {})
+            .length,
+          nationsLoaded: Object.keys(effectiveGameState?.nations || {}).length,
+          humanNationId: effectiveGameState?.humanNationId,
+          currentTurn: effectiveGameState?.currentTurn,
+        };
+
+        console.table(report);
+        alert(
+          `تست سیستم دیباگ:\n- تعداد پیکسل‌های استان: ${nonZeroCount}\n- تعداد استان‌های لودشده: ${report.provincesLoaded}\n- تعداد کشورها: ${report.nationsLoaded}`,
+        );
+      };
+    }
+  }, [gameId, effectiveGameState]);
 
   const countriesData = ALL_COUNTRY_PROFILES.map((p) => ({
     id: p.id ?? 0,

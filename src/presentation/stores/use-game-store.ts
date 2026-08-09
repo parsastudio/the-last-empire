@@ -55,8 +55,33 @@ export const useGameStore = create<GameStoreState>()(
       });
 
       try {
-        const state = await storageAdapter.loadGameState(gameId);
+        let state = await storageAdapter.loadGameState(gameId);
+
         if (state) {
+          const hasProvinces =
+            state.provinces && Object.keys(state.provinces).length > 0;
+
+          if (!hasProvinces) {
+            try {
+              const res = await fetch("/maps/map1/temp/final/manifest.json", {
+                cache: "no-cache",
+              });
+              if (res.ok) {
+                const manifest: FinalMapManifest = await res.json();
+                const initResult = aiInitializer.initializeFromManifest(
+                  manifest,
+                  state.humanNationId,
+                );
+                state = {
+                  ...state,
+                  provinces: initResult.provinces,
+                  nations: { ...initResult.nations, ...state.nations },
+                };
+                await storageAdapter.saveGameState(gameId, state);
+              }
+            } catch {}
+          }
+
           set((draft) => {
             draft.gameState = state;
             draft.loading = false;
@@ -87,10 +112,23 @@ export const useGameStore = create<GameStoreState>()(
 
       try {
         const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
+        let activeManifest = manifest;
+
+        if (!activeManifest) {
+          try {
+            const res = await fetch("/maps/map1/temp/final/manifest.json", {
+              cache: "no-cache",
+            });
+            if (res.ok) {
+              activeManifest = await res.json();
+            }
+          } catch {}
+        }
+
         let detectedNations: string[] = [];
 
-        if (manifest && manifest.nations) {
-          detectedNations = manifest.nations.map((n) => n.id);
+        if (activeManifest && activeManifest.nations) {
+          detectedNations = activeManifest.nations.map((n) => n.id);
         } else {
           detectedNations = ALL_COUNTRY_PROFILES.map(
             (p) => `NATION_${p.code.toUpperCase()}`,
@@ -105,7 +143,7 @@ export const useGameStore = create<GameStoreState>()(
           detectedNations,
           normalizedHumanId,
           governmentType,
-          manifest,
+          activeManifest,
         );
 
         const initialState: GameState = {

@@ -117,7 +117,6 @@ export function useMapGesture(
   }, [containerRef]);
 
   const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     calculateZoom(e.deltaY, rect, e.clientX, e.clientY);
   };
