@@ -33,6 +33,7 @@ export class AutoTradeEngine {
       currentNation.population,
       currentNation.gdp,
       currentNation.doctrines?.unlockedDoctrines,
+      currentNation.industrialLevel,
     );
 
     const oilSurplus = currentNation.resources.oil - oilDemand;
