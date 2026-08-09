@@ -1,6 +1,5 @@
 import { RefObject, useCallback } from "react";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { MAP_CONFIG } from "@/domain/map/map.config";
 
 interface UseHoverProjectionMathProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -13,8 +12,8 @@ interface UseHoverProjectionMathProps {
 export interface MapProjectionResult {
   mapX: number;
   mapY: number;
-  nationIdNumber: number;
-  greenChannelVal: number;
+
+  provinceId: number;
 }
 
 export function useHoverProjectionMath({
@@ -43,21 +42,14 @@ export function useHoverProjectionMath({
         return null;
       }
 
-      const gridState = BitPackedGridState.getInstance();
-      const buffer = gridState.getBuffer();
+      const buffer = BitPackedGridState.getInstance().getBuffer();
+      const provinceId = buffer.getPixel(mapX, mapY);
 
-      const nationIdNumber = buffer.getNationId(mapX, mapY);
-      const greenChannelVal = buffer.getEnclaveId(mapX, mapY);
-
-      if (
-        !nationIdNumber ||
-        nationIdNumber < MAP_CONFIG.MIN_NATION_ID ||
-        nationIdNumber >= MAP_CONFIG.MAX_NATION_ID
-      ) {
+      if (provinceId <= 0) {
         return null;
       }
 
-      return { mapX, mapY, nationIdNumber, greenChannelVal };
+      return { mapX, mapY, provinceId };
     },
     [containerRef, mapWidth, mapHeight, scale, position],
   );

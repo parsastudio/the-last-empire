@@ -1,72 +1,37 @@
-import { CountryMapping } from "@/domain/map/country-mapping.schema";
 import { TacticalPaletteGenerator } from "@/infrastructure/map-preprocessing/color-palette";
-import {
-  findCountryProfileById,
-  CountryRegistry,
-} from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 
 export class WebGLPaletteTextureManager {
-  private static fillGdpPaletteData(
-    countries: CountryMapping[],
-    nationsMap: Record<string, Nation> | undefined,
-    paletteData: Uint8Array,
-  ): void {
-    paletteData.fill(0);
-
-    for (let i = 0; i < countries.length; i++) {
-      const c = countries[i]!;
-      if (c.id >= 11 && c.id < 250) {
-        const canonicalId = CountryRegistry.resolveCanonicalId(c.id);
-        const liveNation = nationsMap
-          ? nationsMap[c.id] ||
-            nationsMap[canonicalId] ||
-            nationsMap[`NATION_${c.code.toUpperCase()}`]
-          : null;
-
-        let gdp = 50000000000;
-        let isAlive = true;
-
-        if (liveNation) {
-          gdp = liveNation.gdp;
-          isAlive = liveNation.isAlive;
-        } else {
-          const profile = findCountryProfileById(c.id);
-          gdp = profile ? profile.gdp : 50000000000;
-        }
-
-        const idx = c.id * 4;
-
-        if (!isAlive || gdp <= 0) {
-          paletteData[idx] = 35;
-          paletteData[idx + 1] = 35;
-          paletteData[idx + 2] = 40;
-          paletteData[idx + 3] = 255;
-          continue;
-        }
-
-        const logGdp = Math.log10(Math.max(1000000, gdp));
-        const normalized = Math.max(0, Math.min(1.0, (logGdp - 8.5) / 5.0));
-
-        const r = Math.floor(10 + (1.0 - normalized) * 200);
-        const g = Math.floor(60 + normalized * 195);
-        const b = Math.floor(40 + normalized * 80);
-
-        paletteData[idx] = r;
-        paletteData[idx + 1] = g;
-        paletteData[idx + 2] = b;
-        paletteData[idx + 3] = 255;
-      }
-    }
-  }
-
-  public static createGdpPaletteTexture(
+  public static createPaletteTexture(
     gl: WebGL2RenderingContext,
-    countries: CountryMapping[],
+    provincesMap?: Record<string, Province>,
     nationsMap?: Record<string, Nation>,
   ): WebGLTexture | null {
-    const paletteData = new Uint8Array(256 * 4);
-    this.fillGdpPaletteData(countries, nationsMap, paletteData);
+    const data = new Uint8Array(256 * 256 * 4);
+
+    if (provincesMap) {
+      for (const prov of Object.values(provincesMap)) {
+        const pid = prov.provinceId;
+        if (pid <= 0 || pid >= 65536) continue;
+
+        const ownerId = prov.ownerNationId;
+        const numId = CountryRegistry.resolveNumericId(ownerId);
+        const pair = TacticalPaletteGenerator.generateColorForCountry(
+          numId || 118,
+        );
+
+        const u = pid & 255;
+        const v = (pid >> 8) & 255;
+        const idx = (v * 256 + u) * 4;
+
+        data[idx] = pair.r1;
+        data[idx + 1] = pair.g1;
+        data[idx + 2] = pair.b1;
+        data[idx + 3] = 255;
+      }
+    }
 
     const texture = gl.createTexture();
     if (!texture) return null;
@@ -77,11 +42,11 @@ export class WebGLPaletteTextureManager {
       0,
       gl.RGBA,
       256,
-      1,
+      256,
       0,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      paletteData,
+      data,
     );
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -92,44 +57,33 @@ export class WebGLPaletteTextureManager {
     return texture;
   }
 
-  public static updateGdpPaletteTexture(
+  public static createGdpPaletteTexture(
     gl: WebGL2RenderingContext,
-    texture: WebGLTexture,
-    countries: CountryMapping[],
-    nationsMap?: Record<string, Nation>,
-  ): void {
-    const paletteData = new Uint8Array(256 * 4);
-    this.fillGdpPaletteData(countries, nationsMap, paletteData);
-
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texSubImage2D(
-      gl.TEXTURE_2D,
-      0,
-      0,
-      0,
-      256,
-      1,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      paletteData,
-    );
-  }
-
-  public static createPaletteTexture(
-    gl: WebGL2RenderingContext,
-    countries: CountryMapping[],
+    provincesMap?: Record<string, Province>,
   ): WebGLTexture | null {
-    const paletteData = new Uint8Array(256 * 4);
+    const data = new Uint8Array(256 * 256 * 4);
 
-    for (let i = 0; i < countries.length; i++) {
-      const c = countries[i]!;
-      if (c.id >= 11 && c.id < 250) {
-        const pair = TacticalPaletteGenerator.generateColorForCountry(c.id);
-        const idx = c.id * 4;
-        paletteData[idx] = pair.r1;
-        paletteData[idx + 1] = pair.g1;
-        paletteData[idx + 2] = pair.b1;
-        paletteData[idx + 3] = 255;
+    if (provincesMap) {
+      for (const prov of Object.values(provincesMap)) {
+        const pid = prov.provinceId;
+        if (pid <= 0 || pid >= 65536) continue;
+
+        const gdp = prov.gdp || 1000000000;
+        const logGdp = Math.log10(Math.max(1000000, gdp));
+        const normalized = Math.max(0, Math.min(1.0, (logGdp - 8.0) / 4.0));
+
+        const r = Math.floor(10 + (1.0 - normalized) * 200);
+        const g = Math.floor(60 + normalized * 195);
+        const b = Math.floor(40 + normalized * 80);
+
+        const u = pid & 255;
+        const v = (pid >> 8) & 255;
+        const idx = (v * 256 + u) * 4;
+
+        data[idx] = r;
+        data[idx + 1] = g;
+        data[idx + 2] = b;
+        data[idx + 3] = 255;
       }
     }
 
@@ -142,11 +96,11 @@ export class WebGLPaletteTextureManager {
       0,
       gl.RGBA,
       256,
-      1,
+      256,
       0,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      paletteData,
+      data,
     );
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
