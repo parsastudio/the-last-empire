@@ -1,5 +1,6 @@
 import { RefObject, useCallback } from "react";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 interface UseHoverProjectionMathProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -12,7 +13,6 @@ interface UseHoverProjectionMathProps {
 export interface MapProjectionResult {
   mapX: number;
   mapY: number;
-
   provinceId: number;
 }
 
@@ -43,7 +43,8 @@ export function useHoverProjectionMath({
       }
 
       const buffer = BitPackedGridState.getInstance().getBuffer();
-      const provinceId = buffer.getPixel(mapX, mapY);
+      const rawPixel = buffer.getPixel(mapX, mapY);
+      const provinceId = BitPackedCellUtility.getProvinceId(rawPixel);
 
       if (provinceId <= 0) {
         return null;

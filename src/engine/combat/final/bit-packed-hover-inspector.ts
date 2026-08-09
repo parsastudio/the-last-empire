@@ -1,8 +1,10 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 export interface HoverInspectionResult {
   mapX: number;
   mapY: number;
+  provinceId: number;
   nationId: number;
   enclaveId: number;
   isFrontier: boolean;
@@ -24,24 +26,21 @@ export class BitPackedHoverInspector {
     }
 
     const rawValue = buffer.getPixel(mapX, mapY);
-    const nationId = buffer.getNationId(mapX, mapY);
+    const provinceId = BitPackedCellUtility.getProvinceId(rawValue);
 
-    if (nationId < 11 || nationId >= 250) {
+    if (provinceId <= 0) {
       return null;
     }
-
-    const enclaveId = buffer.getEnclaveId(mapX, mapY);
-    const frontier = buffer.getFrontier(mapX, mapY);
-    const coastalAccess = buffer.getCoastalAccess(mapX, mapY);
 
     return {
       mapX,
       mapY,
-      nationId,
-      enclaveId,
-      isFrontier: frontier === 1,
-      coastalAccess,
-      rawPackedValue: rawValue,
+      provinceId,
+      nationId: provinceId,
+      enclaveId: 0,
+      isFrontier: false,
+      coastalAccess: 0,
+      rawPackedValue: provinceId,
     };
   }
 }

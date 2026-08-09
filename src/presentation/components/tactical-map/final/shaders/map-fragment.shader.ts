@@ -18,15 +18,15 @@ uniform int u_activeLayer;
 void main() {
   vec4 terrainColor = texture(u_terrainTexture, v_texCoord);
   uint rawState = texture(u_liveStateTexture, v_texCoord).r;
-  uint provinceId = rawState & 65535u;
+  uint provinceId = rawState & 4095u;
 
   if (provinceId == 0u) {
     fragColor = terrainColor;
     return;
   }
 
-  uint pRight = texture(u_liveStateTexture, v_texCoord + vec2(u_texelSize.x, 0.0)).r & 65535u;
-  uint pDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 65535u;
+  uint pRight = texture(u_liveStateTexture, v_texCoord + vec2(u_texelSize.x, 0.0)).r & 4095u;
+  uint pDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 4095u;
 
   bool isBorder = (provinceId != pRight) || (provinceId != pDown);
 
