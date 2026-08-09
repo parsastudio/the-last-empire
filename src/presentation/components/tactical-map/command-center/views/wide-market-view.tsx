@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   TrendingUp,
   Bot,
@@ -8,6 +8,7 @@ import {
   Coins,
   ShoppingBag,
   TrendingDown,
+  ArrowRight,
 } from "lucide-react";
 import { ResourceMarketPrice } from "@/domain/economy/economy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -18,18 +19,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
-interface WideMarketViewProps {
-  marketPrices?: ResourceMarketPrice;
-  oilStock?: number;
-  userTreasury?: number;
-  nation?: Nation | null;
-}
-
-function formatCurrency(value: number): string {
-  return PersianNumberFormatter.formatCurrency(value, true);
-}
-
-function InlineTradeCard({
+function TradeCard({
   title,
   unit,
   icon: Icon,
@@ -51,17 +41,32 @@ function InlineTradeCard({
   onTradeComplete?: () => void;
 }) {
   const [amount, setAmount] = useState<number>(0);
+  const [mode, setMode] = useState<"buy" | "sell">("buy");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { dispatchAction } = useGameActions();
 
   const maxBuy = Math.floor(treasury / price);
   const maxSell = stock;
-  const maxAffordable = Math.max(0, maxBuy);
-  const currentAmount = Math.min(amount, maxBuy, maxSell);
+  const maxValue = mode === "buy" ? maxBuy : maxSell;
+  const currentAmount = Math.min(amount, maxValue);
+
+  const totalCostOrRevenue = useMemo(() => {
+    if (mode === "buy") {
+      return currentAmount * price;
+    }
+    return currentAmount * MARKET_CONFIG.FIXED_SELL_PRICE;
+  }, [currentAmount, mode, price]);
+
+  const canExecute =
+    currentAmount > 0 &&
+    (mode === "buy"
+      ? treasury >= currentAmount * price
+      : stock >= currentAmount);
 
   const handlePercentageSelect = (pct: number) => {
-    const target = Math.floor(Math.max(maxBuy, maxSell) * pct);
-    setAmount(target);
+    if (maxValue <= 0) return;
+    const target = Math.floor(maxValue * pct);
+    setAmount(Math.min(target, maxValue));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,24 +75,23 @@ function InlineTradeCard({
       setAmount(0);
       return;
     }
-    setAmount(val);
+    setAmount(Math.min(val, maxValue));
   };
 
-  const executeTrade = async (isBuy: boolean) => {
-    const tradeAmount = Math.min(amount, isBuy ? maxBuy : maxSell);
-    if (tradeAmount <= 0) return;
+  const executeTrade = async () => {
+    if (!canExecute || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
       const action = ActionFactory.tradeResources(
         nationId,
         "oil",
-        isBuy,
-        tradeAmount,
+        mode === "buy",
+        currentAmount,
       );
       const success = await dispatchAction(
         action,
-        `سفارش ${isBuy ? "خرید" : "فروش"} ${PersianNumberFormatter.toPersianDigits(tradeAmount)} ${unit} ${title} ثبت شد.`,
+        `سفارش ${mode === "buy" ? "خرید" : "فروش"} ${PersianNumberFormatter.toPersianDigits(currentAmount.toLocaleString("en-US"))} ${unit} ${title} ثبت شد.`,
       );
       if (success) {
         setAmount(0);
@@ -98,14 +102,8 @@ function InlineTradeCard({
     }
   };
 
-  const canBuy =
-    currentAmount > 0 &&
-    currentAmount <= maxBuy &&
-    treasury >= currentAmount * price;
-  const canSell = currentAmount > 0 && currentAmount <= maxSell;
-
   return (
-    <div className="bg-background/40 border border-border/60 rounded-2xl p-5 space-y-4 dir-rtl text-right">
+    <div className="bg-background/40 border border-border/60 rounded-2xl p-5 space-y-5 dir-rtl text-right">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <Icon size={18} className={colorClass} />
@@ -122,7 +120,7 @@ function InlineTradeCard({
       </div>
 
       <div className="grid grid-cols-3 gap-3 text-xs font-mono">
-        <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5 border border-border/40">
+        <div className="bg-secondary/40 p-3 rounded-xl space-y-1 border border-border/40">
           <span className="text-[9px] text-muted-foreground block font-sans">
             موجودی انبار
           </span>
@@ -133,25 +131,66 @@ function InlineTradeCard({
             {unit}
           </span>
         </div>
-        <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5 border border-border/40">
+        <div className="bg-secondary/40 p-3 rounded-xl space-y-1 border border-border/40">
           <span className="text-[9px] text-muted-foreground block font-sans">
             قیمت خرید
           </span>
           <span className="font-bold text-gdp block">
-            {formatCurrency(price)}
+            {PersianNumberFormatter.formatCurrency(price)}
           </span>
         </div>
-        <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5 border border-border/40">
+        <div className="bg-secondary/40 p-3 rounded-xl space-y-1 border border-border/40">
           <span className="text-[9px] text-muted-foreground block font-sans">
             قیمت فروش
           </span>
           <span className="font-bold text-treasury block">
-            {formatCurrency(MARKET_CONFIG.FIXED_SELL_PRICE)}
+            {PersianNumberFormatter.formatCurrency(
+              MARKET_CONFIG.FIXED_SELL_PRICE,
+            )}
           </span>
         </div>
       </div>
 
       <div className="space-y-3 pt-1 border-t border-border/40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 bg-secondary/60 p-1 rounded-xl border border-border/40">
+            <button
+              onClick={() => setMode("buy")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                mode === "buy"
+                  ? "bg-gdp text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ShoppingBag size={14} />
+              خرید
+            </button>
+            <button
+              onClick={() => setMode("sell")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                mode === "sell"
+                  ? "bg-treasury text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <TrendingDown size={14} />
+              فروش
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground font-sans">
+              حداکثر {mode === "buy" ? "خرید" : "فروش"}:
+            </span>
+            <span className="font-bold text-foreground font-mono">
+              {PersianNumberFormatter.toPersianDigits(
+                maxValue.toLocaleString("en-US"),
+              )}{" "}
+              {unit}
+            </span>
+          </div>
+        </div>
+
         <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground font-sans">مقدار معامله:</span>
           <span className="font-bold text-foreground font-mono">
@@ -166,7 +205,7 @@ function InlineTradeCard({
           <input
             type="range"
             min={0}
-            max={Math.max(maxBuy, maxSell, 1)}
+            max={Math.max(maxValue, 1)}
             value={currentAmount}
             onChange={(e) => setAmount(Number(e.target.value))}
             className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg"
@@ -174,7 +213,7 @@ function InlineTradeCard({
           <input
             type="number"
             min={0}
-            max={Math.max(maxBuy, maxSell)}
+            max={Math.max(maxValue, 0)}
             value={currentAmount}
             onChange={handleInputChange}
             className="w-20 bg-secondary/80 border border-border/80 rounded-lg py-1.5 px-2 text-center font-bold text-xs text-foreground font-mono focus:outline-none focus:border-primary"
@@ -182,47 +221,48 @@ function InlineTradeCard({
         </div>
 
         <PercentageSelector
-          disabled={Math.max(maxBuy, maxSell) === 0}
+          disabled={maxValue === 0}
           onSelect={handlePercentageSelect}
-          colorVariant="gdp"
+          colorVariant={mode === "buy" ? "gdp" : "treasury"}
         />
 
-        <div className="grid grid-cols-2 gap-2.5 pt-1">
-          <button
-            onClick={() => executeTrade(true)}
-            disabled={!canBuy || isSubmitting}
-            className="py-2.5 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+        <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl flex items-center justify-between font-mono text-sm">
+          <span className="text-muted-foreground font-sans text-xs">
+            {mode === "buy" ? "هزینه کل مورد نیاز" : "کل درآمد حاصل از فروش"}:
+          </span>
+          <span
+            className={`font-extrabold ${
+              mode === "buy" ? "text-military" : "text-gdp"
+            }`}
           >
-            <ShoppingBag size={14} />
-            <span>
-              {isSubmitting
-                ? "در حال ثبت..."
-                : `خرید ${currentAmount > 0 ? PersianNumberFormatter.toPersianDigits(currentAmount) : ""}`}
-            </span>
-          </button>
-          <button
-            onClick={() => executeTrade(false)}
-            disabled={!canSell || isSubmitting}
-            className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground border border-border rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-          >
-            <TrendingDown size={14} className="text-treasury" />
-            <span>
-              {isSubmitting
-                ? "در حال ثبت..."
-                : `فروش ${currentAmount > 0 ? PersianNumberFormatter.toPersianDigits(currentAmount) : ""}`}
-            </span>
-          </button>
+            {PersianNumberFormatter.formatCurrency(totalCostOrRevenue, true)}
+          </span>
         </div>
 
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground font-sans pt-1 border-t border-border/30">
-          <span>
-            حداکثر خرید: {PersianNumberFormatter.toPersianDigits(maxBuy)} {unit}
-          </span>
-          <span>
-            حداکثر فروش: {PersianNumberFormatter.toPersianDigits(maxSell)}{" "}
-            {unit}
-          </span>
-        </div>
+        <button
+          onClick={executeTrade}
+          disabled={!canExecute || isSubmitting}
+          className={`w-full py-3.5 rounded-2xl font-bold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer ${
+            mode === "buy"
+              ? "bg-gdp hover:bg-gdp/90 text-primary-foreground disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none"
+              : "bg-treasury hover:bg-treasury/90 text-primary-foreground disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none"
+          }`}
+        >
+          {isSubmitting ? (
+            <span>در حال ثبت سفارش...</span>
+          ) : (
+            <>
+              <ArrowRight size={16} />
+              <span>
+                {!canExecute
+                  ? mode === "buy"
+                    ? "موجودی خزانه کافی نیست"
+                    : "موجودی انبار کافی نیست"
+                  : `تایید ${mode === "buy" ? "خرید" : "فروش"} ${PersianNumberFormatter.toPersianDigits(currentAmount.toLocaleString("en-US"))} ${unit}`}
+              </span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
@@ -276,11 +316,11 @@ export function WideMarketView({
             موجودی خزانه ملی جهت معامله:
           </span>
           <span className="font-extrabold text-gdp text-sm">
-            {formatCurrency(userTreasury)}
+            {PersianNumberFormatter.formatCurrency(userTreasury, true)}
           </span>
         </div>
 
-        <InlineTradeCard
+        <TradeCard
           key={`oil-${refreshKey}`}
           title="نفت خام استراتژیک"
           unit="بلوک"
@@ -304,4 +344,11 @@ export function WideMarketView({
       )}
     </>
   );
+}
+
+interface WideMarketViewProps {
+  marketPrices?: ResourceMarketPrice;
+  oilStock?: number;
+  userTreasury?: number;
+  nation?: Nation | null;
 }

@@ -14,6 +14,7 @@ import {
 } from "@/engine/economy/economy-calculators";
 import { AutoTradeEngine } from "@/engine/economy/auto-trade/auto-trade.engine";
 import { MarketEngine } from "@/engine/economy/market-engine";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class EconomyPhase implements TurnPhase {
   private popEngine = new PopulationGrowthEngine();
@@ -21,10 +22,50 @@ export class EconomyPhase implements TurnPhase {
   private debtManager = new DebtManager();
   private bankruptcyManager = new BankruptcyManager();
 
+  private autoSettleTinyDebts(state: GameState): GameState {
+    const nations = { ...state.nations };
+    const logs = [...state.turnLogs];
+
+    for (const [id, nation] of Object.entries(nations)) {
+      if (!nation.isAlive) continue;
+      if (nation.nationalDebt <= 0) continue;
+
+      const treasury = nation.treasury;
+      const debt = nation.nationalDebt;
+      const threshold = Math.floor(treasury * 0.1);
+
+      if (debt < threshold) {
+        const settlementAmount = debt;
+        const updatedNation = {
+          ...nation,
+          treasury: treasury - settlementAmount,
+          nationalDebt: 0,
+        };
+        nations[id] = updatedNation;
+
+        const logEntry = TurnLogBuilder.createLogEntry(
+          state.currentTurn,
+          nation.id,
+          "INFO",
+          `تسویه خودکار بدهی‌های خرد: مبلغ ${settlementAmount.toLocaleString("fa-IR")} دلار (کمتر از ۱۰٪ خزانه) تسویه شد.`,
+        );
+        logs.push(logEntry);
+      }
+    }
+
+    return {
+      ...state,
+      nations,
+      turnLogs: logs,
+    };
+  }
+
   public execute(context: PipelineContext): GameState {
-    const nextState = { ...context.state };
+    let nextState = { ...context.state };
     const nations = { ...nextState.nations };
     const marketPrices = MarketEngine.updateMarketPrices();
+
+    nextState = this.autoSettleTinyDebts(nextState);
 
     for (const [id, nation] of Object.entries(nations)) {
       if (!nation.isAlive) {

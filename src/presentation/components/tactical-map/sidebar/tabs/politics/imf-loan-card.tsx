@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { Landmark, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import {
+  Landmark,
+  ArrowUpRight,
+  ArrowDownRight,
+  DollarSign,
+} from "lucide-react";
 import { LoanManager } from "@/engine/economy/calculators/debt-calculator";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
@@ -89,6 +94,8 @@ export function ImfLoanCard({
   const availableLoanBillion = Math.floor(availableLoan / 1e9);
   const maxRepayBillion = Math.floor(Math.min(nationalDebt, treasury) / 1e9);
 
+  const isSmallDebt = nationalDebt > 0 && nationalDebt < 1e9;
+
   const handleConfirmLoan = async (billionAmount: number) => {
     const absoluteVal = billionAmount * 1e9;
     const action = ActionFactory.requestLoan(nationId, absoluteVal);
@@ -104,6 +111,15 @@ export function ImfLoanCard({
     await dispatchAction(
       action,
       `مبلغ ${PersianNumberFormatter.formatCurrency(absoluteVal)} از بدهی ملی تسویه شد.`,
+    );
+  };
+
+  const handleRepayFull = async () => {
+    if (nationalDebt <= 0 || treasury <= 0) return;
+    const action = ActionFactory.repayDebt(nationId, nationalDebt);
+    await dispatchAction(
+      action,
+      `کل بدهی ملی (${PersianNumberFormatter.formatCurrency(nationalDebt)}) تسویه شد.`,
     );
   };
 
@@ -158,15 +174,35 @@ export function ImfLoanCard({
               <span>درخواست وام</span>
             </button>
 
-            <button
-              onClick={() => setIsRepayModalOpen(true)}
-              disabled={nationalDebt <= 0 || treasury <= 0}
-              className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <ArrowDownRight size={13} className="text-military" />
-              <span>تسویه بدهی</span>
-            </button>
+            {isSmallDebt ? (
+              <button
+                onClick={handleRepayFull}
+                disabled={treasury <= 0}
+                className="py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all border border-gdp/30 flex items-center justify-center gap-1 cursor-pointer shadow-md"
+              >
+                <DollarSign size={13} />
+                <span>تسویه کامل بدهی</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsRepayModalOpen(true)}
+                disabled={
+                  nationalDebt <= 0 || treasury <= 0 || maxRepayBillion <= 0
+                }
+                className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <ArrowDownRight size={13} className="text-military" />
+                <span>تسویه بدهی</span>
+              </button>
+            )}
           </div>
+
+          {isSmallDebt && (
+            <div className="text-[10px] text-muted-foreground font-sans bg-secondary/30 p-2 rounded-xl border border-border/40 text-center">
+              بدهی شما کمتر از ۱ میلیارد دلار است. از دکمه «تسویه کامل» برای
+              تسویه یکجا استفاده کنید.
+            </div>
+          )}
         </div>
       </div>
 
