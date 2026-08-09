@@ -44,7 +44,6 @@ export function CommandCenterTabRouter({
         <WideMarketView
           marketPrices={gameState?.marketPrices}
           oilStock={nation.resources.oil}
-          steelStock={nation.resources.steel}
           userTreasury={nation.treasury}
           nation={nation}
         />
@@ -59,7 +58,6 @@ export function CommandCenterTabRouter({
           nationId={nation.id}
           treasury={nation.treasury}
           manpower={nation.resources.manpower}
-          steel={nation.resources.steel}
         />
       );
     case "politics":

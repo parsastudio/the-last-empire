@@ -30,18 +30,6 @@ export class MilitaryActionExecutor {
             "تعداد یگان درخواستی باید مثبت باشد.",
           );
         }
-        if (
-          action.unitType === "AIR_FORCE" ||
-          action.unitType === "DRONE_MISSILE"
-        ) {
-          const reqSteel = action.quantity * 2;
-          if (nation.resources.steel < reqSteel) {
-            throw new GameError(
-              "INSUFFICIENT_RESOURCES",
-              `ساخت این یگان حداقل به ${reqSteel} بلوک فولاد نیاز دارد.`,
-            );
-          }
-        }
         return {
           ...state,
           nations: {

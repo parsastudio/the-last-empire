@@ -11,16 +11,6 @@ export class RecruitmentQueueManager {
   ): Nation {
     const stats = MILITARY_UNIT_STATS[unitType];
 
-    if (stats.steelCost > 0) {
-      const requiredSteel = quantity * stats.steelCost;
-      if (nation.resources.steel < requiredSteel) {
-        throw new GameError(
-          "INSUFFICIENT_RESOURCES",
-          `Recruiting ${unitType} requires at least ${requiredSteel} steel`,
-        );
-      }
-    }
-
     const discount = Math.max(0.7, 1 - (nation.industrialLevel - 1) * 0.05);
     const totalMoney = Math.floor(stats.moneyCost * discount) * quantity;
     const totalManpower = stats.manpowerCost * quantity;
@@ -28,13 +18,13 @@ export class RecruitmentQueueManager {
     if (nation.treasury < totalMoney) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        "Not enough treasury for recruitment",
+        "موجودی خزانه برای ساخت یگان کافی نیست.",
       );
     }
     if (nation.resources.manpower < totalManpower) {
       throw new GameError(
         "INSUFFICIENT_RESOURCES",
-        "Not enough manpower for recruitment",
+        "نیروی انسانی کافی برای ساخت یگان وجود ندارد.",
       );
     }
 
@@ -47,18 +37,12 @@ export class RecruitmentQueueManager {
       manpowerRequired: totalManpower,
     };
 
-    let finalSteel = nation.resources.steel;
-    if (stats.steelCost > 0) {
-      finalSteel = Math.max(0, finalSteel - quantity * stats.steelCost);
-    }
-
     return {
       ...nation,
       treasury: nation.treasury - totalMoney,
       resources: {
         ...nation.resources,
         manpower: nation.resources.manpower - totalManpower,
-        steel: finalSteel,
       },
       recruitmentQueue: [...nation.recruitmentQueue, newOrder],
     };
@@ -96,7 +80,7 @@ export class RecruitmentQueueManager {
   ): Nation {
     const order = nation.recruitmentQueue.find((o) => o.id === orderId);
     if (!order) {
-      throw new GameError("INVALID_ACTION", `Order ID ${orderId} not found`);
+      throw new GameError("INVALID_ACTION", `سفارش ${orderId} یافت نشد.`);
     }
 
     const moneyRefund = Math.floor(order.totalCost * refundRate);
@@ -109,19 +93,12 @@ export class RecruitmentQueueManager {
       nation.resources.manpower + manpowerRefund,
     );
 
-    const stats = MILITARY_UNIT_STATS[order.unitType];
-    let finalSteel = nation.resources.steel;
-    if (stats.steelCost > 0) {
-      finalSteel = finalSteel + order.quantity * stats.steelCost;
-    }
-
     return {
       ...nation,
       treasury: nation.treasury + moneyRefund,
       resources: {
         ...nation.resources,
         manpower: finalManpower,
-        steel: finalSteel,
       },
       recruitmentQueue: newQueue,
     };

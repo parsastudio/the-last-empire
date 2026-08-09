@@ -133,7 +133,6 @@ export class PoliticsActionExecutor {
               autoTradeSettings: {
                 autoBuyDeficit: action.autoBuyDeficit,
                 autoSellOilPercent: action.autoSellOilPercent,
-                autoSellSteelPercent: action.autoSellSteelPercent,
                 allowEmergencyLoans: action.allowEmergencyLoans,
               },
             },

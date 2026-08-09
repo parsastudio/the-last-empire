@@ -58,7 +58,7 @@ export class GameStateInitializer {
       isGameOver: false,
       humanNationId: normalizedHumanId,
       globalThreatLevel: 0,
-      marketPrices: { oil: 25000000, steel: 25000000 },
+      marketPrices: { oil: 25000000 },
       nations: populatedNations,
       turnLogs: [],
     };
