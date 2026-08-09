@@ -44,6 +44,9 @@ export class TurnProgressionOrchestrator {
           `پردازش اکشن هوش مصنوعی: ${action.type}`,
         );
         nextState.turnLogs.push(logEntry);
+        if (nextState.turnLogs.length > 200) {
+          nextState.turnLogs.splice(0, nextState.turnLogs.length - 200);
+        }
       }
     }
 
