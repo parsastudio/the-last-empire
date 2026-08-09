@@ -29,6 +29,10 @@ export class ProvincePixelCalculator {
     }
 
     const counts = this.calculateExactPixelCounts(buffer);
+    console.log(
+      "[ProvincePixelCalculator] Buffer scan complete. Total unique province IDs found:",
+      counts.size,
+    );
 
     const countryProvincesMap = new Map<string, Province[]>();
     const countryTotalGdpMap = new Map<string, number>();
@@ -94,6 +98,12 @@ export class ProvincePixelCalculator {
           };
         }
       }
+    }
+
+    if (hasChanges) {
+      console.log(
+        "[ProvincePixelCalculator] Successfully recalculated pixel counts and proportional GDP/Population for provinces.",
+      );
     }
 
     return hasChanges ? updatedMap : provincesMap;
