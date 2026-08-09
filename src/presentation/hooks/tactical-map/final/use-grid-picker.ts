@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 interface GridPickResult {
   provinceId: number;
@@ -26,7 +27,8 @@ export function useGridPicker() {
       }
 
       const buffer = BitPackedGridState.getInstance().getBuffer();
-      const provinceId = buffer.getPixel(mapX, mapY);
+      const rawPixel = buffer.getPixel(mapX, mapY);
+      const provinceId = BitPackedCellUtility.getProvinceId(rawPixel);
 
       return { provinceId };
     },
