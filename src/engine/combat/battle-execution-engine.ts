@@ -246,10 +246,12 @@ export class BattleExecutionEngine {
       [defender.id]: updatedDefender,
     };
 
-    return {
+    const newState = {
       ...state,
       nations: tempNations,
       turnLogs: [...state.turnLogs, logEntry],
     };
+
+    return newState;
   }
 }

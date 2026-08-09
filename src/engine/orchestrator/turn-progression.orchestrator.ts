@@ -37,17 +37,13 @@ export class TurnProgressionOrchestrator {
       const result = ActionEngine.execute(nextState, action);
       if (result.success && result.newState) {
         nextState = result.newState;
-
         const logEntry = TurnLogBuilder.createLogEntry(
           nextState.currentTurn,
           action.nationId,
           "INFO",
           `پردازش اکشن هوش مصنوعی: ${action.type}`,
         );
-        nextState = {
-          ...nextState,
-          turnLogs: [...nextState.turnLogs, logEntry],
-        };
+        nextState.turnLogs.push(logEntry);
       }
     }
 
