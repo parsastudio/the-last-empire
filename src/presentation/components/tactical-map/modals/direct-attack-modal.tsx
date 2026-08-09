@@ -132,6 +132,7 @@ export function DirectAttackModal({
         dronesToLaunch,
         infantryToDeploy,
         airForceToDeploy,
+        targetEnclaveId,
       );
 
       const success = await dispatchAction(

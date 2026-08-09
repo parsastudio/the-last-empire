@@ -159,6 +159,7 @@ export const InitiateBattleActionSchema = z.object({
   dronesToLaunch: z.number().nonnegative(),
   infantryToDeploy: z.number().positive().optional(),
   airForceToDeploy: z.number().nonnegative().optional(),
+  targetEnclaveId: z.number().nonnegative().optional(),
 });
 
 export const ConfigureAutoTradeActionSchema = z.object({

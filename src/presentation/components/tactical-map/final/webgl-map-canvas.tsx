@@ -48,6 +48,7 @@ export function WebGLMapCanvas({
     positionRef,
     scaleRef,
     countries,
+    nationsMap,
     activeLayer,
   });
 
