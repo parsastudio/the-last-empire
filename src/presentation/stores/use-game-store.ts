@@ -101,7 +101,7 @@ export const useGameStore = create<GameStoreState>()(
           detectedNations.push(normalizedHumanId);
         }
 
-        const populatedNations = aiInitializer.initializeAllNations(
+        const initResult = aiInitializer.initializeAllNations(
           detectedNations,
           normalizedHumanId,
           governmentType,
@@ -116,7 +116,8 @@ export const useGameStore = create<GameStoreState>()(
           humanNationId: normalizedHumanId,
           globalThreatLevel: 0,
           marketPrices: { oil: 25000000 },
-          nations: populatedNations,
+          provinces: initResult.provinces,
+          nations: initResult.nations,
           turnLogs: [],
         };
 

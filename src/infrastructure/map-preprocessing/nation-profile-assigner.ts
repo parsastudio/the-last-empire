@@ -127,6 +127,7 @@ export class NationProfileAssigner {
       researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
+      provinceIds: item.provinceIds || [],
       autoTradeSettings: {
         autoBuyDeficit: false,
         autoSellOilPercent: 0,
@@ -269,6 +270,7 @@ export class NationProfileAssigner {
       researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
+      provinceIds: [],
       autoTradeSettings: {
         autoBuyDeficit: false,
         autoSellOilPercent: 0,

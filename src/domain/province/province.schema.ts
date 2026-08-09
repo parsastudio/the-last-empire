@@ -1,0 +1,21 @@
+import { z } from "zod";
+
+export const ProvinceSchema = z.object({
+  provinceId: z.number().positive(),
+  nameFa: z.string(),
+  countryNumericId: z.number().nonnegative(),
+  ownerNationId: z.string(),
+  pixelCount: z.number().nonnegative(),
+  hasSeaAccess: z.boolean(),
+  landNeighbors: z.array(z.number()),
+  centerCoordinates: z.object({
+    x: z.number(),
+    y: z.number(),
+  }),
+  gdp: z.number().nonnegative(),
+  population: z.number().nonnegative(),
+  fortLevel: z.number().nonnegative().default(0),
+  infrastructureLevel: z.number().positive().default(1),
+});
+
+export type Province = z.infer<typeof ProvinceSchema>;

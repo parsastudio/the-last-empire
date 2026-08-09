@@ -1,9 +1,13 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { NationProfileAssigner } from "@/infrastructure/map-preprocessing/nation-profile-assigner";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { BitPackedNeighborDetector } from "@/engine/combat/final/bit-packed-neighbor-detector";
+
+export interface GlobalInitializationResult {
+  nations: Record<string, Nation>;
+  provinces: Record<string, Province>;
+}
 
 export class DiplomaticMatrixGenerator {
   public generateBlankRelations(
@@ -25,20 +29,42 @@ export class DiplomaticMatrixGenerator {
 export class GlobalAiInitializer {
   private profileAssigner = new NationProfileAssigner();
   private relationsGenerator = new DiplomaticMatrixGenerator();
-  private neighborDetector = new BitPackedNeighborDetector();
 
   public initializeFromManifest(
     manifest: FinalMapManifest,
     humanNationId: string,
     humanGovType?: string,
-  ): Record<string, Nation> {
+  ): GlobalInitializationResult {
     const nations: Record<string, Nation> = {};
+    const provinces: Record<string, Province> = {};
+
+    const manifestProvinces = manifest.provinces || [];
     const manifestItems = manifest.nations || [];
     const allIds = manifestItems.map((item) => item.id);
 
-    const buffer = BitPackedGridState.getInstance().getBuffer();
-    const { landNeighborsMap, oceanAccessMap } =
-      this.neighborDetector.detectNeighbors(buffer);
+    for (const pItem of manifestProvinces) {
+      const parentNation = manifestItems.find((n) => n.id === pItem.countryId);
+      const parentGdp = parentNation ? parentNation.gdp : 10000000000;
+      const parentPop = parentNation ? parentNation.population : 10000000;
+
+      const pGdp = Math.floor(parentGdp * pItem.baseGdpShare);
+      const pPop = Math.floor(parentPop * pItem.basePopulationShare);
+
+      provinces[pItem.provinceId.toString()] = {
+        provinceId: pItem.provinceId,
+        nameFa: pItem.nameFa,
+        countryNumericId: pItem.countryNumericId,
+        ownerNationId: pItem.countryId,
+        pixelCount: pItem.pixelCount,
+        hasSeaAccess: pItem.hasSeaAccess,
+        landNeighbors: pItem.landNeighbors,
+        centerCoordinates: pItem.centerCoordinates,
+        gdp: pGdp,
+        population: pPop,
+        fortLevel: 0,
+        infrastructureLevel: 1,
+      };
+    }
 
     for (const item of manifestItems) {
       const isHuman = item.id === humanNationId;
@@ -56,20 +82,7 @@ export class GlobalAiInitializer {
       nations[item.id] = nation;
     }
 
-    for (const id of Object.keys(nations)) {
-      const n = nations[id]!;
-      const numId = parseInt(id.replace("NATION_", ""), 10);
-      if (!isNaN(numId)) {
-        const detected = landNeighborsMap.get(numId);
-        if (detected) {
-          n.geography.landNeighbors =
-            this.neighborDetector.resolveCanonicalNeighbors(detected, nations);
-        }
-        n.geography.hasSeaAccess = oceanAccessMap.get(numId) ?? true;
-      }
-    }
-
-    return nations;
+    return { nations, provinces };
   }
 
   public initializeAllNations(
@@ -77,15 +90,13 @@ export class GlobalAiInitializer {
     humanNationId: string,
     humanGovType?: string,
     manifest?: FinalMapManifest | null,
-  ): Record<string, Nation> {
+  ): GlobalInitializationResult {
     if (manifest && manifest.nations && manifest.nations.length > 0) {
       return this.initializeFromManifest(manifest, humanNationId, humanGovType);
     }
 
     const nations: Record<string, Nation> = {};
-    const buffer = BitPackedGridState.getInstance().getBuffer();
-    const { landNeighborsMap, oceanAccessMap } =
-      this.neighborDetector.detectNeighbors(buffer);
+    const provinces: Record<string, Province> = {};
 
     for (const id of detectedNationsList) {
       const isHuman = id === humanNationId;
@@ -103,19 +114,6 @@ export class GlobalAiInitializer {
       nations[id] = nation;
     }
 
-    for (const id of Object.keys(nations)) {
-      const n = nations[id]!;
-      const numericId = parseInt(id.replace("NATION_", ""), 10);
-      if (!isNaN(numericId)) {
-        const detected = landNeighborsMap.get(numericId);
-        if (detected) {
-          n.geography.landNeighbors =
-            this.neighborDetector.resolveCanonicalNeighbors(detected, nations);
-        }
-        n.geography.hasSeaAccess = oceanAccessMap.get(numericId) ?? true;
-      }
-    }
-
-    return nations;
+    return { nations, provinces };
   }
 }
