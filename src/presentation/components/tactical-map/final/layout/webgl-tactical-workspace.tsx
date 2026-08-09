@@ -100,15 +100,7 @@ export function WebGLTacticalWorkspace({
   }, [closeActiveTab]);
 
   const handleNextTurnAndRefresh = useCallback(async () => {
-    console.time("next-turn-total");
-    console.log("[NextTurn] Starting turn advancement...");
-    const nextState = await advanceNextTurn();
-    console.log(
-      "[NextTurn] Turn advancement result:",
-      nextState ? "success" : "failure",
-    );
-    console.timeEnd("next-turn-total");
-    return nextState;
+    return await advanceNextTurn();
   }, [advanceNextTurn]);
 
   const isNotFound = !loading && (error !== null || !effectiveGameState);
