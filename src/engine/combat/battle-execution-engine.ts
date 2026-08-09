@@ -1,13 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
+import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "./battle-calculator";
-import { BitPackedStateFacade } from "./final/bit-packed-state-facade";
 import { BattleDiplomacyHelper } from "./battle-diplomacy-helper";
 
 export class BattleExecutionEngine {
-  private facade = new BitPackedStateFacade();
-
   public executeBattle(
     state: GameState,
     action: InitiateBattleAction,
@@ -51,74 +49,80 @@ export class BattleExecutionEngine {
       action.targetEnclaveId,
     );
 
-    const defenderPixels = defender.geography.territoryPixelCount;
-    const requestedTargetPixels = calcResult.isAttackerVictory
-      ? Math.min(calcResult.conqueredPixelsCount, defenderPixels)
+    const updatedProvinces = { ...state.provinces };
+    let conqueredProvince: Province | null = null;
+
+    if (calcResult.isAttackerVictory) {
+      const defenderProvinceList = Object.values(updatedProvinces).filter(
+        (p) =>
+          p.ownerNationId === defender.id ||
+          p.ownerNationId === canonicalDefenderId,
+      );
+
+      if (
+        action.targetProvinceId &&
+        updatedProvinces[action.targetProvinceId.toString()]
+      ) {
+        conqueredProvince =
+          updatedProvinces[action.targetProvinceId.toString()]!;
+      } else if (defenderProvinceList.length > 0) {
+        conqueredProvince = defenderProvinceList.sort(
+          (a, b) => b.gdp - a.gdp,
+        )[0]!;
+      }
+
+      if (conqueredProvince) {
+        updatedProvinces[conqueredProvince.provinceId.toString()] = {
+          ...conqueredProvince,
+          ownerNationId: attacker.id,
+        };
+      }
+    }
+
+    const conqueredPixels = conqueredProvince
+      ? conqueredProvince.pixelCount
       : 0;
 
-    const conquestFacadeResult = this.facade.conquerAndSync(
-      state,
-      CountryRegistry.resolveNumericId(attacker.id),
-      CountryRegistry.resolveNumericId(defender.id),
-      requestedTargetPixels,
-      attacker.id,
-      defender.id,
-      action.targetEnclaveId,
+    const remainingDefenderProvinces = Object.values(updatedProvinces).filter(
+      (p) =>
+        p.ownerNationId === defender.id ||
+        p.ownerNationId === canonicalDefenderId,
     );
 
-    const conqueredPixels = conquestFacadeResult.capturedPixelsCount;
-    const syncedNations = conquestFacadeResult.updatedNations;
-
-    const updatedAttackerRef = syncedNations[attacker.id] || attacker;
-    const updatedDefenderRef = syncedNations[defender.id] || defender;
-
-    const conquestRatio =
-      defenderPixels > 0
-        ? Math.min(1.0, conqueredPixels / defenderPixels)
-        : 1.0;
-
-    const popTransferred = Math.floor(defender.population * conquestRatio);
-    const gdpTransferred = Math.floor(defender.gdp * conquestRatio);
-
-    const isDefenderAlive =
-      updatedDefenderRef.geography.territoryPixelCount > 0 &&
-      defender.population - popTransferred > 0;
-
+    const isDefenderAlive = remainingDefenderProvinces.length > 0;
     const isFullCapitulation = !isDefenderAlive;
 
     const attackerTreasuryAfterDeployment =
-      updatedAttackerRef.treasury - calcResult.deploymentMoneyCost;
+      attacker.treasury - calcResult.deploymentMoneyCost;
     const attackerOilAfterDeployment = Math.max(
       0,
-      updatedAttackerRef.resources.oil - calcResult.deploymentOilCost,
+      attacker.resources.oil - calcResult.deploymentOilCost,
     );
 
     let updatedAttacker = {
-      ...updatedAttackerRef,
-      gdp: updatedAttackerRef.gdp + gdpTransferred,
-      population: updatedAttackerRef.population + popTransferred,
+      ...attacker,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
       resources: {
-        ...updatedAttackerRef.resources,
+        ...attacker.resources,
         oil: attackerOilAfterDeployment,
       },
       military: {
-        ...updatedAttackerRef.military,
+        ...attacker.military,
         infantry: Math.max(
           0,
-          updatedAttackerRef.military.infantry -
+          attacker.military.infantry -
             calcResult.attackerCasualties.infantryLost,
         ),
         airForce: Math.max(
           0,
-          updatedAttackerRef.military.airForce -
+          attacker.military.airForce -
             calcResult.attackerCasualties.airForceLost,
         ),
         droneMissile: Math.max(
           0,
-          updatedAttackerRef.military.droneMissile - calcResult.dronesUsed,
+          attacker.military.droneMissile - calcResult.dronesUsed,
         ),
-        experience: Math.min(100, updatedAttackerRef.military.experience + 5),
+        experience: Math.min(100, attacker.military.experience + 5),
       },
     };
 
@@ -146,30 +150,26 @@ export class BattleExecutionEngine {
     }
 
     const updatedDefender = {
-      ...updatedDefenderRef,
+      ...defender,
       isAlive: isDefenderAlive,
-      gdp: isDefenderAlive ? Math.max(0, defender.gdp - gdpTransferred) : 0,
-      population: isDefenderAlive
-        ? Math.max(0, defender.population - popTransferred)
-        : 0,
       treasury: Math.max(0, defender.treasury - calcResult.treasuryLooted),
       military: {
-        ...updatedDefenderRef.military,
+        ...defender.military,
         infantry: isDefenderAlive
           ? Math.max(
               0,
-              updatedDefenderRef.military.infantry -
+              defender.military.infantry -
                 calcResult.defenderCasualties.infantryLost,
             )
           : 0,
         airForce: isDefenderAlive
           ? Math.max(
               0,
-              updatedDefenderRef.military.airForce -
+              defender.military.airForce -
                 calcResult.defenderCasualties.airForceLost,
             )
           : 0,
-        experience: Math.min(100, updatedDefenderRef.military.experience + 3),
+        experience: Math.min(100, defender.military.experience + 3),
       },
     };
 
@@ -205,13 +205,14 @@ export class BattleExecutionEngine {
     );
 
     const tempNations = {
-      ...syncedNations,
+      ...state.nations,
       [attacker.id]: updatedAttacker,
       [defender.id]: updatedDefender,
     };
 
     const newState = {
       ...state,
+      provinces: updatedProvinces,
       nations: tempNations,
       turnLogs: [...state.turnLogs, logEntry],
     };

@@ -5,7 +5,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
@@ -139,18 +138,6 @@ export class MilitaryActionExecutor {
           state.nations[canonicalTargetId];
         if (!target || !target.isAlive) {
           throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
-        }
-
-        const isLandNeighbor = LandNeighborResolver.isLandNeighbor(
-          nation,
-          target,
-        );
-
-        if (!isLandNeighbor) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "امکان تهاجم زمینی وجود ندارد: کشور هدف دارای مرز خاکی مشترک با شما نیست.",
-          );
         }
 
         if (nation.military.infantry <= 0) {

@@ -54,27 +54,62 @@ export class TurnPipeline {
     const marketPrices = MarketEngine.updateMarketPrices();
     const updatedNations: Record<string, Nation> = {};
 
-    const rawNationsList: Array<{
-      id: string;
-      gdp: number;
-      treasury: number;
-      infantry: number;
-      airForce: number;
-      drone: number;
-      techLevel: number;
-      militaryPowerMultiplier: number;
-    }> = [];
+    const allProvinces = Object.values(state.provinces || {});
 
     const nationKeys = Object.keys(state.nations);
     for (let i = 0; i < nationKeys.length; i++) {
       const id = nationKeys[i]!;
       const nation = state.nations[id];
-      if (!nation || !nation.isAlive) {
-        if (nation) updatedNations[id] = nation;
+      if (!nation) continue;
+
+      const ownedProvinces = allProvinces.filter(
+        (p) =>
+          p.ownerNationId === id ||
+          p.ownerNationId === CountryRegistry.resolveCanonicalId(id),
+      );
+
+      const isAlive = ownedProvinces.length > 0;
+      if (!isAlive) {
+        updatedNations[id] = {
+          ...nation,
+          isAlive: false,
+          gdp: 0,
+          population: 0,
+          geography: {
+            ...nation.geography,
+            territoryPixelCount: 0,
+          },
+        };
         continue;
       }
 
-      let updated = ModifierManager.updateActiveModifiers(nation);
+      const totalProvinceGdp = ownedProvinces.reduce(
+        (sum, p) => sum + p.gdp,
+        0,
+      );
+      const totalProvincePop = ownedProvinces.reduce(
+        (sum, p) => sum + p.population,
+        0,
+      );
+      const totalProvincePixels = ownedProvinces.reduce(
+        (sum, p) => sum + p.pixelCount,
+        0,
+      );
+      const hasSeaAccess = ownedProvinces.some((p) => p.hasSeaAccess);
+
+      let updated: Nation = {
+        ...nation,
+        isAlive: true,
+        gdp: totalProvinceGdp > 0 ? totalProvinceGdp : nation.gdp,
+        population: totalProvincePop > 0 ? totalProvincePop : nation.population,
+        geography: {
+          ...nation.geography,
+          territoryPixelCount: totalProvincePixels,
+          hasSeaAccess,
+        },
+      };
+
+      updated = ModifierManager.updateActiveModifiers(updated);
 
       if (updated.relations) {
         const relKeys = Object.keys(updated.relations);
@@ -192,86 +227,6 @@ export class TurnPipeline {
       updated = this.reputationManager.applyReputationGain(updated, 2);
 
       updatedNations[id] = updated;
-
-      const govTraits = GovernmentSystem.getTraits(updated.government.type);
-      rawNationsList.push({
-        id: updated.id,
-        gdp: updated.gdp,
-        treasury: updated.treasury,
-        infantry: updated.military.infantry,
-        airForce: updated.military.airForce,
-        drone: updated.military.droneMissile,
-        techLevel: updated.military.techLevel,
-        militaryPowerMultiplier: govTraits.militaryPowerMultiplier,
-      });
-    }
-
-    const ranked = this.powerRanker.rankNations(rawNationsList);
-    for (let i = 0; i < ranked.length; i++) {
-      const r = ranked[i]!;
-      if (updatedNations[r.id]) {
-        updatedNations[r.id] = {
-          ...updatedNations[r.id]!,
-          rank: r.rank,
-        };
-      }
-    }
-
-    for (let i = 0; i < nationKeys.length; i++) {
-      const id = nationKeys[i]!;
-      const nation = updatedNations[id];
-      if (!nation || !nation.isAlive || !nation.relations) {
-        continue;
-      }
-
-      const relKeys = Object.keys(nation.relations);
-      let relationsUpdated = false;
-      const newRelations: Record<string, RelationProfile> = {
-        ...nation.relations,
-      };
-
-      for (let j = 0; j < relKeys.length; j++) {
-        const targetId = relKeys[j]!;
-        const relation = newRelations[targetId];
-        if (!relation) continue;
-
-        const canonicalTargetId = CountryRegistry.resolveCanonicalId(targetId);
-        const target =
-          updatedNations[targetId] || updatedNations[canonicalTargetId];
-
-        if (target && target.isAlive) {
-          const landNeighbors = nation.geography?.landNeighbors || [];
-          const isLandNeighbor =
-            landNeighbors.includes(targetId) ||
-            landNeighbors.includes(canonicalTargetId);
-
-          const frictionValue =
-            this.relationsManager.calculateGovernmentFriction(nation, target);
-
-          const nextOpinion = this.opinionCalculator.calculateOpinion(
-            relation.opinion,
-            nation.globalReputation,
-            relation.stance,
-            isLandNeighbor,
-            frictionValue,
-          );
-
-          if (nextOpinion !== relation.opinion) {
-            newRelations[targetId] = {
-              ...relation,
-              opinion: nextOpinion,
-            };
-            relationsUpdated = true;
-          }
-        }
-      }
-
-      if (relationsUpdated) {
-        updatedNations[id] = {
-          ...nation,
-          relations: newRelations,
-        };
-      }
     }
 
     return {
