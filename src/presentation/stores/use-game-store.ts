@@ -50,6 +50,7 @@ export const useGameStore = create<GameStoreState>()(
       }),
 
     loadGame: async (gameId) => {
+      console.log("[useGameStore] Loading campaign gameId:", gameId);
       set((draft) => {
         draft.loading = true;
         draft.error = null;
@@ -64,6 +65,9 @@ export const useGameStore = create<GameStoreState>()(
             state.provinces && Object.keys(state.provinces).length > 0;
 
           if (!hasProvinces) {
+            console.log(
+              "[useGameStore] No provinces found in state, loading manifest...",
+            );
             try {
               const res = await fetch("/maps/map1/temp/final/manifest.json", {
                 cache: "no-cache",
@@ -81,7 +85,9 @@ export const useGameStore = create<GameStoreState>()(
                 };
                 await storageAdapter.saveGameState(gameId, state);
               }
-            } catch {}
+            } catch (fetchErr) {
+              console.error("[useGameStore] Manifest load error:", fetchErr);
+            }
           }
 
           const buffer = BitPackedGridState.getInstance().getBuffer();
@@ -93,6 +99,10 @@ export const useGameStore = create<GameStoreState>()(
             ),
           };
 
+          console.log(
+            "[useGameStore] Game state loaded successfully. Total provinces:",
+            Object.keys(state.provinces).length,
+          );
           set((draft) => {
             draft.gameState = state;
             draft.loading = false;
@@ -100,12 +110,14 @@ export const useGameStore = create<GameStoreState>()(
           return true;
         }
 
+        console.warn("[useGameStore] No saved game found for gameId:", gameId);
         set((draft) => {
           draft.error = "اطلاعات پرونده بازی یافت نشد.";
           draft.loading = false;
         });
         return false;
-      } catch {
+      } catch (err) {
+        console.error("[useGameStore] Error loading game:", err);
         set((draft) => {
           draft.error = "خطا در بارگذاری اطلاعات از حافظه محلی.";
           draft.loading = false;
@@ -115,6 +127,7 @@ export const useGameStore = create<GameStoreState>()(
     },
 
     createCampaign: async (nationId, governmentType, gameId, manifest) => {
+      console.log("[useGameStore] Creating new campaign for nation:", nationId);
       set((draft) => {
         draft.loading = true;
         draft.error = null;
@@ -133,7 +146,12 @@ export const useGameStore = create<GameStoreState>()(
             if (res.ok) {
               activeManifest = await res.json();
             }
-          } catch {}
+          } catch (fetchErr) {
+            console.error(
+              "[useGameStore] Manifest fetch error on create:",
+              fetchErr,
+            );
+          }
         }
 
         let detectedNations: string[] = [];
@@ -178,13 +196,15 @@ export const useGameStore = create<GameStoreState>()(
         };
 
         await storageAdapter.saveGameState(gameId, initialState);
+        console.log("[useGameStore] New campaign created successfully.");
 
         set((draft) => {
           draft.gameState = initialState;
           draft.loading = false;
         });
         return true;
-      } catch {
+      } catch (err) {
+        console.error("[useGameStore] Error creating campaign:", err);
         set((draft) => {
           draft.error = "خطا در ساخت کمپین جدید.";
           draft.loading = false;
@@ -236,7 +256,8 @@ export const useGameStore = create<GameStoreState>()(
         });
         void storageAdapter.saveGameState(activeGameId, nextState);
         return nextState;
-      } catch {
+      } catch (err) {
+        console.error("[useGameStore] Error advancing turn:", err);
         return null;
       }
     },

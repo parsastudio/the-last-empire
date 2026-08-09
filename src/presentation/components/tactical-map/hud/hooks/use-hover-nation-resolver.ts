@@ -18,6 +18,9 @@ export function useHoverNationResolver({
 }: UseHoverNationResolverProps) {
   const syncedProvincesMap = useMemo(() => {
     if (!provincesMap) return {};
+    console.log(
+      "[useHoverNationResolver] Syncing provincesMap with live bitpacked buffer...",
+    );
     const buffer = BitPackedGridState.getInstance().getBuffer();
     return ProvincePixelCalculator.syncProvincesMapPixelCounts(
       buffer,
@@ -30,7 +33,13 @@ export function useHoverNationResolver({
       if (provinceId <= 0 || !syncedProvincesMap) return null;
 
       const province = syncedProvincesMap[provinceId.toString()];
-      if (!province) return null;
+      if (!province) {
+        console.warn(
+          "[useHoverNationResolver] Province ID not found in syncedProvincesMap:",
+          provinceId,
+        );
+        return null;
+      }
 
       const ownerNation = nationsMap
         ? nationsMap[province.ownerNationId]
