@@ -10,123 +10,118 @@ export class GeodesicSeedPicker {
       return [];
     }
 
-    if (allPixelIndices.length <= targetK) {
-      return [...allPixelIndices];
+    if (targetK === 1 || allPixelIndices.length <= targetK) {
+      return [allPixelIndices[Math.floor(allPixelIndices.length / 2)]!];
     }
 
-    const microK = Math.min(
-      allPixelIndices.length,
-      Math.max(targetK * 5, targetK),
-    );
-
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
-
+    let sumX = 0;
+    let sumY = 0;
     for (let i = 0; i < allPixelIndices.length; i++) {
       const idx = allPixelIndices[i]!;
+      sumX += idx % width;
+      sumY += Math.floor(idx / width);
+    }
+
+    const centerX = Math.floor(sumX / allPixelIndices.length);
+    const centerY = Math.floor(sumY / allPixelIndices.length);
+
+    const sortedByCenterDist = [...allPixelIndices].sort((a, b) => {
+      const ax = a % width;
+      const ay = Math.floor(a / width);
+      const bx = b % width;
+      const by = Math.floor(b / width);
+      const dA =
+        (ax - centerX) * (ax - centerX) + (ay - centerY) * (ay - centerY);
+      const dB =
+        (bx - centerX) * (bx - centerX) + (by - centerY) * (by - centerY);
+      return dA - dB;
+    });
+
+    const centerFractionCount = Math.max(
+      1,
+      Math.floor(allPixelIndices.length / targetK),
+    );
+    const centerPixels = sortedByCenterDist.slice(0, centerFractionCount);
+    const outerPixels = sortedByCenterDist.slice(centerFractionCount);
+
+    const seeds: number[] = [];
+
+    let centerSeed = centerPixels[0]!;
+    let minCenterDist = Infinity;
+    for (let i = 0; i < centerPixels.length; i++) {
+      const idx = centerPixels[i]!;
       const px = idx % width;
       const py = Math.floor(idx / width);
-      if (px < minX) minX = px;
-      if (px > maxX) maxX = px;
-      if (py < minY) minY = py;
-      if (py > maxY) maxY = py;
-    }
-
-    const bboxWidth = Math.max(1, maxX - minX);
-    const bboxHeight = Math.max(1, maxY - minY);
-
-    const landArea = allPixelIndices.length;
-    const targetHexRadius = Math.sqrt(
-      (2.0 * landArea) / (Math.sqrt(3) * microK * 1.1),
-    );
-
-    const dx = Math.max(6, targetHexRadius);
-    const dy = Math.max(6, targetHexRadius * (Math.sqrt(3) / 2.0));
-
-    const initialSeedCoords: { x: number; y: number }[] = [];
-    let row = 0;
-
-    for (let y = minY + dy / 2; y <= maxY; y += dy) {
-      const xOffset = row % 2 === 1 ? dx / 2 : 0;
-      for (let x = minX + dx / 2 + xOffset; x <= maxX; x += dx) {
-        initialSeedCoords.push({ x, y });
-      }
-      row++;
-    }
-
-    if (initialSeedCoords.length === 0) {
-      initialSeedCoords.push({
-        x: (minX + maxX) / 2,
-        y: (minY + maxY) / 2,
-      });
-    }
-
-    const microSeeds: number[] = [];
-    const usedIndices = new Set<number>();
-
-    for (let i = 0; i < initialSeedCoords.length; i++) {
-      if (microSeeds.length >= microK) break;
-
-      const target = initialSeedCoords[i]!;
-      let bestIdx = -1;
-      let minDistance = Infinity;
-
-      for (let j = 0; j < allPixelIndices.length; j++) {
-        const pIdx = allPixelIndices[j]!;
-        if (usedIndices.has(pIdx)) continue;
-
-        const px = pIdx % width;
-        const py = Math.floor(pIdx / width);
-        const distSq =
-          (px - target.x) * (px - target.x) + (py - target.y) * (py - target.y);
-
-        if (distSq < minDistance) {
-          minDistance = distSq;
-          bestIdx = pIdx;
-        }
-      }
-
-      if (bestIdx !== -1) {
-        usedIndices.add(bestIdx);
-        microSeeds.push(bestIdx);
+      const dist =
+        (px - centerX) * (px - centerX) + (py - centerY) * (py - centerY);
+      if (dist < minCenterDist) {
+        minCenterDist = dist;
+        centerSeed = idx;
       }
     }
+    seeds.push(centerSeed);
 
-    while (
-      microSeeds.length < microK &&
-      microSeeds.length < allPixelIndices.length
-    ) {
-      let maxDist = -1;
-      let bestFallback = allPixelIndices[0]!;
+    const outerSectorsCount = targetK - 1;
+    if (outerSectorsCount > 0 && outerPixels.length > 0) {
+      const sectorPixels: number[][] = Array.from(
+        { length: outerSectorsCount },
+        () => [],
+      );
 
-      for (let j = 0; j < allPixelIndices.length; j++) {
-        const pIdx = allPixelIndices[j]!;
-        if (usedIndices.has(pIdx)) continue;
+      const sectorAngleStep = (2.0 * Math.PI) / outerSectorsCount;
 
-        const px = pIdx % width;
-        const py = Math.floor(pIdx / width);
+      for (let i = 0; i < outerPixels.length; i++) {
+        const idx = outerPixels[i]!;
+        const px = idx % width;
+        const py = Math.floor(idx / width);
+        let angle = Math.atan2(py - centerY, px - centerX);
+        if (angle < 0) angle += 2.0 * Math.PI;
 
-        let minSeedDist = Infinity;
-        for (let s = 0; s < microSeeds.length; s++) {
-          const sIdx = microSeeds[s]!;
-          const sx = sIdx % width;
-          const sy = Math.floor(sIdx / width);
-          const d = (px - sx) * (px - sx) + (py - sy) * (py - sy);
-          if (d < minSeedDist) minSeedDist = d;
+        const sectorIdx = Math.min(
+          outerSectorsCount - 1,
+          Math.floor(angle / sectorAngleStep),
+        );
+        sectorPixels[sectorIdx]!.push(idx);
+      }
+
+      for (let s = 0; s < outerSectorsCount; s++) {
+        const pixelsInSector = sectorPixels[s]!;
+        if (pixelsInSector.length === 0) {
+          const fallback = outerPixels[s % outerPixels.length]!;
+          seeds.push(fallback);
+          continue;
         }
 
-        if (minSeedDist > maxDist) {
-          maxDist = minSeedDist;
-          bestFallback = pIdx;
+        let secSumX = 0;
+        let secSumY = 0;
+        for (let j = 0; j < pixelsInSector.length; j++) {
+          const pIdx = pixelsInSector[j]!;
+          secSumX += pIdx % width;
+          secSumY += Math.floor(pIdx / width);
         }
-      }
 
-      usedIndices.add(bestFallback);
-      microSeeds.push(bestFallback);
+        const secAvgX = Math.floor(secSumX / pixelsInSector.length);
+        const secAvgY = Math.floor(secSumY / pixelsInSector.length);
+
+        let bestSectorSeed = pixelsInSector[0]!;
+        let minSectorDist = Infinity;
+
+        for (let j = 0; j < pixelsInSector.length; j++) {
+          const pIdx = pixelsInSector[j]!;
+          const px = pIdx % width;
+          const py = Math.floor(pIdx / width);
+          const d =
+            (px - secAvgX) * (px - secAvgX) + (py - secAvgY) * (py - secAvgY);
+          if (d < minSectorDist) {
+            minSectorDist = d;
+            bestSectorSeed = pIdx;
+          }
+        }
+
+        seeds.push(bestSectorSeed);
+      }
     }
 
-    return microSeeds;
+    return seeds;
   }
 }
