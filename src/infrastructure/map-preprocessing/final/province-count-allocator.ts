@@ -31,6 +31,7 @@ export class ProvinceCountAllocator {
     }
 
     const totalK = this.calculateTotalProvinces(totalPixels);
+
     if (majorMasses.length === 1 || totalK <= 1) {
       allocations.set(majorMasses[0]!.id, totalK);
       for (let i = 1; i < majorMasses.length; i++) {
@@ -47,7 +48,10 @@ export class ProvinceCountAllocator {
 
     for (let i = 0; i < majorMasses.length; i++) {
       const mass = majorMasses[i]!;
-      if (i === majorMasses.length - 1) {
+      if (mass.totalPixels < 1500) {
+        allocations.set(mass.id, 1);
+        assignedK += 1;
+      } else if (i === majorMasses.length - 1) {
         const lastShare = Math.max(1, totalK - assignedK);
         allocations.set(mass.id, lastShare);
       } else {

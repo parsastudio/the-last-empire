@@ -79,12 +79,10 @@ export class LandPartitionEngine {
 
       for (let k = 0; k < 8; k++) {
         const n = neighbors8[k]!;
-        let nx = cx + n.dx;
-        if (nx < 0) nx = width - 1;
-        else if (nx >= width) nx = 0;
-
+        const nx = cx + n.dx;
         const ny = cy + n.dy;
-        if (ny >= 0 && ny < height) {
+
+        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
           const nIdx = ny * width + nx;
           if (assignmentGrid[nIdx] === 255) {
             const newDist = currentDist + n.cost;
@@ -177,12 +175,10 @@ export class LandPartitionEngine {
         const cy = Math.floor(currIdx / width);
 
         for (let k = 0; k < 8; k++) {
-          let nx = cx + neighbors8[k]!.dx;
-          if (nx < 0) nx = width - 1;
-          else if (nx >= width) nx = 0;
-
+          const nx = cx + neighbors8[k]!.dx;
           const ny = cy + neighbors8[k]!.dy;
-          if (ny >= 0 && ny < height) {
+
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
             const nIdx = ny * width + nx;
             if (assignmentGrid[nIdx] === 255 && visited[nIdx] === 0) {
               visited[nIdx] = 1;
@@ -209,9 +205,8 @@ export class LandPartitionEngine {
           if (ny < 0 || ny >= height) continue;
 
           for (let dx = -searchRadius; dx <= searchRadius; dx += 4) {
-            let nx = px + dx;
-            if (nx < 0) nx = width - 1;
-            else if (nx >= width) nx = 0;
+            const nx = px + dx;
+            if (nx < 0 || nx >= width) continue;
 
             const nIdx = ny * width + nx;
             const nNation = assignmentGrid[nIdx]!;
