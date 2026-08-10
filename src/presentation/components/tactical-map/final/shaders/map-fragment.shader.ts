@@ -75,7 +75,7 @@ void main() {
     blendedColor = mix(blendedColor, vec3(0.01, 0.02, 0.05), 0.70);
   } else if (isInternal) {
     vec3 internalBorderColor = landColor.rgb * 0.35;
-    blendedColor = mix(blendedColor, internalBorderColor, 0.50);
+    blendedColor = mix(blendedColor, internalBorderColor, 0.45);
   }
 
   fragColor = vec4(blendedColor, 1.0);
