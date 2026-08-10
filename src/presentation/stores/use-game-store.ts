@@ -70,7 +70,7 @@ export const useGameStore = create<GameStoreState>()(
             );
             try {
               const res = await fetch("/maps/map1/temp/final/manifest.json", {
-                cache: "no-cache",
+                cache: "no-store",
               });
               if (res.ok) {
                 const manifest: FinalMapManifest = await res.json();
@@ -149,22 +149,20 @@ export const useGameStore = create<GameStoreState>()(
 
       try {
         const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
-        let activeManifest = manifest;
+        let activeManifest: FinalMapManifest | null = manifest ?? null;
 
-        if (!activeManifest) {
-          try {
-            const res = await fetch("/maps/map1/temp/final/manifest.json", {
-              cache: "no-cache",
-            });
-            if (res.ok) {
-              activeManifest = await res.json();
-            }
-          } catch (fetchErr) {
-            console.error(
-              "[STORE-DIAGNOSTIC] Manifest fetch error on create:",
-              fetchErr,
-            );
+        try {
+          const res = await fetch("/maps/map1/temp/final/manifest.json", {
+            cache: "no-store",
+          });
+          if (res.ok) {
+            activeManifest = await res.json();
           }
+        } catch (fetchErr) {
+          console.error(
+            "[STORE-DIAGNOSTIC] Manifest fetch error on create:",
+            fetchErr,
+          );
         }
 
         let detectedNations: string[] = [];
@@ -182,7 +180,7 @@ export const useGameStore = create<GameStoreState>()(
         }
 
         console.log(
-          `[STORE-DIAGNOSTIC] Initializing ${detectedNations.length} nations from manifest...`,
+          `[STORE-DIAGNOSTIC] Initializing ${detectedNations.length} nations from fresh manifest...`,
         );
 
         const initResult = aiInitializer.initializeAllNations(
