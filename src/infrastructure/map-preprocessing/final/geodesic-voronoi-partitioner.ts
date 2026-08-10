@@ -68,10 +68,6 @@ class LandMinHeap {
 }
 
 export class GeodesicVoronoiPartitioner {
-  private static calculateMildCurvature(x: number, y: number): number {
-    return Math.sin(x * 0.02 + y * 0.02) * 2.0;
-  }
-
   public static partitionAndRelax(
     allPixelIndices: number[],
     initialSeeds: number[],
@@ -93,11 +89,11 @@ export class GeodesicVoronoiPartitioner {
     }
 
     let currentSeeds = [...initialSeeds];
-    const iterations = 3;
+    const iterations = 10;
     let finalAssignmentMap = new Map<number, number>();
 
     for (let iter = 0; iter < iterations; iter++) {
-      finalAssignmentMap = this.runStrictLandPathDijkstra(
+      finalAssignmentMap = this.runPureLandDijkstra(
         allPixelIndices,
         currentSeeds,
         assignedProvinceIds,
@@ -159,7 +155,7 @@ export class GeodesicVoronoiPartitioner {
     }
   }
 
-  private static runStrictLandPathDijkstra(
+  private static runPureLandDijkstra(
     allPixelIndices: number[],
     seeds: number[],
     assignedProvinceIds: number[],
@@ -211,8 +207,7 @@ export class GeodesicVoronoiPartitioner {
         if (nx >= 0 && nx < width && ny >= 0) {
           const nIdx = ny * width + nx;
           if (nIdx < totalMapPixels && landMask[nIdx] === 1) {
-            const curve = this.calculateMildCurvature(nx, ny);
-            const nextDist = currDist + off.cost + curve;
+            const nextDist = currDist + off.cost;
 
             if (nextDist < distMap[nIdx]!) {
               distMap[nIdx] = nextDist;
