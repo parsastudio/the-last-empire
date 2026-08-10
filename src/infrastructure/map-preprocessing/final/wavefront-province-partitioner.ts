@@ -16,8 +16,11 @@ export class WavefrontProvincePartitioner {
   ): number[] {
     void height;
     const allPixelIndices: number[] = [];
-    for (const comp of group.components) {
-      allPixelIndices.push(...comp.pixelIndices);
+    for (let i = 0; i < group.components.length; i++) {
+      const comp = group.components[i]!;
+      for (let j = 0; j < comp.pixelIndices.length; j++) {
+        allPixelIndices.push(comp.pixelIndices[j]!);
+      }
     }
 
     const assignedProvinceIds: number[] = [];
@@ -28,7 +31,8 @@ export class WavefrontProvincePartitioner {
 
       let sumX = 0;
       let sumY = 0;
-      for (const idx of allPixelIndices) {
+      for (let i = 0; i < allPixelIndices.length; i++) {
+        const idx = allPixelIndices[i]!;
         const x = idx % width;
         const y = Math.floor(idx / width);
         bitBuffer.setPixel(x, y, pid);
@@ -93,10 +97,9 @@ export class WavefrontProvincePartitioner {
     }
 
     const pixelSet = new Set<number>(allPixelIndices);
-    const pixelToProvince = new Map<number, number>();
+    const assignmentMap = new Map<number, number>();
 
     const queue: number[] = [];
-    const distMap = new Map<number, number>();
 
     for (let s = 0; s < targetK; s++) {
       const sx = seedsX[s]!;
@@ -104,7 +107,8 @@ export class WavefrontProvincePartitioner {
       let closestPixelIdx = allPixelIndices[0]!;
       let minDistSq = Infinity;
 
-      for (const pIdx of allPixelIndices) {
+      for (let i = 0; i < allPixelIndices.length; i++) {
+        const pIdx = allPixelIndices[i]!;
         const px = pIdx % width;
         const py = Math.floor(pIdx / width);
         const dSq = (px - sx) * (px - sx) + (py - sy) * (py - sy);
@@ -115,9 +119,10 @@ export class WavefrontProvincePartitioner {
       }
 
       const pid = assignedProvinceIds[s]!;
-      pixelToProvince.set(closestPixelIdx, pid);
-      distMap.set(closestPixelIdx, 0);
-      queue.push(closestPixelIdx);
+      if (!assignmentMap.has(closestPixelIdx)) {
+        assignmentMap.set(closestPixelIdx, pid);
+        queue.push(closestPixelIdx);
+      }
     }
 
     let head = 0;
@@ -125,14 +130,12 @@ export class WavefrontProvincePartitioner {
 
     while (head < queue.length) {
       const curr = queue[head++]!;
-      const pid = pixelToProvince.get(curr)!;
-      const currDist = distMap.get(curr)!;
+      const pid = assignmentMap.get(curr)!;
 
-      for (const nxtOffset of neighbors) {
-        const nxt = curr + nxtOffset;
-        if (pixelSet.has(nxt) && !pixelToProvince.has(nxt)) {
-          pixelToProvince.set(nxt, pid);
-          distMap.set(nxt, currDist + 1);
+      for (let k = 0; k < 4; k++) {
+        const nxt = curr + neighbors[k]!;
+        if (pixelSet.has(nxt) && !assignmentMap.has(nxt)) {
+          assignmentMap.set(nxt, pid);
           queue.push(nxt);
         }
       }
@@ -142,14 +145,16 @@ export class WavefrontProvincePartitioner {
     const sumX = new Map<number, number>();
     const sumY = new Map<number, number>();
 
-    for (const pid of assignedProvinceIds) {
+    for (let s = 0; s < assignedProvinceIds.length; s++) {
+      const pid = assignedProvinceIds[s]!;
       counts.set(pid, 0);
       sumX.set(pid, 0);
       sumY.set(pid, 0);
     }
 
-    for (const idx of allPixelIndices) {
-      const pid = pixelToProvince.get(idx) || assignedProvinceIds[0]!;
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      const idx = allPixelIndices[i]!;
+      const pid = assignmentMap.get(idx) || assignedProvinceIds[0]!;
       const x = idx % width;
       const y = Math.floor(idx / width);
 
@@ -160,7 +165,8 @@ export class WavefrontProvincePartitioner {
       sumY.set(pid, (sumY.get(pid) || 0) + y);
     }
 
-    for (const pid of assignedProvinceIds) {
+    for (let s = 0; s < assignedProvinceIds.length; s++) {
+      const pid = assignedProvinceIds[s]!;
       const count = counts.get(pid) || 1;
       provinceMap.set(pid, {
         provinceId: pid,
