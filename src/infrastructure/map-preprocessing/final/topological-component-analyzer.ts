@@ -1,26 +1,14 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { LandComponent } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
-export interface LandComponent {
-  id: number;
-  pixelIndices: number[];
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
-  size: number;
-  centerX: number;
-  centerY: number;
-  isMicroIsland: boolean;
-}
+export type { LandComponent };
 
 export class TopologicalComponentAnalyzer {
-  public static readonly MICRO_ISLAND_THRESHOLD = 400;
-
   public static analyzeComponents(
     pixelIndices: number[],
     width: number,
     height: number,
   ): LandComponent[] {
+    void height;
     const pixelSet = new Set<number>(pixelIndices);
     const visited = new Set<number>();
     const components: LandComponent[] = [];
@@ -87,7 +75,6 @@ export class TopologicalComponentAnalyzer {
         size,
         centerX: Math.floor(sumX / (size || 1)),
         centerY: Math.floor(sumY / (size || 1)),
-        isMicroIsland: size < this.MICRO_ISLAND_THRESHOLD,
       });
     }
 
