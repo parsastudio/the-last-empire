@@ -14,145 +14,80 @@ export class GeodesicSeedPicker {
       return [allPixelIndices[Math.floor(allPixelIndices.length / 2)]!];
     }
 
-    const landPixelSet = new Set<number>(allPixelIndices);
-    const seeds: number[] = [];
-
-    let sumX = 0;
-    let sumY = 0;
-    for (let i = 0; i < allPixelIndices.length; i++) {
-      const idx = allPixelIndices[i]!;
-      sumX += idx % width;
-      sumY += Math.floor(idx / width);
-    }
-
-    const avgX = Math.floor(sumX / allPixelIndices.length);
-    const avgY = Math.floor(sumY / allPixelIndices.length);
-
-    let firstSeed = allPixelIndices[0]!;
-    let minCenterDist = Infinity;
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
 
     for (let i = 0; i < allPixelIndices.length; i++) {
       const idx = allPixelIndices[i]!;
       const px = idx % width;
       const py = Math.floor(idx / width);
-      const distSq = (px - avgX) * (px - avgX) + (py - avgY) * (py - avgY);
-      if (distSq < minCenterDist) {
-        minCenterDist = distSq;
-        firstSeed = idx;
+      if (px < minX) minX = px;
+      if (px > maxX) maxX = px;
+      if (py < minY) minY = py;
+      if (py > maxY) maxY = py;
+    }
+
+    const bboxWidth = Math.max(1, maxX - minX);
+    const bboxHeight = Math.max(1, maxY - minY);
+    const aspectRatio = bboxWidth / bboxHeight;
+
+    let cols = Math.round(Math.sqrt(targetK * aspectRatio));
+    let rows = Math.round(targetK / (cols || 1));
+
+    cols = Math.max(1, cols);
+    rows = Math.max(1, rows);
+
+    while (cols * rows < targetK) {
+      if (cols / rows < aspectRatio) {
+        cols++;
+      } else {
+        rows++;
       }
     }
 
-    seeds.push(firstSeed);
+    const gridCellW = bboxWidth / cols;
+    const gridCellH = bboxHeight / rows;
 
-    const minLandDistances = new Float64Array(allPixelIndices.length);
-    minLandDistances.fill(Infinity);
+    const initialSeedCoords: { x: number; y: number }[] = [];
 
-    const pixelIndexMap = new Map<number, number>();
-    for (let i = 0; i < allPixelIndices.length; i++) {
-      pixelIndexMap.set(allPixelIndices[i]!, i);
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (initialSeedCoords.length >= targetK) break;
+        const targetX = minX + (c + 0.5) * gridCellW;
+        const targetY = minY + (r + 0.5) * gridCellH;
+        initialSeedCoords.push({ x: targetX, y: targetY });
+      }
     }
 
-    this.updateEuclideanGeodesicDistances(
-      firstSeed,
-      minLandDistances,
-      allPixelIndices,
-      pixelIndexMap,
-      landPixelSet,
-      width,
-    );
+    const seeds: number[] = [];
+    const usedIndices = new Set<number>();
 
-    for (let s = 1; s < targetK; s++) {
-      let maxDist = -1;
-      let nextSeed = allPixelIndices[0]!;
+    for (let i = 0; i < initialSeedCoords.length; i++) {
+      const target = initialSeedCoords[i]!;
+      let bestIdx = allPixelIndices[0]!;
+      let minDistance = Infinity;
 
-      for (let i = 0; i < allPixelIndices.length; i++) {
-        const dist = minLandDistances[i]!;
-        if (dist !== Infinity && dist > maxDist) {
-          maxDist = dist;
-          nextSeed = allPixelIndices[i]!;
+      for (let j = 0; j < allPixelIndices.length; j++) {
+        const pIdx = allPixelIndices[j]!;
+        if (usedIndices.has(pIdx)) continue;
+
+        const px = pIdx % width;
+        const py = Math.floor(pIdx / width);
+        const distSq =
+          (px - target.x) * (px - target.x) + (py - target.y) * (py - target.y);
+
+        if (distSq < minDistance) {
+          minDistance = distSq;
+          bestIdx = pIdx;
         }
       }
 
-      if (seeds.includes(nextSeed)) {
-        for (let i = 0; i < allPixelIndices.length; i++) {
-          const fallback = allPixelIndices[i]!;
-          if (!seeds.includes(fallback)) {
-            nextSeed = fallback;
-            break;
-          }
-        }
-      }
-
-      seeds.push(nextSeed);
-      this.updateEuclideanGeodesicDistances(
-        nextSeed,
-        minLandDistances,
-        allPixelIndices,
-        pixelIndexMap,
-        landPixelSet,
-        width,
-      );
+      usedIndices.add(bestIdx);
+      seeds.push(bestIdx);
     }
 
     return seeds;
-  }
-
-  private static updateEuclideanGeodesicDistances(
-    seedIdx: number,
-    minLandDistances: Float64Array,
-    allPixelIndices: number[],
-    pixelIndexMap: Map<number, number>,
-    landPixelSet: Set<number>,
-    width: number,
-  ): void {
-    void allPixelIndices;
-    const seedX = seedIdx % width;
-    const seedY = Math.floor(seedIdx / width);
-
-    const queue: number[] = [seedIdx];
-    const visited = new Set<number>();
-    visited.add(seedIdx);
-
-    const seedLocalArrayIdx = pixelIndexMap.get(seedIdx);
-    if (seedLocalArrayIdx !== undefined) {
-      minLandDistances[seedLocalArrayIdx] = 0;
-    }
-
-    let head = 0;
-    while (head < queue.length) {
-      const curr = queue[head++]!;
-      const cx = curr % width;
-      const cy = Math.floor(curr / width);
-
-      const dx = cx - seedX;
-      const dy = cy - seedY;
-      const euclideanDist = Math.sqrt(dx * dx + dy * dy);
-
-      const localArrayIdx = pixelIndexMap.get(curr);
-      if (localArrayIdx !== undefined) {
-        if (euclideanDist < minLandDistances[localArrayIdx]!) {
-          minLandDistances[localArrayIdx] = euclideanDist;
-        }
-      }
-
-      const neighbors: number[] = [];
-      if (cx > 0) neighbors.push(curr - 1);
-      if (cx < width - 1) neighbors.push(curr + 1);
-      neighbors.push(curr + width);
-      neighbors.push(curr - width);
-
-      if (cx > 0) neighbors.push(curr + width - 1);
-      if (cx < width - 1) neighbors.push(curr + width + 1);
-      if (cx > 0) neighbors.push(curr - width - 1);
-      if (cx < width - 1) neighbors.push(curr - width + 1);
-
-      for (let i = 0; i < neighbors.length; i++) {
-        const next = neighbors[i]!;
-        if (landPixelSet.has(next) && !visited.has(next)) {
-          visited.add(next);
-          queue.push(next);
-        }
-      }
-    }
   }
 }

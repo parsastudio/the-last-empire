@@ -6,9 +6,9 @@ import {
 
 export class GeodesicVoronoiPartitioner {
   private static calculateOrganicNoise(x: number, y: number): number {
-    const f1 = Math.sin(x * 0.025 + y * 0.018) * 12.0;
-    const f2 = Math.cos(x * 0.012 - y * 0.031) * 18.0;
-    const f3 = Math.sin(x * 0.045 + y * 0.042) * 8.0;
+    const f1 = Math.sin(x * 0.035 + y * 0.022) * 10.0;
+    const f2 = Math.cos(x * 0.018 - y * 0.041) * 14.0;
+    const f3 = Math.sin(x * 0.052 + y * 0.058) * 6.0;
     return f1 + f2 + f3;
   }
 
@@ -27,23 +27,20 @@ export class GeodesicVoronoiPartitioner {
       return;
     }
 
-    const landPixelSet = new Set<number>(allPixelIndices);
     let currentSeeds = [...initialSeeds];
-
-    const iterations = 3;
+    const iterations = 5;
     let finalAssignmentMap = new Map<number, number>();
 
     for (let iter = 0; iter < iterations; iter++) {
-      finalAssignmentMap = this.runOrganicNoiseLandVoronoi(
+      finalAssignmentMap = this.runKMeansLandVoronoi(
         allPixelIndices,
         currentSeeds,
         assignedProvinceIds,
-        landPixelSet,
         width,
       );
 
       if (iter < iterations - 1) {
-        currentSeeds = this.calculateNewCentroidSeeds(
+        currentSeeds = this.calculateKMeansCentroids(
           allPixelIndices,
           finalAssignmentMap,
           assignedProvinceIds,
@@ -95,14 +92,12 @@ export class GeodesicVoronoiPartitioner {
     }
   }
 
-  private static runOrganicNoiseLandVoronoi(
+  private static runKMeansLandVoronoi(
     allPixelIndices: number[],
     seeds: number[],
     assignedProvinceIds: number[],
-    landPixelSet: Set<number>,
     width: number,
   ): Map<number, number> {
-    void landPixelSet;
     const assignmentMap = new Map<number, number>();
     const seedXArr = new Float64Array(seeds.length);
     const seedYArr = new Float64Array(seeds.length);
@@ -141,7 +136,7 @@ export class GeodesicVoronoiPartitioner {
     return assignmentMap;
   }
 
-  private static calculateNewCentroidSeeds(
+  private static calculateKMeansCentroids(
     allPixelIndices: number[],
     assignmentMap: Map<number, number>,
     assignedProvinceIds: number[],
