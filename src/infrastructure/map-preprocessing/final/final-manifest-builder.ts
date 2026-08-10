@@ -69,7 +69,6 @@ export class FinalManifestBuilder {
       `[DIAGNOSTIC-MANIFEST] Unique Country Numeric IDs in provinceMap: ${countryProvincesMap.size}`,
     );
 
-    const allMapProvinceIds = new Set<number>(provinceMap.keys());
     const manifestProvinces: FinalManifestProvince[] = [];
     const manifestNations: FinalManifestNation[] = [];
     const includedProvinceIds = new Set<number>();
@@ -77,24 +76,6 @@ export class FinalManifestBuilder {
     const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) =>
       countryProvincesMap.has(p.id ?? 0),
     );
-
-    console.log(
-      `[DIAGNOSTIC-MANIFEST] ALL_COUNTRY_PROFILES count: ${ALL_COUNTRY_PROFILES.length}`,
-    );
-    console.log(
-      `[DIAGNOSTIC-MANIFEST] Matched activeProfiles count: ${activeProfiles.length}`,
-    );
-
-    for (const countryNumericId of countryProvincesMap.keys()) {
-      const profile = ALL_COUNTRY_PROFILES.find(
-        (p) => p.id === countryNumericId,
-      );
-      if (!profile) {
-        console.error(
-          `[DIAGNOSTIC-MANIFEST CRITICAL ERROR] Country Numeric ID ${countryNumericId} exists in provinceMap but HAS NO MATCHING PROFILE in ALL_COUNTRY_PROFILES!`,
-        );
-      }
-    }
 
     activeProfiles.sort((a, b) => b.gdp - a.gdp);
 
@@ -151,26 +132,7 @@ export class FinalManifestBuilder {
       });
     }
 
-    const missingProvinceIds: number[] = [];
-    for (const pid of allMapProvinceIds) {
-      if (!includedProvinceIds.has(pid)) {
-        missingProvinceIds.push(pid);
-      }
-    }
-
-    if (missingProvinceIds.length > 0) {
-      console.error(
-        `[DIAGNOSTIC-MANIFEST CRITICAL ERROR] ${missingProvinceIds.length} Province IDs were GENERATED in Map BUT DROPPED from Manifest!`,
-      );
-      console.error(
-        `[DIAGNOSTIC-MANIFEST CRITICAL ERROR] Dropped Province IDs sample:`,
-        missingProvinceIds.slice(0, 20),
-      );
-    } else {
-      console.log(
-        `[DIAGNOSTIC-MANIFEST SUCCESS] All ${includedProvinceIds.size} generated province IDs successfully written to Manifest.`,
-      );
-    }
+    this.logDetailedStatistics(manifestProvinces, manifestNations);
 
     const manifest: FinalMapManifest = {
       mapId,
@@ -190,8 +152,85 @@ export class FinalManifestBuilder {
       "utf-8",
     );
 
-    console.log(`[DIAGNOSTIC-MANIFEST] Saved manifest.json to ${targetDir}`);
-
     return manifest;
+  }
+
+  private logDetailedStatistics(
+    provinces: FinalManifestProvince[],
+    nations: FinalManifestNation[],
+  ): void {
+    if (provinces.length === 0) return;
+
+    let minPixels = Infinity;
+    let maxPixels = -1;
+    let minProvInfo = "";
+    let maxProvInfo = "";
+    let totalPixelsSum = 0;
+
+    let under500Count = 0;
+    let range500To1500Count = 0;
+    let range1500To3000Count = 0;
+    let above3000Count = 0;
+
+    for (let i = 0; i < provinces.length; i++) {
+      const p = provinces[i]!;
+      const px = p.pixelCount;
+      totalPixelsSum += px;
+
+      if (px < minPixels) {
+        minPixels = px;
+        minProvInfo = `${p.nameFa} (${p.countryId}) - ${px} px`;
+      }
+      if (px > maxPixels) {
+        maxPixels = px;
+        maxProvInfo = `${p.nameFa} (${p.countryId}) - ${px} px`;
+      }
+
+      if (px < 500) under500Count++;
+      else if (px < 1500) range500To1500Count++;
+      else if (px < 3000) range1500To3000Count++;
+      else above3000Count++;
+    }
+
+    const avgPixels = Math.round(totalPixelsSum / provinces.length);
+
+    let singleProvinceNationsCount = 0;
+    let multiProvinceNationsCount = 0;
+
+    for (let i = 0; i < nations.length; i++) {
+      const n = nations[i]!;
+      if (n.provinceIds.length === 1) {
+        singleProvinceNationsCount++;
+      } else {
+        multiProvinceNationsCount++;
+      }
+    }
+
+    console.log(`\n==================================================`);
+    console.log(`[PROVINCE-STATISTICS-REPORT] MAP DIVISION SUMMARY`);
+    console.log(`==================================================`);
+    console.log(`[STAT] Total Provinces Created: ${provinces.length}`);
+    console.log(`[STAT] Total Nations Processed: ${nations.length}`);
+    console.log(
+      `[STAT] Single-Province Nations Count: ${singleProvinceNationsCount}`,
+    );
+    console.log(
+      `[STAT] Multi-Province Nations Count: ${multiProvinceNationsCount}`,
+    );
+    console.log(`[STAT] Average Province Size: ${avgPixels} px`);
+    console.log(`[STAT] Minimum Province Size: ${minProvInfo}`);
+    console.log(`[STAT] Maximum Province Size: ${maxProvInfo}`);
+    console.log(`--------------------------------------------------`);
+    console.log(
+      `[SIZE DISTRIBUTION] < 500 px: ${under500Count} provinces (Micro States)`,
+    );
+    console.log(
+      `[SIZE DISTRIBUTION] 500 - 1500 px: ${range500To1500Count} provinces`,
+    );
+    console.log(
+      `[SIZE DISTRIBUTION] 1500 - 3000 px: ${range1500To3000Count} provinces`,
+    );
+    console.log(`[SIZE DISTRIBUTION] > 3000 px: ${above3000Count} provinces`);
+    console.log(`==================================================\n`);
   }
 }

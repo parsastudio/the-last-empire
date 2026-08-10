@@ -9,9 +9,13 @@ export interface MajorLandMass {
 }
 
 export class ProvinceCountAllocator {
+  public static readonly MIN_PIXELS_PER_PROVINCE = 1500;
+
   public static calculateTotalProvinces(totalPixels: number): number {
-    if (totalPixels < 500) return 1;
-    const count = Math.floor(1 + 7.5 * Math.log10(totalPixels / 500));
+    if (totalPixels < this.MIN_PIXELS_PER_PROVINCE) {
+      return 1;
+    }
+    const count = Math.floor(totalPixels / this.MIN_PIXELS_PER_PROVINCE);
     return Math.max(1, Math.min(60, count));
   }
 
@@ -25,8 +29,11 @@ export class ProvinceCountAllocator {
     }
 
     const totalK = this.calculateTotalProvinces(totalPixels);
-    if (majorMasses.length === 1) {
+    if (majorMasses.length === 1 || totalK <= 1) {
       allocations.set(majorMasses[0]!.id, totalK);
+      for (let i = 1; i < majorMasses.length; i++) {
+        allocations.set(majorMasses[i]!.id, 1);
+      }
       return allocations;
     }
 
@@ -34,16 +41,15 @@ export class ProvinceCountAllocator {
       (sum, m) => sum + m.totalPixels,
       0,
     );
-    let remainingK = totalK;
     let assignedK = 0;
 
     for (let i = 0; i < majorMasses.length; i++) {
       const mass = majorMasses[i]!;
       if (i === majorMasses.length - 1) {
-        const lastShare = Math.max(1, remainingK - assignedK);
+        const lastShare = Math.max(1, totalK - assignedK);
         allocations.set(mass.id, lastShare);
       } else {
-        const rawShare = Math.round(
+        const rawShare = Math.floor(
           (mass.totalPixels / (majorTotalPixels || 1)) * totalK,
         );
         const share = Math.max(1, rawShare);
