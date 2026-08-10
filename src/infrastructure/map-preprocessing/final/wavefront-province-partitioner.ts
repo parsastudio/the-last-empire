@@ -98,10 +98,6 @@ export class WavefrontProvincePartitioner {
     }
 
     const assignments = new Int32Array(allPixelIndices.length);
-    const weights = new Float64Array(k);
-    weights.fill(1.0);
-
-    const targetAvgSize = allPixelIndices.length / k;
     const numIterations = 8;
 
     for (let iter = 0; iter < numIterations; iter++) {
@@ -110,23 +106,17 @@ export class WavefrontProvincePartitioner {
         const px = idx % width;
         const py = Math.floor(idx / width);
 
-        const wave =
-          1.0 +
-          0.15 *
-            Math.sin(px * 0.08 + py * 0.05) *
-            Math.cos(py * 0.08 - px * 0.05);
-
-        let minWeightedDistSq = Infinity;
+        let minDistSq = Infinity;
         let bestK = 0;
 
         for (let s = 0; s < k; s++) {
           const directDx = Math.abs(px - seedsX[s]!);
           const dx = Math.min(directDx, width - directDx);
           const dy = py - seedsY[s]!;
-          const dSq = (dx * dx + dy * dy) * weights[s]! * wave;
+          const dSq = dx * dx + dy * dy;
 
-          if (dSq < minWeightedDistSq) {
-            minWeightedDistSq = dSq;
+          if (dSq < minDistSq) {
+            minDistSq = dSq;
             bestK = s;
           }
         }
@@ -146,31 +136,36 @@ export class WavefrontProvincePartitioner {
         countArr[s] += 1;
       }
 
-      let maxClusterSize = 0;
-      let largestClusterK = 0;
-
       for (let s = 0; s < k; s++) {
         const count = countArr[s]!;
-        if (count > maxClusterSize) {
-          maxClusterSize = count;
-          largestClusterK = s;
-        }
-      }
-
-      for (let s = 0; s < k; s++) {
-        const count = countArr[s]!;
-        if (
-          count < targetAvgSize * 0.15 &&
-          maxClusterSize > targetAvgSize * 1.5
-        ) {
-          seedsX[s] = seedsX[largestClusterK]! + (Math.random() - 0.5) * 10;
-          seedsY[s] = seedsY[largestClusterK]! + (Math.random() - 0.5) * 10;
-          weights[s] = 0.8;
-        } else if (count > 0) {
+        if (count > 0) {
           seedsX[s] = sumXArr[s]! / count;
           seedsY[s] = sumYArr[s]! / count;
-          const ratio = count / (targetAvgSize || 1);
-          weights[s] = Math.max(0.5, Math.min(2.0, Math.pow(ratio, 0.5)));
+        } else {
+          let maxDistSq = -1;
+          let bestIdx = allPixelIndices[0]!;
+          for (let i = 0; i < allPixelIndices.length; i += 10) {
+            const idx = allPixelIndices[i]!;
+            const px = idx % width;
+            const py = Math.floor(idx / width);
+
+            let minDistSq = Infinity;
+            for (let j = 0; j < k; j++) {
+              if (j === s) continue;
+              const directDx = Math.abs(px - seedsX[j]!);
+              const dx = Math.min(directDx, width - directDx);
+              const dy = py - seedsY[j]!;
+              const dSq = dx * dx + dy * dy;
+              if (dSq < minDistSq) minDistSq = dSq;
+            }
+
+            if (minDistSq > maxDistSq) {
+              maxDistSq = minDistSq;
+              bestIdx = idx;
+            }
+          }
+          seedsX[s] = bestIdx % width;
+          seedsY[s] = Math.floor(bestIdx / width);
         }
       }
     }
