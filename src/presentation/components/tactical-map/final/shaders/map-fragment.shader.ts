@@ -28,7 +28,7 @@ void main() {
   uint pRight = texture(u_liveStateTexture, v_texCoord + vec2(u_texelSize.x, 0.0)).r & 4095u;
   uint pDown = texture(u_liveStateTexture, v_texCoord + vec2(0.0, u_texelSize.y)).r & 4095u;
 
-  bool isBorder = (provinceId != pRight) || (provinceId != pDown);
+  bool isBorder = (pRight > 0u && provinceId != pRight) || (pDown > 0u && provinceId != pDown);
 
   float uCoord = (float(provinceId & 255u) + 0.5) / 256.0;
   float vCoord = (float((provinceId >> 8u) & 255u) + 0.5) / 256.0;
