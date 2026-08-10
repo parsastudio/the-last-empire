@@ -50,7 +50,7 @@ export const useGameStore = create<GameStoreState>()(
       }),
 
     loadGame: async (gameId) => {
-      console.log("[useGameStore] Loading campaign gameId:", gameId);
+      console.log("[STORE-DIAGNOSTIC] Loading campaign gameId:", gameId);
       set((draft) => {
         draft.loading = true;
         draft.error = null;
@@ -66,7 +66,7 @@ export const useGameStore = create<GameStoreState>()(
 
           if (!hasProvinces) {
             console.log(
-              "[useGameStore] No provinces found in state, loading manifest...",
+              "[STORE-DIAGNOSTIC] No provinces found in state, loading manifest...",
             );
             try {
               const res = await fetch("/maps/map1/temp/final/manifest.json", {
@@ -86,7 +86,10 @@ export const useGameStore = create<GameStoreState>()(
                 await storageAdapter.saveGameState(gameId, state);
               }
             } catch (fetchErr) {
-              console.error("[useGameStore] Manifest load error:", fetchErr);
+              console.error(
+                "[STORE-DIAGNOSTIC] Manifest load error:",
+                fetchErr,
+              );
             }
           }
 
@@ -99,10 +102,12 @@ export const useGameStore = create<GameStoreState>()(
             ),
           };
 
+          const provKeys = Object.keys(state.provinces);
+          const nationKeys = Object.keys(state.nations);
           console.log(
-            "[useGameStore] Game state loaded successfully. Total provinces:",
-            Object.keys(state.provinces).length,
+            `[STORE-DIAGNOSTIC] Game state loaded successfully. GameId: ${gameId}. Total Provinces: ${provKeys.length}, Total Nations: ${nationKeys.length}`,
           );
+
           set((draft) => {
             draft.gameState = state;
             draft.loading = false;
@@ -110,14 +115,17 @@ export const useGameStore = create<GameStoreState>()(
           return true;
         }
 
-        console.warn("[useGameStore] No saved game found for gameId:", gameId);
+        console.warn(
+          "[STORE-DIAGNOSTIC] No saved game found for gameId:",
+          gameId,
+        );
         set((draft) => {
           draft.error = "اطلاعات پرونده بازی یافت نشد.";
           draft.loading = false;
         });
         return false;
       } catch (err) {
-        console.error("[useGameStore] Error loading game:", err);
+        console.error("[STORE-DIAGNOSTIC] Error loading game:", err);
         set((draft) => {
           draft.error = "خطا در بارگذاری اطلاعات از حافظه محلی.";
           draft.loading = false;
@@ -127,7 +135,12 @@ export const useGameStore = create<GameStoreState>()(
     },
 
     createCampaign: async (nationId, governmentType, gameId, manifest) => {
-      console.log("[useGameStore] Creating new campaign for nation:", nationId);
+      console.log(
+        "[STORE-DIAGNOSTIC] Creating new campaign for nation:",
+        nationId,
+        "gameId:",
+        gameId,
+      );
       set((draft) => {
         draft.loading = true;
         draft.error = null;
@@ -148,7 +161,7 @@ export const useGameStore = create<GameStoreState>()(
             }
           } catch (fetchErr) {
             console.error(
-              "[useGameStore] Manifest fetch error on create:",
+              "[STORE-DIAGNOSTIC] Manifest fetch error on create:",
               fetchErr,
             );
           }
@@ -167,6 +180,10 @@ export const useGameStore = create<GameStoreState>()(
         if (!detectedNations.includes(normalizedHumanId)) {
           detectedNations.push(normalizedHumanId);
         }
+
+        console.log(
+          `[STORE-DIAGNOSTIC] Initializing ${detectedNations.length} nations from manifest...`,
+        );
 
         const initResult = aiInitializer.initializeAllNations(
           detectedNations,
@@ -196,7 +213,9 @@ export const useGameStore = create<GameStoreState>()(
         };
 
         await storageAdapter.saveGameState(gameId, initialState);
-        console.log("[useGameStore] New campaign created successfully.");
+        console.log(
+          `[STORE-DIAGNOSTIC] New campaign created successfully. Total Provinces: ${Object.keys(syncedProvinces).length}, Total Nations: ${Object.keys(initResult.nations).length}`,
+        );
 
         set((draft) => {
           draft.gameState = initialState;
@@ -204,7 +223,7 @@ export const useGameStore = create<GameStoreState>()(
         });
         return true;
       } catch (err) {
-        console.error("[useGameStore] Error creating campaign:", err);
+        console.error("[STORE-DIAGNOSTIC] Error creating campaign:", err);
         set((draft) => {
           draft.error = "خطا در ساخت کمپین جدید.";
           draft.loading = false;
@@ -257,7 +276,7 @@ export const useGameStore = create<GameStoreState>()(
         void storageAdapter.saveGameState(activeGameId, nextState);
         return nextState;
       } catch (err) {
-        console.error("[useGameStore] Error advancing turn:", err);
+        console.error("[STORE-DIAGNOSTIC] Error advancing turn:", err);
         return null;
       }
     },

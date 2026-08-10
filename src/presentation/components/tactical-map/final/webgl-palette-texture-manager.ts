@@ -9,15 +9,25 @@ export class WebGLPaletteTextureManager {
   ): WebGLTexture | null {
     const data = new Uint8Array(256 * 256 * 4);
 
-    const hasProvinces = provincesMap && Object.keys(provincesMap).length > 0;
+    const provincesList = provincesMap ? Object.values(provincesMap) : [];
+    console.log(
+      `[PALETTE-DIAGNOSTIC] Creating WebGL Palette Texture. Provinces count: ${provincesList.length}`,
+    );
 
-    if (hasProvinces) {
-      for (const prov of Object.values(provincesMap)) {
+    let mappedCount = 0;
+    let unmappedNationCount = 0;
+
+    if (provincesList.length > 0) {
+      for (const prov of provincesList) {
         const pid = prov.provinceId;
         if (pid <= 0 || pid >= 65536) continue;
 
         const ownerId = prov.ownerNationId;
         const numId = CountryRegistry.resolveNumericId(ownerId);
+        if (!numId) {
+          unmappedNationCount++;
+        }
+
         const pair = TacticalPaletteGenerator.generateColorForCountry(
           numId || 118,
         );
@@ -30,22 +40,13 @@ export class WebGLPaletteTextureManager {
         data[idx + 1] = pair.g1;
         data[idx + 2] = pair.b1;
         data[idx + 3] = 255;
-      }
-    } else {
-      for (let pid = 1; pid < 4096; pid++) {
-        const pair = TacticalPaletteGenerator.generateColorForCountry(
-          (pid % 200) + 11,
-        );
-        const u = pid & 255;
-        const v = (pid >> 8) & 255;
-        const idx = (v * 256 + u) * 4;
-
-        data[idx] = pair.r1;
-        data[idx + 1] = pair.g1;
-        data[idx + 2] = pair.b1;
-        data[idx + 3] = 255;
+        mappedCount++;
       }
     }
+
+    console.log(
+      `[PALETTE-DIAGNOSTIC] Texture Populated: ${mappedCount} provinces colored. Unmapped ownerNationIds: ${unmappedNationCount}`,
+    );
 
     const texture = gl.createTexture();
     if (!texture) return null;
