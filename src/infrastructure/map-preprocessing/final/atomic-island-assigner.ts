@@ -35,7 +35,11 @@ export class AtomicIslandAssigner {
         const dx = Math.min(directDx, wrapDx);
 
         const dy = island.centerY - targetProv.centerCoordinates.y;
-        const distSq = dx * dx + dy * dy;
+        let distSq = dx * dx + dy * dy;
+
+        if (targetProv.hasSeaAccess) {
+          distSq *= 0.8;
+        }
 
         if (distSq < minDistanceSq) {
           minDistanceSq = distSq;

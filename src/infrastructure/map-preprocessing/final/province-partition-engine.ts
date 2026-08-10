@@ -13,7 +13,7 @@ import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/final
 export type { ProvinceClusterInfo };
 
 export class ProvincePartitionEngine {
-  public static readonly MINOR_MASS_THRESHOLD = 1500;
+  public static readonly MINOR_MASS_THRESHOLD = 3500;
 
   public static partitionProvinces(
     rawNationGrid: Uint8Array,
