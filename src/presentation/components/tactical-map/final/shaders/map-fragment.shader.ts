@@ -72,10 +72,10 @@ void main() {
   vec3 blendedColor = mix(terrainColor.rgb, landColor.rgb, 0.70);
 
   if (isInternational || isCoast) {
-    blendedColor = mix(blendedColor, vec3(0.01, 0.02, 0.05), 0.85);
+    blendedColor = mix(blendedColor, vec3(0.01, 0.02, 0.05), 0.70);
   } else if (isInternal) {
-    vec3 internalBorderColor = landColor.rgb * 0.45;
-    blendedColor = mix(blendedColor, internalBorderColor, 0.55);
+    vec3 internalBorderColor = landColor.rgb * 0.35;
+    blendedColor = mix(blendedColor, internalBorderColor, 0.60);
   }
 
   fragColor = vec4(blendedColor, 1.0);
