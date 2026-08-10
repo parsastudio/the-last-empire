@@ -5,6 +5,7 @@ export class GeodesicSeedPicker {
     width: number,
     height: number,
   ): number[] {
+    void height;
     if (allPixelIndices.length === 0 || targetK <= 0) {
       return [];
     }
@@ -14,7 +15,6 @@ export class GeodesicSeedPicker {
     }
 
     const landPixelSet = new Set<number>(allPixelIndices);
-    const totalMapPixels = width * height;
     const seeds: number[] = [];
 
     let sumX = 0;
@@ -44,43 +44,51 @@ export class GeodesicSeedPicker {
 
     seeds.push(firstSeed);
 
-    const minLandDistances = new Uint32Array(totalMapPixels);
-    minLandDistances.fill(0xffffffff);
+    const minLandDistances = new Float64Array(allPixelIndices.length);
+    minLandDistances.fill(Infinity);
 
-    this.updateDistancesFromSeed(
+    const pixelIndexMap = new Map<number, number>();
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      pixelIndexMap.set(allPixelIndices[i]!, i);
+    }
+
+    this.updateEuclideanGeodesicDistances(
       firstSeed,
       minLandDistances,
+      allPixelIndices,
+      pixelIndexMap,
       landPixelSet,
       width,
     );
 
     for (let s = 1; s < targetK; s++) {
-      let maxDist = 0;
+      let maxDist = -1;
       let nextSeed = allPixelIndices[0]!;
 
       for (let i = 0; i < allPixelIndices.length; i++) {
-        const idx = allPixelIndices[i]!;
-        const dist = minLandDistances[idx]!;
-        if (dist !== 0xffffffff && dist > maxDist) {
+        const dist = minLandDistances[i]!;
+        if (dist !== Infinity && dist > maxDist) {
           maxDist = dist;
-          nextSeed = idx;
+          nextSeed = allPixelIndices[i]!;
         }
       }
 
-      if (nextSeed === seeds[seeds.length - 1]) {
+      if (seeds.includes(nextSeed)) {
         for (let i = 0; i < allPixelIndices.length; i++) {
-          const fallbackIdx = allPixelIndices[i]!;
-          if (!seeds.includes(fallbackIdx)) {
-            nextSeed = fallbackIdx;
+          const fallback = allPixelIndices[i]!;
+          if (!seeds.includes(fallback)) {
+            nextSeed = fallback;
             break;
           }
         }
       }
 
       seeds.push(nextSeed);
-      this.updateDistancesFromSeed(
+      this.updateEuclideanGeodesicDistances(
         nextSeed,
         minLandDistances,
+        allPixelIndices,
+        pixelIndexMap,
         landPixelSet,
         width,
       );
@@ -89,36 +97,60 @@ export class GeodesicSeedPicker {
     return seeds;
   }
 
-  private static updateDistancesFromSeed(
+  private static updateEuclideanGeodesicDistances(
     seedIdx: number,
-    minLandDistances: Uint32Array,
+    minLandDistances: Float64Array,
+    allPixelIndices: number[],
+    pixelIndexMap: Map<number, number>,
     landPixelSet: Set<number>,
     width: number,
   ): void {
+    void allPixelIndices;
+    const seedX = seedIdx % width;
+    const seedY = Math.floor(seedIdx / width);
+
     const queue: number[] = [seedIdx];
-    minLandDistances[seedIdx] = 0;
+    const visited = new Set<number>();
+    visited.add(seedIdx);
+
+    const seedLocalArrayIdx = pixelIndexMap.get(seedIdx);
+    if (seedLocalArrayIdx !== undefined) {
+      minLandDistances[seedLocalArrayIdx] = 0;
+    }
 
     let head = 0;
     while (head < queue.length) {
       const curr = queue[head++]!;
-      const currDist = minLandDistances[curr]!;
-
       const cx = curr % width;
+      const cy = Math.floor(curr / width);
 
-      const candidates: number[] = [];
-      if (cx > 0) candidates.push(curr - 1);
-      if (cx < width - 1) candidates.push(curr + 1);
-      if (curr + width < minLandDistances.length) candidates.push(curr + width);
-      if (curr - width >= 0) candidates.push(curr - width);
+      const dx = cx - seedX;
+      const dy = cy - seedY;
+      const euclideanDist = Math.sqrt(dx * dx + dy * dy);
 
-      for (let i = 0; i < candidates.length; i++) {
-        const next = candidates[i]!;
-        if (landPixelSet.has(next)) {
-          const nextDist = currDist + 1;
-          if (nextDist < minLandDistances[next]!) {
-            minLandDistances[next] = nextDist;
-            queue.push(next);
-          }
+      const localArrayIdx = pixelIndexMap.get(curr);
+      if (localArrayIdx !== undefined) {
+        if (euclideanDist < minLandDistances[localArrayIdx]!) {
+          minLandDistances[localArrayIdx] = euclideanDist;
+        }
+      }
+
+      const neighbors: number[] = [];
+      if (cx > 0) neighbors.push(curr - 1);
+      if (cx < width - 1) neighbors.push(curr + 1);
+      neighbors.push(curr + width);
+      neighbors.push(curr - width);
+
+      if (cx > 0) neighbors.push(curr + width - 1);
+      if (cx < width - 1) neighbors.push(curr + width + 1);
+      if (cx > 0) neighbors.push(curr - width - 1);
+      if (cx < width - 1) neighbors.push(curr - width + 1);
+
+      for (let i = 0; i < neighbors.length; i++) {
+        const next = neighbors[i]!;
+        if (landPixelSet.has(next) && !visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
         }
       }
     }
