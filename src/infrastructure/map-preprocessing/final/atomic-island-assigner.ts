@@ -38,7 +38,7 @@ export class AtomicIslandAssigner {
         let distSq = dx * dx + dy * dy;
 
         if (targetProv.hasSeaAccess) {
-          distSq *= 0.8;
+          distSq *= 0.7;
         }
 
         if (distSq < minDistanceSq) {

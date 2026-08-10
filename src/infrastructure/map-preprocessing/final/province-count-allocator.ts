@@ -9,15 +9,16 @@ export interface MajorLandMass {
 }
 
 export class ProvinceCountAllocator {
-  public static readonly MIN_PIXELS_PER_PROVINCE = 3500;
-  public static readonly MAX_PROVINCES_PER_NATION = 30;
+  public static readonly MIN_PIXELS_PER_PROVINCE = 1500;
 
   public static calculateTotalProvinces(totalPixels: number): number {
     if (totalPixels < this.MIN_PIXELS_PER_PROVINCE) {
       return 1;
     }
-    const count = Math.floor(totalPixels / this.MIN_PIXELS_PER_PROVINCE);
-    return Math.max(1, Math.min(this.MAX_PROVINCES_PER_NATION, count));
+    const count = Math.floor(
+      1 + 3.8 * Math.log2(totalPixels / this.MIN_PIXELS_PER_PROVINCE),
+    );
+    return Math.max(1, Math.min(25, count));
   }
 
   public static allocateProvincesToMasses(
