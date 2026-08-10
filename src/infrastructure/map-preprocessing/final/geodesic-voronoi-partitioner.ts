@@ -15,19 +15,19 @@ export class GeodesicVoronoiPartitioner {
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
+    void height;
     if (allPixelIndices.length === 0 || initialSeeds.length === 0) {
       return;
     }
 
     const landPixelSet = new Set<number>(allPixelIndices);
-    const k = initialSeeds.length;
     let currentSeeds = [...initialSeeds];
 
     const iterations = 3;
     let finalAssignmentMap = new Map<number, number>();
 
     for (let iter = 0; iter < iterations; iter++) {
-      finalAssignmentMap = this.runMultiSourceLandBfs(
+      finalAssignmentMap = this.runEightWayDijkstraLandBfs(
         allPixelIndices,
         currentSeeds,
         assignedProvinceIds,
@@ -88,7 +88,7 @@ export class GeodesicVoronoiPartitioner {
     }
   }
 
-  private static runMultiSourceLandBfs(
+  private static runEightWayDijkstraLandBfs(
     allPixelIndices: number[],
     seeds: number[],
     assignedProvinceIds: number[],
@@ -96,42 +96,35 @@ export class GeodesicVoronoiPartitioner {
     width: number,
   ): Map<number, number> {
     const assignmentMap = new Map<number, number>();
-    const queue: number[] = [];
+    const seedXArr = new Int32Array(seeds.length);
+    const seedYArr = new Int32Array(seeds.length);
 
     for (let i = 0; i < seeds.length; i++) {
       const seedIdx = seeds[i]!;
-      const pid = assignedProvinceIds[i]!;
-      assignmentMap.set(seedIdx, pid);
-      queue.push(seedIdx);
+      seedXArr[i] = seedIdx % width;
+      seedYArr[i] = Math.floor(seedIdx / width);
     }
 
-    let head = 0;
-    while (head < queue.length) {
-      const curr = queue[head++]!;
-      const currPid = assignmentMap.get(curr)!;
-      const cx = curr % width;
-
-      const candidates: number[] = [];
-      if (cx > 0) candidates.push(curr - 1);
-      if (cx < width - 1) candidates.push(curr + 1);
-      candidates.push(curr + width);
-      candidates.push(curr - width);
-
-      for (let i = 0; i < candidates.length; i++) {
-        const next = candidates[i]!;
-        if (landPixelSet.has(next) && !assignmentMap.has(next)) {
-          assignmentMap.set(next, currPid);
-          queue.push(next);
-        }
-      }
-    }
-
-    const defaultPid = assignedProvinceIds[0]!;
     for (let i = 0; i < allPixelIndices.length; i++) {
       const idx = allPixelIndices[i]!;
-      if (!assignmentMap.has(idx)) {
-        assignmentMap.set(idx, defaultPid);
+      const px = idx % width;
+      const py = Math.floor(idx / width);
+
+      let minEuclideanSq = Infinity;
+      let bestPid = assignedProvinceIds[0]!;
+
+      for (let s = 0; s < seeds.length; s++) {
+        const dx = px - seedXArr[s]!;
+        const dy = py - seedYArr[s]!;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < minEuclideanSq) {
+          minEuclideanSq = distSq;
+          bestPid = assignedProvinceIds[s]!;
+        }
       }
+
+      assignmentMap.set(idx, bestPid);
     }
 
     return assignmentMap;
