@@ -14,7 +14,6 @@ export class WavefrontProvincePartitioner {
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): number[] {
-    void height;
     const allPixelIndices: number[] = [];
     for (let i = 0; i < group.components.length; i++) {
       const comp = group.components[i]!;
@@ -71,7 +70,7 @@ export class WavefrontProvincePartitioner {
       let maxDistSq = -1;
       let bestIdx = allPixelIndices[0]!;
 
-      const step = Math.max(1, Math.floor(allPixelIndices.length / 300));
+      const step = Math.max(1, Math.floor(allPixelIndices.length / 400));
       for (let i = 0; i < allPixelIndices.length; i += step) {
         const idx = allPixelIndices[i]!;
         const px = idx % width;
@@ -99,7 +98,11 @@ export class WavefrontProvincePartitioner {
     }
 
     const assignments = new Int32Array(allPixelIndices.length);
-    const numIterations = 6;
+    const weights = new Float64Array(k);
+    weights.fill(1.0);
+
+    const targetAvgSize = allPixelIndices.length / k;
+    const numIterations = 8;
 
     for (let iter = 0; iter < numIterations; iter++) {
       for (let i = 0; i < allPixelIndices.length; i++) {
@@ -107,17 +110,17 @@ export class WavefrontProvincePartitioner {
         const px = idx % width;
         const py = Math.floor(idx / width);
 
-        let minDistSq = Infinity;
+        let minWeightedDistSq = Infinity;
         let bestK = 0;
 
         for (let s = 0; s < k; s++) {
           const directDx = Math.abs(px - seedsX[s]!);
           const dx = Math.min(directDx, width - directDx);
           const dy = py - seedsY[s]!;
-          const dSq = dx * dx + dy * dy;
+          const dSq = (dx * dx + dy * dy) * weights[s]!;
 
-          if (dSq < minDistSq) {
-            minDistSq = dSq;
+          if (dSq < minWeightedDistSq) {
+            minWeightedDistSq = dSq;
             bestK = s;
           }
         }
@@ -125,25 +128,43 @@ export class WavefrontProvincePartitioner {
         assignments[i] = bestK;
       }
 
-      if (iter < numIterations - 1) {
-        const sumXArr = new Float64Array(k);
-        const sumYArr = new Float64Array(k);
-        const countArr = new Int32Array(k);
+      const sumXArr = new Float64Array(k);
+      const sumYArr = new Float64Array(k);
+      const countArr = new Int32Array(k);
 
-        for (let i = 0; i < allPixelIndices.length; i++) {
-          const idx = allPixelIndices[i]!;
-          const s = assignments[i]!;
-          sumXArr[s] += idx % width;
-          sumYArr[s] += Math.floor(idx / width);
-          countArr[s] += 1;
+      for (let i = 0; i < allPixelIndices.length; i++) {
+        const idx = allPixelIndices[i]!;
+        const s = assignments[i]!;
+        sumXArr[s] += idx % width;
+        sumYArr[s] += Math.floor(idx / width);
+        countArr[s] += 1;
+      }
+
+      let maxClusterSize = 0;
+      let largestClusterK = 0;
+
+      for (let s = 0; s < k; s++) {
+        const count = countArr[s]!;
+        if (count > maxClusterSize) {
+          maxClusterSize = count;
+          largestClusterK = s;
         }
+      }
 
-        for (let s = 0; s < k; s++) {
-          const count = countArr[s]!;
-          if (count > 0) {
-            seedsX[s] = sumXArr[s]! / count;
-            seedsY[s] = sumYArr[s]! / count;
-          }
+      for (let s = 0; s < k; s++) {
+        const count = countArr[s]!;
+        if (
+          count < targetAvgSize * 0.15 &&
+          maxClusterSize > targetAvgSize * 1.5
+        ) {
+          seedsX[s] = seedsX[largestClusterK]! + (Math.random() - 0.5) * 10;
+          seedsY[s] = seedsY[largestClusterK]! + (Math.random() - 0.5) * 10;
+          weights[s] = 0.8;
+        } else if (count > 0) {
+          seedsX[s] = sumXArr[s]! / count;
+          seedsY[s] = sumYArr[s]! / count;
+          const ratio = count / (targetAvgSize || 1);
+          weights[s] = Math.max(0.5, Math.min(2.0, Math.pow(ratio, 0.5)));
         }
       }
     }
@@ -179,11 +200,14 @@ export class WavefrontProvincePartitioner {
       }
     }
 
-    if (queue.length === 0 && allPixelIndices.length > 0) {
-      const pid = assignedProvinceIds[0]!;
-      const pIdx = allPixelIndices[0]!;
-      finalAssignmentMap.set(pIdx, pid);
-      queue.push(pIdx);
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      const pIdx = allPixelIndices[i]!;
+      if (!finalAssignmentMap.has(pIdx)) {
+        const fallbackPid =
+          assignedProvinceIds[assignments[i]!] || assignedProvinceIds[0]!;
+        finalAssignmentMap.set(pIdx, fallbackPid);
+        queue.push(pIdx);
+      }
     }
 
     let head = 0;
