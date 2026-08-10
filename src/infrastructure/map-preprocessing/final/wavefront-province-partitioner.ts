@@ -60,7 +60,7 @@ export class WavefrontProvincePartitioner {
       assignedProvinceIds.push(startProvinceId + k);
     }
 
-    const microSeeds = GeodesicSeedPicker.pickSeeds(
+    const initialSeeds = GeodesicSeedPicker.pickSeeds(
       allPixelIndices,
       assignedProvinceIds.length,
       width,
@@ -69,7 +69,7 @@ export class WavefrontProvincePartitioner {
 
     GeodesicVoronoiPartitioner.partitionAndRelax(
       allPixelIndices,
-      microSeeds,
+      initialSeeds,
       assignedProvinceIds,
       group,
       width,
