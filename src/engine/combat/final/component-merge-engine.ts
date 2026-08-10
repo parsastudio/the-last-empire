@@ -18,12 +18,20 @@ export class ComponentMergeEngine {
     const parent = components.map((_, i) => i);
 
     const find = (i: number): number => {
-      if (parent[i] === i) return i;
-      parent[i] = find(parent[i]!);
-      return parent[i]!;
+      let root = i;
+      while (root !== parent[root]) {
+        root = parent[root]!;
+      }
+      let curr = i;
+      while (curr !== root) {
+        const nxt = parent[curr]!;
+        parent[curr] = root;
+        curr = nxt;
+      }
+      return root;
     };
 
-    const union = (i: number, j: number) => {
+    const union = (i: number, j: number): void => {
       const rootI = find(i);
       const rootJ = find(j);
       if (rootI !== rootJ) {
@@ -70,13 +78,32 @@ export class ComponentMergeEngine {
 
     const mergedResult: LandClusterComponent[] = [];
     for (const group of groups.values()) {
-      const allIndices = group.flatMap((g) => g.pixelIndices);
+      const allIndices: number[] = [];
+      for (let i = 0; i < group.length; i++) {
+        const comp = group[i]!;
+        for (let j = 0; j < comp.pixelIndices.length; j++) {
+          allIndices.push(comp.pixelIndices[j]!);
+        }
+      }
+
+      let minX = group[0]!.minX;
+      let maxX = group[0]!.maxX;
+      let minY = group[0]!.minY;
+      let maxY = group[0]!.maxY;
+
+      for (let i = 1; i < group.length; i++) {
+        minX = Math.min(minX, group[i]!.minX);
+        maxX = Math.max(maxX, group[i]!.maxX);
+        minY = Math.min(minY, group[i]!.minY);
+        maxY = Math.max(maxY, group[i]!.maxY);
+      }
+
       mergedResult.push({
         pixelIndices: allIndices,
-        minX: Math.min(...group.map((g) => g.minX)),
-        maxX: Math.max(...group.map((g) => g.maxX)),
-        minY: Math.min(...group.map((g) => g.minY)),
-        maxY: Math.max(...group.map((g) => g.maxY)),
+        minX,
+        maxX,
+        minY,
+        maxY,
         size: allIndices.length,
       });
     }
