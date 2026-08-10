@@ -22,7 +22,7 @@ export function useSelectNationForm() {
     async function loadManifest() {
       try {
         const res = await fetch("/maps/map1/temp/final/manifest.json", {
-          cache: "force-cache",
+          cache: "no-store",
         });
         if (res.ok) {
           const json = await res.json();
