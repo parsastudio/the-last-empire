@@ -10,9 +10,14 @@ export class GeodesicSeedPicker {
       return [];
     }
 
-    if (targetK === 1 || allPixelIndices.length <= targetK) {
-      return [allPixelIndices[Math.floor(allPixelIndices.length / 2)]!];
+    if (allPixelIndices.length <= targetK) {
+      return [...allPixelIndices];
     }
+
+    const microK = Math.min(
+      allPixelIndices.length,
+      Math.max(targetK * 5, targetK),
+    );
 
     let minX = Infinity;
     let maxX = -Infinity;
@@ -34,11 +39,11 @@ export class GeodesicSeedPicker {
 
     const landArea = allPixelIndices.length;
     const targetHexRadius = Math.sqrt(
-      (2.0 * landArea) / (Math.sqrt(3) * targetK * 1.15),
+      (2.0 * landArea) / (Math.sqrt(3) * microK * 1.1),
     );
 
-    const dx = Math.max(12, targetHexRadius);
-    const dy = Math.max(12, targetHexRadius * (Math.sqrt(3) / 2.0));
+    const dx = Math.max(6, targetHexRadius);
+    const dy = Math.max(6, targetHexRadius * (Math.sqrt(3) / 2.0));
 
     const initialSeedCoords: { x: number; y: number }[] = [];
     let row = 0;
@@ -58,11 +63,11 @@ export class GeodesicSeedPicker {
       });
     }
 
-    const seeds: number[] = [];
+    const microSeeds: number[] = [];
     const usedIndices = new Set<number>();
 
     for (let i = 0; i < initialSeedCoords.length; i++) {
-      if (seeds.length >= targetK) break;
+      if (microSeeds.length >= microK) break;
 
       const target = initialSeedCoords[i]!;
       let bestIdx = -1;
@@ -85,11 +90,14 @@ export class GeodesicSeedPicker {
 
       if (bestIdx !== -1) {
         usedIndices.add(bestIdx);
-        seeds.push(bestIdx);
+        microSeeds.push(bestIdx);
       }
     }
 
-    while (seeds.length < targetK) {
+    while (
+      microSeeds.length < microK &&
+      microSeeds.length < allPixelIndices.length
+    ) {
       let maxDist = -1;
       let bestFallback = allPixelIndices[0]!;
 
@@ -101,8 +109,8 @@ export class GeodesicSeedPicker {
         const py = Math.floor(pIdx / width);
 
         let minSeedDist = Infinity;
-        for (let s = 0; s < seeds.length; s++) {
-          const sIdx = seeds[s]!;
+        for (let s = 0; s < microSeeds.length; s++) {
+          const sIdx = microSeeds[s]!;
           const sx = sIdx % width;
           const sy = Math.floor(sIdx / width);
           const d = (px - sx) * (px - sx) + (py - sy) * (py - sy);
@@ -116,9 +124,9 @@ export class GeodesicSeedPicker {
       }
 
       usedIndices.add(bestFallback);
-      seeds.push(bestFallback);
+      microSeeds.push(bestFallback);
     }
 
-    return seeds;
+    return microSeeds;
   }
 }
