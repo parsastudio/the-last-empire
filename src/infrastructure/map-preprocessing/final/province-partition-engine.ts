@@ -1,15 +1,20 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+import {
+  ProvinceClusterInfo,
+  LandComponent,
+  ArchipelagoGroup,
+} from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 import { TopologicalComponentAnalyzer } from "@/infrastructure/map-preprocessing/final/topological-component-analyzer";
-import { ArchipelagoGrouper } from "@/infrastructure/map-preprocessing/final/archipelago-grouper";
 import { ProvinceCountAllocator } from "@/infrastructure/map-preprocessing/final/province-count-allocator";
 import { WavefrontProvincePartitioner } from "@/infrastructure/map-preprocessing/final/wavefront-province-partitioner";
-import { SameCountryIslandAbsorber } from "@/infrastructure/map-preprocessing/final/same-country-island-absorber";
+import { AtomicIslandAssigner } from "@/infrastructure/map-preprocessing/final/atomic-island-assigner";
 import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/final/sliver-province-absorber";
 
 export type { ProvinceClusterInfo };
 
 export class ProvincePartitionEngine {
+  public static readonly MINOR_MASS_THRESHOLD = 1500;
+
   public static partitionProvinces(
     rawNationGrid: Uint8Array,
     width: number,
@@ -35,49 +40,86 @@ export class ProvincePartitionEngine {
     let globalProvinceCounter = 1;
 
     for (const [countryNumericId, pixelIndices] of countryPixelsMap.entries()) {
-      const rawComponents = TopologicalComponentAnalyzer.analyzeComponents(
+      const allComponents = TopologicalComponentAnalyzer.analyzeComponents(
         pixelIndices,
         width,
         height,
       );
 
-      const archipelagoGroups = ArchipelagoGrouper.groupComponents(
-        rawComponents,
-        countryNumericId,
-        width,
-      );
+      if (allComponents.length === 0) continue;
 
-      const allocations = ProvinceCountAllocator.allocateProvinces(
-        archipelagoGroups,
-        pixelIndices.length,
-      );
+      const majorComponents: LandComponent[] = [];
+      const minorComponents: LandComponent[] = [];
 
-      const assignedProvincesForCountry: number[] = [];
-      const unassignedGroups = [];
-
-      for (const alloc of allocations) {
-        if (alloc.provinceCount > 0) {
-          const assignedIds = WavefrontProvincePartitioner.partitionGroup(
-            alloc.group,
-            alloc.provinceCount,
-            globalProvinceCounter,
-            width,
-            height,
-            bitBuffer,
-            provinceMap,
-          );
-
-          assignedProvincesForCountry.push(...assignedIds);
-          globalProvinceCounter += assignedIds.length;
+      for (let i = 0; i < allComponents.length; i++) {
+        const comp = allComponents[i]!;
+        if (comp.size >= this.MINOR_MASS_THRESHOLD) {
+          majorComponents.push(comp);
         } else {
-          unassignedGroups.push(alloc.group);
+          minorComponents.push(comp);
         }
       }
 
-      SameCountryIslandAbsorber.absorbMicroGroups(
-        unassignedGroups,
+      if (majorComponents.length === 0) {
+        allComponents.sort((a, b) => b.size - a.size);
+        const largest = allComponents[0]!;
+        majorComponents.push(largest);
+        minorComponents.shift();
+      }
+
+      const totalCountryPixels = pixelIndices.length;
+
+      const majorGroups: ArchipelagoGroup[] = majorComponents.map(
+        (comp, idx) => ({
+          id: idx + 1,
+          countryNumericId,
+          components: [comp],
+          totalPixels: comp.size,
+          centerX: comp.centerX,
+          centerY: comp.centerY,
+        }),
+      );
+
+      const majorMasses = majorGroups.map((g) => ({
+        id: g.id,
+        components: g.components,
+        totalPixels: g.totalPixels,
+        centerX: g.centerX,
+        centerY: g.centerY,
+      }));
+
+      const allocations = ProvinceCountAllocator.allocateProvincesToMasses(
+        majorMasses,
+        totalCountryPixels,
+      );
+
+      const assignedProvincesForCountry: number[] = [];
+
+      for (let i = 0; i < majorGroups.length; i++) {
+        const group = majorGroups[i]!;
+        const kCount = allocations.get(group.id) || 1;
+
+        const assignedIds = WavefrontProvincePartitioner.partitionGroup(
+          group,
+          kCount,
+          globalProvinceCounter,
+          width,
+          height,
+          bitBuffer,
+          provinceMap,
+        );
+
+        for (let j = 0; j < assignedIds.length; j++) {
+          assignedProvincesForCountry.push(assignedIds[j]!);
+        }
+        globalProvinceCounter += assignedIds.length;
+      }
+
+      AtomicIslandAssigner.assignMinorComponentsAtomically(
+        minorComponents,
         assignedProvincesForCountry,
         width,
+        height,
         bitBuffer,
         provinceMap,
       );
