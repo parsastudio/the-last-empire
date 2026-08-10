@@ -50,6 +50,10 @@ export class FinalManifestBuilder {
     width: number,
     height: number,
   ): Promise<FinalMapManifest> {
+    console.log(
+      `[DIAGNOSTIC-MANIFEST] Starting Manifest Build. Input provinceMap size: ${provinceMap.size}`,
+    );
+
     const countryProvincesMap = new Map<number, ProvinceClusterInfo[]>();
 
     for (const info of provinceMap.values()) {
@@ -61,12 +65,36 @@ export class FinalManifestBuilder {
       list.push(info);
     }
 
+    console.log(
+      `[DIAGNOSTIC-MANIFEST] Unique Country Numeric IDs in provinceMap: ${countryProvincesMap.size}`,
+    );
+
+    const allMapProvinceIds = new Set<number>(provinceMap.keys());
     const manifestProvinces: FinalManifestProvince[] = [];
     const manifestNations: FinalManifestNation[] = [];
+    const includedProvinceIds = new Set<number>();
 
     const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) =>
       countryProvincesMap.has(p.id ?? 0),
     );
+
+    console.log(
+      `[DIAGNOSTIC-MANIFEST] ALL_COUNTRY_PROFILES count: ${ALL_COUNTRY_PROFILES.length}`,
+    );
+    console.log(
+      `[DIAGNOSTIC-MANIFEST] Matched activeProfiles count: ${activeProfiles.length}`,
+    );
+
+    for (const countryNumericId of countryProvincesMap.keys()) {
+      const profile = ALL_COUNTRY_PROFILES.find(
+        (p) => p.id === countryNumericId,
+      );
+      if (!profile) {
+        console.error(
+          `[DIAGNOSTIC-MANIFEST CRITICAL ERROR] Country Numeric ID ${countryNumericId} exists in provinceMap but HAS NO MATCHING PROFILE in ALL_COUNTRY_PROFILES!`,
+        );
+      }
+    }
 
     activeProfiles.sort((a, b) => b.gdp - a.gdp);
 
@@ -85,6 +113,7 @@ export class FinalManifestBuilder {
       for (let pIndex = 0; pIndex < provList.length; pIndex++) {
         const pInfo = provList[pIndex]!;
         provIds.push(pInfo.provinceId);
+        includedProvinceIds.add(pInfo.provinceId);
 
         const share =
           totalCountryPixels > 0
@@ -122,6 +151,27 @@ export class FinalManifestBuilder {
       });
     }
 
+    const missingProvinceIds: number[] = [];
+    for (const pid of allMapProvinceIds) {
+      if (!includedProvinceIds.has(pid)) {
+        missingProvinceIds.push(pid);
+      }
+    }
+
+    if (missingProvinceIds.length > 0) {
+      console.error(
+        `[DIAGNOSTIC-MANIFEST CRITICAL ERROR] ${missingProvinceIds.length} Province IDs were GENERATED in Map BUT DROPPED from Manifest!`,
+      );
+      console.error(
+        `[DIAGNOSTIC-MANIFEST CRITICAL ERROR] Dropped Province IDs sample:`,
+        missingProvinceIds.slice(0, 20),
+      );
+    } else {
+      console.log(
+        `[DIAGNOSTIC-MANIFEST SUCCESS] All ${includedProvinceIds.size} generated province IDs successfully written to Manifest.`,
+      );
+    }
+
     const manifest: FinalMapManifest = {
       mapId,
       totalProvincesCount: manifestProvinces.length,
@@ -139,6 +189,8 @@ export class FinalManifestBuilder {
       JSON.stringify(manifest, null, 2),
       "utf-8",
     );
+
+    console.log(`[DIAGNOSTIC-MANIFEST] Saved manifest.json to ${targetDir}`);
 
     return manifest;
   }

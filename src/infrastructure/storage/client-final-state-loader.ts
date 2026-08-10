@@ -8,14 +8,9 @@ export class ClientFinalStateLoader {
   public static async loadLiveStateBuffer(
     mapId = "map1",
   ): Promise<BitPackedBuffer | null> {
-    if (this.cachedBuffer) {
-      BitPackedGridState.getInstance().markDirty();
-      return this.cachedBuffer;
-    }
-
     try {
       const url = MapPathResolver.getMapFinalClientUrl(mapId, "live-state.bin");
-      const res = await fetch(url, { cache: "no-cache" });
+      const res = await fetch(url, { cache: "no-store" });
 
       if (!res.ok) {
         return null;

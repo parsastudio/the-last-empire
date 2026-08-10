@@ -36,6 +36,10 @@ export class ProvincePartitionEngine {
       }
     }
 
+    console.log(
+      `[DIAGNOSTIC-PROVINCE] Total Unique Country Numeric IDs in Grid: ${countryPixelsMap.size}`,
+    );
+
     const provinceMap = new Map<number, ProvinceClusterInfo>();
     let globalProvinceCounter = 1;
 
@@ -46,7 +50,12 @@ export class ProvincePartitionEngine {
         height,
       );
 
-      if (allComponents.length === 0) continue;
+      if (allComponents.length === 0) {
+        console.warn(
+          `[DIAGNOSTIC-PROVINCE] Country ID ${countryNumericId} has 0 components! Skipping.`,
+        );
+        continue;
+      }
 
       const majorComponents: LandComponent[] = [];
       const minorComponents: LandComponent[] = [];
@@ -68,6 +77,8 @@ export class ProvincePartitionEngine {
       }
 
       const totalCountryPixels = pixelIndices.length;
+      const totalProvincesCount =
+        ProvinceCountAllocator.calculateTotalProvinces(totalCountryPixels);
 
       const majorGroups: ArchipelagoGroup[] = majorComponents.map(
         (comp, idx) => ({
@@ -93,6 +104,7 @@ export class ProvincePartitionEngine {
         totalCountryPixels,
       );
 
+      const startIdForNation = globalProvinceCounter;
       const assignedProvincesForCountry: number[] = [];
 
       for (let i = 0; i < majorGroups.length; i++) {
@@ -123,7 +135,21 @@ export class ProvincePartitionEngine {
         bitBuffer,
         provinceMap,
       );
+
+      const endIdForNation = globalProvinceCounter - 1;
+      console.log(
+        `[DIAGNOSTIC-PROVINCE] Country ID ${countryNumericId}: ${totalCountryPixels} px | ` +
+          `Target K: ${totalProvincesCount} | Major Mass Count: ${majorComponents.length} | ` +
+          `Minor Mass Count: ${minorComponents.length} | Assigned IDs: ${startIdForNation} -> ${endIdForNation}`,
+      );
     }
+
+    console.log(
+      `[DIAGNOSTIC-PROVINCE] Global Province Counter reached: ${globalProvinceCounter - 1}`,
+    );
+    console.log(
+      `[DIAGNOSTIC-PROVINCE] Pre-Sliver Province Map Size: ${provinceMap.size}`,
+    );
 
     this.detectProvinceNeighbors(bitBuffer, width, height, provinceMap);
 
@@ -132,6 +158,10 @@ export class ProvincePartitionEngine {
       width,
       height,
       provinceMap,
+    );
+
+    console.log(
+      `[DIAGNOSTIC-PROVINCE] Post-Sliver Province Map Size: ${provinceMap.size}`,
     );
 
     return provinceMap;
