@@ -4,12 +4,74 @@ import {
   ProvinceClusterInfo,
 } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
+class LandMinHeap {
+  private nodes: { idx: number; dist: number }[] = [];
+
+  public push(idx: number, dist: number): void {
+    this.nodes.push({ idx, dist });
+    this.bubbleUp(this.nodes.length - 1);
+  }
+
+  public pop(): { idx: number; dist: number } | undefined {
+    if (this.nodes.length === 0) return undefined;
+    const top = this.nodes[0]!;
+    const bottom = this.nodes.pop()!;
+    if (this.nodes.length > 0) {
+      this.nodes[0] = bottom;
+      this.sinkDown(0);
+    }
+    return top;
+  }
+
+  public size(): number {
+    return this.nodes.length;
+  }
+
+  private bubbleUp(i: number): void {
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (this.nodes[i]!.dist < this.nodes[p]!.dist) {
+        const tmp = this.nodes[i]!;
+        this.nodes[i] = this.nodes[p]!;
+        this.nodes[p] = tmp;
+        i = p;
+      } else {
+        break;
+      }
+    }
+  }
+
+  private sinkDown(i: number): void {
+    const len = this.nodes.length;
+    while (true) {
+      const left = (i << 1) + 1;
+      const right = left + 1;
+      let smallest = i;
+
+      if (left < len && this.nodes[left]!.dist < this.nodes[smallest]!.dist) {
+        smallest = left;
+      }
+      if (right < len && this.nodes[right]!.dist < this.nodes[smallest]!.dist) {
+        smallest = right;
+      }
+
+      if (smallest !== i) {
+        const tmp = this.nodes[i]!;
+        this.nodes[i] = this.nodes[smallest]!;
+        this.nodes[smallest] = tmp;
+        i = smallest;
+      } else {
+        break;
+      }
+    }
+  }
+}
+
 export class GeodesicVoronoiPartitioner {
   private static calculateOrganicNoise(x: number, y: number): number {
-    const f1 = Math.sin(x * 0.035 + y * 0.022) * 10.0;
-    const f2 = Math.cos(x * 0.018 - y * 0.041) * 14.0;
-    const f3 = Math.sin(x * 0.052 + y * 0.058) * 6.0;
-    return f1 + f2 + f3;
+    const f1 = Math.sin(x * 0.035 + y * 0.022) * 8.0;
+    const f2 = Math.cos(x * 0.018 - y * 0.041) * 10.0;
+    return f1 + f2;
   }
 
   public static partitionAndRelax(
@@ -22,25 +84,32 @@ export class GeodesicVoronoiPartitioner {
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
-    void height;
     if (allPixelIndices.length === 0 || initialSeeds.length === 0) {
       return;
     }
 
+    const totalMapPixels = width * height;
+    const landMask = new Uint8Array(totalMapPixels);
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      landMask[allPixelIndices[i]!] = 1;
+    }
+
     let currentSeeds = [...initialSeeds];
-    const iterations = 5;
+    const iterations = 3;
     let finalAssignmentMap = new Map<number, number>();
 
     for (let iter = 0; iter < iterations; iter++) {
-      finalAssignmentMap = this.runKMeansLandVoronoi(
+      finalAssignmentMap = this.runGeodesicLandDijkstra(
         allPixelIndices,
         currentSeeds,
         assignedProvinceIds,
+        landMask,
         width,
+        totalMapPixels,
       );
 
       if (iter < iterations - 1) {
-        currentSeeds = this.calculateKMeansCentroids(
+        currentSeeds = this.calculateNewCentroidSeeds(
           allPixelIndices,
           finalAssignmentMap,
           assignedProvinceIds,
@@ -92,51 +161,83 @@ export class GeodesicVoronoiPartitioner {
     }
   }
 
-  private static runKMeansLandVoronoi(
+  private static runGeodesicLandDijkstra(
     allPixelIndices: number[],
     seeds: number[],
     assignedProvinceIds: number[],
+    landMask: Uint8Array,
     width: number,
+    totalMapPixels: number,
   ): Map<number, number> {
     const assignmentMap = new Map<number, number>();
-    const seedXArr = new Float64Array(seeds.length);
-    const seedYArr = new Float64Array(seeds.length);
+    const distMap = new Float64Array(totalMapPixels);
+    distMap.fill(Infinity);
 
-    for (let i = 0; i < seeds.length; i++) {
-      const seedIdx = seeds[i]!;
-      seedXArr[i] = seedIdx % width;
-      seedYArr[i] = Math.floor(seedIdx / width);
+    const heap = new LandMinHeap();
+
+    for (let s = 0; s < seeds.length; s++) {
+      const seedIdx = seeds[s]!;
+      const pid = assignedProvinceIds[s]!;
+      distMap[seedIdx] = 0;
+      assignmentMap.set(seedIdx, pid);
+      heap.push(seedIdx, 0);
     }
 
-    for (let i = 0; i < allPixelIndices.length; i++) {
-      const idx = allPixelIndices[i]!;
-      const px = idx % width;
-      const py = Math.floor(idx / width);
+    const neighborOffsets = [
+      { dx: 1, dy: 0, cost: 1000 },
+      { dx: -1, dy: 0, cost: 1000 },
+      { dx: 0, dy: 1, cost: 1000 },
+      { dx: 0, dy: -1, cost: 1000 },
+      { dx: 1, dy: 1, cost: 1414 },
+      { dx: -1, dy: -1, cost: 1414 },
+      { dx: 1, dy: -1, cost: 1414 },
+      { dx: -1, dy: 1, cost: 1414 },
+    ];
 
-      const noiseOffset = this.calculateOrganicNoise(px, py);
+    while (heap.size() > 0) {
+      const item = heap.pop()!;
+      const currIdx = item.idx;
+      const currDist = item.dist;
 
-      let minOrganicDist = Infinity;
-      let bestPid = assignedProvinceIds[0]!;
+      if (currDist > distMap[currIdx]!) continue;
 
-      for (let s = 0; s < seeds.length; s++) {
-        const dx = px - seedXArr[s]!;
-        const dy = py - seedYArr[s]!;
-        const rawDist = Math.sqrt(dx * dx + dy * dy);
-        const organicDist = rawDist + noiseOffset;
+      const currPid = assignmentMap.get(currIdx)!;
+      const cx = currIdx % width;
+      const cy = Math.floor(currIdx / width);
 
-        if (organicDist < minOrganicDist) {
-          minOrganicDist = organicDist;
-          bestPid = assignedProvinceIds[s]!;
+      for (let k = 0; k < 8; k++) {
+        const off = neighborOffsets[k]!;
+        const nx = cx + off.dx;
+        const ny = cy + off.dy;
+
+        if (nx >= 0 && nx < width && ny >= 0) {
+          const nIdx = ny * width + nx;
+          if (nIdx < totalMapPixels && landMask[nIdx] === 1) {
+            const noise = this.calculateOrganicNoise(nx, ny);
+            const nextDist = currDist + off.cost + noise;
+
+            if (nextDist < distMap[nIdx]!) {
+              distMap[nIdx] = nextDist;
+              assignmentMap.set(nIdx, currPid);
+              heap.push(nIdx, nextDist);
+            }
+          }
         }
       }
+    }
 
-      assignmentMap.set(idx, bestPid);
+    const defaultPid = assignedProvinceIds[0]!;
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      const idx = allPixelIndices[i]!;
+      if (!assignmentMap.has(idx)) {
+        assignmentMap.set(idx, defaultPid);
+      }
     }
 
     return assignmentMap;
   }
 
-  private static calculateKMeansCentroids(
+  private static calculateNewCentroidSeeds(
     allPixelIndices: number[],
     assignmentMap: Map<number, number>,
     assignedProvinceIds: number[],

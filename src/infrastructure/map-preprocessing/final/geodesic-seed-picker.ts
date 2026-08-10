@@ -14,80 +14,136 @@ export class GeodesicSeedPicker {
       return [allPixelIndices[Math.floor(allPixelIndices.length / 2)]!];
     }
 
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
+    const landPixelSet = new Set<number>(allPixelIndices);
+    const seeds: number[] = [];
+
+    let sumX = 0;
+    let sumY = 0;
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      const idx = allPixelIndices[i]!;
+      sumX += idx % width;
+      sumY += Math.floor(idx / width);
+    }
+
+    const avgX = Math.floor(sumX / allPixelIndices.length);
+    const avgY = Math.floor(sumY / allPixelIndices.length);
+
+    let firstSeed = allPixelIndices[0]!;
+    let minCenterDist = Infinity;
 
     for (let i = 0; i < allPixelIndices.length; i++) {
       const idx = allPixelIndices[i]!;
       const px = idx % width;
       const py = Math.floor(idx / width);
-      if (px < minX) minX = px;
-      if (px > maxX) maxX = px;
-      if (py < minY) minY = py;
-      if (py > maxY) maxY = py;
-    }
-
-    const bboxWidth = Math.max(1, maxX - minX);
-    const bboxHeight = Math.max(1, maxY - minY);
-    const aspectRatio = bboxWidth / bboxHeight;
-
-    let cols = Math.round(Math.sqrt(targetK * aspectRatio));
-    let rows = Math.round(targetK / (cols || 1));
-
-    cols = Math.max(1, cols);
-    rows = Math.max(1, rows);
-
-    while (cols * rows < targetK) {
-      if (cols / rows < aspectRatio) {
-        cols++;
-      } else {
-        rows++;
+      const distSq = (px - avgX) * (px - avgX) + (py - avgY) * (py - avgY);
+      if (distSq < minCenterDist) {
+        minCenterDist = distSq;
+        firstSeed = idx;
       }
     }
 
-    const gridCellW = bboxWidth / cols;
-    const gridCellH = bboxHeight / rows;
+    seeds.push(firstSeed);
 
-    const initialSeedCoords: { x: number; y: number }[] = [];
+    const minLandDistances = new Float64Array(allPixelIndices.length);
+    minLandDistances.fill(Infinity);
 
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (initialSeedCoords.length >= targetK) break;
-        const targetX = minX + (c + 0.5) * gridCellW;
-        const targetY = minY + (r + 0.5) * gridCellH;
-        initialSeedCoords.push({ x: targetX, y: targetY });
-      }
+    const pixelIndexMap = new Map<number, number>();
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      pixelIndexMap.set(allPixelIndices[i]!, i);
     }
 
-    const seeds: number[] = [];
-    const usedIndices = new Set<number>();
+    this.updateLandPathDistances(
+      firstSeed,
+      minLandDistances,
+      allPixelIndices,
+      pixelIndexMap,
+      landPixelSet,
+      width,
+    );
 
-    for (let i = 0; i < initialSeedCoords.length; i++) {
-      const target = initialSeedCoords[i]!;
-      let bestIdx = allPixelIndices[0]!;
-      let minDistance = Infinity;
+    for (let s = 1; s < targetK; s++) {
+      let maxDist = -1;
+      let nextSeed = allPixelIndices[0]!;
 
-      for (let j = 0; j < allPixelIndices.length; j++) {
-        const pIdx = allPixelIndices[j]!;
-        if (usedIndices.has(pIdx)) continue;
-
-        const px = pIdx % width;
-        const py = Math.floor(pIdx / width);
-        const distSq =
-          (px - target.x) * (px - target.x) + (py - target.y) * (py - target.y);
-
-        if (distSq < minDistance) {
-          minDistance = distSq;
-          bestIdx = pIdx;
+      for (let i = 0; i < allPixelIndices.length; i++) {
+        const dist = minLandDistances[i]!;
+        if (dist !== Infinity && dist > maxDist) {
+          maxDist = dist;
+          nextSeed = allPixelIndices[i]!;
         }
       }
 
-      usedIndices.add(bestIdx);
-      seeds.push(bestIdx);
+      if (seeds.includes(nextSeed)) {
+        for (let i = 0; i < allPixelIndices.length; i++) {
+          const fallback = allPixelIndices[i]!;
+          if (!seeds.includes(fallback)) {
+            nextSeed = fallback;
+            break;
+          }
+        }
+      }
+
+      seeds.push(nextSeed);
+      this.updateLandPathDistances(
+        nextSeed,
+        minLandDistances,
+        allPixelIndices,
+        pixelIndexMap,
+        landPixelSet,
+        width,
+      );
     }
 
     return seeds;
+  }
+
+  private static updateLandPathDistances(
+    seedIdx: number,
+    minLandDistances: Float64Array,
+    allPixelIndices: number[],
+    pixelIndexMap: Map<number, number>,
+    landPixelSet: Set<number>,
+    width: number,
+  ): void {
+    void allPixelIndices;
+    const queue: number[] = [seedIdx];
+    const localIdx = pixelIndexMap.get(seedIdx);
+    if (localIdx !== undefined && minLandDistances[localIdx]! > 0) {
+      minLandDistances[localIdx] = 0;
+    }
+
+    const distMap = new Map<number, number>();
+    distMap.set(seedIdx, 0);
+
+    let head = 0;
+    while (head < queue.length) {
+      const curr = queue[head++]!;
+      const currDist = distMap.get(curr)!;
+      const cx = curr % width;
+
+      const arrayIdx = pixelIndexMap.get(curr);
+      if (arrayIdx !== undefined) {
+        if (currDist < minLandDistances[arrayIdx]!) {
+          minLandDistances[arrayIdx] = currDist;
+        }
+      }
+
+      const neighbors: number[] = [];
+      if (cx > 0) neighbors.push(curr - 1);
+      if (cx < width - 1) neighbors.push(curr + 1);
+      neighbors.push(curr + width);
+      neighbors.push(curr - width);
+
+      for (let i = 0; i < neighbors.length; i++) {
+        const next = neighbors[i]!;
+        if (landPixelSet.has(next)) {
+          const nextDist = currDist + 1;
+          if (!distMap.has(next) || nextDist < distMap.get(next)!) {
+            distMap.set(next, nextDist);
+            queue.push(next);
+          }
+        }
+      }
+    }
   }
 }
