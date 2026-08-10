@@ -110,6 +110,12 @@ export class WavefrontProvincePartitioner {
         const px = idx % width;
         const py = Math.floor(idx / width);
 
+        const wave =
+          1.0 +
+          0.15 *
+            Math.sin(px * 0.08 + py * 0.05) *
+            Math.cos(py * 0.08 - px * 0.05);
+
         let minWeightedDistSq = Infinity;
         let bestK = 0;
 
@@ -117,7 +123,7 @@ export class WavefrontProvincePartitioner {
           const directDx = Math.abs(px - seedsX[s]!);
           const dx = Math.min(directDx, width - directDx);
           const dy = py - seedsY[s]!;
-          const dSq = (dx * dx + dy * dy) * weights[s]!;
+          const dSq = (dx * dx + dy * dy) * weights[s]! * wave;
 
           if (dSq < minWeightedDistSq) {
             minWeightedDistSq = dSq;
