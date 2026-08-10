@@ -2,7 +2,7 @@ import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-pa
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
 export class SliverProvinceAbsorber {
-  public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 500;
+  public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 30;
 
   public static absorbSliverProvinces(
     bitBuffer: BitPackedBuffer,
@@ -10,14 +10,34 @@ export class SliverProvinceAbsorber {
     height: number,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
+    const countryProvinceCounts = new Map<number, number>();
+    for (const info of provinceMap.values()) {
+      const cId = info.countryNumericId;
+      countryProvinceCounts.set(cId, (countryProvinceCounts.get(cId) || 0) + 1);
+    }
+
     const sliverPids: number[] = [];
     for (const [pid, info] of provinceMap.entries()) {
-      if (info.pixelCount < this.MIN_PROVINCE_PIXEL_THRESHOLD) {
+      const nationTotalProvinces =
+        countryProvinceCounts.get(info.countryNumericId) || 1;
+      if (
+        nationTotalProvinces > 1 &&
+        info.pixelCount < this.MIN_PROVINCE_PIXEL_THRESHOLD
+      ) {
         sliverPids.push(pid);
       }
     }
 
-    if (sliverPids.length === 0) return;
+    if (sliverPids.length === 0) {
+      console.log(
+        `[DIAGNOSTIC-SLIVER] No sliver provinces (< ${this.MIN_PROVINCE_PIXEL_THRESHOLD} px in multi-province nations) found.`,
+      );
+      return;
+    }
+
+    console.log(
+      `[DIAGNOSTIC-SLIVER] Found ${sliverPids.length} sliver provinces to absorb.`,
+    );
 
     for (let s = 0; s < sliverPids.length; s++) {
       const sliverPid = sliverPids[s]!;
