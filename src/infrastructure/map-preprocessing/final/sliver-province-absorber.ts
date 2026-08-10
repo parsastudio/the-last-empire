@@ -2,7 +2,8 @@ import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-pa
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
 export class SliverProvinceAbsorber {
-  public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 30;
+  public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 700;
+  public static readonly MAX_CLEANUP_DISTANCE_PX = 200;
 
   public static absorbSliverProvinces(
     bitBuffer: BitPackedBuffer,
@@ -30,19 +31,30 @@ export class SliverProvinceAbsorber {
 
     if (sliverPids.length === 0) {
       console.log(
-        `[DIAGNOSTIC-SLIVER] No sliver provinces (< ${this.MIN_PROVINCE_PIXEL_THRESHOLD} px in multi-province nations) found.`,
+        `[DIAGNOSTIC-CLEANUP] No small provinces (< ${this.MIN_PROVINCE_PIXEL_THRESHOLD} px in multi-province nations) found.`,
       );
       return;
     }
 
+    sliverPids.sort((a, b) => {
+      const infoA = provinceMap.get(a);
+      const infoB = provinceMap.get(b);
+      return (infoA?.pixelCount || 0) - (infoB?.pixelCount || 0);
+    });
+
     console.log(
-      `[DIAGNOSTIC-SLIVER] Found ${sliverPids.length} sliver provinces to absorb.`,
+      `[DIAGNOSTIC-CLEANUP] Starting cleanup pass for ${sliverPids.length} small provinces (< ${this.MIN_PROVINCE_PIXEL_THRESHOLD} px).`,
     );
+    let absorbedCount = 0;
 
     for (let s = 0; s < sliverPids.length; s++) {
       const sliverPid = sliverPids[s]!;
       const sliverInfo = provinceMap.get(sliverPid);
       if (!sliverInfo) continue;
+
+      const nationTotalProvinces =
+        countryProvinceCounts.get(sliverInfo.countryNumericId) || 1;
+      if (nationTotalProvinces <= 1) continue;
 
       const sameNationNeighbors: number[] = [];
       for (const nPid of sliverInfo.landNeighbors) {
@@ -56,35 +68,73 @@ export class SliverProvinceAbsorber {
         }
       }
 
-      if (sameNationNeighbors.length === 0) continue;
+      let bestTargetPid: number | null = null;
 
-      let bestTargetPid = sameNationNeighbors[0]!;
-      let maxSharedBorder = -1;
+      if (sameNationNeighbors.length > 0) {
+        let maxSharedBorder = -1;
+        bestTargetPid = sameNationNeighbors[0]!;
 
-      for (let t = 0; t < sameNationNeighbors.length; t++) {
-        const targetPid = sameNationNeighbors[t]!;
-        const sharedBorder = this.calculateSharedBorderLength(
+        for (let t = 0; t < sameNationNeighbors.length; t++) {
+          const targetPid = sameNationNeighbors[t]!;
+          const sharedBorder = this.calculateSharedBorderLength(
+            bitBuffer,
+            width,
+            height,
+            sliverPid,
+            targetPid,
+          );
+          if (sharedBorder > maxSharedBorder) {
+            maxSharedBorder = sharedBorder;
+            bestTargetPid = targetPid;
+          }
+        }
+      } else {
+        let minDistSq = Infinity;
+        const maxDistSq =
+          this.MAX_CLEANUP_DISTANCE_PX * this.MAX_CLEANUP_DISTANCE_PX;
+
+        for (const [otherPid, otherInfo] of provinceMap.entries()) {
+          if (
+            otherPid !== sliverPid &&
+            otherInfo.countryNumericId === sliverInfo.countryNumericId
+          ) {
+            const directDx = Math.abs(
+              sliverInfo.centerCoordinates.x - otherInfo.centerCoordinates.x,
+            );
+            const wrapDx = width - directDx;
+            const dx = Math.min(directDx, wrapDx);
+            const dy =
+              sliverInfo.centerCoordinates.y - otherInfo.centerCoordinates.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq <= maxDistSq && distSq < minDistSq) {
+              minDistSq = distSq;
+              bestTargetPid = otherPid;
+            }
+          }
+        }
+      }
+
+      if (bestTargetPid !== null) {
+        this.mergeProvinceIntoTarget(
           bitBuffer,
           width,
           height,
           sliverPid,
-          targetPid,
+          bestTargetPid,
+          provinceMap,
         );
-        if (sharedBorder > maxSharedBorder) {
-          maxSharedBorder = sharedBorder;
-          bestTargetPid = targetPid;
-        }
+        countryProvinceCounts.set(
+          sliverInfo.countryNumericId,
+          (countryProvinceCounts.get(sliverInfo.countryNumericId) || 1) - 1,
+        );
+        absorbedCount++;
       }
-
-      this.mergeProvinceIntoTarget(
-        bitBuffer,
-        width,
-        height,
-        sliverPid,
-        bestTargetPid,
-        provinceMap,
-      );
     }
+
+    console.log(
+      `[DIAGNOSTIC-CLEANUP] Cleanup pass complete. Successfully absorbed ${absorbedCount} small provinces.`,
+    );
   }
 
   private static calculateSharedBorderLength(
