@@ -16,11 +16,13 @@ export class SameCountryIslandAbsorber {
       return;
     }
 
-    for (const group of unassignedGroups) {
+    for (let g = 0; g < unassignedGroups.length; g++) {
+      const group = unassignedGroups[g]!;
       let minDistSq = Infinity;
       let bestPid = assignedProvinceIds[0]!;
 
-      for (const pid of assignedProvinceIds) {
+      for (let p = 0; p < assignedProvinceIds.length; p++) {
+        const pid = assignedProvinceIds[p]!;
         const provInfo = provinceMap.get(pid);
         if (!provInfo) continue;
 
@@ -37,8 +39,10 @@ export class SameCountryIslandAbsorber {
         }
       }
 
-      for (const comp of group.components) {
-        for (const idx of comp.pixelIndices) {
+      for (let c = 0; c < group.components.length; c++) {
+        const comp = group.components[c]!;
+        for (let i = 0; i < comp.pixelIndices.length; i++) {
+          const idx = comp.pixelIndices[i]!;
           const x = idx % width;
           const y = Math.floor(idx / width);
           bitBuffer.setPixel(x, y, bestPid);

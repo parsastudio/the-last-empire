@@ -1,43 +1,56 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { LandComponent } from "@/infrastructure/map-preprocessing/final/topological-component-analyzer";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+import {
+  LandComponent,
+  ProvinceClusterInfo,
+} from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
 export class AtomicIslandAssigner {
-  public static assignMicroIslandsAtomically(
-    microIslands: LandComponent[],
-    assignedProvinces: number[],
+  public static assignMinorComponentsAtomically(
+    minorComponents: LandComponent[],
+    assignedProvinceIds: number[],
     width: number,
     height: number,
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
-    if (assignedProvinces.length === 0 || microIslands.length === 0) return;
+    void height;
+    if (assignedProvinceIds.length === 0 || minorComponents.length === 0) {
+      return;
+    }
 
-    for (const island of microIslands) {
+    for (let c = 0; c < minorComponents.length; c++) {
+      const island = minorComponents[c]!;
       let minDistanceSq = Infinity;
-      let bestPid = assignedProvinces[0]!;
+      let bestProvinceId = assignedProvinceIds[0]!;
 
-      for (const pid of assignedProvinces) {
+      for (let p = 0; p < assignedProvinceIds.length; p++) {
+        const pid = assignedProvinceIds[p]!;
         const targetProv = provinceMap.get(pid);
         if (!targetProv) continue;
 
-        const dx = island.centerX - targetProv.centerCoordinates.x;
+        const directDx = Math.abs(
+          island.centerX - targetProv.centerCoordinates.x,
+        );
+        const wrapDx = width - directDx;
+        const dx = Math.min(directDx, wrapDx);
+
         const dy = island.centerY - targetProv.centerCoordinates.y;
         const distSq = dx * dx + dy * dy;
 
         if (distSq < minDistanceSq) {
           minDistanceSq = distSq;
-          bestPid = pid;
+          bestProvinceId = pid;
         }
       }
 
-      for (const idx of island.pixelIndices) {
+      for (let i = 0; i < island.pixelIndices.length; i++) {
+        const idx = island.pixelIndices[i]!;
         const x = idx % width;
         const y = Math.floor(idx / width);
-        bitBuffer.setPixel(x, y, bestPid);
+        bitBuffer.setPixel(x, y, bestProvinceId);
       }
 
-      const targetInfo = provinceMap.get(bestPid);
+      const targetInfo = provinceMap.get(bestProvinceId);
       if (targetInfo) {
         targetInfo.pixelCount += island.size;
       }

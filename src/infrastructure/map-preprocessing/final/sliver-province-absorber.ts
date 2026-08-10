@@ -19,7 +19,8 @@ export class SliverProvinceAbsorber {
 
     if (sliverPids.length === 0) return;
 
-    for (const sliverPid of sliverPids) {
+    for (let s = 0; s < sliverPids.length; s++) {
+      const sliverPid = sliverPids[s]!;
       const sliverInfo = provinceMap.get(sliverPid);
       if (!sliverInfo) continue;
 
@@ -40,7 +41,8 @@ export class SliverProvinceAbsorber {
       let bestTargetPid = sameNationNeighbors[0]!;
       let maxSharedBorder = -1;
 
-      for (const targetPid of sameNationNeighbors) {
+      for (let t = 0; t < sameNationNeighbors.length; t++) {
+        const targetPid = sameNationNeighbors[t]!;
         const sharedBorder = this.calculateSharedBorderLength(
           bitBuffer,
           width,
