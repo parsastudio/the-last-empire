@@ -5,6 +5,13 @@ import {
 } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
 export class GeodesicVoronoiPartitioner {
+  private static calculateOrganicNoise(x: number, y: number): number {
+    const f1 = Math.sin(x * 0.025 + y * 0.018) * 12.0;
+    const f2 = Math.cos(x * 0.012 - y * 0.031) * 18.0;
+    const f3 = Math.sin(x * 0.045 + y * 0.042) * 8.0;
+    return f1 + f2 + f3;
+  }
+
   public static partitionAndRelax(
     allPixelIndices: number[],
     initialSeeds: number[],
@@ -27,7 +34,7 @@ export class GeodesicVoronoiPartitioner {
     let finalAssignmentMap = new Map<number, number>();
 
     for (let iter = 0; iter < iterations; iter++) {
-      finalAssignmentMap = this.runEightWayDijkstraLandBfs(
+      finalAssignmentMap = this.runOrganicNoiseLandVoronoi(
         allPixelIndices,
         currentSeeds,
         assignedProvinceIds,
@@ -88,16 +95,17 @@ export class GeodesicVoronoiPartitioner {
     }
   }
 
-  private static runEightWayDijkstraLandBfs(
+  private static runOrganicNoiseLandVoronoi(
     allPixelIndices: number[],
     seeds: number[],
     assignedProvinceIds: number[],
     landPixelSet: Set<number>,
     width: number,
   ): Map<number, number> {
+    void landPixelSet;
     const assignmentMap = new Map<number, number>();
-    const seedXArr = new Int32Array(seeds.length);
-    const seedYArr = new Int32Array(seeds.length);
+    const seedXArr = new Float64Array(seeds.length);
+    const seedYArr = new Float64Array(seeds.length);
 
     for (let i = 0; i < seeds.length; i++) {
       const seedIdx = seeds[i]!;
@@ -110,16 +118,19 @@ export class GeodesicVoronoiPartitioner {
       const px = idx % width;
       const py = Math.floor(idx / width);
 
-      let minEuclideanSq = Infinity;
+      const noiseOffset = this.calculateOrganicNoise(px, py);
+
+      let minOrganicDist = Infinity;
       let bestPid = assignedProvinceIds[0]!;
 
       for (let s = 0; s < seeds.length; s++) {
         const dx = px - seedXArr[s]!;
         const dy = py - seedYArr[s]!;
-        const distSq = dx * dx + dy * dy;
+        const rawDist = Math.sqrt(dx * dx + dy * dy);
+        const organicDist = rawDist + noiseOffset;
 
-        if (distSq < minEuclideanSq) {
-          minEuclideanSq = distSq;
+        if (organicDist < minOrganicDist) {
+          minOrganicDist = organicDist;
           bestPid = assignedProvinceIds[s]!;
         }
       }
