@@ -4,18 +4,72 @@ import {
   ProvinceClusterInfo,
 } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
+class LandMinHeap {
+  private nodes: { idx: number; dist: number }[] = [];
+
+  public push(idx: number, dist: number): void {
+    this.nodes.push({ idx, dist });
+    this.bubbleUp(this.nodes.length - 1);
+  }
+
+  public pop(): { idx: number; dist: number } | undefined {
+    if (this.nodes.length === 0) return undefined;
+    const top = this.nodes[0]!;
+    const bottom = this.nodes.pop()!;
+    if (this.nodes.length > 0) {
+      this.nodes[0] = bottom;
+      this.sinkDown(0);
+    }
+    return top;
+  }
+
+  public size(): number {
+    return this.nodes.length;
+  }
+
+  private bubbleUp(i: number): void {
+    while (i > 0) {
+      const p = (i - 1) >> 1;
+      if (this.nodes[i]!.dist < this.nodes[p]!.dist) {
+        const tmp = this.nodes[i]!;
+        this.nodes[i] = this.nodes[p]!;
+        this.nodes[p] = tmp;
+        i = p;
+      } else {
+        break;
+      }
+    }
+  }
+
+  private sinkDown(i: number): void {
+    const len = this.nodes.length;
+    while (true) {
+      const left = (i << 1) + 1;
+      const right = left + 1;
+      let smallest = i;
+
+      if (left < len && this.nodes[left]!.dist < this.nodes[smallest]!.dist) {
+        smallest = left;
+      }
+      if (right < len && this.nodes[right]!.dist < this.nodes[smallest]!.dist) {
+        smallest = right;
+      }
+
+      if (smallest !== i) {
+        const tmp = this.nodes[i]!;
+        this.nodes[i] = this.nodes[smallest]!;
+        this.nodes[smallest] = tmp;
+        i = smallest;
+      } else {
+        break;
+      }
+    }
+  }
+}
+
 export class GeodesicVoronoiPartitioner {
-  private static calculateChaikinCurvature(
-    px: number,
-    py: number,
-    seedX: number,
-    seedY: number,
-  ): number {
-    const angle = Math.atan2(py - seedY, px - seedX);
-    const harmonic1 = Math.sin(angle * 3.0) * 3.5;
-    const harmonic2 = Math.cos(angle * 5.0) * 2.0;
-    const harmonic3 = Math.sin(px * 0.025 + py * 0.025) * 2.5;
-    return harmonic1 + harmonic2 + harmonic3;
+  private static calculateMildCurvature(x: number, y: number): number {
+    return Math.sin(x * 0.02 + y * 0.02) * 2.0;
   }
 
   public static partitionAndRelax(
@@ -28,21 +82,28 @@ export class GeodesicVoronoiPartitioner {
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
-    void height;
     if (allPixelIndices.length === 0 || initialSeeds.length === 0) {
       return;
     }
 
+    const totalMapPixels = width * height;
+    const landMask = new Uint8Array(totalMapPixels);
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      landMask[allPixelIndices[i]!] = 1;
+    }
+
     let currentSeeds = [...initialSeeds];
-    const iterations = 15;
+    const iterations = 3;
     let finalAssignmentMap = new Map<number, number>();
 
     for (let iter = 0; iter < iterations; iter++) {
-      finalAssignmentMap = this.runSectorCentroidVoronoi(
+      finalAssignmentMap = this.runStrictLandPathDijkstra(
         allPixelIndices,
         currentSeeds,
         assignedProvinceIds,
+        landMask,
         width,
+        totalMapPixels,
       );
 
       if (iter < iterations - 1) {
@@ -98,47 +159,77 @@ export class GeodesicVoronoiPartitioner {
     }
   }
 
-  private static runSectorCentroidVoronoi(
+  private static runStrictLandPathDijkstra(
     allPixelIndices: number[],
     seeds: number[],
     assignedProvinceIds: number[],
+    landMask: Uint8Array,
     width: number,
+    totalMapPixels: number,
   ): Map<number, number> {
     const assignmentMap = new Map<number, number>();
-    const seedXArr = new Float64Array(seeds.length);
-    const seedYArr = new Float64Array(seeds.length);
+    const distMap = new Float64Array(totalMapPixels);
+    distMap.fill(Infinity);
 
-    for (let i = 0; i < seeds.length; i++) {
-      const seedIdx = seeds[i]!;
-      seedXArr[i] = seedIdx % width;
-      seedYArr[i] = Math.floor(seedIdx / width);
+    const heap = new LandMinHeap();
+
+    for (let s = 0; s < seeds.length; s++) {
+      const seedIdx = seeds[s]!;
+      const pid = assignedProvinceIds[s]!;
+      distMap[seedIdx] = 0;
+      assignmentMap.set(seedIdx, pid);
+      heap.push(seedIdx, 0);
     }
 
-    for (let i = 0; i < allPixelIndices.length; i++) {
-      const idx = allPixelIndices[i]!;
-      const px = idx % width;
-      const py = Math.floor(idx / width);
+    const neighborOffsets = [
+      { dx: 1, dy: 0, cost: 1000 },
+      { dx: -1, dy: 0, cost: 1000 },
+      { dx: 0, dy: 1, cost: 1000 },
+      { dx: 0, dy: -1, cost: 1000 },
+      { dx: 1, dy: 1, cost: 1414 },
+      { dx: -1, dy: -1, cost: 1414 },
+      { dx: 1, dy: -1, cost: 1414 },
+      { dx: -1, dy: 1, cost: 1414 },
+    ];
 
-      let minDistance = Infinity;
-      let bestPid = assignedProvinceIds[0]!;
+    while (heap.size() > 0) {
+      const item = heap.pop()!;
+      const currIdx = item.idx;
+      const currDist = item.dist;
 
-      for (let s = 0; s < seeds.length; s++) {
-        const sx = seedXArr[s]!;
-        const sy = seedYArr[s]!;
-        const dx = px - sx;
-        const dy = py - sy;
-        const rawDist = Math.sqrt(dx * dx + dy * dy);
+      if (currDist > distMap[currIdx]!) continue;
 
-        const curveJitter = this.calculateChaikinCurvature(px, py, sx, sy);
-        const effectiveDist = rawDist + curveJitter;
+      const currPid = assignmentMap.get(currIdx)!;
+      const cx = currIdx % width;
+      const cy = Math.floor(currIdx / width);
 
-        if (effectiveDist < minDistance) {
-          minDistance = effectiveDist;
-          bestPid = assignedProvinceIds[s]!;
+      for (let k = 0; k < 8; k++) {
+        const off = neighborOffsets[k]!;
+        const nx = cx + off.dx;
+        const ny = cy + off.dy;
+
+        if (nx >= 0 && nx < width && ny >= 0) {
+          const nIdx = ny * width + nx;
+          if (nIdx < totalMapPixels && landMask[nIdx] === 1) {
+            const curve = this.calculateMildCurvature(nx, ny);
+            const nextDist = currDist + off.cost + curve;
+
+            if (nextDist < distMap[nIdx]!) {
+              distMap[nIdx] = nextDist;
+              assignmentMap.set(nIdx, currPid);
+              heap.push(nIdx, nextDist);
+            }
+          }
         }
       }
+    }
 
-      assignmentMap.set(idx, bestPid);
+    const defaultPid = assignedProvinceIds[0]!;
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      const idx = allPixelIndices[i]!;
+      if (!assignmentMap.has(idx)) {
+        assignmentMap.set(idx, defaultPid);
+      }
     }
 
     return assignmentMap;
