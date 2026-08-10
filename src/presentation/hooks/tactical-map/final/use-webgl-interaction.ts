@@ -73,6 +73,9 @@ export function useWebGLInteraction({
 
     if (provinceId > 0) {
       if (lastHoverProvinceIdRef.current !== provinceId || !hoverData) {
+        console.log(
+          `[INTERACTION-DIAGNOSTIC] Mouse hover over pixel mapped to provinceId: ${provinceId}`,
+        );
         const info = resolveHoverInfo(provinceId);
         if (info) {
           lastHoverProvinceIdRef.current = provinceId;
@@ -112,6 +115,10 @@ export function useWebGLInteraction({
     const scale = scaleRef.current || 1;
 
     const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
+
+    console.log(
+      `[INTERACTION-DIAGNOSTIC] Map clicked. Mouse coordinates: (${rx.toFixed(0)}, ${ry.toFixed(0)}), Raw provinceId: ${provinceId}`,
+    );
 
     if (provinceId <= 0) {
       closeContextMenu();
