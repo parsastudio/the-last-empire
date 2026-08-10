@@ -50,12 +50,7 @@ export class ProvincePartitionEngine {
         height,
       );
 
-      if (allComponents.length === 0) {
-        console.warn(
-          `[DIAGNOSTIC-PROVINCE] Country ID ${countryNumericId} has 0 components! Skipping.`,
-        );
-        continue;
-      }
+      if (allComponents.length === 0) continue;
 
       const majorComponents: LandComponent[] = [];
       const minorComponents: LandComponent[] = [];
