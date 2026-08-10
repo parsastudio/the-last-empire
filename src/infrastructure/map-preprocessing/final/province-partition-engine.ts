@@ -14,6 +14,7 @@ export type { ProvinceClusterInfo };
 
 export class ProvincePartitionEngine {
   public static readonly MINOR_MASS_THRESHOLD = 3500;
+  public static readonly ISOLATED_WATER_DISTANCE_THRESHOLD = 120;
 
   public static partitionProvinces(
     rawNationGrid: Uint8Array,
@@ -60,7 +61,27 @@ export class ProvincePartitionEngine {
         if (comp.size >= this.MINOR_MASS_THRESHOLD) {
           majorComponents.push(comp);
         } else {
-          minorComponents.push(comp);
+          let isIsolated = true;
+          for (let j = 0; j < allComponents.length; j++) {
+            if (i === j) continue;
+            const other = allComponents[j]!;
+            if (other.size >= comp.size) {
+              const directDx = Math.abs(comp.centerX - other.centerX);
+              const dx = Math.min(directDx, width - directDx);
+              const dy = comp.centerY - other.centerY;
+              const dist = Math.hypot(dx, dy);
+              if (dist <= this.ISOLATED_WATER_DISTANCE_THRESHOLD) {
+                isIsolated = false;
+                break;
+              }
+            }
+          }
+
+          if (isIsolated) {
+            majorComponents.push(comp);
+          } else {
+            minorComponents.push(comp);
+          }
         }
       }
 
