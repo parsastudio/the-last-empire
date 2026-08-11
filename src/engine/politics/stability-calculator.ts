@@ -5,7 +5,6 @@ import {
   TaxCalculator,
   TariffCalculator,
 } from "@/engine/economy/economy-calculators";
-import { TraitManager } from "@/engine/politics/trait-manager";
 import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export class StabilityCalculator {
@@ -21,8 +20,6 @@ export class StabilityCalculator {
 
     const govTraits = GovernmentSystem.getTraits(nation.government.type);
     delta += govTraits.stabilityDeltaPerTurn;
-
-    delta += TraitManager.getStabilityDeltaPerTurn(nation);
 
     const stabilityModifier = ModifierManager.getModifierImpact(
       nation,
