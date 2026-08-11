@@ -115,9 +115,6 @@ export class NationProfileAssigner {
       doctrines: {
         unlockedDoctrines: [],
       },
-      researchBudgetRate: 1,
-      accumulatedResearchCost: 0,
-      researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
       provinceIds: item.provinceIds || [],
@@ -245,9 +242,6 @@ export class NationProfileAssigner {
       doctrines: {
         unlockedDoctrines: [],
       },
-      researchBudgetRate: 1,
-      accumulatedResearchCost: 0,
-      researchCycleTurn: 0,
       proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
       provinceIds: [],

@@ -29,7 +29,7 @@ export function ImfLoanCard({
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
 
-  const maxDebtLimit = Math.floor(gdp * 1.0);
+  const maxDebtLimit = Math.floor(gdp * 0.8);
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 
   const availableLoanBillion = Math.floor(availableLoan / 1e9);
@@ -77,7 +77,7 @@ export function ImfLoanCard({
         <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
           <div className="flex items-center justify-between text-xs font-mono">
             <span className="text-muted-foreground font-sans">
-              اعتبار وام آزاد:
+              اعتبار وام آزاد دستی (حداکثر ۸۰٪ GDP):
             </span>
             <span className="font-bold text-gdp">
               {PersianNumberFormatter.formatCurrency(availableLoan)}
@@ -156,7 +156,7 @@ export function ImfLoanCard({
         confirmLabel="دریافت وام"
         colorVariant="gdp"
         icon={ArrowUpRight}
-        emptyStateText="سقف اعتبار ملی تکمیل است."
+        emptyStateText="سقف اعتبار ملی (۸۰٪ GDP) تکمیل است."
         onClose={() => setIsLoanModalOpen(false)}
         onConfirm={handleConfirmLoan}
       />

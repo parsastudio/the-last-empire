@@ -1,7 +1,6 @@
 import {
   SetTaxRateAction,
   SetTariffRateAction,
-  SetResearchBudgetAction,
   RecruitUnitAction,
   DiplomaticProposalAction,
   UpgradeIndustrialLevelAction,
@@ -44,18 +43,6 @@ export class ActionFactory {
       id: this.createId("tariff"),
       nationId,
       type: "SET_TARIFF_RATE",
-      newRate,
-    };
-  }
-
-  public static setResearchBudget(
-    nationId: string,
-    newRate: number,
-  ): SetResearchBudgetAction {
-    return {
-      id: this.createId("research-budget"),
-      nationId,
-      type: "SET_RESEARCH_BUDGET",
       newRate,
     };
   }

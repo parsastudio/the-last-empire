@@ -21,26 +21,6 @@ export class PoliticsActionExecutor {
     const sourceKey = nation.id;
 
     switch (action.type) {
-      case "SET_RESEARCH_BUDGET": {
-        if (action.newRate < 0 || action.newRate > 30) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "نرخ بودجه پژوهش باید بین ۰ تا ۳۰ درصد باشد.",
-          );
-        }
-        const updatedNation = this.researchManager.setResearchBudget(
-          nation,
-          action.newRate,
-        );
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: updatedNation,
-          },
-        };
-      }
-
       case "ACTIVATE_ABILITY":
         return AbilityExecutor.execute(state, action);
 
