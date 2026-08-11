@@ -2,13 +2,14 @@ import React, { useMemo } from "react";
 import { Globe, Users, Coins, MapPin } from "lucide-react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { getRegionGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface RegionBreakdownCardProps {
   regions?: RegionDemographics[];
   nationName?: string;
   totalPixels?: number;
   totalPopulation?: number;
-  totalGdp?: number;
+  perCapitaProductivity?: number;
 }
 
 export function RegionBreakdownCard({
@@ -16,11 +17,22 @@ export function RegionBreakdownCard({
   nationName = "این کشور",
   totalPixels = 0,
   totalPopulation = 0,
-  totalGdp = 0,
+  perCapitaProductivity = 5000,
 }: RegionBreakdownCardProps) {
-  const effectiveRegions = useMemo<RegionDemographics[]>(() => {
+  const effectiveRegions = useMemo<
+    {
+      regionId: number;
+      name: string;
+      pixelCount: number;
+      population: number;
+      gdp: number;
+    }[]
+  >(() => {
     if (regions && regions.length > 0) {
-      return regions;
+      return regions.map((r) => ({
+        ...r,
+        gdp: getRegionGdp(r, perCapitaProductivity),
+      }));
     }
     return [
       {
@@ -28,10 +40,19 @@ export function RegionBreakdownCard({
         name: `خاک اصلی ${nationName}`,
         pixelCount: totalPixels,
         population: totalPopulation,
-        gdp: totalGdp,
+        gdp: getRegionGdp(
+          { population: totalPopulation },
+          perCapitaProductivity,
+        ),
       },
     ];
-  }, [regions, nationName, totalPixels, totalPopulation, totalGdp]);
+  }, [
+    regions,
+    nationName,
+    totalPixels,
+    totalPopulation,
+    perCapitaProductivity,
+  ]);
 
   return (
     <div className="space-y-3 dir-rtl text-right">

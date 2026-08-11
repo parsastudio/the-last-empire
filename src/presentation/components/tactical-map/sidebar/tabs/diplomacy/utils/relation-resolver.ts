@@ -4,6 +4,7 @@ import { CountryProfileData } from "@/presentation/components/tactical-map/sideb
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface DiplomaticRelation {
   code: string;
@@ -39,7 +40,7 @@ export function resolveProfileRelation(
   const profile = CountryRegistry.getCountry(code);
 
   const realGdpNum = liveNation
-    ? liveNation.gdp
+    ? getNationGdp(liveNation)
     : profile
       ? profile.gdp
       : 50000000000;

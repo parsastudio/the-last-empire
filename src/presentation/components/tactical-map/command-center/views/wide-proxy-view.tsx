@@ -7,6 +7,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ProxyWarManager } from "@/engine/politics/proxy-war-manager";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface TargetCountryOption {
   id: string;
@@ -42,7 +43,7 @@ export function WideProxyView({
         name: n.name,
         flagCode: n.flagCode || "IR",
         stability: n.government.stability,
-        gdp: n.gdp,
+        gdp: getNationGdp(n),
       }))
       .filter(
         (c) =>

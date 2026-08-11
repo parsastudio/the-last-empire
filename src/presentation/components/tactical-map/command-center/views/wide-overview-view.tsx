@@ -5,10 +5,7 @@ import { ResourcesSection } from "@/presentation/components/tactical-map/sidebar
 import { GovernmentStatusSection } from "@/presentation/components/tactical-map/sidebar/government-status-section";
 import { RegionBreakdownCard } from "@/presentation/components/tactical-map/sidebar/region-breakdown-card";
 import { Nation } from "@/domain/nation/nation.schema";
-import {
-  findCountryProfileById,
-  CountryRegistry,
-} from "@/domain/data/countries";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -17,9 +14,7 @@ interface WideOverviewViewProps {
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
   const effectiveGdp = useMemo(() => {
-    const numericId = CountryRegistry.resolveCanonicalId(nation.id);
-    const profile = findCountryProfileById(numericId);
-    return nation.gdp > 0 ? nation.gdp : (profile?.gdp ?? 5000000000);
+    return getNationGdp(nation);
   }, [nation]);
 
   return (
@@ -64,7 +59,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           nationName={nation.name}
           totalPixels={nation.geography.territoryPixelCount}
           totalPopulation={nation.population}
-          totalGdp={effectiveGdp}
+          perCapitaProductivity={nation.perCapitaProductivity}
         />
       </div>
     </div>

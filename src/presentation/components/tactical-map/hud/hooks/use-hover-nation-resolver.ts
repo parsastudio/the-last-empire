@@ -5,6 +5,7 @@ import { Province } from "@/domain/province/province.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
@@ -38,7 +39,7 @@ export function useHoverNationResolver({
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation ? ownerNation.rank : 99;
-      const realGdp = ownerNation ? ownerNation.gdp : 0;
+      const realGdp = ownerNation ? getNationGdp(ownerNation) : 0;
       const realPop = ownerNation ? ownerNation.population : 0;
       const governmentType = ownerNation
         ? ownerNation.government.type
