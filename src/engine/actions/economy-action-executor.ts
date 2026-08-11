@@ -6,7 +6,6 @@ import {
   IndustrialLevelManager,
   InfrastructureManager,
 } from "@/engine/economy/economy-calculators";
-import { MarketEngine } from "@/engine/economy/market-engine";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
@@ -116,6 +115,11 @@ export class EconomyActionExecutor {
             "موجودی خزانه برای ارتقای زیرساخت کافی نیست.",
           );
         }
+        const nextCapacity =
+          InfrastructureManager.calculateNextCapacityOnUpgrade(
+            nation.maxPopulationCapacity ||
+              Math.floor(nation.population / 0.95),
+          );
         return {
           ...state,
           nations: {
@@ -123,7 +127,7 @@ export class EconomyActionExecutor {
             [nation.id]: {
               ...nation,
               treasury: nation.treasury - cost,
-              gdp: Math.floor(nation.gdp * 1.02),
+              maxPopulationCapacity: nextCapacity,
               geography: {
                 ...nation.geography,
                 infrastructureLevel: nation.geography.infrastructureLevel + 1,
@@ -150,37 +154,6 @@ export class EconomyActionExecutor {
               treasury: nation.treasury - cost,
               industrialLevel: nation.industrialLevel + 1,
             },
-          },
-        };
-      }
-
-      case "TRADE_RESOURCES": {
-        if (action.amount <= 0) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "تعداد معامله باید بزرگتر از صفر باشد.",
-          );
-        }
-        const res = action.isBuy
-          ? MarketEngine.buyResource(
-              nation,
-              state.marketPrices,
-              action.resourceType,
-              action.amount,
-            )
-          : MarketEngine.sellResource(
-              nation,
-              state.marketPrices,
-              action.resourceType,
-              action.amount,
-            );
-
-        return {
-          ...state,
-          marketPrices: res.updatedMarketPrices,
-          nations: {
-            ...state.nations,
-            [nation.id]: res.updatedNation,
           },
         };
       }

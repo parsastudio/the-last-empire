@@ -77,22 +77,6 @@ export class PoliticsActionExecutor {
         };
       }
 
-      case "CONFIGURE_AUTO_TRADE":
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              autoTradeSettings: {
-                autoBuyDeficit: action.autoBuyDeficit,
-                autoSellOilPercent: action.autoSellOilPercent,
-                allowEmergencyLoans: action.allowEmergencyLoans,
-              },
-            },
-          },
-        };
-
       case "FUND_PROXY_INFLUENCE": {
         const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,

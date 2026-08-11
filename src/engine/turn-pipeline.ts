@@ -5,18 +5,15 @@ import {
   CoolOffManager,
   ReputationManager,
 } from "@/engine/diplomacy/diplomacy-engine";
-import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
 import {
   GdpCalculator,
-  PopulationGrowthEngine,
   TariffCalculator,
   TaxCalculator,
   MilitaryPayrollCalculator,
-  PopulationWelfareCalculator,
   BankruptcyManager,
 } from "@/engine/economy/economy-calculators";
-import { AutoTradeEngine } from "@/engine/economy/auto-trade/auto-trade.engine";
-import { MarketEngine } from "@/engine/economy/market-engine";
+import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
+import { MigrationEngine } from "@/engine/economy/demographics/migration-engine";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { AttritionManager } from "@/engine/military/attrition-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
@@ -28,7 +25,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 export class TurnPipeline {
   private coolOffManager = new CoolOffManager();
   private reputationManager = new ReputationManager();
-  private popEngine = new PopulationGrowthEngine();
   private bankruptcyManager = new BankruptcyManager();
   private recruitmentQueue = new RecruitmentQueueManager();
   private attritionManager = new AttritionManager();
@@ -36,12 +32,10 @@ export class TurnPipeline {
 
   public processTurn(state: GameState, prng: SeededRandom): GameState {
     void prng;
-    const marketPrices = MarketEngine.updateMarketPrices();
-    const updatedNations: Record<string, Nation> = {};
-
+    let updatedNations: Record<string, Nation> = {};
     const allProvinces = Object.values(state.provinces || {});
-
     const nationKeys = Object.keys(state.nations);
+
     for (let i = 0; i < nationKeys.length; i++) {
       const id = nationKeys[i]!;
       const nation = state.nations[id];
@@ -68,14 +62,6 @@ export class TurnPipeline {
         continue;
       }
 
-      const totalProvinceGdp = ownedProvinces.reduce(
-        (sum, p) => sum + p.gdp,
-        0,
-      );
-      const totalProvincePop = ownedProvinces.reduce(
-        (sum, p) => sum + p.population,
-        0,
-      );
       const totalProvincePixels = ownedProvinces.reduce(
         (sum, p) => sum + p.pixelCount,
         0,
@@ -85,8 +71,6 @@ export class TurnPipeline {
       let updated: Nation = {
         ...nation,
         isAlive: true,
-        gdp: totalProvinceGdp > 0 ? totalProvinceGdp : nation.gdp,
-        population: totalProvincePop > 0 ? totalProvincePop : nation.population,
         geography: {
           ...nation.geography,
           territoryPixelCount: totalProvincePixels,
@@ -127,29 +111,26 @@ export class TurnPipeline {
         }
       }
 
-      const { oilProducedPerTurn } =
-        ResourceGenerationStep.calculateResourceGeneration(updated);
+      const demoResult = DemographicsEngine.processNaturalDemographics(updated);
+      updated = demoResult.updatedNation;
 
-      const updatedGdp = GdpCalculator.updateNationGdp(updated);
-      const population = this.popEngine.updatePopulation(updated);
-
+      const prodResult = GdpCalculator.updateProductivityAndGdp(updated);
       updated = {
         ...updated,
-        gdp: updatedGdp,
-        population,
-        resources: {
-          ...updated.resources,
-          oil: updated.resources.oil + oilProducedPerTurn,
-        },
+        perCapitaProductivity: prodResult.nextProductivity,
+        gdp: prodResult.nextGdp,
       };
 
       const tariffResult = TariffCalculator.calculateTariffEffects(updated);
       const taxResult = TaxCalculator.evaluateTaxPolicy(updated);
 
       let addedTreasury = 0;
-      if (tariffResult.tariffRevenue > 0)
+      if (tariffResult.tariffRevenue > 0) {
         addedTreasury += tariffResult.tariffRevenue;
-      if (taxResult.taxIncome > 0) addedTreasury += taxResult.taxIncome;
+      }
+      if (taxResult.taxIncome > 0) {
+        addedTreasury += taxResult.taxIncome;
+      }
 
       if (addedTreasury > 0) {
         updated = {
@@ -157,12 +138,6 @@ export class TurnPipeline {
           treasury: updated.treasury + addedTreasury,
         };
       }
-
-      const autoResult = AutoTradeEngine.processNationAutoTrade(
-        updated,
-        marketPrices,
-      );
-      updated = autoResult.updatedNation;
 
       const payrollBreakdown =
         MilitaryPayrollCalculator.calculatePayroll(updated);
@@ -181,9 +156,6 @@ export class TurnPipeline {
         treasury: newTreasury,
         nationalDebt: newDebt,
       };
-
-      const welfare = PopulationWelfareCalculator.consumeTurnResources(updated);
-      updated = welfare.updatedNation;
 
       if (this.bankruptcyManager.isBankrupt(updated)) {
         updated = this.bankruptcyManager.applyBankruptcy(updated);
@@ -209,9 +181,12 @@ export class TurnPipeline {
       updatedNations[id] = updated;
     }
 
+    const migrationSummary =
+      MigrationEngine.processGlobalMigration(updatedNations);
+    updatedNations = migrationSummary.updatedNations;
+
     return {
       ...state,
-      marketPrices,
       nations: updatedNations,
     };
   }
