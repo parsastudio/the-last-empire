@@ -102,15 +102,6 @@ export const ActivateAbilityActionSchema = z.object({
   targetNationId: z.string().optional(),
 });
 
-export const DisbandUnitActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("DISBAND_UNIT"),
-  unitType: UnitTypeSchema,
-  quantity: z.number().positive(),
-});
-
 export const RequestLoanActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -186,7 +177,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   UnlockDoctrineActionSchema,
   RepayDebtActionSchema,
   ActivateAbilityActionSchema,
-  DisbandUnitActionSchema,
   RequestLoanActionSchema,
   CancelRecruitmentActionSchema,
   InvestResearchActionSchema,
@@ -226,7 +216,6 @@ export type FundProxyInfluenceAction = z.infer<
 export type UnlockDoctrineAction = z.infer<typeof UnlockDoctrineActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type ActivateAbilityAction = z.infer<typeof ActivateAbilityActionSchema>;
-export type DisbandUnitAction = z.infer<typeof DisbandUnitActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
 export type CancelRecruitmentAction = z.infer<
   typeof CancelRecruitmentActionSchema

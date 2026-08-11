@@ -11,7 +11,6 @@ import {
   UnlockDoctrineAction,
   RepayDebtAction,
   ActivateAbilityAction,
-  DisbandUnitAction,
   RequestLoanAction,
   CancelRecruitmentAction,
   InvestResearchAction,
@@ -179,20 +178,6 @@ export class ActionFactory {
       type: "ACTIVATE_ABILITY",
       abilityType,
       targetNationId,
-    };
-  }
-
-  public static disbandUnit(
-    nationId: string,
-    unitType: UnitType,
-    quantity: number,
-  ): DisbandUnitAction {
-    return {
-      id: this.createId("disband"),
-      nationId,
-      type: "DISBAND_UNIT",
-      unitType,
-      quantity,
     };
   }
 
