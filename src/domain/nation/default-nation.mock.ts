@@ -8,6 +8,8 @@ export const DEFAULT_NATION_MOCK: Nation = {
   flagCode: "IR",
   rank: 1,
   gdp: 450000000000,
+  perCapitaProductivity: 5113,
+  maxPopulationCapacity: 84210526,
   taxRate: 15,
   tariffRate: 10,
   treasury: 100000,
@@ -20,7 +22,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
     stability: 80,
     turnsInPower: 1,
   },
-  resources: { oil: 1000 },
+  resources: {},
   military: {
     infantry: 100,
     airForce: 20,
@@ -48,9 +50,4 @@ export const DEFAULT_NATION_MOCK: Nation = {
   researchCycleTurn: 0,
   proxyInfluenceBudget: {},
   provinceIds: [],
-  autoTradeSettings: {
-    autoBuyDeficit: false,
-    autoSellOilPercent: 0,
-    allowEmergencyLoans: true,
-  },
 };

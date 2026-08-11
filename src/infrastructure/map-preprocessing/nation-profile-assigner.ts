@@ -50,14 +50,15 @@ export class NationProfileAssigner {
     const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
 
     const isTier1 = item.gdp >= 1000000000000;
-    const isTier2 = item.gdp >= 300000000000;
 
     const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
     const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
     const calculatedTreasury = Math.floor(item.gdp * 0.05);
-    const initialOil = isTier2 ? 5000 : 1000;
+    const perCapitaProductivity =
+      item.population > 0 ? Math.floor(item.gdp / item.population) : 5000;
+    const maxPopulationCapacity = Math.floor(item.population / 0.95);
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
@@ -75,6 +76,8 @@ export class NationProfileAssigner {
       flagCode: item.flagCode,
       rank: item.initialRank,
       gdp: item.gdp,
+      perCapitaProductivity,
+      maxPopulationCapacity,
       taxRate: 15,
       tariffRate: 10,
       treasury: calculatedTreasury,
@@ -87,9 +90,7 @@ export class NationProfileAssigner {
         stability,
         turnsInPower: 5,
       },
-      resources: {
-        oil: initialOil,
-      },
+      resources: {},
       military: {
         infantry,
         airForce,
@@ -120,11 +121,6 @@ export class NationProfileAssigner {
       proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
       provinceIds: item.provinceIds || [],
-      autoTradeSettings: {
-        autoBuyDeficit: false,
-        autoSellOilPercent: 0,
-        allowEmergencyLoans: true,
-      },
     };
   }
 
@@ -149,7 +145,6 @@ export class NationProfileAssigner {
     const flagCode = profile ? profile.flagCode : "IR";
 
     const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
-    const isTier2 = profile ? profile.gdp >= 300000000000 : false;
 
     const validGovTypes: GovernmentType[] = [
       "DEMOCRACY",
@@ -190,7 +185,10 @@ export class NationProfileAssigner {
     const territoryPixelCount = profile
       ? Math.round(profile.gdp / 10000000)
       : 4000;
-    const initialOil = isTier2 ? 5000 : 1000;
+
+    const perCapitaProductivity =
+      population > 0 ? Math.floor(gdp / population) : 5000;
+    const maxPopulationCapacity = Math.floor(population / 0.95);
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
@@ -208,6 +206,8 @@ export class NationProfileAssigner {
       flagCode,
       rank: 1,
       gdp,
+      perCapitaProductivity,
+      maxPopulationCapacity,
       taxRate: 15,
       tariffRate: 10,
       treasury,
@@ -220,9 +220,7 @@ export class NationProfileAssigner {
         stability,
         turnsInPower: 5,
       },
-      resources: {
-        oil: initialOil,
-      },
+      resources: {},
       military: {
         infantry,
         airForce,
@@ -253,11 +251,6 @@ export class NationProfileAssigner {
       proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
       provinceIds: [],
-      autoTradeSettings: {
-        autoBuyDeficit: false,
-        autoSellOilPercent: 0,
-        allowEmergencyLoans: true,
-      },
     };
   }
 }

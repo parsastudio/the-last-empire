@@ -43,13 +43,6 @@ export class GlobalAiInitializer {
     const allIds = manifestItems.map((item) => item.id);
 
     for (const pItem of manifestProvinces) {
-      const parentNation = manifestItems.find((n) => n.id === pItem.countryId);
-      const parentGdp = parentNation ? parentNation.gdp : 10000000000;
-      const parentPop = parentNation ? parentNation.population : 10000000;
-
-      const pGdp = Math.floor(parentGdp * pItem.baseGdpShare);
-      const pPop = Math.floor(parentPop * pItem.basePopulationShare);
-
       provinces[pItem.provinceId.toString()] = {
         provinceId: pItem.provinceId,
         nameFa: pItem.nameFa,
@@ -59,8 +52,6 @@ export class GlobalAiInitializer {
         hasSeaAccess: pItem.hasSeaAccess,
         landNeighbors: pItem.landNeighbors,
         centerCoordinates: pItem.centerCoordinates,
-        gdp: pGdp,
-        population: pPop,
         fortLevel: 0,
         infrastructureLevel: 1,
       };
