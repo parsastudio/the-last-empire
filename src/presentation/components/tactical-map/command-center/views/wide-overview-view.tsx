@@ -4,15 +4,22 @@ import { EconomyStatsSection } from "@/presentation/components/tactical-map/side
 import { ResourcesSection } from "@/presentation/components/tactical-map/sidebar/resources-section";
 import { GovernmentStatusSection } from "@/presentation/components/tactical-map/sidebar/government-status-section";
 import { RegionBreakdownCard } from "@/presentation/components/tactical-map/sidebar/region-breakdown-card";
+import { VictoryProgressCard } from "@/presentation/components/tactical-map/command-center/views/components/victory-progress-card";
 import { Nation } from "@/domain/nation/nation.schema";
+import { GameState } from "@/domain/game/game-state.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface WideOverviewViewProps {
   nation: Nation;
   rank?: number;
+  gameState?: GameState | null;
 }
 
-export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
+export function WideOverviewView({
+  nation,
+  rank = 1,
+  gameState,
+}: WideOverviewViewProps) {
   const effectiveGdp = useMemo(() => {
     return getNationGdp(nation);
   }, [nation]);
@@ -29,6 +36,8 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           territoryPixelCount={nation.geography.territoryPixelCount}
           rank={rank}
         />
+
+        <VictoryProgressCard nationId={nation.id} gameState={gameState} />
 
         <EconomyStatsSection
           gdp={effectiveGdp}
