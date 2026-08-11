@@ -8,6 +8,7 @@ import {
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface MilitaryExpansionViewProps {
   nationId: string;
@@ -33,7 +34,7 @@ export function MilitaryExpansionView({
 
     await dispatchAction(
       action,
-      `سفارش ساخت ${quantity.toLocaleString("fa-IR")} یگان ${unit.name} در صف قرار گرفت.`,
+      `سفارش ساخت ${PersianNumberFormatter.toPersianDigits(quantity.toLocaleString("en-US"))} یگان ${unit.name} در صف قرار گرفت.`,
     );
   };
 

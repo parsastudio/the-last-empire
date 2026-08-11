@@ -17,6 +17,10 @@ export interface FormattedNationPresentation {
 }
 
 export class NationPresentationMapper {
+  public static getFlagEmoji(code: string | number): string {
+    return getFlagEmoji(code);
+  }
+
   public static getPowerLabel(gdp: number): string {
     if (gdp >= 10e12) return "ابرقدرت جهانی";
     if (gdp >= 1e12) return "قدرت برتر صنعتی";
@@ -51,7 +55,7 @@ export class NationPresentationMapper {
       name: nameFa,
       code: code.toUpperCase(),
       flagCode: flagCode.toUpperCase(),
-      flagEmoji: getFlagEmoji(flagCode || code),
+      flagEmoji: this.getFlagEmoji(flagCode || code),
       rank,
       powerLabel: this.getPowerLabel(gdp),
       gdpText: PersianNumberFormatter.formatCurrency(gdp, true),
