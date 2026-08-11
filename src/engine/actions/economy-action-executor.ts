@@ -59,12 +59,11 @@ export class EconomyActionExecutor {
             "مبلغ وام باید بزرگتر از صفر باشد.",
           );
         }
-        if (
-          nation.activeModifiers.some((m) => m.id === "bankruptcy-debt-holiday")
-        ) {
+        const maxManualDebtLimit = Math.floor(nation.gdp * 0.8);
+        if (nation.nationalDebt + action.amount > maxManualDebtLimit) {
           throw new GameError(
             "INVALID_ACTION",
-            "امکان دریافت وام در دوره تجدید ساختار ورشکستگی وجود ندارد.",
+            "سقف مجاز وام دستی (۸۰٪ تولید ناخالص داخلی) تکمیل شده است.",
           );
         }
         return {

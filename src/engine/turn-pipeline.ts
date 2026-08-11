@@ -17,7 +17,7 @@ import { MigrationEngine } from "@/engine/economy/demographics/migration-engine"
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { AttritionManager } from "@/engine/military/attrition-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-import { ResearchManager } from "@/engine/politics/research-manager";
+
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -28,7 +28,6 @@ export class TurnPipeline {
   private bankruptcyManager = new BankruptcyManager();
   private recruitmentQueue = new RecruitmentQueueManager();
   private attritionManager = new AttritionManager();
-  private researchManager = new ResearchManager();
 
   public processTurn(state: GameState, prng: SeededRandom): GameState {
     void prng;
@@ -178,7 +177,6 @@ export class TurnPipeline {
         },
       };
 
-      updated = this.researchManager.processTurnResearch(updated);
       updated = this.reputationManager.applyReputationGain(updated, 2);
 
       updatedNations[id] = updated;
