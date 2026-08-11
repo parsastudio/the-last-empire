@@ -121,7 +121,10 @@ export class TurnPipeline {
         gdp: prodResult.nextGdp,
       };
 
-      const tariffResult = TariffCalculator.calculateTariffEffects(updated);
+      const tariffResult = TariffCalculator.calculateTariffEffects(
+        updated,
+        state.nations,
+      );
       const taxResult = TaxCalculator.evaluateTaxPolicy(updated);
 
       let addedTreasury = 0;
