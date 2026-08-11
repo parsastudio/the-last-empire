@@ -1,5 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface VictoryStatus {
   isGameOver: boolean;
@@ -69,13 +70,16 @@ export class ConquestVictoryChecker implements VictoryCondition {
 export class EconomicVictoryChecker implements VictoryCondition {
   public evaluate(state: GameState): VictoryStatus | null {
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
-    const totalGlobalGdp = aliveNations.reduce((sum, n) => sum + n.gdp, 0);
+    const totalGlobalGdp = aliveNations.reduce(
+      (sum, n) => sum + getNationGdp(n),
+      0,
+    );
     if (totalGlobalGdp <= 0) {
       return null;
     }
 
     for (const nation of aliveNations) {
-      const share = nation.gdp / totalGlobalGdp;
+      const share = getNationGdp(nation) / totalGlobalGdp;
       if (share >= 0.6) {
         return {
           isGameOver: true,

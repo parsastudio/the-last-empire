@@ -67,7 +67,6 @@ export class GdpCalculator {
     const population = newPopulation ?? nation.population;
     const productivity =
       newProductivity ?? nation.perCapitaProductivity ?? 5000;
-    const gdp = Math.floor(population * productivity);
 
     let regionsDemographics: RegionDemographics[] | undefined =
       nation.regionsDemographics;
@@ -78,7 +77,6 @@ export class GdpCalculator {
         return {
           ...region,
           population: Math.round(population * ratio),
-          gdp: Math.round(gdp * ratio),
         };
       });
     }
@@ -87,7 +85,6 @@ export class GdpCalculator {
       ...nation,
       population,
       perCapitaProductivity: productivity,
-      gdp,
       regionsDemographics,
     };
   }

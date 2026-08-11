@@ -1,10 +1,12 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class InfrastructureManager {
   public static readonly CAPACITY_UPGRADE_MULTIPLIER = 1.2;
 
   public static getUpgradeCost(gdpOrNation: number | Nation): number {
-    const gdp = typeof gdpOrNation === "number" ? gdpOrNation : gdpOrNation.gdp;
+    const gdp =
+      typeof gdpOrNation === "number" ? gdpOrNation : getNationGdp(gdpOrNation);
     return Math.max(1000000000, Math.floor(gdp * 0.1));
   }
 
@@ -19,7 +21,8 @@ export class InfrastructureManager {
 
 export class IndustrialLevelManager {
   public static getUpgradeCost(gdpOrNation: number | Nation): number {
-    const gdp = typeof gdpOrNation === "number" ? gdpOrNation : gdpOrNation.gdp;
+    const gdp =
+      typeof gdpOrNation === "number" ? gdpOrNation : getNationGdp(gdpOrNation);
     return Math.max(2000000000, Math.floor(gdp * 0.15));
   }
 }

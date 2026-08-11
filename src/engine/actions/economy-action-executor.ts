@@ -6,6 +6,7 @@ import {
   IndustrialLevelManager,
   InfrastructureManager,
 } from "@/engine/economy/economy-calculators";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
@@ -59,7 +60,7 @@ export class EconomyActionExecutor {
             "مبلغ وام باید بزرگتر از صفر باشد.",
           );
         }
-        const maxManualDebtLimit = Math.floor(nation.gdp * 0.8);
+        const maxManualDebtLimit = Math.floor(getNationGdp(nation) * 0.8);
         if (nation.nationalDebt + action.amount > maxManualDebtLimit) {
           throw new GameError(
             "INVALID_ACTION",

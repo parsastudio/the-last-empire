@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface TaxCalculationResult {
   taxIncome: number;
@@ -21,7 +22,7 @@ export class TaxCalculator {
 
   public static evaluateTaxPolicy(nation: Nation): TaxCalculationResult {
     const income = TaxCalculator.calculateTaxIncome(
-      nation.gdp,
+      getNationGdp(nation),
       nation.taxRate,
       nation.doctrines.unlockedDoctrines,
     );

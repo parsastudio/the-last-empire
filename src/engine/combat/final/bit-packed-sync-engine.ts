@@ -77,7 +77,6 @@ export class BitPackedSyncEngine {
           ...nation,
           isAlive: false,
           population: 0,
-          gdp: 0,
           geography: {
             ...nation.geography,
             territoryPixelCount: 0,
@@ -100,7 +99,6 @@ export class BitPackedSyncEngine {
         const ratio =
           totalPixelsCount > 0 ? regionPixels / totalPixelsCount : 1;
         const regionPop = Math.round(nation.population * ratio);
-        const regionGdp = Math.round(nation.gdp * ratio);
 
         let name = `خاک اصلی ${nation.name}`;
         if (rId >= 1 && rId <= 10) {
@@ -114,7 +112,6 @@ export class BitPackedSyncEngine {
           name,
           pixelCount: regionPixels,
           population: regionPop,
-          gdp: regionGdp,
         });
       }
 

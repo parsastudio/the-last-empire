@@ -50,7 +50,6 @@ export class TurnPipeline {
         updatedNations[id] = {
           ...nation,
           isAlive: false,
-          gdp: 0,
           population: 0,
           geography: {
             ...nation.geography,

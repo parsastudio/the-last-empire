@@ -5,6 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -80,11 +81,12 @@ export class PoliticsActionExecutor {
           );
         }
 
+        const targetGdp = getNationGdp(target);
         const drain = Math.max(
           1,
           Math.min(
             15,
-            Math.floor((action.budget / (target.gdp * 0.01 || 1)) * 2),
+            Math.floor((action.budget / (targetGdp * 0.01 || 1)) * 2),
           ),
         );
 
