@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 
 export interface DemographicsResult {
   updatedNation: Nation;
@@ -33,10 +34,14 @@ export class DemographicsEngine {
     const naturalChange = Math.floor(population * growthRate);
     const newPopulation = Math.max(100, population + naturalChange);
 
+    const syncedNation = GdpCalculator.syncNationGdpAndDemographics(
+      nation,
+      newPopulation,
+    );
+
     return {
       updatedNation: {
-        ...nation,
-        population: newPopulation,
+        ...syncedNation,
         maxPopulationCapacity: capacity,
       },
       naturalChange,

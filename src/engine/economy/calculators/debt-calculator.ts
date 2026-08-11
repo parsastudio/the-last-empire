@@ -7,11 +7,16 @@ export class BankruptcyManager {
   }
 
   public applyBankruptcy(nation: Nation): Nation {
+    const currentProd = nation.perCapitaProductivity || 5000;
+    const reducedProd = Math.max(100, Math.floor(currentProd * 0.75));
+    const reducedGdp = Math.floor(nation.population * reducedProd);
+
     return {
       ...nation,
       treasury: 0,
       nationalDebt: 0,
-      gdp: Math.floor(nation.gdp * 0.75),
+      perCapitaProductivity: reducedProd,
+      gdp: reducedGdp,
     };
   }
 }
