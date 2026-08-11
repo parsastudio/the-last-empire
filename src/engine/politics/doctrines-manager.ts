@@ -12,19 +12,19 @@ export class DoctrinesManager {
     return unlocked.includes("trade-diplomacy") ? 1.25 : 1.0;
   }
 
-  public static getOilDemandDiscount(unlocked?: string[]): number {
+  public static getHousingCapacityMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
-    return unlocked.includes("low-upkeep") ? 0.85 : 1.0;
+    return unlocked.includes("urban-expansion") ? 1.15 : 1.0;
+  }
+
+  public static getProductivityGrowthBonus(unlocked?: string[]): number {
+    if (!unlocked) return 0;
+    return unlocked.includes("advanced-education") ? 0.008 : 0;
   }
 
   public static getMilitaryPayrollMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
     return unlocked.includes("cybernetic-automation") ? 0.8 : 1.0;
-  }
-
-  public static getOilProductionBonus(unlocked?: string[]): number {
-    if (!unlocked) return 0;
-    return unlocked.includes("deep-refining") ? 4 : 0;
   }
 
   public static getDronePowerMultiplier(unlocked?: string[]): number {

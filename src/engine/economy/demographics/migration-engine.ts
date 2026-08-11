@@ -5,14 +5,15 @@ export interface MigrationSummary {
   totalMigrants: number;
 }
 
-interface EmigrantPool {
+interface EmigrantCandidate {
   nationId: string;
-  amount: number;
+  desiredPushAmount: number;
 }
 
-interface AttractorPool {
+interface AttractorCandidate {
   nationId: string;
   score: number;
+  emptyCapacityRoom: number;
 }
 
 export class MigrationEngine {
@@ -20,10 +21,11 @@ export class MigrationEngine {
     nations: Record<string, Nation>,
   ): MigrationSummary {
     const updatedNations: Record<string, Nation> = { ...nations };
-    const emigrants: EmigrantPool[] = [];
-    const attractors: AttractorPool[] = [];
+    const candidates: EmigrantCandidate[] = [];
+    const attractors: AttractorCandidate[] = [];
 
-    let totalPush = 0;
+    let totalDesiredPush = 0;
+    let totalGlobalEmptyCapacity = 0;
     let totalAttractionScore = 0;
 
     const nationKeys = Object.keys(nations);
@@ -40,48 +42,69 @@ export class MigrationEngine {
         const pushRate = Math.min(0.03, (40 - stability) * 0.0008);
         const pushAmount = Math.floor(pop * pushRate);
         if (pushAmount > 0) {
-          emigrants.push({ nationId: id, amount: pushAmount });
-          totalPush += pushAmount;
+          candidates.push({ nationId: id, desiredPushAmount: pushAmount });
+          totalDesiredPush += pushAmount;
         }
       } else if (stability > 60) {
-        const capacityRoom = Math.max(0, capacity - pop);
-        if (capacityRoom > 0) {
-          const score =
-            (stability - 60) * Math.min(1.0, capacityRoom / 10000000);
+        const emptyRoom = Math.max(0, capacity - pop);
+        if (emptyRoom > 0) {
+          const score = (stability - 60) * Math.min(1.0, emptyRoom / 10000000);
           if (score > 0) {
-            attractors.push({ nationId: id, score });
+            attractors.push({
+              nationId: id,
+              score,
+              emptyCapacityRoom: emptyRoom,
+            });
             totalAttractionScore += score;
+            totalGlobalEmptyCapacity += emptyRoom;
           }
         }
       }
     }
 
-    if (totalPush === 0 || totalAttractionScore === 0) {
+    if (
+      totalDesiredPush === 0 ||
+      totalAttractionScore === 0 ||
+      totalGlobalEmptyCapacity === 0
+    ) {
       return {
         updatedNations,
         totalMigrants: 0,
       };
     }
 
-    for (let i = 0; i < emigrants.length; i++) {
-      const e = emigrants[i]!;
-      const n = updatedNations[e.nationId];
-      if (n) {
-        updatedNations[e.nationId] = {
+    let actualTotalMigrants = totalDesiredPush;
+    let adjustmentFactor = 1.0;
+
+    if (totalDesiredPush > totalGlobalEmptyCapacity) {
+      actualTotalMigrants = totalGlobalEmptyCapacity;
+      adjustmentFactor = totalGlobalEmptyCapacity / totalDesiredPush;
+    }
+
+    for (let i = 0; i < candidates.length; i++) {
+      const c = candidates[i]!;
+      const actualDeduction = Math.floor(
+        c.desiredPushAmount * adjustmentFactor,
+      );
+      const n = updatedNations[c.nationId];
+      if (n && actualDeduction > 0) {
+        updatedNations[c.nationId] = {
           ...n,
-          population: Math.max(100, n.population - e.amount),
+          population: Math.max(100, n.population - actualDeduction),
         };
       }
     }
 
-    let allocatedTotal = 0;
+    let totalDistributed = 0;
+
     for (let i = 0; i < attractors.length; i++) {
       const a = attractors[i]!;
       const n = updatedNations[a.nationId];
       if (n) {
         const share = a.score / totalAttractionScore;
-        const gain = Math.floor(totalPush * share);
-        allocatedTotal += gain;
+        let gain = Math.floor(actualTotalMigrants * share);
+        gain = Math.min(gain, a.emptyCapacityRoom);
+        totalDistributed += gain;
 
         updatedNations[a.nationId] = {
           ...n,
@@ -90,21 +113,32 @@ export class MigrationEngine {
       }
     }
 
-    const remainder = totalPush - allocatedTotal;
+    const remainder = actualTotalMigrants - totalDistributed;
     if (remainder > 0 && attractors.length > 0) {
-      const topAttractorId = attractors[0]!.nationId;
-      const topNation = updatedNations[topAttractorId];
-      if (topNation) {
-        updatedNations[topAttractorId] = {
-          ...topNation,
-          population: topNation.population + remainder,
-        };
+      for (let i = 0; i < attractors.length; i++) {
+        const a = attractors[i]!;
+        const n = updatedNations[a.nationId];
+        if (n) {
+          const currentRoom = Math.max(
+            0,
+            (n.maxPopulationCapacity || Math.floor(n.population / 0.95)) -
+              n.population,
+          );
+          if (currentRoom > 0) {
+            const add = Math.min(remainder, currentRoom);
+            updatedNations[a.nationId] = {
+              ...n,
+              population: n.population + add,
+            };
+            break;
+          }
+        }
       }
     }
 
     return {
       updatedNations,
-      totalMigrants: totalPush,
+      totalMigrants: actualTotalMigrants,
     };
   }
 }
