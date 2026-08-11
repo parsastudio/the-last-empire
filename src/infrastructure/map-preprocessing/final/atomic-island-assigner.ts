@@ -16,32 +16,59 @@ export class AtomicIslandAssigner {
       return;
     }
 
+    const assignedSet = new Set<number>(assignedProvinceIds);
+    const height = bitBuffer.getHeight();
+    const raw = bitBuffer.getRawBuffer();
+    const totalPixels = width * height;
+
+    const dirs = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
+
     for (let c = 0; c < minorComponents.length; c++) {
       const island = minorComponents[c]!;
-      let minDistanceSq = Infinity;
       let bestProvinceId = assignedProvinceIds[0]!;
 
-      for (let p = 0; p < assignedProvinceIds.length; p++) {
-        const pid = assignedProvinceIds[p]!;
-        const targetProv = provinceMap.get(pid);
-        if (!targetProv) continue;
+      const queue: number[] = [];
+      const visited = new Uint8Array(totalPixels);
 
-        const directDx = Math.abs(
-          island.centerX - targetProv.centerCoordinates.x,
-        );
-        const wrapDx = width - directDx;
-        const dx = Math.min(directDx, wrapDx);
+      for (let i = 0; i < island.pixelIndices.length; i++) {
+        const pIdx = island.pixelIndices[i]!;
+        queue.push(pIdx);
+        visited[pIdx] = 1;
+      }
 
-        const dy = island.centerY - targetProv.centerCoordinates.y;
-        let distSq = dx * dx + dy * dy;
+      let head = 0;
+      let found = false;
 
-        if (targetProv.hasSeaAccess) {
-          distSq *= 0.7;
-        }
+      while (head < queue.length && !found) {
+        const curr = queue[head++]!;
+        const cx = curr % width;
+        const cy = Math.floor(curr / width);
 
-        if (distSq < minDistanceSq) {
-          minDistanceSq = distSq;
-          bestProvinceId = pid;
+        for (let d = 0; d < 4; d++) {
+          const dir = dirs[d]!;
+          const nx = (cx + dir.dx + width) % width;
+          const ny = cy + dir.dy;
+
+          if (ny >= 0 && ny < height) {
+            const nIdx = ny * width + nx;
+            if (visited[nIdx] === 0) {
+              visited[nIdx] = 1;
+              const nPid = raw[nIdx]! & 0x0fff;
+
+              if (assignedSet.has(nPid)) {
+                bestProvinceId = nPid;
+                found = true;
+                break;
+              }
+
+              queue.push(nIdx);
+            }
+          }
         }
       }
 

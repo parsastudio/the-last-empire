@@ -1,9 +1,15 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
 
+interface ProvinceBounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}
+
 export class SliverProvinceAbsorber {
   public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 700;
-  public static readonly MAX_CLEANUP_DISTANCE_PX = 200;
 
   public static absorbSliverProvinces(
     bitBuffer: BitPackedBuffer,
@@ -11,6 +17,28 @@ export class SliverProvinceAbsorber {
     height: number,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
+    const boundsMap = new Map<number, ProvinceBounds>();
+    const raw = bitBuffer.getRawBuffer();
+    const totalPixels = width * height;
+
+    for (let i = 0; i < totalPixels; i++) {
+      const pid = raw[i]! & 0x0fff;
+      if (pid === 0) continue;
+
+      const x = i % width;
+      const y = Math.floor(i / width);
+      const b = boundsMap.get(pid);
+
+      if (!b) {
+        boundsMap.set(pid, { minX: x, maxX: x, minY: y, maxY: y });
+      } else {
+        if (x < b.minX) b.minX = x;
+        if (x > b.maxX) b.maxX = x;
+        if (y < b.minY) b.minY = y;
+        if (y > b.maxY) b.maxY = y;
+      }
+    }
+
     const countryProvinceCounts = new Map<number, number>();
     for (const info of provinceMap.values()) {
       const cId = info.countryNumericId;
@@ -30,9 +58,6 @@ export class SliverProvinceAbsorber {
     }
 
     if (sliverPids.length === 0) {
-      console.log(
-        `[DIAGNOSTIC-CLEANUP] No small provinces (< ${this.MIN_PROVINCE_PIXEL_THRESHOLD} px in multi-province nations) found.`,
-      );
       return;
     }
 
@@ -42,10 +67,12 @@ export class SliverProvinceAbsorber {
       return (infoA?.pixelCount || 0) - (infoB?.pixelCount || 0);
     });
 
-    console.log(
-      `[DIAGNOSTIC-CLEANUP] Starting cleanup pass for ${sliverPids.length} small provinces (< ${this.MIN_PROVINCE_PIXEL_THRESHOLD} px).`,
-    );
-    let absorbedCount = 0;
+    const dirs = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+    ];
 
     for (let s = 0; s < sliverPids.length; s++) {
       const sliverPid = sliverPids[s]!;
@@ -74,42 +101,75 @@ export class SliverProvinceAbsorber {
         let maxSharedBorder = -1;
         bestTargetPid = sameNationNeighbors[0]!;
 
+        const boundsA = boundsMap.get(sliverPid);
         for (let t = 0; t < sameNationNeighbors.length; t++) {
           const targetPid = sameNationNeighbors[t]!;
-          const sharedBorder = this.calculateSharedBorderLength(
-            bitBuffer,
-            width,
-            height,
-            sliverPid,
-            targetPid,
-          );
+          const sharedBorder = boundsA
+            ? this.calculateSharedBorderLength(
+                bitBuffer,
+                width,
+                height,
+                sliverPid,
+                targetPid,
+                boundsA,
+              )
+            : 0;
           if (sharedBorder > maxSharedBorder) {
             maxSharedBorder = sharedBorder;
             bestTargetPid = targetPid;
           }
         }
       } else {
-        let minDistSq = Infinity;
-        const maxDistSq =
-          this.MAX_CLEANUP_DISTANCE_PX * this.MAX_CLEANUP_DISTANCE_PX;
+        const boundsA = boundsMap.get(sliverPid);
+        const queue: number[] = [];
+        const visited = new Uint8Array(totalPixels);
 
-        for (const [otherPid, otherInfo] of provinceMap.entries()) {
-          if (
-            otherPid !== sliverPid &&
-            otherInfo.countryNumericId === sliverInfo.countryNumericId
-          ) {
-            const directDx = Math.abs(
-              sliverInfo.centerCoordinates.x - otherInfo.centerCoordinates.x,
-            );
-            const wrapDx = width - directDx;
-            const dx = Math.min(directDx, wrapDx);
-            const dy =
-              sliverInfo.centerCoordinates.y - otherInfo.centerCoordinates.y;
-            const distSq = dx * dx + dy * dy;
+        if (boundsA) {
+          for (let y = boundsA.minY; y <= boundsA.maxY; y++) {
+            const rowOffset = y * width;
+            for (let x = boundsA.minX; x <= boundsA.maxX; x++) {
+              const idx = rowOffset + x;
+              if ((raw[idx]! & 0x0fff) === sliverPid) {
+                queue.push(idx);
+                visited[idx] = 1;
+              }
+            }
+          }
+        }
 
-            if (distSq <= maxDistSq && distSq < minDistSq) {
-              minDistSq = distSq;
-              bestTargetPid = otherPid;
+        let head = 0;
+        let found = false;
+
+        while (head < queue.length && !found) {
+          const curr = queue[head++]!;
+          const cx = curr % width;
+          const cy = Math.floor(curr / width);
+
+          for (let d = 0; d < 4; d++) {
+            const dir = dirs[d]!;
+            const nx = (cx + dir.dx + width) % width;
+            const ny = cy + dir.dy;
+
+            if (ny >= 0 && ny < height) {
+              const nIdx = ny * width + nx;
+              if (visited[nIdx] === 0) {
+                visited[nIdx] = 1;
+                const nPid = raw[nIdx]! & 0x0fff;
+                const nInfo = provinceMap.get(nPid);
+
+                if (
+                  nPid !== 0 &&
+                  nPid !== sliverPid &&
+                  nInfo &&
+                  nInfo.countryNumericId === sliverInfo.countryNumericId
+                ) {
+                  bestTargetPid = nPid;
+                  found = true;
+                  break;
+                }
+
+                queue.push(nIdx);
+              }
             }
           }
         }
@@ -123,18 +183,14 @@ export class SliverProvinceAbsorber {
           sliverPid,
           bestTargetPid,
           provinceMap,
+          boundsMap,
         );
         countryProvinceCounts.set(
           sliverInfo.countryNumericId,
           (countryProvinceCounts.get(sliverInfo.countryNumericId) || 1) - 1,
         );
-        absorbedCount++;
       }
     }
-
-    console.log(
-      `[DIAGNOSTIC-CLEANUP] Cleanup pass complete. Successfully absorbed ${absorbedCount} small provinces.`,
-    );
   }
 
   private static calculateSharedBorderLength(
@@ -143,13 +199,20 @@ export class SliverProvinceAbsorber {
     height: number,
     pidA: number,
     pidB: number,
+    boundsA: ProvinceBounds,
   ): number {
     const raw = bitBuffer.getRawBuffer();
     let sharedCount = 0;
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const idx = y * width + x;
+    const startY = Math.max(0, boundsA.minY - 1);
+    const endY = Math.min(height - 1, boundsA.maxY + 1);
+    const startX = Math.max(0, boundsA.minX - 1);
+    const endX = Math.min(width - 1, boundsA.maxX + 1);
+
+    for (let y = startY; y <= endY; y++) {
+      const rowOffset = y * width;
+      for (let x = startX; x <= endX; x++) {
+        const idx = rowOffset + x;
         const currentPid = raw[idx]! & 0x0fff;
 
         if (currentPid === pidA) {
@@ -173,19 +236,32 @@ export class SliverProvinceAbsorber {
     sliverPid: number,
     targetPid: number,
     provinceMap: Map<number, ProvinceClusterInfo>,
+    boundsMap: Map<number, ProvinceBounds>,
   ): void {
     const sliverInfo = provinceMap.get(sliverPid);
     const targetInfo = provinceMap.get(targetPid);
     if (!sliverInfo || !targetInfo) return;
 
     const raw = bitBuffer.getRawBuffer();
-    const totalPixels = width * height;
+    const boundsA = boundsMap.get(sliverPid);
+    const boundsB = boundsMap.get(targetPid);
 
-    for (let i = 0; i < totalPixels; i++) {
-      if ((raw[i]! & 0x0fff) === sliverPid) {
-        const x = i % width;
-        const y = Math.floor(i / width);
-        bitBuffer.setPixel(x, y, targetPid);
+    if (boundsA) {
+      for (let y = boundsA.minY; y <= boundsA.maxY; y++) {
+        const rowOffset = y * width;
+        for (let x = boundsA.minX; x <= boundsA.maxX; x++) {
+          const idx = rowOffset + x;
+          if ((raw[idx]! & 0x0fff) === sliverPid) {
+            bitBuffer.setPixel(x, y, targetPid);
+          }
+        }
+      }
+
+      if (boundsB) {
+        boundsB.minX = Math.min(boundsB.minX, boundsA.minX);
+        boundsB.maxX = Math.max(boundsB.maxX, boundsA.maxX);
+        boundsB.minY = Math.min(boundsB.minY, boundsA.minY);
+        boundsB.maxY = Math.max(boundsB.maxY, boundsA.maxY);
       }
     }
 
