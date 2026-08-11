@@ -20,7 +20,7 @@ interface WideOverviewViewProps {
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
   const { effectiveGdp, oilProducedPerTurn, oilRequiredPerTurn } =
     useMemo(() => {
-      const numericId = CountryRegistry.resolveNumericId(nation.id);
+      const numericId = CountryRegistry.resolveCanonicalId(nation.id);
       const profile = findCountryProfileById(numericId);
 
       const gdpVal = nation.gdp > 0 ? nation.gdp : (profile?.gdp ?? 5000000000);
@@ -75,7 +75,6 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
       <div className="space-y-5">
         <GovernmentStatusSection
           stability={nation.government.stability}
-          corruption={nation.government.corruption}
           reputation={nation.globalReputation}
           nation={nation}
         />

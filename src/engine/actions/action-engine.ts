@@ -76,7 +76,6 @@ export class ActionEngine {
         case "SET_RESEARCH_BUDGET":
         case "ACTIVATE_ABILITY":
         case "UNLOCK_DOCTRINE":
-        case "ANTI_CORRUPTION_DRIVE":
         case "INVEST_DIPLOMACY":
         case "FUND_PROXY_INFLUENCE":
         case "DIPLOMATIC_PROPOSAL":
