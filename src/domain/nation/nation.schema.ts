@@ -36,15 +36,7 @@ export const GeographySchema = z.object({
   coordinates: z.array(CoordinateSchema),
 });
 
-export const ResourcesSchema = z.object({
-  oil: z.number().nonnegative(),
-});
-
-export const AutoTradeSettingsSchema = z.object({
-  autoBuyDeficit: z.boolean().default(false),
-  autoSellOilPercent: z.number().min(0).max(100).default(0),
-  allowEmergencyLoans: z.boolean().default(true),
-});
+export const ResourcesSchema = z.object({});
 
 export const NationSchema = z.object({
   id: z.string(),
@@ -54,7 +46,9 @@ export const NationSchema = z.object({
   flagCode: z.string(),
   rank: z.number().positive().default(1),
   gdp: z.number().nonnegative(),
-  taxRate: z.number().min(0).max(100),
+  perCapitaProductivity: z.number().nonnegative().default(5000),
+  maxPopulationCapacity: z.number().nonnegative().default(100000000),
+  taxRate: z.number().min(0).max(50),
   tariffRate: z.number().min(0).max(100),
   treasury: z.number(),
   nationalDebt: z.number().nonnegative(),
@@ -62,7 +56,7 @@ export const NationSchema = z.object({
   industrialLevel: z.number().positive(),
   consecutiveDeficitTurns: z.number().nonnegative(),
   government: GovernmentStateSchema,
-  resources: ResourcesSchema,
+  resources: ResourcesSchema.default({}),
   militaryPayroll: MilitaryPayrollRatesSchema.optional(),
   military: MilitaryStackSchema,
   recruitmentQueue: z.array(RecruitmentOrderSchema),
@@ -77,16 +71,10 @@ export const NationSchema = z.object({
   proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
   regionsDemographics: z.array(RegionDemographicsSchema).optional(),
   provinceIds: z.array(z.number()).default([]),
-  autoTradeSettings: AutoTradeSettingsSchema.default({
-    autoBuyDeficit: false,
-    autoSellOilPercent: 0,
-    allowEmergencyLoans: true,
-  }),
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
 export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
 export type Resources = z.infer<typeof ResourcesSchema>;
-export type AutoTradeSettings = z.infer<typeof AutoTradeSettingsSchema>;
 export type Nation = z.infer<typeof NationSchema>;

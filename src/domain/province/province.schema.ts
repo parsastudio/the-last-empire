@@ -12,8 +12,6 @@ export const ProvinceSchema = z.object({
     x: z.number(),
     y: z.number(),
   }),
-  gdp: z.number().nonnegative(),
-  population: z.number().nonnegative(),
   fortLevel: z.number().nonnegative().default(0),
   infrastructureLevel: z.number().positive().default(1),
 });

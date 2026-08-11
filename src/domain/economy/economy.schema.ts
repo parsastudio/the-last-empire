@@ -7,11 +7,6 @@ export const MilitaryPayrollRatesSchema = z.object({
   droneMissilePayroll: z.number().nonnegative(),
 });
 
-export const ResourceMarketPriceSchema = z.object({
-  oil: z.number().positive(),
-});
-
 export type MilitaryPayrollRates = z.infer<typeof MilitaryPayrollRatesSchema>;
-export type ResourceMarketPrice = z.infer<typeof ResourceMarketPriceSchema>;
 
 export { ResourcesSchema };
