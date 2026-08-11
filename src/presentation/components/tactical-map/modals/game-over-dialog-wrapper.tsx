@@ -44,7 +44,7 @@ export function GameOverDialogWrapper({
 
     let reasonText = "پایان چرخه زمانی و استراتژیک کمپین";
     if (isVictory) {
-      reasonText = "سلطه کامل اقتصادی و دیپلماتیک بر تمام اقالیم جهان";
+      reasonText = "سلطه کامل اقتصادی و فتح قلمروهای راهبردی جهان";
     } else if (humanNation && !humanNation.isAlive) {
       reasonText = "فروپاشی کامل ساختار حاکمیتی و انحلال دولت ملی";
     }

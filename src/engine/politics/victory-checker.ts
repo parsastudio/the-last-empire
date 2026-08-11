@@ -12,6 +12,15 @@ export interface VictoryCondition {
   evaluate(state: GameState): VictoryStatus | null;
 }
 
+export interface VictoryProgressMetrics {
+  territorySharePct: number;
+  territoryTargetPct: number;
+  territoryProgressPct: number;
+  gdpSharePct: number;
+  gdpTargetPct: number;
+  gdpProgressPct: number;
+}
+
 export class ConquestVictoryChecker implements VictoryCondition {
   public evaluate(state: GameState): VictoryStatus | null {
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
@@ -93,74 +102,10 @@ export class EconomicVictoryChecker implements VictoryCondition {
   }
 }
 
-export class DiplomaticVictoryChecker implements VictoryCondition {
-  public evaluate(state: GameState): VictoryStatus | null {
-    const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
-    const totalPopulation = aliveNations.reduce(
-      (sum, n) => sum + n.population,
-      0,
-    );
-    if (totalPopulation <= 0) {
-      return null;
-    }
-
-    const humanCanonicalId = CountryRegistry.resolveCanonicalId(
-      state.humanNationId,
-    );
-    const humanNation =
-      state.nations[state.humanNationId] || state.nations[humanCanonicalId];
-
-    for (const nation of aliveNations) {
-      let coalitionPopulation = nation.population;
-      let maxPartnerPop = 0;
-      for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-        if (!rel) continue;
-        if (rel.stance === "ALLIANCE") {
-          const canonicalTargetId =
-            CountryRegistry.resolveCanonicalId(targetId);
-          const partner =
-            state.nations[targetId] || state.nations[canonicalTargetId];
-          if (partner && partner.isAlive) {
-            coalitionPopulation += partner.population;
-            maxPartnerPop = Math.max(maxPartnerPop, partner.population);
-          }
-        }
-      }
-
-      const isHumanInCoalition =
-        nation.id === state.humanNationId ||
-        nation.id === humanCanonicalId ||
-        nation.relations?.[state.humanNationId]?.stance === "ALLIANCE" ||
-        nation.relations?.[humanCanonicalId]?.stance === "ALLIANCE";
-
-      let isHumanDominant = false;
-      if (isHumanInCoalition && humanNation) {
-        if (humanNation.population >= maxPartnerPop) {
-          isHumanDominant = true;
-        }
-      }
-
-      if (coalitionPopulation / totalPopulation >= 0.7) {
-        return {
-          isGameOver: true,
-          winnerNationId:
-            isHumanInCoalition && isHumanDominant
-              ? state.humanNationId
-              : nation.id,
-          reason: "DIPLOMATIC_HEGEMONY",
-        };
-      }
-    }
-
-    return null;
-  }
-}
-
 export class VictoryChecker {
   private checkers: VictoryCondition[] = [
     new ConquestVictoryChecker(),
     new EconomicVictoryChecker(),
-    new DiplomaticVictoryChecker(),
   ];
 
   public checkVictory(state: GameState): VictoryStatus {
@@ -173,6 +118,66 @@ export class VictoryChecker {
 
     return {
       isGameOver: false,
+    };
+  }
+
+  public static calculateProgress(
+    state: GameState | null,
+    nationId: string,
+  ): VictoryProgressMetrics {
+    if (!state) {
+      return {
+        territorySharePct: 0,
+        territoryTargetPct: 80,
+        territoryProgressPct: 0,
+        gdpSharePct: 0,
+        gdpTargetPct: 60,
+        gdpProgressPct: 0,
+      };
+    }
+
+    const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    const targetNation = state.nations[nationId] || state.nations[canonicalId];
+
+    if (!targetNation) {
+      return {
+        territorySharePct: 0,
+        territoryTargetPct: 80,
+        territoryProgressPct: 0,
+        gdpSharePct: 0,
+        gdpTargetPct: 60,
+        gdpProgressPct: 0,
+      };
+    }
+
+    const totalWorldTerritory = aliveNations.reduce(
+      (sum, n) => sum + (n.geography?.territoryPixelCount || 0),
+      0,
+    );
+    const nationTerritory = targetNation.geography?.territoryPixelCount || 0;
+    const territorySharePct =
+      totalWorldTerritory > 0
+        ? (nationTerritory / totalWorldTerritory) * 100
+        : 0;
+    const territoryProgressPct = Math.min(100, (territorySharePct / 80) * 100);
+
+    const totalGlobalGdp = aliveNations.reduce(
+      (sum, n) => sum + getNationGdp(n),
+      0,
+    );
+    const nationGdp = getNationGdp(targetNation);
+    const gdpSharePct =
+      totalGlobalGdp > 0 ? (nationGdp / totalGlobalGdp) * 100 : 0;
+    const gdpProgressPct = Math.min(100, (gdpSharePct / 60) * 100);
+
+    return {
+      territorySharePct: Number(territorySharePct.toFixed(1)),
+      territoryTargetPct: 80,
+      territoryProgressPct: Number(territoryProgressPct.toFixed(1)),
+      gdpSharePct: Number(gdpSharePct.toFixed(1)),
+      gdpTargetPct: 60,
+      gdpProgressPct: Number(gdpProgressPct.toFixed(1)),
     };
   }
 }
