@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { NationHeaderCard } from "@/presentation/components/tactical-map/sidebar/nation-header-card";
 import { EconomyStatsSection } from "@/presentation/components/tactical-map/sidebar/economy-stats-section";
 import { ResourcesSection } from "@/presentation/components/tactical-map/sidebar/resources-section";
@@ -18,25 +18,34 @@ interface WideOverviewViewProps {
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
-  const numericId = CountryRegistry.resolveNumericId(nation.id);
-  const profile = findCountryProfileById(numericId);
+  const { effectiveGdp, oilProducedPerTurn, oilRequiredPerTurn } =
+    useMemo(() => {
+      const numericId = CountryRegistry.resolveNumericId(nation.id);
+      const profile = findCountryProfileById(numericId);
 
-  const effectiveGdp =
-    nation.gdp && nation.gdp > 0
-      ? nation.gdp
-      : profile
-        ? profile.gdp
-        : 5000000000;
+      const gdpVal =
+        nation.gdp && nation.gdp > 0
+          ? nation.gdp
+          : profile
+            ? profile.gdp
+            : 5000000000;
 
-  const { oilProducedPerTurn } =
-    ResourceGenerationStep.calculateResourceGeneration(nation);
+      const { oilProducedPerTurn: produced } =
+        ResourceGenerationStep.calculateResourceGeneration(nation);
 
-  const oilRequiredPerTurn = PopulationWelfareCalculator.calculateOilDemand(
-    nation.population,
-    effectiveGdp,
-    nation.doctrines?.unlockedDoctrines,
-    nation.industrialLevel,
-  );
+      const required = PopulationWelfareCalculator.calculateOilDemand(
+        nation.population,
+        gdpVal,
+        nation.doctrines?.unlockedDoctrines,
+        nation.industrialLevel,
+      );
+
+      return {
+        effectiveGdp: gdpVal,
+        oilProducedPerTurn: produced,
+        oilRequiredPerTurn: required,
+      };
+    }, [nation]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
