@@ -50,10 +50,6 @@ export class FinalManifestBuilder {
     width: number,
     height: number,
   ): Promise<FinalMapManifest> {
-    console.log(
-      `[DIAGNOSTIC-MANIFEST] Starting Manifest Build. Input provinceMap size: ${provinceMap.size}`,
-    );
-
     const countryProvincesMap = new Map<number, ProvinceClusterInfo[]>();
 
     for (const info of provinceMap.values()) {
@@ -65,13 +61,8 @@ export class FinalManifestBuilder {
       list.push(info);
     }
 
-    console.log(
-      `[DIAGNOSTIC-MANIFEST] Unique Country Numeric IDs in provinceMap: ${countryProvincesMap.size}`,
-    );
-
     const manifestProvinces: FinalManifestProvince[] = [];
     const manifestNations: FinalManifestNation[] = [];
-    const includedProvinceIds = new Set<number>();
 
     const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) =>
       countryProvincesMap.has(p.id ?? 0),
@@ -94,7 +85,6 @@ export class FinalManifestBuilder {
       for (let pIndex = 0; pIndex < provList.length; pIndex++) {
         const pInfo = provList[pIndex]!;
         provIds.push(pInfo.provinceId);
-        includedProvinceIds.add(pInfo.provinceId);
 
         const share =
           totalCountryPixels > 0
@@ -205,32 +195,5 @@ export class FinalManifestBuilder {
         multiProvinceNationsCount++;
       }
     }
-
-    console.log(`\n==================================================`);
-    console.log(`[PROVINCE-STATISTICS-REPORT] MAP DIVISION SUMMARY`);
-    console.log(`==================================================`);
-    console.log(`[STAT] Total Provinces Created: ${provinces.length}`);
-    console.log(`[STAT] Total Nations Processed: ${nations.length}`);
-    console.log(
-      `[STAT] Single-Province Nations Count: ${singleProvinceNationsCount}`,
-    );
-    console.log(
-      `[STAT] Multi-Province Nations Count: ${multiProvinceNationsCount}`,
-    );
-    console.log(`[STAT] Average Province Size: ${avgPixels} px`);
-    console.log(`[STAT] Minimum Province Size: ${minProvInfo}`);
-    console.log(`[STAT] Maximum Province Size: ${maxProvInfo}`);
-    console.log(`--------------------------------------------------`);
-    console.log(
-      `[SIZE DISTRIBUTION] < 500 px: ${under500Count} provinces (Micro States)`,
-    );
-    console.log(
-      `[SIZE DISTRIBUTION] 500 - 1500 px: ${range500To1500Count} provinces`,
-    );
-    console.log(
-      `[SIZE DISTRIBUTION] 1500 - 3000 px: ${range1500To3000Count} provinces`,
-    );
-    console.log(`[SIZE DISTRIBUTION] > 3000 px: ${above3000Count} provinces`);
-    console.log(`==================================================\n`);
   }
 }

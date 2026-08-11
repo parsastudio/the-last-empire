@@ -2,13 +2,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 
 export class CorruptionManager {
-  public static calculateCost(
-    gdp: number,
-    targetReductionPercent: number,
-  ): number {
-    return Math.ceil(gdp * (targetReductionPercent / 100));
-  }
-
   public static calculateReduction(
     investmentAmount: number,
     gdp: number,

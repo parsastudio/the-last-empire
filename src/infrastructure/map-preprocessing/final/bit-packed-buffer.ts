@@ -47,10 +47,6 @@ export class BitPackedBuffer {
     return BitPackedCellUtility.getProvinceId(val);
   }
 
-  public setProvinceId(x: number, y: number, provinceId: number): void {
-    this.setPixel(x, y, provinceId);
-  }
-
   public getNationId(x: number, y: number): number {
     const val = this.getPixel(x, y);
     return BitPackedCellUtility.getNationId(val);
@@ -61,32 +57,6 @@ export class BitPackedBuffer {
     if (index >= 0 && index < this.buffer.length) {
       const val = this.buffer[index] || 0;
       this.buffer[index] = BitPackedCellUtility.setNationId(val, nationId);
-    }
-  }
-
-  public getEnclaveId(x: number, y: number): number {
-    const val = this.getPixel(x, y);
-    return BitPackedCellUtility.getEnclaveId(val);
-  }
-
-  public setEnclaveId(x: number, y: number, enclaveId: number): void {
-    const index = y * this.width + x;
-    if (index >= 0 && index < this.buffer.length) {
-      const val = this.buffer[index] || 0;
-      this.buffer[index] = BitPackedCellUtility.setEnclaveId(val, enclaveId);
-    }
-  }
-
-  public getFrontier(x: number, y: number): number {
-    const val = this.getPixel(x, y);
-    return BitPackedCellUtility.getFrontier(val);
-  }
-
-  public setFrontier(x: number, y: number, frontier: number): void {
-    const index = y * this.width + x;
-    if (index >= 0 && index < this.buffer.length) {
-      const val = this.buffer[index] || 0;
-      this.buffer[index] = BitPackedCellUtility.setFrontier(val, frontier);
     }
   }
 

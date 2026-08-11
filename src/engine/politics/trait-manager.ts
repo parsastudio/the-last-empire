@@ -5,19 +5,6 @@ export class TraitManager {
     return nation.traits.includes(trait);
   }
 
-  public static getGdpGrowthModifier(nation: Nation): number {
-    let modifier = 0;
-    if (TraitManager.hasTrait(nation, "FRAGILE_ECONOMY")) {
-      modifier -= 0.05;
-    }
-
-    if (nation.geography.territoryPixelCount > 2000) {
-      modifier += 0.015;
-    }
-
-    return modifier;
-  }
-
   public static getMilitaryPayrollMultiplier(nation: Nation): number {
     let multiplier = 1.0;
     if (TraitManager.hasTrait(nation, "MILITARISTIC")) {

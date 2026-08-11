@@ -1,41 +1,5 @@
 import { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
 
-export interface FinancialUpdateResult {
-  netIncome: number;
-  newTreasury: number;
-  newDebt: number;
-  interestPaid: number;
-  updatedNation: Nation;
-}
-
-export class DebtManager {
-  private static readonly INTEREST_RATE = 0.05;
-
-  public processFinancials(
-    nation: Nation,
-    totalIncome: number,
-    totalUpkeep: number,
-  ): FinancialUpdateResult {
-    const interestDue = Math.floor(
-      nation.nationalDebt * DebtManager.INTEREST_RATE,
-    );
-    const netIncome = totalIncome - totalUpkeep - interestDue;
-    let treasury = nation.treasury + netIncome;
-    let nationalDebt = nation.nationalDebt;
-    if (treasury < 0) {
-      nationalDebt += Math.abs(treasury);
-      treasury = 0;
-    }
-    return {
-      netIncome,
-      newTreasury: treasury,
-      newDebt: nationalDebt,
-      interestPaid: interestDue,
-      updatedNation: { ...nation, treasury, nationalDebt },
-    };
-  }
-}
-
 export class LoanManager {
   public static calculateCreditRating(nation: Nation): number {
     const debtRatio = nation.gdp > 0 ? nation.nationalDebt / nation.gdp : 1;

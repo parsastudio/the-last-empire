@@ -31,8 +31,4 @@ export class ClientFinalStateLoader {
       return null;
     }
   }
-
-  public static clearCache(): void {
-    this.cachedBuffer = null;
-  }
 }

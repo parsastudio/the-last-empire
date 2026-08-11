@@ -24,11 +24,6 @@ export class DiplomaticBetrayalCalculator {
   }
 }
 
-export interface CoolOffTransitionResult {
-  nextStance: DiplomaticStance;
-  turnsRemaining: number;
-}
-
 export class CoolOffManager {
   public processTurnTick(turnsRemaining: number): number {
     return Math.max(0, turnsRemaining - 1);
@@ -99,69 +94,6 @@ export class PowerScoreCalculator {
       militaryScore: Number(militaryScore.toFixed(4)),
       powerScore: Number((economicScore + militaryScore).toFixed(4)),
     };
-  }
-}
-
-export interface NationRankInput {
-  id: string;
-  gdp: number;
-  treasury: number;
-  infantry: number;
-  airForce: number;
-  drone: number;
-  techLevel?: number;
-  militaryPowerMultiplier?: number;
-}
-
-export interface NationRankOutput {
-  id: string;
-  score: number;
-  rank: number;
-}
-
-export class PowerScoreRanker {
-  private calculator = new PowerScoreCalculator();
-
-  public rankNations(nations: NationRankInput[]): NationRankOutput[] {
-    const scores = nations
-      .map((n) => ({
-        id: n.id,
-        score: this.calculator.calculatePowerScore(
-          n.gdp,
-          n.treasury,
-          n.infantry,
-          n.airForce,
-          n.drone,
-          n.techLevel ?? 1,
-          n.militaryPowerMultiplier ?? 1.0,
-        ).powerScore,
-      }))
-      .sort((a, b) => b.score - a.score);
-
-    return scores.map((item, index) => ({
-      id: item.id,
-      score: item.score,
-      rank: index + 1,
-    }));
-  }
-}
-
-export class RelationsManager {
-  public calculateGovernmentFriction(nationA: Nation, nationB: Nation): number {
-    const typeA = nationA.government.type;
-    const typeB = nationB.government.type;
-    if (typeA === typeB) return 1;
-    if (
-      (typeA === "DEMOCRACY" && typeB === "FASCISM") ||
-      (typeA === "FASCISM" && typeB === "DEMOCRACY")
-    )
-      return -3;
-    if (
-      (typeA === "DEMOCRACY" && typeB === "COMMUNISM") ||
-      (typeA === "COMMUNISM" && typeB === "DEMOCRACY")
-    )
-      return -2;
-    return 0;
   }
 }
 

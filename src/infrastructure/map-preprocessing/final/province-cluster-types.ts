@@ -27,8 +27,3 @@ export interface ProvinceClusterInfo {
   centerCoordinates: { x: number; y: number };
   landNeighbors: Set<number>;
 }
-
-export interface GroupProvinceAllocation {
-  group: ArchipelagoGroup;
-  provinceCount: number;
-}
