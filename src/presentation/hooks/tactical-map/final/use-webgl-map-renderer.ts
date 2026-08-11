@@ -4,7 +4,6 @@ import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-m
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
-import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 
 interface UseWebGLMapRendererProps {
@@ -13,7 +12,6 @@ interface UseWebGLMapRendererProps {
   positionRef: RefObject<CameraPosition>;
   scaleRef: RefObject<number>;
   provincesMap?: Record<string, Province>;
-  nationsMap?: Record<string, Nation>;
   activeLayer?: "political" | "gdp";
 }
 
@@ -23,7 +21,6 @@ export function useWebGLMapRenderer({
   positionRef,
   scaleRef,
   provincesMap,
-  nationsMap,
   activeLayer = "political",
 }: UseWebGLMapRendererProps) {
   const rendererRef = useRef<WebGLMapRenderer | null>(null);
@@ -65,7 +62,7 @@ export function useWebGLMapRenderer({
     const gridState = BitPackedGridState.getInstance();
     const rawBuffer = gridState.getBuffer().getRawBuffer();
     renderer.updateLiveStateTexture(rawBuffer);
-  }, [gl, provincesMap, nationsMap]);
+  }, [gl, provincesMap]);
 
   useEffect(() => {
     if (!gl || !gdpTextureRef.current) return;

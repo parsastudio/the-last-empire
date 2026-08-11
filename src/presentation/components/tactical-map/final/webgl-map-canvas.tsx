@@ -50,7 +50,6 @@ export function WebGLMapCanvas({
     positionRef,
     scaleRef,
     provincesMap,
-    nationsMap,
     activeLayer,
   });
 

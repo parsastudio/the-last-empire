@@ -3,10 +3,7 @@ import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import {
   CoolOffManager,
-  PowerScoreRanker,
   ReputationManager,
-  DiplomaticOpinionCalculator,
-  RelationsManager,
 } from "@/engine/diplomacy/diplomacy-engine";
 import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
 import {
@@ -32,10 +29,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 
 export class TurnPipeline {
   private coolOffManager = new CoolOffManager();
-  private powerRanker = new PowerScoreRanker();
   private reputationManager = new ReputationManager();
-  private opinionCalculator = new DiplomaticOpinionCalculator();
-  private relationsManager = new RelationsManager();
   private popEngine = new PopulationGrowthEngine();
   private manpowerManager = new ManpowerManager();
   private bankruptcyManager = new BankruptcyManager();

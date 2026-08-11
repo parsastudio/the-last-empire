@@ -32,15 +32,20 @@ export class BitPackedHoverInspector {
       return null;
     }
 
+    const nationId = BitPackedCellUtility.getNationId(rawValue);
+    const enclaveId = BitPackedCellUtility.getEnclaveId(rawValue);
+    const isFrontier = BitPackedCellUtility.getFrontier(rawValue) === 1;
+    const coastalAccess = BitPackedCellUtility.getCoastalAccess(rawValue);
+
     return {
       mapX,
       mapY,
       provinceId,
-      nationId: provinceId,
-      enclaveId: 0,
-      isFrontier: false,
-      coastalAccess: 0,
-      rawPackedValue: provinceId,
+      nationId,
+      enclaveId,
+      isFrontier,
+      coastalAccess,
+      rawPackedValue: rawValue,
     };
   }
 }
