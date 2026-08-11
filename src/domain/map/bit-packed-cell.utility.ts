@@ -2,8 +2,8 @@ export class BitPackedCellUtility {
   public static readonly WATER_PROVINCE_ID = 0;
 
   public static readonly COASTAL_NONE = 0;
-  public static readonly COASTAL_OPEN_WATER = 0;
-  public static readonly COASTAL_CLOSED_WATER = 0;
+  public static readonly COASTAL_OPEN_WATER = 1;
+  public static readonly COASTAL_CLOSED_WATER = 2;
 
   private static readonly PROVINCE_MASK = 0x0fff;
 
@@ -12,8 +12,10 @@ export class BitPackedCellUtility {
   }
 
   public static setProvinceId(packed: number, provinceId: number): number {
-    void packed;
-    return provinceId & BitPackedCellUtility.PROVINCE_MASK;
+    return (
+      (packed & ~BitPackedCellUtility.PROVINCE_MASK) |
+      (provinceId & BitPackedCellUtility.PROVINCE_MASK)
+    );
   }
 
   public static getNationId(packed: number): number {
@@ -21,40 +23,36 @@ export class BitPackedCellUtility {
   }
 
   public static setNationId(packed: number, nationId: number): number {
-    void packed;
-    return nationId & BitPackedCellUtility.PROVINCE_MASK;
+    return (
+      (packed & ~BitPackedCellUtility.PROVINCE_MASK) |
+      (nationId & BitPackedCellUtility.PROVINCE_MASK)
+    );
   }
 
   public static getEnclaveId(packed: number): number {
-    void packed;
-    return 0;
+    return (packed >> 12) & 0x0f;
   }
 
   public static setEnclaveId(packed: number, enclaveId: number): number {
-    void enclaveId;
-    return packed & BitPackedCellUtility.PROVINCE_MASK;
+    return (packed & ~(0x0f << 12)) | ((enclaveId & 0x0f) << 12);
   }
 
   public static getFrontier(packed: number): number {
-    void packed;
-    return 0;
+    return (packed >> 11) & 0x01;
   }
 
   public static setFrontier(packed: number, frontier: number): number {
-    void frontier;
-    return packed & BitPackedCellUtility.PROVINCE_MASK;
+    return (packed & ~(1 << 11)) | ((frontier & 1) << 11);
   }
 
   public static getCoastalAccess(packed: number): number {
-    void packed;
-    return 0;
+    return (packed >> 12) & 0x03;
   }
 
   public static setCoastalAccess(
     packed: number,
     coastalAccess: number,
   ): number {
-    void coastalAccess;
-    return packed & BitPackedCellUtility.PROVINCE_MASK;
+    return (packed & ~(0x03 << 12)) | ((coastalAccess & 0x03) << 12);
   }
 }
