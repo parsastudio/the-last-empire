@@ -40,13 +40,7 @@ function ResourceBadge({
   );
 }
 
-function StabilityMeterBadge({
-  stability,
-  corruption,
-}: {
-  stability: number;
-  corruption: number;
-}) {
+function StabilityMeterBadge({ stability }: { stability: number }) {
   const style = useMemo(() => {
     if (stability >= 70) return { text: "text-gdp", bg: "bg-gdp" };
     if (stability >= 40) return { text: "text-treasury", bg: "bg-treasury" };
@@ -56,7 +50,7 @@ function StabilityMeterBadge({
   return (
     <div
       className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 cursor-default shrink-0"
-      title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}% | فساد اداری: ${PersianNumberFormatter.toPersianDigits(corruption)}%`}
+      title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}%`}
     >
       <Landmark size={14} className="text-diplomacy shrink-0" />
       <div className="flex items-center gap-2">
@@ -176,10 +170,7 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
 
         <div className="w-[1px] h-6 bg-border/80 shrink-0 hidden sm:block" />
 
-        <StabilityMeterBadge
-          stability={metrics.stability}
-          corruption={metrics.corruption}
-        />
+        <StabilityMeterBadge stability={metrics.stability} />
 
         <ThreatRadarBadge
           globalReputation={metrics.nation?.globalReputation ?? 50}

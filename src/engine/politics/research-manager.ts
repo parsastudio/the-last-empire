@@ -102,20 +102,9 @@ export class ResearchManager {
       throw new GameError("INSUFFICIENT_FUNDS", "موجودی خزانه کافی نیست.");
     }
 
-    if (node.oilCost > 0 && nation.resources.oil < node.oilCost) {
-      throw new GameError(
-        "INSUFFICIENT_RESOURCES",
-        "ذخایر نفت استراتژیک کافی نیست.",
-      );
-    }
-
     return {
       ...nation,
       treasury: nation.treasury - node.moneyCost,
-      resources: {
-        ...nation.resources,
-        oil: Math.max(0, nation.resources.oil - node.oilCost),
-      },
       doctrines: {
         ...nation.doctrines,
         unlockedDoctrines: [...currentUnlocked, doctrineId],

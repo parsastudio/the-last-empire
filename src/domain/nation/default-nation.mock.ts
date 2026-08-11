@@ -18,7 +18,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   government: {
     type: "DEMOCRACY",
     stability: 80,
-    corruption: 5,
     turnsInPower: 1,
   },
   resources: { oil: 1000 },

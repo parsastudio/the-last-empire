@@ -14,7 +14,6 @@ import {
   RequestLoanAction,
   CancelRecruitmentAction,
   InvestResearchAction,
-  AntiCorruptionDriveAction,
   InvestDiplomacyAction,
   InitiateBattleAction,
   ConfigureAutoTradeAction,
@@ -210,18 +209,6 @@ export class ActionFactory {
       id: this.createId("research"),
       nationId,
       type: "INVEST_RESEARCH",
-    };
-  }
-
-  public static antiCorruptionDrive(
-    nationId: string,
-    amount: number,
-  ): AntiCorruptionDriveAction {
-    return {
-      id: this.createId("anticorrupt"),
-      nationId,
-      type: "ANTI_CORRUPTION_DRIVE",
-      amount,
     };
   }
 

@@ -3,7 +3,7 @@ import { DoctrineBranchColumn } from "@/presentation/components/tactical-map/com
 import { useWideResearch } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-research";
 import { Nation } from "@/domain/nation/nation.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { Coins, Fuel } from "lucide-react";
+import { Coins } from "lucide-react";
 
 interface WideResearchViewProps {
   unlockedDoctrines?: string[];
@@ -18,7 +18,6 @@ export function WideResearchView({
 }: WideResearchViewProps) {
   const activeNationId = nation ? nation.id : nationId;
   const treasury = nation ? nation.treasury : 0;
-  const oilStock = nation ? nation.resources.oil : 0;
 
   const research = useWideResearch({
     unlockedDoctrines: nation
@@ -26,7 +25,6 @@ export function WideResearchView({
       : unlockedDoctrines,
     nationId: activeNationId,
     treasury,
-    oilStock,
   });
 
   return (
@@ -35,20 +33,9 @@ export function WideResearchView({
         <span className="text-muted-foreground font-sans font-bold text-xs">
           موجودی استراتژیک برای توسعه دکترین‌ها:
         </span>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-gdp font-extrabold text-xs">
-            <Coins size={14} />
-            <span>{PersianNumberFormatter.formatCurrency(treasury, true)}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-treasury font-extrabold text-xs">
-            <Fuel size={14} />
-            <span>
-              {PersianNumberFormatter.toPersianDigits(
-                oilStock.toLocaleString("en-US"),
-              )}{" "}
-              بلوک
-            </span>
-          </div>
+        <div className="flex items-center gap-1.5 text-gdp font-extrabold text-xs">
+          <Coins size={14} />
+          <span>{PersianNumberFormatter.formatCurrency(treasury, true)}</span>
         </div>
       </div>
 

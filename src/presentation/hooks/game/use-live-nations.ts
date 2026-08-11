@@ -10,7 +10,6 @@ export interface LiveNationItem {
   gdp: number;
   population: number;
   stability: number;
-  corruption: number;
   governmentType: string;
   isAlive: boolean;
   rawNation: Nation;
@@ -58,7 +57,6 @@ export function useLiveNations({
           gdp: n.gdp,
           population: n.population,
           stability: n.government.stability,
-          corruption: n.government.corruption,
           governmentType: n.government.type,
           isAlive: n.isAlive,
           rawNation: n,

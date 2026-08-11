@@ -11,7 +11,6 @@ export const GovernmentTypeSchema = z.enum([
 export const GovernmentStateSchema = z.object({
   type: GovernmentTypeSchema,
   stability: z.number().min(0).max(100),
-  corruption: z.number().min(0).max(100),
   turnsInPower: z.number().nonnegative(),
 });
 

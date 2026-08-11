@@ -10,13 +10,10 @@ export class TaxCalculator {
   public static calculateTaxIncome(
     gdp: number,
     taxRate: number,
-    corruption: number,
     unlockedDoctrines?: string[],
   ): number {
     const effectiveTaxRate = Math.min(50, Math.max(0, taxRate));
-    const grossIncome = gdp * (effectiveTaxRate / 100);
-    const corruptionLoss = grossIncome * (corruption / 100);
-    const baseIncome = grossIncome - corruptionLoss;
+    const baseIncome = gdp * (effectiveTaxRate / 100);
     const researchMultiplier =
       DoctrinesManager.getGdpTaxRevenueMultiplier(unlockedDoctrines);
     return Math.floor(baseIncome * researchMultiplier);
@@ -26,7 +23,6 @@ export class TaxCalculator {
     const income = TaxCalculator.calculateTaxIncome(
       nation.gdp,
       nation.taxRate,
-      nation.government.corruption,
       nation.doctrines.unlockedDoctrines,
     );
     const clampedRate = Math.min(50, Math.max(0, nation.taxRate));

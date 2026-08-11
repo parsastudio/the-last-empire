@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { CheckCircle, Lock, AlertCircle, Coins, Fuel } from "lucide-react";
+import { CheckCircle, Lock, AlertCircle, Coins } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DoctrineViewItem {
@@ -8,7 +8,6 @@ interface DoctrineViewItem {
   desc: string;
   tier: number;
   moneyCost: number;
-  oilCost: number;
   unlocked: boolean;
   canUnlock: boolean;
   canAfford: boolean;
@@ -82,15 +81,6 @@ export const DoctrineBranchColumn = memo(function DoctrineBranchColumn({
                       )}
                     </span>
                   </div>
-                  {doc.oilCost > 0 && (
-                    <div className="flex items-center gap-1 text-treasury font-bold">
-                      <Fuel size={12} />
-                      <span>
-                        {PersianNumberFormatter.toPersianDigits(doc.oilCost)}{" "}
-                        بلوک
-                      </span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex items-center justify-between">

@@ -10,14 +10,12 @@ interface UseWideResearchProps {
   unlockedDoctrines?: string[];
   nationId: string;
   treasury: number;
-  oilStock: number;
 }
 
 export function useWideResearch({
   unlockedDoctrines = ["gdp-booster"],
   nationId,
   treasury,
-  oilStock,
 }: UseWideResearchProps) {
   const { dispatchAction } = useGameActions();
 
@@ -27,8 +25,7 @@ export function useWideResearch({
       const prereqsMet = node.prerequisites.every((req) =>
         unlockedDoctrines.includes(req),
       );
-      const canAffordMoney = treasury >= node.moneyCost;
-      const canAffordOil = node.oilCost === 0 || oilStock >= node.oilCost;
+      const canAfford = treasury >= node.moneyCost;
 
       return {
         id: node.id,
@@ -36,14 +33,13 @@ export function useWideResearch({
         desc: node.desc,
         tier: node.tier,
         moneyCost: node.moneyCost,
-        oilCost: node.oilCost,
         unlocked,
         canUnlock: !unlocked && prereqsMet,
-        canAfford: canAffordMoney && canAffordOil,
+        canAfford,
         prerequisites: node.prerequisites,
       };
     },
-    [unlockedDoctrines, treasury, oilStock],
+    [unlockedDoctrines, treasury],
   );
 
   const industrialDoctrines = useMemo(() => {

@@ -84,7 +84,6 @@ export function resolveProfileRelation(
       techLevel,
       governmentType: liveNation ? liveNation.government.type : "DEMOCRACY",
       stability: liveNation ? liveNation.government.stability : 80,
-      corruption: liveNation ? liveNation.government.corruption : 10,
     },
   };
 }

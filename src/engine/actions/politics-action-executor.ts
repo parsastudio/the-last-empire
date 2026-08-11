@@ -4,7 +4,6 @@ import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { AbilityExecutor } from "@/engine/actions/ability-executor";
 
 export class PoliticsActionExecutor {
@@ -54,39 +53,6 @@ export class PoliticsActionExecutor {
               nation,
               action.doctrineId,
             ),
-          },
-        };
-      }
-
-      case "ANTI_CORRUPTION_DRIVE": {
-        if (action.amount <= 0) {
-          throw new GameError("INVALID_ACTION", "مبلغ بودجه باید مثبت باشد.");
-        }
-        if (nation.treasury < action.amount) {
-          throw new GameError(
-            "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای طرح ضدفساد کافی نیست.",
-          );
-        }
-        const reduction = CorruptionManager.calculateReduction(
-          action.amount,
-          nation.gdp,
-        );
-        const rawCorruption = nation.government.corruption - reduction;
-        const newCorruption =
-          rawCorruption <= 0.01 ? 0 : Number(rawCorruption.toFixed(2));
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              treasury: nation.treasury - action.amount,
-              government: {
-                ...nation.government,
-                corruption: Math.max(0, newCorruption),
-              },
-            },
           },
         };
       }
