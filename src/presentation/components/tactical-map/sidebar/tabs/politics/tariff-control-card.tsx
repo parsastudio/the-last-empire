@@ -5,6 +5,7 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { Nation } from "@/domain/nation/nation.schema";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
@@ -122,52 +123,16 @@ export function TariffControlCard({
           className="w-full accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg"
         />
 
-        <div className="grid grid-cols-4 gap-1.5 font-sans">
-          <button
-            type="button"
-            onClick={() => setUserTariffRate(0)}
-            className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-              tariffRate === 0
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-secondary/60 hover:bg-secondary border-border/60 text-muted-foreground"
-            }`}
-          >
-            تجارت آزاد (۰٪)
-          </button>
-          <button
-            type="button"
-            onClick={() => setUserTariffRate(10)}
-            className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-              tariffRate === 10
-                ? "bg-gdp text-primary-foreground border-gdp"
-                : "bg-secondary/60 hover:bg-secondary border-border/60 text-muted-foreground"
-            }`}
-          >
-            متعادل (۱۰٪)
-          </button>
-          <button
-            type="button"
-            onClick={() => setUserTariffRate(25)}
-            className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-              tariffRate === 25
-                ? "bg-treasury text-primary-foreground border-treasury"
-                : "bg-secondary/60 hover:bg-secondary border-border/60 text-muted-foreground"
-            }`}
-          >
-            حمایتی (۲۵٪)
-          </button>
-          <button
-            type="button"
-            onClick={() => setUserTariffRate(50)}
-            className={`py-1.5 rounded-xl text-[9px] font-bold border transition-all cursor-pointer ${
-              tariffRate === 50
-                ? "bg-military text-primary-foreground border-military"
-                : "bg-secondary/60 hover:bg-secondary border-border/60 text-muted-foreground"
-            }`}
-          >
-            جنگ تجاری (۵۰٪)
-          </button>
-        </div>
+        <PercentageSelector
+          options={[
+            { pct: 0, label: "تجارت آزاد (۰٪)" },
+            { pct: 0.1, label: "متعادل (۱۰٪)" },
+            { pct: 0.25, label: "حمایتی (۲۵٪)" },
+            { pct: 0.5, label: "جنگ تجاری (۵۰٪)", isMax: true },
+          ]}
+          onSelect={(pct) => setUserTariffRate(Math.round(pct * 100))}
+          colorVariant="gdp"
+        />
 
         <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs">
           <div className="flex items-center gap-1.5 font-sans font-bold text-muted-foreground text-[10px]">
