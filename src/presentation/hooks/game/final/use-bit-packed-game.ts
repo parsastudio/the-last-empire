@@ -18,31 +18,17 @@ export function useBitPackedGame(gameId = "default_game") {
     let active = true;
 
     async function init() {
-      console.log(
-        "[useBitPackedGame] Starting session initialization for gameId:",
-        gameId,
-      );
       try {
         const gridState = BitPackedGridState.getInstance();
         gridState.initializeSession(gameId);
 
         const buffer = gridState.getBuffer();
-        const loadedBuffer = await storageAdapter.ensureBitBufferLoaded(
-          gameId,
-          buffer,
-        );
-        console.log(
-          "[useBitPackedGame] BitPacked buffer load result:",
-          loadedBuffer,
-        );
+        await storageAdapter.ensureBitBufferLoaded(gameId, buffer);
 
         if (active) {
-          const success = await loadGame(gameId);
-          console.log("[useBitPackedGame] Game state load result:", success);
+          await loadGame(gameId);
         }
-      } catch (err) {
-        console.error("[useBitPackedGame] Exception during init:", err);
-      }
+      } catch {}
     }
 
     init();
@@ -55,7 +41,6 @@ export function useBitPackedGame(gameId = "default_game") {
   const advanceNextTurn = useCallback(async () => {
     let nextState = null;
     try {
-      console.log("[useBitPackedGame] Executing advanceNextTurn...");
       nextState = await advanceTurnAction();
       if (nextState) {
         const gridState = BitPackedGridState.getInstance();
@@ -65,12 +50,7 @@ export function useBitPackedGame(gameId = "default_game") {
           void storageAdapter.saveBitBuffer(gameId, bitBuffer);
         }
       }
-    } catch (err) {
-      console.error(
-        "[useBitPackedGame] Exception during advanceNextTurn:",
-        err,
-      );
-    }
+    } catch {}
     return nextState;
   }, [gameId, advanceTurnAction, storageAdapter]);
 

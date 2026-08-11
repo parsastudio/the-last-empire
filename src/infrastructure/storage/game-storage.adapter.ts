@@ -97,6 +97,7 @@ export class GameStorageAdapter {
     if (defaultBuffer) {
       buffer.getRawBuffer().set(defaultBuffer.getRawBuffer());
       BitPackedGridState.getInstance().markDirty();
+      await this.saveBitBuffer(gameId, buffer);
       return true;
     }
 

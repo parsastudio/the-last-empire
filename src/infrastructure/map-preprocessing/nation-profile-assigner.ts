@@ -6,6 +6,7 @@ import {
   findCountryProfileByCode,
 } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { GameError } from "@/domain/shared/domain-utilities";
 
 export class NationProfileAssigner {
   public buildNationFromManifest(
@@ -104,24 +105,27 @@ export class NationProfileAssigner {
     customGovType?: GovernmentType | string,
   ): Nation {
     const numericId = parseInt(id.replace("NATION_", ""), 10);
-    let profile = isNaN(numericId)
+    const profile = isNaN(numericId)
       ? findCountryProfileByCode(id)
       : findCountryProfileById(numericId);
 
-    if (!profile && isNaN(numericId)) {
-      profile = findCountryProfileById(118);
+    if (!profile) {
+      throw new GameError(
+        "NATION_NOT_FOUND",
+        `پروفایل شناسنامه کشوری برای شناسه ${id} یافت نشد.`,
+      );
     }
 
-    const gdp = profile ? profile.gdp : 5000000000;
-    const population = profile ? profile.population : 80000000;
+    const gdp = profile.gdp;
+    const population = profile.population;
     const perCapitaProductivity =
       population > 0 ? Math.floor(gdp / population) : 5000;
 
     const treasury = Math.floor(gdp * 0.05);
-    const name = profile ? profile.nameFa : `قلمرو مستقل ${id}`;
-    const flagCode = profile ? profile.flagCode : "IR";
+    const name = profile.nameFa;
+    const flagCode = profile.flagCode;
 
-    const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
+    const isTier1 = profile.gdp >= 1000000000000;
 
     const validGovTypes: GovernmentType[] = [
       "DEMOCRACY",
@@ -131,7 +135,7 @@ export class NationProfileAssigner {
       "FASCISM",
     ];
 
-    let govType: GovernmentType = profile?.startingGovernment ?? "DEMOCRACY";
+    let govType: GovernmentType = profile.startingGovernment ?? "DEMOCRACY";
     if (
       customGovType &&
       validGovTypes.includes(customGovType as GovernmentType)
@@ -151,18 +155,15 @@ export class NationProfileAssigner {
       stability = 60;
     }
 
-    const techLevel = profile?.startingTechLevel ?? 1;
+    const techLevel = profile.startingTechLevel ?? 1;
     const industrialLevel = Math.max(1, Math.min(5, techLevel));
     const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
 
-    const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
-    const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
-    const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
+    const infantry = profile.startingInfantry ?? (isTier1 ? 200 : 40);
+    const airForce = profile.startingAirForce ?? (isTier1 ? 45 : 5);
+    const droneMissile = profile.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
-    const territoryPixelCount = profile
-      ? Math.round(profile.gdp / 10000000)
-      : 4000;
-
+    const territoryPixelCount = Math.round(profile.gdp / 10000000);
     const maxPopulationCapacity = Math.floor(population / 0.95);
 
     const defaultRegion: RegionDemographics = {
