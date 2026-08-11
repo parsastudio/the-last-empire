@@ -1,4 +1,3 @@
-import { NationTrait } from "@/domain/nation/nation.schema";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 
 export interface CountryProfile {
@@ -8,7 +7,6 @@ export interface CountryProfile {
   nameFa: string;
   gdp: number;
   population: number;
-  traits: NationTrait[];
   flagCode: string;
   startingInfantry?: number;
   startingAirForce?: number;
