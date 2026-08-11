@@ -50,7 +50,6 @@ export const useGameStore = create<GameStoreState>()(
       }),
 
     loadGame: async (gameId) => {
-      console.log("[STORE-DIAGNOSTIC] Loading campaign gameId:", gameId);
       set((draft) => {
         draft.loading = true;
         draft.error = null;
@@ -65,9 +64,6 @@ export const useGameStore = create<GameStoreState>()(
             state.provinces && Object.keys(state.provinces).length > 0;
 
           if (!hasProvinces) {
-            console.log(
-              "[STORE-DIAGNOSTIC] No provinces found in state, loading manifest...",
-            );
             try {
               const res = await fetch("/maps/map1/temp/final/manifest.json", {
                 cache: "no-store",
@@ -85,12 +81,7 @@ export const useGameStore = create<GameStoreState>()(
                 };
                 await storageAdapter.saveGameState(gameId, state);
               }
-            } catch (fetchErr) {
-              console.error(
-                "[STORE-DIAGNOSTIC] Manifest load error:",
-                fetchErr,
-              );
-            }
+            } catch {}
           }
 
           const buffer = BitPackedGridState.getInstance().getBuffer();
@@ -102,12 +93,6 @@ export const useGameStore = create<GameStoreState>()(
             ),
           };
 
-          const provKeys = Object.keys(state.provinces);
-          const nationKeys = Object.keys(state.nations);
-          console.log(
-            `[STORE-DIAGNOSTIC] Game state loaded successfully. GameId: ${gameId}. Total Provinces: ${provKeys.length}, Total Nations: ${nationKeys.length}`,
-          );
-
           set((draft) => {
             draft.gameState = state;
             draft.loading = false;
@@ -115,17 +100,12 @@ export const useGameStore = create<GameStoreState>()(
           return true;
         }
 
-        console.warn(
-          "[STORE-DIAGNOSTIC] No saved game found for gameId:",
-          gameId,
-        );
         set((draft) => {
           draft.error = "اطلاعات پرونده بازی یافت نشد.";
           draft.loading = false;
         });
         return false;
-      } catch (err) {
-        console.error("[STORE-DIAGNOSTIC] Error loading game:", err);
+      } catch {
         set((draft) => {
           draft.error = "خطا در بارگذاری اطلاعات از حافظه محلی.";
           draft.loading = false;
@@ -135,12 +115,6 @@ export const useGameStore = create<GameStoreState>()(
     },
 
     createCampaign: async (nationId, governmentType, gameId, manifest) => {
-      console.log(
-        "[STORE-DIAGNOSTIC] Creating new campaign for nation:",
-        nationId,
-        "gameId:",
-        gameId,
-      );
       set((draft) => {
         draft.loading = true;
         draft.error = null;
@@ -158,12 +132,7 @@ export const useGameStore = create<GameStoreState>()(
           if (res.ok) {
             activeManifest = await res.json();
           }
-        } catch (fetchErr) {
-          console.error(
-            "[STORE-DIAGNOSTIC] Manifest fetch error on create:",
-            fetchErr,
-          );
-        }
+        } catch {}
 
         let detectedNations: string[] = [];
 
@@ -178,10 +147,6 @@ export const useGameStore = create<GameStoreState>()(
         if (!detectedNations.includes(normalizedHumanId)) {
           detectedNations.push(normalizedHumanId);
         }
-
-        console.log(
-          `[STORE-DIAGNOSTIC] Initializing ${detectedNations.length} nations from fresh manifest...`,
-        );
 
         const initResult = aiInitializer.initializeAllNations(
           detectedNations,
@@ -204,24 +169,19 @@ export const useGameStore = create<GameStoreState>()(
           isGameOver: false,
           humanNationId: normalizedHumanId,
           globalThreatLevel: 0,
-          marketPrices: { oil: 25000000 },
           provinces: syncedProvinces,
           nations: initResult.nations,
           turnLogs: [],
         };
 
         await storageAdapter.saveGameState(gameId, initialState);
-        console.log(
-          `[STORE-DIAGNOSTIC] New campaign created successfully. Total Provinces: ${Object.keys(syncedProvinces).length}, Total Nations: ${Object.keys(initResult.nations).length}`,
-        );
 
         set((draft) => {
           draft.gameState = initialState;
           draft.loading = false;
         });
         return true;
-      } catch (err) {
-        console.error("[STORE-DIAGNOSTIC] Error creating campaign:", err);
+      } catch {
         set((draft) => {
           draft.error = "خطا در ساخت کمپین جدید.";
           draft.loading = false;
@@ -273,8 +233,7 @@ export const useGameStore = create<GameStoreState>()(
         });
         void storageAdapter.saveGameState(activeGameId, nextState);
         return nextState;
-      } catch (err) {
-        console.error("[STORE-DIAGNOSTIC] Error advancing turn:", err);
+      } catch {
         return null;
       }
     },
