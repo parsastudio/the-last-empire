@@ -6,6 +6,7 @@ import { NationPresentationMapper } from "@/presentation/utils/nation-presentati
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
@@ -27,7 +28,20 @@ export function useHoverNationResolver({
 
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
-      if (provinceId <= 0 || !syncedProvincesMap) return null;
+      if (provinceId <= 0) return null;
+
+      if (provinceId < BitPackedCellUtility.FIRST_PROVINCE_ID) {
+        return {
+          name: "منطقه رزرو شده سیستمی",
+          code: `SYS_${provinceId}`,
+          flagCode: "UN",
+          rank: 0,
+          stance: "غیرقابل سکونت / غیرفعال",
+          gdp: "۰ دلار",
+          regionName: `منطقه ویژه سیستمی #${provinceId}`,
+          regionPixels: "---",
+        };
+      }
 
       const province = syncedProvincesMap[provinceId.toString()];
       if (!province) return null;

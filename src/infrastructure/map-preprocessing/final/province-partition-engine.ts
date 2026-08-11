@@ -9,6 +9,7 @@ import { ProvinceCountAllocator } from "@/infrastructure/map-preprocessing/final
 import { WavefrontProvincePartitioner } from "@/infrastructure/map-preprocessing/final/wavefront-province-partitioner";
 import { AtomicIslandAssigner } from "@/infrastructure/map-preprocessing/final/atomic-island-assigner";
 import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/final/sliver-province-absorber";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 export type { ProvinceClusterInfo };
 
@@ -38,7 +39,7 @@ export class ProvincePartitionEngine {
     }
 
     const provinceMap = new Map<number, ProvinceClusterInfo>();
-    let globalProvinceCounter = 1;
+    let globalProvinceCounter = BitPackedCellUtility.FIRST_PROVINCE_ID;
 
     for (const [countryNumericId, pixelIndices] of countryPixelsMap.entries()) {
       const allComponents = TopologicalComponentAnalyzer.analyzeComponents(
