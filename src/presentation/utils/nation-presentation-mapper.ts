@@ -25,15 +25,7 @@ export class NationPresentationMapper {
   }
 
   public static formatPopulation(population: number): string {
-    if (population >= 1e9) {
-      const val = (population / 1e9).toFixed(2);
-      return `${PersianNumberFormatter.toPersianDigits(val)} میلیارد نفر`;
-    }
-    if (population >= 1e6) {
-      const val = (population / 1e6).toFixed(1);
-      return `${PersianNumberFormatter.toPersianDigits(val)} میلیون نفر`;
-    }
-    return `${PersianNumberFormatter.toPersianDigits(population.toLocaleString("en-US"))} نفر`;
+    return PersianNumberFormatter.formatCompactNumber(population) + " نفر";
   }
 
   public static formatTerritoryPixels(pixels: number): string {

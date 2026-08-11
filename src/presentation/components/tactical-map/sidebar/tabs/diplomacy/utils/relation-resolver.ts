@@ -1,12 +1,9 @@
-import {
-  findCountryProfileByCode,
-  findCountryProfileById,
-  CountryRegistry,
-} from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 export interface DiplomaticRelation {
   code: string;
@@ -40,16 +37,7 @@ export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
 ): DiplomaticRelation {
-  const canonicalId = CountryRegistry.resolveCanonicalId(code);
-  const numericId = CountryRegistry.resolveNumericId(canonicalId);
-
-  const profile =
-    findCountryProfileByCode(code) ||
-    findCountryProfileById(numericId) ||
-    (liveNation
-      ? findCountryProfileByCode(liveNation.id) ||
-        findCountryProfileById(liveNation.id)
-      : undefined);
+  const profile = CountryRegistry.getCountry(code);
 
   const realGdpNum = liveNation
     ? liveNation.gdp
@@ -104,7 +92,7 @@ export function resolveProfileRelation(
     description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
-      population: `${PersianNumberFormatter.toPersianDigits((realPopNum / 1e6).toFixed(1))} میلیون نفر`,
+      population: NationPresentationMapper.formatPopulation(realPopNum),
       techLevel,
       governmentType: liveNation ? liveNation.government.type : "DEMOCRACY",
       stability: liveNation ? liveNation.government.stability : 80,
