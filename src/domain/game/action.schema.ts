@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
-import { GameStateSchema } from "./game-state.schema";
+import { GameStateSchema } from "@/domain/game/game-state.schema";
 import { SetResearchBudgetActionSchema } from "@/domain/politics/research.schema";
 
 export const SetTaxRateActionSchema = z.object({
@@ -36,16 +36,6 @@ export const DiplomaticProposalActionSchema = z.object({
   type: z.literal("DIPLOMATIC_PROPOSAL"),
   targetNationId: z.string(),
   proposalType: DiplomaticProposalTypeSchema,
-});
-
-export const TradeResourcesActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("TRADE_RESOURCES"),
-  resourceType: z.literal("oil"),
-  isBuy: z.boolean(),
-  amount: z.number().positive(),
 });
 
 export const UpgradeIndustrialLevelActionSchema = z.object({
@@ -146,23 +136,12 @@ export const InitiateBattleActionSchema = z.object({
   targetEnclaveId: z.number().nonnegative().optional(),
 });
 
-export const ConfigureAutoTradeActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("CONFIGURE_AUTO_TRADE"),
-  autoBuyDeficit: z.boolean(),
-  autoSellOilPercent: z.number().min(0).max(100),
-  allowEmergencyLoans: z.boolean(),
-});
-
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetTaxRateActionSchema,
   SetTariffRateActionSchema,
   SetResearchBudgetActionSchema,
   RecruitUnitActionSchema,
   DiplomaticProposalActionSchema,
-  TradeResourcesActionSchema,
   UpgradeIndustrialLevelActionSchema,
   InvestInfrastructureActionSchema,
   FundProxyInfluenceActionSchema,
@@ -174,7 +153,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   InvestResearchActionSchema,
   InvestDiplomacyActionSchema,
   InitiateBattleActionSchema,
-  ConfigureAutoTradeActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
@@ -194,7 +172,6 @@ export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
 export type DiplomaticProposalAction = z.infer<
   typeof DiplomaticProposalActionSchema
 >;
-export type TradeResourcesAction = z.infer<typeof TradeResourcesActionSchema>;
 export type UpgradeIndustrialLevelAction = z.infer<
   typeof UpgradeIndustrialLevelActionSchema
 >;
@@ -214,8 +191,5 @@ export type CancelRecruitmentAction = z.infer<
 export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
 export type InvestDiplomacyAction = z.infer<typeof InvestDiplomacyActionSchema>;
 export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
-export type ConfigureAutoTradeAction = z.infer<
-  typeof ConfigureAutoTradeActionSchema
->;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;

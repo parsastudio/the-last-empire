@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { NationSchema } from "@/domain/nation/nation.schema";
 import { ProvinceSchema } from "@/domain/province/province.schema";
-import { ResourceMarketPriceSchema } from "@/domain/economy/economy.schema";
 
 export const TurnLogLevelSchema = z.enum([
   "INFO",
@@ -23,11 +22,6 @@ export const TurnLogEntrySchema = z.object({
     .optional(),
 });
 
-export const TurnTradeVolumeSchema = z.object({
-  oilBought: z.number().nonnegative(),
-  oilSold: z.number().nonnegative(),
-});
-
 export const GameStateSchema = z.object({
   gameId: z.string(),
   currentTurn: z.number().nonnegative(),
@@ -36,15 +30,12 @@ export const GameStateSchema = z.object({
   winnerNationId: z.string().optional(),
   humanNationId: z.string(),
   globalThreatLevel: z.number().min(0).max(100),
-  marketPrices: ResourceMarketPriceSchema,
   provinces: z.record(z.string(), ProvinceSchema).default({}),
   nations: z.record(z.string(), NationSchema),
   turnLogs: z.array(TurnLogEntrySchema),
   peacefulTurnsCount: z.number().nonnegative().optional(),
-  turnTradeVolume: TurnTradeVolumeSchema.optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;
 export type TurnLogEntry = z.infer<typeof TurnLogEntrySchema>;
 export type GameState = z.infer<typeof GameStateSchema>;
-export type TurnTradeVolume = z.infer<typeof TurnTradeVolumeSchema>;
