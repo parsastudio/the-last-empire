@@ -1,11 +1,12 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { COMPREHENSIVE_RESEARCH_TREE } from "@/domain/politics/research-tree.config";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class ResearchManager {
   public static getMilitaryTechCost(nation: Nation): number {
     const level = nation.military.techLevel || 1;
-    return Math.max(5000000000, Math.floor(nation.gdp * 0.1 * level));
+    return Math.max(5000000000, Math.floor(getNationGdp(nation) * 0.1 * level));
   }
 
   public investInMilitaryTech(nation: Nation): Nation {

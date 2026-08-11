@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { CountryRegistry } from "@/domain/data/countries";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface TariffEffectResult {
   tariffRevenue: number;
@@ -15,6 +16,7 @@ export class TariffCalculator {
   ): TariffEffectResult {
     const tariffRate = nation.tariffRate;
     const seaAccessFactor = nation.geography.hasSeaAccess ? 1.0 : 0.5;
+    const nationGdp = getNationGdp(nation);
 
     let totalBaseRevenue = 0;
     let activePartnerCount = 0;
@@ -41,7 +43,8 @@ export class TariffCalculator {
 
         if (!isSevered) {
           activePartnerCount++;
-          const minGdp = Math.min(nation.gdp, partner.gdp);
+          const partnerGdp = getNationGdp(partner);
+          const minGdp = Math.min(nationGdp, partnerGdp);
           totalBaseRevenue +=
             minGdp * (tariffRate / 100) * 0.04 * seaAccessFactor;
         }
@@ -50,7 +53,7 @@ export class TariffCalculator {
       totalPartnerCount = 25;
       activePartnerCount = 25;
       totalBaseRevenue =
-        nation.gdp * 25 * (tariffRate / 100) * 0.04 * seaAccessFactor;
+        nationGdp * 25 * (tariffRate / 100) * 0.04 * seaAccessFactor;
     }
 
     const researchMultiplier = DoctrinesManager.getTariffRevenueMultiplier(
