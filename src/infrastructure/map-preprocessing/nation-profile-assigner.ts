@@ -4,6 +4,7 @@ import { GovernmentType } from "@/domain/politics/politics.schema";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
+  CountryRegistry,
 } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
@@ -14,7 +15,10 @@ export class NationProfileAssigner {
     customGovType?: GovernmentType | string,
   ): Nation {
     const numericId = item.numericId;
-    const profile = findCountryProfileById(numericId);
+    const profile =
+      findCountryProfileById(numericId) ||
+      findCountryProfileByCode(item.code) ||
+      CountryRegistry.getCountry(item.id);
 
     const validGovTypes: GovernmentType[] = [
       "DEMOCRACY",
@@ -45,11 +49,28 @@ export class NationProfileAssigner {
       stability = 60;
     }
 
+    const population =
+      item.population > 0
+        ? item.population
+        : profile
+          ? profile.population
+          : 80000000;
+
+    const perCapitaProductivity =
+      profile && profile.population > 0
+        ? Math.floor(profile.gdp / profile.population)
+        : item.perCapitaProductivity && item.perCapitaProductivity > 0
+          ? item.perCapitaProductivity
+          : 5000;
+
+    const computedGdp = profile
+      ? profile.gdp
+      : perCapitaProductivity * population;
+
     const techLevel = profile?.startingTechLevel ?? 1;
     const industrialLevel = Math.max(1, Math.min(5, techLevel));
     const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
 
-    const computedGdp = item.perCapitaProductivity * item.population;
     const isTier1 = computedGdp >= 1000000000000;
 
     const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
@@ -57,14 +78,13 @@ export class NationProfileAssigner {
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
     const calculatedTreasury = Math.floor(computedGdp * 0.05);
-    const perCapitaProductivity = item.perCapitaProductivity;
-    const maxPopulationCapacity = Math.floor(item.population / 0.95);
+    const maxPopulationCapacity = Math.floor(population / 0.95);
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
       name: `خاک اصلی ${item.nameFa}`,
       pixelCount: item.territoryPixelCount,
-      population: item.population,
+      population,
     };
 
     return {
@@ -80,7 +100,7 @@ export class NationProfileAssigner {
       tariffRate: 10,
       treasury: calculatedTreasury,
       nationalDebt: 0,
-      population: item.population,
+      population,
       industrialLevel,
       consecutiveDeficitTurns: 0,
       government: {
@@ -135,6 +155,9 @@ export class NationProfileAssigner {
 
     const gdp = profile ? profile.gdp : 5000000000;
     const population = profile ? profile.population : 80000000;
+    const perCapitaProductivity =
+      population > 0 ? Math.floor(gdp / population) : 5000;
+
     const treasury = Math.floor(gdp * 0.05);
     const name = profile ? profile.nameFa : `قلمرو مستقل ${id}`;
     const flagCode = profile ? profile.flagCode : "IR";
@@ -181,8 +204,6 @@ export class NationProfileAssigner {
       ? Math.round(profile.gdp / 10000000)
       : 4000;
 
-    const perCapitaProductivity =
-      population > 0 ? Math.floor(gdp / population) : 5000;
     const maxPopulationCapacity = Math.floor(population / 0.95);
 
     const defaultRegion: RegionDemographics = {
