@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -25,7 +26,7 @@ export function useContextMenu() {
       provincesMap?: Record<string, Province>,
       nationsMap?: Record<string, Nation>,
     ) => {
-      if (provinceId <= 0) {
+      if (provinceId < BitPackedCellUtility.FIRST_PROVINCE_ID) {
         setContextMenuState(null);
         return;
       }
