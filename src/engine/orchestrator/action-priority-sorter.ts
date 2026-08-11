@@ -7,12 +7,9 @@ export class ActionPrioritySorter {
       case "ACTIVATE_ABILITY":
       case "SET_TAX_RATE":
       case "SET_TARIFF_RATE":
-      case "CONFIGURE_AUTO_TRADE":
         return 1;
-      case "TRADE_RESOURCES":
-        return 2;
       default:
-        return 3;
+        return 2;
     }
   }
 
@@ -28,10 +25,7 @@ export class ActionPrioritySorter {
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
       }
-      if (priorityA === 2) {
-        return prng.nextFloat() > 0.5 ? 1 : -1;
-      }
-      return 0;
+      return prng.nextFloat() > 0.5 ? 1 : -1;
     });
 
     return sorted;
