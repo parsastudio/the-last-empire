@@ -5,4 +5,3 @@ export * from "@/engine/economy/calculators/debt-calculator";
 export * from "@/engine/economy/calculators/infrastructure-manager";
 export * from "@/engine/economy/calculators/payroll-calculator";
 export * from "@/engine/economy/calculators/population-growth-engine";
-export * from "@/engine/economy/population-welfare-calculator";

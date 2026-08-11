@@ -5,7 +5,6 @@ import {
   TaxCalculator,
   TariffCalculator,
 } from "@/engine/economy/economy-calculators";
-import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 export class StabilityCalculator {
   public static calculateTurnStabilityDelta(nation: Nation): number {
@@ -14,9 +13,16 @@ export class StabilityCalculator {
 
     let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
 
-    const welfareMetrics =
-      PopulationWelfareCalculator.evaluateWelfareForNation(nation);
-    delta += welfareMetrics.totalStabilityImpact;
+    const capacity =
+      nation.maxPopulationCapacity ||
+      Math.floor((nation.population || 1) / 0.95);
+    const capacityRatio = (nation.population || 0) / (capacity || 1);
+
+    if (capacityRatio > 1.0) {
+      delta -= Math.min(5, (capacityRatio - 1.0) * 10);
+    } else if (capacityRatio < 0.9) {
+      delta += 0.5;
+    }
 
     const govTraits = GovernmentSystem.getTraits(nation.government.type);
     delta += govTraits.stabilityDeltaPerTurn;

@@ -38,14 +38,7 @@ export function CommandCenterTabRouter({
     case "overview":
       return <WideOverviewView nation={nation} rank={nation.rank} />;
     case "market":
-      return (
-        <WideMarketView
-          marketPrices={gameState?.marketPrices}
-          oilStock={nation.resources.oil}
-          userTreasury={nation.treasury}
-          nation={nation}
-        />
-      );
+      return <WideMarketView userTreasury={nation.treasury} nation={nation} />;
     case "military":
       return (
         <WideMilitaryView

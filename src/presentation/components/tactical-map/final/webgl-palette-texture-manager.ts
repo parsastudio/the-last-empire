@@ -28,7 +28,8 @@ export class WebGLPaletteTextureManager {
       const pid = prov.provinceId;
       if (pid <= 0 || pid >= 65536) continue;
 
-      const gdp = prov.gdp || 1000000000;
+      const profile = CountryRegistry.getCountry(prov.ownerNationId);
+      const gdp = profile ? profile.gdp : 1000000000;
       const { r, g, b } = this.calculateGdpColor(gdp);
 
       const u = pid & 255;
