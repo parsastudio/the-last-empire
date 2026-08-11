@@ -52,11 +52,9 @@ function CapacityMeterBadge({
       return {
         text: "text-military",
         bg: "bg-military",
-        label: "تراکم بحرانی",
       };
-    if (capacityPct >= 95)
-      return { text: "text-treasury", bg: "bg-treasury", label: "تراکم بالا" };
-    return { text: "text-gdp", bg: "bg-gdp", label: "وضعیت مطلوب" };
+    if (capacityPct >= 95) return { text: "text-treasury", bg: "bg-treasury" };
+    return { text: "text-gdp", bg: "bg-gdp" };
   }, [capacityPct]);
 
   const formattedPop = PersianNumberFormatter.formatCompactNumber(population);

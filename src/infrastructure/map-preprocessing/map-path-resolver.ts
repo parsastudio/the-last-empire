@@ -1,17 +1,6 @@
 import path from "path";
 
 export class MapPathResolver {
-  public static getEditedMaskServerPath(): string {
-    return path.join(
-      process.cwd(),
-      "public",
-      "maps",
-      "map1",
-      "essential",
-      "edited-mask.png",
-    );
-  }
-
   public static getMapFinalServerDir(mapId = "map1"): string {
     return path.join(process.cwd(), "public", "maps", mapId, "temp", "final");
   }

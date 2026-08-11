@@ -26,8 +26,7 @@ export class TurnPipeline {
   private bankruptcyManager = new BankruptcyManager();
   private recruitmentQueue = new RecruitmentQueueManager();
 
-  public processTurn(state: GameState, prng: SeededRandom): GameState {
-    void prng;
+  public processTurn(state: GameState, _prng: SeededRandom): GameState {
     let updatedNations: Record<string, Nation> = {};
     const allProvinces = Object.values(state.provinces || {});
     const nationKeys = Object.keys(state.nations);
@@ -89,14 +88,9 @@ export class TurnPipeline {
             const nextTurns = this.coolOffManager.processTurnTick(
               relation.coolOffTurnsRemaining,
             );
-            let finalStance = relation.stance;
-            if (nextTurns === 0 && relation.coolOffTargetStance) {
-              finalStance = relation.coolOffTargetStance;
-            }
             newRels[targetId] = {
               ...relation,
               coolOffTurnsRemaining: nextTurns,
-              stance: finalStance,
             };
             relsChanged = true;
           }

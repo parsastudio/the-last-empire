@@ -64,7 +64,6 @@ export class WavefrontProvincePartitioner {
       allPixelIndices,
       assignedProvinceIds.length,
       width,
-      height,
     );
 
     GeodesicVoronoiPartitioner.partitionAndRelax(

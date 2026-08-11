@@ -20,7 +20,6 @@ interface UseWebGLInteractionProps {
   hasDraggedRef: RefObject<boolean>;
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
-  humanNationId?: string;
 }
 
 export function useWebGLInteraction({

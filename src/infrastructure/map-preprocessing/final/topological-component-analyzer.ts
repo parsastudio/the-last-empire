@@ -6,9 +6,7 @@ export class TopologicalComponentAnalyzer {
   public static analyzeComponents(
     pixelIndices: number[],
     width: number,
-    height: number,
   ): LandComponent[] {
-    void height;
     const pixelSet = new Set<number>(pixelIndices);
     const visited = new Set<number>();
     const components: LandComponent[] = [];

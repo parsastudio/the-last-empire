@@ -3,9 +3,7 @@ export class GeodesicSeedPicker {
     allPixelIndices: number[],
     targetK: number,
     width: number,
-    height: number,
   ): number[] {
-    void height;
     if (allPixelIndices.length === 0 || targetK <= 0) {
       return [];
     }

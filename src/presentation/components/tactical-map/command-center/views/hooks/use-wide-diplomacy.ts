@@ -72,16 +72,6 @@ export function useWideDiplomacy({
     return rel;
   }, [activeCode, targetNationId, nationsMap, humanNation]);
 
-  const isLandNeighbor = useMemo(() => {
-    if (!humanNation || !humanNation.geography?.landNeighbors) return false;
-    const targetCanonical = CountryRegistry.resolveCanonicalId(targetNationId);
-    return humanNation.geography.landNeighbors.some(
-      (neighbor) =>
-        neighbor === targetNationId ||
-        CountryRegistry.resolveCanonicalId(neighbor) === targetCanonical,
-    );
-  }, [humanNation, targetNationId]);
-
   return {
     searchQuery,
     setSearchQuery,
@@ -90,6 +80,5 @@ export function useWideDiplomacy({
     filteredRelations: relationsList,
     selectedRelation,
     targetNationId,
-    isLandNeighbor,
   };
 }

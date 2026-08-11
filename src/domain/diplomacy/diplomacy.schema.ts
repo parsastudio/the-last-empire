@@ -22,7 +22,6 @@ export const RelationProfileSchema = z.object({
   stance: DiplomaticStanceSchema,
   opinion: z.number().min(-100).max(100),
   coolOffTurnsRemaining: z.number().nonnegative(),
-  coolOffTargetStance: DiplomaticStanceSchema.optional(),
   isTradeEmbargoed: z.boolean().optional(),
 });
 

@@ -10,8 +10,6 @@ uniform usampler2D u_liveStateTexture;
 uniform sampler2D u_paletteTexture;
 uniform sampler2D u_gdpPaletteTexture;
 
-uniform float u_time;
-uniform float u_overlayOpacity;
 uniform vec2 u_texelSize;
 uniform int u_activeLayer;
 

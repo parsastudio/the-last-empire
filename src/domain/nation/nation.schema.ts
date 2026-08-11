@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { GovernmentStateSchema } from "@/domain/politics/politics.schema";
-import { MilitaryPayrollRatesSchema } from "@/domain/economy/economy.schema";
 import {
   MilitaryStackSchema,
   RecruitmentOrderSchema,
@@ -59,7 +58,6 @@ export const NationSchema = z.object({
   consecutiveDeficitTurns: z.number().nonnegative(),
   government: GovernmentStateSchema,
   resources: ResourcesSchema.default({}),
-  militaryPayroll: MilitaryPayrollRatesSchema.optional(),
   military: MilitaryStackSchema,
   recruitmentQueue: z.array(RecruitmentOrderSchema),
   geography: GeographySchema,
