@@ -57,33 +57,9 @@ export const useGameStore = create<GameStoreState>()(
       });
 
       try {
-        let state = await storageAdapter.loadGameState(gameId);
+        const state = await storageAdapter.loadGameState(gameId);
 
         if (state) {
-          const hasProvinces =
-            state.provinces && Object.keys(state.provinces).length > 0;
-
-          if (!hasProvinces) {
-            try {
-              const res = await fetch("/maps/map1/temp/final/manifest.json", {
-                cache: "no-store",
-              });
-              if (res.ok) {
-                const manifest: FinalMapManifest = await res.json();
-                const initResult = aiInitializer.initializeFromManifest(
-                  manifest,
-                  state.humanNationId,
-                );
-                state = {
-                  ...state,
-                  provinces: initResult.provinces,
-                  nations: { ...initResult.nations, ...state.nations },
-                };
-                await storageAdapter.saveGameState(gameId, state);
-              }
-            } catch {}
-          }
-
           const buffer = BitPackedGridState.getInstance().getBuffer();
           const syncedProvinces =
             ProvincePixelCalculator.syncProvincesMapPixelCounts(
@@ -91,13 +67,13 @@ export const useGameStore = create<GameStoreState>()(
               state.provinces,
             );
 
-          state = {
+          const updatedState: GameState = {
             ...state,
             provinces: syncedProvinces,
           };
 
           set((draft) => {
-            draft.gameState = state;
+            draft.gameState = updatedState;
             draft.loading = false;
           });
           return true;
@@ -128,14 +104,16 @@ export const useGameStore = create<GameStoreState>()(
         const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
         let activeManifest: FinalMapManifest | null = manifest ?? null;
 
-        try {
-          const res = await fetch("/maps/map1/temp/final/manifest.json", {
-            cache: "no-store",
-          });
-          if (res.ok) {
-            activeManifest = await res.json();
-          }
-        } catch {}
+        if (!activeManifest) {
+          try {
+            const res = await fetch("/maps/map1/temp/final/manifest.json", {
+              cache: "no-store",
+            });
+            if (res.ok) {
+              activeManifest = await res.json();
+            }
+          } catch {}
+        }
 
         let detectedNations: string[] = [];
 

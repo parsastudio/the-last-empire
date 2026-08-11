@@ -44,14 +44,6 @@ export function useWebGLMapRenderer({
     img.onload = () => {
       renderer.setTerrainImage(img);
     };
-    img.onerror = () => {
-      const fallbackImg = new Image();
-      fallbackImg.crossOrigin = "anonymous";
-      fallbackImg.src = "/maps/map1/essential/base_map_terrain.png";
-      fallbackImg.onload = () => {
-        renderer.setTerrainImage(fallbackImg);
-      };
-    };
 
     const paletteTex = WebGLPaletteTextureManager.createPaletteTexture(
       gl,

@@ -3,8 +3,6 @@ import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-res
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class ClientFinalStateLoader {
-  private static cachedBuffer: BitPackedBuffer | null = null;
-
   public static async loadLiveStateBuffer(
     mapId = "map1",
   ): Promise<BitPackedBuffer | null> {
@@ -24,9 +22,8 @@ export class ClientFinalStateLoader {
       const bitBuffer = new BitPackedBuffer();
       bitBuffer.loadArrayBuffer(arrayBuf);
 
-      this.cachedBuffer = bitBuffer;
       BitPackedGridState.getInstance().markDirty();
-      return this.cachedBuffer;
+      return bitBuffer;
     } catch {
       return null;
     }
