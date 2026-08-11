@@ -16,7 +16,6 @@ export interface BattleCalculationResult {
   conqueredPixelsCount: number;
   treasuryLooted: number;
   deploymentMoneyCost: number;
-  deploymentOilCost: number;
   airSupportMultiplier: number;
   severity: ReportSeverity;
 }
@@ -26,7 +25,6 @@ export class BattleCalculator {
     attacker: Nation,
     defender: Nation,
     dronesToLaunch: number,
-    oilPrice = 25000000,
     infantryToDeploy?: number,
     airForceToDeploy?: number,
     targetEnclaveId?: number,
@@ -45,8 +43,8 @@ export class BattleCalculator {
       deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (dronesToLaunch || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
-    const { moneyCost: deploymentMoneyCost, oilCost: deploymentOilCost } =
-      CombatModifierResolver.calculateDeploymentCosts(totalForceCost, oilPrice);
+    const { moneyCost: deploymentMoneyCost } =
+      CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
 
     const dronesUsed = Math.min(
       attacker.military.droneMissile,
@@ -274,7 +272,6 @@ export class BattleCalculator {
       conqueredPixelsCount,
       treasuryLooted,
       deploymentMoneyCost,
-      deploymentOilCost,
       airSupportMultiplier,
       severity,
     };
