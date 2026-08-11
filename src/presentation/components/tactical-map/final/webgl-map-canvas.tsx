@@ -9,12 +9,15 @@ import { useWebGLInteraction } from "@/presentation/hooks/tactical-map/final/use
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
+import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 interface WebGLMapCanvasProps {
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   activeLayer?: "political" | "gdp";
+  positionRef?: React.RefObject<CameraPosition>;
+  scaleRef?: React.RefObject<number>;
   onSelectCountryContext?: (code: string) => void;
   onSelectCountryAttackContext?: (code: string, provinceId?: number) => void;
 }
@@ -24,6 +27,8 @@ export function WebGLMapCanvas({
   nationsMap,
   humanNationId,
   activeLayer = "political",
+  positionRef: externalPositionRef,
+  scaleRef: externalScaleRef,
   onSelectCountryContext,
   onSelectCountryAttackContext,
 }: WebGLMapCanvasProps) {
@@ -40,7 +45,15 @@ export function WebGLMapCanvas({
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-  } = useMapGesture(dimensions.width, dimensions.height, 4096, 2048);
+  } = useMapGesture(
+    dimensions.width,
+    dimensions.height,
+    4096,
+    2048,
+    containerRef,
+    externalPositionRef,
+    externalScaleRef,
+  );
 
   useWebGLMapRenderer({
     gl,

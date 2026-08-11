@@ -129,6 +129,8 @@ export function WebGLTacticalWorkspace({
         nationsMap={effectiveGameState?.nations}
         humanNationId={effectiveGameState?.humanNationId}
         activeLayer={activeLayer}
+        positionRef={positionRef}
+        scaleRef={scaleRef}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
       />

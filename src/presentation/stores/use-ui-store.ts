@@ -5,7 +5,6 @@ interface UiStoreState {
   activeTab: SidebarTabType | null;
   activeSubTab: string | null;
   selectedTargetCode: string | null;
-  activeModal: string | null;
   isRailCollapsed: boolean;
 
   setActiveTab: (
@@ -14,19 +13,16 @@ interface UiStoreState {
     targetCode?: string | null,
   ) => void;
   setSelectedTargetCode: (code: string | null) => void;
-  setActiveModal: (modal: string | null) => void;
   setIsRailCollapsed: (
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
   closeActiveTab: () => void;
-  resetUiState: () => void;
 }
 
 export const useUiStore = create<UiStoreState>((set) => ({
   activeTab: null,
   activeSubTab: null,
   selectedTargetCode: null,
-  activeModal: null,
   isRailCollapsed: true,
 
   setActiveTab: (tab, subTab = null, targetCode = null) =>
@@ -42,11 +38,6 @@ export const useUiStore = create<UiStoreState>((set) => ({
       selectedTargetCode: code,
     }),
 
-  setActiveModal: (modal) =>
-    set({
-      activeModal: modal,
-    }),
-
   setIsRailCollapsed: (collapsed) =>
     set((state) => ({
       isRailCollapsed:
@@ -60,14 +51,5 @@ export const useUiStore = create<UiStoreState>((set) => ({
       activeTab: null,
       activeSubTab: null,
       selectedTargetCode: null,
-    }),
-
-  resetUiState: () =>
-    set({
-      activeTab: null,
-      activeSubTab: null,
-      selectedTargetCode: null,
-      activeModal: null,
-      isRailCollapsed: true,
     }),
 }));
