@@ -60,38 +60,6 @@ export class BitPackedBuffer {
     }
   }
 
-  public setEnclaveId(x: number, y: number, enclaveId: number): void {
-    const index = y * this.width + x;
-    if (index >= 0 && index < this.buffer.length) {
-      const val = this.buffer[index] || 0;
-      this.buffer[index] = BitPackedCellUtility.setEnclaveId(val, enclaveId);
-    }
-  }
-
-  public setFrontier(x: number, y: number, frontier: number): void {
-    const index = y * this.width + x;
-    if (index >= 0 && index < this.buffer.length) {
-      const val = this.buffer[index] || 0;
-      this.buffer[index] = BitPackedCellUtility.setFrontier(val, frontier);
-    }
-  }
-
-  public getCoastalAccess(x: number, y: number): number {
-    const val = this.getPixel(x, y);
-    return BitPackedCellUtility.getCoastalAccess(val);
-  }
-
-  public setCoastalAccess(x: number, y: number, coastalAccess: number): void {
-    const index = y * this.width + x;
-    if (index >= 0 && index < this.buffer.length) {
-      const val = this.buffer[index] || 0;
-      this.buffer[index] = BitPackedCellUtility.setCoastalAccess(
-        val,
-        coastalAccess,
-      );
-    }
-  }
-
   public loadArrayBuffer(arrayBuffer: ArrayBuffer): void {
     this.buffer = new Uint16Array(arrayBuffer);
     BitPackedGridState.getInstance().markDirty();
