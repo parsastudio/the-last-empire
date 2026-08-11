@@ -26,8 +26,6 @@ export const TurnLogEntrySchema = z.object({
 export const TurnTradeVolumeSchema = z.object({
   oilBought: z.number().nonnegative(),
   oilSold: z.number().nonnegative(),
-  steelBought: z.number().nonnegative(),
-  steelSold: z.number().nonnegative(),
 });
 
 export const GameStateSchema = z.object({
