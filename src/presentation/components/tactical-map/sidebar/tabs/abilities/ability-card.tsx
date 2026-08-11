@@ -10,9 +10,10 @@ import {
 import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { ActivateAbilityAction } from "@/domain/game/action.schema";
 
 export interface AbilityItem {
-  id: string;
+  id: ActivateAbilityAction["abilityType"];
   name: string;
   requiredGov: string;
   govLabel: string;
@@ -102,17 +103,7 @@ export function AbilityCard({
       return;
     }
 
-    type AbilityEnum =
-      | "DIPLOMATIC_SUMMIT"
-      | "MARTIAL_LAW"
-      | "INDUSTRIAL_MOBILIZATION"
-      | "ROYAL_DECREE"
-      | "WAR_ALERT";
-
-    const action = ActionFactory.activateAbility(
-      nationId,
-      ability.id as AbilityEnum,
-    );
+    const action = ActionFactory.activateAbility(nationId, ability.id);
 
     await dispatchAction(
       action,

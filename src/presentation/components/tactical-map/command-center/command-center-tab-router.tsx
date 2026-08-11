@@ -10,7 +10,7 @@ import { WideResearchView } from "@/presentation/components/tactical-map/command
 import { WideAbilitiesView } from "@/presentation/components/tactical-map/command-center/views/wide-abilities-view";
 import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { FileText, ShieldAlert, Info } from "lucide-react";
 
@@ -92,7 +92,7 @@ export function CommandCenterTabRouter({
         />
       );
     case "reports": {
-      const logs = gameState?.turnLogs || [];
+      const logs: TurnLogEntry[] = gameState?.turnLogs || [];
       if (logs.length === 0) {
         return (
           <div className="py-20 text-center text-xs text-muted-foreground italic">
@@ -112,7 +112,7 @@ export function CommandCenterTabRouter({
             {logs
               .slice()
               .reverse()
-              .map((log) => (
+              .map((log: TurnLogEntry) => (
                 <div
                   key={log.id}
                   className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-1.5 font-mono text-xs"

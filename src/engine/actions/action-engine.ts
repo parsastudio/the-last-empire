@@ -8,7 +8,7 @@ import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executo
 
 export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
-    const targetActionId = (action as { id: string }).id;
+    const targetActionId = action.id;
 
     if (state.isGameOver) {
       return {
