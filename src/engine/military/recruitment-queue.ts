@@ -13,18 +13,11 @@ export class RecruitmentQueueManager {
 
     const discount = Math.max(0.7, 1 - (nation.industrialLevel - 1) * 0.05);
     const totalMoney = Math.floor(stats.moneyCost * discount) * quantity;
-    const totalManpower = stats.manpowerCost * quantity;
 
     if (nation.treasury < totalMoney) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
         "موجودی خزانه برای ساخت یگان کافی نیست.",
-      );
-    }
-    if (nation.resources.manpower < totalManpower) {
-      throw new GameError(
-        "INSUFFICIENT_RESOURCES",
-        "نیروی انسانی کافی برای ساخت یگان وجود ندارد.",
       );
     }
 
@@ -34,16 +27,11 @@ export class RecruitmentQueueManager {
       quantity,
       turnsRemaining: stats.buildTurns,
       totalCost: totalMoney,
-      manpowerRequired: totalManpower,
     };
 
     return {
       ...nation,
       treasury: nation.treasury - totalMoney,
-      resources: {
-        ...nation.resources,
-        manpower: nation.resources.manpower - totalManpower,
-      },
       recruitmentQueue: [...nation.recruitmentQueue, newOrder],
     };
   }
@@ -84,22 +72,11 @@ export class RecruitmentQueueManager {
     }
 
     const moneyRefund = Math.floor(order.totalCost * refundRate);
-    const manpowerRefund = order.manpowerRequired;
     const newQueue = nation.recruitmentQueue.filter((o) => o.id !== orderId);
-
-    const maxManpower = Math.floor(nation.population * 0.15);
-    const finalManpower = Math.min(
-      maxManpower,
-      nation.resources.manpower + manpowerRefund,
-    );
 
     return {
       ...nation,
       treasury: nation.treasury + moneyRefund,
-      resources: {
-        ...nation.resources,
-        manpower: finalManpower,
-      },
       recruitmentQueue: newQueue,
     };
   }

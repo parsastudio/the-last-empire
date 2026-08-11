@@ -21,7 +21,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
     corruption: 5,
     turnsInPower: 1,
   },
-  resources: { oil: 1000, manpower: 500 },
+  resources: { oil: 1000 },
   military: {
     infantry: 100,
     airForce: 20,

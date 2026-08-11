@@ -20,7 +20,6 @@ export const RecruitmentOrderSchema = z.object({
   quantity: z.number().positive(),
   turnsRemaining: z.number().nonnegative(),
   totalCost: z.number().nonnegative(),
-  manpowerRequired: z.number().nonnegative(),
 });
 
 export type UnitType = z.infer<typeof UnitTypeSchema>;

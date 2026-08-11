@@ -95,7 +95,6 @@ export class NationProfileAssigner {
       },
       resources: {
         oil: initialOil,
-        manpower: 500,
       },
       military: {
         infantry,
@@ -237,7 +236,6 @@ export class NationProfileAssigner {
       },
       resources: {
         oil: initialOil,
-        manpower: 500,
       },
       military: {
         infantry,

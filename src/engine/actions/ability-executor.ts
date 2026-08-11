@@ -102,13 +102,8 @@ export class AbilityExecutor {
       }
 
       case "INDUSTRIAL_MOBILIZATION": {
-        const sacManpower = Math.floor(nation.resources.manpower * 0.15);
         updatedNations[sourceKey] = {
           ...nation,
-          resources: {
-            ...nation.resources,
-            manpower: nation.resources.manpower - sacManpower,
-          },
           government: {
             ...nation.government,
             stability: Math.max(0, nation.government.stability - 15),

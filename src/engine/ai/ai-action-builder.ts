@@ -43,32 +43,15 @@ export class AIActionBuilder {
       : nation.treasury * 0.2;
 
     const airMoneyCost = 1400000000;
-    const airManpowerCost = 5;
-
     const infMoneyCost = 350000000;
-    const infManpowerCost = 10;
 
-    if (
-      nation.resources &&
-      recruitBudget >= airMoneyCost &&
-      nation.resources.manpower >= airManpowerCost
-    ) {
-      const airQty = Math.min(
-        Math.floor(recruitBudget / airMoneyCost),
-        Math.floor(nation.resources.manpower / airManpowerCost),
-      );
+    if (recruitBudget >= airMoneyCost) {
+      const airQty = Math.floor(recruitBudget / airMoneyCost);
       if (airQty > 0) {
         actions.push(ActionFactory.recruitUnit(nation.id, "AIR_FORCE", airQty));
       }
-    } else if (
-      nation.resources &&
-      recruitBudget >= infMoneyCost &&
-      nation.resources.manpower >= infManpowerCost
-    ) {
-      const infQty = Math.min(
-        Math.floor(recruitBudget / infMoneyCost),
-        Math.floor(nation.resources.manpower / infManpowerCost),
-      );
+    } else if (recruitBudget >= infMoneyCost) {
+      const infQty = Math.floor(recruitBudget / infMoneyCost);
       if (infQty > 0) {
         actions.push(ActionFactory.recruitUnit(nation.id, "INFANTRY", infQty));
       }

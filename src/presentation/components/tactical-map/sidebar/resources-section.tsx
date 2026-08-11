@@ -1,10 +1,9 @@
 import React from "react";
-import { Cpu, Fuel, Users, Building2 } from "lucide-react";
+import { Cpu, Fuel, Building2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ResourcesSectionProps {
   oil: number;
-  manpower: number;
   industrialLevel: number;
   infrastructureLevel?: number;
   oilRequiredPerTurn?: number;
@@ -13,7 +12,6 @@ interface ResourcesSectionProps {
 
 export function ResourcesSection({
   oil,
-  manpower,
   industrialLevel,
   infrastructureLevel = 1,
   oilRequiredPerTurn = 0,
@@ -21,9 +19,6 @@ export function ResourcesSection({
 }: ResourcesSectionProps) {
   const formattedOil = PersianNumberFormatter.toPersianDigits(
     oil.toLocaleString("en-US"),
-  );
-  const formattedManpower = PersianNumberFormatter.toPersianDigits(
-    manpower.toLocaleString("en-US"),
   );
   const formattedIndustrial =
     PersianNumberFormatter.toPersianDigits(industrialLevel);
@@ -67,16 +62,6 @@ export function ResourcesSection({
 
         <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans font-bold">
-            <Users size={12} className="text-gdp" />
-            <span>نیروی انسانی آماده</span>
-          </div>
-          <span className="text-xs font-extrabold text-foreground block">
-            {formattedManpower} نفر
-          </span>
-        </div>
-
-        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
-          <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans font-bold">
             <Cpu size={12} className="text-gdp" />
             <span>سطح توسعه صنعتی</span>
           </div>
@@ -85,7 +70,7 @@ export function ResourcesSection({
           </span>
         </div>
 
-        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1 col-span-2">
+        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans font-bold">
             <Building2 size={12} className="text-treasury" />
             <span>سطح توسعه زیرساخت و مواصلات</span>
