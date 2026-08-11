@@ -7,7 +7,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   isAlive: true,
   flagCode: "IR",
   rank: 1,
-  gdp: 450000000000,
   perCapitaProductivity: 5113,
   maxPopulationCapacity: 84210526,
   taxRate: 15,
