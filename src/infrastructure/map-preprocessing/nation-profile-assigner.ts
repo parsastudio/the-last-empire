@@ -4,7 +4,6 @@ import { GovernmentType } from "@/domain/politics/politics.schema";
 import {
   findCountryProfileById,
   findCountryProfileByCode,
-  CountryRegistry,
 } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 

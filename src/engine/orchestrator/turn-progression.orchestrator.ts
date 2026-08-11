@@ -54,7 +54,7 @@ export class TurnProgressionOrchestrator {
       }
     }
 
-    nextState = this.pipeline.processTurn(nextState, prng);
+    nextState = this.pipeline.processTurn(nextState);
     nextState = this.turnOrchestrator.processPostTurn(nextState);
     nextState = this.livenessManager.updateLiveness(nextState);
 

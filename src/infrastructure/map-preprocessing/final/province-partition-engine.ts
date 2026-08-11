@@ -88,8 +88,6 @@ export class ProvincePartitionEngine {
       }
 
       const totalCountryPixels = pixelIndices.length;
-      const totalProvincesCount =
-        ProvinceCountAllocator.calculateTotalProvinces(totalCountryPixels);
 
       const majorGroups: ArchipelagoGroup[] = majorComponents.map(
         (comp, idx) => ({

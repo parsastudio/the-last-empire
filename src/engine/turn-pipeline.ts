@@ -1,5 +1,4 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import {
   CoolOffManager,
@@ -26,7 +25,7 @@ export class TurnPipeline {
   private bankruptcyManager = new BankruptcyManager();
   private recruitmentQueue = new RecruitmentQueueManager();
 
-  public processTurn(state: GameState, _prng: SeededRandom): GameState {
+  public processTurn(state: GameState): GameState {
     let updatedNations: Record<string, Nation> = {};
     const allProvinces = Object.values(state.provinces || {});
     const nationKeys = Object.keys(state.nations);
