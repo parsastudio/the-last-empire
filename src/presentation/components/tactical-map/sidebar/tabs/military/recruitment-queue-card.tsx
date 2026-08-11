@@ -3,6 +3,7 @@ import { Clock, X } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { RecruitmentOrder } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface RecruitmentQueueCardProps {
   queue?: RecruitmentOrder[];
@@ -46,10 +47,15 @@ export function RecruitmentQueueCard({
           >
             <div className="space-y-0.5 text-right">
               <span className="text-xs font-bold text-foreground block font-sans">
-                {getUnitNameFa(item.unitType)} ({item.quantity} یگان)
+                {getUnitNameFa(item.unitType)} (
+                {PersianNumberFormatter.toPersianDigits(
+                  item.quantity.toLocaleString("en-US"),
+                )}{" "}
+                یگان)
               </span>
               <span className="text-[9px] text-treasury block font-sans">
-                {item.turnsRemaining} نوبت تا آمادگی کامل
+                {PersianNumberFormatter.toPersianDigits(item.turnsRemaining)}{" "}
+                نوبت تا آمادگی کامل
               </span>
             </div>
 

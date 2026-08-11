@@ -11,6 +11,7 @@ import {
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { useUnitRecruitmentCalculator } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-unit-recruitment-calculator";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export interface UnitConfig {
   type: string;
@@ -82,19 +83,26 @@ export function UnitRecruitmentCard({
         </div>
         <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-lg">
           <Clock size={11} className="text-treasury" />
-          <span>{unit.buildTurns} نوبت ساخت</span>
+          <span>
+            {PersianNumberFormatter.toPersianDigits(unit.buildTurns)} نوبت ساخت
+          </span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 font-mono text-[10px]">
         <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
           <Coins size={11} className="text-gdp" />
-          <span>هزینه: ${calc.totalMoney.toLocaleString("fa-IR")}</span>
+          <span>
+            هزینه: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
+          </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
           <Users size={11} className="text-primary" />
           <span>
-            نیروی انسانی: {calc.totalManpower.toLocaleString("fa-IR")}
+            نیروی انسانی:{" "}
+            {PersianNumberFormatter.toPersianDigits(
+              calc.totalManpower.toLocaleString("en-US"),
+            )}
           </span>
         </div>
       </div>
@@ -105,7 +113,10 @@ export function UnitRecruitmentCard({
             حداکثر ظرفیت ساخت با منابع فعلی:
           </span>
           <span className="font-bold text-gdp">
-            {calc.maxAffordable.toLocaleString("fa-IR")} یگان
+            {PersianNumberFormatter.toPersianDigits(
+              calc.maxAffordable.toLocaleString("en-US"),
+            )}{" "}
+            یگان
           </span>
         </div>
 
@@ -162,7 +173,7 @@ export function UnitRecruitmentCard({
         className="w-full py-2.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
       >
         {calc.quantity > 0
-          ? `ثبت سفارش ساخت ${calc.quantity.toLocaleString("fa-IR")} یگان ${unit.name}`
+          ? `ثبت سفارش ساخت ${PersianNumberFormatter.toPersianDigits(calc.quantity.toLocaleString("en-US"))} یگان ${unit.name}`
           : calc.maxAffordable === 0
             ? "منابع ناکافی جهت ساخت این یگان"
             : "تعداد سفارش را تعیین کنید"}

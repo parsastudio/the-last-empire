@@ -23,10 +23,14 @@ export function useWideDiplomacy({
     searchQuery,
   });
 
+  const humanNation = useMemo(
+    () => (nationsMap ? (nationsMap[humanNationId] ?? null) : null),
+    [nationsMap, humanNationId],
+  );
+
   const relationsList = useMemo(() => {
     const list = liveNationsList.map((item) => {
       const rel = resolveProfileRelation(item.id, item.rawNation);
-      const humanNation = nationsMap ? nationsMap[humanNationId] : null;
       if (humanNation) {
         const directRel = humanNation.relations[item.id];
         if (directRel) {
@@ -39,26 +43,34 @@ export function useWideDiplomacy({
     });
 
     return list.sort((a, b) => a.rank - b.rank);
-  }, [liveNationsList, nationsMap, humanNationId]);
+  }, [liveNationsList, humanNation]);
 
   const defaultCode = relationsList[0]?.code || "";
   const [userSelectedCode, setUserSelectedCode] = useState<string | null>(null);
 
   const activeCode = userSelectedCode || selectedTargetCode || defaultCode;
 
-  const targetNationId = CountryRegistry.resolveCanonicalId(activeCode);
-  const targetLiveNation = nationsMap ? nationsMap[targetNationId] : null;
-  const selectedRelation = resolveProfileRelation(activeCode, targetLiveNation);
+  const targetNationId = useMemo(
+    () => CountryRegistry.resolveCanonicalId(activeCode),
+    [activeCode],
+  );
 
-  const humanNation = nationsMap ? nationsMap[humanNationId] : null;
-  if (humanNation) {
-    const directRel = humanNation.relations[targetNationId];
-    if (directRel) {
-      selectedRelation.stance = directRel.stance;
-      selectedRelation.opinion = directRel.opinion;
-      selectedRelation.isTradeEmbargoed = directRel.isTradeEmbargoed ?? false;
+  const selectedRelation = useMemo(() => {
+    const targetLiveNation = nationsMap
+      ? (nationsMap[targetNationId] ?? null)
+      : null;
+    const rel = resolveProfileRelation(activeCode, targetLiveNation);
+
+    if (humanNation) {
+      const directRel = humanNation.relations[targetNationId];
+      if (directRel) {
+        rel.stance = directRel.stance;
+        rel.opinion = directRel.opinion;
+        rel.isTradeEmbargoed = directRel.isTradeEmbargoed ?? false;
+      }
     }
-  }
+    return rel;
+  }, [activeCode, targetNationId, nationsMap, humanNation]);
 
   const isLandNeighbor = useMemo(() => {
     if (!humanNation || !humanNation.geography?.landNeighbors) return false;
