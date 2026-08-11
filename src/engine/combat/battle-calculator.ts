@@ -153,20 +153,6 @@ export class BattleCalculator {
       airSupportMultiplier = 0.7;
     }
 
-    const militiaMult = DoctrinesManager.getMilitiaPowerMultiplier(
-      defender.doctrines?.unlockedDoctrines,
-    );
-
-    const militiaGarrison = Math.floor(
-      Math.max(
-        10,
-        Math.floor(
-          (defender.population / 100000) *
-            (defender.government.stability / 100),
-        ),
-      ) * militiaMult,
-    );
-
     const attackerGroundPower =
       deployedInfantry *
       (1 + (attacker.military.techLevel - 1) * 0.2) *
@@ -175,7 +161,7 @@ export class BattleCalculator {
       attackerGovMult;
 
     const defenderGroundPower =
-      (defenderRemainingInfantry + militiaGarrison) *
+      defenderRemainingInfantry *
       (1 + (defender.military.techLevel - 1) * 0.2) *
       (1 + defender.military.experience / 100) *
       defenderGovMult;
@@ -277,7 +263,6 @@ export class BattleCalculator {
       airForceLost: defenderAirLoss + airForceDestroyedByDrones,
       droneMissileEngaged: defender.military.droneMissile,
       droneMissileLost: 0,
-      militiaGarrisonPower: militiaGarrison,
     };
 
     return {

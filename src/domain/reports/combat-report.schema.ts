@@ -17,7 +17,6 @@ export const CasualtyMetricsSchema = z.object({
   airForceLost: z.number().nonnegative(),
   droneMissileEngaged: z.number().nonnegative(),
   droneMissileLost: z.number().nonnegative(),
-  militiaGarrisonPower: z.number().nonnegative().optional(),
 });
 
 export const CombatReportSchema = z.object({
