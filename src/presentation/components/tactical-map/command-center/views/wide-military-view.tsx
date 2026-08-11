@@ -10,8 +10,6 @@ import {
 
 interface WideMilitaryViewProps {
   military: MilitaryStack;
-  population?: number;
-  stability?: number;
   recruitmentQueue?: RecruitmentOrder[];
   nationId: string;
   treasury?: number;
@@ -20,18 +18,11 @@ interface WideMilitaryViewProps {
 
 export function WideMilitaryView({
   military,
-  population = 80000000,
-  stability = 70,
   recruitmentQueue = [],
   nationId,
   treasury = 100000,
   manpower = 500,
 }: WideMilitaryViewProps) {
-  const militiaGarrisonPower = Math.max(
-    10,
-    Math.floor((population / 100000) * (stability / 100)),
-  );
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
@@ -41,7 +32,6 @@ export function WideMilitaryView({
           droneMissile={military.droneMissile}
           techLevel={military.techLevel}
           experience={military.experience}
-          militiaGarrisonPower={militiaGarrisonPower}
         />
 
         <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />

@@ -1,5 +1,5 @@
 import React from "react";
-import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
+import { Swords, Shield, Plane, Radio } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -11,7 +11,6 @@ interface MilitaryForcesSectionProps {
   droneMissile: number;
   techLevel: number;
   experience: number;
-  militiaGarrisonPower?: number;
   nation?: Nation;
 }
 
@@ -21,7 +20,6 @@ export function MilitaryForcesSection({
   droneMissile,
   techLevel,
   experience,
-  militiaGarrisonPower = 280,
   nation,
 }: MilitaryForcesSectionProps) {
   const activeNation: Nation = nation || {
@@ -58,26 +56,6 @@ export function MilitaryForcesSection({
           <span className="text-xs font-extrabold text-foreground">
             {PersianNumberFormatter.toPersianDigits(
               infantry.toLocaleString("en-US"),
-            )}{" "}
-            یگان
-          </span>
-        </div>
-
-        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">
-          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-            <ShieldAlert size={14} className="text-treasury shrink-0" />
-            <div className="space-y-0.5">
-              <span className="text-treasury font-bold block font-sans">
-                پادگان و نیروهای انتظامی ملی
-              </span>
-              <span className="text-[9px] text-muted-foreground block font-sans">
-                تامین از نیروهای انتظامی | بدون هزینه مستقیم
-              </span>
-            </div>
-          </div>
-          <span className="text-xs font-extrabold text-treasury">
-            {PersianNumberFormatter.toPersianDigits(
-              militiaGarrisonPower.toLocaleString("en-US"),
             )}{" "}
             یگان
           </span>

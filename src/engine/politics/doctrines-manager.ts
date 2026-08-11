@@ -14,36 +14,6 @@ export class DoctrinesManager {
     return [...DoctrinesManager.doctrines];
   }
 
-  public static purchaseDoctrine(
-    state: DoctrinesState,
-    doctrineId: string,
-  ): DoctrinesState {
-    const doctrine = DoctrinesManager.doctrines.find(
-      (d) => d.id === doctrineId,
-    );
-    if (!doctrine) {
-      throw new Error("DOCTRINE_NOT_FOUND");
-    }
-    if ((state.unlockedDoctrines || []).includes(doctrineId)) {
-      throw new Error("ALREADY_UNLOCKED");
-    }
-    if (state.doctrinePoints < doctrine.cost) {
-      throw new Error("INSUFFICIENT_DOCTRINE_POINTS");
-    }
-
-    const missingPrereqs = doctrine.prerequisites.filter(
-      (req) => !(state.unlockedDoctrines || []).includes(req),
-    );
-    if (missingPrereqs.length > 0) {
-      throw new Error("PREREQUISITES_NOT_MET");
-    }
-
-    return {
-      doctrinePoints: state.doctrinePoints - doctrine.cost,
-      unlockedDoctrines: [...(state.unlockedDoctrines || []), doctrineId],
-    };
-  }
-
   public static getGdpTaxRevenueMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
     let bonus = 0;
@@ -70,11 +40,6 @@ export class DoctrinesManager {
   public static getOilProductionBonus(unlocked?: string[]): number {
     if (!unlocked) return 0;
     return unlocked.includes("deep-refining") ? 4 : 0;
-  }
-
-  public static getMilitiaPowerMultiplier(unlocked?: string[]): number {
-    if (!unlocked) return 1.0;
-    return unlocked.includes("border-fortification") ? 1.25 : 1.0;
   }
 
   public static getDronePowerMultiplier(unlocked?: string[]): number {
