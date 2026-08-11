@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Coins, Fuel, Landmark, ShieldAlert, Globe } from "lucide-react";
+import { Coins, Building2, Landmark, ShieldAlert, Globe } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -35,6 +35,53 @@ function ResourceBadge({
             ({subValue})
           </span>
         )}
+      </div>
+    </div>
+  );
+}
+
+function CapacityMeterBadge({
+  capacityPct,
+  population,
+}: {
+  capacityPct: number;
+  population: number;
+}) {
+  const style = useMemo(() => {
+    if (capacityPct > 100)
+      return {
+        text: "text-military",
+        bg: "bg-military",
+        label: "تراکم بحرانی",
+      };
+    if (capacityPct >= 95)
+      return { text: "text-treasury", bg: "bg-treasury", label: "تراکم بالا" };
+    return { text: "text-gdp", bg: "bg-gdp", label: "وضعیت مطلوب" };
+  }, [capacityPct]);
+
+  const formattedPop = PersianNumberFormatter.formatCompactNumber(population);
+
+  return (
+    <div
+      className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 cursor-default shrink-0"
+      title={`اشغال زیرساخت زیستی: ${PersianNumberFormatter.toPersianDigits(capacityPct)}%`}
+    >
+      <Building2 size={14} className={`${style.text} shrink-0`} />
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <span className={`font-bold ${style.text}`}>
+            {PersianNumberFormatter.toPersianDigits(capacityPct)}%
+          </span>
+          <span className="text-[10px] text-muted-foreground font-sans">
+            ({formattedPop})
+          </span>
+        </div>
+        <div className="w-10 h-1.5 bg-background/80 rounded-full overflow-hidden border border-border/40">
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
+            style={{ width: `${Math.min(100, capacityPct)}%` }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -118,20 +165,9 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       metrics.netIncomePerTurn,
     );
 
-    const formattedOil = `${PersianNumberFormatter.toPersianDigits(
-      metrics.oil.toLocaleString("en-US"),
-    )} بلوک`;
-
-    const formattedOilUsage = `${PersianNumberFormatter.toPersianDigits(
-      metrics.oilRequiredPerTurn,
-    )} مصرف`;
-
     return {
       formattedTreasury,
       formattedIncome,
-      formattedOil,
-      formattedOilUsage,
-      isOilDeficit: metrics.oil < metrics.oilRequiredPerTurn,
     };
   }, [metrics]);
 
@@ -157,15 +193,9 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
           }
         />
 
-        <ResourceBadge
-          icon={Fuel}
-          iconColor={formatted.isOilDeficit ? "text-military" : "text-treasury"}
-          label="ذخایر نفت خام و مصرف نوبتی"
-          value={formatted.formattedOil}
-          subValue={formatted.formattedOilUsage}
-          subValueColor={
-            formatted.isOilDeficit ? "text-military font-bold" : "text-treasury"
-          }
+        <CapacityMeterBadge
+          capacityPct={metrics.capacityPercentage}
+          population={metrics.population}
         />
 
         <div className="w-[1px] h-6 bg-border/80 shrink-0 hidden sm:block" />

@@ -2,7 +2,6 @@ import React, { useState, useMemo } from "react";
 import {
   Swords,
   ShieldAlert,
-  Fuel,
   Coins,
   MapPin,
   Zap,
@@ -20,7 +19,6 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { CountryRegistry } from "@/domain/data/countries";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { MARKET_CONFIG } from "@/domain/economy/market.config";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
 
@@ -95,7 +93,7 @@ export function DirectAttackModal({
   }, [targetNation, targetProvince]);
 
   const deploymentCosts = useMemo(() => {
-    if (!humanNation) return { moneyCost: 0, oilCost: 0 };
+    if (!humanNation) return { moneyCost: 0 };
 
     const totalForceCost =
       infantryToDeploy * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
@@ -103,26 +101,15 @@ export function DirectAttackModal({
       dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const moneyCost = Math.floor(totalForceCost * 0.05);
-    const oilPrice =
-      gameState?.marketPrices?.oil || MARKET_CONFIG.FIXED_BUY_PRICE;
-    const oilCost = Math.max(1, Math.ceil(moneyCost / oilPrice));
-
-    return { moneyCost, oilCost };
-  }, [
-    humanNation,
-    infantryToDeploy,
-    airForceToDeploy,
-    dronesToLaunch,
-    gameState,
-  ]);
+    return { moneyCost };
+  }, [humanNation, infantryToDeploy, airForceToDeploy, dronesToLaunch]);
 
   if (!isOpen || !targetNation || !humanNation) return null;
 
   const canAffordMoney = humanNation.treasury >= deploymentCosts.moneyCost;
-  const canAffordOil = humanNation.resources.oil >= deploymentCosts.oilCost;
   const hasSelectedInfantry = infantryToDeploy > 0;
   const canLaunchAttack =
-    isLandNeighbor && canAffordMoney && canAffordOil && hasSelectedInfantry;
+    isLandNeighbor && canAffordMoney && hasSelectedInfantry;
 
   const handleExecuteAttack = async () => {
     if (!canLaunchAttack || isSubmitting) return;
@@ -273,39 +260,18 @@ export function DirectAttackModal({
             پیش‌نمایش هزینه‌های لجیستیک و پشتیبانی
           </span>
 
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="bg-background/60 p-3 rounded-xl border border-border/40 space-y-1">
-              <span className="text-muted-foreground text-[10px] font-sans flex items-center gap-1">
-                <Coins size={12} className="text-gdp" />
-                هزینه مالی اعزام:
-              </span>
-              <span
-                className={`font-bold block ${
-                  canAffordMoney ? "text-gdp" : "text-military"
-                }`}
-              >
-                {PersianNumberFormatter.formatCurrency(
-                  deploymentCosts.moneyCost,
-                )}
-              </span>
-            </div>
-
-            <div className="bg-background/60 p-3 rounded-xl border border-border/40 space-y-1">
-              <span className="text-muted-foreground text-[10px] font-sans flex items-center gap-1">
-                <Fuel size={12} className="text-treasury" />
-                سوخت نفتی مورد نیاز:
-              </span>
-              <span
-                className={`font-bold block ${
-                  canAffordOil ? "text-treasury" : "text-military"
-                }`}
-              >
-                {PersianNumberFormatter.toPersianDigits(
-                  deploymentCosts.oilCost,
-                )}{" "}
-                بلوک
-              </span>
-            </div>
+          <div className="bg-background/60 p-3 rounded-xl border border-border/40 space-y-1">
+            <span className="text-muted-foreground text-[10px] font-sans flex items-center gap-1">
+              <Coins size={12} className="text-gdp" />
+              هزینه مالی اعزام نیرو:
+            </span>
+            <span
+              className={`font-bold block ${
+                canAffordMoney ? "text-gdp" : "text-military"
+              }`}
+            >
+              {PersianNumberFormatter.formatCurrency(deploymentCosts.moneyCost)}
+            </span>
           </div>
         </div>
 
@@ -324,8 +290,8 @@ export function DirectAttackModal({
                   ? "عدم وجود مرز زمینی با این استان"
                   : !hasSelectedInfantry
                     ? "حداقل ۱ یگان پیاده‌نظام انتخاب کنید"
-                    : !canAffordMoney || !canAffordOil
-                      ? "منابع مالی/نفتی ناکافی جهت اعزام"
+                    : !canAffordMoney
+                      ? "موجودی مالی ناکافی جهت اعزام"
                       : `صدور دستور فتح استان ${targetRegionName}`}
               </span>
             </>
