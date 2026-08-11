@@ -4,7 +4,6 @@ import {
   SetResearchBudgetAction,
   RecruitUnitAction,
   DiplomaticProposalAction,
-  TradeResourcesAction,
   UpgradeIndustrialLevelAction,
   InvestInfrastructureAction,
   FundProxyInfluenceAction,
@@ -16,7 +15,6 @@ import {
   InvestResearchAction,
   InvestDiplomacyAction,
   InitiateBattleAction,
-  ConfigureAutoTradeAction,
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
@@ -87,22 +85,6 @@ export class ActionFactory {
       type: "DIPLOMATIC_PROPOSAL",
       targetNationId,
       proposalType,
-    };
-  }
-
-  public static tradeResources(
-    nationId: string,
-    resourceType: "oil",
-    isBuy: boolean,
-    amount: number,
-  ): TradeResourcesAction {
-    return {
-      id: this.createId("trade"),
-      nationId,
-      type: "TRADE_RESOURCES",
-      resourceType,
-      isBuy,
-      amount,
     };
   }
 
@@ -243,22 +225,6 @@ export class ActionFactory {
       airForceToDeploy,
       targetEnclaveId,
       targetProvinceId,
-    };
-  }
-
-  public static configureAutoTrade(
-    nationId: string,
-    autoBuyDeficit: boolean,
-    autoSellOilPercent: number,
-    allowEmergencyLoans: boolean,
-  ): ConfigureAutoTradeAction {
-    return {
-      id: this.createId("autotrade"),
-      nationId,
-      type: "CONFIGURE_AUTO_TRADE",
-      autoBuyDeficit,
-      autoSellOilPercent,
-      allowEmergencyLoans,
     };
   }
 }
