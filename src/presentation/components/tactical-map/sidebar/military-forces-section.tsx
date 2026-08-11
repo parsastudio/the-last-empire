@@ -3,6 +3,7 @@ import { Swords, Shield, Plane, Radio, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { Nation } from "@/domain/nation/nation.schema";
+import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
 
 interface MilitaryForcesSectionProps {
   infantry: number;
@@ -14,63 +15,6 @@ interface MilitaryForcesSectionProps {
   nation?: Nation;
 }
 
-const DEFAULT_NATION_PAYROLL_FALLBACK: Nation = {
-  id: "NATION_DEFAULT",
-  name: "ملی",
-  isAi: false,
-  isAlive: true,
-  flagCode: "IR",
-  rank: 1,
-  gdp: 0,
-  taxRate: 0,
-  tariffRate: 0,
-  treasury: 0,
-  nationalDebt: 0,
-  population: 0,
-  industrialLevel: 1,
-  consecutiveDeficitTurns: 0,
-  government: {
-    type: "DEMOCRACY",
-    stability: 80,
-    corruption: 0,
-    turnsInPower: 1,
-  },
-  resources: { oil: 0, manpower: 0 },
-  military: {
-    infantry: 0,
-    airForce: 0,
-    droneMissile: 0,
-    experience: 0,
-    techLevel: 1,
-  },
-  recruitmentQueue: [],
-  geography: {
-    landNeighbors: [],
-    seaNeighbors: [],
-    hasSeaAccess: true,
-    territoryPixelCount: 0,
-    infrastructureLevel: 1,
-    contiguousMainlandPixelCount: 0,
-    isolatedPockets: [],
-    coordinates: [],
-  },
-  relations: {},
-  activeModifiers: [],
-  traits: [],
-  globalReputation: 50,
-  doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
-  researchBudgetRate: 0,
-  accumulatedResearchCost: 0,
-  researchCycleTurn: 0,
-  proxyInfluenceBudget: {},
-  provinceIds: [],
-  autoTradeSettings: {
-    autoBuyDeficit: false,
-    autoSellOilPercent: 0,
-    allowEmergencyLoans: true,
-  },
-};
-
 export function MilitaryForcesSection({
   infantry,
   airForce,
@@ -81,7 +25,7 @@ export function MilitaryForcesSection({
   nation,
 }: MilitaryForcesSectionProps) {
   const activeNation: Nation = nation || {
-    ...DEFAULT_NATION_PAYROLL_FALLBACK,
+    ...DEFAULT_NATION_MOCK,
     military: { infantry, airForce, droneMissile, experience, techLevel },
   };
 

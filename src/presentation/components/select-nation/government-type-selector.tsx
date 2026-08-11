@@ -1,42 +1,14 @@
 import React from "react";
-import { GOVERNMENT_TYPE_PERSIAN_MAP } from "@/domain/politics/government-label.utility";
+import {
+  GovernmentOption,
+  GOVERNMENT_OPTIONS,
+} from "@/domain/politics/government-label.utility";
 
-export interface GovernmentOption {
-  type: string;
-  name: string;
-  desc: string;
-}
-
-export const GOVERNMENT_OPTIONS: GovernmentOption[] = [
-  {
-    type: "DEMOCRACY",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.DEMOCRACY,
-    desc: "باعث رشد اقتصادی سریع‌تر و پاداش دیپلماتیک می‌شود، اما در برابر جنگ‌افروزی و فرسایش بحران آسیب‌پذیرتر است.",
-  },
-  {
-    type: "DICTATORSHIP",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.DICTATORSHIP,
-    desc: "قدرت متمرکز و پایداری نظامی بالا، اما با هزینه بالای فساد ساختاری و نارضایتی شدید مردمی همراه است.",
-  },
-  {
-    type: "MONARCHY",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.MONARCHY,
-    desc: "ثبات سنتی بالا، مشروعیت بالا و هزینه‌های بهینه فرمانروایی با انعطاف‌پذیری متوسط در برابر بحران‌ها.",
-  },
-  {
-    type: "COMMUNISM",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.COMMUNISM,
-    desc: "بسیج عمومی بالا برای صنایع و ارتش، کاهش هزینه‌های نگهداری ادوات جنگی و تمرکز شدید دولتی.",
-  },
-  {
-    type: "FASCISM",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.FASCISM,
-    desc: "قدرت مرگبار تهاجمی و پاداش فوق‌العاده در نبردها، در عوض انزوای جهانی و فرسایش شدید ساختاری.",
-  },
-];
+export type { GovernmentOption };
+export { GOVERNMENT_OPTIONS };
 
 interface GovernmentTypeSelectorProps {
-  options: GovernmentOption[];
+  options?: GovernmentOption[];
   selectedType: string;
   onSelect: (type: string) => void;
 }
