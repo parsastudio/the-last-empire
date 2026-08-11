@@ -23,12 +23,7 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
       const numericId = CountryRegistry.resolveNumericId(nation.id);
       const profile = findCountryProfileById(numericId);
 
-      const gdpVal =
-        nation.gdp && nation.gdp > 0
-          ? nation.gdp
-          : profile
-            ? profile.gdp
-            : 5000000000;
+      const gdpVal = nation.gdp > 0 ? nation.gdp : (profile?.gdp ?? 5000000000);
 
       const { oilProducedPerTurn: produced } =
         ResourceGenerationStep.calculateResourceGeneration(nation);
