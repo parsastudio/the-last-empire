@@ -16,7 +16,7 @@ interface WebGLMapCanvasProps {
   humanNationId?: string;
   activeLayer?: "political" | "gdp";
   onSelectCountryContext?: (code: string) => void;
-  onSelectCountryAttackContext?: (code: string, enclaveId?: number) => void;
+  onSelectCountryAttackContext?: (code: string, provinceId?: number) => void;
 }
 
 export function WebGLMapCanvas({
@@ -36,8 +36,6 @@ export function WebGLMapCanvas({
   const {
     scaleRef,
     positionRef,
-    isDraggingRef,
-    hasDraggedRef,
     handleWheel,
     handleMouseDown,
     handleMouseMove,
@@ -65,8 +63,8 @@ export function WebGLMapCanvas({
     containerRef,
     positionRef,
     scaleRef,
-    isDraggingRef,
-    hasDraggedRef,
+    isDraggingRef: useRef(false),
+    hasDraggedRef: useRef(false),
     provincesMap,
     nationsMap,
     humanNationId,
@@ -85,13 +83,13 @@ export function WebGLMapCanvas({
   const handleSelectContext = (
     action: ContextActionType,
     code: string,
-    enclaveId?: number,
+    provinceId?: number,
   ) => {
     closeContextMenu();
     if (action === "profile" && onSelectCountryContext) {
       onSelectCountryContext(code);
     } else if (action === "attack" && onSelectCountryAttackContext) {
-      onSelectCountryAttackContext(code, enclaveId);
+      onSelectCountryAttackContext(code, provinceId);
     }
   };
 

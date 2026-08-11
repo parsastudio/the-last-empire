@@ -64,11 +64,11 @@ export function WebGLTacticalWorkspace({
   const [directAttackState, setDirectAttackState] = useState<{
     isOpen: boolean;
     targetCode: string | null;
-    enclaveId: number;
+    targetProvinceId: number | null;
   }>({
     isOpen: false,
     targetCode: null,
-    enclaveId: 0,
+    targetProvinceId: null,
   });
 
   const humanNation =
@@ -98,11 +98,11 @@ export function WebGLTacticalWorkspace({
   );
 
   const handleSelectCountryAttackContext = useCallback(
-    (code: string, enclaveId = 0) => {
+    (code: string, provinceId?: number) => {
       setDirectAttackState({
         isOpen: true,
         targetCode: code,
-        enclaveId,
+        targetProvinceId: provinceId ?? null,
       });
     },
     [],
@@ -168,7 +168,7 @@ export function WebGLTacticalWorkspace({
       <DirectAttackModal
         isOpen={directAttackState.isOpen}
         targetNationId={directAttackState.targetCode}
-        targetEnclaveId={directAttackState.enclaveId}
+        targetProvinceId={directAttackState.targetProvinceId}
         humanNation={humanNation}
         gameState={effectiveGameState}
         onClose={() =>

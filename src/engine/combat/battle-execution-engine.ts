@@ -1,9 +1,10 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
-import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "./battle-calculator";
 import { BattleDiplomacyHelper } from "./battle-diplomacy-helper";
+import { BitPackedGridState } from "./final/bit-packed-grid-state";
+import { BitPackedProvinceConqueror } from "./final/bit-packed-province-conqueror";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -50,46 +51,59 @@ export class BattleExecutionEngine {
     );
 
     const updatedProvinces = { ...state.provinces };
-    let conqueredProvince: Province | null = null;
+    let conqueredProvinceId: number | null = null;
+    let conqueredPixels = 0;
 
     if (calcResult.isAttackerVictory) {
-      const defenderProvinceList = Object.values(updatedProvinces).filter(
-        (p) =>
-          p.ownerNationId === defender.id ||
-          p.ownerNationId === canonicalDefenderId,
-      );
-
       if (
         action.targetProvinceId &&
         updatedProvinces[action.targetProvinceId.toString()]
       ) {
-        conqueredProvince =
-          updatedProvinces[action.targetProvinceId.toString()]!;
-      } else if (defenderProvinceList.length > 0) {
-        conqueredProvince = defenderProvinceList.sort(
-          (a, b) => b.gdp - a.gdp,
-        )[0]!;
+        conqueredProvinceId = action.targetProvinceId;
+      } else {
+        const defenderProvinces = Object.values(updatedProvinces).filter(
+          (p) =>
+            p.ownerNationId === defender.id ||
+            p.ownerNationId === canonicalDefenderId,
+        );
+        if (defenderProvinces.length > 0) {
+          defenderProvinces.sort((a, b) => b.gdp - a.gdp);
+          conqueredProvinceId = defenderProvinces[0]!.provinceId;
+        }
       }
 
-      if (conqueredProvince) {
-        updatedProvinces[conqueredProvince.provinceId.toString()] = {
-          ...conqueredProvince,
-          ownerNationId: attacker.id,
-        };
+      if (conqueredProvinceId) {
+        const targetProv = updatedProvinces[conqueredProvinceId.toString()];
+        if (targetProv) {
+          updatedProvinces[conqueredProvinceId.toString()] = {
+            ...targetProv,
+            ownerNationId: attacker.id,
+          };
+
+          conqueredPixels = targetProv.pixelCount;
+
+          const attackerNumericId = CountryRegistry.resolveNumericId(
+            attacker.id,
+          );
+          const buffer = BitPackedGridState.getInstance().getBuffer();
+          BitPackedProvinceConqueror.conquerProvince(
+            buffer,
+            conqueredProvinceId,
+            attackerNumericId,
+          );
+          BitPackedGridState.getInstance().markDirty();
+          BitPackedGridState.getInstance().markStorageDirty();
+        }
       }
     }
 
-    const conqueredPixels = conqueredProvince
-      ? conqueredProvince.pixelCount
-      : 0;
-
-    const remainingDefenderProvinces = Object.values(updatedProvinces).filter(
+    const defenderProvincesRemaining = Object.values(updatedProvinces).filter(
       (p) =>
         p.ownerNationId === defender.id ||
         p.ownerNationId === canonicalDefenderId,
     );
 
-    const isDefenderAlive = remainingDefenderProvinces.length > 0;
+    const isDefenderAlive = defenderProvincesRemaining.length > 0;
     const isFullCapitulation = !isDefenderAlive;
 
     const attackerTreasuryAfterDeployment =
