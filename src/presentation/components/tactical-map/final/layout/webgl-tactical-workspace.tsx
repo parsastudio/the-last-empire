@@ -14,6 +14,7 @@ import {
   TacticalLayer,
 } from "@/presentation/components/tactical-map/controls/layer-controller";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
+import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
@@ -43,6 +44,8 @@ export function WebGLTacticalWorkspace({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
+
+  const dimensions = useMapDimensions(containerRef);
 
   const activeTab = useUiStore((state) => state.activeTab);
   const selectedTargetCode = useUiStore((state) => state.selectedTargetCode);
@@ -79,7 +82,7 @@ export function WebGLTacticalWorkspace({
   const { focusOnCountry } = useMapCameraFocus({
     mapWidth: 4096,
     mapHeight: 2048,
-    dimensions: { width: 1200, height: 600 },
+    dimensions,
     scaleRef,
     countries: ALL_COUNTRY_PROFILES.map((p) => ({
       id: p.id ?? 0,

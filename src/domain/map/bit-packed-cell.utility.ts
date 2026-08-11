@@ -11,13 +11,6 @@ export class BitPackedCellUtility {
     return packed & BitPackedCellUtility.PROVINCE_MASK;
   }
 
-  public static setProvinceId(packed: number, provinceId: number): number {
-    return (
-      (packed & ~BitPackedCellUtility.PROVINCE_MASK) |
-      (provinceId & BitPackedCellUtility.PROVINCE_MASK)
-    );
-  }
-
   public static getNationId(packed: number): number {
     return packed & BitPackedCellUtility.PROVINCE_MASK;
   }
@@ -29,16 +22,8 @@ export class BitPackedCellUtility {
     );
   }
 
-  public static getEnclaveId(packed: number): number {
-    return (packed >> 12) & 0x0f;
-  }
-
   public static setEnclaveId(packed: number, enclaveId: number): number {
     return (packed & ~(0x0f << 12)) | ((enclaveId & 0x0f) << 12);
-  }
-
-  public static getFrontier(packed: number): number {
-    return (packed >> 11) & 0x01;
   }
 
   public static setFrontier(packed: number, frontier: number): number {

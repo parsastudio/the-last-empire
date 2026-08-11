@@ -9,11 +9,9 @@ export class AtomicIslandAssigner {
     minorComponents: LandComponent[],
     assignedProvinceIds: number[],
     width: number,
-    height: number,
     bitBuffer: BitPackedBuffer,
     provinceMap: Map<number, ProvinceClusterInfo>,
   ): void {
-    void height;
     if (assignedProvinceIds.length === 0 || minorComponents.length === 0) {
       return;
     }

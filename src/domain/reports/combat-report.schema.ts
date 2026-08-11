@@ -12,7 +12,6 @@ export const ReportSeveritySchema = z.enum([
 export const CasualtyMetricsSchema = z.object({
   infantryEngaged: z.number().nonnegative(),
   infantryLost: z.number().nonnegative(),
-  infantryRetreated: z.number().nonnegative().optional(),
   airForceEngaged: z.number().nonnegative(),
   airForceLost: z.number().nonnegative(),
   droneMissileEngaged: z.number().nonnegative(),
@@ -36,7 +35,6 @@ export const CombatReportSchema = z.object({
   capitulatedPixelsCount: z.number().nonnegative(),
   strategicAssessment: z.string(),
   isVictory: z.boolean(),
-  supplyShortagePenaltyApplied: z.boolean().optional(),
 });
 
 export type ReportSeverity = z.infer<typeof ReportSeveritySchema>;
