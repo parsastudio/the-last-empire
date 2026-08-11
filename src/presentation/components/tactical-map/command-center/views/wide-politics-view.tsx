@@ -22,7 +22,7 @@ export function WidePoliticsView({
         <ActiveModifiersCard modifiers={nation.activeModifiers} />
         <PopulationWelfareCard
           population={nation.population}
-          oilStock={nation.resources.oil}
+          maxPopulationCapacity={nation.maxPopulationCapacity}
           gdp={nation.gdp}
           nation={nation}
         />

@@ -71,14 +71,6 @@ export class AIActionBuilder {
       }
     }
 
-    if (
-      nation.resources &&
-      nation.resources.oil < 10 &&
-      nation.treasury > 50000000
-    ) {
-      actions.push(ActionFactory.tradeResources(nation.id, "oil", true, 5));
-    }
-
     return actions;
   }
 }

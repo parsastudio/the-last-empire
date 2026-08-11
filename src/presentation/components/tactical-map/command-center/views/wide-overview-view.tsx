@@ -9,8 +9,6 @@ import {
   findCountryProfileById,
   CountryRegistry,
 } from "@/domain/data/countries";
-import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-generation.step";
-import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -18,29 +16,11 @@ interface WideOverviewViewProps {
 }
 
 export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
-  const { effectiveGdp, oilProducedPerTurn, oilRequiredPerTurn } =
-    useMemo(() => {
-      const numericId = CountryRegistry.resolveCanonicalId(nation.id);
-      const profile = findCountryProfileById(numericId);
-
-      const gdpVal = nation.gdp > 0 ? nation.gdp : (profile?.gdp ?? 5000000000);
-
-      const { oilProducedPerTurn: produced } =
-        ResourceGenerationStep.calculateResourceGeneration(nation);
-
-      const required = PopulationWelfareCalculator.calculateOilDemand(
-        nation.population,
-        gdpVal,
-        nation.doctrines?.unlockedDoctrines,
-        nation.industrialLevel,
-      );
-
-      return {
-        effectiveGdp: gdpVal,
-        oilProducedPerTurn: produced,
-        oilRequiredPerTurn: required,
-      };
-    }, [nation]);
+  const effectiveGdp = useMemo(() => {
+    const numericId = CountryRegistry.resolveCanonicalId(nation.id);
+    const profile = findCountryProfileById(numericId);
+    return nation.gdp > 0 ? nation.gdp : (profile?.gdp ?? 5000000000);
+  }, [nation]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -64,11 +44,11 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
         />
 
         <ResourcesSection
-          oil={nation.resources.oil}
+          population={nation.population}
+          maxPopulationCapacity={nation.maxPopulationCapacity}
+          perCapitaProductivity={nation.perCapitaProductivity}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
-          oilRequiredPerTurn={oilRequiredPerTurn}
-          oilProducedPerTurn={oilProducedPerTurn}
         />
       </div>
 
