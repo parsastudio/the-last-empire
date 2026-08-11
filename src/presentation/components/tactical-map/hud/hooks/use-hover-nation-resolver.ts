@@ -9,7 +9,6 @@ import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator"
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
-  humanNationId?: string;
 }
 
 export function useHoverNationResolver({

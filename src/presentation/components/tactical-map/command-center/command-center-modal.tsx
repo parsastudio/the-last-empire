@@ -1,7 +1,6 @@
 import React from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CommandCenterTabRouter } from "@/presentation/components/tactical-map/command-center/command-center-tab-router";
-import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
@@ -74,7 +73,6 @@ interface CommandCenterModalProps {
   selectedTargetCode?: string | null;
   nation: Nation | null;
   gameState?: GameState | null;
-  reports: CombatReport[];
   onClose: () => void;
   onNavigateTab: (
     tab: SidebarTabType,
@@ -90,7 +88,6 @@ export function CommandCenterModal({
   selectedTargetCode,
   nation,
   gameState,
-  reports,
   onClose,
   onNavigateTab,
   onFocusCountry,
@@ -122,7 +119,6 @@ export function CommandCenterModal({
           selectedTargetCode={selectedTargetCode}
           nation={nation}
           gameState={gameState}
-          reports={reports}
           onFocusCountry={onFocusCountry}
           onNavigateTab={onNavigateTab}
         />

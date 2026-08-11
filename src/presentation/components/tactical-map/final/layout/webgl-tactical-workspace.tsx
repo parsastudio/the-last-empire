@@ -157,7 +157,6 @@ export function WebGLTacticalWorkspace({
         selectedTargetCode={selectedTargetCode}
         nation={humanNation}
         gameState={effectiveGameState}
-        reports={[]}
         onClose={handleCloseCenterModal}
         onFocusCountry={focusOnCountry}
         onNavigateTab={(tab, subTab, targetCode) => {

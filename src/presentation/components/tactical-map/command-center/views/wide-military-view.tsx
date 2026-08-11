@@ -12,8 +12,6 @@ interface WideMilitaryViewProps {
   recruitmentQueue?: RecruitmentOrder[];
   nationId: string;
   treasury?: number;
-  population?: number;
-  stability?: number;
 }
 
 export function WideMilitaryView({

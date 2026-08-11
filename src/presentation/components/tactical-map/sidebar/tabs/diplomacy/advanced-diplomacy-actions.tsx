@@ -100,7 +100,6 @@ interface AdvancedDiplomacyActionsProps {
   nationId: string;
   currentStance?: DiplomaticStance | string;
   isTradeEmbargoed?: boolean;
-  isLandNeighbor?: boolean;
   onOpenProxy?: () => void;
 }
 

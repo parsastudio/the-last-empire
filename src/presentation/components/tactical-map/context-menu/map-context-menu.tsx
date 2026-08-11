@@ -33,9 +33,7 @@ function QuickActionButton({
 interface MapContextMenuProps {
   position: { x: number; y: number };
   countryName: string;
-  countryCode?: string;
   onSelectAction: (action: ContextActionType) => void;
-  onClose?: () => void;
 }
 
 export function MapContextMenu({

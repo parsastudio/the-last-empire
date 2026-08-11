@@ -31,7 +31,6 @@ export function useWebGLInteraction({
   hasDraggedRef,
   provincesMap,
   nationsMap,
-  humanNationId,
 }: UseWebGLInteractionProps) {
   const lastHoverProvinceIdRef = useRef<number | null>(null);
 
@@ -47,7 +46,6 @@ export function useWebGLInteraction({
   const { resolveHoverInfo } = useHoverNationResolver({
     provincesMap,
     nationsMap,
-    humanNationId,
   });
 
   const handlePointerMove = (clientX: number, clientY: number) => {
