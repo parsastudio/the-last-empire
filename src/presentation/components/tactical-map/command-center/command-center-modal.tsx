@@ -21,11 +21,6 @@ export function getCommandCenterMeta(
         title: `شناسنامه و وضعیت عمومی ${nationName}`,
         subtitle: "پایش زنده اقتصاد، جمعیت، منابع و پایداری داخلی کشور",
       };
-    case "market":
-      return {
-        title: "بورس بین‌المللی انرژی و فولاد",
-        subtitle: "پایش قیمت‌های جهانی و انجام معاملات کلان منابع استراتژیک",
-      };
     case "military":
       return {
         title: "ستاد کل نیروهای مسلح و تسلیحات",
