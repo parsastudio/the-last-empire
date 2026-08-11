@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-partition-engine";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server-map-path-resolver";
 
 export interface FinalManifestProvince {
   provinceId: number;
@@ -165,7 +165,7 @@ export class FinalManifestBuilder {
       nations: manifestNations,
     };
 
-    const targetDir = MapPathResolver.getMapFinalServerDir(mapId);
+    const targetDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
     await fs.mkdir(targetDir, { recursive: true });
     await fs.writeFile(
       path.join(targetDir, "manifest.json"),
