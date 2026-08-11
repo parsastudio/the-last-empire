@@ -13,8 +13,6 @@ export interface FinalManifestProvince {
   hasSeaAccess: boolean;
   landNeighbors: number[];
   centerCoordinates: { x: number; y: number };
-  baseGdpShare: number;
-  basePopulationShare: number;
 }
 
 export interface FinalManifestNation {
@@ -86,11 +84,6 @@ export class FinalManifestBuilder {
         const pInfo = provList[pIndex]!;
         provIds.push(pInfo.provinceId);
 
-        const share =
-          totalCountryPixels > 0
-            ? pInfo.pixelCount / totalCountryPixels
-            : 1 / provList.length;
-
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
           nameFa: `استان ${profile.nameFa} (${pIndex + 1})`,
@@ -100,8 +93,6 @@ export class FinalManifestBuilder {
           hasSeaAccess: pInfo.hasSeaAccess,
           landNeighbors: Array.from(pInfo.landNeighbors),
           centerCoordinates: pInfo.centerCoordinates,
-          baseGdpShare: Number(share.toFixed(6)),
-          basePopulationShare: Number(share.toFixed(6)),
         });
       }
 
