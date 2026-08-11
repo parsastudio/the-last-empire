@@ -27,15 +27,8 @@ export class CombatModifierResolver {
       defender.government.type,
     );
 
-    let attackerGovMult = attackerGovTraits.militaryPowerMultiplier;
-    let defenderGovMult = defenderGovTraits.militaryPowerMultiplier;
-
-    if (attacker.traits.includes("MILITARISTIC")) {
-      attackerGovMult *= 1.15;
-    }
-    if (defender.traits.includes("MILITARISTIC")) {
-      defenderGovMult *= 1.15;
-    }
+    const attackerGovMult = attackerGovTraits.militaryPowerMultiplier;
+    const defenderGovMult = defenderGovTraits.militaryPowerMultiplier;
 
     return { attackerGovMult, defenderGovMult };
   }

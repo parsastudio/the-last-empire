@@ -1,7 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import { TraitManager } from "@/engine/politics/trait-manager";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export interface BreakdownMilitaryPayroll {
@@ -13,17 +12,13 @@ export interface BreakdownMilitaryPayroll {
 
 export class MilitaryPayrollCalculator {
   public static calculatePayroll(nation: Nation): BreakdownMilitaryPayroll {
-    const traitMultiplier = TraitManager.getMilitaryPayrollMultiplier(nation);
     const govTraits = GovernmentSystem.getTraits(nation.government.type);
     const doctrineMultiplier = DoctrinesManager.getMilitaryPayrollMultiplier(
       nation.doctrines?.unlockedDoctrines,
     );
     const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.2;
     const combined =
-      techMultiplier *
-      traitMultiplier *
-      govTraits.militaryPayrollMultiplier *
-      doctrineMultiplier;
+      techMultiplier * govTraits.militaryPayrollMultiplier * doctrineMultiplier;
 
     const infantry = Math.floor(
       nation.military.infantry *

@@ -14,9 +14,6 @@ export class GdpCalculator {
   public static calculateGdpGrowthMultiplier(nation: Nation): number {
     const currentStability = nation.government.stability;
     let stabilityFactor = -0.05 + (currentStability / 100) * 0.075;
-    if (nation.traits.includes("FRAGILE_ECONOMY")) {
-      stabilityFactor -= 0.05;
-    }
     if (nation.geography.territoryPixelCount > 2000) {
       stabilityFactor += 0.015;
     }
