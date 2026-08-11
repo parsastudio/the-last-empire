@@ -50,7 +50,7 @@ export class NationProfileAssigner {
     const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
 
     const isTier1 = item.gdp >= 1000000000000;
-    const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
+    const isTier2 = item.gdp >= 300000000000;
 
     const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
     const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
@@ -110,7 +110,6 @@ export class NationProfileAssigner {
       },
       relations: {},
       activeModifiers: [],
-      traits: profile ? profile.traits : ["FRAGILE_ECONOMY"],
       globalReputation: 50,
       doctrines: {
         unlockedDoctrines: [],
@@ -146,12 +145,11 @@ export class NationProfileAssigner {
     const gdp = profile ? profile.gdp : 5000000000;
     const population = profile ? profile.population : 80000000;
     const treasury = Math.floor(gdp * 0.05);
-    const traits = profile ? profile.traits : ["FRAGILE_ECONOMY" as const];
     const name = profile ? profile.nameFa : `قلمرو مستقل ${id}`;
     const flagCode = profile ? profile.flagCode : "IR";
 
     const isTier1 = profile ? profile.gdp >= 1000000000000 : false;
-    const isTier2 = profile ? profile.traits.includes("OIL_RICH") : false;
+    const isTier2 = profile ? profile.gdp >= 300000000000 : false;
 
     const validGovTypes: GovernmentType[] = [
       "DEMOCRACY",
@@ -245,7 +243,6 @@ export class NationProfileAssigner {
       },
       relations: {},
       activeModifiers: [],
-      traits,
       globalReputation: 50,
       doctrines: {
         unlockedDoctrines: [],
