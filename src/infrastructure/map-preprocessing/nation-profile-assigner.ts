@@ -34,20 +34,15 @@ export class NationProfileAssigner {
     }
 
     let stability = 80;
-    let corruption = 5;
 
     if (govType === "MONARCHY") {
       stability = 85;
-      corruption = 15;
     } else if (govType === "COMMUNISM") {
       stability = 75;
-      corruption = 25;
     } else if (govType === "DICTATORSHIP") {
-      stability = 60;
-      corruption = 35;
+      stability = 55;
     } else if (govType === "FASCISM") {
-      stability = 65;
-      corruption = 30;
+      stability = 60;
     }
 
     const techLevel = profile?.startingTechLevel ?? 1;
@@ -90,7 +85,6 @@ export class NationProfileAssigner {
       government: {
         type: govType,
         stability,
-        corruption,
         turnsInPower: 5,
       },
       resources: {
@@ -176,20 +170,15 @@ export class NationProfileAssigner {
     }
 
     let stability = 80;
-    let corruption = 5;
 
     if (govType === "MONARCHY") {
       stability = 85;
-      corruption = 15;
     } else if (govType === "COMMUNISM") {
       stability = 75;
-      corruption = 25;
     } else if (govType === "DICTATORSHIP") {
-      stability = 60;
-      corruption = 35;
+      stability = 55;
     } else if (govType === "FASCISM") {
-      stability = 65;
-      corruption = 30;
+      stability = 60;
     }
 
     const techLevel = profile?.startingTechLevel ?? 1;
@@ -231,7 +220,6 @@ export class NationProfileAssigner {
       government: {
         type: govType,
         stability,
-        corruption,
         turnsInPower: 5,
       },
       resources: {

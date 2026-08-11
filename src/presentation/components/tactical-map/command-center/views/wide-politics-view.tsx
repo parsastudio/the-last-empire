@@ -2,7 +2,6 @@ import React from "react";
 import { TaxControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tax-control-card";
 import { TariffControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tariff-control-card";
 import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/imf-loan-card";
-import { AntiCorruptionCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/anti-corruption-card";
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
 import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
 import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
@@ -30,7 +29,6 @@ export function WidePoliticsView({
         <TaxControlCard
           taxRate={nation.taxRate}
           baseGdp={nation.gdp}
-          corruption={nation.government.corruption}
           nationId={nation.id}
         />
       </div>
@@ -50,12 +48,6 @@ export function WidePoliticsView({
           gdp={nation.gdp}
           treasury={nation.treasury}
           nation={nation}
-        />
-        <AntiCorruptionCard
-          nationId={nation.id}
-          treasury={nation.treasury}
-          gdp={nation.gdp}
-          currentCorruption={nation.government.corruption}
         />
       </div>
 

@@ -46,14 +46,12 @@ function GovernmentMetricBar({
 
 interface GovernmentStatusSectionProps {
   stability: number;
-  corruption: number;
   reputation: number;
   nation?: Nation | null;
 }
 
 export function GovernmentStatusSection({
   stability,
-  corruption,
   reputation,
   nation,
 }: GovernmentStatusSectionProps) {
@@ -65,21 +63,6 @@ export function GovernmentStatusSection({
     stabilityDelta >= 0
       ? `+${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ / نوبت`
       : `${PersianNumberFormatter.toPersianDigits(stabilityDelta)}٪ / نوبت`;
-
-  const corruptionGrowth = nation
-    ? Number(
-        (
-          5.0 * (1.0 - nation.government.stability / 100) +
-          (nation.government.type === "DICTATORSHIP"
-            ? 0.5
-            : nation.government.type === "FASCISM"
-              ? 0.3
-              : 0)
-        ).toFixed(2),
-      )
-    : 0;
-
-  const corruptionDeltaText = `+${PersianNumberFormatter.toPersianDigits(corruptionGrowth)}٪ انتروپی / نوبت`;
 
   return (
     <div className="space-y-3 dir-rtl text-right">
@@ -97,14 +80,6 @@ export function GovernmentStatusSection({
           deltaText={stabilityDeltaText}
           colorClass={stabilityDelta >= 0 ? "text-gdp" : "text-military"}
           bgClass={stabilityDelta >= 0 ? "bg-gdp" : "bg-military"}
-        />
-
-        <GovernmentMetricBar
-          label="شاخص فساد اداری"
-          value={corruption}
-          deltaText={corruptionDeltaText}
-          colorClass="text-military"
-          bgClass="bg-military"
         />
 
         <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex items-center justify-between">

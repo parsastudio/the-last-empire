@@ -11,7 +11,6 @@ interface ResearchBudgetCardProps {
   currentBudgetRate?: number;
   accumulatedCost?: number;
   cycleTurn?: number;
-  industrialLevel?: number;
 }
 
 export function ResearchBudgetCard({
@@ -21,7 +20,6 @@ export function ResearchBudgetCard({
   currentBudgetRate = 1,
   accumulatedCost = 0,
   cycleTurn = 0,
-  industrialLevel = 1,
 }: ResearchBudgetCardProps) {
   const [userBudgetRate, setUserBudgetRate] = useState<number | null>(null);
   const { dispatchAction } = useGameActions();
@@ -32,8 +30,6 @@ export function ResearchBudgetCard({
   const isRateChanged = budgetRate !== currentBudgetRate;
   const isMidCycle = cycleTurn > 0;
   const isDeficitWarning = treasury < projectedTurnCost;
-
-  const industrialBonusPercent = (industrialLevel - 1) * 10;
 
   const handleApplyBudget = async () => {
     const action = ActionFactory.setResearchBudget(nationId, budgetRate);
@@ -150,15 +146,6 @@ export function ResearchBudgetCard({
               {PersianNumberFormatter.formatCurrency(accumulatedCost)}
             </span>
           </div>
-
-          {industrialBonusPercent > 0 && (
-            <div className="text-[10px] text-gdp font-sans pt-1 border-t border-border/30">
-              • پاداش کارایی صنعت (سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(industrialLevel)}): +
-              {PersianNumberFormatter.toPersianDigits(industrialBonusPercent)}٪
-              امتیاز بیشتر
-            </div>
-          )}
         </div>
 
         {isMidCycle && isRateChanged && (

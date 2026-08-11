@@ -20,15 +20,6 @@ export class AIActionBuilder {
       actions.push(ActionFactory.unlockDoctrine(nation.id, "gdp-booster"));
     }
 
-    if (
-      nation.government &&
-      nation.government.corruption > 35 &&
-      nation.treasury > 20000
-    ) {
-      const amount = Math.min(15000, Math.floor(nation.treasury * 0.1));
-      actions.push(ActionFactory.antiCorruptionDrive(nation.id, amount));
-    }
-
     if (nation.treasury > 50000) {
       actions.push(ActionFactory.investInfrastructure(nation.id));
     }

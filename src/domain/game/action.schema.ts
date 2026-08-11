@@ -125,14 +125,6 @@ export const InvestResearchActionSchema = z.object({
   type: z.literal("INVEST_RESEARCH"),
 });
 
-export const AntiCorruptionDriveActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  signature: z.string().optional(),
-  type: z.literal("ANTI_CORRUPTION_DRIVE"),
-  amount: z.number().positive(),
-});
-
 export const InvestDiplomacyActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -180,7 +172,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   RequestLoanActionSchema,
   CancelRecruitmentActionSchema,
   InvestResearchActionSchema,
-  AntiCorruptionDriveActionSchema,
   InvestDiplomacyActionSchema,
   InitiateBattleActionSchema,
   ConfigureAutoTradeActionSchema,
@@ -221,9 +212,6 @@ export type CancelRecruitmentAction = z.infer<
   typeof CancelRecruitmentActionSchema
 >;
 export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
-export type AntiCorruptionDriveAction = z.infer<
-  typeof AntiCorruptionDriveActionSchema
->;
 export type InvestDiplomacyAction = z.infer<typeof InvestDiplomacyActionSchema>;
 export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
 export type ConfigureAutoTradeAction = z.infer<

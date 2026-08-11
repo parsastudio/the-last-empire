@@ -56,17 +56,12 @@ function TaxSlider({
 function PredictiveImpactBox({
   newTaxRate,
   baseGdp,
-  corruption = 0,
 }: {
   newTaxRate: number;
   baseGdp: number;
-  corruption?: number;
 }) {
   const clampedRate = Math.min(50, Math.max(0, newTaxRate));
-  const grossTax = baseGdp * (clampedRate / 100);
-  const corruptionLoss = grossTax * (corruption / 100);
-  const projectedIncome = Math.floor(grossTax - corruptionLoss);
-
+  const projectedIncome = Math.floor(baseGdp * (clampedRate / 100));
   const stabilityImpact = Number(((15 - clampedRate) * 0.2).toFixed(2));
 
   return (
@@ -121,14 +116,12 @@ function PredictiveImpactBox({
 interface TaxControlCardProps {
   taxRate: number;
   baseGdp: number;
-  corruption?: number;
   nationId: string;
 }
 
 export function TaxControlCard({
   taxRate: initialTaxRate,
   baseGdp,
-  corruption = 0,
   nationId,
 }: TaxControlCardProps) {
   const [taxRate, setTaxRate] = useState<number>(Math.min(50, initialTaxRate));
@@ -172,11 +165,7 @@ export function TaxControlCard({
           onDragEnd={() => setIsDragging(false)}
         />
 
-        <PredictiveImpactBox
-          newTaxRate={taxRate}
-          baseGdp={baseGdp}
-          corruption={corruption}
-        />
+        <PredictiveImpactBox newTaxRate={taxRate} baseGdp={baseGdp} />
 
         <button
           onClick={handleApplyTax}

@@ -19,7 +19,6 @@ import { AutoTradeEngine } from "@/engine/economy/auto-trade/auto-trade.engine";
 import { MarketEngine } from "@/engine/economy/market-engine";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { AttritionManager } from "@/engine/military/attrition-manager";
-import { CorruptionManager } from "@/engine/politics/corruption-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -193,14 +192,12 @@ export class TurnPipeline {
       updated = this.recruitmentQueue.processTurnQueue(updated);
       updated = this.attritionManager.applyMilitaryDeficitAttrition(updated);
 
-      const newCorruption = CorruptionManager.updateCorruptionLevel(updated);
       const newStability = StabilityCalculator.calculateTurnStability(updated);
 
       updated = {
         ...updated,
         government: {
           ...updated.government,
-          corruption: newCorruption,
           stability: newStability,
           turnsInPower: updated.government.turnsInPower + 1,
         },
