@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Globe, Users, Coins, MapPin } from "lucide-react";
 import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -18,18 +18,20 @@ export function RegionBreakdownCard({
   totalPopulation = 0,
   totalGdp = 0,
 }: RegionBreakdownCardProps) {
-  const effectiveRegions: RegionDemographics[] =
-    regions && regions.length > 0
-      ? regions
-      : [
-          {
-            regionId: 0,
-            name: `خاک اصلی ${nationName}`,
-            pixelCount: totalPixels,
-            population: totalPopulation,
-            gdp: totalGdp,
-          },
-        ];
+  const effectiveRegions = useMemo<RegionDemographics[]>(() => {
+    if (regions && regions.length > 0) {
+      return regions;
+    }
+    return [
+      {
+        regionId: 0,
+        name: `خاک اصلی ${nationName}`,
+        pixelCount: totalPixels,
+        population: totalPopulation,
+        gdp: totalGdp,
+      },
+    ];
+  }, [regions, nationName, totalPixels, totalPopulation, totalGdp]);
 
   return (
     <div className="space-y-3 dir-rtl text-right">

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { CheckCircle, Lock, AlertCircle } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -20,7 +20,7 @@ interface DoctrineBranchColumnProps {
   onUnlock: (doctrine: DoctrineItem) => void;
 }
 
-export function DoctrineBranchColumn({
+export const DoctrineBranchColumn = memo(function DoctrineBranchColumn({
   title,
   doctrines,
   activePoints = 0,
@@ -131,4 +131,4 @@ export function DoctrineBranchColumn({
       </div>
     </div>
   );
-}
+});
