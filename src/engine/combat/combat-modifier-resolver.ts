@@ -3,17 +3,12 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class CombatModifierResolver {
-  public static calculateDeploymentCosts(
-    forceCost: number,
-    oilPrice: number,
-  ): { moneyCost: number; oilCost: number } {
+  public static calculateDeploymentCosts(forceCost: number): {
+    moneyCost: number;
+  } {
     const deploymentFivePct = forceCost * 0.05;
     const moneyCost = Math.floor(deploymentFivePct);
-    const oilCost = Math.max(
-      1,
-      Math.ceil(deploymentFivePct / (oilPrice || 25000000)),
-    );
-    return { moneyCost, oilCost };
+    return { moneyCost };
   }
 
   public static getCombatPowerModifiers(

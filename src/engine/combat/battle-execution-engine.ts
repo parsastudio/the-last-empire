@@ -1,10 +1,10 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { BattleCalculator } from "./battle-calculator";
-import { BattleDiplomacyHelper } from "./battle-diplomacy-helper";
-import { BitPackedGridState } from "./final/bit-packed-grid-state";
-import { BitPackedProvinceConqueror } from "./final/bit-packed-province-conqueror";
+import { BattleCalculator } from "@/engine/combat/battle-calculator";
+import { BattleDiplomacyHelper } from "@/engine/combat/battle-diplomacy-helper";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { BitPackedProvinceConqueror } from "@/engine/combat/final/bit-packed-province-conqueror";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -38,13 +38,10 @@ export class BattleExecutionEngine {
     const betrayalResult =
       BattleDiplomacyHelper.evaluateBetrayalPenalty(currentStance);
 
-    const oilPrice = state.marketPrices?.oil || 25000000;
-
     const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
       action.dronesToLaunch,
-      oilPrice,
       action.infantryToDeploy,
       action.airForceToDeploy,
       action.targetEnclaveId,
@@ -67,7 +64,7 @@ export class BattleExecutionEngine {
             p.ownerNationId === canonicalDefenderId,
         );
         if (defenderProvinces.length > 0) {
-          defenderProvinces.sort((a, b) => b.gdp - a.gdp);
+          defenderProvinces.sort((a, b) => b.pixelCount - a.pixelCount);
           conqueredProvinceId = defenderProvinces[0]!.provinceId;
         }
       }
@@ -106,20 +103,30 @@ export class BattleExecutionEngine {
     const isDefenderAlive = defenderProvincesRemaining.length > 0;
     const isFullCapitulation = !isDefenderAlive;
 
+    const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
+    const conquestRatio = Math.min(
+      1.0,
+      conqueredPixels / defenderTotalTerritory,
+    );
+
+    const transferredPopulation = Math.floor(
+      defender.population * conquestRatio,
+    );
+    const transferredCapacity = Math.floor(
+      (defender.maxPopulationCapacity ||
+        Math.floor(defender.population / 0.95)) * conquestRatio,
+    );
+
     const attackerTreasuryAfterDeployment =
       attacker.treasury - calcResult.deploymentMoneyCost;
-    const attackerOilAfterDeployment = Math.max(
-      0,
-      attacker.resources.oil - calcResult.deploymentOilCost,
-    );
 
     let updatedAttacker = {
       ...attacker,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
-      resources: {
-        ...attacker.resources,
-        oil: attackerOilAfterDeployment,
-      },
+      population: attacker.population + transferredPopulation,
+      maxPopulationCapacity:
+        (attacker.maxPopulationCapacity ||
+          Math.floor(attacker.population / 0.95)) + transferredCapacity,
       military: {
         ...attacker.military,
         infantry: Math.max(
@@ -167,6 +174,12 @@ export class BattleExecutionEngine {
       ...defender,
       isAlive: isDefenderAlive,
       treasury: Math.max(0, defender.treasury - calcResult.treasuryLooted),
+      population: Math.max(0, defender.population - transferredPopulation),
+      maxPopulationCapacity: Math.max(
+        0,
+        (defender.maxPopulationCapacity ||
+          Math.floor(defender.population / 0.95)) - transferredCapacity,
+      ),
       military: {
         ...defender.military,
         infantry: isDefenderAlive

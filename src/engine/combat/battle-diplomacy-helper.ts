@@ -5,7 +5,7 @@ import {
   DiplomaticBetrayalCalculator,
   ReputationManager,
 } from "@/engine/diplomacy/diplomacy-engine";
-import { BattleCalculationResult } from "./battle-calculator";
+import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 
 type NationEntity = GameState["nations"][string];
 
@@ -60,7 +60,7 @@ export class BattleDiplomacyHelper {
       defenderCasualties: calcResult.defenderCasualties,
       conqueredPixelsCount: conqueredPixels,
       capitulatedPixelsCount: isFullCapitulation ? conqueredPixels : 0,
-      strategicAssessment: `هزینه اعزام لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} + ${calcResult.deploymentOilCost.toLocaleString("fa-IR")} بلوک نفت | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
+      strategicAssessment: `هزینه اعزام لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
       isVictory: calcResult.isAttackerVictory,
     };
 
