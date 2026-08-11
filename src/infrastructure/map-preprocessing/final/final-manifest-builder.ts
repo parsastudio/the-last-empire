@@ -122,8 +122,6 @@ export class FinalManifestBuilder {
       });
     }
 
-    this.logDetailedStatistics(manifestProvinces, manifestNations);
-
     const manifest: FinalMapManifest = {
       mapId,
       totalProvincesCount: manifestProvinces.length,
@@ -143,57 +141,5 @@ export class FinalManifestBuilder {
     );
 
     return manifest;
-  }
-
-  private logDetailedStatistics(
-    provinces: FinalManifestProvince[],
-    nations: FinalManifestNation[],
-  ): void {
-    if (provinces.length === 0) return;
-
-    let minPixels = Infinity;
-    let maxPixels = -1;
-    let minProvInfo = "";
-    let maxProvInfo = "";
-    let totalPixelsSum = 0;
-
-    let under500Count = 0;
-    let range500To1500Count = 0;
-    let range1500To3000Count = 0;
-    let above3000Count = 0;
-
-    for (let i = 0; i < provinces.length; i++) {
-      const p = provinces[i]!;
-      const px = p.pixelCount;
-      totalPixelsSum += px;
-
-      if (px < minPixels) {
-        minPixels = px;
-        minProvInfo = `${p.nameFa} (${p.countryId}) - ${px} px`;
-      }
-      if (px > maxPixels) {
-        maxPixels = px;
-        maxProvInfo = `${p.nameFa} (${p.countryId}) - ${px} px`;
-      }
-
-      if (px < 500) under500Count++;
-      else if (px < 1500) range500To1500Count++;
-      else if (px < 3000) range1500To3000Count++;
-      else above3000Count++;
-    }
-
-    const avgPixels = Math.round(totalPixelsSum / provinces.length);
-
-    let singleProvinceNationsCount = 0;
-    let multiProvinceNationsCount = 0;
-
-    for (let i = 0; i < nations.length; i++) {
-      const n = nations[i]!;
-      if (n.provinceIds.length === 1) {
-        singleProvinceNationsCount++;
-      } else {
-        multiProvinceNationsCount++;
-      }
-    }
   }
 }
