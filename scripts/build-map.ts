@@ -1,25 +1,20 @@
 import { MapBuildOrchestrator } from "@/infrastructure/map-preprocessing/final/map-build-orchestrator";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server-map-path-resolver";
 
-async function runMapBuild(): Promise<void> {
+async function runMapBuild() {
   console.log("=== شروع فرآیند پردازش و ساخت نقشه ===");
+  const mapId = "map1";
+  const maskPath = ServerMapPathResolver.getEditedMaskServerPath(mapId);
+  const outputDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
 
-  try {
-    const maskPath = MapPathResolver.getEditedMaskServerPath();
-    const outputDir = MapPathResolver.getMapFinalServerDir("map1");
+  console.log(`مسیر فایل ماسک: ${maskPath}`);
+  console.log(`مسیر پوشه خروجی: ${outputDir}`);
 
-    console.log("مسیر فایل ماسک:", maskPath);
-    console.log("مسیر پوشه خروجی:", outputDir);
-
-    const orchestrator = new MapBuildOrchestrator();
-    await orchestrator.executeRebuild(maskPath, outputDir, "map1");
-
-    console.log("=== ساخت نقشه با موفقیت کامل انجام شد ===");
-  } catch (error) {
-    console.error("=== خطای بحرانی در ساخت نقشه ===");
-    console.error(error);
-    process.exit(1);
-  }
+  const orchestrator = new MapBuildOrchestrator();
+  await orchestrator.executeRebuild(maskPath, outputDir, mapId);
 }
 
-runMapBuild();
+runMapBuild().catch((err) => {
+  console.error("=== خطای بحرانی در ساخت نقشه ===", err);
+  process.exit(1);
+});
