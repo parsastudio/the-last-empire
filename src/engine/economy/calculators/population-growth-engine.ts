@@ -1,12 +1,9 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 
 export class PopulationGrowthEngine {
   public updatePopulation(nation: Nation): number {
-    const stability = Math.max(0, Math.min(100, nation.government.stability));
-    const growthRate = stability / 5000 - 0.01;
-    return Math.max(
-      1,
-      nation.population + Math.trunc(nation.population * growthRate),
-    );
+    const result = DemographicsEngine.processNaturalDemographics(nation);
+    return result.updatedNation.population;
   }
 }
