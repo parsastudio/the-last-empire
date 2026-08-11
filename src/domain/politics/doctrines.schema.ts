@@ -1,8 +1,7 @@
 import { z } from "zod";
 
 export const DoctrinesStateSchema = z.object({
-  doctrinePoints: z.number().nonnegative(),
-  unlockedDoctrines: z.array(z.string()),
+  unlockedDoctrines: z.array(z.string()).default([]),
 });
 
 export type DoctrinesState = z.infer<typeof DoctrinesStateSchema>;

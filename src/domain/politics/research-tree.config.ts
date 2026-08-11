@@ -5,17 +5,11 @@ export interface ResearchNode {
   desc: string;
   branch: "INDUSTRIAL_TECH" | "ASYMMETRIC_MILITARY" | "DIPLOMATIC_HEGEMONY";
   tier: 1 | 2 | 3;
-  cost: number;
+  moneyCost: number;
+  oilCost: number;
   prerequisites: string[];
   effectType: string;
   magnitude: number;
-}
-
-export interface Doctrine {
-  id: string;
-  name: string;
-  branch: "INDUSTRIAL_TECH" | "ASYMMETRIC_MILITARY" | "DIPLOMATIC_HEGEMONY";
-  cost: number;
 }
 
 export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
@@ -26,7 +20,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "مکانیزه‌سازی صنایع کشوری که ۵٪ افزایش دائمی در درآمد مالیات صنعتی ایجاد می‌کند.",
     branch: "INDUSTRIAL_TECH",
     tier: 1,
-    cost: 3,
+    moneyCost: 15000000000,
+    oilCost: 0,
     prerequisites: [],
     effectType: "TAX_YIELD_BOOST",
     magnitude: 0.05,
@@ -38,7 +33,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "بهینه‌سازی سیستم‌های انرژی که مصرف نوبتی نفت شهرها و صنایع را ۱۵٪ کاهش می‌دهد.",
     branch: "INDUSTRIAL_TECH",
     tier: 1,
-    cost: 4,
+    moneyCost: 20000000000,
+    oilCost: 10,
     prerequisites: [],
     effectType: "OIL_DEMAND_DISCOUNT",
     magnitude: 0.15,
@@ -50,7 +46,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "پالایش پیشرفته نفت که ۴ بلوک استراتژیک نفت اضافه در هر نوبت استخراج می‌کند.",
     branch: "INDUSTRIAL_TECH",
     tier: 2,
-    cost: 6,
+    moneyCost: 45000000000,
+    oilCost: 25,
     prerequisites: ["low-upkeep"],
     effectType: "OIL_FLAT_BONUS",
     magnitude: 4,
@@ -62,7 +59,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "حداکثرسازی بازدهی صنایع که ۱۵٪ به درآمد مالیات افزوده و ۲۰٪ هزینه ساخت یگان‌ها را کم می‌کند.",
     branch: "INDUSTRIAL_TECH",
     tier: 3,
-    cost: 12,
+    moneyCost: 120000000000,
+    oilCost: 50,
     prerequisites: ["gdp-booster", "deep-refining"],
     effectType: "INDUSTRIAL_CYBERNETICS",
     magnitude: 0.15,
@@ -74,7 +72,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "افزایش ۲۵٪ قدرت رزمی دفاعی پادگان‌ها و نیروهای انتظامی در برابر نفوذ و تهاجم.",
     branch: "ASYMMETRIC_MILITARY",
     tier: 1,
-    cost: 3,
+    moneyCost: 18000000000,
+    oilCost: 0,
     prerequisites: [],
     effectType: "MILITIA_POWER_BOOST",
     magnitude: 0.25,
@@ -86,7 +85,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "شناسایی هوشمند میدان نبرد که کارایی و قدرت تخریب پهپادها و موشک‌ها را ۲۰٪ زیاد می‌کند.",
     branch: "ASYMMETRIC_MILITARY",
     tier: 1,
-    cost: 4,
+    moneyCost: 25000000000,
+    oilCost: 15,
     prerequisites: [],
     effectType: "DRONE_POWER_BOOST",
     magnitude: 0.2,
@@ -98,7 +98,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "پدافند موشکی پیشرفته که ۳۰٪ از پهپادها و موشک‌های شلیک‌شده دشمن را قبل از برخورد منهدم می‌کند.",
     branch: "ASYMMETRIC_MILITARY",
     tier: 2,
-    cost: 7,
+    moneyCost: 50000000000,
+    oilCost: 30,
     prerequisites: ["border-fortification"],
     effectType: "AIR_DEFENSE_INTERCEPT",
     magnitude: 0.3,
@@ -110,7 +111,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "افزایش ۲۵٪ قدرت تهاجمی موشک‌ها و نابودی مستقیم ۳۰٪ از پادگان‌های دفاعی دشمن.",
     branch: "ASYMMETRIC_MILITARY",
     tier: 2,
-    cost: 7,
+    moneyCost: 55000000000,
+    oilCost: 35,
     prerequisites: ["tactical-drones"],
     effectType: "PRECISION_STRIKE",
     magnitude: 0.3,
@@ -122,7 +124,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "بی‌اثر کردن ۵۰٪ از برتری هوایی دشمن در نبردها و افزایش ۲۰٪ شانس فرار یگان‌های خودی.",
     branch: "ASYMMETRIC_MILITARY",
     tier: 3,
-    cost: 13,
+    moneyCost: 130000000000,
+    oilCost: 60,
     prerequisites: ["integrated-air-defense", "precision-missiles"],
     effectType: "ELECTRONIC_WARFARE",
     magnitude: 0.5,
@@ -134,7 +137,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "انعقاد موافقت‌نامه‌های گمرکی که درآمد حاصل از تعرفه‌های تجاری را ۱۵٪ افزایش می‌دهد.",
     branch: "DIPLOMATIC_HEGEMONY",
     tier: 1,
-    cost: 3,
+    moneyCost: 12000000000,
+    oilCost: 0,
     prerequisites: [],
     effectType: "TARIFF_REVENUE_BOOST",
     magnitude: 0.15,
@@ -146,7 +150,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "ارتقای تصویر بین‌المللی که ۱۰ واحد افزایش فوری و دائمی در اعتبار جهانی ایجاد می‌کند.",
     branch: "DIPLOMATIC_HEGEMONY",
     tier: 1,
-    cost: 4,
+    moneyCost: 22000000000,
+    oilCost: 0,
     prerequisites: [],
     effectType: "REPUTATION_FLAT_BOOST",
     magnitude: 10,
@@ -158,7 +163,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "کنترل افکار عمومی که ۵۰٪ از افت ثبات ناشی از مالیات‌های سنگین را خنثی می‌کند.",
     branch: "DIPLOMATIC_HEGEMONY",
     tier: 2,
-    cost: 6,
+    moneyCost: 40000000000,
+    oilCost: 10,
     prerequisites: ["global-influence"],
     effectType: "TAX_STABILITY_DISCOUNT",
     magnitude: 0.5,
@@ -170,7 +176,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "کاهش ۲۵٪ هزینه اجرای بودجه عملیات‌های نیابتی برای تخریب ثبات سیاسی دشمنان.",
     branch: "DIPLOMATIC_HEGEMONY",
     tier: 2,
-    cost: 6,
+    moneyCost: 45000000000,
+    oilCost: 15,
     prerequisites: ["trade-diplomacy"],
     effectType: "PROXY_COST_DISCOUNT",
     magnitude: 0.25,
@@ -182,7 +189,8 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
     desc: "تسهیل شگفت‌انگیز عقد ائتلاف‌های دفاعی با کاهش ۳۰ واحدی آستانه پذیرش نظر کشورهای خارجی.",
     branch: "DIPLOMATIC_HEGEMONY",
     tier: 3,
-    cost: 12,
+    moneyCost: 110000000000,
+    oilCost: 40,
     prerequisites: ["reputation-recovery", "proxy-network"],
     effectType: "DIPLOMATIC_THRESHOLD_BOOST",
     magnitude: 30,
