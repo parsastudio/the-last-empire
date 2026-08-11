@@ -1,6 +1,7 @@
 import React from "react";
 import { LucideIcon } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 
 interface UnitDeploymentSliderProps {
   label: string;
@@ -63,40 +64,11 @@ export function UnitDeploymentSlider({
         className="w-full accent-primary cursor-pointer h-1.5 bg-secondary rounded-lg disabled:opacity-30"
       />
 
-      <div className="grid grid-cols-4 gap-1 pt-0.5">
-        <button
-          type="button"
-          disabled={availableCount === 0}
-          onClick={() => handlePercentageSelect(0.25)}
-          className="py-1 bg-secondary/80 hover:bg-secondary border border-border/40 rounded-lg text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-        >
-          ۲۵٪
-        </button>
-        <button
-          type="button"
-          disabled={availableCount === 0}
-          onClick={() => handlePercentageSelect(0.5)}
-          className="py-1 bg-secondary/80 hover:bg-secondary border border-border/40 rounded-lg text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-        >
-          ۵۰٪
-        </button>
-        <button
-          type="button"
-          disabled={availableCount === 0}
-          onClick={() => handlePercentageSelect(0.75)}
-          className="py-1 bg-secondary/80 hover:bg-secondary border border-border/40 rounded-lg text-[9px] font-mono font-bold text-muted-foreground hover:text-foreground transition-all cursor-pointer disabled:opacity-30"
-        >
-          ۷۵٪
-        </button>
-        <button
-          type="button"
-          disabled={availableCount === 0}
-          onClick={() => handlePercentageSelect(1.0)}
-          className="py-1 bg-primary/20 hover:bg-primary/30 border border-primary/40 rounded-lg text-[9px] font-mono font-bold text-primary transition-all cursor-pointer disabled:opacity-30"
-        >
-          ۱۰۰٪ (کل)
-        </button>
-      </div>
+      <PercentageSelector
+        disabled={availableCount === 0}
+        onSelect={handlePercentageSelect}
+        colorVariant="primary"
+      />
     </div>
   );
 }

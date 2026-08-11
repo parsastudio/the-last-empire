@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
-import { WebGLMapCanvas } from "@/presentation/components/tactical-map/final/webgl-map-canvas";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";
 import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
@@ -17,7 +17,21 @@ import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-cam
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+
+const WebGLMapCanvas = dynamic(
+  () =>
+    import("@/presentation/components/tactical-map/final/webgl-map-canvas").then(
+      (mod) => mod.WebGLMapCanvas,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-screen h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
+      </div>
+    ),
+  },
+);
 
 interface WebGLTacticalWorkspaceProps {
   gameId?: string;
@@ -57,46 +71,6 @@ export function WebGLTacticalWorkspace({
     enclaveId: 0,
   });
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      (
-        window as unknown as { __GEOPOLITICS_DEBUG__: () => void }
-      ).__GEOPOLITICS_DEBUG__ = () => {
-        const gridState = BitPackedGridState.getInstance();
-        const buffer = gridState.getBuffer();
-        const raw = buffer.getRawBuffer();
-
-        let nonZeroCount = 0;
-        for (let i = 0; i < raw.length; i++) {
-          if (raw[i]! > 0) nonZeroCount++;
-        }
-
-        const report = {
-          gameId,
-          bufferSize: raw.length,
-          nonZeroPixels: nonZeroCount,
-          provincesLoaded: Object.keys(effectiveGameState?.provinces || {})
-            .length,
-          nationsLoaded: Object.keys(effectiveGameState?.nations || {}).length,
-          humanNationId: effectiveGameState?.humanNationId,
-          currentTurn: effectiveGameState?.currentTurn,
-        };
-
-        console.table(report);
-        alert(
-          `تست سیستم دیباگ:\n- تعداد پیکسل‌های استان: ${nonZeroCount}\n- تعداد استان‌های لودشده: ${report.provincesLoaded}\n- تعداد کشورها: ${report.nationsLoaded}`,
-        );
-      };
-    }
-  }, [gameId, effectiveGameState]);
-
-  const countriesData = ALL_COUNTRY_PROFILES.map((p) => ({
-    id: p.id ?? 0,
-    code: p.code,
-    name: p.nameFa,
-    color: [0, 0, 0] as [number, number, number],
-  }));
-
   const humanNation =
     effectiveGameState && effectiveGameState.humanNationId
       ? effectiveGameState.nations[effectiveGameState.humanNationId] || null
@@ -107,7 +81,12 @@ export function WebGLTacticalWorkspace({
     mapHeight: 2048,
     dimensions: { width: 1200, height: 600 },
     scaleRef,
-    countries: countriesData,
+    countries: ALL_COUNTRY_PROFILES.map((p) => ({
+      id: p.id ?? 0,
+      code: p.code,
+      name: p.nameFa,
+      color: [0, 0, 0] as [number, number, number],
+    })),
     positionRef,
   });
 
@@ -203,7 +182,7 @@ export function WebGLTacticalWorkspace({
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">
           <div className="w-12 h-12 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground font-medium font-sans text-xs">
-            در حال بارگذاری موتور WebGL2 و استیت باینری...
+            در حال بارگذاری موتور تاکتیکی و پرونده استراتژیک...
           </p>
         </div>
       )}

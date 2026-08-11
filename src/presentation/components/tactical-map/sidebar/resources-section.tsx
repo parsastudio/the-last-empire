@@ -1,5 +1,5 @@
 import React from "react";
-import { Cpu, Fuel, Users } from "lucide-react";
+import { Cpu, Fuel, Users, Building2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ResourcesSectionProps {
@@ -87,7 +87,7 @@ export function ResourcesSection({
 
         <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1 col-span-2">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans font-bold">
-            <div className="i-lucide-building2 size-3 text-treasury" />
+            <Building2 size={12} className="text-treasury" />
             <span>سطح توسعه زیرساخت و مواصلات</span>
           </div>
           <span className="text-xs font-extrabold text-treasury block">
