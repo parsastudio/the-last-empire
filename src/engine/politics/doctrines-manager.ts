@@ -1,10 +1,3 @@
-import {
-  COMPREHENSIVE_RESEARCH_TREE,
-  ResearchNode,
-} from "@/domain/politics/research-tree.config";
-
-export type { ResearchNode as Doctrine };
-
 export class DoctrinesManager {
   public static getGdpTaxRevenueMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;

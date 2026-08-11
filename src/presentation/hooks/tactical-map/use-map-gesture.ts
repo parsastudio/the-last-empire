@@ -28,11 +28,8 @@ export function useMapGesture(
 
   const initial = computeInitial(containerWidth, containerHeight);
 
-  const internalPositionRef = useRef<CameraPosition>(initial.pos);
-  const internalScaleRef = useRef<number>(initial.scale);
-
-  const positionRef = externalPositionRef || internalPositionRef;
-  const scaleRef = externalScaleRef || internalScaleRef;
+  const fallbackPositionRef = useRef<CameraPosition>(initial.pos);
+  const fallbackScaleRef = useRef<number>(initial.scale);
 
   const isDraggingRef = useRef<boolean>(false);
   const hasDraggedRef = useRef<boolean>(false);
@@ -67,44 +64,69 @@ export function useMapGesture(
         containerWidth,
         containerHeight,
       );
-      scaleRef.current = fitScale;
-      positionRef.current = pos;
+
+      if (externalScaleRef) {
+        externalScaleRef.current = fitScale;
+      } else {
+        fallbackScaleRef.current = fitScale;
+      }
+
+      if (externalPositionRef) {
+        externalPositionRef.current = pos;
+      } else {
+        fallbackPositionRef.current = pos;
+      }
     }
-  }, [containerWidth, containerHeight, computeInitial]);
+  }, [
+    containerWidth,
+    containerHeight,
+    computeInitial,
+    externalPositionRef,
+    externalScaleRef,
+  ]);
 
-  const calculateZoom = (
-    deltaY: number,
-    rect: DOMRect,
-    clientX: number,
-    clientY: number,
-  ) => {
-    const mx = clientX - rect.left;
-    const my = clientY - rect.top;
+  const calculateZoom = useCallback(
+    (deltaY: number, rect: DOMRect, clientX: number, clientY: number) => {
+      const mx = clientX - rect.left;
+      const my = clientY - rect.top;
 
-    const currentScale = scaleRef.current;
-    const currentPos = positionRef.current;
+      const currentScale =
+        externalScaleRef?.current ?? fallbackScaleRef.current;
+      const currentPos =
+        externalPositionRef?.current ?? fallbackPositionRef.current;
 
-    const zoomFactor = deltaY < 0 ? 1.15 : 0.85;
-    const minAllowedScale = 0.05;
-    const maxAllowedScale = 35.0;
+      const zoomFactor = deltaY < 0 ? 1.15 : 0.85;
+      const minAllowedScale = 0.05;
+      const maxAllowedScale = 35.0;
 
-    const nextScale = Math.max(
-      minAllowedScale,
-      Math.min(maxAllowedScale, currentScale * zoomFactor),
-    );
+      const nextScale = Math.max(
+        minAllowedScale,
+        Math.min(maxAllowedScale, currentScale * zoomFactor),
+      );
 
-    if (nextScale === currentScale) {
-      return;
-    }
+      if (nextScale === currentScale) {
+        return;
+      }
 
-    const nextPosition = {
-      x: mx - (mx - currentPos.x) * (nextScale / currentScale),
-      y: my - (my - currentPos.y) * (nextScale / currentScale),
-    };
+      const nextPosition = {
+        x: mx - (mx - currentPos.x) * (nextScale / currentScale),
+        y: my - (my - currentPos.y) * (nextScale / currentScale),
+      };
 
-    scaleRef.current = nextScale;
-    positionRef.current = nextPosition;
-  };
+      if (externalScaleRef) {
+        externalScaleRef.current = nextScale;
+      } else {
+        fallbackScaleRef.current = nextScale;
+      }
+
+      if (externalPositionRef) {
+        externalPositionRef.current = nextPosition;
+      } else {
+        fallbackPositionRef.current = nextPosition;
+      }
+    },
+    [externalPositionRef, externalScaleRef],
+  );
 
   useEffect(() => {
     const container = containerRef?.current;
@@ -120,42 +142,65 @@ export function useMapGesture(
     return () => {
       container.removeEventListener("wheel", onNativeWheel);
     };
-  }, [containerRef]);
+  }, [containerRef, calculateZoom]);
 
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    calculateZoom(e.deltaY, rect, e.clientX, e.clientY);
-  };
+  const handleWheel = useCallback(
+    (e: React.WheelEvent<HTMLDivElement>) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      calculateZoom(e.deltaY, rect, e.clientX, e.clientY);
+    },
+    [calculateZoom],
+  );
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
-    isDraggingRef.current = true;
-    hasDraggedRef.current = false;
-    mouseDownPos.current = { x: e.clientX, y: e.clientY };
-    dragStart.current = {
-      x: e.clientX - positionRef.current.x,
-      y: e.clientY - positionRef.current.y,
-    };
-  };
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.button !== 0) return;
+      isDraggingRef.current = true;
+      hasDraggedRef.current = false;
+      mouseDownPos.current = { x: e.clientX, y: e.clientY };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current) return;
-    const dist = Math.hypot(
-      e.clientX - mouseDownPos.current.x,
-      e.clientY - mouseDownPos.current.y,
-    );
-    if (dist > 5) {
-      hasDraggedRef.current = true;
-    }
-    positionRef.current = {
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
-    };
-  };
+      const currentPos =
+        externalPositionRef?.current ?? fallbackPositionRef.current;
 
-  const handleMouseUp = () => {
+      dragStart.current = {
+        x: e.clientX - currentPos.x,
+        y: e.clientY - currentPos.y,
+      };
+    },
+    [externalPositionRef],
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!isDraggingRef.current) return;
+      const dist = Math.hypot(
+        e.clientX - mouseDownPos.current.x,
+        e.clientY - mouseDownPos.current.y,
+      );
+      if (dist > 5) {
+        hasDraggedRef.current = true;
+      }
+
+      const nextPos = {
+        x: e.clientX - dragStart.current.x,
+        y: e.clientY - dragStart.current.y,
+      };
+
+      if (externalPositionRef) {
+        externalPositionRef.current = nextPos;
+      } else {
+        fallbackPositionRef.current = nextPos;
+      }
+    },
+    [externalPositionRef],
+  );
+
+  const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
-  };
+  }, []);
+
+  const positionRef = externalPositionRef ?? fallbackPositionRef;
+  const scaleRef = externalScaleRef ?? fallbackScaleRef;
 
   return {
     positionRef,
