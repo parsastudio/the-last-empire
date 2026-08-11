@@ -15,7 +15,6 @@ import {
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { MigrationEngine } from "@/engine/economy/demographics/migration-engine";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
-import { AttritionManager } from "@/engine/military/attrition-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
@@ -26,7 +25,6 @@ export class TurnPipeline {
   private reputationManager = new ReputationManager();
   private bankruptcyManager = new BankruptcyManager();
   private recruitmentQueue = new RecruitmentQueueManager();
-  private attritionManager = new AttritionManager();
 
   public processTurn(state: GameState, prng: SeededRandom): GameState {
     void prng;
@@ -162,7 +160,6 @@ export class TurnPipeline {
       }
 
       updated = this.recruitmentQueue.processTurnQueue(updated);
-      updated = this.attritionManager.applyMilitaryDeficitAttrition(updated);
 
       const newStability = StabilityCalculator.calculateTurnStability(updated);
 
