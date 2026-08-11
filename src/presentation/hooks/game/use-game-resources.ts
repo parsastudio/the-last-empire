@@ -66,7 +66,10 @@ export function useGameResources(
 
     const taxResult = TaxCalculator.evaluateTaxPolicy(nation);
     const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
-    const tariffResult = TariffCalculator.calculateTariffEffects(nation);
+    const tariffResult = TariffCalculator.calculateTariffEffects(
+      nation,
+      gameState.nations,
+    );
 
     const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
     const totalExpenses =

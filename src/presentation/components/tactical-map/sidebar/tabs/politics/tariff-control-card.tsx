@@ -3,9 +3,9 @@ import { Coins, TrendingUp, Zap, Anchor, Compass, Globe } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { Nation } from "@/domain/nation/nation.schema";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+import { TariffCalculator } from "@/engine/economy/calculators/tariff-calculator";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
@@ -39,50 +39,64 @@ export function TariffControlCard({
     );
   };
 
-  const activeTradeRatio = useMemo(() => {
-    const currentNation = nation || (nationsMap ? nationsMap[nationId] : null);
-    if (!nationsMap || !currentNation) return 1.0;
-
-    const otherAliveNations = Object.values(nationsMap).filter(
-      (n) => n.id !== currentNation.id && n.isAlive,
-    );
-    if (otherAliveNations.length === 0) return 1.0;
-
-    let activeCount = 0;
-    for (const partner of otherAliveNations) {
-      const rel = currentNation.relations?.[partner.id];
-      const isSevered =
-        rel?.stance === "SEVERED_RELATIONS" || rel?.isTradeEmbargoed === true;
-      if (!isSevered) {
-        activeCount++;
-      }
+  const tempNationState = useMemo<Nation>(() => {
+    if (nation) {
+      return { ...nation, tariffRate };
     }
+    return {
+      id: nationId,
+      name: "کشور",
+      isAi: false,
+      isAlive: true,
+      flagCode: "IR",
+      rank: 1,
+      gdp,
+      perCapitaProductivity: 5000,
+      maxPopulationCapacity: 100000000,
+      taxRate: 15,
+      tariffRate,
+      treasury: 100000,
+      nationalDebt: 0,
+      population: 80000000,
+      industrialLevel: 1,
+      consecutiveDeficitTurns: 0,
+      government: { type: "DEMOCRACY", stability: 80, turnsInPower: 1 },
+      resources: {},
+      military: {
+        infantry: 10,
+        airForce: 0,
+        droneMissile: 0,
+        experience: 0,
+        techLevel: 1,
+      },
+      recruitmentQueue: [],
+      geography: {
+        landNeighbors: [],
+        seaNeighbors: [],
+        hasSeaAccess,
+        territoryPixelCount: 1000,
+        infrastructureLevel: 1,
+        contiguousMainlandPixelCount: 1000,
+        isolatedPockets: [],
+        coordinates: [],
+      },
+      relations: {},
+      activeModifiers: [],
+      globalReputation: 50,
+      doctrines: { unlockedDoctrines },
+      researchBudgetRate: 1,
+      accumulatedResearchCost: 0,
+      researchCycleTurn: 0,
+      proxyInfluenceBudget: {},
+      provinceIds: [],
+    };
+  }, [nation, nationId, tariffRate, gdp, hasSeaAccess, unlockedDoctrines]);
 
-    return activeCount / otherAliveNations.length;
-  }, [nationsMap, nation, nationId]);
+  const tariffCalculation = useMemo(() => {
+    return TariffCalculator.calculateTariffEffects(tempNationState, nationsMap);
+  }, [tempNationState, nationsMap]);
 
-  const effectiveGdp = nation?.gdp ?? gdp;
-  const isSeaAccessible = nation?.geography?.hasSeaAccess ?? hasSeaAccess;
-  const seaAccessFactor = isSeaAccessible ? 1.0 : 0.5;
-  const effectiveDoctrines =
-    nation?.doctrines?.unlockedDoctrines ?? unlockedDoctrines;
-
-  const tradeVolumeFactor = Math.max(
-    0.05,
-    1.0 - Math.pow(tariffRate / 100, 1.1),
-  );
-
-  const baseTradeBase =
-    effectiveGdp * 0.15 * seaAccessFactor * activeTradeRatio;
-  const effectiveTradeValue = baseTradeBase * tradeVolumeFactor;
-  const researchMultiplier =
-    DoctrinesManager.getTariffRevenueMultiplier(effectiveDoctrines);
-
-  const projectedTariffRevenue = Math.floor(
-    effectiveTradeValue * (tariffRate / 100) * researchMultiplier,
-  );
-
-  const stabilityImpact = Number(((10 - tariffRate) * 0.08).toFixed(2));
+  const isSeaAccessible = tempNationState.geography.hasSeaAccess;
 
   return (
     <div className="space-y-2.5 dir-rtl text-right">
@@ -107,7 +121,7 @@ export function TariffControlCard({
             ) : (
               <span className="text-[9px] font-bold font-sans text-amber-500 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
                 <Compass size={11} />
-                محصور در خشکی (-۵۰٪)
+                محشور در خشکی (-۵۰٪)
               </span>
             )}
             <span className="text-muted-foreground">نرخ تعرفه گمرک</span>
@@ -146,7 +160,9 @@ export function TariffControlCard({
                 درآمد گمرکی نوبتی:
               </span>
               <span className="font-bold text-gdp text-[11px]">
-                {PersianNumberFormatter.formatCurrency(projectedTariffRevenue)}
+                {PersianNumberFormatter.formatCurrency(
+                  tariffCalculation.tariffRevenue,
+                )}
               </span>
             </div>
 
@@ -156,15 +172,18 @@ export function TariffControlCard({
               </span>
               <span
                 className={`font-bold text-[11px] ${
-                  stabilityImpact > 0
+                  tariffCalculation.stabilityImpact > 0
                     ? "text-gdp"
-                    : stabilityImpact < 0
+                    : tariffCalculation.stabilityImpact < 0
                       ? "text-military"
                       : "text-foreground"
                 }`}
               >
-                {stabilityImpact > 0 ? "+" : ""}
-                {PersianNumberFormatter.toPersianDigits(stabilityImpact)}٪
+                {tariffCalculation.stabilityImpact > 0 ? "+" : ""}
+                {PersianNumberFormatter.toPersianDigits(
+                  tariffCalculation.stabilityImpact,
+                )}
+                ٪
               </span>
             </div>
           </div>
@@ -176,7 +195,7 @@ export function TariffControlCard({
             </span>
             <span className="font-bold text-foreground font-mono">
               {PersianNumberFormatter.toPersianDigits(
-                Math.round(activeTradeRatio * 100),
+                tariffCalculation.tradeVolumePercentage,
               )}
               ٪
             </span>

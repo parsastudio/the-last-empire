@@ -7,9 +7,15 @@ import {
 } from "@/engine/economy/economy-calculators";
 
 export class StabilityCalculator {
-  public static calculateTurnStabilityDelta(nation: Nation): number {
+  public static calculateTurnStabilityDelta(
+    nation: Nation,
+    nationsMap?: Record<string, Nation>,
+  ): number {
     const taxResult = TaxCalculator.evaluateTaxPolicy(nation);
-    const tariffResult = TariffCalculator.calculateTariffEffects(nation);
+    const tariffResult = TariffCalculator.calculateTariffEffects(
+      nation,
+      nationsMap,
+    );
 
     let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
 
@@ -36,8 +42,14 @@ export class StabilityCalculator {
     return Number(delta.toFixed(2));
   }
 
-  public static calculateTurnStability(nation: Nation): number {
-    const delta = StabilityCalculator.calculateTurnStabilityDelta(nation);
+  public static calculateTurnStability(
+    nation: Nation,
+    nationsMap?: Record<string, Nation>,
+  ): number {
+    const delta = StabilityCalculator.calculateTurnStabilityDelta(
+      nation,
+      nationsMap,
+    );
     const currentStability = nation.government.stability;
     const newStability = Math.max(0, Math.min(100, currentStability + delta));
 
