@@ -46,26 +46,14 @@ export class PoliticsActionExecutor {
         return AbilityExecutor.execute(state, action);
 
       case "UNLOCK_DOCTRINE": {
-        if (nation.doctrines.doctrinePoints < 3) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "امتیاز پژوهشی کافی برای آنلاک این دکترین وجود ندارد.",
-          );
-        }
         return {
           ...state,
           nations: {
             ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              doctrines: {
-                doctrinePoints: nation.doctrines.doctrinePoints - 3,
-                unlockedDoctrines: [
-                  ...nation.doctrines.unlockedDoctrines,
-                  action.doctrineId,
-                ],
-              },
-            },
+            [sourceKey]: this.researchManager.unlockDoctrine(
+              nation,
+              action.doctrineId,
+            ),
           },
         };
       }

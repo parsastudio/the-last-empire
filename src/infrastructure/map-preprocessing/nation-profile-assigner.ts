@@ -120,7 +120,6 @@ export class NationProfileAssigner {
       traits: profile ? profile.traits : ["FRAGILE_ECONOMY"],
       globalReputation: 50,
       doctrines: {
-        doctrinePoints: 0,
         unlockedDoctrines: [],
       },
       researchBudgetRate: 1,
@@ -263,7 +262,6 @@ export class NationProfileAssigner {
       traits,
       globalReputation: 50,
       doctrines: {
-        doctrinePoints: 0,
         unlockedDoctrines: [],
       },
       researchBudgetRate: 1,

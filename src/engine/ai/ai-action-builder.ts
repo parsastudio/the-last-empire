@@ -12,7 +12,11 @@ export class AIActionBuilder {
   ): GameAction[] {
     const actions: GameAction[] = [];
 
-    if (nation.doctrines && nation.doctrines.doctrinePoints >= 3) {
+    const currentUnlocked = nation.doctrines?.unlockedDoctrines || [];
+    if (
+      !currentUnlocked.includes("gdp-booster") &&
+      nation.treasury >= 15000000000
+    ) {
       actions.push(ActionFactory.unlockDoctrine(nation.id, "gdp-booster"));
     }
 
