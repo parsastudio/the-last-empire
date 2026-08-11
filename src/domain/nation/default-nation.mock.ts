@@ -44,7 +44,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   activeModifiers: [],
   traits: [],
   globalReputation: 50,
-  doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
+  doctrines: { unlockedDoctrines: [] },
   researchBudgetRate: 1,
   accumulatedResearchCost: 0,
   researchCycleTurn: 0,
