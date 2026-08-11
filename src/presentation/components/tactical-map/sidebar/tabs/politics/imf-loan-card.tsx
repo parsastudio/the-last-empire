@@ -11,6 +11,7 @@ import { AmountActionDialog } from "@/presentation/components/common/amount-acti
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
+import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
 
 interface ImfLoanCardProps {
   nationId: string;
@@ -19,63 +20,6 @@ interface ImfLoanCardProps {
   treasury?: number;
   nation?: Nation;
 }
-
-const DEFAULT_NATION_LOAN_FALLBACK: Nation = {
-  id: "NATION_DEFAULT",
-  name: "ملی",
-  isAi: false,
-  isAlive: true,
-  flagCode: "IR",
-  rank: 1,
-  gdp: 450000000000,
-  taxRate: 15,
-  tariffRate: 10,
-  treasury: 100000,
-  nationalDebt: 0,
-  population: 80000000,
-  industrialLevel: 1,
-  consecutiveDeficitTurns: 0,
-  government: {
-    type: "DEMOCRACY",
-    stability: 80,
-    corruption: 5,
-    turnsInPower: 1,
-  },
-  resources: { oil: 1000, manpower: 500 },
-  military: {
-    infantry: 100,
-    airForce: 20,
-    droneMissile: 5,
-    experience: 10,
-    techLevel: 1,
-  },
-  recruitmentQueue: [],
-  geography: {
-    landNeighbors: [],
-    seaNeighbors: [],
-    hasSeaAccess: true,
-    territoryPixelCount: 1000,
-    infrastructureLevel: 1,
-    contiguousMainlandPixelCount: 1000,
-    isolatedPockets: [],
-    coordinates: [],
-  },
-  relations: {},
-  activeModifiers: [],
-  traits: [],
-  globalReputation: 50,
-  doctrines: { doctrinePoints: 0, unlockedDoctrines: [] },
-  researchBudgetRate: 1,
-  accumulatedResearchCost: 0,
-  researchCycleTurn: 0,
-  proxyInfluenceBudget: {},
-  provinceIds: [],
-  autoTradeSettings: {
-    autoBuyDeficit: false,
-    autoSellOilPercent: 0,
-    allowEmergencyLoans: true,
-  },
-};
 
 export function ImfLoanCard({
   nationId,
@@ -89,7 +33,7 @@ export function ImfLoanCard({
   const { dispatchAction } = useGameActions();
 
   const activeNation: Nation = nation || {
-    ...DEFAULT_NATION_LOAN_FALLBACK,
+    ...DEFAULT_NATION_MOCK,
     id: nationId,
     gdp,
     treasury,
