@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Clock,
-  Coins,
-  Users,
-  Shield,
-  Plane,
-  Radio,
-  LucideIcon,
-} from "lucide-react";
+import { Clock, Coins, Shield, Plane, Radio, LucideIcon } from "lucide-react";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { useUnitRecruitmentCalculator } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-unit-recruitment-calculator";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
@@ -17,7 +9,6 @@ export interface UnitConfig {
   type: string;
   name: string;
   moneyCost: number;
-  manpowerCost: number;
   buildTurns: number;
   icon: LucideIcon;
   color: string;
@@ -28,7 +19,6 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     type: MILITARY_UNIT_STATS.INFANTRY.type,
     name: MILITARY_UNIT_STATS.INFANTRY.nameFa,
     moneyCost: MILITARY_UNIT_STATS.INFANTRY.moneyCost,
-    manpowerCost: MILITARY_UNIT_STATS.INFANTRY.manpowerCost,
     buildTurns: MILITARY_UNIT_STATS.INFANTRY.buildTurns,
     icon: Shield,
     color: "text-primary",
@@ -37,7 +27,6 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     type: MILITARY_UNIT_STATS.AIR_FORCE.type,
     name: MILITARY_UNIT_STATS.AIR_FORCE.nameFa,
     moneyCost: MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
-    manpowerCost: MILITARY_UNIT_STATS.AIR_FORCE.manpowerCost,
     buildTurns: MILITARY_UNIT_STATS.AIR_FORCE.buildTurns,
     icon: Plane,
     color: "text-gdp",
@@ -46,7 +35,6 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     type: MILITARY_UNIT_STATS.DRONE_MISSILE.type,
     name: MILITARY_UNIT_STATS.DRONE_MISSILE.nameFa,
     moneyCost: MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost,
-    manpowerCost: MILITARY_UNIT_STATS.DRONE_MISSILE.manpowerCost,
     buildTurns: MILITARY_UNIT_STATS.DRONE_MISSILE.buildTurns,
     icon: Radio,
     color: "text-treasury",
@@ -56,20 +44,17 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
 interface UnitRecruitmentCardProps {
   unit: UnitConfig;
   treasury: number;
-  manpower: number;
   onRecruit: (unit: UnitConfig, quantity: number) => void;
 }
 
 export function UnitRecruitmentCard({
   unit,
   treasury,
-  manpower,
   onRecruit,
 }: UnitRecruitmentCardProps) {
   const calc = useUnitRecruitmentCalculator({
     unit,
     treasury,
-    manpower,
   });
 
   const Icon = unit.icon;
@@ -89,20 +74,11 @@ export function UnitRecruitmentCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 font-mono text-[10px]">
+      <div className="font-mono text-[10px]">
         <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
           <Coins size={11} className="text-gdp" />
           <span>
             هزینه: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
-          </span>
-        </div>
-        <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
-          <Users size={11} className="text-primary" />
-          <span>
-            نیروی انسانی:{" "}
-            {PersianNumberFormatter.toPersianDigits(
-              calc.totalManpower.toLocaleString("en-US"),
-            )}
           </span>
         </div>
       </div>

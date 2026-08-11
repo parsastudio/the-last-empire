@@ -4,31 +4,20 @@ import { UnitConfig } from "@/presentation/components/tactical-map/sidebar/tabs/
 interface UseUnitRecruitmentCalculatorProps {
   unit: UnitConfig;
   treasury: number;
-  manpower: number;
 }
 
 export function useUnitRecruitmentCalculator({
   unit,
   treasury,
-  manpower,
 }: UseUnitRecruitmentCalculatorProps) {
   const [quantity, setQuantity] = useState<number>(1);
 
   const maxAffordable = useMemo(() => {
-    const maxMoney =
-      unit.moneyCost > 0 ? Math.floor(treasury / unit.moneyCost) : Infinity;
-    const maxManpower =
-      unit.manpowerCost > 0
-        ? Math.floor(manpower / unit.manpowerCost)
-        : Infinity;
-
-    return Math.max(0, Math.min(maxMoney, maxManpower));
-  }, [treasury, manpower, unit]);
+    return unit.moneyCost > 0 ? Math.floor(treasury / unit.moneyCost) : 0;
+  }, [treasury, unit]);
 
   const currentQty = Math.min(quantity, maxAffordable);
-
   const totalMoney = unit.moneyCost * currentQty;
-  const totalManpower = unit.manpowerCost * currentQty;
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +51,6 @@ export function useUnitRecruitmentCalculator({
     quantity: currentQty,
     maxAffordable,
     totalMoney,
-    totalManpower,
     handleInputChange,
     handlePercentageSelect,
     setClampedQuantity,

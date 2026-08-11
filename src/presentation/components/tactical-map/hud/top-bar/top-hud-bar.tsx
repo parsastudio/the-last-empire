@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Coins, Fuel, Users, Landmark, ShieldAlert, Globe } from "lucide-react";
+import { Coins, Fuel, Landmark, ShieldAlert, Globe } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -132,16 +132,11 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       metrics.oilRequiredPerTurn,
     )} مصرف`;
 
-    const formattedManpower = PersianNumberFormatter.toPersianDigits(
-      metrics.manpower.toLocaleString("en-US"),
-    );
-
     return {
       formattedTreasury,
       formattedIncome,
       formattedOil,
       formattedOilUsage,
-      formattedManpower,
       isOilDeficit: metrics.oil < metrics.oilRequiredPerTurn,
     };
   }, [metrics]);
@@ -177,13 +172,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
           subValueColor={
             formatted.isOilDeficit ? "text-military font-bold" : "text-treasury"
           }
-        />
-
-        <ResourceBadge
-          icon={Users}
-          iconColor="text-primary"
-          label="نیروی انسانی آماده"
-          value={formatted.formattedManpower}
         />
 
         <div className="w-[1px] h-6 bg-border/80 shrink-0 hidden sm:block" />

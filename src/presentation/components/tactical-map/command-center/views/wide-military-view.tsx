@@ -12,7 +12,6 @@ interface WideMilitaryViewProps {
   recruitmentQueue?: RecruitmentOrder[];
   nationId: string;
   treasury?: number;
-  manpower?: number;
   population?: number;
   stability?: number;
 }
@@ -22,7 +21,6 @@ export function WideMilitaryView({
   recruitmentQueue = [],
   nationId,
   treasury = 100000,
-  manpower = 500,
 }: WideMilitaryViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -39,11 +37,7 @@ export function WideMilitaryView({
       </div>
 
       <div className="space-y-5">
-        <MilitaryExpansionView
-          nationId={nationId}
-          treasury={treasury}
-          manpower={manpower}
-        />
+        <MilitaryExpansionView nationId={nationId} treasury={treasury} />
       </div>
     </div>
   );

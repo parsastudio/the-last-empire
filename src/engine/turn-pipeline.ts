@@ -9,7 +9,6 @@ import { ResourceGenerationStep } from "@/engine/pipeline/economy/resource-gener
 import {
   GdpCalculator,
   PopulationGrowthEngine,
-  ManpowerManager,
   TariffCalculator,
   TaxCalculator,
   MilitaryPayrollCalculator,
@@ -31,7 +30,6 @@ export class TurnPipeline {
   private coolOffManager = new CoolOffManager();
   private reputationManager = new ReputationManager();
   private popEngine = new PopulationGrowthEngine();
-  private manpowerManager = new ManpowerManager();
   private bankruptcyManager = new BankruptcyManager();
   private recruitmentQueue = new RecruitmentQueueManager();
   private attritionManager = new AttritionManager();
@@ -145,9 +143,6 @@ export class TurnPipeline {
           oil: updated.resources.oil + oilProducedPerTurn,
         },
       };
-
-      const manpowerGrowth = this.manpowerManager.calculateGrowth(updated);
-      updated = this.manpowerManager.restoreManpower(updated, manpowerGrowth);
 
       const tariffResult = TariffCalculator.calculateTariffEffects(updated);
       const taxResult = TaxCalculator.evaluateTaxPolicy(updated);

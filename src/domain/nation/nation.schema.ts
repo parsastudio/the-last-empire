@@ -47,7 +47,6 @@ export const GeographySchema = z.object({
 
 export const ResourcesSchema = z.object({
   oil: z.number().nonnegative(),
-  manpower: z.number().nonnegative(),
 });
 
 export const AutoTradeSettingsSchema = z.object({
