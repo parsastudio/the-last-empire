@@ -42,17 +42,9 @@ export function useBitPackedGame(gameId = "default_game") {
     let nextState = null;
     try {
       nextState = await advanceTurnAction();
-      if (nextState) {
-        const gridState = BitPackedGridState.getInstance();
-        if (gridState.isStorageDirty()) {
-          const bitBuffer = gridState.getBuffer();
-          gridState.clearStorageDirty();
-          void storageAdapter.saveBitBuffer(gameId, bitBuffer);
-        }
-      }
     } catch {}
     return nextState;
-  }, [gameId, advanceTurnAction, storageAdapter]);
+  }, [advanceTurnAction]);
 
   return {
     gameState,
