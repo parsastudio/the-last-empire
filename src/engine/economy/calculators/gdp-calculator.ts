@@ -1,44 +1,55 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 
-export class GdpCalculator {
-  public static calculateBaseGdp(
-    population: number,
-    infrastructureLevel: number,
-  ): number {
-    const basePerCapita = 10;
-    const infraBonus = 1 + infrastructureLevel * 0.05;
-    return Math.floor(population * basePerCapita * infraBonus);
-  }
+export interface GdpCalculationResult {
+  nextProductivity: number;
+  nextGdp: number;
+}
 
-  public static calculateGdpGrowthMultiplier(nation: Nation): number {
-    const currentStability = nation.government.stability;
-    let stabilityFactor = -0.05 + (currentStability / 100) * 0.075;
-    if (nation.geography.territoryPixelCount > 2000) {
-      stabilityFactor += 0.015;
-    }
+export class GdpCalculator {
+  public static readonly PRODUCTIVITY_CAP = 120000;
+
+  public static calculateProductivityGrowth(nation: Nation): number {
+    const currentProd = nation.perCapitaProductivity || 5000;
+    const stability = nation.government.stability;
+    const industrialLevel = nation.industrialLevel || 1;
+
+    let baseGrowth = 0.005 + industrialLevel * 0.003;
+    const stabilityFactor = -0.02 + (stability / 100) * 0.04;
+    baseGrowth += stabilityFactor;
+
     const govTraits = GovernmentSystem.getTraits(nation.government.type);
-    stabilityFactor += govTraits.economicGrowthBonus;
-    for (const mod of nation.activeModifiers) {
-      if (mod.effectType === "GDP_GROWTH_MULT") {
-        stabilityFactor += mod.magnitude;
+    baseGrowth += govTraits.economicGrowthBonus;
+
+    if (nation.doctrines?.unlockedDoctrines) {
+      if (nation.doctrines.unlockedDoctrines.includes("gdp-booster")) {
+        baseGrowth += 0.005;
       }
     }
-    if (nation.activeModifiers.some((m) => m.id === "martial-law-active")) {
-      stabilityFactor -= 0.02;
-    }
-    return Math.max(0.85, 1.0 + stabilityFactor);
+
+    const saturationFactor = Math.max(
+      0.05,
+      1.0 - currentProd / GdpCalculator.PRODUCTIVITY_CAP,
+    );
+
+    const effectiveRate = baseGrowth * saturationFactor;
+    return Math.max(-0.1, Math.min(0.15, effectiveRate));
   }
 
-  public static updateNationGdp(nation: Nation): number {
-    const growthMult = GdpCalculator.calculateGdpGrowthMultiplier(nation);
-    const previousGdp =
-      nation.gdp && nation.gdp > 0
-        ? nation.gdp
-        : GdpCalculator.calculateBaseGdp(
-            nation.population,
-            nation.geography.infrastructureLevel,
-          );
-    return Math.floor(previousGdp * growthMult);
+  public static updateProductivityAndGdp(nation: Nation): GdpCalculationResult {
+    const currentProd = nation.perCapitaProductivity || 5000;
+    const growthRate = GdpCalculator.calculateProductivityGrowth(nation);
+
+    const nextProd = Math.min(
+      GdpCalculator.PRODUCTIVITY_CAP,
+      Math.max(100, Math.floor(currentProd * (1 + growthRate))),
+    );
+
+    const nextGdp = Math.floor(nation.population * nextProd);
+
+    return {
+      nextProductivity: nextProd,
+      nextGdp,
+    };
   }
 }
