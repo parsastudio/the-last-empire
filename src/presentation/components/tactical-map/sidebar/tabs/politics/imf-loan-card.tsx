@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import {
   Landmark,
@@ -5,20 +7,16 @@ import {
   ArrowDownRight,
   DollarSign,
 } from "lucide-react";
-import { LoanManager } from "@/engine/economy/calculators/debt-calculator";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
 
 interface ImfLoanCardProps {
   nationId: string;
   nationalDebt?: number;
   gdp?: number;
   treasury?: number;
-  nation?: Nation;
 }
 
 export function ImfLoanCard({
@@ -26,22 +24,12 @@ export function ImfLoanCard({
   nationalDebt = 0,
   gdp = 450000000000,
   treasury = 100000,
-  nation,
 }: ImfLoanCardProps) {
   const [isLoanModalOpen, setIsLoanModalOpen] = useState(false);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
 
-  const activeNation: Nation = nation || {
-    ...DEFAULT_NATION_MOCK,
-    id: nationId,
-    gdp,
-    treasury,
-    nationalDebt,
-  };
-
-  const creditRating = LoanManager.calculateCreditRating(activeNation);
-  const maxDebtLimit = Math.floor(gdp * 1.0 * (creditRating / 100));
+  const maxDebtLimit = Math.floor(gdp * 1.0);
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 
   const availableLoanBillion = Math.floor(availableLoan / 1e9);
