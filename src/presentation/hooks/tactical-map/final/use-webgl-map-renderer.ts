@@ -27,6 +27,7 @@ export function useWebGLMapRenderer({
   activeLayer = "political",
 }: UseWebGLMapRendererProps) {
   const rendererRef = useRef<WebGLMapRenderer | null>(null);
+  const paletteTextureRef = useRef<WebGLTexture | null>(null);
   const gdpTextureRef = useRef<WebGLTexture | null>(null);
 
   useEffect(() => {
@@ -50,6 +51,7 @@ export function useWebGLMapRenderer({
       provincesMap,
     );
     if (paletteTex) {
+      paletteTextureRef.current = paletteTex;
       renderer.setPaletteTexture(paletteTex);
     }
 
@@ -66,7 +68,16 @@ export function useWebGLMapRenderer({
     const gridState = BitPackedGridState.getInstance();
     const rawBuffer = gridState.getBuffer().getRawBuffer();
     renderer.updateLiveStateTexture(rawBuffer);
-  }, [gl, provincesMap, nationsMap]);
+  }, [gl]);
+
+  useEffect(() => {
+    if (!gl || !paletteTextureRef.current) return;
+    WebGLPaletteTextureManager.updatePaletteTexture(
+      gl,
+      paletteTextureRef.current,
+      provincesMap,
+    );
+  }, [gl, provincesMap]);
 
   useEffect(() => {
     if (!gl || !gdpTextureRef.current) return;
