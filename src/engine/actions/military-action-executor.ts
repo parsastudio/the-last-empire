@@ -61,48 +61,6 @@ export class MilitaryActionExecutor {
         };
       }
 
-      case "DISBAND_UNIT": {
-        if (action.quantity <= 0) {
-          throw new GameError("INVALID_ACTION", "تعداد انحلال باید مثبت باشد.");
-        }
-        const count =
-          action.unitType === "INFANTRY"
-            ? nation.military.infantry
-            : action.unitType === "AIR_FORCE"
-              ? nation.military.airForce
-              : nation.military.droneMissile;
-
-        if (count < action.quantity) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "تعداد انحلال بیشتر از یگان‌های موجود است.",
-          );
-        }
-
-        const military = { ...nation.military };
-        if (action.unitType === "INFANTRY")
-          military.infantry -= action.quantity;
-        else if (action.unitType === "AIR_FORCE")
-          military.airForce -= action.quantity;
-        else if (action.unitType === "DRONE_MISSILE")
-          military.droneMissile -= action.quantity;
-
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              military,
-              resources: {
-                ...nation.resources,
-                manpower: nation.resources.manpower + action.quantity * 4,
-              },
-            },
-          },
-        };
-      }
-
       case "INVEST_RESEARCH": {
         const cost = ResearchManager.getMilitaryTechCost(nation);
         if (nation.treasury < cost) {

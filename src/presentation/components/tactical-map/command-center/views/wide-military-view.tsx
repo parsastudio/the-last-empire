@@ -1,7 +1,6 @@
 import React from "react";
 import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
 import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
-import { DisbandUnitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/disband-unit-card";
 import { MilitaryExpansionView } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-expansion-view";
 import {
   MilitaryStack,
@@ -35,7 +34,6 @@ export function WideMilitaryView({
         />
 
         <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
-        <DisbandUnitCard nationId={nationId} military={military} />
       </div>
 
       <div className="space-y-5">

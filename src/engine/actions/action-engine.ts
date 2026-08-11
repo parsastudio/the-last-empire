@@ -68,7 +68,6 @@ export class ActionEngine {
 
         case "RECRUIT_UNIT":
         case "CANCEL_RECRUITMENT":
-        case "DISBAND_UNIT":
         case "INVEST_RESEARCH":
         case "INITIATE_BATTLE":
           newState = MilitaryActionExecutor.execute(state, action);
