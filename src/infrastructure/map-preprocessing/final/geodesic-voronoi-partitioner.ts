@@ -84,13 +84,32 @@ export class GeodesicVoronoiPartitioner {
 
     const totalMapPixels = width * height;
     const landMask = new Uint8Array(totalMapPixels);
+    let minX = width;
+    let maxX = 0;
+    let minY = height;
+    let maxY = 0;
+
     for (let i = 0; i < allPixelIndices.length; i++) {
-      landMask[allPixelIndices[i]!] = 1;
+      const idx = allPixelIndices[i]!;
+      landMask[idx] = 1;
+      const px = idx % width;
+      const py = Math.floor(idx / width);
+      if (px < minX) minX = px;
+      if (px > maxX) maxX = px;
+      if (py < minY) minY = py;
+      if (py > maxY) maxY = py;
     }
 
+    const startX = Math.max(0, minX - 10);
+    const endX = Math.min(width - 1, maxX + 10);
+    const startY = Math.max(0, minY - 10);
+    const endY = Math.min(height - 1, maxY + 10);
+
     let currentSeeds = [...initialSeeds];
-    const iterations = 10;
+    const iterations = 3;
     let finalAssignmentMap = new Map<number, number>();
+
+    const distMap = new Float32Array(totalMapPixels);
 
     for (let iter = 0; iter < iterations; iter++) {
       finalAssignmentMap = this.runPureLandDijkstra(
@@ -98,6 +117,11 @@ export class GeodesicVoronoiPartitioner {
         currentSeeds,
         assignedProvinceIds,
         landMask,
+        distMap,
+        startX,
+        endX,
+        startY,
+        endY,
         width,
         totalMapPixels,
       );
@@ -115,12 +139,20 @@ export class GeodesicVoronoiPartitioner {
     const counts = new Map<number, number>();
     const sumXMap = new Map<number, number>();
     const sumYMap = new Map<number, number>();
+    const provMinXMap = new Map<number, number>();
+    const provMaxXMap = new Map<number, number>();
+    const provMinYMap = new Map<number, number>();
+    const provMaxYMap = new Map<number, number>();
 
     for (let i = 0; i < assignedProvinceIds.length; i++) {
       const pid = assignedProvinceIds[i]!;
       counts.set(pid, 0);
       sumXMap.set(pid, 0);
       sumYMap.set(pid, 0);
+      provMinXMap.set(pid, width);
+      provMaxXMap.set(pid, 0);
+      provMinYMap.set(pid, height);
+      provMaxYMap.set(pid, 0);
     }
 
     const defaultPid = assignedProvinceIds[0]!;
@@ -136,6 +168,11 @@ export class GeodesicVoronoiPartitioner {
       counts.set(pid, (counts.get(pid) || 0) + 1);
       sumXMap.set(pid, (sumXMap.get(pid) || 0) + x);
       sumYMap.set(pid, (sumYMap.get(pid) || 0) + y);
+
+      if (x < (provMinXMap.get(pid) ?? width)) provMinXMap.set(pid, x);
+      if (x > (provMaxXMap.get(pid) ?? 0)) provMaxXMap.set(pid, x);
+      if (y < (provMinYMap.get(pid) ?? height)) provMinYMap.set(pid, y);
+      if (y > (provMaxYMap.get(pid) ?? 0)) provMaxYMap.set(pid, y);
     }
 
     for (let i = 0; i < assignedProvinceIds.length; i++) {
@@ -151,6 +188,10 @@ export class GeodesicVoronoiPartitioner {
           y: Math.floor((sumYMap.get(pid) || 0) / count),
         },
         landNeighbors: new Set<number>(),
+        minX: provMinXMap.get(pid) ?? 0,
+        maxX: provMaxXMap.get(pid) ?? width,
+        minY: provMinYMap.get(pid) ?? 0,
+        maxY: provMaxYMap.get(pid) ?? height,
       });
     }
   }
@@ -160,12 +201,22 @@ export class GeodesicVoronoiPartitioner {
     seeds: number[],
     assignedProvinceIds: number[],
     landMask: Uint8Array,
+    distMap: Float32Array,
+    startX: number,
+    endX: number,
+    startY: number,
+    endY: number,
     width: number,
     totalMapPixels: number,
   ): Map<number, number> {
     const assignmentMap = new Map<number, number>();
-    const distMap = new Float64Array(totalMapPixels);
-    distMap.fill(Infinity);
+
+    for (let y = startY; y <= endY; y++) {
+      const rowOffset = y * width;
+      for (let x = startX; x <= endX; x++) {
+        distMap[rowOffset + x] = 1e9;
+      }
+    }
 
     const heap = new LandMinHeap();
 
@@ -204,7 +255,7 @@ export class GeodesicVoronoiPartitioner {
         const nx = cx + off.dx;
         const ny = cy + off.dy;
 
-        if (nx >= 0 && nx < width && ny >= 0) {
+        if (nx >= startX && nx <= endX && ny >= startY && ny <= endY) {
           const nIdx = ny * width + nx;
           if (nIdx < totalMapPixels && landMask[nIdx] === 1) {
             const nextDist = currDist + off.cost;

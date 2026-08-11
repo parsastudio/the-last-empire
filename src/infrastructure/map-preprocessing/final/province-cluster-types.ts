@@ -26,4 +26,8 @@ export interface ProvinceClusterInfo {
   hasSeaAccess: boolean;
   centerCoordinates: { x: number; y: number };
   landNeighbors: Set<number>;
+  minX?: number;
+  maxX?: number;
+  minY?: number;
+  maxY?: number;
 }
