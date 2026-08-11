@@ -13,6 +13,8 @@ interface WideMilitaryViewProps {
   nationId: string;
   treasury?: number;
   manpower?: number;
+  population?: number;
+  stability?: number;
 }
 
 export function WideMilitaryView({

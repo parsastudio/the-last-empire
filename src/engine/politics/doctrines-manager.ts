@@ -1,4 +1,3 @@
-import type { DoctrinesState } from "@/domain/politics/doctrines.schema";
 import {
   COMPREHENSIVE_RESEARCH_TREE,
   ResearchNode,
