@@ -66,7 +66,6 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
 
         <ResourcesSection
           oil={nation.resources.oil}
-          manpower={nation.resources.manpower}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
           oilRequiredPerTurn={oilRequiredPerTurn}
