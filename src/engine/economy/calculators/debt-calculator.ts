@@ -1,18 +1,5 @@
 import { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
 
-export class LoanManager {
-  public static calculateCreditRating(nation: Nation): number {
-    const debtRatio = nation.gdp > 0 ? nation.nationalDebt / nation.gdp : 1;
-    let score = 100;
-    score -= Math.min(100, Math.floor(debtRatio * 100));
-    score -= Math.min(30, 100 - nation.government.stability);
-    if (nation.activeModifiers.some((m) => m.id === "bankruptcy-bad-credit")) {
-      score = Math.floor(score * 0.2);
-    }
-    return Math.max(0, score);
-  }
-}
-
 export class BankruptcyManager {
   public isBankrupt(nation: Nation): boolean {
     if (nation.activeModifiers.some((m) => m.id === "bankruptcy-debt-holiday"))
@@ -24,11 +11,9 @@ export class BankruptcyManager {
   public applyBankruptcy(nation: Nation): Nation {
     const existingModifiers = nation.activeModifiers.filter(
       (m) =>
-        ![
-          "bankruptcy-structural-decay",
-          "bankruptcy-debt-holiday",
-          "bankruptcy-bad-credit",
-        ].includes(m.id),
+        !["bankruptcy-structural-decay", "bankruptcy-debt-holiday"].includes(
+          m.id,
+        ),
     );
     const newModifiers: ActiveModifier[] = [
       ...existingModifiers,
@@ -44,13 +29,6 @@ export class BankruptcyManager {
         name: "Debt Restructuring Period",
         effectType: "BANKRUPTCY_HOLIDAY",
         magnitude: 0,
-        turnsRemaining: 10,
-      },
-      {
-        id: "bankruptcy-bad-credit",
-        name: "Ruined Credit Rating",
-        effectType: "CREDIT_RATING_MULT",
-        magnitude: -80,
         turnsRemaining: 10,
       },
     ];
