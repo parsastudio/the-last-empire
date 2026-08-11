@@ -48,7 +48,6 @@ export const NationSchema = z.object({
   isAlive: z.boolean(),
   flagCode: z.string(),
   rank: z.number().positive().default(1),
-  gdp: z.number().nonnegative(),
   perCapitaProductivity: z.number().nonnegative().default(5000),
   maxPopulationCapacity: z.number().nonnegative().default(100000000),
   taxRate: z.number().min(0).max(50),
