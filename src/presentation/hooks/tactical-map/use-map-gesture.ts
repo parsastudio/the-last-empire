@@ -8,6 +8,8 @@ export function useMapGesture(
   mapWidth: number = MAP_CONFIG.HIGH_RES_WIDTH,
   mapHeight: number = MAP_CONFIG.HIGH_RES_HEIGHT,
   containerRef?: RefObject<HTMLDivElement | null>,
+  externalPositionRef?: RefObject<CameraPosition>,
+  externalScaleRef?: RefObject<number>,
 ) {
   const computeInitial = useCallback(
     (w: number, h: number) => {
@@ -26,8 +28,12 @@ export function useMapGesture(
 
   const initial = computeInitial(containerWidth, containerHeight);
 
-  const positionRef = useRef<CameraPosition>(initial.pos);
-  const scaleRef = useRef<number>(initial.scale);
+  const internalPositionRef = useRef<CameraPosition>(initial.pos);
+  const internalScaleRef = useRef<number>(initial.scale);
+
+  const positionRef = externalPositionRef || internalPositionRef;
+  const scaleRef = externalScaleRef || internalScaleRef;
+
   const isDraggingRef = useRef<boolean>(false);
   const hasDraggedRef = useRef<boolean>(false);
 
