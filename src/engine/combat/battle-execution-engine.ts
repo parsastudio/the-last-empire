@@ -5,6 +5,7 @@ import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { BattleDiplomacyHelper } from "@/engine/combat/battle-diplomacy-helper";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { BitPackedProvinceConqueror } from "@/engine/combat/final/bit-packed-province-conqueror";
+import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -120,10 +121,14 @@ export class BattleExecutionEngine {
     const attackerTreasuryAfterDeployment =
       attacker.treasury - calcResult.deploymentMoneyCost;
 
-    let updatedAttacker = {
-      ...attacker,
+    let updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
+      attacker,
+      attacker.population + transferredPopulation,
+    );
+
+    updatedAttacker = {
+      ...updatedAttacker,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
-      population: attacker.population + transferredPopulation,
       maxPopulationCapacity:
         (attacker.maxPopulationCapacity ||
           Math.floor(attacker.population / 0.95)) + transferredCapacity,
@@ -170,11 +175,15 @@ export class BattleExecutionEngine {
       };
     }
 
-    const updatedDefender = {
-      ...defender,
+    let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
+      defender,
+      Math.max(0, defender.population - transferredPopulation),
+    );
+
+    updatedDefender = {
+      ...updatedDefender,
       isAlive: isDefenderAlive,
       treasury: Math.max(0, defender.treasury - calcResult.treasuryLooted),
-      population: Math.max(0, defender.population - transferredPopulation),
       maxPopulationCapacity: Math.max(
         0,
         (defender.maxPopulationCapacity ||

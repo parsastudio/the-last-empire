@@ -7,7 +7,10 @@ import {
 } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesStateSchema } from "@/domain/politics/doctrines.schema";
-import { RegionDemographicsSchema } from "@/domain/nation/region-demographics.schema";
+import {
+  RegionDemographicsSchema,
+  RegionDemographics,
+} from "@/domain/nation/region-demographics.schema";
 import { CoordinateSchema } from "@/domain/map/coordinate.schema";
 
 export const ActiveModifierSchema = z.object({
@@ -75,3 +78,4 @@ export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
 export type Resources = z.infer<typeof ResourcesSchema>;
 export type Nation = z.infer<typeof NationSchema>;
+export type { RegionDemographics };

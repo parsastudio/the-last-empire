@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 
 export interface MigrationSummary {
   updatedNations: Record<string, Nation>;
@@ -88,10 +89,11 @@ export class MigrationEngine {
       );
       const n = updatedNations[c.nationId];
       if (n && actualDeduction > 0) {
-        updatedNations[c.nationId] = {
-          ...n,
-          population: Math.max(100, n.population - actualDeduction),
-        };
+        const newPop = Math.max(100, n.population - actualDeduction);
+        updatedNations[c.nationId] = GdpCalculator.syncNationGdpAndDemographics(
+          n,
+          newPop,
+        );
       }
     }
 
@@ -106,10 +108,10 @@ export class MigrationEngine {
         gain = Math.min(gain, a.emptyCapacityRoom);
         totalDistributed += gain;
 
-        updatedNations[a.nationId] = {
-          ...n,
-          population: n.population + gain,
-        };
+        updatedNations[a.nationId] = GdpCalculator.syncNationGdpAndDemographics(
+          n,
+          n.population + gain,
+        );
       }
     }
 
@@ -126,10 +128,8 @@ export class MigrationEngine {
           );
           if (currentRoom > 0) {
             const add = Math.min(remainder, currentRoom);
-            updatedNations[a.nationId] = {
-              ...n,
-              population: n.population + add,
-            };
+            updatedNations[a.nationId] =
+              GdpCalculator.syncNationGdpAndDemographics(n, n.population + add);
             break;
           }
         }

@@ -17,7 +17,6 @@ import { MigrationEngine } from "@/engine/economy/demographics/migration-engine"
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { AttritionManager } from "@/engine/military/attrition-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -114,11 +113,11 @@ export class TurnPipeline {
       updated = demoResult.updatedNation;
 
       const prodResult = GdpCalculator.updateProductivityAndGdp(updated);
-      updated = {
-        ...updated,
-        perCapitaProductivity: prodResult.nextProductivity,
-        gdp: prodResult.nextGdp,
-      };
+      updated = GdpCalculator.syncNationGdpAndDemographics(
+        updated,
+        updated.population,
+        prodResult.nextProductivity,
+      );
 
       const tariffResult = TariffCalculator.calculateTariffEffects(
         updated,
