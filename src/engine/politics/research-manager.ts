@@ -9,10 +9,6 @@ export class ResearchManager {
     return Math.max(1500000000, baseCost);
   }
 
-  public getMilitaryTechCost(gdpOrNation: number | Nation): number {
-    return ResearchManager.getMilitaryTechCost(gdpOrNation);
-  }
-
   public investInMilitaryTech(nation: Nation): Nation {
     const cost = ResearchManager.getMilitaryTechCost(nation);
 

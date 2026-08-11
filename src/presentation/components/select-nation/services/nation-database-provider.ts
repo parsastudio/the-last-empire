@@ -47,18 +47,7 @@ export class NationDatabaseProvider {
     manifestNations: ManifestNationItem[],
   ): NationDetail[] {
     return manifestNations.map((item) => {
-      const mapped = NationPresentationMapper.formatNationSummary(
-        item.id,
-        item.nameFa,
-        item.flagCode,
-        item.flagCode,
-        item.initialRank,
-        item.gdp,
-        item.population,
-        item.defaultGovernment,
-      );
-
-      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank} و ساختار اقتصادی به ارزش ${mapped.gdpText}.`;
+      const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}.`;
 
       return this.formatNationDetail(
         item.id,
