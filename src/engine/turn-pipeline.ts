@@ -1,6 +1,5 @@
 import type { GameState } from "@/domain/game/game-state.schema";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
-import { TurnPhase } from "@/engine/pipeline/turn-phase";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import {
   CoolOffManager,
@@ -43,10 +42,6 @@ export class TurnPipeline {
   private recruitmentQueue = new RecruitmentQueueManager();
   private attritionManager = new AttritionManager();
   private researchManager = new ResearchManager();
-
-  constructor(phases?: TurnPhase[]) {
-    void phases;
-  }
 
   public processTurn(state: GameState, prng: SeededRandom): GameState {
     void prng;
