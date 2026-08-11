@@ -22,7 +22,7 @@ export interface FinalManifestNation {
   flagCode: string;
   nameFa: string;
   nameEn: string;
-  gdp: number;
+  perCapitaProductivity: number;
   population: number;
   territoryPixelCount: number;
   provinceIds: number[];
@@ -96,6 +96,11 @@ export class FinalManifestBuilder {
         });
       }
 
+      const perCapitaProductivity =
+        profile.population > 0
+          ? Math.floor(profile.gdp / profile.population)
+          : 5000;
+
       manifestNations.push({
         id: countryId,
         numericId: countryNumericId,
@@ -103,7 +108,7 @@ export class FinalManifestBuilder {
         flagCode: profile.flagCode,
         nameFa: profile.nameFa,
         nameEn: profile.nameEn,
-        gdp: profile.gdp,
+        perCapitaProductivity,
         population: profile.population,
         territoryPixelCount: totalCountryPixels,
         provinceIds: provIds,

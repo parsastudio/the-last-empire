@@ -49,15 +49,15 @@ export class NationProfileAssigner {
     const industrialLevel = Math.max(1, Math.min(5, techLevel));
     const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
 
-    const isTier1 = item.gdp >= 1000000000000;
+    const computedGdp = item.perCapitaProductivity * item.population;
+    const isTier1 = computedGdp >= 1000000000000;
 
     const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
     const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
     const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
-    const calculatedTreasury = Math.floor(item.gdp * 0.05);
-    const perCapitaProductivity =
-      item.population > 0 ? Math.floor(item.gdp / item.population) : 5000;
+    const calculatedTreasury = Math.floor(computedGdp * 0.05);
+    const perCapitaProductivity = item.perCapitaProductivity;
     const maxPopulationCapacity = Math.floor(item.population / 0.95);
 
     const defaultRegion: RegionDemographics = {
@@ -65,7 +65,6 @@ export class NationProfileAssigner {
       name: `خاک اصلی ${item.nameFa}`,
       pixelCount: item.territoryPixelCount,
       population: item.population,
-      gdp: item.gdp,
     };
 
     return {
@@ -75,7 +74,6 @@ export class NationProfileAssigner {
       isAlive: true,
       flagCode: item.flagCode,
       rank: item.initialRank,
-      gdp: item.gdp,
       perCapitaProductivity,
       maxPopulationCapacity,
       taxRate: 15,
@@ -192,7 +190,6 @@ export class NationProfileAssigner {
       name: `خاک اصلی ${name}`,
       pixelCount: territoryPixelCount,
       population,
-      gdp,
     };
 
     return {
@@ -202,7 +199,6 @@ export class NationProfileAssigner {
       isAlive: true,
       flagCode,
       rank: 1,
-      gdp,
       perCapitaProductivity,
       maxPopulationCapacity,
       taxRate: 15,
