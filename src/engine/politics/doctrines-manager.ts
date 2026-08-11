@@ -6,13 +6,6 @@ import {
 export type { ResearchNode as Doctrine };
 
 export class DoctrinesManager {
-  private static readonly doctrines: ResearchNode[] =
-    COMPREHENSIVE_RESEARCH_TREE;
-
-  public static getAvailableDoctrines(): ResearchNode[] {
-    return [...DoctrinesManager.doctrines];
-  }
-
   public static getGdpTaxRevenueMultiplier(unlocked?: string[]): number {
     if (!unlocked) return 1.0;
     let bonus = 0;

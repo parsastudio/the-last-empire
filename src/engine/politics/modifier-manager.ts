@@ -1,50 +1,6 @@
-import type { Nation, ActiveModifier } from "@/domain/nation/nation.schema";
-
-export interface ModifierInput {
-  id: string;
-  name: string;
-  effectType: string;
-  magnitude: number;
-  duration: number;
-}
+import type { Nation } from "@/domain/nation/nation.schema";
 
 export class ModifierManager {
-  public static addModifier(nation: Nation, modifier: ModifierInput): Nation {
-    const active: ActiveModifier = {
-      id: modifier.id,
-      name: modifier.name,
-      effectType: modifier.effectType,
-      magnitude: modifier.magnitude,
-      turnsRemaining: modifier.duration,
-    };
-
-    const currentModifiers = nation.activeModifiers || [];
-    const existingIndex = currentModifiers.findIndex(
-      (m) => m.id === modifier.id,
-    );
-
-    const updatedModifiers = [...currentModifiers];
-    if (existingIndex > -1) {
-      updatedModifiers[existingIndex] = active;
-    } else {
-      updatedModifiers.push(active);
-    }
-
-    return {
-      ...nation,
-      activeModifiers: updatedModifiers,
-    };
-  }
-
-  public static removeModifier(nation: Nation, modifierId: string): Nation {
-    return {
-      ...nation,
-      activeModifiers: (nation.activeModifiers || []).filter(
-        (m) => m.id !== modifierId,
-      ),
-    };
-  }
-
   public static updateActiveModifiers(nation: Nation): Nation {
     const nextModifiers = (nation.activeModifiers || [])
       .map((m) => ({

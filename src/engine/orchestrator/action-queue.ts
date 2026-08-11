@@ -49,8 +49,4 @@ export class ActionQueue {
     this.loanNations.clear();
     this.tradeKeys.clear();
   }
-
-  public size(): number {
-    return this.queue.length;
-  }
 }

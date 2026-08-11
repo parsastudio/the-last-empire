@@ -143,8 +143,4 @@ export class TacticalPaletteGenerator {
 
     return { r1, g1, b1, r2, g2, b2 };
   }
-
-  public static clearAssignedCache(): void {
-    this.assignedFamilies.clear();
-  }
 }

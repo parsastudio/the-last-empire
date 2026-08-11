@@ -40,12 +40,4 @@ export class StabilityCalculator {
 
     return Number(newStability.toFixed(2));
   }
-
-  public static getTaxIncomePenaltyMultiplier(stability: number): number {
-    if (stability >= 30) {
-      return 1.0;
-    }
-    const penalty = (30 - stability) * 0.02;
-    return Math.max(0.2, 1.0 - penalty);
-  }
 }
