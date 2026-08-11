@@ -12,7 +12,6 @@ export interface DiplomaticRelation {
   rank: number;
   stance: DiplomaticStance;
   opinion: number;
-  description: string;
   isTradeEmbargoed?: boolean;
   profileData: CountryProfileData;
 }
@@ -69,17 +68,7 @@ export function resolveProfileRelation(
       ? liveNation.flagCode
       : code;
 
-  const infantry = liveNation
-    ? liveNation.military.infantry
-    : (profile?.startingInfantry ?? 50);
-  const airForce = liveNation
-    ? liveNation.military.airForce
-    : (profile?.startingAirForce ?? 10);
-  const drone = liveNation ? liveNation.military.droneMissile : 0;
   const techLevel = liveNation ? liveNation.military.techLevel : 1;
-
-  const basePower = infantry * 1.0 + airForce * 3.0 + drone * 2.5;
-  const militaryPower = basePower * (1 + (techLevel - 1) * 0.2);
 
   return {
     code: displayCode.toUpperCase(),
@@ -89,7 +78,6 @@ export function resolveProfileRelation(
     stance: "NORMAL_DIPLOMACY",
     opinion: 0,
     isTradeEmbargoed: false,
-    description: `شناسنامه رسمی و آمار دفتری کشور ${name}.`,
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
@@ -97,7 +85,6 @@ export function resolveProfileRelation(
       governmentType: liveNation ? liveNation.government.type : "DEMOCRACY",
       stability: liveNation ? liveNation.government.stability : 80,
       corruption: liveNation ? liveNation.government.corruption : 10,
-      militaryStrength: `${PersianNumberFormatter.toPersianDigits(Math.round(militaryPower).toLocaleString("en-US"))} یگان`,
     },
   };
 }

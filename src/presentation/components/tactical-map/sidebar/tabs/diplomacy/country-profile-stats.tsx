@@ -15,7 +15,6 @@ export interface CountryProfileData {
   governmentType: string;
   stability: number;
   corruption: number;
-  militaryStrength?: string;
 }
 
 interface CountryProfileStatsProps {
@@ -71,7 +70,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-          <div className="bg-background/60 border border-border/40 p-2.5 rounded-xl space-y-1">
+          <div className="bg-background/60 border border-border/40 p-2.5 rounded-xl space-y-0.5">
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
               <AlertCircle size={12} className="text-gdp shrink-0" />
               <span>ثبات سیاسی</span>
@@ -81,7 +80,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
             </span>
           </div>
 
-          <div className="bg-background/60 border border-border/40 p-2.5 rounded-xl space-y-1">
+          <div className="bg-background/60 border border-border/40 p-2.5 rounded-xl space-y-0.5">
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
               <ShieldAlert size={12} className="text-military shrink-0" />
               <span>شاخص فساد</span>

@@ -8,7 +8,6 @@ import { WideProxyView } from "@/presentation/components/tactical-map/command-ce
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
 import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
 import { WideAbilitiesView } from "@/presentation/components/tactical-map/command-center/views/wide-abilities-view";
-import { CombatReport } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -19,7 +18,6 @@ interface CommandCenterTabRouterProps {
   selectedTargetCode?: string | null;
   nation: Nation;
   gameState?: GameState | null;
-  reports: CombatReport[];
   onFocusCountry?: (code: string) => void;
   onNavigateTab?: (
     tab: SidebarTabType,
@@ -52,8 +50,6 @@ export function CommandCenterTabRouter({
       return (
         <WideMilitaryView
           military={nation.military}
-          population={nation.population}
-          stability={nation.government.stability}
           recruitmentQueue={nation.recruitmentQueue}
           nationId={nation.id}
           treasury={nation.treasury}

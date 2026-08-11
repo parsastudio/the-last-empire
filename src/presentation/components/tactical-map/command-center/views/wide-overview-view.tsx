@@ -53,7 +53,6 @@ export function WideOverviewView({ nation, rank = 1 }: WideOverviewViewProps) {
           population={nation.population}
           territoryPixelCount={nation.geography.territoryPixelCount}
           rank={rank}
-          regions={nation.regionsDemographics}
         />
 
         <EconomyStatsSection

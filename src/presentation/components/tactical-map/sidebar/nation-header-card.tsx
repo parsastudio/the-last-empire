@@ -1,5 +1,4 @@
 import React, { useMemo } from "react";
-import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
   findCountryProfileById,
@@ -16,7 +15,6 @@ interface NationHeaderCardProps {
   population: number;
   territoryPixelCount?: number;
   rank?: number;
-  regions?: RegionDemographics[];
 }
 
 export function NationHeaderCard({

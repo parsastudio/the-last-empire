@@ -151,23 +151,6 @@ export function useMapGesture(
     isDraggingRef.current = false;
   };
 
-  const zoomIn = () => {
-    scaleRef.current = Math.min(scaleRef.current * 1.25, 35);
-  };
-
-  const zoomOut = () => {
-    scaleRef.current = Math.max(scaleRef.current * 0.8, 0.05);
-  };
-
-  const resetScale = () => {
-    const { scale: fitScale, pos } = computeInitial(
-      containerWidth,
-      containerHeight,
-    );
-    scaleRef.current = fitScale;
-    positionRef.current = pos;
-  };
-
   return {
     positionRef,
     scaleRef,
@@ -177,8 +160,5 @@ export function useMapGesture(
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
-    zoomIn,
-    zoomOut,
-    resetScale,
   };
 }
