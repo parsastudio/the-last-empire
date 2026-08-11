@@ -25,8 +25,6 @@ export function CommandBreadcrumb({
         return "دیوان سیاست";
       case "proxy":
         return "عملیات نیابتی";
-      case "market":
-        return "بورس جهانی";
       case "abilities":
         return "فرمان‌های ویژه";
       case "reports":

@@ -41,13 +41,13 @@ export function DevelopmentUpgradesSection({
         const action = ActionFactory.upgradeIndustrialLevel(nationId);
         await dispatchAction(
           action,
-          `پروژه ارتقای صنایع سنگین به سطح ${industrialLevel + 1} کلید خورد.`,
+          `پروژه ارتقای سطح صنعت و آموزش به سطح ${industrialLevel + 1} آغاز شد.`,
         );
       } else if (type === "infra" && canAffordInfra) {
         const action = ActionFactory.investInfrastructure(nationId);
         await dispatchAction(
           action,
-          `پروژه نوسازی شبکه مواصلاتی مرزی به سطح ${infrastructureLevel + 1} آغاز شد.`,
+          `پروژه ارتقای زیرساخت و مسکن به سطح ${infrastructureLevel + 1} کلید خورد.`,
         );
       }
     } finally {
@@ -69,7 +69,7 @@ export function DevelopmentUpgradesSection({
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-foreground flex items-center gap-1.5">
               <Cpu size={14} className="text-gdp" />
-              صنایع سنگین (سطح{" "}
+              صنعت و آموزش (سطح{" "}
               {PersianNumberFormatter.toPersianDigits(industrialLevel)})
             </span>
             <span className="font-mono text-[10px] text-muted-foreground">
@@ -77,7 +77,8 @@ export function DevelopmentUpgradesSection({
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            افزایش ۲۰٪ نرخ استخراج نفت و تولید فولاد در هر نوبت.
+            افزایش سرعت رشد بهره‌وری سرانه نیروی کار و ارتقای توان تولید صنعتی
+            کشور.
           </p>
           <button
             onClick={() => handleUpgrade("industrial")}
@@ -101,7 +102,7 @@ export function DevelopmentUpgradesSection({
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-foreground flex items-center gap-1.5">
               <Wrench size={14} className="text-primary" />
-              زیرساخت و مواصلات (سطح{" "}
+              زیرساخت و مسکن (سطح{" "}
               {PersianNumberFormatter.toPersianDigits(infrastructureLevel)})
             </span>
             <span className="font-mono text-[10px] text-muted-foreground">
@@ -109,7 +110,7 @@ export function DevelopmentUpgradesSection({
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            افزایش ۲٪ نرخ رشد پایه تولید ناخالص (GDP) کشوری.
+            افزایش ۲۰٪ سقف ظرفیت زیستی و مسکن کشور جهت پذیرش تراکم جمعیت بیشتر.
           </p>
           <button
             onClick={() => handleUpgrade("infra")}

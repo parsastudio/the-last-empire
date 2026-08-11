@@ -3,7 +3,6 @@ export type SidebarTabType =
   | "military"
   | "politics"
   | "proxy"
-  | "market"
   | "abilities"
   | "reports"
   | "diplomacy"

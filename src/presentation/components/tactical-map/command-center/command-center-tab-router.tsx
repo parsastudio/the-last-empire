@@ -1,7 +1,6 @@
 import React from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { WideOverviewView } from "@/presentation/components/tactical-map/command-center/views/wide-overview-view";
-import { WideMarketView } from "@/presentation/components/tactical-map/command-center/views/wide-market-view";
 import { WideMilitaryView } from "@/presentation/components/tactical-map/command-center/views/wide-military-view";
 import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
 import { WideProxyView } from "@/presentation/components/tactical-map/command-center/views/wide-proxy-view";
@@ -37,8 +36,6 @@ export function CommandCenterTabRouter({
   switch (activeTab) {
     case "overview":
       return <WideOverviewView nation={nation} rank={nation.rank} />;
-    case "market":
-      return <WideMarketView userTreasury={nation.treasury} nation={nation} />;
     case "military":
       return (
         <WideMilitaryView
