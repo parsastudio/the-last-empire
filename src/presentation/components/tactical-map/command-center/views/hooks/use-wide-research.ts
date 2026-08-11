@@ -1,38 +1,49 @@
 import { useMemo, useCallback } from "react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { COMPREHENSIVE_RESEARCH_TREE } from "@/domain/politics/research-tree.config";
+import {
+  COMPREHENSIVE_RESEARCH_TREE,
+  ResearchNode,
+} from "@/domain/politics/research-tree.config";
 import { ActionFactory } from "@/domain/game/action-factory";
 
 interface UseWideResearchProps {
   unlockedDoctrines?: string[];
   nationId: string;
+  treasury: number;
+  oilStock: number;
 }
 
 export function useWideResearch({
   unlockedDoctrines = ["gdp-booster"],
   nationId,
+  treasury,
+  oilStock,
 }: UseWideResearchProps) {
   const { dispatchAction } = useGameActions();
 
   const mapNodeToView = useCallback(
-    (node: (typeof COMPREHENSIVE_RESEARCH_TREE)[number]) => {
+    (node: ResearchNode) => {
       const unlocked = unlockedDoctrines.includes(node.id);
       const prereqsMet = node.prerequisites.every((req) =>
         unlockedDoctrines.includes(req),
       );
+      const canAffordMoney = treasury >= node.moneyCost;
+      const canAffordOil = node.oilCost === 0 || oilStock >= node.oilCost;
 
       return {
         id: node.id,
         name: node.nameFa,
         desc: node.desc,
         tier: node.tier,
-        cost: node.cost,
+        moneyCost: node.moneyCost,
+        oilCost: node.oilCost,
         unlocked,
         canUnlock: !unlocked && prereqsMet,
+        canAfford: canAffordMoney && canAffordOil,
         prerequisites: node.prerequisites,
       };
     },
-    [unlockedDoctrines],
+    [unlockedDoctrines, treasury, oilStock],
   );
 
   const industrialDoctrines = useMemo(() => {
@@ -54,9 +65,9 @@ export function useWideResearch({
   }, [mapNodeToView]);
 
   const handleUnlock = useCallback(
-    async (doc: { id: string; name: string; cost: number }) => {
+    async (doc: { id: string; name: string }) => {
       const action = ActionFactory.unlockDoctrine(nationId, doc.id);
-      await dispatchAction(action, `آنلاک فناوری ${doc.name} انجام شد.`);
+      await dispatchAction(action, `دکترین ${doc.name} با موفقیت آنلاک گردید.`);
     },
     [dispatchAction, nationId],
   );
