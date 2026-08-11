@@ -90,7 +90,6 @@ export class BattleExecutionEngine {
             attackerNumericId,
           );
           BitPackedGridState.getInstance().markDirty();
-          BitPackedGridState.getInstance().markStorageDirty();
         }
       }
     }
