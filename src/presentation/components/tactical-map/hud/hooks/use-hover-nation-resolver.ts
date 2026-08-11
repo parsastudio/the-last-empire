@@ -38,7 +38,8 @@ export function useHoverNationResolver({
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation ? ownerNation.rank : 99;
-      const realGdp = province.gdp;
+      const realGdp = ownerNation ? ownerNation.gdp : 0;
+      const realPop = ownerNation ? ownerNation.population : 0;
       const governmentType = ownerNation
         ? ownerNation.government.type
         : "DEMOCRACY";
@@ -50,7 +51,7 @@ export function useHoverNationResolver({
         flagCode,
         realRank,
         realGdp,
-        province.population,
+        realPop,
         governmentType,
       );
 

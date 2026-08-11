@@ -8,7 +8,6 @@ import {
   MilitaryPayrollCalculator,
   TariffCalculator,
 } from "@/engine/economy/economy-calculators";
-import { PopulationWelfareCalculator } from "@/engine/economy/population-welfare-calculator";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
 
@@ -16,8 +15,10 @@ export interface HumanResourceMetrics {
   nation: Nation | null;
   treasury: number;
   netIncomePerTurn: number;
-  oil: number;
-  oilRequiredPerTurn: number;
+  population: number;
+  maxPopulationCapacity: number;
+  capacityPercentage: number;
+  perCapitaProductivity: number;
   stability: number;
   currentTurn: number;
 }
@@ -35,8 +36,10 @@ export function useGameResources(
         nation: null,
         treasury: 0,
         netIncomePerTurn: 0,
-        oil: 0,
-        oilRequiredPerTurn: 0,
+        population: 0,
+        maxPopulationCapacity: 100000000,
+        capacityPercentage: 0,
+        perCapitaProductivity: 5000,
         stability: 0,
         currentTurn: 1,
       };
@@ -52,8 +55,10 @@ export function useGameResources(
         nation: null,
         treasury: 0,
         netIncomePerTurn: 0,
-        oil: 0,
-        oilRequiredPerTurn: 0,
+        population: 0,
+        maxPopulationCapacity: 100000000,
+        capacityPercentage: 0,
+        perCapitaProductivity: 5000,
         stability: 0,
         currentTurn: gameState.currentTurn,
       };
@@ -65,18 +70,21 @@ export function useGameResources(
 
     const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
     const totalExpenses =
-      payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.003);
+      payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.05);
     const netIncome = totalIncome - totalExpenses;
 
-    const welfareMetrics =
-      PopulationWelfareCalculator.evaluateWelfareForNation(nation);
+    const capacity =
+      nation.maxPopulationCapacity || Math.floor(nation.population / 0.95);
+    const capacityPct = Math.round((nation.population / (capacity || 1)) * 100);
 
     return {
       nation,
       treasury: nation.treasury,
       netIncomePerTurn: netIncome,
-      oil: nation.resources.oil,
-      oilRequiredPerTurn: welfareMetrics.oilDemand,
+      population: nation.population,
+      maxPopulationCapacity: capacity,
+      capacityPercentage: capacityPct,
+      perCapitaProductivity: nation.perCapitaProductivity || 5000,
       stability: nation.government.stability,
       currentTurn: gameState.currentTurn,
     };
