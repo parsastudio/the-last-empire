@@ -101,10 +101,6 @@ export function useSelectNationForm() {
     if (!selectedNation) return;
 
     try {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("human_nation_id", selectedNation.id);
-      }
-
       const { gameId } = await BitPackedInitService.initializeBitPackedSession(
         selectedNation.id,
       );

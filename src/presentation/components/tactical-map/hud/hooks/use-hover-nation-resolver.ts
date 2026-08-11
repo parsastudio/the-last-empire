@@ -17,20 +17,12 @@ export function useHoverNationResolver({
   nationsMap,
 }: UseHoverNationResolverProps) {
   const syncedProvincesMap = useMemo(() => {
-    if (!provincesMap) {
-      console.warn("[HOVER-DIAGNOSTIC] provincesMap is empty or undefined!");
-      return {};
-    }
+    if (!provincesMap) return {};
     const buffer = BitPackedGridState.getInstance().getBuffer();
-    const synced = ProvincePixelCalculator.syncProvincesMapPixelCounts(
+    return ProvincePixelCalculator.syncProvincesMapPixelCounts(
       buffer,
       provincesMap,
     );
-    const provinceKeys = Object.keys(synced);
-    console.log(
-      `[HOVER-DIAGNOSTIC] Synced provinces map ready. Total provinces: ${provinceKeys.length}. Sample keys: ${provinceKeys.slice(0, 10).join(", ")}`,
-    );
-    return synced;
   }, [provincesMap]);
 
   const resolveHoverInfo = useCallback(
@@ -38,27 +30,19 @@ export function useHoverNationResolver({
       if (provinceId <= 0 || !syncedProvincesMap) return null;
 
       const province = syncedProvincesMap[provinceId.toString()];
-      if (!province) {
-        console.error(
-          `[HOVER-DIAGNOSTIC-MISSING] Province ID ${provinceId} was hovered on WebGL canvas BUT NOT FOUND in syncedProvincesMap (Total valid keys in map: ${Object.keys(syncedProvincesMap).length})`,
-        );
-        return null;
-      }
+      if (!province) return null;
 
       const ownerNation = nationsMap
         ? nationsMap[province.ownerNationId]
         : null;
 
-      if (!ownerNation) {
-        console.warn(
-          `[HOVER-DIAGNOSTIC-UNMAPPED-NATION] Province ID ${provinceId} (${province.nameFa}) has ownerNationId ${province.ownerNationId} WHICH IS NOT IN nationsMap!`,
-        );
-      }
-
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation ? ownerNation.rank : 99;
       const realGdp = province.gdp;
+      const governmentType = ownerNation
+        ? ownerNation.government.type
+        : "DEMOCRACY";
 
       const summary = NationPresentationMapper.formatNationSummary(
         province.ownerNationId,
@@ -68,7 +52,7 @@ export function useHoverNationResolver({
         realRank,
         realGdp,
         province.population,
-        "DEMOCRACY",
+        governmentType,
       );
 
       return {

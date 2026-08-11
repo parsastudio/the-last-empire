@@ -3,19 +3,51 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
 
 export class WebGLPaletteTextureManager {
+  private static calculateGdpColor(gdp: number): {
+    r: number;
+    g: number;
+    b: number;
+  } {
+    const logGdp = Math.log10(Math.max(1000000, gdp));
+    const normalized = Math.max(0, Math.min(1.0, (logGdp - 8.0) / 4.0));
+
+    return {
+      r: Math.floor(10 + (1.0 - normalized) * 200),
+      g: Math.floor(60 + normalized * 195),
+      b: Math.floor(40 + normalized * 80),
+    };
+  }
+
+  private static fillGdpBuffer(
+    data: Uint8Array,
+    provincesMap?: Record<string, Province>,
+  ): void {
+    if (!provincesMap) return;
+
+    for (const prov of Object.values(provincesMap)) {
+      const pid = prov.provinceId;
+      if (pid <= 0 || pid >= 65536) continue;
+
+      const gdp = prov.gdp || 1000000000;
+      const { r, g, b } = this.calculateGdpColor(gdp);
+
+      const u = pid & 255;
+      const v = (pid >> 8) & 255;
+      const idx = (v * 256 + u) * 4;
+
+      data[idx] = r;
+      data[idx + 1] = g;
+      data[idx + 2] = b;
+      data[idx + 3] = 255;
+    }
+  }
+
   public static createPaletteTexture(
     gl: WebGL2RenderingContext,
     provincesMap?: Record<string, Province>,
   ): WebGLTexture | null {
     const data = new Uint8Array(256 * 256 * 4);
-
     const provincesList = provincesMap ? Object.values(provincesMap) : [];
-    console.log(
-      `[PALETTE-DIAGNOSTIC] Creating WebGL Palette Texture. Provinces count: ${provincesList.length}`,
-    );
-
-    let mappedCount = 0;
-    let unmappedNationCount = 0;
 
     if (provincesList.length > 0) {
       for (const prov of provincesList) {
@@ -24,10 +56,6 @@ export class WebGLPaletteTextureManager {
 
         const ownerId = prov.ownerNationId;
         const numId = CountryRegistry.resolveNumericId(ownerId);
-        if (!numId) {
-          unmappedNationCount++;
-        }
-
         const pair = TacticalPaletteGenerator.generateColorForCountry(
           numId || 118,
         );
@@ -40,13 +68,8 @@ export class WebGLPaletteTextureManager {
         data[idx + 1] = pair.g1;
         data[idx + 2] = pair.b1;
         data[idx + 3] = 255;
-        mappedCount++;
       }
     }
-
-    console.log(
-      `[PALETTE-DIAGNOSTIC] Texture Populated: ${mappedCount} provinces colored. Unmapped ownerNationIds: ${unmappedNationCount}`,
-    );
 
     const texture = gl.createTexture();
     if (!texture) return null;
@@ -77,30 +100,7 @@ export class WebGLPaletteTextureManager {
     provincesMap?: Record<string, Province>,
   ): WebGLTexture | null {
     const data = new Uint8Array(256 * 256 * 4);
-
-    if (provincesMap) {
-      for (const prov of Object.values(provincesMap)) {
-        const pid = prov.provinceId;
-        if (pid <= 0 || pid >= 65536) continue;
-
-        const gdp = prov.gdp || 1000000000;
-        const logGdp = Math.log10(Math.max(1000000, gdp));
-        const normalized = Math.max(0, Math.min(1.0, (logGdp - 8.0) / 4.0));
-
-        const r = Math.floor(10 + (1.0 - normalized) * 200);
-        const g = Math.floor(60 + normalized * 195);
-        const b = Math.floor(40 + normalized * 80);
-
-        const u = pid & 255;
-        const v = (pid >> 8) & 255;
-        const idx = (v * 256 + u) * 4;
-
-        data[idx] = r;
-        data[idx + 1] = g;
-        data[idx + 2] = b;
-        data[idx + 3] = 255;
-      }
-    }
+    this.fillGdpBuffer(data, provincesMap);
 
     const texture = gl.createTexture();
     if (!texture) return null;
@@ -132,30 +132,7 @@ export class WebGLPaletteTextureManager {
     provincesMap?: Record<string, Province>,
   ): void {
     const data = new Uint8Array(256 * 256 * 4);
-
-    if (provincesMap) {
-      for (const prov of Object.values(provincesMap)) {
-        const pid = prov.provinceId;
-        if (pid <= 0 || pid >= 65536) continue;
-
-        const gdp = prov.gdp || 1000000000;
-        const logGdp = Math.log10(Math.max(1000000, gdp));
-        const normalized = Math.max(0, Math.min(1.0, (logGdp - 8.0) / 4.0));
-
-        const r = Math.floor(10 + (1.0 - normalized) * 200);
-        const g = Math.floor(60 + normalized * 195);
-        const b = Math.floor(40 + normalized * 80);
-
-        const u = pid & 255;
-        const v = (pid >> 8) & 255;
-        const idx = (v * 256 + u) * 4;
-
-        data[idx] = r;
-        data[idx + 1] = g;
-        data[idx + 2] = b;
-        data[idx + 3] = 255;
-      }
-    }
+    this.fillGdpBuffer(data, provincesMap);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texSubImage2D(
