@@ -10,7 +10,7 @@ interface WebGLContextMenuWrapperProps {
   onSelectAction: (
     action: ContextActionType,
     code: string,
-    enclaveId?: number,
+    provinceId?: number,
   ) => void;
   onClose: () => void;
 }

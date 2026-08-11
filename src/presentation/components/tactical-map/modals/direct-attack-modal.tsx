@@ -27,7 +27,7 @@ import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/mod
 interface DirectAttackModalProps {
   isOpen: boolean;
   targetNationId: string | null;
-  targetEnclaveId?: number;
+  targetProvinceId?: number | null;
   humanNation: Nation | null;
   gameState: GameState | null;
   onClose: () => void;
@@ -36,12 +36,12 @@ interface DirectAttackModalProps {
 export function DirectAttackModal({
   isOpen,
   targetNationId,
-  targetEnclaveId = 0,
+  targetProvinceId = null,
   humanNation,
   gameState,
   onClose,
 }: DirectAttackModalProps) {
-  const currentKey = `${humanNation?.id}-${isOpen}-${targetNationId}-${targetEnclaveId}`;
+  const currentKey = `${humanNation?.id}-${isOpen}-${targetNationId}-${targetProvinceId}`;
   const [prevKey, setPrevKey] = useState<string | null>(null);
 
   const [infantryToDeploy, setInfantryToDeploy] = useState<number>(0);
@@ -65,10 +65,19 @@ export function DirectAttackModal({
     );
   }, [gameState, targetNationId]);
 
+  const targetProvince = useMemo(() => {
+    if (!gameState || !targetProvinceId) return null;
+    return gameState.provinces[targetProvinceId.toString()] || null;
+  }, [gameState, targetProvinceId]);
+
   const isLandNeighbor = useMemo(() => {
-    if (!humanNation || !targetNation) return false;
-    return LandNeighborResolver.isLandNeighbor(humanNation, targetNation);
-  }, [humanNation, targetNation]);
+    if (!humanNation || !targetProvinceId) return false;
+    return LandNeighborResolver.hasProvinceLandBorder(
+      targetProvinceId,
+      humanNation.id,
+      gameState?.provinces,
+    );
+  }, [humanNation, targetProvinceId, gameState?.provinces]);
 
   const isWarStance = useMemo(() => {
     if (!humanNation || !targetNation) return false;
@@ -80,16 +89,10 @@ export function DirectAttackModal({
   }, [humanNation, targetNation]);
 
   const targetRegionName = useMemo(() => {
+    if (targetProvince) return targetProvince.nameFa;
     if (!targetNation) return "";
-    if (targetEnclaveId === 0) {
-      return `خاک اصلی ${targetNation.name}`;
-    }
-    const matchedRegion = targetNation.regionsDemographics?.find(
-      (r) => r.regionId === targetEnclaveId,
-    );
-    if (matchedRegion) return matchedRegion.name;
-    return `منطقه فرامرزی شماره ${targetEnclaveId.toLocaleString("fa-IR")}`;
-  }, [targetNation, targetEnclaveId]);
+    return `خاک اصلی ${targetNation.name}`;
+  }, [targetNation, targetProvince]);
 
   const deploymentCosts = useMemo(() => {
     if (!humanNation) return { moneyCost: 0, oilCost: 0 };
@@ -132,12 +135,13 @@ export function DirectAttackModal({
         dronesToLaunch,
         infantryToDeploy,
         airForceToDeploy,
-        targetEnclaveId,
+        0,
+        targetProvinceId || undefined,
       );
 
       const success = await dispatchAction(
         action,
-        `دستور تهاجم مستقیم به ${targetRegionName} با موفقیت صادر گردید.`,
+        `دستور تهاجم به ${targetRegionName} با موفقیت صادر گردید.`,
       );
 
       if (success) {
@@ -155,7 +159,7 @@ export function DirectAttackModal({
     <UnifiedModalShell
       isOpen={isOpen}
       title="اتاق فرماندهی و تهاجم مستقیم زمینی"
-      subtitle={`برنامه‌ریزی و تخصیص نیرو جهت حمله به ${targetNation.name}`}
+      subtitle={`برنامه‌ریزی و تخصیص نیرو جهت فتح استان ${targetRegionName}`}
       maxWidthClass="max-w-xl"
       onClose={onClose}
     >
@@ -193,7 +197,7 @@ export function DirectAttackModal({
         <div className="bg-secondary/30 border border-border/60 p-3.5 rounded-2xl flex items-center justify-between font-mono text-xs">
           <span className="text-muted-foreground font-sans flex items-center gap-1.5">
             <MapPin size={14} className="text-primary" />
-            اقلیم مورد تهاجم:
+            استان مورد تهاجم:
           </span>
           <span className="font-extrabold text-foreground text-xs font-sans bg-secondary/80 px-2.5 py-1 rounded-xl border border-border/60">
             {targetRegionName}
@@ -204,10 +208,10 @@ export function DirectAttackModal({
           <div className="p-3.5 bg-military/15 border border-military/40 rounded-2xl flex items-start gap-2.5 text-xs text-military font-sans">
             <ShieldAlert size={18} className="shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold block">عدم امکان تهاجم زمینی</span>
+              <span className="font-bold block">عدم مرز زمینی با استان</span>
               <p className="text-[11px] leading-relaxed text-muted-foreground mt-0.5">
-                کشور شما هیچ مرز خاکی مستقیم با این منطقه ندارد. عملیات زمینی
-                امکان‌پذیر نیست.
+                هیچ‌یک از استان‌های تحت کنترل شما مرز زمینی مستقیم با استان{" "}
+                {targetRegionName} ندارد.
               </p>
             </div>
           </div>
@@ -311,18 +315,18 @@ export function DirectAttackModal({
           className="w-full py-4 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-xl shadow-military/20 flex items-center justify-center gap-2"
         >
           {isSubmitting ? (
-            <span>در حال آغاز عملیات و گسیل نیروها...</span>
+            <span>در حال آغاز عملیات و فتح استان...</span>
           ) : (
             <>
               <Zap size={16} />
               <span>
                 {!isLandNeighbor
-                  ? "عدم مرز زمینی (غیرقابل حمله)"
+                  ? "عدم وجود مرز زمینی با این استان"
                   : !hasSelectedInfantry
                     ? "حداقل ۱ یگان پیاده‌نظام انتخاب کنید"
                     : !canAffordMoney || !canAffordOil
                       ? "منابع مالی/نفتی ناکافی جهت اعزام"
-                      : "صدور دستور تهاجم مستقیم و آغاز نبرد"}
+                      : `صدور دستور فتح استان ${targetRegionName}`}
               </span>
             </>
           )}
