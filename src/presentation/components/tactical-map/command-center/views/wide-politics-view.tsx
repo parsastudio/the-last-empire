@@ -6,6 +6,7 @@ import { ActiveModifiersCard } from "@/presentation/components/tactical-map/side
 import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
 import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
 import { Nation } from "@/domain/nation/nation.schema";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface WidePoliticsViewProps {
   nation: Nation;
@@ -16,6 +17,8 @@ export function WidePoliticsView({
   nation,
   nationsMap,
 }: WidePoliticsViewProps) {
+  const gdp = getNationGdp(nation);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
@@ -23,12 +26,12 @@ export function WidePoliticsView({
         <PopulationWelfareCard
           population={nation.population}
           maxPopulationCapacity={nation.maxPopulationCapacity}
-          gdp={nation.gdp}
+          gdp={gdp}
           nation={nation}
         />
         <TaxControlCard
           taxRate={nation.taxRate}
-          baseGdp={nation.gdp}
+          baseGdp={gdp}
           nationId={nation.id}
         />
       </div>
@@ -38,16 +41,15 @@ export function WidePoliticsView({
           initialTariffRate={nation.tariffRate}
           nationId={nation.id}
           hasSeaAccess={nation.geography.hasSeaAccess}
-          gdp={nation.gdp}
+          gdp={gdp}
           nationsMap={nationsMap}
           nation={nation}
         />
         <ImfLoanCard
           nationId={nation.id}
           nationalDebt={nation.nationalDebt}
-          gdp={nation.gdp}
+          gdp={gdp}
           treasury={nation.treasury}
-          nation={nation}
         />
       </div>
 
@@ -55,7 +57,7 @@ export function WidePoliticsView({
         <DevelopmentUpgradesSection
           nationId={nation.id}
           treasury={nation.treasury}
-          gdp={nation.gdp}
+          gdp={gdp}
           industrialLevel={nation.industrialLevel}
           infrastructureLevel={nation.geography.infrastructureLevel}
         />

@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { GameOverModal } from "./game-over-modal";
 import { GameState } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface GameOverDialogWrapperProps {
   gameState: GameState | null;
@@ -30,7 +31,7 @@ export function GameOverDialogWrapper({
 
     const turnsPlayed = gameState.currentTurn;
     const finalGdp = humanNation
-      ? PersianNumberFormatter.formatCurrency(humanNation.gdp, true)
+      ? PersianNumberFormatter.formatCurrency(getNationGdp(humanNation), true)
       : PersianNumberFormatter.formatCurrency(0, true);
 
     const finalPopNum = humanNation ? humanNation.population / 1e6 : 0;

@@ -1,6 +1,8 @@
 import { TacticalPaletteGenerator } from "@/infrastructure/map-preprocessing/color-palette";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { Nation } from "@/domain/nation/nation.schema";
 
 export class WebGLPaletteTextureManager {
   private static calculateGdpColor(gdp: number): {
@@ -21,6 +23,7 @@ export class WebGLPaletteTextureManager {
   private static fillGdpBuffer(
     data: Uint8Array,
     provincesMap?: Record<string, Province>,
+    nationsMap?: Record<string, Nation>,
   ): void {
     if (!provincesMap) return;
 
@@ -28,8 +31,15 @@ export class WebGLPaletteTextureManager {
       const pid = prov.provinceId;
       if (pid <= 0 || pid >= 65536) continue;
 
-      const profile = CountryRegistry.getCountry(prov.ownerNationId);
-      const gdp = profile ? profile.gdp : 1000000000;
+      const liveNation = nationsMap ? nationsMap[prov.ownerNationId] : null;
+      let gdp = 1000000000;
+      if (liveNation) {
+        gdp = getNationGdp(liveNation);
+      } else {
+        const profile = CountryRegistry.getCountry(prov.ownerNationId);
+        gdp = profile ? profile.gdp : 1000000000;
+      }
+
       const { r, g, b } = this.calculateGdpColor(gdp);
 
       const u = pid & 255;
@@ -99,9 +109,10 @@ export class WebGLPaletteTextureManager {
   public static createGdpPaletteTexture(
     gl: WebGL2RenderingContext,
     provincesMap?: Record<string, Province>,
+    nationsMap?: Record<string, Nation>,
   ): WebGLTexture | null {
     const data = new Uint8Array(256 * 256 * 4);
-    this.fillGdpBuffer(data, provincesMap);
+    this.fillGdpBuffer(data, provincesMap, nationsMap);
 
     const texture = gl.createTexture();
     if (!texture) return null;
@@ -131,9 +142,10 @@ export class WebGLPaletteTextureManager {
     gl: WebGL2RenderingContext,
     texture: WebGLTexture,
     provincesMap?: Record<string, Province>,
+    nationsMap?: Record<string, Nation>,
   ): void {
     const data = new Uint8Array(256 * 256 * 4);
-    this.fillGdpBuffer(data, provincesMap);
+    this.fillGdpBuffer(data, provincesMap, nationsMap);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texSubImage2D(

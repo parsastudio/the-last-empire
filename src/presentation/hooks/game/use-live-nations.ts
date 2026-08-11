@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface LiveNationItem {
   id: string;
@@ -54,7 +55,7 @@ export function useLiveNations({
           name: n.name,
           code,
           flagCode,
-          gdp: n.gdp,
+          gdp: getNationGdp(n),
           population: n.population,
           stability: n.government.stability,
           governmentType: n.government.type,
