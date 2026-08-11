@@ -2,7 +2,6 @@ import { NationDetail } from "@/presentation/components/select-nation/nation-lis
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class NationDatabaseProvider {
   private formatNationDetail(
@@ -49,17 +48,13 @@ export class NationDatabaseProvider {
   ): NationDetail[] {
     return manifestNations.map((item) => {
       const desc = `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}.`;
-      const computedGdp = getNationGdp({
-        population: item.population,
-        perCapitaProductivity: item.perCapitaProductivity,
-      });
 
       return this.formatNationDetail(
         item.id,
         item.nameFa,
         item.flagCode,
         item.initialRank,
-        computedGdp,
+        item.gdp,
         item.population,
         item.defaultGovernment,
         desc,

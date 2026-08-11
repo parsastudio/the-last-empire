@@ -14,12 +14,6 @@ export class NationProfileAssigner {
     isHuman: boolean,
     customGovType?: GovernmentType | string,
   ): Nation {
-    const numericId = item.numericId;
-    const profile =
-      findCountryProfileById(numericId) ||
-      findCountryProfileByCode(item.code) ||
-      CountryRegistry.getCountry(item.id);
-
     const validGovTypes: GovernmentType[] = [
       "DEMOCRACY",
       "DICTATORSHIP",
@@ -37,54 +31,20 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
-    let stability = 80;
-
-    if (govType === "MONARCHY") {
-      stability = 85;
-    } else if (govType === "COMMUNISM") {
-      stability = 75;
-    } else if (govType === "DICTATORSHIP") {
-      stability = 55;
-    } else if (govType === "FASCISM") {
-      stability = 60;
+    let stability = item.startingStability;
+    if (customGovType && customGovType !== item.defaultGovernment) {
+      if (govType === "MONARCHY") stability = 85;
+      else if (govType === "COMMUNISM") stability = 75;
+      else if (govType === "DICTATORSHIP") stability = 55;
+      else if (govType === "FASCISM") stability = 60;
+      else if (govType === "DEMOCRACY") stability = 80;
     }
-
-    const population =
-      item.population > 0
-        ? item.population
-        : profile
-          ? profile.population
-          : 80000000;
-
-    const perCapitaProductivity =
-      profile && profile.population > 0
-        ? Math.floor(profile.gdp / profile.population)
-        : item.perCapitaProductivity && item.perCapitaProductivity > 0
-          ? item.perCapitaProductivity
-          : 5000;
-
-    const computedGdp = profile
-      ? profile.gdp
-      : perCapitaProductivity * population;
-
-    const techLevel = profile?.startingTechLevel ?? 1;
-    const industrialLevel = Math.max(1, Math.min(5, techLevel));
-    const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
-
-    const isTier1 = computedGdp >= 1000000000000;
-
-    const infantry = profile?.startingInfantry ?? (isTier1 ? 200 : 40);
-    const airForce = profile?.startingAirForce ?? (isTier1 ? 45 : 5);
-    const droneMissile = profile?.startingDroneMissile ?? (isTier1 ? 10 : 0);
-
-    const calculatedTreasury = Math.floor(computedGdp * 0.05);
-    const maxPopulationCapacity = Math.floor(population / 0.95);
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
       name: `خاک اصلی ${item.nameFa}`,
       pixelCount: item.territoryPixelCount,
-      population,
+      population: item.population,
     };
 
     return {
@@ -94,14 +54,14 @@ export class NationProfileAssigner {
       isAlive: true,
       flagCode: item.flagCode,
       rank: item.initialRank,
-      perCapitaProductivity,
-      maxPopulationCapacity,
+      perCapitaProductivity: item.perCapitaProductivity,
+      maxPopulationCapacity: item.maxPopulationCapacity,
       taxRate: 15,
       tariffRate: 10,
-      treasury: calculatedTreasury,
+      treasury: item.startingTreasury,
       nationalDebt: 0,
-      population,
-      industrialLevel,
+      population: item.population,
+      industrialLevel: item.industrialLevel,
       consecutiveDeficitTurns: 0,
       government: {
         type: govType,
@@ -110,11 +70,11 @@ export class NationProfileAssigner {
       },
       resources: {},
       military: {
-        infantry,
-        airForce,
-        droneMissile,
+        infantry: item.startingInfantry,
+        airForce: item.startingAirForce,
+        droneMissile: item.startingDroneMissile,
         experience: 10,
-        techLevel,
+        techLevel: item.startingTechLevel,
       },
       recruitmentQueue: [],
       geography: {
@@ -122,7 +82,7 @@ export class NationProfileAssigner {
         seaNeighbors: [],
         hasSeaAccess: true,
         territoryPixelCount: item.territoryPixelCount,
-        infrastructureLevel,
+        infrastructureLevel: item.infrastructureLevel,
         contiguousMainlandPixelCount: item.territoryPixelCount,
         isolatedPockets: [],
         coordinates: [],

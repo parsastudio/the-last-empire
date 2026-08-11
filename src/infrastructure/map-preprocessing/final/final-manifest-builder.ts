@@ -22,13 +22,22 @@ export interface FinalManifestNation {
   flagCode: string;
   nameFa: string;
   nameEn: string;
+  gdp: number;
   perCapitaProductivity: number;
   population: number;
+  maxPopulationCapacity: number;
   territoryPixelCount: number;
   provinceIds: number[];
   startingTreasury: number;
   initialRank: number;
   defaultGovernment: string;
+  startingInfantry: number;
+  startingAirForce: number;
+  startingDroneMissile: number;
+  startingTechLevel: number;
+  industrialLevel: number;
+  infrastructureLevel: number;
+  startingStability: number;
 }
 
 export interface FinalMapManifest {
@@ -96,10 +105,29 @@ export class FinalManifestBuilder {
         });
       }
 
+      const population = profile.population;
+      const gdp = profile.gdp;
       const perCapitaProductivity =
-        profile.population > 0
-          ? Math.floor(profile.gdp / profile.population)
-          : 5000;
+        population > 0 ? Math.floor(gdp / population) : 5000;
+      const maxPopulationCapacity = Math.floor(population / 0.95);
+      const startingTreasury = Math.floor(gdp * 0.05);
+
+      const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
+      let startingStability = 80;
+      if (defaultGov === "MONARCHY") startingStability = 85;
+      else if (defaultGov === "COMMUNISM") startingStability = 75;
+      else if (defaultGov === "DICTATORSHIP") startingStability = 55;
+      else if (defaultGov === "FASCISM") startingStability = 60;
+
+      const techLevel = profile.startingTechLevel ?? 1;
+      const industrialLevel = Math.max(1, Math.min(5, techLevel));
+      const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
+
+      const isTier1 = gdp >= 1000000000000;
+      const startingInfantry = profile.startingInfantry ?? (isTier1 ? 200 : 40);
+      const startingAirForce = profile.startingAirForce ?? (isTier1 ? 45 : 5);
+      const startingDroneMissile =
+        profile.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
       manifestNations.push({
         id: countryId,
@@ -108,13 +136,22 @@ export class FinalManifestBuilder {
         flagCode: profile.flagCode,
         nameFa: profile.nameFa,
         nameEn: profile.nameEn,
+        gdp,
         perCapitaProductivity,
-        population: profile.population,
+        population,
+        maxPopulationCapacity,
         territoryPixelCount: totalCountryPixels,
         provinceIds: provIds,
-        startingTreasury: Math.floor(profile.gdp * 0.05),
+        startingTreasury,
         initialRank: rankIndex + 1,
-        defaultGovernment: profile.startingGovernment ?? "DEMOCRACY",
+        defaultGovernment: defaultGov,
+        startingInfantry,
+        startingAirForce,
+        startingDroneMissile,
+        startingTechLevel: techLevel,
+        industrialLevel,
+        infrastructureLevel,
+        startingStability,
       });
     }
 

@@ -11,7 +11,6 @@ import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
-import { Nation } from "@/domain/nation/nation.schema";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -37,32 +36,6 @@ interface GameStoreState {
 const storageAdapter = new GameStorageAdapter();
 const aiInitializer = new GlobalAiInitializer();
 const orchestrator = new TurnProgressionOrchestrator();
-
-function sanitizeNationsPerCapitaProductivity(
-  nations: Record<string, Nation>,
-): Record<string, Nation> {
-  const updated = { ...nations };
-  let changed = false;
-
-  for (const [id, nation] of Object.entries(nations)) {
-    const profile =
-      CountryRegistry.getCountry(id) ||
-      CountryRegistry.getCountry(nation.flagCode);
-
-    if (profile && profile.population > 0) {
-      const expectedPerCapita = Math.floor(profile.gdp / profile.population);
-      if (nation.perCapitaProductivity === 5000 && expectedPerCapita > 7000) {
-        updated[id] = {
-          ...nation,
-          perCapitaProductivity: expectedPerCapita,
-        };
-        changed = true;
-      }
-    }
-  }
-
-  return changed ? updated : nations;
-}
 
 export const useGameStore = create<GameStoreState>()(
   immer((set, get) => ({
@@ -118,14 +91,9 @@ export const useGameStore = create<GameStoreState>()(
               state.provinces,
             );
 
-          const sanitizedNations = sanitizeNationsPerCapitaProductivity(
-            state.nations,
-          );
-
           state = {
             ...state,
             provinces: syncedProvinces,
-            nations: sanitizedNations,
           };
 
           set((draft) => {
@@ -197,10 +165,6 @@ export const useGameStore = create<GameStoreState>()(
             initResult.provinces,
           );
 
-        const sanitizedNations = sanitizeNationsPerCapitaProductivity(
-          initResult.nations,
-        );
-
         const initialState: GameState = {
           gameId,
           currentTurn: 1,
@@ -209,7 +173,7 @@ export const useGameStore = create<GameStoreState>()(
           humanNationId: normalizedHumanId,
           globalThreatLevel: 0,
           provinces: syncedProvinces,
-          nations: sanitizedNations,
+          nations: initResult.nations,
           turnLogs: [],
         };
 
