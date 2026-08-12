@@ -10,6 +10,7 @@ import {
   Loader2,
   ChevronRight,
   ChevronLeft,
+  Crosshair,
   LucideIcon,
 } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
@@ -101,6 +102,7 @@ export function CommandRail({
     { id: "overview" as const, label: "نما", icon: LayoutDashboard },
     { id: "military" as const, label: "ارتش", icon: Swords },
     { id: "politics" as const, label: "سیاست", icon: Landmark },
+    { id: "proxy" as const, label: "نیابتی", icon: Crosshair },
     { id: "abilities" as const, label: "توانمندی", icon: Zap },
     { id: "reports" as const, label: "گزارش‌ها", icon: FileText },
     { id: "diplomacy" as const, label: "دیپلماسی", icon: Users },

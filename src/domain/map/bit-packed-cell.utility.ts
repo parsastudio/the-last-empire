@@ -1,5 +1,4 @@
 export class BitPackedCellUtility {
-  public static readonly WATER_PROVINCE_ID = 0;
   public static readonly FIRST_PROVINCE_ID = 5;
 
   private static readonly PROVINCE_MASK = 0x0fff;

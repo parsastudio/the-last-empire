@@ -22,7 +22,6 @@ export class GameStorageAdapter {
   }
 
   public async ensureBitBufferLoaded(
-    _gameId: string,
     buffer: BitPackedBuffer,
   ): Promise<boolean> {
     if (buffer.getRawBuffer()[0]! > 0) {

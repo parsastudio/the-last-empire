@@ -23,7 +23,7 @@ export function useBitPackedGame(gameId = "default_game") {
         gridState.initializeSession(gameId);
 
         const buffer = gridState.getBuffer();
-        await storageAdapter.ensureBitBufferLoaded(gameId, buffer);
+        await storageAdapter.ensureBitBufferLoaded(buffer);
 
         if (active) {
           await loadGame(gameId);

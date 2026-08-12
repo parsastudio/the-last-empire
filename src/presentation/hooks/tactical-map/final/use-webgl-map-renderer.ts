@@ -91,7 +91,6 @@ export function useWebGLMapRenderer({
 
   useEffect(() => {
     let animFrameId: number;
-    const startTime = performance.now();
     let lastVersion = -1;
 
     const renderLoop = () => {
@@ -106,7 +105,6 @@ export function useWebGLMapRenderer({
           lastVersion = currentVersion;
         }
 
-        const time = (performance.now() - startTime) / 1000;
         const dpr = window.devicePixelRatio || 1;
         const pos = positionRef.current || { x: 0, y: 0 };
         const scale = scaleRef.current || 1;
@@ -117,7 +115,6 @@ export function useWebGLMapRenderer({
           pos.x * dpr,
           pos.y * dpr,
           scale * dpr,
-          time,
           activeLayer,
         );
       }
