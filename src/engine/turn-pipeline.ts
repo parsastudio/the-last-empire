@@ -100,13 +100,8 @@ export class TurnPipeline {
       }
 
       const demoResult = DemographicsEngine.processNaturalDemographics(updated);
-      updated = demoResult.updatedNation;
-
-      const prodResult = GdpCalculator.updateProductivityAndGdp(updated);
       updated = GdpCalculator.syncNationGdpAndDemographics(
-        updated,
-        updated.population,
-        prodResult.nextProductivity,
+        demoResult.updatedNation,
       );
 
       const tariffResult = TariffCalculator.calculateTariffEffects(

@@ -111,9 +111,9 @@ export function PopulationWelfareCard({
         )}
 
         <p className="text-[10px] text-muted-foreground leading-relaxed bg-secondary/30 p-2.5 rounded-xl border border-border/40 font-sans">
-          ثبات سیاسی بالا باعث زادومولد طبیعی و جذب مهاجران باکیفیت می‌شود.
-          ارتقای صنعت و آموزش بهره‌وری سرانه را به سمت سقف ۱۲۰ هزار دلار افزایش
-          می‌دهد.
+          ثبات سیاسی بالا باعث زادومولد طبیعی و جذب مهاجران باکیفیت می‌شود. هر
+          لِوِل ارتقای صنعت و آموزش ۲٪ به بهره‌وری سرانه می‌افزاید (سقف ۳۰۰ هزار
+          دلار).
         </p>
       </div>
     </div>

@@ -6,6 +6,7 @@ import {
   IndustrialLevelManager,
   InfrastructureManager,
 } from "@/engine/economy/economy-calculators";
+import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class EconomyActionExecutor {
@@ -142,18 +143,26 @@ export class EconomyActionExecutor {
         if (nation.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای ارتقای سطح صنعت کافی نیست.",
+            "موجودی خزانه برای ارتقای سطح صنعت و آموزش کافی نیست.",
           );
         }
+        const nextProd = GdpCalculator.calculateProductivityOnUpgrade(
+          nation.perCapitaProductivity,
+        );
+        const updatedNation = GdpCalculator.syncNationGdpAndDemographics(
+          {
+            ...nation,
+            treasury: nation.treasury - cost,
+            industrialLevel: nation.industrialLevel + 1,
+          },
+          nation.population,
+          nextProd,
+        );
         return {
           ...state,
           nations: {
             ...state.nations,
-            [nation.id]: {
-              ...nation,
-              treasury: nation.treasury - cost,
-              industrialLevel: nation.industrialLevel + 1,
-            },
+            [nation.id]: updatedNation,
           },
         };
       }
