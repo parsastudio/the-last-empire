@@ -7,6 +7,7 @@ export class NationDatabaseProvider {
   private formatNationDetail(
     id: string,
     nameFa: string,
+    code: string,
     flagCode: string,
     rank: number,
     gdp: number,
@@ -17,7 +18,7 @@ export class NationDatabaseProvider {
     const mapped = NationPresentationMapper.formatNationSummary(
       id,
       nameFa,
-      flagCode,
+      code,
       flagCode,
       rank,
       gdp,
@@ -52,6 +53,7 @@ export class NationDatabaseProvider {
       return this.formatNationDetail(
         item.id,
         item.nameFa,
+        item.code,
         item.flagCode,
         item.initialRank,
         item.gdp,
@@ -69,6 +71,7 @@ export class NationDatabaseProvider {
       return this.formatNationDetail(
         `NATION_${profile.code}`,
         profile.nameFa,
+        profile.code,
         profile.flagCode,
         index + 1,
         profile.gdp,

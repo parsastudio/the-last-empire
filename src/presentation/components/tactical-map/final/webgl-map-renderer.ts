@@ -14,8 +14,6 @@ export class WebGLMapRenderer {
   private uResolutionLoc: WebGLUniformLocation | null = null;
   private uPositionLoc: WebGLUniformLocation | null = null;
   private uScaleLoc: WebGLUniformLocation | null = null;
-  private uTimeLoc: WebGLUniformLocation | null = null;
-  private uOverlayOpacityLoc: WebGLUniformLocation | null = null;
   private uTexelSizeLoc: WebGLUniformLocation | null = null;
   private uActiveLayerLoc: WebGLUniformLocation | null = null;
 
@@ -56,8 +54,6 @@ export class WebGLMapRenderer {
       this.uResolutionLoc = gl.getUniformLocation(prog, "u_resolution");
       this.uPositionLoc = gl.getUniformLocation(prog, "u_position");
       this.uScaleLoc = gl.getUniformLocation(prog, "u_scale");
-      this.uTimeLoc = gl.getUniformLocation(prog, "u_time");
-      this.uOverlayOpacityLoc = gl.getUniformLocation(prog, "u_overlayOpacity");
       this.uTexelSizeLoc = gl.getUniformLocation(prog, "u_texelSize");
       this.uActiveLayerLoc = gl.getUniformLocation(prog, "u_activeLayer");
 
@@ -172,9 +168,7 @@ export class WebGLMapRenderer {
     posX: number,
     posY: number,
     scale: number,
-    time: number,
     activeLayer: "political" | "gdp" = "political",
-    overlayOpacity = 0.4,
   ): void {
     const gl = this.gl;
     if (!this.program || !this.vao) return;
@@ -185,8 +179,6 @@ export class WebGLMapRenderer {
     gl.uniform2f(this.uResolutionLoc, width, height);
     gl.uniform2f(this.uPositionLoc, posX, posY);
     gl.uniform1f(this.uScaleLoc, scale);
-    gl.uniform1f(this.uTimeLoc, time);
-    gl.uniform1f(this.uOverlayOpacityLoc, overlayOpacity);
     gl.uniform2f(this.uTexelSizeLoc, 1.0 / 4096.0, 1.0 / 2048.0);
     gl.uniform1i(this.uActiveLayerLoc, activeLayer === "gdp" ? 1 : 0);
 

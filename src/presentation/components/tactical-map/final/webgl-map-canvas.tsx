@@ -25,7 +25,6 @@ interface WebGLMapCanvasProps {
 export function WebGLMapCanvas({
   provincesMap,
   nationsMap,
-  humanNationId,
   activeLayer = "political",
   positionRef: externalPositionRef,
   scaleRef: externalScaleRef,
@@ -81,7 +80,6 @@ export function WebGLMapCanvas({
     hasDraggedRef: useRef(false),
     provincesMap,
     nationsMap,
-    humanNationId,
   });
 
   const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {

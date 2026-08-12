@@ -9,8 +9,8 @@ export type GameErrorCode =
   | "NATION_NOT_FOUND"
   | "INSUFFICIENT_FUNDS"
   | "INSUFFICIENT_RESOURCES"
-  | "INVALID_GOVERNMENT_CHANGE"
-  | "STATE_FROZEN"
+  | "EXECUTION_FAILED"
+  | "UNKNOWN_ACTION"
   | "GAME_OVER";
 
 export class GameError extends Error {
@@ -61,10 +61,6 @@ export class SeededRandom {
     const minCeil = Math.ceil(min);
     const maxFloor = Math.floor(max);
     return Math.floor(this.nextFloat() * (maxFloor - minCeil + 1)) + minCeil;
-  }
-
-  public nextBool(probability = 0.5): boolean {
-    return this.nextFloat() < probability;
   }
 
   public getSeed(): number {

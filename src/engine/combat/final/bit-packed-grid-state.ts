@@ -6,7 +6,6 @@ export class BitPackedGridState {
   private buffer: BitPackedBuffer;
   private activeGameId: string | null = null;
   private modifiedIndices = new Set<number>();
-  private snapshots = new Map<string, Uint16Array>();
   private version = 0;
   private dirtyStorage = false;
 
@@ -78,7 +77,6 @@ export class BitPackedGridState {
     const raw = this.buffer.getRawBuffer();
     raw.fill(0);
     this.clearModifiedIndices();
-    this.snapshots.clear();
     this.activeGameId = null;
     this.dirtyStorage = true;
     this.markDirty();
@@ -90,22 +88,5 @@ export class BitPackedGridState {
       this.buffer.setNationId(x, y, nationId);
       this.markModified(x, y);
     }
-  }
-
-  public saveSnapshot(key: string): void {
-    const raw = this.buffer.getRawBuffer();
-    const copy = new Uint16Array(raw.length);
-    copy.set(raw);
-    this.snapshots.set(key, copy);
-  }
-
-  public restoreSnapshot(key: string): boolean {
-    const snapshot = this.snapshots.get(key);
-    if (!snapshot) return false;
-    this.buffer.getRawBuffer().set(snapshot);
-    this.clearModifiedIndices();
-    this.dirtyStorage = true;
-    this.markDirty();
-    return true;
   }
 }
