@@ -18,6 +18,7 @@ import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
+import { RankManager } from "@/engine/politics/rank-manager";
 
 export class TurnPipeline {
   private coolOffManager = new CoolOffManager();
@@ -167,7 +168,9 @@ export class TurnPipeline {
 
     const migrationSummary =
       MigrationEngine.processGlobalMigration(updatedNations);
-    updatedNations = migrationSummary.updatedNations;
+    updatedNations = RankManager.recalculateRanks(
+      migrationSummary.updatedNations,
+    );
 
     return {
       ...state,

@@ -6,6 +6,7 @@ import { BattleDiplomacyHelper } from "@/engine/combat/battle-diplomacy-helper";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { BitPackedProvinceConqueror } from "@/engine/combat/final/bit-packed-province-conqueror";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { RankManager } from "@/engine/politics/rank-manager";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -296,10 +297,12 @@ export class BattleExecutionEngine {
       [defender.id]: updatedDefender,
     };
 
+    const rankedNations = RankManager.recalculateRanks(tempNations);
+
     const newState = {
       ...state,
       provinces: updatedProvinces,
-      nations: tempNations,
+      nations: rankedNations,
       turnLogs: [...state.turnLogs, logEntry],
     };
 
