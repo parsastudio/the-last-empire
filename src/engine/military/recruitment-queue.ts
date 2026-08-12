@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 
 export class RecruitmentQueueManager {
   public enqueueOrder(
@@ -9,12 +9,12 @@ export class RecruitmentQueueManager {
     unitType: UnitType,
     quantity: number,
   ): Nation {
-    const stats = MILITARY_UNIT_STATS[unitType];
-
-    const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.05;
-    const discount = Math.max(0.7, 1 - (nation.industrialLevel - 1) * 0.05);
-    const unitPrice = Math.floor(stats.moneyCost * techMultiplier * discount);
-    const totalMoney = unitPrice * quantity;
+    const totalMoney = MilitaryPricingCalculator.calculateTotalCost(
+      unitType,
+      quantity,
+      nation.military.techLevel,
+      nation.industrialLevel,
+    );
 
     if (nation.treasury < totalMoney) {
       throw new GameError(
@@ -27,7 +27,7 @@ export class RecruitmentQueueManager {
       id: `${unitType}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       unitType,
       quantity,
-      turnsRemaining: stats.buildTurns,
+      turnsRemaining: 2,
       totalCost: totalMoney,
     };
 

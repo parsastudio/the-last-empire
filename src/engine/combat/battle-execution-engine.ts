@@ -7,6 +7,7 @@ import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state"
 import { BitPackedProvinceConqueror } from "@/engine/combat/final/bit-packed-province-conqueror";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { RankManager } from "@/engine/politics/rank-manager";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -30,12 +31,10 @@ export class BattleExecutionEngine {
       return state;
     }
 
-    const currentRelation =
-      attacker.relations[defender.id] ||
-      attacker.relations[canonicalDefenderId];
-    const currentStance = currentRelation
-      ? currentRelation.stance
-      : "NORMAL_DIPLOMACY";
+    const currentStance = NationRelationResolver.getStance(
+      attacker.relations,
+      defender.id,
+    );
 
     const betrayalResult =
       BattleDiplomacyHelper.evaluateBetrayalPenalty(currentStance);

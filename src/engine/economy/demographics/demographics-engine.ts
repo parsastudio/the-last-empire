@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 
 export interface DemographicsResult {
   updatedNation: Nation;
@@ -10,8 +11,10 @@ export interface DemographicsResult {
 export class DemographicsEngine {
   public static processNaturalDemographics(nation: Nation): DemographicsResult {
     const rawPopulation = nation.population || 1000000;
-    const capacity =
-      nation.maxPopulationCapacity || Math.floor(rawPopulation / 0.95);
+    const capacity = DemographicsCalculator.calculateCapacity(
+      rawPopulation,
+      nation.maxPopulationCapacity,
+    );
     const stability = nation.government.stability;
 
     const currentPopulation = Math.min(capacity, rawPopulation);

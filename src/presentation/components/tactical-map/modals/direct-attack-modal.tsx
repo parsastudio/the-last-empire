@@ -21,6 +21,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 interface DirectAttackModalProps {
   isOpen: boolean;
@@ -79,11 +80,7 @@ export function DirectAttackModal({
 
   const isWarStance = useMemo(() => {
     if (!humanNation || !targetNation) return false;
-    const targetCanonical = CountryRegistry.resolveCanonicalId(targetNation.id);
-    const rel =
-      humanNation.relations[targetNation.id] ||
-      humanNation.relations[targetCanonical];
-    return rel?.stance === "WAR";
+    return NationRelationResolver.isWar(humanNation.relations, targetNation.id);
   }, [humanNation, targetNation]);
 
   const targetRegionName = useMemo(() => {
