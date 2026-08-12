@@ -3,6 +3,10 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { AIPersonalityType } from "@/domain/ai/ai.schema";
+import {
+  IndustrialLevelManager,
+  InfrastructureManager,
+} from "@/engine/economy/economy-calculators";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -20,11 +24,17 @@ export class AIActionBuilder {
       actions.push(ActionFactory.unlockDoctrine(nation.id, "gdp-booster"));
     }
 
-    if (nation.treasury > 50000) {
+    const indCost = IndustrialLevelManager.getUpgradeCost(nation);
+    if (nation.treasury >= indCost) {
+      actions.push(ActionFactory.upgradeIndustrialLevel(nation.id));
+    }
+
+    const infraCost = InfrastructureManager.getUpgradeCost(nation);
+    if (nation.treasury >= infraCost) {
       actions.push(ActionFactory.investInfrastructure(nation.id));
     }
 
-    if (nation.treasury > 150000) {
+    if (nation.treasury > 1500000000) {
       actions.push(ActionFactory.investResearch(nation.id));
     }
 
