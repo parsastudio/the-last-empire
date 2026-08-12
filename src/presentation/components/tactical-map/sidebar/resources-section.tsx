@@ -1,6 +1,7 @@
 import React from "react";
 import { Cpu, Building2, Users, TrendingUp } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 
 interface ResourcesSectionProps {
   population: number;
@@ -17,11 +18,15 @@ export function ResourcesSection({
   industrialLevel,
   infrastructureLevel = 1,
 }: ResourcesSectionProps) {
-  const capacity = maxPopulationCapacity || Math.floor(population / 0.95);
-  const capacityPct = Math.round((population / (capacity || 1)) * 100);
+  const metrics = DemographicsCalculator.getMetrics(
+    population,
+    maxPopulationCapacity,
+  );
 
   const formattedPop = PersianNumberFormatter.formatCompactNumber(population);
-  const formattedCap = PersianNumberFormatter.formatCompactNumber(capacity);
+  const formattedCap = PersianNumberFormatter.formatCompactNumber(
+    metrics.maxPopulationCapacity,
+  );
   const formattedProd = PersianNumberFormatter.formatCurrency(
     perCapitaProductivity,
     true,
@@ -48,7 +53,10 @@ export function ResourcesSection({
               <span>ظرفیت زیستی و مسکن کشور</span>
             </span>
             <span className="text-foreground font-bold">
-              {PersianNumberFormatter.toPersianDigits(capacityPct)}٪ اشغال
+              {PersianNumberFormatter.toPersianDigits(
+                metrics.capacityPercentage,
+              )}
+              ٪ اشغال
             </span>
           </div>
           <div className="flex items-center justify-between text-xs font-bold text-foreground">
@@ -60,13 +68,13 @@ export function ResourcesSection({
           <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
-                capacityPct > 100
+                metrics.isOverCapacity
                   ? "bg-military"
-                  : capacityPct >= 95
+                  : metrics.isNearCapacity
                     ? "bg-treasury"
                     : "bg-gdp"
               }`}
-              style={{ width: `${Math.min(100, capacityPct)}%` }}
+              style={{ width: `${Math.min(100, metrics.capacityPercentage)}%` }}
             />
           </div>
         </div>

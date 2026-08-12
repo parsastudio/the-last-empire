@@ -10,6 +10,7 @@ import {
 } from "@/engine/economy/economy-calculators";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
+import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -76,17 +77,18 @@ export function useGameResources(
       payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.05);
     const netIncome = totalIncome - totalExpenses;
 
-    const capacity =
-      nation.maxPopulationCapacity || Math.floor(nation.population / 0.95);
-    const capacityPct = Math.round((nation.population / (capacity || 1)) * 100);
+    const demoMetrics = DemographicsCalculator.getMetrics(
+      nation.population,
+      nation.maxPopulationCapacity,
+    );
 
     return {
       nation,
       treasury: nation.treasury,
       netIncomePerTurn: netIncome,
       population: nation.population,
-      maxPopulationCapacity: capacity,
-      capacityPercentage: capacityPct,
+      maxPopulationCapacity: demoMetrics.maxPopulationCapacity,
+      capacityPercentage: demoMetrics.capacityPercentage,
       perCapitaProductivity: nation.perCapitaProductivity || 5000,
       stability: nation.government.stability,
       currentTurn: gameState.currentTurn,

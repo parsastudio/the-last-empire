@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { Users, Building2, HeartPulse, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
+import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 
 interface PopulationWelfareCardProps {
   population?: number;
@@ -15,11 +16,11 @@ export function PopulationWelfareCard({
   nation,
 }: PopulationWelfareCardProps) {
   const currentPop = nation ? nation.population : population;
-  const capacity = nation
-    ? nation.maxPopulationCapacity || Math.floor(currentPop / 0.95)
-    : maxPopulationCapacity || Math.floor(currentPop / 0.95);
+  const currentCap = nation
+    ? nation.maxPopulationCapacity
+    : maxPopulationCapacity;
 
-  const capacityPct = Math.round((currentPop / (capacity || 1)) * 100);
+  const metrics = DemographicsCalculator.getMetrics(currentPop, currentCap);
   const stability = nation ? nation.government.stability : 80;
 
   const formattedPop = useMemo(() => {
@@ -80,25 +81,30 @@ export function PopulationWelfareCard({
                 <span>میزان اشغال ظرفیت زیستی زیرساخت:</span>
               </div>
               <span className="font-bold text-foreground">
-                {PersianNumberFormatter.toPersianDigits(capacityPct)}٪
+                {PersianNumberFormatter.toPersianDigits(
+                  metrics.capacityPercentage,
+                )}
+                ٪
               </span>
             </div>
             <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  capacityPct > 100
+                  metrics.isOverCapacity
                     ? "bg-military"
-                    : capacityPct >= 95
+                    : metrics.isNearCapacity
                       ? "bg-treasury"
                       : "bg-gdp"
                 }`}
-                style={{ width: `${Math.min(100, capacityPct)}%` }}
+                style={{
+                  width: `${Math.min(100, metrics.capacityPercentage)}%`,
+                }}
               />
             </div>
           </div>
         </div>
 
-        {capacityPct > 100 && (
+        {metrics.isOverCapacity && (
           <div className="p-3 bg-military/15 border border-military/30 rounded-xl flex items-center gap-2 text-[10px] text-military font-sans">
             <ShieldAlert size={14} className="shrink-0" />
             <span>
