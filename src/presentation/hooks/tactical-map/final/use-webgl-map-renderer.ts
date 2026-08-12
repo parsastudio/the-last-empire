@@ -68,7 +68,7 @@ export function useWebGLMapRenderer({
     const gridState = BitPackedGridState.getInstance();
     const rawBuffer = gridState.getBuffer().getRawBuffer();
     renderer.updateLiveStateTexture(rawBuffer);
-  }, [gl]);
+  }, [gl, provincesMap, nationsMap]);
 
   useEffect(() => {
     if (!gl || !paletteTextureRef.current) return;
