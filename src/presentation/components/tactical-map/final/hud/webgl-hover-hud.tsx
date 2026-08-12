@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Shield, Coins, Users } from "lucide-react";
+import { Shield, Users, PieChart } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -9,9 +9,9 @@ export interface HoverCountryInfo {
   flagCode: string;
   rank: number;
   stance: string;
-  gdp: string;
   regionName?: string;
-  regionPixels?: string;
+  regionPopulation?: string;
+  regionAreaPercentage?: string;
 }
 
 class HoverHudPositionCalculator {
@@ -93,13 +93,17 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
 
         <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
           <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
-            <Coins size={12} className="text-gdp shrink-0" />
-            <span className="truncate">{hoverData.gdp}</span>
+            <Users size={12} className="text-primary shrink-0" />
+            <span className="truncate">
+              {hoverData.regionPopulation || "---"}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
-            <Users size={12} className="text-primary shrink-0" />
-            <span className="truncate">{hoverData.regionPixels || "---"}</span>
+            <PieChart size={12} className="text-gdp shrink-0" />
+            <span className="truncate">
+              {hoverData.regionAreaPercentage || "---"}
+            </span>
           </div>
         </div>
 

@@ -5,8 +5,8 @@ import { Province } from "@/domain/province/province.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
@@ -37,9 +37,9 @@ export function useHoverNationResolver({
           flagCode: "UN",
           rank: 0,
           stance: "غیرقابل سکونت / غیرفعال",
-          gdp: "۰ دلار",
           regionName: `منطقه ویژه سیستمی #${provinceId}`,
-          regionPixels: "---",
+          regionPopulation: "۰ نفر",
+          regionAreaPercentage: "۰٪ از مساحت",
         };
       }
 
@@ -53,11 +53,33 @@ export function useHoverNationResolver({
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation ? ownerNation.rank : 99;
-      const realGdp = ownerNation ? getNationGdp(ownerNation) : 0;
+      const realGdp = 0;
       const realPop = ownerNation ? ownerNation.population : 0;
       const governmentType = ownerNation
         ? ownerNation.government.type
         : "DEMOCRACY";
+
+      const totalNationPixels = ownerNation
+        ? ownerNation.geography.territoryPixelCount || province.pixelCount || 1
+        : province.pixelCount || 1;
+
+      const provPixels = province.pixelCount || 0;
+      const areaPctNum =
+        totalNationPixels > 0 ? (provPixels / totalNationPixels) * 100 : 0;
+
+      const regionPopNum = Math.round(realPop * (areaPctNum / 100));
+
+      const regionPopulationText =
+        NationPresentationMapper.formatPopulation(regionPopNum);
+
+      const formattedAreaPct =
+        areaPctNum < 0.1 && areaPctNum > 0
+          ? "< ۰.۱"
+          : PersianNumberFormatter.toPersianDigits(
+              Number(areaPctNum.toFixed(1)).toString(),
+            );
+
+      const regionAreaPercentageText = `${formattedAreaPct}٪ از مساحت`;
 
       const summary = NationPresentationMapper.formatNationSummary(
         province.ownerNationId,
@@ -76,11 +98,9 @@ export function useHoverNationResolver({
         flagCode: summary.flagCode,
         rank: summary.rank,
         stance: "دیپلماسی استان",
-        gdp: summary.gdpText,
         regionName: province.nameFa,
-        regionPixels: NationPresentationMapper.formatTerritoryPixels(
-          province.pixelCount,
-        ),
+        regionPopulation: regionPopulationText,
+        regionAreaPercentage: regionAreaPercentageText,
       };
     },
     [syncedProvincesMap, nationsMap],
