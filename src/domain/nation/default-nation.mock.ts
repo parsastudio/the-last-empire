@@ -18,7 +18,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   consecutiveDeficitTurns: 0,
   government: {
     type: "DEMOCRACY",
-    stability: 80,
+    stability: 50,
     turnsInPower: 1,
   },
   resources: {},

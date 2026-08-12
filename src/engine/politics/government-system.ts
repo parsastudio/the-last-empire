@@ -19,7 +19,7 @@ export class GovernmentSystem {
         };
       case "DICTATORSHIP":
         return {
-          militaryPayrollMultiplier: 0.95,
+          militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: -1.0,
           tradeMultiplier: 0.85,
           militaryPowerMultiplier: 1.2,
@@ -33,14 +33,14 @@ export class GovernmentSystem {
         };
       case "COMMUNISM":
         return {
-          militaryPayrollMultiplier: 0.75,
+          militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 0.7,
           militaryPowerMultiplier: 1.0,
         };
       case "FASCISM":
         return {
-          militaryPayrollMultiplier: 1.1,
+          militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: -1.5,
           tradeMultiplier: 0.75,
           militaryPowerMultiplier: 1.35,
