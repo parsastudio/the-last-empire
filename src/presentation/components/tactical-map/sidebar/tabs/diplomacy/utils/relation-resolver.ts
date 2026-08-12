@@ -84,7 +84,7 @@ export function resolveProfileRelation(
       population: NationPresentationMapper.formatPopulation(realPopNum),
       techLevel,
       governmentType: liveNation ? liveNation.government.type : "DEMOCRACY",
-      stability: liveNation ? liveNation.government.stability : 80,
+      stability: liveNation ? liveNation.government.stability : 50,
     },
   };
 }

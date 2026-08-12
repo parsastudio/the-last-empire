@@ -113,11 +113,7 @@ export class FinalManifestBuilder {
       const startingTreasury = Math.floor(gdp * 0.05);
 
       const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
-      let startingStability = 80;
-      if (defaultGov === "MONARCHY") startingStability = 85;
-      else if (defaultGov === "COMMUNISM") startingStability = 75;
-      else if (defaultGov === "DICTATORSHIP") startingStability = 55;
-      else if (defaultGov === "FASCISM") startingStability = 60;
+      const startingStability = 50;
 
       const techLevel = profile.startingTechLevel ?? 1;
       const industrialLevel = Math.max(1, Math.min(5, techLevel));

@@ -31,14 +31,7 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
-    let stability = item.startingStability;
-    if (customGovType && customGovType !== item.defaultGovernment) {
-      if (govType === "MONARCHY") stability = 85;
-      else if (govType === "COMMUNISM") stability = 75;
-      else if (govType === "DICTATORSHIP") stability = 55;
-      else if (govType === "FASCISM") stability = 60;
-      else if (govType === "DEMOCRACY") stability = 80;
-    }
+    const stability = 50;
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
@@ -143,17 +136,7 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
-    let stability = 80;
-
-    if (govType === "MONARCHY") {
-      stability = 85;
-    } else if (govType === "COMMUNISM") {
-      stability = 75;
-    } else if (govType === "DICTATORSHIP") {
-      stability = 55;
-    } else if (govType === "FASCISM") {
-      stability = 60;
-    }
+    const stability = 50;
 
     const techLevel = profile.startingTechLevel ?? 1;
     const industrialLevel = Math.max(1, Math.min(5, techLevel));
