@@ -144,21 +144,27 @@ export class BattleExecutionEngine {
     const attackerTreasuryAfterDeployment =
       attacker.treasury - calcResult.deploymentMoneyCost;
 
+    const newAttackerMaxCapacity =
+      (attacker.maxPopulationCapacity ||
+        Math.floor(attacker.population / 0.95)) + transferredCapacity;
+
+    const attackerWithUpdatedCapacity: typeof attacker = {
+      ...attacker,
+      maxPopulationCapacity: newAttackerMaxCapacity,
+      geography: {
+        ...attacker.geography,
+        territoryPixelCount: attackerTotalPixels,
+      },
+    };
+
     let updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
-      attacker,
+      attackerWithUpdatedCapacity,
       attacker.population + transferredPopulation,
     );
 
     updatedAttacker = {
       ...updatedAttacker,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
-      maxPopulationCapacity:
-        (attacker.maxPopulationCapacity ||
-          Math.floor(attacker.population / 0.95)) + transferredCapacity,
-      geography: {
-        ...updatedAttacker.geography,
-        territoryPixelCount: attackerTotalPixels,
-      },
       military: {
         ...attacker.military,
         infantry: Math.max(
@@ -213,23 +219,26 @@ export class BattleExecutionEngine {
         )
       : 0;
 
+    const defenderWithUpdatedCapacity: typeof defender = {
+      ...defender,
+      maxPopulationCapacity: newDefenderCap,
+      geography: {
+        ...defender.geography,
+        territoryPixelCount: defenderRemainingPixels,
+      },
+    };
+
     let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
-      defender,
+      defenderWithUpdatedCapacity,
       newDefenderPop,
     );
 
     updatedDefender = {
       ...updatedDefender,
       isAlive: isDefenderAlive,
-      population: newDefenderPop,
-      maxPopulationCapacity: newDefenderCap,
       treasury: isDefenderAlive
         ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,
-      geography: {
-        ...updatedDefender.geography,
-        territoryPixelCount: defenderRemainingPixels,
-      },
       military: {
         ...defender.military,
         infantry: isDefenderAlive
