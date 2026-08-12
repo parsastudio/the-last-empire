@@ -77,8 +77,8 @@ export function DevelopmentUpgradesSection({
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            افزایش سرعت رشد بهره‌وری سرانه نیروی کار و ارتقای توان تولید صنعتی
-            کشور.
+            افزایش مستقیم ۲٪ به بهره‌وری سرانه نیروی کار و ارتقای توان تولید
+            صنعتی کشور.
           </p>
           <button
             onClick={() => handleUpgrade("industrial")}

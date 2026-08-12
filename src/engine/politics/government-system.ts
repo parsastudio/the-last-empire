@@ -1,7 +1,6 @@
 import type { GovernmentType } from "@/domain/politics/politics.schema";
 
 export interface GovernmentTraits {
-  economicGrowthBonus: number;
   militaryPayrollMultiplier: number;
   stabilityDeltaPerTurn: number;
   tradeMultiplier: number;
@@ -13,7 +12,6 @@ export class GovernmentSystem {
     switch (type) {
       case "DEMOCRACY":
         return {
-          economicGrowthBonus: 0.015,
           militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 1.0,
           tradeMultiplier: 1.25,
@@ -21,7 +19,6 @@ export class GovernmentSystem {
         };
       case "DICTATORSHIP":
         return {
-          economicGrowthBonus: -0.01,
           militaryPayrollMultiplier: 0.95,
           stabilityDeltaPerTurn: -1.0,
           tradeMultiplier: 0.85,
@@ -29,7 +26,6 @@ export class GovernmentSystem {
         };
       case "MONARCHY":
         return {
-          economicGrowthBonus: 0.005,
           militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 0.5,
           tradeMultiplier: 1.0,
@@ -37,7 +33,6 @@ export class GovernmentSystem {
         };
       case "COMMUNISM":
         return {
-          economicGrowthBonus: 0.0,
           militaryPayrollMultiplier: 0.75,
           stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 0.7,
@@ -45,7 +40,6 @@ export class GovernmentSystem {
         };
       case "FASCISM":
         return {
-          economicGrowthBonus: -0.02,
           militaryPayrollMultiplier: 1.1,
           stabilityDeltaPerTurn: -1.5,
           tradeMultiplier: 0.75,
@@ -53,7 +47,6 @@ export class GovernmentSystem {
         };
       default:
         return {
-          economicGrowthBonus: 0.0,
           militaryPayrollMultiplier: 1.0,
           stabilityDeltaPerTurn: 0.0,
           tradeMultiplier: 1.0,
