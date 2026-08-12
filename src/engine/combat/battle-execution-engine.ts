@@ -94,16 +94,16 @@ export class BattleExecutionEngine {
       }
     }
 
-    const defenderProvincesRemaining = Object.values(updatedProvinces).filter(
+    const defenderProvincesList = Object.values(updatedProvinces).filter(
       (p) =>
         p.ownerNationId === defender.id ||
         p.ownerNationId === canonicalDefenderId,
     );
+    const defenderTotalTerritory =
+      defenderProvincesList.reduce((sum, p) => sum + p.pixelCount, 0) ||
+      defender.geography.territoryPixelCount ||
+      1;
 
-    const isDefenderAlive = defenderProvincesRemaining.length > 0;
-    const isFullCapitulation = !isDefenderAlive;
-
-    const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
     const conquestRatio = Math.min(
       1.0,
       conqueredPixels / defenderTotalTerritory,
@@ -116,6 +116,30 @@ export class BattleExecutionEngine {
       (defender.maxPopulationCapacity ||
         Math.floor(defender.population / 0.95)) * conquestRatio,
     );
+
+    const attackerProvincesList = Object.values(updatedProvinces).filter(
+      (p) =>
+        p.ownerNationId === attacker.id ||
+        p.ownerNationId === canonicalAttackerId,
+    );
+    const attackerTotalPixels = attackerProvincesList.reduce(
+      (sum, p) => sum + p.pixelCount,
+      0,
+    );
+
+    const remainingDefenderProvincesList = Object.values(
+      updatedProvinces,
+    ).filter(
+      (p) =>
+        p.ownerNationId === defender.id ||
+        p.ownerNationId === canonicalDefenderId,
+    );
+    const defenderRemainingPixels = remainingDefenderProvincesList.reduce(
+      (sum, p) => sum + p.pixelCount,
+      0,
+    );
+    const isDefenderAlive = remainingDefenderProvincesList.length > 0;
+    const isFullCapitulation = !isDefenderAlive;
 
     const attackerTreasuryAfterDeployment =
       attacker.treasury - calcResult.deploymentMoneyCost;
@@ -131,6 +155,10 @@ export class BattleExecutionEngine {
       maxPopulationCapacity:
         (attacker.maxPopulationCapacity ||
           Math.floor(attacker.population / 0.95)) + transferredCapacity,
+      geography: {
+        ...updatedAttacker.geography,
+        territoryPixelCount: attackerTotalPixels,
+      },
       military: {
         ...attacker.military,
         infantry: Math.max(
@@ -174,20 +202,34 @@ export class BattleExecutionEngine {
       };
     }
 
+    const newDefenderPop = isDefenderAlive
+      ? Math.max(0, defender.population - transferredPopulation)
+      : 0;
+    const newDefenderCap = isDefenderAlive
+      ? Math.max(
+          0,
+          (defender.maxPopulationCapacity ||
+            Math.floor(defender.population / 0.95)) - transferredCapacity,
+        )
+      : 0;
+
     let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
       defender,
-      Math.max(0, defender.population - transferredPopulation),
+      newDefenderPop,
     );
 
     updatedDefender = {
       ...updatedDefender,
       isAlive: isDefenderAlive,
-      treasury: Math.max(0, defender.treasury - calcResult.treasuryLooted),
-      maxPopulationCapacity: Math.max(
-        0,
-        (defender.maxPopulationCapacity ||
-          Math.floor(defender.population / 0.95)) - transferredCapacity,
-      ),
+      population: newDefenderPop,
+      maxPopulationCapacity: newDefenderCap,
+      treasury: isDefenderAlive
+        ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
+        : 0,
+      geography: {
+        ...updatedDefender.geography,
+        territoryPixelCount: defenderRemainingPixels,
+      },
       military: {
         ...defender.military,
         infantry: isDefenderAlive

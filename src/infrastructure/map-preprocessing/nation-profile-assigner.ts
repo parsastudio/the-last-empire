@@ -146,7 +146,10 @@ export class NationProfileAssigner {
     const airForce = profile.startingAirForce ?? (isTier1 ? 45 : 5);
     const droneMissile = profile.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
-    const territoryPixelCount = Math.round(profile.gdp / 10000000);
+    const territoryPixelCount = Math.max(
+      100,
+      Math.round(profile.gdp / 1000000000),
+    );
     const maxPopulationCapacity = Math.floor(population / 0.95);
 
     const defaultRegion: RegionDemographics = {
