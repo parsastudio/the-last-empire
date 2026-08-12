@@ -5,7 +5,6 @@ export interface MilitaryUnitStat {
   nameFa: string;
   moneyCost: number;
   buildTurns: number;
-  moneyPayrollBase: number;
   weightPower: number;
 }
 
@@ -15,7 +14,6 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     nameFa: "پیاده‌نظام رزمی (۱۰ هزار نفر)",
     moneyCost: 350000000,
     buildTurns: 2,
-    moneyPayrollBase: 12,
     weightPower: 1.0,
   },
   AIR_FORCE: {
@@ -23,7 +21,6 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     nameFa: "نیروی هوایی (۱۰ فروند جنگنده)",
     moneyCost: 1400000000,
     buildTurns: 4,
-    moneyPayrollBase: 36,
     weightPower: 3.0,
   },
   DRONE_MISSILE: {
@@ -31,7 +28,6 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     nameFa: "یگان موشکی و پهپادی (۱۰ یگان)",
     moneyCost: 2000000000,
     buildTurns: 1,
-    moneyPayrollBase: 2.4,
     weightPower: 0.2,
   },
 };

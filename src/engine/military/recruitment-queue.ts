@@ -11,8 +11,10 @@ export class RecruitmentQueueManager {
   ): Nation {
     const stats = MILITARY_UNIT_STATS[unitType];
 
+    const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.05;
     const discount = Math.max(0.7, 1 - (nation.industrialLevel - 1) * 0.05);
-    const totalMoney = Math.floor(stats.moneyCost * discount) * quantity;
+    const unitPrice = Math.floor(stats.moneyCost * techMultiplier * discount);
+    const totalMoney = unitPrice * quantity;
 
     if (nation.treasury < totalMoney) {
       throw new GameError(

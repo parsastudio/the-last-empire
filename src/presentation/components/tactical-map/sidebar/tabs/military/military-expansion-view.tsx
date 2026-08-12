@@ -13,11 +13,15 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 interface MilitaryExpansionViewProps {
   nationId: string;
   treasury?: number;
+  techLevel?: number;
+  industrialLevel?: number;
 }
 
 export function MilitaryExpansionView({
   nationId,
   treasury = 100000,
+  techLevel = 1,
+  industrialLevel = 1,
 }: MilitaryExpansionViewProps) {
   const { dispatchAction } = useGameActions();
 
@@ -51,6 +55,8 @@ export function MilitaryExpansionView({
             key={unit.type}
             unit={unit}
             treasury={treasury}
+            techLevel={techLevel}
+            industrialLevel={industrialLevel}
             onRecruit={handleRecruit}
           />
         ))}

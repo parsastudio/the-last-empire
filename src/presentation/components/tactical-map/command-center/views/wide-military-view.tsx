@@ -12,6 +12,7 @@ interface WideMilitaryViewProps {
   recruitmentQueue?: RecruitmentOrder[];
   nationId: string;
   treasury?: number;
+  industrialLevel?: number;
 }
 
 export function WideMilitaryView({
@@ -19,6 +20,7 @@ export function WideMilitaryView({
   recruitmentQueue = [],
   nationId,
   treasury = 100000,
+  industrialLevel = 1,
 }: WideMilitaryViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -35,7 +37,12 @@ export function WideMilitaryView({
       </div>
 
       <div className="space-y-5">
-        <MilitaryExpansionView nationId={nationId} treasury={treasury} />
+        <MilitaryExpansionView
+          nationId={nationId}
+          treasury={treasury}
+          techLevel={military.techLevel}
+          industrialLevel={industrialLevel}
+        />
       </div>
     </div>
   );
