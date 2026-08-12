@@ -3,6 +3,7 @@ import { Province } from "@/domain/province/province.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { NationProfileAssigner } from "@/infrastructure/map-preprocessing/nation-profile-assigner";
 import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { RankManager } from "@/engine/politics/rank-manager";
 
 export interface GlobalInitializationResult {
   nations: Record<string, Nation>;
@@ -73,7 +74,9 @@ export class GlobalAiInitializer {
       nations[item.id] = nation;
     }
 
-    return { nations, provinces };
+    const rankedNations = RankManager.recalculateRanks(nations);
+
+    return { nations: rankedNations, provinces };
   }
 
   public initializeAllNations(
@@ -105,6 +108,8 @@ export class GlobalAiInitializer {
       nations[id] = nation;
     }
 
-    return { nations, provinces };
+    const rankedNations = RankManager.recalculateRanks(nations);
+
+    return { nations: rankedNations, provinces };
   }
 }
