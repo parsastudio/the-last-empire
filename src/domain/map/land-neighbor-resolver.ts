@@ -1,5 +1,4 @@
 import { CountryRegistry } from "@/domain/data/countries";
-import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 
 export class LandNeighborResolver {
@@ -26,38 +25,5 @@ export class LandNeighborResolver {
         canonicalNeighborOwner === canonicalAttacker
       );
     });
-  }
-
-  public static isLandNeighbor(
-    nationA: Nation | string,
-    nationB: Nation | string,
-  ): boolean {
-    const codeA = typeof nationA === "string" ? nationA : nationA.id;
-    const codeB = typeof nationB === "string" ? nationB : nationB.id;
-
-    if (codeA === codeB) return false;
-
-    const canonicalA = CountryRegistry.resolveCanonicalId(codeA);
-    const canonicalB = CountryRegistry.resolveCanonicalId(codeB);
-
-    if (canonicalA === canonicalB) return false;
-
-    if (typeof nationA !== "string" && nationA.geography?.landNeighbors) {
-      const isDirectNeighbor = nationA.geography.landNeighbors.some((n) => {
-        const neighborCanonical = CountryRegistry.resolveCanonicalId(n);
-        return n === codeB || neighborCanonical === canonicalB;
-      });
-      if (isDirectNeighbor) return true;
-    }
-
-    if (typeof nationB !== "string" && nationB.geography?.landNeighbors) {
-      const isDirectNeighbor = nationB.geography.landNeighbors.some((n) => {
-        const neighborCanonical = CountryRegistry.resolveCanonicalId(n);
-        return n === codeA || neighborCanonical === canonicalA;
-      });
-      if (isDirectNeighbor) return true;
-    }
-
-    return false;
   }
 }

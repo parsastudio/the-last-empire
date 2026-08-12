@@ -18,7 +18,6 @@ interface WebGLContextMenuWrapperProps {
 export function WebGLContextMenuWrapper({
   contextMenuState,
   onSelectAction,
-  onClose,
 }: WebGLContextMenuWrapperProps) {
   if (!contextMenuState) return null;
 
@@ -26,7 +25,6 @@ export function WebGLContextMenuWrapper({
     <MapContextMenu
       position={contextMenuState.screenPos}
       countryName={contextMenuState.provinceName}
-      countryCode={contextMenuState.countryCode}
       onSelectAction={(action) =>
         onSelectAction(
           action,
@@ -34,7 +32,6 @@ export function WebGLContextMenuWrapper({
           contextMenuState.provinceId,
         )
       }
-      onClose={onClose}
     />
   );
 }

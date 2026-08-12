@@ -26,7 +26,6 @@ export function WidePoliticsView({
         <PopulationWelfareCard
           population={nation.population}
           maxPopulationCapacity={nation.maxPopulationCapacity}
-          gdp={gdp}
           nation={nation}
         />
         <TaxControlCard

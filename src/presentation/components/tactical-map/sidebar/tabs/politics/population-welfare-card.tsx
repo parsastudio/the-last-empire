@@ -6,8 +6,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 interface PopulationWelfareCardProps {
   population?: number;
   maxPopulationCapacity?: number;
-  gdp?: number;
-  stability?: number;
   nation?: Nation;
 }
 

@@ -5,7 +5,7 @@ export class BitPackedProvinceConqueror {
   public static conquerProvince(
     buffer: BitPackedBuffer,
     targetProvinceId: number,
-    _newOwnerNumericId: number,
+    newOwnerNumericId: number,
   ): number {
     const raw = buffer.getRawBuffer();
     const len = raw.length;
@@ -15,6 +15,7 @@ export class BitPackedProvinceConqueror {
       const packed = raw[i]!;
       const pid = BitPackedCellUtility.getProvinceId(packed);
       if (pid === targetProvinceId) {
+        raw[i] = BitPackedCellUtility.setNationId(packed, newOwnerNumericId);
         pixelCount++;
       }
     }

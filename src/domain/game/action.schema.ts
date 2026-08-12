@@ -6,7 +6,6 @@ import { GameStateSchema } from "@/domain/game/game-state.schema";
 export const SetTaxRateActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("SET_TAX_RATE"),
   newRate: z.number().min(0).max(50),
 });
@@ -14,7 +13,6 @@ export const SetTaxRateActionSchema = z.object({
 export const SetTariffRateActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("SET_TARIFF_RATE"),
   newRate: z.number().min(0).max(100),
 });
@@ -22,7 +20,6 @@ export const SetTariffRateActionSchema = z.object({
 export const RecruitUnitActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("RECRUIT_UNIT"),
   unitType: UnitTypeSchema,
   quantity: z.number().positive(),
@@ -31,7 +28,6 @@ export const RecruitUnitActionSchema = z.object({
 export const DiplomaticProposalActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("DIPLOMATIC_PROPOSAL"),
   targetNationId: z.string(),
   proposalType: DiplomaticProposalTypeSchema,
@@ -40,21 +36,18 @@ export const DiplomaticProposalActionSchema = z.object({
 export const UpgradeIndustrialLevelActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("UPGRADE_INDUSTRIAL_LEVEL"),
 });
 
 export const InvestInfrastructureActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("INVEST_INFRASTRUCTURE"),
 });
 
 export const FundProxyInfluenceActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("FUND_PROXY_INFLUENCE"),
   targetNationId: z.string(),
   budget: z.number().positive(),
@@ -63,7 +56,6 @@ export const FundProxyInfluenceActionSchema = z.object({
 export const UnlockDoctrineActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("UNLOCK_DOCTRINE"),
   doctrineId: z.string(),
 });
@@ -71,7 +63,6 @@ export const UnlockDoctrineActionSchema = z.object({
 export const RepayDebtActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("REPAY_DEBT"),
   amount: z.number().positive(),
 });
@@ -79,7 +70,6 @@ export const RepayDebtActionSchema = z.object({
 export const ActivateAbilityActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("ACTIVATE_ABILITY"),
   abilityType: z.enum([
     "DIPLOMATIC_SUMMIT",
@@ -94,7 +84,6 @@ export const ActivateAbilityActionSchema = z.object({
 export const RequestLoanActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("REQUEST_LOAN"),
   amount: z.number().positive(),
 });
@@ -102,7 +91,6 @@ export const RequestLoanActionSchema = z.object({
 export const CancelRecruitmentActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("CANCEL_RECRUITMENT"),
   orderId: z.string(),
 });
@@ -110,14 +98,12 @@ export const CancelRecruitmentActionSchema = z.object({
 export const InvestResearchActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("INVEST_RESEARCH"),
 });
 
 export const InvestDiplomacyActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("INVEST_DIPLOMACY"),
   amount: z.number().positive(),
 });
@@ -125,7 +111,6 @@ export const InvestDiplomacyActionSchema = z.object({
 export const InitiateBattleActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  signature: z.string().optional(),
   type: z.literal("INITIATE_BATTLE"),
   targetNationId: z.string(),
   targetProvinceId: z.number().positive().optional(),
