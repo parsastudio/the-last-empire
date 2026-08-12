@@ -36,11 +36,12 @@ export class MigrationEngine {
       if (!nation || !nation.isAlive) continue;
 
       const stability = nation.government.stability;
-      const pop = nation.population;
-      const capacity = nation.maxPopulationCapacity || Math.floor(pop / 0.95);
+      const capacity =
+        nation.maxPopulationCapacity || Math.floor(nation.population / 0.95);
+      const pop = Math.min(capacity, nation.population);
 
       if (stability < 40) {
-        const pushRate = Math.min(0.03, (40 - stability) * 0.0008);
+        const pushRate = Math.min(0.02, (40 - stability) * 0.0008);
         const pushAmount = Math.floor(pop * pushRate);
         if (pushAmount > 0) {
           candidates.push({ nationId: id, desiredPushAmount: pushAmount });
@@ -103,15 +104,18 @@ export class MigrationEngine {
       const a = attractors[i]!;
       const n = updatedNations[a.nationId];
       if (n) {
-        const share = a.score / totalAttractionScore;
-        let gain = Math.floor(actualTotalMigrants * share);
-        gain = Math.min(gain, a.emptyCapacityRoom);
-        totalDistributed += gain;
+        const capacity =
+          n.maxPopulationCapacity || Math.floor(n.population / 0.95);
+        const currentRoom = Math.max(0, capacity - n.population);
+        if (currentRoom > 0) {
+          const share = a.score / totalAttractionScore;
+          let gain = Math.floor(actualTotalMigrants * share);
+          gain = Math.min(gain, currentRoom);
+          totalDistributed += gain;
 
-        updatedNations[a.nationId] = GdpCalculator.syncNationGdpAndDemographics(
-          n,
-          n.population + gain,
-        );
+          updatedNations[a.nationId] =
+            GdpCalculator.syncNationGdpAndDemographics(n, n.population + gain);
+        }
       }
     }
 
@@ -121,11 +125,9 @@ export class MigrationEngine {
         const a = attractors[i]!;
         const n = updatedNations[a.nationId];
         if (n) {
-          const currentRoom = Math.max(
-            0,
-            (n.maxPopulationCapacity || Math.floor(n.population / 0.95)) -
-              n.population,
-          );
+          const capacity =
+            n.maxPopulationCapacity || Math.floor(n.population / 0.95);
+          const currentRoom = Math.max(0, capacity - n.population);
           if (currentRoom > 0) {
             const add = Math.min(remainder, currentRoom);
             updatedNations[a.nationId] =

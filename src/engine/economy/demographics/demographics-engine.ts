@@ -9,10 +9,12 @@ export interface DemographicsResult {
 
 export class DemographicsEngine {
   public static processNaturalDemographics(nation: Nation): DemographicsResult {
-    const population = nation.population || 1000000;
+    const rawPopulation = nation.population || 1000000;
     const capacity =
-      nation.maxPopulationCapacity || Math.floor(population / 0.95);
+      nation.maxPopulationCapacity || Math.floor(rawPopulation / 0.95);
     const stability = nation.government.stability;
+
+    const currentPopulation = Math.min(capacity, rawPopulation);
 
     let growthRate = 0;
     if (stability > 60) {
@@ -23,16 +25,19 @@ export class DemographicsEngine {
       growthRate = (stability - 40) * 0.0004;
     }
 
-    const capacityRatio = population / (capacity || 1);
-    if (capacityRatio > 1.0) {
-      const overcrowdingPenalty = (capacityRatio - 1.0) * 0.02;
-      growthRate -= overcrowdingPenalty;
+    if (currentPopulation >= capacity && growthRate > 0) {
+      growthRate = 0;
     }
 
     growthRate = Math.max(-0.05, Math.min(0.05, growthRate));
 
-    const naturalChange = Math.floor(population * growthRate);
-    const newPopulation = Math.max(100, population + naturalChange);
+    const naturalChange = Math.floor(currentPopulation * growthRate);
+    const newPopulation = Math.min(
+      capacity,
+      Math.max(100, currentPopulation + naturalChange),
+    );
+
+    const capacityRatio = capacity > 0 ? newPopulation / capacity : 1.0;
 
     const syncedNation = GdpCalculator.syncNationGdpAndDemographics(
       nation,
