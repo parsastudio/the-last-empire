@@ -1,44 +1,55 @@
-export interface DemographicsCapacityMetrics {
-  population: number;
-  maxPopulationCapacity: number;
-  capacityPercentage: number;
-  isOverCapacity: boolean;
-  isNearCapacity: boolean;
-}
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { UnitType } from "@/domain/military/military.schema";
 
-export class DemographicsCalculator {
-  public static calculateCapacity(
-    population: number,
-    maxPopulationCapacity?: number,
-  ): number {
-    const safePop = Math.max(0, population);
-    if (maxPopulationCapacity && maxPopulationCapacity > 0) {
-      return maxPopulationCapacity;
-    }
-    return Math.floor(safePop / 0.95) || 100000000;
+export class MilitaryPricingCalculator {
+  public static calculateTechMultiplier(techLevel: number = 1): number {
+    return 1 + (techLevel - 1) * 0.05;
   }
 
-  public static calculateCapacityPercentage(
-    population: number,
-    maxPopulationCapacity?: number,
+  public static calculateIndustrialDiscount(
+    industrialLevel: number = 1,
   ): number {
-    const capacity = this.calculateCapacity(population, maxPopulationCapacity);
-    const safePop = Math.max(0, population);
-    return Math.round((safePop / (capacity || 1)) * 100);
+    return Math.max(0.7, 1 - (industrialLevel - 1) * 0.05);
   }
 
-  public static getMetrics(
-    population: number,
-    maxPopulationCapacity?: number,
-  ): DemographicsCapacityMetrics {
-    const capacity = this.calculateCapacity(population, maxPopulationCapacity);
-    const percentage = this.calculateCapacityPercentage(population, capacity);
-    return {
-      population,
-      maxPopulationCapacity: capacity,
-      capacityPercentage: percentage,
-      isOverCapacity: percentage > 100,
-      isNearCapacity: percentage >= 95,
-    };
+  public static calculateUnitPrice(
+    baseCost: number,
+    techLevel: number = 1,
+    industrialLevel: number = 1,
+  ): number {
+    const techMultiplier = this.calculateTechMultiplier(techLevel);
+    const discount = this.calculateIndustrialDiscount(industrialLevel);
+    return Math.floor(baseCost * techMultiplier * discount);
+  }
+
+  public static calculateUnitTypePrice(
+    unitType: UnitType,
+    techLevel: number = 1,
+    industrialLevel: number = 1,
+  ): number {
+    const stats = MILITARY_UNIT_STATS[unitType];
+    return this.calculateUnitPrice(stats.moneyCost, techLevel, industrialLevel);
+  }
+
+  public static calculateTotalCost(
+    unitType: UnitType,
+    quantity: number,
+    techLevel: number = 1,
+    industrialLevel: number = 1,
+  ): number {
+    const unitPrice = this.calculateUnitTypePrice(
+      unitType,
+      techLevel,
+      industrialLevel,
+    );
+    return unitPrice * quantity;
+  }
+
+  public static calculateMaxAffordable(
+    treasury: number,
+    unitPrice: number,
+  ): number {
+    if (unitPrice <= 0) return 0;
+    return Math.floor(treasury / unitPrice);
   }
 }
