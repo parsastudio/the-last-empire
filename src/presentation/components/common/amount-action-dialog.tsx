@@ -97,10 +97,7 @@ function AmountActionForm({
             حداکثر سقف مجاز:
           </span>
           <span className="font-bold text-foreground text-xs font-mono">
-            {PersianNumberFormatter.toPersianDigits(
-              safeMax.toLocaleString("en-US"),
-            )}{" "}
-            {unitLabel}
+            {PersianNumberFormatter.formatNumberWithCommas(safeMax)} {unitLabel}
           </span>
         </div>
 
@@ -110,9 +107,7 @@ function AmountActionForm({
               مقدار درخواستی:
             </span>
             <span className="font-bold text-foreground text-sm font-mono">
-              {PersianNumberFormatter.toPersianDigits(
-                currentAmount.toLocaleString("en-US"),
-              )}{" "}
+              {PersianNumberFormatter.formatNumberWithCommas(currentAmount)}{" "}
               {unitLabel}
             </span>
           </div>
@@ -173,7 +168,7 @@ function AmountActionForm({
             ? emptyStateText
             : isSubmitting
               ? "در حال ثبت دستور..."
-              : `${confirmLabel} (${PersianNumberFormatter.toPersianDigits(currentAmount.toLocaleString("en-US"))} ${unitLabel})`}
+              : `${confirmLabel} (${PersianNumberFormatter.formatNumberWithCommas(currentAmount)} ${unitLabel})`}
         </span>
       </button>
     </div>

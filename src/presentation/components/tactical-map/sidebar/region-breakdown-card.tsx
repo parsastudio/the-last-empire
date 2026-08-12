@@ -71,8 +71,8 @@ export function RegionBreakdownCard({
 
       <div className="space-y-2.5 font-mono text-xs max-h-60 overflow-y-auto pr-1 scrollbar-thin">
         {effectiveRegions.map((reg) => {
-          const formattedPixels = PersianNumberFormatter.toPersianDigits(
-            Math.round(reg.pixelCount).toLocaleString("en-US"),
+          const formattedPixels = PersianNumberFormatter.formatNumberWithCommas(
+            Math.round(reg.pixelCount),
           );
           const formattedPop = PersianNumberFormatter.formatCompactNumber(
             reg.population,

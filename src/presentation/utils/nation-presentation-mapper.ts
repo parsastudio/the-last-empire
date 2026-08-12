@@ -33,8 +33,10 @@ export class NationPresentationMapper {
   }
 
   public static formatTerritoryPixels(pixels: number): string {
-    const formatted = Math.round(pixels).toLocaleString("en-US");
-    return `${PersianNumberFormatter.toPersianDigits(formatted)} پیکسل`;
+    const formatted = PersianNumberFormatter.formatNumberWithCommas(
+      Math.round(pixels),
+    );
+    return `${formatted} پیکسل`;
   }
 
   public static formatNationSummary(

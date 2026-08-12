@@ -15,6 +15,13 @@ export class PersianNumberFormatter {
     return input.replace(/\d/g, (d) => this.digitFormatter.format(Number(d)));
   }
 
+  public static formatNumberWithCommas(value: number | string): string {
+    if (value === null || value === undefined) return "۰";
+    const num = typeof value === "string" ? Number(value) : value;
+    if (isNaN(num)) return this.toPersianDigits(value);
+    return this.commaFormatter.format(num);
+  }
+
   public static formatCompactNumber(value: number): string {
     if (isNaN(value) || value === null) return "۰";
 
