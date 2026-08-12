@@ -49,6 +49,7 @@ export function CommandCenterTabRouter({
           recruitmentQueue={nation.recruitmentQueue}
           nationId={nation.id}
           treasury={nation.treasury}
+          industrialLevel={nation.industrialLevel}
         />
       );
     case "politics":

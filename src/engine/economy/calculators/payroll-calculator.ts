@@ -1,5 +1,4 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GovernmentSystem } from "@/engine/politics/government-system";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
@@ -11,33 +10,33 @@ export interface BreakdownMilitaryPayroll {
 }
 
 export class MilitaryPayrollCalculator {
+  public static readonly PAYROLL_RATE = 0.05;
+
   public static calculatePayroll(nation: Nation): BreakdownMilitaryPayroll {
-    const govTraits = GovernmentSystem.getTraits(nation.government.type);
     const doctrineMultiplier = DoctrinesManager.getMilitaryPayrollMultiplier(
       nation.doctrines?.unlockedDoctrines,
     );
-    const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.2;
-    const combined =
-      techMultiplier * govTraits.militaryPayrollMultiplier * doctrineMultiplier;
+    const techMultiplier = 1 + (nation.military.techLevel - 1) * 0.05;
 
-    const infantry = Math.floor(
-      nation.military.infantry *
-        MILITARY_UNIT_STATS.INFANTRY.moneyPayrollBase *
-        combined *
-        1000000,
+    const calculateUnitUpkeep = (baseCost: number, count: number): number => {
+      const unitValue = baseCost * techMultiplier;
+      const baseUpkeep = unitValue * MilitaryPayrollCalculator.PAYROLL_RATE;
+      return Math.floor(count * baseUpkeep * doctrineMultiplier);
+    };
+
+    const infantry = calculateUnitUpkeep(
+      MILITARY_UNIT_STATS.INFANTRY.moneyCost,
+      nation.military.infantry,
     );
-    const airForce = Math.floor(
-      nation.military.airForce *
-        MILITARY_UNIT_STATS.AIR_FORCE.moneyPayrollBase *
-        combined *
-        1000000,
+    const airForce = calculateUnitUpkeep(
+      MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
+      nation.military.airForce,
     );
-    const droneMissile = Math.floor(
-      nation.military.droneMissile *
-        MILITARY_UNIT_STATS.DRONE_MISSILE.moneyPayrollBase *
-        combined *
-        1000000,
+    const droneMissile = calculateUnitUpkeep(
+      MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost,
+      nation.military.droneMissile,
     );
+
     return {
       infantry,
       airForce,

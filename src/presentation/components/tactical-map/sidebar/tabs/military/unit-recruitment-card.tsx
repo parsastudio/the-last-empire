@@ -44,17 +44,23 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
 interface UnitRecruitmentCardProps {
   unit: UnitConfig;
   treasury: number;
+  techLevel?: number;
+  industrialLevel?: number;
   onRecruit: (unit: UnitConfig, quantity: number) => void;
 }
 
 export function UnitRecruitmentCard({
   unit,
   treasury,
+  techLevel = 1,
+  industrialLevel = 1,
   onRecruit,
 }: UnitRecruitmentCardProps) {
   const calc = useUnitRecruitmentCalculator({
     unit,
     treasury,
+    techLevel,
+    industrialLevel,
   });
 
   const Icon = unit.icon;
@@ -74,12 +80,16 @@ export function UnitRecruitmentCard({
         </div>
       </div>
 
-      <div className="font-mono text-[10px]">
-        <div className="bg-secondary/40 p-2 rounded-xl flex items-center gap-1 text-muted-foreground">
+      <div className="font-mono text-[10px] flex items-center justify-between bg-secondary/40 p-2.5 rounded-xl text-muted-foreground">
+        <div className="flex items-center gap-1">
           <Coins size={11} className="text-gdp" />
           <span>
-            هزینه: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
+            قیمت هر یگان:{" "}
+            {PersianNumberFormatter.formatCurrency(calc.unitUnitPrice)}
           </span>
+        </div>
+        <div className="font-bold text-foreground">
+          جمع کل: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
         </div>
       </div>
 
