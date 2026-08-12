@@ -16,7 +16,11 @@ export class GdpCalculator {
     newPopulation?: number,
     newProductivity?: number,
   ): Nation {
-    const population = newPopulation ?? nation.population;
+    const rawPopulation = newPopulation ?? nation.population;
+    const capacity =
+      nation.maxPopulationCapacity || Math.floor(rawPopulation / 0.95);
+    const population = Math.min(capacity, rawPopulation);
+
     const productivity = Math.min(
       GdpCalculator.PRODUCTIVITY_CAP,
       newProductivity ?? nation.perCapitaProductivity ?? 5000,
