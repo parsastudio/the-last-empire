@@ -5,6 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -78,11 +79,16 @@ export class PoliticsActionExecutor {
         }
 
         const targetGdp = getNationGdp(target);
+        const proxyDiscount = DoctrinesManager.getProxyCostDiscount(
+          nation.doctrines?.unlockedDoctrines,
+        );
+        const effectiveBudget = action.budget / proxyDiscount;
+
         const drain = Math.max(
           1,
           Math.min(
             15,
-            Math.floor((action.budget / (targetGdp * 0.01 || 1)) * 2),
+            Math.floor((effectiveBudget / (targetGdp * 0.01 || 1)) * 2),
           ),
         );
 

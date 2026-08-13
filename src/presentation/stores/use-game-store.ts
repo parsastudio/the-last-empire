@@ -158,7 +158,6 @@ export const useGameStore = create<GameStoreState>()(
           seed: Math.floor(Math.random() * 1000000),
           isGameOver: false,
           humanNationId: normalizedHumanId,
-          globalThreatLevel: 0,
           provinces: syncedProvinces,
           nations: initResult.nations,
           turnLogs: [],

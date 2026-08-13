@@ -15,7 +15,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   nationalDebt: 0,
   population: 80000000,
   industrialLevel: 1,
-  consecutiveDeficitTurns: 0,
   government: {
     type: "DEMOCRACY",
     stability: 50,
@@ -43,6 +42,5 @@ export const DEFAULT_NATION_MOCK: Nation = {
   activeModifiers: [],
   globalReputation: 50,
   doctrines: { unlockedDoctrines: [] },
-  proxyInfluenceBudget: {},
   provinceIds: [],
 };

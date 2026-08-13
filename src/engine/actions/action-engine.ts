@@ -66,6 +66,7 @@ export class ActionEngine {
           break;
 
         case "RECRUIT_UNIT":
+        case "BUY_ARMS_MARKET":
         case "CANCEL_RECRUITMENT":
         case "INVEST_RESEARCH":
         case "INITIATE_BATTLE":

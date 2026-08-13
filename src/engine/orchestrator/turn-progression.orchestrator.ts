@@ -58,12 +58,6 @@ export class TurnProgressionOrchestrator {
     nextState = this.turnOrchestrator.processPostTurn(nextState);
     nextState = this.livenessManager.updateLiveness(nextState);
 
-    const peacefulCount = (nextState.peacefulTurnsCount ?? 0) + 1;
-    nextState = {
-      ...nextState,
-      peacefulTurnsCount: peacefulCount,
-    };
-
     const victoryStatus = this.victoryChecker.checkVictory(nextState);
     if (victoryStatus.isGameOver) {
       nextState = {

@@ -139,20 +139,12 @@ export class GeodesicVoronoiPartitioner {
     const counts = new Map<number, number>();
     const sumXMap = new Map<number, number>();
     const sumYMap = new Map<number, number>();
-    const provMinXMap = new Map<number, number>();
-    const provMaxXMap = new Map<number, number>();
-    const provMinYMap = new Map<number, number>();
-    const provMaxYMap = new Map<number, number>();
 
     for (let i = 0; i < assignedProvinceIds.length; i++) {
       const pid = assignedProvinceIds[i]!;
       counts.set(pid, 0);
       sumXMap.set(pid, 0);
       sumYMap.set(pid, 0);
-      provMinXMap.set(pid, width);
-      provMaxXMap.set(pid, 0);
-      provMinYMap.set(pid, height);
-      provMaxYMap.set(pid, 0);
     }
 
     const defaultPid = assignedProvinceIds[0]!;
@@ -168,11 +160,6 @@ export class GeodesicVoronoiPartitioner {
       counts.set(pid, (counts.get(pid) || 0) + 1);
       sumXMap.set(pid, (sumXMap.get(pid) || 0) + x);
       sumYMap.set(pid, (sumYMap.get(pid) || 0) + y);
-
-      if (x < (provMinXMap.get(pid) ?? width)) provMinXMap.set(pid, x);
-      if (x > (provMaxXMap.get(pid) ?? 0)) provMaxXMap.set(pid, x);
-      if (y < (provMinYMap.get(pid) ?? height)) provMinYMap.set(pid, y);
-      if (y > (provMaxYMap.get(pid) ?? 0)) provMaxYMap.set(pid, y);
     }
 
     for (let i = 0; i < assignedProvinceIds.length; i++) {
@@ -188,10 +175,6 @@ export class GeodesicVoronoiPartitioner {
           y: Math.floor((sumYMap.get(pid) || 0) / count),
         },
         landNeighbors: new Set<number>(),
-        minX: provMinXMap.get(pid) ?? 0,
-        maxX: provMaxXMap.get(pid) ?? width,
-        minY: provMinYMap.get(pid) ?? 0,
-        maxY: provMaxYMap.get(pid) ?? height,
       });
     }
   }

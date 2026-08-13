@@ -42,7 +42,6 @@ export const NationSchema = z.object({
   nationalDebt: z.number().nonnegative(),
   population: z.number().nonnegative(),
   industrialLevel: z.number().positive(),
-  consecutiveDeficitTurns: z.number().nonnegative(),
   government: GovernmentStateSchema,
   military: MilitaryStackSchema,
   recruitmentQueue: z.array(RecruitmentOrderSchema),
@@ -51,7 +50,6 @@ export const NationSchema = z.object({
   activeModifiers: z.array(ActiveModifierSchema),
   globalReputation: z.number().min(-100).max(100),
   doctrines: DoctrinesStateSchema,
-  proxyInfluenceBudget: z.record(z.string(), z.number().nonnegative()),
   regionsDemographics: z.array(RegionDemographicsSchema).optional(),
   provinceIds: z.array(z.number()).default([]),
 });

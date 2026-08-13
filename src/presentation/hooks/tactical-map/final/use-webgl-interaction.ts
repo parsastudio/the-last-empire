@@ -115,18 +115,7 @@ export function useWebGLInteraction({
       return;
     }
 
-    const mapX = Math.floor((rx - pos.x) / scale);
-    const mapY = Math.floor((ry - pos.y) / scale);
-
-    openContextMenu(
-      e.clientX,
-      e.clientY,
-      provinceId,
-      mapX,
-      mapY,
-      provincesMap,
-      nationsMap,
-    );
+    openContextMenu(e.clientX, e.clientY, provinceId, provincesMap, nationsMap);
   };
 
   return {

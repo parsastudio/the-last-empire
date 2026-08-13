@@ -58,7 +58,6 @@ export function TariffControlCard({
       nationalDebt: 0,
       population: 80000000,
       industrialLevel: 1,
-      consecutiveDeficitTurns: 0,
       government: { type: "DEMOCRACY", stability: 80, turnsInPower: 1 },
       military: {
         infantry: 10,
@@ -82,7 +81,6 @@ export function TariffControlCard({
       activeModifiers: [],
       globalReputation: 50,
       doctrines: { unlockedDoctrines },
-      proxyInfluenceBudget: {},
       provinceIds: [],
     };
   }, [nation, nationId, tariffRate, gdp, hasSeaAccess, unlockedDoctrines]);

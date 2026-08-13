@@ -5,7 +5,6 @@ import {
   ReputationManager,
 } from "@/engine/diplomacy/diplomacy-engine";
 import {
-  GdpCalculator,
   TariffCalculator,
   TaxCalculator,
   MilitaryPayrollCalculator,
