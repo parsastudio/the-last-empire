@@ -22,7 +22,6 @@ export class TopologicalComponentAnalyzer {
       -width - 1,
     ];
 
-    let compId = 1;
     for (const startIdx of pixelIndices) {
       if (visited.has(startIdx)) continue;
 
@@ -64,7 +63,6 @@ export class TopologicalComponentAnalyzer {
 
       const size = compIndices.length;
       components.push({
-        id: compId++,
         pixelIndices: compIndices,
         minX,
         maxX,

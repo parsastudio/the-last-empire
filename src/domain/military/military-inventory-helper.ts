@@ -140,44 +140,6 @@ export class MilitaryInventoryHelper {
     };
   }
 
-  public static calculateUnitPower(
-    military: MilitaryStack,
-    unitType: UnitType,
-    deployedQuantity: number,
-    baseWeight: number,
-    experienceMultiplier: number,
-    govMultiplier: number,
-  ): number {
-    if (deployedQuantity <= 0) return 0;
-    const breakdown = this.getBreakdown(military, unitType);
-    const levels = Object.keys(breakdown)
-      .map(Number)
-      .sort((a, b) => b - a);
-
-    let totalPower = 0;
-    let remainingToDeploy = deployedQuantity;
-
-    for (let i = 0; i < levels.length; i++) {
-      if (remainingToDeploy <= 0) break;
-      const lvl = levels[i]!;
-      const count = breakdown[lvl]!;
-      const deployedFromLevel = Math.min(count, remainingToDeploy);
-
-      const techMultiplier = 1 + (lvl - 1) * 0.5;
-      const levelPower =
-        deployedFromLevel *
-        baseWeight *
-        techMultiplier *
-        experienceMultiplier *
-        govMultiplier;
-
-      totalPower += levelPower;
-      remainingToDeploy -= deployedFromLevel;
-    }
-
-    return totalPower;
-  }
-
   public static applyCasualties(
     military: MilitaryStack,
     infantryLost: number,

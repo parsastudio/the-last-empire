@@ -1,5 +1,4 @@
 export interface LandComponent {
-  id: number;
   pixelIndices: number[];
   minX: number;
   maxX: number;

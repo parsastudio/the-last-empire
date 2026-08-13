@@ -35,26 +35,6 @@ export class PoliticsActionExecutor {
         };
       }
 
-      case "INVEST_DIPLOMACY": {
-        if (action.amount <= 0) {
-          throw new GameError("INVALID_ACTION", "مبلغ بودجه باید مثبت باشد.");
-        }
-        if (nation.treasury < action.amount) {
-          throw new GameError("INSUFFICIENT_FUNDS", "موجودی خزانه کافی نیست.");
-        }
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              treasury: nation.treasury - action.amount,
-              globalReputation: Math.min(100, nation.globalReputation + 15),
-            },
-          },
-        };
-      }
-
       case "FUND_PROXY_INFLUENCE": {
         const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,

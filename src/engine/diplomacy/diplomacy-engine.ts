@@ -62,7 +62,6 @@ export class TreatyEvaluator {
     sender: Nation,
     receiver: Nation,
     proposalType: DiplomaticProposalType,
-    requestedTributeAmount?: number,
   ): ProposalEvaluation {
     const relation = receiver.relations[sender.id];
     const opinion =
@@ -88,12 +87,6 @@ export class TreatyEvaluator {
         return opinion > -20
           ? { accepted: true }
           : { accepted: false, reason: "OPINION_TOO_LOW" };
-      case "IMPROVE_RELATIONS":
-        if (sender.treasury < (requestedTributeAmount || 10000))
-          return { accepted: false, reason: "INSUFFICIENT_SENDER_FUNDS" };
-        return opinion >= 40
-          ? { accepted: false, reason: "OPINION_ALREADY_HIGH" }
-          : { accepted: true };
       default:
         return { accepted: false, reason: "UNKNOWN_PROPOSAL" };
     }
