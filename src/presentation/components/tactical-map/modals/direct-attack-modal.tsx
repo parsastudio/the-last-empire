@@ -10,7 +10,6 @@ import {
   Plane,
   Shield,
   Anchor,
-  Compass,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation } from "@/domain/nation/nation.schema";

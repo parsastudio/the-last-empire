@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useEffect } from "react";
 import { useWebGLContext } from "@/presentation/hooks/tactical-map/final/use-webgl-context";
 import { useWebGLMapRenderer } from "@/presentation/hooks/tactical-map/final/use-webgl-map-renderer";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
@@ -36,8 +36,10 @@ export function WebGLMapCanvas({
   const dimensions = useMapDimensions(containerRef);
   const gl = useWebGLContext(canvasRef, dimensions);
 
+  const closeContextMenuRef = useRef<() => void>(() => {});
+
   const handleDragStart = useCallback(() => {
-    closeContextMenu();
+    closeContextMenuRef.current();
   }, []);
 
   const {
@@ -77,6 +79,10 @@ export function WebGLMapCanvas({
     provincesMap,
     nationsMap,
   });
+
+  useEffect(() => {
+    closeContextMenuRef.current = closeContextMenu;
+  }, [closeContextMenu]);
 
   useWebGLMapRenderer({
     gl,

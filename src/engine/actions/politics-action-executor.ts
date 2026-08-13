@@ -4,7 +4,6 @@ import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { AbilityExecutor } from "@/engine/actions/ability-executor";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class PoliticsActionExecutor {
@@ -22,9 +21,6 @@ export class PoliticsActionExecutor {
     const sourceKey = nation.id;
 
     switch (action.type) {
-      case "ACTIVATE_ABILITY":
-        return AbilityExecutor.execute(state, action);
-
       case "UNLOCK_DOCTRINE": {
         return {
           ...state,
