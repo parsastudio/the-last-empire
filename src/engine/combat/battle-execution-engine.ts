@@ -67,7 +67,6 @@ export class BattleExecutionEngine {
     );
 
     const updatedProvinces = { ...state.provinces };
-    const attackerNumericId = CountryRegistry.resolveNumericId(attacker.id);
     const buffer = BitPackedGridState.getInstance().getBuffer();
 
     const defenderProvincesBefore = Object.values(updatedProvinces).filter(
@@ -90,11 +89,7 @@ export class BattleExecutionEngine {
             ownerNationId: attacker.id,
           };
           conqueredPixels += prov.pixelCount;
-          BitPackedProvinceConqueror.conquerProvince(
-            buffer,
-            prov.provinceId,
-            attackerNumericId,
-          );
+          BitPackedProvinceConqueror.conquerProvince(buffer, prov.provinceId);
         }
         BitPackedGridState.getInstance().markDirty();
       } else {
@@ -119,11 +114,7 @@ export class BattleExecutionEngine {
               ownerNationId: attacker.id,
             };
             conqueredPixels = targetProv.pixelCount;
-            BitPackedProvinceConqueror.conquerProvince(
-              buffer,
-              conqueredProvId,
-              attackerNumericId,
-            );
+            BitPackedProvinceConqueror.conquerProvince(buffer, conqueredProvId);
             BitPackedGridState.getInstance().markDirty();
           }
         }
@@ -141,6 +132,7 @@ export class BattleExecutionEngine {
       (sum, p) => sum + p.pixelCount,
       0,
     );
+    const defenderProvIds = remainingDefenderProvinces.map((p) => p.provinceId);
 
     const transferredRatio = calcResult.isAttackerVictory
       ? calcResult.isFullCapitulation
@@ -165,6 +157,7 @@ export class BattleExecutionEngine {
       (sum, p) => sum + p.pixelCount,
       0,
     );
+    const attackerProvIds = attackerProvinces.map((p) => p.provinceId);
 
     let updatedAttackerMilitary = MilitaryInventoryHelper.applyCasualties(
       attacker.military,
@@ -219,6 +212,7 @@ export class BattleExecutionEngine {
 
     updatedAttacker = {
       ...updatedAttacker,
+      provinceIds: attackerProvIds,
       treasury:
         attacker.treasury -
         calcResult.deploymentMoneyCost +
@@ -304,6 +298,7 @@ export class BattleExecutionEngine {
     updatedDefender = {
       ...updatedDefender,
       isAlive: isDefenderAlive,
+      provinceIds: defenderProvIds,
       treasury: isDefenderAlive
         ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,
