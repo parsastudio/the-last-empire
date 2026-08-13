@@ -27,8 +27,6 @@ export class MapBuildOrchestrator {
     outputDir: string,
     mapId = "map1",
   ): Promise<void> {
-    const startTime = performance.now();
-
     await this.cleanOutputDirectory(outputDir);
 
     const imageBuffer = await fs.readFile(maskPngPath);
