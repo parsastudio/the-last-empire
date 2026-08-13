@@ -228,59 +228,26 @@ export class BattleCalculator {
 
     const isAttackerVictory = attackerGroundPower > defenderGroundPower;
 
-    let conqueredPixelsCount = 0;
-    let treasuryLooted = 0;
-
-    const targetRegion =
+    const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
+    const targetRegionPixels =
       targetEnclaveId !== undefined && defender.regionsDemographics
         ? defender.regionsDemographics.find(
             (r) => r.regionId === targetEnclaveId,
-          )
-        : undefined;
+          )?.pixelCount || 1000
+        : 1000;
 
-    const targetRegionPixels = targetRegion
-      ? targetRegion.pixelCount
-      : defender.geography.territoryPixelCount;
+    const conqueredPixelsCount = isAttackerVictory ? targetRegionPixels : 0;
+    const provinceRatio = isAttackerVictory
+      ? Math.min(1.0, targetRegionPixels / defenderTotalTerritory)
+      : 0;
 
-    if (isAttackerVictory) {
-      const powerDiffRatio =
-        (attackerGroundPower - defenderGroundPower) /
-        (attackerGroundPower || 1);
-
-      let conquestRatio = 0.25 + powerDiffRatio * 0.25;
-      conquestRatio = Math.max(0.25, Math.min(1.0, conquestRatio));
-
-      let calculatedConquest = Math.floor(targetRegionPixels * conquestRatio);
-      calculatedConquest = Math.max(500, calculatedConquest);
-
-      if (targetRegionPixels <= 1000) {
-        conqueredPixelsCount = targetRegionPixels;
-      } else {
-        const remainingPixels = targetRegionPixels - calculatedConquest;
-        if (remainingPixels < 10 || calculatedConquest >= targetRegionPixels) {
-          conqueredPixelsCount = targetRegionPixels;
-        } else {
-          conqueredPixelsCount = calculatedConquest;
-        }
-      }
-
-      const actualRatio =
-        defender.geography.territoryPixelCount > 0
-          ? Math.min(
-              1.0,
-              conqueredPixelsCount / defender.geography.territoryPixelCount,
-            )
-          : 1.0;
-
-      treasuryLooted = Math.floor(Math.max(0, defender.treasury) * actualRatio);
-    }
+    const treasuryLooted = isAttackerVictory
+      ? Math.floor(Math.max(0, defender.treasury) * provinceRatio)
+      : 0;
 
     let severity: ReportSeverity = "INFO";
     if (isAttackerVictory) {
-      severity =
-        conqueredPixelsCount >= targetRegionPixels
-          ? "CRUSHING_VICTORY"
-          : "VICTORY";
+      severity = provinceRatio >= 0.8 ? "CRUSHING_VICTORY" : "VICTORY";
     } else {
       severity =
         attackerInfantryLoss > deployedInfantry * 0.4

@@ -71,22 +71,27 @@ export class BattleExecutionEngine {
     let conqueredProvinceId: number | null = null;
     let conqueredPixels = 0;
 
+    const defenderProvincesListBefore = Object.values(updatedProvinces).filter(
+      (p) =>
+        p.ownerNationId === defender.id ||
+        p.ownerNationId === canonicalDefenderId,
+    );
+    const defenderTotalPixels =
+      defenderProvincesListBefore.reduce((sum, p) => sum + p.pixelCount, 0) ||
+      defender.geography.territoryPixelCount ||
+      1;
+
     if (calcResult.isAttackerVictory) {
       if (
         action.targetProvinceId &&
         updatedProvinces[action.targetProvinceId.toString()]
       ) {
         conqueredProvinceId = action.targetProvinceId;
-      } else {
-        const defenderProvinces = Object.values(updatedProvinces).filter(
-          (p) =>
-            p.ownerNationId === defender.id ||
-            p.ownerNationId === canonicalDefenderId,
+      } else if (defenderProvincesListBefore.length > 0) {
+        const sorted = [...defenderProvincesListBefore].sort(
+          (a, b) => b.pixelCount - a.pixelCount,
         );
-        if (defenderProvinces.length > 0) {
-          defenderProvinces.sort((a, b) => b.pixelCount - a.pixelCount);
-          conqueredProvinceId = defenderProvinces[0]!.provinceId;
-        }
+        conqueredProvinceId = sorted[0]!.provinceId;
       }
 
       if (conqueredProvinceId) {
@@ -113,39 +118,6 @@ export class BattleExecutionEngine {
       }
     }
 
-    const defenderProvincesList = Object.values(updatedProvinces).filter(
-      (p) =>
-        p.ownerNationId === defender.id ||
-        p.ownerNationId === canonicalDefenderId,
-    );
-    const defenderTotalTerritory =
-      defenderProvincesList.reduce((sum, p) => sum + p.pixelCount, 0) ||
-      defender.geography.territoryPixelCount ||
-      1;
-
-    const conquestRatio = Math.min(
-      1.0,
-      conqueredPixels / defenderTotalTerritory,
-    );
-
-    const transferredPopulation = Math.floor(
-      defender.population * conquestRatio,
-    );
-    const transferredCapacity = Math.floor(
-      (defender.maxPopulationCapacity ||
-        Math.floor(defender.population / 0.95)) * conquestRatio,
-    );
-
-    const attackerProvincesList = Object.values(updatedProvinces).filter(
-      (p) =>
-        p.ownerNationId === attacker.id ||
-        p.ownerNationId === canonicalAttackerId,
-    );
-    const attackerTotalPixels = attackerProvincesList.reduce(
-      (sum, p) => sum + p.pixelCount,
-      0,
-    );
-
     const remainingDefenderProvincesList = Object.values(
       updatedProvinces,
     ).filter(
@@ -160,8 +132,35 @@ export class BattleExecutionEngine {
     const isDefenderAlive = remainingDefenderProvincesList.length > 0;
     const isFullCapitulation = !isDefenderAlive;
 
+    const provinceRatio = calcResult.isAttackerVictory
+      ? Math.min(1.0, conqueredPixels / (defenderTotalPixels || 1))
+      : 0;
+
+    const transferredPopulation = calcResult.isAttackerVictory
+      ? Math.floor(defender.population * provinceRatio)
+      : 0;
+    const transferredCapacity = calcResult.isAttackerVictory
+      ? Math.floor(
+          (defender.maxPopulationCapacity ||
+            Math.floor(defender.population / 0.95)) * provinceRatio,
+        )
+      : 0;
+    const treasuryLooted = calcResult.isAttackerVictory
+      ? Math.floor(Math.max(0, defender.treasury) * provinceRatio)
+      : 0;
+
     const attackerTreasuryAfterDeployment =
       attacker.treasury - calcResult.deploymentMoneyCost;
+
+    const attackerProvincesList = Object.values(updatedProvinces).filter(
+      (p) =>
+        p.ownerNationId === attacker.id ||
+        p.ownerNationId === canonicalAttackerId,
+    );
+    const attackerTotalPixels = attackerProvincesList.reduce(
+      (sum, p) => sum + p.pixelCount,
+      0,
+    );
 
     const newAttackerMaxCapacity =
       (attacker.maxPopulationCapacity ||
@@ -193,7 +192,7 @@ export class BattleExecutionEngine {
 
     updatedAttacker = {
       ...updatedAttacker,
-      treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
+      treasury: attackerTreasuryAfterDeployment + treasuryLooted,
       military: {
         ...updatedAttackerMilitary,
         experience: Math.min(100, attacker.military.experience + 5),
@@ -274,7 +273,7 @@ export class BattleExecutionEngine {
       ...updatedDefender,
       isAlive: isDefenderAlive,
       treasury: isDefenderAlive
-        ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
+        ? Math.max(0, defender.treasury - treasuryLooted)
         : 0,
       military: {
         ...updatedDefenderMilitary,
