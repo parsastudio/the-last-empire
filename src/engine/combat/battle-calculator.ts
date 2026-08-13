@@ -80,7 +80,7 @@ export class BattleCalculator {
 
     if (defenderAirDefensePower > 0) {
       const interceptionFactor = Math.min(
-        0.8,
+        0.75,
         defenderAirDefensePower / (dronesUsed + 1),
       );
       rawDroneCasualties = Math.floor(
@@ -160,8 +160,17 @@ export class BattleCalculator {
 
     const airRatio = attackerAirPower / (defenderAirPower + 1);
     let airSupportMultiplier = 1.0;
+    let airDefenseDestroyedByFighters = 0;
+
     if (airRatio >= 1.5) {
       airSupportMultiplier = 1.5;
+      const currentDefenderAirDefense = defender.military.airDefense || 0;
+      if (currentDefenderAirDefense > 0) {
+        airDefenseDestroyedByFighters = Math.min(
+          currentDefenderAirDefense,
+          Math.max(1, Math.floor(currentDefenderAirDefense * 0.25)),
+        );
+      }
     } else if (airRatio <= 0.7) {
       airSupportMultiplier = 0.7;
     }
@@ -276,7 +285,7 @@ export class BattleCalculator {
       armorEngaged: defender.military.armor || 0,
       armorLost: defenderArmorLoss + armorDestroyedByDrones,
       airDefenseEngaged: defender.military.airDefense || 0,
-      airDefenseLost: 0,
+      airDefenseLost: airDefenseDestroyedByFighters,
       airForceEngaged: defender.military.airForce,
       airForceLost: defenderAirLoss,
       droneMissileEngaged: defender.military.droneMissile,

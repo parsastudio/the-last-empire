@@ -247,27 +247,15 @@ export class BattleExecutionEngine {
       newDefenderPop,
     );
 
-    const updatedDefenderMilitary = isDefenderAlive
-      ? MilitaryInventoryHelper.applyCasualties(
-          defender.military,
-          calcResult.defenderCasualties.infantryLost,
-          calcResult.defenderCasualties.armorLost,
-          calcResult.defenderCasualties.airDefenseLost,
-          calcResult.defenderCasualties.airForceLost,
-          0,
-          calcResult.defenderCasualties.navalFleetLost,
-        )
-      : {
-          infantry: 0,
-          armor: 0,
-          airDefense: 0,
-          airForce: 0,
-          droneMissile: 0,
-          navalFleet: 0,
-          experience: defender.military.experience,
-          techLevel: defender.military.techLevel,
-          inventory: {},
-        };
+    const updatedDefenderMilitary = MilitaryInventoryHelper.applyCasualties(
+      defender.military,
+      calcResult.defenderCasualties.infantryLost,
+      calcResult.defenderCasualties.armorLost,
+      calcResult.defenderCasualties.airDefenseLost,
+      calcResult.defenderCasualties.airForceLost,
+      0,
+      calcResult.defenderCasualties.navalFleetLost,
+    );
 
     updatedDefender = {
       ...updatedDefender,
