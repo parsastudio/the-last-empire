@@ -1,0 +1,139 @@
+import { GameState } from "@/domain/game/game-state.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { UnitType } from "@/domain/military/military.schema";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { CountryRegistry } from "@/domain/data/countries";
+
+export class ArmsMarketManager {
+  public static executePurchase(
+    state: GameState,
+    buyerId: string,
+    sellerId: string,
+    unitType: UnitType,
+    quantity: number,
+  ): GameState {
+    if (quantity <= 0) {
+      throw new GameError("INVALID_ACTION", "تعداد سفارش خرید باید مثبت باشد.");
+    }
+
+    const canonicalBuyerId = CountryRegistry.resolveCanonicalId(buyerId);
+    const canonicalSellerId = CountryRegistry.resolveCanonicalId(sellerId);
+
+    const buyer = state.nations[buyerId] || state.nations[canonicalBuyerId];
+    const seller = state.nations[sellerId] || state.nations[canonicalSellerId];
+
+    if (!buyer || !buyer.isAlive) {
+      throw new GameError("NATION_NOT_FOUND", "کشور خریدار فعال نیست.");
+    }
+    if (!seller || !seller.isAlive) {
+      throw new GameError("NATION_NOT_FOUND", "کشور فروشنده یافت نشد.");
+    }
+
+    const unitStat = MILITARY_UNIT_STATS[unitType];
+    if (seller.military.techLevel < unitStat.requiredTechLevel) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `کشور ${seller.name} سطح فناوری لازم برای تولید این یگان را ندارد.`,
+      );
+    }
+
+    const rel =
+      seller.relations[buyer.id] || seller.relations[canonicalBuyerId];
+    const opinion = rel ? rel.opinion : 0;
+    if (opinion < 20) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `کشور ${seller.name} به دلیل دیدگاه دیپلماتیک نامناسب حاضر به فروش تسلیحات نیست.`,
+      );
+    }
+
+    const buyerNavalPower =
+      (buyer.military.navalFleet || 0) * (buyer.military.techLevel || 1);
+
+    for (const partner of Object.values(state.nations)) {
+      if (!partner.isAlive || partner.id === buyer.id) continue;
+      const partnerRel =
+        buyer.relations[partner.id] ||
+        buyer.relations[CountryRegistry.resolveCanonicalId(partner.id)];
+
+      if (partnerRel?.stance === "WAR") {
+        const enemyNavalPower =
+          (partner.military.navalFleet || 0) *
+          (partner.military.techLevel || 1);
+        if (enemyNavalPower > buyerNavalPower) {
+          throw new GameError(
+            "EXECUTION_FAILED",
+            "محموله تسلیحاتی به دلیل محاصره کامل دریایی توسط کشور متخاصم امکان تحویل ندارد.",
+          );
+        }
+      }
+    }
+
+    const sellerUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+      unitType,
+      seller.military.techLevel,
+      seller.industrialLevel,
+    );
+
+    const marketPricePerUnit = sellerUnitPrice * 2;
+    const totalCost = marketPricePerUnit * quantity;
+
+    if (buyer.treasury < totalCost) {
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "موجودی خزانه برای خرید این محموله تسلیحاتی کافی نیست.",
+      );
+    }
+
+    const sellerProfit = sellerUnitPrice * quantity;
+
+    const updatedBuyerMilitary = { ...buyer.military };
+    if (unitType === "INFANTRY") {
+      updatedBuyerMilitary.infantry += quantity;
+    } else if (unitType === "ARMOR") {
+      updatedBuyerMilitary.armor = (updatedBuyerMilitary.armor || 0) + quantity;
+    } else if (unitType === "AIR_DEFENSE") {
+      updatedBuyerMilitary.airDefense =
+        (updatedBuyerMilitary.airDefense || 0) + quantity;
+    } else if (unitType === "AIR_FORCE") {
+      updatedBuyerMilitary.airForce += quantity;
+    } else if (unitType === "DRONE_MISSILE") {
+      updatedBuyerMilitary.droneMissile += quantity;
+    } else if (unitType === "NAVAL_FLEET") {
+      updatedBuyerMilitary.navalFleet =
+        (updatedBuyerMilitary.navalFleet || 0) + quantity;
+    }
+
+    const updatedBuyer: Nation = {
+      ...buyer,
+      treasury: buyer.treasury - totalCost,
+      military: updatedBuyerMilitary,
+    };
+
+    const updatedSeller: Nation = {
+      ...seller,
+      treasury: seller.treasury + sellerProfit,
+    };
+
+    const sellerLog = TurnLogBuilder.createLogEntry(
+      state.currentTurn,
+      seller.id,
+      "INFO",
+      `صادرات تسلیحات: تعداد ${quantity.toLocaleString("fa-IR")} یگان ${unitStat.nameFa} به ${buyer.name} تحویل شد و $${sellerProfit.toLocaleString("fa-IR")} سود به خزانه واریز گردید.`,
+    );
+
+    const updatedNations = {
+      ...state.nations,
+      [buyer.id]: updatedBuyer,
+      [seller.id]: updatedSeller,
+    };
+
+    return {
+      ...state,
+      nations: updatedNations,
+      turnLogs: [...state.turnLogs, sellerLog],
+    };
+  }
+}

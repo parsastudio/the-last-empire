@@ -2,6 +2,7 @@ import React from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { WideOverviewView } from "@/presentation/components/tactical-map/command-center/views/wide-overview-view";
 import { WideMilitaryView } from "@/presentation/components/tactical-map/command-center/views/wide-military-view";
+import { WideArmsMarketView } from "@/presentation/components/tactical-map/command-center/views/wide-arms-market-view";
 import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
 import { WideProxyView } from "@/presentation/components/tactical-map/command-center/views/wide-proxy-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
@@ -49,6 +50,14 @@ export function CommandCenterTabRouter({
           nationId={nation.id}
           treasury={nation.treasury}
           industrialLevel={nation.industrialLevel}
+        />
+      );
+    case "market":
+      return (
+        <WideArmsMarketView
+          nation={nation}
+          nationsMap={gameState?.nations}
+          selectedTargetCode={selectedTargetCode}
         />
       );
     case "politics":

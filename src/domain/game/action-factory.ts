@@ -2,6 +2,7 @@ import {
   SetTaxRateAction,
   SetTariffRateAction,
   RecruitUnitAction,
+  BuyArmsMarketAction,
   DiplomaticProposalAction,
   UpgradeIndustrialLevelAction,
   InvestInfrastructureAction,
@@ -55,6 +56,22 @@ export class ActionFactory {
       id: this.createId("recruit"),
       nationId,
       type: "RECRUIT_UNIT",
+      unitType,
+      quantity,
+    };
+  }
+
+  public static buyArmsMarket(
+    nationId: string,
+    sellerNationId: string,
+    unitType: UnitType,
+    quantity: number,
+  ): BuyArmsMarketAction {
+    return {
+      id: this.createId("arms-market"),
+      nationId,
+      type: "BUY_ARMS_MARKET",
+      sellerNationId,
       unitType,
       quantity,
     };
