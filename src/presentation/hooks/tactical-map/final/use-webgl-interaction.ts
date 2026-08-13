@@ -20,6 +20,7 @@ interface UseWebGLInteractionProps {
   hasDraggedRef: RefObject<boolean>;
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
 }
 
 export function useWebGLInteraction({
@@ -30,6 +31,7 @@ export function useWebGLInteraction({
   hasDraggedRef,
   provincesMap,
   nationsMap,
+  humanNationId,
 }: UseWebGLInteractionProps) {
   const lastHoverProvinceIdRef = useRef<number | null>(null);
 
@@ -49,7 +51,7 @@ export function useWebGLInteraction({
 
   const handlePointerMove = (clientX: number, clientY: number) => {
     const container = containerRef.current;
-    if (!container || isDraggingRef.current || hasDraggedRef.current) {
+    if (!container || isDraggingRef.current) {
       if (contextMenuState) {
         closeContextMenu();
       }
@@ -115,7 +117,14 @@ export function useWebGLInteraction({
       return;
     }
 
-    openContextMenu(e.clientX, e.clientY, provinceId, provincesMap, nationsMap);
+    openContextMenu(
+      e.clientX,
+      e.clientY,
+      provinceId,
+      provincesMap,
+      nationsMap,
+      humanNationId,
+    );
   };
 
   return {

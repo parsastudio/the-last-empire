@@ -38,12 +38,14 @@ function QuickActionButton({
 interface MapContextMenuProps {
   position: { x: number; y: number };
   countryName: string;
+  isOwnCountry?: boolean;
   onSelectAction: (action: ContextActionType) => void;
 }
 
 export function MapContextMenu({
   position,
   countryName,
+  isOwnCountry = false,
   onSelectAction,
 }: MapContextMenuProps) {
   return (
@@ -66,13 +68,15 @@ export function MapContextMenu({
           onClick={() => onSelectAction("profile")}
         />
 
-        <QuickActionButton
-          icon={Swords}
-          label="حمله سریع"
-          colorClass="text-military"
-          bgHoverClass="hover:bg-military/15"
-          onClick={() => onSelectAction("attack")}
-        />
+        {!isOwnCountry && (
+          <QuickActionButton
+            icon={Swords}
+            label="حمله سریع"
+            colorClass="text-military"
+            bgHoverClass="hover:bg-military/15"
+            onClick={() => onSelectAction("attack")}
+          />
+        )}
       </div>
 
       <div className="w-2.5 h-2.5 bg-card/95 border-r border-b border-border/80 rotate-45 mx-auto -mt-1.5 shadow-sm" />

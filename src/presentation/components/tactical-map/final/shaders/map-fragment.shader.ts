@@ -18,7 +18,7 @@ void main() {
   uint rawState = texture(u_liveStateTexture, v_texCoord).r;
   uint provinceId = rawState & 4095u;
 
-  if (provinceId == 0u) {
+  if (provinceId <= 1u) {
     fragColor = terrainColor;
     return;
   }
@@ -38,18 +38,18 @@ void main() {
     landColor = texture(u_paletteTexture, vec2(uCoord, vCoord));
   }
 
-  bool isCoast = (pRight == 0u || pDown == 0u || pLeft == 0u || pUp == 0u);
+  bool isCoast = (pRight <= 1u || pDown <= 1u || pLeft <= 1u || pUp <= 1u);
   bool isInternal = false;
   bool isInternational = false;
 
   uint neighborId = 0u;
-  if (pRight > 0u && provinceId != pRight) {
+  if (pRight > 1u && provinceId != pRight) {
     neighborId = pRight;
-  } else if (pDown > 0u && provinceId != pDown) {
+  } else if (pDown > 1u && provinceId != pDown) {
     neighborId = pDown;
   }
 
-  if (neighborId > 0u) {
+  if (neighborId > 1u) {
     float nU = (float(neighborId & 255u) + 0.5) / 256.0;
     float nV = (float((neighborId >> 8u) & 255u) + 0.5) / 256.0;
     vec4 neighborColor;

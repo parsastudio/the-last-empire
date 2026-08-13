@@ -14,6 +14,7 @@ import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-came
 interface WebGLMapCanvasProps {
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
   activeLayer?: "political" | "gdp";
   positionRef?: React.RefObject<CameraPosition>;
   scaleRef?: React.RefObject<number>;
@@ -24,6 +25,7 @@ interface WebGLMapCanvasProps {
 export function WebGLMapCanvas({
   provincesMap,
   nationsMap,
+  humanNationId,
   activeLayer = "political",
   positionRef: externalPositionRef,
   scaleRef: externalScaleRef,
@@ -78,6 +80,7 @@ export function WebGLMapCanvas({
     hasDraggedRef,
     provincesMap,
     nationsMap,
+    humanNationId,
   });
 
   useEffect(() => {

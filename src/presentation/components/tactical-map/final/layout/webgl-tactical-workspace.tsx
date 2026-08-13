@@ -130,6 +130,7 @@ export function WebGLTacticalWorkspace({
       <WebGLMapCanvas
         provincesMap={effectiveGameState?.provinces}
         nationsMap={effectiveGameState?.nations}
+        humanNationId={effectiveGameState?.humanNationId}
         activeLayer={activeLayer}
         positionRef={positionRef}
         scaleRef={scaleRef}
