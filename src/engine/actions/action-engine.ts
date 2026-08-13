@@ -72,7 +72,6 @@ export class ActionEngine {
           newState = MilitaryActionExecutor.execute(state, action);
           break;
 
-        case "ACTIVATE_ABILITY":
         case "UNLOCK_DOCTRINE":
         case "INVEST_DIPLOMACY":
         case "FUND_PROXY_INFLUENCE":

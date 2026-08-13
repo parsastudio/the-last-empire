@@ -8,7 +8,6 @@ import {
   FundProxyInfluenceAction,
   UnlockDoctrineAction,
   RepayDebtAction,
-  ActivateAbilityAction,
   RequestLoanAction,
   CancelRecruitmentAction,
   InvestResearchAction,
@@ -127,25 +126,6 @@ export class ActionFactory {
       nationId,
       type: "REPAY_DEBT",
       amount,
-    };
-  }
-
-  public static activateAbility(
-    nationId: string,
-    abilityType:
-      | "DIPLOMATIC_SUMMIT"
-      | "MARTIAL_LAW"
-      | "INDUSTRIAL_MOBILIZATION"
-      | "ROYAL_DECREE"
-      | "WAR_ALERT",
-    targetNationId?: string,
-  ): ActivateAbilityAction {
-    return {
-      id: this.createId("ability"),
-      nationId,
-      type: "ACTIVATE_ABILITY",
-      abilityType,
-      targetNationId,
     };
   }
 

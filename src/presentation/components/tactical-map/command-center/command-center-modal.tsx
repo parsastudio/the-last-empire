@@ -47,11 +47,6 @@ export function getCommandCenterMeta(
         title: "پژوهشکده دکترین‌های راهبردی",
         subtitle: "توسعه شاخه‌های صنعتی و هژمونی بین‌المللی",
       };
-    case "abilities":
-      return {
-        title: "فرمان‌های ویژه حکومتی",
-        subtitle: "فعال‌سازی توانمندی‌های منحصر‌به‌فرد نظام سیاسی حاکم",
-      };
     case "reports":
       return {
         title: "بایگانی گزارش‌های اطلاعاتی و حاکمیت",
