@@ -8,6 +8,7 @@ import { BitPackedProvinceConqueror } from "@/engine/combat/final/bit-packed-pro
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -39,6 +40,21 @@ export class BattleExecutionEngine {
     const betrayalResult =
       BattleDiplomacyHelper.evaluateBetrayalPenalty(currentStance);
 
+    let navalCostMultiplier: number | undefined = undefined;
+    if (action.attackType === "NAVAL" && action.targetProvinceId) {
+      const navalInfo = NavalNeighborResolver.resolveNavalAttack(
+        action.targetProvinceId,
+        attacker.id,
+        state.provinces,
+        action.infantryToDeploy || attacker.military.infantry,
+        action.airForceToDeploy || attacker.military.airForce,
+        action.dronesToLaunch,
+      );
+      if (navalInfo.isNavalValid) {
+        navalCostMultiplier = navalInfo.navalCostMultiplier;
+      }
+    }
+
     const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
@@ -46,6 +62,8 @@ export class BattleExecutionEngine {
       action.infantryToDeploy,
       action.airForceToDeploy,
       action.targetEnclaveId,
+      action.attackType,
+      navalCostMultiplier,
     );
 
     const updatedProvinces = { ...state.provinces };

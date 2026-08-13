@@ -3,9 +3,16 @@ import { GovernmentSystem } from "@/engine/politics/government-system";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class CombatModifierResolver {
-  public static calculateDeploymentCosts(forceCost: number): {
+  public static calculateDeploymentCosts(
+    forceCost: number,
+    attackType?: "LAND" | "NAVAL",
+    navalCostMultiplier?: number,
+  ): {
     moneyCost: number;
   } {
+    if (attackType === "NAVAL" && navalCostMultiplier !== undefined) {
+      return { moneyCost: Math.floor(forceCost * navalCostMultiplier) };
+    }
     const deploymentFivePct = forceCost * 0.05;
     const moneyCost = Math.floor(deploymentFivePct);
     return { moneyCost };
