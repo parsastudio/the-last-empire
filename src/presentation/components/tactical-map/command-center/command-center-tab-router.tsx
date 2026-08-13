@@ -6,7 +6,6 @@ import { WidePoliticsView } from "@/presentation/components/tactical-map/command
 import { WideProxyView } from "@/presentation/components/tactical-map/command-center/views/wide-proxy-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
 import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
-import { WideAbilitiesView } from "@/presentation/components/tactical-map/command-center/views/wide-abilities-view";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -76,13 +75,6 @@ export function CommandCenterTabRouter({
       );
     case "research":
       return <WideResearchView nationId={nation.id} nation={nation} />;
-    case "abilities":
-      return (
-        <WideAbilitiesView
-          currentGovernment={nation.government.type}
-          nationId={nation.id}
-        />
-      );
     case "reports": {
       const logs: TurnLogEntry[] = gameState?.turnLogs || [];
       if (logs.length === 0) {

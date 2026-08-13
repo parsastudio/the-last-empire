@@ -67,20 +67,6 @@ export const RepayDebtActionSchema = z.object({
   amount: z.number().positive(),
 });
 
-export const ActivateAbilityActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("ACTIVATE_ABILITY"),
-  abilityType: z.enum([
-    "DIPLOMATIC_SUMMIT",
-    "MARTIAL_LAW",
-    "INDUSTRIAL_MOBILIZATION",
-    "ROYAL_DECREE",
-    "WAR_ALERT",
-  ]),
-  targetNationId: z.string().optional(),
-});
-
 export const RequestLoanActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -130,7 +116,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   FundProxyInfluenceActionSchema,
   UnlockDoctrineActionSchema,
   RepayDebtActionSchema,
-  ActivateAbilityActionSchema,
   RequestLoanActionSchema,
   CancelRecruitmentActionSchema,
   InvestResearchActionSchema,
@@ -163,7 +148,6 @@ export type FundProxyInfluenceAction = z.infer<
 >;
 export type UnlockDoctrineAction = z.infer<typeof UnlockDoctrineActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
-export type ActivateAbilityAction = z.infer<typeof ActivateAbilityActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
 export type CancelRecruitmentAction = z.infer<
   typeof CancelRecruitmentActionSchema
