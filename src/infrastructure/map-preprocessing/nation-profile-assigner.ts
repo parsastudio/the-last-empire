@@ -40,9 +40,11 @@ export class NationProfileAssigner {
       CountryRegistry.getCountry(item.code);
     const tier =
       profile?.militaryTier ?? Math.max(1, Math.min(20, 21 - item.initialRank));
+    const startingTech = profile?.startingTechLevel ?? item.startingTechLevel;
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
       tier,
       true,
+      startingTech,
     );
 
     const infantry =
@@ -57,7 +59,11 @@ export class NationProfileAssigner {
         : tierStack.droneMissile;
     const navalFleet = item.startingNavalFleet ?? tierStack.navalFleet;
     const techLevel =
-      item.startingTechLevel > 1 ? item.startingTechLevel : tierStack.techLevel;
+      startingTech && startingTech > 0
+        ? startingTech
+        : item.startingTechLevel > 1
+          ? item.startingTechLevel
+          : tierStack.techLevel;
 
     return {
       id: item.id,
@@ -143,9 +149,11 @@ export class NationProfileAssigner {
     const population = profile ? profile.population : 10000000;
 
     const tier = profile?.militaryTier ?? 5;
+    const startingTech = profile?.startingTechLevel;
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
       tier,
       true,
+      startingTech,
     );
 
     const fallbackManifestItem: ManifestNationItem = {
