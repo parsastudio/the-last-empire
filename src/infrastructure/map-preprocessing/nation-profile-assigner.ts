@@ -7,6 +7,7 @@ import {
 } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { GameError } from "@/domain/shared/domain-utilities";
+import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 
 export class NationProfileAssigner {
   public buildNationFromManifest(
@@ -31,7 +32,14 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
-    const stability = 50;
+    const militaryTier = Math.max(
+      1,
+      Math.min(20, Math.ceil((21 - item.initialRank) * 0.95)),
+    );
+    const militaryStack = MilitaryDistributionEngine.calculateStartingStack(
+      militaryTier,
+      true,
+    );
 
     const defaultRegion: RegionDemographics = {
       regionId: 0,
@@ -58,20 +66,11 @@ export class NationProfileAssigner {
       consecutiveDeficitTurns: 0,
       government: {
         type: govType,
-        stability,
+        stability: 50,
         turnsInPower: 5,
       },
       resources: {},
-      military: {
-        infantry: item.startingInfantry,
-        armor: Math.floor(item.startingInfantry * 0.2),
-        airDefense: Math.floor(item.startingInfantry * 0.1),
-        airForce: item.startingAirForce,
-        droneMissile: item.startingDroneMissile,
-        navalFleet: Math.floor(item.startingAirForce * 0.2),
-        experience: 10,
-        techLevel: item.startingTechLevel,
-      },
+      military: militaryStack,
       recruitmentQueue: [],
       geography: {
         landNeighbors: [],
@@ -121,8 +120,6 @@ export class NationProfileAssigner {
     const name = profile.nameFa;
     const flagCode = profile.flagCode;
 
-    const isTier1 = profile.gdp >= 1000000000000;
-
     const validGovTypes: GovernmentType[] = [
       "DEMOCRACY",
       "DICTATORSHIP",
@@ -139,18 +136,16 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
-    const stability = 50;
+    const militaryStack = MilitaryDistributionEngine.calculateStartingStack(
+      profile.militaryTier || 5,
+      true,
+    );
 
-    const techLevel = profile.startingTechLevel ?? 1;
-    const industrialLevel = Math.max(1, Math.min(5, techLevel));
-    const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
-
-    const infantry = profile.startingInfantry ?? (isTier1 ? 200 : 40);
-    const armor = isTier1 ? 50 : 10;
-    const airDefense = isTier1 ? 30 : 5;
-    const airForce = profile.startingAirForce ?? (isTier1 ? 45 : 5);
-    const droneMissile = profile.startingDroneMissile ?? (isTier1 ? 10 : 0);
-    const navalFleet = isTier1 ? 15 : 2;
+    const industrialLevel = Math.max(1, Math.min(5, militaryStack.techLevel));
+    const infrastructureLevel = Math.max(
+      1,
+      Math.min(5, militaryStack.techLevel),
+    );
 
     const territoryPixelCount = Math.max(
       100,
@@ -183,20 +178,11 @@ export class NationProfileAssigner {
       consecutiveDeficitTurns: 0,
       government: {
         type: govType,
-        stability,
+        stability: 50,
         turnsInPower: 5,
       },
       resources: {},
-      military: {
-        infantry,
-        armor,
-        airDefense,
-        airForce,
-        droneMissile,
-        navalFleet,
-        experience: 10,
-        techLevel,
-      },
+      military: militaryStack,
       recruitmentQueue: [],
       geography: {
         landNeighbors: [],
