@@ -63,8 +63,11 @@ export function TariffControlCard({
       resources: {},
       military: {
         infantry: 10,
+        armor: 0,
+        airDefense: 0,
         airForce: 0,
         droneMissile: 0,
+        navalFleet: 0,
         experience: 0,
         techLevel: 1,
       },
