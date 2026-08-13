@@ -3,6 +3,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
+import { MilitaryStack } from "@/domain/military/military.schema";
 
 type GovernmentType = Nation["government"]["type"];
 
@@ -66,7 +67,7 @@ export class NationProfileAssigner {
           ? item.startingTechLevel
           : tierStack.techLevel;
 
-    let baseMilitary = {
+    let baseMilitary: MilitaryStack = {
       infantry: 0,
       armor: 0,
       airDefense: 0,

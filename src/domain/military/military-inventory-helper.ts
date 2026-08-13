@@ -1,12 +1,38 @@
 import { MilitaryStack, UnitType } from "@/domain/military/military.schema";
 
+export type MilitaryStackKey =
+  | "infantry"
+  | "armor"
+  | "airDefense"
+  | "airForce"
+  | "droneMissile"
+  | "navalFleet";
+
 export class MilitaryInventoryHelper {
+  public static getStackKey(unitType: UnitType): MilitaryStackKey {
+    switch (unitType) {
+      case "INFANTRY":
+        return "infantry";
+      case "ARMOR":
+        return "armor";
+      case "AIR_DEFENSE":
+        return "airDefense";
+      case "AIR_FORCE":
+        return "airForce";
+      case "DRONE_MISSILE":
+        return "droneMissile";
+      case "NAVAL_FLEET":
+        return "navalFleet";
+    }
+  }
+
   public static getBreakdown(
     military: MilitaryStack,
     unitType: UnitType,
   ): Record<number, number> {
+    const key = this.getStackKey(unitType);
     const result: Record<number, number> = {};
-    const totalCount = military[unitType] ?? 0;
+    const totalCount = military[key] ?? 0;
     if (totalCount <= 0) return result;
 
     const rawUnitInventory = military.inventory?.[unitType];
@@ -15,9 +41,9 @@ export class MilitaryInventoryHelper {
     if (rawUnitInventory) {
       const keys = Object.keys(rawUnitInventory);
       for (let i = 0; i < keys.length; i++) {
-        const key = keys[i]!;
-        const level = parseInt(key, 10);
-        const count = rawUnitInventory[key] ?? 0;
+        const k = keys[i]!;
+        const level = parseInt(k, 10);
+        const count = rawUnitInventory[k] ?? 0;
         if (!isNaN(level) && level > 0 && count > 0) {
           result[level] = (result[level] ?? 0) + count;
           recordedSum += count;
@@ -41,6 +67,7 @@ export class MilitaryInventoryHelper {
     techLevel: number,
   ): MilitaryStack {
     if (quantity <= 0) return military;
+    const key = this.getStackKey(unitType);
     const safeTech = Math.max(1, Math.floor(techLevel));
     const breakdown = this.getBreakdown(military, unitType);
     breakdown[safeTech] = (breakdown[safeTech] ?? 0) + quantity;
@@ -59,7 +86,7 @@ export class MilitaryInventoryHelper {
 
     return {
       ...military,
-      [unitType]: (military[unitType] ?? 0) + quantity,
+      [key]: (military[key] ?? 0) + quantity,
       inventory: updatedInventory,
     };
   }
@@ -69,7 +96,8 @@ export class MilitaryInventoryHelper {
     unitType: UnitType,
     quantityToRemove: number,
   ): MilitaryStack {
-    const totalCount = military[unitType] ?? 0;
+    const key = this.getStackKey(unitType);
+    const totalCount = military[key] ?? 0;
     if (quantityToRemove <= 0 || totalCount <= 0) return military;
 
     const toRemove = Math.min(totalCount, quantityToRemove);
@@ -107,7 +135,7 @@ export class MilitaryInventoryHelper {
 
     return {
       ...military,
-      [unitType]: Math.max(0, totalCount - toRemove),
+      [key]: Math.max(0, totalCount - toRemove),
       inventory: updatedInventory,
     };
   }
