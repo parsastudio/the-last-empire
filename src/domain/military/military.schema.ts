@@ -2,14 +2,20 @@ import { z } from "zod";
 
 export const UnitTypeSchema = z.enum([
   "INFANTRY",
+  "ARMOR",
+  "AIR_DEFENSE",
   "AIR_FORCE",
   "DRONE_MISSILE",
+  "NAVAL_FLEET",
 ]);
 
 export const MilitaryStackSchema = z.object({
   infantry: z.number().nonnegative(),
+  armor: z.number().nonnegative().default(0),
+  airDefense: z.number().nonnegative().default(0),
   airForce: z.number().nonnegative(),
   droneMissile: z.number().nonnegative(),
+  navalFleet: z.number().nonnegative().default(0),
   experience: z.number().min(0).max(100),
   techLevel: z.number().positive(),
 });

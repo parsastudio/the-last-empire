@@ -24,8 +24,11 @@ export const DEFAULT_NATION_MOCK: Nation = {
   resources: {},
   military: {
     infantry: 100,
+    armor: 20,
+    airDefense: 10,
     airForce: 20,
     droneMissile: 5,
+    navalFleet: 5,
     experience: 10,
     techLevel: 1,
   },

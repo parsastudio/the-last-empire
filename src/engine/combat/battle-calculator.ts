@@ -42,6 +42,7 @@ export class BattleCalculator {
 
     const totalForceCost =
       deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
+      (attacker.military.armor || 0) * MILITARY_UNIT_STATS.ARMOR.moneyCost +
       deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (dronesToLaunch || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
@@ -60,47 +61,44 @@ export class BattleCalculator {
     const { attackerGovMult, defenderGovMult } =
       CombatModifierResolver.getCombatPowerModifiers(attacker, defender);
 
-    const droneCasualtiesInflicted =
-      CombatModifierResolver.getDroneStrikeEffectiveness(
-        attacker,
-        defender,
-        dronesUsed,
-        attackerGovMult,
-      );
+    let rawDroneCasualties = CombatModifierResolver.getDroneStrikeEffectiveness(
+      attacker,
+      defender,
+      dronesUsed,
+      attackerGovMult,
+    );
 
-    let defenderRemainingInfantry = defender.military.infantry;
-    let defenderRemainingAirForce = defender.military.airForce;
+    const defenderAirDefensePower =
+      (defender.military.airDefense || 0) *
+      (1 + (defender.military.techLevel - 1) * 0.25);
 
-    const precisionDamageRatio =
-      DoctrinesManager.getPrecisionMissileDirectDamage(
-        attacker.doctrines?.unlockedDoctrines,
+    if (defenderAirDefensePower > 0) {
+      const interceptionFactor = Math.min(
+        0.8,
+        defenderAirDefensePower / (dronesUsed + 1),
       );
-    if (precisionDamageRatio > 0 && dronesUsed > 0) {
-      const directInfantryDestroyed = Math.floor(
-        defenderRemainingInfantry * precisionDamageRatio * 0.1,
-      );
-      defenderRemainingInfantry = Math.max(
-        0,
-        defenderRemainingInfantry - directInfantryDestroyed,
+      rawDroneCasualties = Math.floor(
+        rawDroneCasualties * (1 - interceptionFactor),
       );
     }
+
+    const droneCasualtiesInflicted = Math.max(0, rawDroneCasualties);
+
+    let defenderRemainingInfantry = defender.military.infantry;
+    let defenderRemainingArmor = defender.military.armor || 0;
+    let defenderRemainingAirForce = defender.military.airForce;
+
+    const armorDestroyedByDrones = Math.min(
+      defenderRemainingArmor,
+      Math.floor(droneCasualtiesInflicted / 3),
+    );
+    defenderRemainingArmor -= armorDestroyedByDrones;
 
     const infantryDestroyedByDrones = Math.min(
       defenderRemainingInfantry,
       droneCasualtiesInflicted,
     );
     defenderRemainingInfantry -= infantryDestroyedByDrones;
-
-    const remainingDroneCasualties =
-      droneCasualtiesInflicted - infantryDestroyedByDrones;
-    let airForceDestroyedByDrones = 0;
-    if (remainingDroneCasualties > 0 && defenderRemainingAirForce > 0) {
-      airForceDestroyedByDrones = Math.min(
-        defenderRemainingAirForce,
-        Math.floor(remainingDroneCasualties / 3),
-      );
-      defenderRemainingAirForce -= airForceDestroyedByDrones;
-    }
 
     const attackerAirPower =
       deployedAirForce *
@@ -131,12 +129,8 @@ export class BattleCalculator {
       let attackerAirLossPct = (defenderAirPower / totalAirPower) * 0.2;
       const defenderAirLossPct = (attackerAirPower / totalAirPower) * 0.2;
 
-      if (
-        DoctrinesManager.getElectronicWarfareEvasion(
-          attacker.doctrines?.unlockedDoctrines,
-        )
-      ) {
-        attackerAirLossPct *= 0.8;
+      if (defenderAirDefensePower > 0) {
+        attackerAirLossPct += Math.min(0.3, defenderAirDefensePower * 0.05);
       }
 
       attackerAirLoss = Math.min(
@@ -158,14 +152,14 @@ export class BattleCalculator {
     }
 
     const attackerGroundPower =
-      deployedInfantry *
+      (deployedInfantry * 1.0 + (attacker.military.armor || 0) * 3.0) *
       (1 + (attacker.military.techLevel - 1) * 0.2) *
       (1 + attacker.military.experience / 100) *
       airSupportMultiplier *
       attackerGovMult;
 
     const defenderGroundPower =
-      defenderRemainingInfantry *
+      (defenderRemainingInfantry * 1.0 + defenderRemainingArmor * 3.0) *
       (1 + (defender.military.techLevel - 1) * 0.2) *
       (1 + defender.military.experience / 100) *
       defenderGovMult;
@@ -174,6 +168,7 @@ export class BattleCalculator {
 
     let attackerInfantryLoss = 0;
     let defenderInfantryLoss = 0;
+    let defenderArmorLoss = 0;
 
     if (totalGroundPower > 0) {
       const attackerLossPct = (defenderGroundPower / totalGroundPower) * 0.25;
@@ -186,6 +181,10 @@ export class BattleCalculator {
       defenderInfantryLoss = Math.min(
         defenderRemainingInfantry,
         Math.floor(defenderRemainingInfantry * defenderLossPct),
+      );
+      defenderArmorLoss = Math.min(
+        defenderRemainingArmor,
+        Math.floor(defenderRemainingArmor * defenderLossPct),
       );
     }
 
@@ -254,19 +253,31 @@ export class BattleCalculator {
     const attackerCasualties: CasualtyMetrics = {
       infantryEngaged: deployedInfantry,
       infantryLost: attackerInfantryLoss,
+      armorEngaged: attacker.military.armor || 0,
+      armorLost: 0,
+      airDefenseEngaged: attacker.military.airDefense || 0,
+      airDefenseLost: 0,
       airForceEngaged: deployedAirForce,
       airForceLost: attackerAirLoss,
       droneMissileEngaged: dronesUsed,
       droneMissileLost: dronesUsed,
+      navalFleetEngaged: attacker.military.navalFleet || 0,
+      navalFleetLost: 0,
     };
 
     const defenderCasualties: CasualtyMetrics = {
       infantryEngaged: defender.military.infantry,
       infantryLost: defenderInfantryLoss + infantryDestroyedByDrones,
+      armorEngaged: defender.military.armor || 0,
+      armorLost: defenderArmorLoss + armorDestroyedByDrones,
+      airDefenseEngaged: defender.military.airDefense || 0,
+      airDefenseLost: 0,
       airForceEngaged: defender.military.airForce,
       airForceLost: defenderAirLoss + airForceDestroyedByDrones,
       droneMissileEngaged: defender.military.droneMissile,
       droneMissileLost: 0,
+      navalFleetEngaged: defender.military.navalFleet || 0,
+      navalFleetLost: 0,
     };
 
     return {

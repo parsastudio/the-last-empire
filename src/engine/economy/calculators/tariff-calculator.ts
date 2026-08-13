@@ -17,6 +17,8 @@ export class TariffCalculator {
     const tariffRate = nation.tariffRate;
     const seaAccessFactor = nation.geography.hasSeaAccess ? 1.0 : 0.5;
     const nationGdp = getNationGdp(nation);
+    const nationNavalPower =
+      (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
 
     let totalBaseRevenue = 0;
     let activePartnerCount = 0;
@@ -36,12 +38,19 @@ export class TariffCalculator {
           nation.relations?.[partner.id] ||
           nation.relations?.[canonicalPartnerId];
 
+        const isWar = rel?.stance === "WAR";
         const isSevered =
-          rel?.stance === "WAR" ||
+          isWar ||
           rel?.stance === "SEVERED_RELATIONS" ||
           rel?.isTradeEmbargoed === true;
 
-        if (!isSevered) {
+        const partnerNavalPower =
+          (partner.military.navalFleet || 0) *
+          (partner.military.techLevel || 1);
+
+        const isNavalBlockaded = isWar && partnerNavalPower > nationNavalPower;
+
+        if (!isSevered && !isNavalBlockaded) {
           activePartnerCount++;
           const partnerGdp = getNationGdp(partner);
           const minGdp = Math.min(nationGdp, partnerGdp);
