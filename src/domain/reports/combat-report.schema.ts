@@ -12,10 +12,16 @@ export const ReportSeveritySchema = z.enum([
 export const CasualtyMetricsSchema = z.object({
   infantryEngaged: z.number().nonnegative(),
   infantryLost: z.number().nonnegative(),
+  armorEngaged: z.number().nonnegative().default(0),
+  armorLost: z.number().nonnegative().default(0),
+  airDefenseEngaged: z.number().nonnegative().default(0),
+  airDefenseLost: z.number().nonnegative().default(0),
   airForceEngaged: z.number().nonnegative(),
   airForceLost: z.number().nonnegative(),
   droneMissileEngaged: z.number().nonnegative(),
   droneMissileLost: z.number().nonnegative(),
+  navalFleetEngaged: z.number().nonnegative().default(0),
+  navalFleetLost: z.number().nonnegative().default(0),
 });
 
 export const CombatReportSchema = z.object({

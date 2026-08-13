@@ -25,8 +25,11 @@ export function RecruitmentQueueCard({
 
   const getUnitNameFa = (type: string) => {
     if (type === "INFANTRY") return "پیاده‌نظام رزمی";
+    if (type === "ARMOR") return "یگان زرهی و تانک";
+    if (type === "AIR_DEFENSE") return "سامانه پدافند هوایی";
     if (type === "AIR_FORCE") return "جنگنده هوایی";
     if (type === "DRONE_MISSILE") return "یگان پهپاد/موشک";
+    if (type === "NAVAL_FLEET") return "ناوگان دریایی و ناوشکن";
     return type;
   };
 

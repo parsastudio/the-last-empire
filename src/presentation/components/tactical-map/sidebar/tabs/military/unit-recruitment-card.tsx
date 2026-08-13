@@ -1,5 +1,15 @@
 import React from "react";
-import { Clock, Coins, Shield, Plane, Radio, LucideIcon } from "lucide-react";
+import {
+  Clock,
+  Coins,
+  Shield,
+  ShieldAlert,
+  Crosshair,
+  Plane,
+  Radio,
+  Anchor,
+  LucideIcon,
+} from "lucide-react";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { useUnitRecruitmentCalculator } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-unit-recruitment-calculator";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
@@ -24,6 +34,22 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     color: "text-primary",
   },
   {
+    type: MILITARY_UNIT_STATS.ARMOR.type,
+    name: MILITARY_UNIT_STATS.ARMOR.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.ARMOR.moneyCost,
+    buildTurns: MILITARY_UNIT_STATS.ARMOR.buildTurns,
+    icon: ShieldAlert,
+    color: "text-military",
+  },
+  {
+    type: MILITARY_UNIT_STATS.AIR_DEFENSE.type,
+    name: MILITARY_UNIT_STATS.AIR_DEFENSE.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
+    buildTurns: MILITARY_UNIT_STATS.AIR_DEFENSE.buildTurns,
+    icon: Crosshair,
+    color: "text-diplomacy",
+  },
+  {
     type: MILITARY_UNIT_STATS.AIR_FORCE.type,
     name: MILITARY_UNIT_STATS.AIR_FORCE.nameFa,
     moneyCost: MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
@@ -38,6 +64,14 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
     buildTurns: MILITARY_UNIT_STATS.DRONE_MISSILE.buildTurns,
     icon: Radio,
     color: "text-treasury",
+  },
+  {
+    type: MILITARY_UNIT_STATS.NAVAL_FLEET.type,
+    name: MILITARY_UNIT_STATS.NAVAL_FLEET.nameFa,
+    moneyCost: MILITARY_UNIT_STATS.NAVAL_FLEET.moneyCost,
+    buildTurns: MILITARY_UNIT_STATS.NAVAL_FLEET.buildTurns,
+    icon: Anchor,
+    color: "text-primary",
   },
 ];
 
