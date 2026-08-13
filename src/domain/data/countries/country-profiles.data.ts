@@ -9,6 +9,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 65000000,
     flagCode: "TZ",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -19,6 +20,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 100000000,
     flagCode: "CD",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -29,6 +31,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 55000000,
     flagCode: "KE",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -39,6 +42,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 60000000,
     flagCode: "ZA",
     militaryTier: 10,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -49,6 +53,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 220000000,
     flagCode: "NG",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -59,6 +64,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 28000000,
     flagCode: "CM",
     militaryTier: 4,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -69,6 +75,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 22000000,
     flagCode: "BF",
     militaryTier: 3,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -79,6 +86,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 30000000,
     flagCode: "MG",
     militaryTier: 2,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -89,6 +97,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 45000000,
     flagCode: "DZ",
     militaryTier: 11,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -99,6 +108,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 37000000,
     flagCode: "MA",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -109,6 +119,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 110000000,
     flagCode: "EG",
     militaryTier: 13,
+    startingTechLevel: 3,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -119,6 +130,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 7000000,
     flagCode: "LY",
     militaryTier: 5,
+    startingTechLevel: 2,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -129,6 +141,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 125000000,
     flagCode: "ET",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -139,6 +152,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 1100000,
     flagCode: "DJ",
     militaryTier: 2,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -149,6 +163,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 4500000,
     flagCode: "SO",
     militaryTier: 2,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -159,6 +174,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 11000000,
     flagCode: "SS",
     militaryTier: 3,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -169,6 +185,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 39000000,
     flagCode: "CA",
     militaryTier: 12,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -179,6 +196,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 335000000,
     flagCode: "US",
     militaryTier: 20,
+    startingTechLevel: 5,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -189,6 +207,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 46000000,
     flagCode: "AR",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -199,6 +218,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 19000000,
     flagCode: "CL",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -209,6 +229,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 56000,
     flagCode: "GL",
     militaryTier: 1,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -219,6 +240,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 128000000,
     flagCode: "MX",
     militaryTier: 10,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -229,6 +251,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 215000000,
     flagCode: "BR",
     militaryTier: 13,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -239,6 +262,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 12000000,
     flagCode: "BO",
     militaryTier: 4,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -249,6 +273,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 34000000,
     flagCode: "PE",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -259,6 +284,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 52000000,
     flagCode: "CO",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -269,6 +295,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 18000000,
     flagCode: "GT",
     militaryTier: 4,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -279,6 +306,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 28000000,
     flagCode: "VE",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -289,6 +317,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 18000000,
     flagCode: "EC",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -299,6 +328,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 11000000,
     flagCode: "CU",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "COMMUNISM",
   },
   {
@@ -309,6 +339,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 20000000,
     flagCode: "KZ",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -319,6 +350,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 36000000,
     flagCode: "UZ",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -329,6 +361,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 3400000,
     flagCode: "MN",
     militaryTier: 3,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -339,6 +372,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10000000,
     flagCode: "TJ",
     militaryTier: 3,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -349,6 +383,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 7000000,
     flagCode: "KG",
     militaryTier: 3,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -359,6 +394,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 6500000,
     flagCode: "TM",
     militaryTier: 4,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -369,6 +405,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 9500000,
     flagCode: "IL",
     militaryTier: 14,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -379,6 +416,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5500000,
     flagCode: "LB",
     militaryTier: 4,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -389,6 +427,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 11000000,
     flagCode: "JO",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -399,6 +438,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10000000,
     flagCode: "AE",
     militaryTier: 12,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -409,6 +449,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 2700000,
     flagCode: "QA",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -419,6 +460,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 4300000,
     flagCode: "KW",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -429,6 +471,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 44000000,
     flagCode: "IQ",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -439,6 +482,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 4600000,
     flagCode: "OM",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -449,6 +493,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 88000000,
     flagCode: "IR",
     militaryTier: 14,
+    startingTechLevel: 4,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -459,6 +504,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 22000000,
     flagCode: "SY",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -469,6 +515,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 33000000,
     flagCode: "YE",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -479,6 +526,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 36000000,
     flagCode: "SA",
     militaryTier: 13,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -489,6 +537,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 3000000,
     flagCode: "AM",
     militaryTier: 4,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -499,6 +548,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10000000,
     flagCode: "AZ",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -509,6 +559,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 240000000,
     flagCode: "PK",
     militaryTier: 14,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -519,6 +570,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 41000000,
     flagCode: "AF",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -529,6 +581,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 26000000,
     flagCode: "KP",
     militaryTier: 12,
+    startingTechLevel: 4,
     startingGovernment: "COMMUNISM",
   },
   {
@@ -539,6 +592,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 51000000,
     flagCode: "KR",
     militaryTier: 16,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -549,6 +603,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 1400000000,
     flagCode: "CN",
     militaryTier: 19,
+    startingTechLevel: 5,
     startingGovernment: "COMMUNISM",
   },
   {
@@ -559,6 +614,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 23900000,
     flagCode: "TW",
     militaryTier: 11,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -569,6 +625,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 124000000,
     flagCode: "JP",
     militaryTier: 15,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -579,6 +636,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 1400000000,
     flagCode: "IN",
     militaryTier: 17,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -589,6 +647,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 170000000,
     flagCode: "BD",
     militaryTier: 7,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -599,6 +658,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 22000000,
     flagCode: "LK",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -609,6 +669,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 275000000,
     flagCode: "ID",
     militaryTier: 12,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -619,6 +680,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 71000000,
     flagCode: "TH",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "MONARCHY",
   },
   {
@@ -629,6 +691,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 98000000,
     flagCode: "VN",
     militaryTier: 10,
+    startingTechLevel: 3,
     startingGovernment: "COMMUNISM",
   },
   {
@@ -639,6 +702,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 114000000,
     flagCode: "PH",
     militaryTier: 7,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -649,6 +713,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 33000000,
     flagCode: "MY",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -659,6 +724,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 68000000,
     flagCode: "FR",
     militaryTier: 16,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -669,6 +735,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 9000000,
     flagCode: "AT",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -679,6 +746,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 84000000,
     flagCode: "DE",
     militaryTier: 14,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -689,6 +757,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 8800000,
     flagCode: "CH",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -699,6 +768,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 11700000,
     flagCode: "BE",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -709,6 +779,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 17800000,
     flagCode: "NL",
     militaryTier: 8,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -719,6 +790,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5500000,
     flagCode: "NO",
     militaryTier: 7,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -729,6 +801,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10500000,
     flagCode: "SE",
     militaryTier: 8,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -739,6 +812,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5100000,
     flagCode: "IE",
     militaryTier: 4,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -749,6 +823,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5900000,
     flagCode: "DK",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -759,6 +834,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 67000000,
     flagCode: "GB",
     militaryTier: 16,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -769,6 +845,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 380000,
     flagCode: "IS",
     militaryTier: 1,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -779,6 +856,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5600000,
     flagCode: "FI",
     militaryTier: 8,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -789,6 +867,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10400000,
     flagCode: "GR",
     militaryTier: 9,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -799,6 +878,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 85000000,
     flagCode: "TR",
     militaryTier: 15,
+    startingTechLevel: 4,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -809,6 +889,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 3800000,
     flagCode: "HR",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -819,6 +900,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10300000,
     flagCode: "PT",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -829,6 +911,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 47000000,
     flagCode: "ES",
     militaryTier: 11,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -839,6 +922,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 59000000,
     flagCode: "IT",
     militaryTier: 13,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -849,6 +933,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 1200000,
     flagCode: "CY",
     militaryTier: 3,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -859,6 +944,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 144000000,
     flagCode: "RU",
     militaryTier: 18,
+    startingTechLevel: 4,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -869,6 +955,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 9300000,
     flagCode: "BY",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "DICTATORSHIP",
   },
   {
@@ -879,6 +966,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 38000000,
     flagCode: "UA",
     militaryTier: 12,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -889,6 +977,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 38000000,
     flagCode: "PL",
     militaryTier: 12,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -899,6 +988,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 9700000,
     flagCode: "HU",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -909,6 +999,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 19000000,
     flagCode: "RO",
     militaryTier: 8,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -919,6 +1010,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 6800000,
     flagCode: "BG",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -929,6 +1021,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5400000,
     flagCode: "SK",
     militaryTier: 5,
+    startingTechLevel: 1,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -939,6 +1032,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 10500000,
     flagCode: "CZ",
     militaryTier: 7,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -949,6 +1043,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 6800000,
     flagCode: "RS",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -959,6 +1054,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 5200000,
     flagCode: "NZ",
     militaryTier: 6,
+    startingTechLevel: 2,
     startingGovernment: "DEMOCRACY",
   },
   {
@@ -969,6 +1065,7 @@ export const ALL_RAW_COUNTRY_PROFILES: CountryProfile[] = [
     population: 26000000,
     flagCode: "AU",
     militaryTier: 13,
+    startingTechLevel: 3,
     startingGovernment: "DEMOCRACY",
   },
 ];
