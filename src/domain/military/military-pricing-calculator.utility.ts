@@ -3,7 +3,8 @@ import { UnitType } from "@/domain/military/military.schema";
 
 export class MilitaryPricingCalculator {
   public static calculateTechMultiplier(techLevel: number = 1): number {
-    return 1 + (techLevel - 1) * 0.05;
+    const safeLevel = Math.max(1, techLevel);
+    return 1 + (safeLevel - 1) * 0.25;
   }
 
   public static calculateIndustrialDiscount(

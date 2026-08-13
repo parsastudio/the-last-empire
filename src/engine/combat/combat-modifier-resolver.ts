@@ -41,7 +41,7 @@ export class CombatModifierResolver {
     dronesUsed: number,
     attackerGovMult: number,
   ): number {
-    const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.25;
+    const techMultiplier = 1 + (attacker.military.techLevel - 1) * 0.5;
     const droneMult = DoctrinesManager.getDronePowerMultiplier(
       attacker.doctrines?.unlockedDoctrines,
     );

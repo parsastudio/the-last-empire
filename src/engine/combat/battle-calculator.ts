@@ -70,7 +70,7 @@ export class BattleCalculator {
 
     const defenderAirDefensePower =
       (defender.military.airDefense || 0) *
-      (1 + (defender.military.techLevel - 1) * 0.25);
+      (1 + (defender.military.techLevel - 1) * 0.5);
 
     if (defenderAirDefensePower > 0) {
       const interceptionFactor = Math.min(
@@ -102,13 +102,13 @@ export class BattleCalculator {
 
     const attackerAirPower =
       deployedAirForce *
-      (1 + (attacker.military.techLevel - 1) * 0.2) *
+      (1 + (attacker.military.techLevel - 1) * 0.5) *
       (1 + attacker.military.experience / 100) *
       attackerGovMult;
 
     let defenderAirPower =
       defenderRemainingAirForce *
-      (1 + (defender.military.techLevel - 1) * 0.2) *
+      (1 + (defender.military.techLevel - 1) * 0.5) *
       (1 + defender.military.experience / 100) *
       defenderGovMult;
 
@@ -153,14 +153,14 @@ export class BattleCalculator {
 
     const attackerGroundPower =
       (deployedInfantry * 1.0 + (attacker.military.armor || 0) * 3.0) *
-      (1 + (attacker.military.techLevel - 1) * 0.2) *
+      (1 + (attacker.military.techLevel - 1) * 0.5) *
       (1 + attacker.military.experience / 100) *
       airSupportMultiplier *
       attackerGovMult;
 
     const defenderGroundPower =
       (defenderRemainingInfantry * 1.0 + defenderRemainingArmor * 3.0) *
-      (1 + (defender.military.techLevel - 1) * 0.2) *
+      (1 + (defender.military.techLevel - 1) * 0.5) *
       (1 + defender.military.experience / 100) *
       defenderGovMult;
 
