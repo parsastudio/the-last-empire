@@ -36,13 +36,13 @@ export class BattleDiplomacyHelper {
     const reportTitle = calcResult.isAttackerVictory
       ? isFullCapitulation
         ? `فتح کامل و تسلیم ${defender.name}`
-        : `پیروزی در تهاجم به قلمرو ${defender.name}`
+        : `پیروزی و فتح کامل استان در نبرد با ${defender.name}`
       : `عقب‌نشینی نیروها در نبرد با ${defender.name}`;
 
     const reportSummary = calcResult.isAttackerVictory
       ? isFullCapitulation
         ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.${betrayalPenaltyText}`
-        : `نیروهای ${attacker.name} با موفقیت توانستند ${conqueredPixels.toLocaleString("fa-IR")} پیکسل از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت تصرف کنند.${betrayalPenaltyText}`
+        : `نیروهای ${attacker.name} با موفقیت استان انتخاب‌شده از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت فتح کردند.${betrayalPenaltyText}`
       : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalPenaltyText}`;
 
     const report: CombatReport = {
