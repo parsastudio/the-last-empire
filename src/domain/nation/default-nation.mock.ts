@@ -21,7 +21,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
     stability: 50,
     turnsInPower: 1,
   },
-  resources: {},
   military: {
     infantry: 100,
     armor: 20,
@@ -39,9 +38,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
     hasSeaAccess: true,
     territoryPixelCount: 1000,
     infrastructureLevel: 1,
-    contiguousMainlandPixelCount: 1000,
-    isolatedPockets: [],
-    coordinates: [],
   },
   relations: {},
   activeModifiers: [],

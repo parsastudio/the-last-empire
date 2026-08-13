@@ -5,6 +5,7 @@ import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { CountryDefaultsUtility } from "@/domain/data/countries/country-defaults.utility";
 
 export interface DiplomaticRelation {
   code: string;
@@ -38,38 +39,24 @@ export function resolveProfileRelation(
   liveNation?: Nation | null,
 ): DiplomaticRelation {
   const profile = CountryRegistry.getCountry(code);
+  const fallback = CountryDefaultsUtility.getFallbackProfile(code, profile);
 
-  const realGdpNum = liveNation
-    ? getNationGdp(liveNation)
-    : profile
-      ? profile.gdp
-      : 50000000000;
-
-  const realPopNum = liveNation
-    ? liveNation.population
-    : profile
-      ? profile.population
-      : 10000000;
-
-  const name = liveNation
-    ? liveNation.name
-    : profile
-      ? profile.nameFa
-      : `کشور ${code}`;
-
+  const realGdpNum = liveNation ? getNationGdp(liveNation) : fallback.gdp;
+  const realPopNum = liveNation ? liveNation.population : fallback.population;
+  const name = liveNation ? liveNation.name : fallback.nameFa;
   const displayCode = profile
     ? profile.code
     : liveNation
       ? liveNation.id.replace("NATION_", "")
-      : code;
-
+      : fallback.code;
   const flagCode = profile
     ? profile.flagCode
     : liveNation
       ? liveNation.flagCode
-      : code;
-
-  const techLevel = liveNation ? liveNation.military.techLevel : 1;
+      : fallback.flagCode;
+  const techLevel = liveNation
+    ? liveNation.military.techLevel
+    : fallback.startingTechLevel;
 
   return {
     code: displayCode.toUpperCase(),
@@ -83,7 +70,9 @@ export function resolveProfileRelation(
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
       techLevel,
-      governmentType: liveNation ? liveNation.government.type : "DEMOCRACY",
+      governmentType: liveNation
+        ? liveNation.government.type
+        : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
     },
   };

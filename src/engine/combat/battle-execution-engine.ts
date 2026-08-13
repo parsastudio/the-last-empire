@@ -348,7 +348,7 @@ export class BattleExecutionEngine {
 
     const rankedNations = RankManager.recalculateRanks(tempNations);
 
-    const newState = {
+    const newState: GameState = {
       ...state,
       provinces: updatedProvinces,
       nations: rankedNations,
