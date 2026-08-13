@@ -21,6 +21,8 @@ export function CommandBreadcrumb({
         return "نمای کلی";
       case "military":
         return "ارتش و تسلیحات";
+      case "market":
+        return "بازار بین‌المللی اسلحه";
       case "politics":
         return "دیوان سیاست";
       case "proxy":

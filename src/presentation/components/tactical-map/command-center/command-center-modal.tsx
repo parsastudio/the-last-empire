@@ -26,6 +26,11 @@ export function getCommandCenterMeta(
         title: "ستاد کل نیروهای مسلح و تسلیحات",
         subtitle: "مدیریت یگان‌ها، صف ساخت، انحلال و ارتقای سطح فناوری دفاعی",
       };
+    case "market":
+      return {
+        title: "بازار بین‌المللی تسلیحات و واردات فوری",
+        subtitle: "خرید آنی تجهیزات پیشرفته از قدرتهای خارجی با تحویل فوری",
+      };
     case "politics":
       return {
         title: "دیوان عالی سیاست و قوانین",

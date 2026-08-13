@@ -2,6 +2,7 @@ import React from "react";
 import {
   LayoutDashboard,
   Swords,
+  ShoppingCart,
   Landmark,
   FileText,
   Users,
@@ -100,6 +101,7 @@ export function CommandRail({
   const tabs = [
     { id: "overview" as const, label: "نما", icon: LayoutDashboard },
     { id: "military" as const, label: "ارتش", icon: Swords },
+    { id: "market" as const, label: "بازار اسلحه", icon: ShoppingCart },
     { id: "politics" as const, label: "سیاست", icon: Landmark },
     { id: "proxy" as const, label: "نیابتی", icon: Crosshair },
     { id: "reports" as const, label: "گزارش‌ها", icon: FileText },

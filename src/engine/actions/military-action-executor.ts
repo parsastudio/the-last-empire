@@ -5,11 +5,11 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
+import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
 
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
   private static battleEngine = new BattleExecutionEngine();
-  private static researchManager = new ResearchManager();
 
   public static execute(state: GameState, action: GameAction): GameState {
     const canonicalSourceId = CountryRegistry.resolveCanonicalId(
@@ -40,6 +40,16 @@ export class MilitaryActionExecutor {
             ),
           },
         };
+      }
+
+      case "BUY_ARMS_MARKET": {
+        return ArmsMarketManager.executePurchase(
+          state,
+          action.nationId,
+          action.sellerNationId,
+          action.unitType,
+          action.quantity,
+        );
       }
 
       case "CANCEL_RECRUITMENT": {
@@ -73,7 +83,7 @@ export class MilitaryActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [sourceKey]: this.researchManager.investInMilitaryTech(nation),
+            [sourceKey]: new ResearchManager().investInMilitaryTech(nation),
           },
         };
       }

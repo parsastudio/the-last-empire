@@ -8,6 +8,7 @@ import {
   Plane,
   Radio,
   Anchor,
+  Lock,
   LucideIcon,
 } from "lucide-react";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
@@ -98,6 +99,9 @@ export function UnitRecruitmentCard({
   });
 
   const Icon = unit.icon;
+  const unitStat =
+    MILITARY_UNIT_STATS[unit.type as keyof typeof MILITARY_UNIT_STATS];
+  const isTechUnlocked = techLevel >= (unitStat?.requiredTechLevel || 1);
 
   return (
     <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3.5 text-right dir-rtl">
@@ -114,90 +118,110 @@ export function UnitRecruitmentCard({
         </div>
       </div>
 
-      <div className="font-mono text-[10px] flex items-center justify-between bg-secondary/40 p-2.5 rounded-xl text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Coins size={11} className="text-gdp" />
-          <span>
-            قیمت هر یگان:{" "}
-            {PersianNumberFormatter.formatCurrency(calc.unitUnitPrice)}
-          </span>
-        </div>
-        <div className="font-bold text-foreground">
-          جمع کل: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
-        </div>
-      </div>
-
-      <div className="space-y-2 pt-1 border-t border-border/40">
-        <div className="flex items-center justify-between text-[10px] font-mono">
-          <span className="text-muted-foreground font-sans">
-            حداکثر ظرفیت ساخت با منابع فعلی:
-          </span>
-          <span className="font-bold text-gdp">
+      {!isTechUnlocked ? (
+        <div className="p-3 bg-secondary/50 border border-border/60 rounded-xl flex items-center justify-between text-[10px] text-amber-500 font-sans font-bold">
+          <span className="flex items-center gap-1">
+            <Lock size={12} />
+            نیازمند سطح فناوری{" "}
             {PersianNumberFormatter.toPersianDigits(
-              calc.maxAffordable.toLocaleString("en-US"),
+              unitStat.requiredTechLevel,
             )}{" "}
-            یگان
+            جهت تولید داخلی
+          </span>
+          <span className="text-[9px] text-muted-foreground font-mono">
+            قابل خرید از بازار اسلحه
           </span>
         </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="range"
-            min={0}
-            max={calc.maxAffordable}
-            disabled={calc.maxAffordable === 0}
-            value={calc.quantity}
-            onChange={(e) => calc.setClampedQuantity(Number(e.target.value))}
-            className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
-          />
-
-          <div className="flex items-center gap-1 font-mono">
-            <button
-              type="button"
-              disabled={calc.quantity <= 0}
-              onClick={() => calc.setClampedQuantity(calc.quantity - 1)}
-              className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              min={0}
-              max={calc.maxAffordable}
-              value={calc.quantity}
-              onChange={calc.handleInputChange}
-              className="w-14 bg-secondary/80 border border-border/80 rounded-lg py-1 px-1 text-center font-bold text-xs text-foreground font-mono focus:outline-none focus:border-primary"
-            />
-            <button
-              type="button"
-              disabled={calc.quantity >= calc.maxAffordable}
-              onClick={() => calc.setClampedQuantity(calc.quantity + 1)}
-              className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
-            >
-              +
-            </button>
+      ) : (
+        <>
+          <div className="font-mono text-[10px] flex items-center justify-between bg-secondary/40 p-2.5 rounded-xl text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Coins size={11} className="text-gdp" />
+              <span>
+                قیمت هر یگان:{" "}
+                {PersianNumberFormatter.formatCurrency(calc.unitUnitPrice)}
+              </span>
+            </div>
+            <div className="font-bold text-foreground">
+              جمع کل: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
+            </div>
           </div>
-        </div>
 
-        <PercentageSelector
-          disabled={calc.maxAffordable === 0}
-          onSelect={calc.handlePercentageSelect}
-          colorVariant="gdp"
-        />
-      </div>
+          <div className="space-y-2 pt-1 border-t border-border/40">
+            <div className="flex items-center justify-between text-[10px] font-mono">
+              <span className="text-muted-foreground font-sans">
+                حداکثر ظرفیت ساخت با منابع فعلی:
+              </span>
+              <span className="font-bold text-gdp">
+                {PersianNumberFormatter.toPersianDigits(
+                  calc.maxAffordable.toLocaleString("en-US"),
+                )}{" "}
+                یگان
+              </span>
+            </div>
 
-      <button
-        type="button"
-        onClick={() => onRecruit(unit, calc.quantity)}
-        disabled={calc.quantity <= 0 || calc.maxAffordable === 0}
-        className="w-full py-2.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-      >
-        {calc.quantity > 0
-          ? `ثبت سفارش ساخت ${PersianNumberFormatter.toPersianDigits(calc.quantity.toLocaleString("en-US"))} یگان ${unit.name}`
-          : calc.maxAffordable === 0
-            ? "منابع ناکافی جهت ساخت این یگان"
-            : "تعداد سفارش را تعیین کنید"}
-      </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={0}
+                max={calc.maxAffordable}
+                disabled={calc.maxAffordable === 0}
+                value={calc.quantity}
+                onChange={(e) =>
+                  calc.setClampedQuantity(Number(e.target.value))
+                }
+                className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
+              />
+
+              <div className="flex items-center gap-1 font-mono">
+                <button
+                  type="button"
+                  disabled={calc.quantity <= 0}
+                  onClick={() => calc.setClampedQuantity(calc.quantity - 1)}
+                  className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={0}
+                  max={calc.maxAffordable}
+                  value={calc.quantity}
+                  onChange={calc.handleInputChange}
+                  className="w-14 bg-secondary/80 border border-border/80 rounded-lg py-1 px-1 text-center font-bold text-xs text-foreground font-mono focus:outline-none focus:border-primary"
+                />
+                <button
+                  type="button"
+                  disabled={calc.quantity >= calc.maxAffordable}
+                  onClick={() => calc.setClampedQuantity(calc.quantity + 1)}
+                  className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <PercentageSelector
+              disabled={calc.maxAffordable === 0}
+              onSelect={calc.handlePercentageSelect}
+              colorVariant="gdp"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onRecruit(unit, calc.quantity)}
+            disabled={calc.quantity <= 0 || calc.maxAffordable === 0}
+            className="w-full py-2.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+          >
+            {calc.quantity > 0
+              ? `ثبت سفارش ساخت ${PersianNumberFormatter.toPersianDigits(calc.quantity.toLocaleString("en-US"))} یگان ${unit.name}`
+              : calc.maxAffordable === 0
+                ? "منابع ناکافی جهت ساخت این یگان"
+                : "تعداد سفارش را تعیین کنید"}
+          </button>
+        </>
+      )}
     </div>
   );
 }
