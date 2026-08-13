@@ -8,7 +8,7 @@ interface QuickActionButtonProps {
   label: string;
   colorClass: string;
   bgHoverClass: string;
-  onClick: () => void;
+  onClick: (e: React.MouseEvent) => void;
 }
 
 function QuickActionButton({
@@ -20,7 +20,12 @@ function QuickActionButton({
 }: QuickActionButtonProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick(e);
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
       className={`px-3 py-1.5 ${bgHoverClass} ${colorClass} rounded-xl transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold shrink-0`}
       title={label}
     >
@@ -43,6 +48,8 @@ export function MapContextMenu({
 }: MapContextMenuProps) {
   return (
     <div
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
       className="absolute z-50 -translate-x-1/2 -translate-y-full mb-3 pointer-events-auto animate-fade-smooth dir-rtl"
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >

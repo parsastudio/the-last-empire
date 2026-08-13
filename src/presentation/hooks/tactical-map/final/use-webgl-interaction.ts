@@ -49,8 +49,8 @@ export function useWebGLInteraction({
 
   const handlePointerMove = (clientX: number, clientY: number) => {
     const container = containerRef.current;
-    if (!container || isDraggingRef.current) {
-      if (hasDraggedRef.current && contextMenuState) {
+    if (!container || isDraggingRef.current || hasDraggedRef.current) {
+      if (contextMenuState) {
         closeContextMenu();
       }
       if (hoverPos !== null) setHoverPos(null);

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import { useWebGLContext } from "@/presentation/hooks/tactical-map/final/use-webgl-context";
 import { useWebGLMapRenderer } from "@/presentation/hooks/tactical-map/final/use-webgl-map-renderer";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
@@ -36,9 +36,15 @@ export function WebGLMapCanvas({
   const dimensions = useMapDimensions(containerRef);
   const gl = useWebGLContext(canvasRef, dimensions);
 
+  const handleDragStart = useCallback(() => {
+    closeContextMenu();
+  }, []);
+
   const {
     scaleRef,
     positionRef,
+    isDraggingRef,
+    hasDraggedRef,
     handleWheel,
     handleMouseDown,
     handleMouseMove,
@@ -51,17 +57,8 @@ export function WebGLMapCanvas({
     containerRef,
     externalPositionRef,
     externalScaleRef,
+    handleDragStart,
   );
-
-  useWebGLMapRenderer({
-    gl,
-    dimensions,
-    positionRef,
-    scaleRef,
-    provincesMap,
-    nationsMap,
-    activeLayer,
-  });
 
   const {
     hoverPos,
@@ -75,10 +72,20 @@ export function WebGLMapCanvas({
     containerRef,
     positionRef,
     scaleRef,
-    isDraggingRef: useRef(false),
-    hasDraggedRef: useRef(false),
+    isDraggingRef,
+    hasDraggedRef,
     provincesMap,
     nationsMap,
+  });
+
+  useWebGLMapRenderer({
+    gl,
+    dimensions,
+    positionRef,
+    scaleRef,
+    provincesMap,
+    nationsMap,
+    activeLayer,
   });
 
   const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -91,18 +98,17 @@ export function WebGLMapCanvas({
     handlePointerMove(e.clientX, e.clientY);
   };
 
-  const handleSelectContext = (
-    action: ContextActionType,
-    code: string,
-    provinceId?: number,
-  ) => {
-    closeContextMenu();
-    if (action === "profile" && onSelectCountryContext) {
-      onSelectCountryContext(code);
-    } else if (action === "attack" && onSelectCountryAttackContext) {
-      onSelectCountryAttackContext(code, provinceId);
-    }
-  };
+  const handleSelectContext = useCallback(
+    (action: ContextActionType, code: string, provinceId?: number) => {
+      closeContextMenu();
+      if (action === "profile" && onSelectCountryContext) {
+        onSelectCountryContext(code);
+      } else if (action === "attack" && onSelectCountryAttackContext) {
+        onSelectCountryAttackContext(code, provinceId);
+      }
+    },
+    [closeContextMenu, onSelectCountryContext, onSelectCountryAttackContext],
+  );
 
   return (
     <div
