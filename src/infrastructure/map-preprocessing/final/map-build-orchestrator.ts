@@ -91,10 +91,5 @@ export class MapBuildOrchestrator {
       const destTerrainPath = path.join(outputDir, "base_map_terrain.png");
       await fs.copyFile(terrainPath, destTerrainPath);
     }
-
-    const elapsedTime = ((performance.now() - startTime) / 1000).toFixed(2);
-    console.log(
-      `[MAP_BUILD] Map rebuild finished successfully in ${elapsedTime}s`,
-    );
   }
 }

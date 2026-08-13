@@ -1,14 +1,13 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { NationProfileAssigner } from "@/infrastructure/map-preprocessing/nation-profile-assigner";
-import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import {
+  FinalMapManifest,
+  FinalManifestNation,
+} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { RankManager } from "@/engine/politics/rank-manager";
 
-export interface GlobalInitializationResult {
-  nations: Record<string, Nation>;
-  provinces: Record<string, Province>;
-}
+type RelationProfile = Nation["relations"][string];
 
 export class DiplomaticMatrixGenerator {
   public generateBlankRelations(
@@ -35,13 +34,15 @@ export class GlobalAiInitializer {
     manifest: FinalMapManifest,
     humanNationId: string,
     humanGovType?: string,
-  ): GlobalInitializationResult {
+  ): { nations: Record<string, Nation>; provinces: Record<string, Province> } {
     const nations: Record<string, Nation> = {};
     const provinces: Record<string, Province> = {};
 
     const manifestProvinces = manifest.provinces || [];
-    const manifestItems = manifest.nations || [];
-    const allIds = manifestItems.map((item) => item.id);
+    const manifestItems: FinalManifestNation[] = manifest.nations || [];
+    const allIds: string[] = manifestItems.map(
+      (item: FinalManifestNation) => item.id,
+    );
 
     for (const pItem of manifestProvinces) {
       provinces[pItem.provinceId.toString()] = {
@@ -67,7 +68,7 @@ export class GlobalAiInitializer {
         govToApply,
       );
 
-      const relativeList = allIds.filter((id) => id !== item.id);
+      const relativeList = allIds.filter((id: string) => id !== item.id);
       nation.relations =
         this.relationsGenerator.generateBlankRelations(relativeList);
 
@@ -84,7 +85,7 @@ export class GlobalAiInitializer {
     humanNationId: string,
     humanGovType?: string,
     manifest?: FinalMapManifest | null,
-  ): GlobalInitializationResult {
+  ): { nations: Record<string, Nation>; provinces: Record<string, Province> } {
     if (manifest && manifest.nations && manifest.nations.length > 0) {
       return this.initializeFromManifest(manifest, humanNationId, humanGovType);
     }

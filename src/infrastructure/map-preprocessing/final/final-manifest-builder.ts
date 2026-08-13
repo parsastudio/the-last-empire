@@ -3,6 +3,7 @@ import path from "path";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-partition-engine";
 import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server-map-path-resolver";
+import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 
 export interface FinalManifestProvince {
   provinceId: number;
@@ -32,8 +33,11 @@ export interface FinalManifestNation {
   initialRank: number;
   defaultGovernment: string;
   startingInfantry: number;
+  startingArmor?: number;
+  startingAirDefense?: number;
   startingAirForce: number;
   startingDroneMissile: number;
+  startingNavalFleet?: number;
   startingTechLevel: number;
   industrialLevel: number;
   infrastructureLevel: number;
@@ -115,15 +119,25 @@ export class FinalManifestBuilder {
       const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
       const startingStability = 50;
 
-      const techLevel = profile.startingTechLevel ?? 1;
+      const militaryTier =
+        profile.militaryTier ||
+        Math.max(1, Math.min(20, Math.ceil((21 - (rankIndex + 1)) * 0.95)));
+      const stack = MilitaryDistributionEngine.calculateStartingStack(
+        militaryTier,
+        true,
+      );
+
+      const startingInfantry = profile.startingInfantry ?? stack.infantry;
+      const startingArmor = stack.armor;
+      const startingAirDefense = stack.airDefense;
+      const startingAirForce = profile.startingAirForce ?? stack.airForce;
+      const startingDroneMissile =
+        profile.startingDroneMissile ?? stack.droneMissile;
+      const startingNavalFleet = stack.navalFleet;
+      const techLevel = profile.startingTechLevel ?? stack.techLevel;
+
       const industrialLevel = Math.max(1, Math.min(5, techLevel));
       const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
-
-      const isTier1 = gdp >= 1000000000000;
-      const startingInfantry = profile.startingInfantry ?? (isTier1 ? 200 : 40);
-      const startingAirForce = profile.startingAirForce ?? (isTier1 ? 45 : 5);
-      const startingDroneMissile =
-        profile.startingDroneMissile ?? (isTier1 ? 10 : 0);
 
       manifestNations.push({
         id: countryId,
@@ -142,8 +156,11 @@ export class FinalManifestBuilder {
         initialRank: rankIndex + 1,
         defaultGovernment: defaultGov,
         startingInfantry,
+        startingArmor,
+        startingAirDefense,
         startingAirForce,
         startingDroneMissile,
+        startingNavalFleet,
         startingTechLevel: techLevel,
         industrialLevel,
         infrastructureLevel,
