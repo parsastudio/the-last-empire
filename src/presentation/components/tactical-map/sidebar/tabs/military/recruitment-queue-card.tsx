@@ -4,6 +4,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { RecruitmentOrder } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 interface RecruitmentQueueCardProps {
   queue?: RecruitmentOrder[];
@@ -24,13 +25,8 @@ export function RecruitmentQueueCard({
   };
 
   const getUnitNameFa = (type: string) => {
-    if (type === "INFANTRY") return "پیاده‌نظام رزمی";
-    if (type === "ARMOR") return "یگان زرهی و تانک";
-    if (type === "AIR_DEFENSE") return "سامانه پدافند هوایی";
-    if (type === "AIR_FORCE") return "جنگنده هوایی";
-    if (type === "DRONE_MISSILE") return "یگان پهپاد/موشک";
-    if (type === "NAVAL_FLEET") return "ناوگان دریایی و ناوشکن";
-    return type;
+    const stat = MILITARY_UNIT_STATS[type as keyof typeof MILITARY_UNIT_STATS];
+    return stat ? stat.nameFa : type;
   };
 
   return (
