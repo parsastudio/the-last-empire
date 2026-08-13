@@ -4,9 +4,13 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { useToast } from "@/presentation/context/toast-context";
-import { BitPackedInitService } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
+import {
+  BitPackedInitService,
+  FinalMapManifest,
+} from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
 import { NationDatabaseProvider } from "@/presentation/components/select-nation/services/nation-database-provider";
 import { useGameStore } from "@/presentation/stores/use-game-store";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export function useSelectNationForm() {
   const router = useRouter();
@@ -14,7 +18,7 @@ export function useSelectNationForm() {
   const provider = useMemo(() => new NationDatabaseProvider(), []);
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
-  const [manifest, setManifest] = useState<unknown | null>(null);
+  const [manifest, setManifest] = useState<FinalMapManifest | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -25,13 +29,14 @@ export function useSelectNationForm() {
           cache: "no-store",
         });
         if (res.ok) {
-          const json = await res.json();
+          const json: FinalMapManifest = await res.json();
           if (
             active &&
             json &&
             Array.isArray(json.nations) &&
             json.nations.length > 0
           ) {
+            CountryRegistry.initializeFromManifest(json);
             setManifest(json);
           }
         }
@@ -48,18 +53,10 @@ export function useSelectNationForm() {
   const allNations = useMemo(() => {
     if (
       manifest &&
-      typeof manifest === "object" &&
-      "nations" in manifest &&
-      Array.isArray((manifest as { nations: unknown[] }).nations) &&
-      (manifest as { nations: unknown[] }).nations.length > 0
+      Array.isArray(manifest.nations) &&
+      manifest.nations.length > 0
     ) {
-      return provider.getNationsFromManifest(
-        (
-          manifest as {
-            nations: Parameters<typeof provider.getNationsFromManifest>[0];
-          }
-        ).nations,
-      );
+      return provider.getNationsFromManifest(manifest.nations);
     }
     return provider.getAllSelectableNations();
   }, [provider, manifest]);
@@ -109,7 +106,7 @@ export function useSelectNationForm() {
         selectedNation.id,
         selectedGovernment,
         gameId,
-        manifest as Parameters<typeof createCampaignStore>[3],
+        manifest,
       );
 
       if (success) {

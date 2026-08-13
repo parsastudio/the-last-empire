@@ -2,6 +2,9 @@ import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-pa
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 import { GameIdGenerator } from "@/domain/shared/domain-utilities";
+import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+
+export type { FinalMapManifest };
 
 export class BitPackedInitService {
   public static async initializeBitPackedSession(

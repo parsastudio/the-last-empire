@@ -1,6 +1,6 @@
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
-import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 export class NationDatabaseProvider {
@@ -65,19 +65,19 @@ export class NationDatabaseProvider {
   }
 
   public getAllSelectableNations(): NationDetail[] {
-    const sorted = [...ALL_COUNTRY_PROFILES].sort((a, b) => b.gdp - a.gdp);
+    const manifestItems = CountryRegistry.getAllManifestNations();
+    if (manifestItems.length > 0) {
+      return this.getNationsFromManifest(manifestItems);
+    }
 
-    return sorted.map((profile: CountryProfile, index: number) => {
-      return this.formatNationDetail(
-        `NATION_${profile.code}`,
-        profile.nameFa,
-        profile.code,
-        profile.flagCode,
-        index + 1,
-        profile.gdp,
-        profile.population,
-        profile.startingGovernment ?? "DEMOCRACY",
-      );
-    });
+    const sorted = [...CountryRegistry.getAllManifestNations()].sort(
+      (a, b) => b.gdp - a.gdp,
+    );
+
+    if (sorted.length > 0) {
+      return this.getNationsFromManifest(sorted);
+    }
+
+    return [];
   }
 }

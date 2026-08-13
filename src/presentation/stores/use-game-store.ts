@@ -115,6 +115,10 @@ export const useGameStore = create<GameStoreState>()(
           } catch {}
         }
 
+        if (activeManifest) {
+          CountryRegistry.initializeFromManifest(activeManifest);
+        }
+
         let detectedNations: string[] = [];
 
         if (activeManifest && activeManifest.nations) {
