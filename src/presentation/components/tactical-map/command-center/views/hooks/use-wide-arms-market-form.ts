@@ -14,6 +14,7 @@ export interface ArmsSellerOption {
   flagCode: string;
   techLevel: number;
   opinion: number;
+  rank: number;
   isEligible: boolean;
   reason?: string;
 }
@@ -58,9 +59,17 @@ export function useWideArmsMarketForm({
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
           opinion,
+          rank: n.rank || 99,
           isEligible,
           reason,
         };
+      })
+      .filter((c) => c.isEligible)
+      .sort((a, b) => {
+        if (b.techLevel !== a.techLevel) {
+          return b.techLevel - a.techLevel;
+        }
+        return a.rank - b.rank;
       })
       .filter(
         (c) =>
@@ -79,10 +88,9 @@ export function useWideArmsMarketForm({
           c.id.toUpperCase() === cleanCode ||
           c.flagCode.toUpperCase() === cleanCode,
       );
-      if (matched && matched.isEligible) return matched.id;
+      if (matched) return matched.id;
     }
-    const firstEligible = sellerOptions.find((c) => c.isEligible);
-    return firstEligible ? firstEligible.id : sellerOptions[0]?.id || "";
+    return sellerOptions[0]?.id || "";
   }, [selectedTargetCode, sellerOptions]);
 
   const [selectedSellerId, setSelectedSellerId] =

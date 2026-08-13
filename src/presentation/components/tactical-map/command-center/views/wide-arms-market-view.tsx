@@ -1,5 +1,16 @@
 import React from "react";
-import { Search, ShoppingCart, Coins, Zap, Lock, Anchor } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  Coins,
+  Zap,
+  Lock,
+  Anchor,
+  ShieldCheck,
+  AlertTriangle,
+  Award,
+  Users,
+} from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -31,10 +42,18 @@ export function WideArmsMarketView({
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 dir-rtl text-right">
         <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
-          <div className="flex items-center gap-2 pb-1">
-            <ShoppingCart size={14} className="text-gdp" />
-            <span className="text-xs font-bold text-foreground">
-              انتخاب کشور صادرکننده اسلحه
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <ShoppingCart size={14} className="text-gdp" />
+              <span className="text-xs font-bold text-foreground">
+                صادرکنندگان فعال تسلیحات
+              </span>
+            </div>
+            <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground">
+              {PersianNumberFormatter.toPersianDigits(
+                form.sellerOptions.length,
+              )}{" "}
+              کشور
             </span>
           </div>
 
@@ -45,7 +64,7 @@ export function WideArmsMarketView({
             />
             <input
               type="text"
-              placeholder="جستجوی نام یا نماد..."
+              placeholder="جستجوی نام یا نماد صادرکننده..."
               value={form.searchQuery}
               onChange={(e) => form.setSearchQuery(e.target.value)}
               className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right"
@@ -53,54 +72,68 @@ export function WideArmsMarketView({
           </div>
 
           <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
-            {form.sellerOptions.map((seller) => {
-              const isSelected = seller.id === form.selectedSellerId;
-              const flag = getFlagEmoji(seller.flagCode);
+            {form.sellerOptions.length === 0 ? (
+              <div className="p-4 bg-secondary/40 border border-amber-500/30 rounded-2xl text-center space-y-2.5">
+                <AlertTriangle size={24} className="mx-auto text-amber-500" />
+                <h4 className="text-xs font-bold text-foreground font-sans">
+                  هیچ کشور صادرکننده‌ای در دسترس نیست
+                </h4>
+                <p className="text-[10px] text-muted-foreground leading-relaxed font-sans">
+                  برای خرید جنگ‌افزارهای پیشرفته خارجی، دیدگاه دیپلماتیک دوجانبه
+                  با صادرکننده باید حداقل به مثبت ۲۰ (+۲۰) برسد. با مراجعه به
+                  بخش دیپلماسی، پیمان‌های صلح و همکاری دوجانبه امضا کنید.
+                </p>
+              </div>
+            ) : (
+              form.sellerOptions.map((seller) => {
+                const isSelected = seller.id === form.selectedSellerId;
+                const flag = getFlagEmoji(seller.flagCode);
 
-              return (
-                <button
-                  key={seller.id}
-                  onClick={() => form.setSelectedSellerId(seller.id)}
-                  className={`w-full p-3 rounded-2xl border text-right transition-all flex items-center justify-between text-xs cursor-pointer ${
-                    isSelected
-                      ? "bg-secondary border-primary font-bold shadow-sm"
-                      : seller.isEligible
-                        ? "bg-background/40 border-border/60 hover:bg-secondary/40"
-                        : "bg-background/20 border-border/30 opacity-60"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span
-                      className="text-xl select-none"
-                      role="img"
-                      aria-label={seller.name}
-                    >
-                      {flag}
-                    </span>
-                    <div className="space-y-0.5">
-                      <span className="block">{seller.name}</span>
-                      <span className="text-[9px] text-amber-500 font-mono block">
-                        سطح فناوری{" "}
-                        {PersianNumberFormatter.toPersianDigits(
-                          seller.techLevel,
-                        )}
+                return (
+                  <button
+                    key={seller.id}
+                    onClick={() => form.setSelectedSellerId(seller.id)}
+                    className={`w-full p-3 rounded-2xl border text-right transition-all flex items-center justify-between text-xs cursor-pointer ${
+                      isSelected
+                        ? "bg-secondary border-primary font-bold shadow-sm"
+                        : "bg-background/40 border-border/60 hover:bg-secondary/40"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span
+                        className="text-xl select-none"
+                        role="img"
+                        aria-label={seller.name}
+                      >
+                        {flag}
                       </span>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="block font-bold">{seller.name}</span>
+                          <span className="text-[9px] font-mono text-muted-foreground">
+                            #
+                            {PersianNumberFormatter.toPersianDigits(
+                              seller.rank,
+                            )}
+                          </span>
+                        </div>
+                        <span className="text-[9px] text-amber-500 font-mono block">
+                          سطح فناوری{" "}
+                          {PersianNumberFormatter.toPersianDigits(
+                            seller.techLevel,
+                          )}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  {seller.isEligible ? (
-                    <span className="font-mono text-[9px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
+                    <span className="font-mono text-[9px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                      <ShieldCheck size={10} />
                       آماده معامله
                     </span>
-                  ) : (
-                    <span className="font-mono text-[9px] bg-military/15 text-military border border-military/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
-                      <Lock size={10} />
-                      تحریم/مخالف
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -117,8 +150,15 @@ export function WideArmsMarketView({
                     {getFlagEmoji(form.selectedSeller.flagCode)}
                   </span>
                   <div>
-                    <h3 className="text-sm font-extrabold text-foreground">
-                      واردات تسلیحاتی از {form.selectedSeller.name}
+                    <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
+                      <span>واردات تسلیحاتی از {form.selectedSeller.name}</span>
+                      <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                        <Award size={11} />
+                        رتبه نظامی #
+                        {PersianNumberFormatter.toPersianDigits(
+                          form.selectedSeller.rank,
+                        )}
+                      </span>
                     </h3>
                     <span className="text-[10px] text-muted-foreground font-mono">
                       سطح فناوری صادرکننده:{" "}
@@ -325,8 +365,19 @@ export function WideArmsMarketView({
               )}
             </>
           ) : (
-            <div className="py-20 text-center text-xs text-muted-foreground italic">
-              یک کشور صادرکننده را از لیست انتخاب کنید.
+            <div className="py-20 flex flex-col items-center justify-center gap-4 text-center px-4">
+              <div className="w-14 h-14 rounded-2xl bg-secondary/60 border border-border flex items-center justify-center text-muted-foreground">
+                <Users size={28} />
+              </div>
+              <div className="space-y-1.5 max-w-sm">
+                <h4 className="text-sm font-bold text-foreground font-sans">
+                  بازار بین‌المللی تجهیزات نظامی
+                </h4>
+                <p className="text-xs text-muted-foreground leading-relaxed font-sans">
+                  از ستون سمت راست یکی از قدرت‌های صادرکننده فعال را برای مشاهده
+                  فهرست جنگ‌افزارها و واردات فوری انتخاب فرمایید.
+                </p>
+              </div>
             </div>
           )}
         </div>

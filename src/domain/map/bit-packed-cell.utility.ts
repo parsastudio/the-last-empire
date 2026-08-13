@@ -13,7 +13,7 @@ export class BitPackedCellUtility {
     return packed & BitPackedCellUtility.PROVINCE_MASK;
   }
 
-  public static setNationId(packed: number, nationId: number): number {
-    return nationId & BitPackedCellUtility.PROVINCE_MASK;
+  public static setNationId(packed: number, _nationId: number): number {
+    return packed;
   }
 }
