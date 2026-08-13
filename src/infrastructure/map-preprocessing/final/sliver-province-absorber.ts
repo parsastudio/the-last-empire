@@ -1,5 +1,6 @@
 import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 interface ProvinceBounds {
   minX: number;
@@ -23,7 +24,7 @@ export class SliverProvinceAbsorber {
 
     for (let i = 0; i < totalPixels; i++) {
       const pid = raw[i]! & 0x0fff;
-      if (pid === 0) continue;
+      if (pid < BitPackedCellUtility.FIRST_PROVINCE_ID) continue;
 
       const x = i % width;
       const y = Math.floor(i / width);
@@ -158,7 +159,7 @@ export class SliverProvinceAbsorber {
                 const nInfo = provinceMap.get(nPid);
 
                 if (
-                  nPid !== 0 &&
+                  nPid >= BitPackedCellUtility.FIRST_PROVINCE_ID &&
                   nPid !== sliverPid &&
                   nInfo &&
                   nInfo.countryNumericId === sliverInfo.countryNumericId

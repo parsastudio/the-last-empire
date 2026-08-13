@@ -25,6 +25,7 @@ export function WebGLContextMenuWrapper({
     <MapContextMenu
       position={contextMenuState.screenPos}
       countryName={contextMenuState.provinceName}
+      isOwnCountry={contextMenuState.isOwnCountry}
       onSelectAction={(action) =>
         onSelectAction(
           action,

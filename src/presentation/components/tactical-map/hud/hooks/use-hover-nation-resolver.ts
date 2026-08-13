@@ -8,6 +8,7 @@ import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator"
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { CountryRegistry } from "@/domain/data/countries";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
@@ -27,28 +28,29 @@ export function useHoverNationResolver({
     );
   }, [provincesMap]);
 
+  const totalWorldLandPixels = useMemo(() => {
+    let sum = 0;
+    const values = Object.values(syncedProvincesMap);
+    for (let i = 0; i < values.length; i++) {
+      sum += values[i]?.pixelCount || 0;
+    }
+    return sum > 0 ? sum : 1;
+  }, [syncedProvincesMap]);
+
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
-      if (provinceId <= 0) return null;
-
       if (provinceId < BitPackedCellUtility.FIRST_PROVINCE_ID) {
-        return {
-          name: "منطقه رزرو شده سیستمی",
-          code: `SYS_${provinceId}`,
-          flagCode: "UN",
-          rank: 0,
-          stance: "غیرقابل سکونت / غیرفعال",
-          regionName: `منطقه ویژه سیستمی #${provinceId}`,
-          regionPopulation: "۰ نفر",
-          regionAreaPercentage: "۰٪ از مساحت",
-        };
+        return null;
       }
 
       const province = syncedProvincesMap[provinceId.toString()];
       if (!province) return null;
 
+      const canonicalOwnerId = CountryRegistry.resolveCanonicalId(
+        province.ownerNationId,
+      );
       const ownerNation = nationsMap
-        ? nationsMap[province.ownerNationId]
+        ? nationsMap[province.ownerNationId] || nationsMap[canonicalOwnerId]
         : null;
 
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
@@ -64,23 +66,19 @@ export function useHoverNationResolver({
         ? ownerNation.geography.territoryPixelCount || province.pixelCount || 1
         : province.pixelCount || 1;
 
-      const provPixels = province.pixelCount || 0;
-      const areaPctNum =
-        totalNationPixels > 0 ? (provPixels / totalNationPixels) * 100 : 0;
+      const worldLandSharePct =
+        (totalNationPixels / totalWorldLandPixels) * 100;
 
-      const regionPopNum = Math.round(realPop * (areaPctNum / 100));
-
-      const regionPopulationText =
-        NationPresentationMapper.formatPopulation(regionPopNum);
-
-      const formattedAreaPct =
-        areaPctNum < 0.1 && areaPctNum > 0
+      const formattedWorldAreaPct =
+        worldLandSharePct < 0.1 && worldLandSharePct > 0
           ? "< ۰.۱"
           : PersianNumberFormatter.toPersianDigits(
-              Number(areaPctNum.toFixed(1)).toString(),
+              Number(worldLandSharePct.toFixed(1)).toString(),
             );
 
-      const regionAreaPercentageText = `${formattedAreaPct}٪ از مساحت`;
+      const totalPopulationText =
+        NationPresentationMapper.formatPopulation(realPop);
+      const worldAreaPercentageText = `${formattedWorldAreaPct}٪ از کل جهان`;
 
       const summary = NationPresentationMapper.formatNationSummary(
         province.ownerNationId,
@@ -100,11 +98,11 @@ export function useHoverNationResolver({
         rank: summary.rank,
         stance: "دیپلماسی استان",
         regionName: province.nameFa,
-        regionPopulation: regionPopulationText,
-        regionAreaPercentage: regionAreaPercentageText,
+        totalPopulation: totalPopulationText,
+        worldAreaPercentage: worldAreaPercentageText,
       };
     },
-    [syncedProvincesMap, nationsMap],
+    [syncedProvincesMap, nationsMap, totalWorldLandPixels],
   );
 
   return { resolveHoverInfo };

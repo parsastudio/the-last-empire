@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Shield, Users, PieChart } from "lucide-react";
+import { Shield, Users, Globe2 } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -10,8 +10,8 @@ export interface HoverCountryInfo {
   rank: number;
   stance: string;
   regionName?: string;
-  regionPopulation?: string;
-  regionAreaPercentage?: string;
+  totalPopulation?: string;
+  worldAreaPercentage?: string;
 }
 
 class HoverHudPositionCalculator {
@@ -92,17 +92,23 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-          <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
-            <Users size={12} className="text-primary shrink-0" />
-            <span className="truncate">
-              {hoverData.regionPopulation || "---"}
+          <div className="flex flex-col gap-1 bg-secondary/40 p-2 rounded-xl border border-border/40">
+            <span className="text-muted-foreground text-[9px] font-sans flex items-center gap-1">
+              <Users size={11} className="text-primary shrink-0" />
+              جمعیت کل کشور:
+            </span>
+            <span className="font-bold text-foreground truncate">
+              {hoverData.totalPopulation || "---"}
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-secondary/40 p-2 rounded-xl border border-border/40">
-            <PieChart size={12} className="text-gdp shrink-0" />
-            <span className="truncate">
-              {hoverData.regionAreaPercentage || "---"}
+          <div className="flex flex-col gap-1 bg-secondary/40 p-2 rounded-xl border border-border/40">
+            <span className="text-muted-foreground text-[9px] font-sans flex items-center gap-1">
+              <Globe2 size={11} className="text-gdp shrink-0" />
+              وسعت از جهان:
+            </span>
+            <span className="font-bold text-foreground truncate">
+              {hoverData.worldAreaPercentage || "---"}
             </span>
           </div>
         </div>
@@ -110,7 +116,7 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
         <div className="flex items-center justify-between text-[10px] bg-secondary/30 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground flex items-center gap-1">
             <Shield size={11} className="text-diplomacy" />
-            وضعیت سیاسی:
+            وضعیت دیپلماتیک:
           </span>
           <span className="font-bold text-foreground">{hoverData.stance}</span>
         </div>

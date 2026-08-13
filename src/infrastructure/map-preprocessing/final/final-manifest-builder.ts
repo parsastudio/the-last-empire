@@ -29,6 +29,7 @@ export interface FinalManifestNation {
   maxPopulationCapacity: number;
   territoryPixelCount: number;
   provinceIds: number[];
+  hasSeaAccess: boolean;
   startingTreasury: number;
   initialRank: number;
   defaultGovernment: string;
@@ -154,6 +155,7 @@ export class FinalManifestBuilder {
         maxPopulationCapacity,
         territoryPixelCount: totalCountryPixels,
         provinceIds: provIds,
+        hasSeaAccess,
         startingTreasury,
         initialRank: rankIndex + 1,
         defaultGovernment: defaultGov,

@@ -42,6 +42,9 @@ export function useMapGesture(
   useEffect(() => {
     const handleGlobalMouseUp = () => {
       isDraggingRef.current = false;
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+      }, 50);
     };
 
     window.addEventListener("mouseup", handleGlobalMouseUp);
@@ -201,6 +204,9 @@ export function useMapGesture(
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
+    setTimeout(() => {
+      hasDraggedRef.current = false;
+    }, 50);
   }, []);
 
   const positionRef = externalPositionRef ?? fallbackPositionRef;

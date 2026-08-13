@@ -46,7 +46,7 @@ export class NationProfileAssigner {
     const startingTech = profile?.startingTechLevel ?? item.startingTechLevel;
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
       tier,
-      true,
+      item.hasSeaAccess ?? true,
       startingTech,
     );
 
@@ -142,7 +142,7 @@ export class NationProfileAssigner {
       geography: {
         landNeighbors: [],
         seaNeighbors: [],
-        hasSeaAccess: true,
+        hasSeaAccess: item.hasSeaAccess ?? true,
         territoryPixelCount: item.territoryPixelCount,
         infrastructureLevel: item.infrastructureLevel,
       },
@@ -200,6 +200,7 @@ export class NationProfileAssigner {
       maxPopulationCapacity: fallback.maxPopulationCapacity,
       territoryPixelCount: 1000,
       provinceIds: [],
+      hasSeaAccess: true,
       startingTreasury: Math.floor(fallback.gdp * 0.05),
       initialRank: 1,
       defaultGovernment: fallback.startingGovernment,
