@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class RecruitmentQueueManager {
   public enqueueOrder(
@@ -40,26 +41,17 @@ export class RecruitmentQueueManager {
 
   public processTurnQueue(nation: Nation): Nation {
     const remainingQueue: RecruitmentOrder[] = [];
-    const updatedMilitary = { ...nation.military };
+    let updatedMilitary = { ...nation.military };
 
     for (const order of nation.recruitmentQueue) {
       const nextTurns = order.turnsRemaining - 1;
       if (nextTurns <= 0) {
-        if (order.unitType === "INFANTRY") {
-          updatedMilitary.infantry += order.quantity;
-        } else if (order.unitType === "ARMOR") {
-          updatedMilitary.armor = (updatedMilitary.armor || 0) + order.quantity;
-        } else if (order.unitType === "AIR_DEFENSE") {
-          updatedMilitary.airDefense =
-            (updatedMilitary.airDefense || 0) + order.quantity;
-        } else if (order.unitType === "AIR_FORCE") {
-          updatedMilitary.airForce += order.quantity;
-        } else if (order.unitType === "DRONE_MISSILE") {
-          updatedMilitary.droneMissile += order.quantity;
-        } else if (order.unitType === "NAVAL_FLEET") {
-          updatedMilitary.navalFleet =
-            (updatedMilitary.navalFleet || 0) + order.quantity;
-        }
+        updatedMilitary = MilitaryInventoryHelper.addUnits(
+          updatedMilitary,
+          order.unitType,
+          order.quantity,
+          nation.military.techLevel,
+        );
       } else {
         remainingQueue.push({ ...order, turnsRemaining: nextTurns });
       }

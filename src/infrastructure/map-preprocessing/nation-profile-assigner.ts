@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 type GovernmentType = Nation["government"]["type"];
 
@@ -65,6 +66,55 @@ export class NationProfileAssigner {
           ? item.startingTechLevel
           : tierStack.techLevel;
 
+    let baseMilitary = {
+      infantry: 0,
+      armor: 0,
+      airDefense: 0,
+      airForce: 0,
+      droneMissile: 0,
+      navalFleet: 0,
+      experience: 10,
+      techLevel,
+      inventory: {},
+    };
+
+    baseMilitary = MilitaryInventoryHelper.addUnits(
+      baseMilitary,
+      "INFANTRY",
+      infantry,
+      techLevel,
+    );
+    baseMilitary = MilitaryInventoryHelper.addUnits(
+      baseMilitary,
+      "ARMOR",
+      armor,
+      techLevel,
+    );
+    baseMilitary = MilitaryInventoryHelper.addUnits(
+      baseMilitary,
+      "AIR_DEFENSE",
+      airDefense,
+      techLevel,
+    );
+    baseMilitary = MilitaryInventoryHelper.addUnits(
+      baseMilitary,
+      "AIR_FORCE",
+      airForce,
+      techLevel,
+    );
+    baseMilitary = MilitaryInventoryHelper.addUnits(
+      baseMilitary,
+      "DRONE_MISSILE",
+      droneMissile,
+      techLevel,
+    );
+    baseMilitary = MilitaryInventoryHelper.addUnits(
+      baseMilitary,
+      "NAVAL_FLEET",
+      navalFleet,
+      techLevel,
+    );
+
     return {
       id: item.id,
       name: item.nameFa,
@@ -87,16 +137,7 @@ export class NationProfileAssigner {
         turnsInPower: 5,
       },
       resources: {},
-      military: {
-        infantry,
-        armor,
-        airDefense,
-        airForce,
-        droneMissile,
-        navalFleet,
-        experience: 10,
-        techLevel,
-      },
+      military: baseMilitary,
       recruitmentQueue: [],
       geography: {
         landNeighbors: [],

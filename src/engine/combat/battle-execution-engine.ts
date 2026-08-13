@@ -9,6 +9,7 @@ import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -180,25 +181,21 @@ export class BattleExecutionEngine {
       attacker.population + transferredPopulation,
     );
 
+    const updatedAttackerMilitary = MilitaryInventoryHelper.applyCasualties(
+      attacker.military,
+      calcResult.attackerCasualties.infantryLost,
+      calcResult.attackerCasualties.armorLost,
+      calcResult.attackerCasualties.airDefenseLost,
+      calcResult.attackerCasualties.airForceLost,
+      calcResult.dronesUsed,
+      calcResult.attackerCasualties.navalFleetLost,
+    );
+
     updatedAttacker = {
       ...updatedAttacker,
       treasury: attackerTreasuryAfterDeployment + calcResult.treasuryLooted,
       military: {
-        ...attacker.military,
-        infantry: Math.max(
-          0,
-          attacker.military.infantry -
-            calcResult.attackerCasualties.infantryLost,
-        ),
-        airForce: Math.max(
-          0,
-          attacker.military.airForce -
-            calcResult.attackerCasualties.airForceLost,
-        ),
-        droneMissile: Math.max(
-          0,
-          attacker.military.droneMissile - calcResult.dronesUsed,
-        ),
+        ...updatedAttackerMilitary,
         experience: Math.min(100, attacker.military.experience + 5),
       },
     };
@@ -251,6 +248,28 @@ export class BattleExecutionEngine {
       newDefenderPop,
     );
 
+    const updatedDefenderMilitary = isDefenderAlive
+      ? MilitaryInventoryHelper.applyCasualties(
+          defender.military,
+          calcResult.defenderCasualties.infantryLost,
+          calcResult.defenderCasualties.armorLost,
+          calcResult.defenderCasualties.airDefenseLost,
+          calcResult.defenderCasualties.airForceLost,
+          0,
+          calcResult.defenderCasualties.navalFleetLost,
+        )
+      : {
+          infantry: 0,
+          armor: 0,
+          airDefense: 0,
+          airForce: 0,
+          droneMissile: 0,
+          navalFleet: 0,
+          experience: defender.military.experience,
+          techLevel: defender.military.techLevel,
+          inventory: {},
+        };
+
     updatedDefender = {
       ...updatedDefender,
       isAlive: isDefenderAlive,
@@ -258,21 +277,7 @@ export class BattleExecutionEngine {
         ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,
       military: {
-        ...defender.military,
-        infantry: isDefenderAlive
-          ? Math.max(
-              0,
-              defender.military.infantry -
-                calcResult.defenderCasualties.infantryLost,
-            )
-          : 0,
-        airForce: isDefenderAlive
-          ? Math.max(
-              0,
-              defender.military.airForce -
-                calcResult.defenderCasualties.airForceLost,
-            )
-          : 0,
+        ...updatedDefenderMilitary,
         experience: Math.min(100, defender.military.experience + 3),
       },
     };

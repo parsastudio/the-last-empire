@@ -6,6 +6,7 @@ import {
   MilitaryStack,
   RecruitmentOrder,
 } from "@/domain/military/military.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 
 interface WideMilitaryViewProps {
   military: MilitaryStack;
@@ -13,6 +14,7 @@ interface WideMilitaryViewProps {
   nationId: string;
   treasury?: number;
   industrialLevel?: number;
+  nation?: Nation;
 }
 
 export function WideMilitaryView({
@@ -21,16 +23,21 @@ export function WideMilitaryView({
   nationId,
   treasury = 100000,
   industrialLevel = 1,
+  nation,
 }: WideMilitaryViewProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <MilitaryForcesSection
           infantry={military.infantry}
+          armor={military.armor}
+          airDefense={military.airDefense}
           airForce={military.airForce}
           droneMissile={military.droneMissile}
+          navalFleet={military.navalFleet}
           techLevel={military.techLevel}
           experience={military.experience}
+          nation={nation}
         />
 
         <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />

@@ -5,6 +5,7 @@ import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.confi
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class ArmsMarketManager {
   public static executePurchase(
@@ -89,22 +90,12 @@ export class ArmsMarketManager {
 
     const sellerProfit = sellerUnitPrice * quantity;
 
-    const updatedBuyerMilitary = { ...buyer.military };
-    if (unitType === "INFANTRY") {
-      updatedBuyerMilitary.infantry += quantity;
-    } else if (unitType === "ARMOR") {
-      updatedBuyerMilitary.armor = (updatedBuyerMilitary.armor || 0) + quantity;
-    } else if (unitType === "AIR_DEFENSE") {
-      updatedBuyerMilitary.airDefense =
-        (updatedBuyerMilitary.airDefense || 0) + quantity;
-    } else if (unitType === "AIR_FORCE") {
-      updatedBuyerMilitary.airForce += quantity;
-    } else if (unitType === "DRONE_MISSILE") {
-      updatedBuyerMilitary.droneMissile += quantity;
-    } else if (unitType === "NAVAL_FLEET") {
-      updatedBuyerMilitary.navalFleet =
-        (updatedBuyerMilitary.navalFleet || 0) + quantity;
-    }
+    const updatedBuyerMilitary = MilitaryInventoryHelper.addUnits(
+      buyer.military,
+      unitType,
+      quantity,
+      seller.military.techLevel,
+    );
 
     const updatedBuyer: Nation = {
       ...buyer,
