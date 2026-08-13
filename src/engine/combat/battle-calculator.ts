@@ -86,7 +86,7 @@ export class BattleCalculator {
 
     let defenderRemainingInfantry = defender.military.infantry;
     let defenderRemainingArmor = defender.military.armor || 0;
-    let defenderRemainingAirForce = defender.military.airForce;
+    const defenderRemainingAirForce = defender.military.airForce;
 
     const armorDestroyedByDrones = Math.min(
       defenderRemainingArmor,
@@ -273,7 +273,7 @@ export class BattleCalculator {
       airDefenseEngaged: defender.military.airDefense || 0,
       airDefenseLost: 0,
       airForceEngaged: defender.military.airForce,
-      airForceLost: defenderAirLoss + airForceDestroyedByDrones,
+      airForceLost: defenderAirLoss,
       droneMissileEngaged: defender.military.droneMissile,
       droneMissileLost: 0,
       navalFleetEngaged: defender.military.navalFleet || 0,

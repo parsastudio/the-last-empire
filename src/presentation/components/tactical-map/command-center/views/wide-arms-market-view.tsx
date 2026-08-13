@@ -1,13 +1,5 @@
 import React from "react";
-import {
-  Search,
-  ShoppingCart,
-  Coins,
-  ShieldAlert,
-  Zap,
-  Lock,
-  Anchor,
-} from "lucide-react";
+import { Search, ShoppingCart, Coins, Zap, Lock, Anchor } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";

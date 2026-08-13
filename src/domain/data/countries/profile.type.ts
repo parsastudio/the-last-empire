@@ -10,4 +10,8 @@ export interface CountryProfile {
   flagCode: string;
   militaryTier: number;
   startingGovernment?: GovernmentType;
+  startingTechLevel?: number;
+  startingInfantry?: number;
+  startingAirForce?: number;
+  startingDroneMissile?: number;
 }
