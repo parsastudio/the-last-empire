@@ -8,7 +8,10 @@ import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progress
 import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
-import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import {
+  FinalMapManifest,
+  FinalManifestNation,
+} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 
@@ -122,7 +125,9 @@ export const useGameStore = create<GameStoreState>()(
         let detectedNations: string[] = [];
 
         if (activeManifest && activeManifest.nations) {
-          detectedNations = activeManifest.nations.map((n) => n.id);
+          detectedNations = activeManifest.nations.map(
+            (n: FinalManifestNation) => n.id,
+          );
         } else {
           detectedNations = ALL_COUNTRY_PROFILES.map(
             (p) => `NATION_${p.code.toUpperCase()}`,

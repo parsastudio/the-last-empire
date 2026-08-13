@@ -1,8 +1,9 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { RegionDemographics } from "@/domain/nation/region-demographics.schema";
-import { GovernmentType } from "@/domain/politics/politics.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
+
+type GovernmentType = Nation["government"]["type"];
 
 export class NationProfileAssigner {
   public buildNationFromManifest(
@@ -27,12 +28,36 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
-    const defaultRegion: RegionDemographics = {
+    const defaultRegion = {
       regionId: 0,
       name: `خاک اصلی ${item.nameFa}`,
       pixelCount: item.territoryPixelCount,
       population: item.population,
     };
+
+    const profile =
+      CountryRegistry.getCountry(item.id) ||
+      CountryRegistry.getCountry(item.code);
+    const tier =
+      profile?.militaryTier ?? Math.max(1, Math.min(20, 21 - item.initialRank));
+    const tierStack = MilitaryDistributionEngine.calculateStartingStack(
+      tier,
+      true,
+    );
+
+    const infantry =
+      item.startingInfantry > 40 ? item.startingInfantry : tierStack.infantry;
+    const armor = item.startingArmor ?? tierStack.armor;
+    const airDefense = item.startingAirDefense ?? tierStack.airDefense;
+    const airForce =
+      item.startingAirForce > 5 ? item.startingAirForce : tierStack.airForce;
+    const droneMissile =
+      item.startingDroneMissile > 0
+        ? item.startingDroneMissile
+        : tierStack.droneMissile;
+    const navalFleet = item.startingNavalFleet ?? tierStack.navalFleet;
+    const techLevel =
+      item.startingTechLevel > 1 ? item.startingTechLevel : tierStack.techLevel;
 
     return {
       id: item.id,
@@ -57,14 +82,14 @@ export class NationProfileAssigner {
       },
       resources: {},
       military: {
-        infantry: item.startingInfantry,
-        armor: 0,
-        airDefense: 0,
-        airForce: item.startingAirForce,
-        droneMissile: item.startingDroneMissile,
-        navalFleet: 0,
+        infantry,
+        armor,
+        airDefense,
+        airForce,
+        droneMissile,
+        navalFleet,
         experience: 10,
-        techLevel: item.startingTechLevel,
+        techLevel,
       },
       recruitmentQueue: [],
       geography: {
@@ -117,6 +142,12 @@ export class NationProfileAssigner {
     const gdp = profile ? profile.gdp : 100000000000;
     const population = profile ? profile.population : 10000000;
 
+    const tier = profile?.militaryTier ?? 5;
+    const tierStack = MilitaryDistributionEngine.calculateStartingStack(
+      tier,
+      true,
+    );
+
     const fallbackManifestItem: ManifestNationItem = {
       id: canonicalId,
       numericId: profile?.id ?? 0,
@@ -133,10 +164,13 @@ export class NationProfileAssigner {
       startingTreasury: Math.floor(gdp * 0.05),
       initialRank: 1,
       defaultGovernment: profile?.startingGovernment ?? "DEMOCRACY",
-      startingInfantry: profile?.startingInfantry ?? 50,
-      startingAirForce: profile?.startingAirForce ?? 10,
-      startingDroneMissile: profile?.startingDroneMissile ?? 5,
-      startingTechLevel: profile?.startingTechLevel ?? 1,
+      startingInfantry: tierStack.infantry,
+      startingArmor: tierStack.armor,
+      startingAirDefense: tierStack.airDefense,
+      startingAirForce: tierStack.airForce,
+      startingDroneMissile: tierStack.droneMissile,
+      startingNavalFleet: tierStack.navalFleet,
+      startingTechLevel: tierStack.techLevel,
       industrialLevel: 1,
       infrastructureLevel: 1,
       startingStability: 50,
