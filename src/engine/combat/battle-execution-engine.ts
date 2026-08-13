@@ -68,119 +68,106 @@ export class BattleExecutionEngine {
     );
 
     const updatedProvinces = { ...state.provinces };
-    let conqueredProvinceId: number | null = null;
-    let conqueredPixels = 0;
+    const attackerNumericId = CountryRegistry.resolveNumericId(attacker.id);
+    const buffer = BitPackedGridState.getInstance().getBuffer();
 
-    const defenderProvincesListBefore = Object.values(updatedProvinces).filter(
+    const defenderProvincesBefore = Object.values(updatedProvinces).filter(
       (p) =>
         p.ownerNationId === defender.id ||
         p.ownerNationId === canonicalDefenderId,
     );
     const defenderTotalPixels =
-      defenderProvincesListBefore.reduce((sum, p) => sum + p.pixelCount, 0) ||
+      defenderProvincesBefore.reduce((sum, p) => sum + p.pixelCount, 0) ||
       defender.geography.territoryPixelCount ||
       1;
 
-    if (calcResult.isAttackerVictory) {
-      if (
-        action.targetProvinceId &&
-        updatedProvinces[action.targetProvinceId.toString()]
-      ) {
-        conqueredProvinceId = action.targetProvinceId;
-      } else if (defenderProvincesListBefore.length > 0) {
-        const sorted = [...defenderProvincesListBefore].sort(
-          (a, b) => b.pixelCount - a.pixelCount,
-        );
-        conqueredProvinceId = sorted[0]!.provinceId;
-      }
+    let conqueredPixels = 0;
 
-      if (conqueredProvinceId) {
-        const targetProv = updatedProvinces[conqueredProvinceId.toString()];
-        if (targetProv) {
-          updatedProvinces[conqueredProvinceId.toString()] = {
-            ...targetProv,
+    if (calcResult.isAttackerVictory) {
+      if (calcResult.isFullCapitulation) {
+        for (const prov of defenderProvincesBefore) {
+          updatedProvinces[prov.provinceId.toString()] = {
+            ...prov,
             ownerNationId: attacker.id,
           };
-
-          conqueredPixels = targetProv.pixelCount;
-
-          const attackerNumericId = CountryRegistry.resolveNumericId(
-            attacker.id,
-          );
-          const buffer = BitPackedGridState.getInstance().getBuffer();
+          conqueredPixels += prov.pixelCount;
           BitPackedProvinceConqueror.conquerProvince(
             buffer,
-            conqueredProvinceId,
+            prov.provinceId,
             attackerNumericId,
           );
-          BitPackedGridState.getInstance().markDirty();
+        }
+        BitPackedGridState.getInstance().markDirty();
+      } else {
+        let conqueredProvId: number | null = null;
+        if (
+          action.targetProvinceId &&
+          updatedProvinces[action.targetProvinceId.toString()]
+        ) {
+          conqueredProvId = action.targetProvinceId;
+        } else if (defenderProvincesBefore.length > 0) {
+          const sorted = [...defenderProvincesBefore].sort(
+            (a, b) => b.pixelCount - a.pixelCount,
+          );
+          conqueredProvId = sorted[0]!.provinceId;
+        }
+
+        if (conqueredProvId) {
+          const targetProv = updatedProvinces[conqueredProvId.toString()];
+          if (targetProv) {
+            updatedProvinces[conqueredProvId.toString()] = {
+              ...targetProv,
+              ownerNationId: attacker.id,
+            };
+            conqueredPixels = targetProv.pixelCount;
+            BitPackedProvinceConqueror.conquerProvince(
+              buffer,
+              conqueredProvId,
+              attackerNumericId,
+            );
+            BitPackedGridState.getInstance().markDirty();
+          }
         }
       }
     }
 
-    const remainingDefenderProvincesList = Object.values(
-      updatedProvinces,
-    ).filter(
+    const remainingDefenderProvinces = Object.values(updatedProvinces).filter(
       (p) =>
         p.ownerNationId === defender.id ||
         p.ownerNationId === canonicalDefenderId,
     );
-    const defenderRemainingPixels = remainingDefenderProvincesList.reduce(
+    const isDefenderAlive =
+      remainingDefenderProvinces.length > 0 && !calcResult.isFullCapitulation;
+    const defenderRemainingPixels = remainingDefenderProvinces.reduce(
       (sum, p) => sum + p.pixelCount,
       0,
     );
-    const isDefenderAlive = remainingDefenderProvincesList.length > 0;
-    const isFullCapitulation = !isDefenderAlive;
 
-    const provinceRatio = calcResult.isAttackerVictory
-      ? Math.min(1.0, conqueredPixels / (defenderTotalPixels || 1))
+    const transferredRatio = calcResult.isAttackerVictory
+      ? calcResult.isFullCapitulation
+        ? 1.0
+        : Math.min(1.0, conqueredPixels / (defenderTotalPixels || 1))
       : 0;
 
-    const transferredPopulation = calcResult.isAttackerVictory
-      ? Math.floor(defender.population * provinceRatio)
-      : 0;
-    const transferredCapacity = calcResult.isAttackerVictory
-      ? Math.floor(
-          (defender.maxPopulationCapacity ||
-            Math.floor(defender.population / 0.95)) * provinceRatio,
-        )
-      : 0;
-    const treasuryLooted = calcResult.isAttackerVictory
-      ? Math.floor(Math.max(0, defender.treasury) * provinceRatio)
-      : 0;
+    const transferredPopulation = Math.floor(
+      defender.population * transferredRatio,
+    );
+    const transferredCapacity = Math.floor(
+      (defender.maxPopulationCapacity ||
+        Math.floor(defender.population / 0.95)) * transferredRatio,
+    );
 
-    const attackerTreasuryAfterDeployment =
-      attacker.treasury - calcResult.deploymentMoneyCost;
-
-    const attackerProvincesList = Object.values(updatedProvinces).filter(
+    const attackerProvinces = Object.values(updatedProvinces).filter(
       (p) =>
         p.ownerNationId === attacker.id ||
         p.ownerNationId === canonicalAttackerId,
     );
-    const attackerTotalPixels = attackerProvincesList.reduce(
+    const attackerTotalPixels = attackerProvinces.reduce(
       (sum, p) => sum + p.pixelCount,
       0,
     );
 
-    const newAttackerMaxCapacity =
-      (attacker.maxPopulationCapacity ||
-        Math.floor(attacker.population / 0.95)) + transferredCapacity;
-
-    const attackerWithUpdatedCapacity: typeof attacker = {
-      ...attacker,
-      maxPopulationCapacity: newAttackerMaxCapacity,
-      geography: {
-        ...attacker.geography,
-        territoryPixelCount: attackerTotalPixels,
-      },
-    };
-
-    let updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
-      attackerWithUpdatedCapacity,
-      attacker.population + transferredPopulation,
-    );
-
-    const updatedAttackerMilitary = MilitaryInventoryHelper.applyCasualties(
+    let updatedAttackerMilitary = MilitaryInventoryHelper.applyCasualties(
       attacker.military,
       calcResult.attackerCasualties.infantryLost,
       calcResult.attackerCasualties.armorLost,
@@ -190,9 +177,53 @@ export class BattleExecutionEngine {
       calcResult.attackerCasualties.navalFleetLost,
     );
 
+    if (calcResult.capturedAirForce > 0) {
+      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
+        updatedAttackerMilitary,
+        "AIR_FORCE",
+        calcResult.capturedAirForce,
+        defender.military.techLevel,
+      );
+    }
+    if (calcResult.capturedAirDefense > 0) {
+      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
+        updatedAttackerMilitary,
+        "AIR_DEFENSE",
+        calcResult.capturedAirDefense,
+        defender.military.techLevel,
+      );
+    }
+    if (calcResult.capturedNavalFleet > 0) {
+      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
+        updatedAttackerMilitary,
+        "NAVAL_FLEET",
+        calcResult.capturedNavalFleet,
+        defender.military.techLevel,
+      );
+    }
+
+    const newAttackerMaxCap =
+      (attacker.maxPopulationCapacity ||
+        Math.floor(attacker.population / 0.95)) + transferredCapacity;
+
+    let updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
+      {
+        ...attacker,
+        maxPopulationCapacity: newAttackerMaxCap,
+        geography: {
+          ...attacker.geography,
+          territoryPixelCount: attackerTotalPixels,
+        },
+      },
+      attacker.population + transferredPopulation,
+    );
+
     updatedAttacker = {
       ...updatedAttacker,
-      treasury: attackerTreasuryAfterDeployment + treasuryLooted,
+      treasury:
+        attacker.treasury -
+        calcResult.deploymentMoneyCost +
+        calcResult.treasuryLooted,
       military: {
         ...updatedAttackerMilitary,
         experience: Math.min(100, attacker.military.experience + 5),
@@ -209,15 +240,17 @@ export class BattleExecutionEngine {
     const attackerRelKey = updatedAttacker.relations[defender.id]
       ? defender.id
       : canonicalDefenderId;
-    const attackerRelToDefender = updatedAttacker.relations[attackerRelKey];
-    if (attackerRelToDefender) {
+    if (updatedAttacker.relations[attackerRelKey]) {
       updatedAttacker.relations = {
         ...updatedAttacker.relations,
         [attackerRelKey]: {
-          ...attackerRelToDefender,
+          ...updatedAttacker.relations[attackerRelKey]!,
           stance: "WAR",
           isTradeEmbargoed: true,
-          opinion: Math.min(-50, attackerRelToDefender.opinion - 40),
+          opinion: Math.min(
+            -50,
+            updatedAttacker.relations[attackerRelKey]!.opinion - 40,
+          ),
         },
       };
     }
@@ -233,21 +266,7 @@ export class BattleExecutionEngine {
         )
       : 0;
 
-    const defenderWithUpdatedCapacity: typeof defender = {
-      ...defender,
-      maxPopulationCapacity: newDefenderCap,
-      geography: {
-        ...defender.geography,
-        territoryPixelCount: defenderRemainingPixels,
-      },
-    };
-
-    let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
-      defenderWithUpdatedCapacity,
-      newDefenderPop,
-    );
-
-    const updatedDefenderMilitary = MilitaryInventoryHelper.applyCasualties(
+    let updatedDefenderMilitary = MilitaryInventoryHelper.applyCasualties(
       defender.military,
       calcResult.defenderCasualties.infantryLost,
       calcResult.defenderCasualties.armorLost,
@@ -257,27 +276,49 @@ export class BattleExecutionEngine {
       calcResult.defenderCasualties.navalFleetLost,
     );
 
+    if (!isDefenderAlive) {
+      updatedDefenderMilitary = {
+        infantry: 0,
+        armor: 0,
+        airDefense: 0,
+        airForce: 0,
+        droneMissile: 0,
+        navalFleet: 0,
+        experience: 0,
+        techLevel: defender.military.techLevel,
+        inventory: {},
+      };
+    }
+
+    let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
+      {
+        ...defender,
+        maxPopulationCapacity: newDefenderCap,
+        geography: {
+          ...defender.geography,
+          territoryPixelCount: defenderRemainingPixels,
+        },
+      },
+      newDefenderPop,
+    );
+
     updatedDefender = {
       ...updatedDefender,
       isAlive: isDefenderAlive,
       treasury: isDefenderAlive
-        ? Math.max(0, defender.treasury - treasuryLooted)
+        ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,
-      military: {
-        ...updatedDefenderMilitary,
-        experience: Math.min(100, defender.military.experience + 3),
-      },
+      military: updatedDefenderMilitary,
     };
 
     const defenderRelKey = updatedDefender.relations[attacker.id]
       ? attacker.id
       : canonicalAttackerId;
-    const defenderRelToAttacker = updatedDefender.relations[defenderRelKey];
-    if (defenderRelToAttacker) {
+    if (updatedDefender.relations[defenderRelKey]) {
       updatedDefender.relations = {
         ...updatedDefender.relations,
         [defenderRelKey]: {
-          ...defenderRelToAttacker,
+          ...updatedDefender.relations[defenderRelKey]!,
           stance: "WAR",
           isTradeEmbargoed: true,
           opinion: -100,
@@ -285,10 +326,9 @@ export class BattleExecutionEngine {
       };
     }
 
-    let betrayalText = "";
-    if (betrayalResult.hasBetrayed) {
-      betrayalText = ` [جریمه خیانت دیپلماتیک: -${betrayalResult.reputationPenalty} پرستیژ جهانی]`;
-    }
+    const betrayalText = betrayalResult.hasBetrayed
+      ? ` [جریمه نقض معاهده: -${betrayalResult.reputationPenalty} پرستیژ جهانی]`
+      : "";
 
     const { logEntry } = BattleDiplomacyHelper.buildBattleReportAndLog(
       state,
@@ -296,7 +336,7 @@ export class BattleExecutionEngine {
       defender,
       calcResult,
       conqueredPixels,
-      isFullCapitulation,
+      calcResult.isFullCapitulation,
       betrayalText,
     );
 

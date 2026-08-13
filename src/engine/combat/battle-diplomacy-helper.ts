@@ -35,15 +35,20 @@ export class BattleDiplomacyHelper {
   ): { report: CombatReport; logEntry: TurnLogEntry } {
     const reportTitle = calcResult.isAttackerVictory
       ? isFullCapitulation
-        ? `فتح کامل و تسلیم ${defender.name}`
-        : `پیروزی و فتح کامل استان در نبرد با ${defender.name}`
-      : `عقب‌نشینی نیروها در نبرد با ${defender.name}`;
+        ? `فروپاشی و تسلیم کامل ارتش ${defender.name}`
+        : `پیروزی قاطع و فتح استان در نبرد با ${defender.name}`
+      : `عقب‌نشینی نیروهای مهاجم در نبرد با ${defender.name}`;
 
-    const reportSummary = calcResult.isAttackerVictory
-      ? isFullCapitulation
-        ? `نیروهای ${attacker.name} با درهم‌شکستن کامل دفاع ${defender.name}، تمام خاک آن را فتح کردند.${betrayalPenaltyText}`
-        : `نیروهای ${attacker.name} با موفقیت استان انتخاب‌شده از قلمرو ${defender.name} را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت فتح کردند.${betrayalPenaltyText}`
-      : `پدافند و پیاده‌نظام ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalPenaltyText}`;
+    let reportSummary = "";
+    if (calcResult.isAttackerVictory) {
+      if (isFullCapitulation) {
+        reportSummary = `ارتش ${defender.name} متحمل بیش از ۸۵٪ تلفات شده و کاملاً فروپاشید. تمام قلمرو این کشور به تصرف درآمد و ۵۰٪ غنائم تسلیحاتی و خزانه به ارتش شما منتقل شد.${betrayalPenaltyText}`;
+      } else {
+        reportSummary = `نیروهای ${attacker.name} با درهم‌شکستن خط دفاعی ${defender.name}، استان مورد نظر را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت فتح کردند.${betrayalPenaltyText}`;
+      }
+    } else {
+      reportSummary = `پیاده‌نظام و تانک‌های ${defender.name} با مقاومت سرسختانه مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalPenaltyText}`;
+    }
 
     const report: CombatReport = {
       id: `report-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
