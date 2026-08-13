@@ -122,9 +122,10 @@ export class FinalManifestBuilder {
       const militaryTier =
         profile.militaryTier ||
         Math.max(1, Math.min(20, Math.ceil((21 - (rankIndex + 1)) * 0.95)));
+      const hasSeaAccess = provList.some((p) => p.hasSeaAccess);
       const stack = MilitaryDistributionEngine.calculateStartingStack(
         militaryTier,
-        true,
+        hasSeaAccess,
       );
 
       const startingInfantry = profile.startingInfantry ?? stack.infantry;

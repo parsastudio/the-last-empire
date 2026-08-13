@@ -7,6 +7,7 @@ import {
   IndustrialLevelManager,
   InfrastructureManager,
 } from "@/engine/economy/economy-calculators";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -43,10 +44,14 @@ export class AIActionBuilder {
       ? nation.treasury * 0.4
       : nation.treasury * 0.2;
 
-    const airMoneyCost = 1400000000;
-    const infMoneyCost = 350000000;
+    const airMoneyCost = MILITARY_UNIT_STATS.AIR_FORCE.moneyCost;
+    const infMoneyCost = MILITARY_UNIT_STATS.INFANTRY.moneyCost;
 
-    if (recruitBudget >= airMoneyCost) {
+    if (
+      recruitBudget >= airMoneyCost &&
+      nation.military.techLevel >=
+        MILITARY_UNIT_STATS.AIR_FORCE.requiredTechLevel
+    ) {
       const airQty = Math.floor(recruitBudget / airMoneyCost);
       if (airQty > 0) {
         actions.push(ActionFactory.recruitUnit(nation.id, "AIR_FORCE", airQty));

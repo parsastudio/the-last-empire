@@ -46,11 +46,11 @@ export class NationProfileAssigner {
     );
 
     const infantry =
-      item.startingInfantry > 40 ? item.startingInfantry : tierStack.infantry;
+      item.startingInfantry > 0 ? item.startingInfantry : tierStack.infantry;
     const armor = item.startingArmor ?? tierStack.armor;
     const airDefense = item.startingAirDefense ?? tierStack.airDefense;
     const airForce =
-      item.startingAirForce > 5 ? item.startingAirForce : tierStack.airForce;
+      item.startingAirForce > 0 ? item.startingAirForce : tierStack.airForce;
     const droneMissile =
       item.startingDroneMissile > 0
         ? item.startingDroneMissile
