@@ -10,6 +10,7 @@ export function useMapGesture(
   containerRef?: RefObject<HTMLDivElement | null>,
   externalPositionRef?: RefObject<CameraPosition>,
   externalScaleRef?: RefObject<number>,
+  onDragStart?: () => void,
 ) {
   const computeInitial = useCallback(
     (w: number, h: number) => {
@@ -178,6 +179,9 @@ export function useMapGesture(
         e.clientY - mouseDownPos.current.y,
       );
       if (dist > 5) {
+        if (!hasDraggedRef.current && onDragStart) {
+          onDragStart();
+        }
         hasDraggedRef.current = true;
       }
 
@@ -192,7 +196,7 @@ export function useMapGesture(
         fallbackPositionRef.current = nextPos;
       }
     },
-    [externalPositionRef],
+    [externalPositionRef, onDragStart],
   );
 
   const handleMouseUp = useCallback(() => {
