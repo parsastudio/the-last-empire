@@ -6,6 +6,7 @@ import {
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -68,9 +69,14 @@ export class BattleCalculator {
       attackerGovMult,
     );
 
-    const defenderAirDefensePower =
-      (defender.military.airDefense || 0) *
-      (1 + (defender.military.techLevel - 1) * 0.5);
+    const defenderAirDefensePower = MilitaryInventoryHelper.calculateUnitPower(
+      defender.military,
+      "AIR_DEFENSE",
+      defender.military.airDefense || 0,
+      1.0,
+      1.0,
+      1.0,
+    );
 
     if (defenderAirDefensePower > 0) {
       const interceptionFactor = Math.min(
@@ -100,17 +106,26 @@ export class BattleCalculator {
     );
     defenderRemainingInfantry -= infantryDestroyedByDrones;
 
-    const attackerAirPower =
-      deployedAirForce *
-      (1 + (attacker.military.techLevel - 1) * 0.5) *
-      (1 + attacker.military.experience / 100) *
-      attackerGovMult;
+    const attackerExpMult = 1 + attacker.military.experience / 100;
+    const defenderExpMult = 1 + defender.military.experience / 100;
 
-    let defenderAirPower =
-      defenderRemainingAirForce *
-      (1 + (defender.military.techLevel - 1) * 0.5) *
-      (1 + defender.military.experience / 100) *
-      defenderGovMult;
+    const attackerAirPower = MilitaryInventoryHelper.calculateUnitPower(
+      attacker.military,
+      "AIR_FORCE",
+      deployedAirForce,
+      1.0,
+      attackerExpMult,
+      attackerGovMult,
+    );
+
+    let defenderAirPower = MilitaryInventoryHelper.calculateUnitPower(
+      defender.military,
+      "AIR_FORCE",
+      defenderRemainingAirForce,
+      1.0,
+      defenderExpMult,
+      defenderGovMult,
+    );
 
     if (
       DoctrinesManager.getElectronicWarfareEvasion(
@@ -151,18 +166,41 @@ export class BattleCalculator {
       airSupportMultiplier = 0.7;
     }
 
-    const attackerGroundPower =
-      (deployedInfantry * 1.0 + (attacker.military.armor || 0) * 3.0) *
-      (1 + (attacker.military.techLevel - 1) * 0.5) *
-      (1 + attacker.military.experience / 100) *
-      airSupportMultiplier *
-      attackerGovMult;
+    const attackerInfantryPower = MilitaryInventoryHelper.calculateUnitPower(
+      attacker.military,
+      "INFANTRY",
+      deployedInfantry,
+      1.0,
+      attackerExpMult,
+      attackerGovMult * airSupportMultiplier,
+    );
+    const attackerArmorPower = MilitaryInventoryHelper.calculateUnitPower(
+      attacker.military,
+      "ARMOR",
+      attacker.military.armor || 0,
+      3.0,
+      attackerExpMult,
+      attackerGovMult * airSupportMultiplier,
+    );
+    const attackerGroundPower = attackerInfantryPower + attackerArmorPower;
 
-    const defenderGroundPower =
-      (defenderRemainingInfantry * 1.0 + defenderRemainingArmor * 3.0) *
-      (1 + (defender.military.techLevel - 1) * 0.5) *
-      (1 + defender.military.experience / 100) *
-      defenderGovMult;
+    const defenderInfantryPower = MilitaryInventoryHelper.calculateUnitPower(
+      defender.military,
+      "INFANTRY",
+      defenderRemainingInfantry,
+      1.0,
+      defenderExpMult,
+      defenderGovMult,
+    );
+    const defenderArmorPower = MilitaryInventoryHelper.calculateUnitPower(
+      defender.military,
+      "ARMOR",
+      defenderRemainingArmor,
+      3.0,
+      defenderExpMult,
+      defenderGovMult,
+    );
+    const defenderGroundPower = defenderInfantryPower + defenderArmorPower;
 
     const totalGroundPower = attackerGroundPower + defenderGroundPower;
 
