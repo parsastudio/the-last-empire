@@ -28,6 +28,8 @@ export class BattleCalculator {
     infantryToDeploy?: number,
     airForceToDeploy?: number,
     targetEnclaveId?: number,
+    attackType?: "LAND" | "NAVAL",
+    navalCostMultiplier?: number,
   ): BattleCalculationResult {
     const deployedInfantry = Math.min(
       attacker.military.infantry,
@@ -44,7 +46,11 @@ export class BattleCalculator {
       (dronesToLaunch || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const { moneyCost: deploymentMoneyCost } =
-      CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
+      CombatModifierResolver.calculateDeploymentCosts(
+        totalForceCost,
+        attackType,
+        navalCostMultiplier,
+      );
 
     const dronesUsed = Math.min(
       attacker.military.droneMissile,
