@@ -4,8 +4,6 @@ export interface MajorLandMass {
   id: number;
   components: LandComponent[];
   totalPixels: number;
-  centerX: number;
-  centerY: number;
 }
 
 export class ProvinceCountAllocator {

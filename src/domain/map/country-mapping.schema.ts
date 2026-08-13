@@ -3,5 +3,4 @@ export interface CountryMapping {
   code: string;
   name: string;
   color: [number, number, number];
-  pixelCount?: number;
 }

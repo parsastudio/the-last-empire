@@ -62,7 +62,6 @@ export class BattleExecutionEngine {
       action.dronesToLaunch,
       action.infantryToDeploy,
       action.airForceToDeploy,
-      action.targetEnclaveId,
       action.attackType,
       navalCostMultiplier,
     );

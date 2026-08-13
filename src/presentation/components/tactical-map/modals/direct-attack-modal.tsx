@@ -160,7 +160,6 @@ export function DirectAttackModal({
         dronesToLaunch,
         infantryToDeploy,
         airForceToDeploy,
-        0,
         targetProvinceId || undefined,
         isLandNeighbor ? "LAND" : "NAVAL",
       );

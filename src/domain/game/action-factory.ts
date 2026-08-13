@@ -12,7 +12,6 @@ import {
   RequestLoanAction,
   CancelRecruitmentAction,
   InvestResearchAction,
-  InvestDiplomacyAction,
   InitiateBattleAction,
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
@@ -178,25 +177,12 @@ export class ActionFactory {
     };
   }
 
-  public static investDiplomacy(
-    nationId: string,
-    amount: number,
-  ): InvestDiplomacyAction {
-    return {
-      id: this.createId("diplomacy-campaign"),
-      nationId,
-      type: "INVEST_DIPLOMACY",
-      amount,
-    };
-  }
-
   public static initiateBattle(
     nationId: string,
     targetNationId: string,
     dronesToLaunch: number,
     infantryToDeploy?: number,
     airForceToDeploy?: number,
-    targetEnclaveId?: number,
     targetProvinceId?: number,
     attackType?: "LAND" | "NAVAL",
   ): InitiateBattleAction {
@@ -208,7 +194,6 @@ export class ActionFactory {
       dronesToLaunch,
       infantryToDeploy,
       airForceToDeploy,
-      targetEnclaveId,
       targetProvinceId,
       attackType,
     };

@@ -39,10 +39,6 @@ export class BitPackedGridState {
     return this.dirtyStorage;
   }
 
-  public clearStorageDirty(): void {
-    this.dirtyStorage = false;
-  }
-
   public getActiveGameId(): string | null {
     return this.activeGameId;
   }

@@ -105,8 +105,6 @@ export class ProvincePartitionEngine {
         id: g.id,
         components: g.components,
         totalPixels: g.totalPixels,
-        centerX: g.centerX,
-        centerY: g.centerY,
       }));
 
       const allocations = ProvinceCountAllocator.allocateProvincesToMasses(

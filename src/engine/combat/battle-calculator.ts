@@ -30,7 +30,6 @@ export class BattleCalculator {
     dronesToLaunch: number,
     infantryToDeploy?: number,
     airForceToDeploy?: number,
-    targetEnclaveId?: number,
     attackType?: "LAND" | "NAVAL",
     navalCostMultiplier?: number,
   ): BattleCalculationResult {
@@ -242,12 +241,7 @@ export class BattleCalculator {
       : 0;
 
     const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
-    const targetRegionPixels =
-      targetEnclaveId !== undefined && defender.regionsDemographics
-        ? defender.regionsDemographics.find(
-            (r) => r.regionId === targetEnclaveId,
-          )?.pixelCount || 1000
-        : 1000;
+    const targetRegionPixels = 1000;
 
     const conqueredPixelsCount = isAttackerVictory
       ? isFullCapitulation
