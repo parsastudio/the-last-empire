@@ -10,7 +10,6 @@ import {
   RegionDemographicsSchema,
   RegionDemographics,
 } from "@/domain/nation/region-demographics.schema";
-import { CoordinateSchema } from "@/domain/map/coordinate.schema";
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -20,25 +19,13 @@ export const ActiveModifierSchema = z.object({
   turnsRemaining: z.number().nonnegative(),
 });
 
-export const IsolatedPocketSchema = z.object({
-  id: z.string(),
-  pixelCount: z.number().nonnegative(),
-  territoryIds: z.array(z.string()),
-  coordinates: z.array(CoordinateSchema),
-});
-
 export const GeographySchema = z.object({
   landNeighbors: z.array(z.string()),
   seaNeighbors: z.array(z.string()),
   hasSeaAccess: z.boolean(),
   territoryPixelCount: z.number().nonnegative(),
   infrastructureLevel: z.number().positive(),
-  contiguousMainlandPixelCount: z.number().nonnegative(),
-  isolatedPockets: z.array(IsolatedPocketSchema),
-  coordinates: z.array(CoordinateSchema),
 });
-
-export const ResourcesSchema = z.object({});
 
 export const NationSchema = z.object({
   id: z.string(),
@@ -57,7 +44,6 @@ export const NationSchema = z.object({
   industrialLevel: z.number().positive(),
   consecutiveDeficitTurns: z.number().nonnegative(),
   government: GovernmentStateSchema,
-  resources: ResourcesSchema.default({}),
   military: MilitaryStackSchema,
   recruitmentQueue: z.array(RecruitmentOrderSchema),
   geography: GeographySchema,
@@ -71,8 +57,6 @@ export const NationSchema = z.object({
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
-export type IsolatedPocket = z.infer<typeof IsolatedPocketSchema>;
 export type Geography = z.infer<typeof GeographySchema>;
-export type Resources = z.infer<typeof ResourcesSchema>;
 export type Nation = z.infer<typeof NationSchema>;
 export type { RegionDemographics };

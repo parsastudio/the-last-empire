@@ -60,7 +60,6 @@ export function TariffControlCard({
       industrialLevel: 1,
       consecutiveDeficitTurns: 0,
       government: { type: "DEMOCRACY", stability: 80, turnsInPower: 1 },
-      resources: {},
       military: {
         infantry: 10,
         armor: 0,
@@ -78,9 +77,6 @@ export function TariffControlCard({
         hasSeaAccess,
         territoryPixelCount: 1000,
         infrastructureLevel: 1,
-        contiguousMainlandPixelCount: 1000,
-        isolatedPockets: [],
-        coordinates: [],
       },
       relations: {},
       activeModifiers: [],

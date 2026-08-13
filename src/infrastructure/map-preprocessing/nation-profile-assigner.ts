@@ -4,6 +4,7 @@ import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { MilitaryStack } from "@/domain/military/military.schema";
+import { CountryDefaultsUtility } from "@/domain/data/countries/country-defaults.utility";
 
 type GovernmentType = Nation["government"]["type"];
 
@@ -137,7 +138,6 @@ export class NationProfileAssigner {
         stability: item.startingStability ?? 50,
         turnsInPower: 5,
       },
-      resources: {},
       military: baseMilitary,
       recruitmentQueue: [],
       geography: {
@@ -146,9 +146,6 @@ export class NationProfileAssigner {
         hasSeaAccess: true,
         territoryPixelCount: item.territoryPixelCount,
         infrastructureLevel: item.infrastructureLevel,
-        contiguousMainlandPixelCount: item.territoryPixelCount,
-        isolatedPockets: [],
-        coordinates: [],
       },
       relations: {},
       activeModifiers: [],
@@ -185,35 +182,29 @@ export class NationProfileAssigner {
       ? CountryRegistry.getCountry(id)
       : CountryRegistry.getCountry(numericId);
 
-    const name = profile ? profile.nameFa : `کشور ${id}`;
-    const flagCode = profile ? profile.flagCode : "IR";
-    const gdp = profile ? profile.gdp : 100000000000;
-    const population = profile ? profile.population : 10000000;
-
-    const tier = profile?.militaryTier ?? 5;
-    const startingTech = profile?.startingTechLevel;
+    const fallback = CountryDefaultsUtility.getFallbackProfile(id, profile);
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
-      tier,
+      fallback.militaryTier,
       true,
-      startingTech,
+      fallback.startingTechLevel,
     );
 
     const fallbackManifestItem: ManifestNationItem = {
       id: canonicalId,
       numericId: profile?.id ?? 0,
-      code: profile?.code ?? id,
-      flagCode,
-      nameFa: name,
-      nameEn: profile?.nameEn ?? id,
-      gdp,
-      perCapitaProductivity: Math.floor(gdp / (population || 1)),
-      population,
-      maxPopulationCapacity: Math.floor(population / 0.95),
+      code: fallback.code,
+      flagCode: fallback.flagCode,
+      nameFa: fallback.nameFa,
+      nameEn: fallback.nameEn,
+      gdp: fallback.gdp,
+      perCapitaProductivity: fallback.perCapitaProductivity,
+      population: fallback.population,
+      maxPopulationCapacity: fallback.maxPopulationCapacity,
       territoryPixelCount: 1000,
       provinceIds: [],
-      startingTreasury: Math.floor(gdp * 0.05),
+      startingTreasury: Math.floor(fallback.gdp * 0.05),
       initialRank: 1,
-      defaultGovernment: profile?.startingGovernment ?? "DEMOCRACY",
+      defaultGovernment: fallback.startingGovernment,
       startingInfantry: tierStack.infantry,
       startingArmor: tierStack.armor,
       startingAirDefense: tierStack.airDefense,
