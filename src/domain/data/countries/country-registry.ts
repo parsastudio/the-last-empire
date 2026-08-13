@@ -1,5 +1,9 @@
 import { CountryProfile } from "@/domain/data/countries/profile.type";
 import { ALL_RAW_COUNTRY_PROFILES } from "@/domain/data/countries/country-profiles.data";
+import {
+  FinalMapManifest,
+  FinalManifestNation,
+} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 
 const ID_MAPPING: Record<string, number> = {
   TZA: 12,
@@ -118,6 +122,7 @@ export class CountryRegistry {
   private static readonly byNumericId = new Map<number, CountryProfile>();
   private static readonly byCode = new Map<string, CountryProfile>();
   private static readonly byCanonicalId = new Map<string, CountryProfile>();
+  private static manifestNations = new Map<string, FinalManifestNation>();
 
   static {
     for (const profile of ALL_COUNTRY_PROFILES) {
@@ -132,6 +137,43 @@ export class CountryRegistry {
       const canonical = `NATION_${iso3}`;
       this.byCanonicalId.set(canonical, profile);
     }
+  }
+
+  public static initializeFromManifest(
+    manifest: FinalMapManifest | null,
+  ): void {
+    if (!manifest || !Array.isArray(manifest.nations)) return;
+    this.manifestNations.clear();
+    for (const item of manifest.nations) {
+      const canonical = item.id.startsWith("NATION_")
+        ? item.id
+        : `NATION_${item.code.toUpperCase()}`;
+      this.manifestNations.set(canonical, item);
+      this.manifestNations.set(item.code.toUpperCase(), item);
+      if (item.flagCode) {
+        this.manifestNations.set(item.flagCode.toUpperCase(), item);
+      }
+      const profile = this.getCountry(item.id);
+      if (profile) {
+        profile.gdp = item.gdp;
+        profile.population = item.population;
+        profile.startingGovernment =
+          item.defaultGovernment as CountryProfile["startingGovernment"];
+        profile.startingTechLevel = item.startingTechLevel;
+      }
+    }
+  }
+
+  public static getAllManifestNations(): FinalManifestNation[] {
+    const list: FinalManifestNation[] = [];
+    const seen = new Set<string>();
+    for (const item of this.manifestNations.values()) {
+      if (!seen.has(item.id)) {
+        seen.add(item.id);
+        list.push(item);
+      }
+    }
+    return list;
   }
 
   public static getCountry(
