@@ -5,7 +5,6 @@ import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
-  mapPos: { x: number; y: number };
   provinceId: number;
   provinceName: string;
   countryCode: string;
@@ -21,8 +20,6 @@ export function useContextMenu() {
       screenX: number,
       screenY: number,
       provinceId: number,
-      mapX: number,
-      mapY: number,
       provincesMap?: Record<string, Province>,
       nationsMap?: Record<string, Nation>,
     ) => {
@@ -43,7 +40,6 @@ export function useContextMenu() {
 
       setContextMenuState({
         screenPos: { x: screenX, y: screenY },
-        mapPos: { x: mapX, y: mapY },
         provinceId,
         provinceName,
         countryCode,

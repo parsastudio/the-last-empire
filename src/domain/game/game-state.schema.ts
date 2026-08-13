@@ -29,11 +29,9 @@ export const GameStateSchema = z.object({
   isGameOver: z.boolean(),
   winnerNationId: z.string().optional(),
   humanNationId: z.string(),
-  globalThreatLevel: z.number().min(0).max(100),
   provinces: z.record(z.string(), ProvinceSchema).default({}),
   nations: z.record(z.string(), NationSchema),
   turnLogs: z.array(TurnLogEntrySchema),
-  peacefulTurnsCount: z.number().nonnegative().optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;

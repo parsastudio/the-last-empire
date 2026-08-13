@@ -69,15 +69,6 @@ export class NationDatabaseProvider {
     if (manifestItems.length > 0) {
       return this.getNationsFromManifest(manifestItems);
     }
-
-    const sorted = [...CountryRegistry.getAllManifestNations()].sort(
-      (a, b) => b.gdp - a.gdp,
-    );
-
-    if (sorted.length > 0) {
-      return this.getNationsFromManifest(sorted);
-    }
-
     return [];
   }
 }

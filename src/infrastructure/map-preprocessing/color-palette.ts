@@ -2,9 +2,6 @@ export interface TacticalColorPair {
   r1: number;
   g1: number;
   b1: number;
-  r2: number;
-  g2: number;
-  b2: number;
 }
 
 export class TacticalPaletteGenerator {
@@ -135,12 +132,6 @@ export class TacticalPaletteGenerator {
 
     const [r1, g1, b1] = this.hslToRgb(hue, saturation, lightness);
 
-    const [r2, g2, b2] = this.hslToRgb(
-      hue,
-      Math.max(0.18, saturation * 0.85),
-      Math.max(0.28, lightness * 0.84),
-    );
-
-    return { r1, g1, b1, r2, g2, b2 };
+    return { r1, g1, b1 };
   }
 }

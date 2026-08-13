@@ -5,6 +5,7 @@ import {
 } from "@/domain/reports/combat-report.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -63,13 +64,29 @@ export class BattleCalculator {
     const attMult = CombatModifierResolver.getEffectiveMultiplier(attacker);
     const defMult = CombatModifierResolver.getEffectiveMultiplier(defender);
 
+    const attackerDroneBonus = DoctrinesManager.getDronePowerMultiplier(
+      attacker.doctrines?.unlockedDoctrines,
+    );
+    const defenderInterceptionBonus =
+      DoctrinesManager.getAirDefenseInterceptionRate(
+        defender.doctrines?.unlockedDoctrines,
+      );
+    const attackerPrecisionBonus =
+      DoctrinesManager.getPrecisionMissileDirectDamage(
+        attacker.doctrines?.unlockedDoctrines,
+      );
+    const defenderEwBonus = DoctrinesManager.getElectronicWarfareEvasion(
+      defender.doctrines?.unlockedDoctrines,
+    );
+
     const defAirDefense = defender.military.airDefense || 0;
     const defAirForce = defender.military.airForce || 0;
     const defArmor = defender.military.armor || 0;
     const defInfantry = defender.military.infantry || 0;
 
-    const attMissilesEff = deployedDrones * attMult;
-    const defAirDefenseEff = defAirDefense * defMult;
+    const attMissilesEff = deployedDrones * attMult * attackerDroneBonus;
+    const defAirDefenseEff =
+      defAirDefense * defMult * (1 + defenderInterceptionBonus);
 
     const missilesInterceptedEff = Math.min(
       attMissilesEff,
@@ -80,7 +97,9 @@ export class BattleCalculator {
       attMissilesEff - missilesInterceptedEff,
     );
 
-    const airDefenseDestroyedEff = Math.floor(missilesLeakedEff / 2);
+    const airDefenseDestroyedEff = Math.floor(
+      missilesLeakedEff * (0.5 + attackerPrecisionBonus),
+    );
     const defAirDefenseLost = Math.min(
       defAirDefense,
       Math.floor(airDefenseDestroyedEff / defMult),
@@ -88,7 +107,8 @@ export class BattleCalculator {
     const defAirDefenseRemainingRaw = defAirDefense - defAirDefenseLost;
     const defAirDefenseRemainingEff = defAirDefenseRemainingRaw * defMult;
 
-    const attAirEff = deployedAirForce * attMult;
+    const attAirEff =
+      deployedAirForce * attMult * (defenderEwBonus ? 0.8 : 1.0);
     const defAirEff = defAirForce * defMult;
 
     const dogfightLossAttEff = Math.min(attAirEff, defAirEff);

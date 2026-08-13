@@ -11,7 +11,4 @@ export interface CountryProfile {
   militaryTier: number;
   startingGovernment?: GovernmentType;
   startingTechLevel?: number;
-  startingInfantry?: number;
-  startingAirForce?: number;
-  startingDroneMissile?: number;
 }

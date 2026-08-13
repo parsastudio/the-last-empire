@@ -130,12 +130,11 @@ export class FinalManifestBuilder {
         startingTech,
       );
 
-      const startingInfantry = profile.startingInfantry ?? stack.infantry;
+      const startingInfantry = stack.infantry;
       const startingArmor = stack.armor;
       const startingAirDefense = stack.airDefense;
-      const startingAirForce = profile.startingAirForce ?? stack.airForce;
-      const startingDroneMissile =
-        profile.startingDroneMissile ?? stack.droneMissile;
+      const startingAirForce = stack.airForce;
+      const startingDroneMissile = stack.droneMissile;
       const startingNavalFleet = stack.navalFleet;
       const techLevel = profile.startingTechLevel ?? stack.techLevel;
 

@@ -132,7 +132,6 @@ export class NationProfileAssigner {
       nationalDebt: 0,
       population: item.population,
       industrialLevel: item.industrialLevel,
-      consecutiveDeficitTurns: 0,
       government: {
         type: govType,
         stability: item.startingStability ?? 50,
@@ -153,7 +152,6 @@ export class NationProfileAssigner {
       doctrines: {
         unlockedDoctrines: [],
       },
-      proxyInfluenceBudget: {},
       regionsDemographics: [defaultRegion],
       provinceIds: item.provinceIds || [],
     };

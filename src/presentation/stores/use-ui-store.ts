@@ -12,7 +12,6 @@ interface UiStoreState {
     subTab?: string | null,
     targetCode?: string | null,
   ) => void;
-  setSelectedTargetCode: (code: string | null) => void;
   setIsRailCollapsed: (
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
@@ -32,11 +31,6 @@ export const useUiStore = create<UiStoreState>((set) => ({
       selectedTargetCode:
         targetCode !== null ? targetCode : state.selectedTargetCode,
     })),
-
-  setSelectedTargetCode: (code) =>
-    set({
-      selectedTargetCode: code,
-    }),
 
   setIsRailCollapsed: (collapsed) =>
     set((state) => ({
