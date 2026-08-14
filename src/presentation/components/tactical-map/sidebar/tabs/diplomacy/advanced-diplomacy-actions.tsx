@@ -7,8 +7,8 @@ import {
   Globe,
   ShieldAlert,
   AlertTriangle,
-  Flame,
   HeartHandshake,
+  Binary,
 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -346,8 +346,8 @@ export function AdvancedDiplomacyActions({
         </div>
 
         <div className="pt-3 border-t border-border/60 space-y-2">
-          <span className="text-[10px] font-bold text-military uppercase tracking-wider font-mono block">
-            عملیات اطلاعاتی و پنهان
+          <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono block">
+            دایره عملیات ویژه اطلاعاتی و سیاه
           </span>
 
           <button
@@ -359,14 +359,14 @@ export function AdvancedDiplomacyActions({
             className="w-full p-3.5 rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-right transition-all cursor-pointer space-y-1 shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold text-military">
-                تلاش برای براندازی و نفوذ پنهان
+              <span className="text-xs font-extrabold text-primary">
+                ورود به دایره جاسوسی و خرابکاری در {targetName}
               </span>
-              <Flame size={14} className="text-military" />
+              <Binary size={14} className="text-primary" />
             </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              تزریق بودجه اطلاعاتی غیررسمی جهت تخریب ثبات سیاسی بدون تغییر وضعیت
-              دیپلماتیک رسمی.
+              اجرای شنود ماهواره‌ای، انهدام پدافند هوایی و سرقت مستقیم اسرار و
+              فناوری‌های راهبردی.
             </p>
           </button>
         </div>

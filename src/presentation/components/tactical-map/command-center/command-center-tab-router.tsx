@@ -4,7 +4,7 @@ import { WideOverviewView } from "@/presentation/components/tactical-map/command
 import { WideMilitaryView } from "@/presentation/components/tactical-map/command-center/views/wide-military-view";
 import { WideArmsMarketView } from "@/presentation/components/tactical-map/command-center/views/wide-arms-market-view";
 import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
-import { WideProxyView } from "@/presentation/components/tactical-map/command-center/views/wide-proxy-view";
+import { WideEspionageView } from "@/presentation/components/tactical-map/command-center/views/wide-espionage-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
 import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -64,9 +64,9 @@ export function CommandCenterTabRouter({
       return (
         <WidePoliticsView nation={nation} nationsMap={gameState?.nations} />
       );
-    case "proxy":
+    case "espionage":
       return (
-        <WideProxyView
+        <WideEspionageView
           nation={nation}
           nationsMap={gameState?.nations}
           selectedTargetCode={selectedTargetCode}
