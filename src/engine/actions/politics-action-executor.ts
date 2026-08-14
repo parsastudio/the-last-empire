@@ -109,6 +109,16 @@ export class PoliticsActionExecutor {
           Math.min(100, nation.globalReputation + reputationDelta),
         );
 
+        let senderWarFocus = nation.warFocusTargetId;
+        let receiverWarFocus = receiver.warFocusTargetId;
+
+        if (action.proposalType === "PEACE_TREATY") {
+          if (senderWarFocus === receiver.id) senderWarFocus = null;
+          if (receiverWarFocus === nation.id) receiverWarFocus = null;
+        } else if (action.proposalType === "DECLARE_WAR") {
+          senderWarFocus = receiver.id;
+        }
+
         return {
           ...state,
           nations: {
@@ -117,6 +127,7 @@ export class PoliticsActionExecutor {
               ...nation,
               treasury: Math.max(0, nation.treasury - costDeduction),
               globalReputation: newReputation,
+              warFocusTargetId: senderWarFocus,
               relations: {
                 ...nation.relations,
                 [senderRel.targetNationId]: updatedSenderRel,
@@ -124,6 +135,7 @@ export class PoliticsActionExecutor {
             },
             [targetKey]: {
               ...receiver,
+              warFocusTargetId: receiverWarFocus,
               relations: {
                 ...receiver.relations,
                 [receiverRel.targetNationId]: updatedReceiverRel,

@@ -55,12 +55,14 @@ export class AllianceInterventionEvaluator {
       ) {
         interveningAllyIds.push(ally.id);
 
+        const currentGrudge = relWithAttacker?.grudge ?? 0;
         const updatedAllyRelations = {
           ...ally.relations,
           [attacker.id]: {
             targetNationId: attacker.id,
             stance: "WAR" as const,
             opinion: -100,
+            grudge: Math.min(100, currentGrudge + 35),
             coolOffTurnsRemaining: 0,
             isTradeEmbargoed: true,
           },
@@ -68,16 +70,20 @@ export class AllianceInterventionEvaluator {
 
         updatedNations[ally.id] = {
           ...ally,
+          warFocusTargetId: attacker.id,
           relations: updatedAllyRelations,
         };
 
         const currentAttacker = updatedNations[attacker.id] || attacker;
+        const attackerGrudgeWithAlly =
+          currentAttacker.relations[ally.id]?.grudge ?? 0;
         const updatedAttackerRelations = {
           ...currentAttacker.relations,
           [ally.id]: {
             targetNationId: ally.id,
             stance: "WAR" as const,
             opinion: -100,
+            grudge: Math.min(100, attackerGrudgeWithAlly + 20),
             coolOffTurnsRemaining: 0,
             isTradeEmbargoed: true,
           },
@@ -96,6 +102,10 @@ export class AllianceInterventionEvaluator {
             targetNationId: defender.id,
             stance: "NORMAL_DIPLOMACY" as const,
             opinion: Math.min(ally.relations[defender.id]?.opinion ?? 0, 0),
+            grudge: Math.min(
+              100,
+              (ally.relations[defender.id]?.grudge ?? 0) + 10,
+            ),
             coolOffTurnsRemaining: 5,
             isTradeEmbargoed: false,
           },
@@ -108,12 +118,15 @@ export class AllianceInterventionEvaluator {
         };
 
         const currentDefender = updatedNations[defender.id] || defender;
+        const defenderGrudgeWithAlly =
+          currentDefender.relations[ally.id]?.grudge ?? 0;
         const updatedDefenderRelations = {
           ...currentDefender.relations,
           [ally.id]: {
             targetNationId: ally.id,
             stance: "NORMAL_DIPLOMACY" as const,
             opinion: -30,
+            grudge: Math.min(100, defenderGrudgeWithAlly + 45),
             coolOffTurnsRemaining: 5,
             isTradeEmbargoed: false,
           },

@@ -53,6 +53,7 @@ export const NationSchema = z.object({
   regionsDemographics: z.array(RegionDemographicsSchema).optional(),
   provinceIds: z.array(z.number()).default([]),
   executedEspionageTiers: z.array(z.number()).default([]),
+  warFocusTargetId: z.string().nullable().optional(),
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;

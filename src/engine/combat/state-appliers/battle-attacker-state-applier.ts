@@ -73,6 +73,9 @@ export class BattleAttackerStateApplier {
       ? defenderId
       : canonicalDefenderId;
 
+    const existingRel = updatedAttacker.relations[targetKey];
+    const currentGrudge = existingRel?.grudge ?? 0;
+
     const updatedRelations = { ...updatedAttacker.relations };
     if (updatedRelations[targetKey]) {
       updatedRelations[targetKey] = {
@@ -80,6 +83,7 @@ export class BattleAttackerStateApplier {
         stance: "WAR",
         isTradeEmbargoed: true,
         opinion: -100,
+        grudge: currentGrudge,
       };
     }
 
@@ -96,6 +100,7 @@ export class BattleAttackerStateApplier {
         calcResult.treasuryLooted,
       military: updatedMilitary,
       relations: updatedRelations,
+      warFocusTargetId: defenderId,
     };
   }
 }

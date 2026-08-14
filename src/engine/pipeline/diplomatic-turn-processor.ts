@@ -40,6 +40,11 @@ export class DiplomaticTurnProcessor {
         nextOpinion = Math.min(100, relation.opinion + 1);
       }
 
+      let nextGrudge = relation.grudge ?? 0;
+      if (relation.stance !== "WAR" && nextGrudge > 0) {
+        nextGrudge = Math.max(0, nextGrudge - 2);
+      }
+
       let nextEmbargo = relation.isTradeEmbargoed;
       if (
         nation.globalReputation <= -30 &&
@@ -52,13 +57,26 @@ export class DiplomaticTurnProcessor {
       newRels[targetId] = {
         ...relation,
         opinion: nextOpinion,
+        grudge: nextGrudge,
         coolOffTurnsRemaining: nextCoolOff,
         isTradeEmbargoed: nextEmbargo,
       };
     }
 
+    let nextWarFocus = nation.warFocusTargetId ?? null;
+    if (nextWarFocus) {
+      const focusRel = newRels[nextWarFocus];
+      if (!focusRel || focusRel.stance !== "WAR") {
+        nextWarFocus = null;
+      }
+    }
+
     return {
-      updatedNation: { ...nation, relations: newRels },
+      updatedNation: {
+        ...nation,
+        relations: newRels,
+        warFocusTargetId: nextWarFocus,
+      },
       isAtWar,
     };
   }
