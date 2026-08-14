@@ -44,15 +44,15 @@ export function MilitaryExpansionView({
   };
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right pt-2 border-t border-border/40">
       <div className="flex items-center gap-2 px-1">
-        <Swords size={13} className="text-military" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+        <Swords size={14} className="text-military" />
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
           گسترش و استخدام نیروی نظامی داخلی
         </span>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {RECRUITABLE_UNITS.map((unit) => (
           <UnitRecruitmentCard
             key={unit.type}
