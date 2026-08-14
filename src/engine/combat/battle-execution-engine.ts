@@ -48,6 +48,7 @@ export class BattleExecutionEngine {
         attacker.id,
         state.provinces,
         action.infantryToDeploy || attacker.military.infantry,
+        action.armorToDeploy || attacker.military.armor || 0,
         action.airForceToDeploy || attacker.military.airForce,
         action.dronesToLaunch,
       );
@@ -61,6 +62,7 @@ export class BattleExecutionEngine {
       defender,
       action.dronesToLaunch,
       action.infantryToDeploy,
+      action.armorToDeploy || 0,
       action.airForceToDeploy,
       action.attackType,
       navalCostMultiplier,
