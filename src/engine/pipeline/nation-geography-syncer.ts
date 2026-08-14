@@ -6,21 +6,34 @@ export class NationGeographySyncer {
     nation: Nation,
     ownedProvinces: Province[],
   ): { isAlive: boolean; syncedNation: Nation } {
-    const isAlive = ownedProvinces.length > 0;
+    if (ownedProvinces.length === 0) {
+      const isAlive =
+        nation.isAlive &&
+        (nation.geography.territoryPixelCount > 0 || nation.population > 0);
 
-    if (!isAlive) {
+      if (!isAlive) {
+        return {
+          isAlive: false,
+          syncedNation: {
+            ...nation,
+            isAlive: false,
+            population: 0,
+            executedEspionageTiers: [],
+            geography: {
+              ...nation.geography,
+              territoryPixelCount: 0,
+              hasSeaAccess: false,
+            },
+          },
+        };
+      }
+
       return {
-        isAlive: false,
+        isAlive: true,
         syncedNation: {
           ...nation,
-          isAlive: false,
-          population: 0,
+          isAlive: true,
           executedEspionageTiers: [],
-          geography: {
-            ...nation.geography,
-            territoryPixelCount: 0,
-            hasSeaAccess: false,
-          },
         },
       };
     }
