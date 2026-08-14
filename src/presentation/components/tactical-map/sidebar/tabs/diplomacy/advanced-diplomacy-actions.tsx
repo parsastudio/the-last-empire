@@ -4,9 +4,6 @@ import {
   CheckCircle2,
   Ban,
   Swords,
-  Globe,
-  ShieldAlert,
-  AlertTriangle,
   HeartHandshake,
   Binary,
 } from "lucide-react";
@@ -17,80 +14,9 @@ import {
   TreatyEvaluator,
 } from "@/engine/diplomacy/diplomacy-engine";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
-import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-
-function BetrayalConfirmModal({
-  isOpen,
-  targetName,
-  penalty,
-  skippedSteps,
-  onClose,
-  onConfirm,
-}: {
-  isOpen: boolean;
-  targetName: string;
-  penalty: number;
-  skippedSteps: number;
-  onClose: () => void;
-  onConfirm: () => void;
-}) {
-  if (!isOpen) return null;
-
-  return (
-    <UnifiedModalShell
-      isOpen={isOpen}
-      title="هشدار لغو یکباره تعهدات دیپلماتیک"
-      subtitle={`عدم رعایت گام‌به‌گام مراحل دیپلماتیک با ${targetName}`}
-      maxWidthClass="max-w-md"
-      onClose={onClose}
-    >
-      <div className="space-y-4 text-right dir-rtl font-sans">
-        <div className="p-3.5 bg-military/15 border border-military/40 rounded-2xl flex items-start gap-3">
-          <ShieldAlert size={20} className="text-military shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <span className="text-xs font-extrabold text-military block">
-              جریمه نادیده گرفتن{" "}
-              {PersianNumberFormatter.toPersianDigits(skippedSteps)} گام
-              دیپلماتیک
-            </span>
-            <p className="text-[11px] text-muted-foreground leading-relaxed">
-              شما بدون طی کردن مراحل قانونی دیپلماتیک قصد اقدام مستقیم دارید.
-              این رفتار غافلگیرانه باعث واکنش جامعه جهانی خواهد شد.
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl space-y-2 font-mono text-xs">
-          <div className="flex justify-between items-center">
-            <span className="text-muted-foreground font-sans text-[11px]">
-              میزان کسر اعتبار و پرستیژ جهانی:
-            </span>
-            <span className="font-bold text-military text-sm">
-              -{PersianNumberFormatter.toPersianDigits(penalty)} امتیاز
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 pt-2">
-          <button
-            onClick={onClose}
-            className="py-3 bg-secondary hover:bg-secondary/80 text-foreground rounded-2xl text-xs font-bold transition-all border border-border cursor-pointer"
-          >
-            انصراف
-          </button>
-          <button
-            onClick={onConfirm}
-            className="py-3 bg-military hover:bg-military/90 text-primary-foreground rounded-2xl text-xs font-bold transition-all shadow-lg shadow-military/10 cursor-pointer flex items-center justify-center gap-1.5"
-          >
-            <AlertTriangle size={14} />
-            <span>تایید و ریسک جریمه</span>
-          </button>
-        </div>
-      </div>
-    </UnifiedModalShell>
-  );
-}
+import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
+import { TreatyStatusBanner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/treaty-status-banner";
 
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
@@ -112,7 +38,10 @@ export function AdvancedDiplomacyActions({
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const { dispatchAction } = useGameActions();
-  const betrayalCalculator = new DiplomaticBetrayalCalculator();
+  const betrayalCalculator = useMemo(
+    () => new DiplomaticBetrayalCalculator(),
+    [],
+  );
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -134,9 +63,6 @@ export function AdvancedDiplomacyActions({
   const isSevered = currentStance === "SEVERED_RELATIONS" || isTradeEmbargoed;
   const isAlliance = currentStance === "ALLIANCE";
   const isNonAggression = currentStance === "NON_AGGRESSION_PACT";
-  const isNormal =
-    currentStance === "NORMAL_DIPLOMACY" ||
-    (!isWar && !isSevered && !isAlliance && !isNonAggression);
 
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
@@ -225,57 +151,10 @@ export function AdvancedDiplomacyActions({
           </span>
 
           <div className="space-y-2">
-            {isWar ? (
-              <div className="w-full p-3 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-500 flex items-center justify-between text-xs font-bold">
-                <span className="flex items-center gap-1.5">
-                  <Swords size={14} />
-                  در حال نبرد نظامی فعال (متخاصم)
-                </span>
-                <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-400">
-                  وضعیت فعلی
-                </span>
-              </div>
-            ) : isAlliance ? (
-              <div className="w-full p-3 rounded-xl bg-gdp/15 border border-gdp/40 text-gdp flex items-center justify-between text-xs font-bold">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 size={14} />
-                  اتحاد نظامی کامل (فعال)
-                </span>
-                <span className="text-[9px] font-mono bg-gdp/20 px-2 py-0.5 rounded text-gdp">
-                  وضعیت فعلی
-                </span>
-              </div>
-            ) : isNonAggression ? (
-              <div className="w-full p-3 rounded-xl bg-treasury/15 border border-treasury/40 text-treasury flex items-center justify-between text-xs font-bold">
-                <span className="flex items-center gap-1.5">
-                  <Handshake size={14} />
-                  پیمان عدم تخاصم (فعال)
-                </span>
-                <span className="text-[9px] font-mono bg-treasury/20 px-2 py-0.5 rounded text-treasury">
-                  وضعیت فعلی
-                </span>
-              </div>
-            ) : isSevered ? (
-              <div className="w-full p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-between text-xs font-bold">
-                <span className="flex items-center gap-1.5">
-                  <Ban size={14} />
-                  قطع روابط تجاری و تحریم (فعال)
-                </span>
-                <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-400">
-                  وضعیت فعلی
-                </span>
-              </div>
-            ) : isNormal ? (
-              <div className="w-full p-3 rounded-xl bg-secondary/60 border border-border/60 text-muted-foreground flex items-center justify-between text-xs font-bold">
-                <span className="flex items-center gap-1.5">
-                  <Globe size={14} />
-                  دیپلماسی عادی و بی‌طرف (فعال)
-                </span>
-                <span className="text-[9px] font-mono bg-background px-2 py-0.5 rounded text-muted-foreground">
-                  وضعیت فعلی
-                </span>
-              </div>
-            ) : null}
+            <TreatyStatusBanner
+              stance={currentStance}
+              isTradeEmbargoed={isTradeEmbargoed}
+            />
 
             {!isWar && (
               <button
