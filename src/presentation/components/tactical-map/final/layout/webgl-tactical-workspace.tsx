@@ -139,9 +139,7 @@ export function WebGLTacticalWorkspace({
       />
 
       <TopHudBar metrics={metrics} />
-
       <GameOverDialogWrapper gameState={effectiveGameState} />
-
       <LayerController
         activeLayer={activeLayer}
         isRendering={false}

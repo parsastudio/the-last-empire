@@ -7,7 +7,7 @@ import {
   EspionageTier,
   EspionageExecutionResult,
 } from "@/domain/espionage/espionage.schema";
-import { useActionRunner } from "@/presentation/hooks/game/use-action-runner";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { EspionageTargetOption } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
 
@@ -26,7 +26,7 @@ export function useWideEspionageForm({
   const [lastResult, setLastResult] = useState<EspionageExecutionResult | null>(
     null,
   );
-  const { runAction, isSubmitting } = useActionRunner();
+  const { dispatchAction, isSubmitting } = useGameActions();
 
   const countryOptions = useMemo<EspionageTargetOption[]>(() => {
     if (!nationsMap) return [];
@@ -134,12 +134,12 @@ export function useWideEspionageForm({
         tier,
       );
 
-      const success = await runAction(action);
+      const success = await dispatchAction(action);
       if (success) {
         setLastResult(null);
       }
     },
-    [nation.id, selectedTargetNation, isSubmitting, runAction],
+    [nation.id, selectedTargetNation, isSubmitting, dispatchAction],
   );
 
   return {

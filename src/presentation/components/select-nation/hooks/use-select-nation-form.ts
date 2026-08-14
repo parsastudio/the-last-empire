@@ -8,17 +8,55 @@ import {
   BitPackedInitService,
   FinalMapManifest,
 } from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
-import { NationDatabaseProvider } from "@/presentation/components/select-nation/services/nation-database-provider";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+
+function mapManifestToNationDetails(
+  manifest: FinalMapManifest | null,
+): NationDetail[] {
+  const manifestItems = manifest?.nations?.length
+    ? manifest.nations
+    : CountryRegistry.getAllManifestNations();
+
+  return manifestItems.map((item) => {
+    const summary = NationPresentationMapper.formatNationSummary(
+      item.id,
+      item.nameFa,
+      item.code,
+      item.flagCode,
+      item.initialRank,
+      item.gdp,
+      item.population,
+      item.defaultGovernment,
+    );
+
+    return {
+      id: item.id,
+      name: summary.name,
+      code: summary.code,
+      rank: summary.rank,
+      power: summary.powerLabel,
+      gdp: summary.gdpText,
+      population: summary.populationText,
+      treasury: summary.treasuryText,
+      desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}.`,
+      defaultGovernment: item.defaultGovernment,
+    };
+  });
+}
 
 export function useSelectNationForm() {
   const router = useRouter();
   const { showToast } = useToast();
-  const provider = useMemo(() => new NationDatabaseProvider(), []);
   const createCampaignStore = useGameStore((state) => state.createCampaign);
 
   const [manifest, setManifest] = useState<FinalMapManifest | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedNationId, setSelectedNationId] = useState<string | null>(null);
+  const [userSelectedGovernment, setUserSelectedGovernment] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     let active = true;
@@ -44,33 +82,18 @@ export function useSelectNationForm() {
     }
 
     loadManifest();
-
     return () => {
       active = false;
     };
   }, []);
 
-  const allNations = useMemo(() => {
-    if (
-      manifest &&
-      Array.isArray(manifest.nations) &&
-      manifest.nations.length > 0
-    ) {
-      return provider.getNationsFromManifest(manifest.nations);
-    }
-    return provider.getAllSelectableNations();
-  }, [provider, manifest]);
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedNationId, setSelectedNationId] = useState<string | null>(null);
-  const [userSelectedGovernment, setUserSelectedGovernment] = useState<
-    string | null
-  >(null);
+  const allNations = useMemo(
+    () => mapManifestToNationDetails(manifest),
+    [manifest],
+  );
 
   const selectedNation = useMemo<NationDetail | null>(() => {
-    if (!allNations || allNations.length === 0) {
-      return null;
-    }
+    if (!allNations || allNations.length === 0) return null;
     if (selectedNationId) {
       const found = allNations.find((n) => n.id === selectedNationId);
       if (found) return found;
@@ -79,9 +102,7 @@ export function useSelectNationForm() {
   }, [allNations, selectedNationId]);
 
   const selectedGovernment = useMemo(() => {
-    if (userSelectedGovernment) {
-      return userSelectedGovernment;
-    }
+    if (userSelectedGovernment) return userSelectedGovernment;
     return selectedNation ? selectedNation.defaultGovernment : "DEMOCRACY";
   }, [userSelectedGovernment, selectedNation]);
 
@@ -101,7 +122,6 @@ export function useSelectNationForm() {
       const { gameId } = await BitPackedInitService.initializeBitPackedSession(
         selectedNation.id,
       );
-
       const success = await createCampaignStore(
         selectedNation.id,
         selectedGovernment,
