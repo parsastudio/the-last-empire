@@ -55,9 +55,9 @@ export function WideDiplomacyView({
     humanNationId: activeHumanId,
   });
 
-  const handleOpenProxy = () => {
+  const handleOpenEspionage = () => {
     if (onNavigateTab) {
-      onNavigateTab("proxy", undefined, diplomacy.selectedRelation.code);
+      onNavigateTab("espionage", undefined, diplomacy.selectedRelation.code);
     }
   };
 
@@ -74,7 +74,7 @@ export function WideDiplomacyView({
             placeholder="جستجوی نام یا نماد کشور..."
             value={diplomacy.searchQuery}
             onChange={(e) => diplomacy.setSearchQuery(e.target.value)}
-            className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right"
+            className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -119,7 +119,7 @@ export function WideDiplomacyView({
             nationId={activeHumanId}
             currentStance={diplomacy.selectedRelation.stance}
             isTradeEmbargoed={diplomacy.selectedRelation.isTradeEmbargoed}
-            onOpenProxy={handleOpenProxy}
+            onOpenProxy={handleOpenEspionage}
           />
         </div>
       </div>
