@@ -74,7 +74,7 @@ export class ActionEngine {
           break;
 
         case "UNLOCK_DOCTRINE":
-        case "FUND_PROXY_INFLUENCE":
+        case "EXECUTE_ESPIONAGE_OPERATION":
         case "DIPLOMATIC_PROPOSAL":
           newState = PoliticsActionExecutor.execute(state, action);
           break;
