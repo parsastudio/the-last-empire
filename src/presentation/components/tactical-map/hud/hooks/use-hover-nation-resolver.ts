@@ -6,7 +6,6 @@ import { NationPresentationMapper } from "@/presentation/utils/nation-presentati
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 
@@ -27,15 +26,6 @@ export function useHoverNationResolver({
       provincesMap,
     );
   }, [provincesMap]);
-
-  const totalWorldLandPixels = useMemo(() => {
-    let sum = 0;
-    const values = Object.values(syncedProvincesMap);
-    for (let i = 0; i < values.length; i++) {
-      sum += values[i]?.pixelCount || 0;
-    }
-    return sum > 0 ? sum : 1;
-  }, [syncedProvincesMap]);
 
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
@@ -62,23 +52,8 @@ export function useHoverNationResolver({
         ? ownerNation.government.type
         : "DEMOCRACY";
 
-      const totalNationPixels = ownerNation
-        ? ownerNation.geography.territoryPixelCount || province.pixelCount || 1
-        : province.pixelCount || 1;
-
-      const worldLandSharePct =
-        (totalNationPixels / totalWorldLandPixels) * 100;
-
-      const formattedWorldAreaPct =
-        worldLandSharePct < 0.1 && worldLandSharePct > 0
-          ? "< ۰.۱"
-          : PersianNumberFormatter.toPersianDigits(
-              Number(worldLandSharePct.toFixed(1)).toString(),
-            );
-
       const totalPopulationText =
         NationPresentationMapper.formatPopulation(realPop);
-      const worldAreaPercentageText = `${formattedWorldAreaPct}٪ از کل جهان`;
 
       const summary = NationPresentationMapper.formatNationSummary(
         province.ownerNationId,
@@ -99,10 +74,10 @@ export function useHoverNationResolver({
         stance: "دیپلماسی استان",
         regionName: province.nameFa,
         totalPopulation: totalPopulationText,
-        worldAreaPercentage: worldAreaPercentageText,
+        gdpText: summary.gdpText,
       };
     },
-    [syncedProvincesMap, nationsMap, totalWorldLandPixels],
+    [syncedProvincesMap, nationsMap],
   );
 
   return { resolveHoverInfo };

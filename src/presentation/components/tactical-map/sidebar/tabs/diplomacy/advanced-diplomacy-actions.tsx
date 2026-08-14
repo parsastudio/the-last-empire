@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Handshake,
   CheckCircle2,
@@ -96,6 +96,7 @@ interface AdvancedDiplomacyActionsProps {
   targetName: string;
   targetNationId: string;
   nationId: string;
+  targetGdp?: number;
   currentStance?: DiplomaticStance | string;
   isTradeEmbargoed?: boolean;
   onOpenProxy?: () => void;
@@ -105,6 +106,7 @@ export function AdvancedDiplomacyActions({
   targetName,
   targetNationId,
   nationId,
+  targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
   isTradeEmbargoed = false,
   onOpenProxy,
@@ -123,6 +125,10 @@ export function AdvancedDiplomacyActions({
     skippedSteps: 0,
     pendingAction: async () => {},
   });
+
+  const foreignAidCost = useMemo(() => {
+    return TreatyEvaluator.calculateForeignAidCost(targetGdp);
+  }, [targetGdp]);
 
   const isWar = currentStance === "WAR";
   const isSevered = currentStance === "SEVERED_RELATIONS" || isTradeEmbargoed;
@@ -155,9 +161,10 @@ export function AdvancedDiplomacyActions({
 
   const handleSendAid = async () => {
     const action = ActionFactory.sendForeignAid(nationId, targetNationId);
+    const formattedCost = PersianNumberFormatter.formatCurrency(foreignAidCost);
     await dispatchAction(
       action,
-      `بسته کمک مالی و بشردوستانه ۵ میلیارد دلاری به ${targetName} ارسال شد (+۲۰ دیدگاه، +۴ اعتبار جهانی).`,
+      `بسته کمک مالی به ارزش ${formattedCost} به ${targetName} ارسال شد (+۲۰ دیدگاه، +۴ اعتبار جهانی).`,
     );
   };
 
@@ -277,7 +284,8 @@ export function AdvancedDiplomacyActions({
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-gdp">
-                    ارسال کمک مالی و دیپلماتیک (۵ میلیارد دلار)
+                    ارسال کمک مالی و دیپلماتیک (
+                    {PersianNumberFormatter.formatCurrency(foreignAidCost)})
                   </span>
                   <HeartHandshake size={14} className="text-gdp" />
                 </div>

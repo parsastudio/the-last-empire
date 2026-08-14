@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Shield, Users, Globe2 } from "lucide-react";
+import { Shield, Users, Coins } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -11,7 +11,7 @@ export interface HoverCountryInfo {
   stance: string;
   regionName?: string;
   totalPopulation?: string;
-  worldAreaPercentage?: string;
+  gdpText?: string;
 }
 
 class HoverHudPositionCalculator {
@@ -104,11 +104,11 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
 
           <div className="flex flex-col gap-1 bg-secondary/40 p-2 rounded-xl border border-border/40">
             <span className="text-muted-foreground text-[9px] font-sans flex items-center gap-1">
-              <Globe2 size={11} className="text-gdp shrink-0" />
-              وسعت از جهان:
+              <Coins size={11} className="text-gdp shrink-0" />
+              تولید ناخالص (GDP):
             </span>
-            <span className="font-bold text-foreground truncate">
-              {hoverData.worldAreaPercentage || "---"}
+            <span className="font-bold text-gdp truncate">
+              {hoverData.gdpText || "---"}
             </span>
           </div>
         </div>

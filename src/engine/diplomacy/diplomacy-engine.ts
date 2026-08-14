@@ -5,6 +5,7 @@ import {
   DiplomaticProposalType,
 } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface BetrayalEvaluation {
   reputationPenalty: number;
@@ -58,7 +59,9 @@ export interface ProposalEvaluation {
 }
 
 export class TreatyEvaluator {
-  public static readonly FOREIGN_AID_COST = 5000000000;
+  public static calculateForeignAidCost(targetGdp: number): number {
+    return Math.max(500000000, Math.floor(targetGdp * 0.03));
+  }
 
   public evaluateProposal(
     sender: Nation,
@@ -66,7 +69,10 @@ export class TreatyEvaluator {
     proposalType: DiplomaticProposalType,
   ): ProposalEvaluation {
     if (proposalType === "SEND_FOREIGN_AID") {
-      return sender.treasury >= TreatyEvaluator.FOREIGN_AID_COST
+      const requiredCost = TreatyEvaluator.calculateForeignAidCost(
+        getNationGdp(receiver),
+      );
+      return sender.treasury >= requiredCost
         ? { accepted: true }
         : { accepted: false, reason: "INSUFFICIENT_FUNDS" };
     }

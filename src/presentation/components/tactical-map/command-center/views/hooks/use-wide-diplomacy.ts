@@ -3,6 +3,7 @@ import { resolveProfileRelation } from "@/presentation/components/tactical-map/s
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface UseWideDiplomacyProps {
   selectedTargetCode?: string | null;
@@ -55,11 +56,18 @@ export function useWideDiplomacy({
     [activeCode],
   );
 
+  const selectedTargetNation = useMemo(() => {
+    if (!nationsMap) return null;
+    return nationsMap[targetNationId] ?? null;
+  }, [nationsMap, targetNationId]);
+
+  const selectedTargetGdp = useMemo(() => {
+    if (!selectedTargetNation) return 100000000000;
+    return getNationGdp(selectedTargetNation);
+  }, [selectedTargetNation]);
+
   const selectedRelation = useMemo(() => {
-    const targetLiveNation = nationsMap
-      ? (nationsMap[targetNationId] ?? null)
-      : null;
-    const rel = resolveProfileRelation(activeCode, targetLiveNation);
+    const rel = resolveProfileRelation(activeCode, selectedTargetNation);
 
     if (humanNation) {
       const directRel = humanNation.relations[targetNationId];
@@ -70,7 +78,7 @@ export function useWideDiplomacy({
       }
     }
     return rel;
-  }, [activeCode, targetNationId, nationsMap, humanNation]);
+  }, [activeCode, targetNationId, selectedTargetNation, humanNation]);
 
   return {
     searchQuery,
@@ -80,5 +88,6 @@ export function useWideDiplomacy({
     filteredRelations: relationsList,
     selectedRelation,
     targetNationId,
+    selectedTargetGdp,
   };
 }

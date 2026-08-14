@@ -4,6 +4,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -89,7 +90,9 @@ export class PoliticsActionExecutor {
         let costDeduction = 0;
 
         if (action.proposalType === "SEND_FOREIGN_AID") {
-          costDeduction = TreatyEvaluator.FOREIGN_AID_COST;
+          costDeduction = TreatyEvaluator.calculateForeignAidCost(
+            getNationGdp(receiver),
+          );
           reputationDelta = 4;
         } else if (action.proposalType === "NON_AGGRESSION_PACT") {
           reputationDelta = 3;
