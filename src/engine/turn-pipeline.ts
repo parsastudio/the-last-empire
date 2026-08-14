@@ -1,31 +1,15 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { ModifierManager } from "@/engine/politics/modifier-manager";
-import {
-  CoolOffManager,
-  ReputationManager,
-} from "@/engine/diplomacy/diplomacy-engine";
-import {
-  TariffCalculator,
-  TaxCalculator,
-  MilitaryPayrollCalculator,
-  BankruptcyManager,
-} from "@/engine/economy/economy-calculators";
-import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { MigrationEngine } from "@/engine/economy/demographics/migration-engine";
-import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
-import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
-import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { RankManager } from "@/engine/politics/rank-manager";
+import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
+import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-processor";
+import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
+import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
 
 export class TurnPipeline {
-  private coolOffManager = new CoolOffManager();
-  private reputationManager = new ReputationManager();
-  private bankruptcyManager = new BankruptcyManager();
-  private recruitmentQueue = new RecruitmentQueueManager();
-
   public processTurn(state: GameState): GameState {
     const updatedNations: Record<string, Nation> = {};
     const provincesByOwner = new Map<string, Province[]>();
@@ -51,152 +35,29 @@ export class TurnPipeline {
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
       const ownedProvinces = provincesByOwner.get(canonicalId) || [];
-      const isAlive = ownedProvinces.length > 0;
+
+      const { isAlive, syncedNation } = NationGeographySyncer.sync(
+        nation,
+        ownedProvinces,
+      );
 
       if (!isAlive) {
-        updatedNations[id] = {
-          ...nation,
-          isAlive: false,
-          population: 0,
-          executedEspionageTiers: [],
-          geography: {
-            ...nation.geography,
-            territoryPixelCount: 0,
-            hasSeaAccess: false,
-          },
-        };
+        updatedNations[id] = syncedNation;
         continue;
       }
 
-      let totalProvincePixels = 0;
-      let hasSeaAccess = false;
-      for (let pIdx = 0; pIdx < ownedProvinces.length; pIdx++) {
-        const p = ownedProvinces[pIdx]!;
-        totalProvincePixels += p.pixelCount;
-        if (p.hasSeaAccess) {
-          hasSeaAccess = true;
-        }
-      }
+      const { updatedNation: dipNation, isAtWar } =
+        DiplomaticTurnProcessor.process(syncedNation);
 
-      let updated: Nation = {
-        ...nation,
-        isAlive: true,
-        executedEspionageTiers: [],
-        geography: {
-          ...nation.geography,
-          territoryPixelCount: totalProvincePixels,
-          hasSeaAccess,
-        },
-      };
+      const ecoNation = EconomyTurnProcessor.process(dipNation, state.nations);
 
-      updated = ModifierManager.updateActiveModifiers(updated);
-
-      let isAtWar = false;
-
-      if (updated.relations) {
-        const relKeys = Object.keys(updated.relations);
-        const newRels: Record<string, RelationProfile> = {
-          ...updated.relations,
-        };
-
-        for (let j = 0; j < relKeys.length; j++) {
-          const targetId = relKeys[j]!;
-          const relation = newRels[targetId];
-          if (!relation) continue;
-
-          if (relation.stance === "WAR") {
-            isAtWar = true;
-          }
-
-          let nextCoolOff = relation.coolOffTurnsRemaining;
-          if (relation.coolOffTurnsRemaining > 0) {
-            nextCoolOff = this.coolOffManager.processTurnTick(
-              relation.coolOffTurnsRemaining,
-            );
-          }
-
-          let nextOpinion = relation.opinion;
-          if (relation.stance !== "WAR" && !relation.isTradeEmbargoed) {
-            nextOpinion = Math.min(100, relation.opinion + 1);
-          }
-
-          let nextEmbargo = relation.isTradeEmbargoed;
-          if (
-            updated.globalReputation <= -30 &&
-            nextOpinion < 0 &&
-            relation.stance !== "ALLIANCE"
-          ) {
-            nextEmbargo = true;
-          }
-
-          newRels[targetId] = {
-            ...relation,
-            opinion: nextOpinion,
-            coolOffTurnsRemaining: nextCoolOff,
-            isTradeEmbargoed: nextEmbargo,
-          };
-        }
-
-        updated = { ...updated, relations: newRels };
-      }
-
-      const demoResult = DemographicsEngine.processNaturalDemographics(updated);
-      updated = demoResult.updatedNation;
-
-      const tariffResult = TariffCalculator.calculateTariffEffects(
-        updated,
+      const polNation = PoliticsTurnProcessor.process(
+        ecoNation,
         state.nations,
-      );
-      const taxResult = TaxCalculator.evaluateTaxPolicy(updated);
-
-      const addedTreasury =
-        (tariffResult.tariffRevenue > 0 ? tariffResult.tariffRevenue : 0) +
-        (taxResult.taxIncome > 0 ? taxResult.taxIncome : 0);
-
-      const payrollBreakdown =
-        MilitaryPayrollCalculator.calculatePayroll(updated);
-      const totalExpenses =
-        payrollBreakdown.total + Math.floor(updated.nationalDebt * 0.05);
-
-      let newTreasury = updated.treasury + addedTreasury - totalExpenses;
-      let newDebt = updated.nationalDebt;
-
-      if (newTreasury < 0) {
-        newDebt += Math.abs(newTreasury);
-        newTreasury = 0;
-      }
-
-      updated = {
-        ...updated,
-        treasury: newTreasury,
-        nationalDebt: newDebt,
-      };
-
-      if (this.bankruptcyManager.isBankrupt(updated)) {
-        updated = this.bankruptcyManager.applyBankruptcy(updated);
-      }
-
-      updated = this.recruitmentQueue.processTurnQueue(updated);
-
-      const newStability = StabilityCalculator.calculateTurnStability(
-        updated,
-        state.nations,
+        isAtWar,
       );
 
-      updated = {
-        ...updated,
-        government: {
-          ...updated.government,
-          stability: newStability,
-          turnsInPower: updated.government.turnsInPower + 1,
-        },
-      };
-
-      if (!isAtWar) {
-        updated = this.reputationManager.applyReputationGain(updated, 1);
-      }
-
-      updatedNations[id] = updated;
+      updatedNations[id] = polNation;
     }
 
     const migrationSummary =

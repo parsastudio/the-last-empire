@@ -2,18 +2,12 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
-import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
-import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
-import {
-  FinalMapManifest,
-  FinalManifestNation,
-} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
+import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { CampaignInitializationService } from "@/presentation/stores/services/campaign-initialization-service";
+import { GamePersistenceService } from "@/presentation/stores/services/game-persistence-service";
 
 interface GameStoreState {
   gameState: GameState | null;
@@ -36,8 +30,6 @@ interface GameStoreState {
   advanceNextTurn: () => Promise<GameState | null>;
 }
 
-const storageAdapter = new GameStorageAdapter();
-const aiInitializer = new GlobalAiInitializer();
 const orchestrator = new TurnProgressionOrchestrator();
 
 export const useGameStore = create<GameStoreState>()(
@@ -60,21 +52,8 @@ export const useGameStore = create<GameStoreState>()(
       });
 
       try {
-        const state = await storageAdapter.loadGameState(gameId);
-
-        if (state) {
-          const buffer = BitPackedGridState.getInstance().getBuffer();
-          const syncedProvinces =
-            ProvincePixelCalculator.syncProvincesMapPixelCounts(
-              buffer,
-              state.provinces,
-            );
-
-          const updatedState: GameState = {
-            ...state,
-            provinces: syncedProvinces,
-          };
-
+        const updatedState = await GamePersistenceService.loadGameState(gameId);
+        if (updatedState) {
           set((draft) => {
             draft.gameState = updatedState;
             draft.loading = false;
@@ -104,66 +83,15 @@ export const useGameStore = create<GameStoreState>()(
       });
 
       try {
-        const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
-        let activeManifest: FinalMapManifest | null = manifest ?? null;
-
-        if (!activeManifest) {
-          try {
-            const res = await fetch("/maps/map1/temp/final/manifest.json", {
-              cache: "no-store",
-            });
-            if (res.ok) {
-              activeManifest = await res.json();
-            }
-          } catch {}
-        }
-
-        if (activeManifest) {
-          CountryRegistry.initializeFromManifest(activeManifest);
-        }
-
-        let detectedNations: string[] = [];
-
-        if (activeManifest && activeManifest.nations) {
-          detectedNations = activeManifest.nations.map(
-            (n: FinalManifestNation) => n.id,
-          );
-        } else {
-          detectedNations = ALL_COUNTRY_PROFILES.map(
-            (p) => `NATION_${p.code.toUpperCase()}`,
-          );
-        }
-
-        if (!detectedNations.includes(normalizedHumanId)) {
-          detectedNations.push(normalizedHumanId);
-        }
-
-        const initResult = aiInitializer.initializeAllNations(
-          detectedNations,
-          normalizedHumanId,
-          governmentType,
-          activeManifest,
-        );
-
-        const buffer = BitPackedGridState.getInstance().getBuffer();
-        const syncedProvinces =
-          ProvincePixelCalculator.syncProvincesMapPixelCounts(
-            buffer,
-            initResult.provinces,
+        const initialState =
+          await CampaignInitializationService.createInitialGameState(
+            nationId,
+            governmentType,
+            gameId,
+            manifest,
           );
 
-        const initialState: GameState = {
-          gameId,
-          currentTurn: 1,
-          seed: Math.floor(Math.random() * 1000000),
-          isGameOver: false,
-          humanNationId: normalizedHumanId,
-          provinces: syncedProvinces,
-          nations: initResult.nations,
-          turnLogs: [],
-        };
-
-        await storageAdapter.saveGameState(gameId, initialState);
+        await GamePersistenceService.saveGameState(gameId, initialState);
 
         set((draft) => {
           draft.gameState = initialState;
@@ -193,7 +121,10 @@ export const useGameStore = create<GameStoreState>()(
         set((draft) => {
           draft.gameState = result.newState ?? null;
         });
-        void storageAdapter.saveGameState(activeGameId, result.newState);
+        void GamePersistenceService.saveGameState(
+          activeGameId,
+          result.newState,
+        );
 
         return {
           success: true,
@@ -220,7 +151,7 @@ export const useGameStore = create<GameStoreState>()(
         set((draft) => {
           draft.gameState = nextState;
         });
-        void storageAdapter.saveGameState(activeGameId, nextState);
+        void GamePersistenceService.saveGameState(activeGameId, nextState);
         return nextState;
       } catch {
         return null;
