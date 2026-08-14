@@ -34,6 +34,7 @@ export class BattleCalculator {
     defender: Nation,
     dronesToLaunch: number,
     infantryToDeploy?: number,
+    armorToDeploy?: number,
     airForceToDeploy?: number,
     attackType?: "LAND" | "NAVAL",
     navalCostMultiplier?: number,
@@ -41,6 +42,10 @@ export class BattleCalculator {
     const deployedInfantry = Math.min(
       attacker.military.infantry,
       Math.max(1, infantryToDeploy ?? attacker.military.infantry),
+    );
+    const deployedArmor = Math.min(
+      attacker.military.armor || 0,
+      Math.max(0, armorToDeploy ?? (attacker.military.armor || 0)),
     );
     const deployedAirForce = Math.min(
       attacker.military.airForce,
@@ -50,7 +55,6 @@ export class BattleCalculator {
       attacker.military.droneMissile,
       Math.max(0, dronesToLaunch || 0),
     );
-    const deployedArmor = attacker.military.armor || 0;
 
     const totalForceCost =
       deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
