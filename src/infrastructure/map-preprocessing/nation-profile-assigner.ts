@@ -155,6 +155,7 @@ export class NationProfileAssigner {
       regionsDemographics: [defaultRegion],
       provinceIds: item.provinceIds || [],
       executedEspionageTiers: [],
+      warFocusTargetId: null,
     };
   }
 

@@ -44,4 +44,5 @@ export const DEFAULT_NATION_MOCK: Nation = {
   doctrines: { unlockedDoctrines: [] },
   provinceIds: [],
   executedEspionageTiers: [],
+  warFocusTargetId: null,
 };

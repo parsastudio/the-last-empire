@@ -173,6 +173,19 @@ export class EspionageManager {
           },
         };
       }
+
+      const targetRel = updatedTarget.relations[source.id];
+      if (targetRel) {
+        const currentTargetGrudge = targetRel.grudge ?? 0;
+        updatedTarget.relations = {
+          ...updatedTarget.relations,
+          [source.id]: {
+            ...targetRel,
+            opinion: Math.max(-100, targetRel.opinion - tier * 20),
+            grudge: Math.min(100, currentTargetGrudge + tier * 15),
+          },
+        };
+      }
     } else if (outcome === "CRITICAL_FAILURE") {
       const penalty = tier === 3 ? 20 : tier === 2 ? 10 : 5;
       updatedSource = {
@@ -190,6 +203,19 @@ export class EspionageManager {
           [target.id]: {
             ...rel,
             opinion: Math.max(-100, rel.opinion - tier * 20),
+          },
+        };
+      }
+
+      const targetRel = updatedTarget.relations[source.id];
+      if (targetRel) {
+        const currentTargetGrudge = targetRel.grudge ?? 0;
+        updatedTarget.relations = {
+          ...updatedTarget.relations,
+          [source.id]: {
+            ...targetRel,
+            opinion: Math.max(-100, targetRel.opinion - tier * 25),
+            grudge: Math.min(100, currentTargetGrudge + tier * 20),
           },
         };
       }

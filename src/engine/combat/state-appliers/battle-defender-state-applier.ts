@@ -69,6 +69,10 @@ export class BattleDefenderStateApplier {
       ? attackerId
       : canonicalAttackerId;
 
+    const existingRel = updatedDefender.relations[targetKey];
+    const currentGrudge = existingRel?.grudge ?? 0;
+    const grudgeSurge = calcResult.isFullCapitulation ? 50 : 40;
+
     const updatedRelations = { ...updatedDefender.relations };
     if (updatedRelations[targetKey]) {
       updatedRelations[targetKey] = {
@@ -76,8 +80,13 @@ export class BattleDefenderStateApplier {
         stance: "WAR",
         isTradeEmbargoed: true,
         opinion: -100,
+        grudge: Math.min(100, currentGrudge + grudgeSurge),
       };
     }
+
+    const currentFocus = updatedDefender.warFocusTargetId;
+    const nextWarFocus =
+      !currentFocus || currentFocus === attackerId ? attackerId : currentFocus;
 
     return {
       ...updatedDefender,
@@ -88,6 +97,7 @@ export class BattleDefenderStateApplier {
         : 0,
       military: updatedMilitary,
       relations: updatedRelations,
+      warFocusTargetId: isDefenderAlive ? nextWarFocus : null,
     };
   }
 }

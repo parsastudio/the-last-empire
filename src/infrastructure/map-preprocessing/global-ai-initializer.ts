@@ -42,6 +42,7 @@ export class DiplomaticMatrixGenerator {
         stance: "NORMAL_DIPLOMACY",
         opinion: baselineOpinion,
         coolOffTurnsRemaining: 0,
+        grudge: 0,
         isTradeEmbargoed: false,
       };
     }
