@@ -2,6 +2,7 @@ import React from "react";
 import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
 import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
 import { MilitaryExpansionView } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-expansion-view";
+import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import {
   MilitaryStack,
   RecruitmentOrder,
@@ -37,6 +38,12 @@ export function WideMilitaryView({
         />
 
         <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
+
+        <MilitaryTechUpgradeCard
+          nationId={nationId}
+          treasury={treasury}
+          techLevel={military.techLevel}
+        />
       </div>
 
       <div className="space-y-5">
