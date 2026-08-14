@@ -58,13 +58,15 @@ export function resolveProfileRelation(
     ? liveNation.military.techLevel
     : fallback.startingTechLevel;
 
+  const currentOpinion = 0;
+
   return {
     code: displayCode.toUpperCase(),
     name,
     flagCode: flagCode.toUpperCase(),
     rank: liveNation ? liveNation.rank : 99,
     stance: "NORMAL_DIPLOMACY",
-    opinion: 0,
+    opinion: currentOpinion,
     isTradeEmbargoed: false,
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
@@ -74,6 +76,7 @@ export function resolveProfileRelation(
         ? liveNation.government.type
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
+      opinion: currentOpinion,
     },
   };
 }

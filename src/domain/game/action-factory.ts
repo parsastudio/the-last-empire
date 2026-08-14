@@ -90,6 +90,19 @@ export class ActionFactory {
     };
   }
 
+  public static sendForeignAid(
+    nationId: string,
+    targetNationId: string,
+  ): DiplomaticProposalAction {
+    return {
+      id: this.createId("aid"),
+      nationId,
+      type: "DIPLOMATIC_PROPOSAL",
+      targetNationId,
+      proposalType: "SEND_FOREIGN_AID",
+    };
+  }
+
   public static upgradeIndustrialLevel(
     nationId: string,
   ): UpgradeIndustrialLevelAction {

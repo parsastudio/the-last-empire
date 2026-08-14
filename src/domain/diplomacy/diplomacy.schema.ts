@@ -14,6 +14,7 @@ export const DiplomaticProposalTypeSchema = z.enum([
   "FULL_ALLIANCE",
   "SEVER_TRADE_RELATIONS",
   "DECLARE_WAR",
+  "SEND_FOREIGN_AID",
 ]);
 
 export const RelationProfileSchema = z.object({

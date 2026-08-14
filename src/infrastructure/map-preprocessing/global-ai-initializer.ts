@@ -6,22 +6,46 @@ import {
   FinalManifestNation,
 } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
 import { RankManager } from "@/engine/politics/rank-manager";
-
-type RelationProfile = Nation["relations"][string];
+import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 
 export class DiplomaticMatrixGenerator {
-  public generateBlankRelations(
-    nationsList: string[],
+  public generateInitialRelations(
+    currentId: string,
+    currentGov: string,
+    allNations: { id: string; govType: string }[],
   ): Record<string, RelationProfile> {
     const relations: Record<string, RelationProfile> = {};
-    for (const targetId of nationsList) {
-      relations[targetId] = {
-        targetNationId: targetId,
-        stance: "NORMAL_DIPLOMACY" as const,
-        opinion: 0,
+
+    for (const target of allNations) {
+      if (target.id === currentId) continue;
+      let baselineOpinion = 0;
+
+      if (currentGov === target.govType) {
+        baselineOpinion += 15;
+      } else if (
+        (currentGov === "DEMOCRACY" &&
+          (target.govType === "DICTATORSHIP" ||
+            target.govType === "FASCISM" ||
+            target.govType === "COMMUNISM")) ||
+        (target.govType === "DEMOCRACY" &&
+          (currentGov === "DICTATORSHIP" ||
+            currentGov === "FASCISM" ||
+            currentGov === "COMMUNISM"))
+      ) {
+        baselineOpinion -= 15;
+      } else if (currentGov !== "DEMOCRACY" && target.govType !== "DEMOCRACY") {
+        baselineOpinion += 10;
+      }
+
+      relations[target.id] = {
+        targetNationId: target.id,
+        stance: "NORMAL_DIPLOMACY",
+        opinion: baselineOpinion,
         coolOffTurnsRemaining: 0,
+        isTradeEmbargoed: false,
       };
     }
+
     return relations;
   }
 }
@@ -40,9 +64,6 @@ export class GlobalAiInitializer {
 
     const manifestProvinces = manifest.provinces || [];
     const manifestItems: FinalManifestNation[] = manifest.nations || [];
-    const allIds: string[] = manifestItems.map(
-      (item: FinalManifestNation) => item.id,
-    );
 
     for (const pItem of manifestProvinces) {
       provinces[pItem.provinceId.toString()] = {
@@ -59,6 +80,14 @@ export class GlobalAiInitializer {
       };
     }
 
+    const nationsMetaData = manifestItems.map((item) => ({
+      id: item.id,
+      govType:
+        item.id === humanNationId && humanGovType
+          ? humanGovType
+          : item.defaultGovernment,
+    }));
+
     for (const item of manifestItems) {
       const isHuman = item.id === humanNationId;
       const govToApply = isHuman ? humanGovType : undefined;
@@ -68,9 +97,11 @@ export class GlobalAiInitializer {
         govToApply,
       );
 
-      const relativeList = allIds.filter((id: string) => id !== item.id);
-      nation.relations =
-        this.relationsGenerator.generateBlankRelations(relativeList);
+      nation.relations = this.relationsGenerator.generateInitialRelations(
+        item.id,
+        nation.government.type,
+        nationsMetaData,
+      );
 
       nations[item.id] = nation;
     }
@@ -93,6 +124,8 @@ export class GlobalAiInitializer {
     const nations: Record<string, Nation> = {};
     const provinces: Record<string, Province> = {};
 
+    const preBuiltNations: Nation[] = [];
+
     for (const id of detectedNationsList) {
       const isHuman = id === humanNationId;
       const govToApply = isHuman ? humanGovType : undefined;
@@ -101,12 +134,21 @@ export class GlobalAiInitializer {
         isHuman,
         govToApply,
       );
+      preBuiltNations.push(nation);
+    }
 
-      const relativeList = detectedNationsList.filter((nId) => nId !== id);
-      nation.relations =
-        this.relationsGenerator.generateBlankRelations(relativeList);
+    const nationsMetaData = preBuiltNations.map((n) => ({
+      id: n.id,
+      govType: n.government.type,
+    }));
 
-      nations[id] = nation;
+    for (const nation of preBuiltNations) {
+      nation.relations = this.relationsGenerator.generateInitialRelations(
+        nation.id,
+        nation.government.type,
+        nationsMetaData,
+      );
+      nations[nation.id] = nation;
     }
 
     const rankedNations = RankManager.recalculateRanks(nations);

@@ -133,12 +133,35 @@ export class PoliticsActionExecutor {
           action.proposalType,
         );
 
+        let reputationDelta = 0;
+        let costDeduction = 0;
+
+        if (action.proposalType === "SEND_FOREIGN_AID") {
+          costDeduction = TreatyEvaluator.FOREIGN_AID_COST;
+          reputationDelta = 4;
+        } else if (action.proposalType === "NON_AGGRESSION_PACT") {
+          reputationDelta = 3;
+        } else if (action.proposalType === "FULL_ALLIANCE") {
+          reputationDelta = 6;
+        } else if (action.proposalType === "PEACE_TREATY") {
+          reputationDelta = 5;
+        } else if (action.proposalType === "DECLARE_WAR") {
+          reputationDelta = -10;
+        }
+
+        const newReputation = Math.max(
+          -100,
+          Math.min(100, nation.globalReputation + reputationDelta),
+        );
+
         return {
           ...state,
           nations: {
             ...state.nations,
             [sourceKey]: {
               ...nation,
+              treasury: Math.max(0, nation.treasury - costDeduction),
+              globalReputation: newReputation,
               relations: {
                 ...nation.relations,
                 [senderRel.targetNationId]: updatedSenderRel,
