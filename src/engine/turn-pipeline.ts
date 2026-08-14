@@ -89,9 +89,10 @@ export class TurnPipeline {
 
       updated = ModifierManager.updateActiveModifiers(updated);
 
+      let isAtWar = false;
+
       if (updated.relations) {
         const relKeys = Object.keys(updated.relations);
-        let relsChanged = false;
         const newRels: Record<string, RelationProfile> = {
           ...updated.relations,
         };
@@ -99,20 +100,42 @@ export class TurnPipeline {
         for (let j = 0; j < relKeys.length; j++) {
           const targetId = relKeys[j]!;
           const relation = newRels[targetId];
-          if (relation && relation.coolOffTurnsRemaining > 0) {
-            const nextTurns = this.coolOffManager.processTurnTick(
+          if (!relation) continue;
+
+          if (relation.stance === "WAR") {
+            isAtWar = true;
+          }
+
+          let nextCoolOff = relation.coolOffTurnsRemaining;
+          if (relation.coolOffTurnsRemaining > 0) {
+            nextCoolOff = this.coolOffManager.processTurnTick(
               relation.coolOffTurnsRemaining,
             );
-            newRels[targetId] = {
-              ...relation,
-              coolOffTurnsRemaining: nextTurns,
-            };
-            relsChanged = true;
           }
+
+          let nextOpinion = relation.opinion;
+          if (relation.stance !== "WAR" && !relation.isTradeEmbargoed) {
+            nextOpinion = Math.min(100, relation.opinion + 1);
+          }
+
+          let nextEmbargo = relation.isTradeEmbargoed;
+          if (
+            updated.globalReputation <= -30 &&
+            nextOpinion < 0 &&
+            relation.stance !== "ALLIANCE"
+          ) {
+            nextEmbargo = true;
+          }
+
+          newRels[targetId] = {
+            ...relation,
+            opinion: nextOpinion,
+            coolOffTurnsRemaining: nextCoolOff,
+            isTradeEmbargoed: nextEmbargo,
+          };
         }
-        if (relsChanged) {
-          updated = { ...updated, relations: newRels };
-        }
+
+        updated = { ...updated, relations: newRels };
       }
 
       const demoResult = DemographicsEngine.processNaturalDemographics(updated);
@@ -167,7 +190,10 @@ export class TurnPipeline {
         },
       };
 
-      updated = this.reputationManager.applyReputationGain(updated, 2);
+      if (!isAtWar) {
+        updated = this.reputationManager.applyReputationGain(updated, 1);
+      }
+
       updatedNations[id] = updated;
     }
 

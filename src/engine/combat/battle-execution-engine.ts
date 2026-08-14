@@ -1,4 +1,4 @@
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
@@ -10,6 +10,7 @@ import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
+import { AllianceInterventionEvaluator } from "@/engine/combat/alliance-intervention-evaluator";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -210,8 +211,22 @@ export class BattleExecutionEngine {
       attacker.population + transferredPopulation,
     );
 
+    let baseWarReputationPenalty = currentStance !== "WAR" ? 10 : 0;
+    if (calcResult.isFullCapitulation) {
+      baseWarReputationPenalty += 15;
+    }
+
+    let totalRepPenalty = baseWarReputationPenalty;
+    if (betrayalResult.hasBetrayed) {
+      totalRepPenalty += betrayalResult.reputationPenalty;
+    }
+
     updatedAttacker = {
       ...updatedAttacker,
+      globalReputation: Math.max(
+        -100,
+        attacker.globalReputation - totalRepPenalty,
+      ),
       provinceIds: attackerProvIds,
       treasury:
         attacker.treasury -
@@ -223,13 +238,6 @@ export class BattleExecutionEngine {
       },
     };
 
-    if (betrayalResult.hasBetrayed) {
-      updatedAttacker = BattleDiplomacyHelper.applyReputationPenalty(
-        updatedAttacker,
-        betrayalResult.reputationPenalty,
-      );
-    }
-
     const attackerRelKey = updatedAttacker.relations[defender.id]
       ? defender.id
       : canonicalDefenderId;
@@ -240,10 +248,7 @@ export class BattleExecutionEngine {
           ...updatedAttacker.relations[attackerRelKey]!,
           stance: "WAR",
           isTradeEmbargoed: true,
-          opinion: Math.min(
-            -50,
-            updatedAttacker.relations[attackerRelKey]!.opinion - 40,
-          ),
+          opinion: -100,
         },
       };
     }
@@ -320,33 +325,72 @@ export class BattleExecutionEngine {
       };
     }
 
+    const baseNations = {
+      ...state.nations,
+      [attacker.id]: updatedAttacker,
+      [defender.id]: updatedDefender,
+    };
+
+    const intervention =
+      AllianceInterventionEvaluator.evaluateAllianceInterventions(
+        updatedAttacker,
+        updatedDefender,
+        baseNations,
+      );
+
     const betrayalText = betrayalResult.hasBetrayed
-      ? ` [جریمه نقض معاهده: -${betrayalResult.reputationPenalty} پرستیژ جهانی]`
+      ? ` [جریمه نقض معاهده: -${betrayalResult.reputationPenalty} اعتبار جهانی]`
       : "";
 
     const { logEntry } = BattleDiplomacyHelper.buildBattleReportAndLog(
       state,
-      attacker,
-      defender,
+      updatedAttacker,
+      updatedDefender,
       calcResult,
       conqueredPixels,
       calcResult.isFullCapitulation,
       betrayalText,
     );
 
-    const tempNations = {
-      ...state.nations,
-      [attacker.id]: updatedAttacker,
-      [defender.id]: updatedDefender,
-    };
+    const additionalLogs: TurnLogEntry[] = [];
 
-    const rankedNations = RankManager.recalculateRanks(tempNations);
+    for (const allyId of intervention.interveningAllyIds) {
+      const ally = intervention.updatedNations[allyId];
+      if (ally) {
+        additionalLogs.push({
+          id: `log-ally-war-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          turn: state.currentTurn,
+          timestamp: Date.now(),
+          sourceNationId: ally.id,
+          level: "CRITICAL",
+          message: `دفاع جمعی متحدین: کشور ${ally.name} در راستای اجرای تعهدات اتحاد نظامی با ${defender.name}، به ارتش ${attacker.name} اعلان جنگ رسمی نمود.`,
+        });
+      }
+    }
+
+    for (const allyId of intervention.dishonoringAllyIds) {
+      const ally = intervention.updatedNations[allyId];
+      if (ally) {
+        additionalLogs.push({
+          id: `log-ally-dishonor-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          turn: state.currentTurn,
+          timestamp: Date.now(),
+          sourceNationId: ally.id,
+          level: "WARNING",
+          message: `پیمان‌شکنی دفاعی: کشور ${ally.name} از ترس رویارویی با ارتش ${attacker.name}، اتحاد خود با ${defender.name} را لغو کرد و بی‌طرف ماند.`,
+        });
+      }
+    }
+
+    const rankedNations = RankManager.recalculateRanks(
+      intervention.updatedNations,
+    );
 
     const newState: GameState = {
       ...state,
       provinces: updatedProvinces,
       nations: rankedNations,
-      turnLogs: [...state.turnLogs, logEntry],
+      turnLogs: [...state.turnLogs, logEntry, ...additionalLogs],
     };
 
     if (newState.turnLogs.length > 200) {

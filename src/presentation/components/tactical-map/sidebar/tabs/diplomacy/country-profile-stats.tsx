@@ -1,5 +1,13 @@
 import React from "react";
-import { Coins, Users, Award, Landmark, AlertCircle } from "lucide-react";
+import {
+  Coins,
+  Users,
+  Award,
+  Landmark,
+  AlertCircle,
+  ShoppingCart,
+  Lock,
+} from "lucide-react";
 
 export interface CountryProfileData {
   gdp: string;
@@ -7,6 +15,7 @@ export interface CountryProfileData {
   techLevel: number;
   governmentType: string;
   stability: number;
+  opinion?: number;
 }
 
 interface CountryProfileStatsProps {
@@ -14,6 +23,9 @@ interface CountryProfileStatsProps {
 }
 
 export function CountryProfileStats({ data }: CountryProfileStatsProps) {
+  const currentOpinion = data.opinion ?? 0;
+  const isArmsEligible = currentOpinion >= 20;
+
   return (
     <div className="space-y-3 font-mono text-xs dir-rtl">
       <div className="grid grid-cols-2 gap-2.5">
@@ -50,6 +62,28 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         </span>
       </div>
 
+      <div className="bg-secondary/40 border border-border/50 p-3.5 rounded-2xl flex items-center justify-between font-sans">
+        <div className="flex items-center gap-2 text-xs">
+          <ShoppingCart
+            size={15}
+            className={isArmsEligible ? "text-gdp" : "text-military"}
+          />
+          <span className="text-muted-foreground font-bold text-[11px]">
+            وضعیت دسترسی بازار اسلحه:
+          </span>
+        </div>
+        {isArmsEligible ? (
+          <span className="text-[10px] font-bold text-gdp bg-gdp/15 px-2.5 py-0.5 rounded-lg border border-gdp/30">
+            آماده معامله و صادرات
+          </span>
+        ) : (
+          <span className="text-[10px] font-bold text-military bg-military/15 px-2.5 py-0.5 rounded-lg border border-military/30 flex items-center gap-1">
+            <Lock size={10} />
+            تحریم تسلیحاتی (نیازمند دیدگاه ۲۰+)
+          </span>
+        )}
+      </div>
+
       <div className="bg-secondary/40 border border-border/50 p-3.5 rounded-2xl space-y-3 font-sans">
         <div className="flex items-center justify-between pb-2 border-b border-border/40">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -64,7 +98,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         <div className="bg-background/60 border border-border/40 p-2.5 rounded-xl space-y-0.5 font-mono text-xs">
           <div className="flex items-center gap-1 text-[10px] text-muted-foreground font-sans">
             <AlertCircle size={12} className="text-gdp shrink-0" />
-            <span>ثبات سیاسی</span>
+            <span>ثبات سیاسی داخلی</span>
           </div>
           <span className="font-bold text-gdp block text-xs">
             {data.stability}%

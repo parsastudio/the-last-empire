@@ -15,10 +15,10 @@ export interface BetrayalEvaluation {
 export class DiplomaticBetrayalCalculator {
   public calculatePenalty(stance: DiplomaticStance): BetrayalEvaluation {
     if (stance === "ALLIANCE") {
-      return { reputationPenalty: 50, skippedSteps: 2, hasBetrayed: true };
+      return { reputationPenalty: 35, skippedSteps: 2, hasBetrayed: true };
     }
     if (stance === "NON_AGGRESSION_PACT") {
-      return { reputationPenalty: 25, skippedSteps: 1, hasBetrayed: true };
+      return { reputationPenalty: 20, skippedSteps: 1, hasBetrayed: true };
     }
     return { reputationPenalty: 0, skippedSteps: 0, hasBetrayed: false };
   }
@@ -58,11 +58,19 @@ export interface ProposalEvaluation {
 }
 
 export class TreatyEvaluator {
+  public static readonly FOREIGN_AID_COST = 5000000000;
+
   public evaluateProposal(
     sender: Nation,
     receiver: Nation,
     proposalType: DiplomaticProposalType,
   ): ProposalEvaluation {
+    if (proposalType === "SEND_FOREIGN_AID") {
+      return sender.treasury >= TreatyEvaluator.FOREIGN_AID_COST
+        ? { accepted: true }
+        : { accepted: false, reason: "INSUFFICIENT_FUNDS" };
+    }
+
     const relation = receiver.relations[sender.id];
     const opinion =
       (relation ? relation.opinion : 0) +
@@ -97,18 +105,30 @@ export class TreatyEvaluator {
     newType: DiplomaticProposalType,
   ): RelationProfile {
     switch (newType) {
+      case "SEND_FOREIGN_AID":
+        return {
+          ...profile,
+          opinion: Math.min(100, profile.opinion + 20),
+        };
       case "NON_AGGRESSION_PACT":
         return {
           ...profile,
           stance: "NON_AGGRESSION_PACT",
+          opinion: Math.min(100, profile.opinion + 15),
           coolOffTurnsRemaining: 0,
         };
       case "FULL_ALLIANCE":
-        return { ...profile, stance: "ALLIANCE", coolOffTurnsRemaining: 0 };
+        return {
+          ...profile,
+          stance: "ALLIANCE",
+          opinion: Math.min(100, profile.opinion + 30),
+          coolOffTurnsRemaining: 0,
+        };
       case "PEACE_TREATY":
         return {
           ...profile,
           stance: "NORMAL_DIPLOMACY",
+          opinion: Math.max(-20, profile.opinion),
           coolOffTurnsRemaining: 5,
         };
       case "SEVER_TRADE_RELATIONS":
@@ -116,7 +136,7 @@ export class TreatyEvaluator {
           ...profile,
           stance: "SEVERED_RELATIONS",
           isTradeEmbargoed: true,
-          opinion: Math.min(profile.opinion, -30),
+          opinion: Math.max(-100, Math.min(profile.opinion - 30, -30)),
         };
       case "DECLARE_WAR":
         return {

@@ -8,10 +8,14 @@ import {
   ShieldAlert,
   AlertTriangle,
   Flame,
+  HeartHandshake,
 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
+import {
+  DiplomaticBetrayalCalculator,
+  TreatyEvaluator,
+} from "@/engine/diplomacy/diplomacy-engine";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -60,16 +64,10 @@ function BetrayalConfirmModal({
         <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl space-y-2 font-mono text-xs">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground font-sans text-[11px]">
-              میزان کسر پرستیژ و اعتبار جهانی:
+              میزان کسر اعتبار و پرستیژ جهانی:
             </span>
             <span className="font-bold text-military text-sm">
               -{PersianNumberFormatter.toPersianDigits(penalty)} امتیاز
-            </span>
-          </div>
-          <div className="flex justify-between items-center text-[10px] text-muted-foreground font-sans border-t border-border/40 pt-2">
-            <span>توصیه دبیرخانه:</span>
-            <span className="text-amber-500 font-bold">
-              ابتدا روابط را به گام‌های پایین‌تر تنزیل دهید.
             </span>
           </div>
         </div>
@@ -79,7 +77,7 @@ function BetrayalConfirmModal({
             onClick={onClose}
             className="py-3 bg-secondary hover:bg-secondary/80 text-foreground rounded-2xl text-xs font-bold transition-all border border-border cursor-pointer"
           >
-            انصراف و رعایت مراحل
+            انصراف
           </button>
           <button
             onClick={onConfirm}
@@ -155,6 +153,14 @@ export function AdvancedDiplomacyActions({
     actionFn();
   };
 
+  const handleSendAid = async () => {
+    const action = ActionFactory.sendForeignAid(nationId, targetNationId);
+    await dispatchAction(
+      action,
+      `بسته کمک مالی و بشردوستانه ۵ میلیارد دلاری به ${targetName} ارسال شد (+۲۰ دیدگاه، +۴ اعتبار جهانی).`,
+    );
+  };
+
   const handleNonAggression = async () => {
     const action = ActionFactory.diplomaticProposal(
       nationId,
@@ -163,7 +169,7 @@ export function AdvancedDiplomacyActions({
     );
     await dispatchAction(
       action,
-      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید.`,
+      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید (+۱۵ دیدگاه، +۳ اعتبار جهانی).`,
     );
   };
 
@@ -175,7 +181,7 @@ export function AdvancedDiplomacyActions({
     );
     await dispatchAction(
       action,
-      `پیشنهاد معاهده دفاعی مشترک به ${targetName} ارسال گردید.`,
+      `پیشنهاد معاهده اتحاد کامل به ${targetName} ارسال گردید (+۳۰ دیدگاه، +۶ اعتبار جهانی).`,
     );
   };
 
@@ -199,7 +205,7 @@ export function AdvancedDiplomacyActions({
     );
     await dispatchAction(
       action,
-      `بیانیه رسمی اعلان جنگ به ${targetName} ابلاغ گردید و روابط به وضعیت متخاصم تغییر یافت.`,
+      `بیانیه رسمی اعلان جنگ به ${targetName} ابلاغ گردید (-۱۰ اعتبار جهانی).`,
     );
   };
 
@@ -263,6 +269,23 @@ export function AdvancedDiplomacyActions({
                 </span>
               </div>
             ) : null}
+
+            {!isWar && (
+              <button
+                onClick={handleSendAid}
+                className="w-full p-3 rounded-xl bg-gdp/15 hover:bg-gdp/25 border border-gdp/30 text-right transition-all cursor-pointer space-y-1"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-gdp">
+                    ارسال کمک مالی و دیپلماتیک (۵ میلیارد دلار)
+                  </span>
+                  <HeartHandshake size={14} className="text-gdp" />
+                </div>
+                <p className="text-[10px] text-muted-foreground font-sans">
+                  بهبود فوری ۲۰+ دیدگاه دوجانبه و ۴+ اعتبار جهانی برای کشور شما
+                </p>
+              </button>
+            )}
 
             {!isNonAggression && (
               <button

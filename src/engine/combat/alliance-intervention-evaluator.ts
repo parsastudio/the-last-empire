@@ -1,0 +1,135 @@
+import { Nation } from "@/domain/nation/nation.schema";
+import { CountryRegistry } from "@/domain/data/countries";
+import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
+
+export interface AllianceInterventionResult {
+  interveningAllyIds: string[];
+  dishonoringAllyIds: string[];
+  updatedNations: Record<string, Nation>;
+}
+
+export class AllianceInterventionEvaluator {
+  public static evaluateAllianceInterventions(
+    attacker: Nation,
+    defender: Nation,
+    nationsMap: Record<string, Nation>,
+  ): AllianceInterventionResult {
+    const interveningAllyIds: string[] = [];
+    const dishonoringAllyIds: string[] = [];
+    const updatedNations: Record<string, Nation> = { ...nationsMap };
+
+    const attackerPower =
+      MilitaryPowerCalculator.calculateEffectivePower(attacker);
+
+    for (const [targetId, relation] of Object.entries(
+      defender.relations || {},
+    )) {
+      if (relation.stance !== "ALLIANCE") continue;
+
+      const canonicalAllyId = CountryRegistry.resolveCanonicalId(targetId);
+      const ally = updatedNations[targetId] || updatedNations[canonicalAllyId];
+      if (
+        !ally ||
+        !ally.isAlive ||
+        ally.id === attacker.id ||
+        ally.id === defender.id
+      ) {
+        continue;
+      }
+
+      const allyPower = MilitaryPowerCalculator.calculateEffectivePower(ally);
+      const isStrongEnough = allyPower >= attackerPower * 0.35;
+
+      const relWithAttacker =
+        ally.relations[attacker.id] ||
+        ally.relations[CountryRegistry.resolveCanonicalId(attacker.id)];
+
+      const hasPactWithAttacker =
+        relWithAttacker?.stance === "NON_AGGRESSION_PACT";
+      const hasGoodOpinionWithAttacker = (relWithAttacker?.opinion ?? 0) >= 40;
+
+      if (
+        isStrongEnough &&
+        !hasPactWithAttacker &&
+        !hasGoodOpinionWithAttacker
+      ) {
+        interveningAllyIds.push(ally.id);
+
+        const updatedAllyRelations = {
+          ...ally.relations,
+          [attacker.id]: {
+            targetNationId: attacker.id,
+            stance: "WAR" as const,
+            opinion: -100,
+            coolOffTurnsRemaining: 0,
+            isTradeEmbargoed: true,
+          },
+        };
+
+        updatedNations[ally.id] = {
+          ...ally,
+          relations: updatedAllyRelations,
+        };
+
+        const currentAttacker = updatedNations[attacker.id] || attacker;
+        const updatedAttackerRelations = {
+          ...currentAttacker.relations,
+          [ally.id]: {
+            targetNationId: ally.id,
+            stance: "WAR" as const,
+            opinion: -100,
+            coolOffTurnsRemaining: 0,
+            isTradeEmbargoed: true,
+          },
+        };
+
+        updatedNations[attacker.id] = {
+          ...currentAttacker,
+          relations: updatedAttackerRelations,
+        };
+      } else {
+        dishonoringAllyIds.push(ally.id);
+
+        const updatedAllyRelations = {
+          ...ally.relations,
+          [defender.id]: {
+            targetNationId: defender.id,
+            stance: "NORMAL_DIPLOMACY" as const,
+            opinion: Math.min(ally.relations[defender.id]?.opinion ?? 0, 0),
+            coolOffTurnsRemaining: 5,
+            isTradeEmbargoed: false,
+          },
+        };
+
+        updatedNations[ally.id] = {
+          ...ally,
+          globalReputation: Math.max(-100, ally.globalReputation - 10),
+          relations: updatedAllyRelations,
+        };
+
+        const currentDefender = updatedNations[defender.id] || defender;
+        const updatedDefenderRelations = {
+          ...currentDefender.relations,
+          [ally.id]: {
+            targetNationId: ally.id,
+            stance: "NORMAL_DIPLOMACY" as const,
+            opinion: -30,
+            coolOffTurnsRemaining: 5,
+            isTradeEmbargoed: false,
+          },
+        };
+
+        updatedNations[defender.id] = {
+          ...currentDefender,
+          relations: updatedDefenderRelations,
+        };
+      }
+    }
+
+    return {
+      interveningAllyIds,
+      dishonoringAllyIds,
+      updatedNations,
+    };
+  }
+}
