@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -5,8 +7,9 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { useAttackFormState } from "@/presentation/components/tactical-map/modals/attack/hooks/use-attack-form-state";
-import { useAttackLogisticsCalculator } from "@/presentation/components/tactical-map/modals/attack/hooks/use-attack-logistics-calculator";
+import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -25,15 +28,23 @@ export function useDirectAttackForm({
   isOpen,
   onClose,
 }: UseDirectAttackFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { dispatchAction } = useGameActions();
+  const { dispatchAction, isSubmitting } = useGameActions();
 
-  const formState = useAttackFormState({
-    humanNation,
-    targetNationId,
-    targetProvinceId,
-    isOpen,
-  });
+  const [infantryToDeploy, setInfantryToDeploy] = useState<number>(0);
+  const [armorToDeploy, setArmorToDeploy] = useState<number>(0);
+  const [airForceToDeploy, setAirForceToDeploy] = useState<number>(0);
+  const [dronesToLaunch, setDronesToLaunch] = useState<number>(0);
+
+  const [prevKey, setPrevKey] = useState<string | null>(null);
+  const currentKey = `${humanNation?.id}-${isOpen}-${targetNationId}-${targetProvinceId}`;
+
+  if (currentKey !== prevKey) {
+    setPrevKey(currentKey);
+    setInfantryToDeploy(humanNation ? humanNation.military.infantry : 0);
+    setArmorToDeploy(humanNation ? humanNation.military.armor || 0 : 0);
+    setAirForceToDeploy(humanNation ? humanNation.military.airForce : 0);
+    setDronesToLaunch(0);
+  }
 
   const targetNation = useMemo(() => {
     if (!gameState || !targetNationId) return null;
@@ -48,15 +59,70 @@ export function useDirectAttackForm({
     return gameState.provinces[targetProvinceId.toString()] || null;
   }, [gameState, targetProvinceId]);
 
-  const logistics = useAttackLogisticsCalculator({
+  const isLandNeighbor = useMemo(() => {
+    if (!humanNation || !targetProvinceId) return false;
+    return LandNeighborResolver.hasProvinceLandBorder(
+      targetProvinceId,
+      humanNation.id,
+      gameState?.provinces,
+    );
+  }, [humanNation, targetProvinceId, gameState?.provinces]);
+
+  const navalAttackInfo = useMemo(() => {
+    if (isLandNeighbor || !humanNation || !targetProvinceId) {
+      return {
+        isNavalValid: false,
+        closestDistance: 0,
+        closestProvinceName: "",
+        navalCostMultiplier: 0,
+        deploymentMoneyCost: 0,
+      };
+    }
+
+    return NavalNeighborResolver.resolveNavalAttack(
+      targetProvinceId,
+      humanNation.id,
+      gameState?.provinces,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
+      dronesToLaunch,
+    );
+  }, [
+    isLandNeighbor,
     humanNation,
     targetProvinceId,
-    gameState,
-    infantryToDeploy: formState.infantryToDeploy,
-    armorToDeploy: formState.armorToDeploy,
-    airForceToDeploy: formState.airForceToDeploy,
-    dronesToLaunch: formState.dronesToLaunch,
-  });
+    gameState?.provinces,
+    infantryToDeploy,
+    armorToDeploy,
+    airForceToDeploy,
+    dronesToLaunch,
+  ]);
+
+  const rawForceValue = useMemo(() => {
+    return (
+      infantryToDeploy * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
+      armorToDeploy * MILITARY_UNIT_STATS.ARMOR.moneyCost +
+      airForceToDeploy * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
+      dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
+    );
+  }, [infantryToDeploy, armorToDeploy, airForceToDeploy, dronesToLaunch]);
+
+  const baseDeploymentCost = Math.floor(rawForceValue * 0.05);
+  const isNavalOperation = !isLandNeighbor && navalAttackInfo.isNavalValid;
+
+  const navalTransportExtraCost = isNavalOperation
+    ? Math.max(0, navalAttackInfo.deploymentMoneyCost - baseDeploymentCost)
+    : 0;
+
+  const totalLogisticsCost = isLandNeighbor
+    ? baseDeploymentCost
+    : navalAttackInfo.isNavalValid
+      ? navalAttackInfo.deploymentMoneyCost
+      : 0;
+
+  const canAfford = (humanNation?.treasury || 0) >= totalLogisticsCost;
+  const hasSelectedInfantry = infantryToDeploy > 0;
 
   const isWarStance = useMemo(() => {
     if (!humanNation || !targetNation) return false;
@@ -72,41 +138,36 @@ export function useDirectAttackForm({
   const handleExecuteAttack = useCallback(async () => {
     if (!humanNation || !targetNation || isSubmitting) return;
 
-    try {
-      setIsSubmitting(true);
-      const action = ActionFactory.initiateBattle(
-        humanNation.id,
-        targetNation.id,
-        formState.dronesToLaunch,
-        formState.infantryToDeploy,
-        formState.armorToDeploy,
-        formState.airForceToDeploy,
-        targetProvinceId || undefined,
-        logistics.isLandNeighbor ? "LAND" : "NAVAL",
-      );
+    const action = ActionFactory.initiateBattle(
+      humanNation.id,
+      targetNation.id,
+      dronesToLaunch,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
+      targetProvinceId || undefined,
+      isLandNeighbor ? "LAND" : "NAVAL",
+    );
 
-      const typeLabel = logistics.isLandNeighbor ? "زمینی" : "دریایی";
-      const success = await dispatchAction(
-        action,
-        `دستور تهاجم ${typeLabel} به ${targetRegionName} با موفقیت صادر گردید.`,
-      );
+    const typeLabel = isLandNeighbor ? "زمینی" : "دریایی";
+    const success = await dispatchAction(
+      action,
+      `دستور تهاجم ${typeLabel} به ${targetRegionName} با موفقیت صادر گردید.`,
+    );
 
-      if (success) {
-        onClose();
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (success) {
+      onClose();
     }
   }, [
     humanNation,
     targetNation,
     isSubmitting,
-    formState.dronesToLaunch,
-    formState.infantryToDeploy,
-    formState.armorToDeploy,
-    formState.airForceToDeploy,
+    dronesToLaunch,
+    infantryToDeploy,
+    armorToDeploy,
+    airForceToDeploy,
     targetProvinceId,
-    logistics.isLandNeighbor,
+    isLandNeighbor,
     dispatchAction,
     targetRegionName,
     onClose,
@@ -115,24 +176,24 @@ export function useDirectAttackForm({
   return {
     targetNation,
     targetProvince,
-    isLandNeighbor: logistics.isLandNeighbor,
-    navalAttackInfo: logistics.navalAttackInfo,
+    isLandNeighbor,
+    navalAttackInfo,
     isWarStance,
     targetRegionName,
-    infantryToDeploy: formState.infantryToDeploy,
-    setInfantryToDeploy: formState.setInfantryToDeploy,
-    armorToDeploy: formState.armorToDeploy,
-    setArmorToDeploy: formState.setArmorToDeploy,
-    airForceToDeploy: formState.airForceToDeploy,
-    setAirForceToDeploy: formState.setAirForceToDeploy,
-    dronesToLaunch: formState.dronesToLaunch,
-    setDronesToLaunch: formState.setDronesToLaunch,
-    baseDeploymentCost: logistics.baseDeploymentCost,
-    navalTransportExtraCost: logistics.navalTransportExtraCost,
-    isNavalOperation: logistics.isNavalOperation,
-    totalLogisticsCost: logistics.totalLogisticsCost,
-    canAfford: logistics.canAfford,
-    hasSelectedInfantry: logistics.hasSelectedInfantry,
+    infantryToDeploy,
+    setInfantryToDeploy,
+    armorToDeploy,
+    setArmorToDeploy,
+    airForceToDeploy,
+    setAirForceToDeploy,
+    dronesToLaunch,
+    setDronesToLaunch,
+    baseDeploymentCost,
+    navalTransportExtraCost,
+    isNavalOperation,
+    totalLogisticsCost,
+    canAfford,
+    hasSelectedInfantry,
     isSubmitting,
     handleExecuteAttack,
   };

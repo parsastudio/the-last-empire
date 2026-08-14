@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Shield, Users, Coins } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -14,37 +14,32 @@ export interface HoverCountryInfo {
   gdpText?: string;
 }
 
-class HoverHudPositionCalculator {
-  private readonly hudWidth = 288;
-  private readonly hudHeight = 160;
-  private readonly offset = 15;
-
-  public calculatePosition(
-    cursorPos: { x: number; y: number } | null,
-  ): React.CSSProperties {
-    if (!cursorPos || typeof window === "undefined") {
-      return { left: "1.5rem", bottom: "1.5rem" };
-    }
-
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
-
-    let left = cursorPos.x + this.offset;
-    let top = cursorPos.y + this.offset;
-
-    if (left + this.hudWidth > windowWidth - 20) {
-      left = Math.max(10, cursorPos.x - this.hudWidth - this.offset);
-    }
-
-    if (top + this.hudHeight > windowHeight - 20) {
-      top = Math.max(10, cursorPos.y - this.hudHeight - this.offset);
-    }
-
-    return {
-      left: `${left}px`,
-      top: `${top}px`,
-    };
+function calculateHudPosition(
+  cursorPos: { x: number; y: number } | null,
+): React.CSSProperties {
+  if (!cursorPos || typeof window === "undefined") {
+    return { left: "1.5rem", bottom: "1.5rem" };
   }
+
+  const hudWidth = 288;
+  const hudHeight = 160;
+  const offset = 15;
+
+  let left = cursorPos.x + offset;
+  let top = cursorPos.y + offset;
+
+  if (left + hudWidth > window.innerWidth - 20) {
+    left = Math.max(10, cursorPos.x - hudWidth - offset);
+  }
+
+  if (top + hudHeight > window.innerHeight - 20) {
+    top = Math.max(10, cursorPos.y - hudHeight - offset);
+  }
+
+  return {
+    left: `${left}px`,
+    top: `${top}px`,
+  };
 }
 
 interface WebGLHoverHudProps {
@@ -53,12 +48,10 @@ interface WebGLHoverHudProps {
 }
 
 export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
-  const calculator = useMemo(() => new HoverHudPositionCalculator(), []);
-
   if (!hoverPos || !hoverData) return null;
 
   const flagSymbol = getFlagEmoji(hoverData.flagCode || hoverData.code);
-  const stylePosition = calculator.calculatePosition(hoverPos);
+  const stylePosition = calculateHudPosition(hoverPos);
 
   return (
     <div

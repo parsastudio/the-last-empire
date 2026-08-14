@@ -4,7 +4,7 @@ import { UnitType } from "@/domain/military/military.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { useActionRunner } from "@/presentation/hooks/game/use-action-runner";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -33,7 +33,7 @@ export function useWideArmsMarketForm({
   const [selectedUnitType, setSelectedUnitType] = useState<UnitType>("ARMOR");
   const [quantity, setQuantity] = useState<number>(1);
 
-  const { runAction, isSubmitting } = useActionRunner();
+  const { dispatchAction, isSubmitting } = useGameActions();
 
   const sellerOptions = useMemo<ArmsSellerOption[]>(() => {
     if (!nationsMap) return [];
@@ -59,9 +59,7 @@ export function useWideArmsMarketForm({
       })
       .filter((c) => c.isEligible)
       .sort((a, b) => {
-        if (b.techLevel !== a.techLevel) {
-          return b.techLevel - a.techLevel;
-        }
+        if (b.techLevel !== a.techLevel) return b.techLevel - a.techLevel;
         return a.rank - b.rank;
       })
       .filter(
@@ -134,9 +132,7 @@ export function useWideArmsMarketForm({
         const enemyNavalPower =
           (partner.military.navalFleet || 0) *
           (partner.military.techLevel || 1);
-        if (enemyNavalPower > buyerNavalPower) {
-          return true;
-        }
+        if (enemyNavalPower > buyerNavalPower) return true;
       }
     }
     return false;
@@ -162,8 +158,7 @@ export function useWideArmsMarketForm({
     );
 
     const formattedCost = PersianNumberFormatter.formatCurrency(totalPrice);
-
-    await runAction(
+    await dispatchAction(
       action,
       `خرید فوری ${PersianNumberFormatter.toPersianDigits(quantity.toLocaleString("en-US"))} یگان ${unitStat.nameFa} از ${selectedSeller.name} با موفقیت انجام گردید. (مبلغ: ${formattedCost})`,
     );
@@ -177,7 +172,7 @@ export function useWideArmsMarketForm({
     canAfford,
     totalPrice,
     unitStat,
-    runAction,
+    dispatchAction,
   ]);
 
   return {
