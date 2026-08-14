@@ -5,6 +5,7 @@ import {
   UnitConfig,
   UnitRecruitmentCard,
 } from "@/presentation/components/tactical-map/sidebar/tabs/military/unit-recruitment-card";
+import { UnitRecruitModal } from "@/presentation/components/tactical-map/sidebar/tabs/military/unit-recruit-modal";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -27,6 +28,8 @@ export function MilitaryExpansionView({
 }: MilitaryExpansionViewProps) {
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
+  const [selectedUnitForModal, setSelectedUnitForModal] =
+    useState<UnitConfig | null>(null);
 
   const currentNationObj = {
     id: nationId,
@@ -118,13 +121,22 @@ export function MilitaryExpansionView({
           <UnitRecruitmentCard
             key={unit.type}
             unit={unit}
-            treasury={treasury}
             techLevel={techLevel}
             industrialLevel={industrialLevel}
-            onRecruit={handleRecruit}
+            onOpenRecruitModal={(u) => setSelectedUnitForModal(u)}
           />
         ))}
       </div>
+
+      <UnitRecruitModal
+        isOpen={selectedUnitForModal !== null}
+        unit={selectedUnitForModal}
+        treasury={treasury}
+        techLevel={techLevel}
+        industrialLevel={industrialLevel}
+        onClose={() => setSelectedUnitForModal(null)}
+        onConfirm={handleRecruit}
+      />
     </div>
   );
 }

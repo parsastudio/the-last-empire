@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Clock,
-  Coins,
   Shield,
   ShieldAlert,
   Crosshair,
@@ -9,18 +8,21 @@ import {
   Radio,
   Anchor,
   Lock,
+  Zap,
   LucideIcon,
 } from "lucide-react";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { useUnitRecruitmentCalculator } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-unit-recruitment-calculator";
-import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { UnitType } from "@/domain/military/military.schema";
 
 export interface UnitConfig {
   type: string;
   name: string;
+  desc: string;
   moneyCost: number;
   buildTurns: number;
+  weightPower: number;
   icon: LucideIcon;
   color: string;
 }
@@ -29,48 +31,60 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
   {
     type: MILITARY_UNIT_STATS.INFANTRY.type,
     name: MILITARY_UNIT_STATS.INFANTRY.nameFa,
+    desc: "ستون اصلی تسخیر و نگه‌داری استان‌ها و خط مقدم نبردهای زمینی.",
     moneyCost: MILITARY_UNIT_STATS.INFANTRY.moneyCost,
     buildTurns: MILITARY_UNIT_STATS.INFANTRY.buildTurns,
+    weightPower: MILITARY_UNIT_STATS.INFANTRY.weightPower,
     icon: Shield,
     color: "text-primary",
   },
   {
     type: MILITARY_UNIT_STATS.ARMOR.type,
     name: MILITARY_UNIT_STATS.ARMOR.nameFa,
+    desc: "لشکر زرهی سنگین برای درهم شکستن خطوط پیاده‌نظام و پیشروی سریع.",
     moneyCost: MILITARY_UNIT_STATS.ARMOR.moneyCost,
     buildTurns: MILITARY_UNIT_STATS.ARMOR.buildTurns,
+    weightPower: MILITARY_UNIT_STATS.ARMOR.weightPower,
     icon: ShieldAlert,
     color: "text-military",
   },
   {
     type: MILITARY_UNIT_STATS.AIR_DEFENSE.type,
     name: MILITARY_UNIT_STATS.AIR_DEFENSE.nameFa,
+    desc: "سپر موشکی برای رهگیری پهپادها و خنثی‌سازی حملات هوایی دشمن.",
     moneyCost: MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
     buildTurns: MILITARY_UNIT_STATS.AIR_DEFENSE.buildTurns,
+    weightPower: MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower,
     icon: Crosshair,
     color: "text-diplomacy",
   },
   {
     type: MILITARY_UNIT_STATS.AIR_FORCE.type,
     name: MILITARY_UNIT_STATS.AIR_FORCE.nameFa,
+    desc: "جنگنده‌های برتری هوایی جهت شکار اسکادران‌ها و انهدام تانک‌های حریف.",
     moneyCost: MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
     buildTurns: MILITARY_UNIT_STATS.AIR_FORCE.buildTurns,
+    weightPower: MILITARY_UNIT_STATS.AIR_FORCE.weightPower,
     icon: Plane,
     color: "text-gdp",
   },
   {
     type: MILITARY_UNIT_STATS.DRONE_MISSILE.type,
     name: MILITARY_UNIT_STATS.DRONE_MISSILE.nameFa,
+    desc: "پرتابه‌های نقطه‌زن برای تهاجم پیش‌دستانه و نابودی پدافند از راه دور.",
     moneyCost: MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost,
     buildTurns: MILITARY_UNIT_STATS.DRONE_MISSILE.buildTurns,
+    weightPower: MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower,
     icon: Radio,
     color: "text-treasury",
   },
   {
     type: MILITARY_UNIT_STATS.NAVAL_FLEET.type,
     name: MILITARY_UNIT_STATS.NAVAL_FLEET.nameFa,
+    desc: "ناوشکن‌های سنگین برای حاکمیت بر دریاها و تسهیل تهاجم آبی-خاکی.",
     moneyCost: MILITARY_UNIT_STATS.NAVAL_FLEET.moneyCost,
     buildTurns: MILITARY_UNIT_STATS.NAVAL_FLEET.buildTurns,
+    weightPower: MILITARY_UNIT_STATS.NAVAL_FLEET.weightPower,
     icon: Anchor,
     color: "text-primary",
   },
@@ -78,39 +92,47 @@ export const RECRUITABLE_UNITS: UnitConfig[] = [
 
 interface UnitRecruitmentCardProps {
   unit: UnitConfig;
-  treasury: number;
   techLevel?: number;
   industrialLevel?: number;
-  onRecruit: (unit: UnitConfig, quantity: number) => void;
+  onOpenRecruitModal: (unit: UnitConfig) => void;
 }
 
 export function UnitRecruitmentCard({
   unit,
-  treasury,
   techLevel = 1,
   industrialLevel = 1,
-  onRecruit,
+  onOpenRecruitModal,
 }: UnitRecruitmentCardProps) {
-  const calc = useUnitRecruitmentCalculator({
-    unit,
-    treasury,
-    techLevel,
-    industrialLevel,
-  });
-
   const Icon = unit.icon;
   const unitStat =
     MILITARY_UNIT_STATS[unit.type as keyof typeof MILITARY_UNIT_STATS];
   const isTechUnlocked = techLevel >= (unitStat?.requiredTechLevel || 1);
 
+  const unitUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+    unit.type as UnitType,
+    techLevel,
+    industrialLevel,
+  );
+
   return (
-    <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3.5 text-right dir-rtl">
+    <div className="bg-background/40 border border-border/70 p-4 rounded-2xl space-y-3 text-right dir-rtl transition-all hover:border-primary/40 shadow-sm">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon size={16} className={unit.color} />
-          <span className="text-xs font-bold text-foreground">{unit.name}</span>
+        <div className="flex items-center gap-2.5">
+          <div
+            className={`p-2 rounded-xl bg-secondary/80 border border-border/60 ${unit.color}`}
+          >
+            <Icon size={18} />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-foreground">{unit.name}</h4>
+            <span className="text-[10px] text-muted-foreground font-mono">
+              قیمت هر یگان:{" "}
+              {PersianNumberFormatter.formatCurrency(unitUnitPrice)}
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-lg">
+
+        <div className="flex items-center gap-1.5 font-mono text-[10px] text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-lg border border-border/50">
           <Clock size={11} className="text-treasury" />
           <span>
             {PersianNumberFormatter.toPersianDigits(unit.buildTurns)} نوبت ساخت
@@ -118,8 +140,12 @@ export function UnitRecruitmentCard({
         </div>
       </div>
 
+      <p className="text-[11px] text-muted-foreground leading-relaxed font-sans bg-secondary/20 p-2.5 rounded-xl border border-border/40">
+        {unit.desc}
+      </p>
+
       {!isTechUnlocked ? (
-        <div className="p-3 bg-secondary/50 border border-border/60 rounded-xl flex items-center justify-between text-[10px] text-amber-500 font-sans font-bold">
+        <div className="p-3 bg-secondary/60 border border-border/60 rounded-xl flex items-center justify-between text-[10px] text-amber-500 font-sans font-bold">
           <span className="flex items-center gap-1">
             <Lock size={12} />
             نیازمند سطح فناوری{" "}
@@ -129,98 +155,21 @@ export function UnitRecruitmentCard({
             جهت تولید داخلی
           </span>
           <span className="text-[9px] text-muted-foreground font-mono">
-            قابل خرید از بازار اسلحه
+            قابل خرید فوری از بازار اسلحه
           </span>
         </div>
       ) : (
-        <>
-          <div className="font-mono text-[10px] flex items-center justify-between bg-secondary/40 p-2.5 rounded-xl text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Coins size={11} className="text-gdp" />
-              <span>
-                قیمت هر یگان:{" "}
-                {PersianNumberFormatter.formatCurrency(calc.unitUnitPrice)}
-              </span>
-            </div>
-            <div className="font-bold text-foreground">
-              جمع کل: {PersianNumberFormatter.formatCurrency(calc.totalMoney)}
-            </div>
-          </div>
-
-          <div className="space-y-2 pt-1 border-t border-border/40">
-            <div className="flex items-center justify-between text-[10px] font-mono">
-              <span className="text-muted-foreground font-sans">
-                حداکثر ظرفیت ساخت با منابع فعلی:
-              </span>
-              <span className="font-bold text-gdp">
-                {PersianNumberFormatter.toPersianDigits(
-                  calc.maxAffordable.toLocaleString("en-US"),
-                )}{" "}
-                یگان
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min={0}
-                max={calc.maxAffordable}
-                disabled={calc.maxAffordable === 0}
-                value={calc.quantity}
-                onChange={(e) =>
-                  calc.setClampedQuantity(Number(e.target.value))
-                }
-                className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
-              />
-
-              <div className="flex items-center gap-1 font-mono">
-                <button
-                  type="button"
-                  disabled={calc.quantity <= 0}
-                  onClick={() => calc.setClampedQuantity(calc.quantity - 1)}
-                  className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  min={0}
-                  max={calc.maxAffordable}
-                  value={calc.quantity}
-                  onChange={calc.handleInputChange}
-                  className="w-14 bg-secondary/80 border border-border/80 rounded-lg py-1 px-1 text-center font-bold text-xs text-foreground font-mono focus:outline-none focus:border-primary"
-                />
-                <button
-                  type="button"
-                  disabled={calc.quantity >= calc.maxAffordable}
-                  onClick={() => calc.setClampedQuantity(calc.quantity + 1)}
-                  className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <PercentageSelector
-              disabled={calc.maxAffordable === 0}
-              onSelect={calc.handlePercentageSelect}
-              colorVariant="gdp"
-            />
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onRecruit(unit, calc.quantity)}
-            disabled={calc.quantity <= 0 || calc.maxAffordable === 0}
-            className="w-full py-2.5 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
-          >
-            {calc.quantity > 0
-              ? `ثبت سفارش ساخت ${PersianNumberFormatter.toPersianDigits(calc.quantity.toLocaleString("en-US"))} یگان ${unit.name}`
-              : calc.maxAffordable === 0
-                ? "منابع ناکافی جهت ساخت این یگان"
-                : "تعداد سفارش را تعیین کنید"}
-          </button>
-        </>
+        <button
+          type="button"
+          onClick={() => onOpenRecruitModal(unit)}
+          className="w-full py-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-md shadow-gdp/20 hover:scale-[1.005] active:scale-[0.995] cursor-pointer flex items-center justify-center gap-2 border border-gdp/30"
+        >
+          <Zap size={14} />
+          <span>
+            سفارش ساخت و استخدام (
+            {PersianNumberFormatter.formatCurrency(unitUnitPrice)})
+          </span>
+        </button>
       )}
     </div>
   );
