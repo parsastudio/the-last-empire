@@ -58,6 +58,7 @@ export class TurnPipeline {
           ...nation,
           isAlive: false,
           population: 0,
+          executedEspionageTiers: [],
           geography: {
             ...nation.geography,
             territoryPixelCount: 0,
@@ -80,6 +81,7 @@ export class TurnPipeline {
       let updated: Nation = {
         ...nation,
         isAlive: true,
+        executedEspionageTiers: [],
         geography: {
           ...nation.geography,
           territoryPixelCount: totalProvincePixels,

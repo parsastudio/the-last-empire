@@ -6,7 +6,7 @@ import {
   DiplomaticProposalAction,
   UpgradeIndustrialLevelAction,
   InvestInfrastructureAction,
-  FundProxyInfluenceAction,
+  ExecuteEspionageAction,
   UnlockDoctrineAction,
   RepayDebtAction,
   RequestLoanAction,
@@ -16,6 +16,7 @@ import {
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
+import { EspionageTier } from "@/domain/espionage/espionage.schema";
 
 export class ActionFactory {
   private static createId(prefix: string): string {
@@ -123,17 +124,17 @@ export class ActionFactory {
     };
   }
 
-  public static fundProxyInfluence(
+  public static executeEspionage(
     nationId: string,
     targetNationId: string,
-    budget: number,
-  ): FundProxyInfluenceAction {
+    tier: EspionageTier,
+  ): ExecuteEspionageAction {
     return {
-      id: this.createId("proxy"),
+      id: this.createId("espionage"),
       nationId,
-      type: "FUND_PROXY_INFLUENCE",
+      type: "EXECUTE_ESPIONAGE_OPERATION",
       targetNationId,
-      budget,
+      tier,
     };
   }
 

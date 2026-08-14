@@ -10,7 +10,7 @@ import {
   Loader2,
   ChevronRight,
   ChevronLeft,
-  Crosshair,
+  Binary,
   LucideIcon,
 } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
@@ -103,7 +103,7 @@ export function CommandRail({
     { id: "military" as const, label: "ارتش", icon: Swords },
     { id: "market" as const, label: "بازار اسلحه", icon: ShoppingCart },
     { id: "politics" as const, label: "سیاست", icon: Landmark },
-    { id: "proxy" as const, label: "نیابتی", icon: Crosshair },
+    { id: "espionage" as const, label: "جاسوسی", icon: Binary },
     { id: "reports" as const, label: "گزارش‌ها", icon: FileText },
     { id: "diplomacy" as const, label: "دیپلماسی", icon: Users },
     { id: "research" as const, label: "پژوهش", icon: Cpu },

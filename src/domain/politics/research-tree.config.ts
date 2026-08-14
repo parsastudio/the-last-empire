@@ -158,9 +158,9 @@ export const COMPREHENSIVE_RESEARCH_TREE: ResearchNode[] = [
   },
   {
     id: "proxy-network",
-    nameFa: "شبکه نفوذ و عملیات نیابتی",
-    nameEn: "Proxy Influence Network",
-    desc: "کاهش ۲۵٪ هزینه اجرای بودجه عملیات‌های نیابتی برای تخریب ثبات سیاسی دشمنان.",
+    nameFa: "شبکه جاسوسی و عملیات سایبری",
+    nameEn: "Covert Intelligence Network",
+    desc: "کاهش ۲۵٪ هزینه اجرای تمام سطوح عملیات‌های ویژه و خرابکاری اطلاعاتی.",
     branch: "DIPLOMATIC_HEGEMONY",
     tier: 2,
     moneyCost: 45000000000,
