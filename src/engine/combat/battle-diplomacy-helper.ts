@@ -17,7 +17,6 @@ export class BattleDiplomacyHelper {
     attacker: NationEntity,
     defender: NationEntity,
     calcResult: BattleCalculationResult,
-    _conqueredPixels: number,
     isFullCapitulation: boolean,
     betrayalPenaltyText: string,
   ): { logEntry: TurnLogEntry } {

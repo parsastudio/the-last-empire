@@ -15,10 +15,8 @@ export interface BattleCalculationResult {
   dronesUsed: number;
   attackerCasualties: CasualtyMetrics;
   defenderCasualties: CasualtyMetrics;
-  conqueredPixelsCount: number;
   treasuryLooted: number;
   deploymentMoneyCost: number;
-  airSupportMultiplier: number;
   severity: ReportSeverity;
   capturedInfantry: number;
   capturedArmor: number;
@@ -298,12 +296,6 @@ export class BattleCalculator {
     const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
     const targetRegionPixels = 1000;
 
-    const conqueredPixelsCount = isAttackerVictory
-      ? isFullCapitulation
-        ? defenderTotalTerritory
-        : targetRegionPixels
-      : 0;
-
     const treasuryLootRatio = isAttackerVictory
       ? isFullCapitulation
         ? 1.0
@@ -361,10 +353,8 @@ export class BattleCalculator {
       dronesUsed: deployedDrones,
       attackerCasualties,
       defenderCasualties,
-      conqueredPixelsCount,
       treasuryLooted,
       deploymentMoneyCost,
-      airSupportMultiplier: freeAttAirEff > 0 ? 1.5 : 1.0,
       severity,
       capturedInfantry,
       capturedArmor,

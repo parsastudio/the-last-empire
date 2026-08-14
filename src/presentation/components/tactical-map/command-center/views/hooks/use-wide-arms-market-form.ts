@@ -16,7 +16,6 @@ export interface ArmsSellerOption {
   opinion: number;
   rank: number;
   isEligible: boolean;
-  reason?: string;
 }
 
 interface UseWideArmsMarketFormProps {
@@ -48,11 +47,6 @@ export function useWideArmsMarketForm({
         const opinion = rel ? rel.opinion : 0;
         const isEligible = opinion >= 20;
 
-        let reason = "";
-        if (!isEligible) {
-          reason = "دیدگاه دیپلماتیک نامناسب (نیازمند دیدگاه ۲۰+)";
-        }
-
         return {
           id: n.id,
           name: n.name,
@@ -61,7 +55,6 @@ export function useWideArmsMarketForm({
           opinion,
           rank: n.rank || 99,
           isEligible,
-          reason,
         };
       })
       .filter((c) => c.isEligible)

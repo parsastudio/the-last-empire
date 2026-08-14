@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export class MilitaryPowerCalculator {
   public static calculateEffectivePower(nation: Nation): number {
@@ -20,10 +21,8 @@ export class MilitaryPowerCalculator {
 
     const techLevel = Math.max(1, nation.military.techLevel || 1);
     const techMult = 1 + (techLevel - 1) * 0.5;
-    const govType = nation.government?.type;
-    const govMult =
-      govType === "FASCISM" || govType === "DICTATORSHIP" ? 1.2 : 1.0;
+    const govTraits = GovernmentSystem.getTraits(nation.government.type);
 
-    return Math.floor(rawPower * techMult * govMult);
+    return Math.floor(rawPower * techMult * govTraits.militaryPowerMultiplier);
   }
 }

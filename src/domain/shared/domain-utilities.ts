@@ -57,12 +57,6 @@ export class SeededRandom {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   }
 
-  public nextInt(min: number, max: number): number {
-    const minCeil = Math.ceil(min);
-    const maxFloor = Math.floor(max);
-    return Math.floor(this.nextFloat() * (maxFloor - minCeil + 1)) + minCeil;
-  }
-
   public getSeed(): number {
     return this.seed;
   }

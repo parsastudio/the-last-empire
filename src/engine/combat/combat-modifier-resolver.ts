@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export class CombatModifierResolver {
   public static calculateDeploymentCosts(
@@ -17,11 +18,8 @@ export class CombatModifierResolver {
   public static getEffectiveMultiplier(nation: Nation): number {
     const techLevel = Math.max(1, nation.military.techLevel || 1);
     const techMult = 1 + (techLevel - 1) * 0.5;
+    const govTraits = GovernmentSystem.getTraits(nation.government.type);
 
-    const govType = nation.government.type;
-    const govMult =
-      govType === "FASCISM" || govType === "DICTATORSHIP" ? 1.2 : 1.0;
-
-    return techMult * govMult;
+    return techMult * govTraits.militaryPowerMultiplier;
   }
 }

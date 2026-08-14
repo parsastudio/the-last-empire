@@ -39,7 +39,7 @@ export function TariffControlCard({
     );
   };
 
-  const tempNationState = useMemo<Nation>(() => {
+  const currentNationState = useMemo<Nation>(() => {
     if (nation) {
       return { ...nation, tariffRate };
     }
@@ -87,10 +87,13 @@ export function TariffControlCard({
   }, [nation, nationId, tariffRate, gdp, hasSeaAccess, unlockedDoctrines]);
 
   const tariffCalculation = useMemo(() => {
-    return TariffCalculator.calculateTariffEffects(tempNationState, nationsMap);
-  }, [tempNationState, nationsMap]);
+    return TariffCalculator.calculateTariffEffects(
+      currentNationState,
+      nationsMap,
+    );
+  }, [currentNationState, nationsMap]);
 
-  const isSeaAccessible = tempNationState.geography.hasSeaAccess;
+  const isSeaAccessible = currentNationState.geography.hasSeaAccess;
 
   return (
     <div className="space-y-2.5 dir-rtl text-right">

@@ -32,13 +32,6 @@ export class CoolOffManager {
 }
 
 export class ReputationManager {
-  public applyReputationPenalty(nation: Nation, penaltyAmount: number): Nation {
-    return {
-      ...nation,
-      globalReputation: Math.max(-100, nation.globalReputation - penaltyAmount),
-    };
-  }
-
   public applyReputationGain(nation: Nation, gainAmount: number): Nation {
     const multiplier = DoctrinesManager.getReputationGainMultiplier(
       nation.doctrines.unlockedDoctrines,

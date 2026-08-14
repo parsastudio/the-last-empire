@@ -31,10 +31,6 @@ export class TopologicalComponentAnalyzer {
 
       let sumX = 0;
       let sumY = 0;
-      let minX = startIdx % width;
-      let maxX = minX;
-      let minY = Math.floor(startIdx / width);
-      let maxY = minY;
 
       let head = 0;
       while (head < queue.length) {
@@ -46,11 +42,6 @@ export class TopologicalComponentAnalyzer {
 
         sumX += cx;
         sumY += cy;
-
-        minX = Math.min(minX, cx);
-        maxX = Math.max(maxX, cx);
-        minY = Math.min(minY, cy);
-        maxY = Math.max(maxY, cy);
 
         for (const dir of dirs) {
           const next = curr + dir;
@@ -64,10 +55,6 @@ export class TopologicalComponentAnalyzer {
       const size = compIndices.length;
       components.push({
         pixelIndices: compIndices,
-        minX,
-        maxX,
-        minY,
-        maxY,
         size,
         centerX: Math.floor(sumX / (size || 1)),
         centerY: Math.floor(sumY / (size || 1)),

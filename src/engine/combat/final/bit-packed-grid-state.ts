@@ -5,7 +5,6 @@ export class BitPackedGridState {
   private static instance: BitPackedGridState | null = null;
   private buffer: BitPackedBuffer;
   private activeGameId: string | null = null;
-  private modifiedIndices = new Set<number>();
   private version = 0;
 
   constructor(
@@ -41,24 +40,9 @@ export class BitPackedGridState {
     return this.buffer;
   }
 
-  public getModifiedIndices(): ReadonlySet<number> {
-    return this.modifiedIndices;
-  }
-
-  public markModified(x: number, y: number): void {
-    const index = y * this.buffer.getWidth() + x;
-    this.modifiedIndices.add(index);
-    this.markDirty();
-  }
-
-  public clearModifiedIndices(): void {
-    this.modifiedIndices.clear();
-  }
-
   public resetBuffer(): void {
     const raw = this.buffer.getRawBuffer();
     raw.fill(0);
-    this.clearModifiedIndices();
     this.activeGameId = null;
     this.markDirty();
   }
