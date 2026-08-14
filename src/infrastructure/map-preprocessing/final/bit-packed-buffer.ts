@@ -47,19 +47,6 @@ export class BitPackedBuffer {
     return BitPackedCellUtility.getProvinceId(val);
   }
 
-  public getNationId(x: number, y: number): number {
-    const val = this.getPixel(x, y);
-    return BitPackedCellUtility.getNationId(val);
-  }
-
-  public setNationId(x: number, y: number, nationId: number): void {
-    const index = y * this.width + x;
-    if (index >= 0 && index < this.buffer.length) {
-      const val = this.buffer[index] || 0;
-      this.buffer[index] = BitPackedCellUtility.setNationId(val, nationId);
-    }
-  }
-
   public loadArrayBuffer(arrayBuffer: ArrayBuffer): void {
     this.buffer = new Uint16Array(arrayBuffer);
     BitPackedGridState.getInstance().markDirty();

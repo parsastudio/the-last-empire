@@ -5,12 +5,7 @@ import { useHoverNationResolver } from "@/presentation/components/tactical-map/h
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { useGridPicker } from "@/presentation/hooks/tactical-map/final/use-grid-picker";
-import {
-  useContextMenu,
-  ContextMenuState,
-} from "@/presentation/hooks/tactical-map/final/use-context-menu";
-
-export type { ContextMenuState };
+import { useContextMenu } from "@/presentation/hooks/tactical-map/final/use-context-menu";
 
 interface UseWebGLInteractionProps {
   containerRef: RefObject<HTMLDivElement | null>;

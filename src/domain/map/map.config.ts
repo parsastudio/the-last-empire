@@ -1,7 +1,4 @@
 export const MAP_CONFIG = {
   HIGH_RES_WIDTH: 4096,
   HIGH_RES_HEIGHT: 2048,
-  MIN_NATION_ID: 11,
-  MAX_NATION_ID: 250,
-  WATER_NATION_ID: 0,
 } as const;

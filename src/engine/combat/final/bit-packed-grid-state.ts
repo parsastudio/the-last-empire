@@ -7,7 +7,6 @@ export class BitPackedGridState {
   private activeGameId: string | null = null;
   private modifiedIndices = new Set<number>();
   private version = 0;
-  private dirtyStorage = false;
 
   constructor(
     width: number = MAP_CONFIG.HIGH_RES_WIDTH,
@@ -31,18 +30,6 @@ export class BitPackedGridState {
     this.version++;
   }
 
-  public markStorageDirty(): void {
-    this.dirtyStorage = true;
-  }
-
-  public isStorageDirty(): boolean {
-    return this.dirtyStorage;
-  }
-
-  public getActiveGameId(): string | null {
-    return this.activeGameId;
-  }
-
   public initializeSession(gameId: string): void {
     if (this.activeGameId !== gameId) {
       this.resetBuffer();
@@ -61,7 +48,6 @@ export class BitPackedGridState {
   public markModified(x: number, y: number): void {
     const index = y * this.buffer.getWidth() + x;
     this.modifiedIndices.add(index);
-    this.dirtyStorage = true;
     this.markDirty();
   }
 
@@ -74,15 +60,6 @@ export class BitPackedGridState {
     raw.fill(0);
     this.clearModifiedIndices();
     this.activeGameId = null;
-    this.dirtyStorage = true;
     this.markDirty();
-  }
-
-  public setNationId(x: number, y: number, nationId: number): void {
-    const oldVal = this.buffer.getNationId(x, y);
-    if (oldVal !== nationId) {
-      this.buffer.setNationId(x, y, nationId);
-      this.markModified(x, y);
-    }
   }
 }

@@ -79,7 +79,6 @@ export function useLiveNations({
   }, [allLiveNations, searchQuery]);
 
   return {
-    allLiveNations,
     filteredNations,
   };
 }

@@ -43,17 +43,14 @@ export class LandPartitionEngine {
         if (validNationIds.has(rawId)) {
           assignmentGrid[idx] = rawId;
           distGrid[idx] = 0;
-          bitBuffer.setNationId(x, y, rawId);
 
           queueX[tail] = x;
           queueY[tail] = y;
           tail++;
         } else if (rawId >= 11 && rawId < 250) {
           assignmentGrid[idx] = 255;
-          bitBuffer.setNationId(x, y, 0);
         } else {
           assignmentGrid[idx] = 0;
-          bitBuffer.setNationId(x, y, 0);
         }
       }
     }
@@ -90,7 +87,6 @@ export class LandPartitionEngine {
             if (newDist < distGrid[nIdx]!) {
               distGrid[nIdx] = newDist;
               assignmentGrid[nIdx] = currentNation;
-              bitBuffer.setNationId(nx, ny, currentNation);
 
               if (tail < maxQueueSize) {
                 queueX[tail] = nx;
@@ -105,20 +101,11 @@ export class LandPartitionEngine {
 
     for (let i = 0; i < totalPixels; i++) {
       if (assignmentGrid[i] === 255) {
-        const x = i % width;
-        const y = Math.floor(i / width);
         assignmentGrid[i] = 0;
-        bitBuffer.setNationId(x, y, 0);
       }
     }
 
-    this.processIsolatedIslands(
-      assignmentGrid,
-      width,
-      height,
-      bitBuffer,
-      validNationIds,
-    );
+    this.processIsolatedIslands(assignmentGrid, width, height, validNationIds);
 
     this.classifyOceanAndLakes(assignmentGrid, width, height, bitBuffer);
 
@@ -212,10 +199,10 @@ export class LandPartitionEngine {
         const x = i % width;
         const y = Math.floor(i / width);
         if (isOcean[i] === 1) {
-          bitBuffer.setNationId(x, y, BitPackedCellUtility.WATER_OCEAN_ID);
+          bitBuffer.setPixel(x, y, BitPackedCellUtility.WATER_OCEAN_ID);
         } else {
           assignmentGrid[i] = BitPackedCellUtility.WATER_LAKE_ID;
-          bitBuffer.setNationId(x, y, BitPackedCellUtility.WATER_LAKE_ID);
+          bitBuffer.setPixel(x, y, BitPackedCellUtility.WATER_LAKE_ID);
         }
       }
     }
@@ -225,7 +212,6 @@ export class LandPartitionEngine {
     assignmentGrid: Uint8Array,
     width: number,
     height: number,
-    bitBuffer: BitPackedBuffer,
     validNationIds: Set<number>,
   ): void {
     const totalPixels = width * height;
@@ -311,18 +297,12 @@ export class LandPartitionEngine {
       if (nearestNation > 0 && minDistanceSq <= maxAllowedDistSq) {
         for (let k = 0; k < islandIndices.length; k++) {
           const idx = islandIndices[k]!;
-          const x = idx % width;
-          const y = Math.floor(idx / width);
           assignmentGrid[idx] = nearestNation;
-          bitBuffer.setNationId(x, y, nearestNation);
         }
       } else {
         for (let k = 0; k < islandIndices.length; k++) {
           const idx = islandIndices[k]!;
-          const x = idx % width;
-          const y = Math.floor(idx / width);
           assignmentGrid[idx] = 0;
-          bitBuffer.setNationId(x, y, 0);
         }
       }
     }

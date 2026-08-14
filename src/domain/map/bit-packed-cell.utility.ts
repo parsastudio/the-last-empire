@@ -8,12 +8,4 @@ export class BitPackedCellUtility {
   public static getProvinceId(packed: number): number {
     return packed & BitPackedCellUtility.PROVINCE_MASK;
   }
-
-  public static getNationId(packed: number): number {
-    return packed & BitPackedCellUtility.PROVINCE_MASK;
-  }
-
-  public static setNationId(packed: number, _nationId: number): number {
-    return packed;
-  }
 }
