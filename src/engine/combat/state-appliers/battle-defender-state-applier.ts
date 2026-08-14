@@ -53,7 +53,7 @@ export class BattleDefenderStateApplier {
       isDefenderAlive,
     );
 
-    let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
+    const updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
       {
         ...defender,
         maxPopulationCapacity: newCap,
