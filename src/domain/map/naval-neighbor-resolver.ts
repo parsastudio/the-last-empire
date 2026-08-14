@@ -18,6 +18,7 @@ export class NavalNeighborResolver {
     attackerNationId: string,
     provincesMap: Record<string, Province> | undefined,
     infantryCount: number,
+    armorCount: number,
     airForceCount: number,
     droneCount: number,
   ): NavalAttackInfo {
@@ -93,6 +94,7 @@ export class NavalNeighborResolver {
 
     const totalForceCost =
       infantryCount * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
+      armorCount * MILITARY_UNIT_STATS.ARMOR.moneyCost +
       airForceCount * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       droneCount * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
