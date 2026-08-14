@@ -82,6 +82,7 @@ export function TariffControlCard({
       globalReputation: 50,
       doctrines: { unlockedDoctrines },
       provinceIds: [],
+      executedEspionageTiers: [],
     };
   }, [nation, nationId, tariffRate, gdp, hasSeaAccess, unlockedDoctrines]);
 
