@@ -3,7 +3,6 @@ import { NationHeaderCard } from "@/presentation/components/tactical-map/sidebar
 import { EconomyStatsSection } from "@/presentation/components/tactical-map/sidebar/economy-stats-section";
 import { ResourcesSection } from "@/presentation/components/tactical-map/sidebar/resources-section";
 import { GovernmentStatusSection } from "@/presentation/components/tactical-map/sidebar/government-status-section";
-import { RegionBreakdownCard } from "@/presentation/components/tactical-map/sidebar/region-breakdown-card";
 import { VictoryProgressCard } from "@/presentation/components/tactical-map/command-center/views/components/victory-progress-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -46,14 +45,6 @@ export function WideOverviewView({
           nationalDebt={nation.nationalDebt}
           tariffRate={nation.tariffRate}
         />
-
-        <ResourcesSection
-          population={nation.population}
-          maxPopulationCapacity={nation.maxPopulationCapacity}
-          perCapitaProductivity={nation.perCapitaProductivity}
-          industrialLevel={nation.industrialLevel}
-          infrastructureLevel={nation.geography.infrastructureLevel}
-        />
       </div>
 
       <div className="space-y-5">
@@ -63,12 +54,12 @@ export function WideOverviewView({
           nation={nation}
         />
 
-        <RegionBreakdownCard
-          regions={nation.regionsDemographics}
-          nationName={nation.name}
-          totalPixels={nation.geography.territoryPixelCount}
-          totalPopulation={nation.population}
+        <ResourcesSection
+          population={nation.population}
+          maxPopulationCapacity={nation.maxPopulationCapacity}
           perCapitaProductivity={nation.perCapitaProductivity}
+          industrialLevel={nation.industrialLevel}
+          infrastructureLevel={nation.geography.infrastructureLevel}
         />
       </div>
     </div>

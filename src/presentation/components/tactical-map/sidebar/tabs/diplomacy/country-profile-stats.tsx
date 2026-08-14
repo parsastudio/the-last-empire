@@ -66,7 +66,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         <div className="flex items-center gap-2 text-xs">
           <ShoppingCart
             size={15}
-            className={isArmsEligible ? "text-gdp" : "text-military"}
+            className={isArmsEligible ? "text-gdp" : "text-muted-foreground"}
           />
           <span className="text-muted-foreground font-bold text-[11px]">
             وضعیت دسترسی بازار اسلحه:
@@ -77,9 +77,9 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
             آماده معامله و صادرات
           </span>
         ) : (
-          <span className="text-[10px] font-bold text-military bg-military/15 px-2.5 py-0.5 rounded-lg border border-military/30 flex items-center gap-1">
+          <span className="text-[10px] font-bold text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
             <Lock size={10} />
-            تحریم تسلیحاتی (نیازمند دیدگاه ۲۰+)
+            برای فروش تسلیحات به نظر بالای ۲۰+ نیاز است
           </span>
         )}
       </div>

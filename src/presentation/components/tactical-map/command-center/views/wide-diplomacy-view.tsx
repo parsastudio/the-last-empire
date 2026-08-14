@@ -101,6 +101,7 @@ export function WideDiplomacyView({
           code={diplomacy.selectedRelation.code}
           flagCode={diplomacy.selectedRelation.flagCode}
           stance={diplomacy.selectedRelation.stance}
+          opinion={diplomacy.selectedRelation.opinion}
         />
 
         {onFocusCountry && (
