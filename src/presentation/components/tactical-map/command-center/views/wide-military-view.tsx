@@ -24,8 +24,8 @@ export function WideMilitaryView({
   industrialLevel = 1,
 }: WideMilitaryViewProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
-      <div className="space-y-5">
+    <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <MilitaryForcesSection
           infantry={military.infantry}
           armor={military.armor}
@@ -37,23 +37,22 @@ export function WideMilitaryView({
           experience={military.experience}
         />
 
-        <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
-
-        <MilitaryTechUpgradeCard
-          nationId={nationId}
-          treasury={treasury}
-          techLevel={military.techLevel}
-        />
+        <div className="space-y-5">
+          <MilitaryTechUpgradeCard
+            nationId={nationId}
+            treasury={treasury}
+            techLevel={military.techLevel}
+          />
+          <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
+        </div>
       </div>
 
-      <div className="space-y-5">
-        <MilitaryExpansionView
-          nationId={nationId}
-          treasury={treasury}
-          techLevel={military.techLevel}
-          industrialLevel={industrialLevel}
-        />
-      </div>
+      <MilitaryExpansionView
+        nationId={nationId}
+        treasury={treasury}
+        techLevel={military.techLevel}
+        industrialLevel={industrialLevel}
+      />
     </div>
   );
 }
