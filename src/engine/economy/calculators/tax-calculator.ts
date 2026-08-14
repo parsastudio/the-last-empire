@@ -24,13 +24,13 @@ export class TaxCalculator {
     const income = TaxCalculator.calculateTaxIncome(
       getNationGdp(nation),
       nation.taxRate,
-      nation.doctrines.unlockedDoctrines,
+      nation.doctrines?.unlockedDoctrines,
     );
     const clampedRate = Math.min(50, Math.max(0, nation.taxRate));
     let stabilityImpact = Number(((15 - clampedRate) * 0.2).toFixed(2));
     if (stabilityImpact < 0) {
       const discount = DoctrinesManager.getTaxStabilityPenaltyDiscount(
-        nation.doctrines.unlockedDoctrines,
+        nation.doctrines?.unlockedDoctrines,
       );
       stabilityImpact *= discount;
     }

@@ -64,6 +64,7 @@ export function WebGLTacticalWorkspace({
 
   const metrics = useGameResources(effectiveGameState);
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
+  const [isProcessingTurn, setIsProcessingTurn] = useState(false);
   const [directAttackState, setDirectAttackState] = useState<{
     isOpen: boolean;
     targetCode: string | null;
@@ -116,8 +117,14 @@ export function WebGLTacticalWorkspace({
   }, [closeActiveTab]);
 
   const handleNextTurnAndRefresh = useCallback(async () => {
-    return await advanceNextTurn();
-  }, [advanceNextTurn]);
+    if (isProcessingTurn) return;
+    try {
+      setIsProcessingTurn(true);
+      await advanceNextTurn();
+    } finally {
+      setIsProcessingTurn(false);
+    }
+  }, [advanceNextTurn, isProcessingTurn]);
 
   const isNotFound = !loading && (error !== null || !effectiveGameState);
 
@@ -150,6 +157,7 @@ export function WebGLTacticalWorkspace({
         activeTab={activeTab}
         isCollapsed={isRailCollapsed}
         currentTurn={effectiveGameState ? effectiveGameState.currentTurn : 1}
+        isProcessingTurn={isProcessingTurn}
         onSelectTab={(tab) => setActiveTab(tab)}
         onToggleCollapse={() => setIsRailCollapsed((prev) => !prev)}
         onNextTurn={handleNextTurnAndRefresh}

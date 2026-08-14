@@ -34,7 +34,7 @@ export class CoolOffManager {
 export class ReputationManager {
   public applyReputationGain(nation: Nation, gainAmount: number): Nation {
     const multiplier = DoctrinesManager.getReputationGainMultiplier(
-      nation.doctrines.unlockedDoctrines,
+      nation.doctrines?.unlockedDoctrines,
     );
     return {
       ...nation,
