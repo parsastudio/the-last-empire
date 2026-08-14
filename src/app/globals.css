@@ -9,22 +9,8 @@
   }
 }
 
-@keyframes pulseGlow {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
 .animate-fade-smooth {
   animation: fadeInOpacity 0.15s ease-in-out forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @font-face {
@@ -61,7 +47,6 @@
   --military: #f43f5e;
   --treasury: #f59e0b;
   --diplomacy: #6366f1;
-  --sovereign: #0b0f19;
 
   --font-vazirmatn: "Vazirmatn", system-ui, sans-serif;
 }
@@ -94,7 +79,6 @@
   --color-military: var(--military);
   --color-treasury: var(--treasury);
   --color-diplomacy: var(--diplomacy);
-  --color-sovereign: var(--sovereign);
 }
 
 ::-webkit-scrollbar {

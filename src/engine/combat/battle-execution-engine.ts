@@ -4,7 +4,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { BattleDiplomacyHelper } from "@/engine/combat/battle-diplomacy-helper";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { BitPackedProvinceConqueror } from "@/engine/combat/final/bit-packed-province-conqueror";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
@@ -68,7 +67,6 @@ export class BattleExecutionEngine {
     );
 
     const updatedProvinces = { ...state.provinces };
-    const buffer = BitPackedGridState.getInstance().getBuffer();
 
     const defenderProvincesBefore = Object.values(updatedProvinces).filter(
       (p) =>
@@ -90,7 +88,6 @@ export class BattleExecutionEngine {
             ownerNationId: attacker.id,
           };
           conqueredPixels += prov.pixelCount;
-          BitPackedProvinceConqueror.conquerProvince(buffer, prov.provinceId);
         }
         BitPackedGridState.getInstance().markDirty();
       } else {
@@ -115,7 +112,6 @@ export class BattleExecutionEngine {
               ownerNationId: attacker.id,
             };
             conqueredPixels = targetProv.pixelCount;
-            BitPackedProvinceConqueror.conquerProvince(buffer, conqueredProvId);
             BitPackedGridState.getInstance().markDirty();
           }
         }
