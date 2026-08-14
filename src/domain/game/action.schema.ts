@@ -2,6 +2,7 @@ import { z } from "zod";
 import { UnitTypeSchema } from "@/domain/military/military.schema";
 import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { GameStateSchema } from "@/domain/game/game-state.schema";
+import { EspionageTierSchema } from "@/domain/espionage/espionage.schema";
 
 export const SetTaxRateActionSchema = z.object({
   id: z.string(),
@@ -54,12 +55,12 @@ export const InvestInfrastructureActionSchema = z.object({
   type: z.literal("INVEST_INFRASTRUCTURE"),
 });
 
-export const FundProxyInfluenceActionSchema = z.object({
+export const ExecuteEspionageActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
-  type: z.literal("FUND_PROXY_INFLUENCE"),
+  type: z.literal("EXECUTE_ESPIONAGE_OPERATION"),
   targetNationId: z.string(),
-  budget: z.number().positive(),
+  tier: EspionageTierSchema,
 });
 
 export const UnlockDoctrineActionSchema = z.object({
@@ -116,7 +117,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   DiplomaticProposalActionSchema,
   UpgradeIndustrialLevelActionSchema,
   InvestInfrastructureActionSchema,
-  FundProxyInfluenceActionSchema,
+  ExecuteEspionageActionSchema,
   UnlockDoctrineActionSchema,
   RepayDebtActionSchema,
   RequestLoanActionSchema,
@@ -146,8 +147,8 @@ export type UpgradeIndustrialLevelAction = z.infer<
 export type InvestInfrastructureAction = z.infer<
   typeof InvestInfrastructureActionSchema
 >;
-export type FundProxyInfluenceAction = z.infer<
-  typeof FundProxyInfluenceActionSchema
+export type ExecuteEspionageAction = z.infer<
+  typeof ExecuteEspionageActionSchema
 >;
 export type UnlockDoctrineAction = z.infer<typeof UnlockDoctrineActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;

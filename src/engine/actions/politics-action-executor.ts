@@ -1,11 +1,9 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { EspionageManager } from "@/engine/espionage/espionage-manager";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -35,60 +33,14 @@ export class PoliticsActionExecutor {
         };
       }
 
-      case "FUND_PROXY_INFLUENCE": {
-        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
+      case "EXECUTE_ESPIONAGE_OPERATION": {
+        const { newState } = EspionageManager.executeOperation(
+          state,
+          action.nationId,
           action.targetNationId,
+          action.tier,
         );
-        const target =
-          state.nations[action.targetNationId] ||
-          state.nations[canonicalTargetId];
-        if (!target || !target.isAlive) {
-          throw new GameError("NATION_NOT_FOUND", "کشور هدف یافت نشد.");
-        }
-        const targetKey = target.id;
-
-        if (action.budget <= 0) {
-          throw new GameError("INVALID_ACTION", "بودجه عملیات باید مثبت باشد.");
-        }
-
-        if (nation.treasury < action.budget) {
-          throw new GameError(
-            "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای اجرای عملیات نیابتی کافی نیست.",
-          );
-        }
-
-        const targetGdp = getNationGdp(target);
-        const proxyDiscount = DoctrinesManager.getProxyCostDiscount(
-          nation.doctrines?.unlockedDoctrines,
-        );
-        const effectiveBudget = action.budget / proxyDiscount;
-
-        const drain = Math.max(
-          1,
-          Math.min(
-            15,
-            Math.floor((effectiveBudget / (targetGdp * 0.01 || 1)) * 2),
-          ),
-        );
-
-        return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              treasury: nation.treasury - action.budget,
-            },
-            [targetKey]: {
-              ...target,
-              government: {
-                ...target.government,
-                stability: Math.max(0, target.government.stability - drain),
-              },
-            },
-          },
-        };
+        return newState;
       }
 
       case "DIPLOMATIC_PROPOSAL": {
