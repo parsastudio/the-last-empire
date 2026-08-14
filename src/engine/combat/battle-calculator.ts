@@ -7,6 +7,10 @@ import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.confi
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
+import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
+import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
+import { GroundEngagementPhase } from "@/engine/combat/phases/ground-engagement-phase";
+import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -70,173 +74,49 @@ export class BattleCalculator {
     const attMult = CombatModifierResolver.getEffectiveMultiplier(attacker);
     const defMult = CombatModifierResolver.getEffectiveMultiplier(defender);
 
-    const attackerDroneBonus = DoctrinesManager.getDronePowerMultiplier(
-      attacker.doctrines?.unlockedDoctrines,
-    );
-    const defenderInterceptionBonus =
-      DoctrinesManager.getAirDefenseInterceptionRate(
-        defender.doctrines?.unlockedDoctrines,
-      );
-    const attackerPrecisionBonus =
-      DoctrinesManager.getPrecisionMissileDirectDamage(
-        attacker.doctrines?.unlockedDoctrines,
-      );
-    const defenderEwBonus = DoctrinesManager.getElectronicWarfareEvasion(
-      defender.doctrines?.unlockedDoctrines,
-    );
-
     const defAirDefense = defender.military.airDefense || 0;
     const defAirForce = defender.military.airForce || 0;
     const defArmor = defender.military.armor || 0;
     const defInfantry = defender.military.infantry || 0;
 
-    const attMissilesEff = deployedDrones * attMult * attackerDroneBonus;
-    const defAirDefenseEff =
-      defAirDefense * defMult * (1 + defenderInterceptionBonus);
-
-    const missilesInterceptedEff = Math.min(
-      attMissilesEff,
-      defAirDefenseEff * 2,
-    );
-    const missilesLeakedEff = Math.max(
-      0,
-      attMissilesEff - missilesInterceptedEff,
-    );
-
-    const airDefenseDestroyedEff = Math.floor(
-      missilesLeakedEff * (0.5 + attackerPrecisionBonus),
-    );
-    const rawDefAirDefenseLost = Math.min(
+    const missilePhase = MissileInterceptionPhase.calculate({
+      deployedDrones,
       defAirDefense,
-      Math.floor(airDefenseDestroyedEff / defMult),
-    );
-    const defAirDefenseRemainingRaw = defAirDefense - rawDefAirDefenseLost;
-    const defAirDefenseRemainingEff = defAirDefenseRemainingRaw * defMult;
+      attMult,
+      defMult,
+      attackerDroneBonus: DoctrinesManager.getDronePowerMultiplier(
+        attacker.doctrines?.unlockedDoctrines,
+      ),
+      defenderInterceptionBonus: DoctrinesManager.getAirDefenseInterceptionRate(
+        defender.doctrines?.unlockedDoctrines,
+      ),
+      attackerPrecisionBonus: DoctrinesManager.getPrecisionMissileDirectDamage(
+        attacker.doctrines?.unlockedDoctrines,
+      ),
+    });
 
-    const attAirEff =
-      deployedAirForce * attMult * (defenderEwBonus ? 0.8 : 1.0);
-    const defAirEff = defAirForce * defMult;
-
-    const dogfightLossAttEff = Math.min(attAirEff, defAirEff);
-    const dogfightLossDefEff = Math.min(attAirEff, defAirEff);
-
-    const rawAttAirLoss = Math.min(
+    const airPhase = AirSupremacyPhase.calculate({
       deployedAirForce,
-      Math.ceil(dogfightLossAttEff / attMult),
-    );
-    const rawDefAirLoss = Math.min(
       defAirForce,
-      Math.ceil(dogfightLossDefEff / defMult),
-    );
-
-    const survivingAttAirRaw = deployedAirForce - rawAttAirLoss;
-    const survivingAttAirEff = survivingAttAirRaw * attMult;
-
-    const fightersSuppressedEff = Math.min(
-      survivingAttAirEff,
-      defAirDefenseRemainingEff * 2,
-    );
-    const freeAttAirEff = Math.max(
-      0,
-      survivingAttAirEff - fightersSuppressedEff,
-    );
-
-    const tanksDestroyedByAirEff = freeAttAirEff * 2;
-    const defArmorDestroyedByAir = Math.min(
       defArmor,
-      Math.floor(tanksDestroyedByAirEff / defMult),
-    );
-    const defArmorAfterAirRaw = defArmor - defArmorDestroyedByAir;
-    const defArmorAfterAirEff = defArmorAfterAirRaw * defMult;
+      attMult,
+      defMult,
+      defenderEwBonus: DoctrinesManager.getElectronicWarfareEvasion(
+        defender.doctrines?.unlockedDoctrines,
+      ),
+      defAirDefenseRemainingEff: missilePhase.defAirDefenseRemainingEff,
+    });
 
-    const attArmorEff = deployedArmor * attMult;
-    const tankTradeLossAttEff = Math.min(attArmorEff, defArmorAfterAirEff);
-    const tankTradeLossDefEff = Math.min(attArmorEff, defArmorAfterAirEff);
-
-    const rawAttArmorLoss = Math.min(
+    const groundPhase = GroundEngagementPhase.calculate({
       deployedArmor,
-      Math.ceil(tankTradeLossAttEff / attMult),
-    );
-    const defArmorLossGround = Math.min(
-      defArmorAfterAirRaw,
-      Math.ceil(tankTradeLossDefEff / defMult),
-    );
-    const rawDefArmorLost = defArmorDestroyedByAir + defArmorLossGround;
-
-    const survivingAttArmorEff = Math.max(0, attArmorEff - defArmorAfterAirEff);
-    const survivingDefArmorEff = Math.max(0, defArmorAfterAirEff - attArmorEff);
-
-    const defInfantryTotalEff = defInfantry * defMult;
-    const defInfantryKilledByTanksEff = Math.min(
-      defInfantryTotalEff,
-      survivingAttArmorEff * 3,
-    );
-    const defInfantryKilledByTanks = Math.min(
-      defInfantry,
-      Math.floor(defInfantryKilledByTanksEff / defMult),
-    );
-    const defInfRemainingAfterTanksRaw = defInfantry - defInfantryKilledByTanks;
-    const defInfRemainingAfterTanksEff = defInfRemainingAfterTanksRaw * defMult;
-
-    const attInfantryTotalEff = deployedInfantry * attMult;
-    const attInfantryKilledByTanksEff = Math.min(
-      attInfantryTotalEff,
-      survivingDefArmorEff * 3,
-    );
-    const attInfantryKilledByTanks = Math.min(
       deployedInfantry,
-      Math.floor(attInfantryKilledByTanksEff / attMult),
-    );
-    const attInfRemainingAfterTanksRaw =
-      deployedInfantry - attInfantryKilledByTanks;
-    const attInfRemainingAfterTanksEff = attInfRemainingAfterTanksRaw * attMult;
-
-    const infTradeLossAttEff = Math.min(
-      attInfRemainingAfterTanksEff,
-      defInfRemainingAfterTanksEff,
-    );
-    const infTradeLossDefEff = Math.min(
-      attInfRemainingAfterTanksEff,
-      defInfRemainingAfterTanksEff,
-    );
-
-    const attInfTradeLoss = Math.min(
-      attInfRemainingAfterTanksRaw,
-      Math.ceil(infTradeLossAttEff / attMult),
-    );
-    const defInfTradeLoss = Math.min(
-      defInfRemainingAfterTanksRaw,
-      Math.ceil(infTradeLossDefEff / defMult),
-    );
-
-    const rawAttInfantryLost = attInfantryKilledByTanks + attInfTradeLoss;
-    const rawDefInfantryLost = defInfantryKilledByTanks + defInfTradeLoss;
-
-    const survivingAttInfantryRaw = deployedInfantry - rawAttInfantryLost;
-    const survivingDefInfantryRaw = defInfantry - rawDefInfantryLost;
-
-    const isAttackerVictory =
-      survivingAttInfantryRaw > 0 &&
-      (survivingAttInfantryRaw > survivingDefInfantryRaw ||
-        survivingDefInfantryRaw === 0);
-
-    const attInfRecovered = Math.floor(rawAttInfantryLost * 0.25);
-    const attArmorRecovered = Math.floor(rawAttArmorLoss * 0.25);
-    const attAirRecovered = Math.floor(rawAttAirLoss * 0.25);
-
-    const defInfRecovered = Math.floor(rawDefInfantryLost * 0.25);
-    const defArmorRecovered = Math.floor(rawDefArmorLost * 0.25);
-    const defAirDefenseRecovered = Math.floor(rawDefAirDefenseLost * 0.25);
-    const defAirRecovered = Math.floor(rawDefAirLoss * 0.25);
-
-    const netAttInfantryLost = rawAttInfantryLost - attInfRecovered;
-    const netAttArmorLost = rawAttArmorLoss - attArmorRecovered;
-    const netAttAirLost = rawAttAirLoss - attAirRecovered;
-
-    const netDefInfantryLost = rawDefInfantryLost - defInfRecovered;
-    const netDefArmorLost = rawDefArmorLost - defArmorRecovered;
-    const netDefAirDefenseLost = rawDefAirDefenseLost - defAirDefenseRecovered;
-    const netDefAirLost = rawDefAirLoss - defAirRecovered;
+      defInfantry,
+      defArmorAfterAirRaw: airPhase.defArmorAfterAirRaw,
+      defArmorAfterAirEff: airPhase.defArmorAfterAirEff,
+      defArmorDestroyedByAir: airPhase.defArmorDestroyedByAir,
+      attMult,
+      defMult,
+    });
 
     const attackerDeployedValuation =
       MilitaryPricingCalculator.calculateLandAndAirValuation(
@@ -271,35 +151,63 @@ export class BattleCalculator {
             (attackerDeployedValuation / defenderTotalValuation).toFixed(2),
           );
 
-    const isFullCapitulation = isAttackerVictory && valuationRatio >= 4.0;
+    const isFullCapitulation =
+      groundPhase.isAttackerVictory && valuationRatio >= 4.0;
+
+    const casualty = BattleCasualtyResolver.resolve({
+      deployedInfantry,
+      deployedArmor,
+      deployedAirForce,
+      deployedDrones,
+      attackerNaval: attacker.military.navalFleet || 0,
+      defInfantry,
+      defArmor,
+      defAirDefense,
+      defAirForce,
+      defenderNaval: defender.military.navalFleet || 0,
+      rawAttInfantryLost: groundPhase.rawAttInfantryLost,
+      rawAttArmorLoss: groundPhase.rawAttArmorLoss,
+      rawAttAirLoss: airPhase.rawAttAirLoss,
+      rawDefInfantryLost: groundPhase.rawDefInfantryLost,
+      rawDefArmorLost: groundPhase.rawDefArmorLost,
+      rawDefAirDefenseLost: missilePhase.rawDefAirDefenseLost,
+      rawDefAirLoss: airPhase.rawDefAirLoss,
+      isFullCapitulation,
+    });
 
     const defenderRemainingInfantry = Math.max(
       0,
-      defInfantry - netDefInfantryLost,
+      defInfantry - casualty.netDefInfantryLost,
     );
-    const defenderRemainingArmor = Math.max(0, defArmor - netDefArmorLost);
+    const defenderRemainingArmor = Math.max(
+      0,
+      defArmor - casualty.netDefArmorLost,
+    );
     const defenderRemainingAD = Math.max(
       0,
-      defAirDefense - netDefAirDefenseLost,
+      defAirDefense - casualty.netDefAirDefenseLost,
     );
-    const defenderRemainingAir = Math.max(0, defAirForce - netDefAirLost);
-    const defenderRemainingDrones = defender.military.droneMissile || 0;
-    const defenderRemainingNaval = defender.military.navalFleet || 0;
+    const defenderRemainingAir = Math.max(
+      0,
+      defAirForce - casualty.netDefAirLost,
+    );
 
     const capturedInfantry = isFullCapitulation ? defenderRemainingInfantry : 0;
     const capturedArmor = isFullCapitulation ? defenderRemainingArmor : 0;
     const capturedAirDefense = isFullCapitulation ? defenderRemainingAD : 0;
     const capturedAirForce = isFullCapitulation ? defenderRemainingAir : 0;
-    const capturedDrones = isFullCapitulation ? defenderRemainingDrones : 0;
-    const capturedNavalFleet = isFullCapitulation ? defenderRemainingNaval : 0;
+    const capturedDrones = isFullCapitulation
+      ? defender.military.droneMissile || 0
+      : 0;
+    const capturedNavalFleet = isFullCapitulation
+      ? defender.military.navalFleet || 0
+      : 0;
 
     const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
-    const targetRegionPixels = 1000;
-
-    const treasuryLootRatio = isAttackerVictory
+    const treasuryLootRatio = groundPhase.isAttackerVictory
       ? isFullCapitulation
         ? 1.0
-        : Math.min(0.2, targetRegionPixels / defenderTotalTerritory)
+        : Math.min(0.2, 1000 / defenderTotalTerritory)
       : 0;
 
     const treasuryLooted = Math.floor(
@@ -307,52 +215,22 @@ export class BattleCalculator {
     );
 
     let severity: ReportSeverity = "INFO";
-    if (isAttackerVictory) {
+    if (groundPhase.isAttackerVictory) {
       severity = isFullCapitulation ? "CRUSHING_VICTORY" : "VICTORY";
     } else {
       severity =
-        netAttInfantryLost > deployedInfantry * 0.5
+        casualty.netAttInfantryLost > deployedInfantry * 0.5
           ? "CRITICAL_DEFEAT"
           : "DEFEAT";
     }
 
-    const attackerCasualties: CasualtyMetrics = {
-      infantryEngaged: deployedInfantry,
-      infantryLost: netAttInfantryLost,
-      armorEngaged: deployedArmor,
-      armorLost: netAttArmorLost,
-      airDefenseEngaged: 0,
-      airDefenseLost: 0,
-      airForceEngaged: deployedAirForce,
-      airForceLost: netAttAirLost,
-      droneMissileEngaged: deployedDrones,
-      droneMissileLost: deployedDrones,
-      navalFleetEngaged: attacker.military.navalFleet || 0,
-      navalFleetLost: 0,
-    };
-
-    const defenderCasualties: CasualtyMetrics = {
-      infantryEngaged: defInfantry,
-      infantryLost: isFullCapitulation ? defInfantry : netDefInfantryLost,
-      armorEngaged: defArmor,
-      armorLost: isFullCapitulation ? defArmor : netDefArmorLost,
-      airDefenseEngaged: defAirDefense,
-      airDefenseLost: isFullCapitulation ? defAirDefense : netDefAirDefenseLost,
-      airForceEngaged: defAirForce,
-      airForceLost: isFullCapitulation ? defAirForce : netDefAirLost,
-      droneMissileEngaged: 0,
-      droneMissileLost: 0,
-      navalFleetEngaged: defender.military.navalFleet || 0,
-      navalFleetLost: 0,
-    };
-
     return {
-      isAttackerVictory,
+      isAttackerVictory: groundPhase.isAttackerVictory,
       isFullCapitulation,
       valuationRatio,
       dronesUsed: deployedDrones,
-      attackerCasualties,
-      defenderCasualties,
+      attackerCasualties: casualty.attackerCasualties,
+      defenderCasualties: casualty.defenderCasualties,
       treasuryLooted,
       deploymentMoneyCost,
       severity,

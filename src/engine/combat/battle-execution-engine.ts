@@ -3,13 +3,14 @@ import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { BattleDiplomacyHelper } from "@/engine/combat/battle-diplomacy-helper";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
-import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { AllianceInterventionEvaluator } from "@/engine/combat/alliance-intervention-evaluator";
+import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
+import { DemographicsTransferCalculator } from "@/engine/combat/conquest/demographics-transfer-calculator";
+import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -37,7 +38,6 @@ export class BattleExecutionEngine {
       attacker.relations,
       defender.id,
     );
-
     const betrayalResult =
       BattleDiplomacyHelper.evaluateBetrayalPenalty(currentStance);
 
@@ -68,158 +68,53 @@ export class BattleExecutionEngine {
       navalCostMultiplier,
     );
 
-    const updatedProvinces = { ...state.provinces };
-
-    const defenderProvincesBefore = Object.values(updatedProvinces).filter(
-      (p) =>
-        p.ownerNationId === defender.id ||
-        p.ownerNationId === canonicalDefenderId,
+    const conquest = ProvinceConquestHandler.handleConquest(
+      state.provinces,
+      attacker.id,
+      canonicalAttackerId,
+      defender.id,
+      canonicalDefenderId,
+      calcResult.isAttackerVictory,
+      calcResult.isFullCapitulation,
+      action.targetProvinceId,
+      defender.geography.territoryPixelCount || 1,
     );
-    const defenderTotalPixels =
-      defenderProvincesBefore.reduce((sum, p) => sum + p.pixelCount, 0) ||
-      defender.geography.territoryPixelCount ||
-      1;
 
-    let conqueredPixels = 0;
-
-    if (calcResult.isAttackerVictory) {
-      if (calcResult.isFullCapitulation) {
-        for (const prov of defenderProvincesBefore) {
-          updatedProvinces[prov.provinceId.toString()] = {
-            ...prov,
-            ownerNationId: attacker.id,
-          };
-          conqueredPixels += prov.pixelCount;
-        }
-        BitPackedGridState.getInstance().markDirty();
-      } else {
-        let conqueredProvId: number | null = null;
-        if (
-          action.targetProvinceId &&
-          updatedProvinces[action.targetProvinceId.toString()]
-        ) {
-          conqueredProvId = action.targetProvinceId;
-        } else if (defenderProvincesBefore.length > 0) {
-          const sorted = [...defenderProvincesBefore].sort(
-            (a, b) => b.pixelCount - a.pixelCount,
-          );
-          conqueredProvId = sorted[0]!.provinceId;
-        }
-
-        if (conqueredProvId) {
-          const targetProv = updatedProvinces[conqueredProvId.toString()];
-          if (targetProv) {
-            updatedProvinces[conqueredProvId.toString()] = {
-              ...targetProv,
-              ownerNationId: attacker.id,
-            };
-            conqueredPixels = targetProv.pixelCount;
-            BitPackedGridState.getInstance().markDirty();
-          }
-        }
-      }
-    }
-
-    const remainingDefenderProvinces = Object.values(updatedProvinces).filter(
-      (p) =>
-        p.ownerNationId === defender.id ||
-        p.ownerNationId === canonicalDefenderId,
-    );
     const isDefenderAlive =
-      remainingDefenderProvinces.length > 0 && !calcResult.isFullCapitulation;
-    const defenderRemainingPixels = remainingDefenderProvinces.reduce(
+      conquest.remainingDefenderProvinces.length > 0 &&
+      !calcResult.isFullCapitulation;
+
+    const transfer = DemographicsTransferCalculator.calculateTransfer(
+      defender,
+      calcResult.isAttackerVictory,
+      calcResult.isFullCapitulation,
+      conquest.conqueredPixels,
+      conquest.defenderTotalPixels,
+    );
+
+    const attackerTotalPixels = conquest.attackerProvinces.reduce(
       (sum, p) => sum + p.pixelCount,
       0,
     );
-    const defenderProvIds = remainingDefenderProvinces.map((p) => p.provinceId);
-
-    const transferredRatio = calcResult.isAttackerVictory
-      ? calcResult.isFullCapitulation
-        ? 1.0
-        : Math.min(1.0, conqueredPixels / (defenderTotalPixels || 1))
-      : 0;
-
-    const transferredPopulation = Math.floor(
-      defender.population * transferredRatio,
-    );
-    const transferredCapacity = Math.floor(
-      (defender.maxPopulationCapacity ||
-        Math.floor(defender.population / 0.95)) * transferredRatio,
-    );
-
-    const attackerProvinces = Object.values(updatedProvinces).filter(
-      (p) =>
-        p.ownerNationId === attacker.id ||
-        p.ownerNationId === canonicalAttackerId,
-    );
-    const attackerTotalPixels = attackerProvinces.reduce(
+    const attackerProvIds = conquest.attackerProvinces.map((p) => p.provinceId);
+    const defenderRemainingPixels = conquest.remainingDefenderProvinces.reduce(
       (sum, p) => sum + p.pixelCount,
       0,
     );
-    const attackerProvIds = attackerProvinces.map((p) => p.provinceId);
-
-    let updatedAttackerMilitary = MilitaryInventoryHelper.applyCasualties(
-      attacker.military,
-      calcResult.attackerCasualties.infantryLost,
-      calcResult.attackerCasualties.armorLost,
-      calcResult.attackerCasualties.airDefenseLost,
-      calcResult.attackerCasualties.airForceLost,
-      calcResult.dronesUsed,
-      calcResult.attackerCasualties.navalFleetLost,
+    const defenderProvIds = conquest.remainingDefenderProvinces.map(
+      (p) => p.provinceId,
     );
 
-    if (calcResult.capturedInfantry > 0) {
-      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
-        updatedAttackerMilitary,
-        "INFANTRY",
-        calcResult.capturedInfantry,
+    const updatedAttackerMilitary =
+      BattleLootManager.applyAttackerForcesAndSpoils(
+        attacker.military,
         defender.military.techLevel,
+        calcResult,
       );
-    }
-    if (calcResult.capturedArmor > 0) {
-      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
-        updatedAttackerMilitary,
-        "ARMOR",
-        calcResult.capturedArmor,
-        defender.military.techLevel,
-      );
-    }
-    if (calcResult.capturedAirDefense > 0) {
-      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
-        updatedAttackerMilitary,
-        "AIR_DEFENSE",
-        calcResult.capturedAirDefense,
-        defender.military.techLevel,
-      );
-    }
-    if (calcResult.capturedAirForce > 0) {
-      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
-        updatedAttackerMilitary,
-        "AIR_FORCE",
-        calcResult.capturedAirForce,
-        defender.military.techLevel,
-      );
-    }
-    if (calcResult.capturedDrones > 0) {
-      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
-        updatedAttackerMilitary,
-        "DRONE_MISSILE",
-        calcResult.capturedDrones,
-        defender.military.techLevel,
-      );
-    }
-    if (calcResult.capturedNavalFleet > 0) {
-      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
-        updatedAttackerMilitary,
-        "NAVAL_FLEET",
-        calcResult.capturedNavalFleet,
-        defender.military.techLevel,
-      );
-    }
 
     const newAttackerMaxCap =
       (attacker.maxPopulationCapacity ||
-        Math.floor(attacker.population / 0.95)) + transferredCapacity;
+        Math.floor(attacker.population / 0.95)) + transfer.transferredCapacity;
 
     let updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
       {
@@ -230,18 +125,16 @@ export class BattleExecutionEngine {
           territoryPixelCount: attackerTotalPixels,
         },
       },
-      attacker.population + transferredPopulation,
+      attacker.population + transfer.transferredPopulation,
     );
 
-    let baseWarReputationPenalty = currentStance !== "WAR" ? 10 : 0;
+    let baseWarRepPenalty = currentStance !== "WAR" ? 10 : 0;
     if (calcResult.isFullCapitulation) {
-      baseWarReputationPenalty += 15;
+      baseWarRepPenalty += 15;
     }
-
-    let totalRepPenalty = baseWarReputationPenalty;
-    if (betrayalResult.hasBetrayed) {
-      totalRepPenalty += betrayalResult.reputationPenalty;
-    }
+    const totalRepPenalty =
+      baseWarRepPenalty +
+      (betrayalResult.hasBetrayed ? betrayalResult.reputationPenalty : 0);
 
     updatedAttacker = {
       ...updatedAttacker,
@@ -254,10 +147,7 @@ export class BattleExecutionEngine {
         attacker.treasury -
         calcResult.deploymentMoneyCost +
         calcResult.treasuryLooted,
-      military: {
-        ...updatedAttackerMilitary,
-        experience: Math.min(100, attacker.military.experience + 5),
-      },
+      military: updatedAttackerMilitary,
     };
 
     const attackerRelKey = updatedAttacker.relations[defender.id]
@@ -276,39 +166,22 @@ export class BattleExecutionEngine {
     }
 
     const newDefenderPop = isDefenderAlive
-      ? Math.max(0, defender.population - transferredPopulation)
+      ? Math.max(0, defender.population - transfer.transferredPopulation)
       : 0;
     const newDefenderCap = isDefenderAlive
       ? Math.max(
           0,
           (defender.maxPopulationCapacity ||
-            Math.floor(defender.population / 0.95)) - transferredCapacity,
+            Math.floor(defender.population / 0.95)) -
+            transfer.transferredCapacity,
         )
       : 0;
 
-    let updatedDefenderMilitary = MilitaryInventoryHelper.applyCasualties(
+    const updatedDefenderMilitary = BattleLootManager.applyDefenderCasualties(
       defender.military,
-      calcResult.defenderCasualties.infantryLost,
-      calcResult.defenderCasualties.armorLost,
-      calcResult.defenderCasualties.airDefenseLost,
-      calcResult.defenderCasualties.airForceLost,
-      0,
-      calcResult.defenderCasualties.navalFleetLost,
+      calcResult,
+      isDefenderAlive,
     );
-
-    if (!isDefenderAlive) {
-      updatedDefenderMilitary = {
-        infantry: 0,
-        armor: 0,
-        airDefense: 0,
-        airForce: 0,
-        droneMissile: 0,
-        navalFleet: 0,
-        experience: 0,
-        techLevel: defender.military.techLevel,
-        inventory: {},
-      };
-    }
 
     let updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
       {
@@ -374,7 +247,6 @@ export class BattleExecutionEngine {
     );
 
     const additionalLogs: TurnLogEntry[] = [];
-
     for (const allyId of intervention.interveningAllyIds) {
       const ally = intervention.updatedNations[allyId];
       if (ally) {
@@ -409,7 +281,7 @@ export class BattleExecutionEngine {
 
     const newState: GameState = {
       ...state,
-      provinces: updatedProvinces,
+      provinces: conquest.updatedProvinces,
       nations: rankedNations,
       turnLogs: [...state.turnLogs, logEntry, ...additionalLogs],
     };
