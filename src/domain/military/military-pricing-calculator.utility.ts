@@ -53,4 +53,51 @@ export class MilitaryPricingCalculator {
     if (unitPrice <= 0) return 0;
     return Math.floor(treasury / unitPrice);
   }
+
+  public static calculateLandAndAirValuation(
+    military: {
+      infantry?: number;
+      armor?: number;
+      airDefense?: number;
+      airForce?: number;
+      droneMissile?: number;
+      techLevel?: number;
+    },
+    industrialLevel: number = 1,
+  ): number {
+    const techLevel = military.techLevel ?? 1;
+    const infPrice = this.calculateUnitTypePrice(
+      "INFANTRY",
+      techLevel,
+      industrialLevel,
+    );
+    const armPrice = this.calculateUnitTypePrice(
+      "ARMOR",
+      techLevel,
+      industrialLevel,
+    );
+    const adPrice = this.calculateUnitTypePrice(
+      "AIR_DEFENSE",
+      techLevel,
+      industrialLevel,
+    );
+    const afPrice = this.calculateUnitTypePrice(
+      "AIR_FORCE",
+      techLevel,
+      industrialLevel,
+    );
+    const drPrice = this.calculateUnitTypePrice(
+      "DRONE_MISSILE",
+      techLevel,
+      industrialLevel,
+    );
+
+    return (
+      (military.infantry || 0) * infPrice +
+      (military.armor || 0) * armPrice +
+      (military.airDefense || 0) * adPrice +
+      (military.airForce || 0) * afPrice +
+      (military.droneMissile || 0) * drPrice
+    );
+  }
 }

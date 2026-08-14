@@ -10,6 +10,7 @@
     "files": "python3 debug/file_collector.py",
     "tree": "python3 debug/tree_generator.py",
     "errors": "python3 debug/error_checker.py",
+    "skeleton": "tsx debug/generate-skeleton.ts",
     "lint": "eslint"
   },
   "dependencies": {
@@ -34,6 +35,7 @@
     "eslint-config-next": "16.2.10",
     "pngjs": "^7.0.0",
     "tailwindcss": "^4",
+    "ts-morph": "^28.0.0",
     "tsx": "^4.19.3",
     "typescript": "^5"
   }
