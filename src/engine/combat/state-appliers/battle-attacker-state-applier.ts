@@ -49,7 +49,7 @@ export class BattleAttackerStateApplier {
       (attacker.maxPopulationCapacity ||
         Math.floor(attacker.population / 0.95)) + transfer.transferredCapacity;
 
-    let updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
+    const updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
       {
         ...attacker,
         maxPopulationCapacity: newMaxCap,

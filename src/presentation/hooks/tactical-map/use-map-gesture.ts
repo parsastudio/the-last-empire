@@ -44,6 +44,11 @@ export function useMapGesture(
   const dragStart = useRef<CameraPosition>({ x: 0, y: 0 });
   const mouseDownPos = useRef<CameraPosition>({ x: 0, y: 0 });
 
+  const onDragStartRef = useRef(onDragStart);
+  useEffect(() => {
+    onDragStartRef.current = onDragStart;
+  }, [onDragStart]);
+
   useEffect(() => {
     if (
       containerWidth > 0 &&
@@ -59,7 +64,7 @@ export function useMapGesture(
       scaleRef.current = fitScale;
       positionRef.current = pos;
     }
-  }, [containerWidth, containerHeight, computeInitial, scaleRef, positionRef]);
+  }, [containerWidth, containerHeight, computeInitial]);
 
   useEffect(() => {
     const handleGlobalMouseUp = () => {
@@ -100,7 +105,7 @@ export function useMapGesture(
       scaleRef.current = nextScale;
       positionRef.current = nextPosition;
     },
-    [scaleRef, positionRef],
+    [],
   );
 
   useEffect(() => {
@@ -127,43 +132,37 @@ export function useMapGesture(
     [calculateZoom],
   );
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.button !== 0) return;
-      isDraggingRef.current = true;
-      hasDraggedRef.current = false;
-      mouseDownPos.current = { x: e.clientX, y: e.clientY };
+  const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    mouseDownPos.current = { x: e.clientX, y: e.clientY };
 
-      const currentPos = positionRef.current || { x: 0, y: 0 };
-      dragStart.current = {
-        x: e.clientX - currentPos.x,
-        y: e.clientY - currentPos.y,
-      };
-    },
-    [positionRef],
-  );
+    const currentPos = positionRef.current || { x: 0, y: 0 };
+    dragStart.current = {
+      x: e.clientX - currentPos.x,
+      y: e.clientY - currentPos.y,
+    };
+  }, []);
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!isDraggingRef.current) return;
-      const dist = Math.hypot(
-        e.clientX - mouseDownPos.current.x,
-        e.clientY - mouseDownPos.current.y,
-      );
-      if (dist > 5) {
-        if (!hasDraggedRef.current && onDragStart) {
-          onDragStart();
-        }
-        hasDraggedRef.current = true;
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    const dist = Math.hypot(
+      e.clientX - mouseDownPos.current.x,
+      e.clientY - mouseDownPos.current.y,
+    );
+    if (dist > 5) {
+      if (!hasDraggedRef.current && onDragStartRef.current) {
+        onDragStartRef.current();
       }
+      hasDraggedRef.current = true;
+    }
 
-      positionRef.current = {
-        x: e.clientX - dragStart.current.x,
-        y: e.clientY - dragStart.current.y,
-      };
-    },
-    [positionRef, onDragStart],
-  );
+    positionRef.current = {
+      x: e.clientX - dragStart.current.x,
+      y: e.clientY - dragStart.current.y,
+    };
+  }, []);
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
