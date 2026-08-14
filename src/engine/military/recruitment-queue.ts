@@ -3,6 +3,7 @@ import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class RecruitmentQueueManager {
   public enqueueOrder(
@@ -24,11 +25,14 @@ export class RecruitmentQueueManager {
       );
     }
 
+    const unitStat = MILITARY_UNIT_STATS[unitType];
+    const turnsRemaining = unitStat ? unitStat.buildTurns : 2;
+
     const newOrder: RecruitmentOrder = {
       id: `${unitType}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       unitType,
       quantity,
-      turnsRemaining: 2,
+      turnsRemaining,
       totalCost: totalMoney,
     };
 
