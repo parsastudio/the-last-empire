@@ -3,6 +3,7 @@ import { MilitaryForcesSection } from "@/presentation/components/tactical-map/si
 import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
 import { MilitaryExpansionView } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-expansion-view";
 import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
+import { MilitaryValuationCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-valuation-card";
 import {
   MilitaryStack,
   RecruitmentOrder,
@@ -37,11 +38,16 @@ export function WideMilitaryView({
           experience={military.experience}
         />
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <MilitaryTechUpgradeCard
             nationId={nationId}
             treasury={treasury}
             techLevel={military.techLevel}
+          />
+          <MilitaryValuationCard
+            military={military}
+            industrialLevel={industrialLevel}
+            nationId={nationId}
           />
           <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
         </div>
