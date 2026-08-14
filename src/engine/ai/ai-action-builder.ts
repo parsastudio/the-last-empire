@@ -1,91 +1,215 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { AIPersonalityType } from "@/domain/ai/ai.schema";
-import {
-  IndustrialLevelManager,
-  InfrastructureManager,
-} from "@/engine/economy/economy-calculators";
+import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
+import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class AIActionBuilder {
   public static buildNationActions(
     nation: Nation,
     allNations: Record<string, Nation>,
-    personality: AIPersonalityType,
+    provincesMap?: Record<string, Province>,
   ): GameAction[] {
     const actions: GameAction[] = [];
 
-    const currentUnlocked = nation.doctrines?.unlockedDoctrines || [];
-    if (
-      !currentUnlocked.includes("gdp-booster") &&
-      nation.treasury >= 15000000000
+    this.appendMilitaryBuildup(nation, actions);
+
+    this.appendDiplomaticAndWarActions(
+      nation,
+      allNations,
+      provincesMap,
+      actions,
+    );
+
+    return actions;
+  }
+
+  private static appendMilitaryBuildup(
+    nation: Nation,
+    actions: GameAction[],
+  ): void {
+    if (nation.recruitmentQueue.length >= 2) return;
+
+    const tech = nation.military.techLevel;
+    const treasury = nation.treasury;
+
+    if (tech >= 4 && treasury >= MILITARY_UNIT_STATS.AIR_FORCE.moneyCost * 2) {
+      actions.push(ActionFactory.recruitUnit(nation.id, "AIR_FORCE", 1));
+    } else if (
+      tech >= 2 &&
+      treasury >= MILITARY_UNIT_STATS.ARMOR.moneyCost * 2
     ) {
-      actions.push(ActionFactory.unlockDoctrine(nation.id, "gdp-booster"));
-    }
-
-    const indCost = IndustrialLevelManager.getUpgradeCost(nation);
-    if (nation.treasury >= indCost) {
-      actions.push(ActionFactory.upgradeIndustrialLevel(nation.id));
-    }
-
-    const infraCost = InfrastructureManager.getUpgradeCost(nation);
-    if (nation.treasury >= infraCost) {
-      actions.push(ActionFactory.investInfrastructure(nation.id));
-    }
-
-    if (nation.treasury > 1500000000) {
-      actions.push(ActionFactory.investResearch(nation.id));
-    }
-
-    const isAggressive = personality === "AGGRESSIVE";
-    const recruitBudget = isAggressive
-      ? nation.treasury * 0.4
-      : nation.treasury * 0.2;
-
-    const airMoneyCost = MILITARY_UNIT_STATS.AIR_FORCE.moneyCost;
-    const infMoneyCost = MILITARY_UNIT_STATS.INFANTRY.moneyCost;
-
-    if (
-      recruitBudget >= airMoneyCost &&
-      nation.military.techLevel >=
-        MILITARY_UNIT_STATS.AIR_FORCE.requiredTechLevel
-    ) {
-      const airQty = Math.floor(recruitBudget / airMoneyCost);
-      if (airQty > 0) {
-        actions.push(ActionFactory.recruitUnit(nation.id, "AIR_FORCE", airQty));
-      }
-    } else if (recruitBudget >= infMoneyCost) {
-      const infQty = Math.floor(recruitBudget / infMoneyCost);
-      if (infQty > 0) {
-        actions.push(ActionFactory.recruitUnit(nation.id, "INFANTRY", infQty));
+      actions.push(ActionFactory.recruitUnit(nation.id, "ARMOR", 1));
+    } else if (treasury >= MILITARY_UNIT_STATS.INFANTRY.moneyCost * 2) {
+      const count = Math.min(
+        3,
+        Math.floor(treasury / (MILITARY_UNIT_STATS.INFANTRY.moneyCost * 3)),
+      );
+      if (count > 0) {
+        actions.push(ActionFactory.recruitUnit(nation.id, "INFANTRY", count));
       }
     }
+  }
 
-    for (const [targetId, relation] of Object.entries(nation.relations || {})) {
-      if (actions.length >= 6) break;
-      if (!relation) continue;
+  private static appendDiplomaticAndWarActions(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap: Record<string, Province> | undefined,
+    actions: GameAction[],
+  ): void {
+    const activeWarTarget = nation.warFocusTargetId
+      ? allNations[nation.warFocusTargetId] ||
+        allNations[CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)]
+      : null;
 
-      const canonicalTargetId = CountryRegistry.resolveCanonicalId(targetId);
-      const target = allNations[targetId] || allNations[canonicalTargetId];
-      if (!target || !target.isAlive) continue;
+    if (activeWarTarget && activeWarTarget.isAlive) {
+      const attackAction = this.planAttack(
+        nation,
+        activeWarTarget,
+        provincesMap,
+      );
+      if (attackAction) {
+        actions.push(attackAction);
+        return;
+      }
+    }
+
+    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
+      if (actions.length >= 3) break;
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      const target = allNations[targetId] || allNations[canonicalTarget];
+      if (!target || !target.isAlive || target.id === nation.id) continue;
+
+      const evalResult = AIThreatCalculator.evaluate(
+        nation,
+        target,
+        provincesMap,
+      );
+      const grudge = rel.grudge ?? 0;
+
+      if (rel.stance === "WAR") {
+        if (evalResult.powerRatio > 3.0 && nation.military.infantry <= 3) {
+          actions.push(
+            ActionFactory.diplomaticProposal(
+              nation.id,
+              target.id,
+              "PEACE_TREATY",
+            ),
+          );
+          return;
+        }
+
+        const attackAction = this.planAttack(nation, target, provincesMap);
+        if (attackAction) {
+          actions.push(attackAction);
+          return;
+        }
+      }
+
+      if (rel.stance !== "WAR" && rel.stance !== "ALLIANCE") {
+        const wantsVendetta =
+          grudge >= 45 && evalResult.isNeighbor && evalResult.powerRatio <= 1.4;
+        const wantsPredatoryWar =
+          evalResult.opportunityScore >= 70 && grudge >= 20;
+
+        if (wantsVendetta || wantsPredatoryWar) {
+          actions.push(
+            ActionFactory.diplomaticProposal(
+              nation.id,
+              target.id,
+              "DECLARE_WAR",
+            ),
+          );
+          return;
+        }
+      }
 
       if (
-        relation.opinion < -30 &&
-        relation.stance !== "SEVERED_RELATIONS" &&
-        relation.stance !== "WAR"
+        rel.stance === "NORMAL_DIPLOMACY" &&
+        rel.opinion >= 50 &&
+        nation.globalReputation >= 20
       ) {
         actions.push(
           ActionFactory.diplomaticProposal(
             nation.id,
             target.id,
-            "SEVER_TRADE_RELATIONS",
+            "NON_AGGRESSION_PACT",
           ),
         );
       }
     }
+  }
 
-    return actions;
+  private static planAttack(
+    attacker: Nation,
+    defender: Nation,
+    provincesMap?: Record<string, Province>,
+  ): GameAction | null {
+    if (attacker.military.infantry <= 1) return null;
+
+    let targetProvId: number | undefined = undefined;
+    let attackType: "LAND" | "NAVAL" = "LAND";
+
+    if (
+      provincesMap &&
+      defender.provinceIds &&
+      defender.provinceIds.length > 0
+    ) {
+      for (const pid of defender.provinceIds) {
+        if (
+          LandNeighborResolver.hasProvinceLandBorder(
+            pid,
+            attacker.id,
+            provincesMap,
+          )
+        ) {
+          targetProvId = pid;
+          attackType = "LAND";
+          break;
+        }
+      }
+
+      if (!targetProvId && attacker.geography.hasSeaAccess) {
+        for (const pid of defender.provinceIds) {
+          const navalInfo = NavalNeighborResolver.resolveNavalAttack(
+            pid,
+            attacker.id,
+            provincesMap,
+            1,
+            0,
+            0,
+            0,
+          );
+          if (navalInfo.isNavalValid) {
+            targetProvId = pid;
+            attackType = "NAVAL";
+            break;
+          }
+        }
+      }
+    }
+
+    const infToDeploy = Math.max(
+      1,
+      Math.floor(attacker.military.infantry * 0.7),
+    );
+    const armToDeploy = Math.floor((attacker.military.armor || 0) * 0.7);
+    const airToDeploy = Math.floor(attacker.military.airForce * 0.7);
+    const dronesToLaunch = Math.min(2, attacker.military.droneMissile);
+
+    return ActionFactory.initiateBattle(
+      attacker.id,
+      defender.id,
+      dronesToLaunch,
+      infToDeploy,
+      armToDeploy,
+      airToDeploy,
+      targetProvId,
+      attackType,
+    );
   }
 }

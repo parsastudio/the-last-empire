@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { AIPersonalityType } from "@/domain/ai/ai.schema";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
+import { AIReinforcementSubsidizer } from "@/engine/ai/ai-reinforcement-subsidizer";
 
 export class AIEngine {
   public generateTurnActions(state: GameState): GameAction[] {
@@ -9,42 +9,26 @@ export class AIEngine {
     const sortedIds = Object.keys(state.nations).sort();
 
     for (const id of sortedIds) {
-      const nation = state.nations[id];
+      let nation = state.nations[id];
       if (!nation || !nation.isAlive || !nation.isAi) {
         continue;
       }
 
-      const personality = this.resolvePersonality(id, state.gameId, state.seed);
+      nation = AIReinforcementSubsidizer.applySubsidiesAndScaling(
+        nation,
+        state.currentTurn,
+      );
+      state.nations[id] = nation;
+
       const aiActions = AIActionBuilder.buildNationActions(
         nation,
         state.nations,
-        personality,
+        state.provinces,
       );
 
       actions.push(...aiActions);
     }
 
     return actions;
-  }
-
-  private resolvePersonality(
-    nationId: string,
-    gameId: string,
-    seed: number,
-  ): AIPersonalityType {
-    const personalities: AIPersonalityType[] = [
-      "AGGRESSIVE",
-      "PACIFIST",
-      "ECONOMIC",
-      "ISOLATIONIST",
-    ];
-    let hash = seed;
-    for (let i = 0; i < gameId.length; i++) {
-      hash += gameId.charCodeAt(i);
-    }
-    for (let i = 0; i < nationId.length; i++) {
-      hash += nationId.charCodeAt(i);
-    }
-    return personalities[Math.abs(hash) % personalities.length] || "ECONOMIC";
   }
 }
