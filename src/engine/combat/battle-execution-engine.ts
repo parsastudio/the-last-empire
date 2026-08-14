@@ -170,11 +170,19 @@ export class BattleExecutionEngine {
       calcResult.attackerCasualties.navalFleetLost,
     );
 
-    if (calcResult.capturedAirForce > 0) {
+    if (calcResult.capturedInfantry > 0) {
       updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
         updatedAttackerMilitary,
-        "AIR_FORCE",
-        calcResult.capturedAirForce,
+        "INFANTRY",
+        calcResult.capturedInfantry,
+        defender.military.techLevel,
+      );
+    }
+    if (calcResult.capturedArmor > 0) {
+      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
+        updatedAttackerMilitary,
+        "ARMOR",
+        calcResult.capturedArmor,
         defender.military.techLevel,
       );
     }
@@ -183,6 +191,22 @@ export class BattleExecutionEngine {
         updatedAttackerMilitary,
         "AIR_DEFENSE",
         calcResult.capturedAirDefense,
+        defender.military.techLevel,
+      );
+    }
+    if (calcResult.capturedAirForce > 0) {
+      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
+        updatedAttackerMilitary,
+        "AIR_FORCE",
+        calcResult.capturedAirForce,
+        defender.military.techLevel,
+      );
+    }
+    if (calcResult.capturedDrones > 0) {
+      updatedAttackerMilitary = MilitaryInventoryHelper.addUnits(
+        updatedAttackerMilitary,
+        "DRONE_MISSILE",
+        calcResult.capturedDrones,
         defender.military.techLevel,
       );
     }

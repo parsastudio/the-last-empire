@@ -10,6 +10,8 @@ import {
   Plane,
   Shield,
   Anchor,
+  Flame,
+  CheckCircle2,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -20,6 +22,7 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { CountryRegistry } from "@/domain/data/countries";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
@@ -140,6 +143,47 @@ export function DirectAttackModal({
     dronesToLaunch,
   ]);
 
+  const valuationRatio = useMemo(() => {
+    if (!humanNation || !targetNation) return 0;
+
+    const attackerDeployedValuation =
+      MilitaryPricingCalculator.calculateLandAndAirValuation(
+        {
+          infantry: infantryToDeploy,
+          armor: humanNation.military.armor || 0,
+          airDefense: 0,
+          airForce: airForceToDeploy,
+          droneMissile: dronesToLaunch,
+          techLevel: humanNation.military.techLevel,
+        },
+        humanNation.industrialLevel,
+      );
+
+    const defenderTotalValuation =
+      MilitaryPricingCalculator.calculateLandAndAirValuation(
+        {
+          infantry: targetNation.military.infantry,
+          armor: targetNation.military.armor,
+          airDefense: targetNation.military.airDefense,
+          airForce: targetNation.military.airForce,
+          droneMissile: targetNation.military.droneMissile,
+          techLevel: targetNation.military.techLevel,
+        },
+        targetNation.industrialLevel,
+      );
+
+    if (defenderTotalValuation <= 0) return 999;
+    return Number(
+      (attackerDeployedValuation / defenderTotalValuation).toFixed(2),
+    );
+  }, [
+    humanNation,
+    targetNation,
+    infantryToDeploy,
+    airForceToDeploy,
+    dronesToLaunch,
+  ]);
+
   if (!isOpen || !targetNation || !humanNation) return null;
 
   const canAffordMoney = humanNation.treasury >= deploymentCosts.moneyCost;
@@ -148,6 +192,8 @@ export function DirectAttackModal({
     (isLandNeighbor || navalAttackInfo.isNavalValid) &&
     canAffordMoney &&
     hasSelectedInfantry;
+
+  const isFullAnnexationThreshold = valuationRatio >= 4.0;
 
   const handleExecuteAttack = async () => {
     if (!canLaunchAttack || isSubmitting) return;
@@ -223,6 +269,34 @@ export function DirectAttackModal({
                 مدافع (هدف تهاجم)
               </span>
             </div>
+          </div>
+        </div>
+
+        <div
+          className={`p-3.5 rounded-2xl border flex items-center justify-between font-mono text-xs ${
+            isFullAnnexationThreshold
+              ? "bg-amber-500/10 border-amber-500/40 text-amber-500"
+              : "bg-secondary/40 border-border/60 text-foreground"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {isFullAnnexationThreshold ? (
+              <Flame size={16} className="text-amber-500 animate-pulse" />
+            ) : (
+              <CheckCircle2 size={16} className="text-gdp" />
+            )}
+            <span className="font-bold font-sans text-xs">
+              {isFullAnnexationThreshold
+                ? "پتانسیل سقوط و الحاق کامل کشور در صورت پیروزی"
+                : "عملیات فتح تک‌استانی در صورت پیروزی"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1 font-bold">
+            <span>نسبت ارزش نیروها:</span>
+            <span className="font-mono text-sm">
+              {PersianNumberFormatter.toPersianDigits(valuationRatio)}x
+            </span>
           </div>
         </div>
 
@@ -377,7 +451,9 @@ export function DirectAttackModal({
                     ? "حداقل ۱ یگان پیاده‌نظام انتخاب کنید"
                     : !canAffordMoney
                       ? "موجودی مالی ناکافی جهت اعزام"
-                      : `صدور دستور فتح ${isLandNeighbor ? "زمینی" : "دریایی"} استان ${targetRegionName}`}
+                      : isFullAnnexationThreshold
+                        ? `صدور فرمان تهاجم سراسری و الحاق کامل ${targetNation.name}`
+                        : `صدور دستور فتح ${isLandNeighbor ? "زمینی" : "دریایی"} استان ${targetRegionName}`}
               </span>
             </>
           )}

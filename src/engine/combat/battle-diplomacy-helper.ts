@@ -35,19 +35,19 @@ export class BattleDiplomacyHelper {
   ): { report: CombatReport; logEntry: TurnLogEntry } {
     const reportTitle = calcResult.isAttackerVictory
       ? isFullCapitulation
-        ? `فروپاشی و تسلیم کامل ارتش ${defender.name}`
+        ? `سقوط و تسلیم کامل ارتش ${defender.name} (برتری ۴+ برابر)`
         : `پیروزی قاطع و فتح استان در نبرد با ${defender.name}`
       : `عقب‌نشینی نیروهای مهاجم در نبرد با ${defender.name}`;
 
     let reportSummary = "";
     if (calcResult.isAttackerVictory) {
       if (isFullCapitulation) {
-        reportSummary = `ارتش ${defender.name} متحمل بیش از ۸۵٪ تلفات شده و کاملاً فروپاشید. تمام قلمرو این کشور به تصرف درآمد و ۵۰٪ غنائم تسلیحاتی و خزانه به ارتش شما منتقل شد.${betrayalPenaltyText}`;
+        reportSummary = `به دلیل برتری رزمی ${calcResult.valuationRatio} برابری ارتش شما، حاکمیت ${defender.name} به طور کامل فروپاشید. تمام استان‌ها تصرف شده و ۱۰۰٪ غنائم تسلیحاتی و خزانه به ارتش شما منتقل گردید (۲۵٪ نیروهای درگیر نیز به صفوف ارتش بازگشتند).${betrayalPenaltyText}`;
       } else {
-        reportSummary = `نیروهای ${attacker.name} با درهم‌شکستن خط دفاعی ${defender.name}، استان مورد نظر را به همراه $${calcResult.treasuryLooted.toLocaleString("fa-IR")} غنیمت فتح کردند.${betrayalPenaltyText}`;
+        reportSummary = `نیروهای ${attacker.name} با پیروزی در فازهای نبرد، استان هدف را تصرف کردند. ۲۵٪ نیروهای مجروح دو طرف به ارتش‌ها بازگشتند و مدافع با استان‌های باقی‌مانده به مقاومت ادامه می‌دهد.${betrayalPenaltyText}`;
       }
     } else {
-      reportSummary = `پیاده‌نظام و تانک‌های ${defender.name} با مقاومت سرسختانه مانع پیشروی نیروهای ${attacker.name} شدند.${betrayalPenaltyText}`;
+      reportSummary = `خطوط دفاعی ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند. ۲۵٪ از نیروهای مجروح و بازمانده به پایگاه‌ها بازگشتند.${betrayalPenaltyText}`;
     }
 
     const report: CombatReport = {
@@ -65,7 +65,7 @@ export class BattleDiplomacyHelper {
       defenderCasualties: calcResult.defenderCasualties,
       conqueredPixelsCount: conqueredPixels,
       capitulatedPixelsCount: isFullCapitulation ? conqueredPixels : 0,
-      strategicAssessment: `هزینه اعزام لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
+      strategicAssessment: `نسبت ارزش نیروها: ${calcResult.valuationRatio}x | هزینه لجیستیک: $${calcResult.deploymentMoneyCost.toLocaleString("fa-IR")} | پشتیبانی هوایی: ${calcResult.airSupportMultiplier.toFixed(1)}x`,
       isVictory: calcResult.isAttackerVictory,
     };
 
