@@ -154,6 +154,7 @@ export class NationProfileAssigner {
       },
       regionsDemographics: [defaultRegion],
       provinceIds: item.provinceIds || [],
+      executedEspionageTiers: [],
     };
   }
 
