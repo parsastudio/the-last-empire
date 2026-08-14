@@ -8,7 +8,6 @@ export function useBitPackedGame(gameId = "default_game") {
   const loading = useGameStore((state) => state.loading);
   const error = useGameStore((state) => state.error);
 
-  const setGameState = useGameStore((state) => state.setGameState);
   const loadGame = useGameStore((state) => state.loadGame);
   const advanceTurnAction = useGameStore((state) => state.advanceNextTurn);
 
@@ -48,7 +47,6 @@ export function useBitPackedGame(gameId = "default_game") {
 
   return {
     gameState,
-    setGameState,
     loading,
     error,
     advanceNextTurn,

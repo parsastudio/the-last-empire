@@ -24,25 +24,5 @@ export const CasualtyMetricsSchema = z.object({
   navalFleetLost: z.number().nonnegative().default(0),
 });
 
-export const CombatReportSchema = z.object({
-  id: z.string(),
-  turn: z.number().nonnegative(),
-  timestamp: z.number().positive(),
-  severity: ReportSeveritySchema,
-  title: z.string(),
-  summary: z.string(),
-  attackerNationId: z.string(),
-  attackerName: z.string(),
-  defenderNationId: z.string(),
-  defenderName: z.string(),
-  attackerCasualties: CasualtyMetricsSchema,
-  defenderCasualties: CasualtyMetricsSchema,
-  conqueredPixelsCount: z.number().nonnegative(),
-  capitulatedPixelsCount: z.number().nonnegative(),
-  strategicAssessment: z.string(),
-  isVictory: z.boolean(),
-});
-
 export type ReportSeverity = z.infer<typeof ReportSeveritySchema>;
 export type CasualtyMetrics = z.infer<typeof CasualtyMetricsSchema>;
-export type CombatReport = z.infer<typeof CombatReportSchema>;

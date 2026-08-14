@@ -96,6 +96,7 @@ const ID_MAPPING: Record<string, number> = {
   PRT: 142,
   ESP: 143,
   ITA: 152,
+  CYP: 187,
   SRB: 182,
   KOS: 184,
   FRA: 54,

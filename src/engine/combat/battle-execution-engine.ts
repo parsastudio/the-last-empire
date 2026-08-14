@@ -367,7 +367,6 @@ export class BattleExecutionEngine {
       updatedAttacker,
       updatedDefender,
       calcResult,
-      conqueredPixels,
       calcResult.isFullCapitulation,
       betrayalText,
     );

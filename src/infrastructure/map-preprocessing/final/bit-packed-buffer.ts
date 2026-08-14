@@ -1,4 +1,3 @@
-import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { MAP_CONFIG } from "@/domain/map/map.config";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
@@ -40,11 +39,6 @@ export class BitPackedBuffer {
       return;
     }
     this.buffer[y * this.width + x] = value & 0xffff;
-  }
-
-  public getProvinceId(x: number, y: number): number {
-    const val = this.getPixel(x, y);
-    return BitPackedCellUtility.getProvinceId(val);
   }
 
   public loadArrayBuffer(arrayBuffer: ArrayBuffer): void {
