@@ -2,7 +2,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import type { GovernmentType } from "@/domain/politics/politics.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class StabilityCalculator {
   public static clampStability(stability: number): number {
@@ -63,12 +62,7 @@ export class StabilityCalculator {
         delta -= traits.blockadePenalty;
       }
     } else {
-      const gdp = getNationGdp(nation);
-      const minReserve = Math.floor(gdp * 0.02);
-
-      if (nation.treasury < minReserve) {
-        delta -= 0.5;
-      } else if (nation.government.stability < 85) {
+      if (nation.government.stability < 85) {
         delta += traits.peaceRecoveryRate;
       }
     }

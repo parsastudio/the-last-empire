@@ -97,21 +97,11 @@ export class TechHeistExecutor {
       nextProductivity,
     );
 
-    const stabDrain = 6;
-    const updatedTarget: Nation = {
-      ...target,
-      government: {
-        ...target.government,
-        stability: Math.max(0, target.government.stability - stabDrain),
-      },
-    };
-
     const techTheftData: EspionageTechTheftData = {
       militaryTechGained: gMil,
       industrialLevelGained: gInd,
       infrastructureLevelGained: gInfra,
       totalPointsGained: pointsToGrant,
-      stabilityDrain: stabDrain,
     };
 
     const message =
@@ -119,6 +109,6 @@ export class TechHeistExecutor {
         ? `سرقت قرن با موفقیت انجام شد! دانشمندان شما موفق شدند ${pointsToGrant} امتیاز ارتقای فناوری از ${target.name} استخراج و اعمال کنند.`
         : `سرقت فناوری (${pointsToGrant} امتیاز ارتقا) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
 
-    return { updatedSource, updatedTarget, techTheftData, message };
+    return { updatedSource, updatedTarget: target, techTheftData, message };
   }
 }
