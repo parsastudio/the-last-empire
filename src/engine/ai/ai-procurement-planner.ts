@@ -7,6 +7,7 @@ import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-ca
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 
 export type AIPosture = "PEACE" | "THREAT" | "WAR";
 
@@ -21,12 +22,31 @@ export class AIProcurementPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): GameAction[] {
-    if (nation.recruitmentQueue && nation.recruitmentQueue.length >= 4) {
+    const gdp = getNationGdp(nation);
+    const aliveCount = Object.values(allNations).filter(
+      (n) => n.isAlive,
+    ).length;
+    const maxArmyValuation = AiEconomyCalculator.calculateMaxArmyValuation(
+      gdp,
+      nation.rank,
+      aliveCount,
+    );
+
+    const currentArmyValuation = this.calculateTotalArmyValuation(nation);
+    const remainingValuationCapacity = Math.max(
+      0,
+      maxArmyValuation - currentArmyValuation,
+    );
+
+    if (remainingValuationCapacity <= 0) {
       return [];
     }
 
     const posture = this.evaluatePosture(nation, allNations, provincesMap);
-    const spendableBudget = this.calculateSpendableBudget(nation, posture);
+    const spendableBudget = Math.min(
+      this.calculateSpendableBudget(nation, posture),
+      remainingValuationCapacity,
+    );
 
     if (spendableBudget <= 0) {
       return [];
@@ -64,6 +84,23 @@ export class AIProcurementPlanner {
     }
 
     return actions;
+  }
+
+  public static calculateTotalArmyValuation(nation: Nation): number {
+    const landAndAirValuation =
+      MilitaryPricingCalculator.calculateLandAndAirValuation(
+        nation.military,
+        nation.industrialLevel,
+      );
+
+    const navalUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+      "NAVAL_FLEET",
+      nation.military.techLevel,
+      nation.industrialLevel,
+    );
+    const navalValuation = (nation.military.navalFleet || 0) * navalUnitPrice;
+
+    return landAndAirValuation + navalValuation;
   }
 
   public static evaluatePosture(
