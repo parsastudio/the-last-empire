@@ -6,7 +6,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -16,8 +15,6 @@ export class AIActionBuilder {
   ): GameAction[] {
     const actions: GameAction[] = [];
 
-    this.appendMilitaryBuildup(nation, actions);
-
     this.appendDiplomaticAndWarActions(
       nation,
       allNations,
@@ -26,33 +23,6 @@ export class AIActionBuilder {
     );
 
     return actions;
-  }
-
-  private static appendMilitaryBuildup(
-    nation: Nation,
-    actions: GameAction[],
-  ): void {
-    if (nation.recruitmentQueue.length >= 2) return;
-
-    const tech = nation.military.techLevel;
-    const treasury = nation.treasury;
-
-    if (tech >= 4 && treasury >= MILITARY_UNIT_STATS.AIR_FORCE.moneyCost * 2) {
-      actions.push(ActionFactory.recruitUnit(nation.id, "AIR_FORCE", 1));
-    } else if (
-      tech >= 2 &&
-      treasury >= MILITARY_UNIT_STATS.ARMOR.moneyCost * 2
-    ) {
-      actions.push(ActionFactory.recruitUnit(nation.id, "ARMOR", 1));
-    } else if (treasury >= MILITARY_UNIT_STATS.INFANTRY.moneyCost * 2) {
-      const count = Math.min(
-        3,
-        Math.floor(treasury / (MILITARY_UNIT_STATS.INFANTRY.moneyCost * 3)),
-      );
-      if (count > 0) {
-        actions.push(ActionFactory.recruitUnit(nation.id, "INFANTRY", count));
-      }
-    }
   }
 
   private static appendDiplomaticAndWarActions(
