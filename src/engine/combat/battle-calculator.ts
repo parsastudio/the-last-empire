@@ -11,6 +11,7 @@ import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interce
 import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
 import { GroundEngagementPhase } from "@/engine/combat/phases/ground-engagement-phase";
 import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -203,6 +204,10 @@ export class BattleCalculator {
       ? defender.military.navalFleet || 0
       : 0;
 
+    const defenderGdp = getNationGdp(defender);
+    const guaranteedLootPool =
+      Math.max(0, defender.treasury) + Math.floor(defenderGdp * 0.05);
+
     const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
     const treasuryLootRatio = groundPhase.isAttackerVictory
       ? isFullCapitulation
@@ -210,9 +215,7 @@ export class BattleCalculator {
         : Math.min(0.2, 1000 / defenderTotalTerritory)
       : 0;
 
-    const treasuryLooted = Math.floor(
-      Math.max(0, defender.treasury) * treasuryLootRatio,
-    );
+    const treasuryLooted = Math.floor(guaranteedLootPool * treasuryLootRatio);
 
     let severity: ReportSeverity = "INFO";
     if (groundPhase.isAttackerVictory) {

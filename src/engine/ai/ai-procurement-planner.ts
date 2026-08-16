@@ -46,7 +46,7 @@ export class AIProcurementPlanner {
     const posture = this.evaluatePosture(nation, allNations, provincesMap);
     const effectiveTreasury = availableTreasury ?? nation.treasury;
     const spendableBudget = Math.min(
-      this.calculateSpendableBudget(nation, posture, effectiveTreasury),
+      this.calculateSpendableBudget(posture, effectiveTreasury),
       remainingValuationCapacity,
     );
 
@@ -142,14 +142,10 @@ export class AIProcurementPlanner {
   }
 
   public static calculateSpendableBudget(
-    nation: Nation,
     posture: AIPosture,
-    effectiveTreasury?: number,
+    effectiveTreasury: number,
   ): number {
-    const gdp = getNationGdp(nation);
-    const reserveFloor = Math.floor(gdp * 0.05);
-    const currentMoney = effectiveTreasury ?? nation.treasury;
-    const disposable = Math.max(0, currentMoney - reserveFloor);
+    const disposable = Math.max(0, effectiveTreasury);
 
     if (disposable <= 0) {
       return 0;
