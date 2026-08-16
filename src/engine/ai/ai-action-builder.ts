@@ -6,6 +6,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
+import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -14,6 +15,13 @@ export class AIActionBuilder {
     provincesMap?: Record<string, Province>,
   ): GameAction[] {
     const actions: GameAction[] = [];
+
+    const recruitmentActions = AIProcurementPlanner.planRecruitment(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    actions.push(...recruitmentActions);
 
     this.appendDiplomaticAndWarActions(
       nation,
@@ -49,7 +57,7 @@ export class AIActionBuilder {
     }
 
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (actions.length >= 3) break;
+      if (actions.length >= 5) break;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const target = allNations[targetId] || allNations[canonicalTarget];
       if (!target || !target.isAlive || target.id === nation.id) continue;

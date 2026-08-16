@@ -5,6 +5,7 @@ import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-
 import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -16,6 +17,20 @@ export class EconomyTurnProcessor {
   ): Nation {
     const demoResult = DemographicsEngine.processNaturalDemographics(nation);
     let updated = demoResult.updatedNation;
+
+    if (updated.isAi) {
+      const gdp = getNationGdp(updated);
+      const injectionRate = 0.13 + Math.random() * 0.04;
+      const addedTreasury = Math.floor(gdp * injectionRate);
+
+      updated = {
+        ...updated,
+        treasury: updated.treasury + addedTreasury,
+      };
+
+      updated = this.recruitmentQueue.processTurnQueue(updated);
+      return updated;
+    }
 
     const tariffResult = TariffCalculator.calculateTariffEffects(
       updated,
