@@ -5,6 +5,7 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -119,6 +120,24 @@ export class PoliticsActionExecutor {
           senderWarFocus = receiver.id;
         }
 
+        const senderStabBonus =
+          StabilityCalculator.calculateDiplomaticStabilityBonus(
+            action.proposalType,
+            true,
+          );
+        const receiverStabBonus =
+          StabilityCalculator.calculateDiplomaticStabilityBonus(
+            action.proposalType,
+            false,
+          );
+
+        const newSenderStability = StabilityCalculator.clampStability(
+          nation.government.stability + senderStabBonus,
+        );
+        const newReceiverStability = StabilityCalculator.clampStability(
+          receiver.government.stability + receiverStabBonus,
+        );
+
         return {
           ...state,
           nations: {
@@ -128,6 +147,10 @@ export class PoliticsActionExecutor {
               treasury: Math.max(0, nation.treasury - costDeduction),
               globalReputation: newReputation,
               warFocusTargetId: senderWarFocus,
+              government: {
+                ...nation.government,
+                stability: newSenderStability,
+              },
               relations: {
                 ...nation.relations,
                 [senderRel.targetNationId]: updatedSenderRel,
@@ -136,6 +159,10 @@ export class PoliticsActionExecutor {
             [targetKey]: {
               ...receiver,
               warFocusTargetId: receiverWarFocus,
+              government: {
+                ...receiver.government,
+                stability: newReceiverStability,
+              },
               relations: {
                 ...receiver.relations,
                 [receiverRel.targetNationId]: updatedReceiverRel,
