@@ -112,7 +112,7 @@ export class GeodesicDijkstra {
       const pixels = provincePixelsMap.get(pid) || [];
 
       if (pixels.length === 0) {
-        newSeeds.push(allPixelIndices[0]!;
+        newSeeds.push(allPixelIndices[0]!);
         continue;
       }
 
