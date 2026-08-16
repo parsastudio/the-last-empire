@@ -21,6 +21,7 @@ export class AIProcurementPlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    availableTreasury?: number,
   ): GameAction[] {
     const gdp = getNationGdp(nation);
     const aliveCount = Object.values(allNations).filter(
@@ -43,8 +44,9 @@ export class AIProcurementPlanner {
     }
 
     const posture = this.evaluatePosture(nation, allNations, provincesMap);
+    const effectiveTreasury = availableTreasury ?? nation.treasury;
     const spendableBudget = Math.min(
-      this.calculateSpendableBudget(nation, posture),
+      this.calculateSpendableBudget(nation, posture, effectiveTreasury),
       remainingValuationCapacity,
     );
 
@@ -142,10 +144,12 @@ export class AIProcurementPlanner {
   public static calculateSpendableBudget(
     nation: Nation,
     posture: AIPosture,
+    effectiveTreasury?: number,
   ): number {
     const gdp = getNationGdp(nation);
     const reserveFloor = Math.floor(gdp * 0.05);
-    const disposable = Math.max(0, nation.treasury - reserveFloor);
+    const currentMoney = effectiveTreasury ?? nation.treasury;
+    const disposable = Math.max(0, currentMoney - reserveFloor);
 
     if (disposable <= 0) {
       return 0;

@@ -7,6 +7,7 @@ import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
+import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -16,10 +17,18 @@ export class AIActionBuilder {
   ): GameAction[] {
     const actions: GameAction[] = [];
 
+    const upgradeResult = AIUpgradePlanner.planUpgrades(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    actions.push(...upgradeResult.actions);
+
     const recruitmentActions = AIProcurementPlanner.planRecruitment(
       nation,
       allNations,
       provincesMap,
+      upgradeResult.remainingTreasury,
     );
     actions.push(...recruitmentActions);
 
@@ -57,7 +66,7 @@ export class AIActionBuilder {
     }
 
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (actions.length >= 5) break;
+      if (actions.length >= 6) break;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const target = allNations[targetId] || allNations[canonicalTarget];
       if (!target || !target.isAlive || target.id === nation.id) continue;
