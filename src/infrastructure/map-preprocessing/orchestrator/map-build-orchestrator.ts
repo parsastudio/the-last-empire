@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import fsSync from "fs";
 import path from "path";
 import { PNG } from "pngjs";
 import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
@@ -11,7 +10,7 @@ import { WaterBodyClassifier } from "@/infrastructure/map-preprocessing/pipeline
 import { ProvincePartitionEngine } from "@/infrastructure/map-preprocessing/orchestrator/province-partition-engine";
 import { BinaryStateExporter } from "@/infrastructure/map-preprocessing/pipeline/05-export/binary-state-exporter";
 import { StrategicManifestBuilder } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
-import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
+import { TerrainMapGenerator } from "@/infrastructure/map-preprocessing/generator/terrain-map-generator";
 
 export class MapBuildOrchestrator {
   private manifestBuilder = new StrategicManifestBuilder();
@@ -86,10 +85,12 @@ export class MapBuildOrchestrator {
     await BinaryStateExporter.exportLiveState(bitBuffer, outputDir);
     await this.manifestBuilder.buildAndSave(mapId, provinceMap, width, height);
 
-    const terrainPath = ServerMapPathResolver.getTerrainServerPath(mapId);
-    if (terrainPath && fsSync.existsSync(terrainPath)) {
-      const destTerrainPath = path.join(outputDir, "base_map_terrain.png");
-      await fs.copyFile(terrainPath, destTerrainPath);
-    }
+    const destTerrainPath = path.join(outputDir, "base_map_terrain.png");
+    await TerrainMapGenerator.generateAndSave(
+      assignmentGrid,
+      width,
+      height,
+      destTerrainPath,
+    );
   }
 }
