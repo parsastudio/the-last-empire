@@ -40,14 +40,9 @@ export class SabotageTierExecutor {
       nvLost,
     );
 
-    const stabDrain = 4;
     const updatedTarget: Nation = {
       ...target,
       military: updatedTargetMil,
-      government: {
-        ...target.government,
-        stability: Math.max(0, target.government.stability - stabDrain),
-      },
     };
 
     const sabotageData: EspionageSabotageData = {
@@ -57,7 +52,6 @@ export class SabotageTierExecutor {
       airForceDestroyed: afLost,
       droneMissileDestroyed: drLost,
       navalFleetDestroyed: nvLost,
-      stabilityDrain: stabDrain,
     };
 
     const message =
