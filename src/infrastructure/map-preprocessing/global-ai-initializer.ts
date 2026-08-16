@@ -4,7 +4,7 @@ import { NationProfileAssigner } from "@/infrastructure/map-preprocessing/nation
 import {
   FinalMapManifest,
   FinalManifestNation,
-} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+} from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 

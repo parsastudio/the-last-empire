@@ -1,4 +1,4 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import { Province } from "@/domain/province/province.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 

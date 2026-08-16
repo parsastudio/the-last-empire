@@ -1,11 +1,11 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import {
   ArchipelagoGroup,
   ProvinceClusterInfo,
-} from "@/infrastructure/map-preprocessing/final/province-cluster-types";
-import { GeodesicDijkstra } from "@/infrastructure/map-preprocessing/final/algorithms/geodesic-dijkstra";
+} from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
+import { GeodesicDijkstra } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/geodesic-dijkstra";
 
-export class GeodesicVoronoiPartitioner {
+export class LloydRelaxationEngine {
   public static partitionAndRelax(
     allPixelIndices: number[],
     initialSeeds: number[],

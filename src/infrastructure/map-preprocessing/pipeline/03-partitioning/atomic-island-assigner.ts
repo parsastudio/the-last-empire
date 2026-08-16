@@ -1,8 +1,8 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import {
   LandComponent,
   ProvinceClusterInfo,
-} from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+} from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 
 export class AtomicIslandAssigner {
   public static assignMinorComponentsAtomically(

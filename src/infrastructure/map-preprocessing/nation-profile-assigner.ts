@@ -1,6 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { FinalManifestNation as ManifestNationItem } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { MilitaryStack } from "@/domain/military/military.schema";

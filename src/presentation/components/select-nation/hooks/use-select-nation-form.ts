@@ -7,7 +7,7 @@ import { useToast } from "@/presentation/context/toast-context";
 import {
   BitPackedInitService,
   FinalMapManifest,
-} from "@/infrastructure/map-preprocessing/final/bit-packed-init-service";
+} from "@/infrastructure/map-preprocessing/runtime/bit-packed-init-service";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
