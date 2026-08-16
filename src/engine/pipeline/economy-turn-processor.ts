@@ -6,6 +6,7 @@ import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator"
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -20,8 +21,14 @@ export class EconomyTurnProcessor {
 
     if (updated.isAi) {
       const gdp = getNationGdp(updated);
-      const injectionRate = 0.13 + Math.random() * 0.04;
-      const addedTreasury = Math.floor(gdp * injectionRate);
+      const aliveCount = Object.values(allNations).filter(
+        (n) => n.isAlive,
+      ).length;
+      const addedTreasury = AiEconomyCalculator.calculateTurnIncome(
+        gdp,
+        updated.rank,
+        aliveCount,
+      );
 
       updated = {
         ...updated,
