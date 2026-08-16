@@ -1,37 +1,77 @@
 import type { Nation } from "@/domain/nation/nation.schema";
+import type { GovernmentType } from "@/domain/politics/politics.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import {
-  TaxCalculator,
-  TariffCalculator,
-} from "@/engine/economy/economy-calculators";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class StabilityCalculator {
+  public static clampStability(stability: number): number {
+    return Math.max(0, Math.min(100, Number(stability.toFixed(2))));
+  }
+
+  public static calculateAttackerBattleStabilityDelta(
+    type: GovernmentType,
+    isVictory: boolean,
+  ): number {
+    const traits = GovernmentSystem.getTraits(type);
+    return isVictory
+      ? traits.attackerVictoryBonus
+      : -traits.attackerDefeatPenalty;
+  }
+
+  public static calculateDefenderBattleStabilityDelta(
+    type: GovernmentType,
+    isProvinceLost: boolean,
+  ): number {
+    if (!isProvinceLost) {
+      return 0;
+    }
+    const traits = GovernmentSystem.getTraits(type);
+    return -traits.defenderLossPenalty;
+  }
+
+  public static calculateDiplomaticStabilityBonus(
+    proposalType: string,
+    isSender: boolean,
+  ): number {
+    switch (proposalType) {
+      case "NON_AGGRESSION_PACT":
+        return 2.0;
+      case "FULL_ALLIANCE":
+        return 4.0;
+      case "SEND_FOREIGN_AID":
+        return isSender ? 2.0 : 4.0;
+      default:
+        return 0;
+    }
+  }
+
   public static calculateTurnStabilityDelta(
     nation: Nation,
-    nationsMap?: Record<string, Nation>,
+    isAtWar?: boolean,
+    isBlockaded?: boolean,
   ): number {
-    const taxResult = TaxCalculator.evaluateTaxPolicy(nation);
-    const tariffResult = TariffCalculator.calculateTariffEffects(
-      nation,
-      nationsMap,
-    );
+    const traits = GovernmentSystem.getTraits(nation.government.type);
+    let delta = 0;
 
-    let delta = taxResult.stabilityImpact + tariffResult.stabilityImpact;
+    const warActive =
+      isAtWar ??
+      Object.values(nation.relations || {}).some((r) => r.stance === "WAR");
 
-    const capacity =
-      nation.maxPopulationCapacity ||
-      Math.floor((nation.population || 1) / 0.95);
-    const capacityRatio = (nation.population || 0) / (capacity || 1);
+    if (warActive) {
+      if (isBlockaded) {
+        delta -= traits.blockadePenalty;
+      }
+    } else {
+      const gdp = getNationGdp(nation);
+      const minReserve = Math.floor(gdp * 0.02);
 
-    if (capacityRatio > 1.0) {
-      delta -= Math.min(5, (capacityRatio - 1.0) * 10);
-    } else if (capacityRatio < 0.9) {
-      delta += 0.5;
+      if (nation.treasury < minReserve) {
+        delta -= 0.5;
+      } else if (nation.government.stability < 85) {
+        delta += traits.peaceRecoveryRate;
+      }
     }
-
-    const govTraits = GovernmentSystem.getTraits(nation.government.type);
-    delta += govTraits.stabilityDeltaPerTurn;
 
     const stabilityModifier = ModifierManager.getModifierImpact(
       nation,
@@ -44,15 +84,16 @@ export class StabilityCalculator {
 
   public static calculateTurnStability(
     nation: Nation,
-    nationsMap?: Record<string, Nation>,
+    isAtWar?: boolean,
+    isBlockaded?: boolean,
   ): number {
     const delta = StabilityCalculator.calculateTurnStabilityDelta(
       nation,
-      nationsMap,
+      isAtWar,
+      isBlockaded,
     );
-    const currentStability = nation.government.stability;
-    const newStability = Math.max(0, Math.min(100, currentStability + delta));
-
-    return Number(newStability.toFixed(2));
+    return StabilityCalculator.clampStability(
+      nation.government.stability + delta,
+    );
   }
 }

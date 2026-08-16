@@ -6,6 +6,7 @@ import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conque
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export interface AttackerStateApplierInput {
   attacker: Nation;
@@ -87,8 +88,22 @@ export class BattleAttackerStateApplier {
       };
     }
 
+    const combatStabilityDelta =
+      StabilityCalculator.calculateAttackerBattleStabilityDelta(
+        attacker.government.type,
+        calcResult.isAttackerVictory,
+      );
+
+    const nextStability = StabilityCalculator.clampStability(
+      attacker.government.stability + combatStabilityDelta,
+    );
+
     return {
       ...updatedAttacker,
+      government: {
+        ...updatedAttacker.government,
+        stability: nextStability,
+      },
       globalReputation: Math.max(
         -100,
         attacker.globalReputation - totalRepPenalty,

@@ -4,6 +4,7 @@ import { DemographicsTransferResult } from "@/engine/combat/conquest/demographic
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export interface DefenderStateApplierInput {
   defender: Nation;
@@ -88,10 +89,30 @@ export class BattleDefenderStateApplier {
     const nextWarFocus =
       !currentFocus || currentFocus === attackerId ? attackerId : currentFocus;
 
+    const isProvinceLost =
+      calcResult.isAttackerVictory &&
+      (conquest.conqueredPixels > 0 || calcResult.isFullCapitulation);
+
+    const combatStabilityDelta =
+      StabilityCalculator.calculateDefenderBattleStabilityDelta(
+        defender.government.type,
+        isProvinceLost,
+      );
+
+    const nextStability = isDefenderAlive
+      ? StabilityCalculator.clampStability(
+          defender.government.stability + combatStabilityDelta,
+        )
+      : 0;
+
     return {
       ...updatedDefender,
       isAlive: isDefenderAlive,
       provinceIds: defenderProvIds,
+      government: {
+        ...updatedDefender.government,
+        stability: nextStability,
+      },
       treasury: isDefenderAlive
         ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,

@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { ReputationManager } from "@/engine/diplomacy/diplomacy-engine";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class PoliticsTurnProcessor {
   private static reputationManager = new ReputationManager();
@@ -13,9 +14,34 @@ export class PoliticsTurnProcessor {
   ): Nation {
     let updated = ModifierManager.updateActiveModifiers(nation);
 
+    let isBlockaded = false;
+    if (isAtWar && updated.relations) {
+      const myNavalPower =
+        (updated.military.navalFleet || 0) * (updated.military.techLevel || 1);
+
+      for (const [relTargetId, rel] of Object.entries(updated.relations)) {
+        if (rel.stance === "WAR") {
+          const canonical = CountryRegistry.resolveCanonicalId(relTargetId);
+          const enemy = allNations[relTargetId] || allNations[canonical];
+
+          if (enemy && enemy.isAlive) {
+            const enemyNavalPower =
+              (enemy.military.navalFleet || 0) *
+              (enemy.military.techLevel || 1);
+
+            if (enemyNavalPower > myNavalPower) {
+              isBlockaded = true;
+              break;
+            }
+          }
+        }
+      }
+    }
+
     const newStability = StabilityCalculator.calculateTurnStability(
       updated,
-      allNations,
+      isAtWar,
+      isBlockaded,
     );
 
     updated = {
