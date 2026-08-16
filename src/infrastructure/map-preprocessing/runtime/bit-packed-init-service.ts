@@ -1,8 +1,8 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 import { GameIdGenerator } from "@/domain/shared/domain-utilities";
-import { FinalMapManifest } from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+import { FinalMapManifest } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 
 export type { FinalMapManifest };
 

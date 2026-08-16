@@ -1,15 +1,13 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
-import { TopologicalComponentAnalyzer } from "@/infrastructure/map-preprocessing/final/topological-component-analyzer";
-import { ProvinceCountAllocator } from "@/infrastructure/map-preprocessing/final/province-count-allocator";
-import { WavefrontProvincePartitioner } from "@/infrastructure/map-preprocessing/final/wavefront-province-partitioner";
-import { AtomicIslandAssigner } from "@/infrastructure/map-preprocessing/final/atomic-island-assigner";
-import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/final/sliver-province-absorber";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
+import { ComponentAnalyzer } from "@/infrastructure/map-preprocessing/pipeline/02-topology/component-analyzer";
+import { LandMassClassifier } from "@/infrastructure/map-preprocessing/pipeline/02-topology/land-mass-classifier";
+import { ProvinceCountAllocator } from "@/infrastructure/map-preprocessing/pipeline/02-topology/province-count-allocator";
+import { WavefrontProvincePartitioner } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/wavefront-province-partitioner";
+import { AtomicIslandAssigner } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/atomic-island-assigner";
+import { ProvinceNeighborDetector } from "@/infrastructure/map-preprocessing/pipeline/04-topology-graph/province-neighbor-detector";
+import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/pipeline/04-topology-graph/sliver-province-absorber";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
-import { LandMassClassifier } from "@/infrastructure/map-preprocessing/final/analyzers/land-mass-classifier";
-import { ProvinceNeighborDetector } from "@/infrastructure/map-preprocessing/final/analyzers/province-neighbor-detector";
-
-export type { ProvinceClusterInfo };
 
 export class ProvincePartitionEngine {
   public static partitionProvinces(
@@ -37,7 +35,7 @@ export class ProvincePartitionEngine {
     let globalProvinceCounter = BitPackedCellUtility.FIRST_PROVINCE_ID;
 
     for (const [countryNumericId, pixelIndices] of countryPixelsMap.entries()) {
-      const allComponents = TopologicalComponentAnalyzer.analyzeComponents(
+      const allComponents = ComponentAnalyzer.analyzeComponents(
         pixelIndices,
         width,
       );

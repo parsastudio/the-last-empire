@@ -1,5 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import {
   db,
   SavedGameStateRecord,

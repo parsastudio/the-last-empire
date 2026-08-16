@@ -1,10 +1,10 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
-import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import {
-  ProvinceBorderAnalyzer,
+  ProvinceClusterInfo,
   ProvinceBounds,
-} from "@/infrastructure/map-preprocessing/final/analyzers/province-border-analyzer";
+} from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
+import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
+import { ProvinceBorderAnalyzer } from "@/infrastructure/map-preprocessing/pipeline/04-topology-graph/province-border-analyzer";
 
 export class SliverProvinceAbsorber {
   public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 700;

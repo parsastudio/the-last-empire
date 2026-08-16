@@ -1,12 +1,6 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { ProvinceBounds } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
-
-export interface ProvinceBounds {
-  minX: number;
-  maxX: number;
-  minY: number;
-  maxY: number;
-}
 
 export class ProvinceBorderAnalyzer {
   public static calculateAllBounds(

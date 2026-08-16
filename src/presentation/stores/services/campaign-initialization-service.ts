@@ -3,7 +3,7 @@ import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import {
   FinalMapManifest,
   FinalManifestNation,
-} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+} from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";

@@ -1,10 +1,10 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import {
   ArchipelagoGroup,
   ProvinceClusterInfo,
-} from "@/infrastructure/map-preprocessing/final/province-cluster-types";
-import { GeodesicSeedPicker } from "@/infrastructure/map-preprocessing/final/geodesic-seed-picker";
-import { GeodesicVoronoiPartitioner } from "@/infrastructure/map-preprocessing/final/geodesic-voronoi-partitioner";
+} from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
+import { GeodesicSeedPicker } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/geodesic-seed-picker";
+import { LloydRelaxationEngine } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/lloyd-relaxation-engine";
 
 export class WavefrontProvincePartitioner {
   public static partitionGroup(
@@ -66,7 +66,7 @@ export class WavefrontProvincePartitioner {
       width,
     );
 
-    GeodesicVoronoiPartitioner.partitionAndRelax(
+    LloydRelaxationEngine.partitionAndRelax(
       allPixelIndices,
       initialSeeds,
       assignedProvinceIds,

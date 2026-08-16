@@ -1,10 +1,4 @@
-import { LandComponent } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
-
-export interface MajorLandMass {
-  id: number;
-  components: LandComponent[];
-  totalPixels: number;
-}
+import { MajorLandMass } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 
 export class ProvinceCountAllocator {
   public static readonly MIN_PIXELS_PER_PROVINCE = 2500;

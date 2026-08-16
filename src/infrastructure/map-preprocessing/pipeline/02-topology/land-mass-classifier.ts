@@ -1,7 +1,7 @@
 import {
   LandComponent,
   ArchipelagoGroup,
-} from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+} from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 
 export class LandMassClassifier {
   public static readonly MINOR_MASS_THRESHOLD = 3500;

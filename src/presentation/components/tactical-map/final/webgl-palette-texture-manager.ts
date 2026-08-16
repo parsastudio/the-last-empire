@@ -1,4 +1,4 @@
-import { TacticalPaletteGenerator } from "@/infrastructure/map-preprocessing/color-palette";
+import { TacticalPaletteGenerator } from "@/infrastructure/map-preprocessing/runtime/tactical-color-palette";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";

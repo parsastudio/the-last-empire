@@ -1,5 +1,5 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 export class ProvinceNeighborDetector {

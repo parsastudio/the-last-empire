@@ -1,5 +1,5 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
-import { MapPathResolver } from "@/infrastructure/map-preprocessing/map-path-resolver";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { ClientMapPathResolver } from "@/infrastructure/map-preprocessing/runtime/client-map-path-resolver";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class ClientFinalStateLoader {
@@ -7,7 +7,10 @@ export class ClientFinalStateLoader {
     mapId = "map1",
   ): Promise<BitPackedBuffer | null> {
     try {
-      const url = MapPathResolver.getMapFinalClientUrl(mapId, "live-state.bin");
+      const url = ClientMapPathResolver.getMapFinalClientUrl(
+        mapId,
+        "live-state.bin",
+      );
       const res = await fetch(url, { cache: "no-store" });
 
       if (!res.ok) {

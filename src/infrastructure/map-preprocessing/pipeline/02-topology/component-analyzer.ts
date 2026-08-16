@@ -1,8 +1,6 @@
-import { LandComponent } from "@/infrastructure/map-preprocessing/final/province-cluster-types";
+import { LandComponent } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 
-export type { LandComponent };
-
-export class TopologicalComponentAnalyzer {
+export class ComponentAnalyzer {
   public static analyzeComponents(
     pixelIndices: number[],
     width: number,

@@ -1,4 +1,4 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/final/bit-packed-buffer";
+import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 export class WaterBodyClassifier {

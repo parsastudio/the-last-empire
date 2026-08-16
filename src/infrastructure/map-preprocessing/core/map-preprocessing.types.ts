@@ -22,3 +22,16 @@ export interface ProvinceClusterInfo {
   centerCoordinates: { x: number; y: number };
   landNeighbors: Set<number>;
 }
+
+export interface MajorLandMass {
+  id: number;
+  components: LandComponent[];
+  totalPixels: number;
+}
+
+export interface ProvinceBounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}

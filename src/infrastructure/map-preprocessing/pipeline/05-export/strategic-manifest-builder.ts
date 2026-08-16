@@ -1,8 +1,8 @@
 import fs from "fs/promises";
 import path from "path";
 import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/final/province-partition-engine";
-import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server-map-path-resolver";
+import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
+import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 
 export interface FinalManifestProvince {
@@ -55,7 +55,7 @@ export interface FinalMapManifest {
   nations: FinalManifestNation[];
 }
 
-export class FinalManifestBuilder {
+export class StrategicManifestBuilder {
   public async buildAndSave(
     mapId: string,
     provinceMap: Map<number, ProvinceClusterInfo>,

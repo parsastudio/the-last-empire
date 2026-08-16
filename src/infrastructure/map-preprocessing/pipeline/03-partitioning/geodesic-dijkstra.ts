@@ -1,4 +1,4 @@
-import { LandMinHeap } from "@/infrastructure/map-preprocessing/final/utils/land-min-heap";
+import { LandMinHeap } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/utils/land-min-heap";
 
 export class GeodesicDijkstra {
   public static runPureLandDijkstra(
@@ -112,7 +112,7 @@ export class GeodesicDijkstra {
       const pixels = provincePixelsMap.get(pid) || [];
 
       if (pixels.length === 0) {
-        newSeeds.push(allPixelIndices[0]!);
+        newSeeds.push(allPixelIndices[0]!;
         continue;
       }
 

@@ -3,7 +3,7 @@ import { ALL_RAW_COUNTRY_PROFILES } from "@/domain/data/countries/country-profil
 import {
   FinalMapManifest,
   FinalManifestNation,
-} from "@/infrastructure/map-preprocessing/final/final-manifest-builder";
+} from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 
 const ID_MAPPING: Record<string, number> = {
   TZA: 12,
