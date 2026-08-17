@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NationSchema } from "@/domain/nation/nation.schema";
 import { ProvinceSchema } from "@/domain/province/province.schema";
+import { PendingDiplomaticProposalSchema } from "@/domain/diplomacy/diplomacy.schema";
 
 export const TurnLogLevelSchema = z.enum([
   "INFO",
@@ -31,6 +32,7 @@ export const GameStateSchema = z.object({
   humanNationId: z.string(),
   provinces: z.record(z.string(), ProvinceSchema).default({}),
   nations: z.record(z.string(), NationSchema),
+  pendingProposals: z.array(PendingDiplomaticProposalSchema).default([]),
   turnLogs: z.array(TurnLogEntrySchema),
 });
 

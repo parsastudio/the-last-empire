@@ -2,6 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
+import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
@@ -44,6 +45,19 @@ export class PoliticsActionExecutor {
           action.tier,
         );
         return newState;
+      }
+
+      case "RESPOND_DIPLOMATIC_PROPOSAL": {
+        const proposal = state.pendingProposals.find(
+          (p) => p.id === action.proposalId,
+        );
+        if (!proposal) return state;
+
+        if (action.accept) {
+          return TreatyAcceptanceApplier.applyAcceptance(state, proposal);
+        } else {
+          return TreatyAcceptanceApplier.applyRejection(state, proposal);
+        }
       }
 
       case "DIPLOMATIC_PROPOSAL": {
@@ -208,15 +222,36 @@ export class PoliticsActionExecutor {
           };
         }
 
+        const isDuplicate = state.pendingProposals.some(
+          (p) =>
+            p.senderNationId === nation.id &&
+            p.receiverNationId === receiver.id &&
+            p.proposalType === action.proposalType,
+        );
+
+        if (isDuplicate) {
+          return state;
+        }
+
+        const newProposal = {
+          id: `prop-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          turn: state.currentTurn,
+          senderNationId: nation.id,
+          receiverNationId: receiver.id,
+          proposalType: action.proposalType,
+          expiresTurn: state.currentTurn + 2,
+        };
+
         const proposalLog = TurnLogBuilder.createLogEntry(
           state.currentTurn,
           nation.id,
           "INFO",
-          `پیشنهاد دیپلماتیک (${action.proposalType}) از سوی ${nation.name} برای ${receiver.name} ارسال شد.`,
+          `پیشنهاد رسمی (${action.proposalType}) از سوی ${nation.name} برای ${receiver.name} ارسال گردید.`,
         );
 
         return {
           ...state,
+          pendingProposals: [...state.pendingProposals, newProposal],
           turnLogs: [...state.turnLogs, proposalLog],
         };
       }
