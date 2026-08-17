@@ -98,7 +98,7 @@ export class DiplomaticAcceptanceEvaluator {
     );
 
     if (threatResult.powerRatio >= 0.7 && threatResult.powerRatio <= 1.4) {
-      return opinion >= -60;
+      return receiverStability < 50 || grudge < 30;
     }
 
     return true;
@@ -165,10 +165,10 @@ export class DiplomaticAcceptanceEvaluator {
       }
     }
 
-    if (hasCommonEnemy && opinion >= 20) {
+    if (hasCommonEnemy && opinion >= 10) {
       return true;
     }
 
-    return opinion >= 45 && sender.globalReputation >= 10;
+    return opinion >= 15 && sender.globalReputation >= 10;
   }
 }
