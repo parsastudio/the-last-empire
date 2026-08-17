@@ -4,13 +4,9 @@ import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface DiplomaticStanceBadgeProps {
   stance: DiplomaticStance;
-  isTradeEmbargoed?: boolean;
 }
 
-export function DiplomaticStanceBadge({
-  stance,
-  isTradeEmbargoed = false,
-}: DiplomaticStanceBadgeProps) {
+export function DiplomaticStanceBadge({ stance }: DiplomaticStanceBadgeProps) {
   if (stance === "WAR") {
     return (
       <span className="px-2 py-0.5 rounded-md bg-rose-600/25 text-rose-500 border border-rose-500/40 text-[9px] font-bold flex items-center gap-1">
@@ -19,7 +15,7 @@ export function DiplomaticStanceBadge({
     );
   }
 
-  if (stance === "SEVERED_RELATIONS" || isTradeEmbargoed) {
+  if (stance === "SEVERED_RELATIONS") {
     return (
       <span className="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/20 text-[9px] font-bold flex items-center gap-1">
         <Ban size={10} /> قطع روابط تجاری

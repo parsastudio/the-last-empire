@@ -84,6 +84,7 @@ export class PoliticsActionExecutor {
 
         if (action.proposalType === "SEND_FOREIGN_AID") {
           costDeduction = TreatyEvaluator.calculateForeignAidCost(
+            getNationGdp(nation),
             getNationGdp(receiver),
           );
           reputationDelta = 4;
@@ -150,6 +151,7 @@ export class PoliticsActionExecutor {
             },
             [targetKey]: {
               ...receiver,
+              treasury: receiver.treasury + costDeduction,
               warFocusTargetId: receiverWarFocus,
               government: {
                 ...receiver.government,

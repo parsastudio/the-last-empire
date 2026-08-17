@@ -36,12 +36,7 @@ export class NationRelationResolver {
     relationsMap: Record<string, RelationProfile> | undefined,
     targetNationId: string,
   ): boolean {
-    const relation = this.getRelation(relationsMap, targetNationId);
-    if (!relation) return false;
-    return (
-      relation.stance === "WAR" ||
-      relation.stance === "SEVERED_RELATIONS" ||
-      relation.isTradeEmbargoed === true
-    );
+    const stance = this.getStance(relationsMap, targetNationId);
+    return stance === "WAR" || stance === "SEVERED_RELATIONS";
   }
 }

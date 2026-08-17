@@ -75,15 +75,12 @@ export class BattleDefenderStateApplier {
     const grudgeSurge = calcResult.isFullCapitulation ? 50 : 40;
 
     const updatedRelations = { ...updatedDefender.relations };
-    if (updatedRelations[targetKey]) {
-      updatedRelations[targetKey] = {
-        ...updatedRelations[targetKey]!,
-        stance: "WAR",
-        isTradeEmbargoed: true,
-        opinion: -100,
-        grudge: Math.min(100, currentGrudge + grudgeSurge),
-      };
-    }
+    updatedRelations[targetKey] = {
+      targetNationId: attackerId,
+      stance: "WAR",
+      opinion: -100,
+      grudge: Math.min(100, currentGrudge + grudgeSurge),
+    };
 
     const currentFocus = updatedDefender.warFocusTargetId;
     const nextWarFocus =

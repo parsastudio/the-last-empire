@@ -4,13 +4,9 @@ import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface TreatyStatusBannerProps {
   stance: DiplomaticStance | string;
-  isTradeEmbargoed?: boolean;
 }
 
-export function TreatyStatusBanner({
-  stance,
-  isTradeEmbargoed = false,
-}: TreatyStatusBannerProps) {
+export function TreatyStatusBanner({ stance }: TreatyStatusBannerProps) {
   if (stance === "WAR") {
     return (
       <div className="w-full p-3 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-500 flex items-center justify-between text-xs font-bold">
@@ -53,7 +49,7 @@ export function TreatyStatusBanner({
     );
   }
 
-  if (stance === "SEVERED_RELATIONS" || isTradeEmbargoed) {
+  if (stance === "SEVERED_RELATIONS") {
     return (
       <div className="w-full p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-between text-xs font-bold">
         <span className="flex items-center gap-1.5">

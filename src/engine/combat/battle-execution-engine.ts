@@ -2,7 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
-import { BattleDiplomacyHelper } from "@/engine/combat/battle-diplomacy-helper";
+import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
@@ -40,7 +40,7 @@ export class BattleExecutionEngine {
       defender.id,
     );
     const betrayalResult =
-      BattleDiplomacyHelper.evaluateBetrayalPenalty(currentStance);
+      DiplomaticBetrayalCalculator.calculatePenalty(currentStance);
 
     let navalCostMultiplier: number | undefined = undefined;
     if (action.attackType === "NAVAL" && action.targetProvinceId) {

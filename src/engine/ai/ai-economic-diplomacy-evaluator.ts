@@ -21,6 +21,8 @@ export class AIEconomicDiplomacyEvaluator {
       return null;
     }
 
+    const senderGdp = getNationGdp(nation);
+
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
@@ -30,7 +32,10 @@ export class AIEconomicDiplomacyEvaluator {
       }
 
       const targetGdp = getNationGdp(targetNation);
-      const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
+      const cost = TreatyEvaluator.calculateForeignAidCost(
+        senderGdp,
+        targetGdp,
+      );
 
       if (currentTreasury < cost) {
         continue;
@@ -47,8 +52,8 @@ export class AIEconomicDiplomacyEvaluator {
 
       const isPeacetimeAppeasement =
         rel.stance !== "WAR" &&
-        powerRatio >= 2.0 &&
-        rel.opinion < 0 &&
+        powerRatio >= 1.5 &&
+        rel.opinion < 20 &&
         threatResult.isNeighbor;
 
       if (isWartimeReparation || isPeacetimeAppeasement) {

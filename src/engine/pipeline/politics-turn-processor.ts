@@ -1,12 +1,10 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-import { ReputationManager } from "@/engine/diplomacy/diplomacy-engine";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export class PoliticsTurnProcessor {
-  private static reputationManager = new ReputationManager();
-
   public static process(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -54,7 +52,16 @@ export class PoliticsTurnProcessor {
     };
 
     if (!isAtWar) {
-      updated = this.reputationManager.applyReputationGain(updated, 1);
+      const multiplier = DoctrinesManager.getReputationGainMultiplier(
+        updated.doctrines?.unlockedDoctrines,
+      );
+      updated = {
+        ...updated,
+        globalReputation: Math.min(
+          100,
+          updated.globalReputation + 1 * multiplier,
+        ),
+      };
     }
 
     return updated;
