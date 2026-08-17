@@ -6,6 +6,7 @@ import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -55,13 +56,6 @@ export class PoliticsActionExecutor {
         if (!receiver) return state;
         const targetKey = receiver.id;
 
-        const result = this.treatyEvaluator.evaluateProposal(
-          nation,
-          receiver,
-          action.proposalType,
-        );
-        if (!result.accepted) return state;
-
         const senderRel =
           nation.relations[action.targetNationId] ||
           nation.relations[canonicalTargetId];
@@ -70,99 +64,160 @@ export class PoliticsActionExecutor {
           receiver.relations[canonicalSourceId];
         if (!senderRel || !receiverRel) return state;
 
-        const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
-          senderRel,
-          action.proposalType,
-        );
-        const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
-          receiverRel,
-          action.proposalType,
-        );
+        if (action.proposalType === "DECLARE_WAR") {
+          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
+            senderRel,
+            "DECLARE_WAR",
+          );
+          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
+            receiverRel,
+            "DECLARE_WAR",
+          );
 
-        let reputationDelta = 0;
-        let costDeduction = 0;
+          const newReputation = Math.max(-100, nation.globalReputation - 10);
+          const warLog = TurnLogBuilder.createLogEntry(
+            state.currentTurn,
+            nation.id,
+            "CRITICAL",
+            `کشور ${nation.name} به ${receiver.name} اعلان جنگ رسمی نمود.`,
+          );
+
+          return {
+            ...state,
+            turnLogs: [...state.turnLogs, warLog],
+            nations: {
+              ...state.nations,
+              [sourceKey]: {
+                ...nation,
+                globalReputation: newReputation,
+                warFocusTargetId: receiver.id,
+                relations: {
+                  ...nation.relations,
+                  [senderRel.targetNationId]: updatedSenderRel,
+                },
+              },
+              [targetKey]: {
+                ...receiver,
+                warFocusTargetId: receiver.warFocusTargetId || nation.id,
+                relations: {
+                  ...receiver.relations,
+                  [receiverRel.targetNationId]: updatedReceiverRel,
+                },
+              },
+            },
+          };
+        }
+
+        if (action.proposalType === "SEVER_TRADE_RELATIONS") {
+          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
+            senderRel,
+            "SEVER_TRADE_RELATIONS",
+          );
+          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
+            receiverRel,
+            "SEVER_TRADE_RELATIONS",
+          );
+
+          return {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: {
+                ...nation,
+                relations: {
+                  ...nation.relations,
+                  [senderRel.targetNationId]: updatedSenderRel,
+                },
+              },
+              [targetKey]: {
+                ...receiver,
+                relations: {
+                  ...receiver.relations,
+                  [receiverRel.targetNationId]: updatedReceiverRel,
+                },
+              },
+            },
+          };
+        }
 
         if (action.proposalType === "SEND_FOREIGN_AID") {
-          costDeduction = TreatyEvaluator.calculateForeignAidCost(
+          const costDeduction = TreatyEvaluator.calculateForeignAidCost(
             getNationGdp(nation),
             getNationGdp(receiver),
           );
-          reputationDelta = 4;
-        } else if (action.proposalType === "NON_AGGRESSION_PACT") {
-          reputationDelta = 3;
-        } else if (action.proposalType === "FULL_ALLIANCE") {
-          reputationDelta = 6;
-        } else if (action.proposalType === "PEACE_TREATY") {
-          reputationDelta = 5;
-        } else if (action.proposalType === "DECLARE_WAR") {
-          reputationDelta = -10;
-        }
 
-        const newReputation = Math.max(
-          -100,
-          Math.min(100, nation.globalReputation + reputationDelta),
-        );
+          if (nation.treasury < costDeduction) {
+            return state;
+          }
 
-        let senderWarFocus = nation.warFocusTargetId;
-        let receiverWarFocus = receiver.warFocusTargetId;
-
-        if (action.proposalType === "PEACE_TREATY") {
-          if (senderWarFocus === receiver.id) senderWarFocus = null;
-          if (receiverWarFocus === nation.id) receiverWarFocus = null;
-        } else if (action.proposalType === "DECLARE_WAR") {
-          senderWarFocus = receiver.id;
-        }
-
-        const senderStabBonus =
-          StabilityCalculator.calculateDiplomaticStabilityBonus(
-            action.proposalType,
-            true,
+          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
+            senderRel,
+            "SEND_FOREIGN_AID",
           );
-        const receiverStabBonus =
-          StabilityCalculator.calculateDiplomaticStabilityBonus(
-            action.proposalType,
-            false,
+          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
+            receiverRel,
+            "SEND_FOREIGN_AID",
           );
 
-        const newSenderStability = StabilityCalculator.clampStability(
-          nation.government.stability + senderStabBonus,
-        );
-        const newReceiverStability = StabilityCalculator.clampStability(
-          receiver.government.stability + receiverStabBonus,
+          const newReputation = Math.min(100, nation.globalReputation + 4);
+          const senderStabBonus =
+            StabilityCalculator.calculateDiplomaticStabilityBonus(
+              "SEND_FOREIGN_AID",
+              true,
+            );
+          const receiverStabBonus =
+            StabilityCalculator.calculateDiplomaticStabilityBonus(
+              "SEND_FOREIGN_AID",
+              false,
+            );
+
+          return {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: {
+                ...nation,
+                treasury: Math.max(0, nation.treasury - costDeduction),
+                globalReputation: newReputation,
+                government: {
+                  ...nation.government,
+                  stability: StabilityCalculator.clampStability(
+                    nation.government.stability + senderStabBonus,
+                  ),
+                },
+                relations: {
+                  ...nation.relations,
+                  [senderRel.targetNationId]: updatedSenderRel,
+                },
+              },
+              [targetKey]: {
+                ...receiver,
+                treasury: receiver.treasury + costDeduction,
+                government: {
+                  ...receiver.government,
+                  stability: StabilityCalculator.clampStability(
+                    receiver.government.stability + receiverStabBonus,
+                  ),
+                },
+                relations: {
+                  ...receiver.relations,
+                  [receiverRel.targetNationId]: updatedReceiverRel,
+                },
+              },
+            },
+          };
+        }
+
+        const proposalLog = TurnLogBuilder.createLogEntry(
+          state.currentTurn,
+          nation.id,
+          "INFO",
+          `پیشنهاد دیپلماتیک (${action.proposalType}) از سوی ${nation.name} برای ${receiver.name} ارسال شد.`,
         );
 
         return {
           ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: {
-              ...nation,
-              treasury: Math.max(0, nation.treasury - costDeduction),
-              globalReputation: newReputation,
-              warFocusTargetId: senderWarFocus,
-              government: {
-                ...nation.government,
-                stability: newSenderStability,
-              },
-              relations: {
-                ...nation.relations,
-                [senderRel.targetNationId]: updatedSenderRel,
-              },
-            },
-            [targetKey]: {
-              ...receiver,
-              treasury: receiver.treasury + costDeduction,
-              warFocusTargetId: receiverWarFocus,
-              government: {
-                ...receiver.government,
-                stability: newReceiverStability,
-              },
-              relations: {
-                ...receiver.relations,
-                [receiverRel.targetNationId]: updatedReceiverRel,
-              },
-            },
-          },
+          turnLogs: [...state.turnLogs, proposalLog],
         };
       }
 
