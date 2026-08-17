@@ -6,6 +6,7 @@ import {
 } from "@/domain/diplomacy/diplomacy.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 
 export interface BetrayalEvaluation {
   reputationPenalty: number;
@@ -71,6 +72,7 @@ export class TreatyEvaluator {
     }
 
     const relation = receiver.relations[sender.id];
+    const isAtWar = relation?.stance === "WAR";
     const opinion =
       (relation ? relation.opinion : 0) +
       DoctrinesManager.getDiplomaticOpinionThresholdBonus(
@@ -90,10 +92,28 @@ export class TreatyEvaluator {
         return opinion >= 60 && sender.globalReputation >= 20
           ? { accepted: true }
           : { accepted: false, reason: "REQUIREMENTS_NOT_MET" };
-      case "PEACE_TREATY":
-        return opinion > -20
-          ? { accepted: true }
-          : { accepted: false, reason: "OPINION_TOO_LOW" };
+      case "PEACE_TREATY": {
+        if (!isAtWar) {
+          return opinion > -20
+            ? { accepted: true }
+            : { accepted: false, reason: "OPINION_TOO_LOW" };
+        }
+
+        const senderPower =
+          MilitaryPowerCalculator.calculateEffectivePower(sender);
+        const receiverPower =
+          MilitaryPowerCalculator.calculateEffectivePower(receiver);
+
+        const isReceiverOverwhelming =
+          receiverPower > senderPower * 3.0 &&
+          receiver.government.stability >= 60;
+
+        if (isReceiverOverwhelming) {
+          return { accepted: false, reason: "DEMANDING_FULL_CONQUEST" };
+        }
+
+        return { accepted: true };
+      }
       default:
         return { accepted: false, reason: "UNKNOWN_PROPOSAL" };
     }
