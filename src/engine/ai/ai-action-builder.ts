@@ -9,6 +9,7 @@ import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
+import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -57,6 +58,17 @@ export class AIActionBuilder {
     provincesMap: Record<string, Province> | undefined,
     actions: GameAction[],
   ): void {
+    const peaceAction = AIPeaceEvaluator.evaluate(
+      nation,
+      allNations,
+      provincesMap,
+    );
+
+    if (peaceAction) {
+      actions.push(peaceAction);
+      return;
+    }
+
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[nation.warFocusTargetId] ||
         allNations[CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)]
@@ -88,17 +100,6 @@ export class AIActionBuilder {
       const grudge = rel.grudge ?? 0;
 
       if (rel.stance === "WAR") {
-        if (evalResult.powerRatio > 3.0 && nation.military.infantry <= 3) {
-          actions.push(
-            ActionFactory.diplomaticProposal(
-              nation.id,
-              target.id,
-              "PEACE_TREATY",
-            ),
-          );
-          return;
-        }
-
         const attackAction = this.planAttack(nation, target, provincesMap);
         if (attackAction) {
           actions.push(attackAction);
