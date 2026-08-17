@@ -11,7 +11,7 @@ import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor
 
 export class TurnPipeline {
   public processTurn(state: GameState): GameState {
-    let currentState =
+    const currentState =
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
 
     const updatedNations: Record<string, Nation> = {};
@@ -50,7 +50,7 @@ export class TurnPipeline {
       }
 
       const { updatedNation: dipNation, isAtWar } =
-        DiplomaticTurnProcessor.process(syncedNation);
+        DiplomaticTurnProcessor.process(syncedNation, currentState.nations);
 
       const ecoNation = EconomyTurnProcessor.process(
         dipNation,
