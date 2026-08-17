@@ -3,7 +3,6 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
@@ -12,6 +11,7 @@ import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
 import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
 import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
 import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-evaluator";
+import { AIWarDeclarationEvaluator } from "@/engine/ai/ai-war-declaration-evaluator";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -98,6 +98,16 @@ export class AIActionBuilder {
       currentTreasury -= aidResult.cost;
     }
 
+    const warDeclarationAction = AIWarDeclarationEvaluator.evaluate(
+      nation,
+      allNations,
+      provincesMap,
+    );
+
+    if (warDeclarationAction) {
+      actions.push(warDeclarationAction);
+    }
+
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[nation.warFocusTargetId] ||
         allNations[CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)]
@@ -121,35 +131,10 @@ export class AIActionBuilder {
       const target = allNations[targetId] || allNations[canonicalTarget];
       if (!target || !target.isAlive || target.id === nation.id) continue;
 
-      const evalResult = AIThreatCalculator.evaluate(
-        nation,
-        target,
-        provincesMap,
-      );
-      const grudge = rel.grudge ?? 0;
-
       if (rel.stance === "WAR") {
         const attackAction = this.planAttack(nation, target, provincesMap);
         if (attackAction) {
           actions.push(attackAction);
-          return;
-        }
-      }
-
-      if (rel.stance !== "WAR" && rel.stance !== "ALLIANCE") {
-        const wantsVendetta =
-          grudge >= 45 && evalResult.isNeighbor && evalResult.powerRatio <= 1.4;
-        const wantsPredatoryWar =
-          evalResult.opportunityScore >= 70 && grudge >= 20;
-
-        if (wantsVendetta || wantsPredatoryWar) {
-          actions.push(
-            ActionFactory.diplomaticProposal(
-              nation.id,
-              target.id,
-              "DECLARE_WAR",
-            ),
-          );
           return;
         }
       }
