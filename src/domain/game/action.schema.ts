@@ -43,6 +43,14 @@ export const DiplomaticProposalActionSchema = z.object({
   proposalType: DiplomaticProposalTypeSchema,
 });
 
+export const RespondDiplomaticProposalActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  type: z.literal("RESPOND_DIPLOMATIC_PROPOSAL"),
+  proposalId: z.string(),
+  accept: z.boolean(),
+});
+
 export const UpgradeIndustrialLevelActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -116,6 +124,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   RecruitUnitActionSchema,
   BuyArmsMarketActionSchema,
   DiplomaticProposalActionSchema,
+  RespondDiplomaticProposalActionSchema,
   UpgradeIndustrialLevelActionSchema,
   InvestInfrastructureActionSchema,
   ExecuteEspionageActionSchema,
@@ -141,6 +150,9 @@ export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
 export type BuyArmsMarketAction = z.infer<typeof BuyArmsMarketActionSchema>;
 export type DiplomaticProposalAction = z.infer<
   typeof DiplomaticProposalActionSchema
+>;
+export type RespondDiplomaticProposalAction = z.infer<
+  typeof RespondDiplomaticProposalActionSchema
 >;
 export type UpgradeIndustrialLevelAction = z.infer<
   typeof UpgradeIndustrialLevelActionSchema

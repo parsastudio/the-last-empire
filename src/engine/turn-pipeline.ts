@@ -11,10 +11,13 @@ import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor
 
 export class TurnPipeline {
   public processTurn(state: GameState): GameState {
+    let currentState =
+      DiplomaticTurnProcessor.processPendingProposalsForAi(state);
+
     const updatedNations: Record<string, Nation> = {};
     const provincesByOwner = new Map<string, Province[]>();
 
-    for (const prov of Object.values(state.provinces || {})) {
+    for (const prov of Object.values(currentState.provinces || {})) {
       const canonicalOwner = CountryRegistry.resolveCanonicalId(
         prov.ownerNationId,
       );
@@ -26,11 +29,11 @@ export class TurnPipeline {
       list.push(prov);
     }
 
-    const nationKeys = Object.keys(state.nations);
+    const nationKeys = Object.keys(currentState.nations);
 
     for (let i = 0; i < nationKeys.length; i++) {
       const id = nationKeys[i]!;
-      const nation = state.nations[id];
+      const nation = currentState.nations[id];
       if (!nation) continue;
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
@@ -49,11 +52,14 @@ export class TurnPipeline {
       const { updatedNation: dipNation, isAtWar } =
         DiplomaticTurnProcessor.process(syncedNation);
 
-      const ecoNation = EconomyTurnProcessor.process(dipNation, state.nations);
+      const ecoNation = EconomyTurnProcessor.process(
+        dipNation,
+        currentState.nations,
+      );
 
       const polNation = PoliticsTurnProcessor.process(
         ecoNation,
-        state.nations,
+        currentState.nations,
         isAtWar,
       );
 
@@ -67,7 +73,7 @@ export class TurnPipeline {
     );
 
     return {
-      ...state,
+      ...currentState,
       nations: rankedNations,
     };
   }

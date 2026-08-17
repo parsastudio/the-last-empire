@@ -24,8 +24,20 @@ export const RelationProfileSchema = z.object({
   grudge: z.number().min(0).max(100).default(0),
 });
 
+export const PendingDiplomaticProposalSchema = z.object({
+  id: z.string(),
+  turn: z.number().nonnegative(),
+  senderNationId: z.string(),
+  receiverNationId: z.string(),
+  proposalType: DiplomaticProposalTypeSchema,
+  expiresTurn: z.number().nonnegative(),
+});
+
 export type DiplomaticStance = z.infer<typeof DiplomaticStanceSchema>;
 export type DiplomaticProposalType = z.infer<
   typeof DiplomaticProposalTypeSchema
 >;
 export type RelationProfile = z.infer<typeof RelationProfileSchema>;
+export type PendingDiplomaticProposal = z.infer<
+  typeof PendingDiplomaticProposalSchema
+>;

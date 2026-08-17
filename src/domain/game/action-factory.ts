@@ -4,6 +4,7 @@ import {
   RecruitUnitAction,
   BuyArmsMarketAction,
   DiplomaticProposalAction,
+  RespondDiplomaticProposalAction,
   UpgradeIndustrialLevelAction,
   InvestInfrastructureAction,
   ExecuteEspionageAction,
@@ -88,6 +89,20 @@ export class ActionFactory {
       type: "DIPLOMATIC_PROPOSAL",
       targetNationId,
       proposalType,
+    };
+  }
+
+  public static respondDiplomaticProposal(
+    nationId: string,
+    proposalId: string,
+    accept: boolean,
+  ): RespondDiplomaticProposalAction {
+    return {
+      id: this.createId("diplomacy-response"),
+      nationId,
+      type: "RESPOND_DIPLOMATIC_PROPOSAL",
+      proposalId,
+      accept,
     };
   }
 
