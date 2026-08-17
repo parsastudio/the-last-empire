@@ -54,11 +54,4 @@ export class DoctrinesManager {
     if (!unlocked) return 1.0;
     return unlocked.includes("reputation-recovery") ? 0.5 : 1.0;
   }
-
-  public static getDiplomaticOpinionThresholdBonus(
-    unlocked?: string[],
-  ): number {
-    if (!unlocked) return 0;
-    return unlocked.includes("security-alliance") ? 30 : 0;
-  }
 }

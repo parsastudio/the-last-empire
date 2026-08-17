@@ -6,6 +6,43 @@ import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-ap
 import { CountryRegistry } from "@/domain/data/countries";
 
 export class DiplomaticTurnProcessor {
+  private static calculateBaselineOpinion(
+    currentGov: string,
+    targetGov?: string,
+    stance?: string,
+  ): number {
+    let baseline = 0;
+    if (targetGov) {
+      if (currentGov === targetGov) {
+        baseline = 15;
+      } else if (
+        (currentGov === "DEMOCRACY" &&
+          (targetGov === "DICTATORSHIP" ||
+            targetGov === "FASCISM" ||
+            targetGov === "COMMUNISM")) ||
+        (targetGov === "DEMOCRACY" &&
+          (currentGov === "DICTATORSHIP" ||
+            currentGov === "FASCISM" ||
+            currentGov === "COMMUNISM"))
+      ) {
+        baseline = -15;
+      } else if (currentGov !== "DEMOCRACY" && targetGov !== "DEMOCRACY") {
+        baseline = 10;
+      }
+    }
+
+    if (stance === "ALLIANCE") {
+      return Math.max(baseline, 50);
+    }
+    if (stance === "NON_AGGRESSION_PACT") {
+      return Math.max(baseline, 25);
+    }
+    if (stance === "SEVERED_RELATIONS") {
+      return Math.min(baseline, -30);
+    }
+    return baseline;
+  }
+
   public static processPendingProposalsForAi(state: GameState): GameState {
     let currentState = state;
     const proposalsToEvaluate = [...currentState.pendingProposals];
@@ -73,7 +110,10 @@ export class DiplomaticTurnProcessor {
     return currentState;
   }
 
-  public static process(nation: Nation): {
+  public static process(
+    nation: Nation,
+    allNations?: Record<string, Nation>,
+  ): {
     updatedNation: Nation;
     isAtWar: boolean;
   } {
@@ -92,16 +132,29 @@ export class DiplomaticTurnProcessor {
       const relation = newRels[targetId];
       if (!relation) continue;
 
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      const targetNation = allNations
+        ? allNations[targetId] || allNations[canonicalTarget]
+        : null;
+
       if (relation.stance === "WAR") {
-        isAtWar = true;
+        if (targetNation && targetNation.isAlive) {
+          isAtWar = true;
+        }
       }
 
       let nextOpinion = relation.opinion;
-      if (
-        relation.stance !== "WAR" &&
-        relation.stance !== "SEVERED_RELATIONS"
-      ) {
-        nextOpinion = Math.min(100, relation.opinion + 1);
+      if (relation.stance !== "WAR") {
+        const baseline = this.calculateBaselineOpinion(
+          nation.government.type,
+          targetNation?.government.type,
+          relation.stance,
+        );
+        if (relation.opinion < baseline) {
+          nextOpinion = Math.min(baseline, relation.opinion + 1);
+        } else if (relation.opinion > baseline) {
+          nextOpinion = Math.max(baseline, relation.opinion - 1);
+        }
       }
 
       let nextGrudge = relation.grudge ?? 0;
@@ -129,7 +182,13 @@ export class DiplomaticTurnProcessor {
     let nextWarFocus = nation.warFocusTargetId ?? null;
     if (nextWarFocus) {
       const focusRel = newRels[nextWarFocus];
-      if (!focusRel || focusRel.stance !== "WAR") {
+      const canonicalFocus = CountryRegistry.resolveCanonicalId(nextWarFocus);
+      const focusTarget = allNations
+        ? allNations[nextWarFocus] || allNations[canonicalFocus]
+        : null;
+      const isFocusAlive = focusTarget ? focusTarget.isAlive : true;
+
+      if (!focusRel || focusRel.stance !== "WAR" || !isFocusAlive) {
         nextWarFocus = null;
       }
     }

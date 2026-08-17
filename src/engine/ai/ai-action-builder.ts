@@ -86,6 +86,20 @@ export class AIActionBuilder {
       actions.push(treatyAction);
     }
 
+    const warDeclarationAction = AIWarDeclarationEvaluator.evaluate(
+      nation,
+      allNations,
+      provincesMap,
+    );
+
+    let declaredTargetId: string | null = null;
+    if (warDeclarationAction) {
+      actions.push(warDeclarationAction);
+      if ("targetNationId" in warDeclarationAction) {
+        declaredTargetId = warDeclarationAction.targetNationId;
+      }
+    }
+
     const aidResult = AIEconomicDiplomacyEvaluator.evaluate(
       nation,
       allNations,
@@ -94,18 +108,14 @@ export class AIActionBuilder {
     );
 
     if (aidResult) {
-      actions.push(aidResult.action);
-      currentTreasury -= aidResult.cost;
-    }
-
-    const warDeclarationAction = AIWarDeclarationEvaluator.evaluate(
-      nation,
-      allNations,
-      provincesMap,
-    );
-
-    if (warDeclarationAction) {
-      actions.push(warDeclarationAction);
+      const aidTargetId =
+        "targetNationId" in aidResult.action
+          ? aidResult.action.targetNationId
+          : null;
+      if (!declaredTargetId || aidTargetId !== declaredTargetId) {
+        actions.push(aidResult.action);
+        currentTreasury -= aidResult.cost;
+      }
     }
 
     const activeWarTarget = nation.warFocusTargetId

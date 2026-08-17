@@ -51,7 +51,7 @@ export class AITreatyEvaluator {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
-      if (!targetNation || !targetNation.isAlive) {
+      if (!targetNation || !targetNation.isAlive || !targetNation.isAi) {
         continue;
       }
 
@@ -115,7 +115,7 @@ export class AITreatyEvaluator {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
-      if (!targetNation || !targetNation.isAlive) {
+      if (!targetNation || !targetNation.isAlive || !targetNation.isAi) {
         continue;
       }
 

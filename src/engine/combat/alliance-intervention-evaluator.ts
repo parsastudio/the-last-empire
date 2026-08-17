@@ -44,13 +44,14 @@ export class AllianceInterventionEvaluator {
         ally.relations[attacker.id] ||
         ally.relations[CountryRegistry.resolveCanonicalId(attacker.id)];
 
-      const hasPactWithAttacker =
-        relWithAttacker?.stance === "NON_AGGRESSION_PACT";
+      const hasActiveTreatyWithAttacker =
+        relWithAttacker?.stance === "NON_AGGRESSION_PACT" ||
+        relWithAttacker?.stance === "ALLIANCE";
       const hasGoodOpinionWithAttacker = (relWithAttacker?.opinion ?? 0) >= 40;
 
       if (
         isStrongEnough &&
-        !hasPactWithAttacker &&
+        !hasActiveTreatyWithAttacker &&
         !hasGoodOpinionWithAttacker
       ) {
         interveningAllyIds.push(ally.id);
