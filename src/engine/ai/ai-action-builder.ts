@@ -8,6 +8,7 @@ import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
+import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -31,6 +32,14 @@ export class AIActionBuilder {
       procurementResult.remainingTreasury,
     );
     actions.push(...upgradeResult.actions);
+
+    const espionageResult = AIEspionagePlanner.planEspionage(
+      nation,
+      allNations,
+      provincesMap,
+      upgradeResult.remainingTreasury,
+    );
+    actions.push(...espionageResult.actions);
 
     this.appendDiplomaticAndWarActions(
       nation,
