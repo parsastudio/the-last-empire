@@ -55,14 +55,6 @@ export class PoliticsActionExecutor {
         if (!receiver) return state;
         const targetKey = receiver.id;
 
-        if (
-          (action.proposalType === "NON_AGGRESSION_PACT" ||
-            action.proposalType === "FULL_ALLIANCE") &&
-          nation.isAi
-        ) {
-          return state;
-        }
-
         const result = this.treatyEvaluator.evaluateProposal(
           nation,
           receiver,

@@ -1,0 +1,143 @@
+import { GameAction } from "@/domain/game/action.schema";
+import { ActionFactory } from "@/domain/game/action-factory";
+import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
+import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
+import { CountryRegistry } from "@/domain/data/countries";
+
+export class AITreatyEvaluator {
+  public static evaluate(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): GameAction | null {
+    if (!nation.relations) {
+      return null;
+    }
+
+    const allianceAction = this.evaluateAlliance(
+      nation,
+      allNations,
+      provincesMap,
+    );
+
+    if (allianceAction) {
+      return allianceAction;
+    }
+
+    const napAction = this.evaluateNonAggression(
+      nation,
+      allNations,
+      provincesMap,
+    );
+
+    if (napAction) {
+      return napAction;
+    }
+
+    return null;
+  }
+
+  private static evaluateAlliance(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): GameAction | null {
+    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
+      if (rel.stance === "WAR" || rel.stance === "ALLIANCE") {
+        continue;
+      }
+
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      const targetNation = allNations[targetId] || allNations[canonicalTarget];
+
+      if (!targetNation || !targetNation.isAlive) {
+        continue;
+      }
+
+      let hasCommonEnemy = false;
+
+      for (const [thirdId, thirdNation] of Object.entries(allNations)) {
+        if (
+          !thirdNation.isAlive ||
+          thirdId === nation.id ||
+          thirdId === targetNation.id
+        ) {
+          continue;
+        }
+
+        const myThreat = AIThreatCalculator.evaluate(
+          nation,
+          thirdNation,
+          provincesMap,
+        );
+
+        const targetThreat = AIThreatCalculator.evaluate(
+          targetNation,
+          thirdNation,
+          provincesMap,
+        );
+
+        if (myThreat.threatScore > 50 && targetThreat.threatScore > 50) {
+          hasCommonEnemy = true;
+          break;
+        }
+      }
+
+      const isDeepTrust = rel.opinion >= 60 && nation.globalReputation >= 50;
+
+      if (hasCommonEnemy || isDeepTrust) {
+        return ActionFactory.diplomaticProposal(
+          nation.id,
+          targetNation.id,
+          "FULL_ALLIANCE",
+        );
+      }
+    }
+
+    return null;
+  }
+
+  private static evaluateNonAggression(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): GameAction | null {
+    const isCurrentlyAtWar = Object.values(nation.relations || {}).some(
+      (r) => r.stance === "WAR",
+    );
+
+    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
+      if (rel.stance !== "NORMAL_DIPLOMACY") {
+        continue;
+      }
+
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      const targetNation = allNations[targetId] || allNations[canonicalTarget];
+
+      if (!targetNation || !targetNation.isAlive) {
+        continue;
+      }
+
+      const threatEval = AIThreatCalculator.evaluate(
+        nation,
+        targetNation,
+        provincesMap,
+      );
+
+      const isFlankSecurity = isCurrentlyAtWar && threatEval.isNeighbor;
+      const isFriendlyNeighbor =
+        rel.opinion >= 40 && nation.globalReputation >= 40;
+
+      if (isFlankSecurity || isFriendlyNeighbor) {
+        return ActionFactory.diplomaticProposal(
+          nation.id,
+          targetNation.id,
+          "NON_AGGRESSION_PACT",
+        );
+      }
+    }
+
+    return null;
+  }
+}

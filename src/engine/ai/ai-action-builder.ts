@@ -10,6 +10,7 @@ import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
 import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
+import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -69,6 +70,16 @@ export class AIActionBuilder {
       return;
     }
 
+    const treatyAction = AITreatyEvaluator.evaluate(
+      nation,
+      allNations,
+      provincesMap,
+    );
+
+    if (treatyAction) {
+      actions.push(treatyAction);
+    }
+
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[nation.warFocusTargetId] ||
         allNations[CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)]
@@ -123,20 +134,6 @@ export class AIActionBuilder {
           );
           return;
         }
-      }
-
-      if (
-        rel.stance === "NORMAL_DIPLOMACY" &&
-        rel.opinion >= 50 &&
-        nation.globalReputation >= 20
-      ) {
-        actions.push(
-          ActionFactory.diplomaticProposal(
-            nation.id,
-            target.id,
-            "NON_AGGRESSION_PACT",
-          ),
-        );
       }
     }
   }
