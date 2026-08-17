@@ -22,8 +22,10 @@ export class AIUpgradePlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    availableTreasury?: number,
   ): UpgradePlanResult {
-    let currentTreasury = nation.treasury;
+    let currentTreasury =
+      availableTreasury !== undefined ? availableTreasury : nation.treasury;
     const actions: GameAction[] = [];
 
     const capacityPercentage =
