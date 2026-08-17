@@ -21,9 +21,7 @@ export const RelationProfileSchema = z.object({
   targetNationId: z.string(),
   stance: DiplomaticStanceSchema,
   opinion: z.number().min(-100).max(100),
-  coolOffTurnsRemaining: z.number().nonnegative(),
   grudge: z.number().min(0).max(100).default(0),
-  isTradeEmbargoed: z.boolean().optional(),
 });
 
 export type DiplomaticStance = z.infer<typeof DiplomaticStanceSchema>;

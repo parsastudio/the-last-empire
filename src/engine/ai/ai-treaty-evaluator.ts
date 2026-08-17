@@ -84,9 +84,9 @@ export class AITreatyEvaluator {
         }
       }
 
-      const isDeepTrust = rel.opinion >= 60 && nation.globalReputation >= 50;
+      const isDeepTrust = rel.opinion >= 50 && nation.globalReputation >= 20;
 
-      if (hasCommonEnemy || isDeepTrust) {
+      if ((hasCommonEnemy && rel.opinion >= 20) || isDeepTrust) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,
@@ -127,7 +127,7 @@ export class AITreatyEvaluator {
 
       const isFlankSecurity = isCurrentlyAtWar && threatEval.isNeighbor;
       const isFriendlyNeighbor =
-        rel.opinion >= 40 && nation.globalReputation >= 40;
+        rel.opinion >= 20 && nation.globalReputation >= 0;
 
       if (isFlankSecurity || isFriendlyNeighbor) {
         return ActionFactory.diplomaticProposal(

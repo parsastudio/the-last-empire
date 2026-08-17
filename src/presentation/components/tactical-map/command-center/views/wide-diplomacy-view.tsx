@@ -120,7 +120,6 @@ export function WideDiplomacyView({
             nationId={activeHumanId}
             targetGdp={diplomacy.selectedTargetGdp}
             currentStance={diplomacy.selectedRelation.stance}
-            isTradeEmbargoed={diplomacy.selectedRelation.isTradeEmbargoed}
             onOpenProxy={handleOpenEspionage}
           />
         </div>

@@ -63,8 +63,6 @@ export class AllianceInterventionEvaluator {
             stance: "WAR" as const,
             opinion: -100,
             grudge: Math.min(100, currentGrudge + 35),
-            coolOffTurnsRemaining: 0,
-            isTradeEmbargoed: true,
           },
         };
 
@@ -84,8 +82,6 @@ export class AllianceInterventionEvaluator {
             stance: "WAR" as const,
             opinion: -100,
             grudge: Math.min(100, attackerGrudgeWithAlly + 20),
-            coolOffTurnsRemaining: 0,
-            isTradeEmbargoed: true,
           },
         };
 
@@ -106,8 +102,6 @@ export class AllianceInterventionEvaluator {
               100,
               (ally.relations[defender.id]?.grudge ?? 0) + 10,
             ),
-            coolOffTurnsRemaining: 5,
-            isTradeEmbargoed: false,
           },
         };
 
@@ -127,8 +121,6 @@ export class AllianceInterventionEvaluator {
             stance: "NORMAL_DIPLOMACY" as const,
             opinion: -30,
             grudge: Math.min(100, defenderGrudgeWithAlly + 45),
-            coolOffTurnsRemaining: 5,
-            isTradeEmbargoed: false,
           },
         };
 

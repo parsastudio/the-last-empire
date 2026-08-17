@@ -15,7 +15,7 @@ export interface BetrayalEvaluation {
 }
 
 export class DiplomaticBetrayalCalculator {
-  public calculatePenalty(stance: DiplomaticStance): BetrayalEvaluation {
+  public static calculatePenalty(stance: DiplomaticStance): BetrayalEvaluation {
     if (stance === "ALLIANCE") {
       return { reputationPenalty: 35, skippedSteps: 2, hasBetrayed: true };
     }
@@ -26,35 +26,22 @@ export class DiplomaticBetrayalCalculator {
   }
 }
 
-export class CoolOffManager {
-  public processTurnTick(turnsRemaining: number): number {
-    return Math.max(0, turnsRemaining - 1);
-  }
-}
-
-export class ReputationManager {
-  public applyReputationGain(nation: Nation, gainAmount: number): Nation {
-    const multiplier = DoctrinesManager.getReputationGainMultiplier(
-      nation.doctrines?.unlockedDoctrines,
-    );
-    return {
-      ...nation,
-      globalReputation: Math.min(
-        100,
-        nation.globalReputation + gainAmount * multiplier,
-      ),
-    };
-  }
-}
-
 export interface ProposalEvaluation {
   accepted: boolean;
   reason?: string;
 }
 
 export class TreatyEvaluator {
-  public static calculateForeignAidCost(targetGdp: number): number {
-    return Math.max(500000000, Math.floor(targetGdp * 0.03));
+  public static calculateForeignAidCost(
+    senderOrTargetGdp: number,
+    optionalTargetGdp?: number,
+  ): number {
+    if (optionalTargetGdp !== undefined) {
+      const senderBudget = Math.floor(senderOrTargetGdp * 0.04);
+      const targetNeed = Math.floor(optionalTargetGdp * 0.02);
+      return Math.max(500_000_000, Math.min(senderBudget, targetNeed));
+    }
+    return Math.max(500_000_000, Math.floor(senderOrTargetGdp * 0.02));
   }
 
   public evaluateProposal(
@@ -62,9 +49,13 @@ export class TreatyEvaluator {
     receiver: Nation,
     proposalType: DiplomaticProposalType,
   ): ProposalEvaluation {
+    const senderGdp = getNationGdp(sender);
+    const receiverGdp = getNationGdp(receiver);
+
     if (proposalType === "SEND_FOREIGN_AID") {
       const requiredCost = TreatyEvaluator.calculateForeignAidCost(
-        getNationGdp(receiver),
+        senderGdp,
+        receiverGdp,
       );
       return sender.treasury >= requiredCost
         ? { accepted: true }
@@ -81,17 +72,23 @@ export class TreatyEvaluator {
 
     switch (proposalType) {
       case "SEVER_TRADE_RELATIONS":
-        return { accepted: true };
       case "DECLARE_WAR":
         return { accepted: true };
       case "NON_AGGRESSION_PACT":
-        return opinion >= -10
+        return opinion >= -15
           ? { accepted: true }
           : { accepted: false, reason: "OPINION_TOO_LOW" };
-      case "FULL_ALLIANCE":
-        return opinion >= 60 && sender.globalReputation >= 20
+      case "FULL_ALLIANCE": {
+        const hasCommonEnemy = Object.entries(sender.relations).some(
+          ([targetId, rel]) =>
+            rel.stance === "WAR" &&
+            receiver.relations[targetId]?.stance === "WAR",
+        );
+        const threshold = hasCommonEnemy ? 20 : 50;
+        return opinion >= threshold && sender.globalReputation >= 10
           ? { accepted: true }
           : { accepted: false, reason: "REQUIREMENTS_NOT_MET" };
+      }
       case "PEACE_TREATY": {
         if (!isAtWar) {
           return opinion > -20
@@ -106,7 +103,7 @@ export class TreatyEvaluator {
 
         const isReceiverOverwhelming =
           receiverPower > senderPower * 3.0 &&
-          receiver.government.stability >= 60;
+          receiver.government.stability >= 65;
 
         if (isReceiverOverwhelming) {
           return { accepted: false, reason: "DEMANDING_FULL_CONQUEST" };
@@ -129,15 +126,14 @@ export class TreatyEvaluator {
       case "SEND_FOREIGN_AID":
         return {
           ...profile,
-          opinion: Math.min(100, profile.opinion + 20),
-          grudge: Math.max(0, currentGrudge - 15),
+          opinion: Math.min(100, profile.opinion + 25),
+          grudge: Math.max(0, currentGrudge - 20),
         };
       case "NON_AGGRESSION_PACT":
         return {
           ...profile,
           stance: "NON_AGGRESSION_PACT",
           opinion: Math.min(100, profile.opinion + 15),
-          coolOffTurnsRemaining: 0,
           grudge: Math.max(0, currentGrudge - 10),
         };
       case "FULL_ALLIANCE":
@@ -145,22 +141,19 @@ export class TreatyEvaluator {
           ...profile,
           stance: "ALLIANCE",
           opinion: Math.min(100, profile.opinion + 30),
-          coolOffTurnsRemaining: 0,
           grudge: 0,
         };
       case "PEACE_TREATY":
         return {
           ...profile,
           stance: "NORMAL_DIPLOMACY",
-          opinion: Math.max(-20, profile.opinion),
-          coolOffTurnsRemaining: 5,
-          grudge: Math.floor(currentGrudge * 0.5),
+          opinion: Math.max(-10, profile.opinion),
+          grudge: Math.floor(currentGrudge * 0.4),
         };
       case "SEVER_TRADE_RELATIONS":
         return {
           ...profile,
           stance: "SEVERED_RELATIONS",
-          isTradeEmbargoed: true,
           opinion: Math.max(-100, Math.min(profile.opinion - 30, -30)),
           grudge: Math.min(100, currentGrudge + 15),
         };
@@ -168,7 +161,6 @@ export class TreatyEvaluator {
         return {
           ...profile,
           stance: "WAR",
-          isTradeEmbargoed: true,
           opinion: -100,
           grudge: Math.min(100, currentGrudge + 30),
         };

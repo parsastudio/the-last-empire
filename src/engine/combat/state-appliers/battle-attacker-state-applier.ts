@@ -78,15 +78,12 @@ export class BattleAttackerStateApplier {
     const currentGrudge = existingRel?.grudge ?? 0;
 
     const updatedRelations = { ...updatedAttacker.relations };
-    if (updatedRelations[targetKey]) {
-      updatedRelations[targetKey] = {
-        ...updatedRelations[targetKey]!,
-        stance: "WAR",
-        isTradeEmbargoed: true,
-        opinion: -100,
-        grudge: currentGrudge,
-      };
-    }
+    updatedRelations[targetKey] = {
+      targetNationId: defenderId,
+      stance: "WAR",
+      opinion: -100,
+      grudge: currentGrudge,
+    };
 
     const combatStabilityDelta =
       StabilityCalculator.calculateAttackerBattleStabilityDelta(

@@ -37,7 +37,6 @@ export function useWideDiplomacy({
         if (directRel) {
           rel.stance = directRel.stance;
           rel.opinion = directRel.opinion;
-          rel.isTradeEmbargoed = directRel.isTradeEmbargoed ?? false;
         }
       }
       return rel;
@@ -74,7 +73,6 @@ export function useWideDiplomacy({
       if (directRel) {
         rel.stance = directRel.stance;
         rel.opinion = directRel.opinion;
-        rel.isTradeEmbargoed = directRel.isTradeEmbargoed ?? false;
       }
     }
     return rel;

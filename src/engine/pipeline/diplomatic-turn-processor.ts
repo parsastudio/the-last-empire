@@ -1,10 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
-import { CoolOffManager } from "@/engine/diplomacy/diplomacy-engine";
 
 export class DiplomaticTurnProcessor {
-  private static coolOffManager = new CoolOffManager();
-
   public static process(nation: Nation): {
     updatedNation: Nation;
     isAtWar: boolean;
@@ -28,15 +25,11 @@ export class DiplomaticTurnProcessor {
         isAtWar = true;
       }
 
-      let nextCoolOff = relation.coolOffTurnsRemaining;
-      if (relation.coolOffTurnsRemaining > 0) {
-        nextCoolOff = this.coolOffManager.processTurnTick(
-          relation.coolOffTurnsRemaining,
-        );
-      }
-
       let nextOpinion = relation.opinion;
-      if (relation.stance !== "WAR" && !relation.isTradeEmbargoed) {
+      if (
+        relation.stance !== "WAR" &&
+        relation.stance !== "SEVERED_RELATIONS"
+      ) {
         nextOpinion = Math.min(100, relation.opinion + 1);
       }
 
@@ -45,21 +38,20 @@ export class DiplomaticTurnProcessor {
         nextGrudge = Math.max(0, nextGrudge - 2);
       }
 
-      let nextEmbargo = relation.isTradeEmbargoed;
+      let nextStance = relation.stance;
       if (
         nation.globalReputation <= -30 &&
         nextOpinion < 0 &&
-        relation.stance !== "ALLIANCE"
+        relation.stance === "NORMAL_DIPLOMACY"
       ) {
-        nextEmbargo = true;
+        nextStance = "SEVERED_RELATIONS";
       }
 
       newRels[targetId] = {
         ...relation,
+        stance: nextStance,
         opinion: nextOpinion,
         grudge: nextGrudge,
-        coolOffTurnsRemaining: nextCoolOff,
-        isTradeEmbargoed: nextEmbargo,
       };
     }
 

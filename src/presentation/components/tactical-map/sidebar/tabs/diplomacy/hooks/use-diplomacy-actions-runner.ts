@@ -24,10 +24,6 @@ export function useDiplomacyActionsRunner({
   currentStance = "NORMAL_DIPLOMACY",
 }: UseDiplomacyActionsRunnerProps) {
   const { dispatchAction } = useGameActions();
-  const betrayalCalculator = useMemo(
-    () => new DiplomaticBetrayalCalculator(),
-    [],
-  );
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -50,7 +46,7 @@ export function useDiplomacyActionsRunner({
     requiresBetrayalCheck: boolean,
   ) => {
     if (requiresBetrayalCheck) {
-      const evaluation = betrayalCalculator.calculatePenalty(
+      const evaluation = DiplomaticBetrayalCalculator.calculatePenalty(
         currentStance as DiplomaticStance,
       );
       if (evaluation.hasBetrayed) {
@@ -71,7 +67,7 @@ export function useDiplomacyActionsRunner({
     const formattedCost = PersianNumberFormatter.formatCurrency(foreignAidCost);
     await dispatchAction(
       action,
-      `بسته کمک مالی به ارزش ${formattedCost} به ${targetName} ارسال شد (+۲۰ دیدگاه، +۴ اعتبار جهانی).`,
+      `بسته کمک مالی به ارزش ${formattedCost} به ${targetName} ارسال شد (+۲۵ دیدگاه، +۴ اعتبار جهانی).`,
     );
   };
 

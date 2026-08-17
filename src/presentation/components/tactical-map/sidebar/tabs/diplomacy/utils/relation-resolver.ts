@@ -14,7 +14,6 @@ export interface DiplomaticRelation {
   rank: number;
   stance: DiplomaticStance;
   opinion: number;
-  isTradeEmbargoed?: boolean;
   profileData: CountryProfileData;
 }
 
@@ -67,7 +66,6 @@ export function resolveProfileRelation(
     rank: liveNation ? liveNation.rank : 99,
     stance: "NORMAL_DIPLOMACY",
     opinion: currentOpinion,
-    isTradeEmbargoed: false,
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
