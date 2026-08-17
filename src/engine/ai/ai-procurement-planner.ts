@@ -11,6 +11,11 @@ import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 
 export type AIPosture = "PEACE" | "THREAT" | "WAR";
 
+export interface RecruitmentPlanResult {
+  actions: GameAction[];
+  remainingTreasury: number;
+}
+
 interface UnitBudgetRatio {
   unitType: UnitType;
   ratio: number;
@@ -22,7 +27,10 @@ export class AIProcurementPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
-  ): GameAction[] {
+  ): RecruitmentPlanResult {
+    const effectiveTreasury =
+      availableTreasury !== undefined ? availableTreasury : nation.treasury;
+
     const gdp = getNationGdp(nation);
     const aliveCount = Object.values(allNations).filter(
       (n) => n.isAlive,
@@ -40,18 +48,23 @@ export class AIProcurementPlanner {
     );
 
     if (remainingValuationCapacity <= 0) {
-      return [];
+      return {
+        actions: [],
+        remainingTreasury: effectiveTreasury,
+      };
     }
 
     const posture = this.evaluatePosture(nation, allNations, provincesMap);
-    const effectiveTreasury = availableTreasury ?? nation.treasury;
     const spendableBudget = Math.min(
       this.calculateSpendableBudget(posture, effectiveTreasury),
       remainingValuationCapacity,
     );
 
     if (spendableBudget <= 0) {
-      return [];
+      return {
+        actions: [],
+        remainingTreasury: effectiveTreasury,
+      };
     }
 
     const ratios = this.getUnitRatios(
@@ -63,6 +76,7 @@ export class AIProcurementPlanner {
 
     const actions: GameAction[] = [];
     let remainingBudget = spendableBudget;
+    let totalSpent = 0;
 
     for (let i = 0; i < ratios.length; i++) {
       const { unitType, ratio } = ratios[i]!;
@@ -80,12 +94,17 @@ export class AIProcurementPlanner {
       const quantity = Math.floor(allocatedMoney / unitPrice);
 
       if (quantity > 0) {
+        const cost = quantity * unitPrice;
         actions.push(ActionFactory.recruitUnit(nation.id, unitType, quantity));
-        remainingBudget -= quantity * unitPrice;
+        remainingBudget -= cost;
+        totalSpent += cost;
       }
     }
 
-    return actions;
+    return {
+      actions,
+      remainingTreasury: Math.max(0, effectiveTreasury - totalSpent),
+    };
   }
 
   public static calculateTotalArmyValuation(nation: Nation): number {

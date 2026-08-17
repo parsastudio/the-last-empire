@@ -17,20 +17,20 @@ export class AIActionBuilder {
   ): GameAction[] {
     const actions: GameAction[] = [];
 
+    const procurementResult = AIProcurementPlanner.planRecruitment(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    actions.push(...procurementResult.actions);
+
     const upgradeResult = AIUpgradePlanner.planUpgrades(
       nation,
       allNations,
       provincesMap,
+      procurementResult.remainingTreasury,
     );
     actions.push(...upgradeResult.actions);
-
-    const recruitmentActions = AIProcurementPlanner.planRecruitment(
-      nation,
-      allNations,
-      provincesMap,
-      upgradeResult.remainingTreasury,
-    );
-    actions.push(...recruitmentActions);
 
     this.appendDiplomaticAndWarActions(
       nation,
