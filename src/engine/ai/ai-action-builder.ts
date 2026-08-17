@@ -11,6 +11,7 @@ import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
 import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
 import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
+import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-evaluator";
 
 export class AIActionBuilder {
   public static buildNationActions(
@@ -48,6 +49,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       actions,
+      espionageResult.remainingTreasury,
     );
 
     return actions;
@@ -58,7 +60,11 @@ export class AIActionBuilder {
     allNations: Record<string, Nation>,
     provincesMap: Record<string, Province> | undefined,
     actions: GameAction[],
+    availableTreasury?: number,
   ): void {
+    let currentTreasury =
+      availableTreasury !== undefined ? availableTreasury : nation.treasury;
+
     const peaceAction = AIPeaceEvaluator.evaluate(
       nation,
       allNations,
@@ -78,6 +84,18 @@ export class AIActionBuilder {
 
     if (treatyAction) {
       actions.push(treatyAction);
+    }
+
+    const aidResult = AIEconomicDiplomacyEvaluator.evaluate(
+      nation,
+      allNations,
+      provincesMap,
+      currentTreasury,
+    );
+
+    if (aidResult) {
+      actions.push(aidResult.action);
+      currentTreasury -= aidResult.cost;
     }
 
     const activeWarTarget = nation.warFocusTargetId
