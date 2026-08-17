@@ -27,7 +27,11 @@ export class AIEconomicDiplomacyEvaluator {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
-      if (!targetNation || !targetNation.isAlive || !targetNation.isAi) {
+      if (
+        !targetNation ||
+        !targetNation.isAlive ||
+        targetNation.id === nation.id
+      ) {
         continue;
       }
 
