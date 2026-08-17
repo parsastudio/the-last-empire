@@ -65,6 +65,22 @@ export class AIActionBuilder {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
+    let aidedTargetId: string | null = null;
+    const aidResult = AIEconomicDiplomacyEvaluator.evaluate(
+      nation,
+      allNations,
+      provincesMap,
+      currentTreasury,
+    );
+
+    if (aidResult) {
+      actions.push(aidResult.action);
+      currentTreasury -= aidResult.cost;
+      if ("targetNationId" in aidResult.action) {
+        aidedTargetId = aidResult.action.targetNationId;
+      }
+    }
+
     const peaceAction = AIPeaceEvaluator.evaluate(
       nation,
       allNations,
@@ -76,45 +92,30 @@ export class AIActionBuilder {
       return;
     }
 
-    const treatyAction = AITreatyEvaluator.evaluate(
-      nation,
-      allNations,
-      provincesMap,
-    );
-
-    if (treatyAction) {
-      actions.push(treatyAction);
-    }
-
     const warDeclarationAction = AIWarDeclarationEvaluator.evaluate(
       nation,
       allNations,
       provincesMap,
     );
 
-    let declaredTargetId: string | null = null;
     if (warDeclarationAction) {
-      actions.push(warDeclarationAction);
-      if ("targetNationId" in warDeclarationAction) {
-        declaredTargetId = warDeclarationAction.targetNationId;
-      }
-    }
-
-    const aidResult = AIEconomicDiplomacyEvaluator.evaluate(
-      nation,
-      allNations,
-      provincesMap,
-      currentTreasury,
-    );
-
-    if (aidResult) {
-      const aidTargetId =
-        "targetNationId" in aidResult.action
-          ? aidResult.action.targetNationId
+      const warTargetId =
+        "targetNationId" in warDeclarationAction
+          ? warDeclarationAction.targetNationId
           : null;
-      if (!declaredTargetId || aidTargetId !== declaredTargetId) {
-        actions.push(aidResult.action);
-        currentTreasury -= aidResult.cost;
+
+      if (!aidedTargetId || warTargetId !== aidedTargetId) {
+        actions.push(warDeclarationAction);
+      }
+    } else {
+      const treatyAction = AITreatyEvaluator.evaluate(
+        nation,
+        allNations,
+        provincesMap,
+      );
+
+      if (treatyAction) {
+        actions.push(treatyAction);
       }
     }
 
