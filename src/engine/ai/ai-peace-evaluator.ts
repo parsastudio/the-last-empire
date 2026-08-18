@@ -4,6 +4,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class AIPeaceEvaluator {
   public static evaluate(
@@ -21,16 +22,11 @@ export class AIPeaceEvaluator {
         continue;
       }
 
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      if (
-        lockedTargets?.has(targetId) ||
-        lockedTargets?.has(canonicalTarget) ||
-        lockedTargets?.has(`${nation.id}:${targetId}`) ||
-        lockedTargets?.has(`${targetId}:${nation.id}`)
-      ) {
+      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
         continue;
       }
 
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
       if (

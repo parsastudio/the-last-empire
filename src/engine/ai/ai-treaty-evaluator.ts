@@ -4,6 +4,10 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import {
+  DiplomacyLockManager,
+  NationRelationResolver,
+} from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class AITreatyEvaluator {
   public static evaluate(
@@ -52,16 +56,11 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      if (
-        lockedTargets?.has(targetId) ||
-        lockedTargets?.has(canonicalTarget) ||
-        lockedTargets?.has(`${nation.id}:${targetId}`) ||
-        lockedTargets?.has(`${targetId}:${nation.id}`)
-      ) {
+      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
         continue;
       }
 
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
       if (
@@ -72,34 +71,11 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      let hasCommonEnemy = false;
-
-      for (const [thirdId, thirdNation] of Object.entries(allNations)) {
-        if (
-          !thirdNation.isAlive ||
-          thirdId === nation.id ||
-          thirdId === targetNation.id
-        ) {
-          continue;
-        }
-
-        const myThreat = AIThreatCalculator.evaluate(
-          nation,
-          thirdNation,
-          provincesMap,
-        );
-
-        const targetThreat = AIThreatCalculator.evaluate(
-          targetNation,
-          thirdNation,
-          provincesMap,
-        );
-
-        if (myThreat.threatScore > 50 && targetThreat.threatScore > 50) {
-          hasCommonEnemy = true;
-          break;
-        }
-      }
+      const hasCommonEnemy = NationRelationResolver.hasCommonEnemy(
+        nation,
+        targetNation,
+        allNations,
+      );
 
       const isDeepTrust = rel.opinion >= 15 && nation.globalReputation >= 20;
 
@@ -130,16 +106,11 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      if (
-        lockedTargets?.has(targetId) ||
-        lockedTargets?.has(canonicalTarget) ||
-        lockedTargets?.has(`${nation.id}:${targetId}`) ||
-        lockedTargets?.has(`${targetId}:${nation.id}`)
-      ) {
+      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
         continue;
       }
 
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
       if (

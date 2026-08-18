@@ -4,6 +4,7 @@ import { PendingDiplomaticProposal } from "@/domain/diplomacy/diplomacy.schema";
 import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class DiplomaticAcceptanceEvaluator {
   public static evaluate(
@@ -147,24 +148,11 @@ export class DiplomaticAcceptanceEvaluator {
       return false;
     }
 
-    let hasCommonEnemy = false;
-    for (const [thirdId, thirdNation] of Object.entries(allNations)) {
-      if (
-        !thirdNation.isAlive ||
-        thirdId === sender.id ||
-        thirdId === receiver.id
-      ) {
-        continue;
-      }
-
-      const senderWar = sender.relations[thirdId]?.stance === "WAR";
-      const receiverWar = receiver.relations[thirdId]?.stance === "WAR";
-
-      if (senderWar && receiverWar) {
-        hasCommonEnemy = true;
-        break;
-      }
-    }
+    const hasCommonEnemy = NationRelationResolver.hasCommonEnemy(
+      receiver,
+      sender,
+      allNations,
+    );
 
     if (hasCommonEnemy && opinion >= 10) {
       return true;

@@ -6,7 +6,6 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -37,10 +36,6 @@ export class AIEconomicDiplomacyEvaluator {
         !targetNation.isAlive ||
         targetNation.id === nation.id
       ) {
-        continue;
-      }
-
-      if (NationRelationResolver.isTradeEmbargoed(nation, targetNation)) {
         continue;
       }
 
