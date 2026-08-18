@@ -55,7 +55,7 @@ export class QuadtreeExportService {
     const statsPath = path.join(finalDir, "quadtree-stats.json");
     await fs.writeFile(statsPath, JSON.stringify(stats, null, 2), "utf-8");
 
-    const reader = new QuadtreeReader(serializedData.buffer);
+    const reader = new QuadtreeReader(serializedData);
     let samplePassed = true;
 
     const sampleStep = 64;

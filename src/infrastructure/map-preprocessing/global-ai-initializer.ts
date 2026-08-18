@@ -7,7 +7,7 @@ import {
 } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
-import { ALL_COUNTRY_PROFILES, CountryRegistry } from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(
