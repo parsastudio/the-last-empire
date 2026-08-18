@@ -14,6 +14,7 @@ export class AIActionBuilder {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    lockedTargets?: Set<string>,
   ): GameAction[] {
     const actions: GameAction[] = [];
 
@@ -46,6 +47,7 @@ export class AIActionBuilder {
       provincesMap,
       actions,
       espionageResult.remainingTreasury,
+      lockedTargets,
     );
 
     return actions;
@@ -57,6 +59,7 @@ export class AIActionBuilder {
     provincesMap: Record<string, Province> | undefined,
     actions: GameAction[],
     availableTreasury?: number,
+    lockedTargets?: Set<string>,
   ): void {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -81,6 +84,7 @@ export class AIActionBuilder {
       nation,
       allNations,
       provincesMap,
+      lockedTargets,
     );
 
     if (peaceAction) {
@@ -92,6 +96,7 @@ export class AIActionBuilder {
       nation,
       allNations,
       provincesMap,
+      lockedTargets,
     );
 
     if (warDeclarationAction) {
@@ -108,6 +113,7 @@ export class AIActionBuilder {
         nation,
         allNations,
         provincesMap,
+        lockedTargets,
       );
 
       if (treatyAction) {

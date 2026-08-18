@@ -3,6 +3,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
+import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
@@ -220,6 +221,37 @@ export class PoliticsActionExecutor {
           };
         }
 
+        const transientProposal = {
+          id: `prop-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          turn: state.currentTurn,
+          senderNationId: nation.id,
+          receiverNationId: receiver.id,
+          proposalType: action.proposalType,
+          expiresTurn: state.currentTurn + 2,
+        };
+
+        if (receiver.isAi) {
+          const isAccepted = DiplomaticAcceptanceEvaluator.evaluate(
+            transientProposal,
+            receiver,
+            nation,
+            state.nations,
+            state.provinces,
+          );
+
+          if (isAccepted) {
+            return TreatyAcceptanceApplier.applyAcceptance(
+              state,
+              transientProposal,
+            );
+          } else {
+            return TreatyAcceptanceApplier.applyRejection(
+              state,
+              transientProposal,
+            );
+          }
+        }
+
         const isDuplicate = state.pendingProposals.some(
           (p) =>
             p.senderNationId === nation.id &&
@@ -231,15 +263,6 @@ export class PoliticsActionExecutor {
           return state;
         }
 
-        const newProposal = {
-          id: `prop-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-          turn: state.currentTurn,
-          senderNationId: nation.id,
-          receiverNationId: receiver.id,
-          proposalType: action.proposalType,
-          expiresTurn: state.currentTurn + 2,
-        };
-
         const proposalLog = TurnLogBuilder.createLogEntry(
           state.currentTurn,
           nation.id,
@@ -249,7 +272,7 @@ export class PoliticsActionExecutor {
 
         return {
           ...state,
-          pendingProposals: [...state.pendingProposals, newProposal],
+          pendingProposals: [...state.pendingProposals, transientProposal],
           turnLogs: [...state.turnLogs, proposalLog],
         };
       }

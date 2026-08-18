@@ -10,6 +10,7 @@ export class AIWarDeclarationEvaluator {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    lockedTargets?: Set<string>,
   ): GameAction | null {
     if (!nation.relations) {
       return null;
@@ -37,6 +38,15 @@ export class AIWarDeclarationEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      if (
+        lockedTargets?.has(targetId) ||
+        lockedTargets?.has(canonicalTarget) ||
+        lockedTargets?.has(`${nation.id}:${targetId}`) ||
+        lockedTargets?.has(`${targetId}:${nation.id}`)
+      ) {
+        continue;
+      }
+
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
       if (

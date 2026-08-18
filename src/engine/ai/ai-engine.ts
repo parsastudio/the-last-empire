@@ -3,7 +3,10 @@ import { GameAction } from "@/domain/game/action.schema";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 
 export class AIEngine {
-  public generateTurnActions(state: GameState): GameAction[] {
+  public generateTurnActions(
+    state: GameState,
+    lockedTargets?: Set<string>,
+  ): GameAction[] {
     const actions: GameAction[] = [];
     const sortedIds = Object.keys(state.nations).sort();
 
@@ -17,6 +20,7 @@ export class AIEngine {
         nation,
         state.nations,
         state.provinces,
+        lockedTargets,
       );
 
       actions.push(...aiActions);

@@ -10,6 +10,7 @@ export class AITreatyEvaluator {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    lockedTargets?: Set<string>,
   ): GameAction | null {
     if (!nation.relations) {
       return null;
@@ -19,6 +20,7 @@ export class AITreatyEvaluator {
       nation,
       allNations,
       provincesMap,
+      lockedTargets,
     );
 
     if (allianceAction) {
@@ -29,6 +31,7 @@ export class AITreatyEvaluator {
       nation,
       allNations,
       provincesMap,
+      lockedTargets,
     );
 
     if (napAction) {
@@ -42,6 +45,7 @@ export class AITreatyEvaluator {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    lockedTargets?: Set<string>,
   ): GameAction | null {
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       if (rel.stance === "WAR" || rel.stance === "ALLIANCE") {
@@ -49,6 +53,15 @@ export class AITreatyEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      if (
+        lockedTargets?.has(targetId) ||
+        lockedTargets?.has(canonicalTarget) ||
+        lockedTargets?.has(`${nation.id}:${targetId}`) ||
+        lockedTargets?.has(`${targetId}:${nation.id}`)
+      ) {
+        continue;
+      }
+
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
       if (
@@ -106,6 +119,7 @@ export class AITreatyEvaluator {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    lockedTargets?: Set<string>,
   ): GameAction | null {
     const isCurrentlyAtWar = Object.values(nation.relations || {}).some(
       (r) => r.stance === "WAR",
@@ -117,6 +131,15 @@ export class AITreatyEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      if (
+        lockedTargets?.has(targetId) ||
+        lockedTargets?.has(canonicalTarget) ||
+        lockedTargets?.has(`${nation.id}:${targetId}`) ||
+        lockedTargets?.has(`${targetId}:${nation.id}`)
+      ) {
+        continue;
+      }
+
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
       if (
