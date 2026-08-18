@@ -1,0 +1,10 @@
+{
+  "originalSizeBytes": 16777216,
+  "compressedSizeBytes": 192172,
+  "compressionRatioPercent": 98.85,
+  "totalSpansCount": 45988,
+  "minSpansPerRow": 1,
+  "maxSpansPerRow": 66,
+  "avgSpansPerRow": 22.46,
+  "totalRows": 2048
+}

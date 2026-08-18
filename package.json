@@ -1,42 +1,18 @@
 {
-  "name": "geopolitics-engine",
+  "name": "geopolitics-engine-monorepo",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.5.2",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "build:map": "tsx scripts/build-map.ts",
-    "files": "python3 debug/file_collector.py",
-    "tree": "python3 debug/tree_generator.py",
-    "errors": "python3 debug/error_checker.py",
-    "skeleton": "tsx debug/generate-skeleton.ts",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "canvas-confetti": "^1.9.4",
-    "dexie": "^4.4.4",
-    "immer": "^11.1.15",
-    "lucide-react": "^1.25.0",
-    "next": "16.2.10",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "zod": "^4.4.3",
-    "zustand": "^5.0.14"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "build:map": "pnpm --filter @geopolitics/map-pipeline build:map",
+    "build:row-spans": "pnpm --filter @geopolitics/map-pipeline build:row-spans"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/canvas-confetti": "^1.9.0",
-    "@types/node": "^20.19.43",
-    "@types/pngjs": "^6.0.5",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.10",
-    "pngjs": "^7.0.0",
-    "tailwindcss": "^4",
-    "ts-morph": "^28.0.0",
-    "tsx": "^4.19.3",
+    "turbo": "^2.4.4",
     "typescript": "^5"
   }
 }

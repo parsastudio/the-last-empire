@@ -1,0 +1,24 @@
+{
+  "name": "@geopolitics/map-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build:map": "tsx scripts/build-map.ts",
+    "build:row-spans": "tsx scripts/build-row-spans.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@geopolitics/domain": "workspace:*",
+    "@geopolitics/game-engine": "workspace:*",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/pngjs": "^6.0.5",
+    "ts-morph": "^28.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  }
+}
