@@ -26,10 +26,10 @@ export class BattleExecutionEngine {
     );
 
     const attacker =
-      state.nations[action.nationId] || state.nations[canonicalAttackerId];
+      state.nations[canonicalAttackerId] || state.nations[action.nationId];
     const defender =
-      state.nations[action.targetNationId] ||
-      state.nations[canonicalDefenderId];
+      state.nations[canonicalDefenderId] ||
+      state.nations[action.targetNationId];
 
     if (!attacker || !defender || !attacker.isAlive || !defender.isAlive) {
       return state;

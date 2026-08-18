@@ -17,16 +17,19 @@ export function useWideDiplomacy({
   humanNationId,
 }: UseWideDiplomacyProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const activeHumanId = CountryRegistry.resolveCanonicalId(
+    humanNationId || "USA",
+  );
 
   const { filteredNations: liveNationsList } = useLiveNations({
     nationsMap,
-    excludeNationId: humanNationId,
+    excludeNationId: activeHumanId,
     searchQuery,
   });
 
   const humanNation = useMemo(
-    () => (nationsMap ? (nationsMap[humanNationId] ?? null) : null),
-    [nationsMap, humanNationId],
+    () => (nationsMap ? (nationsMap[activeHumanId] ?? null) : null),
+    [nationsMap, activeHumanId],
   );
 
   const relationsList = useMemo(() => {

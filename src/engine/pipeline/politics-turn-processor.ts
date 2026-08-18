@@ -20,7 +20,7 @@ export class PoliticsTurnProcessor {
       for (const [relTargetId, rel] of Object.entries(updated.relations)) {
         if (rel.stance === "WAR") {
           const canonical = CountryRegistry.resolveCanonicalId(relTargetId);
-          const enemy = allNations[relTargetId] || allNations[canonical];
+          const enemy = allNations[canonical] || allNations[relTargetId];
 
           if (enemy && enemy.isAlive) {
             const enemyNavalPower =

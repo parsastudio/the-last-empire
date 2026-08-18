@@ -20,22 +20,22 @@ export class TreatyAcceptanceApplier {
     );
 
     const sender =
-      state.nations[proposal.senderNationId] ||
-      state.nations[canonicalSenderId];
+      state.nations[canonicalSenderId] ||
+      state.nations[proposal.senderNationId];
     const receiver =
-      state.nations[proposal.receiverNationId] ||
-      state.nations[canonicalReceiverId];
+      state.nations[canonicalReceiverId] ||
+      state.nations[proposal.receiverNationId];
 
     if (!sender || !receiver || !sender.isAlive || !receiver.isAlive) {
       return this.removeProposal(state, proposal.id);
     }
 
     const senderRel =
-      sender.relations[proposal.receiverNationId] ||
-      sender.relations[canonicalReceiverId];
+      sender.relations[canonicalReceiverId] ||
+      sender.relations[proposal.receiverNationId];
     const receiverRel =
-      receiver.relations[proposal.senderNationId] ||
-      receiver.relations[canonicalSenderId];
+      receiver.relations[canonicalSenderId] ||
+      receiver.relations[proposal.senderNationId];
 
     if (!senderRel || !receiverRel) {
       return this.removeProposal(state, proposal.id);
@@ -151,11 +151,11 @@ export class TreatyAcceptanceApplier {
     );
 
     const sender =
-      state.nations[proposal.senderNationId] ||
-      state.nations[canonicalSenderId];
+      state.nations[canonicalSenderId] ||
+      state.nations[proposal.senderNationId];
     const receiver =
-      state.nations[proposal.receiverNationId] ||
-      state.nations[canonicalReceiverId];
+      state.nations[canonicalReceiverId] ||
+      state.nations[proposal.receiverNationId];
 
     const senderName = sender ? sender.name : proposal.senderNationId;
     const receiverName = receiver ? receiver.name : proposal.receiverNationId;

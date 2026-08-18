@@ -54,7 +54,7 @@ export class ConquestVictoryChecker implements VictoryCondition {
       state.humanNationId,
     );
     const humanNation =
-      state.nations[state.humanNationId] || state.nations[humanCanonicalId];
+      state.nations[humanCanonicalId] || state.nations[state.humanNationId];
     if (humanNation && !humanNation.isAlive) {
       return {
         isGameOver: true,

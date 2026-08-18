@@ -31,6 +31,8 @@ export class NationProfileAssigner {
       govType = customGovType as GovernmentType;
     }
 
+    const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
+
     const defaultRegion = {
       regionId: 0,
       name: `خاک اصلی ${item.nameFa}`,
@@ -39,7 +41,7 @@ export class NationProfileAssigner {
     };
 
     const profile =
-      CountryRegistry.getCountry(item.id) ||
+      CountryRegistry.getCountry(cleanId) ||
       CountryRegistry.getCountry(item.code);
     const tier =
       profile?.militaryTier ?? Math.max(1, Math.min(20, 21 - item.initialRank));
@@ -118,7 +120,7 @@ export class NationProfileAssigner {
     );
 
     return {
-      id: item.id,
+      id: cleanId,
       name: item.nameFa,
       isAi: !isHuman,
       isAlive: true,
@@ -167,22 +169,18 @@ export class NationProfileAssigner {
     const canonicalId = CountryRegistry.resolveCanonicalId(id);
     const manifestItems = CountryRegistry.getAllManifestNations();
     const found = manifestItems.find(
-      (m) =>
-        m.id === canonicalId ||
-        m.id === id ||
-        m.code.toUpperCase() === id.toUpperCase(),
+      (m) => CountryRegistry.resolveCanonicalId(m.code || m.id) === canonicalId,
     );
 
     if (found) {
       return this.buildNationFromManifest(found, isHuman, customGovType);
     }
 
-    const numericId = parseInt(id.replace("NATION_", ""), 10);
-    const profile = isNaN(numericId)
-      ? CountryRegistry.getCountry(id)
-      : CountryRegistry.getCountry(numericId);
-
-    const fallback = CountryDefaultsUtility.getFallbackProfile(id, profile);
+    const profile = CountryRegistry.getCountry(canonicalId);
+    const fallback = CountryDefaultsUtility.getFallbackProfile(
+      canonicalId,
+      profile,
+    );
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
       fallback.militaryTier,
       true,

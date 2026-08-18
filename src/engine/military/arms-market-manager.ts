@@ -22,8 +22,8 @@ export class ArmsMarketManager {
     const canonicalBuyerId = CountryRegistry.resolveCanonicalId(buyerId);
     const canonicalSellerId = CountryRegistry.resolveCanonicalId(sellerId);
 
-    const buyer = state.nations[buyerId] || state.nations[canonicalBuyerId];
-    const seller = state.nations[sellerId] || state.nations[canonicalSellerId];
+    const buyer = state.nations[canonicalBuyerId] || state.nations[buyerId];
+    const seller = state.nations[canonicalSellerId] || state.nations[sellerId];
 
     if (!buyer || !buyer.isAlive) {
       throw new GameError("NATION_NOT_FOUND", "کشور خریدار فعال نیست.");
@@ -41,7 +41,7 @@ export class ArmsMarketManager {
     }
 
     const rel =
-      seller.relations[buyer.id] || seller.relations[canonicalBuyerId];
+      seller.relations[canonicalBuyerId] || seller.relations[buyer.id];
     const opinion = rel ? rel.opinion : 0;
     if (opinion < 20) {
       throw new GameError(
@@ -56,8 +56,8 @@ export class ArmsMarketManager {
     for (const partner of Object.values(state.nations)) {
       if (!partner.isAlive || partner.id === buyer.id) continue;
       const partnerRel =
-        buyer.relations[partner.id] ||
-        buyer.relations[CountryRegistry.resolveCanonicalId(partner.id)];
+        buyer.relations[CountryRegistry.resolveCanonicalId(partner.id)] ||
+        buyer.relations[partner.id];
 
       if (partnerRel?.stance === "WAR") {
         const enemyNavalPower =

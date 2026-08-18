@@ -43,12 +43,12 @@ export function useWideArmsMarketForm({
       .filter((n) => n.id !== nation.id && n.isAlive)
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
-        const rel = nation.relations[n.id] || nation.relations[canonical];
+        const rel = nation.relations[canonical] || nation.relations[n.id];
         const opinion = rel ? rel.opinion : 0;
         const isEligible = opinion >= 20;
 
         return {
-          id: n.id,
+          id: canonical,
           name: n.name,
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
@@ -73,7 +73,7 @@ export function useWideArmsMarketForm({
 
   const defaultSellerId = useMemo(() => {
     if (selectedTargetCode) {
-      const cleanCode = selectedTargetCode.toUpperCase();
+      const cleanCode = CountryRegistry.resolveCanonicalId(selectedTargetCode);
       const matched = sellerOptions.find(
         (c) =>
           c.id.toUpperCase() === cleanCode ||
@@ -94,7 +94,7 @@ export function useWideArmsMarketForm({
   const sellerNation = useMemo(() => {
     if (!nationsMap || !selectedSellerId) return null;
     const canonical = CountryRegistry.resolveCanonicalId(selectedSellerId);
-    return nationsMap[selectedSellerId] || nationsMap[canonical] || null;
+    return nationsMap[canonical] || nationsMap[selectedSellerId] || null;
   }, [nationsMap, selectedSellerId]);
 
   const unitStat = MILITARY_UNIT_STATS[selectedUnitType];
@@ -126,7 +126,7 @@ export function useWideArmsMarketForm({
       if (!partner.isAlive || partner.id === nation.id) continue;
       const canonical = CountryRegistry.resolveCanonicalId(partner.id);
       const partnerRel =
-        nation.relations[partner.id] || nation.relations[canonical];
+        nation.relations[canonical] || nation.relations[partner.id];
 
       if (partnerRel?.stance === "WAR") {
         const enemyNavalPower =

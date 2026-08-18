@@ -2,6 +2,7 @@ import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { AllianceInterventionResult } from "@/engine/combat/alliance-intervention-evaluator";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class BattleLogFactory {
   public static createBattleSummaryLog(
@@ -22,7 +23,7 @@ export class BattleLogFactory {
       reportSummary = `خطوط دفاعی ${defender.name} مانع پیشروی نیروهای ${attacker.name} شدند. ۲۵٪ از نیروهای مجروح و بازمانده به پایگاه‌ها بازگشتند.${betrayalPenaltyText}`;
     }
 
-    const cleanNation = attacker.id.replace("NATION_", "");
+    const cleanNation = CountryRegistry.resolveCanonicalId(attacker.id);
     const randomSuffix = Math.random().toString(36).substring(2, 7);
 
     return {

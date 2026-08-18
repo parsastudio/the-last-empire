@@ -16,7 +16,7 @@ export class DiplomaticAcceptanceEvaluator {
   ): boolean {
     const canonicalSenderId = CountryRegistry.resolveCanonicalId(sender.id);
     const rel =
-      receiver.relations[sender.id] || receiver.relations[canonicalSenderId];
+      receiver.relations[canonicalSenderId] || receiver.relations[sender.id];
     const opinion = rel ? rel.opinion : 0;
     const grudge = rel ? (rel.grudge ?? 0) : 0;
 

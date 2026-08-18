@@ -29,7 +29,7 @@ export class VictoryProgressCalculator {
 
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    const targetNation = state.nations[nationId] || state.nations[canonicalId];
+    const targetNation = state.nations[canonicalId] || state.nations[nationId];
 
     if (!targetNation) {
       return {
