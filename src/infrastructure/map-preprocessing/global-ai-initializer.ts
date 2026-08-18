@@ -7,6 +7,7 @@ import {
 } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { RankManager } from "@/engine/politics/rank-manager";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
+import { ALL_COUNTRY_PROFILES, CountryRegistry } from "@/domain/data/countries";
 
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(
@@ -69,7 +70,7 @@ export class GlobalAiInitializer {
         provinceId: pItem.provinceId,
         nameFa: pItem.nameFa,
         countryNumericId: pItem.countryNumericId,
-        ownerNationId: pItem.countryId,
+        ownerNationId: CountryRegistry.resolveCanonicalId(pItem.countryId),
         pixelCount: pItem.pixelCount,
         hasSeaAccess: pItem.hasSeaAccess,
         landNeighbors: pItem.landNeighbors,
@@ -80,15 +81,18 @@ export class GlobalAiInitializer {
     }
 
     const nationsMetaData = manifestItems.map((item) => ({
-      id: item.id,
+      id: CountryRegistry.resolveCanonicalId(item.code || item.id),
       govType:
-        item.id === humanNationId && humanGovType
+        CountryRegistry.resolveCanonicalId(item.code || item.id) ===
+          CountryRegistry.resolveCanonicalId(humanNationId) && humanGovType
           ? humanGovType
           : item.defaultGovernment,
     }));
 
     for (const item of manifestItems) {
-      const isHuman = item.id === humanNationId;
+      const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
+      const isHuman =
+        cleanId === CountryRegistry.resolveCanonicalId(humanNationId);
       const govToApply = isHuman ? humanGovType : undefined;
       const nation = this.profileAssigner.buildNationFromManifest(
         item,
@@ -97,12 +101,12 @@ export class GlobalAiInitializer {
       );
 
       nation.relations = this.relationsGenerator.generateInitialRelations(
-        item.id,
+        cleanId,
         nation.government.type,
         nationsMetaData,
       );
 
-      nations[item.id] = nation;
+      nations[cleanId] = nation;
     }
 
     const rankedNations = RankManager.recalculateRanks(nations);
@@ -123,13 +127,15 @@ export class GlobalAiInitializer {
     const nations: Record<string, Nation> = {};
     const provinces: Record<string, Province> = {};
 
+    const cleanHumanId = CountryRegistry.resolveCanonicalId(humanNationId);
     const preBuiltNations: Nation[] = [];
 
     for (const id of detectedNationsList) {
-      const isHuman = id === humanNationId;
+      const cleanId = CountryRegistry.resolveCanonicalId(id);
+      const isHuman = cleanId === cleanHumanId;
       const govToApply = isHuman ? humanGovType : undefined;
       const nation = this.profileAssigner.buildStartingNation(
-        id,
+        cleanId,
         isHuman,
         govToApply,
       );

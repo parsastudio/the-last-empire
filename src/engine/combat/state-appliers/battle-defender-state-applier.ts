@@ -5,6 +5,7 @@ import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conque
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface DefenderStateApplierInput {
   defender: Nation;
@@ -21,12 +22,13 @@ export class BattleDefenderStateApplier {
     const {
       defender,
       attackerId,
-      canonicalAttackerId,
       calcResult,
       conquest,
       transfer,
       isDefenderAlive,
     } = input;
+
+    const cleanAttackerId = CountryRegistry.resolveCanonicalId(attackerId);
 
     const defenderRemainingPixels = conquest.remainingDefenderProvinces.reduce(
       (sum, p) => sum + p.pixelCount,
@@ -66,17 +68,15 @@ export class BattleDefenderStateApplier {
       newPop,
     );
 
-    const targetKey = updatedDefender.relations[attackerId]
-      ? attackerId
-      : canonicalAttackerId;
-
-    const existingRel = updatedDefender.relations[targetKey];
+    const existingRel =
+      updatedDefender.relations[cleanAttackerId] ||
+      updatedDefender.relations[attackerId];
     const currentGrudge = existingRel?.grudge ?? 0;
     const grudgeSurge = calcResult.isFullCapitulation ? 50 : 40;
 
     const updatedRelations = { ...updatedDefender.relations };
-    updatedRelations[targetKey] = {
-      targetNationId: attackerId,
+    updatedRelations[cleanAttackerId] = {
+      targetNationId: cleanAttackerId,
       stance: "WAR",
       opinion: -100,
       grudge: Math.min(100, currentGrudge + grudgeSurge),
@@ -84,7 +84,9 @@ export class BattleDefenderStateApplier {
 
     const currentFocus = updatedDefender.warFocusTargetId;
     const nextWarFocus =
-      !currentFocus || currentFocus === attackerId ? attackerId : currentFocus;
+      !currentFocus || currentFocus === cleanAttackerId
+        ? cleanAttackerId
+        : currentFocus;
 
     const isProvinceLost =
       calcResult.isAttackerVictory &&

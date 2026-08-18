@@ -1,5 +1,6 @@
 import { Province } from "@/domain/province/province.schema";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
@@ -23,10 +24,12 @@ export class ProvinceConquestHandler {
   ): ProvinceConquestResult {
     const updatedProvinces: Record<string, Province> = { ...provinces };
 
+    const cleanAttackerId = CountryRegistry.resolveCanonicalId(attackerId);
+    const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
+
     const defenderProvincesBefore = Object.values(updatedProvinces).filter(
       (p) =>
-        p.ownerNationId === defenderId ||
-        p.ownerNationId === canonicalDefenderId,
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
     );
 
     const defenderTotalPixels =
@@ -41,7 +44,7 @@ export class ProvinceConquestHandler {
           const prov = defenderProvincesBefore[i]!;
           updatedProvinces[prov.provinceId.toString()] = {
             ...prov,
-            ownerNationId: attackerId,
+            ownerNationId: cleanAttackerId,
           };
           conqueredPixels += prov.pixelCount;
         }
@@ -62,7 +65,7 @@ export class ProvinceConquestHandler {
           if (targetProv) {
             updatedProvinces[conqueredProvId.toString()] = {
               ...targetProv,
-              ownerNationId: attackerId,
+              ownerNationId: cleanAttackerId,
             };
             conqueredPixels = targetProv.pixelCount;
             BitPackedGridState.getInstance().markDirty();
@@ -73,14 +76,12 @@ export class ProvinceConquestHandler {
 
     const remainingDefenderProvinces = Object.values(updatedProvinces).filter(
       (p) =>
-        p.ownerNationId === defenderId ||
-        p.ownerNationId === canonicalDefenderId,
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
     );
 
     const attackerProvinces = Object.values(updatedProvinces).filter(
       (p) =>
-        p.ownerNationId === attackerId ||
-        p.ownerNationId === canonicalAttackerId,
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanAttackerId,
     );
 
     return {

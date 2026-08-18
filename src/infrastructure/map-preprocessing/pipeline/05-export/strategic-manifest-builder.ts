@@ -1,6 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
+import {
+  ALL_COUNTRY_PROFILES,
+  CountryProfile,
+  CountryRegistry,
+} from "@/domain/data/countries";
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
@@ -85,7 +89,7 @@ export class StrategicManifestBuilder {
     for (let rankIndex = 0; rankIndex < activeProfiles.length; rankIndex++) {
       const profile = activeProfiles[rankIndex]!;
       const countryNumericId = profile.id ?? 0;
-      const countryId = `NATION_${profile.code.toUpperCase()}`;
+      const countryId = profile.code.toUpperCase();
       const provList = countryProvincesMap.get(countryNumericId) || [];
 
       const totalCountryPixels = provList.reduce(

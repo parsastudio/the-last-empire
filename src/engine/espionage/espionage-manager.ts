@@ -61,9 +61,9 @@ export class EspionageManager {
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNationId);
 
     const source =
-      state.nations[sourceNationId] || state.nations[canonicalSource];
+      state.nations[canonicalSource] || state.nations[sourceNationId];
     const target =
-      state.nations[targetNationId] || state.nations[canonicalTarget];
+      state.nations[canonicalTarget] || state.nations[targetNationId];
 
     if (!source || !source.isAlive) {
       throw new GameError(

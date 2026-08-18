@@ -7,6 +7,7 @@ import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface AttackerStateApplierInput {
   attacker: Nation;
@@ -25,7 +26,6 @@ export class BattleAttackerStateApplier {
     const {
       attacker,
       defenderId,
-      canonicalDefenderId,
       defenderTechLevel,
       calcResult,
       conquest,
@@ -33,6 +33,8 @@ export class BattleAttackerStateApplier {
       currentStance,
       betrayalResult,
     } = input;
+
+    const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
 
     const attackerTotalPixels = conquest.attackerProvinces.reduce(
       (sum, p) => sum + p.pixelCount,
@@ -70,16 +72,14 @@ export class BattleAttackerStateApplier {
       baseWarRepPenalty +
       (betrayalResult.hasBetrayed ? betrayalResult.reputationPenalty : 0);
 
-    const targetKey = updatedAttacker.relations[defenderId]
-      ? defenderId
-      : canonicalDefenderId;
-
-    const existingRel = updatedAttacker.relations[targetKey];
+    const existingRel =
+      updatedAttacker.relations[cleanDefenderId] ||
+      updatedAttacker.relations[defenderId];
     const currentGrudge = existingRel?.grudge ?? 0;
 
     const updatedRelations = { ...updatedAttacker.relations };
-    updatedRelations[targetKey] = {
-      targetNationId: defenderId,
+    updatedRelations[cleanDefenderId] = {
+      targetNationId: cleanDefenderId,
       stance: "WAR",
       opinion: -100,
       grudge: currentGrudge,
@@ -112,7 +112,7 @@ export class BattleAttackerStateApplier {
         calcResult.treasuryLooted,
       military: updatedMilitary,
       relations: updatedRelations,
-      warFocusTargetId: defenderId,
+      warFocusTargetId: cleanDefenderId,
     };
   }
 }

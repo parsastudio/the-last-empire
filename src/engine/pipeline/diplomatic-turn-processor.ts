@@ -77,7 +77,7 @@ export class DiplomaticTurnProcessor {
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations
-        ? allNations[targetId] || allNations[canonicalTarget]
+        ? allNations[canonicalTarget] || allNations[targetId]
         : null;
 
       if (relation.stance === "WAR") {
@@ -114,10 +114,10 @@ export class DiplomaticTurnProcessor {
 
     let nextWarFocus = nation.warFocusTargetId ?? null;
     if (nextWarFocus) {
-      const focusRel = newRels[nextWarFocus];
       const canonicalFocus = CountryRegistry.resolveCanonicalId(nextWarFocus);
+      const focusRel = newRels[canonicalFocus] || newRels[nextWarFocus];
       const focusTarget = allNations
-        ? allNations[nextWarFocus] || allNations[canonicalFocus]
+        ? allNations[canonicalFocus] || allNations[nextWarFocus]
         : null;
       const isFocusAlive = focusTarget ? focusTarget.isAlive : true;
 

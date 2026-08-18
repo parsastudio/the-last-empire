@@ -35,7 +35,7 @@ export function useWideEspionageForm({
     return Object.values(nationsMap)
       .filter((n) => n.id !== nation.id && n.isAlive)
       .map((n) => ({
-        id: n.id,
+        id: CountryRegistry.resolveCanonicalId(n.id),
         name: n.name,
         flagCode: n.flagCode || "IR",
         rank: n.rank || 99,
@@ -56,7 +56,7 @@ export function useWideEspionageForm({
 
   const defaultTarget = useMemo(() => {
     if (selectedTargetCode) {
-      const cleanCode = selectedTargetCode.toUpperCase();
+      const cleanCode = CountryRegistry.resolveCanonicalId(selectedTargetCode);
       const matched = countryOptions.find(
         (c) =>
           c.id.toUpperCase() === cleanCode ||
@@ -73,7 +73,7 @@ export function useWideEspionageForm({
   const selectedTargetNation = useMemo(() => {
     if (!nationsMap || !selectedTargetId) return null;
     const canonical = CountryRegistry.resolveCanonicalId(selectedTargetId);
-    return nationsMap[selectedTargetId] || nationsMap[canonical] || null;
+    return nationsMap[canonical] || nationsMap[selectedTargetId] || null;
   }, [nationsMap, selectedTargetId]);
 
   const targetGdp = useMemo(() => {
