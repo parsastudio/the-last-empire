@@ -9,9 +9,16 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "build:map": "pnpm --filter @geopolitics/map-pipeline build:map",
-    "build:row-spans": "pnpm --filter @geopolitics/map-pipeline build:row-spans"
+    "build:row-spans": "pnpm --filter @geopolitics/map-pipeline build:row-spans",
+    "files": "python3 debug/file_collector.py",
+    "tree": "python3 debug/tree_generator.py",
+    "errors": "python3 debug/error_checker.py",
+    "skeleton": "tsx debug/generate-skeleton.ts"
   },
   "devDependencies": {
+    "@types/node": "^20.19.43",
+    "ts-morph": "^28.0.0",
+    "tsx": "^4.19.3",
     "turbo": "^2.4.4",
     "typescript": "^5"
   }

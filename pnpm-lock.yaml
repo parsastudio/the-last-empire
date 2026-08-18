@@ -8,6 +8,15 @@ importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: ^20.19.43
+        version: 20.19.43
+      ts-morph:
+        specifier: ^28.0.0
+        version: 28.0.0
+      tsx:
+        specifier: ^4.19.3
+        version: 4.23.9
       turbo:
         specifier: ^2.4.4
         version: 2.10.11

@@ -2,8 +2,75 @@ import path from "path";
 import fs from "fs";
 
 export class ServerMapPathResolver {
+  private static findMapsBaseDir(mapId = "map1"): string {
+    const candidates = [
+      path.join(process.cwd(), "apps", "web", "public", "maps", mapId),
+      path.join(process.cwd(), "public", "maps", mapId),
+      path.join(
+        process.cwd(),
+        "..",
+        "..",
+        "apps",
+        "web",
+        "public",
+        "maps",
+        mapId,
+      ),
+      path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "..",
+        "apps",
+        "web",
+        "public",
+        "maps",
+        mapId,
+      ),
+    ];
+
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i]!;
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+    }
+
+    let current = process.cwd();
+    for (let i = 0; i < 5; i++) {
+      const webMapsPath = path.join(
+        current,
+        "apps",
+        "web",
+        "public",
+        "maps",
+        mapId,
+      );
+      if (fs.existsSync(webMapsPath)) {
+        return webMapsPath;
+      }
+      const directMapsPath = path.join(current, "public", "maps", mapId);
+      if (fs.existsSync(directMapsPath)) {
+        return directMapsPath;
+      }
+      current = path.dirname(current);
+    }
+
+    const defaultPath = path.join(
+      process.cwd(),
+      "apps",
+      "web",
+      "public",
+      "maps",
+      mapId,
+    );
+    fs.mkdirSync(defaultPath, { recursive: true });
+    return defaultPath;
+  }
+
   public static getMapDir(mapId = "map1"): string {
-    return path.join(process.cwd(), "public", "maps", mapId);
+    return this.findMapsBaseDir(mapId);
   }
 
   public static getMapEssentialServerDir(mapId = "map1"): string {
