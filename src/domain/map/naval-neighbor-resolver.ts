@@ -50,11 +50,7 @@ export class NavalNeighborResolver {
       const canonicalOwner = CountryRegistry.resolveCanonicalId(
         p.ownerNationId,
       );
-      return (
-        (p.ownerNationId === attackerNationId ||
-          canonicalOwner === canonicalAttacker) &&
-        p.hasSeaAccess
-      );
+      return canonicalOwner === canonicalAttacker && p.hasSeaAccess;
     });
 
     if (attackerCoastalProvinces.length === 0) {

@@ -118,7 +118,6 @@ export const ALL_COUNTRY_PROFILES: CountryProfile[] =
 export class CountryRegistry {
   private static readonly byNumericId = new Map<number, CountryProfile>();
   private static readonly byCode = new Map<string, CountryProfile>();
-  private static readonly byCanonicalId = new Map<string, CountryProfile>();
   private static manifestNations = new Map<string, FinalManifestNation>();
 
   static {
@@ -131,8 +130,6 @@ export class CountryRegistry {
       if (profile.flagCode) {
         this.byCode.set(profile.flagCode.toUpperCase(), profile);
       }
-      const canonical = `NATION_${iso3}`;
-      this.byCanonicalId.set(canonical, profile);
     }
   }
 
@@ -142,15 +139,15 @@ export class CountryRegistry {
     if (!manifest || !Array.isArray(manifest.nations)) return;
     this.manifestNations.clear();
     for (const item of manifest.nations) {
-      const canonical = item.id.startsWith("NATION_")
-        ? item.id
-        : `NATION_${item.code.toUpperCase()}`;
-      this.manifestNations.set(canonical, item);
-      this.manifestNations.set(item.code.toUpperCase(), item);
+      const code = item.code.toUpperCase();
+      this.manifestNations.set(code, item);
+      if (item.id) {
+        this.manifestNations.set(item.id.toUpperCase(), item);
+      }
       if (item.flagCode) {
         this.manifestNations.set(item.flagCode.toUpperCase(), item);
       }
-      const profile = this.getCountry(item.id);
+      const profile = this.getCountry(item.code);
       if (profile) {
         profile.gdp = item.gdp;
         profile.population = item.population;
@@ -165,8 +162,9 @@ export class CountryRegistry {
     const list: FinalManifestNation[] = [];
     const seen = new Set<string>();
     for (const item of this.manifestNations.values()) {
-      if (!seen.has(item.id)) {
-        seen.add(item.id);
+      const code = item.code.toUpperCase();
+      if (!seen.has(code)) {
+        seen.add(code);
         list.push(item);
       }
     }
@@ -184,16 +182,16 @@ export class CountryRegistry {
       return this.byNumericId.get(identifier);
     }
 
-    const clean = identifier.toString().trim().toUpperCase();
-
-    const canonicalMatch = this.byCanonicalId.get(clean);
-    if (canonicalMatch) return canonicalMatch;
+    const clean = identifier
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/^NATION_/, "");
 
     const codeMatch = this.byCode.get(clean);
     if (codeMatch) return codeMatch;
 
-    const rawNum = clean.replace("NATION_", "");
-    const parsedNum = parseInt(rawNum, 10);
+    const parsedNum = parseInt(clean, 10);
     if (!isNaN(parsedNum)) {
       const numMatch = this.byNumericId.get(parsedNum);
       if (numMatch) return numMatch;
@@ -205,13 +203,13 @@ export class CountryRegistry {
   public static resolveCanonicalId(identifier: string | number): string {
     const profile = this.getCountry(identifier);
     if (profile) {
-      return `NATION_${profile.code.toUpperCase()}`;
+      return profile.code.toUpperCase();
     }
-    const clean = identifier.toString().trim().toUpperCase();
-    if (clean.startsWith("NATION_")) {
-      return clean;
-    }
-    return `NATION_${clean}`;
+    return identifier
+      .toString()
+      .trim()
+      .toUpperCase()
+      .replace(/^NATION_/, "");
   }
 
   public static resolveNumericId(identifier: string | number): number {
@@ -226,7 +224,7 @@ export class CountryRegistry {
       .toString()
       .trim()
       .toUpperCase()
-      .replace("NATION_", "");
+      .replace(/^NATION_/, "");
     const parsed = parseInt(clean, 10);
     return isNaN(parsed) ? 0 : parsed;
   }

@@ -16,7 +16,7 @@ export class MilitaryActionExecutor {
       action.nationId,
     );
     const nation =
-      state.nations[action.nationId] || state.nations[canonicalSourceId];
+      state.nations[canonicalSourceId] || state.nations[action.nationId];
     if (!nation) return state;
 
     const sourceKey = nation.id;
@@ -102,8 +102,8 @@ export class MilitaryActionExecutor {
           );
         }
         const target =
-          state.nations[action.targetNationId] ||
-          state.nations[canonicalTargetId];
+          state.nations[canonicalTargetId] ||
+          state.nations[action.targetNationId];
         if (!target || !target.isAlive) {
           throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
         }

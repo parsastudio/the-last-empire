@@ -27,7 +27,7 @@ export class AIPeaceEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[targetId] || allNations[canonicalTarget];
+      const targetNation = allNations[canonicalTarget] || allNations[targetId];
 
       if (
         !targetNation ||
@@ -89,7 +89,7 @@ export class AIPeaceEvaluator {
         }
 
         const canonicalOther = CountryRegistry.resolveCanonicalId(otherId);
-        const otherNation = allNations[otherId] || allNations[canonicalOther];
+        const otherNation = allNations[canonicalOther] || allNations[otherId];
 
         if (otherNation && otherNation.isAlive) {
           const otherEval = AIThreatCalculator.evaluate(

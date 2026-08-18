@@ -90,7 +90,7 @@ export class AIUpgradePlanner {
     if (!provincesMap) {
       for (const neighborId of nation.geography.landNeighbors || []) {
         const canonical = CountryRegistry.resolveCanonicalId(neighborId);
-        const neighbor = allNations[neighborId] || allNations[canonical];
+        const neighbor = allNations[canonical] || allNations[neighborId];
         if (
           neighbor &&
           neighbor.isAlive &&
