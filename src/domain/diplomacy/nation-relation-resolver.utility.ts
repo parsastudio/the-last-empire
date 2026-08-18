@@ -14,7 +14,7 @@ export class NationRelationResolver {
     const canonicalTargetId =
       CountryRegistry.resolveCanonicalId(targetNationId);
     return (
-      relationsMap[targetNationId] || relationsMap[canonicalTargetId] || null
+      relationsMap[canonicalTargetId] || relationsMap[targetNationId] || null
     );
   }
 

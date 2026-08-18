@@ -43,7 +43,7 @@ export class AIWarDeclarationEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[targetId] || allNations[canonicalTarget];
+      const targetNation = allNations[canonicalTarget] || allNations[targetId];
 
       if (
         !targetNation ||

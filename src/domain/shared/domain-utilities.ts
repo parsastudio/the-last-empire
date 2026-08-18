@@ -38,7 +38,7 @@ export class GameIdGenerator {
       const randomIndex = Math.floor(Math.random() * chars.length);
       code += chars[randomIndex];
     }
-    const cleanCountry = countryCode.toUpperCase().replace("NATION_", "");
+    const cleanCountry = CountryRegistry.resolveCanonicalId(countryCode);
     return `${cleanCountry}-${code}`;
   }
 }
@@ -69,14 +69,13 @@ export class TurnLogBuilder {
     level: TurnLogLevel,
     message: string,
   ): TurnLogEntry {
-    const canonical = CountryRegistry.resolveCanonicalId(sourceNationId);
-    const cleanNation = canonical.replace("NATION_", "");
+    const cleanNation = CountryRegistry.resolveCanonicalId(sourceNationId);
     const randomSuffix = Math.random().toString(36).substring(2, 7);
     return {
       id: `log-${cleanNation}-t${turn}-${randomSuffix}`,
       turn,
       timestamp: Date.now(),
-      sourceNationId,
+      sourceNationId: cleanNation,
       level,
       message,
     };

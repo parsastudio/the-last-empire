@@ -146,7 +146,7 @@ export class AIProcurementPlanner {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const target = allNations[targetId] || allNations[canonicalTarget];
+      const target = allNations[canonicalTarget] || allNations[targetId];
 
       if (target && target.isAlive && target.id !== nation.id) {
         const evalResult = AIThreatCalculator.evaluate(

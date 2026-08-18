@@ -20,10 +20,7 @@ export class LandNeighborResolver {
       const canonicalNeighborOwner = CountryRegistry.resolveCanonicalId(
         neighborProv.ownerNationId,
       );
-      return (
-        neighborProv.ownerNationId === attackerNationId ||
-        canonicalNeighborOwner === canonicalAttacker
-      );
+      return canonicalNeighborOwner === canonicalAttacker;
     });
   }
 }

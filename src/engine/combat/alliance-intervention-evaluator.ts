@@ -27,7 +27,7 @@ export class AllianceInterventionEvaluator {
       if (relation.stance !== "ALLIANCE") continue;
 
       const canonicalAllyId = CountryRegistry.resolveCanonicalId(targetId);
-      const ally = updatedNations[targetId] || updatedNations[canonicalAllyId];
+      const ally = updatedNations[canonicalAllyId] || updatedNations[targetId];
       if (
         !ally ||
         !ally.isAlive ||
@@ -41,8 +41,8 @@ export class AllianceInterventionEvaluator {
       const isStrongEnough = allyPower >= attackerPower * 0.35;
 
       const relWithAttacker =
-        ally.relations[attacker.id] ||
-        ally.relations[CountryRegistry.resolveCanonicalId(attacker.id)];
+        ally.relations[CountryRegistry.resolveCanonicalId(attacker.id)] ||
+        ally.relations[attacker.id];
 
       const hasActiveTreatyWithAttacker =
         relWithAttacker?.stance === "NON_AGGRESSION_PACT" ||

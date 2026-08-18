@@ -19,7 +19,7 @@ export class PoliticsActionExecutor {
       action.nationId,
     );
     const nation =
-      state.nations[action.nationId] || state.nations[canonicalSourceId];
+      state.nations[canonicalSourceId] || state.nations[action.nationId];
     if (!nation) return state;
 
     const sourceKey = nation.id;
@@ -66,17 +66,17 @@ export class PoliticsActionExecutor {
           action.targetNationId,
         );
         const receiver =
-          state.nations[action.targetNationId] ||
-          state.nations[canonicalTargetId];
+          state.nations[canonicalTargetId] ||
+          state.nations[action.targetNationId];
         if (!receiver) return state;
         const targetKey = receiver.id;
 
         const senderRel =
-          nation.relations[action.targetNationId] ||
-          nation.relations[canonicalTargetId];
+          nation.relations[canonicalTargetId] ||
+          nation.relations[action.targetNationId];
         const receiverRel =
-          receiver.relations[action.nationId] ||
-          receiver.relations[canonicalSourceId];
+          receiver.relations[canonicalSourceId] ||
+          receiver.relations[action.nationId];
         if (!senderRel || !receiverRel) return state;
 
         if (action.proposalType === "DECLARE_WAR") {

@@ -15,7 +15,7 @@ export class EconomyActionExecutor {
       action.nationId,
     );
     const nation =
-      state.nations[action.nationId] || state.nations[canonicalNationId];
+      state.nations[canonicalNationId] || state.nations[action.nationId];
     if (!nation) return state;
 
     switch (action.type) {

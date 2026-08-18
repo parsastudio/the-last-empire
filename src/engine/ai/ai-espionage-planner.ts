@@ -80,8 +80,9 @@ export class AIEspionagePlanner {
     }
 
     const activeWarTarget = nation.warFocusTargetId
-      ? allNations[nation.warFocusTargetId] ||
-        allNations[CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)]
+      ? allNations[
+          CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
+        ] || allNations[nation.warFocusTargetId]
       : null;
 
     if (activeWarTarget && activeWarTarget.isAlive) {
@@ -111,7 +112,7 @@ export class AIEspionagePlanner {
 
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const target = allNations[targetId] || allNations[canonicalTarget];
+      const target = allNations[canonicalTarget] || allNations[targetId];
 
       if (!target || !target.isAlive || target.id === nation.id) {
         continue;
@@ -176,7 +177,7 @@ export class AIEspionagePlanner {
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
       const rel =
-        nation.relations[target.id] || nation.relations[canonicalTarget];
+        nation.relations[canonicalTarget] || nation.relations[target.id];
 
       if (rel && rel.stance === "ALLIANCE") {
         continue;

@@ -23,7 +23,7 @@ export class ActionEngine {
       action.nationId,
     );
     const sourceNation =
-      state.nations[action.nationId] || state.nations[canonicalSourceId];
+      state.nations[canonicalSourceId] || state.nations[action.nationId];
 
     if (!sourceNation || !sourceNation.isAlive) {
       return {
@@ -39,8 +39,8 @@ export class ActionEngine {
         action.targetNationId,
       );
       const targetNation =
-        state.nations[action.targetNationId] ||
-        state.nations[canonicalTargetId];
+        state.nations[canonicalTargetId] ||
+        state.nations[action.targetNationId];
 
       if (!targetNation || !targetNation.isAlive) {
         return {
