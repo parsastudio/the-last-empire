@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export interface TariffEffectResult {
   tariffRevenue: number;
@@ -31,18 +31,12 @@ export class TariffCalculator {
       totalPartnerCount = partners.length;
 
       for (const partner of partners) {
-        const canonicalPartnerId = CountryRegistry.resolveCanonicalId(
-          partner.id,
+        const isSevered = NationRelationResolver.isTradeEmbargoed(
+          nation,
+          partner,
         );
-        const rel =
-          nation.relations?.[partner.id] ||
-          nation.relations?.[canonicalPartnerId];
-
+        const rel = nation.relations?.[partner.id];
         const isWar = rel?.stance === "WAR";
-        const isSevered =
-          isWar ||
-          rel?.stance === "SEVERED_RELATIONS" ||
-          rel?.isTradeEmbargoed === true;
 
         const partnerNavalPower =
           (partner.military.navalFleet || 0) *

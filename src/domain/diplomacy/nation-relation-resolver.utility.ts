@@ -33,10 +33,22 @@ export class NationRelationResolver {
   }
 
   public static isTradeEmbargoed(
-    relationsMap: Record<string, RelationProfile> | undefined,
-    targetNationId: string,
+    sourceNation: {
+      globalReputation: number;
+      relations?: Record<string, RelationProfile>;
+    },
+    targetNation: { id: string; globalReputation: number },
   ): boolean {
-    const stance = this.getStance(relationsMap, targetNationId);
-    return stance === "WAR" || stance === "SEVERED_RELATIONS";
+    const stance = this.getStance(sourceNation.relations, targetNation.id);
+    if (stance === "WAR") {
+      return true;
+    }
+    if (stance === "ALLIANCE" || stance === "NON_AGGRESSION_PACT") {
+      return false;
+    }
+    return (
+      sourceNation.globalReputation <= -30 ||
+      targetNation.globalReputation <= -30
+    );
   }
 }

@@ -95,18 +95,6 @@ export function useDiplomacyActionsRunner({
     );
   };
 
-  const handleSeverTrade = async () => {
-    const action = ActionFactory.diplomaticProposal(
-      nationId,
-      targetNationId,
-      "SEVER_TRADE_RELATIONS",
-    );
-    await dispatchAction(
-      action,
-      `قطع روابط تجاری و تحریم اقتصادی علیه ${targetName} اعمال گردید.`,
-    );
-  };
-
   const handleDeclareWar = async () => {
     const action = ActionFactory.diplomaticProposal(
       nationId,
@@ -135,7 +123,6 @@ export function useDiplomacyActionsRunner({
     handleSendAid,
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),
     handleAlliance: () => executeOrConfirm(handleAlliance, false),
-    handleSeverTrade,
     handleDeclareWar: () => executeOrConfirm(handleDeclareWar, true),
     closeConfirmModal,
     acceptConfirmModal,

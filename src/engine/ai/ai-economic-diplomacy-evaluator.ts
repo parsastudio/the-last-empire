@@ -6,6 +6,7 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -24,7 +25,7 @@ export class AIEconomicDiplomacyEvaluator {
     const senderGdp = getNationGdp(nation);
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
-      if (rel.stance === "WAR" || rel.stance === "SEVERED_RELATIONS") {
+      if (rel.stance === "WAR") {
         continue;
       }
 
@@ -36,6 +37,10 @@ export class AIEconomicDiplomacyEvaluator {
         !targetNation.isAlive ||
         targetNation.id === nation.id
       ) {
+        continue;
+      }
+
+      if (NationRelationResolver.isTradeEmbargoed(nation, targetNation)) {
         continue;
       }
 

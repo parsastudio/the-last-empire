@@ -12,6 +12,7 @@ interface AdvancedDiplomacyActionsProps {
   nationId: string;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
+  isEmbargoed?: boolean;
   onOpenProxy?: () => void;
 }
 
@@ -21,6 +22,7 @@ export function AdvancedDiplomacyActions({
   nationId,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
+  isEmbargoed = false,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -32,7 +34,6 @@ export function AdvancedDiplomacyActions({
   });
 
   const isWar = currentStance === "WAR";
-  const isSevered = currentStance === "SEVERED_RELATIONS";
   const isAlliance = currentStance === "ALLIANCE";
   const isNonAggression = currentStance === "NON_AGGRESSION_PACT";
 
@@ -45,18 +46,19 @@ export function AdvancedDiplomacyActions({
           </span>
 
           <div className="space-y-2">
-            <TreatyStatusBanner stance={currentStance} />
+            <TreatyStatusBanner
+              stance={currentStance}
+              isEmbargoed={isEmbargoed}
+            />
 
             <DiplomacyActionButtons
               isWar={isWar}
-              isSevered={isSevered}
               isAlliance={isAlliance}
               isNonAggression={isNonAggression}
               foreignAidCost={runner.foreignAidCost}
               onSendAid={runner.handleSendAid}
               onNonAggression={runner.handleNonAggression}
               onAlliance={runner.handleAlliance}
-              onSeverTrade={runner.handleSeverTrade}
               onDeclareWar={runner.handleDeclareWar}
             />
           </div>
