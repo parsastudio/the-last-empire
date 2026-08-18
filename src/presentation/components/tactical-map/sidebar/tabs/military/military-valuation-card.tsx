@@ -6,6 +6,7 @@ import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
 import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
+import { CountryRegistry } from "@/domain/data/countries";
 
 interface MilitaryValuationCardProps {
   military: MilitaryStack;
@@ -17,7 +18,7 @@ interface MilitaryValuationCardProps {
 export function MilitaryValuationCard({
   military,
   industrialLevel = 1,
-  nationId = "NATION_DEFAULT",
+  nationId = "IRN",
   nation,
 }: MilitaryValuationCardProps) {
   const metrics = useMemo(() => {
@@ -49,7 +50,7 @@ export function MilitaryValuationCard({
 
     const activeNation: Nation = nation || {
       ...DEFAULT_NATION_MOCK,
-      id: nationId,
+      id: CountryRegistry.resolveCanonicalId(nationId),
       industrialLevel: indLevel,
       military,
     };

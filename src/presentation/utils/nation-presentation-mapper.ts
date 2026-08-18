@@ -51,13 +51,14 @@ export class NationPresentationMapper {
     treasury?: number,
   ): FormattedNationPresentation {
     const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
+    const cleanCode = code.toUpperCase().replace(/^NATION_/, "");
 
     return {
-      id,
+      id: cleanCode,
       name: nameFa,
-      code: code.toUpperCase(),
-      flagCode: flagCode.toUpperCase(),
-      flagEmoji: this.getFlagEmoji(flagCode || code),
+      code: cleanCode,
+      flagCode: (flagCode || cleanCode).toUpperCase(),
+      flagEmoji: this.getFlagEmoji(flagCode || cleanCode),
       rank,
       powerLabel: this.getPowerLabel(gdp),
       gdpText: PersianNumberFormatter.formatCurrency(gdp, true),

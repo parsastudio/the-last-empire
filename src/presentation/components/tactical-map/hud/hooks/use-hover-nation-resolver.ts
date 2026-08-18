@@ -40,7 +40,7 @@ export function useHoverNationResolver({
         province.ownerNationId,
       );
       const ownerNation = nationsMap
-        ? nationsMap[province.ownerNationId] || nationsMap[canonicalOwnerId]
+        ? nationsMap[canonicalOwnerId] || nationsMap[province.ownerNationId]
         : null;
 
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
@@ -56,9 +56,9 @@ export function useHoverNationResolver({
         NationPresentationMapper.formatPopulation(realPop);
 
       const summary = NationPresentationMapper.formatNationSummary(
-        province.ownerNationId,
+        canonicalOwnerId,
         realName,
-        province.ownerNationId,
+        canonicalOwnerId,
         flagCode,
         realRank,
         realGdp,

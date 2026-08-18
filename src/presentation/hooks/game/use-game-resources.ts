@@ -49,7 +49,7 @@ export function useGameResources(
     const humanId = gameState.humanNationId;
     const canonicalHumanId = CountryRegistry.resolveCanonicalId(humanId);
     const nation =
-      gameState.nations[humanId] || gameState.nations[canonicalHumanId] || null;
+      gameState.nations[canonicalHumanId] || gameState.nations[humanId] || null;
 
     if (!nation) {
       return {

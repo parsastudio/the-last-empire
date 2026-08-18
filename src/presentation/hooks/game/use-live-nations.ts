@@ -41,17 +41,16 @@ export function useLiveNations({
         return canonical !== canonicalExclude && n.id !== excludeNationId;
       })
       .map((n) => {
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
         const profile =
-          CountryRegistry.getCountry(n.id) ||
+          CountryRegistry.getCountry(canonical) ||
           CountryRegistry.getCountry(n.flagCode);
 
         const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
-        const code = profile
-          ? profile.code
-          : CountryRegistry.resolveCanonicalId(n.id).replace("NATION_", "");
+        const code = profile ? profile.code : canonical;
 
         return {
-          id: n.id,
+          id: canonical,
           name: n.name,
           code,
           flagCode,
