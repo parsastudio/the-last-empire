@@ -61,21 +61,18 @@ export class DiplomaticAcceptanceEvaluator {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): boolean {
-    const receiverPower =
-      MilitaryPowerCalculator.calculateEffectivePower(receiver);
-    const senderPower = MilitaryPowerCalculator.calculateEffectivePower(sender);
+    const receiverPower = Math.max(
+      1,
+      MilitaryPowerCalculator.calculateEffectivePower(receiver),
+    );
+    const senderPower = Math.max(
+      1,
+      MilitaryPowerCalculator.calculateEffectivePower(sender),
+    );
     const receiverStability = receiver.government.stability;
+    const senderPowerRatio = senderPower / receiverPower;
 
-    const isReceiverOverwhelming =
-      receiverPower > senderPower * 3.0 &&
-      receiverStability >= 65 &&
-      grudge >= 50;
-
-    if (isReceiverOverwhelming) {
-      return false;
-    }
-
-    if (senderPower >= receiverPower * 1.8 || receiverStability < 35) {
+    if (senderPowerRatio >= 1.4 || receiverStability < 35) {
       return true;
     }
 
@@ -91,6 +88,10 @@ export class DiplomaticAcceptanceEvaluator {
       return true;
     }
 
+    if (senderPowerRatio < 0.7) {
+      return grudge < 15 && opinion > -10;
+    }
+
     const threatResult = AIThreatCalculator.evaluate(
       receiver,
       sender,
@@ -98,10 +99,10 @@ export class DiplomaticAcceptanceEvaluator {
     );
 
     if (threatResult.powerRatio >= 0.7 && threatResult.powerRatio <= 1.4) {
-      return receiverStability < 50 || grudge < 30;
+      return receiverStability < 50 || grudge < 35;
     }
 
-    return true;
+    return false;
   }
 
   private static evaluateNonAggressionAcceptance(
