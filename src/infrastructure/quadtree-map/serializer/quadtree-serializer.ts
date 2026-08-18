@@ -1,7 +1,13 @@
 import {
   QuadtreeNode,
   QuadtreeBuildStats,
+  QuadtreeBranchNode,
 } from "@/infrastructure/quadtree-map/core/quadtree-types";
+
+interface QueueItem {
+  node: QuadtreeBranchNode;
+  targetIndex: number;
+}
 
 export class QuadtreeSerializer {
   private static readonly MAGIC_NUMBER = 0x51545245;
@@ -15,22 +21,56 @@ export class QuadtreeSerializer {
     mapWidth: number,
     mapHeight: number,
   ): { buffer: Uint8Array; stats: QuadtreeBuildStats } {
-    const flatNodes: number[] = [];
+    const flatNodes: number[] = [0, 0];
+    const queue: QueueItem[] = [];
+
     let leafCount = 0;
     let branchCount = 0;
 
-    const rootWestIdx = this.flattenNode(
-      rootWest,
-      flatNodes,
-      () => leafCount++,
-      () => branchCount++,
-    );
-    const rootEastIdx = this.flattenNode(
-      rootEast,
-      flatNodes,
-      () => leafCount++,
-      () => branchCount++,
-    );
+    const rootWestIdx = 0;
+    const rootEastIdx = 1;
+
+    if (rootWest.isLeaf) {
+      flatNodes[rootWestIdx] =
+        this.LEAF_BIT_FLAG | (rootWest.provinceId & 0xffff);
+      leafCount++;
+    } else {
+      branchCount++;
+      queue.push({ node: rootWest, targetIndex: rootWestIdx });
+    }
+
+    if (rootEast.isLeaf) {
+      flatNodes[rootEastIdx] =
+        this.LEAF_BIT_FLAG | (rootEast.provinceId & 0xffff);
+      leafCount++;
+    } else {
+      branchCount++;
+      queue.push({ node: rootEast, targetIndex: rootEastIdx });
+    }
+
+    let head = 0;
+    while (head < queue.length) {
+      const item = queue[head++]!;
+      const childBaseIndex = flatNodes.length;
+      flatNodes[item.targetIndex] = childBaseIndex & 0x7fffffff;
+
+      flatNodes.push(0, 0, 0, 0);
+
+      for (let i = 0; i < 4; i++) {
+        const childNode = item.node.children[i]!;
+        const slotIndex = childBaseIndex + i;
+
+        if (childNode.isLeaf) {
+          flatNodes[slotIndex] =
+            this.LEAF_BIT_FLAG | (childNode.provinceId & 0xffff);
+          leafCount++;
+        } else {
+          flatNodes[slotIndex] = 0;
+          branchCount++;
+          queue.push({ node: childNode, targetIndex: slotIndex });
+        }
+      }
+    }
 
     const totalNodes = flatNodes.length;
     const nodesByteSize = totalNodes * 4;
@@ -74,39 +114,5 @@ export class QuadtreeSerializer {
     };
 
     return { buffer: outputBuffer, stats };
-  }
-
-  private static flattenNode(
-    node: QuadtreeNode,
-    flatNodes: number[],
-    onLeaf: () => void,
-    onBranch: () => void,
-  ): number {
-    if (node.isLeaf) {
-      onLeaf();
-      const nodeIndex = flatNodes.length;
-      const leafValue = this.LEAF_BIT_FLAG | (node.provinceId & 0xffff);
-      flatNodes.push(leafValue);
-      return nodeIndex;
-    }
-
-    onBranch();
-    const branchIndex = flatNodes.length;
-    flatNodes.push(0);
-
-    const childIndices: [number, number, number, number] = [0, 0, 0, 0];
-    for (let i = 0; i < 4; i++) {
-      childIndices[i] = this.flattenNode(
-        node.children[i],
-        flatNodes,
-        onLeaf,
-        onBranch,
-      );
-    }
-
-    const firstChildOffset = childIndices[0];
-    flatNodes[branchIndex] = firstChildOffset & 0x7fffffff;
-
-    return branchIndex;
   }
 }

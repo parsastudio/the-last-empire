@@ -58,7 +58,7 @@ export class QuadtreeExportService {
     const reader = new QuadtreeReader(serializedData);
     let samplePassed = true;
 
-    const sampleStep = 64;
+    const sampleStep = 16;
     for (let y = 0; y < mapHeight; y += sampleStep) {
       for (let x = 0; x < mapWidth; x += sampleStep) {
         const rawPid = uint16Data[y * mapWidth + x]! & 0x0fff;
