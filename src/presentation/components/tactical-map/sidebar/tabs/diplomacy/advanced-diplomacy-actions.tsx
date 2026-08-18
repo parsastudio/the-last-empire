@@ -10,6 +10,7 @@ interface AdvancedDiplomacyActionsProps {
   targetName: string;
   targetNationId: string;
   nationId: string;
+  senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
   isEmbargoed?: boolean;
@@ -20,6 +21,7 @@ export function AdvancedDiplomacyActions({
   targetName,
   targetNationId,
   nationId,
+  senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
   isEmbargoed = false,
@@ -29,6 +31,7 @@ export function AdvancedDiplomacyActions({
     targetName,
     targetNationId,
     nationId,
+    senderGdp,
     targetGdp,
     currentStance,
   });

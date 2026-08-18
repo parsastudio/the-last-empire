@@ -19,6 +19,7 @@ export class NationGeographySyncer {
             isAlive: false,
             population: 0,
             executedEspionageTiers: [],
+            provinceIds: [],
             geography: {
               ...nation.geography,
               territoryPixelCount: 0,
@@ -34,15 +35,19 @@ export class NationGeographySyncer {
           ...nation,
           isAlive: true,
           executedEspionageTiers: [],
+          provinceIds: [],
         },
       };
     }
 
     let totalProvincePixels = 0;
     let hasSeaAccess = false;
+    const provinceIds: number[] = [];
+
     for (let pIdx = 0; pIdx < ownedProvinces.length; pIdx++) {
       const p = ownedProvinces[pIdx]!;
       totalProvincePixels += p.pixelCount;
+      provinceIds.push(p.provinceId);
       if (p.hasSeaAccess) {
         hasSeaAccess = true;
       }
@@ -54,6 +59,7 @@ export class NationGeographySyncer {
         ...nation,
         isAlive: true,
         executedEspionageTiers: [],
+        provinceIds,
         geography: {
           ...nation.geography,
           territoryPixelCount: totalProvincePixels,
