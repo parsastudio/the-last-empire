@@ -41,17 +41,18 @@ export function useContextMenu() {
         CountryRegistry.resolveCanonicalId(ownerNationId);
       const ownerNation =
         province && nationsMap
-          ? nationsMap[ownerNationId] || nationsMap[canonicalOwnerId]
+          ? nationsMap[canonicalOwnerId] || nationsMap[ownerNationId]
           : null;
 
       const countryName = ownerNation ? ownerNation.name : "نامشخص";
-      const countryCode = ownerNation ? ownerNation.id : "NATION_DEFAULT";
+      const countryCode = ownerNation
+        ? ownerNation.id
+        : canonicalOwnerId || "IRN";
 
       const isOwnCountry =
         !!humanNationId &&
-        (ownerNationId === humanNationId ||
-          canonicalOwnerId ===
-            CountryRegistry.resolveCanonicalId(humanNationId));
+        CountryRegistry.resolveCanonicalId(ownerNationId) ===
+          CountryRegistry.resolveCanonicalId(humanNationId);
 
       setContextMenuState({
         screenPos: { x: screenX, y: screenY },

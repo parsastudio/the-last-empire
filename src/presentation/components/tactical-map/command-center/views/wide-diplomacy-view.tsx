@@ -8,6 +8,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { CountryRegistry } from "@/domain/data/countries";
 
 function FocusMapButton({
   countryCode,
@@ -48,11 +49,15 @@ export function WideDiplomacyView({
   onFocusCountry,
   onNavigateTab,
 }: WideDiplomacyViewProps) {
-  const activeHumanId = humanNationId || "NATION_USA";
+  const activeHumanId = CountryRegistry.resolveCanonicalId(
+    humanNationId || "USA",
+  );
 
   const humanNation = useMemo(() => {
-    return nationsMap ? nationsMap[activeHumanId] : null;
-  }, [nationsMap, activeHumanId]);
+    return nationsMap
+      ? nationsMap[activeHumanId] || nationsMap[humanNationId || ""]
+      : null;
+  }, [nationsMap, activeHumanId, humanNationId]);
 
   const humanGdp = useMemo(() => {
     return humanNation ? getNationGdp(humanNation) : 100000000000;

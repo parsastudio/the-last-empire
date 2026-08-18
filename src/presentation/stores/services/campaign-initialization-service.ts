@@ -38,13 +38,11 @@ export class CampaignInitializationService {
     let detectedNations: string[] = [];
 
     if (activeManifest && activeManifest.nations) {
-      detectedNations = activeManifest.nations.map(
-        (n: FinalManifestNation) => n.id,
+      detectedNations = activeManifest.nations.map((n: FinalManifestNation) =>
+        CountryRegistry.resolveCanonicalId(n.code || n.id),
       );
     } else {
-      detectedNations = ALL_COUNTRY_PROFILES.map(
-        (p) => `NATION_${p.code.toUpperCase()}`,
-      );
+      detectedNations = ALL_COUNTRY_PROFILES.map((p) => p.code.toUpperCase());
     }
 
     if (!detectedNations.includes(normalizedHumanId)) {
@@ -72,6 +70,7 @@ export class CampaignInitializationService {
       humanNationId: normalizedHumanId,
       provinces: syncedProvinces,
       nations: initResult.nations,
+      pendingProposals: [],
       turnLogs: [],
     };
   }

@@ -59,7 +59,7 @@ export function useMapCameraFocus({
         (m) =>
           m.numericId === targetId ||
           m.code.toUpperCase() === matchedCountry.code.toUpperCase() ||
-          m.id === CountryRegistry.resolveCanonicalId(matchedCountry.code),
+          m.id.toUpperCase() === matchedCountry.code.toUpperCase(),
       );
 
       const targetProvinceIds = new Set<number>(

@@ -6,6 +6,7 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import { Nation } from "@/domain/nation/nation.schema";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 import { TariffCalculator } from "@/engine/economy/calculators/tariff-calculator";
+import { CountryRegistry } from "@/domain/data/countries";
 
 interface TariffControlCardProps {
   initialTariffRate?: number;
@@ -43,8 +44,9 @@ export function TariffControlCard({
     if (nation) {
       return { ...nation, tariffRate };
     }
+    const cleanId = CountryRegistry.resolveCanonicalId(nationId);
     return {
-      id: nationId,
+      id: cleanId,
       name: "کشور",
       isAi: false,
       isAlive: true,
