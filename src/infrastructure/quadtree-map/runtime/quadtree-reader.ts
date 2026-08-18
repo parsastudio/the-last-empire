@@ -8,8 +8,13 @@ export class QuadtreeReader {
   private totalNodes: number;
   private nodeArray: Uint32Array;
 
-  constructor(arrayBuffer: ArrayBuffer) {
-    const dataView = new DataView(arrayBuffer);
+  constructor(source: ArrayBufferLike | Uint8Array) {
+    const view = source instanceof Uint8Array ? source : new Uint8Array(source);
+    const dataView = new DataView(
+      view.buffer,
+      view.byteOffset,
+      view.byteLength,
+    );
     const magic = dataView.getUint32(0, true);
     if (magic !== 0x51545245) {
       throw new Error("Invalid Quadtree binary header signature.");
@@ -21,9 +26,9 @@ export class QuadtreeReader {
     this.rootEastIndex = dataView.getUint32(14, true);
     this.totalNodes = dataView.getUint32(18, true);
 
-    const headerOffset = 22;
+    const headerOffset = view.byteOffset + 22;
     this.nodeArray = new Uint32Array(
-      arrayBuffer,
+      view.buffer,
       headerOffset,
       this.totalNodes,
     );

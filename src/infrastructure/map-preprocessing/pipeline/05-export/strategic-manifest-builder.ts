@@ -1,10 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import {
-  ALL_COUNTRY_PROFILES,
-  CountryProfile,
-  CountryRegistry,
-} from "@/domain/data/countries";
+import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
 import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
