@@ -3,13 +3,32 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "incremental": true,
+    "baseUrl": ".",
     "plugins": [
       {
         "name": "next"
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/domain/*": ["../../packages/domain/src/*"],
+      "@/engine/*": ["../../packages/game-engine/src/*"],
+      "@/infrastructure/map-preprocessing/*": [
+        "../../packages/map-pipeline/src/map-preprocessing/*"
+      ],
+      "@/infrastructure/quadtree-map/*": [
+        "../../packages/map-pipeline/src/quadtree-map/*"
+      ],
+      "@/infrastructure/row-spans-map/*": [
+        "../../packages/map-pipeline/src/row-spans-map/*"
+      ],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@geopolitics/domain": ["../../packages/domain/src/index.ts"],
+      "@geopolitics/domain/*": ["../../packages/domain/src/*"],
+      "@geopolitics/game-engine": ["../../packages/game-engine/src/index.ts"],
+      "@geopolitics/game-engine/*": ["../../packages/game-engine/src/*"],
+      "@geopolitics/map-pipeline": ["../../packages/map-pipeline/src/index.ts"],
+      "@geopolitics/map-pipeline/*": ["../../packages/map-pipeline/src/*"]
     }
   },
   "include": [

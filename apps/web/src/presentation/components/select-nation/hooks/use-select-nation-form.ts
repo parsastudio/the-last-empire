@@ -7,9 +7,9 @@ import { useToast } from "@/presentation/context/toast-context";
 import {
   BitPackedInitService,
   FinalMapManifest,
-} from "@/infrastructure/map-preprocessing/runtime/bit-packed-init-service";
+} from "@/presentation/components/select-nation/services/bit-packed-init-service";
 import { useGameStore } from "@/presentation/stores/use-game-store";
-import { CountryRegistry } from "@/domain/data/countries";
+import { CountryRegistry } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(

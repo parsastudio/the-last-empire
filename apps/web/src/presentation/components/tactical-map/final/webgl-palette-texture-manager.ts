@@ -1,8 +1,10 @@
-import { TacticalPaletteGenerator } from "@/infrastructure/map-preprocessing/runtime/tactical-color-palette";
-import { CountryRegistry } from "@/domain/data/countries";
-import { Province } from "@/domain/province/province.schema";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  TacticalPaletteGenerator,
+  CountryRegistry,
+  Province,
+  Nation,
+  getNationGdp,
+} from "@geopolitics/domain";
 
 export class WebGLPaletteTextureManager {
   private static calculateGdpColor(gdp: number): {

@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState } from "@geopolitics/domain";
 
 export interface SavedGameStateRecord {
   gameId: string;
