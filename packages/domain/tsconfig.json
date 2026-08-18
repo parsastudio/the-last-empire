@@ -3,6 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/domain/*": ["./src/*"],
+      "@geopolitics/domain": ["./src/index.ts"],
       "@geopolitics/domain/*": ["./src/*"]
     }
   },

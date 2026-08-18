@@ -1,11 +1,9 @@
 import { useEffect, useRef, RefObject } from "react";
 import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
 import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { ClientMapPathResolver } from "@/infrastructure/map-preprocessing/runtime/client-map-path-resolver";
+import { BitPackedGridState } from "@geopolitics/game-engine";
+import { ClientMapPathResolver, Province, Nation } from "@geopolitics/domain";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
-import { Province } from "@/domain/province/province.schema";
-import { Nation } from "@/domain/nation/nation.schema";
 
 interface UseWebGLMapRendererProps {
   gl: WebGL2RenderingContext | null;

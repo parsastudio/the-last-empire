@@ -3,6 +3,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/domain/*": ["../domain/src/*"],
+      "@/engine/*": ["./src/*"],
+      "@geopolitics/domain": ["../domain/src/index.ts"],
+      "@geopolitics/domain/*": ["../domain/src/*"],
+      "@geopolitics/game-engine": ["./src/index.ts"],
       "@geopolitics/game-engine/*": ["./src/*"]
     }
   },

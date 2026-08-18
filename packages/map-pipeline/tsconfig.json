@@ -3,6 +3,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
+      "@/domain/*": ["../domain/src/*"],
+      "@/engine/*": ["../game-engine/src/*"],
+      "@/infrastructure/*": ["./src/*"],
+      "@geopolitics/domain": ["../domain/src/index.ts"],
+      "@geopolitics/domain/*": ["../domain/src/*"],
+      "@geopolitics/game-engine": ["../game-engine/src/index.ts"],
+      "@geopolitics/game-engine/*": ["../game-engine/src/*"],
+      "@geopolitics/map-pipeline": ["./src/index.ts"],
       "@geopolitics/map-pipeline/*": ["./src/*"]
     }
   },

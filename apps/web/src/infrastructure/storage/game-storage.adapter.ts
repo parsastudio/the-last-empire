@@ -1,10 +1,9 @@
-import { GameState } from "@/domain/game/game-state.schema";
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { GameState, BitPackedBuffer } from "@geopolitics/domain";
 import {
   db,
   SavedGameStateRecord,
 } from "@/infrastructure/storage/game-database";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { BitPackedGridState } from "@geopolitics/game-engine";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export class GameStorageAdapter {

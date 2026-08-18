@@ -1,4 +1,4 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { BitPackedBuffer } from "@/domain/map/bit-packed-buffer";
 import { MAP_CONFIG } from "@/domain/map/map.config";
 
 export class BitPackedGridState {

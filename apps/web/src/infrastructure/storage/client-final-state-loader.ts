@@ -1,6 +1,5 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
-import { ClientMapPathResolver } from "@/infrastructure/map-preprocessing/runtime/client-map-path-resolver";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { BitPackedBuffer, ClientMapPathResolver } from "@geopolitics/domain";
+import { BitPackedGridState } from "@geopolitics/game-engine";
 
 export class ClientFinalStateLoader {
   public static async loadLiveStateBuffer(
