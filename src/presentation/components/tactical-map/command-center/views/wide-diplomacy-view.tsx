@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { DiplomacyListItem } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomacy-list-item";
 import { CountryProfileStats } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/advanced-diplomacy-actions";
@@ -7,6 +7,7 @@ import { Search, MapPin } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 function FocusMapButton({
   countryCode,
@@ -48,6 +49,14 @@ export function WideDiplomacyView({
   onNavigateTab,
 }: WideDiplomacyViewProps) {
   const activeHumanId = humanNationId || "NATION_USA";
+
+  const humanNation = useMemo(() => {
+    return nationsMap ? nationsMap[activeHumanId] : null;
+  }, [nationsMap, activeHumanId]);
+
+  const humanGdp = useMemo(() => {
+    return humanNation ? getNationGdp(humanNation) : 100000000000;
+  }, [humanNation]);
 
   const diplomacy = useWideDiplomacy({
     selectedTargetCode,
@@ -118,6 +127,7 @@ export function WideDiplomacyView({
             targetName={diplomacy.selectedRelation.name}
             targetNationId={diplomacy.targetNationId}
             nationId={activeHumanId}
+            senderGdp={humanGdp}
             targetGdp={diplomacy.selectedTargetGdp}
             currentStance={diplomacy.selectedRelation.stance}
             onOpenProxy={handleOpenEspionage}

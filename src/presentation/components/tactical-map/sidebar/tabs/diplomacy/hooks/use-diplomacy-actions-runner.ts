@@ -12,6 +12,7 @@ interface UseDiplomacyActionsRunnerProps {
   targetName: string;
   targetNationId: string;
   nationId: string;
+  senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
 }
@@ -20,6 +21,7 @@ export function useDiplomacyActionsRunner({
   targetName,
   targetNationId,
   nationId,
+  senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
 }: UseDiplomacyActionsRunnerProps) {
@@ -38,8 +40,8 @@ export function useDiplomacyActionsRunner({
   });
 
   const foreignAidCost = useMemo(() => {
-    return TreatyEvaluator.calculateForeignAidCost(targetGdp);
-  }, [targetGdp]);
+    return TreatyEvaluator.calculateForeignAidCost(senderGdp, targetGdp);
+  }, [senderGdp, targetGdp]);
 
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
