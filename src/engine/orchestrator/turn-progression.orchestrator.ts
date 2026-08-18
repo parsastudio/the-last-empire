@@ -5,7 +5,7 @@ import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
-import { CountryRegistry } from "@/domain/data/countries";
+import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -36,21 +36,18 @@ export class TurnProgressionOrchestrator {
           nextState = result.newState;
 
           if ("targetNationId" in action && action.targetNationId) {
-            const canonicalTarget = CountryRegistry.resolveCanonicalId(
-              action.targetNationId,
-            );
-            const canonicalActor = CountryRegistry.resolveCanonicalId(
-              action.nationId,
-            );
-
             lockedDiplomacyTargets.add(
-              `${action.nationId}:${action.targetNationId}`,
+              DiplomacyLockManager.createKey(
+                action.nationId,
+                action.targetNationId,
+              ),
             );
             lockedDiplomacyTargets.add(
-              `${action.targetNationId}:${action.nationId}`,
+              DiplomacyLockManager.createKey(
+                action.targetNationId,
+                action.nationId,
+              ),
             );
-            lockedDiplomacyTargets.add(`${canonicalActor}:${canonicalTarget}`);
-            lockedDiplomacyTargets.add(`${canonicalTarget}:${canonicalActor}`);
           }
 
           const logEntry = TurnLogBuilder.createLogEntry(

@@ -121,7 +121,14 @@ export class AIProcurementPlanner {
     );
     const navalValuation = (nation.military.navalFleet || 0) * navalUnitPrice;
 
-    return landAndAirValuation + navalValuation;
+    let queuedValuation = 0;
+    const queue = nation.recruitmentQueue || [];
+    for (let i = 0; i < queue.length; i++) {
+      const order = queue[i]!;
+      queuedValuation += order.totalCost;
+    }
+
+    return landAndAirValuation + navalValuation + queuedValuation;
   }
 
   public static evaluatePosture(

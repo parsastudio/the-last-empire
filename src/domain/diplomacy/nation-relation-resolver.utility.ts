@@ -1,4 +1,5 @@
 import { CountryRegistry } from "@/domain/data/countries";
+import { Nation } from "@/domain/nation/nation.schema";
 import {
   RelationProfile,
   DiplomaticStance,
@@ -32,6 +33,25 @@ export class NationRelationResolver {
     return this.getStance(relationsMap, targetNationId) === "WAR";
   }
 
+  public static hasCommonEnemy(
+    nationA: Nation,
+    nationB: Nation,
+    allNations: Record<string, Nation>,
+  ): boolean {
+    return Object.values(allNations).some((third) => {
+      if (
+        !third.isAlive ||
+        third.id === nationA.id ||
+        third.id === nationB.id
+      ) {
+        return false;
+      }
+      const warA = this.isWar(nationA.relations, third.id);
+      const warB = this.isWar(nationB.relations, third.id);
+      return warA && warB;
+    });
+  }
+
   public static isTradeEmbargoed(
     sourceNation: {
       globalReputation: number;
@@ -50,5 +70,24 @@ export class NationRelationResolver {
       sourceNation.globalReputation <= -30 ||
       targetNation.globalReputation <= -30
     );
+  }
+}
+
+export class DiplomacyLockManager {
+  public static createKey(idA: string, idB: string): string {
+    const cA = CountryRegistry.resolveCanonicalId(idA);
+    const cB = CountryRegistry.resolveCanonicalId(idB);
+    return `${cA}:${cB}`;
+  }
+
+  public static isLocked(
+    lockedSet: Set<string> | undefined,
+    idA: string,
+    idB: string,
+  ): boolean {
+    if (!lockedSet) return false;
+    const key1 = this.createKey(idA, idB);
+    const key2 = this.createKey(idB, idA);
+    return lockedSet.has(key1) || lockedSet.has(key2);
   }
 }
