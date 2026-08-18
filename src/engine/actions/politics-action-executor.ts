@@ -155,6 +155,10 @@ export class PoliticsActionExecutor {
         }
 
         if (action.proposalType === "SEND_FOREIGN_AID") {
+          if (senderRel.stance === "WAR" || receiverRel.stance === "WAR") {
+            return state;
+          }
+
           const costDeduction = TreatyEvaluator.calculateForeignAidCost(
             getNationGdp(nation),
             getNationGdp(receiver),
@@ -164,14 +168,12 @@ export class PoliticsActionExecutor {
             return state;
           }
 
-          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
-            senderRel,
-            "SEND_FOREIGN_AID",
-          );
-          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
-            receiverRel,
-            "SEND_FOREIGN_AID",
-          );
+          const currentReceiverGrudge = receiverRel.grudge ?? 0;
+          const updatedReceiverRel = {
+            ...receiverRel,
+            opinion: Math.min(100, receiverRel.opinion + 25),
+            grudge: Math.max(0, currentReceiverGrudge - 20),
+          };
 
           const newReputation = Math.min(100, nation.globalReputation + 4);
           const senderStabBonus =
@@ -198,10 +200,6 @@ export class PoliticsActionExecutor {
                   stability: StabilityCalculator.clampStability(
                     nation.government.stability + senderStabBonus,
                   ),
-                },
-                relations: {
-                  ...nation.relations,
-                  [senderRel.targetNationId]: updatedSenderRel,
                 },
               },
               [targetKey]: {

@@ -24,6 +24,10 @@ export class AIEconomicDiplomacyEvaluator {
     const senderGdp = getNationGdp(nation);
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
+      if (rel.stance === "WAR" || rel.stance === "SEVERED_RELATIONS") {
+        continue;
+      }
+
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[targetId] || allNations[canonicalTarget];
 
@@ -41,7 +45,7 @@ export class AIEconomicDiplomacyEvaluator {
         targetGdp,
       );
 
-      if (currentTreasury < cost) {
+      if (currentTreasury < Math.floor(cost * 1.5)) {
         continue;
       }
 
@@ -52,15 +56,10 @@ export class AIEconomicDiplomacyEvaluator {
       );
       const powerRatio = threatResult.powerRatio;
 
-      const isWartimeReparation = rel.stance === "WAR" && powerRatio >= 2.0;
-
       const isPeacetimeAppeasement =
-        rel.stance !== "WAR" &&
-        powerRatio >= 1.5 &&
-        rel.opinion < 20 &&
-        threatResult.isNeighbor;
+        powerRatio >= 1.3 && rel.opinion < 20 && threatResult.isNeighbor;
 
-      if (isWartimeReparation || isPeacetimeAppeasement) {
+      if (isPeacetimeAppeasement) {
         return {
           action: ActionFactory.sendForeignAid(nation.id, targetNation.id),
           cost,
