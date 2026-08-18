@@ -1,39 +1,73 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { AIEngine } from "@/engine/ai/ai-engine";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
+import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class TurnProgressionOrchestrator {
-  private aiEngine = new AIEngine();
   private pipeline = new TurnPipeline();
   private livenessManager = new NationLivenessManager();
   private victoryChecker = new VictoryChecker();
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
     let nextState = state;
-    const aiActions = this.aiEngine.generateTurnActions(nextState);
+    const lockedDiplomacyTargets = new Set<string>();
+    const sortedNationIds = Object.keys(nextState.nations).sort();
 
-    for (const action of aiActions) {
-      const result = ActionEngine.execute(nextState, action);
-      if (result.success && result.newState) {
-        nextState = result.newState;
-        const logEntry = TurnLogBuilder.createLogEntry(
-          nextState.currentTurn,
-          action.nationId,
-          "INFO",
-          `پردازش اکشن هوش مصنوعی: ${action.type}`,
-        );
-        const updatedLogs = [...nextState.turnLogs, logEntry];
-        if (updatedLogs.length > 200) {
-          updatedLogs.splice(0, updatedLogs.length - 200);
+    for (const id of sortedNationIds) {
+      const nation = nextState.nations[id];
+      if (!nation || !nation.isAlive || !nation.isAi) {
+        continue;
+      }
+
+      const aiActions = AIActionBuilder.buildNationActions(
+        nation,
+        nextState.nations,
+        nextState.provinces,
+        lockedDiplomacyTargets,
+      );
+
+      for (const action of aiActions) {
+        const result = ActionEngine.execute(nextState, action);
+        if (result.success && result.newState) {
+          nextState = result.newState;
+
+          if ("targetNationId" in action && action.targetNationId) {
+            const canonicalTarget = CountryRegistry.resolveCanonicalId(
+              action.targetNationId,
+            );
+            const canonicalActor = CountryRegistry.resolveCanonicalId(
+              action.nationId,
+            );
+
+            lockedDiplomacyTargets.add(
+              `${action.nationId}:${action.targetNationId}`,
+            );
+            lockedDiplomacyTargets.add(
+              `${action.targetNationId}:${action.nationId}`,
+            );
+            lockedDiplomacyTargets.add(`${canonicalActor}:${canonicalTarget}`);
+            lockedDiplomacyTargets.add(`${canonicalTarget}:${canonicalActor}`);
+          }
+
+          const logEntry = TurnLogBuilder.createLogEntry(
+            nextState.currentTurn,
+            action.nationId,
+            "INFO",
+            `پردازش اکشن هوش مصنوعی: ${action.type}`,
+          );
+          const updatedLogs = [...nextState.turnLogs, logEntry];
+          if (updatedLogs.length > 200) {
+            updatedLogs.splice(0, updatedLogs.length - 200);
+          }
+          nextState = {
+            ...nextState,
+            turnLogs: updatedLogs,
+          };
         }
-        nextState = {
-          ...nextState,
-          turnLogs: updatedLogs,
-        };
       }
     }
 
