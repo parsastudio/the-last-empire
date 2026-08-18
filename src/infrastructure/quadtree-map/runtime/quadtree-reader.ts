@@ -1,5 +1,6 @@
 export class QuadtreeReader {
   private static readonly LEAF_BIT_FLAG = 0x80000000;
+  private static readonly HEADER_BYTE_SIZE = 24;
 
   private mapWidth: number;
   private mapHeight: number;
@@ -22,11 +23,11 @@ export class QuadtreeReader {
 
     this.mapWidth = dataView.getUint16(6, true);
     this.mapHeight = dataView.getUint16(8, true);
-    this.rootWestIndex = dataView.getUint32(10, true);
-    this.rootEastIndex = dataView.getUint32(14, true);
-    this.totalNodes = dataView.getUint32(18, true);
+    this.rootWestIndex = dataView.getUint32(12, true);
+    this.rootEastIndex = dataView.getUint32(16, true);
+    this.totalNodes = dataView.getUint32(20, true);
 
-    const headerOffset = view.byteOffset + 22;
+    const headerOffset = view.byteOffset + QuadtreeReader.HEADER_BYTE_SIZE;
     this.nodeArray = new Uint32Array(
       view.buffer,
       headerOffset,
@@ -96,6 +97,6 @@ export class QuadtreeReader {
   }
 
   public getByteSize(): number {
-    return 22 + this.totalNodes * 4;
+    return QuadtreeReader.HEADER_BYTE_SIZE + this.totalNodes * 4;
   }
 }

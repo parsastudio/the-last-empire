@@ -7,6 +7,7 @@ export class QuadtreeSerializer {
   private static readonly MAGIC_NUMBER = 0x51545245;
   private static readonly FORMAT_VERSION = 1;
   private static readonly LEAF_BIT_FLAG = 0x80000000;
+  private static readonly HEADER_BYTE_SIZE = 24;
 
   public static serializeDualRoot(
     rootWest: QuadtreeNode,
@@ -32,9 +33,8 @@ export class QuadtreeSerializer {
     );
 
     const totalNodes = flatNodes.length;
-    const headerByteSize = 22;
     const nodesByteSize = totalNodes * 4;
-    const totalBytes = headerByteSize + nodesByteSize;
+    const totalBytes = this.HEADER_BYTE_SIZE + nodesByteSize;
 
     const outputBuffer = new Uint8Array(totalBytes);
     const dataView = new DataView(outputBuffer.buffer);
@@ -43,13 +43,14 @@ export class QuadtreeSerializer {
     dataView.setUint16(4, this.FORMAT_VERSION, true);
     dataView.setUint16(6, mapWidth, true);
     dataView.setUint16(8, mapHeight, true);
-    dataView.setUint32(10, rootWestIdx, true);
-    dataView.setUint32(14, rootEastIdx, true);
-    dataView.setUint32(18, totalNodes, true);
+    dataView.setUint16(10, 0, true);
+    dataView.setUint32(12, rootWestIdx, true);
+    dataView.setUint32(16, rootEastIdx, true);
+    dataView.setUint32(20, totalNodes, true);
 
     const nodeArray = new Uint32Array(
       outputBuffer.buffer,
-      headerByteSize,
+      this.HEADER_BYTE_SIZE,
       totalNodes,
     );
     for (let i = 0; i < totalNodes; i++) {
