@@ -1,12 +1,16 @@
 import React from "react";
-import { Swords, CheckCircle2, Handshake, Ban, Globe } from "lucide-react";
+import { Swords, CheckCircle2, Handshake, Globe, Ban } from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface TreatyStatusBannerProps {
   stance: DiplomaticStance | string;
+  isEmbargoed?: boolean;
 }
 
-export function TreatyStatusBanner({ stance }: TreatyStatusBannerProps) {
+export function TreatyStatusBanner({
+  stance,
+  isEmbargoed = false,
+}: TreatyStatusBannerProps) {
   if (stance === "WAR") {
     return (
       <div className="w-full p-3 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-500 flex items-center justify-between text-xs font-bold">
@@ -49,12 +53,12 @@ export function TreatyStatusBanner({ stance }: TreatyStatusBannerProps) {
     );
   }
 
-  if (stance === "SEVERED_RELATIONS") {
+  if (isEmbargoed) {
     return (
       <div className="w-full p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-between text-xs font-bold">
         <span className="flex items-center gap-1.5">
           <Ban size={14} />
-          قطع روابط تجاری و تحریم (فعال)
+          تحریم تجاری ناشی از اعتبار جهانی بحرانی
         </span>
         <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-400">
           وضعیت فعلی

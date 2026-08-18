@@ -35,9 +35,6 @@ export class DiplomaticTurnProcessor {
     if (stance === "NON_AGGRESSION_PACT") {
       return Math.max(baseline, 25);
     }
-    if (stance === "SEVERED_RELATIONS") {
-      return Math.min(baseline, -30);
-    }
     return baseline;
   }
 
@@ -108,18 +105,8 @@ export class DiplomaticTurnProcessor {
         nextGrudge = Math.max(0, nextGrudge - 2);
       }
 
-      let nextStance = relation.stance;
-      if (
-        nation.globalReputation <= -30 &&
-        nextOpinion < 0 &&
-        relation.stance === "NORMAL_DIPLOMACY"
-      ) {
-        nextStance = "SEVERED_RELATIONS";
-      }
-
       newRels[targetId] = {
         ...relation,
-        stance: nextStance,
         opinion: nextOpinion,
         grudge: nextGrudge,
       };

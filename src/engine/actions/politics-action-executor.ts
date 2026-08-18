@@ -123,38 +123,6 @@ export class PoliticsActionExecutor {
           };
         }
 
-        if (action.proposalType === "SEVER_TRADE_RELATIONS") {
-          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
-            senderRel,
-            "SEVER_TRADE_RELATIONS",
-          );
-          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
-            receiverRel,
-            "SEVER_TRADE_RELATIONS",
-          );
-
-          return {
-            ...state,
-            nations: {
-              ...state.nations,
-              [sourceKey]: {
-                ...nation,
-                relations: {
-                  ...nation.relations,
-                  [senderRel.targetNationId]: updatedSenderRel,
-                },
-              },
-              [targetKey]: {
-                ...receiver,
-                relations: {
-                  ...receiver.relations,
-                  [receiverRel.targetNationId]: updatedReceiverRel,
-                },
-              },
-            },
-          };
-        }
-
         if (action.proposalType === "SEND_FOREIGN_AID") {
           if (senderRel.stance === "WAR" || receiverRel.stance === "WAR") {
             return state;

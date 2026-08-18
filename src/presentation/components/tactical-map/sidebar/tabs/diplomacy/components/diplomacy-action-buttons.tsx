@@ -1,36 +1,26 @@
 import React from "react";
-import {
-  Handshake,
-  CheckCircle2,
-  Ban,
-  Swords,
-  HeartHandshake,
-} from "lucide-react";
+import { Handshake, CheckCircle2, Swords, HeartHandshake } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DiplomacyActionButtonsProps {
   isWar: boolean;
-  isSevered: boolean;
   isAlliance: boolean;
   isNonAggression: boolean;
   foreignAidCost: number;
   onSendAid: () => void;
   onNonAggression: () => void;
   onAlliance: () => void;
-  onSeverTrade: () => void;
   onDeclareWar: () => void;
 }
 
 export function DiplomacyActionButtons({
   isWar,
-  isSevered,
   isAlliance,
   isNonAggression,
   foreignAidCost,
   onSendAid,
   onNonAggression,
   onAlliance,
-  onSeverTrade,
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
   return (
@@ -56,7 +46,7 @@ export function DiplomacyActionButtons({
       {!isNonAggression && (
         <button
           onClick={onNonAggression}
-          disabled={isWar || isSevered}
+          disabled={isWar}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 disabled:opacity-40 border border-border text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">
@@ -71,7 +61,7 @@ export function DiplomacyActionButtons({
       {!isAlliance && (
         <button
           onClick={onAlliance}
-          disabled={isWar || isSevered}
+          disabled={isWar}
           className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 disabled:opacity-40 border border-border text-right transition-all cursor-pointer space-y-1"
         >
           <div className="flex items-center justify-between">
@@ -79,20 +69,6 @@ export function DiplomacyActionButtons({
               پیمان اتحاد کامل
             </span>
             <CheckCircle2 size={13} className="text-gdp" />
-          </div>
-        </button>
-      )}
-
-      {!isSevered && !isWar && (
-        <button
-          onClick={onSeverTrade}
-          className="w-full p-3 rounded-xl bg-secondary hover:bg-secondary/80 border border-border text-right transition-all cursor-pointer space-y-1"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground">
-              قطع روابط تجاری
-            </span>
-            <Ban size={13} className="text-rose-400" />
           </div>
         </button>
       )}

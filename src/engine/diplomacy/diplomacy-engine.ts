@@ -69,13 +69,6 @@ export class TreatyEvaluator {
           opinion: Math.max(-10, profile.opinion),
           grudge: Math.floor(currentGrudge * 0.4),
         };
-      case "SEVER_TRADE_RELATIONS":
-        return {
-          ...profile,
-          stance: "SEVERED_RELATIONS",
-          opinion: Math.max(-100, Math.min(profile.opinion - 30, -30)),
-          grudge: Math.min(100, currentGrudge + 15),
-        };
       case "DECLARE_WAR":
         return {
           ...profile,
