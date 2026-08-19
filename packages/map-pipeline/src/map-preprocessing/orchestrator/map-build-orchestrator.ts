@@ -22,6 +22,7 @@ export class MapBuildOrchestrator {
       "manifest.json",
       "live-state.bin",
       "base_map_terrain.png",
+      "terrain-preview.png",
       "terrain-raw.bin",
       "terrain-compressed.bin",
       "terrain-compressed.bin.gz",
