@@ -21,18 +21,18 @@ export class DemographicsEngine {
 
     let growthRate = 0;
     if (stability > 60) {
-      growthRate = (stability - 60) * 0.0003;
+      growthRate = ((stability - 60) / 40) * 0.02;
     } else if (stability >= 40) {
-      growthRate = 0.0001;
+      growthRate = 0;
     } else {
-      growthRate = (stability - 40) * 0.0004;
+      growthRate = ((stability - 40) / 40) * 0.05;
     }
 
     if (currentPopulation >= capacity && growthRate > 0) {
       growthRate = 0;
     }
 
-    growthRate = Math.max(-0.05, Math.min(0.05, growthRate));
+    growthRate = Math.max(-0.05, Math.min(0.02, growthRate));
 
     const naturalChange = Math.floor(currentPopulation * growthRate);
     const newPopulation = Math.min(

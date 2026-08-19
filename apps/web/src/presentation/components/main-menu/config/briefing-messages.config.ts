@@ -70,7 +70,7 @@ export const INITIAL_BRIEFING_MESSAGES: FeedMessage[] = [
   {
     id: "12",
     type: "danger",
-    text: "فرار مغزها و خروج آوارگان به دلیل افت ثبات سیاسی رصد شد.",
+    text: "افت نرخ رشد جمعیت کشور به دلیل کاهش شاخص ثبات سیاسی رصد شد.",
     time: "۴۵ دقیقه پیش",
   },
   {
@@ -118,7 +118,7 @@ export const INITIAL_BRIEFING_MESSAGES: FeedMessage[] = [
   {
     id: "20",
     type: "info",
-    text: "جذب نیروی انسانی باکیفیت و مهاجران نخبه به کشور آغاز گردید.",
+    text: "ثبت شاخص رشد طبیعی جمعیت در سایه برقراری ثبات ملی پایدار.",
     time: "۳ ساعت پیش",
   },
 ];

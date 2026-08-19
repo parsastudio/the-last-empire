@@ -1,5 +1,4 @@
 import type { GameState } from "@/domain/game/game-state.schema";
-import { MigrationEngine } from "@/engine/economy/demographics/migration-engine";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -66,11 +65,7 @@ export class TurnPipeline {
       updatedNations[id] = polNation;
     }
 
-    const migrationSummary =
-      MigrationEngine.processGlobalMigration(updatedNations);
-    const rankedNations = RankManager.recalculateRanks(
-      migrationSummary.updatedNations,
-    );
+    const rankedNations = RankManager.recalculateRanks(updatedNations);
 
     return {
       ...currentState,
