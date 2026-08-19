@@ -24,6 +24,7 @@ export class MapBuildOrchestrator {
       "base_map_terrain.png",
       "terrain-raw.bin",
       "terrain-compressed.bin",
+      "terrain-compressed.bin.gz",
       "terrain-binary-stats.json",
     ];
     for (const file of files) {
@@ -106,7 +107,6 @@ export class MapBuildOrchestrator {
       width,
       height,
       outputDir,
-      destTerrainPath,
     );
   }
 }
