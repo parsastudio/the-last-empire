@@ -32,7 +32,7 @@ export function PopulationWelfareCard({
 
   const demographicStatus = useMemo(() => {
     if (stability > 60) {
-      return { text: "رشد مثبت طبیعی + جذب مهاجران نخبگان", color: "text-gdp" };
+      return { text: "رشد مثبت طبیعی جمعیت", color: "text-gdp" };
     }
     if (stability >= 40) {
       return {
@@ -41,7 +41,7 @@ export function PopulationWelfareCard({
       };
     }
     return {
-      text: "کاهش جمعیت + خروج آوارگان و فرار مغزها",
+      text: "کاهش طبیعی جمعیت ناشی از بحران سیاسی",
       color: "text-military",
     };
   }, [stability]);
@@ -115,9 +115,8 @@ export function PopulationWelfareCard({
         )}
 
         <p className="text-[10px] text-muted-foreground leading-relaxed bg-secondary/30 p-2.5 rounded-xl border border-border/40 font-sans">
-          ثبات سیاسی بالا باعث زادومولد طبیعی و جذب مهاجران باکیفیت می‌شود. هر
-          لِوِل ارتقای صنعت و آموزش ۲٪ به بهره‌وری سرانه می‌افزاید (سقف ۳۰۰ هزار
-          دلار).
+          ثبات سیاسی بالا باعث پویایی طبیعی جمعیت می‌شود. هر لِوِل ارتقای صنعت و
+          آموزش ۲٪ به بهره‌وری سرانه می‌افزاید (سقف ۳۰۰ هزار دلار).
         </p>
       </div>
     </div>
