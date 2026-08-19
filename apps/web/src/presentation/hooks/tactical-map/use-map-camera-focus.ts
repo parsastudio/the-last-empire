@@ -5,9 +5,8 @@ import {
   CountryRegistry,
 } from "@/domain/data/countries";
 import { CountryMapping } from "@/domain/map/country-mapping.schema";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { Province } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
-import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 
 interface UseMapCameraFocusProps {
   mapWidth: number;
@@ -16,6 +15,7 @@ interface UseMapCameraFocusProps {
   scaleRef: RefObject<number>;
   countries: CountryMapping[];
   positionRef: RefObject<CameraPosition>;
+  provincesMap?: Record<string, Province>;
 }
 
 export function useMapCameraFocus({
@@ -25,6 +25,7 @@ export function useMapCameraFocus({
   scaleRef,
   countries,
   positionRef,
+  provincesMap,
 }: UseMapCameraFocusProps) {
   const focusOnCountry = useCallback(
     (countryCodeOrId: string | number) => {
@@ -54,55 +55,63 @@ export function useMapCameraFocus({
       if (!matchedCountry) return;
 
       const targetId = matchedCountry.id;
-      const manifestNations = CountryRegistry.getAllManifestNations();
-      const manifestNation = manifestNations.find(
-        (m) =>
-          m.numericId === targetId ||
-          m.code.toUpperCase() === matchedCountry.code.toUpperCase() ||
-          m.id.toUpperCase() === matchedCountry.code.toUpperCase(),
+      const canonicalCountryId = CountryRegistry.resolveCanonicalId(
+        matchedCountry.code,
       );
-
-      const targetProvinceIds = new Set<number>(
-        manifestNation?.provinceIds || [],
-      );
-
-      const buffer = BitPackedGridState.getInstance().getBuffer();
 
       let sumX = 0;
       let sumY = 0;
-      let count = 0;
+      let totalWeight = 0;
 
-      const step = 8;
-      for (let y = 0; y < mapHeight; y += step) {
-        for (let x = 0; x < mapWidth; x += step) {
-          const rawPixel = buffer.getPixel(x, y);
-          const provId = BitPackedCellUtility.getProvinceId(rawPixel);
-
+      if (provincesMap) {
+        for (const prov of Object.values(provincesMap)) {
+          const canonicalOwner = CountryRegistry.resolveCanonicalId(
+            prov.ownerNationId,
+          );
           if (
-            targetProvinceIds.size > 0
-              ? targetProvinceIds.has(provId)
-              : provId >= BitPackedCellUtility.FIRST_PROVINCE_ID
+            canonicalOwner === canonicalCountryId ||
+            prov.countryNumericId === targetId
           ) {
-            sumX += x;
-            sumY += y;
-            count++;
+            const weight = Math.max(1, prov.pixelCount);
+            sumX += prov.centerCoordinates.x * weight;
+            sumY += prov.centerCoordinates.y * weight;
+            totalWeight += weight;
           }
         }
       }
 
-      if (count === 0) return;
+      if (totalWeight === 0) {
+        const manifestNations = CountryRegistry.getAllManifestNations();
+        const manifestNation = manifestNations.find(
+          (m) =>
+            m.numericId === targetId ||
+            m.code.toUpperCase() === canonicalCountryId,
+        );
 
-      const centerX = sumX / count;
-      const centerY = sumY / count;
+        if (!manifestNation) return;
+        sumX = mapWidth / 2;
+        sumY = mapHeight / 2;
+        totalWeight = 1;
+      }
+
+      const centerX = sumX / totalWeight;
+      const centerY = sumY / totalWeight;
 
       const currentScale = scaleRef.current || 1;
-
       const targetPosX = dimensions.width / 2 - centerX * currentScale;
       const targetPosY = dimensions.height / 2 - centerY * currentScale;
 
       positionRef.current = { x: targetPosX, y: targetPosY };
     },
-    [countries, dimensions, mapHeight, mapWidth, scaleRef, positionRef],
+    [
+      countries,
+      dimensions,
+      mapHeight,
+      mapWidth,
+      scaleRef,
+      positionRef,
+      provincesMap,
+    ],
   );
 
   return { focusOnCountry };

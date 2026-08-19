@@ -23,6 +23,9 @@
       "@/infrastructure/row-spans-map/*": [
         "../../packages/map-pipeline/src/row-spans-map/*"
       ],
+      "@/infrastructure/terrain-binary-map/*": [
+        "../../packages/map-pipeline/src/terrain-binary-map/*"
+      ],
       "@/infrastructure/*": ["./src/infrastructure/*"],
       "@geopolitics/domain": ["../../packages/domain/src/index.ts"],
       "@geopolitics/domain/*": ["../../packages/domain/src/*"],
@@ -37,7 +40,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "../../packages/domain/src/**/*",
+    "../../packages/game-engine/src/**/*",
+    "../../packages/map-pipeline/src/**/*"
   ],
   "exclude": ["node_modules"]
 }

@@ -15,5 +15,10 @@
       "@geopolitics/map-pipeline/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "scripts/**/*"]
+  "include": [
+    "src/**/*",
+    "scripts/**/*",
+    "../domain/src/**/*",
+    "../game-engine/src/**/*"
+  ]
 }
