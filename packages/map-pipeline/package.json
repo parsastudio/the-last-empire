@@ -7,6 +7,7 @@
   "scripts": {
     "build:map": "tsx scripts/build-map.ts",
     "build:row-spans": "tsx scripts/build-row-spans.ts",
+    "build:tactical-terrain": "tsx scripts/build-tactical-terrain.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
