@@ -4,6 +4,7 @@ export * from "./actions/military-action-executor";
 export * from "./actions/politics-action-executor";
 
 export * from "./ai/ai-action-builder";
+export * from "./ai/ai-attack-planner";
 export * from "./ai/ai-economic-diplomacy-evaluator";
 export * from "./ai/ai-economy-calculator";
 export * from "./ai/ai-engine";

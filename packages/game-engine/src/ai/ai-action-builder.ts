@@ -4,6 +4,7 @@ import { Province } from "@/domain/province/province.schema";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
+import { AIAttackPlanner } from "@/engine/ai/ai-attack-planner";
 import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
 import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
 import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-evaluator";
@@ -40,6 +41,15 @@ export class AIActionBuilder {
       upgradeResult.remainingTreasury,
     );
     actions.push(...espionageResult.actions);
+
+    const attackAction = AIAttackPlanner.planAttack(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    if (attackAction) {
+      actions.push(attackAction);
+    }
 
     this.appendDiplomaticAndWarActions(
       nation,
