@@ -116,12 +116,44 @@ export class TreatyAcceptanceApplier {
       },
     };
 
-    const logEntry = TurnLogBuilder.createLogEntry(
-      state.currentTurn,
-      receiver.id,
-      "INFO",
-      `توافق دیپلماتیک: کشور ${receiver.name} پیشنهاد معاهده (${proposal.proposalType}) از سوی ${sender.name} را پذیرفت.`,
+    const treatyLabel =
+      proposal.proposalType === "FULL_ALLIANCE"
+        ? "اتحاد کامل راهبردی"
+        : proposal.proposalType === "NON_AGGRESSION_PACT"
+          ? "پیمان عدم تخاصم"
+          : "معاهده صلح و پایان جنگ";
+
+    const treatyText = `توافق دیپلماتیک: کشور ${receiver.name} پیشنهاد (${treatyLabel}) از سوی ${sender.name} را رسماً امضا و نافذ نمود.`;
+
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      state.humanNationId,
     );
+    const isHumanInvolved =
+      canonicalSenderId === canonicalHuman ||
+      canonicalReceiverId === canonicalHuman;
+
+    const newLogs = [
+      TurnLogBuilder.createGlobalDiplomacyLog(
+        state.currentTurn,
+        sender.id,
+        receiver.id,
+        treatyText,
+        "INFO",
+      ),
+    ];
+
+    if (isHumanInvolved) {
+      newLogs.push(
+        TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          sender.id,
+          "DIPLOMACY",
+          "INFO",
+          treatyText,
+          receiver.id,
+        ),
+      );
+    }
 
     const remainingProposals = state.pendingProposals.filter(
       (p) => p.id !== proposal.id,
@@ -130,7 +162,7 @@ export class TreatyAcceptanceApplier {
     return {
       ...state,
       pendingProposals: remainingProposals,
-      turnLogs: [...state.turnLogs, logEntry],
+      turnLogs: [...state.turnLogs, ...newLogs],
       nations: {
         ...state.nations,
         [sender.id]: updatedSender,
@@ -160,12 +192,44 @@ export class TreatyAcceptanceApplier {
     const senderName = sender ? sender.name : proposal.senderNationId;
     const receiverName = receiver ? receiver.name : proposal.receiverNationId;
 
-    const logEntry = TurnLogBuilder.createLogEntry(
-      state.currentTurn,
-      proposal.receiverNationId,
-      "WARNING",
-      `رد پیشنهاد دیپلماتیک: کشور ${receiverName} پیشنهاد معاهده (${proposal.proposalType}) از سوی ${senderName} را رد نمود.`,
+    const treatyLabel =
+      proposal.proposalType === "FULL_ALLIANCE"
+        ? "اتحاد کامل"
+        : proposal.proposalType === "NON_AGGRESSION_PACT"
+          ? "عدم تخاصم"
+          : "صلح";
+
+    const rejectionText = `رد معاهده دیپلماتیک: کشور ${receiverName} پیشنهاد (${treatyLabel}) از سوی ${senderName} را نپذیرفت.`;
+
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      state.humanNationId,
     );
+    const isHumanInvolved =
+      canonicalSenderId === canonicalHuman ||
+      canonicalReceiverId === canonicalHuman;
+
+    const newLogs = [
+      TurnLogBuilder.createGlobalDiplomacyLog(
+        state.currentTurn,
+        proposal.receiverNationId,
+        proposal.senderNationId,
+        rejectionText,
+        "WARNING",
+      ),
+    ];
+
+    if (isHumanInvolved) {
+      newLogs.push(
+        TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          proposal.receiverNationId,
+          "DIPLOMACY",
+          "WARNING",
+          rejectionText,
+          proposal.senderNationId,
+        ),
+      );
+    }
 
     const remainingProposals = state.pendingProposals.filter(
       (p) => p.id !== proposal.id,
@@ -174,7 +238,7 @@ export class TreatyAcceptanceApplier {
     return {
       ...state,
       pendingProposals: remainingProposals,
-      turnLogs: [...state.turnLogs, logEntry],
+      turnLogs: [...state.turnLogs, ...newLogs],
     };
   }
 

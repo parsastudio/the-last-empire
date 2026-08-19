@@ -79,6 +79,13 @@ export class PoliticsActionExecutor {
           receiver.relations[action.nationId];
         if (!senderRel || !receiverRel) return state;
 
+        const canonicalHuman = CountryRegistry.resolveCanonicalId(
+          state.humanNationId,
+        );
+        const isHumanInvolved =
+          canonicalSourceId === canonicalHuman ||
+          canonicalTargetId === canonicalHuman;
+
         if (action.proposalType === "DECLARE_WAR") {
           const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
             senderRel,
@@ -90,16 +97,34 @@ export class PoliticsActionExecutor {
           );
 
           const newReputation = Math.max(-100, nation.globalReputation - 10);
-          const warLog = TurnLogBuilder.createLogEntry(
-            state.currentTurn,
-            nation.id,
-            "CRITICAL",
-            `کشور ${nation.name} به ${receiver.name} اعلان جنگ رسمی نمود.`,
-          );
+          const warMessage = `اعلان جنگ رسمی: کشور ${nation.name} علیه ${receiver.name} فرمان آتش و آغاز نبرد سراسری صادر نمود.`;
+
+          const warLogs = [
+            TurnLogBuilder.createGlobalWarLog(
+              state.currentTurn,
+              nation.id,
+              receiver.id,
+              warMessage,
+              "CRITICAL",
+            ),
+          ];
+
+          if (isHumanInvolved) {
+            warLogs.push(
+              TurnLogBuilder.createNationalLog(
+                state.currentTurn,
+                nation.id,
+                "DIPLOMACY",
+                "CRITICAL",
+                warMessage,
+                receiver.id,
+              ),
+            );
+          }
 
           return {
             ...state,
-            turnLogs: [...state.turnLogs, warLog],
+            turnLogs: [...state.turnLogs, ...warLogs],
             nations: {
               ...state.nations,
               [sourceKey]: {
@@ -156,8 +181,34 @@ export class PoliticsActionExecutor {
               false,
             );
 
+          const aidMsg = `بسته کمک مالی و دیپلماتیک از سوی ${nation.name} به خزانه‌داری ${receiver.name} واریز شد.`;
+
+          const aidLogs = [
+            TurnLogBuilder.createGlobalDiplomacyLog(
+              state.currentTurn,
+              nation.id,
+              receiver.id,
+              aidMsg,
+              "INFO",
+            ),
+          ];
+
+          if (isHumanInvolved) {
+            aidLogs.push(
+              TurnLogBuilder.createNationalLog(
+                state.currentTurn,
+                nation.id,
+                "DIPLOMACY",
+                "INFO",
+                aidMsg,
+                receiver.id,
+              ),
+            );
+          }
+
           return {
             ...state,
+            turnLogs: [...state.turnLogs, ...aidLogs],
             nations: {
               ...state.nations,
               [sourceKey]: {
@@ -231,11 +282,13 @@ export class PoliticsActionExecutor {
           return state;
         }
 
-        const proposalLog = TurnLogBuilder.createLogEntry(
+        const proposalLog = TurnLogBuilder.createNationalLog(
           state.currentTurn,
           nation.id,
+          "DIPLOMACY",
           "INFO",
-          `پیشنهاد رسمی (${action.proposalType}) از سوی ${nation.name} برای ${receiver.name} ارسال گردید.`,
+          `پیشنهاد رسمی (${action.proposalType}) از سوی ${nation.name} برای ${receiver.name} ابلاغ گردید.`,
+          receiver.id,
         );
 
         return {

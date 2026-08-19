@@ -2,7 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
-import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
@@ -49,21 +49,6 @@ export class TurnProgressionOrchestrator {
               ),
             );
           }
-
-          const logEntry = TurnLogBuilder.createLogEntry(
-            nextState.currentTurn,
-            action.nationId,
-            "INFO",
-            `پردازش اکشن هوش مصنوعی: ${action.type}`,
-          );
-          const updatedLogs = [...nextState.turnLogs, logEntry];
-          if (updatedLogs.length > 200) {
-            updatedLogs.splice(0, updatedLogs.length - 200);
-          }
-          nextState = {
-            ...nextState,
-            turnLogs: updatedLogs,
-          };
         }
       }
     }

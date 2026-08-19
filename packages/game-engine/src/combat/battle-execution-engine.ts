@@ -132,12 +132,13 @@ export class BattleExecutionEngine {
       ? ` [جریمه نقض معاهده: -${betrayalResult.reputationPenalty} اعتبار جهانی]`
       : "";
 
-    const battleLog = BattleLogFactory.createBattleSummaryLog(
+    const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,
       updatedAttacker,
       updatedDefender,
       calcResult,
       betrayalText,
+      state.humanNationId,
     );
 
     const interventionLogs = BattleLogFactory.createInterventionLogs(
@@ -145,15 +146,16 @@ export class BattleExecutionEngine {
       intervention,
       updatedAttacker,
       updatedDefender,
+      state.humanNationId,
     );
 
     const rankedNations = RankManager.recalculateRanks(
       intervention.updatedNations,
     );
 
-    const updatedLogs = [...state.turnLogs, battleLog, ...interventionLogs];
-    if (updatedLogs.length > 200) {
-      updatedLogs.splice(0, updatedLogs.length - 200);
+    const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
+    if (updatedLogs.length > 300) {
+      updatedLogs.splice(0, updatedLogs.length - 300);
     }
 
     return {

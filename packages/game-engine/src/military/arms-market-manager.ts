@@ -108,12 +108,31 @@ export class ArmsMarketManager {
       treasury: seller.treasury + sellerProfit,
     };
 
-    const sellerLog = TurnLogBuilder.createLogEntry(
-      state.currentTurn,
-      seller.id,
-      "INFO",
-      `صادرات تسلیحات: تعداد ${quantity.toLocaleString("fa-IR")} یگان ${unitStat.nameFa} به ${buyer.name} تحویل شد و $${sellerProfit.toLocaleString("fa-IR")} سود به خزانه واریز گردید.`,
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      state.humanNationId,
     );
+    const isHumanInvolved =
+      canonicalBuyerId === canonicalHuman ||
+      canonicalSellerId === canonicalHuman;
+
+    const logs = [];
+    if (isHumanInvolved) {
+      const isHumanBuyer = canonicalBuyerId === canonicalHuman;
+      const logMessage = isHumanBuyer
+        ? `واردات فوری تسلیحات: ${quantity.toLocaleString("fa-IR")} یگان ${unitStat.nameFa} از کشور ${seller.name} تحویل ارتش شد.`
+        : `صادرات تسلیحات: ${quantity.toLocaleString("fa-IR")} یگان ${unitStat.nameFa} به ${buyer.name} صادر و سود آن به خزانه واریز گردید.`;
+
+      logs.push(
+        TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          isHumanBuyer ? buyer.id : seller.id,
+          "DOMESTIC",
+          "INFO",
+          logMessage,
+          isHumanBuyer ? seller.id : buyer.id,
+        ),
+      );
+    }
 
     const updatedNations = {
       ...state.nations,
@@ -124,7 +143,7 @@ export class ArmsMarketManager {
     return {
       ...state,
       nations: updatedNations,
-      turnLogs: [...state.turnLogs, sellerLog],
+      turnLogs: [...state.turnLogs, ...logs],
     };
   }
 }
