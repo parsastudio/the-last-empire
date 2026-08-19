@@ -30,4 +30,34 @@ export class AiEconomyCalculator {
     const turnIncome = this.calculateTurnIncome(gdp, rank, totalAliveCount);
     return turnIncome * 10;
   }
+
+  public static calculateArmyMaintenanceDeductionRate(
+    currentArmyValuation: number,
+    maxArmyValuation: number,
+  ): number {
+    if (maxArmyValuation <= 0 || currentArmyValuation <= 0) {
+      return 0;
+    }
+    const ratio = Math.min(1.0, currentArmyValuation / maxArmyValuation);
+    return ratio * 0.2;
+  }
+
+  public static calculateEffectiveTurnIncome(
+    gdp: number,
+    rank: number,
+    totalAliveCount: number,
+    currentArmyValuation: number,
+  ): number {
+    const baseIncome = this.calculateTurnIncome(gdp, rank, totalAliveCount);
+    const maxValuation = this.calculateMaxArmyValuation(
+      gdp,
+      rank,
+      totalAliveCount,
+    );
+    const deductionRate = this.calculateArmyMaintenanceDeductionRate(
+      currentArmyValuation,
+      maxValuation,
+    );
+    return Math.floor(baseIncome * (1.0 - deductionRate));
+  }
 }

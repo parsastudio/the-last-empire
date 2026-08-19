@@ -7,6 +7,8 @@ export interface ThreatEvaluationResult {
   threatScore: number;
   opportunityScore: number;
   isNeighbor: boolean;
+  isLandNeighbor: boolean;
+  isNavalReachable: boolean;
   powerRatio: number;
 }
 
@@ -26,16 +28,40 @@ export class AIThreatCalculator {
     );
     const powerRatio = Number((targetPower / sourcePower).toFixed(2));
 
-    const isNeighbor = this.checkNeighborhood(source, target, provincesMap);
+    const isLandNeighbor = this.checkLandNeighborhood(
+      source,
+      target,
+      provincesMap,
+    );
+    const isNavalReachable = Boolean(
+      source.geography.hasSeaAccess && target.geography.hasSeaAccess,
+    );
+
+    const hasGlobalReach =
+      source.rank <= 5 ||
+      source.military.techLevel >= 4 ||
+      (source.military.navalFleet || 0) >= 2;
+
+    const isNeighbor =
+      isLandNeighbor ||
+      (isNavalReachable &&
+        (hasGlobalReach ||
+          source.geography.seaNeighbors?.includes(target.id) ||
+          false));
 
     let threatScore = 0;
-    if (isNeighbor) {
+    if (isLandNeighbor) {
       threatScore += 30;
       if (powerRatio > 1.2) {
         threatScore += Math.min(50, Math.floor((powerRatio - 1.0) * 40));
       }
+    } else if (isNavalReachable) {
+      threatScore += hasGlobalReach ? 22 : 15;
+      if (powerRatio > 1.2) {
+        threatScore += Math.min(35, Math.floor((powerRatio - 1.0) * 30));
+      }
     } else if (powerRatio > 2.5) {
-      threatScore += 20;
+      threatScore += 15;
     }
 
     const rel = source.relations[target.id];
@@ -47,11 +73,25 @@ export class AIThreatCalculator {
     threatScore = Math.min(100, Math.max(0, threatScore));
 
     let opportunityScore = 0;
-    if (isNeighbor) {
+    if (isLandNeighbor) {
       opportunityScore += 25;
       if (powerRatio < 0.7) {
         opportunityScore += Math.min(50, Math.floor((1.0 - powerRatio) * 60));
       }
+    } else if (isNavalReachable) {
+      const navalPowerRatio =
+        ((source.military.navalFleet || 0) + 1) /
+        ((target.military.navalFleet || 0) + 1);
+
+      if (hasGlobalReach || navalPowerRatio >= 1.2) {
+        opportunityScore += 20;
+        if (powerRatio < 0.7) {
+          opportunityScore += Math.min(40, Math.floor((1.0 - powerRatio) * 50));
+        }
+      }
+    }
+
+    if (opportunityScore > 0) {
       if (target.government.stability < 40) {
         opportunityScore += Math.floor(
           (40 - target.government.stability) * 0.8,
@@ -68,11 +108,13 @@ export class AIThreatCalculator {
       threatScore,
       opportunityScore,
       isNeighbor,
+      isLandNeighbor,
+      isNavalReachable,
       powerRatio,
     };
   }
 
-  private static checkNeighborhood(
+  private static checkLandNeighborhood(
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,

@@ -182,11 +182,7 @@ export class CountryRegistry {
       return this.byNumericId.get(identifier);
     }
 
-    const clean = identifier
-      .toString()
-      .trim()
-      .toUpperCase()
-      .replace(/^NATION_/, "");
+    const clean = identifier.toString().trim().toUpperCase();
 
     const codeMatch = this.byCode.get(clean);
     if (codeMatch) return codeMatch;
@@ -205,11 +201,7 @@ export class CountryRegistry {
     if (profile) {
       return profile.code.toUpperCase();
     }
-    return identifier
-      .toString()
-      .trim()
-      .toUpperCase()
-      .replace(/^NATION_/, "");
+    return identifier.toString().trim().toUpperCase();
   }
 
   public static resolveNumericId(identifier: string | number): number {
@@ -220,11 +212,7 @@ export class CountryRegistry {
     if (profile && profile.id) {
       return profile.id;
     }
-    const clean = identifier
-      .toString()
-      .trim()
-      .toUpperCase()
-      .replace(/^NATION_/, "");
+    const clean = identifier.toString().trim().toUpperCase();
     const parsed = parseInt(clean, 10);
     return isNaN(parsed) ? 0 : parsed;
   }

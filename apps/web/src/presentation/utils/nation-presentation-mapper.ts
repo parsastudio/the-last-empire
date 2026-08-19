@@ -51,7 +51,7 @@ export class NationPresentationMapper {
     treasury?: number,
   ): FormattedNationPresentation {
     const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
-    const cleanCode = code.toUpperCase().replace(/^NATION_/, "");
+    const cleanCode = code.toUpperCase();
 
     return {
       id: cleanCode,

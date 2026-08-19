@@ -98,7 +98,15 @@ export class AITreatyEvaluator {
     lockedTargets?: Set<string>,
   ): GameAction | null {
     const isCurrentlyAtWar = Object.values(nation.relations || {}).some(
-      (r) => r.stance === "WAR",
+      (rel) => {
+        if (rel.stance !== "WAR") return false;
+        const canonicalTarget = CountryRegistry.resolveCanonicalId(
+          rel.targetNationId,
+        );
+        const targetNation =
+          allNations[canonicalTarget] || allNations[rel.targetNationId];
+        return targetNation && targetNation.isAlive;
+      },
     );
 
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {

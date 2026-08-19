@@ -17,9 +17,15 @@ export class AIWarDeclarationEvaluator {
       return null;
     }
 
-    const isCurrentlyAtWar = Object.values(nation.relations).some(
-      (r) => r.stance === "WAR",
-    );
+    const isCurrentlyAtWar = Object.values(nation.relations).some((rel) => {
+      if (rel.stance !== "WAR") return false;
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(
+        rel.targetNationId,
+      );
+      const targetNation =
+        allNations[canonicalTarget] || allNations[rel.targetNationId];
+      return targetNation && targetNation.isAlive;
+    });
 
     if (isCurrentlyAtWar) {
       return null;
@@ -60,12 +66,8 @@ export class AIWarDeclarationEvaluator {
       );
 
       const powerRatio = threatResult.powerRatio;
-      const isNeighbor = threatResult.isNeighbor;
+      const isReachable = threatResult.isNeighbor;
       const grudge = rel.grudge ?? 0;
-
-      const isReachable =
-        isNeighbor ||
-        (nation.geography.hasSeaAccess && targetNation.geography.hasSeaAccess);
 
       const isBloodGrudge = grudge >= 45 && powerRatio <= 1.3 && isReachable;
 
@@ -77,10 +79,10 @@ export class AIWarDeclarationEvaluator {
         rel.opinion < -20;
 
       const isPredatoryExpansion =
-        isNeighbor && powerRatio < 0.6 && hasVulnerability;
+        isReachable && powerRatio < 0.65 && hasVulnerability;
 
       const isPreemptiveStrike =
-        isNeighbor &&
+        isReachable &&
         rel.opinion <= -40 &&
         threatResult.threatScore >= 60 &&
         powerRatio <= 0.85;

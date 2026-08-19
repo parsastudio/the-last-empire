@@ -7,6 +7,7 @@ import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
+import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -24,10 +25,14 @@ export class EconomyTurnProcessor {
       const aliveCount = Object.values(allNations).filter(
         (n) => n.isAlive,
       ).length;
-      const addedTreasury = AiEconomyCalculator.calculateTurnIncome(
+      const currentArmyValuation =
+        AIProcurementPlanner.calculateTotalArmyValuation(updated);
+
+      const addedTreasury = AiEconomyCalculator.calculateEffectiveTurnIncome(
         gdp,
         updated.rank,
         aliveCount,
+        currentArmyValuation,
       );
 
       updated = {

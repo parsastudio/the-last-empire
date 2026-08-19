@@ -63,8 +63,8 @@ export class TreatyEvaluator {
         return {
           ...profile,
           stance: "NORMAL_DIPLOMACY",
-          opinion: Math.max(-10, profile.opinion),
-          grudge: Math.floor(currentGrudge * 0.4),
+          opinion: Math.max(10, profile.opinion + 20),
+          grudge: Math.min(5, Math.floor(currentGrudge * 0.1)),
         };
       case "DECLARE_WAR":
         return {
