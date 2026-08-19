@@ -50,7 +50,7 @@ export class TerrainBinaryBuilder {
         } else {
           const isLake = gridVal === BitPackedCellUtility.WATER_LAKE_ID;
           const dist = distField[idx] || 1.0;
-          const [r, g, b] = this.calculateQuantizedOceanColor(dist, isLake);
+          const [r, g, b] = this.calculateZoneOceanColor(dist, isLake);
           rawIndexedGrid[idx] = getOrAddColor(r, g, b);
         }
       }
@@ -232,29 +232,23 @@ export class TerrainBinaryBuilder {
     return dist;
   }
 
-  private static calculateQuantizedOceanColor(
+  private static calculateZoneOceanColor(
     distance: number,
     isLake: boolean,
   ): [number, number, number] {
     if (isLake) {
-      const rawFactor = Math.exp(-Math.max(0, distance - 1.0) / 8.0);
-      const step = Math.min(5, Math.max(0, Math.floor(rawFactor * 6)));
-      const factor = step / 5.0;
-
-      const r = Math.round(14 + factor * (22 - 14));
-      const g = Math.round(24 + factor * (36 - 24));
-      const b = Math.round(36 + factor * (50 - 36));
-      return [r, g, b];
+      if (distance <= 4.0) {
+        return [22, 36, 50];
+      }
+      return [14, 24, 36];
     }
 
-    const rawFactor = Math.exp(-Math.max(0, distance - 1.0) / 16.0);
-    const step = Math.min(9, Math.max(0, Math.floor(rawFactor * 10)));
-    const factor = step / 9.0;
-
-    const r = Math.round(9 + factor * (26 - 9));
-    const g = Math.round(15 + factor * (48 - 15));
-    const b = Math.round(24 + factor * (68 - 24));
-
-    return [r, g, b];
+    if (distance <= 4.0) {
+      return [26, 48, 68];
+    }
+    if (distance <= 14.0) {
+      return [18, 32, 48];
+    }
+    return [9, 15, 24];
   }
 }

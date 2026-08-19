@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import zlib from "zlib";
 import { promisify } from "util";
+import { PNG } from "pngjs";
 import { TerrainBinaryBuilder } from "@/infrastructure/terrain-binary-map/builder/terrain-binary-builder";
 import { TerrainBinarySerializer } from "@/infrastructure/terrain-binary-map/serializer/terrain-binary-serializer";
 import { TerrainBinaryReader } from "@/infrastructure/terrain-binary-map/runtime/terrain-binary-reader";
@@ -40,19 +41,35 @@ export class TerrainBinaryExportService {
     const gzippedOutputPath = path.join(outputDir, "terrain-compressed.bin.gz");
     await fs.writeFile(gzippedOutputPath, gzippedBuffer);
 
+    const reader = new TerrainBinaryReader(compressedBuffer);
+    const unpacked = reader.unpackToRawBuffer();
+    const palette = reader.getPalette();
+
+    const previewPng = new PNG({ width, height });
+    const totalPixels = width * height;
+
+    for (let i = 0; i < totalPixels; i++) {
+      const outIdx = i << 2;
+      const colorIdx = unpacked[i]!;
+      const color = palette[colorIdx] || { r: 255, g: 255, b: 255 };
+
+      previewPng.data[outIdx] = color.r;
+      previewPng.data[outIdx + 1] = color.g;
+      previewPng.data[outIdx + 2] = color.b;
+      previewPng.data[outIdx + 3] = 255;
+    }
+
+    const previewPngBuffer = PNG.sync.write(previewPng);
+    const previewPngPath = path.join(outputDir, "terrain-preview.png");
+    await fs.writeFile(previewPngPath, previewPngBuffer);
+
     let pngSize = width * height * 4;
-    const pngPath = path.join(outputDir, "base_map_terrain.png");
     try {
-      const pngStat = await fs.stat(pngPath);
+      const pngStat = await fs.stat(previewPngPath);
       pngSize = pngStat.size;
     } catch {}
 
-    const reader = new TerrainBinaryReader(compressedBuffer);
-    const unpacked = reader.unpackToRawBuffer();
-
     let mismatchCount = 0;
-    const totalPixels = width * height;
-
     for (let i = 0; i < totalPixels; i++) {
       if (unpacked[i] !== built.rawIndexedGrid[i]) {
         mismatchCount++;
@@ -111,7 +128,7 @@ export class TerrainBinaryExportService {
     process.stdout.write(
       "==================================================\n",
     );
-    process.stdout.write(`حجم تصویر مرجع PNG:              ${pngKb} KB\n`);
+    process.stdout.write(`حجم تصویر پیش‌نمایش بازخوانی‌شده:   ${pngKb} KB\n`);
     process.stdout.write(`حجم فایل باینری خام (terrain-raw):  ${rawKb} KB\n`);
     process.stdout.write(`حجم فایل فشرده سطری (terrain-comp): ${compKb} KB\n`);
     process.stdout.write(`حجم نهایی فشرده Gzip (level 9):     ${gzipKb} KB\n`);
