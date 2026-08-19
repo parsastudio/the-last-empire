@@ -1,20 +1,32 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class NationLivenessManager {
   public updateLiveness(state: GameState): GameState {
     const updatedNations: Record<string, Nation> = { ...state.nations };
     const deadCanonicalIds = new Set<string>();
+    const newAnnexationLogs = [];
 
     for (const [id, nation] of Object.entries(updatedNations)) {
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
       const hasTerritory = (nation.geography?.territoryPixelCount ?? 0) > 0;
       const hasPopulation = (nation.population ?? 0) > 0;
 
-      if (!nation.isAlive || !hasTerritory || !hasPopulation) {
+      if (nation.isAlive && (!hasTerritory || !hasPopulation)) {
         deadCanonicalIds.add(canonicalId);
         deadCanonicalIds.add(id);
+
+        const collapseMsg = `فروپاشی کامل دولت: کشور ${nation.name} به دلیل از دست دادن تمامی قلمروها و ساختار حاکمیتی خود به طور کامل منحل گردید.`;
+        newAnnexationLogs.push(
+          TurnLogBuilder.createAnnexationLog(
+            state.currentTurn,
+            "UNKNOWN",
+            nation.id,
+            collapseMsg,
+          ),
+        );
 
         updatedNations[id] = {
           ...nation,
@@ -130,6 +142,7 @@ export class NationLivenessManager {
       ...state,
       nations: updatedNations,
       pendingProposals: filteredProposals,
+      turnLogs: [...state.turnLogs, ...newAnnexationLogs],
     };
   }
 }

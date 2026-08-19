@@ -221,11 +221,13 @@ export class EspionageManager {
       }
     }
 
-    const logEntry = TurnLogBuilder.createLogEntry(
+    const logEntry = TurnLogBuilder.createNationalLog(
       state.currentTurn,
       source.id,
+      "ESPIONAGE",
       outcome === "CRITICAL_FAILURE" ? "WARNING" : "INFO",
       `عملیات ویژه اطلاعاتی علیه ${target.name}: ${message}`,
+      target.id,
     );
 
     const updatedNations = {

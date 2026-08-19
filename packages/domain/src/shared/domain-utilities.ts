@@ -1,4 +1,9 @@
-import { TurnLogEntry, TurnLogLevel } from "@/domain/game/game-state.schema";
+import {
+  TurnLogEntry,
+  TurnLogLevel,
+  TurnLogScope,
+  TurnLogCategory,
+} from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export type { Nation } from "@/domain/nation/nation.schema";
@@ -68,16 +73,106 @@ export class TurnLogBuilder {
     sourceNationId: string,
     level: TurnLogLevel,
     message: string,
+    category: TurnLogCategory = "DOMESTIC",
+    scope: TurnLogScope = "NATIONAL",
+    targetNationId?: string,
+    conquerorNationId?: string,
+    metadata?: Record<string, string | number | boolean>,
   ): TurnLogEntry {
-    const cleanNation = CountryRegistry.resolveCanonicalId(sourceNationId);
+    const cleanSource = CountryRegistry.resolveCanonicalId(sourceNationId);
+    const cleanTarget = targetNationId
+      ? CountryRegistry.resolveCanonicalId(targetNationId)
+      : undefined;
+    const cleanConqueror = conquerorNationId
+      ? CountryRegistry.resolveCanonicalId(conquerorNationId)
+      : undefined;
     const randomSuffix = Math.random().toString(36).substring(2, 7);
+
     return {
-      id: `log-${cleanNation}-t${turn}-${randomSuffix}`,
+      id: `log-${cleanSource}-t${turn}-${randomSuffix}`,
       turn,
       timestamp: Date.now(),
-      sourceNationId: cleanNation,
+      sourceNationId: cleanSource,
+      targetNationId: cleanTarget,
+      conquerorNationId: cleanConqueror,
+      scope,
+      category,
       level,
       message,
+      metadata,
     };
+  }
+
+  public static createNationalLog(
+    turn: number,
+    nationId: string,
+    category: "DOMESTIC" | "MILITARY" | "DIPLOMACY" | "ESPIONAGE",
+    level: TurnLogLevel,
+    message: string,
+    targetNationId?: string,
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      nationId,
+      level,
+      message,
+      category,
+      "NATIONAL",
+      targetNationId,
+    );
+  }
+
+  public static createGlobalWarLog(
+    turn: number,
+    attackerId: string,
+    defenderId: string,
+    message: string,
+    level: TurnLogLevel = "CRITICAL",
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      attackerId,
+      level,
+      message,
+      "GLOBAL_WAR",
+      "GLOBAL",
+      defenderId,
+    );
+  }
+
+  public static createGlobalDiplomacyLog(
+    turn: number,
+    sourceNationId: string,
+    targetNationId: string,
+    message: string,
+    level: TurnLogLevel = "INFO",
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      sourceNationId,
+      level,
+      message,
+      "GLOBAL_DIPLOMACY",
+      "GLOBAL",
+      targetNationId,
+    );
+  }
+
+  public static createAnnexationLog(
+    turn: number,
+    conquerorId: string,
+    eliminatedNationId: string,
+    message: string,
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      eliminatedNationId,
+      "CRITICAL",
+      message,
+      "GLOBAL_ANNEXATION",
+      "GLOBAL",
+      undefined,
+      conquerorId,
+    );
   }
 }
