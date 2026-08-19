@@ -1,5 +1,4 @@
-import { Nation } from "@/domain/nation/nation.schema";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { Nation, DiplomaticStance, CountryRegistry } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { DemographicsTransferResult } from "@/engine/combat/conquest/demographics-transfer-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
@@ -7,7 +6,6 @@ import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
 
 export interface AttackerStateApplierInput {
   attacker: Nation;
@@ -95,6 +93,18 @@ export class BattleAttackerStateApplier {
       attacker.government.stability + combatStabilityDelta,
     );
 
+    const actualDeploymentCost = attacker.isAi
+      ? Math.min(
+          calcResult.deploymentMoneyCost,
+          Math.max(0, Math.floor(attacker.treasury * 0.6)),
+        )
+      : calcResult.deploymentMoneyCost;
+
+    const updatedTreasury = Math.max(
+      0,
+      attacker.treasury - actualDeploymentCost + calcResult.treasuryLooted,
+    );
+
     return {
       ...updatedAttacker,
       government: {
@@ -106,10 +116,7 @@ export class BattleAttackerStateApplier {
         attacker.globalReputation - totalRepPenalty,
       ),
       provinceIds: attackerProvIds,
-      treasury:
-        attacker.treasury -
-        calcResult.deploymentMoneyCost +
-        calcResult.treasuryLooted,
+      treasury: updatedTreasury,
       military: updatedMilitary,
       relations: updatedRelations,
       warFocusTargetId: cleanDefenderId,

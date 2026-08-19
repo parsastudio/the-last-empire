@@ -1,13 +1,15 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { CountryRegistry } from "@/domain/data/countries";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { GOVERNMENT_TRAITS_MAP } from "@/domain/politics/government-traits.config";
-import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
-import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
-import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
+import {
+  GameAction,
+  ActionFactory,
+  Nation,
+  Province,
+  CountryRegistry,
+  MILITARY_UNIT_STATS,
+  GOVERNMENT_TRAITS_MAP,
+  MilitaryPowerCalculator,
+  LandNeighborResolver,
+  NavalNeighborResolver,
+} from "@geopolitics/domain";
 
 export class AIAttackPlanner {
   public static planAttack(
@@ -25,19 +27,46 @@ export class AIAttackPlanner {
     }
 
     const activeWarCount = this.countActiveWars(nation, allNations);
-    const deployRatio = activeWarCount > 1 ? 0.5 : 0.75;
+    const maxDeployRatio = activeWarCount > 1 ? 0.5 : 0.9;
+
+    const attackerTotalPower = Math.max(
+      1,
+      MilitaryPowerCalculator.calculateEffectivePower(nation),
+    );
+    const targetTotalPower = Math.max(
+      1,
+      MilitaryPowerCalculator.calculateEffectivePower(targetNation),
+    );
+
+    const targetRatio = (targetTotalPower * 1.08) / attackerTotalPower;
+    if (
+      targetRatio > maxDeployRatio &&
+      (attackerTotalPower * maxDeployRatio) / targetTotalPower < 1.05
+    ) {
+      return null;
+    }
+
+    const effectiveDeployRatio = Math.min(
+      maxDeployRatio,
+      Math.max(0.15, targetRatio),
+    );
 
     const availableInfantry = nation.military.infantry || 0;
     const availableArmor = nation.military.armor || 0;
     const availableAirForce = nation.military.airForce || 0;
     const availableDrones = nation.military.droneMissile || 0;
 
-    const infantryToDeploy = Math.floor(availableInfantry * deployRatio);
-    const armorToDeploy = Math.floor(availableArmor * deployRatio);
-    const airForceToDeploy = Math.floor(availableAirForce * deployRatio);
-    const dronesToLaunch = Math.floor(availableDrones * deployRatio);
+    const infantryToDeploy = Math.max(
+      1,
+      Math.floor(availableInfantry * effectiveDeployRatio),
+    );
+    const armorToDeploy = Math.floor(availableArmor * effectiveDeployRatio);
+    const airForceToDeploy = Math.floor(
+      availableAirForce * effectiveDeployRatio,
+    );
+    const dronesToLaunch = Math.floor(availableDrones * effectiveDeployRatio);
 
-    if (infantryToDeploy < 1) {
+    if (availableInfantry < 1 || infantryToDeploy > availableInfantry) {
       return null;
     }
 
@@ -64,27 +93,7 @@ export class AIAttackPlanner {
       targetResolution.attackType,
     );
 
-    const targetPower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateEffectivePower(targetNation),
-    );
-
-    if (deployedPower / targetPower < 1.3) {
-      return null;
-    }
-
-    const totalForceCost =
-      infantryToDeploy * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      armorToDeploy * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      airForceToDeploy * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
-
-    const deploymentCost =
-      targetResolution.attackType === "LAND"
-        ? Math.floor(totalForceCost * 0.05)
-        : targetResolution.navalDeploymentCost;
-
-    if (nation.treasury < deploymentCost) {
+    if (deployedPower / targetTotalPower < 1.05) {
       return null;
     }
 
