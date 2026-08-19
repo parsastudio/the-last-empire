@@ -35,7 +35,11 @@ export class TurnProgressionOrchestrator {
         if (result.success && result.newState) {
           nextState = result.newState;
 
-          if ("targetNationId" in action && action.targetNationId) {
+          if (
+            action.type === "DIPLOMATIC_PROPOSAL" &&
+            "targetNationId" in action &&
+            action.targetNationId
+          ) {
             lockedDiplomacyTargets.add(
               DiplomacyLockManager.createKey(
                 action.nationId,
