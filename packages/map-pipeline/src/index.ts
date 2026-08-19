@@ -17,3 +17,9 @@ export * from "./row-spans-map/core/row-spans-types";
 export * from "./row-spans-map/generator/row-spans-export-service";
 export * from "./row-spans-map/runtime/row-spans-reader";
 export * from "./row-spans-map/serializer/row-spans-serializer";
+
+export * from "./terrain-binary-map/core/terrain-binary-types";
+export * from "./terrain-binary-map/builder/terrain-binary-builder";
+export * from "./terrain-binary-map/serializer/terrain-binary-serializer";
+export * from "./terrain-binary-map/runtime/terrain-binary-reader";
+export * from "./terrain-binary-map/generator/terrain-binary-export-service";

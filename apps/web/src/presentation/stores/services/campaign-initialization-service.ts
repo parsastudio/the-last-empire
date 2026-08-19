@@ -5,8 +5,6 @@ import {
   FinalManifestNation,
 } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 
 export class CampaignInitializationService {
   private static aiInitializer = new GlobalAiInitializer();
@@ -56,19 +54,13 @@ export class CampaignInitializationService {
       activeManifest,
     );
 
-    const buffer = BitPackedGridState.getInstance().getBuffer();
-    const syncedProvinces = ProvincePixelCalculator.syncProvincesMapPixelCounts(
-      buffer,
-      initResult.provinces,
-    );
-
     return {
       gameId,
       currentTurn: 1,
       seed: Math.floor(Math.random() * 1000000),
       isGameOver: false,
       humanNationId: normalizedHumanId,
-      provinces: syncedProvinces,
+      provinces: initResult.provinces,
       nations: initResult.nations,
       pendingProposals: [],
       turnLogs: [],

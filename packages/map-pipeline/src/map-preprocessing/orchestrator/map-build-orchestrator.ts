@@ -11,13 +11,21 @@ import { ProvincePartitionEngine } from "@/infrastructure/map-preprocessing/orch
 import { BinaryStateExporter } from "@/infrastructure/map-preprocessing/pipeline/05-export/binary-state-exporter";
 import { StrategicManifestBuilder } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { TerrainMapGenerator } from "@/infrastructure/map-preprocessing/generator/terrain-map-generator";
+import { TerrainBinaryExportService } from "@/infrastructure/terrain-binary-map/generator/terrain-binary-export-service";
 
 export class MapBuildOrchestrator {
   private manifestBuilder = new StrategicManifestBuilder();
 
   public async cleanOutputDirectory(targetDir: string): Promise<void> {
     await fs.mkdir(targetDir, { recursive: true });
-    const files = ["manifest.json", "live-state.bin", "base_map_terrain.png"];
+    const files = [
+      "manifest.json",
+      "live-state.bin",
+      "base_map_terrain.png",
+      "terrain-raw.bin",
+      "terrain-compressed.bin",
+      "terrain-binary-stats.json",
+    ];
     for (const file of files) {
       const filePath = path.join(targetDir, file);
       try {
@@ -90,6 +98,14 @@ export class MapBuildOrchestrator {
       assignmentGrid,
       width,
       height,
+      destTerrainPath,
+    );
+
+    await TerrainBinaryExportService.generateAndExport(
+      assignmentGrid,
+      width,
+      height,
+      outputDir,
       destTerrainPath,
     );
   }

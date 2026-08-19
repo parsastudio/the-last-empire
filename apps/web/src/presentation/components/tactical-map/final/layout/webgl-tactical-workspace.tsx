@@ -92,6 +92,7 @@ export function WebGLTacticalWorkspace({
       color: [0, 0, 0] as [number, number, number],
     })),
     positionRef,
+    provincesMap: effectiveGameState?.provinces,
   });
 
   const handleSelectCountryContext = useCallback(

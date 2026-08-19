@@ -43,8 +43,6 @@ export * from "./economy/demographics/migration-engine";
 export * from "./espionage/espionage-calculator";
 export * from "./espionage/espionage-manager";
 
-export * from "./map/province-pixel-calculator";
-
 export * from "./military/arms-market-manager";
 export * from "./military/military-distribution-engine";
 export * from "./military/recruitment-queue";

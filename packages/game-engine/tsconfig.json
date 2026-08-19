@@ -12,5 +12,5 @@
       "@geopolitics/game-engine/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../domain/src/**/*"]
 }

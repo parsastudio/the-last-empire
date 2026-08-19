@@ -1,10 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { ProvincePixelCalculator } from "@/engine/map/province-pixel-calculator";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -18,22 +16,16 @@ export function useHoverNationResolver({
   provincesMap,
   nationsMap,
 }: UseHoverNationResolverProps) {
-  const syncedProvincesMap = useMemo(() => {
-    if (!provincesMap) return {};
-    const buffer = BitPackedGridState.getInstance().getBuffer();
-    return ProvincePixelCalculator.syncProvincesMapPixelCounts(
-      buffer,
-      provincesMap,
-    );
-  }, [provincesMap]);
-
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
-      if (provinceId < BitPackedCellUtility.FIRST_PROVINCE_ID) {
+      if (
+        provinceId < BitPackedCellUtility.FIRST_PROVINCE_ID ||
+        !provincesMap
+      ) {
         return null;
       }
 
-      const province = syncedProvincesMap[provinceId.toString()];
+      const province = provincesMap[provinceId.toString()];
       if (!province) return null;
 
       const canonicalOwnerId = CountryRegistry.resolveCanonicalId(
@@ -77,7 +69,7 @@ export function useHoverNationResolver({
         gdpText: summary.gdpText,
       };
     },
-    [syncedProvincesMap, nationsMap],
+    [provincesMap, nationsMap],
   );
 
   return { resolveHoverInfo };

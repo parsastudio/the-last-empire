@@ -1,76 +1,39 @@
 import path from "path";
 import fs from "fs";
 
+function findMonorepoRoot(startDir: string): string {
+  let curr = path.resolve(startDir);
+  while (curr !== path.dirname(curr)) {
+    if (
+      fs.existsSync(path.join(curr, "pnpm-workspace.yaml")) ||
+      fs.existsSync(path.join(curr, "turbo.json"))
+    ) {
+      return curr;
+    }
+    curr = path.dirname(curr);
+  }
+  return process.cwd();
+}
+
 export class ServerMapPathResolver {
-  private static findMapsBaseDir(mapId = "map1"): string {
-    const candidates = [
-      path.join(process.cwd(), "apps", "web", "public", "maps", mapId),
-      path.join(process.cwd(), "public", "maps", mapId),
-      path.join(
-        process.cwd(),
-        "..",
-        "..",
-        "apps",
-        "web",
-        "public",
-        "maps",
-        mapId,
-      ),
-      path.join(
-        __dirname,
-        "..",
-        "..",
-        "..",
-        "..",
-        "apps",
-        "web",
-        "public",
-        "maps",
-        mapId,
-      ),
-    ];
-
-    for (let i = 0; i < candidates.length; i++) {
-      const candidate = candidates[i]!;
-      if (fs.existsSync(candidate)) {
-        return candidate;
-      }
-    }
-
-    let current = process.cwd();
-    for (let i = 0; i < 5; i++) {
-      const webMapsPath = path.join(
-        current,
-        "apps",
-        "web",
-        "public",
-        "maps",
-        mapId,
-      );
-      if (fs.existsSync(webMapsPath)) {
-        return webMapsPath;
-      }
-      const directMapsPath = path.join(current, "public", "maps", mapId);
-      if (fs.existsSync(directMapsPath)) {
-        return directMapsPath;
-      }
-      current = path.dirname(current);
-    }
-
-    const defaultPath = path.join(
-      process.cwd(),
-      "apps",
-      "web",
-      "public",
-      "maps",
-      mapId,
-    );
-    fs.mkdirSync(defaultPath, { recursive: true });
-    return defaultPath;
+  public static getMonorepoRoot(): string {
+    return findMonorepoRoot(__dirname);
   }
 
   public static getMapDir(mapId = "map1"): string {
-    return this.findMapsBaseDir(mapId);
+    const root = this.getMonorepoRoot();
+    const primaryPath = path.join(root, "apps", "web", "public", "maps", mapId);
+    const fallbackPath = path.join(root, "public", "maps", mapId);
+
+    if (fs.existsSync(primaryPath)) {
+      return primaryPath;
+    }
+    if (fs.existsSync(fallbackPath)) {
+      return fallbackPath;
+    }
+
+    fs.mkdirSync(primaryPath, { recursive: true });
+    return primaryPath;
   }
 
   public static getMapEssentialServerDir(mapId = "map1"): string {
