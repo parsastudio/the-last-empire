@@ -46,7 +46,7 @@ export class AIPeaceEvaluator {
       const powerRatio = threatResult.powerRatio;
       const myStability = nation.government.stability;
 
-      const isSurvivalPeace = powerRatio >= 2.5 || myStability < 30;
+      const isSurvivalPeace = powerRatio >= 2.8 || myStability < 22;
 
       if (isSurvivalPeace) {
         return ActionFactory.diplomaticProposal(
@@ -57,7 +57,7 @@ export class AIPeaceEvaluator {
       }
 
       const isStalematePeace =
-        powerRatio >= 0.75 && powerRatio <= 1.3 && myStability < 45;
+        powerRatio >= 0.8 && powerRatio <= 1.25 && myStability < 32;
 
       if (isStalematePeace) {
         return ActionFactory.diplomaticProposal(
@@ -97,14 +97,14 @@ export class AIPeaceEvaluator {
             otherNation,
             provincesMap,
           );
-          if (otherEval.threatScore > 50 && otherEval.isNeighbor) {
+          if (otherEval.threatScore > 55 && otherEval.isNeighbor) {
             hasThirdPartyThreat = true;
             break;
           }
         }
       }
 
-      const isCounterAttackRisk = powerRatio >= 0.75;
+      const isCounterAttackRisk = powerRatio >= 0.85;
       const isConsolidationPeace =
         hasCapturedProvince && (hasThirdPartyThreat || isCounterAttackRisk);
 

@@ -37,12 +37,7 @@ export class CountryDefaultsUtility {
     identifier: string | number,
     profile?: CountryProfile,
   ): NormalizedCountryFallback {
-    const rawId = identifier
-      .toString()
-      .trim()
-      .toUpperCase()
-      .replace(/^NATION_/, "");
-    const cleanCode = rawId;
+    const cleanCode = identifier.toString().trim().toUpperCase();
 
     const nameFa = profile?.nameFa ?? `کشور ${cleanCode}`;
     const nameEn = profile?.nameEn ?? cleanCode;

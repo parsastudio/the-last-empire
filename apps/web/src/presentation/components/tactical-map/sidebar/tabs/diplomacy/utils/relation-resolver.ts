@@ -46,7 +46,7 @@ export function resolveProfileRelation(
   const displayCode = profile
     ? profile.code
     : liveNation
-      ? liveNation.id.replace("NATION_", "")
+      ? liveNation.id
       : fallback.code;
   const flagCode = profile
     ? profile.flagCode
