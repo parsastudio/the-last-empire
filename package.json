@@ -10,6 +10,7 @@
     "type-check": "turbo type-check",
     "build:map": "pnpm --filter @geopolitics/map-pipeline build:map",
     "build:row-spans": "pnpm --filter @geopolitics/map-pipeline build:row-spans",
+    "build:tactical-terrain": "pnpm --filter @geopolitics/map-pipeline build:tactical-terrain",
     "files": "python3 debug/file_collector.py",
     "tree": "python3 debug/tree_generator.py",
     "errors": "python3 debug/error_checker.py",

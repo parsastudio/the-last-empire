@@ -2,7 +2,6 @@ import fs from "fs/promises";
 import path from "path";
 import zlib from "zlib";
 import { promisify } from "util";
-import { PNG } from "pngjs";
 import { TerrainBinaryBuilder } from "@/infrastructure/terrain-binary-map/builder/terrain-binary-builder";
 import { TerrainBinarySerializer } from "@/infrastructure/terrain-binary-map/serializer/terrain-binary-serializer";
 import { TerrainBinaryReader } from "@/infrastructure/terrain-binary-map/runtime/terrain-binary-reader";
@@ -11,13 +10,13 @@ import { TerrainBinaryBuildStats } from "@/infrastructure/terrain-binary-map/cor
 const gzipAsync = promisify(zlib.gzip);
 
 export class TerrainBinaryExportService {
-  public static async generateAndExport(
-    assignmentGrid: Uint8Array,
+  public static async generateAndExportFromRgba(
+    rgbaData: Uint8Array,
     width: number,
     height: number,
     outputDir: string,
   ): Promise<TerrainBinaryBuildStats> {
-    const built = TerrainBinaryBuilder.build(assignmentGrid, width, height);
+    const built = TerrainBinaryBuilder.buildFromRgba(rgbaData, width, height);
 
     const rawBuffer = TerrainBinarySerializer.serializeRaw(
       built,
@@ -43,32 +42,8 @@ export class TerrainBinaryExportService {
 
     const reader = new TerrainBinaryReader(compressedBuffer);
     const unpacked = reader.unpackToRawBuffer();
-    const palette = reader.getPalette();
 
-    const previewPng = new PNG({ width, height });
     const totalPixels = width * height;
-
-    for (let i = 0; i < totalPixels; i++) {
-      const outIdx = i << 2;
-      const colorIdx = unpacked[i]!;
-      const color = palette[colorIdx] || { r: 255, g: 255, b: 255 };
-
-      previewPng.data[outIdx] = color.r;
-      previewPng.data[outIdx + 1] = color.g;
-      previewPng.data[outIdx + 2] = color.b;
-      previewPng.data[outIdx + 3] = 255;
-    }
-
-    const previewPngBuffer = PNG.sync.write(previewPng);
-    const previewPngPath = path.join(outputDir, "terrain-preview.png");
-    await fs.writeFile(previewPngPath, previewPngBuffer);
-
-    let pngSize = width * height * 4;
-    try {
-      const pngStat = await fs.stat(previewPngPath);
-      pngSize = pngStat.size;
-    } catch {}
-
     let mismatchCount = 0;
     for (let i = 0; i < totalPixels; i++) {
       if (unpacked[i] !== built.rawIndexedGrid[i]) {
@@ -76,22 +51,33 @@ export class TerrainBinaryExportService {
       }
     }
 
+    const uncompressedRgbaSize = totalPixels * 4;
     const rawSize = rawBuffer.byteLength;
     const compressedSize = compressedBuffer.byteLength;
     const gzippedSize = gzippedBuffer.byteLength;
 
     const rawSavings = Number(
-      (((pngSize - rawSize) / (pngSize || 1)) * 100).toFixed(2),
+      (
+        ((uncompressedRgbaSize - rawSize) / (uncompressedRgbaSize || 1)) *
+        100
+      ).toFixed(2),
     );
     const compressedSavings = Number(
-      (((pngSize - compressedSize) / (pngSize || 1)) * 100).toFixed(2),
+      (
+        ((uncompressedRgbaSize - compressedSize) /
+          (uncompressedRgbaSize || 1)) *
+        100
+      ).toFixed(2),
     );
     const gzippedSavings = Number(
-      (((pngSize - gzippedSize) / (pngSize || 1)) * 100).toFixed(2),
+      (
+        ((uncompressedRgbaSize - gzippedSize) / (uncompressedRgbaSize || 1)) *
+        100
+      ).toFixed(2),
     );
 
     const stats: TerrainBinaryBuildStats = {
-      pngSizeBytes: pngSize,
+      pngSizeBytes: uncompressedRgbaSize,
       rawBinarySizeBytes: rawSize,
       compressedBinarySizeBytes: compressedSize,
       gzippedBinarySizeBytes: gzippedSize,
@@ -109,49 +95,6 @@ export class TerrainBinaryExportService {
     const statsPath = path.join(outputDir, "terrain-binary-stats.json");
     await fs.writeFile(statsPath, JSON.stringify(stats, null, 2), "utf-8");
 
-    this.logConsoleReport(stats);
     return stats;
-  }
-
-  private static logConsoleReport(stats: TerrainBinaryBuildStats): void {
-    const pngKb = (stats.pngSizeBytes / 1024).toFixed(1);
-    const rawKb = (stats.rawBinarySizeBytes / 1024).toFixed(1);
-    const compKb = (stats.compressedBinarySizeBytes / 1024).toFixed(1);
-    const gzipKb = (stats.gzippedBinarySizeBytes / 1024).toFixed(1);
-
-    process.stdout.write(
-      "\n==================================================\n",
-    );
-    process.stdout.write(
-      "       گزارش بهینه‌سازی فایل‌های باینری ترِین      \n",
-    );
-    process.stdout.write(
-      "==================================================\n",
-    );
-    process.stdout.write(`حجم تصویر پیش‌نمایش بازخوانی‌شده:   ${pngKb} KB\n`);
-    process.stdout.write(`حجم فایل باینری خام (terrain-raw):  ${rawKb} KB\n`);
-    process.stdout.write(`حجم فایل فشرده سطری (terrain-comp): ${compKb} KB\n`);
-    process.stdout.write(`حجم نهایی فشرده Gzip (level 9):     ${gzipKb} KB\n`);
-    process.stdout.write(
-      "--------------------------------------------------\n",
-    );
-    process.stdout.write(
-      `درصد کاهش حجم نهایی نسبت به PNG:  ${stats.gzippedSavingsPercent}%\n`,
-    );
-    process.stdout.write(
-      `تعداد کل رنگ‌های منحصربه‌فرد پالت:   ${stats.totalPaletteColors}\n`,
-    );
-    process.stdout.write(
-      `تعداد کل بازه‌های سطری (Spans):     ${stats.totalSpansCount}\n`,
-    );
-    process.stdout.write(
-      `تعداد خطاهای تطبیق پیکسلی:        ${stats.mismatchCount}\n`,
-    );
-    process.stdout.write(
-      `وضعیت تطبیق ۱۰۰٪ بدون اتلاف:       ${stats.isLosslessMatch ? "تایید شد (LOSSLESS OK)" : "خطا در تطبیق"}\n`,
-    );
-    process.stdout.write(
-      "==================================================\n\n",
-    );
   }
 }

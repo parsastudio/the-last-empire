@@ -38,7 +38,7 @@ export function useWebGLMapRenderer({
     img.crossOrigin = "anonymous";
     img.src = ClientMapPathResolver.getMapFinalClientUrl(
       "map1",
-      "base_map_terrain.png",
+      "tactical_map_terrain.png",
     );
     img.onload = () => {
       renderer.setTerrainImage(img);
