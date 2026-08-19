@@ -31,11 +31,11 @@ export class AIAttackPlanner {
 
     const attackerTotalPower = Math.max(
       1,
-      MilitaryPowerCalculator.calculateEffectivePower(nation),
+      MilitaryPowerCalculator.calculateLandAndAirPower(nation),
     );
     const targetTotalPower = Math.max(
       1,
-      MilitaryPowerCalculator.calculateEffectivePower(targetNation),
+      MilitaryPowerCalculator.calculateLandAndAirPower(targetNation),
     );
 
     const targetRatio = (targetTotalPower * 1.08) / attackerTotalPower;
@@ -90,7 +90,6 @@ export class AIAttackPlanner {
       armorToDeploy,
       airForceToDeploy,
       dronesToLaunch,
-      targetResolution.attackType,
     );
 
     if (deployedPower / targetTotalPower < 1.05) {
@@ -257,20 +256,12 @@ export class AIAttackPlanner {
     armor: number,
     airForce: number,
     drones: number,
-    attackType: "LAND" | "NAVAL",
   ): number {
-    const navalPower =
-      attackType === "NAVAL"
-        ? (nation.military.navalFleet || 0) *
-          MILITARY_UNIT_STATS.NAVAL_FLEET.weightPower
-        : 0;
-
     const rawPower =
       infantry * MILITARY_UNIT_STATS.INFANTRY.weightPower +
       armor * MILITARY_UNIT_STATS.ARMOR.weightPower +
       airForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower +
-      drones * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower +
-      navalPower;
+      drones * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower;
 
     const techLevel = Math.max(1, nation.military.techLevel || 1);
     const techMult = 1 + (techLevel - 1) * 0.5;

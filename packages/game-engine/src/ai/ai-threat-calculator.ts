@@ -20,11 +20,11 @@ export class AIThreatCalculator {
   ): ThreatEvaluationResult {
     const sourcePower = Math.max(
       1,
-      MilitaryPowerCalculator.calculateEffectivePower(source),
+      MilitaryPowerCalculator.calculateLandAndAirPower(source),
     );
     const targetPower = Math.max(
       1,
-      MilitaryPowerCalculator.calculateEffectivePower(target),
+      MilitaryPowerCalculator.calculateLandAndAirPower(target),
     );
     const powerRatio = Number((targetPower / sourcePower).toFixed(2));
 
