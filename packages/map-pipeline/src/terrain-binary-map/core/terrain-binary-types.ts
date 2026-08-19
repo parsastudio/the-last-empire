@@ -18,8 +18,10 @@ export interface TerrainBinaryBuildStats {
   pngSizeBytes: number;
   rawBinarySizeBytes: number;
   compressedBinarySizeBytes: number;
+  gzippedBinarySizeBytes: number;
   rawSavingsPercent: number;
   compressedSavingsPercent: number;
+  gzippedSavingsPercent: number;
   totalPaletteColors: number;
   totalSpansCount: number;
   avgSpansPerRow: number;

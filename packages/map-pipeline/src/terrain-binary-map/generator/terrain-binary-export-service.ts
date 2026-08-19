@@ -1,9 +1,13 @@
 import fs from "fs/promises";
 import path from "path";
+import zlib from "zlib";
+import { promisify } from "util";
 import { TerrainBinaryBuilder } from "@/infrastructure/terrain-binary-map/builder/terrain-binary-builder";
 import { TerrainBinarySerializer } from "@/infrastructure/terrain-binary-map/serializer/terrain-binary-serializer";
 import { TerrainBinaryReader } from "@/infrastructure/terrain-binary-map/runtime/terrain-binary-reader";
 import { TerrainBinaryBuildStats } from "@/infrastructure/terrain-binary-map/core/terrain-binary-types";
+
+const gzipAsync = promisify(zlib.gzip);
 
 export class TerrainBinaryExportService {
   public static async generateAndExport(
@@ -11,7 +15,6 @@ export class TerrainBinaryExportService {
     width: number,
     height: number,
     outputDir: string,
-    pngFilePath: string,
   ): Promise<TerrainBinaryBuildStats> {
     const built = TerrainBinaryBuilder.build(assignmentGrid, width, height);
 
@@ -31,13 +34,18 @@ export class TerrainBinaryExportService {
     const compressedOutputPath = path.join(outputDir, "terrain-compressed.bin");
     await fs.writeFile(compressedOutputPath, compressedBuffer);
 
-    let pngSize = 0;
+    const gzippedBuffer = await gzipAsync(compressedBuffer, {
+      level: zlib.constants.Z_BEST_COMPRESSION,
+    });
+    const gzippedOutputPath = path.join(outputDir, "terrain-compressed.bin.gz");
+    await fs.writeFile(gzippedOutputPath, gzippedBuffer);
+
+    let pngSize = width * height * 4;
+    const pngPath = path.join(outputDir, "base_map_terrain.png");
     try {
-      const pngStat = await fs.stat(pngFilePath);
+      const pngStat = await fs.stat(pngPath);
       pngSize = pngStat.size;
-    } catch {
-      pngSize = width * height * 4;
-    }
+    } catch {}
 
     const reader = new TerrainBinaryReader(compressedBuffer);
     const unpacked = reader.unpackToRawBuffer();
@@ -53,6 +61,7 @@ export class TerrainBinaryExportService {
 
     const rawSize = rawBuffer.byteLength;
     const compressedSize = compressedBuffer.byteLength;
+    const gzippedSize = gzippedBuffer.byteLength;
 
     const rawSavings = Number(
       (((pngSize - rawSize) / (pngSize || 1)) * 100).toFixed(2),
@@ -60,13 +69,18 @@ export class TerrainBinaryExportService {
     const compressedSavings = Number(
       (((pngSize - compressedSize) / (pngSize || 1)) * 100).toFixed(2),
     );
+    const gzippedSavings = Number(
+      (((pngSize - gzippedSize) / (pngSize || 1)) * 100).toFixed(2),
+    );
 
     const stats: TerrainBinaryBuildStats = {
       pngSizeBytes: pngSize,
       rawBinarySizeBytes: rawSize,
       compressedBinarySizeBytes: compressedSize,
+      gzippedBinarySizeBytes: gzippedSize,
       rawSavingsPercent: rawSavings,
       compressedSavingsPercent: compressedSavings,
+      gzippedSavingsPercent: gzippedSavings,
       totalPaletteColors: built.palette.length,
       totalSpansCount: built.totalSpans,
       avgSpansPerRow: Number((built.totalSpans / height).toFixed(2)),
@@ -86,6 +100,7 @@ export class TerrainBinaryExportService {
     const pngKb = (stats.pngSizeBytes / 1024).toFixed(1);
     const rawKb = (stats.rawBinarySizeBytes / 1024).toFixed(1);
     const compKb = (stats.compressedBinarySizeBytes / 1024).toFixed(1);
+    const gzipKb = (stats.gzippedBinarySizeBytes / 1024).toFixed(1);
 
     process.stdout.write(
       "\n==================================================\n",
@@ -99,20 +114,18 @@ export class TerrainBinaryExportService {
     process.stdout.write(`حجم تصویر مرجع PNG:              ${pngKb} KB\n`);
     process.stdout.write(`حجم فایل باینری خام (terrain-raw):  ${rawKb} KB\n`);
     process.stdout.write(`حجم فایل فشرده سطری (terrain-comp): ${compKb} KB\n`);
+    process.stdout.write(`حجم نهایی فشرده Gzip (level 9):     ${gzipKb} KB\n`);
     process.stdout.write(
       "--------------------------------------------------\n",
     );
     process.stdout.write(
-      `درصد کاهش حجم نهایی نسبت به PNG:  ${stats.compressedSavingsPercent}%\n`,
+      `درصد کاهش حجم نهایی نسبت به PNG:  ${stats.gzippedSavingsPercent}%\n`,
     );
     process.stdout.write(
       `تعداد کل رنگ‌های منحصربه‌فرد پالت:   ${stats.totalPaletteColors}\n`,
     );
     process.stdout.write(
       `تعداد کل بازه‌های سطری (Spans):     ${stats.totalSpansCount}\n`,
-    );
-    process.stdout.write(
-      `میانگین بازه در هر سطر نقشه:       ${stats.avgSpansPerRow}\n`,
     );
     process.stdout.write(
       `تعداد خطاهای تطبیق پیکسلی:        ${stats.mismatchCount}\n`,
