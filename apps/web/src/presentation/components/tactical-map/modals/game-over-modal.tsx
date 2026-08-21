@@ -1,7 +1,19 @@
 import React, { useEffect } from "react";
-import { Trophy, RefreshCw, Award, Globe2, Coins, Users } from "lucide-react";
+import {
+  Trophy,
+  RefreshCw,
+  Award,
+  Globe2,
+  Coins,
+  Users,
+  Home,
+  Crown,
+  Sparkles,
+} from "lucide-react";
 import confetti from "canvas-confetti";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 function VictoryStatsCard({
   turnsPlayed,
@@ -19,15 +31,17 @@ function VictoryStatsCard({
       <div className="bg-secondary/50 p-3.5 rounded-2xl space-y-1 border border-border/60">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-sans font-bold">
           <Award size={13} className="text-amber-500" />
-          <span>تعداد نوبت‌ها</span>
+          <span>تعداد نوبت‌های سپری‌شده</span>
         </div>
-        <span className="font-bold text-foreground block">{turnsPlayed}</span>
+        <span className="font-bold text-foreground block">
+          {PersianNumberFormatter.toPersianDigits(turnsPlayed)} نوبت
+        </span>
       </div>
 
       <div className="bg-secondary/50 p-3.5 rounded-2xl space-y-1 border border-border/60">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-sans font-bold">
           <Coins size={13} className="text-gdp" />
-          <span>تولید ناخالص نهایی</span>
+          <span>تولید ناخالص امپراتوری شما</span>
         </div>
         <span className="font-bold text-foreground block">{finalGdp}</span>
       </div>
@@ -35,7 +49,7 @@ function VictoryStatsCard({
       <div className="bg-secondary/50 p-3.5 rounded-2xl space-y-1 border border-border/60">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-sans font-bold">
           <Users size={13} className="text-primary" />
-          <span>جمعیت کل امپراتوری</span>
+          <span>جمعیت کل کشور شما</span>
         </div>
         <span className="font-bold text-foreground block">
           {finalPopulation}
@@ -45,7 +59,7 @@ function VictoryStatsCard({
       <div className="bg-secondary/50 p-3.5 rounded-2xl space-y-1 border border-border/60">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-sans font-bold">
           <Globe2 size={13} className="text-military" />
-          <span>پیکسل‌های تحت کنترل</span>
+          <span>وسعت قلمرو تحت کنترل</span>
         </div>
         <span className="font-bold text-foreground block">
           {conqueredPixels}
@@ -59,30 +73,38 @@ interface GameOverModalProps {
   isOpen: boolean;
   isVictory: boolean;
   winnerName: string;
-  reason: string;
+  winnerCode: string;
+  winnerFlagCode: string;
+  reasonTitle: string;
+  reasonDescription: string;
   turnsPlayed: number;
   finalGdp: string;
   finalPopulation: string;
   conqueredPixels: string;
   onRestart: () => void;
+  onHome: () => void;
 }
 
 export function GameOverModal({
   isOpen,
   isVictory,
   winnerName,
-  reason,
+  winnerCode,
+  winnerFlagCode,
+  reasonTitle,
+  reasonDescription,
   turnsPlayed,
   finalGdp,
   finalPopulation,
   conqueredPixels,
   onRestart,
+  onHome,
 }: GameOverModalProps) {
   useEffect(() => {
     if (isOpen && isVictory) {
       try {
         confetti({
-          particleCount: 120,
+          particleCount: 140,
           spread: 80,
           origin: { y: 0.6 },
         });
@@ -92,50 +114,115 @@ export function GameOverModal({
 
   if (!isOpen) return null;
 
+  const winnerFlag = getFlagEmoji(winnerFlagCode || winnerCode);
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title={isVictory ? "پیروزی مطلق امپراتوری!" : "شکست و سقوط حاکمیت"}
+      title={
+        isVictory ? "پیروزی مطلق بر جهان!" : "پایان ماراتن قدرت و پیروزی رقیب"
+      }
       subtitle={
         isVictory
-          ? `امپراتوری ${winnerName} با موفقیت توانست بر مقدرات جهانی مسلط شود.`
-          : "کشور شما تحت فشار بحران‌های داخلی یا نظامی فروپاشید."
+          ? "حاکمیت شما با اقتدار کامل توانست مقدرات سیاسی و اقتصادی جهان را تسخیر کند."
+          : `امپراتوری ${winnerName} موفق شد شروط سلطه جهانی را تکمیل کرده و پیروز بازی شود.`
       }
-      maxWidthClass="max-w-md"
+      maxWidthClass="max-w-lg"
       onClose={onRestart}
     >
-      <div className="space-y-5 text-right dir-rtl font-sans">
-        <div className="flex flex-col items-center justify-center gap-2.5 text-center">
+      <div className="space-y-4 text-right dir-rtl font-sans">
+        <div
+          className={`p-4.5 rounded-3xl border flex items-center justify-between gap-4 transition-all shadow-lg backdrop-blur-xl ${
+            isVictory
+              ? "bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-amber-500/15 border-amber-500/40 text-foreground"
+              : "bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border-border/80 text-foreground"
+          }`}
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-14 h-14 rounded-2xl bg-secondary/80 border border-border/80 flex items-center justify-center text-4xl shadow-inner select-none shrink-0">
+              {winnerFlag}
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Crown
+                  size={16}
+                  className={isVictory ? "text-amber-500" : "text-primary"}
+                />
+                <span className="text-sm font-black text-foreground">
+                  {winnerName}
+                </span>
+                <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded text-muted-foreground">
+                  {winnerCode}
+                </span>
+              </div>
+              <span
+                className={`text-[11px] font-bold block ${
+                  isVictory ? "text-amber-500" : "text-muted-foreground"
+                }`}
+              >
+                {isVictory ? "امپراتوری پیروز شما" : "فاتح نهایی جهان"}
+              </span>
+            </div>
+          </div>
+
           <div
-            className={`w-16 h-16 rounded-2xl flex items-center justify-center border shadow-xl ${
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-md shrink-0 ${
               isVictory
-                ? "bg-amber-500/15 border-amber-500/40 text-amber-500"
-                : "bg-rose-500/15 border-rose-500/40 text-rose-500"
+                ? "bg-amber-500/20 border-amber-500/40 text-amber-500"
+                : "bg-secondary text-muted-foreground border-border/60"
             }`}
           >
-            <Trophy size={32} />
+            {isVictory ? <Trophy size={24} /> : <Sparkles size={24} />}
           </div>
         </div>
 
-        <div className="bg-secondary/40 p-3.5 rounded-2xl border border-border/60 text-[11px] text-muted-foreground leading-relaxed font-sans">
-          دلیل پایان کمپین:{" "}
-          <strong className="text-foreground">{reason}</strong>
+        <div className="bg-background/60 border border-border/70 p-4 rounded-2xl space-y-1.5 shadow-inner">
+          <div className="flex items-center justify-between text-xs font-bold">
+            <span className="text-muted-foreground font-sans">
+              شرح رویداد تاریخی:
+            </span>
+            <span
+              className={`font-mono text-[11px] ${
+                isVictory ? "text-amber-500" : "text-primary"
+              }`}
+            >
+              {reasonTitle}
+            </span>
+          </div>
+          <p className="text-xs text-foreground leading-relaxed font-sans font-medium">
+            {reasonDescription}
+          </p>
         </div>
 
-        <VictoryStatsCard
-          turnsPlayed={turnsPlayed}
-          finalGdp={finalGdp}
-          finalPopulation={finalPopulation}
-          conqueredPixels={conqueredPixels}
-        />
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono px-1 block">
+            کارنامه نهایی امپراتوری شما
+          </span>
+          <VictoryStatsCard
+            turnsPlayed={turnsPlayed}
+            finalGdp={finalGdp}
+            finalPopulation={finalPopulation}
+            conqueredPixels={conqueredPixels}
+          />
+        </div>
 
-        <button
-          onClick={onRestart}
-          className="w-full py-4 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xl shadow-gdp/20 hover:scale-[1.01] active:scale-[0.99] transition-all border border-gdp/30"
-        >
-          <RefreshCw size={16} />
-          <span>شروع کمپین جدید</span>
-        </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+          <button
+            onClick={onRestart}
+            className="py-3.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-gdp/20 hover:scale-[1.01] active:scale-[0.99] transition-all border border-gdp/30"
+          >
+            <RefreshCw size={15} />
+            <span>شروع کمپین جدید</span>
+          </button>
+
+          <button
+            onClick={onHome}
+            className="py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all"
+          >
+            <Home size={15} />
+            <span>بازگشت به منوی اصلی</span>
+          </button>
+        </div>
       </div>
     </UnifiedModalShell>
   );
