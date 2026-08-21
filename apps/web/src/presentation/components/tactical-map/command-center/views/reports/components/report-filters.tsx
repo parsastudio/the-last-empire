@@ -48,7 +48,7 @@ export function ReportFilters({
                 گزارش‌های حاکمیتی و داخلی کشور
               </span>
               <span className="text-[10px] text-muted-foreground">
-                وقایع مالی، نظامی، عملیات سیاه و اولویت‌دار
+                وقایع نظامی، امنیتی، دیپلماتیک و مالی کشور شما
               </span>
             </div>
           </div>
@@ -94,7 +94,7 @@ export function ReportFilters({
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold shrink-0 ml-1">
             <Clock size={13} className="text-primary" />
-            <span>نوبت وقایع:</span>
+            <span>نوبت:</span>
           </div>
 
           <button
