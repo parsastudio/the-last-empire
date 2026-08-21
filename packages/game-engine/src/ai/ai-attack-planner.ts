@@ -26,8 +26,13 @@ export class AIAttackPlanner {
       return null;
     }
 
+    const availableInfantry = nation.military.infantry || 0;
+    if (availableInfantry < 1) {
+      return null;
+    }
+
     const activeWarCount = this.countActiveWars(nation, allNations);
-    const maxDeployRatio = activeWarCount > 1 ? 0.5 : 0.9;
+    const maxDeployRatio = activeWarCount > 1 ? 0.6 : 0.95;
 
     const attackerTotalPower = Math.max(
       1,
@@ -38,35 +43,82 @@ export class AIAttackPlanner {
       MilitaryPowerCalculator.calculateLandAndAirPower(targetNation),
     );
 
-    const targetRatio = (targetTotalPower * 1.08) / attackerTotalPower;
-    if (
-      targetRatio > maxDeployRatio &&
-      (attackerTotalPower * maxDeployRatio) / targetTotalPower < 1.05
-    ) {
+    const maxDeployablePower = attackerTotalPower * maxDeployRatio;
+    if (maxDeployablePower < targetTotalPower * 1.05) {
       return null;
     }
 
-    const effectiveDeployRatio = Math.min(
+    const requiredPower = Math.min(maxDeployablePower, targetTotalPower * 1.35);
+
+    const powerRatioNeeded = Math.min(
       maxDeployRatio,
-      Math.max(0.15, targetRatio),
+      Math.max(0.25, requiredPower / attackerTotalPower),
     );
 
-    const availableInfantry = nation.military.infantry || 0;
     const availableArmor = nation.military.armor || 0;
     const availableAirForce = nation.military.airForce || 0;
     const availableDrones = nation.military.droneMissile || 0;
 
-    const infantryToDeploy = Math.max(
+    let infantryToDeploy = Math.max(
       1,
-      Math.floor(availableInfantry * effectiveDeployRatio),
+      Math.min(
+        availableInfantry,
+        Math.ceil(availableInfantry * powerRatioNeeded),
+      ),
     );
-    const armorToDeploy = Math.floor(availableArmor * effectiveDeployRatio);
-    const airForceToDeploy = Math.floor(
-      availableAirForce * effectiveDeployRatio,
+    let armorToDeploy = Math.min(
+      availableArmor,
+      Math.ceil(availableArmor * powerRatioNeeded),
     );
-    const dronesToLaunch = Math.floor(availableDrones * effectiveDeployRatio);
+    let airForceToDeploy = Math.min(
+      availableAirForce,
+      Math.ceil(availableAirForce * powerRatioNeeded),
+    );
+    let dronesToLaunch = Math.min(
+      availableDrones,
+      Math.ceil(availableDrones * powerRatioNeeded),
+    );
 
-    if (availableInfantry < 1 || infantryToDeploy > availableInfantry) {
+    let deployedPower = this.calculateDeployedPower(
+      nation,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
+      dronesToLaunch,
+    );
+
+    if (deployedPower < targetTotalPower * 1.15) {
+      if (armorToDeploy < availableArmor) {
+        armorToDeploy = Math.min(
+          availableArmor,
+          Math.ceil(availableArmor * maxDeployRatio),
+        );
+      }
+      if (airForceToDeploy < availableAirForce) {
+        airForceToDeploy = Math.min(
+          availableAirForce,
+          Math.ceil(availableAirForce * maxDeployRatio),
+        );
+      }
+      if (infantryToDeploy < availableInfantry) {
+        infantryToDeploy = Math.max(
+          1,
+          Math.min(
+            availableInfantry,
+            Math.ceil(availableInfantry * maxDeployRatio),
+          ),
+        );
+      }
+      deployedPower = this.calculateDeployedPower(
+        nation,
+        infantryToDeploy,
+        armorToDeploy,
+        airForceToDeploy,
+        dronesToLaunch,
+      );
+    }
+
+    if (deployedPower / targetTotalPower < 1.05) {
       return null;
     }
 
@@ -81,18 +133,6 @@ export class AIAttackPlanner {
     );
 
     if (!targetResolution) {
-      return null;
-    }
-
-    const deployedPower = this.calculateDeployedPower(
-      nation,
-      infantryToDeploy,
-      armorToDeploy,
-      airForceToDeploy,
-      dronesToLaunch,
-    );
-
-    if (deployedPower / targetTotalPower < 1.05) {
       return null;
     }
 
