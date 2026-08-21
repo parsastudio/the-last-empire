@@ -52,7 +52,7 @@ export function WideReportsView({
 
       <ReportStatsOverview stats={stats} turnLabel={turnLabel} />
 
-      <div className="space-y-3 pt-1">
+      <div className="space-y-2.5 pt-1">
         {sortedLogs.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center gap-2.5 text-center bg-secondary/20 rounded-2xl border border-border/40">
             <FileQuestion size={24} className="text-muted-foreground" />

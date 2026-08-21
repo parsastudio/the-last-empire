@@ -1,23 +1,16 @@
 import React, { useMemo } from "react";
-import {
-  TurnLogEntry,
-  TurnLogCategory,
-  TurnLogLevel,
-} from "@/domain/game/game-state.schema";
+import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
   Swords,
   Users,
   Binary,
   Coins,
-  ShieldAlert,
-  Info,
-  AlertTriangle,
   Skull,
-  Flame,
+  Info,
+  ArrowLeft,
 } from "lucide-react";
 
 interface ReportCardProps {
@@ -45,151 +38,101 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
     targetFlag = getFlagEmoji(targetNation?.flagCode || targetCanonical);
   }
 
-  const visualStyle = useMemo(() => {
-    const isWarOrCombat =
-      log.category === "GLOBAL_WAR" ||
-      log.category === "MILITARY" ||
-      log.level === "COMBAT";
-
+  const style = useMemo(() => {
     const isAnnexation =
       log.category === "GLOBAL_ANNEXATION" ||
       log.message.includes("سقوط") ||
       log.message.includes("انحلال");
 
+    const isWar =
+      log.category === "GLOBAL_WAR" ||
+      log.category === "MILITARY" ||
+      log.level === "COMBAT" ||
+      log.level === "CRITICAL" ||
+      log.message.includes("اعلان جنگ") ||
+      log.message.includes("نبرد") ||
+      log.message.includes("تهاجم");
+
     const isEspionage = log.category === "ESPIONAGE";
-    const isDiplomacy =
-      log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY";
-    const isAidOrMoney =
+    const isMoneyOrAid =
       log.message.includes("کمک مالی") ||
       log.message.includes("خزانه") ||
       log.category === "DOMESTIC";
+    const isDiplomacy =
+      log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY";
 
     if (isAnnexation) {
       return {
         cardBg: "bg-red-950/20",
-        border: "border-red-600/60 hover:border-red-500",
-        badgeBg: "bg-red-600/20 text-red-300 border-red-500/40",
-        label: "سقوط حاکمیت",
-        priorityLabel: "رویداد تاریخی و الحاق",
-        priorityTagColor: "text-red-400 bg-red-950/60 border-red-800/60",
+        border: "border-red-600/50 hover:border-red-500",
         icon: Skull,
-        accentColor: "text-red-400",
+        iconBg: "bg-red-500/20 text-red-400 border-red-500/40",
       };
     }
 
-    if (isWarOrCombat || log.level === "CRITICAL") {
+    if (isWar) {
       return {
-        cardBg: "bg-rose-950/25",
-        border: "border-rose-500/50 hover:border-rose-500 shadow-rose-950/20",
-        badgeBg: "bg-rose-500/20 text-rose-300 border-rose-500/40",
-        label: "نبرد و فرمان آتش",
-        priorityLabel: "اولویت ۱: تحولات رزمی جبهه",
-        priorityTagColor: "text-rose-400 bg-rose-950/60 border-rose-800/60",
+        cardBg: "bg-rose-950/20",
+        border: "border-rose-500/40 hover:border-rose-500",
         icon: Swords,
-        accentColor: "text-rose-400",
+        iconBg: "bg-rose-500/20 text-rose-400 border-rose-500/40",
       };
     }
 
     if (isEspionage) {
       return {
         cardBg: "bg-amber-950/20",
-        border:
-          "border-amber-500/40 hover:border-amber-500 shadow-amber-950/20",
-        badgeBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-        label: "عملیات ویژه اطلاعاتی",
-        priorityLabel: "اولویت ۲: امنیت و سایبر",
-        priorityTagColor: "text-amber-400 bg-amber-950/60 border-amber-800/60",
+        border: "border-amber-500/40 hover:border-amber-500",
         icon: Binary,
-        accentColor: "text-amber-400",
+        iconBg: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+      };
+    }
+
+    if (isMoneyOrAid) {
+      return {
+        cardBg: "bg-emerald-950/20",
+        border: "border-emerald-500/40 hover:border-emerald-500",
+        icon: Coins,
+        iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
       };
     }
 
     if (isDiplomacy) {
       return {
         cardBg: "bg-indigo-950/20",
-        border:
-          "border-indigo-500/40 hover:border-indigo-500 shadow-indigo-950/20",
-        badgeBg: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
-        label: "دیپلماسی و معاهدات",
-        priorityLabel: "اولویت ۳: روابط خارجی",
-        priorityTagColor:
-          "text-indigo-400 bg-indigo-950/60 border-indigo-800/60",
+        border: "border-indigo-500/40 hover:border-indigo-500",
         icon: Users,
-        accentColor: "text-indigo-400",
-      };
-    }
-
-    if (isAidOrMoney) {
-      return {
-        cardBg: "bg-emerald-950/20",
-        border:
-          "border-emerald-500/40 hover:border-emerald-500 shadow-emerald-950/20",
-        badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-        label: "امور مالی و خزانه‌داری",
-        priorityLabel: "اولویت ۴: مراودات اقتصادی",
-        priorityTagColor:
-          "text-emerald-400 bg-emerald-950/60 border-emerald-800/60",
-        icon: Coins,
-        accentColor: "text-emerald-400",
+        iconBg: "bg-indigo-500/20 text-indigo-400 border-indigo-500/40",
       };
     }
 
     return {
       cardBg: "bg-secondary/30",
       border: "border-border/60 hover:border-border",
-      badgeBg: "bg-secondary text-muted-foreground border-border/50",
-      label: "گزارش عادی",
-      priorityLabel: "گزارش عمومی",
-      priorityTagColor:
-        "text-muted-foreground bg-secondary/50 border-border/40",
       icon: Info,
-      accentColor: "text-primary",
+      iconBg: "bg-secondary text-muted-foreground border-border/50",
     };
   }, [log]);
 
-  const Icon = visualStyle.icon;
+  const Icon = style.icon;
 
   return (
     <div
-      className={`p-4 rounded-2xl border ${visualStyle.border} ${visualStyle.cardBg} space-y-3 transition-all font-sans text-right dir-rtl shadow-md backdrop-blur-sm`}
+      className={`p-4 rounded-2xl border ${style.border} ${style.cardBg} flex items-start gap-3.5 transition-all font-sans text-right dir-rtl backdrop-blur-sm shadow-sm hover:shadow-md`}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span
-            className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg border flex items-center gap-1 ${visualStyle.priorityTagColor}`}
-          >
-            <Flame size={10} />
-            <span>{visualStyle.priorityLabel}</span>
-          </span>
-
-          <span
-            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 ${visualStyle.badgeBg}`}
-          >
-            <Icon size={12} className={visualStyle.accentColor} />
-            <span>{visualStyle.label}</span>
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
-          <span className="bg-background/80 border border-border/60 px-2 py-0.5 rounded-md font-bold text-foreground">
-            نوبت {PersianNumberFormatter.toPersianDigits(log.turn)}
-          </span>
-          <span>
-            {new Date(log.timestamp).toLocaleTimeString("fa-IR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </span>
-        </div>
+      <div
+        className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${style.iconBg}`}
+      >
+        <Icon size={16} />
       </div>
 
-      <div className="space-y-2">
+      <div className="flex-1 space-y-2.5 overflow-hidden">
         <p className="text-xs text-foreground leading-relaxed font-sans font-medium">
           {log.message}
         </p>
 
         {(sourceName || targetName) && (
-          <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-[10px]">
+          <div className="flex flex-wrap items-center gap-2 pt-0.5 font-mono text-[10px]">
             {sourceName && (
               <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
                 <span className="text-base select-none">{sourceFlag}</span>
@@ -199,7 +142,10 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
 
             {targetName && (
               <>
-                <span className="text-muted-foreground font-bold">←</span>
+                <ArrowLeft
+                  size={11}
+                  className="text-muted-foreground shrink-0"
+                />
                 <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
                   <span className="text-base select-none">{targetFlag}</span>
                   <span className="font-bold text-foreground">
