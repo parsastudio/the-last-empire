@@ -1,31 +1,25 @@
 import React from "react";
-import { Swords, Users, Binary, ShieldAlert, FileText } from "lucide-react";
+import { Swords, Users, Binary, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ReportStatsOverviewProps {
   stats: {
-    total: number;
     combatCount: number;
     diplomacyCount: number;
     espionageCount: number;
     criticalCount: number;
   };
+  turnLabel: string;
 }
 
-export function ReportStatsOverview({ stats }: ReportStatsOverviewProps) {
+export function ReportStatsOverview({
+  stats,
+  turnLabel,
+}: ReportStatsOverviewProps) {
   const cards = [
     {
-      id: "total",
-      label: "کل رویدادهای ثبت‌شده",
-      value: stats.total,
-      icon: FileText,
-      color: "text-foreground",
-      border: "border-border/60",
-      bg: "bg-secondary/40",
-    },
-    {
       id: "combat",
-      label: "نبردها و درگیری‌ها",
+      label: `نبردها (${turnLabel})`,
       value: stats.combatCount,
       icon: Swords,
       color: "text-military",
@@ -34,7 +28,7 @@ export function ReportStatsOverview({ stats }: ReportStatsOverviewProps) {
     },
     {
       id: "diplomacy",
-      label: "دیپلماسی و معاهدات",
+      label: `دیپلماسی (${turnLabel})`,
       value: stats.diplomacyCount,
       icon: Users,
       color: "text-diplomacy",
@@ -43,7 +37,7 @@ export function ReportStatsOverview({ stats }: ReportStatsOverviewProps) {
     },
     {
       id: "espionage",
-      label: "عملیات‌های ویژه اطلاعاتی",
+      label: `عملیات ویژه (${turnLabel})`,
       value: stats.espionageCount,
       icon: Binary,
       color: "text-treasury",
@@ -52,7 +46,7 @@ export function ReportStatsOverview({ stats }: ReportStatsOverviewProps) {
     },
     {
       id: "critical",
-      label: "وضعیت‌های بحرانی و سقوط",
+      label: `رویداد بحرانی (${turnLabel})`,
       value: stats.criticalCount,
       icon: ShieldAlert,
       color: "text-rose-500",
@@ -62,7 +56,7 @@ export function ReportStatsOverview({ stats }: ReportStatsOverviewProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-sans dir-rtl text-right">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-sans dir-rtl text-right">
       {cards.map((card) => {
         const Icon = card.icon;
         return (
@@ -71,13 +65,13 @@ export function ReportStatsOverview({ stats }: ReportStatsOverviewProps) {
             className={`p-3 rounded-2xl border ${card.border} ${card.bg} space-y-1 transition-all backdrop-blur-sm shadow-sm`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-muted-foreground font-semibold">
+              <span className="text-[10px] text-muted-foreground font-bold">
                 {card.label}
               </span>
               <Icon size={14} className={card.color} />
             </div>
             <span
-              className={`text-base font-black font-mono block ${card.color}`}
+              className={`text-lg font-black font-mono block ${card.color}`}
             >
               {PersianNumberFormatter.toPersianDigits(card.value)}
             </span>

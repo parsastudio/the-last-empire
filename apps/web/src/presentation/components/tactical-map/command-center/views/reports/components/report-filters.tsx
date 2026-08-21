@@ -1,157 +1,200 @@
 import React from "react";
-import { Search, Filter, Layers, Clock } from "lucide-react";
 import {
-  TurnLogCategory,
-  TurnLogLevel,
-  TurnLogScope,
-} from "@/domain/game/game-state.schema";
+  ShieldCheck,
+  Globe2,
+  Clock,
+  Search,
+  Swords,
+  Users,
+  Skull,
+} from "lucide-react";
+import { TurnLogCategory, TurnLogScope } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ReportFiltersProps {
-  searchQuery: string;
-  selectedScope: TurnLogScope | "ALL";
-  selectedCategory: TurnLogCategory | "ALL";
-  selectedLevel: TurnLogLevel | "ALL";
+  selectedScope: TurnLogScope;
   selectedTurn: number | "ALL";
+  selectedCategory: TurnLogCategory | "ALL";
+  searchQuery: string;
   availableTurns: number[];
-  onSearchChange: (query: string) => void;
-  onScopeChange: (scope: TurnLogScope | "ALL") => void;
-  onCategoryChange: (category: TurnLogCategory | "ALL") => void;
-  onLevelChange: (level: TurnLogLevel | "ALL") => void;
+  onScopeChange: (scope: TurnLogScope) => void;
   onTurnChange: (turn: number | "ALL") => void;
+  onCategoryChange: (category: TurnLogCategory | "ALL") => void;
+  onSearchChange: (query: string) => void;
 }
 
 export function ReportFilters({
-  searchQuery,
   selectedScope,
-  selectedCategory,
-  selectedLevel,
   selectedTurn,
+  selectedCategory,
+  searchQuery,
   availableTurns,
-  onSearchChange,
   onScopeChange,
-  onCategoryChange,
-  onLevelChange,
   onTurnChange,
+  onCategoryChange,
+  onSearchChange,
 }: ReportFiltersProps) {
-  const scopeOptions: { id: TurnLogScope | "ALL"; label: string }[] = [
-    { id: "ALL", label: "همه دامنه‌ها" },
-    { id: "NATIONAL", label: "محرمانه ملی" },
-    { id: "GLOBAL", label: "رویدادهای بین‌المللی" },
-  ];
-
-  const categoryOptions: { id: TurnLogCategory | "ALL"; label: string }[] = [
-    { id: "ALL", label: "همه موضوعات" },
-    { id: "MILITARY", label: "ستاد ارتش" },
-    { id: "GLOBAL_WAR", label: "جنگ‌های جهان" },
-    { id: "DIPLOMACY", label: "دیپلماسی ملی" },
-    { id: "GLOBAL_DIPLOMACY", label: "معاهدات بین‌الملل" },
-    { id: "ESPIONAGE", label: "عملیات ویژه و سیاه" },
-    { id: "GLOBAL_ANNEXATION", label: "سقوط حاکمیت‌ها" },
-    { id: "DOMESTIC", label: "امور مالی و داخلی" },
-  ];
-
-  const levelOptions: { id: TurnLogLevel | "ALL"; label: string }[] = [
-    { id: "ALL", label: "همه سطوح" },
-    { id: "CRITICAL", label: "بحرانی" },
-    { id: "COMBAT", label: "نبرد" },
-    { id: "WARNING", label: "هشدار" },
-    { id: "INFO", label: "عادی" },
+  const globalCategories: {
+    id: TurnLogCategory | "ALL";
+    label: string;
+    icon: React.ElementType;
+  }[] = [
+    { id: "ALL", label: "تمام وقایع جهان", icon: Globe2 },
+    { id: "GLOBAL_WAR", label: "جنگ‌ها و لشکرکشی‌ها", icon: Swords },
+    { id: "GLOBAL_DIPLOMACY", label: "معاهدات بین‌الملل", icon: Users },
+    { id: "GLOBAL_ANNEXATION", label: "فروپاشی و الحاق", icon: Skull },
   ];
 
   return (
-    <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 font-sans dir-rtl text-right">
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-        <div className="md:col-span-8 relative">
+    <div className="space-y-3.5 font-sans dir-rtl text-right">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button
+          onClick={() => onScopeChange("NATIONAL")}
+          className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer ${
+            selectedScope === "NATIONAL"
+              ? "bg-primary/15 border-primary text-foreground shadow-lg shadow-primary/10 ring-1 ring-primary/40"
+              : "bg-secondary/40 border-border/60 hover:bg-secondary/70 text-muted-foreground"
+          }`}
+        >
+          <div className="flex items-center gap-3 text-right">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                selectedScope === "NATIONAL"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <span className="text-xs font-black block text-foreground">
+                گزارش‌های حاکمیتی و داخلی کشور
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                وقایع مالی، نظامی، عملیات سیاه و محرمانه
+              </span>
+            </div>
+          </div>
+          {selectedScope === "NATIONAL" && (
+            <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shrink-0" />
+          )}
+        </button>
+
+        <button
+          onClick={() => onScopeChange("GLOBAL")}
+          className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer ${
+            selectedScope === "GLOBAL"
+              ? "bg-diplomacy/15 border-diplomacy text-foreground shadow-lg shadow-diplomacy/10 ring-1 ring-diplomacy/40"
+              : "bg-secondary/40 border-border/60 hover:bg-secondary/70 text-muted-foreground"
+          }`}
+        >
+          <div className="flex items-center gap-3 text-right">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                selectedScope === "GLOBAL"
+                  ? "bg-diplomacy text-primary-foreground"
+                  : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              <Globe2 size={20} />
+            </div>
+            <div>
+              <span className="text-xs font-black block text-foreground">
+                دیده‌بان اخبار بین‌الملل و جهان
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                پوشش عمومی جنگ‌ها، معاهدات و سقوط دولت‌ها
+              </span>
+            </div>
+          </div>
+          {selectedScope === "GLOBAL" && (
+            <span className="w-2.5 h-2.5 rounded-full bg-diplomacy animate-pulse shrink-0" />
+          )}
+        </button>
+      </div>
+
+      <div className="bg-background/40 border border-border/60 p-3 rounded-2xl flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-bold shrink-0 ml-1">
+            <Clock size={13} className="text-primary" />
+            <span>نوبت مورد نظر:</span>
+          </div>
+
+          <button
+            onClick={() => onTurnChange(availableTurns[0] ?? 1)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
+              selectedTurn === (availableTurns[0] ?? 1)
+                ? "bg-gdp text-primary-foreground border-gdp shadow-sm"
+                : "bg-secondary/50 text-muted-foreground border-border/60 hover:bg-secondary"
+            }`}
+          >
+            دست جاری (نوبت{" "}
+            {PersianNumberFormatter.toPersianDigits(availableTurns[0] ?? 1)})
+          </button>
+
+          {availableTurns.slice(1, 6).map((turn) => (
+            <button
+              key={turn}
+              onClick={() => onTurnChange(turn)}
+              className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer shrink-0 border ${
+                selectedTurn === turn
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-secondary/30 text-muted-foreground border-border/40 hover:bg-secondary/60"
+              }`}
+            >
+              نوبت {PersianNumberFormatter.toPersianDigits(turn)}
+            </button>
+          ))}
+
+          <button
+            onClick={() => onTurnChange("ALL")}
+            className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer shrink-0 border ${
+              selectedTurn === "ALL"
+                ? "bg-foreground text-background border-foreground"
+                : "bg-secondary/20 text-muted-foreground border-border/40 hover:bg-secondary/50"
+            }`}
+          >
+            همه دست‌ها
+          </button>
+        </div>
+
+        <div className="relative min-w-[200px] flex-1 sm:flex-initial">
           <Search
-            size={14}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            size={13}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
-            placeholder="جستجو در پیام‌ها، نام کشورها یا کدهای رهگیری..."
+            placeholder="جستجو در متن وقایع..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+            className="w-full bg-secondary/50 border border-border rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
           />
         </div>
-
-        <div className="md:col-span-4 flex items-center gap-2">
-          <Clock size={14} className="text-primary shrink-0" />
-          <select
-            value={selectedTurn}
-            onChange={(e) =>
-              onTurnChange(
-                e.target.value === "ALL" ? "ALL" : Number(e.target.value),
-              )
-            }
-            className="w-full bg-secondary/50 border border-border rounded-xl py-2 px-3 text-xs text-foreground font-mono focus:outline-none focus:border-primary cursor-pointer"
-          >
-            <option value="ALL">تمامی نوبت‌ها</option>
-            {availableTurns.map((turn) => (
-              <option key={turn} value={turn}>
-                نوبت {PersianNumberFormatter.toPersianDigits(turn)}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/30 text-[11px]">
-        <div className="flex items-center gap-1 text-muted-foreground shrink-0 font-bold">
-          <Filter size={12} />
-          <span>دامنه:</span>
+      {selectedScope === "GLOBAL" && (
+        <div className="flex flex-wrap items-center gap-2 pt-0.5">
+          {globalCategories.map((cat) => {
+            const Icon = cat.icon;
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onCategoryChange(cat.id)}
+                className={`px-3 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1.5 border ${
+                  isSelected
+                    ? "bg-diplomacy text-primary-foreground border-diplomacy shadow-sm"
+                    : "bg-secondary/40 text-muted-foreground border-border/50 hover:bg-secondary"
+                }`}
+              >
+                <Icon size={12} />
+                <span>{cat.label}</span>
+              </button>
+            );
+          })}
         </div>
-        {scopeOptions.map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => onScopeChange(opt.id)}
-            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer border ${
-              selectedScope === opt.id
-                ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                : "bg-secondary/40 text-muted-foreground border-border/50 hover:bg-secondary"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-
-        <div className="w-[1px] h-4 bg-border/60 mx-1 hidden sm:block" />
-
-        <div className="flex items-center gap-1 text-muted-foreground shrink-0 font-bold">
-          <Layers size={12} />
-          <span>سطح:</span>
-        </div>
-        {levelOptions.map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => onLevelChange(opt.id)}
-            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold transition-all cursor-pointer border ${
-              selectedLevel === opt.id
-                ? "bg-gdp text-primary-foreground border-gdp shadow-sm"
-                : "bg-secondary/40 text-muted-foreground border-border/50 hover:bg-secondary"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-1.5 pt-1">
-        {categoryOptions.map((opt) => (
-          <button
-            key={opt.id}
-            onClick={() => onCategoryChange(opt.id)}
-            className={`px-2 py-0.5 rounded-lg text-[10px] transition-all cursor-pointer border ${
-              selectedCategory === opt.id
-                ? "bg-secondary text-foreground border-primary font-bold shadow-inner"
-                : "bg-background/40 text-muted-foreground border-border/40 hover:bg-secondary/40"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      )}
     </div>
   );
 }

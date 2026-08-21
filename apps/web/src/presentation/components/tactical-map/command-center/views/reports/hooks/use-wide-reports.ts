@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   TurnLogEntry,
   TurnLogCategory,
@@ -10,31 +10,48 @@ import { Nation } from "@/domain/nation/nation.schema";
 
 interface UseWideReportsProps {
   logs: TurnLogEntry[];
-  humanNationId?: string;
+  currentTurn?: number;
   nationsMap?: Record<string, Nation>;
 }
 
 export function useWideReports({
   logs = [],
-  humanNationId,
+  currentTurn = 1,
   nationsMap,
 }: UseWideReportsProps) {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedScope, setSelectedScope] = useState<TurnLogScope | "ALL">(
-    "ALL",
-  );
+  const [selectedScope, setSelectedScope] = useState<TurnLogScope>("NATIONAL");
+  const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(currentTurn);
   const [selectedCategory, setSelectedCategory] = useState<
     TurnLogCategory | "ALL"
   >("ALL");
   const [selectedLevel, setSelectedLevel] = useState<TurnLogLevel | "ALL">(
     "ALL",
   );
-  const [selectedTurn, setSelectedTurn] = useState<number | "ALL">("ALL");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const availableTurns = useMemo(() => {
     const turns = Array.from(new Set(logs.map((l) => l.turn)));
+    if (turns.length === 0) return [currentTurn];
     return turns.sort((a, b) => b - a);
-  }, [logs]);
+  }, [logs, currentTurn]);
+
+  useEffect(() => {
+    if (availableTurns.length > 0 && selectedTurn !== "ALL") {
+      const latestAvailable = availableTurns[0]!;
+      if (!availableTurns.includes(selectedTurn)) {
+        setSelectedTurn(latestAvailable);
+      }
+    }
+  }, [availableTurns, selectedTurn]);
+
+  const activeTurnLogs = useMemo(() => {
+    return logs.filter((log) => {
+      if (selectedTurn !== "ALL" && log.turn !== selectedTurn) {
+        return false;
+      }
+      return log.scope === selectedScope;
+    });
+  }, [logs, selectedTurn, selectedScope]);
 
   const stats = useMemo(() => {
     let combatCount = 0;
@@ -42,8 +59,8 @@ export function useWideReports({
     let espionageCount = 0;
     let criticalCount = 0;
 
-    for (let i = 0; i < logs.length; i++) {
-      const log = logs[i]!;
+    for (let i = 0; i < activeTurnLogs.length; i++) {
+      const log = activeTurnLogs[i]!;
       if (log.category === "GLOBAL_WAR" || log.category === "MILITARY") {
         combatCount++;
       }
@@ -59,35 +76,27 @@ export function useWideReports({
     }
 
     return {
-      total: logs.length,
       combatCount,
       diplomacyCount,
       espionageCount,
       criticalCount,
     };
-  }, [logs]);
+  }, [activeTurnLogs]);
 
   const filteredLogs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return logs
+    return activeTurnLogs
       .slice()
       .reverse()
       .filter((log) => {
-        if (selectedScope !== "ALL" && log.scope !== selectedScope) {
-          return false;
-        }
-
-        if (selectedCategory !== "ALL" && log.category !== selectedCategory) {
-          return false;
-        }
-
-        if (selectedLevel !== "ALL" && log.level !== selectedLevel) {
-          return false;
-        }
-
-        if (selectedTurn !== "ALL" && log.turn !== selectedTurn) {
-          return false;
+        if (selectedScope === "GLOBAL") {
+          if (selectedCategory !== "ALL" && log.category !== selectedCategory) {
+            return false;
+          }
+          if (selectedLevel !== "ALL" && log.level !== selectedLevel) {
+            return false;
+          }
         }
 
         if (!query) {
@@ -120,28 +129,27 @@ export function useWideReports({
         );
       });
   }, [
-    logs,
+    activeTurnLogs,
     selectedScope,
     selectedCategory,
     selectedLevel,
-    selectedTurn,
     searchQuery,
     nationsMap,
   ]);
 
   return {
-    searchQuery,
     selectedScope,
+    selectedTurn,
     selectedCategory,
     selectedLevel,
-    selectedTurn,
+    searchQuery,
     availableTurns,
     stats,
     filteredLogs,
-    setSearchQuery,
     setSelectedScope,
+    setSelectedTurn,
     setSelectedCategory,
     setSelectedLevel,
-    setSelectedTurn,
+    setSearchQuery,
   };
 }
