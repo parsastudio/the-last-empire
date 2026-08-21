@@ -24,14 +24,12 @@ export function WideReportsView({
   const {
     selectedScope,
     selectedTurn,
-    selectedCategory,
     searchQuery,
     availableTurns,
     stats,
-    filteredLogs,
+    sortedLogs,
     setSelectedScope,
     setSelectedTurn,
-    setSelectedCategory,
     setSearchQuery,
   } = useWideReports({ logs, currentTurn, humanNationId, nationsMap });
 
@@ -41,23 +39,21 @@ export function WideReportsView({
       : `نوبت ${PersianNumberFormatter.toPersianDigits(selectedTurn)}`;
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right font-sans pb-4">
+    <div className="space-y-4 animate-in fade-in duration-200 dir-rtl text-right font-sans pb-6">
       <ReportFilters
         selectedScope={selectedScope}
         selectedTurn={selectedTurn}
-        selectedCategory={selectedCategory}
         searchQuery={searchQuery}
         availableTurns={availableTurns}
         onScopeChange={setSelectedScope}
         onTurnChange={setSelectedTurn}
-        onCategoryChange={setSelectedCategory}
         onSearchChange={setSearchQuery}
       />
 
       <ReportStatsOverview stats={stats} turnLabel={turnLabel} />
 
-      <div className="space-y-2.5 pt-1">
-        {filteredLogs.length === 0 ? (
+      <div className="space-y-3 pt-1">
+        {sortedLogs.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center gap-2.5 text-center bg-secondary/20 rounded-2xl border border-border/40">
             <FileQuestion size={24} className="text-muted-foreground" />
             <span className="text-xs font-bold text-foreground">
@@ -68,7 +64,7 @@ export function WideReportsView({
             </span>
           </div>
         ) : (
-          filteredLogs.map((log) => (
+          sortedLogs.map((log) => (
             <ReportCard key={log.id} log={log} nationsMap={nationsMap} />
           ))
         )}

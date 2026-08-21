@@ -46,7 +46,7 @@ export function ReportStatsOverview({
     },
     {
       id: "critical",
-      label: `رویداد بحرانی (${turnLabel})`,
+      label: `بحران و سقوط (${turnLabel})`,
       value: stats.criticalCount,
       icon: ShieldAlert,
       color: "text-rose-500",
