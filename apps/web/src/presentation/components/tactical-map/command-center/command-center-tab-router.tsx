@@ -7,10 +7,9 @@ import { WidePoliticsView } from "@/presentation/components/tactical-map/command
 import { WideEspionageView } from "@/presentation/components/tactical-map/command-center/views/wide-espionage-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
 import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
+import { WideReportsView } from "@/presentation/components/tactical-map/command-center/views/wide-reports-view";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { FileText, ShieldAlert, Info } from "lucide-react";
+import { GameState } from "@/domain/game/game-state.schema";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
@@ -84,57 +83,14 @@ export function CommandCenterTabRouter({
       );
     case "research":
       return <WideResearchView nationId={nation.id} nation={nation} />;
-    case "reports": {
-      const logs: TurnLogEntry[] = gameState?.turnLogs || [];
-      if (logs.length === 0) {
-        return (
-          <div className="py-20 text-center text-xs text-muted-foreground italic">
-            هیچ گزارش یا لاگ ثبت‌شده‌ای در این کمپین یافت نشد.
-          </div>
-        );
-      }
+    case "reports":
       return (
-        <div className="space-y-3 dir-rtl text-right animate-in fade-in duration-200">
-          <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-            <FileText size={16} className="text-primary" />
-            <span className="text-xs font-bold text-foreground">
-              بایگانی گزارش‌های امنیتی و نبردهای ثبت‌شده
-            </span>
-          </div>
-          <div className="space-y-2 max-h-[450px] overflow-y-auto pr-1 scrollbar-thin">
-            {logs
-              .slice()
-              .reverse()
-              .map((log: TurnLogEntry) => (
-                <div
-                  key={log.id}
-                  className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-1.5 font-mono text-xs"
-                >
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="font-bold text-primary flex items-center gap-1 font-sans">
-                      {log.level === "COMBAT" || log.level === "CRITICAL" ? (
-                        <ShieldAlert size={12} className="text-military" />
-                      ) : (
-                        <Info size={12} className="text-primary" />
-                      )}
-                      نوبت {PersianNumberFormatter.toPersianDigits(log.turn)}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {new Date(log.timestamp).toLocaleTimeString("fa-IR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
-                  </div>
-                  <p className="text-foreground font-sans text-xs leading-relaxed">
-                    {log.message}
-                  </p>
-                </div>
-              ))}
-          </div>
-        </div>
+        <WideReportsView
+          logs={gameState?.turnLogs}
+          humanNationId={nation.id}
+          nationsMap={gameState?.nations}
+        />
       );
-    }
     default:
       return null;
   }
