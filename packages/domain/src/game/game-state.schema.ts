@@ -22,20 +22,43 @@ export const TurnLogCategorySchema = z.enum([
   "GLOBAL_ANNEXATION",
 ]);
 
+export const TurnLogEventCodeSchema = z.enum([
+  "WAR_DECLARED",
+  "DIPLOMATIC_PROPOSAL_SENT",
+  "TREATY_ACCEPTED",
+  "TREATY_REJECTED",
+  "FOREIGN_AID_SENT",
+  "ALLIANCE_INTERVENTION",
+  "ALLIANCE_BETRAYED",
+  "BATTLE_TACTICAL_REPORT",
+  "BATTLE_GLOBAL_NEWS",
+  "NATION_ANNEXED",
+  "NATION_COLLAPSED",
+  "ESPIONAGE_OPERATION",
+  "ARMS_TRADE",
+  "GENERIC_EVENT",
+]);
+
+export const TurnLogParamValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+]);
+
 export const TurnLogEntrySchema = z.object({
   id: z.string(),
   turn: z.number().nonnegative(),
   timestamp: z.number().positive(),
+  eventCode: TurnLogEventCodeSchema.default("GENERIC_EVENT"),
   sourceNationId: z.string(),
   targetNationId: z.string().optional(),
   conquerorNationId: z.string().optional(),
   scope: TurnLogScopeSchema.default("NATIONAL"),
   category: TurnLogCategorySchema.default("DOMESTIC"),
   level: TurnLogLevelSchema,
-  message: z.string(),
-  metadata: z
-    .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-    .optional(),
+  message: z.string().default(""),
+  params: z.record(z.string(), TurnLogParamValueSchema).default({}),
+  metadata: z.record(z.string(), TurnLogParamValueSchema).optional(),
 });
 
 export const GameStateSchema = z.object({
@@ -55,5 +78,7 @@ export const GameStateSchema = z.object({
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;
 export type TurnLogScope = z.infer<typeof TurnLogScopeSchema>;
 export type TurnLogCategory = z.infer<typeof TurnLogCategorySchema>;
+export type TurnLogEventCode = z.infer<typeof TurnLogEventCodeSchema>;
+export type TurnLogParamValue = z.infer<typeof TurnLogParamValueSchema>;
 export type TurnLogEntry = z.infer<typeof TurnLogEntrySchema>;
 export type GameState = z.infer<typeof GameStateSchema>;

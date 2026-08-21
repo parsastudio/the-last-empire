@@ -128,9 +128,7 @@ export class BattleExecutionEngine {
         baseNations,
       );
 
-    const betrayalText = betrayalResult.hasBetrayed
-      ? ` [جریمه نقض معاهده: -${betrayalResult.reputationPenalty} اعتبار جهانی]`
-      : "";
+    const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
 
     const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,
@@ -154,9 +152,6 @@ export class BattleExecutionEngine {
     );
 
     const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
-    if (updatedLogs.length > 300) {
-      updatedLogs.splice(0, updatedLogs.length - 300);
-    }
 
     return {
       ...state,

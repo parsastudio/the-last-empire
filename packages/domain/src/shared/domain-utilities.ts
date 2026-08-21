@@ -3,6 +3,8 @@ import {
   TurnLogLevel,
   TurnLogScope,
   TurnLogCategory,
+  TurnLogEventCode,
+  TurnLogParamValue,
 } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 
@@ -72,12 +74,13 @@ export class TurnLogBuilder {
     turn: number,
     sourceNationId: string,
     level: TurnLogLevel,
-    message: string,
+    eventCode: TurnLogEventCode,
     category: TurnLogCategory = "DOMESTIC",
     scope: TurnLogScope = "NATIONAL",
     targetNationId?: string,
     conquerorNationId?: string,
-    metadata?: Record<string, string | number | boolean>,
+    params: Record<string, TurnLogParamValue> = {},
+    message = "",
   ): TurnLogEntry {
     const cleanSource = CountryRegistry.resolveCanonicalId(sourceNationId);
     const cleanTarget = targetNationId
@@ -92,6 +95,7 @@ export class TurnLogBuilder {
       id: `log-${cleanSource}-t${turn}-${randomSuffix}`,
       turn,
       timestamp: Date.now(),
+      eventCode,
       sourceNationId: cleanSource,
       targetNationId: cleanTarget,
       conquerorNationId: cleanConqueror,
@@ -99,7 +103,7 @@ export class TurnLogBuilder {
       category,
       level,
       message,
-      metadata,
+      params,
     };
   }
 
@@ -108,17 +112,22 @@ export class TurnLogBuilder {
     nationId: string,
     category: "DOMESTIC" | "MILITARY" | "DIPLOMACY" | "ESPIONAGE",
     level: TurnLogLevel,
-    message: string,
+    eventCode: TurnLogEventCode,
+    params: Record<string, TurnLogParamValue> = {},
     targetNationId?: string,
+    message = "",
   ): TurnLogEntry {
     return this.createLogEntry(
       turn,
       nationId,
       level,
-      message,
+      eventCode,
       category,
       "NATIONAL",
       targetNationId,
+      undefined,
+      params,
+      message,
     );
   }
 
@@ -126,17 +135,22 @@ export class TurnLogBuilder {
     turn: number,
     attackerId: string,
     defenderId: string,
-    message: string,
+    eventCode: TurnLogEventCode,
+    params: Record<string, TurnLogParamValue> = {},
     level: TurnLogLevel = "CRITICAL",
+    message = "",
   ): TurnLogEntry {
     return this.createLogEntry(
       turn,
       attackerId,
       level,
-      message,
+      eventCode,
       "GLOBAL_WAR",
       "GLOBAL",
       defenderId,
+      undefined,
+      params,
+      message,
     );
   }
 
@@ -144,17 +158,22 @@ export class TurnLogBuilder {
     turn: number,
     sourceNationId: string,
     targetNationId: string,
-    message: string,
+    eventCode: TurnLogEventCode,
+    params: Record<string, TurnLogParamValue> = {},
     level: TurnLogLevel = "INFO",
+    message = "",
   ): TurnLogEntry {
     return this.createLogEntry(
       turn,
       sourceNationId,
       level,
-      message,
+      eventCode,
       "GLOBAL_DIPLOMACY",
       "GLOBAL",
       targetNationId,
+      undefined,
+      params,
+      message,
     );
   }
 
@@ -162,17 +181,20 @@ export class TurnLogBuilder {
     turn: number,
     conquerorId: string,
     eliminatedNationId: string,
-    message: string,
+    params: Record<string, TurnLogParamValue> = {},
+    message = "",
   ): TurnLogEntry {
     return this.createLogEntry(
       turn,
-      eliminatedNationId,
+      conquerorId,
       "CRITICAL",
-      message,
+      "NATION_ANNEXED",
       "GLOBAL_ANNEXATION",
       "GLOBAL",
-      undefined,
+      eliminatedNationId,
       conquerorId,
+      params,
+      message,
     );
   }
 }

@@ -6,6 +6,7 @@ export * from "./espionage/espionage.schema";
 export * from "./game/action.schema";
 export * from "./game/action-factory";
 export * from "./game/game-state.schema";
+export * from "./game/log-formatter.utility";
 export * from "./map/bit-packed-buffer";
 export * from "./map/bit-packed-cell.utility";
 export * from "./map/client-map-path-resolver";

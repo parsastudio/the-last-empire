@@ -18,13 +18,14 @@ export class NationLivenessManager {
         deadCanonicalIds.add(canonicalId);
         deadCanonicalIds.add(id);
 
-        const collapseMsg = `فروپاشی کامل دولت: کشور ${nation.name} به دلیل از دست دادن تمامی قلمروها و ساختار حاکمیتی خود به طور کامل منحل گردید.`;
         newAnnexationLogs.push(
-          TurnLogBuilder.createAnnexationLog(
+          TurnLogBuilder.createLogEntry(
             state.currentTurn,
-            "UNKNOWN",
             nation.id,
-            collapseMsg,
+            "CRITICAL",
+            "NATION_COLLAPSED",
+            "GLOBAL_ANNEXATION",
+            "GLOBAL",
           ),
         );
 

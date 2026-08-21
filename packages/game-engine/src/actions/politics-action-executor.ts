@@ -97,14 +97,14 @@ export class PoliticsActionExecutor {
           );
 
           const newReputation = Math.max(-100, nation.globalReputation - 10);
-          const warMessage = `اعلان جنگ رسمی: کشور ${nation.name} علیه ${receiver.name} فرمان آتش و آغاز نبرد سراسری صادر نمود.`;
 
           const warLogs = [
             TurnLogBuilder.createGlobalWarLog(
               state.currentTurn,
               nation.id,
               receiver.id,
-              warMessage,
+              "WAR_DECLARED",
+              {},
               "CRITICAL",
             ),
           ];
@@ -116,7 +116,8 @@ export class PoliticsActionExecutor {
                 nation.id,
                 "DIPLOMACY",
                 "CRITICAL",
-                warMessage,
+                "WAR_DECLARED",
+                {},
                 receiver.id,
               ),
             );
@@ -181,14 +182,13 @@ export class PoliticsActionExecutor {
               false,
             );
 
-          const aidMsg = `بسته کمک مالی و دیپلماتیک از سوی ${nation.name} به خزانه‌داری ${receiver.name} واریز شد.`;
-
           const aidLogs = [
             TurnLogBuilder.createGlobalDiplomacyLog(
               state.currentTurn,
               nation.id,
               receiver.id,
-              aidMsg,
+              "FOREIGN_AID_SENT",
+              { amount: costDeduction },
               "INFO",
             ),
           ];
@@ -200,7 +200,8 @@ export class PoliticsActionExecutor {
                 nation.id,
                 "DIPLOMACY",
                 "INFO",
-                aidMsg,
+                "FOREIGN_AID_SENT",
+                { amount: costDeduction },
                 receiver.id,
               ),
             );
@@ -287,7 +288,8 @@ export class PoliticsActionExecutor {
           nation.id,
           "DIPLOMACY",
           "INFO",
-          `پیشنهاد رسمی (${action.proposalType}) از سوی ${nation.name} برای ${receiver.name} ابلاغ گردید.`,
+          "DIPLOMATIC_PROPOSAL_SENT",
+          { treatyType: action.proposalType },
           receiver.id,
         );
 
