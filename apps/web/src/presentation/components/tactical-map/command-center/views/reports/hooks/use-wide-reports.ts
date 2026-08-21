@@ -11,12 +11,14 @@ import { Nation } from "@/domain/nation/nation.schema";
 interface UseWideReportsProps {
   logs: TurnLogEntry[];
   currentTurn?: number;
+  humanNationId?: string;
   nationsMap?: Record<string, Nation>;
 }
 
 export function useWideReports({
   logs = [],
   currentTurn = 1,
+  humanNationId,
   nationsMap,
 }: UseWideReportsProps) {
   const [selectedScope, setSelectedScope] = useState<TurnLogScope>("NATIONAL");
@@ -28,6 +30,12 @@ export function useWideReports({
     "ALL",
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const canonicalHuman = useMemo(() => {
+    return humanNationId
+      ? CountryRegistry.resolveCanonicalId(humanNationId)
+      : null;
+  }, [humanNationId]);
 
   const availableTurns = useMemo(() => {
     const turns = Array.from(new Set(logs.map((l) => l.turn)));
@@ -49,9 +57,26 @@ export function useWideReports({
       if (selectedTurn !== "ALL" && log.turn !== selectedTurn) {
         return false;
       }
-      return log.scope === selectedScope;
+
+      if (selectedScope === "NATIONAL") {
+        if (!canonicalHuman) {
+          return log.scope === "NATIONAL";
+        }
+        const srcCanonical = CountryRegistry.resolveCanonicalId(
+          log.sourceNationId,
+        );
+        const trgCanonical = log.targetNationId
+          ? CountryRegistry.resolveCanonicalId(log.targetNationId)
+          : null;
+
+        const isHumanInvolved =
+          srcCanonical === canonicalHuman || trgCanonical === canonicalHuman;
+        return isHumanInvolved && log.scope === "NATIONAL";
+      }
+
+      return log.scope === "GLOBAL";
     });
-  }, [logs, selectedTurn, selectedScope]);
+  }, [logs, selectedTurn, selectedScope, canonicalHuman]);
 
   const stats = useMemo(() => {
     let combatCount = 0;
