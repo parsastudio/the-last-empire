@@ -38,6 +38,50 @@ export class DiplomaticTurnProcessor {
     return baseline;
   }
 
+  private static calculateGrudgeDecay(
+    currentGrudge: number,
+    stance: string,
+    govType: string,
+    opinion: number,
+    targetReputation = 0,
+  ): number {
+    if (currentGrudge <= 0) return 0;
+
+    const baseDecay = Math.max(3, Math.ceil(currentGrudge * 0.1));
+
+    let stanceBonus = 0;
+    if (stance === "ALLIANCE") {
+      stanceBonus = 8;
+    } else if (stance === "NON_AGGRESSION_PACT") {
+      stanceBonus = 4;
+    }
+
+    let opinionBonus = 0;
+    if (opinion >= 20) {
+      opinionBonus = 3;
+    } else if (opinion > 0) {
+      opinionBonus = 1;
+    }
+
+    let repBonus = 0;
+    if (targetReputation >= 40) {
+      repBonus = 2;
+    } else if (targetReputation <= -30) {
+      repBonus = -2;
+    }
+
+    let govMultiplier = 1.0;
+    if (govType === "DEMOCRACY") {
+      govMultiplier = 1.4;
+    } else if (govType === "DICTATORSHIP" || govType === "FASCISM") {
+      govMultiplier = 0.8;
+    }
+
+    const rawDecay =
+      (baseDecay + stanceBonus + opinionBonus + repBonus) * govMultiplier;
+    return Math.max(1, Math.round(rawDecay));
+  }
+
   public static processPendingProposalsForAi(state: GameState): GameState {
     const validPendingProposals = state.pendingProposals.filter(
       (proposal) => state.currentTurn <= proposal.expiresTurn,
@@ -102,7 +146,15 @@ export class DiplomaticTurnProcessor {
 
       let nextGrudge = relation.grudge ?? 0;
       if (relation.stance !== "WAR" && nextGrudge > 0) {
-        nextGrudge = Math.max(0, nextGrudge - 2);
+        const targetRep = targetNation ? targetNation.globalReputation : 0;
+        const decay = this.calculateGrudgeDecay(
+          nextGrudge,
+          relation.stance,
+          nation.government.type,
+          relation.opinion,
+          targetRep,
+        );
+        nextGrudge = Math.max(0, nextGrudge - decay);
       }
 
       newRels[targetId] = {
