@@ -12,11 +12,12 @@ import {
   Swords,
   Users,
   Binary,
-  Landmark,
+  Coins,
   ShieldAlert,
   Info,
   AlertTriangle,
   Skull,
+  Flame,
 } from "lucide-react";
 
 interface ReportCardProps {
@@ -44,107 +45,142 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
     targetFlag = getFlagEmoji(targetNation?.flagCode || targetCanonical);
   }
 
-  const categoryMeta = useMemo(() => {
-    switch (log.category as TurnLogCategory) {
-      case "GLOBAL_WAR":
-      case "MILITARY":
-        return {
-          label: "ستاد کل و نبرد",
-          icon: Swords,
-          color: "text-military",
-          badgeBg: "bg-military/15 text-military border-military/30",
-        };
-      case "GLOBAL_DIPLOMACY":
-      case "DIPLOMACY":
-        return {
-          label: "روابط بین‌الملل",
-          icon: Users,
-          color: "text-diplomacy",
-          badgeBg: "bg-diplomacy/15 text-diplomacy border-diplomacy/30",
-        };
-      case "ESPIONAGE":
-        return {
-          label: "عملیات ویژه و اطلاعات",
-          icon: Binary,
-          color: "text-treasury",
-          badgeBg: "bg-treasury/15 text-treasury border-treasury/30",
-        };
-      case "GLOBAL_ANNEXATION":
-        return {
-          label: "فروپاشی و الحاق سرزمینی",
-          icon: Skull,
-          color: "text-rose-500",
-          badgeBg: "bg-rose-500/15 text-rose-500 border-rose-500/40",
-        };
-      case "DOMESTIC":
-      default:
-        return {
-          label: "امور داخلی و خزانه",
-          icon: Landmark,
-          color: "text-gdp",
-          badgeBg: "bg-gdp/15 text-gdp border-gdp/30",
-        };
-    }
-  }, [log.category]);
+  const visualStyle = useMemo(() => {
+    const isWarOrCombat =
+      log.category === "GLOBAL_WAR" ||
+      log.category === "MILITARY" ||
+      log.level === "COMBAT";
 
-  const levelMeta = useMemo(() => {
-    switch (log.level as TurnLogLevel) {
-      case "COMBAT":
-        return {
-          icon: Swords,
-          border: "border-military/40 hover:border-military/70",
-          cardBg: "bg-military/5",
-        };
-      case "CRITICAL":
-        return {
-          icon: ShieldAlert,
-          border: "border-rose-500/50 hover:border-rose-500/80",
-          cardBg: "bg-rose-500/10",
-        };
-      case "WARNING":
-        return {
-          icon: AlertTriangle,
-          border: "border-treasury/40 hover:border-treasury/70",
-          cardBg: "bg-treasury/5",
-        };
-      case "INFO":
-      default:
-        return {
-          icon: Info,
-          border: "border-border/60 hover:border-border",
-          cardBg: "bg-secondary/30",
-        };
-    }
-  }, [log.level]);
+    const isAnnexation =
+      log.category === "GLOBAL_ANNEXATION" ||
+      log.message.includes("سقوط") ||
+      log.message.includes("انحلال");
 
-  const CategoryIcon = categoryMeta.icon;
-  const LevelIcon = levelMeta.icon;
+    const isEspionage = log.category === "ESPIONAGE";
+    const isDiplomacy =
+      log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY";
+    const isAidOrMoney =
+      log.message.includes("کمک مالی") ||
+      log.message.includes("خزانه") ||
+      log.category === "DOMESTIC";
+
+    if (isAnnexation) {
+      return {
+        cardBg: "bg-red-950/20",
+        border: "border-red-600/60 hover:border-red-500",
+        badgeBg: "bg-red-600/20 text-red-300 border-red-500/40",
+        label: "سقوط حاکمیت",
+        priorityLabel: "رویداد تاریخی و الحاق",
+        priorityTagColor: "text-red-400 bg-red-950/60 border-red-800/60",
+        icon: Skull,
+        accentColor: "text-red-400",
+      };
+    }
+
+    if (isWarOrCombat || log.level === "CRITICAL") {
+      return {
+        cardBg: "bg-rose-950/25",
+        border: "border-rose-500/50 hover:border-rose-500 shadow-rose-950/20",
+        badgeBg: "bg-rose-500/20 text-rose-300 border-rose-500/40",
+        label: "نبرد و فرمان آتش",
+        priorityLabel: "اولویت ۱: تحولات رزمی جبهه",
+        priorityTagColor: "text-rose-400 bg-rose-950/60 border-rose-800/60",
+        icon: Swords,
+        accentColor: "text-rose-400",
+      };
+    }
+
+    if (isEspionage) {
+      return {
+        cardBg: "bg-amber-950/20",
+        border:
+          "border-amber-500/40 hover:border-amber-500 shadow-amber-950/20",
+        badgeBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        label: "عملیات ویژه اطلاعاتی",
+        priorityLabel: "اولویت ۲: امنیت و سایبر",
+        priorityTagColor: "text-amber-400 bg-amber-950/60 border-amber-800/60",
+        icon: Binary,
+        accentColor: "text-amber-400",
+      };
+    }
+
+    if (isDiplomacy) {
+      return {
+        cardBg: "bg-indigo-950/20",
+        border:
+          "border-indigo-500/40 hover:border-indigo-500 shadow-indigo-950/20",
+        badgeBg: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
+        label: "دیپلماسی و معاهدات",
+        priorityLabel: "اولویت ۳: روابط خارجی",
+        priorityTagColor:
+          "text-indigo-400 bg-indigo-950/60 border-indigo-800/60",
+        icon: Users,
+        accentColor: "text-indigo-400",
+      };
+    }
+
+    if (isAidOrMoney) {
+      return {
+        cardBg: "bg-emerald-950/20",
+        border:
+          "border-emerald-500/40 hover:border-emerald-500 shadow-emerald-950/20",
+        badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+        label: "امور مالی و خزانه‌داری",
+        priorityLabel: "اولویت ۴: مراودات اقتصادی",
+        priorityTagColor:
+          "text-emerald-400 bg-emerald-950/60 border-emerald-800/60",
+        icon: Coins,
+        accentColor: "text-emerald-400",
+      };
+    }
+
+    return {
+      cardBg: "bg-secondary/30",
+      border: "border-border/60 hover:border-border",
+      badgeBg: "bg-secondary text-muted-foreground border-border/50",
+      label: "گزارش عادی",
+      priorityLabel: "گزارش عمومی",
+      priorityTagColor:
+        "text-muted-foreground bg-secondary/50 border-border/40",
+      icon: Info,
+      accentColor: "text-primary",
+    };
+  }, [log]);
+
+  const Icon = visualStyle.icon;
 
   return (
     <div
-      className={`p-4 rounded-2xl border ${levelMeta.border} ${levelMeta.cardBg} space-y-2.5 transition-all font-sans text-right dir-rtl shadow-sm`}
+      className={`p-4 rounded-2xl border ${visualStyle.border} ${visualStyle.cardBg} space-y-3 transition-all font-sans text-right dir-rtl shadow-md backdrop-blur-sm`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/40">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl font-mono text-xs font-bold text-foreground shadow-inner">
-            <LevelIcon size={13} className={categoryMeta.color} />
-            <span>نوبت {PersianNumberFormatter.toPersianDigits(log.turn)}</span>
-          </div>
+          <span
+            className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg border flex items-center gap-1 ${visualStyle.priorityTagColor}`}
+          >
+            <Flame size={10} />
+            <span>{visualStyle.priorityLabel}</span>
+          </span>
 
           <span
-            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1 ${categoryMeta.badgeBg}`}
+            className={`text-[10px] font-bold px-2.5 py-0.5 rounded-lg border flex items-center gap-1.5 ${visualStyle.badgeBg}`}
           >
-            <CategoryIcon size={12} />
-            <span>{categoryMeta.label}</span>
+            <Icon size={12} className={visualStyle.accentColor} />
+            <span>{visualStyle.label}</span>
           </span>
         </div>
 
-        <span className="text-[10px] font-mono text-muted-foreground">
-          {new Date(log.timestamp).toLocaleTimeString("fa-IR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
+        <div className="flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+          <span className="bg-background/80 border border-border/60 px-2 py-0.5 rounded-md font-bold text-foreground">
+            نوبت {PersianNumberFormatter.toPersianDigits(log.turn)}
+          </span>
+          <span>
+            {new Date(log.timestamp).toLocaleTimeString("fa-IR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -155,17 +191,17 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
         {(sourceName || targetName) && (
           <div className="flex flex-wrap items-center gap-2 pt-1 font-mono text-[10px]">
             {sourceName && (
-              <div className="flex items-center gap-1 bg-background/60 border border-border/50 px-2 py-0.5 rounded-lg text-muted-foreground">
-                <span className="text-sm">{sourceFlag}</span>
+              <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
+                <span className="text-base select-none">{sourceFlag}</span>
                 <span className="font-bold text-foreground">{sourceName}</span>
               </div>
             )}
 
             {targetName && (
               <>
-                <span className="text-muted-foreground">←</span>
-                <div className="flex items-center gap-1 bg-background/60 border border-border/50 px-2 py-0.5 rounded-lg text-muted-foreground">
-                  <span className="text-sm">{targetFlag}</span>
+                <span className="text-muted-foreground font-bold">←</span>
+                <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
+                  <span className="text-base select-none">{targetFlag}</span>
                   <span className="font-bold text-foreground">
                     {targetName}
                   </span>

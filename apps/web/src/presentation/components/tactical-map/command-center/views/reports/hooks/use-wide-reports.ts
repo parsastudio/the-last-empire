@@ -1,12 +1,65 @@
 import { useState, useMemo, useEffect } from "react";
-import {
-  TurnLogEntry,
-  TurnLogCategory,
-  TurnLogLevel,
-  TurnLogScope,
-} from "@/domain/game/game-state.schema";
+import { TurnLogEntry, TurnLogScope } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
+
+function calculateLogPriority(
+  log: TurnLogEntry,
+  canonicalHuman: string | null,
+): number {
+  const sourceCanonical = CountryRegistry.resolveCanonicalId(
+    log.sourceNationId,
+  );
+  const targetCanonical = log.targetNationId
+    ? CountryRegistry.resolveCanonicalId(log.targetNationId)
+    : null;
+
+  const isHumanInvolved =
+    canonicalHuman !== null &&
+    (sourceCanonical === canonicalHuman || targetCanonical === canonicalHuman);
+
+  if (
+    log.category === "GLOBAL_ANNEXATION" ||
+    log.message.includes("سقوط") ||
+    log.message.includes("انحلال")
+  ) {
+    return isHumanInvolved ? 1 : 4;
+  }
+
+  if (
+    log.level === "CRITICAL" ||
+    log.level === "COMBAT" ||
+    log.category === "GLOBAL_WAR" ||
+    log.category === "MILITARY"
+  ) {
+    if (
+      log.message.includes("اعلان جنگ") ||
+      log.message.includes("تهاجم") ||
+      log.message.includes("حمله")
+    ) {
+      return isHumanInvolved ? 2 : 5;
+    }
+    if (log.message.includes("پیمان‌شکنی") || log.message.includes("خیانت")) {
+      return isHumanInvolved ? 2 : 6;
+    }
+    return isHumanInvolved ? 3 : 7;
+  }
+
+  if (log.category === "ESPIONAGE") {
+    return isHumanInvolved ? 4 : 8;
+  }
+
+  if (log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY") {
+    if (log.level === "WARNING") return isHumanInvolved ? 5 : 9;
+    return isHumanInvolved ? 6 : 10;
+  }
+
+  if (log.message.includes("کمک مالی") || log.category === "DOMESTIC") {
+    return isHumanInvolved ? 7 : 11;
+  }
+
+  return 12;
+}
 
 interface UseWideReportsProps {
   logs: TurnLogEntry[];
@@ -23,12 +76,6 @@ export function useWideReports({
 }: UseWideReportsProps) {
   const [selectedScope, setSelectedScope] = useState<TurnLogScope>("NATIONAL");
   const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(currentTurn);
-  const [selectedCategory, setSelectedCategory] = useState<
-    TurnLogCategory | "ALL"
-  >("ALL");
-  const [selectedLevel, setSelectedLevel] = useState<TurnLogLevel | "ALL">(
-    "ALL",
-  );
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const canonicalHuman = useMemo(() => {
@@ -108,73 +155,55 @@ export function useWideReports({
     };
   }, [activeTurnLogs]);
 
-  const filteredLogs = useMemo(() => {
+  const sortedLogs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return activeTurnLogs
-      .slice()
-      .reverse()
-      .filter((log) => {
-        if (selectedScope === "GLOBAL") {
-          if (selectedCategory !== "ALL" && log.category !== selectedCategory) {
-            return false;
-          }
-          if (selectedLevel !== "ALL" && log.level !== selectedLevel) {
-            return false;
-          }
-        }
+    const filtered = activeTurnLogs.filter((log) => {
+      if (!query) return true;
 
-        if (!query) {
-          return true;
-        }
+      const sourceCanonical = CountryRegistry.resolveCanonicalId(
+        log.sourceNationId,
+      );
+      const sourceNation = nationsMap ? nationsMap[sourceCanonical] : null;
+      const sourceName = sourceNation ? sourceNation.name : log.sourceNationId;
 
-        const sourceCanonical = CountryRegistry.resolveCanonicalId(
-          log.sourceNationId,
+      let targetName = "";
+      if (log.targetNationId) {
+        const targetCanonical = CountryRegistry.resolveCanonicalId(
+          log.targetNationId,
         );
-        const sourceNation = nationsMap ? nationsMap[sourceCanonical] : null;
-        const sourceName = sourceNation
-          ? sourceNation.name
-          : log.sourceNationId;
+        const targetNation = nationsMap ? nationsMap[targetCanonical] : null;
+        targetName = targetNation ? targetNation.name : log.targetNationId;
+      }
 
-        let targetName = "";
-        if (log.targetNationId) {
-          const targetCanonical = CountryRegistry.resolveCanonicalId(
-            log.targetNationId,
-          );
-          const targetNation = nationsMap ? nationsMap[targetCanonical] : null;
-          targetName = targetNation ? targetNation.name : log.targetNationId;
-        }
+      return (
+        log.message.toLowerCase().includes(query) ||
+        sourceName.toLowerCase().includes(query) ||
+        targetName.toLowerCase().includes(query) ||
+        log.sourceNationId.toLowerCase().includes(query) ||
+        (log.targetNationId?.toLowerCase().includes(query) ?? false)
+      );
+    });
 
-        return (
-          log.message.toLowerCase().includes(query) ||
-          sourceName.toLowerCase().includes(query) ||
-          targetName.toLowerCase().includes(query) ||
-          log.sourceNationId.toLowerCase().includes(query) ||
-          (log.targetNationId?.toLowerCase().includes(query) ?? false)
-        );
-      });
-  }, [
-    activeTurnLogs,
-    selectedScope,
-    selectedCategory,
-    selectedLevel,
-    searchQuery,
-    nationsMap,
-  ]);
+    return filtered.sort((a, b) => {
+      const pA = calculateLogPriority(a, canonicalHuman);
+      const pB = calculateLogPriority(b, canonicalHuman);
+      if (pA !== pB) {
+        return pA - pB;
+      }
+      return b.timestamp - a.timestamp;
+    });
+  }, [activeTurnLogs, searchQuery, canonicalHuman, nationsMap]);
 
   return {
     selectedScope,
     selectedTurn,
-    selectedCategory,
-    selectedLevel,
     searchQuery,
     availableTurns,
     stats,
-    filteredLogs,
+    sortedLogs,
     setSelectedScope,
     setSelectedTurn,
-    setSelectedCategory,
-    setSelectedLevel,
     setSearchQuery,
   };
 }
