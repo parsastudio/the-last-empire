@@ -66,6 +66,7 @@ export class TurnProgressionOrchestrator {
         ...nextState,
         isGameOver: true,
         winnerNationId: victoryStatus.winnerNationId,
+        gameOverReason: victoryStatus.reason,
       };
     }
 

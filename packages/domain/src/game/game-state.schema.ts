@@ -44,6 +44,7 @@ export const GameStateSchema = z.object({
   seed: z.number(),
   isGameOver: z.boolean(),
   winnerNationId: z.string().optional(),
+  gameOverReason: z.string().optional(),
   humanNationId: z.string(),
   provinces: z.record(z.string(), ProvinceSchema).default({}),
   nations: z.record(z.string(), NationSchema),
