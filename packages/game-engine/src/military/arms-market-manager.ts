@@ -118,17 +118,18 @@ export class ArmsMarketManager {
     const logs = [];
     if (isHumanInvolved) {
       const isHumanBuyer = canonicalBuyerId === canonicalHuman;
-      const logMessage = isHumanBuyer
-        ? `واردات فوری تسلیحات: ${quantity.toLocaleString("fa-IR")} یگان ${unitStat.nameFa} از کشور ${seller.name} تحویل ارتش شد.`
-        : `صادرات تسلیحات: ${quantity.toLocaleString("fa-IR")} یگان ${unitStat.nameFa} به ${buyer.name} صادر و سود آن به خزانه واریز گردید.`;
-
       logs.push(
         TurnLogBuilder.createNationalLog(
           state.currentTurn,
           isHumanBuyer ? buyer.id : seller.id,
           "DOMESTIC",
           "INFO",
-          logMessage,
+          "ARMS_TRADE",
+          {
+            quantity,
+            unitName: unitStat.nameFa,
+            role: isHumanBuyer ? "BUYER" : "SELLER",
+          },
           isHumanBuyer ? seller.id : buyer.id,
         ),
       );

@@ -22,16 +22,11 @@ export class BattleLogFactory {
       CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman;
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
-    let nationalReport = "";
-    if (calcResult.isAttackerVictory) {
-      if (calcResult.isFullCapitulation) {
-        nationalReport = `به دلیل برتری رزمی ${calcResult.valuationRatio} برابری ارتش، حاکمیت ${defender.name} به طور کامل فروپاشید و تمامی استان‌ها و غنائم تسلیحاتی تسخیر شدند.${betrayalPenaltyText}`;
-      } else {
-        nationalReport = `ارتش ${attacker.name} در نبرد با ${defender.name} پیروز شد و استان هدف را تصرف کرد (۲۵٪ نیروهای مجروح بازسازی شدند).${betrayalPenaltyText}`;
-      }
-    } else {
-      nationalReport = `مدافعان ${defender.name} با مقاومت در خطوط پدافندی مانع پیشروی ارتش ${attacker.name} شدند.${betrayalPenaltyText}`;
-    }
+    const outcome = calcResult.isAttackerVictory
+      ? calcResult.isFullCapitulation
+        ? "CAPITULATION"
+        : "VICTORY"
+      : "DEFEAT";
 
     if (isHumanInvolved) {
       const actorNation = isAttackerHuman ? attacker : defender;
@@ -47,17 +42,15 @@ export class BattleLogFactory {
             : isAttackerHuman
               ? "WARNING"
               : "INFO",
-          nationalReport,
+          "BATTLE_TACTICAL_REPORT",
+          {
+            outcome,
+            ratio: calcResult.valuationRatio,
+            betrayalPenalty: betrayalPenaltyText ? 10 : 0,
+          },
           isAttackerHuman ? defender.id : attacker.id,
         ),
       );
-    }
-
-    let globalWarNews = "";
-    if (calcResult.isAttackerVictory) {
-      globalWarNews = `گزارش جبهه نبرد: ارتش ${attacker.name} موفق به شکست خطوط دفاعی ${defender.name} و تصرف قلمرو گردید.`;
-    } else {
-      globalWarNews = `گزارش جبهه نبرد: حمله سنگین ارتش ${attacker.name} به مواضع ${defender.name} با مقاومت مدافعان دفع شد.`;
     }
 
     logs.push(
@@ -65,19 +58,20 @@ export class BattleLogFactory {
         currentTurn,
         attacker.id,
         defender.id,
-        globalWarNews,
+        "BATTLE_GLOBAL_NEWS",
+        {
+          outcome: calcResult.isAttackerVictory ? "VICTORY" : "DEFENDED",
+        },
         "COMBAT",
       ),
     );
 
     if (calcResult.isFullCapitulation) {
-      const annexationMessage = `سقوط قطعی و تاریخی: کشور ${defender.name} پس از شکست کامل نظامی، به طور مطلق توسط امپراتوری ${attacker.name} تصرف و از جغرافیای جهان حذف شد.`;
       logs.push(
         TurnLogBuilder.createAnnexationLog(
           currentTurn,
           attacker.id,
           defender.id,
-          annexationMessage,
         ),
       );
     }
@@ -98,14 +92,13 @@ export class BattleLogFactory {
     for (const allyId of intervention.interveningAllyIds) {
       const ally = intervention.updatedNations[allyId];
       if (ally) {
-        const msg = `دفاع جمعی متحدین: کشور ${ally.name} در راستای اجرای تعهدات اتحاد نظامی با ${defender.name}، به ارتش ${attacker.name} اعلان جنگ رسمی نمود.`;
-
         logs.push(
           TurnLogBuilder.createGlobalWarLog(
             currentTurn,
             ally.id,
             attacker.id,
-            msg,
+            "ALLIANCE_INTERVENTION",
+            {},
             "CRITICAL",
           ),
         );
@@ -121,7 +114,8 @@ export class BattleLogFactory {
               ally.id,
               "DIPLOMACY",
               "CRITICAL",
-              msg,
+              "ALLIANCE_INTERVENTION",
+              {},
               attacker.id,
             ),
           );
@@ -132,14 +126,13 @@ export class BattleLogFactory {
     for (const allyId of intervention.dishonoringAllyIds) {
       const ally = intervention.updatedNations[allyId];
       if (ally) {
-        const msg = `پیمان‌شکنی دفاعی: کشور ${ally.name} از ترس رویارویی با ارتش ${attacker.name}، اتحاد خود با ${defender.name} را لغو کرد و بی‌طرف ماند.`;
-
         logs.push(
           TurnLogBuilder.createGlobalDiplomacyLog(
             currentTurn,
             ally.id,
             defender.id,
-            msg,
+            "ALLIANCE_BETRAYED",
+            {},
             "WARNING",
           ),
         );
@@ -154,7 +147,8 @@ export class BattleLogFactory {
               ally.id,
               "DIPLOMACY",
               "WARNING",
-              msg,
+              "ALLIANCE_BETRAYED",
+              {},
               defender.id,
             ),
           );

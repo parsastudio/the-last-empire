@@ -123,8 +123,6 @@ export class TreatyAcceptanceApplier {
           ? "پیمان عدم تخاصم"
           : "معاهده صلح و پایان جنگ";
 
-    const treatyText = `توافق دیپلماتیک: کشور ${receiver.name} پیشنهاد (${treatyLabel}) از سوی ${sender.name} را رسماً امضا و نافذ نمود.`;
-
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
@@ -137,7 +135,8 @@ export class TreatyAcceptanceApplier {
         state.currentTurn,
         sender.id,
         receiver.id,
-        treatyText,
+        "TREATY_ACCEPTED",
+        { treatyLabel },
         "INFO",
       ),
     ];
@@ -149,7 +148,8 @@ export class TreatyAcceptanceApplier {
           sender.id,
           "DIPLOMACY",
           "INFO",
-          treatyText,
+          "TREATY_ACCEPTED",
+          { treatyLabel },
           receiver.id,
         ),
       );
@@ -182,24 +182,12 @@ export class TreatyAcceptanceApplier {
       proposal.receiverNationId,
     );
 
-    const sender =
-      state.nations[canonicalSenderId] ||
-      state.nations[proposal.senderNationId];
-    const receiver =
-      state.nations[canonicalReceiverId] ||
-      state.nations[proposal.receiverNationId];
-
-    const senderName = sender ? sender.name : proposal.senderNationId;
-    const receiverName = receiver ? receiver.name : proposal.receiverNationId;
-
     const treatyLabel =
       proposal.proposalType === "FULL_ALLIANCE"
         ? "اتحاد کامل"
         : proposal.proposalType === "NON_AGGRESSION_PACT"
           ? "عدم تخاصم"
           : "صلح";
-
-    const rejectionText = `رد معاهده دیپلماتیک: کشور ${receiverName} پیشنهاد (${treatyLabel}) از سوی ${senderName} را نپذیرفت.`;
 
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
@@ -213,7 +201,8 @@ export class TreatyAcceptanceApplier {
         state.currentTurn,
         proposal.receiverNationId,
         proposal.senderNationId,
-        rejectionText,
+        "TREATY_REJECTED",
+        { treatyLabel },
         "WARNING",
       ),
     ];
@@ -225,7 +214,8 @@ export class TreatyAcceptanceApplier {
           proposal.receiverNationId,
           "DIPLOMACY",
           "WARNING",
-          rejectionText,
+          "TREATY_REJECTED",
+          { treatyLabel },
           proposal.senderNationId,
         ),
       );

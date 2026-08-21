@@ -226,7 +226,8 @@ export class EspionageManager {
       source.id,
       "ESPIONAGE",
       outcome === "CRITICAL_FAILURE" ? "WARNING" : "INFO",
-      `عملیات ویژه اطلاعاتی علیه ${target.name}: ${message}`,
+      "ESPIONAGE_OPERATION",
+      { details: message, tier, outcome },
       target.id,
     );
 

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { TurnLogEntry, TurnLogScope } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { TurnLogFormatter } from "@/domain/game/log-formatter.utility";
 import { Nation } from "@/domain/nation/nation.schema";
 
 function calculateLogPriority(
@@ -18,47 +19,36 @@ function calculateLogPriority(
     canonicalHuman !== null &&
     (sourceCanonical === canonicalHuman || targetCanonical === canonicalHuman);
 
-  if (
-    log.category === "GLOBAL_ANNEXATION" ||
-    log.message.includes("سقوط") ||
-    log.message.includes("انحلال")
-  ) {
-    return isHumanInvolved ? 1 : 4;
-  }
+  switch (log.eventCode) {
+    case "NATION_ANNEXED":
+    case "NATION_COLLAPSED":
+      return isHumanInvolved ? 1 : 4;
 
-  if (
-    log.level === "CRITICAL" ||
-    log.level === "COMBAT" ||
-    log.category === "GLOBAL_WAR" ||
-    log.category === "MILITARY"
-  ) {
-    if (
-      log.message.includes("اعلان جنگ") ||
-      log.message.includes("تهاجم") ||
-      log.message.includes("حمله")
-    ) {
+    case "WAR_DECLARED":
+    case "BATTLE_TACTICAL_REPORT":
+    case "ALLIANCE_INTERVENTION":
+    case "ALLIANCE_BETRAYED":
       return isHumanInvolved ? 2 : 5;
-    }
-    if (log.message.includes("پیمان‌شکنی") || log.message.includes("خیانت")) {
-      return isHumanInvolved ? 2 : 6;
-    }
-    return isHumanInvolved ? 3 : 7;
-  }
 
-  if (log.category === "ESPIONAGE") {
-    return isHumanInvolved ? 4 : 8;
-  }
+    case "BATTLE_GLOBAL_NEWS":
+      return 6;
 
-  if (log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY") {
-    if (log.level === "WARNING") return isHumanInvolved ? 5 : 9;
-    return isHumanInvolved ? 6 : 10;
-  }
+    case "ESPIONAGE_OPERATION":
+      return isHumanInvolved ? 3 : 7;
 
-  if (log.message.includes("کمک مالی") || log.category === "DOMESTIC") {
-    return isHumanInvolved ? 7 : 11;
-  }
+    case "TREATY_ACCEPTED":
+    case "TREATY_REJECTED":
+    case "DIPLOMATIC_PROPOSAL_SENT":
+      return isHumanInvolved ? 4 : 8;
 
-  return 12;
+    case "FOREIGN_AID_SENT":
+    case "ARMS_TRADE":
+      return isHumanInvolved ? 5 : 9;
+
+    case "GENERIC_EVENT":
+    default:
+      return 10;
+  }
 }
 
 interface UseWideReportsProps {
@@ -176,8 +166,10 @@ export function useWideReports({
         targetName = targetNation ? targetNation.name : log.targetNationId;
       }
 
+      const formatted = TurnLogFormatter.formatMessage(log, nationsMap);
+
       return (
-        log.message.toLowerCase().includes(query) ||
+        formatted.toLowerCase().includes(query) ||
         sourceName.toLowerCase().includes(query) ||
         targetName.toLowerCase().includes(query) ||
         log.sourceNationId.toLowerCase().includes(query) ||

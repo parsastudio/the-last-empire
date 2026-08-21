@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { TurnLogFormatter } from "@/domain/game/log-formatter.utility";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import {
   Swords,
@@ -38,81 +39,70 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
     targetFlag = getFlagEmoji(targetNation?.flagCode || targetCanonical);
   }
 
+  const dynamicMessage = useMemo(() => {
+    return TurnLogFormatter.formatMessage(log, nationsMap);
+  }, [log, nationsMap]);
+
   const style = useMemo(() => {
-    const isAnnexation =
-      log.category === "GLOBAL_ANNEXATION" ||
-      log.message.includes("سقوط") ||
-      log.message.includes("انحلال");
+    switch (log.eventCode) {
+      case "NATION_ANNEXED":
+      case "NATION_COLLAPSED":
+        return {
+          cardBg: "bg-red-950/20",
+          border: "border-red-600/50 hover:border-red-500",
+          icon: Skull,
+          iconBg: "bg-red-500/20 text-red-400 border-red-500/40",
+        };
 
-    const isWar =
-      log.category === "GLOBAL_WAR" ||
-      log.category === "MILITARY" ||
-      log.level === "COMBAT" ||
-      log.level === "CRITICAL" ||
-      log.message.includes("اعلان جنگ") ||
-      log.message.includes("نبرد") ||
-      log.message.includes("تهاجم");
+      case "WAR_DECLARED":
+      case "BATTLE_TACTICAL_REPORT":
+      case "BATTLE_GLOBAL_NEWS":
+      case "ALLIANCE_INTERVENTION":
+      case "ALLIANCE_BETRAYED":
+        return {
+          cardBg: "bg-rose-950/20",
+          border: "border-rose-500/40 hover:border-rose-500",
+          icon: Swords,
+          iconBg: "bg-rose-500/20 text-rose-400 border-rose-500/40",
+        };
 
-    const isEspionage = log.category === "ESPIONAGE";
-    const isMoneyOrAid =
-      log.message.includes("کمک مالی") ||
-      log.message.includes("خزانه") ||
-      log.category === "DOMESTIC";
-    const isDiplomacy =
-      log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY";
+      case "ESPIONAGE_OPERATION":
+        return {
+          cardBg: "bg-amber-950/20",
+          border: "border-amber-500/40 hover:border-amber-500",
+          icon: Binary,
+          iconBg: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+        };
 
-    if (isAnnexation) {
-      return {
-        cardBg: "bg-red-950/20",
-        border: "border-red-600/50 hover:border-red-500",
-        icon: Skull,
-        iconBg: "bg-red-500/20 text-red-400 border-red-500/40",
-      };
+      case "FOREIGN_AID_SENT":
+      case "ARMS_TRADE":
+        return {
+          cardBg: "bg-emerald-950/20",
+          border: "border-emerald-500/40 hover:border-emerald-500",
+          icon: Coins,
+          iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+        };
+
+      case "DIPLOMATIC_PROPOSAL_SENT":
+      case "TREATY_ACCEPTED":
+      case "TREATY_REJECTED":
+        return {
+          cardBg: "bg-indigo-950/20",
+          border: "border-indigo-500/40 hover:border-indigo-500",
+          icon: Users,
+          iconBg: "bg-indigo-500/20 text-indigo-400 border-indigo-500/40",
+        };
+
+      case "GENERIC_EVENT":
+      default:
+        return {
+          cardBg: "bg-secondary/30",
+          border: "border-border/60 hover:border-border",
+          icon: Info,
+          iconBg: "bg-secondary text-muted-foreground border-border/50",
+        };
     }
-
-    if (isWar) {
-      return {
-        cardBg: "bg-rose-950/20",
-        border: "border-rose-500/40 hover:border-rose-500",
-        icon: Swords,
-        iconBg: "bg-rose-500/20 text-rose-400 border-rose-500/40",
-      };
-    }
-
-    if (isEspionage) {
-      return {
-        cardBg: "bg-amber-950/20",
-        border: "border-amber-500/40 hover:border-amber-500",
-        icon: Binary,
-        iconBg: "bg-amber-500/20 text-amber-400 border-amber-500/40",
-      };
-    }
-
-    if (isMoneyOrAid) {
-      return {
-        cardBg: "bg-emerald-950/20",
-        border: "border-emerald-500/40 hover:border-emerald-500",
-        icon: Coins,
-        iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
-      };
-    }
-
-    if (isDiplomacy) {
-      return {
-        cardBg: "bg-indigo-950/20",
-        border: "border-indigo-500/40 hover:border-indigo-500",
-        icon: Users,
-        iconBg: "bg-indigo-500/20 text-indigo-400 border-indigo-500/40",
-      };
-    }
-
-    return {
-      cardBg: "bg-secondary/30",
-      border: "border-border/60 hover:border-border",
-      icon: Info,
-      iconBg: "bg-secondary text-muted-foreground border-border/50",
-    };
-  }, [log]);
+  }, [log.eventCode]);
 
   const Icon = style.icon;
 
@@ -128,7 +118,7 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
 
       <div className="flex-1 space-y-2.5 overflow-hidden">
         <p className="text-xs text-foreground leading-relaxed font-sans font-medium">
-          {log.message}
+          {dynamicMessage}
         </p>
 
         {(sourceName || targetName) && (
