@@ -87,7 +87,7 @@ export function CommandCenterTabRouter({
       return (
         <WideReportsView
           logs={gameState?.turnLogs}
-          humanNationId={nation.id}
+          currentTurn={gameState?.currentTurn ?? 1}
           nationsMap={gameState?.nations}
         />
       );

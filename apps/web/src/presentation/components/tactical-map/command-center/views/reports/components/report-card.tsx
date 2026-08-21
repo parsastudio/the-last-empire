@@ -17,8 +17,6 @@ import {
   Info,
   AlertTriangle,
   Skull,
-  Globe2,
-  Lock,
 } from "lucide-react";
 
 interface ReportCardProps {
@@ -66,14 +64,14 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
         };
       case "ESPIONAGE":
         return {
-          label: "عملیات ویژه و نفوذ",
+          label: "عملیات ویژه و اطلاعات",
           icon: Binary,
           color: "text-treasury",
           badgeBg: "bg-treasury/15 text-treasury border-treasury/30",
         };
       case "GLOBAL_ANNEXATION":
         return {
-          label: "الحاق و سقوط حاکمیت",
+          label: "فروپاشی و الحاق سرزمینی",
           icon: Skull,
           color: "text-rose-500",
           badgeBg: "bg-rose-500/15 text-rose-500 border-rose-500/40",
@@ -81,7 +79,7 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
       case "DOMESTIC":
       default:
         return {
-          label: "امور مالی و داخلی",
+          label: "امور داخلی و خزانه",
           icon: Landmark,
           color: "text-gdp",
           badgeBg: "bg-gdp/15 text-gdp border-gdp/30",
@@ -124,7 +122,7 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
 
   return (
     <div
-      className={`p-4 rounded-2xl border ${levelMeta.border} ${levelMeta.cardBg} space-y-3 transition-all font-sans text-right dir-rtl shadow-sm`}
+      className={`p-4 rounded-2xl border ${levelMeta.border} ${levelMeta.cardBg} space-y-2.5 transition-all font-sans text-right dir-rtl shadow-sm`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/40">
         <div className="flex items-center gap-2">
@@ -138,20 +136,6 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
           >
             <CategoryIcon size={12} />
             <span>{categoryMeta.label}</span>
-          </span>
-
-          <span className="text-[9px] font-mono font-bold bg-secondary/80 text-muted-foreground px-2 py-0.5 rounded-md border border-border/50 flex items-center gap-1">
-            {log.scope === "GLOBAL" ? (
-              <>
-                <Globe2 size={10} className="text-primary" />
-                <span>اخبار جهانی</span>
-              </>
-            ) : (
-              <>
-                <Lock size={10} className="text-treasury" />
-                <span>گزارش محرمانه ملی</span>
-              </>
-            )}
           </span>
         </div>
 
