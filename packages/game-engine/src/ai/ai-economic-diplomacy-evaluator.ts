@@ -6,7 +6,6 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -23,10 +22,6 @@ export class AIEconomicDiplomacyEvaluator {
     }
 
     const senderGdp = getNationGdp(nation);
-    const reachTier = GeopoliticalReachResolver.getReachTier(
-      nation,
-      allNations,
-    );
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (rel.stance === "WAR") {
@@ -44,23 +39,7 @@ export class AIEconomicDiplomacyEvaluator {
         continue;
       }
 
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        )
-      ) {
-        continue;
-      }
-
       const targetGdp = getNationGdp(targetNation);
-
-      if (reachTier !== "SUPERPOWER" && targetGdp > senderGdp * 1.5) {
-        continue;
-      }
-
       const cost = TreatyEvaluator.calculateForeignAidCost(
         senderGdp,
         targetGdp,
@@ -82,10 +61,9 @@ export class AIEconomicDiplomacyEvaluator {
       const isPeacetimeAppeasement =
         powerRatio >= 1.3 && rel.opinion < 20 && threatResult.isNeighbor;
 
-      const isSphereInfluence =
-        reachTier === "SUPERPOWER" && rel.opinion >= 0 && rel.opinion < 50;
+      const isFriendlyAid = rel.opinion >= 0 && rel.opinion < 50;
 
-      if (isPeacetimeAppeasement || isSphereInfluence) {
+      if (isPeacetimeAppeasement || isFriendlyAid) {
         return {
           action: ActionFactory.sendForeignAid(nation.id, targetNation.id),
           cost,

@@ -17,7 +17,7 @@ export class AIThreatCalculator {
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,
-    allNations?: Record<string, Nation>,
+    _allNations?: Record<string, Nation>,
   ): ThreatEvaluationResult {
     const sourcePower = Math.max(
       1,
@@ -42,33 +42,11 @@ export class AIThreatCalculator {
         provincesMap,
       );
 
-    const isReachable = allNations
-      ? GeopoliticalReachResolver.isReachable(
-          source,
-          target,
-          allNations,
-          provincesMap,
-        )
-      : isLandNeighbor || isImmediateSeaNeighbor;
-
     const isNavalReachable = Boolean(
-      source.geography.hasSeaAccess &&
-      target.geography.hasSeaAccess &&
-      isReachable,
+      source.geography.hasSeaAccess && target.geography.hasSeaAccess,
     );
 
     const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
-
-    if (!isReachable) {
-      return {
-        threatScore: 0,
-        opportunityScore: 0,
-        isNeighbor: false,
-        isLandNeighbor: false,
-        isNavalReachable: false,
-        powerRatio,
-      };
-    }
 
     let threatScore = 0;
     if (isLandNeighbor) {
