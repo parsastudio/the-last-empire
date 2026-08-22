@@ -8,6 +8,7 @@ import {
   DiplomacyLockManager,
   NationRelationResolver,
 } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AITreatyEvaluator {
   public static evaluate(
@@ -71,13 +72,24 @@ export class AITreatyEvaluator {
         continue;
       }
 
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
+      ) {
+        continue;
+      }
+
       const hasCommonEnemy = NationRelationResolver.hasCommonEnemy(
         nation,
         targetNation,
         allNations,
       );
 
-      const isDeepTrust = rel.opinion >= 15 && nation.globalReputation >= 20;
+      const isDeepTrust = rel.opinion >= 20 && nation.globalReputation >= 20;
 
       if ((hasCommonEnemy && rel.opinion >= 10) || isDeepTrust) {
         return ActionFactory.diplomaticProposal(
@@ -129,15 +141,29 @@ export class AITreatyEvaluator {
         continue;
       }
 
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
+      ) {
+        continue;
+      }
+
       const threatEval = AIThreatCalculator.evaluate(
         nation,
         targetNation,
         provincesMap,
+        allNations,
       );
 
       const isFlankSecurity = isCurrentlyAtWar && threatEval.isNeighbor;
       const isFriendlyNeighbor =
-        rel.opinion >= 10 && nation.globalReputation >= 0;
+        rel.opinion >= 10 &&
+        nation.globalReputation >= 0 &&
+        threatEval.isNeighbor;
 
       if (isFlankSecurity || isFriendlyNeighbor) {
         return ActionFactory.diplomaticProposal(

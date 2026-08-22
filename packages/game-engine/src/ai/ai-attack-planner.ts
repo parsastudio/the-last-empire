@@ -9,6 +9,7 @@ import {
   MilitaryPowerCalculator,
   LandNeighborResolver,
   NavalNeighborResolver,
+  GeopoliticalReachResolver,
 } from "@geopolitics/domain";
 
 export class AIAttackPlanner {
@@ -23,6 +24,17 @@ export class AIAttackPlanner {
 
     const targetNation = this.resolveActiveWarTarget(nation, allNations);
     if (!targetNation || !targetNation.isAlive) {
+      return null;
+    }
+
+    if (
+      !GeopoliticalReachResolver.isReachable(
+        nation,
+        targetNation,
+        allNations,
+        provincesMap,
+      )
+    ) {
       return null;
     }
 
@@ -122,6 +134,11 @@ export class AIAttackPlanner {
       return null;
     }
 
+    const reachTier = GeopoliticalReachResolver.getReachTier(
+      nation,
+      allNations,
+    );
+
     const targetResolution = this.resolveTargetProvince(
       nation,
       targetNation,
@@ -130,6 +147,7 @@ export class AIAttackPlanner {
       armorToDeploy,
       airForceToDeploy,
       dronesToLaunch,
+      reachTier,
     );
 
     if (!targetResolution) {
@@ -212,6 +230,7 @@ export class AIAttackPlanner {
     armor: number,
     airForce: number,
     drones: number,
+    reachTier: "SUPERPOWER" | "REGIONAL_POWER" | "LOCAL_POWER",
   ): {
     provinceId: number;
     attackType: "LAND" | "NAVAL";
@@ -254,6 +273,13 @@ export class AIAttackPlanner {
       return null;
     }
 
+    const maxAllowedNavalDistance =
+      reachTier === "SUPERPOWER"
+        ? Infinity
+        : reachTier === "REGIONAL_POWER"
+          ? GeopoliticalReachResolver.REGIONAL_RADIUS_THRESHOLD_PX
+          : GeopoliticalReachResolver.LOCAL_MARITIME_THRESHOLD_PX;
+
     let bestNavalProv: Province | null = null;
     let minNavalCost = Infinity;
 
@@ -272,6 +298,7 @@ export class AIAttackPlanner {
 
       if (
         navalInfo.isNavalValid &&
+        navalInfo.closestDistance <= maxAllowedNavalDistance &&
         navalInfo.deploymentMoneyCost < minNavalCost
       ) {
         minNavalCost = navalInfo.deploymentMoneyCost;

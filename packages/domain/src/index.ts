@@ -2,6 +2,7 @@ export * from "./ai/ai.schema";
 export * from "./data/countries";
 export * from "./diplomacy/diplomacy.schema";
 export * from "./diplomacy/nation-relation-resolver.utility";
+export * from "./diplomacy/geopolitical-reach-resolver.utility";
 export * from "./espionage/espionage.schema";
 export * from "./game/action.schema";
 export * from "./game/action-factory";
