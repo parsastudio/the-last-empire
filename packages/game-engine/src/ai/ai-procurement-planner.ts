@@ -8,7 +8,6 @@ import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export type AIPosture = "PEACE" | "THREAT" | "WAR";
 
@@ -150,17 +149,6 @@ export class AIProcurementPlanner {
       const target = allNations[canonicalTarget] || allNations[targetId];
 
       if (target && target.isAlive && target.id !== nation.id) {
-        if (
-          !GeopoliticalReachResolver.isReachable(
-            nation,
-            target,
-            allNations,
-            provincesMap,
-          )
-        ) {
-          continue;
-        }
-
         const evalResult = AIThreatCalculator.evaluate(
           nation,
           target,

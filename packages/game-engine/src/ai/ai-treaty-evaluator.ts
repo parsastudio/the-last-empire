@@ -8,7 +8,6 @@ import {
   DiplomacyLockManager,
   NationRelationResolver,
 } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AITreatyEvaluator {
   public static evaluate(
@@ -49,7 +48,7 @@ export class AITreatyEvaluator {
   private static evaluateAlliance(
     nation: Nation,
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    _provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
   ): GameAction | null {
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
@@ -68,17 +67,6 @@ export class AITreatyEvaluator {
         !targetNation ||
         !targetNation.isAlive ||
         targetNation.id === nation.id
-      ) {
-        continue;
-      }
-
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        )
       ) {
         continue;
       }
@@ -137,17 +125,6 @@ export class AITreatyEvaluator {
         !targetNation ||
         !targetNation.isAlive ||
         targetNation.id === nation.id
-      ) {
-        continue;
-      }
-
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        )
       ) {
         continue;
       }
