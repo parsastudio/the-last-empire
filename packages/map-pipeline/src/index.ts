@@ -6,6 +6,10 @@ export * from "./map-preprocessing/orchestrator/map-build-orchestrator";
 export * from "./map-preprocessing/orchestrator/province-partition-engine";
 export * from "./map-preprocessing/server/server-map-path-resolver";
 
+export * from "./maritime-topology/core/maritime-topology.types";
+export * from "./maritime-topology/algorithms/bounded-water-bfs";
+export * from "./maritime-topology/orchestrator/maritime-enricher-engine";
+
 export * from "./quadtree-map/builder/quadtree-builder";
 export * from "./quadtree-map/core/quadtree-types";
 export * from "./quadtree-map/generator/quadtree-export-service";

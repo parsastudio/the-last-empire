@@ -6,6 +6,8 @@ export interface FinalManifestProvince {
   pixelCount: number;
   hasSeaAccess: boolean;
   landNeighbors: number[];
+  maritimeNeighborsTier1?: number[];
+  maritimeNeighborsTier2?: number[];
   centerCoordinates: { x: number; y: number };
 }
 

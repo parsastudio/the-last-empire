@@ -17,11 +17,17 @@
       "@/infrastructure/map-preprocessing/*": [
         "../../packages/map-pipeline/src/map-preprocessing/*"
       ],
+      "@/infrastructure/maritime-topology/*": [
+        "../../packages/map-pipeline/src/maritime-topology/*"
+      ],
       "@/infrastructure/quadtree-map/*": [
         "../../packages/map-pipeline/src/quadtree-map/*"
       ],
       "@/infrastructure/row-spans-map/*": [
         "../../packages/map-pipeline/src/row-spans-map/*"
+      ],
+      "@/infrastructure/tactical-terrain-enhancer/*": [
+        "../../packages/map-pipeline/src/tactical-terrain-enhancer/*"
       ],
       "@/infrastructure/terrain-binary-map/*": [
         "../../packages/map-pipeline/src/terrain-binary-map/*"

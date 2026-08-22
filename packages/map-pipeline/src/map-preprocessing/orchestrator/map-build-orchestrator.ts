@@ -12,6 +12,7 @@ import { BinaryStateExporter } from "@/infrastructure/map-preprocessing/pipeline
 import { StrategicManifestBuilder } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
 import { TerrainMapGenerator } from "@/infrastructure/map-preprocessing/generator/terrain-map-generator";
 import { TerrainBinaryExportService } from "@/infrastructure/terrain-binary-map/generator/terrain-binary-export-service";
+import { MaritimeEnricherEngine } from "@/infrastructure/maritime-topology/orchestrator/maritime-enricher-engine";
 
 export class MapBuildOrchestrator {
   private manifestBuilder = new StrategicManifestBuilder();
@@ -109,5 +110,7 @@ export class MapBuildOrchestrator {
       height,
       outputDir,
     );
+
+    await MaritimeEnricherEngine.enrichManifestMaritimeTopology(mapId);
   }
 }

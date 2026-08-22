@@ -13,6 +13,8 @@ export interface FinalManifestProvince {
   pixelCount: number;
   hasSeaAccess: boolean;
   landNeighbors: number[];
+  maritimeNeighborsTier1?: number[];
+  maritimeNeighborsTier2?: number[];
   centerCoordinates: { x: number; y: number };
 }
 
@@ -106,6 +108,8 @@ export class StrategicManifestBuilder {
           pixelCount: pInfo.pixelCount,
           hasSeaAccess: pInfo.hasSeaAccess,
           landNeighbors: Array.from(pInfo.landNeighbors),
+          maritimeNeighborsTier1: [],
+          maritimeNeighborsTier2: [],
           centerCoordinates: pInfo.centerCoordinates,
         });
       }

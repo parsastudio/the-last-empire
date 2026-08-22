@@ -74,6 +74,8 @@ export class GlobalAiInitializer {
         pixelCount: pItem.pixelCount,
         hasSeaAccess: pItem.hasSeaAccess,
         landNeighbors: pItem.landNeighbors,
+        maritimeNeighborsTier1: pItem.maritimeNeighborsTier1 || [],
+        maritimeNeighborsTier2: pItem.maritimeNeighborsTier2 || [],
         centerCoordinates: pItem.centerCoordinates,
         fortLevel: 0,
         infrastructureLevel: 1,
