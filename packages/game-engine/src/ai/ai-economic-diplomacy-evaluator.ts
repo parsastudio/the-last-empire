@@ -6,6 +6,7 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -22,6 +23,10 @@ export class AIEconomicDiplomacyEvaluator {
     }
 
     const senderGdp = getNationGdp(nation);
+    const reachTier = GeopoliticalReachResolver.getReachTier(
+      nation,
+      allNations,
+    );
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (rel.stance === "WAR") {
@@ -39,13 +44,29 @@ export class AIEconomicDiplomacyEvaluator {
         continue;
       }
 
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
+      ) {
+        continue;
+      }
+
       const targetGdp = getNationGdp(targetNation);
+
+      if (reachTier !== "SUPERPOWER" && targetGdp > senderGdp * 1.5) {
+        continue;
+      }
+
       const cost = TreatyEvaluator.calculateForeignAidCost(
         senderGdp,
         targetGdp,
       );
 
-      if (currentTreasury < Math.floor(cost * 1.5)) {
+      if (currentTreasury < Math.floor(cost * 2.0)) {
         continue;
       }
 
@@ -53,13 +74,18 @@ export class AIEconomicDiplomacyEvaluator {
         nation,
         targetNation,
         provincesMap,
+        allNations,
       );
+
       const powerRatio = threatResult.powerRatio;
 
       const isPeacetimeAppeasement =
         powerRatio >= 1.3 && rel.opinion < 20 && threatResult.isNeighbor;
 
-      if (isPeacetimeAppeasement) {
+      const isSphereInfluence =
+        reachTier === "SUPERPOWER" && rel.opinion >= 0 && rel.opinion < 50;
+
+      if (isPeacetimeAppeasement || isSphereInfluence) {
         return {
           action: ActionFactory.sendForeignAid(nation.id, targetNation.id),
           cost,

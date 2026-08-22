@@ -5,6 +5,7 @@ import { Province } from "@/domain/province/province.schema";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AIWarDeclarationEvaluator {
   public static evaluate(
@@ -59,14 +60,27 @@ export class AIWarDeclarationEvaluator {
         continue;
       }
 
+      if (
+        !GeopoliticalReachResolver.isReachable(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
+      ) {
+        continue;
+      }
+
       const threatResult = AIThreatCalculator.evaluate(
         nation,
         targetNation,
         provincesMap,
+        allNations,
       );
 
       const powerRatio = threatResult.powerRatio;
-      const isReachable = threatResult.isNeighbor;
+      const isReachable =
+        threatResult.isNeighbor || threatResult.isNavalReachable;
       const grudge = rel.grudge ?? 0;
 
       const isBloodGrudge = grudge >= 45 && powerRatio <= 1.3 && isReachable;

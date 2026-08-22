@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
-import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export interface ThreatEvaluationResult {
   threatScore: number;
@@ -17,6 +17,7 @@ export class AIThreatCalculator {
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,
+    allNations?: Record<string, Nation>,
   ): ThreatEvaluationResult {
     const sourcePower = Math.max(
       1,
@@ -28,40 +29,63 @@ export class AIThreatCalculator {
     );
     const powerRatio = Number((targetPower / sourcePower).toFixed(2));
 
-    const isLandNeighbor = this.checkLandNeighborhood(
+    const isLandNeighbor = GeopoliticalReachResolver.hasDirectLandBorder(
       source,
       target,
       provincesMap,
     );
+
+    const isImmediateSeaNeighbor =
+      GeopoliticalReachResolver.isImmediateMaritimeNeighbor(
+        source,
+        target,
+        provincesMap,
+      );
+
+    const isReachable = allNations
+      ? GeopoliticalReachResolver.isReachable(
+          source,
+          target,
+          allNations,
+          provincesMap,
+        )
+      : isLandNeighbor || isImmediateSeaNeighbor;
+
     const isNavalReachable = Boolean(
-      source.geography.hasSeaAccess && target.geography.hasSeaAccess,
+      source.geography.hasSeaAccess &&
+      target.geography.hasSeaAccess &&
+      isReachable,
     );
 
-    const hasGlobalReach =
-      source.rank <= 5 ||
-      source.military.techLevel >= 4 ||
-      (source.military.navalFleet || 0) >= 2;
+    const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
 
-    const isNeighbor =
-      isLandNeighbor ||
-      (isNavalReachable &&
-        (hasGlobalReach ||
-          source.geography.seaNeighbors?.includes(target.id) ||
-          false));
+    if (!isReachable) {
+      return {
+        threatScore: 0,
+        opportunityScore: 0,
+        isNeighbor: false,
+        isLandNeighbor: false,
+        isNavalReachable: false,
+        powerRatio,
+      };
+    }
 
     let threatScore = 0;
     if (isLandNeighbor) {
-      threatScore += 30;
+      threatScore += 35;
       if (powerRatio > 1.2) {
         threatScore += Math.min(50, Math.floor((powerRatio - 1.0) * 40));
       }
-    } else if (isNavalReachable) {
-      threatScore += hasGlobalReach ? 22 : 15;
+    } else if (isImmediateSeaNeighbor) {
+      threatScore += 25;
       if (powerRatio > 1.2) {
-        threatScore += Math.min(35, Math.floor((powerRatio - 1.0) * 30));
+        threatScore += Math.min(40, Math.floor((powerRatio - 1.0) * 35));
       }
-    } else if (powerRatio > 2.5) {
+    } else if (isNavalReachable) {
       threatScore += 15;
+      if (powerRatio > 1.3) {
+        threatScore += Math.min(30, Math.floor((powerRatio - 1.0) * 25));
+      }
     }
 
     const rel = source.relations[target.id];
@@ -74,16 +98,21 @@ export class AIThreatCalculator {
 
     let opportunityScore = 0;
     if (isLandNeighbor) {
-      opportunityScore += 25;
+      opportunityScore += 30;
       if (powerRatio < 0.7) {
         opportunityScore += Math.min(50, Math.floor((1.0 - powerRatio) * 60));
+      }
+    } else if (isImmediateSeaNeighbor) {
+      opportunityScore += 25;
+      if (powerRatio < 0.7) {
+        opportunityScore += Math.min(45, Math.floor((1.0 - powerRatio) * 55));
       }
     } else if (isNavalReachable) {
       const navalPowerRatio =
         ((source.military.navalFleet || 0) + 1) /
         ((target.military.navalFleet || 0) + 1);
 
-      if (hasGlobalReach || navalPowerRatio >= 1.2) {
+      if (navalPowerRatio >= 1.2) {
         opportunityScore += 20;
         if (powerRatio < 0.7) {
           opportunityScore += Math.min(40, Math.floor((1.0 - powerRatio) * 50));
@@ -112,25 +141,5 @@ export class AIThreatCalculator {
       isNavalReachable,
       powerRatio,
     };
-  }
-
-  private static checkLandNeighborhood(
-    source: Nation,
-    target: Nation,
-    provincesMap?: Record<string, Province>,
-  ): boolean {
-    if (!provincesMap) {
-      return source.geography.landNeighbors.includes(target.id);
-    }
-
-    for (const pid of target.provinceIds || []) {
-      if (
-        LandNeighborResolver.hasProvinceLandBorder(pid, source.id, provincesMap)
-      ) {
-        return true;
-      }
-    }
-
-    return false;
   }
 }
