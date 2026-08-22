@@ -32,6 +32,39 @@ export class TerrainBinaryBuilder {
       rawIndexedGrid[i] = colorIdx & 0xff;
     }
 
+    return this.buildSpansFromIndexed(rawIndexedGrid, palette, width, height);
+  }
+
+  public static buildFromIndexedGrid(
+    indexedGrid: Uint8Array,
+    width: number,
+    height: number,
+  ): BuiltTerrainSpans {
+    const totalPixels = width * height;
+    const rawIndexedGrid = new Uint8Array(totalPixels);
+    const palette: TerrainColorRGB[] = [];
+    const colorToIndexMap = new Map<number, number>();
+
+    for (let i = 0; i < totalPixels; i++) {
+      const val = indexedGrid[i]!;
+      let colorIdx = colorToIndexMap.get(val);
+      if (colorIdx === undefined) {
+        colorIdx = palette.length;
+        palette.push({ r: val, g: val, b: val });
+        colorToIndexMap.set(val, colorIdx);
+      }
+      rawIndexedGrid[i] = colorIdx & 0xff;
+    }
+
+    return this.buildSpansFromIndexed(rawIndexedGrid, palette, width, height);
+  }
+
+  private static buildSpansFromIndexed(
+    rawIndexedGrid: Uint8Array,
+    palette: TerrainColorRGB[],
+    width: number,
+    height: number,
+  ): BuiltTerrainSpans {
     const rowOffsets = new Uint32Array(height + 1);
     const spansList: number[] = [];
     let minSpans = Infinity;

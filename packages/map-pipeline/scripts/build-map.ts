@@ -2,12 +2,22 @@ import { MapBuildOrchestrator } from "@/infrastructure/map-preprocessing/orchest
 import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
 
 async function runMapBuild() {
+  process.stdout.write(
+    "در حال پردازش و ساخت کامل نقشه، بافرها و توپولوژی دریایی...\n",
+  );
+
   const mapId = "map1";
   const maskPath = ServerMapPathResolver.getEditedMaskServerPath(mapId);
   const outputDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
 
   const orchestrator = new MapBuildOrchestrator();
   await orchestrator.executeRebuild(maskPath, outputDir, mapId);
+
+  process.stdout.write("--------------------------------------------------\n");
+  process.stdout.write(
+    "فرآیند ساخت نقشه و توپولوژی دریایی با موفقیت کامل انجام شد.\n",
+  );
+  process.stdout.write("--------------------------------------------------\n");
 }
 
 runMapBuild().catch((error: unknown) => {

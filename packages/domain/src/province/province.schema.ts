@@ -8,6 +8,8 @@ export const ProvinceSchema = z.object({
   pixelCount: z.number().nonnegative(),
   hasSeaAccess: z.boolean(),
   landNeighbors: z.array(z.number()),
+  maritimeNeighborsTier1: z.array(z.number()).default([]),
+  maritimeNeighborsTier2: z.array(z.number()).default([]),
   centerCoordinates: z.object({
     x: z.number(),
     y: z.number(),

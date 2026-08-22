@@ -5,11 +5,45 @@ import { promisify } from "util";
 import { TerrainBinaryBuilder } from "@/infrastructure/terrain-binary-map/builder/terrain-binary-builder";
 import { TerrainBinarySerializer } from "@/infrastructure/terrain-binary-map/serializer/terrain-binary-serializer";
 import { TerrainBinaryReader } from "@/infrastructure/terrain-binary-map/runtime/terrain-binary-reader";
-import { TerrainBinaryBuildStats } from "@/infrastructure/terrain-binary-map/core/terrain-binary-types";
+import {
+  BuiltTerrainSpans,
+  TerrainBinaryBuildStats,
+} from "@/infrastructure/terrain-binary-map/core/terrain-binary-types";
 
 const gzipAsync = promisify(zlib.gzip);
 
 export class TerrainBinaryExportService {
+  public static async generateAndExport(
+    gridData: Uint8Array,
+    width: number,
+    height: number,
+    outputDir: string,
+  ): Promise<TerrainBinaryBuildStats> {
+    if (gridData.byteLength === width * height * 4) {
+      return this.generateAndExportFromRgba(gridData, width, height, outputDir);
+    }
+    return this.generateAndExportFromIndexed(
+      gridData,
+      width,
+      height,
+      outputDir,
+    );
+  }
+
+  public static async generateAndExportFromIndexed(
+    indexedData: Uint8Array,
+    width: number,
+    height: number,
+    outputDir: string,
+  ): Promise<TerrainBinaryBuildStats> {
+    const built = TerrainBinaryBuilder.buildFromIndexedGrid(
+      indexedData,
+      width,
+      height,
+    );
+    return this.saveAndVerify(built, width, height, outputDir);
+  }
+
   public static async generateAndExportFromRgba(
     rgbaData: Uint8Array,
     width: number,
@@ -17,7 +51,15 @@ export class TerrainBinaryExportService {
     outputDir: string,
   ): Promise<TerrainBinaryBuildStats> {
     const built = TerrainBinaryBuilder.buildFromRgba(rgbaData, width, height);
+    return this.saveAndVerify(built, width, height, outputDir);
+  }
 
+  private static async saveAndVerify(
+    built: BuiltTerrainSpans,
+    width: number,
+    height: number,
+    outputDir: string,
+  ): Promise<TerrainBinaryBuildStats> {
     const rawBuffer = TerrainBinarySerializer.serializeRaw(
       built,
       width,
