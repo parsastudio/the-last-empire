@@ -24,12 +24,12 @@ export class DiplomaticBetrayalCalculator {
 
 export class TreatyEvaluator {
   public static calculateForeignAidCost(
-    senderGdp: number,
-    targetGdp: number,
+    _senderGdpOrTargetGdp: number,
+    targetGdp?: number,
   ): number {
-    const senderBudget = Math.floor(senderGdp * 0.04);
-    const targetNeed = Math.floor(targetGdp * 0.02);
-    return Math.max(500_000_000, Math.min(senderBudget, targetNeed));
+    const effectiveTargetGdp =
+      targetGdp !== undefined ? targetGdp : _senderGdpOrTargetGdp;
+    return Math.floor(effectiveTargetGdp * 0.03);
   }
 
   public applyTreatyStance(

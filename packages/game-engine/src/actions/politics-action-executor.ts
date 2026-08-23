@@ -8,7 +8,8 @@ import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -78,6 +79,20 @@ export class PoliticsActionExecutor {
           receiver.relations[canonicalSourceId] ||
           receiver.relations[action.nationId];
         if (!senderRel || !receiverRel) return state;
+
+        const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          receiver,
+          state.nations,
+          state.provinces,
+        );
+
+        if (!isReachable && senderRel.stance !== "WAR") {
+          throw new GameError(
+            "INVALID_ACTION",
+            `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
+          );
+        }
 
         const canonicalHuman = CountryRegistry.resolveCanonicalId(
           state.humanNationId,
@@ -154,10 +169,9 @@ export class PoliticsActionExecutor {
             return state;
           }
 
-          const costDeduction = TreatyEvaluator.calculateForeignAidCost(
-            getNationGdp(nation),
-            getNationGdp(receiver),
-          );
+          const targetGdp = getNationGdp(receiver, state.provinces);
+          const costDeduction =
+            TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
           if (nation.treasury < costDeduction) {
             return state;

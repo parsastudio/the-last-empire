@@ -8,6 +8,7 @@ import {
   DiplomacyLockManager,
   NationRelationResolver,
 } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AITreatyEvaluator {
   public static evaluate(
@@ -48,7 +49,7 @@ export class AITreatyEvaluator {
   private static evaluateAlliance(
     nation: Nation,
     allNations: Record<string, Nation>,
-    _provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
   ): GameAction | null {
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
@@ -71,15 +72,26 @@ export class AITreatyEvaluator {
         continue;
       }
 
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
+      ) {
+        continue;
+      }
+
       const hasCommonEnemy = NationRelationResolver.hasCommonEnemy(
         nation,
         targetNation,
         allNations,
       );
 
-      const isDeepTrust = rel.opinion >= 20 && nation.globalReputation >= 20;
+      const isDeepTrust = rel.opinion >= 25 && nation.globalReputation >= 20;
 
-      if ((hasCommonEnemy && rel.opinion >= 10) || isDeepTrust) {
+      if ((hasCommonEnemy && rel.opinion >= 15) || isDeepTrust) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,
@@ -125,6 +137,17 @@ export class AITreatyEvaluator {
         !targetNation ||
         !targetNation.isAlive ||
         targetNation.id === nation.id
+      ) {
+        continue;
+      }
+
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
       ) {
         continue;
       }

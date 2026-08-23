@@ -51,6 +51,7 @@ export class StrategicManifestBuilder {
         0,
       );
       const provIds: number[] = [];
+      const provCount = Math.max(1, provList.length);
 
       const population = profile.population;
       const gdp = profile.gdp;
@@ -58,6 +59,9 @@ export class StrategicManifestBuilder {
         population > 0 ? Math.floor(gdp / population) : 5000;
       const maxPopulationCapacity = Math.floor(population / 0.95);
       const startingTreasury = Math.floor(gdp * 0.05);
+
+      const equalPopulationShare = Math.floor(population / provCount);
+      const equalCapacityShare = Math.floor(maxPopulationCapacity / provCount);
 
       let distributedPopulation = 0;
       let distributedCapacity = 0;
@@ -67,21 +71,17 @@ export class StrategicManifestBuilder {
         provIds.push(pInfo.provinceId);
 
         const isLast = pIndex === provList.length - 1;
-        const shareRatio = pInfo.pixelCount / Math.max(1, totalCountryPixels);
 
         const provPopulation = isLast
           ? Math.max(1, population - distributedPopulation)
-          : Math.max(1, Math.round(population * shareRatio));
+          : Math.max(1, equalPopulationShare);
 
         const provCapacity = isLast
           ? Math.max(
               provPopulation,
               maxPopulationCapacity - distributedCapacity,
             )
-          : Math.max(
-              provPopulation,
-              Math.round(maxPopulationCapacity * shareRatio),
-            );
+          : Math.max(provPopulation, equalCapacityShare);
 
         distributedPopulation += provPopulation;
         distributedCapacity += provCapacity;

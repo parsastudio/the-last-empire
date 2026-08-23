@@ -5,6 +5,7 @@ import { Province } from "@/domain/province/province.schema";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AIWarDeclarationEvaluator {
   public static evaluate(
@@ -55,6 +56,17 @@ export class AIWarDeclarationEvaluator {
         !targetNation ||
         !targetNation.isAlive ||
         targetNation.id === nation.id
+      ) {
+        continue;
+      }
+
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
       ) {
         continue;
       }

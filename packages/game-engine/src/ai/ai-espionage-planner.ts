@@ -6,6 +6,7 @@ import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export interface EspionagePlanResult {
   actions: GameAction[];
@@ -49,6 +50,7 @@ export class AIEspionagePlanner {
     const techTheftAction = this.planTechHeistTier3(
       nation,
       allNations,
+      provincesMap,
       currentTreasury,
       executedTiers,
     );
@@ -160,6 +162,7 @@ export class AIEspionagePlanner {
   private static planTechHeistTier3(
     nation: Nation,
     allNations: Record<string, Nation>,
+    provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
     executedTiers: number[],
   ): { action: GameAction; cost: number } | null {
@@ -172,6 +175,17 @@ export class AIEspionagePlanner {
 
     for (const target of Object.values(allNations)) {
       if (!target.isAlive || target.id === nation.id) {
+        continue;
+      }
+
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          target,
+          allNations,
+          provincesMap,
+        )
+      ) {
         continue;
       }
 
