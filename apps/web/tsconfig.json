@@ -14,7 +14,10 @@
       "@/*": ["./src/*"],
       "@/domain/*": ["../../packages/domain/src/*"],
       "@/engine/*": ["../../packages/game-engine/src/*"],
-      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/infrastructure/*": [
+        "./src/infrastructure/*",
+        "../../packages/map-pipeline/src/*"
+      ],
       "@geopolitics/domain": ["../../packages/domain/src/index.ts"],
       "@geopolitics/domain/*": ["../../packages/domain/src/*"],
       "@geopolitics/game-engine": ["../../packages/game-engine/src/index.ts"],
