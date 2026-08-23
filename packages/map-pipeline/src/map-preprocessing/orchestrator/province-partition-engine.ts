@@ -59,13 +59,23 @@ export class ProvincePartitionEngine {
       const allocations = ProvinceCountAllocator.allocateProvincesToMasses(
         majorMasses,
         totalCountryPixels,
+        countryNumericId,
+        width,
       );
 
       const assignedProvincesForCountry: number[] = [];
+      const leftoverMinorComponents = [...minorComponents];
 
       for (let i = 0; i < majorGroups.length; i++) {
         const group = majorGroups[i]!;
-        const kCount = allocations.get(group.id) || 1;
+        const kCount = allocations.get(group.id) ?? 0;
+
+        if (kCount <= 0) {
+          for (let c = 0; c < group.components.length; c++) {
+            leftoverMinorComponents.push(group.components[c]!);
+          }
+          continue;
+        }
 
         const assignedIds = WavefrontProvincePartitioner.partitionGroup(
           group,
@@ -83,8 +93,25 @@ export class ProvincePartitionEngine {
         globalProvinceCounter += assignedIds.length;
       }
 
+      if (assignedProvincesForCountry.length === 0 && majorGroups.length > 0) {
+        const fallbackGroup = majorGroups[0]!;
+        const assignedIds = WavefrontProvincePartitioner.partitionGroup(
+          fallbackGroup,
+          1,
+          globalProvinceCounter,
+          width,
+          height,
+          bitBuffer,
+          provinceMap,
+        );
+        for (let j = 0; j < assignedIds.length; j++) {
+          assignedProvincesForCountry.push(assignedIds[j]!);
+        }
+        globalProvinceCounter += assignedIds.length;
+      }
+
       AtomicIslandAssigner.assignMinorComponentsAtomically(
-        minorComponents,
+        leftoverMinorComponents,
         assignedProvincesForCountry,
         width,
         bitBuffer,

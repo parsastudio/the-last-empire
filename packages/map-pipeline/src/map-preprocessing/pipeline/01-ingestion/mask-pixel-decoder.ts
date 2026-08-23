@@ -1,4 +1,5 @@
 import { PNG } from "pngjs";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class MaskPixelDecoder {
   public static decodeNationGrid(
@@ -16,10 +17,17 @@ export class MaskPixelDecoder {
         const b = png.data[idx + 2]!;
 
         let nationId = 0;
-        if (b >= 11 && b < 250) {
+
+        if (r >= 11 && r < 250 && CountryRegistry.getCountry(r)) {
+          nationId = r;
+        } else if (b >= 11 && b < 250 && CountryRegistry.getCountry(b)) {
           nationId = b;
+        } else if (g >= 11 && g < 250 && CountryRegistry.getCountry(g)) {
+          nationId = g;
         } else if (r >= 11 && r < 250) {
           nationId = r;
+        } else if (b >= 11 && b < 250) {
+          nationId = b;
         } else if (g >= 11 && g < 250) {
           nationId = g;
         }

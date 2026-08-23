@@ -9,15 +9,15 @@ export class ComponentAnalyzer {
     const visited = new Set<number>();
     const components: LandComponent[] = [];
 
-    const dirs = [
-      1,
-      -1,
-      width,
-      -width,
-      width + 1,
-      width - 1,
-      -width + 1,
-      -width - 1,
+    const neighborOffsets = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: 1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: -1 },
     ];
 
     for (const startIdx of pixelIndices) {
@@ -41,11 +41,17 @@ export class ComponentAnalyzer {
         sumX += cx;
         sumY += cy;
 
-        for (const dir of dirs) {
-          const next = curr + dir;
-          if (pixelSet.has(next) && !visited.has(next)) {
-            visited.add(next);
-            queue.push(next);
+        for (let i = 0; i < neighborOffsets.length; i++) {
+          const off = neighborOffsets[i]!;
+          const nx = (cx + off.dx + width) % width;
+          const ny = cy + off.dy;
+
+          if (ny >= 0) {
+            const next = ny * width + nx;
+            if (pixelSet.has(next) && !visited.has(next)) {
+              visited.add(next);
+              queue.push(next);
+            }
           }
         }
       }
