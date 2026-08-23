@@ -6,7 +6,7 @@ import {
   FinalManifestNation,
   ClientMapPathResolver,
 } from "@geopolitics/domain";
-import { GlobalAiInitializer } from "@geopolitics/map-pipeline";
+import { GlobalAiInitializer } from "@geopolitics/game-engine";
 
 export class CampaignInitializationService {
   private static aiInitializer = new GlobalAiInitializer();

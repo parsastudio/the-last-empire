@@ -42,6 +42,9 @@ export * from "./economy/demographics/demographics-engine";
 export * from "./espionage/espionage-calculator";
 export * from "./espionage/espionage-manager";
 
+export * from "./initializers/nation-profile-assigner";
+export * from "./initializers/global-ai-initializer";
+
 export * from "./military/arms-market-manager";
 export * from "./military/military-distribution-engine";
 export * from "./military/recruitment-queue";

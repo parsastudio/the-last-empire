@@ -1,7 +1,5 @@
 export * from "./core/types/map-pipeline.types";
 export * from "./core/io/server-map-path-resolver";
-export * from "./core/initializers/nation-profile-assigner";
-export * from "./core/initializers/global-ai-initializer";
 
 export * from "./visual-pipeline/core/tactical-terrain.types";
 export * from "./visual-pipeline/algorithms/ocean-bathymetry-engine";
