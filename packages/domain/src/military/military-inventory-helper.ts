@@ -1,4 +1,8 @@
-import { MilitaryStack, UnitType } from "@/domain/military/military.schema";
+import {
+  MilitaryStack,
+  UnitType,
+  BranchTechRating,
+} from "@/domain/military/military.schema";
 
 export type MilitaryStackKey =
   | "infantry"
@@ -26,68 +30,67 @@ export class MilitaryInventoryHelper {
     }
   }
 
-  public static getBreakdown(
+  public static getBranchTech(
     military: MilitaryStack,
     unitType: UnitType,
-  ): Record<number, number> {
+  ): number {
     const key = this.getStackKey(unitType);
-    const result: Record<number, number> = {};
-    const totalCount = military[key] ?? 0;
-    if (totalCount <= 0) return result;
-
-    const rawUnitInventory = military.inventory?.[unitType];
-    let recordedSum = 0;
-
-    if (rawUnitInventory) {
-      const keys = Object.keys(rawUnitInventory);
-      for (let i = 0; i < keys.length; i++) {
-        const k = keys[i]!;
-        const level = parseInt(k, 10);
-        const count = rawUnitInventory[k] ?? 0;
-        if (!isNaN(level) && level > 0 && count > 0) {
-          result[level] = (result[level] ?? 0) + count;
-          recordedSum += count;
-        }
-      }
+    const customTech = military.branchTech?.[key];
+    if (customTech !== undefined && customTech > 0) {
+      return Number(customTech.toFixed(2));
     }
+    return Math.max(1, military.techLevel ?? 1);
+  }
 
-    if (recordedSum < totalCount) {
-      const fallbackLevel = Math.max(1, military.techLevel ?? 1);
-      const remaining = totalCount - recordedSum;
-      result[fallbackLevel] = (result[fallbackLevel] ?? 0) + remaining;
-    }
-
-    return result;
+  public static initializeBranchTech(
+    baseTechLevel: number = 1,
+  ): BranchTechRating {
+    const tech = Math.max(1, baseTechLevel);
+    return {
+      infantry: tech,
+      armor: tech,
+      airDefense: tech,
+      airForce: tech,
+      droneMissile: tech,
+      navalFleet: tech,
+    };
   }
 
   public static addUnits(
     military: MilitaryStack,
     unitType: UnitType,
     quantity: number,
-    techLevel: number,
+    incomingTechLevel: number,
   ): MilitaryStack {
     if (quantity <= 0) return military;
-    const key = this.getStackKey(unitType);
-    const safeTech = Math.max(1, Math.floor(techLevel));
-    const breakdown = this.getBreakdown(military, unitType);
-    breakdown[safeTech] = (breakdown[safeTech] ?? 0) + quantity;
 
-    const updatedInventory = { ...(military.inventory ?? {}) };
-    const stringifiedRecord: Record<string, number> = {};
-    const levels = Object.keys(breakdown).map(Number);
-    for (let i = 0; i < levels.length; i++) {
-      const lvl = levels[i]!;
-      const count = breakdown[lvl]!;
-      if (count > 0) {
-        stringifiedRecord[lvl.toString()] = count;
-      }
-    }
-    updatedInventory[unitType] = stringifiedRecord;
+    const key = this.getStackKey(unitType);
+    const oldCount = military[key] ?? 0;
+    const newCount = oldCount + quantity;
+
+    const currentTech = this.getBranchTech(military, unitType);
+    const safeIncomingTech = Math.max(1, incomingTechLevel);
+
+    const weightedTech =
+      newCount > 0
+        ? Number(
+            (
+              (oldCount * currentTech + quantity * safeIncomingTech) /
+              newCount
+            ).toFixed(2),
+          )
+        : safeIncomingTech;
+
+    const currentBranchTech: BranchTechRating = military.branchTech
+      ? { ...military.branchTech }
+      : this.initializeBranchTech(military.techLevel);
+
+    currentBranchTech[key] = weightedTech;
 
     return {
       ...military,
-      [key]: (military[key] ?? 0) + quantity,
-      inventory: updatedInventory,
+      [key]: newCount,
+      branchTech: currentBranchTech,
     };
   }
 
@@ -100,43 +103,11 @@ export class MilitaryInventoryHelper {
     const totalCount = military[key] ?? 0;
     if (quantityToRemove <= 0 || totalCount <= 0) return military;
 
-    const toRemove = Math.min(totalCount, quantityToRemove);
-    const breakdown = this.getBreakdown(military, unitType);
-    let remainingToRemove = toRemove;
-
-    const levels = Object.keys(breakdown)
-      .map(Number)
-      .sort((a, b) => a - b);
-
-    for (let i = 0; i < levels.length; i++) {
-      if (remainingToRemove <= 0) break;
-      const lvl = levels[i]!;
-      const currentCount = breakdown[lvl]!;
-      if (currentCount <= remainingToRemove) {
-        remainingToRemove -= currentCount;
-        delete breakdown[lvl];
-      } else {
-        breakdown[lvl] = currentCount - remainingToRemove;
-        remainingToRemove = 0;
-      }
-    }
-
-    const updatedInventory = { ...(military.inventory ?? {}) };
-    const stringifiedRecord: Record<string, number> = {};
-    const remainingLevels = Object.keys(breakdown).map(Number);
-    for (let i = 0; i < remainingLevels.length; i++) {
-      const lvl = remainingLevels[i]!;
-      const count = breakdown[lvl]!;
-      if (count > 0) {
-        stringifiedRecord[lvl.toString()] = count;
-      }
-    }
-    updatedInventory[unitType] = stringifiedRecord;
+    const newCount = Math.max(0, totalCount - quantityToRemove);
 
     return {
       ...military,
-      [key]: Math.max(0, totalCount - toRemove),
-      inventory: updatedInventory,
+      [key]: newCount,
     };
   }
 

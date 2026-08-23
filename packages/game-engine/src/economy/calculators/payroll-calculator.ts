@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export interface BreakdownMilitaryPayroll {
   infantry: number;
@@ -31,9 +32,13 @@ export class MilitaryPayrollCalculator {
       count: number,
     ): number => {
       if (!count || count <= 0) return 0;
+      const tech = MilitaryInventoryHelper.getBranchTech(
+        nation.military,
+        unitType,
+      );
       const unitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
         unitType,
-        nation.military.techLevel,
+        tech,
         nation.industrialLevel,
       );
       const baseUpkeep = unitPrice * MilitaryPayrollCalculator.PAYROLL_RATE;

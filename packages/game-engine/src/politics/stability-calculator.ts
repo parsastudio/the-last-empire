@@ -30,22 +30,6 @@ export class StabilityCalculator {
     return -traits.defenderLossPenalty;
   }
 
-  public static calculateDiplomaticStabilityBonus(
-    proposalType: string,
-    isSender: boolean,
-  ): number {
-    switch (proposalType) {
-      case "NON_AGGRESSION_PACT":
-        return 0.5;
-      case "FULL_ALLIANCE":
-        return 1.0;
-      case "SEND_FOREIGN_AID":
-        return isSender ? 0.5 : 1.0;
-      default:
-        return 0;
-    }
-  }
-
   public static calculateTurnStabilityDelta(
     nation: Nation,
     isAtWar?: boolean,
@@ -64,9 +48,14 @@ export class StabilityCalculator {
       }
     } else {
       if (nation.government.stability < 85) {
-        const gap = (85 - nation.government.stability) / 85;
-        delta += traits.peaceRecoveryRate * gap;
+        delta += traits.peaceRecoveryRate;
       }
+    }
+
+    const rep = nation.globalReputation ?? 50;
+    if (rep > 50) {
+      const repBonus = ((Math.min(100, rep) - 50) / 50) * 1.5;
+      delta += repBonus;
     }
 
     const clampedTax = Math.min(50, Math.max(0, nation.taxRate));

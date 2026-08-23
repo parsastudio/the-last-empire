@@ -7,7 +7,6 @@ import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acc
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
@@ -111,7 +110,7 @@ export class PoliticsActionExecutor {
             "DECLARE_WAR",
           );
 
-          const newReputation = Math.max(-100, nation.globalReputation - 10);
+          const newReputation = Math.max(-100, nation.globalReputation - 5);
 
           const warLogs = [
             TurnLogBuilder.createGlobalWarLog(
@@ -185,16 +184,6 @@ export class PoliticsActionExecutor {
           };
 
           const newReputation = Math.min(100, nation.globalReputation + 4);
-          const senderStabBonus =
-            StabilityCalculator.calculateDiplomaticStabilityBonus(
-              "SEND_FOREIGN_AID",
-              true,
-            );
-          const receiverStabBonus =
-            StabilityCalculator.calculateDiplomaticStabilityBonus(
-              "SEND_FOREIGN_AID",
-              false,
-            );
 
           const aidLogs = [
             TurnLogBuilder.createGlobalDiplomacyLog(
@@ -230,22 +219,10 @@ export class PoliticsActionExecutor {
                 ...nation,
                 treasury: Math.max(0, nation.treasury - costDeduction),
                 globalReputation: newReputation,
-                government: {
-                  ...nation.government,
-                  stability: StabilityCalculator.clampStability(
-                    nation.government.stability + senderStabBonus,
-                  ),
-                },
               },
               [targetKey]: {
                 ...receiver,
                 treasury: receiver.treasury + costDeduction,
-                government: {
-                  ...receiver.government,
-                  stability: StabilityCalculator.clampStability(
-                    receiver.government.stability + receiverStabBonus,
-                  ),
-                },
                 relations: {
                   ...receiver.relations,
                   [receiverRel.targetNationId]: updatedReceiverRel,

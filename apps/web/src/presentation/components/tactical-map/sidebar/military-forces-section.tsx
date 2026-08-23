@@ -49,32 +49,33 @@ export function MilitaryForcesSection({
       navalFleet,
       experience,
       techLevel,
+      branchTech: MilitaryInventoryHelper.initializeBranchTech(techLevel),
     },
   };
 
   const payroll = MilitaryPayrollCalculator.calculatePayroll(activeNation);
 
-  const infantryBreakdown = MilitaryInventoryHelper.getBreakdown(
+  const infTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "INFANTRY",
   );
-  const armorBreakdown = MilitaryInventoryHelper.getBreakdown(
+  const armTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "ARMOR",
   );
-  const airDefenseBreakdown = MilitaryInventoryHelper.getBreakdown(
+  const adTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "AIR_DEFENSE",
   );
-  const airForceBreakdown = MilitaryInventoryHelper.getBreakdown(
+  const afTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "AIR_FORCE",
   );
-  const droneBreakdown = MilitaryInventoryHelper.getBreakdown(
+  const drTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "DRONE_MISSILE",
   );
-  const navalBreakdown = MilitaryInventoryHelper.getBreakdown(
+  const nvTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "NAVAL_FLEET",
   );
@@ -84,7 +85,7 @@ export function MilitaryForcesSection({
       <div className="flex items-center gap-2 px-1">
         <Swords size={14} className="text-military" />
         <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
-          قدرت ارکانی ارتش و تفکیک سطح فناوری یگان‌ها
+          قدرت ارکانی ارتش و سطح فناوری یگان‌ها
         </span>
       </div>
 
@@ -96,7 +97,7 @@ export function MilitaryForcesSection({
             name="پیاده‌نظام"
             payrollCost={payroll.infantry}
             count={infantry}
-            breakdown={infantryBreakdown}
+            techRating={infTech}
           />
 
           <MilitaryForceUnitCard
@@ -105,7 +106,7 @@ export function MilitaryForcesSection({
             name="زرهی و تانک"
             payrollCost={payroll.armor}
             count={armor}
-            breakdown={armorBreakdown}
+            techRating={armTech}
           />
 
           <MilitaryForceUnitCard
@@ -114,7 +115,7 @@ export function MilitaryForcesSection({
             name="پدافند هوایی"
             payrollCost={payroll.airDefense}
             count={airDefense}
-            breakdown={airDefenseBreakdown}
+            techRating={adTech}
           />
 
           <MilitaryForceUnitCard
@@ -123,7 +124,7 @@ export function MilitaryForcesSection({
             name="نیروی هوایی"
             payrollCost={payroll.airForce}
             count={airForce}
-            breakdown={airForceBreakdown}
+            techRating={afTech}
           />
 
           <MilitaryForceUnitCard
@@ -132,7 +133,7 @@ export function MilitaryForcesSection({
             name="پهپاد و موشک"
             payrollCost={payroll.droneMissile}
             count={droneMissile}
-            breakdown={droneBreakdown}
+            techRating={drTech}
           />
 
           <MilitaryForceUnitCard
@@ -141,7 +142,7 @@ export function MilitaryForcesSection({
             name="ناوگان دریایی"
             payrollCost={payroll.navalFleet}
             count={navalFleet}
-            breakdown={navalBreakdown}
+            techRating={nvTech}
           />
         </div>
 

@@ -39,9 +39,9 @@ export class BattleAttackerStateApplier {
       calcResult,
     );
 
-    let baseWarRepPenalty = currentStance !== "WAR" ? 10 : 0;
+    let baseWarRepPenalty = currentStance !== "WAR" ? 15 : 0;
     if (calcResult.isFullCapitulation) {
-      baseWarRepPenalty += 15;
+      baseWarRepPenalty += 10;
     }
     const totalRepPenalty =
       baseWarRepPenalty +

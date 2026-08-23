@@ -62,33 +62,40 @@ export class MilitaryPricingCalculator {
       airForce?: number;
       droneMissile?: number;
       techLevel?: number;
+      branchTech?: Partial<Record<string, number>>;
     },
     industrialLevel: number = 1,
   ): number {
-    const techLevel = military.techLevel ?? 1;
+    const fallbackTech = military.techLevel ?? 1;
+    const infTech = military.branchTech?.infantry ?? fallbackTech;
+    const armTech = military.branchTech?.armor ?? fallbackTech;
+    const adTech = military.branchTech?.airDefense ?? fallbackTech;
+    const afTech = military.branchTech?.airForce ?? fallbackTech;
+    const drTech = military.branchTech?.droneMissile ?? fallbackTech;
+
     const infPrice = this.calculateUnitTypePrice(
       "INFANTRY",
-      techLevel,
+      infTech,
       industrialLevel,
     );
     const armPrice = this.calculateUnitTypePrice(
       "ARMOR",
-      techLevel,
+      armTech,
       industrialLevel,
     );
     const adPrice = this.calculateUnitTypePrice(
       "AIR_DEFENSE",
-      techLevel,
+      adTech,
       industrialLevel,
     );
     const afPrice = this.calculateUnitTypePrice(
       "AIR_FORCE",
-      techLevel,
+      afTech,
       industrialLevel,
     );
     const drPrice = this.calculateUnitTypePrice(
       "DRONE_MISSILE",
-      techLevel,
+      drTech,
       industrialLevel,
     );
 

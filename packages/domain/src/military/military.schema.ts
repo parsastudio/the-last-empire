@@ -9,9 +9,14 @@ export const UnitTypeSchema = z.enum([
   "NAVAL_FLEET",
 ]);
 
-export const UnitInventorySchema = z
-  .record(z.string(), z.record(z.string(), z.number().nonnegative()))
-  .default({});
+export const BranchTechRatingSchema = z.object({
+  infantry: z.number().default(1),
+  armor: z.number().default(1),
+  airDefense: z.number().default(1),
+  airForce: z.number().default(1),
+  droneMissile: z.number().default(1),
+  navalFleet: z.number().default(1),
+});
 
 export const MilitaryStackSchema = z.object({
   infantry: z.number().nonnegative(),
@@ -22,7 +27,7 @@ export const MilitaryStackSchema = z.object({
   navalFleet: z.number().nonnegative().default(0),
   experience: z.number().min(0).max(100),
   techLevel: z.number().positive(),
-  inventory: UnitInventorySchema.optional(),
+  branchTech: BranchTechRatingSchema.optional(),
 });
 
 export const RecruitmentOrderSchema = z.object({
@@ -34,6 +39,6 @@ export const RecruitmentOrderSchema = z.object({
 });
 
 export type UnitType = z.infer<typeof UnitTypeSchema>;
-export type UnitInventory = z.infer<typeof UnitInventorySchema>;
+export type BranchTechRating = z.infer<typeof BranchTechRatingSchema>;
 export type MilitaryStack = z.infer<typeof MilitaryStackSchema>;
 export type RecruitmentOrder = z.infer<typeof RecruitmentOrderSchema>;

@@ -153,8 +153,8 @@ export class EspionageManager {
       message = heist.message;
     }
 
-    if (outcome === "COMPROMISED_SUCCESS") {
-      const penalty = tier === 3 ? 15 : tier === 2 ? 5 : 2;
+    if (outcome === "COMPROMISED_SUCCESS" || outcome === "CRITICAL_FAILURE") {
+      const penalty = tier === 3 ? 10 : tier === 2 ? 7 : 5;
       updatedSource = {
         ...updatedSource,
         globalReputation: Math.max(
@@ -183,39 +183,6 @@ export class EspionageManager {
             ...targetRel,
             opinion: Math.max(-100, targetRel.opinion - tier * 20),
             grudge: Math.min(100, currentTargetGrudge + tier * 15),
-          },
-        };
-      }
-    } else if (outcome === "CRITICAL_FAILURE") {
-      const penalty = tier === 3 ? 20 : tier === 2 ? 10 : 5;
-      updatedSource = {
-        ...updatedSource,
-        globalReputation: Math.max(
-          -100,
-          updatedSource.globalReputation - penalty,
-        ),
-      };
-
-      const rel = updatedSource.relations[target.id];
-      if (rel) {
-        updatedSource.relations = {
-          ...updatedSource.relations,
-          [target.id]: {
-            ...rel,
-            opinion: Math.max(-100, rel.opinion - tier * 20),
-          },
-        };
-      }
-
-      const targetRel = updatedTarget.relations[source.id];
-      if (targetRel) {
-        const currentTargetGrudge = targetRel.grudge ?? 0;
-        updatedTarget.relations = {
-          ...updatedTarget.relations,
-          [source.id]: {
-            ...targetRel,
-            opinion: Math.max(-100, targetRel.opinion - tier * 25),
-            grudge: Math.min(100, currentTargetGrudge + tier * 20),
           },
         };
       }

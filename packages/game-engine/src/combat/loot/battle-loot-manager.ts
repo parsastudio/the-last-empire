@@ -88,7 +88,7 @@ export class BattleLootManager {
         navalFleet: 0,
         experience: 0,
         techLevel: defenderMilitary.techLevel,
-        inventory: {},
+        branchTech: defenderMilitary.branchTech,
       };
     }
 
