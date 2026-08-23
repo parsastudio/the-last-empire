@@ -10,39 +10,33 @@ export interface TaxPolicyTier {
   rate: number;
   label: string;
   badge: string;
-  desc: string;
 }
 
 export const TAX_POLICY_TIERS: TaxPolicyTier[] = [
   {
     rate: 0,
-    label: "معافیت کامل و رفاه عمومی",
+    label: "معافیت کامل و اقتصاد رفاهی",
     badge: "معافیت کامل",
-    desc: "صفر شدن مالیات‌ها جهت حداکثرسازی رشد ثبات و رفاه با درآمد صفر خزانه‌داری",
   },
   {
     rate: 15,
     label: "اقتصاد متعادل ملی",
     badge: "پایه و استاندارد",
-    desc: "توازن پایدار میان مالیات‌ستانی و ثبات سیاسی کشور",
   },
   {
     rate: 25,
     label: "توسعه و جهش صنعتی",
     badge: "رشد صنعتی",
-    desc: "تامین بودجه برای پروژه‌های ملی همراه با افت ملایم ثبات",
   },
   {
     rate: 35,
     label: "عوارض سنگین حاکمیتی",
     badge: "فشار مالیاتی",
-    desc: "درآمد ارزی و ریالی بالا با ریسک آغاز نارضایتی‌های عمومی",
   },
   {
     rate: 50,
     label: "مصادره اضطراری جنگی",
     badge: "اقتصاد جنگی",
-    desc: "غارت حداکثری نقدینگی جهت نجات کشور در بحران‌های مرگ و زندگی",
   },
 ];
 
@@ -93,18 +87,13 @@ export function TaxControlCard({
       </div>
 
       <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl space-y-3">
-        <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground">
-              {currentPolicy.label}
-            </span>
-            <span className="text-xs font-mono font-black text-gdp">
-              {PersianNumberFormatter.toPersianDigits(taxRate)}٪
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            {currentPolicy.desc}
-          </p>
+        <div className="bg-secondary/40 border border-border/50 px-3 py-2 rounded-xl flex items-center justify-between">
+          <span className="text-xs font-bold text-foreground">
+            {currentPolicy.label}
+          </span>
+          <span className="text-xs font-mono font-black text-gdp">
+            {PersianNumberFormatter.toPersianDigits(taxRate)}٪
+          </span>
         </div>
 
         <TaxSlider
