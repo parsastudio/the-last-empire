@@ -9,6 +9,7 @@ import { DemographicsEngine } from "@/engine/economy/demographics/demographics-e
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -40,9 +41,15 @@ export class EconomyTurnProcessor {
       const currentArmyValuation =
         AIProcurementPlanner.calculateTotalArmyValuation(updated);
 
+      const nationRank = NationGettersUtility.getRank(
+        updated.id,
+        allNations,
+        currentProvincesMap,
+      );
+
       const addedTreasury = AiEconomyCalculator.calculateEffectiveTurnIncome(
         gdp,
-        updated.rank,
+        nationRank,
         aliveCount,
         currentArmyValuation,
       );
