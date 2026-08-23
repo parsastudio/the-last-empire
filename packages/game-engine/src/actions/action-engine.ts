@@ -60,8 +60,7 @@ export class ActionEngine {
         case "SET_TARIFF_RATE":
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
-        case "INVEST_INFRASTRUCTURE":
-        case "UPGRADE_INDUSTRIAL_LEVEL":
+        case "UPGRADE_DEVELOPMENT":
           newState = EconomyActionExecutor.execute(state, action);
           break;
 
@@ -76,6 +75,7 @@ export class ActionEngine {
         case "UNLOCK_DOCTRINE":
         case "EXECUTE_ESPIONAGE_OPERATION":
         case "DIPLOMATIC_PROPOSAL":
+        case "RESPOND_DIPLOMATIC_PROPOSAL":
           newState = PoliticsActionExecutor.execute(state, action);
           break;
 

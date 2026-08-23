@@ -1,10 +1,13 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
-import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import {
+  GameAction,
+  ActionFactory,
+  Nation,
+  Province,
+  CountryRegistry,
+  DiplomacyLockManager,
+} from "@geopolitics/domain";
+import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
 
 export class AIPeaceEvaluator {
   public static evaluate(
@@ -13,14 +16,10 @@ export class AIPeaceEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
   ): GameAction | null {
-    if (!nation.relations) {
-      return null;
-    }
+    if (!nation.relations) return null;
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
-      if (rel.stance !== "WAR") {
-        continue;
-      }
+      if (rel.stance !== "WAR") continue;
 
       if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
         continue;
@@ -37,78 +36,20 @@ export class AIPeaceEvaluator {
         continue;
       }
 
-      const threatResult = AIThreatCalculator.evaluate(
+      const vector = GeopoliticalVectorCalculator.calculate(
         nation,
         targetNation,
+        allNations,
         provincesMap,
       );
 
-      const powerRatio = threatResult.powerRatio;
-      const myStability = nation.government.stability;
+      const peaceUtility = UtilityDecisionEngine.calculatePeaceUtility(
+        nation,
+        targetNation,
+        vector,
+      );
 
-      const isSurvivalPeace = powerRatio >= 2.8 || myStability < 22;
-
-      if (isSurvivalPeace) {
-        return ActionFactory.diplomaticProposal(
-          nation.id,
-          targetNation.id,
-          "PEACE_TREATY",
-        );
-      }
-
-      const isStalematePeace =
-        powerRatio >= 0.8 && powerRatio <= 1.25 && myStability < 32;
-
-      if (isStalematePeace) {
-        return ActionFactory.diplomaticProposal(
-          nation.id,
-          targetNation.id,
-          "PEACE_TREATY",
-        );
-      }
-
-      const targetNumericId = CountryRegistry.resolveNumericId(targetNation.id);
-      let hasCapturedProvince = false;
-
-      if (provincesMap && targetNumericId > 0) {
-        for (const pid of nation.provinceIds || []) {
-          const prov = provincesMap[pid.toString()];
-          if (prov && prov.countryNumericId === targetNumericId) {
-            hasCapturedProvince = true;
-            break;
-          }
-        }
-      }
-
-      let hasThirdPartyThreat = false;
-      for (const [otherId, otherRel] of Object.entries(
-        nation.relations || {},
-      )) {
-        if (otherId === targetNation.id || otherRel.stance === "WAR") {
-          continue;
-        }
-
-        const canonicalOther = CountryRegistry.resolveCanonicalId(otherId);
-        const otherNation = allNations[canonicalOther] || allNations[otherId];
-
-        if (otherNation && otherNation.isAlive) {
-          const otherEval = AIThreatCalculator.evaluate(
-            nation,
-            otherNation,
-            provincesMap,
-          );
-          if (otherEval.threatScore > 55 && otherEval.isNeighbor) {
-            hasThirdPartyThreat = true;
-            break;
-          }
-        }
-      }
-
-      const isCounterAttackRisk = powerRatio >= 0.85;
-      const isConsolidationPeace =
-        hasCapturedProvince && (hasThirdPartyThreat || isCounterAttackRisk);
-
-      if (isConsolidationPeace) {
+      if (peaceUtility >= 35) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,

@@ -1,7 +1,8 @@
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { Nation, Province } from "@geopolitics/domain";
+import {
+  GeopoliticalVectorCalculator,
+  GeopoliticalVector,
+} from "@/engine/ai/geopolitical-vector-calculator";
 
 export interface ThreatEvaluationResult {
   threatScore: number;
@@ -10,6 +11,7 @@ export interface ThreatEvaluationResult {
   isLandNeighbor: boolean;
   isNavalReachable: boolean;
   powerRatio: number;
+  vector: GeopoliticalVector;
 }
 
 export class AIThreatCalculator {
@@ -17,107 +19,39 @@ export class AIThreatCalculator {
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,
-    _allNations?: Record<string, Nation>,
+    allNations?: Record<string, Nation>,
   ): ThreatEvaluationResult {
-    const sourcePower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateLandAndAirPower(source),
-    );
-    const targetPower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateLandAndAirPower(target),
-    );
-    const powerRatio = Number((targetPower / sourcePower).toFixed(2));
-
-    const isLandNeighbor = GeopoliticalReachResolver.hasDirectLandBorder(
+    const vector = GeopoliticalVectorCalculator.calculate(
       source,
       target,
+      allNations,
       provincesMap,
     );
 
-    const isImmediateSeaNeighbor =
-      GeopoliticalReachResolver.isImmediateMaritimeNeighbor(
-        source,
-        target,
-        provincesMap,
-      );
+    const threatScore =
+      vector.powerRatio > 1.1
+        ? Math.min(
+            100,
+            Math.round(vector.tension * 0.8 + (vector.powerRatio - 1.0) * 30),
+          )
+        : Math.round(vector.tension * 0.5);
 
-    const isNavalReachable = Boolean(
-      source.geography.hasSeaAccess && target.geography.hasSeaAccess,
-    );
-
-    const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
-
-    let threatScore = 0;
-    if (isLandNeighbor) {
-      threatScore += 35;
-      if (powerRatio > 1.2) {
-        threatScore += Math.min(50, Math.floor((powerRatio - 1.0) * 40));
-      }
-    } else if (isImmediateSeaNeighbor) {
-      threatScore += 25;
-      if (powerRatio > 1.2) {
-        threatScore += Math.min(40, Math.floor((powerRatio - 1.0) * 35));
-      }
-    } else if (isNavalReachable) {
-      threatScore += 15;
-      if (powerRatio > 1.3) {
-        threatScore += Math.min(30, Math.floor((powerRatio - 1.0) * 25));
-      }
-    }
-
-    const rel = source.relations[target.id];
-    if (rel) {
-      if (rel.stance === "WAR") threatScore += 25;
-      if (rel.opinion < -30) threatScore += 15;
-    }
-
-    threatScore = Math.min(100, Math.max(0, threatScore));
-
-    let opportunityScore = 0;
-    if (isLandNeighbor) {
-      opportunityScore += 30;
-      if (powerRatio < 0.7) {
-        opportunityScore += Math.min(50, Math.floor((1.0 - powerRatio) * 60));
-      }
-    } else if (isImmediateSeaNeighbor) {
-      opportunityScore += 25;
-      if (powerRatio < 0.7) {
-        opportunityScore += Math.min(45, Math.floor((1.0 - powerRatio) * 55));
-      }
-    } else if (isNavalReachable) {
-      const navalPowerRatio =
-        ((source.military.navalFleet || 0) + 1) /
-        ((target.military.navalFleet || 0) + 1);
-
-      if (navalPowerRatio >= 1.2) {
-        opportunityScore += 20;
-        if (powerRatio < 0.7) {
-          opportunityScore += Math.min(40, Math.floor((1.0 - powerRatio) * 50));
-        }
-      }
-    }
-
-    if (opportunityScore > 0) {
-      if (target.government.stability < 40) {
-        opportunityScore += Math.floor(
-          (40 - target.government.stability) * 0.8,
-        );
-      }
-      if (target.warFocusTargetId && target.warFocusTargetId !== source.id) {
-        opportunityScore += 20;
-      }
-    }
-
-    opportunityScore = Math.min(100, Math.max(0, opportunityScore));
+    const opportunityScore =
+      vector.powerRatio < 0.8
+        ? Math.min(
+            100,
+            Math.round(vector.tension * 0.6 + (1.0 - vector.powerRatio) * 50),
+          )
+        : 0;
 
     return {
       threatScore,
       opportunityScore,
-      isNeighbor,
-      isLandNeighbor,
-      isNavalReachable,
-      powerRatio,
+      isNeighbor: vector.isNeighbor,
+      isLandNeighbor: vector.isLandNeighbor,
+      isNavalReachable: vector.isNavalReachable,
+      powerRatio: vector.powerRatio,
+      vector,
     };
   }
 }

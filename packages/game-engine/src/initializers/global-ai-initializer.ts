@@ -43,6 +43,9 @@ export class DiplomaticMatrixGenerator {
         stance: "NORMAL_DIPLOMACY",
         opinion: baselineOpinion,
         grudge: 0,
+        alignment: baselineOpinion,
+        tension: 10,
+        lostProvincesCount: 0,
       };
     }
 

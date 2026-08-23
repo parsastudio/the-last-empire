@@ -1,7 +1,7 @@
 import React from "react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { DiplomaticStanceBadge } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomatic-stance-badge";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 import {
   getQualitativeOpinionLabel,
   getQualitativeOpinionColor,
@@ -14,6 +14,9 @@ interface DiplomacyTargetCardProps {
   flagCode: string;
   stance: DiplomaticStance | string;
   opinion?: number;
+  alignment?: number;
+  tension?: number;
+  posture?: DiplomaticPosture;
 }
 
 export function DiplomacyTargetCard({
@@ -22,6 +25,7 @@ export function DiplomacyTargetCard({
   flagCode,
   stance,
   opinion = 0,
+  posture,
 }: DiplomacyTargetCardProps) {
   const flagEmoji = getFlagEmoji(flagCode || code);
   const opinionLabel = getQualitativeOpinionLabel(opinion);
@@ -53,14 +57,17 @@ export function DiplomacyTargetCard({
       <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
         <div className="flex items-center gap-1.5 bg-secondary/80 border border-border/70 px-3 py-1.5 rounded-xl text-xs font-mono">
           <span className="text-[10px] text-muted-foreground font-sans">
-            نظر نسبت به شما:
+            دیدگاه دوجانبه:
           </span>
           <span className={`font-bold ${opinionColor}`}>
             {formattedOpinion} ({opinionLabel})
           </span>
         </div>
 
-        <DiplomaticStanceBadge stance={stance as DiplomaticStance} />
+        <DiplomaticStanceBadge
+          stance={stance as DiplomaticStance}
+          posture={posture}
+        />
       </div>
     </div>
   );

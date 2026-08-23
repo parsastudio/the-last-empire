@@ -37,10 +37,13 @@ export function DiplomacyListItem({
           </span>
         </div>
         <div>
-          <DiplomaticStanceBadge stance={relation.stance} />
+          <DiplomaticStanceBadge
+            stance={relation.stance}
+            posture={relation.posture}
+          />
         </div>
       </div>
-      <div className="text-left font-sans text-[10px]">
+      <div className="text-left font-sans text-[10px] space-y-0.5">
         <span className="text-muted-foreground block text-[9px]">
           دیدگاه دوجانبه:
         </span>

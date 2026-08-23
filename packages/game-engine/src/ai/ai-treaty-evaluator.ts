@@ -1,14 +1,14 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
 import {
+  GameAction,
+  ActionFactory,
+  Nation,
+  Province,
+  CountryRegistry,
   DiplomacyLockManager,
-  NationRelationResolver,
-} from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+  GeopoliticalReachResolver,
+} from "@geopolitics/domain";
+import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
 
 export class AITreatyEvaluator {
   public static evaluate(
@@ -17,45 +17,10 @@ export class AITreatyEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
   ): GameAction | null {
-    if (!nation.relations) {
-      return null;
-    }
+    if (!nation.relations) return null;
 
-    const allianceAction = this.evaluateAlliance(
-      nation,
-      allNations,
-      provincesMap,
-      lockedTargets,
-    );
-
-    if (allianceAction) {
-      return allianceAction;
-    }
-
-    const napAction = this.evaluateNonAggression(
-      nation,
-      allNations,
-      provincesMap,
-      lockedTargets,
-    );
-
-    if (napAction) {
-      return napAction;
-    }
-
-    return null;
-  }
-
-  private static evaluateAlliance(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    lockedTargets?: Set<string>,
-  ): GameAction | null {
-    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (rel.stance === "WAR" || rel.stance === "ALLIANCE") {
-        continue;
-      }
+    for (const [targetId, rel] of Object.entries(nation.relations)) {
+      if (rel.stance === "WAR" || rel.stance === "ALLIANCE") continue;
 
       if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
         continue;
@@ -83,94 +48,41 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      const hasCommonEnemy = NationRelationResolver.hasCommonEnemy(
+      const vector = GeopoliticalVectorCalculator.calculate(
         nation,
         targetNation,
         allNations,
+        provincesMap,
       );
 
-      const isDeepTrust = rel.opinion >= 25 && nation.globalReputation >= 20;
+      const allianceUtility = UtilityDecisionEngine.calculateAllianceUtility(
+        nation,
+        targetNation,
+        vector,
+      );
 
-      if ((hasCommonEnemy && rel.opinion >= 15) || isDeepTrust) {
+      if (allianceUtility >= 30) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,
           "FULL_ALLIANCE",
         );
       }
-    }
 
-    return null;
-  }
-
-  private static evaluateNonAggression(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    lockedTargets?: Set<string>,
-  ): GameAction | null {
-    const isCurrentlyAtWar = Object.values(nation.relations || {}).some(
-      (rel) => {
-        if (rel.stance !== "WAR") return false;
-        const canonicalTarget = CountryRegistry.resolveCanonicalId(
-          rel.targetNationId,
-        );
-        const targetNation =
-          allNations[canonicalTarget] || allNations[rel.targetNationId];
-        return targetNation && targetNation.isAlive;
-      },
-    );
-
-    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (rel.stance !== "NORMAL_DIPLOMACY") {
-        continue;
-      }
-
-      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
-        continue;
-      }
-
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[canonicalTarget] || allNations[targetId];
-
-      if (
-        !targetNation ||
-        !targetNation.isAlive ||
-        targetNation.id === nation.id
-      ) {
-        continue;
-      }
-
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
+      if (rel.stance === "NORMAL_DIPLOMACY") {
+        const napUtility = UtilityDecisionEngine.calculateNapUtility(
           nation,
           targetNation,
-          allNations,
-          provincesMap,
-        )
-      ) {
-        continue;
-      }
-
-      const threatEval = AIThreatCalculator.evaluate(
-        nation,
-        targetNation,
-        provincesMap,
-        allNations,
-      );
-
-      const isFlankSecurity = isCurrentlyAtWar && threatEval.isNeighbor;
-      const isFriendlyNeighbor =
-        rel.opinion >= 10 &&
-        nation.globalReputation >= 0 &&
-        threatEval.isNeighbor;
-
-      if (isFlankSecurity || isFriendlyNeighbor) {
-        return ActionFactory.diplomaticProposal(
-          nation.id,
-          targetNation.id,
-          "NON_AGGRESSION_PACT",
+          vector,
         );
+
+        if (napUtility >= 20) {
+          return ActionFactory.diplomaticProposal(
+            nation.id,
+            targetNation.id,
+            "NON_AGGRESSION_PACT",
+          );
+        }
       }
     }
 

@@ -57,6 +57,9 @@ export class BattleAttackerStateApplier {
       stance: "WAR",
       opinion: -100,
       grudge: currentGrudge,
+      alignment: -100,
+      tension: 100,
+      lostProvincesCount: existingRel?.lostProvincesCount ?? 0,
     };
 
     const combatStabilityDelta =

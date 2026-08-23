@@ -1,6 +1,4 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { GameAction, Nation, Province } from "@geopolitics/domain";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";

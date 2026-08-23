@@ -1,6 +1,8 @@
-import { Nation } from "@/domain/nation/nation.schema";
-import { CountryRegistry } from "@/domain/data/countries";
-import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
+import {
+  Nation,
+  CountryRegistry,
+  MilitaryPowerCalculator,
+} from "@geopolitics/domain";
 
 export interface AllianceInterventionResult {
   interveningAllyIds: string[];
@@ -64,6 +66,9 @@ export class AllianceInterventionEvaluator {
             stance: "WAR" as const,
             opinion: -100,
             grudge: Math.min(100, currentGrudge + 35),
+            alignment: -100,
+            tension: 100,
+            lostProvincesCount: relWithAttacker?.lostProvincesCount ?? 0,
           },
         };
 
@@ -83,6 +88,10 @@ export class AllianceInterventionEvaluator {
             stance: "WAR" as const,
             opinion: -100,
             grudge: Math.min(100, attackerGrudgeWithAlly + 20),
+            alignment: -100,
+            tension: 100,
+            lostProvincesCount:
+              currentAttacker.relations[ally.id]?.lostProvincesCount ?? 0,
           },
         };
 
@@ -103,6 +112,10 @@ export class AllianceInterventionEvaluator {
               100,
               (ally.relations[defender.id]?.grudge ?? 0) + 10,
             ),
+            alignment: -20,
+            tension: 40,
+            lostProvincesCount:
+              ally.relations[defender.id]?.lostProvincesCount ?? 0,
           },
         };
 
@@ -122,6 +135,10 @@ export class AllianceInterventionEvaluator {
             stance: "NORMAL_DIPLOMACY" as const,
             opinion: -30,
             grudge: Math.min(100, defenderGrudgeWithAlly + 45),
+            alignment: -40,
+            tension: 60,
+            lostProvincesCount:
+              currentDefender.relations[ally.id]?.lostProvincesCount ?? 0,
           },
         };
 

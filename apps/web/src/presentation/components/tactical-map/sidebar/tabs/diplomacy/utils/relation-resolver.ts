@@ -1,11 +1,16 @@
-import { CountryRegistry } from "@/domain/data/countries";
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  CountryRegistry,
+  Nation,
+  DiplomaticStance,
+  DiplomaticPosture,
+  Province,
+  CountryDefaultsUtility,
+  getNationGdp,
+} from "@geopolitics/domain";
+import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { CountryDefaultsUtility } from "@/domain/data/countries/country-defaults.utility";
 
 export interface DiplomaticRelation {
   code: string;
@@ -14,7 +19,39 @@ export interface DiplomaticRelation {
   rank: number;
   stance: DiplomaticStance;
   opinion: number;
+  alignment: number;
+  tension: number;
+  posture: DiplomaticPosture;
+  postureLabel: string;
   profileData: CountryProfileData;
+}
+
+export function getPostureLabel(posture: DiplomaticPosture): string {
+  switch (posture) {
+    case "NATURAL_ALLY":
+      return "متحد طبیعی و همسو";
+    case "OPPORTUNISTIC_PREDATOR":
+      return "شکارچی و رقیب متخاصم";
+    case "WARY_BUFFER":
+      return "مدافع محتاط و نگران";
+    case "NEUTRAL_COEXISTENCE":
+    default:
+      return "همزیستی مسالمت‌آمیز";
+  }
+}
+
+export function getPostureBadgeClass(posture: DiplomaticPosture): string {
+  switch (posture) {
+    case "NATURAL_ALLY":
+      return "bg-gdp/15 text-gdp border-gdp/30";
+    case "OPPORTUNISTIC_PREDATOR":
+      return "bg-rose-500/15 text-rose-500 border-rose-500/30";
+    case "WARY_BUFFER":
+      return "bg-amber-500/15 text-amber-500 border-amber-500/30";
+    case "NEUTRAL_COEXISTENCE":
+    default:
+      return "bg-secondary text-muted-foreground border-border/60";
+  }
 }
 
 export function getQualitativeOpinionLabel(opinion: number): string {
@@ -36,6 +73,9 @@ export function getQualitativeOpinionColor(opinion: number): string {
 export function resolveProfileRelation(
   code: string,
   liveNation?: Nation | null,
+  humanNation?: Nation | null,
+  allNations?: Record<string, Nation>,
+  provincesMap?: Record<string, Province>,
 ): DiplomaticRelation {
   const profile = CountryRegistry.getCountry(code);
   const fallback = CountryDefaultsUtility.getFallbackProfile(code, profile);
@@ -57,15 +97,40 @@ export function resolveProfileRelation(
     ? liveNation.military.techLevel
     : fallback.startingTechLevel;
 
-  const currentOpinion = 0;
+  let stance: DiplomaticStance = "NORMAL_DIPLOMACY";
+  let opinion = 0;
+  let alignment = 0;
+  let tension = 10;
+  let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
+
+  if (humanNation && liveNation && humanNation.id !== liveNation.id) {
+    const directRel = humanNation.relations[liveNation.id];
+    if (directRel) {
+      stance = directRel.stance;
+      opinion = directRel.opinion;
+    }
+    const vector = GeopoliticalVectorCalculator.calculate(
+      humanNation,
+      liveNation,
+      allNations,
+      provincesMap,
+    );
+    alignment = vector.alignment;
+    tension = vector.tension;
+    posture = vector.posture;
+  }
 
   return {
     code: displayCode.toUpperCase(),
     name,
     flagCode: flagCode.toUpperCase(),
     rank: liveNation ? liveNation.rank : 99,
-    stance: "NORMAL_DIPLOMACY",
-    opinion: currentOpinion,
+    stance,
+    opinion,
+    alignment,
+    tension,
+    posture,
+    postureLabel: getPostureLabel(posture),
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
@@ -74,7 +139,10 @@ export function resolveProfileRelation(
         ? liveNation.government.type
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
-      opinion: currentOpinion,
+      opinion,
+      alignment,
+      tension,
+      posture,
     },
   };
 }
