@@ -52,9 +52,39 @@ export class StrategicManifestBuilder {
       );
       const provIds: number[] = [];
 
+      const population = profile.population;
+      const gdp = profile.gdp;
+      const perCapitaProductivity =
+        population > 0 ? Math.floor(gdp / population) : 5000;
+      const maxPopulationCapacity = Math.floor(population / 0.95);
+      const startingTreasury = Math.floor(gdp * 0.05);
+
+      let distributedPopulation = 0;
+      let distributedCapacity = 0;
+
       for (let pIndex = 0; pIndex < provList.length; pIndex++) {
         const pInfo = provList[pIndex]!;
         provIds.push(pInfo.provinceId);
+
+        const isLast = pIndex === provList.length - 1;
+        const shareRatio = pInfo.pixelCount / Math.max(1, totalCountryPixels);
+
+        const provPopulation = isLast
+          ? Math.max(1, population - distributedPopulation)
+          : Math.max(1, Math.round(population * shareRatio));
+
+        const provCapacity = isLast
+          ? Math.max(
+              provPopulation,
+              maxPopulationCapacity - distributedCapacity,
+            )
+          : Math.max(
+              provPopulation,
+              Math.round(maxPopulationCapacity * shareRatio),
+            );
+
+        distributedPopulation += provPopulation;
+        distributedCapacity += provCapacity;
 
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
@@ -67,15 +97,11 @@ export class StrategicManifestBuilder {
           maritimeNeighborsTier1: [],
           maritimeNeighborsTier2: [],
           centerCoordinates: pInfo.centerCoordinates,
+          population: provPopulation,
+          perCapitaProductivity,
+          maxPopulationCapacity: provCapacity,
         });
       }
-
-      const population = profile.population;
-      const gdp = profile.gdp;
-      const perCapitaProductivity =
-        population > 0 ? Math.floor(gdp / population) : 5000;
-      const maxPopulationCapacity = Math.floor(population / 0.95);
-      const startingTreasury = Math.floor(gdp * 0.05);
 
       const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
       const startingStability = 50;

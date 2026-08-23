@@ -1,4 +1,4 @@
-import { Nation, RegionDemographics } from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 
 export class GdpCalculator {
   public static readonly PRODUCTIVITY_CAP = 300000;
@@ -26,24 +26,11 @@ export class GdpCalculator {
       newProductivity ?? nation.perCapitaProductivity ?? 5000,
     );
 
-    let regionsDemographics: RegionDemographics[] | undefined =
-      nation.regionsDemographics;
-    if (regionsDemographics && regionsDemographics.length > 0) {
-      const totalPixels = nation.geography.territoryPixelCount || 1;
-      regionsDemographics = regionsDemographics.map((region) => {
-        const ratio = region.pixelCount / totalPixels;
-        return {
-          ...region,
-          population: Math.round(population * ratio),
-        };
-      });
-    }
-
     return {
       ...nation,
       population,
       perCapitaProductivity: productivity,
-      regionsDemographics,
+      maxPopulationCapacity: capacity,
     };
   }
 }

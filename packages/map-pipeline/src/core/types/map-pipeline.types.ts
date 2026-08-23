@@ -21,6 +21,9 @@ export interface ProvinceClusterInfo {
   hasSeaAccess: boolean;
   centerCoordinates: { x: number; y: number };
   landNeighbors: Set<number>;
+  population?: number;
+  perCapitaProductivity?: number;
+  maxPopulationCapacity?: number;
 }
 
 export interface MajorLandMass {

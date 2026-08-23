@@ -16,6 +16,9 @@ export const ProvinceSchema = z.object({
   }),
   fortLevel: z.number().nonnegative().default(0),
   infrastructureLevel: z.number().positive().default(1),
+  population: z.number().nonnegative().default(0),
+  perCapitaProductivity: z.number().nonnegative().default(5000),
+  maxPopulationCapacity: z.number().nonnegative().default(100000),
 });
 
 export type Province = z.infer<typeof ProvinceSchema>;

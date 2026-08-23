@@ -79,6 +79,9 @@ export class GlobalAiInitializer {
         centerCoordinates: pItem.centerCoordinates,
         fortLevel: 0,
         infrastructureLevel: 1,
+        population: pItem.population ?? 100000,
+        perCapitaProductivity: pItem.perCapitaProductivity ?? 5000,
+        maxPopulationCapacity: pItem.maxPopulationCapacity ?? 150000,
       };
     }
 

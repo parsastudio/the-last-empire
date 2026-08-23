@@ -1,23 +1,27 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
-import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
+import { Province } from "@/domain/province/province.schema";
+import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 
 export interface DemographicsResult {
   updatedNation: Nation;
+  updatedProvinces: Province[];
   naturalChange: number;
-  capacityRatio: number;
 }
 
 export class DemographicsEngine {
-  public static processNaturalDemographics(nation: Nation): DemographicsResult {
-    const rawPopulation = nation.population || 1000000;
-    const capacity = DemographicsCalculator.calculateCapacity(
-      rawPopulation,
-      nation.maxPopulationCapacity,
-    );
-    const stability = nation.government.stability;
+  public static processNaturalDemographics(
+    nation: Nation,
+    ownedProvinces: Province[],
+  ): DemographicsResult {
+    if (ownedProvinces.length === 0) {
+      return {
+        updatedNation: nation,
+        updatedProvinces: [],
+        naturalChange: 0,
+      };
+    }
 
-    const currentPopulation = Math.min(capacity, rawPopulation);
+    const stability = nation.government.stability;
 
     let growthRate = 0;
     if (stability > 60) {
@@ -28,32 +32,43 @@ export class DemographicsEngine {
       growthRate = ((stability - 40) / 40) * 0.05;
     }
 
-    if (currentPopulation >= capacity && growthRate > 0) {
-      growthRate = 0;
-    }
-
     growthRate = Math.max(-0.05, Math.min(0.02, growthRate));
 
-    const naturalChange = Math.floor(currentPopulation * growthRate);
-    const newPopulation = Math.min(
-      capacity,
-      Math.max(100, currentPopulation + naturalChange),
-    );
+    let totalNaturalChange = 0;
+    const updatedProvinces: Province[] = [];
 
-    const capacityRatio = capacity > 0 ? newPopulation / capacity : 1.0;
+    for (let i = 0; i < ownedProvinces.length; i++) {
+      const prov = ownedProvinces[i]!;
+      const currentPop = prov.population;
+      const capacity = prov.maxPopulationCapacity;
 
-    const syncedNation = GdpCalculator.syncNationGdpAndDemographics(
+      let change = 0;
+      if (growthRate > 0) {
+        const availableHeadroom = Math.max(0, capacity - currentPop);
+        const desiredGrowth = Math.floor(currentPop * growthRate);
+        change = Math.min(availableHeadroom, desiredGrowth);
+      } else if (growthRate < 0) {
+        change = Math.floor(currentPop * growthRate);
+      }
+
+      const nextPop = Math.max(10, currentPop + change);
+      totalNaturalChange += nextPop - currentPop;
+
+      updatedProvinces.push({
+        ...prov,
+        population: nextPop,
+      });
+    }
+
+    const { syncedNation } = NationGeographySyncer.sync(
       nation,
-      newPopulation,
+      updatedProvinces,
     );
 
     return {
-      updatedNation: {
-        ...syncedNation,
-        maxPopulationCapacity: capacity,
-      },
-      naturalChange,
-      capacityRatio,
+      updatedNation: syncedNation,
+      updatedProvinces,
+      naturalChange: totalNaturalChange,
     };
   }
 }
