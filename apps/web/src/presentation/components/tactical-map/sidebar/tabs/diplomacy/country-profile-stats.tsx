@@ -4,10 +4,8 @@ import {
   Users,
   Award,
   Landmark,
-  Compass,
   ShoppingCart,
   Lock,
-  Flame,
 } from "lucide-react";
 import { DiplomaticPosture } from "@geopolitics/domain";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -31,8 +29,6 @@ interface CountryProfileStatsProps {
 export function CountryProfileStats({ data }: CountryProfileStatsProps) {
   const currentOpinion = data.opinion ?? 0;
   const isArmsEligible = currentOpinion >= 20;
-  const alignment = data.alignment ?? 0;
-  const tension = data.tension ?? 10;
 
   return (
     <div className="space-y-3 font-mono text-xs dir-rtl font-sans">
@@ -55,48 +51,6 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
           <span className="text-xs font-bold text-foreground block font-mono">
             {data.population}
           </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2.5">
-        <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl space-y-1">
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="text-muted-foreground flex items-center gap-1">
-              <Compass size={12} className="text-primary" />
-              همسویی استراتژیک
-            </span>
-            <span className="font-bold text-primary font-mono">
-              {alignment > 0
-                ? `+${PersianNumberFormatter.toPersianDigits(alignment)}`
-                : PersianNumberFormatter.toPersianDigits(alignment)}
-            </span>
-          </div>
-          <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all ${alignment >= 0 ? "bg-gdp" : "bg-military"}`}
-              style={{
-                width: `${Math.min(100, Math.max(10, Math.abs(alignment)))}%`,
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl space-y-1">
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="text-muted-foreground flex items-center gap-1">
-              <Flame size={12} className="text-rose-500" />
-              تنش ژئوپلیتیک
-            </span>
-            <span className="font-bold text-rose-500 font-mono">
-              {PersianNumberFormatter.toPersianDigits(tension)}٪
-            </span>
-          </div>
-          <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-rose-500 rounded-full transition-all"
-              style={{ width: `${Math.min(100, tension)}%` }}
-            />
-          </div>
         </div>
       </div>
 

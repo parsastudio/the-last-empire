@@ -55,10 +55,10 @@ export function getPostureBadgeClass(posture: DiplomaticPosture): string {
 }
 
 export function getQualitativeOpinionLabel(opinion: number): string {
-  if (opinion >= 60) return "بسیار دوستانه";
-  if (opinion >= 20) return "دوستانه و همسو";
+  if (opinion >= 60) return "بسیار دوستانه و همسو";
+  if (opinion >= 20) return "دوستانه و مسالمت‌آمیز";
   if (opinion >= -19) return "بی‌طرف و متعادل";
-  if (opinion >= -59) return "سرد و بدبین";
+  if (opinion >= -59) return "سرد و متشنج";
   return "خصمانه و متخاصم";
 }
 
@@ -98,7 +98,7 @@ export function resolveProfileRelation(
     : fallback.startingTechLevel;
 
   let stance: DiplomaticStance = "NORMAL_DIPLOMACY";
-  let opinion = 0;
+  let unifiedScore = 0;
   let alignment = 0;
   let tension = 10;
   let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
@@ -107,7 +107,7 @@ export function resolveProfileRelation(
     const directRel = humanNation.relations[liveNation.id];
     if (directRel) {
       stance = directRel.stance;
-      opinion = directRel.opinion;
+      unifiedScore = directRel.opinion;
     }
     const vector = GeopoliticalVectorCalculator.calculate(
       humanNation,
@@ -118,6 +118,11 @@ export function resolveProfileRelation(
     alignment = vector.alignment;
     tension = vector.tension;
     posture = vector.posture;
+
+    const calculatedUnified = Math.round(
+      vector.alignment * 0.65 - vector.tension * 0.35,
+    );
+    unifiedScore = Math.max(-100, Math.min(100, calculatedUnified));
   }
 
   return {
@@ -126,7 +131,7 @@ export function resolveProfileRelation(
     flagCode: flagCode.toUpperCase(),
     rank: liveNation ? liveNation.rank : 99,
     stance,
-    opinion,
+    opinion: unifiedScore,
     alignment,
     tension,
     posture,
@@ -139,7 +144,7 @@ export function resolveProfileRelation(
         ? liveNation.government.type
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
-      opinion,
+      opinion: unifiedScore,
       alignment,
       tension,
       posture,
