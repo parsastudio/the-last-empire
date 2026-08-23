@@ -51,6 +51,9 @@ export class WavefrontProvincePartitioner {
           y: Math.floor(sumY / (allPixelIndices.length || 1)),
         },
         landNeighbors: new Set<number>(),
+        population: 0,
+        perCapitaProductivity: 5000,
+        maxPopulationCapacity: 0,
       });
 
       return assignedProvinceIds;

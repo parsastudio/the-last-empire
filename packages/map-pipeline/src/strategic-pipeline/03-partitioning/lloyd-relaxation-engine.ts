@@ -113,6 +113,9 @@ export class LloydRelaxationEngine {
           y: Math.floor((sumYMap.get(pid) || 0) / count),
         },
         landNeighbors: new Set<number>(),
+        population: 0,
+        perCapitaProductivity: 5000,
+        maxPopulationCapacity: 0,
       });
     }
   }

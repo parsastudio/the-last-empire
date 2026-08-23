@@ -9,6 +9,9 @@ export interface FinalManifestProvince {
   maritimeNeighborsTier1?: number[];
   maritimeNeighborsTier2?: number[];
   centerCoordinates: { x: number; y: number };
+  population: number;
+  perCapitaProductivity: number;
+  maxPopulationCapacity: number;
 }
 
 export interface FinalManifestNation {

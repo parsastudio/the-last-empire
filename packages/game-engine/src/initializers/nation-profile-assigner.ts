@@ -35,13 +35,6 @@ export class NationProfileAssigner {
 
     const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
 
-    const defaultRegion = {
-      regionId: 0,
-      name: `خاک اصلی ${item.nameFa}`,
-      pixelCount: item.territoryPixelCount,
-      population: item.population,
-    };
-
     const profile =
       CountryRegistry.getCountry(cleanId) ||
       CountryRegistry.getCountry(item.code);
@@ -156,7 +149,6 @@ export class NationProfileAssigner {
       doctrines: {
         unlockedDoctrines: [],
       },
-      regionsDemographics: [defaultRegion],
       provinceIds: item.provinceIds || [],
       executedEspionageTiers: [],
       warFocusTargetId: null,

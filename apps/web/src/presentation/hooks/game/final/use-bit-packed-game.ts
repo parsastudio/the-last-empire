@@ -1,12 +1,13 @@
-import { useEffect, useCallback, useMemo } from "react";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { BitPackedGridState } from "@geopolitics/game-engine";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 
 export function useBitPackedGame(gameId = "default_game") {
   const gameState = useGameStore((state) => state.gameState);
-  const loading = useGameStore((state) => state.loading);
+  const storeLoading = useGameStore((state) => state.loading);
   const error = useGameStore((state) => state.error);
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   const loadGame = useGameStore((state) => state.loadGame);
   const advanceTurnAction = useGameStore((state) => state.advanceNextTurn);
@@ -17,6 +18,7 @@ export function useBitPackedGame(gameId = "default_game") {
     let active = true;
 
     async function init() {
+      setIsInitializing(true);
       try {
         const gridState = BitPackedGridState.getInstance();
         gridState.initializeSession(gameId);
@@ -27,7 +29,12 @@ export function useBitPackedGame(gameId = "default_game") {
         if (active) {
           await loadGame(gameId);
         }
-      } catch {}
+      } catch {
+      } finally {
+        if (active) {
+          setIsInitializing(false);
+        }
+      }
     }
 
     init();
@@ -44,6 +51,8 @@ export function useBitPackedGame(gameId = "default_game") {
     } catch {}
     return nextState;
   }, [advanceTurnAction]);
+
+  const loading = isInitializing || storeLoading;
 
   return {
     gameState,
