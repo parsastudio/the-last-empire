@@ -20,9 +20,9 @@ export class MaritimeEnricherEngine {
     mapId = "map1",
   ): Promise<MaritimeEnrichmentStats> {
     const startTime = Date.now();
-    const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
-    const liveStatePath = path.join(finalDir, "live-state.bin");
-    const manifestPath = path.join(finalDir, "manifest.json");
+    const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
+    const liveStatePath = path.join(strategicDir, "live-state.bin");
+    const manifestPath = path.join(strategicDir, "manifest.json");
 
     const rawBuffer = await fs.readFile(liveStatePath);
     const highResGrid = new Uint16Array(

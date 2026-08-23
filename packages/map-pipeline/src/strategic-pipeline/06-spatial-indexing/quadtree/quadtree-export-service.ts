@@ -10,8 +10,8 @@ export class QuadtreeExportService {
   public static async generateFromLiveState(
     mapId = "map1",
   ): Promise<{ stats: QuadtreeBuildStats; verificationPassed: boolean }> {
-    const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
-    const liveStatePath = path.join(finalDir, "live-state.bin");
+    const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
+    const liveStatePath = path.join(strategicDir, "live-state.bin");
 
     const rawBuffer = await fs.readFile(liveStatePath);
     const uint16Data = new Uint16Array(
@@ -49,10 +49,10 @@ export class QuadtreeExportService {
         mapHeight,
       );
 
-    const outputPath = path.join(finalDir, "quadtree-state.bin");
+    const outputPath = path.join(strategicDir, "quadtree-state.bin");
     await fs.writeFile(outputPath, serializedData);
 
-    const statsPath = path.join(finalDir, "quadtree-stats.json");
+    const statsPath = path.join(strategicDir, "quadtree-stats.json");
     await fs.writeFile(statsPath, JSON.stringify(stats, null, 2), "utf-8");
 
     const reader = new QuadtreeReader(serializedData);

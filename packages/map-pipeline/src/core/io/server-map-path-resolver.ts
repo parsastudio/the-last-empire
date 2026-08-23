@@ -52,12 +52,23 @@ export class ServerMapPathResolver {
     return tempDir;
   }
 
-  public static getMapFinalServerDir(mapId = "map1"): string {
-    const finalDir = path.join(this.getMapTempServerDir(mapId), "final");
-    if (!fs.existsSync(finalDir)) {
-      fs.mkdirSync(finalDir, { recursive: true });
+  public static getMapVisualServerDir(mapId = "map1"): string {
+    const visualDir = path.join(this.getMapTempServerDir(mapId), "visual");
+    if (!fs.existsSync(visualDir)) {
+      fs.mkdirSync(visualDir, { recursive: true });
     }
-    return finalDir;
+    return visualDir;
+  }
+
+  public static getMapStrategicServerDir(mapId = "map1"): string {
+    const strategicDir = path.join(
+      this.getMapTempServerDir(mapId),
+      "strategic",
+    );
+    if (!fs.existsSync(strategicDir)) {
+      fs.mkdirSync(strategicDir, { recursive: true });
+    }
+    return strategicDir;
   }
 
   public static getTerrainServerPath(mapId = "map1"): string | null {

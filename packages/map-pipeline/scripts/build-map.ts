@@ -8,10 +8,9 @@ async function runMapBuild() {
 
   const mapId = "map1";
   const maskPath = ServerMapPathResolver.getEditedMaskServerPath(mapId);
-  const outputDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
 
   const orchestrator = new MapBuildOrchestrator();
-  await orchestrator.executeRebuild(maskPath, outputDir, mapId);
+  await orchestrator.executeRebuild(maskPath, mapId);
 
   process.stdout.write("--------------------------------------------------\n");
   process.stdout.write(

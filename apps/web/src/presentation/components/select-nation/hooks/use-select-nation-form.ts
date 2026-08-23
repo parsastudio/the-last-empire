@@ -9,7 +9,7 @@ import {
   FinalMapManifest,
 } from "@/presentation/components/select-nation/services/bit-packed-init-service";
 import { useGameStore } from "@/presentation/stores/use-game-store";
-import { CountryRegistry } from "@geopolitics/domain";
+import { CountryRegistry, ClientMapPathResolver } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(
@@ -63,7 +63,11 @@ export function useSelectNationForm() {
 
     async function loadManifest() {
       try {
-        const res = await fetch("/maps/map1/temp/final/manifest.json", {
+        const manifestUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+          "map1",
+          "manifest.json",
+        );
+        const res = await fetch(manifestUrl, {
           cache: "no-store",
         });
         if (res.ok) {

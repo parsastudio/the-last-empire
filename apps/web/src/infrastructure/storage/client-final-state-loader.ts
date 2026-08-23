@@ -6,7 +6,7 @@ export class ClientFinalStateLoader {
     mapId = "map1",
   ): Promise<BitPackedBuffer | null> {
     try {
-      const url = ClientMapPathResolver.getMapFinalClientUrl(
+      const url = ClientMapPathResolver.getMapStrategicClientUrl(
         mapId,
         "live-state.bin",
       );
