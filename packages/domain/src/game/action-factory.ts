@@ -5,8 +5,7 @@ import {
   BuyArmsMarketAction,
   DiplomaticProposalAction,
   RespondDiplomaticProposalAction,
-  UpgradeIndustrialLevelAction,
-  InvestInfrastructureAction,
+  UpgradeDevelopmentAction,
   ExecuteEspionageAction,
   UnlockDoctrineAction,
   RepayDebtAction,
@@ -119,23 +118,11 @@ export class ActionFactory {
     };
   }
 
-  public static upgradeIndustrialLevel(
-    nationId: string,
-  ): UpgradeIndustrialLevelAction {
+  public static upgradeDevelopment(nationId: string): UpgradeDevelopmentAction {
     return {
-      id: this.createId("industrial"),
+      id: this.createId("development"),
       nationId,
-      type: "UPGRADE_INDUSTRIAL_LEVEL",
-    };
-  }
-
-  public static investInfrastructure(
-    nationId: string,
-  ): InvestInfrastructureAction {
-    return {
-      id: this.createId("infra"),
-      nationId,
-      type: "INVEST_INFRASTRUCTURE",
+      type: "UPGRADE_DEVELOPMENT",
     };
   }
 

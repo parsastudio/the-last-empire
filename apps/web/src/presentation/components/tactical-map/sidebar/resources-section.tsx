@@ -31,10 +31,8 @@ export function ResourcesSection({
     perCapitaProductivity,
     true,
   );
-  const formattedIndustrial =
-    PersianNumberFormatter.toPersianDigits(industrialLevel);
-  const formattedInfra =
-    PersianNumberFormatter.toPersianDigits(infrastructureLevel);
+  const effectiveLevel = Math.max(industrialLevel, infrastructureLevel);
+  const formattedLevel = PersianNumberFormatter.toPersianDigits(effectiveLevel);
 
   return (
     <div className="space-y-3 dir-rtl text-right">
@@ -92,20 +90,10 @@ export function ResourcesSection({
         <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1">
           <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans font-bold">
             <Users size={12} className="text-primary" />
-            <span>سطح صنعت و آموزش</span>
+            <span>سطح توسعه و صنعت ملی</span>
           </div>
           <span className="text-xs font-extrabold text-primary block">
-            سطح {formattedIndustrial}
-          </span>
-        </div>
-
-        <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl space-y-1 col-span-2">
-          <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground font-sans font-bold">
-            <Building2 size={12} className="text-treasury" />
-            <span>سطح توسعه زیرساخت مواصلاتی و مسکن</span>
-          </div>
-          <span className="text-xs font-extrabold text-treasury block">
-            سطح {formattedInfra} (افزایش سقف تراکم زیستی)
+            سطح {formattedLevel}
           </span>
         </div>
       </div>
