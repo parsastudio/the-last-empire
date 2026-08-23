@@ -42,9 +42,9 @@ export class LandWatershedFlood {
       { dx: 0, dy: 1, cost: 10 },
       { dx: 0, dy: -1, cost: 10 },
       { dx: 1, dy: 1, cost: 14 },
-      { dx: -1, dy: -1, cost: 14 },
-      { dx: 1, dy: -1, cost: 14 },
       { dx: -1, dy: 1, cost: 14 },
+      { dx: 1, dy: -1, cost: 14 },
+      { dx: -1, dy: -1, cost: 14 },
     ];
 
     while (head < tail) {
@@ -58,10 +58,10 @@ export class LandWatershedFlood {
 
       for (let k = 0; k < 8; k++) {
         const n = neighbors8[k]!;
-        const nx = cx + n.dx;
+        const nx = (cx + n.dx + width) % width;
         const ny = cy + n.dy;
 
-        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+        if (ny >= 0 && ny < height) {
           const nIdx = ny * width + nx;
           if (assignmentGrid[nIdx] === 255) {
             const newDist = currentDist + n.cost;

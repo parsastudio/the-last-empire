@@ -7,8 +7,6 @@ import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { ProvinceBorderAnalyzer } from "@/infrastructure/map-preprocessing/pipeline/04-topology-graph/province-border-analyzer";
 
 export class SliverProvinceAbsorber {
-  public static readonly MIN_PROVINCE_PIXEL_THRESHOLD = 700;
-
   public static absorbSliverProvinces(
     bitBuffer: BitPackedBuffer,
     width: number,
@@ -24,18 +22,35 @@ export class SliverProvinceAbsorber {
     const totalPixels = width * height;
 
     const countryProvinceCounts = new Map<number, number>();
+    const countryTotalPixels = new Map<number, number>();
+
     for (const info of provinceMap.values()) {
       const cId = info.countryNumericId;
       countryProvinceCounts.set(cId, (countryProvinceCounts.get(cId) || 0) + 1);
+      countryTotalPixels.set(
+        cId,
+        (countryTotalPixels.get(cId) || 0) + info.pixelCount,
+      );
     }
 
     const sliverPids: number[] = [];
     for (const [pid, info] of provinceMap.entries()) {
       const nationTotalProvinces =
         countryProvinceCounts.get(info.countryNumericId) || 1;
+      const totalCountryArea =
+        countryTotalPixels.get(info.countryNumericId) || 1000;
+
+      const dynamicSliverThreshold = Math.max(
+        20,
+        Math.min(
+          200,
+          Math.floor(totalCountryArea / (nationTotalProvinces * 5)),
+        ),
+      );
+
       if (
         nationTotalProvinces > 1 &&
-        info.pixelCount < this.MIN_PROVINCE_PIXEL_THRESHOLD
+        info.pixelCount < dynamicSliverThreshold
       ) {
         sliverPids.push(pid);
       }

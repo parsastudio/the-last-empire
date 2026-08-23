@@ -26,6 +26,10 @@ export class AtomicIslandAssigner {
       { dx: -1, dy: 0 },
       { dx: 0, dy: 1 },
       { dx: 0, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: 1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: -1 },
     ];
 
     for (let c = 0; c < minorComponents.length; c++) {
@@ -49,7 +53,7 @@ export class AtomicIslandAssigner {
         const cx = curr % width;
         const cy = Math.floor(curr / width);
 
-        for (let d = 0; d < 4; d++) {
+        for (let d = 0; d < dirs.length; d++) {
           const dir = dirs[d]!;
           const nx = (cx + dir.dx + width) % width;
           const ny = cy + dir.dy;

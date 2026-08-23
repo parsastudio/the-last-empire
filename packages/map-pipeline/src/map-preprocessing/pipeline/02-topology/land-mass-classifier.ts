@@ -4,8 +4,43 @@ import {
 } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
 
 export class LandMassClassifier {
-  public static readonly MINOR_MASS_THRESHOLD = 3500;
-  public static readonly ISOLATED_WATER_DISTANCE_THRESHOLD = 120;
+  public static readonly MINOR_MASS_THRESHOLD = 800;
+  public static readonly ISOLATED_WATER_DISTANCE_THRESHOLD = 150;
+  public static readonly DISTANT_OVERSEAS_DISTANCE_THRESHOLD = 500;
+  public static readonly DISTANT_OVERSEAS_MIN_SIZE = 700;
+
+  private static computeMinShoreDistance(
+    compA: LandComponent,
+    compB: LandComponent,
+    width: number,
+  ): number {
+    let minD = Infinity;
+    const stepA = Math.max(1, Math.floor(compA.pixelIndices.length / 40));
+    const stepB = Math.max(1, Math.floor(compB.pixelIndices.length / 40));
+
+    for (let i = 0; i < compA.pixelIndices.length; i += stepA) {
+      const idxA = compA.pixelIndices[i]!;
+      const ax = idxA % width;
+      const ay = Math.floor(idxA / width);
+
+      for (let j = 0; j < compB.pixelIndices.length; j += stepB) {
+        const idxB = compB.pixelIndices[j]!;
+        const bx = idxB % width;
+        const by = Math.floor(idxB / width);
+
+        const rawDx = Math.abs(ax - bx);
+        const dx = Math.min(rawDx, width - rawDx);
+        const dy = ay - by;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist < minD) {
+          minD = dist;
+          if (minD <= 2) return minD;
+        }
+      }
+    }
+    return minD;
+  }
 
   public static classify(
     allComponents: LandComponent[],
@@ -18,9 +53,36 @@ export class LandMassClassifier {
     const majorComponents: LandComponent[] = [];
     const minorComponents: LandComponent[] = [];
 
+    const totalCountryPixels = allComponents.reduce(
+      (sum, c) => sum + c.size,
+      0,
+    );
+    const dynamicThreshold = Math.max(
+      200,
+      Math.min(
+        this.MINOR_MASS_THRESHOLD,
+        Math.floor(totalCountryPixels * 0.15),
+      ),
+    );
+
     for (let i = 0; i < allComponents.length; i++) {
       const comp = allComponents[i]!;
-      if (comp.size >= this.MINOR_MASS_THRESHOLD) {
+
+      let minShoreDistance = Infinity;
+      for (let j = 0; j < allComponents.length; j++) {
+        if (i === j) continue;
+        const other = allComponents[j]!;
+        const dist = this.computeMinShoreDistance(comp, other, width);
+        if (dist < minShoreDistance) {
+          minShoreDistance = dist;
+        }
+      }
+
+      const isDistantOverseasTerritory =
+        comp.size >= this.DISTANT_OVERSEAS_MIN_SIZE &&
+        minShoreDistance > this.DISTANT_OVERSEAS_DISTANCE_THRESHOLD;
+
+      if (isDistantOverseasTerritory || comp.size >= dynamicThreshold) {
         majorComponents.push(comp);
       } else {
         let isIsolated = true;
@@ -28,10 +90,7 @@ export class LandMassClassifier {
           if (i === j) continue;
           const other = allComponents[j]!;
           if (other.size >= comp.size) {
-            const directDx = Math.abs(comp.centerX - other.centerX);
-            const dx = Math.min(directDx, width - directDx);
-            const dy = comp.centerY - other.centerY;
-            const dist = Math.hypot(dx, dy);
+            const dist = this.computeMinShoreDistance(comp, other, width);
             if (dist <= this.ISOLATED_WATER_DISTANCE_THRESHOLD) {
               isIsolated = false;
               break;

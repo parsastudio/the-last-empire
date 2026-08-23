@@ -12,112 +12,281 @@ export class GeodesicSeedPicker {
       return [allPixelIndices[Math.floor(allPixelIndices.length / 2)]!];
     }
 
-    let minX = Infinity;
-    let maxX = -Infinity;
-    let minY = Infinity;
-    let maxY = -Infinity;
+    const pixelSet = new Set<number>(allPixelIndices);
+    const centerPixel = this.findCenterPixel(allPixelIndices, width);
+    const extremeA = this.findFurthestPixel(centerPixel, pixelSet, width);
+    const extremeB = this.findFurthestPixel(extremeA, pixelSet, width);
+
+    if (targetK === 2) {
+      const path = this.findGeodesicPath(extremeA, extremeB, pixelSet, width);
+      if (path.length >= 2) {
+        const seed1 = path[Math.floor(path.length * 0.3)]!;
+        const seed2 = path[Math.floor(path.length * 0.7)]!;
+        return [seed1, seed2];
+      }
+      return [extremeA, extremeB];
+    }
+
+    const seeds: number[] = [extremeA, extremeB];
+    const minGeodesicDistances = new Map<number, number>();
 
     for (let i = 0; i < allPixelIndices.length; i++) {
-      const idx = allPixelIndices[i]!;
-      const px = idx % width;
-      const py = Math.floor(idx / width);
-      if (px < minX) minX = px;
-      if (px > maxX) maxX = px;
-      if (py < minY) minY = py;
-      if (py > maxY) maxY = py;
+      minGeodesicDistances.set(allPixelIndices[i]!, Infinity);
     }
 
-    const bboxWidth = Math.max(1, maxX - minX);
-    const bboxHeight = Math.max(1, maxY - minY);
-    const aspectRatio = bboxWidth / bboxHeight;
-
-    let cols = Math.round(Math.sqrt(targetK * aspectRatio));
-    let rows = Math.round(targetK / (cols || 1));
-
-    cols = Math.max(1, cols);
-    rows = Math.max(1, rows);
-
-    while (cols * rows < targetK) {
-      if (cols / rows < aspectRatio) {
-        cols++;
-      } else {
-        rows++;
-      }
-    }
-
-    const gridCellW = bboxWidth / cols;
-    const gridCellH = bboxHeight / rows;
-
-    const initialSeedCoords: { x: number; y: number }[] = [];
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (initialSeedCoords.length >= targetK) break;
-        const targetX = minX + (c + 0.5) * gridCellW;
-        const targetY = minY + (r + 0.5) * gridCellH;
-        initialSeedCoords.push({ x: targetX, y: targetY });
-      }
-    }
-
-    const seeds: number[] = [];
-    const usedIndices = new Set<number>();
-
-    for (let i = 0; i < initialSeedCoords.length; i++) {
-      const target = initialSeedCoords[i]!;
-      let bestIdx = -1;
-      let minDistance = Infinity;
-
-      for (let j = 0; j < allPixelIndices.length; j++) {
-        const pIdx = allPixelIndices[j]!;
-        if (usedIndices.has(pIdx)) continue;
-
-        const px = pIdx % width;
-        const py = Math.floor(pIdx / width);
-        const distSq =
-          (px - target.x) * (px - target.x) + (py - target.y) * (py - target.y);
-
-        if (distSq < minDistance) {
-          minDistance = distSq;
-          bestIdx = pIdx;
-        }
-      }
-
-      if (bestIdx !== -1) {
-        usedIndices.add(bestIdx);
-        seeds.push(bestIdx);
-      }
-    }
+    this.updateDistancesFromSeed(
+      extremeA,
+      pixelSet,
+      minGeodesicDistances,
+      width,
+    );
+    this.updateDistancesFromSeed(
+      extremeB,
+      pixelSet,
+      minGeodesicDistances,
+      width,
+    );
 
     while (seeds.length < targetK) {
       let maxDist = -1;
-      let bestFallback = allPixelIndices[0]!;
+      let nextSeed = allPixelIndices[0]!;
 
-      for (let j = 0; j < allPixelIndices.length; j++) {
-        const pIdx = allPixelIndices[j]!;
-        if (usedIndices.has(pIdx)) continue;
-
-        const px = pIdx % width;
-        const py = Math.floor(pIdx / width);
-
-        let minSeedDist = Infinity;
-        for (let s = 0; s < seeds.length; s++) {
-          const sIdx = seeds[s]!;
-          const sx = sIdx % width;
-          const sy = Math.floor(sIdx / width);
-          const d = (px - sx) * (px - sx) + (py - sy) * (py - sy);
-          if (d < minSeedDist) minSeedDist = d;
-        }
-
-        if (minSeedDist > maxDist) {
-          maxDist = minSeedDist;
-          bestFallback = pIdx;
+      for (let i = 0; i < allPixelIndices.length; i++) {
+        const idx = allPixelIndices[i]!;
+        const d = minGeodesicDistances.get(idx) ?? 0;
+        if (d !== Infinity && d > maxDist) {
+          maxDist = d;
+          nextSeed = idx;
         }
       }
 
-      usedIndices.add(bestFallback);
-      seeds.push(bestFallback);
+      if (maxDist <= 0 || seeds.includes(nextSeed)) {
+        for (let i = 0; i < allPixelIndices.length; i++) {
+          const fallback = allPixelIndices[i]!;
+          if (!seeds.includes(fallback)) {
+            nextSeed = fallback;
+            break;
+          }
+        }
+      }
+
+      seeds.push(nextSeed);
+      this.updateDistancesFromSeed(
+        nextSeed,
+        pixelSet,
+        minGeodesicDistances,
+        width,
+      );
     }
 
     return seeds;
+  }
+
+  private static findCenterPixel(
+    pixelIndices: number[],
+    width: number,
+  ): number {
+    let sumX = 0;
+    let sumY = 0;
+
+    for (let i = 0; i < pixelIndices.length; i++) {
+      const idx = pixelIndices[i]!;
+      sumX += idx % width;
+      sumY += Math.floor(idx / width);
+    }
+
+    const avgX = Math.floor(sumX / pixelIndices.length);
+    const avgY = Math.floor(sumY / pixelIndices.length);
+
+    let bestIdx = pixelIndices[0]!;
+    let minDistanceSq = Infinity;
+
+    for (let i = 0; i < pixelIndices.length; i++) {
+      const idx = pixelIndices[i]!;
+      const px = idx % width;
+      const py = Math.floor(idx / width);
+      const directDx = Math.abs(px - avgX);
+      const dx = Math.min(directDx, width - directDx);
+      const dy = py - avgY;
+      const distSq = dx * dx + dy * dy;
+
+      if (distSq < minDistanceSq) {
+        minDistanceSq = distSq;
+        bestIdx = idx;
+      }
+    }
+
+    return bestIdx;
+  }
+
+  private static findFurthestPixel(
+    startIdx: number,
+    pixelSet: Set<number>,
+    width: number,
+  ): number {
+    const queue: number[] = [startIdx];
+    const dist = new Map<number, number>();
+    dist.set(startIdx, 0);
+
+    let furthestIdx = startIdx;
+    let maxDist = 0;
+
+    const dirs = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: 1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: -1 },
+    ];
+
+    let head = 0;
+    while (head < queue.length) {
+      const curr = queue[head++]!;
+      const d = dist.get(curr)!;
+
+      if (d > maxDist) {
+        maxDist = d;
+        furthestIdx = curr;
+      }
+
+      const cx = curr % width;
+      const cy = Math.floor(curr / width);
+
+      for (let i = 0; i < dirs.length; i++) {
+        const off = dirs[i]!;
+        const nx = (cx + off.dx + width) % width;
+        const ny = cy + off.dy;
+
+        if (ny >= 0) {
+          const next = ny * width + nx;
+          if (pixelSet.has(next) && !dist.has(next)) {
+            dist.set(next, d + 1);
+            queue.push(next);
+          }
+        }
+      }
+    }
+
+    return furthestIdx;
+  }
+
+  private static findGeodesicPath(
+    fromIdx: number,
+    toIdx: number,
+    pixelSet: Set<number>,
+    width: number,
+  ): number[] {
+    const queue: number[] = [fromIdx];
+    const visited = new Set<number>([fromIdx]);
+    const parent = new Map<number, number>();
+
+    const dirs = [
+      { dx: 1, dy: 0 },
+      { dx: -1, dy: 0 },
+      { dx: 0, dy: 1 },
+      { dx: 0, dy: -1 },
+      { dx: 1, dy: 1 },
+      { dx: -1, dy: 1 },
+      { dx: 1, dy: -1 },
+      { dx: -1, dy: -1 },
+    ];
+
+    let head = 0;
+    let found = false;
+
+    while (head < queue.length) {
+      const curr = queue[head++]!;
+      if (curr === toIdx) {
+        found = true;
+        break;
+      }
+
+      const cx = curr % width;
+      const cy = Math.floor(curr / width);
+
+      for (let i = 0; i < dirs.length; i++) {
+        const off = dirs[i]!;
+        const nx = (cx + off.dx + width) % width;
+        const ny = cy + off.dy;
+
+        if (ny >= 0) {
+          const next = ny * width + nx;
+          if (pixelSet.has(next) && !visited.has(next)) {
+            visited.add(next);
+            parent.set(next, curr);
+            queue.push(next);
+          }
+        }
+      }
+    }
+
+    if (!found) return [fromIdx, toIdx];
+
+    const path: number[] = [];
+    let curr: number | undefined = toIdx;
+    while (curr !== undefined) {
+      path.push(curr);
+      curr = parent.get(curr);
+    }
+
+    return path.reverse();
+  }
+
+  private static updateDistancesFromSeed(
+    seedIdx: number,
+    pixelSet: Set<number>,
+    minGeodesicDistances: Map<number, number>,
+    width: number,
+  ): void {
+    const queue: number[] = [seedIdx];
+    const localDist = new Map<number, number>();
+    localDist.set(seedIdx, 0);
+
+    const dirs = [
+      { dx: 1, dy: 0, cost: 10 },
+      { dx: -1, dy: 0, cost: 10 },
+      { dx: 0, dy: 1, cost: 10 },
+      { dx: 0, dy: -1, cost: 10 },
+      { dx: 1, dy: 1, cost: 14 },
+      { dx: -1, dy: 1, cost: 14 },
+      { dx: 1, dy: -1, cost: 14 },
+      { dx: -1, dy: -1, cost: 14 },
+    ];
+
+    let head = 0;
+    while (head < queue.length) {
+      const curr = queue[head++]!;
+      const currD = localDist.get(curr)!;
+
+      const currentGlobalMin = minGeodesicDistances.get(curr) ?? Infinity;
+      if (currD < currentGlobalMin) {
+        minGeodesicDistances.set(curr, currD);
+      }
+
+      const cx = curr % width;
+      const cy = Math.floor(curr / width);
+
+      for (let i = 0; i < dirs.length; i++) {
+        const off = dirs[i]!;
+        const nx = (cx + off.dx + width) % width;
+        const ny = cy + off.dy;
+
+        if (ny >= 0) {
+          const next = ny * width + nx;
+          if (!pixelSet.has(next)) continue;
+
+          const nextD = currD + off.cost;
+          const prevLocalD = localDist.get(next);
+
+          if (prevLocalD === undefined || nextD < prevLocalD) {
+            localDist.set(next, nextD);
+            queue.push(next);
+          }
+        }
+      }
+    }
   }
 }

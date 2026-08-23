@@ -1,4 +1,5 @@
 import { LandMinHeap } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/utils/land-min-heap";
+import { OrganicCostNoise } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/utils/organic-cost-noise";
 
 export class GeodesicDijkstra {
   public static runPureLandDijkstra(
@@ -15,12 +16,20 @@ export class GeodesicDijkstra {
     totalMapPixels: number,
   ): Map<number, number> {
     const assignmentMap = new Map<number, number>();
+    const totalLandPixels = allPixelIndices.length;
+    const kCount = assignedProvinceIds.length;
+    const targetSizePerProvince = Math.max(
+      1,
+      Math.floor(totalLandPixels / kCount),
+    );
 
-    for (let y = startY; y <= endY; y++) {
-      const rowOffset = y * width;
-      for (let x = startX; x <= endX; x++) {
-        distMap[rowOffset + x] = 1e9;
-      }
+    const provincePixelCounts = new Map<number, number>();
+    for (let i = 0; i < kCount; i++) {
+      provincePixelCounts.set(assignedProvinceIds[i]!, 0);
+    }
+
+    for (let i = 0; i < allPixelIndices.length; i++) {
+      distMap[allPixelIndices[i]!] = 1e9;
     }
 
     const heap = new LandMinHeap();
@@ -30,18 +39,19 @@ export class GeodesicDijkstra {
       const pid = assignedProvinceIds[s]!;
       distMap[seedIdx] = 0;
       assignmentMap.set(seedIdx, pid);
+      provincePixelCounts.set(pid, 1);
       heap.push(seedIdx, 0);
     }
 
     const neighborOffsets = [
-      { dx: 1, dy: 0, cost: 1000 },
-      { dx: -1, dy: 0, cost: 1000 },
-      { dx: 0, dy: 1, cost: 1000 },
-      { dx: 0, dy: -1, cost: 1000 },
-      { dx: 1, dy: 1, cost: 1414 },
-      { dx: -1, dy: -1, cost: 1414 },
-      { dx: 1, dy: -1, cost: 1414 },
-      { dx: -1, dy: 1, cost: 1414 },
+      { dx: 1, dy: 0, baseCost: 1000 },
+      { dx: -1, dy: 0, baseCost: 1000 },
+      { dx: 0, dy: 1, baseCost: 1000 },
+      { dx: 0, dy: -1, baseCost: 1000 },
+      { dx: 1, dy: 1, baseCost: 1414 },
+      { dx: -1, dy: 1, baseCost: 1414 },
+      { dx: 1, dy: -1, baseCost: 1414 },
+      { dx: -1, dy: -1, baseCost: 1414 },
     ];
 
     while (heap.size() > 0) {
@@ -55,17 +65,40 @@ export class GeodesicDijkstra {
       const cx = currIdx % width;
       const cy = Math.floor(currIdx / width);
 
+      const currentAssignedCount = provincePixelCounts.get(currPid) ?? 0;
+      const capacityRatio = currentAssignedCount / targetSizePerProvince;
+      const capacityDamping = Math.pow(Math.max(0.5, capacityRatio), 1.8);
+
       for (let k = 0; k < 8; k++) {
         const off = neighborOffsets[k]!;
-        const nx = cx + off.dx;
+        const nx = (cx + off.dx + width) % width;
         const ny = cy + off.dy;
 
-        if (nx >= startX && nx <= endX && ny >= startY && ny <= endY) {
+        if (ny >= startY && ny <= endY) {
           const nIdx = ny * width + nx;
           if (nIdx < totalMapPixels && landMask[nIdx] === 1) {
-            const nextDist = currDist + off.cost;
+            const rawNoiseCost = OrganicCostNoise.getTraverseCost(
+              nx,
+              ny,
+              off.baseCost,
+            );
+            const stepCost = Math.round(rawNoiseCost * capacityDamping);
+            const nextDist = currDist + stepCost;
 
             if (nextDist < distMap[nIdx]!) {
+              const oldPid = assignmentMap.get(nIdx);
+              if (oldPid !== undefined && oldPid !== currPid) {
+                const oldCount = provincePixelCounts.get(oldPid) ?? 1;
+                provincePixelCounts.set(oldPid, Math.max(0, oldCount - 1));
+              }
+
+              if (oldPid !== currPid) {
+                provincePixelCounts.set(
+                  currPid,
+                  (provincePixelCounts.get(currPid) ?? 0) + 1,
+                );
+              }
+
               distMap[nIdx] = nextDist;
               assignmentMap.set(nIdx, currPid);
               heap.push(nIdx, nextDist);
@@ -134,7 +167,11 @@ export class GeodesicDijkstra {
         const pIdx = pixels[j]!;
         const px = pIdx % width;
         const py = Math.floor(pIdx / width);
-        const distSq = (px - avgX) * (px - avgX) + (py - avgY) * (py - avgY);
+        const directDx = Math.abs(px - avgX);
+        const dx = Math.min(directDx, width - directDx);
+        const dy = py - avgY;
+        const distSq = dx * dx + dy * dy;
+
         if (distSq < minDistSq) {
           minDistSq = distSq;
           bestSeed = pIdx;
