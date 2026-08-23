@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
+import { BitPackedBuffer } from "@geopolitics/domain";
 
 export class BinaryStateExporter {
   public static async exportLiveState(

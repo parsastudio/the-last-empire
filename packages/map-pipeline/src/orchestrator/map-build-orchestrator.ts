@@ -1,18 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
 import { PNG } from "pngjs";
-import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
-import { MaskPixelDecoder } from "@/infrastructure/map-preprocessing/pipeline/01-ingestion/mask-pixel-decoder";
-import { LandWatershedFlood } from "@/infrastructure/map-preprocessing/pipeline/01-ingestion/land-watershed-flood";
-import { IslandTerritoryResolver } from "@/infrastructure/map-preprocessing/pipeline/01-ingestion/island-territory-resolver";
-import { WaterBodyClassifier } from "@/infrastructure/map-preprocessing/pipeline/01-ingestion/water-body-classifier";
-import { ProvincePartitionEngine } from "@/infrastructure/map-preprocessing/orchestrator/province-partition-engine";
-import { BinaryStateExporter } from "@/infrastructure/map-preprocessing/pipeline/05-export/binary-state-exporter";
-import { StrategicManifestBuilder } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
-import { TerrainMapGenerator } from "@/infrastructure/map-preprocessing/generator/terrain-map-generator";
-import { TerrainBinaryExportService } from "@/infrastructure/terrain-binary-map/generator/terrain-binary-export-service";
-import { MaritimeEnricherEngine } from "@/infrastructure/maritime-topology/orchestrator/maritime-enricher-engine";
+import { ALL_COUNTRY_PROFILES, BitPackedBuffer } from "@geopolitics/domain";
+import { MaskPixelDecoder } from "@/infrastructure/strategic-pipeline/01-ingestion/mask-pixel-decoder";
+import { LandWatershedFlood } from "@/infrastructure/strategic-pipeline/01-ingestion/land-watershed-flood";
+import { IslandTerritoryResolver } from "@/infrastructure/strategic-pipeline/01-ingestion/island-territory-resolver";
+import { WaterBodyClassifier } from "@/infrastructure/strategic-pipeline/01-ingestion/water-body-classifier";
+import { ProvincePartitionEngine } from "@/infrastructure/orchestrator/province-partition-engine";
+import { BinaryStateExporter } from "@/infrastructure/orchestrator/binary-state-exporter";
+import { StrategicManifestBuilder } from "@/infrastructure/orchestrator/strategic-manifest-builder";
+import { TacticalTerrainExporter } from "@/infrastructure/visual-pipeline/exporters/tactical-terrain-exporter";
+import { MaritimeEnricherEngine } from "@/infrastructure/strategic-pipeline/05-maritime-network/orchestrator/maritime-enricher-engine";
 
 export class MapBuildOrchestrator {
   private manifestBuilder = new StrategicManifestBuilder();
@@ -23,7 +21,7 @@ export class MapBuildOrchestrator {
       "manifest.json",
       "live-state.bin",
       "base_map_terrain.png",
-      "terrain-preview.png",
+      "tactical_map_terrain.png",
       "terrain-raw.bin",
       "terrain-compressed.bin",
       "terrain-compressed.bin.gz",
@@ -96,19 +94,10 @@ export class MapBuildOrchestrator {
     await BinaryStateExporter.exportLiveState(bitBuffer, outputDir);
     await this.manifestBuilder.buildAndSave(mapId, provinceMap, width, height);
 
-    const destTerrainPath = path.join(outputDir, "base_map_terrain.png");
-    await TerrainMapGenerator.generateAndSave(
-      assignmentGrid,
-      width,
-      height,
+    const destTerrainPath = path.join(outputDir, "tactical_map_terrain.png");
+    await TacticalTerrainExporter.buildDirectlyFromMask(
+      maskPngPath,
       destTerrainPath,
-    );
-
-    await TerrainBinaryExportService.generateAndExport(
-      assignmentGrid,
-      width,
-      height,
-      outputDir,
     );
 
     await MaritimeEnricherEngine.enrichManifestMaritimeTopology(mapId);

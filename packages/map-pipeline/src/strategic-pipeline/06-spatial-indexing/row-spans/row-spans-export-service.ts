@@ -1,10 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
-import { RowSpansBuilder } from "@/infrastructure/row-spans-map/builder/row-spans-builder";
-import { RowSpansSerializer } from "@/infrastructure/row-spans-map/serializer/row-spans-serializer";
-import { RowSpansReader } from "@/infrastructure/row-spans-map/runtime/row-spans-reader";
-import { RowSpansBuildStats } from "@/infrastructure/row-spans-map/core/row-spans-types";
+import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
+import { RowSpansBuilder } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-builder";
+import { RowSpansSerializer } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-serializer";
+import { RowSpansReader } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-reader";
+import { RowSpansBuildStats } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-types";
 
 export class RowSpansExportService {
   public static async generateFromLiveState(mapId = "map1"): Promise<{

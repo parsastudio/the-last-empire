@@ -1,13 +1,12 @@
-import { BitPackedBuffer } from "@/infrastructure/map-preprocessing/core/bit-packed-buffer";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
-import { ComponentAnalyzer } from "@/infrastructure/map-preprocessing/pipeline/02-topology/component-analyzer";
-import { LandMassClassifier } from "@/infrastructure/map-preprocessing/pipeline/02-topology/land-mass-classifier";
-import { ProvinceCountAllocator } from "@/infrastructure/map-preprocessing/pipeline/02-topology/province-count-allocator";
-import { WavefrontProvincePartitioner } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/wavefront-province-partitioner";
-import { AtomicIslandAssigner } from "@/infrastructure/map-preprocessing/pipeline/03-partitioning/atomic-island-assigner";
-import { ProvinceNeighborDetector } from "@/infrastructure/map-preprocessing/pipeline/04-topology-graph/province-neighbor-detector";
-import { SliverProvinceAbsorber } from "@/infrastructure/map-preprocessing/pipeline/04-topology-graph/sliver-province-absorber";
-import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
+import { BitPackedBuffer, BitPackedCellUtility } from "@geopolitics/domain";
+import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
+import { ComponentAnalyzer } from "@/infrastructure/strategic-pipeline/02-topology/component-analyzer";
+import { LandMassClassifier } from "@/infrastructure/strategic-pipeline/02-topology/land-mass-classifier";
+import { ProvinceCountAllocator } from "@/infrastructure/strategic-pipeline/02-topology/province-count-allocator";
+import { WavefrontProvincePartitioner } from "@/infrastructure/strategic-pipeline/03-partitioning/wavefront-province-partitioner";
+import { AtomicIslandAssigner } from "@/infrastructure/strategic-pipeline/03-partitioning/atomic-island-assigner";
+import { ProvinceNeighborDetector } from "@/infrastructure/strategic-pipeline/04-topology-graph/province-neighbor-detector";
+import { SliverProvinceAbsorber } from "@/infrastructure/strategic-pipeline/04-topology-graph/sliver-province-absorber";
 
 export class ProvincePartitionEngine {
   public static partitionProvinces(

@@ -1,5 +1,5 @@
-import { MapBuildOrchestrator } from "@/infrastructure/map-preprocessing/orchestrator/map-build-orchestrator";
-import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
+import { MapBuildOrchestrator } from "@/infrastructure/orchestrator/map-build-orchestrator";
+import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
 
 async function runMapBuild() {
   process.stdout.write(

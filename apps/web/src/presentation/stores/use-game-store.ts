@@ -1,11 +1,15 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import { GameState } from "@/domain/game/game-state.schema";
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionEngine } from "@/engine/actions/action-engine";
-import { TurnProgressionOrchestrator } from "@/engine/orchestrator/turn-progression.orchestrator";
-import { SeededRandom } from "@/domain/shared/domain-utilities";
-import { FinalMapManifest } from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
+import {
+  GameState,
+  GameAction,
+  SeededRandom,
+  FinalMapManifest,
+} from "@geopolitics/domain";
+import {
+  ActionEngine,
+  TurnProgressionOrchestrator,
+} from "@geopolitics/game-engine";
 import { CampaignInitializationService } from "@/presentation/stores/services/campaign-initialization-service";
 import { GamePersistenceService } from "@/presentation/stores/services/game-persistence-service";
 

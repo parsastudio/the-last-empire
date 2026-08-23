@@ -1,10 +1,11 @@
-import { GameState } from "@/domain/game/game-state.schema";
-import { CountryRegistry, ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
 import {
+  GameState,
+  CountryRegistry,
+  ALL_COUNTRY_PROFILES,
   FinalMapManifest,
   FinalManifestNation,
-} from "@/infrastructure/map-preprocessing/pipeline/05-export/strategic-manifest-builder";
-import { GlobalAiInitializer } from "@/infrastructure/map-preprocessing/global-ai-initializer";
+} from "@geopolitics/domain";
+import { GlobalAiInitializer } from "@geopolitics/map-pipeline";
 
 export class CampaignInitializationService {
   private static aiInitializer = new GlobalAiInitializer();
