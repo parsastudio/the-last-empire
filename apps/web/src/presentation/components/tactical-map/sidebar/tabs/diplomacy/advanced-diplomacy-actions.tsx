@@ -48,32 +48,25 @@ export function AdvancedDiplomacyActions({
     provincesMap,
   });
 
-  const isWar = currentStance === "WAR";
-  const isAlliance = currentStance === "ALLIANCE";
-  const isNonAggression = currentStance === "NON_AGGRESSION_PACT";
-
   return (
     <>
       <div className="space-y-4 dir-rtl text-right font-sans">
         <div className="space-y-2">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            وضعیت‌های سیاسی و معاهدات دوجانبه
+            نردبان معاهدات و مدیریت روابط
           </span>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <TreatyStatusBanner
               stance={currentStance}
               isEmbargoed={isEmbargoed}
             />
 
             <DiplomacyActionButtons
-              isWar={isWar}
-              isAlliance={isAlliance}
-              isNonAggression={isNonAggression}
+              currentStance={currentStance}
               foreignAidCost={runner.foreignAidCost}
-              allianceEvaluation={runner.allianceEvaluation}
-              napEvaluation={runner.napEvaluation}
               onSendAid={runner.handleSendAid}
+              onPeaceTreaty={runner.handlePeaceTreaty}
               onNonAggression={runner.handleNonAggression}
               onAlliance={runner.handleAlliance}
               onDeclareWar={runner.handleDeclareWar}
