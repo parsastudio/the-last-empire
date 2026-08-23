@@ -8,6 +8,7 @@ export interface ProvinceConquestResult {
   defenderTotalPixels: number;
   remainingDefenderProvinces: Province[];
   attackerProvinces: Province[];
+  conqueredProvincesList: Province[];
 }
 
 export class ProvinceConquestHandler {
@@ -37,16 +38,19 @@ export class ProvinceConquestHandler {
       fallbackDefenderPixels;
 
     let conqueredPixels = 0;
+    const conqueredProvincesList: Province[] = [];
 
     if (isAttackerVictory) {
       if (isFullCapitulation) {
         for (let i = 0; i < defenderProvincesBefore.length; i++) {
           const prov = defenderProvincesBefore[i]!;
-          updatedProvinces[prov.provinceId.toString()] = {
+          const conqueredProv: Province = {
             ...prov,
             ownerNationId: cleanAttackerId,
           };
+          updatedProvinces[prov.provinceId.toString()] = conqueredProv;
           conqueredPixels += prov.pixelCount;
+          conqueredProvincesList.push(conqueredProv);
         }
         BitPackedGridState.getInstance().markDirty();
       } else {
@@ -63,11 +67,13 @@ export class ProvinceConquestHandler {
         if (conqueredProvId) {
           const targetProv = updatedProvinces[conqueredProvId.toString()];
           if (targetProv) {
-            updatedProvinces[conqueredProvId.toString()] = {
+            const conqueredProv: Province = {
               ...targetProv,
               ownerNationId: cleanAttackerId,
             };
+            updatedProvinces[conqueredProvId.toString()] = conqueredProv;
             conqueredPixels = targetProv.pixelCount;
+            conqueredProvincesList.push(conqueredProv);
             BitPackedGridState.getInstance().markDirty();
           }
         }
@@ -90,6 +96,7 @@ export class ProvinceConquestHandler {
       defenderTotalPixels,
       remainingDefenderProvinces,
       attackerProvinces,
+      conqueredProvincesList,
     };
   }
 }

@@ -1,4 +1,4 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 
 export interface DemographicsTransferResult {
   transferredPopulation: number;
@@ -7,27 +7,21 @@ export interface DemographicsTransferResult {
 
 export class DemographicsTransferCalculator {
   public static calculateTransfer(
-    defender: Nation,
+    conqueredProvincesList: Province[],
     isAttackerVictory: boolean,
-    isFullCapitulation: boolean,
-    conqueredPixels: number,
-    defenderTotalPixels: number,
   ): DemographicsTransferResult {
-    if (!isAttackerVictory) {
+    if (!isAttackerVictory || conqueredProvincesList.length === 0) {
       return { transferredPopulation: 0, transferredCapacity: 0 };
     }
 
-    const transferredRatio = isFullCapitulation
-      ? 1.0
-      : Math.min(1.0, conqueredPixels / (defenderTotalPixels || 1));
+    let transferredPopulation = 0;
+    let transferredCapacity = 0;
 
-    const transferredPopulation = Math.floor(
-      defender.population * transferredRatio,
-    );
-
-    const baseCapacity =
-      defender.maxPopulationCapacity || Math.floor(defender.population / 0.95);
-    const transferredCapacity = Math.floor(baseCapacity * transferredRatio);
+    for (let i = 0; i < conqueredProvincesList.length; i++) {
+      const p = conqueredProvincesList[i]!;
+      transferredPopulation += p.population;
+      transferredCapacity += p.maxPopulationCapacity;
+    }
 
     return {
       transferredPopulation,

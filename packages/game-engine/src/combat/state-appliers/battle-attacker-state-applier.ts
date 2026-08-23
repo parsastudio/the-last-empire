@@ -4,7 +4,7 @@ import { DemographicsTransferResult } from "@/engine/combat/conquest/demographic
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
-import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export interface AttackerStateApplierInput {
@@ -27,39 +27,16 @@ export class BattleAttackerStateApplier {
       defenderTechLevel,
       calcResult,
       conquest,
-      transfer,
       currentStance,
       betrayalResult,
     } = input;
 
     const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
 
-    const attackerTotalPixels = conquest.attackerProvinces.reduce(
-      (sum, p) => sum + p.pixelCount,
-      0,
-    );
-    const attackerProvIds = conquest.attackerProvinces.map((p) => p.provinceId);
-
     const updatedMilitary = BattleLootManager.applyAttackerForcesAndSpoils(
       attacker.military,
       defenderTechLevel,
       calcResult,
-    );
-
-    const newMaxCap =
-      (attacker.maxPopulationCapacity ||
-        Math.floor(attacker.population / 0.95)) + transfer.transferredCapacity;
-
-    const updatedAttacker = GdpCalculator.syncNationGdpAndDemographics(
-      {
-        ...attacker,
-        maxPopulationCapacity: newMaxCap,
-        geography: {
-          ...attacker.geography,
-          territoryPixelCount: attackerTotalPixels,
-        },
-      },
-      attacker.population + transfer.transferredPopulation,
     );
 
     let baseWarRepPenalty = currentStance !== "WAR" ? 10 : 0;
@@ -71,11 +48,10 @@ export class BattleAttackerStateApplier {
       (betrayalResult.hasBetrayed ? betrayalResult.reputationPenalty : 0);
 
     const existingRel =
-      updatedAttacker.relations[cleanDefenderId] ||
-      updatedAttacker.relations[defenderId];
+      attacker.relations[cleanDefenderId] || attacker.relations[defenderId];
     const currentGrudge = existingRel?.grudge ?? 0;
 
-    const updatedRelations = { ...updatedAttacker.relations };
+    const updatedRelations = { ...attacker.relations };
     updatedRelations[cleanDefenderId] = {
       targetNationId: cleanDefenderId,
       stance: "WAR",
@@ -105,21 +81,27 @@ export class BattleAttackerStateApplier {
       attacker.treasury - actualDeploymentCost + calcResult.treasuryLooted,
     );
 
-    return {
-      ...updatedAttacker,
+    const interimAttacker: Nation = {
+      ...attacker,
       government: {
-        ...updatedAttacker.government,
+        ...attacker.government,
         stability: nextStability,
       },
       globalReputation: Math.max(
         -100,
         attacker.globalReputation - totalRepPenalty,
       ),
-      provinceIds: attackerProvIds,
       treasury: updatedTreasury,
       military: updatedMilitary,
       relations: updatedRelations,
       warFocusTargetId: cleanDefenderId,
     };
+
+    const { syncedNation } = NationGeographySyncer.sync(
+      interimAttacker,
+      conquest.attackerProvinces,
+    );
+
+    return syncedNation;
   }
 }

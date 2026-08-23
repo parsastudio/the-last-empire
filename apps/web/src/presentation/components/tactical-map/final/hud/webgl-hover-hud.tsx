@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield, Users, Coins } from "lucide-react";
+import { Shield, Users, Coins, MapPin, Building2 } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -10,6 +10,9 @@ export interface HoverCountryInfo {
   rank: number;
   stance: string;
   regionName?: string;
+  regionPopulation?: string;
+  regionGdpText?: string;
+  regionCapacityPercentage?: number;
   totalPopulation?: string;
   gdpText?: string;
 }
@@ -21,8 +24,8 @@ function calculateHudPosition(
     return { left: "1.5rem", bottom: "1.5rem" };
   }
 
-  const hudWidth = 288;
-  const hudHeight = 160;
+  const hudWidth = 300;
+  const hudHeight = 220;
   const offset = 15;
 
   let left = cursorPos.x + offset;
@@ -55,10 +58,10 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
 
   return (
     <div
-      className="fixed z-50 pointer-events-none w-72 animate-fade-smooth dir-rtl text-right"
+      className="fixed z-50 pointer-events-none w-76 animate-fade-smooth dir-rtl text-right"
       style={stylePosition}
     >
-      <div className="bg-card/90 backdrop-blur-xl border border-border/80 p-3.5 rounded-2xl shadow-2xl space-y-2.5 text-foreground font-sans">
+      <div className="bg-card/95 backdrop-blur-xl border border-border/80 p-3.5 rounded-2xl shadow-2xl space-y-2.5 text-foreground font-sans">
         <div className="flex items-center justify-between border-b border-border/60 pb-2">
           <div className="flex items-center gap-2">
             <span
@@ -73,8 +76,7 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
                 {hoverData.name}
               </h4>
               <span className="text-[9px] font-mono text-muted-foreground block mt-0.5">
-                {hoverData.code}{" "}
-                {hoverData.regionName && `| ${hoverData.regionName}`}
+                {hoverData.code}
               </span>
             </div>
           </div>
@@ -83,6 +85,45 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
             رتبه: #{PersianNumberFormatter.toPersianDigits(hoverData.rank)}
           </span>
         </div>
+
+        {hoverData.regionName && (
+          <div className="bg-secondary/60 border border-primary/30 p-2 rounded-xl space-y-1.5 font-mono text-[10px]">
+            <div className="flex items-center justify-between">
+              <span className="text-primary font-bold font-sans flex items-center gap-1 text-[10px]">
+                <MapPin size={11} />
+                {hoverData.regionName}
+              </span>
+              {hoverData.regionCapacityPercentage !== undefined && (
+                <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                  <Building2 size={10} className="text-treasury" />
+                  {PersianNumberFormatter.toPersianDigits(
+                    hoverData.regionCapacityPercentage,
+                  )}
+                  ٪ اشغال
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+              <div className="bg-background/60 p-1.5 rounded-lg border border-border/40">
+                <span className="text-muted-foreground block font-sans text-[8px]">
+                  جمعیت استان:
+                </span>
+                <span className="font-bold text-foreground block">
+                  {hoverData.regionPopulation || "---"}
+                </span>
+              </div>
+              <div className="bg-background/60 p-1.5 rounded-lg border border-border/40">
+                <span className="text-muted-foreground block font-sans text-[8px]">
+                  تولید ناخالص استان:
+                </span>
+                <span className="font-bold text-gdp block">
+                  {hoverData.regionGdpText || "---"}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
           <div className="flex flex-col gap-1 bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -98,7 +139,7 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
           <div className="flex flex-col gap-1 bg-secondary/40 p-2 rounded-xl border border-border/40">
             <span className="text-muted-foreground text-[9px] font-sans flex items-center gap-1">
               <Coins size={11} className="text-gdp shrink-0" />
-              تولید ناخالص (GDP):
+              GDP کل کشور:
             </span>
             <span className="font-bold text-gdp truncate">
               {hoverData.gdpText || "---"}

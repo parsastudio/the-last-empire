@@ -14,6 +14,9 @@ export class TurnPipeline {
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
 
     const updatedNations: Record<string, Nation> = {};
+    const updatedProvincesMap: Record<string, Province> = {
+      ...currentState.provinces,
+    };
     const provincesByOwner = new Map<string, Province[]>();
 
     for (const prov of Object.values(currentState.provinces || {})) {
@@ -51,10 +54,17 @@ export class TurnPipeline {
       const { updatedNation: dipNation, isAtWar } =
         DiplomaticTurnProcessor.process(syncedNation, currentState.nations);
 
-      const ecoNation = EconomyTurnProcessor.process(
-        dipNation,
-        currentState.nations,
-      );
+      const { updatedNation: ecoNation, updatedProvinces } =
+        EconomyTurnProcessor.process(
+          dipNation,
+          currentState.nations,
+          ownedProvinces,
+        );
+
+      for (let p = 0; p < updatedProvinces.length; p++) {
+        const up = updatedProvinces[p]!;
+        updatedProvincesMap[up.provinceId.toString()] = up;
+      }
 
       const polNation = PoliticsTurnProcessor.process(
         ecoNation,
@@ -69,6 +79,7 @@ export class TurnPipeline {
 
     return {
       ...currentState,
+      provinces: updatedProvincesMap,
       nations: rankedNations,
     };
   }

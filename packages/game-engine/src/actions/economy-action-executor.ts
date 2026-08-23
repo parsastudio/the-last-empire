@@ -1,5 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
+import { Province } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import {
@@ -7,6 +8,7 @@ import {
   InfrastructureManager,
 } from "@/engine/economy/economy-calculators";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class EconomyActionExecutor {
@@ -116,24 +118,50 @@ export class EconomyActionExecutor {
             "موجودی خزانه برای ارتقای زیرساخت کافی نیست.",
           );
         }
-        const nextCapacity =
-          InfrastructureManager.calculateNextCapacityOnUpgrade(
-            nation.maxPopulationCapacity ||
-              Math.floor(nation.population / 0.95),
+
+        const updatedProvinces: Record<string, Province> = {
+          ...state.provinces,
+        };
+        const ownedProvs: Province[] = [];
+
+        for (const prov of Object.values(state.provinces)) {
+          const canonicalOwner = CountryRegistry.resolveCanonicalId(
+            prov.ownerNationId,
           );
+          if (canonicalOwner === canonicalNationId) {
+            const nextCap =
+              InfrastructureManager.calculateNextCapacityOnUpgrade(
+                prov.maxPopulationCapacity,
+              );
+            const nextInfra = prov.infrastructureLevel + 1;
+            const updatedProv: Province = {
+              ...prov,
+              maxPopulationCapacity: nextCap,
+              infrastructureLevel: nextInfra,
+            };
+            updatedProvinces[prov.provinceId.toString()] = updatedProv;
+            ownedProvs.push(updatedProv);
+          }
+        }
+
+        const { syncedNation } = NationGeographySyncer.sync(
+          {
+            ...nation,
+            treasury: nation.treasury - cost,
+            geography: {
+              ...nation.geography,
+              infrastructureLevel: nation.geography.infrastructureLevel + 1,
+            },
+          },
+          ownedProvs,
+        );
+
         return {
           ...state,
+          provinces: updatedProvinces,
           nations: {
             ...state.nations,
-            [nation.id]: {
-              ...nation,
-              treasury: nation.treasury - cost,
-              maxPopulationCapacity: nextCapacity,
-              geography: {
-                ...nation.geography,
-                infrastructureLevel: nation.geography.infrastructureLevel + 1,
-              },
-            },
+            [nation.id]: syncedNation,
           },
         };
       }
@@ -146,23 +174,44 @@ export class EconomyActionExecutor {
             "موجودی خزانه برای ارتقای سطح صنعت و آموزش کافی نیست.",
           );
         }
-        const nextProd = GdpCalculator.calculateProductivityOnUpgrade(
-          nation.perCapitaProductivity,
-        );
-        const updatedNation = GdpCalculator.syncNationGdpAndDemographics(
+
+        const updatedProvinces: Record<string, Province> = {
+          ...state.provinces,
+        };
+        const ownedProvs: Province[] = [];
+
+        for (const prov of Object.values(state.provinces)) {
+          const canonicalOwner = CountryRegistry.resolveCanonicalId(
+            prov.ownerNationId,
+          );
+          if (canonicalOwner === canonicalNationId) {
+            const nextProd = GdpCalculator.calculateProductivityOnUpgrade(
+              prov.perCapitaProductivity,
+            );
+            const updatedProv: Province = {
+              ...prov,
+              perCapitaProductivity: nextProd,
+            };
+            updatedProvinces[prov.provinceId.toString()] = updatedProv;
+            ownedProvs.push(updatedProv);
+          }
+        }
+
+        const { syncedNation } = NationGeographySyncer.sync(
           {
             ...nation,
             treasury: nation.treasury - cost,
             industrialLevel: nation.industrialLevel + 1,
           },
-          nation.population,
-          nextProd,
+          ownedProvs,
         );
+
         return {
           ...state,
+          provinces: updatedProvinces,
           nations: {
             ...state.nations,
-            [nation.id]: updatedNation,
+            [nation.id]: syncedNation,
           },
         };
       }
