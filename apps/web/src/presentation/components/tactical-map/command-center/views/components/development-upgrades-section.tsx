@@ -1,134 +1,135 @@
 import React, { useState } from "react";
-import { Cpu, Wrench, Zap, Loader2 } from "lucide-react";
+import {
+  Cpu,
+  Zap,
+  Loader2,
+  TrendingUp,
+  Building2,
+  ShieldCheck,
+} from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
-import {
-  IndustrialLevelManager,
-  InfrastructureManager,
-} from "@/engine/economy/economy-calculators";
+import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface DevelopmentUpgradesSectionProps {
   nationId: string;
   treasury: number;
   gdp: number;
-  industrialLevel: number;
-  infrastructureLevel: number;
+  developmentLevel: number;
 }
 
 export function DevelopmentUpgradesSection({
   nationId,
   treasury,
   gdp,
-  industrialLevel,
-  infrastructureLevel,
+  developmentLevel,
 }: DevelopmentUpgradesSectionProps) {
-  const [activeUpgrade, setActiveUpgrade] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { dispatchAction } = useGameActions();
 
-  const industrialCost = IndustrialLevelManager.getUpgradeCost(gdp);
-  const infraCost = InfrastructureManager.getUpgradeCost(gdp);
+  const upgradeCost = DevelopmentManager.getUpgradeCost(gdp);
+  const canAfford = treasury >= upgradeCost;
 
-  const canAffordIndustrial = treasury >= industrialCost;
-  const canAffordInfra = treasury >= infraCost;
-
-  const handleUpgrade = async (type: "industrial" | "infra") => {
-    if (activeUpgrade) return;
-    setActiveUpgrade(type);
+  const handleUpgrade = async () => {
+    if (isSubmitting || !canAfford) return;
+    setIsSubmitting(true);
 
     try {
-      if (type === "industrial" && canAffordIndustrial) {
-        const action = ActionFactory.upgradeIndustrialLevel(nationId);
-        await dispatchAction(
-          action,
-          `پروژه ارتقای سطح صنعت و آموزش به سطح ${industrialLevel + 1} آغاز شد.`,
-        );
-      } else if (type === "infra" && canAffordInfra) {
-        const action = ActionFactory.investInfrastructure(nationId);
-        await dispatchAction(
-          action,
-          `پروژه ارتقای زیرساخت و مسکن به سطح ${infrastructureLevel + 1} کلید خورد.`,
-        );
-      }
+      const action = ActionFactory.upgradeDevelopment(nationId);
+      await dispatchAction(
+        action,
+        `طرح جامع توسعه و نوسازی ملی (سطح ${developmentLevel + 1}) با موفقیت به اجرا درآمد.`,
+      );
     } finally {
-      setActiveUpgrade(null);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="space-y-3 dir-rtl text-right font-sans">
-      <div className="flex items-center gap-2 px-1">
-        <Cpu size={14} className="text-gdp" />
-        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          پروژه‌های توسعه صنعتی و زیرساخت
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Cpu size={14} className="text-gdp" />
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+            طرح جامع توسعه و نوسازی ملی
+          </span>
+        </div>
+        <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/30 px-2.5 py-0.5 rounded-lg">
+          سطح فعلی: {PersianNumberFormatter.toPersianDigits(developmentLevel)}
         </span>
       </div>
 
-      <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3">
-        <div className="bg-secondary/40 border border-border/40 p-3 rounded-xl space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-foreground flex items-center gap-1.5">
-              <Cpu size={14} className="text-gdp" />
-              صنعت و آموزش (سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(industrialLevel)})
-            </span>
-            <span className="font-mono text-[10px] text-muted-foreground">
-              {PersianNumberFormatter.formatCurrency(industrialCost)}
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            افزایش مستقیم ۲٪ به بهره‌وری سرانه نیروی کار و ارتقای توان تولید
-            صنعتی کشور.
-          </p>
-          <button
-            onClick={() => handleUpgrade("industrial")}
-            disabled={!canAffordIndustrial || activeUpgrade !== null}
-            className="w-full py-2 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-[10px] font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
+      <div className="bg-background/40 border border-border/70 p-4 rounded-3xl space-y-4 shadow-sm">
+        <div className="flex items-center justify-between text-xs pb-3 border-b border-border/50 font-mono">
+          <span className="text-muted-foreground font-sans font-bold">
+            هزینه سرمایه‌گذاری طرح (۴۰٪ GDP):
+          </span>
+          <span
+            className={`font-extrabold text-sm ${
+              canAfford ? "text-gdp" : "text-military"
+            }`}
           >
-            {activeUpgrade === "industrial" ? (
-              <Loader2 size={12} className="animate-spin" />
-            ) : (
-              <Zap size={12} />
-            )}
-            <span>
-              {canAffordIndustrial
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(industrialLevel + 1)}`
-                : "موجودی ناکافی"}
-            </span>
-          </button>
+            {PersianNumberFormatter.formatCurrency(upgradeCost)}
+          </span>
         </div>
 
-        <div className="bg-secondary/40 border border-border/40 p-3 rounded-xl space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-foreground flex items-center gap-1.5">
-              <Wrench size={14} className="text-primary" />
-              زیرساخت و مسکن (سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(infrastructureLevel)})
-            </span>
-            <span className="font-mono text-[10px] text-muted-foreground">
-              {PersianNumberFormatter.formatCurrency(infraCost)}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+          <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl space-y-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-sans text-muted-foreground">
+              <TrendingUp size={13} className="text-gdp shrink-0" />
+              <span>بهره‌وری کار</span>
+            </div>
+            <span className="text-xs font-black text-gdp block font-mono">
+              +۵٪ رشد آنی
             </span>
           </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            افزایش ۲۰٪ سقف ظرفیت زیستی و مسکن کشور جهت پذیرش تراکم جمعیت بیشتر.
-          </p>
-          <button
-            onClick={() => handleUpgrade("infra")}
-            disabled={!canAffordInfra || activeUpgrade !== null}
-            className="w-full py-2 bg-primary hover:bg-primary/90 disabled:opacity-40 text-primary-foreground rounded-xl text-[10px] font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1"
-          >
-            {activeUpgrade === "infra" ? (
-              <Loader2 size={12} className="animate-spin" />
-            ) : (
-              <Zap size={12} />
-            )}
-            <span>
-              {canAffordInfra
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(infrastructureLevel + 1)}`
-                : "موجودی ناکافی"}
+
+          <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl space-y-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-sans text-muted-foreground">
+              <Building2 size={13} className="text-primary shrink-0" />
+              <span>ظرفیت مسکن</span>
+            </div>
+            <span className="text-xs font-black text-primary block font-mono">
+              +۸٪ سقف زیستی
             </span>
-          </button>
+          </div>
+
+          <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl space-y-1">
+            <div className="flex items-center gap-1.5 text-[10px] font-sans text-muted-foreground">
+              <ShieldCheck size={13} className="text-amber-500 shrink-0" />
+              <span>لجستیک دفاعی</span>
+            </div>
+            <span className="text-xs font-black text-amber-500 block font-mono">
+              -۵٪ مخارج ساخت
+            </span>
+          </div>
         </div>
+
+        <p className="text-[11px] text-muted-foreground leading-relaxed bg-secondary/20 p-3 rounded-2xl border border-border/40 font-sans">
+          اجرای این طرح با ارتقای هم‌زمان زیرساخت‌های زیستی و صنایع پیشرفته،
+          موجب افزایش ۵ درصدی تولید سرانه، گسترش ۸ درصدی ظرفیت مسکن استان‌ها و
+          کاهش هزینه‌های نگهداری ارتش می‌گردد.
+        </p>
+
+        <button
+          onClick={handleUpgrade}
+          disabled={!canAfford || isSubmitting}
+          className="w-full py-3.5 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-bold transition-all shadow-lg shadow-gdp/20 cursor-pointer flex items-center justify-center gap-2"
+        >
+          {isSubmitting ? (
+            <Loader2 size={15} className="animate-spin" />
+          ) : (
+            <Zap size={15} />
+          )}
+          <span>
+            {isSubmitting
+              ? "در حال اجرای پروژه ملی..."
+              : canAfford
+                ? `اجرای طرح جامع توسعه (ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(developmentLevel + 1)})`
+                : "موجودی خزانه ناکافی جهت تامین بودجه طرح (۴۰٪ GDP)"}
+          </span>
+        </button>
       </div>
     </div>
   );

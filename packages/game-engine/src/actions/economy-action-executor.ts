@@ -3,11 +3,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { Province } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
-import {
-  IndustrialLevelManager,
-  InfrastructureManager,
-} from "@/engine/economy/economy-calculators";
-import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
@@ -110,12 +106,12 @@ export class EconomyActionExecutor {
         };
       }
 
-      case "INVEST_INFRASTRUCTURE": {
-        const cost = InfrastructureManager.getUpgradeCost(nation);
+      case "UPGRADE_DEVELOPMENT": {
+        const cost = DevelopmentManager.getUpgradeCost(nation);
         if (nation.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای ارتقای زیرساخت کافی نیست.",
+            "موجودی خزانه برای اجرای طرح جامع توسعه ملی کافی نیست.",
           );
         }
 
@@ -129,79 +125,35 @@ export class EconomyActionExecutor {
             prov.ownerNationId,
           );
           if (canonicalOwner === canonicalNationId) {
-            const nextCap =
-              InfrastructureManager.calculateNextCapacityOnUpgrade(
-                prov.maxPopulationCapacity,
-              );
-            const nextInfra = prov.infrastructureLevel + 1;
+            const nextCap = DevelopmentManager.calculateNextCapacity(
+              prov.maxPopulationCapacity,
+            );
+            const nextProd = DevelopmentManager.calculateNextProductivity(
+              prov.perCapitaProductivity,
+            );
+            const nextLevel = prov.infrastructureLevel + 1;
             const updatedProv: Province = {
               ...prov,
               maxPopulationCapacity: nextCap,
-              infrastructureLevel: nextInfra,
+              perCapitaProductivity: nextProd,
+              infrastructureLevel: nextLevel,
             };
             updatedProvinces[prov.provinceId.toString()] = updatedProv;
             ownedProvs.push(updatedProv);
           }
         }
 
+        const nextLevel = nation.industrialLevel + 1;
+
         const { syncedNation } = NationGeographySyncer.sync(
           {
             ...nation,
             treasury: nation.treasury - cost,
+            industrialLevel: nextLevel,
             geography: {
               ...nation.geography,
-              infrastructureLevel: nation.geography.infrastructureLevel + 1,
+              infrastructureLevel: nextLevel,
             },
-          },
-          ownedProvs,
-        );
-
-        return {
-          ...state,
-          provinces: updatedProvinces,
-          nations: {
-            ...state.nations,
-            [nation.id]: syncedNation,
-          },
-        };
-      }
-
-      case "UPGRADE_INDUSTRIAL_LEVEL": {
-        const cost = IndustrialLevelManager.getUpgradeCost(nation);
-        if (nation.treasury < cost) {
-          throw new GameError(
-            "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای ارتقای سطح صنعت و آموزش کافی نیست.",
-          );
-        }
-
-        const updatedProvinces: Record<string, Province> = {
-          ...state.provinces,
-        };
-        const ownedProvs: Province[] = [];
-
-        for (const prov of Object.values(state.provinces)) {
-          const canonicalOwner = CountryRegistry.resolveCanonicalId(
-            prov.ownerNationId,
-          );
-          if (canonicalOwner === canonicalNationId) {
-            const nextProd = GdpCalculator.calculateProductivityOnUpgrade(
-              prov.perCapitaProductivity,
-            );
-            const updatedProv: Province = {
-              ...prov,
-              perCapitaProductivity: nextProd,
-            };
-            updatedProvinces[prov.provinceId.toString()] = updatedProv;
-            ownedProvs.push(updatedProv);
-          }
-        }
-
-        const { syncedNation } = NationGeographySyncer.sync(
-          {
-            ...nation,
-            treasury: nation.treasury - cost,
-            industrialLevel: nation.industrialLevel + 1,
           },
           ownedProvs,
         );

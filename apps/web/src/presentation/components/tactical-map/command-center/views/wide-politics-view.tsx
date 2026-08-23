@@ -57,8 +57,7 @@ export function WidePoliticsView({
           nationId={nation.id}
           treasury={nation.treasury}
           gdp={gdp}
-          industrialLevel={nation.industrialLevel}
-          infrastructureLevel={nation.geography.infrastructureLevel}
+          developmentLevel={nation.industrialLevel}
         />
       </div>
     </div>

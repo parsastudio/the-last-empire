@@ -1,14 +1,11 @@
 import { Nation } from "@/domain/nation/nation.schema";
 
 export class GdpCalculator {
-  public static readonly PRODUCTIVITY_CAP = 300000;
-
   public static calculateProductivityOnUpgrade(
     currentProductivity: number,
   ): number {
     const prod = currentProductivity || 5000;
-    const boosted = Math.floor(prod * 1.02);
-    return Math.min(GdpCalculator.PRODUCTIVITY_CAP, Math.max(100, boosted));
+    return Math.max(100, Math.floor(prod * 1.05));
   }
 
   public static syncNationGdpAndDemographics(
@@ -21,8 +18,8 @@ export class GdpCalculator {
       nation.maxPopulationCapacity || Math.floor(rawPopulation / 0.95);
     const population = Math.min(capacity, rawPopulation);
 
-    const productivity = Math.min(
-      GdpCalculator.PRODUCTIVITY_CAP,
+    const productivity = Math.max(
+      100,
       newProductivity ?? nation.perCapitaProductivity ?? 5000,
     );
 
