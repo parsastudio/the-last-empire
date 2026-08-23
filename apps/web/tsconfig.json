@@ -14,16 +14,11 @@
       "@/*": ["./src/*"],
       "@/domain/*": ["../../packages/domain/src/*"],
       "@/engine/*": ["../../packages/game-engine/src/*"],
-      "@/infrastructure/*": [
-        "./src/infrastructure/*",
-        "../../packages/map-pipeline/src/*"
-      ],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
       "@geopolitics/domain": ["../../packages/domain/src/index.ts"],
       "@geopolitics/domain/*": ["../../packages/domain/src/*"],
       "@geopolitics/game-engine": ["../../packages/game-engine/src/index.ts"],
-      "@geopolitics/game-engine/*": ["../../packages/game-engine/src/*"],
-      "@geopolitics/map-pipeline": ["../../packages/map-pipeline/src/index.ts"],
-      "@geopolitics/map-pipeline/*": ["../../packages/map-pipeline/src/*"]
+      "@geopolitics/game-engine/*": ["../../packages/game-engine/src/*"]
     }
   },
   "include": [
@@ -33,8 +28,7 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "../../packages/domain/src/**/*",
-    "../../packages/game-engine/src/**/*",
-    "../../packages/map-pipeline/src/**/*"
+    "../../packages/game-engine/src/**/*"
   ],
   "exclude": ["node_modules"]
 }

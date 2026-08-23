@@ -6,8 +6,8 @@ import {
   FinalMapManifest,
   FinalManifestNation,
 } from "@geopolitics/domain";
-import { NationProfileAssigner } from "@/infrastructure/core/initializers/nation-profile-assigner";
-import { RankManager } from "@geopolitics/game-engine";
+import { NationProfileAssigner } from "@/engine/initializers/nation-profile-assigner";
+import { RankManager } from "@/engine/politics/rank-manager";
 
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(

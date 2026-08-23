@@ -6,7 +6,7 @@ import {
   MilitaryStack,
   CountryDefaultsUtility,
 } from "@geopolitics/domain";
-import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
+import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 
 type GovernmentType = Nation["government"]["type"];
 

@@ -12,7 +12,6 @@
   "dependencies": {
     "@geopolitics/domain": "workspace:*",
     "@geopolitics/game-engine": "workspace:*",
-    "@geopolitics/map-pipeline": "workspace:*",
     "canvas-confetti": "^1.9.4",
     "dexie": "^4.4.4",
     "immer": "^11.1.15",
