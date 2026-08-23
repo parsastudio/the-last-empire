@@ -6,8 +6,8 @@ import {
   FinalManifestProvince,
   FinalManifestNation,
   FinalMapManifest,
-  MilitaryDistributionEngine,
 } from "@geopolitics/domain";
+import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
 import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
 import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
 

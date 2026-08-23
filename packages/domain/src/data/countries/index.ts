@@ -3,9 +3,10 @@ import {
   ALL_COUNTRY_PROFILES,
   CountryRegistry,
 } from "@/domain/data/countries/country-registry";
+import { CountryDefaultsUtility } from "@/domain/data/countries/country-defaults.utility";
 
 export type { CountryProfile };
-export { ALL_COUNTRY_PROFILES, CountryRegistry };
+export { ALL_COUNTRY_PROFILES, CountryRegistry, CountryDefaultsUtility };
 
 export function findCountryProfileByCode(
   code: string,

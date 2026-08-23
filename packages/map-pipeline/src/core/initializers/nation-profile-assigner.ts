@@ -2,11 +2,11 @@ import {
   Nation,
   CountryRegistry,
   FinalManifestNation,
-  MilitaryDistributionEngine,
   MilitaryInventoryHelper,
   MilitaryStack,
   CountryDefaultsUtility,
 } from "@geopolitics/domain";
+import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
 
 type GovernmentType = Nation["government"]["type"];
 
