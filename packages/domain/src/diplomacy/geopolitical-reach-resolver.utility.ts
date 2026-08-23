@@ -162,6 +162,10 @@ export class GeopoliticalReachResolver {
       return false;
     }
 
+    if (!source.isAi) {
+      return true;
+    }
+
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const rel =
       source.relations[canonicalTarget] || source.relations[target.id];
