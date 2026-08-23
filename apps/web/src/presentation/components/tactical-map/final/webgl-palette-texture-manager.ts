@@ -3,7 +3,7 @@ import {
   CountryRegistry,
   Province,
   Nation,
-  getNationGdp,
+  getProvinceGdp,
 } from "@geopolitics/domain";
 
 export class WebGLPaletteTextureManager {
@@ -52,7 +52,7 @@ export class WebGLPaletteTextureManager {
   private static fillGdpBuffer(
     data: Uint8Array,
     provincesMap?: Record<string, Province>,
-    nationsMap?: Record<string, Nation>,
+    _nationsMap?: Record<string, Nation>,
   ): void {
     if (!provincesMap) return;
 
@@ -60,15 +60,7 @@ export class WebGLPaletteTextureManager {
       const pid = prov.provinceId;
       if (pid <= 0 || pid >= 65536) continue;
 
-      const liveNation = nationsMap ? nationsMap[prov.ownerNationId] : null;
-      let gdp = 1000000000;
-      if (liveNation) {
-        gdp = getNationGdp(liveNation);
-      } else {
-        const profile = CountryRegistry.getCountry(prov.ownerNationId);
-        gdp = profile ? profile.gdp : 1000000000;
-      }
-
+      const gdp = getProvinceGdp(prov);
       const { r, g, b } = this.calculateGdpColor(gdp);
 
       const u = pid & 255;

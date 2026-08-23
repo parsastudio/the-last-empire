@@ -86,11 +86,8 @@ export class BattleExecutionEngine {
       !calcResult.isFullCapitulation;
 
     const transfer = DemographicsTransferCalculator.calculateTransfer(
-      defender,
+      conquest.conqueredProvincesList,
       calcResult.isAttackerVictory,
-      calcResult.isFullCapitulation,
-      conquest.conqueredPixels,
-      conquest.defenderTotalPixels,
     );
 
     const updatedAttacker = BattleAttackerStateApplier.apply({

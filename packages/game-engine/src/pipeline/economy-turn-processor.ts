@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { TariffCalculator } from "@/engine/economy/calculators/tariff-calculator";
 import { TaxCalculator } from "@/engine/economy/calculators/tax-calculator";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
@@ -16,9 +17,14 @@ export class EconomyTurnProcessor {
   public static process(
     nation: Nation,
     allNations: Record<string, Nation>,
-  ): Nation {
-    const demoResult = DemographicsEngine.processNaturalDemographics(nation);
+    ownedProvinces: Province[],
+  ): { updatedNation: Nation; updatedProvinces: Province[] } {
+    const demoResult = DemographicsEngine.processNaturalDemographics(
+      nation,
+      ownedProvinces,
+    );
     let updated = demoResult.updatedNation;
+    const updatedProvinces = demoResult.updatedProvinces;
 
     if (updated.isAi) {
       const gdp = getNationGdp(updated);
@@ -41,7 +47,7 @@ export class EconomyTurnProcessor {
       };
 
       updated = this.recruitmentQueue.processTurnQueue(updated);
-      return updated;
+      return { updatedNation: updated, updatedProvinces };
     }
 
     const tariffResult = TariffCalculator.calculateTariffEffects(
@@ -79,6 +85,6 @@ export class EconomyTurnProcessor {
 
     updated = this.recruitmentQueue.processTurnQueue(updated);
 
-    return updated;
+    return { updatedNation: updated, updatedProvinces };
   }
 }

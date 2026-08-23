@@ -3,7 +3,7 @@ import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { DemographicsTransferResult } from "@/engine/combat/conquest/demographics-transfer-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
-import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 
@@ -19,36 +19,10 @@ export interface DefenderStateApplierInput {
 
 export class BattleDefenderStateApplier {
   public static apply(input: DefenderStateApplierInput): Nation {
-    const {
-      defender,
-      attackerId,
-      calcResult,
-      conquest,
-      transfer,
-      isDefenderAlive,
-    } = input;
+    const { defender, attackerId, calcResult, conquest, isDefenderAlive } =
+      input;
 
     const cleanAttackerId = CountryRegistry.resolveCanonicalId(attackerId);
-
-    const defenderRemainingPixels = conquest.remainingDefenderProvinces.reduce(
-      (sum, p) => sum + p.pixelCount,
-      0,
-    );
-    const defenderProvIds = conquest.remainingDefenderProvinces.map(
-      (p) => p.provinceId,
-    );
-
-    const newPop = isDefenderAlive
-      ? Math.max(0, defender.population - transfer.transferredPopulation)
-      : 0;
-    const newCap = isDefenderAlive
-      ? Math.max(
-          0,
-          (defender.maxPopulationCapacity ||
-            Math.floor(defender.population / 0.95)) -
-            transfer.transferredCapacity,
-        )
-      : 0;
 
     const updatedMilitary = BattleLootManager.applyDefenderCasualties(
       defender.military,
@@ -56,25 +30,12 @@ export class BattleDefenderStateApplier {
       isDefenderAlive,
     );
 
-    const updatedDefender = GdpCalculator.syncNationGdpAndDemographics(
-      {
-        ...defender,
-        maxPopulationCapacity: newCap,
-        geography: {
-          ...defender.geography,
-          territoryPixelCount: defenderRemainingPixels,
-        },
-      },
-      newPop,
-    );
-
     const existingRel =
-      updatedDefender.relations[cleanAttackerId] ||
-      updatedDefender.relations[attackerId];
+      defender.relations[cleanAttackerId] || defender.relations[attackerId];
     const currentGrudge = existingRel?.grudge ?? 0;
     const grudgeSurge = calcResult.isFullCapitulation ? 50 : 40;
 
-    const updatedRelations = { ...updatedDefender.relations };
+    const updatedRelations = { ...defender.relations };
     updatedRelations[cleanAttackerId] = {
       targetNationId: cleanAttackerId,
       stance: "WAR",
@@ -82,7 +43,7 @@ export class BattleDefenderStateApplier {
       grudge: Math.min(100, currentGrudge + grudgeSurge),
     };
 
-    const currentFocus = updatedDefender.warFocusTargetId;
+    const currentFocus = defender.warFocusTargetId;
     const nextWarFocus =
       !currentFocus || currentFocus === cleanAttackerId
         ? cleanAttackerId
@@ -104,12 +65,11 @@ export class BattleDefenderStateApplier {
         )
       : 0;
 
-    return {
-      ...updatedDefender,
+    const interimDefender: Nation = {
+      ...defender,
       isAlive: isDefenderAlive,
-      provinceIds: defenderProvIds,
       government: {
-        ...updatedDefender.government,
+        ...defender.government,
         stability: nextStability,
       },
       treasury: isDefenderAlive
@@ -119,5 +79,12 @@ export class BattleDefenderStateApplier {
       relations: updatedRelations,
       warFocusTargetId: isDefenderAlive ? nextWarFocus : null,
     };
+
+    const { syncedNation } = NationGeographySyncer.sync(
+      interimDefender,
+      conquest.remainingDefenderProvinces,
+    );
+
+    return syncedNation;
   }
 }
