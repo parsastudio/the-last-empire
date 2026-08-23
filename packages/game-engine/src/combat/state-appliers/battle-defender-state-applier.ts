@@ -30,18 +30,19 @@ export class BattleDefenderStateApplier {
       isDefenderAlive,
     );
 
-    const existingRel =
-      defender.relations[cleanAttackerId] || defender.relations[attackerId];
-    const currentGrudge = existingRel?.grudge ?? 0;
-    const grudgeSurge = calcResult.isFullCapitulation ? 50 : 40;
-
     const updatedRelations = { ...defender.relations };
-    updatedRelations[cleanAttackerId] = {
-      targetNationId: cleanAttackerId,
-      stance: "WAR",
-      opinion: -100,
-      grudge: Math.min(100, currentGrudge + grudgeSurge),
-    };
+
+    if (isDefenderAlive) {
+      const existingRel =
+        defender.relations[cleanAttackerId] || defender.relations[attackerId];
+      const currentGrudge = existingRel?.grudge ?? 0;
+      updatedRelations[cleanAttackerId] = {
+        targetNationId: cleanAttackerId,
+        stance: "WAR",
+        opinion: -100,
+        grudge: Math.min(100, currentGrudge + 40),
+      };
+    }
 
     const currentFocus = defender.warFocusTargetId;
     const nextWarFocus =
@@ -76,7 +77,7 @@ export class BattleDefenderStateApplier {
         ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,
       military: updatedMilitary,
-      relations: updatedRelations,
+      relations: isDefenderAlive ? updatedRelations : {},
       warFocusTargetId: isDefenderAlive ? nextWarFocus : null,
     };
 

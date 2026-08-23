@@ -2,7 +2,6 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { PendingDiplomaticProposal } from "@/domain/diplomacy/diplomacy.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
-import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class TreatyAcceptanceApplier {
@@ -52,11 +51,11 @@ export class TreatyAcceptanceApplier {
 
     let reputationBonus = 0;
     if (proposal.proposalType === "NON_AGGRESSION_PACT") {
-      reputationBonus = 3;
+      reputationBonus = 1;
     } else if (proposal.proposalType === "FULL_ALLIANCE") {
-      reputationBonus = 6;
+      reputationBonus = 1;
     } else if (proposal.proposalType === "PEACE_TREATY") {
-      reputationBonus = 5;
+      reputationBonus = 2;
     }
 
     let senderWarFocus = sender.warFocusTargetId;
@@ -67,17 +66,6 @@ export class TreatyAcceptanceApplier {
       if (receiverWarFocus === sender.id) receiverWarFocus = null;
     }
 
-    const senderStabBonus =
-      StabilityCalculator.calculateDiplomaticStabilityBonus(
-        proposal.proposalType,
-        true,
-      );
-    const receiverStabBonus =
-      StabilityCalculator.calculateDiplomaticStabilityBonus(
-        proposal.proposalType,
-        false,
-      );
-
     const updatedSender = {
       ...sender,
       globalReputation: Math.min(
@@ -85,12 +73,6 @@ export class TreatyAcceptanceApplier {
         sender.globalReputation + reputationBonus,
       ),
       warFocusTargetId: senderWarFocus,
-      government: {
-        ...sender.government,
-        stability: StabilityCalculator.clampStability(
-          sender.government.stability + senderStabBonus,
-        ),
-      },
       relations: {
         ...sender.relations,
         [senderRel.targetNationId]: updatedSenderRel,
@@ -101,15 +83,9 @@ export class TreatyAcceptanceApplier {
       ...receiver,
       globalReputation: Math.min(
         100,
-        receiver.globalReputation + Math.floor(reputationBonus * 0.5),
+        receiver.globalReputation + reputationBonus,
       ),
       warFocusTargetId: receiverWarFocus,
-      government: {
-        ...receiver.government,
-        stability: StabilityCalculator.clampStability(
-          receiver.government.stability + receiverStabBonus,
-        ),
-      },
       relations: {
         ...receiver.relations,
         [receiverRel.targetNationId]: updatedReceiverRel,

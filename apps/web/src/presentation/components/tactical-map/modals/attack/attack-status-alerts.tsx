@@ -57,7 +57,7 @@ export function AttackStatusAlerts({
               حمله غافلگیرانه بدون اعلان جنگ رسمی
             </span>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              تهاجم بدون صدور بیانیه قبلی باعث کسر ۱۰ امتیاز اعتبار بین‌المللی
+              تهاجم بدون صدور بیانیه قبلی باعث کسر ۱۵ امتیاز اعتبار بین‌المللی
               خواهد شد.
             </p>
           </div>

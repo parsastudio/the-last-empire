@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { GOVERNMENT_TRAITS_MAP } from "@/domain/politics/government-traits.config";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class MilitaryPowerCalculator {
   public static calculateLandAndAirPower(nation: Nation): number {
@@ -10,29 +11,58 @@ export class MilitaryPowerCalculator {
     const airForce = nation.military.airForce || 0;
     const droneMissile = nation.military.droneMissile || 0;
 
-    const rawPower =
-      infantry * MILITARY_UNIT_STATS.INFANTRY.weightPower +
-      armor * MILITARY_UNIT_STATS.ARMOR.weightPower +
-      airDefense * MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower +
-      airForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower +
-      droneMissile * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower;
+    const infTech = MilitaryInventoryHelper.getBranchTech(
+      nation.military,
+      "INFANTRY",
+    );
+    const armTech = MilitaryInventoryHelper.getBranchTech(
+      nation.military,
+      "ARMOR",
+    );
+    const adTech = MilitaryInventoryHelper.getBranchTech(
+      nation.military,
+      "AIR_DEFENSE",
+    );
+    const afTech = MilitaryInventoryHelper.getBranchTech(
+      nation.military,
+      "AIR_FORCE",
+    );
+    const drTech = MilitaryInventoryHelper.getBranchTech(
+      nation.military,
+      "DRONE_MISSILE",
+    );
 
-    const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = 1 + (techLevel - 1) * 0.5;
+    const infMult = 1 + (infTech - 1) * 0.5;
+    const armMult = 1 + (armTech - 1) * 0.5;
+    const adMult = 1 + (adTech - 1) * 0.5;
+    const afMult = 1 + (afTech - 1) * 0.5;
+    const drMult = 1 + (drTech - 1) * 0.5;
+
+    const rawPower =
+      infantry * MILITARY_UNIT_STATS.INFANTRY.weightPower * infMult +
+      armor * MILITARY_UNIT_STATS.ARMOR.weightPower * armMult +
+      airDefense * MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower * adMult +
+      airForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower * afMult +
+      droneMissile * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower * drMult;
+
     const govTraits = GOVERNMENT_TRAITS_MAP[nation.government.type];
 
-    return Math.floor(rawPower * techMult * govTraits.militaryPowerMultiplier);
+    return Math.floor(rawPower * govTraits.militaryPowerMultiplier);
   }
 
   public static calculateNavalPower(nation: Nation): number {
     const navalFleet = nation.military.navalFleet || 0;
-    const rawPower = navalFleet * MILITARY_UNIT_STATS.NAVAL_FLEET.weightPower;
+    const nvTech = MilitaryInventoryHelper.getBranchTech(
+      nation.military,
+      "NAVAL_FLEET",
+    );
+    const nvMult = 1 + (nvTech - 1) * 0.5;
 
-    const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = 1 + (techLevel - 1) * 0.5;
+    const rawPower =
+      navalFleet * MILITARY_UNIT_STATS.NAVAL_FLEET.weightPower * nvMult;
     const govTraits = GOVERNMENT_TRAITS_MAP[nation.government.type];
 
-    return Math.floor(rawPower * techMult * govTraits.militaryPowerMultiplier);
+    return Math.floor(rawPower * govTraits.militaryPowerMultiplier);
   }
 
   public static calculateEffectivePower(

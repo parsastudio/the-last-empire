@@ -74,7 +74,7 @@ export class NationProfileAssigner {
       navalFleet: 0,
       experience: 10,
       techLevel,
-      inventory: {},
+      branchTech: MilitaryInventoryHelper.initializeBranchTech(techLevel),
     };
 
     baseMilitary = MilitaryInventoryHelper.addUnits(

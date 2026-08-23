@@ -81,7 +81,7 @@ export function useDiplomacyActionsRunner({
     );
     await dispatchAction(
       action,
-      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید (+۱۵ دیدگاه، +۳ اعتبار جهانی).`,
+      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید (+۱۵ دیدگاه، +۱ اعتبار جهانی).`,
     );
   };
 
@@ -93,7 +93,7 @@ export function useDiplomacyActionsRunner({
     );
     await dispatchAction(
       action,
-      `پیشنهاد معاهده اتحاد کامل به ${targetName} ارسال گردید (+۳۰ دیدگاه، +۶ اعتبار جهانی).`,
+      `پیشنهاد معاهده اتحاد کامل به ${targetName} ارسال گردید (+۳۰ دیدگاه، +۱ اعتبار جهانی).`,
     );
   };
 
@@ -105,7 +105,7 @@ export function useDiplomacyActionsRunner({
     );
     await dispatchAction(
       action,
-      `بیانیه رسمی اعلان جنگ به ${targetName} ابلاغ گردید (-۱۰ اعتبار جهانی).`,
+      `بیانیه رسمی اعلان جنگ به ${targetName} ابلاغ گردید (-۵ اعتبار جهانی).`,
     );
   };
 

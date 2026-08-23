@@ -28,7 +28,6 @@ export class NationGeographySyncer {
             airForce: 0,
             droneMissile: 0,
             navalFleet: 0,
-            inventory: {},
           },
           geography: {
             ...nation.geography,

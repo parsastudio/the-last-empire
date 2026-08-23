@@ -1,7 +1,6 @@
 import React from "react";
 import { LucideIcon } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { UnitTechBreakdownBadge } from "@/presentation/components/tactical-map/sidebar/components/unit-tech-breakdown-badge";
 
 interface MilitaryForceUnitCardProps {
   icon: LucideIcon;
@@ -9,7 +8,7 @@ interface MilitaryForceUnitCardProps {
   name: string;
   payrollCost: number;
   count: number;
-  breakdown: Record<number, number>;
+  techRating: number;
 }
 
 export function MilitaryForceUnitCard({
@@ -18,10 +17,14 @@ export function MilitaryForceUnitCard({
   name,
   payrollCost,
   count,
-  breakdown,
+  techRating,
 }: MilitaryForceUnitCardProps) {
+  const formattedTech = PersianNumberFormatter.toPersianDigits(
+    techRating.toFixed(1),
+  );
+
   return (
-    <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex flex-col justify-between space-y-1">
+    <div className="bg-background/50 border border-border/70 p-3.5 rounded-2xl flex flex-col justify-between space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Icon size={14} className={`${iconColorClass} shrink-0`} />
@@ -34,13 +37,21 @@ export function MilitaryForceUnitCard({
             </span>
           </div>
         </div>
-        <span className="text-xs font-extrabold text-foreground">
+        <span className="text-xs font-extrabold text-foreground font-mono">
           {PersianNumberFormatter.toPersianDigits(
             count.toLocaleString("en-US"),
           )}
         </span>
       </div>
-      <UnitTechBreakdownBadge breakdown={breakdown} />
+
+      <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[10px] font-mono">
+        <span className="text-muted-foreground font-sans text-[9px]">
+          فناوری میانگین:
+        </span>
+        <span className="font-bold text-amber-500 bg-secondary/80 px-2 py-0.5 rounded-md border border-border/50">
+          لِوِل {formattedTech}
+        </span>
+      </div>
     </div>
   );
 }
