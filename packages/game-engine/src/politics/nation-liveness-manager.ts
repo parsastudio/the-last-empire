@@ -2,6 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class NationLivenessManager {
   public updateLiveness(state: GameState): GameState {
@@ -11,10 +12,9 @@ export class NationLivenessManager {
 
     for (const [id, nation] of Object.entries(updatedNations)) {
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
-      const hasTerritory = (nation.geography?.territoryPixelCount ?? 0) > 0;
-      const hasPopulation = (nation.population ?? 0) > 0;
+      const isAlive = NationGettersUtility.isAlive(id, state.provinces);
 
-      if (nation.isAlive && (!hasTerritory || !hasPopulation)) {
+      if (nation.isAlive && !isAlive) {
         deadCanonicalIds.add(canonicalId);
         deadCanonicalIds.add(id);
 
@@ -32,11 +32,9 @@ export class NationLivenessManager {
         updatedNations[id] = {
           ...nation,
           isAlive: false,
-          population: 0,
           treasury: 0,
           nationalDebt: 0,
           warFocusTargetId: null,
-          provinceIds: [],
           recruitmentQueue: [],
           executedEspionageTiers: [],
           military: {
@@ -47,13 +45,6 @@ export class NationLivenessManager {
             airForce: 0,
             droneMissile: 0,
             navalFleet: 0,
-          },
-          geography: {
-            ...nation.geography,
-            territoryPixelCount: 0,
-            hasSeaAccess: false,
-            landNeighbors: [],
-            seaNeighbors: [],
           },
           relations: {},
         };
@@ -97,29 +88,10 @@ export class NationLivenessManager {
         nextWarFocus = null;
       }
 
-      const nextLandNeighbors = nation.geography.landNeighbors.filter(
-        (neighborId) =>
-          !deadCanonicalIds.has(
-            CountryRegistry.resolveCanonicalId(neighborId),
-          ) && !deadCanonicalIds.has(neighborId),
-      );
-
-      const nextSeaNeighbors = nation.geography.seaNeighbors.filter(
-        (neighborId) =>
-          !deadCanonicalIds.has(
-            CountryRegistry.resolveCanonicalId(neighborId),
-          ) && !deadCanonicalIds.has(neighborId),
-      );
-
       updatedNations[id] = {
         ...nation,
         warFocusTargetId: nextWarFocus,
         relations: relationsChanged ? updatedRelations : nation.relations,
-        geography: {
-          ...nation.geography,
-          landNeighbors: nextLandNeighbors,
-          seaNeighbors: nextSeaNeighbors,
-        },
       };
     }
 

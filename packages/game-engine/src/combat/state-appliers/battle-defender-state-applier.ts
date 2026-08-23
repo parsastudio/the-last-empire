@@ -1,9 +1,7 @@
 import { Nation, CountryRegistry } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { DemographicsTransferResult } from "@/engine/combat/conquest/demographics-transfer-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
-import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export interface DefenderStateApplierInput {
@@ -12,7 +10,6 @@ export interface DefenderStateApplierInput {
   canonicalAttackerId: string;
   calcResult: BattleCalculationResult;
   conquest: ProvinceConquestResult;
-  transfer: DemographicsTransferResult;
   isDefenderAlive: boolean;
 }
 
@@ -73,7 +70,7 @@ export class BattleDefenderStateApplier {
         )
       : 0;
 
-    const interimDefender: Nation = {
+    return {
       ...defender,
       isAlive: isDefenderAlive,
       government: {
@@ -87,12 +84,5 @@ export class BattleDefenderStateApplier {
       relations: isDefenderAlive ? updatedRelations : {},
       warFocusTargetId: isDefenderAlive ? nextWarFocus : null,
     };
-
-    const { syncedNation } = NationGeographySyncer.sync(
-      interimDefender,
-      conquest.remainingDefenderProvinces,
-    );
-
-    return syncedNation;
   }
 }

@@ -8,6 +8,7 @@ import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { NationGettersUtility, getNationGdp } from "@geopolitics/domain";
 
 export interface UpgradePlanResult {
   actions: GameAction[];
@@ -25,11 +26,14 @@ export class AIUpgradePlanner {
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
     const actions: GameAction[] = [];
 
+    const pop = NationGettersUtility.getPopulation(nation.id, provincesMap);
+    const maxCap = NationGettersUtility.getMaxPopulationCapacity(
+      nation.id,
+      provincesMap,
+    );
+
     const capacityPercentage =
-      DemographicsCalculator.calculateCapacityPercentage(
-        nation.population,
-        nation.maxPopulationCapacity,
-      );
+      DemographicsCalculator.calculateCapacityPercentage(pop, maxCap);
 
     const posture = AIProcurementPlanner.evaluatePosture(
       nation,
@@ -37,7 +41,8 @@ export class AIUpgradePlanner {
       provincesMap,
     );
 
-    const devCost = DevelopmentManager.getUpgradeCost(nation);
+    const gdp = getNationGdp(nation, provincesMap);
+    const devCost = DevelopmentManager.getUpgradeCost(gdp);
     const isUnderHousingPressure = capacityPercentage >= 90;
     const hasDevelopmentSurplus = currentTreasury >= Math.floor(devCost * 1.25);
 
@@ -80,17 +85,6 @@ export class AIUpgradePlanner {
     const currentTech = nation.military.techLevel;
 
     if (!provincesMap) {
-      for (const neighborId of nation.geography.landNeighbors || []) {
-        const canonical = CountryRegistry.resolveCanonicalId(neighborId);
-        const neighbor = allNations[canonical] || allNations[neighborId];
-        if (
-          neighbor &&
-          neighbor.isAlive &&
-          neighbor.military.techLevel > currentTech
-        ) {
-          return true;
-        }
-      }
       return false;
     }
 
@@ -98,10 +92,15 @@ export class AIUpgradePlanner {
       if (!otherNation.isAlive || otherNation.id === nation.id) continue;
       if (otherNation.military.techLevel <= currentTech) continue;
 
-      for (const pid of otherNation.provinceIds || []) {
+      const otherProvs = NationGettersUtility.getOwnedProvinces(
+        otherNation.id,
+        provincesMap,
+      );
+
+      for (const prov of otherProvs) {
         if (
           LandNeighborResolver.hasProvinceLandBorder(
-            pid,
+            prov.provinceId,
             nation.id,
             provincesMap,
           )

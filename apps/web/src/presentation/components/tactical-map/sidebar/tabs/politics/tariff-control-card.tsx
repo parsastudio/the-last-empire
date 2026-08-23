@@ -4,9 +4,10 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { TariffCalculator } from "@/engine/economy/calculators/tariff-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
 import { TaxSlider } from "@/presentation/components/tactical-map/sidebar/tabs/politics/components/tax-slider";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface TariffPolicyTier {
   rate: number;
@@ -48,19 +49,17 @@ interface TariffControlCardProps {
   initialTariffRate?: number;
   nationId: string;
   hasSeaAccess?: boolean;
-  gdp?: number;
-  unlockedDoctrines?: string[];
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   nation?: Nation;
 }
 
 export function TariffControlCard({
   initialTariffRate = 10,
   nationId,
-  hasSeaAccess = true,
-  gdp = 450000000000,
-  unlockedDoctrines = [],
+  hasSeaAccess: directSeaAccess,
   nationsMap,
+  provincesMap,
   nation,
 }: TariffControlCardProps) {
   const [userTariffRate, setUserTariffRate] = useState<number | null>(null);
@@ -88,21 +87,17 @@ export function TariffControlCard({
     if (nation) {
       return { ...nation, tariffRate };
     }
-    const cleanId = CountryRegistry.resolveCanonicalId(nationId);
     return {
-      id: cleanId,
+      id: nationId,
       name: "کشور",
       isAi: false,
       isAlive: true,
       flagCode: "IR",
       rank: 1,
-      perCapitaProductivity: Math.floor(gdp / 80000000),
-      maxPopulationCapacity: 100000000,
       taxRate: 15,
       tariffRate,
       treasury: 100000,
       nationalDebt: 0,
-      population: 80000000,
       industrialLevel: 1,
       government: { type: "DEMOCRACY", stability: 80, turnsInPower: 1 },
       military: {
@@ -116,31 +111,27 @@ export function TariffControlCard({
         techLevel: 1,
       },
       recruitmentQueue: [],
-      geography: {
-        landNeighbors: [],
-        seaNeighbors: [],
-        hasSeaAccess,
-        territoryPixelCount: 1000,
-        infrastructureLevel: 1,
-      },
       relations: {},
       activeModifiers: [],
       globalReputation: 50,
-      doctrines: { unlockedDoctrines },
-      provinceIds: [],
+      doctrines: { unlockedDoctrines: [] },
       executedEspionageTiers: [],
       warFocusTargetId: null,
     };
-  }, [nation, nationId, tariffRate, gdp, hasSeaAccess, unlockedDoctrines]);
+  }, [nation, nationId, tariffRate]);
 
   const tariffCalculation = useMemo(() => {
     return TariffCalculator.calculateTariffEffects(
       currentNationState,
       nationsMap,
+      provincesMap,
     );
-  }, [currentNationState, nationsMap]);
+  }, [currentNationState, nationsMap, provincesMap]);
 
-  const isSeaAccessible = currentNationState.geography.hasSeaAccess;
+  const isSeaAccessible =
+    directSeaAccess !== undefined
+      ? directSeaAccess
+      : NationGettersUtility.hasSeaAccess(nationId, provincesMap);
 
   return (
     <div className="space-y-2.5 font-sans dir-rtl text-right">

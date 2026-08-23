@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export type GeopoliticalReachTier =
   | "SUPERPOWER"
@@ -32,10 +33,7 @@ export class GeopoliticalReachResolver {
     provincesMap?: Record<string, Province>,
   ): boolean {
     if (!provincesMap) {
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
-      return source.geography.landNeighbors.some(
-        (id) => CountryRegistry.resolveCanonicalId(id) === canonicalTarget,
-      );
+      return false;
     }
 
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
@@ -65,24 +63,25 @@ export class GeopoliticalReachResolver {
     target: Nation,
     provincesMap?: Record<string, Province>,
   ): boolean {
-    if (!source.geography.hasSeaAccess || !target.geography.hasSeaAccess) {
+    if (!provincesMap) {
+      return false;
+    }
+
+    const sourceSea = NationGettersUtility.hasSeaAccess(
+      source.id,
+      provincesMap,
+    );
+    const targetSea = NationGettersUtility.hasSeaAccess(
+      target.id,
+      provincesMap,
+    );
+
+    if (!sourceSea || !targetSea) {
       return false;
     }
 
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const canonicalSource = CountryRegistry.resolveCanonicalId(source.id);
-
-    if (
-      source.geography.seaNeighbors.some(
-        (id) => CountryRegistry.resolveCanonicalId(id) === canonicalTarget,
-      )
-    ) {
-      return true;
-    }
-
-    if (!provincesMap) {
-      return false;
-    }
 
     for (const prov of Object.values(provincesMap)) {
       if (
@@ -113,16 +112,25 @@ export class GeopoliticalReachResolver {
     target: Nation,
     provincesMap?: Record<string, Province>,
   ): boolean {
-    if (!source.geography.hasSeaAccess || !target.geography.hasSeaAccess) {
+    if (!provincesMap) {
+      return false;
+    }
+
+    const sourceSea = NationGettersUtility.hasSeaAccess(
+      source.id,
+      provincesMap,
+    );
+    const targetSea = NationGettersUtility.hasSeaAccess(
+      target.id,
+      provincesMap,
+    );
+
+    if (!sourceSea || !targetSea) {
       return false;
     }
 
     if (this.isImmediateMaritimeNeighbor(source, target, provincesMap)) {
       return true;
-    }
-
-    if (!provincesMap) {
-      return false;
     }
 
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);

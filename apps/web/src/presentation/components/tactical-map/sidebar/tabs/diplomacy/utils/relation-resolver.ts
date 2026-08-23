@@ -6,6 +6,7 @@ import {
   Province,
   CountryDefaultsUtility,
   getNationGdp,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
@@ -80,8 +81,12 @@ export function resolveProfileRelation(
   const profile = CountryRegistry.getCountry(code);
   const fallback = CountryDefaultsUtility.getFallbackProfile(code, profile);
 
-  const realGdpNum = liveNation ? getNationGdp(liveNation) : fallback.gdp;
-  const realPopNum = liveNation ? liveNation.population : fallback.population;
+  const realGdpNum = liveNation
+    ? getNationGdp(liveNation, provincesMap)
+    : fallback.gdp;
+  const realPopNum = liveNation
+    ? NationGettersUtility.getPopulation(liveNation.id, provincesMap)
+    : fallback.population;
   const name = liveNation ? liveNation.name : fallback.nameFa;
   const displayCode = profile
     ? profile.code

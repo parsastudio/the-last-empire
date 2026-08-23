@@ -117,7 +117,7 @@ export class GlobalAiInitializer {
       nations[cleanId] = nation;
     }
 
-    const rankedNations = RankManager.recalculateRanks(nations);
+    const rankedNations = RankManager.recalculateRanks(nations, provinces);
 
     return { nations: rankedNations, provinces };
   }
@@ -164,7 +164,7 @@ export class GlobalAiInitializer {
       nations[nation.id] = nation;
     }
 
-    const rankedNations = RankManager.recalculateRanks(nations);
+    const rankedNations = RankManager.recalculateRanks(nations, provinces);
 
     return { nations: rankedNations, provinces };
   }

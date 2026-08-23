@@ -28,6 +28,7 @@ export function useWideDiplomacy({
 
   const { filteredNations: liveNationsList } = useLiveNations({
     nationsMap,
+    provincesMap,
     excludeNationId: activeHumanId,
     searchQuery,
   });
@@ -68,8 +69,8 @@ export function useWideDiplomacy({
 
   const selectedTargetGdp = useMemo(() => {
     if (!selectedTargetNation) return 100000000000;
-    return getNationGdp(selectedTargetNation);
-  }, [selectedTargetNation]);
+    return getNationGdp(selectedTargetNation, provincesMap);
+  }, [selectedTargetNation, provincesMap]);
 
   const selectedRelation = useMemo(() => {
     return resolveProfileRelation(

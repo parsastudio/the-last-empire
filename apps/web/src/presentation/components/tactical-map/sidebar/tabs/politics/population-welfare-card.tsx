@@ -1,34 +1,30 @@
 import React, { useMemo } from "react";
 import { Users, Building2, HeartPulse, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { Nation } from "@/domain/nation/nation.schema";
 import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 
 interface PopulationWelfareCardProps {
   population?: number;
   maxPopulationCapacity?: number;
-  nation?: Nation;
+  stability?: number;
 }
 
 export function PopulationWelfareCard({
   population = 80000000,
-  maxPopulationCapacity,
-  nation,
+  maxPopulationCapacity = 100000000,
+  stability = 80,
 }: PopulationWelfareCardProps) {
-  const currentPop = nation ? nation.population : population;
-  const currentCap = nation
-    ? nation.maxPopulationCapacity
-    : maxPopulationCapacity;
-
-  const metrics = DemographicsCalculator.getMetrics(currentPop, currentCap);
-  const stability = nation ? nation.government.stability : 80;
+  const metrics = DemographicsCalculator.getMetrics(
+    population,
+    maxPopulationCapacity,
+  );
 
   const formattedPop = useMemo(() => {
-    if (currentPop >= 1e9) {
-      return `${PersianNumberFormatter.toPersianDigits((currentPop / 1e9).toFixed(2))} میلیارد نفر`;
+    if (population >= 1e9) {
+      return `${PersianNumberFormatter.toPersianDigits((population / 1e9).toFixed(2))} میلیارد نفر`;
     }
-    return `${PersianNumberFormatter.toPersianDigits((currentPop / 1e6).toFixed(1))} میلیون نفر`;
-  }, [currentPop]);
+    return `${PersianNumberFormatter.toPersianDigits((population / 1e6).toFixed(1))} میلیون نفر`;
+  }, [population]);
 
   const demographicStatus = useMemo(() => {
     if (stability > 60) {

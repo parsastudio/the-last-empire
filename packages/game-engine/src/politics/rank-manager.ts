@@ -1,18 +1,26 @@
-import { Nation } from "@/domain/nation/nation.schema";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import {
+  Nation,
+  Province,
+  getNationGdp,
+  NationGettersUtility,
+} from "@geopolitics/domain";
 
 export class RankManager {
   public static recalculateRanks(
     nations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
   ): Record<string, Nation> {
     const updatedNations: Record<string, Nation> = { ...nations };
 
     const sortedAliveNations = Object.values(updatedNations)
       .filter((n) => n.isAlive)
       .sort((a, b) => {
-        const gdpDiff = getNationGdp(b) - getNationGdp(a);
+        const gdpDiff =
+          getNationGdp(b, provincesMap) - getNationGdp(a, provincesMap);
         if (gdpDiff !== 0) return gdpDiff;
-        const popDiff = b.population - a.population;
+        const popB = NationGettersUtility.getPopulation(b.id, provincesMap);
+        const popA = NationGettersUtility.getPopulation(a.id, provincesMap);
+        const popDiff = popB - popA;
         if (popDiff !== 0) return popDiff;
         return a.id.localeCompare(b.id);
       });

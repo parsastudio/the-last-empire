@@ -6,6 +6,7 @@ import {
   UnitType,
   MilitaryPricingCalculator,
   getNationGdp,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
@@ -32,7 +33,7 @@ export class AIProcurementPlanner {
     const effectiveTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
-    const gdp = getNationGdp(nation);
+    const gdp = getNationGdp(nation, provincesMap);
     const aliveCount = Object.values(allNations).filter(
       (n) => n.isAlive,
     ).length;
@@ -62,9 +63,11 @@ export class AIProcurementPlanner {
       return { actions: [], remainingTreasury: effectiveTreasury };
     }
 
+    const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
+
     const ratios = this.getUnitRatios(
       nation.military.techLevel,
-      nation.geography.hasSeaAccess,
+      hasSea,
       posture,
       nation.military.infantry,
     );

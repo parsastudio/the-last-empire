@@ -1,27 +1,21 @@
-import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 
 export interface DemographicsResult {
-  updatedNation: Nation;
   updatedProvinces: Province[];
   naturalChange: number;
 }
 
 export class DemographicsEngine {
   public static processNaturalDemographics(
-    nation: Nation,
+    stability: number,
     ownedProvinces: Province[],
   ): DemographicsResult {
     if (ownedProvinces.length === 0) {
       return {
-        updatedNation: nation,
         updatedProvinces: [],
         naturalChange: 0,
       };
     }
-
-    const stability = nation.government.stability;
 
     let growthRate = 0;
     if (stability > 60) {
@@ -60,13 +54,7 @@ export class DemographicsEngine {
       });
     }
 
-    const { syncedNation } = NationGeographySyncer.sync(
-      nation,
-      updatedProvinces,
-    );
-
     return {
-      updatedNation: syncedNation,
       updatedProvinces,
       naturalChange: totalNaturalChange,
     };

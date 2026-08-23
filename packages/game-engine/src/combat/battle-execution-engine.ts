@@ -8,10 +8,10 @@ import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resol
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AllianceInterventionEvaluator } from "@/engine/combat/alliance-intervention-evaluator";
 import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
-import { DemographicsTransferCalculator } from "@/engine/combat/conquest/demographics-transfer-calculator";
 import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
 import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -67,7 +67,14 @@ export class BattleExecutionEngine {
       action.airForceToDeploy,
       action.attackType,
       navalCostMultiplier,
+      state.provinces,
     );
+
+    const defPixels =
+      NationGettersUtility.getTerritoryPixelCount(
+        defender.id,
+        state.provinces,
+      ) || 1;
 
     const conquest = ProvinceConquestHandler.handleConquest(
       state.provinces,
@@ -78,17 +85,12 @@ export class BattleExecutionEngine {
       calcResult.isAttackerVictory,
       calcResult.isFullCapitulation,
       action.targetProvinceId,
-      defender.geography.territoryPixelCount || 1,
+      defPixels,
     );
 
     const isDefenderAlive =
       conquest.remainingDefenderProvinces.length > 0 &&
       !calcResult.isFullCapitulation;
-
-    const transfer = DemographicsTransferCalculator.calculateTransfer(
-      conquest.conqueredProvincesList,
-      calcResult.isAttackerVictory,
-    );
 
     const updatedAttacker = BattleAttackerStateApplier.apply({
       attacker,
@@ -97,7 +99,6 @@ export class BattleExecutionEngine {
       defenderTechLevel: defender.military.techLevel,
       calcResult,
       conquest,
-      transfer,
       currentStance,
       betrayalResult,
     });
@@ -108,7 +109,6 @@ export class BattleExecutionEngine {
       canonicalAttackerId,
       calcResult,
       conquest,
-      transfer,
       isDefenderAlive,
     });
 
@@ -146,6 +146,7 @@ export class BattleExecutionEngine {
 
     const rankedNations = RankManager.recalculateRanks(
       intervention.updatedNations,
+      conquest.updatedProvinces,
     );
 
     const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];

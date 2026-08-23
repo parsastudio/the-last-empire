@@ -1,8 +1,10 @@
 import { useMemo } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface LiveNationItem {
   id: string;
@@ -20,12 +22,14 @@ export interface LiveNationItem {
 
 interface UseLiveNationsProps {
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   excludeNationId?: string;
   searchQuery?: string;
 }
 
 export function useLiveNations({
   nationsMap,
+  provincesMap,
   excludeNationId,
   searchQuery = "",
 }: UseLiveNationsProps) {
@@ -58,16 +62,22 @@ export function useLiveNations({
               sourceNation,
               n,
               nationsMap,
+              provincesMap,
             )
           : true;
+
+        const population = NationGettersUtility.getPopulation(
+          n.id,
+          provincesMap,
+        );
 
         return {
           id: canonical,
           name: n.name,
           code,
           flagCode,
-          gdp: getNationGdp(n),
-          population: n.population,
+          gdp: getNationGdp(n, provincesMap),
+          population,
           stability: n.government.stability,
           governmentType: n.government.type,
           isAlive: n.isAlive,
@@ -75,7 +85,7 @@ export function useLiveNations({
           rawNation: n,
         };
       });
-  }, [nationsMap, excludeNationId]);
+  }, [nationsMap, provincesMap, excludeNationId]);
 
   const filteredNations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();

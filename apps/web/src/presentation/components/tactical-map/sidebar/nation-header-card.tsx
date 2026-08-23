@@ -1,10 +1,5 @@
 import React, { useMemo } from "react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import {
-  findCountryProfileById,
-  findCountryProfileByCode,
-  CountryRegistry,
-} from "@/domain/data/countries";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 interface NationHeaderCardProps {
@@ -23,27 +18,10 @@ export function NationHeaderCard({
   flagCode,
   governmentType,
   population,
-  territoryPixelCount,
+  territoryPixelCount = 0,
   rank = 1,
 }: NationHeaderCardProps) {
   const formatted = useMemo(() => {
-    let realPixels =
-      territoryPixelCount && territoryPixelCount > 0 ? territoryPixelCount : 0;
-    if (!realPixels) {
-      const numericId = CountryRegistry.resolveNumericId(code);
-      const profile =
-        findCountryProfileById(numericId) || findCountryProfileByCode(code);
-      realPixels = profile ? Math.round(profile.gdp / 10000000) : 4000;
-    }
-
-    let realPop = population;
-    if (!realPop || realPop <= 0) {
-      const numericId = CountryRegistry.resolveNumericId(code);
-      const profile =
-        findCountryProfileById(numericId) || findCountryProfileByCode(code);
-      realPop = profile ? profile.population : 80000000;
-    }
-
     const summary = NationPresentationMapper.formatNationSummary(
       code,
       name,
@@ -51,14 +29,14 @@ export function NationHeaderCard({
       flagCode,
       rank,
       0,
-      realPop,
+      population,
       governmentType,
     );
 
     return {
       flagEmoji: summary.flagEmoji,
       formattedPixels:
-        NationPresentationMapper.formatTerritoryPixels(realPixels),
+        NationPresentationMapper.formatTerritoryPixels(territoryPixelCount),
       formattedPopulation: summary.populationText,
       governmentLabel: summary.governmentLabel,
     };

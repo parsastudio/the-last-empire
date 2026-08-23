@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface VictoryProgressMetrics {
   territorySharePct: number;
@@ -42,11 +43,14 @@ export class VictoryProgressCalculator {
       };
     }
 
-    const totalWorldTerritory = aliveNations.reduce(
-      (sum, n) => sum + (n.geography?.territoryPixelCount || 0),
+    const totalWorldTerritory = Object.values(state.provinces || {}).reduce(
+      (sum, p) => sum + (p.pixelCount || 0),
       0,
     );
-    const nationTerritory = targetNation.geography?.territoryPixelCount || 0;
+    const nationTerritory = NationGettersUtility.getTerritoryPixelCount(
+      targetNation.id,
+      state.provinces,
+    );
     const territorySharePct =
       totalWorldTerritory > 0
         ? (nationTerritory / totalWorldTerritory) * 100
@@ -54,10 +58,10 @@ export class VictoryProgressCalculator {
     const territoryProgressPct = Math.min(100, (territorySharePct / 80) * 100);
 
     const totalGlobalGdp = aliveNations.reduce(
-      (sum, n) => sum + getNationGdp(n),
+      (sum, n) => sum + getNationGdp(n, state.provinces),
       0,
     );
-    const nationGdp = getNationGdp(targetNation);
+    const nationGdp = getNationGdp(targetNation, state.provinces);
     const gdpSharePct =
       totalGlobalGdp > 0 ? (nationGdp / totalGlobalGdp) * 100 : 0;
     const gdpProgressPct = Math.min(100, (gdpSharePct / 60) * 100);

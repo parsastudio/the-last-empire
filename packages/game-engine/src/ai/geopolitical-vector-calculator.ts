@@ -6,6 +6,7 @@ import {
   NationRelationResolver,
   GeopoliticalReachResolver,
   MilitaryPowerCalculator,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 
 export interface GeopoliticalVector {
@@ -88,9 +89,15 @@ export class GeopoliticalVectorCalculator {
         provincesMap,
       );
 
-    const isNavalReachable = Boolean(
-      source.geography.hasSeaAccess && target.geography.hasSeaAccess,
+    const sourceSea = NationGettersUtility.hasSeaAccess(
+      source.id,
+      provincesMap,
     );
+    const targetSea = NationGettersUtility.hasSeaAccess(
+      target.id,
+      provincesMap,
+    );
+    const isNavalReachable = Boolean(sourceSea && targetSea);
 
     const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
 

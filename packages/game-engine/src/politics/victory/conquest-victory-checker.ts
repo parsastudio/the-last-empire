@@ -1,5 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface VictoryStatus {
   isGameOver: boolean;
@@ -31,15 +32,18 @@ export class ConquestVictoryChecker implements VictoryCondition {
       };
     }
 
-    const totalWorldTerritory = aliveNations.reduce(
-      (sum, n) => sum + (n.geography?.territoryPixelCount || 0),
+    const totalWorldTerritory = Object.values(state.provinces || {}).reduce(
+      (sum, p) => sum + (p.pixelCount || 0),
       0,
     );
 
     if (totalWorldTerritory > 0) {
       for (const nation of aliveNations) {
-        const territoryShare =
-          (nation.geography?.territoryPixelCount || 0) / totalWorldTerritory;
+        const nationPixels = NationGettersUtility.getTerritoryPixelCount(
+          nation.id,
+          state.provinces,
+        );
+        const territoryShare = nationPixels / totalWorldTerritory;
         if (territoryShare >= 0.8) {
           return {
             isGameOver: true,

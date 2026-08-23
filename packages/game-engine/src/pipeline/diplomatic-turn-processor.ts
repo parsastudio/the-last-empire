@@ -1,6 +1,7 @@
 import {
   GameState,
   Nation,
+  Province,
   RelationProfile,
   CountryRegistry,
 } from "@geopolitics/domain";
@@ -25,6 +26,7 @@ export class DiplomaticTurnProcessor {
   public static process(
     nation: Nation,
     allNations?: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
   ): {
     updatedNation: Nation;
     isAtWar: boolean;
@@ -78,6 +80,7 @@ export class DiplomaticTurnProcessor {
             nation,
             targetNation,
             allNations,
+            provincesMap,
           )
         : null;
 

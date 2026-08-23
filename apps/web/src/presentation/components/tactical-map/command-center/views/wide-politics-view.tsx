@@ -6,27 +6,36 @@ import { ActiveModifiersCard } from "@/presentation/components/tactical-map/side
 import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
 import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 interface WidePoliticsViewProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
 }
 
 export function WidePoliticsView({
   nation,
   nationsMap,
+  provincesMap,
 }: WidePoliticsViewProps) {
-  const gdp = getNationGdp(nation);
+  const gdp = getNationGdp(nation, provincesMap);
+  const pop = NationGettersUtility.getPopulation(nation.id, provincesMap);
+  const maxCap = NationGettersUtility.getMaxPopulationCapacity(
+    nation.id,
+    provincesMap,
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard modifiers={nation.activeModifiers} />
         <PopulationWelfareCard
-          population={nation.population}
-          maxPopulationCapacity={nation.maxPopulationCapacity}
-          nation={nation}
+          population={pop}
+          maxPopulationCapacity={maxCap}
+          stability={nation.government.stability}
         />
         <TaxControlCard
           taxRate={nation.taxRate}
@@ -39,9 +48,8 @@ export function WidePoliticsView({
         <TariffControlCard
           initialTariffRate={nation.tariffRate}
           nationId={nation.id}
-          hasSeaAccess={nation.geography.hasSeaAccess}
-          gdp={gdp}
           nationsMap={nationsMap}
+          provincesMap={provincesMap}
           nation={nation}
         />
         <ImfLoanCard
