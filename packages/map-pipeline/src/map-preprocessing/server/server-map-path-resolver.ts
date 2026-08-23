@@ -114,9 +114,7 @@ export class ServerMapPathResolver {
 
     const defaultPath = path.join(essentialDir, "edited-mask.png");
     if (!fs.existsSync(defaultPath)) {
-      throw new Error(
-        `فایل ماسک تصویر نقشه در هیچ‌یک از مسیرهای متداول مانند ${defaultPath} یافت نشد.`,
-      );
+      throw new Error(`فایل ماسک تصویر نقشه در مسیر ${defaultPath} یافت نشد.`);
     }
 
     return defaultPath;
