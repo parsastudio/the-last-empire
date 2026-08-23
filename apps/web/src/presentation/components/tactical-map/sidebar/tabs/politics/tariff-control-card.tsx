@@ -12,7 +12,6 @@ export interface TariffPolicyTier {
   rate: number;
   label: string;
   badge: string;
-  desc: string;
 }
 
 export const TARIFF_POLICY_TIERS: TariffPolicyTier[] = [
@@ -20,31 +19,26 @@ export const TARIFF_POLICY_TIERS: TariffPolicyTier[] = [
     rate: 0,
     label: "تجارت آزاد و مرزهای باز",
     badge: "تجارت آزاد",
-    desc: "صفر شدن تعرفه گمرک جهت تسهیل ترانزیت و ارتقای دیپلماسی تجاری",
   },
   {
     rate: 10,
     label: "تعرفه متعادل حمایتی",
     badge: "پایه و متعادل",
-    desc: "کسب درآمد قانونی از ترانزیت بین‌المللی بدون آسیب به روابط تجاری",
   },
   {
     rate: 25,
     label: "حمایت‌گرایی از تولید داخل",
     badge: "حمایت‌گرایی",
-    desc: "درآمد چشمگیر گمرکی با احتمال کاهش تمایل شرکای تجاری دوردست",
   },
   {
     rate: 35,
     label: "سیاست انقباضی و سهمیه‌بندی",
     badge: "گمرک انقباضی",
-    desc: "درآمد بالا بر روی کالاهای اساسی و محدودسازی شدید واردات خارجی",
   },
   {
     rate: 50,
     label: "جنگ تجاری و مرکانتیلیسم",
     badge: "جنگ تجاری",
-    desc: "تعرفه حداکثری و تحریم متقابل با بیشترین ضربه به حجم تجارت جهانی",
   },
 ];
 
@@ -173,18 +167,13 @@ export function TariffControlCard({
       </div>
 
       <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl space-y-3">
-        <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground">
-              {currentPolicy.label}
-            </span>
-            <span className="text-xs font-mono font-black text-gdp">
-              {PersianNumberFormatter.toPersianDigits(tariffRate)}٪
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            {currentPolicy.desc}
-          </p>
+        <div className="bg-secondary/40 border border-border/50 px-3 py-2 rounded-xl flex items-center justify-between">
+          <span className="text-xs font-bold text-foreground">
+            {currentPolicy.label}
+          </span>
+          <span className="text-xs font-mono font-black text-gdp">
+            {PersianNumberFormatter.toPersianDigits(tariffRate)}٪
+          </span>
         </div>
 
         <TaxSlider
