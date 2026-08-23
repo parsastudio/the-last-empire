@@ -37,10 +37,12 @@ export class EspionageManager {
   public static calculateTechSuperiority(
     sourceNation: Nation,
     targetNation: Nation,
+    provincesMap?: Record<string, import("@geopolitics/domain").Province>,
   ): TechSuperiorityDelta {
     return EspionageCalculator.calculateTechSuperiority(
       sourceNation,
       targetNation,
+      provincesMap,
     );
   }
 
@@ -83,7 +85,7 @@ export class EspionageManager {
       );
     }
 
-    const targetGdp = getNationGdp(target);
+    const targetGdp = getNationGdp(target, state.provinces);
     const cost = EspionageCalculator.calculateOperationCost(
       targetGdp,
       tier,
@@ -100,6 +102,7 @@ export class EspionageManager {
     const superiority = EspionageCalculator.calculateTechSuperiority(
       source,
       target,
+      state.provinces,
     );
     if (tier === 3 && superiority.totalAvailablePoints <= 0) {
       throw new GameError(
@@ -124,6 +127,7 @@ export class EspionageManager {
       executedEspionageTiers: [...executedTiers, tier],
     };
     let updatedTarget: Nation = { ...target };
+    let updatedProvinces = { ...state.provinces };
 
     let reconData: EspionageReconData | undefined;
     let sabotageData: EspionageSabotageData | undefined;
@@ -131,7 +135,7 @@ export class EspionageManager {
     let message = "";
 
     if (tier === 1) {
-      const recon = ReconTierExecutor.execute(target, outcome);
+      const recon = ReconTierExecutor.execute(target, outcome, state.provinces);
       reconData = recon.reconData;
       message = recon.message;
     } else if (tier === 2) {
@@ -146,9 +150,11 @@ export class EspionageManager {
         superiority,
         isSuccess,
         outcome,
+        state.provinces,
       );
       updatedSource = heist.updatedSource;
       updatedTarget = heist.updatedTarget;
+      updatedProvinces = heist.updatedProvinces;
       techTheftData = heist.techTheftData;
       message = heist.message;
     }
@@ -206,6 +212,7 @@ export class EspionageManager {
 
     const newState: GameState = {
       ...state,
+      provinces: updatedProvinces,
       nations: updatedNations,
       turnLogs: [...state.turnLogs, logEntry],
     };

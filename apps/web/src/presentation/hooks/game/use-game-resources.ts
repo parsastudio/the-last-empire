@@ -11,6 +11,7 @@ import {
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -65,11 +66,28 @@ export function useGameResources(
       };
     }
 
-    const taxResult = TaxCalculator.evaluateTaxPolicy(nation);
+    const population = NationGettersUtility.getPopulation(
+      nation.id,
+      gameState.provinces,
+    );
+    const maxCapacity = NationGettersUtility.getMaxPopulationCapacity(
+      nation.id,
+      gameState.provinces,
+    );
+    const productivity = NationGettersUtility.getPerCapitaProductivity(
+      nation.id,
+      gameState.provinces,
+    );
+
+    const taxResult = TaxCalculator.evaluateTaxPolicy(
+      nation,
+      gameState.provinces,
+    );
     const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
     const tariffResult = TariffCalculator.calculateTariffEffects(
       nation,
       gameState.nations,
+      gameState.provinces,
     );
 
     const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
@@ -78,18 +96,18 @@ export function useGameResources(
     const netIncome = totalIncome - totalExpenses;
 
     const demoMetrics = DemographicsCalculator.getMetrics(
-      nation.population,
-      nation.maxPopulationCapacity,
+      population,
+      maxCapacity,
     );
 
     return {
       nation,
       treasury: nation.treasury,
       netIncomePerTurn: netIncome,
-      population: nation.population,
+      population,
       maxPopulationCapacity: demoMetrics.maxPopulationCapacity,
       capacityPercentage: demoMetrics.capacityPercentage,
-      perCapitaProductivity: nation.perCapitaProductivity || 5000,
+      perCapitaProductivity: productivity,
       stability: nation.government.stability,
       currentTurn: gameState.currentTurn,
     };

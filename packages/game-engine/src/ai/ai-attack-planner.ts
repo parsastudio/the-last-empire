@@ -9,6 +9,7 @@ import {
   MilitaryPowerCalculator,
   LandNeighborResolver,
   NavalNeighborResolver,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 
 export class AIAttackPlanner {
@@ -221,10 +222,9 @@ export class AIAttackPlanner {
       return null;
     }
 
-    const cleanTargetId = CountryRegistry.resolveCanonicalId(targetNation.id);
-    const targetProvinceList = Object.values(provincesMap).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanTargetId,
+    const targetProvinceList = NationGettersUtility.getOwnedProvinces(
+      targetNation.id,
+      provincesMap,
     );
 
     if (targetProvinceList.length === 0) {
@@ -247,10 +247,16 @@ export class AIAttackPlanner {
       }
     }
 
-    if (
-      !nation.geography.hasSeaAccess ||
-      !targetNation.geography.hasSeaAccess
-    ) {
+    const sourceSea = NationGettersUtility.hasSeaAccess(
+      nation.id,
+      provincesMap,
+    );
+    const targetSea = NationGettersUtility.hasSeaAccess(
+      targetNation.id,
+      provincesMap,
+    );
+
+    if (!sourceSea || !targetSea) {
       return null;
     }
 

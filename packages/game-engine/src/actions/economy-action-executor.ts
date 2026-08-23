@@ -4,7 +4,6 @@ import { Province } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
-import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class EconomyActionExecutor {
@@ -59,7 +58,9 @@ export class EconomyActionExecutor {
             "مبلغ وام باید بزرگتر از صفر باشد.",
           );
         }
-        const maxManualDebtLimit = Math.floor(getNationGdp(nation) * 0.8);
+        const maxManualDebtLimit = Math.floor(
+          getNationGdp(nation, state.provinces) * 0.8,
+        );
         if (nation.nationalDebt + action.amount > maxManualDebtLimit) {
           throw new GameError(
             "INVALID_ACTION",
@@ -107,7 +108,9 @@ export class EconomyActionExecutor {
       }
 
       case "UPGRADE_DEVELOPMENT": {
-        const cost = DevelopmentManager.getUpgradeCost(nation);
+        const cost = DevelopmentManager.getUpgradeCost(
+          getNationGdp(nation, state.provinces),
+        );
         if (nation.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
@@ -118,7 +121,6 @@ export class EconomyActionExecutor {
         const updatedProvinces: Record<string, Province> = {
           ...state.provinces,
         };
-        const ownedProvs: Province[] = [];
 
         for (const prov of Object.values(state.provinces)) {
           const canonicalOwner = CountryRegistry.resolveCanonicalId(
@@ -139,31 +141,21 @@ export class EconomyActionExecutor {
               infrastructureLevel: nextLevel,
             };
             updatedProvinces[prov.provinceId.toString()] = updatedProv;
-            ownedProvs.push(updatedProv);
           }
         }
 
         const nextLevel = nation.industrialLevel + 1;
-
-        const { syncedNation } = NationGeographySyncer.sync(
-          {
-            ...nation,
-            treasury: nation.treasury - cost,
-            industrialLevel: nextLevel,
-            geography: {
-              ...nation.geography,
-              infrastructureLevel: nextLevel,
-            },
-          },
-          ownedProvs,
-        );
 
         return {
           ...state,
           provinces: updatedProvinces,
           nations: {
             ...state.nations,
-            [nation.id]: syncedNation,
+            [nation.id]: {
+              ...nation,
+              treasury: nation.treasury - cost,
+              industrialLevel: nextLevel,
+            },
           },
         };
       }

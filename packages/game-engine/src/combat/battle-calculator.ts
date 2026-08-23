@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import {
   CasualtyMetrics,
   ReportSeverity,
@@ -12,6 +13,7 @@ import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
 import { GroundEngagementPhase } from "@/engine/combat/phases/ground-engagement-phase";
 import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -41,6 +43,7 @@ export class BattleCalculator {
     airForceToDeploy?: number,
     attackType?: "LAND" | "NAVAL",
     navalCostMultiplier?: number,
+    provincesMap?: Record<string, Province>,
   ): BattleCalculationResult {
     const deployedInfantry = Math.min(
       attacker.military.infantry,
@@ -204,11 +207,13 @@ export class BattleCalculator {
       ? defender.military.navalFleet || 0
       : 0;
 
-    const defenderGdp = getNationGdp(defender);
+    const defenderGdp = getNationGdp(defender, provincesMap);
     const guaranteedLootPool =
       Math.max(0, defender.treasury) + Math.floor(defenderGdp * 0.05);
 
-    const defenderTotalTerritory = defender.geography.territoryPixelCount || 1;
+    const defenderTotalTerritory =
+      NationGettersUtility.getTerritoryPixelCount(defender.id, provincesMap) ||
+      1;
     const treasuryLootRatio = groundPhase.isAttackerVictory
       ? isFullCapitulation
         ? 1.0

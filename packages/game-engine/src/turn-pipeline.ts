@@ -3,10 +3,10 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { RankManager } from "@/engine/politics/rank-manager";
-import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-processor";
 import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
 import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class TurnPipeline {
   public processTurn(state: GameState): GameState {
@@ -39,26 +39,34 @@ export class TurnPipeline {
       if (!nation) continue;
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
-      const ownedProvinces = provincesByOwner.get(canonicalId) || [];
-
-      const { isAlive, syncedNation } = NationGeographySyncer.sync(
-        nation,
-        ownedProvinces,
+      const isAlive = NationGettersUtility.isAlive(
+        canonicalId,
+        updatedProvincesMap,
       );
 
-      if (!isAlive) {
-        updatedNations[id] = syncedNation;
+      if (!isAlive || !nation.isAlive) {
+        updatedNations[id] = {
+          ...nation,
+          isAlive: false,
+        };
         continue;
       }
 
+      const ownedProvinces = provincesByOwner.get(canonicalId) || [];
+
       const { updatedNation: dipNation, isAtWar } =
-        DiplomaticTurnProcessor.process(syncedNation, currentState.nations);
+        DiplomaticTurnProcessor.process(
+          nation,
+          currentState.nations,
+          updatedProvincesMap,
+        );
 
       const { updatedNation: ecoNation, updatedProvinces } =
         EconomyTurnProcessor.process(
           dipNation,
           currentState.nations,
           ownedProvinces,
+          updatedProvincesMap,
         );
 
       for (let p = 0; p < updatedProvinces.length; p++) {
@@ -70,12 +78,16 @@ export class TurnPipeline {
         ecoNation,
         currentState.nations,
         isAtWar,
+        updatedProvincesMap,
       );
 
       updatedNations[id] = polNation;
     }
 
-    const rankedNations = RankManager.recalculateRanks(updatedNations);
+    const rankedNations = RankManager.recalculateRanks(
+      updatedNations,
+      updatedProvincesMap,
+    );
 
     return {
       ...currentState,

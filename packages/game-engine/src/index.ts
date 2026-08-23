@@ -55,7 +55,6 @@ export * from "./orchestrator/turn-progression.orchestrator";
 
 export * from "./pipeline/diplomatic-turn-processor";
 export * from "./pipeline/economy-turn-processor";
-export * from "./pipeline/nation-geography-syncer";
 export * from "./pipeline/politics-turn-processor";
 
 export * from "./politics/doctrines-manager";

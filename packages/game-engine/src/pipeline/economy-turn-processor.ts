@@ -18,16 +18,22 @@ export class EconomyTurnProcessor {
     nation: Nation,
     allNations: Record<string, Nation>,
     ownedProvinces: Province[],
+    provincesMap: Record<string, Province>,
   ): { updatedNation: Nation; updatedProvinces: Province[] } {
     const demoResult = DemographicsEngine.processNaturalDemographics(
-      nation,
+      nation.government.stability,
       ownedProvinces,
     );
-    let updated = demoResult.updatedNation;
-    const updatedProvinces = demoResult.updatedProvinces;
+    let updated = { ...nation };
+    let updatedProvinces = demoResult.updatedProvinces;
+
+    const currentProvincesMap: Record<string, Province> = { ...provincesMap };
+    for (const p of updatedProvinces) {
+      currentProvincesMap[p.provinceId.toString()] = p;
+    }
 
     if (updated.isAi) {
-      const gdp = getNationGdp(updated);
+      const gdp = getNationGdp(updated, currentProvincesMap);
       const aliveCount = Object.values(allNations).filter(
         (n) => n.isAlive,
       ).length;
@@ -53,8 +59,12 @@ export class EconomyTurnProcessor {
     const tariffResult = TariffCalculator.calculateTariffEffects(
       updated,
       allNations,
+      currentProvincesMap,
     );
-    const taxResult = TaxCalculator.evaluateTaxPolicy(updated);
+    const taxResult = TaxCalculator.evaluateTaxPolicy(
+      updated,
+      currentProvincesMap,
+    );
 
     const addedTreasury =
       (tariffResult.tariffRevenue > 0 ? tariffResult.tariffRevenue : 0) +
@@ -79,8 +89,13 @@ export class EconomyTurnProcessor {
       nationalDebt: newDebt,
     };
 
-    if (this.bankruptcyManager.isBankrupt(updated)) {
-      updated = this.bankruptcyManager.applyBankruptcy(updated);
+    if (this.bankruptcyManager.isBankrupt(updated, currentProvincesMap)) {
+      const bankResult = this.bankruptcyManager.applyBankruptcy(
+        updated,
+        updatedProvinces,
+      );
+      updated = bankResult.updatedNation;
+      updatedProvinces = bankResult.updatedProvinces;
     }
 
     updated = this.recruitmentQueue.processTurnQueue(updated);

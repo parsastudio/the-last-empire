@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import {
   EspionageOutcome,
   EspionageTechTheftData,
@@ -6,6 +7,7 @@ import {
 import { TechSuperiorityDelta } from "@/engine/espionage/espionage-calculator";
 import { InfrastructureManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class TechHeistExecutor {
   public static execute(
@@ -14,16 +16,21 @@ export class TechHeistExecutor {
     superiority: TechSuperiorityDelta,
     isSuccess: boolean,
     outcome: EspionageOutcome,
+    provincesMap: Record<string, Province>,
   ): {
     updatedSource: Nation;
     updatedTarget: Nation;
+    updatedProvinces: Record<string, Province>;
     techTheftData?: EspionageTechTheftData;
     message: string;
   } {
+    const updatedProvinces: Record<string, Province> = { ...provincesMap };
+
     if (!isSuccess) {
       return {
         updatedSource: source,
         updatedTarget: target,
+        updatedProvinces,
         message: `نفوذ به سرورهای محرمانه ${target.name} شکست خورد و کدهای نفوذی مسدود شدند (-۴۰ دیدگاه، -۱۵ اعتبار جهانی).`,
       };
     }
@@ -65,37 +72,37 @@ export class TechHeistExecutor {
 
     const newTechLevel = source.military.techLevel + gMil;
     const newIndLevel = source.industrialLevel + gInd;
-    const newInfraLevel = source.geography.infrastructureLevel + gInfra;
 
-    let nextCapacity = source.maxPopulationCapacity;
-    for (let i = 0; i < gInfra; i++) {
-      nextCapacity =
-        InfrastructureManager.calculateNextCapacityOnUpgrade(nextCapacity);
+    const cleanSourceId = CountryRegistry.resolveCanonicalId(source.id);
+    for (const [pid, prov] of Object.entries(updatedProvinces)) {
+      if (
+        CountryRegistry.resolveCanonicalId(prov.ownerNationId) === cleanSourceId
+      ) {
+        let cap = prov.maxPopulationCapacity;
+        let prod = prov.perCapitaProductivity;
+        for (let i = 0; i < gInfra; i++) {
+          cap = InfrastructureManager.calculateNextCapacity(cap);
+        }
+        for (let i = 0; i < gInd; i++) {
+          prod = GdpCalculator.calculateProductivityOnUpgrade(prod);
+        }
+        updatedProvinces[pid] = {
+          ...prov,
+          infrastructureLevel: prov.infrastructureLevel + gInfra,
+          maxPopulationCapacity: cap,
+          perCapitaProductivity: prod,
+        };
+      }
     }
 
-    let nextProductivity = source.perCapitaProductivity;
-    for (let i = 0; i < gInd; i++) {
-      nextProductivity =
-        GdpCalculator.calculateProductivityOnUpgrade(nextProductivity);
-    }
-
-    const updatedSource = GdpCalculator.syncNationGdpAndDemographics(
-      {
-        ...source,
-        industrialLevel: newIndLevel,
-        maxPopulationCapacity: nextCapacity,
-        military: {
-          ...source.military,
-          techLevel: newTechLevel,
-        },
-        geography: {
-          ...source.geography,
-          infrastructureLevel: newInfraLevel,
-        },
+    const updatedSource: Nation = {
+      ...source,
+      industrialLevel: newIndLevel,
+      military: {
+        ...source.military,
+        techLevel: newTechLevel,
       },
-      source.population,
-      nextProductivity,
-    );
+    };
 
     const techTheftData: EspionageTechTheftData = {
       militaryTechGained: gMil,
@@ -109,6 +116,12 @@ export class TechHeistExecutor {
         ? `سرقت قرن با موفقیت انجام شد! دانشمندان شما موفق شدند ${pointsToGrant} امتیاز ارتقای فناوری از ${target.name} استخراج و اعمال کنند.`
         : `سرقت فناوری (${pointsToGrant} امتیاز ارتقا) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
 
-    return { updatedSource, updatedTarget: target, techTheftData, message };
+    return {
+      updatedSource,
+      updatedTarget: target,
+      updatedProvinces,
+      techTheftData,
+      message,
+    };
   }
 }

@@ -61,13 +61,18 @@ export function CommandCenterTabRouter({
       );
     case "politics":
       return (
-        <WidePoliticsView nation={nation} nationsMap={gameState?.nations} />
+        <WidePoliticsView
+          nation={nation}
+          nationsMap={gameState?.nations}
+          provincesMap={gameState?.provinces}
+        />
       );
     case "espionage":
       return (
         <WideEspionageView
           nation={nation}
           nationsMap={gameState?.nations}
+          provincesMap={gameState?.provinces}
           selectedTargetCode={selectedTargetCode}
         />
       );
@@ -77,6 +82,7 @@ export function CommandCenterTabRouter({
           selectedTargetCode={selectedTargetCode}
           nationsMap={gameState?.nations}
           humanNationId={nation.id}
+          provincesMap={gameState?.provinces}
           onFocusCountry={onFocusCountry}
           onNavigateTab={onNavigateTab}
         />

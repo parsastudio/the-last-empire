@@ -1,10 +1,8 @@
 import { Nation, DiplomaticStance, CountryRegistry } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { DemographicsTransferResult } from "@/engine/combat/conquest/demographics-transfer-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
-import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export interface AttackerStateApplierInput {
@@ -14,7 +12,6 @@ export interface AttackerStateApplierInput {
   defenderTechLevel: number;
   calcResult: BattleCalculationResult;
   conquest: ProvinceConquestResult;
-  transfer: DemographicsTransferResult;
   currentStance: DiplomaticStance;
   betrayalResult: BetrayalEvaluation;
 }
@@ -26,7 +23,6 @@ export class BattleAttackerStateApplier {
       defenderId,
       defenderTechLevel,
       calcResult,
-      conquest,
       currentStance,
       betrayalResult,
     } = input;
@@ -84,7 +80,7 @@ export class BattleAttackerStateApplier {
       attacker.treasury - actualDeploymentCost + calcResult.treasuryLooted,
     );
 
-    const interimAttacker: Nation = {
+    return {
       ...attacker,
       government: {
         ...attacker.government,
@@ -99,12 +95,5 @@ export class BattleAttackerStateApplier {
       relations: updatedRelations,
       warFocusTargetId: cleanDefenderId,
     };
-
-    const { syncedNation } = NationGeographySyncer.sync(
-      interimAttacker,
-      conquest.attackerProvinces,
-    );
-
-    return syncedNation;
   }
 }

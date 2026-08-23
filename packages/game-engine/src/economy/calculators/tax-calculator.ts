@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
@@ -20,9 +21,12 @@ export class TaxCalculator {
     return Math.floor(baseIncome * researchMultiplier);
   }
 
-  public static evaluateTaxPolicy(nation: Nation): TaxCalculationResult {
+  public static evaluateTaxPolicy(
+    nation: Nation,
+    provincesMap?: Record<string, Province>,
+  ): TaxCalculationResult {
     const income = TaxCalculator.calculateTaxIncome(
-      getNationGdp(nation),
+      getNationGdp(nation, provincesMap),
       nation.taxRate,
       nation.doctrines?.unlockedDoctrines,
     );

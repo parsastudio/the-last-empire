@@ -1,7 +1,9 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface TariffEffectResult {
   tariffRevenue: number;
@@ -13,10 +15,12 @@ export class TariffCalculator {
   public static calculateTariffEffects(
     nation: Nation,
     nationsMap?: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
   ): TariffEffectResult {
     const tariffRate = nation.tariffRate;
-    const seaAccessFactor = nation.geography.hasSeaAccess ? 1.0 : 0.5;
-    const nationGdp = getNationGdp(nation);
+    const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
+    const seaAccessFactor = hasSea ? 1.0 : 0.5;
+    const nationGdp = getNationGdp(nation, provincesMap);
     const nationNavalPower =
       (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
 
@@ -46,7 +50,7 @@ export class TariffCalculator {
 
         if (!isSevered && !isNavalBlockaded) {
           activePartnerCount++;
-          const partnerGdp = getNationGdp(partner);
+          const partnerGdp = getNationGdp(partner, provincesMap);
           const minGdp = Math.min(nationGdp, partnerGdp);
           totalBaseRevenue +=
             minGdp * (tariffRate / 100) * 0.04 * seaAccessFactor;

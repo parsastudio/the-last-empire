@@ -7,6 +7,7 @@ import { VictoryProgressCard } from "@/presentation/components/tactical-map/comm
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -19,9 +20,37 @@ export function WideOverviewView({
   rank = 1,
   gameState,
 }: WideOverviewViewProps) {
+  const provincesMap = gameState?.provinces;
+
   const effectiveGdp = useMemo(() => {
-    return getNationGdp(nation);
-  }, [nation]);
+    return getNationGdp(nation, provincesMap);
+  }, [nation, provincesMap]);
+
+  const population = useMemo(() => {
+    return NationGettersUtility.getPopulation(nation.id, provincesMap);
+  }, [nation.id, provincesMap]);
+
+  const maxCapacity = useMemo(() => {
+    return NationGettersUtility.getMaxPopulationCapacity(
+      nation.id,
+      provincesMap,
+    );
+  }, [nation.id, provincesMap]);
+
+  const productivity = useMemo(() => {
+    return NationGettersUtility.getPerCapitaProductivity(
+      nation.id,
+      provincesMap,
+    );
+  }, [nation.id, provincesMap]);
+
+  const territoryPixels = useMemo(() => {
+    return NationGettersUtility.getTerritoryPixelCount(nation.id, provincesMap);
+  }, [nation.id, provincesMap]);
+
+  const infraLevel = useMemo(() => {
+    return NationGettersUtility.getInfrastructureLevel(nation.id, provincesMap);
+  }, [nation.id, provincesMap]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
@@ -31,8 +60,8 @@ export function WideOverviewView({
           code={nation.id}
           flagCode={nation.flagCode}
           governmentType={nation.government.type}
-          population={nation.population}
-          territoryPixelCount={nation.geography.territoryPixelCount}
+          population={population}
+          territoryPixelCount={territoryPixels}
           rank={rank}
         />
 
@@ -55,11 +84,11 @@ export function WideOverviewView({
         />
 
         <ResourcesSection
-          population={nation.population}
-          maxPopulationCapacity={nation.maxPopulationCapacity}
-          perCapitaProductivity={nation.perCapitaProductivity}
+          population={population}
+          maxPopulationCapacity={maxCapacity}
+          perCapitaProductivity={productivity}
           industrialLevel={nation.industrialLevel}
-          infrastructureLevel={nation.geography.infrastructureLevel}
+          infrastructureLevel={infraLevel}
         />
       </div>
     </div>

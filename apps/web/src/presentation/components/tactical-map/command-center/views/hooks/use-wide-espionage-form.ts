@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
@@ -10,16 +11,19 @@ import {
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { EspionageTargetOption } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 interface UseWideEspionageFormProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   selectedTargetCode?: string | null;
 }
 
 export function useWideEspionageForm({
   nation,
   nationsMap,
+  provincesMap,
   selectedTargetCode,
 }: UseWideEspionageFormProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -39,10 +43,13 @@ export function useWideEspionageForm({
         name: n.name,
         flagCode: n.flagCode || "IR",
         rank: n.rank || 99,
-        gdp: getNationGdp(n),
+        gdp: getNationGdp(n, provincesMap),
         militaryTechLevel: n.military.techLevel,
         industrialLevel: n.industrialLevel,
-        infrastructureLevel: n.geography.infrastructureLevel,
+        infrastructureLevel: NationGettersUtility.getInfrastructureLevel(
+          n.id,
+          provincesMap,
+        ),
       }))
       .filter(
         (c) =>
@@ -52,7 +59,7 @@ export function useWideEspionageForm({
           c.flagCode.toLowerCase().includes(query),
       )
       .sort((a, b) => b.gdp - a.gdp);
-  }, [nationsMap, nation.id, searchQuery]);
+  }, [nationsMap, provincesMap, nation.id, searchQuery]);
 
   const defaultTarget = useMemo(() => {
     if (selectedTargetCode) {
@@ -78,8 +85,8 @@ export function useWideEspionageForm({
 
   const targetGdp = useMemo(() => {
     if (!selectedTargetNation) return 1000000000;
-    return getNationGdp(selectedTargetNation);
-  }, [selectedTargetNation]);
+    return getNationGdp(selectedTargetNation, provincesMap);
+  }, [selectedTargetNation, provincesMap]);
 
   const tier1Cost = useMemo(
     () => EspionageManager.calculateOperationCost(targetGdp, 1, nation),
@@ -119,8 +126,9 @@ export function useWideEspionageForm({
     return EspionageManager.calculateTechSuperiority(
       nation,
       selectedTargetNation,
+      provincesMap,
     );
-  }, [nation, selectedTargetNation]);
+  }, [nation, selectedTargetNation, provincesMap]);
 
   const executedTiers = nation.executedEspionageTiers || [];
 

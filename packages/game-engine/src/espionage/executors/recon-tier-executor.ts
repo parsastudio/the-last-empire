@@ -1,16 +1,27 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import {
   EspionageOutcome,
   EspionageReconData,
 } from "@/domain/espionage/espionage.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class ReconTierExecutor {
   public static execute(
     target: Nation,
     outcome: EspionageOutcome,
+    provincesMap?: Record<string, Province>,
   ): { reconData: EspionageReconData; message: string } {
-    const targetGdp = getNationGdp(target);
+    const targetGdp = getNationGdp(target, provincesMap);
+    const targetInfra = NationGettersUtility.getInfrastructureLevel(
+      target.id,
+      provincesMap,
+    );
+    const ownedCount = NationGettersUtility.getOwnedProvinces(
+      target.id,
+      provincesMap,
+    ).length;
 
     const reconData: EspionageReconData = {
       infantry: target.military.infantry,
@@ -21,11 +32,11 @@ export class ReconTierExecutor {
       navalFleet: target.military.navalFleet || 0,
       techLevel: target.military.techLevel,
       industrialLevel: target.industrialLevel,
-      infrastructureLevel: target.geography.infrastructureLevel,
+      infrastructureLevel: targetInfra,
       treasury: target.treasury,
       gdp: targetGdp,
       stability: target.government.stability,
-      activeProvincesCount: target.provinceIds?.length || 1,
+      activeProvincesCount: ownedCount || 1,
     };
 
     let message = "";

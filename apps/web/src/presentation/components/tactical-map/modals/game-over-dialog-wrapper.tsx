@@ -5,6 +5,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 interface GameOverDialogWrapperProps {
   gameState: GameState | null;
@@ -44,14 +45,23 @@ export function GameOverDialogWrapper({
 
     const turnsPlayed = gameState.currentTurn;
     const finalGdp = humanNation
-      ? PersianNumberFormatter.formatCurrency(getNationGdp(humanNation), true)
+      ? PersianNumberFormatter.formatCurrency(
+          getNationGdp(humanNation, gameState.provinces),
+          true,
+        )
       : PersianNumberFormatter.formatCurrency(0, true);
 
-    const finalPopNum = humanNation ? humanNation.population / 1e6 : 0;
+    const popCount = humanNation
+      ? NationGettersUtility.getPopulation(humanNation.id, gameState.provinces)
+      : 0;
+    const finalPopNum = popCount / 1e6;
     const finalPopulation = `${PersianNumberFormatter.toPersianDigits(finalPopNum.toFixed(1))}M نفر`;
 
     const pixelCount = humanNation
-      ? humanNation.geography.territoryPixelCount
+      ? NationGettersUtility.getTerritoryPixelCount(
+          humanNation.id,
+          gameState.provinces,
+        )
       : 0;
     const conqueredPixels = `${PersianNumberFormatter.toPersianDigits(pixelCount.toLocaleString("en-US"))} پیکسل`;
 

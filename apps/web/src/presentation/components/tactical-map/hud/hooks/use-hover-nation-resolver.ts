@@ -10,6 +10,7 @@ import {
 } from "@/domain/nation/gdp-calculator.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
@@ -43,7 +44,9 @@ export function useHoverNationResolver({
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation ? ownerNation.rank : 99;
       const realGdp = ownerNation ? getNationGdp(ownerNation, provincesMap) : 0;
-      const realPop = ownerNation ? ownerNation.population : 0;
+      const realPop = ownerNation
+        ? NationGettersUtility.getPopulation(ownerNation.id, provincesMap)
+        : 0;
       const governmentType = ownerNation
         ? ownerNation.government.type
         : "DEMOCRACY";

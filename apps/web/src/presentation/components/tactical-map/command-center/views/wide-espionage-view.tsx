@@ -1,6 +1,7 @@
 import React from "react";
 import { Radio, ShieldAlert, Binary, Award, Users } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { EspionageTargetSelector } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
@@ -11,17 +12,20 @@ import { useWideEspionageForm } from "@/presentation/components/tactical-map/com
 interface WideEspionageViewProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   selectedTargetCode?: string | null;
 }
 
 export function WideEspionageView({
   nation,
   nationsMap,
+  provincesMap,
   selectedTargetCode,
 }: WideEspionageViewProps) {
   const form = useWideEspionageForm({
     nation,
     nationsMap,
+    provincesMap,
     selectedTargetCode,
   });
 

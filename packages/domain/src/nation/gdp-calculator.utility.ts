@@ -1,4 +1,5 @@
 import { Province } from "@/domain/province/province.schema";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export function getProvinceGdp(province: {
   population: number;
@@ -9,26 +10,11 @@ export function getProvinceGdp(province: {
 }
 
 export function getNationGdp(
-  nation: {
-    population: number;
-    perCapitaProductivity?: number;
-    provinceIds?: number[];
-  },
-  provincesMap?: Record<string, Province>,
+  nationOrId: { id: string } | string,
+  provincesMap?: Record<string, Province> | Province[],
 ): number {
-  if (provincesMap && nation.provinceIds && nation.provinceIds.length > 0) {
-    let totalGdp = 0;
-    for (let i = 0; i < nation.provinceIds.length; i++) {
-      const pid = nation.provinceIds[i]!;
-      const prov = provincesMap[pid.toString()];
-      if (prov) {
-        totalGdp += getProvinceGdp(prov);
-      }
-    }
-    if (totalGdp > 0) {
-      return totalGdp;
-    }
-  }
-  const prod = nation.perCapitaProductivity ?? 5000;
-  return Math.floor(nation.population * prod);
+  const nationId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
+  const provs = NationGettersUtility.getOwnedProvinces(nationId, provincesMap);
+  if (provs.length === 0) return 0;
+  return provs.reduce((sum, p) => sum + getProvinceGdp(p), 0);
 }
