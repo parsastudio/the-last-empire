@@ -142,8 +142,7 @@ export class StrategicManifestBuilder {
       nations: manifestNations,
     };
 
-    const targetDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
-    await fs.mkdir(targetDir, { recursive: true });
+    const targetDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
     await fs.writeFile(
       path.join(targetDir, "manifest.json"),
       JSON.stringify(manifest, null, 2),

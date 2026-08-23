@@ -5,8 +5,11 @@ import { TacticalTerrainExporter } from "@/infrastructure/visual-pipeline/export
 async function main() {
   const mapId = "map1";
   const sourceMaskPath = ServerMapPathResolver.getEditedMaskServerPath(mapId);
-  const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
-  const outputTacticalTerrain = path.join(finalDir, "tactical_map_terrain.png");
+  const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
+  const outputTacticalTerrain = path.join(
+    visualDir,
+    "tactical_map_terrain.png",
+  );
 
   process.stdout.write(
     "در حال پردازش و تولید نقشه تاکتیکی مستقیماً از فایل ماسک اولیه...\n",

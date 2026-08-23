@@ -11,36 +11,53 @@ import { BinaryStateExporter } from "@/infrastructure/orchestrator/binary-state-
 import { StrategicManifestBuilder } from "@/infrastructure/orchestrator/strategic-manifest-builder";
 import { TacticalTerrainExporter } from "@/infrastructure/visual-pipeline/exporters/tactical-terrain-exporter";
 import { MaritimeEnricherEngine } from "@/infrastructure/strategic-pipeline/05-maritime-network/orchestrator/maritime-enricher-engine";
+import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
 
 export class MapBuildOrchestrator {
   private manifestBuilder = new StrategicManifestBuilder();
 
-  public async cleanOutputDirectory(targetDir: string): Promise<void> {
-    await fs.mkdir(targetDir, { recursive: true });
-    const files = [
+  public async cleanOutputDirectory(mapId = "map1"): Promise<void> {
+    const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
+    const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
+
+    const strategicFiles = [
       "manifest.json",
       "live-state.bin",
-      "base_map_terrain.png",
+      "row-spans-state.bin",
+      "row-spans-stats.json",
+      "quadtree-state.bin",
+      "quadtree-stats.json",
+    ];
+
+    const visualFiles = [
       "tactical_map_terrain.png",
       "terrain-raw.bin",
       "terrain-compressed.bin",
       "terrain-compressed.bin.gz",
       "terrain-binary-stats.json",
     ];
-    for (const file of files) {
-      const filePath = path.join(targetDir, file);
+
+    for (const file of strategicFiles) {
       try {
-        await fs.unlink(filePath);
+        await fs.unlink(path.join(strategicDir, file));
+      } catch {}
+    }
+
+    for (const file of visualFiles) {
+      try {
+        await fs.unlink(path.join(visualDir, file));
       } catch {}
     }
   }
 
   public async executeRebuild(
     maskPngPath: string,
-    outputDir: string,
     mapId = "map1",
   ): Promise<void> {
-    await this.cleanOutputDirectory(outputDir);
+    await this.cleanOutputDirectory(mapId);
+
+    const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
+    const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
 
     const imageBuffer = await fs.readFile(maskPngPath);
     const png = await new Promise<PNG>((resolve, reject) => {
@@ -91,10 +108,10 @@ export class MapBuildOrchestrator {
       bitBuffer,
     );
 
-    await BinaryStateExporter.exportLiveState(bitBuffer, outputDir);
+    await BinaryStateExporter.exportLiveState(bitBuffer, strategicDir);
     await this.manifestBuilder.buildAndSave(mapId, provinceMap, width, height);
 
-    const destTerrainPath = path.join(outputDir, "tactical_map_terrain.png");
+    const destTerrainPath = path.join(visualDir, "tactical_map_terrain.png");
     await TacticalTerrainExporter.buildDirectlyFromMask(
       maskPngPath,
       destTerrainPath,

@@ -13,8 +13,8 @@ export class RowSpansExportService {
     totalPixelsVerified: number;
     mismatchCount: number;
   }> {
-    const finalDir = ServerMapPathResolver.getMapFinalServerDir(mapId);
-    const liveStatePath = path.join(finalDir, "live-state.bin");
+    const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
+    const liveStatePath = path.join(strategicDir, "live-state.bin");
 
     const rawBuffer = await fs.readFile(liveStatePath);
     const uint16Data = new Uint16Array(
@@ -34,10 +34,10 @@ export class RowSpansExportService {
       mapHeight,
     );
 
-    const outputPath = path.join(finalDir, "row-spans-state.bin");
+    const outputPath = path.join(strategicDir, "row-spans-state.bin");
     await fs.writeFile(outputPath, serializedData);
 
-    const statsPath = path.join(finalDir, "row-spans-stats.json");
+    const statsPath = path.join(strategicDir, "row-spans-stats.json");
     await fs.writeFile(statsPath, JSON.stringify(stats, null, 2), "utf-8");
 
     const reader = new RowSpansReader(serializedData);

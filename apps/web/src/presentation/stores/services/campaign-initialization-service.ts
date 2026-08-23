@@ -4,6 +4,7 @@ import {
   ALL_COUNTRY_PROFILES,
   FinalMapManifest,
   FinalManifestNation,
+  ClientMapPathResolver,
 } from "@geopolitics/domain";
 import { GlobalAiInitializer } from "@geopolitics/map-pipeline";
 
@@ -21,7 +22,11 @@ export class CampaignInitializationService {
 
     if (!activeManifest) {
       try {
-        const res = await fetch("/maps/map1/temp/final/manifest.json", {
+        const manifestUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+          "map1",
+          "manifest.json",
+        );
+        const res = await fetch(manifestUrl, {
           cache: "no-store",
         });
         if (res.ok) {
