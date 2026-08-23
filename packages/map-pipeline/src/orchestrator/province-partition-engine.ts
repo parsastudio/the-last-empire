@@ -1,5 +1,8 @@
 import { BitPackedBuffer, BitPackedCellUtility } from "@geopolitics/domain";
-import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
+import {
+  ProvinceClusterInfo,
+  ArchipelagoGroup,
+} from "@/infrastructure/core/types/map-pipeline.types";
 import { ComponentAnalyzer } from "@/infrastructure/strategic-pipeline/02-topology/component-analyzer";
 import { LandMassClassifier } from "@/infrastructure/strategic-pipeline/02-topology/land-mass-classifier";
 import { ProvinceCountAllocator } from "@/infrastructure/strategic-pipeline/02-topology/province-count-allocator";
@@ -49,7 +52,7 @@ export class ProvincePartitionEngine {
 
       const totalCountryPixels = pixelIndices.length;
 
-      const majorMasses = majorGroups.map((g) => ({
+      const majorMasses = majorGroups.map((g: ArchipelagoGroup) => ({
         id: g.id,
         components: g.components,
         totalPixels: g.totalPixels,
