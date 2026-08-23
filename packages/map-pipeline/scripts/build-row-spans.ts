@@ -1,4 +1,4 @@
-import { RowSpansExportService } from "@/infrastructure/row-spans-map/generator/row-spans-export-service";
+import { RowSpansExportService } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-export-service";
 
 async function main() {
   process.stdout.write("در حال پردازش و ارزیابی تطبیق پیکسلی نقشه سطری...\n");
@@ -22,7 +22,7 @@ async function main() {
   );
   process.stdout.write(`تعداد خطای عدم تطبیق: ${result.mismatchCount}\n`);
   process.stdout.write(
-    `وضعیت تطبیق ۱۰۰٪: ${result.verificationPassed ? "موفق (PASSED)" : "ناموفق (FAILED)"}\n`,
+    `وضعیت تطبیق ۱۰۰٪: ${result.verificationPassed ? "موفق" : "ناموفق"}\n`,
   );
   process.stdout.write("----------------------------------------\n");
 }

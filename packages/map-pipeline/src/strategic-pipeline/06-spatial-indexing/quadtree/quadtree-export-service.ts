@@ -1,10 +1,10 @@
 import fs from "fs/promises";
 import path from "path";
-import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
-import { QuadtreeBuilder } from "@/infrastructure/quadtree-map/builder/quadtree-builder";
-import { QuadtreeSerializer } from "@/infrastructure/quadtree-map/serializer/quadtree-serializer";
-import { QuadtreeReader } from "@/infrastructure/quadtree-map/runtime/quadtree-reader";
-import { QuadtreeBuildStats } from "@/infrastructure/quadtree-map/core/quadtree-types";
+import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
+import { QuadtreeBuilder } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/quadtree/quadtree-builder";
+import { QuadtreeSerializer } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/quadtree/quadtree-serializer";
+import { QuadtreeReader } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/quadtree/quadtree-reader";
+import { QuadtreeBuildStats } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/quadtree/quadtree-types";
 
 export class QuadtreeExportService {
   public static async generateFromLiveState(

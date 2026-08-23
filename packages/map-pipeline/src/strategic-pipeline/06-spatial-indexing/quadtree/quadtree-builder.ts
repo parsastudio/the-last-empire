@@ -1,4 +1,4 @@
-import { QuadtreeNode } from "@/infrastructure/quadtree-map/core/quadtree-types";
+import { QuadtreeNode } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/quadtree/quadtree-types";
 
 export class QuadtreeBuilder {
   public static buildHemisphereTree(

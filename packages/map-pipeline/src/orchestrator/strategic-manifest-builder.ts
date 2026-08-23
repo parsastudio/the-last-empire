@@ -1,61 +1,17 @@
 import fs from "fs/promises";
 import path from "path";
-import { ALL_COUNTRY_PROFILES, CountryProfile } from "@/domain/data/countries";
-import { ProvinceClusterInfo } from "@/infrastructure/map-preprocessing/core/map-preprocessing.types";
-import { ServerMapPathResolver } from "@/infrastructure/map-preprocessing/server/server-map-path-resolver";
-import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
+import {
+  ALL_COUNTRY_PROFILES,
+  CountryProfile,
+  FinalManifestProvince,
+  FinalManifestNation,
+  FinalMapManifest,
+  MilitaryDistributionEngine,
+} from "@geopolitics/domain";
+import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
+import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
 
-export interface FinalManifestProvince {
-  provinceId: number;
-  nameFa: string;
-  countryId: string;
-  countryNumericId: number;
-  pixelCount: number;
-  hasSeaAccess: boolean;
-  landNeighbors: number[];
-  maritimeNeighborsTier1?: number[];
-  maritimeNeighborsTier2?: number[];
-  centerCoordinates: { x: number; y: number };
-}
-
-export interface FinalManifestNation {
-  id: string;
-  numericId: number;
-  code: string;
-  flagCode: string;
-  nameFa: string;
-  nameEn: string;
-  gdp: number;
-  perCapitaProductivity: number;
-  population: number;
-  maxPopulationCapacity: number;
-  territoryPixelCount: number;
-  provinceIds: number[];
-  hasSeaAccess: boolean;
-  startingTreasury: number;
-  initialRank: number;
-  defaultGovernment: string;
-  startingInfantry: number;
-  startingArmor?: number;
-  startingAirDefense?: number;
-  startingAirForce: number;
-  startingDroneMissile: number;
-  startingNavalFleet?: number;
-  startingTechLevel: number;
-  industrialLevel: number;
-  infrastructureLevel: number;
-  startingStability: number;
-}
-
-export interface FinalMapManifest {
-  mapId: string;
-  totalProvincesCount: number;
-  totalNationsCount: number;
-  width: number;
-  height: number;
-  provinces: FinalManifestProvince[];
-  nations: FinalManifestNation[];
-}
+export type { FinalManifestProvince, FinalManifestNation, FinalMapManifest };
 
 export class StrategicManifestBuilder {
   public async buildAndSave(
