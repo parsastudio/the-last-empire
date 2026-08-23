@@ -1,5 +1,7 @@
 import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class NationGettersUtility {
   public static getOwnedProvinces(
@@ -81,5 +83,53 @@ export class NationGettersUtility {
       provs.length > 0 &&
       provs.some((p) => (p.pixelCount || 0) > 0 && (p.population || 0) > 0)
     );
+  }
+
+  public static calculateRankMap(
+    nationsMap?: Record<string, Nation>,
+    provincesMap?: Record<string, Province> | Province[],
+  ): Map<string, number> {
+    const rankMap = new Map<string, number>();
+    if (!nationsMap) return rankMap;
+
+    const aliveNations = Object.values(nationsMap).filter((n) => n.isAlive);
+
+    aliveNations.sort((a, b) => {
+      const gdpA = NationGettersUtility.getOwnedProvinces(
+        a.id,
+        provincesMap,
+      ).reduce((sum, p) => sum + getProvinceGdp(p), 0);
+      const gdpB = NationGettersUtility.getOwnedProvinces(
+        b.id,
+        provincesMap,
+      ).reduce((sum, p) => sum + getProvinceGdp(p), 0);
+
+      if (gdpB !== gdpA) return gdpB - gdpA;
+
+      const popA = NationGettersUtility.getPopulation(a.id, provincesMap);
+      const popB = NationGettersUtility.getPopulation(b.id, provincesMap);
+      if (popB !== popA) return popB - popA;
+
+      return a.id.localeCompare(b.id);
+    });
+
+    for (let i = 0; i < aliveNations.length; i++) {
+      const nation = aliveNations[i]!;
+      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+      rankMap.set(canonicalId, i + 1);
+      rankMap.set(nation.id, i + 1);
+    }
+
+    return rankMap;
+  }
+
+  public static getRank(
+    nationId: string,
+    nationsMap?: Record<string, Nation>,
+    provincesMap?: Record<string, Province> | Province[],
+  ): number {
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    const map = this.calculateRankMap(nationsMap, provincesMap);
+    return map.get(canonicalId) ?? map.get(nationId) ?? 99;
   }
 }

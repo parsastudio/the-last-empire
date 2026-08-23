@@ -42,7 +42,9 @@ export function useHoverNationResolver({
 
       const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
-      const realRank = ownerNation ? ownerNation.rank : 99;
+      const realRank = ownerNation
+        ? NationGettersUtility.getRank(ownerNation.id, nationsMap, provincesMap)
+        : 99;
       const realGdp = ownerNation ? getNationGdp(ownerNation, provincesMap) : 0;
       const realPop = ownerNation
         ? NationGettersUtility.getPopulation(ownerNation.id, provincesMap)

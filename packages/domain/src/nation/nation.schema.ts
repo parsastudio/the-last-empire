@@ -21,7 +21,6 @@ export const NationSchema = z.object({
   isAi: z.boolean(),
   isAlive: z.boolean(),
   flagCode: z.string(),
-  rank: z.number().positive().default(1),
   taxRate: z.number().min(0).max(50),
   tariffRate: z.number().min(0).max(100),
   treasury: z.number(),

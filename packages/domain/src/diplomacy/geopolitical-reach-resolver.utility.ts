@@ -15,9 +15,14 @@ export class GeopoliticalReachResolver {
 
   public static getReachTier(
     nation: Nation,
-    _allNations?: Record<string, Nation> | Nation[],
+    allNations?: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
   ): GeopoliticalReachTier {
-    const rank = nation.rank || 99;
+    const rank = NationGettersUtility.getRank(
+      nation.id,
+      allNations,
+      provincesMap,
+    );
     if (rank <= this.SUPERPOWER_MAX_RANK) {
       return "SUPERPOWER";
     }
@@ -182,12 +187,12 @@ export class GeopoliticalReachResolver {
       return true;
     }
 
-    const sourceTier = this.getReachTier(source, allNations);
+    const sourceTier = this.getReachTier(source, allNations, provincesMap);
     if (sourceTier === "SUPERPOWER") {
       return true;
     }
 
-    const targetTier = this.getReachTier(target, allNations);
+    const targetTier = this.getReachTier(target, allNations, provincesMap);
     if (targetTier === "SUPERPOWER") {
       return true;
     }

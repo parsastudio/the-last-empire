@@ -7,7 +7,6 @@ import {
   FinalManifestNation,
 } from "@geopolitics/domain";
 import { NationProfileAssigner } from "@/engine/initializers/nation-profile-assigner";
-import { RankManager } from "@/engine/politics/rank-manager";
 
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(
@@ -117,9 +116,7 @@ export class GlobalAiInitializer {
       nations[cleanId] = nation;
     }
 
-    const rankedNations = RankManager.recalculateRanks(nations, provinces);
-
-    return { nations: rankedNations, provinces };
+    return { nations, provinces };
   }
 
   public initializeAllNations(
@@ -164,8 +161,6 @@ export class GlobalAiInitializer {
       nations[nation.id] = nation;
     }
 
-    const rankedNations = RankManager.recalculateRanks(nations, provinces);
-
-    return { nations: rankedNations, provinces };
+    return { nations, provinces };
   }
 }

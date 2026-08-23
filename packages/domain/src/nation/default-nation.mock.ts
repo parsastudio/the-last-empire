@@ -6,7 +6,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   isAi: false,
   isAlive: true,
   flagCode: "IR",
-  rank: 1,
   taxRate: 15,
   tariffRate: 10,
   treasury: 100000,

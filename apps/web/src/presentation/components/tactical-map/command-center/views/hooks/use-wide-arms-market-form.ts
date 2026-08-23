@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
@@ -7,6 +8,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface ArmsSellerOption {
   id: string;
@@ -21,12 +23,14 @@ export interface ArmsSellerOption {
 interface UseWideArmsMarketFormProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   selectedTargetCode?: string | null;
 }
 
 export function useWideArmsMarketForm({
   nation,
   nationsMap,
+  provincesMap,
   selectedTargetCode,
 }: UseWideArmsMarketFormProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,6 +42,10 @@ export function useWideArmsMarketForm({
   const sellerOptions = useMemo<ArmsSellerOption[]>(() => {
     if (!nationsMap) return [];
     const query = searchQuery.trim().toLowerCase();
+    const rankLookup = NationGettersUtility.calculateRankMap(
+      nationsMap,
+      provincesMap,
+    );
 
     return Object.values(nationsMap)
       .filter((n) => n.id !== nation.id && n.isAlive)
@@ -46,6 +54,7 @@ export function useWideArmsMarketForm({
         const rel = nation.relations[canonical] || nation.relations[n.id];
         const opinion = rel ? rel.opinion : 0;
         const isEligible = opinion >= 20;
+        const rank = rankLookup.get(canonical) ?? 99;
 
         return {
           id: canonical,
@@ -53,7 +62,7 @@ export function useWideArmsMarketForm({
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
           opinion,
-          rank: n.rank || 99,
+          rank,
           isEligible,
         };
       })
@@ -69,7 +78,7 @@ export function useWideArmsMarketForm({
           c.id.toLowerCase().includes(query) ||
           c.flagCode.toLowerCase().includes(query),
       );
-  }, [nationsMap, nation.id, nation.relations, searchQuery]);
+  }, [nationsMap, provincesMap, nation.id, nation.relations, searchQuery]);
 
   const defaultSellerId = useMemo(() => {
     if (selectedTargetCode) {
