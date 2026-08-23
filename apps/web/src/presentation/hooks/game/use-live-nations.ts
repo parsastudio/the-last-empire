@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export interface LiveNationItem {
   id: string;
@@ -13,6 +14,7 @@ export interface LiveNationItem {
   stability: number;
   governmentType: string;
   isAlive: boolean;
+  isReachable: boolean;
   rawNation: Nation;
 }
 
@@ -34,6 +36,8 @@ export function useLiveNations({
       ? CountryRegistry.resolveCanonicalId(excludeNationId)
       : null;
 
+    const sourceNation = canonicalExclude ? nationsMap[canonicalExclude] : null;
+
     return Object.values(nationsMap)
       .filter((n) => {
         if (!n.isAlive) return false;
@@ -49,6 +53,14 @@ export function useLiveNations({
         const flagCode = profile ? profile.flagCode : n.flagCode || "IR";
         const code = profile ? profile.code : canonical;
 
+        const isReachable = sourceNation
+          ? GeopoliticalReachResolver.canInitiateDiplomacy(
+              sourceNation,
+              n,
+              nationsMap,
+            )
+          : true;
+
         return {
           id: canonical,
           name: n.name,
@@ -59,6 +71,7 @@ export function useLiveNations({
           stability: n.government.stability,
           governmentType: n.government.type,
           isAlive: n.isAlive,
+          isReachable,
           rawNation: n,
         };
       });

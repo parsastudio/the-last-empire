@@ -2,6 +2,7 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import type { GovernmentType } from "@/domain/politics/politics.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class StabilityCalculator {
   public static clampStability(stability: number): number {
@@ -35,11 +36,11 @@ export class StabilityCalculator {
   ): number {
     switch (proposalType) {
       case "NON_AGGRESSION_PACT":
-        return 2.0;
+        return 0.5;
       case "FULL_ALLIANCE":
-        return 4.0;
+        return 1.0;
       case "SEND_FOREIGN_AID":
-        return isSender ? 2.0 : 4.0;
+        return isSender ? 0.5 : 1.0;
       default:
         return 0;
     }
@@ -63,9 +64,24 @@ export class StabilityCalculator {
       }
     } else {
       if (nation.government.stability < 85) {
-        delta += traits.peaceRecoveryRate;
+        const gap = (85 - nation.government.stability) / 85;
+        delta += traits.peaceRecoveryRate * gap;
       }
     }
+
+    const clampedTax = Math.min(50, Math.max(0, nation.taxRate));
+    let taxStabilityDelta = (15 - clampedTax) * 0.1;
+    if (taxStabilityDelta < 0) {
+      const discount = DoctrinesManager.getTaxStabilityPenaltyDiscount(
+        nation.doctrines?.unlockedDoctrines,
+      );
+      taxStabilityDelta *= discount;
+    }
+    delta += taxStabilityDelta;
+
+    const clampedTariff = Math.min(100, Math.max(0, nation.tariffRate));
+    const tariffStabilityDelta = (10 - clampedTariff) * 0.04;
+    delta += tariffStabilityDelta;
 
     const stabilityModifier = ModifierManager.getModifierImpact(
       nation,

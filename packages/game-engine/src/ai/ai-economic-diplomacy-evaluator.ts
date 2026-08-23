@@ -6,6 +6,7 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -20,8 +21,6 @@ export class AIEconomicDiplomacyEvaluator {
     if (currentTreasury <= 0 || !nation.relations) {
       return null;
     }
-
-    const senderGdp = getNationGdp(nation);
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (rel.stance === "WAR") {
@@ -39,13 +38,21 @@ export class AIEconomicDiplomacyEvaluator {
         continue;
       }
 
-      const targetGdp = getNationGdp(targetNation);
-      const cost = TreatyEvaluator.calculateForeignAidCost(
-        senderGdp,
-        targetGdp,
-      );
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        )
+      ) {
+        continue;
+      }
 
-      if (currentTreasury < Math.floor(cost * 2.0)) {
+      const targetGdp = getNationGdp(targetNation, provincesMap);
+      const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
+
+      if (currentTreasury < Math.floor(cost * 3.0)) {
         continue;
       }
 
@@ -57,13 +64,15 @@ export class AIEconomicDiplomacyEvaluator {
       );
 
       const powerRatio = threatResult.powerRatio;
+      const isNeighbor = threatResult.isNeighbor;
 
       const isPeacetimeAppeasement =
-        powerRatio >= 1.3 && rel.opinion < 20 && threatResult.isNeighbor;
+        isNeighbor && powerRatio >= 1.3 && rel.opinion < 20;
 
-      const isFriendlyAid = rel.opinion >= 0 && rel.opinion < 50;
+      const isHostileThreatAppeasement =
+        isNeighbor && rel.opinion < -15 && powerRatio >= 1.5;
 
-      if (isPeacetimeAppeasement || isFriendlyAid) {
+      if (isPeacetimeAppeasement || isHostileThreatAppeasement) {
         return {
           action: ActionFactory.sendForeignAid(nation.id, targetNation.id),
           cost,
