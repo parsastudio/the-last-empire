@@ -1,20 +1,25 @@
 import { useState, useMemo } from "react";
 import { resolveProfileRelation } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
-import { Nation } from "@/domain/nation/nation.schema";
-import { CountryRegistry } from "@/domain/data/countries";
+import {
+  Nation,
+  CountryRegistry,
+  getNationGdp,
+  Province,
+} from "@geopolitics/domain";
 import { useLiveNations } from "@/presentation/hooks/game/use-live-nations";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 interface UseWideDiplomacyProps {
   selectedTargetCode?: string | null;
   nationsMap?: Record<string, Nation>;
   humanNationId: string;
+  provincesMap?: Record<string, Province>;
 }
 
 export function useWideDiplomacy({
   selectedTargetCode,
   nationsMap,
   humanNationId,
+  provincesMap,
 }: UseWideDiplomacyProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const activeHumanId = CountryRegistry.resolveCanonicalId(
@@ -34,19 +39,17 @@ export function useWideDiplomacy({
 
   const relationsList = useMemo(() => {
     const list = liveNationsList.map((item) => {
-      const rel = resolveProfileRelation(item.id, item.rawNation);
-      if (humanNation) {
-        const directRel = humanNation.relations[item.id];
-        if (directRel) {
-          rel.stance = directRel.stance;
-          rel.opinion = directRel.opinion;
-        }
-      }
-      return rel;
+      return resolveProfileRelation(
+        item.id,
+        item.rawNation,
+        humanNation,
+        nationsMap,
+        provincesMap,
+      );
     });
 
     return list.sort((a, b) => a.rank - b.rank);
-  }, [liveNationsList, humanNation]);
+  }, [liveNationsList, humanNation, nationsMap, provincesMap]);
 
   const defaultCode = relationsList[0]?.code || "";
   const [userSelectedCode, setUserSelectedCode] = useState<string | null>(null);
@@ -69,17 +72,14 @@ export function useWideDiplomacy({
   }, [selectedTargetNation]);
 
   const selectedRelation = useMemo(() => {
-    const rel = resolveProfileRelation(activeCode, selectedTargetNation);
-
-    if (humanNation) {
-      const directRel = humanNation.relations[targetNationId];
-      if (directRel) {
-        rel.stance = directRel.stance;
-        rel.opinion = directRel.opinion;
-      }
-    }
-    return rel;
-  }, [activeCode, targetNationId, selectedTargetNation, humanNation]);
+    return resolveProfileRelation(
+      activeCode,
+      selectedTargetNation,
+      humanNation,
+      nationsMap,
+      provincesMap,
+    );
+  }, [activeCode, selectedTargetNation, humanNation, nationsMap, provincesMap]);
 
   return {
     searchQuery,
@@ -90,5 +90,7 @@ export function useWideDiplomacy({
     selectedRelation,
     targetNationId,
     selectedTargetGdp,
+    humanNation,
+    selectedTargetNation,
   };
 }

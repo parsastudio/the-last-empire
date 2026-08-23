@@ -1,6 +1,6 @@
 import React from "react";
 import { Binary } from "lucide-react";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { DiplomaticStance, Nation, Province } from "@geopolitics/domain";
 import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
 import { TreatyStatusBanner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/treaty-status-banner";
 import { useDiplomacyActionsRunner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/hooks/use-diplomacy-actions-runner";
@@ -14,6 +14,10 @@ interface AdvancedDiplomacyActionsProps {
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
   isEmbargoed?: boolean;
+  humanNation?: Nation | null;
+  targetNation?: Nation | null;
+  allNations?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   onOpenProxy?: () => void;
 }
 
@@ -25,6 +29,10 @@ export function AdvancedDiplomacyActions({
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
   isEmbargoed = false,
+  humanNation,
+  targetNation,
+  allNations,
+  provincesMap,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -34,6 +42,10 @@ export function AdvancedDiplomacyActions({
     senderGdp,
     targetGdp,
     currentStance,
+    humanNation,
+    targetNation,
+    allNations,
+    provincesMap,
   });
 
   const isWar = currentStance === "WAR";
@@ -42,7 +54,7 @@ export function AdvancedDiplomacyActions({
 
   return (
     <>
-      <div className="space-y-4 dir-rtl text-right">
+      <div className="space-y-4 dir-rtl text-right font-sans">
         <div className="space-y-2">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
             وضعیت‌های سیاسی و معاهدات دوجانبه
@@ -59,6 +71,8 @@ export function AdvancedDiplomacyActions({
               isAlliance={isAlliance}
               isNonAggression={isNonAggression}
               foreignAidCost={runner.foreignAidCost}
+              allianceEvaluation={runner.allianceEvaluation}
+              napEvaluation={runner.napEvaluation}
               onSendAid={runner.handleSendAid}
               onNonAggression={runner.handleNonAggression}
               onAlliance={runner.handleAlliance}

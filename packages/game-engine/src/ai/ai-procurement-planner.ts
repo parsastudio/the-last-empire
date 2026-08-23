@@ -1,13 +1,14 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { UnitType } from "@/domain/military/military.schema";
-import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
+import {
+  GameAction,
+  ActionFactory,
+  Nation,
+  Province,
+  UnitType,
+  MilitaryPricingCalculator,
+  getNationGdp,
+} from "@geopolitics/domain";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
+import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
 export type AIPosture = "PEACE" | "THREAT" | "WAR";
 
@@ -48,10 +49,7 @@ export class AIProcurementPlanner {
     );
 
     if (remainingValuationCapacity <= 0) {
-      return {
-        actions: [],
-        remainingTreasury: effectiveTreasury,
-      };
+      return { actions: [], remainingTreasury: effectiveTreasury };
     }
 
     const posture = this.evaluatePosture(nation, allNations, provincesMap);
@@ -61,10 +59,7 @@ export class AIProcurementPlanner {
     );
 
     if (spendableBudget <= 0) {
-      return {
-        actions: [],
-        remainingTreasury: effectiveTreasury,
-      };
+      return { actions: [], remainingTreasury: effectiveTreasury };
     }
 
     const ratios = this.getUnitRatios(
@@ -124,8 +119,7 @@ export class AIProcurementPlanner {
     let queuedValuation = 0;
     const queue = nation.recruitmentQueue || [];
     for (let i = 0; i < queue.length; i++) {
-      const order = queue[i]!;
-      queuedValuation += order.totalCost;
+      queuedValuation += queue[i]!.totalCost;
     }
 
     return landAndAirValuation + navalValuation + queuedValuation;
@@ -140,31 +134,26 @@ export class AIProcurementPlanner {
       return "WAR";
     }
 
+    let maxTension = 0;
+
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (rel.stance === "WAR") {
-        return "WAR";
-      }
+      if (rel.stance === "WAR") return "WAR";
 
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const target = allNations[canonicalTarget] || allNations[targetId];
-
+      const target = allNations[targetId];
       if (target && target.isAlive && target.id !== nation.id) {
-        const evalResult = AIThreatCalculator.evaluate(
+        const vector = GeopoliticalVectorCalculator.calculate(
           nation,
           target,
-          provincesMap,
           allNations,
+          provincesMap,
         );
-
-        if (
-          evalResult.isNeighbor &&
-          (evalResult.threatScore >= 50 || rel.opinion <= -30)
-        ) {
-          return "THREAT";
+        if (vector.isNeighbor && vector.tension > maxTension) {
+          maxTension = vector.tension;
         }
       }
     }
 
+    if (maxTension >= 55) return "THREAT";
     return "PEACE";
   }
 
@@ -173,17 +162,11 @@ export class AIProcurementPlanner {
     effectiveTreasury: number,
   ): number {
     const disposable = Math.max(0, effectiveTreasury);
-
-    if (disposable <= 0) {
-      return 0;
-    }
+    if (disposable <= 0) return 0;
 
     let postureMultiplier = 0.35;
-    if (posture === "THREAT") {
-      postureMultiplier = 0.65;
-    } else if (posture === "WAR") {
-      postureMultiplier = 0.9;
-    }
+    if (posture === "THREAT") postureMultiplier = 0.65;
+    else if (posture === "WAR") postureMultiplier = 0.9;
 
     return Math.floor(disposable * postureMultiplier);
   }
@@ -208,14 +191,12 @@ export class AIProcurementPlanner {
           { unitType: "INFANTRY", ratio: 0.85 },
           { unitType: "DRONE_MISSILE", ratio: 0.15 },
         ];
-
       case 2:
         return [
           { unitType: "INFANTRY", ratio: 0.5 },
           { unitType: "ARMOR", ratio: 0.4 },
           { unitType: "DRONE_MISSILE", ratio: 0.1 },
         ];
-
       case 3:
         return [
           { unitType: "INFANTRY", ratio: 0.35 },
@@ -223,7 +204,6 @@ export class AIProcurementPlanner {
           { unitType: "AIR_DEFENSE", ratio: 0.2 },
           { unitType: "DRONE_MISSILE", ratio: 0.1 },
         ];
-
       case 4:
         return [
           { unitType: "AIR_FORCE", ratio: 0.3 },
@@ -231,7 +211,6 @@ export class AIProcurementPlanner {
           { unitType: "INFANTRY", ratio: 0.25 },
           { unitType: "AIR_DEFENSE", ratio: 0.15 },
         ];
-
       case 5:
       default:
         if (hasSeaAccess) {

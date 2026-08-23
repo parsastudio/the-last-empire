@@ -15,11 +15,21 @@ export const DiplomaticProposalTypeSchema = z.enum([
   "SEND_FOREIGN_AID",
 ]);
 
+export const DiplomaticPostureSchema = z.enum([
+  "NATURAL_ALLY",
+  "OPPORTUNISTIC_PREDATOR",
+  "WARY_BUFFER",
+  "NEUTRAL_COEXISTENCE",
+]);
+
 export const RelationProfileSchema = z.object({
   targetNationId: z.string(),
   stance: DiplomaticStanceSchema,
   opinion: z.number().min(-100).max(100),
   grudge: z.number().min(0).max(100).default(0),
+  alignment: z.number().min(-100).max(100).optional(),
+  tension: z.number().min(0).max(100).optional(),
+  lostProvincesCount: z.number().nonnegative().default(0),
 });
 
 export const PendingDiplomaticProposalSchema = z.object({
@@ -35,6 +45,7 @@ export type DiplomaticStance = z.infer<typeof DiplomaticStanceSchema>;
 export type DiplomaticProposalType = z.infer<
   typeof DiplomaticProposalTypeSchema
 >;
+export type DiplomaticPosture = z.infer<typeof DiplomaticPostureSchema>;
 export type RelationProfile = z.infer<typeof RelationProfileSchema>;
 export type PendingDiplomaticProposal = z.infer<
   typeof PendingDiplomaticProposalSchema

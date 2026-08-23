@@ -1,12 +1,14 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import {
+  GameAction,
+  ActionFactory,
+  Nation,
+  Province,
+  CountryRegistry,
+  GeopoliticalReachResolver,
+  getNationGdp,
+} from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -18,14 +20,10 @@ export class AIEconomicDiplomacyEvaluator {
     const currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
-    if (currentTreasury <= 0 || !nation.relations) {
-      return null;
-    }
+    if (currentTreasury <= 0 || !nation.relations) return null;
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
-      if (rel.stance === "WAR") {
-        continue;
-      }
+      if (rel.stance === "WAR") continue;
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
       const targetNation = allNations[canonicalTarget] || allNations[targetId];
@@ -52,27 +50,26 @@ export class AIEconomicDiplomacyEvaluator {
       const targetGdp = getNationGdp(targetNation, provincesMap);
       const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
-      if (currentTreasury < Math.floor(cost * 3.0)) {
-        continue;
-      }
+      if (currentTreasury < Math.floor(cost * 3.0)) continue;
 
-      const threatResult = AIThreatCalculator.evaluate(
+      const vector = GeopoliticalVectorCalculator.calculate(
         nation,
         targetNation,
-        provincesMap,
         allNations,
+        provincesMap,
       );
 
-      const powerRatio = threatResult.powerRatio;
-      const isNeighbor = threatResult.isNeighbor;
+      const isAppeasement =
+        vector.posture === "WARY_BUFFER" &&
+        vector.tension >= 50 &&
+        rel.opinion < 10;
 
-      const isPeacetimeAppeasement =
-        isNeighbor && powerRatio >= 1.3 && rel.opinion < 20;
+      const isAllianceSupport =
+        rel.stance === "ALLIANCE" &&
+        vector.alignment >= 50 &&
+        Boolean(targetNation.warFocusTargetId);
 
-      const isHostileThreatAppeasement =
-        isNeighbor && rel.opinion < -15 && powerRatio >= 1.5;
-
-      if (isPeacetimeAppeasement || isHostileThreatAppeasement) {
+      if (isAppeasement || isAllianceSupport) {
         return {
           action: ActionFactory.sendForeignAid(nation.id, targetNation.id),
           cost,

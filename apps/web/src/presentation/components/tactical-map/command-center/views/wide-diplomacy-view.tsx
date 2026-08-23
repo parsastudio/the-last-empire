@@ -5,6 +5,7 @@ import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map
 import { DiplomacyTargetCard } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-target-card";
 import { Search, MapPin } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
@@ -22,7 +23,7 @@ function FocusMapButton({
   return (
     <button
       onClick={() => onFocus(countryCode)}
-      className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98"
+      className="w-full py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-98 font-sans"
     >
       <MapPin size={14} className="text-military" />
       <span>تمرکز دوربین روی {countryName}</span>
@@ -34,6 +35,7 @@ interface WideDiplomacyViewProps {
   selectedTargetCode?: string | null;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
+  provincesMap?: Record<string, Province>;
   onFocusCountry?: (code: string) => void;
   onNavigateTab?: (
     tab: SidebarTabType,
@@ -46,6 +48,7 @@ export function WideDiplomacyView({
   selectedTargetCode,
   nationsMap,
   humanNationId,
+  provincesMap,
   onFocusCountry,
   onNavigateTab,
 }: WideDiplomacyViewProps) {
@@ -67,6 +70,7 @@ export function WideDiplomacyView({
     selectedTargetCode,
     nationsMap,
     humanNationId: activeHumanId,
+    provincesMap,
   });
 
   const handleOpenEspionage = () => {
@@ -76,7 +80,7 @@ export function WideDiplomacyView({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right font-sans">
       <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
         <div className="relative">
           <Search
@@ -116,6 +120,9 @@ export function WideDiplomacyView({
           flagCode={diplomacy.selectedRelation.flagCode}
           stance={diplomacy.selectedRelation.stance}
           opinion={diplomacy.selectedRelation.opinion}
+          alignment={diplomacy.selectedRelation.alignment}
+          tension={diplomacy.selectedRelation.tension}
+          posture={diplomacy.selectedRelation.posture}
         />
 
         {onFocusCountry && (
@@ -135,6 +142,10 @@ export function WideDiplomacyView({
             senderGdp={humanGdp}
             targetGdp={diplomacy.selectedTargetGdp}
             currentStance={diplomacy.selectedRelation.stance}
+            humanNation={humanNation}
+            targetNation={diplomacy.selectedTargetNation}
+            allNations={nationsMap}
+            provincesMap={provincesMap}
             onOpenProxy={handleOpenEspionage}
           />
         </div>

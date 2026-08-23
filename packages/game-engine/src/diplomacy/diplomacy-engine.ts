@@ -2,7 +2,7 @@ import {
   DiplomaticStance,
   RelationProfile,
   DiplomaticProposalType,
-} from "@/domain/diplomacy/diplomacy.schema";
+} from "@geopolitics/domain";
 
 export interface BetrayalEvaluation {
   reputationPenalty: number;

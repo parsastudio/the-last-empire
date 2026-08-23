@@ -1,11 +1,10 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, CountryRegistry } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { DemographicsTransferResult } from "@/engine/combat/conquest/demographics-transfer-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { NationGeographySyncer } from "@/engine/pipeline/nation-geography-syncer";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
 
 export interface DefenderStateApplierInput {
   defender: Nation;
@@ -32,15 +31,27 @@ export class BattleDefenderStateApplier {
 
     const updatedRelations = { ...defender.relations };
 
+    const isProvinceLost =
+      calcResult.isAttackerVictory &&
+      (conquest.conqueredPixels > 0 || calcResult.isFullCapitulation);
+
     if (isDefenderAlive) {
       const existingRel =
         defender.relations[cleanAttackerId] || defender.relations[attackerId];
       const currentGrudge = existingRel?.grudge ?? 0;
+      const currentLostProvinces = existingRel?.lostProvincesCount ?? 0;
+      const nextLostProvinces = isProvinceLost
+        ? currentLostProvinces + (conquest.conqueredProvincesList.length || 1)
+        : currentLostProvinces;
+
       updatedRelations[cleanAttackerId] = {
         targetNationId: cleanAttackerId,
         stance: "WAR",
         opinion: -100,
         grudge: Math.min(100, currentGrudge + 40),
+        alignment: -100,
+        tension: 100,
+        lostProvincesCount: nextLostProvinces,
       };
     }
 
@@ -49,10 +60,6 @@ export class BattleDefenderStateApplier {
       !currentFocus || currentFocus === cleanAttackerId
         ? cleanAttackerId
         : currentFocus;
-
-    const isProvinceLost =
-      calcResult.isAttackerVictory &&
-      (conquest.conqueredPixels > 0 || calcResult.isFullCapitulation);
 
     const combatStabilityDelta =
       StabilityCalculator.calculateDefenderBattleStabilityDelta(

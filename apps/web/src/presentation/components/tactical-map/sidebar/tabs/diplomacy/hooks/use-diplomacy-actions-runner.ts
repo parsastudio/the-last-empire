@@ -1,11 +1,17 @@
 import { useState, useMemo } from "react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ActionFactory } from "@/domain/game/action-factory";
+import {
+  ActionFactory,
+  DiplomaticStance,
+  Nation,
+  Province,
+} from "@geopolitics/domain";
 import {
   DiplomaticBetrayalCalculator,
   TreatyEvaluator,
-} from "@/engine/diplomacy/diplomacy-engine";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+  GeopoliticalVectorCalculator,
+  UtilityDecisionEngine,
+} from "@geopolitics/game-engine";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface UseDiplomacyActionsRunnerProps {
@@ -15,6 +21,10 @@ interface UseDiplomacyActionsRunnerProps {
   senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
+  humanNation?: Nation | null;
+  targetNation?: Nation | null;
+  allNations?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
 }
 
 export function useDiplomacyActionsRunner({
@@ -24,6 +34,10 @@ export function useDiplomacyActionsRunner({
   senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
+  humanNation,
+  targetNation,
+  allNations,
+  provincesMap,
 }: UseDiplomacyActionsRunnerProps) {
   const { dispatchAction } = useGameActions();
 
@@ -42,6 +56,36 @@ export function useDiplomacyActionsRunner({
   const foreignAidCost = useMemo(() => {
     return TreatyEvaluator.calculateForeignAidCost(senderGdp, targetGdp);
   }, [senderGdp, targetGdp]);
+
+  const vector = useMemo(() => {
+    if (!humanNation || !targetNation) return null;
+    return GeopoliticalVectorCalculator.calculate(
+      targetNation,
+      humanNation,
+      allNations,
+      provincesMap,
+    );
+  }, [humanNation, targetNation, allNations, provincesMap]);
+
+  const allianceEvaluation = useMemo(() => {
+    if (!vector || !targetNation || !humanNation) return null;
+    return UtilityDecisionEngine.evaluateAcceptance(
+      "FULL_ALLIANCE",
+      targetNation,
+      humanNation,
+      vector,
+    );
+  }, [vector, targetNation, humanNation]);
+
+  const napEvaluation = useMemo(() => {
+    if (!vector || !targetNation || !humanNation) return null;
+    return UtilityDecisionEngine.evaluateAcceptance(
+      "NON_AGGRESSION_PACT",
+      targetNation,
+      humanNation,
+      vector,
+    );
+  }, [vector, targetNation, humanNation]);
 
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
@@ -69,7 +113,7 @@ export function useDiplomacyActionsRunner({
     const formattedCost = PersianNumberFormatter.formatCurrency(foreignAidCost);
     await dispatchAction(
       action,
-      `بسته کمک مالی به ارزش ${formattedCost} به ${targetName} ارسال شد (+۲۵ دیدگاه، +۴ اعتبار جهانی).`,
+      `بسته کمک مالی به ارزش ${formattedCost} به ${targetName} ارسال شد (+۲۵ همسویی، +۴ اعتبار جهانی).`,
     );
   };
 
@@ -81,7 +125,7 @@ export function useDiplomacyActionsRunner({
     );
     await dispatchAction(
       action,
-      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید (+۱۵ دیدگاه، +۱ اعتبار جهانی).`,
+      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید (+۱۵ همسویی، +۱ اعتبار جهانی).`,
     );
   };
 
@@ -93,7 +137,7 @@ export function useDiplomacyActionsRunner({
     );
     await dispatchAction(
       action,
-      `پیشنهاد معاهده اتحاد کامل به ${targetName} ارسال گردید (+۳۰ دیدگاه، +۱ اعتبار جهانی).`,
+      `پیشنهاد معاهده اتحاد کامل به ${targetName} ارسال گردید (+۳۰ همسویی، +۱ اعتبار جهانی).`,
     );
   };
 
@@ -122,6 +166,8 @@ export function useDiplomacyActionsRunner({
   return {
     confirmModal,
     foreignAidCost,
+    allianceEvaluation,
+    napEvaluation,
     handleSendAid,
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),
     handleAlliance: () => executeOrConfirm(handleAlliance, false),

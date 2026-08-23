@@ -1,11 +1,14 @@
-import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
-import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import {
+  GameAction,
+  ActionFactory,
+  Nation,
+  Province,
+  CountryRegistry,
+  DiplomacyLockManager,
+  GeopoliticalReachResolver,
+} from "@geopolitics/domain";
+import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
 
 export class AIWarDeclarationEvaluator {
   public static evaluate(
@@ -14,27 +17,20 @@ export class AIWarDeclarationEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
   ): GameAction | null {
-    if (!nation.relations) {
-      return null;
-    }
+    if (!nation.relations) return null;
 
     const isCurrentlyAtWar = Object.values(nation.relations).some((rel) => {
       if (rel.stance !== "WAR") return false;
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(
-        rel.targetNationId,
-      );
       const targetNation =
-        allNations[canonicalTarget] || allNations[rel.targetNationId];
+        allNations[CountryRegistry.resolveCanonicalId(rel.targetNationId)] ||
+        allNations[rel.targetNationId];
       return targetNation && targetNation.isAlive;
     });
 
-    if (isCurrentlyAtWar) {
-      return null;
-    }
+    if (isCurrentlyAtWar) return null;
 
-    if (nation.military.infantry < 4 || nation.government.stability < 35) {
-      return null;
-    }
+    let bestTargetId: string | null = null;
+    let highestWarUtility = 55;
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (
@@ -71,43 +67,31 @@ export class AIWarDeclarationEvaluator {
         continue;
       }
 
-      const threatResult = AIThreatCalculator.evaluate(
+      const vector = GeopoliticalVectorCalculator.calculate(
         nation,
         targetNation,
-        provincesMap,
         allNations,
+        provincesMap,
       );
 
-      const powerRatio = threatResult.powerRatio;
-      const isReachable =
-        threatResult.isNeighbor || threatResult.isNavalReachable;
-      const grudge = rel.grudge ?? 0;
+      const warUtility = UtilityDecisionEngine.calculateWarUtility(
+        nation,
+        targetNation,
+        vector,
+      );
 
-      const isBloodGrudge = grudge >= 45 && powerRatio <= 1.3 && isReachable;
-
-      const hasVulnerability =
-        (targetNation.warFocusTargetId !== null &&
-          targetNation.warFocusTargetId !== undefined &&
-          targetNation.warFocusTargetId !== nation.id) ||
-        targetNation.government.stability < 40 ||
-        rel.opinion < -20;
-
-      const isPredatoryExpansion =
-        isReachable && powerRatio < 0.65 && hasVulnerability;
-
-      const isPreemptiveStrike =
-        isReachable &&
-        rel.opinion <= -40 &&
-        threatResult.threatScore >= 60 &&
-        powerRatio <= 0.85;
-
-      if (isBloodGrudge || isPredatoryExpansion || isPreemptiveStrike) {
-        return ActionFactory.diplomaticProposal(
-          nation.id,
-          targetNation.id,
-          "DECLARE_WAR",
-        );
+      if (warUtility > highestWarUtility) {
+        highestWarUtility = warUtility;
+        bestTargetId = targetNation.id;
       }
+    }
+
+    if (bestTargetId) {
+      return ActionFactory.diplomaticProposal(
+        nation.id,
+        bestTargetId,
+        "DECLARE_WAR",
+      );
     }
 
     return null;

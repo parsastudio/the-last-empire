@@ -1,8 +1,10 @@
-import { GameState } from "@/domain/game/game-state.schema";
-import { PendingDiplomaticProposal } from "@/domain/diplomacy/diplomacy.schema";
-import { CountryRegistry } from "@/domain/data/countries";
+import {
+  GameState,
+  PendingDiplomaticProposal,
+  CountryRegistry,
+  TurnLogBuilder,
+} from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
-import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class TreatyAcceptanceApplier {
   private static treatyEvaluator = new TreatyEvaluator();
