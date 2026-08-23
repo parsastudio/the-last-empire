@@ -2,6 +2,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
+import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 
 export class NationGettersUtility {
   public static getOwnedProvinces(
@@ -93,31 +94,65 @@ export class NationGettersUtility {
     if (!nationsMap) return rankMap;
 
     const aliveNations = Object.values(nationsMap).filter((n) => n.isAlive);
+    if (aliveNations.length === 0) return rankMap;
 
-    aliveNations.sort((a, b) => {
-      const gdpA = NationGettersUtility.getOwnedProvinces(
-        a.id,
+    const nationMetrics = aliveNations.map((nation) => {
+      const provs = NationGettersUtility.getOwnedProvinces(
+        nation.id,
         provincesMap,
-      ).reduce((sum, p) => sum + getProvinceGdp(p), 0);
-      const gdpB = NationGettersUtility.getOwnedProvinces(
-        b.id,
-        provincesMap,
-      ).reduce((sum, p) => sum + getProvinceGdp(p), 0);
+      );
+      const gdp = provs.reduce((sum, p) => sum + getProvinceGdp(p), 0);
+      const milPower = MilitaryPowerCalculator.calculateEffectivePower(
+        nation,
+        true,
+      );
+      const population = provs.reduce((sum, p) => sum + (p.population || 0), 0);
 
-      if (gdpB !== gdpA) return gdpB - gdpA;
-
-      const popA = NationGettersUtility.getPopulation(a.id, provincesMap);
-      const popB = NationGettersUtility.getPopulation(b.id, provincesMap);
-      if (popB !== popA) return popB - popA;
-
-      return a.id.localeCompare(b.id);
+      return {
+        nation,
+        gdp,
+        milPower,
+        population,
+      };
     });
 
-    for (let i = 0; i < aliveNations.length; i++) {
-      const nation = aliveNations[i]!;
-      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+    let maxGdp = 0;
+    let maxMilPower = 0;
+
+    for (const item of nationMetrics) {
+      if (item.gdp > maxGdp) maxGdp = item.gdp;
+      if (item.milPower > maxMilPower) maxMilPower = item.milPower;
+    }
+
+    const safeMaxGdp = Math.max(1, maxGdp);
+    const safeMaxMil = Math.max(1, maxMilPower);
+
+    const scoredNations = nationMetrics.map((item) => {
+      const normGdp = (item.gdp / safeMaxGdp) * 100;
+      const normMil = (item.milPower / safeMaxMil) * 100;
+      const compositeScore = normGdp * 0.7 + normMil * 0.3;
+
+      return {
+        ...item,
+        compositeScore,
+      };
+    });
+
+    scoredNations.sort((a, b) => {
+      if (Math.abs(b.compositeScore - a.compositeScore) > 0.0001) {
+        return b.compositeScore - a.compositeScore;
+      }
+      if (b.population !== a.population) {
+        return b.population - a.population;
+      }
+      return a.nation.id.localeCompare(b.nation.id);
+    });
+
+    for (let i = 0; i < scoredNations.length; i++) {
+      const item = scoredNations[i]!;
+      const canonicalId = CountryRegistry.resolveCanonicalId(item.nation.id);
       rankMap.set(canonicalId, i + 1);
-      rankMap.set(nation.id, i + 1);
+      rankMap.set(item.nation.id, i + 1);
     }
 
     return rankMap;

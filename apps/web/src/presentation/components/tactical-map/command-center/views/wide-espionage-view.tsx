@@ -8,6 +8,7 @@ import { EspionageTargetSelector } from "@/presentation/components/tactical-map/
 import { EspionageTierCard } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-tier-card";
 import { EspionageResultBanner } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-result-banner";
 import { useWideEspionageForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-espionage-form";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 interface WideEspionageViewProps {
   nation: Nation;
@@ -28,6 +29,14 @@ export function WideEspionageView({
     provincesMap,
     selectedTargetCode,
   });
+
+  const targetRank = form.selectedTargetNation
+    ? NationGettersUtility.getRank(
+        form.selectedTargetNation.id,
+        nationsMap,
+        provincesMap,
+      )
+    : 99;
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
@@ -61,9 +70,7 @@ export function WideEspionageView({
                       </span>
                       <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground border border-border/60">
                         رتبه جهانی #
-                        {PersianNumberFormatter.toPersianDigits(
-                          form.selectedTargetNation.rank,
-                        )}
+                        {PersianNumberFormatter.toPersianDigits(targetRank)}
                       </span>
                     </h3>
                     <span className="text-[10px] text-muted-foreground font-mono">

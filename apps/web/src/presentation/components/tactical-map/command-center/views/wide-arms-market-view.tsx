@@ -1,6 +1,7 @@
 import React from "react";
 import { Anchor, Award, Users } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { useWideArmsMarketForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-arms-market-form";
@@ -11,17 +12,20 @@ import { ArmsOrderSummary } from "@/presentation/components/tactical-map/command
 interface WideArmsMarketViewProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
   selectedTargetCode?: string | null;
 }
 
 export function WideArmsMarketView({
   nation,
   nationsMap,
+  provincesMap,
   selectedTargetCode,
 }: WideArmsMarketViewProps) {
   const form = useWideArmsMarketForm({
     nation,
     nationsMap,
+    provincesMap,
     selectedTargetCode,
   });
 

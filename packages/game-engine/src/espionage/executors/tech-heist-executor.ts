@@ -5,7 +5,7 @@ import {
   EspionageTechTheftData,
 } from "@/domain/espionage/espionage.schema";
 import { TechSuperiorityDelta } from "@/engine/espionage/espionage-calculator";
-import { InfrastructureManager } from "@/engine/economy/calculators/infrastructure-manager";
+import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { GdpCalculator } from "@/engine/economy/calculators/gdp-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 
@@ -81,7 +81,7 @@ export class TechHeistExecutor {
         let cap = prov.maxPopulationCapacity;
         let prod = prov.perCapitaProductivity;
         for (let i = 0; i < gInfra; i++) {
-          cap = InfrastructureManager.calculateNextCapacity(cap);
+          cap = DevelopmentManager.calculateNextCapacity(cap);
         }
         for (let i = 0; i < gInd; i++) {
           prod = GdpCalculator.calculateProductivityOnUpgrade(prod);
