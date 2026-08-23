@@ -37,9 +37,15 @@ export class AIProcurementPlanner {
     const aliveCount = Object.values(allNations).filter(
       (n) => n.isAlive,
     ).length;
+    const nationRank = NationGettersUtility.getRank(
+      nation.id,
+      allNations,
+      provincesMap,
+    );
+
     const maxArmyValuation = AiEconomyCalculator.calculateMaxArmyValuation(
       gdp,
-      nation.rank,
+      nationRank,
       aliveCount,
     );
 

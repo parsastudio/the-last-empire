@@ -3,7 +3,6 @@ import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
-import { RankManager } from "@/engine/politics/rank-manager";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AllianceInterventionEvaluator } from "@/engine/combat/alliance-intervention-evaluator";
@@ -144,17 +143,12 @@ export class BattleExecutionEngine {
       state.humanNationId,
     );
 
-    const rankedNations = RankManager.recalculateRanks(
-      intervention.updatedNations,
-      conquest.updatedProvinces,
-    );
-
     const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
 
     return {
       ...state,
       provinces: conquest.updatedProvinces,
-      nations: rankedNations,
+      nations: intervention.updatedNations,
       turnLogs: updatedLogs,
     };
   }

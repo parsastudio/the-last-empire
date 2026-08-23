@@ -2,7 +2,6 @@ import type { GameState } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { RankManager } from "@/engine/politics/rank-manager";
 import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-processor";
 import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
 import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
@@ -84,15 +83,10 @@ export class TurnPipeline {
       updatedNations[id] = polNation;
     }
 
-    const rankedNations = RankManager.recalculateRanks(
-      updatedNations,
-      updatedProvincesMap,
-    );
-
     return {
       ...currentState,
       provinces: updatedProvincesMap,
-      nations: rankedNations,
+      nations: updatedNations,
     };
   }
 }

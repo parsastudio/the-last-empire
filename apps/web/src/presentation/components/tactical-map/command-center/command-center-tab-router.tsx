@@ -34,13 +34,7 @@ export function CommandCenterTabRouter({
 }: CommandCenterTabRouterProps) {
   switch (activeTab) {
     case "overview":
-      return (
-        <WideOverviewView
-          nation={nation}
-          rank={nation.rank}
-          gameState={gameState}
-        />
-      );
+      return <WideOverviewView nation={nation} gameState={gameState} />;
     case "military":
       return (
         <WideMilitaryView
@@ -56,6 +50,7 @@ export function CommandCenterTabRouter({
         <WideArmsMarketView
           nation={nation}
           nationsMap={gameState?.nations}
+          provincesMap={gameState?.provinces}
           selectedTargetCode={selectedTargetCode}
         />
       );

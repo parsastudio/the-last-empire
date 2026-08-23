@@ -35,22 +35,31 @@ export function useWideEspionageForm({
   const countryOptions = useMemo<EspionageTargetOption[]>(() => {
     if (!nationsMap) return [];
     const query = searchQuery.trim().toLowerCase();
+    const rankLookup = NationGettersUtility.calculateRankMap(
+      nationsMap,
+      provincesMap,
+    );
 
     return Object.values(nationsMap)
       .filter((n) => n.id !== nation.id && n.isAlive)
-      .map((n) => ({
-        id: CountryRegistry.resolveCanonicalId(n.id),
-        name: n.name,
-        flagCode: n.flagCode || "IR",
-        rank: n.rank || 99,
-        gdp: getNationGdp(n, provincesMap),
-        militaryTechLevel: n.military.techLevel,
-        industrialLevel: n.industrialLevel,
-        infrastructureLevel: NationGettersUtility.getInfrastructureLevel(
-          n.id,
-          provincesMap,
-        ),
-      }))
+      .map((n) => {
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
+        const rank = rankLookup.get(canonical) ?? 99;
+
+        return {
+          id: canonical,
+          name: n.name,
+          flagCode: n.flagCode || "IR",
+          rank,
+          gdp: getNationGdp(n, provincesMap),
+          militaryTechLevel: n.military.techLevel,
+          industrialLevel: n.industrialLevel,
+          infrastructureLevel: NationGettersUtility.getInfrastructureLevel(
+            n.id,
+            provincesMap,
+          ),
+        };
+      })
       .filter(
         (c) =>
           !query ||

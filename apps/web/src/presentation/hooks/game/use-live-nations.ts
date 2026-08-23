@@ -11,6 +11,7 @@ export interface LiveNationItem {
   name: string;
   code: string;
   flagCode: string;
+  rank: number;
   gdp: number;
   population: number;
   stability: number;
@@ -41,6 +42,10 @@ export function useLiveNations({
       : null;
 
     const sourceNation = canonicalExclude ? nationsMap[canonicalExclude] : null;
+    const rankLookup = NationGettersUtility.calculateRankMap(
+      nationsMap,
+      provincesMap,
+    );
 
     return Object.values(nationsMap)
       .filter((n) => {
@@ -70,12 +75,14 @@ export function useLiveNations({
           n.id,
           provincesMap,
         );
+        const rank = rankLookup.get(canonical) ?? 99;
 
         return {
           id: canonical,
           name: n.name,
           code,
           flagCode,
+          rank,
           gdp: getNationGdp(n, provincesMap),
           population,
           stability: n.government.stability,

@@ -102,6 +102,10 @@ export function resolveProfileRelation(
     ? liveNation.military.techLevel
     : fallback.startingTechLevel;
 
+  const rank = liveNation
+    ? NationGettersUtility.getRank(liveNation.id, allNations, provincesMap)
+    : 99;
+
   let stance: DiplomaticStance = "NORMAL_DIPLOMACY";
   let unifiedScore = 0;
   let alignment = 0;
@@ -134,7 +138,7 @@ export function resolveProfileRelation(
     code: displayCode.toUpperCase(),
     name,
     flagCode: flagCode.toUpperCase(),
-    rank: liveNation ? liveNation.rank : 99,
+    rank,
     stance,
     opinion: unifiedScore,
     alignment,

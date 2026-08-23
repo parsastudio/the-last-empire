@@ -11,16 +11,19 @@ import { NationGettersUtility } from "@geopolitics/domain";
 
 interface WideOverviewViewProps {
   nation: Nation;
-  rank?: number;
   gameState?: GameState | null;
 }
 
-export function WideOverviewView({
-  nation,
-  rank = 1,
-  gameState,
-}: WideOverviewViewProps) {
+export function WideOverviewView({ nation, gameState }: WideOverviewViewProps) {
   const provincesMap = gameState?.provinces;
+
+  const rank = useMemo(() => {
+    return NationGettersUtility.getRank(
+      nation.id,
+      gameState?.nations,
+      provincesMap,
+    );
+  }, [nation.id, gameState?.nations, provincesMap]);
 
   const effectiveGdp = useMemo(() => {
     return getNationGdp(nation, provincesMap);

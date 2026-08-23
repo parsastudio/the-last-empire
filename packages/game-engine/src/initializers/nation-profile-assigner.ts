@@ -120,7 +120,6 @@ export class NationProfileAssigner {
       isAi: !isHuman,
       isAlive: true,
       flagCode: item.flagCode,
-      rank: item.initialRank,
       taxRate: 15,
       tariffRate: 10,
       treasury: item.startingTreasury,

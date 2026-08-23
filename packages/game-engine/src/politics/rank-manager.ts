@@ -1,41 +1,18 @@
-import {
-  Nation,
-  Province,
-  getNationGdp,
-  NationGettersUtility,
-} from "@geopolitics/domain";
+import { Nation, Province, NationGettersUtility } from "@geopolitics/domain";
 
 export class RankManager {
-  public static recalculateRanks(
+  public static calculateRankMap(
     nations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
-  ): Record<string, Nation> {
-    const updatedNations: Record<string, Nation> = { ...nations };
+  ): Map<string, number> {
+    return NationGettersUtility.calculateRankMap(nations, provincesMap);
+  }
 
-    const sortedAliveNations = Object.values(updatedNations)
-      .filter((n) => n.isAlive)
-      .sort((a, b) => {
-        const gdpDiff =
-          getNationGdp(b, provincesMap) - getNationGdp(a, provincesMap);
-        if (gdpDiff !== 0) return gdpDiff;
-        const popB = NationGettersUtility.getPopulation(b.id, provincesMap);
-        const popA = NationGettersUtility.getPopulation(a.id, provincesMap);
-        const popDiff = popB - popA;
-        if (popDiff !== 0) return popDiff;
-        return a.id.localeCompare(b.id);
-      });
-
-    for (let index = 0; index < sortedAliveNations.length; index++) {
-      const nation = sortedAliveNations[index]!;
-      const newRank = index + 1;
-      if (nation.rank !== newRank) {
-        updatedNations[nation.id] = {
-          ...updatedNations[nation.id]!,
-          rank: newRank,
-        };
-      }
-    }
-
-    return updatedNations;
+  public static getRank(
+    nationId: string,
+    nations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): number {
+    return NationGettersUtility.getRank(nationId, nations, provincesMap);
   }
 }
