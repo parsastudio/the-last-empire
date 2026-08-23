@@ -79,18 +79,20 @@ export class PoliticsActionExecutor {
           receiver.relations[action.nationId];
         if (!senderRel || !receiverRel) return state;
 
-        const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          receiver,
-          state.nations,
-          state.provinces,
-        );
-
-        if (!isReachable && senderRel.stance !== "WAR") {
-          throw new GameError(
-            "INVALID_ACTION",
-            `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
+        if (nation.isAi) {
+          const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
+            nation,
+            receiver,
+            state.nations,
+            state.provinces,
           );
+
+          if (!isReachable && senderRel.stance !== "WAR") {
+            throw new GameError(
+              "INVALID_ACTION",
+              `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
+            );
+          }
         }
 
         const canonicalHuman = CountryRegistry.resolveCanonicalId(
