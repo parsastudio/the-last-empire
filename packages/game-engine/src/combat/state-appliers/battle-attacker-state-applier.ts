@@ -85,6 +85,8 @@ export class BattleAttackerStateApplier {
       attacker.treasury - actualDeploymentCost + totalLoot,
     );
 
+    const nextWarFocus = isTotalAnnexation ? null : cleanDefenderId;
+
     return {
       ...attacker,
       government: {
@@ -98,7 +100,7 @@ export class BattleAttackerStateApplier {
       treasury: updatedTreasury,
       military: updatedMilitary,
       relations: updatedRelations,
-      warFocusTargetId: cleanDefenderId,
+      warFocusTargetId: nextWarFocus,
     };
   }
 }

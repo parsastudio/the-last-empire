@@ -177,11 +177,14 @@ export class EspionageManager {
         ),
       };
 
-      const rel = updatedSource.relations[target.id];
+      const rel =
+        updatedSource.relations[canonicalTarget] ||
+        updatedSource.relations[target.id];
       if (rel) {
+        const key = rel.targetNationId || canonicalTarget;
         updatedSource.relations = {
           ...updatedSource.relations,
-          [target.id]: {
+          [key]: {
             ...rel,
             alignment: Math.max(-100, (rel.alignment ?? 0) - tier * 15),
             tension: Math.min(100, (rel.tension ?? 10) + tier * 10),
@@ -189,11 +192,14 @@ export class EspionageManager {
         };
       }
 
-      const targetRel = updatedTarget.relations[source.id];
+      const targetRel =
+        updatedTarget.relations[canonicalSource] ||
+        updatedTarget.relations[source.id];
       if (targetRel) {
+        const key = targetRel.targetNationId || canonicalSource;
         updatedTarget.relations = {
           ...updatedTarget.relations,
-          [source.id]: {
+          [key]: {
             ...targetRel,
             alignment: Math.max(-100, (targetRel.alignment ?? 0) - tier * 25),
             tension: Math.min(100, (targetRel.tension ?? 10) + tier * 20),

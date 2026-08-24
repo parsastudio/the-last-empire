@@ -1,8 +1,8 @@
 export interface MissilePhaseInput {
   deployedDrones: number;
   defAirDefense: number;
-  attMult: number;
-  defMult: number;
+  attDroneMult: number;
+  defAdMult: number;
   attackerDroneBonus: number;
   defenderInterceptionBonus: number;
   attackerPrecisionBonus: number;
@@ -17,10 +17,10 @@ export interface MissilePhaseOutput {
 export class MissileInterceptionPhase {
   public static calculate(input: MissilePhaseInput): MissilePhaseOutput {
     const attMissilesEff =
-      input.deployedDrones * input.attMult * input.attackerDroneBonus;
+      input.deployedDrones * input.attDroneMult * input.attackerDroneBonus;
     const defAirDefenseEff =
       input.defAirDefense *
-      input.defMult *
+      input.defAdMult *
       (1 + input.defenderInterceptionBonus);
 
     const missilesInterceptedEff = Math.min(
@@ -37,11 +37,12 @@ export class MissileInterceptionPhase {
     );
     const rawDefAirDefenseLost = Math.min(
       input.defAirDefense,
-      Math.floor(airDefenseDestroyedEff / input.defMult),
+      Math.floor(airDefenseDestroyedEff / input.defAdMult),
     );
     const defAirDefenseRemainingRaw =
       input.defAirDefense - rawDefAirDefenseLost;
-    const defAirDefenseRemainingEff = defAirDefenseRemainingRaw * input.defMult;
+    const defAirDefenseRemainingEff =
+      defAirDefenseRemainingRaw * input.defAdMult;
 
     return {
       rawDefAirDefenseLost,

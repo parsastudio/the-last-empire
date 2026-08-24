@@ -1,5 +1,6 @@
 import {
   Nation,
+  Province,
   CountryRegistry,
   MilitaryPowerCalculator,
   GeopoliticalReachResolver,
@@ -17,6 +18,7 @@ export class AllianceInterventionEvaluator {
     attacker: Nation,
     defender: Nation,
     nationsMap: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
   ): AllianceInterventionResult {
     const interveningAllyIds: string[] = [];
     const dishonoringAllyIds: string[] = [];
@@ -44,13 +46,14 @@ export class AllianceInterventionEvaluator {
       const hasLandBorder = GeopoliticalReachResolver.hasDirectLandBorder(
         ally,
         attacker,
+        provincesMap,
       );
       const allySea =
         (ally.military.navalFleet || 0) > 0 ||
-        NationGettersUtility.hasSeaAccess(ally.id);
+        NationGettersUtility.hasSeaAccess(ally.id, provincesMap);
       const attackerSea =
         (attacker.military.navalFleet || 0) > 0 ||
-        NationGettersUtility.hasSeaAccess(attacker.id);
+        NationGettersUtility.hasSeaAccess(attacker.id, provincesMap);
       const hasNavalRoute = allySea && attackerSea;
       const canReachAttacker = hasLandBorder || hasNavalRoute;
 
