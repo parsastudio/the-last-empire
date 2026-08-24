@@ -5,6 +5,7 @@ import {
   CountryRegistry,
   TurnLogFormatter,
   PendingDiplomaticProposal,
+  BattleFullReportData,
 } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import {
@@ -17,6 +18,7 @@ import {
   ArrowLeft,
   Handshake,
   Sparkles,
+  Eye,
 } from "lucide-react";
 import { ProposalActionButtons } from "./proposal-action-buttons";
 
@@ -25,6 +27,7 @@ interface ReportCardProps {
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   pendingProposals?: PendingDiplomaticProposal[];
+  onOpenBattleDebrief?: (reportData: BattleFullReportData) => void;
 }
 
 export function ReportCard({
@@ -32,6 +35,7 @@ export function ReportCard({
   nationsMap,
   humanNationId,
   pendingProposals = [],
+  onOpenBattleDebrief,
 }: ReportCardProps) {
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
     log.sourceNationId,
@@ -55,6 +59,22 @@ export function ReportCard({
   const dynamicMessage = useMemo(() => {
     return TurnLogFormatter.formatMessage(log, nationsMap);
   }, [log, nationsMap]);
+
+  const battleReportData = useMemo<BattleFullReportData | null>(() => {
+    if (
+      log.eventCode !== "BATTLE_TACTICAL_REPORT" &&
+      log.eventCode !== "BATTLE_GLOBAL_NEWS"
+    ) {
+      return null;
+    }
+    const rawJson = log.params?.["reportJson"];
+    if (!rawJson || typeof rawJson !== "string") return null;
+    try {
+      return JSON.parse(rawJson) as BattleFullReportData;
+    } catch {
+      return null;
+    }
+  }, [log]);
 
   const activePendingProposal = useMemo(() => {
     if (
@@ -221,6 +241,16 @@ export function ReportCard({
                 </>
               )}
             </div>
+          )}
+
+          {battleReportData && onOpenBattleDebrief && (
+            <button
+              onClick={() => onOpenBattleDebrief(battleReportData)}
+              className="px-2.5 py-1 bg-military/15 hover:bg-military/25 text-military border border-military/30 hover:border-military/50 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0"
+            >
+              <Eye size={12} />
+              <span>مشاهده جزئیات ۳ فاز نبرد</span>
+            </button>
           )}
 
           {isIncomingInteractiveProposal && activePendingProposal && (

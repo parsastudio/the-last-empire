@@ -3,6 +3,9 @@ import { Province } from "@/domain/province/province.schema";
 import {
   CasualtyMetrics,
   ReportSeverity,
+  BattlePhaseReconDetail,
+  BattlePhaseAirDetail,
+  BattlePhaseGroundDetail,
 } from "@/domain/reports/combat-report.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
@@ -31,6 +34,9 @@ export interface BattleCalculationResult {
   capturedAirForce: number;
   capturedDrones: number;
   capturedNavalFleet: number;
+  phase1Missile: BattlePhaseReconDetail;
+  phase2Air: BattlePhaseAirDetail;
+  phase3Ground: BattlePhaseGroundDetail;
 }
 
 export class BattleCalculator {
@@ -268,6 +274,25 @@ export class BattleCalculator {
           : "DEFEAT";
     }
 
+    const phase1Winner =
+      missilePhase.rawDefAirDefenseLost > 0 && deployedDrones > 0
+        ? "ATTACKER"
+        : defAirDefense > 0
+          ? "DEFENDER"
+          : "DRAW";
+
+    const phase2Winner =
+      airPhase.rawDefAirLoss > airPhase.rawAttAirLoss ||
+      airPhase.defArmorDestroyedByAir > 0
+        ? "ATTACKER"
+        : airPhase.rawAttAirLoss > airPhase.rawDefAirLoss
+          ? "DEFENDER"
+          : "DRAW";
+
+    const phase3Winner = groundPhase.isAttackerVictory
+      ? "ATTACKER"
+      : "DEFENDER";
+
     return {
       isAttackerVictory: groundPhase.isAttackerVictory,
       isFullCapitulation,
@@ -284,6 +309,32 @@ export class BattleCalculator {
       capturedAirForce,
       capturedDrones,
       capturedNavalFleet,
+      phase1Missile: {
+        dronesLaunched: deployedDrones,
+        defAirDefense,
+        airDefenseLost: casualty.netDefAirDefenseLost,
+        dronesIntercepted: Math.min(deployedDrones, defAirDefense * 2),
+        phaseWinner: phase1Winner,
+      },
+      phase2Air: {
+        attAirForce: deployedAirForce,
+        defAirForce,
+        attAirLost: casualty.netAttAirLost,
+        defAirLost: casualty.netDefAirLost,
+        defArmorDestroyedByAir: airPhase.defArmorDestroyedByAir,
+        phaseWinner: phase2Winner,
+      },
+      phase3Ground: {
+        attArmor: deployedArmor,
+        defArmor,
+        attArmorLost: casualty.netAttArmorLost,
+        defArmorLost: casualty.netDefArmorLost,
+        attInfantry: deployedInfantry,
+        defInfantry,
+        attInfantryLost: casualty.netAttInfantryLost,
+        defInfantryLost: casualty.netDefInfantryLost,
+        phaseWinner: phase3Winner,
+      },
     };
   }
 }

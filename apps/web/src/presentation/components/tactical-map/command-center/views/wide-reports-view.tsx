@@ -1,13 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   TurnLogEntry,
   Nation,
   PendingDiplomaticProposal,
+  BattleFullReportData,
 } from "@geopolitics/domain";
 import { useWideReports } from "@/presentation/components/tactical-map/command-center/views/reports/hooks/use-wide-reports";
 import { ReportStatsOverview } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-stats-overview";
 import { ReportFilters } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-filters";
 import { ReportCard } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-card";
+import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { FileQuestion } from "lucide-react";
 
@@ -26,6 +28,9 @@ export function WideReportsView({
   nationsMap,
   pendingProposals = [],
 }: WideReportsViewProps) {
+  const [selectedDebrief, setSelectedDebrief] =
+    useState<BattleFullReportData | null>(null);
+
   const {
     selectedScope,
     selectedTurn,
@@ -76,10 +81,21 @@ export function WideReportsView({
               nationsMap={nationsMap}
               humanNationId={humanNationId}
               pendingProposals={pendingProposals}
+              onOpenBattleDebrief={(reportData) =>
+                setSelectedDebrief(reportData)
+              }
             />
           ))
         )}
       </div>
+
+      <BattleDebriefModal
+        isOpen={selectedDebrief !== null}
+        reportData={selectedDebrief}
+        nationsMap={nationsMap}
+        humanNationId={humanNationId}
+        onClose={() => setSelectedDebrief(null)}
+      />
     </div>
   );
 }

@@ -19,35 +19,38 @@ function calculateLogPriority(
     canonicalHuman !== null &&
     (sourceCanonical === canonicalHuman || targetCanonical === canonicalHuman);
 
+  if (log.eventCode === "BATTLE_TACTICAL_REPORT" && isHumanInvolved) {
+    return 1;
+  }
+
   switch (log.eventCode) {
     case "NATION_ANNEXED":
     case "NATION_COLLAPSED":
-      return isHumanInvolved ? 1 : 4;
-
-    case "WAR_DECLARED":
-    case "BATTLE_TACTICAL_REPORT":
-    case "ALLIANCE_INTERVENTION":
-    case "ALLIANCE_BETRAYED":
       return isHumanInvolved ? 2 : 5;
 
+    case "WAR_DECLARED":
+    case "ALLIANCE_INTERVENTION":
+    case "ALLIANCE_BETRAYED":
+      return isHumanInvolved ? 3 : 6;
+
     case "BATTLE_GLOBAL_NEWS":
-      return 6;
+      return 7;
 
     case "ESPIONAGE_OPERATION":
-      return isHumanInvolved ? 3 : 7;
+      return isHumanInvolved ? 4 : 8;
 
     case "TREATY_ACCEPTED":
     case "TREATY_REJECTED":
     case "DIPLOMATIC_PROPOSAL_SENT":
-      return isHumanInvolved ? 4 : 8;
+      return isHumanInvolved ? 5 : 9;
 
     case "FOREIGN_AID_SENT":
     case "ARMS_TRADE":
-      return isHumanInvolved ? 5 : 9;
+      return isHumanInvolved ? 6 : 10;
 
     case "GENERIC_EVENT":
     default:
-      return 10;
+      return 11;
   }
 }
 

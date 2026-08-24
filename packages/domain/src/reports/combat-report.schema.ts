@@ -23,5 +23,58 @@ export const CasualtyMetricsSchema = z.object({
   navalFleetLost: z.number().nonnegative().default(0),
 });
 
+export const BattlePhaseReconDetailSchema = z.object({
+  dronesLaunched: z.number().nonnegative(),
+  defAirDefense: z.number().nonnegative(),
+  airDefenseLost: z.number().nonnegative(),
+  dronesIntercepted: z.number().nonnegative(),
+  phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW"]),
+});
+
+export const BattlePhaseAirDetailSchema = z.object({
+  attAirForce: z.number().nonnegative(),
+  defAirForce: z.number().nonnegative(),
+  attAirLost: z.number().nonnegative(),
+  defAirLost: z.number().nonnegative(),
+  defArmorDestroyedByAir: z.number().nonnegative(),
+  phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW"]),
+});
+
+export const BattlePhaseGroundDetailSchema = z.object({
+  attArmor: z.number().nonnegative(),
+  defArmor: z.number().nonnegative(),
+  attArmorLost: z.number().nonnegative(),
+  defArmorLost: z.number().nonnegative(),
+  attInfantry: z.number().nonnegative(),
+  defInfantry: z.number().nonnegative(),
+  attInfantryLost: z.number().nonnegative(),
+  defInfantryLost: z.number().nonnegative(),
+  phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW"]),
+});
+
+export const BattleFullReportDataSchema = z.object({
+  attackerId: z.string(),
+  defenderId: z.string(),
+  targetProvinceName: z.string().optional(),
+  attackType: z.enum(["LAND", "NAVAL"]).default("LAND"),
+  isAttackerVictory: z.boolean(),
+  isFullCapitulation: z.boolean(),
+  valuationRatio: z.number(),
+  treasuryLooted: z.number().nonnegative(),
+  attackerCasualties: CasualtyMetricsSchema,
+  defenderCasualties: CasualtyMetricsSchema,
+  phase1Missile: BattlePhaseReconDetailSchema,
+  phase2Air: BattlePhaseAirDetailSchema,
+  phase3Ground: BattlePhaseGroundDetailSchema,
+});
+
 export type ReportSeverity = z.infer<typeof ReportSeveritySchema>;
 export type CasualtyMetrics = z.infer<typeof CasualtyMetricsSchema>;
+export type BattlePhaseReconDetail = z.infer<
+  typeof BattlePhaseReconDetailSchema
+>;
+export type BattlePhaseAirDetail = z.infer<typeof BattlePhaseAirDetailSchema>;
+export type BattlePhaseGroundDetail = z.infer<
+  typeof BattlePhaseGroundDetailSchema
+>;
+export type BattleFullReportData = z.infer<typeof BattleFullReportDataSchema>;
