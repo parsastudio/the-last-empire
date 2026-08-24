@@ -11,7 +11,10 @@ import {
   CountryRegistry,
 } from "@geopolitics/domain";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
-import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import {
+  GeopoliticalVectorCalculator,
+  GeopoliticalVector,
+} from "@/engine/ai/geopolitical-vector-calculator";
 
 export type AIPosture = "PEACE" | "THREAT" | "WAR";
 
@@ -32,6 +35,7 @@ export class AIProcurementPlanner {
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
     rankMap?: Map<string, number>,
+    precomputedPosture?: AIPosture,
   ): RecruitmentPlanResult {
     const effectiveTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -63,12 +67,10 @@ export class AIProcurementPlanner {
       return { actions: [], remainingTreasury: effectiveTreasury };
     }
 
-    const posture = this.evaluatePosture(
-      nation,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
+    const posture =
+      precomputedPosture ??
+      this.evaluatePosture(nation, allNations, provincesMap, rankMap);
+
     const spendableBudget = Math.min(
       this.calculateSpendableBudget(posture, effectiveTreasury),
       remainingValuationCapacity,
@@ -148,6 +150,8 @@ export class AIProcurementPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
+    vectorsByTarget?: Map<string, GeopoliticalVector>,
+    reachableTargets?: Nation[],
   ): AIPosture {
     if (nation.warFocusTargetId) {
       return "WAR";
@@ -155,14 +159,16 @@ export class AIProcurementPlanner {
 
     let maxTension = 0;
 
-    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
+    const targets =
+      reachableTargets ??
+      GeopoliticalReachResolver.getReachableTargets(
+        nation,
+        allNations,
+        provincesMap,
+        rankMap,
+      );
 
-    for (const target of reachableTargets) {
+    for (const target of targets) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
       const rel =
         nation.relations[canonicalTarget] || nation.relations[target.id];
@@ -171,12 +177,14 @@ export class AIProcurementPlanner {
         return "WAR";
       }
 
-      const vector = GeopoliticalVectorCalculator.calculate(
-        nation,
-        target,
-        allNations,
-        provincesMap,
-      );
+      const vector =
+        vectorsByTarget?.get(canonicalTarget) ??
+        GeopoliticalVectorCalculator.calculate(
+          nation,
+          target,
+          allNations,
+          provincesMap,
+        );
 
       if (vector.isNeighbor && vector.tension > maxTension) {
         maxTension = vector.tension;

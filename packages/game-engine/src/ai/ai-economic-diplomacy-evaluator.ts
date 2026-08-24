@@ -8,7 +8,10 @@ import {
   getNationGdp,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
-import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import {
+  GeopoliticalVectorCalculator,
+  GeopoliticalVector,
+} from "@/engine/ai/geopolitical-vector-calculator";
 
 export class AIEconomicDiplomacyEvaluator {
   public static evaluate(
@@ -17,20 +20,24 @@ export class AIEconomicDiplomacyEvaluator {
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
     rankMap?: Map<string, number>,
+    reachableTargets?: Nation[],
+    vectorsByTarget?: Map<string, GeopoliticalVector>,
   ): { action: GameAction; cost: number } | null {
     const currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
     if (currentTreasury <= 0 || !nation.relations) return null;
 
-    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
+    const targets =
+      reachableTargets ??
+      GeopoliticalReachResolver.getReachableTargets(
+        nation,
+        allNations,
+        provincesMap,
+        rankMap,
+      );
 
-    for (const targetNation of reachableTargets) {
+    for (const targetNation of targets) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
         targetNation.id,
       );
@@ -44,12 +51,14 @@ export class AIEconomicDiplomacyEvaluator {
 
       if (currentTreasury < Math.floor(cost * 3.0)) continue;
 
-      const vector = GeopoliticalVectorCalculator.calculate(
-        nation,
-        targetNation,
-        allNations,
-        provincesMap,
-      );
+      const vector =
+        vectorsByTarget?.get(canonicalTarget) ??
+        GeopoliticalVectorCalculator.calculate(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        );
 
       const isAppeasement =
         vector.posture === "WARY_BUFFER" &&

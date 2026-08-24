@@ -6,7 +6,10 @@ import {
   CountryRegistry,
   DiplomacyLockManager,
 } from "@geopolitics/domain";
-import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import {
+  GeopoliticalVectorCalculator,
+  GeopoliticalVector,
+} from "@/engine/ai/geopolitical-vector-calculator";
 import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
 
 export class AIPeaceEvaluator {
@@ -15,6 +18,7 @@ export class AIPeaceEvaluator {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
+    vectorsByTarget?: Map<string, GeopoliticalVector>,
   ): GameAction | null {
     if (!nation.relations) return null;
 
@@ -36,12 +40,14 @@ export class AIPeaceEvaluator {
         continue;
       }
 
-      const vector = GeopoliticalVectorCalculator.calculate(
-        nation,
-        targetNation,
-        allNations,
-        provincesMap,
-      );
+      const vector =
+        vectorsByTarget?.get(canonicalTarget) ??
+        GeopoliticalVectorCalculator.calculate(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        );
 
       const peaceUtility = UtilityDecisionEngine.calculatePeaceUtility(
         nation,

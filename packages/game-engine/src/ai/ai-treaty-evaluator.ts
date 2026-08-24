@@ -7,7 +7,10 @@ import {
   DiplomacyLockManager,
   GeopoliticalReachResolver,
 } from "@geopolitics/domain";
-import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import {
+  GeopoliticalVectorCalculator,
+  GeopoliticalVector,
+} from "@/engine/ai/geopolitical-vector-calculator";
 import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
 
 export class AITreatyEvaluator {
@@ -17,17 +20,21 @@ export class AITreatyEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
     rankMap?: Map<string, number>,
+    reachableTargets?: Nation[],
+    vectorsByTarget?: Map<string, GeopoliticalVector>,
   ): GameAction | null {
     if (!nation.relations) return null;
 
-    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
+    const targets =
+      reachableTargets ??
+      GeopoliticalReachResolver.getReachableTargets(
+        nation,
+        allNations,
+        provincesMap,
+        rankMap,
+      );
 
-    for (const targetNation of reachableTargets) {
+    for (const targetNation of targets) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
         targetNation.id,
       );
@@ -42,12 +49,14 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      const vector = GeopoliticalVectorCalculator.calculate(
-        nation,
-        targetNation,
-        allNations,
-        provincesMap,
-      );
+      const vector =
+        vectorsByTarget?.get(canonicalTarget) ??
+        GeopoliticalVectorCalculator.calculate(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        );
 
       const allianceUtility = UtilityDecisionEngine.calculateAllianceUtility(
         nation,
