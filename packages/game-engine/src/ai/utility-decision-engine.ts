@@ -116,11 +116,8 @@ export class UtilityDecisionEngine {
       }
     }
 
-    let baseScore = 0;
-
     switch (proposalType) {
       case "FULL_ALLIANCE": {
-        baseScore = -25;
         reasons.push({ label: "پیش‌نیاز اعتماد بنیادین", value: -25 });
 
         const alignVal = Math.round(vector.alignment * 0.6);
@@ -146,7 +143,6 @@ export class UtilityDecisionEngine {
       }
 
       case "NON_AGGRESSION_PACT": {
-        baseScore = 5;
         reasons.push({ label: "تمایل پایه به ثبات", value: 5 });
 
         const alignVal = Math.round(vector.alignment * 0.4);
@@ -162,7 +158,6 @@ export class UtilityDecisionEngine {
       }
 
       case "PEACE_TREATY": {
-        baseScore = -15;
         reasons.push({ label: "مقاومت اولیه در جبهه", value: -15 });
 
         const exhaustion = Math.round(
@@ -193,21 +188,17 @@ export class UtilityDecisionEngine {
       }
 
       case "SEND_FOREIGN_AID": {
-        baseScore = 100;
         reasons.push({ label: "دریافت کمک مالی بدون تعهد", value: 100 });
         break;
       }
 
       case "DECLARE_WAR": {
-        baseScore = -100;
+        reasons.push({ label: "اعلان جنگ رسمی", value: -100 });
         break;
       }
     }
 
-    const totalScore = reasons.reduce(
-      (sum, item) => sum + item.value,
-      baseScore,
-    );
+    const totalScore = reasons.reduce((sum, item) => sum + item.value, 0);
 
     return {
       willAccept: totalScore >= 0,

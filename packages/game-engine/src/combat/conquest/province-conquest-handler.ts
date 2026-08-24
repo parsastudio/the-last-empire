@@ -45,8 +45,16 @@ export class ProvinceConquestHandler {
       } else {
         let conqueredProvId: number | null = null;
         if (targetProvinceId && updatedProvinces[targetProvinceId.toString()]) {
-          conqueredProvId = targetProvinceId;
-        } else if (defenderProvincesBefore.length > 0) {
+          const targetedProv = updatedProvinces[targetProvinceId.toString()]!;
+          const actualOwner = CountryRegistry.resolveCanonicalId(
+            targetedProv.ownerNationId,
+          );
+          if (actualOwner === cleanDefenderId) {
+            conqueredProvId = targetProvinceId;
+          }
+        }
+
+        if (!conqueredProvId && defenderProvincesBefore.length > 0) {
           const sorted = [...defenderProvincesBefore].sort(
             (a, b) => b.pixelCount - a.pixelCount,
           );
@@ -55,7 +63,11 @@ export class ProvinceConquestHandler {
 
         if (conqueredProvId) {
           const targetProv = updatedProvinces[conqueredProvId.toString()];
-          if (targetProv) {
+          if (
+            targetProv &&
+            CountryRegistry.resolveCanonicalId(targetProv.ownerNationId) ===
+              cleanDefenderId
+          ) {
             const conqueredProv: Province = {
               ...targetProv,
               ownerNationId: cleanAttackerId,
