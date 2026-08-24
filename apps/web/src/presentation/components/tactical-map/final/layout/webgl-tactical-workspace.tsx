@@ -9,6 +9,7 @@ import { CommandCenterModal } from "@/presentation/components/tactical-map/comma
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
 import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
+import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import {
   LayerController,
   TacticalLayer,
@@ -51,10 +52,16 @@ export function WebGLTacticalWorkspace({
   const activeSubTab = useUiStore((state) => state.activeSubTab);
   const selectedTargetCode = useUiStore((state) => state.selectedTargetCode);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
+  const selectedBattleDebrief = useUiStore(
+    (state) => state.selectedBattleDebrief,
+  );
 
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
   const closeActiveTab = useUiStore((state) => state.closeActiveTab);
+  const setSelectedBattleDebrief = useUiStore(
+    (state) => state.setSelectedBattleDebrief,
+  );
 
   const {
     gameState: effectiveGameState,
@@ -186,6 +193,14 @@ export function WebGLTacticalWorkspace({
         onClose={() =>
           setDirectAttackState((prev) => ({ ...prev, isOpen: false }))
         }
+      />
+
+      <BattleDebriefModal
+        isOpen={selectedBattleDebrief !== null}
+        reportData={selectedBattleDebrief}
+        nationsMap={effectiveGameState?.nations}
+        humanNationId={effectiveGameState?.humanNationId}
+        onClose={() => setSelectedBattleDebrief(null)}
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />

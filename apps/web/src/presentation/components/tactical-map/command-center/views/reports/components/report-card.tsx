@@ -21,13 +21,13 @@ import {
   Eye,
 } from "lucide-react";
 import { ProposalActionButtons } from "./proposal-action-buttons";
+import { useUiStore } from "@/presentation/stores/use-ui-store";
 
 interface ReportCardProps {
   log: TurnLogEntry;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   pendingProposals?: PendingDiplomaticProposal[];
-  onOpenBattleDebrief?: (reportData: BattleFullReportData) => void;
 }
 
 export function ReportCard({
@@ -35,8 +35,11 @@ export function ReportCard({
   nationsMap,
   humanNationId,
   pendingProposals = [],
-  onOpenBattleDebrief,
 }: ReportCardProps) {
+  const setSelectedBattleDebrief = useUiStore(
+    (state) => state.setSelectedBattleDebrief,
+  );
+
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
     log.sourceNationId,
   );
@@ -243,9 +246,9 @@ export function ReportCard({
             </div>
           )}
 
-          {battleReportData && onOpenBattleDebrief && (
+          {battleReportData && (
             <button
-              onClick={() => onOpenBattleDebrief(battleReportData)}
+              onClick={() => setSelectedBattleDebrief(battleReportData)}
               className="px-3.5 py-1.5 bg-military/15 hover:bg-military/25 text-military border border-military/40 hover:border-military/60 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Eye size={14} />
