@@ -100,10 +100,13 @@ export class DiplomaticTurnProcessor {
       const isReachable = reachableCanonicalSet.has(canonicalTarget);
 
       if (!isReachable) {
-        relation.opinion = nextOpinion;
-        relation.grudge = nextGrudge;
-        relation.alignment = nextOpinion;
-        relation.tension = 0;
+        newRels[targetId] = {
+          ...relation,
+          opinion: nextOpinion,
+          grudge: nextGrudge,
+          alignment: nextOpinion,
+          tension: 0,
+        };
         continue;
       }
 
@@ -129,10 +132,13 @@ export class DiplomaticTurnProcessor {
         currentTension = Math.min(100, nextGrudge + 10);
       }
 
-      relation.opinion = nextOpinion;
-      relation.grudge = nextGrudge;
-      relation.alignment = currentAlignment;
-      relation.tension = currentTension;
+      newRels[targetId] = {
+        ...relation,
+        opinion: nextOpinion,
+        grudge: nextGrudge,
+        alignment: currentAlignment,
+        tension: currentTension,
+      };
     }
 
     let nextWarFocus = nation.warFocusTargetId ?? null;
