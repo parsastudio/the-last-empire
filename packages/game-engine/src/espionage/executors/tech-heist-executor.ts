@@ -7,6 +7,7 @@ import {
 import { TechSuperiorityDelta } from "@/engine/espionage/espionage-calculator";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { CountryRegistry } from "@/domain/data/countries";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class TechHeistExecutor {
   public static execute(
@@ -86,13 +87,18 @@ export class TechHeistExecutor {
       }
     }
 
+    const updatedMilitary =
+      gMil > 0
+        ? MilitaryInventoryHelper.syncBranchTechOnUpgrade(
+            source.military,
+            newTechLevel,
+          )
+        : source.military;
+
     const updatedSource: Nation = {
       ...source,
       industrialLevel: newIndLevel,
-      military: {
-        ...source.military,
-        techLevel: newTechLevel,
-      },
+      military: updatedMilitary,
     };
 
     const techTheftData: EspionageTechTheftData = {
