@@ -108,17 +108,12 @@ export class GeopoliticalVectorCalculator {
     const sourceSea =
       sourceSeaAccess !== undefined
         ? sourceSeaAccess
-        : NationGettersUtility.hasSeaAccess(
-            source.id,
-            provincesMap,
-            myProvs,
-            provincesByOwnerMap,
-          );
+        : myProvs.some((p) => p.hasSeaAccess);
 
     const targetProvs = provincesByOwnerMap?.get(canonicalTarget);
     const targetSea = targetProvs
       ? targetProvs.some((p) => p.hasSeaAccess)
-      : target.military.navalFleet > 0 ||
+      : (target.military.navalFleet || 0) > 0 ||
         NationGettersUtility.hasSeaAccess(
           target.id,
           provincesMap,
