@@ -55,6 +55,7 @@ export class AIProcurementPlanner {
       gdp,
       nationRank,
       aliveCount,
+      nation.government.type,
     );
 
     const currentArmyValuation = this.calculateTotalArmyValuation(nation);

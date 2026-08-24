@@ -53,6 +53,7 @@ export class EconomyTurnProcessor {
         nationRank,
         aliveCount,
         currentArmyValuation,
+        updated.government.type,
       );
 
       updated = {
