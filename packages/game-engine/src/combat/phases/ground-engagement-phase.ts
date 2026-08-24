@@ -26,85 +26,127 @@ export class GroundEngagementPhase {
     input: GroundEngagementInput,
   ): GroundEngagementOutput {
     const attArmorEff = input.deployedArmor * input.attArmorMult;
-    const tankTradeLossAttEff = Math.min(
-      attArmorEff,
-      input.defArmorAfterAirEff,
-    );
-    const tankTradeLossDefEff = Math.min(
-      attArmorEff,
-      input.defArmorAfterAirEff,
-    );
+    const defArmorEff = input.defArmorAfterAirEff;
 
-    const rawAttArmorLoss = Math.min(
-      input.deployedArmor,
-      Math.ceil(tankTradeLossAttEff / input.attArmorMult),
-    );
-    const defArmorLossGround = Math.min(
-      input.defArmorAfterAirRaw,
-      Math.ceil(tankTradeLossDefEff / input.defArmorMult),
-    );
+    let attArmorLossGround = 0;
+    let defArmorLossGround = 0;
+
+    if (input.deployedArmor > 0 && input.defArmorAfterAirRaw > 0) {
+      const totalArmorEff = attArmorEff + defArmorEff;
+      const attArmorAttrition = Math.min(
+        0.8,
+        (defArmorEff / (totalArmorEff || 1)) * 0.9,
+      );
+      const defArmorAttrition = Math.min(
+        0.9,
+        (attArmorEff / (totalArmorEff || 1)) * 0.95,
+      );
+
+      attArmorLossGround = Math.min(
+        input.deployedArmor,
+        Math.max(1, Math.round(input.deployedArmor * attArmorAttrition)),
+      );
+      defArmorLossGround = Math.min(
+        input.defArmorAfterAirRaw,
+        Math.max(1, Math.round(input.defArmorAfterAirRaw * defArmorAttrition)),
+      );
+    } else if (input.deployedArmor > 0 && input.defInfantry > 0) {
+      const antiTankFire = input.defInfantry * input.defInfMult * 0.15;
+      attArmorLossGround = Math.min(
+        input.deployedArmor,
+        Math.round(antiTankFire / Math.max(0.1, input.attArmorMult)),
+      );
+    }
+
+    const rawAttArmorLoss = attArmorLossGround;
     const rawDefArmorLost = input.defArmorDestroyedByAir + defArmorLossGround;
 
-    const survivingAttArmorEff = Math.max(
+    const survivingAttArmorRaw = Math.max(
       0,
-      attArmorEff - input.defArmorAfterAirEff,
+      input.deployedArmor - rawAttArmorLoss,
     );
-    const survivingDefArmorEff = Math.max(
-      0,
-      input.defArmorAfterAirEff - attArmorEff,
-    );
+    const survivingAttArmorEff = survivingAttArmorRaw * input.attArmorMult;
 
-    const defInfantryTotalEff = input.defInfantry * input.defInfMult;
+    const survivingDefArmorRaw = Math.max(
+      0,
+      input.defArmorAfterAirRaw - defArmorLossGround,
+    );
+    const survivingDefArmorEff = survivingDefArmorRaw * input.defArmorMult;
+
+    const defInfTotalEff = input.defInfantry * input.defInfMult;
     const defInfantryKilledByTanksEff = Math.min(
-      defInfantryTotalEff,
-      survivingAttArmorEff * 3,
+      defInfTotalEff,
+      survivingAttArmorEff * 2.5,
     );
     const defInfantryKilledByTanks = Math.min(
       input.defInfantry,
-      Math.floor(defInfantryKilledByTanksEff / input.defInfMult),
+      Math.floor(defInfantryKilledByTanksEff / Math.max(0.1, input.defInfMult)),
     );
-    const defInfRemainingAfterTanksRaw =
-      input.defInfantry - defInfantryKilledByTanks;
+    const defInfRemainingAfterTanksRaw = Math.max(
+      0,
+      input.defInfantry - defInfantryKilledByTanks,
+    );
     const defInfRemainingAfterTanksEff =
       defInfRemainingAfterTanksRaw * input.defInfMult;
 
-    const attInfantryTotalEff = input.deployedInfantry * input.attInfMult;
+    const attInfTotalEff = input.deployedInfantry * input.attInfMult;
     const attInfantryKilledByTanksEff = Math.min(
-      attInfantryTotalEff,
-      survivingDefArmorEff * 3,
+      attInfTotalEff,
+      survivingDefArmorEff * 2.5,
     );
     const attInfantryKilledByTanks = Math.min(
       input.deployedInfantry,
-      Math.floor(attInfantryKilledByTanksEff / input.attInfMult),
+      Math.floor(attInfantryKilledByTanksEff / Math.max(0.1, input.attInfMult)),
     );
-    const attInfRemainingAfterTanksRaw =
-      input.deployedInfantry - attInfantryKilledByTanks;
+    const attInfRemainingAfterTanksRaw = Math.max(
+      0,
+      input.deployedInfantry - attInfantryKilledByTanks,
+    );
     const attInfRemainingAfterTanksEff =
       attInfRemainingAfterTanksRaw * input.attInfMult;
 
-    const infTradeLossAttEff = Math.min(
-      attInfRemainingAfterTanksEff,
-      defInfRemainingAfterTanksEff,
+    let attInfTradeLoss = 0;
+    let defInfTradeLoss = 0;
+
+    if (attInfRemainingAfterTanksRaw > 0 && defInfRemainingAfterTanksRaw > 0) {
+      const totalInfEff =
+        attInfRemainingAfterTanksEff + defInfRemainingAfterTanksEff;
+      const attInfAttrition = Math.min(
+        0.9,
+        (defInfRemainingAfterTanksEff / (totalInfEff || 1)) * 0.95,
+      );
+      const defInfAttrition = Math.min(
+        0.9,
+        (attInfRemainingAfterTanksEff / (totalInfEff || 1)) * 0.95,
+      );
+
+      attInfTradeLoss = Math.min(
+        attInfRemainingAfterTanksRaw,
+        Math.max(1, Math.round(attInfRemainingAfterTanksRaw * attInfAttrition)),
+      );
+      defInfTradeLoss = Math.min(
+        defInfRemainingAfterTanksRaw,
+        Math.max(1, Math.round(defInfRemainingAfterTanksRaw * defInfAttrition)),
+      );
+    }
+
+    const rawAttInfantryLost = Math.min(
+      input.deployedInfantry,
+      attInfantryKilledByTanks + attInfTradeLoss,
     );
-    const infTradeLossDefEff = Math.min(
-      attInfRemainingAfterTanksEff,
-      defInfRemainingAfterTanksEff,
+    const rawDefInfantryLost = Math.min(
+      input.defInfantry,
+      defInfantryKilledByTanks + defInfTradeLoss,
     );
 
-    const attInfTradeLoss = Math.min(
-      attInfRemainingAfterTanksRaw,
-      Math.ceil(infTradeLossAttEff / input.attInfMult),
+    const survivingAttInfantryRaw = Math.max(
+      0,
+      input.deployedInfantry - rawAttInfantryLost,
     );
-    const defInfTradeLoss = Math.min(
-      defInfRemainingAfterTanksRaw,
-      Math.ceil(infTradeLossDefEff / input.defInfMult),
+    const survivingDefInfantryRaw = Math.max(
+      0,
+      input.defInfantry - rawDefInfantryLost,
     );
-
-    const rawAttInfantryLost = attInfantryKilledByTanks + attInfTradeLoss;
-    const rawDefInfantryLost = defInfantryKilledByTanks + defInfTradeLoss;
-
-    const survivingAttInfantryRaw = input.deployedInfantry - rawAttInfantryLost;
-    const survivingDefInfantryRaw = input.defInfantry - rawDefInfantryLost;
 
     const isAttackerVictory =
       survivingAttInfantryRaw > 0 &&

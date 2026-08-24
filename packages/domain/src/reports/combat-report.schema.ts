@@ -28,7 +28,7 @@ export const BattlePhaseReconDetailSchema = z.object({
   defAirDefense: z.number().nonnegative(),
   airDefenseLost: z.number().nonnegative(),
   dronesIntercepted: z.number().nonnegative(),
-  phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW"]),
+  phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW", "SKIPPED"]),
 });
 
 export const BattlePhaseAirDetailSchema = z.object({

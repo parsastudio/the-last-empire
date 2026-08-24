@@ -156,6 +156,7 @@ export class CoalitionManager {
       state.currentTurn,
       hegemonicNation.id,
       memberNames,
+      memberCanonicalIds.join(","),
     );
 
     return {

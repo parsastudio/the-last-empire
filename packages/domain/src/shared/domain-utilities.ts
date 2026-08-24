@@ -192,6 +192,7 @@ export class TurnLogBuilder {
     turn: number,
     targetNationId: string,
     memberNames: string,
+    memberIds = "",
   ): TurnLogEntry {
     return this.createLogEntry(
       turn,
@@ -201,7 +202,7 @@ export class TurnLogBuilder {
       "GLOBAL_WAR",
       "GLOBAL",
       undefined,
-      { memberNames },
+      { memberNames, memberIds },
     );
   }
 

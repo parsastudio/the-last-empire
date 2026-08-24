@@ -10,13 +10,14 @@ import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/mo
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
 import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
 import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
+import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
 import {
   LayerController,
   TacticalLayer,
 } from "@/presentation/components/tactical-map/controls/layer-controller";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
-import { ALL_COUNTRY_PROFILES } from "@/domain/data/countries";
+import { ALL_COUNTRY_PROFILES, CountryRegistry } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 
@@ -55,12 +56,18 @@ export function WebGLTacticalWorkspace({
   const selectedBattleDebrief = useUiStore(
     (state) => state.selectedBattleDebrief,
   );
+  const selectedCoalitionAlert = useUiStore(
+    (state) => state.selectedCoalitionAlert,
+  );
 
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
   const closeActiveTab = useUiStore((state) => state.closeActiveTab);
   const setSelectedBattleDebrief = useUiStore(
     (state) => state.setSelectedBattleDebrief,
+  );
+  const setSelectedCoalitionAlert = useUiStore(
+    (state) => state.setSelectedCoalitionAlert,
   );
 
   const {
@@ -128,11 +135,44 @@ export function WebGLTacticalWorkspace({
     if (isProcessingTurn) return;
     try {
       setIsProcessingTurn(true);
-      await advanceNextTurn();
+      const nextState = await advanceNextTurn();
+      if (nextState && !nextState.isGameOver) {
+        setActiveTab("reports");
+
+        const justTriggeredCoalition =
+          nextState.globalCoalition &&
+          nextState.globalCoalition.triggeredTurn === nextState.currentTurn - 1;
+
+        if (justTriggeredCoalition && nextState.globalCoalition) {
+          const targetCanonical = CountryRegistry.resolveCanonicalId(
+            nextState.globalCoalition.targetNationId,
+          );
+          const humanCanonical = CountryRegistry.resolveCanonicalId(
+            nextState.humanNationId,
+          );
+          const targetNation =
+            nextState.nations[targetCanonical] ||
+            nextState.nations[nextState.globalCoalition.targetNationId];
+
+          setSelectedCoalitionAlert({
+            targetNationId: nextState.globalCoalition.targetNationId,
+            targetName: targetNation ? targetNation.name : "امپراتوری شما",
+            targetFlagCode: targetNation?.flagCode || "IR",
+            isHumanTarget: targetCanonical === humanCanonical,
+            memberIds: nextState.globalCoalition.memberNationIds,
+            turn: nextState.globalCoalition.triggeredTurn,
+          });
+        }
+      }
     } finally {
       setIsProcessingTurn(false);
     }
-  }, [advanceNextTurn, isProcessingTurn]);
+  }, [
+    advanceNextTurn,
+    isProcessingTurn,
+    setActiveTab,
+    setSelectedCoalitionAlert,
+  ]);
 
   const isNotFound = !loading && (error !== null || !effectiveGameState);
 
@@ -201,6 +241,13 @@ export function WebGLTacticalWorkspace({
         nationsMap={effectiveGameState?.nations}
         humanNationId={effectiveGameState?.humanNationId}
         onClose={() => setSelectedBattleDebrief(null)}
+      />
+
+      <CoalitionAlertModal
+        isOpen={selectedCoalitionAlert !== null}
+        data={selectedCoalitionAlert}
+        nationsMap={effectiveGameState?.nations}
+        onClose={() => setSelectedCoalitionAlert(null)}
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />

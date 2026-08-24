@@ -274,20 +274,38 @@ export class BattleCalculator {
           : "DEFEAT";
     }
 
-    const phase1Winner =
-      missilePhase.rawDefAirDefenseLost > 0 && deployedDrones > 0
-        ? "ATTACKER"
-        : defAirDefense > 0
-          ? "DEFENDER"
-          : "DRAW";
+    let phase1Winner: "ATTACKER" | "DEFENDER" | "DRAW" | "SKIPPED" = "SKIPPED";
+    if (deployedDrones > 0) {
+      if (casualty.netDefAirDefenseLost > 0) {
+        phase1Winner = "ATTACKER";
+      } else if (defAirDefense > 0) {
+        phase1Winner = "DEFENDER";
+      } else {
+        phase1Winner = "DRAW";
+      }
+    }
 
-    const phase2Winner =
-      airPhase.rawDefAirLoss > airPhase.rawAttAirLoss ||
-      airPhase.defArmorDestroyedByAir > 0
-        ? "ATTACKER"
-        : airPhase.rawAttAirLoss > airPhase.rawDefAirLoss
-          ? "DEFENDER"
-          : "DRAW";
+    let phase2Winner: "ATTACKER" | "DEFENDER" | "DRAW" = "DRAW";
+    if (deployedAirForce > 0 || defAirForce > 0) {
+      const attAirLossRatio =
+        deployedAirForce > 0 ? casualty.netAttAirLost / deployedAirForce : 1;
+      const defAirLossRatio =
+        defAirForce > 0 ? casualty.netDefAirLost / defAirForce : 1;
+
+      if (
+        casualty.netDefAirLost > casualty.netAttAirLost ||
+        (airPhase.defArmorDestroyedByAir > 0 &&
+          casualty.netAttAirLost <= casualty.netDefAirLost)
+      ) {
+        phase2Winner = "ATTACKER";
+      } else if (casualty.netAttAirLost > casualty.netDefAirLost) {
+        phase2Winner = "DEFENDER";
+      } else if (attAirLossRatio < defAirLossRatio) {
+        phase2Winner = "ATTACKER";
+      } else if (defAirLossRatio < attAirLossRatio) {
+        phase2Winner = "DEFENDER";
+      }
+    }
 
     const phase3Winner = groundPhase.isAttackerVictory
       ? "ATTACKER"
