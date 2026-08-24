@@ -7,17 +7,25 @@ import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
 
+export interface MilitaryExecutionOutput {
+  newState: GameState;
+  resultData?: unknown;
+}
+
 export class MilitaryActionExecutor {
   private static recruitmentManager = new RecruitmentQueueManager();
   private static battleEngine = new BattleExecutionEngine();
 
-  public static execute(state: GameState, action: GameAction): GameState {
+  public static execute(
+    state: GameState,
+    action: GameAction,
+  ): MilitaryExecutionOutput {
     const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const nation =
       state.nations[canonicalSourceId] || state.nations[action.nationId];
-    if (!nation) return state;
+    if (!nation) return { newState: state };
 
     const sourceKey = nation.id;
 
@@ -30,26 +38,30 @@ export class MilitaryActionExecutor {
           );
         }
         return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: this.recruitmentManager.enqueueOrder(
-              nation,
-              action.unitType,
-              action.quantity,
-            ),
+          newState: {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: this.recruitmentManager.enqueueOrder(
+                nation,
+                action.unitType,
+                action.quantity,
+              ),
+            },
           },
         };
       }
 
       case "BUY_ARMS_MARKET": {
-        return ArmsMarketManager.executePurchase(
-          state,
-          action.nationId,
-          action.sellerNationId,
-          action.unitType,
-          action.quantity,
-        );
+        return {
+          newState: ArmsMarketManager.executePurchase(
+            state,
+            action.nationId,
+            action.sellerNationId,
+            action.unitType,
+            action.quantity,
+          ),
+        };
       }
 
       case "CANCEL_RECRUITMENT": {
@@ -60,13 +72,15 @@ export class MilitaryActionExecutor {
           );
         }
         return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: this.recruitmentManager.cancelOrder(
-              nation,
-              action.orderId,
-            ),
+          newState: {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: this.recruitmentManager.cancelOrder(
+                nation,
+                action.orderId,
+              ),
+            },
           },
         };
       }
@@ -80,10 +94,12 @@ export class MilitaryActionExecutor {
           );
         }
         return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: new ResearchManager().investInMilitaryTech(nation),
+          newState: {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: new ResearchManager().investInMilitaryTech(nation),
+            },
           },
         };
       }
@@ -121,11 +137,15 @@ export class MilitaryActionExecutor {
           );
         }
 
-        return this.battleEngine.executeBattle(state, action);
+        const battleResult = this.battleEngine.executeBattle(state, action);
+        return {
+          newState: battleResult.state,
+          resultData: battleResult.reportData,
+        };
       }
 
       default:
-        return state;
+        return { newState: state };
     }
   }
 }

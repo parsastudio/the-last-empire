@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import {
   Swords,
   ChevronLeft,
@@ -35,6 +36,24 @@ export function BattleDebriefModal({
   onClose,
 }: BattleDebriefModalProps) {
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+
+  const isAttackerWin = reportData?.isAttackerVictory ?? false;
+  const isHumanWinner =
+    (humanNationId === reportData?.attackerId && isAttackerWin) ||
+    (humanNationId === reportData?.defenderId && !isAttackerWin);
+
+  useEffect(() => {
+    if (isOpen && isHumanWinner) {
+      try {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#10b981", "#f59e0b", "#3b82f6", "#ffffff"],
+        });
+      } catch {}
+    }
+  }, [isOpen, isHumanWinner]);
 
   if (!isOpen || !reportData) return null;
 

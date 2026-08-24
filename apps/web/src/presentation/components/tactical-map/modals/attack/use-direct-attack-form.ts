@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import confetti from "canvas-confetti";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -10,6 +11,8 @@ import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resol
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { useUiStore } from "@/presentation/stores/use-ui-store";
+import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -29,6 +32,9 @@ export function useDirectAttackForm({
   onClose,
 }: UseDirectAttackFormProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
+  const setSelectedBattleDebrief = useUiStore(
+    (state) => state.setSelectedBattleDebrief,
+  );
 
   const [infantryToDeploy, setInfantryToDeploy] = useState<number>(0);
   const [armorToDeploy, setArmorToDeploy] = useState<number>(0);
@@ -150,13 +156,28 @@ export function useDirectAttackForm({
     );
 
     const typeLabel = isLandNeighbor ? "زمینی" : "دریایی";
-    const success = await dispatchAction(
+    const res = await dispatchAction(
       action,
       `دستور تهاجم ${typeLabel} به ${targetRegionName} با موفقیت صادر گردید.`,
     );
 
-    if (success) {
+    if (res.success) {
       onClose();
+      if (res.resultData) {
+        const report = res.resultData as BattleFullReportData;
+        setSelectedBattleDebrief(report);
+
+        if (report.isAttackerVictory) {
+          try {
+            confetti({
+              particleCount: 160,
+              spread: 90,
+              origin: { y: 0.65 },
+              colors: ["#10b981", "#f59e0b", "#3b82f6", "#ffffff"],
+            });
+          } catch {}
+        }
+      }
     }
   }, [
     humanNation,
@@ -171,6 +192,7 @@ export function useDirectAttackForm({
     dispatchAction,
     targetRegionName,
     onClose,
+    setSelectedBattleDebrief,
   ]);
 
   return {

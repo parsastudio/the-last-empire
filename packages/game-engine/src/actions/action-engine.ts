@@ -71,9 +71,12 @@ export class ActionEngine {
         case "BUY_ARMS_MARKET":
         case "CANCEL_RECRUITMENT":
         case "INVEST_RESEARCH":
-        case "INITIATE_BATTLE":
-          newState = MilitaryActionExecutor.execute(state, action);
+        case "INITIATE_BATTLE": {
+          const milResult = MilitaryActionExecutor.execute(state, action);
+          newState = milResult.newState;
+          resultData = milResult.resultData;
           break;
+        }
 
         case "EXECUTE_ESPIONAGE_OPERATION": {
           const espResult = EspionageManager.executeOperation(
