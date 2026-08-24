@@ -25,15 +25,22 @@ export class AIWarDeclarationEvaluator {
   ): GameAction | null {
     if (!nation.relations) return null;
 
-    const isCurrentlyAtWar = Object.values(nation.relations).some((rel) => {
-      if (rel.stance !== "WAR") return false;
-      const targetNation =
-        allNations[CountryRegistry.resolveCanonicalId(rel.targetNationId)] ||
-        allNations[rel.targetNationId];
-      return targetNation && targetNation.isAlive;
-    });
+    if (nation.warFocusTargetId) {
+      return null;
+    }
 
-    if (isCurrentlyAtWar) return null;
+    for (const key in nation.relations) {
+      const rel = nation.relations[key];
+      if (rel && rel.stance === "WAR") {
+        const canonical = CountryRegistry.resolveCanonicalId(
+          rel.targetNationId,
+        );
+        const target = allNations[canonical] || allNations[rel.targetNationId];
+        if (target && target.isAlive) {
+          return null;
+        }
+      }
+    }
 
     let bestTargetId: string | null = null;
     let highestWarUtility = 55;
@@ -47,7 +54,8 @@ export class AIWarDeclarationEvaluator {
         rankMap,
       );
 
-    for (const targetNation of targets) {
+    for (let i = 0; i < targets.length; i++) {
+      const targetNation = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
         targetNation.id,
       );
