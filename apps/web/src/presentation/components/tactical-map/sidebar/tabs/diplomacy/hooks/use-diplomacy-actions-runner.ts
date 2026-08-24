@@ -110,6 +110,18 @@ export function useDiplomacyActionsRunner({
     }
   };
 
+  const handleCancelTreaty = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "CANCEL_TREATY",
+    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
+  };
+
   const handleDeclareWar = async () => {
     const action = ActionFactory.diplomaticProposal(
       nationId,
@@ -140,6 +152,7 @@ export function useDiplomacyActionsRunner({
     handlePeaceTreaty: () => executeOrConfirm(handlePeaceTreaty, false),
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),
     handleAlliance: () => executeOrConfirm(handleAlliance, false),
+    handleCancelTreaty: () => executeOrConfirm(handleCancelTreaty, false),
     handleDeclareWar: () => executeOrConfirm(handleDeclareWar, true),
     closeConfirmModal,
     acceptConfirmModal,

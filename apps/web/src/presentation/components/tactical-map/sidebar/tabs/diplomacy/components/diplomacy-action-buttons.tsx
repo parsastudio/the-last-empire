@@ -15,6 +15,7 @@ interface DiplomacyActionButtonsProps {
   onPeaceTreaty: () => void;
   onNonAggression: () => void;
   onAlliance: () => void;
+  onCancelTreaty: () => void;
   onDeclareWar: () => void;
 }
 
@@ -25,6 +26,7 @@ export function DiplomacyActionButtons({
   onPeaceTreaty,
   onNonAggression,
   onAlliance,
+  onCancelTreaty,
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
   const renderStepUpAction = () => {
@@ -111,33 +113,67 @@ export function DiplomacyActionButtons({
 
     if (currentStance === "NON_AGGRESSION_PACT") {
       return (
-        <button
-          onClick={onDeclareWar}
-          className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold">
-              لغو تعهد و اعلان جنگ (گام رو به پایین با جریمه نقض پیمان)
-            </span>
-            <ShieldAlert size={15} className="text-rose-400" />
-          </div>
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={onCancelTreaty}
+            className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-right transition-all cursor-pointer space-y-0.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold">
+                لغو پیمان عدم تخاصم (گام رو به پایین: دیپلماسی عادی)
+              </span>
+              <ArrowDownCircle size={15} className="text-amber-400" />
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              تنزل آرام و قانونی سطح روابط بدون اعلام جنگ
+            </p>
+          </button>
+
+          <button
+            onClick={onDeclareWar}
+            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold">
+                لغو تعهد و اعلان جنگ مستقیم (با جریمه نقض پیمان)
+              </span>
+              <ShieldAlert size={15} className="text-rose-400" />
+            </div>
+          </button>
+        </div>
       );
     }
 
     if (currentStance === "ALLIANCE") {
       return (
-        <button
-          onClick={onDeclareWar}
-          className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-extrabold">
-              پیمان‌شکنی و اعلان جنگ (گام رو به پایین با جریمه سنگین اعتبار)
-            </span>
-            <ShieldAlert size={15} className="text-rose-400" />
-          </div>
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={onCancelTreaty}
+            className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 text-right transition-all cursor-pointer space-y-0.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold">
+                لغو معاهده اتحاد (گام رو به پایین: پیمان عدم تخاصم)
+              </span>
+              <ArrowDownCircle size={15} className="text-amber-400" />
+            </div>
+            <p className="text-[10px] text-muted-foreground">
+              خروج از اتحاد نظامی و بازگشت به توافق عدم تعرض
+            </p>
+          </button>
+
+          <button
+            onClick={onDeclareWar}
+            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold">
+                پیمان‌شکنی و اعلان جنگ مستقیم (با جریمه سنگین اعتبار)
+              </span>
+              <ShieldAlert size={15} className="text-rose-400" />
+            </div>
+          </button>
+        </div>
       );
     }
 

@@ -62,6 +62,13 @@ export class TurnLogFormatter {
         return `رد معاهده دیپلماتیک: کشور ${targetName} پیشنهاد (${treatyLabel}) از سوی ${sourceName} را نپذیرفت.`;
       }
 
+      case "TREATY_CANCELLED": {
+        const newStanceName = String(
+          params["newStanceName"] || "دیپلماسی عادی",
+        );
+        return `تنزل روابط دیپلماتیک: کشور ${sourceName} معاهده پیشین با ${targetName} را لغو کرد و روابط به سطح (${newStanceName}) کاهش یافت.`;
+      }
+
       case "FOREIGN_AID_SENT": {
         return `بسته کمک مالی و اقتصادی از سوی ${sourceName} به خزانه‌داری ${targetName} واریز گردید.`;
       }

@@ -40,6 +40,18 @@ export class TreatyEvaluator {
     const currentTension = profile.tension ?? 10;
 
     switch (newType) {
+      case "CANCEL_TREATY": {
+        const nextStance: DiplomaticStance =
+          profile.stance === "ALLIANCE"
+            ? "NON_AGGRESSION_PACT"
+            : "NORMAL_DIPLOMACY";
+        return {
+          ...profile,
+          stance: nextStance,
+          alignment: Math.max(-100, currentAlignment - 15),
+          tension: Math.min(100, currentTension + 15),
+        };
+      }
       case "SEND_FOREIGN_AID":
         return {
           ...profile,
