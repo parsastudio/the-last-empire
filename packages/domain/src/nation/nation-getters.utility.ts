@@ -4,23 +4,18 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 
+interface NationRankingCandidate {
+  nation: Nation;
+  canonicalId: string;
+  gdp: number;
+  milPower: number;
+  population: number;
+  ecoRank: number;
+  milRank: number;
+  compositeScore: number;
+}
+
 export class NationGettersUtility {
-  public static calculateCompositePowerScore(
-    gdp: number,
-    militaryPower: number,
-  ): number {
-    const safeGdp = Math.max(1_000_000, gdp);
-    const safeMil = Math.max(1, militaryPower);
-
-    const logGdp = Math.log10(safeGdp);
-    const logMil = Math.log10(safeMil);
-
-    const normalizedGdp = Math.max(0, (logGdp - 9.0) / 4.5);
-    const normalizedMil = Math.max(0, (logMil - 1.0) / 3.0);
-
-    return normalizedGdp * 3.0 + normalizedMil * 1.0;
-  }
-
   public static buildProvincesByOwnerMap(
     provincesMap?: Record<string, Province> | Province[],
   ): Map<string, Province[]> {
@@ -237,7 +232,7 @@ export class NationGettersUtility {
     const ownerMap =
       provincesByOwnerMap ?? this.buildProvincesByOwnerMap(provincesMap);
 
-    const nationMetrics = new Array(aliveNations.length);
+    const candidates: NationRankingCandidate[] = new Array(aliveNations.length);
 
     for (let i = 0; i < aliveNations.length; i++) {
       const nation = aliveNations[i]!;
@@ -258,20 +253,46 @@ export class NationGettersUtility {
         true,
       );
 
-      const compositeScore = this.calculateCompositePowerScore(gdp, milPower);
-
-      nationMetrics[i] = {
+      candidates[i] = {
         nation,
+        canonicalId,
         gdp,
         milPower,
         population,
-        compositeScore,
+        ecoRank: 1,
+        milRank: 1,
+        compositeScore: 0,
       };
     }
 
-    nationMetrics.sort((a, b) => {
-      if (Math.abs(b.compositeScore - a.compositeScore) > 0.0001) {
-        return b.compositeScore - a.compositeScore;
+    const ecoSorted = [...candidates].sort((a, b) => {
+      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
+      if (b.population !== a.population) return b.population - a.population;
+      return a.canonicalId.localeCompare(b.canonicalId);
+    });
+
+    for (let i = 0; i < ecoSorted.length; i++) {
+      ecoSorted[i]!.ecoRank = i + 1;
+    }
+
+    const milSorted = [...candidates].sort((a, b) => {
+      if (b.milPower !== a.milPower) return b.milPower - a.milPower;
+      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
+      return a.canonicalId.localeCompare(b.canonicalId);
+    });
+
+    for (let i = 0; i < milSorted.length; i++) {
+      milSorted[i]!.milRank = i + 1;
+    }
+
+    for (let i = 0; i < candidates.length; i++) {
+      const c = candidates[i]!;
+      c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
+    }
+
+    candidates.sort((a, b) => {
+      if (a.compositeScore !== b.compositeScore) {
+        return a.compositeScore - b.compositeScore;
       }
       if (b.gdp !== a.gdp) {
         return b.gdp - a.gdp;
@@ -279,14 +300,13 @@ export class NationGettersUtility {
       if (b.population !== a.population) {
         return b.population - a.population;
       }
-      return a.nation.id.localeCompare(b.nation.id);
+      return a.canonicalId.localeCompare(b.canonicalId);
     });
 
-    for (let i = 0; i < nationMetrics.length; i++) {
-      const item = nationMetrics[i]!;
-      const canonicalId = CountryRegistry.resolveCanonicalId(item.nation.id);
+    for (let i = 0; i < candidates.length; i++) {
+      const item = candidates[i]!;
       const rankValue = i + 1;
-      rankMap.set(canonicalId, rankValue);
+      rankMap.set(item.canonicalId, rankValue);
       rankMap.set(item.nation.id, rankValue);
     }
 

@@ -6,7 +6,6 @@ import {
   FinalManifestProvince,
   FinalManifestNation,
   FinalMapManifest,
-  NationGettersUtility,
   MilitaryPowerCalculator,
 } from "@geopolitics/domain";
 import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
@@ -14,6 +13,16 @@ import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.ty
 import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
 
 export type { FinalManifestProvince, FinalManifestNation, FinalMapManifest };
+
+interface ProfileRankCandidate {
+  profile: CountryProfile;
+  gdp: number;
+  milPower: number;
+  population: number;
+  ecoRank: number;
+  milRank: number;
+  compositeScore: number;
+}
 
 export class StrategicManifestBuilder {
   public async buildAndSave(
@@ -40,36 +49,32 @@ export class StrategicManifestBuilder {
       countryProvincesMap.has(p.id ?? 0),
     );
 
-    activeProfiles.sort((a, b) => {
-      const stackA = MilitaryDistributionEngine.calculateStartingStack(
-        a.militaryTier || 5,
+    const candidates: ProfileRankCandidate[] = activeProfiles.map((p) => {
+      const tier = p.militaryTier || 5;
+      const stack = MilitaryDistributionEngine.calculateStartingStack(
+        tier,
         true,
-        a.startingTechLevel,
-      );
-      const stackB = MilitaryDistributionEngine.calculateStartingStack(
-        b.militaryTier || 5,
-        true,
-        b.startingTechLevel,
+        p.startingTechLevel,
       );
 
-      const milA = MilitaryPowerCalculator.calculateEffectivePower(
+      const milPower = MilitaryPowerCalculator.calculateEffectivePower(
         {
-          id: a.code,
-          name: a.nameFa,
+          id: p.code,
+          name: p.nameFa,
           isAi: true,
           isAlive: true,
-          flagCode: a.flagCode,
+          flagCode: p.flagCode,
           taxRate: 15,
           tariffRate: 10,
           treasury: 100000,
           nationalDebt: 0,
           industrialLevel: 1,
           government: {
-            type: a.startingGovernment || "DEMOCRACY",
+            type: p.startingGovernment || "DEMOCRACY",
             stability: 50,
             turnsInPower: 1,
           },
-          military: stackA,
+          military: stack,
           recruitmentQueue: [],
           relations: {},
           activeModifiers: [],
@@ -81,52 +86,55 @@ export class StrategicManifestBuilder {
         true,
       );
 
-      const milB = MilitaryPowerCalculator.calculateEffectivePower(
-        {
-          id: b.code,
-          name: b.nameFa,
-          isAi: true,
-          isAlive: true,
-          flagCode: b.flagCode,
-          taxRate: 15,
-          tariffRate: 10,
-          treasury: 100000,
-          nationalDebt: 0,
-          industrialLevel: 1,
-          government: {
-            type: b.startingGovernment || "DEMOCRACY",
-            stability: 50,
-            turnsInPower: 1,
-          },
-          military: stackB,
-          recruitmentQueue: [],
-          relations: {},
-          activeModifiers: [],
-          globalReputation: 50,
-          doctrines: { unlockedDoctrines: [] },
-          executedEspionageTiers: [],
-          warFocusTargetId: null,
-        },
-        true,
-      );
-
-      const scoreA = NationGettersUtility.calculateCompositePowerScore(
-        a.gdp,
-        milA,
-      );
-      const scoreB = NationGettersUtility.calculateCompositePowerScore(
-        b.gdp,
-        milB,
-      );
-
-      if (Math.abs(scoreB - scoreA) > 0.0001) {
-        return scoreB - scoreA;
-      }
-      return b.gdp - a.gdp;
+      return {
+        profile: p,
+        gdp: p.gdp,
+        milPower,
+        population: p.population,
+        ecoRank: 1,
+        milRank: 1,
+        compositeScore: 0,
+      };
     });
 
-    for (let rankIndex = 0; rankIndex < activeProfiles.length; rankIndex++) {
-      const profile = activeProfiles[rankIndex]!;
+    const ecoSorted = [...candidates].sort((a, b) => {
+      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
+      if (b.population !== a.population) return b.population - a.population;
+      return a.profile.code.localeCompare(b.profile.code);
+    });
+    for (let i = 0; i < ecoSorted.length; i++) {
+      ecoSorted[i]!.ecoRank = i + 1;
+    }
+
+    const milSorted = [...candidates].sort((a, b) => {
+      if (b.milPower !== a.milPower) return b.milPower - a.milPower;
+      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
+      return a.profile.code.localeCompare(b.profile.code);
+    });
+    for (let i = 0; i < milSorted.length; i++) {
+      milSorted[i]!.milRank = i + 1;
+    }
+
+    for (let i = 0; i < candidates.length; i++) {
+      const c = candidates[i]!;
+      c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
+    }
+
+    candidates.sort((a, b) => {
+      if (a.compositeScore !== b.compositeScore) {
+        return a.compositeScore - b.compositeScore;
+      }
+      if (b.gdp !== a.gdp) {
+        return b.gdp - a.gdp;
+      }
+      if (b.population !== a.population) {
+        return b.population - a.population;
+      }
+      return a.profile.code.localeCompare(b.profile.code);
+    });
+
+    for (let rankIndex = 0; rankIndex < candidates.length; rankIndex++) {
+      const profile = candidates[rankIndex]!.profile;
       const countryNumericId = profile.id ?? 0;
       const countryId = profile.code.toUpperCase();
       const provList = countryProvincesMap.get(countryNumericId) || [];
@@ -191,9 +199,7 @@ export class StrategicManifestBuilder {
       const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
       const startingStability = 50;
 
-      const militaryTier =
-        profile.militaryTier ||
-        Math.max(1, Math.min(20, Math.ceil((21 - (rankIndex + 1)) * 0.95)));
+      const militaryTier = profile.militaryTier || 5;
       const hasSeaAccess = provList.some((p) => p.hasSeaAccess);
       const startingTech = profile.startingTechLevel;
       const stack = MilitaryDistributionEngine.calculateStartingStack(
