@@ -5,6 +5,7 @@ export class BitPackedGridState {
   private static instance: BitPackedGridState | null = null;
   private buffer: BitPackedBuffer;
   private activeGameId: string | null = null;
+  private isLoaded = false;
   private version = 0;
 
   constructor(
@@ -29,6 +30,15 @@ export class BitPackedGridState {
     this.version++;
   }
 
+  public isBufferLoaded(): boolean {
+    return this.isLoaded;
+  }
+
+  public markLoaded(): void {
+    this.isLoaded = true;
+    this.markDirty();
+  }
+
   public initializeSession(gameId: string): void {
     if (this.activeGameId !== gameId) {
       this.resetBuffer();
@@ -44,6 +54,7 @@ export class BitPackedGridState {
     const raw = this.buffer.getRawBuffer();
     raw.fill(0);
     this.activeGameId = null;
+    this.isLoaded = false;
     this.markDirty();
   }
 }

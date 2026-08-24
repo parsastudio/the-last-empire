@@ -109,16 +109,23 @@ const ID_MAPPING: Record<string, number> = {
   AUS: 148,
 };
 
-export const ALL_COUNTRY_PROFILES: CountryProfile[] =
-  ALL_RAW_COUNTRY_PROFILES.map((p) => ({
-    ...p,
-    id: p.id ?? ID_MAPPING[p.code] ?? 0,
-  }));
+export const ALL_COUNTRY_PROFILES: readonly CountryProfile[] = Object.freeze(
+  ALL_RAW_COUNTRY_PROFILES.map((p) =>
+    Object.freeze({
+      ...p,
+      id: p.id ?? ID_MAPPING[p.code] ?? 0,
+    }),
+  ),
+);
 
 export class CountryRegistry {
   private static readonly byNumericId = new Map<number, CountryProfile>();
   private static readonly byCode = new Map<string, CountryProfile>();
-  private static manifestNations = new Map<string, FinalManifestNation>();
+  private static readonly manifestProfiles = new Map<string, CountryProfile>();
+  private static readonly manifestNations = new Map<
+    string,
+    FinalManifestNation
+  >();
 
   static {
     for (const profile of ALL_COUNTRY_PROFILES) {
@@ -136,8 +143,11 @@ export class CountryRegistry {
   public static initializeFromManifest(
     manifest: FinalMapManifest | null,
   ): void {
-    if (!manifest || !Array.isArray(manifest.nations)) return;
     this.manifestNations.clear();
+    this.manifestProfiles.clear();
+
+    if (!manifest || !Array.isArray(manifest.nations)) return;
+
     for (const item of manifest.nations) {
       const code = item.code.toUpperCase();
       this.manifestNations.set(code, item);
@@ -147,13 +157,28 @@ export class CountryRegistry {
       if (item.flagCode) {
         this.manifestNations.set(item.flagCode.toUpperCase(), item);
       }
-      const profile = this.getCountry(item.code);
-      if (profile) {
-        profile.gdp = item.gdp;
-        profile.population = item.population;
-        profile.startingGovernment =
-          item.defaultGovernment as CountryProfile["startingGovernment"];
-        profile.startingTechLevel = item.startingTechLevel;
+
+      const defaultProfile = this.byCode.get(code);
+      const dynamicProfile: CountryProfile = {
+        id: item.numericId ?? defaultProfile?.id ?? 0,
+        code: item.code,
+        nameEn: item.nameEn || defaultProfile?.nameEn || item.code,
+        nameFa: item.nameFa || defaultProfile?.nameFa || item.code,
+        gdp: item.gdp,
+        population: item.population,
+        flagCode: item.flagCode,
+        militaryTier: defaultProfile?.militaryTier ?? 5,
+        startingGovernment:
+          item.defaultGovernment as CountryProfile["startingGovernment"],
+        startingTechLevel: item.startingTechLevel,
+      };
+
+      this.manifestProfiles.set(code, dynamicProfile);
+      if (item.id) {
+        this.manifestProfiles.set(item.id.toUpperCase(), dynamicProfile);
+      }
+      if (item.numericId) {
+        this.manifestProfiles.set(item.numericId.toString(), dynamicProfile);
       }
     }
   }
@@ -178,11 +203,14 @@ export class CountryRegistry {
       return undefined;
     }
 
+    const clean = identifier.toString().trim().toUpperCase();
+
+    const manifestMatch = this.manifestProfiles.get(clean);
+    if (manifestMatch) return manifestMatch;
+
     if (typeof identifier === "number") {
       return this.byNumericId.get(identifier);
     }
-
-    const clean = identifier.toString().trim().toUpperCase();
 
     const codeMatch = this.byCode.get(clean);
     if (codeMatch) return codeMatch;
