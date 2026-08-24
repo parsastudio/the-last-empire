@@ -5,13 +5,14 @@ import { Province } from "@/domain/province/province.schema";
 import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-processor";
 import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
 import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
 export class TurnPipeline {
   public processTurn(
     state: GameState,
     rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
+    matrixCache?: GeopoliticalMatrixCache,
   ): GameState {
     const currentState =
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
@@ -23,7 +24,8 @@ export class TurnPipeline {
 
     const ownerMap =
       provincesByOwnerMap ??
-      NationGettersUtility.buildProvincesByOwnerMap(currentState.provinces);
+      matrixCache?.getProvincesByOwnerMap() ??
+      new Map<string, Province[]>();
 
     const nationKeys = Object.keys(currentState.nations);
 
@@ -51,6 +53,7 @@ export class TurnPipeline {
           updatedProvincesMap,
           rankMap,
           ownerMap,
+          matrixCache,
         );
 
       const { updatedNation: ecoNation, updatedProvinces } =

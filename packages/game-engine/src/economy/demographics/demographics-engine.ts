@@ -28,6 +28,13 @@ export class DemographicsEngine {
 
     growthRate = Math.max(-0.05, Math.min(0.02, growthRate));
 
+    if (growthRate === 0) {
+      return {
+        updatedProvinces: ownedProvinces,
+        naturalChange: 0,
+      };
+    }
+
     let totalNaturalChange = 0;
     const updatedProvinces: Province[] = [];
 

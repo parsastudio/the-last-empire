@@ -7,6 +7,7 @@ import {
   GeopoliticalReachResolver,
   NationGettersUtility,
 } from "@geopolitics/domain";
+import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
 export class DiplomaticTurnProcessor {
   public static processPendingProposalsForAi(state: GameState): GameState {
@@ -30,6 +31,7 @@ export class DiplomaticTurnProcessor {
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
+    matrixCache?: GeopoliticalMatrixCache,
   ): {
     updatedNation: Nation;
     isAtWar: boolean;
@@ -42,20 +44,20 @@ export class DiplomaticTurnProcessor {
     const relKeys = Object.keys(nation.relations);
     const newRels: Record<string, RelationProfile> = { ...nation.relations };
 
-    const myProvs = NationGettersUtility.getOwnedProvinces(
-      nation.id,
-      provincesMap,
-      provincesByOwnerMap,
-    );
-
-    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
-      nation,
-      allNations || {},
-      provincesMap,
-      rankMap,
-      myProvs,
-      provincesByOwnerMap,
-    );
+    const reachableTargets = matrixCache
+      ? matrixCache.getReachableTargets(nation, allNations || {}, provincesMap)
+      : GeopoliticalReachResolver.getReachableTargets(
+          nation,
+          allNations || {},
+          provincesMap,
+          rankMap,
+          NationGettersUtility.getOwnedProvinces(
+            nation.id,
+            provincesMap,
+            provincesByOwnerMap,
+          ),
+          provincesByOwnerMap,
+        );
 
     const reachableCanonicalSet = new Set(
       reachableTargets.map((t) => CountryRegistry.resolveCanonicalId(t.id)),

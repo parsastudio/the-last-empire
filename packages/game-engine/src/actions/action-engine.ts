@@ -117,15 +117,22 @@ export class ActionEngine {
     actions: GameAction[],
     lockedDiplomacyTargets?: Set<string>,
   ): { newState: GameState; executedCount: number } {
-    let currentState = state;
+    let workingState: GameState = {
+      ...state,
+      provinces: { ...state.provinces },
+      nations: { ...state.nations },
+      turnLogs: [...state.turnLogs],
+      pendingProposals: [...state.pendingProposals],
+    };
+
     let executedCount = 0;
 
     for (let i = 0; i < actions.length; i++) {
       const action = actions[i]!;
-      const result = this.execute(currentState, action);
+      const result = this.execute(workingState, action);
 
       if (result.success && result.newState) {
-        currentState = result.newState;
+        workingState = result.newState;
         executedCount++;
 
         if (
@@ -150,6 +157,6 @@ export class ActionEngine {
       }
     }
 
-    return { newState: currentState, executedCount };
+    return { newState: workingState, executedCount };
   }
 }

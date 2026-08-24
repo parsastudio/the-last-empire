@@ -1,12 +1,4 @@
-import {
-  GameAction,
-  Nation,
-  Province,
-  GeopoliticalReachResolver,
-  CountryRegistry,
-  NationGettersUtility,
-  MilitaryPowerCalculator,
-} from "@geopolitics/domain";
+import { GameAction, Nation, Province } from "@geopolitics/domain";
 import {
   AIProcurementPlanner,
   AIPosture,
@@ -18,10 +10,8 @@ import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
 import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
 import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-evaluator";
 import { AIWarDeclarationEvaluator } from "@/engine/ai/ai-war-declaration-evaluator";
-import {
-  GeopoliticalVectorCalculator,
-  GeopoliticalVector,
-} from "@/engine/ai/geopolitical-vector-calculator";
+import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
+import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
 interface NationDecisionContext {
   ownedProvinces: Province[];
@@ -35,76 +25,40 @@ export class AIActionBuilder {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
-    rankMap?: Map<string, number>,
-    provincesByOwnerMap?: Map<string, Province[]>,
+    matrixCache?: GeopoliticalMatrixCache,
   ): NationDecisionContext {
-    const ownedProvinces = NationGettersUtility.getOwnedProvinces(
-      nation.id,
-      provincesMap,
-      provincesByOwnerMap,
+    if (matrixCache) {
+      const ownedProvinces = matrixCache.getOwnedProvinces(nation.id);
+      const reachableTargets = matrixCache.getReachableTargets(
+        nation,
+        allNations,
+        provincesMap,
+      );
+      const vectorsByTarget = matrixCache.getVectorsForNation(
+        nation,
+        allNations,
+        provincesMap,
+      );
+      const posture = matrixCache.getPosture(nation, allNations, provincesMap);
+
+      return {
+        ownedProvinces,
+        reachableTargets,
+        vectorsByTarget,
+        posture,
+      };
+    }
+
+    const fallbackCache = GeopoliticalMatrixCache.build(
+      allNations,
+      provincesMap || {},
     );
-
-    const sourcePower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateLandAndAirPower(nation),
-    );
-
-    const sourceSeaAccess = ownedProvinces.some((p) => p.hasSeaAccess);
-
-    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+    return this.buildDecisionContext(
       nation,
       allNations,
       provincesMap,
-      rankMap,
-      ownedProvinces,
-      provincesByOwnerMap,
+      fallbackCache,
     );
-
-    const vectorsByTarget = new Map<string, GeopoliticalVector>();
-    let maxTension = 0;
-    let isWar = Boolean(nation.warFocusTargetId);
-
-    for (let i = 0; i < reachableTargets.length; i++) {
-      const target = reachableTargets[i]!;
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[target.id];
-
-      if (rel && rel.stance === "WAR") {
-        isWar = true;
-      }
-
-      const vector = GeopoliticalVectorCalculator.calculate(
-        nation,
-        target,
-        allNations,
-        provincesMap,
-        ownedProvinces,
-        sourcePower,
-        sourceSeaAccess,
-        provincesByOwnerMap,
-      );
-
-      vectorsByTarget.set(canonicalTarget, vector);
-
-      if (vector.isNeighbor && vector.tension > maxTension) {
-        maxTension = vector.tension;
-      }
-    }
-
-    let posture: AIPosture = "PEACE";
-    if (isWar) {
-      posture = "WAR";
-    } else if (maxTension >= 55) {
-      posture = "THREAT";
-    }
-
-    return {
-      ownedProvinces,
-      reachableTargets,
-      vectorsByTarget,
-      posture,
-    };
   }
 
   public static buildNationActions(
@@ -114,6 +68,7 @@ export class AIActionBuilder {
     lockedTargets?: Set<string>,
     rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
+    matrixCache?: GeopoliticalMatrixCache,
   ): GameAction[] {
     const actions: GameAction[] = [];
 
@@ -121,8 +76,7 @@ export class AIActionBuilder {
       nation,
       allNations,
       provincesMap,
-      rankMap,
-      provincesByOwnerMap,
+      matrixCache,
     );
 
     const procurementResult = AIProcurementPlanner.planRecruitment(

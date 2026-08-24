@@ -4,6 +4,7 @@ export * from "./actions/military-action-executor";
 export * from "./actions/politics-action-executor";
 
 export * from "./ai/geopolitical-vector-calculator";
+export * from "./ai/geopolitical-matrix-cache";
 export * from "./ai/utility-decision-engine";
 export * from "./ai/ai-action-builder";
 export * from "./ai/ai-attack-planner";
