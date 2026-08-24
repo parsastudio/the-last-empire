@@ -52,6 +52,21 @@ export const BattlePhaseGroundDetailSchema = z.object({
   phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW"]),
 });
 
+export const BattleSpoilsDetailsSchema = z.object({
+  conqueredPixels: z.number().nonnegative().default(0),
+  conqueredProvincesCount: z.number().nonnegative().default(0),
+  conqueredProvincesNames: z.array(z.string()).default([]),
+  gainedPopulation: z.number().nonnegative().default(0),
+  gainedGdp: z.number().nonnegative().default(0),
+  lootedTreasury: z.number().nonnegative().default(0),
+  capturedInfantry: z.number().nonnegative().default(0),
+  capturedArmor: z.number().nonnegative().default(0),
+  capturedAirDefense: z.number().nonnegative().default(0),
+  capturedAirForce: z.number().nonnegative().default(0),
+  capturedDrones: z.number().nonnegative().default(0),
+  capturedNavalFleet: z.number().nonnegative().default(0),
+});
+
 export const BattleFullReportDataSchema = z.object({
   attackerId: z.string(),
   defenderId: z.string(),
@@ -66,6 +81,7 @@ export const BattleFullReportDataSchema = z.object({
   phase1Missile: BattlePhaseReconDetailSchema,
   phase2Air: BattlePhaseAirDetailSchema,
   phase3Ground: BattlePhaseGroundDetailSchema,
+  spoils: BattleSpoilsDetailsSchema.optional(),
 });
 
 export type ReportSeverity = z.infer<typeof ReportSeveritySchema>;
@@ -77,4 +93,5 @@ export type BattlePhaseAirDetail = z.infer<typeof BattlePhaseAirDetailSchema>;
 export type BattlePhaseGroundDetail = z.infer<
   typeof BattlePhaseGroundDetailSchema
 >;
+export type BattleSpoilsDetails = z.infer<typeof BattleSpoilsDetailsSchema>;
 export type BattleFullReportData = z.infer<typeof BattleFullReportDataSchema>;

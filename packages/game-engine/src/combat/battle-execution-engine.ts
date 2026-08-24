@@ -12,6 +12,8 @@ import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battl
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
 import { ExtraCapturedMilitaryUnits } from "@/engine/combat/loot/battle-loot-manager";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
+import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -172,6 +174,40 @@ export class BattleExecutionEngine {
       ? state.provinces[action.targetProvinceId.toString()] || null
       : null;
 
+    let gainedPop = 0;
+    let gainedGdp = 0;
+    for (let i = 0; i < conquest.conqueredProvincesList.length; i++) {
+      const p = conquest.conqueredProvincesList[i]!;
+      gainedPop += p.population || 0;
+      gainedGdp += getProvinceGdp(p);
+    }
+
+    const totalLootedTreasury =
+      calcResult.treasuryLooted + (extraTreasuryLooted || 0);
+
+    const spoilsData: BattleSpoilsDetails = {
+      conqueredPixels: conquest.conqueredPixels,
+      conqueredProvincesCount: conquest.conqueredProvincesList.length,
+      conqueredProvincesNames: conquest.conqueredProvincesList.map(
+        (p) => p.nameFa,
+      ),
+      gainedPopulation: gainedPop,
+      gainedGdp: gainedGdp,
+      lootedTreasury: totalLootedTreasury,
+      capturedInfantry:
+        calcResult.capturedInfantry + (extraCapturedUnits?.infantry || 0),
+      capturedArmor:
+        calcResult.capturedArmor + (extraCapturedUnits?.armor || 0),
+      capturedAirDefense:
+        calcResult.capturedAirDefense + (extraCapturedUnits?.airDefense || 0),
+      capturedAirForce:
+        calcResult.capturedAirForce + (extraCapturedUnits?.airForce || 0),
+      capturedDrones:
+        calcResult.capturedDrones + (extraCapturedUnits?.droneMissile || 0),
+      capturedNavalFleet:
+        calcResult.capturedNavalFleet + (extraCapturedUnits?.navalFleet || 0),
+    };
+
     const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,
       updatedAttacker,
@@ -182,6 +218,7 @@ export class BattleExecutionEngine {
       !isDefenderAlive,
       targetProvinceObj,
       action.attackType || "LAND",
+      spoilsData,
     );
 
     const interventionLogs = BattleLogFactory.createInterventionLogs(
