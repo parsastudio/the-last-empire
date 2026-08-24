@@ -7,6 +7,7 @@ import {
   GeopoliticalReachResolver,
   MilitaryPowerCalculator,
   NationGettersUtility,
+  TerritoryClaimsUtility,
 } from "@geopolitics/domain";
 
 export interface GeopoliticalVector {
@@ -17,12 +18,14 @@ export interface GeopoliticalVector {
   isLandNeighbor: boolean;
   isNavalReachable: boolean;
   powerRatio: number;
+  lostProvincesCount: number;
   reasons: {
     ideologyScore: number;
     commonEnemyBonus: number;
     reputationEffect: number;
     borderFriction: number;
     powerImbalance: number;
+    revanchismPenalty: number;
   };
 }
 
@@ -36,6 +39,7 @@ export class GeopoliticalVectorCalculator {
     sourcePower?: number,
     sourceSeaAccess?: boolean,
     provincesByOwnerMap?: Map<string, Province[]>,
+    occupiedTerritoryMap?: Map<string, number>,
   ): GeopoliticalVector {
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const rel =
@@ -73,8 +77,21 @@ export class GeopoliticalVectorCalculator {
     const targetRep = target.globalReputation ?? 50;
     const reputationEffect = Math.round((targetRep / 100) * 15);
 
+    const lostProvincesCount = TerritoryClaimsUtility.getOccupiedProvinceCount(
+      source.id,
+      target.id,
+      occupiedTerritoryMap,
+      provincesMap,
+    );
+
+    const revanchismPenalty = Math.min(25, lostProvincesCount * 12);
+
     const rawAlignment =
-      baseAlignment + ideologyScore + commonEnemyBonus + reputationEffect;
+      baseAlignment +
+      ideologyScore +
+      commonEnemyBonus +
+      reputationEffect -
+      revanchismPenalty;
     const alignment = Math.max(-100, Math.min(100, rawAlignment));
 
     const myProvs =
@@ -162,7 +179,8 @@ export class GeopoliticalVectorCalculator {
       Math.floor(storedTension * 0.4) +
       borderFriction +
       powerImbalance +
-      vulnerabilityBonus;
+      vulnerabilityBonus +
+      revanchismPenalty;
 
     if (rel && rel.stance === "WAR") {
       rawTension = 100;
@@ -191,12 +209,14 @@ export class GeopoliticalVectorCalculator {
       isLandNeighbor,
       isNavalReachable,
       powerRatio,
+      lostProvincesCount,
       reasons: {
         ideologyScore,
         commonEnemyBonus,
         reputationEffect,
         borderFriction,
         powerImbalance,
+        revanchismPenalty,
       },
     };
   }

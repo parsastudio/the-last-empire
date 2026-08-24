@@ -4,6 +4,7 @@ import {
   CountryRegistry,
   NationGettersUtility,
   GeopoliticalReachResolver,
+  TerritoryClaimsUtility,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -14,6 +15,7 @@ import { AIPosture } from "@/engine/ai/ai-procurement-planner";
 export class GeopoliticalMatrixCache {
   private provincesByOwnerMap: Map<string, Province[]>;
   private rankMap: Map<string, number>;
+  private occupiedTerritoryMap: Map<string, number>;
 
   constructor(
     allNations: Record<string, Nation>,
@@ -26,6 +28,8 @@ export class GeopoliticalMatrixCache {
       provincesMap,
       this.provincesByOwnerMap,
     );
+    this.occupiedTerritoryMap =
+      TerritoryClaimsUtility.buildOccupiedTerritoryMap(provincesMap);
   }
 
   public static build(
@@ -41,6 +45,10 @@ export class GeopoliticalMatrixCache {
 
   public getRankMap(): Map<string, number> {
     return this.rankMap;
+  }
+
+  public getOccupiedTerritoryMap(): Map<string, number> {
+    return this.occupiedTerritoryMap;
   }
 
   public getOwnedProvinces(nationId: string): Province[] {
@@ -79,6 +87,7 @@ export class GeopoliticalMatrixCache {
       undefined,
       undefined,
       this.provincesByOwnerMap,
+      this.occupiedTerritoryMap,
     );
   }
 

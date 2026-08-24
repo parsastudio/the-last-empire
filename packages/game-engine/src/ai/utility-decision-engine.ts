@@ -41,7 +41,9 @@ export class UtilityDecisionEngine {
     _target: Nation,
     vector: GeopoliticalVector,
   ): number {
-    if (source.globalReputation < -20) return -100;
+    if (source.globalReputation < -20 || vector.lostProvincesCount > 0) {
+      return -100;
+    }
     const alignmentScore = vector.alignment * 0.8;
     const tensionPenalty = vector.tension * 0.6;
     const commonEnemyBonus = vector.reasons.commonEnemyBonus;
@@ -70,8 +72,11 @@ export class UtilityDecisionEngine {
     const weaknessScore =
       vector.powerRatio > 1.4 ? (vector.powerRatio - 1.0) * 40 : 0;
     const tensionDampener = vector.tension * 0.3;
+    const revanchismDampener = vector.reasons.revanchismPenalty * 0.4;
 
-    return Math.round(exhaustionScore + weaknessScore - tensionDampener);
+    return Math.round(
+      exhaustionScore + weaknessScore - tensionDampener - revanchismDampener,
+    );
   }
 
   public static evaluateAcceptance(
@@ -93,6 +98,13 @@ export class UtilityDecisionEngine {
 
         const tensionVal = -Math.round(vector.tension * 0.5);
         reasons.push({ label: "تنش و اصطکاک مرزی", value: tensionVal });
+
+        if (vector.lostProvincesCount > 0) {
+          reasons.push({
+            label: "اشغال خاک مادری توسط طرف مقابل",
+            value: -50,
+          });
+        }
 
         if (vector.reasons.commonEnemyBonus > 0) {
           reasons.push({
@@ -133,8 +145,16 @@ export class UtilityDecisionEngine {
           reasons.push({ label: "برتری نظامی طرف مقابل", value: powerDiff });
         }
 
+        if (vector.reasons.revanchismPenalty > 0) {
+          const revVal = -Math.round(vector.reasons.revanchismPenalty * 0.7);
+          reasons.push({
+            label: "اشغال خاک مادری و ادعای سرزمینی",
+            value: revVal,
+          });
+        }
+
         const animosityVal =
-          vector.alignment < 0 ? Math.round(vector.alignment * 0.4) : 0;
+          vector.alignment < 0 ? Math.round(vector.alignment * 0.3) : 0;
         reasons.push({
           label: "بی‌اعتمادی و تخاصم سیاسی",
           value: animosityVal,
