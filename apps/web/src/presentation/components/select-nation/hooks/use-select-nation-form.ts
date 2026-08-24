@@ -9,7 +9,13 @@ import {
   FinalMapManifest,
 } from "@/presentation/components/select-nation/services/bit-packed-init-service";
 import { useGameStore } from "@/presentation/stores/use-game-store";
-import { CountryRegistry, ClientMapPathResolver } from "@geopolitics/domain";
+import {
+  CountryRegistry,
+  ClientMapPathResolver,
+  NationGettersUtility,
+  MilitaryDistributionEngine,
+  MilitaryPowerCalculator,
+} from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(
@@ -19,13 +25,103 @@ function mapManifestToNationDetails(
     ? manifest.nations
     : CountryRegistry.getAllManifestNations();
 
-  return manifestItems.map((item) => {
+  const sortedItems = [...manifestItems].sort((a, b) => {
+    const stackA = MilitaryDistributionEngine.calculateStartingStack(
+      Math.max(1, 21 - a.initialRank),
+      a.hasSeaAccess,
+      a.startingTechLevel,
+    );
+    const stackB = MilitaryDistributionEngine.calculateStartingStack(
+      Math.max(1, 21 - b.initialRank),
+      b.hasSeaAccess,
+      b.startingTechLevel,
+    );
+
+    const milA = MilitaryPowerCalculator.calculateEffectivePower(
+      {
+        id: a.code,
+        name: a.nameFa,
+        isAi: true,
+        isAlive: true,
+        flagCode: a.flagCode,
+        taxRate: 15,
+        tariffRate: 10,
+        treasury: a.startingTreasury,
+        nationalDebt: 0,
+        industrialLevel: a.industrialLevel,
+        government: {
+          type:
+            (a.defaultGovernment as import("@geopolitics/domain").GovernmentType) ||
+            "DEMOCRACY",
+          stability: 50,
+          turnsInPower: 1,
+        },
+        military: stackA,
+        recruitmentQueue: [],
+        relations: {},
+        activeModifiers: [],
+        globalReputation: 50,
+        doctrines: { unlockedDoctrines: [] },
+        executedEspionageTiers: [],
+        warFocusTargetId: null,
+      },
+      true,
+    );
+
+    const milB = MilitaryPowerCalculator.calculateEffectivePower(
+      {
+        id: b.code,
+        name: b.nameFa,
+        isAi: true,
+        isAlive: true,
+        flagCode: b.flagCode,
+        taxRate: 15,
+        tariffRate: 10,
+        treasury: b.startingTreasury,
+        nationalDebt: 0,
+        industrialLevel: b.industrialLevel,
+        government: {
+          type:
+            (b.defaultGovernment as import("@geopolitics/domain").GovernmentType) ||
+            "DEMOCRACY",
+          stability: 50,
+          turnsInPower: 1,
+        },
+        military: stackB,
+        recruitmentQueue: [],
+        relations: {},
+        activeModifiers: [],
+        globalReputation: 50,
+        doctrines: { unlockedDoctrines: [] },
+        executedEspionageTiers: [],
+        warFocusTargetId: null,
+      },
+      true,
+    );
+
+    const scoreA = NationGettersUtility.calculateCompositePowerScore(
+      a.gdp,
+      milA,
+    );
+    const scoreB = NationGettersUtility.calculateCompositePowerScore(
+      b.gdp,
+      milB,
+    );
+
+    if (Math.abs(scoreB - scoreA) > 0.0001) {
+      return scoreB - scoreA;
+    }
+    return b.gdp - a.gdp;
+  });
+
+  return sortedItems.map((item, idx) => {
+    const computedRank = idx + 1;
     const summary = NationPresentationMapper.formatNationSummary(
       item.id,
       item.nameFa,
       item.code,
       item.flagCode,
-      item.initialRank,
+      computedRank,
       item.gdp,
       item.population,
       item.defaultGovernment,
@@ -40,7 +136,7 @@ function mapManifestToNationDetails(
       gdp: summary.gdpText,
       population: summary.populationText,
       treasury: summary.treasuryText,
-      desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${item.initialRank}.`,
+      desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${computedRank}.`,
       defaultGovernment: item.defaultGovernment,
     };
   });

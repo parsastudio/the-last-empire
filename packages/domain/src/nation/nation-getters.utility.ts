@@ -5,6 +5,22 @@ import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 
 export class NationGettersUtility {
+  public static calculateCompositePowerScore(
+    gdp: number,
+    militaryPower: number,
+  ): number {
+    const safeGdp = Math.max(1_000_000, gdp);
+    const safeMil = Math.max(1, militaryPower);
+
+    const logGdp = Math.log10(safeGdp);
+    const logMil = Math.log10(safeMil);
+
+    const normalizedGdp = Math.max(0, (logGdp - 9.0) / 4.5);
+    const normalizedMil = Math.max(0, (logMil - 1.0) / 3.0);
+
+    return normalizedGdp * 3.0 + normalizedMil * 1.0;
+  }
+
   public static buildProvincesByOwnerMap(
     provincesMap?: Record<string, Province> | Province[],
   ): Map<string, Province[]> {
@@ -222,8 +238,6 @@ export class NationGettersUtility {
       provincesByOwnerMap ?? this.buildProvincesByOwnerMap(provincesMap);
 
     const nationMetrics = new Array(aliveNations.length);
-    let maxGdp = 0;
-    let maxMilPower = 0;
 
     for (let i = 0; i < aliveNations.length; i++) {
       const nation = aliveNations[i]!;
@@ -244,31 +258,23 @@ export class NationGettersUtility {
         true,
       );
 
-      if (gdp > maxGdp) maxGdp = gdp;
-      if (milPower > maxMilPower) maxMilPower = milPower;
+      const compositeScore = this.calculateCompositePowerScore(gdp, milPower);
 
       nationMetrics[i] = {
         nation,
         gdp,
         milPower,
         population,
-        compositeScore: 0,
+        compositeScore,
       };
-    }
-
-    const safeMaxGdp = Math.max(1, maxGdp);
-    const safeMaxMil = Math.max(1, maxMilPower);
-
-    for (let i = 0; i < nationMetrics.length; i++) {
-      const item = nationMetrics[i]!;
-      const normGdp = (item.gdp / safeMaxGdp) * 100;
-      const normMil = (item.milPower / safeMaxMil) * 100;
-      item.compositeScore = normGdp * 0.7 + normMil * 0.3;
     }
 
     nationMetrics.sort((a, b) => {
       if (Math.abs(b.compositeScore - a.compositeScore) > 0.0001) {
         return b.compositeScore - a.compositeScore;
+      }
+      if (b.gdp !== a.gdp) {
+        return b.gdp - a.gdp;
       }
       if (b.population !== a.population) {
         return b.population - a.population;

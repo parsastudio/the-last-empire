@@ -6,6 +6,8 @@ import {
   FinalManifestProvince,
   FinalManifestNation,
   FinalMapManifest,
+  NationGettersUtility,
+  MilitaryPowerCalculator,
 } from "@geopolitics/domain";
 import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
 import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
@@ -38,7 +40,90 @@ export class StrategicManifestBuilder {
       countryProvincesMap.has(p.id ?? 0),
     );
 
-    activeProfiles.sort((a, b) => b.gdp - a.gdp);
+    activeProfiles.sort((a, b) => {
+      const stackA = MilitaryDistributionEngine.calculateStartingStack(
+        a.militaryTier || 5,
+        true,
+        a.startingTechLevel,
+      );
+      const stackB = MilitaryDistributionEngine.calculateStartingStack(
+        b.militaryTier || 5,
+        true,
+        b.startingTechLevel,
+      );
+
+      const milA = MilitaryPowerCalculator.calculateEffectivePower(
+        {
+          id: a.code,
+          name: a.nameFa,
+          isAi: true,
+          isAlive: true,
+          flagCode: a.flagCode,
+          taxRate: 15,
+          tariffRate: 10,
+          treasury: 100000,
+          nationalDebt: 0,
+          industrialLevel: 1,
+          government: {
+            type: a.startingGovernment || "DEMOCRACY",
+            stability: 50,
+            turnsInPower: 1,
+          },
+          military: stackA,
+          recruitmentQueue: [],
+          relations: {},
+          activeModifiers: [],
+          globalReputation: 50,
+          doctrines: { unlockedDoctrines: [] },
+          executedEspionageTiers: [],
+          warFocusTargetId: null,
+        },
+        true,
+      );
+
+      const milB = MilitaryPowerCalculator.calculateEffectivePower(
+        {
+          id: b.code,
+          name: b.nameFa,
+          isAi: true,
+          isAlive: true,
+          flagCode: b.flagCode,
+          taxRate: 15,
+          tariffRate: 10,
+          treasury: 100000,
+          nationalDebt: 0,
+          industrialLevel: 1,
+          government: {
+            type: b.startingGovernment || "DEMOCRACY",
+            stability: 50,
+            turnsInPower: 1,
+          },
+          military: stackB,
+          recruitmentQueue: [],
+          relations: {},
+          activeModifiers: [],
+          globalReputation: 50,
+          doctrines: { unlockedDoctrines: [] },
+          executedEspionageTiers: [],
+          warFocusTargetId: null,
+        },
+        true,
+      );
+
+      const scoreA = NationGettersUtility.calculateCompositePowerScore(
+        a.gdp,
+        milA,
+      );
+      const scoreB = NationGettersUtility.calculateCompositePowerScore(
+        b.gdp,
+        milB,
+      );
+
+      if (Math.abs(scoreB - scoreA) > 0.0001) {
+        return scoreB - scoreA;
+      }
+      return b.gdp - a.gdp;
+    });
 
     for (let rankIndex = 0; rankIndex < activeProfiles.length; rankIndex++) {
       const profile = activeProfiles[rankIndex]!;
