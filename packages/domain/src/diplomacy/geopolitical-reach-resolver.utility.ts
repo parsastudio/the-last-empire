@@ -87,7 +87,8 @@ export class GeopoliticalReachResolver {
       return Array.from(reachableMap.values());
     }
 
-    for (const prov of Object.values(provincesMap)) {
+    for (const provId in provincesMap) {
+      const prov = provincesMap[provId]!;
       if (
         CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
         sourceCanonical
@@ -173,12 +174,13 @@ export class GeopoliticalReachResolver {
     const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
 
-    for (const prov of Object.values(provincesMap)) {
+    for (const key in provincesMap) {
+      const prov = provincesMap[key]!;
       if (
         CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
         sourceCanonical
       ) {
-        const neighbors = prov.landNeighbors;
+        const neighbors = prov.landNeighbors || [];
         for (let i = 0; i < neighbors.length; i++) {
           const neighborProv = provincesMap[neighbors[i]!.toString()];
           if (
@@ -207,7 +209,8 @@ export class GeopoliticalReachResolver {
     const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
 
-    for (const prov of Object.values(provincesMap)) {
+    for (const key in provincesMap) {
+      const prov = provincesMap[key]!;
       if (
         CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
           sourceCanonical &&
@@ -246,7 +249,8 @@ export class GeopoliticalReachResolver {
     const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
 
-    for (const prov of Object.values(provincesMap)) {
+    for (const key in provincesMap) {
+      const prov = provincesMap[key]!;
       if (
         CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
           sourceCanonical &&
