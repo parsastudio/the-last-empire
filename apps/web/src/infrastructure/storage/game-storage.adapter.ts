@@ -7,11 +7,54 @@ import { BitPackedGridState } from "@geopolitics/game-engine";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export class GameStorageAdapter {
+  private static readonly MAX_LOGS_PER_GAME = 300;
+
   public async saveGameState(gameId: string, state: GameState): Promise<void> {
-    await db.gameStates.put({
-      gameId,
-      state,
-      timestamp: Date.now(),
+    const cappedTurnLogs = state.turnLogs.slice(
+      -GameStorageAdapter.MAX_LOGS_PER_GAME,
+    );
+    const normalizedState: GameState = {
+      ...state,
+      turnLogs: cappedTurnLogs,
+    };
+
+    const now = Date.now();
+
+    await db.transaction("rw", db.gameStates, db.turnLogs, async () => {
+      await db.gameStates.put({
+        gameId,
+        state: normalizedState,
+        timestamp: now,
+      });
+
+      if (cappedTurnLogs.length > 0) {
+        const logRecords = cappedTurnLogs.map((log) => ({
+          id: `${gameId}_${log.id}`,
+          gameId,
+          turn: log.turn,
+          timestamp: log.timestamp || now,
+          log,
+        }));
+        await db.turnLogs.bulkPut(logRecords);
+
+        const totalLogsCount = await db.turnLogs
+          .where("gameId")
+          .equals(gameId)
+          .count();
+
+        if (totalLogsCount > GameStorageAdapter.MAX_LOGS_PER_GAME) {
+          const excess = totalLogsCount - GameStorageAdapter.MAX_LOGS_PER_GAME;
+          const oldestLogs = await db.turnLogs
+            .where("gameId")
+            .equals(gameId)
+            .sortBy("timestamp");
+
+          const toDeleteIds = oldestLogs
+            .slice(0, excess)
+            .map((record) => record.id);
+          await db.turnLogs.bulkDelete(toDeleteIds);
+        }
+      }
     });
   }
 
@@ -45,6 +88,9 @@ export class GameStorageAdapter {
   }
 
   public async deleteState(gameId: string): Promise<void> {
-    await db.gameStates.delete(gameId);
+    await db.transaction("rw", db.gameStates, db.turnLogs, async () => {
+      await db.gameStates.delete(gameId);
+      await db.turnLogs.where("gameId").equals(gameId).delete();
+    });
   }
 }

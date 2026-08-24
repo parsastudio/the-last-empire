@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie";
-import { GameState } from "@geopolitics/domain";
+import { GameState, TurnLogEntry } from "@geopolitics/domain";
 
 export interface SavedGameStateRecord {
   gameId: string;
@@ -7,13 +7,23 @@ export interface SavedGameStateRecord {
   timestamp: number;
 }
 
+export interface SavedTurnLogRecord {
+  id: string;
+  gameId: string;
+  turn: number;
+  timestamp: number;
+  log: TurnLogEntry;
+}
+
 export class GameDatabase extends Dexie {
   public gameStates!: Table<SavedGameStateRecord, string>;
+  public turnLogs!: Table<SavedTurnLogRecord, string>;
 
   constructor() {
     super("GeopoliticsEngineDB_v2");
-    this.version(1).stores({
+    this.version(2).stores({
       gameStates: "gameId, timestamp",
+      turnLogs: "id, gameId, [gameId+turn], timestamp",
     });
   }
 }

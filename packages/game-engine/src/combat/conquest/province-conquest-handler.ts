@@ -1,5 +1,4 @@
 import { Province } from "@/domain/province/province.schema";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export interface ProvinceConquestResult {
@@ -43,7 +42,6 @@ export class ProvinceConquestHandler {
           conqueredPixels += prov.pixelCount;
           conqueredProvincesList.push(conqueredProv);
         }
-        BitPackedGridState.getInstance().markDirty();
       } else {
         let conqueredProvId: number | null = null;
         if (targetProvinceId && updatedProvinces[targetProvinceId.toString()]) {
@@ -65,7 +63,6 @@ export class ProvinceConquestHandler {
             updatedProvinces[conqueredProvId.toString()] = conqueredProv;
             conqueredPixels = targetProv.pixelCount;
             conqueredProvincesList.push(conqueredProv);
-            BitPackedGridState.getInstance().markDirty();
           }
         }
       }

@@ -13,9 +13,7 @@ export class TurnProgressionOrchestrator {
   private victoryChecker = new VictoryChecker();
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
-    const orchStart = performance.now();
     const lockedDiplomacyTargets = new Set<string>();
-    const sortedNationIds = Object.keys(state.nations).sort();
 
     let workingState: GameState = {
       ...state,
@@ -25,32 +23,29 @@ export class TurnProgressionOrchestrator {
       pendingProposals: [...state.pendingProposals],
     };
 
-    console.group(
-      `[ORCHESTRATOR] ارکستراسیون پیشروی نوبت ${state.currentTurn} ➔ ${state.currentTurn + 1}`,
-    );
+    const shuffledNationIds = Object.keys(workingState.nations);
+    for (let i = shuffledNationIds.length - 1; i > 0; i--) {
+      const j = Math.floor(prng.nextFloat() * (i + 1));
+      const temp = shuffledNationIds[i]!;
+      shuffledNationIds[i] = shuffledNationIds[j]!;
+      shuffledNationIds[j] = temp;
+    }
 
-    const initIndexStart = performance.now();
-    const matrixCache = GeopoliticalMatrixCache.build(
+    let activeMatrixCache = GeopoliticalMatrixCache.build(
       workingState.nations,
       workingState.provinces,
     );
-    const provincesByOwnerMap = matrixCache.getProvincesByOwnerMap();
-    const rankMap = matrixCache.getRankMap();
-    const initIndexDuration = (performance.now() - initIndexStart).toFixed(2);
-    console.log(
-      `[ORCH_STEP] ۱. ایندکس‌گذاری ماتریس ژئوپلیتیک تک‌پاس (${provincesByOwnerMap.size} کشور): ${initIndexDuration}ms`,
-    );
 
-    const aiPlanStart = performance.now();
-    let totalExecutedActions = 0;
-
-    for (let i = 0; i < sortedNationIds.length; i++) {
-      const id = sortedNationIds[i]!;
+    for (let i = 0; i < shuffledNationIds.length; i++) {
+      const id = shuffledNationIds[i]!;
       const currentNation = workingState.nations[id];
 
       if (!currentNation || !currentNation.isAlive || !currentNation.isAi) {
         continue;
       }
+
+      const rankMap = activeMatrixCache.getRankMap();
+      const provincesByOwnerMap = activeMatrixCache.getProvincesByOwnerMap();
 
       const aiActions = AIActionBuilder.buildNationActions(
         currentNation,
@@ -59,7 +54,7 @@ export class TurnProgressionOrchestrator {
         lockedDiplomacyTargets,
         rankMap,
         provincesByOwnerMap,
-        matrixCache,
+        activeMatrixCache,
       );
 
       if (aiActions.length > 0) {
@@ -69,41 +64,39 @@ export class TurnProgressionOrchestrator {
             aiActions,
             lockedDiplomacyTargets,
           );
-        workingState = executedState;
-        totalExecutedActions += executedCount;
+
+        if (executedCount > 0) {
+          workingState = executedState;
+          const hasStructuralChange = aiActions.some(
+            (action) =>
+              action.type === "INITIATE_BATTLE" ||
+              action.type === "EXECUTE_ESPIONAGE_OPERATION",
+          );
+
+          if (hasStructuralChange) {
+            activeMatrixCache = GeopoliticalMatrixCache.build(
+              workingState.nations,
+              workingState.provinces,
+            );
+          }
+        }
       }
     }
 
-    const aiPlanDuration = (performance.now() - aiPlanStart).toFixed(2);
-    console.log(
-      `[ORCH_STEP] ۲ و ۳. برنامه‌ریزی و اجرای اتمیک متوالی هوش مصنوعی (${totalExecutedActions} اکشن موفق): ${aiPlanDuration}ms`,
-    );
+    const postActionProvincesByOwnerMap =
+      activeMatrixCache.getProvincesByOwnerMap();
+    const postActionRankMap = activeMatrixCache.getRankMap();
 
-    const pipelineStart = performance.now();
     workingState = this.pipeline.processTurn(
       workingState,
-      rankMap,
-      provincesByOwnerMap,
-      matrixCache,
-    );
-    const pipelineDuration = (performance.now() - pipelineStart).toFixed(2);
-    console.log(
-      `[ORCH_STEP] ۴. اجرای خط لوله نوبتی (TurnPipeline): ${pipelineDuration}ms`,
+      postActionRankMap,
+      postActionProvincesByOwnerMap,
+      activeMatrixCache,
     );
 
-    const livenessStart = performance.now();
     workingState = this.livenessManager.updateLiveness(workingState);
-    const livenessDuration = (performance.now() - livenessStart).toFixed(2);
-    console.log(
-      `[ORCH_STEP] ۵. بررسی وضعیت بقا و سقوط کشورها (Liveness): ${livenessDuration}ms`,
-    );
 
-    const victoryStart = performance.now();
     const victoryStatus = this.victoryChecker.checkVictory(workingState);
-    const victoryDuration = (performance.now() - victoryStart).toFixed(2);
-    console.log(
-      `[ORCH_STEP] ۶. ارزیابی شروط پیروزی جهانی (VictoryChecker): ${victoryDuration}ms`,
-    );
 
     if (victoryStatus.isGameOver) {
       workingState = {
@@ -114,12 +107,11 @@ export class TurnProgressionOrchestrator {
       };
     }
 
-    const orchTotalDuration = (performance.now() - orchStart).toFixed(2);
-    console.log(`[ORCH_TOTAL] مجموع کل ارکستراسیون: ${orchTotalDuration}ms`);
-    console.groupEnd();
+    const cappedLogs = workingState.turnLogs.slice(-300);
 
     return {
       ...workingState,
+      turnLogs: cappedLogs,
       currentTurn: workingState.currentTurn + 1,
       seed: prng.getSeed(),
     };
