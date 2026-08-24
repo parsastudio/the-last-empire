@@ -1,8 +1,11 @@
 import React, { useMemo } from "react";
-import { TurnLogEntry } from "@/domain/game/game-state.schema";
-import { Nation } from "@/domain/nation/nation.schema";
-import { CountryRegistry } from "@/domain/data/countries";
-import { TurnLogFormatter } from "@/domain/game/log-formatter.utility";
+import {
+  TurnLogEntry,
+  Nation,
+  CountryRegistry,
+  TurnLogFormatter,
+  PendingDiplomaticProposal,
+} from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import {
   Swords,
@@ -12,14 +15,24 @@ import {
   Skull,
   Info,
   ArrowLeft,
+  Handshake,
+  Sparkles,
 } from "lucide-react";
+import { ProposalActionButtons } from "./proposal-action-buttons";
 
 interface ReportCardProps {
   log: TurnLogEntry;
   nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
+  pendingProposals?: PendingDiplomaticProposal[];
 }
 
-export function ReportCard({ log, nationsMap }: ReportCardProps) {
+export function ReportCard({
+  log,
+  nationsMap,
+  humanNationId,
+  pendingProposals = [],
+}: ReportCardProps) {
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
     log.sourceNationId,
   );
@@ -43,7 +56,58 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
     return TurnLogFormatter.formatMessage(log, nationsMap);
   }, [log, nationsMap]);
 
+  const activePendingProposal = useMemo(() => {
+    if (
+      log.eventCode !== "DIPLOMATIC_PROPOSAL_SENT" ||
+      !humanNationId ||
+      !log.targetNationId
+    ) {
+      return null;
+    }
+
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
+    const canonicalTarget = CountryRegistry.resolveCanonicalId(
+      log.targetNationId,
+    );
+
+    if (canonicalTarget !== canonicalHuman) {
+      return null;
+    }
+
+    const logProposalId = log.params?.["proposalId"]
+      ? String(log.params["proposalId"])
+      : null;
+
+    if (logProposalId) {
+      const directMatch = pendingProposals.find((p) => p.id === logProposalId);
+      if (directMatch) return directMatch;
+    }
+
+    return (
+      pendingProposals.find((p) => {
+        const pSender = CountryRegistry.resolveCanonicalId(p.senderNationId);
+        const pReceiver = CountryRegistry.resolveCanonicalId(
+          p.receiverNationId,
+        );
+        return pSender === sourceCanonical && pReceiver === canonicalHuman;
+      }) || null
+    );
+  }, [log, humanNationId, pendingProposals, sourceCanonical]);
+
+  const isIncomingInteractiveProposal = Boolean(activePendingProposal);
+
   const style = useMemo(() => {
+    if (isIncomingInteractiveProposal) {
+      return {
+        cardBg:
+          "bg-gradient-to-r from-indigo-950/40 via-card/95 to-purple-950/30",
+        border:
+          "border-indigo-500/60 shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500/30",
+        icon: Handshake,
+        iconBg: "bg-indigo-500/25 text-indigo-300 border-indigo-400/50",
+      };
+    }
+
     switch (log.eventCode) {
       case "NATION_ANNEXED":
       case "NATION_COLLAPSED":
@@ -102,13 +166,13 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
           iconBg: "bg-secondary text-muted-foreground border-border/50",
         };
     }
-  }, [log.eventCode]);
+  }, [log.eventCode, isIncomingInteractiveProposal]);
 
   const Icon = style.icon;
 
   return (
     <div
-      className={`p-4 rounded-2xl border ${style.border} ${style.cardBg} flex items-start gap-3.5 transition-all font-sans text-right dir-rtl backdrop-blur-sm shadow-sm hover:shadow-md`}
+      className={`p-4 rounded-2xl border ${style.border} ${style.cardBg} flex items-start gap-3.5 transition-all font-sans text-right dir-rtl backdrop-blur-sm shadow-sm hover:shadow-md relative overflow-hidden`}
     >
       <div
         className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${style.iconBg}`}
@@ -117,35 +181,56 @@ export function ReportCard({ log, nationsMap }: ReportCardProps) {
       </div>
 
       <div className="flex-1 space-y-2.5 overflow-hidden">
-        <p className="text-xs text-foreground leading-relaxed font-sans font-medium">
-          {dynamicMessage}
-        </p>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <p className="text-xs text-foreground leading-relaxed font-sans font-medium flex-1">
+            {dynamicMessage}
+          </p>
 
-        {(sourceName || targetName) && (
-          <div className="flex flex-wrap items-center gap-2 pt-0.5 font-mono text-[10px]">
-            {sourceName && (
-              <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
-                <span className="text-base select-none">{sourceFlag}</span>
-                <span className="font-bold text-foreground">{sourceName}</span>
-              </div>
-            )}
+          {isIncomingInteractiveProposal && (
+            <span className="flex items-center gap-1 text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-lg shrink-0 animate-pulse">
+              <Sparkles size={10} />
+              در انتظار تصمیم شما
+            </span>
+          )}
+        </div>
 
-            {targetName && (
-              <>
-                <ArrowLeft
-                  size={11}
-                  className="text-muted-foreground shrink-0"
-                />
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 border-t border-border/30">
+          {(sourceName || targetName) && (
+            <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
+              {sourceName && (
                 <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
-                  <span className="text-base select-none">{targetFlag}</span>
+                  <span className="text-base select-none">{sourceFlag}</span>
                   <span className="font-bold text-foreground">
-                    {targetName}
+                    {sourceName}
                   </span>
                 </div>
-              </>
-            )}
-          </div>
-        )}
+              )}
+
+              {targetName && (
+                <>
+                  <ArrowLeft
+                    size={11}
+                    className="text-muted-foreground shrink-0"
+                  />
+                  <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
+                    <span className="text-base select-none">{targetFlag}</span>
+                    <span className="font-bold text-foreground">
+                      {targetName}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {isIncomingInteractiveProposal && activePendingProposal && (
+            <ProposalActionButtons
+              proposalId={activePendingProposal.id}
+              humanNationId={humanNationId!}
+              sourceNationName={sourceName}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

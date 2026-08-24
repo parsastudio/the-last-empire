@@ -91,6 +91,7 @@ export function CommandCenterTabRouter({
           currentTurn={gameState?.currentTurn ?? 1}
           humanNationId={nation.id}
           nationsMap={gameState?.nations}
+          pendingProposals={gameState?.pendingProposals}
         />
       );
     default:

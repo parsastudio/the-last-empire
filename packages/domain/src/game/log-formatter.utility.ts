@@ -38,8 +38,18 @@ export class TurnLogFormatter {
         return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;
 
       case "DIPLOMATIC_PROPOSAL_SENT": {
-        const treatyType = String(params["treatyType"] || "معاهده");
-        return `پیشنهاد دیپلماتیک: کشور ${sourceName} پیشنهاد (${treatyType}) را رسماً برای ${targetName} ارسال کرد.`;
+        const rawType = String(params["treatyType"] || "معاهده");
+        const treatyTypeFa =
+          rawType === "FULL_ALLIANCE"
+            ? "اتحاد کامل راهبردی"
+            : rawType === "NON_AGGRESSION_PACT"
+              ? "پیمان عدم تخاصم"
+              : rawType === "PEACE_TREATY"
+                ? "معاهده صلح"
+                : rawType === "SEND_FOREIGN_AID"
+                  ? "کمک مالی"
+                  : rawType;
+        return `پیشنهاد دیپلماتیک: کشور ${sourceName} پیشنهاد رسمی (${treatyTypeFa}) را برای ${targetName} ارسال کرد.`;
       }
 
       case "TREATY_ACCEPTED": {
