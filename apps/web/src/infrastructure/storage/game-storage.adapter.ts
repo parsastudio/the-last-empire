@@ -22,16 +22,18 @@ export class GameStorageAdapter {
 
   public async ensureBitBufferLoaded(
     buffer: BitPackedBuffer,
+    mapId = "map1",
   ): Promise<boolean> {
-    if (buffer.getRawBuffer()[0]! > 0) {
+    const gridState = BitPackedGridState.getInstance();
+    if (gridState.isBufferLoaded()) {
       return true;
     }
 
     const defaultBuffer =
-      await ClientFinalStateLoader.loadLiveStateBuffer("map1");
+      await ClientFinalStateLoader.loadLiveStateBuffer(mapId);
     if (defaultBuffer) {
       buffer.getRawBuffer().set(defaultBuffer.getRawBuffer());
-      BitPackedGridState.getInstance().markDirty();
+      gridState.markLoaded();
       return true;
     }
 
