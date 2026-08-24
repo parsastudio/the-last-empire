@@ -7,6 +7,7 @@ import {
   MilitaryPricingCalculator,
   getNationGdp,
   NationGettersUtility,
+  GeopoliticalReachResolver,
 } from "@geopolitics/domain";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
@@ -61,7 +62,12 @@ export class AIProcurementPlanner {
       return { actions: [], remainingTreasury: effectiveTreasury };
     }
 
-    const posture = this.evaluatePosture(nation, allNations, provincesMap);
+    const posture = this.evaluatePosture(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
     const spendableBudget = Math.min(
       this.calculateSpendableBudget(posture, effectiveTreasury),
       remainingValuationCapacity,
@@ -140,6 +146,7 @@ export class AIProcurementPlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    rankMap?: Map<string, number>,
   ): AIPosture {
     if (nation.warFocusTargetId) {
       return "WAR";
@@ -151,16 +158,31 @@ export class AIProcurementPlanner {
       if (rel.stance === "WAR") return "WAR";
 
       const target = allNations[targetId];
-      if (target && target.isAlive && target.id !== nation.id) {
-        const vector = GeopoliticalVectorCalculator.calculate(
+      if (!target || !target.isAlive || target.id === nation.id) {
+        continue;
+      }
+
+      if (
+        !GeopoliticalReachResolver.canInitiateDiplomacy(
           nation,
           target,
           allNations,
           provincesMap,
-        );
-        if (vector.isNeighbor && vector.tension > maxTension) {
-          maxTension = vector.tension;
-        }
+          rankMap,
+        )
+      ) {
+        continue;
+      }
+
+      const vector = GeopoliticalVectorCalculator.calculate(
+        nation,
+        target,
+        allNations,
+        provincesMap,
+      );
+
+      if (vector.isNeighbor && vector.tension > maxTension) {
+        maxTension = vector.tension;
       }
     }
 

@@ -100,7 +100,7 @@ export class TurnProgressionOrchestrator {
     );
 
     const pipelineStart = performance.now();
-    nextState = this.pipeline.processTurn(nextState);
+    nextState = this.pipeline.processTurn(nextState, rankMap);
     const pipelineDuration = (performance.now() - pipelineStart).toFixed(2);
     console.log(
       `[ORCH_STEP] ۴. اجرای خط لوله نوبتی (TurnPipeline): ${pipelineDuration}ms`,

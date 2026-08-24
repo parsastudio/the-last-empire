@@ -8,7 +8,10 @@ import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor
 import { NationGettersUtility } from "@geopolitics/domain";
 
 export class TurnPipeline {
-  public processTurn(state: GameState): GameState {
+  public processTurn(
+    state: GameState,
+    rankMap?: Map<string, number>,
+  ): GameState {
     const pipeStart = performance.now();
 
     const propStart = performance.now();
@@ -69,6 +72,7 @@ export class TurnPipeline {
           nation,
           currentState.nations,
           updatedProvincesMap,
+          rankMap,
         );
       totalDipDuration += performance.now() - dipStart;
 
