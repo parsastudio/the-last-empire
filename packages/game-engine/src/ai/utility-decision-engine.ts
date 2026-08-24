@@ -76,11 +76,16 @@ export class UtilityDecisionEngine {
     const exhaustionScore = (100 - source.government.stability) * 0.8;
     const weaknessScore =
       vector.powerRatio > 1.4 ? (vector.powerRatio - 1.0) * 40 : 0;
+    const reachBonus = !vector.isNeighbor && !vector.isNavalReachable ? 60 : 0;
     const tensionDampener = vector.tension * 0.3;
     const revanchismDampener = vector.reasons.revanchismPenalty * 0.4;
 
     return Math.round(
-      exhaustionScore + weaknessScore - tensionDampener - revanchismDampener,
+      exhaustionScore +
+        weaknessScore +
+        reachBonus -
+        tensionDampener -
+        revanchismDampener,
     );
   }
 

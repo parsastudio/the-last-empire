@@ -9,6 +9,7 @@ import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -79,22 +80,6 @@ export class PoliticsActionExecutor {
           receiver.relations[action.nationId];
         if (!senderRel || !receiverRel) return state;
 
-        if (nation.isAi) {
-          const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
-            nation,
-            receiver,
-            state.nations,
-            state.provinces,
-          );
-
-          if (!isReachable && senderRel.stance !== "WAR") {
-            throw new GameError(
-              "INVALID_ACTION",
-              `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
-            );
-          }
-        }
-
         const canonicalHuman = CountryRegistry.resolveCanonicalId(
           state.humanNationId,
         );
@@ -103,6 +88,44 @@ export class PoliticsActionExecutor {
           canonicalTargetId === canonicalHuman;
 
         if (action.proposalType === "DECLARE_WAR") {
+          const hasLandBorder = GeopoliticalReachResolver.hasDirectLandBorder(
+            nation,
+            receiver,
+            state.provinces,
+          );
+          const sourceSea = NationGettersUtility.hasSeaAccess(
+            nation.id,
+            state.provinces,
+          );
+          const targetSea = NationGettersUtility.hasSeaAccess(
+            receiver.id,
+            state.provinces,
+          );
+          const hasNavalAccess = sourceSea && targetSea;
+
+          if (!hasLandBorder && !hasNavalAccess) {
+            throw new GameError(
+              "INVALID_ACTION",
+              `امکان اعلان جنگ به کشور ${receiver.name} وجود ندارد: عدم وجود مرز زمینی مشترک یا دسترسی همزمان به آب‌های آزاد.`,
+            );
+          }
+
+          if (nation.isAi) {
+            const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
+              nation,
+              receiver,
+              state.nations,
+              state.provinces,
+            );
+
+            if (!isReachable) {
+              throw new GameError(
+                "INVALID_ACTION",
+                `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
+              );
+            }
+          }
+
           const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
             senderRel,
             "DECLARE_WAR",
@@ -163,6 +186,22 @@ export class PoliticsActionExecutor {
               },
             },
           };
+        }
+
+        if (nation.isAi) {
+          const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
+            nation,
+            receiver,
+            state.nations,
+            state.provinces,
+          );
+
+          if (!isReachable && senderRel.stance !== "WAR") {
+            throw new GameError(
+              "INVALID_ACTION",
+              `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
+            );
+          }
         }
 
         if (action.proposalType === "SEND_FOREIGN_AID") {

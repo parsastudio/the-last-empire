@@ -74,8 +74,45 @@ export class DiplomaticTurnProcessor {
         ? allNations[canonicalTarget] || allNations[targetId]
         : null;
 
+      const hasDirectBorder = targetNation
+        ? GeopoliticalReachResolver.hasDirectLandBorder(
+            nation,
+            targetNation,
+            provincesMap,
+            undefined,
+            provincesByOwnerMap,
+          )
+        : false;
+
+      const sourceHasSea = NationGettersUtility.hasSeaAccess(
+        nation.id,
+        provincesMap,
+        undefined,
+        provincesByOwnerMap,
+      );
+      const targetHasSea = targetNation
+        ? NationGettersUtility.hasSeaAccess(
+            targetNation.id,
+            provincesMap,
+            undefined,
+            provincesByOwnerMap,
+          )
+        : false;
+
+      const isPhysicallyReachable =
+        hasDirectBorder || (sourceHasSea && targetHasSea);
+
       if (relation.stance === "WAR") {
         if (targetNation && targetNation.isAlive) {
+          if (!isPhysicallyReachable) {
+            newRels[targetId] = {
+              ...relation,
+              stance: "NORMAL_DIPLOMACY",
+              alignment: Math.max(0, relation.alignment ?? 0),
+              tension: 15,
+            };
+            continue;
+          }
           isAtWar = true;
         }
       }
