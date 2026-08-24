@@ -12,22 +12,10 @@ import { useGameStore } from "@/presentation/stores/use-game-store";
 import {
   CountryRegistry,
   ClientMapPathResolver,
-  MilitaryPowerCalculator,
-  GovernmentType,
-  FinalManifestNation,
+  NationGettersUtility,
+  NationRankCandidateInput,
 } from "@geopolitics/domain";
-import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
-
-interface ManifestRankCandidate {
-  item: FinalManifestNation;
-  gdp: number;
-  milPower: number;
-  population: number;
-  ecoRank: number;
-  milRank: number;
-  compositeScore: number;
-}
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
@@ -36,99 +24,34 @@ function mapManifestToNationDetails(
     ? manifest.nations
     : CountryRegistry.getAllManifestNations();
 
-  const candidates: ManifestRankCandidate[] = manifestItems.map((item) => {
-    const profile = CountryRegistry.getCountry(item.code || item.id);
-    const tier = profile?.militaryTier ?? 5;
-    const techLevel = profile?.startingTechLevel ?? item.startingTechLevel ?? 1;
-
-    const stack = MilitaryDistributionEngine.calculateStartingStack(
-      tier,
-      item.hasSeaAccess,
-      techLevel,
-    );
-
-    const milPower = MilitaryPowerCalculator.calculateEffectivePower(
-      {
-        id: item.code,
+  const candidatesInput: NationRankCandidateInput[] = manifestItems.map(
+    (item) => {
+      const profile = CountryRegistry.getCountry(item.code || item.id);
+      return {
+        id: item.code || item.id,
         name: item.nameFa,
-        isAi: true,
-        isAlive: true,
-        flagCode: item.flagCode,
-        taxRate: 15,
-        tariffRate: 10,
-        treasury: item.startingTreasury,
-        nationalDebt: 0,
-        industrialLevel: item.industrialLevel,
-        government: {
-          type:
-            (item.defaultGovernment as GovernmentType) ||
-            profile?.startingGovernment ||
-            "DEMOCRACY",
-          stability: 50,
-          turnsInPower: 1,
-        },
-        military: stack,
-        recruitmentQueue: [],
-        relations: {},
-        activeModifiers: [],
-        globalReputation: 50,
-        doctrines: { unlockedDoctrines: [] },
-        executedEspionageTiers: [],
-        warFocusTargetId: null,
-      },
-      true,
-    );
+        gdp: item.gdp,
+        population: item.population,
+        governmentType: item.defaultGovernment,
+        militaryTier: profile?.militaryTier ?? 5,
+        startingTechLevel:
+          profile?.startingTechLevel ?? item.startingTechLevel ?? 1,
+        hasSeaAccess: item.hasSeaAccess,
+      };
+    },
+  );
 
-    return {
-      item,
-      gdp: item.gdp,
-      milPower,
-      population: item.population,
-      ecoRank: 1,
-      milRank: 1,
-      compositeScore: 0,
-    };
+  const rankMap =
+    NationGettersUtility.calculateRankMapFromCandidates(candidatesInput);
+
+  const sortedItems = [...manifestItems].sort((a, b) => {
+    const rankA = rankMap.get(a.code || a.id) ?? 999;
+    const rankB = rankMap.get(b.code || b.id) ?? 999;
+    return rankA - rankB;
   });
 
-  const ecoSorted = [...candidates].sort((a, b) => {
-    if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-    if (b.population !== a.population) return b.population - a.population;
-    return a.item.code.localeCompare(b.item.code);
-  });
-  for (let i = 0; i < ecoSorted.length; i++) {
-    ecoSorted[i]!.ecoRank = i + 1;
-  }
-
-  const milSorted = [...candidates].sort((a, b) => {
-    if (b.milPower !== a.milPower) return b.milPower - a.milPower;
-    if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-    return a.item.code.localeCompare(b.item.code);
-  });
-  for (let i = 0; i < milSorted.length; i++) {
-    milSorted[i]!.milRank = i + 1;
-  }
-
-  for (let i = 0; i < candidates.length; i++) {
-    const c = candidates[i]!;
-    c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
-  }
-
-  candidates.sort((a, b) => {
-    if (a.compositeScore !== b.compositeScore) {
-      return a.compositeScore - b.compositeScore;
-    }
-    if (b.gdp !== a.gdp) {
-      return b.gdp - a.gdp;
-    }
-    if (b.population !== a.population) {
-      return b.population - a.population;
-    }
-    return a.item.code.localeCompare(b.item.code);
-  });
-
-  return candidates.map((candidate, idx) => {
-    const item = candidate.item;
-    const computedRank = idx + 1;
+  return sortedItems.map((item) => {
+    const computedRank = rankMap.get(item.code || item.id) ?? item.initialRank;
     const summary = NationPresentationMapper.formatNationSummary(
       item.id,
       item.nameFa,
