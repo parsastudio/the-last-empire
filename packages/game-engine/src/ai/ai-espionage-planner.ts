@@ -222,9 +222,9 @@ export class AIEspionagePlanner {
         0,
         target.industrialLevel - nation.industrialLevel,
       );
-      const totalPoints = milDelta + indDelta * 2;
+      const totalPoints = milDelta + indDelta;
 
-      if (totalPoints < 2) {
+      if (totalPoints < 1) {
         continue;
       }
 

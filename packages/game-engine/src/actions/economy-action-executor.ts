@@ -133,12 +133,10 @@ export class EconomyActionExecutor {
             const nextProd = DevelopmentManager.calculateNextProductivity(
               prov.perCapitaProductivity,
             );
-            const nextLevel = prov.infrastructureLevel + 1;
             const updatedProv: Province = {
               ...prov,
               maxPopulationCapacity: nextCap,
               perCapitaProductivity: nextProd,
-              infrastructureLevel: nextLevel,
             };
             updatedProvinces[prov.provinceId.toString()] = updatedProv;
           }

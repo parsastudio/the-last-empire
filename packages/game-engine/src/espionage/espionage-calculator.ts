@@ -1,13 +1,10 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { EspionageTier } from "@/domain/espionage/espionage.schema";
 import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
-import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface TechSuperiorityDelta {
   militaryDelta: number;
   industrialDelta: number;
-  infrastructureDelta: number;
   totalAvailablePoints: number;
 }
 
@@ -43,9 +40,6 @@ export class EspionageCalculator {
   public static calculateTechSuperiority(
     sourceNation: Nation,
     targetNation: Nation,
-    provincesMap?: Record<string, Province>,
-    sourceProvinces?: Province[],
-    targetProvinces?: Province[],
   ): TechSuperiorityDelta {
     const militaryDelta = Math.max(
       0,
@@ -56,27 +50,10 @@ export class EspionageCalculator {
       targetNation.industrialLevel - sourceNation.industrialLevel,
     );
 
-    let infrastructureDelta = industrialDelta;
-    if (sourceProvinces && targetProvinces) {
-      const sourceInfra = NationGettersUtility.getInfrastructureLevel(
-        sourceNation.id,
-        provincesMap,
-        sourceProvinces,
-      );
-      const targetInfra = NationGettersUtility.getInfrastructureLevel(
-        targetNation.id,
-        provincesMap,
-        targetProvinces,
-      );
-      infrastructureDelta = Math.max(0, targetInfra - sourceInfra);
-    }
-
     return {
       militaryDelta,
       industrialDelta,
-      infrastructureDelta,
-      totalAvailablePoints:
-        militaryDelta + industrialDelta + infrastructureDelta,
+      totalAvailablePoints: militaryDelta + industrialDelta,
     };
   }
 

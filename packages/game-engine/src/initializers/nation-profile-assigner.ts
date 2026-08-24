@@ -194,7 +194,6 @@ export class NationProfileAssigner {
       startingNavalFleet: tierStack.navalFleet,
       startingTechLevel: tierStack.techLevel,
       industrialLevel: 1,
-      infrastructureLevel: 1,
       startingStability: 50,
     };
 

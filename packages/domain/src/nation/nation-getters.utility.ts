@@ -348,25 +348,6 @@ export class NationGettersUtility {
     return false;
   }
 
-  public static getInfrastructureLevel(
-    nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): number {
-    const provs =
-      ownedProvinces ??
-      this.getOwnedProvinces(nationId, provincesMap, provincesByOwnerMap);
-
-    if (provs.length === 0) return 1;
-    let maxLevel = 1;
-    for (let i = 0; i < provs.length; i++) {
-      const lvl = provs[i]!.infrastructureLevel || 1;
-      if (lvl > maxLevel) maxLevel = lvl;
-    }
-    return maxLevel;
-  }
-
   public static isAlive(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
