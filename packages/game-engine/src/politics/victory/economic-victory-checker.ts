@@ -18,7 +18,7 @@ export class EconomicVictoryChecker implements VictoryCondition {
 
     for (const nation of aliveNations) {
       const share = getNationGdp(nation, state.provinces) / totalGlobalGdp;
-      if (share >= 0.6) {
+      if (share >= 0.65) {
         return {
           isGameOver: true,
           winnerNationId: nation.id,

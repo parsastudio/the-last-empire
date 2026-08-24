@@ -44,7 +44,7 @@ export class ConquestVictoryChecker implements VictoryCondition {
           state.provinces,
         );
         const territoryShare = nationPixels / totalWorldTerritory;
-        if (territoryShare >= 0.8) {
+        if (territoryShare >= 0.65) {
           return {
             isGameOver: true,
             winnerNationId: nation.id,

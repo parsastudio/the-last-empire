@@ -20,10 +20,10 @@ export class VictoryProgressCalculator {
     if (!state) {
       return {
         territorySharePct: 0,
-        territoryTargetPct: 80,
+        territoryTargetPct: 65,
         territoryProgressPct: 0,
         gdpSharePct: 0,
-        gdpTargetPct: 60,
+        gdpTargetPct: 65,
         gdpProgressPct: 0,
       };
     }
@@ -35,10 +35,10 @@ export class VictoryProgressCalculator {
     if (!targetNation) {
       return {
         territorySharePct: 0,
-        territoryTargetPct: 80,
+        territoryTargetPct: 65,
         territoryProgressPct: 0,
         gdpSharePct: 0,
-        gdpTargetPct: 60,
+        gdpTargetPct: 65,
         gdpProgressPct: 0,
       };
     }
@@ -55,7 +55,7 @@ export class VictoryProgressCalculator {
       totalWorldTerritory > 0
         ? (nationTerritory / totalWorldTerritory) * 100
         : 0;
-    const territoryProgressPct = Math.min(100, (territorySharePct / 80) * 100);
+    const territoryProgressPct = Math.min(100, (territorySharePct / 65) * 100);
 
     const totalGlobalGdp = aliveNations.reduce(
       (sum, n) => sum + getNationGdp(n, state.provinces),
@@ -64,14 +64,14 @@ export class VictoryProgressCalculator {
     const nationGdp = getNationGdp(targetNation, state.provinces);
     const gdpSharePct =
       totalGlobalGdp > 0 ? (nationGdp / totalGlobalGdp) * 100 : 0;
-    const gdpProgressPct = Math.min(100, (gdpSharePct / 60) * 100);
+    const gdpProgressPct = Math.min(100, (gdpSharePct / 65) * 100);
 
     return {
       territorySharePct: Number(territorySharePct.toFixed(1)),
-      territoryTargetPct: 80,
+      territoryTargetPct: 65,
       territoryProgressPct: Number(territoryProgressPct.toFixed(1)),
       gdpSharePct: Number(gdpSharePct.toFixed(1)),
-      gdpTargetPct: 60,
+      gdpTargetPct: 65,
       gdpProgressPct: Number(gdpProgressPct.toFixed(1)),
     };
   }
