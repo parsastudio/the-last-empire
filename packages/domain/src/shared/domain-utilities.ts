@@ -9,7 +9,6 @@ import {
 import { CountryRegistry } from "@/domain/data/countries";
 
 export type { Nation } from "@/domain/nation/nation.schema";
-export type { AIPersonalityType } from "@/domain/ai/ai.schema";
 
 export type GameErrorCode =
   | "INVALID_ACTION"
@@ -78,16 +77,12 @@ export class TurnLogBuilder {
     category: TurnLogCategory = "DOMESTIC",
     scope: TurnLogScope = "NATIONAL",
     targetNationId?: string,
-    conquerorNationId?: string,
     params: Record<string, TurnLogParamValue> = {},
     message = "",
   ): TurnLogEntry {
     const cleanSource = CountryRegistry.resolveCanonicalId(sourceNationId);
     const cleanTarget = targetNationId
       ? CountryRegistry.resolveCanonicalId(targetNationId)
-      : undefined;
-    const cleanConqueror = conquerorNationId
-      ? CountryRegistry.resolveCanonicalId(conquerorNationId)
       : undefined;
     const randomSuffix = Math.random().toString(36).substring(2, 7);
 
@@ -98,7 +93,6 @@ export class TurnLogBuilder {
       eventCode,
       sourceNationId: cleanSource,
       targetNationId: cleanTarget,
-      conquerorNationId: cleanConqueror,
       scope,
       category,
       level,
@@ -125,7 +119,6 @@ export class TurnLogBuilder {
       category,
       "NATIONAL",
       targetNationId,
-      undefined,
       params,
       message,
     );
@@ -148,7 +141,6 @@ export class TurnLogBuilder {
       "GLOBAL_WAR",
       "GLOBAL",
       defenderId,
-      undefined,
       params,
       message,
     );
@@ -171,7 +163,6 @@ export class TurnLogBuilder {
       "GLOBAL_DIPLOMACY",
       "GLOBAL",
       targetNationId,
-      undefined,
       params,
       message,
     );
@@ -192,7 +183,6 @@ export class TurnLogBuilder {
       "GLOBAL_ANNEXATION",
       "GLOBAL",
       eliminatedNationId,
-      conquerorId,
       params,
       message,
     );

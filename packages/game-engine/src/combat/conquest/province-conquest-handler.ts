@@ -7,7 +7,6 @@ export interface ProvinceConquestResult {
   conqueredPixels: number;
   defenderTotalPixels: number;
   remainingDefenderProvinces: Province[];
-  attackerProvinces: Province[];
   conqueredProvincesList: Province[];
 }
 
@@ -85,17 +84,11 @@ export class ProvinceConquestHandler {
         CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
     );
 
-    const attackerProvinces = Object.values(updatedProvinces).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanAttackerId,
-    );
-
     return {
       updatedProvinces,
       conqueredPixels,
       defenderTotalPixels,
       remainingDefenderProvinces,
-      attackerProvinces,
       conqueredProvincesList,
     };
   }

@@ -120,8 +120,6 @@ export function WideDiplomacyView({
           flagCode={diplomacy.selectedRelation.flagCode}
           stance={diplomacy.selectedRelation.stance}
           opinion={diplomacy.selectedRelation.opinion}
-          alignment={diplomacy.selectedRelation.alignment}
-          tension={diplomacy.selectedRelation.tension}
           posture={diplomacy.selectedRelation.posture}
         />
 
@@ -142,10 +140,6 @@ export function WideDiplomacyView({
             senderGdp={humanGdp}
             targetGdp={diplomacy.selectedTargetGdp}
             currentStance={diplomacy.selectedRelation.stance}
-            humanNation={humanNation}
-            targetNation={diplomacy.selectedTargetNation}
-            allNations={nationsMap}
-            provincesMap={provincesMap}
             onOpenProxy={handleOpenEspionage}
           />
         </div>

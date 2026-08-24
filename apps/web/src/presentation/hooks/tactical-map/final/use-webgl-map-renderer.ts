@@ -56,7 +56,6 @@ export function useWebGLMapRenderer({
     const gdpPaletteTex = WebGLPaletteTextureManager.createGdpPaletteTexture(
       gl,
       provincesMap,
-      nationsMap,
     );
     if (gdpPaletteTex) {
       gdpTextureRef.current = gdpPaletteTex;
@@ -83,9 +82,8 @@ export function useWebGLMapRenderer({
       gl,
       gdpTextureRef.current,
       provincesMap,
-      nationsMap,
     );
-  }, [gl, provincesMap, nationsMap]);
+  }, [gl, provincesMap]);
 
   useEffect(() => {
     let animFrameId: number;

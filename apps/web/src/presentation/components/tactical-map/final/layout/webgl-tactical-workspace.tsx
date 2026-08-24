@@ -48,6 +48,7 @@ export function WebGLTacticalWorkspace({
   const dimensions = useMapDimensions(containerRef);
 
   const activeTab = useUiStore((state) => state.activeTab);
+  const activeSubTab = useUiStore((state) => state.activeSubTab);
   const selectedTargetCode = useUiStore((state) => state.selectedTargetCode);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
 
@@ -89,7 +90,6 @@ export function WebGLTacticalWorkspace({
       id: p.id ?? 0,
       code: p.code,
       name: p.nameFa,
-      color: [0, 0, 0] as [number, number, number],
     })),
     positionRef,
     provincesMap: effectiveGameState?.provinces,
@@ -166,6 +166,7 @@ export function WebGLTacticalWorkspace({
 
       <CommandCenterModal
         activeTab={activeTab}
+        activeSubTab={activeSubTab}
         selectedTargetCode={selectedTargetCode}
         nation={humanNation}
         gameState={effectiveGameState}

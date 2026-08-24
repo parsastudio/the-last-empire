@@ -79,7 +79,6 @@ export class GlobalAiInitializer {
         maritimeNeighborsTier1: pItem.maritimeNeighborsTier1 || [],
         maritimeNeighborsTier2: pItem.maritimeNeighborsTier2 || [],
         centerCoordinates: pItem.centerCoordinates,
-        fortLevel: 0,
         infrastructureLevel: 1,
         population: pItem.population ?? 100000,
         perCapitaProductivity: pItem.perCapitaProductivity ?? 5000,

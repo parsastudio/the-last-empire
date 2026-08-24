@@ -11,8 +11,6 @@ interface DiplomacyTargetCardProps {
   flagCode: string;
   stance: DiplomaticStance | string;
   opinion?: number;
-  alignment?: number;
-  tension?: number;
   posture?: DiplomaticPosture;
 }
 

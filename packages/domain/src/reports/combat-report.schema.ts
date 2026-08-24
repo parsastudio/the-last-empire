@@ -3,7 +3,6 @@ import { z } from "zod";
 export const ReportSeveritySchema = z.enum([
   "CRITICAL_DEFEAT",
   "DEFEAT",
-  "PYRRHIC_VICTORY",
   "VICTORY",
   "CRUSHING_VICTORY",
   "INFO",

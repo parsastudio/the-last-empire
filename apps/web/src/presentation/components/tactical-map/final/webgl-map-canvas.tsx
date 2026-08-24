@@ -138,7 +138,6 @@ export function WebGLMapCanvas({
       <WebGLContextMenuWrapper
         contextMenuState={contextMenuState}
         onSelectAction={handleSelectContext}
-        onClose={closeContextMenu}
       />
     </div>
   );

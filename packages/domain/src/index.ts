@@ -1,4 +1,3 @@
-export * from "./ai/ai.schema";
 export * from "./data/countries";
 export * from "./diplomacy/diplomacy.schema";
 export * from "./diplomacy/nation-relation-resolver.utility";

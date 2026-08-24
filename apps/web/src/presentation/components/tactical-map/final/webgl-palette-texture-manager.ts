@@ -2,7 +2,6 @@ import {
   TacticalPaletteGenerator,
   CountryRegistry,
   Province,
-  Nation,
   getProvinceGdp,
 } from "@geopolitics/domain";
 
@@ -52,7 +51,6 @@ export class WebGLPaletteTextureManager {
   private static fillGdpBuffer(
     data: Uint8Array,
     provincesMap?: Record<string, Province>,
-    _nationsMap?: Record<string, Nation>,
   ): void {
     if (!provincesMap) return;
 
@@ -130,10 +128,9 @@ export class WebGLPaletteTextureManager {
   public static createGdpPaletteTexture(
     gl: WebGL2RenderingContext,
     provincesMap?: Record<string, Province>,
-    nationsMap?: Record<string, Nation>,
   ): WebGLTexture | null {
     const data = new Uint8Array(256 * 256 * 4);
-    this.fillGdpBuffer(data, provincesMap, nationsMap);
+    this.fillGdpBuffer(data, provincesMap);
 
     const texture = gl.createTexture();
     if (!texture) return null;
@@ -163,10 +160,9 @@ export class WebGLPaletteTextureManager {
     gl: WebGL2RenderingContext,
     texture: WebGLTexture,
     provincesMap?: Record<string, Province>,
-    nationsMap?: Record<string, Nation>,
   ): void {
     const data = new Uint8Array(256 * 256 * 4);
-    this.fillGdpBuffer(data, provincesMap, nationsMap);
+    this.fillGdpBuffer(data, provincesMap);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texSubImage2D(

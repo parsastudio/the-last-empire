@@ -10,16 +10,6 @@ export interface QuadtreeBranchNode {
 
 export type QuadtreeNode = QuadtreeLeafNode | QuadtreeBranchNode;
 
-export interface QuadtreeMapHeader {
-  magic: number;
-  version: number;
-  width: number;
-  height: number;
-  rootWestIndex: number;
-  rootEastIndex: number;
-  totalNodes: number;
-}
-
 export interface QuadtreeBuildStats {
   originalSizeBytes: number;
   quadtreeSizeBytes: number;

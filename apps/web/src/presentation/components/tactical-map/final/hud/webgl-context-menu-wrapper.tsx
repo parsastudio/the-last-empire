@@ -12,7 +12,6 @@ interface WebGLContextMenuWrapperProps {
     code: string,
     provinceId?: number,
   ) => void;
-  onClose: () => void;
 }
 
 export function WebGLContextMenuWrapper({

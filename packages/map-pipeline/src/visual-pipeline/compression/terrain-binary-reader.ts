@@ -51,44 +51,6 @@ export class TerrainBinaryReader {
     this.packedSpans = new Uint32Array(view.buffer, spansOffset, totalSpans);
   }
 
-  public getPixelColorIndex(x: number, y: number): number {
-    const clampedX = Math.floor(x);
-    const clampedY = Math.floor(y);
-
-    if (
-      clampedX < 0 ||
-      clampedX >= this.mapWidth ||
-      clampedY < 0 ||
-      clampedY >= this.mapHeight
-    ) {
-      return 0;
-    }
-
-    const startIdx = this.rowOffsets[clampedY]!;
-    const endIdx = this.rowOffsets[clampedY + 1]!;
-
-    if (startIdx >= endIdx) return 0;
-
-    let low = startIdx;
-    let high = endIdx - 1;
-    let result = 0;
-
-    while (low <= high) {
-      const mid = (low + high) >>> 1;
-      const span = this.packedSpans[mid]!;
-      const spanEnd = span >>> 16;
-
-      if (clampedX <= spanEnd) {
-        result = span & 0xffff;
-        high = mid - 1;
-      } else {
-        low = mid + 1;
-      }
-    }
-
-    return result;
-  }
-
   public unpackToRawBuffer(): Uint8Array {
     const totalPixels = this.mapWidth * this.mapHeight;
     const output = new Uint8Array(totalPixels);
