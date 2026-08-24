@@ -5,6 +5,7 @@ import { AllianceInterventionResult } from "@/engine/combat/alliance-interventio
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { Province } from "@/domain/province/province.schema";
+import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 
 export class BattleLogFactory {
   public static createBattleLogs(
@@ -17,6 +18,7 @@ export class BattleLogFactory {
     isDefenderAnnexed = false,
     targetProvince?: Province | null,
     attackType: "LAND" | "NAVAL" = "LAND",
+    spoilsData?: BattleSpoilsDetails,
   ): TurnLogEntry[] {
     const logs: TurnLogEntry[] = [];
     const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
@@ -70,6 +72,7 @@ export class BattleLogFactory {
       phase1Missile: calcResult.phase1Missile,
       phase2Air: calcResult.phase2Air,
       phase3Ground: calcResult.phase3Ground,
+      spoils: spoilsData,
     };
 
     if (isHumanInvolved) {
