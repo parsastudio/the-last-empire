@@ -41,6 +41,16 @@ export class DiplomaticTurnProcessor {
     const relKeys = Object.keys(nation.relations);
     const newRels: Record<string, RelationProfile> = { ...nation.relations };
 
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations || {},
+      provincesMap,
+      rankMap,
+    );
+    const reachableCanonicalSet = new Set(
+      reachableTargets.map((t) => CountryRegistry.resolveCanonicalId(t.id)),
+    );
+
     for (let j = 0; j < relKeys.length; j++) {
       const targetId = relKeys[j]!;
       const relation = newRels[targetId];
@@ -77,18 +87,7 @@ export class DiplomaticTurnProcessor {
         nextGrudge = Math.max(0, nextGrudge - 3);
       }
 
-      const hasActiveStance = relation.stance !== "NORMAL_DIPLOMACY";
-      const isReachable =
-        hasActiveStance ||
-        (targetNation
-          ? GeopoliticalReachResolver.canInitiateDiplomacy(
-              nation,
-              targetNation,
-              allNations,
-              provincesMap,
-              rankMap,
-            )
-          : false);
+      const isReachable = reachableCanonicalSet.has(canonicalTarget);
 
       if (!isReachable) {
         newRels[targetId] = {

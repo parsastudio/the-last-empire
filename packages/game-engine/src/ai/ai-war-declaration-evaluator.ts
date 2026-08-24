@@ -33,38 +33,31 @@ export class AIWarDeclarationEvaluator {
     let bestTargetId: string | null = null;
     let highestWarUtility = 55;
 
-    for (const [targetId, rel] of Object.entries(nation.relations)) {
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
+
+    for (const targetNation of reachableTargets) {
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(
+        targetNation.id,
+      );
+      const rel =
+        nation.relations[canonicalTarget] || nation.relations[targetNation.id];
+
       if (
-        rel.stance === "WAR" ||
-        rel.stance === "ALLIANCE" ||
-        rel.stance === "NON_AGGRESSION_PACT"
+        rel &&
+        (rel.stance === "WAR" ||
+          rel.stance === "ALLIANCE" ||
+          rel.stance === "NON_AGGRESSION_PACT")
       ) {
         continue;
       }
 
-      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
-        continue;
-      }
-
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[canonicalTarget] || allNations[targetId];
-
       if (
-        !targetNation ||
-        !targetNation.isAlive ||
-        targetNation.id === nation.id
-      ) {
-        continue;
-      }
-
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-          rankMap,
-        )
+        DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)
       ) {
         continue;
       }

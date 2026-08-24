@@ -23,31 +23,21 @@ export class AIEconomicDiplomacyEvaluator {
 
     if (currentTreasury <= 0 || !nation.relations) return null;
 
-    for (const [targetId, rel] of Object.entries(nation.relations)) {
-      if (rel.stance === "WAR") continue;
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
 
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[canonicalTarget] || allNations[targetId];
+    for (const targetNation of reachableTargets) {
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(
+        targetNation.id,
+      );
+      const rel =
+        nation.relations[canonicalTarget] || nation.relations[targetNation.id];
 
-      if (
-        !targetNation ||
-        !targetNation.isAlive ||
-        targetNation.id === nation.id
-      ) {
-        continue;
-      }
-
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-          rankMap,
-        )
-      ) {
-        continue;
-      }
+      if (!rel || rel.stance === "WAR") continue;
 
       const targetGdp = getNationGdp(targetNation, provincesMap);
       const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
