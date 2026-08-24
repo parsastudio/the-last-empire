@@ -12,10 +12,33 @@ export function getProvinceGdp(province: {
 export function getNationGdp(
   nationOrId: { id: string } | string,
   provincesMap?: Record<string, Province> | Province[],
+  ownedProvinces?: Province[],
+  provincesByOwnerMap?: Map<string, Province[]>,
 ): number {
-  if (!provincesMap) return 0;
   const nationId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
   const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+
+  if (ownedProvinces) {
+    let total = 0;
+    for (let i = 0; i < ownedProvinces.length; i++) {
+      total += getProvinceGdp(ownedProvinces[i]!);
+    }
+    return total;
+  }
+
+  if (provincesByOwnerMap) {
+    const provs =
+      provincesByOwnerMap.get(canonicalId) ??
+      provincesByOwnerMap.get(nationId) ??
+      [];
+    let total = 0;
+    for (let i = 0; i < provs.length; i++) {
+      total += getProvinceGdp(provs[i]!);
+    }
+    return total;
+  }
+
+  if (!provincesMap) return 0;
   let totalGdp = 0;
 
   if (Array.isArray(provincesMap)) {

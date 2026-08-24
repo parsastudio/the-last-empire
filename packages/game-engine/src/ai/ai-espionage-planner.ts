@@ -21,6 +21,7 @@ export class AIEspionagePlanner {
     availableTreasury?: number,
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): EspionagePlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -38,6 +39,7 @@ export class AIEspionagePlanner {
       provincesMap,
       currentTreasury,
       executedTiers,
+      provincesByOwnerMap,
     );
 
     if (sabotageAction) {
@@ -57,6 +59,7 @@ export class AIEspionagePlanner {
       executedTiers,
       rankMap,
       reachableTargets,
+      provincesByOwnerMap,
     );
 
     if (techTheftAction) {
@@ -80,6 +83,7 @@ export class AIEspionagePlanner {
     provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
     executedTiers: number[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): { action: GameAction; cost: number } | null {
     if (executedTiers.includes(2)) {
       return null;
@@ -92,7 +96,12 @@ export class AIEspionagePlanner {
       : null;
 
     if (activeWarTarget && activeWarTarget.isAlive) {
-      const targetGdp = getNationGdp(activeWarTarget, provincesMap);
+      const targetGdp = getNationGdp(
+        activeWarTarget,
+        provincesMap,
+        undefined,
+        provincesByOwnerMap,
+      );
       const cost = EspionageCalculator.calculateOperationCost(
         targetGdp,
         2,
@@ -125,7 +134,12 @@ export class AIEspionagePlanner {
       }
 
       if (rel.stance === "WAR") {
-        const targetGdp = getNationGdp(target, provincesMap);
+        const targetGdp = getNationGdp(
+          target,
+          provincesMap,
+          undefined,
+          provincesByOwnerMap,
+        );
         const cost = EspionageCalculator.calculateOperationCost(
           targetGdp,
           2,
@@ -171,6 +185,7 @@ export class AIEspionagePlanner {
     executedTiers: number[],
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): { action: GameAction; cost: number } | null {
     if (executedTiers.includes(3)) {
       return null;
@@ -183,6 +198,8 @@ export class AIEspionagePlanner {
         allNations,
         provincesMap,
         rankMap,
+        undefined,
+        provincesByOwnerMap,
       );
 
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
@@ -212,7 +229,12 @@ export class AIEspionagePlanner {
         continue;
       }
 
-      const targetGdp = getNationGdp(target, provincesMap);
+      const targetGdp = getNationGdp(
+        target,
+        provincesMap,
+        undefined,
+        provincesByOwnerMap,
+      );
       const cost = EspionageCalculator.calculateOperationCost(
         targetGdp,
         3,

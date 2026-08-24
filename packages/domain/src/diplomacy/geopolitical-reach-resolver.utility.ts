@@ -39,6 +39,7 @@ export class GeopoliticalReachResolver {
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
     sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): Nation[] {
     const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const sourceTier = this.getReachTier(
@@ -90,7 +91,11 @@ export class GeopoliticalReachResolver {
 
     const myProvs =
       sourceProvinces ??
-      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
 
     for (let p = 0; p < myProvs.length; p++) {
       const prov = myProvs[p]!;
@@ -164,6 +169,7 @@ export class GeopoliticalReachResolver {
     target: Nation,
     provincesMap?: Record<string, Province>,
     sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): boolean {
     if (!provincesMap) {
       return false;
@@ -172,7 +178,11 @@ export class GeopoliticalReachResolver {
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
     const myProvs =
       sourceProvinces ??
-      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
 
     for (let p = 0; p < myProvs.length; p++) {
       const prov = myProvs[p]!;
@@ -197,6 +207,7 @@ export class GeopoliticalReachResolver {
     target: Nation,
     provincesMap?: Record<string, Province>,
     sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): boolean {
     if (!provincesMap) {
       return false;
@@ -205,7 +216,11 @@ export class GeopoliticalReachResolver {
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
     const myProvs =
       sourceProvinces ??
-      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
 
     for (let p = 0; p < myProvs.length; p++) {
       const prov = myProvs[p]!;
@@ -231,6 +246,7 @@ export class GeopoliticalReachResolver {
     target: Nation,
     provincesMap?: Record<string, Province>,
     sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): boolean {
     if (!provincesMap) {
       return false;
@@ -238,10 +254,20 @@ export class GeopoliticalReachResolver {
 
     const myProvs =
       sourceProvinces ??
-      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
 
     if (
-      this.isImmediateMaritimeNeighbor(source, target, provincesMap, myProvs)
+      this.isImmediateMaritimeNeighbor(
+        source,
+        target,
+        provincesMap,
+        myProvs,
+        provincesByOwnerMap,
+      )
     ) {
       return true;
     }
@@ -274,6 +300,7 @@ export class GeopoliticalReachResolver {
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
     sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): boolean {
     if (source.id === target.id) {
       return false;
@@ -313,14 +340,32 @@ export class GeopoliticalReachResolver {
 
     const myProvs =
       sourceProvinces ??
-      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
 
-    if (this.hasDirectLandBorder(source, target, provincesMap, myProvs)) {
+    if (
+      this.hasDirectLandBorder(
+        source,
+        target,
+        provincesMap,
+        myProvs,
+        provincesByOwnerMap,
+      )
+    ) {
       return true;
     }
 
     if (
-      this.isImmediateMaritimeNeighbor(source, target, provincesMap, myProvs)
+      this.isImmediateMaritimeNeighbor(
+        source,
+        target,
+        provincesMap,
+        myProvs,
+        provincesByOwnerMap,
+      )
     ) {
       return true;
     }
@@ -332,6 +377,7 @@ export class GeopoliticalReachResolver {
           target,
           provincesMap,
           myProvs,
+          provincesByOwnerMap,
         )
       ) {
         return true;

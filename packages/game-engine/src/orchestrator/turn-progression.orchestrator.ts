@@ -23,14 +23,18 @@ export class TurnProgressionOrchestrator {
       `[ORCHESTRATOR] ارکستراسیون پیشروی نوبت ${state.currentTurn} ➔ ${state.currentTurn + 1}`,
     );
 
-    const rankStart = performance.now();
+    const initIndexStart = performance.now();
+    const provincesByOwnerMap = NationGettersUtility.buildProvincesByOwnerMap(
+      nextState.provinces,
+    );
     const rankMap = NationGettersUtility.calculateRankMap(
       nextState.nations,
       nextState.provinces,
+      provincesByOwnerMap,
     );
-    const rankDuration = (performance.now() - rankStart).toFixed(2);
+    const initIndexDuration = (performance.now() - initIndexStart).toFixed(2);
     console.log(
-      `[ORCH_STEP] ۱. محاسبه رتبه جهانی (RankMap): ${rankDuration}ms`,
+      `[ORCH_STEP] ۱. ایندکس‌گذاری مستقیم استان‌ها و رتبه (${provincesByOwnerMap.size} کشور): ${initIndexDuration}ms`,
     );
 
     const aiPlanStart = performance.now();
@@ -52,6 +56,7 @@ export class TurnProgressionOrchestrator {
         nextState.provinces,
         lockedDiplomacyTargets,
         rankMap,
+        provincesByOwnerMap,
       );
 
       totalActionsGenerated += aiActions.length;
@@ -100,7 +105,11 @@ export class TurnProgressionOrchestrator {
     );
 
     const pipelineStart = performance.now();
-    nextState = this.pipeline.processTurn(nextState, rankMap);
+    nextState = this.pipeline.processTurn(
+      nextState,
+      rankMap,
+      provincesByOwnerMap,
+    );
     const pipelineDuration = (performance.now() - pipelineStart).toFixed(2);
     console.log(
       `[ORCH_STEP] ۴. اجرای خط لوله نوبتی (TurnPipeline): ${pipelineDuration}ms`,
