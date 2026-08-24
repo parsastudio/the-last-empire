@@ -62,8 +62,22 @@ export class NationGettersUtility {
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): boolean {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    return provs.some((p) => Boolean(p.hasSeaAccess));
+    if (!provincesMap) return false;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    const list = Array.isArray(provincesMap)
+      ? provincesMap
+      : Object.values(provincesMap);
+
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i]!;
+      if (
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
+        p.hasSeaAccess
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static getInfrastructureLevel(
@@ -79,11 +93,23 @@ export class NationGettersUtility {
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): boolean {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    return (
-      provs.length > 0 &&
-      provs.some((p) => (p.pixelCount || 0) > 0 && (p.population || 0) > 0)
-    );
+    if (!provincesMap) return false;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    const list = Array.isArray(provincesMap)
+      ? provincesMap
+      : Object.values(provincesMap);
+
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i]!;
+      if (
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
+        (p.pixelCount || 0) > 0 &&
+        (p.population || 0) > 0
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static calculateRankMap(
@@ -96,49 +122,62 @@ export class NationGettersUtility {
     const aliveNations = Object.values(nationsMap).filter((n) => n.isAlive);
     if (aliveNations.length === 0) return rankMap;
 
-    const nationMetrics = aliveNations.map((nation) => {
-      const provs = NationGettersUtility.getOwnedProvinces(
-        nation.id,
-        provincesMap,
-      );
-      const gdp = provs.reduce((sum, p) => sum + getProvinceGdp(p), 0);
+    const gdpByNation = new Map<string, number>();
+    const popByNation = new Map<string, number>();
+
+    if (provincesMap) {
+      const provList = Array.isArray(provincesMap)
+        ? provincesMap
+        : Object.values(provincesMap);
+
+      for (let i = 0; i < provList.length; i++) {
+        const p = provList[i]!;
+        const cid = CountryRegistry.resolveCanonicalId(p.ownerNationId);
+        const provGdp = getProvinceGdp(p);
+        gdpByNation.set(cid, (gdpByNation.get(cid) || 0) + provGdp);
+        popByNation.set(cid, (popByNation.get(cid) || 0) + (p.population || 0));
+      }
+    }
+
+    const nationMetrics = new Array(aliveNations.length);
+    let maxGdp = 0;
+    let maxMilPower = 0;
+
+    for (let i = 0; i < aliveNations.length; i++) {
+      const nation = aliveNations[i]!;
+      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+      const gdp =
+        gdpByNation.get(canonicalId) || gdpByNation.get(nation.id) || 0;
       const milPower = MilitaryPowerCalculator.calculateEffectivePower(
         nation,
         true,
       );
-      const population = provs.reduce((sum, p) => sum + (p.population || 0), 0);
+      const population =
+        popByNation.get(canonicalId) || popByNation.get(nation.id) || 0;
 
-      return {
+      if (gdp > maxGdp) maxGdp = gdp;
+      if (milPower > maxMilPower) maxMilPower = milPower;
+
+      nationMetrics[i] = {
         nation,
         gdp,
         milPower,
         population,
+        compositeScore: 0,
       };
-    });
-
-    let maxGdp = 0;
-    let maxMilPower = 0;
-
-    for (const item of nationMetrics) {
-      if (item.gdp > maxGdp) maxGdp = item.gdp;
-      if (item.milPower > maxMilPower) maxMilPower = item.milPower;
     }
 
     const safeMaxGdp = Math.max(1, maxGdp);
     const safeMaxMil = Math.max(1, maxMilPower);
 
-    const scoredNations = nationMetrics.map((item) => {
+    for (let i = 0; i < nationMetrics.length; i++) {
+      const item = nationMetrics[i]!;
       const normGdp = (item.gdp / safeMaxGdp) * 100;
       const normMil = (item.milPower / safeMaxMil) * 100;
-      const compositeScore = normGdp * 0.7 + normMil * 0.3;
+      item.compositeScore = normGdp * 0.7 + normMil * 0.3;
+    }
 
-      return {
-        ...item,
-        compositeScore,
-      };
-    });
-
-    scoredNations.sort((a, b) => {
+    nationMetrics.sort((a, b) => {
       if (Math.abs(b.compositeScore - a.compositeScore) > 0.0001) {
         return b.compositeScore - a.compositeScore;
       }
@@ -148,11 +187,12 @@ export class NationGettersUtility {
       return a.nation.id.localeCompare(b.nation.id);
     });
 
-    for (let i = 0; i < scoredNations.length; i++) {
-      const item = scoredNations[i]!;
+    for (let i = 0; i < nationMetrics.length; i++) {
+      const item = nationMetrics[i]!;
       const canonicalId = CountryRegistry.resolveCanonicalId(item.nation.id);
-      rankMap.set(canonicalId, i + 1);
-      rankMap.set(item.nation.id, i + 1);
+      const rankValue = i + 1;
+      rankMap.set(canonicalId, rankValue);
+      rankMap.set(item.nation.id, rankValue);
     }
 
     return rankMap;
@@ -162,8 +202,12 @@ export class NationGettersUtility {
     nationId: string,
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province> | Province[],
+    rankMap?: Map<string, number>,
   ): number {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    if (rankMap) {
+      return rankMap.get(canonicalId) ?? rankMap.get(nationId) ?? 99;
+    }
     const map = this.calculateRankMap(nationsMap, provincesMap);
     return map.get(canonicalId) ?? map.get(nationId) ?? 99;
   }

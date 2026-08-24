@@ -16,6 +16,7 @@ export class AIEconomicDiplomacyEvaluator {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
+    rankMap?: Map<string, number>,
   ): { action: GameAction; cost: number } | null {
     const currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -42,6 +43,7 @@ export class AIEconomicDiplomacyEvaluator {
           targetNation,
           allNations,
           provincesMap,
+          rankMap,
         )
       ) {
         continue;

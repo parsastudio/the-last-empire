@@ -19,6 +19,7 @@ export class AIEspionagePlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
+    rankMap?: Map<string, number>,
   ): EspionagePlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -53,6 +54,7 @@ export class AIEspionagePlanner {
       provincesMap,
       currentTreasury,
       executedTiers,
+      rankMap,
     );
 
     if (techTheftAction) {
@@ -165,6 +167,7 @@ export class AIEspionagePlanner {
     provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
     executedTiers: number[],
+    rankMap?: Map<string, number>,
   ): { action: GameAction; cost: number } | null {
     if (executedTiers.includes(3)) {
       return null;
@@ -184,6 +187,7 @@ export class AIEspionagePlanner {
           target,
           allNations,
           provincesMap,
+          rankMap,
         )
       ) {
         continue;
@@ -200,13 +204,14 @@ export class AIEspionagePlanner {
       const superiority = EspionageCalculator.calculateTechSuperiority(
         nation,
         target,
+        provincesMap,
       );
 
       if (superiority.totalAvailablePoints < 2) {
         continue;
       }
 
-      const targetGdp = getNationGdp(target);
+      const targetGdp = getNationGdp(target, provincesMap);
       const cost = EspionageCalculator.calculateOperationCost(
         targetGdp,
         3,

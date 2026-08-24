@@ -7,7 +7,6 @@ import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
-import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { NationGettersUtility, getNationGdp } from "@geopolitics/domain";
 
 export interface UpgradePlanResult {
@@ -82,30 +81,38 @@ export class AIUpgradePlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): boolean {
-    const currentTech = nation.military.techLevel;
-
     if (!provincesMap) {
       return false;
     }
 
-    for (const otherNation of Object.values(allNations)) {
-      if (!otherNation.isAlive || otherNation.id === nation.id) continue;
-      if (otherNation.military.techLevel <= currentTech) continue;
+    const currentTech = nation.military.techLevel;
+    const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
 
-      const otherProvs = NationGettersUtility.getOwnedProvinces(
-        otherNation.id,
-        provincesMap,
-      );
-
-      for (const prov of otherProvs) {
-        if (
-          LandNeighborResolver.hasProvinceLandBorder(
-            prov.provinceId,
-            nation.id,
-            provincesMap,
-          )
-        ) {
-          return true;
+    for (const prov of Object.values(provincesMap)) {
+      if (
+        CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
+        canonicalNation
+      ) {
+        const neighbors = prov.landNeighbors;
+        for (let i = 0; i < neighbors.length; i++) {
+          const neighborProv = provincesMap[neighbors[i]!.toString()];
+          if (neighborProv) {
+            const neighborOwnerId = CountryRegistry.resolveCanonicalId(
+              neighborProv.ownerNationId,
+            );
+            if (neighborOwnerId !== canonicalNation) {
+              const neighborNation =
+                allNations[neighborOwnerId] ||
+                allNations[neighborProv.ownerNationId];
+              if (
+                neighborNation &&
+                neighborNation.isAlive &&
+                neighborNation.military.techLevel > currentTech
+              ) {
+                return true;
+              }
+            }
+          }
         }
       }
     }

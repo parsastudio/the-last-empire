@@ -14,6 +14,7 @@ export class AIActionBuilder {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
+    rankMap?: Map<string, number>,
   ): GameAction[] {
     const actions: GameAction[] = [];
 
@@ -21,6 +22,8 @@ export class AIActionBuilder {
       nation,
       allNations,
       provincesMap,
+      undefined,
+      rankMap,
     );
     actions.push(...procurementResult.actions);
 
@@ -37,6 +40,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       upgradeResult.remainingTreasury,
+      rankMap,
     );
     actions.push(...espionageResult.actions);
 
@@ -56,6 +60,7 @@ export class AIActionBuilder {
       actions,
       espionageResult.remainingTreasury,
       lockedTargets,
+      rankMap,
     );
 
     return actions;
@@ -68,6 +73,7 @@ export class AIActionBuilder {
     actions: GameAction[],
     availableTreasury?: number,
     lockedTargets?: Set<string>,
+    rankMap?: Map<string, number>,
   ): void {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -78,6 +84,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       currentTreasury,
+      rankMap,
     );
 
     if (aidResult) {
@@ -105,6 +112,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       lockedTargets,
+      rankMap,
     );
 
     if (warDeclarationAction) {
@@ -122,6 +130,7 @@ export class AIActionBuilder {
         allNations,
         provincesMap,
         lockedTargets,
+        rankMap,
       );
 
       if (treatyAction) {

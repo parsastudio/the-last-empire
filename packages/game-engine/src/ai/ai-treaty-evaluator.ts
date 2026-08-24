@@ -16,6 +16,7 @@ export class AITreatyEvaluator {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
+    rankMap?: Map<string, number>,
   ): GameAction | null {
     if (!nation.relations) return null;
 
@@ -43,6 +44,7 @@ export class AITreatyEvaluator {
           targetNation,
           allNations,
           provincesMap,
+          rankMap,
         )
       ) {
         continue;
