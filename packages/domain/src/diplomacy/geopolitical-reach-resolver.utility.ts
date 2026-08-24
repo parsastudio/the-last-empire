@@ -213,13 +213,4 @@ export class GeopoliticalReachResolver {
 
     return false;
   }
-
-  public static isReachable(
-    source: Nation,
-    target: Nation,
-    allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-  ): boolean {
-    return this.canInitiateDiplomacy(source, target, allNations, provincesMap);
-  }
 }

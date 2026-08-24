@@ -83,20 +83,4 @@ export class QuadtreeReader {
 
     return 0;
   }
-
-  public getWidth(): number {
-    return this.mapWidth;
-  }
-
-  public getHeight(): number {
-    return this.mapHeight;
-  }
-
-  public getTotalNodes(): number {
-    return this.totalNodes;
-  }
-
-  public getByteSize(): number {
-    return QuadtreeReader.HEADER_BYTE_SIZE + this.totalNodes * 4;
-  }
 }
