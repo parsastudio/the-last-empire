@@ -1,4 +1,9 @@
-import { Nation, DiplomaticProposalType } from "@geopolitics/domain";
+import {
+  Nation,
+  DiplomaticProposalType,
+  GlobalCoalition,
+  CountryRegistry,
+} from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
 export interface DecisionReasonItem {
@@ -82,10 +87,35 @@ export class UtilityDecisionEngine {
   public static evaluateAcceptance(
     proposalType: DiplomaticProposalType,
     receiver: Nation,
-    _sender: Nation,
+    sender: Nation,
     vector: GeopoliticalVector,
+    globalCoalition?: GlobalCoalition | null,
   ): AcceptanceEvaluation {
     const reasons: DecisionReasonItem[] = [];
+
+    if (globalCoalition && proposalType === "PEACE_TREATY") {
+      const rCanonical = CountryRegistry.resolveCanonicalId(receiver.id);
+      const sCanonical = CountryRegistry.resolveCanonicalId(sender.id);
+      const isMemberAndTarget =
+        (globalCoalition.memberNationIds.includes(rCanonical) &&
+          sCanonical === globalCoalition.targetNationId) ||
+        (globalCoalition.memberNationIds.includes(sCanonical) &&
+          rCanonical === globalCoalition.targetNationId);
+
+      if (isMemberAndTarget) {
+        return {
+          willAccept: false,
+          score: -1000,
+          reasons: [
+            {
+              label: "تعهد به پیمان دفاع جمعی ائتلاف مهار هژمونی",
+              value: -1000,
+            },
+          ],
+        };
+      }
+    }
+
     let baseScore = 0;
 
     switch (proposalType) {

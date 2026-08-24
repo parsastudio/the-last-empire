@@ -10,6 +10,7 @@ import {
   LandNeighborResolver,
   NavalNeighborResolver,
   NationGettersUtility,
+  GlobalCoalition,
 } from "@geopolitics/domain";
 
 export class AIAttackPlanner {
@@ -18,6 +19,7 @@ export class AIAttackPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     ownedProvinces?: Province[],
+    globalCoalition?: GlobalCoalition | null,
   ): GameAction | null {
     if (!nation.isAlive || !nation.relations) {
       return null;
@@ -33,9 +35,6 @@ export class AIAttackPlanner {
       return null;
     }
 
-    const activeWarCount = this.countActiveWars(nation, allNations);
-    const maxDeployRatio = activeWarCount > 1 ? 0.6 : 0.95;
-
     const attackerTotalPower = Math.max(
       1,
       MilitaryPowerCalculator.calculateLandAndAirPower(nation),
@@ -45,17 +44,34 @@ export class AIAttackPlanner {
       MilitaryPowerCalculator.calculateLandAndAirPower(targetNation),
     );
 
-    const maxDeployablePower = attackerTotalPower * maxDeployRatio;
-    if (maxDeployablePower < targetTotalPower * 1.05) {
-      return null;
-    }
-
-    const requiredPower = Math.min(maxDeployablePower, targetTotalPower * 1.35);
-
-    const powerRatioNeeded = Math.min(
-      maxDeployRatio,
-      Math.max(0.25, requiredPower / attackerTotalPower),
+    const isCoalitionAttacker = Boolean(
+      globalCoalition &&
+      globalCoalition.memberNationIds.includes(
+        CountryRegistry.resolveCanonicalId(nation.id),
+      ) &&
+      CountryRegistry.resolveCanonicalId(targetNation.id) ===
+        globalCoalition.targetNationId,
     );
+
+    const activeWarCount = this.countActiveWars(nation, allNations);
+    const maxDeployRatio = activeWarCount > 1 ? 0.6 : 0.95;
+
+    let powerRatioNeeded = maxDeployRatio;
+
+    if (!isCoalitionAttacker) {
+      const maxDeployablePower = attackerTotalPower * maxDeployRatio;
+      if (maxDeployablePower < targetTotalPower * 1.05) {
+        return null;
+      }
+      const requiredPower = Math.min(
+        maxDeployablePower,
+        targetTotalPower * 1.35,
+      );
+      powerRatioNeeded = Math.min(
+        maxDeployRatio,
+        Math.max(0.25, requiredPower / attackerTotalPower),
+      );
+    }
 
     const availableArmor = nation.military.armor || 0;
     const availableAirForce = nation.military.airForce || 0;
@@ -89,7 +105,7 @@ export class AIAttackPlanner {
       dronesToLaunch,
     );
 
-    if (deployedPower < targetTotalPower * 1.15) {
+    if (!isCoalitionAttacker && deployedPower < targetTotalPower * 1.15) {
       if (armorToDeploy < availableArmor) {
         armorToDeploy = Math.min(
           availableArmor,
@@ -120,7 +136,7 @@ export class AIAttackPlanner {
       );
     }
 
-    if (deployedPower / targetTotalPower < 1.05) {
+    if (!isCoalitionAttacker && deployedPower / targetTotalPower < 1.05) {
       return null;
     }
 
