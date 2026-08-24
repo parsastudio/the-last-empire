@@ -5,7 +5,7 @@ import {
   DiplomaticBetrayalCalculator,
   TreatyEvaluator,
 } from "@geopolitics/game-engine";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { DiplomaticProposalFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 
 interface UseDiplomacyActionsRunnerProps {
   targetName: string;
@@ -38,6 +38,9 @@ export function useDiplomacyActionsRunner({
     pendingAction: async () => {},
   });
 
+  const [feedbackModal, setFeedbackModal] =
+    useState<DiplomaticProposalFeedback | null>(null);
+
   const foreignAidCost = useMemo(() => {
     return TreatyEvaluator.calculateForeignAidCost(senderGdp, targetGdp);
   }, [senderGdp, targetGdp]);
@@ -65,11 +68,10 @@ export function useDiplomacyActionsRunner({
 
   const handleSendAid = async () => {
     const action = ActionFactory.sendForeignAid(nationId, targetNationId);
-    const formattedCost = PersianNumberFormatter.formatCurrency(foreignAidCost);
-    await dispatchAction(
-      action,
-      `بسته کمک مالی به ارزش ${formattedCost} به ${targetName} ارسال شد (+۲۵ همسویی، +۴ اعتبار جهانی).`,
-    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
   };
 
   const handlePeaceTreaty = async () => {
@@ -78,10 +80,10 @@ export function useDiplomacyActionsRunner({
       targetNationId,
       "PEACE_TREATY",
     );
-    await dispatchAction(
-      action,
-      `پیشنهاد معاهده صلح به ${targetName} ارسال گردید (+۲۰ همسویی، +۲ اعتبار جهانی).`,
-    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
   };
 
   const handleNonAggression = async () => {
@@ -90,10 +92,10 @@ export function useDiplomacyActionsRunner({
       targetNationId,
       "NON_AGGRESSION_PACT",
     );
-    await dispatchAction(
-      action,
-      `پیشنهاد پیمان عدم تخاصم به ${targetName} ابلاغ گردید (+۱۵ همسویی، +۱ اعتبار جهانی).`,
-    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
   };
 
   const handleAlliance = async () => {
@@ -102,10 +104,10 @@ export function useDiplomacyActionsRunner({
       targetNationId,
       "FULL_ALLIANCE",
     );
-    await dispatchAction(
-      action,
-      `پیشنهاد معاهده اتحاد کامل به ${targetName} ارسال گردید (+۳۰ همسویی، +۱ اعتبار جهانی).`,
-    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
   };
 
   const handleDeclareWar = async () => {
@@ -114,10 +116,10 @@ export function useDiplomacyActionsRunner({
       targetNationId,
       "DECLARE_WAR",
     );
-    await dispatchAction(
-      action,
-      `بیانیه رسمی اعلان جنگ به ${targetName} ابلاغ گردید (-۵ اعتبار جهانی).`,
-    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
   };
 
   const closeConfirmModal = () => {
@@ -132,6 +134,7 @@ export function useDiplomacyActionsRunner({
 
   return {
     confirmModal,
+    feedbackModal,
     foreignAidCost,
     handleSendAid,
     handlePeaceTreaty: () => executeOrConfirm(handlePeaceTreaty, false),
@@ -140,5 +143,6 @@ export function useDiplomacyActionsRunner({
     handleDeclareWar: () => executeOrConfirm(handleDeclareWar, true),
     closeConfirmModal,
     acceptConfirmModal,
+    closeFeedbackModal: () => setFeedbackModal(null),
   };
 }

@@ -2,6 +2,7 @@ import React from "react";
 import { Binary } from "lucide-react";
 import { DiplomaticStance } from "@geopolitics/domain";
 import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
+import { DiplomaticFeedbackModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 import { TreatyStatusBanner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/treaty-status-banner";
 import { useDiplomacyActionsRunner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/hooks/use-diplomacy-actions-runner";
 import { DiplomacyActionButtons } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/components/diplomacy-action-buttons";
@@ -91,6 +92,12 @@ export function AdvancedDiplomacyActions({
         skippedSteps={runner.confirmModal.skippedSteps}
         onClose={runner.closeConfirmModal}
         onConfirm={runner.acceptConfirmModal}
+      />
+
+      <DiplomaticFeedbackModal
+        isOpen={runner.feedbackModal !== null}
+        feedback={runner.feedbackModal}
+        onClose={runner.closeFeedbackModal}
       />
     </>
   );
