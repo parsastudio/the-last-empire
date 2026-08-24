@@ -51,16 +51,11 @@ export class TurnProgressionOrchestrator {
         continue;
       }
 
-      const rankMap = activeMatrixCache.getRankMap();
-      const provincesByOwnerMap = activeMatrixCache.getProvincesByOwnerMap();
-
       const aiActions = AIActionBuilder.buildNationActions(
         currentNation,
         workingState.nations,
         workingState.provinces,
         lockedDiplomacyTargets,
-        rankMap,
-        provincesByOwnerMap,
         activeMatrixCache,
         workingState.globalCoalition,
       );
@@ -91,14 +86,10 @@ export class TurnProgressionOrchestrator {
       }
     }
 
-    const postActionProvincesByOwnerMap =
-      activeMatrixCache.getProvincesByOwnerMap();
-    const postActionRankMap = activeMatrixCache.getRankMap();
-
     workingState = this.pipeline.processTurn(
       workingState,
-      postActionRankMap,
-      postActionProvincesByOwnerMap,
+      activeMatrixCache.getRankMap(),
+      activeMatrixCache.getProvincesByOwnerMap(),
       activeMatrixCache,
     );
 
@@ -106,8 +97,8 @@ export class TurnProgressionOrchestrator {
 
     workingState = CoalitionManager.evaluateCoalitionState(
       workingState,
-      postActionRankMap,
-      postActionProvincesByOwnerMap,
+      activeMatrixCache.getRankMap(),
+      activeMatrixCache.getProvincesByOwnerMap(),
     );
 
     const victoryStatus = this.victoryChecker.checkVictory(workingState);

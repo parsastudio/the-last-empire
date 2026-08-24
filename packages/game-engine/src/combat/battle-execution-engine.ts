@@ -10,6 +10,7 @@ import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conqu
 import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
 import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
+import { ExtraCapturedMilitaryUnits } from "@/engine/combat/loot/battle-loot-manager";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -81,6 +82,56 @@ export class BattleExecutionEngine {
       conquest.remainingDefenderProvinces.length > 0 &&
       !calcResult.isFullCapitulation;
 
+    const isTotalAnnexation = calcResult.isAttackerVictory && !isDefenderAlive;
+
+    let extraCapturedUnits: ExtraCapturedMilitaryUnits | undefined = undefined;
+    let extraTreasuryLooted = 0;
+
+    if (isTotalAnnexation && !calcResult.isFullCapitulation) {
+      const survivingDefenderInf = Math.max(
+        0,
+        (defender.military.infantry || 0) -
+          calcResult.defenderCasualties.infantryLost,
+      );
+      const survivingDefenderArmor = Math.max(
+        0,
+        (defender.military.armor || 0) -
+          calcResult.defenderCasualties.armorLost,
+      );
+      const survivingDefenderAD = Math.max(
+        0,
+        (defender.military.airDefense || 0) -
+          calcResult.defenderCasualties.airDefenseLost,
+      );
+      const survivingDefenderAir = Math.max(
+        0,
+        (defender.military.airForce || 0) -
+          calcResult.defenderCasualties.airForceLost,
+      );
+      const survivingDefenderDrones = Math.max(
+        0,
+        defender.military.droneMissile || 0,
+      );
+      const survivingDefenderNaval = Math.max(
+        0,
+        defender.military.navalFleet || 0,
+      );
+
+      extraCapturedUnits = {
+        infantry: survivingDefenderInf,
+        armor: survivingDefenderArmor,
+        airDefense: survivingDefenderAD,
+        airForce: survivingDefenderAir,
+        droneMissile: survivingDefenderDrones,
+        navalFleet: survivingDefenderNaval,
+      };
+
+      extraTreasuryLooted = Math.max(
+        0,
+        defender.treasury - calcResult.treasuryLooted,
+      );
+    }
+
     const updatedAttacker = BattleAttackerStateApplier.apply({
       attacker,
       defenderId: defender.id,
@@ -88,6 +139,9 @@ export class BattleExecutionEngine {
       calcResult,
       currentStance,
       betrayalResult,
+      isDefenderEliminated: !isDefenderAlive,
+      extraCapturedUnits,
+      extraTreasuryLooted,
     });
 
     const updatedDefender = BattleDefenderStateApplier.apply({
@@ -120,6 +174,7 @@ export class BattleExecutionEngine {
       calcResult,
       betrayalText,
       state.humanNationId,
+      !isDefenderAlive,
     );
 
     const interventionLogs = BattleLogFactory.createInterventionLogs(

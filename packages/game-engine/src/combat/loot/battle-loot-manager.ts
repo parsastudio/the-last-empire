@@ -2,11 +2,21 @@ import { MilitaryStack } from "@/domain/military/military.schema";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 
+export interface ExtraCapturedMilitaryUnits {
+  infantry?: number;
+  armor?: number;
+  airDefense?: number;
+  airForce?: number;
+  droneMissile?: number;
+  navalFleet?: number;
+}
+
 export class BattleLootManager {
   public static applyAttackerForcesAndSpoils(
     attackerMilitary: MilitaryStack,
     defenderTechLevel: number,
     calcResult: BattleCalculationResult,
+    extraCaptured?: ExtraCapturedMilitaryUnits,
   ): MilitaryStack {
     let updatedMilitary = MilitaryInventoryHelper.applyCasualties(
       attackerMilitary,
@@ -18,51 +28,63 @@ export class BattleLootManager {
       calcResult.attackerCasualties.navalFleetLost,
     );
 
-    if (calcResult.capturedInfantry > 0) {
+    const totalInfantry =
+      calcResult.capturedInfantry + (extraCaptured?.infantry || 0);
+    const totalArmor = calcResult.capturedArmor + (extraCaptured?.armor || 0);
+    const totalAirDefense =
+      calcResult.capturedAirDefense + (extraCaptured?.airDefense || 0);
+    const totalAirForce =
+      calcResult.capturedAirForce + (extraCaptured?.airForce || 0);
+    const totalDrones =
+      calcResult.capturedDrones + (extraCaptured?.droneMissile || 0);
+    const totalNavalFleet =
+      calcResult.capturedNavalFleet + (extraCaptured?.navalFleet || 0);
+
+    if (totalInfantry > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
         updatedMilitary,
         "INFANTRY",
-        calcResult.capturedInfantry,
+        totalInfantry,
         defenderTechLevel,
       );
     }
-    if (calcResult.capturedArmor > 0) {
+    if (totalArmor > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
         updatedMilitary,
         "ARMOR",
-        calcResult.capturedArmor,
+        totalArmor,
         defenderTechLevel,
       );
     }
-    if (calcResult.capturedAirDefense > 0) {
+    if (totalAirDefense > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
         updatedMilitary,
         "AIR_DEFENSE",
-        calcResult.capturedAirDefense,
+        totalAirDefense,
         defenderTechLevel,
       );
     }
-    if (calcResult.capturedAirForce > 0) {
+    if (totalAirForce > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
         updatedMilitary,
         "AIR_FORCE",
-        calcResult.capturedAirForce,
+        totalAirForce,
         defenderTechLevel,
       );
     }
-    if (calcResult.capturedDrones > 0) {
+    if (totalDrones > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
         updatedMilitary,
         "DRONE_MISSILE",
-        calcResult.capturedDrones,
+        totalDrones,
         defenderTechLevel,
       );
     }
-    if (calcResult.capturedNavalFleet > 0) {
+    if (totalNavalFleet > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
         updatedMilitary,
         "NAVAL_FLEET",
-        calcResult.capturedNavalFleet,
+        totalNavalFleet,
         defenderTechLevel,
       );
     }
