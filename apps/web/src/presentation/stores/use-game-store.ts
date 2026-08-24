@@ -143,21 +143,53 @@ export const useGameStore = create<GameStoreState>()(
     },
 
     advanceNextTurn: async () => {
+      const totalStart = performance.now();
       const { activeGameId, gameState } = get();
       if (!gameState) {
         return null;
       }
       try {
+        console.group(
+          `[TURN_ADVANCE] نوبت ${gameState.currentTurn} ➔ ${gameState.currentTurn + 1}`,
+        );
         const prng = new SeededRandom(
           gameState.seed || Math.floor(Math.random() * 1000000),
         );
+
+        const orchStart = performance.now();
         const nextState = orchestrator.advanceTurn(gameState, prng);
+        const orchDuration = (performance.now() - orchStart).toFixed(2);
+        console.log(
+          `[STORE_PERF] محاسبه موتور بازی (Orchestrator): ${orchDuration}ms`,
+        );
+
+        const stateUpdateStart = performance.now();
         set((draft) => {
           draft.gameState = nextState;
         });
+        const stateUpdateDuration = (
+          performance.now() - stateUpdateStart
+        ).toFixed(2);
+        console.log(
+          `[STORE_PERF] به‌روزرسانی استیت Zustand: ${stateUpdateDuration}ms`,
+        );
+
+        const persistStart = performance.now();
         void GamePersistenceService.saveGameState(activeGameId, nextState);
+        const persistDuration = (performance.now() - persistStart).toFixed(2);
+        console.log(
+          `[STORE_PERF] اعزام دستور ذخیره‌سازی در IndexedDB: ${persistDuration}ms`,
+        );
+
+        const totalDuration = (performance.now() - totalStart).toFixed(2);
+        console.log(
+          `[STORE_PERF] زمان کل پردازش کلاینتی نوبت: ${totalDuration}ms`,
+        );
+        console.groupEnd();
         return nextState;
-      } catch {
+      } catch (err) {
+        console.error(`[TURN_ADVANCE_ERROR] خطا در پیشروی نوبت:`, err);
+        console.groupEnd();
         return null;
       }
     },

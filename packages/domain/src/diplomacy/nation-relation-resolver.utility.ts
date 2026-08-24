@@ -38,18 +38,23 @@ export class NationRelationResolver {
     nationB: Nation,
     allNations: Record<string, Nation>,
   ): boolean {
-    return Object.values(allNations).some((third) => {
-      if (
-        !third.isAlive ||
-        third.id === nationA.id ||
-        third.id === nationB.id
-      ) {
-        return false;
+    if (!nationA.relations || !nationB.relations) return false;
+
+    for (const [targetId, relA] of Object.entries(nationA.relations)) {
+      if (relA.stance === "WAR") {
+        const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+        const relB =
+          nationB.relations[canonicalTarget] || nationB.relations[targetId];
+
+        if (relB && relB.stance === "WAR") {
+          const enemy = allNations[canonicalTarget] || allNations[targetId];
+          if (enemy && enemy.isAlive) {
+            return true;
+          }
+        }
       }
-      const warA = this.isWar(nationA.relations, third.id);
-      const warB = this.isWar(nationB.relations, third.id);
-      return warA && warB;
-    });
+    }
+    return false;
   }
 
   public static isTradeEmbargoed(

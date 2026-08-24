@@ -29,6 +29,7 @@ export class AIProcurementPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
+    rankMap?: Map<string, number>,
   ): RecruitmentPlanResult {
     const effectiveTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -41,6 +42,7 @@ export class AIProcurementPlanner {
       nation.id,
       allNations,
       provincesMap,
+      rankMap,
     );
 
     const maxArmyValuation = AiEconomyCalculator.calculateMaxArmyValuation(

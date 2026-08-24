@@ -6,6 +6,7 @@ import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -16,6 +17,15 @@ export class TurnProgressionOrchestrator {
     let nextState = state;
     const lockedDiplomacyTargets = new Set<string>();
     const sortedNationIds = Object.keys(nextState.nations).sort();
+
+    const rankMap = NationGettersUtility.calculateRankMap(
+      nextState.nations,
+      nextState.provinces,
+    );
+
+    const pendingAiActions: ReturnType<
+      typeof AIActionBuilder.buildNationActions
+    >[] = [];
 
     for (const id of sortedNationIds) {
       const nation = nextState.nations[id];
@@ -28,10 +38,16 @@ export class TurnProgressionOrchestrator {
         nextState.nations,
         nextState.provinces,
         lockedDiplomacyTargets,
+        rankMap,
       );
 
-      for (const action of aiActions) {
+      pendingAiActions.push(aiActions);
+    }
+
+    for (const actionList of pendingAiActions) {
+      for (const action of actionList) {
         const result = ActionEngine.execute(nextState, action);
+
         if (result.success && result.newState) {
           nextState = result.newState;
 
