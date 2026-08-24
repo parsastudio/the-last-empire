@@ -19,6 +19,10 @@ function calculateLogPriority(
     canonicalHuman !== null &&
     (sourceCanonical === canonicalHuman || targetCanonical === canonicalHuman);
 
+  if (log.eventCode === "COALITION_FORMED") {
+    return 0;
+  }
+
   if (log.eventCode === "BATTLE_TACTICAL_REPORT" && isHumanInvolved) {
     return 1;
   }
@@ -31,6 +35,7 @@ function calculateLogPriority(
     case "WAR_DECLARED":
     case "ALLIANCE_INTERVENTION":
     case "ALLIANCE_BETRAYED":
+    case "COALITION_MEMBER_FALLEN":
       return isHumanInvolved ? 3 : 6;
 
     case "BATTLE_GLOBAL_NEWS":
@@ -68,7 +73,6 @@ export function useWideReports({
   nationsMap,
 }: UseWideReportsProps) {
   const [selectedScope, setSelectedScope] = useState<TurnLogScope>("NATIONAL");
-  const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(currentTurn);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const canonicalHuman = useMemo(() => {
@@ -83,11 +87,13 @@ export function useWideReports({
     return turns.sort((a, b) => b - a);
   }, [logs, currentTurn]);
 
+  const defaultTurn = availableTurns[0] ?? currentTurn;
+  const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(defaultTurn);
+
   useEffect(() => {
     if (availableTurns.length > 0 && selectedTurn !== "ALL") {
-      const latestAvailable = availableTurns[0]!;
       if (!availableTurns.includes(selectedTurn)) {
-        setSelectedTurn(latestAvailable);
+        setSelectedTurn(availableTurns[0]!);
       }
     }
   }, [availableTurns, selectedTurn]);
@@ -109,12 +115,20 @@ export function useWideReports({
           ? CountryRegistry.resolveCanonicalId(log.targetNationId)
           : null;
 
+        if (log.eventCode === "COALITION_FORMED") {
+          const memberIdsRaw = String(log.params?.["memberIds"] || "");
+          const memberIds = memberIdsRaw.split(",").filter(Boolean);
+          const isTarget = srcCanonical === canonicalHuman;
+          const isMember = memberIds.includes(canonicalHuman);
+          return isTarget || isMember;
+        }
+
         const isHumanInvolved =
           srcCanonical === canonicalHuman || trgCanonical === canonicalHuman;
         return isHumanInvolved && log.scope === "NATIONAL";
       }
 
-      return log.scope === "GLOBAL";
+      return log.scope === "GLOBAL" || log.eventCode === "COALITION_FORMED";
     });
   }, [logs, selectedTurn, selectedScope, canonicalHuman]);
 

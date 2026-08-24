@@ -152,11 +152,13 @@ export class CoalitionManager {
     };
 
     const memberNames = chosenMembers.map((m) => m.name).join("، ");
-    const coalitionLog = TurnLogBuilder.createCoalitionFormedLog(
+    const memberIdsStr = memberCanonicalIds.join(",");
+
+    const singleCoalitionLog = TurnLogBuilder.createCoalitionFormedLog(
       state.currentTurn,
       hegemonicNation.id,
       memberNames,
-      memberCanonicalIds.join(","),
+      memberIdsStr,
     );
 
     return {
@@ -167,7 +169,7 @@ export class CoalitionManager {
         memberNationIds: memberCanonicalIds,
         triggeredTurn: state.currentTurn,
       },
-      turnLogs: [...state.turnLogs, coalitionLog],
+      turnLogs: [...state.turnLogs, singleCoalitionLog],
     };
   }
 

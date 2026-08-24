@@ -200,7 +200,7 @@ export class TurnLogBuilder {
       "CRITICAL",
       "COALITION_FORMED",
       "GLOBAL_WAR",
-      "GLOBAL",
+      "NATIONAL",
       undefined,
       { memberNames, memberIds },
     );
