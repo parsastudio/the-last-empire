@@ -223,4 +223,21 @@ export class TurnLogBuilder {
       { remainingCount },
     );
   }
+
+  public static createVictoryLog(
+    turn: number,
+    winnerNationId: string,
+    reason = "WORLD_DOMINANCE",
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      winnerNationId,
+      "CRITICAL",
+      "VICTORY_ACHIEVED",
+      "GLOBAL_WAR",
+      "NATIONAL",
+      undefined,
+      { reason },
+    );
+  }
 }

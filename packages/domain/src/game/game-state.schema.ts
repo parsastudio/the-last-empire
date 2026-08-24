@@ -39,6 +39,7 @@ export const TurnLogEventCodeSchema = z.enum([
   "ARMS_TRADE",
   "COALITION_FORMED",
   "COALITION_MEMBER_FALLEN",
+  "VICTORY_ACHIEVED",
   "GENERIC_EVENT",
 ]);
 
@@ -73,6 +74,7 @@ export const GameStateSchema = z.object({
   currentTurn: z.number().nonnegative(),
   seed: z.number(),
   isGameOver: z.boolean(),
+  isSandboxMode: z.boolean().default(false).optional(),
   winnerNationId: z.string().optional(),
   gameOverReason: z.string().optional(),
   humanNationId: z.string(),

@@ -20,6 +20,7 @@ import {
   Sparkles,
   Eye,
   ShieldAlert,
+  Trophy,
 } from "lucide-react";
 import { ProposalActionButtons } from "./proposal-action-buttons";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
@@ -42,6 +43,9 @@ export function ReportCard({
   );
   const setSelectedCoalitionAlert = useUiStore(
     (state) => state.setSelectedCoalitionAlert,
+  );
+  const setIsVictoryDebriefOpen = useUiStore(
+    (state) => state.setIsVictoryDebriefOpen,
   );
 
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
@@ -84,10 +88,13 @@ export function ReportCard({
   }, [log]);
 
   const isCoalitionFormed = log.eventCode === "COALITION_FORMED";
+  const isVictoryAchieved = log.eventCode === "VICTORY_ACHIEVED";
 
   const handleOpenCoalition = () => {
     const memberIdsRaw = String(log.params?.["memberIds"] || "");
-    const memberIds = memberIdsRaw ? memberIdsRaw.split(",") : [];
+    const memberIds = memberIdsRaw
+      ? memberIdsRaw.split(",").filter(Boolean)
+      : [];
     const targetCanonical = sourceCanonical;
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       humanNationId || "",
@@ -144,6 +151,17 @@ export function ReportCard({
   const isIncomingInteractiveProposal = Boolean(activePendingProposal);
 
   const style = useMemo(() => {
+    if (isVictoryAchieved) {
+      return {
+        cardBg:
+          "bg-gradient-to-r from-amber-950/40 via-card/95 to-emerald-950/30",
+        border:
+          "border-amber-500/60 shadow-lg shadow-amber-500/10 ring-1 ring-amber-500/30",
+        icon: Trophy,
+        iconBg: "bg-amber-500/25 text-amber-300 border-amber-400/50",
+      };
+    }
+
     if (isCoalitionFormed) {
       return {
         cardBg: "bg-gradient-to-r from-rose-950/40 via-card/95 to-red-950/30",
@@ -224,7 +242,12 @@ export function ReportCard({
           iconBg: "bg-secondary text-muted-foreground border-border/50",
         };
     }
-  }, [log.eventCode, isIncomingInteractiveProposal, isCoalitionFormed]);
+  }, [
+    log.eventCode,
+    isIncomingInteractiveProposal,
+    isCoalitionFormed,
+    isVictoryAchieved,
+  ]);
 
   const Icon = style.icon;
 
@@ -244,6 +267,13 @@ export function ReportCard({
             {dynamicMessage}
           </p>
 
+          {isVictoryAchieved && (
+            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
+              <Trophy size={12} />
+              افتخار هژمونی جهانی
+            </span>
+          )}
+
           {isCoalitionFormed && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
               <ShieldAlert size={12} />
@@ -260,32 +290,44 @@ export function ReportCard({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-border/40">
-          {(sourceName || targetName) && !isCoalitionFormed && (
-            <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
-              {sourceName && (
-                <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
-                  <span className="text-lg select-none">{sourceFlag}</span>
-                  <span className="font-black text-foreground">
-                    {sourceName}
-                  </span>
-                </div>
-              )}
-
-              {targetName && (
-                <>
-                  <ArrowLeft
-                    size={13}
-                    className="text-muted-foreground shrink-0"
-                  />
+          {(sourceName || targetName) &&
+            !isCoalitionFormed &&
+            !isVictoryAchieved && (
+              <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
+                {sourceName && (
                   <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
-                    <span className="text-lg select-none">{targetFlag}</span>
+                    <span className="text-lg select-none">{sourceFlag}</span>
                     <span className="font-black text-foreground">
-                      {targetName}
+                      {sourceName}
                     </span>
                   </div>
-                </>
-              )}
-            </div>
+                )}
+
+                {targetName && (
+                  <>
+                    <ArrowLeft
+                      size={13}
+                      className="text-muted-foreground shrink-0"
+                    />
+                    <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
+                      <span className="text-lg select-none">{targetFlag}</span>
+                      <span className="font-black text-foreground">
+                        {targetName}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+          {isVictoryAchieved && (
+            <button
+              onClick={() => setIsVictoryDebriefOpen(true)}
+              className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 hover:border-amber-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+            >
+              <Trophy size={14} />
+              <span>مشاهده کارنامه و جشن پیروزی</span>
+            </button>
           )}
 
           {isCoalitionFormed && (

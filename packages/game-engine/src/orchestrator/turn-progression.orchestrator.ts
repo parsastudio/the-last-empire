@@ -2,7 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
-import { SeededRandom } from "@/domain/shared/domain-utilities";
+import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
@@ -108,12 +108,21 @@ export class TurnProgressionOrchestrator {
 
     const victoryStatus = this.victoryChecker.checkVictory(workingState);
 
-    if (victoryStatus.isGameOver) {
+    if (victoryStatus.isGameOver && !workingState.isGameOver) {
+      const winnerId =
+        victoryStatus.winnerNationId || workingState.humanNationId;
+      const victoryLog = TurnLogBuilder.createVictoryLog(
+        workingState.currentTurn,
+        winnerId,
+        victoryStatus.reason || "WORLD_DOMINANCE",
+      );
+
       workingState = {
         ...workingState,
         isGameOver: true,
-        winnerNationId: victoryStatus.winnerNationId,
+        winnerNationId: winnerId,
         gameOverReason: victoryStatus.reason,
+        turnLogs: [...workingState.turnLogs, victoryLog],
       };
     }
 

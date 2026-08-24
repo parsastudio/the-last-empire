@@ -24,6 +24,10 @@ export class TurnLogFormatter {
     const params = log.params || {};
 
     switch (log.eventCode) {
+      case "VICTORY_ACHIEVED": {
+        return `فتح قاطع و پیروزی تاریخی: امپراتوری ${sourceName} به برتری مطلق بر جهان دست یافت و سند هژمونی بین‌المللی را امضا کرد.`;
+      }
+
       case "COALITION_FORMED": {
         const members = String(params["memberNames"] || "قدرت‌های بزرگ");
         return `پیمان مهار اضطراری: کشورهای [${members}] با امضای معاهده دفاع جمعی، رسماً علیه امپراتوری ${sourceName} اعلام جنگ کرده و صلح را ناممکن دانستند.`;

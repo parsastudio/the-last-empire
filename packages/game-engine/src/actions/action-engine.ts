@@ -12,7 +12,7 @@ export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
     const targetActionId = action.id;
 
-    if (state.isGameOver) {
+    if (state.isGameOver && !state.isSandboxMode) {
       return {
         success: false,
         actionId: targetActionId,
