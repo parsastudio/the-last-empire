@@ -1,6 +1,6 @@
 import React from "react";
 import { Binary } from "lucide-react";
-import { DiplomaticStance, Nation, Province } from "@geopolitics/domain";
+import { DiplomaticStance } from "@geopolitics/domain";
 import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
 import { TreatyStatusBanner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/treaty-status-banner";
 import { useDiplomacyActionsRunner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/hooks/use-diplomacy-actions-runner";
@@ -13,11 +13,6 @@ interface AdvancedDiplomacyActionsProps {
   senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
-  isEmbargoed?: boolean;
-  humanNation?: Nation | null;
-  targetNation?: Nation | null;
-  allNations?: Record<string, Nation>;
-  provincesMap?: Record<string, Province>;
   onOpenProxy?: () => void;
 }
 
@@ -28,11 +23,6 @@ export function AdvancedDiplomacyActions({
   senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
-  isEmbargoed = false,
-  humanNation,
-  targetNation,
-  allNations,
-  provincesMap,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -42,10 +32,6 @@ export function AdvancedDiplomacyActions({
     senderGdp,
     targetGdp,
     currentStance,
-    humanNation,
-    targetNation,
-    allNations,
-    provincesMap,
   });
 
   return (
@@ -57,10 +43,7 @@ export function AdvancedDiplomacyActions({
           </span>
 
           <div className="space-y-2.5">
-            <TreatyStatusBanner
-              stance={currentStance}
-              isEmbargoed={isEmbargoed}
-            />
+            <TreatyStatusBanner stance={currentStance} />
 
             <DiplomacyActionButtons
               currentStance={currentStance}

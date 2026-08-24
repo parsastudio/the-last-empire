@@ -1,13 +1,3 @@
-export interface RowSpansMapHeader {
-  magic: number;
-  version: number;
-  width: number;
-  height: number;
-  totalRows: number;
-  totalSpans: number;
-  headerByteSize: number;
-}
-
 export interface RowSpansBuildStats {
   originalSizeBytes: number;
   compressedSizeBytes: number;

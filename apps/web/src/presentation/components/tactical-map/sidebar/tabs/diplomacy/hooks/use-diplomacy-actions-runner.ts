@@ -1,11 +1,6 @@
 import { useState, useMemo } from "react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import {
-  ActionFactory,
-  DiplomaticStance,
-  Nation,
-  Province,
-} from "@geopolitics/domain";
+import { ActionFactory, DiplomaticStance } from "@geopolitics/domain";
 import {
   DiplomaticBetrayalCalculator,
   TreatyEvaluator,
@@ -19,10 +14,6 @@ interface UseDiplomacyActionsRunnerProps {
   senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
-  humanNation?: Nation | null;
-  targetNation?: Nation | null;
-  allNations?: Record<string, Nation>;
-  provincesMap?: Record<string, Province>;
 }
 
 export function useDiplomacyActionsRunner({

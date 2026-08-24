@@ -52,13 +52,11 @@ export const TurnLogEntrySchema = z.object({
   eventCode: TurnLogEventCodeSchema.default("GENERIC_EVENT"),
   sourceNationId: z.string(),
   targetNationId: z.string().optional(),
-  conquerorNationId: z.string().optional(),
   scope: TurnLogScopeSchema.default("NATIONAL"),
   category: TurnLogCategorySchema.default("DOMESTIC"),
   level: TurnLogLevelSchema,
   message: z.string().default(""),
   params: z.record(z.string(), TurnLogParamValueSchema).default({}),
-  metadata: z.record(z.string(), TurnLogParamValueSchema).optional(),
 });
 
 export const GameStateSchema = z.object({

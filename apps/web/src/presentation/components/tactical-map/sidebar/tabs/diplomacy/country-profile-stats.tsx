@@ -7,7 +7,6 @@ import {
   ShoppingCart,
   Lock,
 } from "lucide-react";
-import { DiplomaticPosture } from "@geopolitics/domain";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export interface CountryProfileData {
@@ -17,9 +16,6 @@ export interface CountryProfileData {
   governmentType: string;
   stability: number;
   opinion?: number;
-  alignment?: number;
-  tension?: number;
-  posture?: DiplomaticPosture;
 }
 
 interface CountryProfileStatsProps {

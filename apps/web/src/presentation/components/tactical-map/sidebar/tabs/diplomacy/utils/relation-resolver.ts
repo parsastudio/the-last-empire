@@ -55,14 +55,6 @@ export function getPostureBadgeClass(posture: DiplomaticPosture): string {
   }
 }
 
-export function getQualitativeOpinionLabel(opinion: number): string {
-  if (opinion >= 60) return "بسیار دوستانه و همسو";
-  if (opinion >= 20) return "دوستانه و مسالمت‌آمیز";
-  if (opinion >= -19) return "بی‌طرف و متعادل";
-  if (opinion >= -59) return "سرد و متشنج";
-  return "خصمانه و متخاصم";
-}
-
 export function getQualitativeOpinionColor(opinion: number): string {
   if (opinion >= 60) return "text-emerald-500 font-bold";
   if (opinion >= 20) return "text-emerald-400 font-semibold";
@@ -154,9 +146,6 @@ export function resolveProfileRelation(
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
       opinion: unifiedScore,
-      alignment,
-      tension,
-      posture,
     },
   };
 }

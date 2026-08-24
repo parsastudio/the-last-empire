@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  CheckCircle2,
-  Handshake,
-  Swords,
-  Globe,
-  Ban,
-  Compass,
-} from "lucide-react";
+import { CheckCircle2, Handshake, Swords, Globe, Compass } from "lucide-react";
 import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 import {
   getPostureLabel,
@@ -16,13 +9,11 @@ import {
 interface DiplomaticStanceBadgeProps {
   stance: DiplomaticStance;
   posture?: DiplomaticPosture;
-  isEmbargoed?: boolean;
 }
 
 export function DiplomaticStanceBadge({
   stance,
   posture,
-  isEmbargoed = false,
 }: DiplomaticStanceBadgeProps) {
   if (stance === "WAR") {
     return (
@@ -44,14 +35,6 @@ export function DiplomaticStanceBadge({
     return (
       <span className="px-2 py-0.5 rounded-md bg-treasury/20 text-treasury border border-treasury/30 text-[9px] font-bold flex items-center gap-1 font-sans">
         <Handshake size={10} /> عدم تخاصم
-      </span>
-    );
-  }
-
-  if (isEmbargoed) {
-    return (
-      <span className="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/20 text-[9px] font-bold flex items-center gap-1 font-sans">
-        <Ban size={10} /> تحریم تجاری
       </span>
     );
   }
