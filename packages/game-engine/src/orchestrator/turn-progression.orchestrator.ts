@@ -14,18 +14,31 @@ export class TurnProgressionOrchestrator {
   private victoryChecker = new VictoryChecker();
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
+    const orchStart = performance.now();
     let nextState = state;
     const lockedDiplomacyTargets = new Set<string>();
     const sortedNationIds = Object.keys(nextState.nations).sort();
 
+    console.group(
+      `[ORCHESTRATOR] ارکستراسیون پیشروی نوبت ${state.currentTurn} ➔ ${state.currentTurn + 1}`,
+    );
+
+    const rankStart = performance.now();
     const rankMap = NationGettersUtility.calculateRankMap(
       nextState.nations,
       nextState.provinces,
     );
+    const rankDuration = (performance.now() - rankStart).toFixed(2);
+    console.log(
+      `[ORCH_STEP] ۱. محاسبه رتبه جهانی (RankMap): ${rankDuration}ms`,
+    );
 
-    const pendingAiActions: ReturnType<
-      typeof AIActionBuilder.buildNationActions
-    >[] = [];
+    const aiPlanStart = performance.now();
+    let totalActionsGenerated = 0;
+    const pendingAiActions: {
+      nationId: string;
+      actions: ReturnType<typeof AIActionBuilder.buildNationActions>;
+    }[] = [];
 
     for (const id of sortedNationIds) {
       const nation = nextState.nations[id];
@@ -41,15 +54,24 @@ export class TurnProgressionOrchestrator {
         rankMap,
       );
 
-      pendingAiActions.push(aiActions);
+      totalActionsGenerated += aiActions.length;
+      pendingAiActions.push({ nationId: id, actions: aiActions });
     }
+    const aiPlanDuration = (performance.now() - aiPlanStart).toFixed(2);
+    console.log(
+      `[ORCH_STEP] ۲. برنامه‌ریزی هوش مصنوعی برای تمام کشورها (${totalActionsGenerated} اکشن): ${aiPlanDuration}ms`,
+    );
 
-    for (const actionList of pendingAiActions) {
-      for (const action of actionList) {
+    const aiExecStart = performance.now();
+    let executedCount = 0;
+
+    for (const item of pendingAiActions) {
+      for (const action of item.actions) {
         const result = ActionEngine.execute(nextState, action);
 
         if (result.success && result.newState) {
           nextState = result.newState;
+          executedCount++;
 
           if (
             action.type === "DIPLOMATIC_PROPOSAL" &&
@@ -72,11 +94,32 @@ export class TurnProgressionOrchestrator {
         }
       }
     }
+    const aiExecDuration = (performance.now() - aiExecStart).toFixed(2);
+    console.log(
+      `[ORCH_STEP] ۳. اجرای اکشن‌های هوش مصنوعی (${executedCount} اکشن موفق): ${aiExecDuration}ms`,
+    );
 
+    const pipelineStart = performance.now();
     nextState = this.pipeline.processTurn(nextState);
-    nextState = this.livenessManager.updateLiveness(nextState);
+    const pipelineDuration = (performance.now() - pipelineStart).toFixed(2);
+    console.log(
+      `[ORCH_STEP] ۴. اجرای خط لوله نوبتی (TurnPipeline): ${pipelineDuration}ms`,
+    );
 
+    const livenessStart = performance.now();
+    nextState = this.livenessManager.updateLiveness(nextState);
+    const livenessDuration = (performance.now() - livenessStart).toFixed(2);
+    console.log(
+      `[ORCH_STEP] ۵. بررسی وضعیت بقا و سقوط کشورها (Liveness): ${livenessDuration}ms`,
+    );
+
+    const victoryStart = performance.now();
     const victoryStatus = this.victoryChecker.checkVictory(nextState);
+    const victoryDuration = (performance.now() - victoryStart).toFixed(2);
+    console.log(
+      `[ORCH_STEP] ۶. ارزیابی شروط پیروزی جهانی (VictoryChecker): ${victoryDuration}ms`,
+    );
+
     if (victoryStatus.isGameOver) {
       nextState = {
         ...nextState,
@@ -85,6 +128,10 @@ export class TurnProgressionOrchestrator {
         gameOverReason: victoryStatus.reason,
       };
     }
+
+    const orchTotalDuration = (performance.now() - orchStart).toFixed(2);
+    console.log(`[ORCH_TOTAL] مجموع کل ارکستراسیون: ${orchTotalDuration}ms`);
+    console.groupEnd();
 
     return {
       ...nextState,

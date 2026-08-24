@@ -9,8 +9,12 @@ import { NationGettersUtility } from "@geopolitics/domain";
 
 export class TurnPipeline {
   public processTurn(state: GameState): GameState {
+    const pipeStart = performance.now();
+
+    const propStart = performance.now();
     const currentState =
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
+    const propDuration = (performance.now() - propStart).toFixed(2);
 
     const updatedNations: Record<string, Nation> = {};
     const updatedProvincesMap: Record<string, Province> = {
@@ -18,6 +22,7 @@ export class TurnPipeline {
     };
     const provincesByOwner = new Map<string, Province[]>();
 
+    const groupStart = performance.now();
     for (const prov of Object.values(currentState.provinces || {})) {
       const canonicalOwner = CountryRegistry.resolveCanonicalId(
         prov.ownerNationId,
@@ -29,8 +34,13 @@ export class TurnPipeline {
       }
       list.push(prov);
     }
+    const groupDuration = (performance.now() - groupStart).toFixed(2);
 
     const nationKeys = Object.keys(currentState.nations);
+
+    let totalDipDuration = 0;
+    let totalEcoDuration = 0;
+    let totalPolDuration = 0;
 
     for (let i = 0; i < nationKeys.length; i++) {
       const id = nationKeys[i]!;
@@ -53,13 +63,16 @@ export class TurnPipeline {
 
       const ownedProvinces = provincesByOwner.get(canonicalId) || [];
 
+      const dipStart = performance.now();
       const { updatedNation: dipNation, isAtWar } =
         DiplomaticTurnProcessor.process(
           nation,
           currentState.nations,
           updatedProvincesMap,
         );
+      totalDipDuration += performance.now() - dipStart;
 
+      const ecoStart = performance.now();
       const { updatedNation: ecoNation, updatedProvinces } =
         EconomyTurnProcessor.process(
           dipNation,
@@ -67,21 +80,29 @@ export class TurnPipeline {
           ownedProvinces,
           updatedProvincesMap,
         );
+      totalEcoDuration += performance.now() - ecoStart;
 
       for (let p = 0; p < updatedProvinces.length; p++) {
         const up = updatedProvinces[p]!;
         updatedProvincesMap[up.provinceId.toString()] = up;
       }
 
+      const polStart = performance.now();
       const polNation = PoliticsTurnProcessor.process(
         ecoNation,
         currentState.nations,
         isAtWar,
         updatedProvincesMap,
       );
+      totalPolDuration += performance.now() - polStart;
 
       updatedNations[id] = polNation;
     }
+
+    const totalPipeDuration = (performance.now() - pipeStart).toFixed(2);
+    console.log(
+      `[PIPELINE_METRICS] زمان کل پایپلاین: ${totalPipeDuration}ms [پروپوزال‌ها: ${propDuration}ms | گروه‌بندی استان‌ها: ${groupDuration}ms | دیپلماسی کل: ${totalDipDuration.toFixed(2)}ms | اقتصاد کل: ${totalEcoDuration.toFixed(2)}ms | سیاست کل: ${totalPolDuration.toFixed(2)}ms]`,
+    );
 
     return {
       ...currentState,
