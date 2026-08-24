@@ -5,6 +5,7 @@ import {
   RelationProfile,
   CountryRegistry,
   GeopoliticalReachResolver,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
@@ -41,12 +42,19 @@ export class DiplomaticTurnProcessor {
     const relKeys = Object.keys(nation.relations);
     const newRels: Record<string, RelationProfile> = { ...nation.relations };
 
+    const myProvs = NationGettersUtility.getOwnedProvinces(
+      nation.id,
+      provincesMap,
+    );
+
     const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
       nation,
       allNations || {},
       provincesMap,
       rankMap,
+      myProvs,
     );
+
     const reachableCanonicalSet = new Set(
       reachableTargets.map((t) => CountryRegistry.resolveCanonicalId(t.id)),
     );
@@ -106,6 +114,7 @@ export class DiplomaticTurnProcessor {
             targetNation,
             allNations,
             provincesMap,
+            myProvs,
           )
         : null;
 

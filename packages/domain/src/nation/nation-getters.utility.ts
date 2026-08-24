@@ -11,19 +11,44 @@ export class NationGettersUtility {
   ): Province[] {
     if (!provincesMap) return [];
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    const list = Array.isArray(provincesMap)
-      ? provincesMap
-      : Object.values(provincesMap);
-    return list.filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId,
-    );
+    const result: Province[] = [];
+
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          result.push(p);
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          result.push(p);
+        }
+      }
+    }
+
+    return result;
   }
 
   public static getPopulation(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): number {
+    if (ownedProvinces) {
+      let total = 0;
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        total += ownedProvinces[i]!.population || 0;
+      }
+      return total;
+    }
+
     if (!provincesMap) return 0;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     let total = 0;
@@ -54,7 +79,16 @@ export class NationGettersUtility {
   public static getMaxPopulationCapacity(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): number {
+    if (ownedProvinces) {
+      let total = 0;
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        total += ownedProvinces[i]!.maxPopulationCapacity || 0;
+      }
+      return total;
+    }
+
     if (!provincesMap) return 0;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     let total = 0;
@@ -85,34 +119,20 @@ export class NationGettersUtility {
   public static getPerCapitaProductivity(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): number {
-    if (!provincesMap) return 5000;
-    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    const provs =
+      ownedProvinces ?? this.getOwnedProvinces(nationId, provincesMap);
+    if (provs.length === 0) return 5000;
+
     let totalPop = 0;
     let totalProdWeighted = 0;
 
-    if (Array.isArray(provincesMap)) {
-      for (let i = 0; i < provincesMap.length; i++) {
-        const p = provincesMap[i]!;
-        if (
-          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
-        ) {
-          const pop = p.population || 0;
-          totalPop += pop;
-          totalProdWeighted += pop * (p.perCapitaProductivity || 5000);
-        }
-      }
-    } else {
-      for (const key in provincesMap) {
-        const p = provincesMap[key]!;
-        if (
-          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
-        ) {
-          const pop = p.population || 0;
-          totalPop += pop;
-          totalProdWeighted += pop * (p.perCapitaProductivity || 5000);
-        }
-      }
+    for (let i = 0; i < provs.length; i++) {
+      const p = provs[i]!;
+      const pop = p.population || 0;
+      totalPop += pop;
+      totalProdWeighted += pop * (p.perCapitaProductivity || 5000);
     }
 
     if (totalPop <= 0) return 5000;
@@ -122,7 +142,16 @@ export class NationGettersUtility {
   public static getTerritoryPixelCount(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): number {
+    if (ownedProvinces) {
+      let total = 0;
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        total += ownedProvinces[i]!.pixelCount || 0;
+      }
+      return total;
+    }
+
     if (!provincesMap) return 0;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     let total = 0;
@@ -153,7 +182,15 @@ export class NationGettersUtility {
   public static hasSeaAccess(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): boolean {
+    if (ownedProvinces) {
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        if (ownedProvinces[i]!.hasSeaAccess) return true;
+      }
+      return false;
+    }
+
     if (!provincesMap) return false;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
 
@@ -185,7 +222,18 @@ export class NationGettersUtility {
   public static getInfrastructureLevel(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): number {
+    if (ownedProvinces) {
+      if (ownedProvinces.length === 0) return 1;
+      let maxLevel = 1;
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        const lvl = ownedProvinces[i]!.infrastructureLevel || 1;
+        if (lvl > maxLevel) maxLevel = lvl;
+      }
+      return maxLevel;
+    }
+
     if (!provincesMap) return 1;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     let maxLevel = 1;
@@ -196,9 +244,8 @@ export class NationGettersUtility {
         if (
           CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
         ) {
-          if ((p.infrastructureLevel || 1) > maxLevel) {
-            maxLevel = p.infrastructureLevel || 1;
-          }
+          const lvl = p.infrastructureLevel || 1;
+          if (lvl > maxLevel) maxLevel = lvl;
         }
       }
     } else {
@@ -207,9 +254,8 @@ export class NationGettersUtility {
         if (
           CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
         ) {
-          if ((p.infrastructureLevel || 1) > maxLevel) {
-            maxLevel = p.infrastructureLevel || 1;
-          }
+          const lvl = p.infrastructureLevel || 1;
+          if (lvl > maxLevel) maxLevel = lvl;
         }
       }
     }
@@ -220,7 +266,16 @@ export class NationGettersUtility {
   public static isAlive(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
   ): boolean {
+    if (ownedProvinces) {
+      for (let i = 0; i < ownedProvinces.length; i++) {
+        const p = ownedProvinces[i]!;
+        if ((p.pixelCount || 0) > 0 && (p.population || 0) > 0) return true;
+      }
+      return false;
+    }
+
     if (!provincesMap) return false;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
 

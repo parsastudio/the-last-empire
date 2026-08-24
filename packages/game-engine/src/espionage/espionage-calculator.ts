@@ -44,6 +44,8 @@ export class EspionageCalculator {
     sourceNation: Nation,
     targetNation: Nation,
     provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
+    targetProvinces?: Province[],
   ): TechSuperiorityDelta {
     const militaryDelta = Math.max(
       0,
@@ -56,10 +58,12 @@ export class EspionageCalculator {
     const sourceInfra = NationGettersUtility.getInfrastructureLevel(
       sourceNation.id,
       provincesMap,
+      sourceProvinces,
     );
     const targetInfra = NationGettersUtility.getInfrastructureLevel(
       targetNation.id,
       provincesMap,
+      targetProvinces,
     );
     const infrastructureDelta = Math.max(0, targetInfra - sourceInfra);
 
