@@ -179,9 +179,13 @@ export class PoliticsActionExecutor {
           }
 
           const currentReceiverGrudge = receiverRel.grudge ?? 0;
+          const currentReceiverAlignment = receiverRel.alignment ?? 0;
+          const currentReceiverTension = receiverRel.tension ?? 10;
+
           const updatedReceiverRel = {
             ...receiverRel,
-            opinion: Math.min(100, receiverRel.opinion + 25),
+            alignment: Math.min(100, currentReceiverAlignment + 25),
+            tension: Math.max(0, currentReceiverTension - 15),
             grudge: Math.max(0, currentReceiverGrudge - 20),
           };
 

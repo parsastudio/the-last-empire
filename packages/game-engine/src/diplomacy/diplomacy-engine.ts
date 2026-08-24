@@ -37,40 +37,47 @@ export class TreatyEvaluator {
     newType: DiplomaticProposalType,
   ): RelationProfile {
     const currentGrudge = profile.grudge ?? 0;
+    const currentAlignment = profile.alignment ?? 0;
+    const currentTension = profile.tension ?? 10;
 
     switch (newType) {
       case "SEND_FOREIGN_AID":
         return {
           ...profile,
-          opinion: Math.min(100, profile.opinion + 25),
+          alignment: Math.min(100, currentAlignment + 25),
+          tension: Math.max(0, currentTension - 15),
           grudge: Math.max(0, currentGrudge - 20),
         };
       case "NON_AGGRESSION_PACT":
         return {
           ...profile,
           stance: "NON_AGGRESSION_PACT",
-          opinion: Math.min(100, profile.opinion + 15),
+          alignment: Math.min(100, currentAlignment + 15),
+          tension: Math.min(20, currentTension),
           grudge: Math.max(0, currentGrudge - 10),
         };
       case "FULL_ALLIANCE":
         return {
           ...profile,
           stance: "ALLIANCE",
-          opinion: Math.min(100, profile.opinion + 30),
+          alignment: Math.min(100, currentAlignment + 30),
+          tension: 0,
           grudge: 0,
         };
       case "PEACE_TREATY":
         return {
           ...profile,
           stance: "NORMAL_DIPLOMACY",
-          opinion: Math.max(10, profile.opinion + 20),
+          alignment: Math.max(10, currentAlignment + 20),
+          tension: Math.min(30, Math.floor(currentTension * 0.3)),
           grudge: Math.min(5, Math.floor(currentGrudge * 0.1)),
         };
       case "DECLARE_WAR":
         return {
           ...profile,
           stance: "WAR",
-          opinion: -100,
+          alignment: -100,
+          tension: 100,
           grudge: Math.min(100, currentGrudge + 30),
         };
       default:

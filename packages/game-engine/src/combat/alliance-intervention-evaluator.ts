@@ -49,12 +49,13 @@ export class AllianceInterventionEvaluator {
       const hasActiveTreatyWithAttacker =
         relWithAttacker?.stance === "NON_AGGRESSION_PACT" ||
         relWithAttacker?.stance === "ALLIANCE";
-      const hasGoodOpinionWithAttacker = (relWithAttacker?.opinion ?? 0) >= 40;
+      const hasGoodAlignmentWithAttacker =
+        (relWithAttacker?.alignment ?? 0) >= 40;
 
       if (
         isStrongEnough &&
         !hasActiveTreatyWithAttacker &&
-        !hasGoodOpinionWithAttacker
+        !hasGoodAlignmentWithAttacker
       ) {
         interveningAllyIds.push(ally.id);
 
@@ -64,10 +65,9 @@ export class AllianceInterventionEvaluator {
           [attacker.id]: {
             targetNationId: attacker.id,
             stance: "WAR" as const,
-            opinion: -100,
-            grudge: Math.min(100, currentGrudge + 35),
             alignment: -100,
             tension: 100,
+            grudge: Math.min(100, currentGrudge + 35),
             lostProvincesCount: relWithAttacker?.lostProvincesCount ?? 0,
           },
         };
@@ -86,10 +86,9 @@ export class AllianceInterventionEvaluator {
           [ally.id]: {
             targetNationId: ally.id,
             stance: "WAR" as const,
-            opinion: -100,
-            grudge: Math.min(100, attackerGrudgeWithAlly + 20),
             alignment: -100,
             tension: 100,
+            grudge: Math.min(100, attackerGrudgeWithAlly + 20),
             lostProvincesCount:
               currentAttacker.relations[ally.id]?.lostProvincesCount ?? 0,
           },
@@ -107,13 +106,12 @@ export class AllianceInterventionEvaluator {
           [defender.id]: {
             targetNationId: defender.id,
             stance: "NORMAL_DIPLOMACY" as const,
-            opinion: Math.min(ally.relations[defender.id]?.opinion ?? 0, 0),
+            alignment: -20,
+            tension: 40,
             grudge: Math.min(
               100,
               (ally.relations[defender.id]?.grudge ?? 0) + 10,
             ),
-            alignment: -20,
-            tension: 40,
             lostProvincesCount:
               ally.relations[defender.id]?.lostProvincesCount ?? 0,
           },
@@ -133,10 +131,9 @@ export class AllianceInterventionEvaluator {
           [ally.id]: {
             targetNationId: ally.id,
             stance: "NORMAL_DIPLOMACY" as const,
-            opinion: -30,
-            grudge: Math.min(100, defenderGrudgeWithAlly + 45),
             alignment: -40,
             tension: 60,
+            grudge: Math.min(100, defenderGrudgeWithAlly + 45),
             lostProvincesCount:
               currentDefender.relations[ally.id]?.lostProvincesCount ?? 0,
           },

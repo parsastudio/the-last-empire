@@ -59,7 +59,7 @@ export class AIEconomicDiplomacyEvaluator {
       const isAppeasement =
         vector.posture === "WARY_BUFFER" &&
         vector.tension >= 50 &&
-        rel.opinion < 10;
+        vector.alignment < 10;
 
       const isAllianceSupport =
         rel.stance === "ALLIANCE" &&

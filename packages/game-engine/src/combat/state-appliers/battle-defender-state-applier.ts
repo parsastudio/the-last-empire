@@ -44,10 +44,9 @@ export class BattleDefenderStateApplier {
       updatedRelations[cleanAttackerId] = {
         targetNationId: cleanAttackerId,
         stance: "WAR",
-        opinion: -100,
-        grudge: Math.min(100, currentGrudge + 40),
         alignment: -100,
         tension: 100,
+        grudge: Math.min(100, currentGrudge + 40),
         lostProvincesCount: nextLostProvinces,
       };
     }

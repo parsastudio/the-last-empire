@@ -19,7 +19,6 @@ export interface DiplomaticRelation {
   flagCode: string;
   rank: number;
   stance: DiplomaticStance;
-  opinion: number;
   alignment: number;
   tension: number;
   posture: DiplomaticPosture;
@@ -55,12 +54,18 @@ export function getPostureBadgeClass(posture: DiplomaticPosture): string {
   }
 }
 
-export function getQualitativeOpinionColor(opinion: number): string {
-  if (opinion >= 60) return "text-emerald-500 font-bold";
-  if (opinion >= 20) return "text-emerald-400 font-semibold";
-  if (opinion >= -19) return "text-muted-foreground font-medium";
-  if (opinion >= -59) return "text-amber-500 font-semibold";
+export function getAlignmentColor(alignment: number): string {
+  if (alignment >= 40) return "text-emerald-500 font-bold";
+  if (alignment >= 15) return "text-emerald-400 font-semibold";
+  if (alignment >= -15) return "text-muted-foreground font-medium";
+  if (alignment >= -40) return "text-amber-500 font-semibold";
   return "text-rose-500 font-bold";
+}
+
+export function getTensionColor(tension: number): string {
+  if (tension >= 60) return "text-rose-500 font-bold";
+  if (tension >= 35) return "text-amber-500 font-semibold";
+  return "text-emerald-400 font-medium";
 }
 
 export function resolveProfileRelation(
@@ -99,7 +104,6 @@ export function resolveProfileRelation(
     : 99;
 
   let stance: DiplomaticStance = "NORMAL_DIPLOMACY";
-  let unifiedScore = 0;
   let alignment = 0;
   let tension = 10;
   let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
@@ -108,7 +112,6 @@ export function resolveProfileRelation(
     const directRel = humanNation.relations[liveNation.id];
     if (directRel) {
       stance = directRel.stance;
-      unifiedScore = directRel.opinion;
     }
     const vector = GeopoliticalVectorCalculator.calculate(
       humanNation,
@@ -119,11 +122,6 @@ export function resolveProfileRelation(
     alignment = vector.alignment;
     tension = vector.tension;
     posture = vector.posture;
-
-    const calculatedUnified = Math.round(
-      vector.alignment * 0.65 - vector.tension * 0.35,
-    );
-    unifiedScore = Math.max(-100, Math.min(100, calculatedUnified));
   }
 
   return {
@@ -132,7 +130,6 @@ export function resolveProfileRelation(
     flagCode: flagCode.toUpperCase(),
     rank,
     stance,
-    opinion: unifiedScore,
     alignment,
     tension,
     posture,
@@ -145,7 +142,8 @@ export function resolveProfileRelation(
         ? liveNation.government.type
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
-      opinion: unifiedScore,
+      alignment,
+      tension,
     },
   };
 }

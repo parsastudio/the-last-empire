@@ -25,10 +25,9 @@ export const DiplomaticPostureSchema = z.enum([
 export const RelationProfileSchema = z.object({
   targetNationId: z.string(),
   stance: DiplomaticStanceSchema,
-  opinion: z.number().min(-100).max(100),
+  alignment: z.number().min(-100).max(100).default(0),
+  tension: z.number().min(0).max(100).default(10),
   grudge: z.number().min(0).max(100).default(0),
-  alignment: z.number().min(-100).max(100).optional(),
-  tension: z.number().min(0).max(100).optional(),
   lostProvincesCount: z.number().nonnegative().default(0),
 });
 

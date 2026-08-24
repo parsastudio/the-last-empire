@@ -15,7 +15,8 @@ export interface CountryProfileData {
   techLevel: number;
   governmentType: string;
   stability: number;
-  opinion?: number;
+  alignment: number;
+  tension: number;
 }
 
 interface CountryProfileStatsProps {
@@ -23,8 +24,7 @@ interface CountryProfileStatsProps {
 }
 
 export function CountryProfileStats({ data }: CountryProfileStatsProps) {
-  const currentOpinion = data.opinion ?? 0;
-  const isArmsEligible = currentOpinion >= 20;
+  const isArmsEligible = data.alignment >= 15 && data.tension < 60;
 
   return (
     <div className="space-y-3 font-mono text-xs dir-rtl font-sans">
@@ -79,7 +79,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         ) : (
           <span className="text-[10px] font-bold text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
             <Lock size={10} />
-            نیازمند دیدگاه ۲۰+
+            نیازمند همسویی ۱۵+
           </span>
         )}
       </div>

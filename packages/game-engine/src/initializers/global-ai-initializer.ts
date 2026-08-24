@@ -18,10 +18,10 @@ export class DiplomaticMatrixGenerator {
 
     for (const target of allNations) {
       if (target.id === currentId) continue;
-      let baselineOpinion = 0;
+      let baselineAlignment = 0;
 
       if (currentGov === target.govType) {
-        baselineOpinion += 15;
+        baselineAlignment += 15;
       } else if (
         (currentGov === "DEMOCRACY" &&
           (target.govType === "DICTATORSHIP" ||
@@ -32,18 +32,17 @@ export class DiplomaticMatrixGenerator {
             currentGov === "FASCISM" ||
             currentGov === "COMMUNISM"))
       ) {
-        baselineOpinion -= 15;
+        baselineAlignment -= 15;
       } else if (currentGov !== "DEMOCRACY" && target.govType !== "DEMOCRACY") {
-        baselineOpinion += 10;
+        baselineAlignment += 10;
       }
 
       relations[target.id] = {
         targetNationId: target.id,
         stance: "NORMAL_DIPLOMACY",
-        opinion: baselineOpinion,
-        grudge: 0,
-        alignment: baselineOpinion,
+        alignment: baselineAlignment,
         tension: 10,
+        grudge: 0,
         lostProvincesCount: 0,
       };
     }
