@@ -21,6 +21,7 @@ export * from "./military/military-inventory-helper";
 export * from "./military/military-power-calculator.utility";
 export * from "./military/military-pricing-calculator.utility";
 export * from "./military/military-unit-stats.config";
+export * from "./military/military-distribution-engine";
 export * from "./nation/default-nation.mock";
 export * from "./nation/demographics-calculator.utility";
 export * from "./nation/gdp-calculator.utility";

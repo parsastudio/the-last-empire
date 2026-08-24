@@ -6,23 +6,14 @@ import {
   FinalManifestProvince,
   FinalManifestNation,
   FinalMapManifest,
-  MilitaryPowerCalculator,
+  NationGettersUtility,
+  NationRankCandidateInput,
 } from "@geopolitics/domain";
-import { MilitaryDistributionEngine } from "@geopolitics/game-engine";
+import { MilitaryDistributionEngine } from "@geopolitics/domain";
 import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
 import { ServerMapPathResolver } from "@/infrastructure/core/io/server-map-path-resolver";
 
 export type { FinalManifestProvince, FinalManifestNation, FinalMapManifest };
-
-interface ProfileRankCandidate {
-  profile: CountryProfile;
-  gdp: number;
-  milPower: number;
-  population: number;
-  ecoRank: number;
-  milRank: number;
-  compositeScore: number;
-}
 
 export class StrategicManifestBuilder {
   public async buildAndSave(
@@ -49,92 +40,32 @@ export class StrategicManifestBuilder {
       countryProvincesMap.has(p.id ?? 0),
     );
 
-    const candidates: ProfileRankCandidate[] = activeProfiles.map((p) => {
-      const tier = p.militaryTier || 5;
-      const stack = MilitaryDistributionEngine.calculateStartingStack(
-        tier,
-        true,
-        p.startingTechLevel,
-      );
-
-      const milPower = MilitaryPowerCalculator.calculateEffectivePower(
-        {
-          id: p.code,
-          name: p.nameFa,
-          isAi: true,
-          isAlive: true,
-          flagCode: p.flagCode,
-          taxRate: 15,
-          tariffRate: 10,
-          treasury: 100000,
-          nationalDebt: 0,
-          industrialLevel: 1,
-          government: {
-            type: p.startingGovernment || "DEMOCRACY",
-            stability: 50,
-            turnsInPower: 1,
-          },
-          military: stack,
-          recruitmentQueue: [],
-          relations: {},
-          activeModifiers: [],
-          globalReputation: 50,
-          doctrines: { unlockedDoctrines: [] },
-          executedEspionageTiers: [],
-          warFocusTargetId: null,
-        },
-        true,
-      );
-
-      return {
-        profile: p,
+    const candidatesInput: NationRankCandidateInput[] = activeProfiles.map(
+      (p) => ({
+        id: p.code,
+        name: p.nameFa,
         gdp: p.gdp,
-        milPower,
         population: p.population,
-        ecoRank: 1,
-        milRank: 1,
-        compositeScore: 0,
-      };
+        governmentType: p.startingGovernment,
+        militaryTier: p.militaryTier,
+        startingTechLevel: p.startingTechLevel,
+        hasSeaAccess: (countryProvincesMap.get(p.id ?? 0) || []).some(
+          (prov) => prov.hasSeaAccess,
+        ),
+      }),
+    );
+
+    const globalRankMap =
+      NationGettersUtility.calculateRankMapFromCandidates(candidatesInput);
+
+    activeProfiles.sort((a, b) => {
+      const rankA = globalRankMap.get(a.code) ?? 999;
+      const rankB = globalRankMap.get(b.code) ?? 999;
+      return rankA - rankB;
     });
 
-    const ecoSorted = [...candidates].sort((a, b) => {
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      if (b.population !== a.population) return b.population - a.population;
-      return a.profile.code.localeCompare(b.profile.code);
-    });
-    for (let i = 0; i < ecoSorted.length; i++) {
-      ecoSorted[i]!.ecoRank = i + 1;
-    }
-
-    const milSorted = [...candidates].sort((a, b) => {
-      if (b.milPower !== a.milPower) return b.milPower - a.milPower;
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      return a.profile.code.localeCompare(b.profile.code);
-    });
-    for (let i = 0; i < milSorted.length; i++) {
-      milSorted[i]!.milRank = i + 1;
-    }
-
-    for (let i = 0; i < candidates.length; i++) {
-      const c = candidates[i]!;
-      c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
-    }
-
-    candidates.sort((a, b) => {
-      if (a.compositeScore !== b.compositeScore) {
-        return a.compositeScore - b.compositeScore;
-      }
-      if (b.gdp !== a.gdp) {
-        return b.gdp - a.gdp;
-      }
-      if (b.population !== a.population) {
-        return b.population - a.population;
-      }
-      return a.profile.code.localeCompare(b.profile.code);
-    });
-
-    for (let rankIndex = 0; rankIndex < candidates.length; rankIndex++) {
-      const profile = candidates[rankIndex]!.profile;
+    for (let rankIndex = 0; rankIndex < activeProfiles.length; rankIndex++) {
+      const profile = activeProfiles[rankIndex]!;
       const countryNumericId = profile.id ?? 0;
       const countryId = profile.code.toUpperCase();
       const provList = countryProvincesMap.get(countryNumericId) || [];
@@ -218,6 +149,7 @@ export class StrategicManifestBuilder {
 
       const industrialLevel = Math.max(1, Math.min(5, techLevel));
       const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
+      const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
 
       manifestNations.push({
         id: countryId,
@@ -234,7 +166,7 @@ export class StrategicManifestBuilder {
         provinceIds: provIds,
         hasSeaAccess,
         startingTreasury,
-        initialRank: rankIndex + 1,
+        initialRank: computedRank,
         defaultGovernment: defaultGov,
         startingInfantry,
         startingArmor,

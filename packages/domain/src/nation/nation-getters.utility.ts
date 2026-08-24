@@ -3,9 +3,25 @@ import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
+import { MilitaryDistributionEngine } from "@/domain/military/military-distribution-engine";
+import { MilitaryStack } from "@/domain/military/military.schema";
+import { GovernmentType } from "@/domain/politics/politics.schema";
 
-interface NationRankingCandidate {
-  nation: Nation;
+export interface NationRankCandidateInput {
+  id: string;
+  name?: string;
+  gdp: number;
+  population?: number;
+  military?: MilitaryStack;
+  militaryPower?: number;
+  governmentType?: GovernmentType | string;
+  militaryTier?: number;
+  startingTechLevel?: number;
+  hasSeaAccess?: boolean;
+}
+
+interface ProcessedCandidate {
+  id: string;
   canonicalId: string;
   gdp: number;
   milPower: number;
@@ -16,6 +32,159 @@ interface NationRankingCandidate {
 }
 
 export class NationGettersUtility {
+  public static calculateRankMapFromCandidates(
+    candidatesInput: NationRankCandidateInput[],
+  ): Map<string, number> {
+    const rankMap = new Map<string, number>();
+    if (candidatesInput.length === 0) return rankMap;
+
+    const processed: ProcessedCandidate[] = new Array(candidatesInput.length);
+
+    for (let i = 0; i < candidatesInput.length; i++) {
+      const input = candidatesInput[i]!;
+      const canonicalId = CountryRegistry.resolveCanonicalId(input.id);
+      const profile =
+        CountryRegistry.getCountry(canonicalId) ||
+        CountryRegistry.getCountry(input.id);
+
+      let milPower = input.militaryPower;
+
+      if (milPower === undefined) {
+        if (input.military) {
+          milPower = MilitaryPowerCalculator.calculateEffectivePower(
+            {
+              id: canonicalId,
+              name: input.name || profile?.nameFa || canonicalId,
+              isAi: true,
+              isAlive: true,
+              flagCode: profile?.flagCode || "IR",
+              taxRate: 15,
+              tariffRate: 10,
+              treasury: 100000,
+              nationalDebt: 0,
+              industrialLevel: 1,
+              government: {
+                type:
+                  (input.governmentType as GovernmentType) ||
+                  profile?.startingGovernment ||
+                  "DEMOCRACY",
+                stability: 50,
+                turnsInPower: 1,
+              },
+              military: input.military,
+              recruitmentQueue: [],
+              relations: {},
+              activeModifiers: [],
+              globalReputation: 50,
+              doctrines: { unlockedDoctrines: [] },
+              executedEspionageTiers: [],
+              warFocusTargetId: null,
+            },
+            true,
+          );
+        } else {
+          const tier = input.militaryTier ?? profile?.militaryTier ?? 5;
+          const techLevel =
+            input.startingTechLevel ?? profile?.startingTechLevel ?? 1;
+          const hasSea = input.hasSeaAccess ?? true;
+          const stack = MilitaryDistributionEngine.calculateStartingStack(
+            tier,
+            hasSea,
+            techLevel,
+          );
+
+          milPower = MilitaryPowerCalculator.calculateEffectivePower(
+            {
+              id: canonicalId,
+              name: input.name || profile?.nameFa || canonicalId,
+              isAi: true,
+              isAlive: true,
+              flagCode: profile?.flagCode || "IR",
+              taxRate: 15,
+              tariffRate: 10,
+              treasury: 100000,
+              nationalDebt: 0,
+              industrialLevel: 1,
+              government: {
+                type:
+                  (input.governmentType as GovernmentType) ||
+                  profile?.startingGovernment ||
+                  "DEMOCRACY",
+                stability: 50,
+                turnsInPower: 1,
+              },
+              military: stack,
+              recruitmentQueue: [],
+              relations: {},
+              activeModifiers: [],
+              globalReputation: 50,
+              doctrines: { unlockedDoctrines: [] },
+              executedEspionageTiers: [],
+              warFocusTargetId: null,
+            },
+            true,
+          );
+        }
+      }
+
+      processed[i] = {
+        id: input.id,
+        canonicalId,
+        gdp: input.gdp,
+        milPower,
+        population: input.population || profile?.population || 0,
+        ecoRank: 1,
+        milRank: 1,
+        compositeScore: 0,
+      };
+    }
+
+    const ecoSorted = [...processed].sort((a, b) => {
+      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
+      if (b.population !== a.population) return b.population - a.population;
+      return a.canonicalId.localeCompare(b.canonicalId);
+    });
+    for (let i = 0; i < ecoSorted.length; i++) {
+      ecoSorted[i]!.ecoRank = i + 1;
+    }
+
+    const milSorted = [...processed].sort((a, b) => {
+      if (b.milPower !== a.milPower) return b.milPower - a.milPower;
+      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
+      return a.canonicalId.localeCompare(b.canonicalId);
+    });
+    for (let i = 0; i < milSorted.length; i++) {
+      milSorted[i]!.milRank = i + 1;
+    }
+
+    for (let i = 0; i < processed.length; i++) {
+      const c = processed[i]!;
+      c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
+    }
+
+    processed.sort((a, b) => {
+      if (a.compositeScore !== b.compositeScore) {
+        return a.compositeScore - b.compositeScore;
+      }
+      if (b.gdp !== a.gdp) {
+        return b.gdp - a.gdp;
+      }
+      if (b.population !== a.population) {
+        return b.population - a.population;
+      }
+      return a.canonicalId.localeCompare(b.canonicalId);
+    });
+
+    for (let i = 0; i < processed.length; i++) {
+      const item = processed[i]!;
+      const rankValue = i + 1;
+      rankMap.set(item.canonicalId, rankValue);
+      rankMap.set(item.id, rankValue);
+    }
+
+    return rankMap;
+  }
+
   public static buildProvincesByOwnerMap(
     provincesMap?: Record<string, Province> | Province[],
   ): Map<string, Province[]> {
@@ -223,16 +392,17 @@ export class NationGettersUtility {
     provincesMap?: Record<string, Province> | Province[],
     provincesByOwnerMap?: Map<string, Province[]>,
   ): Map<string, number> {
-    const rankMap = new Map<string, number>();
-    if (!nationsMap) return rankMap;
+    if (!nationsMap) return new Map<string, number>();
 
     const aliveNations = Object.values(nationsMap).filter((n) => n.isAlive);
-    if (aliveNations.length === 0) return rankMap;
+    if (aliveNations.length === 0) return new Map<string, number>();
 
     const ownerMap =
       provincesByOwnerMap ?? this.buildProvincesByOwnerMap(provincesMap);
 
-    const candidates: NationRankingCandidate[] = new Array(aliveNations.length);
+    const candidatesInput: NationRankCandidateInput[] = new Array(
+      aliveNations.length,
+    );
 
     for (let i = 0; i < aliveNations.length; i++) {
       const nation = aliveNations[i]!;
@@ -248,69 +418,17 @@ export class NationGettersUtility {
         population += prov.population || 0;
       }
 
-      const milPower = MilitaryPowerCalculator.calculateEffectivePower(
-        nation,
-        true,
-      );
-
-      candidates[i] = {
-        nation,
-        canonicalId,
+      candidatesInput[i] = {
+        id: nation.id,
+        name: nation.name,
         gdp,
-        milPower,
         population,
-        ecoRank: 1,
-        milRank: 1,
-        compositeScore: 0,
+        military: nation.military,
+        governmentType: nation.government.type,
       };
     }
 
-    const ecoSorted = [...candidates].sort((a, b) => {
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      if (b.population !== a.population) return b.population - a.population;
-      return a.canonicalId.localeCompare(b.canonicalId);
-    });
-
-    for (let i = 0; i < ecoSorted.length; i++) {
-      ecoSorted[i]!.ecoRank = i + 1;
-    }
-
-    const milSorted = [...candidates].sort((a, b) => {
-      if (b.milPower !== a.milPower) return b.milPower - a.milPower;
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      return a.canonicalId.localeCompare(b.canonicalId);
-    });
-
-    for (let i = 0; i < milSorted.length; i++) {
-      milSorted[i]!.milRank = i + 1;
-    }
-
-    for (let i = 0; i < candidates.length; i++) {
-      const c = candidates[i]!;
-      c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
-    }
-
-    candidates.sort((a, b) => {
-      if (a.compositeScore !== b.compositeScore) {
-        return a.compositeScore - b.compositeScore;
-      }
-      if (b.gdp !== a.gdp) {
-        return b.gdp - a.gdp;
-      }
-      if (b.population !== a.population) {
-        return b.population - a.population;
-      }
-      return a.canonicalId.localeCompare(b.canonicalId);
-    });
-
-    for (let i = 0; i < candidates.length; i++) {
-      const item = candidates[i]!;
-      const rankValue = i + 1;
-      rankMap.set(item.canonicalId, rankValue);
-      rankMap.set(item.nation.id, rankValue);
-    }
-
-    return rankMap;
+    return this.calculateRankMapFromCandidates(candidatesInput);
   }
 
   public static getRank(
