@@ -24,38 +24,130 @@ export class NationGettersUtility {
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): number {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    return provs.reduce((sum, p) => sum + (p.population || 0), 0);
+    if (!provincesMap) return 0;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    let total = 0;
+
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          total += p.population || 0;
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          total += p.population || 0;
+        }
+      }
+    }
+
+    return total;
   }
 
   public static getMaxPopulationCapacity(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): number {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    return provs.reduce((sum, p) => sum + (p.maxPopulationCapacity || 0), 0);
+    if (!provincesMap) return 0;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    let total = 0;
+
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          total += p.maxPopulationCapacity || 0;
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          total += p.maxPopulationCapacity || 0;
+        }
+      }
+    }
+
+    return total;
   }
 
   public static getPerCapitaProductivity(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): number {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    const totalPop = provs.reduce((sum, p) => sum + (p.population || 0), 0);
+    if (!provincesMap) return 5000;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    let totalPop = 0;
+    let totalProdWeighted = 0;
+
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          const pop = p.population || 0;
+          totalPop += pop;
+          totalProdWeighted += pop * (p.perCapitaProductivity || 5000);
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          const pop = p.population || 0;
+          totalPop += pop;
+          totalProdWeighted += pop * (p.perCapitaProductivity || 5000);
+        }
+      }
+    }
+
     if (totalPop <= 0) return 5000;
-    const totalProductivity = provs.reduce(
-      (sum, p) => sum + (p.population || 0) * (p.perCapitaProductivity || 5000),
-      0,
-    );
-    return Math.round(totalProductivity / totalPop);
+    return Math.round(totalProdWeighted / totalPop);
   }
 
   public static getTerritoryPixelCount(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): number {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    return provs.reduce((sum, p) => sum + (p.pixelCount || 0), 0);
+    if (!provincesMap) return 0;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    let total = 0;
+
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          total += p.pixelCount || 0;
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          total += p.pixelCount || 0;
+        }
+      }
+    }
+
+    return total;
   }
 
   public static hasSeaAccess(
@@ -64,19 +156,29 @@ export class NationGettersUtility {
   ): boolean {
     if (!provincesMap) return false;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    const list = Array.isArray(provincesMap)
-      ? provincesMap
-      : Object.values(provincesMap);
 
-    for (let i = 0; i < list.length; i++) {
-      const p = list[i]!;
-      if (
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
-        p.hasSeaAccess
-      ) {
-        return true;
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
+          p.hasSeaAccess
+        ) {
+          return true;
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
+          p.hasSeaAccess
+        ) {
+          return true;
+        }
       }
     }
+
     return false;
   }
 
@@ -84,9 +186,35 @@ export class NationGettersUtility {
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],
   ): number {
-    const provs = this.getOwnedProvinces(nationId, provincesMap);
-    if (provs.length === 0) return 1;
-    return Math.max(1, ...provs.map((p) => p.infrastructureLevel || 1));
+    if (!provincesMap) return 1;
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    let maxLevel = 1;
+
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          if ((p.infrastructureLevel || 1) > maxLevel) {
+            maxLevel = p.infrastructureLevel || 1;
+          }
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId
+        ) {
+          if ((p.infrastructureLevel || 1) > maxLevel) {
+            maxLevel = p.infrastructureLevel || 1;
+          }
+        }
+      }
+    }
+
+    return maxLevel;
   }
 
   public static isAlive(
@@ -95,20 +223,31 @@ export class NationGettersUtility {
   ): boolean {
     if (!provincesMap) return false;
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    const list = Array.isArray(provincesMap)
-      ? provincesMap
-      : Object.values(provincesMap);
 
-    for (let i = 0; i < list.length; i++) {
-      const p = list[i]!;
-      if (
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
-        (p.pixelCount || 0) > 0 &&
-        (p.population || 0) > 0
-      ) {
-        return true;
+    if (Array.isArray(provincesMap)) {
+      for (let i = 0; i < provincesMap.length; i++) {
+        const p = provincesMap[i]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
+          (p.pixelCount || 0) > 0 &&
+          (p.population || 0) > 0
+        ) {
+          return true;
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId &&
+          (p.pixelCount || 0) > 0 &&
+          (p.population || 0) > 0
+        ) {
+          return true;
+        }
       }
     }
+
     return false;
   }
 
