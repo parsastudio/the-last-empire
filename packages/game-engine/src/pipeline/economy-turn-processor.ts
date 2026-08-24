@@ -29,8 +29,9 @@ export class EconomyTurnProcessor {
     let updatedProvinces = demoResult.updatedProvinces;
 
     const currentProvincesMap: Record<string, Province> = { ...provincesMap };
-    for (const p of updatedProvinces) {
-      currentProvincesMap[p.provinceId.toString()] = p;
+    for (let p = 0; p < updatedProvinces.length; p++) {
+      const up = updatedProvinces[p]!;
+      currentProvincesMap[up.provinceId.toString()] = up;
     }
 
     if (updated.isAi) {

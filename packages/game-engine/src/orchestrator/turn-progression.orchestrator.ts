@@ -5,7 +5,8 @@ import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
-import { GameAction, NationGettersUtility } from "@geopolitics/domain";
+import { GameAction } from "@geopolitics/domain";
+import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -23,17 +24,15 @@ export class TurnProgressionOrchestrator {
     );
 
     const initIndexStart = performance.now();
-    const provincesByOwnerMap = NationGettersUtility.buildProvincesByOwnerMap(
-      nextState.provinces,
-    );
-    const rankMap = NationGettersUtility.calculateRankMap(
+    const matrixCache = GeopoliticalMatrixCache.build(
       nextState.nations,
       nextState.provinces,
-      provincesByOwnerMap,
     );
+    const provincesByOwnerMap = matrixCache.getProvincesByOwnerMap();
+    const rankMap = matrixCache.getRankMap();
     const initIndexDuration = (performance.now() - initIndexStart).toFixed(2);
     console.log(
-      `[ORCH_STEP] ۱. ایندکس‌گذاری مستقیم استان‌ها و رتبه (${provincesByOwnerMap.size} کشور): ${initIndexDuration}ms`,
+      `[ORCH_STEP] ۱. ایندکس‌گذاری و ساخت ماتریس ژئوپلیتیک تک‌پاس (${provincesByOwnerMap.size} کشور): ${initIndexDuration}ms`,
     );
 
     const aiPlanStart = performance.now();
@@ -53,6 +52,7 @@ export class TurnProgressionOrchestrator {
         lockedDiplomacyTargets,
         rankMap,
         provincesByOwnerMap,
+        matrixCache,
       );
 
       for (let j = 0; j < aiActions.length; j++) {
@@ -61,7 +61,7 @@ export class TurnProgressionOrchestrator {
     }
     const aiPlanDuration = (performance.now() - aiPlanStart).toFixed(2);
     console.log(
-      `[ORCH_STEP] ۲. برنامه‌ریزی هوش مصنوعی برای تمام کشورها (${allAiActions.length} اکشن): ${aiPlanDuration}ms`,
+      `[ORCH_STEP] ۲. برنامه‌ریزی هوش مصنوعی بر پایه ماتریس کش (${allAiActions.length} اکشن): ${aiPlanDuration}ms`,
     );
 
     const aiExecStart = performance.now();
@@ -73,7 +73,7 @@ export class TurnProgressionOrchestrator {
     nextState = batchedState;
     const aiExecDuration = (performance.now() - aiExecStart).toFixed(2);
     console.log(
-      `[ORCH_STEP] ۳. اجرای دسته‌ای اکشن‌های هوش مصنوعی (${executedCount} اکشن موفق): ${aiExecDuration}ms`,
+      `[ORCH_STEP] ۳. اجرای دسته‌ای بهینه در استیت کاری (${executedCount} اکشن موفق): ${aiExecDuration}ms`,
     );
 
     const pipelineStart = performance.now();
@@ -81,6 +81,7 @@ export class TurnProgressionOrchestrator {
       nextState,
       rankMap,
       provincesByOwnerMap,
+      matrixCache,
     );
     const pipelineDuration = (performance.now() - pipelineStart).toFixed(2);
     console.log(
