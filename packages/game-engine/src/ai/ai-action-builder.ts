@@ -27,38 +27,29 @@ export class AIActionBuilder {
     provincesMap?: Record<string, Province>,
     matrixCache?: GeopoliticalMatrixCache,
   ): NationDecisionContext {
-    if (matrixCache) {
-      const ownedProvinces = matrixCache.getOwnedProvinces(nation.id);
-      const reachableTargets = matrixCache.getReachableTargets(
-        nation,
-        allNations,
-        provincesMap,
-      );
-      const vectorsByTarget = matrixCache.getVectorsForNation(
-        nation,
-        allNations,
-        provincesMap,
-      );
-      const posture = matrixCache.getPosture(nation, allNations, provincesMap);
+    const cache =
+      matrixCache ??
+      GeopoliticalMatrixCache.build(allNations, provincesMap || {});
 
-      return {
-        ownedProvinces,
-        reachableTargets,
-        vectorsByTarget,
-        posture,
-      };
-    }
-
-    const fallbackCache = GeopoliticalMatrixCache.build(
-      allNations,
-      provincesMap || {},
-    );
-    return this.buildDecisionContext(
+    const ownedProvinces = cache.getOwnedProvinces(nation.id);
+    const reachableTargets = cache.getReachableTargets(
       nation,
       allNations,
       provincesMap,
-      fallbackCache,
     );
+    const vectorsByTarget = cache.getVectorsForNation(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    const posture = cache.getPosture(nation, allNations, provincesMap);
+
+    return {
+      ownedProvinces,
+      reachableTargets,
+      vectorsByTarget,
+      posture,
+    };
   }
 
   public static buildNationActions(

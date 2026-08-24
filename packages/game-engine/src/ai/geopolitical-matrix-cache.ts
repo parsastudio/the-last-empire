@@ -3,7 +3,6 @@ import {
   Province,
   CountryRegistry,
   NationGettersUtility,
-  MilitaryPowerCalculator,
   GeopoliticalReachResolver,
 } from "@geopolitics/domain";
 import {
@@ -15,11 +14,6 @@ import { AIPosture } from "@/engine/ai/ai-procurement-planner";
 export class GeopoliticalMatrixCache {
   private provincesByOwnerMap: Map<string, Province[]>;
   private rankMap: Map<string, number>;
-  private reachableTargetsMap = new Map<string, Nation[]>();
-  private vectorsMap = new Map<string, Map<string, GeopoliticalVector>>();
-  private powerMap = new Map<string, number>();
-  private seaAccessMap = new Map<string, boolean>();
-  private postureMap = new Map<string, AIPosture>();
 
   constructor(
     allNations: Record<string, Nation>,
@@ -32,20 +26,6 @@ export class GeopoliticalMatrixCache {
       provincesMap,
       this.provincesByOwnerMap,
     );
-
-    for (const nation of Object.values(allNations)) {
-      if (!nation.isAlive) continue;
-      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-      const provs = this.provincesByOwnerMap.get(canonicalId) || [];
-      const power = Math.max(
-        1,
-        MilitaryPowerCalculator.calculateLandAndAirPower(nation),
-      );
-      const hasSea = provs.some((p) => p.hasSeaAccess);
-
-      this.powerMap.set(canonicalId, power);
-      this.seaAccessMap.set(canonicalId, hasSea);
-    }
   }
 
   public static build(
@@ -73,20 +53,14 @@ export class GeopoliticalMatrixCache {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): Nation[] {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-    let targets = this.reachableTargetsMap.get(canonicalId);
-    if (!targets) {
-      targets = GeopoliticalReachResolver.getReachableTargets(
-        nation,
-        allNations,
-        provincesMap,
-        this.rankMap,
-        this.getOwnedProvinces(nation.id),
-        this.provincesByOwnerMap,
-      );
-      this.reachableTargetsMap.set(canonicalId, targets);
-    }
-    return targets;
+    return GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      this.rankMap,
+      this.getOwnedProvinces(nation.id),
+      this.provincesByOwnerMap,
+    );
   }
 
   public getVector(
@@ -95,35 +69,17 @@ export class GeopoliticalMatrixCache {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): GeopoliticalVector {
-    const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
-    const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
-
-    let sourceVectors = this.vectorsMap.get(sourceCanonical);
-    if (!sourceVectors) {
-      sourceVectors = new Map<string, GeopoliticalVector>();
-      this.vectorsMap.set(sourceCanonical, sourceVectors);
-    }
-
-    let vector = sourceVectors.get(targetCanonical);
-    if (!vector) {
-      const sourceProvs = this.getOwnedProvinces(source.id);
-      const sourcePower = this.powerMap.get(sourceCanonical) || 1;
-      const sourceSea = this.seaAccessMap.get(sourceCanonical) ?? false;
-
-      vector = GeopoliticalVectorCalculator.calculate(
-        source,
-        target,
-        allNations,
-        provincesMap,
-        sourceProvs,
-        sourcePower,
-        sourceSea,
-        this.provincesByOwnerMap,
-      );
-      sourceVectors.set(targetCanonical, vector);
-    }
-
-    return vector;
+    const sourceProvs = this.getOwnedProvinces(source.id);
+    return GeopoliticalVectorCalculator.calculate(
+      source,
+      target,
+      allNations,
+      provincesMap,
+      sourceProvs,
+      undefined,
+      undefined,
+      this.provincesByOwnerMap,
+    );
   }
 
   public getVectorsForNation(
@@ -149,14 +105,8 @@ export class GeopoliticalMatrixCache {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): AIPosture {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-    let posture = this.postureMap.get(canonicalId);
-    if (posture) return posture;
-
     if (nation.warFocusTargetId) {
-      posture = "WAR";
-      this.postureMap.set(canonicalId, posture);
-      return posture;
+      return "WAR";
     }
 
     let isWar = false;
@@ -180,14 +130,11 @@ export class GeopoliticalMatrixCache {
     }
 
     if (isWar) {
-      posture = "WAR";
-    } else if (maxTension >= 55) {
-      posture = "THREAT";
-    } else {
-      posture = "PEACE";
+      return "WAR";
     }
-
-    this.postureMap.set(canonicalId, posture);
-    return posture;
+    if (maxTension >= 55) {
+      return "THREAT";
+    }
+    return "PEACE";
   }
 }

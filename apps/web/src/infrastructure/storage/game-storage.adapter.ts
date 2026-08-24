@@ -36,24 +36,6 @@ export class GameStorageAdapter {
           log,
         }));
         await db.turnLogs.bulkPut(logRecords);
-
-        const totalLogsCount = await db.turnLogs
-          .where("gameId")
-          .equals(gameId)
-          .count();
-
-        if (totalLogsCount > GameStorageAdapter.MAX_LOGS_PER_GAME) {
-          const excess = totalLogsCount - GameStorageAdapter.MAX_LOGS_PER_GAME;
-          const oldestLogs = await db.turnLogs
-            .where("gameId")
-            .equals(gameId)
-            .sortBy("timestamp");
-
-          const toDeleteIds = oldestLogs
-            .slice(0, excess)
-            .map((record) => record.id);
-          await db.turnLogs.bulkDelete(toDeleteIds);
-        }
       }
     });
   }
