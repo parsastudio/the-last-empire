@@ -55,17 +55,21 @@ export class EspionageCalculator {
       0,
       targetNation.industrialLevel - sourceNation.industrialLevel,
     );
-    const sourceInfra = NationGettersUtility.getInfrastructureLevel(
-      sourceNation.id,
-      provincesMap,
-      sourceProvinces,
-    );
-    const targetInfra = NationGettersUtility.getInfrastructureLevel(
-      targetNation.id,
-      provincesMap,
-      targetProvinces,
-    );
-    const infrastructureDelta = Math.max(0, targetInfra - sourceInfra);
+
+    let infrastructureDelta = industrialDelta;
+    if (sourceProvinces && targetProvinces) {
+      const sourceInfra = NationGettersUtility.getInfrastructureLevel(
+        sourceNation.id,
+        provincesMap,
+        sourceProvinces,
+      );
+      const targetInfra = NationGettersUtility.getInfrastructureLevel(
+        targetNation.id,
+        provincesMap,
+        targetProvinces,
+      );
+      infrastructureDelta = Math.max(0, targetInfra - sourceInfra);
+    }
 
     return {
       militaryDelta,

@@ -188,7 +188,8 @@ export class AIEspionagePlanner {
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
       [];
 
-    for (const target of targets) {
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
       const rel =
         nation.relations[canonicalTarget] || nation.relations[target.id];
@@ -197,13 +198,17 @@ export class AIEspionagePlanner {
         continue;
       }
 
-      const superiority = EspionageCalculator.calculateTechSuperiority(
-        nation,
-        target,
-        provincesMap,
+      const milDelta = Math.max(
+        0,
+        target.military.techLevel - nation.military.techLevel,
       );
+      const indDelta = Math.max(
+        0,
+        target.industrialLevel - nation.industrialLevel,
+      );
+      const totalPoints = milDelta + indDelta * 2;
 
-      if (superiority.totalAvailablePoints < 2) {
+      if (totalPoints < 2) {
         continue;
       }
 
@@ -218,7 +223,7 @@ export class AIEspionagePlanner {
         eligibleTargets.push({
           target,
           cost,
-          points: superiority.totalAvailablePoints,
+          points: totalPoints,
         });
       }
     }
