@@ -1,11 +1,13 @@
 import { create } from "zustand";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+import { BattleFullReportData } from "@geopolitics/domain";
 
 interface UiStoreState {
   activeTab: SidebarTabType | null;
   activeSubTab: string | null;
   selectedTargetCode: string | null;
   isRailCollapsed: boolean;
+  selectedBattleDebrief: BattleFullReportData | null;
 
   setActiveTab: (
     tab: SidebarTabType | null,
@@ -15,6 +17,7 @@ interface UiStoreState {
   setIsRailCollapsed: (
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
+  setSelectedBattleDebrief: (data: BattleFullReportData | null) => void;
   closeActiveTab: () => void;
 }
 
@@ -23,6 +26,7 @@ export const useUiStore = create<UiStoreState>((set) => ({
   activeSubTab: null,
   selectedTargetCode: null,
   isRailCollapsed: true,
+  selectedBattleDebrief: null,
 
   setActiveTab: (tab, subTab = null, targetCode = null) =>
     set((state) => ({
@@ -39,6 +43,11 @@ export const useUiStore = create<UiStoreState>((set) => ({
           ? collapsed(state.isRailCollapsed)
           : collapsed,
     })),
+
+  setSelectedBattleDebrief: (data) =>
+    set({
+      selectedBattleDebrief: data,
+    }),
 
   closeActiveTab: () =>
     set({
