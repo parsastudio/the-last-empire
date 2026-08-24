@@ -21,6 +21,7 @@ export class NavalNeighborResolver {
     armorCount: number,
     airForceCount: number,
     droneCount: number,
+    attackerProvinces?: Province[],
   ): NavalAttackInfo {
     if (!provincesMap || !targetProvinceId) {
       return {
@@ -46,14 +47,29 @@ export class NavalNeighborResolver {
     const canonicalAttacker =
       CountryRegistry.resolveCanonicalId(attackerNationId);
 
-    const attackerCoastalProvinces = Object.values(provincesMap).filter((p) => {
-      const canonicalOwner = CountryRegistry.resolveCanonicalId(
-        p.ownerNationId,
-      );
-      return canonicalOwner === canonicalAttacker && p.hasSeaAccess;
-    });
+    const coastalProvinces: Province[] = [];
 
-    if (attackerCoastalProvinces.length === 0) {
+    if (attackerProvinces) {
+      for (let i = 0; i < attackerProvinces.length; i++) {
+        const p = attackerProvinces[i]!;
+        if (p.hasSeaAccess) {
+          coastalProvinces.push(p);
+        }
+      }
+    } else {
+      for (const key in provincesMap) {
+        const p = provincesMap[key]!;
+        if (
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
+            canonicalAttacker &&
+          p.hasSeaAccess
+        ) {
+          coastalProvinces.push(p);
+        }
+      }
+    }
+
+    if (coastalProvinces.length === 0) {
       return {
         isNavalValid: false,
         closestDistance: 0,
@@ -64,13 +80,13 @@ export class NavalNeighborResolver {
     }
 
     let minDistance = Infinity;
-    let closestProv = attackerCoastalProvinces[0]!;
+    let closestProv = coastalProvinces[0]!;
 
     const targetX = targetProv.centerCoordinates.x;
     const targetY = targetProv.centerCoordinates.y;
 
-    for (let i = 0; i < attackerCoastalProvinces.length; i++) {
-      const prov = attackerCoastalProvinces[i]!;
+    for (let i = 0; i < coastalProvinces.length; i++) {
+      const prov = coastalProvinces[i]!;
       const srcX = prov.centerCoordinates.x;
       const srcY = prov.centerCoordinates.y;
 

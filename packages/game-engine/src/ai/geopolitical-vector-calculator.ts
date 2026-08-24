@@ -34,6 +34,8 @@ export class GeopoliticalVectorCalculator {
     allNations?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     sourceProvinces?: Province[],
+    sourcePower?: number,
+    sourceSeaAccess?: boolean,
   ): GeopoliticalVector {
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const rel =
@@ -96,15 +98,17 @@ export class GeopoliticalVectorCalculator {
         myProvs,
       );
 
-    const sourceSea = NationGettersUtility.hasSeaAccess(
-      source.id,
-      provincesMap,
-      myProvs,
-    );
-    const targetSea = NationGettersUtility.hasSeaAccess(
-      target.id,
-      provincesMap,
-    );
+    const sourceSea =
+      sourceSeaAccess !== undefined
+        ? sourceSeaAccess
+        : NationGettersUtility.hasSeaAccess(source.id, provincesMap, myProvs);
+
+    const targetSea =
+      target.military.navalFleet > 0 ||
+      (provincesMap
+        ? NationGettersUtility.hasSeaAccess(target.id, provincesMap)
+        : false);
+
     const isNavalReachable = Boolean(sourceSea && targetSea);
 
     const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
@@ -123,14 +127,16 @@ export class GeopoliticalVectorCalculator {
       lostProvinces * 20 + Math.round(grudge * 0.4),
     );
 
-    const sPower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateLandAndAirPower(source),
-    );
+    const sPower =
+      sourcePower !== undefined
+        ? sourcePower
+        : Math.max(1, MilitaryPowerCalculator.calculateLandAndAirPower(source));
+
     const tPower = Math.max(
       1,
       MilitaryPowerCalculator.calculateLandAndAirPower(target),
     );
+
     const powerRatio = Number((tPower / sPower).toFixed(2));
 
     let powerImbalance = 0;

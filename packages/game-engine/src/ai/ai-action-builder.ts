@@ -5,6 +5,7 @@ import {
   GeopoliticalReachResolver,
   CountryRegistry,
   NationGettersUtility,
+  MilitaryPowerCalculator,
 } from "@geopolitics/domain";
 import {
   AIProcurementPlanner,
@@ -41,6 +42,13 @@ export class AIActionBuilder {
       provincesMap,
     );
 
+    const sourcePower = Math.max(
+      1,
+      MilitaryPowerCalculator.calculateLandAndAirPower(nation),
+    );
+
+    const sourceSeaAccess = ownedProvinces.some((p) => p.hasSeaAccess);
+
     const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
       nation,
       allNations,
@@ -69,6 +77,8 @@ export class AIActionBuilder {
         allNations,
         provincesMap,
         ownedProvinces,
+        sourcePower,
+        sourceSeaAccess,
       );
 
       vectorsByTarget.set(canonicalTarget, vector);
@@ -152,6 +162,7 @@ export class AIActionBuilder {
       nation,
       allNations,
       provincesMap,
+      context.ownedProvinces,
     );
     const tAtk = performance.now() - tAtkStart;
     if (attackAction) {
