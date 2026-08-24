@@ -14,10 +14,6 @@ export class ReconTierExecutor {
     provincesMap?: Record<string, Province>,
   ): { reconData: EspionageReconData; message: string } {
     const targetGdp = getNationGdp(target, provincesMap);
-    const targetInfra = NationGettersUtility.getInfrastructureLevel(
-      target.id,
-      provincesMap,
-    );
     const ownedCount = NationGettersUtility.getOwnedProvinces(
       target.id,
       provincesMap,
@@ -32,7 +28,6 @@ export class ReconTierExecutor {
       navalFleet: target.military.navalFleet || 0,
       techLevel: target.military.techLevel,
       industrialLevel: target.industrialLevel,
-      infrastructureLevel: targetInfra,
       treasury: target.treasury,
       gdp: targetGdp,
       stability: target.government.stability,

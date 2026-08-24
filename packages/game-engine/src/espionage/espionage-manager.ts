@@ -37,12 +37,10 @@ export class EspionageManager {
   public static calculateTechSuperiority(
     sourceNation: Nation,
     targetNation: Nation,
-    provincesMap?: Record<string, import("@geopolitics/domain").Province>,
   ): TechSuperiorityDelta {
     return EspionageCalculator.calculateTechSuperiority(
       sourceNation,
       targetNation,
-      provincesMap,
     );
   }
 
@@ -102,12 +100,11 @@ export class EspionageManager {
     const superiority = EspionageCalculator.calculateTechSuperiority(
       source,
       target,
-      state.provinces,
     );
     if (tier === 3 && superiority.totalAvailablePoints <= 0) {
       throw new GameError(
         "INVALID_ACTION",
-        "کشور هدف در هیچ‌یک از زمینه‌های نظامی، صنعتی یا زیرساختی از شما برتر نیست.",
+        "کشور هدف در هیچ‌یک از زمینه‌های نظامی یا صنعتی از شما برتر نیست.",
       );
     }
 

@@ -39,7 +39,6 @@ export interface FinalManifestNation {
   startingNavalFleet?: number;
   startingTechLevel: number;
   industrialLevel: number;
-  infrastructureLevel: number;
   startingStability: number;
 }
 

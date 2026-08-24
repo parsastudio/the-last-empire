@@ -34,16 +34,14 @@ export class TechHeistExecutor {
       };
     }
 
-    const pointsToGrant = Math.min(3, superiority.totalAvailablePoints);
+    const pointsToGrant = Math.min(2, superiority.totalAvailablePoints);
     let remainingPoints = pointsToGrant;
 
     let gMil = 0;
     let gInd = 0;
-    let gInfra = 0;
 
     let currMilGap = superiority.militaryDelta;
     let currIndGap = superiority.industrialDelta;
-    let currInfraGap = superiority.infrastructureDelta;
 
     while (remainingPoints > 0) {
       if (currMilGap > 0) {
@@ -58,13 +56,7 @@ export class TechHeistExecutor {
         remainingPoints--;
         if (remainingPoints <= 0) break;
       }
-      if (currInfraGap > 0) {
-        gInfra++;
-        currInfraGap--;
-        remainingPoints--;
-        if (remainingPoints <= 0) break;
-      }
-      if (currMilGap === 0 && currIndGap === 0 && currInfraGap === 0) {
+      if (currMilGap === 0 && currIndGap === 0) {
         break;
       }
     }
@@ -72,25 +64,25 @@ export class TechHeistExecutor {
     const newTechLevel = source.military.techLevel + gMil;
     const newIndLevel = source.industrialLevel + gInd;
 
-    const cleanSourceId = CountryRegistry.resolveCanonicalId(source.id);
-    for (const [pid, prov] of Object.entries(updatedProvinces)) {
-      if (
-        CountryRegistry.resolveCanonicalId(prov.ownerNationId) === cleanSourceId
-      ) {
-        let cap = prov.maxPopulationCapacity;
-        let prod = prov.perCapitaProductivity;
-        for (let i = 0; i < gInfra; i++) {
-          cap = DevelopmentManager.calculateNextCapacity(cap);
+    if (gInd > 0) {
+      const cleanSourceId = CountryRegistry.resolveCanonicalId(source.id);
+      for (const [pid, prov] of Object.entries(updatedProvinces)) {
+        if (
+          CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
+          cleanSourceId
+        ) {
+          let cap = prov.maxPopulationCapacity;
+          let prod = prov.perCapitaProductivity;
+          for (let i = 0; i < gInd; i++) {
+            cap = DevelopmentManager.calculateNextCapacity(cap);
+            prod = DevelopmentManager.calculateNextProductivity(prod);
+          }
+          updatedProvinces[pid] = {
+            ...prov,
+            maxPopulationCapacity: cap,
+            perCapitaProductivity: prod,
+          };
         }
-        for (let i = 0; i < gInd; i++) {
-          prod = DevelopmentManager.calculateNextProductivity(prod);
-        }
-        updatedProvinces[pid] = {
-          ...prov,
-          infrastructureLevel: prov.infrastructureLevel + gInfra,
-          maxPopulationCapacity: cap,
-          perCapitaProductivity: prod,
-        };
       }
     }
 
@@ -106,14 +98,13 @@ export class TechHeistExecutor {
     const techTheftData: EspionageTechTheftData = {
       militaryTechGained: gMil,
       industrialLevelGained: gInd,
-      infrastructureLevelGained: gInfra,
       totalPointsGained: pointsToGrant,
     };
 
     const message =
       outcome === "CLEAN_SUCCESS"
-        ? `سرقت قرن با موفقیت انجام شد! دانشمندان شما موفق شدند ${pointsToGrant} امتیاز ارتقای فناوری از ${target.name} استخراج و اعمال کنند.`
-        : `سرقت فناوری (${pointsToGrant} امتیاز ارتقا) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
+        ? `سرقت قرن با موفقیت انجام شد! دانشمندان شما موفق شدند ${pointsToGrant} سطح ارتقای فناوری از ${target.name} استخراج و اعمال کنند.`
+        : `سرقت فناوری (${pointsToGrant} سطح ارتقا) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
 
     return {
       updatedSource,
