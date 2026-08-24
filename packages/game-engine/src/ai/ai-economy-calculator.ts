@@ -1,4 +1,25 @@
+import { GovernmentType } from "@/domain/politics/politics.schema";
+
 export class AiEconomyCalculator {
+  public static getGovernmentIncomeMultiplier(
+    govType?: GovernmentType | string,
+  ): number {
+    switch (govType) {
+      case "DEMOCRACY":
+        return 1.1;
+      case "MONARCHY":
+        return 1.05;
+      case "COMMUNISM":
+        return 1.0;
+      case "DICTATORSHIP":
+        return 0.95;
+      case "FASCISM":
+        return 0.9;
+      default:
+        return 1.0;
+    }
+  }
+
   public static calculateIncomeRate(
     rank: number,
     totalAliveCount: number,
@@ -17,17 +38,25 @@ export class AiEconomyCalculator {
     gdp: number,
     rank: number,
     totalAliveCount: number,
+    govType?: GovernmentType | string,
   ): number {
     const rate = this.calculateIncomeRate(rank, totalAliveCount);
-    return Math.floor(gdp * rate);
+    const govMultiplier = this.getGovernmentIncomeMultiplier(govType);
+    return Math.floor(gdp * rate * govMultiplier);
   }
 
   public static calculateMaxArmyValuation(
     gdp: number,
     rank: number,
     totalAliveCount: number,
+    govType?: GovernmentType | string,
   ): number {
-    const turnIncome = this.calculateTurnIncome(gdp, rank, totalAliveCount);
+    const turnIncome = this.calculateTurnIncome(
+      gdp,
+      rank,
+      totalAliveCount,
+      govType,
+    );
     return turnIncome * 10;
   }
 
@@ -47,12 +76,19 @@ export class AiEconomyCalculator {
     rank: number,
     totalAliveCount: number,
     currentArmyValuation: number,
+    govType?: GovernmentType | string,
   ): number {
-    const baseIncome = this.calculateTurnIncome(gdp, rank, totalAliveCount);
+    const baseIncome = this.calculateTurnIncome(
+      gdp,
+      rank,
+      totalAliveCount,
+      govType,
+    );
     const maxValuation = this.calculateMaxArmyValuation(
       gdp,
       rank,
       totalAliveCount,
+      govType,
     );
     const deductionRate = this.calculateArmyMaintenanceDeductionRate(
       currentArmyValuation,
