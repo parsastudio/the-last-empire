@@ -1,4 +1,4 @@
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
@@ -8,26 +8,28 @@ export class NationLivenessManager {
   public updateLiveness(state: GameState): GameState {
     const updatedNations: Record<string, Nation> = { ...state.nations };
     const deadCanonicalIds = new Set<string>();
-    const newAnnexationLogs = [];
+    const newAnnexationLogs: TurnLogEntry[] = [];
 
     for (const [id, nation] of Object.entries(updatedNations)) {
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
-      const isAlive = NationGettersUtility.isAlive(id, state.provinces);
+      const hasProvinces = NationGettersUtility.isAlive(id, state.provinces);
 
-      if (nation.isAlive && !isAlive) {
+      if (!hasProvinces) {
         deadCanonicalIds.add(canonicalId);
         deadCanonicalIds.add(id);
 
-        newAnnexationLogs.push(
-          TurnLogBuilder.createLogEntry(
-            state.currentTurn,
-            nation.id,
-            "CRITICAL",
-            "NATION_COLLAPSED",
-            "GLOBAL_ANNEXATION",
-            "GLOBAL",
-          ),
-        );
+        if (nation.isAlive) {
+          newAnnexationLogs.push(
+            TurnLogBuilder.createLogEntry(
+              state.currentTurn,
+              nation.id,
+              "CRITICAL",
+              "NATION_COLLAPSED",
+              "GLOBAL_ANNEXATION",
+              "GLOBAL",
+            ),
+          );
+        }
 
         updatedNations[id] = {
           ...nation,

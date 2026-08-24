@@ -162,7 +162,7 @@ export class BattleExecutionEngine {
     const intervention =
       AllianceInterventionEvaluator.evaluateAllianceInterventions(
         updatedAttacker,
-        updatedDefender,
+        defender,
         baseNations,
       );
 

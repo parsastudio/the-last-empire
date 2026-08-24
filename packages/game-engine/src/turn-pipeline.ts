@@ -36,13 +36,10 @@ export class TurnPipeline {
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
       const ownedProvinces = ownerMap.get(canonicalId) || [];
-      const isAlive = ownedProvinces.length > 0 && nation.isAlive;
+      const hasTerritory = ownedProvinces.length > 0;
 
-      if (!isAlive) {
-        updatedNations[id] = {
-          ...nation,
-          isAlive: false,
-        };
+      if (!nation.isAlive || !hasTerritory) {
+        updatedNations[id] = nation;
         continue;
       }
 

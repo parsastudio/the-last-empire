@@ -8,7 +8,11 @@ import {
   EspionageSabotageData,
   EspionageTechTheftData,
 } from "@/domain/espionage/espionage.schema";
-import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import {
+  GameError,
+  TurnLogBuilder,
+  SeededRandom,
+} from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import {
@@ -56,6 +60,7 @@ export class EspionageManager {
     sourceNationId: string,
     targetNationId: string,
     tier: EspionageTier,
+    prng?: SeededRandom,
   ): { newState: GameState; result: EspionageExecutionResult } {
     const canonicalSource = CountryRegistry.resolveCanonicalId(sourceNationId);
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNationId);
@@ -108,13 +113,14 @@ export class EspionageManager {
       );
     }
 
+    const effectivePrng = prng ?? new SeededRandom(state.seed);
     const successRate = EspionageCalculator.calculateSuccessRate(tier, source);
-    const roll = Math.random();
+    const roll = effectivePrng.nextFloat();
     const isSuccess = roll <= successRate;
 
     let outcome: EspionageOutcome = "CRITICAL_FAILURE";
     if (isSuccess) {
-      const blowbackRoll = Math.random();
+      const blowbackRoll = effectivePrng.nextFloat();
       outcome = blowbackRoll > 0.3 ? "CLEAN_SUCCESS" : "COMPROMISED_SUCCESS";
     }
 
@@ -136,7 +142,12 @@ export class EspionageManager {
       reconData = recon.reconData;
       message = recon.message;
     } else if (tier === 2) {
-      const sabotage = SabotageTierExecutor.execute(target, isSuccess, outcome);
+      const sabotage = SabotageTierExecutor.execute(
+        target,
+        isSuccess,
+        outcome,
+        effectivePrng,
+      );
       updatedTarget = sabotage.updatedTarget;
       sabotageData = sabotage.sabotageData;
       message = sabotage.message;
@@ -209,6 +220,7 @@ export class EspionageManager {
 
     const newState: GameState = {
       ...state,
+      seed: effectivePrng.getSeed(),
       provinces: updatedProvinces,
       nations: updatedNations,
       turnLogs: [...state.turnLogs, logEntry],
