@@ -1,6 +1,9 @@
 import React from "react";
-import { TurnLogEntry } from "@/domain/game/game-state.schema";
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  TurnLogEntry,
+  Nation,
+  PendingDiplomaticProposal,
+} from "@geopolitics/domain";
 import { useWideReports } from "@/presentation/components/tactical-map/command-center/views/reports/hooks/use-wide-reports";
 import { ReportStatsOverview } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-stats-overview";
 import { ReportFilters } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-filters";
@@ -13,6 +16,7 @@ interface WideReportsViewProps {
   currentTurn?: number;
   humanNationId?: string;
   nationsMap?: Record<string, Nation>;
+  pendingProposals?: PendingDiplomaticProposal[];
 }
 
 export function WideReportsView({
@@ -20,6 +24,7 @@ export function WideReportsView({
   currentTurn = 1,
   humanNationId,
   nationsMap,
+  pendingProposals = [],
 }: WideReportsViewProps) {
   const {
     selectedScope,
@@ -65,7 +70,13 @@ export function WideReportsView({
           </div>
         ) : (
           sortedLogs.map((log) => (
-            <ReportCard key={log.id} log={log} nationsMap={nationsMap} />
+            <ReportCard
+              key={log.id}
+              log={log}
+              nationsMap={nationsMap}
+              humanNationId={humanNationId}
+              pendingProposals={pendingProposals}
+            />
           ))
         )}
       </div>

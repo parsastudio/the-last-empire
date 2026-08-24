@@ -323,7 +323,10 @@ export class PoliticsActionExecutor {
           "DIPLOMACY",
           "INFO",
           "DIPLOMATIC_PROPOSAL_SENT",
-          { treatyType: action.proposalType },
+          {
+            treatyType: action.proposalType,
+            proposalId: transientProposal.id,
+          },
           receiver.id,
         );
 
