@@ -19,7 +19,6 @@ interface GameStoreState {
   error: string | null;
   activeGameId: string;
 
-  setGameState: (state: GameState | null) => void;
   loadGame: (gameId: string) => Promise<boolean>;
   createCampaign: (
     nationId: string,
@@ -30,7 +29,7 @@ interface GameStoreState {
   dispatchAction: (
     action: GameAction,
     onSuccessMessage?: string,
-  ) => Promise<{ success: boolean; message: string }>;
+  ) => Promise<{ success: boolean; message: string; resultData?: unknown }>;
   advanceNextTurn: () => Promise<GameState | null>;
 }
 
@@ -42,11 +41,6 @@ export const useGameStore = create<GameStoreState>()(
     loading: false,
     error: null,
     activeGameId: "default_game",
-
-    setGameState: (state) =>
-      set((draft) => {
-        draft.gameState = state;
-      }),
 
     loadGame: async (gameId) => {
       set((draft) => {
@@ -133,6 +127,7 @@ export const useGameStore = create<GameStoreState>()(
         return {
           success: true,
           message: onSuccessMessage || result.message,
+          resultData: result.resultData,
         };
       }
 
@@ -143,53 +138,25 @@ export const useGameStore = create<GameStoreState>()(
     },
 
     advanceNextTurn: async () => {
-      const totalStart = performance.now();
       const { activeGameId, gameState } = get();
       if (!gameState) {
         return null;
       }
       try {
-        console.group(
-          `[TURN_ADVANCE] نوبت ${gameState.currentTurn} ➔ ${gameState.currentTurn + 1}`,
-        );
         const prng = new SeededRandom(
           gameState.seed || Math.floor(Math.random() * 1000000),
         );
 
-        const orchStart = performance.now();
         const nextState = orchestrator.advanceTurn(gameState, prng);
-        const orchDuration = (performance.now() - orchStart).toFixed(2);
-        console.log(
-          `[STORE_PERF] محاسبه موتور بازی (Orchestrator): ${orchDuration}ms`,
-        );
 
-        const stateUpdateStart = performance.now();
         set((draft) => {
           draft.gameState = nextState;
         });
-        const stateUpdateDuration = (
-          performance.now() - stateUpdateStart
-        ).toFixed(2);
-        console.log(
-          `[STORE_PERF] به‌روزرسانی استیت Zustand: ${stateUpdateDuration}ms`,
-        );
 
-        const persistStart = performance.now();
         void GamePersistenceService.saveGameState(activeGameId, nextState);
-        const persistDuration = (performance.now() - persistStart).toFixed(2);
-        console.log(
-          `[STORE_PERF] اعزام دستور ذخیره‌سازی در IndexedDB: ${persistDuration}ms`,
-        );
-
-        const totalDuration = (performance.now() - totalStart).toFixed(2);
-        console.log(
-          `[STORE_PERF] زمان کل پردازش کلاینتی نوبت: ${totalDuration}ms`,
-        );
-        console.groupEnd();
         return nextState;
       } catch (err) {
-        console.error(`[TURN_ADVANCE_ERROR] خطا در پیشروی نوبت:`, err);
-        console.groupEnd();
+        console.error(err);
         return null;
       }
     },

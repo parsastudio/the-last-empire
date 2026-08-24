@@ -11,8 +11,11 @@ export function useGameActions(onActionExecuted?: () => void) {
   const dispatchStoreAction = useGameStore((state) => state.dispatchAction);
 
   const dispatchAction = useCallback(
-    async (action: GameAction, successMessage?: string): Promise<boolean> => {
-      if (isSubmitting) return false;
+    async (
+      action: GameAction,
+      successMessage?: string,
+    ): Promise<{ success: boolean; resultData?: unknown }> => {
+      if (isSubmitting) return { success: false };
       try {
         setIsSubmitting(true);
         const result = await dispatchStoreAction(action, successMessage);
@@ -24,14 +27,14 @@ export function useGameActions(onActionExecuted?: () => void) {
           if (onActionExecuted) {
             onActionExecuted();
           }
-          return true;
+          return { success: true, resultData: result.resultData };
         }
 
         showToast("خطا در اجرای دستور", result.message, "error");
-        return false;
+        return { success: false };
       } catch {
         showToast("خطا در سیستم", "امکان اجرای این دستور وجود ندارد.", "error");
-        return false;
+        return { success: false };
       } finally {
         setIsSubmitting(false);
       }

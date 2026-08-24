@@ -135,6 +135,7 @@ export const ActionResultSchema = z.object({
   message: z.string(),
   error: z.string().optional(),
   newState: GameStateSchema.optional(),
+  resultData: z.unknown().optional(),
 });
 
 export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;

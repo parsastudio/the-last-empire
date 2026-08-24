@@ -151,9 +151,9 @@ export function useWideEspionageForm({
         tier,
       );
 
-      const success = await dispatchAction(action);
-      if (success) {
-        setLastResult(null);
+      const response = await dispatchAction(action);
+      if (response.success && response.resultData) {
+        setLastResult(response.resultData as EspionageExecutionResult);
       }
     },
     [nation.id, selectedTargetNation, isSubmitting, dispatchAction],

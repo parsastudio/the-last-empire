@@ -5,7 +5,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
   conqueredPixels: number;
-  defenderTotalPixels: number;
   remainingDefenderProvinces: Province[];
   conqueredProvincesList: Province[];
 }
@@ -14,13 +13,10 @@ export class ProvinceConquestHandler {
   public static handleConquest(
     provinces: Record<string, Province>,
     attackerId: string,
-    canonicalAttackerId: string,
     defenderId: string,
-    canonicalDefenderId: string,
     isAttackerVictory: boolean,
     isFullCapitulation: boolean,
     targetProvinceId?: number,
-    fallbackDefenderPixels: number = 1,
   ): ProvinceConquestResult {
     const updatedProvinces: Record<string, Province> = { ...provinces };
 
@@ -31,10 +27,6 @@ export class ProvinceConquestHandler {
       (p) =>
         CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
     );
-
-    const defenderTotalPixels =
-      defenderProvincesBefore.reduce((sum, p) => sum + p.pixelCount, 0) ||
-      fallbackDefenderPixels;
 
     let conqueredPixels = 0;
     const conqueredProvincesList: Province[] = [];
@@ -87,7 +79,6 @@ export class ProvinceConquestHandler {
     return {
       updatedProvinces,
       conqueredPixels,
-      defenderTotalPixels,
       remainingDefenderProvinces,
       conqueredProvincesList,
     };

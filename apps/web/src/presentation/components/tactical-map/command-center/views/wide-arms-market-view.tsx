@@ -104,7 +104,6 @@ export function WideArmsMarketView({
                   quantity={form.quantity}
                   canAfford={form.canAfford}
                   isSubmitting={form.isSubmitting}
-                  isEligible={form.selectedSeller.isEligible}
                   isSellerTechEligible={form.isSellerTechEligible}
                   isNavalBlockaded={form.isNavalBlockaded}
                   onQuantityChange={form.setQuantity}
