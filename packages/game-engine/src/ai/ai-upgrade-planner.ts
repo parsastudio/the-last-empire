@@ -20,6 +20,7 @@ export class AIUpgradePlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
+    rankMap?: Map<string, number>,
   ): UpgradePlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -38,6 +39,7 @@ export class AIUpgradePlanner {
       nation,
       allNations,
       provincesMap,
+      rankMap,
     );
 
     const gdp = getNationGdp(nation, provincesMap);

@@ -4,6 +4,7 @@ import {
   Province,
   RelationProfile,
   CountryRegistry,
+  GeopoliticalReachResolver,
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
@@ -27,6 +28,7 @@ export class DiplomaticTurnProcessor {
     nation: Nation,
     allNations?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    rankMap?: Map<string, number>,
   ): {
     updatedNation: Nation;
     isAtWar: boolean;
@@ -73,6 +75,30 @@ export class DiplomaticTurnProcessor {
       let nextGrudge = relation.grudge ?? 0;
       if (relation.stance !== "WAR" && nextGrudge > 0) {
         nextGrudge = Math.max(0, nextGrudge - 3);
+      }
+
+      const hasActiveStance = relation.stance !== "NORMAL_DIPLOMACY";
+      const isReachable =
+        hasActiveStance ||
+        (targetNation
+          ? GeopoliticalReachResolver.canInitiateDiplomacy(
+              nation,
+              targetNation,
+              allNations,
+              provincesMap,
+              rankMap,
+            )
+          : false);
+
+      if (!isReachable) {
+        newRels[targetId] = {
+          ...relation,
+          opinion: nextOpinion,
+          grudge: nextGrudge,
+          alignment: nextOpinion,
+          tension: 0,
+        };
+        continue;
       }
 
       const vector = targetNation

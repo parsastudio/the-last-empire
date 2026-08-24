@@ -36,6 +36,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       procurementResult.remainingTreasury,
+      rankMap,
     );
     const tUpg = performance.now() - tUpgStart;
     actions.push(...upgradeResult.actions);
