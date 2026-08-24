@@ -38,12 +38,11 @@ export class GeopoliticalVectorCalculator {
     sourceSeaAccess?: boolean,
     provincesByOwnerMap?: Map<string, Province[]>,
   ): GeopoliticalVector {
-    const canonicalSource = CountryRegistry.resolveCanonicalId(source.id);
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const rel =
       source.relations[canonicalTarget] || source.relations[target.id];
 
-    const opinion = rel ? rel.opinion : 0;
+    const baseAlignment = rel?.alignment ?? 0;
     const grudge = rel ? (rel.grudge ?? 0) : 0;
     const lostProvinces = rel ? (rel.lostProvincesCount ?? 0) : 0;
 
@@ -78,7 +77,7 @@ export class GeopoliticalVectorCalculator {
     const reputationEffect = Math.round((targetRep / 100) * 15);
 
     const rawAlignment =
-      opinion + ideologyScore + commonEnemyBonus + reputationEffect;
+      baseAlignment + ideologyScore + commonEnemyBonus + reputationEffect;
     const alignment = Math.max(-100, Math.min(100, rawAlignment));
 
     const myProvs =
@@ -128,7 +127,6 @@ export class GeopoliticalVectorCalculator {
         );
 
     const isNavalReachable = Boolean(sourceSea && targetSea);
-
     const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
 
     let borderFriction = 0;

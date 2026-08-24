@@ -42,11 +42,13 @@ export class ArmsMarketManager {
 
     const rel =
       seller.relations[canonicalBuyerId] || seller.relations[buyer.id];
-    const opinion = rel ? rel.opinion : 0;
-    if (opinion < 20) {
+    const alignment = rel ? (rel.alignment ?? 0) : 0;
+    const tension = rel ? (rel.tension ?? 10) : 10;
+
+    if (alignment < 15 || tension >= 60) {
       throw new GameError(
         "INVALID_ACTION",
-        `کشور ${seller.name} به دلیل دیدگاه دیپلماتیک نامناسب حاضر به فروش تسلیحات نیست.`,
+        `کشور ${seller.name} به دلیل عدم همسویی استراتژیک یا تنش مرزی حاضر به فروش تسلیحات نیست.`,
       );
     }
 

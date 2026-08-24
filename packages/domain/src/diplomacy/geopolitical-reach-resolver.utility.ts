@@ -70,18 +70,6 @@ export class GeopoliticalReachResolver {
           rel.stance === "NON_AGGRESSION_PACT")
       ) {
         reachableMap.set(targetCanonical, target);
-        continue;
-      }
-
-      const targetTier = this.getReachTier(
-        target,
-        allNations,
-        provincesMap,
-        rankMap,
-      );
-      if (targetTier === "SUPERPOWER") {
-        reachableMap.set(targetCanonical, target);
-        continue;
       }
     }
 
@@ -325,16 +313,6 @@ export class GeopoliticalReachResolver {
       rankMap,
     );
     if (sourceTier === "SUPERPOWER") {
-      return true;
-    }
-
-    const targetTier = this.getReachTier(
-      target,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
-    if (targetTier === "SUPERPOWER") {
       return true;
     }
 

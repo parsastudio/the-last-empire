@@ -79,18 +79,18 @@ export class DiplomaticTurnProcessor {
         }
       }
 
-      let nextOpinion = relation.opinion;
+      let nextAlignment = relation.alignment ?? 0;
       if (relation.stance !== "WAR") {
-        const baselineOpinion =
+        const baseline =
           targetNation &&
           nation.government.type === targetNation.government.type
             ? 15
             : 0;
 
-        if (relation.opinion < baselineOpinion) {
-          nextOpinion = Math.min(baselineOpinion, relation.opinion + 1);
-        } else if (relation.opinion > baselineOpinion) {
-          nextOpinion = Math.max(baselineOpinion, relation.opinion - 1);
+        if (nextAlignment < baseline) {
+          nextAlignment = Math.min(baseline, nextAlignment + 1);
+        } else if (nextAlignment > baseline) {
+          nextAlignment = Math.max(baseline, nextAlignment - 1);
         }
       }
 
@@ -104,10 +104,9 @@ export class DiplomaticTurnProcessor {
       if (!isReachable) {
         newRels[targetId] = {
           ...relation,
-          opinion: nextOpinion,
-          grudge: nextGrudge,
-          alignment: nextOpinion,
+          alignment: nextAlignment,
           tension: 0,
+          grudge: nextGrudge,
         };
         continue;
       }
@@ -120,7 +119,7 @@ export class DiplomaticTurnProcessor {
       const repEffect = Math.round((targetRep / 100) * 15);
       const currentAlignment = Math.max(
         -100,
-        Math.min(100, nextOpinion + ideologyBonus + repEffect),
+        Math.min(100, nextAlignment + ideologyBonus + repEffect),
       );
 
       let currentTension = 10;
@@ -136,10 +135,9 @@ export class DiplomaticTurnProcessor {
 
       newRels[targetId] = {
         ...relation,
-        opinion: nextOpinion,
-        grudge: nextGrudge,
         alignment: currentAlignment,
         tension: currentTension,
+        grudge: nextGrudge,
       };
     }
 

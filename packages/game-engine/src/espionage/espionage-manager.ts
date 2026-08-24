@@ -175,7 +175,8 @@ export class EspionageManager {
           ...updatedSource.relations,
           [target.id]: {
             ...rel,
-            opinion: Math.max(-100, rel.opinion - tier * 15),
+            alignment: Math.max(-100, (rel.alignment ?? 0) - tier * 15),
+            tension: Math.min(100, (rel.tension ?? 10) + tier * 10),
           },
         };
       }
@@ -187,7 +188,8 @@ export class EspionageManager {
           ...updatedTarget.relations,
           [source.id]: {
             ...targetRel,
-            opinion: Math.max(-100, targetRel.opinion - tier * 20),
+            alignment: Math.max(-100, (targetRel.alignment ?? 0) - tier * 20),
+            tension: Math.min(100, (targetRel.tension ?? 10) + tier * 15),
             grudge: Math.min(100, currentTargetGrudge + tier * 15),
           },
         };

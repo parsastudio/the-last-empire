@@ -15,7 +15,8 @@ export interface ArmsSellerOption {
   name: string;
   flagCode: string;
   techLevel: number;
-  opinion: number;
+  alignment: number;
+  tension: number;
   rank: number;
   isEligible: boolean;
 }
@@ -52,8 +53,9 @@ export function useWideArmsMarketForm({
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
         const rel = nation.relations[canonical] || nation.relations[n.id];
-        const opinion = rel ? rel.opinion : 0;
-        const isEligible = opinion >= 20;
+        const alignment = rel ? (rel.alignment ?? 0) : 0;
+        const tension = rel ? (rel.tension ?? 10) : 10;
+        const isEligible = alignment >= 15 && tension < 60;
         const rank = rankLookup.get(canonical) ?? 99;
 
         return {
@@ -61,7 +63,8 @@ export function useWideArmsMarketForm({
           name: n.name,
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
-          opinion,
+          alignment,
+          tension,
           rank,
           isEligible,
         };

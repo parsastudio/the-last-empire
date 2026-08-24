@@ -1,7 +1,8 @@
 import React from "react";
 import {
   DiplomaticRelation,
-  getQualitativeOpinionColor,
+  getAlignmentColor,
+  getTensionColor,
 } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
 import { DiplomaticStanceBadge } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/diplomatic-stance-badge";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -15,11 +16,12 @@ export function DiplomacyListItem({
   relation,
   onSelect,
 }: DiplomacyListItemProps) {
-  const opinionColor = getQualitativeOpinionColor(relation.opinion);
-  const formattedOpinion =
-    relation.opinion > 0
-      ? `+${PersianNumberFormatter.toPersianDigits(relation.opinion)}`
-      : PersianNumberFormatter.toPersianDigits(relation.opinion);
+  const alignColor = getAlignmentColor(relation.alignment);
+  const tensionColor = getTensionColor(relation.tension);
+  const formattedAlign =
+    relation.alignment > 0
+      ? `+${PersianNumberFormatter.toPersianDigits(relation.alignment)}`
+      : PersianNumberFormatter.toPersianDigits(relation.alignment);
 
   return (
     <button
@@ -46,12 +48,18 @@ export function DiplomacyListItem({
         </div>
       </div>
       <div className="text-left font-sans text-[10px] space-y-0.5">
-        <span className="text-muted-foreground block text-[9px]">
-          دیدگاه کلی:
-        </span>
-        <span className={`block font-bold ${opinionColor}`}>
-          {formattedOpinion}
-        </span>
+        <div className="flex items-center gap-1 justify-end">
+          <span className="text-muted-foreground text-[9px]">همسویی:</span>
+          <span className={`font-bold font-mono ${alignColor}`}>
+            {formattedAlign}
+          </span>
+        </div>
+        <div className="flex items-center gap-1 justify-end">
+          <span className="text-muted-foreground text-[9px]">تنش:</span>
+          <span className={`font-bold font-mono ${tensionColor}`}>
+            {PersianNumberFormatter.toPersianDigits(relation.tension)}٪
+          </span>
+        </div>
       </div>
     </button>
   );
