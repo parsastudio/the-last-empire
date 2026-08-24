@@ -19,6 +19,7 @@ import {
   Handshake,
   Sparkles,
   Eye,
+  ShieldAlert,
 } from "lucide-react";
 import { ProposalActionButtons } from "./proposal-action-buttons";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
@@ -38,6 +39,9 @@ export function ReportCard({
 }: ReportCardProps) {
   const setSelectedBattleDebrief = useUiStore(
     (state) => state.setSelectedBattleDebrief,
+  );
+  const setSelectedCoalitionAlert = useUiStore(
+    (state) => state.setSelectedCoalitionAlert,
   );
 
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
@@ -78,6 +82,26 @@ export function ReportCard({
       return null;
     }
   }, [log]);
+
+  const isCoalitionFormed = log.eventCode === "COALITION_FORMED";
+
+  const handleOpenCoalition = () => {
+    const memberIdsRaw = String(log.params?.["memberIds"] || "");
+    const memberIds = memberIdsRaw ? memberIdsRaw.split(",") : [];
+    const targetCanonical = sourceCanonical;
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      humanNationId || "",
+    );
+
+    setSelectedCoalitionAlert({
+      targetNationId: targetCanonical,
+      targetName: sourceName,
+      targetFlagCode: sourceNation?.flagCode || targetCanonical,
+      isHumanTarget: targetCanonical === canonicalHuman,
+      memberIds,
+      turn: log.turn,
+    });
+  };
 
   const activePendingProposal = useMemo(() => {
     if (
@@ -120,6 +144,16 @@ export function ReportCard({
   const isIncomingInteractiveProposal = Boolean(activePendingProposal);
 
   const style = useMemo(() => {
+    if (isCoalitionFormed) {
+      return {
+        cardBg: "bg-gradient-to-r from-rose-950/40 via-card/95 to-red-950/30",
+        border:
+          "border-rose-500/60 shadow-lg shadow-rose-500/10 ring-1 ring-rose-500/30",
+        icon: ShieldAlert,
+        iconBg: "bg-rose-500/25 text-rose-300 border-rose-400/50",
+      };
+    }
+
     if (isIncomingInteractiveProposal) {
       return {
         cardBg:
@@ -146,6 +180,7 @@ export function ReportCard({
       case "BATTLE_GLOBAL_NEWS":
       case "ALLIANCE_INTERVENTION":
       case "ALLIANCE_BETRAYED":
+      case "COALITION_MEMBER_FALLEN":
         return {
           cardBg: "bg-rose-950/20",
           border: "border-rose-500/40 hover:border-rose-500",
@@ -189,7 +224,7 @@ export function ReportCard({
           iconBg: "bg-secondary text-muted-foreground border-border/50",
         };
     }
-  }, [log.eventCode, isIncomingInteractiveProposal]);
+  }, [log.eventCode, isIncomingInteractiveProposal, isCoalitionFormed]);
 
   const Icon = style.icon;
 
@@ -209,6 +244,13 @@ export function ReportCard({
             {dynamicMessage}
           </p>
 
+          {isCoalitionFormed && (
+            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
+              <ShieldAlert size={12} />
+              بحران بقای ملی
+            </span>
+          )}
+
           {isIncomingInteractiveProposal && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
               <Sparkles size={12} />
@@ -218,7 +260,7 @@ export function ReportCard({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-border/40">
-          {(sourceName || targetName) && (
+          {(sourceName || targetName) && !isCoalitionFormed && (
             <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
               {sourceName && (
                 <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
@@ -244,6 +286,16 @@ export function ReportCard({
                 </>
               )}
             </div>
+          )}
+
+          {isCoalitionFormed && (
+            <button
+              onClick={handleOpenCoalition}
+              className="px-3.5 py-1.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/50 hover:border-rose-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+            >
+              <Eye size={14} />
+              <span>مشاهده بیانیه پیمان ائتلاف جهانی</span>
+            </button>
           )}
 
           {battleReportData && (

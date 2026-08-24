@@ -31,37 +31,27 @@ export function BattleCasualtyTable({
   const rows = [
     {
       unit: "پیاده‌نظام رزمی 🪖",
-      attEngaged: reportData.attackerCasualties.infantryEngaged,
       attLost: reportData.attackerCasualties.infantryLost,
-      defEngaged: reportData.defenderCasualties.infantryEngaged,
       defLost: reportData.defenderCasualties.infantryLost,
     },
     {
       unit: "لشکر زرهی و تانک‌ها 🛡️",
-      attEngaged: reportData.attackerCasualties.armorEngaged,
       attLost: reportData.attackerCasualties.armorLost,
-      defEngaged: reportData.defenderCasualties.armorEngaged,
       defLost: reportData.defenderCasualties.armorLost,
     },
     {
       unit: "سامانه پدافند هوایی 🎯",
-      attEngaged: reportData.attackerCasualties.airDefenseEngaged,
       attLost: reportData.attackerCasualties.airDefenseLost,
-      defEngaged: reportData.defenderCasualties.airDefenseEngaged,
       defLost: reportData.defenderCasualties.airDefenseLost,
     },
     {
       unit: "جنگنده‌های برتری هوایی 🛩️",
-      attEngaged: reportData.attackerCasualties.airForceEngaged,
       attLost: reportData.attackerCasualties.airForceLost,
-      defEngaged: reportData.defenderCasualties.airForceEngaged,
       defLost: reportData.defenderCasualties.airForceLost,
     },
     {
       unit: "پهپاد و موشک‌های نقطه‌زن 🚀",
-      attEngaged: reportData.attackerCasualties.droneMissileEngaged,
       attLost: reportData.attackerCasualties.droneMissileLost,
-      defEngaged: reportData.defenderCasualties.droneMissileEngaged,
       defLost: reportData.defenderCasualties.droneMissileLost,
     },
   ];
@@ -79,21 +69,14 @@ export function BattleCasualtyTable({
           <div className="p-3 rounded-2xl bg-card border border-border/80 flex items-center justify-center text-3xl shadow-inner">
             {winnerFlag}
           </div>
-          <div className="space-y-1">
-            <span className="text-base font-black flex items-center gap-2">
-              {isHumanWinner ? (
-                <Trophy size={18} className="text-amber-400" />
-              ) : (
-                <Skull size={18} className="text-rose-400" />
-              )}
-              <span>فاتح نهایی نبرد: {winnerName}</span>
-            </span>
-            <span className="text-xs text-muted-foreground block font-mono">
-              {reportData.isFullCapitulation
-                ? "تسلیم کامل ارتش مدافع و تصرف تمامی ادوات و استان‌ها"
-                : "شکست خطوط و تصرف استان هدف با بازسازی ۲۵٪ مجروحین"}
-            </span>
-          </div>
+          <span className="text-base font-black flex items-center gap-2">
+            {isHumanWinner ? (
+              <Trophy size={18} className="text-amber-400" />
+            ) : (
+              <Skull size={18} className="text-rose-400" />
+            )}
+            <span>فاتح نهایی نبرد: {winnerName}</span>
+          </span>
         </div>
 
         <div className="text-left font-mono space-y-0.5 dir-ltr">
@@ -110,10 +93,10 @@ export function BattleCasualtyTable({
       <div className="bg-card/95 border border-border/80 rounded-3xl overflow-hidden shadow-2xl">
         <div className="p-4 border-b border-border/60 bg-secondary/30 flex items-center justify-between">
           <h4 className="text-sm font-black text-foreground">
-            جدول رسمی تلفات و یگان‌های باقیمانده طرفین
+            جدول رسمی تلفات جنگی طرفین
           </h4>
           <span className="text-[10px] font-mono bg-secondary px-2.5 py-1 rounded-xl text-muted-foreground border border-border/60">
-            گزارش معتبر ستاد کل نیروهای مسلح
+            گزارش ستاد کل نیروهای مسلح
           </span>
         </div>
 
@@ -122,14 +105,8 @@ export function BattleCasualtyTable({
             <thead>
               <tr className="border-b border-border/60 bg-secondary/50 font-bold text-muted-foreground text-[11px]">
                 <th className="p-3.5">نوع جنگ‌افزار</th>
-                <th className="p-3.5 text-center text-primary font-black">
-                  حاضر ({attackerName})
-                </th>
                 <th className="p-3.5 text-center text-rose-400 font-black">
                   تلفات ({attackerName})
-                </th>
-                <th className="p-3.5 text-center text-military font-black">
-                  حاضر ({defenderName})
                 </th>
                 <th className="p-3.5 text-center text-rose-400 font-black">
                   تلفات ({defenderName})
@@ -145,18 +122,12 @@ export function BattleCasualtyTable({
                   <td className="p-3.5 font-bold text-foreground font-sans">
                     {r.unit}
                   </td>
-                  <td className="p-3.5 text-center font-bold text-foreground">
-                    {PersianNumberFormatter.toPersianDigits(r.attEngaged)}
-                  </td>
-                  <td className="p-3.5 text-center font-extrabold text-rose-400">
+                  <td className="p-3.5 text-center font-extrabold text-rose-400 text-sm">
                     {r.attLost > 0
                       ? `-${PersianNumberFormatter.toPersianDigits(r.attLost)}`
                       : "۰"}
                   </td>
-                  <td className="p-3.5 text-center font-bold text-foreground">
-                    {PersianNumberFormatter.toPersianDigits(r.defEngaged)}
-                  </td>
-                  <td className="p-3.5 text-center font-extrabold text-rose-400">
+                  <td className="p-3.5 text-center font-extrabold text-rose-400 text-sm">
                     {r.defLost > 0
                       ? `-${PersianNumberFormatter.toPersianDigits(r.defLost)}`
                       : "۰"}

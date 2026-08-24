@@ -25,6 +25,8 @@ export interface CasualtyResolutionOutput {
   attackerCasualties: CasualtyMetrics;
   defenderCasualties: CasualtyMetrics;
   netAttInfantryLost: number;
+  netAttArmorLost: number;
+  netAttAirLost: number;
   netDefInfantryLost: number;
   netDefArmorLost: number;
   netDefAirDefenseLost: number;
@@ -35,26 +37,26 @@ export class BattleCasualtyResolver {
   public static resolve(
     input: CasualtyResolutionInput,
   ): CasualtyResolutionOutput {
-    const attInfRecovered = Math.floor(input.rawAttInfantryLost * 0.25);
-    const attArmorRecovered = Math.floor(input.rawAttArmorLoss * 0.25);
-    const attAirRecovered = Math.floor(input.rawAttAirLoss * 0.25);
-
-    const defInfRecovered = Math.floor(input.rawDefInfantryLost * 0.25);
-    const defArmorRecovered = Math.floor(input.rawDefArmorLost * 0.25);
-    const defAirDefenseRecovered = Math.floor(
-      input.rawDefAirDefenseLost * 0.25,
+    const netAttInfantryLost = Math.min(
+      input.deployedInfantry,
+      input.rawAttInfantryLost,
     );
-    const defAirRecovered = Math.floor(input.rawDefAirLoss * 0.25);
+    const netAttArmorLost = Math.min(
+      input.deployedArmor,
+      input.rawAttArmorLoss,
+    );
+    const netAttAirLost = Math.min(input.deployedAirForce, input.rawAttAirLoss);
 
-    const netAttInfantryLost = input.rawAttInfantryLost - attInfRecovered;
-    const netAttArmorLost = input.rawAttArmorLoss - attArmorRecovered;
-    const netAttAirLost = input.rawAttAirLoss - attAirRecovered;
-
-    const netDefInfantryLost = input.rawDefInfantryLost - defInfRecovered;
-    const netDefArmorLost = input.rawDefArmorLost - defArmorRecovered;
-    const netDefAirDefenseLost =
-      input.rawDefAirDefenseLost - defAirDefenseRecovered;
-    const netDefAirLost = input.rawDefAirLoss - defAirRecovered;
+    const netDefInfantryLost = Math.min(
+      input.defInfantry,
+      input.rawDefInfantryLost,
+    );
+    const netDefArmorLost = Math.min(input.defArmor, input.rawDefArmorLost);
+    const netDefAirDefenseLost = Math.min(
+      input.defAirDefense,
+      input.rawDefAirDefenseLost,
+    );
+    const netDefAirLost = Math.min(input.defAirForce, input.rawDefAirLoss);
 
     const attackerCasualties: CasualtyMetrics = {
       infantryEngaged: input.deployedInfantry,
@@ -96,6 +98,8 @@ export class BattleCasualtyResolver {
       attackerCasualties,
       defenderCasualties,
       netAttInfantryLost,
+      netAttArmorLost,
+      netAttAirLost,
       netDefInfantryLost,
       netDefArmorLost,
       netDefAirDefenseLost,

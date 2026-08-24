@@ -36,9 +36,9 @@ export function BattleDebriefModal({
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   const isAttackerWin = reportData?.isAttackerVictory ?? false;
+  const isHumanAttacker = humanNationId === reportData?.attackerId;
   const isHumanWinner =
-    (humanNationId === reportData?.attackerId && isAttackerWin) ||
-    (humanNationId === reportData?.defenderId && !isAttackerWin);
+    (isHumanAttacker && isAttackerWin) || (!isHumanAttacker && !isAttackerWin);
 
   useEffect(() => {
     if (isOpen && isHumanWinner) {
@@ -68,23 +68,43 @@ export function BattleDebriefModal({
     defender?.flagCode || reportData.defenderId,
   );
 
+  let modalTitle = "";
+  if (isHumanAttacker) {
+    if (reportData.isFullCapitulation && isAttackerWin) {
+      modalTitle = `پیروزی قاطع و فتح کامل ${defenderName}`;
+    } else if (isAttackerWin) {
+      modalTitle = `پیروزی در حمله به ${defenderName}`;
+    } else {
+      modalTitle = `شکست در حمله به ${defenderName}`;
+    }
+  } else if (humanNationId === reportData.defenderId) {
+    if (!isAttackerWin) {
+      modalTitle = `دفاع موفق مقابل ${attackerName}`;
+    } else {
+      modalTitle = `شکست دفاعی مقابل ${attackerName}`;
+    }
+  } else {
+    modalTitle = isAttackerWin
+      ? `پیروزی ${attackerName} در نبرد با ${defenderName}`
+      : `دفاع موفق ${defenderName} مقابل ${attackerName}`;
+  }
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="اتاق فرماندهی: گزارش زنده و آنالیز جامع نبرد و فتوحات"
-      subtitle={`شرح تفصیلی عملیات ارتش ${attackerName} و ارتش مدافع ${defenderName}`}
-      maxWidthClass="max-w-6xl"
+      title={modalTitle}
+      maxWidthClass="max-w-3xl"
       onClose={onClose}
     >
-      <div className="space-y-5 text-right dir-rtl font-sans pb-2">
-        <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-5 rounded-3xl flex items-center justify-between gap-4 shadow-xl">
-          <div className="flex items-center gap-4">
-            <span className="text-4xl select-none">{attackerFlag}</span>
+      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+        <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-4 rounded-2xl flex items-center justify-between gap-3 shadow-md">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl select-none">{attackerFlag}</span>
             <div className="space-y-0.5">
-              <span className="text-base font-black text-foreground block">
+              <span className="text-sm font-black text-foreground block">
                 {attackerName}
               </span>
-              <span className="text-xs text-primary font-mono font-bold">
+              <span className="text-[10px] text-primary font-mono font-bold">
                 متهاجم (
                 {reportData.attackType === "NAVAL"
                   ? "هجوم دریایی ⚓"
@@ -95,34 +115,34 @@ export function BattleDebriefModal({
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <div className="p-3 rounded-2xl bg-military/15 text-military border border-military/30 shadow-lg">
-              <Swords size={26} className="animate-pulse" />
+            <div className="p-2 rounded-xl bg-military/15 text-military border border-military/30 shadow-sm">
+              <Swords size={20} className="animate-pulse" />
             </div>
-            <span className="text-[10px] font-mono text-muted-foreground font-black tracking-widest">
-              VERSUS
+            <span className="text-[9px] font-mono text-muted-foreground font-black tracking-widest">
+              VS
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-left dir-ltr">
-            <span className="text-4xl select-none">{defenderFlag}</span>
+          <div className="flex items-center gap-3 text-left dir-ltr">
+            <span className="text-3xl select-none">{defenderFlag}</span>
             <div className="space-y-0.5">
-              <span className="text-base font-black text-foreground block">
+              <span className="text-sm font-black text-foreground block">
                 {defenderName}
               </span>
-              <span className="text-xs text-military font-mono font-bold">
+              <span className="text-[10px] text-military font-mono font-bold">
                 دولت مدافع
               </span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 font-sans">
+        <div className="grid grid-cols-5 gap-1.5 font-sans">
           {[
-            { step: 1, title: "۱. موشکی و پدافند", icon: Flame },
-            { step: 2, title: "۲. نبرد هوایی", icon: Plane },
-            { step: 3, title: "۳. درگیری زمینی", icon: ShieldAlert },
-            { step: 4, title: "۴. جدول تلفات", icon: BarChart3 },
-            { step: 5, title: "۵. غنائم و فتوحات", icon: Trophy },
+            { step: 1, title: "۱. موشکی", icon: Flame },
+            { step: 2, title: "۲. هوایی", icon: Plane },
+            { step: 3, title: "۳. زمینی", icon: ShieldAlert },
+            { step: 4, title: "۴. تلفات", icon: BarChart3 },
+            { step: 5, title: "۵. غنائم", icon: Trophy },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = activeStep === item.step;
@@ -130,14 +150,14 @@ export function BattleDebriefModal({
               <button
                 key={item.step}
                 onClick={() => setActiveStep(item.step as 1 | 2 | 3 | 4 | 5)}
-                className={`py-3.5 px-3 rounded-2xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                className={`py-2 px-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   isActive
-                    ? "bg-primary text-primary-foreground border-primary shadow-xl shadow-primary/20 scale-[1.02]"
+                    ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
                     : "bg-secondary/40 border-border/60 text-muted-foreground hover:bg-secondary/70 hover:text-foreground"
                 }`}
               >
-                <Icon size={16} />
-                <span>{item.title}</span>
+                <Icon size={14} />
+                <span className="truncate">{item.title}</span>
               </button>
             );
           })}

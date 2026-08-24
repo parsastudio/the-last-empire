@@ -2,12 +2,22 @@ import { create } from "zustand";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { BattleFullReportData } from "@geopolitics/domain";
 
+export interface CoalitionAlertData {
+  targetNationId: string;
+  targetName: string;
+  targetFlagCode: string;
+  isHumanTarget: boolean;
+  memberIds: string[];
+  turn: number;
+}
+
 interface UiStoreState {
   activeTab: SidebarTabType | null;
   activeSubTab: string | null;
   selectedTargetCode: string | null;
   isRailCollapsed: boolean;
   selectedBattleDebrief: BattleFullReportData | null;
+  selectedCoalitionAlert: CoalitionAlertData | null;
 
   setActiveTab: (
     tab: SidebarTabType | null,
@@ -18,6 +28,7 @@ interface UiStoreState {
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
   setSelectedBattleDebrief: (data: BattleFullReportData | null) => void;
+  setSelectedCoalitionAlert: (data: CoalitionAlertData | null) => void;
   closeActiveTab: () => void;
 }
 
@@ -27,6 +38,7 @@ export const useUiStore = create<UiStoreState>((set) => ({
   selectedTargetCode: null,
   isRailCollapsed: true,
   selectedBattleDebrief: null,
+  selectedCoalitionAlert: null,
 
   setActiveTab: (tab, subTab = null, targetCode = null) =>
     set((state) => ({
@@ -47,6 +59,11 @@ export const useUiStore = create<UiStoreState>((set) => ({
   setSelectedBattleDebrief: (data) =>
     set({
       selectedBattleDebrief: data,
+    }),
+
+  setSelectedCoalitionAlert: (data) =>
+    set({
+      selectedCoalitionAlert: data,
     }),
 
   closeActiveTab: () =>

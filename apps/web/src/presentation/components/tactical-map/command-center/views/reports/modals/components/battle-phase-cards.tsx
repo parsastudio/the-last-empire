@@ -1,7 +1,7 @@
 import React from "react";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { Swords, ShieldCheck, Flame, ShieldAlert } from "lucide-react";
+import { Swords, ShieldCheck, Flame, ShieldAlert, Ban } from "lucide-react";
 
 interface BattlePhaseCardsProps {
   activeStep: 1 | 2 | 3;
@@ -21,6 +21,42 @@ export function BattlePhaseCards({
   defenderFlag,
 }: BattlePhaseCardsProps) {
   if (activeStep === 1) {
+    const isSkipped =
+      reportData.phase1Missile.phaseWinner === "SKIPPED" ||
+      reportData.phase1Missile.dronesLaunched === 0;
+
+    if (isSkipped) {
+      return (
+        <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
+          <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🚀</span>
+              <h3 className="text-sm font-black text-foreground">
+                فاز اول: ضربات موشکی و مصاف با شبکه پدافند
+              </h3>
+            </div>
+            <span className="px-3.5 py-1.5 rounded-2xl text-xs font-black border bg-secondary/80 text-muted-foreground border-border/70 flex items-center gap-1.5">
+              <Ban size={14} />
+              <span>عملیات موشکی انجام نشد</span>
+            </span>
+          </div>
+
+          <div className="p-8 bg-card/60 border border-border/60 rounded-3xl flex flex-col items-center justify-center text-center space-y-2">
+            <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-2xl shadow-inner">
+              🚫
+            </div>
+            <span className="text-sm font-bold text-foreground block">
+              هیچ موشک یا پهپادی در این تهاجم شلیک نگردید
+            </span>
+            <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
+              فرماندهی تهاجم بدون اجرای آتش موشکی پیش‌دستانه، مستقیماً وارد فاز
+              درگیری‌های هوایی و زمینی شد.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     const isAttackerWin = reportData.phase1Missile.phaseWinner === "ATTACKER";
     return (
       <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
