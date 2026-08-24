@@ -1,4 +1,9 @@
-import { GameAction, Nation, Province } from "@geopolitics/domain";
+import {
+  GameAction,
+  Nation,
+  Province,
+  GlobalCoalition,
+} from "@geopolitics/domain";
 import {
   AIProcurementPlanner,
   AIPosture,
@@ -60,6 +65,7 @@ export class AIActionBuilder {
     rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
     matrixCache?: GeopoliticalMatrixCache,
+    globalCoalition?: GlobalCoalition | null,
   ): GameAction[] {
     const actions: GameAction[] = [];
 
@@ -107,6 +113,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       context.ownedProvinces,
+      globalCoalition,
     );
     if (attackAction) {
       actions.push(attackAction);
@@ -121,6 +128,7 @@ export class AIActionBuilder {
       lockedTargets,
       rankMap,
       context,
+      globalCoalition,
     );
 
     return actions;
@@ -135,6 +143,7 @@ export class AIActionBuilder {
     lockedTargets?: Set<string>,
     rankMap?: Map<string, number>,
     context?: NationDecisionContext,
+    globalCoalition?: GlobalCoalition | null,
   ): void {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -164,6 +173,7 @@ export class AIActionBuilder {
       provincesMap,
       lockedTargets,
       context?.vectorsByTarget,
+      globalCoalition,
     );
 
     if (peaceAction) {

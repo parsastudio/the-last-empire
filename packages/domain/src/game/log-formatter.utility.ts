@@ -24,6 +24,16 @@ export class TurnLogFormatter {
     const params = log.params || {};
 
     switch (log.eventCode) {
+      case "COALITION_FORMED": {
+        const members = String(params["memberNames"] || "قدرت‌های بزرگ");
+        return `پیمان مهار اضطراری: کشورهای [${members}] با امضای معاهده دفاع جمعی، رسماً علیه امپراتوری ${sourceName} اعلام جنگ کرده و صلح را ناممکن دانستند.`;
+      }
+
+      case "COALITION_MEMBER_FALLEN": {
+        const remaining = String(params["remainingCount"] || "۰");
+        return `شکست ضلع ائتلاف جهانی: کشور ${sourceName} سقوط کرد (${remaining} قدرت متخاصم از ائتلاف باقی مانده است).`;
+      }
+
       case "WAR_DECLARED":
         return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;
 

@@ -6,6 +6,7 @@ import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
+import { CoalitionManager } from "@/engine/politics/coalition-manager";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -23,6 +24,17 @@ export class TurnProgressionOrchestrator {
       pendingProposals: [...state.pendingProposals],
     };
 
+    let activeMatrixCache = GeopoliticalMatrixCache.build(
+      workingState.nations,
+      workingState.provinces,
+    );
+
+    workingState = CoalitionManager.evaluateCoalitionState(
+      workingState,
+      activeMatrixCache.getRankMap(),
+      activeMatrixCache.getProvincesByOwnerMap(),
+    );
+
     const shuffledNationIds = Object.keys(workingState.nations);
     for (let i = shuffledNationIds.length - 1; i > 0; i--) {
       const j = Math.floor(prng.nextFloat() * (i + 1));
@@ -30,11 +42,6 @@ export class TurnProgressionOrchestrator {
       shuffledNationIds[i] = shuffledNationIds[j]!;
       shuffledNationIds[j] = temp;
     }
-
-    let activeMatrixCache = GeopoliticalMatrixCache.build(
-      workingState.nations,
-      workingState.provinces,
-    );
 
     for (let i = 0; i < shuffledNationIds.length; i++) {
       const id = shuffledNationIds[i]!;
@@ -55,6 +62,7 @@ export class TurnProgressionOrchestrator {
         rankMap,
         provincesByOwnerMap,
         activeMatrixCache,
+        workingState.globalCoalition,
       );
 
       if (aiActions.length > 0) {
@@ -95,6 +103,12 @@ export class TurnProgressionOrchestrator {
     );
 
     workingState = this.livenessManager.updateLiveness(workingState);
+
+    workingState = CoalitionManager.evaluateCoalitionState(
+      workingState,
+      postActionRankMap,
+      postActionProvincesByOwnerMap,
+    );
 
     const victoryStatus = this.victoryChecker.checkVictory(workingState);
 

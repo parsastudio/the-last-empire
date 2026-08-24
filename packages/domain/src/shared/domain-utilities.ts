@@ -187,4 +187,39 @@ export class TurnLogBuilder {
       message,
     );
   }
+
+  public static createCoalitionFormedLog(
+    turn: number,
+    targetNationId: string,
+    memberNames: string,
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      targetNationId,
+      "CRITICAL",
+      "COALITION_FORMED",
+      "GLOBAL_WAR",
+      "GLOBAL",
+      undefined,
+      { memberNames },
+    );
+  }
+
+  public static createCoalitionMemberFallenLog(
+    turn: number,
+    fallenNationId: string,
+    targetNationId: string,
+    remainingCount: number,
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      fallenNationId,
+      "CRITICAL",
+      "COALITION_MEMBER_FALLEN",
+      "GLOBAL_WAR",
+      "GLOBAL",
+      targetNationId,
+      { remainingCount },
+    );
+  }
 }

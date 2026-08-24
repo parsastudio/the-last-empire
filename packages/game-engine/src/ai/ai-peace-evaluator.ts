@@ -5,6 +5,7 @@ import {
   Province,
   CountryRegistry,
   DiplomacyLockManager,
+  GlobalCoalition,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -19,8 +20,11 @@ export class AIPeaceEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
     vectorsByTarget?: Map<string, GeopoliticalVector>,
+    globalCoalition?: GlobalCoalition | null,
   ): GameAction | null {
     if (!nation.relations) return null;
+
+    const sourceCanonical = CountryRegistry.resolveCanonicalId(nation.id);
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (rel.stance !== "WAR") continue;
@@ -30,6 +34,19 @@ export class AIPeaceEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+
+      if (globalCoalition) {
+        const isMemberAndTarget =
+          (globalCoalition.memberNationIds.includes(sourceCanonical) &&
+            canonicalTarget === globalCoalition.targetNationId) ||
+          (globalCoalition.memberNationIds.includes(canonicalTarget) &&
+            sourceCanonical === globalCoalition.targetNationId);
+
+        if (isMemberAndTarget) {
+          continue;
+        }
+      }
+
       const targetNation = allNations[canonicalTarget] || allNations[targetId];
 
       if (

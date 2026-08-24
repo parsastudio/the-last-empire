@@ -36,6 +36,8 @@ export const TurnLogEventCodeSchema = z.enum([
   "NATION_COLLAPSED",
   "ESPIONAGE_OPERATION",
   "ARMS_TRADE",
+  "COALITION_FORMED",
+  "COALITION_MEMBER_FALLEN",
   "GENERIC_EVENT",
 ]);
 
@@ -59,6 +61,12 @@ export const TurnLogEntrySchema = z.object({
   params: z.record(z.string(), TurnLogParamValueSchema).default({}),
 });
 
+export const GlobalCoalitionSchema = z.object({
+  targetNationId: z.string(),
+  memberNationIds: z.array(z.string()),
+  triggeredTurn: z.number().nonnegative(),
+});
+
 export const GameStateSchema = z.object({
   gameId: z.string(),
   currentTurn: z.number().nonnegative(),
@@ -71,6 +79,7 @@ export const GameStateSchema = z.object({
   nations: z.record(z.string(), NationSchema),
   pendingProposals: z.array(PendingDiplomaticProposalSchema).default([]),
   turnLogs: z.array(TurnLogEntrySchema),
+  globalCoalition: GlobalCoalitionSchema.nullable().optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;
@@ -79,4 +88,5 @@ export type TurnLogCategory = z.infer<typeof TurnLogCategorySchema>;
 export type TurnLogEventCode = z.infer<typeof TurnLogEventCodeSchema>;
 export type TurnLogParamValue = z.infer<typeof TurnLogParamValueSchema>;
 export type TurnLogEntry = z.infer<typeof TurnLogEntrySchema>;
+export type GlobalCoalition = z.infer<typeof GlobalCoalitionSchema>;
 export type GameState = z.infer<typeof GameStateSchema>;
