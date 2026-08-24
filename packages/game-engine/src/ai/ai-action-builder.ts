@@ -46,6 +46,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       rankMap,
+      ownedProvinces,
     );
 
     const vectorsByTarget = new Map<string, GeopoliticalVector>();
@@ -67,6 +68,7 @@ export class AIActionBuilder {
         target,
         allNations,
         provincesMap,
+        ownedProvinces,
       );
 
       vectorsByTarget.set(canonicalTarget, vector);

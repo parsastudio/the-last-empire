@@ -38,6 +38,7 @@ export class GeopoliticalReachResolver {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
+    sourceProvinces?: Province[],
   ): Nation[] {
     const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const sourceTier = this.getReachTier(
@@ -87,15 +88,33 @@ export class GeopoliticalReachResolver {
       return Array.from(reachableMap.values());
     }
 
-    for (const provId in provincesMap) {
-      const prov = provincesMap[provId]!;
-      if (
-        CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
-        sourceCanonical
-      ) {
-        const landNeighbors = prov.landNeighbors || [];
-        for (let i = 0; i < landNeighbors.length; i++) {
-          const nProv = provincesMap[landNeighbors[i]!.toString()];
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+
+    for (let p = 0; p < myProvs.length; p++) {
+      const prov = myProvs[p]!;
+      const landNeighbors = prov.landNeighbors || [];
+      for (let i = 0; i < landNeighbors.length; i++) {
+        const nProv = provincesMap[landNeighbors[i]!.toString()];
+        if (nProv) {
+          const nCanonical = CountryRegistry.resolveCanonicalId(
+            nProv.ownerNationId,
+          );
+          if (nCanonical !== sourceCanonical && !reachableMap.has(nCanonical)) {
+            const targetNation =
+              allNations[nCanonical] || allNations[nProv.ownerNationId];
+            if (targetNation && targetNation.isAlive) {
+              reachableMap.set(nCanonical, targetNation);
+            }
+          }
+        }
+      }
+
+      if (prov.hasSeaAccess) {
+        const t1 = prov.maritimeNeighborsTier1 || [];
+        for (let i = 0; i < t1.length; i++) {
+          const nProv = provincesMap[t1[i]!.toString()];
           if (nProv) {
             const nCanonical = CountryRegistry.resolveCanonicalId(
               nProv.ownerNationId,
@@ -113,10 +132,10 @@ export class GeopoliticalReachResolver {
           }
         }
 
-        if (prov.hasSeaAccess) {
-          const t1 = prov.maritimeNeighborsTier1 || [];
-          for (let i = 0; i < t1.length; i++) {
-            const nProv = provincesMap[t1[i]!.toString()];
+        if (sourceTier === "REGIONAL_POWER") {
+          const t2 = prov.maritimeNeighborsTier2 || [];
+          for (let i = 0; i < t2.length; i++) {
+            const nProv = provincesMap[t2[i]!.toString()];
             if (nProv) {
               const nCanonical = CountryRegistry.resolveCanonicalId(
                 nProv.ownerNationId,
@@ -133,28 +152,6 @@ export class GeopoliticalReachResolver {
               }
             }
           }
-
-          if (sourceTier === "REGIONAL_POWER") {
-            const t2 = prov.maritimeNeighborsTier2 || [];
-            for (let i = 0; i < t2.length; i++) {
-              const nProv = provincesMap[t2[i]!.toString()];
-              if (nProv) {
-                const nCanonical = CountryRegistry.resolveCanonicalId(
-                  nProv.ownerNationId,
-                );
-                if (
-                  nCanonical !== sourceCanonical &&
-                  !reachableMap.has(nCanonical)
-                ) {
-                  const targetNation =
-                    allNations[nCanonical] || allNations[nProv.ownerNationId];
-                  if (targetNation && targetNation.isAlive) {
-                    reachableMap.set(nCanonical, targetNation);
-                  }
-                }
-              }
-            }
-          }
         }
       }
     }
@@ -166,30 +163,28 @@ export class GeopoliticalReachResolver {
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
   ): boolean {
     if (!provincesMap) {
       return false;
     }
 
-    const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
 
-    for (const key in provincesMap) {
-      const prov = provincesMap[key]!;
-      if (
-        CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
-        sourceCanonical
-      ) {
-        const neighbors = prov.landNeighbors || [];
-        for (let i = 0; i < neighbors.length; i++) {
-          const neighborProv = provincesMap[neighbors[i]!.toString()];
-          if (
-            neighborProv &&
-            CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
-              targetCanonical
-          ) {
-            return true;
-          }
+    for (let p = 0; p < myProvs.length; p++) {
+      const prov = myProvs[p]!;
+      const neighbors = prov.landNeighbors || [];
+      for (let i = 0; i < neighbors.length; i++) {
+        const neighborProv = provincesMap[neighbors[i]!.toString()];
+        if (
+          neighborProv &&
+          CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
+            targetCanonical
+        ) {
+          return true;
         }
       }
     }
@@ -201,31 +196,29 @@ export class GeopoliticalReachResolver {
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
   ): boolean {
     if (!provincesMap) {
       return false;
     }
 
-    const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
 
-    for (const key in provincesMap) {
-      const prov = provincesMap[key]!;
-      if (
-        CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
-          sourceCanonical &&
-        prov.hasSeaAccess
-      ) {
-        const t1 = prov.maritimeNeighborsTier1 || [];
-        for (let i = 0; i < t1.length; i++) {
-          const neighborProv = provincesMap[t1[i]!.toString()];
-          if (
-            neighborProv &&
-            CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
-              targetCanonical
-          ) {
-            return true;
-          }
+    for (let p = 0; p < myProvs.length; p++) {
+      const prov = myProvs[p]!;
+      if (!prov.hasSeaAccess) continue;
+      const t1 = prov.maritimeNeighborsTier1 || [];
+      for (let i = 0; i < t1.length; i++) {
+        const neighborProv = provincesMap[t1[i]!.toString()];
+        if (
+          neighborProv &&
+          CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
+            targetCanonical
+        ) {
+          return true;
         }
       }
     }
@@ -237,35 +230,36 @@ export class GeopoliticalReachResolver {
     source: Nation,
     target: Nation,
     provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
   ): boolean {
     if (!provincesMap) {
       return false;
     }
 
-    if (this.isImmediateMaritimeNeighbor(source, target, provincesMap)) {
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+
+    if (
+      this.isImmediateMaritimeNeighbor(source, target, provincesMap, myProvs)
+    ) {
       return true;
     }
 
-    const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
 
-    for (const key in provincesMap) {
-      const prov = provincesMap[key]!;
-      if (
-        CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
-          sourceCanonical &&
-        prov.hasSeaAccess
-      ) {
-        const t2 = prov.maritimeNeighborsTier2 || [];
-        for (let i = 0; i < t2.length; i++) {
-          const neighborProv = provincesMap[t2[i]!.toString()];
-          if (
-            neighborProv &&
-            CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
-              targetCanonical
-          ) {
-            return true;
-          }
+    for (let p = 0; p < myProvs.length; p++) {
+      const prov = myProvs[p]!;
+      if (!prov.hasSeaAccess) continue;
+      const t2 = prov.maritimeNeighborsTier2 || [];
+      for (let i = 0; i < t2.length; i++) {
+        const neighborProv = provincesMap[t2[i]!.toString()];
+        if (
+          neighborProv &&
+          CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
+            targetCanonical
+        ) {
+          return true;
         }
       }
     }
@@ -279,6 +273,7 @@ export class GeopoliticalReachResolver {
     allNations?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
+    sourceProvinces?: Province[],
   ): boolean {
     if (source.id === target.id) {
       return false;
@@ -316,16 +311,29 @@ export class GeopoliticalReachResolver {
       return true;
     }
 
-    if (this.hasDirectLandBorder(source, target, provincesMap)) {
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+
+    if (this.hasDirectLandBorder(source, target, provincesMap, myProvs)) {
       return true;
     }
 
-    if (this.isImmediateMaritimeNeighbor(source, target, provincesMap)) {
+    if (
+      this.isImmediateMaritimeNeighbor(source, target, provincesMap, myProvs)
+    ) {
       return true;
     }
 
     if (sourceTier === "REGIONAL_POWER") {
-      if (this.hasRegionalMaritimeConnection(source, target, provincesMap)) {
+      if (
+        this.hasRegionalMaritimeConnection(
+          source,
+          target,
+          provincesMap,
+          myProvs,
+        )
+      ) {
         return true;
       }
     }

@@ -33,6 +33,7 @@ export class GeopoliticalVectorCalculator {
     target: Nation,
     allNations?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
   ): GeopoliticalVector {
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const rel =
@@ -76,10 +77,15 @@ export class GeopoliticalVectorCalculator {
       opinion + ideologyScore + commonEnemyBonus + reputationEffect;
     const alignment = Math.max(-100, Math.min(100, rawAlignment));
 
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+
     const isLandNeighbor = GeopoliticalReachResolver.hasDirectLandBorder(
       source,
       target,
       provincesMap,
+      myProvs,
     );
 
     const isImmediateSeaNeighbor =
@@ -87,11 +93,13 @@ export class GeopoliticalVectorCalculator {
         source,
         target,
         provincesMap,
+        myProvs,
       );
 
     const sourceSea = NationGettersUtility.hasSeaAccess(
       source.id,
       provincesMap,
+      myProvs,
     );
     const targetSea = NationGettersUtility.hasSeaAccess(
       target.id,
