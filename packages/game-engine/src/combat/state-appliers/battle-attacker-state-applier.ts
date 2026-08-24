@@ -1,7 +1,10 @@
 import { Nation, DiplomaticStance, CountryRegistry } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
-import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
+import {
+  BattleLootManager,
+  ExtraCapturedMilitaryUnits,
+} from "@/engine/combat/loot/battle-loot-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export interface AttackerStateApplierInput {
@@ -11,6 +14,9 @@ export interface AttackerStateApplierInput {
   calcResult: BattleCalculationResult;
   currentStance: DiplomaticStance;
   betrayalResult: BetrayalEvaluation;
+  isDefenderEliminated?: boolean;
+  extraCapturedUnits?: ExtraCapturedMilitaryUnits;
+  extraTreasuryLooted?: number;
 }
 
 export class BattleAttackerStateApplier {
@@ -22,6 +28,9 @@ export class BattleAttackerStateApplier {
       calcResult,
       currentStance,
       betrayalResult,
+      isDefenderEliminated,
+      extraCapturedUnits,
+      extraTreasuryLooted,
     } = input;
 
     const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
@@ -30,10 +39,14 @@ export class BattleAttackerStateApplier {
       attacker.military,
       defenderTechLevel,
       calcResult,
+      extraCapturedUnits,
     );
 
+    const isTotalAnnexation =
+      calcResult.isFullCapitulation || Boolean(isDefenderEliminated);
+
     let baseWarRepPenalty = currentStance !== "WAR" ? 15 : 0;
-    if (calcResult.isFullCapitulation) {
+    if (isTotalAnnexation) {
       baseWarRepPenalty += 10;
     }
     const totalRepPenalty =
@@ -65,9 +78,11 @@ export class BattleAttackerStateApplier {
         )
       : calcResult.deploymentMoneyCost;
 
+    const totalLoot = calcResult.treasuryLooted + (extraTreasuryLooted || 0);
+
     const updatedTreasury = Math.max(
       0,
-      attacker.treasury - actualDeploymentCost + calcResult.treasuryLooted,
+      attacker.treasury - actualDeploymentCost + totalLoot,
     );
 
     return {

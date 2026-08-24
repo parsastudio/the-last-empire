@@ -62,19 +62,24 @@ export class AIActionBuilder {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
-    rankMap?: Map<string, number>,
-    provincesByOwnerMap?: Map<string, Province[]>,
     matrixCache?: GeopoliticalMatrixCache,
     globalCoalition?: GlobalCoalition | null,
   ): GameAction[] {
     const actions: GameAction[] = [];
 
+    const cache =
+      matrixCache ??
+      GeopoliticalMatrixCache.build(allNations, provincesMap || {});
+
     const context = this.buildDecisionContext(
       nation,
       allNations,
       provincesMap,
-      matrixCache,
+      cache,
     );
+
+    const rankMap = cache.getRankMap();
+    const provincesByOwnerMap = cache.getProvincesByOwnerMap();
 
     const procurementResult = AIProcurementPlanner.planRecruitment(
       nation,

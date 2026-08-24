@@ -95,45 +95,17 @@ export class DiplomaticTurnProcessor {
               provincesMap,
             );
 
-        const revanchismCap =
-          lostCount > 0 ? Math.max(-35, -lostCount * 12) : 15;
+        const revanchismBaseline =
+          lostCount > 0 ? Math.max(-35, -lostCount * 12) : 0;
 
-        const ideologyBonus =
-          targetNation &&
-          nation.government.type === targetNation.government.type
-            ? 15
-            : 0;
-
-        const baseline = Math.min(revanchismCap, ideologyBonus);
-
-        if (nextAlignment < baseline) {
-          nextAlignment = Math.min(baseline, nextAlignment + 1);
-        } else if (nextAlignment > baseline) {
-          nextAlignment = Math.max(baseline, nextAlignment - 1);
+        if (nextAlignment < revanchismBaseline) {
+          nextAlignment = Math.min(revanchismBaseline, nextAlignment + 1);
+        } else if (nextAlignment > revanchismBaseline) {
+          nextAlignment = Math.max(revanchismBaseline, nextAlignment - 1);
         }
       }
 
       const isReachable = reachableCanonicalSet.has(canonicalTarget);
-
-      if (!isReachable) {
-        newRels[targetId] = {
-          ...relation,
-          alignment: nextAlignment,
-          tension: 0,
-        };
-        continue;
-      }
-
-      const ideologyBonus =
-        targetNation && nation.government.type === targetNation.government.type
-          ? 15
-          : 0;
-      const targetRep = targetNation?.globalReputation ?? 50;
-      const repEffect = Math.round((targetRep / 100) * 15);
-      const currentAlignment = Math.max(
-        -100,
-        Math.min(100, nextAlignment + ideologyBonus + repEffect),
-      );
 
       let currentTension = relation.tension ?? 10;
       if (relation.stance === "WAR") {
@@ -143,14 +115,16 @@ export class DiplomaticTurnProcessor {
       } else if (relation.stance === "NON_AGGRESSION_PACT") {
         currentTension = Math.min(15, currentTension);
       } else {
-        if (currentTension > 10) {
+        if (!isReachable) {
+          currentTension = Math.max(0, currentTension - 5);
+        } else if (currentTension > 10) {
           currentTension = Math.max(10, currentTension - 3);
         }
       }
 
       newRels[targetId] = {
         ...relation,
-        alignment: currentAlignment,
+        alignment: Math.max(-100, Math.min(100, nextAlignment)),
         tension: currentTension,
       };
     }

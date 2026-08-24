@@ -13,6 +13,7 @@ export class BattleLogFactory {
     calcResult: BattleCalculationResult,
     betrayalPenaltyText: string,
     humanNationId: string,
+    isDefenderAnnexed = false,
   ): TurnLogEntry[] {
     const logs: TurnLogEntry[] = [];
     const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
@@ -22,8 +23,11 @@ export class BattleLogFactory {
       CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman;
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
+    const isCapitulationOutcome =
+      calcResult.isFullCapitulation || isDefenderAnnexed;
+
     const outcome = calcResult.isAttackerVictory
-      ? calcResult.isFullCapitulation
+      ? isCapitulationOutcome
         ? "CAPITULATION"
         : "VICTORY"
       : "DEFEAT";
@@ -66,7 +70,7 @@ export class BattleLogFactory {
       ),
     );
 
-    if (calcResult.isFullCapitulation) {
+    if (isCapitulationOutcome && calcResult.isAttackerVictory) {
       logs.push(
         TurnLogBuilder.createAnnexationLog(
           currentTurn,
