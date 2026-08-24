@@ -13,13 +13,16 @@ import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
 import { ExtraCapturedMilitaryUnits } from "@/engine/combat/loot/battle-loot-manager";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
-import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
+import {
+  BattleFullReportData,
+  BattleSpoilsDetails,
+} from "@/domain/reports/combat-report.schema";
 
 export class BattleExecutionEngine {
   public executeBattle(
     state: GameState,
     action: InitiateBattleAction,
-  ): GameState {
+  ): { state: GameState; reportData: BattleFullReportData | null } {
     const canonicalAttackerId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
@@ -34,7 +37,7 @@ export class BattleExecutionEngine {
       state.nations[action.targetNationId];
 
     if (!attacker || !defender || !attacker.isAlive || !defender.isAlive) {
-      return state;
+      return { state, reportData: null };
     }
 
     const currentStance = NationRelationResolver.getStance(
@@ -208,6 +211,23 @@ export class BattleExecutionEngine {
         calcResult.capturedNavalFleet + (extraCapturedUnits?.navalFleet || 0),
     };
 
+    const fullReportData: BattleFullReportData = {
+      attackerId: attacker.id,
+      defenderId: defender.id,
+      targetProvinceName: targetProvinceObj?.nameFa,
+      attackType: action.attackType || "LAND",
+      isAttackerVictory: calcResult.isAttackerVictory,
+      isFullCapitulation: calcResult.isFullCapitulation || !isDefenderAlive,
+      valuationRatio: calcResult.valuationRatio,
+      treasuryLooted: calcResult.treasuryLooted,
+      attackerCasualties: calcResult.attackerCasualties,
+      defenderCasualties: calcResult.defenderCasualties,
+      phase1Missile: calcResult.phase1Missile,
+      phase2Air: calcResult.phase2Air,
+      phase3Ground: calcResult.phase3Ground,
+      spoils: spoilsData,
+    };
+
     const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,
       updatedAttacker,
@@ -235,11 +255,13 @@ export class BattleExecutionEngine {
       BitPackedGridState.getInstance().markDirty();
     }
 
-    return {
+    const nextState: GameState = {
       ...state,
       provinces: conquest.updatedProvinces,
       nations: intervention.updatedNations,
       turnLogs: updatedLogs,
     };
+
+    return { state: nextState, reportData: fullReportData };
   }
 }
