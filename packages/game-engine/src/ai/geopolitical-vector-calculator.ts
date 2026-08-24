@@ -36,7 +36,9 @@ export class GeopoliticalVectorCalculator {
     sourceProvinces?: Province[],
     sourcePower?: number,
     sourceSeaAccess?: boolean,
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): GeopoliticalVector {
+    const canonicalSource = CountryRegistry.resolveCanonicalId(source.id);
     const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
     const rel =
       source.relations[canonicalTarget] || source.relations[target.id];
@@ -81,13 +83,18 @@ export class GeopoliticalVectorCalculator {
 
     const myProvs =
       sourceProvinces ??
-      NationGettersUtility.getOwnedProvinces(source.id, provincesMap);
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
 
     const isLandNeighbor = GeopoliticalReachResolver.hasDirectLandBorder(
       source,
       target,
       provincesMap,
       myProvs,
+      provincesByOwnerMap,
     );
 
     const isImmediateSeaNeighbor =
@@ -96,18 +103,29 @@ export class GeopoliticalVectorCalculator {
         target,
         provincesMap,
         myProvs,
+        provincesByOwnerMap,
       );
 
     const sourceSea =
       sourceSeaAccess !== undefined
         ? sourceSeaAccess
-        : NationGettersUtility.hasSeaAccess(source.id, provincesMap, myProvs);
+        : NationGettersUtility.hasSeaAccess(
+            source.id,
+            provincesMap,
+            myProvs,
+            provincesByOwnerMap,
+          );
 
-    const targetSea =
-      target.military.navalFleet > 0 ||
-      (provincesMap
-        ? NationGettersUtility.hasSeaAccess(target.id, provincesMap)
-        : false);
+    const targetProvs = provincesByOwnerMap?.get(canonicalTarget);
+    const targetSea = targetProvs
+      ? targetProvs.some((p) => p.hasSeaAccess)
+      : target.military.navalFleet > 0 ||
+        NationGettersUtility.hasSeaAccess(
+          target.id,
+          provincesMap,
+          undefined,
+          provincesByOwnerMap,
+        );
 
     const isNavalReachable = Boolean(sourceSea && targetSea);
 

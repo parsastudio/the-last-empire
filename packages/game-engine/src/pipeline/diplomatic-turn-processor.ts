@@ -29,6 +29,7 @@ export class DiplomaticTurnProcessor {
     allNations?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     rankMap?: Map<string, number>,
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): {
     updatedNation: Nation;
     isAtWar: boolean;
@@ -44,6 +45,7 @@ export class DiplomaticTurnProcessor {
     const myProvs = NationGettersUtility.getOwnedProvinces(
       nation.id,
       provincesMap,
+      provincesByOwnerMap,
     );
 
     const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
@@ -52,6 +54,7 @@ export class DiplomaticTurnProcessor {
       provincesMap,
       rankMap,
       myProvs,
+      provincesByOwnerMap,
     );
 
     const reachableCanonicalSet = new Set(
