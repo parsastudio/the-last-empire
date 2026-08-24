@@ -129,20 +129,22 @@ export class AllianceInterventionEvaluator {
         };
 
         const currentDefender = updatedNations[defender.id] || defender;
-        const updatedDefenderRelations = {
-          ...currentDefender.relations,
-          [ally.id]: {
-            targetNationId: ally.id,
-            stance: "NORMAL_DIPLOMACY" as const,
-            alignment: -60,
-            tension: 70,
-          },
-        };
+        if (currentDefender.isAlive) {
+          const updatedDefenderRelations = {
+            ...currentDefender.relations,
+            [ally.id]: {
+              targetNationId: ally.id,
+              stance: "NORMAL_DIPLOMACY" as const,
+              alignment: -60,
+              tension: 70,
+            },
+          };
 
-        updatedNations[defender.id] = {
-          ...currentDefender,
-          relations: updatedDefenderRelations,
-        };
+          updatedNations[defender.id] = {
+            ...currentDefender,
+            relations: updatedDefenderRelations,
+          };
+        }
       }
     }
 

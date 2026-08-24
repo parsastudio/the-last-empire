@@ -4,12 +4,14 @@ import {
   EspionageSabotageData,
 } from "@/domain/espionage/espionage.schema";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
+import { SeededRandom } from "@/domain/shared/domain-utilities";
 
 export class SabotageTierExecutor {
   public static execute(
     target: Nation,
     isSuccess: boolean,
     outcome: EspionageOutcome,
+    prng?: SeededRandom,
   ): {
     updatedTarget: Nation;
     sabotageData?: EspionageSabotageData;
@@ -22,7 +24,8 @@ export class SabotageTierExecutor {
       };
     }
 
-    const destRatio = 0.2 + Math.random() * 0.1;
+    const randomFactor = prng ? prng.nextFloat() : 0.5;
+    const destRatio = 0.2 + randomFactor * 0.1;
     const infLost = Math.floor((target.military.infantry || 0) * destRatio);
     const armLost = Math.floor((target.military.armor || 0) * destRatio);
     const adLost = Math.floor((target.military.airDefense || 0) * destRatio);
