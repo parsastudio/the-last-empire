@@ -6,7 +6,10 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
+import {
+  AIProcurementPlanner,
+  AIPosture,
+} from "@/engine/ai/ai-procurement-planner";
 import { NationGettersUtility, getNationGdp } from "@geopolitics/domain";
 
 export interface UpgradePlanResult {
@@ -21,6 +24,8 @@ export class AIUpgradePlanner {
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
     rankMap?: Map<string, number>,
+    precomputedPosture?: AIPosture,
+    ownedProvinces?: Province[],
   ): UpgradePlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -35,12 +40,14 @@ export class AIUpgradePlanner {
     const capacityPercentage =
       DemographicsCalculator.calculateCapacityPercentage(pop, maxCap);
 
-    const posture = AIProcurementPlanner.evaluatePosture(
-      nation,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
+    const posture =
+      precomputedPosture ??
+      AIProcurementPlanner.evaluatePosture(
+        nation,
+        allNations,
+        provincesMap,
+        rankMap,
+      );
 
     const gdp = getNationGdp(nation, provincesMap);
     const devCost = DevelopmentManager.getUpgradeCost(gdp);
@@ -61,6 +68,7 @@ export class AIUpgradePlanner {
       nation,
       allNations,
       provincesMap,
+      ownedProvinces,
     );
     const hasTechSurplus = currentTreasury >= Math.floor(techCost * 1.5);
 
@@ -82,6 +90,7 @@ export class AIUpgradePlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    ownedProvinces?: Province[],
   ): boolean {
     if (!provincesMap) {
       return false;
@@ -90,29 +99,29 @@ export class AIUpgradePlanner {
     const currentTech = nation.military.techLevel;
     const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
 
-    for (const prov of Object.values(provincesMap)) {
-      if (
-        CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
-        canonicalNation
-      ) {
-        const neighbors = prov.landNeighbors;
-        for (let i = 0; i < neighbors.length; i++) {
-          const neighborProv = provincesMap[neighbors[i]!.toString()];
-          if (neighborProv) {
-            const neighborOwnerId = CountryRegistry.resolveCanonicalId(
-              neighborProv.ownerNationId,
-            );
-            if (neighborOwnerId !== canonicalNation) {
-              const neighborNation =
-                allNations[neighborOwnerId] ||
-                allNations[neighborProv.ownerNationId];
-              if (
-                neighborNation &&
-                neighborNation.isAlive &&
-                neighborNation.military.techLevel > currentTech
-              ) {
-                return true;
-              }
+    const provsToCheck =
+      ownedProvinces ??
+      NationGettersUtility.getOwnedProvinces(nation.id, provincesMap);
+
+    for (let p = 0; p < provsToCheck.length; p++) {
+      const prov = provsToCheck[p]!;
+      const neighbors = prov.landNeighbors || [];
+      for (let i = 0; i < neighbors.length; i++) {
+        const neighborProv = provincesMap[neighbors[i]!.toString()];
+        if (neighborProv) {
+          const neighborOwnerId = CountryRegistry.resolveCanonicalId(
+            neighborProv.ownerNationId,
+          );
+          if (neighborOwnerId !== canonicalNation) {
+            const neighborNation =
+              allNations[neighborOwnerId] ||
+              allNations[neighborProv.ownerNationId];
+            if (
+              neighborNation &&
+              neighborNation.isAlive &&
+              neighborNation.military.techLevel > currentTech
+            ) {
+              return true;
             }
           }
         }

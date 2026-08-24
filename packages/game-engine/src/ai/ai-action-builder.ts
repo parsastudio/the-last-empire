@@ -1,5 +1,15 @@
-import { GameAction, Nation, Province } from "@geopolitics/domain";
-import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
+import {
+  GameAction,
+  Nation,
+  Province,
+  GeopoliticalReachResolver,
+  CountryRegistry,
+  NationGettersUtility,
+} from "@geopolitics/domain";
+import {
+  AIProcurementPlanner,
+  AIPosture,
+} from "@/engine/ai/ai-procurement-planner";
 import { AIUpgradePlanner } from "@/engine/ai/ai-upgrade-planner";
 import { AIEspionagePlanner } from "@/engine/ai/ai-espionage-planner";
 import { AIAttackPlanner } from "@/engine/ai/ai-attack-planner";
@@ -7,8 +17,80 @@ import { AIPeaceEvaluator } from "@/engine/ai/ai-peace-evaluator";
 import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
 import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-evaluator";
 import { AIWarDeclarationEvaluator } from "@/engine/ai/ai-war-declaration-evaluator";
+import {
+  GeopoliticalVectorCalculator,
+  GeopoliticalVector,
+} from "@/engine/ai/geopolitical-vector-calculator";
+
+interface NationDecisionContext {
+  ownedProvinces: Province[];
+  reachableTargets: Nation[];
+  vectorsByTarget: Map<string, GeopoliticalVector>;
+  posture: AIPosture;
+}
 
 export class AIActionBuilder {
+  private static buildDecisionContext(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+    rankMap?: Map<string, number>,
+  ): NationDecisionContext {
+    const ownedProvinces = NationGettersUtility.getOwnedProvinces(
+      nation.id,
+      provincesMap,
+    );
+
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
+
+    const vectorsByTarget = new Map<string, GeopoliticalVector>();
+    let maxTension = 0;
+    let isWar = Boolean(nation.warFocusTargetId);
+
+    for (let i = 0; i < reachableTargets.length; i++) {
+      const target = reachableTargets[i]!;
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
+      const rel =
+        nation.relations[canonicalTarget] || nation.relations[target.id];
+
+      if (rel && rel.stance === "WAR") {
+        isWar = true;
+      }
+
+      const vector = GeopoliticalVectorCalculator.calculate(
+        nation,
+        target,
+        allNations,
+        provincesMap,
+      );
+
+      vectorsByTarget.set(canonicalTarget, vector);
+
+      if (vector.isNeighbor && vector.tension > maxTension) {
+        maxTension = vector.tension;
+      }
+    }
+
+    let posture: AIPosture = "PEACE";
+    if (isWar) {
+      posture = "WAR";
+    } else if (maxTension >= 55) {
+      posture = "THREAT";
+    }
+
+    return {
+      ownedProvinces,
+      reachableTargets,
+      vectorsByTarget,
+      posture,
+    };
+  }
+
   public static buildNationActions(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -19,6 +101,13 @@ export class AIActionBuilder {
     const nationStart = performance.now();
     const actions: GameAction[] = [];
 
+    const context = this.buildDecisionContext(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
+
     const tProcStart = performance.now();
     const procurementResult = AIProcurementPlanner.planRecruitment(
       nation,
@@ -26,6 +115,7 @@ export class AIActionBuilder {
       provincesMap,
       undefined,
       rankMap,
+      context.posture,
     );
     const tProc = performance.now() - tProcStart;
     actions.push(...procurementResult.actions);
@@ -37,6 +127,8 @@ export class AIActionBuilder {
       provincesMap,
       procurementResult.remainingTreasury,
       rankMap,
+      context.posture,
+      context.ownedProvinces,
     );
     const tUpg = performance.now() - tUpgStart;
     actions.push(...upgradeResult.actions);
@@ -48,6 +140,7 @@ export class AIActionBuilder {
       provincesMap,
       upgradeResult.remainingTreasury,
       rankMap,
+      context.reachableTargets,
     );
     const tEsp = performance.now() - tEspStart;
     actions.push(...espionageResult.actions);
@@ -72,6 +165,7 @@ export class AIActionBuilder {
       espionageResult.remainingTreasury,
       lockedTargets,
       rankMap,
+      context,
     );
     const tDip = performance.now() - tDipStart;
 
@@ -94,6 +188,7 @@ export class AIActionBuilder {
     availableTreasury?: number,
     lockedTargets?: Set<string>,
     rankMap?: Map<string, number>,
+    context?: NationDecisionContext,
   ): void {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -105,6 +200,8 @@ export class AIActionBuilder {
       provincesMap,
       currentTreasury,
       rankMap,
+      context?.reachableTargets,
+      context?.vectorsByTarget,
     );
 
     if (aidResult) {
@@ -120,6 +217,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       lockedTargets,
+      context?.vectorsByTarget,
     );
 
     if (peaceAction) {
@@ -133,6 +231,8 @@ export class AIActionBuilder {
       provincesMap,
       lockedTargets,
       rankMap,
+      context?.reachableTargets,
+      context?.vectorsByTarget,
     );
 
     if (warDeclarationAction) {
@@ -151,6 +251,8 @@ export class AIActionBuilder {
         provincesMap,
         lockedTargets,
         rankMap,
+        context?.reachableTargets,
+        context?.vectorsByTarget,
       );
 
       if (treatyAction) {

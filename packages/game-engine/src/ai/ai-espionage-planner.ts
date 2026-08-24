@@ -20,6 +20,7 @@ export class AIEspionagePlanner {
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
     rankMap?: Map<string, number>,
+    reachableTargets?: Nation[],
   ): EspionagePlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -55,6 +56,7 @@ export class AIEspionagePlanner {
       currentTreasury,
       executedTiers,
       rankMap,
+      reachableTargets,
     );
 
     if (techTheftAction) {
@@ -168,22 +170,25 @@ export class AIEspionagePlanner {
     currentTreasury: number,
     executedTiers: number[],
     rankMap?: Map<string, number>,
+    reachableTargets?: Nation[],
   ): { action: GameAction; cost: number } | null {
     if (executedTiers.includes(3)) {
       return null;
     }
 
-    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
+    const targets =
+      reachableTargets ??
+      GeopoliticalReachResolver.getReachableTargets(
+        nation,
+        allNations,
+        provincesMap,
+        rankMap,
+      );
 
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
       [];
 
-    for (const target of reachableTargets) {
+    for (const target of targets) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
       const rel =
         nation.relations[canonicalTarget] || nation.relations[target.id];
