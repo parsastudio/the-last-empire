@@ -168,6 +168,9 @@ export class BattleExecutionEngine {
       );
 
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
+    const targetProvinceObj = action.targetProvinceId
+      ? state.provinces[action.targetProvinceId.toString()] || null
+      : null;
 
     const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,
@@ -177,6 +180,8 @@ export class BattleExecutionEngine {
       betrayalText,
       state.humanNationId,
       !isDefenderAlive,
+      targetProvinceObj,
+      action.attackType || "LAND",
     );
 
     const interventionLogs = BattleLogFactory.createInterventionLogs(

@@ -80,6 +80,13 @@ export class TurnLogFormatter {
         return `پیمان‌شکنی دفاعی: کشور ${sourceName} از اجرای تعهدات اتحاد با ${targetName} سر باز زد و پیمان را لغو نمود.`;
 
       case "BATTLE_TACTICAL_REPORT": {
+        const customHeadline = params["humanHeadline"]
+          ? String(params["humanHeadline"])
+          : "";
+        if (customHeadline) {
+          return customHeadline;
+        }
+
         const outcome = String(params["outcome"] || "VICTORY");
         const ratio = params["ratio"] ? String(params["ratio"]) : "۱";
         const betrayal = params["betrayalPenalty"]
@@ -92,6 +99,9 @@ export class TurnLogFormatter {
         if (outcome === "VICTORY") {
           return `ارتش ${sourceName} در نبرد با ${targetName} پیروز شد و استان هدف را تصرف کرد (۲۵٪ نیروهای مجروح بازسازی شدند).${betrayal}`;
         }
+        if (outcome === "DEFENDED") {
+          return `دفاع جانانه: نیروهای پدافندی ${sourceName} تهاجم سنگین ارتش ${targetName} را دفع کردند.${betrayal}`;
+        }
         return `مدافعان ${targetName} با مقاومت در خطوط پدافندی مانع پیشروی ارتش ${sourceName} شدند.${betrayal}`;
       }
 
@@ -100,7 +110,7 @@ export class TurnLogFormatter {
         if (outcome === "VICTORY") {
           return `گزارش جبهه نبرد: ارتش ${sourceName} موفق به شکست خطوط دفاعی ${targetName} و تصرف قلمرو گردید.`;
         }
-        return `گزارش جبهه نبرد: حمله سنگین ارتش ${sourceName} به مواضع ${targetName} با مقاومت مدافعان دفع شد.`;
+        return `گزارش جبهه نبرد: تهاجم ارتش ${sourceName} به مواضع ${targetName} با مقاومت مدافعان دفع شد.`;
       }
 
       case "NATION_ANNEXED":
