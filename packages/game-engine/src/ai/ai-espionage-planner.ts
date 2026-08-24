@@ -90,7 +90,7 @@ export class AIEspionagePlanner {
       : null;
 
     if (activeWarTarget && activeWarTarget.isAlive) {
-      const targetGdp = getNationGdp(activeWarTarget);
+      const targetGdp = getNationGdp(activeWarTarget, provincesMap);
       const cost = EspionageCalculator.calculateOperationCost(
         targetGdp,
         2,
@@ -123,7 +123,7 @@ export class AIEspionagePlanner {
       }
 
       if (rel.stance === "WAR") {
-        const targetGdp = getNationGdp(target);
+        const targetGdp = getNationGdp(target, provincesMap);
         const cost = EspionageCalculator.calculateOperationCost(
           targetGdp,
           2,
@@ -173,26 +173,17 @@ export class AIEspionagePlanner {
       return null;
     }
 
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
+
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
       [];
 
-    for (const target of Object.values(allNations)) {
-      if (!target.isAlive || target.id === nation.id) {
-        continue;
-      }
-
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          target,
-          allNations,
-          provincesMap,
-          rankMap,
-        )
-      ) {
-        continue;
-      }
-
+    for (const target of reachableTargets) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
       const rel =
         nation.relations[canonicalTarget] || nation.relations[target.id];

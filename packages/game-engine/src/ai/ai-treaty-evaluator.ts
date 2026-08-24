@@ -20,32 +20,24 @@ export class AITreatyEvaluator {
   ): GameAction | null {
     if (!nation.relations) return null;
 
-    for (const [targetId, rel] of Object.entries(nation.relations)) {
-      if (rel.stance === "WAR" || rel.stance === "ALLIANCE") continue;
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
 
-      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
-        continue;
-      }
+    for (const targetNation of reachableTargets) {
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(
+        targetNation.id,
+      );
+      const rel =
+        nation.relations[canonicalTarget] || nation.relations[targetNation.id];
 
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[canonicalTarget] || allNations[targetId];
-
-      if (
-        !targetNation ||
-        !targetNation.isAlive ||
-        targetNation.id === nation.id
-      ) {
-        continue;
-      }
+      if (!rel || rel.stance === "WAR" || rel.stance === "ALLIANCE") continue;
 
       if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-          rankMap,
-        )
+        DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)
       ) {
         continue;
       }

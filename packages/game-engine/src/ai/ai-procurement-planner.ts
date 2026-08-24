@@ -8,6 +8,7 @@ import {
   getNationGdp,
   NationGettersUtility,
   GeopoliticalReachResolver,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
@@ -154,24 +155,20 @@ export class AIProcurementPlanner {
 
     let maxTension = 0;
 
-    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (rel.stance === "WAR") return "WAR";
+    const reachableTargets = GeopoliticalReachResolver.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
 
-      const target = allNations[targetId];
-      if (!target || !target.isAlive || target.id === nation.id) {
-        continue;
-      }
+    for (const target of reachableTargets) {
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
+      const rel =
+        nation.relations[canonicalTarget] || nation.relations[target.id];
 
-      if (
-        !GeopoliticalReachResolver.canInitiateDiplomacy(
-          nation,
-          target,
-          allNations,
-          provincesMap,
-          rankMap,
-        )
-      ) {
-        continue;
+      if (rel && rel.stance === "WAR") {
+        return "WAR";
       }
 
       const vector = GeopoliticalVectorCalculator.calculate(
