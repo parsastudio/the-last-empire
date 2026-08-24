@@ -17,6 +17,7 @@ export class AIAttackPlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    ownedProvinces?: Province[],
   ): GameAction | null {
     if (!nation.isAlive || !nation.relations) {
       return null;
@@ -131,6 +132,7 @@ export class AIAttackPlanner {
       armorToDeploy,
       airForceToDeploy,
       dronesToLaunch,
+      ownedProvinces,
     );
 
     if (!targetResolution) {
@@ -213,6 +215,7 @@ export class AIAttackPlanner {
     armor: number,
     airForce: number,
     drones: number,
+    ownedProvinces?: Province[],
   ): {
     provinceId: number;
     attackType: "LAND" | "NAVAL";
@@ -231,7 +234,8 @@ export class AIAttackPlanner {
       return null;
     }
 
-    for (const prov of targetProvinceList) {
+    for (let i = 0; i < targetProvinceList.length; i++) {
+      const prov = targetProvinceList[i]!;
       if (
         LandNeighborResolver.hasProvinceLandBorder(
           prov.provinceId,
@@ -250,11 +254,9 @@ export class AIAttackPlanner {
     const sourceSea = NationGettersUtility.hasSeaAccess(
       nation.id,
       provincesMap,
+      ownedProvinces,
     );
-    const targetSea = NationGettersUtility.hasSeaAccess(
-      targetNation.id,
-      provincesMap,
-    );
+    const targetSea = targetProvinceList.some((p) => p.hasSeaAccess);
 
     if (!sourceSea || !targetSea) {
       return null;
@@ -263,7 +265,8 @@ export class AIAttackPlanner {
     let bestNavalProv: Province | null = null;
     let minNavalCost = Infinity;
 
-    for (const prov of targetProvinceList) {
+    for (let i = 0; i < targetProvinceList.length; i++) {
+      const prov = targetProvinceList[i]!;
       if (!prov.hasSeaAccess) continue;
 
       const navalInfo = NavalNeighborResolver.resolveNavalAttack(
@@ -274,6 +277,7 @@ export class AIAttackPlanner {
         armor,
         airForce,
         drones,
+        ownedProvinces,
       );
 
       if (
