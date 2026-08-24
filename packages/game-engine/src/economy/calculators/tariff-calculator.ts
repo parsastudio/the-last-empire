@@ -29,12 +29,13 @@ export class TariffCalculator {
     let totalPartnerCount = 0;
 
     if (nationsMap && Object.keys(nationsMap).length > 1) {
-      const partners = Object.values(nationsMap).filter(
-        (p) => p.id !== nation.id && p.isAlive,
-      );
-      totalPartnerCount = partners.length;
+      const partners = Object.values(nationsMap);
+      totalPartnerCount = partners.length - 1;
 
-      for (const partner of partners) {
+      for (let i = 0; i < partners.length; i++) {
+        const partner = partners[i]!;
+        if (partner.id === nation.id || !partner.isAlive) continue;
+
         const isSevered = NationRelationResolver.isTradeEmbargoed(
           nation,
           partner,

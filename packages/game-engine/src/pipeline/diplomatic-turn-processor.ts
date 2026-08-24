@@ -7,7 +7,6 @@ import {
   GeopoliticalReachResolver,
   NationGettersUtility,
 } from "@geopolitics/domain";
-import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class DiplomaticTurnProcessor {
   public static processPendingProposalsForAi(state: GameState): GameState {
@@ -108,22 +107,34 @@ export class DiplomaticTurnProcessor {
         continue;
       }
 
-      const vector = targetNation
-        ? GeopoliticalVectorCalculator.calculate(
-            nation,
-            targetNation,
-            allNations,
-            provincesMap,
-            myProvs,
-          )
-        : null;
+      const ideologyBonus =
+        targetNation && nation.government.type === targetNation.government.type
+          ? 15
+          : 0;
+      const targetRep = targetNation?.globalReputation ?? 50;
+      const repEffect = Math.round((targetRep / 100) * 15);
+      const currentAlignment = Math.max(
+        -100,
+        Math.min(100, nextOpinion + ideologyBonus + repEffect),
+      );
+
+      let currentTension = 10;
+      if (relation.stance === "WAR") {
+        currentTension = 100;
+      } else if (relation.stance === "ALLIANCE") {
+        currentTension = 0;
+      } else if (relation.stance === "NON_AGGRESSION_PACT") {
+        currentTension = 5;
+      } else {
+        currentTension = Math.min(100, nextGrudge + 10);
+      }
 
       newRels[targetId] = {
         ...relation,
         opinion: nextOpinion,
         grudge: nextGrudge,
-        alignment: vector ? vector.alignment : relation.alignment,
-        tension: vector ? vector.tension : relation.tension,
+        alignment: currentAlignment,
+        tension: currentTension,
       };
     }
 
