@@ -53,6 +53,7 @@ export function AdvancedDiplomacyActions({
               onPeaceTreaty={runner.handlePeaceTreaty}
               onNonAggression={runner.handleNonAggression}
               onAlliance={runner.handleAlliance}
+              onCancelTreaty={runner.handleCancelTreaty}
               onDeclareWar={runner.handleDeclareWar}
             />
           </div>

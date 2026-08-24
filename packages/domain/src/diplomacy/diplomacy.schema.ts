@@ -13,6 +13,7 @@ export const DiplomaticProposalTypeSchema = z.enum([
   "FULL_ALLIANCE",
   "DECLARE_WAR",
   "SEND_FOREIGN_AID",
+  "CANCEL_TREATY",
 ]);
 
 export const DiplomaticPostureSchema = z.enum([

@@ -101,6 +101,80 @@ export class PoliticsActionExecutor {
           canonicalSourceId === canonicalHuman ||
           canonicalTargetId === canonicalHuman;
 
+        if (action.proposalType === "CANCEL_TREATY") {
+          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
+            senderRel,
+            "CANCEL_TREATY",
+          );
+          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
+            receiverRel,
+            "CANCEL_TREATY",
+          );
+
+          const prevStance = senderRel.stance;
+          const newStanceName =
+            prevStance === "ALLIANCE" ? "پیمان عدم تخاصم" : "دیپلماسی عادی";
+
+          const cancelLogs = [
+            TurnLogBuilder.createGlobalDiplomacyLog(
+              state.currentTurn,
+              nation.id,
+              receiver.id,
+              "TREATY_CANCELLED",
+              { prevStance, newStanceName },
+              "WARNING",
+            ),
+          ];
+
+          if (isHumanInvolved) {
+            cancelLogs.push(
+              TurnLogBuilder.createNationalLog(
+                state.currentTurn,
+                nation.id,
+                "DIPLOMACY",
+                "WARNING",
+                "TREATY_CANCELLED",
+                { prevStance, newStanceName },
+                receiver.id,
+              ),
+            );
+          }
+
+          const newState = {
+            ...state,
+            turnLogs: [...state.turnLogs, ...cancelLogs],
+            nations: {
+              ...state.nations,
+              [sourceKey]: {
+                ...nation,
+                relations: {
+                  ...nation.relations,
+                  [senderRel.targetNationId]: updatedSenderRel,
+                },
+              },
+              [targetKey]: {
+                ...receiver,
+                relations: {
+                  ...receiver.relations,
+                  [receiverRel.targetNationId]: updatedReceiverRel,
+                },
+              },
+            },
+          };
+
+          return {
+            newState,
+            resultData: {
+              proposalType: "CANCEL_TREATY",
+              accepted: true,
+              targetNationId: receiver.id,
+              targetName: receiver.name,
+              targetFlagCode: receiver.flagCode,
+              message: `معاهده قبلی لغو گردید و سطح روابط با کشور ${receiver.name} به (${newStanceName}) تنزل یافت.`,
+            },
+          };
+        }
+
         if (action.proposalType === "DECLARE_WAR") {
           const hasLandBorder = GeopoliticalReachResolver.hasDirectLandBorder(
             nation,
@@ -308,7 +382,7 @@ export class PoliticsActionExecutor {
               targetNationId: receiver.id,
               targetName: receiver.name,
               targetFlagCode: receiver.flagCode,
-              message: `بسته کمک مالی و دیپلماتیک به ارزش مصوب به خزانه‌داری ${receiver.name} واریز شد. این کشور با ابراز خرسندی، همسویی سیاسی خود را افزایش داد (+۲۵ همسویی، +۴ پرستیژ).`,
+              message: `بسته کمک مالی و دیپلماتیک به خزانه‌داری ${receiver.name} واریز شد (+۲۵ همسویی، +۴ پرستیژ جهانی).`,
             },
           };
         }
@@ -337,11 +411,11 @@ export class PoliticsActionExecutor {
               transientProposal,
             );
 
-            let acceptedMsg = `دولت ${receiver.name} پس از بررسی منافع استراتژیک، با پیشنهاد شما موافقت کرد.`;
+            let acceptedMsg = `دولت ${receiver.name} با پیشنهاد شما موافقت کرد.`;
             if (action.proposalType === "FULL_ALLIANCE") {
-              acceptedMsg = `دولت ${receiver.name} معاهده اتحاد کامل را با اشتیاق امضا کرد! دو کشور رسماً متحد استراتژیک یکدیگر شدند.`;
+              acceptedMsg = `دولت ${receiver.name} معاهده اتحاد کامل را امضا کرد! دو کشور رسماً متحد استراتژیک شدند.`;
             } else if (action.proposalType === "NON_AGGRESSION_PACT") {
-              acceptedMsg = `دولت ${receiver.name} پیمان عدم تخاصم را پذیرفت و امنیت مرزهای مشترک برقرار گردید.`;
+              acceptedMsg = `دولت ${receiver.name} پیمان عدم تخاصم را پذیرفت و امنیت مرزهای مشترک برقرار شد.`;
             } else if (action.proposalType === "PEACE_TREATY") {
               acceptedMsg = `دولت ${receiver.name} معاهده صلح را امضا کرد و به درگیری‌های نظامی پایان داد.`;
             }
@@ -363,13 +437,13 @@ export class PoliticsActionExecutor {
               transientProposal,
             );
 
-            let rejectedMsg = `دولت ${receiver.name} پیشنهاد شما را در شرایط فعلی به صلاح ندانست و آن را رد کرد.`;
+            let rejectedMsg = `دولت ${receiver.name} پیشنهاد شما را در شرایط فعلی رد کرد.`;
             if (action.proposalType === "FULL_ALLIANCE") {
-              rejectedMsg = `دولت ${receiver.name} پیشنهاد اتحاد نظامی را رد کرد. سطح همسویی و اعتماد دوجانبه برای امضای معاهده اتحاد هنوز کافی نیست.`;
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد اتحاد نظامی را رد کرد. سطح همسویی برای اتحاد کافی نیست.`;
             } else if (action.proposalType === "NON_AGGRESSION_PACT") {
-              rejectedMsg = `دولت ${receiver.name} پیشنهاد پیمان عدم تخاصم را رد کرد. تنش‌های مرزی یا تفاوت ساختار سیاسی مانع توافق شد.`;
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد پیمان عدم تخاصم را رد کرد. تنش‌های مرزی مانع توافق شد.`;
             } else if (action.proposalType === "PEACE_TREATY") {
-              rejectedMsg = `دولت ${receiver.name} پیشنهاد صلح را رد کرد و اعلام نمود تا تحقق اهداف ژئوپلیتیک خود به نبرد ادامه خواهد داد.`;
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد صلح را رد کرد و اعلام نمود تا تحقق شروط خود به نبرد ادامه خواهد داد.`;
             }
 
             return {
