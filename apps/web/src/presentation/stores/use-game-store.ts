@@ -31,6 +31,7 @@ interface GameStoreState {
     onSuccessMessage?: string,
   ) => Promise<{ success: boolean; message: string; resultData?: unknown }>;
   advanceNextTurn: () => Promise<GameState | null>;
+  enableSandboxMode: () => Promise<void>;
 }
 
 const orchestrator = new TurnProgressionOrchestrator();
@@ -159,6 +160,20 @@ export const useGameStore = create<GameStoreState>()(
         console.error(err);
         return null;
       }
+    },
+
+    enableSandboxMode: async () => {
+      const { activeGameId, gameState } = get();
+      if (!gameState) return;
+
+      set((draft) => {
+        if (draft.gameState) {
+          draft.gameState.isSandboxMode = true;
+        }
+      });
+
+      const updatedState = { ...gameState, isSandboxMode: true };
+      void GamePersistenceService.saveGameState(activeGameId, updatedState);
     },
   })),
 );

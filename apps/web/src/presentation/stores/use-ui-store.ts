@@ -18,6 +18,7 @@ interface UiStoreState {
   isRailCollapsed: boolean;
   selectedBattleDebrief: BattleFullReportData | null;
   selectedCoalitionAlert: CoalitionAlertData | null;
+  isVictoryDebriefOpen: boolean;
 
   setActiveTab: (
     tab: SidebarTabType | null,
@@ -29,6 +30,7 @@ interface UiStoreState {
   ) => void;
   setSelectedBattleDebrief: (data: BattleFullReportData | null) => void;
   setSelectedCoalitionAlert: (data: CoalitionAlertData | null) => void;
+  setIsVictoryDebriefOpen: (open: boolean) => void;
   closeActiveTab: () => void;
 }
 
@@ -39,6 +41,7 @@ export const useUiStore = create<UiStoreState>((set) => ({
   isRailCollapsed: true,
   selectedBattleDebrief: null,
   selectedCoalitionAlert: null,
+  isVictoryDebriefOpen: false,
 
   setActiveTab: (tab, subTab = null, targetCode = null) =>
     set((state) => ({
@@ -64,6 +67,11 @@ export const useUiStore = create<UiStoreState>((set) => ({
   setSelectedCoalitionAlert: (data) =>
     set({
       selectedCoalitionAlert: data,
+    }),
+
+  setIsVictoryDebriefOpen: (open) =>
+    set({
+      isVictoryDebriefOpen: open,
     }),
 
   closeActiveTab: () =>

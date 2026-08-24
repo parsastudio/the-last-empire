@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GameOverModal } from "./game-over-modal";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -6,6 +6,8 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@geopolitics/domain";
+import { useGameStore } from "@/presentation/stores/use-game-store";
+import { useUiStore } from "@/presentation/stores/use-ui-store";
 
 interface GameOverDialogWrapperProps {
   gameState: GameState | null;
@@ -15,6 +17,14 @@ export function GameOverDialogWrapper({
   gameState,
 }: GameOverDialogWrapperProps) {
   const router = useRouter();
+  const enableSandboxMode = useGameStore((state) => state.enableSandboxMode);
+  const isVictoryDebriefOpen = useUiStore(
+    (state) => state.isVictoryDebriefOpen,
+  );
+  const setIsVictoryDebriefOpen = useUiStore(
+    (state) => state.setIsVictoryDebriefOpen,
+  );
+  const [isDismissed, setIsDismissed] = useState(false);
 
   const metrics = useMemo(() => {
     if (!gameState || !gameState.isGameOver) {
@@ -73,10 +83,10 @@ export function GameOverDialogWrapper({
     if (isVictory) {
       if (rawReason === "ECONOMIC_DOMINANCE") {
         reasonTitle = "هژمونی و سلطه اقتصادی بر جهان";
-        reasonDescription = `امپراتوری ${winnerName} با دستیابی به بیش از ۶۰٪ کل تولید ناخالص (GDP) جهان، نبض اقتصاد بین‌الملل را در دست گرفت و پیروز مطلق کمپین شد.`;
+        reasonDescription = `امپراتوری ${winnerName} با دستیابی به بیش از ۶۵٪ کل تولید ناخالص (GDP) جهان، نبض اقتصاد بین‌الملل را در دست گرفت و پیروز مطلق کمپین شد.`;
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
         reasonTitle = "سلطه سرزمینی و الحاق قلمروها";
-        reasonDescription = `ارتش ${winnerName} با فتح بیش از ۸۰٪ وسعت خاک و پیکسل‌های نقشه، جهان را یکپارچه کرد و به پیروزی قاطع رسید.`;
+        reasonDescription = `ارتش ${winnerName} با فتح بیش از ۶۵٪ وسعت خاک و پیکسل‌های نقشه، جهان را یکپارچه کرد و به پیروزی قاطع رسید.`;
       } else if (rawReason === "WORLD_CONQUEST") {
         reasonTitle = "فتح کامل و تسلیم تمام کشورها";
         reasonDescription = `امپراتوری ${winnerName} تمامی کشورهای رقیب را مغلوب ساخت و تنها حاکمیت باقی‌مانده بر کره زمین شد.`;
@@ -90,10 +100,10 @@ export function GameOverDialogWrapper({
         reasonDescription = `کشور شما در جریان نبردها تمامی قلمروها و پایداری حاکمیتی خود را از دست داد و از جغرافیای جهان حذف گردید.`;
       } else if (rawReason === "ECONOMIC_DOMINANCE") {
         reasonTitle = "پیروزی رقیب در ماراتن اقتصادی";
-        reasonDescription = `کشور ${winnerName} توانست زودتر از سایر قدرت‌ها به بیش از ۶۰٪ ثروت و GDP کل جهان دست یابد و هژمونی اقتصادی را فتح کند.`;
+        reasonDescription = `کشور ${winnerName} توانست زودتر از سایر قدرت‌ها به بیش از ۶۵٪ ثروت و GDP کل جهان دست یابد و هژمونی اقتصادی را فتح کند.`;
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
         reasonTitle = "پیروزی رقیب در فتوحات سرزمینی";
-        reasonDescription = `کشور ${winnerName} با پیشروی مداوم توانست بیش از ۸۰٪ خاک جهان را تصرف کند و به عنوان امپراتوری برتر برگزیده شود.`;
+        reasonDescription = `کشور ${winnerName} با پیشروی مداوم توانست بیش از ۶۵٪ خاک جهان را تصرف کند و به عنوان امپراتوری برتر برگزیده شود.`;
       } else if (rawReason === "WORLD_CONQUEST") {
         reasonTitle = "پیروزی قاطع قدرت رقیب";
         reasonDescription = `کشور ${winnerName} موفق به برچیدن تمامی رقبا و یکپارچه‌سازی جهان شد.`;
@@ -121,9 +131,18 @@ export function GameOverDialogWrapper({
     return null;
   }
 
+  const isModalOpen =
+    isVictoryDebriefOpen || (!gameState.isSandboxMode && !isDismissed);
+
+  const handleContinueSandbox = () => {
+    setIsDismissed(true);
+    setIsVictoryDebriefOpen(false);
+    void enableSandboxMode();
+  };
+
   return (
     <GameOverModal
-      isOpen={gameState.isGameOver}
+      isOpen={isModalOpen}
       isVictory={metrics.isVictory}
       winnerName={metrics.winnerName}
       winnerCode={metrics.winnerCode}
@@ -134,6 +153,7 @@ export function GameOverDialogWrapper({
       finalGdp={metrics.finalGdp}
       finalPopulation={metrics.finalPopulation}
       conqueredPixels={metrics.conqueredPixels}
+      onContinueSandbox={handleContinueSandbox}
       onRestart={() => router.push("/select-nation")}
       onHome={() => router.push("/")}
     />

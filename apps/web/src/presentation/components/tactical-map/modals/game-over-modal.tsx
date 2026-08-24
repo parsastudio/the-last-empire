@@ -9,6 +9,7 @@ import {
   Home,
   Crown,
   Sparkles,
+  Compass,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
@@ -81,6 +82,7 @@ interface GameOverModalProps {
   finalGdp: string;
   finalPopulation: string;
   conqueredPixels: string;
+  onContinueSandbox?: () => void;
   onRestart: () => void;
   onHome: () => void;
 }
@@ -97,6 +99,7 @@ export function GameOverModal({
   finalGdp,
   finalPopulation,
   conqueredPixels,
+  onContinueSandbox,
   onRestart,
   onHome,
 }: GameOverModalProps) {
@@ -128,7 +131,7 @@ export function GameOverModal({
           : `امپراتوری ${winnerName} موفق شد شروط سلطه جهانی را تکمیل کرده و پیروز بازی شود.`
       }
       maxWidthClass="max-w-lg"
-      onClose={onRestart}
+      onClose={onContinueSandbox || onRestart}
     >
       <div className="space-y-4 text-right dir-rtl font-sans">
         <div
@@ -206,22 +209,34 @@ export function GameOverModal({
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-          <button
-            onClick={onRestart}
-            className="py-3.5 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-gdp/20 hover:scale-[1.01] active:scale-[0.99] transition-all border border-gdp/30"
-          >
-            <RefreshCw size={15} />
-            <span>شروع کمپین جدید</span>
-          </button>
+        <div className="space-y-2.5 pt-2">
+          {onContinueSandbox && (
+            <button
+              onClick={onContinueSandbox}
+              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xl shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all border border-emerald-400/40"
+            >
+              <Compass size={16} />
+              <span>ادامه سلطنت و جهان‌گشایی آزاد (حالت سندباکس)</span>
+            </button>
+          )}
 
-          <button
-            onClick={onHome}
-            className="py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all"
-          >
-            <Home size={15} />
-            <span>بازگشت به منوی اصلی</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button
+              onClick={onRestart}
+              className="py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all"
+            >
+              <RefreshCw size={14} />
+              <span>شروع کمپین جدید</span>
+            </button>
+
+            <button
+              onClick={onHome}
+              className="py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all"
+            >
+              <Home size={14} />
+              <span>بازگشت به منوی اصلی</span>
+            </button>
+          </div>
         </div>
       </div>
     </UnifiedModalShell>

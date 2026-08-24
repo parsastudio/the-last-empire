@@ -19,43 +19,47 @@ function calculateLogPriority(
     canonicalHuman !== null &&
     (sourceCanonical === canonicalHuman || targetCanonical === canonicalHuman);
 
-  if (log.eventCode === "COALITION_FORMED") {
+  if (log.eventCode === "VICTORY_ACHIEVED") {
     return 0;
   }
 
-  if (log.eventCode === "BATTLE_TACTICAL_REPORT" && isHumanInvolved) {
+  if (log.eventCode === "COALITION_FORMED") {
     return 1;
+  }
+
+  if (log.eventCode === "BATTLE_TACTICAL_REPORT" && isHumanInvolved) {
+    return 2;
   }
 
   switch (log.eventCode) {
     case "NATION_ANNEXED":
     case "NATION_COLLAPSED":
-      return isHumanInvolved ? 2 : 5;
+      return isHumanInvolved ? 3 : 6;
 
     case "WAR_DECLARED":
     case "ALLIANCE_INTERVENTION":
     case "ALLIANCE_BETRAYED":
     case "COALITION_MEMBER_FALLEN":
-      return isHumanInvolved ? 3 : 6;
+      return isHumanInvolved ? 4 : 7;
 
     case "BATTLE_GLOBAL_NEWS":
-      return 7;
+      return 8;
 
     case "ESPIONAGE_OPERATION":
-      return isHumanInvolved ? 4 : 8;
+      return isHumanInvolved ? 5 : 9;
 
     case "TREATY_ACCEPTED":
     case "TREATY_REJECTED":
     case "DIPLOMATIC_PROPOSAL_SENT":
-      return isHumanInvolved ? 5 : 9;
+      return isHumanInvolved ? 6 : 10;
 
     case "FOREIGN_AID_SENT":
     case "ARMS_TRADE":
-      return isHumanInvolved ? 6 : 10;
+      return isHumanInvolved ? 7 : 11;
 
     case "GENERIC_EVENT":
     default:
-      return 11;
+      return 12;
   }
 }
 
@@ -115,6 +119,10 @@ export function useWideReports({
           ? CountryRegistry.resolveCanonicalId(log.targetNationId)
           : null;
 
+        if (log.eventCode === "VICTORY_ACHIEVED") {
+          return true;
+        }
+
         if (log.eventCode === "COALITION_FORMED") {
           const memberIdsRaw = String(log.params?.["memberIds"] || "");
           const memberIds = memberIdsRaw.split(",").filter(Boolean);
@@ -128,7 +136,11 @@ export function useWideReports({
         return isHumanInvolved && log.scope === "NATIONAL";
       }
 
-      return log.scope === "GLOBAL" || log.eventCode === "COALITION_FORMED";
+      return (
+        log.scope === "GLOBAL" ||
+        log.eventCode === "COALITION_FORMED" ||
+        log.eventCode === "VICTORY_ACHIEVED"
+      );
     });
   }, [logs, selectedTurn, selectedScope, canonicalHuman]);
 
