@@ -7,6 +7,7 @@ export class BitPackedGridState {
   private activeGameId: string | null = null;
   private isLoaded = false;
   private version = 0;
+  private listeners: Set<(version: number) => void> = new Set();
 
   constructor(
     width: number = MAP_CONFIG.HIGH_RES_WIDTH,
@@ -28,6 +29,20 @@ export class BitPackedGridState {
 
   public markDirty(): void {
     this.version++;
+    this.notifyListeners();
+  }
+
+  public subscribe(listener: (version: number) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notifyListeners(): void {
+    for (const listener of this.listeners) {
+      listener(this.version);
+    }
   }
 
   public isBufferLoaded(): boolean {

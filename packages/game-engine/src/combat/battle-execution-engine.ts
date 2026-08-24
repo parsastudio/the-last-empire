@@ -11,6 +11,7 @@ import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battl
 import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
 import { ExtraCapturedMilitaryUnits } from "@/engine/combat/loot/battle-loot-manager";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -186,6 +187,10 @@ export class BattleExecutionEngine {
     );
 
     const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
+
+    if (conquest.conqueredProvincesList.length > 0) {
+      BitPackedGridState.getInstance().markDirty();
+    }
 
     return {
       ...state,
