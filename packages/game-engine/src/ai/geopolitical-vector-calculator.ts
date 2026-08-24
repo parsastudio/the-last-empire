@@ -22,7 +22,6 @@ export interface GeopoliticalVector {
     commonEnemyBonus: number;
     reputationEffect: number;
     borderFriction: number;
-    grudgePenalty: number;
     powerImbalance: number;
   };
 }
@@ -43,8 +42,6 @@ export class GeopoliticalVectorCalculator {
       source.relations[canonicalTarget] || source.relations[target.id];
 
     const baseAlignment = rel?.alignment ?? 0;
-    const grudge = rel ? (rel.grudge ?? 0) : 0;
-    const lostProvinces = rel ? (rel.lostProvincesCount ?? 0) : 0;
 
     let ideologyScore = 0;
     const sGov = source.government.type;
@@ -133,11 +130,6 @@ export class GeopoliticalVectorCalculator {
       borderFriction = 10;
     }
 
-    const grudgePenalty = Math.min(
-      40,
-      lostProvinces * 20 + Math.round(grudge * 0.4),
-    );
-
     const sPower =
       sourcePower !== undefined
         ? sourcePower
@@ -165,14 +157,19 @@ export class GeopoliticalVectorCalculator {
       vulnerabilityBonus += 15;
     }
 
+    const storedTension = rel ? (rel.tension ?? 10) : 10;
     let rawTension =
-      borderFriction + grudgePenalty + powerImbalance + vulnerabilityBonus;
+      Math.floor(storedTension * 0.4) +
+      borderFriction +
+      powerImbalance +
+      vulnerabilityBonus;
+
     if (rel && rel.stance === "WAR") {
-      rawTension += 30;
+      rawTension = 100;
     } else if (rel && rel.stance === "ALLIANCE") {
-      rawTension = Math.max(0, rawTension - 40);
+      rawTension = 0;
     } else if (rel && rel.stance === "NON_AGGRESSION_PACT") {
-      rawTension = Math.max(0, rawTension - 25);
+      rawTension = Math.min(15, rawTension);
     }
 
     const tension = Math.max(0, Math.min(100, rawTension));
@@ -199,7 +196,6 @@ export class GeopoliticalVectorCalculator {
         commonEnemyBonus,
         reputationEffect,
         borderFriction,
-        grudgePenalty,
         powerImbalance,
       },
     };

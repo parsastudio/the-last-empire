@@ -155,7 +155,6 @@ export class AIEspionagePlanner {
           target,
           provincesMap,
         );
-        const grudge = rel.grudge ?? 0;
         const hasDefenses =
           (target.military.airDefense || 0) > 0 ||
           (target.military.armor || 0) > 0 ||
@@ -163,7 +162,7 @@ export class AIEspionagePlanner {
 
         const isPreStrikeValid = nation.military.infantry > 1 && hasDefenses;
         const isAsymmetricValid =
-          evalResult.powerRatio > 1.5 && grudge >= 40 && hasDefenses;
+          evalResult.powerRatio > 1.5 && rel.alignment <= -30 && hasDefenses;
 
         if (isPreStrikeValid || isAsymmetricValid) {
           return {

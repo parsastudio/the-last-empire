@@ -178,7 +178,6 @@ export class PoliticsActionExecutor {
             return state;
           }
 
-          const currentReceiverGrudge = receiverRel.grudge ?? 0;
           const currentReceiverAlignment = receiverRel.alignment ?? 0;
           const currentReceiverTension = receiverRel.tension ?? 10;
 
@@ -186,7 +185,6 @@ export class PoliticsActionExecutor {
             ...receiverRel,
             alignment: Math.min(100, currentReceiverAlignment + 25),
             tension: Math.max(0, currentReceiverTension - 15),
-            grudge: Math.max(0, currentReceiverGrudge - 20),
           };
 
           const newReputation = Math.min(100, nation.globalReputation + 4);

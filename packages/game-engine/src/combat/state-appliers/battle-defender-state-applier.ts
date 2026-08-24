@@ -32,21 +32,11 @@ export class BattleDefenderStateApplier {
       (conquest.conqueredPixels > 0 || calcResult.isFullCapitulation);
 
     if (isDefenderAlive) {
-      const existingRel =
-        defender.relations[cleanAttackerId] || defender.relations[attackerId];
-      const currentGrudge = existingRel?.grudge ?? 0;
-      const currentLostProvinces = existingRel?.lostProvincesCount ?? 0;
-      const nextLostProvinces = isProvinceLost
-        ? currentLostProvinces + (conquest.conqueredProvincesList.length || 1)
-        : currentLostProvinces;
-
       updatedRelations[cleanAttackerId] = {
         targetNationId: cleanAttackerId,
         stance: "WAR",
         alignment: -100,
         tension: 100,
-        grudge: Math.min(100, currentGrudge + 40),
-        lostProvincesCount: nextLostProvinces,
       };
     }
 
