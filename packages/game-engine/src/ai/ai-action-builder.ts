@@ -16,8 +16,10 @@ export class AIActionBuilder {
     lockedTargets?: Set<string>,
     rankMap?: Map<string, number>,
   ): GameAction[] {
+    const nationStart = performance.now();
     const actions: GameAction[] = [];
 
+    const tProcStart = performance.now();
     const procurementResult = AIProcurementPlanner.planRecruitment(
       nation,
       allNations,
@@ -25,16 +27,20 @@ export class AIActionBuilder {
       undefined,
       rankMap,
     );
+    const tProc = performance.now() - tProcStart;
     actions.push(...procurementResult.actions);
 
+    const tUpgStart = performance.now();
     const upgradeResult = AIUpgradePlanner.planUpgrades(
       nation,
       allNations,
       provincesMap,
       procurementResult.remainingTreasury,
     );
+    const tUpg = performance.now() - tUpgStart;
     actions.push(...upgradeResult.actions);
 
+    const tEspStart = performance.now();
     const espionageResult = AIEspionagePlanner.planEspionage(
       nation,
       allNations,
@@ -42,17 +48,21 @@ export class AIActionBuilder {
       upgradeResult.remainingTreasury,
       rankMap,
     );
+    const tEsp = performance.now() - tEspStart;
     actions.push(...espionageResult.actions);
 
+    const tAtkStart = performance.now();
     const attackAction = AIAttackPlanner.planAttack(
       nation,
       allNations,
       provincesMap,
     );
+    const tAtk = performance.now() - tAtkStart;
     if (attackAction) {
       actions.push(attackAction);
     }
 
+    const tDipStart = performance.now();
     this.appendDiplomaticAndWarActions(
       nation,
       allNations,
@@ -62,6 +72,15 @@ export class AIActionBuilder {
       lockedTargets,
       rankMap,
     );
+    const tDip = performance.now() - tDipStart;
+
+    const nationDuration = performance.now() - nationStart;
+
+    if (nationDuration > 2) {
+      console.log(
+        `[AI_NATION_PERF] ${nation.name} (${nation.id}): ${nationDuration.toFixed(2)}ms [تجهیزات: ${tProc.toFixed(2)}ms | ارتقا: ${tUpg.toFixed(2)}ms | جاسوسی: ${tEsp.toFixed(2)}ms | تهاجم: ${tAtk.toFixed(2)}ms | دیپلماسی: ${tDip.toFixed(2)}ms]`,
+      );
+    }
 
     return actions;
   }
