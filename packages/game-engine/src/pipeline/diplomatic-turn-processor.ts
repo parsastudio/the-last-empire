@@ -6,6 +6,7 @@ import {
   CountryRegistry,
   GeopoliticalReachResolver,
   NationGettersUtility,
+  TerritoryClaimsUtility,
 } from "@geopolitics/domain";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
@@ -81,11 +82,29 @@ export class DiplomaticTurnProcessor {
 
       let nextAlignment = relation.alignment ?? 0;
       if (relation.stance !== "WAR") {
-        const baseline =
+        const lostCount = matrixCache
+          ? TerritoryClaimsUtility.getOccupiedProvinceCount(
+              nation.id,
+              targetId,
+              matrixCache.getOccupiedTerritoryMap(),
+            )
+          : TerritoryClaimsUtility.getOccupiedProvinceCount(
+              nation.id,
+              targetId,
+              undefined,
+              provincesMap,
+            );
+
+        const revanchismCap =
+          lostCount > 0 ? Math.max(-35, -lostCount * 12) : 15;
+
+        const ideologyBonus =
           targetNation &&
           nation.government.type === targetNation.government.type
             ? 15
             : 0;
+
+        const baseline = Math.min(revanchismCap, ideologyBonus);
 
         if (nextAlignment < baseline) {
           nextAlignment = Math.min(baseline, nextAlignment + 1);

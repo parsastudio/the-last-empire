@@ -27,6 +27,7 @@ export * from "./nation/demographics-calculator.utility";
 export * from "./nation/gdp-calculator.utility";
 export * from "./nation/nation.schema";
 export * from "./nation/nation-getters.utility";
+export * from "./nation/territory-claims.utility";
 export * from "./politics/doctrines.schema";
 export * from "./politics/government-label.utility";
 export * from "./politics/government-traits.config";
