@@ -1,7 +1,7 @@
 import React from "react";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { Coins, Trophy, Skull } from "lucide-react";
+import { Trophy, Skull } from "lucide-react";
 
 interface BattleCasualtyTableProps {
   reportData: BattleFullReportData;
@@ -167,18 +167,6 @@ export function BattleCasualtyTable({
           </table>
         </div>
       </div>
-
-      {reportData.treasuryLooted > 0 && (
-        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between text-xs font-mono">
-          <span className="text-foreground font-bold font-sans flex items-center gap-2">
-            <Coins size={16} className="text-gdp" />
-            <span>غنیمت جنگی تسخیرشده از خزانه‌داری حریف:</span>
-          </span>
-          <span className="font-black text-gdp text-sm">
-            +{PersianNumberFormatter.formatCurrency(reportData.treasuryLooted)}
-          </span>
-        </div>
-      )}
     </div>
   );
 }

@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import {
   Swords,
-  ChevronLeft,
-  ChevronRight,
   Flame,
   Plane,
   ShieldAlert,
@@ -87,7 +85,7 @@ export function BattleDebriefModal({
                 {attackerName}
               </span>
               <span className="text-xs text-primary font-mono font-bold">
-                فرماندهی تهاجم (
+                متهاجم (
                 {reportData.attackType === "NAVAL"
                   ? "هجوم دریایی ⚓"
                   : "تهاجم زمینی ⚔️"}
@@ -173,37 +171,6 @@ export function BattleDebriefModal({
             humanNationId={humanNationId}
           />
         )}
-
-        <div className="flex items-center justify-between pt-4 border-t border-border/60">
-          <button
-            onClick={() =>
-              setActiveStep(
-                (prev) => Math.max(1, prev - 1) as 1 | 2 | 3 | 4 | 5,
-              )
-            }
-            disabled={activeStep === 1}
-            className="py-3 px-5 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-2xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 border border-border/60"
-          >
-            <ChevronRight size={16} />
-            <span>مرحله قبل</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (activeStep < 5) {
-                setActiveStep((prev) => (prev + 1) as 1 | 2 | 3 | 4 | 5);
-              } else {
-                onClose();
-              }
-            }}
-            className="py-3 px-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-lg shadow-primary/20 flex items-center gap-2 border border-primary/40"
-          >
-            <span>
-              {activeStep === 5 ? "بستن پرونده نبرد" : "مشاهده گام بعدی"}
-            </span>
-            {activeStep < 5 && <ChevronLeft size={16} />}
-          </button>
-        </div>
       </div>
     </UnifiedModalShell>
   );

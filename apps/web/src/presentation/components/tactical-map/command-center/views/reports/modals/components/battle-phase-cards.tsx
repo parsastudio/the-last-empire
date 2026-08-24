@@ -24,18 +24,12 @@ export function BattlePhaseCards({
     const isAttackerWin = reportData.phase1Missile.phaseWinner === "ATTACKER";
     return (
       <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
-        <div className="bg-secondary/40 border border-border/80 p-4.5 rounded-3xl flex items-center justify-between">
+        <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🚀</span>
-            <div>
-              <h3 className="text-base font-black text-foreground">
-                فاز اول: ضربات موشکی و مصاف با شبکه پدافند
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                حمله پهپادها و موشک‌های دوربرد به پایگاه‌های راداری و پدافند
-                هوایی
-              </p>
-            </div>
+            <span className="text-2xl">🚀</span>
+            <h3 className="text-sm font-black text-foreground">
+              فاز اول: ضربات موشکی و مصاف با شبکه پدافند
+            </h3>
           </div>
           <span
             className={`px-3.5 py-1.5 rounded-2xl text-xs font-black border flex items-center gap-1.5 ${
@@ -132,17 +126,12 @@ export function BattlePhaseCards({
     const isAttackerWin = reportData.phase2Air.phaseWinner === "ATTACKER";
     return (
       <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
-        <div className="bg-secondary/40 border border-border/80 p-4.5 rounded-3xl flex items-center justify-between">
+        <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🛩️</span>
-            <div>
-              <h3 className="text-base font-black text-foreground">
-                فاز دوم: نبرد سنگین برتری هوایی و بمباران
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                داگ‌فایت جنگنده‌ها و بمباران مواضع زرهی و تانک‌های دشمن از آسمان
-              </p>
-            </div>
+            <span className="text-2xl">🛩️</span>
+            <h3 className="text-sm font-black text-foreground">
+              فاز دوم: نبرد سنگین برتری هوایی و بمباران
+            </h3>
           </div>
           <span
             className={`px-3.5 py-1.5 rounded-2xl text-xs font-black border flex items-center gap-1.5 ${
@@ -233,21 +222,6 @@ export function BattlePhaseCards({
             </div>
           </div>
         </div>
-
-        {reportData.phase2Air.defArmorDestroyedByAir > 0 && (
-          <div className="p-3.5 bg-amber-500/15 border border-amber-500/30 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-400 font-mono">
-            <span className="flex items-center gap-2 font-sans">
-              <span>🔥</span>
-              <span>شکار تانک‌های دشمن از آسمان توسط نیروی هوایی مهاجم:</span>
-            </span>
-            <span className="text-sm font-black">
-              {PersianNumberFormatter.toPersianDigits(
-                reportData.phase2Air.defArmorDestroyedByAir,
-              )}{" "}
-              تانک منهدم شد 💥
-            </span>
-          </div>
-        )}
       </div>
     );
   }
@@ -255,17 +229,12 @@ export function BattlePhaseCards({
   const isAttackerWin = reportData.phase3Ground.phaseWinner === "ATTACKER";
   return (
     <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
-      <div className="bg-secondary/40 border border-border/80 p-4.5 rounded-3xl flex items-center justify-between">
+      <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">⚔️</span>
-          <div>
-            <h3 className="text-base font-black text-foreground">
-              فاز سوم: پیشروی زرهی و برخورد خونین خطوط پیاده‌نظام
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              درگیری تانک‌ها برای درهم شکستن خطوط دفاعی و تصرف مستقیم استان
-            </p>
-          </div>
+          <span className="text-2xl">⚔️</span>
+          <h3 className="text-sm font-black text-foreground">
+            فاز سوم: پیشروی زرهی و برخورد خونین خطوط پیاده‌نظام
+          </h3>
         </div>
         <span
           className={`px-3.5 py-1.5 rounded-2xl text-xs font-black border flex items-center gap-1.5 ${
