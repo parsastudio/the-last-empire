@@ -71,31 +71,6 @@ export class ServerMapPathResolver {
     return strategicDir;
   }
 
-  public static getTerrainServerPath(mapId = "map1"): string | null {
-    const mapDir = this.getMapDir(mapId);
-    const tempDir = this.getMapTempServerDir(mapId);
-    const essentialDir = this.getMapEssentialServerDir(mapId);
-
-    const candidatePaths = [
-      path.join(essentialDir, "base_map_terrain.png"),
-      path.join(essentialDir, "base-map-terrain.png"),
-      path.join(essentialDir, "terrain.png"),
-      path.join(tempDir, "base_map_terrain.png"),
-      path.join(tempDir, "base-map-terrain.png"),
-      path.join(mapDir, "base_map_terrain.png"),
-      path.join(mapDir, "base-map-terrain.png"),
-    ];
-
-    for (let i = 0; i < candidatePaths.length; i++) {
-      const fullPath = candidatePaths[i]!;
-      if (fs.existsSync(fullPath)) {
-        return fullPath;
-      }
-    }
-
-    return null;
-  }
-
   public static getEditedMaskServerPath(mapId = "map1"): string {
     const mapDir = this.getMapDir(mapId);
     const tempDir = this.getMapTempServerDir(mapId);

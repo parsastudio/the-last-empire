@@ -89,11 +89,6 @@ export class TerrainBinaryReader {
     return result;
   }
 
-  public getPixelRGB(x: number, y: number): TerrainColorRGB {
-    const idx = this.getPixelColorIndex(x, y);
-    return this.palette[idx] || { r: 255, g: 255, b: 255 };
-  }
-
   public unpackToRawBuffer(): Uint8Array {
     const totalPixels = this.mapWidth * this.mapHeight;
     const output = new Uint8Array(totalPixels);
@@ -117,9 +112,5 @@ export class TerrainBinaryReader {
     }
 
     return output;
-  }
-
-  public getPalette(): TerrainColorRGB[] {
-    return this.palette;
   }
 }

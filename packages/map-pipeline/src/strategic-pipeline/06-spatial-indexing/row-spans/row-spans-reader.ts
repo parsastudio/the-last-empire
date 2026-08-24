@@ -81,24 +81,4 @@ export class RowSpansReader {
 
     return result;
   }
-
-  public getWidth(): number {
-    return this.mapWidth;
-  }
-
-  public getHeight(): number {
-    return this.mapHeight;
-  }
-
-  public getTotalSpans(): number {
-    return this.totalSpans;
-  }
-
-  public getByteSize(): number {
-    return (
-      RowSpansReader.HEADER_BYTE_SIZE +
-      this.rowOffsets.byteLength +
-      this.packedSpans.byteLength
-    );
-  }
 }

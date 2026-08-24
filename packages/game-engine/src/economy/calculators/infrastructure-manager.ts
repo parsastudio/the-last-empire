@@ -24,21 +24,3 @@ export class DevelopmentManager {
     );
   }
 }
-
-export class InfrastructureManager {
-  public static getUpgradeCost(gdpOrNation: number | Nation): number {
-    return DevelopmentManager.getUpgradeCost(gdpOrNation);
-  }
-
-  public static calculateNextCapacityOnUpgrade(
-    currentCapacity: number,
-  ): number {
-    return DevelopmentManager.calculateNextCapacity(currentCapacity);
-  }
-}
-
-export class IndustrialLevelManager {
-  public static getUpgradeCost(gdpOrNation: number | Nation): number {
-    return DevelopmentManager.getUpgradeCost(gdpOrNation);
-  }
-}

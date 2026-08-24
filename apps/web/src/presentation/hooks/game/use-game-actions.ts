@@ -41,7 +41,6 @@ export function useGameActions(onActionExecuted?: () => void) {
 
   return {
     dispatchAction,
-    runAction: dispatchAction,
     isSubmitting,
   };
 }

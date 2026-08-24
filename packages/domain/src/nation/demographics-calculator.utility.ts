@@ -41,11 +41,4 @@ export class DemographicsCalculator {
       isNearCapacity: percentage >= 95,
     };
   }
-
-  public static getProvinceMetrics(province: {
-    population: number;
-    maxPopulationCapacity?: number;
-  }): DemographicsCapacityMetrics {
-    return this.getMetrics(province.population, province.maxPopulationCapacity);
-  }
 }
