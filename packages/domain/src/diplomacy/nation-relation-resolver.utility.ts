@@ -38,16 +38,15 @@ export class NationRelationResolver {
     nationB: Nation,
     allNations: Record<string, Nation>,
   ): boolean {
-    if (!nationA.relations || !nationB.relations) return false;
+    const relsA = nationA.relations;
+    const relsB = nationB.relations;
+    if (!relsA || !relsB) return false;
 
-    for (const [targetId, relA] of Object.entries(nationA.relations)) {
-      if (relA.stance === "WAR") {
-        const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-        const relB =
-          nationB.relations[canonicalTarget] || nationB.relations[targetId];
-
-        if (relB && relB.stance === "WAR") {
-          const enemy = allNations[canonicalTarget] || allNations[targetId];
+    for (const key in relsA) {
+      if (relsA[key]?.stance === "WAR") {
+        const targetB = relsB[key];
+        if (targetB?.stance === "WAR") {
+          const enemy = allNations[key];
           if (enemy && enemy.isAlive) {
             return true;
           }

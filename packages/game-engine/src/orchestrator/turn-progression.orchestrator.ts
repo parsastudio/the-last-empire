@@ -5,8 +5,7 @@ import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
-import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { GameAction, NationGettersUtility } from "@geopolitics/domain";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -38,13 +37,10 @@ export class TurnProgressionOrchestrator {
     );
 
     const aiPlanStart = performance.now();
-    let totalActionsGenerated = 0;
-    const pendingAiActions: {
-      nationId: string;
-      actions: ReturnType<typeof AIActionBuilder.buildNationActions>;
-    }[] = [];
+    const allAiActions: GameAction[] = [];
 
-    for (const id of sortedNationIds) {
+    for (let i = 0; i < sortedNationIds.length; i++) {
+      const id = sortedNationIds[i]!;
       const nation = nextState.nations[id];
       if (!nation || !nation.isAlive || !nation.isAi) {
         continue;
@@ -59,49 +55,25 @@ export class TurnProgressionOrchestrator {
         provincesByOwnerMap,
       );
 
-      totalActionsGenerated += aiActions.length;
-      pendingAiActions.push({ nationId: id, actions: aiActions });
+      for (let j = 0; j < aiActions.length; j++) {
+        allAiActions.push(aiActions[j]!);
+      }
     }
     const aiPlanDuration = (performance.now() - aiPlanStart).toFixed(2);
     console.log(
-      `[ORCH_STEP] ۲. برنامه‌ریزی هوش مصنوعی برای تمام کشورها (${totalActionsGenerated} اکشن): ${aiPlanDuration}ms`,
+      `[ORCH_STEP] ۲. برنامه‌ریزی هوش مصنوعی برای تمام کشورها (${allAiActions.length} اکشن): ${aiPlanDuration}ms`,
     );
 
     const aiExecStart = performance.now();
-    let executedCount = 0;
-
-    for (const item of pendingAiActions) {
-      for (const action of item.actions) {
-        const result = ActionEngine.execute(nextState, action);
-
-        if (result.success && result.newState) {
-          nextState = result.newState;
-          executedCount++;
-
-          if (
-            action.type === "DIPLOMATIC_PROPOSAL" &&
-            "targetNationId" in action &&
-            action.targetNationId
-          ) {
-            lockedDiplomacyTargets.add(
-              DiplomacyLockManager.createKey(
-                action.nationId,
-                action.targetNationId,
-              ),
-            );
-            lockedDiplomacyTargets.add(
-              DiplomacyLockManager.createKey(
-                action.targetNationId,
-                action.nationId,
-              ),
-            );
-          }
-        }
-      }
-    }
+    const { newState: batchedState, executedCount } = ActionEngine.executeBatch(
+      nextState,
+      allAiActions,
+      lockedDiplomacyTargets,
+    );
+    nextState = batchedState;
     const aiExecDuration = (performance.now() - aiExecStart).toFixed(2);
     console.log(
-      `[ORCH_STEP] ۳. اجرای اکشن‌های هوش مصنوعی (${executedCount} اکشن موفق): ${aiExecDuration}ms`,
+      `[ORCH_STEP] ۳. اجرای دسته‌ای اکشن‌های هوش مصنوعی (${executedCount} اکشن موفق): ${aiExecDuration}ms`,
     );
 
     const pipelineStart = performance.now();
