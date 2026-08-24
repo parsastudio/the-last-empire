@@ -75,8 +75,39 @@ export class BattleCalculator {
         navalCostMultiplier,
       );
 
-    const attMult = CombatModifierResolver.getEffectiveMultiplier(attacker);
-    const defMult = CombatModifierResolver.getEffectiveMultiplier(defender);
+    const attDroneMult = CombatModifierResolver.getUnitMultiplier(
+      attacker,
+      "DRONE_MISSILE",
+    );
+    const attAirMult = CombatModifierResolver.getUnitMultiplier(
+      attacker,
+      "AIR_FORCE",
+    );
+    const attArmorMult = CombatModifierResolver.getUnitMultiplier(
+      attacker,
+      "ARMOR",
+    );
+    const attInfMult = CombatModifierResolver.getUnitMultiplier(
+      attacker,
+      "INFANTRY",
+    );
+
+    const defAdMult = CombatModifierResolver.getUnitMultiplier(
+      defender,
+      "AIR_DEFENSE",
+    );
+    const defAirMult = CombatModifierResolver.getUnitMultiplier(
+      defender,
+      "AIR_FORCE",
+    );
+    const defArmorMult = CombatModifierResolver.getUnitMultiplier(
+      defender,
+      "ARMOR",
+    );
+    const defInfMult = CombatModifierResolver.getUnitMultiplier(
+      defender,
+      "INFANTRY",
+    );
 
     const defAirDefense = defender.military.airDefense || 0;
     const defAirForce = defender.military.airForce || 0;
@@ -86,8 +117,8 @@ export class BattleCalculator {
     const missilePhase = MissileInterceptionPhase.calculate({
       deployedDrones,
       defAirDefense,
-      attMult,
-      defMult,
+      attDroneMult,
+      defAdMult,
       attackerDroneBonus: DoctrinesManager.getDronePowerMultiplier(
         attacker.doctrines?.unlockedDoctrines,
       ),
@@ -103,8 +134,9 @@ export class BattleCalculator {
       deployedAirForce,
       defAirForce,
       defArmor,
-      attMult,
-      defMult,
+      attAirMult,
+      defAirMult,
+      defArmorMult,
       defenderEwBonus: DoctrinesManager.getElectronicWarfareEvasion(
         defender.doctrines?.unlockedDoctrines,
       ),
@@ -118,8 +150,10 @@ export class BattleCalculator {
       defArmorAfterAirRaw: airPhase.defArmorAfterAirRaw,
       defArmorAfterAirEff: airPhase.defArmorAfterAirEff,
       defArmorDestroyedByAir: airPhase.defArmorDestroyedByAir,
-      attMult,
-      defMult,
+      attArmorMult,
+      attInfMult,
+      defArmorMult,
+      defInfMult,
     });
 
     const attackerDeployedValuation =
@@ -131,6 +165,7 @@ export class BattleCalculator {
           airForce: deployedAirForce,
           droneMissile: deployedDrones,
           techLevel: attacker.military.techLevel,
+          branchTech: attacker.military.branchTech,
         },
         attacker.industrialLevel,
       );
@@ -144,6 +179,7 @@ export class BattleCalculator {
           airForce: defender.military.airForce,
           droneMissile: defender.military.droneMissile,
           techLevel: defender.military.techLevel,
+          branchTech: defender.military.branchTech,
         },
         defender.industrialLevel,
       );

@@ -164,6 +164,7 @@ export class BattleExecutionEngine {
         updatedAttacker,
         defender,
         baseNations,
+        conquest.updatedProvinces,
       );
 
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";

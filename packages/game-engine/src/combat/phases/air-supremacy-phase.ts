@@ -2,8 +2,9 @@ export interface AirSupremacyPhaseInput {
   deployedAirForce: number;
   defAirForce: number;
   defArmor: number;
-  attMult: number;
-  defMult: number;
+  attAirMult: number;
+  defAirMult: number;
+  defArmorMult: number;
   defenderEwBonus: boolean;
   defAirDefenseRemainingEff: number;
 }
@@ -22,24 +23,24 @@ export class AirSupremacyPhase {
   ): AirSupremacyPhaseOutput {
     const attAirEff =
       input.deployedAirForce *
-      input.attMult *
+      input.attAirMult *
       (input.defenderEwBonus ? 0.8 : 1.0);
-    const defAirEff = input.defAirForce * input.defMult;
+    const defAirEff = input.defAirForce * input.defAirMult;
 
     const dogfightLossAttEff = Math.min(attAirEff, defAirEff);
     const dogfightLossDefEff = Math.min(attAirEff, defAirEff);
 
     const rawAttAirLoss = Math.min(
       input.deployedAirForce,
-      Math.ceil(dogfightLossAttEff / input.attMult),
+      Math.ceil(dogfightLossAttEff / input.attAirMult),
     );
     const rawDefAirLoss = Math.min(
       input.defAirForce,
-      Math.ceil(dogfightLossDefEff / input.defMult),
+      Math.ceil(dogfightLossDefEff / input.defAirMult),
     );
 
     const survivingAttAirRaw = input.deployedAirForce - rawAttAirLoss;
-    const survivingAttAirEff = survivingAttAirRaw * input.attMult;
+    const survivingAttAirEff = survivingAttAirRaw * input.attAirMult;
 
     const fightersSuppressedEff = Math.min(
       survivingAttAirEff,
@@ -53,10 +54,10 @@ export class AirSupremacyPhase {
     const tanksDestroyedByAirEff = freeAttAirEff * 2;
     const defArmorDestroyedByAir = Math.min(
       input.defArmor,
-      Math.floor(tanksDestroyedByAirEff / input.defMult),
+      Math.floor(tanksDestroyedByAirEff / input.defArmorMult),
     );
     const defArmorAfterAirRaw = input.defArmor - defArmorDestroyedByAir;
-    const defArmorAfterAirEff = defArmorAfterAirRaw * input.defMult;
+    const defArmorAfterAirEff = defArmorAfterAirRaw * input.defArmorMult;
 
     return {
       rawAttAirLoss,
