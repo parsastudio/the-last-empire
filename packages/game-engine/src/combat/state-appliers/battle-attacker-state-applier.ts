@@ -1,6 +1,5 @@
 import { Nation, DiplomaticStance, CountryRegistry } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
@@ -8,10 +7,8 @@ import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 export interface AttackerStateApplierInput {
   attacker: Nation;
   defenderId: string;
-  canonicalDefenderId: string;
   defenderTechLevel: number;
   calcResult: BattleCalculationResult;
-  conquest: ProvinceConquestResult;
   currentStance: DiplomaticStance;
   betrayalResult: BetrayalEvaluation;
 }

@@ -7,7 +7,6 @@ import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 export interface DefenderStateApplierInput {
   defender: Nation;
   attackerId: string;
-  canonicalAttackerId: string;
   calcResult: BattleCalculationResult;
   conquest: ProvinceConquestResult;
   isDefenderAlive: boolean;

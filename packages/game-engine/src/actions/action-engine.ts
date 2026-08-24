@@ -6,6 +6,7 @@ import { EconomyActionExecutor } from "@/engine/actions/economy-action-executor"
 import { MilitaryActionExecutor } from "@/engine/actions/military-action-executor";
 import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executor";
 import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { EspionageManager } from "@/engine/espionage/espionage-manager";
 
 export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
@@ -55,6 +56,7 @@ export class ActionEngine {
 
     try {
       let newState: GameState = state;
+      let resultData: unknown = undefined;
 
       switch (action.type) {
         case "SET_TAX_RATE":
@@ -73,8 +75,19 @@ export class ActionEngine {
           newState = MilitaryActionExecutor.execute(state, action);
           break;
 
+        case "EXECUTE_ESPIONAGE_OPERATION": {
+          const espResult = EspionageManager.executeOperation(
+            state,
+            action.nationId,
+            action.targetNationId,
+            action.tier,
+          );
+          newState = espResult.newState;
+          resultData = espResult.result;
+          break;
+        }
+
         case "UNLOCK_DOCTRINE":
-        case "EXECUTE_ESPIONAGE_OPERATION":
         case "DIPLOMATIC_PROPOSAL":
         case "RESPOND_DIPLOMATIC_PROPOSAL":
           newState = PoliticsActionExecutor.execute(state, action);
@@ -94,6 +107,7 @@ export class ActionEngine {
         actionId: targetActionId,
         message: "دستور با موفقیت اجرا شد.",
         newState,
+        resultData,
       };
     } catch (err) {
       const errorMsg =

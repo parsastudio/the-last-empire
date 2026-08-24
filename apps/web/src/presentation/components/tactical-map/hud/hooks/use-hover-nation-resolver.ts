@@ -10,16 +10,21 @@ import {
 } from "@/domain/nation/gdp-calculator.utility";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationGettersUtility } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  NationRelationResolver,
+} from "@geopolitics/domain";
 
 interface UseHoverNationResolverProps {
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
 }
 
 export function useHoverNationResolver({
   provincesMap,
   nationsMap,
+  humanNationId,
 }: UseHoverNationResolverProps) {
   const resolveHoverInfo = useCallback(
     (provinceId: number): HoverCountryInfo | null => {
@@ -80,12 +85,31 @@ export function useHoverNationResolver({
           100,
       );
 
+      let stanceLabel = "دیپلماسی عادی";
+      if (humanNationId && nationsMap && ownerNation) {
+        const canonicalHuman =
+          CountryRegistry.resolveCanonicalId(humanNationId);
+        if (canonicalOwnerId === canonicalHuman) {
+          stanceLabel = "قلمرو تحت حاکمیت شما";
+        } else {
+          const humanNation = nationsMap[canonicalHuman];
+          const stance = NationRelationResolver.getStance(
+            humanNation?.relations,
+            canonicalOwnerId,
+          );
+          if (stance === "WAR") stanceLabel = "وضعیت جنگی متخاصم";
+          else if (stance === "ALLIANCE") stanceLabel = "اتحاد کامل راهبردی";
+          else if (stance === "NON_AGGRESSION_PACT")
+            stanceLabel = "پیمان عدم تخاصم";
+        }
+      }
+
       return {
         name: summary.name,
         code: summary.code,
         flagCode: summary.flagCode,
         rank: summary.rank,
-        stance: "دیپلماسی استان",
+        stance: stanceLabel,
         regionName: province.nameFa,
         regionPopulation: provincePopText,
         regionGdpText: provinceGdpText,
@@ -94,7 +118,7 @@ export function useHoverNationResolver({
         gdpText: summary.gdpText,
       };
     },
-    [provincesMap, nationsMap],
+    [provincesMap, nationsMap, humanNationId],
   );
 
   return { resolveHoverInfo };

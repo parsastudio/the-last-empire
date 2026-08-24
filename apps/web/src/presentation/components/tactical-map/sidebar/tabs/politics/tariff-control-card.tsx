@@ -83,50 +83,21 @@ export function TariffControlCard({
     );
   };
 
-  const currentNationState = useMemo<Nation>(() => {
-    if (nation) {
-      return { ...nation, tariffRate };
-    }
-    return {
-      id: nationId,
-      name: "کشور",
-      isAi: false,
-      isAlive: true,
-      flagCode: "IR",
-      rank: 1,
-      taxRate: 15,
-      tariffRate,
-      treasury: 100000,
-      nationalDebt: 0,
-      industrialLevel: 1,
-      government: { type: "DEMOCRACY", stability: 80, turnsInPower: 1 },
-      military: {
-        infantry: 10,
-        armor: 0,
-        airDefense: 0,
-        airForce: 0,
-        droneMissile: 0,
-        navalFleet: 0,
-        experience: 0,
-        techLevel: 1,
-      },
-      recruitmentQueue: [],
-      relations: {},
-      activeModifiers: [],
-      globalReputation: 50,
-      doctrines: { unlockedDoctrines: [] },
-      executedEspionageTiers: [],
-      warFocusTargetId: null,
-    };
-  }, [nation, nationId, tariffRate]);
-
   const tariffCalculation = useMemo(() => {
+    if (!nation) {
+      return {
+        tariffRevenue: 0,
+        stabilityImpact: 0,
+        tradeVolumePercentage: 100,
+      };
+    }
+    const currentNationState: Nation = { ...nation, tariffRate };
     return TariffCalculator.calculateTariffEffects(
       currentNationState,
       nationsMap,
       provincesMap,
     );
-  }, [currentNationState, nationsMap, provincesMap]);
+  }, [nation, tariffRate, nationsMap, provincesMap]);
 
   const isSeaAccessible =
     directSeaAccess !== undefined

@@ -10,7 +10,6 @@ export * from "./ai/ai-action-builder";
 export * from "./ai/ai-attack-planner";
 export * from "./ai/ai-economic-diplomacy-evaluator";
 export * from "./ai/ai-economy-calculator";
-export * from "./ai/ai-engine";
 export * from "./ai/ai-espionage-planner";
 export * from "./ai/ai-peace-evaluator";
 export * from "./ai/ai-procurement-planner";

@@ -10,14 +10,12 @@ import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conqu
 import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
 import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
-import { NationGettersUtility } from "@geopolitics/domain";
 
 export class BattleExecutionEngine {
   public executeBattle(
     state: GameState,
     action: InitiateBattleAction,
   ): GameState {
-    const battleTotalStart = performance.now();
     const canonicalAttackerId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
@@ -44,7 +42,6 @@ export class BattleExecutionEngine {
 
     let navalCostMultiplier: number | undefined = undefined;
     if (action.attackType === "NAVAL" && action.targetProvinceId) {
-      const navalStart = performance.now();
       const navalInfo = NavalNeighborResolver.resolveNavalAttack(
         action.targetProvinceId,
         attacker.id,
@@ -57,13 +54,8 @@ export class BattleExecutionEngine {
       if (navalInfo.isNavalValid) {
         navalCostMultiplier = navalInfo.navalCostMultiplier;
       }
-      const navalDuration = (performance.now() - navalStart).toFixed(2);
-      console.log(
-        `[BATTLE_PERF] محاسبه ترابری و دسترسی دریایی: ${navalDuration}ms`,
-      );
     }
 
-    const calcStart = performance.now();
     const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
@@ -75,40 +67,25 @@ export class BattleExecutionEngine {
       navalCostMultiplier,
       state.provinces,
     );
-    const calcDuration = (performance.now() - calcStart).toFixed(2);
 
-    const defPixels =
-      NationGettersUtility.getTerritoryPixelCount(
-        defender.id,
-        state.provinces,
-      ) || 1;
-
-    const conquestStart = performance.now();
     const conquest = ProvinceConquestHandler.handleConquest(
       state.provinces,
       attacker.id,
-      canonicalAttackerId,
       defender.id,
-      canonicalDefenderId,
       calcResult.isAttackerVictory,
       calcResult.isFullCapitulation,
       action.targetProvinceId,
-      defPixels,
     );
-    const conquestDuration = (performance.now() - conquestStart).toFixed(2);
 
     const isDefenderAlive =
       conquest.remainingDefenderProvinces.length > 0 &&
       !calcResult.isFullCapitulation;
 
-    const applyStart = performance.now();
     const updatedAttacker = BattleAttackerStateApplier.apply({
       attacker,
       defenderId: defender.id,
-      canonicalDefenderId,
       defenderTechLevel: defender.military.techLevel,
       calcResult,
-      conquest,
       currentStance,
       betrayalResult,
     });
@@ -116,12 +93,10 @@ export class BattleExecutionEngine {
     const updatedDefender = BattleDefenderStateApplier.apply({
       defender,
       attackerId: attacker.id,
-      canonicalAttackerId,
       calcResult,
       conquest,
       isDefenderAlive,
     });
-    const applyDuration = (performance.now() - applyStart).toFixed(2);
 
     const baseNations = {
       ...state.nations,
@@ -129,14 +104,12 @@ export class BattleExecutionEngine {
       [defender.id]: updatedDefender,
     };
 
-    const intervStart = performance.now();
     const intervention =
       AllianceInterventionEvaluator.evaluateAllianceInterventions(
         updatedAttacker,
         updatedDefender,
         baseNations,
       );
-    const intervDuration = (performance.now() - intervStart).toFixed(2);
 
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
 
@@ -158,13 +131,6 @@ export class BattleExecutionEngine {
     );
 
     const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
-    const totalBattleDuration = (performance.now() - battleTotalStart).toFixed(
-      2,
-    );
-
-    console.log(
-      `[BATTLE_EXECUTION] نبرد ${attacker.name} ➔ ${defender.name} | زمان کل: ${totalBattleDuration}ms [محاسبه فازها: ${calcDuration}ms | فتح استان: ${conquestDuration}ms | اعمال نتایج: ${applyDuration}ms | مداخله ائتلاف: ${intervDuration}ms]`,
-    );
 
     return {
       ...state,

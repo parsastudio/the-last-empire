@@ -9,7 +9,6 @@ interface ArmsOrderSummaryProps {
   quantity: number;
   canAfford: boolean;
   isSubmitting: boolean;
-  isEligible: boolean;
   isSellerTechEligible: boolean;
   isNavalBlockaded: boolean;
   onQuantityChange: (qty: number) => void;
@@ -22,7 +21,6 @@ export function ArmsOrderSummary({
   quantity,
   canAfford,
   isSubmitting,
-  isEligible,
   isSellerTechEligible,
   isNavalBlockaded,
   onQuantityChange,
@@ -118,7 +116,6 @@ export function ArmsOrderSummary({
       <button
         onClick={onBuyArms}
         disabled={
-          !isEligible ||
           !isSellerTechEligible ||
           isNavalBlockaded ||
           !canAfford ||

@@ -13,7 +13,6 @@ export interface NationRankCandidateInput {
   gdp: number;
   population?: number;
   military?: MilitaryStack;
-  militaryPower?: number;
   governmentType?: GovernmentType | string;
   militaryTier?: number;
   startingTechLevel?: number;
@@ -47,84 +46,82 @@ export class NationGettersUtility {
         CountryRegistry.getCountry(canonicalId) ||
         CountryRegistry.getCountry(input.id);
 
-      let milPower = input.militaryPower;
+      let milPower = 0;
 
-      if (milPower === undefined) {
-        if (input.military) {
-          milPower = MilitaryPowerCalculator.calculateEffectivePower(
-            {
-              id: canonicalId,
-              name: input.name || profile?.nameFa || canonicalId,
-              isAi: true,
-              isAlive: true,
-              flagCode: profile?.flagCode || "IR",
-              taxRate: 15,
-              tariffRate: 10,
-              treasury: 100000,
-              nationalDebt: 0,
-              industrialLevel: 1,
-              government: {
-                type:
-                  (input.governmentType as GovernmentType) ||
-                  profile?.startingGovernment ||
-                  "DEMOCRACY",
-                stability: 50,
-                turnsInPower: 1,
-              },
-              military: input.military,
-              recruitmentQueue: [],
-              relations: {},
-              activeModifiers: [],
-              globalReputation: 50,
-              doctrines: { unlockedDoctrines: [] },
-              executedEspionageTiers: [],
-              warFocusTargetId: null,
+      if (input.military) {
+        milPower = MilitaryPowerCalculator.calculateEffectivePower(
+          {
+            id: canonicalId,
+            name: input.name || profile?.nameFa || canonicalId,
+            isAi: true,
+            isAlive: true,
+            flagCode: profile?.flagCode || "IR",
+            taxRate: 15,
+            tariffRate: 10,
+            treasury: 100000,
+            nationalDebt: 0,
+            industrialLevel: 1,
+            government: {
+              type:
+                (input.governmentType as GovernmentType) ||
+                profile?.startingGovernment ||
+                "DEMOCRACY",
+              stability: 50,
+              turnsInPower: 1,
             },
-            true,
-          );
-        } else {
-          const tier = input.militaryTier ?? profile?.militaryTier ?? 5;
-          const techLevel =
-            input.startingTechLevel ?? profile?.startingTechLevel ?? 1;
-          const hasSea = input.hasSeaAccess ?? true;
-          const stack = MilitaryDistributionEngine.calculateStartingStack(
-            tier,
-            hasSea,
-            techLevel,
-          );
+            military: input.military,
+            recruitmentQueue: [],
+            relations: {},
+            activeModifiers: [],
+            globalReputation: 50,
+            doctrines: { unlockedDoctrines: [] },
+            executedEspionageTiers: [],
+            warFocusTargetId: null,
+          },
+          true,
+        );
+      } else {
+        const tier = input.militaryTier ?? profile?.militaryTier ?? 5;
+        const techLevel =
+          input.startingTechLevel ?? profile?.startingTechLevel ?? 1;
+        const hasSea = input.hasSeaAccess ?? true;
+        const stack = MilitaryDistributionEngine.calculateStartingStack(
+          tier,
+          hasSea,
+          techLevel,
+        );
 
-          milPower = MilitaryPowerCalculator.calculateEffectivePower(
-            {
-              id: canonicalId,
-              name: input.name || profile?.nameFa || canonicalId,
-              isAi: true,
-              isAlive: true,
-              flagCode: profile?.flagCode || "IR",
-              taxRate: 15,
-              tariffRate: 10,
-              treasury: 100000,
-              nationalDebt: 0,
-              industrialLevel: 1,
-              government: {
-                type:
-                  (input.governmentType as GovernmentType) ||
-                  profile?.startingGovernment ||
-                  "DEMOCRACY",
-                stability: 50,
-                turnsInPower: 1,
-              },
-              military: stack,
-              recruitmentQueue: [],
-              relations: {},
-              activeModifiers: [],
-              globalReputation: 50,
-              doctrines: { unlockedDoctrines: [] },
-              executedEspionageTiers: [],
-              warFocusTargetId: null,
+        milPower = MilitaryPowerCalculator.calculateEffectivePower(
+          {
+            id: canonicalId,
+            name: input.name || profile?.nameFa || canonicalId,
+            isAi: true,
+            isAlive: true,
+            flagCode: profile?.flagCode || "IR",
+            taxRate: 15,
+            tariffRate: 10,
+            treasury: 100000,
+            nationalDebt: 0,
+            industrialLevel: 1,
+            government: {
+              type:
+                (input.governmentType as GovernmentType) ||
+                profile?.startingGovernment ||
+                "DEMOCRACY",
+              stability: 50,
+              turnsInPower: 1,
             },
-            true,
-          );
-        }
+            military: stack,
+            recruitmentQueue: [],
+            relations: {},
+            activeModifiers: [],
+            globalReputation: 50,
+            doctrines: { unlockedDoctrines: [] },
+            executedEspionageTiers: [],
+            warFocusTargetId: null,
+          },
+          true,
+        );
       }
 
       processed[i] = {
