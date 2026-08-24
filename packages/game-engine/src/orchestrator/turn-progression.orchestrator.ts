@@ -95,6 +95,11 @@ export class TurnProgressionOrchestrator {
 
     workingState = this.livenessManager.updateLiveness(workingState);
 
+    activeMatrixCache = GeopoliticalMatrixCache.build(
+      workingState.nations,
+      workingState.provinces,
+    );
+
     workingState = CoalitionManager.evaluateCoalitionState(
       workingState,
       activeMatrixCache.getRankMap(),

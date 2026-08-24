@@ -56,6 +56,39 @@ export class MilitaryInventoryHelper {
     };
   }
 
+  public static syncBranchTechOnUpgrade(
+    military: MilitaryStack,
+    newTechLevel: number,
+  ): MilitaryStack {
+    const safeTech = Math.max(1, newTechLevel);
+    const currentBranchTech: BranchTechRating = military.branchTech
+      ? { ...military.branchTech }
+      : this.initializeBranchTech(military.techLevel);
+
+    const keys: MilitaryStackKey[] = [
+      "infantry",
+      "armor",
+      "airDefense",
+      "airForce",
+      "droneMissile",
+      "navalFleet",
+    ];
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]!;
+      const currentVal = currentBranchTech[key] ?? military.techLevel ?? 1;
+      if (currentVal < safeTech) {
+        currentBranchTech[key] = safeTech;
+      }
+    }
+
+    return {
+      ...military,
+      techLevel: safeTech,
+      branchTech: currentBranchTech,
+    };
+  }
+
   public static addUnits(
     military: MilitaryStack,
     unitType: UnitType,

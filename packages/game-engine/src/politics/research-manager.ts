@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { COMPREHENSIVE_RESEARCH_TREE } from "@/domain/politics/research-tree.config";
+import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class ResearchManager {
   public static getMilitaryTechCost(nation: Nation): number {
@@ -28,13 +29,16 @@ export class ResearchManager {
       );
     }
 
+    const nextTechLevel = nation.military.techLevel + 1;
+    const updatedMilitary = MilitaryInventoryHelper.syncBranchTechOnUpgrade(
+      nation.military,
+      nextTechLevel,
+    );
+
     return {
       ...nation,
       treasury: nation.treasury - cost,
-      military: {
-        ...nation.military,
-        techLevel: nation.military.techLevel + 1,
-      },
+      military: updatedMilitary,
     };
   }
 
