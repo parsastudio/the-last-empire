@@ -192,35 +192,35 @@ export function ReportCard({
 
   return (
     <div
-      className={`p-4 rounded-2xl border ${style.border} ${style.cardBg} flex items-start gap-3.5 transition-all font-sans text-right dir-rtl backdrop-blur-sm shadow-sm hover:shadow-md relative overflow-hidden`}
+      className={`p-4.5 rounded-3xl border ${style.border} ${style.cardBg} flex items-start gap-4 transition-all font-sans text-right dir-rtl backdrop-blur-md shadow-md hover:shadow-xl relative overflow-hidden`}
     >
       <div
-        className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${style.iconBg}`}
+        className={`w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0 mt-0.5 shadow-sm ${style.iconBg}`}
       >
-        <Icon size={16} />
+        <Icon size={18} />
       </div>
 
-      <div className="flex-1 space-y-2.5 overflow-hidden">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <p className="text-xs text-foreground leading-relaxed font-sans font-medium flex-1">
+      <div className="flex-1 space-y-3 overflow-hidden">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-sm text-foreground leading-relaxed font-sans font-bold flex-1">
             {dynamicMessage}
           </p>
 
           {isIncomingInteractiveProposal && (
-            <span className="flex items-center gap-1 text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-lg shrink-0 animate-pulse">
-              <Sparkles size={10} />
+            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
+              <Sparkles size={12} />
               در انتظار تصمیم شما
             </span>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 border-t border-border/30">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-border/40">
           {(sourceName || targetName) && (
-            <div className="flex flex-wrap items-center gap-2 font-mono text-[10px]">
+            <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
               {sourceName && (
-                <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
-                  <span className="text-base select-none">{sourceFlag}</span>
-                  <span className="font-bold text-foreground">
+                <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
+                  <span className="text-lg select-none">{sourceFlag}</span>
+                  <span className="font-black text-foreground">
                     {sourceName}
                   </span>
                 </div>
@@ -229,12 +229,12 @@ export function ReportCard({
               {targetName && (
                 <>
                   <ArrowLeft
-                    size={11}
+                    size={13}
                     className="text-muted-foreground shrink-0"
                   />
-                  <div className="flex items-center gap-1.5 bg-background/80 border border-border/60 px-2.5 py-1 rounded-xl text-muted-foreground shadow-sm">
-                    <span className="text-base select-none">{targetFlag}</span>
-                    <span className="font-bold text-foreground">
+                  <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
+                    <span className="text-lg select-none">{targetFlag}</span>
+                    <span className="font-black text-foreground">
                       {targetName}
                     </span>
                   </div>
@@ -246,10 +246,10 @@ export function ReportCard({
           {battleReportData && onOpenBattleDebrief && (
             <button
               onClick={() => onOpenBattleDebrief(battleReportData)}
-              className="px-2.5 py-1 bg-military/15 hover:bg-military/25 text-military border border-military/30 hover:border-military/50 rounded-xl text-[10px] font-bold transition-all cursor-pointer flex items-center gap-1 shrink-0"
+              className="px-3.5 py-1.5 bg-military/15 hover:bg-military/25 text-military border border-military/40 hover:border-military/60 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
-              <Eye size={12} />
-              <span>مشاهده جزئیات ۳ فاز نبرد</span>
+              <Eye size={14} />
+              <span>مشاهده جزئیات و جدول ۳ فاز نبرد</span>
             </button>
           )}
 
