@@ -9,8 +9,22 @@ export type GeopoliticalReachTier =
   | "LOCAL_POWER";
 
 export class GeopoliticalReachResolver {
-  public static readonly SUPERPOWER_MAX_RANK = 8;
-  public static readonly REGIONAL_POWER_MAX_RANK = 20;
+  public static readonly SUPERPOWER_PERCENTAGE = 0.08;
+  public static readonly REGIONAL_PERCENTAGE = 0.3;
+  public static readonly MIN_SUPERPOWERS = 3;
+
+  public static getSuperpowerCutoffRank(totalAlive: number): number {
+    const safeTotal = Math.max(1, totalAlive);
+    const calculated = Math.ceil(safeTotal * this.SUPERPOWER_PERCENTAGE);
+    return Math.min(safeTotal, Math.max(this.MIN_SUPERPOWERS, calculated));
+  }
+
+  public static getRegionalCutoffRank(totalAlive: number): number {
+    const safeTotal = Math.max(1, totalAlive);
+    const superpowerCutoff = this.getSuperpowerCutoffRank(safeTotal);
+    const calculated = Math.ceil(safeTotal * this.REGIONAL_PERCENTAGE);
+    return Math.min(safeTotal, Math.max(superpowerCutoff + 1, calculated));
+  }
 
   public static getReachTier(
     nation: Nation,
@@ -24,10 +38,18 @@ export class GeopoliticalReachResolver {
       provincesMap,
       rankMap,
     );
-    if (rank <= this.SUPERPOWER_MAX_RANK) {
+
+    const totalAlive = allNations
+      ? Object.values(allNations).filter((n) => n.isAlive).length
+      : 100;
+
+    const superpowerCutoff = this.getSuperpowerCutoffRank(totalAlive);
+    const regionalCutoff = this.getRegionalCutoffRank(totalAlive);
+
+    if (rank <= superpowerCutoff) {
       return "SUPERPOWER";
     }
-    if (rank <= this.REGIONAL_POWER_MAX_RANK) {
+    if (rank <= regionalCutoff) {
       return "REGIONAL_POWER";
     }
     return "LOCAL_POWER";
