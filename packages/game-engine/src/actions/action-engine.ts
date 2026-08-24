@@ -5,6 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { EconomyActionExecutor } from "@/engine/actions/economy-action-executor";
 import { MilitaryActionExecutor } from "@/engine/actions/military-action-executor";
 import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executor";
+import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
@@ -109,5 +110,46 @@ export class ActionEngine {
         error: "EXECUTION_FAILED",
       };
     }
+  }
+
+  public static executeBatch(
+    state: GameState,
+    actions: GameAction[],
+    lockedDiplomacyTargets?: Set<string>,
+  ): { newState: GameState; executedCount: number } {
+    let currentState = state;
+    let executedCount = 0;
+
+    for (let i = 0; i < actions.length; i++) {
+      const action = actions[i]!;
+      const result = this.execute(currentState, action);
+
+      if (result.success && result.newState) {
+        currentState = result.newState;
+        executedCount++;
+
+        if (
+          lockedDiplomacyTargets &&
+          action.type === "DIPLOMATIC_PROPOSAL" &&
+          "targetNationId" in action &&
+          action.targetNationId
+        ) {
+          lockedDiplomacyTargets.add(
+            DiplomacyLockManager.createKey(
+              action.nationId,
+              action.targetNationId,
+            ),
+          );
+          lockedDiplomacyTargets.add(
+            DiplomacyLockManager.createKey(
+              action.targetNationId,
+              action.nationId,
+            ),
+          );
+        }
+      }
+    }
+
+    return { newState: currentState, executedCount };
   }
 }
