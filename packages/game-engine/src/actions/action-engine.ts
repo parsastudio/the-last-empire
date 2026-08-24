@@ -89,9 +89,12 @@ export class ActionEngine {
 
         case "UNLOCK_DOCTRINE":
         case "DIPLOMATIC_PROPOSAL":
-        case "RESPOND_DIPLOMATIC_PROPOSAL":
-          newState = PoliticsActionExecutor.execute(state, action);
+        case "RESPOND_DIPLOMATIC_PROPOSAL": {
+          const polyResult = PoliticsActionExecutor.execute(state, action);
+          newState = polyResult.newState;
+          resultData = polyResult.resultData;
           break;
+        }
 
         default:
           return {

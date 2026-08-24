@@ -11,54 +11,68 @@ import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
 
+export interface PoliticsExecutionOutput {
+  newState: GameState;
+  resultData?: unknown;
+}
+
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
   private static researchManager = new ResearchManager();
 
-  public static execute(state: GameState, action: GameAction): GameState {
+  public static execute(
+    state: GameState,
+    action: GameAction,
+  ): PoliticsExecutionOutput {
     const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
     const nation =
       state.nations[canonicalSourceId] || state.nations[action.nationId];
-    if (!nation) return state;
+    if (!nation) return { newState: state };
 
     const sourceKey = nation.id;
 
     switch (action.type) {
       case "UNLOCK_DOCTRINE": {
         return {
-          ...state,
-          nations: {
-            ...state.nations,
-            [sourceKey]: this.researchManager.unlockDoctrine(
-              nation,
-              action.doctrineId,
-            ),
+          newState: {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: this.researchManager.unlockDoctrine(
+                nation,
+                action.doctrineId,
+              ),
+            },
           },
         };
       }
 
       case "EXECUTE_ESPIONAGE_OPERATION": {
-        const { newState } = EspionageManager.executeOperation(
+        const { newState, result } = EspionageManager.executeOperation(
           state,
           action.nationId,
           action.targetNationId,
           action.tier,
         );
-        return newState;
+        return { newState, resultData: result };
       }
 
       case "RESPOND_DIPLOMATIC_PROPOSAL": {
         const proposal = state.pendingProposals.find(
           (p) => p.id === action.proposalId,
         );
-        if (!proposal) return state;
+        if (!proposal) return { newState: state };
 
         if (action.accept) {
-          return TreatyAcceptanceApplier.applyAcceptance(state, proposal);
+          return {
+            newState: TreatyAcceptanceApplier.applyAcceptance(state, proposal),
+          };
         } else {
-          return TreatyAcceptanceApplier.applyRejection(state, proposal);
+          return {
+            newState: TreatyAcceptanceApplier.applyRejection(state, proposal),
+          };
         }
       }
 
@@ -69,7 +83,7 @@ export class PoliticsActionExecutor {
         const receiver =
           state.nations[canonicalTargetId] ||
           state.nations[action.targetNationId];
-        if (!receiver) return state;
+        if (!receiver) return { newState: state };
         const targetKey = receiver.id;
 
         const senderRel =
@@ -78,7 +92,7 @@ export class PoliticsActionExecutor {
         const receiverRel =
           receiver.relations[canonicalSourceId] ||
           receiver.relations[action.nationId];
-        if (!senderRel || !receiverRel) return state;
+        if (!senderRel || !receiverRel) return { newState: state };
 
         const canonicalHuman = CountryRegistry.resolveCanonicalId(
           state.humanNationId,
@@ -162,7 +176,7 @@ export class PoliticsActionExecutor {
             );
           }
 
-          return {
+          const newState = {
             ...state,
             turnLogs: [...state.turnLogs, ...warLogs],
             nations: {
@@ -186,6 +200,18 @@ export class PoliticsActionExecutor {
               },
             },
           };
+
+          return {
+            newState,
+            resultData: {
+              proposalType: "DECLARE_WAR",
+              accepted: true,
+              targetNationId: receiver.id,
+              targetName: receiver.name,
+              targetFlagCode: receiver.flagCode,
+              message: `بیانیه رسمی اعلان جنگ به کشور ${receiver.name} ابلاغ گردید و تمامی روابط دیپلماتیک قطع شد.`,
+            },
+          };
         }
 
         if (nation.isAi) {
@@ -206,7 +232,7 @@ export class PoliticsActionExecutor {
 
         if (action.proposalType === "SEND_FOREIGN_AID") {
           if (senderRel.stance === "WAR" || receiverRel.stance === "WAR") {
-            return state;
+            return { newState: state };
           }
 
           const targetGdp = getNationGdp(receiver, state.provinces);
@@ -214,7 +240,7 @@ export class PoliticsActionExecutor {
             TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
           if (nation.treasury < costDeduction) {
-            return state;
+            return { newState: state };
           }
 
           const currentReceiverAlignment = receiverRel.alignment ?? 0;
@@ -253,7 +279,7 @@ export class PoliticsActionExecutor {
             );
           }
 
-          return {
+          const newState = {
             ...state,
             turnLogs: [...state.turnLogs, ...aidLogs],
             nations: {
@@ -271,6 +297,18 @@ export class PoliticsActionExecutor {
                   [receiverRel.targetNationId]: updatedReceiverRel,
                 },
               },
+            },
+          };
+
+          return {
+            newState,
+            resultData: {
+              proposalType: "SEND_FOREIGN_AID",
+              accepted: true,
+              targetNationId: receiver.id,
+              targetName: receiver.name,
+              targetFlagCode: receiver.flagCode,
+              message: `بسته کمک مالی و دیپلماتیک به ارزش مصوب به خزانه‌داری ${receiver.name} واریز شد. این کشور با ابراز خرسندی، همسویی سیاسی خود را افزایش داد (+۲۵ همسویی، +۴ پرستیژ).`,
             },
           };
         }
@@ -294,15 +332,57 @@ export class PoliticsActionExecutor {
           );
 
           if (isAccepted) {
-            return TreatyAcceptanceApplier.applyAcceptance(
+            const newState = TreatyAcceptanceApplier.applyAcceptance(
               state,
               transientProposal,
             );
+
+            let acceptedMsg = `دولت ${receiver.name} پس از بررسی منافع استراتژیک، با پیشنهاد شما موافقت کرد.`;
+            if (action.proposalType === "FULL_ALLIANCE") {
+              acceptedMsg = `دولت ${receiver.name} معاهده اتحاد کامل را با اشتیاق امضا کرد! دو کشور رسماً متحد استراتژیک یکدیگر شدند.`;
+            } else if (action.proposalType === "NON_AGGRESSION_PACT") {
+              acceptedMsg = `دولت ${receiver.name} پیمان عدم تخاصم را پذیرفت و امنیت مرزهای مشترک برقرار گردید.`;
+            } else if (action.proposalType === "PEACE_TREATY") {
+              acceptedMsg = `دولت ${receiver.name} معاهده صلح را امضا کرد و به درگیری‌های نظامی پایان داد.`;
+            }
+
+            return {
+              newState,
+              resultData: {
+                proposalType: action.proposalType,
+                accepted: true,
+                targetNationId: receiver.id,
+                targetName: receiver.name,
+                targetFlagCode: receiver.flagCode,
+                message: acceptedMsg,
+              },
+            };
           } else {
-            return TreatyAcceptanceApplier.applyRejection(
+            const newState = TreatyAcceptanceApplier.applyRejection(
               state,
               transientProposal,
             );
+
+            let rejectedMsg = `دولت ${receiver.name} پیشنهاد شما را در شرایط فعلی به صلاح ندانست و آن را رد کرد.`;
+            if (action.proposalType === "FULL_ALLIANCE") {
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد اتحاد نظامی را رد کرد. سطح همسویی و اعتماد دوجانبه برای امضای معاهده اتحاد هنوز کافی نیست.`;
+            } else if (action.proposalType === "NON_AGGRESSION_PACT") {
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد پیمان عدم تخاصم را رد کرد. تنش‌های مرزی یا تفاوت ساختار سیاسی مانع توافق شد.`;
+            } else if (action.proposalType === "PEACE_TREATY") {
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد صلح را رد کرد و اعلام نمود تا تحقق اهداف ژئوپلیتیک خود به نبرد ادامه خواهد داد.`;
+            }
+
+            return {
+              newState,
+              resultData: {
+                proposalType: action.proposalType,
+                accepted: false,
+                targetNationId: receiver.id,
+                targetName: receiver.name,
+                targetFlagCode: receiver.flagCode,
+                message: rejectedMsg,
+              },
+            };
           }
         }
 
@@ -314,7 +394,7 @@ export class PoliticsActionExecutor {
         );
 
         if (isDuplicate) {
-          return state;
+          return { newState: state };
         }
 
         const proposalLog = TurnLogBuilder.createNationalLog(
@@ -331,14 +411,16 @@ export class PoliticsActionExecutor {
         );
 
         return {
-          ...state,
-          pendingProposals: [...state.pendingProposals, transientProposal],
-          turnLogs: [...state.turnLogs, proposalLog],
+          newState: {
+            ...state,
+            pendingProposals: [...state.pendingProposals, transientProposal],
+            turnLogs: [...state.turnLogs, proposalLog],
+          },
         };
       }
 
       default:
-        return state;
+        return { newState: state };
     }
   }
 }
