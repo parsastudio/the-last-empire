@@ -40,18 +40,12 @@ export class BattleAttackerStateApplier {
       baseWarRepPenalty +
       (betrayalResult.hasBetrayed ? betrayalResult.reputationPenalty : 0);
 
-    const existingRel =
-      attacker.relations[cleanDefenderId] || attacker.relations[defenderId];
-    const currentGrudge = existingRel?.grudge ?? 0;
-
     const updatedRelations = { ...attacker.relations };
     updatedRelations[cleanDefenderId] = {
       targetNationId: cleanDefenderId,
       stance: "WAR",
       alignment: -100,
       tension: 100,
-      grudge: currentGrudge,
-      lostProvincesCount: existingRel?.lostProvincesCount ?? 0,
     };
 
     const combatStabilityDelta =

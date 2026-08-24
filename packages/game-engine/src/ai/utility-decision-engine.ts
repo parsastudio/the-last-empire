@@ -133,8 +133,12 @@ export class UtilityDecisionEngine {
           reasons.push({ label: "برتری نظامی طرف مقابل", value: powerDiff });
         }
 
-        const grudgeVal = -Math.round(vector.reasons.grudgePenalty * 0.6);
-        reasons.push({ label: "کینه و خسارات سرزمینی", value: grudgeVal });
+        const animosityVal =
+          vector.alignment < 0 ? Math.round(vector.alignment * 0.4) : 0;
+        reasons.push({
+          label: "بی‌اعتمادی و تخاصم سیاسی",
+          value: animosityVal,
+        });
         break;
       }
 

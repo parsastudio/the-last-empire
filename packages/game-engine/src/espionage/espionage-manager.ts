@@ -183,14 +183,12 @@ export class EspionageManager {
 
       const targetRel = updatedTarget.relations[source.id];
       if (targetRel) {
-        const currentTargetGrudge = targetRel.grudge ?? 0;
         updatedTarget.relations = {
           ...updatedTarget.relations,
           [source.id]: {
             ...targetRel,
-            alignment: Math.max(-100, (targetRel.alignment ?? 0) - tier * 20),
-            tension: Math.min(100, (targetRel.tension ?? 10) + tier * 15),
-            grudge: Math.min(100, currentTargetGrudge + tier * 15),
+            alignment: Math.max(-100, (targetRel.alignment ?? 0) - tier * 25),
+            tension: Math.min(100, (targetRel.tension ?? 10) + tier * 20),
           },
         };
       }

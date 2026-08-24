@@ -59,7 +59,6 @@ export class AllianceInterventionEvaluator {
       ) {
         interveningAllyIds.push(ally.id);
 
-        const currentGrudge = relWithAttacker?.grudge ?? 0;
         const updatedAllyRelations = {
           ...ally.relations,
           [attacker.id]: {
@@ -67,8 +66,6 @@ export class AllianceInterventionEvaluator {
             stance: "WAR" as const,
             alignment: -100,
             tension: 100,
-            grudge: Math.min(100, currentGrudge + 35),
-            lostProvincesCount: relWithAttacker?.lostProvincesCount ?? 0,
           },
         };
 
@@ -79,8 +76,6 @@ export class AllianceInterventionEvaluator {
         };
 
         const currentAttacker = updatedNations[attacker.id] || attacker;
-        const attackerGrudgeWithAlly =
-          currentAttacker.relations[ally.id]?.grudge ?? 0;
         const updatedAttackerRelations = {
           ...currentAttacker.relations,
           [ally.id]: {
@@ -88,9 +83,6 @@ export class AllianceInterventionEvaluator {
             stance: "WAR" as const,
             alignment: -100,
             tension: 100,
-            grudge: Math.min(100, attackerGrudgeWithAlly + 20),
-            lostProvincesCount:
-              currentAttacker.relations[ally.id]?.lostProvincesCount ?? 0,
           },
         };
 
@@ -106,14 +98,8 @@ export class AllianceInterventionEvaluator {
           [defender.id]: {
             targetNationId: defender.id,
             stance: "NORMAL_DIPLOMACY" as const,
-            alignment: -20,
+            alignment: -30,
             tension: 40,
-            grudge: Math.min(
-              100,
-              (ally.relations[defender.id]?.grudge ?? 0) + 10,
-            ),
-            lostProvincesCount:
-              ally.relations[defender.id]?.lostProvincesCount ?? 0,
           },
         };
 
@@ -124,18 +110,13 @@ export class AllianceInterventionEvaluator {
         };
 
         const currentDefender = updatedNations[defender.id] || defender;
-        const defenderGrudgeWithAlly =
-          currentDefender.relations[ally.id]?.grudge ?? 0;
         const updatedDefenderRelations = {
           ...currentDefender.relations,
           [ally.id]: {
             targetNationId: ally.id,
             stance: "NORMAL_DIPLOMACY" as const,
-            alignment: -40,
-            tension: 60,
-            grudge: Math.min(100, defenderGrudgeWithAlly + 45),
-            lostProvincesCount:
-              currentDefender.relations[ally.id]?.lostProvincesCount ?? 0,
+            alignment: -60,
+            tension: 70,
           },
         };
 

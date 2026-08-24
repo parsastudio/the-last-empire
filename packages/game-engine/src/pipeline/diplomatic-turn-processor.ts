@@ -94,11 +94,6 @@ export class DiplomaticTurnProcessor {
         }
       }
 
-      let nextGrudge = relation.grudge ?? 0;
-      if (relation.stance !== "WAR" && nextGrudge > 0) {
-        nextGrudge = Math.max(0, nextGrudge - 3);
-      }
-
       const isReachable = reachableCanonicalSet.has(canonicalTarget);
 
       if (!isReachable) {
@@ -106,7 +101,6 @@ export class DiplomaticTurnProcessor {
           ...relation,
           alignment: nextAlignment,
           tension: 0,
-          grudge: nextGrudge,
         };
         continue;
       }
@@ -122,22 +116,23 @@ export class DiplomaticTurnProcessor {
         Math.min(100, nextAlignment + ideologyBonus + repEffect),
       );
 
-      let currentTension = 10;
+      let currentTension = relation.tension ?? 10;
       if (relation.stance === "WAR") {
         currentTension = 100;
       } else if (relation.stance === "ALLIANCE") {
         currentTension = 0;
       } else if (relation.stance === "NON_AGGRESSION_PACT") {
-        currentTension = 5;
+        currentTension = Math.min(15, currentTension);
       } else {
-        currentTension = Math.min(100, nextGrudge + 10);
+        if (currentTension > 10) {
+          currentTension = Math.max(10, currentTension - 3);
+        }
       }
 
       newRels[targetId] = {
         ...relation,
         alignment: currentAlignment,
         tension: currentTension,
-        grudge: nextGrudge,
       };
     }
 
