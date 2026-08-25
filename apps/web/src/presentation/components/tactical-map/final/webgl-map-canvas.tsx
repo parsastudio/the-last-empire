@@ -67,6 +67,7 @@ export function WebGLMapCanvas({
   const {
     hoverPos,
     hoverData,
+    hoveredCountryId,
     contextMenuState,
     handlePointerMove,
     handlePointerLeave,
@@ -93,8 +94,8 @@ export function WebGLMapCanvas({
     positionRef,
     scaleRef,
     provincesMap,
-    nationsMap,
     activeLayer,
+    hoveredCountryId,
   });
 
   const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {

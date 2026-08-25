@@ -6,6 +6,7 @@ import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/h
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { useGridPicker } from "@/presentation/hooks/tactical-map/final/use-grid-picker";
 import { useContextMenu } from "@/presentation/hooks/tactical-map/final/use-context-menu";
+import { CountryRegistry } from "@/domain/data/countries";
 
 interface UseWebGLInteractionProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -34,6 +35,7 @@ export function useWebGLInteraction({
     null,
   );
   const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);
+  const [hoveredCountryId, setHoveredCountryId] = useState<number>(0);
 
   const { pickAtScreenPos } = useGridPicker();
   const { contextMenuState, openContextMenu, closeContextMenu } =
@@ -53,6 +55,7 @@ export function useWebGLInteraction({
       }
       if (hoverPos !== null) setHoverPos(null);
       if (hoverData !== null) setHoverData(null);
+      if (hoveredCountryId !== 0) setHoveredCountryId(0);
       lastHoverProvinceIdRef.current = null;
       return;
     }
@@ -67,6 +70,17 @@ export function useWebGLInteraction({
     const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
 
     if (provinceId > 0) {
+      const prov = provincesMap?.[provinceId.toString()];
+      const numericId = prov
+        ? CountryRegistry.resolveNumericId(prov.ownerNationId) ||
+          prov.countryNumericId ||
+          0
+        : 0;
+
+      if (hoveredCountryId !== numericId) {
+        setHoveredCountryId(numericId);
+      }
+
       if (lastHoverProvinceIdRef.current !== provinceId || !hoverData) {
         const info = resolveHoverInfo(provinceId);
         if (info) {
@@ -84,12 +98,14 @@ export function useWebGLInteraction({
     lastHoverProvinceIdRef.current = null;
     if (hoverPos !== null) setHoverPos(null);
     if (hoverData !== null) setHoverData(null);
+    if (hoveredCountryId !== 0) setHoveredCountryId(0);
   };
 
   const handlePointerLeave = () => {
     lastHoverProvinceIdRef.current = null;
     setHoverPos(null);
     setHoverData(null);
+    setHoveredCountryId(0);
   };
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -126,6 +142,7 @@ export function useWebGLInteraction({
   return {
     hoverPos,
     hoverData,
+    hoveredCountryId,
     contextMenuState,
     handlePointerMove,
     handlePointerLeave,

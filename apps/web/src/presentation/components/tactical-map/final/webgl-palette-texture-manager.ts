@@ -58,7 +58,10 @@ export class WebGLPaletteTextureManager {
       if (pid <= 0 || pid >= 65536) continue;
 
       const ownerId = prov.ownerNationId;
-      const numId = CountryRegistry.resolveNumericId(ownerId);
+      const numId =
+        CountryRegistry.resolveNumericId(ownerId) ||
+        prov.countryNumericId ||
+        118;
       const pair = TacticalPaletteGenerator.generateColorForCountry(
         numId || 118,
       );
@@ -70,7 +73,7 @@ export class WebGLPaletteTextureManager {
       data[idx] = pair.r1;
       data[idx + 1] = pair.g1;
       data[idx + 2] = pair.b1;
-      data[idx + 3] = 255;
+      data[idx + 3] = numId & 255;
     }
   }
 
@@ -98,6 +101,11 @@ export class WebGLPaletteTextureManager {
     for (let rankIndex = 0; rankIndex < totalCount; rankIndex++) {
       const entry = gdpEntries[rankIndex]!;
       const pid = entry.prov.provinceId;
+      const ownerId = entry.prov.ownerNationId;
+      const numId =
+        CountryRegistry.resolveNumericId(ownerId) ||
+        entry.prov.countryNumericId ||
+        118;
 
       const normalized =
         totalCount > 1 ? 1.0 - rankIndex / (totalCount - 1) : 1.0;
@@ -111,7 +119,7 @@ export class WebGLPaletteTextureManager {
       data[idx] = r;
       data[idx + 1] = g;
       data[idx + 2] = b;
-      data[idx + 3] = 255;
+      data[idx + 3] = numId & 255;
     }
   }
 
