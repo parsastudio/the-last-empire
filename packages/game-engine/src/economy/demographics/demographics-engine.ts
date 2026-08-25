@@ -19,14 +19,14 @@ export class DemographicsEngine {
 
     let growthRate = 0;
     if (stability > 60) {
-      growthRate = ((stability - 60) / 40) * 0.02;
+      growthRate = ((stability - 60) / 40) * 0.04;
     } else if (stability >= 40) {
       growthRate = 0;
     } else {
-      growthRate = ((stability - 40) / 40) * 0.05;
+      growthRate = ((stability - 40) / 40) * 0.06;
     }
 
-    growthRate = Math.max(-0.05, Math.min(0.02, growthRate));
+    growthRate = Math.max(-0.06, Math.min(0.04, growthRate));
 
     if (growthRate === 0) {
       return {

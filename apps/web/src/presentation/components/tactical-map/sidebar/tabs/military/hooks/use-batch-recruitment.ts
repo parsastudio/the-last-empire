@@ -6,7 +6,6 @@ import {
   ActionFactory,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 const ALL_UNIT_TYPES: UnitType[] = [
   "INFANTRY",
@@ -44,7 +43,7 @@ export function useBatchRecruitment({
   });
 
   const unitConfigs = useMemo(() => {
-    const fivePercentTreasury = Math.floor(treasury * 0.05);
+    const tenPercentTreasury = Math.floor(treasury * 0.1);
 
     return ALL_UNIT_TYPES.map((type) => {
       const stat = MILITARY_UNIT_STATS[type];
@@ -56,8 +55,8 @@ export function useBatchRecruitment({
       const isUnlocked = techLevel >= stat.requiredTechLevel;
 
       let step = 1;
-      if (fivePercentTreasury > 0 && unitPrice <= fivePercentTreasury) {
-        step = Math.max(1, Math.floor(fivePercentTreasury / unitPrice));
+      if (tenPercentTreasury > 0 && unitPrice <= tenPercentTreasury) {
+        step = Math.max(1, Math.floor(tenPercentTreasury / unitPrice));
       }
 
       return {

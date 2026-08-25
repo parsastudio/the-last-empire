@@ -101,37 +101,52 @@ export class TreatyAcceptanceApplier {
           ? "پیمان عدم تخاصم"
           : "معاهده صلح و پایان جنگ";
 
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(
-      state.humanNationId,
-    );
-    const isHumanInvolved =
-      canonicalSenderId === canonicalHuman ||
-      canonicalReceiverId === canonicalHuman;
+    let foundMatchingLog = false;
+    const updatedLogs = state.turnLogs.map((log) => {
+      const isMatchingProposalId =
+        log.params?.["proposalId"] &&
+        String(log.params["proposalId"]) === proposal.id;
 
-    const newLogs = [
-      TurnLogBuilder.createGlobalDiplomacyLog(
-        state.currentTurn,
-        sender.id,
-        receiver.id,
-        "TREATY_ACCEPTED",
-        { treatyLabel },
-        "INFO",
-      ),
-    ];
+      const isMatchingProposalFallback =
+        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT" &&
+        CountryRegistry.resolveCanonicalId(log.sourceNationId) ===
+          canonicalSenderId &&
+        CountryRegistry.resolveCanonicalId(log.targetNationId || "") ===
+          canonicalReceiverId;
 
-    if (isHumanInvolved) {
-      newLogs.push(
-        TurnLogBuilder.createNationalLog(
-          state.currentTurn,
-          sender.id,
-          "DIPLOMACY",
-          "INFO",
-          "TREATY_ACCEPTED",
-          { treatyLabel },
-          receiver.id,
-        ),
-      );
-    }
+      if (
+        isMatchingProposalId ||
+        (!foundMatchingLog && isMatchingProposalFallback)
+      ) {
+        foundMatchingLog = true;
+        return {
+          ...log,
+          eventCode: "TREATY_ACCEPTED" as const,
+          level: "INFO" as const,
+          category: "DIPLOMACY" as const,
+          params: {
+            ...log.params,
+            treatyLabel,
+            accepted: true,
+          },
+        };
+      }
+      return log;
+    });
+
+    const finalLogs = foundMatchingLog
+      ? updatedLogs
+      : [
+          ...state.turnLogs,
+          TurnLogBuilder.createGlobalDiplomacyLog(
+            state.currentTurn,
+            sender.id,
+            receiver.id,
+            "TREATY_ACCEPTED",
+            { treatyLabel },
+            "INFO",
+          ),
+        ];
 
     const remainingProposals = state.pendingProposals.filter(
       (p) => p.id !== proposal.id,
@@ -140,7 +155,7 @@ export class TreatyAcceptanceApplier {
     return {
       ...state,
       pendingProposals: remainingProposals,
-      turnLogs: [...state.turnLogs, ...newLogs],
+      turnLogs: finalLogs,
       nations: {
         ...state.nations,
         [sender.id]: updatedSender,
@@ -167,37 +182,52 @@ export class TreatyAcceptanceApplier {
           ? "عدم تخاصم"
           : "صلح";
 
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(
-      state.humanNationId,
-    );
-    const isHumanInvolved =
-      canonicalSenderId === canonicalHuman ||
-      canonicalReceiverId === canonicalHuman;
+    let foundMatchingLog = false;
+    const updatedLogs = state.turnLogs.map((log) => {
+      const isMatchingProposalId =
+        log.params?.["proposalId"] &&
+        String(log.params["proposalId"]) === proposal.id;
 
-    const newLogs = [
-      TurnLogBuilder.createGlobalDiplomacyLog(
-        state.currentTurn,
-        proposal.receiverNationId,
-        proposal.senderNationId,
-        "TREATY_REJECTED",
-        { treatyLabel },
-        "WARNING",
-      ),
-    ];
+      const isMatchingProposalFallback =
+        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT" &&
+        CountryRegistry.resolveCanonicalId(log.sourceNationId) ===
+          canonicalSenderId &&
+        CountryRegistry.resolveCanonicalId(log.targetNationId || "") ===
+          canonicalReceiverId;
 
-    if (isHumanInvolved) {
-      newLogs.push(
-        TurnLogBuilder.createNationalLog(
-          state.currentTurn,
-          proposal.receiverNationId,
-          "DIPLOMACY",
-          "WARNING",
-          "TREATY_REJECTED",
-          { treatyLabel },
-          proposal.senderNationId,
-        ),
-      );
-    }
+      if (
+        isMatchingProposalId ||
+        (!foundMatchingLog && isMatchingProposalFallback)
+      ) {
+        foundMatchingLog = true;
+        return {
+          ...log,
+          eventCode: "TREATY_REJECTED" as const,
+          level: "WARNING" as const,
+          category: "DIPLOMACY" as const,
+          params: {
+            ...log.params,
+            treatyLabel,
+            accepted: false,
+          },
+        };
+      }
+      return log;
+    });
+
+    const finalLogs = foundMatchingLog
+      ? updatedLogs
+      : [
+          ...state.turnLogs,
+          TurnLogBuilder.createGlobalDiplomacyLog(
+            state.currentTurn,
+            proposal.receiverNationId,
+            proposal.senderNationId,
+            "TREATY_REJECTED",
+            { treatyLabel },
+            "WARNING",
+          ),
+        ];
 
     const remainingProposals = state.pendingProposals.filter(
       (p) => p.id !== proposal.id,
@@ -206,7 +236,7 @@ export class TreatyAcceptanceApplier {
     return {
       ...state,
       pendingProposals: remainingProposals,
-      turnLogs: [...state.turnLogs, ...newLogs],
+      turnLogs: finalLogs,
     };
   }
 

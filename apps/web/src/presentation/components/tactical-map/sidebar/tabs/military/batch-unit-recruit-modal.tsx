@@ -48,7 +48,7 @@ export function BatchUnitRecruitModal({
     <UnifiedModalShell
       isOpen={isOpen}
       title="ستاد ساخت و تجهیز تسلیحات نظامی"
-      subtitle="تخصیص بودجه و سفارش همزمان نیروهای زمینی، هوایی، موشکی و دریایی"
+      subtitle="تخصیص بودجه با گام‌های ۱۰٪ خزانه و سفارش همزمان نیروهای زمینی، هوایی، موشکی و دریایی"
       maxWidthClass="max-w-3xl"
       onClose={onClose}
     >
@@ -98,8 +98,8 @@ export function BatchUnitRecruitModal({
                 unitPrice={config.unitPrice}
                 isUnlocked={config.isUnlocked}
                 quantity={quantities[config.type] || 0}
-                step={config.step}
                 maxAffordable={maxAffordable}
+                totalTreasury={treasury}
                 onQuantityChange={(qty) =>
                   handleQuantityChange(config.type, qty)
                 }

@@ -8,13 +8,12 @@ import { ActionFactory } from "@geopolitics/domain";
 interface ProposalActionButtonsProps {
   proposalId: string;
   humanNationId: string;
-  sourceNationName: string;
+  sourceNationName?: string;
 }
 
 export function ProposalActionButtons({
   proposalId,
   humanNationId,
-  sourceNationName,
 }: ProposalActionButtonsProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
 
@@ -27,11 +26,7 @@ export function ProposalActionButtons({
       accept,
     );
 
-    const message = accept
-      ? `معاهده پیشنهادی از سوی ${sourceNationName} پذیرفته شد.`
-      : `پیشنهاد معاهده از سوی ${sourceNationName} رد شد.`;
-
-    await dispatchAction(action, message);
+    await dispatchAction(action);
   };
 
   return (

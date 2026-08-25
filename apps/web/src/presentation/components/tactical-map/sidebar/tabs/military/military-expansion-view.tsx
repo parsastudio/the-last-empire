@@ -58,7 +58,7 @@ export function MilitaryExpansionView({
               </h3>
               <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5 font-medium">
                 سفارش همزمان و یکپارچه پیاده‌نظام، زرهی، پدافند هوایی،
-                جنگنده‌ها، موشک‌ها و ناوگان دریایی با گام‌های ۵٪ خزانه.
+                جنگنده‌ها، موشک‌ها و ناوگان دریایی با گام‌های ۱۰٪ خزانه.
               </p>
             </div>
           </div>
