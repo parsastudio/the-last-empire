@@ -109,11 +109,14 @@ export class TurnProgressionOrchestrator {
     const victoryStatus = this.victoryChecker.checkVictory(workingState);
 
     if (victoryStatus.isGameOver && !workingState.isGameOver) {
-      const winnerId =
-        victoryStatus.winnerNationId || workingState.humanNationId;
+      let winnerId = victoryStatus.winnerNationId;
+      if (!winnerId && victoryStatus.reason !== "HUMAN_PLAYER_DEFEATED") {
+        winnerId = workingState.humanNationId;
+      }
+
       const victoryLog = TurnLogBuilder.createVictoryLog(
         workingState.currentTurn,
-        winnerId,
+        winnerId || workingState.humanNationId,
         victoryStatus.reason || "WORLD_DOMINANCE",
       );
 

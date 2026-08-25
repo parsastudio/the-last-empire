@@ -38,20 +38,61 @@ export function GameOverDialogWrapper({
       gameState.nations[humanCanonical] ||
       gameState.nations[gameState.humanNationId];
 
+    const pixelCount = humanNation
+      ? NationGettersUtility.getTerritoryPixelCount(
+          humanNation.id,
+          gameState.provinces,
+        )
+      : 0;
+
+    const rawReason = gameState.gameOverReason || "";
+    const isPlayerDefeated =
+      !humanNation ||
+      !humanNation.isAlive ||
+      pixelCount === 0 ||
+      rawReason === "HUMAN_PLAYER_DEFEATED";
+
     const winnerCanonical = gameState.winnerNationId
       ? CountryRegistry.resolveCanonicalId(gameState.winnerNationId)
       : null;
 
-    const winnerNation = winnerCanonical
-      ? gameState.nations[winnerCanonical] ||
-        gameState.nations[gameState.winnerNationId || ""]
-      : null;
+    const leadingAliveNation = Object.values(gameState.nations)
+      .filter(
+        (n) =>
+          n.isAlive &&
+          CountryRegistry.resolveCanonicalId(n.id) !== humanCanonical,
+      )
+      .sort((a, b) => {
+        const gdpA = getNationGdp(a, gameState.provinces);
+        const gdpB = getNationGdp(b, gameState.provinces);
+        return gdpB - gdpA;
+      })[0];
 
-    const isVictory = !!winnerCanonical && winnerCanonical === humanCanonical;
+    const effectiveWinnerNation = isPlayerDefeated
+      ? winnerCanonical && winnerCanonical !== humanCanonical
+        ? gameState.nations[winnerCanonical] || leadingAliveNation
+        : leadingAliveNation
+      : winnerCanonical
+        ? gameState.nations[winnerCanonical] || null
+        : null;
 
-    const winnerName = winnerNation ? winnerNation.name : "قدرت برتر جهانی";
-    const winnerCode = winnerNation ? winnerNation.id : "WIN";
-    const winnerFlagCode = winnerNation?.flagCode || winnerCode;
+    const isVictory =
+      !isPlayerDefeated &&
+      !!effectiveWinnerNation &&
+      CountryRegistry.resolveCanonicalId(effectiveWinnerNation.id) ===
+        humanCanonical;
+
+    const winnerName = effectiveWinnerNation
+      ? effectiveWinnerNation.name
+      : isPlayerDefeated
+        ? "قدرت‌های رقیب"
+        : "قدرت برتر جهانی";
+    const winnerCode = effectiveWinnerNation
+      ? effectiveWinnerNation.id
+      : isPlayerDefeated
+        ? "DEFEAT"
+        : "WIN";
+    const winnerFlagCode = effectiveWinnerNation?.flagCode || winnerCode;
 
     const turnsPlayed = gameState.currentTurn;
     const finalGdp = humanNation
@@ -66,19 +107,10 @@ export function GameOverDialogWrapper({
       : 0;
     const finalPopNum = popCount / 1e6;
     const finalPopulation = `${PersianNumberFormatter.toPersianDigits(finalPopNum.toFixed(1))}M نفر`;
-
-    const pixelCount = humanNation
-      ? NationGettersUtility.getTerritoryPixelCount(
-          humanNation.id,
-          gameState.provinces,
-        )
-      : 0;
     const conqueredPixels = `${PersianNumberFormatter.toPersianDigits(pixelCount.toLocaleString("en-US"))} پیکسل`;
 
-    let reasonTitle = "سلطه و پایان رقابت بین‌المللی";
+    let reasonTitle = "پایان بازی و سرنوشت جهان";
     let reasonDescription = "";
-
-    const rawReason = gameState.gameOverReason || "";
 
     if (isVictory) {
       if (rawReason === "ECONOMIC_DOMINANCE") {
@@ -95,9 +127,9 @@ export function GameOverDialogWrapper({
         reasonDescription = `امپراتوری ${winnerName} تمامی شروط غلبه بر رقبای بین‌المللی را به انجام رساند.`;
       }
     } else {
-      if (humanNation && !humanNation.isAlive) {
-        reasonTitle = "فروپاشی کامل دولت ملی";
-        reasonDescription = `کشور شما در جریان نبردها تمامی قلمروها و پایداری حاکمیتی خود را از دست داد و از جغرافیای جهان حذف گردید.`;
+      if (isPlayerDefeated) {
+        reasonTitle = "فروپاشی کامل دولت و شکست حاکمیت";
+        reasonDescription = `کشور شما در جریان نبردها تمامی استان‌ها، قلمرو و پایداری حاکمیتی خود را از دست داد و از جغرافیای سیاسی جهان حذف گردید.`;
       } else if (rawReason === "ECONOMIC_DOMINANCE") {
         reasonTitle = "پیروزی رقیب در ماراتن اقتصادی";
         reasonDescription = `کشور ${winnerName} توانست زودتر از سایر قدرت‌ها به بیش از ۶۵٪ ثروت و GDP کل جهان دست یابد و هژمونی اقتصادی را فتح کند.`;
@@ -124,6 +156,7 @@ export function GameOverDialogWrapper({
       finalGdp,
       finalPopulation,
       conqueredPixels,
+      isPlayerDefeated,
     };
   }, [gameState]);
 
@@ -153,7 +186,9 @@ export function GameOverDialogWrapper({
       finalGdp={metrics.finalGdp}
       finalPopulation={metrics.finalPopulation}
       conqueredPixels={metrics.conqueredPixels}
-      onContinueSandbox={handleContinueSandbox}
+      onContinueSandbox={
+        metrics.isPlayerDefeated ? undefined : handleContinueSandbox
+      }
       onRestart={() => router.push("/select-nation")}
       onHome={() => router.push("/")}
     />
