@@ -1,58 +1,64 @@
-import React from "react";
-import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
-import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
-import { QuickMilitaryRecruitmentGrid } from "@/presentation/components/tactical-map/sidebar/tabs/military/quick-military-recruitment-grid";
-import { MilitaryValuationCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-valuation-card";
+import React, { useState } from "react";
+import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import {
-  MilitaryStack,
-  RecruitmentOrder,
-} from "@/domain/military/military.schema";
+  MilitarySubTabsHeader,
+  MilitarySubTabType,
+} from "@/presentation/components/tactical-map/command-center/views/military/military-sub-tabs-header";
+import { MilitaryOverviewTab } from "@/presentation/components/tactical-map/command-center/views/military/military-overview-tab";
+import { MilitaryDomesticTab } from "@/presentation/components/tactical-map/command-center/views/military/military-domestic-tab";
+import { MilitaryAlliedProcurementTab } from "@/presentation/components/tactical-map/command-center/views/military/military-allied-procurement-tab";
+import { CountryRegistry } from "@/domain/data/countries";
 
 interface WideMilitaryViewProps {
-  military: MilitaryStack;
-  recruitmentQueue?: RecruitmentOrder[];
-  nationId: string;
-  treasury?: number;
-  industrialLevel?: number;
+  nation: Nation;
+  nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
+  selectedTargetCode?: string | null;
 }
 
 export function WideMilitaryView({
-  military,
-  recruitmentQueue = [],
-  nationId,
-  treasury = 100000,
-  industrialLevel = 1,
+  nation,
+  nationsMap,
+  provincesMap,
+  selectedTargetCode,
 }: WideMilitaryViewProps) {
+  const [activeSubTab, setActiveSubTab] = useState<MilitarySubTabType>(
+    selectedTargetCode ? "allies" : "overview",
+  );
+
+  const eligibleAlliesCount = React.useMemo(() => {
+    if (!nationsMap) return 0;
+    return Object.values(nationsMap).filter((n) => {
+      if (!n.isAlive || n.id === nation.id) return false;
+      const canonical = CountryRegistry.resolveCanonicalId(n.id);
+      const rel = nation.relations[canonical] || nation.relations[n.id];
+      const alignment = rel ? (rel.alignment ?? 0) : 0;
+      const tension = rel ? (rel.tension ?? 10) : 10;
+      return alignment >= 15 && tension < 60;
+    }).length;
+  }, [nationsMap, nation]);
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-200 dir-rtl text-right">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-        <MilitaryForcesSection
-          infantry={military.infantry}
-          armor={military.armor}
-          airDefense={military.airDefense}
-          airForce={military.airForce}
-          droneMissile={military.droneMissile}
-          navalFleet={military.navalFleet}
-          techLevel={military.techLevel}
-          experience={military.experience}
-        />
-
-        <div className="space-y-4">
-          <MilitaryValuationCard
-            military={military}
-            industrialLevel={industrialLevel}
-            nationId={nationId}
-          />
-          <RecruitmentQueueCard queue={recruitmentQueue} nationId={nationId} />
-        </div>
-      </div>
-
-      <QuickMilitaryRecruitmentGrid
-        nationId={nationId}
-        treasury={treasury}
-        techLevel={military.techLevel}
-        industrialLevel={industrialLevel}
+    <div className="space-y-5 animate-fade-smooth dir-rtl text-right font-sans">
+      <MilitarySubTabsHeader
+        activeSubTab={activeSubTab}
+        alliesCount={eligibleAlliesCount}
+        onSelectSubTab={setActiveSubTab}
       />
+
+      {activeSubTab === "overview" && <MilitaryOverviewTab nation={nation} />}
+
+      {activeSubTab === "domestic" && <MilitaryDomesticTab nation={nation} />}
+
+      {activeSubTab === "allies" && (
+        <MilitaryAlliedProcurementTab
+          nation={nation}
+          nationsMap={nationsMap}
+          provincesMap={provincesMap}
+          selectedTargetCode={selectedTargetCode}
+        />
+      )}
     </div>
   );
 }

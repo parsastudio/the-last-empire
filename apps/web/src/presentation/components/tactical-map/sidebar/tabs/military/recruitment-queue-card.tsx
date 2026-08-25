@@ -30,7 +30,7 @@ export function RecruitmentQueueCard({
   };
 
   return (
-    <div className="space-y-2.5 dir-rtl text-right">
+    <div className="space-y-2.5 dir-rtl text-right font-sans">
       <div className="flex items-center gap-2 px-1">
         <Clock size={13} className="text-treasury" />
         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
@@ -52,9 +52,8 @@ export function RecruitmentQueueCard({
                 )}{" "}
                 یگان)
               </span>
-              <span className="text-[9px] text-treasury block font-sans">
-                {PersianNumberFormatter.toPersianDigits(item.turnsRemaining)}{" "}
-                نوبت تا آمادگی کامل
+              <span className="text-[10px] text-gdp font-bold block font-sans">
+                آماده‌سازی نهایی در نوبت بعد (۱ نوبت)
               </span>
             </div>
 

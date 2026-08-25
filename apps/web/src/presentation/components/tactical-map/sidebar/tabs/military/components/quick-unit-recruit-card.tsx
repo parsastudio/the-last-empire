@@ -104,9 +104,9 @@ export function QuickUnitRecruitCard({
             <span>
               واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
-            <span className="flex items-center gap-0.5">
-              <Clock size={10} className="text-treasury" />
-              {PersianNumberFormatter.toPersianDigits(info.buildTurns)} نوبت
+            <span className="flex items-center gap-0.5 text-gdp font-bold">
+              <Clock size={10} />
+              آماده‌سازی: نوبت بعد (۱ نوبت)
             </span>
           </div>
         </div>
