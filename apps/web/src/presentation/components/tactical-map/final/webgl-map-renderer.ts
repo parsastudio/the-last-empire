@@ -16,6 +16,7 @@ export class WebGLMapRenderer {
   private uScaleLoc: WebGLUniformLocation | null = null;
   private uTexelSizeLoc: WebGLUniformLocation | null = null;
   private uActiveLayerLoc: WebGLUniformLocation | null = null;
+  private uHoveredCountryLoc: WebGLUniformLocation | null = null;
 
   constructor(gl: WebGL2RenderingContext) {
     this.gl = gl;
@@ -56,6 +57,10 @@ export class WebGLMapRenderer {
       this.uScaleLoc = gl.getUniformLocation(prog, "u_scale");
       this.uTexelSizeLoc = gl.getUniformLocation(prog, "u_texelSize");
       this.uActiveLayerLoc = gl.getUniformLocation(prog, "u_activeLayer");
+      this.uHoveredCountryLoc = gl.getUniformLocation(
+        prog,
+        "u_hoveredCountryId",
+      );
 
       const uTerrainLoc = gl.getUniformLocation(prog, "u_terrainTexture");
       const uLiveStateLoc = gl.getUniformLocation(prog, "u_liveStateTexture");
@@ -67,6 +72,7 @@ export class WebGLMapRenderer {
       if (uLiveStateLoc) gl.uniform1i(uLiveStateLoc, 1);
       if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
       if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
+      if (this.uHoveredCountryLoc) gl.uniform1i(this.uHoveredCountryLoc, 0);
     }
   }
 
@@ -169,6 +175,7 @@ export class WebGLMapRenderer {
     posY: number,
     scale: number,
     activeLayer: "political" | "gdp" = "political",
+    hoveredCountryId = 0,
   ): void {
     const gl = this.gl;
     if (!this.program || !this.vao) return;
@@ -181,6 +188,10 @@ export class WebGLMapRenderer {
     gl.uniform1f(this.uScaleLoc, scale);
     gl.uniform2f(this.uTexelSizeLoc, 1.0 / 4096.0, 1.0 / 2048.0);
     gl.uniform1i(this.uActiveLayerLoc, activeLayer === "gdp" ? 1 : 0);
+
+    if (this.uHoveredCountryLoc) {
+      gl.uniform1i(this.uHoveredCountryLoc, hoveredCountryId);
+    }
 
     if (this.terrainTexture) {
       gl.activeTexture(gl.TEXTURE0);

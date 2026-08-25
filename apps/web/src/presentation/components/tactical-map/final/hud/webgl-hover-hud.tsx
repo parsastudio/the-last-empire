@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Users,
   Coins,
   MapPin,
   Building2,
@@ -9,6 +8,7 @@ import {
   Handshake,
   Globe,
   Crown,
+  Landmark,
 } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -23,12 +23,9 @@ export interface HoverCountryInfo {
   rawStance?: DiplomaticStance;
   isOwnCountry: boolean;
   regionName?: string;
-  regionPopulationText?: string;
   regionGdpText?: string;
   regionCapacityPercentage?: number;
-  totalPopulationText?: string;
   totalGdpText?: string;
-  popSharePct?: number;
   gdpSharePct?: number;
 }
 
@@ -39,8 +36,8 @@ function calculateHudPosition(
     return { left: "1.5rem", bottom: "1.5rem" };
   }
 
-  const hudWidth = 340;
-  const hudHeight = 180;
+  const hudWidth = 320;
+  const hudHeight = 145;
   const offset = 16;
 
   let left = cursorPos.x + offset;
@@ -116,12 +113,12 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
 
   return (
     <div
-      className="fixed z-50 pointer-events-none w-84 animate-fade-smooth dir-rtl text-right"
+      className="fixed z-50 pointer-events-none w-80 animate-fade-smooth dir-rtl text-right"
       style={stylePosition}
     >
-      <div className="bg-card/95 backdrop-blur-2xl border border-border/80 p-3.5 rounded-2xl shadow-2xl space-y-2.5 text-foreground font-sans">
-        <div className="flex items-center justify-between border-b border-border/60 pb-2">
-          <div className="flex items-center gap-2.5">
+      <div className="bg-card/95 backdrop-blur-2xl border border-border/80 p-3 rounded-2xl shadow-2xl space-y-2 text-foreground font-sans">
+        <div className="flex items-center justify-between border-b border-border/60 pb-1.5">
+          <div className="flex items-center gap-2">
             <span
               className="text-2xl select-none"
               role="img"
@@ -149,15 +146,15 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
         </div>
 
         {hoverData.regionName && (
-          <div className="bg-secondary/40 border border-border/60 p-2.5 rounded-xl space-y-2 font-mono text-[11px]">
-            <div className="flex items-center justify-between pb-1.5 border-b border-border/40 font-sans">
-              <span className="text-primary font-bold flex items-center gap-1 text-xs">
-                <MapPin size={12} />
+          <div className="space-y-1.5 font-mono text-[11px]">
+            <div className="flex items-center justify-between px-0.5 font-sans">
+              <span className="text-primary font-bold flex items-center gap-1 text-[11px]">
+                <MapPin size={11} />
                 {hoverData.regionName}
               </span>
               {hoverData.regionCapacityPercentage !== undefined && (
-                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-mono">
-                  <Building2 size={11} className="text-treasury" />
+                <span className="text-[9px] text-muted-foreground flex items-center gap-0.5 font-mono bg-secondary/80 px-1.5 py-0.5 rounded-md border border-border/40">
+                  <Building2 size={10} className="text-treasury" />
                   {PersianNumberFormatter.toPersianDigits(
                     hoverData.regionCapacityPercentage,
                   )}
@@ -166,51 +163,37 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
               )}
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
-                  <Users size={12} className="text-primary" />
-                  جمعیت:
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-foreground">
-                    {hoverData.regionPopulationText}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground font-sans">
-                    از کل {hoverData.totalPopulationText}
-                  </span>
-                  {hoverData.popSharePct !== undefined && (
-                    <span className="text-[9px] bg-secondary/80 px-1 py-0.5 rounded text-primary font-bold">
-                      {PersianNumberFormatter.toPersianDigits(
-                        hoverData.popSharePct,
-                      )}
-                      ٪
-                    </span>
-                  )}
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="bg-secondary/40 border border-border/60 p-2 rounded-xl space-y-0.5">
+                <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-sans">
+                  <Coins size={11} className="text-gdp" />
+                  <span>اقتصاد این استان:</span>
                 </div>
+                <span className="text-xs font-black text-gdp block truncate">
+                  {hoverData.regionGdpText}
+                </span>
+                {hoverData.gdpSharePct !== undefined && (
+                  <span className="text-[8px] text-muted-foreground block font-sans">
+                    {PersianNumberFormatter.toPersianDigits(
+                      hoverData.gdpSharePct,
+                    )}
+                    ٪ از کل تولید ملی
+                  </span>
+                )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
-                  <Coins size={12} className="text-gdp" />
-                  تولید GDP:
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-gdp">
-                    {hoverData.regionGdpText}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground font-sans">
-                    از کل {hoverData.totalGdpText}
-                  </span>
-                  {hoverData.gdpSharePct !== undefined && (
-                    <span className="text-[9px] bg-secondary/80 px-1 py-0.5 rounded text-gdp font-bold">
-                      {PersianNumberFormatter.toPersianDigits(
-                        hoverData.gdpSharePct,
-                      )}
-                      ٪
-                    </span>
-                  )}
+              <div className="bg-secondary/40 border border-border/60 p-2 rounded-xl space-y-0.5">
+                <div className="flex items-center gap-1 text-[9px] text-muted-foreground font-sans">
+                  <Landmark size={11} className="text-primary" />
+                  <span>GDP کل کشور:</span>
                 </div>
+                <span className="text-xs font-black text-foreground block truncate">
+                  {hoverData.totalGdpText}
+                </span>
+                <span className="text-[8px] text-muted-foreground block font-sans">
+                  رتبه #{PersianNumberFormatter.toPersianDigits(hoverData.rank)}{" "}
+                  اقتصاد جهان
+                </span>
               </div>
             </div>
           </div>

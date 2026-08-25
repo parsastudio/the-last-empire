@@ -51,9 +51,6 @@ export function useHoverNationResolver({
         ? NationGettersUtility.getRank(ownerNation.id, nationsMap, provincesMap)
         : 99;
       const realGdp = ownerNation ? getNationGdp(ownerNation, provincesMap) : 0;
-      const realPop = ownerNation
-        ? NationGettersUtility.getPopulation(ownerNation.id, provincesMap)
-        : 0;
 
       const provinceGdp = getProvinceGdp(province);
       const provinceCapPct = Math.round(
@@ -86,8 +83,6 @@ export function useHoverNationResolver({
         }
       }
 
-      const popSharePct =
-        realPop > 0 ? Math.round((province.population / realPop) * 100) : 0;
       const gdpSharePct =
         realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
 
@@ -100,15 +95,9 @@ export function useHoverNationResolver({
         rawStance,
         isOwnCountry,
         regionName: province.nameFa,
-        regionPopulationText: PersianNumberFormatter.formatCompactNumber(
-          province.population,
-        ),
         regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
         regionCapacityPercentage: provinceCapPct,
-        totalPopulationText:
-          PersianNumberFormatter.formatCompactNumber(realPop),
         totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
-        popSharePct,
         gdpSharePct,
       };
     },

@@ -12,6 +12,7 @@ interface UseWebGLMapRendererProps {
   scaleRef: RefObject<number>;
   provincesMap?: Record<string, Province>;
   activeLayer?: "political" | "gdp";
+  hoveredCountryId?: number;
 }
 
 export function useWebGLMapRenderer({
@@ -21,10 +22,16 @@ export function useWebGLMapRenderer({
   scaleRef,
   provincesMap,
   activeLayer = "political",
+  hoveredCountryId = 0,
 }: UseWebGLMapRendererProps) {
   const rendererRef = useRef<WebGLMapRenderer | null>(null);
   const paletteTextureRef = useRef<WebGLTexture | null>(null);
   const gdpTextureRef = useRef<WebGLTexture | null>(null);
+  const hoveredCountryIdRef = useRef<number>(hoveredCountryId);
+
+  useEffect(() => {
+    hoveredCountryIdRef.current = hoveredCountryId;
+  }, [hoveredCountryId]);
 
   useEffect(() => {
     if (!gl) return;
@@ -110,6 +117,7 @@ export function useWebGLMapRenderer({
           pos.y * dpr,
           scale * dpr,
           activeLayer,
+          hoveredCountryIdRef.current,
         );
       }
       animFrameId = requestAnimationFrame(renderLoop);
