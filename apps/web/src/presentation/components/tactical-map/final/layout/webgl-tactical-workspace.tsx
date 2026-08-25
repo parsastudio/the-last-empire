@@ -149,7 +149,7 @@ export function WebGLTacticalWorkspace({
 
         const justTriggeredCoalition =
           nextState.globalCoalition &&
-          nextState.globalCoalition.triggeredTurn === nextState.currentTurn - 1;
+          nextState.globalCoalition.triggeredTurn === nextState.currentTurn;
 
         if (justTriggeredCoalition && nextState.globalCoalition) {
           const targetCanonical = CountryRegistry.resolveCanonicalId(

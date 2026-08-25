@@ -15,9 +15,11 @@ export class TurnProgressionOrchestrator {
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
     const lockedDiplomacyTargets = new Set<string>();
+    const nextTurn = state.currentTurn + 1;
 
     let workingState: GameState = {
       ...state,
+      currentTurn: nextTurn,
       provinces: { ...state.provinces },
       nations: { ...state.nations },
       turnLogs: [...state.turnLogs],
@@ -25,6 +27,20 @@ export class TurnProgressionOrchestrator {
     };
 
     let activeMatrixCache = GeopoliticalMatrixCache.build(
+      workingState.nations,
+      workingState.provinces,
+    );
+
+    workingState = this.pipeline.processTurn(
+      workingState,
+      activeMatrixCache.getRankMap(),
+      activeMatrixCache.getProvincesByOwnerMap(),
+      activeMatrixCache,
+    );
+
+    workingState = this.livenessManager.updateLiveness(workingState);
+
+    activeMatrixCache = GeopoliticalMatrixCache.build(
       workingState.nations,
       workingState.provinces,
     );
@@ -86,25 +102,7 @@ export class TurnProgressionOrchestrator {
       }
     }
 
-    workingState = this.pipeline.processTurn(
-      workingState,
-      activeMatrixCache.getRankMap(),
-      activeMatrixCache.getProvincesByOwnerMap(),
-      activeMatrixCache,
-    );
-
     workingState = this.livenessManager.updateLiveness(workingState);
-
-    activeMatrixCache = GeopoliticalMatrixCache.build(
-      workingState.nations,
-      workingState.provinces,
-    );
-
-    workingState = CoalitionManager.evaluateCoalitionState(
-      workingState,
-      activeMatrixCache.getRankMap(),
-      activeMatrixCache.getProvincesByOwnerMap(),
-    );
 
     const victoryStatus = this.victoryChecker.checkVictory(workingState);
 
@@ -134,7 +132,6 @@ export class TurnProgressionOrchestrator {
     return {
       ...workingState,
       turnLogs: cappedLogs,
-      currentTurn: workingState.currentTurn + 1,
       seed: prng.getSeed(),
     };
   }
