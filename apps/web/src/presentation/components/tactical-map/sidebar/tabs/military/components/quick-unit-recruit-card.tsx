@@ -130,15 +130,16 @@ export function QuickUnitRecruitCard({
             onClick={() => onBuy(info)}
             disabled={!info.canAfford}
             className="py-2.5 px-4 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.03] active:scale-[0.96] flex items-center gap-1.5 border border-gdp/30"
-            title={`خرید بسته ${info.batchQuantity} تایی`}
+            title={`سفارش با هزینه ${PersianNumberFormatter.formatCurrency(info.batchCost)}`}
           >
             <Plus size={14} strokeWidth={3} />
-            <span>
-              {PersianNumberFormatter.toPersianDigits(info.batchQuantity)} یگان
-            </span>
-            <span className="text-[10px] font-normal opacity-90 mr-1 flex items-center gap-0.5 font-mono">
-              <Coins size={10} />
+            <Coins size={12} className="opacity-90 shrink-0" />
+            <span className="font-extrabold text-xs">
               {PersianNumberFormatter.formatCurrency(info.batchCost)}
+            </span>
+            <span className="text-[10px] font-medium opacity-85 mr-0.5">
+              ({PersianNumberFormatter.toPersianDigits(info.batchQuantity)}{" "}
+              یگان)
             </span>
           </button>
         ) : (

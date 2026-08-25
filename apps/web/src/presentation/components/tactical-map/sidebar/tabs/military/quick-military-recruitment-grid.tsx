@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, Zap, Wallet, Sparkles } from "lucide-react";
+import { Zap, Wallet } from "lucide-react";
 import { useQuickRecruitBatch } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { QuickUnitRecruitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/quick-unit-recruit-card";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -27,7 +27,7 @@ export function QuickMilitaryRecruitmentGrid({
   );
 
   return (
-    <div className="space-y-3.5 font-sans dir-rtl text-right">
+    <div className="space-y-3 font-sans dir-rtl text-right">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2">
           <Zap size={15} className="text-gdp animate-pulse" />
@@ -56,16 +56,6 @@ export function QuickMilitaryRecruitmentGrid({
             onBuy={handleBuyBatch}
           />
         ))}
-      </div>
-
-      <div className="flex items-center justify-between text-[10px] text-muted-foreground bg-secondary/30 p-2.5 rounded-xl border border-border/40 font-sans">
-        <span className="flex items-center gap-1.5">
-          <Sparkles size={11} className="text-amber-500" />
-          تعداد هر کلیک بر اساس ۱۰٪ موجودی لحظه ورود شما به ستاد تنظیم شده است.
-        </span>
-        <span className="font-mono text-foreground font-bold">
-          آماده صدور فرمان رزم
-        </span>
       </div>
     </div>
   );
