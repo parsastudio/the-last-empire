@@ -6,7 +6,6 @@ import {
   Plane,
   Radio,
   Anchor,
-  Clock,
   Lock,
   Plus,
   Coins,
@@ -102,11 +101,7 @@ export function QuickUnitRecruitCard({
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
-              واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
-            </span>
-            <span className="flex items-center gap-0.5 text-gdp font-bold">
-              <Clock size={10} />
-              آماده‌سازی: نوبت بعد (۱ نوبت)
+              قیمت واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Wallet, Zap } from "lucide-react";
+import { ArrowRight, Wallet, Award } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
 import { AlliedUnitBuyCard } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-card";
@@ -27,7 +27,7 @@ export function AlliedUnitBuyGrid({
 
   return (
     <div className="space-y-4 font-sans dir-rtl text-right animate-fade-smooth">
-      <div className="flex items-center justify-between bg-secondary/40 border border-border/70 p-3.5 rounded-2xl">
+      <div className="flex items-center justify-between bg-secondary/40 border border-border/70 p-3.5 rounded-2xl flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -37,18 +37,20 @@ export function AlliedUnitBuyGrid({
             <ArrowRight size={14} />
             <span>فهرست هم‌پیمانان</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="text-2xl select-none">{sellerFlag}</span>
-            <div>
+            <div className="flex items-center gap-2">
               <h4 className="text-xs font-black text-foreground">
                 واردات تسلیحاتی از {sellerNation.name}
               </h4>
-              <span className="text-[10px] text-muted-foreground font-mono">
-                سطح فناوری دفاعی صادرکننده: لِوِل{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  sellerNation.military.techLevel,
-                )}{" "}
-                (تحویل آنی در همین نوبت با ضریب ۱.۵x)
+              <span className="text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
+                <Award size={11} />
+                <span>
+                  سطح فناوری دفاعی: لِوِل{" "}
+                  {PersianNumberFormatter.toPersianDigits(
+                    sellerNation.military.techLevel,
+                  )}
+                </span>
               </span>
             </div>
           </div>

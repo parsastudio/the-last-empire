@@ -9,14 +9,10 @@ interface MilitaryDomesticTabProps {
 export function MilitaryDomesticTab({ nation }: MilitaryDomesticTabProps) {
   return (
     <div className="space-y-5 animate-fade-smooth dir-rtl text-right">
-      <div className="p-4 bg-secondary/30 border border-border/60 rounded-2xl space-y-1">
+      <div className="p-3.5 bg-secondary/30 border border-border/60 rounded-2xl flex items-center justify-between">
         <h3 className="text-xs font-black text-foreground">
           خطوط تولید و صنایع دفاع بومی کشور
         </h3>
-        <p className="text-[11px] text-muted-foreground leading-relaxed font-sans">
-          تمامی سفارش‌های ساخت بومی دقیقا ظرف مدت ۱ نوبت در صنایع دفاعی ملی
-          تکمیل شده و در آغاز نوبت بعد به لشکرها ملحق می‌شوند.
-        </p>
       </div>
 
       <QuickMilitaryRecruitmentGrid
