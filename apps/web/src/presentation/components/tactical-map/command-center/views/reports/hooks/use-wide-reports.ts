@@ -137,6 +137,17 @@ export function useWideReports({
           return isTarget || isMember;
         }
 
+        if (log.eventCode === "ESPIONAGE_OPERATION") {
+          const role = String(log.params?.["role"] || "ATTACKER");
+          if (role === "ATTACKER") {
+            return srcCanonical === canonicalHuman && log.scope === "NATIONAL";
+          }
+          if (role === "DEFENDER") {
+            return srcCanonical === canonicalHuman && log.scope === "NATIONAL";
+          }
+          return false;
+        }
+
         const isHumanInvolved =
           srcCanonical === canonicalHuman || trgCanonical === canonicalHuman;
         return isHumanInvolved && log.scope === "NATIONAL";

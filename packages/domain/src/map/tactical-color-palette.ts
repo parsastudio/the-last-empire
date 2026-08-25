@@ -5,51 +5,99 @@ export interface TacticalColorPair {
 }
 
 export class TacticalPaletteGenerator {
-  private static readonly STRATEGIC_HUE_FAMILIES: number[] = [
-    12, 32, 48, 135, 158, 182, 205, 222, 248, 268, 350, 25,
-  ];
-
-  private static readonly REAL_WORLD_LAND_NEIGHBORS: Record<number, number[]> =
-    {
-      118: [120, 135, 98, 113, 114, 117, 156],
-      120: [118, 135, 156, 29],
-      135: [118, 120, 156, 119, 134, 133, 98],
-      156: [118, 120, 135, 29],
-      29: [156, 122, 123, 16, 108, 150, 106, 121, 162, 116, 117],
-      150: [29, 108, 106, 109, 110, 113, 114, 115, 116, 105, 102],
-      109: [150, 113, 110, 114, 149],
-      113: [118, 109, 114, 150],
-      114: [118, 113, 117, 116, 115, 150],
-      98: [118, 135, 119, 94, 169, 97],
-      119: [135, 98, 88, 87, 94],
-      169: [98, 94, 95, 96, 97, 99, 168],
-      123: [29, 122, 124, 128, 126, 163],
-      124: [123, 122, 132, 164, 163, 29],
-      132: [124, 164, 125, 138, 54, 140, 141, 153],
-      54: [132, 138, 152, 143, 140, 125],
-      152: [54, 138, 125, 137],
-      143: [54, 142],
-      16: [29, 17, 116, 117, 150],
-      17: [16, 116, 117, 114, 115],
-      108: [29, 150],
-      107: [106],
-      106: [29, 150, 107],
-      15: [14, 38],
-      14: [15, 33],
-      38: [15, 49],
-      40: [20, 41, 42, 43, 51, 55, 185],
-      20: [40, 21, 41, 42],
-      21: [20, 41, 42],
-    };
-
-  private static assignedFamilies = new Map<number, number>();
-
-  private static hashInt(x: number): number {
-    let h = (x ^ 0x61c88647) >>> 0;
-    h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
-    h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
-    return (h ^ (h >>> 16)) >>> 0;
-  }
+  private static readonly COUNTRY_PALETTE: Record<number, TacticalColorPair> = {
+    118: { r1: 26, g1: 96, b1: 68 },
+    15: { r1: 30, g1: 68, b1: 116 },
+    29: { r1: 46, g1: 78, b1: 58 },
+    150: { r1: 138, g1: 76, b1: 32 },
+    109: { r1: 142, g1: 82, b1: 34 },
+    132: { r1: 64, g1: 76, b1: 88 },
+    154: { r1: 118, g1: 36, b1: 48 },
+    54: { r1: 28, g1: 64, b1: 112 },
+    166: { r1: 118, g1: 48, b1: 68 },
+    169: { r1: 36, g1: 86, b1: 52 },
+    135: { r1: 116, g1: 40, b1: 52 },
+    40: { r1: 24, g1: 94, b1: 78 },
+    14: { r1: 122, g1: 38, b1: 42 },
+    148: { r1: 126, g1: 82, b1: 36 },
+    152: { r1: 36, g1: 92, b1: 58 },
+    143: { r1: 128, g1: 98, b1: 32 },
+    173: { r1: 118, g1: 92, b1: 46 },
+    113: { r1: 18, g1: 76, b1: 44 },
+    106: { r1: 98, g1: 30, b1: 40 },
+    107: { r1: 28, g1: 80, b1: 112 },
+    123: { r1: 34, g1: 76, b1: 118 },
+    124: { r1: 115, g1: 42, b1: 58 },
+    121: { r1: 28, g1: 68, b1: 108 },
+    32: { r1: 42, g1: 62, b1: 102 },
+    162: { r1: 32, g1: 88, b1: 102 },
+    138: { r1: 118, g1: 34, b1: 40 },
+    141: { r1: 138, g1: 68, b1: 28 },
+    140: { r1: 120, g1: 84, b1: 36 },
+    125: { r1: 106, g1: 36, b1: 48 },
+    134: { r1: 26, g1: 76, b1: 118 },
+    182: { r1: 38, g1: 64, b1: 104 },
+    128: { r1: 30, g1: 60, b1: 102 },
+    133: { r1: 34, g1: 84, b1: 58 },
+    126: { r1: 28, g1: 82, b1: 66 },
+    122: { r1: 32, g1: 78, b1: 54 },
+    16: { r1: 32, g1: 92, b1: 90 },
+    17: { r1: 34, g1: 85, b1: 82 },
+    117: { r1: 112, g1: 78, b1: 44 },
+    116: { r1: 30, g1: 88, b1: 64 },
+    115: { r1: 78, g1: 46, b1: 88 },
+    114: { r1: 104, g1: 70, b1: 42 },
+    108: { r1: 40, g1: 55, b1: 92 },
+    19: { r1: 22, g1: 88, b1: 84 },
+    102: { r1: 85, g1: 42, b1: 92 },
+    105: { r1: 112, g1: 34, b1: 36 },
+    158: { r1: 26, g1: 68, b1: 110 },
+    159: { r1: 30, g1: 62, b1: 102 },
+    110: { r1: 24, g1: 85, b1: 46 },
+    149: { r1: 30, g1: 68, b1: 108 },
+    87: { r1: 30, g1: 80, b1: 122 },
+    88: { r1: 30, g1: 88, b1: 56 },
+    94: { r1: 112, g1: 58, b1: 46 },
+    95: { r1: 126, g1: 94, b1: 38 },
+    96: { r1: 88, g1: 28, b1: 48 },
+    97: { r1: 28, g1: 80, b1: 52 },
+    98: { r1: 118, g1: 80, b1: 36 },
+    99: { r1: 114, g1: 52, b1: 52 },
+    119: { r1: 38, g1: 84, b1: 68 },
+    168: { r1: 98, g1: 54, b1: 38 },
+    120: { r1: 98, g1: 34, b1: 46 },
+    156: { r1: 26, g1: 84, b1: 92 },
+    93: { r1: 28, g1: 84, b1: 56 },
+    172: { r1: 104, g1: 38, b1: 44 },
+    174: { r1: 115, g1: 88, b1: 40 },
+    175: { r1: 118, g1: 74, b1: 30 },
+    36: { r1: 120, g1: 88, b1: 34 },
+    67: { r1: 26, g1: 90, b1: 46 },
+    38: { r1: 115, g1: 58, b1: 32 },
+    20: { r1: 32, g1: 78, b1: 114 },
+    21: { r1: 98, g1: 34, b1: 40 },
+    43: { r1: 24, g1: 84, b1: 82 },
+    51: { r1: 110, g1: 50, b1: 35 },
+    42: { r1: 124, g1: 86, b1: 28 },
+    41: { r1: 102, g1: 42, b1: 62 },
+    55: { r1: 26, g1: 84, b1: 104 },
+    58: { r1: 24, g1: 90, b1: 94 },
+    33: { r1: 48, g1: 78, b1: 104 },
+    147: { r1: 30, g1: 84, b1: 56 },
+    144: { r1: 24, g1: 88, b1: 52 },
+    153: { r1: 108, g1: 34, b1: 40 },
+    155: { r1: 42, g1: 56, b1: 96 },
+    137: { r1: 26, g1: 70, b1: 108 },
+    142: { r1: 26, g1: 80, b1: 84 },
+    187: { r1: 118, g1: 78, b1: 38 },
+    22: { r1: 20, g1: 74, b1: 42 },
+    24: { r1: 112, g1: 76, b1: 38 },
+    12: { r1: 36, g1: 84, b1: 52 },
+    68: { r1: 28, g1: 80, b1: 58 },
+    76: { r1: 114, g1: 84, b1: 32 },
+    89: { r1: 108, g1: 54, b1: 42 },
+    186: { r1: 45, g1: 65, b1: 78 },
+  };
 
   private static hslToRgb(
     h: number,
@@ -67,26 +115,20 @@ export class TacticalPaletteGenerator {
     if (h >= 0 && h < 60) {
       r = c;
       g = x;
-      b = 0;
     } else if (h >= 60 && h < 120) {
       r = x;
       g = c;
-      b = 0;
     } else if (h >= 120 && h < 180) {
-      r = 0;
       g = c;
       b = x;
     } else if (h >= 180 && h < 240) {
-      r = 0;
       g = x;
       b = c;
     } else if (h >= 240 && h < 300) {
       r = x;
-      g = 0;
       b = c;
     } else if (h >= 300 && h < 360) {
       r = c;
-      g = 0;
       b = x;
     }
 
@@ -98,36 +140,14 @@ export class TacticalPaletteGenerator {
   }
 
   public static generateColorForCountry(countryId: number): TacticalColorPair {
-    const totalFamilies = this.STRATEGIC_HUE_FAMILIES.length;
-    const hash1 = this.hashInt(countryId);
-    const hash2 = this.hashInt(hash1);
-
-    let chosenFamily = hash1 % totalFamilies;
-
-    const neighbors = this.REAL_WORLD_LAND_NEIGHBORS[countryId] || [];
-    const usedNeighborFamilies = new Set<number>();
-
-    for (let i = 0; i < neighbors.length; i++) {
-      const neighborId = neighbors[i]!;
-      if (this.assignedFamilies.has(neighborId)) {
-        usedNeighborFamilies.add(this.assignedFamilies.get(neighborId)!);
-      }
+    const exactMatch = this.COUNTRY_PALETTE[countryId];
+    if (exactMatch) {
+      return exactMatch;
     }
 
-    let attempts = 0;
-    while (usedNeighborFamilies.has(chosenFamily) && attempts < totalFamilies) {
-      chosenFamily = (chosenFamily + 1) % totalFamilies;
-      attempts++;
-    }
-
-    this.assignedFamilies.set(countryId, chosenFamily);
-
-    const baseHue = this.STRATEGIC_HUE_FAMILIES[chosenFamily]!;
-    const hueOffset = (hash2 % 11) - 5;
-    const hue = (baseHue + hueOffset + 360) % 360;
-
-    const saturation = 0.24 + (hash2 % 14) / 100;
-    const lightness = 0.38 + ((hash1 >>> 8) % 12) / 100;
+    const hue = (countryId * 137.508) % 360;
+    const saturation = 0.32 + ((countryId * 7) % 5) * 0.025;
+    const lightness = 0.24 + (countryId % 4) * 0.025;
 
     const [r1, g1, b1] = this.hslToRgb(hue, saturation, lightness);
 

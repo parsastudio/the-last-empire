@@ -128,9 +128,13 @@ export class TurnLogFormatter {
         return `فروپاشی کامل دولت: کشور ${sourceName} به دلیل از دست دادن تمامی قلمروها و ساختار حاکمیتی خود به طور کامل منحل گردید.`;
 
       case "ESPIONAGE_OPERATION": {
+        const role = String(params["role"] || "ATTACKER");
         const rawMsg = params["details"]
           ? String(params["details"])
           : log.message;
+        if (role === "DEFENDER") {
+          return rawMsg;
+        }
         return `عملیات ویژه اطلاعاتی علیه ${targetName}: ${rawMsg}`;
       }
 
