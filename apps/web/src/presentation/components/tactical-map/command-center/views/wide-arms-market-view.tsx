@@ -102,11 +102,14 @@ export function WideArmsMarketView({
                   unitPrice={form.unitPrice}
                   totalPrice={form.totalPrice}
                   quantity={form.quantity}
+                  maxAffordable={form.maxAffordable}
+                  treasury={form.treasury}
                   canAfford={form.canAfford}
                   isSubmitting={form.isSubmitting}
                   isSellerTechEligible={form.isSellerTechEligible}
                   isNavalBlockaded={form.isNavalBlockaded}
-                  onQuantityChange={form.setQuantity}
+                  onQuantityChange={form.handleQuantityChange}
+                  onPercentageSelect={form.handlePercentageSelect}
                   onBuyArms={form.handleBuyArms}
                 />
               ) : (

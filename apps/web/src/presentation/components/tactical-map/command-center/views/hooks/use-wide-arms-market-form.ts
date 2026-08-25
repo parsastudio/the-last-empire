@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { UnitType } from "@/domain/military/military.schema";
@@ -126,8 +126,42 @@ export function useWideArmsMarketForm({
     return sellerCost * 2;
   }, [sellerNation, selectedUnitType]);
 
+  const maxAffordable = useMemo(() => {
+    if (unitPrice <= 0) return 0;
+    return Math.floor(nation.treasury / unitPrice);
+  }, [nation.treasury, unitPrice]);
+
+  useEffect(() => {
+    if (maxAffordable <= 0) {
+      setQuantity(0);
+    } else {
+      setQuantity((prev) => Math.max(1, Math.min(maxAffordable, prev || 1)));
+    }
+  }, [maxAffordable, selectedUnitType, selectedSellerId]);
+
+  const handleQuantityChange = useCallback(
+    (qty: number) => {
+      if (maxAffordable <= 0) {
+        setQuantity(0);
+        return;
+      }
+      const clamped = Math.max(1, Math.min(maxAffordable, qty));
+      setQuantity(clamped);
+    },
+    [maxAffordable],
+  );
+
+  const handlePercentageSelect = useCallback(
+    (pct: number) => {
+      if (maxAffordable <= 0) return;
+      const target = Math.max(1, Math.floor(maxAffordable * pct));
+      setQuantity(target);
+    },
+    [maxAffordable],
+  );
+
   const totalPrice = unitPrice * quantity;
-  const canAfford = nation.treasury >= totalPrice;
+  const canAfford = nation.treasury >= totalPrice && quantity > 0;
 
   const isNavalBlockaded = useMemo(() => {
     if (!nationsMap) return false;
@@ -193,7 +227,8 @@ export function useWideArmsMarketForm({
     selectedUnitType,
     setSelectedUnitType,
     quantity,
-    setQuantity,
+    maxAffordable,
+    treasury: nation.treasury,
     sellerOptions,
     selectedSellerId,
     setSelectedSellerId,
@@ -206,6 +241,8 @@ export function useWideArmsMarketForm({
     totalPrice,
     canAfford,
     isSubmitting,
+    handleQuantityChange,
+    handlePercentageSelect,
     handleBuyArms,
   };
 }
