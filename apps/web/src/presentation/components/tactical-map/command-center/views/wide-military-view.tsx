@@ -1,7 +1,7 @@
 import React from "react";
 import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
 import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
-import { MilitaryExpansionView } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-expansion-view";
+import { QuickMilitaryRecruitmentGrid } from "@/presentation/components/tactical-map/sidebar/tabs/military/quick-military-recruitment-grid";
 import { MilitaryValuationCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-valuation-card";
 import {
   MilitaryStack,
@@ -47,7 +47,7 @@ export function WideMilitaryView({
         </div>
       </div>
 
-      <MilitaryExpansionView
+      <QuickMilitaryRecruitmentGrid
         nationId={nationId}
         treasury={treasury}
         techLevel={military.techLevel}
