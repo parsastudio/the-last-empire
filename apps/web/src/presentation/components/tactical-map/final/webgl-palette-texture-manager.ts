@@ -6,18 +6,44 @@ import {
 } from "@geopolitics/domain";
 
 export class WebGLPaletteTextureManager {
-  private static calculateGdpColor(gdp: number): {
+  private static interpolateChannel(
+    a: number,
+    b: number,
+    factor: number,
+  ): number {
+    return Math.round(a + (b - a) * factor);
+  }
+
+  private static calculateGdpRankColor(normalized: number): {
     r: number;
     g: number;
     b: number;
   } {
-    const logGdp = Math.log10(Math.max(1000000, gdp));
-    const normalized = Math.max(0, Math.min(1.0, (logGdp - 8.0) / 4.0));
+    const t = Math.max(0, Math.min(1.0, normalized));
 
+    if (t <= 0.33) {
+      const segT = t / 0.33;
+      return {
+        r: this.interpolateChannel(225, 249, segT),
+        g: this.interpolateChannel(29, 115, segT),
+        b: this.interpolateChannel(72, 22, segT),
+      };
+    }
+
+    if (t <= 0.66) {
+      const segT = (t - 0.33) / 0.33;
+      return {
+        r: this.interpolateChannel(249, 163, segT),
+        g: this.interpolateChannel(115, 230, segT),
+        b: this.interpolateChannel(22, 53, segT),
+      };
+    }
+
+    const segT = (t - 0.66) / 0.34;
     return {
-      r: Math.floor(10 + (1.0 - normalized) * 200),
-      g: Math.floor(60 + normalized * 195),
-      b: Math.floor(40 + normalized * 80),
+      r: this.interpolateChannel(163, 16, segT),
+      g: this.interpolateChannel(230, 185, segT),
+      b: this.interpolateChannel(53, 129, segT),
     };
   }
 
@@ -54,12 +80,29 @@ export class WebGLPaletteTextureManager {
   ): void {
     if (!provincesMap) return;
 
-    for (const prov of Object.values(provincesMap)) {
-      const pid = prov.provinceId;
-      if (pid <= 0 || pid >= 65536) continue;
+    const provList = Object.values(provincesMap).filter(
+      (p) => p.provinceId > 0 && p.provinceId < 65536,
+    );
 
-      const gdp = getProvinceGdp(prov);
-      const { r, g, b } = this.calculateGdpColor(gdp);
+    if (provList.length === 0) return;
+
+    const gdpEntries = provList.map((prov) => ({
+      prov,
+      gdp: getProvinceGdp(prov),
+    }));
+
+    gdpEntries.sort((a, b) => b.gdp - a.gdp);
+
+    const totalCount = gdpEntries.length;
+
+    for (let rankIndex = 0; rankIndex < totalCount; rankIndex++) {
+      const entry = gdpEntries[rankIndex]!;
+      const pid = entry.prov.provinceId;
+
+      const normalized =
+        totalCount > 1 ? 1.0 - rankIndex / (totalCount - 1) : 1.0;
+
+      const { r, g, b } = this.calculateGdpRankColor(normalized);
 
       const u = pid & 255;
       const v = (pid >> 8) & 255;

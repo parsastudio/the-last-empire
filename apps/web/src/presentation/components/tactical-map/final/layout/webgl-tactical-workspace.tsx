@@ -109,6 +109,14 @@ export function WebGLTacticalWorkspace({
     provincesMap: effectiveGameState?.provinces,
   });
 
+  const handleFocusCountryAndClose = useCallback(
+    (code: string) => {
+      focusOnCountry(code);
+      closeActiveTab();
+    },
+    [focusOnCountry, closeActiveTab],
+  );
+
   const handleSelectCountryContext = useCallback(
     (code: string) => {
       setActiveTab("diplomacy", null, code);
@@ -218,7 +226,7 @@ export function WebGLTacticalWorkspace({
         nation={humanNation}
         gameState={effectiveGameState}
         onClose={handleCloseCenterModal}
-        onFocusCountry={focusOnCountry}
+        onFocusCountry={handleFocusCountryAndClose}
         onNavigateTab={(tab, subTab, targetCode) => {
           setActiveTab(tab, subTab, targetCode);
         }}
