@@ -181,7 +181,7 @@ export class DiplomaticTurnProcessor {
     }
 
     let postWarCooldown = nation.postWarCooldownTurns || 0;
-    if (isAtWar) {
+    if (isAtWar || !nation.isAi) {
       postWarCooldown = 0;
     } else if (postWarCooldown > 0) {
       postWarCooldown = Math.max(0, postWarCooldown - 1);

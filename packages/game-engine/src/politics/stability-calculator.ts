@@ -32,7 +32,6 @@ export class StabilityCalculator {
   public static calculateTurnStabilityDelta(
     nation: Nation,
     isAtWar?: boolean,
-    isBlockaded?: boolean,
   ): number {
     const traits = GovernmentSystem.getTraits(nation.government.type);
     let delta = 0;
@@ -41,11 +40,7 @@ export class StabilityCalculator {
       isAtWar ??
       Object.values(nation.relations || {}).some((r) => r.stance === "WAR");
 
-    if (warActive) {
-      if (isBlockaded) {
-        delta -= traits.blockadePenalty;
-      }
-    } else {
+    if (!warActive) {
       if (nation.government.stability < 85) {
         delta += traits.peaceRecoveryRate;
       }
@@ -77,12 +72,10 @@ export class StabilityCalculator {
   public static calculateTurnStability(
     nation: Nation,
     isAtWar?: boolean,
-    isBlockaded?: boolean,
   ): number {
     const delta = StabilityCalculator.calculateTurnStabilityDelta(
       nation,
       isAtWar,
-      isBlockaded,
     );
     return StabilityCalculator.clampStability(
       nation.government.stability + delta,

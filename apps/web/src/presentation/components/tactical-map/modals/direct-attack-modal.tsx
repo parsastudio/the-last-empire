@@ -67,8 +67,6 @@ export function DirectAttackModal({
           isLandNeighbor={form.isLandNeighbor}
           isNavalValid={form.navalAttackInfo.isNavalValid}
           isWarStance={form.isWarStance}
-          isPostWarCooldown={form.isPostWarCooldown}
-          postWarCooldownTurns={form.postWarCooldownTurns}
           currentStance={form.currentStance}
           reputationPenalty={form.reputationPenalty}
           targetNationName={form.targetNation.name}
@@ -132,7 +130,6 @@ export function DirectAttackModal({
           canAfford={form.canAfford}
           hasSelectedInfantry={form.hasSelectedInfantry}
           isSubmitting={form.isSubmitting}
-          isPostWarCooldown={form.isPostWarCooldown}
           targetRegionName={form.targetRegionName}
           isLandNeighbor={form.isLandNeighbor}
           isNavalValid={form.navalAttackInfo.isNavalValid}

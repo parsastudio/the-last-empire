@@ -8,7 +8,6 @@ import {
   BattlePhaseGroundDetail,
 } from "@/domain/reports/combat-report.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
 import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
@@ -149,43 +148,34 @@ export class BattleCalculator {
       defInfMult,
     });
 
-    const attackerDeployedValuation =
-      MilitaryPricingCalculator.calculateLandAndAirValuation(
-        {
-          infantry: deployedInfantry,
-          armor: deployedArmor,
-          airDefense: 0,
-          airForce: deployedAirForce,
-          droneMissile: deployedDrones,
-          techLevel: attacker.military.techLevel,
-          branchTech: attacker.military.branchTech,
-        },
-        attacker.industrialLevel,
-      );
+    const attackerDeployedPower = Math.max(
+      0.1,
+      deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.weightPower * attInfMult +
+        deployedArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * attArmorMult +
+        deployedAirForce *
+          MILITARY_UNIT_STATS.AIR_FORCE.weightPower *
+          attAirMult +
+        deployedDrones *
+          MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower *
+          attDroneMult,
+    );
 
-    const defenderTotalValuation =
-      MilitaryPricingCalculator.calculateLandAndAirValuation(
-        {
-          infantry: defender.military.infantry,
-          armor: defender.military.armor,
-          airDefense: defender.military.airDefense,
-          airForce: defender.military.airForce,
-          droneMissile: defender.military.droneMissile,
-          techLevel: defender.military.techLevel,
-          branchTech: defender.military.branchTech,
-        },
-        defender.industrialLevel,
-      );
+    const defenderTotalPower = Math.max(
+      0.1,
+      defInfantry * MILITARY_UNIT_STATS.INFANTRY.weightPower * defInfMult +
+        defArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * defArmorMult +
+        defAirDefense *
+          MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower *
+          defAdMult +
+        defAirForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower * defAirMult,
+    );
 
-    const valuationRatio =
-      defenderTotalValuation <= 0
-        ? 999
-        : Number(
-            (attackerDeployedValuation / defenderTotalValuation).toFixed(2),
-          );
+    const valuationRatio = Number(
+      (attackerDeployedPower / defenderTotalPower).toFixed(2),
+    );
 
     const isFullCapitulation =
-      groundPhase.isAttackerVictory && valuationRatio >= 4.0;
+      groundPhase.isAttackerVictory && valuationRatio >= 2.0;
 
     const casualty = BattleCasualtyResolver.resolve({
       deployedInfantry,

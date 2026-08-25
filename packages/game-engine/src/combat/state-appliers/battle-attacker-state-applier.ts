@@ -92,9 +92,11 @@ export class BattleAttackerStateApplier {
     );
 
     const postWarCooldown =
-      isTotalAnnexation && !hasOtherWars
+      attacker.isAi && isTotalAnnexation && !hasOtherWars
         ? 5
-        : attacker.postWarCooldownTurns || 0;
+        : attacker.isAi
+          ? attacker.postWarCooldownTurns || 0
+          : 0;
 
     return {
       ...attacker,

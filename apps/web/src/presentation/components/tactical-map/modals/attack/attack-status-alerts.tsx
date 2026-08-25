@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle, ShieldAlert, Radio, Flame, Clock } from "lucide-react";
+import { AlertTriangle, ShieldAlert, Radio, Flame } from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -7,8 +7,6 @@ interface AttackStatusAlertsProps {
   isLandNeighbor: boolean;
   isNavalValid: boolean;
   isWarStance: boolean;
-  isPostWarCooldown?: boolean;
-  postWarCooldownTurns?: number;
   currentStance: DiplomaticStance;
   reputationPenalty: number;
   targetNationName: string;
@@ -19,8 +17,6 @@ export function AttackStatusAlerts({
   isLandNeighbor,
   isNavalValid,
   isWarStance,
-  isPostWarCooldown = false,
-  postWarCooldownTurns = 0,
   currentStance,
   reputationPenalty,
   targetNationName,
@@ -45,28 +41,6 @@ export function AttackStatusAlerts({
 
   return (
     <div className="space-y-3 dir-rtl text-right font-sans">
-      {isPostWarCooldown && (
-        <div className="p-4 bg-amber-500/15 border border-amber-500/40 rounded-2xl flex items-start gap-3 text-xs text-amber-400 font-sans shadow-lg shadow-amber-500/10 animate-fade-smooth">
-          <Clock
-            size={20}
-            className="shrink-0 mt-0.5 animate-pulse text-amber-400"
-          />
-          <div className="space-y-1">
-            <span className="font-black text-sm block">
-              دوره سردسازی و بازسازی پس از جنگ فعال است
-            </span>
-            <p className="text-[11px] leading-relaxed text-muted-foreground">
-              کشور شما اخیراً از نبرد خارج شده و در مرحله بازسازی ملی قرار دارد.
-              تا{" "}
-              <strong className="text-amber-400 font-mono font-bold">
-                {PersianNumberFormatter.toPersianDigits(postWarCooldownTurns)}
-              </strong>{" "}
-              نوبت دیگر، امکان صدور فرمان تهاجم جدید به سایر کشورها وجود ندارد.
-            </p>
-          </div>
-        </div>
-      )}
-
       {!isAccessible && (
         <div className="p-4 bg-military/15 border border-military/50 rounded-2xl flex items-start gap-3 text-xs text-military font-sans shadow-lg shadow-military/10 animate-fade-smooth">
           <ShieldAlert size={20} className="shrink-0 mt-0.5" />
@@ -82,7 +56,7 @@ export function AttackStatusAlerts({
         </div>
       )}
 
-      {isAccessible && !isWarStance && !isPostWarCooldown && (
+      {isAccessible && !isWarStance && (
         <div className="relative overflow-hidden bg-gradient-to-r from-amber-950/60 via-card to-amber-950/40 border-2 border-amber-500/60 p-4 rounded-2xl shadow-xl shadow-amber-500/10 space-y-2.5 animate-fade-smooth">
           <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent animate-pulse" />
 
