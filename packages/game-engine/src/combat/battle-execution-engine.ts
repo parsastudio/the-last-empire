@@ -17,6 +17,7 @@ import {
   BattleFullReportData,
   BattleSpoilsDetails,
 } from "@/domain/reports/combat-report.schema";
+import { AIEmergencyDefenseManager } from "@/engine/ai/ai-emergency-defense-manager";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -30,15 +31,36 @@ export class BattleExecutionEngine {
       action.targetNationId,
     );
 
-    const attacker =
+    let baseAttacker =
       state.nations[canonicalAttackerId] || state.nations[action.nationId];
-    const defender =
+    let baseDefender =
       state.nations[canonicalDefenderId] ||
       state.nations[action.targetNationId];
 
-    if (!attacker || !defender || !attacker.isAlive || !defender.isAlive) {
+    if (
+      !baseAttacker ||
+      !baseDefender ||
+      !baseAttacker.isAlive ||
+      !baseDefender.isAlive
+    ) {
       return { state, reportData: null };
     }
+
+    let workingState = state;
+    if (baseDefender.isAi) {
+      workingState = AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
+        workingState,
+        baseAttacker,
+        baseDefender,
+      );
+    }
+
+    const attacker =
+      workingState.nations[canonicalAttackerId] ||
+      workingState.nations[action.nationId]!;
+    const defender =
+      workingState.nations[canonicalDefenderId] ||
+      workingState.nations[action.targetNationId]!;
 
     const currentStance = NationRelationResolver.getStance(
       attacker.relations,
@@ -52,7 +74,7 @@ export class BattleExecutionEngine {
       const navalInfo = NavalNeighborResolver.resolveNavalAttack(
         action.targetProvinceId,
         attacker.id,
-        state.provinces,
+        workingState.provinces,
         action.infantryToDeploy || attacker.military.infantry,
         action.armorToDeploy || attacker.military.armor || 0,
         action.airForceToDeploy || attacker.military.airForce,
@@ -72,11 +94,11 @@ export class BattleExecutionEngine {
       action.airForceToDeploy,
       action.attackType,
       navalCostMultiplier,
-      state.provinces,
+      workingState.provinces,
     );
 
     const conquest = ProvinceConquestHandler.handleConquest(
-      state.provinces,
+      workingState.provinces,
       attacker.id,
       defender.id,
       calcResult.isAttackerVictory,
@@ -159,7 +181,7 @@ export class BattleExecutionEngine {
     });
 
     const baseNations = {
-      ...state.nations,
+      ...workingState.nations,
       [attacker.id]: updatedAttacker,
       [defender.id]: updatedDefender,
     };
@@ -174,7 +196,7 @@ export class BattleExecutionEngine {
 
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
     const targetProvinceObj = action.targetProvinceId
-      ? state.provinces[action.targetProvinceId.toString()] || null
+      ? workingState.provinces[action.targetProvinceId.toString()] || null
       : null;
 
     let gainedPop = 0;
@@ -229,12 +251,12 @@ export class BattleExecutionEngine {
     };
 
     const battleLogs = BattleLogFactory.createBattleLogs(
-      state.currentTurn,
+      workingState.currentTurn,
       updatedAttacker,
       updatedDefender,
       calcResult,
       betrayalText,
-      state.humanNationId,
+      workingState.humanNationId,
       !isDefenderAlive,
       targetProvinceObj,
       action.attackType || "LAND",
@@ -242,21 +264,25 @@ export class BattleExecutionEngine {
     );
 
     const interventionLogs = BattleLogFactory.createInterventionLogs(
-      state.currentTurn,
+      workingState.currentTurn,
       intervention,
       updatedAttacker,
       updatedDefender,
-      state.humanNationId,
+      workingState.humanNationId,
     );
 
-    const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
+    const updatedLogs = [
+      ...workingState.turnLogs,
+      ...battleLogs,
+      ...interventionLogs,
+    ];
 
     if (conquest.conqueredProvincesList.length > 0) {
       BitPackedGridState.getInstance().markDirty();
     }
 
     const nextState: GameState = {
-      ...state,
+      ...workingState,
       provinces: conquest.updatedProvinces,
       nations: intervention.updatedNations,
       turnLogs: updatedLogs,

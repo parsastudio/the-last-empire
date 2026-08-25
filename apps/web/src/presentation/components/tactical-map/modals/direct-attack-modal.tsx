@@ -58,6 +58,7 @@ export function DirectAttackModal({
           defenderName={form.targetNation.name}
           defenderCode={form.targetNation.id}
           defenderFlagCode={form.targetNation.flagCode || form.targetNation.id}
+          originRegionName={form.originRegionName}
           targetRegionName={form.targetRegionName}
           isLandNeighbor={form.isLandNeighbor}
         />
@@ -65,8 +66,10 @@ export function DirectAttackModal({
         <AttackStatusAlerts
           isLandNeighbor={form.isLandNeighbor}
           isNavalValid={form.navalAttackInfo.isNavalValid}
-          navalOriginProvince={form.navalAttackInfo.closestProvinceName}
           isWarStance={form.isWarStance}
+          currentStance={form.currentStance}
+          reputationPenalty={form.reputationPenalty}
+          targetNationName={form.targetNation.name}
           targetRegionName={form.targetRegionName}
         />
 

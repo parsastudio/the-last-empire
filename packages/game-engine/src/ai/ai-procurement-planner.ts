@@ -9,6 +9,7 @@ import {
   NationGettersUtility,
   GeopoliticalReachResolver,
   CountryRegistry,
+  MilitaryPowerCalculator,
 } from "@geopolitics/domain";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 import {
@@ -37,7 +38,7 @@ export class AIProcurementPlanner {
     rankMap?: Map<string, number>,
     precomputedPosture?: AIPosture,
   ): RecruitmentPlanResult {
-    const effectiveTreasury =
+    let effectiveTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
     const gdp = getNationGdp(nation, provincesMap);
@@ -72,13 +73,28 @@ export class AIProcurementPlanner {
       precomputedPosture ??
       this.evaluatePosture(nation, allNations, provincesMap, rankMap);
 
+    const actions: GameAction[] = [];
+
+    if (posture === "WAR") {
+      const loanAction = this.evaluateWartimeLoan(
+        nation,
+        allNations,
+        gdp,
+        effectiveTreasury,
+      );
+      if (loanAction) {
+        actions.push(loanAction.action);
+        effectiveTreasury += loanAction.amount;
+      }
+    }
+
     const spendableBudget = Math.min(
       this.calculateSpendableBudget(posture, effectiveTreasury),
       remainingValuationCapacity,
     );
 
     if (spendableBudget <= 0) {
-      return { actions: [], remainingTreasury: effectiveTreasury };
+      return { actions, remainingTreasury: effectiveTreasury };
     }
 
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
@@ -90,7 +106,6 @@ export class AIProcurementPlanner {
       nation.military.infantry,
     );
 
-    const actions: GameAction[] = [];
     let remainingBudget = spendableBudget;
     let totalSpent = 0;
 
@@ -121,6 +136,98 @@ export class AIProcurementPlanner {
       actions,
       remainingTreasury: Math.max(0, effectiveTreasury - totalSpent),
     };
+  }
+
+  private static evaluateWartimeLoan(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    gdp: number,
+    currentTreasury: number,
+  ): { action: GameAction; amount: number } | null {
+    const maxDebtLimit = Math.floor(gdp * 0.8);
+    const availableLoanHeadroom = Math.max(
+      0,
+      maxDebtLimit - nation.nationalDebt,
+    );
+
+    if (availableLoanHeadroom <= 0) {
+      return null;
+    }
+
+    const activeEnemy = this.findPrimaryWartimeEnemy(nation, allNations);
+    if (!activeEnemy) {
+      return null;
+    }
+
+    const myPower = MilitaryPowerCalculator.calculateLandAndAirPower(nation);
+    const enemyPower =
+      MilitaryPowerCalculator.calculateLandAndAirPower(activeEnemy);
+    const targetPower = Math.floor(enemyPower * 1.1);
+
+    if (myPower >= targetPower) {
+      return null;
+    }
+
+    const deficitPower = targetPower - myPower;
+    const singleInfantryPower = Math.max(
+      0.5,
+      MILITARY_UNIT_STATS.INFANTRY.weightPower *
+        (1 + (nation.military.techLevel - 1) * 0.5),
+    );
+    const infPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+      "INFANTRY",
+      nation.military.techLevel,
+      nation.industrialLevel,
+    );
+
+    const neededInfantry = Math.ceil(deficitPower / singleInfantryPower);
+    const budgetNeeded = neededInfantry * infPrice;
+
+    if (currentTreasury >= budgetNeeded) {
+      return null;
+    }
+
+    const loanAmount = Math.min(
+      availableLoanHeadroom,
+      budgetNeeded - currentTreasury,
+    );
+
+    if (loanAmount <= 0) {
+      return null;
+    }
+
+    return {
+      action: ActionFactory.requestLoan(nation.id, loanAmount),
+      amount: loanAmount,
+    };
+  }
+
+  private static findPrimaryWartimeEnemy(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+  ): Nation | null {
+    if (nation.warFocusTargetId) {
+      const canonical = CountryRegistry.resolveCanonicalId(
+        nation.warFocusTargetId,
+      );
+      const focus =
+        allNations[canonical] || allNations[nation.warFocusTargetId];
+      if (focus && focus.isAlive) {
+        return focus;
+      }
+    }
+
+    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
+      if (rel.stance === "WAR") {
+        const canonical = CountryRegistry.resolveCanonicalId(targetId);
+        const enemy = allNations[canonical] || allNations[targetId];
+        if (enemy && enemy.isAlive && enemy.id !== nation.id) {
+          return enemy;
+        }
+      }
+    }
+
+    return null;
   }
 
   public static calculateTotalArmyValuation(nation: Nation): number {
