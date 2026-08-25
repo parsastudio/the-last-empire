@@ -23,7 +23,7 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     nameFa: "تیپ تهاجمی پهپادی و موشکی",
     moneyCost: 2000000000,
     buildTurns: 1,
-    weightPower: 0.2,
+    weightPower: 0.5,
     requiredTechLevel: 1,
   },
   ARMOR: {
@@ -39,15 +39,15 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     nameFa: "تیپ پدافند هوایی و موشکی",
     moneyCost: 8000000000,
     buildTurns: 1,
-    weightPower: 0.5,
+    weightPower: 2.5,
     requiredTechLevel: 3,
   },
   AIR_FORCE: {
     type: "AIR_FORCE",
     nameFa: "اسکادران جنگنده‌های برتری هوایی",
-    moneyCost: 14000000000,
+    moneyCost: 12000000000,
     buildTurns: 1,
-    weightPower: 3.5,
+    weightPower: 6.0,
     requiredTechLevel: 4,
   },
   NAVAL_FLEET: {
@@ -55,7 +55,7 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     nameFa: "ناوگروه ضربت ناوشکن‌های سنگین",
     moneyCost: 50000000000,
     buildTurns: 1,
-    weightPower: 5.0,
+    weightPower: 0.0,
     requiredTechLevel: 5,
   },
 };

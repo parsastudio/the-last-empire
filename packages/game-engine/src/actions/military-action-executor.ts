@@ -130,7 +130,11 @@ export class MilitaryActionExecutor {
           action.targetNationId,
         );
 
-        if (!isCurrentWar && (nation.postWarCooldownTurns || 0) > 0) {
+        if (
+          nation.isAi &&
+          !isCurrentWar &&
+          (nation.postWarCooldownTurns || 0) > 0
+        ) {
           throw new GameError(
             "INVALID_ACTION",
             `امکان آغاز تهاجم نظامی جدید وجود ندارد: کشور در دوره سردسازی و بازسازی پس از جنگ قرار دارد (${nation.postWarCooldownTurns} نوبت باقی‌مانده).`,

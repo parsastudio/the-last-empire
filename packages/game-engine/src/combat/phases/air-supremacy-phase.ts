@@ -72,7 +72,7 @@ export class AirSupremacyPhase {
       survivingAttAirEff - fightersSuppressedEff,
     );
 
-    const tanksDestroyedByAirEff = freeAttAirEff * 1.5;
+    const tanksDestroyedByAirEff = freeAttAirEff * 2.0;
     const defArmorDestroyedByAir = Math.min(
       input.defArmor,
       Math.floor(tanksDestroyedByAirEff / Math.max(0.1, input.defArmorMult)),
