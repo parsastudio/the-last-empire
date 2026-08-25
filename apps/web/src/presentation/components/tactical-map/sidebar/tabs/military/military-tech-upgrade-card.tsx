@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Zap, Loader2 } from "lucide-react";
+import { Award, Zap, Loader2, Sparkles } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { MilitaryStack } from "@/domain/military/military.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
@@ -47,42 +47,59 @@ export function MilitaryTechUpgradeCard({
   };
 
   return (
-    <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
-      <div className="flex items-center justify-between text-xs font-mono">
-        <div className="flex items-center gap-1.5 font-sans font-bold text-foreground">
-          <Award size={15} className="text-amber-500" />
-          <span>
-            ارتقای سطح فناوری نظامی (سطح فعلی:{" "}
-            {PersianNumberFormatter.toPersianDigits(techLevel)})
+    <div className="space-y-2.5 dir-rtl text-right font-sans">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <Award size={14} className="text-amber-500" />
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+            تحقیقات و فناوری نظامی
           </span>
         </div>
-        <span className="font-bold text-amber-500 text-xs">
-          {PersianNumberFormatter.formatCurrency(researchCost, true)}
+        <span className="text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2.5 py-0.5 rounded-md flex items-center gap-1">
+          <Sparkles size={10} />
+          سطح {PersianNumberFormatter.toPersianDigits(techLevel)}
         </span>
       </div>
 
-      <p className="text-[10px] text-muted-foreground font-sans leading-relaxed">
-        هر لِوِل ارتقای فناوری، ۵۰٪ قدرت نبرد تمام یگان‌ها را افزایش می‌دهد و
-        امکان تولید تسلیحات سنگین‌تر مانند تانک، پدافند، جنگنده و ناوگان دریایی
-        را فراهم می‌سازد.
-      </p>
+      <div className="bg-background/40 border border-border/60 p-3.5 rounded-2xl space-y-3 shadow-sm">
+        <div className="flex items-center justify-between text-xs pb-2.5 border-b border-border/50 font-mono">
+          <span className="text-muted-foreground font-sans font-bold text-[11px]">
+            هزینه پژوهش سطح{" "}
+            {PersianNumberFormatter.toPersianDigits(techLevel + 1)}:
+          </span>
+          <span
+            className={`font-extrabold text-xs ${
+              canAffordTech ? "text-amber-500" : "text-military"
+            }`}
+          >
+            {PersianNumberFormatter.formatCurrency(researchCost, true)}
+          </span>
+        </div>
 
-      <button
-        onClick={handleInvestTech}
-        disabled={!canAffordTech || isSubmittingTech}
-        className="w-full py-3 bg-amber-500 hover:bg-amber-500/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
-      >
-        {isSubmittingTech ? (
-          <Loader2 size={14} className="animate-spin" />
-        ) : (
-          <Zap size={14} />
-        )}
-        <span>
-          {canAffordTech
-            ? `ارتقا به سطح فناوری ${PersianNumberFormatter.toPersianDigits(techLevel + 1)}`
-            : "موجودی خزانه ناکافی جهت R&D"}
-        </span>
-      </button>
+        <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl text-[10px] text-muted-foreground font-sans leading-relaxed">
+          ارتقای سطح فناوری به افزایش ۵۰٪ قدرت نبرد تمامی یگان‌ها و امکان ساخت
+          تجهیزات پیشرفته‌تر (زرهی، پدافند موشکی، جنگنده‌ها و ناوگان) می‌انجامد.
+        </div>
+
+        <button
+          onClick={handleInvestTech}
+          disabled={!canAffordTech || isSubmittingTech}
+          className="w-full py-3 bg-amber-500 hover:bg-amber-500/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          {isSubmittingTech ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <Zap size={14} />
+          )}
+          <span>
+            {isSubmittingTech
+              ? "در حال اجرای تحقیقات دفاعی..."
+              : canAffordTech
+                ? `ارتقا به سطح فناوری ${PersianNumberFormatter.toPersianDigits(techLevel + 1)}`
+                : "موجودی خزانه ناکافی جهت R&D"}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

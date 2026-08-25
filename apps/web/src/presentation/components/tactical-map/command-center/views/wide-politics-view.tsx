@@ -5,6 +5,7 @@ import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
 import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
 import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
+import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
@@ -66,6 +67,11 @@ export function WidePoliticsView({
           treasury={nation.treasury}
           gdp={gdp}
           developmentLevel={nation.industrialLevel}
+        />
+        <MilitaryTechUpgradeCard
+          nationId={nation.id}
+          treasury={nation.treasury}
+          techLevel={nation.military.techLevel}
         />
       </div>
     </div>

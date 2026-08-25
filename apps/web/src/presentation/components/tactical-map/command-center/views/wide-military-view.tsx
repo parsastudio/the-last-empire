@@ -2,7 +2,6 @@ import React from "react";
 import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
 import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
 import { MilitaryExpansionView } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-expansion-view";
-import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import { MilitaryValuationCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-valuation-card";
 import {
   MilitaryStack,
@@ -39,11 +38,6 @@ export function WideMilitaryView({
         />
 
         <div className="space-y-4">
-          <MilitaryTechUpgradeCard
-            nationId={nationId}
-            treasury={treasury}
-            techLevel={military.techLevel}
-          />
           <MilitaryValuationCard
             military={military}
             industrialLevel={industrialLevel}
