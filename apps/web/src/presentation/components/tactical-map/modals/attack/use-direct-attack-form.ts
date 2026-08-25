@@ -13,6 +13,7 @@ import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
+import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -105,6 +106,36 @@ export function useDirectAttackForm({
     dronesToLaunch,
   ]);
 
+  const originRegionName = useMemo(() => {
+    if (!humanNation || !gameState?.provinces) return "خاک اصلی کشور";
+
+    if (isLandNeighbor && targetProvince) {
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
+      for (const neighborId of targetProvince.landNeighbors || []) {
+        const neighborProv = gameState.provinces[neighborId.toString()];
+        if (
+          neighborProv &&
+          CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
+            canonicalHuman
+        ) {
+          return neighborProv.nameFa;
+        }
+      }
+    }
+
+    if (navalAttackInfo.isNavalValid && navalAttackInfo.closestProvinceName) {
+      return navalAttackInfo.closestProvinceName;
+    }
+
+    return "خاک اصلی کشور";
+  }, [
+    humanNation,
+    gameState?.provinces,
+    isLandNeighbor,
+    targetProvince,
+    navalAttackInfo,
+  ]);
+
   const rawForceValue = useMemo(() => {
     return (
       infantryToDeploy * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
@@ -130,10 +161,22 @@ export function useDirectAttackForm({
   const canAfford = (humanNation?.treasury || 0) >= totalLogisticsCost;
   const hasSelectedInfantry = infantryToDeploy > 0;
 
-  const isWarStance = useMemo(() => {
-    if (!humanNation || !targetNation) return false;
-    return NationRelationResolver.isWar(humanNation.relations, targetNation.id);
+  const currentStance = useMemo<DiplomaticStance>(() => {
+    if (!humanNation || !targetNation) return "NORMAL_DIPLOMACY";
+    return NationRelationResolver.getStance(
+      humanNation.relations,
+      targetNation.id,
+    );
   }, [humanNation, targetNation]);
+
+  const isWarStance = currentStance === "WAR";
+
+  const reputationPenalty = useMemo(() => {
+    if (isWarStance) return 0;
+    if (currentStance === "ALLIANCE") return 50;
+    if (currentStance === "NON_AGGRESSION_PACT") return 35;
+    return 15;
+  }, [isWarStance, currentStance]);
 
   const targetRegionName = useMemo(() => {
     if (targetProvince) return targetProvince.nameFa;
@@ -200,7 +243,10 @@ export function useDirectAttackForm({
     targetProvince,
     isLandNeighbor,
     navalAttackInfo,
+    currentStance,
     isWarStance,
+    reputationPenalty,
+    originRegionName,
     targetRegionName,
     infantryToDeploy,
     setInfantryToDeploy,

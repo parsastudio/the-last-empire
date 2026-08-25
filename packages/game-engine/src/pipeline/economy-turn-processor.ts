@@ -56,9 +56,20 @@ export class EconomyTurnProcessor {
         updated.government.type,
       );
 
+      let netAddedTreasury = addedTreasury;
+      let newDebt = updated.nationalDebt;
+
+      if (newDebt > 0 && addedTreasury > 0) {
+        const maxRepayment = Math.floor(addedTreasury * 0.3);
+        const actualRepayment = Math.min(newDebt, maxRepayment);
+        newDebt -= actualRepayment;
+        netAddedTreasury -= actualRepayment;
+      }
+
       updated = {
         ...updated,
-        treasury: updated.treasury + addedTreasury,
+        treasury: updated.treasury + netAddedTreasury,
+        nationalDebt: newDebt,
       };
 
       updated = this.recruitmentQueue.processTurnQueue(updated);

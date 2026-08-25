@@ -10,6 +10,7 @@ import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
+import { AIEmergencyDefenseManager } from "@/engine/ai/ai-emergency-defense-manager";
 
 export interface PoliticsExecutionOutput {
   newState: GameState;
@@ -250,7 +251,7 @@ export class PoliticsActionExecutor {
             );
           }
 
-          const newState = {
+          let newState: GameState = {
             ...state,
             turnLogs: [...state.turnLogs, ...warLogs],
             nations: {
@@ -274,6 +275,17 @@ export class PoliticsActionExecutor {
               },
             },
           };
+
+          if (receiver.isAi) {
+            const liveReceiver = newState.nations[targetKey]!;
+            const liveNation = newState.nations[sourceKey]!;
+            newState =
+              AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
+                newState,
+                liveNation,
+                liveReceiver,
+              );
+          }
 
           return {
             newState,

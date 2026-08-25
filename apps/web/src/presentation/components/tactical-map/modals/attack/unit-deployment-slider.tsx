@@ -31,15 +31,17 @@ export function UnitDeploymentSlider({
   const clampedCount = Math.min(availableCount, Math.max(0, selectedCount));
 
   return (
-    <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-2.5 font-sans dir-rtl text-right">
+    <div className="bg-secondary/40 border border-border/70 p-4 rounded-3xl space-y-3 font-sans dir-rtl text-right hover:border-primary/40 transition-all shadow-sm">
       <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
-          <Icon size={15} className={iconColorClass} />
-          <span className="font-bold text-foreground">{label}</span>
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-secondary/80 border border-border/60">
+            <Icon size={16} className={iconColorClass} />
+          </div>
+          <span className="font-black text-foreground text-xs">{label}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 font-mono text-[11px]">
-          <span className="font-extrabold text-foreground">
+        <div className="flex items-center gap-1.5 font-mono text-[11px] bg-background/60 border border-border/50 px-2.5 py-1 rounded-xl">
+          <span className="font-extrabold text-foreground text-xs">
             {PersianNumberFormatter.toPersianDigits(
               clampedCount.toLocaleString("en-US"),
             )}
@@ -61,7 +63,7 @@ export function UnitDeploymentSlider({
         disabled={availableCount === 0}
         value={clampedCount}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-primary cursor-pointer h-1.5 bg-secondary rounded-lg disabled:opacity-30"
+        className="w-full accent-primary cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
       />
 
       <PercentageSelector

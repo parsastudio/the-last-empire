@@ -34,13 +34,14 @@ export function AttackCostSummary({
   const isAccessible = isLandNeighbor || isNavalValid;
   const isButtonDisabled =
     !isAccessible || !hasSelectedInfantry || !canAfford || isSubmitting;
+
   const formattedRegionName = targetRegionName.startsWith("استان")
     ? targetRegionName
     : `استان ${targetRegionName}`;
 
   return (
     <div className="space-y-3.5 pt-2 border-t border-border/60 dir-rtl text-right font-sans">
-      <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl space-y-3 font-mono text-xs">
+      <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl space-y-3 font-mono text-xs shadow-sm">
         <div className="flex items-center justify-between pb-2 border-b border-border/50">
           <span className="text-[11px] font-bold text-foreground font-sans flex items-center gap-1.5">
             <Coins size={14} className="text-gdp" />
@@ -59,7 +60,7 @@ export function AttackCostSummary({
           <div className="bg-background/60 p-3 rounded-2xl border border-border/40 flex items-center justify-between">
             <span className="text-muted-foreground text-[11px] font-sans flex items-center gap-1.5">
               <Coins size={13} className="text-gdp" />
-              هزینه اعزام تا مرز:
+              هزینه اعزام تا مرز (لجستیک زمینی):
             </span>
             <span
               className={`font-bold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
@@ -73,7 +74,7 @@ export function AttackCostSummary({
               <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-1">
                 <span className="text-muted-foreground block text-[10px] font-sans flex items-center gap-1">
                   <Coins size={11} className="text-primary" />
-                  هزینه اعزام تا ساحل (لجستیک زمینی):
+                  لجستیک زمینی تا ساحل:
                 </span>
                 <span className="font-bold text-foreground block text-xs">
                   {PersianNumberFormatter.formatCurrency(baseDeploymentCost)}
@@ -83,7 +84,7 @@ export function AttackCostSummary({
               <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-1">
                 <span className="text-muted-foreground block text-[10px] font-sans flex items-center gap-1">
                   <Anchor size={11} className="text-gdp" />
-                  هزینه ترابری ناوگان دریایی:
+                  ترابری ناوگان دریایی:
                 </span>
                 <span className="font-bold text-gdp block text-xs">
                   +
@@ -121,7 +122,7 @@ export function AttackCostSummary({
       <button
         onClick={onExecute}
         disabled={isButtonDisabled}
-        className="w-full py-4 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-xl shadow-military/20 flex items-center justify-center gap-2"
+        className="w-full py-4 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xl shadow-military/20 flex items-center justify-center gap-2 hover:scale-[1.005] active:scale-[0.995]"
       >
         <Zap size={16} />
         <span>
