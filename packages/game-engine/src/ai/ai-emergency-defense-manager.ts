@@ -12,14 +12,28 @@ import {
   GOVERNMENT_TRAITS_MAP,
 } from "@geopolitics/domain";
 
+export interface ReactiveDefenseEvent {
+  type: "PURCHASED" | "BLOCKADED" | "NO_SELLER" | "MAX_DEBT" | "NONE";
+  sellerName?: string;
+  sellerFlagCode?: string;
+  unitName?: string;
+  quantity?: number;
+  cost?: number;
+}
+
+export interface ReactiveDefenseResult {
+  newState: GameState;
+  defenseEvent: ReactiveDefenseEvent;
+}
+
 export class AIEmergencyDefenseManager {
   public static handleReactiveDefenseProcurement(
     state: GameState,
     attacker: Nation,
     defender: Nation,
-  ): GameState {
+  ): ReactiveDefenseResult {
     if (!defender.isAi || !defender.isAlive || !attacker.isAlive) {
-      return state;
+      return { newState: state, defenseEvent: { type: "NONE" } };
     }
 
     const attackerPower =
@@ -29,7 +43,7 @@ export class AIEmergencyDefenseManager {
 
     const targetPower = Math.floor(attackerPower * 1.1);
     if (defenderPower >= targetPower) {
-      return state;
+      return { newState: state, defenseEvent: { type: "NONE" } };
     }
 
     const powerGap = targetPower - defenderPower;
@@ -41,23 +55,23 @@ export class AIEmergencyDefenseManager {
     );
 
     if (availableLoanHeadroom <= 0) {
-      return state;
+      return { newState: state, defenseEvent: { type: "MAX_DEBT" } };
     }
 
     if (this.isNavalBlockaded(defender, state.nations)) {
-      return state;
+      return { newState: state, defenseEvent: { type: "BLOCKADED" } };
     }
 
     const bestSeller = this.findBestArmsSeller(defender, state.nations);
     if (!bestSeller) {
-      return state;
+      return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
     const bestUnit = this.selectBestPurchasableUnit(
       bestSeller.military.techLevel,
     );
     if (!bestUnit) {
-      return state;
+      return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
     const unitPrice =
@@ -74,7 +88,7 @@ export class AIEmergencyDefenseManager {
     );
 
     if (unitPrice <= 0 || unitSinglePower <= 0) {
-      return state;
+      return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
     const unitsNeeded = Math.ceil(powerGap / unitSinglePower);
@@ -83,7 +97,7 @@ export class AIEmergencyDefenseManager {
     const actualQuantity = Math.floor(loanToTake / unitPrice);
 
     if (actualQuantity <= 0) {
-      return state;
+      return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
     const finalCost = actualQuantity * unitPrice;
@@ -134,7 +148,7 @@ export class AIEmergencyDefenseManager {
       );
     }
 
-    return {
+    const nextState: GameState = {
       ...state,
       nations: {
         ...state.nations,
@@ -142,6 +156,18 @@ export class AIEmergencyDefenseManager {
         [bestSeller.id]: updatedSeller,
       },
       turnLogs: [...state.turnLogs, ...newLogs],
+    };
+
+    return {
+      newState: nextState,
+      defenseEvent: {
+        type: "PURCHASED",
+        sellerName: bestSeller.name,
+        sellerFlagCode: bestSeller.flagCode,
+        unitName: bestUnit.nameFa,
+        quantity: actualQuantity,
+        cost: finalCost,
+      },
     };
   }
 
