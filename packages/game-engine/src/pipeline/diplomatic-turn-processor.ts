@@ -180,11 +180,19 @@ export class DiplomaticTurnProcessor {
       }
     }
 
+    let postWarCooldown = nation.postWarCooldownTurns || 0;
+    if (isAtWar) {
+      postWarCooldown = 0;
+    } else if (postWarCooldown > 0) {
+      postWarCooldown = Math.max(0, postWarCooldown - 1);
+    }
+
     return {
       updatedNation: {
         ...nation,
         relations: newRels,
         warFocusTargetId: nextWarFocus,
+        postWarCooldownTurns: postWarCooldown,
       },
       isAtWar,
     };

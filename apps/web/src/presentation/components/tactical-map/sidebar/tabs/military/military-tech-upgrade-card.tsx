@@ -37,10 +37,7 @@ export function MilitaryTechUpgradeCard({
     try {
       setIsSubmittingTech(true);
       const action = ActionFactory.investResearch(nationId);
-      await dispatchAction(
-        action,
-        `سطح فناوری نظامی به سطح ${techLevel + 1} ارتقا یافت (+۵۰٪ قدرت نبرد یگان‌ها).`,
-      );
+      await dispatchAction(action);
     } finally {
       setIsSubmittingTech(false);
     }

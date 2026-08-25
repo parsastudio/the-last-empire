@@ -11,6 +11,7 @@ import { DiplomaticStance } from "@geopolitics/domain";
 interface DiplomacyActionButtonsProps {
   currentStance: DiplomaticStance | string;
   foreignAidCost: number;
+  postWarCooldownTurns?: number;
   onSendAid: () => void;
   onPeaceTreaty: () => void;
   onNonAggression: () => void;
@@ -22,6 +23,7 @@ interface DiplomacyActionButtonsProps {
 export function DiplomacyActionButtons({
   currentStance,
   foreignAidCost,
+  postWarCooldownTurns = 0,
   onSendAid,
   onPeaceTreaty,
   onNonAggression,
@@ -29,6 +31,8 @@ export function DiplomacyActionButtons({
   onCancelTreaty,
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
+  const isCooldownActive = postWarCooldownTurns > 0;
+
   const renderStepUpAction = () => {
     if (currentStance === "WAR") {
       return (
@@ -99,13 +103,16 @@ export function DiplomacyActionButtons({
       return (
         <button
           onClick={onDeclareWar}
-          className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
+          disabled={isCooldownActive}
+          className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-secondary/40 disabled:opacity-50 disabled:cursor-not-allowed border border-rose-500/30 text-rose-400 disabled:text-muted-foreground text-right transition-all cursor-pointer space-y-0.5"
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold">
-              اعلان جنگ رسمی (گام رو به پایین: قطع روابط و نبرد)
+              {isCooldownActive
+                ? `سردسازی پس از جنگ (${PersianNumberFormatter.toPersianDigits(postWarCooldownTurns)} نوبت تا امکان اعلان جنگ)`
+                : "اعلان جنگ رسمی (گام رو به پایین: قطع روابط و نبرد)"}
             </span>
-            <ArrowDownCircle size={15} className="text-rose-400" />
+            <ArrowDownCircle size={15} />
           </div>
         </button>
       );
@@ -131,13 +138,16 @@ export function DiplomacyActionButtons({
 
           <button
             onClick={onDeclareWar}
-            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
+            disabled={isCooldownActive}
+            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-secondary/40 disabled:opacity-50 disabled:cursor-not-allowed border border-rose-500/30 text-rose-400 disabled:text-muted-foreground text-right transition-all cursor-pointer space-y-0.5"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold">
-                لغو تعهد و اعلان جنگ مستقیم (با جریمه نقض پیمان)
+                {isCooldownActive
+                  ? `سردسازی پس از جنگ (${PersianNumberFormatter.toPersianDigits(postWarCooldownTurns)} نوبت تا امکان اعلان جنگ)`
+                  : "لغو تعهد و اعلان جنگ مستقیم (با جریمه نقض پیمان)"}
               </span>
-              <ShieldAlert size={15} className="text-rose-400" />
+              <ShieldAlert size={15} />
             </div>
           </button>
         </div>
@@ -164,13 +174,16 @@ export function DiplomacyActionButtons({
 
           <button
             onClick={onDeclareWar}
-            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
+            disabled={isCooldownActive}
+            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 disabled:bg-secondary/40 disabled:opacity-50 disabled:cursor-not-allowed border border-rose-500/30 text-rose-400 disabled:text-muted-foreground text-right transition-all cursor-pointer space-y-0.5"
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold">
-                پیمان‌شکنی و اعلان جنگ مستقیم (با جریمه سنگین اعتبار)
+                {isCooldownActive
+                  ? `سردسازی پس از جنگ (${PersianNumberFormatter.toPersianDigits(postWarCooldownTurns)} نوبت تا امکان اعلان جنگ)`
+                  : "پیمان‌شکنی و اعلان جنگ مستقیم (با جریمه سنگین اعتبار)"}
               </span>
-              <ShieldAlert size={15} className="text-rose-400" />
+              <ShieldAlert size={15} />
             </div>
           </button>
         </div>

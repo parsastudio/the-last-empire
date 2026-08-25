@@ -77,10 +77,7 @@ export function TariffControlCard({
 
   const handleApplyTariff = async () => {
     const action = ActionFactory.setTariffRate(nationId, tariffRate);
-    await dispatchAction(
-      action,
-      `سیاست گمرکی ${currentPolicy.label} (${PersianNumberFormatter.toPersianDigits(tariffRate)}٪) به اجرا درآمد.`,
-    );
+    await dispatchAction(action);
   };
 
   const tariffCalculation = useMemo(() => {

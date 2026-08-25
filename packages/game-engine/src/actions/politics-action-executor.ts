@@ -102,6 +102,8 @@ export class PoliticsActionExecutor {
           const newStanceName =
             prevStance === "ALLIANCE" ? "پیمان عدم تخاصم" : "دیپلماسی عادی";
 
+          const newReputation = Math.max(-100, nation.globalReputation - 2);
+
           const cancelLogs = [
             TurnLogBuilder.createGlobalDiplomacyLog(
               state.currentTurn,
@@ -134,6 +136,7 @@ export class PoliticsActionExecutor {
               ...state.nations,
               [sourceKey]: {
                 ...nation,
+                globalReputation: newReputation,
                 relations: {
                   ...nation.relations,
                   [senderRel.targetNationId]: updatedSenderRel,
@@ -157,6 +160,7 @@ export class PoliticsActionExecutor {
               targetNationId: receiver.id,
               targetName: receiver.name,
               targetFlagCode: receiver.flagCode,
+              reputationChange: -2,
               message: `معاهده قبلی لغو گردید و سطح روابط با کشور ${receiver.name} به (${newStanceName}) تنزل یافت.`,
             },
           };
@@ -328,7 +332,7 @@ export class PoliticsActionExecutor {
             tension: Math.max(0, currentReceiverTension - 15),
           };
 
-          const newReputation = Math.min(100, nation.globalReputation + 4);
+          const newReputation = Math.min(100, nation.globalReputation + 1);
 
           const aidLogs = [
             TurnLogBuilder.createGlobalDiplomacyLog(
@@ -384,7 +388,8 @@ export class PoliticsActionExecutor {
               targetNationId: receiver.id,
               targetName: receiver.name,
               targetFlagCode: receiver.flagCode,
-              message: `بسته کمک مالی و دیپلماتیک به خزانه‌داری ${receiver.name} واریز شد (+۲۵ همسویی، +۴ پرستیژ جهانی).`,
+              reputationChange: 1,
+              message: `بسته کمک مالی و دیپلماتیک به خزانه‌داری ${receiver.name} واریز شد (+۲۵ همسویی، +۱ پرستیژ جهانی).`,
             },
           };
         }
@@ -430,6 +435,7 @@ export class PoliticsActionExecutor {
                 targetNationId: receiver.id,
                 targetName: receiver.name,
                 targetFlagCode: receiver.flagCode,
+                reputationChange: 1,
                 message: acceptedMsg,
               },
             };
@@ -456,6 +462,7 @@ export class PoliticsActionExecutor {
                 targetNationId: receiver.id,
                 targetName: receiver.name,
                 targetFlagCode: receiver.flagCode,
+                reputationChange: 0,
                 message: rejectedMsg,
               },
             };

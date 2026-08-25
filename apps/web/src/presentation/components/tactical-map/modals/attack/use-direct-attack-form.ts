@@ -171,6 +171,10 @@ export function useDirectAttackForm({
 
   const isWarStance = currentStance === "WAR";
 
+  const isPostWarCooldown =
+    !isWarStance && (humanNation?.postWarCooldownTurns || 0) > 0;
+  const postWarCooldownTurns = humanNation?.postWarCooldownTurns || 0;
+
   const reputationPenalty = useMemo(() => {
     if (isWarStance) return 0;
     if (currentStance === "ALLIANCE") return 50;
@@ -185,7 +189,9 @@ export function useDirectAttackForm({
   }, [targetNation, targetProvince]);
 
   const handleExecuteAttack = useCallback(async () => {
-    if (!humanNation || !targetNation || isSubmitting) return;
+    if (!humanNation || !targetNation || isSubmitting || isPostWarCooldown) {
+      return;
+    }
 
     const action = ActionFactory.initiateBattle(
       humanNation.id,
@@ -226,6 +232,7 @@ export function useDirectAttackForm({
     humanNation,
     targetNation,
     isSubmitting,
+    isPostWarCooldown,
     dronesToLaunch,
     infantryToDeploy,
     armorToDeploy,
@@ -245,6 +252,8 @@ export function useDirectAttackForm({
     navalAttackInfo,
     currentStance,
     isWarStance,
+    isPostWarCooldown,
+    postWarCooldownTurns,
     reputationPenalty,
     originRegionName,
     targetRegionName,

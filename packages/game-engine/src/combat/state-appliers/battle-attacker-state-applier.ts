@@ -87,6 +87,15 @@ export class BattleAttackerStateApplier {
 
     const nextWarFocus = isTotalAnnexation ? null : cleanDefenderId;
 
+    const hasOtherWars = Object.entries(updatedRelations).some(
+      ([key, r]) => key !== cleanDefenderId && r.stance === "WAR",
+    );
+
+    const postWarCooldown =
+      isTotalAnnexation && !hasOtherWars
+        ? 5
+        : attacker.postWarCooldownTurns || 0;
+
     return {
       ...attacker,
       government: {
@@ -101,6 +110,7 @@ export class BattleAttackerStateApplier {
       military: updatedMilitary,
       relations: updatedRelations,
       warFocusTargetId: nextWarFocus,
+      postWarCooldownTurns: postWarCooldown,
     };
   }
 }

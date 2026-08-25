@@ -76,6 +76,7 @@ export class NationGettersUtility {
             globalReputation: 50,
             executedEspionageTiers: [],
             warFocusTargetId: null,
+            postWarCooldownTurns: 0,
           },
           true,
         );
@@ -117,6 +118,7 @@ export class NationGettersUtility {
             globalReputation: 50,
             executedEspionageTiers: [],
             warFocusTargetId: null,
+            postWarCooldownTurns: 0,
           },
           true,
         );

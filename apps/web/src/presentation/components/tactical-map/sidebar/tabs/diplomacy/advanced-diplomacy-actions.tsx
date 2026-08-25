@@ -14,6 +14,7 @@ interface AdvancedDiplomacyActionsProps {
   senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
+  postWarCooldownTurns?: number;
   onOpenProxy?: () => void;
 }
 
@@ -24,6 +25,7 @@ export function AdvancedDiplomacyActions({
   senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
+  postWarCooldownTurns = 0,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -49,6 +51,7 @@ export function AdvancedDiplomacyActions({
             <DiplomacyActionButtons
               currentStance={currentStance}
               foreignAidCost={runner.foreignAidCost}
+              postWarCooldownTurns={postWarCooldownTurns}
               onSendAid={runner.handleSendAid}
               onPeaceTreaty={runner.handlePeaceTreaty}
               onNonAggression={runner.handleNonAggression}

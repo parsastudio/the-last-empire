@@ -6,6 +6,7 @@ import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export interface MilitaryExecutionOutput {
   newState: GameState;
@@ -122,6 +123,18 @@ export class MilitaryActionExecutor {
           state.nations[action.targetNationId];
         if (!target || !target.isAlive) {
           throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
+        }
+
+        const isCurrentWar = NationRelationResolver.isWar(
+          nation.relations,
+          action.targetNationId,
+        );
+
+        if (!isCurrentWar && (nation.postWarCooldownTurns || 0) > 0) {
+          throw new GameError(
+            "INVALID_ACTION",
+            `امکان آغاز تهاجم نظامی جدید وجود ندارد: کشور در دوره سردسازی و بازسازی پس از جنگ قرار دارد (${nation.postWarCooldownTurns} نوبت باقی‌مانده).`,
+          );
         }
 
         if (nation.military.infantry <= 0) {
