@@ -31,8 +31,6 @@ export function CommandBreadcrumb({
         return "گزارش‌های نبرد";
       case "diplomacy":
         return "دیپلماسی";
-      case "research":
-        return "پژوهشکده دکترین";
       default:
         return "اتاق فرماندهی";
     }

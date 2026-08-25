@@ -6,7 +6,6 @@ import { WideArmsMarketView } from "@/presentation/components/tactical-map/comma
 import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
 import { WideEspionageView } from "@/presentation/components/tactical-map/command-center/views/wide-espionage-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
-import { WideResearchView } from "@/presentation/components/tactical-map/command-center/views/wide-research-view";
 import { WideReportsView } from "@/presentation/components/tactical-map/command-center/views/wide-reports-view";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -82,8 +81,6 @@ export function CommandCenterTabRouter({
           onNavigateTab={onNavigateTab}
         />
       );
-    case "research":
-      return <WideResearchView nationId={nation.id} nation={nation} />;
     case "reports":
       return (
         <WideReportsView

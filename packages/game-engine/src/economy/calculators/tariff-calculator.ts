@@ -1,6 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
@@ -64,11 +63,7 @@ export class TariffCalculator {
         nationGdp * 25 * (tariffRate / 100) * 0.04 * seaAccessFactor;
     }
 
-    const researchMultiplier = DoctrinesManager.getTariffRevenueMultiplier(
-      nation.doctrines?.unlockedDoctrines,
-    );
-
-    const tariffRevenue = Math.floor(totalBaseRevenue * researchMultiplier);
+    const tariffRevenue = Math.floor(totalBaseRevenue);
     const stabilityImpact = Number(((10 - tariffRate) * 0.08).toFixed(2));
     const tradeVolumePercentage =
       totalPartnerCount > 0

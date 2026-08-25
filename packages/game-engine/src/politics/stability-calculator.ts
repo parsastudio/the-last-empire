@@ -2,7 +2,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import type { GovernmentType } from "@/domain/politics/politics.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export class StabilityCalculator {
   public static clampStability(stability: number): number {
@@ -59,13 +58,7 @@ export class StabilityCalculator {
     }
 
     const clampedTax = Math.min(50, Math.max(0, nation.taxRate));
-    let taxStabilityDelta = (15 - clampedTax) * 0.1;
-    if (taxStabilityDelta < 0) {
-      const discount = DoctrinesManager.getTaxStabilityPenaltyDiscount(
-        nation.doctrines?.unlockedDoctrines,
-      );
-      taxStabilityDelta *= discount;
-    }
+    const taxStabilityDelta = (15 - clampedTax) * 0.1;
     delta += taxStabilityDelta;
 
     const clampedTariff = Math.min(100, Math.max(0, nation.tariffRate));

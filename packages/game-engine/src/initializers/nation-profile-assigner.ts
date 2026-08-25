@@ -135,9 +135,6 @@ export class NationProfileAssigner {
       relations: {},
       activeModifiers: [],
       globalReputation: 50,
-      doctrines: {
-        unlockedDoctrines: [],
-      },
       executedEspionageTiers: [],
       warFocusTargetId: null,
     };

@@ -5,7 +5,6 @@ export interface AirSupremacyPhaseInput {
   attAirMult: number;
   defAirMult: number;
   defArmorMult: number;
-  defenderEwBonus: boolean;
   defAirDefenseRemainingEff: number;
 }
 
@@ -31,10 +30,7 @@ export class AirSupremacyPhase {
       };
     }
 
-    const attAirEff =
-      input.deployedAirForce *
-      input.attAirMult *
-      (input.defenderEwBonus ? 0.8 : 1.0);
+    const attAirEff = input.deployedAirForce * input.attAirMult;
     const defAirEff = input.defAirForce * input.defAirMult;
 
     let rawAttAirLoss = 0;

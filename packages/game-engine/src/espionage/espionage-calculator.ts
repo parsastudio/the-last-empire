@@ -1,6 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { EspionageTier } from "@/domain/espionage/espionage.schema";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 
 export interface TechSuperiorityDelta {
   militaryDelta: number;
@@ -27,14 +26,8 @@ export class EspionageCalculator {
       0.7,
       1.0 - (sourceNation.industrialLevel - 1) * 0.05,
     );
-    const doctrineDiscount = DoctrinesManager.getProxyCostDiscount(
-      sourceNation.doctrines?.unlockedDoctrines,
-    );
 
-    return Math.max(
-      1000000000,
-      Math.floor(baseCost * industrialDiscount * doctrineDiscount),
-    );
+    return Math.max(1000000000, Math.floor(baseCost * industrialDiscount));
   }
 
   public static calculateTechSuperiority(

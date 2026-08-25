@@ -5,5 +5,4 @@ export type SidebarTabType =
   | "politics"
   | "espionage"
   | "reports"
-  | "diplomacy"
-  | "research";
+  | "diplomacy";

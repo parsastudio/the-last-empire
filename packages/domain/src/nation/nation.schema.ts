@@ -5,7 +5,6 @@ import {
   RecruitmentOrderSchema,
 } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
-import { DoctrinesStateSchema } from "@/domain/politics/doctrines.schema";
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -32,7 +31,6 @@ export const NationSchema = z.object({
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
   globalReputation: z.number().min(-100).max(100),
-  doctrines: DoctrinesStateSchema,
   executedEspionageTiers: z.array(z.number()).default([]),
   warFocusTargetId: z.string().nullable().optional(),
 });

@@ -10,7 +10,6 @@ import {
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
 import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
 import { GroundEngagementPhase } from "@/engine/combat/phases/ground-engagement-phase";
@@ -125,15 +124,6 @@ export class BattleCalculator {
       defAirDefense,
       attDroneMult,
       defAdMult,
-      attackerDroneBonus: DoctrinesManager.getDronePowerMultiplier(
-        attacker.doctrines?.unlockedDoctrines,
-      ),
-      defenderInterceptionBonus: DoctrinesManager.getAirDefenseInterceptionRate(
-        defender.doctrines?.unlockedDoctrines,
-      ),
-      attackerPrecisionBonus: DoctrinesManager.getPrecisionMissileDirectDamage(
-        attacker.doctrines?.unlockedDoctrines,
-      ),
     });
 
     const airPhase = AirSupremacyPhase.calculate({
@@ -143,9 +133,6 @@ export class BattleCalculator {
       attAirMult,
       defAirMult,
       defArmorMult,
-      defenderEwBonus: DoctrinesManager.getElectronicWarfareEvasion(
-        defender.doctrines?.unlockedDoctrines,
-      ),
       defAirDefenseRemainingEff: missilePhase.defAirDefenseRemainingEff,
     });
 

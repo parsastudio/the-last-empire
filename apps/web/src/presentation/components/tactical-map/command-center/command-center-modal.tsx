@@ -47,11 +47,6 @@ export function getCommandCenterMeta(
         title: "وزارت امور خارجه و دیپلماسی",
         subtitle: "روابط بین‌المللی، معاهدات دفاعی و ائتلاف‌های استراتژیک",
       };
-    case "research":
-      return {
-        title: "پژوهشکده دکترین‌های راهبردی",
-        subtitle: "توسعه شاخه‌های صنعتی و هژمونی بین‌المللی",
-      };
     case "reports":
       return {
         title: "بایگانی گزارش‌های اطلاعاتی و حاکمیت",

@@ -4,7 +4,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
 import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
-import { ResearchManager } from "@/engine/politics/research-manager";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
@@ -22,7 +21,6 @@ export interface PoliticsExecutionOutput {
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
-  private static researchManager = new ResearchManager();
 
   public static execute(
     state: GameState,
@@ -38,21 +36,6 @@ export class PoliticsActionExecutor {
     const sourceKey = nation.id;
 
     switch (action.type) {
-      case "UNLOCK_DOCTRINE": {
-        return {
-          newState: {
-            ...state,
-            nations: {
-              ...state.nations,
-              [sourceKey]: this.researchManager.unlockDoctrine(
-                nation,
-                action.doctrineId,
-              ),
-            },
-          },
-        };
-      }
-
       case "EXECUTE_ESPIONAGE_OPERATION": {
         const { newState, result } = EspionageManager.executeOperation(
           state,

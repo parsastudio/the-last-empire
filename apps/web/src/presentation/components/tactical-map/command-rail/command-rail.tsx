@@ -6,7 +6,6 @@ import {
   Landmark,
   FileText,
   Users,
-  Cpu,
   Loader2,
   ChevronRight,
   ChevronLeft,
@@ -106,7 +105,6 @@ export function CommandRail({
     { id: "espionage" as const, label: "جاسوسی", icon: Binary },
     { id: "reports" as const, label: "گزارش‌ها", icon: FileText },
     { id: "diplomacy" as const, label: "دیپلماسی", icon: Users },
-    { id: "research" as const, label: "پژوهش", icon: Cpu },
   ];
 
   return (

@@ -1,5 +1,4 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
@@ -17,10 +16,6 @@ export class MilitaryPayrollCalculator {
   public static readonly PAYROLL_RATE = 0.05;
 
   public static calculatePayroll(nation: Nation): BreakdownMilitaryPayroll {
-    const doctrineMultiplier = DoctrinesManager.getMilitaryPayrollMultiplier(
-      nation.doctrines?.unlockedDoctrines,
-    );
-
     const calcUnitUpkeep = (
       unitType:
         | "INFANTRY"
@@ -42,7 +37,7 @@ export class MilitaryPayrollCalculator {
         nation.industrialLevel,
       );
       const baseUpkeep = unitPrice * MilitaryPayrollCalculator.PAYROLL_RATE;
-      return Math.floor(count * baseUpkeep * doctrineMultiplier);
+      return Math.floor(count * baseUpkeep);
     };
 
     const infantry = calcUnitUpkeep("INFANTRY", nation.military.infantry || 0);
