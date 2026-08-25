@@ -25,6 +25,10 @@ export class TurnLogFormatter {
 
     switch (log.eventCode) {
       case "VICTORY_ACHIEVED": {
+        const reason = String(params["reason"] || "");
+        if (reason === "HUMAN_PLAYER_DEFEATED") {
+          return `سقوط و فروپاشی کامل: حاکمیت ${sourceName} تمامی استان‌ها و مواضع خود را از دست داد و پرونده حاکمیت آن بسته شد.`;
+        }
         return `فتح قاطع و پیروزی تاریخی: امپراتوری ${sourceName} به برتری مطلق بر جهان دست یافت و سند هژمونی بین‌المللی را امضا کرد.`;
       }
 

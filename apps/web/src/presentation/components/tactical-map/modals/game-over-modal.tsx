@@ -10,6 +10,7 @@ import {
   Crown,
   Sparkles,
   Compass,
+  Skull,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
@@ -123,12 +124,12 @@ export function GameOverModal({
     <UnifiedModalShell
       isOpen={isOpen}
       title={
-        isVictory ? "پیروزی مطلق بر جهان!" : "پایان ماراتن قدرت و پیروزی رقیب"
+        isVictory ? "پیروزی مطلق بر جهان!" : "سقوط حاکمیت و شکست در بقای ملی"
       }
       subtitle={
         isVictory
           ? "حاکمیت شما با اقتدار کامل توانست مقدرات سیاسی و اقتصادی جهان را تسخیر کند."
-          : `امپراتوری ${winnerName} موفق شد شروط سلطه جهانی را تکمیل کرده و پیروز بازی شود.`
+          : `قلمرو و ساختار حاکمیتی شما در جریان تحولات نظامی و سیاسی از بین رفت.`
       }
       maxWidthClass="max-w-lg"
       onClose={onContinueSandbox || onRestart}
@@ -138,7 +139,7 @@ export function GameOverModal({
           className={`p-4.5 rounded-3xl border flex items-center justify-between gap-4 transition-all shadow-lg backdrop-blur-xl ${
             isVictory
               ? "bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-amber-500/15 border-amber-500/40 text-foreground"
-              : "bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border-border/80 text-foreground"
+              : "bg-gradient-to-r from-rose-950/40 via-card to-rose-950/30 border-rose-500/40 text-foreground"
           }`}
         >
           <div className="flex items-center gap-3.5">
@@ -147,10 +148,11 @@ export function GameOverModal({
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Crown
-                  size={16}
-                  className={isVictory ? "text-amber-500" : "text-primary"}
-                />
+                {isVictory ? (
+                  <Crown size={16} className="text-amber-500" />
+                ) : (
+                  <Skull size={16} className="text-rose-400" />
+                )}
                 <span className="text-sm font-black text-foreground">
                   {winnerName}
                 </span>
@@ -160,10 +162,10 @@ export function GameOverModal({
               </div>
               <span
                 className={`text-[11px] font-bold block ${
-                  isVictory ? "text-amber-500" : "text-muted-foreground"
+                  isVictory ? "text-amber-500" : "text-rose-400"
                 }`}
               >
-                {isVictory ? "امپراتوری پیروز شما" : "فاتح نهایی جهان"}
+                {isVictory ? "امپراتوری پیروز شما" : "قدرت برتر میدان نبرد"}
               </span>
             </div>
           </div>
@@ -172,10 +174,10 @@ export function GameOverModal({
             className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-md shrink-0 ${
               isVictory
                 ? "bg-amber-500/20 border-amber-500/40 text-amber-500"
-                : "bg-secondary text-muted-foreground border-border/60"
+                : "bg-rose-500/20 text-rose-400 border-rose-500/40"
             }`}
           >
-            {isVictory ? <Trophy size={24} /> : <Sparkles size={24} />}
+            {isVictory ? <Trophy size={24} /> : <Skull size={24} />}
           </div>
         </div>
 
@@ -186,7 +188,7 @@ export function GameOverModal({
             </span>
             <span
               className={`font-mono text-[11px] ${
-                isVictory ? "text-amber-500" : "text-primary"
+                isVictory ? "text-amber-500" : "text-rose-400"
               }`}
             >
               {reasonTitle}
@@ -223,7 +225,7 @@ export function GameOverModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <button
               onClick={onRestart}
-              className="py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl font-bold text-xs flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all shadow-md shadow-primary/20"
             >
               <RefreshCw size={14} />
               <span>شروع کمپین جدید</span>

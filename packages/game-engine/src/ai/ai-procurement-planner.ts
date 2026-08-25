@@ -5,6 +5,7 @@ import {
   Province,
   UnitType,
   MilitaryPricingCalculator,
+  MILITARY_UNIT_STATS,
   getNationGdp,
   NationGettersUtility,
   GeopoliticalReachResolver,
