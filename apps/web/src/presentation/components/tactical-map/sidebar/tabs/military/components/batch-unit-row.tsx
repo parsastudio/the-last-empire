@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Shield,
   ShieldAlert,
@@ -9,6 +9,7 @@ import {
   Clock,
   Lock,
   LucideIcon,
+  PieChart,
 } from "lucide-react";
 import { MilitaryUnitStat, UnitType } from "@geopolitics/domain";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -18,8 +19,8 @@ interface BatchUnitRowProps {
   unitPrice: number;
   isUnlocked: boolean;
   quantity: number;
-  step: number;
   maxAffordable: number;
+  totalTreasury: number;
   onQuantityChange: (qty: number) => void;
 }
 
@@ -37,13 +38,67 @@ export function BatchUnitRow({
   unitPrice,
   isUnlocked,
   quantity,
-  step,
   maxAffordable,
+  totalTreasury,
   onQuantityChange,
 }: BatchUnitRowProps) {
   const iconMeta = UNIT_ICONS[stat.type];
   const Icon = iconMeta.icon;
   const currentCost = quantity * unitPrice;
+
+  const tenPercentTreasury = Math.floor(totalTreasury * 0.1);
+  const isTenPercentStep =
+    totalTreasury > 0 && unitPrice > 0 && unitPrice <= tenPercentTreasury;
+
+  const maxAllowedPct = useMemo(() => {
+    if (totalTreasury <= 0 || unitPrice <= 0) return 0;
+    const maxAffordableBudget = maxAffordable * unitPrice;
+    const rawPct = Math.min(
+      100,
+      Math.floor((maxAffordableBudget / totalTreasury) * 100),
+    );
+    return Math.floor(rawPct / 10) * 10;
+  }, [totalTreasury, unitPrice, maxAffordable]);
+
+  const activePct = useMemo(() => {
+    if (totalTreasury <= 0 || quantity <= 0) return 0;
+    if (isTenPercentStep) {
+      return Math.min(100, Math.round((currentCost / totalTreasury) * 10) * 10);
+    }
+    return Math.min(100, Math.round((currentCost / totalTreasury) * 100));
+  }, [totalTreasury, quantity, currentCost, isTenPercentStep]);
+
+  const handleSliderChange = (val: number) => {
+    if (isTenPercentStep) {
+      const targetBudget = Math.floor(totalTreasury * (val / 100));
+      const targetQty = Math.floor(targetBudget / unitPrice);
+      onQuantityChange(Math.min(maxAffordable, targetQty));
+    } else {
+      onQuantityChange(Math.min(maxAffordable, val));
+    }
+  };
+
+  const handleStepUp = () => {
+    if (isTenPercentStep) {
+      const nextPct = Math.min(maxAllowedPct, activePct + 10);
+      const targetBudget = Math.floor(totalTreasury * (nextPct / 100));
+      const targetQty = Math.floor(targetBudget / unitPrice);
+      onQuantityChange(Math.min(maxAffordable, targetQty));
+    } else {
+      onQuantityChange(Math.min(maxAffordable, quantity + 1));
+    }
+  };
+
+  const handleStepDown = () => {
+    if (isTenPercentStep) {
+      const prevPct = Math.max(0, activePct - 10);
+      const targetBudget = Math.floor(totalTreasury * (prevPct / 100));
+      const targetQty = Math.floor(targetBudget / unitPrice);
+      onQuantityChange(Math.max(0, targetQty));
+    } else {
+      onQuantityChange(Math.max(0, quantity - 1));
+    }
+  };
 
   return (
     <div
@@ -109,7 +164,7 @@ export function BatchUnitRow({
               <button
                 type="button"
                 disabled={quantity <= 0}
-                onClick={() => onQuantityChange(Math.max(0, quantity - step))}
+                onClick={handleStepDown}
                 className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
               >
                 -
@@ -131,10 +186,12 @@ export function BatchUnitRow({
               />
               <button
                 type="button"
-                disabled={quantity >= maxAffordable || maxAffordable <= 0}
-                onClick={() =>
-                  onQuantityChange(Math.min(maxAffordable, quantity + step))
+                disabled={
+                  quantity >= maxAffordable ||
+                  maxAffordable <= 0 ||
+                  (isTenPercentStep && activePct >= maxAllowedPct)
                 }
+                onClick={handleStepUp}
                 className="w-7 h-7 bg-secondary hover:bg-secondary/80 disabled:opacity-30 rounded-lg flex items-center justify-center font-bold text-xs text-foreground cursor-pointer shrink-0"
               >
                 +
@@ -145,20 +202,48 @@ export function BatchUnitRow({
       </div>
 
       {isUnlocked && (
-        <div className="pt-2.5 mt-2 border-t border-border/40 flex items-center gap-3">
-          <input
-            type="range"
-            min={0}
-            max={Math.max(0, maxAffordable)}
-            step={step}
-            disabled={maxAffordable <= 0}
-            value={quantity}
-            onChange={(e) => onQuantityChange(Number(e.target.value))}
-            className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
-          />
-          <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
-            گام: {PersianNumberFormatter.toPersianDigits(step)} یگان
-          </span>
+        <div className="pt-2.5 mt-2 border-t border-border/40 space-y-1.5 font-sans">
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={0}
+              max={
+                isTenPercentStep
+                  ? Math.max(0, maxAllowedPct)
+                  : Math.max(0, maxAffordable)
+              }
+              step={isTenPercentStep ? 10 : 1}
+              disabled={maxAffordable <= 0}
+              value={isTenPercentStep ? activePct : quantity}
+              onChange={(e) => handleSliderChange(Number(e.target.value))}
+              className="flex-1 accent-emerald-600 cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <PieChart
+                size={11}
+                className={activePct > 0 ? "text-gdp" : "text-muted-foreground"}
+              />
+              <span className="font-sans">سهم از خزانه:</span>
+              <strong
+                className={`font-bold ${
+                  activePct > 0 ? "text-gdp font-mono" : "text-foreground"
+                }`}
+              >
+                {PersianNumberFormatter.toPersianDigits(activePct)}٪
+              </strong>
+            </span>
+
+            <span>
+              {isTenPercentStep
+                ? `گام ۱۰٪ بودجه (${PersianNumberFormatter.toPersianDigits(
+                    Math.floor(tenPercentTreasury / unitPrice),
+                  )} یگان)`
+                : "گام: ۱ یگان"}
+            </span>
+          </div>
         </div>
       )}
     </div>
