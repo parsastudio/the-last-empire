@@ -42,6 +42,7 @@ export function useWebGLInteraction({
   const { resolveHoverInfo } = useHoverNationResolver({
     provincesMap,
     nationsMap,
+    humanNationId,
   });
 
   const handlePointerMove = (clientX: number, clientY: number) => {

@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import {
   getNationGdp,
@@ -13,6 +12,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import {
   NationGettersUtility,
   NationRelationResolver,
+  DiplomaticStance,
 } from "@geopolitics/domain";
 
 interface UseHoverNationResolverProps {
@@ -45,7 +45,7 @@ export function useHoverNationResolver({
         ? nationsMap[canonicalOwnerId] || nationsMap[province.ownerNationId]
         : null;
 
-      const realName = ownerNation ? ownerNation.name : "کشور ناشناخته";
+      const realName = ownerNation ? ownerNation.name : "کشور نامشخص";
       const flagCode = ownerNation ? ownerNation.flagCode : "IR";
       const realRank = ownerNation
         ? NationGettersUtility.getRank(ownerNation.id, nationsMap, provincesMap)
@@ -54,68 +54,62 @@ export function useHoverNationResolver({
       const realPop = ownerNation
         ? NationGettersUtility.getPopulation(ownerNation.id, provincesMap)
         : 0;
-      const governmentType = ownerNation
-        ? ownerNation.government.type
-        : "DEMOCRACY";
-
-      const totalPopulationText =
-        NationPresentationMapper.formatPopulation(realPop);
-
-      const summary = NationPresentationMapper.formatNationSummary(
-        canonicalOwnerId,
-        realName,
-        canonicalOwnerId,
-        flagCode,
-        realRank,
-        realGdp,
-        realPop,
-        governmentType,
-      );
 
       const provinceGdp = getProvinceGdp(province);
-      const provinceGdpText = PersianNumberFormatter.formatCurrency(
-        provinceGdp,
-        true,
-      );
-      const provincePopText = NationPresentationMapper.formatPopulation(
-        province.population,
-      );
       const provinceCapPct = Math.round(
         (province.population / Math.max(1, province.maxPopulationCapacity)) *
           100,
       );
 
       let stanceLabel = "دیپلماسی عادی";
+      let rawStance: DiplomaticStance = "NORMAL_DIPLOMACY";
+      let isOwnCountry = false;
+
       if (humanNationId && nationsMap && ownerNation) {
         const canonicalHuman =
           CountryRegistry.resolveCanonicalId(humanNationId);
         if (canonicalOwnerId === canonicalHuman) {
-          stanceLabel = "قلمرو تحت حاکمیت شما";
+          stanceLabel = "امپراتوری شما";
+          isOwnCountry = true;
         } else {
-          const humanNation = nationsMap[canonicalHuman];
+          const humanNation =
+            nationsMap[canonicalHuman] || nationsMap[humanNationId];
           const stance = NationRelationResolver.getStance(
             humanNation?.relations,
             canonicalOwnerId,
           );
-          if (stance === "WAR") stanceLabel = "وضعیت جنگی متخاصم";
-          else if (stance === "ALLIANCE") stanceLabel = "اتحاد کامل راهبردی";
-          else if (stance === "NON_AGGRESSION_PACT")
-            stanceLabel = "پیمان عدم تخاصم";
+          rawStance = stance;
+          if (stance === "WAR") stanceLabel = "وضعیت نبرد";
+          else if (stance === "ALLIANCE") stanceLabel = "اتحاد کامل";
+          else if (stance === "NON_AGGRESSION_PACT") stanceLabel = "عدم تخاصم";
+          else stanceLabel = "دیپلماسی عادی";
         }
       }
 
+      const popSharePct =
+        realPop > 0 ? Math.round((province.population / realPop) * 100) : 0;
+      const gdpSharePct =
+        realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
+
       return {
-        name: summary.name,
-        code: summary.code,
-        flagCode: summary.flagCode,
-        rank: summary.rank,
+        name: realName,
+        code: canonicalOwnerId,
+        flagCode,
+        rank: realRank,
         stance: stanceLabel,
+        rawStance,
+        isOwnCountry,
         regionName: province.nameFa,
-        regionPopulation: provincePopText,
-        regionGdpText: provinceGdpText,
+        regionPopulationText: PersianNumberFormatter.formatCompactNumber(
+          province.population,
+        ),
+        regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
         regionCapacityPercentage: provinceCapPct,
-        totalPopulation: totalPopulationText,
-        gdpText: summary.gdpText,
+        totalPopulationText:
+          PersianNumberFormatter.formatCompactNumber(realPop),
+        totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
+        popSharePct,
+        gdpSharePct,
       };
     },
     [provincesMap, nationsMap, humanNationId],
