@@ -57,8 +57,8 @@ void main() {
 
   float halfStroke = 0.95;
   float coastStroke = 1.90;
-  float provStroke = isHovered ? 0.45 : 0.70;
-  float edgeSoft = 0.45;
+  float provStroke = 0.70;
+  float edgeSoft = 0.40;
 
   float intBorder = 0.0;
   float coastBorder = 0.0;
@@ -139,16 +139,32 @@ void main() {
   }
 
   vec3 effectiveCenterColor = centerColor.rgb;
-  if (isHovered) {
-    effectiveCenterColor = effectiveCenterColor * 1.22 + vec3(0.04);
-  } else if (u_hoveredCountryId > 0) {
-    effectiveCenterColor = effectiveCenterColor * 0.94;
+  float blendOpacity = 0.70;
+
+  if (u_activeLayer == 1) {
+    if (u_hoveredCountryId > 0) {
+      if (isHovered) {
+        effectiveCenterColor = effectiveCenterColor * 1.15 + vec3(0.02);
+        blendOpacity = 0.85;
+      } else {
+        float gray = dot(effectiveCenterColor, vec3(0.299, 0.587, 0.114));
+        effectiveCenterColor = mix(vec3(gray), effectiveCenterColor, 0.20) * 0.45;
+        blendOpacity = 0.55;
+      }
+    }
+  } else {
+    if (isHovered) {
+      effectiveCenterColor = effectiveCenterColor * 1.20 + vec3(0.04);
+      blendOpacity = 0.78;
+    } else if (u_hoveredCountryId > 0) {
+      effectiveCenterColor = effectiveCenterColor * 0.94;
+    }
   }
 
-  vec3 baseColor = mix(terrainColor.rgb, effectiveCenterColor, isHovered ? 0.78 : 0.70);
+  vec3 baseColor = mix(terrainColor.rgb, effectiveCenterColor, blendOpacity);
 
   if (minEdgeDist < 12.0) {
-    float glowFactor = exp(-minEdgeDist / 4.5) * (isHovered ? 0.35 : 0.20);
+    float glowFactor = exp(-minEdgeDist / 4.5) * (isHovered ? 0.30 : 0.20);
     vec3 glowColor = effectiveCenterColor * 1.30 + vec3(0.03);
     baseColor = mix(baseColor, glowColor, glowFactor);
   }
@@ -158,13 +174,14 @@ void main() {
   baseColor = mix(baseColor, darkLineColor, mainBorderFactor * 0.90);
 
   if (isHovered && hoveredPerimeter > 0.0) {
-    vec3 rimGlowColor = mix(centerColor.rgb * 1.6 + vec3(0.2), vec3(1.0), 0.4);
-    baseColor = mix(baseColor, rimGlowColor, hoveredPerimeter * 0.80);
+    vec3 rimGlowColor = (u_activeLayer == 1)
+      ? vec3(0.25, 0.85, 1.0)
+      : mix(centerColor.rgb * 1.6 + vec3(0.2), vec3(1.0), 0.4);
+    baseColor = mix(baseColor, rimGlowColor, hoveredPerimeter * 0.85);
   }
 
-  vec3 internalLineColor = effectiveCenterColor * (isHovered ? 0.65 : 0.45);
-  float internalAlpha = isHovered ? 0.25 : 0.45;
-  baseColor = mix(baseColor, internalLineColor, provBorder * (1.0 - mainBorderFactor) * internalAlpha);
+  vec3 internalLineColor = effectiveCenterColor * 0.35;
+  baseColor = mix(baseColor, internalLineColor, provBorder * (1.0 - mainBorderFactor) * 0.60);
 
   fragColor = vec4(baseColor, 1.0);
 }

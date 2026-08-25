@@ -95,6 +95,12 @@ export function useWideReports({
   const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(defaultTurn);
 
   useEffect(() => {
+    if (selectedTurn !== "ALL") {
+      setSelectedTurn(availableTurns[0] ?? currentTurn);
+    }
+  }, [currentTurn]);
+
+  useEffect(() => {
     if (availableTurns.length > 0 && selectedTurn !== "ALL") {
       if (!availableTurns.includes(selectedTurn)) {
         setSelectedTurn(availableTurns[0]!);
