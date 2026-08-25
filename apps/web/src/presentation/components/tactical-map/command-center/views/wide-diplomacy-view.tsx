@@ -141,6 +141,7 @@ export function WideDiplomacyView({
             senderGdp={humanGdp}
             targetGdp={diplomacy.selectedTargetGdp}
             currentStance={diplomacy.selectedRelation.stance}
+            postWarCooldownTurns={humanNation?.postWarCooldownTurns || 0}
             onOpenProxy={handleOpenEspionage}
           />
         </div>

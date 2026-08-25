@@ -40,4 +40,5 @@ export const DEFAULT_NATION_MOCK: Nation = {
   globalReputation: 50,
   executedEspionageTiers: [],
   warFocusTargetId: null,
+  postWarCooldownTurns: 0,
 };

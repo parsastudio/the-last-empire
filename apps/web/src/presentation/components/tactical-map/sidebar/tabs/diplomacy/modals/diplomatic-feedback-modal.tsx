@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   AlertTriangle,
   Radio,
+  Globe,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -27,6 +28,7 @@ export interface DiplomaticProposalFeedback {
   targetName: string;
   targetFlagCode?: string;
   message?: string;
+  reputationChange?: number;
   defenseEvent?: ReactiveDefenseEvent;
 }
 
@@ -196,40 +198,53 @@ export function DiplomaticFeedbackModal({
           )}
         </div>
 
-        <div className="space-y-1.5 px-2">
+        <div className="space-y-2.5 px-2">
           <div className="flex items-center justify-center gap-2 text-base font-extrabold text-foreground">
             <span className="text-xl select-none">{flagEmoji}</span>
             <span>{feedback.targetName}</span>
           </div>
 
           {isCancel ? (
-            <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-              معاهده پیشین با دولت{" "}
-              <strong className="text-foreground">{feedback.targetName}</strong>{" "}
-              لغو گردید و سطح روابط با موفقیت{" "}
-              <span className="text-amber-400 font-black">تنزل یافت</span>.
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                معاهده پیشین با دولت{" "}
+                <strong className="text-foreground">
+                  {feedback.targetName}
+                </strong>{" "}
+                لغو گردید و سطح روابط با موفقیت{" "}
+                <span className="text-amber-400 font-black">تنزل یافت</span>.
+              </p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-military/10 border border-military/30 rounded-full text-[11px] font-mono font-bold text-military">
+                <Globe size={12} />
+                <span>۲- امتیاز اعتبار جهانی (تنزل معاهده)</span>
+              </div>
+            </div>
+          ) : isAccepted ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                دولت{" "}
+                <strong className="text-foreground">
+                  {feedback.targetName}
+                </strong>{" "}
+                درخواست{" "}
+                <span className="font-black text-emerald-400">
+                  {proposalName}
+                </span>{" "}
+                شما را{" "}
+                <span className="font-black text-emerald-400">پذیرفت</span>.
+              </p>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">
+                <Globe size={12} />
+                <span>۱+ امتیاز اعتبار جهانی</span>
+              </div>
+            </div>
           ) : (
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
               دولت{" "}
               <strong className="text-foreground">{feedback.targetName}</strong>{" "}
               درخواست{" "}
-              <span
-                className={`font-black ${
-                  isAccepted ? "text-emerald-400" : "text-rose-400"
-                }`}
-              >
-                {proposalName}
-              </span>{" "}
-              شما را{" "}
-              <span
-                className={`font-black ${
-                  isAccepted ? "text-emerald-400" : "text-rose-400"
-                }`}
-              >
-                {isAccepted ? "پذیرفت" : "رد کرد"}
-              </span>
-              .
+              <span className="font-black text-rose-400">{proposalName}</span>{" "}
+              شما را <span className="font-black text-rose-400">رد کرد</span>.
             </p>
           )}
         </div>

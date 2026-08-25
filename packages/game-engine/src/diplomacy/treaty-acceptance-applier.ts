@@ -51,14 +51,7 @@ export class TreatyAcceptanceApplier {
       proposal.proposalType,
     );
 
-    let reputationBonus = 0;
-    if (proposal.proposalType === "NON_AGGRESSION_PACT") {
-      reputationBonus = 1;
-    } else if (proposal.proposalType === "FULL_ALLIANCE") {
-      reputationBonus = 1;
-    } else if (proposal.proposalType === "PEACE_TREATY") {
-      reputationBonus = 2;
-    }
+    const reputationBonus = 1;
 
     let senderWarFocus = sender.warFocusTargetId;
     let receiverWarFocus = receiver.warFocusTargetId;

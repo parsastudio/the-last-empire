@@ -37,10 +37,7 @@ export function DevelopmentUpgradesSection({
 
     try {
       const action = ActionFactory.upgradeDevelopment(nationId);
-      await dispatchAction(
-        action,
-        `طرح شکوفایی اقتصادی (سطح ${developmentLevel + 1}) با موفقیت به اجرا درآمد.`,
-      );
+      await dispatchAction(action);
     } finally {
       setIsSubmitting(false);
     }

@@ -137,6 +137,7 @@ export class NationProfileAssigner {
       globalReputation: 50,
       executedEspionageTiers: [],
       warFocusTargetId: null,
+      postWarCooldownTurns: 0,
     };
   }
 

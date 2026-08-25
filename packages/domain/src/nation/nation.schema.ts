@@ -33,6 +33,7 @@ export const NationSchema = z.object({
   globalReputation: z.number().min(-100).max(100),
   executedEspionageTiers: z.array(z.number()).default([]),
   warFocusTargetId: z.string().nullable().optional(),
+  postWarCooldownTurns: z.number().nonnegative().default(0),
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;

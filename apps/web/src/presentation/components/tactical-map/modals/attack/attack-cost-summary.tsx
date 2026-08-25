@@ -11,6 +11,7 @@ interface AttackCostSummaryProps {
   canAfford: boolean;
   hasSelectedInfantry: boolean;
   isSubmitting: boolean;
+  isPostWarCooldown?: boolean;
   targetRegionName: string;
   isLandNeighbor: boolean;
   isNavalValid: boolean;
@@ -26,6 +27,7 @@ export function AttackCostSummary({
   canAfford,
   hasSelectedInfantry,
   isSubmitting,
+  isPostWarCooldown = false,
   targetRegionName,
   isLandNeighbor,
   isNavalValid,
@@ -33,7 +35,11 @@ export function AttackCostSummary({
 }: AttackCostSummaryProps) {
   const isAccessible = isLandNeighbor || isNavalValid;
   const isButtonDisabled =
-    !isAccessible || !hasSelectedInfantry || !canAfford || isSubmitting;
+    !isAccessible ||
+    !hasSelectedInfantry ||
+    !canAfford ||
+    isSubmitting ||
+    isPostWarCooldown;
 
   const formattedRegionName = targetRegionName.startsWith("استان")
     ? targetRegionName
@@ -128,13 +134,15 @@ export function AttackCostSummary({
         <span>
           {isSubmitting
             ? "در حال ثبت دستور و گسیل ارتش..."
-            : !isAccessible
-              ? "عدم امکان دسترسی به منطقه تهاجم"
-              : !hasSelectedInfantry
-                ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
-                : !canAfford
-                  ? "موجودی خزانه ناکافی جهت تأمین مخارج"
-                  : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
+            : isPostWarCooldown
+              ? "غیرمجاز به دلیل دوره سردسازی پس از جنگ"
+              : !isAccessible
+                ? "عدم امکان دسترسی به منطقه تهاجم"
+                : !hasSelectedInfantry
+                  ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
+                  : !canAfford
+                    ? "موجودی خزانه ناکافی جهت تأمین مخارج"
+                    : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
         </span>
       </button>
     </div>

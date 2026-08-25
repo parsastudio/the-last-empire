@@ -66,10 +66,7 @@ export function TaxControlCard({
 
   const handleApplyTax = async () => {
     const action = ActionFactory.setTaxRate(nationId, taxRate);
-    await dispatchAction(
-      action,
-      `سیاست مالیاتی ${currentPolicy.label} (${PersianNumberFormatter.toPersianDigits(taxRate)}٪) به تصویب رسید.`,
-    );
+    await dispatchAction(action);
   };
 
   return (

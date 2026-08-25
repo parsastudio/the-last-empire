@@ -29,6 +29,10 @@ export class AIWarDeclarationEvaluator {
       return null;
     }
 
+    if ((nation.postWarCooldownTurns || 0) > 0) {
+      return null;
+    }
+
     for (const key in nation.relations) {
       const rel = nation.relations[key];
       if (rel && rel.stance === "WAR") {

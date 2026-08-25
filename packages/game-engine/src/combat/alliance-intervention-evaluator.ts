@@ -37,6 +37,7 @@ export class AllianceInterventionEvaluator {
       if (
         !ally ||
         !ally.isAlive ||
+        !ally.isAi ||
         ally.id === attacker.id ||
         ally.id === defender.id
       ) {
