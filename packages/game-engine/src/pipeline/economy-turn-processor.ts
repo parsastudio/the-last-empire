@@ -48,23 +48,39 @@ export class EconomyTurnProcessor {
         currentProvincesMap,
       );
 
-      const addedTreasury = AiEconomyCalculator.calculateEffectiveTurnIncome(
+      const baseIncome = AiEconomyCalculator.calculateTurnIncome(
         gdp,
         nationRank,
         aliveCount,
-        currentArmyValuation,
         updated.government.type,
       );
 
-      let netAddedTreasury = addedTreasury;
+      const maxArmyValuation = AiEconomyCalculator.calculateMaxArmyValuation(
+        gdp,
+        nationRank,
+        aliveCount,
+        updated.government.type,
+      );
+
+      const maintenanceCost = AiEconomyCalculator.calculateArmyMaintenanceCost(
+        baseIncome,
+        currentArmyValuation,
+        maxArmyValuation,
+      );
+
+      let actualRepayment = 0;
       let newDebt = updated.nationalDebt;
 
-      if (newDebt > 0 && addedTreasury > 0) {
-        const maxRepayment = Math.floor(addedTreasury * 0.3);
-        const actualRepayment = Math.min(newDebt, maxRepayment);
+      if (newDebt > 0 && baseIncome > 0) {
+        const maxRepayment = Math.floor(baseIncome * 0.3);
+        actualRepayment = Math.min(newDebt, maxRepayment);
         newDebt -= actualRepayment;
-        netAddedTreasury -= actualRepayment;
       }
+
+      const netAddedTreasury = Math.max(
+        0,
+        baseIncome - maintenanceCost - actualRepayment,
+      );
 
       updated = {
         ...updated,

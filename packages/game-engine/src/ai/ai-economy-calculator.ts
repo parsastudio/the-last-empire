@@ -68,7 +68,19 @@ export class AiEconomyCalculator {
       return 0;
     }
     const ratio = Math.min(1.0, currentArmyValuation / maxArmyValuation);
-    return ratio * 0.2;
+    return ratio * 0.3;
+  }
+
+  public static calculateArmyMaintenanceCost(
+    baseIncome: number,
+    currentArmyValuation: number,
+    maxArmyValuation: number,
+  ): number {
+    const rate = this.calculateArmyMaintenanceDeductionRate(
+      currentArmyValuation,
+      maxArmyValuation,
+    );
+    return Math.floor(baseIncome * rate);
   }
 
   public static calculateEffectiveTurnIncome(
@@ -90,10 +102,11 @@ export class AiEconomyCalculator {
       totalAliveCount,
       govType,
     );
-    const deductionRate = this.calculateArmyMaintenanceDeductionRate(
+    const maintenanceCost = this.calculateArmyMaintenanceCost(
+      baseIncome,
       currentArmyValuation,
       maxValuation,
     );
-    return Math.floor(baseIncome * (1.0 - deductionRate));
+    return Math.max(0, baseIncome - maintenanceCost);
   }
 }
