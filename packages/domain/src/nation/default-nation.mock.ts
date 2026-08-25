@@ -38,7 +38,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   relations: {},
   activeModifiers: [],
   globalReputation: 50,
-  doctrines: { unlockedDoctrines: [] },
   executedEspionageTiers: [],
   warFocusTargetId: null,
 };

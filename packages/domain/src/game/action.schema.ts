@@ -65,13 +65,6 @@ export const ExecuteEspionageActionSchema = z.object({
   tier: EspionageTierSchema,
 });
 
-export const UnlockDoctrineActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("UNLOCK_DOCTRINE"),
-  doctrineId: z.string(),
-});
-
 export const RepayDebtActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -121,7 +114,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   RespondDiplomaticProposalActionSchema,
   UpgradeDevelopmentActionSchema,
   ExecuteEspionageActionSchema,
-  UnlockDoctrineActionSchema,
   RepayDebtActionSchema,
   RequestLoanActionSchema,
   CancelRecruitmentActionSchema,
@@ -154,7 +146,6 @@ export type UpgradeDevelopmentAction = z.infer<
 export type ExecuteEspionageAction = z.infer<
   typeof ExecuteEspionageActionSchema
 >;
-export type UnlockDoctrineAction = z.infer<typeof UnlockDoctrineActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
 export type CancelRecruitmentAction = z.infer<

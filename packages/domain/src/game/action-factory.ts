@@ -7,7 +7,6 @@ import {
   RespondDiplomaticProposalAction,
   UpgradeDevelopmentAction,
   ExecuteEspionageAction,
-  UnlockDoctrineAction,
   RepayDebtAction,
   RequestLoanAction,
   CancelRecruitmentAction,
@@ -137,18 +136,6 @@ export class ActionFactory {
       type: "EXECUTE_ESPIONAGE_OPERATION",
       targetNationId,
       tier,
-    };
-  }
-
-  public static unlockDoctrine(
-    nationId: string,
-    doctrineId: string,
-  ): UnlockDoctrineAction {
-    return {
-      id: this.createId("doctrine"),
-      nationId,
-      type: "UNLOCK_DOCTRINE",
-      doctrineId,
     };
   }
 

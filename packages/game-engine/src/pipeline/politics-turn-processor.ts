@@ -2,7 +2,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
-import { DoctrinesManager } from "@/engine/politics/doctrines-manager";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@geopolitics/domain";
 
@@ -57,15 +56,9 @@ export class PoliticsTurnProcessor {
     };
 
     if (!isAtWar) {
-      const multiplier = DoctrinesManager.getReputationGainMultiplier(
-        updated.doctrines?.unlockedDoctrines,
-      );
       updated = {
         ...updated,
-        globalReputation: Math.min(
-          100,
-          updated.globalReputation + 1 * multiplier,
-        ),
+        globalReputation: Math.min(100, updated.globalReputation + 1),
       };
     }
 
