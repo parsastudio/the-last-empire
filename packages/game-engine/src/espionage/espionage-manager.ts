@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import {
   EspionageTier,
   EspionageExecutionResult,
@@ -208,15 +208,88 @@ export class EspionageManager {
       }
     }
 
-    const logEntry = TurnLogBuilder.createNationalLog(
+    const newLogs: TurnLogEntry[] = [];
+
+    const attackerLog = TurnLogBuilder.createNationalLog(
       state.currentTurn,
       source.id,
       "ESPIONAGE",
       outcome === "CRITICAL_FAILURE" ? "WARNING" : "INFO",
       "ESPIONAGE_OPERATION",
-      { details: message, tier, outcome },
+      { details: message, tier, outcome, role: "ATTACKER" },
       target.id,
     );
+    newLogs.push(attackerLog);
+
+    if (outcome === "CLEAN_SUCCESS") {
+      if (tier === 2) {
+        const defenderLog = TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          target.id,
+          "ESPIONAGE",
+          "CRITICAL",
+          "ESPIONAGE_OPERATION",
+          {
+            details:
+              "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید (عاملان ناشناس بدون رد متواری شدند).",
+            tier,
+            outcome,
+            role: "DEFENDER",
+          },
+        );
+        newLogs.push(defenderLog);
+      }
+    } else if (outcome === "COMPROMISED_SUCCESS") {
+      let defenderMsg = "";
+      if (tier === 1) {
+        defenderMsg = `گزارش ضدجاسوسی: تلاش برای شنود سیگنالی و نفوذ به مراکز فرماندهی کشف شد و فرکانس‌های ارسالی از کشور ${source.name} رصد گردید.`;
+      } else if (tier === 2) {
+        defenderMsg = `هشدار تروریستی: خرابکاری در پایگاه‌های تسلیحاتی رخ داد، اما تیم نفوذی لو رفت و مشخص شد عملیات با هدایت کشور ${source.name} بوده است.`;
+      } else {
+        defenderMsg = `رخنه امنیتی: سرورهای تحقیقاتی هدف نفوذ سایبری قرار گرفتند. سازمان ضدجاسوسی منشأ حمله را در کشور ${source.name} شناسایی کرد.`;
+      }
+
+      const defenderLog = TurnLogBuilder.createNationalLog(
+        state.currentTurn,
+        target.id,
+        "ESPIONAGE",
+        "CRITICAL",
+        "ESPIONAGE_OPERATION",
+        {
+          details: defenderMsg,
+          tier,
+          outcome,
+          role: "DEFENDER",
+        },
+        source.id,
+      );
+      newLogs.push(defenderLog);
+    } else if (outcome === "CRITICAL_FAILURE") {
+      let defenderMsg = "";
+      if (tier === 1) {
+        defenderMsg = `موفقیت ضدجاسوسی: شبکه شنود و سیگنال‌های نفوذی ارسال‌شده از کشور ${source.name} پیش از نفوذ خنثی و مسدود گردید.`;
+      } else if (tier === 2) {
+        defenderMsg = `پیروزی امنیتی: تیم خرابکاری اعزامی از کشور ${source.name} پیش از هرگونه اقدام در پایگاه‌های نظامی شناسایی و دستگیر شد.`;
+      } else {
+        defenderMsg = `دفاع سایبری: نفوذ هکرهای وابسته به کشور ${source.name} به سرورهای محرمانه دفع شد و کلیه کدهای نفوذی مسدود گردیدند.`;
+      }
+
+      const defenderLog = TurnLogBuilder.createNationalLog(
+        state.currentTurn,
+        target.id,
+        "ESPIONAGE",
+        "INFO",
+        "ESPIONAGE_OPERATION",
+        {
+          details: defenderMsg,
+          tier,
+          outcome,
+          role: "DEFENDER",
+        },
+        source.id,
+      );
+      newLogs.push(defenderLog);
+    }
 
     const updatedNations = {
       ...state.nations,
@@ -229,7 +302,7 @@ export class EspionageManager {
       seed: effectivePrng.getSeed(),
       provinces: updatedProvinces,
       nations: updatedNations,
-      turnLogs: [...state.turnLogs, logEntry],
+      turnLogs: [...state.turnLogs, ...newLogs],
     };
 
     const result: EspionageExecutionResult = {

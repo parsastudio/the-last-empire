@@ -3,13 +3,11 @@ import { TaxControlCard } from "@/presentation/components/tactical-map/sidebar/t
 import { TariffControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/tariff-control-card";
 import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/imf-loan-card";
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
-import { PopulationWelfareCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/population-welfare-card";
 import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
 import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
 
 interface WidePoliticsViewProps {
   nation: Nation;
@@ -23,21 +21,11 @@ export function WidePoliticsView({
   provincesMap,
 }: WidePoliticsViewProps) {
   const gdp = getNationGdp(nation, provincesMap);
-  const pop = NationGettersUtility.getPopulation(nation.id, provincesMap);
-  const maxCap = NationGettersUtility.getMaxPopulationCapacity(
-    nation.id,
-    provincesMap,
-  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <ActiveModifiersCard modifiers={nation.activeModifiers} />
-        <PopulationWelfareCard
-          population={pop}
-          maxPopulationCapacity={maxCap}
-          stability={nation.government.stability}
-        />
         <TaxControlCard
           taxRate={nation.taxRate}
           baseGdp={gdp}

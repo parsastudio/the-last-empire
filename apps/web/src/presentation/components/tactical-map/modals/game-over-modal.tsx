@@ -8,9 +8,9 @@ import {
   Users,
   Home,
   Crown,
-  Sparkles,
   Compass,
   Skull,
+  Eye,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
@@ -83,7 +83,7 @@ interface GameOverModalProps {
   finalGdp: string;
   finalPopulation: string;
   conqueredPixels: string;
-  onContinueSandbox?: () => void;
+  onInspectOrContinue: () => void;
   onRestart: () => void;
   onHome: () => void;
 }
@@ -100,7 +100,7 @@ export function GameOverModal({
   finalGdp,
   finalPopulation,
   conqueredPixels,
-  onContinueSandbox,
+  onInspectOrContinue,
   onRestart,
   onHome,
 }: GameOverModalProps) {
@@ -129,10 +129,10 @@ export function GameOverModal({
       subtitle={
         isVictory
           ? "حاکمیت شما با اقتدار کامل توانست مقدرات سیاسی و اقتصادی جهان را تسخیر کند."
-          : `قلمرو و ساختار حاکمیتی شما در جریان تحولات نظامی و سیاسی از بین رفت.`
+          : "قلمرو و ساختار حاکمیتی شما در جریان تحولات نظامی و سیاسی از بین رفت."
       }
       maxWidthClass="max-w-lg"
-      onClose={onContinueSandbox || onRestart}
+      onClose={onInspectOrContinue}
     >
       <div className="space-y-4 text-right dir-rtl font-sans">
         <div
@@ -212,15 +212,21 @@ export function GameOverModal({
         </div>
 
         <div className="space-y-2.5 pt-2">
-          {onContinueSandbox && (
-            <button
-              onClick={onContinueSandbox}
-              className="w-full py-3.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xl shadow-emerald-600/20 hover:scale-[1.01] active:scale-[0.99] transition-all border border-emerald-400/40"
-            >
-              <Compass size={16} />
-              <span>ادامه سلطنت و جهان‌گشایی آزاد (حالت سندباکس)</span>
-            </button>
-          )}
+          <button
+            onClick={onInspectOrContinue}
+            className={`w-full py-3.5 text-white rounded-2xl font-black text-xs flex items-center justify-center gap-2 cursor-pointer shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all border ${
+              isVictory
+                ? "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/20 border-emerald-400/40"
+                : "bg-gradient-to-r from-slate-700 via-slate-600 to-slate-700 hover:from-slate-600 hover:to-slate-500 shadow-black/30 border-slate-500/40"
+            }`}
+          >
+            {isVictory ? <Compass size={16} /> : <Eye size={16} />}
+            <span>
+              {isVictory
+                ? "ادامه سلطنت و جهان‌گشایی آزاد (حالت سندباکس)"
+                : "پایش نقشه جهان و تحلیل وقایع تاریخی (حالت تماشاچی)"}
+            </span>
+          </button>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <button

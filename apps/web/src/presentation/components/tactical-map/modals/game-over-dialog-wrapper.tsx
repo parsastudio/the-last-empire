@@ -167,7 +167,7 @@ export function GameOverDialogWrapper({
   const isModalOpen =
     isVictoryDebriefOpen || (!gameState.isSandboxMode && !isDismissed);
 
-  const handleContinueSandbox = () => {
+  const handleInspectOrContinue = () => {
     setIsDismissed(true);
     setIsVictoryDebriefOpen(false);
     void enableSandboxMode();
@@ -186,9 +186,7 @@ export function GameOverDialogWrapper({
       finalGdp={metrics.finalGdp}
       finalPopulation={metrics.finalPopulation}
       conqueredPixels={metrics.conqueredPixels}
-      onContinueSandbox={
-        metrics.isPlayerDefeated ? undefined : handleContinueSandbox
-      }
+      onInspectOrContinue={handleInspectOrContinue}
       onRestart={() => router.push("/select-nation")}
       onHome={() => router.push("/")}
     />
