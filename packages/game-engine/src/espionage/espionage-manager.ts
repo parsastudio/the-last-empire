@@ -81,10 +81,12 @@ export class EspionageManager {
     }
 
     const executedTiers = source.executedEspionageTiers || [];
-    if (executedTiers.includes(tier)) {
+    const executionKey = `${canonicalTarget}:${tier}`;
+
+    if (executedTiers.includes(executionKey)) {
       throw new GameError(
         "INVALID_ACTION",
-        `عملیات سطح ${tier} در این نوبت قبلاً اجرا شده است. هر سطح فقط ۱ بار در هر نوبت مجاز است.`,
+        `عملیات سطح ${tier} علیه این کشور در این نوبت قبلاً اجرا شده است.`,
       );
     }
 
@@ -127,7 +129,7 @@ export class EspionageManager {
     let updatedSource: Nation = {
       ...source,
       treasury: source.treasury - cost,
-      executedEspionageTiers: [...executedTiers, tier],
+      executedEspionageTiers: [...executedTiers, executionKey],
     };
     let updatedTarget: Nation = { ...target };
     let updatedProvinces = { ...state.provinces };

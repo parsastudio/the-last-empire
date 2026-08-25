@@ -82,13 +82,9 @@ export class AIEspionagePlanner {
     allNations: Record<string, Nation>,
     provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
-    executedTiers: number[],
+    executedTiers: string[],
     provincesByOwnerMap?: Map<string, Province[]>,
   ): { action: GameAction; cost: number } | null {
-    if (executedTiers.includes(2)) {
-      return null;
-    }
-
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[
           CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
@@ -96,6 +92,11 @@ export class AIEspionagePlanner {
       : null;
 
     if (activeWarTarget && activeWarTarget.isAlive) {
+      const canonical = CountryRegistry.resolveCanonicalId(activeWarTarget.id);
+      if (executedTiers.includes(`${canonical}:2`)) {
+        return null;
+      }
+
       const targetGdp = getNationGdp(
         activeWarTarget,
         provincesMap,
@@ -127,6 +128,10 @@ export class AIEspionagePlanner {
 
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      if (executedTiers.includes(`${canonicalTarget}:2`)) {
+        continue;
+      }
+
       const target = allNations[canonicalTarget] || allNations[targetId];
 
       if (!target || !target.isAlive || target.id === nation.id) {
@@ -181,15 +186,11 @@ export class AIEspionagePlanner {
     allNations: Record<string, Nation>,
     provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
-    executedTiers: number[],
+    executedTiers: string[],
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
     provincesByOwnerMap?: Map<string, Province[]>,
   ): { action: GameAction; cost: number } | null {
-    if (executedTiers.includes(3)) {
-      return null;
-    }
-
     const targets =
       reachableTargets ??
       GeopoliticalReachResolver.getReachableTargets(
@@ -207,6 +208,10 @@ export class AIEspionagePlanner {
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
+      if (executedTiers.includes(`${canonicalTarget}:3`)) {
+        continue;
+      }
+
       const rel =
         nation.relations[canonicalTarget] || nation.relations[target.id];
 

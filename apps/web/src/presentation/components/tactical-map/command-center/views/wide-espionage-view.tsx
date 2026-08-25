@@ -113,7 +113,7 @@ export function WideEspionageView({
                   borderColorClass="border-primary/40"
                   cost={form.tier1Cost}
                   successRate={form.tier1SuccessRate}
-                  isExecutedThisTurn={form.executedTiers.includes(1)}
+                  isExecutedThisTurn={form.isTierExecuted(1)}
                   canAfford={nation.treasury >= form.tier1Cost}
                   isExecuting={form.isSubmitting}
                   onExecute={() => form.handleExecute(1)}
@@ -128,7 +128,7 @@ export function WideEspionageView({
                   borderColorClass="border-military/40"
                   cost={form.tier2Cost}
                   successRate={form.tier2SuccessRate}
-                  isExecutedThisTurn={form.executedTiers.includes(2)}
+                  isExecutedThisTurn={form.isTierExecuted(2)}
                   canAfford={nation.treasury >= form.tier2Cost}
                   isExecuting={form.isSubmitting}
                   onExecute={() => form.handleExecute(2)}
@@ -143,7 +143,7 @@ export function WideEspionageView({
                   borderColorClass="border-amber-500/40"
                   cost={form.tier3Cost}
                   successRate={form.tier3SuccessRate}
-                  isExecutedThisTurn={form.executedTiers.includes(3)}
+                  isExecutedThisTurn={form.isTierExecuted(3)}
                   canAfford={nation.treasury >= form.tier3Cost}
                   isDisabledCondition={
                     form.techSuperiority.totalAvailablePoints <= 0

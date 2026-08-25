@@ -48,6 +48,7 @@ export class PoliticsTurnProcessor {
 
     updated = {
       ...updated,
+      executedEspionageTiers: [],
       government: {
         ...updated.government,
         stability: newStability,

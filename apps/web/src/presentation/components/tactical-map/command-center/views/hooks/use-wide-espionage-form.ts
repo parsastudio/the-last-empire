@@ -135,11 +135,21 @@ export function useWideEspionageForm({
     return EspionageManager.calculateTechSuperiority(
       nation,
       selectedTargetNation,
-      provincesMap,
     );
-  }, [nation, selectedTargetNation, provincesMap]);
+  }, [nation, selectedTargetNation]);
 
-  const executedTiers = nation.executedEspionageTiers || [];
+  const isTierExecuted = useCallback(
+    (tier: EspionageTier) => {
+      if (!selectedTargetId) return false;
+      const canonical = CountryRegistry.resolveCanonicalId(selectedTargetId);
+      const list = nation.executedEspionageTiers || [];
+      return (
+        list.includes(`${canonical}:${tier}`) ||
+        list.includes(`${selectedTargetId}:${tier}`)
+      );
+    },
+    [selectedTargetId, nation.executedEspionageTiers],
+  );
 
   const handleExecute = useCallback(
     async (tier: EspionageTier) => {
@@ -174,7 +184,7 @@ export function useWideEspionageForm({
     tier2SuccessRate,
     tier3SuccessRate,
     techSuperiority,
-    executedTiers,
+    isTierExecuted,
     lastResult,
     isSubmitting,
     handleExecute,
