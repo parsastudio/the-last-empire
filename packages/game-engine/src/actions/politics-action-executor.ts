@@ -10,7 +10,10 @@ import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
-import { AIEmergencyDefenseManager } from "@/engine/ai/ai-emergency-defense-manager";
+import {
+  AIEmergencyDefenseManager,
+  ReactiveDefenseEvent,
+} from "@/engine/ai/ai-emergency-defense-manager";
 
 export interface PoliticsExecutionOutput {
   newState: GameState;
@@ -276,15 +279,19 @@ export class PoliticsActionExecutor {
             },
           };
 
+          let defenseEvent: ReactiveDefenseEvent = { type: "NONE" };
+
           if (receiver.isAi) {
             const liveReceiver = newState.nations[targetKey]!;
             const liveNation = newState.nations[sourceKey]!;
-            newState =
+            const reactiveResult =
               AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
                 newState,
                 liveNation,
                 liveReceiver,
               );
+            newState = reactiveResult.newState;
+            defenseEvent = reactiveResult.defenseEvent;
           }
 
           return {
@@ -295,7 +302,7 @@ export class PoliticsActionExecutor {
               targetNationId: receiver.id,
               targetName: receiver.name,
               targetFlagCode: receiver.flagCode,
-              message: `بیانیه رسمی اعلان جنگ به کشور ${receiver.name} ابلاغ گردید و تمامی روابط دیپلماتیک قطع شد.`,
+              defenseEvent,
             },
           };
         }

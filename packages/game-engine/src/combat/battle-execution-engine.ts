@@ -48,11 +48,13 @@ export class BattleExecutionEngine {
 
     let workingState = state;
     if (baseDefender.isAi) {
-      workingState = AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
-        workingState,
-        baseAttacker,
-        baseDefender,
-      );
+      const reactiveResult =
+        AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
+          workingState,
+          baseAttacker,
+          baseDefender,
+        );
+      workingState = reactiveResult.newState;
     }
 
     const attacker =
