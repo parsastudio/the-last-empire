@@ -1,0 +1,80 @@
+import React from "react";
+import { ArrowRight, Wallet, Zap } from "lucide-react";
+import { Nation } from "@/domain/nation/nation.schema";
+import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
+import { AlliedUnitBuyCard } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-card";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+
+interface AlliedUnitBuyGridProps {
+  buyerNation: Nation;
+  sellerNation: Nation;
+  onBack: () => void;
+}
+
+export function AlliedUnitBuyGrid({
+  buyerNation,
+  sellerNation,
+  onBack,
+}: AlliedUnitBuyGridProps) {
+  const { batchList, floatingFeedbacks, handleBuyAlliedBatch } =
+    useAlliedArmsProcurement({
+      buyerNation,
+      sellerNation,
+    });
+
+  const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
+
+  return (
+    <div className="space-y-4 font-sans dir-rtl text-right animate-fade-smooth">
+      <div className="flex items-center justify-between bg-secondary/40 border border-border/70 p-3.5 rounded-2xl">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+          >
+            <ArrowRight size={14} />
+            <span>فهرست هم‌پیمانان</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl select-none">{sellerFlag}</span>
+            <div>
+              <h4 className="text-xs font-black text-foreground">
+                واردات تسلیحاتی از {sellerNation.name}
+              </h4>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                سطح فناوری دفاعی صادرکننده: لِوِل{" "}
+                {PersianNumberFormatter.toPersianDigits(
+                  sellerNation.military.techLevel,
+                )}{" "}
+                (تحویل آنی در همین نوبت با ضریب ۱.۵x)
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 font-mono text-[11px] bg-secondary/80 border border-border/60 px-3 py-1.5 rounded-xl">
+          <Wallet size={13} className="text-primary" />
+          <span className="text-muted-foreground font-sans">
+            خزانه ملی شما:
+          </span>
+          <span className="font-extrabold text-gdp text-xs">
+            {PersianNumberFormatter.formatCurrency(buyerNation.treasury)}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        {batchList.map((item) => (
+          <AlliedUnitBuyCard
+            key={item.type}
+            info={item}
+            feedbacks={floatingFeedbacks[item.type]}
+            onBuy={handleBuyAlliedBatch}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

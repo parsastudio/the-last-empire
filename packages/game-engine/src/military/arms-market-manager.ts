@@ -80,7 +80,7 @@ export class ArmsMarketManager {
       seller.industrialLevel,
     );
 
-    const marketPricePerUnit = sellerUnitPrice * 2;
+    const marketPricePerUnit = Math.floor(sellerUnitPrice * 1.5);
     const totalCost = marketPricePerUnit * quantity;
 
     if (buyer.treasury < totalCost) {
@@ -90,7 +90,7 @@ export class ArmsMarketManager {
       );
     }
 
-    const sellerProfit = sellerUnitPrice * quantity;
+    const sellerProfit = Math.floor(sellerUnitPrice * 0.5) * quantity;
 
     const updatedBuyerMilitary = MilitaryInventoryHelper.addUnits(
       buyer.military,

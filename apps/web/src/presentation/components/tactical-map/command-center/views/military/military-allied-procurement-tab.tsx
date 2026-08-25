@@ -1,0 +1,209 @@
+import React, { useState, useMemo } from "react";
+import { ShieldAlert, Anchor, Users, Search, ShoppingCart } from "lucide-react";
+import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
+import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@geopolitics/domain";
+import {
+  AlliedSellerCard,
+  AlliedSellerItem,
+} from "@/presentation/components/tactical-map/command-center/views/military/components/allied-seller-card";
+import { AlliedUnitBuyGrid } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-grid";
+
+interface MilitaryAlliedProcurementTabProps {
+  nation: Nation;
+  nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
+  selectedTargetCode?: string | null;
+}
+
+export function MilitaryAlliedProcurementTab({
+  nation,
+  nationsMap,
+  provincesMap,
+  selectedTargetCode,
+}: MilitaryAlliedProcurementTabProps) {
+  const [selectedSellerId, setSelectedSellerId] = useState<string | null>(
+    selectedTargetCode
+      ? CountryRegistry.resolveCanonicalId(selectedTargetCode)
+      : null,
+  );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const isSanctioned = (nation.globalReputation ?? 50) <= -30;
+
+  const isNavalBlockaded = useMemo(() => {
+    if (!nationsMap) return false;
+    const buyerNavalPower =
+      (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
+
+    for (const partner of Object.values(nationsMap)) {
+      if (!partner.isAlive || partner.id === nation.id) continue;
+      const canonical = CountryRegistry.resolveCanonicalId(partner.id);
+      const partnerRel =
+        nation.relations[canonical] || nation.relations[partner.id];
+
+      if (partnerRel?.stance === "WAR") {
+        const enemyNavalPower =
+          (partner.military.navalFleet || 0) *
+          (partner.military.techLevel || 1);
+        if (enemyNavalPower > buyerNavalPower) return true;
+      }
+    }
+    return false;
+  }, [nationsMap, nation]);
+
+  const sellerOptions = useMemo<AlliedSellerItem[]>(() => {
+    if (!nationsMap) return [];
+    const rankLookup = NationGettersUtility.calculateRankMap(
+      nationsMap,
+      provincesMap,
+    );
+
+    return Object.values(nationsMap)
+      .filter((n) => n.id !== nation.id && n.isAlive)
+      .map((n) => {
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
+        const rel = nation.relations[canonical] || nation.relations[n.id];
+        const alignment = rel ? (rel.alignment ?? 0) : 0;
+        const tension = rel ? (rel.tension ?? 10) : 10;
+        const isEligible = alignment >= 15 && tension < 60;
+        const rank = rankLookup.get(canonical) ?? 99;
+
+        return {
+          id: canonical,
+          name: n.name,
+          flagCode: n.flagCode || "IR",
+          techLevel: n.military.techLevel,
+          alignment,
+          rank,
+          isEligible,
+        };
+      })
+      .filter((c) => c.isEligible)
+      .sort((a, b) => {
+        if (b.techLevel !== a.techLevel) return b.techLevel - a.techLevel;
+        return a.rank - b.rank;
+      });
+  }, [nationsMap, provincesMap, nation.id, nation.relations]);
+
+  const filteredSellers = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return sellerOptions;
+    return sellerOptions.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.id.toLowerCase().includes(q) ||
+        s.flagCode.toLowerCase().includes(q),
+    );
+  }, [sellerOptions, searchQuery]);
+
+  const selectedSellerNation = useMemo(() => {
+    if (!selectedSellerId || !nationsMap) return null;
+    const canonical = CountryRegistry.resolveCanonicalId(selectedSellerId);
+    return nationsMap[canonical] || nationsMap[selectedSellerId] || null;
+  }, [selectedSellerId, nationsMap]);
+
+  if (isSanctioned) {
+    return (
+      <div className="p-8 bg-military/15 border border-military/40 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
+        <ShieldAlert
+          size={36}
+          className="text-military mx-auto animate-pulse"
+        />
+        <h3 className="text-sm font-black text-military">
+          تحریم همه‌جانبه و انزوای بین‌المللی تسلیحاتی!
+        </h3>
+        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+          به دلیل افت شدید پرستیژ و جایگاه جهانی کشور، جامعه بین‌الملل فروش
+          هرگونه تجهیزات و جنگ‌افزار نظامی به کشور شما را ممنوع و تحریم کرده
+          است.
+        </p>
+      </div>
+    );
+  }
+
+  if (isNavalBlockaded) {
+    return (
+      <div className="p-8 bg-military/15 border border-military/40 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
+        <Anchor size={36} className="text-military mx-auto animate-pulse" />
+        <h3 className="text-sm font-black text-military">
+          محاصره کامل آب‌های آزاد توسط ناوگان دشمن!
+        </h3>
+        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+          کشتی‌های ترابری حامل تسلیحات خریداری‌شده به دلیل برتری ناوگان دریایی
+          متخاصم امکان پهلوگیری در بنادر شما را ندارند.
+        </p>
+      </div>
+    );
+  }
+
+  if (selectedSellerNation) {
+    return (
+      <AlliedUnitBuyGrid
+        buyerNation={nation}
+        sellerNation={selectedSellerNation}
+        onBack={() => setSelectedSellerId(null)}
+      />
+    );
+  }
+
+  if (sellerOptions.length === 0) {
+    return (
+      <div className="p-12 bg-secondary/30 border border-border/60 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
+        <Users size={36} className="text-muted-foreground mx-auto" />
+        <h3 className="text-sm font-black text-foreground">
+          هیچ کشور متحد یا هم‌پیمانی برای خرید اسلحه در دسترس نیست
+        </h3>
+        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed font-sans">
+          برای خرید تسلیحات پیشرفته خارجی با ضریب ۱.۵x، باید از طریق دیپلماسی
+          همسویی خود را با قدرت‌های جهانی به حداقل ۱۵+ برسانید و تنش مرزی زیر
+          ۶۰٪ باشد.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 font-sans dir-rtl text-right animate-fade-smooth">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-secondary/30 border border-border/60 rounded-2xl">
+        <div className="flex items-center gap-2">
+          <ShoppingCart size={16} className="text-amber-500" />
+          <div>
+            <h3 className="text-xs font-black text-foreground">
+              فهرست کشورهای هم‌پیمان و صادرکنندگان مجاز
+            </h3>
+            <span className="text-[10px] text-muted-foreground">
+              روی هر کشور کلیک کنید تا زرادخانه و تجهیزات قابل خرید آن باز شود
+              (تحویل فوری با ضریب ۱.۵x).
+            </span>
+          </div>
+        </div>
+
+        <div className="relative min-w-[220px]">
+          <Search
+            size={13}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="text"
+            placeholder="جستجوی نام یا نماد صادرکننده..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {filteredSellers.map((seller) => (
+          <AlliedSellerCard
+            key={seller.id}
+            seller={seller}
+            onSelect={setSelectedSellerId}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

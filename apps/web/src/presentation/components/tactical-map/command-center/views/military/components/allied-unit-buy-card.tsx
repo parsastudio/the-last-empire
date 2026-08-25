@@ -6,17 +6,15 @@ import {
   Plane,
   Radio,
   Anchor,
-  Clock,
   Lock,
   Plus,
   Coins,
+  Zap,
   LucideIcon,
 } from "lucide-react";
 import { UnitType } from "@geopolitics/domain";
-import {
-  QuickUnitBatchInfo,
-  FloatingFeedback,
-} from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
+import { AlliedUnitProcurementInfo } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
+import { FloatingFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 const UNIT_ICONS: Record<
@@ -55,17 +53,17 @@ const UNIT_ICONS: Record<
   },
 };
 
-interface QuickUnitRecruitCardProps {
-  info: QuickUnitBatchInfo;
+interface AlliedUnitBuyCardProps {
+  info: AlliedUnitProcurementInfo;
   feedbacks: FloatingFeedback[];
-  onBuy: (info: QuickUnitBatchInfo) => void;
+  onBuy: (info: AlliedUnitProcurementInfo) => void;
 }
 
-export function QuickUnitRecruitCard({
+export function AlliedUnitBuyCard({
   info,
   feedbacks,
   onBuy,
-}: QuickUnitRecruitCardProps) {
+}: AlliedUnitBuyCardProps) {
   const iconMeta = UNIT_ICONS[info.type];
   const Icon = iconMeta.icon;
 
@@ -75,7 +73,7 @@ export function QuickUnitRecruitCard({
         !info.isUnlocked
           ? "bg-background/20 border-border/40 opacity-50"
           : info.canAfford
-            ? "bg-card/90 border-border/80 hover:border-gdp/50 hover:bg-card shadow-sm"
+            ? "bg-card/90 border-border/80 hover:border-amber-500/50 hover:bg-card shadow-sm"
             : "bg-background/40 border-border/60 opacity-60"
       }`}
     >
@@ -94,7 +92,7 @@ export function QuickUnitRecruitCard({
             {!info.isUnlocked && (
               <span className="text-[9px] font-mono text-amber-500 flex items-center gap-0.5 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
                 <Lock size={9} />
-                سطح{" "}
+                نیازمند لِوِل{" "}
                 {PersianNumberFormatter.toPersianDigits(info.requiredTechLevel)}
               </span>
             )}
@@ -102,11 +100,12 @@ export function QuickUnitRecruitCard({
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
-              واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
+              قیمت (۱.۵x):{" "}
+              {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
-            <span className="flex items-center gap-0.5 text-gdp font-bold">
-              <Clock size={10} />
-              آماده‌سازی: نوبت بعد (۱ نوبت)
+            <span className="flex items-center gap-0.5 text-emerald-400">
+              <Zap size={10} />
+              تحویل آنی
             </span>
           </div>
         </div>
@@ -117,7 +116,7 @@ export function QuickUnitRecruitCard({
           {feedbacks.map((f) => (
             <span
               key={f.id}
-              className="text-xs font-black font-mono text-gdp drop-shadow-md animate-out fade-out slide-out-to-top-3 duration-500"
+              className="text-xs font-black font-mono text-amber-400 drop-shadow-md animate-out fade-out slide-out-to-top-3 duration-500"
             >
               {f.text}
             </span>
@@ -129,8 +128,8 @@ export function QuickUnitRecruitCard({
             type="button"
             onClick={() => onBuy(info)}
             disabled={!info.canAfford}
-            className="py-2.5 px-4 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.03] active:scale-[0.96] flex items-center gap-1.5 border border-gdp/30"
-            title={`سفارش با هزینه ${PersianNumberFormatter.formatCurrency(info.batchCost)}`}
+            className="py-2.5 px-4 bg-amber-500 hover:bg-amber-500/90 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-amber-500/20 hover:scale-[1.03] active:scale-[0.96] flex items-center gap-1.5 border border-amber-400/30"
+            title={`خرید فوری با هزینه ${PersianNumberFormatter.formatCurrency(info.batchCost)}`}
           >
             <Plus size={14} strokeWidth={3} />
             <Coins size={12} className="opacity-90 shrink-0" />
@@ -144,7 +143,7 @@ export function QuickUnitRecruitCard({
           </button>
         ) : (
           <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
-            قفل فناوری
+            فناوری ناکافی
           </div>
         )}
       </div>
