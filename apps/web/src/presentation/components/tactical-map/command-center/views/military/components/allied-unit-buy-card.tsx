@@ -95,7 +95,7 @@ export function AlliedUnitBuyCard({
             {!info.isUnlocked && (
               <span className="text-[9px] font-mono text-amber-500 flex items-center gap-0.5 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
                 <Lock size={9} />
-                نیازمند لِوِل{" "}
+                فروشنده فاقد سطح{" "}
                 {PersianNumberFormatter.toPersianDigits(info.requiredTechLevel)}
               </span>
             )}
@@ -103,9 +103,18 @@ export function AlliedUnitBuyCard({
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
-              قیمت (۱.۵x):{" "}
+              قیمت واردات (۱.۵x):{" "}
               {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
+            {info.isUnlocked && (
+              <span className="text-[9px] text-foreground font-sans">
+                (ظرفیت باقی‌مانده:{" "}
+                {PersianNumberFormatter.toPersianDigits(
+                  info.remainingRoom.toLocaleString("en-US"),
+                )}
+                )
+              </span>
+            )}
             <span className="flex items-center gap-0.5 text-emerald-400">
               <Zap size={10} />
               تحویل آنی
@@ -128,12 +137,12 @@ export function AlliedUnitBuyCard({
 
         {!info.isUnlocked ? (
           <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
-            فناوری ناکافی
+            فناوری ناکافی فروشنده
           </div>
         ) : info.isCapReached ? (
           <div className="py-2 px-3 bg-amber-500/15 text-amber-400 rounded-xl text-[10px] font-mono border border-amber-500/30 flex items-center gap-1">
             <ShieldCheck size={12} />
-            <span>سقف ظرفیت</span>
+            <span>سقف سهمیه ارتش</span>
           </div>
         ) : (
           <button

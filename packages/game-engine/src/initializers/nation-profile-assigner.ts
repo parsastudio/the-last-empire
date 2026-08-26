@@ -119,7 +119,7 @@ export class NationProfileAssigner {
       isAlive: true,
       flagCode: item.flagCode,
       taxRate: 15,
-      tariffRate: 10,
+      tariffRate: 15,
       treasury: item.startingTreasury,
       nationalDebt: 0,
       industrialLevel: item.industrialLevel,

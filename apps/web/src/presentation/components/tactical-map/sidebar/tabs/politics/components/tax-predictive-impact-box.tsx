@@ -13,7 +13,7 @@ export function TaxPredictiveImpactBox({
 }: TaxPredictiveImpactBoxProps) {
   const clampedRate = Math.min(50, Math.max(0, newTaxRate));
   const projectedIncome = Math.floor(baseGdp * (clampedRate / 100));
-  const stabilityImpact = Number(((15 - clampedRate) * 0.2).toFixed(2));
+  const stabilityImpact = Number(((15 - clampedRate) * 0.1).toFixed(2));
 
   return (
     <div className="space-y-2 font-mono text-xs dir-rtl text-right">

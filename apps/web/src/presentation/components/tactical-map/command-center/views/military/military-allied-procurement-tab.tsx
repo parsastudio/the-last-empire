@@ -3,7 +3,7 @@ import { ShieldAlert, Anchor, Users, Search, ShoppingCart } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, getNationGdp } from "@geopolitics/domain";
 import {
   AlliedSellerCard,
   AlliedSellerItem,
@@ -31,6 +31,10 @@ export function MilitaryAlliedProcurementTab({
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const isSanctioned = (nation.globalReputation ?? 50) <= -30;
+  const buyerGdp = useMemo(
+    () => getNationGdp(nation, provincesMap),
+    [nation, provincesMap],
+  );
 
   const isNavalBlockaded = useMemo(() => {
     if (!nationsMap) return false;
@@ -143,6 +147,8 @@ export function MilitaryAlliedProcurementTab({
       <AlliedUnitBuyGrid
         buyerNation={nation}
         sellerNation={selectedSellerNation}
+        provincesMap={provincesMap}
+        currentGdp={buyerGdp}
         onBack={() => setSelectedSellerId(null)}
       />
     );

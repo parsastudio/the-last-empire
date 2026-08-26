@@ -11,6 +11,7 @@ interface AlliedUnitBuyGridProps {
   buyerNation: Nation;
   sellerNation: Nation;
   provincesMap?: Record<string, Province>;
+  currentGdp?: number;
   onBack: () => void;
 }
 
@@ -18,6 +19,7 @@ export function AlliedUnitBuyGrid({
   buyerNation,
   sellerNation,
   provincesMap,
+  currentGdp,
   onBack,
 }: AlliedUnitBuyGridProps) {
   const { batchList, floatingFeedbacks, handleBuyAlliedBatch } =
@@ -25,6 +27,7 @@ export function AlliedUnitBuyGrid({
       buyerNation,
       sellerNation,
       provincesMap,
+      currentGdp,
     });
 
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);

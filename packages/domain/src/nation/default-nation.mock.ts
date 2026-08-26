@@ -7,7 +7,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   isAlive: true,
   flagCode: "IR",
   taxRate: 15,
-  tariffRate: 10,
+  tariffRate: 15,
   treasury: 100000,
   nationalDebt: 0,
   industrialLevel: 1,

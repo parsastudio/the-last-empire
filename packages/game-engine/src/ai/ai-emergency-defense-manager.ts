@@ -75,11 +75,7 @@ export class AIEmergencyDefenseManager {
     }
 
     const unitPrice = Math.floor(
-      MilitaryPricingCalculator.calculateUnitTypePrice(
-        bestUnit.type,
-        bestSeller.military.techLevel,
-        bestSeller.industrialLevel,
-      ) * 1.5,
+      MilitaryPricingCalculator.calculateUnitTypePrice(bestUnit.type) * 1.5,
     );
 
     const unitSinglePower = this.calculateSingleUnitPower(

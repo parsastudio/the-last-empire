@@ -18,27 +18,27 @@ export interface TariffPolicyTier {
 export const TARIFF_POLICY_TIERS: TariffPolicyTier[] = [
   {
     rate: 0,
-    label: "تجارت آزاد و مرزهای باز",
+    label: "تجارت آزاد و معافیت گمرکی",
     badge: "تجارت آزاد",
   },
   {
-    rate: 10,
-    label: "تعرفه متعادل حمایتی",
+    rate: 15,
+    label: "تعرفه متعادل و استاندارد گمرک",
     badge: "پایه و متعادل",
   },
   {
-    rate: 25,
-    label: "حمایت‌گرایی از تولید داخل",
+    rate: 30,
+    label: "حمایت‌گرایی تجاری و هاب عوارض",
     badge: "حمایت‌گرایی",
   },
   {
-    rate: 35,
-    label: "سیاست انقباضی و سهمیه‌بندی",
+    rate: 40,
+    label: "گمرک سنگین و سهمیه‌بندی واردات",
     badge: "گمرک انقباضی",
   },
   {
     rate: 50,
-    label: "جنگ تجاری و مرکانتیلیسم",
+    label: "جنگ تجاری و مسدودسازی مرزها",
     badge: "جنگ تجاری",
   },
 ];
@@ -55,7 +55,7 @@ interface TariffControlCardProps {
 }
 
 export function TariffControlCard({
-  initialTariffRate = 10,
+  initialTariffRate = 15,
   nationId,
   hasSeaAccess: directSeaAccess,
   nationsMap,

@@ -12,7 +12,7 @@ export function TechTheftResultView({
       <span className="text-[10px] text-muted-foreground font-sans font-bold block">
         امتیازات استخراج‌شده و اعمال‌شده بر ارکان کشور شما:
       </span>
-      <div className="grid grid-cols-3 gap-2 text-[10px]">
+      <div className="grid grid-cols-2 gap-2 text-[10px]">
         {data.militaryTechGained > 0 && (
           <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
             <span className="text-muted-foreground block font-sans text-[9px]">
@@ -33,20 +33,6 @@ export function TechTheftResultView({
               +
               {PersianNumberFormatter.toPersianDigits(
                 data.industrialLevelGained,
-              )}{" "}
-              سطح
-            </span>
-          </div>
-        )}
-        {data.infrastructureLevelGained > 0 && (
-          <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
-            <span className="text-muted-foreground block font-sans text-[9px]">
-              رشد زیرساخت و مسکن:
-            </span>
-            <span className="font-bold text-primary block mt-0.5">
-              +
-              {PersianNumberFormatter.toPersianDigits(
-                data.infrastructureLevelGained,
               )}{" "}
               سطح
             </span>
