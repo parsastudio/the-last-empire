@@ -50,7 +50,6 @@ export class UtilityDecisionEngine {
         opportunismMultiplier = 0.0;
         distancePenalty = -50;
         break;
-      case "NONE":
       default:
         return -100;
     }

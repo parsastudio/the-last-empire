@@ -4,6 +4,7 @@ import {
   RecruitmentOrder,
 } from "@/domain/military/military.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 
 export interface UnitBudgetQuota {
   unitType: UnitType;
@@ -16,69 +17,26 @@ export interface UnitBudgetQuota {
 
 export class MilitaryQuotaCalculator {
   public static getUnitRatios(
-    techLevel: number,
     hasSeaAccess: boolean = true,
   ): Record<UnitType, number> {
-    const baseLevel = Math.floor(Math.max(1, techLevel));
-
-    switch (baseLevel) {
-      case 1:
-        return {
-          INFANTRY: 0.8,
-          DRONE_MISSILE: 0.2,
-          ARMOR: 0.0,
-          AIR_DEFENSE: 0.0,
-          AIR_FORCE: 0.0,
-          NAVAL_FLEET: 0.0,
-        };
-      case 2:
-        return {
-          INFANTRY: 0.45,
-          ARMOR: 0.45,
-          DRONE_MISSILE: 0.1,
-          AIR_DEFENSE: 0.0,
-          AIR_FORCE: 0.0,
-          NAVAL_FLEET: 0.0,
-        };
-      case 3:
-        return {
-          ARMOR: 0.35,
-          INFANTRY: 0.3,
-          AIR_DEFENSE: 0.25,
-          DRONE_MISSILE: 0.1,
-          AIR_FORCE: 0.0,
-          NAVAL_FLEET: 0.0,
-        };
-      case 4:
-        return {
-          ARMOR: 0.3,
-          AIR_FORCE: 0.25,
-          INFANTRY: 0.2,
-          AIR_DEFENSE: 0.15,
-          DRONE_MISSILE: 0.1,
-          NAVAL_FLEET: 0.0,
-        };
-      case 5:
-      default:
-        if (hasSeaAccess) {
-          return {
-            ARMOR: 0.25,
-            AIR_FORCE: 0.2,
-            INFANTRY: 0.15,
-            AIR_DEFENSE: 0.15,
-            NAVAL_FLEET: 0.15,
-            DRONE_MISSILE: 0.1,
-          };
-        }
-        return {
-          ARMOR: 0.3,
-          AIR_FORCE: 0.3,
-          INFANTRY: 0.15,
-          AIR_DEFENSE: 0.15,
-          DRONE_MISSILE: 0.1,
-          NAVAL_FLEET: 0.0,
-        };
+    if (hasSeaAccess) {
+      return {
+        ARMOR: 0.25,
+        AIR_FORCE: 0.2,
+        INFANTRY: 0.15,
+        AIR_DEFENSE: 0.15,
+        NAVAL_FLEET: 0.15,
+        DRONE_MISSILE: 0.1,
+      };
     }
+    return {
+      ARMOR: 0.3,
+      AIR_FORCE: 0.3,
+      INFANTRY: 0.15,
+      AIR_DEFENSE: 0.15,
+      DRONE_MISSILE: 0.1,
+      NAVAL_FLEET: 0.0,
+    };
   }
 
   public static getUnitCurrentCount(
@@ -123,7 +81,7 @@ export class MilitaryQuotaCalculator {
     hasSeaAccess: boolean = true,
     recruitmentQueue: RecruitmentOrder[] = [],
   ): Record<UnitType, UnitBudgetQuota> {
-    const ratios = this.getUnitRatios(military.techLevel, hasSeaAccess);
+    const ratios = this.getUnitRatios(hasSeaAccess);
     const result: Partial<Record<UnitType, UnitBudgetQuota>> = {};
 
     const types: UnitType[] = [
@@ -134,6 +92,21 @@ export class MilitaryQuotaCalculator {
       "DRONE_MISSILE",
       "NAVAL_FLEET",
     ];
+
+    const currentTotalValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuation(military);
+
+    let queuedCost = 0;
+    for (let i = 0; i < recruitmentQueue.length; i++) {
+      queuedCost += recruitmentQueue[i]!.totalCost;
+    }
+
+    const totalValuation = currentTotalValuation + queuedCost;
+    const maxGlobalValuation = Math.floor(gdp);
+    const remainingGlobalValuation = Math.max(
+      0,
+      maxGlobalValuation - totalValuation,
+    );
 
     for (let i = 0; i < types.length; i++) {
       const type = types[i]!;
@@ -146,7 +119,10 @@ export class MilitaryQuotaCalculator {
         type,
         recruitmentQueue,
       );
-      const remainingRoom = Math.max(0, maxUnits - currentUnits);
+      const remainingQuotaRoom = Math.max(0, maxUnits - currentUnits);
+      const maxGlobalUnits =
+        unitPrice > 0 ? Math.floor(remainingGlobalValuation / unitPrice) : 0;
+      const remainingRoom = Math.min(remainingQuotaRoom, maxGlobalUnits);
 
       result[type] = {
         unitType: type,

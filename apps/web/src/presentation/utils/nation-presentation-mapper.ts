@@ -18,7 +18,7 @@ export interface FormattedNationPresentation {
 
 export class NationPresentationMapper {
   public static getFlagEmoji(code: string | number): string {
-    return getFlagEmoji(code);
+    return getFlagEmoji(String(code));
   }
 
   public static getPowerLabel(gdp: number): string {

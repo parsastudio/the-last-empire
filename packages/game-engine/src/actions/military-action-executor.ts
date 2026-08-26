@@ -47,6 +47,7 @@ export class MilitaryActionExecutor {
                 nation,
                 action.unitType,
                 action.quantity,
+                state.provinces,
               ),
             },
           },

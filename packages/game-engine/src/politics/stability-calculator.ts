@@ -56,8 +56,8 @@ export class StabilityCalculator {
     const taxStabilityDelta = (15 - clampedTax) * 0.1;
     delta += taxStabilityDelta;
 
-    const clampedTariff = Math.min(100, Math.max(0, nation.tariffRate));
-    const tariffStabilityDelta = (10 - clampedTariff) * 0.04;
+    const clampedTariff = Math.min(50, Math.max(0, nation.tariffRate));
+    const tariffStabilityDelta = (15 - clampedTariff) * 0.1;
     delta += tariffStabilityDelta;
 
     const stabilityModifier = ModifierManager.getModifierImpact(

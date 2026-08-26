@@ -15,7 +15,7 @@ export const SetTariffRateActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   type: z.literal("SET_TARIFF_RATE"),
-  newRate: z.number().min(0).max(100),
+  newRate: z.number().min(0).max(50),
 });
 
 export const RecruitUnitActionSchema = z.object({

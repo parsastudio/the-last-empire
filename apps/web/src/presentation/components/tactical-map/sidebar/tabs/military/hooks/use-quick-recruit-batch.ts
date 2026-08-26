@@ -67,9 +67,15 @@ export function useQuickRecruitBatch({
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
   const maxValuation = Math.floor(currentGdp);
+
+  let queuedCost = 0;
+  for (let i = 0; i < (nation.recruitmentQueue || []).length; i++) {
+    queuedCost += nation.recruitmentQueue[i]!.totalCost;
+  }
+
   const remainingValuationCapacity = Math.max(
     0,
-    maxValuation - currentValuation,
+    maxValuation - (currentValuation + queuedCost),
   );
 
   const quotas = useMemo(() => {
@@ -92,7 +98,7 @@ export function useQuickRecruitBatch({
       const affordableByMoney =
         tenPercentBudget > 0 && unitPrice > 0
           ? Math.max(1, Math.floor(tenPercentBudget / unitPrice))
-          : 1;
+          : 0;
 
       const affordableByValuationCap = Math.floor(
         remainingValuationCapacity / unitPrice,
@@ -104,11 +110,12 @@ export function useQuickRecruitBatch({
         Math.min(affordableByMoney, affordableByValuationCap, allowedByQuota),
       );
 
-      const batchQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
-      const batchCost = batchQuantity * unitPrice;
-      const canAfford = nation.treasury >= batchCost && clampedQuantity > 0;
       const isCapReached =
         q.remainingRoom <= 0 || remainingValuationCapacity < unitPrice;
+      const batchQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
+      const batchCost = batchQuantity * unitPrice;
+      const canAfford =
+        nation.treasury >= batchCost && clampedQuantity > 0 && !isCapReached;
 
       return {
         type,

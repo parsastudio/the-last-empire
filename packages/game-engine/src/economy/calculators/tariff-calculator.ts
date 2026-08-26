@@ -16,23 +16,24 @@ export class TariffCalculator {
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): TariffEffectResult {
-    const tariffRate = nation.tariffRate;
+    const tariffRate = Math.min(50, Math.max(0, nation.tariffRate));
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const seaAccessFactor = hasSea ? 1.0 : 0.5;
     const nationGdp = getNationGdp(nation, provincesMap);
     const nationNavalPower =
       (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
 
-    let totalBaseRevenue = 0;
+    let totalEligibleGdp = 0;
     let activePartnerCount = 0;
     let totalPartnerCount = 0;
 
     if (nationsMap && Object.keys(nationsMap).length > 1) {
-      const partners = Object.values(nationsMap);
-      totalPartnerCount = partners.length - 1;
+      const allNationEntries = Object.values(nationsMap);
+      totalPartnerCount = allNationEntries.length - 1;
+      const totalWorldCountriesCount = Math.max(1, allNationEntries.length);
 
-      for (let i = 0; i < partners.length; i++) {
-        const partner = partners[i]!;
+      for (let i = 0; i < allNationEntries.length; i++) {
+        const partner = allNationEntries[i]!;
         if (partner.id === nation.id || !partner.isAlive) continue;
 
         const isSevered = NationRelationResolver.isTradeEmbargoed(
@@ -51,29 +52,45 @@ export class TariffCalculator {
         if (!isSevered && !isNavalBlockaded) {
           activePartnerCount++;
           const partnerGdp = getNationGdp(partner, provincesMap);
-          const minGdp = Math.min(nationGdp, partnerGdp);
-          totalBaseRevenue +=
-            minGdp * (tariffRate / 100) * 0.04 * seaAccessFactor;
+          totalEligibleGdp += partnerGdp;
         }
       }
-    } else {
-      totalPartnerCount = 25;
-      activePartnerCount = 25;
-      totalBaseRevenue =
-        nationGdp * 25 * (tariffRate / 100) * 0.04 * seaAccessFactor;
+
+      const baseTradePool = totalEligibleGdp * 0.01;
+      const normalizedTradeVolume =
+        baseTradePool * (100 / totalWorldCountriesCount);
+      const effectiveTradeVolume = normalizedTradeVolume * seaAccessFactor;
+      const maxTradeVolumeCap = nationGdp * 10;
+      const cappedTradeVolume = Math.min(
+        effectiveTradeVolume,
+        maxTradeVolumeCap,
+      );
+
+      const tariffRevenue = Math.floor(cappedTradeVolume * (tariffRate / 100));
+      const stabilityImpact = Number(((15 - tariffRate) * 0.1).toFixed(2));
+      const tradeVolumePercentage =
+        totalPartnerCount > 0
+          ? Math.round((activePartnerCount / totalPartnerCount) * 100)
+          : 100;
+
+      return {
+        tariffRevenue,
+        stabilityImpact,
+        tradeVolumePercentage,
+      };
     }
 
-    const tariffRevenue = Math.floor(totalBaseRevenue);
-    const stabilityImpact = Number(((10 - tariffRate) * 0.08).toFixed(2));
-    const tradeVolumePercentage =
-      totalPartnerCount > 0
-        ? Math.round((activePartnerCount / totalPartnerCount) * 100)
-        : 100;
+    const fallbackEligibleGdp = nationGdp * 60;
+    const baseTradePool = fallbackEligibleGdp * 0.01;
+    const effectiveTradeVolume = baseTradePool * seaAccessFactor;
+    const cappedTradeVolume = Math.min(effectiveTradeVolume, nationGdp * 10);
+    const tariffRevenue = Math.floor(cappedTradeVolume * (tariffRate / 100));
+    const stabilityImpact = Number(((15 - tariffRate) * 0.1).toFixed(2));
 
     return {
       tariffRevenue,
       stabilityImpact,
-      tradeVolumePercentage,
+      tradeVolumePercentage: 100,
     };
   }
 }

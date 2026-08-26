@@ -8,6 +8,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class ArmsMarketManager {
   public static executePurchase(
@@ -94,17 +95,23 @@ export class ArmsMarketManager {
     const maxValuation = Math.floor(buyerGdp);
     const addedValuation = baseUnitPrice * quantity;
 
-    if (currentValuation + addedValuation > maxValuation) {
+    let queuedValuation = 0;
+    for (let i = 0; i < buyer.recruitmentQueue.length; i++) {
+      queuedValuation += buyer.recruitmentQueue[i]!.totalCost;
+    }
+
+    if (currentValuation + queuedValuation + addedValuation > maxValuation) {
       throw new GameError(
         "INVALID_ACTION",
         "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",
       );
     }
 
+    const hasSea = NationGettersUtility.hasSeaAccess(buyer.id, state.provinces);
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       buyerGdp,
       buyer.military,
-      true,
+      hasSea,
       buyer.recruitmentQueue,
     );
     const q = quotas[unitType];

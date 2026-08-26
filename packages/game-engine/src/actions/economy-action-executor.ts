@@ -36,10 +36,10 @@ export class EconomyActionExecutor {
       }
 
       case "SET_TARIFF_RATE": {
-        if (action.newRate < 0 || action.newRate > 100) {
+        if (action.newRate < 0 || action.newRate > 50) {
           throw new GameError(
             "INVALID_ACTION",
-            "نرخ تعرفه گمرک باید بین ۰ تا ۱۰۰ درصد باشد.",
+            "نرخ تعرفه گمرک باید بین ۰ تا ۵۰ درصد باشد.",
           );
         }
         return {

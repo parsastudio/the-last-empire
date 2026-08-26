@@ -25,8 +25,15 @@ export function QuickMilitaryRecruitmentGrid({
     },
   );
 
+  let queuedCost = 0;
+  for (let i = 0; i < (nation.recruitmentQueue || []).length; i++) {
+    queuedCost += nation.recruitmentQueue[i]!.totalCost;
+  }
+
   const currentValuation =
-    MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
+    MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military) +
+    queuedCost;
+
   const capacityRatio =
     currentGdp > 0
       ? Math.min(100, Math.round((currentValuation / currentGdp) * 100))

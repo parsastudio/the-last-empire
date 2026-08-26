@@ -15,21 +15,21 @@ export interface TaxPolicyTier {
 export const TAX_POLICY_TIERS: TaxPolicyTier[] = [
   {
     rate: 0,
-    label: "معافیت کامل و اقتصاد رفاهی",
+    label: "معافیت کامل و رفاه عمومی",
     badge: "معافیت کامل",
   },
   {
     rate: 15,
-    label: "اقتصاد متعادل ملی",
-    badge: "پایه و استاندارد",
+    label: "اقتصاد متعادل و استاندارد ملی",
+    badge: "پایه و متعادل",
   },
   {
-    rate: 25,
-    label: "توسعه و جهش صنعتی",
-    badge: "رشد صنعتی",
+    rate: 30,
+    label: "مالیات انقباضی و تمرکز منابع",
+    badge: "انقباضی",
   },
   {
-    rate: 35,
+    rate: 40,
     label: "عوارض سنگین حاکمیتی",
     badge: "فشار مالیاتی",
   },

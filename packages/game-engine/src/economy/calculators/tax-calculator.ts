@@ -23,7 +23,7 @@ export class TaxCalculator {
       nation.taxRate,
     );
     const clampedRate = Math.min(50, Math.max(0, nation.taxRate));
-    const stabilityImpact = Number(((15 - clampedRate) * 0.2).toFixed(2));
+    const stabilityImpact = Number(((15 - clampedRate) * 0.1).toFixed(2));
 
     return {
       taxIncome: income,
