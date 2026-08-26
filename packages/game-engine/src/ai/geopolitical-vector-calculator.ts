@@ -5,6 +5,8 @@ import {
   CountryRegistry,
   NationRelationResolver,
   GeopoliticalReachResolver,
+  GeopoliticalReachTier,
+  ProximityTier,
   MilitaryPowerCalculator,
   NationGettersUtility,
   TerritoryClaimsUtility,
@@ -14,6 +16,9 @@ export interface GeopoliticalVector {
   alignment: number;
   tension: number;
   posture: DiplomaticPosture;
+  sourceReachTier: GeopoliticalReachTier;
+  targetReachTier: GeopoliticalReachTier;
+  proximityTier: ProximityTier;
   isNeighbor: boolean;
   isLandNeighbor: boolean;
   isNavalReachable: boolean;
@@ -24,7 +29,6 @@ export interface GeopoliticalVector {
     commonEnemyBonus: number;
     reputationEffect: number;
     borderFriction: number;
-    powerImbalance: number;
     revanchismPenalty: number;
   };
 }
@@ -110,41 +114,25 @@ export class GeopoliticalVectorCalculator {
       provincesByOwnerMap,
     );
 
-    const isImmediateSeaNeighbor =
-      GeopoliticalReachResolver.isImmediateMaritimeNeighbor(
-        source,
-        target,
-        provincesMap,
-        myProvs,
-        provincesByOwnerMap,
-      );
+    const proximityTier = GeopoliticalReachResolver.getProximityTier(
+      source,
+      target,
+      provincesMap,
+      myProvs,
+      provincesByOwnerMap,
+    );
 
-    const sourceSea =
-      sourceSeaAccess !== undefined
-        ? sourceSeaAccess
-        : myProvs.some((p) => p.hasSeaAccess);
-
-    const targetProvs = provincesByOwnerMap?.get(canonicalTarget);
-    const targetSea = targetProvs
-      ? targetProvs.some((p) => p.hasSeaAccess)
-      : (target.military.navalFleet || 0) > 0 ||
-        NationGettersUtility.hasSeaAccess(
-          target.id,
-          provincesMap,
-          undefined,
-          provincesByOwnerMap,
-        );
-
-    const isNavalReachable = Boolean(sourceSea && targetSea);
-    const isNeighbor = isLandNeighbor || isImmediateSeaNeighbor;
+    const isNeighbor = proximityTier === "DIRECT_NEIGHBOR";
+    const isNavalReachable =
+      proximityTier === "DIRECT_NEIGHBOR" ||
+      proximityTier === "REGIONAL_MARITIME" ||
+      proximityTier === "DISTANT_OCEAN";
 
     let borderFriction = 0;
-    if (isLandNeighbor) {
-      borderFriction = 30;
-    } else if (isImmediateSeaNeighbor) {
-      borderFriction = 20;
-    } else if (isNavalReachable) {
-      borderFriction = 10;
+    if (proximityTier === "DIRECT_NEIGHBOR") {
+      borderFriction = isLandNeighbor ? 30 : 20;
+    } else if (proximityTier === "REGIONAL_MARITIME") {
+      borderFriction = 12;
     }
 
     const sPower =
@@ -159,26 +147,18 @@ export class GeopoliticalVectorCalculator {
 
     const powerRatio = Number((tPower / sPower).toFixed(2));
 
-    let powerImbalance = 0;
-    if (powerRatio < 0.7) {
-      powerImbalance = Math.min(30, Math.round((1.0 - powerRatio) * 40));
-    } else if (powerRatio > 1.3) {
-      powerImbalance = Math.min(25, Math.round((powerRatio - 1.0) * 20));
-    }
-
     let vulnerabilityBonus = 0;
     if (target.warFocusTargetId && target.warFocusTargetId !== source.id) {
-      vulnerabilityBonus += 15;
+      vulnerabilityBonus += 10;
     }
     if (target.government.stability < 35) {
-      vulnerabilityBonus += 15;
+      vulnerabilityBonus += 10;
     }
 
     const storedTension = rel ? (rel.tension ?? 10) : 10;
     let rawTension =
       Math.floor(storedTension * 0.4) +
       borderFriction +
-      powerImbalance +
       vulnerabilityBonus +
       revanchismPenalty;
 
@@ -201,10 +181,24 @@ export class GeopoliticalVectorCalculator {
       posture = "WARY_BUFFER";
     }
 
+    const sourceReachTier = GeopoliticalReachResolver.getReachTier(
+      source,
+      allNations,
+      provincesMap,
+    );
+    const targetReachTier = GeopoliticalReachResolver.getReachTier(
+      target,
+      allNations,
+      provincesMap,
+    );
+
     return {
       alignment,
       tension,
       posture,
+      sourceReachTier,
+      targetReachTier,
+      proximityTier,
       isNeighbor,
       isLandNeighbor,
       isNavalReachable,
@@ -215,7 +209,6 @@ export class GeopoliticalVectorCalculator {
         commonEnemyBonus,
         reputationEffect,
         borderFriction,
-        powerImbalance,
         revanchismPenalty,
       },
     };

@@ -18,11 +18,11 @@ export class MaskPixelDecoder {
 
         let nationId = 0;
 
-        if (r >= 11 && r < 250 && CountryRegistry.getCountry(r)) {
+        if (r >= 11 && r < 250 && CountryRegistry.getIso3ByGpuIndex(r)) {
           nationId = r;
-        } else if (b >= 11 && b < 250 && CountryRegistry.getCountry(b)) {
+        } else if (b >= 11 && b < 250 && CountryRegistry.getIso3ByGpuIndex(b)) {
           nationId = b;
-        } else if (g >= 11 && g < 250 && CountryRegistry.getCountry(g)) {
+        } else if (g >= 11 && g < 250 && CountryRegistry.getIso3ByGpuIndex(g)) {
           nationId = g;
         } else if (r >= 11 && r < 250) {
           nationId = r;

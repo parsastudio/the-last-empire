@@ -8,6 +8,7 @@ import {
   FinalMapManifest,
   NationGettersUtility,
   NationRankCandidateInput,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import { MilitaryDistributionEngine } from "@geopolitics/domain";
 import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
@@ -36,23 +37,27 @@ export class StrategicManifestBuilder {
     const manifestProvinces: FinalManifestProvince[] = [];
     const manifestNations: FinalManifestNation[] = [];
 
-    const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) =>
-      countryProvincesMap.has(p.id ?? 0),
-    );
+    const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) => {
+      const gpuIdx = CountryRegistry.getGpuColorIndex(p.code);
+      return countryProvincesMap.has(gpuIdx);
+    });
 
     const candidatesInput: NationRankCandidateInput[] = activeProfiles.map(
-      (p) => ({
-        id: p.code,
-        name: p.nameFa,
-        gdp: p.gdp,
-        population: p.population,
-        governmentType: p.startingGovernment,
-        militaryTier: p.militaryTier,
-        startingTechLevel: p.startingTechLevel,
-        hasSeaAccess: (countryProvincesMap.get(p.id ?? 0) || []).some(
-          (prov) => prov.hasSeaAccess,
-        ),
-      }),
+      (p) => {
+        const gpuIdx = CountryRegistry.getGpuColorIndex(p.code);
+        return {
+          id: p.code,
+          name: p.nameFa,
+          gdp: p.gdp,
+          population: p.population,
+          governmentType: p.startingGovernment,
+          militaryTier: p.militaryTier,
+          startingTechLevel: p.startingTechLevel,
+          hasSeaAccess: (countryProvincesMap.get(gpuIdx) || []).some(
+            (prov) => prov.hasSeaAccess,
+          ),
+        };
+      },
     );
 
     const globalRankMap =
@@ -66,9 +71,9 @@ export class StrategicManifestBuilder {
 
     for (let rankIndex = 0; rankIndex < activeProfiles.length; rankIndex++) {
       const profile = activeProfiles[rankIndex]!;
-      const countryNumericId = profile.id ?? 0;
+      const gpuIdx = CountryRegistry.getGpuColorIndex(profile.code);
       const countryId = profile.code.toUpperCase();
-      const provList = countryProvincesMap.get(countryNumericId) || [];
+      const provList = countryProvincesMap.get(gpuIdx) || [];
 
       const totalCountryPixels = provList.reduce(
         (sum, p) => sum + p.pixelCount,
@@ -114,7 +119,7 @@ export class StrategicManifestBuilder {
           provinceId: pInfo.provinceId,
           nameFa: `استان ${profile.nameFa} (${pIndex + 1})`,
           countryId,
-          countryNumericId,
+          originalCountryId: countryId,
           pixelCount: pInfo.pixelCount,
           hasSeaAccess: pInfo.hasSeaAccess,
           landNeighbors: Array.from(pInfo.landNeighbors),
@@ -148,12 +153,10 @@ export class StrategicManifestBuilder {
       const techLevel = profile.startingTechLevel ?? stack.techLevel;
 
       const industrialLevel = Math.max(1, Math.min(5, techLevel));
-      const infrastructureLevel = Math.max(1, Math.min(5, techLevel));
       const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
 
       manifestNations.push({
         id: countryId,
-        numericId: countryNumericId,
         code: profile.code,
         flagCode: profile.flagCode,
         nameFa: profile.nameFa,
@@ -176,7 +179,6 @@ export class StrategicManifestBuilder {
         startingNavalFleet,
         startingTechLevel: techLevel,
         industrialLevel,
-        infrastructureLevel,
         startingStability,
       });
     }

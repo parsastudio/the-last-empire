@@ -17,6 +17,7 @@ export interface AttackerStateApplierInput {
   isDefenderEliminated?: boolean;
   extraCapturedUnits?: ExtraCapturedMilitaryUnits;
   extraTreasuryLooted?: number;
+  isCounterAttack?: boolean;
 }
 
 export class BattleAttackerStateApplier {
@@ -31,6 +32,7 @@ export class BattleAttackerStateApplier {
       isDefenderEliminated,
       extraCapturedUnits,
       extraTreasuryLooted,
+      isCounterAttack = false,
     } = input;
 
     const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
@@ -47,7 +49,8 @@ export class BattleAttackerStateApplier {
 
     let baseWarRepPenalty = currentStance !== "WAR" ? 15 : 0;
     if (isTotalAnnexation) {
-      baseWarRepPenalty += 10;
+      const annexationPenalty = isCounterAttack ? 4 : 8;
+      baseWarRepPenalty += annexationPenalty;
     }
     const totalRepPenalty =
       baseWarRepPenalty +

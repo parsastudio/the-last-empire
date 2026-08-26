@@ -8,6 +8,12 @@ export type GeopoliticalReachTier =
   | "REGIONAL_POWER"
   | "LOCAL_POWER";
 
+export type ProximityTier =
+  | "DIRECT_NEIGHBOR"
+  | "REGIONAL_MARITIME"
+  | "DISTANT_OCEAN"
+  | "NONE";
+
 export class GeopoliticalReachResolver {
   public static readonly SUPERPOWER_PERCENTAGE = 0.08;
   public static readonly REGIONAL_PERCENTAGE = 0.3;
@@ -53,6 +59,70 @@ export class GeopoliticalReachResolver {
       return "REGIONAL_POWER";
     }
     return "LOCAL_POWER";
+  }
+
+  public static getProximityTier(
+    source: Nation,
+    target: Nation,
+    provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): ProximityTier {
+    if (!provincesMap) return "NONE";
+
+    const isLand = this.hasDirectLandBorder(
+      source,
+      target,
+      provincesMap,
+      sourceProvinces,
+      provincesByOwnerMap,
+    );
+    if (isLand) return "DIRECT_NEIGHBOR";
+
+    const isImmediateSea = this.isImmediateMaritimeNeighbor(
+      source,
+      target,
+      provincesMap,
+      sourceProvinces,
+      provincesByOwnerMap,
+    );
+    if (isImmediateSea) return "DIRECT_NEIGHBOR";
+
+    const isRegionalSea = this.hasRegionalMaritimeConnection(
+      source,
+      target,
+      provincesMap,
+      sourceProvinces,
+      provincesByOwnerMap,
+    );
+    if (isRegionalSea) return "REGIONAL_MARITIME";
+
+    const myProvs =
+      sourceProvinces ??
+      NationGettersUtility.getOwnedProvinces(
+        source.id,
+        provincesMap,
+        provincesByOwnerMap,
+      );
+    const sourceSea = myProvs.some((p) => p.hasSeaAccess);
+
+    const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
+    const targetProvs = provincesByOwnerMap?.get(targetCanonical);
+    const targetSea = targetProvs
+      ? targetProvs.some((p) => p.hasSeaAccess)
+      : (target.military.navalFleet || 0) > 0 ||
+        NationGettersUtility.hasSeaAccess(
+          target.id,
+          provincesMap,
+          undefined,
+          provincesByOwnerMap,
+        );
+
+    if (sourceSea && targetSea) {
+      return "DISTANT_OCEAN";
+    }
+
+    return "NONE";
   }
 
   public static getReachableTargets(

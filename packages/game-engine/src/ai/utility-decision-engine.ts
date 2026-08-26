@@ -26,18 +26,95 @@ export class UtilityDecisionEngine {
     if (source.military.infantry < 4 || source.government.stability < 35) {
       return -100;
     }
-    if (!vector.isNeighbor && !vector.isNavalReachable) {
+    if (vector.proximityTier === "NONE") {
       return -100;
     }
 
     const tensionScore = vector.tension * 0.7;
+    const rawPowerAdvantage =
+      vector.powerRatio < 0.8 ? (1.0 - vector.powerRatio) * 50 : -40;
+
+    let opportunismMultiplier = 0.0;
+    let distancePenalty = 0;
+
+    switch (vector.proximityTier) {
+      case "DIRECT_NEIGHBOR":
+        opportunismMultiplier = 1.0;
+        distancePenalty = 0;
+        break;
+      case "REGIONAL_MARITIME":
+        opportunismMultiplier = 0.35;
+        distancePenalty = -20;
+        break;
+      case "DISTANT_OCEAN":
+        opportunismMultiplier = 0.0;
+        distancePenalty = -50;
+        break;
+      case "NONE":
+      default:
+        return -100;
+    }
+
     const powerAdvantageScore =
-      vector.powerRatio < 0.8 ? (1.0 - vector.powerRatio) * 60 : -40;
+      rawPowerAdvantage > 0
+        ? Math.round(rawPowerAdvantage * opportunismMultiplier)
+        : rawPowerAdvantage;
+
+    let tierStrategyModifier = 0;
+    const isSourceSuperpower = vector.sourceReachTier === "SUPERPOWER";
+    const isTargetSuperpower = vector.targetReachTier === "SUPERPOWER";
+    const isTargetLocal = vector.targetReachTier === "LOCAL_POWER";
+
+    if (isSourceSuperpower && isTargetSuperpower) {
+      tierStrategyModifier = vector.alignment < 10 ? 30 : 15;
+    } else if (
+      isSourceSuperpower &&
+      isTargetLocal &&
+      vector.proximityTier !== "DIRECT_NEIGHBOR"
+    ) {
+      tierStrategyModifier = -35;
+    } else if (
+      vector.sourceReachTier === "LOCAL_POWER" &&
+      vector.proximityTier !== "DIRECT_NEIGHBOR"
+    ) {
+      tierStrategyModifier = -30;
+    }
+
+    let regimeWarModifier = 0;
+    const sGov = source.government.type;
+
+    if (sGov === "DEMOCRACY") {
+      if (vector.tension < 50 && !isTargetSuperpower) {
+        regimeWarModifier = -25;
+      }
+    } else if (sGov === "FASCISM") {
+      if (vector.proximityTier === "DIRECT_NEIGHBOR") {
+        regimeWarModifier = 20;
+      }
+    } else if (sGov === "DICTATORSHIP") {
+      if (vector.proximityTier === "DIRECT_NEIGHBOR") {
+        regimeWarModifier = 10;
+      }
+    } else if (sGov === "COMMUNISM") {
+      if (
+        _target.government.type === "DEMOCRACY" ||
+        _target.government.type === "FASCISM"
+      ) {
+        regimeWarModifier = 10;
+      }
+    }
+
     const alignmentDampener = vector.alignment * 0.5;
     const stabilityScore = ((source.government.stability - 50) / 50) * 20;
 
     return Math.round(
-      tensionScore + powerAdvantageScore - alignmentDampener + stabilityScore,
+      tensionScore +
+        powerAdvantageScore +
+        distancePenalty +
+        tierStrategyModifier +
+        regimeWarModifier -
+        alignmentDampener +
+        stabilityScore,
     );
   }
 
@@ -73,12 +150,17 @@ export class UtilityDecisionEngine {
     _target: Nation,
     vector: GeopoliticalVector,
   ): number {
-    const exhaustionScore = (100 - source.government.stability) * 0.8;
+    const exhaustionScore =
+      source.government.stability < 55
+        ? (55 - source.government.stability) * 1.2
+        : -25;
+
     const weaknessScore =
-      vector.powerRatio > 1.4 ? (vector.powerRatio - 1.0) * 40 : 0;
+      vector.powerRatio > 1.25 ? (vector.powerRatio - 1.0) * 45 : -35;
+
     const reachBonus = !vector.isNeighbor && !vector.isNavalReachable ? 60 : 0;
     const tensionDampener = vector.tension * 0.3;
-    const revanchismDampener = vector.reasons.revanchismPenalty * 0.4;
+    const revanchismDampener = vector.reasons.revanchismPenalty * 0.5;
 
     return Math.round(
       exhaustionScore +
@@ -163,20 +245,40 @@ export class UtilityDecisionEngine {
       }
 
       case "PEACE_TREATY": {
-        reasons.push({ label: "مقاومت اولیه در جبهه", value: -15 });
+        reasons.push({ label: "مقاومت اولیه در جبهه نبرد", value: -25 });
 
-        const exhaustion = Math.round(
-          (100 - receiver.government.stability) * 0.7,
-        );
-        reasons.push({ label: "خستگی جنگ و افت ثبات", value: exhaustion });
+        if (receiver.government.stability < 55) {
+          const exhaustion = Math.round(
+            (55 - receiver.government.stability) * 1.2,
+          );
+          reasons.push({
+            label: "خستگی جنگ و افت شدید ثبات",
+            value: exhaustion,
+          });
+        }
 
-        if (vector.powerRatio < 0.75) {
-          const powerDiff = Math.round((1.0 - vector.powerRatio) * 50);
-          reasons.push({ label: "برتری نظامی طرف مقابل", value: powerDiff });
+        if (vector.powerRatio > 1.25) {
+          const powerDiff = Math.min(
+            50,
+            Math.round((vector.powerRatio - 1.0) * 40),
+          );
+          reasons.push({
+            label: "برتری نظامی طرف مقابل در جبهه",
+            value: powerDiff,
+          });
+        } else if (vector.powerRatio < 0.8) {
+          const advantagePenalty = -Math.min(
+            45,
+            Math.round((1.0 - vector.powerRatio) * 45),
+          );
+          reasons.push({
+            label: "برتری نظامی ارتش ما و تداوم تهاجم",
+            value: advantagePenalty,
+          });
         }
 
         if (vector.reasons.revanchismPenalty > 0) {
-          const revVal = -Math.round(vector.reasons.revanchismPenalty * 0.7);
+          const revVal = -Math.round(vector.reasons.revanchismPenalty * 0.8);
           reasons.push({
             label: "اشغال خاک مادری و ادعای سرزمینی",
             value: revVal,
@@ -184,11 +286,13 @@ export class UtilityDecisionEngine {
         }
 
         const animosityVal =
-          vector.alignment < 0 ? Math.round(vector.alignment * 0.3) : 0;
-        reasons.push({
-          label: "بی‌اعتمادی و تخاصم سیاسی",
-          value: animosityVal,
-        });
+          vector.alignment < 0 ? Math.round(vector.alignment * 0.25) : 0;
+        if (animosityVal !== 0) {
+          reasons.push({
+            label: "بی‌اعتمادی و تخاصم سیاسی",
+            value: animosityVal,
+          });
+        }
         break;
       }
 

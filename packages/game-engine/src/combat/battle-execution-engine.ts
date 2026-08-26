@@ -162,6 +162,10 @@ export class BattleExecutionEngine {
       );
     }
 
+    const isCounterAttack =
+      defender.warFocusTargetId === canonicalAttackerId ||
+      defender.warFocusTargetId === attacker.id;
+
     const updatedAttacker = BattleAttackerStateApplier.apply({
       attacker,
       defenderId: defender.id,
@@ -172,6 +176,7 @@ export class BattleExecutionEngine {
       isDefenderEliminated: !isDefenderAlive,
       extraCapturedUnits,
       extraTreasuryLooted,
+      isCounterAttack,
     });
 
     const updatedDefender = BattleDefenderStateApplier.apply({

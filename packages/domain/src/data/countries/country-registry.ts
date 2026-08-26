@@ -116,6 +116,7 @@ export const ALL_COUNTRY_PROFILES: readonly CountryProfile[] = Object.freeze(
 export class CountryRegistry {
   private static readonly byIso3 = new Map<string, CountryProfile>();
   private static readonly byFlagCode = new Map<string, CountryProfile>();
+  private static readonly byGpuIndex = new Map<number, string>();
   private static readonly manifestProfiles = new Map<string, CountryProfile>();
   private static readonly manifestNations = new Map<
     string,
@@ -129,6 +130,10 @@ export class CountryRegistry {
       if (profile.flagCode) {
         this.byFlagCode.set(profile.flagCode.toUpperCase(), profile);
       }
+    }
+
+    for (const [iso3, gpuIndex] of Object.entries(GPU_INDEX_MAPPING)) {
+      this.byGpuIndex.set(gpuIndex, iso3);
     }
   }
 
@@ -197,5 +202,9 @@ export class CountryRegistry {
   public static getGpuColorIndex(identifier: string): number {
     const iso3 = this.resolveCanonicalId(identifier);
     return GPU_INDEX_MAPPING[iso3] ?? 118;
+  }
+
+  public static getIso3ByGpuIndex(gpuIndex: number): string | undefined {
+    return this.byGpuIndex.get(gpuIndex);
   }
 }

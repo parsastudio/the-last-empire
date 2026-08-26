@@ -1,7 +1,11 @@
 import fs from "fs/promises";
 import path from "path";
 import { PNG } from "pngjs";
-import { ALL_COUNTRY_PROFILES, BitPackedBuffer } from "@geopolitics/domain";
+import {
+  ALL_COUNTRY_PROFILES,
+  BitPackedBuffer,
+  CountryRegistry,
+} from "@geopolitics/domain";
 import { MaskPixelDecoder } from "@/infrastructure/strategic-pipeline/01-ingestion/mask-pixel-decoder";
 import { LandWatershedFlood } from "@/infrastructure/strategic-pipeline/01-ingestion/land-watershed-flood";
 import { IslandTerritoryResolver } from "@/infrastructure/strategic-pipeline/01-ingestion/island-territory-resolver";
@@ -75,8 +79,9 @@ export class MapBuildOrchestrator {
 
     const validNationIds = new Set<number>();
     for (const profile of ALL_COUNTRY_PROFILES) {
-      if (profile.id && profile.id >= 11 && profile.id < 250) {
-        validNationIds.add(profile.id);
+      const gpuIdx = CountryRegistry.getGpuColorIndex(profile.code);
+      if (gpuIdx >= 11 && gpuIdx < 250) {
+        validNationIds.add(gpuIdx);
       }
     }
 
