@@ -17,7 +17,7 @@ import {
 } from "@/presentation/components/tactical-map/controls/layer-controller";
 import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
-import { ALL_COUNTRY_PROFILES, CountryRegistry } from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 
@@ -100,35 +100,30 @@ export function WebGLTacticalWorkspace({
     mapHeight: 2048,
     dimensions,
     scaleRef,
-    countries: ALL_COUNTRY_PROFILES.map((p) => ({
-      id: p.id ?? 0,
-      code: p.code,
-      name: p.nameFa,
-    })),
     positionRef,
     provincesMap: effectiveGameState?.provinces,
   });
 
   const handleFocusCountryAndClose = useCallback(
-    (code: string) => {
-      focusOnCountry(code);
+    (iso3: string) => {
+      focusOnCountry(iso3);
       closeActiveTab();
     },
     [focusOnCountry, closeActiveTab],
   );
 
   const handleSelectCountryContext = useCallback(
-    (code: string) => {
-      setActiveTab("diplomacy", null, code);
+    (iso3: string) => {
+      setActiveTab("diplomacy", null, iso3);
     },
     [setActiveTab],
   );
 
   const handleSelectCountryAttackContext = useCallback(
-    (code: string, provinceId?: number) => {
+    (iso3: string, provinceId?: number) => {
       setDirectAttackState({
         isOpen: true,
-        targetCode: code,
+        targetCode: iso3,
         targetProvinceId: provinceId ?? null,
       });
     },

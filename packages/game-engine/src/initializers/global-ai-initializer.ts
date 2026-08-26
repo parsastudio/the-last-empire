@@ -65,11 +65,16 @@ export class GlobalAiInitializer {
     const manifestItems: FinalManifestNation[] = manifest.nations || [];
 
     for (const pItem of manifestProvinces) {
+      const canonicalCountryId = CountryRegistry.resolveCanonicalId(
+        pItem.countryId,
+      );
       provinces[pItem.provinceId.toString()] = {
         provinceId: pItem.provinceId,
         nameFa: pItem.nameFa,
-        countryNumericId: pItem.countryNumericId,
-        ownerNationId: CountryRegistry.resolveCanonicalId(pItem.countryId),
+        ownerNationId: canonicalCountryId,
+        originalNationId: pItem.originalCountryId
+          ? CountryRegistry.resolveCanonicalId(pItem.originalCountryId)
+          : canonicalCountryId,
         pixelCount: pItem.pixelCount,
         hasSeaAccess: pItem.hasSeaAccess,
         landNeighbors: pItem.landNeighbors,

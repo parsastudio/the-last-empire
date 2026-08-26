@@ -57,14 +57,9 @@ export class WebGLPaletteTextureManager {
       const pid = prov.provinceId;
       if (pid <= 0 || pid >= 65536) continue;
 
-      const ownerId = prov.ownerNationId;
-      const numId =
-        CountryRegistry.resolveNumericId(ownerId) ||
-        prov.countryNumericId ||
-        118;
-      const pair = TacticalPaletteGenerator.generateColorForCountry(
-        numId || 118,
-      );
+      const ownerIso3 = CountryRegistry.resolveCanonicalId(prov.ownerNationId);
+      const gpuIndex = CountryRegistry.getGpuColorIndex(ownerIso3);
+      const pair = TacticalPaletteGenerator.generateColorForGpuIndex(gpuIndex);
 
       const u = pid & 255;
       const v = (pid >> 8) & 255;
@@ -73,7 +68,7 @@ export class WebGLPaletteTextureManager {
       data[idx] = pair.r1;
       data[idx + 1] = pair.g1;
       data[idx + 2] = pair.b1;
-      data[idx + 3] = numId & 255;
+      data[idx + 3] = gpuIndex & 255;
     }
   }
 
@@ -101,11 +96,10 @@ export class WebGLPaletteTextureManager {
     for (let rankIndex = 0; rankIndex < totalCount; rankIndex++) {
       const entry = gdpEntries[rankIndex]!;
       const pid = entry.prov.provinceId;
-      const ownerId = entry.prov.ownerNationId;
-      const numId =
-        CountryRegistry.resolveNumericId(ownerId) ||
-        entry.prov.countryNumericId ||
-        118;
+      const ownerIso3 = CountryRegistry.resolveCanonicalId(
+        entry.prov.ownerNationId,
+      );
+      const gpuIndex = CountryRegistry.getGpuColorIndex(ownerIso3);
 
       const normalized =
         totalCount > 1 ? 1.0 - rankIndex / (totalCount - 1) : 1.0;
@@ -119,7 +113,7 @@ export class WebGLPaletteTextureManager {
       data[idx] = r;
       data[idx + 1] = g;
       data[idx + 2] = b;
-      data[idx + 3] = numId & 255;
+      data[idx + 3] = gpuIndex & 255;
     }
   }
 

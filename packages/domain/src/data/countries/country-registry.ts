@@ -5,7 +5,7 @@ import {
   FinalManifestNation,
 } from "@/domain/map/manifest.type";
 
-const ID_MAPPING: Record<string, number> = {
+const GPU_INDEX_MAPPING: Record<string, number> = {
   TZA: 12,
   SAH: 13,
   COD: 22,
@@ -110,17 +110,12 @@ const ID_MAPPING: Record<string, number> = {
 };
 
 export const ALL_COUNTRY_PROFILES: readonly CountryProfile[] = Object.freeze(
-  ALL_RAW_COUNTRY_PROFILES.map((p) =>
-    Object.freeze({
-      ...p,
-      id: p.id ?? ID_MAPPING[p.code] ?? 0,
-    }),
-  ),
+  ALL_RAW_COUNTRY_PROFILES.map((p) => Object.freeze({ ...p })),
 );
 
 export class CountryRegistry {
-  private static readonly byNumericId = new Map<number, CountryProfile>();
-  private static readonly byCode = new Map<string, CountryProfile>();
+  private static readonly byIso3 = new Map<string, CountryProfile>();
+  private static readonly byFlagCode = new Map<string, CountryProfile>();
   private static readonly manifestProfiles = new Map<string, CountryProfile>();
   private static readonly manifestNations = new Map<
     string,
@@ -129,13 +124,10 @@ export class CountryRegistry {
 
   static {
     for (const profile of ALL_COUNTRY_PROFILES) {
-      if (profile.id) {
-        this.byNumericId.set(profile.id, profile);
-      }
       const iso3 = profile.code.toUpperCase();
-      this.byCode.set(iso3, profile);
+      this.byIso3.set(iso3, profile);
       if (profile.flagCode) {
-        this.byCode.set(profile.flagCode.toUpperCase(), profile);
+        this.byFlagCode.set(profile.flagCode.toUpperCase(), profile);
       }
     }
   }
@@ -149,99 +141,61 @@ export class CountryRegistry {
     if (!manifest || !Array.isArray(manifest.nations)) return;
 
     for (const item of manifest.nations) {
-      const code = item.code.toUpperCase();
-      this.manifestNations.set(code, item);
-      if (item.id) {
-        this.manifestNations.set(item.id.toUpperCase(), item);
-      }
-      if (item.flagCode) {
-        this.manifestNations.set(item.flagCode.toUpperCase(), item);
-      }
+      const iso3 = (item.code || item.id).toUpperCase();
+      this.manifestNations.set(iso3, item);
 
-      const defaultProfile = this.byCode.get(code);
+      const defaultProfile = this.byIso3.get(iso3);
       const dynamicProfile: CountryProfile = {
-        id: item.numericId ?? defaultProfile?.id ?? 0,
-        code: item.code,
-        nameEn: item.nameEn || defaultProfile?.nameEn || item.code,
-        nameFa: item.nameFa || defaultProfile?.nameFa || item.code,
+        code: iso3,
+        nameEn: item.nameEn || defaultProfile?.nameEn || iso3,
+        nameFa: item.nameFa || defaultProfile?.nameFa || iso3,
         gdp: item.gdp,
         population: item.population,
-        flagCode: item.flagCode,
+        flagCode: (
+          item.flagCode ||
+          defaultProfile?.flagCode ||
+          iso3.slice(0, 2)
+        ).toUpperCase(),
         militaryTier: defaultProfile?.militaryTier ?? 5,
         startingGovernment:
           item.defaultGovernment as CountryProfile["startingGovernment"],
         startingTechLevel: item.startingTechLevel,
       };
 
-      this.manifestProfiles.set(code, dynamicProfile);
-      if (item.id) {
-        this.manifestProfiles.set(item.id.toUpperCase(), dynamicProfile);
-      }
-      if (item.numericId) {
-        this.manifestProfiles.set(item.numericId.toString(), dynamicProfile);
+      this.manifestProfiles.set(iso3, dynamicProfile);
+      if (item.flagCode) {
+        this.manifestProfiles.set(item.flagCode.toUpperCase(), dynamicProfile);
       }
     }
   }
 
   public static getAllManifestNations(): FinalManifestNation[] {
-    const list: FinalManifestNation[] = [];
-    const seen = new Set<string>();
-    for (const item of this.manifestNations.values()) {
-      const code = item.code.toUpperCase();
-      if (!seen.has(code)) {
-        seen.add(code);
-        list.push(item);
-      }
-    }
-    return list;
+    return Array.from(this.manifestNations.values());
   }
 
-  public static getCountry(
-    identifier: string | number,
-  ): CountryProfile | undefined {
-    if (identifier === null || identifier === undefined || identifier === "") {
-      return undefined;
-    }
-
-    const clean = identifier.toString().trim().toUpperCase();
+  public static getCountry(identifier: string): CountryProfile | undefined {
+    if (!identifier) return undefined;
+    const clean = identifier.trim().toUpperCase();
 
     const manifestMatch = this.manifestProfiles.get(clean);
     if (manifestMatch) return manifestMatch;
 
-    if (typeof identifier === "number") {
-      return this.byNumericId.get(identifier);
-    }
+    const iso3Match = this.byIso3.get(clean);
+    if (iso3Match) return iso3Match;
 
-    const codeMatch = this.byCode.get(clean);
-    if (codeMatch) return codeMatch;
-
-    const parsedNum = parseInt(clean, 10);
-    if (!isNaN(parsedNum)) {
-      const numMatch = this.byNumericId.get(parsedNum);
-      if (numMatch) return numMatch;
-    }
-
-    return undefined;
+    return this.byFlagCode.get(clean);
   }
 
-  public static resolveCanonicalId(identifier: string | number): string {
+  public static resolveCanonicalId(identifier: string): string {
+    if (!identifier) return "IRN";
     const profile = this.getCountry(identifier);
-    if (profile) {
-      return profile.code.toUpperCase();
-    }
-    return identifier.toString().trim().toUpperCase();
+    return profile
+      ? profile.code.toUpperCase()
+      : identifier.trim().toUpperCase();
   }
 
-  public static resolveNumericId(identifier: string | number): number {
-    if (typeof identifier === "number") {
-      return identifier;
-    }
-    const profile = this.getCountry(identifier);
-    if (profile && profile.id) {
-      return profile.id;
-    }
-    const clean = identifier.toString().trim().toUpperCase();
-    const parsed = parseInt(clean, 10);
-    return isNaN(parsed) ? 0 : parsed;
+  public static getGpuColorIndex(identifier: string): number {
+    const iso3 = this.resolveCanonicalId(identifier);
+    return GPU_INDEX_MAPPING[iso3] ?? 118;
   }
 }

@@ -13,9 +13,3 @@ export function findCountryProfileByCode(
 ): CountryProfile | undefined {
   return CountryRegistry.getCountry(code);
 }
-
-export function findCountryProfileById(
-  id: number | string,
-): CountryProfile | undefined {
-  return CountryRegistry.getCountry(id);
-}

@@ -20,10 +20,8 @@ export class TerritoryClaimsUtility {
 
     for (let i = 0; i < list.length; i++) {
       const p = list[i]!;
-      if (!p.countryNumericId) continue;
-
       const originalNation = CountryRegistry.resolveCanonicalId(
-        p.countryNumericId,
+        p.originalNationId || p.ownerNationId,
       );
       const currentOwner = CountryRegistry.resolveCanonicalId(p.ownerNationId);
 

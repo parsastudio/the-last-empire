@@ -1,10 +1,5 @@
 import { useCallback, RefObject } from "react";
-import {
-  findCountryProfileByCode,
-  findCountryProfileById,
-  CountryRegistry,
-} from "@/domain/data/countries";
-import { CountryMapping } from "@/domain/map/country-mapping.schema";
+import { ALL_COUNTRY_PROFILES, CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
@@ -13,7 +8,6 @@ interface UseMapCameraFocusProps {
   mapHeight: number;
   dimensions: { width: number; height: number };
   scaleRef: RefObject<number>;
-  countries: CountryMapping[];
   positionRef: RefObject<CameraPosition>;
   provincesMap?: Record<string, Province>;
 }
@@ -23,41 +17,17 @@ export function useMapCameraFocus({
   mapHeight,
   dimensions,
   scaleRef,
-  countries,
   positionRef,
   provincesMap,
 }: UseMapCameraFocusProps) {
   const focusOnCountry = useCallback(
-    (countryCodeOrId: string | number) => {
+    (countryIso3OrFlag: string) => {
       if (dimensions.width === 0 || dimensions.height === 0) {
         return;
       }
 
-      let matchedCountry = countries.find(
-        (c) =>
-          c.code.toUpperCase() === countryCodeOrId.toString().toUpperCase() ||
-          c.id.toString() === countryCodeOrId.toString(),
-      );
-
-      if (!matchedCountry) {
-        const profile =
-          findCountryProfileByCode(countryCodeOrId.toString()) ||
-          findCountryProfileById(Number(countryCodeOrId));
-        if (profile) {
-          matchedCountry = countries.find(
-            (c) =>
-              c.code.toUpperCase() === profile.code.toUpperCase() ||
-              c.code.toUpperCase() === profile.flagCode.toUpperCase(),
-          );
-        }
-      }
-
-      if (!matchedCountry) return;
-
-      const targetId = matchedCountry.id;
-      const canonicalCountryId = CountryRegistry.resolveCanonicalId(
-        matchedCountry.code,
-      );
+      const canonicalIso3 =
+        CountryRegistry.resolveCanonicalId(countryIso3OrFlag);
 
       let sumX = 0;
       let sumY = 0;
@@ -68,10 +38,7 @@ export function useMapCameraFocus({
           const canonicalOwner = CountryRegistry.resolveCanonicalId(
             prov.ownerNationId,
           );
-          if (
-            canonicalOwner === canonicalCountryId ||
-            prov.countryNumericId === targetId
-          ) {
+          if (canonicalOwner === canonicalIso3) {
             const weight = Math.max(1, prov.pixelCount);
             sumX += prov.centerCoordinates.x * weight;
             sumY += prov.centerCoordinates.y * weight;
@@ -84,8 +51,8 @@ export function useMapCameraFocus({
         const manifestNations = CountryRegistry.getAllManifestNations();
         const manifestNation = manifestNations.find(
           (m) =>
-            m.numericId === targetId ||
-            m.code.toUpperCase() === canonicalCountryId,
+            CountryRegistry.resolveCanonicalId(m.code || m.id) ===
+            canonicalIso3,
         );
 
         if (!manifestNation) return;
@@ -103,15 +70,7 @@ export function useMapCameraFocus({
 
       positionRef.current = { x: targetPosX, y: targetPosY };
     },
-    [
-      countries,
-      dimensions,
-      mapHeight,
-      mapWidth,
-      scaleRef,
-      positionRef,
-      provincesMap,
-    ],
+    [dimensions, mapHeight, mapWidth, scaleRef, positionRef, provincesMap],
   );
 
   return { focusOnCountry };

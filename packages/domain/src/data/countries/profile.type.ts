@@ -1,7 +1,6 @@
 import { GovernmentType } from "@/domain/politics/politics.schema";
 
 export interface CountryProfile {
-  id?: number;
   code: string;
   nameEn: string;
   nameFa: string;

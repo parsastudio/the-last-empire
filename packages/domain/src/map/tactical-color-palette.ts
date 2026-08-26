@@ -139,18 +139,17 @@ export class TacticalPaletteGenerator {
     ];
   }
 
-  public static generateColorForCountry(countryId: number): TacticalColorPair {
-    const exactMatch = this.COUNTRY_PALETTE[countryId];
+  public static generateColorForGpuIndex(gpuIndex: number): TacticalColorPair {
+    const exactMatch = this.COUNTRY_PALETTE[gpuIndex];
     if (exactMatch) {
       return exactMatch;
     }
 
-    const hue = (countryId * 137.508) % 360;
-    const saturation = 0.32 + ((countryId * 7) % 5) * 0.025;
-    const lightness = 0.24 + (countryId % 4) * 0.025;
+    const hue = (gpuIndex * 137.508) % 360;
+    const saturation = 0.32 + ((gpuIndex * 7) % 5) * 0.025;
+    const lightness = 0.24 + (gpuIndex % 4) * 0.025;
 
     const [r1, g1, b1] = this.hslToRgb(hue, saturation, lightness);
-
     return { r1, g1, b1 };
   }
 }

@@ -2,7 +2,7 @@ export interface FinalManifestProvince {
   provinceId: number;
   nameFa: string;
   countryId: string;
-  countryNumericId: number;
+  originalCountryId?: string;
   pixelCount: number;
   hasSeaAccess: boolean;
   landNeighbors: number[];
@@ -16,7 +16,6 @@ export interface FinalManifestProvince {
 
 export interface FinalManifestNation {
   id: string;
-  numericId: number;
   code: string;
   flagCode: string;
   nameFa: string;

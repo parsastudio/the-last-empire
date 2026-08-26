@@ -35,9 +35,7 @@ export class NationProfileAssigner {
 
     const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
 
-    const profile =
-      CountryRegistry.getCountry(cleanId) ||
-      CountryRegistry.getCountry(item.code);
+    const profile = CountryRegistry.getCountry(cleanId);
     const tier =
       profile?.militaryTier ?? Math.max(1, Math.min(20, 21 - item.initialRank));
     const startingTech = profile?.startingTechLevel ?? item.startingTechLevel;
@@ -169,7 +167,6 @@ export class NationProfileAssigner {
 
     const fallbackManifestItem: FinalManifestNation = {
       id: canonicalId,
-      numericId: profile?.id ?? 0,
       code: fallback.code,
       flagCode: fallback.flagCode,
       nameFa: fallback.nameFa,

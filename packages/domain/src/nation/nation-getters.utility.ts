@@ -42,9 +42,7 @@ export class NationGettersUtility {
     for (let i = 0; i < candidatesInput.length; i++) {
       const input = candidatesInput[i]!;
       const canonicalId = CountryRegistry.resolveCanonicalId(input.id);
-      const profile =
-        CountryRegistry.getCountry(canonicalId) ||
-        CountryRegistry.getCountry(input.id);
+      const profile = CountryRegistry.getCountry(canonicalId);
 
       let milPower = 0;
 
