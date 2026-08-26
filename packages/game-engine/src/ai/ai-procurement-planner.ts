@@ -11,8 +11,8 @@ import {
   GeopoliticalReachResolver,
   CountryRegistry,
   MilitaryPowerCalculator,
+  MilitaryQuotaCalculator,
 } from "@geopolitics/domain";
-import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
 import {
   GeopoliticalVectorCalculator,
   GeopoliticalVector,
@@ -23,11 +23,6 @@ export type AIPosture = "PEACE" | "THREAT" | "WAR";
 export interface RecruitmentPlanResult {
   actions: GameAction[];
   remainingTreasury: number;
-}
-
-interface UnitBudgetRatio {
-  unitType: UnitType;
-  ratio: number;
 }
 
 export class AIProcurementPlanner {
@@ -43,23 +38,6 @@ export class AIProcurementPlanner {
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
     const gdp = getNationGdp(nation, provincesMap);
-    const aliveCount = Object.values(allNations).filter(
-      (n) => n.isAlive,
-    ).length;
-    const nationRank = NationGettersUtility.getRank(
-      nation.id,
-      allNations,
-      provincesMap,
-      rankMap,
-    );
-
-    const maxArmyValuation = AiEconomyCalculator.calculateMaxArmyValuation(
-      gdp,
-      nationRank,
-      aliveCount,
-      nation.government.type,
-    );
-
     const posture =
       precomputedPosture ??
       this.evaluatePosture(nation, allNations, provincesMap, rankMap);
@@ -89,74 +67,79 @@ export class AIProcurementPlanner {
     }
 
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
-
-    const ratios = this.getUnitRatios(
-      nation.military.techLevel,
+    const quotas = MilitaryQuotaCalculator.calculateQuotas(
+      gdp,
+      nation.military,
       hasSea,
-      posture,
-      nation.military.infantry,
+      nation.recruitmentQueue,
     );
 
-    const deficits: {
-      unitType: UnitType;
-      deficit: number;
-      unitPrice: number;
-    }[] = [];
-    let totalDeficit = 0;
+    const currentTotalValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
+    const maxArmyValuation = Math.floor(gdp);
+    const globalRemainingValuation = Math.max(
+      0,
+      maxArmyValuation - currentTotalValuation,
+    );
 
-    for (let i = 0; i < ratios.length; i++) {
-      const { unitType, ratio } = ratios[i]!;
-      const unitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
-        unitType,
-        nation.military.techLevel,
-        nation.industrialLevel,
-      );
-
-      if (unitPrice <= 0) continue;
-
-      const targetValuation = Math.floor(maxArmyValuation * ratio);
-      const currentCount = this.getUnitCount(nation, unitType);
-      const currentValuation = currentCount * unitPrice;
-
-      const categoryDeficit = Math.max(0, targetValuation - currentValuation);
-
-      if (posture === "WAR" && unitType === "INFANTRY" && currentCount <= 3) {
-        const emergencyInfantryDeficit = Math.max(
-          categoryDeficit,
-          unitPrice * 5,
-        );
-        deficits.push({
-          unitType,
-          deficit: emergencyInfantryDeficit,
-          unitPrice,
-        });
-        totalDeficit += emergencyInfantryDeficit;
-      } else if (categoryDeficit > 0) {
-        deficits.push({
-          unitType,
-          deficit: categoryDeficit,
-          unitPrice,
-        });
-        totalDeficit += categoryDeficit;
-      }
-    }
-
-    if (deficits.length === 0 || totalDeficit <= 0) {
+    if (globalRemainingValuation <= 0) {
       return { actions, remainingTreasury: effectiveTreasury };
     }
 
-    let remainingBudget = spendableBudget;
+    const deficits: {
+      unitType: UnitType;
+      deficitMoney: number;
+      unitPrice: number;
+      maxAllowedUnits: number;
+    }[] = [];
+    let totalDeficitMoney = 0;
+
+    const unitTypes: UnitType[] = [
+      "INFANTRY",
+      "ARMOR",
+      "AIR_DEFENSE",
+      "AIR_FORCE",
+      "DRONE_MISSILE",
+      "NAVAL_FLEET",
+    ];
+
+    for (let i = 0; i < unitTypes.length; i++) {
+      const type = unitTypes[i]!;
+      const q = quotas[type];
+      if (q.remainingRoom <= 0 || q.unitPrice <= 0) continue;
+
+      const stat = MILITARY_UNIT_STATS[type];
+      if (Math.floor(nation.military.techLevel) < stat.requiredTechLevel)
+        continue;
+
+      const deficitMoney = q.remainingRoom * q.unitPrice;
+      deficits.push({
+        unitType: type,
+        deficitMoney,
+        unitPrice: q.unitPrice,
+        maxAllowedUnits: q.remainingRoom,
+      });
+      totalDeficitMoney += deficitMoney;
+    }
+
+    if (deficits.length === 0 || totalDeficitMoney <= 0) {
+      return { actions, remainingTreasury: effectiveTreasury };
+    }
+
+    let remainingBudget = Math.min(spendableBudget, globalRemainingValuation);
     let totalSpent = 0;
 
     for (let i = 0; i < deficits.length; i++) {
-      const { unitType, deficit, unitPrice } = deficits[i]!;
-      const shareOfDeficit = deficit / totalDeficit;
+      const { unitType, deficitMoney, unitPrice, maxAllowedUnits } =
+        deficits[i]!;
+      const shareOfDeficit = deficitMoney / totalDeficitMoney;
       const allocatedMoney = Math.min(
         remainingBudget,
         Math.floor(spendableBudget * shareOfDeficit),
       );
 
-      const quantity = Math.floor(allocatedMoney / unitPrice);
+      const wantedQuantity = Math.floor(allocatedMoney / unitPrice);
+      const quantity = Math.min(wantedQuantity, maxAllowedUnits);
 
       if (quantity > 0) {
         const cost = quantity * unitPrice;
@@ -170,23 +153,6 @@ export class AIProcurementPlanner {
       actions,
       remainingTreasury: Math.max(0, effectiveTreasury - totalSpent),
     };
-  }
-
-  private static getUnitCount(nation: Nation, unitType: UnitType): number {
-    switch (unitType) {
-      case "INFANTRY":
-        return nation.military.infantry || 0;
-      case "ARMOR":
-        return nation.military.armor || 0;
-      case "AIR_DEFENSE":
-        return nation.military.airDefense || 0;
-      case "AIR_FORCE":
-        return nation.military.airForce || 0;
-      case "DRONE_MISSILE":
-        return nation.military.droneMissile || 0;
-      case "NAVAL_FLEET":
-        return nation.military.navalFleet || 0;
-    }
   }
 
   private static evaluateWartimeLoan(
@@ -225,11 +191,7 @@ export class AIProcurementPlanner {
       MILITARY_UNIT_STATS.INFANTRY.weightPower *
         (1 + (nation.military.techLevel - 1) * 0.5),
     );
-    const infPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
-      "INFANTRY",
-      nation.military.techLevel,
-      nation.industrialLevel,
-    );
+    const infPrice = MILITARY_UNIT_STATS.INFANTRY.moneyCost;
 
     const neededInfantry = Math.ceil(deficitPower / singleInfantryPower);
     const budgetNeeded = neededInfantry * infPrice;
@@ -282,18 +244,8 @@ export class AIProcurementPlanner {
   }
 
   public static calculateTotalArmyValuation(nation: Nation): number {
-    const landAndAirValuation =
-      MilitaryPricingCalculator.calculateLandAndAirValuation(
-        nation.military,
-        nation.industrialLevel,
-      );
-
-    const navalUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
-      "NAVAL_FLEET",
-      nation.military.techLevel,
-      nation.industrialLevel,
-    );
-    const navalValuation = (nation.military.navalFleet || 0) * navalUnitPrice;
+    const militaryValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
 
     let queuedValuation = 0;
     const queue = nation.recruitmentQueue || [];
@@ -301,7 +253,7 @@ export class AIProcurementPlanner {
       queuedValuation += queue[i]!.totalCost;
     }
 
-    return landAndAirValuation + navalValuation + queuedValuation;
+    return militaryValuation + queuedValuation;
   }
 
   public static evaluatePosture(
@@ -366,68 +318,5 @@ export class AIProcurementPlanner {
     else if (posture === "WAR") postureMultiplier = 0.9;
 
     return Math.floor(disposable * postureMultiplier);
-  }
-
-  private static getUnitRatios(
-    techLevel: number,
-    hasSeaAccess: boolean,
-    posture: AIPosture,
-    currentInfantry: number,
-  ): UnitBudgetRatio[] {
-    if (posture === "WAR" && currentInfantry <= 3) {
-      return [
-        { unitType: "INFANTRY", ratio: 0.7 },
-        { unitType: "ARMOR", ratio: techLevel >= 2 ? 0.2 : 0.0 },
-        { unitType: "DRONE_MISSILE", ratio: 0.1 },
-      ];
-    }
-
-    switch (techLevel) {
-      case 1:
-        return [
-          { unitType: "INFANTRY", ratio: 0.8 },
-          { unitType: "DRONE_MISSILE", ratio: 0.2 },
-        ];
-      case 2:
-        return [
-          { unitType: "INFANTRY", ratio: 0.45 },
-          { unitType: "ARMOR", ratio: 0.45 },
-          { unitType: "DRONE_MISSILE", ratio: 0.1 },
-        ];
-      case 3:
-        return [
-          { unitType: "ARMOR", ratio: 0.35 },
-          { unitType: "INFANTRY", ratio: 0.3 },
-          { unitType: "AIR_DEFENSE", ratio: 0.25 },
-          { unitType: "DRONE_MISSILE", ratio: 0.1 },
-        ];
-      case 4:
-        return [
-          { unitType: "ARMOR", ratio: 0.3 },
-          { unitType: "AIR_FORCE", ratio: 0.25 },
-          { unitType: "INFANTRY", ratio: 0.2 },
-          { unitType: "AIR_DEFENSE", ratio: 0.15 },
-          { unitType: "DRONE_MISSILE", ratio: 0.1 },
-        ];
-      case 5:
-      default:
-        if (hasSeaAccess) {
-          return [
-            { unitType: "ARMOR", ratio: 0.25 },
-            { unitType: "AIR_FORCE", ratio: 0.2 },
-            { unitType: "INFANTRY", ratio: 0.15 },
-            { unitType: "AIR_DEFENSE", ratio: 0.15 },
-            { unitType: "NAVAL_FLEET", ratio: 0.15 },
-            { unitType: "DRONE_MISSILE", ratio: 0.1 },
-          ];
-        }
-        return [
-          { unitType: "ARMOR", ratio: 0.3 },
-          { unitType: "AIR_FORCE", ratio: 0.3 },
-          { unitType: "INFANTRY", ratio: 0.15 },
-          { unitType: "AIR_DEFENSE", ratio: 0.15 },
-          { unitType: "DRONE_MISSILE", ratio: 0.1 },
-        ];
-    }
   }
 }

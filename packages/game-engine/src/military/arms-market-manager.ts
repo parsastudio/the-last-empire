@@ -6,6 +6,8 @@ import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-ca
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
 
 export class ArmsMarketManager {
   public static executePurchase(
@@ -33,7 +35,7 @@ export class ArmsMarketManager {
     }
 
     const unitStat = MILITARY_UNIT_STATS[unitType];
-    if (seller.military.techLevel < unitStat.requiredTechLevel) {
+    if (Math.floor(seller.military.techLevel) < unitStat.requiredTechLevel) {
       throw new GameError(
         "INVALID_ACTION",
         `کشور ${seller.name} سطح فناوری لازم برای تولید این یگان را ندارد.`,
@@ -74,13 +76,9 @@ export class ArmsMarketManager {
       }
     }
 
-    const sellerUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
-      unitType,
-      seller.military.techLevel,
-      seller.industrialLevel,
-    );
-
-    const marketPricePerUnit = Math.floor(sellerUnitPrice * 1.5);
+    const baseUnitPrice =
+      MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
+    const marketPricePerUnit = Math.floor(baseUnitPrice * 1.5);
     const totalCost = marketPricePerUnit * quantity;
 
     if (buyer.treasury < totalCost) {
@@ -90,7 +88,35 @@ export class ArmsMarketManager {
       );
     }
 
-    const sellerProfit = Math.floor(sellerUnitPrice * 0.5) * quantity;
+    const buyerGdp = getNationGdp(buyer, state.provinces);
+    const currentValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuation(buyer.military);
+    const maxValuation = Math.floor(buyerGdp);
+    const addedValuation = baseUnitPrice * quantity;
+
+    if (currentValuation + addedValuation > maxValuation) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",
+      );
+    }
+
+    const quotas = MilitaryQuotaCalculator.calculateQuotas(
+      buyerGdp,
+      buyer.military,
+      true,
+      buyer.recruitmentQueue,
+    );
+    const q = quotas[unitType];
+
+    if (q.remainingRoom < quantity) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `سقف مجاز سهمیه ${unitStat.nameFa} در ارتش شما تکمیل شده است.`,
+      );
+    }
+
+    const sellerProfit = Math.floor(baseUnitPrice * 0.5) * quantity;
 
     const updatedBuyerMilitary = MilitaryInventoryHelper.addUnits(
       buyer.military,

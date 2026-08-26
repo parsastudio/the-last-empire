@@ -47,9 +47,13 @@ export function WideMilitaryView({
         onSelectSubTab={setActiveSubTab}
       />
 
-      {activeSubTab === "overview" && <MilitaryOverviewTab nation={nation} />}
+      {activeSubTab === "overview" && (
+        <MilitaryOverviewTab nation={nation} provincesMap={provincesMap} />
+      )}
 
-      {activeSubTab === "domestic" && <MilitaryDomesticTab nation={nation} />}
+      {activeSubTab === "domestic" && (
+        <MilitaryDomesticTab nation={nation} provincesMap={provincesMap} />
+      )}
 
       {activeSubTab === "allies" && (
         <MilitaryAlliedProcurementTab

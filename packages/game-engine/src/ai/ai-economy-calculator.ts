@@ -45,68 +45,7 @@ export class AiEconomyCalculator {
     return Math.floor(gdp * rate * govMultiplier);
   }
 
-  public static calculateMaxArmyValuation(
-    gdp: number,
-    rank: number,
-    totalAliveCount: number,
-    govType?: GovernmentType | string,
-  ): number {
-    const turnIncome = this.calculateTurnIncome(
-      gdp,
-      rank,
-      totalAliveCount,
-      govType,
-    );
-    return turnIncome * 10;
-  }
-
-  public static calculateArmyMaintenanceDeductionRate(
-    currentArmyValuation: number,
-    maxArmyValuation: number,
-  ): number {
-    if (maxArmyValuation <= 0 || currentArmyValuation <= 0) {
-      return 0;
-    }
-    const ratio = Math.min(1.0, currentArmyValuation / maxArmyValuation);
-    return ratio * 0.3;
-  }
-
-  public static calculateArmyMaintenanceCost(
-    baseIncome: number,
-    currentArmyValuation: number,
-    maxArmyValuation: number,
-  ): number {
-    const rate = this.calculateArmyMaintenanceDeductionRate(
-      currentArmyValuation,
-      maxArmyValuation,
-    );
-    return Math.floor(baseIncome * rate);
-  }
-
-  public static calculateEffectiveTurnIncome(
-    gdp: number,
-    rank: number,
-    totalAliveCount: number,
-    currentArmyValuation: number,
-    govType?: GovernmentType | string,
-  ): number {
-    const baseIncome = this.calculateTurnIncome(
-      gdp,
-      rank,
-      totalAliveCount,
-      govType,
-    );
-    const maxValuation = this.calculateMaxArmyValuation(
-      gdp,
-      rank,
-      totalAliveCount,
-      govType,
-    );
-    const maintenanceCost = this.calculateArmyMaintenanceCost(
-      baseIncome,
-      currentArmyValuation,
-      maxValuation,
-    );
-    return Math.max(0, baseIncome - maintenanceCost);
+  public static calculateMaxArmyValuation(gdp: number): number {
+    return Math.max(0, Math.floor(gdp));
   }
 }

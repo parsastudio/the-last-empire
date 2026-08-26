@@ -10,6 +10,7 @@ import {
   Plus,
   Coins,
   Zap,
+  ShieldCheck,
   LucideIcon,
 } from "lucide-react";
 import { UnitType } from "@geopolitics/domain";
@@ -72,9 +73,11 @@ export function AlliedUnitBuyCard({
       className={`relative p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 font-sans dir-rtl select-none ${
         !info.isUnlocked
           ? "bg-background/20 border-border/40 opacity-50"
-          : info.canAfford
-            ? "bg-card/90 border-border/80 hover:border-amber-500/50 hover:bg-card shadow-sm"
-            : "bg-background/40 border-border/60 opacity-60"
+          : info.isCapReached
+            ? "bg-secondary/30 border-border/60 opacity-60"
+            : info.canAfford
+              ? "bg-card/90 border-border/80 hover:border-amber-500/50 hover:bg-card shadow-sm"
+              : "bg-background/40 border-border/60 opacity-60"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -123,7 +126,16 @@ export function AlliedUnitBuyCard({
           ))}
         </div>
 
-        {info.isUnlocked ? (
+        {!info.isUnlocked ? (
+          <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
+            فناوری ناکافی
+          </div>
+        ) : info.isCapReached ? (
+          <div className="py-2 px-3 bg-amber-500/15 text-amber-400 rounded-xl text-[10px] font-mono border border-amber-500/30 flex items-center gap-1">
+            <ShieldCheck size={12} />
+            <span>سقف ظرفیت</span>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={() => onBuy(info)}
@@ -141,10 +153,6 @@ export function AlliedUnitBuyCard({
               یگان)
             </span>
           </button>
-        ) : (
-          <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
-            فناوری ناکافی
-          </div>
         )}
       </div>
     </div>

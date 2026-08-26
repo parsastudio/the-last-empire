@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { MilitaryForceUnitCard } from "@/presentation/components/tactical-map/sidebar/components/military-force-unit-card";
@@ -25,6 +26,7 @@ interface MilitaryForcesSectionProps {
   techLevel: number;
   experience: number;
   nation?: Nation;
+  provincesMap?: Record<string, Province>;
 }
 
 export function MilitaryForcesSection({
@@ -37,6 +39,7 @@ export function MilitaryForcesSection({
   techLevel,
   experience,
   nation,
+  provincesMap,
 }: MilitaryForcesSectionProps) {
   const activeNation: Nation = nation || {
     ...DEFAULT_NATION_MOCK,
@@ -53,7 +56,10 @@ export function MilitaryForcesSection({
     },
   };
 
-  const payroll = MilitaryPayrollCalculator.calculatePayroll(activeNation);
+  const payroll = MilitaryPayrollCalculator.calculatePayroll(
+    activeNation,
+    provincesMap,
+  );
 
   const infTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,

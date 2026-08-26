@@ -8,7 +8,6 @@ import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
-import { AIProcurementPlanner } from "@/engine/ai/ai-procurement-planner";
 import { NationGettersUtility } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
@@ -34,14 +33,16 @@ export class EconomyTurnProcessor {
       currentProvincesMap[up.provinceId.toString()] = up;
     }
 
+    const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(
+      updated,
+      currentProvincesMap,
+    );
+
     if (updated.isAi) {
       const gdp = getNationGdp(updated, currentProvincesMap);
       const aliveCount = Object.values(allNations).filter(
         (n) => n.isAlive,
       ).length;
-      const currentArmyValuation =
-        AIProcurementPlanner.calculateTotalArmyValuation(updated);
-
       const nationRank = NationGettersUtility.getRank(
         updated.id,
         allNations,
@@ -55,18 +56,7 @@ export class EconomyTurnProcessor {
         updated.government.type,
       );
 
-      const maxArmyValuation = AiEconomyCalculator.calculateMaxArmyValuation(
-        gdp,
-        nationRank,
-        aliveCount,
-        updated.government.type,
-      );
-
-      const maintenanceCost = AiEconomyCalculator.calculateArmyMaintenanceCost(
-        baseIncome,
-        currentArmyValuation,
-        maxArmyValuation,
-      );
+      const maintenanceCost = payrollBreakdown.total;
 
       let actualRepayment = 0;
       let newDebt = updated.nationalDebt;
@@ -106,8 +96,6 @@ export class EconomyTurnProcessor {
       (tariffResult.tariffRevenue > 0 ? tariffResult.tariffRevenue : 0) +
       (taxResult.taxIncome > 0 ? taxResult.taxIncome : 0);
 
-    const payrollBreakdown =
-      MilitaryPayrollCalculator.calculatePayroll(updated);
     const totalExpenses =
       payrollBreakdown.total + Math.floor(updated.nationalDebt * 0.05);
 
