@@ -14,6 +14,10 @@ import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.confi
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { BattleCalculator } from "@/engine/combat/battle-calculator";
+import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { TacticalForecast } from "./attack-intel-panel";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -41,6 +45,7 @@ export function useDirectAttackForm({
   const [armorToDeploy, setArmorToDeploy] = useState<number>(0);
   const [airForceToDeploy, setAirForceToDeploy] = useState<number>(0);
   const [dronesToLaunch, setDronesToLaunch] = useState<number>(0);
+  const [isExecutingRecon, setIsExecutingRecon] = useState<boolean>(false);
 
   const [prevKey, setPrevKey] = useState<string | null>(null);
   const currentKey = `${humanNation?.id}-${isOpen}-${targetNationId}-${targetProvinceId}`;
@@ -74,6 +79,32 @@ export function useDirectAttackForm({
       gameState?.provinces,
     );
   }, [humanNation, targetProvinceId, gameState?.provinces]);
+
+  const isReconActive = useMemo(() => {
+    if (!humanNation || !targetNation) return false;
+    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
+    const list = humanNation.executedEspionageTiers || [];
+    return (
+      list.includes(`${canonicalTarget}:1`) ||
+      list.includes(`${targetNation.id}:1`)
+    );
+  }, [humanNation, targetNation]);
+
+  const targetGdp = useMemo(() => {
+    if (!targetNation) return 1000000000;
+    return getNationGdp(targetNation, gameState?.provinces);
+  }, [targetNation, gameState?.provinces]);
+
+  const reconCost = useMemo(() => {
+    if (!humanNation) return 1000000000;
+    return EspionageCalculator.calculateOperationCost(
+      targetGdp,
+      1,
+      humanNation,
+    );
+  }, [targetGdp, humanNation]);
+
+  const canAffordRecon = (humanNation?.treasury || 0) >= reconCost;
 
   const navalAttackInfo = useMemo(() => {
     if (isLandNeighbor || !humanNation || !targetProvinceId) {
@@ -184,6 +215,118 @@ export function useDirectAttackForm({
     return `خاک اصلی ${targetNation.name}`;
   }, [targetNation, targetProvince]);
 
+  const forecast = useMemo<TacticalForecast>(() => {
+    if (!humanNation || !targetNation) {
+      return {
+        winProbability: 0,
+        isVictoryPredicted: false,
+        isCapitulationPredicted: false,
+        phase1Prediction: "نامشخص",
+        phase2Prediction: "نامشخص",
+        phase3Prediction: "نامشخص",
+        valuationRatio: 1,
+      };
+    }
+
+    const calc = BattleCalculator.calculateBattle(
+      humanNation,
+      targetNation,
+      dronesToLaunch,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
+      isLandNeighbor ? "LAND" : "NAVAL",
+      navalAttackInfo.navalCostMultiplier,
+      gameState?.provinces,
+    );
+
+    let winProb = 50;
+    if (calc.isAttackerVictory) {
+      winProb = Math.min(99, Math.round(55 + (calc.valuationRatio - 1.0) * 35));
+    } else {
+      winProb = Math.max(1, Math.round(45 * calc.valuationRatio));
+    }
+
+    return {
+      winProbability: winProb,
+      isVictoryPredicted: calc.isAttackerVictory,
+      isCapitulationPredicted: calc.isFullCapitulation,
+      phase1Prediction: calc.phase1Missile.phaseWinner,
+      phase2Prediction: calc.phase2Air.phaseWinner,
+      phase3Prediction: calc.phase3Ground.phaseWinner,
+      valuationRatio: calc.valuationRatio,
+    };
+  }, [
+    humanNation,
+    targetNation,
+    dronesToLaunch,
+    infantryToDeploy,
+    armorToDeploy,
+    airForceToDeploy,
+    isLandNeighbor,
+    navalAttackInfo.navalCostMultiplier,
+    gameState?.provinces,
+  ]);
+
+  const handleExecuteQuickRecon = useCallback(async () => {
+    if (!humanNation || !targetNation || isExecutingRecon || !canAffordRecon) {
+      return;
+    }
+    try {
+      setIsExecutingRecon(true);
+      const action = ActionFactory.executeEspionage(
+        humanNation.id,
+        targetNation.id,
+        1,
+      );
+      await dispatchAction(
+        action,
+        "شنود ماهواره‌ای مواضع دشمن با موفقیت انجام شد.",
+      );
+    } finally {
+      setIsExecutingRecon(false);
+    }
+  }, [
+    humanNation,
+    targetNation,
+    isExecutingRecon,
+    canAffordRecon,
+    dispatchAction,
+  ]);
+
+  const handleAutoOptimizeDeploy = useCallback(() => {
+    if (!humanNation || !targetNation) return;
+
+    const myMil = humanNation.military;
+    const enemyMil = targetNation.military;
+
+    const enemyAD = enemyMil.airDefense || 0;
+    const optimalDrones = Math.min(myMil.droneMissile || 0, enemyAD * 2);
+
+    const enemyAir = enemyMil.airForce || 0;
+    const optimalAir = Math.min(
+      myMil.airForce || 0,
+      Math.max(1, Math.ceil(enemyAir * 1.35) + 2),
+    );
+
+    const enemyArmor = enemyMil.armor || 0;
+    const optimalArmor = Math.min(
+      myMil.armor || 0,
+      Math.max(1, Math.ceil(enemyArmor * 1.25) + 2),
+    );
+
+    const enemyInf = enemyMil.infantry || 0;
+    const optimalInf = Math.max(
+      1,
+      Math.min(myMil.infantry || 0, Math.ceil(enemyInf * 1.3) + 5),
+    );
+
+    setDronesToLaunch(optimalDrones);
+    setAirForceToDeploy(optimalAir);
+    setArmorToDeploy(optimalArmor);
+    setInfantryToDeploy(optimalInf);
+  }, [humanNation, targetNation]);
+
   const handleExecuteAttack = useCallback(async () => {
     if (!humanNation || !targetNation || isSubmitting) {
       return;
@@ -244,12 +387,17 @@ export function useDirectAttackForm({
     targetNation,
     targetProvince,
     isLandNeighbor,
+    isReconActive,
+    reconCost,
+    canAffordRecon,
+    isExecutingRecon,
     navalAttackInfo,
     currentStance,
     isWarStance,
     reputationPenalty,
     originRegionName,
     targetRegionName,
+    forecast,
     infantryToDeploy,
     setInfantryToDeploy,
     armorToDeploy,
@@ -265,6 +413,8 @@ export function useDirectAttackForm({
     canAfford,
     hasSelectedInfantry,
     isSubmitting,
+    handleExecuteQuickRecon,
+    handleAutoOptimizeDeploy,
     handleExecuteAttack,
   };
 }

@@ -1,4 +1,8 @@
-import { ALL_COUNTRY_PROFILES, MAP_CONFIG } from "@geopolitics/domain";
+import {
+  ALL_COUNTRY_PROFILES,
+  CountryRegistry,
+  MAP_CONFIG,
+} from "@geopolitics/domain";
 import {
   MajorLandMass,
   LandComponent,
@@ -49,7 +53,8 @@ export class ProvinceCountAllocator {
     countryNumericId: number,
     totalPixels: number,
   ): number {
-    const profile = ALL_COUNTRY_PROFILES.find((p) => p.id === countryNumericId);
+    const iso3 = CountryRegistry.getIso3ByGpuIndex(countryNumericId);
+    const profile = iso3 ? CountryRegistry.getCountry(iso3) : undefined;
     const rawGdp = profile?.gdp ?? 0;
     const gdp =
       rawGdp > 0 && rawGdp < 100_000 ? rawGdp * 1_000_000_000 : rawGdp;

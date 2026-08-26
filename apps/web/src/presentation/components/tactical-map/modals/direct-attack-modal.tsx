@@ -7,6 +7,7 @@ import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/mod
 import { AttackHeader } from "@/presentation/components/tactical-map/modals/attack/attack-header";
 import { AttackStatusAlerts } from "@/presentation/components/tactical-map/modals/attack/attack-status-alerts";
 import { AttackCostSummary } from "@/presentation/components/tactical-map/modals/attack/attack-cost-summary";
+import { AttackIntelPanel } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { useDirectAttackForm } from "@/presentation/components/tactical-map/modals/attack/use-direct-attack-form";
 
 interface DirectAttackModalProps {
@@ -61,6 +62,17 @@ export function DirectAttackModal({
           originRegionName={form.originRegionName}
           targetRegionName={form.targetRegionName}
           isLandNeighbor={form.isLandNeighbor}
+        />
+
+        <AttackIntelPanel
+          isReconActive={form.isReconActive}
+          reconCost={form.reconCost}
+          canAffordRecon={form.canAffordRecon}
+          isExecutingRecon={form.isExecutingRecon}
+          targetNation={form.targetNation}
+          forecast={form.forecast}
+          onExecuteRecon={form.handleExecuteQuickRecon}
+          onAutoOptimizeDeploy={form.handleAutoOptimizeDeploy}
         />
 
         <AttackStatusAlerts
