@@ -9,6 +9,7 @@ import {
   Lock,
   Plus,
   Coins,
+  ShieldCheck,
   LucideIcon,
 } from "lucide-react";
 import { UnitType } from "@geopolitics/domain";
@@ -73,9 +74,11 @@ export function QuickUnitRecruitCard({
       className={`relative p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 font-sans dir-rtl select-none ${
         !info.isUnlocked
           ? "bg-background/20 border-border/40 opacity-50"
-          : info.canAfford
-            ? "bg-card/90 border-border/80 hover:border-gdp/50 hover:bg-card shadow-sm"
-            : "bg-background/40 border-border/60 opacity-60"
+          : info.isCapReached
+            ? "bg-secondary/30 border-border/60 opacity-60"
+            : info.canAfford
+              ? "bg-card/90 border-border/80 hover:border-gdp/50 hover:bg-card shadow-sm"
+              : "bg-background/40 border-border/60 opacity-60"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -103,6 +106,15 @@ export function QuickUnitRecruitCard({
             <span>
               قیمت واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
+            {info.isUnlocked && (
+              <span className="text-[9px] text-foreground font-sans">
+                (ظرفیت باقی‌مانده:{" "}
+                {PersianNumberFormatter.toPersianDigits(
+                  info.remainingRoom.toLocaleString("en-US"),
+                )}
+                )
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -119,7 +131,16 @@ export function QuickUnitRecruitCard({
           ))}
         </div>
 
-        {info.isUnlocked ? (
+        {!info.isUnlocked ? (
+          <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
+            قفل فناوری
+          </div>
+        ) : info.isCapReached ? (
+          <div className="py-2 px-3 bg-amber-500/15 text-amber-400 rounded-xl text-[10px] font-mono border border-amber-500/30 flex items-center gap-1">
+            <ShieldCheck size={12} />
+            <span>سقف ظرفیت</span>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={() => onBuy(info)}
@@ -137,10 +158,6 @@ export function QuickUnitRecruitCard({
               یگان)
             </span>
           </button>
-        ) : (
-          <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
-            قفل فناوری
-          </div>
         )}
       </div>
     </div>

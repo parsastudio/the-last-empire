@@ -1,22 +1,23 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
 
 export class RecruitmentQueueManager {
   public enqueueOrder(
     nation: Nation,
     unitType: UnitType,
     quantity: number,
+    provincesMap?: Record<string, Province>,
   ): Nation {
-    const totalMoney = MilitaryPricingCalculator.calculateTotalCost(
-      unitType,
-      quantity,
-      nation.military.techLevel,
-      nation.industrialLevel,
-    );
+    const unitPrice =
+      MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
+    const totalMoney = unitPrice * quantity;
 
     if (nation.treasury < totalMoney) {
       throw new GameError(
@@ -25,8 +26,40 @@ export class RecruitmentQueueManager {
       );
     }
 
+    const gdp = getNationGdp(nation, provincesMap);
+    const currentValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
+    const maxValuation = Math.floor(gdp);
+
+    let queuedCost = 0;
+    for (let i = 0; i < nation.recruitmentQueue.length; i++) {
+      queuedCost += nation.recruitmentQueue[i]!.totalCost;
+    }
+
+    if (currentValuation + queuedCost + totalMoney > maxValuation) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",
+      );
+    }
+
+    const quotas = MilitaryQuotaCalculator.calculateQuotas(
+      gdp,
+      nation.military,
+      true,
+      nation.recruitmentQueue,
+    );
+    const q = quotas[unitType];
+
+    if (q.remainingRoom < quantity) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `سقف مجاز ساخت ${MILITARY_UNIT_STATS[unitType].nameFa} تکمیل شده است.`,
+      );
+    }
+
     const unitStat = MILITARY_UNIT_STATS[unitType];
-    const turnsRemaining = unitStat ? unitStat.buildTurns : 2;
+    const turnsRemaining = unitStat ? unitStat.buildTurns : 1;
 
     const newOrder: RecruitmentOrder = {
       id: `${unitType}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,

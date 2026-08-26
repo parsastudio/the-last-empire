@@ -3,7 +3,9 @@ import {
   UnitType,
   MILITARY_UNIT_STATS,
   MilitaryPricingCalculator,
+  MilitaryQuotaCalculator,
   ActionFactory,
+  Nation,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
@@ -18,6 +20,8 @@ export interface QuickUnitBatchInfo {
   requiredTechLevel: number;
   isUnlocked: boolean;
   canAfford: boolean;
+  remainingRoom: number;
+  isCapReached: boolean;
 }
 
 export interface FloatingFeedback {
@@ -36,19 +40,18 @@ const ALL_TYPES: UnitType[] = [
 
 interface UseQuickRecruitBatchProps {
   nationId: string;
-  currentTreasury: number;
-  techLevel?: number;
-  industrialLevel?: number;
+  nation: Nation;
+  currentGdp: number;
+  hasSeaAccess?: boolean;
 }
 
 export function useQuickRecruitBatch({
   nationId,
-  currentTreasury,
-  techLevel = 1,
-  industrialLevel = 1,
+  nation,
+  currentGdp,
+  hasSeaAccess = true,
 }: UseQuickRecruitBatchProps) {
   const { dispatchAction } = useGameActions();
-  const [snapshotTreasury] = useState<number>(() => currentTreasury);
   const [floatingFeedbacks, setFloatingFeedbacks] = useState<
     Record<UnitType, FloatingFeedback[]>
   >({
@@ -60,25 +63,52 @@ export function useQuickRecruitBatch({
     NAVAL_FLEET: [],
   });
 
-  const tenPercentBudget = Math.max(0, Math.floor(snapshotTreasury * 0.1));
+  const tenPercentBudget = Math.max(0, Math.floor(nation.treasury * 0.1));
+  const currentValuation =
+    MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
+  const maxValuation = Math.floor(currentGdp);
+  const remainingValuationCapacity = Math.max(
+    0,
+    maxValuation - currentValuation,
+  );
+
+  const quotas = useMemo(() => {
+    return MilitaryQuotaCalculator.calculateQuotas(
+      currentGdp,
+      nation.military,
+      hasSeaAccess,
+      nation.recruitmentQueue,
+    );
+  }, [currentGdp, nation.military, hasSeaAccess, nation.recruitmentQueue]);
 
   const batchList = useMemo<QuickUnitBatchInfo[]>(() => {
     return ALL_TYPES.map((type) => {
       const stat = MILITARY_UNIT_STATS[type];
-      const unitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
-        type,
-        techLevel,
-        industrialLevel,
-      );
+      const unitPrice = stat.moneyCost;
+      const q = quotas[type];
+      const isUnlocked =
+        Math.floor(nation.military.techLevel) >= stat.requiredTechLevel;
 
-      const isUnlocked = techLevel >= stat.requiredTechLevel;
-      const batchQuantity =
+      const affordableByMoney =
         tenPercentBudget > 0 && unitPrice > 0
           ? Math.max(1, Math.floor(tenPercentBudget / unitPrice))
           : 1;
 
+      const affordableByValuationCap = Math.floor(
+        remainingValuationCapacity / unitPrice,
+      );
+      const allowedByQuota = q.remainingRoom;
+
+      const clampedQuantity = Math.max(
+        0,
+        Math.min(affordableByMoney, affordableByValuationCap, allowedByQuota),
+      );
+
+      const batchQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
       const batchCost = batchQuantity * unitPrice;
-      const canAfford = currentTreasury >= batchCost;
+      const canAfford = nation.treasury >= batchCost && clampedQuantity > 0;
+      const isCapReached =
+        q.remainingRoom <= 0 || remainingValuationCapacity < unitPrice;
 
       return {
         type,
@@ -90,19 +120,21 @@ export function useQuickRecruitBatch({
         requiredTechLevel: stat.requiredTechLevel,
         isUnlocked,
         canAfford,
+        remainingRoom: q.remainingRoom,
+        isCapReached,
       };
     });
   }, [
-    snapshotTreasury,
+    nation.treasury,
+    nation.military.techLevel,
     tenPercentBudget,
-    techLevel,
-    industrialLevel,
-    currentTreasury,
+    quotas,
+    remainingValuationCapacity,
   ]);
 
   const handleBuyBatch = useCallback(
     async (info: QuickUnitBatchInfo) => {
-      if (!info.isUnlocked || !info.canAfford) return;
+      if (!info.isUnlocked || !info.canAfford || info.isCapReached) return;
 
       TacticalSound.playCoinSound();
 

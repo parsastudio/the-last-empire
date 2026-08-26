@@ -3,8 +3,8 @@ import { GameError } from "@/domain/shared/domain-utilities";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class ResearchManager {
-  public static getMilitaryTechCost(nation: Nation): number {
-    const level = nation.military.techLevel || 1;
+  public static getMajorLevelCost(baseLevel: number): number {
+    const level = Math.floor(Math.max(1, baseLevel));
     switch (level) {
       case 1:
         return 15_000_000_000;
@@ -19,6 +19,13 @@ export class ResearchManager {
     }
   }
 
+  public static getMilitaryTechCost(nation: Nation): number {
+    const currentTech = nation.military.techLevel || 1.0;
+    const majorLevel = Math.floor(currentTech);
+    const fullTierCost = this.getMajorLevelCost(majorLevel);
+    return Math.floor(fullTierCost / 10);
+  }
+
   public investInMilitaryTech(nation: Nation): Nation {
     const cost = ResearchManager.getMilitaryTechCost(nation);
     if (nation.treasury < cost) {
@@ -28,7 +35,9 @@ export class ResearchManager {
       );
     }
 
-    const nextTechLevel = nation.military.techLevel + 1;
+    const currentTech = nation.military.techLevel || 1.0;
+    const nextTechLevel = Number((currentTech + 0.1).toFixed(1));
+
     const updatedMilitary = MilitaryInventoryHelper.syncBranchTechOnUpgrade(
       nation.military,
       nextTechLevel,

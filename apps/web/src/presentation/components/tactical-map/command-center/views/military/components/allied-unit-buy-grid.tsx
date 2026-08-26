@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowRight, Wallet, Award } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
 import { AlliedUnitBuyCard } from "@/presentation/components/tactical-map/command-center/views/military/components/allied-unit-buy-card";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -9,18 +10,21 @@ import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 interface AlliedUnitBuyGridProps {
   buyerNation: Nation;
   sellerNation: Nation;
+  provincesMap?: Record<string, Province>;
   onBack: () => void;
 }
 
 export function AlliedUnitBuyGrid({
   buyerNation,
   sellerNation,
+  provincesMap,
   onBack,
 }: AlliedUnitBuyGridProps) {
   const { batchList, floatingFeedbacks, handleBuyAlliedBatch } =
     useAlliedArmsProcurement({
       buyerNation,
       sellerNation,
+      provincesMap,
     });
 
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
@@ -48,7 +52,7 @@ export function AlliedUnitBuyGrid({
                 <span>
                   سطح فناوری دفاعی: لِوِل{" "}
                   {PersianNumberFormatter.toPersianDigits(
-                    sellerNation.military.techLevel,
+                    sellerNation.military.techLevel.toFixed(1),
                   )}
                 </span>
               </span>
