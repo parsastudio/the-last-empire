@@ -34,10 +34,10 @@ export class CountryDefaultsUtility {
   }
 
   public static getFallbackProfile(
-    identifier: string | number,
+    identifier: string,
     profile?: CountryProfile,
   ): NormalizedCountryFallback {
-    const cleanCode = identifier.toString().trim().toUpperCase();
+    const cleanCode = identifier.trim().toUpperCase();
 
     const nameFa = profile?.nameFa ?? `کشور ${cleanCode}`;
     const nameEn = profile?.nameEn ?? cleanCode;

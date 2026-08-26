@@ -3,8 +3,8 @@ import { z } from "zod";
 export const ProvinceSchema = z.object({
   provinceId: z.number().positive(),
   nameFa: z.string(),
-  countryNumericId: z.number().nonnegative(),
   ownerNationId: z.string(),
+  originalNationId: z.string().optional(),
   pixelCount: z.number().nonnegative(),
   hasSeaAccess: z.boolean(),
   landNeighbors: z.array(z.number()),

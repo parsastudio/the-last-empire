@@ -35,7 +35,7 @@ export function useWebGLInteraction({
     null,
   );
   const [hoverData, setHoverData] = useState<HoverCountryInfo | null>(null);
-  const [hoveredCountryId, setHoveredCountryId] = useState<number>(0);
+  const [hoveredGpuIndex, setHoveredGpuIndex] = useState<number>(0);
 
   const { pickAtScreenPos } = useGridPicker();
   const { contextMenuState, openContextMenu, closeContextMenu } =
@@ -55,7 +55,7 @@ export function useWebGLInteraction({
       }
       if (hoverPos !== null) setHoverPos(null);
       if (hoverData !== null) setHoverData(null);
-      if (hoveredCountryId !== 0) setHoveredCountryId(0);
+      if (hoveredGpuIndex !== 0) setHoveredGpuIndex(0);
       lastHoverProvinceIdRef.current = null;
       return;
     }
@@ -71,14 +71,12 @@ export function useWebGLInteraction({
 
     if (provinceId > 0) {
       const prov = provincesMap?.[provinceId.toString()];
-      const numericId = prov
-        ? CountryRegistry.resolveNumericId(prov.ownerNationId) ||
-          prov.countryNumericId ||
-          0
+      const gpuIdx = prov
+        ? CountryRegistry.getGpuColorIndex(prov.ownerNationId)
         : 0;
 
-      if (hoveredCountryId !== numericId) {
-        setHoveredCountryId(numericId);
+      if (hoveredGpuIndex !== gpuIdx) {
+        setHoveredGpuIndex(gpuIdx);
       }
 
       if (lastHoverProvinceIdRef.current !== provinceId || !hoverData) {
@@ -98,14 +96,14 @@ export function useWebGLInteraction({
     lastHoverProvinceIdRef.current = null;
     if (hoverPos !== null) setHoverPos(null);
     if (hoverData !== null) setHoverData(null);
-    if (hoveredCountryId !== 0) setHoveredCountryId(0);
+    if (hoveredGpuIndex !== 0) setHoveredGpuIndex(0);
   };
 
   const handlePointerLeave = () => {
     lastHoverProvinceIdRef.current = null;
     setHoverPos(null);
     setHoverData(null);
-    setHoveredCountryId(0);
+    setHoveredGpuIndex(0);
   };
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -142,7 +140,7 @@ export function useWebGLInteraction({
   return {
     hoverPos,
     hoverData,
-    hoveredCountryId,
+    hoveredGpuIndex,
     contextMenuState,
     handlePointerMove,
     handlePointerLeave,

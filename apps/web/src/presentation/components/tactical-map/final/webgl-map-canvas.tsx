@@ -18,8 +18,8 @@ interface WebGLMapCanvasProps {
   activeLayer?: "political" | "gdp";
   positionRef?: React.RefObject<CameraPosition>;
   scaleRef?: React.RefObject<number>;
-  onSelectCountryContext?: (code: string) => void;
-  onSelectCountryAttackContext?: (code: string, provinceId?: number) => void;
+  onSelectCountryContext?: (iso3: string) => void;
+  onSelectCountryAttackContext?: (iso3: string, provinceId?: number) => void;
 }
 
 export function WebGLMapCanvas({
@@ -67,7 +67,7 @@ export function WebGLMapCanvas({
   const {
     hoverPos,
     hoverData,
-    hoveredCountryId,
+    hoveredGpuIndex,
     contextMenuState,
     handlePointerMove,
     handlePointerLeave,
@@ -95,7 +95,7 @@ export function WebGLMapCanvas({
     scaleRef,
     provincesMap,
     activeLayer,
-    hoveredCountryId,
+    hoveredGpuIndex,
   });
 
   const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {
@@ -109,12 +109,12 @@ export function WebGLMapCanvas({
   };
 
   const handleSelectContext = useCallback(
-    (action: ContextActionType, code: string, provinceId?: number) => {
+    (action: ContextActionType, iso3: string, provinceId?: number) => {
       closeContextMenu();
       if (action === "profile" && onSelectCountryContext) {
-        onSelectCountryContext(code);
+        onSelectCountryContext(iso3);
       } else if (action === "attack" && onSelectCountryAttackContext) {
-        onSelectCountryAttackContext(code, provinceId);
+        onSelectCountryAttackContext(iso3, provinceId);
       }
     },
     [closeContextMenu, onSelectCountryContext, onSelectCountryAttackContext],
