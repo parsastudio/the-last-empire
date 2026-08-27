@@ -31,7 +31,6 @@ export class SabotageTierExecutor {
     const adLost = Math.floor((target.military.airDefense || 0) * destRatio);
     const afLost = Math.floor((target.military.airForce || 0) * destRatio);
     const drLost = Math.floor((target.military.droneMissile || 0) * destRatio);
-    const nvLost = Math.floor((target.military.navalFleet || 0) * destRatio);
 
     const updatedTargetMil = MilitaryInventoryHelper.applyCasualties(
       target.military,
@@ -40,7 +39,6 @@ export class SabotageTierExecutor {
       adLost,
       afLost,
       drLost,
-      nvLost,
     );
 
     const updatedTarget: Nation = {
@@ -54,7 +52,6 @@ export class SabotageTierExecutor {
       airDefenseDestroyed: adLost,
       airForceDestroyed: afLost,
       droneMissileDestroyed: drLost,
-      navalFleetDestroyed: nvLost,
     };
 
     const message =

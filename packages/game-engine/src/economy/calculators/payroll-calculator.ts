@@ -9,7 +9,6 @@ export interface BreakdownMilitaryPayroll {
   airDefense: number;
   airForce: number;
   droneMissile: number;
-  navalFleet: number;
   total: number;
   rawTotal: number;
   gdpCapped: boolean;
@@ -47,19 +46,9 @@ export class MilitaryPayrollCalculator {
         MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost *
         this.PAYROLL_RATE,
     );
-    const rawNavalFleet = Math.floor(
-      (nation.military.navalFleet || 0) *
-        MILITARY_UNIT_STATS.NAVAL_FLEET.moneyCost *
-        this.PAYROLL_RATE,
-    );
 
     const rawTotal =
-      rawInfantry +
-      rawArmor +
-      rawAirDefense +
-      rawAirForce +
-      rawDroneMissile +
-      rawNavalFleet;
+      rawInfantry + rawArmor + rawAirDefense + rawAirForce + rawDroneMissile;
 
     const gdp = getNationGdp(nation, provincesMap);
     const maxAllowedPayroll = gdp > 0 ? Math.floor(gdp * 0.1) : rawTotal;
@@ -71,9 +60,7 @@ export class MilitaryPayrollCalculator {
       const airDefense = Math.floor(rawAirDefense * scale);
       const airForce = Math.floor(rawAirForce * scale);
       const droneMissile = Math.floor(rawDroneMissile * scale);
-      const navalFleet = Math.floor(rawNavalFleet * scale);
-      const total =
-        infantry + armor + airDefense + airForce + droneMissile + navalFleet;
+      const total = infantry + armor + airDefense + airForce + droneMissile;
 
       return {
         infantry,
@@ -81,7 +68,6 @@ export class MilitaryPayrollCalculator {
         airDefense,
         airForce,
         droneMissile,
-        navalFleet,
         total,
         rawTotal,
         gdpCapped: true,
@@ -94,7 +80,6 @@ export class MilitaryPayrollCalculator {
       airDefense: rawAirDefense,
       airForce: rawAirForce,
       droneMissile: rawDroneMissile,
-      navalFleet: rawNavalFleet,
       total: rawTotal,
       rawTotal,
       gdpCapped: false,

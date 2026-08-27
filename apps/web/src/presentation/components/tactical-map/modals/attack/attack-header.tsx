@@ -1,5 +1,5 @@
 import React from "react";
-import { Swords, Anchor, ArrowLeft } from "lucide-react";
+import { Swords, ArrowLeft } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface AttackHeaderProps {
@@ -11,7 +11,6 @@ interface AttackHeaderProps {
   defenderFlagCode: string;
   originRegionName: string;
   targetRegionName: string;
-  isLandNeighbor: boolean;
 }
 
 export function AttackHeader({
@@ -23,7 +22,6 @@ export function AttackHeader({
   defenderFlagCode,
   originRegionName,
   targetRegionName,
-  isLandNeighbor,
 }: AttackHeaderProps) {
   const attackerFlag = getFlagEmoji(attackerFlagCode || attackerCode);
   const defenderFlag = getFlagEmoji(defenderFlagCode || defenderCode);
@@ -55,10 +53,10 @@ export function AttackHeader({
 
         <div className="flex flex-col items-center justify-center gap-1 shrink-0">
           <div className="p-3 bg-military/15 text-military border border-military/35 rounded-2xl shadow-lg shadow-military/15 animate-pulse">
-            {isLandNeighbor ? <Swords size={22} /> : <Anchor size={22} />}
+            <Swords size={22} />
           </div>
           <span className="text-[9px] font-mono font-black text-muted-foreground uppercase tracking-widest">
-            {isLandNeighbor ? "LAND VECTOR" : "NAVAL VECTOR"}
+            LAND VECTOR
           </span>
         </div>
 

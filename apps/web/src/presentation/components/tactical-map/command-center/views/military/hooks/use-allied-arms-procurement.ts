@@ -6,7 +6,6 @@ import {
   MilitaryQuotaCalculator,
   ActionFactory,
   getNationGdp,
-  NationGettersUtility,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
@@ -34,7 +33,6 @@ const ALL_TYPES: UnitType[] = [
   "AIR_DEFENSE",
   "AIR_FORCE",
   "DRONE_MISSILE",
-  "NAVAL_FLEET",
 ];
 
 interface UseAlliedArmsProcurementProps {
@@ -59,7 +57,6 @@ export function useAlliedArmsProcurement({
     AIR_DEFENSE: [],
     AIR_FORCE: [],
     DRONE_MISSILE: [],
-    NAVAL_FLEET: [],
   });
 
   const tenPercentBudget = Math.max(0, Math.floor(buyerNation.treasury * 0.1));
@@ -68,38 +65,13 @@ export function useAlliedArmsProcurement({
     return getNationGdp(buyerNation, provincesMap);
   }, [currentGdp, buyerNation, provincesMap]);
 
-  const currentValuation =
-    MilitaryPricingCalculator.calculateTotalArmyValuation(buyerNation.military);
-  const maxValuation = Math.floor(effectiveBuyerGdp);
-
-  let queuedCost = 0;
-  for (let i = 0; i < (buyerNation.recruitmentQueue || []).length; i++) {
-    queuedCost += buyerNation.recruitmentQueue[i]!.totalCost;
-  }
-
-  const remainingValuationCapacity = Math.max(
-    0,
-    maxValuation - (currentValuation + queuedCost),
-  );
-
-  const hasSea = NationGettersUtility.hasSeaAccess(
-    buyerNation.id,
-    provincesMap,
-  );
-
   const quotas = useMemo(() => {
     return MilitaryQuotaCalculator.calculateQuotas(
       effectiveBuyerGdp,
       buyerNation.military,
-      hasSea,
       buyerNation.recruitmentQueue,
     );
-  }, [
-    effectiveBuyerGdp,
-    buyerNation.military,
-    hasSea,
-    buyerNation.recruitmentQueue,
-  ]);
+  }, [effectiveBuyerGdp, buyerNation.military, buyerNation.recruitmentQueue]);
 
   const batchList = useMemo<AlliedUnitProcurementInfo[]>(() => {
     return ALL_TYPES.map((type) => {

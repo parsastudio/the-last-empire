@@ -4,7 +4,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { NavalNeighborResolver } from "@/domain/map/naval-neighbor-resolver";
 import { AllianceInterventionEvaluator } from "@/engine/combat/alliance-intervention-evaluator";
 import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
@@ -71,22 +70,6 @@ export class BattleExecutionEngine {
     const betrayalResult =
       DiplomaticBetrayalCalculator.calculatePenalty(currentStance);
 
-    let navalCostMultiplier: number | undefined = undefined;
-    if (action.attackType === "NAVAL" && action.targetProvinceId) {
-      const navalInfo = NavalNeighborResolver.resolveNavalAttack(
-        action.targetProvinceId,
-        attacker.id,
-        workingState.provinces,
-        action.infantryToDeploy || attacker.military.infantry,
-        action.armorToDeploy || attacker.military.armor || 0,
-        action.airForceToDeploy || attacker.military.airForce,
-        action.dronesToLaunch,
-      );
-      if (navalInfo.isNavalValid) {
-        navalCostMultiplier = navalInfo.navalCostMultiplier;
-      }
-    }
-
     const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
@@ -94,8 +77,6 @@ export class BattleExecutionEngine {
       action.infantryToDeploy,
       action.armorToDeploy || 0,
       action.airForceToDeploy,
-      action.attackType,
-      navalCostMultiplier,
       workingState.provinces,
     );
 
@@ -142,10 +123,6 @@ export class BattleExecutionEngine {
         0,
         defender.military.droneMissile || 0,
       );
-      const survivingDefenderNaval = Math.max(
-        0,
-        defender.military.navalFleet || 0,
-      );
 
       extraCapturedUnits = {
         infantry: survivingDefenderInf,
@@ -153,7 +130,6 @@ export class BattleExecutionEngine {
         airDefense: survivingDefenderAD,
         airForce: survivingDefenderAir,
         droneMissile: survivingDefenderDrones,
-        navalFleet: survivingDefenderNaval,
       };
 
       extraTreasuryLooted = Math.max(
@@ -236,15 +212,12 @@ export class BattleExecutionEngine {
         calcResult.capturedAirForce + (extraCapturedUnits?.airForce || 0),
       capturedDrones:
         calcResult.capturedDrones + (extraCapturedUnits?.droneMissile || 0),
-      capturedNavalFleet:
-        calcResult.capturedNavalFleet + (extraCapturedUnits?.navalFleet || 0),
     };
 
     const fullReportData: BattleFullReportData = {
       attackerId: attacker.id,
       defenderId: defender.id,
       targetProvinceName: targetProvinceObj?.nameFa,
-      attackType: action.attackType || "LAND",
       isAttackerVictory: calcResult.isAttackerVictory,
       isFullCapitulation: calcResult.isFullCapitulation || !isDefenderAlive,
       valuationRatio: calcResult.valuationRatio,
@@ -266,7 +239,6 @@ export class BattleExecutionEngine {
       workingState.humanNationId,
       !isDefenderAlive,
       targetProvinceObj,
-      action.attackType || "LAND",
       spoilsData,
     );
 

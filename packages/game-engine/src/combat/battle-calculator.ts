@@ -31,7 +31,6 @@ export interface BattleCalculationResult {
   capturedAirDefense: number;
   capturedAirForce: number;
   capturedDrones: number;
-  capturedNavalFleet: number;
   phase1Missile: BattlePhaseReconDetail;
   phase2Air: BattlePhaseAirDetail;
   phase3Ground: BattlePhaseGroundDetail;
@@ -45,8 +44,6 @@ export class BattleCalculator {
     infantryToDeploy?: number,
     armorToDeploy?: number,
     airForceToDeploy?: number,
-    attackType?: "LAND" | "NAVAL",
-    navalCostMultiplier?: number,
     provincesMap?: Record<string, Province>,
   ): BattleCalculationResult {
     const deployedInfantry = Math.min(
@@ -73,11 +70,7 @@ export class BattleCalculator {
       deployedDrones * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
 
     const { moneyCost: deploymentMoneyCost } =
-      CombatModifierResolver.calculateDeploymentCosts(
-        totalForceCost,
-        attackType,
-        navalCostMultiplier,
-      );
+      CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
 
     const attDroneMult = CombatModifierResolver.getUnitMultiplier(
       attacker,
@@ -182,12 +175,10 @@ export class BattleCalculator {
       deployedArmor,
       deployedAirForce,
       deployedDrones,
-      attackerNaval: attacker.military.navalFleet || 0,
       defInfantry,
       defArmor,
       defAirDefense,
       defAirForce,
-      defenderNaval: defender.military.navalFleet || 0,
       rawAttInfantryLost: groundPhase.rawAttInfantryLost,
       rawAttArmorLoss: groundPhase.rawAttArmorLoss,
       rawAttAirLoss: airPhase.rawAttAirLoss,
@@ -221,9 +212,6 @@ export class BattleCalculator {
     const capturedAirForce = isFullCapitulation ? defenderRemainingAir : 0;
     const capturedDrones = isFullCapitulation
       ? defender.military.droneMissile || 0
-      : 0;
-    const capturedNavalFleet = isFullCapitulation
-      ? defender.military.navalFleet || 0
       : 0;
 
     const defenderGdp = getNationGdp(defender, provincesMap);
@@ -303,7 +291,6 @@ export class BattleCalculator {
       capturedAirDefense,
       capturedAirForce,
       capturedDrones,
-      capturedNavalFleet,
       phase1Missile: {
         dronesLaunched: deployedDrones,
         defAirDefense,

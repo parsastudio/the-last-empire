@@ -8,7 +8,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
 
 export class ArmsMarketManager {
   public static executePurchase(
@@ -55,28 +54,6 @@ export class ArmsMarketManager {
       );
     }
 
-    const buyerNavalPower =
-      (buyer.military.navalFleet || 0) * (buyer.military.techLevel || 1);
-
-    for (const partner of Object.values(state.nations)) {
-      if (!partner.isAlive || partner.id === buyer.id) continue;
-      const partnerRel =
-        buyer.relations[CountryRegistry.resolveCanonicalId(partner.id)] ||
-        buyer.relations[partner.id];
-
-      if (partnerRel?.stance === "WAR") {
-        const enemyNavalPower =
-          (partner.military.navalFleet || 0) *
-          (partner.military.techLevel || 1);
-        if (enemyNavalPower > buyerNavalPower) {
-          throw new GameError(
-            "EXECUTION_FAILED",
-            "محموله تسلیحاتی به دلیل محاصره کامل دریایی توسط کشور متخاصم امکان تحویل ندارد.",
-          );
-        }
-      }
-    }
-
     const baseUnitPrice =
       MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
     const marketPricePerUnit = Math.floor(baseUnitPrice * 1.5);
@@ -107,11 +84,9 @@ export class ArmsMarketManager {
       );
     }
 
-    const hasSea = NationGettersUtility.hasSeaAccess(buyer.id, state.provinces);
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       buyerGdp,
       buyer.military,
-      hasSea,
       buyer.recruitmentQueue,
     );
     const q = quotas[unitType];

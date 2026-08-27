@@ -35,21 +35,18 @@ const ALL_TYPES: UnitType[] = [
   "AIR_DEFENSE",
   "AIR_FORCE",
   "DRONE_MISSILE",
-  "NAVAL_FLEET",
 ];
 
 interface UseQuickRecruitBatchProps {
   nationId: string;
   nation: Nation;
   currentGdp: number;
-  hasSeaAccess?: boolean;
 }
 
 export function useQuickRecruitBatch({
   nationId,
   nation,
   currentGdp,
-  hasSeaAccess = true,
 }: UseQuickRecruitBatchProps) {
   const { dispatchAction } = useGameActions();
   const [floatingFeedbacks, setFloatingFeedbacks] = useState<
@@ -60,7 +57,6 @@ export function useQuickRecruitBatch({
     AIR_DEFENSE: [],
     AIR_FORCE: [],
     DRONE_MISSILE: [],
-    NAVAL_FLEET: [],
   });
 
   const tenPercentBudget = Math.max(0, Math.floor(nation.treasury * 0.1));
@@ -82,10 +78,9 @@ export function useQuickRecruitBatch({
     return MilitaryQuotaCalculator.calculateQuotas(
       currentGdp,
       nation.military,
-      hasSeaAccess,
       nation.recruitmentQueue,
     );
-  }, [currentGdp, nation.military, hasSeaAccess, nation.recruitmentQueue]);
+  }, [currentGdp, nation.military, nation.recruitmentQueue]);
 
   const batchList = useMemo<QuickUnitBatchInfo[]>(() => {
     return ALL_TYPES.map((type) => {

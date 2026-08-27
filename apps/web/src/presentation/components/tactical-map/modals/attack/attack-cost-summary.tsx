@@ -1,11 +1,8 @@
 import React from "react";
-import { Coins, Wallet, Anchor, Zap, ShieldAlert } from "lucide-react";
+import { Coins, Wallet, Zap, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface AttackCostSummaryProps {
-  baseDeploymentCost: number;
-  navalTransportExtraCost: number;
-  isNaval: boolean;
   totalLogisticsCost: number;
   currentTreasury: number;
   canAfford: boolean;
@@ -13,14 +10,10 @@ interface AttackCostSummaryProps {
   isSubmitting: boolean;
   targetRegionName: string;
   isLandNeighbor: boolean;
-  isNavalValid: boolean;
   onExecute: () => void;
 }
 
 export function AttackCostSummary({
-  baseDeploymentCost,
-  navalTransportExtraCost,
-  isNaval,
   totalLogisticsCost,
   currentTreasury,
   canAfford,
@@ -28,10 +21,9 @@ export function AttackCostSummary({
   isSubmitting,
   targetRegionName,
   isLandNeighbor,
-  isNavalValid,
   onExecute,
 }: AttackCostSummaryProps) {
-  const isAccessible = isLandNeighbor || isNavalValid;
+  const isAccessible = isLandNeighbor;
   const isButtonDisabled =
     !isAccessible || !hasSelectedInfantry || !canAfford || isSubmitting;
 
@@ -56,58 +48,17 @@ export function AttackCostSummary({
           </div>
         </div>
 
-        {!isNaval ? (
-          <div className="bg-background/60 p-3 rounded-2xl border border-border/40 flex items-center justify-between">
-            <span className="text-muted-foreground text-[11px] font-sans flex items-center gap-1.5">
-              <Coins size={13} className="text-gdp" />
-              هزینه اعزام تا مرز (لجستیک زمینی):
-            </span>
-            <span
-              className={`font-bold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
-            >
-              {PersianNumberFormatter.formatCurrency(totalLogisticsCost)}
-            </span>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-              <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-1">
-                <span className="text-muted-foreground block text-[10px] font-sans flex items-center gap-1">
-                  <Coins size={11} className="text-primary" />
-                  لجستیک زمینی تا ساحل:
-                </span>
-                <span className="font-bold text-foreground block text-xs">
-                  {PersianNumberFormatter.formatCurrency(baseDeploymentCost)}
-                </span>
-              </div>
-
-              <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-1">
-                <span className="text-muted-foreground block text-[10px] font-sans flex items-center gap-1">
-                  <Anchor size={11} className="text-gdp" />
-                  ترابری ناوگان دریایی:
-                </span>
-                <span className="font-bold text-gdp block text-xs">
-                  +
-                  {PersianNumberFormatter.formatCurrency(
-                    navalTransportExtraCost,
-                  )}
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-secondary/60 p-2.5 rounded-2xl border border-border/60 flex items-center justify-between text-xs">
-              <span className="font-bold text-foreground font-sans flex items-center gap-1.5">
-                <Coins size={13} className="text-military" />
-                مجموع هزینه عملیات دریایی:
-              </span>
-              <span
-                className={`font-extrabold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
-              >
-                {PersianNumberFormatter.formatCurrency(totalLogisticsCost)}
-              </span>
-            </div>
-          </div>
-        )}
+        <div className="bg-background/60 p-3 rounded-2xl border border-border/40 flex items-center justify-between">
+          <span className="text-muted-foreground text-[11px] font-sans flex items-center gap-1.5">
+            <Coins size={13} className="text-gdp" />
+            هزینه اعزام تا مرز (لجستیک زمینی):
+          </span>
+          <span
+            className={`font-bold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
+          >
+            {PersianNumberFormatter.formatCurrency(totalLogisticsCost)}
+          </span>
+        </div>
       </div>
 
       {!canAfford && (

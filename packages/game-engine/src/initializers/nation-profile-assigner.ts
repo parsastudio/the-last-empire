@@ -41,7 +41,6 @@ export class NationProfileAssigner {
     const startingTech = profile?.startingTechLevel ?? item.startingTechLevel;
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
       tier,
-      item.hasSeaAccess ?? true,
       startingTech,
     );
 
@@ -55,7 +54,6 @@ export class NationProfileAssigner {
       item.startingDroneMissile > 0
         ? item.startingDroneMissile
         : tierStack.droneMissile;
-    const navalFleet = item.startingNavalFleet ?? tierStack.navalFleet;
     const techLevel =
       startingTech && startingTech > 0
         ? startingTech
@@ -69,7 +67,6 @@ export class NationProfileAssigner {
       airDefense: 0,
       airForce: 0,
       droneMissile: 0,
-      navalFleet: 0,
       experience: 10,
       techLevel,
       branchTech: MilitaryInventoryHelper.initializeBranchTech(techLevel),
@@ -103,12 +100,6 @@ export class NationProfileAssigner {
       baseMilitary,
       "DRONE_MISSILE",
       droneMissile,
-      techLevel,
-    );
-    baseMilitary = MilitaryInventoryHelper.addUnits(
-      baseMilitary,
-      "NAVAL_FLEET",
-      navalFleet,
       techLevel,
     );
 
@@ -161,7 +152,6 @@ export class NationProfileAssigner {
     );
     const tierStack = MilitaryDistributionEngine.calculateStartingStack(
       fallback.militaryTier,
-      true,
       fallback.startingTechLevel,
     );
 
@@ -186,7 +176,6 @@ export class NationProfileAssigner {
       startingAirDefense: tierStack.airDefense,
       startingAirForce: tierStack.airForce,
       startingDroneMissile: tierStack.droneMissile,
-      startingNavalFleet: tierStack.navalFleet,
       startingTechLevel: tierStack.techLevel,
       industrialLevel: 1,
       startingStability: 50,

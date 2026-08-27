@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { ShieldAlert, Anchor, Users, Search, ShoppingCart } from "lucide-react";
+import { ShieldAlert, Users, Search, ShoppingCart } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -35,27 +35,6 @@ export function MilitaryAlliedProcurementTab({
     () => getNationGdp(nation, provincesMap),
     [nation, provincesMap],
   );
-
-  const isNavalBlockaded = useMemo(() => {
-    if (!nationsMap) return false;
-    const buyerNavalPower =
-      (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
-
-    for (const partner of Object.values(nationsMap)) {
-      if (!partner.isAlive || partner.id === nation.id) continue;
-      const canonical = CountryRegistry.resolveCanonicalId(partner.id);
-      const partnerRel =
-        nation.relations[canonical] || nation.relations[partner.id];
-
-      if (partnerRel?.stance === "WAR") {
-        const enemyNavalPower =
-          (partner.military.navalFleet || 0) *
-          (partner.military.techLevel || 1);
-        if (enemyNavalPower > buyerNavalPower) return true;
-      }
-    }
-    return false;
-  }, [nationsMap, nation]);
 
   const sellerOptions = useMemo<AlliedSellerItem[]>(() => {
     if (!nationsMap) return [];
@@ -122,21 +101,6 @@ export function MilitaryAlliedProcurementTab({
           به دلیل افت شدید پرستیژ و جایگاه جهانی کشور، جامعه بین‌الملل فروش
           هرگونه تجهیزات و جنگ‌افزار نظامی به کشور شما را ممنوع و تحریم کرده
           است.
-        </p>
-      </div>
-    );
-  }
-
-  if (isNavalBlockaded) {
-    return (
-      <div className="p-8 bg-military/15 border border-military/40 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
-        <Anchor size={36} className="text-military mx-auto animate-pulse" />
-        <h3 className="text-sm font-black text-military">
-          محاصره کامل آب‌های آزاد توسط ناوگان دشمن!
-        </h3>
-        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-          کشتی‌های ترابری حامل تسلیحات خریداری‌شده به دلیل برتری ناوگان دریایی
-          متخاصم امکان پهلوگیری در بنادر شما را ندارند.
         </p>
       </div>
     );
