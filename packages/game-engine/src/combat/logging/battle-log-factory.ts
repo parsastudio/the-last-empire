@@ -17,7 +17,6 @@ export class BattleLogFactory {
     humanNationId: string,
     isDefenderAnnexed = false,
     targetProvince?: Province | null,
-    attackType: "LAND" | "NAVAL" = "LAND",
     spoilsData?: BattleSpoilsDetails,
   ): TurnLogEntry[] {
     const logs: TurnLogEntry[] = [];
@@ -62,7 +61,6 @@ export class BattleLogFactory {
       attackerId: attacker.id,
       defenderId: defender.id,
       targetProvinceName: targetProvince?.nameFa,
-      attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
       isFullCapitulation: isCapitulationOutcome,
       valuationRatio: calcResult.valuationRatio,

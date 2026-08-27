@@ -16,26 +16,13 @@ export interface UnitBudgetQuota {
 }
 
 export class MilitaryQuotaCalculator {
-  public static getUnitRatios(
-    hasSeaAccess: boolean = true,
-  ): Record<UnitType, number> {
-    if (hasSeaAccess) {
-      return {
-        ARMOR: 0.25,
-        AIR_FORCE: 0.2,
-        INFANTRY: 0.15,
-        AIR_DEFENSE: 0.15,
-        NAVAL_FLEET: 0.15,
-        DRONE_MISSILE: 0.1,
-      };
-    }
+  public static getUnitRatios(): Record<UnitType, number> {
     return {
       ARMOR: 0.3,
       AIR_FORCE: 0.3,
       INFANTRY: 0.15,
       AIR_DEFENSE: 0.15,
       DRONE_MISSILE: 0.1,
-      NAVAL_FLEET: 0.0,
     };
   }
 
@@ -61,9 +48,6 @@ export class MilitaryQuotaCalculator {
       case "DRONE_MISSILE":
         count = military.droneMissile || 0;
         break;
-      case "NAVAL_FLEET":
-        count = military.navalFleet || 0;
-        break;
     }
 
     for (let i = 0; i < recruitmentQueue.length; i++) {
@@ -78,10 +62,9 @@ export class MilitaryQuotaCalculator {
   public static calculateQuotas(
     gdp: number,
     military: MilitaryStack,
-    hasSeaAccess: boolean = true,
     recruitmentQueue: RecruitmentOrder[] = [],
   ): Record<UnitType, UnitBudgetQuota> {
-    const ratios = this.getUnitRatios(hasSeaAccess);
+    const ratios = this.getUnitRatios();
     const result: Partial<Record<UnitType, UnitBudgetQuota>> = {};
 
     const types: UnitType[] = [
@@ -90,7 +73,6 @@ export class MilitaryQuotaCalculator {
       "AIR_DEFENSE",
       "AIR_FORCE",
       "DRONE_MISSILE",
-      "NAVAL_FLEET",
     ];
 
     const currentTotalValuation =

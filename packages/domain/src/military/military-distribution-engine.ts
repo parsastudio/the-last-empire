@@ -3,7 +3,6 @@ import { MilitaryStack } from "@/domain/military/military.schema";
 export class MilitaryDistributionEngine {
   public static calculateStartingStack(
     militaryTier: number,
-    hasSeaAccess: boolean = true,
     customTechLevel?: number,
   ): MilitaryStack {
     const safeTier = Math.max(1, Math.min(20, militaryTier || 1));
@@ -30,28 +29,20 @@ export class MilitaryDistributionEngine {
       airForce = Math.floor((safeTier - 12) * 1.5);
     }
 
-    let navalFleet = 0;
-    if (techLevel >= 5 && hasSeaAccess) {
-      navalFleet = Math.floor((safeTier - 16) * 2.0);
+    let redirectedPoints = 0;
+    if (techLevel < 4 && safeTier > 12) {
+      redirectedPoints += Math.floor((safeTier - 12) * 1.5);
+    }
+    if (techLevel < 3 && safeTier > 8) {
+      redirectedPoints += Math.floor((safeTier - 8) * 1.2);
+    }
+    if (techLevel >= 2) {
+      armor += Math.floor(redirectedPoints * 0.6);
     } else {
-      let redirectedPoints = 0;
-      if (techLevel < 5 && safeTier > 16) {
-        redirectedPoints += Math.floor((safeTier - 16) * 2.0);
-      }
-      if (techLevel < 4 && safeTier > 12) {
-        redirectedPoints += Math.floor((safeTier - 12) * 1.5);
-      }
-      if (techLevel < 3 && safeTier > 8) {
-        redirectedPoints += Math.floor((safeTier - 8) * 1.2);
-      }
-      if (techLevel >= 2) {
-        armor += Math.floor(redirectedPoints * 0.6);
-      } else {
-        infantry += Math.floor(redirectedPoints * 0.8);
-      }
-      if (techLevel >= 3) {
-        airDefense += Math.floor(redirectedPoints * 0.4);
-      }
+      infantry += Math.floor(redirectedPoints * 0.8);
+    }
+    if (techLevel >= 3) {
+      airDefense += Math.floor(redirectedPoints * 0.4);
     }
 
     return {
@@ -60,7 +51,6 @@ export class MilitaryDistributionEngine {
       airDefense: Math.max(0, airDefense),
       airForce: Math.max(0, airForce),
       droneMissile: Math.max(0, droneMissile),
-      navalFleet: Math.max(0, navalFleet),
       experience: 10,
       techLevel,
     };

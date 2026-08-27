@@ -27,16 +27,13 @@ export class MilitaryPricingCalculator {
     airDefense?: number;
     airForce?: number;
     droneMissile?: number;
-    navalFleet?: number;
   }): number {
     return (
       (military.infantry || 0) * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
       (military.armor || 0) * MILITARY_UNIT_STATS.ARMOR.moneyCost +
       (military.airDefense || 0) * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
       (military.airForce || 0) * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      (military.droneMissile || 0) *
-        MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost +
-      (military.navalFleet || 0) * MILITARY_UNIT_STATS.NAVAL_FLEET.moneyCost
+      (military.droneMissile || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
     );
   }
 
@@ -47,12 +44,6 @@ export class MilitaryPricingCalculator {
     airForce?: number;
     droneMissile?: number;
   }): number {
-    return (
-      (military.infantry || 0) * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
-      (military.armor || 0) * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      (military.airDefense || 0) * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
-      (military.airForce || 0) * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      (military.droneMissile || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
-    );
+    return this.calculateTotalArmyValuation(military);
   }
 }

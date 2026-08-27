@@ -35,7 +35,6 @@ export interface FinalManifestNation {
   startingAirDefense?: number;
   startingAirForce: number;
   startingDroneMissile: number;
-  startingNavalFleet?: number;
   startingTechLevel: number;
   industrialLevel: number;
   startingStability: number;

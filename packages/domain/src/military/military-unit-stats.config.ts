@@ -50,12 +50,4 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     weightPower: 6.0,
     requiredTechLevel: 4,
   },
-  NAVAL_FLEET: {
-    type: "NAVAL_FLEET",
-    nameFa: "ناوگروه ضربت ناوشکن‌های سنگین",
-    moneyCost: 50000000000,
-    buildTurns: 1,
-    weightPower: 0.0,
-    requiredTechLevel: 5,
-  },
 };

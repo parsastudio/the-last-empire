@@ -19,8 +19,6 @@ export const CasualtyMetricsSchema = z.object({
   airForceLost: z.number().nonnegative(),
   droneMissileEngaged: z.number().nonnegative(),
   droneMissileLost: z.number().nonnegative(),
-  navalFleetEngaged: z.number().nonnegative().default(0),
-  navalFleetLost: z.number().nonnegative().default(0),
 });
 
 export const BattlePhaseReconDetailSchema = z.object({
@@ -64,14 +62,12 @@ export const BattleSpoilsDetailsSchema = z.object({
   capturedAirDefense: z.number().nonnegative().default(0),
   capturedAirForce: z.number().nonnegative().default(0),
   capturedDrones: z.number().nonnegative().default(0),
-  capturedNavalFleet: z.number().nonnegative().default(0),
 });
 
 export const BattleFullReportDataSchema = z.object({
   attackerId: z.string(),
   defenderId: z.string(),
   targetProvinceName: z.string().optional(),
-  attackType: z.enum(["LAND", "NAVAL"]).default("LAND"),
   isAttackerVictory: z.boolean(),
   isFullCapitulation: z.boolean(),
   valuationRatio: z.number(),

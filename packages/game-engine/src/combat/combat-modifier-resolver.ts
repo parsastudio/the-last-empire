@@ -3,16 +3,9 @@ import { MilitaryInventoryHelper } from "@geopolitics/domain";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export class CombatModifierResolver {
-  public static calculateDeploymentCosts(
-    forceCost: number,
-    attackType?: "LAND" | "NAVAL",
-    navalCostMultiplier?: number,
-  ): {
+  public static calculateDeploymentCosts(forceCost: number): {
     moneyCost: number;
   } {
-    if (attackType === "NAVAL" && navalCostMultiplier !== undefined) {
-      return { moneyCost: Math.floor(forceCost * navalCostMultiplier) };
-    }
     return { moneyCost: Math.floor(forceCost * 0.05) };
   }
 

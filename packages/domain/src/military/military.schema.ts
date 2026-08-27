@@ -6,7 +6,6 @@ export const UnitTypeSchema = z.enum([
   "AIR_DEFENSE",
   "AIR_FORCE",
   "DRONE_MISSILE",
-  "NAVAL_FLEET",
 ]);
 
 export const BranchTechRatingSchema = z.object({
@@ -15,7 +14,6 @@ export const BranchTechRatingSchema = z.object({
   airDefense: z.number().default(1),
   airForce: z.number().default(1),
   droneMissile: z.number().default(1),
-  navalFleet: z.number().default(1),
 });
 
 export const MilitaryStackSchema = z.object({
@@ -24,7 +22,6 @@ export const MilitaryStackSchema = z.object({
   airDefense: z.number().nonnegative().default(0),
   airForce: z.number().nonnegative(),
   droneMissile: z.number().nonnegative(),
-  navalFleet: z.number().nonnegative().default(0),
   experience: z.number().min(0).max(100),
   techLevel: z.number().positive(),
   branchTech: BranchTechRatingSchema.optional(),

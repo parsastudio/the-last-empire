@@ -110,8 +110,7 @@ export class GeopoliticalReachResolver {
     const targetProvs = provincesByOwnerMap?.get(targetCanonical);
     const targetSea = targetProvs
       ? targetProvs.some((p) => p.hasSeaAccess)
-      : (target.military.navalFleet || 0) > 0 ||
-        NationGettersUtility.hasSeaAccess(
+      : NationGettersUtility.hasSeaAccess(
           target.id,
           provincesMap,
           undefined,
