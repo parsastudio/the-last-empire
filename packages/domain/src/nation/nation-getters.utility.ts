@@ -16,7 +16,6 @@ export interface NationRankCandidateInput {
   governmentType?: GovernmentType | string;
   militaryTier?: number;
   startingTechLevel?: number;
-  hasSeaAccess?: boolean;
 }
 
 interface ProcessedCandidate {
@@ -47,79 +46,71 @@ export class NationGettersUtility {
       let milPower = 0;
 
       if (input.military) {
-        milPower = MilitaryPowerCalculator.calculateEffectivePower(
-          {
-            id: canonicalId,
-            name: input.name || profile?.nameFa || canonicalId,
-            isAi: true,
-            isAlive: true,
-            flagCode: profile?.flagCode || "IR",
-            taxRate: 15,
-            tariffRate: 10,
-            treasury: 100000,
-            nationalDebt: 0,
-            industrialLevel: 1,
-            government: {
-              type:
-                (input.governmentType as GovernmentType) ||
-                profile?.startingGovernment ||
-                "DEMOCRACY",
-              stability: 50,
-              turnsInPower: 1,
-            },
-            military: input.military,
-            recruitmentQueue: [],
-            relations: {},
-            activeModifiers: [],
-            globalReputation: 50,
-            executedEspionageTiers: [],
-            warFocusTargetId: null,
-            postWarCooldownTurns: 0,
+        milPower = MilitaryPowerCalculator.calculateEffectivePower({
+          id: canonicalId,
+          name: input.name || profile?.nameFa || canonicalId,
+          isAi: true,
+          isAlive: true,
+          flagCode: profile?.flagCode || "IR",
+          taxRate: 15,
+          tariffRate: 10,
+          treasury: 100000,
+          nationalDebt: 0,
+          industrialLevel: 1,
+          government: {
+            type:
+              (input.governmentType as GovernmentType) ||
+              profile?.startingGovernment ||
+              "DEMOCRACY",
+            stability: 50,
+            turnsInPower: 1,
           },
-          true,
-        );
+          military: input.military,
+          recruitmentQueue: [],
+          relations: {},
+          activeModifiers: [],
+          globalReputation: 50,
+          executedEspionageTiers: [],
+          warFocusTargetId: null,
+          postWarCooldownTurns: 0,
+        });
       } else {
         const tier = input.militaryTier ?? profile?.militaryTier ?? 5;
         const techLevel =
           input.startingTechLevel ?? profile?.startingTechLevel ?? 1;
-        const hasSea = input.hasSeaAccess ?? true;
         const stack = MilitaryDistributionEngine.calculateStartingStack(
           tier,
-          hasSea,
           techLevel,
         );
 
-        milPower = MilitaryPowerCalculator.calculateEffectivePower(
-          {
-            id: canonicalId,
-            name: input.name || profile?.nameFa || canonicalId,
-            isAi: true,
-            isAlive: true,
-            flagCode: profile?.flagCode || "IR",
-            taxRate: 15,
-            tariffRate: 10,
-            treasury: 100000,
-            nationalDebt: 0,
-            industrialLevel: 1,
-            government: {
-              type:
-                (input.governmentType as GovernmentType) ||
-                profile?.startingGovernment ||
-                "DEMOCRACY",
-              stability: 50,
-              turnsInPower: 1,
-            },
-            military: stack,
-            recruitmentQueue: [],
-            relations: {},
-            activeModifiers: [],
-            globalReputation: 50,
-            executedEspionageTiers: [],
-            warFocusTargetId: null,
-            postWarCooldownTurns: 0,
+        milPower = MilitaryPowerCalculator.calculateEffectivePower({
+          id: canonicalId,
+          name: input.name || profile?.nameFa || canonicalId,
+          isAi: true,
+          isAlive: true,
+          flagCode: profile?.flagCode || "IR",
+          taxRate: 15,
+          tariffRate: 10,
+          treasury: 100000,
+          nationalDebt: 0,
+          industrialLevel: 1,
+          government: {
+            type:
+              (input.governmentType as GovernmentType) ||
+              profile?.startingGovernment ||
+              "DEMOCRACY",
+            stability: 50,
+            turnsInPower: 1,
           },
-          true,
-        );
+          military: stack,
+          recruitmentQueue: [],
+          relations: {},
+          activeModifiers: [],
+          globalReputation: 50,
+          executedEspionageTiers: [],
+          warFocusTargetId: null,
+          postWarCooldownTurns: 0,
+        });
       }
 
       processed[i] = {
