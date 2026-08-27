@@ -214,10 +214,13 @@ export class BattleExecutionEngine {
         calcResult.capturedDrones + (extraCapturedUnits?.droneMissile || 0),
     };
 
+    const attackType = action.attackType || "LAND";
+
     const fullReportData: BattleFullReportData = {
       attackerId: attacker.id,
       defenderId: defender.id,
       targetProvinceName: targetProvinceObj?.nameFa,
+      attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
       isFullCapitulation: calcResult.isFullCapitulation || !isDefenderAlive,
       valuationRatio: calcResult.valuationRatio,
@@ -239,6 +242,7 @@ export class BattleExecutionEngine {
       workingState.humanNationId,
       !isDefenderAlive,
       targetProvinceObj,
+      attackType,
       spoilsData,
     );
 

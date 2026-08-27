@@ -24,7 +24,6 @@ export function MilitaryOverviewTab({
           airDefense={nation.military.airDefense}
           airForce={nation.military.airForce}
           droneMissile={nation.military.droneMissile}
-          navalFleet={nation.military.navalFleet}
           techLevel={nation.military.techLevel}
           experience={nation.military.experience}
           nation={nation}

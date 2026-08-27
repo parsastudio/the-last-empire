@@ -139,13 +139,14 @@ export class AIAttackPlanner {
       return null;
     }
 
-    const targetProvinceId = this.resolveTargetProvince(
+    const targetResolution = this.resolveTargetProvince(
       nation,
       targetNation,
       provincesMap,
+      ownedProvinces,
     );
 
-    if (!targetProvinceId) {
+    if (!targetResolution) {
       return null;
     }
 
@@ -156,7 +157,8 @@ export class AIAttackPlanner {
       infantryToDeploy,
       armorToDeploy,
       airForceToDeploy,
-      targetProvinceId,
+      targetResolution.provinceId,
+      targetResolution.attackType,
     );
   }
 
@@ -220,7 +222,8 @@ export class AIAttackPlanner {
     nation: Nation,
     targetNation: Nation,
     provincesMap: Record<string, Province> | undefined,
-  ): number | null {
+    ownedProvinces?: Province[],
+  ): { provinceId: number; attackType: "LAND" | "NAVAL" } | null {
     if (!provincesMap) {
       return null;
     }
@@ -243,7 +246,30 @@ export class AIAttackPlanner {
           provincesMap,
         )
       ) {
-        return prov.provinceId;
+        return {
+          provinceId: prov.provinceId,
+          attackType: "LAND",
+        };
+      }
+    }
+
+    const sourceSea = NationGettersUtility.hasSeaAccess(
+      nation.id,
+      provincesMap,
+      ownedProvinces,
+    );
+
+    if (!sourceSea) {
+      return null;
+    }
+
+    for (let i = 0; i < targetProvinceList.length; i++) {
+      const prov = targetProvinceList[i]!;
+      if (prov.hasSeaAccess) {
+        return {
+          provinceId: prov.provinceId,
+          attackType: "NAVAL",
+        };
       }
     }
 

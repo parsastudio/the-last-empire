@@ -40,8 +40,7 @@ export function MilitaryValuationCard({
       (military.armor || 0) +
       (military.airDefense || 0) +
       (military.airForce || 0) +
-      (military.droneMissile || 0) +
-      (military.navalFleet || 0);
+      (military.droneMissile || 0);
 
     const activeNation: Nation = nation || {
       ...DEFAULT_NATION_MOCK,

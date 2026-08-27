@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, Wallet, Zap, ShieldAlert } from "lucide-react";
+import { Coins, Wallet, Zap, ShieldAlert, Anchor, Swords } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface AttackCostSummaryProps {
@@ -10,6 +10,8 @@ interface AttackCostSummaryProps {
   isSubmitting: boolean;
   targetRegionName: string;
   isLandNeighbor: boolean;
+  isNavalValid?: boolean;
+  attackType?: "LAND" | "NAVAL";
   onExecute: () => void;
 }
 
@@ -21,9 +23,11 @@ export function AttackCostSummary({
   isSubmitting,
   targetRegionName,
   isLandNeighbor,
+  isNavalValid = false,
+  attackType = "LAND",
   onExecute,
 }: AttackCostSummaryProps) {
-  const isAccessible = isLandNeighbor;
+  const isAccessible = isLandNeighbor || isNavalValid;
   const isButtonDisabled =
     !isAccessible || !hasSelectedInfantry || !canAfford || isSubmitting;
 
@@ -31,13 +35,15 @@ export function AttackCostSummary({
     ? targetRegionName
     : `استان ${targetRegionName}`;
 
+  const isNaval = attackType === "NAVAL";
+
   return (
     <div className="space-y-3.5 pt-2 border-t border-border/60 dir-rtl text-right font-sans">
       <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl space-y-3 font-mono text-xs shadow-sm">
         <div className="flex items-center justify-between pb-2 border-b border-border/50">
           <span className="text-[11px] font-bold text-foreground font-sans flex items-center gap-1.5">
             <Coins size={14} className="text-gdp" />
-            صورت‌حساب لجیستیک و پشتیبانی تهاجم
+            صورت‌حساب لجستیک و پشتیبانی تهاجم
           </span>
           <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] font-sans">
             <Wallet size={12} className="text-primary" />
@@ -50,8 +56,14 @@ export function AttackCostSummary({
 
         <div className="bg-background/60 p-3 rounded-2xl border border-border/40 flex items-center justify-between">
           <span className="text-muted-foreground text-[11px] font-sans flex items-center gap-1.5">
-            <Coins size={13} className="text-gdp" />
-            هزینه اعزام تا مرز (لجستیک زمینی):
+            {isNaval ? (
+              <Anchor size={13} className="text-gdp" />
+            ) : (
+              <Coins size={13} className="text-gdp" />
+            )}
+            {isNaval
+              ? "مخارج ترابری دریایی و لجستیک:"
+              : "هزینه اعزام تا مرز (لجستیک زمینی):"}
           </span>
           <span
             className={`font-bold text-sm ${canAfford ? "text-gdp" : "text-military"}`}
@@ -75,7 +87,7 @@ export function AttackCostSummary({
         disabled={isButtonDisabled}
         className="w-full py-4 bg-military hover:bg-military/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xl shadow-military/20 flex items-center justify-center gap-2 hover:scale-[1.005] active:scale-[0.995]"
       >
-        <Zap size={16} />
+        {isNaval ? <Anchor size={16} /> : <Swords size={16} />}
         <span>
           {isSubmitting
             ? "در حال ثبت دستور و گسیل ارتش..."
@@ -85,7 +97,9 @@ export function AttackCostSummary({
                 ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
                 : !canAfford
                   ? "موجودی خزانه ناکافی جهت تأمین مخارج"
-                  : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
+                  : isNaval
+                    ? `صدور فرمان هجوم دریایی به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`
+                    : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
         </span>
       </button>
     </div>

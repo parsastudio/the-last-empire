@@ -38,10 +38,15 @@ export function DirectAttackModal({
 
   if (!isOpen || !form.targetNation || !humanNation) return null;
 
+  const modalTitle =
+    form.attackType === "NAVAL"
+      ? "اتاق فرماندهی و عملیات هجوم دریایی"
+      : "اتاق فرماندهی و تهاجم مستقیم زمینی";
+
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="اتاق فرماندهی و تهاجم مستقیم زمینی"
+      title={modalTitle}
       maxWidthClass="max-w-2xl"
       onClose={onClose}
     >
@@ -55,6 +60,7 @@ export function DirectAttackModal({
           defenderFlagCode={form.targetNation.flagCode || form.targetNation.id}
           originRegionName={form.originRegionName}
           targetRegionName={form.targetRegionName}
+          attackType={form.attackType}
         />
 
         <AttackIntelPanel
@@ -70,6 +76,7 @@ export function DirectAttackModal({
 
         <AttackStatusAlerts
           isLandNeighbor={form.isLandNeighbor}
+          isNavalValid={form.isNavalValid}
           isWarStance={form.isWarStance}
           currentStance={form.currentStance}
           reputationPenalty={form.reputationPenalty}
@@ -133,6 +140,8 @@ export function DirectAttackModal({
           isSubmitting={form.isSubmitting}
           targetRegionName={form.targetRegionName}
           isLandNeighbor={form.isLandNeighbor}
+          isNavalValid={form.isNavalValid}
+          attackType={form.attackType}
           onExecute={form.handleExecuteAttack}
         />
       </div>
