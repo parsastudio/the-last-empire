@@ -11,31 +11,14 @@ import { NationProfileAssigner } from "@/engine/initializers/nation-profile-assi
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(
     currentId: string,
-    currentGov: string,
+    _currentGov: string,
     allNations: { id: string; govType: string }[],
   ): Record<string, RelationProfile> {
     const relations: Record<string, RelationProfile> = {};
 
     for (const target of allNations) {
       if (target.id === currentId) continue;
-      let baselineAlignment = 0;
-
-      if (currentGov === target.govType) {
-        baselineAlignment += 15;
-      } else if (
-        (currentGov === "DEMOCRACY" &&
-          (target.govType === "DICTATORSHIP" ||
-            target.govType === "FASCISM" ||
-            target.govType === "COMMUNISM")) ||
-        (target.govType === "DEMOCRACY" &&
-          (currentGov === "DICTATORSHIP" ||
-            currentGov === "FASCISM" ||
-            currentGov === "COMMUNISM"))
-      ) {
-        baselineAlignment -= 15;
-      } else if (currentGov !== "DEMOCRACY" && target.govType !== "DEMOCRACY") {
-        baselineAlignment += 10;
-      }
+      const baselineAlignment = 0;
 
       relations[target.id] = {
         targetNationId: target.id,

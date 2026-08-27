@@ -5,7 +5,6 @@ import {
   Province,
   CountryRegistry,
   MILITARY_UNIT_STATS,
-  GOVERNMENT_TRAITS_MAP,
   MilitaryPowerCalculator,
   LandNeighborResolver,
   NationGettersUtility,
@@ -290,9 +289,8 @@ export class AIAttackPlanner {
       drones * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower;
 
     const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
-    const govTraits = GOVERNMENT_TRAITS_MAP[nation.government.type];
+    const techMult = 1 + (techLevel - 1) * 0.5;
 
-    return Math.floor(rawPower * techMult * govTraits.militaryPowerMultiplier);
+    return Math.floor(rawPower * techMult);
   }
 }

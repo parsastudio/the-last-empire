@@ -9,7 +9,6 @@ import {
   UnitType,
   getNationGdp,
   TurnLogBuilder,
-  GOVERNMENT_TRAITS_MAP,
 } from "@geopolitics/domain";
 
 export interface ReactiveDefenseEvent {
@@ -68,19 +67,13 @@ export class AIEmergencyDefenseManager {
       return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
-    const baseUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
-      bestUnit.type,
-    );
-    const unitPrice = MilitaryPricingCalculator.calculateArmsImportUnitPrice(
-      bestUnit.type,
-      defender.military.techLevel,
-      bestSeller.military.techLevel,
+    const unitPrice = Math.floor(
+      MilitaryPricingCalculator.calculateUnitTypePrice(bestUnit.type) * 1.5,
     );
 
     const unitSinglePower = this.calculateSingleUnitPower(
       bestUnit.type,
       bestSeller.military.techLevel,
-      defender.government.type,
     );
 
     if (unitPrice <= 0 || unitSinglePower <= 0) {
@@ -97,8 +90,7 @@ export class AIEmergencyDefenseManager {
     }
 
     const finalCost = actualQuantity * unitPrice;
-    const sellerProfit =
-      Math.max(0, unitPrice - baseUnitPrice) * actualQuantity;
+    const sellerProfit = Math.floor(finalCost / 3);
 
     const updatedMilitary = MilitaryInventoryHelper.addUnits(
       defender.military,
@@ -206,14 +198,10 @@ export class AIEmergencyDefenseManager {
   private static calculateSingleUnitPower(
     unitType: UnitType,
     techLevel: number,
-    govType: Nation["government"]["type"],
+    _govType?: Nation["government"]["type"],
   ): number {
     const stat = MILITARY_UNIT_STATS[unitType];
-    const techMultiplier =
-      MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
-    const govTraits = GOVERNMENT_TRAITS_MAP[govType];
-    return (
-      stat.weightPower * techMultiplier * govTraits.militaryPowerMultiplier
-    );
+    const techMultiplier = 1 + (Math.max(1, techLevel) - 1) * 0.5;
+    return stat.weightPower * techMultiplier;
   }
 }

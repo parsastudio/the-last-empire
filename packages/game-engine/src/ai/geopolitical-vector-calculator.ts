@@ -41,7 +41,7 @@ export class GeopoliticalVectorCalculator {
     provincesMap?: Record<string, Province>,
     sourceProvinces?: Province[],
     sourcePower?: number,
-    sourceSeaAccess?: boolean,
+    _sourceSeaAccess?: boolean,
     provincesByOwnerMap?: Map<string, Province[]>,
     occupiedTerritoryMap?: Map<string, number>,
   ): GeopoliticalVector {
@@ -50,25 +50,7 @@ export class GeopoliticalVectorCalculator {
       source.relations[canonicalTarget] || source.relations[target.id];
 
     const baseAlignment = rel?.alignment ?? 0;
-
-    let ideologyScore = 0;
-    const sGov = source.government.type;
-    const tGov = target.government.type;
-
-    if (sGov === tGov) {
-      ideologyScore = 15;
-    } else if (
-      (sGov === "DEMOCRACY" &&
-        (tGov === "DICTATORSHIP" ||
-          tGov === "FASCISM" ||
-          tGov === "COMMUNISM")) ||
-      (tGov === "DEMOCRACY" &&
-        (sGov === "DICTATORSHIP" || sGov === "FASCISM" || sGov === "COMMUNISM"))
-    ) {
-      ideologyScore = -15;
-    } else {
-      ideologyScore = 5;
-    }
+    const ideologyScore = 0;
 
     let commonEnemyBonus = 0;
     if (

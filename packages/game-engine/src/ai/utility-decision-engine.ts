@@ -79,30 +79,7 @@ export class UtilityDecisionEngine {
       tierStrategyModifier = -30;
     }
 
-    let regimeWarModifier = 0;
-    const sGov = source.government.type;
-
-    if (sGov === "DEMOCRACY") {
-      if (vector.tension < 50 && !isTargetSuperpower) {
-        regimeWarModifier = -25;
-      }
-    } else if (sGov === "FASCISM") {
-      if (vector.proximityTier === "DIRECT_NEIGHBOR") {
-        regimeWarModifier = 20;
-      }
-    } else if (sGov === "DICTATORSHIP") {
-      if (vector.proximityTier === "DIRECT_NEIGHBOR") {
-        regimeWarModifier = 10;
-      }
-    } else if (sGov === "COMMUNISM") {
-      if (
-        _target.government.type === "DEMOCRACY" ||
-        _target.government.type === "FASCISM"
-      ) {
-        regimeWarModifier = 10;
-      }
-    }
-
+    const regimeWarModifier = 0;
     const alignmentDampener = vector.alignment * 0.5;
     const stabilityScore = ((source.government.stability - 50) / 50) * 20;
 
