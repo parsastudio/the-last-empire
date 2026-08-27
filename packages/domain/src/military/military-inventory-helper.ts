@@ -9,8 +9,7 @@ export type MilitaryStackKey =
   | "armor"
   | "airDefense"
   | "airForce"
-  | "droneMissile"
-  | "navalFleet";
+  | "droneMissile";
 
 export class MilitaryInventoryHelper {
   public static getStackKey(unitType: UnitType): MilitaryStackKey {
@@ -25,8 +24,6 @@ export class MilitaryInventoryHelper {
         return "airForce";
       case "DRONE_MISSILE":
         return "droneMissile";
-      case "NAVAL_FLEET":
-        return "navalFleet";
     }
   }
 
@@ -52,7 +49,6 @@ export class MilitaryInventoryHelper {
       airDefense: tech,
       airForce: tech,
       droneMissile: tech,
-      navalFleet: tech,
     };
   }
 
@@ -71,7 +67,6 @@ export class MilitaryInventoryHelper {
       "airDefense",
       "airForce",
       "droneMissile",
-      "navalFleet",
     ];
 
     for (let i = 0; i < keys.length; i++) {
@@ -151,7 +146,6 @@ export class MilitaryInventoryHelper {
     airDefenseLost: number,
     airForceLost: number,
     dronesUsed: number,
-    navalFleetLost: number,
   ): MilitaryStack {
     let current = military;
     if (infantryLost > 0) {
@@ -168,9 +162,6 @@ export class MilitaryInventoryHelper {
     }
     if (dronesUsed > 0) {
       current = this.removeUnits(current, "DRONE_MISSILE", dronesUsed);
-    }
-    if (navalFleetLost > 0) {
-      current = this.removeUnits(current, "NAVAL_FLEET", navalFleetLost);
     }
     return current;
   }

@@ -5,12 +5,10 @@ export interface CasualtyResolutionInput {
   deployedArmor: number;
   deployedAirForce: number;
   deployedDrones: number;
-  attackerNaval: number;
   defInfantry: number;
   defArmor: number;
   defAirDefense: number;
   defAirForce: number;
-  defenderNaval: number;
   rawAttInfantryLost: number;
   rawAttArmorLoss: number;
   rawAttAirLoss: number;
@@ -69,8 +67,6 @@ export class BattleCasualtyResolver {
       airForceLost: netAttAirLost,
       droneMissileEngaged: input.deployedDrones,
       droneMissileLost: input.deployedDrones,
-      navalFleetEngaged: input.attackerNaval,
-      navalFleetLost: 0,
     };
 
     const defenderCasualties: CasualtyMetrics = {
@@ -90,8 +86,6 @@ export class BattleCasualtyResolver {
         : netDefAirLost,
       droneMissileEngaged: 0,
       droneMissileLost: 0,
-      navalFleetEngaged: input.defenderNaval,
-      navalFleetLost: 0,
     };
 
     return {

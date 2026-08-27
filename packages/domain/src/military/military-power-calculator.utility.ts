@@ -50,29 +50,7 @@ export class MilitaryPowerCalculator {
     return Math.floor(rawPower * govTraits.militaryPowerMultiplier);
   }
 
-  public static calculateNavalPower(nation: Nation): number {
-    const navalFleet = nation.military.navalFleet || 0;
-    const nvTech = MilitaryInventoryHelper.getBranchTech(
-      nation.military,
-      "NAVAL_FLEET",
-    );
-    const nvMult = 1 + (nvTech - 1) * 0.5;
-
-    const rawPower =
-      navalFleet * MILITARY_UNIT_STATS.NAVAL_FLEET.weightPower * nvMult;
-    const govTraits = GOVERNMENT_TRAITS_MAP[nation.government.type];
-
-    return Math.floor(rawPower * govTraits.militaryPowerMultiplier);
-  }
-
-  public static calculateEffectivePower(
-    nation: Nation,
-    includeNaval: boolean = false,
-  ): number {
-    const landAndAir = this.calculateLandAndAirPower(nation);
-    if (!includeNaval) {
-      return landAndAir;
-    }
-    return landAndAir + this.calculateNavalPower(nation);
+  public static calculateEffectivePower(nation: Nation): number {
+    return this.calculateLandAndAirPower(nation);
   }
 }

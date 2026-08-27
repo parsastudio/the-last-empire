@@ -102,7 +102,6 @@ export const InitiateBattleActionSchema = z.object({
   infantryToDeploy: z.number().positive().optional(),
   armorToDeploy: z.number().nonnegative().optional(),
   airForceToDeploy: z.number().nonnegative().optional(),
-  attackType: z.enum(["LAND", "NAVAL"]).optional(),
 });
 
 export const GameActionSchema = z.discriminatedUnion("type", [

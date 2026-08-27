@@ -14,7 +14,6 @@ export * from "./map/country-mapping.schema";
 export * from "./map/land-neighbor-resolver";
 export * from "./map/manifest.type";
 export * from "./map/map.config";
-export * from "./map/naval-neighbor-resolver";
 export * from "./map/tactical-color-palette";
 export * from "./military/military.schema";
 export * from "./military/military-inventory-helper";

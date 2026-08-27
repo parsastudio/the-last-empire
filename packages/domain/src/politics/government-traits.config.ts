@@ -5,7 +5,6 @@ export interface GovernmentStabilityTraits {
   attackerVictoryBonus: number;
   attackerDefeatPenalty: number;
   defenderLossPenalty: number;
-  blockadePenalty: number;
   militaryPowerMultiplier: number;
 }
 
@@ -18,7 +17,6 @@ export const GOVERNMENT_TRAITS_MAP: Record<
     attackerVictoryBonus: 4.5,
     attackerDefeatPenalty: 5.0,
     defenderLossPenalty: 5.0,
-    blockadePenalty: 0.0,
     militaryPowerMultiplier: 1.25,
   },
   DICTATORSHIP: {
@@ -26,7 +24,6 @@ export const GOVERNMENT_TRAITS_MAP: Record<
     attackerVictoryBonus: 4.0,
     attackerDefeatPenalty: 3.5,
     defenderLossPenalty: 4.5,
-    blockadePenalty: 0.0,
     militaryPowerMultiplier: 1.15,
   },
   MONARCHY: {
@@ -34,7 +31,6 @@ export const GOVERNMENT_TRAITS_MAP: Record<
     attackerVictoryBonus: 3.0,
     attackerDefeatPenalty: 3.0,
     defenderLossPenalty: 3.0,
-    blockadePenalty: 0.0,
     militaryPowerMultiplier: 1.0,
   },
   COMMUNISM: {
@@ -42,7 +38,6 @@ export const GOVERNMENT_TRAITS_MAP: Record<
     attackerVictoryBonus: 3.5,
     attackerDefeatPenalty: 1.5,
     defenderLossPenalty: 2.5,
-    blockadePenalty: 0.0,
     militaryPowerMultiplier: 1.05,
   },
   DEMOCRACY: {
@@ -50,7 +45,6 @@ export const GOVERNMENT_TRAITS_MAP: Record<
     attackerVictoryBonus: 2.0,
     attackerDefeatPenalty: 3.0,
     defenderLossPenalty: 3.5,
-    blockadePenalty: 0.0,
     militaryPowerMultiplier: 0.85,
   },
 };

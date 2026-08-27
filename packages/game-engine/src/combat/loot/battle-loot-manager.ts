@@ -8,7 +8,6 @@ export interface ExtraCapturedMilitaryUnits {
   airDefense?: number;
   airForce?: number;
   droneMissile?: number;
-  navalFleet?: number;
 }
 
 export class BattleLootManager {
@@ -25,7 +24,6 @@ export class BattleLootManager {
       calcResult.attackerCasualties.airDefenseLost,
       calcResult.attackerCasualties.airForceLost,
       calcResult.dronesUsed,
-      calcResult.attackerCasualties.navalFleetLost,
     );
 
     const totalInfantry =
@@ -37,8 +35,6 @@ export class BattleLootManager {
       calcResult.capturedAirForce + (extraCaptured?.airForce || 0);
     const totalDrones =
       calcResult.capturedDrones + (extraCaptured?.droneMissile || 0);
-    const totalNavalFleet =
-      calcResult.capturedNavalFleet + (extraCaptured?.navalFleet || 0);
 
     if (totalInfantry > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(
@@ -80,14 +76,6 @@ export class BattleLootManager {
         defenderTechLevel,
       );
     }
-    if (totalNavalFleet > 0) {
-      updatedMilitary = MilitaryInventoryHelper.addUnits(
-        updatedMilitary,
-        "NAVAL_FLEET",
-        totalNavalFleet,
-        defenderTechLevel,
-      );
-    }
 
     return {
       ...updatedMilitary,
@@ -107,7 +95,6 @@ export class BattleLootManager {
         airDefense: 0,
         airForce: 0,
         droneMissile: 0,
-        navalFleet: 0,
         experience: 0,
         techLevel: defenderMilitary.techLevel,
         branchTech: defenderMilitary.branchTech,
@@ -121,7 +108,6 @@ export class BattleLootManager {
       calcResult.defenderCasualties.airDefenseLost,
       calcResult.defenderCasualties.airForceLost,
       0,
-      calcResult.defenderCasualties.navalFleetLost,
     );
   }
 }
