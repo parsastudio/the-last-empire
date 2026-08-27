@@ -11,8 +11,8 @@ export function MilitaryReadinessCard({
   techLevel,
   experience,
 }: MilitaryReadinessCardProps) {
-  const multiplier = MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
-  const bonusPercent = Math.round((multiplier - 1) * 100);
+  const techMult = MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
+  const bonusPercent = Math.round((techMult - 1) * 100);
 
   return (
     <div className="grid grid-cols-2 gap-2.5">
