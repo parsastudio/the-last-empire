@@ -5,6 +5,7 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 
 interface AttackStatusAlertsProps {
   isLandNeighbor: boolean;
+  isNavalValid?: boolean;
   isWarStance: boolean;
   currentStance: DiplomaticStance;
   reputationPenalty: number;
@@ -14,13 +15,14 @@ interface AttackStatusAlertsProps {
 
 export function AttackStatusAlerts({
   isLandNeighbor,
+  isNavalValid = false,
   isWarStance,
   currentStance,
   reputationPenalty,
   targetNationName,
   targetRegionName,
 }: AttackStatusAlertsProps) {
-  const isAccessible = isLandNeighbor;
+  const isAccessible = isLandNeighbor || isNavalValid;
   const formattedRegionName = targetRegionName.startsWith("استان")
     ? targetRegionName
     : `استان ${targetRegionName}`;
@@ -44,11 +46,11 @@ export function AttackStatusAlerts({
           <ShieldAlert size={20} className="shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-black text-sm block">
-              مسدود بودن مسیر دسترسی زمینی
+              مسدود بودن مسیر دسترسی زمینی و دریایی
             </span>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
-              هیچ مرز زمینی مستقیمی برای اعزام یگان‌های رزمی به{" "}
-              {formattedRegionName} در دسترس نیست.
+              هیچ مرز زمینی مشترک یا دسترسی به آب‌های آزاد برای اجرای عملیات
+              دریایی به {formattedRegionName} وجود ندارد.
             </p>
           </div>
         </div>

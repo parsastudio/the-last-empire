@@ -188,6 +188,7 @@ export class ActionFactory {
     armorToDeploy?: number,
     airForceToDeploy?: number,
     targetProvinceId?: number,
+    attackType?: "LAND" | "NAVAL",
   ): InitiateBattleAction {
     return {
       id: this.createId("battle"),
@@ -199,6 +200,7 @@ export class ActionFactory {
       armorToDeploy,
       airForceToDeploy,
       targetProvinceId,
+      attackType,
     };
   }
 }

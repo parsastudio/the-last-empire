@@ -1,5 +1,5 @@
 import React from "react";
-import { Swords, ArrowLeft } from "lucide-react";
+import { Swords, Anchor, ArrowLeft } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 interface AttackHeaderProps {
@@ -11,6 +11,7 @@ interface AttackHeaderProps {
   defenderFlagCode: string;
   originRegionName: string;
   targetRegionName: string;
+  attackType?: "LAND" | "NAVAL";
 }
 
 export function AttackHeader({
@@ -22,17 +23,16 @@ export function AttackHeader({
   defenderFlagCode,
   originRegionName,
   targetRegionName,
+  attackType = "LAND",
 }: AttackHeaderProps) {
   const attackerFlag = getFlagEmoji(attackerFlagCode || attackerCode);
   const defenderFlag = getFlagEmoji(defenderFlagCode || defenderCode);
 
-  const formattedOrigin = originRegionName.startsWith("استان")
-    ? originRegionName
-    : `استان ${originRegionName}`;
-
   const formattedTarget = targetRegionName.startsWith("استان")
     ? targetRegionName
     : `استان ${targetRegionName}`;
+
+  const isNaval = attackType === "NAVAL";
 
   return (
     <div className="space-y-3 dir-rtl text-right font-sans">
@@ -53,10 +53,10 @@ export function AttackHeader({
 
         <div className="flex flex-col items-center justify-center gap-1 shrink-0">
           <div className="p-3 bg-military/15 text-military border border-military/35 rounded-2xl shadow-lg shadow-military/15 animate-pulse">
-            <Swords size={22} />
+            {isNaval ? <Anchor size={22} /> : <Swords size={22} />}
           </div>
           <span className="text-[9px] font-mono font-black text-muted-foreground uppercase tracking-widest">
-            LAND VECTOR
+            {isNaval ? "NAVAL VECTOR" : "LAND VECTOR"}
           </span>
         </div>
 
@@ -81,7 +81,7 @@ export function AttackHeader({
             مبدأ حمله:
           </span>
           <span className="font-bold text-foreground text-xs font-sans bg-background/80 px-3 py-1 rounded-xl border border-border/60 truncate block shadow-sm">
-            {formattedOrigin}
+            {originRegionName}
           </span>
         </div>
 

@@ -105,7 +105,9 @@ export function BattleDebriefModal({
                 {attackerName}
               </span>
               <span className="text-[10px] text-primary font-mono font-bold">
-                فرماندهی تهاجم زمینی ⚔️
+                {reportData.attackType === "NAVAL"
+                  ? "متهاجم (هجوم دریایی ⚓)"
+                  : "متهاجم (تهاجم زمینی ⚔️)"}
               </span>
             </div>
           </div>

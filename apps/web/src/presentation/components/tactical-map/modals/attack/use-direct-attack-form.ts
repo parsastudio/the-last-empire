@@ -16,6 +16,7 @@ import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 import { TacticalForecast } from "./attack-intel-panel";
 
 interface UseDirectAttackFormProps {
@@ -79,6 +80,19 @@ export function useDirectAttackForm({
     );
   }, [humanNation, targetProvinceId, gameState?.provinces]);
 
+  const attackerHasSea = useMemo(() => {
+    if (!humanNation) return false;
+    return NationGettersUtility.hasSeaAccess(
+      humanNation.id,
+      gameState?.provinces,
+    );
+  }, [humanNation, gameState?.provinces]);
+
+  const targetProvinceHasSea = Boolean(targetProvince?.hasSeaAccess);
+  const isNavalValid =
+    !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
+  const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
+
   const isReconActive = useMemo(() => {
     if (!humanNation || !targetNation) return false;
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
@@ -104,26 +118,9 @@ export function useDirectAttackForm({
   }, [targetGdp, humanNation]);
 
   const canAffordRecon = (humanNation?.treasury || 0) >= reconCost;
-
-  const originRegionName = useMemo(() => {
-    if (!humanNation || !gameState?.provinces) return "خاک اصلی کشور";
-
-    if (isLandNeighbor && targetProvince) {
-      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
-      for (const neighborId of targetProvince.landNeighbors || []) {
-        const neighborProv = gameState.provinces[neighborId.toString()];
-        if (
-          neighborProv &&
-          CountryRegistry.resolveCanonicalId(neighborProv.ownerNationId) ===
-            canonicalHuman
-        ) {
-          return neighborProv.nameFa;
-        }
-      }
-    }
-
-    return "خاک اصلی کشور";
-  }, [humanNation, gameState?.provinces, isLandNeighbor, targetProvince]);
+  const originRegionName = humanNation
+    ? `خاک ${humanNation.name}`
+    : "خاک اصلی کشور";
 
   const rawForceValue = useMemo(() => {
     return (
@@ -196,8 +193,8 @@ export function useDirectAttackForm({
       isVictoryPredicted: calc.isAttackerVictory,
       isCapitulationPredicted: calc.isFullCapitulation,
       phase1Prediction: calc.phase1Missile.phaseWinner,
-      phase2Air: calc.phase2Air.phaseWinner,
-      phase3Ground: calc.phase3Ground.phaseWinner,
+      phase2Prediction: calc.phase2Air.phaseWinner,
+      phase3Prediction: calc.phase3Ground.phaseWinner,
       valuationRatio: calc.valuationRatio,
     };
   }, [
@@ -282,11 +279,13 @@ export function useDirectAttackForm({
       armorToDeploy,
       airForceToDeploy,
       targetProvinceId || undefined,
+      attackType,
     );
 
+    const typeLabel = attackType === "NAVAL" ? "دریایی" : "زمینی";
     const res = await dispatchAction(
       action,
-      `دستور تهاجم زمینی به ${targetRegionName} با موفقیت صادر گردید.`,
+      `دستور تهاجم ${typeLabel} به ${targetRegionName} با موفقیت صادر گردید.`,
     );
 
     if (res.success) {
@@ -316,6 +315,7 @@ export function useDirectAttackForm({
     armorToDeploy,
     airForceToDeploy,
     targetProvinceId,
+    attackType,
     dispatchAction,
     targetRegionName,
     onClose,
@@ -326,6 +326,8 @@ export function useDirectAttackForm({
     targetNation,
     targetProvince,
     isLandNeighbor,
+    isNavalValid,
+    attackType,
     isReconActive,
     reconCost,
     canAffordRecon,
