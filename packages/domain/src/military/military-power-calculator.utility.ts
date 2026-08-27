@@ -4,6 +4,11 @@ import { GOVERNMENT_TRAITS_MAP } from "@/domain/politics/government-traits.confi
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class MilitaryPowerCalculator {
+  public static calculateTechMultiplier(techLevel: number): number {
+    const safeTech = Math.max(1.0, techLevel);
+    return Math.pow(1.25, safeTech - 1.0);
+  }
+
   public static calculateLandAndAirPower(nation: Nation): number {
     const infantry = nation.military.infantry || 0;
     const armor = nation.military.armor || 0;
@@ -32,11 +37,11 @@ export class MilitaryPowerCalculator {
       "DRONE_MISSILE",
     );
 
-    const infMult = 1 + (infTech - 1) * 0.5;
-    const armMult = 1 + (armTech - 1) * 0.5;
-    const adMult = 1 + (adTech - 1) * 0.5;
-    const afMult = 1 + (afTech - 1) * 0.5;
-    const drMult = 1 + (drTech - 1) * 0.5;
+    const infMult = this.calculateTechMultiplier(infTech);
+    const armMult = this.calculateTechMultiplier(armTech);
+    const adMult = this.calculateTechMultiplier(adTech);
+    const afMult = this.calculateTechMultiplier(afTech);
+    const drMult = this.calculateTechMultiplier(drTech);
 
     const rawPower =
       infantry * MILITARY_UNIT_STATS.INFANTRY.weightPower * infMult +

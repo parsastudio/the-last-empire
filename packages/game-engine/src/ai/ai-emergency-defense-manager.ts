@@ -203,7 +203,8 @@ export class AIEmergencyDefenseManager {
     govType: Nation["government"]["type"],
   ): number {
     const stat = MILITARY_UNIT_STATS[unitType];
-    const techMultiplier = 1 + (Math.max(1, techLevel) - 1) * 0.5;
+    const techMultiplier =
+      MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
     const govTraits = GOVERNMENT_TRAITS_MAP[govType];
     return (
       stat.weightPower * techMultiplier * govTraits.militaryPowerMultiplier

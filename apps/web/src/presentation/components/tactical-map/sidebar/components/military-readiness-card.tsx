@@ -1,5 +1,6 @@
 import React from "react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { MilitaryPowerCalculator } from "@geopolitics/domain";
 
 interface MilitaryReadinessCardProps {
   techLevel: number;
@@ -10,7 +11,8 @@ export function MilitaryReadinessCard({
   techLevel,
   experience,
 }: MilitaryReadinessCardProps) {
-  const bonusPercent = Math.round((techLevel - 1) * 50);
+  const multiplier = MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
+  const bonusPercent = Math.round((multiplier - 1) * 100);
 
   return (
     <div className="grid grid-cols-2 gap-2.5">

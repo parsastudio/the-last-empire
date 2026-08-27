@@ -181,7 +181,9 @@ export class AIProcurementPlanner {
     const singleInfantryPower = Math.max(
       0.5,
       MILITARY_UNIT_STATS.INFANTRY.weightPower *
-        (1 + (nation.military.techLevel - 1) * 0.5),
+        MilitaryPowerCalculator.calculateTechMultiplier(
+          nation.military.techLevel,
+        ),
     );
     const infPrice = MILITARY_UNIT_STATS.INFANTRY.moneyCost;
 
