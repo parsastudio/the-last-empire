@@ -32,7 +32,7 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     moneyCost: 4000000000,
     buildTurns: 1,
     weightPower: 3.0,
-    requiredTechLevel: 2,
+    requiredTechLevel: 1,
   },
   AIR_DEFENSE: {
     type: "AIR_DEFENSE",
@@ -40,7 +40,7 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     moneyCost: 8000000000,
     buildTurns: 1,
     weightPower: 2.5,
-    requiredTechLevel: 3,
+    requiredTechLevel: 1,
   },
   AIR_FORCE: {
     type: "AIR_FORCE",
@@ -48,6 +48,6 @@ export const MILITARY_UNIT_STATS: Record<UnitType, MilitaryUnitStat> = {
     moneyCost: 12000000000,
     buildTurns: 1,
     weightPower: 6.0,
-    requiredTechLevel: 4,
+    requiredTechLevel: 1,
   },
 };

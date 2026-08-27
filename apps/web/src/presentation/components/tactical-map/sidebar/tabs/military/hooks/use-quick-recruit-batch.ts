@@ -87,8 +87,7 @@ export function useQuickRecruitBatch({
       const stat = MILITARY_UNIT_STATS[type];
       const unitPrice = stat.moneyCost;
       const q = quotas[type];
-      const isUnlocked =
-        Math.floor(nation.military.techLevel) >= stat.requiredTechLevel;
+      const isUnlocked = true;
 
       const affordableByMoney =
         tenPercentBudget > 0 && unitPrice > 0
@@ -126,13 +125,7 @@ export function useQuickRecruitBatch({
         isCapReached,
       };
     });
-  }, [
-    nation.treasury,
-    nation.military.techLevel,
-    tenPercentBudget,
-    quotas,
-    remainingValuationCapacity,
-  ]);
+  }, [nation.treasury, tenPercentBudget, quotas, remainingValuationCapacity]);
 
   const handleBuyBatch = useCallback(
     async (info: QuickUnitBatchInfo) => {

@@ -1,5 +1,8 @@
 import { CountryProfile } from "@/domain/data/countries/profile.type";
-import { ALL_RAW_COUNTRY_PROFILES } from "@/domain/data/countries/country-profiles.data";
+import { COUNTRY_IDENTITY_MAP } from "@/domain/data/countries/sources/country-identity.data";
+import { COUNTRY_DEMOGRAPHICS_MAP } from "@/domain/data/countries/sources/country-demographics.data";
+import { COUNTRY_GDP_MAP } from "@/domain/data/countries/sources/country-economy.data";
+import { COUNTRY_MILITARY_MAP } from "@/domain/data/countries/sources/country-military.data";
 import {
   FinalMapManifest,
   FinalManifestNation,
@@ -109,8 +112,34 @@ const GPU_INDEX_MAPPING: Record<string, number> = {
   AUS: 148,
 };
 
+function composeAllCountryProfiles(): CountryProfile[] {
+  const codes = Object.keys(COUNTRY_IDENTITY_MAP);
+  return codes.map((code) => {
+    const idInfo = COUNTRY_IDENTITY_MAP[code]!;
+    const population = COUNTRY_DEMOGRAPHICS_MAP[code] ?? 10_000_000;
+    const gdp = COUNTRY_GDP_MAP[code] ?? 50_000_000_000;
+    const milInfo = COUNTRY_MILITARY_MAP[code] ?? {
+      domesticTechLevel: 1.0,
+      equipmentTechLevel: 1.0,
+    };
+
+    return {
+      code,
+      nameEn: idInfo.nameEn,
+      nameFa: idInfo.nameFa,
+      flagCode: idInfo.flagCode,
+      startingGovernment: idInfo.startingGovernment,
+      gdp,
+      population,
+      domesticTechLevel: milInfo.domesticTechLevel,
+      equipmentTechLevel: milInfo.equipmentTechLevel,
+      militaryTier: milInfo.militaryTier,
+    };
+  });
+}
+
 export const ALL_COUNTRY_PROFILES: readonly CountryProfile[] = Object.freeze(
-  ALL_RAW_COUNTRY_PROFILES.map((p) => Object.freeze({ ...p })),
+  composeAllCountryProfiles().map((p) => Object.freeze({ ...p })),
 );
 
 export class CountryRegistry {
@@ -150,6 +179,11 @@ export class CountryRegistry {
       this.manifestNations.set(iso3, item);
 
       const defaultProfile = this.byIso3.get(iso3);
+      const domesticTechLevel =
+        defaultProfile?.domesticTechLevel ?? item.startingTechLevel ?? 1;
+      const equipmentTechLevel =
+        defaultProfile?.equipmentTechLevel ?? domesticTechLevel;
+
       const dynamicProfile: CountryProfile = {
         code: iso3,
         nameEn: item.nameEn || defaultProfile?.nameEn || iso3,
@@ -161,10 +195,12 @@ export class CountryRegistry {
           defaultProfile?.flagCode ||
           iso3.slice(0, 2)
         ).toUpperCase(),
+        domesticTechLevel,
+        equipmentTechLevel,
         militaryTier: defaultProfile?.militaryTier ?? 5,
         startingGovernment:
           item.defaultGovernment as CountryProfile["startingGovernment"],
-        startingTechLevel: item.startingTechLevel,
+        startingTechLevel: domesticTechLevel,
       };
 
       this.manifestProfiles.set(iso3, dynamicProfile);

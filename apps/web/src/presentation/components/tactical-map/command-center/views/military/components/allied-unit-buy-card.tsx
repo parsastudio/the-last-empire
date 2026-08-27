@@ -5,7 +5,6 @@ import {
   Crosshair,
   Plane,
   Radio,
-  Lock,
   Plus,
   Coins,
   Zap,
@@ -65,13 +64,11 @@ export function AlliedUnitBuyCard({
   return (
     <div
       className={`relative p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 font-sans dir-rtl select-none ${
-        !info.isUnlocked
-          ? "bg-background/20 border-border/40 opacity-50"
-          : info.isCapReached
-            ? "bg-secondary/30 border-border/60 opacity-60"
-            : info.canAfford
-              ? "bg-card/90 border-border/80 hover:border-amber-500/50 hover:bg-card shadow-sm"
-              : "bg-background/40 border-border/60 opacity-60"
+        info.isCapReached
+          ? "bg-secondary/30 border-border/60 opacity-60"
+          : info.canAfford
+            ? "bg-card/90 border-border/80 hover:border-amber-500/50 hover:bg-card shadow-sm"
+            : "bg-background/40 border-border/60 opacity-60"
       }`}
     >
       <div className="flex items-center gap-3">
@@ -86,13 +83,6 @@ export function AlliedUnitBuyCard({
             <span className="text-xs font-black text-foreground">
               {info.nameFa}
             </span>
-            {!info.isUnlocked && (
-              <span className="text-[9px] font-mono text-amber-500 flex items-center gap-0.5 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">
-                <Lock size={9} />
-                فروشنده فاقد سطح{" "}
-                {PersianNumberFormatter.toPersianDigits(info.requiredTechLevel)}
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
@@ -100,15 +90,13 @@ export function AlliedUnitBuyCard({
               قیمت واردات (۱.۵x):{" "}
               {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
-            {info.isUnlocked && (
-              <span className="text-[9px] text-foreground font-sans">
-                (ظرفیت باقی‌مانده:{" "}
-                {PersianNumberFormatter.toPersianDigits(
-                  info.remainingRoom.toLocaleString("en-US"),
-                )}
-                )
-              </span>
-            )}
+            <span className="text-[9px] text-foreground font-sans">
+              (ظرفیت باقی‌مانده:{" "}
+              {PersianNumberFormatter.toPersianDigits(
+                info.remainingRoom.toLocaleString("en-US"),
+              )}
+              )
+            </span>
             <span className="flex items-center gap-0.5 text-emerald-400">
               <Zap size={10} />
               تحویل آنی
@@ -129,11 +117,7 @@ export function AlliedUnitBuyCard({
           ))}
         </div>
 
-        {!info.isUnlocked ? (
-          <div className="py-2 px-3 bg-secondary/50 text-muted-foreground rounded-xl text-[10px] font-mono border border-border/50">
-            فناوری ناکافی فروشنده
-          </div>
-        ) : info.isCapReached ? (
+        {info.isCapReached ? (
           <div className="py-2 px-3 bg-amber-500/15 text-amber-400 rounded-xl text-[10px] font-mono border border-amber-500/30 flex items-center gap-1">
             <ShieldCheck size={12} />
             <span>سقف سهمیه ارتش</span>

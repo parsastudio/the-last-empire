@@ -35,12 +35,6 @@ export class ArmsMarketManager {
     }
 
     const unitStat = MILITARY_UNIT_STATS[unitType];
-    if (Math.floor(seller.military.techLevel) < unitStat.requiredTechLevel) {
-      throw new GameError(
-        "INVALID_ACTION",
-        `کشور ${seller.name} سطح فناوری لازم برای تولید این یگان را ندارد.`,
-      );
-    }
 
     const rel =
       seller.relations[canonicalBuyerId] || seller.relations[buyer.id];

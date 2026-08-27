@@ -7,7 +7,9 @@ export interface CountryProfile {
   gdp: number;
   population: number;
   flagCode: string;
-  militaryTier: number;
+  domesticTechLevel: number;
+  equipmentTechLevel: number;
   startingGovernment?: GovernmentType;
   startingTechLevel?: number;
+  militaryTier?: number;
 }

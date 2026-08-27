@@ -104,10 +104,6 @@ export class AIProcurementPlanner {
       const q = quotas[type];
       if (q.remainingRoom <= 0 || q.unitPrice <= 0) continue;
 
-      const stat = MILITARY_UNIT_STATS[type];
-      if (Math.floor(nation.military.techLevel) < stat.requiredTechLevel)
-        continue;
-
       const deficitMoney = q.remainingRoom * q.unitPrice;
       deficits.push({
         unitType: type,

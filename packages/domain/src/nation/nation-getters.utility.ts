@@ -14,8 +14,11 @@ export interface NationRankCandidateInput {
   population?: number;
   military?: MilitaryStack;
   governmentType?: GovernmentType | string;
-  militaryTier?: number;
+  domesticTechLevel?: number;
+  equipmentTechLevel?: number;
   startingTechLevel?: number;
+  militaryTier?: number;
+  hasSeaAccess?: boolean;
 }
 
 interface ProcessedCandidate {
@@ -75,12 +78,21 @@ export class NationGettersUtility {
           postWarCooldownTurns: 0,
         });
       } else {
-        const tier = input.militaryTier ?? profile?.militaryTier ?? 5;
-        const techLevel =
-          input.startingTechLevel ?? profile?.startingTechLevel ?? 1;
+        const domesticTech =
+          input.domesticTechLevel ??
+          input.startingTechLevel ??
+          profile?.domesticTechLevel ??
+          profile?.startingTechLevel ??
+          1.0;
+        const equipmentTech =
+          input.equipmentTechLevel ??
+          profile?.equipmentTechLevel ??
+          domesticTech;
+
         const stack = MilitaryDistributionEngine.calculateStartingStack(
-          tier,
-          techLevel,
+          input.gdp,
+          domesticTech,
+          equipmentTech,
         );
 
         milPower = MilitaryPowerCalculator.calculateEffectivePower({
@@ -145,7 +157,7 @@ export class NationGettersUtility {
 
     for (let i = 0; i < processed.length; i++) {
       const c = processed[i]!;
-      c.compositeScore = c.ecoRank * 3 + c.milRank * 1;
+      c.compositeScore = c.ecoRank * 1 + c.milRank * 1;
     }
 
     processed.sort((a, b) => {
