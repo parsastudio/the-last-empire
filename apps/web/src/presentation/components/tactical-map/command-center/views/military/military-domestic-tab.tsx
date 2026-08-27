@@ -2,7 +2,7 @@ import React from "react";
 import { QuickMilitaryRecruitmentGrid } from "@/presentation/components/tactical-map/sidebar/tabs/military/quick-military-recruitment-grid";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { getNationGdp, NationGettersUtility } from "@geopolitics/domain";
+import { getNationGdp } from "@geopolitics/domain";
 
 interface MilitaryDomesticTabProps {
   nation: Nation;
@@ -14,7 +14,6 @@ export function MilitaryDomesticTab({
   provincesMap,
 }: MilitaryDomesticTabProps) {
   const gdp = getNationGdp(nation, provincesMap);
-  const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
 
   return (
     <div className="space-y-5 animate-fade-smooth dir-rtl text-right">
@@ -24,11 +23,7 @@ export function MilitaryDomesticTab({
         </h3>
       </div>
 
-      <QuickMilitaryRecruitmentGrid
-        nation={nation}
-        currentGdp={gdp}
-        hasSeaAccess={hasSea}
-      />
+      <QuickMilitaryRecruitmentGrid nation={nation} currentGdp={gdp} />
     </div>
   );
 }

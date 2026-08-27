@@ -7,7 +7,6 @@ import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-he
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
 
 export class RecruitmentQueueManager {
   public enqueueOrder(
@@ -44,11 +43,9 @@ export class RecruitmentQueueManager {
       );
     }
 
-    const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       gdp,
       nation.military,
-      hasSea,
       nation.recruitmentQueue,
     );
     const q = quotas[unitType];

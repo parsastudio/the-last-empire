@@ -8,20 +8,17 @@ import { Nation, MilitaryPricingCalculator } from "@geopolitics/domain";
 interface QuickMilitaryRecruitmentGridProps {
   nation: Nation;
   currentGdp: number;
-  hasSeaAccess?: boolean;
 }
 
 export function QuickMilitaryRecruitmentGrid({
   nation,
   currentGdp,
-  hasSeaAccess = true,
 }: QuickMilitaryRecruitmentGridProps) {
   const { batchList, floatingFeedbacks, handleBuyBatch } = useQuickRecruitBatch(
     {
       nationId: nation.id,
       nation,
       currentGdp,
-      hasSeaAccess,
     },
   );
 

@@ -44,7 +44,6 @@ export class StrategicManifestBuilder {
 
     const candidatesInput: NationRankCandidateInput[] = activeProfiles.map(
       (p) => {
-        const gpuIdx = CountryRegistry.getGpuColorIndex(p.code);
         return {
           id: p.code,
           name: p.nameFa,
@@ -53,9 +52,6 @@ export class StrategicManifestBuilder {
           governmentType: p.startingGovernment,
           militaryTier: p.militaryTier,
           startingTechLevel: p.startingTechLevel,
-          hasSeaAccess: (countryProvincesMap.get(gpuIdx) || []).some(
-            (prov) => prov.hasSeaAccess,
-          ),
         };
       },
     );
@@ -140,7 +136,6 @@ export class StrategicManifestBuilder {
       const startingTech = profile.startingTechLevel;
       const stack = MilitaryDistributionEngine.calculateStartingStack(
         militaryTier,
-        hasSeaAccess,
         startingTech,
       );
 
@@ -149,7 +144,6 @@ export class StrategicManifestBuilder {
       const startingAirDefense = stack.airDefense;
       const startingAirForce = stack.airForce;
       const startingDroneMissile = stack.droneMissile;
-      const startingNavalFleet = stack.navalFleet;
       const techLevel = profile.startingTechLevel ?? stack.techLevel;
 
       const industrialLevel = Math.max(1, Math.min(5, techLevel));
@@ -176,7 +170,6 @@ export class StrategicManifestBuilder {
         startingAirDefense,
         startingAirForce,
         startingDroneMissile,
-        startingNavalFleet,
         startingTechLevel: techLevel,
         industrialLevel,
         startingStability,
