@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback } from "react";
 import {
   UnitType,
   MILITARY_UNIT_STATS,
-  MilitaryPricingCalculator,
   MilitaryQuotaCalculator,
   ActionFactory,
   getNationGdp,
@@ -79,8 +78,7 @@ export function useAlliedArmsProcurement({
       const baseCost = stat.moneyCost;
       const marketUnitPrice = Math.floor(baseCost * 1.5);
       const q = quotas[type];
-      const isUnlocked =
-        Math.floor(sellerNation.military.techLevel) >= stat.requiredTechLevel;
+      const isUnlocked = true;
 
       const affordableByMoney =
         tenPercentBudget > 0 && marketUnitPrice > 0
@@ -116,12 +114,7 @@ export function useAlliedArmsProcurement({
         isCapReached,
       };
     });
-  }, [
-    buyerNation.treasury,
-    sellerNation.military.techLevel,
-    tenPercentBudget,
-    quotas,
-  ]);
+  }, [buyerNation.treasury, tenPercentBudget, quotas]);
 
   const handleBuyAlliedBatch = useCallback(
     async (info: AlliedUnitProcurementInfo) => {

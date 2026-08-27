@@ -10,8 +10,10 @@ export interface NormalizedCountryFallback {
   population: number;
   perCapitaProductivity: number;
   maxPopulationCapacity: number;
-  militaryTier: number;
+  domesticTechLevel: number;
+  equipmentTechLevel: number;
   startingTechLevel: number;
+  militaryTier: number;
   startingGovernment: GovernmentType;
 }
 
@@ -50,10 +52,15 @@ export class CountryDefaultsUtility {
     const perCapitaProductivity = this.calculateProductivity(gdp, population);
     const maxPopulationCapacity = this.calculateCapacity(population);
 
+    const domesticTechLevel =
+      profile?.domesticTechLevel ??
+      profile?.startingTechLevel ??
+      this.DEFAULT_BASE_TECH_LEVEL;
+    const equipmentTechLevel = profile?.equipmentTechLevel ?? domesticTechLevel;
+
     const militaryTier =
       profile?.militaryTier ?? this.DEFAULT_BASE_MILITARY_TIER;
-    const startingTechLevel =
-      profile?.startingTechLevel ?? this.DEFAULT_BASE_TECH_LEVEL;
+    const startingTechLevel = domesticTechLevel;
     const startingGovernment: GovernmentType =
       profile?.startingGovernment ?? this.DEFAULT_GOVERNMENT;
 
@@ -66,6 +73,8 @@ export class CountryDefaultsUtility {
       population,
       perCapitaProductivity,
       maxPopulationCapacity,
+      domesticTechLevel,
+      equipmentTechLevel,
       militaryTier,
       startingTechLevel,
       startingGovernment,

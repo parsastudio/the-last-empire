@@ -1,58 +1,114 @@
-import { MilitaryStack } from "@/domain/military/military.schema";
+import {
+  MilitaryStack,
+  UnitType,
+  BranchTechRating,
+} from "@/domain/military/military.schema";
+import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class MilitaryDistributionEngine {
+  public static readonly INITIAL_GDP_ARMY_RATIO = 0.3;
+  public static readonly MIN_INITIAL_GDP_ARMY_RATIO = 0.1;
+
+  public static calculateArmyBudgetRatio(
+    domesticTechLevel: number,
+    equipmentTechLevel: number,
+  ): number {
+    const nativeTech = Number(Math.max(1.0, domesticTechLevel).toFixed(2));
+    const fieldTech = Number(
+      Math.max(nativeTech, equipmentTechLevel).toFixed(2),
+    );
+    const techGap = Math.max(0, fieldTech - nativeTech);
+    const penalty = techGap * 0.1;
+    return Math.max(
+      this.MIN_INITIAL_GDP_ARMY_RATIO,
+      this.INITIAL_GDP_ARMY_RATIO - penalty,
+    );
+  }
+
   public static calculateStartingStack(
-    militaryTier: number,
-    customTechLevel?: number,
+    gdp: number,
+    domesticTechLevel = 1.0,
+    equipmentTechLevel = 1.0,
+    branchTechOverrides?: Partial<BranchTechRating>,
   ): MilitaryStack {
-    const safeTier = Math.max(1, Math.min(20, militaryTier || 1));
-    const techLevel =
-      customTechLevel && customTechLevel >= 1 && customTechLevel <= 5
-        ? customTechLevel
-        : Math.max(1, Math.min(5, Math.ceil(safeTier / 4)));
+    const safeGdp = Math.max(1_000_000_000, gdp);
+    const nativeTech = Number(Math.max(1.0, domesticTechLevel).toFixed(2));
+    const fieldTech = Number(
+      Math.max(nativeTech, equipmentTechLevel).toFixed(2),
+    );
 
-    let infantry = Math.max(1, Math.floor(safeTier * 2.5));
-    const droneMissile = Math.floor(safeTier * 0.5);
+    const budgetRatio = this.calculateArmyBudgetRatio(nativeTech, fieldTech);
+    const totalArmyBudget = Math.floor(safeGdp * budgetRatio);
 
-    let armor = 0;
-    if (techLevel >= 2) {
-      armor = Math.floor((safeTier - 4) * 1.5);
+    const initialBranchTech: BranchTechRating = {
+      infantry: branchTechOverrides?.infantry ?? nativeTech,
+      armor: branchTechOverrides?.armor ?? nativeTech,
+      airDefense: branchTechOverrides?.airDefense ?? nativeTech,
+      airForce: branchTechOverrides?.airForce ?? nativeTech,
+      droneMissile: branchTechOverrides?.droneMissile ?? fieldTech,
+    };
+
+    const quotaRatios: Record<UnitType, number> = {
+      ARMOR: 0.3,
+      AIR_FORCE: 0.3,
+      INFANTRY: 0.15,
+      AIR_DEFENSE: 0.15,
+      DRONE_MISSILE: 0.1,
+    };
+
+    const priorities: UnitType[] = [
+      "AIR_FORCE",
+      "AIR_DEFENSE",
+      "ARMOR",
+      "DRONE_MISSILE",
+      "INFANTRY",
+    ];
+
+    let remainingBudget = totalArmyBudget;
+    const quantities: Record<UnitType, number> = {
+      INFANTRY: 0,
+      ARMOR: 0,
+      AIR_DEFENSE: 0,
+      AIR_FORCE: 0,
+      DRONE_MISSILE: 0,
+    };
+
+    for (const type of priorities) {
+      const stat = MILITARY_UNIT_STATS[type];
+      const allocatedForType = Math.floor(totalArmyBudget * quotaRatios[type]);
+      const spendable = Math.min(remainingBudget, allocatedForType);
+      const count = Math.floor(spendable / stat.moneyCost);
+
+      if (count > 0) {
+        quantities[type] = count;
+        remainingBudget -= count * stat.moneyCost;
+      }
     }
 
-    let airDefense = 0;
-    if (techLevel >= 3) {
-      airDefense = Math.floor((safeTier - 8) * 1.2);
+    if (remainingBudget > 0) {
+      for (const type of priorities) {
+        const stat = MILITARY_UNIT_STATS[type];
+        const count = Math.floor(remainingBudget / stat.moneyCost);
+        if (count > 0) {
+          quantities[type] += count;
+          remainingBudget -= count * stat.moneyCost;
+        }
+      }
     }
 
-    let airForce = 0;
-    if (techLevel >= 4) {
-      airForce = Math.floor((safeTier - 12) * 1.5);
-    }
-
-    let redirectedPoints = 0;
-    if (techLevel < 4 && safeTier > 12) {
-      redirectedPoints += Math.floor((safeTier - 12) * 1.5);
-    }
-    if (techLevel < 3 && safeTier > 8) {
-      redirectedPoints += Math.floor((safeTier - 8) * 1.2);
-    }
-    if (techLevel >= 2) {
-      armor += Math.floor(redirectedPoints * 0.6);
-    } else {
-      infantry += Math.floor(redirectedPoints * 0.8);
-    }
-    if (techLevel >= 3) {
-      airDefense += Math.floor(redirectedPoints * 0.4);
+    if (quantities.INFANTRY < 1) {
+      quantities.INFANTRY = 1;
     }
 
     return {
-      infantry: Math.max(1, infantry),
-      armor: Math.max(0, armor),
-      airDefense: Math.max(0, airDefense),
-      airForce: Math.max(0, airForce),
-      droneMissile: Math.max(0, droneMissile),
+      infantry: quantities.INFANTRY,
+      armor: quantities.ARMOR,
+      airDefense: quantities.AIR_DEFENSE,
+      airForce: quantities.AIR_FORCE,
+      droneMissile: quantities.DRONE_MISSILE,
       experience: 10,
-      techLevel,
+      techLevel: nativeTech,
+      branchTech: initialBranchTech,
     };
   }
 }

@@ -34,32 +34,36 @@ export class NationProfileAssigner {
     }
 
     const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
-
     const profile = CountryRegistry.getCountry(cleanId);
-    const tier =
-      profile?.militaryTier ?? Math.max(1, Math.min(20, 21 - item.initialRank));
-    const startingTech = profile?.startingTechLevel ?? item.startingTechLevel;
-    const tierStack = MilitaryDistributionEngine.calculateStartingStack(
-      tier,
-      startingTech,
+    const domesticTech =
+      profile?.domesticTechLevel ??
+      profile?.startingTechLevel ??
+      item.startingTechLevel ??
+      1.0;
+    const equipmentTech = profile?.equipmentTechLevel ?? domesticTech;
+
+    const dynamicStack = MilitaryDistributionEngine.calculateStartingStack(
+      item.gdp,
+      domesticTech,
+      equipmentTech,
     );
 
     const infantry =
-      item.startingInfantry > 0 ? item.startingInfantry : tierStack.infantry;
-    const armor = item.startingArmor ?? tierStack.armor;
-    const airDefense = item.startingAirDefense ?? tierStack.airDefense;
+      item.startingInfantry > 0 ? item.startingInfantry : dynamicStack.infantry;
+    const armor =
+      item.startingArmor !== undefined && item.startingArmor > 0
+        ? item.startingArmor
+        : dynamicStack.armor;
+    const airDefense =
+      item.startingAirDefense !== undefined && item.startingAirDefense > 0
+        ? item.startingAirDefense
+        : dynamicStack.airDefense;
     const airForce =
-      item.startingAirForce > 0 ? item.startingAirForce : tierStack.airForce;
+      item.startingAirForce > 0 ? item.startingAirForce : dynamicStack.airForce;
     const droneMissile =
       item.startingDroneMissile > 0
         ? item.startingDroneMissile
-        : tierStack.droneMissile;
-    const techLevel =
-      startingTech && startingTech > 0
-        ? startingTech
-        : item.startingTechLevel > 1
-          ? item.startingTechLevel
-          : tierStack.techLevel;
+        : dynamicStack.droneMissile;
 
     let baseMilitary: MilitaryStack = {
       infantry: 0,
@@ -68,39 +72,41 @@ export class NationProfileAssigner {
       airForce: 0,
       droneMissile: 0,
       experience: 10,
-      techLevel,
-      branchTech: MilitaryInventoryHelper.initializeBranchTech(techLevel),
+      techLevel: domesticTech,
+      branchTech:
+        dynamicStack.branchTech ||
+        MilitaryInventoryHelper.initializeBranchTech(domesticTech),
     };
 
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "INFANTRY",
       infantry,
-      techLevel,
+      dynamicStack.branchTech?.infantry ?? domesticTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "ARMOR",
       armor,
-      techLevel,
+      dynamicStack.branchTech?.armor ?? domesticTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "AIR_DEFENSE",
       airDefense,
-      techLevel,
+      dynamicStack.branchTech?.airDefense ?? domesticTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "AIR_FORCE",
       airForce,
-      techLevel,
+      dynamicStack.branchTech?.airForce ?? domesticTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "DRONE_MISSILE",
       droneMissile,
-      techLevel,
+      dynamicStack.branchTech?.droneMissile ?? domesticTech,
     );
 
     return {
@@ -150,9 +156,10 @@ export class NationProfileAssigner {
       canonicalId,
       profile,
     );
-    const tierStack = MilitaryDistributionEngine.calculateStartingStack(
-      fallback.militaryTier,
-      fallback.startingTechLevel,
+    const dynamicStack = MilitaryDistributionEngine.calculateStartingStack(
+      fallback.gdp,
+      fallback.domesticTechLevel,
+      fallback.equipmentTechLevel,
     );
 
     const fallbackManifestItem: FinalManifestNation = {
@@ -171,12 +178,12 @@ export class NationProfileAssigner {
       startingTreasury: Math.floor(fallback.gdp * 0.05),
       initialRank: 1,
       defaultGovernment: fallback.startingGovernment,
-      startingInfantry: tierStack.infantry,
-      startingArmor: tierStack.armor,
-      startingAirDefense: tierStack.airDefense,
-      startingAirForce: tierStack.airForce,
-      startingDroneMissile: tierStack.droneMissile,
-      startingTechLevel: tierStack.techLevel,
+      startingInfantry: dynamicStack.infantry,
+      startingArmor: dynamicStack.armor,
+      startingAirDefense: dynamicStack.airDefense,
+      startingAirForce: dynamicStack.airForce,
+      startingDroneMissile: dynamicStack.droneMissile,
+      startingTechLevel: dynamicStack.techLevel,
       industrialLevel: 1,
       startingStability: 50,
     };

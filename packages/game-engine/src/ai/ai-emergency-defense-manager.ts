@@ -63,9 +63,7 @@ export class AIEmergencyDefenseManager {
       return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
-    const bestUnit = this.selectBestPurchasableUnit(
-      bestSeller.military.techLevel,
-    );
+    const bestUnit = this.selectBestPurchasableUnit();
     if (!bestUnit) {
       return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
@@ -195,26 +193,8 @@ export class AIEmergencyDefenseManager {
     return sellers[0]!;
   }
 
-  private static selectBestPurchasableUnit(
-    sellerTechLevel: number,
-  ): (typeof MILITARY_UNIT_STATS)[UnitType] | null {
-    const priorityList: UnitType[] = [
-      "ARMOR",
-      "AIR_FORCE",
-      "AIR_DEFENSE",
-      "DRONE_MISSILE",
-      "INFANTRY",
-    ];
-
-    for (let i = 0; i < priorityList.length; i++) {
-      const type = priorityList[i]!;
-      const stat = MILITARY_UNIT_STATS[type];
-      if (sellerTechLevel >= stat.requiredTechLevel) {
-        return stat;
-      }
-    }
-
-    return MILITARY_UNIT_STATS.INFANTRY;
+  private static selectBestPurchasableUnit(): (typeof MILITARY_UNIT_STATS)[UnitType] {
+    return MILITARY_UNIT_STATS.ARMOR;
   }
 
   private static calculateSingleUnitPower(
