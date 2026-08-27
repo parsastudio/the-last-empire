@@ -11,6 +11,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   treasury: 100000,
   nationalDebt: 0,
   industrialLevel: 1,
+  navalFleet: 0,
   government: {
     type: "DEMOCRACY",
     stability: 50,

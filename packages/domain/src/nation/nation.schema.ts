@@ -25,6 +25,7 @@ export const NationSchema = z.object({
   treasury: z.number(),
   nationalDebt: z.number().nonnegative(),
   industrialLevel: z.number().positive(),
+  navalFleet: z.number().nonnegative().default(0),
   government: GovernmentStateSchema,
   military: MilitaryStackSchema,
   recruitmentQueue: z.array(RecruitmentOrderSchema),

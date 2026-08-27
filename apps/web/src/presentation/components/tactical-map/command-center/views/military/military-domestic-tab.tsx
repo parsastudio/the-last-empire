@@ -19,11 +19,15 @@ export function MilitaryDomesticTab({
     <div className="space-y-5 animate-fade-smooth dir-rtl text-right">
       <div className="p-3.5 bg-secondary/30 border border-border/60 rounded-2xl flex items-center justify-between">
         <h3 className="text-xs font-black text-foreground">
-          خطوط تولید و صنایع دفاع بومی کشور
+          خطوط تولید، صنایع دفاع بومی و ناوگان دریایی کشور
         </h3>
       </div>
 
-      <QuickMilitaryRecruitmentGrid nation={nation} currentGdp={gdp} />
+      <QuickMilitaryRecruitmentGrid
+        nation={nation}
+        currentGdp={gdp}
+        provincesMap={provincesMap}
+      />
     </div>
   );
 }

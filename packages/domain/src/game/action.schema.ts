@@ -35,6 +35,13 @@ export const BuyArmsMarketActionSchema = z.object({
   quantity: z.number().positive(),
 });
 
+export const BuyNavalFleetActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  type: z.literal("BUY_NAVAL_FLEET"),
+  quantity: z.number().positive(),
+});
+
 export const DiplomaticProposalActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -110,6 +117,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   SetTariffRateActionSchema,
   RecruitUnitActionSchema,
   BuyArmsMarketActionSchema,
+  BuyNavalFleetActionSchema,
   DiplomaticProposalActionSchema,
   RespondDiplomaticProposalActionSchema,
   UpgradeDevelopmentActionSchema,
@@ -134,6 +142,7 @@ export type SetTaxRateAction = z.infer<typeof SetTaxRateActionSchema>;
 export type SetTariffRateAction = z.infer<typeof SetTariffRateActionSchema>;
 export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
 export type BuyArmsMarketAction = z.infer<typeof BuyArmsMarketActionSchema>;
+export type BuyNavalFleetAction = z.infer<typeof BuyNavalFleetActionSchema>;
 export type DiplomaticProposalAction = z.infer<
   typeof DiplomaticProposalActionSchema
 >;

@@ -96,11 +96,11 @@ export function ImfLoanCard({
 
             <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
               <span className="text-muted-foreground block font-sans">
-                بهره نوبتی (۵٪)
+                بهره نوبتی (۷٪)
               </span>
               <span className="font-bold text-treasury block">
                 {PersianNumberFormatter.formatCurrency(
-                  Math.floor(nationalDebt * 0.05),
+                  Math.floor(nationalDebt * 0.07),
                 )}
               </span>
             </div>
@@ -150,7 +150,7 @@ export function ImfLoanCard({
       <AmountActionDialog
         isOpen={isLoanModalOpen}
         title="دریافت تسهیلات اضطراری از بانک جهانی"
-        subtitle="پرداخت نوبتی ۵٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
+        subtitle="پرداخت نوبتی ۷٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
         unitLabel="میلیارد دلار"
         maxAmount={availableLoanBillion}
         confirmLabel="دریافت وام"

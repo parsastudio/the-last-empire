@@ -19,6 +19,7 @@ export interface NationRankCandidateInput {
   startingTechLevel?: number;
   militaryTier?: number;
   hasSeaAccess?: boolean;
+  navalFleet?: number;
 }
 
 interface ProcessedCandidate {
@@ -60,6 +61,7 @@ export class NationGettersUtility {
           treasury: 100000,
           nationalDebt: 0,
           industrialLevel: 1,
+          navalFleet: input.navalFleet ?? 0,
           government: {
             type:
               (input.governmentType as GovernmentType) ||
@@ -106,6 +108,7 @@ export class NationGettersUtility {
           treasury: 100000,
           nationalDebt: 0,
           industrialLevel: 1,
+          navalFleet: input.navalFleet ?? 0,
           government: {
             type:
               (input.governmentType as GovernmentType) ||
@@ -392,6 +395,7 @@ export class NationGettersUtility {
         population,
         military: nation.military,
         governmentType: nation.government.type,
+        navalFleet: nation.navalFleet,
       };
     }
 

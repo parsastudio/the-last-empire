@@ -38,6 +38,10 @@ export class EconomyTurnProcessor {
       currentProvincesMap,
     );
 
+    const navalSecurityIncome = Math.floor(
+      (updated.navalFleet || 0) * 50_000_000_000 * 0.06,
+    );
+
     if (updated.isAi) {
       const gdp = getNationGdp(updated, currentProvincesMap);
       const aliveCount = Object.values(allNations).filter(
@@ -69,7 +73,7 @@ export class EconomyTurnProcessor {
 
       const netAddedTreasury = Math.max(
         0,
-        baseIncome - maintenanceCost - actualRepayment,
+        baseIncome + navalSecurityIncome - maintenanceCost - actualRepayment,
       );
 
       updated = {
@@ -94,10 +98,11 @@ export class EconomyTurnProcessor {
 
     const addedTreasury =
       (tariffResult.tariffRevenue > 0 ? tariffResult.tariffRevenue : 0) +
-      (taxResult.taxIncome > 0 ? taxResult.taxIncome : 0);
+      (taxResult.taxIncome > 0 ? taxResult.taxIncome : 0) +
+      navalSecurityIncome;
 
     const totalExpenses =
-      payrollBreakdown.total + Math.floor(updated.nationalDebt * 0.05);
+      payrollBreakdown.total + Math.floor(updated.nationalDebt * 0.07);
 
     let newTreasury = updated.treasury + addedTreasury - totalExpenses;
     let newDebt = updated.nationalDebt;

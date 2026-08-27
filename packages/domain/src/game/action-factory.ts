@@ -3,6 +3,7 @@ import {
   SetTariffRateAction,
   RecruitUnitAction,
   BuyArmsMarketAction,
+  BuyNavalFleetAction,
   DiplomaticProposalAction,
   RespondDiplomaticProposalAction,
   UpgradeDevelopmentAction,
@@ -72,6 +73,18 @@ export class ActionFactory {
       type: "BUY_ARMS_MARKET",
       sellerNationId,
       unitType,
+      quantity,
+    };
+  }
+
+  public static buyNavalFleet(
+    nationId: string,
+    quantity: number = 1,
+  ): BuyNavalFleetAction {
+    return {
+      id: this.createId("naval-fleet"),
+      nationId,
+      type: "BUY_NAVAL_FLEET",
       quantity,
     };
   }

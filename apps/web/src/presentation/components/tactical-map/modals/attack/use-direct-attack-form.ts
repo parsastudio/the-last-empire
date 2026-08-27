@@ -93,6 +93,13 @@ export function useDirectAttackForm({
     !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
   const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
 
+  const navalFleetCount = humanNation?.navalFleet || 0;
+  const maxNavalCapacity = navalFleetCount * 60;
+  const requiredNavalLoad = infantryToDeploy * 1 + armorToDeploy * 4;
+  const hasNavalCapacity =
+    attackType !== "NAVAL" ||
+    (navalFleetCount > 0 && requiredNavalLoad <= maxNavalCapacity);
+
   const isReconActive = useMemo(() => {
     if (!humanNation || !targetNation) return false;
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
@@ -262,7 +269,7 @@ export function useDirectAttackForm({
   }, [humanNation, targetNation]);
 
   const handleExecuteAttack = useCallback(async () => {
-    if (!humanNation || !targetNation || isSubmitting) {
+    if (!humanNation || !targetNation || isSubmitting || !hasNavalCapacity) {
       return;
     }
 
@@ -305,6 +312,7 @@ export function useDirectAttackForm({
     humanNation,
     targetNation,
     isSubmitting,
+    hasNavalCapacity,
     dronesToLaunch,
     infantryToDeploy,
     armorToDeploy,
@@ -323,6 +331,8 @@ export function useDirectAttackForm({
     isLandNeighbor,
     isNavalValid,
     attackType,
+    navalFleetCount,
+    hasNavalCapacity,
     isReconActive,
     reconCost,
     canAffordRecon,
