@@ -20,8 +20,6 @@ export class TariffCalculator {
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const seaAccessFactor = hasSea ? 1.0 : 0.5;
     const nationGdp = getNationGdp(nation, provincesMap);
-    const nationNavalPower =
-      (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
 
     let totalEligibleGdp = 0;
     let activePartnerCount = 0;
@@ -40,16 +38,8 @@ export class TariffCalculator {
           nation,
           partner,
         );
-        const rel = nation.relations?.[partner.id];
-        const isWar = rel?.stance === "WAR";
 
-        const partnerNavalPower =
-          (partner.military.navalFleet || 0) *
-          (partner.military.techLevel || 1);
-
-        const isNavalBlockaded = isWar && partnerNavalPower > nationNavalPower;
-
-        if (!isSevered && !isNavalBlockaded) {
+        if (!isSevered) {
           activePartnerCount++;
           const partnerGdp = getNationGdp(partner, provincesMap);
           totalEligibleGdp += partnerGdp;

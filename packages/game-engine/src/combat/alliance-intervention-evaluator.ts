@@ -4,7 +4,6 @@ import {
   CountryRegistry,
   MilitaryPowerCalculator,
   GeopoliticalReachResolver,
-  NationGettersUtility,
 } from "@geopolitics/domain";
 
 export interface AllianceInterventionResult {
@@ -49,16 +48,8 @@ export class AllianceInterventionEvaluator {
         attacker,
         provincesMap,
       );
-      const allySea =
-        (ally.military.navalFleet || 0) > 0 ||
-        NationGettersUtility.hasSeaAccess(ally.id, provincesMap);
-      const attackerSea =
-        (attacker.military.navalFleet || 0) > 0 ||
-        NationGettersUtility.hasSeaAccess(attacker.id, provincesMap);
-      const hasNavalRoute = allySea && attackerSea;
-      const canReachAttacker = hasLandBorder || hasNavalRoute;
 
-      if (!canReachAttacker) {
+      if (!hasLandBorder) {
         continue;
       }
 

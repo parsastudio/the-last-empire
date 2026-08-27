@@ -4,7 +4,6 @@ import {
   X,
   Swords,
   ShieldAlert,
-  Anchor,
   ShoppingCart,
   AlertTriangle,
   Radio,
@@ -122,22 +121,6 @@ export function DiplomaticFeedbackModal({
                 از کشور {defense.sellerName}{" "}
                 {getFlagEmoji(defense.sellerFlagCode || "")} نمود تا خطوط
                 دفاعی‌اش را تقویت کند.
-              </p>
-            </div>
-          )}
-
-          {defense?.type === "BLOCKADED" && (
-            <div className="w-full bg-gradient-to-r from-emerald-950/60 via-card to-cyan-950/40 border border-emerald-500/50 p-4 rounded-2xl space-y-2 shadow-lg text-right">
-              <div className="flex items-center gap-2 text-xs font-black text-emerald-400">
-                <Anchor size={16} />
-                <span>
-                  گزارش ناوگان دریایی: محاصره موفق و مهار تسلیحاتی دشمن!
-                </span>
-              </div>
-              <p className="text-[11px] text-foreground/90 leading-relaxed font-sans font-medium">
-                دولت {feedback.targetName} قصد داشت برای جبران کسری توان رزمی
-                خود تسلیحات خارجی وارد کند، اما به دلیل برتری مطلق ناوگان دریایی
-                شما و محاصره آب‌های آزاد، هیچ محموله‌ای به دشمن نرسید!
               </p>
             </div>
           )}

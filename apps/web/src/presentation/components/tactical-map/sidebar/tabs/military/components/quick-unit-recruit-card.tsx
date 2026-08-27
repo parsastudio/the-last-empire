@@ -5,7 +5,6 @@ import {
   Crosshair,
   Plane,
   Radio,
-  Anchor,
   Lock,
   Plus,
   Coins,
@@ -47,11 +46,6 @@ const UNIT_ICONS: Record<
     icon: Radio,
     color: "text-treasury",
     bg: "bg-treasury/10 border-treasury/20",
-  },
-  NAVAL_FLEET: {
-    icon: Anchor,
-    color: "text-primary",
-    bg: "bg-primary/10 border-primary/20",
   },
 };
 

@@ -63,11 +63,6 @@ export function BattleSpoilsCard({
       count: spoils?.capturedDrones || 0,
       icon: "🚀",
     },
-    {
-      label: "ناوگان دریایی تسخیرشده",
-      count: spoils?.capturedNavalFleet || 0,
-      icon: "⚓",
-    },
   ].filter((u) => u.count > 0);
 
   return (

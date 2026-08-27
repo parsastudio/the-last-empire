@@ -13,7 +13,7 @@ import {
 } from "@geopolitics/domain";
 
 export interface ReactiveDefenseEvent {
-  type: "PURCHASED" | "BLOCKADED" | "NO_SELLER" | "MAX_DEBT" | "NONE";
+  type: "PURCHASED" | "NO_SELLER" | "MAX_DEBT" | "NONE";
   sellerName?: string;
   sellerFlagCode?: string;
   unitName?: string;
@@ -56,10 +56,6 @@ export class AIEmergencyDefenseManager {
 
     if (availableLoanHeadroom <= 0) {
       return { newState: state, defenseEvent: { type: "MAX_DEBT" } };
-    }
-
-    if (this.isNavalBlockaded(defender, state.nations)) {
-      return { newState: state, defenseEvent: { type: "BLOCKADED" } };
     }
 
     const bestSeller = this.findBestArmsSeller(defender, state.nations);
@@ -166,30 +162,6 @@ export class AIEmergencyDefenseManager {
         cost: finalCost,
       },
     };
-  }
-
-  private static isNavalBlockaded(
-    nation: Nation,
-    nationsMap: Record<string, Nation>,
-  ): boolean {
-    const buyerNavalPower =
-      (nation.military.navalFleet || 0) * (nation.military.techLevel || 1);
-
-    for (const partner of Object.values(nationsMap)) {
-      if (!partner.isAlive || partner.id === nation.id) continue;
-      const canonical = CountryRegistry.resolveCanonicalId(partner.id);
-      const rel = nation.relations[canonical] || nation.relations[partner.id];
-
-      if (rel?.stance === "WAR") {
-        const enemyNavalPower =
-          (partner.military.navalFleet || 0) *
-          (partner.military.techLevel || 1);
-        if (enemyNavalPower > buyerNavalPower) {
-          return true;
-        }
-      }
-    }
-    return false;
   }
 
   private static findBestArmsSeller(

@@ -25,7 +25,6 @@ export class ReconTierExecutor {
       airDefense: target.military.airDefense || 0,
       airForce: target.military.airForce,
       droneMissile: target.military.droneMissile,
-      navalFleet: target.military.navalFleet || 0,
       techLevel: target.military.techLevel,
       industrialLevel: target.industrialLevel,
       treasury: target.treasury,

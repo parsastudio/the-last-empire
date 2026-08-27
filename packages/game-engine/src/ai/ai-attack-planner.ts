@@ -8,7 +8,6 @@ import {
   GOVERNMENT_TRAITS_MAP,
   MilitaryPowerCalculator,
   LandNeighborResolver,
-  NavalNeighborResolver,
   NationGettersUtility,
   GlobalCoalition,
 } from "@geopolitics/domain";
@@ -140,18 +139,13 @@ export class AIAttackPlanner {
       return null;
     }
 
-    const targetResolution = this.resolveTargetProvince(
+    const targetProvinceId = this.resolveTargetProvince(
       nation,
       targetNation,
       provincesMap,
-      infantryToDeploy,
-      armorToDeploy,
-      airForceToDeploy,
-      dronesToLaunch,
-      ownedProvinces,
     );
 
-    if (!targetResolution) {
+    if (!targetProvinceId) {
       return null;
     }
 
@@ -162,8 +156,7 @@ export class AIAttackPlanner {
       infantryToDeploy,
       armorToDeploy,
       airForceToDeploy,
-      targetResolution.provinceId,
-      targetResolution.attackType,
+      targetProvinceId,
     );
   }
 
@@ -227,16 +220,7 @@ export class AIAttackPlanner {
     nation: Nation,
     targetNation: Nation,
     provincesMap: Record<string, Province> | undefined,
-    infantry: number,
-    armor: number,
-    airForce: number,
-    drones: number,
-    ownedProvinces?: Province[],
-  ): {
-    provinceId: number;
-    attackType: "LAND" | "NAVAL";
-    navalDeploymentCost: number;
-  } | null {
+  ): number | null {
     if (!provincesMap) {
       return null;
     }
@@ -259,58 +243,8 @@ export class AIAttackPlanner {
           provincesMap,
         )
       ) {
-        return {
-          provinceId: prov.provinceId,
-          attackType: "LAND",
-          navalDeploymentCost: 0,
-        };
+        return prov.provinceId;
       }
-    }
-
-    const sourceSea = NationGettersUtility.hasSeaAccess(
-      nation.id,
-      provincesMap,
-      ownedProvinces,
-    );
-    const targetSea = targetProvinceList.some((p) => p.hasSeaAccess);
-
-    if (!sourceSea || !targetSea) {
-      return null;
-    }
-
-    let bestNavalProv: Province | null = null;
-    let minNavalCost = Infinity;
-
-    for (let i = 0; i < targetProvinceList.length; i++) {
-      const prov = targetProvinceList[i]!;
-      if (!prov.hasSeaAccess) continue;
-
-      const navalInfo = NavalNeighborResolver.resolveNavalAttack(
-        prov.provinceId,
-        nation.id,
-        provincesMap,
-        infantry,
-        armor,
-        airForce,
-        drones,
-        ownedProvinces,
-      );
-
-      if (
-        navalInfo.isNavalValid &&
-        navalInfo.deploymentMoneyCost < minNavalCost
-      ) {
-        minNavalCost = navalInfo.deploymentMoneyCost;
-        bestNavalProv = prov;
-      }
-    }
-
-    if (bestNavalProv) {
-      return {
-        provinceId: bestNavalProv.provinceId,
-        attackType: "NAVAL",
-        navalDeploymentCost: minNavalCost,
-      };
     }
 
     return null;

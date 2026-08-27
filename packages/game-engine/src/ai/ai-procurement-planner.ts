@@ -7,7 +7,6 @@ import {
   MilitaryPricingCalculator,
   MILITARY_UNIT_STATS,
   getNationGdp,
-  NationGettersUtility,
   GeopoliticalReachResolver,
   CountryRegistry,
   MilitaryPowerCalculator,
@@ -66,11 +65,9 @@ export class AIProcurementPlanner {
       return { actions, remainingTreasury: effectiveTreasury };
     }
 
-    const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       gdp,
       nation.military,
-      hasSea,
       nation.recruitmentQueue,
     );
 
@@ -100,7 +97,6 @@ export class AIProcurementPlanner {
       "AIR_DEFENSE",
       "AIR_FORCE",
       "DRONE_MISSILE",
-      "NAVAL_FLEET",
     ];
 
     for (let i = 0; i < unitTypes.length; i++) {

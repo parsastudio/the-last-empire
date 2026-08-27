@@ -5,7 +5,6 @@ import {
   ShieldAlert,
   Plane,
   Radio,
-  Anchor,
   Crosshair,
 } from "lucide-react";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
@@ -22,7 +21,6 @@ interface MilitaryForcesSectionProps {
   airDefense?: number;
   airForce: number;
   droneMissile: number;
-  navalFleet?: number;
   techLevel: number;
   experience: number;
   nation?: Nation;
@@ -35,7 +33,6 @@ export function MilitaryForcesSection({
   airDefense = 0,
   airForce,
   droneMissile,
-  navalFleet = 0,
   techLevel,
   experience,
   nation,
@@ -49,7 +46,6 @@ export function MilitaryForcesSection({
       airDefense,
       airForce,
       droneMissile,
-      navalFleet,
       experience,
       techLevel,
       branchTech: MilitaryInventoryHelper.initializeBranchTech(techLevel),
@@ -80,10 +76,6 @@ export function MilitaryForcesSection({
   const drTech = MilitaryInventoryHelper.getBranchTech(
     activeNation.military,
     "DRONE_MISSILE",
-  );
-  const nvTech = MilitaryInventoryHelper.getBranchTech(
-    activeNation.military,
-    "NAVAL_FLEET",
   );
 
   return (
@@ -140,15 +132,6 @@ export function MilitaryForcesSection({
             payrollCost={payroll.droneMissile}
             count={droneMissile}
             techRating={drTech}
-          />
-
-          <MilitaryForceUnitCard
-            icon={Anchor}
-            iconColorClass="text-primary"
-            name="ناوگان دریایی"
-            payrollCost={payroll.navalFleet}
-            count={navalFleet}
-            techRating={nvTech}
           />
         </div>
 

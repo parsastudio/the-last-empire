@@ -24,7 +24,6 @@ export const EspionageReconDataSchema = z.object({
   airDefense: z.number().nonnegative(),
   airForce: z.number().nonnegative(),
   droneMissile: z.number().nonnegative(),
-  navalFleet: z.number().nonnegative(),
   techLevel: z.number().positive(),
   industrialLevel: z.number().positive(),
   treasury: z.number(),
@@ -39,7 +38,6 @@ export const EspionageSabotageDataSchema = z.object({
   airDefenseDestroyed: z.number().nonnegative(),
   airForceDestroyed: z.number().nonnegative(),
   droneMissileDestroyed: z.number().nonnegative(),
-  navalFleetDestroyed: z.number().nonnegative(),
 });
 
 export const EspionageTechTheftDataSchema = z.object({

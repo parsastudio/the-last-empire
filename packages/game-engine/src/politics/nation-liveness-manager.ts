@@ -47,7 +47,6 @@ export class NationLivenessManager {
             airDefense: 0,
             airForce: 0,
             droneMissile: 0,
-            navalFleet: 0,
           },
           relations: {},
         };
