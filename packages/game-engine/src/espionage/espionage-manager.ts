@@ -29,13 +29,8 @@ export class EspionageManager {
   public static calculateOperationCost(
     targetGdp: number,
     tier: EspionageTier,
-    sourceNation: Nation,
   ): number {
-    return EspionageCalculator.calculateOperationCost(
-      targetGdp,
-      tier,
-      sourceNation,
-    );
+    return EspionageCalculator.calculateOperationCost(targetGdp, tier);
   }
 
   public static calculateTechSuperiority(
@@ -51,8 +46,13 @@ export class EspionageManager {
   public static calculateSuccessRate(
     tier: EspionageTier,
     sourceNation: Nation,
+    targetNation?: Nation,
   ): number {
-    return EspionageCalculator.calculateSuccessRate(tier, sourceNation);
+    return EspionageCalculator.calculateSuccessRate(
+      tier,
+      sourceNation,
+      targetNation,
+    );
   }
 
   public static executeOperation(
@@ -91,11 +91,7 @@ export class EspionageManager {
     }
 
     const targetGdp = getNationGdp(target, state.provinces);
-    const cost = EspionageCalculator.calculateOperationCost(
-      targetGdp,
-      tier,
-      source,
-    );
+    const cost = EspionageCalculator.calculateOperationCost(targetGdp, tier);
 
     if (source.treasury < cost) {
       throw new GameError(
@@ -116,7 +112,11 @@ export class EspionageManager {
     }
 
     const effectivePrng = prng ?? new SeededRandom(state.seed);
-    const successRate = EspionageCalculator.calculateSuccessRate(tier, source);
+    const successRate = EspionageCalculator.calculateSuccessRate(
+      tier,
+      source,
+      target,
+    );
     const roll = effectivePrng.nextFloat();
     const isSuccess = roll <= successRate;
 

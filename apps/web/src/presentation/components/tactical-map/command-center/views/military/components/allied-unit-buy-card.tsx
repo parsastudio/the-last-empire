@@ -10,6 +10,7 @@ import {
   Zap,
   ShieldCheck,
   LucideIcon,
+  TrendingUp,
 } from "lucide-react";
 import { UnitType } from "@geopolitics/domain";
 import { AlliedUnitProcurementInfo } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
@@ -60,6 +61,7 @@ export function AlliedUnitBuyCard({
 }: AlliedUnitBuyCardProps) {
   const iconMeta = UNIT_ICONS[info.type];
   const Icon = iconMeta.icon;
+  const surchargeRate = Math.round((info.techMultiplier - 1.0) * 100);
 
   return (
     <div
@@ -83,12 +85,18 @@ export function AlliedUnitBuyCard({
             <span className="text-xs font-black text-foreground">
               {info.nameFa}
             </span>
+            {surchargeRate > 0 && (
+              <span className="text-[9px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.2 rounded-md flex items-center gap-0.5">
+                <TrendingUp size={9} />+
+                {PersianNumberFormatter.toPersianDigits(surchargeRate)}٪ شکاف
+                فناوری
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
-              قیمت واردات (۱.۵x):{" "}
-              {PersianNumberFormatter.formatCurrency(info.unitPrice)}
+              قیمت واحد: {PersianNumberFormatter.formatCurrency(info.unitPrice)}
             </span>
             <span className="text-[9px] text-foreground font-sans">
               (ظرفیت باقی‌مانده:{" "}
@@ -97,7 +105,7 @@ export function AlliedUnitBuyCard({
               )}
               )
             </span>
-            <span className="flex items-center gap-0.5 text-emerald-400">
+            <span className="flex items-center gap-0.5 text-emerald-400 font-sans">
               <Zap size={10} />
               تحویل آنی
             </span>

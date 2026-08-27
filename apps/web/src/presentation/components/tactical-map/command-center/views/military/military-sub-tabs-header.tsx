@@ -29,7 +29,7 @@ export function MilitarySubTabsHeader({
     },
     {
       id: "allies" as const,
-      label: "واردات تسلیحات از هم‌پیمانان (۱.۵x)",
+      label: "واردات تسلیحات از هم‌پیمانان",
       icon: ShoppingCart,
       badge: `${alliesCount} صادرکننده`,
     },

@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowRight, Wallet, Award } from "lucide-react";
+import { ArrowRight, Wallet, Award, TrendingUp, Info } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { useAlliedArmsProcurement } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
@@ -22,15 +22,21 @@ export function AlliedUnitBuyGrid({
   currentGdp,
   onBack,
 }: AlliedUnitBuyGridProps) {
-  const { batchList, floatingFeedbacks, handleBuyAlliedBatch } =
-    useAlliedArmsProcurement({
-      buyerNation,
-      sellerNation,
-      provincesMap,
-      currentGdp,
-    });
+  const {
+    batchList,
+    techMultiplier,
+    techDelta,
+    floatingFeedbacks,
+    handleBuyAlliedBatch,
+  } = useAlliedArmsProcurement({
+    buyerNation,
+    sellerNation,
+    provincesMap,
+    currentGdp,
+  });
 
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
+  const surchargeRate = Math.round((techMultiplier - 1.0) * 100);
 
   return (
     <div className="space-y-4 font-sans dir-rtl text-right animate-fade-smooth">
@@ -72,6 +78,36 @@ export function AlliedUnitBuyGrid({
             {PersianNumberFormatter.formatCurrency(buyerNation.treasury)}
           </span>
         </div>
+      </div>
+
+      <div className="p-3 bg-secondary/30 border border-border/60 rounded-2xl flex items-center justify-between gap-2 text-xs font-mono">
+        <div className="flex items-center gap-2 text-muted-foreground font-sans text-[11px]">
+          <Info size={14} className="text-primary shrink-0" />
+          <span>
+            {techDelta > 0 ? (
+              <>
+                اختلاف فناوری با شما:{" "}
+                <strong className="text-amber-400 font-mono">
+                  +{PersianNumberFormatter.toPersianDigits(techDelta)}
+                </strong>{" "}
+                سطح (به ازای هر ۰.۱ اختلاف، ۵٪ افزایش قیمت بر مبنای نرخ پایه
+                اعمال شده است).
+              </>
+            ) : (
+              "سطح فناوری این کشور برابر یا پایین‌تر از شماست (خرید با قیمت پایه بومی)."
+            )}
+          </span>
+        </div>
+
+        {surchargeRate > 0 && (
+          <div className="flex items-center gap-1 text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-500/20 shrink-0">
+            <TrendingUp size={12} />
+            <span>
+              ضریب تعدیل قیمت:{" "}
+              {PersianNumberFormatter.toPersianDigits(techMultiplier)}x
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">

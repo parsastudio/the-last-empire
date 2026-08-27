@@ -50,7 +50,12 @@ export class ArmsMarketManager {
 
     const baseUnitPrice =
       MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
-    const marketPricePerUnit = Math.floor(baseUnitPrice * 1.5);
+    const marketPricePerUnit =
+      MilitaryPricingCalculator.calculateArmsImportUnitPrice(
+        unitType,
+        buyer.military.techLevel,
+        seller.military.techLevel,
+      );
     const totalCost = marketPricePerUnit * quantity;
 
     if (buyer.treasury < totalCost) {
@@ -92,7 +97,8 @@ export class ArmsMarketManager {
       );
     }
 
-    const sellerProfit = Math.floor(baseUnitPrice * 0.5) * quantity;
+    const sellerProfit =
+      Math.max(0, marketPricePerUnit - baseUnitPrice) * quantity;
 
     const updatedBuyerMilitary = MilitaryInventoryHelper.addUnits(
       buyer.military,

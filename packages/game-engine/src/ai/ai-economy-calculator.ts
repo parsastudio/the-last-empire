@@ -25,13 +25,13 @@ export class AiEconomyCalculator {
     totalAliveCount: number,
   ): number {
     if (totalAliveCount <= 1) {
-      return 0.2;
+      return 0.3;
     }
 
     const safeRank = Math.max(1, Math.min(totalAliveCount, rank));
     const rankProgress = (safeRank - 1) / (totalAliveCount - 1);
 
-    return 0.2 + rankProgress * 0.3;
+    return 0.3 + rankProgress * 0.3;
   }
 
   public static calculateTurnIncome(

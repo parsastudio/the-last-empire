@@ -19,7 +19,10 @@ export function TechTheftResultView({
               رشد فناوری دفاعی:
             </span>
             <span className="font-bold text-amber-500 block mt-0.5">
-              +{PersianNumberFormatter.toPersianDigits(data.militaryTechGained)}{" "}
+              +
+              {PersianNumberFormatter.toPersianDigits(
+                data.militaryTechGained.toFixed(1),
+              )}{" "}
               سطح
             </span>
           </div>

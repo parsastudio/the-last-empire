@@ -43,7 +43,9 @@ export function AlliedSellerCard({ seller, onSelect }: AlliedSellerCardProps) {
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
             <span>
               فناوری نظامی: سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(seller.techLevel)}
+              {PersianNumberFormatter.toPersianDigits(
+                seller.techLevel.toFixed(1),
+              )}
             </span>
             <span>•</span>
             <span className="text-gdp">

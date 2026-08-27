@@ -91,9 +91,9 @@ export function WideEspionageView({
                 <div className="hidden sm:flex items-center gap-1.5 font-mono text-[10px] bg-secondary/80 px-2.5 py-1 rounded-xl text-primary font-bold border border-primary/20">
                   <Award size={12} />
                   <span>
-                    توان سایبری شما: سطح{" "}
+                    فناوری دفاعی شما: سطح{" "}
                     {PersianNumberFormatter.toPersianDigits(
-                      nation.industrialLevel,
+                      nation.military.techLevel.toFixed(1),
                     )}
                   </span>
                 </div>
@@ -107,7 +107,7 @@ export function WideEspionageView({
                 <EspionageTierCard
                   tier={1}
                   title="شنود ماهواره‌ای و کشف زرادخانه (Strategic Recon)"
-                  subtitle="نفوذ سیگنالی و آشکارسازی فوری ترکیب تمام یگان‌های ارتش، پدافند موشکی و موجودی واقعی خزانه کشور هدف."
+                  subtitle="نفوذ سیگنالی و آشکارسازی فوری ترکیب تمام یگان‌های ارتش، پدافند موشکی و موجودی واقعی خزانه کشور هدف (۶٪ GDP)."
                   icon={Radio}
                   iconColorClass="text-primary"
                   borderColorClass="border-primary/40"
@@ -122,7 +122,7 @@ export function WideEspionageView({
                 <EspionageTierCard
                   tier={2}
                   title="خرابکاری در پایگاه‌های تسلیحاتی و پدافند (Defense Sabotage)"
-                  subtitle="انفجار و از کار انداختن مستقیم ۲۰٪ تا ۳۰٪ از سامانه‌های پدافند هوایی، تانک‌ها و جنگنده‌های آماده رزم حریف قبل از آغاز حمله نظامی شما."
+                  subtitle="انفجار و از کار انداختن مستقیم ۲۰٪ تا ۳۰٪ از سامانه‌های پدافند هوایی، تانک‌ها و جنگنده‌های آماده رزم حریف قبل از آغاز حمله نظامی شما (۱۸٪ GDP)."
                   icon={ShieldAlert}
                   iconColorClass="text-military"
                   borderColorClass="border-military/40"
@@ -136,8 +136,8 @@ export function WideEspionageView({
 
                 <EspionageTierCard
                   tier={3}
-                  title="سرقت فوق‌محرمانه اسرار و جهش ۳ لِوِل فناوری (Superpower Tech Heist)"
-                  subtitle={`نفوذ به سرورهای محرمانه و سرقت تا سقف ۳ امتیاز ارتقا در زمینه‌هایی که ${form.selectedTargetNation.name} از شما برتر است (+${PersianNumberFormatter.toPersianDigits(Math.min(3, form.techSuperiority.totalAvailablePoints))} سطح آماده تصاحب).`}
+                  title="سرقت فوق‌محرمانه اسرار و جهش فناوری (Superpower Tech Heist)"
+                  subtitle={`نفوذ به سرورهای محرمانه و سرقت سطوح فناوری متناسب با برتری‌های ${form.selectedTargetNation.name} (۴۰٪ GDP).`}
                   icon={Binary}
                   iconColorClass="text-amber-500"
                   borderColorClass="border-amber-500/40"
@@ -148,7 +148,7 @@ export function WideEspionageView({
                   isDisabledCondition={
                     form.techSuperiority.totalAvailablePoints <= 0
                   }
-                  disabledReasonText="کشور هدف در هیچ زمینه‌ای (نظامی، صنعتی یا زیرساخت) برتری فناوری ندارد."
+                  disabledReasonText="کشور هدف در هیچ زمینه‌ای (نظامی یا صنعتی) از شما برتر نیست."
                   isExecuting={form.isSubmitting}
                   onExecute={() => form.handleExecute(3)}
                 />
