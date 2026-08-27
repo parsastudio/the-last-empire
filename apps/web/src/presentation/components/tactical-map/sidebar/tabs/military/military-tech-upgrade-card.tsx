@@ -8,17 +8,22 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { Nation } from "@/domain/nation/nation.schema";
+import { Province } from "@/domain/province/province.schema";
 
 interface MilitaryTechUpgradeCardProps {
   nationId: string;
   treasury?: number;
   techLevel?: number;
+  gdp?: number;
+  provincesMap?: Record<string, Province>;
 }
 
 export function MilitaryTechUpgradeCard({
   nationId,
   treasury = 100000,
   techLevel = 1.0,
+  gdp,
+  provincesMap,
 }: MilitaryTechUpgradeCardProps) {
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
@@ -29,8 +34,11 @@ export function MilitaryTechUpgradeCard({
     military: { techLevel } as MilitaryStack,
   } as Nation;
 
-  const stepResearchCost =
-    ResearchManager.getMilitaryTechCost(currentNationObj);
+  const stepResearchCost = ResearchManager.getMilitaryTechCost(
+    currentNationObj,
+    provincesMap,
+    gdp,
+  );
   const canAffordTech = treasury >= stepResearchCost;
 
   const nextStepLevel = Number((techLevel + 0.1).toFixed(1));
@@ -98,8 +106,8 @@ export function MilitaryTechUpgradeCard({
         </div>
 
         <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl text-[10px] text-muted-foreground font-sans leading-relaxed">
-          هر ارتقای اعشاری (+۰.۱) بلافاصله ۵٪ به قدرت نبرد تمام یگان‌های ارتش
-          اضافه می‌کند.
+          هر ارتقای اعشاری (+۰.۱) حدوداً ۲.۳٪ به توان رزمی یگان‌ها اضافه می‌کند
+          (۲۵٪ به ازای هر لول کامل).
         </div>
 
         <button
@@ -116,7 +124,7 @@ export function MilitaryTechUpgradeCard({
             {isSubmittingTech
               ? "در حال اجرای تحقیقات دفاعی..."
               : canAffordTech
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))} (+۵٪ قدرت نبرد)`
+                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))} (+۲.۳٪ قدرت نبرد)`
                 : "موجودی خزانه ناکافی جهت R&D"}
           </span>
         </button>

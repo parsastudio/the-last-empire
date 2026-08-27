@@ -88,7 +88,10 @@ export class MilitaryActionExecutor {
       }
 
       case "INVEST_RESEARCH": {
-        const cost = ResearchManager.getMilitaryTechCost(nation);
+        const cost = ResearchManager.getMilitaryTechCost(
+          nation,
+          state.provinces,
+        );
         if (nation.treasury < cost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
@@ -100,7 +103,10 @@ export class MilitaryActionExecutor {
             ...state,
             nations: {
               ...state.nations,
-              [sourceKey]: new ResearchManager().investInMilitaryTech(nation),
+              [sourceKey]: new ResearchManager().investInMilitaryTech(
+                nation,
+                state.provinces,
+              ),
             },
           },
         };

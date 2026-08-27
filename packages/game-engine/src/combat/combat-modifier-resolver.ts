@@ -1,5 +1,6 @@
 import { Nation, UnitType } from "@geopolitics/domain";
 import { MilitaryInventoryHelper } from "@geopolitics/domain";
+import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 import { GovernmentSystem } from "@/engine/politics/government-system";
 
 export class CombatModifierResolver {
@@ -14,7 +15,8 @@ export class CombatModifierResolver {
       nation.military,
       unitType,
     );
-    const techMult = 1 + (Math.max(1, branchTech) - 1) * 0.5;
+    const techMult =
+      MilitaryPowerCalculator.calculateTechMultiplier(branchTech);
     const govTraits = GovernmentSystem.getTraits(nation.government.type);
 
     return techMult * govTraits.militaryPowerMultiplier;
@@ -22,7 +24,7 @@ export class CombatModifierResolver {
 
   public static getEffectiveMultiplier(nation: Nation): number {
     const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = 1 + (techLevel - 1) * 0.5;
+    const techMult = MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
     const govTraits = GovernmentSystem.getTraits(nation.government.type);
 
     return techMult * govTraits.militaryPowerMultiplier;

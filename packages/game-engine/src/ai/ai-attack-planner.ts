@@ -290,7 +290,7 @@ export class AIAttackPlanner {
       drones * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower;
 
     const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = 1 + (techLevel - 1) * 0.5;
+    const techMult = MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
     const govTraits = GOVERNMENT_TRAITS_MAP[nation.government.type];
 
     return Math.floor(rawPower * techMult * govTraits.militaryPowerMultiplier);

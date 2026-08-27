@@ -42,6 +42,7 @@ export function MilitaryOverviewTab({
             nationId={nation.id}
             treasury={nation.treasury}
             techLevel={nation.military.techLevel}
+            provincesMap={provincesMap}
           />
           <RecruitmentQueueCard
             queue={nation.recruitmentQueue}

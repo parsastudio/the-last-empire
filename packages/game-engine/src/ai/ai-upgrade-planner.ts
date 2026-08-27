@@ -62,7 +62,11 @@ export class AIUpgradePlanner {
       currentTreasury -= devCost;
     }
 
-    const techCost = ResearchManager.getMilitaryTechCost(nation);
+    const techCost = ResearchManager.getMilitaryTechCost(
+      nation,
+      provincesMap,
+      gdp,
+    );
     const isWar = posture === "WAR";
     const isOutTeched = this.hasSuperiorTechNeighbor(
       nation,
