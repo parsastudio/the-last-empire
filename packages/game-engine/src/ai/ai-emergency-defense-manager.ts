@@ -68,8 +68,13 @@ export class AIEmergencyDefenseManager {
       return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
-    const unitPrice = Math.floor(
-      MilitaryPricingCalculator.calculateUnitTypePrice(bestUnit.type) * 1.5,
+    const baseUnitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+      bestUnit.type,
+    );
+    const unitPrice = MilitaryPricingCalculator.calculateArmsImportUnitPrice(
+      bestUnit.type,
+      defender.military.techLevel,
+      bestSeller.military.techLevel,
     );
 
     const unitSinglePower = this.calculateSingleUnitPower(
@@ -92,7 +97,8 @@ export class AIEmergencyDefenseManager {
     }
 
     const finalCost = actualQuantity * unitPrice;
-    const sellerProfit = Math.floor(finalCost / 3);
+    const sellerProfit =
+      Math.max(0, unitPrice - baseUnitPrice) * actualQuantity;
 
     const updatedMilitary = MilitaryInventoryHelper.addUnits(
       defender.military,

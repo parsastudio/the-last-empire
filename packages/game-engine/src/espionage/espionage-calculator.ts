@@ -15,28 +15,23 @@ export class EspionageCalculator {
   public static calculateOperationCost(
     targetGdp: number,
     tier: EspionageTier,
-    sourceNation: Nation,
   ): number {
     let baseRatio = this.TIER_1_COST_RATIO;
     if (tier === 2) baseRatio = this.TIER_2_COST_RATIO;
     if (tier === 3) baseRatio = this.TIER_3_COST_RATIO;
 
-    const baseCost = Math.floor(targetGdp * baseRatio);
-    const industrialDiscount = Math.max(
-      0.7,
-      1.0 - (sourceNation.industrialLevel - 1) * 0.05,
-    );
-
-    return Math.max(1000000000, Math.floor(baseCost * industrialDiscount));
+    return Math.floor(targetGdp * baseRatio);
   }
 
   public static calculateTechSuperiority(
     sourceNation: Nation,
     targetNation: Nation,
   ): TechSuperiorityDelta {
-    const militaryDelta = Math.max(
-      0,
-      targetNation.military.techLevel - sourceNation.military.techLevel,
+    const militaryDelta = Number(
+      Math.max(
+        0,
+        targetNation.military.techLevel - sourceNation.military.techLevel,
+      ).toFixed(1),
     );
     const industrialDelta = Math.max(
       0,
@@ -46,19 +41,31 @@ export class EspionageCalculator {
     return {
       militaryDelta,
       industrialDelta,
-      totalAvailablePoints: militaryDelta + industrialDelta,
+      totalAvailablePoints: Number(
+        (militaryDelta + industrialDelta).toFixed(1),
+      ),
     };
   }
 
   public static calculateSuccessRate(
     tier: EspionageTier,
     sourceNation: Nation,
+    targetNation?: Nation,
   ): number {
     let baseChance = 0.8;
     if (tier === 2) baseChance = 0.6;
     if (tier === 3) baseChance = 0.4;
 
-    const indBonus = (sourceNation.industrialLevel - 1) * 0.03;
-    return Math.min(0.95, baseChance + indBonus);
+    if (!targetNation) {
+      return baseChance;
+    }
+
+    const sourceTech = Math.max(1.0, sourceNation.military.techLevel || 1.0);
+    const targetTech = Math.max(1.0, targetNation.military.techLevel || 1.0);
+    const deltaTech = sourceTech - targetTech;
+    const steps = Math.round(deltaTech * 10);
+
+    const rate = baseChance + steps * 0.02;
+    return Number(Math.max(0.15, Math.min(0.85, rate)).toFixed(2));
   }
 }

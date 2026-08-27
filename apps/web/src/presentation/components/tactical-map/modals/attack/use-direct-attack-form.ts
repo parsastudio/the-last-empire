@@ -109,13 +109,8 @@ export function useDirectAttackForm({
   }, [targetNation, gameState?.provinces]);
 
   const reconCost = useMemo(() => {
-    if (!humanNation) return 1000000000;
-    return EspionageCalculator.calculateOperationCost(
-      targetGdp,
-      1,
-      humanNation,
-    );
-  }, [targetGdp, humanNation]);
+    return EspionageCalculator.calculateOperationCost(targetGdp, 1);
+  }, [targetGdp]);
 
   const canAffordRecon = (humanNation?.treasury || 0) >= reconCost;
   const originRegionName = humanNation

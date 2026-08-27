@@ -103,11 +103,7 @@ export class AIEspionagePlanner {
         undefined,
         provincesByOwnerMap,
       );
-      const cost = EspionageCalculator.calculateOperationCost(
-        targetGdp,
-        2,
-        nation,
-      );
+      const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
 
       const hasDefenses =
         (activeWarTarget.military.airDefense || 0) > 0 ||
@@ -145,11 +141,7 @@ export class AIEspionagePlanner {
           undefined,
           provincesByOwnerMap,
         );
-        const cost = EspionageCalculator.calculateOperationCost(
-          targetGdp,
-          2,
-          nation,
-        );
+        const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
 
         if (currentTreasury < Math.floor(cost * 1.2)) {
           continue;
@@ -229,7 +221,7 @@ export class AIEspionagePlanner {
       );
       const totalPoints = milDelta + indDelta;
 
-      if (totalPoints < 1) {
+      if (totalPoints <= 0) {
         continue;
       }
 
@@ -239,11 +231,7 @@ export class AIEspionagePlanner {
         undefined,
         provincesByOwnerMap,
       );
-      const cost = EspionageCalculator.calculateOperationCost(
-        targetGdp,
-        3,
-        nation,
-      );
+      const cost = EspionageCalculator.calculateOperationCost(targetGdp, 3);
 
       if (currentTreasury >= Math.floor(cost * 1.3)) {
         eligibleTargets.push({

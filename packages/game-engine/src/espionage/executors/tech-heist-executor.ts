@@ -35,34 +35,24 @@ export class TechHeistExecutor {
       };
     }
 
-    const pointsToGrant = Math.min(2, superiority.totalAvailablePoints);
-    let remainingPoints = pointsToGrant;
+    const indDiff = superiority.industrialDelta;
+    const milDiff = superiority.militaryDelta;
 
-    let gMil = 0;
     let gInd = 0;
+    let gMil = 0;
 
-    let currMilGap = superiority.militaryDelta;
-    let currIndGap = superiority.industrialDelta;
-
-    while (remainingPoints > 0) {
-      if (currMilGap > 0) {
-        gMil++;
-        currMilGap--;
-        remainingPoints--;
-        if (remainingPoints <= 0) break;
-      }
-      if (currIndGap > 0) {
-        gInd++;
-        currIndGap--;
-        remainingPoints--;
-        if (remainingPoints <= 0) break;
-      }
-      if (currMilGap === 0 && currIndGap === 0) {
-        break;
-      }
+    if (indDiff > 0 && milDiff > 0) {
+      gInd = Math.min(1, indDiff);
+      gMil = Number(Math.min(0.5, milDiff).toFixed(1));
+    } else if (indDiff > 0 && milDiff === 0) {
+      gInd = Math.min(2, indDiff);
+      gMil = 0;
+    } else if (milDiff > 0 && indDiff === 0) {
+      gInd = 0;
+      gMil = Number(Math.min(1.0, milDiff).toFixed(1));
     }
 
-    const newTechLevel = source.military.techLevel + gMil;
+    const newTechLevel = Number((source.military.techLevel + gMil).toFixed(1));
     const newIndLevel = source.industrialLevel + gInd;
 
     if (gInd > 0) {
@@ -104,13 +94,18 @@ export class TechHeistExecutor {
     const techTheftData: EspionageTechTheftData = {
       militaryTechGained: gMil,
       industrialLevelGained: gInd,
-      totalPointsGained: pointsToGrant,
+      totalPointsGained: Number((gMil + gInd).toFixed(1)),
     };
+
+    const gainParts: string[] = [];
+    if (gInd > 0) gainParts.push(`${gInd} سطح توسعه صنعتی`);
+    if (gMil > 0) gainParts.push(`${gMil} سطح فناوری نظامی`);
+    const gainDescription = gainParts.join(" و ");
 
     const message =
       outcome === "CLEAN_SUCCESS"
-        ? `سرقت قرن با موفقیت انجام شد! دانشمندان شما موفق شدند ${pointsToGrant} سطح ارتقای فناوری از ${target.name} استخراج و اعمال کنند.`
-        : `سرقت فناوری (${pointsToGrant} سطح ارتقا) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
+        ? `سرقت فناوری با موفقیت انجام شد! دانشمندان شما موفق شدند ${gainDescription} از کشور ${target.name} استخراج و اعمال کنند.`
+        : `سرقت فناوری (${gainDescription}) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
 
     return {
       updatedSource,

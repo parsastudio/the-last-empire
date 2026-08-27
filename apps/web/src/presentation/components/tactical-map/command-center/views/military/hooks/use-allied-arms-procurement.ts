@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import {
   UnitType,
   MILITARY_UNIT_STATS,
+  MilitaryPricingCalculator,
   MilitaryQuotaCalculator,
   ActionFactory,
   getNationGdp,
@@ -17,6 +18,8 @@ export interface AlliedUnitProcurementInfo {
   nameFa: string;
   sellerUnitPrice: number;
   unitPrice: number;
+  techMultiplier: number;
+  techDelta: number;
   batchQuantity: number;
   batchCost: number;
   requiredTechLevel: number;
@@ -72,11 +75,32 @@ export function useAlliedArmsProcurement({
     );
   }, [effectiveBuyerGdp, buyerNation.military, buyerNation.recruitmentQueue]);
 
+  const techMultiplier = useMemo(() => {
+    return MilitaryPricingCalculator.calculateArmsImportMultiplier(
+      buyerNation.military.techLevel,
+      sellerNation.military.techLevel,
+    );
+  }, [buyerNation.military.techLevel, sellerNation.military.techLevel]);
+
+  const techDelta = useMemo(() => {
+    return Number(
+      Math.max(
+        0,
+        sellerNation.military.techLevel - buyerNation.military.techLevel,
+      ).toFixed(1),
+    );
+  }, [buyerNation.military.techLevel, sellerNation.military.techLevel]);
+
   const batchList = useMemo<AlliedUnitProcurementInfo[]>(() => {
     return ALL_TYPES.map((type) => {
       const stat = MILITARY_UNIT_STATS[type];
       const baseCost = stat.moneyCost;
-      const marketUnitPrice = Math.floor(baseCost * 1.5);
+      const marketUnitPrice =
+        MilitaryPricingCalculator.calculateArmsImportUnitPrice(
+          type,
+          buyerNation.military.techLevel,
+          sellerNation.military.techLevel,
+        );
       const q = quotas[type];
       const isUnlocked = true;
 
@@ -105,6 +129,8 @@ export function useAlliedArmsProcurement({
         nameFa: stat.nameFa,
         sellerUnitPrice: baseCost,
         unitPrice: marketUnitPrice,
+        techMultiplier,
+        techDelta,
         batchQuantity,
         batchCost,
         requiredTechLevel: stat.requiredTechLevel,
@@ -114,7 +140,15 @@ export function useAlliedArmsProcurement({
         isCapReached,
       };
     });
-  }, [buyerNation.treasury, tenPercentBudget, quotas]);
+  }, [
+    buyerNation.treasury,
+    buyerNation.military.techLevel,
+    sellerNation.military.techLevel,
+    tenPercentBudget,
+    quotas,
+    techMultiplier,
+    techDelta,
+  ]);
 
   const handleBuyAlliedBatch = useCallback(
     async (info: AlliedUnitProcurementInfo) => {
@@ -155,6 +189,8 @@ export function useAlliedArmsProcurement({
 
   return {
     batchList,
+    techMultiplier,
+    techDelta,
     floatingFeedbacks,
     handleBuyAlliedBatch,
   };
