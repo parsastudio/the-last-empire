@@ -1,6 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, NationGettersUtility } from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
@@ -63,6 +63,39 @@ export class MilitaryActionExecutor {
             action.unitType,
             action.quantity,
           ),
+        };
+      }
+
+      case "BUY_NAVAL_FLEET": {
+        const hasSea = NationGettersUtility.hasSeaAccess(
+          nation.id,
+          state.provinces,
+        );
+        if (!hasSea) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "کشور شما به آب‌های آزاد دسترسی ندارد و امکان تجهیز ناوگان دریایی وجود ندارد.",
+          );
+        }
+        const fleetCost = 50_000_000_000 * action.quantity;
+        if (nation.treasury < fleetCost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای خرید ناوگان دریایی کافی نیست.",
+          );
+        }
+        return {
+          newState: {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: {
+                ...nation,
+                treasury: nation.treasury - fleetCost,
+                navalFleet: (nation.navalFleet || 0) + action.quantity,
+              },
+            },
+          },
         };
       }
 
@@ -144,14 +177,29 @@ export class MilitaryActionExecutor {
         ) {
           throw new GameError(
             "INVALID_ACTION",
-            `امکان آغاز تهاجم نظامی جدید وجود ندارد: کشور در دوره سردسازی و بازسازی پس از جنگ قرار دارد (${nation.postWarCooldownTurns} نوبت باقی‌مانده).`,
+            `امکان آغاز تهاجم نظامی جدید وجود ندارد: کشور در دوره سردسازی پس از جنگ قرار دارد.`,
           );
+        }
+
+        if (action.attackType === "NAVAL") {
+          const fleetCount = nation.navalFleet || 0;
+          const maxCapacityPoints = fleetCount * 60;
+          const infantryCount = action.infantryToDeploy || 0;
+          const armorCount = action.armorToDeploy || 0;
+          const requiredPoints = infantryCount * 1 + armorCount * 4;
+
+          if (fleetCount <= 0 || requiredPoints > maxCapacityPoints) {
+            throw new GameError(
+              "INVALID_ACTION",
+              "ظرفیت ترابری ناوگان دریایی شما برای حمل این حجم از ادوات زمینی کافی نیست.",
+            );
+          }
         }
 
         if (nation.military.infantry <= 0) {
           throw new GameError(
             "INVALID_ACTION",
-            "برای آغاز تهاجم زمینی حداقل به ۱ یگان پیاده‌نظام نیاز است.",
+            "برای آغاز تهاجم حداقل به ۱ یگان پیاده‌نظام نیاز است.",
           );
         }
         if (action.dronesToLaunch > nation.military.droneMissile) {

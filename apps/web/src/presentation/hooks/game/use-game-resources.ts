@@ -90,9 +90,13 @@ export function useGameResources(
       gameState.provinces,
     );
 
-    const totalIncome = taxResult.taxIncome + tariffResult.tariffRevenue;
+    const navalSecurityIncome = Math.floor(
+      (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
+    );
+    const totalIncome =
+      taxResult.taxIncome + tariffResult.tariffRevenue + navalSecurityIncome;
     const totalExpenses =
-      payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.05);
+      payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.07);
     const netIncome = totalIncome - totalExpenses;
 
     const demoMetrics = DemographicsCalculator.getMetrics(

@@ -8,6 +8,7 @@ import { AttackHeader } from "@/presentation/components/tactical-map/modals/atta
 import { AttackStatusAlerts } from "@/presentation/components/tactical-map/modals/attack/attack-status-alerts";
 import { AttackCostSummary } from "@/presentation/components/tactical-map/modals/attack/attack-cost-summary";
 import { AttackIntelPanel } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
+import { NavalTransportCapacityCard } from "@/presentation/components/tactical-map/modals/attack/naval-transport-capacity-card";
 import { useDirectAttackForm } from "@/presentation/components/tactical-map/modals/attack/use-direct-attack-form";
 
 interface DirectAttackModalProps {
@@ -62,6 +63,14 @@ export function DirectAttackModal({
           targetRegionName={form.targetRegionName}
           attackType={form.attackType}
         />
+
+        {form.attackType === "NAVAL" && (
+          <NavalTransportCapacityCard
+            navalFleetCount={form.navalFleetCount}
+            infantryDeployed={form.infantryToDeploy}
+            armorDeployed={form.armorToDeploy}
+          />
+        )}
 
         <AttackIntelPanel
           isReconActive={form.isReconActive}
@@ -141,6 +150,7 @@ export function DirectAttackModal({
           targetRegionName={form.targetRegionName}
           isLandNeighbor={form.isLandNeighbor}
           isNavalValid={form.isNavalValid}
+          hasNavalCapacity={form.hasNavalCapacity}
           attackType={form.attackType}
           onExecute={form.handleExecuteAttack}
         />

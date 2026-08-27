@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, Wallet, Zap, ShieldAlert, Anchor, Swords } from "lucide-react";
+import { Coins, Wallet, Anchor, Swords, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface AttackCostSummaryProps {
@@ -11,6 +11,7 @@ interface AttackCostSummaryProps {
   targetRegionName: string;
   isLandNeighbor: boolean;
   isNavalValid?: boolean;
+  hasNavalCapacity?: boolean;
   attackType?: "LAND" | "NAVAL";
   onExecute: () => void;
 }
@@ -24,12 +25,17 @@ export function AttackCostSummary({
   targetRegionName,
   isLandNeighbor,
   isNavalValid = false,
+  hasNavalCapacity = true,
   attackType = "LAND",
   onExecute,
 }: AttackCostSummaryProps) {
   const isAccessible = isLandNeighbor || isNavalValid;
   const isButtonDisabled =
-    !isAccessible || !hasSelectedInfantry || !canAfford || isSubmitting;
+    !isAccessible ||
+    !hasSelectedInfantry ||
+    !canAfford ||
+    !hasNavalCapacity ||
+    isSubmitting;
 
   const formattedRegionName = targetRegionName.startsWith("استان")
     ? targetRegionName
@@ -82,6 +88,15 @@ export function AttackCostSummary({
         </div>
       )}
 
+      {isNaval && !hasNavalCapacity && (
+        <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-2xl flex items-center gap-2 text-xs text-rose-400">
+          <Anchor size={15} className="shrink-0" />
+          <span>
+            تعداد ناوگان فعال شما پاسخگوی ترابری این حجم از ادوات زمینی نیست.
+          </span>
+        </div>
+      )}
+
       <button
         onClick={onExecute}
         disabled={isButtonDisabled}
@@ -93,13 +108,15 @@ export function AttackCostSummary({
             ? "در حال ثبت دستور و گسیل ارتش..."
             : !isAccessible
               ? "عدم امکان دسترسی به منطقه تهاجم"
-              : !hasSelectedInfantry
-                ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
-                : !canAfford
-                  ? "موجودی خزانه ناکافی جهت تأمین مخارج"
-                  : isNaval
-                    ? `صدور فرمان هجوم دریایی به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`
-                    : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
+              : isNaval && !hasNavalCapacity
+                ? "ظرفیت ترابری ناوگان دریایی ناکافی است"
+                : !hasSelectedInfantry
+                  ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
+                  : !canAfford
+                    ? "موجودی خزانه ناکافی جهت تأمین مخارج"
+                    : isNaval
+                      ? `صدور فرمان هجوم دریایی به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`
+                      : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
         </span>
       </button>
     </div>

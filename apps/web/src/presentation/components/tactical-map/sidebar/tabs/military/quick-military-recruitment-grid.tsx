@@ -2,17 +2,25 @@ import React from "react";
 import { Zap, Wallet, ShieldAlert } from "lucide-react";
 import { useQuickRecruitBatch } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { QuickUnitRecruitCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/quick-unit-recruit-card";
+import { NavalFleetProcurementCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/components/naval-fleet-procurement-card";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { Nation, MilitaryPricingCalculator } from "@geopolitics/domain";
+import {
+  Nation,
+  MilitaryPricingCalculator,
+  Province,
+  NationGettersUtility,
+} from "@geopolitics/domain";
 
 interface QuickMilitaryRecruitmentGridProps {
   nation: Nation;
   currentGdp: number;
+  provincesMap?: Record<string, Province>;
 }
 
 export function QuickMilitaryRecruitmentGrid({
   nation,
   currentGdp,
+  provincesMap,
 }: QuickMilitaryRecruitmentGridProps) {
   const { batchList, floatingFeedbacks, handleBuyBatch } = useQuickRecruitBatch(
     {
@@ -36,8 +44,13 @@ export function QuickMilitaryRecruitmentGrid({
       ? Math.min(100, Math.round((currentValuation / currentGdp) * 100))
       : 100;
 
+  const hasSeaAccess = NationGettersUtility.hasSeaAccess(
+    nation.id,
+    provincesMap,
+  );
+
   return (
-    <div className="space-y-3 font-sans dir-rtl text-right">
+    <div className="space-y-4 font-sans dir-rtl text-right">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
         <div className="flex items-center gap-2">
           <Zap size={15} className="text-gdp animate-pulse" />
@@ -70,6 +83,13 @@ export function QuickMilitaryRecruitmentGrid({
           </div>
         </div>
       </div>
+
+      <NavalFleetProcurementCard
+        nationId={nation.id}
+        treasury={nation.treasury}
+        navalFleetCount={nation.navalFleet || 0}
+        hasSeaAccess={hasSeaAccess}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
         {batchList.map((item) => (

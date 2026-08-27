@@ -109,6 +109,11 @@ export class NationProfileAssigner {
       dynamicStack.branchTech?.droneMissile ?? domesticTech,
     );
 
+    const initialNavalFleet =
+      item.hasSeaAccess && item.gdp >= 1_000_000_000_000
+        ? Math.max(1, Math.floor(item.gdp / 2_000_000_000_000))
+        : 0;
+
     return {
       id: cleanId,
       name: item.nameFa,
@@ -120,6 +125,7 @@ export class NationProfileAssigner {
       treasury: item.startingTreasury,
       nationalDebt: 0,
       industrialLevel: item.industrialLevel,
+      navalFleet: initialNavalFleet,
       government: {
         type: govType,
         stability: item.startingStability ?? 50,
