@@ -2,22 +2,9 @@ import { GovernmentType } from "@/domain/politics/politics.schema";
 
 export class AiEconomyCalculator {
   public static getGovernmentIncomeMultiplier(
-    govType?: GovernmentType | string,
+    _govType?: GovernmentType | string,
   ): number {
-    switch (govType) {
-      case "DEMOCRACY":
-        return 1.1;
-      case "MONARCHY":
-        return 1.05;
-      case "COMMUNISM":
-        return 1.0;
-      case "DICTATORSHIP":
-        return 0.95;
-      case "FASCISM":
-        return 0.9;
-      default:
-        return 1.0;
-    }
+    return 1.0;
   }
 
   public static calculateIncomeRate(
