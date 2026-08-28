@@ -146,6 +146,7 @@ export class NationProfileAssigner {
       postWarCooldownTurns: 0,
       doctrine: item.aiDoctrine || doctrineProfile.type,
       doctrineWeights: doctrineProfile.weights,
+      securityGuarantorId: null,
     };
   }
 

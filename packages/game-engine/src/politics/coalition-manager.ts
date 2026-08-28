@@ -118,7 +118,7 @@ export class CoalitionManager {
         if (peerId !== CountryRegistry.resolveCanonicalId(mId)) {
           memberRelations[peerId] = {
             targetNationId: peerId,
-            stance: "ALLIANCE",
+            stance: "STRATEGIC_PARTNERSHIP",
             alignment: 100,
             tension: 0,
           };

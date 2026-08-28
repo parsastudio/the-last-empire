@@ -78,6 +78,8 @@ export class NationGettersUtility {
           executedEspionageTiers: [],
           warFocusTargetId: null,
           postWarCooldownTurns: 0,
+          doctrine: "DOMESTIC_INDUSTRIALIST",
+          securityGuarantorId: null,
         });
       } else {
         const domesticTech =
@@ -125,6 +127,8 @@ export class NationGettersUtility {
           executedEspionageTiers: [],
           warFocusTargetId: null,
           postWarCooldownTurns: 0,
+          doctrine: "DOMESTIC_INDUSTRIALIST",
+          securityGuarantorId: null,
         });
       }
 

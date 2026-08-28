@@ -62,7 +62,7 @@ export class AIEconomicDiplomacyEvaluator {
         vector.alignment < 10;
 
       const isAllianceSupport =
-        rel.stance === "ALLIANCE" &&
+        rel.stance === "STRATEGIC_PARTNERSHIP" &&
         vector.alignment >= 50 &&
         Boolean(targetNation.warFocusTargetId);
 
