@@ -79,7 +79,7 @@ export class ActionFactory {
 
   public static buyNavalFleet(
     nationId: string,
-    quantity: number = 1,
+    quantity = 1,
   ): BuyNavalFleetAction {
     return {
       id: this.createId("naval-fleet"),

@@ -70,6 +70,14 @@ export class BattleExecutionEngine {
     const betrayalResult =
       DiplomaticBetrayalCalculator.calculatePenalty(currentStance);
 
+    const guarantorNation = defender.securityGuarantorId
+      ? workingState.nations[
+          CountryRegistry.resolveCanonicalId(defender.securityGuarantorId)
+        ] ||
+        workingState.nations[defender.securityGuarantorId] ||
+        null
+      : null;
+
     const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
@@ -78,6 +86,7 @@ export class BattleExecutionEngine {
       action.armorToDeploy || 0,
       action.airForceToDeploy,
       workingState.provinces,
+      guarantorNation,
     );
 
     const conquest = ProvinceConquestHandler.handleConquest(
@@ -231,6 +240,7 @@ export class BattleExecutionEngine {
       phase2Air: calcResult.phase2Air,
       phase3Ground: calcResult.phase3Ground,
       spoils: spoilsData,
+      auxiliaryGuarantor: calcResult.auxiliaryGuarantor,
     };
 
     const battleLogs = BattleLogFactory.createBattleLogs(

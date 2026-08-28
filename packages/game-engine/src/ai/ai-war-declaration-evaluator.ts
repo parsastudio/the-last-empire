@@ -69,7 +69,7 @@ export class AIWarDeclarationEvaluator {
       if (
         rel &&
         (rel.stance === "WAR" ||
-          rel.stance === "ALLIANCE" ||
+          rel.stance === "STRATEGIC_PARTNERSHIP" ||
           rel.stance === "NON_AGGRESSION_PACT")
       ) {
         continue;

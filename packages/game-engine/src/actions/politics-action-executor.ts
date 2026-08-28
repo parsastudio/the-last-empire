@@ -87,6 +87,42 @@ export class PoliticsActionExecutor {
           canonicalSourceId === canonicalHuman ||
           canonicalTargetId === canonicalHuman;
 
+        if (action.proposalType === "CANCEL_SECURITY_GUARANTEE") {
+          const newState = {
+            ...state,
+            nations: {
+              ...state.nations,
+              [sourceKey]: {
+                ...nation,
+                securityGuarantorId: null,
+              },
+            },
+            turnLogs: [
+              ...state.turnLogs,
+              TurnLogBuilder.createGlobalDiplomacyLog(
+                state.currentTurn,
+                nation.id,
+                receiver.id,
+                "SECURITY_GUARANTEE_CANCELLED",
+                { reason: "فسخ اختیاری توسط متقاضی" },
+                "INFO",
+              ),
+            ],
+          };
+
+          return {
+            newState,
+            resultData: {
+              proposalType: "CANCEL_SECURITY_GUARANTEE",
+              accepted: true,
+              targetNationId: receiver.id,
+              targetName: receiver.name,
+              targetFlagCode: receiver.flagCode,
+              message: `پیمان چتر امنیتی با کشور ${receiver.name} لغو گردید.`,
+            },
+          };
+        }
+
         if (action.proposalType === "CANCEL_TREATY") {
           const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
             senderRel,
@@ -99,7 +135,9 @@ export class PoliticsActionExecutor {
 
           const prevStance = senderRel.stance;
           const newStanceName =
-            prevStance === "ALLIANCE" ? "پیمان عدم تخاصم" : "دیپلماسی عادی";
+            prevStance === "STRATEGIC_PARTNERSHIP"
+              ? "پیمان عدم تخاصم"
+              : "دیپلماسی عادی";
 
           const newReputation = Math.max(-100, nation.globalReputation - 2);
 
@@ -268,22 +306,6 @@ export class PoliticsActionExecutor {
           };
         }
 
-        if (nation.isAi) {
-          const isReachable = GeopoliticalReachResolver.canInitiateDiplomacy(
-            nation,
-            receiver,
-            state.nations,
-            state.provinces,
-          );
-
-          if (!isReachable && senderRel.stance !== "WAR") {
-            throw new GameError(
-              "INVALID_ACTION",
-              `کشور ${receiver.name} خارج از شعاع دسترسی ژئوپلیتیک شما قرار دارد.`,
-            );
-          }
-        }
-
         if (action.proposalType === "SEND_FOREIGN_AID") {
           if (senderRel.stance === "WAR" || receiverRel.stance === "WAR") {
             return { newState: state };
@@ -393,8 +415,10 @@ export class PoliticsActionExecutor {
             );
 
             let acceptedMsg = `دولت ${receiver.name} با پیشنهاد شما موافقت کرد.`;
-            if (action.proposalType === "FULL_ALLIANCE") {
-              acceptedMsg = `دولت ${receiver.name} معاهده اتحاد کامل را امضا کرد! دو کشور رسماً متحد استراتژیک شدند.`;
+            if (action.proposalType === "STRATEGIC_PARTNERSHIP") {
+              acceptedMsg = `دولت ${receiver.name} معاهده شراکت استراتژیک را امضا کرد! دو کشور رسماً شریک راهبردی و اقتصادی شدند.`;
+            } else if (action.proposalType === "SECURITY_GUARANTEE") {
+              acceptedMsg = `دولت ${receiver.name} درخواست چتر امنیتی شما را پذیرفت. امنیت مرزهای شما با پشتیبانی ۳۰٪ نیروی ضربت تضمین شد.`;
             } else if (action.proposalType === "NON_AGGRESSION_PACT") {
               acceptedMsg = `دولت ${receiver.name} پیمان عدم تخاصم را پذیرفت و امنیت مرزهای مشترک برقرار شد.`;
             } else if (action.proposalType === "PEACE_TREATY") {
@@ -420,8 +444,10 @@ export class PoliticsActionExecutor {
             );
 
             let rejectedMsg = `دولت ${receiver.name} پیشنهاد شما را در شرایط فعلی رد کرد.`;
-            if (action.proposalType === "FULL_ALLIANCE") {
-              rejectedMsg = `دولت ${receiver.name} پیشنهاد اتحاد نظامی را رد کرد. سطح همسویی برای اتحاد کافی نیست.`;
+            if (action.proposalType === "STRATEGIC_PARTNERSHIP") {
+              rejectedMsg = `دولت ${receiver.name} پیشنهاد شراکت استراتژیک را رد کرد. سطح همسویی برای شراکت کافی نیست.`;
+            } else if (action.proposalType === "SECURITY_GUARANTEE") {
+              rejectedMsg = `دولت ${receiver.name} به دلیل تنش‌های دیپلماتیک یا عدم تمایل راهبردی، درخواست چتر امنیتی را نپذیرفت.`;
             } else if (action.proposalType === "NON_AGGRESSION_PACT") {
               rejectedMsg = `دولت ${receiver.name} پیشنهاد پیمان عدم تخاصم را رد کرد. تنش‌های مرزی مانع توافق شد.`;
             } else if (action.proposalType === "PEACE_TREATY") {

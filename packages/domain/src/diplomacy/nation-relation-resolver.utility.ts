@@ -67,7 +67,10 @@ export class NationRelationResolver {
     if (stance === "WAR") {
       return true;
     }
-    if (stance === "ALLIANCE" || stance === "NON_AGGRESSION_PACT") {
+    if (
+      stance === "STRATEGIC_PARTNERSHIP" ||
+      stance === "NON_AGGRESSION_PACT"
+    ) {
       return false;
     }
     return (

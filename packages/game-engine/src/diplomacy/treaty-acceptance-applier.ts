@@ -31,6 +31,36 @@ export class TreatyAcceptanceApplier {
       return this.removeProposal(state, proposal.id);
     }
 
+    if (proposal.proposalType === "SECURITY_GUARANTEE") {
+      const updatedSender = {
+        ...sender,
+        securityGuarantorId: receiver.id,
+      };
+
+      const guaranteeLog = TurnLogBuilder.createGlobalDiplomacyLog(
+        state.currentTurn,
+        sender.id,
+        receiver.id,
+        "SECURITY_GUARANTEE_SIGNED",
+        {},
+        "INFO",
+      );
+
+      const remainingProposals = state.pendingProposals.filter(
+        (p) => p.id !== proposal.id,
+      );
+
+      return {
+        ...state,
+        pendingProposals: remainingProposals,
+        turnLogs: [...state.turnLogs, guaranteeLog],
+        nations: {
+          ...state.nations,
+          [sender.id]: updatedSender,
+        },
+      };
+    }
+
     const senderRel =
       sender.relations[canonicalReceiverId] ||
       sender.relations[proposal.receiverNationId];
@@ -88,8 +118,8 @@ export class TreatyAcceptanceApplier {
     };
 
     const treatyLabel =
-      proposal.proposalType === "FULL_ALLIANCE"
-        ? "اتحاد کامل راهبردی"
+      proposal.proposalType === "STRATEGIC_PARTNERSHIP"
+        ? "شراکت استراتژیک و اقتصادی"
         : proposal.proposalType === "NON_AGGRESSION_PACT"
           ? "پیمان عدم تخاصم"
           : "معاهده صلح و پایان جنگ";
@@ -169,11 +199,13 @@ export class TreatyAcceptanceApplier {
     );
 
     const treatyLabel =
-      proposal.proposalType === "FULL_ALLIANCE"
-        ? "اتحاد کامل"
+      proposal.proposalType === "STRATEGIC_PARTNERSHIP"
+        ? "شراکت استراتژیک"
         : proposal.proposalType === "NON_AGGRESSION_PACT"
           ? "عدم تخاصم"
-          : "صلح";
+          : proposal.proposalType === "SECURITY_GUARANTEE"
+            ? "چتر امنیتی"
+            : "صلح";
 
     let foundMatchingLog = false;
     const updatedLogs = state.turnLogs.map((log) => {

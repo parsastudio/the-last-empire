@@ -8,7 +8,7 @@ import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, CountryRegistry } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -42,8 +42,44 @@ export class EconomyTurnProcessor {
       (updated.navalFleet || 0) * 50_000_000_000 * 0.06,
     );
 
+    const gdp = getNationGdp(updated, currentProvincesMap);
+
+    let securityFee = 0;
+    if (updated.securityGuarantorId) {
+      const gCanonical = CountryRegistry.resolveCanonicalId(
+        updated.securityGuarantorId,
+      );
+      const guarantor =
+        allNations[gCanonical] || allNations[updated.securityGuarantorId];
+      if (guarantor && guarantor.isAlive) {
+        securityFee = Math.floor(gdp * 0.1);
+      } else {
+        updated.securityGuarantorId = null;
+      }
+    }
+
+    let warSubsidiesReceived = 0;
+    const isAtWar = Object.values(updated.relations || {}).some(
+      (r) => r.stance === "WAR",
+    );
+
+    if (isAtWar) {
+      for (const rel of Object.values(updated.relations || {})) {
+        if (rel.stance === "STRATEGIC_PARTNERSHIP") {
+          const partnerCanonical = CountryRegistry.resolveCanonicalId(
+            rel.targetNationId,
+          );
+          const partner =
+            allNations[partnerCanonical] || allNations[rel.targetNationId];
+          if (partner && partner.isAlive && partner.treasury > gdp * 0.05) {
+            const subsidy = Math.floor(gdp * 0.02);
+            warSubsidiesReceived += subsidy;
+          }
+        }
+      }
+    }
+
     if (updated.isAi) {
-      const gdp = getNationGdp(updated, currentProvincesMap);
       const aliveCount = Object.values(allNations).filter(
         (n) => n.isAlive,
       ).length;
@@ -71,10 +107,37 @@ export class EconomyTurnProcessor {
         newDebt -= actualRepayment;
       }
 
-      const netAddedTreasury = Math.max(
+      let netAddedTreasury = Math.max(
         0,
-        baseIncome + navalSecurityIncome - maintenanceCost - actualRepayment,
+        baseIncome +
+          navalSecurityIncome +
+          warSubsidiesReceived -
+          maintenanceCost -
+          actualRepayment,
       );
+
+      if (securityFee > 0) {
+        if (netAddedTreasury + updated.treasury >= securityFee) {
+          if (netAddedTreasury >= securityFee) {
+            netAddedTreasury -= securityFee;
+          } else {
+            const deficit = securityFee - netAddedTreasury;
+            netAddedTreasury = 0;
+            updated.treasury = Math.max(0, updated.treasury - deficit);
+          }
+        } else {
+          const cashAvailable = netAddedTreasury + updated.treasury;
+          const borrowNeeded = securityFee - cashAvailable;
+          netAddedTreasury = 0;
+          updated.treasury = 0;
+          const maxDebtLimit = Math.floor(gdp * 0.8);
+          if (newDebt + borrowNeeded > maxDebtLimit) {
+            updated.securityGuarantorId = null;
+          } else {
+            newDebt += borrowNeeded;
+          }
+        }
+      }
 
       updated = {
         ...updated,
@@ -99,16 +162,24 @@ export class EconomyTurnProcessor {
     const addedTreasury =
       (tariffResult.tariffRevenue > 0 ? tariffResult.tariffRevenue : 0) +
       (taxResult.taxIncome > 0 ? taxResult.taxIncome : 0) +
-      navalSecurityIncome;
+      navalSecurityIncome +
+      warSubsidiesReceived;
 
     const totalExpenses =
-      payrollBreakdown.total + Math.floor(updated.nationalDebt * 0.07);
+      payrollBreakdown.total +
+      Math.floor(updated.nationalDebt * 0.07) +
+      securityFee;
 
     let newTreasury = updated.treasury + addedTreasury - totalExpenses;
     let newDebt = updated.nationalDebt;
 
     if (newTreasury < 0) {
-      newDebt += Math.abs(newTreasury);
+      const deficit = Math.abs(newTreasury);
+      const maxDebtLimit = Math.floor(gdp * 0.8);
+      if (newDebt + deficit > maxDebtLimit && updated.securityGuarantorId) {
+        updated.securityGuarantorId = null;
+      }
+      newDebt += deficit;
       newTreasury = 0;
     }
 

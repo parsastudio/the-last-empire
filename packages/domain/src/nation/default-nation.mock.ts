@@ -43,4 +43,5 @@ export const DEFAULT_NATION_MOCK: Nation = {
   postWarCooldownTurns: 0,
   doctrine: "DOMESTIC_INDUSTRIALIST",
   doctrineWeights: AI_DOCTRINE_PRESETS.DOMESTIC_INDUSTRIALIST,
+  securityGuarantorId: null,
 };
