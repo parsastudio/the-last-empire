@@ -41,6 +41,7 @@ export const NationSchema = z.object({
   postWarCooldownTurns: z.number().nonnegative().default(0),
   doctrine: AiDoctrineTypeSchema.default("DOMESTIC_INDUSTRIALIST"),
   doctrineWeights: AiDoctrineWeightsSchema.optional(),
+  securityGuarantorId: z.string().nullable().optional().default(null),
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;

@@ -64,6 +64,18 @@ export const BattleSpoilsDetailsSchema = z.object({
   capturedDrones: z.number().nonnegative().default(0),
 });
 
+export const AuxiliaryGuarantorDefenseSchema = z.object({
+  guarantorId: z.string(),
+  guarantorName: z.string(),
+  guarantorFlagCode: z.string(),
+  techLevel: z.number(),
+  deployedInfantry: z.number().nonnegative(),
+  deployedArmor: z.number().nonnegative(),
+  deployedAirDefense: z.number().nonnegative(),
+  deployedAirForce: z.number().nonnegative(),
+  budgetValuation: z.number().nonnegative(),
+});
+
 export const BattleFullReportDataSchema = z.object({
   attackerId: z.string(),
   defenderId: z.string(),
@@ -79,6 +91,7 @@ export const BattleFullReportDataSchema = z.object({
   phase2Air: BattlePhaseAirDetailSchema,
   phase3Ground: BattlePhaseGroundDetailSchema,
   spoils: BattleSpoilsDetailsSchema.optional(),
+  auxiliaryGuarantor: AuxiliaryGuarantorDefenseSchema.optional(),
 });
 
 export type ReportSeverity = z.infer<typeof ReportSeveritySchema>;
@@ -91,4 +104,7 @@ export type BattlePhaseGroundDetail = z.infer<
   typeof BattlePhaseGroundDetailSchema
 >;
 export type BattleSpoilsDetails = z.infer<typeof BattleSpoilsDetailsSchema>;
+export type AuxiliaryGuarantorDefense = z.infer<
+  typeof AuxiliaryGuarantorDefenseSchema
+>;
 export type BattleFullReportData = z.infer<typeof BattleFullReportDataSchema>;

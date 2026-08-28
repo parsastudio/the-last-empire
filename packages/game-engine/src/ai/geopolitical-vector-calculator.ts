@@ -122,10 +122,30 @@ export class GeopoliticalVectorCalculator {
         ? sourcePower
         : Math.max(1, MilitaryPowerCalculator.calculateLandAndAirPower(source));
 
-    const tPower = Math.max(
+    let tPower = Math.max(
       1,
       MilitaryPowerCalculator.calculateLandAndAirPower(target),
     );
+
+    if (target.securityGuarantorId && allNations) {
+      const gCanonical = CountryRegistry.resolveCanonicalId(
+        target.securityGuarantorId,
+      );
+      const guarantor =
+        allNations[gCanonical] || allNations[target.securityGuarantorId];
+      if (guarantor && guarantor.isAlive && guarantor.id !== source.id) {
+        const guarantorTechMult =
+          MilitaryPowerCalculator.calculateTechMultiplier(
+            guarantor.military.techLevel,
+          );
+        const targetGdp =
+          NationGettersUtility.getPopulation(target.id, provincesMap) * 5000;
+        const auxiliaryPower = Math.floor(
+          targetGdp * 0.3 * 0.000000001 * guarantorTechMult * 4,
+        );
+        tPower += auxiliaryPower;
+      }
+    }
 
     const powerRatio = Number((tPower / sPower).toFixed(2));
 
@@ -146,7 +166,7 @@ export class GeopoliticalVectorCalculator {
 
     if (rel && rel.stance === "WAR") {
       rawTension = 100;
-    } else if (rel && rel.stance === "ALLIANCE") {
+    } else if (rel && rel.stance === "STRATEGIC_PARTNERSHIP") {
       rawTension = 0;
     } else if (rel && rel.stance === "NON_AGGRESSION_PACT") {
       rawTension = Math.min(15, rawTension);

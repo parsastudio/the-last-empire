@@ -12,11 +12,11 @@ export interface BetrayalEvaluation {
 
 export class DiplomaticBetrayalCalculator {
   public static calculatePenalty(stance: DiplomaticStance): BetrayalEvaluation {
-    if (stance === "ALLIANCE") {
-      return { reputationPenalty: 35, skippedSteps: 2, hasBetrayed: true };
+    if (stance === "STRATEGIC_PARTNERSHIP") {
+      return { reputationPenalty: 30, skippedSteps: 2, hasBetrayed: true };
     }
     if (stance === "NON_AGGRESSION_PACT") {
-      return { reputationPenalty: 20, skippedSteps: 1, hasBetrayed: true };
+      return { reputationPenalty: 15, skippedSteps: 1, hasBetrayed: true };
     }
     return { reputationPenalty: 0, skippedSteps: 0, hasBetrayed: false };
   }
@@ -42,7 +42,7 @@ export class TreatyEvaluator {
     switch (newType) {
       case "CANCEL_TREATY": {
         const nextStance: DiplomaticStance =
-          profile.stance === "ALLIANCE"
+          profile.stance === "STRATEGIC_PARTNERSHIP"
             ? "NON_AGGRESSION_PACT"
             : "NORMAL_DIPLOMACY";
         return {
@@ -65,10 +65,10 @@ export class TreatyEvaluator {
           alignment: Math.min(100, currentAlignment + 15),
           tension: Math.min(15, currentTension),
         };
-      case "FULL_ALLIANCE":
+      case "STRATEGIC_PARTNERSHIP":
         return {
           ...profile,
-          stance: "ALLIANCE",
+          stance: "STRATEGIC_PARTNERSHIP",
           alignment: Math.min(100, currentAlignment + 30),
           tension: 0,
         };

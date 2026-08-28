@@ -48,15 +48,17 @@ export class TurnLogFormatter {
       case "DIPLOMATIC_PROPOSAL_SENT": {
         const rawType = String(params["treatyType"] || "معاهده");
         const treatyTypeFa =
-          rawType === "FULL_ALLIANCE"
-            ? "اتحاد کامل راهبردی"
+          rawType === "STRATEGIC_PARTNERSHIP"
+            ? "شراکت استراتژیک و اقتصادی"
             : rawType === "NON_AGGRESSION_PACT"
               ? "پیمان عدم تخاصم"
-              : rawType === "PEACE_TREATY"
-                ? "معاهده صلح"
-                : rawType === "SEND_FOREIGN_AID"
-                  ? "کمک مالی"
-                  : rawType;
+              : rawType === "SECURITY_GUARANTEE"
+                ? "پیمان چتر امنیتی و تضمین بقا"
+                : rawType === "PEACE_TREATY"
+                  ? "معاهده صلح"
+                  : rawType === "SEND_FOREIGN_AID"
+                    ? "کمک مالی"
+                    : rawType;
         return `پیشنهاد دیپلماتیک: کشور ${sourceName} پیشنهاد رسمی (${treatyTypeFa}) را برای ${targetName} ارسال کرد.`;
       }
 
@@ -77,12 +79,29 @@ export class TurnLogFormatter {
         return `تنزل روابط دیپلماتیک: کشور ${sourceName} معاهده پیشین با ${targetName} را لغو کرد و روابط به سطح (${newStanceName}) کاهش یافت.`;
       }
 
+      case "SECURITY_GUARANTEE_SIGNED": {
+        return `انعقاد پیمان چتر امنیتی: کشور ${sourceName} با پرداخت نوبتی ۱۰٪ GDP، رسماً تحت چتر تضمین دفاعی امپراتوری ${targetName} قرار گرفت.`;
+      }
+
+      case "SECURITY_GUARANTEE_CANCELLED": {
+        const reason = String(params["reason"] || "فسخ معاهده");
+        return `لغو چتر امنیتی: پیمان تضمین امنیت میان ${sourceName} و ${targetName} لغو گردید (${reason}).`;
+      }
+
+      case "SECURITY_GUARANTEE_DEFENDED": {
+        return `مداخله چتر امنیتی: ارتش ${targetName} در راستای اجرای تعهدات پیمان امنیت ملی، نیروی ضربت فوق‌پیشرفته کمکی به میدان نبرد با ${sourceName} اعزام کرد.`;
+      }
+
       case "FOREIGN_AID_SENT": {
         return `بسته کمک مالی و اقتصادی از سوی ${sourceName} به خزانه‌داری ${targetName} واریز گردید.`;
       }
 
+      case "WAR_SUBSIDY_SENT": {
+        return `یارانه و کمک جنگی خودکار: در راستای شراکت استراتژیک، کمکی نقدی از سوی ${sourceName} به خزانه‌داری جنگی ${targetName} تزریق شد.`;
+      }
+
       case "ALLIANCE_INTERVENTION":
-        return `دفاع جمعی متحدین: کشور ${sourceName} در راستای اجرای تعهدات اتحاد نظامی با ${targetName}، وارد جنگ شد.`;
+        return `دفاع جمعی: کشور ${sourceName} در حمایت از ${targetName} وارد نبرد شد.`;
 
       case "ALLIANCE_BETRAYED":
         return `پیمان‌شکنی دفاعی: کشور ${sourceName} از اجرای تعهدات اتحاد با ${targetName} سر باز زد و پیمان را لغو نمود.`;
@@ -105,10 +124,10 @@ export class TurnLogFormatter {
           return `به دلیل برتری رزمی ${ratio} برابری ارتش، حاکمیت ${targetName} به طور کامل فروپاشید و تمامی استان‌ها و غنائم تسلیحاتی تسخیر شدند.${betrayal}`;
         }
         if (outcome === "VICTORY") {
-          return `ارتش ${sourceName} در نبرد با ${targetName} پیروز شد و استان هدف را تصرف کرد (۲۵٪ نیروهای مجروح بازسازی شدند).${betrayal}`;
+          return `ارتش ${sourceName} در نبرد با ${targetName} پیروز شد و استان هدف را تصرف کرد.${betrayal}`;
         }
         if (outcome === "DEFENDED") {
-          return `دفاع جانانه: نیروهای پدافندی ${sourceName} تهاجم سنگین ارتش ${targetName} را دفع کردند.${betrayal}`;
+          return `دفاع جانانه: نیروهای مدافع ${sourceName} تهاجم سنگین ارتش ${targetName} را دفع کردند.${betrayal}`;
         }
         return `مدافعان ${targetName} با مقاومت در خطوط پدافندی مانع پیشروی ارتش ${sourceName} شدند.${betrayal}`;
       }
@@ -125,7 +144,7 @@ export class TurnLogFormatter {
         return `سقوط قطعی و تاریخی: کشور ${targetName} پس از شکست کامل نظامی، به طور مطلق توسط امپراتوری ${sourceName} تصرف و از جغرافیای جهان حذف شد.`;
 
       case "NATION_COLLAPSED":
-        return `فروپاشی کامل دولت: کشور ${sourceName} به دلیل از دست دادن تمامی قلمروها و ساختار حاکمیتی خود به طور کامل منحل گردید.`;
+        return `فروپاشی کامل دولت: کشور ${sourceName} به دلیل از دست دادن تمامی قلمروها به طور کامل منحل گردید.`;
 
       case "ESPIONAGE_OPERATION": {
         const role = String(params["role"] || "ATTACKER");

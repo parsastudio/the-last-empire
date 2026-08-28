@@ -94,7 +94,7 @@ export class UtilityDecisionEngine {
     );
   }
 
-  public static calculateAllianceUtility(
+  public static calculateStrategicPartnershipUtility(
     source: Nation,
     _target: Nation,
     vector: GeopoliticalVector,
@@ -180,8 +180,21 @@ export class UtilityDecisionEngine {
     }
 
     switch (proposalType) {
-      case "FULL_ALLIANCE": {
-        reasons.push({ label: "پیش‌نیاز اعتماد بنیادین", value: -25 });
+      case "SECURITY_GUARANTEE": {
+        if (vector.tension >= 40) {
+          return {
+            willAccept: false,
+            score: -50,
+            reasons: [{ label: "تنش امنیتی بالا با کشور متقاضی", value: -50 }],
+          };
+        }
+        reasons.push({ label: "دریافت نوبتی ۱۰٪ درآمد پایدار", value: 60 });
+        reasons.push({ label: "تنش امنیتی پایین", value: 20 });
+        break;
+      }
+
+      case "STRATEGIC_PARTNERSHIP": {
+        reasons.push({ label: "پیش‌نیاز اعتماد بنیادین", value: -20 });
 
         const alignVal = Math.round(vector.alignment * 0.6);
         reasons.push({ label: "همسویی استراتژیک", value: alignVal });
@@ -272,8 +285,9 @@ export class UtilityDecisionEngine {
         break;
       }
 
+      case "CANCEL_SECURITY_GUARANTEE":
       case "SEND_FOREIGN_AID": {
-        reasons.push({ label: "دریافت کمک مالی بدون تعهد", value: 100 });
+        reasons.push({ label: "پذیرش تعهد بدون قید و شرط", value: 100 });
         break;
       }
 
