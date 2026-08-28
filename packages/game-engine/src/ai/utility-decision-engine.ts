@@ -25,9 +25,14 @@ export class UtilityDecisionEngine {
     _target: Nation,
     vector: GeopoliticalVector,
   ): number {
+    if (vector.tension < 50) {
+      return -100;
+    }
+
     if (source.military.infantry < 4 || source.government.stability < 35) {
       return -100;
     }
+
     if (vector.proximityTier === "NONE") {
       return -100;
     }
@@ -67,7 +72,13 @@ export class UtilityDecisionEngine {
     const isTargetLocal = vector.targetReachTier === "LOCAL_POWER";
 
     if (isSourceSuperpower && isTargetSuperpower) {
-      tierStrategyModifier = vector.alignment < 10 ? 30 : 15;
+      if (vector.powerRatio >= 0.8 && vector.powerRatio <= 1.25) {
+        tierStrategyModifier = -50;
+      } else if (vector.powerRatio < 0.8) {
+        tierStrategyModifier = 15;
+      } else {
+        tierStrategyModifier = -30;
+      }
     } else if (
       isSourceSuperpower &&
       isTargetLocal &&

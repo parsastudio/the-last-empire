@@ -212,8 +212,7 @@ export class BattleCalculator {
       (attackerDeployedPower / defenderTotalPower).toFixed(2),
     );
 
-    const isFullCapitulation =
-      groundPhase.isAttackerVictory && valuationRatio >= 2.0;
+    const isFullCapitulation = false;
 
     const casualty = BattleCasualtyResolver.resolve({
       deployedInfantry,
@@ -234,31 +233,6 @@ export class BattleCalculator {
       isFullCapitulation,
     });
 
-    const defenderRemainingInfantry = Math.max(
-      0,
-      (defender.military.infantry || 0) - casualty.netDefInfantryLost,
-    );
-    const defenderRemainingArmor = Math.max(
-      0,
-      (defender.military.armor || 0) - casualty.netDefArmorLost,
-    );
-    const defenderRemainingAD = Math.max(
-      0,
-      (defender.military.airDefense || 0) - casualty.netDefAirDefenseLost,
-    );
-    const defenderRemainingAir = Math.max(
-      0,
-      (defender.military.airForce || 0) - casualty.netDefAirLost,
-    );
-
-    const capturedInfantry = isFullCapitulation ? defenderRemainingInfantry : 0;
-    const capturedArmor = isFullCapitulation ? defenderRemainingArmor : 0;
-    const capturedAirDefense = isFullCapitulation ? defenderRemainingAD : 0;
-    const capturedAirForce = isFullCapitulation ? defenderRemainingAir : 0;
-    const capturedDrones = isFullCapitulation
-      ? defender.military.droneMissile || 0
-      : 0;
-
     const defenderGdp = getNationGdp(defender, provincesMap);
     const guaranteedLootPool =
       Math.max(0, defender.treasury) + Math.floor(defenderGdp * 0.05);
@@ -267,16 +241,14 @@ export class BattleCalculator {
       NationGettersUtility.getTerritoryPixelCount(defender.id, provincesMap) ||
       1;
     const treasuryLootRatio = groundPhase.isAttackerVictory
-      ? isFullCapitulation
-        ? 1.0
-        : Math.min(0.2, 1000 / defenderTotalTerritory)
+      ? Math.min(0.2, 1000 / defenderTotalTerritory)
       : 0;
 
     const treasuryLooted = Math.floor(guaranteedLootPool * treasuryLootRatio);
 
     let severity: ReportSeverity = "INFO";
     if (groundPhase.isAttackerVictory) {
-      severity = isFullCapitulation ? "CRUSHING_VICTORY" : "VICTORY";
+      severity = "VICTORY";
     } else {
       severity =
         casualty.netAttInfantryLost > deployedInfantry * 0.5
@@ -331,11 +303,11 @@ export class BattleCalculator {
       treasuryLooted,
       deploymentMoneyCost,
       severity,
-      capturedInfantry,
-      capturedArmor,
-      capturedAirDefense,
-      capturedAirForce,
-      capturedDrones,
+      capturedInfantry: 0,
+      capturedArmor: 0,
+      capturedAirDefense: 0,
+      capturedAirForce: 0,
+      capturedDrones: 0,
       phase1Missile: {
         dronesLaunched: deployedDrones,
         defAirDefense,

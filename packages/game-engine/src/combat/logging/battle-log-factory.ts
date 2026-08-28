@@ -28,33 +28,34 @@ export class BattleLogFactory {
       CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman;
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
-    const isCapitulationOutcome =
-      calcResult.isFullCapitulation || isDefenderAnnexed;
+    const provinceLabel = targetProvince?.nameFa
+      ? `استان ${targetProvince.nameFa}`
+      : "منطقه مرزی";
 
     let humanHeadline = "";
     let outcome = "DEFEAT";
 
     if (isAttackerHuman) {
-      if (isCapitulationOutcome) {
+      if (isDefenderAnnexed) {
         outcome = "CAPITULATION";
-        humanHeadline = `پیروزی ویرانگر و فتح کامل ارتش مقابل ${defender.name}`;
+        humanHeadline = `سقوط آخرین سنگر و انحلال کامل حاکمیت ${defender.name}`;
       } else if (calcResult.isAttackerVictory) {
         outcome = "VICTORY";
-        humanHeadline = `پیروزی نظامی و پیشروی ارتش در نبرد با ${defender.name}`;
+        humanHeadline = `پیروزی ارتش و فتح ${provinceLabel} در نبرد با ${defender.name}`;
       } else {
         outcome = "DEFEAT";
-        humanHeadline = `شکست عملیات تهاجمی و عقب‌نشینی مقابل ${defender.name}`;
+        humanHeadline = `شکست عملیات تهاجمی و عقب‌نشینی از ${provinceLabel} مقابل ${defender.name}`;
       }
     } else if (isDefenderHuman) {
-      if (isCapitulationOutcome) {
+      if (isDefenderAnnexed) {
         outcome = "CAPITULATION";
-        humanHeadline = `سقوط خطوط دفاعی و فروپاشی استان‌ها توسط ارتش ${attacker.name}`;
+        humanHeadline = `سقوط آخرین سنگر و فروپاشی کامل کشور توسط ارتش ${attacker.name}`;
       } else if (!calcResult.isAttackerVictory) {
         outcome = "DEFENDED";
-        humanHeadline = `دفاع جانانه و دفع قاطع تهاجم ارتش ${attacker.name}`;
+        humanHeadline = `دفاع جانانه و حفظ تمامیت ارضی ${provinceLabel} در برابر ${attacker.name}`;
       } else {
         outcome = "DEFEAT";
-        humanHeadline = `شکست سنگین خط دفاعی و واگذاری مواضع به ارتش ${attacker.name}`;
+        humanHeadline = `شکست سنگرها و واگذاری ${provinceLabel} به ارتش ${attacker.name}`;
       }
     }
 
@@ -64,7 +65,7 @@ export class BattleLogFactory {
       targetProvinceName: targetProvince?.nameFa,
       attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
-      isFullCapitulation: isCapitulationOutcome,
+      isFullCapitulation: isDefenderAnnexed,
       valuationRatio: calcResult.valuationRatio,
       treasuryLooted: calcResult.treasuryLooted,
       attackerCasualties: calcResult.attackerCasualties,
@@ -73,6 +74,7 @@ export class BattleLogFactory {
       phase2Air: calcResult.phase2Air,
       phase3Ground: calcResult.phase3Ground,
       spoils: spoilsData,
+      auxiliaryGuarantor: calcResult.auxiliaryGuarantor,
     };
 
     if (isHumanInvolved) {
@@ -116,7 +118,7 @@ export class BattleLogFactory {
       ),
     );
 
-    if (isCapitulationOutcome && calcResult.isAttackerVictory) {
+    if (isDefenderAnnexed && calcResult.isAttackerVictory) {
       logs.push(
         TurnLogBuilder.createAnnexationLog(
           currentTurn,
