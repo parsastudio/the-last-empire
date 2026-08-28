@@ -16,7 +16,7 @@ export interface CasualtyResolutionInput {
   rawDefArmorLost: number;
   rawDefAirDefenseLost: number;
   rawDefAirLoss: number;
-  isFullCapitulation: boolean;
+  isFullCapitulation?: boolean;
 }
 
 export interface CasualtyResolutionOutput {
@@ -71,19 +71,13 @@ export class BattleCasualtyResolver {
 
     const defenderCasualties: CasualtyMetrics = {
       infantryEngaged: input.defInfantry,
-      infantryLost: input.isFullCapitulation
-        ? input.defInfantry
-        : netDefInfantryLost,
+      infantryLost: netDefInfantryLost,
       armorEngaged: input.defArmor,
-      armorLost: input.isFullCapitulation ? input.defArmor : netDefArmorLost,
+      armorLost: netDefArmorLost,
       airDefenseEngaged: input.defAirDefense,
-      airDefenseLost: input.isFullCapitulation
-        ? input.defAirDefense
-        : netDefAirDefenseLost,
+      airDefenseLost: netDefAirDefenseLost,
       airForceEngaged: input.defAirForce,
-      airForceLost: input.isFullCapitulation
-        ? input.defAirForce
-        : netDefAirLost,
+      airForceLost: netDefAirLost,
       droneMissileEngaged: 0,
       droneMissileLost: 0,
     };

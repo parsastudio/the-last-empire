@@ -94,20 +94,17 @@ export class BattleExecutionEngine {
       attacker.id,
       defender.id,
       calcResult.isAttackerVictory,
-      calcResult.isFullCapitulation,
+      false,
       action.targetProvinceId,
     );
 
-    const isDefenderAlive =
-      conquest.remainingDefenderProvinces.length > 0 &&
-      !calcResult.isFullCapitulation;
-
+    const isDefenderAlive = conquest.remainingDefenderProvinces.length > 0;
     const isTotalAnnexation = calcResult.isAttackerVictory && !isDefenderAlive;
 
     let extraCapturedUnits: ExtraCapturedMilitaryUnits | undefined = undefined;
     let extraTreasuryLooted = 0;
 
-    if (isTotalAnnexation && !calcResult.isFullCapitulation) {
+    if (isTotalAnnexation) {
       const survivingDefenderInf = Math.max(
         0,
         (defender.military.infantry || 0) -
@@ -231,7 +228,7 @@ export class BattleExecutionEngine {
       targetProvinceName: targetProvinceObj?.nameFa,
       attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
-      isFullCapitulation: calcResult.isFullCapitulation || !isDefenderAlive,
+      isFullCapitulation: !isDefenderAlive,
       valuationRatio: calcResult.valuationRatio,
       treasuryLooted: calcResult.treasuryLooted,
       attackerCasualties: calcResult.attackerCasualties,
