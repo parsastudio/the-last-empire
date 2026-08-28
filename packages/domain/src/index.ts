@@ -37,5 +37,6 @@ export * from "./politics/government-label.utility";
 export * from "./politics/government-traits.config";
 export * from "./politics/politics.schema";
 export * from "./province/province.schema";
+export * from "./province/province-buyout-calculator.utility";
 export * from "./reports/combat-report.schema";
 export * from "./shared/domain-utilities";

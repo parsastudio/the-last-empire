@@ -1,10 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { Province } from "@/domain/province/province.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { ProvinceBuyoutCalculator } from "@/domain/province/province-buyout-calculator.utility";
+import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
@@ -26,6 +28,101 @@ export class EconomyActionExecutor {
               economicStance: action.stance,
             },
           },
+        };
+      }
+
+      case "BUY_PROVINCE": {
+        const evaluation = ProvinceBuyoutCalculator.evaluate(
+          nation,
+          action.provinceId,
+          state.provinces,
+          state.nations,
+        );
+
+        if (!evaluation.canBuy) {
+          throw new GameError(
+            "INVALID_ACTION",
+            evaluation.reason || "امکان خرید این استان وجود ندارد.",
+          );
+        }
+
+        const targetProvince = state.provinces[action.provinceId.toString()]!;
+        const canonicalSellerId = CountryRegistry.resolveCanonicalId(
+          targetProvince.ownerNationId,
+        );
+        const seller =
+          state.nations[canonicalSellerId] ||
+          state.nations[targetProvince.ownerNationId]!;
+
+        const updatedBuyer = {
+          ...nation,
+          treasury: nation.treasury - evaluation.cost,
+        };
+
+        const updatedSeller = {
+          ...seller,
+          treasury: seller.treasury + evaluation.cost,
+        };
+
+        const updatedProvince: Province = {
+          ...targetProvince,
+          ownerNationId: canonicalNationId,
+        };
+
+        const updatedProvinces = {
+          ...state.provinces,
+          [action.provinceId.toString()]: updatedProvince,
+        };
+
+        const canonicalHuman = CountryRegistry.resolveCanonicalId(
+          state.humanNationId,
+        );
+        const isHumanInvolved =
+          canonicalNationId === canonicalHuman ||
+          canonicalSellerId === canonicalHuman;
+
+        const newLogs = [
+          TurnLogBuilder.createGlobalDiplomacyLog(
+            state.currentTurn,
+            nation.id,
+            seller.id,
+            "PROVINCE_PURCHASED",
+            {
+              provinceName: targetProvince.nameFa,
+              cost: evaluation.cost,
+            },
+            "INFO",
+          ),
+        ];
+
+        if (isHumanInvolved) {
+          newLogs.push(
+            TurnLogBuilder.createNationalLog(
+              state.currentTurn,
+              nation.id,
+              "DOMESTIC",
+              "INFO",
+              "PROVINCE_PURCHASED",
+              {
+                provinceName: targetProvince.nameFa,
+                cost: evaluation.cost,
+              },
+              seller.id,
+            ),
+          );
+        }
+
+        BitPackedGridState.getInstance().markDirty();
+
+        return {
+          ...state,
+          provinces: updatedProvinces,
+          nations: {
+            ...state.nations,
+            [nation.id]: updatedBuyer,
+            [seller.id]: updatedSeller,
+          },
+          turnLogs: [...state.turnLogs, ...newLogs],
         };
       }
 
