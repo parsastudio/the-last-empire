@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Lock,
   Compass,
+  ShieldCheck,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -19,6 +20,7 @@ export interface CountryProfileData {
   alignment: number;
   tension: number;
   doctrineLabel?: string;
+  guarantorName?: string;
 }
 
 interface CountryProfileStatsProps {
@@ -63,6 +65,18 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
           سطح {PersianNumberFormatter.toPersianDigits(data.techLevel)}
         </span>
       </div>
+
+      {data.guarantorName && (
+        <div className="bg-cyan-950/20 border border-cyan-500/40 p-3 rounded-2xl flex items-center justify-between font-sans">
+          <div className="flex items-center gap-1.5 text-xs text-cyan-300">
+            <ShieldCheck size={14} className="text-cyan-400 shrink-0" />
+            <span className="text-[11px] font-bold">چتر امنیتی فعال:</span>
+          </div>
+          <span className="text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 px-2.5 py-0.5 rounded-lg">
+            تحت حمایت {data.guarantorName}
+          </span>
+        </div>
+      )}
 
       {data.doctrineLabel && (
         <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl flex items-center justify-between font-sans">

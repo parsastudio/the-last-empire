@@ -1,6 +1,7 @@
 import React from "react";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { Swords, ShieldCheck, Flame, ShieldAlert, Ban } from "lucide-react";
 
 interface BattlePhaseCardsProps {
@@ -20,6 +21,11 @@ export function BattlePhaseCards({
   attackerFlag,
   defenderFlag,
 }: BattlePhaseCardsProps) {
+  const aux = reportData.auxiliaryGuarantor;
+  const auxFlag = aux
+    ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
+    : "";
+
   if (activeStep === 1) {
     const isSkipped =
       reportData.phase1Missile.phaseWinner === "SKIPPED" ||
@@ -123,9 +129,18 @@ export function BattlePhaseCards({
                 <span>{defenderFlag}</span>
                 <span>سپر موشکی {defenderName}</span>
               </span>
-              <span className="text-xs font-mono font-bold text-muted-foreground">
-                پدافند مدافع
-              </span>
+              {aux && (
+                <span className="text-[10px] font-sans font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <span>{auxFlag}</span>
+                  <span>
+                    +
+                    {PersianNumberFormatter.toPersianDigits(
+                      aux.deployedAirDefense,
+                    )}{" "}
+                    پدافند چتر امنیتی
+                  </span>
+                </span>
+              )}
             </div>
 
             <div className="space-y-2 font-mono">
@@ -227,9 +242,18 @@ export function BattlePhaseCards({
                 <span>{defenderFlag}</span>
                 <span>نیروی هوایی {defenderName}</span>
               </span>
-              <span className="text-xs font-mono font-bold text-muted-foreground">
-                اسکادران مدافع
-              </span>
+              {aux && (
+                <span className="text-[10px] font-sans font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                  <span>{auxFlag}</span>
+                  <span>
+                    +
+                    {PersianNumberFormatter.toPersianDigits(
+                      aux.deployedAirForce,
+                    )}{" "}
+                    جنگنده چتر امنیتی
+                  </span>
+                </span>
+              )}
             </div>
 
             <div className="space-y-2 font-mono">
@@ -354,9 +378,17 @@ export function BattlePhaseCards({
               <span>{defenderFlag}</span>
               <span>لشکرهای مدافع {defenderName}</span>
             </span>
-            <span className="text-xs font-mono font-bold text-muted-foreground">
-              سنگرهای دفاعی
-            </span>
+            {aux && (
+              <span className="text-[10px] font-sans font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                <span>{auxFlag}</span>
+                <span>
+                  +{PersianNumberFormatter.toPersianDigits(aux.deployedArmor)}{" "}
+                  تانک، +
+                  {PersianNumberFormatter.toPersianDigits(aux.deployedInfantry)}{" "}
+                  پیاده چتر
+                </span>
+              </span>
+            )}
           </div>
 
           <div className="space-y-2 font-mono">

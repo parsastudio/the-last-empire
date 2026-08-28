@@ -14,6 +14,7 @@ interface AdvancedDiplomacyActionsProps {
   senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
+  hasSecurityGuarantee?: boolean;
   onOpenProxy?: () => void;
 }
 
@@ -24,6 +25,7 @@ export function AdvancedDiplomacyActions({
   senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
+  hasSecurityGuarantee = false,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -40,19 +42,26 @@ export function AdvancedDiplomacyActions({
       <div className="space-y-4 dir-rtl text-right font-sans">
         <div className="space-y-2">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            نردبان معاهدات و مدیریت روابط
+            نردبان معاهدات، چتر امنیتی و مدیریت روابط
           </span>
 
           <div className="space-y-2.5">
-            <TreatyStatusBanner stance={currentStance} />
+            <TreatyStatusBanner
+              stance={currentStance}
+              hasSecurityGuarantee={hasSecurityGuarantee}
+            />
 
             <DiplomacyActionButtons
               currentStance={currentStance}
               foreignAidCost={runner.foreignAidCost}
+              securityGuaranteeCost={runner.securityGuaranteeCost}
+              hasSecurityGuarantee={hasSecurityGuarantee}
               onSendAid={runner.handleSendAid}
               onPeaceTreaty={runner.handlePeaceTreaty}
               onNonAggression={runner.handleNonAggression}
-              onAlliance={runner.handleAlliance}
+              onStrategicPartnership={runner.handleStrategicPartnership}
+              onSecurityGuarantee={runner.handleSecurityGuarantee}
+              onCancelSecurityGuarantee={runner.handleCancelSecurityGuarantee}
               onCancelTreaty={runner.handleCancelTreaty}
               onDeclareWar={runner.handleDeclareWar}
             />

@@ -1,5 +1,12 @@
 import React from "react";
-import { CheckCircle2, Handshake, Swords, Globe, Compass } from "lucide-react";
+import {
+  CheckCircle2,
+  Handshake,
+  Swords,
+  Globe,
+  Compass,
+  ShieldCheck,
+} from "lucide-react";
 import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 import {
   getPostureLabel,
@@ -9,11 +16,13 @@ import {
 interface DiplomaticStanceBadgeProps {
   stance: DiplomaticStance;
   posture?: DiplomaticPosture;
+  hasSecurityGuarantee?: boolean;
 }
 
 export function DiplomaticStanceBadge({
   stance,
   posture,
+  hasSecurityGuarantee = false,
 }: DiplomaticStanceBadgeProps) {
   if (stance === "WAR") {
     return (
@@ -23,10 +32,18 @@ export function DiplomaticStanceBadge({
     );
   }
 
-  if (stance === "ALLIANCE") {
+  if (hasSecurityGuarantee) {
+    return (
+      <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[9px] font-bold flex items-center gap-1 font-sans">
+        <ShieldCheck size={10} /> تحت چتر امنیتی
+      </span>
+    );
+  }
+
+  if (stance === "STRATEGIC_PARTNERSHIP") {
     return (
       <span className="px-2 py-0.5 rounded-md bg-gdp/20 text-gdp border border-gdp/30 text-[9px] font-bold flex items-center gap-1 font-sans">
-        <CheckCircle2 size={10} /> اتحاد کامل
+        <CheckCircle2 size={10} /> شراکت استراتژیک
       </span>
     );
   }
