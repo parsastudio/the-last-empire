@@ -2,7 +2,6 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import type { GovernmentType } from "@/domain/politics/politics.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
-import { ECONOMIC_DOCTRINE_CONFIGS } from "@geopolitics/domain";
 
 export class StabilityCalculator {
   public static clampStability(stability: number): number {
@@ -52,10 +51,6 @@ export class StabilityCalculator {
       const repBonus = ((Math.min(100, rep) - 50) / 50) * 1.5;
       delta += repBonus;
     }
-
-    const stance = nation.economicStance || "BALANCED_MIXED";
-    const doctrineConfig = ECONOMIC_DOCTRINE_CONFIGS[stance];
-    delta += doctrineConfig.stabilityDelta;
 
     const stabilityModifier = ModifierManager.getModifierImpact(
       nation,

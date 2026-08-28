@@ -17,6 +17,7 @@ import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-
 import { AIWarDeclarationEvaluator } from "@/engine/ai/ai-war-declaration-evaluator";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
+import { AIEconomicStanceEvaluator } from "@/engine/ai/ai-economic-stance-evaluator";
 
 interface NationDecisionContext {
   ownedProvinces: Province[];
@@ -66,13 +67,30 @@ export class AIActionBuilder {
     globalCoalition?: GlobalCoalition | null,
   ): GameAction[] {
     const actions: GameAction[] = [];
+    let currentNation = nation;
+
+    const stanceAction = AIEconomicStanceEvaluator.evaluateBestStance(
+      currentNation,
+      allNations,
+      provincesMap,
+    );
+
+    if (stanceAction) {
+      actions.push(stanceAction);
+      if (stanceAction.type === "SET_ECONOMIC_DOCTRINE") {
+        currentNation = {
+          ...currentNation,
+          economicStance: stanceAction.stance,
+        };
+      }
+    }
 
     const cache =
       matrixCache ??
       GeopoliticalMatrixCache.build(allNations, provincesMap || {});
 
     const context = this.buildDecisionContext(
-      nation,
+      currentNation,
       allNations,
       provincesMap,
       cache,
@@ -82,7 +100,7 @@ export class AIActionBuilder {
     const provincesByOwnerMap = cache.getProvincesByOwnerMap();
 
     const procurementResult = AIProcurementPlanner.planRecruitment(
-      nation,
+      currentNation,
       allNations,
       provincesMap,
       undefined,
@@ -92,7 +110,7 @@ export class AIActionBuilder {
     actions.push(...procurementResult.actions);
 
     const upgradeResult = AIUpgradePlanner.planUpgrades(
-      nation,
+      currentNation,
       allNations,
       provincesMap,
       procurementResult.remainingTreasury,
@@ -103,7 +121,7 @@ export class AIActionBuilder {
     actions.push(...upgradeResult.actions);
 
     const espionageResult = AIEspionagePlanner.planEspionage(
-      nation,
+      currentNation,
       allNations,
       provincesMap,
       upgradeResult.remainingTreasury,
@@ -114,7 +132,7 @@ export class AIActionBuilder {
     actions.push(...espionageResult.actions);
 
     const attackAction = AIAttackPlanner.planAttack(
-      nation,
+      currentNation,
       allNations,
       provincesMap,
       context.ownedProvinces,
@@ -125,7 +143,7 @@ export class AIActionBuilder {
     }
 
     this.appendDiplomaticAndWarActions(
-      nation,
+      currentNation,
       allNations,
       provincesMap,
       actions,

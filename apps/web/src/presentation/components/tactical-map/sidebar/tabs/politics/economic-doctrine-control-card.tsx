@@ -4,12 +4,9 @@ import {
   Zap,
   Globe2,
   Building2,
-  ShieldAlert,
   Anchor,
   Compass,
   CheckCircle2,
-  TrendingUp,
-  TrendingDown,
 } from "lucide-react";
 import {
   Nation,
@@ -190,30 +187,7 @@ export function EconomicDoctrineControlCard({
           </div>
 
           <div className="flex items-center justify-between pt-1 border-t border-border/30 text-[10px] text-muted-foreground font-sans">
-            <div className="flex items-center gap-1.5">
-              <span>نوسان ثبات سیاسی:</span>
-              <span
-                className={`font-bold font-mono flex items-center gap-0.5 ${
-                  activeConfig.stabilityDelta > 0
-                    ? "text-gdp"
-                    : activeConfig.stabilityDelta < 0
-                      ? "text-military"
-                      : "text-foreground"
-                }`}
-              >
-                {activeConfig.stabilityDelta > 0 ? (
-                  <TrendingUp size={11} />
-                ) : activeConfig.stabilityDelta < 0 ? (
-                  <TrendingDown size={11} />
-                ) : null}
-                {activeConfig.stabilityDelta > 0 ? "+" : ""}
-                {PersianNumberFormatter.toPersianDigits(
-                  activeConfig.stabilityDelta,
-                )}
-                ٪ / نوبت
-              </span>
-            </div>
-
+            <span className="text-muted-foreground">وضعیت شبکه بین‌الملل:</span>
             <div className="flex items-center gap-1">
               <span>شرکای صلح:</span>
               <span className="font-bold text-foreground font-mono">

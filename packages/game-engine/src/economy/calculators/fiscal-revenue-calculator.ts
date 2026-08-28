@@ -18,7 +18,6 @@ export interface FiscalRevenueBreakdown {
   transitGateway: number;
   activePeacePartnersCount: number;
   totalPeacePartnersGdp: number;
-  stabilityImpact: number;
   stance: EconomicDoctrineStance;
 }
 
@@ -90,7 +89,6 @@ export class FiscalRevenueCalculator {
       transitGateway,
       activePeacePartnersCount,
       totalPeacePartnersGdp: totalPeaceGdp,
-      stabilityImpact: config.stabilityDelta,
       stance,
     };
   }

@@ -19,7 +19,6 @@ export const EconomicDoctrineConfigSchema = z.object({
   description: z.string(),
   domesticWeight: z.number().min(0).max(1),
   globalWeight: z.number().min(0).max(1),
-  stabilityDelta: z.number(),
   badgeText: z.string(),
 });
 

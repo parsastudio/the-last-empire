@@ -59,8 +59,7 @@ export class ActionEngine {
       let resultData: unknown = undefined;
 
       switch (action.type) {
-        case "SET_TAX_RATE":
-        case "SET_TARIFF_RATE":
+        case "SET_ECONOMIC_DOCTRINE":
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
         case "UPGRADE_DEVELOPMENT":
