@@ -5,6 +5,7 @@ import {
   GlobalCoalition,
   CountryRegistry,
   SecurityGuaranteeValidator,
+  getNationGdp,
 } from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
@@ -24,6 +25,7 @@ export class UtilityDecisionEngine {
     source: Nation,
     target: Nation,
     vector: GeopoliticalVector,
+    provincesMap?: Record<string, Province>,
   ): number {
     if (vector.tension < 25) {
       return -100;
@@ -37,8 +39,20 @@ export class UtilityDecisionEngine {
       return -100;
     }
 
-    if (!target.isAi && vector.powerRatio < 0.4 && vector.tension < 80) {
-      return -100;
+    if (!target.isAi) {
+      const isMuchStrongerMilitary = vector.powerRatio < 0.67;
+      const sGdp = getNationGdp(source, provincesMap);
+      const tGdp = getNationGdp(target, provincesMap);
+      const isMuchStrongerGdp = tGdp > 0 && sGdp / tGdp > 1.5;
+
+      const isProtectedByDisparity =
+        isMuchStrongerMilitary || isMuchStrongerGdp;
+      const isPlayerProvocative =
+        vector.tension >= 75 || (target.globalReputation ?? 50) <= -30;
+
+      if (isProtectedByDisparity && !isPlayerProvocative) {
+        return -100;
+      }
     }
 
     const tensionScore = vector.tension * 0.7;

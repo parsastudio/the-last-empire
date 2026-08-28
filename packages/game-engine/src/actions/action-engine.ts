@@ -60,6 +60,7 @@ export class ActionEngine {
 
       switch (action.type) {
         case "SET_ECONOMIC_DOCTRINE":
+        case "BUY_PROVINCE":
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
         case "UPGRADE_DEVELOPMENT":

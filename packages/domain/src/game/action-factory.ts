@@ -80,13 +80,17 @@ export class ActionFactory {
 
   public static buyProvince(
     nationId: string,
+    targetNationId: string,
     provinceId: number,
+    cost: number,
   ): BuyProvinceAction {
     return {
       id: this.createId("buy-province"),
       nationId,
       type: "BUY_PROVINCE",
+      targetNationId,
       provinceId,
+      cost,
     };
   }
 
