@@ -157,7 +157,7 @@ export class GeopoliticalReachResolver {
       if (
         rel &&
         (rel.stance === "WAR" ||
-          rel.stance === "ALLIANCE" ||
+          rel.stance === "STRATEGIC_PARTNERSHIP" ||
           rel.stance === "NON_AGGRESSION_PACT")
       ) {
         reachableMap.set(targetCanonical, target);

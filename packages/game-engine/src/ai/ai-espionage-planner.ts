@@ -217,7 +217,7 @@ export class AIEspionagePlanner {
       const rel =
         nation.relations[canonicalTarget] || nation.relations[target.id];
 
-      if (rel && rel.stance === "ALLIANCE") {
+      if (rel && rel.stance === "STRATEGIC_PARTNERSHIP") {
         continue;
       }
 

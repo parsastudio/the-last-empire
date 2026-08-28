@@ -29,8 +29,8 @@ export function AttackStatusAlerts({
 
   const getStancePersianLabel = (stance: DiplomaticStance) => {
     switch (stance) {
-      case "ALLIANCE":
-        return "اتحاد کامل راهبردی";
+      case "STRATEGIC_PARTNERSHIP":
+        return "شراکت استراتژیک";
       case "NON_AGGRESSION_PACT":
         return "پیمان عدم تخاصم";
       case "NORMAL_DIPLOMACY":

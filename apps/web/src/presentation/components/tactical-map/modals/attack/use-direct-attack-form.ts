@@ -209,7 +209,7 @@ export function useDirectAttackForm({
       isCapitulationPredicted: calc.isFullCapitulation,
       phase1Prediction: calc.phase1Missile.phaseWinner,
       phase2Prediction: calc.phase2Air.phaseWinner,
-      phase3Ground: calc.phase3Ground.phaseWinner,
+      phase3Prediction: calc.phase3Ground.phaseWinner,
       valuationRatio: calc.valuationRatio,
       auxiliaryGuarantor: calc.auxiliaryGuarantor,
     };

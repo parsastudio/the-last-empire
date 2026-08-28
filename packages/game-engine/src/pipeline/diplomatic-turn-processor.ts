@@ -110,7 +110,7 @@ export class DiplomaticTurnProcessor {
       let currentTension = relation.tension ?? 10;
       if (relation.stance === "WAR") {
         currentTension = 100;
-      } else if (relation.stance === "ALLIANCE") {
+      } else if (relation.stance === "STRATEGIC_PARTNERSHIP") {
         currentTension = 0;
       } else if (relation.stance === "NON_AGGRESSION_PACT") {
         currentTension = Math.min(15, currentTension);

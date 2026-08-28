@@ -77,7 +77,8 @@ export function useHoverNationResolver({
           );
           rawStance = stance;
           if (stance === "WAR") stanceLabel = "وضعیت نبرد";
-          else if (stance === "ALLIANCE") stanceLabel = "اتحاد کامل";
+          else if (stance === "STRATEGIC_PARTNERSHIP")
+            stanceLabel = "شراکت استراتژیک";
           else if (stance === "NON_AGGRESSION_PACT") stanceLabel = "عدم تخاصم";
           else stanceLabel = "دیپلماسی عادی";
         }

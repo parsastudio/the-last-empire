@@ -12,8 +12,8 @@ import {
   GameError,
   TurnLogBuilder,
   SeededRandom,
-  NationGettersUtility,
 } from "@/domain/shared/domain-utilities";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import {
