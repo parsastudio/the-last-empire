@@ -77,13 +77,18 @@ const COUNTRY_SPECIFIC_DOCTRINES: Record<string, AiDoctrineType> = {
 
 export class NationDoctrineResolver {
   public static resolveDoctrineType(
-    countryCode: string,
+    countryCode: unknown,
     domesticTech = 1.0,
     equipmentTech = 1.0,
     gdp = 50_000_000_000,
   ): AiDoctrineType {
-    const cleanCode = countryCode.trim().toUpperCase();
-    if (COUNTRY_SPECIFIC_DOCTRINES[cleanCode]) {
+    const str =
+      countryCode !== null && countryCode !== undefined
+        ? String(countryCode)
+        : "";
+    const cleanCode = str.trim().toUpperCase();
+
+    if (cleanCode && COUNTRY_SPECIFIC_DOCTRINES[cleanCode]) {
       return COUNTRY_SPECIFIC_DOCTRINES[cleanCode];
     }
 
@@ -117,7 +122,7 @@ export class NationDoctrineResolver {
   }
 
   public static resolveProfileForCountry(
-    countryCode: string,
+    countryCode: unknown,
     domesticTech = 1.0,
     equipmentTech = 1.0,
     gdp = 50_000_000_000,
