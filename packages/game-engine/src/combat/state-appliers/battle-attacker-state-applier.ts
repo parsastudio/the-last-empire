@@ -32,7 +32,6 @@ export class BattleAttackerStateApplier {
       isDefenderEliminated,
       extraCapturedUnits,
       extraTreasuryLooted,
-      isCounterAttack = false,
     } = input;
 
     const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
@@ -44,14 +43,7 @@ export class BattleAttackerStateApplier {
       extraCapturedUnits,
     );
 
-    const isTotalAnnexation =
-      calcResult.isFullCapitulation || Boolean(isDefenderEliminated);
-
-    let baseWarRepPenalty = currentStance !== "WAR" ? 15 : 0;
-    if (isTotalAnnexation) {
-      const annexationPenalty = isCounterAttack ? 4 : 8;
-      baseWarRepPenalty += annexationPenalty;
-    }
+    const baseWarRepPenalty = currentStance !== "WAR" ? 15 : 0;
     const totalRepPenalty =
       baseWarRepPenalty +
       (betrayalResult.hasBetrayed ? betrayalResult.reputationPenalty : 0);
@@ -87,6 +79,9 @@ export class BattleAttackerStateApplier {
       0,
       attacker.treasury - actualDeploymentCost + totalLoot,
     );
+
+    const isTotalAnnexation =
+      calcResult.isFullCapitulation || Boolean(isDefenderEliminated);
 
     const nextWarFocus = isTotalAnnexation ? null : cleanDefenderId;
 
