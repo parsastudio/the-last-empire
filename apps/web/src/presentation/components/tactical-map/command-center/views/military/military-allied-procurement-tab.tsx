@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { ShieldAlert, Users, Search, ShoppingCart } from "lucide-react";
+import { Users, Search, ShoppingCart } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -30,7 +30,6 @@ export function MilitaryAlliedProcurementTab({
   );
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const isSanctioned = (nation.globalReputation ?? 50) <= -30;
   const buyerGdp = useMemo(
     () => getNationGdp(nation, provincesMap),
     [nation, provincesMap],
@@ -48,9 +47,9 @@ export function MilitaryAlliedProcurementTab({
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
         const rel = nation.relations[canonical] || nation.relations[n.id];
-        const alignment = rel ? (rel.alignment ?? 0) : 0;
+        const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
         const tension = rel ? (rel.tension ?? 10) : 10;
-        const isEligible = alignment >= 15 && tension < 60;
+        const isEligible = stance !== "WAR" && tension < 50;
         const rank = rankLookup.get(canonical) ?? 99;
 
         return {
@@ -58,7 +57,8 @@ export function MilitaryAlliedProcurementTab({
           name: n.name,
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
-          alignment,
+          alignment: rel ? (rel.alignment ?? 0) : 0,
+          tension,
           rank,
           isEligible,
         };
@@ -87,25 +87,6 @@ export function MilitaryAlliedProcurementTab({
     return nationsMap[canonical] || nationsMap[selectedSellerId] || null;
   }, [selectedSellerId, nationsMap]);
 
-  if (isSanctioned) {
-    return (
-      <div className="p-8 bg-military/15 border border-military/40 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
-        <ShieldAlert
-          size={36}
-          className="text-military mx-auto animate-pulse"
-        />
-        <h3 className="text-sm font-black text-military">
-          تحریم همه‌جانبه و انزوای بین‌المللی تسلیحاتی!
-        </h3>
-        <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
-          به دلیل افت شدید پرستیژ و جایگاه جهانی کشور، جامعه بین‌الملل فروش
-          هرگونه تجهیزات و جنگ‌افزار نظامی به کشور شما را ممنوع و تحریم کرده
-          است.
-        </p>
-      </div>
-    );
-  }
-
   if (selectedSellerNation) {
     return (
       <AlliedUnitBuyGrid
@@ -123,11 +104,11 @@ export function MilitaryAlliedProcurementTab({
       <div className="p-12 bg-secondary/30 border border-border/60 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
         <Users size={36} className="text-muted-foreground mx-auto" />
         <h3 className="text-sm font-black text-foreground">
-          هیچ کشور متحد یا هم‌پیمانی برای خرید اسلحه در دسترس نیست
+          هیچ کشوری برای معامله تسلیحاتی در دسترس نیست
         </h3>
         <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed font-sans">
-          برای خرید تسلیحات پیشرفته خارجی، باید از طریق دیپلماسی همسویی خود را
-          با قدرت‌های جهانی به حداقل ۱۵+ برسانید و تنش مرزی زیر ۶۰٪ باشد.
+          برای خرید تسلیحات خارجی، نباید با کشور صادرکننده در حال جنگ باشید و
+          تنش امنیتی متقابل باید زیر ۵۰٪ باشد.
         </p>
       </div>
     );

@@ -24,7 +24,7 @@ interface CountryProfileStatsProps {
 }
 
 export function CountryProfileStats({ data }: CountryProfileStatsProps) {
-  const isArmsEligible = data.alignment >= 15 && data.tension < 60;
+  const isArmsEligible = data.tension < 50;
 
   return (
     <div className="space-y-3 font-mono text-xs dir-rtl font-sans">
@@ -79,7 +79,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         ) : (
           <span className="text-[10px] font-bold text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
             <Lock size={10} />
-            نیازمند همسویی ۱۵+
+            تنش بالای ۵۰٪
           </span>
         )}
       </div>

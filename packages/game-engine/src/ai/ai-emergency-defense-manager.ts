@@ -173,12 +173,10 @@ export class AIEmergencyDefenseManager {
       const rel =
         nation.relations[canonicalBuyer] || nation.relations[buyer.id];
 
-      if (!rel || rel.stance === "WAR") continue;
+      const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
+      const tension = rel ? (rel.tension ?? 10) : 10;
 
-      const alignment = rel.alignment ?? 0;
-      const tension = rel.tension ?? 10;
-
-      if (alignment >= 15 && tension < 60) {
+      if (stance !== "WAR" && tension < 50) {
         sellers.push(nation);
       }
     }

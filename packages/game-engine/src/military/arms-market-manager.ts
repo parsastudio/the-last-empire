@@ -38,13 +38,13 @@ export class ArmsMarketManager {
 
     const rel =
       seller.relations[canonicalBuyerId] || seller.relations[buyer.id];
-    const alignment = rel ? (rel.alignment ?? 0) : 0;
+    const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
     const tension = rel ? (rel.tension ?? 10) : 10;
 
-    if (alignment < 15 || tension >= 60) {
+    if (stance === "WAR" || tension >= 50) {
       throw new GameError(
         "INVALID_ACTION",
-        `کشور ${seller.name} به دلیل عدم همسویی استراتژیک یا تنش مرزی حاضر به فروش تسلیحات نیست.`,
+        `کشور ${seller.name} به دلیل وضعیت جنگی یا تنش امنیتی بالا (۵۰٪ یا بیشتر) حاضر به فروش تسلیحات نیست.`,
       );
     }
 

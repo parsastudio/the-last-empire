@@ -10,6 +10,7 @@ export interface AlliedSellerItem {
   techLevel: number;
   rank: number;
   alignment: number;
+  tension?: number;
 }
 
 interface AlliedSellerCardProps {
@@ -49,8 +50,8 @@ export function AlliedSellerCard({ seller, onSelect }: AlliedSellerCardProps) {
             </span>
             <span>•</span>
             <span className="text-gdp">
-              همسویی: +
-              {PersianNumberFormatter.toPersianDigits(seller.alignment)}
+              تنش:{" "}
+              {PersianNumberFormatter.toPersianDigits(seller.tension ?? 10)}٪
             </span>
           </div>
         </div>
