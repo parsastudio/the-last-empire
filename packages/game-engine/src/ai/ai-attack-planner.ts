@@ -33,6 +33,17 @@ export class AIAttackPlanner {
       return null;
     }
 
+    const targetResolution = this.resolveTargetProvince(
+      nation,
+      targetNation,
+      provincesMap,
+      ownedProvinces,
+    );
+
+    if (!targetResolution) {
+      return null;
+    }
+
     const attackerTotalPower = Math.max(
       1,
       MilitaryPowerCalculator.calculateLandAndAirPower(nation),
@@ -95,7 +106,29 @@ export class AIAttackPlanner {
       Math.ceil(availableDrones * powerRatioNeeded),
     );
 
-    let deployedPower = this.calculateDeployedPower(
+    if (targetResolution.attackType === "NAVAL") {
+      const fleetCount = nation.navalFleet || 0;
+      if (fleetCount <= 0) {
+        return null;
+      }
+
+      const maxNavalCapacity = fleetCount * 60;
+      let load = infantryToDeploy * 1 + armorToDeploy * 4;
+
+      if (load > maxNavalCapacity) {
+        const scale = maxNavalCapacity / load;
+        armorToDeploy = Math.floor(armorToDeploy * scale);
+        infantryToDeploy = Math.max(
+          1,
+          Math.min(
+            availableInfantry,
+            Math.floor(maxNavalCapacity - armorToDeploy * 4),
+          ),
+        );
+      }
+    }
+
+    const deployedPower = this.calculateDeployedPower(
       nation,
       infantryToDeploy,
       armorToDeploy,
@@ -103,49 +136,7 @@ export class AIAttackPlanner {
       dronesToLaunch,
     );
 
-    if (!isCoalitionAttacker && deployedPower < targetTotalPower * 1.15) {
-      if (armorToDeploy < availableArmor) {
-        armorToDeploy = Math.min(
-          availableArmor,
-          Math.ceil(availableArmor * maxDeployRatio),
-        );
-      }
-      if (airForceToDeploy < availableAirForce) {
-        airForceToDeploy = Math.min(
-          availableAirForce,
-          Math.ceil(availableAirForce * maxDeployRatio),
-        );
-      }
-      if (infantryToDeploy < availableInfantry) {
-        infantryToDeploy = Math.max(
-          1,
-          Math.min(
-            availableInfantry,
-            Math.ceil(availableInfantry * maxDeployRatio),
-          ),
-        );
-      }
-      deployedPower = this.calculateDeployedPower(
-        nation,
-        infantryToDeploy,
-        armorToDeploy,
-        airForceToDeploy,
-        dronesToLaunch,
-      );
-    }
-
     if (!isCoalitionAttacker && deployedPower / targetTotalPower < 1.05) {
-      return null;
-    }
-
-    const targetResolution = this.resolveTargetProvince(
-      nation,
-      targetNation,
-      provincesMap,
-      ownedProvinces,
-    );
-
-    if (!targetResolution) {
       return null;
     }
 
@@ -258,7 +249,9 @@ export class AIAttackPlanner {
       ownedProvinces,
     );
 
-    if (!sourceSea) {
+    const hasNavalFleets = (nation.navalFleet || 0) > 0;
+
+    if (!sourceSea || !hasNavalFleets) {
       return null;
     }
 
