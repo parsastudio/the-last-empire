@@ -11,6 +11,8 @@ export class EspionageCalculator {
   public static readonly TIER_1_COST_RATIO = 0.06;
   public static readonly TIER_2_COST_RATIO = 0.18;
   public static readonly TIER_3_COST_RATIO = 0.4;
+  public static readonly MIN_TECH_DELTA_FOR_HEIST = 0.5;
+  public static readonly TECH_HEIST_GAIN = 0.5;
 
   public static calculateOperationCost(
     targetGdp: number,
@@ -33,39 +35,44 @@ export class EspionageCalculator {
         targetNation.military.techLevel - sourceNation.military.techLevel,
       ).toFixed(1),
     );
-    const industrialDelta = Math.max(
-      0,
-      targetNation.industrialLevel - sourceNation.industrialLevel,
-    );
+
+    const isEligible = militaryDelta >= this.MIN_TECH_DELTA_FOR_HEIST;
+    const totalPoints = isEligible ? this.TECH_HEIST_GAIN : 0;
 
     return {
       militaryDelta,
-      industrialDelta,
-      totalAvailablePoints: Number(
-        (militaryDelta + industrialDelta).toFixed(1),
-      ),
+      industrialDelta: 0,
+      totalAvailablePoints: totalPoints,
     };
   }
 
   public static calculateSuccessRate(
     tier: EspionageTier,
-    sourceNation: Nation,
-    targetNation?: Nation,
+    sourceRank = 50,
+    targetRank = 50,
   ): number {
-    let baseChance = 0.8;
-    if (tier === 2) baseChance = 0.6;
-    if (tier === 3) baseChance = 0.4;
+    const rankGap = sourceRank - targetRank;
+    const rankModifier = -rankGap * 0.015;
 
-    if (!targetNation) {
-      return baseChance;
+    let baseChance = 0.45;
+    let minRate = 0.15;
+    let maxRate = 0.85;
+
+    if (tier === 1) {
+      baseChance = 0.8;
+      minRate = 0.35;
+      maxRate = 0.95;
+    } else if (tier === 2) {
+      baseChance = 0.6;
+      minRate = 0.25;
+      maxRate = 0.9;
+    } else if (tier === 3) {
+      baseChance = 0.45;
+      minRate = 0.15;
+      maxRate = 0.85;
     }
 
-    const sourceTech = Math.max(1.0, sourceNation.military.techLevel || 1.0);
-    const targetTech = Math.max(1.0, targetNation.military.techLevel || 1.0);
-    const deltaTech = sourceTech - targetTech;
-    const steps = Math.round(deltaTech * 10);
-
-    const rate = baseChance + steps * 0.02;
-    return Number(Math.max(0.15, Math.min(0.85, rate)).toFixed(2));
+    const calculated = baseChance + rankModifier;
+    return Number(Math.max(minRate, Math.min(maxRate, calculated)).toFixed(2));
   }
 }

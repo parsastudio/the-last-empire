@@ -221,17 +221,11 @@ export class AIEspionagePlanner {
         continue;
       }
 
-      const milDelta = Math.max(
-        0,
-        target.military.techLevel - nation.military.techLevel,
+      const milDelta = Number(
+        (target.military.techLevel - nation.military.techLevel).toFixed(1),
       );
-      const indDelta = Math.max(
-        0,
-        target.industrialLevel - nation.industrialLevel,
-      );
-      const totalPoints = milDelta + indDelta;
 
-      if (totalPoints <= 0) {
+      if (milDelta < EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST) {
         continue;
       }
 
@@ -247,7 +241,7 @@ export class AIEspionagePlanner {
         eligibleTargets.push({
           target,
           cost,
-          points: totalPoints,
+          points: milDelta,
         });
       }
     }
