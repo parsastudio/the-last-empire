@@ -22,8 +22,8 @@ export function WidePoliticsView({
   const gdp = getNationGdp(nation, provincesMap);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 animate-in fade-in duration-200 dir-rtl text-right font-sans">
-      <div className="lg:col-span-6 space-y-5">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right font-sans">
+      <div className="space-y-5">
         <EconomicDoctrineControlCard
           nation={nation}
           nationsMap={nationsMap}
@@ -31,34 +31,27 @@ export function WidePoliticsView({
         />
       </div>
 
-      <div className="lg:col-span-6 space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="space-y-5">
-            <ActiveModifiersCard modifiers={nation.activeModifiers} />
-            <ImfLoanCard
-              nationId={nation.id}
-              nationalDebt={nation.nationalDebt}
-              gdp={gdp}
-              treasury={nation.treasury}
-            />
-          </div>
-
-          <div className="space-y-5">
-            <DevelopmentUpgradesSection
-              nationId={nation.id}
-              treasury={nation.treasury}
-              gdp={gdp}
-              developmentLevel={nation.industrialLevel}
-            />
-            <MilitaryTechUpgradeCard
-              nationId={nation.id}
-              treasury={nation.treasury}
-              techLevel={nation.military.techLevel}
-              gdp={gdp}
-              provincesMap={provincesMap}
-            />
-          </div>
-        </div>
+      <div className="space-y-5">
+        <ActiveModifiersCard modifiers={nation.activeModifiers} />
+        <ImfLoanCard
+          nationId={nation.id}
+          nationalDebt={nation.nationalDebt}
+          gdp={gdp}
+          treasury={nation.treasury}
+        />
+        <DevelopmentUpgradesSection
+          nationId={nation.id}
+          treasury={nation.treasury}
+          gdp={gdp}
+          developmentLevel={nation.industrialLevel}
+        />
+        <MilitaryTechUpgradeCard
+          nationId={nation.id}
+          treasury={nation.treasury}
+          techLevel={nation.military.techLevel}
+          gdp={gdp}
+          provincesMap={provincesMap}
+        />
       </div>
     </div>
   );

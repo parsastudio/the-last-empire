@@ -15,7 +15,6 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
       "قطع کامل اتکا به جهان، ایمنی مطلق در برابر تحریم‌ها و محاصره‌های دریایی با انضباط شدید دولتی.",
     domesticWeight: 1.0,
     globalWeight: 0.0,
-    stabilityDelta: -1.0,
     badgeText: "۱۰۰٪ بومی",
   },
   PROTECTIONISM: {
@@ -26,7 +25,6 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
       "حمایت از صنایع سنگین بومی و حفظ بازارهای استراتژیک در شرایط تنش‌های ژئوپلیتیک.",
     domesticWeight: 0.75,
     globalWeight: 0.25,
-    stabilityDelta: 0.0,
     badgeText: "۷۵٪ بومی • ۲۵٪ جهانی",
   },
   BALANCED_MIXED: {
@@ -37,7 +35,6 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
       "سیاست استاندارد تعادل مالی میان رفاه عمومی، درآمد داخلی و فرصت‌های تجاری با هم‌پیمانان.",
     domesticWeight: 0.5,
     globalWeight: 0.5,
-    stabilityDelta: 1.0,
     badgeText: "۵۰٪ بومی • ۵۰٪ جهانی",
   },
   FREE_TRADE: {
@@ -48,7 +45,6 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
       "گسترش صادرات و جذب سرمایه جهانی با بهره‌گیری حداکثری از دسترسی به آب‌های آزاد.",
     domesticWeight: 0.25,
     globalWeight: 0.75,
-    stabilityDelta: 1.5,
     badgeText: "۲۵٪ بومی • ۷۵٪ جهانی",
   },
   MERCANTILE_HUB: {
@@ -59,7 +55,6 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
       "بهره‌برداری کامل از تنگه‌های استراتژیک و مسیرهای دریایی برای خلق ثروت نجومی بدون سقف.",
     domesticWeight: 0.0,
     globalWeight: 1.0,
-    stabilityDelta: -0.5,
     badgeText: "۱۰۰٪ تجارت جهانی",
   },
 };

@@ -18,6 +18,7 @@ export * from "./ai/ai-treaty-evaluator";
 export * from "./ai/ai-upgrade-planner";
 export * from "./ai/ai-war-declaration-evaluator";
 export * from "./ai/ai-emergency-defense-manager";
+export * from "./ai/ai-economic-stance-evaluator";
 
 export * from "./combat/alliance-intervention-evaluator";
 export * from "./combat/battle-calculator";
