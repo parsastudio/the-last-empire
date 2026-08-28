@@ -1,7 +1,6 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export class TurnLogFormatter {
   private static resolveName(
@@ -14,6 +13,20 @@ export class TurnLogFormatter {
     if (nation) return nation.name;
     const profile = CountryRegistry.getCountry(canonical);
     return profile ? profile.nameFa : canonical;
+  }
+
+  private static formatCurrencyCompact(value: number): string {
+    const abs = Math.abs(value);
+    if (abs >= 1e12) {
+      return `${(abs / 1e12).toFixed(1).replace(/\.0$/, "")} تریلیارد دلار`;
+    }
+    if (abs >= 1e9) {
+      return `${(abs / 1e9).toFixed(1).replace(/\.0$/, "")} میلیارد دلار`;
+    }
+    if (abs >= 1e6) {
+      return `${(abs / 1e6).toFixed(1).replace(/\.0$/, "")} میلیون دلار`;
+    }
+    return `${Math.round(abs).toLocaleString("en-US")} دلار`;
   }
 
   public static formatMessage(
@@ -49,7 +62,7 @@ export class TurnLogFormatter {
       case "PROVINCE_PURCHASED": {
         const provinceName = String(params["provinceName"] || "منطقه مرزی");
         const costNum = Number(params["cost"] || 0);
-        const costText = PersianNumberFormatter.formatCurrency(costNum, true);
+        const costText = this.formatCurrencyCompact(costNum);
         return `معاهده خرید قلمرو: کشور ${sourceName} با پرداخت ${costText} به خزانه‌داری ${targetName}، حاکمیت ${provinceName} را بدون درگیری الحاق کرد.`;
       }
 

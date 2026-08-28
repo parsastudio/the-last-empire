@@ -15,8 +15,9 @@ export class TariffCalculator {
     nation: Nation,
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    tariffRate = 10,
   ): TariffEffectResult {
-    const tariffRate = Math.min(50, Math.max(0, nation.tariffRate));
+    const effectiveTariffRate = Math.min(50, Math.max(0, tariffRate));
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const seaAccessFactor = hasSea ? 1.0 : 0.5;
     const nationGdp = getNationGdp(nation, provincesMap);
@@ -56,8 +57,12 @@ export class TariffCalculator {
         maxTradeVolumeCap,
       );
 
-      const tariffRevenue = Math.floor(cappedTradeVolume * (tariffRate / 100));
-      const stabilityImpact = Number(((15 - tariffRate) * 0.1).toFixed(2));
+      const tariffRevenue = Math.floor(
+        cappedTradeVolume * (effectiveTariffRate / 100),
+      );
+      const stabilityImpact = Number(
+        ((15 - effectiveTariffRate) * 0.1).toFixed(2),
+      );
       const tradeVolumePercentage =
         totalPartnerCount > 0
           ? Math.round((activePartnerCount / totalPartnerCount) * 100)
@@ -74,8 +79,12 @@ export class TariffCalculator {
     const baseTradePool = fallbackEligibleGdp * 0.01;
     const effectiveTradeVolume = baseTradePool * seaAccessFactor;
     const cappedTradeVolume = Math.min(effectiveTradeVolume, nationGdp * 10);
-    const tariffRevenue = Math.floor(cappedTradeVolume * (tariffRate / 100));
-    const stabilityImpact = Number(((15 - tariffRate) * 0.1).toFixed(2));
+    const tariffRevenue = Math.floor(
+      cappedTradeVolume * (effectiveTariffRate / 100),
+    );
+    const stabilityImpact = Number(
+      ((15 - effectiveTariffRate) * 0.1).toFixed(2),
+    );
 
     return {
       tariffRevenue,

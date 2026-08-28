@@ -8,7 +8,7 @@ export interface TaxCalculationResult {
 }
 
 export class TaxCalculator {
-  public static calculateTaxIncome(gdp: number, taxRate: number): number {
+  public static calculateTaxIncome(gdp: number, taxRate = 15): number {
     const effectiveTaxRate = Math.min(50, Math.max(0, taxRate));
     const baseIncome = gdp * (effectiveTaxRate / 100);
     return Math.floor(baseIncome);
@@ -17,12 +17,13 @@ export class TaxCalculator {
   public static evaluateTaxPolicy(
     nation: Nation,
     provincesMap?: Record<string, Province>,
+    taxRate = 15,
   ): TaxCalculationResult {
     const income = TaxCalculator.calculateTaxIncome(
       getNationGdp(nation, provincesMap),
-      nation.taxRate,
+      taxRate,
     );
-    const clampedRate = Math.min(50, Math.max(0, nation.taxRate));
+    const clampedRate = Math.min(50, Math.max(0, taxRate));
     const stabilityImpact = Number(((15 - clampedRate) * 0.1).toFixed(2));
 
     return {
