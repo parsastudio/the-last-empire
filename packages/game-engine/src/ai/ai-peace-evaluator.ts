@@ -72,7 +72,7 @@ export class AIPeaceEvaluator {
         vector,
       );
 
-      if (peaceUtility >= 35) {
+      if (peaceUtility >= 60) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,

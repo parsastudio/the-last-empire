@@ -2,9 +2,9 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class DevelopmentManager {
-  public static readonly COST_RATIO = 0.4;
-  public static readonly CAPACITY_GROWTH_MULTIPLIER = 1.08;
-  public static readonly PRODUCTIVITY_GROWTH_MULTIPLIER = 1.05;
+  public static readonly COST_RATIO = 0.25;
+  public static readonly CAPACITY_GROWTH_MULTIPLIER = 1.04;
+  public static readonly PRODUCTIVITY_GROWTH_MULTIPLIER = 1.08;
 
   public static getUpgradeCost(gdpOrNation: number | Nation): number {
     const gdp =

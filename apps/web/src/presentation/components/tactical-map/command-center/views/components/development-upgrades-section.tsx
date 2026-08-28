@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  Cpu,
-  Zap,
-  Loader2,
-  TrendingUp,
-  Building2,
-  ShieldCheck,
-} from "lucide-react";
+import { Cpu, Zap, Loader2, TrendingUp, Building2 } from "lucide-react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
@@ -61,7 +54,7 @@ export function DevelopmentUpgradesSection({
         <div className="flex items-center justify-between text-xs pb-2.5 border-b border-border/50 font-mono">
           <span className="text-muted-foreground font-sans font-bold text-[11px]">
             هزینه ارتقا به لول{" "}
-            {PersianNumberFormatter.toPersianDigits(developmentLevel + 1)} (۴۰٪
+            {PersianNumberFormatter.toPersianDigits(developmentLevel + 1)} (۲۵٪
             GDP):
           </span>
           <span
@@ -73,14 +66,14 @@ export function DevelopmentUpgradesSection({
           </span>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl space-y-1 text-center sm:text-right">
             <div className="flex items-center gap-1 text-[10px] font-sans text-muted-foreground justify-center sm:justify-start">
               <TrendingUp size={12} className="text-gdp shrink-0" />
               <span className="truncate">نرخ بهره‌وری</span>
             </div>
             <span className="text-xs font-black text-gdp block font-mono">
-              +۵٪
+              +۸٪
             </span>
           </div>
 
@@ -90,17 +83,7 @@ export function DevelopmentUpgradesSection({
               <span className="truncate">ظرفیت مسکن</span>
             </div>
             <span className="text-xs font-black text-primary block font-mono">
-              +۸٪
-            </span>
-          </div>
-
-          <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl space-y-1 text-center sm:text-right">
-            <div className="flex items-center gap-1 text-[10px] font-sans text-muted-foreground justify-center sm:justify-start">
-              <ShieldCheck size={12} className="text-amber-500 shrink-0" />
-              <span className="truncate">هزینه ساخت نظامی</span>
-            </div>
-            <span className="text-xs font-black text-amber-500 block font-mono">
-              -۵٪
+              +۴٪
             </span>
           </div>
         </div>

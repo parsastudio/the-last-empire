@@ -57,9 +57,20 @@ export class ProvinceConquestHandler {
           CountryRegistry.resolveCanonicalId(targetProv.ownerNationId) ===
             cleanDefenderId
         ) {
+          const nextPopulation = Math.max(
+            10,
+            Math.floor(targetProv.population * 0.75),
+          );
+          const nextProductivity = Math.max(
+            100,
+            Math.floor((targetProv.perCapitaProductivity || 5000) * 0.75),
+          );
+
           const conqueredProv: Province = {
             ...targetProv,
             ownerNationId: cleanAttackerId,
+            population: nextPopulation,
+            perCapitaProductivity: nextProductivity,
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
           conqueredPixels = targetProv.pixelCount;

@@ -219,8 +219,9 @@ export class AIProcurementPlanner {
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const currentFleet = nation.navalFleet || 0;
     const totalInfantry = nation.military.infantry || 0;
+    const totalArmor = nation.military.armor || 0;
     const currentCapacity = currentFleet * 60;
-    const targetCapacity = Math.floor(totalInfantry * 0.5);
+    const targetCapacity = totalInfantry * 1 + totalArmor * 4;
     const fleetCost = 50_000_000_000;
 
     if (

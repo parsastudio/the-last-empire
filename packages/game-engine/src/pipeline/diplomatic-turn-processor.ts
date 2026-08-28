@@ -117,8 +117,12 @@ export class DiplomaticTurnProcessor {
       } else {
         if (!isReachable) {
           currentTension = Math.max(0, currentTension - 5);
-        } else if (currentTension > 10) {
-          currentTension = Math.max(10, currentTension - 3);
+        } else {
+          if (nextAlignment <= 15) {
+            currentTension = Math.min(45, currentTension + 2);
+          } else if (currentTension > 10) {
+            currentTension = Math.max(10, currentTension - 2);
+          }
         }
       }
 

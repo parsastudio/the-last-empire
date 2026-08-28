@@ -22,14 +22,14 @@ export interface AcceptanceEvaluation {
 export class UtilityDecisionEngine {
   public static calculateWarUtility(
     source: Nation,
-    _target: Nation,
+    target: Nation,
     vector: GeopoliticalVector,
   ): number {
-    if (vector.tension < 50) {
+    if (vector.tension < 25) {
       return -100;
     }
 
-    if (source.military.infantry < 4 || source.government.stability < 35) {
+    if (source.military.infantry < 2 || source.government.stability < 20) {
       return -100;
     }
 
@@ -37,9 +37,13 @@ export class UtilityDecisionEngine {
       return -100;
     }
 
+    if (!target.isAi && vector.powerRatio < 0.4 && vector.tension < 80) {
+      return -100;
+    }
+
     const tensionScore = vector.tension * 0.7;
     const rawPowerAdvantage =
-      vector.powerRatio < 0.8 ? (1.0 - vector.powerRatio) * 50 : -40;
+      vector.powerRatio < 0.9 ? (1.0 - vector.powerRatio) * 50 : -20;
 
     let opportunismMultiplier = 0.0;
     let distancePenalty = 0;
@@ -50,12 +54,12 @@ export class UtilityDecisionEngine {
         distancePenalty = 0;
         break;
       case "REGIONAL_MARITIME":
-        opportunismMultiplier = 0.35;
-        distancePenalty = -20;
+        opportunismMultiplier = 0.5;
+        distancePenalty = -10;
         break;
       case "DISTANT_OCEAN":
-        opportunismMultiplier = 0.0;
-        distancePenalty = -50;
+        opportunismMultiplier = 0.1;
+        distancePenalty = -30;
         break;
       default:
         return -100;
@@ -66,17 +70,13 @@ export class UtilityDecisionEngine {
         ? Math.round(rawPowerAdvantage * opportunismMultiplier)
         : rawPowerAdvantage;
 
-    const tierStrategyModifier = 0;
-    const regimeWarModifier = 0;
-    const alignmentDampener = vector.alignment * 0.5;
-    const stabilityScore = ((source.government.stability - 50) / 50) * 20;
+    const alignmentDampener = vector.alignment * 0.4;
+    const stabilityScore = ((source.government.stability - 50) / 50) * 15;
 
     return Math.round(
       tensionScore +
         powerAdvantageScore +
-        distancePenalty +
-        tierStrategyModifier +
-        regimeWarModifier -
+        distancePenalty -
         alignmentDampener +
         stabilityScore,
     );
@@ -98,15 +98,14 @@ export class UtilityDecisionEngine {
   }
 
   public static calculateNapUtility(
-    source: Nation,
+    _source: Nation,
     _target: Nation,
     vector: GeopoliticalVector,
   ): number {
-    const alignmentScore = vector.alignment * 0.4;
-    const neighborBonus = vector.isNeighbor ? 20 : 0;
-    const tensionPenalty = vector.tension * 0.3;
+    const alignmentScore = vector.alignment * 0.6;
+    const tensionPenalty = vector.tension * 0.5;
 
-    return Math.round(alignmentScore + neighborBonus - tensionPenalty);
+    return Math.round(alignmentScore - tensionPenalty);
   }
 
   public static calculatePeaceUtility(
@@ -115,16 +114,16 @@ export class UtilityDecisionEngine {
     vector: GeopoliticalVector,
   ): number {
     const exhaustionScore =
-      source.government.stability < 55
-        ? (55 - source.government.stability) * 1.2
-        : -25;
+      source.government.stability < 30
+        ? (30 - source.government.stability) * 1.5
+        : -45;
 
     const weaknessScore =
-      vector.powerRatio > 1.25 ? (vector.powerRatio - 1.0) * 45 : -35;
+      vector.powerRatio > 1.8 ? (vector.powerRatio - 1.0) * 35 : -45;
 
-    const reachBonus = !vector.isNeighbor && !vector.isNavalReachable ? 60 : 0;
-    const tensionDampener = vector.tension * 0.3;
-    const revanchismDampener = vector.reasons.revanchismPenalty * 0.5;
+    const reachBonus = !vector.isNeighbor && !vector.isNavalReachable ? 40 : 0;
+    const tensionDampener = vector.tension * 0.4;
+    const revanchismDampener = vector.reasons.revanchismPenalty * 0.8;
 
     return Math.round(
       exhaustionScore +
@@ -223,26 +222,22 @@ export class UtilityDecisionEngine {
       }
 
       case "NON_AGGRESSION_PACT": {
-        reasons.push({ label: "تمایل پایه به ثبات", value: 5 });
+        reasons.push({ label: "تمایل پایه به ثبات", value: -10 });
 
-        const alignVal = Math.round(vector.alignment * 0.4);
+        const alignVal = Math.round(vector.alignment * 0.5);
         reasons.push({ label: "همسویی سیاسی", value: alignVal });
 
-        const tensionVal = -Math.round(vector.tension * 0.3);
+        const tensionVal = -Math.round(vector.tension * 0.5);
         reasons.push({ label: "اصطکاک ژئوپلیتیک", value: tensionVal });
-
-        if (vector.isNeighbor) {
-          reasons.push({ label: "تثبیت امنیت مرز مشترک", value: 20 });
-        }
         break;
       }
 
       case "PEACE_TREATY": {
-        reasons.push({ label: "مقاومت اولیه در جبهه نبرد", value: -25 });
+        reasons.push({ label: "مقاومت اولیه در جبهه نبرد", value: -50 });
 
-        if (receiver.government.stability < 55) {
+        if (receiver.government.stability < 30) {
           const exhaustion = Math.round(
-            (55 - receiver.government.stability) * 1.2,
+            (30 - receiver.government.stability) * 1.5,
           );
           reasons.push({
             label: "خستگی جنگ و افت شدید ثبات",
@@ -250,19 +245,19 @@ export class UtilityDecisionEngine {
           });
         }
 
-        if (vector.powerRatio > 1.25) {
+        if (vector.powerRatio > 1.8) {
           const powerDiff = Math.min(
-            50,
-            Math.round((vector.powerRatio - 1.0) * 40),
+            60,
+            Math.round((vector.powerRatio - 1.0) * 35),
           );
           reasons.push({
             label: "برتری نظامی طرف مقابل در جبهه",
             value: powerDiff,
           });
-        } else if (vector.powerRatio < 0.8) {
+        } else if (vector.powerRatio < 0.9) {
           const advantagePenalty = -Math.min(
-            45,
-            Math.round((1.0 - vector.powerRatio) * 45),
+            50,
+            Math.round((1.0 - vector.powerRatio) * 50),
           );
           reasons.push({
             label: "برتری نظامی ارتش ما و تداوم تهاجم",
@@ -271,7 +266,7 @@ export class UtilityDecisionEngine {
         }
 
         if (vector.reasons.revanchismPenalty > 0) {
-          const revVal = -Math.round(vector.reasons.revanchismPenalty * 0.8);
+          const revVal = -Math.round(vector.reasons.revanchismPenalty * 1.0);
           reasons.push({
             label: "اشغال خاک مادری و ادعای سرزمینی",
             value: revVal,
@@ -279,7 +274,7 @@ export class UtilityDecisionEngine {
         }
 
         const animosityVal =
-          vector.alignment < 0 ? Math.round(vector.alignment * 0.25) : 0;
+          vector.alignment < 0 ? Math.round(vector.alignment * 0.35) : 0;
         if (animosityVal !== 0) {
           reasons.push({
             label: "بی‌اعتمادی و تخاصم سیاسی",
