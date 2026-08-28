@@ -11,6 +11,7 @@ import {
   CountryRegistry,
   MilitaryPowerCalculator,
   MilitaryQuotaCalculator,
+  AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -42,6 +43,9 @@ export class AIProcurementPlanner {
       this.evaluatePosture(nation, allNations, provincesMap, rankMap);
 
     const actions: GameAction[] = [];
+    const weights =
+      nation.doctrineWeights ??
+      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
 
     if (posture === "WAR") {
       const loanAction = this.evaluateWartimeLoan(
@@ -59,6 +63,7 @@ export class AIProcurementPlanner {
     const spendableBudget = this.calculateSpendableBudget(
       posture,
       effectiveTreasury,
+      weights.peacetimeArmyCap,
     );
 
     if (spendableBudget <= 0) {
@@ -73,8 +78,14 @@ export class AIProcurementPlanner {
 
     const currentTotalValuation =
       MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
-    const maxArmyValuation = Math.floor(gdp);
-    const globalRemainingValuation = Math.max(
+    const maxArmyValuation =
+      posture === "WAR"
+        ? Math.floor(gdp)
+        : posture === "THREAT"
+          ? Math.floor(gdp * Math.max(weights.peacetimeArmyCap, 0.8))
+          : Math.floor(gdp * weights.peacetimeArmyCap);
+
+    let globalRemainingValuation = Math.max(
       0,
       maxArmyValuation - currentTotalValuation,
     );
@@ -83,61 +94,122 @@ export class AIProcurementPlanner {
       return { actions, remainingTreasury: effectiveTreasury };
     }
 
-    const deficits: {
-      unitType: UnitType;
-      deficitMoney: number;
-      unitPrice: number;
-      maxAllowedUnits: number;
-    }[] = [];
-    let totalDeficitMoney = 0;
+    const importRatio = weights.armsImportRatio;
+    let targetImportBudget = Math.floor(spendableBudget * importRatio);
+    let targetDomesticBudget = spendableBudget - targetImportBudget;
 
+    let totalSpent = 0;
     const unitTypes: UnitType[] = [
-      "INFANTRY",
-      "ARMOR",
-      "AIR_DEFENSE",
       "AIR_FORCE",
+      "AIR_DEFENSE",
+      "ARMOR",
       "DRONE_MISSILE",
+      "INFANTRY",
     ];
 
-    for (let i = 0; i < unitTypes.length; i++) {
-      const type = unitTypes[i]!;
-      const q = quotas[type];
-      if (q.remainingRoom <= 0 || q.unitPrice <= 0) continue;
+    if (targetImportBudget > 0) {
+      const eligibleSellers = this.findEligibleArmsSellers(nation, allNations);
 
-      const deficitMoney = q.remainingRoom * q.unitPrice;
-      deficits.push({
-        unitType: type,
-        deficitMoney,
-        unitPrice: q.unitPrice,
-        maxAllowedUnits: q.remainingRoom,
-      });
-      totalDeficitMoney += deficitMoney;
+      if (eligibleSellers.length > 0) {
+        for (let i = 0; i < unitTypes.length; i++) {
+          const type = unitTypes[i]!;
+          const q = quotas[type];
+          if (q.remainingRoom <= 0 || targetImportBudget <= 0) continue;
+
+          const bestSeller = eligibleSellers[0]!;
+          const unitPrice =
+            MilitaryPricingCalculator.calculateArmsImportUnitPrice(
+              type,
+              nation.military.techLevel,
+              bestSeller.military.techLevel,
+            );
+
+          const maxUnitsByMoney = Math.floor(targetImportBudget / unitPrice);
+          const maxUnitsByValuation = Math.floor(
+            globalRemainingValuation /
+              MilitaryPricingCalculator.calculateUnitTypePrice(type),
+          );
+          const allowedUnits = Math.min(
+            q.remainingRoom,
+            maxUnitsByMoney,
+            maxUnitsByValuation,
+          );
+
+          if (allowedUnits > 0) {
+            const cost = allowedUnits * unitPrice;
+            actions.push(
+              ActionFactory.buyArmsMarket(
+                nation.id,
+                bestSeller.id,
+                type,
+                allowedUnits,
+              ),
+            );
+            targetImportBudget -= cost;
+            totalSpent += cost;
+            globalRemainingValuation -=
+              allowedUnits *
+              MilitaryPricingCalculator.calculateUnitTypePrice(type);
+            q.remainingRoom -= allowedUnits;
+          }
+        }
+      } else {
+        targetDomesticBudget += targetImportBudget;
+        targetImportBudget = 0;
+      }
     }
 
-    if (deficits.length === 0 || totalDeficitMoney <= 0) {
-      return { actions, remainingTreasury: effectiveTreasury };
-    }
+    if (targetDomesticBudget > 0 && globalRemainingValuation > 0) {
+      const domesticDeficits: {
+        unitType: UnitType;
+        deficitMoney: number;
+        unitPrice: number;
+        maxAllowedUnits: number;
+      }[] = [];
+      let totalDomesticDeficitMoney = 0;
 
-    let remainingBudget = Math.min(spendableBudget, globalRemainingValuation);
-    let totalSpent = 0;
+      for (let i = 0; i < unitTypes.length; i++) {
+        const type = unitTypes[i]!;
+        const q = quotas[type];
+        if (q.remainingRoom <= 0 || q.unitPrice <= 0) continue;
 
-    for (let i = 0; i < deficits.length; i++) {
-      const { unitType, deficitMoney, unitPrice, maxAllowedUnits } =
-        deficits[i]!;
-      const shareOfDeficit = deficitMoney / totalDeficitMoney;
-      const allocatedMoney = Math.min(
-        remainingBudget,
-        Math.floor(spendableBudget * shareOfDeficit),
-      );
+        const deficitMoney = q.remainingRoom * q.unitPrice;
+        domesticDeficits.push({
+          unitType: type,
+          deficitMoney,
+          unitPrice: q.unitPrice,
+          maxAllowedUnits: q.remainingRoom,
+        });
+        totalDomesticDeficitMoney += deficitMoney;
+      }
 
-      const wantedQuantity = Math.floor(allocatedMoney / unitPrice);
-      const quantity = Math.min(wantedQuantity, maxAllowedUnits);
+      if (domesticDeficits.length > 0 && totalDomesticDeficitMoney > 0) {
+        let remainingDomBudget = Math.min(
+          targetDomesticBudget,
+          globalRemainingValuation,
+        );
 
-      if (quantity > 0) {
-        const cost = quantity * unitPrice;
-        actions.push(ActionFactory.recruitUnit(nation.id, unitType, quantity));
-        remainingBudget -= cost;
-        totalSpent += cost;
+        for (let i = 0; i < domesticDeficits.length; i++) {
+          const { unitType, deficitMoney, unitPrice, maxAllowedUnits } =
+            domesticDeficits[i]!;
+          const shareOfDeficit = deficitMoney / totalDomesticDeficitMoney;
+          const allocatedMoney = Math.min(
+            remainingDomBudget,
+            Math.floor(targetDomesticBudget * shareOfDeficit),
+          );
+
+          const wantedQuantity = Math.floor(allocatedMoney / unitPrice);
+          const quantity = Math.min(wantedQuantity, maxAllowedUnits);
+
+          if (quantity > 0) {
+            const cost = quantity * unitPrice;
+            actions.push(
+              ActionFactory.recruitUnit(nation.id, unitType, quantity),
+            );
+            remainingDomBudget -= cost;
+            totalSpent += cost;
+          }
+        }
       }
     }
 
@@ -145,6 +217,32 @@ export class AIProcurementPlanner {
       actions,
       remainingTreasury: Math.max(0, effectiveTreasury - totalSpent),
     };
+  }
+
+  private static findEligibleArmsSellers(
+    buyer: Nation,
+    allNations: Record<string, Nation>,
+  ): Nation[] {
+    const sellers: Nation[] = [];
+    const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
+
+    for (const seller of Object.values(allNations)) {
+      if (!seller.isAlive || seller.id === buyer.id) continue;
+      const canonicalSeller = CountryRegistry.resolveCanonicalId(seller.id);
+      if (canonicalSeller === canonicalBuyer) continue;
+
+      const rel =
+        seller.relations[canonicalBuyer] || seller.relations[buyer.id];
+      const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
+      const tension = rel ? (rel.tension ?? 10) : 10;
+
+      if (stance !== "WAR" && tension < 50) {
+        sellers.push(seller);
+      }
+    }
+
+    sellers.sort((a, b) => b.military.techLevel - a.military.techLevel);
+    return sellers;
   }
 
   private static evaluateWartimeLoan(
@@ -237,19 +335,6 @@ export class AIProcurementPlanner {
     return null;
   }
 
-  public static calculateTotalArmyValuation(nation: Nation): number {
-    const militaryValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
-
-    let queuedValuation = 0;
-    const queue = nation.recruitmentQueue || [];
-    for (let i = 0; i < queue.length; i++) {
-      queuedValuation += queue[i]!.totalCost;
-    }
-
-    return militaryValuation + queuedValuation;
-  }
-
   public static evaluatePosture(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -303,12 +388,13 @@ export class AIProcurementPlanner {
   public static calculateSpendableBudget(
     posture: AIPosture,
     effectiveTreasury: number,
+    peacetimeCap = 0.5,
   ): number {
     const disposable = Math.max(0, effectiveTreasury);
     if (disposable <= 0) return 0;
 
-    let postureMultiplier = 0.35;
-    if (posture === "THREAT") postureMultiplier = 0.65;
+    let postureMultiplier = peacetimeCap * 0.7;
+    if (posture === "THREAT") postureMultiplier = Math.max(0.65, peacetimeCap);
     else if (posture === "WAR") postureMultiplier = 0.9;
 
     return Math.floor(disposable * postureMultiplier);

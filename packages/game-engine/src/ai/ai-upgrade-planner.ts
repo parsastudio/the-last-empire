@@ -10,7 +10,11 @@ import {
   AIProcurementPlanner,
   AIPosture,
 } from "@/engine/ai/ai-procurement-planner";
-import { NationGettersUtility, getNationGdp } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  getNationGdp,
+  AI_DOCTRINE_PRESETS,
+} from "@geopolitics/domain";
 
 export interface UpgradePlanResult {
   actions: GameAction[];
@@ -30,6 +34,10 @@ export class AIUpgradePlanner {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
     const actions: GameAction[] = [];
+
+    const weights =
+      nation.doctrineWeights ??
+      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
 
     const pop = NationGettersUtility.getPopulation(nation.id, provincesMap);
     const maxCap = NationGettersUtility.getMaxPopulationCapacity(
@@ -51,22 +59,22 @@ export class AIUpgradePlanner {
 
     const gdp = getNationGdp(nation, provincesMap);
     const devCost = DevelopmentManager.getUpgradeCost(gdp);
-    const isUnderHousingPressure = capacityPercentage >= 90;
-    const hasDevelopmentSurplus = currentTreasury >= Math.floor(devCost * 1.25);
-
-    if (
-      (isUnderHousingPressure || hasDevelopmentSurplus) &&
-      currentTreasury >= devCost
-    ) {
-      actions.push(ActionFactory.upgradeDevelopment(nation.id));
-      currentTreasury -= devCost;
-    }
-
     const techCost = ResearchManager.getMilitaryTechCost(
       nation,
       provincesMap,
       gdp,
     );
+
+    const devPriority = weights.developmentPriority;
+    const techPriority = weights.researchFocusWeight;
+
+    const isUnderHousingPressure = capacityPercentage >= 85;
+    const devThresholdMultiplier = Math.max(1.0, 2.0 - devPriority);
+    const isDevCandidate =
+      currentTreasury >= devCost &&
+      (isUnderHousingPressure ||
+        currentTreasury >= Math.floor(devCost * devThresholdMultiplier));
+
     const isWar = posture === "WAR";
     const isOutTeched = this.hasSuperiorTechNeighbor(
       nation,
@@ -74,14 +82,31 @@ export class AIUpgradePlanner {
       provincesMap,
       ownedProvinces,
     );
-    const hasTechSurplus = currentTreasury >= Math.floor(techCost * 1.5);
+    const techThresholdMultiplier = Math.max(1.0, 2.2 - techPriority);
+    const isTechCandidate =
+      currentTreasury >= techCost &&
+      (isWar ||
+        isOutTeched ||
+        currentTreasury >= Math.floor(techCost * techThresholdMultiplier));
 
-    if (
-      (isWar || isOutTeched || hasTechSurplus) &&
-      currentTreasury >= techCost
-    ) {
-      actions.push(ActionFactory.investResearch(nation.id));
-      currentTreasury -= techCost;
+    if (devPriority >= techPriority) {
+      if (isDevCandidate && currentTreasury >= devCost) {
+        actions.push(ActionFactory.upgradeDevelopment(nation.id));
+        currentTreasury -= devCost;
+      }
+      if (isTechCandidate && currentTreasury >= techCost) {
+        actions.push(ActionFactory.investResearch(nation.id));
+        currentTreasury -= techCost;
+      }
+    } else {
+      if (isTechCandidate && currentTreasury >= techCost) {
+        actions.push(ActionFactory.investResearch(nation.id));
+        currentTreasury -= techCost;
+      }
+      if (isDevCandidate && currentTreasury >= devCost) {
+        actions.push(ActionFactory.upgradeDevelopment(nation.id));
+        currentTreasury -= devCost;
+      }
     }
 
     return {
