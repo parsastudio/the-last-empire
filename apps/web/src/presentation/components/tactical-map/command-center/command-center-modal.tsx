@@ -29,8 +29,9 @@ export function getCommandCenterMeta(
       };
     case "politics":
       return {
-        title: "دیوان عالی سیاست و قوانین",
-        subtitle: "تنظیم مالیات، تعرفه‌ها، وام‌های بین‌المللی و تغییر رژیم",
+        title: "دیوان عالی سیاست، دکترین مالی و قوانین",
+        subtitle:
+          "تنظیم دکترین اقتصاد ملی و ترانزیت، تسهیلات بین‌المللی و تغییر رژیم",
       };
     case "espionage":
       return {

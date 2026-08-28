@@ -4,10 +4,9 @@ import { useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import {
-  TaxCalculator,
   MilitaryPayrollCalculator,
-  TariffCalculator,
-} from "@/engine/economy/economy-calculators";
+  FiscalRevenueCalculator,
+} from "@geopolitics/game-engine";
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
@@ -17,6 +16,7 @@ export interface HumanResourceMetrics {
   nation: Nation | null;
   treasury: number;
   netIncomePerTurn: number;
+  grossIncomePerTurn: number;
   population: number;
   maxPopulationCapacity: number;
   capacityPercentage: number;
@@ -38,6 +38,7 @@ export function useGameResources(
         nation: null,
         treasury: 0,
         netIncomePerTurn: 0,
+        grossIncomePerTurn: 0,
         population: 0,
         maxPopulationCapacity: 100000000,
         capacityPercentage: 0,
@@ -57,6 +58,7 @@ export function useGameResources(
         nation: null,
         treasury: 0,
         netIncomePerTurn: 0,
+        grossIncomePerTurn: 0,
         population: 0,
         maxPopulationCapacity: 100000000,
         capacityPercentage: 0,
@@ -79,25 +81,20 @@ export function useGameResources(
       gameState.provinces,
     );
 
-    const taxResult = TaxCalculator.evaluateTaxPolicy(
-      nation,
-      gameState.provinces,
-    );
-    const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
-    const tariffResult = TariffCalculator.calculateTariffEffects(
+    const fiscalResult = FiscalRevenueCalculator.calculate(
       nation,
       gameState.nations,
       gameState.provinces,
     );
+    const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
 
     const navalSecurityIncome = Math.floor(
       (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
     );
-    const totalIncome =
-      taxResult.taxIncome + tariffResult.tariffRevenue + navalSecurityIncome;
+    const totalGrossIncome = fiscalResult.totalRevenue + navalSecurityIncome;
     const totalExpenses =
       payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.07);
-    const netIncome = totalIncome - totalExpenses;
+    const netIncome = totalGrossIncome - totalExpenses;
 
     const demoMetrics = DemographicsCalculator.getMetrics(
       population,
@@ -108,6 +105,7 @@ export function useGameResources(
       nation,
       treasury: nation.treasury,
       netIncomePerTurn: netIncome,
+      grossIncomePerTurn: totalGrossIncome,
       population,
       maxPopulationCapacity: demoMetrics.maxPopulationCapacity,
       capacityPercentage: demoMetrics.capacityPercentage,
