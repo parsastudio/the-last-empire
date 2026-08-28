@@ -80,17 +80,30 @@ export class ActionFactory {
 
   public static buyProvince(
     nationId: string,
-    targetNationId: string,
-    provinceId: number,
-    cost: number,
+    targetNationIdOrProvinceId: string | number,
+    provinceId?: number,
+    cost = 0,
   ): BuyProvinceAction {
+    let targetNationId = "";
+    let effectiveProvinceId = 0;
+    let effectiveCost = cost;
+
+    if (typeof targetNationIdOrProvinceId === "number") {
+      effectiveProvinceId = targetNationIdOrProvinceId;
+      effectiveCost = typeof provinceId === "number" ? provinceId : 0;
+    } else {
+      targetNationId = targetNationIdOrProvinceId;
+      effectiveProvinceId = provinceId ?? 0;
+      effectiveCost = cost ?? 0;
+    }
+
     return {
       id: this.createId("buy-province"),
       nationId,
       type: "BUY_PROVINCE",
       targetNationId,
-      provinceId,
-      cost,
+      provinceId: effectiveProvinceId,
+      cost: effectiveCost,
     };
   }
 

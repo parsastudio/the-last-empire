@@ -40,9 +40,9 @@ export const BuyProvinceActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   type: z.literal("BUY_PROVINCE"),
-  targetNationId: z.string(),
+  targetNationId: z.string().default(""),
   provinceId: z.number().positive(),
-  cost: z.number().positive(),
+  cost: z.number().nonnegative().default(0),
 });
 
 export const DiplomaticProposalActionSchema = z.object({
