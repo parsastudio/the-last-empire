@@ -30,6 +30,11 @@ export const EspionageReconDataSchema = z.object({
   gdp: z.number().positive(),
   stability: z.number().min(0).max(100),
   activeProvincesCount: z.number().nonnegative(),
+  guarantorNationId: z.string().optional(),
+  guarantorName: z.string().optional(),
+  guarantorFlagCode: z.string().optional(),
+  guarantorTechLevel: z.number().optional(),
+  guarantorAuxiliaryValuation: z.number().optional(),
 });
 
 export const EspionageSabotageDataSchema = z.object({

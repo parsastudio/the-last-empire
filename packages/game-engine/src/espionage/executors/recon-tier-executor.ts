@@ -5,19 +5,41 @@ import {
   EspionageReconData,
 } from "@/domain/espionage/espionage.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, CountryRegistry } from "@geopolitics/domain";
 
 export class ReconTierExecutor {
   public static execute(
     target: Nation,
     outcome: EspionageOutcome,
     provincesMap?: Record<string, Province>,
+    allNations?: Record<string, Nation>,
   ): { reconData: EspionageReconData; message: string } {
     const targetGdp = getNationGdp(target, provincesMap);
     const ownedCount = NationGettersUtility.getOwnedProvinces(
       target.id,
       provincesMap,
     ).length;
+
+    let guarantorNationId: string | undefined = undefined;
+    let guarantorName: string | undefined = undefined;
+    let guarantorFlagCode: string | undefined = undefined;
+    let guarantorTechLevel: number | undefined = undefined;
+    let guarantorAuxiliaryValuation: number | undefined = undefined;
+
+    if (target.securityGuarantorId && allNations) {
+      const gCanonical = CountryRegistry.resolveCanonicalId(
+        target.securityGuarantorId,
+      );
+      const guarantor =
+        allNations[gCanonical] || allNations[target.securityGuarantorId];
+      if (guarantor && guarantor.isAlive) {
+        guarantorNationId = guarantor.id;
+        guarantorName = guarantor.name;
+        guarantorFlagCode = guarantor.flagCode;
+        guarantorTechLevel = guarantor.military.techLevel;
+        guarantorAuxiliaryValuation = Math.floor(targetGdp * 0.3);
+      }
+    }
 
     const reconData: EspionageReconData = {
       infantry: target.military.infantry,
@@ -31,6 +53,11 @@ export class ReconTierExecutor {
       gdp: targetGdp,
       stability: target.government.stability,
       activeProvincesCount: ownedCount || 1,
+      guarantorNationId,
+      guarantorName,
+      guarantorFlagCode,
+      guarantorTechLevel,
+      guarantorAuxiliaryValuation,
     };
 
     let message = "";
