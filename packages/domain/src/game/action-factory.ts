@@ -3,6 +3,7 @@ import {
   RecruitUnitAction,
   BuyArmsMarketAction,
   BuyNavalFleetAction,
+  BuyProvinceAction,
   DiplomaticProposalAction,
   RespondDiplomaticProposalAction,
   UpgradeDevelopmentAction,
@@ -74,6 +75,18 @@ export class ActionFactory {
       nationId,
       type: "BUY_NAVAL_FLEET",
       quantity,
+    };
+  }
+
+  public static buyProvince(
+    nationId: string,
+    provinceId: number,
+  ): BuyProvinceAction {
+    return {
+      id: this.createId("buy-province"),
+      nationId,
+      type: "BUY_PROVINCE",
+      provinceId,
     };
   }
 

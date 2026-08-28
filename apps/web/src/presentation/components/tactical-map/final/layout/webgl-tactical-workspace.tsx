@@ -11,6 +11,7 @@ import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/mo
 import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
 import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
+import { BuyProvinceModal } from "@/presentation/components/tactical-map/modals/buy-province-modal";
 import {
   LayerController,
   TacticalLayer,
@@ -90,6 +91,14 @@ export function WebGLTacticalWorkspace({
     targetProvinceId: null,
   });
 
+  const [buyProvinceState, setBuyProvinceState] = useState<{
+    isOpen: boolean;
+    provinceId: number | null;
+  }>({
+    isOpen: false,
+    provinceId: null,
+  });
+
   const humanNation =
     effectiveGameState && effectiveGameState.humanNationId
       ? effectiveGameState.nations[effectiveGameState.humanNationId] || null
@@ -126,6 +135,18 @@ export function WebGLTacticalWorkspace({
         targetCode: iso3,
         targetProvinceId: provinceId ?? null,
       });
+    },
+    [],
+  );
+
+  const handleSelectBuyProvinceContext = useCallback(
+    (_iso3: string, provinceId?: number) => {
+      if (provinceId) {
+        setBuyProvinceState({
+          isOpen: true,
+          provinceId,
+        });
+      }
     },
     [],
   );
@@ -194,6 +215,7 @@ export function WebGLTacticalWorkspace({
         scaleRef={scaleRef}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
+        onSelectBuyProvinceContext={handleSelectBuyProvinceContext}
       />
 
       <TopHudBar metrics={metrics} />
@@ -236,6 +258,15 @@ export function WebGLTacticalWorkspace({
         onClose={() =>
           setDirectAttackState((prev) => ({ ...prev, isOpen: false }))
         }
+      />
+
+      <BuyProvinceModal
+        isOpen={buyProvinceState.isOpen}
+        provinceId={buyProvinceState.provinceId}
+        humanNation={humanNation}
+        provincesMap={effectiveGameState?.provinces}
+        nationsMap={effectiveGameState?.nations}
+        onClose={() => setBuyProvinceState({ isOpen: false, provinceId: null })}
       />
 
       <BattleDebriefModal

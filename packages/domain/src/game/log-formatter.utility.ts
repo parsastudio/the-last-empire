@@ -1,6 +1,7 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export class TurnLogFormatter {
   private static resolveName(
@@ -44,6 +45,13 @@ export class TurnLogFormatter {
 
       case "WAR_DECLARED":
         return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;
+
+      case "PROVINCE_PURCHASED": {
+        const provinceName = String(params["provinceName"] || "منطقه مرزی");
+        const costNum = Number(params["cost"] || 0);
+        const costText = PersianNumberFormatter.formatCurrency(costNum, true);
+        return `معاهده خرید قلمرو: کشور ${sourceName} با پرداخت ${costText} به خزانه‌داری ${targetName}، حاکمیت ${provinceName} را بدون درگیری الحاق کرد.`;
+      }
 
       case "DIPLOMATIC_PROPOSAL_SENT": {
         const rawType = String(params["treatyType"] || "معاهده");
