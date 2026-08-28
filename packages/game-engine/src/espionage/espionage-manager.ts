@@ -140,7 +140,12 @@ export class EspionageManager {
     let message = "";
 
     if (tier === 1) {
-      const recon = ReconTierExecutor.execute(target, outcome, state.provinces);
+      const recon = ReconTierExecutor.execute(
+        target,
+        outcome,
+        state.provinces,
+        state.nations,
+      );
       reconData = recon.reconData;
       message = recon.message;
     } else if (tier === 2) {
@@ -233,7 +238,7 @@ export class EspionageManager {
           "ESPIONAGE_OPERATION",
           {
             details:
-              "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید (عاملان ناشناس بدون رد متواری شدند).",
+              "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید.",
             tier,
             outcome,
             role: "DEFENDER",

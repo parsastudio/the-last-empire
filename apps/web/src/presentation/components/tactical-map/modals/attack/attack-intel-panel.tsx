@@ -6,13 +6,15 @@ import {
   ShieldAlert,
   Crosshair,
   Plane,
-  Eye,
   Loader2,
   CheckCircle2,
   AlertTriangle,
+  ShieldCheck,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
+import { AuxiliaryGuarantorDefense } from "@/domain/reports/combat-report.schema";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 
 export interface TacticalForecast {
   winProbability: number;
@@ -22,6 +24,7 @@ export interface TacticalForecast {
   phase2Prediction: string;
   phase3Prediction: string;
   valuationRatio: number;
+  auxiliaryGuarantor?: AuxiliaryGuarantorDefense;
 }
 
 interface AttackIntelPanelProps {
@@ -45,6 +48,11 @@ export function AttackIntelPanel({
   onExecuteRecon,
   onAutoOptimizeDeploy,
 }: AttackIntelPanelProps) {
+  const aux = forecast.auxiliaryGuarantor;
+  const auxFlag = aux
+    ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
+    : "";
+
   const probColor =
     forecast.winProbability >= 75
       ? "text-gdp"
@@ -130,6 +138,27 @@ export function AttackIntelPanel({
               <span>بهترین آرایش و ترکیب تهاجم</span>
             </button>
           </div>
+
+          {aux && (
+            <div className="p-2.5 bg-cyan-950/40 border border-cyan-500/40 rounded-2xl flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-cyan-300">
+                <ShieldCheck size={16} className="text-cyan-400" />
+                <span>
+                  هشدار اشراف اطلاعاتی: کشور تحت چتر امنیتی{" "}
+                  <strong>{aux.guarantorName}</strong> {auxFlag} قرار دارد.
+                </span>
+              </div>
+              <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-500/20 px-2 py-0.5 rounded-lg border border-cyan-500/30">
+                +
+                {PersianNumberFormatter.formatCurrency(
+                  aux.budgetValuation,
+                  true,
+                )}{" "}
+                نیروی ضربت لِوِل{" "}
+                {PersianNumberFormatter.toPersianDigits(aux.techLevel)}
+              </span>
+            </div>
+          )}
 
           <div className="grid grid-cols-5 gap-1.5 font-mono text-[10px]">
             <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">

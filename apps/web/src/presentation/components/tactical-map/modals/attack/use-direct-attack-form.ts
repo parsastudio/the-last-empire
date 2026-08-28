@@ -66,6 +66,18 @@ export function useDirectAttackForm({
     );
   }, [gameState, targetNationId]);
 
+  const targetGuarantorNation = useMemo(() => {
+    if (!gameState || !targetNation?.securityGuarantorId) return null;
+    const canonical = CountryRegistry.resolveCanonicalId(
+      targetNation.securityGuarantorId,
+    );
+    return (
+      gameState.nations[canonical] ||
+      gameState.nations[targetNation.securityGuarantorId] ||
+      null
+    );
+  }, [gameState, targetNation]);
+
   const targetProvince = useMemo(() => {
     if (!gameState || !targetProvinceId) return null;
     return gameState.provinces[targetProvinceId.toString()] || null;
@@ -149,8 +161,8 @@ export function useDirectAttackForm({
 
   const reputationPenalty = useMemo(() => {
     if (isWarStance) return 0;
-    if (currentStance === "ALLIANCE") return 50;
-    if (currentStance === "NON_AGGRESSION_PACT") return 35;
+    if (currentStance === "STRATEGIC_PARTNERSHIP") return 40;
+    if (currentStance === "NON_AGGRESSION_PACT") return 25;
     return 15;
   }, [isWarStance, currentStance]);
 
@@ -181,6 +193,7 @@ export function useDirectAttackForm({
       armorToDeploy,
       airForceToDeploy,
       gameState?.provinces,
+      targetGuarantorNation,
     );
 
     let winProb = 50;
@@ -196,12 +209,14 @@ export function useDirectAttackForm({
       isCapitulationPredicted: calc.isFullCapitulation,
       phase1Prediction: calc.phase1Missile.phaseWinner,
       phase2Prediction: calc.phase2Air.phaseWinner,
-      phase3Prediction: calc.phase3Ground.phaseWinner,
+      phase3Ground: calc.phase3Ground.phaseWinner,
       valuationRatio: calc.valuationRatio,
+      auxiliaryGuarantor: calc.auxiliaryGuarantor,
     };
   }, [
     humanNation,
     targetNation,
+    targetGuarantorNation,
     dronesToLaunch,
     infantryToDeploy,
     armorToDeploy,
@@ -327,6 +342,7 @@ export function useDirectAttackForm({
 
   return {
     targetNation,
+    targetGuarantorNation,
     targetProvince,
     isLandNeighbor,
     isNavalValid,
