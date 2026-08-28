@@ -9,6 +9,7 @@ import {
   Globe,
   Crown,
   Landmark,
+  ShieldCheck,
 } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -27,6 +28,7 @@ export interface HoverCountryInfo {
   regionCapacityPercentage?: number;
   totalGdpText?: string;
   gdpSharePct?: number;
+  hasSecurityGuarantee?: boolean;
 }
 
 function calculateHudPosition(
@@ -78,6 +80,15 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
       );
     }
 
+    if (hoverData.hasSecurityGuarantee) {
+      return (
+        <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-2 py-0.5 rounded-lg shadow-sm">
+          <ShieldCheck size={11} />
+          <span>چتر امنیتی</span>
+        </span>
+      );
+    }
+
     switch (hoverData.rawStance) {
       case "WAR":
         return (
@@ -86,11 +97,11 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
             <span>وضعیت نبرد</span>
           </span>
         );
-      case "ALLIANCE":
+      case "STRATEGIC_PARTNERSHIP":
         return (
           <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-gdp/20 text-gdp border border-gdp/35 px-2 py-0.5 rounded-lg shadow-sm">
             <CheckCircle2 size={11} />
-            <span>اتحاد کامل</span>
+            <span>شراکت استراتژیک</span>
           </span>
         );
       case "NON_AGGRESSION_PACT":

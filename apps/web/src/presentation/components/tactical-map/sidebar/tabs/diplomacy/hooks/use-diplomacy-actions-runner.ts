@@ -45,6 +45,10 @@ export function useDiplomacyActionsRunner({
     return TreatyEvaluator.calculateForeignAidCost(senderGdp, targetGdp);
   }, [senderGdp, targetGdp]);
 
+  const securityGuaranteeCost = useMemo(() => {
+    return Math.floor(senderGdp * 0.1);
+  }, [senderGdp]);
+
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
     requiresBetrayalCheck: boolean,
@@ -98,11 +102,35 @@ export function useDiplomacyActionsRunner({
     }
   };
 
-  const handleAlliance = async () => {
+  const handleStrategicPartnership = async () => {
     const action = ActionFactory.diplomaticProposal(
       nationId,
       targetNationId,
-      "FULL_ALLIANCE",
+      "STRATEGIC_PARTNERSHIP",
+    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
+  };
+
+  const handleSecurityGuarantee = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "SECURITY_GUARANTEE",
+    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
+  };
+
+  const handleCancelSecurityGuarantee = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "CANCEL_SECURITY_GUARANTEE",
     );
     const res = await dispatchAction(action);
     if (res.success && res.resultData) {
@@ -148,10 +176,14 @@ export function useDiplomacyActionsRunner({
     confirmModal,
     feedbackModal,
     foreignAidCost,
+    securityGuaranteeCost,
     handleSendAid,
     handlePeaceTreaty: () => executeOrConfirm(handlePeaceTreaty, false),
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),
-    handleAlliance: () => executeOrConfirm(handleAlliance, false),
+    handleStrategicPartnership: () =>
+      executeOrConfirm(handleStrategicPartnership, false),
+    handleSecurityGuarantee,
+    handleCancelSecurityGuarantee,
     handleCancelTreaty: () => executeOrConfirm(handleCancelTreaty, false),
     handleDeclareWar: () => executeOrConfirm(handleDeclareWar, true),
     closeConfirmModal,

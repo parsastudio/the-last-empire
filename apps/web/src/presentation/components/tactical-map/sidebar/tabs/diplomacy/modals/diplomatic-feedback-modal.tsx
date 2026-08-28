@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   Radio,
   Globe,
+  ShieldCheck,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -18,7 +19,9 @@ export interface DiplomaticProposalFeedback {
   proposalType:
     | "PEACE_TREATY"
     | "NON_AGGRESSION_PACT"
-    | "FULL_ALLIANCE"
+    | "STRATEGIC_PARTNERSHIP"
+    | "SECURITY_GUARANTEE"
+    | "CANCEL_SECURITY_GUARANTEE"
     | "SEND_FOREIGN_AID"
     | "DECLARE_WAR"
     | "CANCEL_TREATY";
@@ -41,8 +44,12 @@ function getProposalName(
   type: DiplomaticProposalFeedback["proposalType"],
 ): string {
   switch (type) {
-    case "FULL_ALLIANCE":
-      return "اتحاد کامل";
+    case "STRATEGIC_PARTNERSHIP":
+      return "شراکت استراتژیک";
+    case "SECURITY_GUARANTEE":
+      return "پیمان چتر امنیتی";
+    case "CANCEL_SECURITY_GUARANTEE":
+      return "لغو چتر امنیتی";
     case "NON_AGGRESSION_PACT":
       return "پیمان عدم تخاصم";
     case "PEACE_TREATY":
@@ -71,6 +78,8 @@ export function DiplomaticFeedbackModal({
   const isAccepted = feedback.accepted;
   const proposalName = getProposalName(feedback.proposalType);
   const isCancel = feedback.proposalType === "CANCEL_TREATY";
+  const isSecurityCancel =
+    feedback.proposalType === "CANCEL_SECURITY_GUARANTEE";
   const isWar = feedback.proposalType === "DECLARE_WAR";
   const defense = feedback.defenseEvent;
 
@@ -119,8 +128,7 @@ export function DiplomaticFeedbackModal({
                   {defense.unitName}
                 </strong>{" "}
                 از کشور {defense.sellerName}{" "}
-                {getFlagEmoji(defense.sellerFlagCode || "")} نمود تا خطوط
-                دفاعی‌اش را تقویت کند.
+                {getFlagEmoji(defense.sellerFlagCode || "")} نمود.
               </p>
             </div>
           )}
@@ -129,18 +137,8 @@ export function DiplomaticFeedbackModal({
             <div className="w-full bg-secondary/60 border border-border/70 p-3 rounded-2xl flex items-center gap-2.5 text-[11px] text-muted-foreground text-right">
               <AlertTriangle size={15} className="text-amber-400 shrink-0" />
               <span>
-                دولت {feedback.targetName} به سقف بدهی ملی مجاز رسیده و توان
-                دریافت وام اضطراری جهت تسلیح بیشتر را ندارد.
-              </span>
-            </div>
-          )}
-
-          {defense?.type === "NO_SELLER" && (
-            <div className="w-full bg-secondary/60 border border-border/70 p-3 rounded-2xl flex items-center gap-2.5 text-[11px] text-muted-foreground text-right">
-              <ShieldAlert size={15} className="text-primary shrink-0" />
-              <span>
-                دولت {feedback.targetName} به دلیل فقدان شریک تجاری همسو در
-                بازار بین‌الملل، نتوانست خرید فوری تجهیزات انجام دهد.
+                دولت {feedback.targetName} به سقف بدهی مجاز رسیده و توان دریافت
+                وام اضطراری جهت تسلیح بیشتر را ندارد.
               </span>
             </div>
           )}
@@ -168,7 +166,7 @@ export function DiplomaticFeedbackModal({
         <div
           className={`w-16 h-16 rounded-full flex items-center justify-center border shadow-xl transition-all ${
             isAccepted
-              ? isCancel
+              ? isCancel || isSecurityCancel
                 ? "bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-amber-500/20"
                 : "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-emerald-500/20"
               : "bg-rose-500/15 border-rose-500/40 text-rose-400 shadow-rose-500/20"
@@ -187,7 +185,17 @@ export function DiplomaticFeedbackModal({
             <span>{feedback.targetName}</span>
           </div>
 
-          {isCancel ? (
+          {isSecurityCancel ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground leading-relaxed">
+                پیمان چتر امنیتی با دولت{" "}
+                <strong className="text-foreground">
+                  {feedback.targetName}
+                </strong>{" "}
+                لغو گردید.
+              </p>
+            </div>
+          ) : isCancel ? (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground leading-relaxed">
                 معاهده پیشین با دولت{" "}
@@ -216,10 +224,17 @@ export function DiplomaticFeedbackModal({
                 شما را{" "}
                 <span className="font-black text-emerald-400">پذیرفت</span>.
               </p>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">
-                <Globe size={12} />
-                <span>۱+ امتیاز اعتبار جهانی</span>
-              </div>
+              {feedback.proposalType === "SECURITY_GUARANTEE" ? (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[11px] font-mono font-bold text-cyan-300">
+                  <ShieldCheck size={12} />
+                  <span>فعال‌سازی ۳۰٪ نیروی ضربت پشتیبان در زمان دفاع</span>
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">
+                  <Globe size={12} />
+                  <span>۱+ امتیاز اعتبار جهانی</span>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">

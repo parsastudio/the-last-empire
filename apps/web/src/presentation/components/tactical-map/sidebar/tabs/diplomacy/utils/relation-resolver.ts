@@ -26,6 +26,7 @@ export interface DiplomaticRelation {
   tension: number;
   posture: DiplomaticPosture;
   postureLabel: string;
+  hasSecurityGuarantee: boolean;
   profileData: CountryProfileData;
 }
 
@@ -110,6 +111,7 @@ export function resolveProfileRelation(
   let alignment = 0;
   let tension = 10;
   let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
+  let hasSecurityGuarantee = false;
 
   if (humanNation && liveNation && humanNation.id !== liveNation.id) {
     const directRel = humanNation.relations[liveNation.id];
@@ -125,7 +127,21 @@ export function resolveProfileRelation(
     alignment = vector.alignment;
     tension = vector.tension;
     posture = vector.posture;
+
+    const humanCanonical = CountryRegistry.resolveCanonicalId(humanNation.id);
+    const targetCanonical = CountryRegistry.resolveCanonicalId(liveNation.id);
+    hasSecurityGuarantee =
+      CountryRegistry.resolveCanonicalId(
+        humanNation.securityGuarantorId || "",
+      ) === targetCanonical;
   }
+
+  const guarantorNation =
+    liveNation?.securityGuarantorId && allNations
+      ? allNations[
+          CountryRegistry.resolveCanonicalId(liveNation.securityGuarantorId)
+        ] || allNations[liveNation.securityGuarantorId]
+      : null;
 
   const rawDoctrine = liveNation?.doctrine || profile?.aiDoctrine;
   const doctrineLabel = getDoctrineLabel(rawDoctrine);
@@ -140,6 +156,7 @@ export function resolveProfileRelation(
     tension,
     posture,
     postureLabel: getPostureLabel(posture),
+    hasSecurityGuarantee,
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
@@ -151,6 +168,7 @@ export function resolveProfileRelation(
       alignment,
       tension,
       doctrineLabel,
+      guarantorName: guarantorNation?.name,
     },
   };
 }
