@@ -3,8 +3,8 @@ import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class DevelopmentManager {
   public static readonly COST_RATIO = 0.25;
-  public static readonly CAPACITY_GROWTH_MULTIPLIER = 1.04;
-  public static readonly PRODUCTIVITY_GROWTH_MULTIPLIER = 1.08;
+  public static readonly CAPACITY_GROWTH_MULTIPLIER = 1.03;
+  public static readonly PRODUCTIVITY_GROWTH_MULTIPLIER = 1.05;
 
   public static getUpgradeCost(gdpOrNation: number | Nation): number {
     const gdp =

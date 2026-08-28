@@ -15,20 +15,6 @@ export class TurnLogFormatter {
     return profile ? profile.nameFa : canonical;
   }
 
-  private static formatCurrencyCompact(value: number): string {
-    const abs = Math.abs(value);
-    if (abs >= 1e12) {
-      return `${(abs / 1e12).toFixed(1).replace(/\.0$/, "")} تریلیارد دلار`;
-    }
-    if (abs >= 1e9) {
-      return `${(abs / 1e9).toFixed(1).replace(/\.0$/, "")} میلیارد دلار`;
-    }
-    if (abs >= 1e6) {
-      return `${(abs / 1e6).toFixed(1).replace(/\.0$/, "")} میلیون دلار`;
-    }
-    return `${Math.round(abs).toLocaleString("en-US")} دلار`;
-  }
-
   public static formatMessage(
     log: TurnLogEntry,
     nationsMap?: Record<string, Nation>,
@@ -58,13 +44,6 @@ export class TurnLogFormatter {
 
       case "WAR_DECLARED":
         return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;
-
-      case "PROVINCE_PURCHASED": {
-        const provinceName = String(params["provinceName"] || "منطقه مرزی");
-        const costNum = Number(params["cost"] || 0);
-        const costText = this.formatCurrencyCompact(costNum);
-        return `معاهده خرید قلمرو: کشور ${sourceName} با پرداخت ${costText} به خزانه‌داری ${targetName}، حاکمیت ${provinceName} را بدون درگیری الحاق کرد.`;
-      }
 
       case "DIPLOMATIC_PROPOSAL_SENT": {
         const rawType = String(params["treatyType"] || "معاهده");
@@ -186,6 +165,11 @@ export class TurnLogFormatter {
           return `واردات فوری تسلیحات: ${qty} یگان ${unitName} از کشور ${targetName} تحویل ارتش شد.`;
         }
         return `صادرات تسلیحات: ${qty} یگان ${unitName} به ${targetName} صادر و سود آن به خزانه واریز گردید.`;
+      }
+
+      case "TERRITORY_PURCHASED": {
+        const provName = String(params["provinceName"] || "استان");
+        return `معامله و الحاق سرزمینی: کشور ${sourceName} استان (${provName}) را از کشور ${targetName} خریداری و رسماً به قلمرو خود الحاق کرد.`;
       }
 
       case "GENERIC_EVENT":

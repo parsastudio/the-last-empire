@@ -73,7 +73,7 @@ export function DevelopmentUpgradesSection({
               <span className="truncate">نرخ بهره‌وری</span>
             </div>
             <span className="text-xs font-black text-gdp block font-mono">
-              +۸٪
+              +۵٪
             </span>
           </div>
 
@@ -83,7 +83,7 @@ export function DevelopmentUpgradesSection({
               <span className="truncate">ظرفیت مسکن</span>
             </div>
             <span className="text-xs font-black text-primary block font-mono">
-              +۴٪
+              +۳٪
             </span>
           </div>
         </div>

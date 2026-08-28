@@ -5,7 +5,6 @@ import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { ProvinceBuyoutCalculator } from "@/domain/province/province-buyout-calculator.utility";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class EconomyActionExecutor {
@@ -32,97 +31,87 @@ export class EconomyActionExecutor {
       }
 
       case "BUY_PROVINCE": {
-        const evaluation = ProvinceBuyoutCalculator.evaluate(
-          nation,
-          action.provinceId,
-          state.provinces,
-          state.nations,
-        );
+        const province = state.provinces[action.provinceId.toString()];
+        if (!province) {
+          throw new GameError("INVALID_ACTION", "استان مورد نظر یافت نشد.");
+        }
 
-        if (!evaluation.canBuy) {
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
+          action.targetNationId,
+        );
+        const seller =
+          state.nations[canonicalTargetId] ||
+          state.nations[action.targetNationId];
+
+        if (!seller || !seller.isAlive) {
+          throw new GameError("NATION_NOT_FOUND", "کشور مالک استان فعال نیست.");
+        }
+
+        const currentOwnerCanonical = CountryRegistry.resolveCanonicalId(
+          province.ownerNationId,
+        );
+        if (currentOwnerCanonical !== canonicalTargetId) {
           throw new GameError(
             "INVALID_ACTION",
-            evaluation.reason || "امکان خرید این استان وجود ندارد.",
+            "استان در حال حاضر در کنترل کشور فروشنده نیست.",
           );
         }
 
-        const targetProvince = state.provinces[action.provinceId.toString()]!;
-        const canonicalSellerId = CountryRegistry.resolveCanonicalId(
-          targetProvince.ownerNationId,
-        );
-        const seller =
-          state.nations[canonicalSellerId] ||
-          state.nations[targetProvince.ownerNationId]!;
+        if (nation.treasury < action.cost) {
+          throw new GameError(
+            "INSUFFICIENT_FUNDS",
+            "موجودی خزانه برای خرید این استان کافی نیست.",
+          );
+        }
 
-        const updatedBuyer = {
-          ...nation,
-          treasury: nation.treasury - evaluation.cost,
-        };
+        const rel =
+          seller.relations[canonicalNationId] || seller.relations[nation.id];
+        if (rel?.stance === "WAR") {
+          throw new GameError(
+            "INVALID_ACTION",
+            "در وضعیت جنگ امکان معامله و خرید سرزمینی وجود ندارد.",
+          );
+        }
 
-        const updatedSeller = {
-          ...seller,
-          treasury: seller.treasury + evaluation.cost,
-        };
-
-        const updatedProvince: Province = {
-          ...targetProvince,
-          ownerNationId: canonicalNationId,
-        };
-
-        const updatedProvinces = {
+        const updatedProvinces: Record<string, Province> = {
           ...state.provinces,
-          [action.provinceId.toString()]: updatedProvince,
+          [province.provinceId.toString()]: {
+            ...province,
+            ownerNationId: canonicalNationId,
+          },
         };
 
-        const canonicalHuman = CountryRegistry.resolveCanonicalId(
-          state.humanNationId,
-        );
-        const isHumanInvolved =
-          canonicalNationId === canonicalHuman ||
-          canonicalSellerId === canonicalHuman;
+        BitPackedGridState.getInstance().markDirty();
 
-        const newLogs = [
+        const buyLogs = [
           TurnLogBuilder.createGlobalDiplomacyLog(
             state.currentTurn,
             nation.id,
             seller.id,
-            "PROVINCE_PURCHASED",
+            "TERRITORY_PURCHASED",
             {
-              provinceName: targetProvince.nameFa,
-              cost: evaluation.cost,
+              provinceName: province.nameFa,
+              cost: action.cost,
             },
             "INFO",
           ),
         ];
 
-        if (isHumanInvolved) {
-          newLogs.push(
-            TurnLogBuilder.createNationalLog(
-              state.currentTurn,
-              nation.id,
-              "DOMESTIC",
-              "INFO",
-              "PROVINCE_PURCHASED",
-              {
-                provinceName: targetProvince.nameFa,
-                cost: evaluation.cost,
-              },
-              seller.id,
-            ),
-          );
-        }
-
-        BitPackedGridState.getInstance().markDirty();
-
         return {
           ...state,
           provinces: updatedProvinces,
+          turnLogs: [...state.turnLogs, ...buyLogs],
           nations: {
             ...state.nations,
-            [nation.id]: updatedBuyer,
-            [seller.id]: updatedSeller,
+            [nation.id]: {
+              ...nation,
+              treasury: nation.treasury - action.cost,
+            },
+            [seller.id]: {
+              ...seller,
+              treasury: seller.treasury + action.cost,
+            },
           },
-          turnLogs: [...state.turnLogs, ...newLogs],
         };
       }
 
