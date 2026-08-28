@@ -1,13 +1,11 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { TariffCalculator } from "@/engine/economy/calculators/tariff-calculator";
-import { TaxCalculator } from "@/engine/economy/calculators/tax-calculator";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
+import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
 import { CountryRegistry } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
@@ -79,82 +77,32 @@ export class EconomyTurnProcessor {
       }
     }
 
-    if (updated.isAi) {
-      const taxAt30 = TaxCalculator.calculateTaxIncome(gdp, 30);
-      const tariffAt30 = TariffCalculator.calculateTariffEffects(
-        { ...updated, tariffRate: 30 },
-        allNations,
-        currentProvincesMap,
-      ).tariffRevenue;
-
-      const baseIncome = AiEconomyCalculator.calculateComparativeTurnIncome(
-        taxAt30,
-        tariffAt30,
-      );
-
-      const maintenanceCost = payrollBreakdown.total;
-      const debtInterest = Math.floor(updated.nationalDebt * 0.07);
-
-      let actualRepayment = 0;
-      let newDebt = updated.nationalDebt;
-
-      if (newDebt > 0 && baseIncome > 0) {
-        const maxRepayment = Math.floor(baseIncome * 0.3);
-        actualRepayment = Math.min(newDebt, maxRepayment);
-        newDebt -= actualRepayment;
-      }
-
-      const totalAiExpenses =
-        maintenanceCost + securityFee + actualRepayment + debtInterest;
-      const totalAiGains =
-        baseIncome + navalSecurityIncome + warSubsidiesReceived;
-      const netChange = totalAiGains - totalAiExpenses;
-
-      let newTreasury = updated.treasury + netChange;
-
-      if (newTreasury < 0) {
-        const deficit = Math.abs(newTreasury);
-        const maxDebtLimit = Math.floor(gdp * 0.8);
-        if (newDebt + deficit > maxDebtLimit && updated.securityGuarantorId) {
-          updated.securityGuarantorId = null;
-        }
-        newDebt += deficit;
-        newTreasury = 0;
-      }
-
-      updated = {
-        ...updated,
-        treasury: newTreasury,
-        nationalDebt: newDebt,
-      };
-
-      updated = this.recruitmentQueue.processTurnQueue(updated);
-      return { updatedNation: updated, updatedProvinces };
-    }
-
-    const tariffResult = TariffCalculator.calculateTariffEffects(
+    const fiscalResult = FiscalRevenueCalculator.calculate(
       updated,
       allNations,
       currentProvincesMap,
     );
-    const taxResult = TaxCalculator.evaluateTaxPolicy(
-      updated,
-      currentProvincesMap,
-    );
 
-    const addedTreasury =
-      (tariffResult.tariffRevenue > 0 ? tariffResult.tariffRevenue : 0) +
-      (taxResult.taxIncome > 0 ? taxResult.taxIncome : 0) +
-      navalSecurityIncome +
-      warSubsidiesReceived;
+    const totalIncome =
+      fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesReceived;
+
+    const maintenanceCost = payrollBreakdown.total;
+    const debtInterest = Math.floor(updated.nationalDebt * 0.07);
+
+    let actualRepayment = 0;
+    let newDebt = updated.nationalDebt;
+
+    if (updated.isAi && newDebt > 0 && totalIncome > 0) {
+      const maxRepayment = Math.floor(totalIncome * 0.3);
+      actualRepayment = Math.min(newDebt, maxRepayment);
+      newDebt -= actualRepayment;
+    }
 
     const totalExpenses =
-      payrollBreakdown.total +
-      Math.floor(updated.nationalDebt * 0.07) +
-      securityFee;
+      maintenanceCost + securityFee + actualRepayment + debtInterest;
+    const netChange = totalIncome - totalExpenses;
 
-    let newTreasury = updated.treasury + addedTreasury - totalExpenses;
-    let newDebt = updated.nationalDebt;
+    let newTreasury = updated.treasury + netChange;
 
     if (newTreasury < 0) {
       const deficit = Math.abs(newTreasury);

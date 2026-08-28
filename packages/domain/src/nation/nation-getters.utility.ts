@@ -20,17 +20,15 @@ export interface NationRankCandidateInput {
   militaryTier?: number;
   hasSeaAccess?: boolean;
   navalFleet?: number;
+  stability?: number;
+  globalReputation?: number;
 }
 
-interface ProcessedCandidate {
+interface RankedCandidate {
   id: string;
   canonicalId: string;
+  powerScore: number;
   gdp: number;
-  milPower: number;
-  population: number;
-  ecoRank: number;
-  milRank: number;
-  compositeScore: number;
 }
 
 export class NationGettersUtility {
@@ -38,19 +36,31 @@ export class NationGettersUtility {
     candidatesInput: NationRankCandidateInput[],
   ): Map<string, number> {
     const rankMap = new Map<string, number>();
-    if (candidatesInput.length === 0) return rankMap;
+    const count = candidatesInput.length;
+    if (count === 0) return rankMap;
 
-    const processed: ProcessedCandidate[] = new Array(candidatesInput.length);
+    const rankedList: RankedCandidate[] = new Array(count);
 
-    for (let i = 0; i < candidatesInput.length; i++) {
+    for (let i = 0; i < count; i++) {
       const input = candidatesInput[i]!;
       const canonicalId = CountryRegistry.resolveCanonicalId(input.id);
       const profile = CountryRegistry.getCountry(canonicalId);
 
-      let milPower = 0;
+      const domesticTech =
+        input.military?.techLevel ??
+        input.domesticTechLevel ??
+        input.startingTechLevel ??
+        profile?.domesticTechLevel ??
+        profile?.startingTechLevel ??
+        1.0;
+
+      const equipmentTech =
+        input.equipmentTechLevel ?? profile?.equipmentTechLevel ?? domesticTech;
+
+      let activeCombatPower = 0;
 
       if (input.military) {
-        milPower = MilitaryPowerCalculator.calculateEffectivePower({
+        activeCombatPower = MilitaryPowerCalculator.calculateEffectivePower({
           id: canonicalId,
           name: input.name || profile?.nameFa || canonicalId,
           isAi: true,
@@ -67,14 +77,14 @@ export class NationGettersUtility {
               (input.governmentType as GovernmentType) ||
               profile?.startingGovernment ||
               "DEMOCRACY",
-            stability: 50,
+            stability: input.stability ?? 50,
             turnsInPower: 1,
           },
           military: input.military,
           recruitmentQueue: [],
           relations: {},
           activeModifiers: [],
-          globalReputation: 50,
+          globalReputation: input.globalReputation ?? 50,
           executedEspionageTiers: [],
           warFocusTargetId: null,
           postWarCooldownTurns: 0,
@@ -82,24 +92,12 @@ export class NationGettersUtility {
           securityGuarantorId: null,
         });
       } else {
-        const domesticTech =
-          input.domesticTechLevel ??
-          input.startingTechLevel ??
-          profile?.domesticTechLevel ??
-          profile?.startingTechLevel ??
-          1.0;
-        const equipmentTech =
-          input.equipmentTechLevel ??
-          profile?.equipmentTechLevel ??
-          domesticTech;
-
         const stack = MilitaryDistributionEngine.calculateStartingStack(
           input.gdp,
           domesticTech,
           equipmentTech,
         );
-
-        milPower = MilitaryPowerCalculator.calculateEffectivePower({
+        activeCombatPower = MilitaryPowerCalculator.calculateEffectivePower({
           id: canonicalId,
           name: input.name || profile?.nameFa || canonicalId,
           isAi: true,
@@ -116,14 +114,14 @@ export class NationGettersUtility {
               (input.governmentType as GovernmentType) ||
               profile?.startingGovernment ||
               "DEMOCRACY",
-            stability: 50,
+            stability: input.stability ?? 50,
             turnsInPower: 1,
           },
           military: stack,
           recruitmentQueue: [],
           relations: {},
           activeModifiers: [],
-          globalReputation: 50,
+          globalReputation: input.globalReputation ?? 50,
           executedEspionageTiers: [],
           warFocusTargetId: null,
           postWarCooldownTurns: 0,
@@ -132,52 +130,42 @@ export class NationGettersUtility {
         });
       }
 
-      processed[i] = {
+      const effectiveFieldTech = Math.max(domesticTech, equipmentTech);
+      const techMultiplier = 1 + (Math.max(1, effectiveFieldTech) - 1) * 0.5;
+
+      const navalPower = (input.navalFleet ?? 0) * 1500 * techMultiplier;
+      const totalBattlefieldPower = activeCombatPower + navalPower;
+
+      const economicWarPotential = (input.gdp / 1_000_000_000) * techMultiplier;
+
+      const stabilityFactor = 0.8 + 0.2 * ((input.stability ?? 50) / 100);
+      const repBonus = 1 + (((input.globalReputation ?? 50) - 50) / 50) * 0.05;
+      const resilienceMultiplier = stabilityFactor * repBonus;
+
+      const powerScore =
+        (totalBattlefieldPower * 0.6 + economicWarPotential * 0.4) *
+        resilienceMultiplier;
+
+      rankedList[i] = {
         id: input.id,
         canonicalId,
+        powerScore,
         gdp: input.gdp,
-        milPower,
-        population: input.population || profile?.population || 0,
-        ecoRank: 1,
-        milRank: 1,
-        compositeScore: 0,
       };
     }
 
-    const ecoSorted = [...processed].sort((a, b) => {
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      if (b.population !== a.population) return b.population - a.population;
-      return a.canonicalId.localeCompare(b.canonicalId);
-    });
-    for (let i = 0; i < ecoSorted.length; i++) {
-      ecoSorted[i]!.ecoRank = i + 1;
-    }
-
-    const milSorted = [...processed].sort((a, b) => {
-      if (b.milPower !== a.milPower) return b.milPower - a.milPower;
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      return a.canonicalId.localeCompare(b.canonicalId);
-    });
-    for (let i = 0; i < milSorted.length; i++) {
-      milSorted[i]!.milRank = i + 1;
-    }
-
-    for (let i = 0; i < processed.length; i++) {
-      const c = processed[i]!;
-      c.compositeScore = c.ecoRank * 1 + c.milRank * 1;
-    }
-
-    processed.sort((a, b) => {
-      if (a.compositeScore !== b.compositeScore) {
-        return a.compositeScore - b.compositeScore;
+    rankedList.sort((a, b) => {
+      if (b.powerScore !== a.powerScore) {
+        return b.powerScore - a.powerScore;
       }
-      if (b.gdp !== a.gdp) return b.gdp - a.gdp;
-      if (b.population !== a.population) return b.population - a.population;
+      if (b.gdp !== a.gdp) {
+        return b.gdp - a.gdp;
+      }
       return a.canonicalId.localeCompare(b.canonicalId);
     });
 
-    for (let i = 0; i < processed.length; i++) {
-      const item = processed[i]!;
+    for (let i = 0; i < count; i++) {
+      const item = rankedList[i]!;
       const rankValue = i + 1;
       rankMap.set(item.canonicalId, rankValue);
       rankMap.set(item.id, rankValue);
@@ -400,6 +388,8 @@ export class NationGettersUtility {
         military: nation.military,
         governmentType: nation.government.type,
         navalFleet: nation.navalFleet,
+        stability: nation.government.stability,
+        globalReputation: nation.globalReputation,
       };
     }
 

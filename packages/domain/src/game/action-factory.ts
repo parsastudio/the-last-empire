@@ -1,6 +1,5 @@
 import {
-  SetTaxRateAction,
-  SetTariffRateAction,
+  SetEconomicDoctrineAction,
   RecruitUnitAction,
   BuyArmsMarketAction,
   BuyNavalFleetAction,
@@ -17,33 +16,22 @@ import {
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
 import { EspionageTier } from "@/domain/espionage/espionage.schema";
+import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.schema";
 
 export class ActionFactory {
   private static createId(prefix: string): string {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
   }
 
-  public static setTaxRate(
+  public static setEconomicDoctrine(
     nationId: string,
-    newRate: number,
-  ): SetTaxRateAction {
+    stance: EconomicDoctrineStance,
+  ): SetEconomicDoctrineAction {
     return {
-      id: this.createId("tax"),
+      id: this.createId("doctrine"),
       nationId,
-      type: "SET_TAX_RATE",
-      newRate,
-    };
-  }
-
-  public static setTariffRate(
-    nationId: string,
-    newRate: number,
-  ): SetTariffRateAction {
-    return {
-      id: this.createId("tariff"),
-      nationId,
-      type: "SET_TARIFF_RATE",
-      newRate,
+      type: "SET_ECONOMIC_DOCTRINE",
+      stance,
     };
   }
 

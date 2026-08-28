@@ -9,6 +9,7 @@ import {
   AiDoctrineTypeSchema,
   AiDoctrineWeightsSchema,
 } from "@/domain/nation/nation-doctrine.schema";
+import { EconomicDoctrineStanceSchema } from "@/domain/politics/economic-doctrine.schema";
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -24,8 +25,7 @@ export const NationSchema = z.object({
   isAi: z.boolean(),
   isAlive: z.boolean(),
   flagCode: z.string(),
-  taxRate: z.number().min(0).max(50),
-  tariffRate: z.number().min(0).max(50),
+  economicStance: EconomicDoctrineStanceSchema.default("BALANCED_MIXED"),
   treasury: z.number(),
   nationalDebt: z.number().nonnegative(),
   industrialLevel: z.number().positive(),

@@ -7,7 +7,7 @@ import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { AI_DOCTRINE_PRESETS } from "@geopolitics/domain";
+import { AI_DOCTRINE_PRESETS, NationGettersUtility } from "@geopolitics/domain";
 
 export interface EspionagePlanResult {
   actions: GameAction[];
@@ -40,6 +40,7 @@ export class AIEspionagePlanner {
       provincesMap,
       currentTreasury,
       executedTiers,
+      rankMap,
       provincesByOwnerMap,
     );
 
@@ -84,8 +85,13 @@ export class AIEspionagePlanner {
     provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
     executedTiers: string[],
+    rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
   ): { action: GameAction; cost: number } | null {
+    const sourceRank =
+      rankMap?.get(CountryRegistry.resolveCanonicalId(nation.id)) ??
+      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
+
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[
           CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
@@ -94,32 +100,46 @@ export class AIEspionagePlanner {
 
     if (activeWarTarget && activeWarTarget.isAlive) {
       const canonical = CountryRegistry.resolveCanonicalId(activeWarTarget.id);
-      if (executedTiers.includes(`${canonical}:2`)) {
-        return null;
-      }
-
-      const targetGdp = getNationGdp(
-        activeWarTarget,
-        provincesMap,
-        undefined,
-        provincesByOwnerMap,
-      );
-      const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
-
-      const hasDefenses =
-        (activeWarTarget.military.airDefense || 0) > 0 ||
-        (activeWarTarget.military.armor || 0) > 0 ||
-        activeWarTarget.military.airForce > 0;
-
-      if (hasDefenses && currentTreasury >= Math.floor(cost * 1.2)) {
-        return {
-          action: ActionFactory.executeEspionage(
-            nation.id,
+      if (!executedTiers.includes(`${canonical}:2`)) {
+        const targetRank =
+          rankMap?.get(canonical) ??
+          NationGettersUtility.getRank(
             activeWarTarget.id,
-            2,
-          ),
-          cost,
-        };
+            allNations,
+            provincesMap,
+          );
+
+        const successRate = EspionageCalculator.calculateSuccessRate(
+          2,
+          sourceRank,
+          targetRank,
+        );
+
+        if (successRate >= 0.5) {
+          const targetGdp = getNationGdp(
+            activeWarTarget,
+            provincesMap,
+            undefined,
+            provincesByOwnerMap,
+          );
+          const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
+
+          const hasDefenses =
+            (activeWarTarget.military.airDefense || 0) > 0 ||
+            (activeWarTarget.military.armor || 0) > 0 ||
+            activeWarTarget.military.airForce > 0;
+
+          if (hasDefenses && currentTreasury >= Math.floor(cost * 1.2)) {
+            return {
+              action: ActionFactory.executeEspionage(
+                nation.id,
+                activeWarTarget.id,
+                2,
+              ),
+              cost,
+            };
+          }
+        }
       }
     }
 
@@ -136,6 +156,20 @@ export class AIEspionagePlanner {
       }
 
       if (rel.stance === "WAR") {
+        const targetRank =
+          rankMap?.get(canonicalTarget) ??
+          NationGettersUtility.getRank(target.id, allNations, provincesMap);
+
+        const successRate = EspionageCalculator.calculateSuccessRate(
+          2,
+          sourceRank,
+          targetRank,
+        );
+
+        if (successRate < 0.5) {
+          continue;
+        }
+
         const targetGdp = getNationGdp(
           target,
           provincesMap,
@@ -195,6 +229,10 @@ export class AIEspionagePlanner {
         provincesByOwnerMap,
       );
 
+    const sourceRank =
+      rankMap?.get(CountryRegistry.resolveCanonicalId(nation.id)) ??
+      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
+
     const weights =
       nation.doctrineWeights ??
       AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
@@ -226,6 +264,20 @@ export class AIEspionagePlanner {
       );
 
       if (milDelta < EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST) {
+        continue;
+      }
+
+      const targetRank =
+        rankMap?.get(canonicalTarget) ??
+        NationGettersUtility.getRank(target.id, allNations, provincesMap);
+
+      const successRate = EspionageCalculator.calculateSuccessRate(
+        3,
+        sourceRank,
+        targetRank,
+      );
+
+      if (successRate < 0.5) {
         continue;
       }
 
