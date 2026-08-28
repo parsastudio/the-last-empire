@@ -26,6 +26,8 @@ export class DiplomaticAcceptanceEvaluator {
       receiver,
       sender,
       vector,
+      null,
+      provincesMap,
     );
 
     return evaluation.willAccept;

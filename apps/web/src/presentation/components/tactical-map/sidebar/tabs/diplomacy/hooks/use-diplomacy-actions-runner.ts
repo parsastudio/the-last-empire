@@ -1,6 +1,13 @@
 import { useState, useMemo } from "react";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ActionFactory, DiplomaticStance } from "@geopolitics/domain";
+import {
+  ActionFactory,
+  DiplomaticStance,
+  SecurityGuaranteeValidator,
+  SecurityGuaranteeValidationResult,
+  Province,
+  Nation,
+} from "@geopolitics/domain";
 import {
   DiplomaticBetrayalCalculator,
   TreatyEvaluator,
@@ -14,6 +21,9 @@ interface UseDiplomacyActionsRunnerProps {
   senderGdp?: number;
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
+  provincesMap?: Record<string, Province>;
+  clientNation?: Nation | null;
+  targetNation?: Nation | null;
 }
 
 export function useDiplomacyActionsRunner({
@@ -23,6 +33,9 @@ export function useDiplomacyActionsRunner({
   senderGdp = 100000000000,
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
+  provincesMap,
+  clientNation,
+  targetNation,
 }: UseDiplomacyActionsRunnerProps) {
   const { dispatchAction } = useGameActions();
 
@@ -48,6 +61,27 @@ export function useDiplomacyActionsRunner({
   const securityGuaranteeCost = useMemo(() => {
     return Math.floor(senderGdp * 0.1);
   }, [senderGdp]);
+
+  const guaranteeValidation = useMemo<SecurityGuaranteeValidationResult>(() => {
+    if (!clientNation || !targetNation) {
+      return {
+        isValid: false,
+        reason: "اطلاعات کشور در دسترس نیست.",
+        gdpRatio: 1,
+        techDiff: 0,
+        tension: 0,
+        isGdpValid: false,
+        isTechValid: false,
+        isTensionValid: false,
+        isNotWar: false,
+      };
+    }
+    return SecurityGuaranteeValidator.validate(
+      clientNation,
+      targetNation,
+      provincesMap,
+    );
+  }, [clientNation, targetNation, provincesMap]);
 
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
@@ -115,6 +149,7 @@ export function useDiplomacyActionsRunner({
   };
 
   const handleSecurityGuarantee = async () => {
+    if (!guaranteeValidation.isValid) return;
     const action = ActionFactory.diplomaticProposal(
       nationId,
       targetNationId,
@@ -177,6 +212,7 @@ export function useDiplomacyActionsRunner({
     feedbackModal,
     foreignAidCost,
     securityGuaranteeCost,
+    guaranteeValidation,
     handleSendAid,
     handlePeaceTreaty: () => executeOrConfirm(handlePeaceTreaty, false),
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),

@@ -1,8 +1,10 @@
 import {
   Nation,
+  Province,
   DiplomaticProposalType,
   GlobalCoalition,
   CountryRegistry,
+  SecurityGuaranteeValidator,
 } from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
@@ -153,6 +155,7 @@ export class UtilityDecisionEngine {
     sender: Nation,
     vector: GeopoliticalVector,
     globalCoalition?: GlobalCoalition | null,
+    provincesMap?: Record<string, Province>,
   ): AcceptanceEvaluation {
     const reasons: DecisionReasonItem[] = [];
 
@@ -181,15 +184,30 @@ export class UtilityDecisionEngine {
 
     switch (proposalType) {
       case "SECURITY_GUARANTEE": {
-        if (vector.tension >= 40) {
+        const validation = SecurityGuaranteeValidator.validate(
+          sender,
+          receiver,
+          provincesMap,
+        );
+
+        if (!validation.isValid) {
           return {
             willAccept: false,
-            score: -50,
-            reasons: [{ label: "تنش امنیتی بالا با کشور متقاضی", value: -50 }],
+            score: -100,
+            reasons: [
+              {
+                label: validation.reason || "عدم احراز شروط سه‌گانه امنیتی",
+                value: -100,
+              },
+            ],
           };
         }
-        reasons.push({ label: "دریافت نوبتی ۱۰٪ درآمد پایدار", value: 60 });
-        reasons.push({ label: "تنش امنیتی پایین", value: 20 });
+
+        reasons.push({
+          label: "احراز کامل نسبت GDP و برتری فناوری",
+          value: 50,
+        });
+        reasons.push({ label: "دریافت نوبتی ۱۰٪ درآمد پایدار", value: 50 });
         break;
       }
 

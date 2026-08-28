@@ -6,15 +6,20 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldX,
+  Lock,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { DiplomaticStance } from "@geopolitics/domain";
+import {
+  DiplomaticStance,
+  SecurityGuaranteeValidationResult,
+} from "@geopolitics/domain";
 
 interface DiplomacyActionButtonsProps {
   currentStance: DiplomaticStance | string;
   foreignAidCost: number;
   securityGuaranteeCost: number;
   hasSecurityGuarantee?: boolean;
+  guaranteeValidation?: SecurityGuaranteeValidationResult;
   onSendAid: () => void;
   onPeaceTreaty: () => void;
   onNonAggression: () => void;
@@ -30,6 +35,7 @@ export function DiplomacyActionButtons({
   foreignAidCost,
   securityGuaranteeCost,
   hasSecurityGuarantee = false,
+  guaranteeValidation,
   onSendAid,
   onPeaceTreaty,
   onNonAggression,
@@ -134,30 +140,57 @@ export function DiplomacyActionButtons({
       );
     }
 
+    const isEligible = guaranteeValidation?.isValid ?? false;
+    const reasonText = guaranteeValidation?.reason;
+
     return (
-      <button
-        onClick={onSecurityGuarantee}
-        className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/40 border border-cyan-500/40 text-cyan-300 text-right transition-all cursor-pointer space-y-1 shadow-sm"
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-black flex items-center gap-1.5">
-            <ShieldCheck size={15} className="text-cyan-400" />
-            انعقاد پیمان چتر امنیتی و دفاع سرزمینی (
-            {PersianNumberFormatter.formatCurrency(
-              securityGuaranteeCost,
-              true,
-            )}{" "}
-            / نوبت)
-          </span>
-          <span className="text-[9px] font-mono bg-cyan-500/20 text-cyan-300 px-2 py-0.5 rounded-md border border-cyan-500/30">
-            ۱۰٪ GDP
-          </span>
-        </div>
-        <p className="text-[10px] text-muted-foreground leading-relaxed">
-          اعزام ۳۰٪ نیروی ضربت فوق‌پیشرفته این کشور به میدان در زمان دفاع
-          (استقراض خودکار در صورت کسری بودجه).
-        </p>
-      </button>
+      <div className="space-y-1.5 font-sans">
+        <button
+          onClick={onSecurityGuarantee}
+          disabled={!isEligible}
+          className={`w-full p-3.5 rounded-2xl text-right transition-all space-y-1 shadow-sm border ${
+            isEligible
+              ? "bg-cyan-950/25 hover:bg-cyan-950/40 border-cyan-500/40 text-cyan-300 cursor-pointer"
+              : "bg-secondary/40 border-border/60 text-muted-foreground cursor-not-allowed opacity-75"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black flex items-center gap-1.5">
+              {isEligible ? (
+                <ShieldCheck size={15} className="text-cyan-400" />
+              ) : (
+                <Lock size={14} className="text-muted-foreground" />
+              )}
+              انعقاد پیمان چتر امنیتی و دفاع سرزمینی (
+              {PersianNumberFormatter.formatCurrency(
+                securityGuaranteeCost,
+                true,
+              )}{" "}
+              / نوبت)
+            </span>
+            <span
+              className={`text-[9px] font-mono px-2 py-0.5 rounded-md border ${
+                isEligible
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+                  : "bg-secondary text-muted-foreground border-border/60"
+              }`}
+            >
+              ۱۰٪ GDP
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            اعزام ۳۰٪ نیروی ضربت فوق‌پیشرفته این کشور در زمان دفاع سرزمینی
+            (استقراض خودکار تا سقف بدهی).
+          </p>
+        </button>
+
+        {!isEligible && reasonText && (
+          <div className="px-3 py-1.5 bg-secondary/60 border border-border/60 rounded-xl text-[10px] text-amber-400 flex items-center gap-1.5 font-sans">
+            <ShieldAlert size={12} className="shrink-0 text-amber-400" />
+            <span>عدم احراز شرایط چتر امنیتی: {reasonText}</span>
+          </div>
+        )}
+      </div>
     );
   };
 

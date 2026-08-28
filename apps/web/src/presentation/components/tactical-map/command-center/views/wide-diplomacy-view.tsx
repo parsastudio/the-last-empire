@@ -63,8 +63,8 @@ export function WideDiplomacyView({
   }, [nationsMap, activeHumanId, humanNationId]);
 
   const humanGdp = useMemo(() => {
-    return humanNation ? getNationGdp(humanNation) : 100000000000;
-  }, [humanNation]);
+    return humanNation ? getNationGdp(humanNation, provincesMap) : 100000000000;
+  }, [humanNation, provincesMap]);
 
   const diplomacy = useWideDiplomacy({
     selectedTargetCode,
@@ -141,6 +141,12 @@ export function WideDiplomacyView({
             senderGdp={humanGdp}
             targetGdp={diplomacy.selectedTargetGdp}
             currentStance={diplomacy.selectedRelation.stance}
+            hasSecurityGuarantee={
+              diplomacy.selectedRelation.hasSecurityGuarantee
+            }
+            provincesMap={provincesMap}
+            clientNation={humanNation}
+            targetNation={diplomacy.selectedTargetNation}
             onOpenProxy={handleOpenEspionage}
           />
         </div>
