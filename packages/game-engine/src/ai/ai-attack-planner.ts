@@ -4,8 +4,6 @@ import {
   Nation,
   Province,
   CountryRegistry,
-  MILITARY_UNIT_STATS,
-  MilitaryPowerCalculator,
   LandNeighborResolver,
   NationGettersUtility,
   GlobalCoalition,
@@ -17,7 +15,7 @@ export class AIAttackPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     ownedProvinces?: Province[],
-    globalCoalition?: GlobalCoalition | null,
+    _globalCoalition?: GlobalCoalition | null,
   ): GameAction | null {
     if (!nation.isAlive || !nation.relations) {
       return null;
@@ -44,43 +42,8 @@ export class AIAttackPlanner {
       return null;
     }
 
-    const attackerTotalPower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateLandAndAirPower(nation),
-    );
-    const targetTotalPower = Math.max(
-      1,
-      MilitaryPowerCalculator.calculateLandAndAirPower(targetNation),
-    );
-
-    const isCoalitionAttacker = Boolean(
-      globalCoalition &&
-      globalCoalition.memberNationIds.includes(
-        CountryRegistry.resolveCanonicalId(nation.id),
-      ) &&
-      CountryRegistry.resolveCanonicalId(targetNation.id) ===
-        globalCoalition.targetNationId,
-    );
-
     const activeWarCount = this.countActiveWars(nation, allNations);
-    const maxDeployRatio = activeWarCount > 1 ? 0.6 : 0.95;
-
-    let powerRatioNeeded = maxDeployRatio;
-
-    if (!isCoalitionAttacker) {
-      const maxDeployablePower = attackerTotalPower * maxDeployRatio;
-      if (maxDeployablePower < targetTotalPower * 1.05) {
-        return null;
-      }
-      const requiredPower = Math.min(
-        maxDeployablePower,
-        targetTotalPower * 1.35,
-      );
-      powerRatioNeeded = Math.min(
-        maxDeployRatio,
-        Math.max(0.25, requiredPower / attackerTotalPower),
-      );
-    }
+    const deployRatio = activeWarCount > 1 ? 0.65 : 0.9;
 
     const availableArmor = nation.military.armor || 0;
     const availableAirForce = nation.military.airForce || 0;
@@ -88,22 +51,19 @@ export class AIAttackPlanner {
 
     let infantryToDeploy = Math.max(
       1,
-      Math.min(
-        availableInfantry,
-        Math.ceil(availableInfantry * powerRatioNeeded),
-      ),
+      Math.min(availableInfantry, Math.ceil(availableInfantry * deployRatio)),
     );
     let armorToDeploy = Math.min(
       availableArmor,
-      Math.ceil(availableArmor * powerRatioNeeded),
+      Math.ceil(availableArmor * deployRatio),
     );
     let airForceToDeploy = Math.min(
       availableAirForce,
-      Math.ceil(availableAirForce * powerRatioNeeded),
+      Math.ceil(availableAirForce * deployRatio),
     );
     let dronesToLaunch = Math.min(
       availableDrones,
-      Math.ceil(availableDrones * powerRatioNeeded),
+      Math.ceil(availableDrones * deployRatio),
     );
 
     if (targetResolution.attackType === "NAVAL") {
@@ -113,7 +73,7 @@ export class AIAttackPlanner {
       }
 
       const maxNavalCapacity = fleetCount * 60;
-      let load = infantryToDeploy * 1 + armorToDeploy * 4;
+      const load = infantryToDeploy * 1 + armorToDeploy * 4;
 
       if (load > maxNavalCapacity) {
         const scale = maxNavalCapacity / load;
@@ -126,18 +86,6 @@ export class AIAttackPlanner {
           ),
         );
       }
-    }
-
-    const deployedPower = this.calculateDeployedPower(
-      nation,
-      infantryToDeploy,
-      armorToDeploy,
-      airForceToDeploy,
-      dronesToLaunch,
-    );
-
-    if (!isCoalitionAttacker && deployedPower / targetTotalPower < 1.05) {
-      return null;
     }
 
     return ActionFactory.initiateBattle(
@@ -266,24 +214,5 @@ export class AIAttackPlanner {
     }
 
     return null;
-  }
-
-  private static calculateDeployedPower(
-    nation: Nation,
-    infantry: number,
-    armor: number,
-    airForce: number,
-    drones: number,
-  ): number {
-    const rawPower =
-      infantry * MILITARY_UNIT_STATS.INFANTRY.weightPower +
-      armor * MILITARY_UNIT_STATS.ARMOR.weightPower +
-      airForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower +
-      drones * MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower;
-
-    const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = 1 + (techLevel - 1) * 0.5;
-
-    return Math.floor(rawPower * techMult);
   }
 }
