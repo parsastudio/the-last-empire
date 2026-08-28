@@ -1,6 +1,6 @@
 import React from "react";
 import { Binary } from "lucide-react";
-import { DiplomaticStance } from "@geopolitics/domain";
+import { DiplomaticStance, Province, Nation } from "@geopolitics/domain";
 import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
 import { DiplomaticFeedbackModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 import { TreatyStatusBanner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/treaty-status-banner";
@@ -15,6 +15,9 @@ interface AdvancedDiplomacyActionsProps {
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
   hasSecurityGuarantee?: boolean;
+  provincesMap?: Record<string, Province>;
+  clientNation?: Nation | null;
+  targetNation?: Nation | null;
   onOpenProxy?: () => void;
 }
 
@@ -26,6 +29,9 @@ export function AdvancedDiplomacyActions({
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
   hasSecurityGuarantee = false,
+  provincesMap,
+  clientNation,
+  targetNation,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -35,6 +41,9 @@ export function AdvancedDiplomacyActions({
     senderGdp,
     targetGdp,
     currentStance,
+    provincesMap,
+    clientNation,
+    targetNation,
   });
 
   return (
@@ -56,6 +65,7 @@ export function AdvancedDiplomacyActions({
               foreignAidCost={runner.foreignAidCost}
               securityGuaranteeCost={runner.securityGuaranteeCost}
               hasSecurityGuarantee={hasSecurityGuarantee}
+              guaranteeValidation={runner.guaranteeValidation}
               onSendAid={runner.handleSendAid}
               onPeaceTreaty={runner.handlePeaceTreaty}
               onNonAggression={runner.handleNonAggression}

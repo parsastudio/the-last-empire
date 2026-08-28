@@ -6,6 +6,7 @@ import {
   CountryRegistry,
   DiplomacyLockManager,
   GeopoliticalReachResolver,
+  SecurityGuaranteeValidator,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -34,6 +35,31 @@ export class AITreatyEvaluator {
         rankMap,
       );
 
+    if (!nation.securityGuarantorId) {
+      for (let i = 0; i < targets.length; i++) {
+        const candidate = targets[i]!;
+        if (
+          DiplomacyLockManager.isLocked(lockedTargets, nation.id, candidate.id)
+        ) {
+          continue;
+        }
+
+        const validation = SecurityGuaranteeValidator.validate(
+          nation,
+          candidate,
+          provincesMap,
+        );
+
+        if (validation.isValid) {
+          return ActionFactory.diplomaticProposal(
+            nation.id,
+            candidate.id,
+            "SECURITY_GUARANTEE",
+          );
+        }
+      }
+    }
+
     for (let i = 0; i < targets.length; i++) {
       const targetNation = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
@@ -46,8 +72,9 @@ export class AITreatyEvaluator {
         !rel ||
         rel.stance === "WAR" ||
         rel.stance === "STRATEGIC_PARTNERSHIP"
-      )
+      ) {
         continue;
+      }
 
       if (
         DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)

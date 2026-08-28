@@ -8,6 +8,7 @@ import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { SecurityGuaranteeValidator } from "@geopolitics/domain";
 import {
   AIEmergencyDefenseManager,
   ReactiveDefenseEvent,
@@ -86,6 +87,22 @@ export class PoliticsActionExecutor {
         const isHumanInvolved =
           canonicalSourceId === canonicalHuman ||
           canonicalTargetId === canonicalHuman;
+
+        if (action.proposalType === "SECURITY_GUARANTEE") {
+          const validation = SecurityGuaranteeValidator.validate(
+            nation,
+            receiver,
+            state.provinces,
+          );
+
+          if (!validation.isValid) {
+            throw new GameError(
+              "INVALID_ACTION",
+              validation.reason ||
+                "عدم احراز شروط سه‌گانه امنیتی جهت انعقاد چتر دفاعی.",
+            );
+          }
+        }
 
         if (action.proposalType === "CANCEL_SECURITY_GUARANTEE") {
           const newState = {
@@ -447,7 +464,7 @@ export class PoliticsActionExecutor {
             if (action.proposalType === "STRATEGIC_PARTNERSHIP") {
               rejectedMsg = `دولت ${receiver.name} پیشنهاد شراکت استراتژیک را رد کرد. سطح همسویی برای شراکت کافی نیست.`;
             } else if (action.proposalType === "SECURITY_GUARANTEE") {
-              rejectedMsg = `دولت ${receiver.name} به دلیل تنش‌های دیپلماتیک یا عدم تمایل راهبردی، درخواست چتر امنیتی را نپذیرفت.`;
+              rejectedMsg = `دولت ${receiver.name} به دلیل عدم احراز نسبت مناسب GDP یا سطح فناوری، درخواست چتر امنیتی را نپذیرفت.`;
             } else if (action.proposalType === "NON_AGGRESSION_PACT") {
               rejectedMsg = `دولت ${receiver.name} پیشنهاد پیمان عدم تخاصم را رد کرد. تنش‌های مرزی مانع توافق شد.`;
             } else if (action.proposalType === "PEACE_TREATY") {
