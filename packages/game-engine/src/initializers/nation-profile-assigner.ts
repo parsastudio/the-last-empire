@@ -109,10 +109,7 @@ export class NationProfileAssigner {
       dynamicStack.branchTech?.droneMissile ?? domesticTech,
     );
 
-    const initialNavalFleet =
-      item.hasSeaAccess && item.gdp >= 1_000_000_000_000
-        ? Math.max(1, Math.floor(item.gdp / 2_000_000_000_000))
-        : 0;
+    const initialNavalFleet = item.hasSeaAccess && domesticTech > 4.5 ? 3 : 0;
 
     return {
       id: cleanId,

@@ -33,9 +33,9 @@ export function WideMilitaryView({
       if (!n.isAlive || n.id === nation.id) return false;
       const canonical = CountryRegistry.resolveCanonicalId(n.id);
       const rel = nation.relations[canonical] || nation.relations[n.id];
-      const alignment = rel ? (rel.alignment ?? 0) : 0;
+      const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
       const tension = rel ? (rel.tension ?? 10) : 10;
-      return alignment >= 15 && tension < 60;
+      return stance !== "WAR" && tension < 50;
     }).length;
   }, [nationsMap, nation]);
 
