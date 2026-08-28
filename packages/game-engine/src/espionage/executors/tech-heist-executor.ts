@@ -4,9 +4,10 @@ import {
   EspionageOutcome,
   EspionageTechTheftData,
 } from "@/domain/espionage/espionage.schema";
-import { TechSuperiorityDelta } from "@/engine/espionage/espionage-calculator";
-import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
-import { CountryRegistry } from "@/domain/data/countries";
+import {
+  EspionageCalculator,
+  TechSuperiorityDelta,
+} from "@/engine/espionage/espionage-calculator";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class TechHeistExecutor {
@@ -26,7 +27,11 @@ export class TechHeistExecutor {
   } {
     const updatedProvinces: Record<string, Province> = { ...provincesMap };
 
-    if (!isSuccess) {
+    if (
+      !isSuccess ||
+      superiority.totalAvailablePoints <
+        EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST
+    ) {
       return {
         updatedSource: source,
         updatedTarget: target,
@@ -35,77 +40,29 @@ export class TechHeistExecutor {
       };
     }
 
-    const indDiff = superiority.industrialDelta;
-    const milDiff = superiority.militaryDelta;
-
-    let gInd = 0;
-    let gMil = 0;
-
-    if (indDiff > 0 && milDiff > 0) {
-      gInd = Math.min(1, indDiff);
-      gMil = Number(Math.min(0.5, milDiff).toFixed(1));
-    } else if (indDiff > 0 && milDiff === 0) {
-      gInd = Math.min(2, indDiff);
-      gMil = 0;
-    } else if (milDiff > 0 && indDiff === 0) {
-      gInd = 0;
-      gMil = Number(Math.min(1.0, milDiff).toFixed(1));
-    }
-
+    const gMil = EspionageCalculator.TECH_HEIST_GAIN;
     const newTechLevel = Number((source.military.techLevel + gMil).toFixed(1));
-    const newIndLevel = source.industrialLevel + gInd;
 
-    if (gInd > 0) {
-      const cleanSourceId = CountryRegistry.resolveCanonicalId(source.id);
-      for (const [pid, prov] of Object.entries(updatedProvinces)) {
-        if (
-          CountryRegistry.resolveCanonicalId(prov.ownerNationId) ===
-          cleanSourceId
-        ) {
-          let cap = prov.maxPopulationCapacity;
-          let prod = prov.perCapitaProductivity;
-          for (let i = 0; i < gInd; i++) {
-            cap = DevelopmentManager.calculateNextCapacity(cap);
-            prod = DevelopmentManager.calculateNextProductivity(prod);
-          }
-          updatedProvinces[pid] = {
-            ...prov,
-            maxPopulationCapacity: cap,
-            perCapitaProductivity: prod,
-          };
-        }
-      }
-    }
-
-    const updatedMilitary =
-      gMil > 0
-        ? MilitaryInventoryHelper.syncBranchTechOnUpgrade(
-            source.military,
-            newTechLevel,
-          )
-        : source.military;
+    const updatedMilitary = MilitaryInventoryHelper.syncBranchTechOnUpgrade(
+      source.military,
+      newTechLevel,
+    );
 
     const updatedSource: Nation = {
       ...source,
-      industrialLevel: newIndLevel,
       military: updatedMilitary,
     };
 
     const techTheftData: EspionageTechTheftData = {
       militaryTechGained: gMil,
-      industrialLevelGained: gInd,
-      totalPointsGained: Number((gMil + gInd).toFixed(1)),
+      industrialLevelGained: 0,
+      totalPointsGained: gMil,
     };
-
-    const gainParts: string[] = [];
-    if (gInd > 0) gainParts.push(`${gInd} سطح توسعه صنعتی`);
-    if (gMil > 0) gainParts.push(`${gMil} سطح فناوری نظامی`);
-    const gainDescription = gainParts.join(" و ");
 
     const message =
       outcome === "CLEAN_SUCCESS"
-        ? `سرقت فناوری با موفقیت انجام شد! دانشمندان شما موفق شدند ${gainDescription} از کشور ${target.name} استخراج و اعمال کنند.`
-        : `سرقت فناوری (${gainDescription}) موفق بود اما سازمان اطلاعات ${target.name} منشأ نفوذ را شناسایی کرد (-۲۵ همسویی هدف، -۱۰ اعتبار جهانی).`;
+        ? `سرقت فناوری با موفقیت انجام شد! دانشمندان شما موفق شدند ۰.۵ سطح فناوری نظامی از کشور ${target.name} استخراج و بومی‌سازی کنند.`
+        : `سرقت فناوری (۰.۵ سطح نظامی) موفق بود اما سازمان اطلاعات ${target.name} منشأ نفوذ را شناسایی کرد (-۲۵ همسویی هدف، -۱۰ اعتبار جهانی).`;
 
     return {
       updatedSource,

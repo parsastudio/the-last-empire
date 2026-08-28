@@ -32,6 +32,10 @@ export function useWideEspionageForm({
   );
   const { dispatchAction, isSubmitting } = useGameActions();
 
+  const sourceRank = useMemo(() => {
+    return NationGettersUtility.getRank(nation.id, nationsMap, provincesMap);
+  }, [nation.id, nationsMap, provincesMap]);
+
   const countryOptions = useMemo<EspionageTargetOption[]>(() => {
     if (!nationsMap) return [];
     const query = searchQuery.trim().toLowerCase();
@@ -92,6 +96,15 @@ export function useWideEspionageForm({
     return nationsMap[canonical] || nationsMap[selectedTargetId] || null;
   }, [nationsMap, selectedTargetId]);
 
+  const targetRank = useMemo(() => {
+    if (!selectedTargetNation) return 50;
+    return NationGettersUtility.getRank(
+      selectedTargetNation.id,
+      nationsMap,
+      provincesMap,
+    );
+  }, [selectedTargetNation, nationsMap, provincesMap]);
+
   const targetGdp = useMemo(() => {
     if (!selectedTargetNation) return 1000000000;
     return getNationGdp(selectedTargetNation, provincesMap);
@@ -111,31 +124,16 @@ export function useWideEspionageForm({
   );
 
   const tier1SuccessRate = useMemo(
-    () =>
-      EspionageManager.calculateSuccessRate(
-        1,
-        nation,
-        selectedTargetNation || undefined,
-      ),
-    [nation, selectedTargetNation],
+    () => EspionageManager.calculateSuccessRate(1, sourceRank, targetRank),
+    [sourceRank, targetRank],
   );
   const tier2SuccessRate = useMemo(
-    () =>
-      EspionageManager.calculateSuccessRate(
-        2,
-        nation,
-        selectedTargetNation || undefined,
-      ),
-    [nation, selectedTargetNation],
+    () => EspionageManager.calculateSuccessRate(2, sourceRank, targetRank),
+    [sourceRank, targetRank],
   );
   const tier3SuccessRate = useMemo(
-    () =>
-      EspionageManager.calculateSuccessRate(
-        3,
-        nation,
-        selectedTargetNation || undefined,
-      ),
-    [nation, selectedTargetNation],
+    () => EspionageManager.calculateSuccessRate(3, sourceRank, targetRank),
+    [sourceRank, targetRank],
   );
 
   const techSuperiority = useMemo(() => {

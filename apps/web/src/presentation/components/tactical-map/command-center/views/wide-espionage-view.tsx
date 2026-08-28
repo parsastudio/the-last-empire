@@ -137,7 +137,7 @@ export function WideEspionageView({
                 <EspionageTierCard
                   tier={3}
                   title="سرقت فوق‌محرمانه اسرار و جهش فناوری (Superpower Tech Heist)"
-                  subtitle={`نفوذ به سرورهای محرمانه و سرقت سطوح فناوری متناسب با برتری‌های ${form.selectedTargetNation.name} (۴۰٪ GDP).`}
+                  subtitle={`نفوذ به سرورهای محرمانه و سرقت ۰.۵ سطح فناوری نظامی ${form.selectedTargetNation.name} (۴۰٪ GDP).`}
                   icon={Binary}
                   iconColorClass="text-amber-500"
                   borderColorClass="border-amber-500/40"
@@ -146,9 +146,9 @@ export function WideEspionageView({
                   isExecutedThisTurn={form.isTierExecuted(3)}
                   canAfford={nation.treasury >= form.tier3Cost}
                   isDisabledCondition={
-                    form.techSuperiority.totalAvailablePoints <= 0
+                    form.techSuperiority.totalAvailablePoints < 0.5
                   }
-                  disabledReasonText="کشور هدف در هیچ زمینه‌ای (نظامی یا صنعتی) از شما برتر نیست."
+                  disabledReasonText="کشور هدف باید حداقل ۰.۵ لول فناوری نظامی از شما بالاتر باشد."
                   isExecuting={form.isSubmitting}
                   onExecute={() => form.handleExecute(3)}
                 />
