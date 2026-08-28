@@ -1,5 +1,7 @@
 import { CountryProfile } from "@/domain/data/countries/profile.type";
 import { GovernmentType } from "@/domain/politics/politics.schema";
+import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
+import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
 
 export interface NormalizedCountryFallback {
   nameFa: string;
@@ -15,6 +17,7 @@ export interface NormalizedCountryFallback {
   startingTechLevel: number;
   militaryTier: number;
   startingGovernment: GovernmentType;
+  aiDoctrine: AiDoctrineType;
 }
 
 export class CountryDefaultsUtility {
@@ -64,6 +67,15 @@ export class CountryDefaultsUtility {
     const startingGovernment: GovernmentType =
       profile?.startingGovernment ?? this.DEFAULT_GOVERNMENT;
 
+    const aiDoctrine =
+      profile?.aiDoctrine ??
+      NationDoctrineResolver.resolveDoctrineType(
+        cleanCode,
+        domesticTechLevel,
+        equipmentTechLevel,
+        gdp,
+      );
+
     return {
       nameFa,
       nameEn,
@@ -78,6 +90,7 @@ export class CountryDefaultsUtility {
       militaryTier,
       startingTechLevel,
       startingGovernment,
+      aiDoctrine,
     };
   }
 }

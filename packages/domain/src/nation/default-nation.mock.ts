@@ -1,4 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
+import { AI_DOCTRINE_PRESETS } from "@/domain/nation/nation-doctrine.config";
 
 export const DEFAULT_NATION_MOCK: Nation = {
   id: "IRN",
@@ -40,4 +41,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   executedEspionageTiers: [],
   warFocusTargetId: null,
   postWarCooldownTurns: 0,
+  doctrine: "DOMESTIC_INDUSTRIALIST",
+  doctrineWeights: AI_DOCTRINE_PRESETS.DOMESTIC_INDUSTRIALIST,
 };

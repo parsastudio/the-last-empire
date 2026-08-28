@@ -5,6 +5,10 @@ import {
   RecruitmentOrderSchema,
 } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
+import {
+  AiDoctrineTypeSchema,
+  AiDoctrineWeightsSchema,
+} from "@/domain/nation/nation-doctrine.schema";
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -35,6 +39,8 @@ export const NationSchema = z.object({
   executedEspionageTiers: z.array(z.string()).default([]),
   warFocusTargetId: z.string().nullable().optional(),
   postWarCooldownTurns: z.number().nonnegative().default(0),
+  doctrine: AiDoctrineTypeSchema.default("DOMESTIC_INDUSTRIALIST"),
+  doctrineWeights: AiDoctrineWeightsSchema.optional(),
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;

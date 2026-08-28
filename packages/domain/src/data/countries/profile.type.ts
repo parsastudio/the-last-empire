@@ -1,4 +1,5 @@
 import { GovernmentType } from "@/domain/politics/politics.schema";
+import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 
 export interface CountryProfile {
   code: string;
@@ -12,4 +13,5 @@ export interface CountryProfile {
   startingGovernment?: GovernmentType;
   startingTechLevel?: number;
   militaryTier?: number;
+  aiDoctrine?: AiDoctrineType;
 }
