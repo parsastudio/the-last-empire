@@ -8,7 +8,7 @@ import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AiEconomyCalculator } from "@/engine/ai/ai-economy-calculator";
-import { NationGettersUtility, CountryRegistry } from "@geopolitics/domain";
+import { CountryRegistry } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -80,23 +80,20 @@ export class EconomyTurnProcessor {
     }
 
     if (updated.isAi) {
-      const aliveCount = Object.values(allNations).filter(
-        (n) => n.isAlive,
-      ).length;
-      const nationRank = NationGettersUtility.getRank(
-        updated.id,
+      const taxAt30 = TaxCalculator.calculateTaxIncome(gdp, 30);
+      const tariffAt30 = TariffCalculator.calculateTariffEffects(
+        { ...updated, tariffRate: 30 },
         allNations,
         currentProvincesMap,
-      );
+      ).tariffRevenue;
 
-      const baseIncome = AiEconomyCalculator.calculateTurnIncome(
-        gdp,
-        nationRank,
-        aliveCount,
-        updated.government.type,
+      const baseIncome = AiEconomyCalculator.calculateComparativeTurnIncome(
+        taxAt30,
+        tariffAt30,
       );
 
       const maintenanceCost = payrollBreakdown.total;
+      const debtInterest = Math.floor(updated.nationalDebt * 0.07);
 
       let actualRepayment = 0;
       let newDebt = updated.nationalDebt;
@@ -107,41 +104,27 @@ export class EconomyTurnProcessor {
         newDebt -= actualRepayment;
       }
 
-      let netAddedTreasury = Math.max(
-        0,
-        baseIncome +
-          navalSecurityIncome +
-          warSubsidiesReceived -
-          maintenanceCost -
-          actualRepayment,
-      );
+      const totalAiExpenses =
+        maintenanceCost + securityFee + actualRepayment + debtInterest;
+      const totalAiGains =
+        baseIncome + navalSecurityIncome + warSubsidiesReceived;
+      const netChange = totalAiGains - totalAiExpenses;
 
-      if (securityFee > 0) {
-        if (netAddedTreasury + updated.treasury >= securityFee) {
-          if (netAddedTreasury >= securityFee) {
-            netAddedTreasury -= securityFee;
-          } else {
-            const deficit = securityFee - netAddedTreasury;
-            netAddedTreasury = 0;
-            updated.treasury = Math.max(0, updated.treasury - deficit);
-          }
-        } else {
-          const cashAvailable = netAddedTreasury + updated.treasury;
-          const borrowNeeded = securityFee - cashAvailable;
-          netAddedTreasury = 0;
-          updated.treasury = 0;
-          const maxDebtLimit = Math.floor(gdp * 0.8);
-          if (newDebt + borrowNeeded > maxDebtLimit) {
-            updated.securityGuarantorId = null;
-          } else {
-            newDebt += borrowNeeded;
-          }
+      let newTreasury = updated.treasury + netChange;
+
+      if (newTreasury < 0) {
+        const deficit = Math.abs(newTreasury);
+        const maxDebtLimit = Math.floor(gdp * 0.8);
+        if (newDebt + deficit > maxDebtLimit && updated.securityGuarantorId) {
+          updated.securityGuarantorId = null;
         }
+        newDebt += deficit;
+        newTreasury = 0;
       }
 
       updated = {
         ...updated,
-        treasury: updated.treasury + netAddedTreasury,
+        treasury: newTreasury,
         nationalDebt: newDebt,
       };
 

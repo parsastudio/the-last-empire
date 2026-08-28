@@ -31,7 +31,7 @@ export class TechHeistExecutor {
         updatedSource: source,
         updatedTarget: target,
         updatedProvinces,
-        message: `نفوذ به سرورهای محرمانه ${target.name} شکست خورد و کدهای نفوذی مسدود شدند (-۴۰ دیدگاه، -۱۵ اعتبار جهانی).`,
+        message: `نفوذ به سرورهای محرمانه ${target.name} شکست خورد و کدهای نفوذی مسدود شدند (-۱۰ اعتبار جهانی).`,
       };
     }
 
@@ -105,7 +105,7 @@ export class TechHeistExecutor {
     const message =
       outcome === "CLEAN_SUCCESS"
         ? `سرقت فناوری با موفقیت انجام شد! دانشمندان شما موفق شدند ${gainDescription} از کشور ${target.name} استخراج و اعمال کنند.`
-        : `سرقت فناوری (${gainDescription}) موفق بود اما وزارت اطلاعات ${target.name} عاملان را شناسایی کرد (-۵۰ دیدگاه، -۱۵ اعتبار جهانی).`;
+        : `سرقت فناوری (${gainDescription}) موفق بود اما سازمان اطلاعات ${target.name} منشأ نفوذ را شناسایی کرد (-۲۵ همسویی هدف، -۱۰ اعتبار جهانی).`;
 
     return {
       updatedSource,
