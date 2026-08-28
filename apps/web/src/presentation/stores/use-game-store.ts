@@ -134,7 +134,7 @@ export const useGameStore = create<GameStoreState>()(
 
       return {
         success: false,
-        message: result.message || "امکان انجام این دستور وجود ندارد.",
+        message: result.message || "امکان اجرای این دستور وجود ندارد.",
       };
     },
 

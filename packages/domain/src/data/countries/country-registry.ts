@@ -185,7 +185,12 @@ export class CountryRegistry {
     if (!manifest || !Array.isArray(manifest.nations)) return;
 
     for (const item of manifest.nations) {
-      const iso3 = (item.code || item.id).toUpperCase();
+      const rawCode = item.code || item.id;
+      const str =
+        rawCode !== null && rawCode !== undefined ? String(rawCode) : "";
+      const iso3 = str.trim().toUpperCase();
+      if (!iso3) continue;
+
       this.manifestNations.set(iso3, item);
 
       const defaultProfile = this.byIso3.get(iso3);
@@ -210,10 +215,8 @@ export class CountryRegistry {
         nameFa: item.nameFa || defaultProfile?.nameFa || iso3,
         gdp: item.gdp,
         population: item.population,
-        flagCode: (
-          item.flagCode ||
-          defaultProfile?.flagCode ||
-          iso3.slice(0, 2)
+        flagCode: String(
+          item.flagCode || defaultProfile?.flagCode || iso3.slice(0, 2),
         ).toUpperCase(),
         domesticTechLevel,
         equipmentTechLevel,
@@ -226,7 +229,10 @@ export class CountryRegistry {
 
       this.manifestProfiles.set(iso3, dynamicProfile);
       if (item.flagCode) {
-        this.manifestProfiles.set(item.flagCode.toUpperCase(), dynamicProfile);
+        const flagStr = String(item.flagCode).trim().toUpperCase();
+        if (flagStr) {
+          this.manifestProfiles.set(flagStr, dynamicProfile);
+        }
       }
     }
   }
@@ -235,9 +241,12 @@ export class CountryRegistry {
     return Array.from(this.manifestNations.values());
   }
 
-  public static getCountry(identifier: string): CountryProfile | undefined {
-    if (!identifier) return undefined;
-    const clean = identifier.trim().toUpperCase();
+  public static getCountry(identifier: unknown): CountryProfile | undefined {
+    if (identifier === null || identifier === undefined) return undefined;
+    const str =
+      typeof identifier === "string" ? identifier : String(identifier);
+    const clean = str.trim().toUpperCase();
+    if (!clean) return undefined;
 
     const manifestMatch = this.manifestProfiles.get(clean);
     if (manifestMatch) return manifestMatch;
@@ -248,15 +257,18 @@ export class CountryRegistry {
     return this.byFlagCode.get(clean);
   }
 
-  public static resolveCanonicalId(identifier: string): string {
-    if (!identifier) return "IRN";
-    const profile = this.getCountry(identifier);
-    return profile
-      ? profile.code.toUpperCase()
-      : identifier.trim().toUpperCase();
+  public static resolveCanonicalId(identifier: unknown): string {
+    if (identifier === null || identifier === undefined) return "IRN";
+    const str =
+      typeof identifier === "string" ? identifier : String(identifier);
+    const clean = str.trim().toUpperCase();
+    if (!clean) return "IRN";
+
+    const profile = this.getCountry(clean);
+    return profile ? profile.code.toUpperCase() : clean;
   }
 
-  public static getGpuColorIndex(identifier: string): number {
+  public static getGpuColorIndex(identifier: unknown): number {
     const iso3 = this.resolveCanonicalId(identifier);
     return GPU_INDEX_MAPPING[iso3] ?? 118;
   }

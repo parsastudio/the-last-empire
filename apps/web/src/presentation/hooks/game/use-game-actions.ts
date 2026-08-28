@@ -30,10 +30,18 @@ export function useGameActions(onActionExecuted?: () => void) {
           return { success: true, resultData: result.resultData };
         }
 
-        showToast("خطا در اجرای دستور", result.message, "error");
+        showToast(
+          "خطا در اجرای دستور",
+          result.message || "امکان اجرای این دستور وجود ندارد.",
+          "error",
+        );
         return { success: false };
-      } catch {
-        showToast("خطا در سیستم", "امکان اجرای این دستور وجود ندارد.", "error");
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error
+            ? err.message
+            : "امکان اجرای این دستور وجود ندارد.";
+        showToast("خطا در سیستم", errorMsg, "error");
         return { success: false };
       } finally {
         setIsSubmitting(false);

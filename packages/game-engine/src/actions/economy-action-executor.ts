@@ -4,7 +4,10 @@ import { Province } from "@/domain/province/province.schema";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DevelopmentManager } from "@/engine/economy/calculators/infrastructure-manager";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import {
+  getNationGdp,
+  getProvinceGdp,
+} from "@/domain/nation/gdp-calculator.utility";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export class EconomyActionExecutor {
@@ -14,7 +17,16 @@ export class EconomyActionExecutor {
     );
     const nation =
       state.nations[canonicalNationId] || state.nations[action.nationId];
-    if (!nation) return state;
+    if (!nation) {
+      throw new GameError(
+        "NATION_NOT_FOUND",
+        `کشور صادرکننده دستور (${action.nationId}) یافت نشد.`,
+      );
+    }
+
+    const buyerKey = state.nations[canonicalNationId]
+      ? canonicalNationId
+      : nation.id;
 
     switch (action.type) {
       case "SET_ECONOMIC_DOCTRINE": {
@@ -22,7 +34,7 @@ export class EconomyActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [nation.id]: {
+            [buyerKey]: {
               ...nation,
               economicStance: action.stance,
             },
@@ -33,43 +45,63 @@ export class EconomyActionExecutor {
       case "BUY_PROVINCE": {
         const province = state.provinces[action.provinceId.toString()];
         if (!province) {
-          throw new GameError("INVALID_ACTION", "استان مورد نظر یافت نشد.");
-        }
-
-        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
-          action.targetNationId,
-        );
-        const seller =
-          state.nations[canonicalTargetId] ||
-          state.nations[action.targetNationId];
-
-        if (!seller || !seller.isAlive) {
-          throw new GameError("NATION_NOT_FOUND", "کشور مالک استان فعال نیست.");
+          throw new GameError(
+            "INVALID_ACTION",
+            "استان مورد نظر روی نقشه یافت نشد.",
+          );
         }
 
         const currentOwnerCanonical = CountryRegistry.resolveCanonicalId(
           province.ownerNationId,
         );
-        if (currentOwnerCanonical !== canonicalTargetId) {
+
+        if (currentOwnerCanonical === canonicalNationId) {
           throw new GameError(
             "INVALID_ACTION",
-            "استان در حال حاضر در کنترل کشور فروشنده نیست.",
+            "این استان در حال حاضر متعلق به خاک خود شماست.",
           );
         }
 
-        if (nation.treasury < action.cost) {
+        const canonicalTargetId = CountryRegistry.resolveCanonicalId(
+          action.targetNationId || province.ownerNationId,
+        );
+
+        const seller =
+          state.nations[canonicalTargetId] ||
+          state.nations[province.ownerNationId];
+
+        if (!seller || !seller.isAlive) {
+          throw new GameError(
+            "NATION_NOT_FOUND",
+            "کشور حاکم بر این استان در حال حاضر فعال نیست.",
+          );
+        }
+
+        const sellerKey = state.nations[canonicalTargetId]
+          ? canonicalTargetId
+          : seller.id;
+
+        const provinceGdp = getProvinceGdp(province);
+        const calculatedPrice = Math.max(
+          10_000_000_000,
+          Math.floor(provinceGdp * 5),
+        );
+        const effectiveCost = action.cost > 0 ? action.cost : calculatedPrice;
+
+        if (nation.treasury < effectiveCost) {
           throw new GameError(
             "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای خرید این استان کافی نیست.",
+            `موجودی خزانه برای خرید این استان کافی نیست (هزینه: ${effectiveCost.toLocaleString("en-US")} دلار).`,
           );
         }
 
         const rel =
           seller.relations[canonicalNationId] || seller.relations[nation.id];
+
         if (rel?.stance === "WAR") {
           throw new GameError(
             "INVALID_ACTION",
-            "در وضعیت جنگ امکان معامله و خرید سرزمینی وجود ندارد.",
+            `کشور ${seller.name} به دلیل وضعیت جنگی حاضر به واگذاری این استان نیست.`,
           );
         }
 
@@ -91,7 +123,7 @@ export class EconomyActionExecutor {
             "TERRITORY_PURCHASED",
             {
               provinceName: province.nameFa,
-              cost: action.cost,
+              cost: effectiveCost,
             },
             "INFO",
           ),
@@ -103,13 +135,13 @@ export class EconomyActionExecutor {
           turnLogs: [...state.turnLogs, ...buyLogs],
           nations: {
             ...state.nations,
-            [nation.id]: {
+            [buyerKey]: {
               ...nation,
-              treasury: nation.treasury - action.cost,
+              treasury: nation.treasury - effectiveCost,
             },
-            [seller.id]: {
+            [sellerKey]: {
               ...seller,
-              treasury: seller.treasury + action.cost,
+              treasury: seller.treasury + effectiveCost,
             },
           },
         };
@@ -135,7 +167,7 @@ export class EconomyActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [nation.id]: {
+            [buyerKey]: {
               ...nation,
               treasury: nation.treasury + action.amount,
               nationalDebt: nation.nationalDebt + action.amount,
@@ -162,7 +194,7 @@ export class EconomyActionExecutor {
           ...state,
           nations: {
             ...state.nations,
-            [nation.id]: {
+            [buyerKey]: {
               ...nation,
               treasury: nation.treasury - repayAmount,
               nationalDebt: nation.nationalDebt - repayAmount,
@@ -213,7 +245,7 @@ export class EconomyActionExecutor {
           provinces: updatedProvinces,
           nations: {
             ...state.nations,
-            [nation.id]: {
+            [buyerKey]: {
               ...nation,
               treasury: nation.treasury - cost,
               industrialLevel: nextLevel,
