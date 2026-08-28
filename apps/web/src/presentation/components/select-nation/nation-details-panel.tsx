@@ -1,5 +1,5 @@
 import React from "react";
-import { Zap, ShieldCheck } from "lucide-react";
+import { Zap, ShieldCheck, Compass } from "lucide-react";
 import { NationDetail } from "@/presentation/components/select-nation/nation-list-item";
 import { NationOverviewStats } from "@/presentation/components/select-nation/nation-overview-stats";
 import {
@@ -7,6 +7,7 @@ import {
   GovernmentOption,
 } from "@/presentation/components/select-nation/government-type-selector";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { getDoctrineDescription } from "@/presentation/utils/nation-presentation-mapper";
 
 interface NationDetailsPanelProps {
   nation: NationDetail;
@@ -24,6 +25,7 @@ export function NationDetailsPanel({
   onStartCampaign,
 }: NationDetailsPanelProps) {
   const flagEmoji = getFlagEmoji(nation.code);
+  const doctrineDesc = getDoctrineDescription(nation.doctrine);
 
   return (
     <div className="lg:col-span-8 flex flex-col bg-card/90 backdrop-blur-2xl border border-border/80 rounded-3xl p-6 overflow-y-auto scrollbar-thin scrollbar-thumb-border/60 scrollbar-track-transparent shadow-2xl h-full space-y-6 dir-rtl text-right transition-all">
@@ -54,6 +56,25 @@ export function NationDetailsPanel({
       </div>
 
       <NationOverviewStats nation={nation} />
+
+      {nation.doctrineLabel && (
+        <div className="bg-secondary/40 border border-border/60 p-3.5 rounded-2xl space-y-1 text-right">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono flex items-center gap-1.5">
+              <Compass size={13} className="text-primary" />
+              دکترین ژئوپلیتیک و ساختار تسلیحاتی
+            </span>
+            <span className="text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 px-2.5 py-0.5 rounded-lg">
+              {nation.doctrineLabel}
+            </span>
+          </div>
+          {doctrineDesc && (
+            <p className="text-[11px] text-muted-foreground leading-relaxed font-sans pt-1">
+              {doctrineDesc}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="space-y-2">
         <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
