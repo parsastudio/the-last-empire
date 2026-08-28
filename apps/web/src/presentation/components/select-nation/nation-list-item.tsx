@@ -13,6 +13,8 @@ export interface NationDetail {
   treasury: string;
   desc: string;
   defaultGovernment: string;
+  doctrine?: string;
+  doctrineLabel?: string;
 }
 
 interface NationListItemProps {

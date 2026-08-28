@@ -11,7 +11,10 @@ import {
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import {
+  NationPresentationMapper,
+  getDoctrineLabel,
+} from "@/presentation/utils/nation-presentation-mapper";
 
 export interface DiplomaticRelation {
   code: string;
@@ -124,6 +127,9 @@ export function resolveProfileRelation(
     posture = vector.posture;
   }
 
+  const rawDoctrine = liveNation?.doctrine || profile?.aiDoctrine;
+  const doctrineLabel = getDoctrineLabel(rawDoctrine);
+
   return {
     code: displayCode.toUpperCase(),
     name,
@@ -144,6 +150,7 @@ export function resolveProfileRelation(
       stability: liveNation ? liveNation.government.stability : 50,
       alignment,
       tension,
+      doctrineLabel,
     },
   };
 }

@@ -6,6 +6,7 @@ import {
   Landmark,
   ShoppingCart,
   Lock,
+  Compass,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -17,6 +18,7 @@ export interface CountryProfileData {
   stability: number;
   alignment: number;
   tension: number;
+  doctrineLabel?: string;
 }
 
 interface CountryProfileStatsProps {
@@ -61,6 +63,18 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
           سطح {PersianNumberFormatter.toPersianDigits(data.techLevel)}
         </span>
       </div>
+
+      {data.doctrineLabel && (
+        <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl flex items-center justify-between font-sans">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Compass size={14} className="text-primary shrink-0" />
+            <span className="text-[11px] font-bold">دکترین ژئوپلیتیک:</span>
+          </div>
+          <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/25 px-2.5 py-0.5 rounded-lg">
+            {data.doctrineLabel}
+          </span>
+        </div>
+      )}
 
       <div className="bg-secondary/40 border border-border/50 p-3.5 rounded-2xl flex items-center justify-between font-sans">
         <div className="flex items-center gap-2 text-xs">

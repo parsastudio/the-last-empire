@@ -14,8 +14,13 @@ import {
   ClientMapPathResolver,
   NationGettersUtility,
   NationRankCandidateInput,
+  NationDoctrineResolver,
+  AiDoctrineType,
 } from "@geopolitics/domain";
-import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import {
+  NationPresentationMapper,
+  getDoctrineLabel,
+} from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
@@ -52,6 +57,18 @@ function mapManifestToNationDetails(
 
   return sortedItems.map((item) => {
     const computedRank = rankMap.get(item.code || item.id) ?? item.initialRank;
+    const profile = CountryRegistry.getCountry(item.code || item.id);
+
+    const resolvedDoctrine =
+      (item.aiDoctrine as AiDoctrineType) ||
+      profile?.aiDoctrine ||
+      NationDoctrineResolver.resolveDoctrineType(
+        item.code || item.id,
+        profile?.domesticTechLevel ?? 1,
+        profile?.equipmentTechLevel ?? 1,
+        item.gdp,
+      );
+
     const summary = NationPresentationMapper.formatNationSummary(
       item.id,
       item.nameFa,
@@ -61,6 +78,8 @@ function mapManifestToNationDetails(
       item.gdp,
       item.population,
       item.defaultGovernment,
+      undefined,
+      resolvedDoctrine,
     );
 
     return {
@@ -74,6 +93,8 @@ function mapManifestToNationDetails(
       treasury: summary.treasuryText,
       desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${computedRank}.`,
       defaultGovernment: item.defaultGovernment,
+      doctrine: resolvedDoctrine,
+      doctrineLabel: summary.doctrineLabel,
     };
   });
 }
