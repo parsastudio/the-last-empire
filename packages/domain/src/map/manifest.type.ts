@@ -1,3 +1,5 @@
+import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
+
 export interface FinalManifestProvince {
   provinceId: number;
   nameFa: string;
@@ -38,6 +40,7 @@ export interface FinalManifestNation {
   startingTechLevel: number;
   industrialLevel: number;
   startingStability: number;
+  aiDoctrine?: AiDoctrineType;
 }
 
 export interface FinalMapManifest {

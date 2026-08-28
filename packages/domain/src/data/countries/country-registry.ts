@@ -7,6 +7,8 @@ import {
   FinalMapManifest,
   FinalManifestNation,
 } from "@/domain/map/manifest.type";
+import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
+import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 
 const GPU_INDEX_MAPPING: Record<string, number> = {
   TZA: 12,
@@ -123,6 +125,13 @@ function composeAllCountryProfiles(): CountryProfile[] {
       equipmentTechLevel: 1.0,
     };
 
+    const aiDoctrine = NationDoctrineResolver.resolveDoctrineType(
+      code,
+      milInfo.domesticTechLevel,
+      milInfo.equipmentTechLevel,
+      gdp,
+    );
+
     return {
       code,
       nameEn: idInfo.nameEn,
@@ -134,6 +143,7 @@ function composeAllCountryProfiles(): CountryProfile[] {
       domesticTechLevel: milInfo.domesticTechLevel,
       equipmentTechLevel: milInfo.equipmentTechLevel,
       militaryTier: milInfo.militaryTier,
+      aiDoctrine,
     };
   });
 }
@@ -184,6 +194,16 @@ export class CountryRegistry {
       const equipmentTechLevel =
         defaultProfile?.equipmentTechLevel ?? domesticTechLevel;
 
+      const aiDoctrine =
+        (item.aiDoctrine as AiDoctrineType) ||
+        defaultProfile?.aiDoctrine ||
+        NationDoctrineResolver.resolveDoctrineType(
+          iso3,
+          domesticTechLevel,
+          equipmentTechLevel,
+          item.gdp,
+        );
+
       const dynamicProfile: CountryProfile = {
         code: iso3,
         nameEn: item.nameEn || defaultProfile?.nameEn || iso3,
@@ -201,6 +221,7 @@ export class CountryRegistry {
         startingGovernment:
           item.defaultGovernment as CountryProfile["startingGovernment"],
         startingTechLevel: domesticTechLevel,
+        aiDoctrine,
       };
 
       this.manifestProfiles.set(iso3, dynamicProfile);

@@ -5,6 +5,7 @@ import {
   MilitaryInventoryHelper,
   MilitaryStack,
   CountryDefaultsUtility,
+  NationDoctrineResolver,
 } from "@geopolitics/domain";
 import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 
@@ -111,6 +112,13 @@ export class NationProfileAssigner {
 
     const initialNavalFleet = item.hasSeaAccess && domesticTech > 4.5 ? 3 : 0;
 
+    const doctrineProfile = NationDoctrineResolver.resolveProfileForCountry(
+      cleanId,
+      domesticTech,
+      equipmentTech,
+      item.gdp,
+    );
+
     return {
       id: cleanId,
       name: item.nameFa,
@@ -136,6 +144,8 @@ export class NationProfileAssigner {
       executedEspionageTiers: [],
       warFocusTargetId: null,
       postWarCooldownTurns: 0,
+      doctrine: item.aiDoctrine || doctrineProfile.type,
+      doctrineWeights: doctrineProfile.weights,
     };
   }
 
@@ -189,6 +199,7 @@ export class NationProfileAssigner {
       startingTechLevel: dynamicStack.techLevel,
       industrialLevel: 1,
       startingStability: 50,
+      aiDoctrine: fallback.aiDoctrine,
     };
 
     return this.buildNationFromManifest(
