@@ -31,6 +31,8 @@ export * from "./nation/nation-doctrine.schema";
 export * from "./nation/nation-doctrine.config";
 export * from "./nation/nation-getters.utility";
 export * from "./nation/territory-claims.utility";
+export * from "./politics/economic-doctrine.schema";
+export * from "./politics/economic-doctrine.config";
 export * from "./politics/government-label.utility";
 export * from "./politics/government-traits.config";
 export * from "./politics/politics.schema";
