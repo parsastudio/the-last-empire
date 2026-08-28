@@ -7,6 +7,7 @@ import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { AI_DOCTRINE_PRESETS } from "@geopolitics/domain";
 
 export interface EspionagePlanResult {
   actions: GameAction[];
@@ -194,6 +195,15 @@ export class AIEspionagePlanner {
         provincesByOwnerMap,
       );
 
+    const weights =
+      nation.doctrineWeights ??
+      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
+
+    const costMultiplier =
+      weights.armsImportRatio >= 0.6 && nation.military.techLevel < 3.5
+        ? 1.1
+        : 1.3;
+
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
       [];
 
@@ -233,7 +243,7 @@ export class AIEspionagePlanner {
       );
       const cost = EspionageCalculator.calculateOperationCost(targetGdp, 3);
 
-      if (currentTreasury >= Math.floor(cost * 1.3)) {
+      if (currentTreasury >= Math.floor(cost * costMultiplier)) {
         eligibleTargets.push({
           target,
           cost,
