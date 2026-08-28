@@ -1,35 +1,10 @@
-import { GovernmentType } from "@/domain/politics/politics.schema";
-
 export class AiEconomyCalculator {
-  public static getGovernmentIncomeMultiplier(
-    _govType?: GovernmentType | string,
+  public static calculateComparativeTurnIncome(
+    taxIncomeAt30: number,
+    tariffRevenueAt30: number,
   ): number {
-    return 1.0;
-  }
-
-  public static calculateIncomeRate(
-    rank: number,
-    totalAliveCount: number,
-  ): number {
-    if (totalAliveCount <= 1) {
-      return 0.3;
-    }
-
-    const safeRank = Math.max(1, Math.min(totalAliveCount, rank));
-    const rankProgress = (safeRank - 1) / (totalAliveCount - 1);
-
-    return 0.3 + rankProgress * 0.3;
-  }
-
-  public static calculateTurnIncome(
-    gdp: number,
-    rank: number,
-    totalAliveCount: number,
-    govType?: GovernmentType | string,
-  ): number {
-    const rate = this.calculateIncomeRate(rank, totalAliveCount);
-    const govMultiplier = this.getGovernmentIncomeMultiplier(govType);
-    return Math.floor(gdp * rate * govMultiplier);
+    const higherRevenue = Math.max(taxIncomeAt30, tariffRevenueAt30);
+    return Math.floor(higherRevenue * 0.9);
   }
 
   public static calculateMaxArmyValuation(gdp: number): number {

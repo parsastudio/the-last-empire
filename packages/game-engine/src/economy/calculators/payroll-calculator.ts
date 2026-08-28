@@ -15,7 +15,7 @@ export interface BreakdownMilitaryPayroll {
 }
 
 export class MilitaryPayrollCalculator {
-  public static readonly PAYROLL_RATE = 0.1;
+  public static readonly PAYROLL_RATE = 0.06;
 
   public static calculatePayroll(
     nation: Nation,
@@ -51,7 +51,7 @@ export class MilitaryPayrollCalculator {
       rawInfantry + rawArmor + rawAirDefense + rawAirForce + rawDroneMissile;
 
     const gdp = getNationGdp(nation, provincesMap);
-    const maxAllowedPayroll = gdp > 0 ? Math.floor(gdp * 0.1) : rawTotal;
+    const maxAllowedPayroll = gdp > 0 ? Math.floor(gdp * 0.06) : rawTotal;
 
     if (rawTotal > maxAllowedPayroll && rawTotal > 0) {
       const scale = maxAllowedPayroll / rawTotal;

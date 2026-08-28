@@ -34,6 +34,8 @@ export * from "./combat/phases/missile-interception-phase";
 export * from "./combat/state-appliers/battle-attacker-state-applier";
 export * from "./combat/state-appliers/battle-defender-state-applier";
 
+export * from "./diagnostics/turn-state-logger";
+
 export * from "./diplomacy/diplomacy-engine";
 export * from "./diplomacy/diplomatic-acceptance-evaluator";
 export * from "./diplomacy/treaty-acceptance-applier";

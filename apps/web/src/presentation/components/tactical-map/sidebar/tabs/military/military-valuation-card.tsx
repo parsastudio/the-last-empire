@@ -106,7 +106,7 @@ export function MilitaryValuationCard({
         <div className="bg-secondary/40 border border-border/50 p-3 rounded-xl space-y-1">
           <span className="text-[10px] text-muted-foreground block font-sans flex items-center gap-1">
             <TrendingDown size={12} className="text-military" />
-            هزینه نگهداری هر نوبت (۱۰٪):
+            هزینه نگهداری هر نوبت (۶٪):
           </span>
           <span className="font-extrabold text-military text-xs block truncate">
             -{PersianNumberFormatter.formatCurrency(metrics.totalPayroll, true)}
@@ -114,15 +114,15 @@ export function MilitaryValuationCard({
           {metrics.isGdpCapped && (
             <span className="text-[9px] text-amber-400 font-bold block font-sans flex items-center gap-0.5">
               <ShieldCheck size={10} />
-              مهارشده در سقف ۱۰٪ GDP
+              مهارشده در سقف ۶٪ GDP
             </span>
           )}
         </div>
       </div>
 
       <p className="text-[10px] text-muted-foreground leading-relaxed bg-secondary/20 p-2.5 rounded-xl border border-border/40 font-sans">
-        هزینه نگهداری نوبتی ارتش دقیقاً ۱۰٪ ارزش نیروهاست و تحت هیچ شرایطی از
-        ۱۰٪ تولید ناخالص (GDP) کشور فراتر نمی‌رود.
+        هزینه نگهداری نوبتی ارتش دقیقاً ۶٪ ارزش نیروهاست و تحت هیچ شرایطی از ۶٪
+        تولید ناخالص (GDP) کشور فراتر نمی‌رود.
       </p>
     </div>
   );

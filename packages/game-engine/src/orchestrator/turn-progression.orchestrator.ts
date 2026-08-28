@@ -7,6 +7,7 @@ import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { CoalitionManager } from "@/engine/politics/coalition-manager";
+import { TurnStateLogger } from "@/engine/diagnostics/turn-state-logger";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -129,10 +130,14 @@ export class TurnProgressionOrchestrator {
 
     const cappedLogs = workingState.turnLogs.slice(-300);
 
-    return {
+    const finalState: GameState = {
       ...workingState,
       turnLogs: cappedLogs,
       seed: prng.getSeed(),
     };
+
+    TurnStateLogger.logTurnState(finalState);
+
+    return finalState;
   }
 }

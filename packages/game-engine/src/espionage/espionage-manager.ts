@@ -184,21 +184,6 @@ export class EspionageManager {
         ),
       };
 
-      const rel =
-        updatedSource.relations[canonicalTarget] ||
-        updatedSource.relations[target.id];
-      if (rel) {
-        const key = rel.targetNationId || canonicalTarget;
-        updatedSource.relations = {
-          ...updatedSource.relations,
-          [key]: {
-            ...rel,
-            alignment: Math.max(-100, (rel.alignment ?? 0) - tier * 15),
-            tension: Math.min(100, (rel.tension ?? 10) + tier * 10),
-          },
-        };
-      }
-
       const targetRel =
         updatedTarget.relations[canonicalSource] ||
         updatedTarget.relations[source.id];
@@ -238,7 +223,7 @@ export class EspionageManager {
           "ESPIONAGE_OPERATION",
           {
             details:
-              "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید.",
+              "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید (منشأ خرابکاری نامشخص).",
             tier,
             outcome,
             role: "DEFENDER",
@@ -251,9 +236,9 @@ export class EspionageManager {
       if (tier === 1) {
         defenderMsg = `گزارش ضدجاسوسی: تلاش برای شنود سیگنالی و نفوذ به مراکز فرماندهی کشف شد و فرکانس‌های ارسالی از کشور ${source.name} رصد گردید.`;
       } else if (tier === 2) {
-        defenderMsg = `هشدار تروریستی: خرابکاری در پایگاه‌های تسلیحاتی رخ داد، اما تیم نفوذی لو رفت و مشخص شد عملیات با هدایت کشور ${source.name} بوده است.`;
+        defenderMsg = `هشدار امنیتی: خرابکاری در پایگاه‌های تسلیحاتی رخ داد و شواهد میدانی، دست داشتن سازمان اطلاعات ${source.name} را تایید کرد.`;
       } else {
-        defenderMsg = `رخنه امنیتی: سرورهای تحقیقاتی هدف نفوذ سایبری قرار گرفتند. سازمان ضدجاسوسی منشأ حمله را در کشور ${source.name} شناسایی کرد.`;
+        defenderMsg = `رخنه امنیتی: سرورهای تحقیقاتی هدف نفوذ سایبری قرار گرفتند. سازمان ضدجاسوسی منشأ سرقت داده‌ها را در کشور ${source.name} شناسایی کرد.`;
       }
 
       const defenderLog = TurnLogBuilder.createNationalLog(

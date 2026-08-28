@@ -66,32 +66,7 @@ export class UtilityDecisionEngine {
         ? Math.round(rawPowerAdvantage * opportunismMultiplier)
         : rawPowerAdvantage;
 
-    let tierStrategyModifier = 0;
-    const isSourceSuperpower = vector.sourceReachTier === "SUPERPOWER";
-    const isTargetSuperpower = vector.targetReachTier === "SUPERPOWER";
-    const isTargetLocal = vector.targetReachTier === "LOCAL_POWER";
-
-    if (isSourceSuperpower && isTargetSuperpower) {
-      if (vector.powerRatio >= 0.8 && vector.powerRatio <= 1.25) {
-        tierStrategyModifier = -50;
-      } else if (vector.powerRatio < 0.8) {
-        tierStrategyModifier = 15;
-      } else {
-        tierStrategyModifier = -30;
-      }
-    } else if (
-      isSourceSuperpower &&
-      isTargetLocal &&
-      vector.proximityTier !== "DIRECT_NEIGHBOR"
-    ) {
-      tierStrategyModifier = -35;
-    } else if (
-      vector.sourceReachTier === "LOCAL_POWER" &&
-      vector.proximityTier !== "DIRECT_NEIGHBOR"
-    ) {
-      tierStrategyModifier = -30;
-    }
-
+    const tierStrategyModifier = 0;
     const regimeWarModifier = 0;
     const alignmentDampener = vector.alignment * 0.5;
     const stabilityScore = ((source.government.stability - 50) / 50) * 20;
