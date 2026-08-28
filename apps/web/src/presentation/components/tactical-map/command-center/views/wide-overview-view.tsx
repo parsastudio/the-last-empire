@@ -73,9 +73,8 @@ export function WideOverviewView({ nation, gameState }: WideOverviewViewProps) {
         <EconomyStatsSection
           gdp={effectiveGdp}
           treasury={nation.treasury}
-          taxRate={nation.taxRate}
           nationalDebt={nation.nationalDebt}
-          tariffRate={nation.tariffRate}
+          economicStance={nation.economicStance}
         />
       </div>
 
