@@ -114,13 +114,15 @@ export function resolveProfileRelation(
   let hasSecurityGuarantee = false;
 
   if (humanNation && liveNation && humanNation.id !== liveNation.id) {
-    const directRel = humanNation.relations[liveNation.id];
+    const directRel =
+      humanNation.relations[liveNation.id] ||
+      humanNation.relations[CountryRegistry.resolveCanonicalId(liveNation.id)];
     if (directRel) {
       stance = directRel.stance;
     }
     const vector = GeopoliticalVectorCalculator.calculate(
-      humanNation,
       liveNation,
+      humanNation,
       allNations,
       provincesMap,
     );
@@ -128,7 +130,6 @@ export function resolveProfileRelation(
     tension = vector.tension;
     posture = vector.posture;
 
-    const humanCanonical = CountryRegistry.resolveCanonicalId(humanNation.id);
     const targetCanonical = CountryRegistry.resolveCanonicalId(liveNation.id);
     hasSecurityGuarantee =
       CountryRegistry.resolveCanonicalId(

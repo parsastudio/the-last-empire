@@ -338,12 +338,24 @@ export class PoliticsActionExecutor {
 
           const currentReceiverAlignment = receiverRel.alignment ?? 0;
           const currentReceiverTension = receiverRel.tension ?? 10;
+          const currentSenderAlignment = senderRel.alignment ?? 0;
+          const currentSenderTension = senderRel.tension ?? 10;
 
           const updatedReceiverRel = {
             ...receiverRel,
             alignment: Math.min(100, currentReceiverAlignment + 25),
             tension: Math.max(0, currentReceiverTension - 15),
           };
+
+          const updatedSenderRel = {
+            ...senderRel,
+            alignment: Math.min(100, currentSenderAlignment + 25),
+            tension: Math.max(0, currentSenderTension - 15),
+          };
+
+          const senderTargetKey = senderRel.targetNationId || canonicalTargetId;
+          const receiverTargetKey =
+            receiverRel.targetNationId || canonicalSourceId;
 
           const newReputation = Math.min(100, nation.globalReputation + 1);
 
@@ -381,13 +393,17 @@ export class PoliticsActionExecutor {
                 ...nation,
                 treasury: Math.max(0, nation.treasury - costDeduction),
                 globalReputation: newReputation,
+                relations: {
+                  ...nation.relations,
+                  [senderTargetKey]: updatedSenderRel,
+                },
               },
               [targetKey]: {
                 ...receiver,
                 treasury: receiver.treasury + costDeduction,
                 relations: {
                   ...receiver.relations,
-                  [receiverRel.targetNationId]: updatedReceiverRel,
+                  [receiverTargetKey]: updatedReceiverRel,
                 },
               },
             },
