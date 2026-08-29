@@ -6,8 +6,7 @@ import { GovernmentStatusSection } from "@/presentation/components/tactical-map/
 import { VictoryProgressCard } from "@/presentation/components/tactical-map/command-center/views/components/victory-progress-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { selectNationOverviewViewModel } from "@/presentation/selectors/nation-overview-model.selector";
 
 interface WideOverviewViewProps {
   nation: Nation;
@@ -15,82 +14,52 @@ interface WideOverviewViewProps {
 }
 
 export function WideOverviewView({ nation, gameState }: WideOverviewViewProps) {
-  const provincesMap = gameState?.provinces;
-
-  const rank = useMemo(() => {
-    return NationGettersUtility.getRank(
-      nation.id,
-      gameState?.nations,
-      provincesMap,
-    );
-  }, [nation.id, gameState?.nations, provincesMap]);
-
-  const effectiveGdp = useMemo(() => {
-    return getNationGdp(nation, provincesMap);
-  }, [nation, provincesMap]);
-
-  const population = useMemo(() => {
-    return NationGettersUtility.getPopulation(nation.id, provincesMap);
-  }, [nation.id, provincesMap]);
-
-  const maxCapacity = useMemo(() => {
-    return NationGettersUtility.getMaxPopulationCapacity(
-      nation.id,
-      provincesMap,
-    );
-  }, [nation.id, provincesMap]);
-
-  const productivity = useMemo(() => {
-    return NationGettersUtility.getPerCapitaProductivity(
-      nation.id,
-      provincesMap,
-    );
-  }, [nation.id, provincesMap]);
-
-  const territoryPixels = useMemo(() => {
-    return NationGettersUtility.getTerritoryPixelCount(nation.id, provincesMap);
-  }, [nation.id, provincesMap]);
-
-  const infraLevel = useMemo(() => {
-    return NationGettersUtility.getInfrastructureLevel(nation.id, provincesMap);
-  }, [nation.id, provincesMap]);
+  const model = useMemo(
+    () =>
+      selectNationOverviewViewModel(
+        nation,
+        gameState?.nations,
+        gameState?.provinces,
+      ),
+    [nation, gameState?.nations, gameState?.provinces],
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in duration-200 dir-rtl text-right">
       <div className="space-y-5">
         <NationHeaderCard
-          name={nation.name}
-          code={nation.id}
-          flagCode={nation.flagCode}
-          governmentType={nation.government.type}
-          population={population}
-          territoryPixelCount={territoryPixels}
-          rank={rank}
+          name={model.name}
+          code={model.id}
+          flagCode={model.flagCode}
+          governmentType={model.governmentType}
+          population={model.population}
+          territoryPixelCount={model.territoryPixelCount}
+          rank={model.rank}
         />
 
-        <VictoryProgressCard nationId={nation.id} gameState={gameState} />
+        <VictoryProgressCard nationId={model.id} gameState={gameState} />
 
         <EconomyStatsSection
-          gdp={effectiveGdp}
-          treasury={nation.treasury}
-          nationalDebt={nation.nationalDebt}
-          economicStance={nation.economicStance}
+          gdp={model.gdp}
+          treasury={model.treasury}
+          nationalDebt={model.nationalDebt}
+          economicStance={model.economicStance}
         />
       </div>
 
       <div className="space-y-5">
         <GovernmentStatusSection
-          stability={nation.government.stability}
-          reputation={nation.globalReputation}
+          stability={model.stability}
+          reputation={model.globalReputation}
           nation={nation}
         />
 
         <ResourcesSection
-          population={population}
-          maxPopulationCapacity={maxCapacity}
-          perCapitaProductivity={productivity}
+          population={model.population}
+          maxPopulationCapacity={model.maxPopulationCapacity}
+          perCapitaProductivity={model.perCapitaProductivity}
           industrialLevel={nation.industrialLevel}
-          infrastructureLevel={infraLevel}
+          infrastructureLevel={model.infrastructureLevel}
         />
       </div>
     </div>

@@ -18,17 +18,7 @@ export function MilitaryOverviewTab({
   return (
     <div className="space-y-6 animate-fade-smooth dir-rtl text-right">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-        <MilitaryForcesSection
-          infantry={nation.military.infantry}
-          armor={nation.military.armor}
-          airDefense={nation.military.airDefense}
-          airForce={nation.military.airForce}
-          droneMissile={nation.military.droneMissile}
-          techLevel={nation.military.techLevel}
-          experience={nation.military.experience}
-          nation={nation}
-          provincesMap={provincesMap}
-        />
+        <MilitaryForcesSection nation={nation} provincesMap={provincesMap} />
 
         <div className="space-y-4">
           <MilitaryValuationCard

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Swords,
   Shield,
@@ -6,76 +6,35 @@ import {
   Plane,
   Radio,
   Crosshair,
+  LucideIcon,
 } from "lucide-react";
-import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
-import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { MilitaryForceUnitCard } from "@/presentation/components/tactical-map/sidebar/components/military-force-unit-card";
 import { MilitaryReadinessCard } from "@/presentation/components/tactical-map/sidebar/components/military-readiness-card";
+import { selectMilitaryForcesViewModel } from "@/presentation/selectors/military-view-model.selector";
+import { UnitType } from "@geopolitics/domain";
+
+const UNIT_ICONS: Record<UnitType, { icon: LucideIcon; color: string }> = {
+  INFANTRY: { icon: Shield, color: "text-primary" },
+  ARMOR: { icon: ShieldAlert, color: "text-military" },
+  AIR_DEFENSE: { icon: Crosshair, color: "text-diplomacy" },
+  AIR_FORCE: { icon: Plane, color: "text-gdp" },
+  DRONE_MISSILE: { icon: Radio, color: "text-treasury" },
+};
 
 interface MilitaryForcesSectionProps {
-  infantry: number;
-  armor?: number;
-  airDefense?: number;
-  airForce: number;
-  droneMissile: number;
-  techLevel: number;
-  experience: number;
   nation?: Nation;
   provincesMap?: Record<string, Province>;
 }
 
 export function MilitaryForcesSection({
-  infantry,
-  armor = 0,
-  airDefense = 0,
-  airForce,
-  droneMissile,
-  techLevel,
-  experience,
   nation,
   provincesMap,
 }: MilitaryForcesSectionProps) {
-  const activeNation: Nation = nation || {
-    ...DEFAULT_NATION_MOCK,
-    military: {
-      infantry,
-      armor,
-      airDefense,
-      airForce,
-      droneMissile,
-      experience,
-      techLevel,
-      branchTech: MilitaryInventoryHelper.initializeBranchTech(techLevel),
-    },
-  };
-
-  const payroll = MilitaryPayrollCalculator.calculatePayroll(
-    activeNation,
-    provincesMap,
-  );
-
-  const infTech = MilitaryInventoryHelper.getBranchTech(
-    activeNation.military,
-    "INFANTRY",
-  );
-  const armTech = MilitaryInventoryHelper.getBranchTech(
-    activeNation.military,
-    "ARMOR",
-  );
-  const adTech = MilitaryInventoryHelper.getBranchTech(
-    activeNation.military,
-    "AIR_DEFENSE",
-  );
-  const afTech = MilitaryInventoryHelper.getBranchTech(
-    activeNation.military,
-    "AIR_FORCE",
-  );
-  const drTech = MilitaryInventoryHelper.getBranchTech(
-    activeNation.military,
-    "DRONE_MISSILE",
+  const model = useMemo(
+    () => selectMilitaryForcesViewModel(nation, provincesMap),
+    [nation, provincesMap],
   );
 
   return (
@@ -89,53 +48,26 @@ export function MilitaryForcesSection({
 
       <div className="space-y-2.5 font-mono">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <MilitaryForceUnitCard
-            icon={Shield}
-            iconColorClass="text-primary"
-            name="پیاده‌نظام"
-            payrollCost={payroll.infantry}
-            count={infantry}
-            techRating={infTech}
-          />
-
-          <MilitaryForceUnitCard
-            icon={ShieldAlert}
-            iconColorClass="text-military"
-            name="زرهی و تانک"
-            payrollCost={payroll.armor}
-            count={armor}
-            techRating={armTech}
-          />
-
-          <MilitaryForceUnitCard
-            icon={Crosshair}
-            iconColorClass="text-diplomacy"
-            name="پدافند هوایی"
-            payrollCost={payroll.airDefense}
-            count={airDefense}
-            techRating={adTech}
-          />
-
-          <MilitaryForceUnitCard
-            icon={Plane}
-            iconColorClass="text-gdp"
-            name="نیروی هوایی"
-            payrollCost={payroll.airForce}
-            count={airForce}
-            techRating={afTech}
-          />
-
-          <MilitaryForceUnitCard
-            icon={Radio}
-            iconColorClass="text-treasury"
-            name="پهپاد و موشک"
-            payrollCost={payroll.droneMissile}
-            count={droneMissile}
-            techRating={drTech}
-          />
+          {model.units.map((unit) => {
+            const iconConfig = UNIT_ICONS[unit.type];
+            return (
+              <MilitaryForceUnitCard
+                key={unit.type}
+                icon={iconConfig.icon}
+                iconColorClass={iconConfig.color}
+                name={unit.nameFa}
+                payrollCost={unit.payrollCost}
+                count={unit.count}
+                techRating={unit.techLevel}
+              />
+            );
+          })}
         </div>
 
-        <MilitaryReadinessCard techLevel={techLevel} experience={experience} />
+        <MilitaryReadinessCard
+          techLevel={model.techLevel}
+          experience={model.experience}
+        />
       </div>
     </div>
   );
