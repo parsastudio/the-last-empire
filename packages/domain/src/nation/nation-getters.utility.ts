@@ -53,4 +53,8 @@ export class NationGettersUtility {
     NationDemographicsResolverUtility.getPerCapitaProductivity.bind(
       NationDemographicsResolverUtility,
     );
+
+  public static getInfrastructureLevel(nation: Nation): number {
+    return nation.industrialLevel || 1;
+  }
 }

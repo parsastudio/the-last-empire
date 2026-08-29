@@ -11,11 +11,20 @@ export interface BetrayalEvaluation {
 }
 
 export class DiplomaticBetrayalCalculator {
-  public static calculatePenalty(stance: DiplomaticStance): BetrayalEvaluation {
-    if (stance === "STRATEGIC_PARTNERSHIP") {
+  public static calculatePenalty(
+    stance: DiplomaticStance,
+    targetStance?: DiplomaticStance,
+  ): BetrayalEvaluation {
+    if (
+      stance === "STRATEGIC_PARTNERSHIP" ||
+      targetStance === "STRATEGIC_PARTNERSHIP"
+    ) {
       return { reputationPenalty: 30, skippedSteps: 2, hasBetrayed: true };
     }
-    if (stance === "NON_AGGRESSION_PACT") {
+    if (
+      stance === "NON_AGGRESSION_PACT" ||
+      targetStance === "NON_AGGRESSION_PACT"
+    ) {
       return { reputationPenalty: 15, skippedSteps: 1, hasBetrayed: true };
     }
     return { reputationPenalty: 0, skippedSteps: 0, hasBetrayed: false };
@@ -23,7 +32,10 @@ export class DiplomaticBetrayalCalculator {
 }
 
 export class TreatyEvaluator {
-  public static calculateForeignAidCost(targetGdp: number): number {
+  public static calculateForeignAidCost(
+    targetGdp: number,
+    _options?: unknown,
+  ): number {
     return Math.floor(targetGdp * 0.03);
   }
 
