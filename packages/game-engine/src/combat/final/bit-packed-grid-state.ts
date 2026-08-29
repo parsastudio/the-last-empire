@@ -27,6 +27,10 @@ export class BitPackedGridState {
     return this.version;
   }
 
+  public isBufferLoaded(): boolean {
+    return this.isLoaded;
+  }
+
   public markDirty(): void {
     this.version++;
     this.notifyListeners();

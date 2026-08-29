@@ -1,3 +1,10 @@
+export interface DemographicsMetrics {
+  population: number;
+  maxPopulationCapacity: number;
+  capacityPercentage: number;
+  isOvercrowded: boolean;
+}
+
 export class DemographicsCalculator {
   public static calculateCapacity(
     population: number,
@@ -17,5 +24,27 @@ export class DemographicsCalculator {
     const capacity = this.calculateCapacity(population, maxPopulationCapacity);
     const safePop = Math.max(0, population);
     return Math.round((safePop / (capacity || 1)) * 100);
+  }
+
+  public static getMetrics(
+    population: number,
+    maxPopulationCapacity?: number,
+  ): DemographicsMetrics {
+    const maxCapacity = this.calculateCapacity(
+      population,
+      maxPopulationCapacity,
+    );
+    const capacityPercentage = this.calculateCapacityPercentage(
+      population,
+      maxPopulationCapacity,
+    );
+    const isOvercrowded = capacityPercentage >= 95;
+
+    return {
+      population: Math.max(0, population),
+      maxPopulationCapacity: maxCapacity,
+      capacityPercentage,
+      isOvercrowded,
+    };
   }
 }
