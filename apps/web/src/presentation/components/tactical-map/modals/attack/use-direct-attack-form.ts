@@ -1,23 +1,20 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
-import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
 import { useAttackForcesDeployment } from "./hooks/use-attack-forces-deployment";
 import { useAttackForecastCalculator } from "./hooks/use-attack-forecast-calculator";
+import { useAttackTerritoryReach } from "./hooks/use-attack-territory-reach";
+import { useAttackReputationPenalty } from "./hooks/use-attack-reputation-penalty";
+import { useAttackReconRunner } from "./hooks/use-attack-recon-runner";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -38,7 +35,6 @@ export function useDirectAttackForm({
 }: UseDirectAttackFormProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
   const openModal = useUiStore((state) => state.openModal);
-  const [isExecutingRecon, setIsExecutingRecon] = useState<boolean>(false);
 
   const targetNation = useMemo(() => {
     if (!gameState || !targetNationId) return null;
@@ -60,87 +56,31 @@ export function useDirectAttackForm({
     );
   }, [gameState, targetNation]);
 
-  const targetProvince = useMemo(() => {
-    if (!gameState || !targetProvinceId) return null;
-    return gameState.provinces[targetProvinceId.toString()] || null;
-  }, [gameState, targetProvinceId]);
+  const reach = useAttackTerritoryReach({
+    humanNation,
+    targetNationName: targetNation?.name,
+    targetProvinceId,
+    gameState,
+  });
 
-  const isLandNeighbor = useMemo(() => {
-    if (!humanNation || !targetProvinceId) return false;
-    return LandNeighborResolver.hasProvinceLandBorder(
-      targetProvinceId,
-      humanNation.id,
-      gameState?.provinces,
-    );
-  }, [humanNation, targetProvinceId, gameState?.provinces]);
+  const penalty = useAttackReputationPenalty({
+    humanNation,
+    targetNation,
+  });
 
-  const attackerHasSea = useMemo(() => {
-    if (!humanNation) return false;
-    return NationGettersUtility.hasSeaAccess(
-      humanNation.id,
-      gameState?.provinces,
-    );
-  }, [humanNation, gameState?.provinces]);
-
-  const targetProvinceHasSea = Boolean(targetProvince?.hasSeaAccess);
-  const isNavalValid =
-    !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
-  const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
+  const recon = useAttackReconRunner({
+    humanNation,
+    targetNation,
+    provincesMap: gameState?.provinces,
+  });
 
   const deployment = useAttackForcesDeployment({
     humanNation,
     isOpen,
     targetNationId,
     targetProvinceId,
-    attackType,
+    attackType: reach.attackType,
   });
-
-  const isReconActive = useMemo(() => {
-    if (!humanNation || !targetNation) return false;
-    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
-    const list = humanNation.executedEspionageTiers || [];
-    return (
-      list.includes(`${canonicalTarget}:1`) ||
-      list.includes(`${targetNation.id}:1`)
-    );
-  }, [humanNation, targetNation]);
-
-  const targetGdp = useMemo(() => {
-    if (!targetNation) return 1000000000;
-    return getNationGdp(targetNation, gameState?.provinces);
-  }, [targetNation, gameState?.provinces]);
-
-  const reconCost = useMemo(() => {
-    return EspionageCalculator.calculateOperationCost(targetGdp, 1);
-  }, [targetGdp]);
-
-  const canAffordRecon = (humanNation?.treasury || 0) >= reconCost;
-  const originRegionName = humanNation
-    ? `خاک ${humanNation.name}`
-    : "خاک اصلی کشور";
-
-  const currentStance = useMemo<DiplomaticStance>(() => {
-    if (!humanNation || !targetNation) return "NORMAL_DIPLOMACY";
-    return NationRelationResolver.getStance(
-      humanNation.relations,
-      targetNation.id,
-    );
-  }, [humanNation, targetNation]);
-
-  const isWarStance = currentStance === "WAR";
-
-  const reputationPenalty = useMemo(() => {
-    if (isWarStance) return 0;
-    if (currentStance === "STRATEGIC_PARTNERSHIP") return 40;
-    if (currentStance === "NON_AGGRESSION_PACT") return 25;
-    return 15;
-  }, [isWarStance, currentStance]);
-
-  const targetRegionName = useMemo(() => {
-    if (targetProvince) return targetProvince.nameFa;
-    if (!targetNation) return "";
-    return `خاک اصلی ${targetNation.name}`;
-  }, [targetNation, targetProvince]);
 
   const forecast = useAttackForecastCalculator({
     humanNation,
@@ -153,32 +93,6 @@ export function useDirectAttackForm({
     provincesMap: gameState?.provinces,
   });
 
-  const handleExecuteQuickRecon = useCallback(async () => {
-    if (!humanNation || !targetNation || isExecutingRecon || !canAffordRecon) {
-      return;
-    }
-    try {
-      setIsExecutingRecon(true);
-      const action = ActionFactory.executeEspionage(
-        humanNation.id,
-        targetNation.id,
-        1,
-      );
-      await dispatchAction(
-        action,
-        "شنود ماهواره‌ای مواضع دشمن با موفقیت انجام شد.",
-      );
-    } finally {
-      setIsExecutingRecon(false);
-    }
-  }, [
-    humanNation,
-    targetNation,
-    isExecutingRecon,
-    canAffordRecon,
-    dispatchAction,
-  ]);
-
   const handleAutoOptimizeDeploy = useCallback(() => {
     if (!humanNation || !targetNation) return;
 
@@ -187,7 +101,7 @@ export function useDirectAttackForm({
       targetNation,
       gameState?.provinces,
       targetGuarantorNation,
-      attackType,
+      reach.attackType,
       deployment.navalFleetCount,
     );
 
@@ -202,7 +116,7 @@ export function useDirectAttackForm({
     targetNation,
     gameState?.provinces,
     targetGuarantorNation,
-    attackType,
+    reach.attackType,
     deployment,
   ]);
 
@@ -224,13 +138,13 @@ export function useDirectAttackForm({
       deployment.armorToDeploy,
       deployment.airForceToDeploy,
       targetProvinceId || undefined,
-      attackType,
+      reach.attackType,
     );
 
-    const typeLabel = attackType === "NAVAL" ? "دریایی" : "زمینی";
+    const typeLabel = reach.attackType === "NAVAL" ? "دریایی" : "زمینی";
     const res = await dispatchAction(
       action,
-      `دستور تهاجم ${typeLabel} به ${targetRegionName} با موفقیت صادر گردید.`,
+      `دستور تهاجم ${typeLabel} به ${reach.targetRegionName} با موفقیت صادر گردید.`,
     );
 
     if (res.success) {
@@ -260,9 +174,9 @@ export function useDirectAttackForm({
     isSubmitting,
     deployment,
     targetProvinceId,
-    attackType,
+    reach.attackType,
+    reach.targetRegionName,
     dispatchAction,
-    targetRegionName,
     onClose,
     openModal,
   ]);
@@ -270,21 +184,21 @@ export function useDirectAttackForm({
   return {
     targetNation,
     targetGuarantorNation,
-    targetProvince,
-    isLandNeighbor,
-    isNavalValid,
-    attackType,
+    targetProvince: reach.targetProvince,
+    isLandNeighbor: reach.isLandNeighbor,
+    isNavalValid: reach.isNavalValid,
+    attackType: reach.attackType,
     navalFleetCount: deployment.navalFleetCount,
     hasNavalCapacity: deployment.hasNavalCapacity,
-    isReconActive,
-    reconCost,
-    canAffordRecon,
-    isExecutingRecon,
-    currentStance,
-    isWarStance,
-    reputationPenalty,
-    originRegionName,
-    targetRegionName,
+    isReconActive: recon.isReconActive,
+    reconCost: recon.reconCost,
+    canAffordRecon: recon.canAffordRecon,
+    isExecutingRecon: recon.isExecutingRecon,
+    currentStance: penalty.currentStance,
+    isWarStance: penalty.isWarStance,
+    reputationPenalty: penalty.reputationPenalty,
+    originRegionName: reach.originRegionName,
+    targetRegionName: reach.targetRegionName,
     forecast,
     infantryToDeploy: deployment.infantryToDeploy,
     setInfantryToDeploy: deployment.setInfantryToDeploy,
@@ -298,7 +212,7 @@ export function useDirectAttackForm({
     canAfford: deployment.canAfford,
     hasSelectedInfantry: deployment.hasSelectedInfantry,
     isSubmitting,
-    handleExecuteQuickRecon,
+    handleExecuteQuickRecon: recon.handleExecuteQuickRecon,
     handleAutoOptimizeDeploy,
     handleExecuteAttack,
   };
