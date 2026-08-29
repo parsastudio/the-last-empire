@@ -10,7 +10,7 @@ export class SabotageTierExecutor {
   public static execute(
     target: Nation,
     isSuccess: boolean,
-    outcome: EspionageOutcome,
+    _outcome: EspionageOutcome,
     prng?: SeededRandom,
   ): {
     updatedTarget: Nation;
@@ -20,7 +20,7 @@ export class SabotageTierExecutor {
     if (!isSuccess) {
       return {
         updatedTarget: target,
-        message: `تیم خرابکاری توسط گشت‌های ضدجاسوسی ${target.name} رهگیری و منهدم شد (-۳۵ دیدگاه، -۱۰ اعتبار جهانی).`,
+        message: `عملیات خرابکاری توسط ضدجاسوسی ${target.name} خنثی شد و هویت تیم نفوذی لو رفت (-۵۰ همسویی، -۷ اعتبار جهانی).`,
       };
     }
 
@@ -54,10 +54,7 @@ export class SabotageTierExecutor {
       droneMissileDestroyed: drLost,
     };
 
-    const message =
-      outcome === "CLEAN_SUCCESS"
-        ? `عملیات خرابکاری در پایگاه‌های ${target.name} با انهدام موفق ادوات و پدافند به پایان رسید. هیچ ردی به جا نماند.`
-        : `خرابکاری موفق بود و انبارهای تسلیحات ${target.name} منفجر شد، اما تیم نفوذی لو رفت (-۳۰ دیدگاه، -۵ اعتبار جهانی).`;
+    const message = `عملیات خرابکاری در پایگاه‌های ${target.name} با انهدام موفق ادوات و پدافند به پایان رسید. هیچ ردی به جا نماند.`;
 
     return { updatedTarget, sabotageData, message };
   }

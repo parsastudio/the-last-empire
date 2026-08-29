@@ -134,13 +134,10 @@ export class EspionageManager {
       targetRank,
     );
     const roll = effectivePrng.nextFloat();
-    const isSuccess = roll <= successRate;
-
-    let outcome: EspionageOutcome = "CRITICAL_FAILURE";
-    if (isSuccess) {
-      const blowbackRoll = effectivePrng.nextFloat();
-      outcome = blowbackRoll > 0.3 ? "CLEAN_SUCCESS" : "COMPROMISED_SUCCESS";
-    }
+    const isSuccess = tier === 1 ? true : roll <= successRate;
+    const outcome: EspionageOutcome = isSuccess
+      ? "CLEAN_SUCCESS"
+      : "CRITICAL_FAILURE";
 
     let updatedSource: Nation = {
       ...source,
@@ -190,7 +187,7 @@ export class EspionageManager {
       message = heist.message;
     }
 
-    if (outcome === "COMPROMISED_SUCCESS" || outcome === "CRITICAL_FAILURE") {
+    if (outcome === "CRITICAL_FAILURE") {
       const penalty = tier === 3 ? 10 : tier === 2 ? 7 : 5;
       updatedSource = {
         ...updatedSource,
@@ -247,14 +244,12 @@ export class EspionageManager {
         );
         newLogs.push(defenderLog);
       }
-    } else if (outcome === "COMPROMISED_SUCCESS") {
+    } else if (outcome === "CRITICAL_FAILURE") {
       let defenderMsg = "";
-      if (tier === 1) {
-        defenderMsg = `گزارش ضدجاسوسی: تلاش برای شنود سیگنالی و نفوذ به مراکز فرماندهی کشف شد و فرکانس‌های ارسالی از کشور ${source.name} رصد گردید.`;
-      } else if (tier === 2) {
-        defenderMsg = `هشدار امنیتی: خرابکاری در پایگاه‌های تسلیحاتی رخ داد و شواهد میدانی، دست داشتن سازمان اطلاعات ${source.name} را تایید کرد.`;
+      if (tier === 2) {
+        defenderMsg = `پیروزی امنیتی: عملیات خرابکاری در پایگاه‌های نظامی توسط ضدجاسوسی کشف و تیم نفوذی وابسته به ${source.name} متلاشی شد.`;
       } else {
-        defenderMsg = `رخنه امنیتی: سرورهای تحقیقاتی هدف نفوذ سایبری قرار گرفتند. سازمان ضدجاسوسی منشأ سرقت داده‌ها را در کشور ${source.name} شناسایی کرد.`;
+        defenderMsg = `دفاع سایبری: تلاش نفوذگران وابسته به ${source.name} برای دسترسی به سرورهای محرمانه و سرقت فناوری کشف و دفع گردید.`;
       }
 
       const defenderLog = TurnLogBuilder.createNationalLog(
@@ -262,31 +257,6 @@ export class EspionageManager {
         target.id,
         "ESPIONAGE",
         "CRITICAL",
-        "ESPIONAGE_OPERATION",
-        {
-          details: defenderMsg,
-          tier,
-          outcome,
-          role: "DEFENDER",
-        },
-        source.id,
-      );
-      newLogs.push(defenderLog);
-    } else if (outcome === "CRITICAL_FAILURE") {
-      let defenderMsg = "";
-      if (tier === 1) {
-        defenderMsg = `موفقیت ضدجاسوسی: شبکه شنود و سیگنال‌های نفوذی ارسال‌شده از کشور ${source.name} پیش از نفوذ خنثی و مسدود گردید.`;
-      } else if (tier === 2) {
-        defenderMsg = `پیروزی امنیتی: تیم خرابکاری اعزامی از کشور ${source.name} پیش از هرگونه اقدام در پایگاه‌های نظامی شناسایی و دستگیر شد.`;
-      } else {
-        defenderMsg = `دفاع سایبری: نفوذ هکرهای وابسته به کشور ${source.name} به سرورهای محرمانه دفع شد و کلیه کدهای نفوذی مسدود گردیدند.`;
-      }
-
-      const defenderLog = TurnLogBuilder.createNationalLog(
-        state.currentTurn,
-        target.id,
-        "ESPIONAGE",
-        "INFO",
         "ESPIONAGE_OPERATION",
         {
           details: defenderMsg,
