@@ -23,13 +23,8 @@ export class DiplomaticBetrayalCalculator {
 }
 
 export class TreatyEvaluator {
-  public static calculateForeignAidCost(
-    _senderGdpOrTargetGdp: number,
-    targetGdp?: number,
-  ): number {
-    const effectiveTargetGdp =
-      targetGdp !== undefined ? targetGdp : _senderGdpOrTargetGdp;
-    return Math.floor(effectiveTargetGdp * 0.03);
+  public static calculateForeignAidCost(targetGdp: number): number {
+    return Math.floor(targetGdp * 0.03);
   }
 
   public applyTreatyStance(

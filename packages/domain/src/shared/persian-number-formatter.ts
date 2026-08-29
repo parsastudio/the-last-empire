@@ -57,11 +57,4 @@ export class PersianNumberFormatter {
     const formattedWithCommas = this.commaFormatter.format(Math.round(value));
     return `${formattedWithCommas} دلار`;
   }
-
-  public static formatSignedIncome(value: number): string {
-    const absValue = Math.abs(value);
-    const compactText = this.formatCurrency(absValue, true);
-    const sign = value >= 0 ? "+" : "-";
-    return `${sign}${compactText}`;
-  }
 }

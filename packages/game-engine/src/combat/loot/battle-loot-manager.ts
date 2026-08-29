@@ -26,15 +26,11 @@ export class BattleLootManager {
       calcResult.dronesUsed,
     );
 
-    const totalInfantry =
-      calcResult.capturedInfantry + (extraCaptured?.infantry || 0);
-    const totalArmor = calcResult.capturedArmor + (extraCaptured?.armor || 0);
-    const totalAirDefense =
-      calcResult.capturedAirDefense + (extraCaptured?.airDefense || 0);
-    const totalAirForce =
-      calcResult.capturedAirForce + (extraCaptured?.airForce || 0);
-    const totalDrones =
-      calcResult.capturedDrones + (extraCaptured?.droneMissile || 0);
+    const totalInfantry = extraCaptured?.infantry || 0;
+    const totalArmor = extraCaptured?.armor || 0;
+    const totalAirDefense = extraCaptured?.airDefense || 0;
+    const totalAirForce = extraCaptured?.airForce || 0;
+    const totalDrones = extraCaptured?.droneMissile || 0;
 
     if (totalInfantry > 0) {
       updatedMilitary = MilitaryInventoryHelper.addUnits(

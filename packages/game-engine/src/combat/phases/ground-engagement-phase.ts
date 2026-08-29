@@ -16,8 +16,6 @@ export interface GroundEngagementOutput {
   rawDefArmorLost: number;
   rawAttInfantryLost: number;
   rawDefInfantryLost: number;
-  survivingAttInfantryRaw: number;
-  survivingDefInfantryRaw: number;
   isAttackerVictory: boolean;
 }
 
@@ -158,8 +156,6 @@ export class GroundEngagementPhase {
       rawDefArmorLost,
       rawAttInfantryLost,
       rawDefInfantryLost,
-      survivingAttInfantryRaw,
-      survivingDefInfantryRaw,
       isAttackerVictory,
     };
   }

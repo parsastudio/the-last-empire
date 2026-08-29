@@ -279,24 +279,6 @@ export class NationGettersUtility {
     return Math.round(totalProdWeighted / totalPop);
   }
 
-  public static getInfrastructureLevel(
-    nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): number {
-    const prod = this.getPerCapitaProductivity(
-      nationId,
-      provincesMap,
-      ownedProvinces,
-      provincesByOwnerMap,
-    );
-    if (prod <= 5000) return 1;
-    const ratio = prod / 5000;
-    const level = Math.floor(Math.log(ratio + 1e-6) / Math.log(1.05)) + 1;
-    return Math.max(1, level);
-  }
-
   public static getTerritoryPixelCount(
     nationId: string,
     provincesMap?: Record<string, Province> | Province[],

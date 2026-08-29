@@ -5,7 +5,6 @@ import {
   CountryRegistry,
   NationRelationResolver,
   GeopoliticalReachResolver,
-  GeopoliticalReachTier,
   ProximityTier,
   MilitaryPowerCalculator,
   NationGettersUtility,
@@ -16,8 +15,6 @@ export interface GeopoliticalVector {
   alignment: number;
   tension: number;
   posture: DiplomaticPosture;
-  sourceReachTier: GeopoliticalReachTier;
-  targetReachTier: GeopoliticalReachTier;
   proximityTier: ProximityTier;
   isNeighbor: boolean;
   isLandNeighbor: boolean;
@@ -209,23 +206,10 @@ export class GeopoliticalVectorCalculator {
       posture = "WARY_BUFFER";
     }
 
-    const sourceReachTier = GeopoliticalReachResolver.getReachTier(
-      source,
-      allNations,
-      provincesMap,
-    );
-    const targetReachTier = GeopoliticalReachResolver.getReachTier(
-      target,
-      allNations,
-      provincesMap,
-    );
-
     return {
       alignment,
       tension,
       posture,
-      sourceReachTier,
-      targetReachTier,
       proximityTier,
       isNeighbor,
       isLandNeighbor,

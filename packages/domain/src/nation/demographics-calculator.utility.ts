@@ -1,11 +1,3 @@
-export interface DemographicsCapacityMetrics {
-  population: number;
-  maxPopulationCapacity: number;
-  capacityPercentage: number;
-  isOverCapacity: boolean;
-  isNearCapacity: boolean;
-}
-
 export class DemographicsCalculator {
   public static calculateCapacity(
     population: number,
@@ -25,20 +17,5 @@ export class DemographicsCalculator {
     const capacity = this.calculateCapacity(population, maxPopulationCapacity);
     const safePop = Math.max(0, population);
     return Math.round((safePop / (capacity || 1)) * 100);
-  }
-
-  public static getMetrics(
-    population: number,
-    maxPopulationCapacity?: number,
-  ): DemographicsCapacityMetrics {
-    const capacity = this.calculateCapacity(population, maxPopulationCapacity);
-    const percentage = this.calculateCapacityPercentage(population, capacity);
-    return {
-      population,
-      maxPopulationCapacity: capacity,
-      capacityPercentage: percentage,
-      isOverCapacity: percentage > 100,
-      isNearCapacity: percentage >= 95,
-    };
   }
 }
