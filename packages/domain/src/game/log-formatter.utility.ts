@@ -111,23 +111,9 @@ export class TurnLogFormatter {
         return `گزارش ستاد کل: نیروی ضربت اعزامی شما در دفاع از خاک ${targetName} آسیب دید و مبلغ ${formattedCost} هزینه بازسازی به خزانه‌داری تحمیل شد.`;
       }
 
-      case "SECURITY_GUARANTEE_DEFENDED": {
-        return `مداخله چتر امنیتی: ارتش ${targetName} در راستای اجرای تعهدات پیمان امنیت ملی، نیروی ضربت فوق‌پیشرفته کمکی به میدان نبرد با ${sourceName} اعزام کرد.`;
-      }
-
       case "FOREIGN_AID_SENT": {
         return `بسته کمک مالی و اقتصادی از سوی ${sourceName} به خزانه‌داری ${targetName} واریز گردید.`;
       }
-
-      case "WAR_SUBSIDY_SENT": {
-        return `یارانه و کمک جنگی خودکار: در راستای شراکت استراتژیک، کمکی نقدی از سوی ${sourceName} به خزانه‌داری جنگی ${targetName} تزریق شد.`;
-      }
-
-      case "ALLIANCE_INTERVENTION":
-        return `دفاع جمعی: کشور ${sourceName} در حمایت از ${targetName} وارد نبرد شد.`;
-
-      case "ALLIANCE_BETRAYED":
-        return `پیمان‌شکنی دفاعی: کشور ${sourceName} از اجرای تعهدات اتحاد با ${targetName} سر باز زد و پیمان را لغو نمود.`;
 
       case "BATTLE_TACTICAL_REPORT": {
         const customHeadline = params["humanHeadline"]

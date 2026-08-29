@@ -15,7 +15,6 @@ import {
   BattleFullReportData,
   BattleSpoilsDetails,
 } from "@/domain/reports/combat-report.schema";
-import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -166,16 +165,11 @@ export class BattleExecutionEngine {
         };
 
         guarantorLogs.push(
-          TurnLogBuilder.createNationalLog(
+          BattleLogFactory.createGuarantorCasualtyLog(
             state.currentTurn,
             guarantorNation.id,
-            "MILITARY",
-            "WARNING",
-            "GUARANTOR_CASUALTY_COST_INCURRED",
-            {
-              cost: damage,
-            },
             defender.id,
+            damage,
           ),
         );
       }
@@ -206,16 +200,11 @@ export class BattleExecutionEngine {
       gainedPopulation: gainedPop,
       gainedGdp: gainedGdp,
       lootedTreasury: totalLootedTreasury,
-      capturedInfantry:
-        calcResult.capturedInfantry + (extraCapturedUnits?.infantry || 0),
-      capturedArmor:
-        calcResult.capturedArmor + (extraCapturedUnits?.armor || 0),
-      capturedAirDefense:
-        calcResult.capturedAirDefense + (extraCapturedUnits?.airDefense || 0),
-      capturedAirForce:
-        calcResult.capturedAirForce + (extraCapturedUnits?.airForce || 0),
-      capturedDrones:
-        calcResult.capturedDrones + (extraCapturedUnits?.droneMissile || 0),
+      capturedInfantry: extraCapturedUnits?.infantry || 0,
+      capturedArmor: extraCapturedUnits?.armor || 0,
+      capturedAirDefense: extraCapturedUnits?.airDefense || 0,
+      capturedAirForce: extraCapturedUnits?.airForce || 0,
+      capturedDrones: extraCapturedUnits?.droneMissile || 0,
     };
 
     const attackType = action.attackType || "LAND";

@@ -4,7 +4,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
 import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
-import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { PeaceSettlementExecutor } from "@/engine/diplomacy/peace-settlement-executor";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
@@ -47,16 +46,6 @@ export class PoliticsActionExecutor {
             message: "معاهده صلح با موفقیت امضا و شروط آن اعمال گردید.",
           },
         };
-      }
-
-      case "EXECUTE_ESPIONAGE_OPERATION": {
-        const { newState, result } = EspionageManager.executeOperation(
-          state,
-          action.nationId,
-          action.targetNationId,
-          action.tier,
-        );
-        return { newState, resultData: result };
       }
 
       case "RESPOND_DIPLOMATIC_PROPOSAL": {

@@ -27,11 +27,6 @@ export interface BattleCalculationResult {
   treasuryLooted: number;
   deploymentMoneyCost: number;
   severity: ReportSeverity;
-  capturedInfantry: number;
-  capturedArmor: number;
-  capturedAirDefense: number;
-  capturedAirForce: number;
-  capturedDrones: number;
   phase1Missile: BattlePhaseReconDetail;
   phase2Air: BattlePhaseAirDetail;
   phase3Ground: BattlePhaseGroundDetail;
@@ -352,11 +347,6 @@ export class BattleCalculator {
       treasuryLooted,
       deploymentMoneyCost,
       severity,
-      capturedInfantry: 0,
-      capturedArmor: 0,
-      capturedAirDefense: 0,
-      capturedAirForce: 0,
-      capturedDrones: 0,
       phase1Missile: {
         dronesLaunched: deployedDrones,
         defAirDefense,

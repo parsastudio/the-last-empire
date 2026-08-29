@@ -45,10 +45,6 @@ export class BitPackedGridState {
     }
   }
 
-  public isBufferLoaded(): boolean {
-    return this.isLoaded;
-  }
-
   public markLoaded(): void {
     this.isLoaded = true;
     this.markDirty();
