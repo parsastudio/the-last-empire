@@ -141,6 +141,7 @@ export class NationProfileAssigner {
       activeModifiers: [],
       globalReputation: 50,
       executedEspionageTiers: [],
+      attackedTargetIdsThisTurn: [],
       warFocusTargetId: null,
       postWarCooldownTurns: 0,
       doctrine: item.aiDoctrine || doctrineProfile.type,

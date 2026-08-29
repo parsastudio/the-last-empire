@@ -38,6 +38,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   activeModifiers: [],
   globalReputation: 50,
   executedEspionageTiers: [],
+  attackedTargetIdsThisTurn: [],
   warFocusTargetId: null,
   postWarCooldownTurns: 0,
   doctrine: "DOMESTIC_INDUSTRIALIST",

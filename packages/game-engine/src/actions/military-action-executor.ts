@@ -165,6 +165,17 @@ export class MilitaryActionExecutor {
           throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
         }
 
+        const attackedTargets = nation.attackedTargetIdsThisTurn || [];
+        if (
+          attackedTargets.includes(canonicalTargetId) ||
+          attackedTargets.includes(action.targetNationId)
+        ) {
+          throw new GameError(
+            "INVALID_ACTION",
+            `در هر نوبت تنها یک بار امکان تهاجم نظامی علیه کشور ${target.name} وجود دارد. برای تهاجم مجدد باید نوبت را به پایان برسانید.`,
+          );
+        }
+
         const isCurrentWar = NationRelationResolver.isWar(
           nation.relations,
           action.targetNationId,
