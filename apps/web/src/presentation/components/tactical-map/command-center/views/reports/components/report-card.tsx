@@ -42,18 +42,7 @@ export function ReportCard({
   humanNationId,
   pendingProposals = [],
 }: ReportCardProps) {
-  const setSelectedBattleDebrief = useUiStore(
-    (state) => state.setSelectedBattleDebrief,
-  );
-  const setSelectedCoalitionAlert = useUiStore(
-    (state) => state.setSelectedCoalitionAlert,
-  );
-  const setIsVictoryDebriefOpen = useUiStore(
-    (state) => state.setIsVictoryDebriefOpen,
-  );
-  const setSelectedExportSalesModal = useUiStore(
-    (state) => state.setSelectedExportSalesModal,
-  );
+  const openModal = useUiStore((state) => state.openModal);
 
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
     log.sourceNationId,
@@ -119,22 +108,28 @@ export function ReportCard({
       humanNationId || "",
     );
 
-    setSelectedCoalitionAlert({
-      targetNationId: targetCanonical,
-      targetName: sourceName,
-      targetFlagCode: sourceNation?.flagCode || targetCanonical,
-      isHumanTarget: targetCanonical === canonicalHuman,
-      memberIds,
-      turn: log.turn,
+    openModal({
+      type: "COALITION_ALERT",
+      data: {
+        targetNationId: targetCanonical,
+        targetName: sourceName,
+        targetFlagCode: sourceNation?.flagCode || targetCanonical,
+        isHumanTarget: targetCanonical === canonicalHuman,
+        memberIds,
+        turn: log.turn,
+      },
     });
   };
 
   const handleOpenExportDetails = () => {
     const totalProfit = Number(log.params?.["totalProfit"] || 0);
-    setSelectedExportSalesModal({
-      buyers: exportBuyersList,
-      totalProfit,
-      turn: log.turn,
+    openModal({
+      type: "EXPORT_SALES",
+      data: {
+        buyers: exportBuyersList,
+        totalProfit,
+        turn: log.turn,
+      },
     });
   };
 
@@ -380,7 +375,7 @@ export function ReportCard({
 
           {isVictoryAchieved && (
             <button
-              onClick={() => setIsVictoryDebriefOpen(true)}
+              onClick={() => openModal({ type: "VICTORY_DEBRIEF" })}
               className="px-3.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/50 hover:border-amber-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Trophy size={14} />
@@ -400,7 +395,12 @@ export function ReportCard({
 
           {battleReportData && (
             <button
-              onClick={() => setSelectedBattleDebrief(battleReportData)}
+              onClick={() =>
+                openModal({
+                  type: "BATTLE_DEBRIEF",
+                  reportData: battleReportData,
+                })
+              }
               className="px-3.5 py-1.5 bg-military/15 hover:bg-military/25 text-military border border-military/40 hover:border-military/60 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               <Eye size={14} />

@@ -22,51 +22,85 @@ export interface ExportSalesModalData {
   turn: number;
 }
 
-interface UiStoreState {
-  activeTab: SidebarTabType | null;
-  activeSubTab: string | null;
-  selectedTargetCode: string | null;
-  isRailCollapsed: boolean;
-  selectedBattleDebrief: BattleFullReportData | null;
-  selectedCoalitionAlert: CoalitionAlertData | null;
-  selectedPeaceTargetCode: string | null;
-  isVictoryDebriefOpen: boolean;
-  selectedExportSalesModal: ExportSalesModalData | null;
+export type ActiveModalState =
+  | {
+      type: "COMMAND_CENTER";
+      activeTab: SidebarTabType;
+      activeSubTab?: string | null;
+      selectedTargetCode?: string | null;
+    }
+  | {
+      type: "DIRECT_ATTACK";
+      targetNationId: string;
+      targetProvinceId?: number | null;
+    }
+  | {
+      type: "BUY_PROVINCE";
+      provinceId: number;
+    }
+  | {
+      type: "PEACE_NEGOTIATION";
+      targetNationId: string;
+    }
+  | {
+      type: "BATTLE_DEBRIEF";
+      reportData: BattleFullReportData;
+    }
+  | {
+      type: "COALITION_ALERT";
+      data: CoalitionAlertData;
+    }
+  | {
+      type: "EXPORT_SALES";
+      data: ExportSalesModalData;
+    }
+  | {
+      type: "VICTORY_DEBRIEF";
+    }
+  | null;
 
-  setActiveTab: (
-    tab: SidebarTabType | null,
-    subTab?: string | null,
-    targetCode?: string | null,
+interface UiStoreState {
+  activeModal: ActiveModalState;
+  isRailCollapsed: boolean;
+  openModal: (modal: NonNullable<ActiveModalState>) => void;
+  openCommandCenter: (
+    activeTab: SidebarTabType,
+    activeSubTab?: string | null,
+    selectedTargetCode?: string | null,
   ) => void;
+  closeModal: () => void;
   setIsRailCollapsed: (
     collapsed: boolean | ((prev: boolean) => boolean),
   ) => void;
-  setSelectedBattleDebrief: (data: BattleFullReportData | null) => void;
-  setSelectedCoalitionAlert: (data: CoalitionAlertData | null) => void;
-  setSelectedPeaceTargetCode: (code: string | null) => void;
-  setIsVictoryDebriefOpen: (open: boolean) => void;
-  setSelectedExportSalesModal: (data: ExportSalesModalData | null) => void;
-  closeActiveTab: () => void;
 }
 
 export const useUiStore = create<UiStoreState>((set) => ({
-  activeTab: null,
-  activeSubTab: null,
-  selectedTargetCode: null,
+  activeModal: null,
   isRailCollapsed: true,
-  selectedBattleDebrief: null,
-  selectedCoalitionAlert: null,
-  selectedPeaceTargetCode: null,
-  isVictoryDebriefOpen: false,
-  selectedExportSalesModal: null,
 
-  setActiveTab: (tab, subTab = null, targetCode = null) =>
-    set((state) => ({
-      activeTab: tab,
-      activeSubTab: subTab ?? null,
-      selectedTargetCode:
-        targetCode !== null ? targetCode : state.selectedTargetCode,
-    })),
+  openModal: (modal) =>
+    set({
+      activeModal: modal,
+    }),
+
+  openCommandCenter: (
+    activeTab,
+    activeSubTab = null,
+    selectedTargetCode = null,
+  ) =>
+    set({
+      activeModal: {
+        type: "COMMAND_CENTER",
+        activeTab,
+        activeSubTab,
+        selectedTargetCode,
+      },
+    }),
+
+  closeModal: () =>
+    set({
+      activeModal: null,
+    }),
 
   setIsRailCollapsed: (collapsed) =>
     set((state) => ({
@@ -75,36 +109,4 @@ export const useUiStore = create<UiStoreState>((set) => ({
           ? collapsed(state.isRailCollapsed)
           : collapsed,
     })),
-
-  setSelectedBattleDebrief: (data) =>
-    set({
-      selectedBattleDebrief: data,
-    }),
-
-  setSelectedCoalitionAlert: (data) =>
-    set({
-      selectedCoalitionAlert: data,
-    }),
-
-  setSelectedPeaceTargetCode: (code) =>
-    set({
-      selectedPeaceTargetCode: code,
-    }),
-
-  setIsVictoryDebriefOpen: (open) =>
-    set({
-      isVictoryDebriefOpen: open,
-    }),
-
-  setSelectedExportSalesModal: (data) =>
-    set({
-      selectedExportSalesModal: data,
-    }),
-
-  closeActiveTab: () =>
-    set({
-      activeTab: null,
-      activeSubTab: null,
-      selectedTargetCode: null,
-    }),
 }));
