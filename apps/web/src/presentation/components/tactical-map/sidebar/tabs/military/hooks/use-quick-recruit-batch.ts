@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import {
   UnitType,
   MILITARY_UNIT_STATS,
@@ -59,7 +59,25 @@ export function useQuickRecruitBatch({
     DRONE_MISSILE: [],
   });
 
-  const tenPercentBudget = Math.max(0, Math.floor(nation.treasury * 0.1));
+  const baselineTreasuryRef = useRef<number>(nation.treasury);
+  const prevNationIdRef = useRef<string>(nationId);
+
+  if (prevNationIdRef.current !== nationId) {
+    prevNationIdRef.current = nationId;
+    baselineTreasuryRef.current = nation.treasury;
+  }
+
+  useEffect(() => {
+    if (nation.treasury > baselineTreasuryRef.current) {
+      baselineTreasuryRef.current = nation.treasury;
+    }
+  }, [nation.treasury]);
+
+  const baselineTenPercent = Math.max(
+    0,
+    Math.floor(baselineTreasuryRef.current * 0.1),
+  );
+
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
   const maxValuation = Math.floor(currentGdp);
@@ -89,25 +107,31 @@ export function useQuickRecruitBatch({
       const q = quotas[type];
       const isUnlocked = true;
 
-      const affordableByMoney =
-        tenPercentBudget > 0 && unitPrice > 0
-          ? Math.max(1, Math.floor(tenPercentBudget / unitPrice))
-          : 0;
+      const targetBatchQuantity =
+        baselineTenPercent > 0 && unitPrice > 0
+          ? Math.max(1, Math.floor(baselineTenPercent / unitPrice))
+          : 1;
 
-      const affordableByValuationCap = Math.floor(
-        remainingValuationCapacity / unitPrice,
-      );
+      const affordableByCurrentTreasury =
+        unitPrice > 0 ? Math.floor(nation.treasury / unitPrice) : 0;
+      const affordableByValuationCap =
+        unitPrice > 0 ? Math.floor(remainingValuationCapacity / unitPrice) : 0;
       const allowedByQuota = q.remainingRoom;
 
       const clampedQuantity = Math.max(
         0,
-        Math.min(affordableByMoney, affordableByValuationCap, allowedByQuota),
+        Math.min(
+          targetBatchQuantity,
+          affordableByCurrentTreasury,
+          affordableByValuationCap,
+          allowedByQuota,
+        ),
       );
 
       const isCapReached =
         q.remainingRoom <= 0 || remainingValuationCapacity < unitPrice;
-      const batchQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
-      const batchCost = batchQuantity * unitPrice;
+      const displayQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
+      const batchCost = displayQuantity * unitPrice;
       const canAfford =
         nation.treasury >= batchCost && clampedQuantity > 0 && !isCapReached;
 
@@ -115,7 +139,7 @@ export function useQuickRecruitBatch({
         type,
         nameFa: stat.nameFa,
         unitPrice,
-        batchQuantity,
+        batchQuantity: displayQuantity,
         batchCost,
         buildTurns: stat.buildTurns,
         requiredTechLevel: stat.requiredTechLevel,
@@ -125,7 +149,7 @@ export function useQuickRecruitBatch({
         isCapReached,
       };
     });
-  }, [nation.treasury, tenPercentBudget, quotas, remainingValuationCapacity]);
+  }, [nation.treasury, baselineTenPercent, quotas, remainingValuationCapacity]);
 
   const handleBuyBatch = useCallback(
     async (info: QuickUnitBatchInfo) => {

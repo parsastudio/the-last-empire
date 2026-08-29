@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import {
   UnitType,
   MILITARY_UNIT_STATS,
@@ -61,11 +61,48 @@ export function useAlliedArmsProcurement({
     DRONE_MISSILE: [],
   });
 
-  const tenPercentBudget = Math.max(0, Math.floor(buyerNation.treasury * 0.1));
+  const baselineTreasuryRef = useRef<number>(buyerNation.treasury);
+  const prevBuyerIdRef = useRef<string>(buyerNation.id);
+  const prevSellerIdRef = useRef<string>(sellerNation.id);
+
+  if (
+    prevBuyerIdRef.current !== buyerNation.id ||
+    prevSellerIdRef.current !== sellerNation.id
+  ) {
+    prevBuyerIdRef.current = buyerNation.id;
+    prevSellerIdRef.current = sellerNation.id;
+    baselineTreasuryRef.current = buyerNation.treasury;
+  }
+
+  useEffect(() => {
+    if (buyerNation.treasury > baselineTreasuryRef.current) {
+      baselineTreasuryRef.current = buyerNation.treasury;
+    }
+  }, [buyerNation.treasury]);
+
+  const baselineTenPercent = Math.max(
+    0,
+    Math.floor(baselineTreasuryRef.current * 0.1),
+  );
+
   const effectiveBuyerGdp = useMemo(() => {
     if (currentGdp !== undefined && currentGdp > 0) return currentGdp;
     return getNationGdp(buyerNation, provincesMap);
   }, [currentGdp, buyerNation, provincesMap]);
+
+  const currentValuation =
+    MilitaryPricingCalculator.calculateTotalArmyValuation(buyerNation.military);
+  const maxValuation = Math.floor(effectiveBuyerGdp);
+
+  let queuedCost = 0;
+  for (let i = 0; i < (buyerNation.recruitmentQueue || []).length; i++) {
+    queuedCost += buyerNation.recruitmentQueue[i]!.totalCost;
+  }
+
+  const remainingValuationCapacity = Math.max(
+    0,
+    maxValuation - (currentValuation + queuedCost),
+  );
 
   const quotas = useMemo(() => {
     return MilitaryQuotaCalculator.calculateQuotas(
@@ -104,21 +141,33 @@ export function useAlliedArmsProcurement({
       const q = quotas[type];
       const isUnlocked = true;
 
-      const affordableByMoney =
-        tenPercentBudget > 0 && marketUnitPrice > 0
-          ? Math.max(1, Math.floor(tenPercentBudget / marketUnitPrice))
-          : 0;
+      const targetBatchQuantity =
+        baselineTenPercent > 0 && marketUnitPrice > 0
+          ? Math.max(1, Math.floor(baselineTenPercent / marketUnitPrice))
+          : 1;
 
+      const affordableByCurrentTreasury =
+        marketUnitPrice > 0
+          ? Math.floor(buyerNation.treasury / marketUnitPrice)
+          : 0;
+      const affordableByValuationCap =
+        baseCost > 0 ? Math.floor(remainingValuationCapacity / baseCost) : 0;
       const allowedByQuota = q.remainingRoom;
 
       const clampedQuantity = Math.max(
         0,
-        Math.min(affordableByMoney, allowedByQuota),
+        Math.min(
+          targetBatchQuantity,
+          affordableByCurrentTreasury,
+          affordableByValuationCap,
+          allowedByQuota,
+        ),
       );
 
-      const isCapReached = q.remainingRoom <= 0;
-      const batchQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
-      const batchCost = batchQuantity * marketUnitPrice;
+      const isCapReached =
+        q.remainingRoom <= 0 || remainingValuationCapacity < baseCost;
+      const displayQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
+      const batchCost = displayQuantity * marketUnitPrice;
       const canAfford =
         buyerNation.treasury >= batchCost &&
         clampedQuantity > 0 &&
@@ -131,7 +180,7 @@ export function useAlliedArmsProcurement({
         unitPrice: marketUnitPrice,
         techMultiplier,
         techDelta,
-        batchQuantity,
+        batchQuantity: displayQuantity,
         batchCost,
         requiredTechLevel: stat.requiredTechLevel,
         isUnlocked,
@@ -144,8 +193,9 @@ export function useAlliedArmsProcurement({
     buyerNation.treasury,
     buyerNation.military.techLevel,
     sellerNation.military.techLevel,
-    tenPercentBudget,
+    baselineTenPercent,
     quotas,
+    remainingValuationCapacity,
     techMultiplier,
     techDelta,
   ]);
