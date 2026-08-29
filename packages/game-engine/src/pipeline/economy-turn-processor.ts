@@ -69,9 +69,13 @@ export class EconomyTurnProcessor {
           );
           const partner =
             allNations[partnerCanonical] || allNations[rel.targetNationId];
-          if (partner && partner.isAlive && partner.treasury > gdp * 0.05) {
-            const subsidy = Math.floor(gdp * 0.02);
-            warSubsidiesReceived += subsidy;
+          if (partner && partner.isAlive) {
+            const partnerGdp = getNationGdp(partner, currentProvincesMap);
+            const subsidy = Math.floor(partnerGdp * 0.02);
+            if (partner.treasury >= subsidy && subsidy > 0) {
+              partner.treasury = Math.max(0, partner.treasury - subsidy);
+              warSubsidiesReceived += subsidy;
+            }
           }
         }
       }

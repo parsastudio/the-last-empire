@@ -77,6 +77,19 @@ export class EconomyActionExecutor {
           );
         }
 
+        const sellerProvinces = Object.values(state.provinces).filter(
+          (p) =>
+            CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
+            canonicalTargetId,
+        );
+
+        if (sellerProvinces.length <= 1) {
+          throw new GameError(
+            "INVALID_ACTION",
+            `امکان خرید آخرین استان کشور ${seller.name} وجود ندارد. دولت‌ها هرگز آخرین قلمرو حاکمیتی خود را واگذار نمی‌کنند (برای الحاق باید از تهاجم نظامی استفاده کنید).`,
+          );
+        }
+
         const sellerKey = state.nations[canonicalTargetId]
           ? canonicalTargetId
           : seller.id;

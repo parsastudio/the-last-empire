@@ -10,7 +10,7 @@ import {
 import { useGameStore } from "@/presentation/stores/use-game-store";
 import { CountryRegistry } from "@/domain/data/countries";
 import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, getNationGdp } from "@geopolitics/domain";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;
@@ -91,7 +91,33 @@ export function useGameResources(
     const navalSecurityIncome = Math.floor(
       (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
     );
-    const totalGrossIncome = fiscalResult.totalRevenue + navalSecurityIncome;
+
+    let warSubsidiesIncome = 0;
+    const isAtWar = Object.values(nation.relations || {}).some(
+      (r) => r.stance === "WAR",
+    );
+    if (isAtWar && gameState.nations) {
+      for (const rel of Object.values(nation.relations || {})) {
+        if (rel.stance === "STRATEGIC_PARTNERSHIP") {
+          const partnerCanonical = CountryRegistry.resolveCanonicalId(
+            rel.targetNationId,
+          );
+          const partner =
+            gameState.nations[partnerCanonical] ||
+            gameState.nations[rel.targetNationId];
+          if (partner && partner.isAlive) {
+            const partnerGdp = getNationGdp(partner, gameState.provinces);
+            const subsidy = Math.floor(partnerGdp * 0.02);
+            if (partner.treasury >= subsidy && subsidy > 0) {
+              warSubsidiesIncome += subsidy;
+            }
+          }
+        }
+      }
+    }
+
+    const totalGrossIncome =
+      fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesIncome;
     const totalExpenses =
       payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.07);
     const netIncome = totalGrossIncome - totalExpenses;
