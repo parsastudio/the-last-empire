@@ -17,7 +17,7 @@ export interface ProvinceBuyoutEvaluation {
 }
 
 export class ProvinceBuyoutCalculator {
-  public static readonly INLAND_MULTIPLIER = 3;
+  public static readonly INLAND_MULTIPLIER = 4;
   public static readonly COASTAL_MULTIPLIER = 5;
 
   public static calculateCost(province: Province): {
@@ -29,7 +29,7 @@ export class ProvinceBuyoutCalculator {
     const multiplier = province.hasSeaAccess
       ? this.COASTAL_MULTIPLIER
       : this.INLAND_MULTIPLIER;
-    const cost = Math.max(1_000_000_000, Math.floor(provinceGdp * multiplier));
+    const cost = Math.max(10_000_000_000, Math.floor(provinceGdp * multiplier));
     return { cost, multiplier, provinceGdp };
   }
 
@@ -45,8 +45,8 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: 0,
         isCoastal: false,
-        multiplier: 3,
-        estimatedRoiTurns: 10,
+        multiplier: 4,
+        estimatedRoiTurns: 4,
         reason: "اطلاعات استان در دسترس نیست.",
       };
     }
@@ -58,8 +58,8 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: 0,
         isCoastal: false,
-        multiplier: 3,
-        estimatedRoiTurns: 10,
+        multiplier: 4,
+        estimatedRoiTurns: 4,
         reason: "استان مورد نظر یافت نشد.",
       };
     }
@@ -75,9 +75,9 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: getProvinceGdp(province),
         isCoastal: province.hasSeaAccess,
-        multiplier: province.hasSeaAccess ? 5 : 3,
+        multiplier: province.hasSeaAccess ? 5 : 4,
         estimatedRoiTurns: 0,
-        reason: "این استان در حال حاضر متعلق به کشور شماست.",
+        reason: "این استان در حال حاضر متعلق به خاک خود شماست.",
       };
     }
 
@@ -90,9 +90,9 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: getProvinceGdp(province),
         isCoastal: province.hasSeaAccess,
-        multiplier: province.hasSeaAccess ? 5 : 3,
-        estimatedRoiTurns: 10,
-        reason: "کشور مالک این استان دیگر وجود ندارد.",
+        multiplier: province.hasSeaAccess ? 5 : 4,
+        estimatedRoiTurns: province.hasSeaAccess ? 5 : 4,
+        reason: "کشور مالک این استان در حال حاضر فعال نیست.",
       };
     }
 
@@ -106,16 +106,33 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: getProvinceGdp(province),
         isCoastal: province.hasSeaAccess,
-        multiplier: province.hasSeaAccess ? 5 : 3,
-        estimatedRoiTurns: 10,
+        multiplier: province.hasSeaAccess ? 5 : 4,
+        estimatedRoiTurns: province.hasSeaAccess ? 5 : 4,
         reason:
           "کشورهای تک‌استانی طبق قوانین بین‌الملل مجاز به واگذاری تنها استان خود نیستند.",
       };
     }
 
+    if (province.hasSeaAccess) {
+      const sellerCoastalCount = sellerOwnedProvinces.filter(
+        (p) => p.hasSeaAccess,
+      ).length;
+      if (sellerCoastalCount <= 1) {
+        return {
+          canBuy: false,
+          cost: 0,
+          provinceGdp: getProvinceGdp(province),
+          isCoastal: true,
+          multiplier: 5,
+          estimatedRoiTurns: 5,
+          reason:
+            "دولت‌ها هرگز آخرین استان ساحلی و راه ارتباطی خود به آب‌های آزاد را واگذار نمی‌کنند.",
+        };
+      }
+    }
+
     const rel = NationRelationResolver.getRelation(buyer.relations, seller.id);
     const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
-    const tension = rel ? (rel.tension ?? 10) : 10;
 
     if (stance === "WAR") {
       return {
@@ -123,23 +140,10 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: getProvinceGdp(province),
         isCoastal: province.hasSeaAccess,
-        multiplier: province.hasSeaAccess ? 5 : 3,
-        estimatedRoiTurns: 10,
+        multiplier: province.hasSeaAccess ? 5 : 4,
+        estimatedRoiTurns: province.hasSeaAccess ? 5 : 4,
         reason:
           "در وضعیت جنگ امکان معامله تجاری و خرید دیپلماتیک استان وجود ندارد.",
-      };
-    }
-
-    if (tension >= 75) {
-      return {
-        canBuy: false,
-        cost: 0,
-        provinceGdp: getProvinceGdp(province),
-        isCoastal: province.hasSeaAccess,
-        multiplier: province.hasSeaAccess ? 5 : 3,
-        estimatedRoiTurns: 10,
-        reason:
-          "به دلیل تنش دیپلماتیک شدید (بالای ۷۵٪)، دولت مقابل حاضر به واگذاری خاک نیست.",
       };
     }
 
@@ -160,15 +164,15 @@ export class ProvinceBuyoutCalculator {
         cost: 0,
         provinceGdp: getProvinceGdp(province),
         isCoastal: province.hasSeaAccess,
-        multiplier: province.hasSeaAccess ? 5 : 3,
-        estimatedRoiTurns: 10,
+        multiplier: province.hasSeaAccess ? 5 : 4,
+        estimatedRoiTurns: province.hasSeaAccess ? 5 : 4,
         reason:
-          "عدم اتصال سرزمینی: استان هدف باید با شما مرز زمینی یا دسترسی به آب‌های آزاد مشترک داشته باشد.",
+          "عدم اتصال سرزمینی: استان هدف باید با خاک کشور شما مرز زمینی مشترک داشته باشد یا هر دو متصل به آب‌های آزاد باشند.",
       };
     }
 
     const { cost, multiplier, provinceGdp } = this.calculateCost(province);
-    const estimatedRoiTurns = province.hasSeaAccess ? 12 : 9;
+    const estimatedRoiTurns = province.hasSeaAccess ? 5 : 4;
 
     if (buyer.treasury < cost) {
       return {

@@ -55,10 +55,10 @@ void main() {
   float dN = f.y * pixelScale;
   float dS = (1.0 - f.y) * pixelScale;
 
-  float halfStroke = 0.95;
-  float coastStroke = 1.90;
+  float halfStroke = 1.90;
+  float coastStroke = 3.80;
   float provStroke = 0.70;
-  float edgeSoft = 0.40;
+  float edgeSoft = 0.50;
 
   float intBorder = 0.0;
   float coastBorder = 0.0;
@@ -79,7 +79,7 @@ void main() {
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
       minEdgeDist = min(minEdgeDist, dW);
-    } else {
+    } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dW));
     }
   }
@@ -97,7 +97,7 @@ void main() {
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
       minEdgeDist = min(minEdgeDist, dE);
-    } else {
+    } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dE));
     }
   }
@@ -115,7 +115,7 @@ void main() {
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
       minEdgeDist = min(minEdgeDist, dN);
-    } else {
+    } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dN));
     }
   }
@@ -133,7 +133,7 @@ void main() {
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
       minEdgeDist = min(minEdgeDist, dS);
-    } else {
+    } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dS));
     }
   }
@@ -163,8 +163,8 @@ void main() {
 
   vec3 baseColor = mix(terrainColor.rgb, effectiveCenterColor, blendOpacity);
 
-  if (minEdgeDist < 8.0) {
-    float glowFactor = exp(-minEdgeDist / 3.0) * (isHovered ? 0.12 : 0.06);
+  if (minEdgeDist < 12.0) {
+    float glowFactor = exp(-minEdgeDist / 4.0) * (isHovered ? 0.14 : 0.07);
     vec3 glowColor = effectiveCenterColor * 1.20 + vec3(0.02);
     baseColor = mix(baseColor, glowColor, glowFactor);
   }
@@ -180,8 +180,10 @@ void main() {
     baseColor = mix(baseColor, rimGlowColor, hoveredPerimeter * 0.50);
   }
 
-  vec3 internalLineColor = effectiveCenterColor * 0.30;
-  baseColor = mix(baseColor, internalLineColor, provBorder * (1.0 - mainBorderFactor) * 0.60);
+  if (isHovered && provBorder > 0.0) {
+    vec3 internalLineColor = effectiveCenterColor * 0.30;
+    baseColor = mix(baseColor, internalLineColor, provBorder * (1.0 - mainBorderFactor) * 0.65);
+  }
 
   fragColor = vec4(baseColor, 1.0);
 }
