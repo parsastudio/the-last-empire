@@ -156,6 +156,7 @@ export class EconomyActionExecutor {
           [province.provinceId.toString()]: {
             ...province,
             ownerNationId: canonicalNationId,
+            originalNationId: canonicalNationId,
           },
         };
 
