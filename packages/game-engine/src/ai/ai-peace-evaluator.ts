@@ -49,7 +49,8 @@ export class AIPeaceEvaluator {
       if (
         !targetNation ||
         !targetNation.isAlive ||
-        targetNation.id === nation.id
+        targetNation.id === nation.id ||
+        targetNation.isAi
       ) {
         continue;
       }
