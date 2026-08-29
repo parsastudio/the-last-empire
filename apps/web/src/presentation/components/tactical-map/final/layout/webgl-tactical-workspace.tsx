@@ -153,17 +153,14 @@ export function WebGLTacticalWorkspace({
     [],
   );
 
-  const handleSelectBuyProvinceContext = useCallback(
-    (_iso3: string, provinceId?: number) => {
-      if (provinceId) {
-        setBuyProvinceState({
-          isOpen: true,
-          provinceId,
-        });
-      }
-    },
-    [],
-  );
+  const handleSelectBuyProvinceContext = useCallback((provinceId?: number) => {
+    if (provinceId) {
+      setBuyProvinceState({
+        isOpen: true,
+        provinceId,
+      });
+    }
+  }, []);
 
   const handleCloseCenterModal = useCallback(() => {
     closeActiveTab();
@@ -229,7 +226,9 @@ export function WebGLTacticalWorkspace({
         scaleRef={scaleRef}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
-        onSelectBuyProvinceContext={handleSelectBuyProvinceContext}
+        onSelectBuyProvinceContext={(_iso3, pid) =>
+          handleSelectBuyProvinceContext(pid)
+        }
       />
 
       <TopHudBar metrics={metrics} />

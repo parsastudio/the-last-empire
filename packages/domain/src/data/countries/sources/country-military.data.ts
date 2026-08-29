@@ -1,7 +1,6 @@
 export interface CountryMilitaryInfo {
   domesticTechLevel: number;
   equipmentTechLevel: number;
-  militaryTier?: number;
 }
 
 export const COUNTRY_MILITARY_MAP: Record<string, CountryMilitaryInfo> = {

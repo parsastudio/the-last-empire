@@ -17,8 +17,6 @@ export interface NationRankCandidateInput {
   domesticTechLevel?: number;
   equipmentTechLevel?: number;
   startingTechLevel?: number;
-  militaryTier?: number;
-  hasSeaAccess?: boolean;
   navalFleet?: number;
   stability?: number;
   globalReputation?: number;

@@ -35,10 +35,8 @@ function mapManifestToNationDetails(
         gdp: item.gdp,
         population: item.population,
         governmentType: item.defaultGovernment,
-        militaryTier: profile?.militaryTier ?? 5,
         startingTechLevel:
           profile?.startingTechLevel ?? item.startingTechLevel ?? 1,
-        hasSeaAccess: item.hasSeaAccess,
       };
     },
   );

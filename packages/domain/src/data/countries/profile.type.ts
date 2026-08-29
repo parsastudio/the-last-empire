@@ -12,6 +12,5 @@ export interface CountryProfile {
   equipmentTechLevel: number;
   startingGovernment?: GovernmentType;
   startingTechLevel?: number;
-  militaryTier?: number;
   aiDoctrine?: AiDoctrineType;
 }

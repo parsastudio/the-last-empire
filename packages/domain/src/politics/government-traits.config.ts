@@ -5,7 +5,6 @@ export interface GovernmentStabilityTraits {
   attackerVictoryBonus: number;
   attackerDefeatPenalty: number;
   defenderLossPenalty: number;
-  militaryPowerMultiplier: number;
 }
 
 const NEUTRAL_TRAITS: GovernmentStabilityTraits = {
@@ -13,7 +12,6 @@ const NEUTRAL_TRAITS: GovernmentStabilityTraits = {
   attackerVictoryBonus: 3.0,
   attackerDefeatPenalty: 3.0,
   defenderLossPenalty: 3.0,
-  militaryPowerMultiplier: 1.0,
 };
 
 export const GOVERNMENT_TRAITS_MAP: Record<

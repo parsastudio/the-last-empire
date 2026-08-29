@@ -17,11 +17,4 @@ export class CombatModifierResolver {
 
     return techMult;
   }
-
-  public static getEffectiveMultiplier(nation: Nation): number {
-    const techLevel = Math.max(1, nation.military.techLevel || 1);
-    const techMult = 1 + (techLevel - 1) * 0.5;
-
-    return techMult;
-  }
 }

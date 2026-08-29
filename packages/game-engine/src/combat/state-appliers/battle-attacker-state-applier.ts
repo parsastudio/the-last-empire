@@ -17,7 +17,6 @@ export interface AttackerStateApplierInput {
   isDefenderEliminated?: boolean;
   extraCapturedUnits?: ExtraCapturedMilitaryUnits;
   extraTreasuryLooted?: number;
-  isCounterAttack?: boolean;
 }
 
 export class BattleAttackerStateApplier {

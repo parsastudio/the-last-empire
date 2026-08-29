@@ -1,9 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import {
-  EspionageOutcome,
-  EspionageTechTheftData,
-} from "@/domain/espionage/espionage.schema";
+import { EspionageTechTheftData } from "@/domain/espionage/espionage.schema";
 import {
   EspionageCalculator,
   TechSuperiorityDelta,
@@ -16,17 +12,12 @@ export class TechHeistExecutor {
     target: Nation,
     superiority: TechSuperiorityDelta,
     isSuccess: boolean,
-    _outcome: EspionageOutcome,
-    provincesMap: Record<string, Province>,
   ): {
     updatedSource: Nation;
     updatedTarget: Nation;
-    updatedProvinces: Record<string, Province>;
     techTheftData?: EspionageTechTheftData;
     message: string;
   } {
-    const updatedProvinces: Record<string, Province> = { ...provincesMap };
-
     if (
       !isSuccess ||
       superiority.totalAvailablePoints <
@@ -35,7 +26,6 @@ export class TechHeistExecutor {
       return {
         updatedSource: source,
         updatedTarget: target,
-        updatedProvinces,
         message: `نفوذ به سرورهای محرمانه ${target.name} شکست خورد و ردپای هکرها شناسایی گردید (-۷۵ همسویی، -۱۰ اعتبار جهانی).`,
       };
     }
@@ -64,7 +54,6 @@ export class TechHeistExecutor {
     return {
       updatedSource,
       updatedTarget: target,
-      updatedProvinces,
       techTheftData,
       message,
     };

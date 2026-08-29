@@ -1,16 +1,12 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import {
-  EspionageOutcome,
-  EspionageReconData,
-} from "@/domain/espionage/espionage.schema";
+import { EspionageReconData } from "@/domain/espionage/espionage.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationGettersUtility, CountryRegistry } from "@geopolitics/domain";
 
 export class ReconTierExecutor {
   public static execute(
     target: Nation,
-    _outcome: EspionageOutcome,
     provincesMap?: Record<string, Province>,
     allNations?: Record<string, Nation>,
   ): { reconData: EspionageReconData; message: string } {

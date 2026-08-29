@@ -140,7 +140,6 @@ export function useWideEspionageForm({
     if (!selectedTargetNation) {
       return {
         militaryDelta: 0,
-        industrialDelta: 0,
         totalAvailablePoints: 0,
       };
     }
