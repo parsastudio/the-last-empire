@@ -8,6 +8,7 @@ import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { CoalitionManager } from "@/engine/politics/coalition-manager";
 import { TurnStateLogger } from "@/engine/diagnostics/turn-state-logger";
+import { AiWarResolutionSweep } from "@/engine/ai/ai-war-resolution-sweep";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -103,6 +104,7 @@ export class TurnProgressionOrchestrator {
       }
     }
 
+    workingState = AiWarResolutionSweep.resolveAiWars(workingState);
     workingState = this.livenessManager.updateLiveness(workingState);
 
     const victoryStatus = this.victoryChecker.checkVictory(workingState);

@@ -19,6 +19,7 @@ export * from "./ai/ai-upgrade-planner";
 export * from "./ai/ai-war-declaration-evaluator";
 export * from "./ai/ai-emergency-defense-manager";
 export * from "./ai/ai-economic-stance-evaluator";
+export * from "./ai/ai-war-resolution-sweep";
 
 export * from "./combat/alliance-intervention-evaluator";
 export * from "./combat/attack-deployment-optimizer";
@@ -41,6 +42,7 @@ export * from "./diagnostics/turn-state-logger";
 export * from "./diplomacy/diplomacy-engine";
 export * from "./diplomacy/diplomatic-acceptance-evaluator";
 export * from "./diplomacy/treaty-acceptance-applier";
+export * from "./diplomacy/peace-settlement-executor";
 
 export * from "./economy/economy-calculators";
 export * from "./economy/demographics/demographics-engine";
