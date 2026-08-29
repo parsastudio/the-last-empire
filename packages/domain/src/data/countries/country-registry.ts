@@ -112,6 +112,10 @@ const GPU_INDEX_MAPPING: Record<string, number> = {
   AUS: 148,
 };
 
+const GPU_INDEX_TO_ISO3: Map<number, string> = new Map(
+  Object.entries(GPU_INDEX_MAPPING).map(([iso3, gpuIndex]) => [gpuIndex, iso3]),
+);
+
 function composeAllCountryProfiles(): CountryProfile[] {
   const codes = Object.keys(COUNTRY_IDENTITY_MAP);
   return codes.map((code) => {
@@ -262,5 +266,9 @@ export class CountryRegistry {
   public static getGpuColorIndex(identifier: unknown): number {
     const iso3 = this.resolveCanonicalId(identifier);
     return GPU_INDEX_MAPPING[iso3] ?? 118;
+  }
+
+  public static getIso3ByGpuIndex(gpuIndex: number): string | undefined {
+    return GPU_INDEX_TO_ISO3.get(gpuIndex);
   }
 }
