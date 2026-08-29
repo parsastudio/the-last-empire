@@ -92,7 +92,8 @@ export class ActionEngine {
         }
 
         case "DIPLOMATIC_PROPOSAL":
-        case "RESPOND_DIPLOMATIC_PROPOSAL": {
+        case "RESPOND_DIPLOMATIC_PROPOSAL":
+        case "SIGN_PEACE_SETTLEMENT": {
           const polyResult = PoliticsActionExecutor.execute(state, action);
           newState = polyResult.newState;
           resultData = polyResult.resultData;

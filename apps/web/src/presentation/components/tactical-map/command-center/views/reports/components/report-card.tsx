@@ -21,9 +21,13 @@ import {
   Eye,
   ShieldAlert,
   Trophy,
+  ShoppingCart,
 } from "lucide-react";
 import { ProposalActionButtons } from "./proposal-action-buttons";
-import { useUiStore } from "@/presentation/stores/use-ui-store";
+import {
+  useUiStore,
+  ExportSalesBuyerItem,
+} from "@/presentation/stores/use-ui-store";
 
 interface ReportCardProps {
   log: TurnLogEntry;
@@ -46,6 +50,9 @@ export function ReportCard({
   );
   const setIsVictoryDebriefOpen = useUiStore(
     (state) => state.setIsVictoryDebriefOpen,
+  );
+  const setSelectedExportSalesModal = useUiStore(
+    (state) => state.setSelectedExportSalesModal,
   );
 
   const sourceCanonical = CountryRegistry.resolveCanonicalId(
@@ -89,6 +96,18 @@ export function ReportCard({
 
   const isCoalitionFormed = log.eventCode === "COALITION_FORMED";
   const isVictoryAchieved = log.eventCode === "VICTORY_ACHIEVED";
+  const isExportSummary = log.eventCode === "ARMS_EXPORT_SUMMARY";
+
+  const exportBuyersList = useMemo<ExportSalesBuyerItem[]>(() => {
+    if (!isExportSummary) return [];
+    const rawJson = log.params?.["buyersJson"];
+    if (!rawJson || typeof rawJson !== "string") return [];
+    try {
+      return JSON.parse(rawJson) as ExportSalesBuyerItem[];
+    } catch {
+      return [];
+    }
+  }, [isExportSummary, log.params]);
 
   const handleOpenCoalition = () => {
     const memberIdsRaw = String(log.params?.["memberIds"] || "");
@@ -106,6 +125,15 @@ export function ReportCard({
       targetFlagCode: sourceNation?.flagCode || targetCanonical,
       isHumanTarget: targetCanonical === canonicalHuman,
       memberIds,
+      turn: log.turn,
+    });
+  };
+
+  const handleOpenExportDetails = () => {
+    const totalProfit = Number(log.params?.["totalProfit"] || 0);
+    setSelectedExportSalesModal({
+      buyers: exportBuyersList,
+      totalProfit,
       turn: log.turn,
     });
   };
@@ -169,6 +197,17 @@ export function ReportCard({
           "border-rose-500/60 shadow-lg shadow-rose-500/10 ring-1 ring-rose-500/30",
         icon: ShieldAlert,
         iconBg: "bg-rose-500/25 text-rose-300 border-rose-400/50",
+      };
+    }
+
+    if (isExportSummary) {
+      return {
+        cardBg:
+          "bg-gradient-to-r from-emerald-950/30 via-card/95 to-cyan-950/20",
+        border:
+          "border-emerald-500/50 shadow-md shadow-emerald-500/10 hover:border-emerald-400",
+        icon: ShoppingCart,
+        iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
       };
     }
 
@@ -247,6 +286,7 @@ export function ReportCard({
     isIncomingInteractiveProposal,
     isCoalitionFormed,
     isVictoryAchieved,
+    isExportSummary,
   ]);
 
   const Icon = style.icon;
@@ -281,6 +321,13 @@ export function ReportCard({
             </span>
           )}
 
+          {isExportSummary && (
+            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-xl shrink-0">
+              <Coins size={12} />
+              درآمد صادراتی
+            </span>
+          )}
+
           {isIncomingInteractiveProposal && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-3 py-1 rounded-xl shrink-0 animate-pulse">
               <Sparkles size={12} />
@@ -292,7 +339,8 @@ export function ReportCard({
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1 border-t border-border/40">
           {(sourceName || targetName) &&
             !isCoalitionFormed &&
-            !isVictoryAchieved && (
+            !isVictoryAchieved &&
+            !isExportSummary && (
               <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
                 {sourceName && (
                   <div className="flex items-center gap-1.5 bg-background/90 border border-border/70 px-3 py-1.5 rounded-xl text-muted-foreground shadow-sm">
@@ -319,6 +367,16 @@ export function ReportCard({
                 )}
               </div>
             )}
+
+          {isExportSummary && (
+            <button
+              onClick={handleOpenExportDetails}
+              className="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+            >
+              <Eye size={14} />
+              <span>مشاهده جزئیات و لیست خریداران</span>
+            </button>
+          )}
 
           {isVictoryAchieved && (
             <button

@@ -13,6 +13,7 @@ import { BattleDebriefModal } from "@/presentation/components/tactical-map/comma
 import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
 import { BuyProvinceModal } from "@/presentation/components/tactical-map/modals/buy-province-modal";
 import { PeaceNegotiationModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/peace-negotiation-modal";
+import { ExportSalesDetailsModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/export-sales-details-modal";
 import {
   LayerController,
   TacticalLayer,
@@ -64,6 +65,9 @@ export function WebGLTacticalWorkspace({
   const selectedPeaceTargetCode = useUiStore(
     (state) => state.selectedPeaceTargetCode,
   );
+  const selectedExportSalesModal = useUiStore(
+    (state) => state.selectedExportSalesModal,
+  );
 
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
@@ -76,6 +80,9 @@ export function WebGLTacticalWorkspace({
   );
   const setSelectedPeaceTargetCode = useUiStore(
     (state) => state.setSelectedPeaceTargetCode,
+  );
+  const setSelectedExportSalesModal = useUiStore(
+    (state) => state.setSelectedExportSalesModal,
   );
 
   const {
@@ -298,6 +305,13 @@ export function WebGLTacticalWorkspace({
         data={selectedCoalitionAlert}
         nationsMap={effectiveGameState?.nations}
         onClose={() => setSelectedCoalitionAlert(null)}
+      />
+
+      <ExportSalesDetailsModal
+        isOpen={selectedExportSalesModal !== null}
+        data={selectedExportSalesModal}
+        nationsMap={effectiveGameState?.nations}
+        onClose={() => setSelectedExportSalesModal(null)}
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />

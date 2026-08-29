@@ -15,8 +15,6 @@ export interface ReactiveDefenseEvent {
   type: "PURCHASED" | "NO_SELLER" | "MAX_DEBT" | "NONE";
   sellerName?: string;
   sellerFlagCode?: string;
-  unitName?: string;
-  quantity?: number;
   cost?: number;
 }
 
@@ -127,10 +125,8 @@ export class AIEmergencyDefenseManager {
           "WARNING",
           "ARMS_TRADE",
           {
-            quantity: actualQuantity,
-            unitName: bestUnit.nameFa,
+            amount: finalCost,
             role: "BUYER",
-            emergencyLoan: finalCost,
           },
           bestSeller.id,
         ),
@@ -153,8 +149,6 @@ export class AIEmergencyDefenseManager {
         type: "PURCHASED",
         sellerName: bestSeller.name,
         sellerFlagCode: bestSeller.flagCode,
-        unitName: bestUnit.nameFa,
-        quantity: actualQuantity,
         cost: finalCost,
       },
     };
@@ -196,7 +190,6 @@ export class AIEmergencyDefenseManager {
   private static calculateSingleUnitPower(
     unitType: UnitType,
     techLevel: number,
-    _govType?: Nation["government"]["type"],
   ): number {
     const stat = MILITARY_UNIT_STATS[unitType];
     const techMultiplier = 1 + (Math.max(1, techLevel) - 1) * 0.5;

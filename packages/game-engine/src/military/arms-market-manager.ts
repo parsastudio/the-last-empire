@@ -121,26 +121,38 @@ export class ArmsMarketManager {
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
-    const isHumanInvolved =
-      canonicalBuyerId === canonicalHuman ||
-      canonicalSellerId === canonicalHuman;
+    const isHumanBuyer = canonicalBuyerId === canonicalHuman;
+    const isHumanSeller = canonicalSellerId === canonicalHuman;
 
     const logs = [];
-    if (isHumanInvolved) {
-      const isHumanBuyer = canonicalBuyerId === canonicalHuman;
+    if (isHumanBuyer) {
       logs.push(
         TurnLogBuilder.createNationalLog(
           state.currentTurn,
-          isHumanBuyer ? buyer.id : seller.id,
+          buyer.id,
           "DOMESTIC",
           "INFO",
           "ARMS_TRADE",
           {
-            quantity,
-            unitName: unitStat.nameFa,
-            role: isHumanBuyer ? "BUYER" : "SELLER",
+            amount: totalCost,
+            role: "BUYER",
           },
-          isHumanBuyer ? seller.id : buyer.id,
+          seller.id,
+        ),
+      );
+    } else if (isHumanSeller && sellerProfit > 0) {
+      logs.push(
+        TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          seller.id,
+          "DOMESTIC",
+          "INFO",
+          "ARMS_TRADE",
+          {
+            amount: sellerProfit,
+            role: "SELLER",
+          },
+          buyer.id,
         ),
       );
     }
