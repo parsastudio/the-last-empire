@@ -17,6 +17,7 @@ interface UseWebGLInteractionProps {
   provincesMap?: Record<string, Province>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
+  onRequestRender?: () => void;
 }
 
 export function useWebGLInteraction({
@@ -28,6 +29,7 @@ export function useWebGLInteraction({
   provincesMap,
   nationsMap,
   humanNationId,
+  onRequestRender,
 }: UseWebGLInteractionProps) {
   const lastHoverProvinceIdRef = useRef<number | null>(null);
 
@@ -55,7 +57,10 @@ export function useWebGLInteraction({
       }
       if (hoverPos !== null) setHoverPos(null);
       if (hoverData !== null) setHoverData(null);
-      if (hoveredGpuIndex !== 0) setHoveredGpuIndex(0);
+      if (hoveredGpuIndex !== 0) {
+        setHoveredGpuIndex(0);
+        if (onRequestRender) onRequestRender();
+      }
       lastHoverProvinceIdRef.current = null;
       return;
     }
@@ -77,6 +82,7 @@ export function useWebGLInteraction({
 
       if (hoveredGpuIndex !== gpuIdx) {
         setHoveredGpuIndex(gpuIdx);
+        if (onRequestRender) onRequestRender();
       }
 
       if (lastHoverProvinceIdRef.current !== provinceId || !hoverData) {
@@ -96,14 +102,20 @@ export function useWebGLInteraction({
     lastHoverProvinceIdRef.current = null;
     if (hoverPos !== null) setHoverPos(null);
     if (hoverData !== null) setHoverData(null);
-    if (hoveredGpuIndex !== 0) setHoveredGpuIndex(0);
+    if (hoveredGpuIndex !== 0) {
+      setHoveredGpuIndex(0);
+      if (onRequestRender) onRequestRender();
+    }
   };
 
   const handlePointerLeave = () => {
     lastHoverProvinceIdRef.current = null;
     setHoverPos(null);
     setHoverData(null);
-    setHoveredGpuIndex(0);
+    if (hoveredGpuIndex !== 0) {
+      setHoveredGpuIndex(0);
+      if (onRequestRender) onRequestRender();
+    }
   };
 
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
