@@ -41,4 +41,5 @@ export * from "./politics/politics.schema";
 export * from "./province/province.schema";
 export * from "./province/province-buyout-calculator.utility";
 export * from "./reports/combat-report.schema";
+export * from "./shared/persian-number-formatter";
 export * from "./shared/domain-utilities";
