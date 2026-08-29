@@ -43,7 +43,6 @@ const GPU_INDEX_MAPPING: Record<string, number> = {
   VEN: 51,
   ECU: 55,
   CUB: 58,
-  TTO: 185,
   KAZ: 16,
   UZB: 17,
   MNG: 108,
@@ -103,7 +102,6 @@ const GPU_INDEX_MAPPING: Record<string, number> = {
   ITA: 152,
   CYP: 187,
   SRB: 182,
-  KOS: 184,
   FRA: 54,
   AUT: 125,
   DEU: 132,
@@ -142,7 +140,6 @@ function composeAllCountryProfiles(): CountryProfile[] {
       population,
       domesticTechLevel: milInfo.domesticTechLevel,
       equipmentTechLevel: milInfo.equipmentTechLevel,
-      militaryTier: milInfo.militaryTier,
       aiDoctrine,
     };
   });
@@ -220,7 +217,6 @@ export class CountryRegistry {
         ).toUpperCase(),
         domesticTechLevel,
         equipmentTechLevel,
-        militaryTier: defaultProfile?.militaryTier ?? 5,
         startingGovernment:
           item.defaultGovernment as CountryProfile["startingGovernment"],
         startingTechLevel: domesticTechLevel,

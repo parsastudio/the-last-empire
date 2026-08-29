@@ -3,7 +3,6 @@ import { EspionageTier } from "@/domain/espionage/espionage.schema";
 
 export interface TechSuperiorityDelta {
   militaryDelta: number;
-  industrialDelta: number;
   totalAvailablePoints: number;
 }
 
@@ -41,7 +40,6 @@ export class EspionageCalculator {
 
     return {
       militaryDelta,
-      industrialDelta: 0,
       totalAvailablePoints: totalPoints,
     };
   }

@@ -1,8 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import {
-  EspionageOutcome,
-  EspionageSabotageData,
-} from "@/domain/espionage/espionage.schema";
+import { EspionageSabotageData } from "@/domain/espionage/espionage.schema";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { SeededRandom } from "@/domain/shared/domain-utilities";
 
@@ -10,7 +7,6 @@ export class SabotageTierExecutor {
   public static execute(
     target: Nation,
     isSuccess: boolean,
-    _outcome: EspionageOutcome,
     prng?: SeededRandom,
   ): {
     updatedTarget: Nation;

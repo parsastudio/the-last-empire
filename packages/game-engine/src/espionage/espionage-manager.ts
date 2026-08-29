@@ -145,7 +145,6 @@ export class EspionageManager {
       executedEspionageTiers: [...executedTiers, executionKey],
     };
     let updatedTarget: Nation = { ...target };
-    let updatedProvinces = { ...state.provinces };
 
     let reconData: EspionageReconData | undefined;
     let sabotageData: EspionageSabotageData | undefined;
@@ -155,7 +154,6 @@ export class EspionageManager {
     if (tier === 1) {
       const recon = ReconTierExecutor.execute(
         target,
-        outcome,
         state.provinces,
         state.nations,
       );
@@ -165,7 +163,6 @@ export class EspionageManager {
       const sabotage = SabotageTierExecutor.execute(
         target,
         isSuccess,
-        outcome,
         effectivePrng,
       );
       updatedTarget = sabotage.updatedTarget;
@@ -177,12 +174,9 @@ export class EspionageManager {
         updatedTarget,
         superiority,
         isSuccess,
-        outcome,
-        state.provinces,
       );
       updatedSource = heist.updatedSource;
       updatedTarget = heist.updatedTarget;
-      updatedProvinces = heist.updatedProvinces;
       techTheftData = heist.techTheftData;
       message = heist.message;
     }
@@ -278,7 +272,7 @@ export class EspionageManager {
     const newState: GameState = {
       ...state,
       seed: effectivePrng.getSeed(),
-      provinces: updatedProvinces,
+      provinces: state.provinces,
       nations: updatedNations,
       turnLogs: [...state.turnLogs, ...newLogs],
     };

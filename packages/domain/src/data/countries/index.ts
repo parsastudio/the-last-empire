@@ -25,9 +25,3 @@ export {
   COUNTRY_PPP_GDP_MAP,
   COUNTRY_MILITARY_MAP,
 };
-
-export function findCountryProfileByCode(
-  code: string,
-): CountryProfile | undefined {
-  return CountryRegistry.getCountry(code);
-}
