@@ -20,7 +20,6 @@ export * from "./ai/ai-emergency-defense-manager";
 export * from "./ai/ai-economic-stance-evaluator";
 export * from "./ai/ai-war-resolution-sweep";
 
-export * from "./combat/alliance-intervention-evaluator";
 export * from "./combat/attack-deployment-optimizer";
 export * from "./combat/battle-calculator";
 export * from "./combat/battle-casualty-resolver";
@@ -53,7 +52,6 @@ export * from "./initializers/nation-profile-assigner";
 export * from "./initializers/global-ai-initializer";
 
 export * from "./military/arms-market-manager";
-export * from "./military/military-distribution-engine";
 export * from "./military/recruitment-queue";
 
 export * from "./orchestrator/turn-progression.orchestrator";

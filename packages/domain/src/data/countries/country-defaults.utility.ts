@@ -2,6 +2,7 @@ import { CountryProfile } from "@/domain/data/countries/profile.type";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
+import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 
 export interface NormalizedCountryFallback {
   nameFa: string;
@@ -31,11 +32,6 @@ export class CountryDefaultsUtility {
     return Math.max(100, Math.floor(gdp / population));
   }
 
-  public static calculateCapacity(population: number): number {
-    const safePop = Math.max(100, population);
-    return Math.floor(safePop / 0.95);
-  }
-
   public static getFallbackProfile(
     identifier: unknown,
     profile?: CountryProfile,
@@ -55,7 +51,8 @@ export class CountryDefaultsUtility {
     const gdp = profile?.gdp ?? this.DEFAULT_BASE_GDP;
     const population = profile?.population ?? this.DEFAULT_BASE_POPULATION;
     const perCapitaProductivity = this.calculateProductivity(gdp, population);
-    const maxPopulationCapacity = this.calculateCapacity(population);
+    const maxPopulationCapacity =
+      DemographicsCalculator.calculateCapacity(population);
 
     const domesticTechLevel =
       profile?.domesticTechLevel ??

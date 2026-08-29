@@ -412,7 +412,6 @@ export function ReportCard({
             <ProposalActionButtons
               proposal={activePendingProposal}
               humanNationId={humanNationId!}
-              sourceNationName={sourceName}
             />
           )}
         </div>

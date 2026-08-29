@@ -6,8 +6,8 @@ import {
   MilitaryStack,
   CountryDefaultsUtility,
   NationDoctrineResolver,
+  MilitaryDistributionEngine,
 } from "@geopolitics/domain";
-import { MilitaryDistributionEngine } from "@/engine/military/military-distribution-engine";
 
 type GovernmentType = Nation["government"]["type"];
 

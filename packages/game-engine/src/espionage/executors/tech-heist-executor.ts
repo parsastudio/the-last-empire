@@ -45,7 +45,6 @@ export class TechHeistExecutor {
 
     const techTheftData: EspionageTechTheftData = {
       militaryTechGained: gMil,
-      industrialLevelGained: 0,
       totalPointsGained: gMil,
     };
 

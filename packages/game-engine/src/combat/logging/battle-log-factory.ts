@@ -1,7 +1,6 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { AllianceInterventionResult } from "@/engine/combat/alliance-intervention-evaluator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { Province } from "@/domain/province/province.schema";
@@ -126,86 +125,6 @@ export class BattleLogFactory {
           defender.id,
         ),
       );
-    }
-
-    return logs;
-  }
-
-  public static createInterventionLogs(
-    currentTurn: number,
-    intervention: AllianceInterventionResult,
-    attacker: Nation,
-    defender: Nation,
-    humanNationId: string,
-  ): TurnLogEntry[] {
-    const logs: TurnLogEntry[] = [];
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
-
-    for (const allyId of intervention.interveningAllyIds) {
-      const ally = intervention.updatedNations[allyId];
-      if (ally) {
-        logs.push(
-          TurnLogBuilder.createGlobalWarLog(
-            currentTurn,
-            ally.id,
-            attacker.id,
-            "ALLIANCE_INTERVENTION",
-            {},
-            "CRITICAL",
-          ),
-        );
-
-        if (
-          CountryRegistry.resolveCanonicalId(ally.id) === canonicalHuman ||
-          CountryRegistry.resolveCanonicalId(attacker.id) === canonicalHuman ||
-          CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman
-        ) {
-          logs.push(
-            TurnLogBuilder.createNationalLog(
-              currentTurn,
-              ally.id,
-              "DIPLOMACY",
-              "CRITICAL",
-              "ALLIANCE_INTERVENTION",
-              {},
-              attacker.id,
-            ),
-          );
-        }
-      }
-    }
-
-    for (const allyId of intervention.dishonoringAllyIds) {
-      const ally = intervention.updatedNations[allyId];
-      if (ally) {
-        logs.push(
-          TurnLogBuilder.createGlobalDiplomacyLog(
-            currentTurn,
-            ally.id,
-            defender.id,
-            "ALLIANCE_BETRAYED",
-            {},
-            "WARNING",
-          ),
-        );
-
-        if (
-          CountryRegistry.resolveCanonicalId(ally.id) === canonicalHuman ||
-          CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman
-        ) {
-          logs.push(
-            TurnLogBuilder.createNationalLog(
-              currentTurn,
-              ally.id,
-              "DIPLOMACY",
-              "WARNING",
-              "ALLIANCE_BETRAYED",
-              {},
-              defender.id,
-            ),
-          );
-        }
-      }
     }
 
     return logs;

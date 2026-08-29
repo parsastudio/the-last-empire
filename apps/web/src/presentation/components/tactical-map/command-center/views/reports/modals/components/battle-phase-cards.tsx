@@ -1,15 +1,8 @@
 import React from "react";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import {
-  Swords,
-  ShieldCheck,
-  Flame,
-  ShieldAlert,
-  Ban,
-  Skull,
-} from "lucide-react";
+import { Swords, ShieldCheck, Flame, ShieldAlert, Ban } from "lucide-react";
 
 interface BattlePhaseCardsProps {
   activeStep: 1 | 2 | 3;

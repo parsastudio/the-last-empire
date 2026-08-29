@@ -22,8 +22,6 @@ export interface AlliedUnitProcurementInfo {
   techDelta: number;
   batchQuantity: number;
   batchCost: number;
-  requiredTechLevel: number;
-  isUnlocked: boolean;
   canAfford: boolean;
   remainingRoom: number;
   isCapReached: boolean;
@@ -139,7 +137,6 @@ export function useAlliedArmsProcurement({
           sellerNation.military.techLevel,
         );
       const q = quotas[type];
-      const isUnlocked = true;
 
       const targetBatchQuantity =
         baselineTenPercent > 0 && marketUnitPrice > 0
@@ -182,8 +179,6 @@ export function useAlliedArmsProcurement({
         techDelta,
         batchQuantity: displayQuantity,
         batchCost,
-        requiredTechLevel: stat.requiredTechLevel,
-        isUnlocked,
         canAfford,
         remainingRoom: q.remainingRoom,
         isCapReached,
@@ -202,7 +197,7 @@ export function useAlliedArmsProcurement({
 
   const handleBuyAlliedBatch = useCallback(
     async (info: AlliedUnitProcurementInfo) => {
-      if (!info.isUnlocked || !info.canAfford || info.isCapReached) return;
+      if (!info.canAfford || info.isCapReached) return;
 
       TacticalSound.playCoinSound();
 

@@ -9,7 +9,6 @@ import { useUiStore } from "@/presentation/stores/use-ui-store";
 interface ProposalActionButtonsProps {
   proposal: PendingDiplomaticProposal;
   humanNationId: string;
-  sourceNationName?: string;
 }
 
 export function ProposalActionButtons({

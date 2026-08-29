@@ -9,7 +9,7 @@ import {
   Compass,
   ShieldCheck,
 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PersianNumberFormatter } from "@geopolitics/domain";
 
 export interface CountryProfileData {
   gdp: string;
@@ -17,7 +17,6 @@ export interface CountryProfileData {
   techLevel: number;
   governmentType: string;
   stability: number;
-  alignment: number;
   tension: number;
   doctrineLabel?: string;
   guarantorName?: string;
