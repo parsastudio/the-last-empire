@@ -36,6 +36,7 @@ export function WebGLMapCanvas({
 }: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const requestRenderRef = useRef<() => void>(() => {});
 
   const dimensions = useMapDimensions(containerRef);
   const gl = useWebGLContext(canvasRef, dimensions);
@@ -44,6 +45,10 @@ export function WebGLMapCanvas({
 
   const handleDragStart = useCallback(() => {
     closeContextMenuRef.current();
+  }, []);
+
+  const handleTransformChange = useCallback(() => {
+    requestRenderRef.current();
   }, []);
 
   const {
@@ -64,6 +69,7 @@ export function WebGLMapCanvas({
     externalPositionRef,
     externalScaleRef,
     handleDragStart,
+    handleTransformChange,
   );
 
   const {
@@ -84,13 +90,14 @@ export function WebGLMapCanvas({
     provincesMap,
     nationsMap,
     humanNationId,
+    onRequestRender: handleTransformChange,
   });
 
   useEffect(() => {
     closeContextMenuRef.current = closeContextMenu;
   }, [closeContextMenu]);
 
-  useWebGLMapRenderer({
+  const { requestRender } = useWebGLMapRenderer({
     gl,
     dimensions,
     positionRef,
@@ -99,6 +106,10 @@ export function WebGLMapCanvas({
     activeLayer,
     hoveredGpuIndex,
   });
+
+  useEffect(() => {
+    requestRenderRef.current = requestRender;
+  }, [requestRender]);
 
   const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {
     closeContextMenu();

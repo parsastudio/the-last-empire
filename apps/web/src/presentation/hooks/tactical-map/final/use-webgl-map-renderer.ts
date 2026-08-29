@@ -1,4 +1,4 @@
-import { useEffect, useRef, RefObject } from "react";
+import { useEffect, useRef, useCallback, RefObject } from "react";
 import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
 import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
 import { BitPackedGridState } from "@geopolitics/game-engine";
@@ -28,10 +28,74 @@ export function useWebGLMapRenderer({
   const paletteTextureRef = useRef<WebGLTexture | null>(null);
   const gdpTextureRef = useRef<WebGLTexture | null>(null);
   const hoveredGpuIndexRef = useRef<number>(hoveredGpuIndex);
+  const isDirtyRef = useRef<boolean>(true);
+  const lastVersionRef = useRef<number>(-1);
+  const animFrameIdRef = useRef<number | null>(null);
+
+  const lastRenderedStateRef = useRef({
+    posX: 0,
+    posY: 0,
+    scale: 0,
+    width: 0,
+    height: 0,
+    layer: activeLayer,
+    hoveredGpuIndex: 0,
+  });
+
+  const requestRender = useCallback(() => {
+    isDirtyRef.current = true;
+    if (animFrameIdRef.current === null) {
+      animFrameIdRef.current = requestAnimationFrame(() => {
+        animFrameIdRef.current = null;
+        renderSingleFrame();
+      });
+    }
+  }, []);
+
+  const renderSingleFrame = useCallback(() => {
+    if (!rendererRef.current || !gl) return;
+
+    const gridState = BitPackedGridState.getInstance();
+    const currentVersion = gridState.getVersion();
+
+    if (currentVersion !== lastVersionRef.current) {
+      rendererRef.current.updateLiveStateTexture(
+        gridState.getBuffer().getRawBuffer(),
+      );
+      lastVersionRef.current = currentVersion;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    const pos = positionRef.current || { x: 0, y: 0 };
+    const scale = scaleRef.current || 1;
+
+    rendererRef.current.render(
+      dimensions.width * dpr,
+      dimensions.height * dpr,
+      pos.x * dpr,
+      pos.y * dpr,
+      scale * dpr,
+      activeLayer,
+      hoveredGpuIndexRef.current,
+    );
+
+    lastRenderedStateRef.current = {
+      posX: pos.x,
+      posY: pos.y,
+      scale,
+      width: dimensions.width,
+      height: dimensions.height,
+      layer: activeLayer,
+      hoveredGpuIndex: hoveredGpuIndexRef.current,
+    };
+
+    isDirtyRef.current = false;
+  }, [gl, dimensions, positionRef, scaleRef, activeLayer]);
 
   useEffect(() => {
     hoveredGpuIndexRef.current = hoveredGpuIndex;
-  }, [hoveredGpuIndex]);
+    requestRender();
+  }, [hoveredGpuIndex, requestRender]);
 
   useEffect(() => {
     if (!gl) return;
@@ -47,6 +111,7 @@ export function useWebGLMapRenderer({
     );
     img.onload = () => {
       renderer.setTerrainImage(img);
+      requestRender();
     };
 
     const paletteTex = WebGLPaletteTextureManager.createPaletteTexture(
@@ -70,7 +135,10 @@ export function useWebGLMapRenderer({
     const gridState = BitPackedGridState.getInstance();
     const rawBuffer = gridState.getBuffer().getRawBuffer();
     renderer.updateLiveStateTexture(rawBuffer);
-  }, [gl]);
+    lastVersionRef.current = gridState.getVersion();
+
+    requestRender();
+  }, [gl, requestRender]);
 
   useEffect(() => {
     if (!gl || !paletteTextureRef.current) return;
@@ -79,7 +147,8 @@ export function useWebGLMapRenderer({
       paletteTextureRef.current,
       provincesMap,
     );
-  }, [gl, provincesMap]);
+    requestRender();
+  }, [gl, provincesMap, requestRender]);
 
   useEffect(() => {
     if (!gl || !gdpTextureRef.current) return;
@@ -88,47 +157,21 @@ export function useWebGLMapRenderer({
       gdpTextureRef.current,
       provincesMap,
     );
-  }, [gl, provincesMap]);
+    requestRender();
+  }, [gl, provincesMap, requestRender]);
 
   useEffect(() => {
-    let animFrameId: number;
-    let lastVersion = -1;
+    requestRender();
+  }, [dimensions, activeLayer, requestRender]);
 
-    const renderLoop = () => {
-      if (rendererRef.current && gl) {
-        const gridState = BitPackedGridState.getInstance();
-        const currentVersion = gridState.getVersion();
-
-        if (currentVersion !== lastVersion) {
-          rendererRef.current.updateLiveStateTexture(
-            gridState.getBuffer().getRawBuffer(),
-          );
-          lastVersion = currentVersion;
-        }
-
-        const dpr = window.devicePixelRatio || 1;
-        const pos = positionRef.current || { x: 0, y: 0 };
-        const scale = scaleRef.current || 1;
-
-        rendererRef.current.render(
-          dimensions.width * dpr,
-          dimensions.height * dpr,
-          pos.x * dpr,
-          pos.y * dpr,
-          scale * dpr,
-          activeLayer,
-          hoveredGpuIndexRef.current,
-        );
-      }
-      animFrameId = requestAnimationFrame(renderLoop);
-    };
-
-    renderLoop();
-
+  useEffect(() => {
     return () => {
-      cancelAnimationFrame(animFrameId);
+      if (animFrameIdRef.current !== null) {
+        cancelAnimationFrame(animFrameIdRef.current);
+        animFrameIdRef.current = null;
+      }
     };
-  }, [gl, dimensions, positionRef, scaleRef, activeLayer]);
+  }, []);
 
-  return rendererRef;
+  return { rendererRef, requestRender };
 }

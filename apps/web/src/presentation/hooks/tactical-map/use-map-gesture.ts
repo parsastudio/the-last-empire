@@ -11,6 +11,7 @@ export function useMapGesture(
   externalPositionRef?: RefObject<CameraPosition>,
   externalScaleRef?: RefObject<number>,
   onDragStart?: () => void,
+  onTransformChange?: () => void,
 ) {
   const computeInitial = useCallback(
     (w: number, h: number) => {
@@ -65,6 +66,10 @@ export function useMapGesture(
       } else {
         fallbackPositionRef.current = pos;
       }
+
+      if (onTransformChange) {
+        onTransformChange();
+      }
     }
   }, [
     containerWidth,
@@ -72,6 +77,7 @@ export function useMapGesture(
     computeInitial,
     externalPositionRef,
     externalScaleRef,
+    onTransformChange,
   ]);
 
   useEffect(() => {
@@ -127,12 +133,17 @@ export function useMapGesture(
       } else {
         fallbackPositionRef.current = nextPosition;
       }
+
+      if (onTransformChange) {
+        onTransformChange();
+      }
     },
     [
       externalPositionRef,
       externalScaleRef,
       fallbackPositionRef,
       fallbackScaleRef,
+      onTransformChange,
     ],
   );
 
@@ -202,8 +213,12 @@ export function useMapGesture(
       } else {
         fallbackPositionRef.current = nextPos;
       }
+
+      if (onTransformChange) {
+        onTransformChange();
+      }
     },
-    [externalPositionRef, fallbackPositionRef, onDragStart],
+    [externalPositionRef, fallbackPositionRef, onDragStart, onTransformChange],
   );
 
   const handleMouseUp = useCallback(() => {
