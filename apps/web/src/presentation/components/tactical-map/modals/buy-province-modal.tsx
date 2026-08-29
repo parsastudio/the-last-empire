@@ -20,6 +20,8 @@ import {
   CountryRegistry,
   ActionFactory,
   getProvinceGdp,
+  LandNeighborResolver,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -67,16 +69,43 @@ export function BuyProvinceModal({
     );
   }, [province, nationsMap]);
 
-  const sellerProvincesCount = useMemo(() => {
-    if (!ownerNation || !provincesMap) return 0;
+  const sellerOwnedProvinces = useMemo(() => {
+    if (!ownerNation || !provincesMap) return [];
     const canonicalOwner = CountryRegistry.resolveCanonicalId(ownerNation.id);
     return Object.values(provincesMap).filter(
       (p) =>
         CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalOwner,
-    ).length;
+    );
   }, [ownerNation, provincesMap]);
 
+  const sellerProvincesCount = sellerOwnedProvinces.length;
   const isLastProvince = sellerProvincesCount <= 1;
+
+  const sellerCoastalCount = useMemo(() => {
+    return sellerOwnedProvinces.filter((p) => Boolean(p.hasSeaAccess)).length;
+  }, [sellerOwnedProvinces]);
+
+  const hasSeaAccess = Boolean(province?.hasSeaAccess);
+  const isLastCoastalProvince = hasSeaAccess && sellerCoastalCount <= 1;
+
+  const isLandNeighbor = useMemo(() => {
+    if (!humanNation || !province || !provincesMap) return false;
+    return LandNeighborResolver.hasProvinceLandBorder(
+      province.provinceId,
+      humanNation.id,
+      provincesMap,
+    );
+  }, [humanNation, province, provincesMap]);
+
+  const buyerHasSea = useMemo(() => {
+    if (!humanNation || !provincesMap) return false;
+    return NationGettersUtility.hasSeaAccess(humanNation.id, provincesMap);
+  }, [humanNation, provincesMap]);
+
+  const isMaritimeAccessible = buyerHasSea && hasSeaAccess;
+  const isGeographicallyConnected = isLandNeighbor || isMaritimeAccessible;
+
+  const costMultiplier = hasSeaAccess ? 5 : 4;
 
   const provinceGdp = useMemo(() => {
     if (!province) return 0;
@@ -85,8 +114,8 @@ export function BuyProvinceModal({
 
   const purchasePrice = useMemo(() => {
     if (!provinceGdp) return 10_000_000_000;
-    return Math.max(10_000_000_000, Math.floor(provinceGdp * 5));
-  }, [provinceGdp]);
+    return Math.max(10_000_000_000, Math.floor(provinceGdp * costMultiplier));
+  }, [provinceGdp, costMultiplier]);
 
   const buyerTreasury = humanNation?.treasury || 0;
   const canAfford = buyerTreasury >= purchasePrice;
@@ -99,7 +128,6 @@ export function BuyProvinceModal({
     CountryRegistry.resolveCanonicalId(humanNation.id) ===
       CountryRegistry.resolveCanonicalId(province.ownerNationId);
 
-  const hasSeaAccess = Boolean(province?.hasSeaAccess);
   const formattedProvinceName = province
     ? getCleanProvinceName(province.nameFa)
     : "استان نامشخص";
@@ -118,7 +146,9 @@ export function BuyProvinceModal({
       isSubmitting ||
       !canAfford ||
       isOwnCountry ||
-      isLastProvince
+      isLastProvince ||
+      isLastCoastalProvince ||
+      !isGeographicallyConnected
     ) {
       return;
     }
@@ -147,6 +177,8 @@ export function BuyProvinceModal({
     canAfford,
     isOwnCountry,
     isLastProvince,
+    isLastCoastalProvince,
+    isGeographicallyConnected,
     dispatchAction,
     formattedProvinceName,
     onClose,
@@ -258,7 +290,8 @@ export function BuyProvinceModal({
               بسیار سودده
             </span>
             <span className="text-[8px] text-muted-foreground font-sans block">
-              بازگشت اصل سرمایه در ۵ نوبت
+              بازگشت اصل سرمایه در{" "}
+              {PersianNumberFormatter.toPersianDigits(costMultiplier)} نوبت
             </span>
           </div>
         </div>
@@ -267,7 +300,11 @@ export function BuyProvinceModal({
           <div className="flex items-center justify-between pb-2 border-b border-border/50">
             <span className="text-muted-foreground font-sans font-bold text-[11px] flex items-center gap-1.5">
               <Coins size={14} className="text-gdp" />
-              <span>قیمت قطعی واگذاری سرزمینی (۵ برابر GDP):</span>
+              <span>
+                قیمت قطعی واگذاری سرزمینی (
+                {PersianNumberFormatter.toPersianDigits(costMultiplier)} برابر
+                GDP):
+              </span>
             </span>
             <span className="font-black text-sm text-gdp">
               {PersianNumberFormatter.formatCurrency(purchasePrice)}
@@ -327,6 +364,34 @@ export function BuyProvinceModal({
               </p>
             </div>
           </div>
+        ) : isLastCoastalProvince ? (
+          <div className="p-3.5 bg-amber-500/15 border border-amber-500/40 rounded-2xl text-xs text-amber-300 flex items-start gap-2.5 shadow-sm">
+            <Ban size={18} className="text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-black block text-amber-400">
+                عدم امکان خرید آخرین استان ساحلی کشور
+              </span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                این استان تنها گذرگاه دریایی و دسترسی کشور {ownerNation.name} به
+                آب‌های آزاد جهان است. هیچ دولتی آخرین راه ارتباطی خود به اقیانوس
+                را واگذار نمی‌کند.
+              </p>
+            </div>
+          </div>
+        ) : !isGeographicallyConnected ? (
+          <div className="p-3.5 bg-rose-500/15 border border-rose-500/40 rounded-2xl text-xs text-rose-300 flex items-start gap-2.5 shadow-sm">
+            <Ban size={18} className="text-rose-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-black block text-rose-400">
+                عدم اتصال جغرافیایی و لجستیکی
+              </span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                خرید استان تنها در صورتی مجاز است که خاک هدف با مرزهای فعلی شما
+                هم‌مرز زمینی باشد، یا هر دو طرف مستقیماً به آب‌های آزاد دسترسی
+                داشته باشند.
+              </p>
+            </div>
+          </div>
         ) : !canAfford ? (
           <div className="p-3.5 bg-military/15 border border-military/40 rounded-2xl text-xs text-military flex items-center justify-between gap-2 shadow-sm">
             <div className="flex items-center gap-2">
@@ -346,7 +411,12 @@ export function BuyProvinceModal({
           type="button"
           onClick={handleExecutePurchase}
           disabled={
-            !canAfford || isOwnCountry || isLastProvince || isSubmitting
+            !canAfford ||
+            isOwnCountry ||
+            isLastProvince ||
+            isLastCoastalProvince ||
+            !isGeographicallyConnected ||
+            isSubmitting
           }
           className="w-full py-4 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-xl shadow-gdp/20 hover:scale-[1.005] active:scale-[0.995] flex items-center justify-center gap-2 border border-gdp/30"
         >
@@ -356,6 +426,21 @@ export function BuyProvinceModal({
             <>
               <Ban size={16} />
               <span>آخرین استان حاکمیت غیرقابل خرید است</span>
+            </>
+          ) : isLastCoastalProvince ? (
+            <>
+              <Ban size={16} />
+              <span>آخرین استان ساحلی غیرقابل خرید است</span>
+            </>
+          ) : !isGeographicallyConnected ? (
+            <>
+              <Ban size={16} />
+              <span>عدم اتصال سرزمینی یا دریایی به استان</span>
+            </>
+          ) : !canAfford ? (
+            <>
+              <ShieldAlert size={16} />
+              <span>موجودی خزانه ناکافی است</span>
             </>
           ) : (
             <>

@@ -9,6 +9,8 @@ import {
   getProvinceGdp,
 } from "@/domain/nation/gdp-calculator.utility";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { NationGettersUtility } from "@geopolitics/domain";
 
 export class EconomyActionExecutor {
   public static execute(state: GameState, action: GameAction): GameState {
@@ -86,7 +88,37 @@ export class EconomyActionExecutor {
         if (sellerProvinces.length <= 1) {
           throw new GameError(
             "INVALID_ACTION",
-            `امکان خرید آخرین استان کشور ${seller.name} وجود ندارد. دولت‌ها هرگز آخرین قلمرو حاکمیتی خود را واگذار نمی‌کنند (برای الحاق باید از تهاجم نظامی استفاده کنید).`,
+            `امکان خرید آخرین استان کشور ${seller.name} وجود ندارد. دولت‌ها هرگز آخرین قلمرو حاکمیتی خود را واگذار نمی‌کنند.`,
+          );
+        }
+
+        if (province.hasSeaAccess) {
+          const sellerCoastalCount = sellerProvinces.filter(
+            (p) => p.hasSeaAccess,
+          ).length;
+          if (sellerCoastalCount <= 1) {
+            throw new GameError(
+              "INVALID_ACTION",
+              `امکان خرید آخرین استان ساحلی کشور ${seller.name} وجود ندارد. دولت‌ها هرگز آخرین راه ارتباطی خود به آب‌های آزاد را واگذار نمی‌کنند.`,
+            );
+          }
+        }
+
+        const isLandNeighbor = LandNeighborResolver.hasProvinceLandBorder(
+          province.provinceId,
+          nation.id,
+          state.provinces,
+        );
+        const buyerHasSea = NationGettersUtility.hasSeaAccess(
+          nation.id,
+          state.provinces,
+        );
+        const isMaritimeAccessible = buyerHasSea && province.hasSeaAccess;
+
+        if (!isLandNeighbor && !isMaritimeAccessible) {
+          throw new GameError(
+            "INVALID_ACTION",
+            "عدم اتصال سرزمینی: استان هدف باید با خاک کشور شما مرز زمینی مشترک داشته باشد یا هر دو متصل به آب‌های آزاد باشند.",
           );
         }
 
@@ -95,9 +127,10 @@ export class EconomyActionExecutor {
           : seller.id;
 
         const provinceGdp = getProvinceGdp(province);
+        const multiplier = province.hasSeaAccess ? 5 : 4;
         const calculatedPrice = Math.max(
           10_000_000_000,
-          Math.floor(provinceGdp * 5),
+          Math.floor(provinceGdp * multiplier),
         );
         const effectiveCost = action.cost > 0 ? action.cost : calculatedPrice;
 
