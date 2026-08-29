@@ -180,6 +180,7 @@ export class AIActionBuilder {
       rankMap,
       context?.reachableTargets,
       context?.vectorsByTarget,
+      globalCoalition,
     );
 
     if (aidResult) {

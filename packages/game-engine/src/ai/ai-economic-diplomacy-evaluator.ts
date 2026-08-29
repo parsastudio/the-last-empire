@@ -6,6 +6,7 @@ import {
   CountryRegistry,
   GeopoliticalReachResolver,
   getNationGdp,
+  GlobalCoalition,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import {
@@ -22,12 +23,14 @@ export class AIEconomicDiplomacyEvaluator {
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
     vectorsByTarget?: Map<string, GeopoliticalVector>,
+    globalCoalition?: GlobalCoalition | null,
   ): { action: GameAction; cost: number } | null {
     const currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
     if (currentTreasury <= 0 || !nation.relations) return null;
 
+    const sourceGdp = getNationGdp(nation, provincesMap);
     const targets =
       reachableTargets ??
       GeopoliticalReachResolver.getReachableTargets(
@@ -37,11 +40,18 @@ export class AIEconomicDiplomacyEvaluator {
         rankMap,
       );
 
+    const hegemonicTargetId = globalCoalition?.targetNationId;
+
     for (let i = 0; i < targets.length; i++) {
       const targetNation = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
         targetNation.id,
       );
+
+      if (hegemonicTargetId && canonicalTarget === hegemonicTargetId) {
+        continue;
+      }
+
       const rel =
         nation.relations[canonicalTarget] || nation.relations[targetNation.id];
 
@@ -56,24 +66,26 @@ export class AIEconomicDiplomacyEvaluator {
           provincesMap,
         );
 
-      const isAppeasement =
-        vector.posture === "WARY_BUFFER" &&
-        vector.tension >= 50 &&
-        vector.alignment < 10;
-
-      const isAllianceSupport =
-        rel.stance === "STRATEGIC_PARTNERSHIP" &&
-        vector.alignment >= 50 &&
-        Boolean(targetNation.warFocusTargetId);
-
-      if (!isAppeasement && !isAllianceSupport) {
+      if (vector.tension >= 30 || vector.alignment < 0) {
         continue;
       }
 
       const targetGdp = getNationGdp(targetNation, provincesMap);
+
+      const isDiplomaticCultivation =
+        rel.stance !== "STRATEGIC_PARTNERSHIP" &&
+        vector.alignment >= 20 &&
+        vector.tension < 15 &&
+        sourceGdp >= targetGdp * 0.8 &&
+        vector.posture === "NATURAL_ALLY";
+
+      if (!isDiplomaticCultivation) {
+        continue;
+      }
+
       const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
-      if (currentTreasury < Math.floor(cost * 3.0)) {
+      if (currentTreasury < Math.floor(cost * 3.5)) {
         continue;
       }
 
