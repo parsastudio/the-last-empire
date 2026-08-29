@@ -16,6 +16,8 @@ export interface ReactiveDefenseEvent {
   sellerName?: string;
   sellerFlagCode?: string;
   cost?: number;
+  quantity?: number;
+  unitName?: string;
 }
 
 export interface ReactiveDefenseResult {
@@ -150,6 +152,8 @@ export class AIEmergencyDefenseManager {
         sellerName: bestSeller.name,
         sellerFlagCode: bestSeller.flagCode,
         cost: finalCost,
+        quantity: actualQuantity,
+        unitName: bestUnit.nameFa,
       },
     };
   }

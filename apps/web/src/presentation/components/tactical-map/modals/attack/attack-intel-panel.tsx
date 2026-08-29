@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   ShieldCheck,
+  Skull,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -140,18 +141,37 @@ export function AttackIntelPanel({
           </div>
 
           {aux && (
-            <div className="p-2.5 bg-cyan-950/40 border border-cyan-500/40 rounded-2xl flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-cyan-300">
-                <ShieldCheck size={16} className="text-cyan-400" />
+            <div
+              className={`p-2.5 rounded-2xl flex items-center justify-between text-xs border ${
+                aux.isEmergencyProtectorate
+                  ? "bg-rose-950/40 border-rose-500/50 text-rose-300"
+                  : "bg-cyan-950/40 border-cyan-500/40 text-cyan-300"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {aux.isEmergencyProtectorate ? (
+                  <Skull size={16} className="text-rose-400 animate-pulse" />
+                ) : (
+                  <ShieldCheck size={16} className="text-cyan-400" />
+                )}
                 <span>
-                  هشدار اشراف اطلاعاتی: کشور تحت چتر امنیتی{" "}
+                  هشدار اشراف اطلاعاتی: کشور تحت{" "}
+                  {aux.isEmergencyProtectorate
+                    ? "حمایت استعماری"
+                    : "چتر امنیتی"}{" "}
                   <strong>{aux.guarantorName}</strong> {auxFlag} قرار دارد.
                 </span>
               </div>
-              <span className="text-[10px] font-mono text-cyan-300 font-bold bg-cyan-500/20 px-2 py-0.5 rounded-lg border border-cyan-500/30">
+              <span
+                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border ${
+                  aux.isEmergencyProtectorate
+                    ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                    : "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+                }`}
+              >
                 +
                 {PersianNumberFormatter.formatCurrency(
-                  aux.budgetValuation,
+                  aux.initialBudgetValuation,
                   true,
                 )}{" "}
                 نیروی ضربت لِوِل{" "}
