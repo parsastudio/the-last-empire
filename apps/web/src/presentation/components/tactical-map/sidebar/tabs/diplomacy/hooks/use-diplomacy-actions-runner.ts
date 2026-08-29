@@ -39,9 +39,7 @@ export function useDiplomacyActionsRunner({
   targetNation,
 }: UseDiplomacyActionsRunnerProps) {
   const { dispatchAction } = useGameActions();
-  const setSelectedPeaceTargetCode = useUiStore(
-    (state) => state.setSelectedPeaceTargetCode,
-  );
+  const openModal = useUiStore((state) => state.openModal);
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -144,7 +142,10 @@ export function useDiplomacyActionsRunner({
   };
 
   const handleOpenPeaceNegotiations = () => {
-    setSelectedPeaceTargetCode(targetNationId);
+    openModal({
+      type: "PEACE_NEGOTIATION",
+      targetNationId,
+    });
   };
 
   const handleNonAggression = async () => {

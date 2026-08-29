@@ -16,9 +16,7 @@ export function ProposalActionButtons({
   humanNationId,
 }: ProposalActionButtonsProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
-  const setSelectedPeaceTargetCode = useUiStore(
-    (state) => state.setSelectedPeaceTargetCode,
-  );
+  const openModal = useUiStore((state) => state.openModal);
 
   const isPeace = proposal.proposalType === "PEACE_TREATY";
 
@@ -38,7 +36,12 @@ export function ProposalActionButtons({
     return (
       <div className="flex items-center gap-1.5 shrink-0 font-sans" dir="rtl">
         <button
-          onClick={() => setSelectedPeaceTargetCode(proposal.senderNationId)}
+          onClick={() =>
+            openModal({
+              type: "PEACE_NEGOTIATION",
+              targetNationId: proposal.senderNationId,
+            })
+          }
           className="px-3 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/50 hover:border-emerald-400 rounded-xl text-[10px] font-black transition-all cursor-pointer shadow-sm shadow-emerald-500/10 flex items-center gap-1"
         >
           <Handshake size={13} strokeWidth={2.5} />

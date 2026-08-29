@@ -18,13 +18,11 @@ export function GameOverDialogWrapper({
 }: GameOverDialogWrapperProps) {
   const router = useRouter();
   const enableSandboxMode = useGameStore((state) => state.enableSandboxMode);
-  const isVictoryDebriefOpen = useUiStore(
-    (state) => state.isVictoryDebriefOpen,
-  );
-  const setIsVictoryDebriefOpen = useUiStore(
-    (state) => state.setIsVictoryDebriefOpen,
-  );
+  const activeModal = useUiStore((state) => state.activeModal);
+  const closeModal = useUiStore((state) => state.closeModal);
   const [isDismissed, setIsDismissed] = useState(false);
+
+  const isVictoryDebriefOpen = activeModal?.type === "VICTORY_DEBRIEF";
 
   const metrics = useMemo(() => {
     if (!gameState || !gameState.isGameOver) {
@@ -169,7 +167,7 @@ export function GameOverDialogWrapper({
 
   const handleInspectOrContinue = () => {
     setIsDismissed(true);
-    setIsVictoryDebriefOpen(false);
+    closeModal();
     void enableSandboxMode();
   };
 

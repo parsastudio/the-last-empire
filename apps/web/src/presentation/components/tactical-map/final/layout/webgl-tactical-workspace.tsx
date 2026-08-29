@@ -5,15 +5,9 @@ import dynamic from "next/dynamic";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";
-import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
+import { TacticalModalOrchestrator } from "@/presentation/components/tactical-map/modals/tactical-modal-orchestrator";
 import { GameOverDialogWrapper } from "@/presentation/components/tactical-map/modals/game-over-dialog-wrapper";
 import { CampaignNotFoundModal } from "@/presentation/components/tactical-map/modals/campaign-not-found-modal";
-import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
-import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
-import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
-import { BuyProvinceModal } from "@/presentation/components/tactical-map/modals/buy-province-modal";
-import { PeaceNegotiationModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/peace-negotiation-modal";
-import { ExportSalesDetailsModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/export-sales-details-modal";
 import {
   LayerController,
   TacticalLayer,
@@ -52,38 +46,12 @@ export function WebGLTacticalWorkspace({
 
   const dimensions = useMapDimensions(containerRef);
 
-  const activeTab = useUiStore((state) => state.activeTab);
-  const activeSubTab = useUiStore((state) => state.activeSubTab);
-  const selectedTargetCode = useUiStore((state) => state.selectedTargetCode);
+  const activeModal = useUiStore((state) => state.activeModal);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
-  const selectedBattleDebrief = useUiStore(
-    (state) => state.selectedBattleDebrief,
-  );
-  const selectedCoalitionAlert = useUiStore(
-    (state) => state.selectedCoalitionAlert,
-  );
-  const selectedPeaceTargetCode = useUiStore(
-    (state) => state.selectedPeaceTargetCode,
-  );
-  const selectedExportSalesModal = useUiStore(
-    (state) => state.selectedExportSalesModal,
-  );
-
-  const setActiveTab = useUiStore((state) => state.setActiveTab);
+  const openModal = useUiStore((state) => state.openModal);
+  const openCommandCenter = useUiStore((state) => state.openCommandCenter);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
-  const closeActiveTab = useUiStore((state) => state.closeActiveTab);
-  const setSelectedBattleDebrief = useUiStore(
-    (state) => state.setSelectedBattleDebrief,
-  );
-  const setSelectedCoalitionAlert = useUiStore(
-    (state) => state.setSelectedCoalitionAlert,
-  );
-  const setSelectedPeaceTargetCode = useUiStore(
-    (state) => state.setSelectedPeaceTargetCode,
-  );
-  const setSelectedExportSalesModal = useUiStore(
-    (state) => state.setSelectedExportSalesModal,
-  );
+  const closeModal = useUiStore((state) => state.closeModal);
 
   const {
     gameState: effectiveGameState,
@@ -95,23 +63,6 @@ export function WebGLTacticalWorkspace({
   const metrics = useGameResources(effectiveGameState);
   const [activeLayer, setActiveLayer] = useState<TacticalLayer>("political");
   const [isProcessingTurn, setIsProcessingTurn] = useState(false);
-  const [directAttackState, setDirectAttackState] = useState<{
-    isOpen: boolean;
-    targetCode: string | null;
-    targetProvinceId: number | null;
-  }>({
-    isOpen: false,
-    targetCode: null,
-    targetProvinceId: null,
-  });
-
-  const [buyProvinceState, setBuyProvinceState] = useState<{
-    isOpen: boolean;
-    provinceId: number | null;
-  }>({
-    isOpen: false,
-    provinceId: null,
-  });
 
   const humanNation =
     effectiveGameState && effectiveGameState.humanNationId
@@ -130,41 +81,40 @@ export function WebGLTacticalWorkspace({
   const handleFocusCountryAndClose = useCallback(
     (iso3: string) => {
       focusOnCountry(iso3);
-      closeActiveTab();
+      closeModal();
     },
-    [focusOnCountry, closeActiveTab],
+    [focusOnCountry, closeModal],
   );
 
   const handleSelectCountryContext = useCallback(
     (iso3: string) => {
-      setActiveTab("diplomacy", null, iso3);
+      openCommandCenter("diplomacy", null, iso3);
     },
-    [setActiveTab],
+    [openCommandCenter],
   );
 
   const handleSelectCountryAttackContext = useCallback(
     (iso3: string, provinceId?: number) => {
-      setDirectAttackState({
-        isOpen: true,
-        targetCode: iso3,
+      openModal({
+        type: "DIRECT_ATTACK",
+        targetNationId: iso3,
         targetProvinceId: provinceId ?? null,
       });
     },
-    [],
+    [openModal],
   );
 
-  const handleSelectBuyProvinceContext = useCallback((provinceId?: number) => {
-    if (provinceId) {
-      setBuyProvinceState({
-        isOpen: true,
-        provinceId,
-      });
-    }
-  }, []);
-
-  const handleCloseCenterModal = useCallback(() => {
-    closeActiveTab();
-  }, [closeActiveTab]);
+  const handleSelectBuyProvinceContext = useCallback(
+    (provinceId?: number) => {
+      if (provinceId) {
+        openModal({
+          type: "BUY_PROVINCE",
+          provinceId,
+        });
+      }
+    },
+    [openModal],
+  );
 
   const handleNextTurnAndRefresh = useCallback(async () => {
     if (isProcessingTurn) return;
@@ -172,7 +122,7 @@ export function WebGLTacticalWorkspace({
       setIsProcessingTurn(true);
       const nextState = await advanceNextTurn();
       if (nextState && !nextState.isGameOver) {
-        setActiveTab("reports");
+        openCommandCenter("reports");
 
         const justTriggeredCoalition =
           nextState.globalCoalition &&
@@ -189,25 +139,26 @@ export function WebGLTacticalWorkspace({
             nextState.nations[targetCanonical] ||
             nextState.nations[nextState.globalCoalition.targetNationId];
 
-          setSelectedCoalitionAlert({
-            targetNationId: nextState.globalCoalition.targetNationId,
-            targetName: targetNation ? targetNation.name : "امپراتوری شما",
-            targetFlagCode: targetNation?.flagCode || "IR",
-            isHumanTarget: targetCanonical === humanCanonical,
-            memberIds: nextState.globalCoalition.memberNationIds,
-            turn: nextState.globalCoalition.triggeredTurn,
+          openModal({
+            type: "COALITION_ALERT",
+            data: {
+              targetNationId: nextState.globalCoalition.targetNationId,
+              targetName: targetNation ? targetNation.name : "امپراتوری شما",
+              targetFlagCode: targetNation?.flagCode || "IR",
+              isHumanTarget: targetCanonical === humanCanonical,
+              memberIds: nextState.globalCoalition.memberNationIds,
+              turn: nextState.globalCoalition.triggeredTurn,
+            },
           });
         }
       }
     } finally {
       setIsProcessingTurn(false);
     }
-  }, [
-    advanceNextTurn,
-    isProcessingTurn,
-    setActiveTab,
-    setSelectedCoalitionAlert,
-  ]);
+  }, [advanceNextTurn, isProcessingTurn, openCommandCenter, openModal]);
+
+  const activeRailTab =
+    activeModal?.type === "COMMAND_CENTER" ? activeModal.activeTab : null;
 
   const isNotFound = !loading && (error !== null || !effectiveGameState);
 
@@ -240,77 +191,19 @@ export function WebGLTacticalWorkspace({
       />
 
       <CommandRail
-        activeTab={activeTab}
+        activeTab={activeRailTab}
         isCollapsed={isRailCollapsed}
         currentTurn={effectiveGameState ? effectiveGameState.currentTurn : 1}
         isProcessingTurn={isProcessingTurn}
-        onSelectTab={(tab) => setActiveTab(tab)}
+        onSelectTab={(tab) => openCommandCenter(tab)}
         onToggleCollapse={() => setIsRailCollapsed((prev) => !prev)}
         onNextTurn={handleNextTurnAndRefresh}
       />
 
-      <CommandCenterModal
-        activeTab={activeTab}
-        activeSubTab={activeSubTab}
-        selectedTargetCode={selectedTargetCode}
-        nation={humanNation}
+      <TacticalModalOrchestrator
+        humanNation={humanNation}
         gameState={effectiveGameState}
-        onClose={handleCloseCenterModal}
         onFocusCountry={handleFocusCountryAndClose}
-        onNavigateTab={(tab, subTab, targetCode) => {
-          setActiveTab(tab, subTab, targetCode);
-        }}
-      />
-
-      <DirectAttackModal
-        isOpen={directAttackState.isOpen}
-        targetNationId={directAttackState.targetCode}
-        targetProvinceId={directAttackState.targetProvinceId}
-        humanNation={humanNation}
-        gameState={effectiveGameState}
-        onClose={() =>
-          setDirectAttackState((prev) => ({ ...prev, isOpen: false }))
-        }
-      />
-
-      <BuyProvinceModal
-        isOpen={buyProvinceState.isOpen}
-        provinceId={buyProvinceState.provinceId}
-        humanNation={humanNation}
-        provincesMap={effectiveGameState?.provinces}
-        nationsMap={effectiveGameState?.nations}
-        onClose={() => setBuyProvinceState({ isOpen: false, provinceId: null })}
-      />
-
-      <PeaceNegotiationModal
-        isOpen={selectedPeaceTargetCode !== null}
-        humanNation={humanNation}
-        targetNationId={selectedPeaceTargetCode}
-        nationsMap={effectiveGameState?.nations}
-        provincesMap={effectiveGameState?.provinces}
-        onClose={() => setSelectedPeaceTargetCode(null)}
-      />
-
-      <BattleDebriefModal
-        isOpen={selectedBattleDebrief !== null}
-        reportData={selectedBattleDebrief}
-        nationsMap={effectiveGameState?.nations}
-        humanNationId={effectiveGameState?.humanNationId}
-        onClose={() => setSelectedBattleDebrief(null)}
-      />
-
-      <CoalitionAlertModal
-        isOpen={selectedCoalitionAlert !== null}
-        data={selectedCoalitionAlert}
-        nationsMap={effectiveGameState?.nations}
-        onClose={() => setSelectedCoalitionAlert(null)}
-      />
-
-      <ExportSalesDetailsModal
-        isOpen={selectedExportSalesModal !== null}
-        data={selectedExportSalesModal}
-        nationsMap={effectiveGameState?.nations}
-        onClose={() => setSelectedExportSalesModal(null)}
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />
