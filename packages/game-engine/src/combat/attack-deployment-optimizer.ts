@@ -7,6 +7,8 @@ import {
 } from "@geopolitics/domain";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
+import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
+import { DeploymentStepSearch } from "@/engine/combat/optimizer/deployment-step-search";
 
 export interface OptimalDeploymentResult {
   infantry: number;
@@ -59,29 +61,13 @@ export class AttackDeploymentOptimizer {
       );
     };
 
-    const maxNavalCap =
-      attackType === "NAVAL" ? Math.max(0, navalFleetCount * 60) : Infinity;
+    const fullForcesClamped = NavalDeploymentClamper.clamp(
+      maxInf,
+      maxArmor,
+      attackType,
+      navalFleetCount,
+    );
 
-    const clampNaval = (inf: number, arm: number) => {
-      let curInf = inf;
-      let curArm = arm;
-      if (attackType === "NAVAL" && maxNavalCap < Infinity) {
-        while (curInf * 1 + curArm * 4 > maxNavalCap) {
-          if (curArm > 0 && curArm * 4 >= curInf) {
-            curArm = Math.max(0, curArm - 1);
-          } else if (curInf > 1) {
-            curInf = Math.max(1, curInf - 1);
-          } else if (curArm > 0) {
-            curArm = Math.max(0, curArm - 1);
-          } else {
-            break;
-          }
-        }
-      }
-      return { inf: curInf, arm: curArm };
-    };
-
-    const fullForcesClamped = clampNaval(maxInf, maxArmor);
     const maxSim = testBattle(
       maxDrones,
       fullForcesClamped.inf,
@@ -190,7 +176,12 @@ export class AttackDeploymentOptimizer {
       5;
     let infantry = Math.max(1, Math.min(maxInf, neededInf));
 
-    const initialClamped = clampNaval(infantry, armor);
+    const initialClamped = NavalDeploymentClamper.clamp(
+      infantry,
+      armor,
+      attackType,
+      navalFleetCount,
+    );
     infantry = initialClamped.inf;
     armor = initialClamped.arm;
 
@@ -199,66 +190,29 @@ export class AttackDeploymentOptimizer {
     if (!sim.isAttackerVictory) {
       drones = maxDrones;
       air = maxAir;
-      const fullClamped = clampNaval(maxInf, maxArmor);
+      const fullClamped = NavalDeploymentClamper.clamp(
+        maxInf,
+        maxArmor,
+        attackType,
+        navalFleetCount,
+      );
       infantry = fullClamped.inf;
       armor = fullClamped.arm;
       sim = testBattle(drones, infantry, armor, air);
     }
 
-    const isSafeVictory = (d: number, inf: number, arm: number, af: number) => {
-      const result = testBattle(d, inf, arm, af);
-      const survivingInfantry =
-        result.phase3Ground.attInfantry - result.phase3Ground.attInfantryLost;
-      return (
-        result.isAttackerVictory &&
-        survivingInfantry >= 1 &&
-        result.attackerCasualties.infantryLost < inf
-      );
-    };
+    const optimized = DeploymentStepSearch.optimize(
+      infantry,
+      armor,
+      air,
+      drones,
+      testBattle,
+    );
 
-    let step = Math.max(1, Math.floor(infantry * 0.1));
-    while (step >= 1) {
-      while (
-        infantry - step >= 1 &&
-        isSafeVictory(drones, infantry - step, armor, air)
-      ) {
-        infantry -= step;
-      }
-      step = Math.floor(step / 2);
-    }
-
-    let armStep = Math.max(1, Math.floor(armor * 0.1));
-    while (armStep >= 1) {
-      while (
-        armor - armStep >= 0 &&
-        isSafeVictory(drones, infantry, armor - armStep, air)
-      ) {
-        armor -= armStep;
-      }
-      armStep = Math.floor(armStep / 2);
-    }
-
-    let airStep = Math.max(1, Math.floor(air * 0.1));
-    while (airStep >= 1) {
-      while (
-        air - airStep >= 0 &&
-        isSafeVictory(drones, infantry, armor, air - airStep)
-      ) {
-        air -= airStep;
-      }
-      airStep = Math.floor(airStep / 2);
-    }
-
-    let droneStep = Math.max(1, Math.floor(drones * 0.1));
-    while (droneStep >= 1) {
-      while (
-        drones - droneStep >= 0 &&
-        isSafeVictory(drones - droneStep, infantry, armor, air)
-      ) {
-        drones -= droneStep;
-      }
-      droneStep = Math.floor(droneStep / 2);
-    }
+    infantry = optimized.infantry;
+    armor = optimized.armor;
+    air = optimized.airForce;
+    drones = optimized.drones;
 
     const finalValidation = testBattle(drones, infantry, armor, air);
     if (!finalValidation.isAttackerVictory) {
@@ -266,7 +220,12 @@ export class AttackDeploymentOptimizer {
       air = Math.min(maxAir, air + 2);
       armor = Math.min(maxArmor, armor + 2);
       infantry = Math.min(maxInf, infantry + 5);
-      const finalClamped = clampNaval(infantry, armor);
+      const finalClamped = NavalDeploymentClamper.clamp(
+        infantry,
+        armor,
+        attackType,
+        navalFleetCount,
+      );
       infantry = finalClamped.inf;
       armor = finalClamped.arm;
     }

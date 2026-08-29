@@ -1,4 +1,5 @@
 export * from "./data/countries";
+export * from "./data/countries/gpu-index-registry";
 export * from "./diplomacy/diplomacy.schema";
 export * from "./diplomacy/peace-terms.schema";
 export * from "./diplomacy/twmi-calculator.utility";
@@ -11,6 +12,9 @@ export * from "./espionage/espionage.schema";
 export * from "./game/action.schema";
 export * from "./game/action-factory";
 export * from "./game/game-state.schema";
+export * from "./game/formatters/war-log-formatter";
+export * from "./game/formatters/diplomacy-log-formatter";
+export * from "./game/formatters/national-events-log-formatter";
 export * from "./game/log-formatter.utility";
 export * from "./map/bit-packed-buffer";
 export * from "./map/bit-packed-cell.utility";

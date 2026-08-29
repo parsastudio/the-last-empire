@@ -15,6 +15,8 @@ export * from "./ai/utility-decision-engine";
 export * from "./ai/ai-action-builder";
 export * from "./ai/ai-attack-planner";
 export * from "./ai/ai-economic-diplomacy-evaluator";
+export * from "./ai/espionage/ai-sabotage-planner";
+export * from "./ai/espionage/ai-tech-heist-planner";
 export * from "./ai/ai-espionage-planner";
 export * from "./ai/ai-peace-evaluator";
 export * from "./ai/procurement/ai-posture-evaluator";
@@ -29,6 +31,8 @@ export * from "./ai/ai-emergency-defense-manager";
 export * from "./ai/ai-economic-stance-evaluator";
 export * from "./ai/ai-war-resolution-sweep";
 
+export * from "./combat/optimizer/naval-deployment-clamper";
+export * from "./combat/optimizer/deployment-step-search";
 export * from "./combat/attack-deployment-optimizer";
 export * from "./combat/battle-calculator";
 export * from "./combat/battle-casualty-resolver";
@@ -63,6 +67,7 @@ export * from "./initializers/global-ai-initializer";
 export * from "./military/arms-market-manager";
 export * from "./military/recruitment-queue";
 
+export * from "./orchestrator/turn-export-sales-aggregator";
 export * from "./orchestrator/turn-progression.orchestrator";
 
 export * from "./pipeline/diplomatic-turn-processor";

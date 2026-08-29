@@ -9,112 +9,7 @@ import {
 } from "@/domain/map/manifest.type";
 import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
 import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
-
-const GPU_INDEX_MAPPING: Record<string, number> = {
-  TZA: 12,
-  SAH: 13,
-  COD: 22,
-  KEN: 24,
-  ZAF: 36,
-  NGA: 67,
-  CMR: 68,
-  BFA: 76,
-  MDG: 89,
-  DZA: 93,
-  MAR: 172,
-  EGY: 173,
-  LBY: 174,
-  ETH: 175,
-  DJI: 176,
-  SOL: 177,
-  SDS: 186,
-  CAN: 14,
-  USA: 15,
-  ARG: 20,
-  CHL: 21,
-  GRL: 33,
-  MEX: 38,
-  BRA: 40,
-  BOL: 41,
-  PER: 42,
-  COL: 43,
-  GTM: 49,
-  PAN: 50,
-  VEN: 51,
-  ECU: 55,
-  CUB: 58,
-  KAZ: 16,
-  UZB: 17,
-  MNG: 108,
-  TJK: 115,
-  KGZ: 116,
-  TKM: 117,
-  ISR: 87,
-  LBN: 88,
-  JOR: 94,
-  ARE: 95,
-  QAT: 96,
-  KWT: 97,
-  IRQ: 98,
-  OMN: 99,
-  IRN: 118,
-  SYR: 119,
-  YEM: 168,
-  SAU: 169,
-  ARM: 120,
-  AZE: 156,
-  PRK: 106,
-  KOR: 107,
-  CHN: 150,
-  TWN: 151,
-  JPN: 166,
-  IND: 109,
-  BGD: 110,
-  PAK: 113,
-  AFG: 114,
-  LKA: 149,
-  IDN: 19,
-  THA: 102,
-  VNM: 105,
-  PHL: 158,
-  MYS: 159,
-  RUS: 29,
-  BLR: 122,
-  UKR: 123,
-  POL: 124,
-  HUN: 126,
-  ROU: 128,
-  BGR: 133,
-  SVK: 163,
-  CZE: 164,
-  NOR: 32,
-  SWE: 121,
-  IRL: 144,
-  DNK: 153,
-  GBR: 154,
-  ISL: 155,
-  FIN: 162,
-  GRC: 134,
-  TUR: 135,
-  HRV: 137,
-  PRT: 142,
-  ESP: 143,
-  ITA: 152,
-  CYP: 187,
-  SRB: 182,
-  FRA: 54,
-  AUT: 125,
-  DEU: 132,
-  CHE: 138,
-  BEL: 140,
-  NLD: 141,
-  NZL: 147,
-  AUS: 148,
-};
-
-const GPU_INDEX_TO_ISO3: Map<number, string> = new Map(
-  Object.entries(GPU_INDEX_MAPPING).map(([iso3, gpuIndex]) => [gpuIndex, iso3]),
-);
+import { GpuIndexRegistry } from "@/domain/data/countries/gpu-index-registry";
 
 function composeAllCountryProfiles(): CountryProfile[] {
   const codes = Object.keys(COUNTRY_IDENTITY_MAP);
@@ -265,10 +160,10 @@ export class CountryRegistry {
 
   public static getGpuColorIndex(identifier: unknown): number {
     const iso3 = this.resolveCanonicalId(identifier);
-    return GPU_INDEX_MAPPING[iso3] ?? 118;
+    return GpuIndexRegistry.getGpuColorIndex(iso3);
   }
 
   public static getIso3ByGpuIndex(gpuIndex: number): string | undefined {
-    return GPU_INDEX_TO_ISO3.get(gpuIndex);
+    return GpuIndexRegistry.getIso3ByGpuIndex(gpuIndex);
   }
 }
