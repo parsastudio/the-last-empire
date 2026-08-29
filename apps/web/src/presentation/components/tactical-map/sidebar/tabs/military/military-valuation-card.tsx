@@ -7,14 +7,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { MilitaryStack } from "@/domain/military/military.schema";
-import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
-import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
-import { CountryRegistry } from "@/domain/data/countries";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { selectMilitaryValuationViewModel } from "@/presentation/selectors/military-view-model.selector";
 
 interface MilitaryValuationCardProps {
   military: MilitaryStack;
@@ -31,41 +27,17 @@ export function MilitaryValuationCard({
   nation,
   provincesMap,
 }: MilitaryValuationCardProps) {
-  const metrics = useMemo(() => {
-    const totalValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(military);
-
-    const totalUnits =
-      (military.infantry || 0) +
-      (military.armor || 0) +
-      (military.airDefense || 0) +
-      (military.airForce || 0) +
-      (military.droneMissile || 0);
-
-    const activeNation: Nation = nation || {
-      ...DEFAULT_NATION_MOCK,
-      id: CountryRegistry.resolveCanonicalId(nationId),
-      industrialLevel,
-      military,
-    };
-
-    const payroll = MilitaryPayrollCalculator.calculatePayroll(
-      activeNation,
-      provincesMap,
-    );
-    const gdp = getNationGdp(activeNation, provincesMap);
-    const capacityRatio =
-      gdp > 0 ? Math.min(100, Math.round((totalValuation / gdp) * 100)) : 100;
-
-    return {
-      totalValuation,
-      totalUnits,
-      totalPayroll: payroll.total,
-      isGdpCapped: payroll.gdpCapped,
-      capacityRatio,
-      gdp,
-    };
-  }, [military, industrialLevel, nationId, nation, provincesMap]);
+  const metrics = useMemo(
+    () =>
+      selectMilitaryValuationViewModel(
+        military,
+        industrialLevel,
+        nationId,
+        nation,
+        provincesMap,
+      ),
+    [military, industrialLevel, nationId, nation, provincesMap],
+  );
 
   return (
     <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right font-sans">

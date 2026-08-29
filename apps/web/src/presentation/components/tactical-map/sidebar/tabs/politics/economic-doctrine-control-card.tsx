@@ -14,12 +14,11 @@ import {
   EconomicDoctrineStance,
   ECONOMIC_DOCTRINE_CONFIGS,
   ALL_ECONOMIC_DOCTRINES,
-  NationGettersUtility,
 } from "@geopolitics/domain";
-import { FiscalRevenueCalculator } from "@geopolitics/game-engine";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { selectEconomicDoctrinePreview } from "@/presentation/selectors/politics-view-model.selector";
 
 interface EconomicDoctrineControlCardProps {
   nation: Nation;
@@ -37,30 +36,19 @@ export function EconomicDoctrineControlCard({
     useState<EconomicDoctrineStance>(currentStance);
   const { dispatchAction, isSubmitting } = useGameActions();
 
-  const previewNation: Nation = useMemo(
-    () => ({
-      ...nation,
-      economicStance: selectedStance,
-    }),
-    [nation, selectedStance],
-  );
-
-  const preview = useMemo(
+  const previewModel = useMemo(
     () =>
-      FiscalRevenueCalculator.calculate(
-        previewNation,
+      selectEconomicDoctrinePreview(
+        nation,
+        selectedStance,
         nationsMap,
         provincesMap,
       ),
-    [previewNation, nationsMap, provincesMap],
+    [nation, selectedStance, nationsMap, provincesMap],
   );
 
-  const hasSeaAccess = useMemo(
-    () => NationGettersUtility.hasSeaAccess(nation.id, provincesMap),
-    [nation.id, provincesMap],
-  );
-
-  const activeConfig = ECONOMIC_DOCTRINE_CONFIGS[selectedStance];
+  const activeConfig = previewModel.activeConfig;
+  const preview = previewModel.preview;
   const isChanged = selectedStance !== currentStance;
 
   const handleApplyDoctrine = async () => {
@@ -82,7 +70,7 @@ export function EconomicDoctrineControlCard({
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          {hasSeaAccess ? (
+          {previewModel.hasSeaAccess ? (
             <span className="text-[9px] font-bold font-sans text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-lg flex items-center gap-1">
               <Anchor size={10} />
               <span>شاهراه دریایی (۱۰۰٪ ترانزیت)</span>
