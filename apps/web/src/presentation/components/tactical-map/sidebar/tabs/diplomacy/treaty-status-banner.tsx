@@ -5,18 +5,35 @@ import {
   Handshake,
   Globe,
   ShieldCheck,
+  Skull,
 } from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 
 interface TreatyStatusBannerProps {
   stance: DiplomaticStance | string;
   hasSecurityGuarantee?: boolean;
+  isEmergencyProtectorate?: boolean;
 }
 
 export function TreatyStatusBanner({
   stance,
   hasSecurityGuarantee = false,
+  isEmergencyProtectorate = false,
 }: TreatyStatusBannerProps) {
+  if (isEmergencyProtectorate) {
+    return (
+      <div className="w-full p-3 rounded-xl bg-rose-950/40 border border-rose-500/60 text-rose-300 flex items-center justify-between text-xs font-bold font-sans shadow-md">
+        <span className="flex items-center gap-1.5">
+          <Skull size={14} className="text-rose-400 animate-pulse" />
+          معاهده تحت‌الحمایگی استعماری (۳۰٪ خراج نوبتی • نیروی ضربت ۳ برابری)
+        </span>
+        <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-300 font-black">
+          تحت‌الحمایه
+        </span>
+      </div>
+    );
+  }
+
   if (stance === "WAR") {
     return (
       <div className="w-full p-3 rounded-xl bg-rose-600/20 border border-rose-500/40 text-rose-500 flex items-center justify-between text-xs font-bold font-sans">

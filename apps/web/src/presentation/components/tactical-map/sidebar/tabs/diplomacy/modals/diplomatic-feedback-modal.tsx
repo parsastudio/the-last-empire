@@ -3,12 +3,12 @@ import {
   Check,
   X,
   Swords,
-  ShieldAlert,
   ShoppingCart,
   AlertTriangle,
   Radio,
   Globe,
   ShieldCheck,
+  Skull,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -21,7 +21,9 @@ export interface DiplomaticProposalFeedback {
     | "NON_AGGRESSION_PACT"
     | "STRATEGIC_PARTNERSHIP"
     | "SECURITY_GUARANTEE"
+    | "EMERGENCY_PROTECTORATE"
     | "CANCEL_SECURITY_GUARANTEE"
+    | "CANCEL_EMERGENCY_PROTECTORATE"
     | "SEND_FOREIGN_AID"
     | "DECLARE_WAR"
     | "CANCEL_TREATY";
@@ -48,8 +50,12 @@ function getProposalName(
       return "شراکت استراتژیک";
     case "SECURITY_GUARANTEE":
       return "پیمان چتر امنیتی";
+    case "EMERGENCY_PROTECTORATE":
+      return "معاهده تحت‌الحمایگی استعماری";
     case "CANCEL_SECURITY_GUARANTEE":
       return "لغو چتر امنیتی";
+    case "CANCEL_EMERGENCY_PROTECTORATE":
+      return "لغو معاهده استعماری";
     case "NON_AGGRESSION_PACT":
       return "پیمان عدم تخاصم";
     case "PEACE_TREATY":
@@ -79,7 +85,9 @@ export function DiplomaticFeedbackModal({
   const proposalName = getProposalName(feedback.proposalType);
   const isCancel = feedback.proposalType === "CANCEL_TREATY";
   const isSecurityCancel =
-    feedback.proposalType === "CANCEL_SECURITY_GUARANTEE";
+    feedback.proposalType === "CANCEL_SECURITY_GUARANTEE" ||
+    feedback.proposalType === "CANCEL_EMERGENCY_PROTECTORATE";
+  const isEmergency = feedback.proposalType === "EMERGENCY_PROTECTORATE";
   const isWar = feedback.proposalType === "DECLARE_WAR";
   const defense = feedback.defenseEvent;
 
@@ -166,14 +174,20 @@ export function DiplomaticFeedbackModal({
         <div
           className={`w-16 h-16 rounded-full flex items-center justify-center border shadow-xl transition-all ${
             isAccepted
-              ? isCancel || isSecurityCancel
-                ? "bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-amber-500/20"
-                : "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-emerald-500/20"
+              ? isEmergency
+                ? "bg-rose-500/20 border-rose-500/50 text-rose-400 shadow-rose-500/25"
+                : isCancel || isSecurityCancel
+                  ? "bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-amber-500/20"
+                  : "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-emerald-500/20"
               : "bg-rose-500/15 border-rose-500/40 text-rose-400 shadow-rose-500/20"
           }`}
         >
           {isAccepted ? (
-            <Check size={32} strokeWidth={3} />
+            isEmergency ? (
+              <Skull size={30} className="animate-pulse" />
+            ) : (
+              <Check size={32} strokeWidth={3} />
+            )
           ) : (
             <X size={32} strokeWidth={3} />
           )}
@@ -185,7 +199,23 @@ export function DiplomaticFeedbackModal({
             <span>{feedback.targetName}</span>
           </div>
 
-          {isSecurityCancel ? (
+          {isEmergency && isAccepted ? (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground leading-relaxed">
+                معاهده تحت‌الحمایگی استعماری با امپراتوری{" "}
+                <strong className="text-rose-400">{feedback.targetName}</strong>{" "}
+                منعقد گردید.
+              </p>
+              <div className="flex flex-col gap-1.5 text-[10px] font-mono font-bold">
+                <span className="px-2.5 py-1 bg-rose-500/15 text-rose-300 border border-rose-500/30 rounded-xl">
+                  استقرار نیروی ضربت فوق‌پیشرفته (۳ برابر GDP)
+                </span>
+                <span className="px-2.5 py-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded-xl">
+                  پرداخت نوبتی ۳۰٪ خراج • ۳۰- پرستیژ • ۱۵-٪ ثبات
+                </span>
+              </div>
+            </div>
+          ) : isSecurityCancel ? (
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground leading-relaxed">
                 پیمان چتر امنیتی با دولت{" "}

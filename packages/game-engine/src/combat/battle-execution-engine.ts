@@ -16,6 +16,7 @@ import {
   BattleFullReportData,
   BattleSpoilsDetails,
 } from "@/domain/reports/combat-report.schema";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -46,11 +47,13 @@ export class BattleExecutionEngine {
     const betrayalResult =
       DiplomaticBetrayalCalculator.calculatePenalty(currentStance);
 
-    const guarantorNation = defender.securityGuarantorId
-      ? state.nations[
-          CountryRegistry.resolveCanonicalId(defender.securityGuarantorId)
-        ] ||
-        state.nations[defender.securityGuarantorId] ||
+    const guarantorCanonical = defender.securityGuarantorId
+      ? CountryRegistry.resolveCanonicalId(defender.securityGuarantorId)
+      : null;
+
+    const guarantorNation = guarantorCanonical
+      ? state.nations[guarantorCanonical] ||
+        state.nations[defender.securityGuarantorId!] ||
         null
       : null;
 
@@ -151,6 +154,40 @@ export class BattleExecutionEngine {
       [defender.id]: updatedDefender,
     };
 
+    const guarantorLogs = [];
+    if (guarantorNation && calcResult.auxiliaryGuarantor) {
+      const damage = calcResult.auxiliaryGuarantor.damageCostIncurred || 0;
+      if (damage > 0) {
+        const curG = baseNations[guarantorNation.id] || guarantorNation;
+        let nextTreasury = curG.treasury - damage;
+        let nextDebt = curG.nationalDebt;
+        if (nextTreasury < 0) {
+          nextDebt += Math.abs(nextTreasury);
+          nextTreasury = 0;
+        }
+
+        baseNations[guarantorNation.id] = {
+          ...curG,
+          treasury: nextTreasury,
+          nationalDebt: nextDebt,
+        };
+
+        guarantorLogs.push(
+          TurnLogBuilder.createNationalLog(
+            state.currentTurn,
+            guarantorNation.id,
+            "MILITARY",
+            "WARNING",
+            "GUARANTOR_CASUALTY_COST_INCURRED",
+            {
+              cost: damage,
+            },
+            defender.id,
+          ),
+        );
+      }
+    }
+
     const intervention =
       AllianceInterventionEvaluator.evaluateAllianceInterventions(
         updatedAttacker,
@@ -237,7 +274,12 @@ export class BattleExecutionEngine {
       state.humanNationId,
     );
 
-    const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
+    const updatedLogs = [
+      ...state.turnLogs,
+      ...battleLogs,
+      ...interventionLogs,
+      ...guarantorLogs,
+    ];
 
     if (conquest.conqueredProvincesList.length > 0) {
       BitPackedGridState.getInstance().markDirty();

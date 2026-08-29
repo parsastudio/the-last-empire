@@ -49,6 +49,7 @@ export class EconomyTurnProcessor {
 
     let securityFee = 0;
     let nextSecurityGuarantorId = nation.securityGuarantorId ?? null;
+    let nextIsEmergency = nation.isEmergencyProtectorate ?? false;
 
     if (nation.securityGuarantorId) {
       const gCanonical = CountryRegistry.resolveCanonicalId(
@@ -57,9 +58,11 @@ export class EconomyTurnProcessor {
       const guarantor =
         allNations[gCanonical] || allNations[nation.securityGuarantorId];
       if (guarantor && guarantor.isAlive) {
-        securityFee = Math.floor(gdp * 0.1);
+        const feeRatio = nextIsEmergency ? 0.3 : 0.1;
+        securityFee = Math.floor(gdp * feeRatio);
       } else {
         nextSecurityGuarantorId = null;
+        nextIsEmergency = false;
       }
     }
 
@@ -116,6 +119,7 @@ export class EconomyTurnProcessor {
       const maxDebtLimit = Math.floor(gdp * 0.8);
       if (newDebt + deficit > maxDebtLimit && nextSecurityGuarantorId) {
         nextSecurityGuarantorId = null;
+        nextIsEmergency = false;
       }
       newDebt += deficit;
       newTreasury = 0;
@@ -126,6 +130,7 @@ export class EconomyTurnProcessor {
       treasury: newTreasury,
       nationalDebt: newDebt,
       securityGuarantorId: nextSecurityGuarantorId,
+      isEmergencyProtectorate: nextIsEmergency,
     };
 
     let bankruptcyLog: TurnLogEntry | undefined = undefined;

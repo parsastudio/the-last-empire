@@ -32,7 +32,10 @@ export class PeaceTermsCalculator {
       Math.floor(armyValuation * 0.06),
     );
     const debtInterest = Math.floor(nation.nationalDebt * 0.07);
-    const securityFee = nation.securityGuarantorId ? Math.floor(gdp * 0.1) : 0;
+    const securityFeeRatio = nation.isEmergencyProtectorate ? 0.3 : 0.1;
+    const securityFee = nation.securityGuarantorId
+      ? Math.floor(gdp * securityFeeRatio)
+      : 0;
 
     const netTurnIncome =
       estimatedRevenue - (estimatedPayroll + debtInterest + securityFee);
@@ -45,7 +48,12 @@ export class PeaceTermsCalculator {
       const guarantor =
         nationsMap[gCanonical] || nationsMap[nation.securityGuarantorId];
       if (guarantor && guarantor.isAlive) {
-        guarantorValuation = Math.floor(gdp * 0.3);
+        const forceMultiplier = nation.isEmergencyProtectorate ? 3.0 : 0.3;
+        const rawBudget = Math.floor(gdp * forceMultiplier);
+        const maxSuperpowerLimit = Math.floor(
+          getNationGdp(guarantor, provincesMap) * 0.3,
+        );
+        guarantorValuation = Math.min(rawBudget, maxSuperpowerLimit);
       }
     }
 
@@ -120,20 +128,36 @@ export class PeaceTermsCalculator {
     );
 
     if (ratio >= 2.0) {
+      const sortedHumanProvs = [...allHumanProvinces].sort(
+        (a, b) => getProvinceGdp(b) - getProvinceGdp(a),
+      );
+      const provsToCedeCount = Math.min(
+        2,
+        Math.max(1, allHumanProvinces.length - 1),
+      );
+      const demandedProvs = sortedHumanProvs.slice(0, provsToCedeCount);
+      const demandedMoney = Math.floor(maxHumanCash * 0.6);
+
+      const canAfford =
+        humanNation.treasury >= demandedMoney ||
+        humanNation.treasury +
+          Math.max(0, Math.floor(humanGdp * 0.8) - humanNation.nationalDebt) >=
+          demandedMoney;
+
       return {
         sourceNationId: aiNation.id,
         targetNationId: humanNation.id,
-        settlementType: "FULL_CAPITULATION",
+        settlementType: "TERRITORY_CONCESSION",
         ratio,
         sourceTwmi: aiTwmi,
         targetTwmi: humanTwmi,
         isAiOffering: false,
-        moneyAmount: 0,
-        concededProvinceIds: allHumanProvinces.map((p) => p.provinceId),
-        concededProvincesNames: allHumanProvinces.map((p) => p.nameFa),
-        headline: "مطالبه تسلیم بی‌قیدوشرط و انحلال کامل حاکمیت",
-        description: `امپراتوری ${aiNation.name} به دلیل برتری نظامی و اقتصادی قاطع، حاضر به هیچ‌گونه صلح جزئی نیست و تنها تسلیم کامل شما را می‌پذیرد.`,
-        canAffordTerms: true,
+        moneyAmount: demandedMoney,
+        concededProvinceIds: demandedProvs.map((p) => p.provinceId),
+        concededProvincesNames: demandedProvs.map((p) => p.nameFa),
+        headline: "صلح تلخ و آتش‌بس با واگذاری استان مرزی و تاوان سنگین",
+        description: `امپراتوری ${aiNation.name} به دلیل برتری قاطع، شرط توقف تهاجم را واگذاری ${demandedProvs.length} استان و پرداخت غرامت جنگی تعیین کرده است.`,
+        canAffordTerms: canAfford,
       };
     }
 
