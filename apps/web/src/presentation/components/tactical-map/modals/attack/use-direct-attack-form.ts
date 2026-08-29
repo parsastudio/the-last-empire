@@ -38,9 +38,7 @@ export function useDirectAttackForm({
   onClose,
 }: UseDirectAttackFormProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
-  const setSelectedBattleDebrief = useUiStore(
-    (state) => state.setSelectedBattleDebrief,
-  );
+  const openModal = useUiStore((state) => state.openModal);
 
   const [infantryToDeploy, setInfantryToDeploy] = useState<number>(0);
   const [armorToDeploy, setArmorToDeploy] = useState<number>(0);
@@ -207,8 +205,9 @@ export function useDirectAttackForm({
     return {
       winProbability: winProb,
       isVictoryPredicted: calc.isAttackerVictory,
-      isCapitulationPredicted: calc.isFullCapitulation,
+      isCapitulationPredicted: Boolean(calc.isFullCapitulation),
       phase1Prediction: calc.phase1Missile.phaseWinner,
+      phase2Air: calc.phase2Air,
       phase2Prediction: calc.phase2Air.phaseWinner,
       phase3Prediction: calc.phase3Ground.phaseWinner,
       valuationRatio: calc.valuationRatio,
@@ -302,7 +301,10 @@ export function useDirectAttackForm({
       onClose();
       if (res.resultData) {
         const report = res.resultData as BattleFullReportData;
-        setSelectedBattleDebrief(report);
+        openModal({
+          type: "BATTLE_DEBRIEF",
+          reportData: report,
+        });
 
         if (report.isAttackerVictory) {
           try {
@@ -330,7 +332,7 @@ export function useDirectAttackForm({
     dispatchAction,
     targetRegionName,
     onClose,
-    setSelectedBattleDebrief,
+    openModal,
   ]);
 
   return {
