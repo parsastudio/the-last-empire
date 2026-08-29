@@ -25,7 +25,6 @@ export interface GeopoliticalVector {
   powerRatio: number;
   lostProvincesCount: number;
   reasons: {
-    ideologyScore: number;
     commonEnemyBonus: number;
     reputationEffect: number;
     borderFriction: number;
@@ -41,7 +40,6 @@ export class GeopoliticalVectorCalculator {
     provincesMap?: Record<string, Province>,
     sourceProvinces?: Province[],
     sourcePower?: number,
-    _sourceSeaAccess?: boolean,
     provincesByOwnerMap?: Map<string, Province[]>,
     occupiedTerritoryMap?: Map<string, number>,
   ): GeopoliticalVector {
@@ -50,7 +48,6 @@ export class GeopoliticalVectorCalculator {
       source.relations[canonicalTarget] || source.relations[target.id];
 
     const baseAlignment = rel?.alignment ?? 0;
-    const ideologyScore = 0;
 
     let commonEnemyBonus = 0;
     if (
@@ -73,11 +70,7 @@ export class GeopoliticalVectorCalculator {
     const revanchismPenalty = Math.min(25, lostProvincesCount * 12);
 
     const rawAlignment =
-      baseAlignment +
-      ideologyScore +
-      commonEnemyBonus +
-      reputationEffect -
-      revanchismPenalty;
+      baseAlignment + commonEnemyBonus + reputationEffect - revanchismPenalty;
     const alignment = Math.max(-100, Math.min(100, rawAlignment));
 
     const myProvs =
@@ -240,7 +233,6 @@ export class GeopoliticalVectorCalculator {
       powerRatio,
       lostProvincesCount,
       reasons: {
-        ideologyScore,
         commonEnemyBonus,
         reputationEffect,
         borderFriction,

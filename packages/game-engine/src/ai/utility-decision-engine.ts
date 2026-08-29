@@ -24,7 +24,6 @@ export class UtilityDecisionEngine {
     source: Nation,
     target: Nation,
     vector: GeopoliticalVector,
-    _sourceGdp?: number,
     targetGdp?: number,
     allNations?: Record<string, Nation>,
   ): number {
@@ -118,7 +117,6 @@ export class UtilityDecisionEngine {
 
   public static calculateStrategicPartnershipUtility(
     source: Nation,
-    _target: Nation,
     vector: GeopoliticalVector,
   ): number {
     if (source.globalReputation < -20 || vector.lostProvincesCount > 0) {
@@ -131,11 +129,7 @@ export class UtilityDecisionEngine {
     return Math.round(alignmentScore - tensionPenalty + commonEnemyBonus);
   }
 
-  public static calculateNapUtility(
-    _source: Nation,
-    _target: Nation,
-    vector: GeopoliticalVector,
-  ): number {
+  public static calculateNapUtility(vector: GeopoliticalVector): number {
     const alignmentScore = vector.alignment * 0.6;
     const tensionPenalty = vector.tension * 0.5;
 
@@ -144,7 +138,6 @@ export class UtilityDecisionEngine {
 
   public static calculatePeaceUtility(
     source: Nation,
-    _target: Nation,
     vector: GeopoliticalVector,
   ): number {
     const exhaustionScore =

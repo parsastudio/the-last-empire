@@ -17,7 +17,6 @@ export class ProvinceConquestHandler {
     attackerId: string,
     defenderId: string,
     isAttackerVictory: boolean,
-    _isFullCapitulation = false,
     targetProvinceId?: number,
   ): ProvinceConquestResult {
     const updatedProvinces: Record<string, Province> = { ...provinces };

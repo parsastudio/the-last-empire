@@ -1,15 +1,9 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export class PoliticsTurnProcessor {
-  public static process(
-    nation: Nation,
-    _allNations: Record<string, Nation>,
-    isAtWar: boolean,
-    _provincesMap?: Record<string, Province>,
-  ): Nation {
+  public static process(nation: Nation, isAtWar: boolean): Nation {
     const updated = ModifierManager.updateActiveModifiers(nation);
 
     const newStability = StabilityCalculator.calculateTurnStability(

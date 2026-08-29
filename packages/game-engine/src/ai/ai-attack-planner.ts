@@ -6,7 +6,6 @@ import {
   CountryRegistry,
   LandNeighborResolver,
   NationGettersUtility,
-  GlobalCoalition,
 } from "@geopolitics/domain";
 
 export class AIAttackPlanner {
@@ -15,7 +14,6 @@ export class AIAttackPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     ownedProvinces?: Province[],
-    _globalCoalition?: GlobalCoalition | null,
   ): GameAction | null {
     if (!nation.isAlive || !nation.relations) {
       return null;

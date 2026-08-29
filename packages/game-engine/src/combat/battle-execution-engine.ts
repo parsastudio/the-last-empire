@@ -73,7 +73,6 @@ export class BattleExecutionEngine {
       attacker.id,
       defender.id,
       calcResult.isAttackerVictory,
-      false,
       action.targetProvinceId,
     );
 
@@ -189,12 +188,7 @@ export class BattleExecutionEngine {
     }
 
     const intervention =
-      AllianceInterventionEvaluator.evaluateAllianceInterventions(
-        updatedAttacker,
-        defender,
-        baseNations,
-        conquest.updatedProvinces,
-      );
+      AllianceInterventionEvaluator.evaluateAllianceInterventions(baseNations);
 
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
     const targetProvinceObj = action.targetProvinceId

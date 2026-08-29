@@ -17,10 +17,7 @@ import {
   NationDoctrineResolver,
   AiDoctrineType,
 } from "@geopolitics/domain";
-import {
-  NationPresentationMapper,
-  getDoctrineLabel,
-} from "@/presentation/utils/nation-presentation-mapper";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,

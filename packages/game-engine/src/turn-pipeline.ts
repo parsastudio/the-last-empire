@@ -75,12 +75,7 @@ export class TurnPipeline {
         updatedProvincesMap[up.provinceId.toString()] = up;
       }
 
-      const polNation = PoliticsTurnProcessor.process(
-        ecoNation,
-        currentState.nations,
-        isAtWar,
-        updatedProvincesMap,
-      );
+      const polNation = PoliticsTurnProcessor.process(ecoNation, isAtWar);
 
       updatedNations[id] = polNation;
     }

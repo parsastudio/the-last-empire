@@ -51,8 +51,4 @@ export class MilitaryPowerCalculator {
 
     return Math.floor(rawPower);
   }
-
-  public static calculateEffectivePower(nation: Nation): number {
-    return this.calculateLandAndAirPower(nation);
-  }
 }
