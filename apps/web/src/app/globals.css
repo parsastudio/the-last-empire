@@ -3,14 +3,30 @@
 @keyframes fadeInOpacity {
   from {
     opacity: 0;
+    transform: scale(0.985);
   }
   to {
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes tacticalPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
   }
 }
 
 .animate-fade-smooth {
-  animation: fadeInOpacity 0.15s ease-in-out forwards;
+  animation: fadeInOpacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-tactical-pulse {
+  animation: tacticalPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @font-face {
@@ -22,31 +38,33 @@
 }
 
 :root {
-  --background: #090d16;
-  --foreground: #f4f4f5;
-  --card: #111827;
-  --card-foreground: #f4f4f5;
-  --popover: #111827;
-  --popover-foreground: #f4f4f5;
+  --background: #070a12;
+  --foreground: #f8fafc;
+  --card: #0e1626;
+  --card-foreground: #f8fafc;
+  --popover: #0e1626;
+  --popover-foreground: #f8fafc;
   --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --secondary: #1f2937;
-  --secondary-foreground: #f4f4f5;
-  --muted: #1f2937;
-  --muted-foreground: #9ca3af;
-  --accent: #1f2937;
-  --accent-foreground: #f4f4f5;
+  --secondary: #162032;
+  --secondary-foreground: #e2e8f0;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #374151;
-  --input: #374151;
+  --border: #1e293b;
+  --input: #1e293b;
   --ring: #3b82f6;
-  --radius: 0.875rem;
+  --radius: 1rem;
 
   --gdp: #10b981;
   --military: #f43f5e;
   --treasury: #f59e0b;
   --diplomacy: #6366f1;
+  --maritime: #06b6d4;
+  --intel: #a855f7;
 
   --font-vazirmatn: "Vazirmatn", system-ui, sans-serif;
 }
@@ -79,11 +97,13 @@
   --color-military: var(--military);
   --color-treasury: var(--treasury);
   --color-diplomacy: var(--diplomacy);
+  --color-maritime: var(--maritime);
+  --color-intel: var(--intel);
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
