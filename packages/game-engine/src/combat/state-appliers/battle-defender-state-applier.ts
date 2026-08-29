@@ -58,6 +58,19 @@ export class BattleDefenderStateApplier {
         )
       : 0;
 
+    let updatedDebt = defender.nationalDebt;
+    if (
+      isDefenderAlive &&
+      conquest.conqueredProvincesList.length > 0 &&
+      defender.nationalDebt > 0
+    ) {
+      const totalGdpBefore = Math.max(1, conquest.totalDefenderGdpBefore);
+      const lostGdp = conquest.conqueredProvincesGdp || 0;
+      const share = Math.min(1.0, Math.max(0, lostGdp / totalGdpBefore));
+      const debtRelief = Math.floor(defender.nationalDebt * share);
+      updatedDebt = Math.max(0, defender.nationalDebt - debtRelief);
+    }
+
     return {
       ...defender,
       isAlive: isDefenderAlive,
@@ -68,6 +81,7 @@ export class BattleDefenderStateApplier {
       treasury: isDefenderAlive
         ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
         : 0,
+      nationalDebt: isDefenderAlive ? updatedDebt : 0,
       military: updatedMilitary,
       relations: isDefenderAlive ? updatedRelations : {},
       warFocusTargetId: isDefenderAlive ? nextWarFocus : null,

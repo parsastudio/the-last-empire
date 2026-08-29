@@ -1,4 +1,4 @@
-import type { GameState } from "@/domain/game/game-state.schema";
+import type { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -21,6 +21,7 @@ export class TurnPipeline {
     const updatedProvincesMap: Record<string, Province> = {
       ...currentState.provinces,
     };
+    const economyLogs: TurnLogEntry[] = [];
 
     const ownerMap =
       provincesByOwnerMap ??
@@ -53,13 +54,21 @@ export class TurnPipeline {
           matrixCache,
         );
 
-      const { updatedNation: ecoNation, updatedProvinces } =
-        EconomyTurnProcessor.process(
-          dipNation,
-          currentState.nations,
-          ownedProvinces,
-          updatedProvincesMap,
-        );
+      const {
+        updatedNation: ecoNation,
+        updatedProvinces,
+        bankruptcyLog,
+      } = EconomyTurnProcessor.process(
+        dipNation,
+        currentState.nations,
+        ownedProvinces,
+        updatedProvincesMap,
+        currentState.currentTurn,
+      );
+
+      if (bankruptcyLog) {
+        economyLogs.push(bankruptcyLog);
+      }
 
       for (let p = 0; p < updatedProvinces.length; p++) {
         const up = updatedProvinces[p]!;
@@ -80,6 +89,7 @@ export class TurnPipeline {
       ...currentState,
       provinces: updatedProvincesMap,
       nations: updatedNations,
+      turnLogs: [...currentState.turnLogs, ...economyLogs],
     };
   }
 }

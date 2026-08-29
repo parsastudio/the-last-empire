@@ -1,12 +1,13 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
+import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
-import { CountryRegistry } from "@geopolitics/domain";
+import { CountryRegistry, TurnLogBuilder } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -17,7 +18,12 @@ export class EconomyTurnProcessor {
     allNations: Record<string, Nation>,
     ownedProvinces: Province[],
     provincesMap: Record<string, Province>,
-  ): { updatedNation: Nation; updatedProvinces: Province[] } {
+    currentTurn = 1,
+  ): {
+    updatedNation: Nation;
+    updatedProvinces: Province[];
+    bankruptcyLog?: TurnLogEntry;
+  } {
     const demoResult = DemographicsEngine.processNaturalDemographics(
       nation.government.stability,
       ownedProvinces,
@@ -122,6 +128,8 @@ export class EconomyTurnProcessor {
       securityGuarantorId: nextSecurityGuarantorId,
     };
 
+    let bankruptcyLog: TurnLogEntry | undefined = undefined;
+
     if (this.bankruptcyManager.isBankrupt(updated, currentProvincesMap)) {
       const bankResult = this.bankruptcyManager.applyBankruptcy(
         updated,
@@ -129,10 +137,14 @@ export class EconomyTurnProcessor {
       );
       updated = bankResult.updatedNation;
       updatedProvinces = bankResult.updatedProvinces;
+      bankruptcyLog = TurnLogBuilder.createBankruptcyLog(
+        currentTurn,
+        updated.id,
+      );
     }
 
     updated = this.recruitmentQueue.processTurnQueue(updated);
 
-    return { updatedNation: updated, updatedProvinces };
+    return { updatedNation: updated, updatedProvinces, bankruptcyLog };
   }
 }

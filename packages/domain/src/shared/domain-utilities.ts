@@ -124,6 +124,23 @@ export class TurnLogBuilder {
     );
   }
 
+  public static createBankruptcyLog(
+    turn: number,
+    nationId: string,
+    params: Record<string, TurnLogParamValue> = {},
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      nationId,
+      "CRITICAL",
+      "NATION_BANKRUPTCY",
+      "DOMESTIC",
+      "NATIONAL",
+      undefined,
+      params,
+    );
+  }
+
   public static createGlobalWarLog(
     turn: number,
     attackerId: string,

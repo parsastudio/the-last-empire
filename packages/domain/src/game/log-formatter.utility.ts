@@ -24,6 +24,9 @@ export class TurnLogFormatter {
     const params = log.params || {};
 
     switch (log.eventCode) {
+      case "NATION_BANKRUPTCY":
+        return `هشدار بحران مالی و ورشکستگی ملی: به دلیل رسیدن بدهی به ۱۰۰٪ GDP، خزانه‌داری کشور ${sourceName} تخلیه، بدهی‌ها با نکول رسمی صفر، و بهره‌وری زیرساخت‌های کشور ۲۵٪ تنزل یافت.`;
+
       case "VICTORY_ACHIEVED": {
         const reason = String(params["reason"] || "");
         if (reason === "HUMAN_PLAYER_DEFEATED") {
