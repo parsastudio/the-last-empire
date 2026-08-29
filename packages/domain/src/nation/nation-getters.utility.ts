@@ -54,7 +54,17 @@ export class NationGettersUtility {
       NationDemographicsResolverUtility,
     );
 
-  public static getInfrastructureLevel(nation: Nation): number {
-    return nation.industrialLevel || 1;
+  public static getInfrastructureLevel(
+    nationOrId: Nation | string,
+    _provincesMap?: Record<string, Province> | Province[] | unknown,
+  ): number {
+    if (
+      typeof nationOrId === "object" &&
+      nationOrId !== null &&
+      "industrialLevel" in nationOrId
+    ) {
+      return nationOrId.industrialLevel || 1;
+    }
+    return 1;
   }
 }

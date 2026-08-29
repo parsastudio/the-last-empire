@@ -3,6 +3,8 @@ export interface DemographicsMetrics {
   maxPopulationCapacity: number;
   capacityPercentage: number;
   isOvercrowded: boolean;
+  isOverCapacity: boolean;
+  isNearCapacity: boolean;
 }
 
 export class DemographicsCalculator {
@@ -38,6 +40,9 @@ export class DemographicsCalculator {
       population,
       maxPopulationCapacity,
     );
+    const isOverCapacity =
+      capacityPercentage >= 100 || population >= maxCapacity;
+    const isNearCapacity = capacityPercentage >= 85;
     const isOvercrowded = capacityPercentage >= 95;
 
     return {
@@ -45,6 +50,8 @@ export class DemographicsCalculator {
       maxPopulationCapacity: maxCapacity,
       capacityPercentage,
       isOvercrowded,
+      isOverCapacity,
+      isNearCapacity,
     };
   }
 }
