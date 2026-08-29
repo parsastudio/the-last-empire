@@ -1,7 +1,7 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PersianNumberFormatter } from "@/domain/shared/persian-number-formatter";
 
 export class TurnLogFormatter {
   private static resolveName(
