@@ -85,7 +85,6 @@ export class GeopoliticalMatrixCache {
       provincesMap,
       sourceProvs,
       undefined,
-      undefined,
       this.provincesByOwnerMap,
       this.occupiedTerritoryMap,
     );

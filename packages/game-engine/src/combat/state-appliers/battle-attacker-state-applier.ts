@@ -80,7 +80,7 @@ export class BattleAttackerStateApplier {
     );
 
     const isTotalAnnexation =
-      calcResult.isFullCapitulation || Boolean(isDefenderEliminated);
+      Boolean(calcResult.isFullCapitulation) || Boolean(isDefenderEliminated);
 
     const nextWarFocus = isTotalAnnexation ? null : cleanDefenderId;
 

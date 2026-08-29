@@ -19,6 +19,7 @@ import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
+  isFullCapitulation?: boolean;
   valuationRatio: number;
   dronesUsed: number;
   attackerCasualties: CasualtyMetrics;
@@ -343,6 +344,7 @@ export class BattleCalculator {
 
     return {
       isAttackerVictory: groundPhase.isAttackerVictory,
+      isFullCapitulation: false,
       valuationRatio,
       dronesUsed: deployedDrones,
       attackerCasualties: casualty.attackerCasualties,
