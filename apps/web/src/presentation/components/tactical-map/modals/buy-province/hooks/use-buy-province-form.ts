@@ -1,0 +1,189 @@
+import { useMemo, useCallback } from "react";
+import {
+  Nation,
+  Province,
+  CountryRegistry,
+  ActionFactory,
+  getProvinceGdp,
+  LandNeighborResolver,
+  NationGettersUtility,
+} from "@geopolitics/domain";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+
+function getCleanProvinceName(rawName: string): string {
+  const trimmed = rawName.trim();
+  if (trimmed.startsWith("استان ")) {
+    return trimmed;
+  }
+  return `استان ${trimmed}`;
+}
+
+interface UseBuyProvinceFormProps {
+  provinceId: number | null;
+  humanNation: Nation | null;
+  nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
+  onClose: () => void;
+}
+
+export function useBuyProvinceForm({
+  provinceId,
+  humanNation,
+  nationsMap,
+  provincesMap,
+  onClose,
+}: UseBuyProvinceFormProps) {
+  const { dispatchAction, isSubmitting } = useGameActions();
+
+  const province = useMemo(() => {
+    if (!provinceId || !provincesMap) return null;
+    return provincesMap[provinceId.toString()] || null;
+  }, [provinceId, provincesMap]);
+
+  const ownerNation = useMemo(() => {
+    if (!province || !nationsMap) return null;
+    const canonicalOwner = CountryRegistry.resolveCanonicalId(
+      province.ownerNationId,
+    );
+    return (
+      nationsMap[canonicalOwner] || nationsMap[province.ownerNationId] || null
+    );
+  }, [province, nationsMap]);
+
+  const sellerOwnedProvinces = useMemo(() => {
+    if (!ownerNation || !provincesMap) return [];
+    const canonicalOwner = CountryRegistry.resolveCanonicalId(ownerNation.id);
+    return Object.values(provincesMap).filter(
+      (p) =>
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalOwner,
+    );
+  }, [ownerNation, provincesMap]);
+
+  const sellerProvincesCount = sellerOwnedProvinces.length;
+  const isLastProvince = sellerProvincesCount <= 1;
+
+  const sellerCoastalCount = useMemo(() => {
+    return sellerOwnedProvinces.filter((p) => Boolean(p.hasSeaAccess)).length;
+  }, [sellerOwnedProvinces]);
+
+  const hasSeaAccess = Boolean(province?.hasSeaAccess);
+  const isLastCoastalProvince = hasSeaAccess && sellerCoastalCount <= 1;
+
+  const isLandNeighbor = useMemo(() => {
+    if (!humanNation || !province || !provincesMap) return false;
+    return LandNeighborResolver.hasProvinceLandBorder(
+      province.provinceId,
+      humanNation.id,
+      provincesMap,
+    );
+  }, [humanNation, province, provincesMap]);
+
+  const buyerHasSea = useMemo(() => {
+    if (!humanNation || !provincesMap) return false;
+    return NationGettersUtility.hasSeaAccess(humanNation.id, provincesMap);
+  }, [humanNation, provincesMap]);
+
+  const isMaritimeAccessible = buyerHasSea && hasSeaAccess;
+  const isGeographicallyConnected = isLandNeighbor || isMaritimeAccessible;
+
+  const costMultiplier = hasSeaAccess ? 5 : 4;
+
+  const provinceGdp = useMemo(() => {
+    if (!province) return 0;
+    return getProvinceGdp(province);
+  }, [province]);
+
+  const purchasePrice = useMemo(() => {
+    if (!provinceGdp) return 10_000_000_000;
+    return Math.max(10_000_000_000, Math.floor(provinceGdp * costMultiplier));
+  }, [provinceGdp, costMultiplier]);
+
+  const buyerTreasury = humanNation?.treasury || 0;
+  const canAfford = buyerTreasury >= purchasePrice;
+  const remainingTreasury = Math.max(0, buyerTreasury - purchasePrice);
+  const shortageAmount = Math.max(0, purchasePrice - buyerTreasury);
+
+  const isOwnCountry =
+    !!humanNation &&
+    !!province &&
+    CountryRegistry.resolveCanonicalId(humanNation.id) ===
+      CountryRegistry.resolveCanonicalId(province.ownerNationId);
+
+  const formattedProvinceName = province
+    ? getCleanProvinceName(province.nameFa)
+    : "استان نامشخص";
+
+  const capacityPercentage = useMemo(() => {
+    if (!province) return 0;
+    const maxCap = Math.max(1, province.maxPopulationCapacity || 100000);
+    return Math.round((province.population / maxCap) * 100);
+  }, [province]);
+
+  const handleExecutePurchase = useCallback(async () => {
+    if (
+      !humanNation ||
+      !province ||
+      !ownerNation ||
+      isSubmitting ||
+      !canAfford ||
+      isOwnCountry ||
+      isLastProvince ||
+      isLastCoastalProvince ||
+      !isGeographicallyConnected
+    ) {
+      return;
+    }
+
+    const action = ActionFactory.buyProvince(
+      humanNation.id,
+      ownerNation.id,
+      province.provinceId,
+      purchasePrice,
+    );
+
+    const res = await dispatchAction(
+      action,
+      `${formattedProvinceName} با موفقیت از ${ownerNation.name} خریداری و رسماً به قلمرو کشور الحاق شد.`,
+    );
+
+    if (res.success) {
+      onClose();
+    }
+  }, [
+    humanNation,
+    province,
+    ownerNation,
+    purchasePrice,
+    isSubmitting,
+    canAfford,
+    isOwnCountry,
+    isLastProvince,
+    isLastCoastalProvince,
+    isGeographicallyConnected,
+    dispatchAction,
+    formattedProvinceName,
+    onClose,
+  ]);
+
+  return {
+    province,
+    ownerNation,
+    sellerProvincesCount,
+    hasSeaAccess,
+    isLastProvince,
+    isLastCoastalProvince,
+    isGeographicallyConnected,
+    costMultiplier,
+    provinceGdp,
+    purchasePrice,
+    buyerTreasury,
+    canAfford,
+    remainingTreasury,
+    shortageAmount,
+    isOwnCountry,
+    formattedProvinceName,
+    capacityPercentage,
+    isSubmitting,
+    handleExecutePurchase,
+  };
+}
