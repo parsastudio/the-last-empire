@@ -1,13 +1,8 @@
 import { GameAction } from "@/domain/game/action.schema";
-import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
-import { CountryRegistry } from "@/domain/data/countries";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { AI_DOCTRINE_PRESETS, NationGettersUtility } from "@geopolitics/domain";
+import { AISabotagePlanner } from "@/engine/ai/espionage/ai-sabotage-planner";
+import { AITechHeistPlanner } from "@/engine/ai/espionage/ai-tech-heist-planner";
 
 export interface EspionagePlanResult {
   actions: GameAction[];
@@ -34,7 +29,7 @@ export class AIEspionagePlanner {
 
     const executedTiers = nation.executedEspionageTiers || [];
 
-    const sabotageAction = this.planSabotageTier2(
+    const sabotageAction = AISabotagePlanner.planSabotageTier2(
       nation,
       allNations,
       provincesMap,
@@ -53,7 +48,7 @@ export class AIEspionagePlanner {
       };
     }
 
-    const techTheftAction = this.planTechHeistTier3(
+    const techTheftAction = AITechHeistPlanner.planTechHeistTier3(
       nation,
       allNations,
       provincesMap,
@@ -76,244 +71,6 @@ export class AIEspionagePlanner {
     return {
       actions,
       remainingTreasury: currentTreasury,
-    };
-  }
-
-  private static planSabotageTier2(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province> | undefined,
-    currentTreasury: number,
-    executedTiers: string[],
-    rankMap?: Map<string, number>,
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): { action: GameAction; cost: number } | null {
-    const sourceRank =
-      rankMap?.get(CountryRegistry.resolveCanonicalId(nation.id)) ??
-      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
-
-    const activeWarTarget = nation.warFocusTargetId
-      ? allNations[
-          CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
-        ] || allNations[nation.warFocusTargetId]
-      : null;
-
-    if (activeWarTarget && activeWarTarget.isAlive) {
-      const canonical = CountryRegistry.resolveCanonicalId(activeWarTarget.id);
-      if (!executedTiers.includes(`${canonical}:2`)) {
-        const targetRank =
-          rankMap?.get(canonical) ??
-          NationGettersUtility.getRank(
-            activeWarTarget.id,
-            allNations,
-            provincesMap,
-          );
-
-        const successRate = EspionageCalculator.calculateSuccessRate(
-          2,
-          sourceRank,
-          targetRank,
-        );
-
-        if (successRate >= 0.5) {
-          const targetGdp = getNationGdp(
-            activeWarTarget,
-            provincesMap,
-            undefined,
-            provincesByOwnerMap,
-          );
-          const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
-
-          const hasDefenses =
-            (activeWarTarget.military.airDefense || 0) > 0 ||
-            (activeWarTarget.military.armor || 0) > 0 ||
-            activeWarTarget.military.airForce > 0;
-
-          if (hasDefenses && currentTreasury >= Math.floor(cost * 1.2)) {
-            return {
-              action: ActionFactory.executeEspionage(
-                nation.id,
-                activeWarTarget.id,
-                2,
-              ),
-              cost,
-            };
-          }
-        }
-      }
-    }
-
-    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      if (executedTiers.includes(`${canonicalTarget}:2`)) {
-        continue;
-      }
-
-      const target = allNations[canonicalTarget] || allNations[targetId];
-
-      if (!target || !target.isAlive || target.id === nation.id) {
-        continue;
-      }
-
-      if (rel.stance === "WAR") {
-        const targetRank =
-          rankMap?.get(canonicalTarget) ??
-          NationGettersUtility.getRank(target.id, allNations, provincesMap);
-
-        const successRate = EspionageCalculator.calculateSuccessRate(
-          2,
-          sourceRank,
-          targetRank,
-        );
-
-        if (successRate < 0.5) {
-          continue;
-        }
-
-        const targetGdp = getNationGdp(
-          target,
-          provincesMap,
-          undefined,
-          provincesByOwnerMap,
-        );
-        const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
-
-        if (currentTreasury < Math.floor(cost * 1.2)) {
-          continue;
-        }
-
-        const evalResult = AIThreatCalculator.evaluate(
-          nation,
-          target,
-          provincesMap,
-        );
-        const hasDefenses =
-          (target.military.airDefense || 0) > 0 ||
-          (target.military.armor || 0) > 0 ||
-          target.military.airForce > 0;
-
-        const isPreStrikeValid = nation.military.infantry > 1 && hasDefenses;
-        const isAsymmetricValid =
-          evalResult.powerRatio > 1.5 && rel.alignment <= -30 && hasDefenses;
-
-        if (isPreStrikeValid || isAsymmetricValid) {
-          return {
-            action: ActionFactory.executeEspionage(nation.id, target.id, 2),
-            cost,
-          };
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private static planTechHeistTier3(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province> | undefined,
-    currentTreasury: number,
-    executedTiers: string[],
-    rankMap?: Map<string, number>,
-    reachableTargets?: Nation[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): { action: GameAction; cost: number } | null {
-    const targets =
-      reachableTargets ??
-      GeopoliticalReachResolver.getReachableTargets(
-        nation,
-        allNations,
-        provincesMap,
-        rankMap,
-        undefined,
-        provincesByOwnerMap,
-      );
-
-    const sourceRank =
-      rankMap?.get(CountryRegistry.resolveCanonicalId(nation.id)) ??
-      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
-
-    const weights =
-      nation.doctrineWeights ??
-      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
-
-    const costMultiplier =
-      weights.armsImportRatio >= 0.6 && nation.military.techLevel < 3.5
-        ? 1.1
-        : 1.3;
-
-    const eligibleTargets: { target: Nation; cost: number; points: number }[] =
-      [];
-
-    for (let i = 0; i < targets.length; i++) {
-      const target = targets[i]!;
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
-      if (executedTiers.includes(`${canonicalTarget}:3`)) {
-        continue;
-      }
-
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[target.id];
-
-      if (rel && rel.stance === "STRATEGIC_PARTNERSHIP") {
-        continue;
-      }
-
-      const milDelta = Number(
-        (target.military.techLevel - nation.military.techLevel).toFixed(1),
-      );
-
-      if (milDelta < EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST) {
-        continue;
-      }
-
-      const targetRank =
-        rankMap?.get(canonicalTarget) ??
-        NationGettersUtility.getRank(target.id, allNations, provincesMap);
-
-      const successRate = EspionageCalculator.calculateSuccessRate(
-        3,
-        sourceRank,
-        targetRank,
-      );
-
-      if (successRate < 0.5) {
-        continue;
-      }
-
-      const targetGdp = getNationGdp(
-        target,
-        provincesMap,
-        undefined,
-        provincesByOwnerMap,
-      );
-      const cost = EspionageCalculator.calculateOperationCost(targetGdp, 3);
-
-      if (currentTreasury >= Math.floor(cost * costMultiplier)) {
-        eligibleTargets.push({
-          target,
-          cost,
-          points: milDelta,
-        });
-      }
-    }
-
-    if (eligibleTargets.length === 0) {
-      return null;
-    }
-
-    eligibleTargets.sort((a, b) => {
-      if (b.points !== a.points) {
-        return b.points - a.points;
-      }
-      return a.cost - b.cost;
-    });
-
-    const chosen = eligibleTargets[0]!;
-
-    return {
-      action: ActionFactory.executeEspionage(nation.id, chosen.target.id, 3),
-      cost: chosen.cost,
     };
   }
 }

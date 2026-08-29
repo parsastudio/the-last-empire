@@ -1,7 +1,9 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { PersianNumberFormatter } from "@/domain/shared/persian-number-formatter";
+import { WarLogFormatter } from "@/domain/game/formatters/war-log-formatter";
+import { DiplomacyLogFormatter } from "@/domain/game/formatters/diplomacy-log-formatter";
+import { NationalEventsLogFormatter } from "@/domain/game/formatters/national-events-log-formatter";
 
 export class TurnLogFormatter {
   private static resolveName(
@@ -24,175 +26,28 @@ export class TurnLogFormatter {
     const targetName = this.resolveName(log.targetNationId, nationsMap);
     const params = log.params || {};
 
-    switch (log.eventCode) {
-      case "NATION_BANKRUPTCY":
-        return `هشدار بحران مالی و ورشکستگی ملی: به دلیل رسیدن بدهی به ۱۰۰٪ GDP، خزانه‌داری کشور ${sourceName} تخلیه، بدهی‌ها با نکول رسمی صفر، و بهره‌وری زیرساخت‌های کشور ۲۵٪ تنزل یافت.`;
+    const warFormatted = WarLogFormatter.format(
+      log.eventCode,
+      sourceName,
+      targetName,
+      params,
+    );
+    if (warFormatted) return warFormatted;
 
-      case "VICTORY_ACHIEVED": {
-        const reason = String(params["reason"] || "");
-        if (reason === "HUMAN_PLAYER_DEFEATED") {
-          return `سقوط و فروپاشی کامل: حاکمیت ${sourceName} تمامی استان‌ها و مواضع خود را از دست داد و پرونده حاکمیت آن بسته شد.`;
-        }
-        return `فتح قاطع و پیروزی تاریخی: امپراتوری ${sourceName} به برتری مطلق بر جهان دست یافت و سند هژمونی بین‌المللی را امضا کرد.`;
-      }
+    const dipFormatted = DiplomacyLogFormatter.format(
+      log.eventCode,
+      sourceName,
+      targetName,
+      params,
+    );
+    if (dipFormatted) return dipFormatted;
 
-      case "COALITION_FORMED": {
-        const members = String(params["memberNames"] || "قدرت‌های بزرگ");
-        return `پیمان مهار اضطراری: کشورهای [${members}] با امضای معاهده دفاع جمعی، رسماً علیه امپراتوری ${sourceName} اعلام جنگ کرده و صلح را ناممکن دانستند.`;
-      }
-
-      case "COALITION_MEMBER_FALLEN": {
-        const remaining = String(params["remainingCount"] || "۰");
-        return `شکست ضلع ائتلاف جهانی: کشور ${sourceName} سقوط کرد (${remaining} قدرت متخاصم از ائتلاف باقی مانده است).`;
-      }
-
-      case "WAR_DECLARED":
-        return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;
-
-      case "DIPLOMATIC_PROPOSAL_SENT": {
-        const rawType = String(params["treatyType"] || "معاهده");
-        const treatyTypeFa =
-          rawType === "STRATEGIC_PARTNERSHIP"
-            ? "شراکت استراتژیک و اقتصادی"
-            : rawType === "NON_AGGRESSION_PACT"
-              ? "پیمان عدم تخاصم"
-              : rawType === "SECURITY_GUARANTEE"
-                ? "پیمان چتر امنیتی و تضمین بقا"
-                : rawType === "EMERGENCY_PROTECTORATE"
-                  ? "معاهده استعماری تحت‌الحمایگی اضطراری"
-                  : rawType === "PEACE_TREATY"
-                    ? "معاهده صلح"
-                    : rawType === "SEND_FOREIGN_AID"
-                      ? "کمک مالی"
-                      : rawType;
-        return `پیشنهاد دیپلماتیک: کشور ${sourceName} پیشنهاد رسمی (${treatyTypeFa}) را برای ${targetName} ارسال کرد.`;
-      }
-
-      case "TREATY_ACCEPTED": {
-        const treatyLabel = String(params["treatyLabel"] || "معاهده");
-        return `توافق دیپلماتیک: کشور ${targetName} پیشنهاد (${treatyLabel}) از سوی ${sourceName} را پذیرفت و امضا کرد.`;
-      }
-
-      case "TREATY_REJECTED": {
-        const treatyLabel = String(params["treatyLabel"] || "معاهده");
-        return `رد معاهده دیپلماتیک: کشور ${targetName} پیشنهاد (${treatyLabel}) از سوی ${sourceName} را نپذیرفت.`;
-      }
-
-      case "TREATY_CANCELLED": {
-        const newStanceName = String(
-          params["newStanceName"] || "دیپلماسی عادی",
-        );
-        return `تنزل روابط دیپلماتیک: کشور ${sourceName} معاهده پیشین با ${targetName} را لغو کرد و روابط به سطح (${newStanceName}) کاهش یافت.`;
-      }
-
-      case "SECURITY_GUARANTEE_SIGNED": {
-        return `انعقاد پیمان چتر امنیتی: کشور ${sourceName} با پرداخت نوبتی ۱۰٪ GDP، رسماً تحت چتر تضمین دفاعی امپراتوری ${targetName} قرار گرفت.`;
-      }
-
-      case "SECURITY_GUARANTEE_CANCELLED": {
-        const reason = String(params["reason"] || "فسخ معاهده");
-        return `لغو چتر امنیتی: پیمان تضمین امنیت میان ${sourceName} و ${targetName} لغو گردید (${reason}).`;
-      }
-
-      case "EMERGENCY_PROTECTORATE_SIGNED": {
-        return `امضای معاهده تحت‌الحمایگی استعماری: کشور ${sourceName} در ازای پرداخت ۳۰٪ خراج نوبتی و واگذاری استقلال سیاسی، تحت حفاظت کامل نیروی ضربت فوق‌پیشرفته ${targetName} قرار گرفت.`;
-      }
-
-      case "EMERGENCY_PROTECTORATE_CANCELLED": {
-        return `لغو معاهده تحت‌الحمایگی: کشور ${sourceName} رسماً به پیمان استعماری با امپراتوری ${targetName} پایان داد و حاکمیت مستقل خود را اعلام کرد.`;
-      }
-
-      case "GUARANTOR_CASUALTY_COST_INCURRED": {
-        const costNum = Number(params["cost"] || 0);
-        const formattedCost = PersianNumberFormatter.formatCurrency(
-          costNum,
-          true,
-        );
-        return `گزارش ستاد کل: نیروی ضربت اعزامی شما در دفاع از خاک ${targetName} آسیب دید و مبلغ ${formattedCost} هزینه بازسازی به خزانه‌داری تحمیل شد.`;
-      }
-
-      case "FOREIGN_AID_SENT": {
-        return `بسته کمک مالی و اقتصادی از سوی ${sourceName} به خزانه‌داری ${targetName} واریز گردید.`;
-      }
-
-      case "BATTLE_TACTICAL_REPORT": {
-        const customHeadline = params["humanHeadline"]
-          ? String(params["humanHeadline"])
-          : "";
-        if (customHeadline) {
-          return customHeadline;
-        }
-
-        const outcome = String(params["outcome"] || "VICTORY");
-        const ratio = params["ratio"] ? String(params["ratio"]) : "۱";
-        const betrayal = params["betrayalPenalty"]
-          ? ` [جریمه نقض معاهده: -${String(params["betrayalPenalty"])} اعتبار جهانی]`
-          : "";
-
-        if (outcome === "CAPITULATION") {
-          return `به دلیل برتری رزمی ${ratio} برابری ارتش، حاکمیت ${targetName} به طور کامل فروپاشید و تمامی استان‌ها و غنائم تسلیحاتی تسخیر شدند.${betrayal}`;
-        }
-        if (outcome === "VICTORY") {
-          return `ارتش ${sourceName} در نبرد با ${targetName} پیروز شد و استان هدف را تصرف کرد.${betrayal}`;
-        }
-        if (outcome === "DEFENDED") {
-          return `دفاع جانانه: نیروهای مدافع ${sourceName} تهاجم سنگین ارتش ${targetName} را دفع کردند.${betrayal}`;
-        }
-        return `مدافعان ${targetName} با مقاومت در خطوط پدافندی مانع پیشروی ارتش ${sourceName} شدند.${betrayal}`;
-      }
-
-      case "BATTLE_GLOBAL_NEWS": {
-        const outcome = String(params["outcome"] || "VICTORY");
-        if (outcome === "VICTORY") {
-          return `گزارش جبهه نبرد: ارتش ${sourceName} موفق به شکست خطوط دفاعی ${targetName} و تصرف قلمرو گردید.`;
-        }
-        return `گزارش جبهه نبرد: تهاجم ارتش ${sourceName} به مواضع ${targetName} با مقاومت مدافعان دفع شد.`;
-      }
-
-      case "NATION_ANNEXED":
-        return `سقوط قطعی و تاریخی: کشور ${targetName} پس از شکست کامل نظامی، به طور مطلق توسط امپراتوری ${sourceName} تصرف و از جغرافیای جهان حذف شد.`;
-
-      case "NATION_COLLAPSED":
-        return `فروپاشی کامل دولت: کشور ${sourceName} به دلیل از دست دادن تمامی قلمروها به طور کامل منحل گردید.`;
-
-      case "ESPIONAGE_OPERATION": {
-        const role = String(params["role"] || "ATTACKER");
-        const rawMsg = params["details"]
-          ? String(params["details"])
-          : log.message;
-        if (role === "DEFENDER") {
-          return rawMsg;
-        }
-        return `عملیات ویژه اطلاعاتی علیه ${targetName}: ${rawMsg}`;
-      }
-
-      case "ARMS_TRADE": {
-        const amountNum = Number(params["amount"] || 0);
-        const formattedAmount = PersianNumberFormatter.formatCurrency(
-          amountNum,
-          true,
-        );
-        const role = String(params["role"] || "BUYER");
-        if (role === "BUYER") {
-          return `خرید و واردات فوری تسلیحات به ارزش ${formattedAmount} از کشور ${targetName}.`;
-        }
-        return `فروش و صادرات تسلیحات به ارزش ${formattedAmount} به کشور ${targetName}.`;
-      }
-
-      case "ARMS_EXPORT_SUMMARY": {
-        const count = Number(params["buyersCount"] || 0);
-        const profit = Number(params["totalProfit"] || 0);
-        return `مجموعاً ${PersianNumberFormatter.toPersianDigits(count)} کشور از صنایع دفاعی شما تسلیحات خریداری کردند و مبلغ ${PersianNumberFormatter.formatCurrency(profit, true)} سود به خزانه واریز گردید.`;
-      }
-
-      case "TERRITORY_PURCHASED": {
-        const provName = String(params["provinceName"] || "استان");
-        return `معامله و الحاق سرزمینی: کشور ${sourceName} استان (${provName}) را از کشور ${targetName} خریداری و رسماً به قلمرو خود الحاق کرد.`;
-      }
-
-      case "GENERIC_EVENT":
-      default:
-        return log.message || "رویداد ثبت‌شده حاکمیتی";
-    }
+    return NationalEventsLogFormatter.format(
+      log.eventCode,
+      sourceName,
+      targetName,
+      params,
+      log.message,
+    );
   }
 }
