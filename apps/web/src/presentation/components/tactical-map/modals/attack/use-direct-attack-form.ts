@@ -14,6 +14,7 @@ import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
+import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
@@ -209,7 +210,7 @@ export function useDirectAttackForm({
       isCapitulationPredicted: calc.isFullCapitulation,
       phase1Prediction: calc.phase1Missile.phaseWinner,
       phase2Prediction: calc.phase2Air.phaseWinner,
-      phase3Prediction: calc.phase3Ground.phaseWinner,
+      phase3Ground: calc.phase3Ground.phaseWinner,
       valuationRatio: calc.valuationRatio,
       auxiliaryGuarantor: calc.auxiliaryGuarantor,
     };
@@ -253,35 +254,27 @@ export function useDirectAttackForm({
   const handleAutoOptimizeDeploy = useCallback(() => {
     if (!humanNation || !targetNation) return;
 
-    const myMil = humanNation.military;
-    const enemyMil = targetNation.military;
-
-    const enemyAD = enemyMil.airDefense || 0;
-    const optimalDrones = Math.min(myMil.droneMissile || 0, enemyAD * 2);
-
-    const enemyAir = enemyMil.airForce || 0;
-    const optimalAir = Math.min(
-      myMil.airForce || 0,
-      Math.max(1, Math.ceil(enemyAir * 1.35) + 2),
+    const result = AttackDeploymentOptimizer.calculateOptimalDeployment(
+      humanNation,
+      targetNation,
+      gameState?.provinces,
+      targetGuarantorNation,
+      attackType,
+      navalFleetCount,
     );
 
-    const enemyArmor = enemyMil.armor || 0;
-    const optimalArmor = Math.min(
-      myMil.armor || 0,
-      Math.max(1, Math.ceil(enemyArmor * 1.25) + 2),
-    );
-
-    const enemyInf = enemyMil.infantry || 0;
-    const optimalInf = Math.max(
-      1,
-      Math.min(myMil.infantry || 0, Math.ceil(enemyInf * 1.3) + 5),
-    );
-
-    setDronesToLaunch(optimalDrones);
-    setAirForceToDeploy(optimalAir);
-    setArmorToDeploy(optimalArmor);
-    setInfantryToDeploy(optimalInf);
-  }, [humanNation, targetNation]);
+    setDronesToLaunch(result.drones);
+    setAirForceToDeploy(result.airForce);
+    setArmorToDeploy(result.armor);
+    setInfantryToDeploy(result.infantry);
+  }, [
+    humanNation,
+    targetNation,
+    gameState?.provinces,
+    targetGuarantorNation,
+    attackType,
+    navalFleetCount,
+  ]);
 
   const handleExecuteAttack = useCallback(async () => {
     if (!humanNation || !targetNation || isSubmitting || !hasNavalCapacity) {

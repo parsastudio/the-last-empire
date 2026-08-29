@@ -21,6 +21,7 @@ export * from "./ai/ai-emergency-defense-manager";
 export * from "./ai/ai-economic-stance-evaluator";
 
 export * from "./combat/alliance-intervention-evaluator";
+export * from "./combat/attack-deployment-optimizer";
 export * from "./combat/battle-calculator";
 export * from "./combat/battle-casualty-resolver";
 export * from "./combat/battle-execution-engine";
