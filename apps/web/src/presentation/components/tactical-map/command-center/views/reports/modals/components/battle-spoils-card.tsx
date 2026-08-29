@@ -1,15 +1,12 @@
 import React from "react";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { Trophy } from "lucide-react";
+import { BattleSpoilsMetricsGrid } from "./spoils/battle-spoils-metrics-grid";
+import { ConqueredProvincesList } from "./spoils/conquered-provinces-list";
 import {
-  Coins,
-  Globe2,
-  Users,
-  Building2,
-  Sparkles,
-  Trophy,
-  Flag,
-} from "lucide-react";
+  CapturedUnitsGrid,
+  CapturedUnitItem,
+} from "./spoils/captured-units-grid";
 
 interface BattleSpoilsCardProps {
   reportData: BattleFullReportData;
@@ -37,7 +34,7 @@ export function BattleSpoilsCard({
     (humanNationId === reportData.attackerId && isAttackerWin) ||
     (humanNationId === reportData.defenderId && !isAttackerWin);
 
-  const capturedUnitsList = [
+  const capturedUnitsList: CapturedUnitItem[] = [
     {
       label: "پیاده‌نظام اسیرشده",
       count: spoils?.capturedInfantry || 0,
@@ -94,150 +91,13 @@ export function BattleSpoilsCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 font-mono w-full">
-        <div className="bg-card/90 border border-border/80 p-3.5 rounded-2xl space-y-1 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
-            <span className="flex items-center gap-1">
-              <Globe2 size={13} className="text-primary" />
-              <span>مساحت خاک:</span>
-            </span>
-            <span>🗺️</span>
-          </div>
-          <span className="text-base font-black text-foreground block">
-            {PersianNumberFormatter.formatNumberWithCommas(
-              spoils?.conqueredPixels || 0,
-            )}{" "}
-            پیکسل
-          </span>
-          <span className="text-[9px] text-muted-foreground font-sans block">
-            {PersianNumberFormatter.toPersianDigits(
-              spoils?.conqueredProvincesCount || 0,
-            )}{" "}
-            استان
-          </span>
-        </div>
+      <BattleSpoilsMetricsGrid spoils={spoils} />
 
-        <div className="bg-card/90 border border-border/80 p-3.5 rounded-2xl space-y-1 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
-            <span className="flex items-center gap-1">
-              <Users size={13} className="text-primary" />
-              <span>جمعیت افزوده:</span>
-            </span>
-            <span>👥</span>
-          </div>
-          <span className="text-base font-black text-foreground block">
-            {PersianNumberFormatter.formatCompactNumber(
-              spoils?.gainedPopulation || 0,
-            )}{" "}
-            نفر
-          </span>
-          <span className="text-[9px] text-gdp font-sans block">
-            رشد نیروی کار
-          </span>
-        </div>
+      <ConqueredProvincesList
+        provincesNames={spoils?.conqueredProvincesNames}
+      />
 
-        <div className="bg-card/90 border border-border/80 p-3.5 rounded-2xl space-y-1 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
-            <span className="flex items-center gap-1">
-              <Building2 size={13} className="text-gdp" />
-              <span>GDP افزوده:</span>
-            </span>
-            <span>📈</span>
-          </div>
-          <span className="text-base font-black text-gdp block">
-            +
-            {PersianNumberFormatter.formatCurrency(
-              spoils?.gainedGdp || 0,
-              true,
-            )}
-          </span>
-          <span className="text-[9px] text-muted-foreground font-sans block">
-            پایه اقتصادی
-          </span>
-        </div>
-
-        <div className="bg-card/90 border border-border/80 p-3.5 rounded-2xl space-y-1 shadow-sm">
-          <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
-            <span className="flex items-center gap-1">
-              <Coins size={13} className="text-treasury" />
-              <span>غارت خزانه:</span>
-            </span>
-            <span>💰</span>
-          </div>
-          <span className="text-base font-black text-amber-400 block">
-            +
-            {PersianNumberFormatter.formatCurrency(
-              spoils?.lootedTreasury || 0,
-              true,
-            )}
-          </span>
-          <span className="text-[9px] text-muted-foreground font-sans block">
-            واریز به خزانه
-          </span>
-        </div>
-      </div>
-
-      {spoils?.conqueredProvincesNames &&
-        spoils.conqueredProvincesNames.length > 0 && (
-          <div className="bg-card/90 border border-border/80 p-3 rounded-2xl space-y-2 w-full">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <Flag size={13} className="text-primary" />
-              <span>استان‌های تصرف‌شده:</span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {spoils.conqueredProvincesNames.map((name, idx) => {
-                const formattedName = name.startsWith("استان")
-                  ? name
-                  : `استان ${name}`;
-                return (
-                  <span
-                    key={idx}
-                    className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
-                  >
-                    <span>📍</span>
-                    <span>{formattedName}</span>
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-      {capturedUnitsList.length > 0 ? (
-        <div className="bg-card/95 border border-border/80 rounded-2xl overflow-hidden shadow-md w-full">
-          <div className="p-3 border-b border-border/60 bg-secondary/30 flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Sparkles size={14} className="text-amber-400" />
-              <h4 className="text-xs font-black text-foreground">
-                غنائم تسلیحاتی اسیرشده
-              </h4>
-            </div>
-            <span className="text-[9px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-bold">
-              ادغام فوری ⚡
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 w-full">
-            {capturedUnitsList.map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-secondary/40 border border-border/60 p-2.5 rounded-xl flex items-center justify-between"
-              >
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-foreground">
-                  <span className="text-base select-none">{item.icon}</span>
-                  <span className="font-sans truncate">{item.label}</span>
-                </div>
-                <span className="text-xs font-black font-mono text-emerald-400">
-                  +
-                  {PersianNumberFormatter.toPersianDigits(
-                    item.count.toLocaleString("en-US"),
-                  )}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <CapturedUnitsGrid units={capturedUnitsList} />
     </div>
   );
 }

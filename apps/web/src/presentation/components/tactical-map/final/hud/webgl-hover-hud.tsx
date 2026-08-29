@@ -1,19 +1,10 @@
 import React from "react";
-import {
-  Coins,
-  MapPin,
-  Building2,
-  Swords,
-  CheckCircle2,
-  Handshake,
-  Globe,
-  Crown,
-  Landmark,
-  ShieldCheck,
-} from "lucide-react";
+import { Coins, MapPin, Building2, Landmark } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { DiplomaticStance } from "@geopolitics/domain";
+import { HoverHudPositionUtility } from "./utils/hover-hud-position.utility";
+import { HoverStanceBadge } from "./components/hover-stance-badge";
 
 export interface HoverCountryInfo {
   name: string;
@@ -31,34 +22,6 @@ export interface HoverCountryInfo {
   hasSecurityGuarantee?: boolean;
 }
 
-function calculateHudPosition(
-  cursorPos: { x: number; y: number } | null,
-): React.CSSProperties {
-  if (!cursorPos || typeof window === "undefined") {
-    return { left: "1.5rem", bottom: "1.5rem" };
-  }
-
-  const hudWidth = 320;
-  const hudHeight = 145;
-  const offset = 16;
-
-  let left = cursorPos.x + offset;
-  let top = cursorPos.y + offset;
-
-  if (left + hudWidth > window.innerWidth - 20) {
-    left = Math.max(10, cursorPos.x - hudWidth - offset);
-  }
-
-  if (top + hudHeight > window.innerHeight - 20) {
-    top = Math.max(10, cursorPos.y - hudHeight - offset);
-  }
-
-  return {
-    left: `${left}px`,
-    top: `${top}px`,
-  };
-}
-
 interface WebGLHoverHudProps {
   hoverPos: { x: number; y: number } | null;
   hoverData: HoverCountryInfo | null;
@@ -68,59 +31,7 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
   if (!hoverPos || !hoverData) return null;
 
   const flagSymbol = getFlagEmoji(hoverData.flagCode || hoverData.code);
-  const stylePosition = calculateHudPosition(hoverPos);
-
-  const renderStanceBadge = () => {
-    if (hoverData.isOwnCountry) {
-      return (
-        <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-gdp/15 text-gdp border border-gdp/30 px-2 py-0.5 rounded-lg shadow-sm">
-          <Crown size={11} />
-          <span>امپراتوری شما</span>
-        </span>
-      );
-    }
-
-    if (hoverData.hasSecurityGuarantee) {
-      return (
-        <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 px-2 py-0.5 rounded-lg shadow-sm">
-          <ShieldCheck size={11} />
-          <span>چتر امنیتی</span>
-        </span>
-      );
-    }
-
-    switch (hoverData.rawStance) {
-      case "WAR":
-        return (
-          <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-rose-500/20 text-rose-400 border border-rose-500/40 px-2 py-0.5 rounded-lg shadow-sm animate-pulse">
-            <Swords size={11} />
-            <span>وضعیت نبرد</span>
-          </span>
-        );
-      case "STRATEGIC_PARTNERSHIP":
-        return (
-          <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-gdp/20 text-gdp border border-gdp/35 px-2 py-0.5 rounded-lg shadow-sm">
-            <CheckCircle2 size={11} />
-            <span>شراکت استراتژیک</span>
-          </span>
-        );
-      case "NON_AGGRESSION_PACT":
-        return (
-          <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-amber-500/20 text-amber-400 border border-amber-500/35 px-2 py-0.5 rounded-lg shadow-sm">
-            <Handshake size={11} />
-            <span>عدم تخاصم</span>
-          </span>
-        );
-      case "NORMAL_DIPLOMACY":
-      default:
-        return (
-          <span className="flex items-center gap-1 text-[10px] font-bold font-sans bg-secondary/80 text-muted-foreground border border-border/70 px-2 py-0.5 rounded-lg shadow-sm">
-            <Globe size={11} />
-            <span>دیپلماسی عادی</span>
-          </span>
-        );
-    }
-  };
+  const stylePosition = HoverHudPositionUtility.calculatePosition(hoverPos);
 
   return (
     <div
@@ -153,7 +64,13 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
             </div>
           </div>
 
-          <div>{renderStanceBadge()}</div>
+          <div>
+            <HoverStanceBadge
+              isOwnCountry={hoverData.isOwnCountry}
+              hasSecurityGuarantee={hoverData.hasSecurityGuarantee}
+              rawStance={hoverData.rawStance}
+            />
+          </div>
         </div>
 
         {hoverData.regionName && (
