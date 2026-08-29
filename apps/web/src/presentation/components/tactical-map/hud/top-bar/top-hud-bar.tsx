@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { Coins, Building2, Landmark, ShieldAlert, Globe } from "lucide-react";
-import { HumanResourceMetrics } from "@/presentation/hooks/game/use-game-resources";
+import { HumanResourceMetrics } from "@/presentation/selectors/resource-metrics.selector";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface ResourceBadgeProps {
@@ -24,7 +24,7 @@ function ResourceBadge({
 }: ResourceBadgeProps) {
   return (
     <div
-      className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 hover:border-border cursor-default shrink-0"
+      className="flex items-center gap-2 bg-secondary/60 border border-border/80 px-3.5 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary hover:border-border cursor-default shrink-0 shadow-sm"
       title={label}
     >
       <Icon size={14} className={`${iconColor} shrink-0`} />
@@ -61,7 +61,7 @@ function CapacityMeterBadge({
 
   return (
     <div
-      className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 cursor-default shrink-0"
+      className="flex items-center gap-2 bg-secondary/60 border border-border/80 px-3.5 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary cursor-default shrink-0 shadow-sm"
       title={`اشغال زیرساخت زیستی: ${PersianNumberFormatter.toPersianDigits(capacityPct)}%`}
     >
       <Building2 size={14} className={`${style.text} shrink-0`} />
@@ -74,7 +74,7 @@ function CapacityMeterBadge({
             ({formattedPop})
           </span>
         </div>
-        <div className="w-10 h-1.5 bg-background/80 rounded-full overflow-hidden border border-border/40">
+        <div className="w-10 h-1.5 bg-background/90 rounded-full overflow-hidden border border-border/60">
           <div
             className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
             style={{ width: `${Math.min(100, capacityPct)}%` }}
@@ -94,7 +94,7 @@ function StabilityMeterBadge({ stability }: { stability: number }) {
 
   return (
     <div
-      className="flex items-center gap-2 bg-secondary/50 border border-border/70 px-3 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary/80 cursor-default shrink-0"
+      className="flex items-center gap-2 bg-secondary/60 border border-border/80 px-3.5 py-1.5 rounded-2xl font-mono text-xs transition-all hover:bg-secondary cursor-default shrink-0 shadow-sm"
       title={`ثبات سیاسی: ${PersianNumberFormatter.toPersianDigits(stability)}%`}
     >
       <Landmark size={14} className="text-diplomacy shrink-0" />
@@ -102,7 +102,7 @@ function StabilityMeterBadge({ stability }: { stability: number }) {
         <span className={`font-bold ${style.text}`}>
           {PersianNumberFormatter.toPersianDigits(stability)}%
         </span>
-        <div className="w-12 h-1.5 bg-background/80 rounded-full overflow-hidden border border-border/40">
+        <div className="w-12 h-1.5 bg-background/90 rounded-full overflow-hidden border border-border/60">
           <div
             className={`h-full rounded-full transition-all duration-300 ${style.bg}`}
             style={{ width: `${stability}%` }}
@@ -119,12 +119,12 @@ function ThreatRadarBadge({ globalReputation }: { globalReputation: number }) {
 
   return (
     <div
-      className={`flex items-center gap-2 border px-3 py-1.5 rounded-2xl font-mono text-xs transition-all cursor-default shrink-0 ${
+      className={`flex items-center gap-2 border px-3.5 py-1.5 rounded-2xl font-mono text-xs transition-all cursor-default shrink-0 shadow-sm ${
         isHighThreat
           ? "bg-military/15 border-military/50 text-military"
           : isPositive
             ? "bg-gdp/15 border-gdp/50 text-gdp"
-            : "bg-secondary/50 border-border/70 text-muted-foreground"
+            : "bg-secondary/60 border-border/80 text-muted-foreground"
       }`}
       title="شاخص پرستیژ و جایگاه بین‌المللی کشور"
     >
@@ -176,10 +176,10 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       onMouseMove={(e) => e.stopPropagation()}
       onMouseEnter={(e) => e.stopPropagation()}
       onMouseOver={(e) => e.stopPropagation()}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-card/95 backdrop-blur-2xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl flex items-center justify-between gap-3 text-foreground select-none w-max max-w-[95vw] dir-rtl transition-all pointer-events-auto"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-card/95 backdrop-blur-2xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl shadow-black/60 flex items-center justify-between gap-3 text-foreground select-none w-max max-w-[95vw] dir-rtl transition-all pointer-events-auto ring-1 ring-white/5"
       dir="rtl"
     >
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 shrink-0">
+      <div className="flex items-center gap-2.5 overflow-x-auto scrollbar-none py-0.5 shrink-0">
         <ResourceBadge
           icon={Coins}
           iconColor="text-gdp"
@@ -206,7 +206,7 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">
-        <div className="flex flex-col items-center leading-none font-mono px-2.5 py-1 bg-secondary/80 rounded-xl border border-border/80">
+        <div className="flex flex-col items-center leading-none font-mono px-3 py-1 bg-secondary/80 rounded-xl border border-border">
           <span className="text-[9px] text-muted-foreground font-sans">
             نوبت
           </span>
