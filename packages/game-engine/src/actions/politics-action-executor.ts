@@ -5,15 +5,12 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
 import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
 import { PeaceSettlementExecutor } from "@/engine/diplomacy/peace-settlement-executor";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { GameError } from "@/domain/shared/domain-utilities";
 import { SecurityGuaranteeValidator } from "@geopolitics/domain";
-import {
-  AIEmergencyDefenseManager,
-  ReactiveDefenseEvent,
-} from "@/engine/ai/ai-emergency-defense-manager";
 import { DiplomaticProposalExecutor } from "@/engine/diplomacy/executors/diplomatic-proposal-executor";
+import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-declaration-executor";
+import { TreatyTerminationExecutor } from "@/engine/actions/executors/politics/treaty-termination-executor";
+import { ForeignAidExecutor } from "@/engine/actions/executors/politics/foreign-aid-executor";
 
 export interface PoliticsExecutionOutput {
   newState: GameState;
@@ -33,8 +30,6 @@ export class PoliticsActionExecutor {
     const nation =
       state.nations[canonicalSourceId] || state.nations[action.nationId];
     if (!nation) return { newState: state };
-
-    const sourceKey = nation.id;
 
     switch (action.type) {
       case "SIGN_PEACE_SETTLEMENT": {
@@ -88,7 +83,6 @@ export class PoliticsActionExecutor {
           state.nations[canonicalTargetId] ||
           state.nations[action.targetNationId];
         if (!receiver) return { newState: state };
-        const targetKey = receiver.id;
 
         const senderRel =
           nation.relations[canonicalTargetId] ||
@@ -130,262 +124,45 @@ export class PoliticsActionExecutor {
         }
 
         if (action.proposalType === "CANCEL_SECURITY_GUARANTEE") {
-          const newState = {
-            ...state,
-            nations: {
-              ...state.nations,
-              [sourceKey]: {
-                ...nation,
-                securityGuarantorId: null,
-                isEmergencyProtectorate: false,
-              },
-            },
-            turnLogs: [
-              ...state.turnLogs,
-              TurnLogBuilder.createGlobalDiplomacyLog(
-                state.currentTurn,
-                nation.id,
-                receiver.id,
-                "SECURITY_GUARANTEE_CANCELLED",
-                { reason: "فسخ اختیاری" },
-                "INFO",
-              ),
-            ],
-          };
-
-          return {
-            newState,
-            resultData: {
-              proposalType: "CANCEL_SECURITY_GUARANTEE",
-              accepted: true,
-              targetNationId: receiver.id,
-              targetName: receiver.name,
-              targetFlagCode: receiver.flagCode,
-              message: `پیمان چتر امنیتی با کشور ${receiver.name} لغو گردید.`,
-            },
-          };
+          return TreatyTerminationExecutor.handleCancelSecurityGuarantee(
+            state,
+            nation,
+            receiver,
+          );
         }
 
         if (action.proposalType === "CANCEL_TREATY") {
-          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
+          return TreatyTerminationExecutor.handleCancelTreaty(
+            state,
+            nation,
+            receiver,
             senderRel,
-            "CANCEL_TREATY",
-          );
-          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
             receiverRel,
-            "CANCEL_TREATY",
+            this.treatyEvaluator,
           );
-
-          const newReputation = Math.max(-100, nation.globalReputation - 2);
-
-          const cancelLogs = [
-            TurnLogBuilder.createGlobalDiplomacyLog(
-              state.currentTurn,
-              nation.id,
-              receiver.id,
-              "TREATY_CANCELLED",
-              {},
-              "WARNING",
-            ),
-          ];
-
-          const newState = {
-            ...state,
-            turnLogs: [...state.turnLogs, ...cancelLogs],
-            nations: {
-              ...state.nations,
-              [sourceKey]: {
-                ...nation,
-                globalReputation: newReputation,
-                relations: {
-                  ...nation.relations,
-                  [senderRel.targetNationId]: updatedSenderRel,
-                },
-              },
-              [targetKey]: {
-                ...receiver,
-                relations: {
-                  ...receiver.relations,
-                  [receiverRel.targetNationId]: updatedReceiverRel,
-                },
-              },
-            },
-          };
-
-          return {
-            newState,
-            resultData: {
-              proposalType: "CANCEL_TREATY",
-              accepted: true,
-              targetNationId: receiver.id,
-              targetName: receiver.name,
-              targetFlagCode: receiver.flagCode,
-              reputationChange: -2,
-            },
-          };
         }
 
         if (action.proposalType === "DECLARE_WAR") {
-          const hasLandBorder = GeopoliticalReachResolver.hasDirectLandBorder(
+          return WarDeclarationExecutor.execute(
+            state,
             nation,
             receiver,
-            state.provinces,
-          );
-
-          if (!hasLandBorder) {
-            throw new GameError(
-              "INVALID_ACTION",
-              `امکان اعلان جنگ به کشور ${receiver.name} وجود ندارد: عدم وجود مرز زمینی مشترک.`,
-            );
-          }
-
-          const updatedSenderRel = this.treatyEvaluator.applyTreatyStance(
             senderRel,
-            "DECLARE_WAR",
-          );
-          const updatedReceiverRel = this.treatyEvaluator.applyTreatyStance(
             receiverRel,
-            "DECLARE_WAR",
+            this.treatyEvaluator,
           );
-
-          const newReputation = Math.max(-100, nation.globalReputation - 5);
-
-          const warLogs = [
-            TurnLogBuilder.createGlobalWarLog(
-              state.currentTurn,
-              nation.id,
-              receiver.id,
-              "WAR_DECLARED",
-              {},
-              "CRITICAL",
-            ),
-          ];
-
-          let newState: GameState = {
-            ...state,
-            turnLogs: [...state.turnLogs, ...warLogs],
-            nations: {
-              ...state.nations,
-              [sourceKey]: {
-                ...nation,
-                globalReputation: newReputation,
-                warFocusTargetId: receiver.id,
-                relations: {
-                  ...nation.relations,
-                  [senderRel.targetNationId]: updatedSenderRel,
-                },
-              },
-              [targetKey]: {
-                ...receiver,
-                warFocusTargetId: receiver.warFocusTargetId || nation.id,
-                relations: {
-                  ...receiver.relations,
-                  [receiverRel.targetNationId]: updatedReceiverRel,
-                },
-              },
-            },
-          };
-
-          let defenseEvent: ReactiveDefenseEvent = { type: "NONE" };
-
-          if (receiver.isAi) {
-            const liveReceiver = newState.nations[targetKey]!;
-            const liveNation = newState.nations[sourceKey]!;
-            const reactiveResult =
-              AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
-                newState,
-                liveNation,
-                liveReceiver,
-              );
-            newState = reactiveResult.newState;
-            defenseEvent = reactiveResult.defenseEvent;
-          }
-
-          return {
-            newState,
-            resultData: {
-              proposalType: "DECLARE_WAR",
-              accepted: true,
-              targetNationId: receiver.id,
-              targetName: receiver.name,
-              targetFlagCode: receiver.flagCode,
-              defenseEvent,
-            },
-          };
         }
 
         if (action.proposalType === "SEND_FOREIGN_AID") {
-          const targetGdp = getNationGdp(receiver, state.provinces);
-          const costDeduction =
-            TreatyEvaluator.calculateForeignAidCost(targetGdp);
-
-          if (nation.treasury < costDeduction) {
-            return { newState: state };
-          }
-
-          const updatedReceiverRel = {
-            ...receiverRel,
-            alignment: Math.min(100, (receiverRel.alignment ?? 0) + 25),
-            tension: Math.max(0, (receiverRel.tension ?? 10) - 15),
-          };
-
-          const updatedSenderRel = {
-            ...senderRel,
-            alignment: Math.min(100, (senderRel.alignment ?? 0) + 25),
-            tension: Math.max(0, (senderRel.tension ?? 10) - 15),
-          };
-
-          const senderTargetKey = senderRel.targetNationId || canonicalTargetId;
-          const receiverTargetKey =
-            receiverRel.targetNationId || canonicalSourceId;
-
-          const aidLogs = [
-            TurnLogBuilder.createGlobalDiplomacyLog(
-              state.currentTurn,
-              nation.id,
-              receiver.id,
-              "FOREIGN_AID_SENT",
-              { amount: costDeduction },
-              "INFO",
-            ),
-          ];
-
-          const newState = {
-            ...state,
-            turnLogs: [...state.turnLogs, ...aidLogs],
-            nations: {
-              ...state.nations,
-              [sourceKey]: {
-                ...nation,
-                treasury: Math.max(0, nation.treasury - costDeduction),
-                globalReputation: Math.min(100, nation.globalReputation + 1),
-                relations: {
-                  ...nation.relations,
-                  [senderTargetKey]: updatedSenderRel,
-                },
-              },
-              [targetKey]: {
-                ...receiver,
-                treasury: receiver.treasury + costDeduction,
-                relations: {
-                  ...receiver.relations,
-                  [receiverTargetKey]: updatedReceiverRel,
-                },
-              },
-            },
-          };
-
-          return {
-            newState,
-            resultData: {
-              proposalType: "SEND_FOREIGN_AID",
-              accepted: true,
-              targetNationId: receiver.id,
-              targetName: receiver.name,
-              targetFlagCode: receiver.flagCode,
-              reputationChange: 1,
-            },
-          };
+          return ForeignAidExecutor.execute(
+            state,
+            nation,
+            receiver,
+            senderRel,
+            receiverRel,
+            canonicalTargetId,
+            canonicalSourceId,
+          );
         }
 
         const transientProposal = {
