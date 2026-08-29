@@ -16,7 +16,6 @@ import {
   BattleFullReportData,
   BattleSpoilsDetails,
 } from "@/domain/reports/combat-report.schema";
-import { AIEmergencyDefenseManager } from "@/engine/ai/ai-emergency-defense-manager";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -30,38 +29,15 @@ export class BattleExecutionEngine {
       action.targetNationId,
     );
 
-    let baseAttacker =
+    const attacker =
       state.nations[canonicalAttackerId] || state.nations[action.nationId];
-    let baseDefender =
+    const defender =
       state.nations[canonicalDefenderId] ||
       state.nations[action.targetNationId];
 
-    if (
-      !baseAttacker ||
-      !baseDefender ||
-      !baseAttacker.isAlive ||
-      !baseDefender.isAlive
-    ) {
+    if (!attacker || !defender || !attacker.isAlive || !defender.isAlive) {
       return { state, reportData: null };
     }
-
-    let workingState = state;
-    if (baseDefender.isAi) {
-      const reactiveResult =
-        AIEmergencyDefenseManager.handleReactiveDefenseProcurement(
-          workingState,
-          baseAttacker,
-          baseDefender,
-        );
-      workingState = reactiveResult.newState;
-    }
-
-    const attacker =
-      workingState.nations[canonicalAttackerId] ||
-      workingState.nations[action.nationId]!;
-    const defender =
-      workingState.nations[canonicalDefenderId] ||
-      workingState.nations[action.targetNationId]!;
 
     const currentStance = NationRelationResolver.getStance(
       attacker.relations,
@@ -71,10 +47,10 @@ export class BattleExecutionEngine {
       DiplomaticBetrayalCalculator.calculatePenalty(currentStance);
 
     const guarantorNation = defender.securityGuarantorId
-      ? workingState.nations[
+      ? state.nations[
           CountryRegistry.resolveCanonicalId(defender.securityGuarantorId)
         ] ||
-        workingState.nations[defender.securityGuarantorId] ||
+        state.nations[defender.securityGuarantorId] ||
         null
       : null;
 
@@ -85,12 +61,12 @@ export class BattleExecutionEngine {
       action.infantryToDeploy,
       action.armorToDeploy || 0,
       action.airForceToDeploy,
-      workingState.provinces,
+      state.provinces,
       guarantorNation,
     );
 
     const conquest = ProvinceConquestHandler.handleConquest(
-      workingState.provinces,
+      state.provinces,
       attacker.id,
       defender.id,
       calcResult.isAttackerVictory,
@@ -170,7 +146,7 @@ export class BattleExecutionEngine {
     });
 
     const baseNations = {
-      ...workingState.nations,
+      ...state.nations,
       [attacker.id]: updatedAttacker,
       [defender.id]: updatedDefender,
     };
@@ -185,7 +161,7 @@ export class BattleExecutionEngine {
 
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
     const targetProvinceObj = action.targetProvinceId
-      ? workingState.provinces[action.targetProvinceId.toString()] || null
+      ? state.provinces[action.targetProvinceId.toString()] || null
       : null;
 
     let gainedPop = 0;
@@ -241,12 +217,12 @@ export class BattleExecutionEngine {
     };
 
     const battleLogs = BattleLogFactory.createBattleLogs(
-      workingState.currentTurn,
+      state.currentTurn,
       updatedAttacker,
       updatedDefender,
       calcResult,
       betrayalText,
-      workingState.humanNationId,
+      state.humanNationId,
       !isDefenderAlive,
       targetProvinceObj,
       attackType,
@@ -254,25 +230,21 @@ export class BattleExecutionEngine {
     );
 
     const interventionLogs = BattleLogFactory.createInterventionLogs(
-      workingState.currentTurn,
+      state.currentTurn,
       intervention,
       updatedAttacker,
       updatedDefender,
-      workingState.humanNationId,
+      state.humanNationId,
     );
 
-    const updatedLogs = [
-      ...workingState.turnLogs,
-      ...battleLogs,
-      ...interventionLogs,
-    ];
+    const updatedLogs = [...state.turnLogs, ...battleLogs, ...interventionLogs];
 
     if (conquest.conqueredProvincesList.length > 0) {
       BitPackedGridState.getInstance().markDirty();
     }
 
     const nextState: GameState = {
-      ...workingState,
+      ...state,
       provinces: conquest.updatedProvinces,
       nations: intervention.updatedNations,
       turnLogs: updatedLogs,

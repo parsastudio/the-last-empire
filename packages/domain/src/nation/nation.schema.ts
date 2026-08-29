@@ -37,6 +37,7 @@ export const NationSchema = z.object({
   activeModifiers: z.array(ActiveModifierSchema),
   globalReputation: z.number().min(-100).max(100),
   executedEspionageTiers: z.array(z.string()).default([]),
+  attackedTargetIdsThisTurn: z.array(z.string()).default([]),
   warFocusTargetId: z.string().nullable().optional(),
   postWarCooldownTurns: z.number().nonnegative().default(0),
   doctrine: AiDoctrineTypeSchema.default("DOMESTIC_INDUSTRIALIST"),

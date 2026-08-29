@@ -39,6 +39,7 @@ export class NationLivenessManager {
           warFocusTargetId: null,
           recruitmentQueue: [],
           executedEspionageTiers: [],
+          attackedTargetIdsThisTurn: [],
           postWarCooldownTurns: 0,
           military: {
             ...nation.military,

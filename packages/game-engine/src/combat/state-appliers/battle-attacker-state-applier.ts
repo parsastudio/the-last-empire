@@ -96,6 +96,11 @@ export class BattleAttackerStateApplier {
           ? attacker.postWarCooldownTurns || 0
           : 0;
 
+    const currentAttackedTargets = attacker.attackedTargetIdsThisTurn || [];
+    const updatedAttackedTargets = Array.from(
+      new Set([...currentAttackedTargets, cleanDefenderId, defenderId]),
+    );
+
     return {
       ...attacker,
       government: {
@@ -111,6 +116,7 @@ export class BattleAttackerStateApplier {
       relations: updatedRelations,
       warFocusTargetId: nextWarFocus,
       postWarCooldownTurns: postWarCooldown,
+      attackedTargetIdsThisTurn: updatedAttackedTargets,
     };
   }
 }
