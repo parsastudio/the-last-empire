@@ -93,9 +93,7 @@ export class AIWarDeclarationEvaluator {
           provincesMap,
         );
 
-      const targetGdp = !targetNation.isAi
-        ? getNationGdp(targetNation, provincesMap)
-        : undefined;
+      const targetGdp = getNationGdp(targetNation, provincesMap);
 
       const warUtility = UtilityDecisionEngine.calculateWarUtility(
         nation,
@@ -103,6 +101,7 @@ export class AIWarDeclarationEvaluator {
         vector,
         sourceGdp,
         targetGdp,
+        allNations,
       );
 
       if (warUtility > highestWarUtility) {

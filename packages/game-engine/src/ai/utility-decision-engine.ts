@@ -24,10 +24,11 @@ export class UtilityDecisionEngine {
     source: Nation,
     target: Nation,
     vector: GeopoliticalVector,
-    sourceGdp?: number,
+    _sourceGdp?: number,
     targetGdp?: number,
+    allNations?: Record<string, Nation>,
   ): number {
-    if (vector.tension < 25) {
+    if (vector.tension < 20) {
       return -100;
     }
 
@@ -39,35 +40,55 @@ export class UtilityDecisionEngine {
       return -100;
     }
 
-    if (
-      !target.isAi &&
-      sourceGdp !== undefined &&
-      targetGdp !== undefined &&
-      targetGdp > 0
-    ) {
-      if (sourceGdp > 2.0 * targetGdp) {
-        return -100;
+    let rawPowerAdvantage = 0;
+    if (vector.powerRatio > 1.0) {
+      rawPowerAdvantage = -Math.round((vector.powerRatio - 1.0) * 60);
+    } else {
+      rawPowerAdvantage = Math.round((1.0 - vector.powerRatio) * 45);
+    }
+
+    let opportunismBonus = 0;
+    if (target.relations) {
+      const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
+      for (const [relId, rel] of Object.entries(target.relations)) {
+        if (rel.stance === "WAR") {
+          const cRel = CountryRegistry.resolveCanonicalId(relId);
+          if (cRel !== sourceCanonical) {
+            const other = allNations
+              ? allNations[cRel] || allNations[relId]
+              : null;
+            if (!other || other.isAlive) {
+              opportunismBonus += 25;
+              break;
+            }
+          }
+        }
       }
     }
 
-    const tensionScore = vector.tension * 0.7;
-    const rawPowerAdvantage =
-      vector.powerRatio < 0.9 ? (1.0 - vector.powerRatio) * 50 : -20;
+    if (target.government.stability < 35) {
+      opportunismBonus += 20;
+    }
 
-    let opportunismMultiplier = 0.0;
+    const tGdp = targetGdp ?? 50_000_000_000;
+    if (target.treasury <= 0 || target.nationalDebt >= tGdp * 0.4) {
+      opportunismBonus += 15;
+    }
+
+    let proximityMultiplier = 1.0;
     let distancePenalty = 0;
 
     switch (vector.proximityTier) {
       case "DIRECT_NEIGHBOR":
-        opportunismMultiplier = 1.0;
+        proximityMultiplier = 1.0;
         distancePenalty = 0;
         break;
       case "REGIONAL_MARITIME":
-        opportunismMultiplier = 0.5;
+        proximityMultiplier = 0.7;
         distancePenalty = -10;
         break;
       case "DISTANT_OCEAN":
-        opportunismMultiplier = 0.1;
+        proximityMultiplier = 0.3;
         distancePenalty = -30;
         break;
       default:
@@ -76,15 +97,19 @@ export class UtilityDecisionEngine {
 
     const powerAdvantageScore =
       rawPowerAdvantage > 0
-        ? Math.round(rawPowerAdvantage * opportunismMultiplier)
+        ? Math.round(rawPowerAdvantage * proximityMultiplier)
         : rawPowerAdvantage;
 
-    const alignmentDampener = vector.alignment * 0.4;
-    const stabilityScore = ((source.government.stability - 50) / 50) * 15;
+    const tensionScore = Math.round(vector.tension * 0.5);
+    const alignmentDampener = Math.round(vector.alignment * 0.4);
+    const stabilityScore = Math.round(
+      ((source.government.stability - 50) / 50) * 15,
+    );
 
     return Math.round(
       tensionScore +
         powerAdvantageScore +
+        opportunismBonus +
         distancePenalty -
         alignmentDampener +
         stabilityScore,
