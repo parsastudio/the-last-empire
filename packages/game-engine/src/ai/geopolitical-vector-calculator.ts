@@ -147,7 +147,32 @@ export class GeopoliticalVectorCalculator {
       }
     }
 
-    const powerRatio = Number((tPower / sPower).toFixed(2));
+    let activeEnemyWarsCount = 0;
+    if (allNations && target.relations) {
+      const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
+      for (const [otherId, otherRel] of Object.entries(target.relations)) {
+        if (otherRel.stance === "WAR") {
+          const canonicalOther = CountryRegistry.resolveCanonicalId(otherId);
+          if (canonicalOther !== sourceCanonical) {
+            const otherNation =
+              allNations[canonicalOther] || allNations[otherId];
+            if (otherNation && otherNation.isAlive) {
+              activeEnemyWarsCount++;
+            }
+          }
+        }
+      }
+    }
+
+    const effectiveTargetPower =
+      activeEnemyWarsCount > 0
+        ? Math.max(
+            Math.round(tPower * 0.2),
+            Math.round(tPower / (1 + activeEnemyWarsCount * 0.75)),
+          )
+        : tPower;
+
+    const powerRatio = Number((effectiveTargetPower / sPower).toFixed(2));
 
     let vulnerabilityBonus = 0;
     if (target.warFocusTargetId && target.warFocusTargetId !== source.id) {
@@ -177,9 +202,17 @@ export class GeopoliticalVectorCalculator {
     let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
     if (alignment >= 25 && tension < 40) {
       posture = "NATURAL_ALLY";
-    } else if (alignment < 0 && tension >= 45 && sPower >= tPower) {
+    } else if (
+      alignment < 0 &&
+      tension >= 45 &&
+      sPower >= effectiveTargetPower
+    ) {
       posture = "OPPORTUNISTIC_PREDATOR";
-    } else if (alignment < 0 && tension >= 45 && sPower < tPower) {
+    } else if (
+      alignment < 0 &&
+      tension >= 45 &&
+      sPower < effectiveTargetPower
+    ) {
       posture = "WARY_BUFFER";
     }
 
