@@ -154,7 +154,6 @@ export function GameOverDialogWrapper({
       finalGdp,
       finalPopulation,
       conqueredPixels,
-      isPlayerDefeated,
     };
   }, [gameState]);
 

@@ -43,13 +43,18 @@ export function MilitaryAlliedProcurementTab({
     );
 
     return Object.values(nationsMap)
-      .filter((n) => n.id !== nation.id && n.isAlive)
-      .map((n) => {
+      .filter((n) => {
+        if (n.id === nation.id || !n.isAlive) return false;
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
         const rel = nation.relations[canonical] || nation.relations[n.id];
         const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
         const tension = rel ? (rel.tension ?? 10) : 10;
-        const isEligible = stance !== "WAR" && tension < 50;
+        return stance !== "WAR" && tension < 50;
+      })
+      .map((n) => {
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
+        const rel = nation.relations[canonical] || nation.relations[n.id];
+        const tension = rel ? (rel.tension ?? 10) : 10;
         const rank = rankLookup.get(canonical) ?? 99;
 
         return {
@@ -57,13 +62,10 @@ export function MilitaryAlliedProcurementTab({
           name: n.name,
           flagCode: n.flagCode || "IR",
           techLevel: n.military.techLevel,
-          alignment: rel ? (rel.alignment ?? 0) : 0,
           tension,
           rank,
-          isEligible,
         };
       })
-      .filter((c) => c.isEligible)
       .sort((a, b) => {
         if (b.techLevel !== a.techLevel) return b.techLevel - a.techLevel;
         return a.rank - b.rank;

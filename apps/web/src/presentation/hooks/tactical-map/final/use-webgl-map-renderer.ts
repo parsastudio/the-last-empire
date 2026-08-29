@@ -28,29 +28,8 @@ export function useWebGLMapRenderer({
   const paletteTextureRef = useRef<WebGLTexture | null>(null);
   const gdpTextureRef = useRef<WebGLTexture | null>(null);
   const hoveredGpuIndexRef = useRef<number>(hoveredGpuIndex);
-  const isDirtyRef = useRef<boolean>(true);
   const lastVersionRef = useRef<number>(-1);
   const animFrameIdRef = useRef<number | null>(null);
-
-  const lastRenderedStateRef = useRef({
-    posX: 0,
-    posY: 0,
-    scale: 0,
-    width: 0,
-    height: 0,
-    layer: activeLayer,
-    hoveredGpuIndex: 0,
-  });
-
-  const requestRender = useCallback(() => {
-    isDirtyRef.current = true;
-    if (animFrameIdRef.current === null) {
-      animFrameIdRef.current = requestAnimationFrame(() => {
-        animFrameIdRef.current = null;
-        renderSingleFrame();
-      });
-    }
-  }, []);
 
   const renderSingleFrame = useCallback(() => {
     if (!rendererRef.current || !gl) return;
@@ -78,19 +57,16 @@ export function useWebGLMapRenderer({
       activeLayer,
       hoveredGpuIndexRef.current,
     );
-
-    lastRenderedStateRef.current = {
-      posX: pos.x,
-      posY: pos.y,
-      scale,
-      width: dimensions.width,
-      height: dimensions.height,
-      layer: activeLayer,
-      hoveredGpuIndex: hoveredGpuIndexRef.current,
-    };
-
-    isDirtyRef.current = false;
   }, [gl, dimensions, positionRef, scaleRef, activeLayer]);
+
+  const requestRender = useCallback(() => {
+    if (animFrameIdRef.current === null) {
+      animFrameIdRef.current = requestAnimationFrame(() => {
+        animFrameIdRef.current = null;
+        renderSingleFrame();
+      });
+    }
+  }, [renderSingleFrame]);
 
   useEffect(() => {
     hoveredGpuIndexRef.current = hoveredGpuIndex;
@@ -138,7 +114,7 @@ export function useWebGLMapRenderer({
     lastVersionRef.current = gridState.getVersion();
 
     requestRender();
-  }, [gl, requestRender]);
+  }, [gl, provincesMap, requestRender]);
 
   useEffect(() => {
     if (!gl || !paletteTextureRef.current) return;

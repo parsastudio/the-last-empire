@@ -163,14 +163,6 @@ export function useMapGesture(
     };
   }, [containerRef, calculateZoom]);
 
-  const handleWheel = useCallback(
-    (e: React.WheelEvent<HTMLDivElement>) => {
-      const rect = e.currentTarget.getBoundingClientRect();
-      calculateZoom(e.deltaY, rect, e.clientX, e.clientY);
-    },
-    [calculateZoom],
-  );
-
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.button !== 0) return;
@@ -236,7 +228,6 @@ export function useMapGesture(
     scaleRef,
     isDraggingRef,
     hasDraggedRef,
-    handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
