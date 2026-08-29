@@ -136,31 +136,6 @@ export class UtilityDecisionEngine {
     return Math.round(alignmentScore - tensionPenalty);
   }
 
-  public static calculatePeaceUtility(
-    source: Nation,
-    vector: GeopoliticalVector,
-  ): number {
-    const exhaustionScore =
-      source.government.stability < 30
-        ? (30 - source.government.stability) * 1.5
-        : -45;
-
-    const weaknessScore =
-      vector.powerRatio > 1.8 ? (vector.powerRatio - 1.0) * 35 : -45;
-
-    const reachBonus = !vector.isNeighbor && !vector.isNavalReachable ? 40 : 0;
-    const tensionDampener = vector.tension * 0.4;
-    const revanchismDampener = vector.reasons.revanchismPenalty * 0.8;
-
-    return Math.round(
-      exhaustionScore +
-        weaknessScore +
-        reachBonus -
-        tensionDampener -
-        revanchismDampener,
-    );
-  }
-
   public static evaluateAcceptance(
     proposalType: DiplomaticProposalType,
     receiver: Nation,

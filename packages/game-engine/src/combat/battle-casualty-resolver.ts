@@ -16,7 +16,6 @@ export interface CasualtyResolutionInput {
   rawDefArmorLost: number;
   rawDefAirDefenseLost: number;
   rawDefAirLoss: number;
-  isFullCapitulation?: boolean;
 }
 
 export interface CasualtyResolutionOutput {

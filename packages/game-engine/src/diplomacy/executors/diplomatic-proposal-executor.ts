@@ -1,25 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { DiplomaticProposalAction } from "@/domain/game/action.schema";
 import {
   Nation,
-  CountryRegistry,
   TurnLogBuilder,
   GameError,
   SecurityGuaranteeValidator,
 } from "@geopolitics/domain";
-import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
-import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
-import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import {
-  AIEmergencyDefenseManager,
-  ReactiveDefenseEvent,
-} from "@/engine/ai/ai-emergency-defense-manager";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export class DiplomaticProposalExecutor {
-  private static treatyEvaluator = new TreatyEvaluator();
-
   public static handleEmergencyProtectorate(
     state: GameState,
     nation: Nation,

@@ -8,9 +8,8 @@ import {
   Radio,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { CoalitionAlertData } from "@/presentation/stores/use-ui-store";
 
 interface CoalitionAlertModalProps {
@@ -27,8 +26,6 @@ export function CoalitionAlertModal({
   onClose,
 }: CoalitionAlertModalProps) {
   if (!isOpen || !data) return null;
-
-  const targetFlag = getFlagEmoji(data.targetFlagCode || data.targetNationId);
 
   const memberNations = data.memberIds
     .map((id) => {

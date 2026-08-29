@@ -7,10 +7,10 @@ import {
   CountryDefaultsUtility,
   getNationGdp,
   NationGettersUtility,
+  PersianNumberFormatter,
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
   NationPresentationMapper,
   getDoctrineLabel,
@@ -166,7 +166,6 @@ export function resolveProfileRelation(
         ? liveNation.government.type
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
-      alignment,
       tension,
       doctrineLabel,
       guarantorName: guarantorNation?.name,

@@ -4,7 +4,6 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import { AllianceInterventionEvaluator } from "@/engine/combat/alliance-intervention-evaluator";
 import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
 import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
@@ -182,9 +181,6 @@ export class BattleExecutionEngine {
       }
     }
 
-    const intervention =
-      AllianceInterventionEvaluator.evaluateAllianceInterventions(baseNations);
-
     const betrayalText = betrayalResult.hasBetrayed ? "BETRAYAL" : "";
     const targetProvinceObj = action.targetProvinceId
       ? state.provinces[action.targetProvinceId.toString()] || null
@@ -255,20 +251,7 @@ export class BattleExecutionEngine {
       spoilsData,
     );
 
-    const interventionLogs = BattleLogFactory.createInterventionLogs(
-      state.currentTurn,
-      intervention,
-      updatedAttacker,
-      updatedDefender,
-      state.humanNationId,
-    );
-
-    const updatedLogs = [
-      ...state.turnLogs,
-      ...battleLogs,
-      ...interventionLogs,
-      ...guarantorLogs,
-    ];
+    const updatedLogs = [...state.turnLogs, ...battleLogs, ...guarantorLogs];
 
     if (conquest.conqueredProvincesList.length > 0) {
       BitPackedGridState.getInstance().markDirty();
@@ -277,7 +260,7 @@ export class BattleExecutionEngine {
     const nextState: GameState = {
       ...state,
       provinces: conquest.updatedProvinces,
-      nations: intervention.updatedNations,
+      nations: baseNations,
       turnLogs: updatedLogs,
     };
 

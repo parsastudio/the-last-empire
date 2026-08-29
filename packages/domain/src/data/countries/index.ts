@@ -6,11 +6,7 @@ import {
 import { CountryDefaultsUtility } from "@/domain/data/countries/country-defaults.utility";
 import { COUNTRY_IDENTITY_MAP } from "@/domain/data/countries/sources/country-identity.data";
 import { COUNTRY_DEMOGRAPHICS_MAP } from "@/domain/data/countries/sources/country-demographics.data";
-import {
-  COUNTRY_GDP_MAP,
-  COUNTRY_NOMINAL_GDP_MAP,
-  COUNTRY_PPP_GDP_MAP,
-} from "@/domain/data/countries/sources/country-economy.data";
+import { COUNTRY_GDP_MAP } from "@/domain/data/countries/sources/country-economy.data";
 import { COUNTRY_MILITARY_MAP } from "@/domain/data/countries/sources/country-military.data";
 
 export type { CountryProfile };
@@ -21,7 +17,5 @@ export {
   COUNTRY_IDENTITY_MAP,
   COUNTRY_DEMOGRAPHICS_MAP,
   COUNTRY_GDP_MAP,
-  COUNTRY_NOMINAL_GDP_MAP,
-  COUNTRY_PPP_GDP_MAP,
   COUNTRY_MILITARY_MAP,
 };

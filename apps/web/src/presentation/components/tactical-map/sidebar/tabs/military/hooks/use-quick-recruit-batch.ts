@@ -16,9 +16,6 @@ export interface QuickUnitBatchInfo {
   unitPrice: number;
   batchQuantity: number;
   batchCost: number;
-  buildTurns: number;
-  requiredTechLevel: number;
-  isUnlocked: boolean;
   canAfford: boolean;
   remainingRoom: number;
   isCapReached: boolean;
@@ -105,7 +102,6 @@ export function useQuickRecruitBatch({
       const stat = MILITARY_UNIT_STATS[type];
       const unitPrice = stat.moneyCost;
       const q = quotas[type];
-      const isUnlocked = true;
 
       const targetBatchQuantity =
         baselineTenPercent > 0 && unitPrice > 0
@@ -141,9 +137,6 @@ export function useQuickRecruitBatch({
         unitPrice,
         batchQuantity: displayQuantity,
         batchCost,
-        buildTurns: stat.buildTurns,
-        requiredTechLevel: stat.requiredTechLevel,
-        isUnlocked,
         canAfford,
         remainingRoom: q.remainingRoom,
         isCapReached,
@@ -153,7 +146,7 @@ export function useQuickRecruitBatch({
 
   const handleBuyBatch = useCallback(
     async (info: QuickUnitBatchInfo) => {
-      if (!info.isUnlocked || !info.canAfford || info.isCapReached) return;
+      if (!info.canAfford || info.isCapReached) return;
 
       TacticalSound.playCoinSound();
 

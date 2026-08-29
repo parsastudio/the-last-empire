@@ -19,7 +19,6 @@ import { NationGettersUtility } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
-  isFullCapitulation: boolean;
   valuationRatio: number;
   dronesUsed: number;
   attackerCasualties: CasualtyMetrics;
@@ -228,8 +227,6 @@ export class BattleCalculator {
       (attackerDeployedPower / defenderTotalPower).toFixed(2),
     );
 
-    const isFullCapitulation = false;
-
     const casualty = BattleCasualtyResolver.resolve({
       deployedInfantry,
       deployedArmor,
@@ -246,7 +243,6 @@ export class BattleCalculator {
       rawDefArmorLost: groundPhase.rawDefArmorLost,
       rawDefAirDefenseLost: missilePhase.rawDefAirDefenseLost,
       rawDefAirLoss: airPhase.rawDefAirLoss,
-      isFullCapitulation,
     });
 
     if (auxiliaryGuarantor && effectiveDefenseBudget > 0) {
@@ -347,7 +343,6 @@ export class BattleCalculator {
 
     return {
       isAttackerVictory: groundPhase.isAttackerVictory,
-      isFullCapitulation,
       valuationRatio,
       dronesUsed: deployedDrones,
       attackerCasualties: casualty.attackerCasualties,

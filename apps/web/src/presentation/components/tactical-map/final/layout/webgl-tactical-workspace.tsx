@@ -226,7 +226,7 @@ export function WebGLTacticalWorkspace({
         scaleRef={scaleRef}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
-        onSelectBuyProvinceContext={(_iso3, pid) =>
+        onSelectBuyProvinceContext={(_, pid) =>
           handleSelectBuyProvinceContext(pid)
         }
       />

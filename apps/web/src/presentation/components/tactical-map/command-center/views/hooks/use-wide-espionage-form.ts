@@ -57,11 +57,6 @@ export function useWideEspionageForm({
           rank,
           gdp: getNationGdp(n, provincesMap),
           militaryTechLevel: n.military.techLevel,
-          industrialLevel: n.industrialLevel,
-          infrastructureLevel: NationGettersUtility.getInfrastructureLevel(
-            n.id,
-            provincesMap,
-          ),
         };
       })
       .filter(

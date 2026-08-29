@@ -12,10 +12,9 @@ import {
   LucideIcon,
   TrendingUp,
 } from "lucide-react";
-import { UnitType } from "@geopolitics/domain";
+import { UnitType, PersianNumberFormatter } from "@geopolitics/domain";
 import { AlliedUnitProcurementInfo } from "@/presentation/components/tactical-map/command-center/views/military/hooks/use-allied-arms-procurement";
 import { FloatingFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 const UNIT_ICONS: Record<
   UnitType,

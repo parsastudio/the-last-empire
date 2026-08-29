@@ -1,7 +1,7 @@
 import React from "react";
 import { Search, Binary } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { PersianNumberFormatter } from "@geopolitics/domain";
 
 export interface EspionageTargetOption {
   id: string;
@@ -10,8 +10,6 @@ export interface EspionageTargetOption {
   rank: number;
   gdp: number;
   militaryTechLevel: number;
-  industrialLevel: number;
-  infrastructureLevel: number;
 }
 
 interface EspionageTargetSelectorProps {

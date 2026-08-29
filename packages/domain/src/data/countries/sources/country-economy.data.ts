@@ -1,4 +1,4 @@
-export const COUNTRY_NOMINAL_GDP_MAP: Record<string, number> = {
+const COUNTRY_NOMINAL_GDP_MAP: Record<string, number> = {
   USA: 30_767_000_000_000,
   CHN: 19_626_000_000_000,
   DEU: 5_048_000_000_000,
@@ -98,7 +98,7 @@ export const COUNTRY_NOMINAL_GDP_MAP: Record<string, number> = {
   SOL: 1_700_000_000,
 };
 
-export const COUNTRY_PPP_GDP_MAP: Record<string, number> = {
+const COUNTRY_PPP_GDP_MAP: Record<string, number> = {
   USA: 30_767_000_000_000,
   CHN: 41_241_000_000_000,
   IND: 17_257_000_000_000,

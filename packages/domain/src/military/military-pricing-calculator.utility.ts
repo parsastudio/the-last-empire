@@ -2,7 +2,6 @@ import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.confi
 import { UnitType } from "@/domain/military/military.schema";
 
 export class MilitaryPricingCalculator {
-  public static readonly BASE_IMPORT_MULTIPLIER = 1.0;
   public static readonly MAX_IMPORT_TECH_MULTIPLIER = 3.0;
   public static readonly TECH_STEP_SURCHARGE_RATE = 0.05;
 
@@ -38,21 +37,6 @@ export class MilitaryPricingCalculator {
       sellerTechLevel,
     );
     return Math.floor(basePrice * techMultiplier);
-  }
-
-  public static calculateTotalCost(
-    unitType: UnitType,
-    quantity: number,
-  ): number {
-    return this.calculateUnitTypePrice(unitType) * quantity;
-  }
-
-  public static calculateMaxAffordable(
-    treasury: number,
-    unitPrice: number,
-  ): number {
-    if (unitPrice <= 0) return 0;
-    return Math.floor(treasury / unitPrice);
   }
 
   public static calculateTotalArmyValuation(military: {

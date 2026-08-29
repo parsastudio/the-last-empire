@@ -10,12 +10,11 @@ import {
   ShieldCheck,
   LucideIcon,
 } from "lucide-react";
-import { UnitType } from "@geopolitics/domain";
+import { UnitType, PersianNumberFormatter } from "@geopolitics/domain";
 import {
   QuickUnitBatchInfo,
   FloatingFeedback,
 } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 const UNIT_ICONS: Record<
   UnitType,
