@@ -1,11 +1,14 @@
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
   conqueredPixels: number;
   remainingDefenderProvinces: Province[];
   conqueredProvincesList: Province[];
+  totalDefenderGdpBefore: number;
+  conqueredProvincesGdp: number;
 }
 
 export class ProvinceConquestHandler {
@@ -27,7 +30,13 @@ export class ProvinceConquestHandler {
         CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
     );
 
+    let totalDefenderGdpBefore = 0;
+    for (let i = 0; i < defenderProvincesBefore.length; i++) {
+      totalDefenderGdpBefore += getProvinceGdp(defenderProvincesBefore[i]!);
+    }
+
     let conqueredPixels = 0;
+    let conqueredProvincesGdp = 0;
     const conqueredProvincesList: Province[] = [];
 
     if (isAttackerVictory && defenderProvincesBefore.length > 0) {
@@ -74,6 +83,7 @@ export class ProvinceConquestHandler {
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
           conqueredPixels = targetProv.pixelCount;
+          conqueredProvincesGdp = getProvinceGdp(targetProv);
           conqueredProvincesList.push(conqueredProv);
         }
       }
@@ -89,6 +99,8 @@ export class ProvinceConquestHandler {
       conqueredPixels,
       remainingDefenderProvinces,
       conqueredProvincesList,
+      totalDefenderGdpBefore,
+      conqueredProvincesGdp,
     };
   }
 }

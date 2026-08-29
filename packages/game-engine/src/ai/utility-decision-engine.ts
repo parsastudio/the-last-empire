@@ -256,7 +256,7 @@ export class UtilityDecisionEngine {
       }
 
       case "NON_AGGRESSION_PACT": {
-        reasons.push({ label: "تمایل پایه به ثبات", value: -10 });
+        reasons.push({ label: "تمایل پایه به ثبات", value: -2 });
 
         const alignVal = Math.round(vector.alignment * 0.5);
         reasons.push({ label: "همسویی سیاسی", value: alignVal });

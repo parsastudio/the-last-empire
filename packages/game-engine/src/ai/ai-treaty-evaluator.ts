@@ -113,7 +113,7 @@ export class AITreatyEvaluator {
           vector,
         );
 
-        if (napUtility >= 20) {
+        if (napUtility >= 5) {
           return ActionFactory.diplomaticProposal(
             nation.id,
             targetNation.id,

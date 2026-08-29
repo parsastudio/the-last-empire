@@ -7,6 +7,7 @@ import {
   PeaceTermsCalculator,
   SignPeaceSettlementAction,
   GameError,
+  getProvinceGdp,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
@@ -79,6 +80,35 @@ export class PeaceSettlementExecutor {
     }
 
     if (terms.concededProvinceIds.length > 0) {
+      const loserProvsBefore = Object.values(updatedProvinces).filter(
+        (p) =>
+          CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
+          loserCanonical,
+      );
+
+      let totalLoserGdpBefore = 0;
+      let cededGdp = 0;
+      for (let i = 0; i < loserProvsBefore.length; i++) {
+        const p = loserProvsBefore[i]!;
+        const pGdp = getProvinceGdp(p);
+        totalLoserGdpBefore += pGdp;
+        if (terms.concededProvinceIds.includes(p.provinceId)) {
+          cededGdp += pGdp;
+        }
+      }
+
+      const cededShare =
+        totalLoserGdpBefore > 0
+          ? Math.min(1.0, cededGdp / totalLoserGdpBefore)
+          : 0;
+      const curDebt = updatedNations[loserNation.id]?.nationalDebt || 0;
+      const debtRelief = Math.floor(curDebt * cededShare);
+
+      updatedNations[loserNation.id] = {
+        ...updatedNations[loserNation.id]!,
+        nationalDebt: Math.max(0, curDebt - debtRelief),
+      };
+
       for (let i = 0; i < terms.concededProvinceIds.length; i++) {
         const pid = terms.concededProvinceIds[i]!;
         const prov = updatedProvinces[pid.toString()];
