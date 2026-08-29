@@ -1,0 +1,79 @@
+import React from "react";
+import { Building2, Globe2 } from "lucide-react";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { FiscalRevenueBreakdown } from "@geopolitics/game-engine";
+import {
+  ECONOMIC_DOCTRINE_CONFIGS,
+  EconomicDoctrineStance,
+} from "@geopolitics/domain";
+
+interface EconomicRevenuePreviewBoxProps {
+  preview: FiscalRevenueBreakdown;
+  activeConfig: (typeof ECONOMIC_DOCTRINE_CONFIGS)[EconomicDoctrineStance];
+}
+
+export function EconomicRevenuePreviewBox({
+  preview,
+  activeConfig,
+}: EconomicRevenuePreviewBoxProps) {
+  return (
+    <div className="bg-secondary/50 border border-border/70 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs shadow-inner">
+      <div className="flex items-center justify-between pb-2 border-b border-border/40">
+        <span className="text-muted-foreground font-sans font-bold text-[11px]">
+          پیش‌بینی درآمد کل هر نوبت:
+        </span>
+        <span className="text-sm font-black text-gdp font-mono">
+          +{PersianNumberFormatter.formatCurrency(preview.totalRevenue)}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-[10px]">
+        <div className="bg-background/70 p-2.5 rounded-xl space-y-1 border border-border/50">
+          <div className="flex items-center justify-between text-muted-foreground font-sans">
+            <span className="flex items-center gap-1">
+              <Building2 size={11} className="text-primary" />
+              <span>تولید و مالیات بومی:</span>
+            </span>
+            <span className="font-bold text-foreground">
+              {Math.round(activeConfig.domesticWeight * 100)}٪
+            </span>
+          </div>
+          <span className="font-extrabold text-foreground text-xs block">
+            {PersianNumberFormatter.formatCurrency(
+              preview.domesticRevenue,
+              true,
+            )}
+          </span>
+        </div>
+
+        <div className="bg-background/70 p-2.5 rounded-xl space-y-1 border border-border/50">
+          <div className="flex items-center justify-between text-muted-foreground font-sans">
+            <span className="flex items-center gap-1">
+              <Globe2 size={11} className="text-treasury" />
+              <span>شاهراه و ترانزیت جهانی:</span>
+            </span>
+            <span className="font-bold text-foreground">
+              {Math.round(activeConfig.globalWeight * 100)}٪
+            </span>
+          </div>
+          <span className="font-extrabold text-gdp text-xs block">
+            {PersianNumberFormatter.formatCurrency(preview.globalRevenue, true)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-1 border-t border-border/30 text-[10px] text-muted-foreground font-sans">
+        <span className="text-muted-foreground">وضعیت شبکه بین‌الملل:</span>
+        <div className="flex items-center gap-1">
+          <span>شرکای صلح:</span>
+          <span className="font-bold text-foreground font-mono">
+            {PersianNumberFormatter.toPersianDigits(
+              preview.activePeacePartnersCount,
+            )}{" "}
+            کشور
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

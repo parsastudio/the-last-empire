@@ -1,21 +1,9 @@
 import React from "react";
-import {
-  Radio,
-  Sparkles,
-  Shield,
-  ShieldAlert,
-  Crosshair,
-  Plane,
-  Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  ShieldCheck,
-  Skull,
-} from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { Nation } from "@/domain/nation/nation.schema";
 import { AuxiliaryGuarantorDefense } from "@/domain/reports/combat-report.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { AttackFogReconCard } from "./components/attack-fog-recon-card";
+import { AttackDiscoveredIntelGrid } from "./components/attack-discovered-intel-grid";
 
 export interface TacticalForecast {
   winProbability: number;
@@ -25,6 +13,13 @@ export interface TacticalForecast {
   phase2Prediction: string;
   phase3Prediction: string;
   valuationRatio: number;
+  phase2Air?: {
+    phaseWinner: string;
+    attAirForce: number;
+    defAirForce: number;
+    attAirLost: number;
+    defAirLost: number;
+  };
   auxiliaryGuarantor?: AuxiliaryGuarantorDefense;
 }
 
@@ -71,210 +66,24 @@ export function AttackIntelPanel({
   return (
     <div className="space-y-3 font-sans dir-rtl text-right">
       {!isReconActive ? (
-        <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-3.5 rounded-3xl space-y-3 shadow-md backdrop-blur-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/25 shrink-0">
-                <AlertTriangle size={16} />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-xs font-black text-foreground block">
-                  مه اطلاعاتی: داده‌های میدانی دقیق پنهان است
-                </span>
-                <span className="text-[10px] text-muted-foreground block font-sans">
-                  برآورد موازنه قوا بر مبنای داده‌های عمومی بین‌المللی (OSINT)
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onExecuteRecon}
-              disabled={!canAffordRecon || isExecutingRecon}
-              className="py-2 px-3.5 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/40 rounded-2xl text-xs font-black transition-all cursor-pointer shadow-sm hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {isExecutingRecon ? (
-                <Loader2 size={13} className="animate-spin" />
-              ) : (
-                <Radio size={13} className="animate-pulse" />
-              )}
-              <span>
-                شنود ماهواره‌ای فوری (
-                {PersianNumberFormatter.formatCurrency(reconCost)})
-              </span>
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between pt-2 border-t border-border/40 font-mono text-xs">
-            <span className="text-[11px] text-muted-foreground font-sans">
-              تخمین شانس پیروزی عملیات:
-            </span>
-            <span
-              className={`font-black text-xs px-2.5 py-0.5 rounded-xl border ${probBg} ${probColor}`}
-            >
-              حدوداً{" "}
-              {PersianNumberFormatter.toPersianDigits(forecast.winProbability)}٪
-              (خطای اطلاعاتی)
-            </span>
-          </div>
-        </div>
+        <AttackFogReconCard
+          reconCost={reconCost}
+          canAffordRecon={canAffordRecon}
+          isExecutingRecon={isExecutingRecon}
+          winProbability={forecast.winProbability}
+          probBg={probBg}
+          probColor={probColor}
+          onExecuteRecon={onExecuteRecon}
+        />
       ) : (
-        <div className="bg-gradient-to-r from-emerald-950/25 via-card to-cyan-950/20 border border-emerald-500/40 p-3.5 rounded-3xl space-y-3 shadow-lg backdrop-blur-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-border/50">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                <CheckCircle2 size={14} />
-              </div>
-              <span className="text-xs font-black text-foreground">
-                اشراف اطلاعاتی کامل (زرادخانه کشف‌شده {targetNation.name}):
-              </span>
-            </div>
-
-            <button
-              type="button"
-              onClick={onAutoOptimizeDeploy}
-              className="py-1.5 px-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 shrink-0"
-            >
-              <Sparkles size={13} />
-              <span>بهترین آرایش و ترکیب تهاجم</span>
-            </button>
-          </div>
-
-          {aux && (
-            <div
-              className={`p-2.5 rounded-2xl flex items-center justify-between text-xs border ${
-                aux.isEmergencyProtectorate
-                  ? "bg-rose-950/40 border-rose-500/50 text-rose-300"
-                  : "bg-cyan-950/40 border-cyan-500/40 text-cyan-300"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                {aux.isEmergencyProtectorate ? (
-                  <Skull size={16} className="text-rose-400 animate-pulse" />
-                ) : (
-                  <ShieldCheck size={16} className="text-cyan-400" />
-                )}
-                <span>
-                  هشدار اشراف اطلاعاتی: کشور تحت{" "}
-                  {aux.isEmergencyProtectorate
-                    ? "حمایت استعماری"
-                    : "چتر امنیتی"}{" "}
-                  <strong>{aux.guarantorName}</strong> {auxFlag} قرار دارد.
-                </span>
-              </div>
-              <span
-                className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border ${
-                  aux.isEmergencyProtectorate
-                    ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
-                    : "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
-                }`}
-              >
-                +
-                {PersianNumberFormatter.formatCurrency(
-                  aux.initialBudgetValuation,
-                  true,
-                )}{" "}
-                نیروی ضربت لِوِل{" "}
-                {PersianNumberFormatter.toPersianDigits(aux.techLevel)}
-              </span>
-            </div>
-          )}
-
-          <div className="grid grid-cols-5 gap-1.5 font-mono text-[10px]">
-            <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
-              <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
-                <Shield size={10} className="text-primary" />
-                <span>پیاده‌نظام</span>
-              </div>
-              <span className="font-extrabold text-foreground block">
-                {PersianNumberFormatter.toPersianDigits(
-                  (targetNation.military.infantry || 0).toLocaleString("en-US"),
-                )}
-              </span>
-            </div>
-
-            <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
-              <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
-                <ShieldAlert size={10} className="text-military" />
-                <span>زرهی</span>
-              </div>
-              <span className="font-extrabold text-foreground block">
-                {PersianNumberFormatter.toPersianDigits(
-                  (targetNation.military.armor || 0).toLocaleString("en-US"),
-                )}
-              </span>
-            </div>
-
-            <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
-              <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
-                <Crosshair size={10} className="text-diplomacy" />
-                <span>پدافند</span>
-              </div>
-              <span className="font-extrabold text-foreground block">
-                {PersianNumberFormatter.toPersianDigits(
-                  (targetNation.military.airDefense || 0).toLocaleString(
-                    "en-US",
-                  ),
-                )}
-              </span>
-            </div>
-
-            <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
-              <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
-                <Plane size={10} className="text-gdp" />
-                <span>جنگنده</span>
-              </div>
-              <span className="font-extrabold text-foreground block">
-                {PersianNumberFormatter.toPersianDigits(
-                  (targetNation.military.airForce || 0).toLocaleString("en-US"),
-                )}
-              </span>
-            </div>
-
-            <div className="bg-secondary/40 border border-border/50 p-2 rounded-xl text-center space-y-0.5">
-              <div className="flex items-center justify-center gap-1 text-muted-foreground text-[9px] font-sans">
-                <Radio size={10} className="text-treasury" />
-                <span>موشک</span>
-              </div>
-              <span className="font-extrabold text-foreground block">
-                {PersianNumberFormatter.toPersianDigits(
-                  (targetNation.military.droneMissile || 0).toLocaleString(
-                    "en-US",
-                  ),
-                )}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-1 border-t border-border/40 font-mono text-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground font-sans">
-                برآورد ۳ فاز:
-              </span>
-              <span className="text-[10px] text-foreground font-sans bg-secondary/80 px-2 py-0.5 rounded-lg border border-border/50">
-                {forecast.isCapitulationPredicted
-                  ? "تسلیم کامل و الحاق قطعی"
-                  : forecast.isVictoryPredicted
-                    ? "پیروزی تاکتیکی و فتح منطقه"
-                    : "ریسک بالای شکست زمینی"}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground font-sans">
-                شانس پیروزی قطعی:
-              </span>
-              <span
-                className={`font-black text-xs px-2.5 py-0.5 rounded-xl border ${probBg} ${probColor}`}
-              >
-                {PersianNumberFormatter.toPersianDigits(
-                  forecast.winProbability,
-                )}
-                ٪
-              </span>
-            </div>
-          </div>
-        </div>
+        <AttackDiscoveredIntelGrid
+          targetNation={targetNation}
+          forecast={forecast}
+          probBg={probBg}
+          probColor={probColor}
+          auxFlag={auxFlag}
+          onAutoOptimizeDeploy={onAutoOptimizeDeploy}
+        />
       )}
     </div>
   );
