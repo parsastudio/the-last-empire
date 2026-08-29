@@ -29,7 +29,7 @@ export class BattleDefenderStateApplier {
 
     const isProvinceLost =
       calcResult.isAttackerVictory &&
-      (conquest.conqueredPixels > 0 || calcResult.isFullCapitulation);
+      (conquest.conqueredPixels > 0 || Boolean(calcResult.isFullCapitulation));
 
     if (isDefenderAlive) {
       updatedRelations[cleanAttackerId] = {
