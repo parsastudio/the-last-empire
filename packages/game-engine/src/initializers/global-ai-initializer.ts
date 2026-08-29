@@ -11,7 +11,6 @@ import { NationProfileAssigner } from "@/engine/initializers/nation-profile-assi
 export class DiplomaticMatrixGenerator {
   public generateInitialRelations(
     currentId: string,
-    _currentGov: string,
     allNations: { id: string; govType: string }[],
   ): Record<string, RelationProfile> {
     const relations: Record<string, RelationProfile> = {};
@@ -92,7 +91,6 @@ export class GlobalAiInitializer {
 
       nation.relations = this.relationsGenerator.generateInitialRelations(
         cleanId,
-        nation.government.type,
         nationsMetaData,
       );
 
@@ -138,7 +136,6 @@ export class GlobalAiInitializer {
     for (const nation of preBuiltNations) {
       nation.relations = this.relationsGenerator.generateInitialRelations(
         nation.id,
-        nation.government.type,
         nationsMetaData,
       );
       nations[nation.id] = nation;

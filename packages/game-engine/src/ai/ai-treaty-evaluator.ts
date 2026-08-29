@@ -94,7 +94,6 @@ export class AITreatyEvaluator {
       const partnershipUtility =
         UtilityDecisionEngine.calculateStrategicPartnershipUtility(
           nation,
-          targetNation,
           vector,
         );
 
@@ -107,11 +106,7 @@ export class AITreatyEvaluator {
       }
 
       if (rel.stance === "NORMAL_DIPLOMACY") {
-        const napUtility = UtilityDecisionEngine.calculateNapUtility(
-          nation,
-          targetNation,
-          vector,
-        );
+        const napUtility = UtilityDecisionEngine.calculateNapUtility(vector);
 
         if (napUtility >= 5) {
           return ActionFactory.diplomaticProposal(

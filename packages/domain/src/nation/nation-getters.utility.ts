@@ -60,7 +60,7 @@ export class NationGettersUtility {
       let activeCombatPower = 0;
 
       if (input.military) {
-        activeCombatPower = MilitaryPowerCalculator.calculateEffectivePower({
+        activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
           id: canonicalId,
           name: input.name || profile?.nameFa || canonicalId,
           isAi: true,
@@ -97,7 +97,7 @@ export class NationGettersUtility {
           domesticTech,
           equipmentTech,
         );
-        activeCombatPower = MilitaryPowerCalculator.calculateEffectivePower({
+        activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
           id: canonicalId,
           name: input.name || profile?.nameFa || canonicalId,
           isAi: true,

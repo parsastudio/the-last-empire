@@ -10,11 +10,6 @@ export class MilitaryPricingCalculator {
     return MILITARY_UNIT_STATS[unitType].moneyCost;
   }
 
-  public static calculateBaseImportUnitPrice(unitType: UnitType): number {
-    const basePrice = this.calculateUnitTypePrice(unitType);
-    return Math.floor(basePrice * this.BASE_IMPORT_MULTIPLIER);
-  }
-
   public static calculateArmsImportMultiplier(
     buyerTechLevel: number,
     sellerTechLevel: number,
@@ -74,15 +69,5 @@ export class MilitaryPricingCalculator {
       (military.airForce || 0) * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (military.droneMissile || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
     );
-  }
-
-  public static calculateLandAndAirValuation(military: {
-    infantry?: number;
-    armor?: number;
-    airDefense?: number;
-    airForce?: number;
-    droneMissile?: number;
-  }): number {
-    return this.calculateTotalArmyValuation(military);
   }
 }

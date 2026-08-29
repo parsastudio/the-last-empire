@@ -8,7 +8,6 @@ import {
   GlobalCoalition,
   PeaceTermsCalculator,
 } from "@geopolitics/domain";
-import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class AIPeaceEvaluator {
   public static evaluate(
@@ -16,7 +15,6 @@ export class AIPeaceEvaluator {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
-    _vectorsByTarget?: Map<string, GeopoliticalVector>,
     globalCoalition?: GlobalCoalition | null,
   ): GameAction | null {
     if (!nation.relations) return null;

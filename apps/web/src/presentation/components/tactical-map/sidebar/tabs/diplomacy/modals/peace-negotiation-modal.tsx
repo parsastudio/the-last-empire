@@ -7,13 +7,8 @@ import {
   ShieldAlert,
   Swords,
   Scroll,
-  Trophy,
   CheckCircle2,
-  XCircle,
-  TrendingUp,
-  TrendingDown,
   Scale,
-  Ban,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import {
@@ -254,7 +249,7 @@ export function PeaceNegotiationModal({
           >
             {isDominantAi ? (
               <>
-                <Skull size={15} />
+                <ShieldAlert size={15} />
                 <span>پذیرش تسلیم و انحلال</span>
               </>
             ) : (
@@ -268,8 +263,4 @@ export function PeaceNegotiationModal({
       </div>
     </UnifiedModalShell>
   );
-}
-
-function Skull({ size, className }: { size: number; className?: string }) {
-  return <ShieldAlert size={size} className={className} />;
 }

@@ -1,5 +1,5 @@
 import { useCallback, RefObject } from "react";
-import { ALL_COUNTRY_PROFILES, CountryRegistry } from "@/domain/data/countries";
+import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 

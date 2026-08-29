@@ -136,7 +136,6 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       context.ownedProvinces,
-      globalCoalition,
     );
     if (attackAction) {
       actions.push(attackAction);
@@ -196,7 +195,6 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       lockedTargets,
-      context?.vectorsByTarget,
       globalCoalition,
     );
 

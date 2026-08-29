@@ -4,7 +4,6 @@ export const ReportSeveritySchema = z.enum([
   "CRITICAL_DEFEAT",
   "DEFEAT",
   "VICTORY",
-  "CRUSHING_VICTORY",
   "INFO",
 ]);
 
