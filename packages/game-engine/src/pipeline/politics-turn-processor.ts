@@ -10,14 +10,14 @@ export class PoliticsTurnProcessor {
     isAtWar: boolean,
     _provincesMap?: Record<string, Province>,
   ): Nation {
-    let updated = ModifierManager.updateActiveModifiers(nation);
+    const updated = ModifierManager.updateActiveModifiers(nation);
 
     const newStability = StabilityCalculator.calculateTurnStability(
       updated,
       isAtWar,
     );
 
-    updated = {
+    return {
       ...updated,
       executedEspionageTiers: [],
       government: {
@@ -25,15 +25,9 @@ export class PoliticsTurnProcessor {
         stability: newStability,
         turnsInPower: updated.government.turnsInPower + 1,
       },
+      globalReputation: !isAtWar
+        ? Math.min(100, updated.globalReputation + 1)
+        : updated.globalReputation,
     };
-
-    if (!isAtWar) {
-      updated = {
-        ...updated,
-        globalReputation: Math.min(100, updated.globalReputation + 1),
-      };
-    }
-
-    return updated;
   }
 }
