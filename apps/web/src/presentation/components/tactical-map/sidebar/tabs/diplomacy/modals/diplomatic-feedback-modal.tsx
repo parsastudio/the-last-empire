@@ -32,7 +32,6 @@ export interface DiplomaticProposalFeedback {
   targetName: string;
   targetFlagCode?: string;
   message?: string;
-  reputationChange?: number;
   defenseEvent?: ReactiveDefenseEvent;
 }
 

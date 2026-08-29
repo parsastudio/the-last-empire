@@ -16,7 +16,6 @@ import { DiplomaticProposalFeedback } from "@/presentation/components/tactical-m
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 
 interface UseDiplomacyActionsRunnerProps {
-  targetName: string;
   targetNationId: string;
   nationId: string;
   senderGdp?: number;
@@ -28,7 +27,6 @@ interface UseDiplomacyActionsRunnerProps {
 }
 
 export function useDiplomacyActionsRunner({
-  targetName,
   targetNationId,
   nationId,
   senderGdp = 100000000000,

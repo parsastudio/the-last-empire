@@ -56,7 +56,6 @@ export function WebGLMapCanvas({
     positionRef,
     isDraggingRef,
     hasDraggedRef,
-    handleWheel,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -111,11 +110,6 @@ export function WebGLMapCanvas({
     requestRenderRef.current = requestRender;
   }, [requestRender]);
 
-  const onWheelCombined = (e: React.WheelEvent<HTMLDivElement>) => {
-    closeContextMenu();
-    handleWheel(e);
-  };
-
   const onMouseMoveCombined = (e: React.MouseEvent<HTMLDivElement>) => {
     handleMouseMove(e);
     handlePointerMove(e.clientX, e.clientY);
@@ -148,7 +142,6 @@ export function WebGLMapCanvas({
       onMouseMove={onMouseMoveCombined}
       onMouseUp={handleMouseUp}
       onMouseLeave={handlePointerLeave}
-      onWheel={onWheelCombined}
       onClick={handleMapClick}
     >
       <canvas

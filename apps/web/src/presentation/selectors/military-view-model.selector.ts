@@ -31,7 +31,6 @@ export interface MilitaryValuationViewModel {
   totalPayroll: number;
   isGdpCapped: boolean;
   capacityRatio: number;
-  gdp: number;
 }
 
 export function selectMilitaryForcesViewModel(
@@ -155,6 +154,5 @@ export function selectMilitaryValuationViewModel(
     totalPayroll: payroll.total,
     isGdpCapped: payroll.gdpCapped,
     capacityRatio,
-    gdp,
   };
 }

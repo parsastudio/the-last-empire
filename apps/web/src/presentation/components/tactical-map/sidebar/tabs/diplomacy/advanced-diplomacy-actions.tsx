@@ -37,7 +37,6 @@ export function AdvancedDiplomacyActions({
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
-    targetName,
     targetNationId,
     nationId,
     senderGdp,

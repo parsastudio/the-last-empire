@@ -7,7 +7,6 @@ export interface SavedCampaignMeta {
   turn: number;
   date: string;
   time: string;
-  humanNationId: string;
 }
 
 export function useSavedCampaigns() {
@@ -37,7 +36,6 @@ export function useSavedCampaigns() {
             hour: "2-digit",
             minute: "2-digit",
           }),
-          humanNationId: state.humanNationId,
         });
       }
 

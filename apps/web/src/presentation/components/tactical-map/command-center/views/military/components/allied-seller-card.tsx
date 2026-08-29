@@ -9,7 +9,6 @@ export interface AlliedSellerItem {
   flagCode: string;
   techLevel: number;
   rank: number;
-  alignment: number;
   tension?: number;
 }
 

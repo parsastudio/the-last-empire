@@ -16,7 +16,6 @@ import { FloatingFeedback } from "@/presentation/components/tactical-map/sidebar
 export interface AlliedUnitProcurementInfo {
   type: UnitType;
   nameFa: string;
-  sellerUnitPrice: number;
   unitPrice: number;
   techMultiplier: number;
   techDelta: number;
@@ -173,7 +172,6 @@ export function useAlliedArmsProcurement({
       return {
         type,
         nameFa: stat.nameFa,
-        sellerUnitPrice: baseCost,
         unitPrice: marketUnitPrice,
         techMultiplier,
         techDelta,
