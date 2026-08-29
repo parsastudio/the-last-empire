@@ -15,6 +15,7 @@ import {
   BattleFullReportData,
   BattleSpoilsDetails,
 } from "@/domain/reports/combat-report.schema";
+import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
 export class BattleExecutionEngine {
   public executeBattle(
@@ -165,11 +166,16 @@ export class BattleExecutionEngine {
         };
 
         guarantorLogs.push(
-          BattleLogFactory.createGuarantorCasualtyLog(
+          TurnLogBuilder.createNationalLog(
             state.currentTurn,
             guarantorNation.id,
+            "MILITARY",
+            "WARNING",
+            "GUARANTOR_CASUALTY_COST_INCURRED",
+            {
+              cost: damage,
+            },
             defender.id,
-            damage,
           ),
         );
       }
