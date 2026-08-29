@@ -66,6 +66,10 @@ export function useDiplomacyActionsRunner({
     return Math.floor(senderGdp * 0.1);
   }, [senderGdp]);
 
+  const emergencyProtectorateCost = useMemo(() => {
+    return Math.floor(senderGdp * 0.3);
+  }, [senderGdp]);
+
   const guaranteeValidation = useMemo<SecurityGuaranteeValidationResult>(() => {
     if (!clientNation || !targetNation) {
       return {
@@ -84,6 +88,29 @@ export function useDiplomacyActionsRunner({
       clientNation,
       targetNation,
       provincesMap,
+      false,
+    );
+  }, [clientNation, targetNation, provincesMap]);
+
+  const emergencyValidation = useMemo<SecurityGuaranteeValidationResult>(() => {
+    if (!clientNation || !targetNation) {
+      return {
+        isValid: false,
+        reason: "اطلاعات کشور در دسترس نیست.",
+        gdpRatio: 1,
+        techDiff: 0,
+        tension: 0,
+        isGdpValid: false,
+        isTechValid: false,
+        isTensionValid: false,
+        isNotWar: false,
+      };
+    }
+    return SecurityGuaranteeValidator.validate(
+      clientNation,
+      targetNation,
+      provincesMap,
+      true,
     );
   }, [clientNation, targetNation, provincesMap]);
 
@@ -157,11 +184,36 @@ export function useDiplomacyActionsRunner({
     }
   };
 
+  const handleEmergencyProtectorate = async () => {
+    if (!emergencyValidation.isValid) return;
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "EMERGENCY_PROTECTORATE",
+    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
+  };
+
   const handleCancelSecurityGuarantee = async () => {
     const action = ActionFactory.diplomaticProposal(
       nationId,
       targetNationId,
       "CANCEL_SECURITY_GUARANTEE",
+    );
+    const res = await dispatchAction(action);
+    if (res.success && res.resultData) {
+      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
+    }
+  };
+
+  const handleCancelEmergencyProtectorate = async () => {
+    const action = ActionFactory.diplomaticProposal(
+      nationId,
+      targetNationId,
+      "CANCEL_EMERGENCY_PROTECTORATE",
     );
     const res = await dispatchAction(action);
     if (res.success && res.resultData) {
@@ -208,14 +260,18 @@ export function useDiplomacyActionsRunner({
     feedbackModal,
     foreignAidCost,
     securityGuaranteeCost,
+    emergencyProtectorateCost,
     guaranteeValidation,
+    emergencyValidation,
     handleSendAid,
     handlePeaceTreaty: handleOpenPeaceNegotiations,
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),
     handleStrategicPartnership: () =>
       executeOrConfirm(handleStrategicPartnership, false),
     handleSecurityGuarantee,
+    handleEmergencyProtectorate,
     handleCancelSecurityGuarantee,
+    handleCancelEmergencyProtectorate,
     handleCancelTreaty: () => executeOrConfirm(handleCancelTreaty, false),
     handleDeclareWar: () => executeOrConfirm(handleDeclareWar, true),
     closeConfirmModal,

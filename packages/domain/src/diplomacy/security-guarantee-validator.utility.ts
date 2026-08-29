@@ -13,6 +13,7 @@ export interface SecurityGuaranteeValidationResult {
   isTechValid: boolean;
   isTensionValid: boolean;
   isNotWar: boolean;
+  isEmergencyProtectorate?: boolean;
 }
 
 export class SecurityGuaranteeValidator {
@@ -20,6 +21,7 @@ export class SecurityGuaranteeValidator {
     client: Nation,
     guarantor: Nation,
     provincesMap?: Record<string, Province>,
+    isEmergency = false,
   ): SecurityGuaranteeValidationResult {
     if (client.id === guarantor.id) {
       return {
@@ -32,14 +34,13 @@ export class SecurityGuaranteeValidator {
         isTechValid: false,
         isTensionValid: true,
         isNotWar: true,
+        isEmergencyProtectorate: isEmergency,
       };
     }
 
     const clientGdp = getNationGdp(client, provincesMap);
     const guarantorGdp = getNationGdp(guarantor, provincesMap);
     const gdpRatio = Number((guarantorGdp / Math.max(1, clientGdp)).toFixed(2));
-
-    const isGdpValid = gdpRatio >= 2.0 && gdpRatio <= 10.0;
 
     const clientTech = client.military.techLevel || 1.0;
     const guarantorTech = guarantor.military.techLevel || 1.0;
@@ -52,13 +53,47 @@ export class SecurityGuaranteeValidator {
     );
     const tension = rel ? (rel.tension ?? 10) : 10;
     const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
-
     const isNotWar = stance !== "WAR";
+
+    if (isEmergency) {
+      const isGdpValid = gdpRatio >= 2.0;
+      const isTensionValid = tension < 50;
+
+      let reason: string | undefined = undefined;
+      if (!isNotWar) {
+        reason =
+          "نمی‌توان از کشوری که با آن در حال جنگ هستید درخواست تحت‌الحمایگی کرد.";
+      } else if (!isTensionValid) {
+        reason = "تنش با ابرقدرت حامی باید کمتر از ۵۰٪ باشد.";
+      } else if (!isGdpValid) {
+        reason = "GDP ابرقدرت حامی باید حداقل ۲ برابر کشور شما باشد.";
+      } else if (!isTechValid) {
+        reason = "سطح فناوری نظامی ابرقدرت حامی باید بالاتر از شما باشد.";
+      }
+
+      const isValid = isGdpValid && isTechValid && isNotWar && isTensionValid;
+
+      return {
+        isValid,
+        reason,
+        gdpRatio,
+        techDiff,
+        tension,
+        isGdpValid,
+        isTechValid,
+        isTensionValid,
+        isNotWar,
+        isEmergencyProtectorate: true,
+      };
+    }
+
+    const isGdpValid = gdpRatio >= 2.0 && gdpRatio <= 10.0;
     const isTensionValid = tension < 35;
 
     let reason: string | undefined = undefined;
     if (!isNotWar) {
-      reason = "در وضعیت جنگ امکان انعقاد پیمان امنیتی وجود ندارد.";
+      reason =
+        "در وضعیت جنگ امکان انعقاد پیمان امنیتی عادی وجود ندارد (از پیمان تحت‌الحمایگی اضطراری استفاده کنید).";
     } else if (!isTensionValid) {
       reason = "تنش دیپلماتیک باید کمتر از ۳۵٪ باشد.";
     } else if (!isGdpValid) {
@@ -83,6 +118,7 @@ export class SecurityGuaranteeValidator {
       isTechValid,
       isTensionValid,
       isNotWar,
+      isEmergencyProtectorate: false,
     };
   }
 }

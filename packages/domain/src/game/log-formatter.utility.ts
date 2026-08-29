@@ -58,11 +58,13 @@ export class TurnLogFormatter {
               ? "پیمان عدم تخاصم"
               : rawType === "SECURITY_GUARANTEE"
                 ? "پیمان چتر امنیتی و تضمین بقا"
-                : rawType === "PEACE_TREATY"
-                  ? "معاهده صلح"
-                  : rawType === "SEND_FOREIGN_AID"
-                    ? "کمک مالی"
-                    : rawType;
+                : rawType === "EMERGENCY_PROTECTORATE"
+                  ? "معاهده استعماری تحت‌الحمایگی اضطراری"
+                  : rawType === "PEACE_TREATY"
+                    ? "معاهده صلح"
+                    : rawType === "SEND_FOREIGN_AID"
+                      ? "کمک مالی"
+                      : rawType;
         return `پیشنهاد دیپلماتیک: کشور ${sourceName} پیشنهاد رسمی (${treatyTypeFa}) را برای ${targetName} ارسال کرد.`;
       }
 
@@ -90,6 +92,23 @@ export class TurnLogFormatter {
       case "SECURITY_GUARANTEE_CANCELLED": {
         const reason = String(params["reason"] || "فسخ معاهده");
         return `لغو چتر امنیتی: پیمان تضمین امنیت میان ${sourceName} و ${targetName} لغو گردید (${reason}).`;
+      }
+
+      case "EMERGENCY_PROTECTORATE_SIGNED": {
+        return `امضای معاهده تحت‌الحمایگی استعماری: کشور ${sourceName} در ازای پرداخت ۳۰٪ خراج نوبتی و واگذاری استقلال سیاسی، تحت حفاظت کامل نیروی ضربت فوق‌پیشرفته ${targetName} قرار گرفت.`;
+      }
+
+      case "EMERGENCY_PROTECTORATE_CANCELLED": {
+        return `لغو معاهده تحت‌الحمایگی: کشور ${sourceName} رسماً به پیمان استعماری با امپراتوری ${targetName} پایان داد و حاکمیت مستقل خود را اعلام کرد.`;
+      }
+
+      case "GUARANTOR_CASUALTY_COST_INCURRED": {
+        const costNum = Number(params["cost"] || 0);
+        const formattedCost = PersianNumberFormatter.formatCurrency(
+          costNum,
+          true,
+        );
+        return `گزارش ستاد کل: نیروی ضربت اعزامی شما در دفاع از خاک ${targetName} آسیب دید و مبلغ ${formattedCost} هزینه بازسازی به خزانه‌داری تحمیل شد.`;
       }
 
       case "SECURITY_GUARANTEE_DEFENDED": {

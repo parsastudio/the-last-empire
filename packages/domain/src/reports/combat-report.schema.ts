@@ -69,11 +69,13 @@ export const AuxiliaryGuarantorDefenseSchema = z.object({
   guarantorName: z.string(),
   guarantorFlagCode: z.string(),
   techLevel: z.number(),
+  isEmergencyProtectorate: z.boolean().default(false),
   deployedInfantry: z.number().nonnegative(),
   deployedArmor: z.number().nonnegative(),
   deployedAirDefense: z.number().nonnegative(),
   deployedAirForce: z.number().nonnegative(),
-  budgetValuation: z.number().nonnegative(),
+  initialBudgetValuation: z.number().nonnegative(),
+  damageCostIncurred: z.number().nonnegative().default(0),
 });
 
 export const BattleFullReportDataSchema = z.object({

@@ -8,6 +8,7 @@ import {
   ShieldX,
   Lock,
   Handshake,
+  Skull,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
@@ -19,14 +20,19 @@ interface DiplomacyActionButtonsProps {
   currentStance: DiplomaticStance | string;
   foreignAidCost: number;
   securityGuaranteeCost: number;
+  emergencyProtectorateCost: number;
   hasSecurityGuarantee?: boolean;
+  isEmergencyProtectorate?: boolean;
   guaranteeValidation?: SecurityGuaranteeValidationResult;
+  emergencyValidation?: SecurityGuaranteeValidationResult;
   onSendAid: () => void;
   onPeaceTreaty: () => void;
   onNonAggression: () => void;
   onStrategicPartnership: () => void;
   onSecurityGuarantee: () => void;
+  onEmergencyProtectorate: () => void;
   onCancelSecurityGuarantee: () => void;
+  onCancelEmergencyProtectorate: () => void;
   onCancelTreaty: () => void;
   onDeclareWar: () => void;
 }
@@ -35,19 +41,26 @@ export function DiplomacyActionButtons({
   currentStance,
   foreignAidCost,
   securityGuaranteeCost,
+  emergencyProtectorateCost,
   hasSecurityGuarantee = false,
+  isEmergencyProtectorate = false,
   guaranteeValidation,
+  emergencyValidation,
   onSendAid,
   onPeaceTreaty,
   onNonAggression,
   onStrategicPartnership,
   onSecurityGuarantee,
+  onEmergencyProtectorate,
   onCancelSecurityGuarantee,
+  onCancelEmergencyProtectorate,
   onCancelTreaty,
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
+  const isWar = currentStance === "WAR";
+
   const renderStepUpAction = () => {
-    if (currentStance === "WAR") {
+    if (isWar) {
       return (
         <button
           onClick={onPeaceTreaty}
@@ -109,7 +122,36 @@ export function DiplomacyActionButtons({
   };
 
   const renderSecurityUmbrellaBlock = () => {
-    if (currentStance === "WAR") return null;
+    if (isEmergencyProtectorate) {
+      return (
+        <div className="p-3.5 bg-rose-950/40 border border-rose-500/60 rounded-2xl space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-rose-300 text-xs font-black">
+              <Skull size={16} className="text-rose-400 animate-pulse" />
+              <span>تحت‌الحمایگی استعماری فعال (۳ برابر GDP نیرو)</span>
+            </div>
+            <span className="text-[10px] font-mono text-rose-400 font-bold">
+              {PersianNumberFormatter.formatCurrency(
+                emergencyProtectorateCost,
+                true,
+              )}{" "}
+              / نوبت (۳۰٪ خراج)
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            استقرار ارتش فوق‌پیشرفته ابرقدرت در سنگرهای شما با پرداخت ۳۰٪ خراج
+            نوبتی.
+          </p>
+          <button
+            onClick={onCancelEmergencyProtectorate}
+            className="w-full py-2 bg-secondary/80 hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 border border-border/60 hover:border-rose-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+          >
+            <ShieldX size={13} />
+            <span>لغو معاهده استعماری و احیای استقلال کامل</span>
+          </button>
+        </div>
+      );
+    }
 
     if (hasSecurityGuarantee) {
       return (
@@ -137,6 +179,37 @@ export function DiplomacyActionButtons({
           >
             <ShieldX size={13} />
             <span>فسخ اختیاری پیمان چتر امنیتی</span>
+          </button>
+        </div>
+      );
+    }
+
+    if (isWar) {
+      const isEligibleEmergency = emergencyValidation?.isValid ?? false;
+      return (
+        <div className="space-y-1.5 font-sans">
+          <button
+            onClick={onEmergencyProtectorate}
+            disabled={!isEligibleEmergency}
+            className={`w-full p-3.5 rounded-2xl text-right transition-all space-y-1 shadow-md border ${
+              isEligibleEmergency
+                ? "bg-rose-950/30 hover:bg-rose-950/50 border-rose-500/60 text-rose-300 cursor-pointer"
+                : "bg-secondary/40 border-border/60 text-muted-foreground cursor-not-allowed opacity-75"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black flex items-center gap-1.5">
+                <Skull size={15} className="text-rose-400" />
+                استمداد و معاهده تحت‌الحمایگی استعماری (۳ برابر GDP نیرو)
+              </span>
+              <span className="text-[9px] font-mono px-2 py-0.5 rounded-md border bg-rose-500/20 text-rose-300 border-rose-500/40">
+                ۳۰٪ خراج
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              استقرار تمام‌قد ارتش ابرقدرت در خاک شما در ازای واگذاری ۳۰٪ درآمد،
+              ۳۰- پرستیژ و ۱۵-٪ ثبات.
+            </p>
           </button>
         </div>
       );
@@ -181,8 +254,7 @@ export function DiplomacyActionButtons({
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            اعزام ۳۰٪ نیروی ضربت فوق‌پیشرفته این کشور در زمان دفاع سرزمینی
-            (استقراض خودکار تا سقف بدهی).
+            اعزام ۳۰٪ نیروی ضربت فوق‌پیشرفته این کشور در زمان دفاع سرزمینی.
           </p>
         </button>
 
@@ -197,7 +269,7 @@ export function DiplomacyActionButtons({
   };
 
   const renderStepDownAction = () => {
-    if (currentStance === "WAR") return null;
+    if (isWar) return null;
 
     if (currentStance === "NORMAL_DIPLOMACY") {
       return (
@@ -228,21 +300,6 @@ export function DiplomacyActionButtons({
               </span>
               <ArrowDownCircle size={15} className="text-amber-400" />
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              تنزل قانونی سطح روابط بدون نقض معاهده
-            </p>
-          </button>
-
-          <button
-            onClick={onDeclareWar}
-            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold">
-                لغو تعهد و اعلان جنگ مستقیم (با جریمه نقض پیمان)
-              </span>
-              <ShieldAlert size={15} />
-            </div>
           </button>
         </div>
       );
@@ -261,21 +318,6 @@ export function DiplomacyActionButtons({
               </span>
               <ArrowDownCircle size={15} className="text-amber-400" />
             </div>
-            <p className="text-[10px] text-muted-foreground">
-              خروج از شراکت و بازگشت به توافق عدم تعرض
-            </p>
-          </button>
-
-          <button
-            onClick={onDeclareWar}
-            className="w-full p-3 rounded-2xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-right transition-all cursor-pointer space-y-0.5"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold">
-                پیمان‌شکنی و اعلان جنگ مستقیم (با جریمه اعتبار)
-              </span>
-              <ShieldAlert size={15} />
-            </div>
           </button>
         </div>
       );
@@ -289,7 +331,7 @@ export function DiplomacyActionButtons({
       {renderStepUpAction()}
       {renderSecurityUmbrellaBlock()}
 
-      {currentStance !== "WAR" && (
+      {!isWar && (
         <button
           onClick={onSendAid}
           className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-right transition-all cursor-pointer space-y-1"

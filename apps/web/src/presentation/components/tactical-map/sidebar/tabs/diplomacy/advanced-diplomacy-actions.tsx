@@ -15,6 +15,7 @@ interface AdvancedDiplomacyActionsProps {
   targetGdp?: number;
   currentStance?: DiplomaticStance | string;
   hasSecurityGuarantee?: boolean;
+  isEmergencyProtectorate?: boolean;
   provincesMap?: Record<string, Province>;
   clientNation?: Nation | null;
   targetNation?: Nation | null;
@@ -29,6 +30,7 @@ export function AdvancedDiplomacyActions({
   targetGdp = 100000000000,
   currentStance = "NORMAL_DIPLOMACY",
   hasSecurityGuarantee = false,
+  isEmergencyProtectorate = false,
   provincesMap,
   clientNation,
   targetNation,
@@ -58,20 +60,28 @@ export function AdvancedDiplomacyActions({
             <TreatyStatusBanner
               stance={currentStance}
               hasSecurityGuarantee={hasSecurityGuarantee}
+              isEmergencyProtectorate={isEmergencyProtectorate}
             />
 
             <DiplomacyActionButtons
               currentStance={currentStance}
               foreignAidCost={runner.foreignAidCost}
               securityGuaranteeCost={runner.securityGuaranteeCost}
+              emergencyProtectorateCost={runner.emergencyProtectorateCost}
               hasSecurityGuarantee={hasSecurityGuarantee}
+              isEmergencyProtectorate={isEmergencyProtectorate}
               guaranteeValidation={runner.guaranteeValidation}
+              emergencyValidation={runner.emergencyValidation}
               onSendAid={runner.handleSendAid}
               onPeaceTreaty={runner.handlePeaceTreaty}
               onNonAggression={runner.handleNonAggression}
               onStrategicPartnership={runner.handleStrategicPartnership}
               onSecurityGuarantee={runner.handleSecurityGuarantee}
+              onEmergencyProtectorate={runner.handleEmergencyProtectorate}
               onCancelSecurityGuarantee={runner.handleCancelSecurityGuarantee}
+              onCancelEmergencyProtectorate={
+                runner.handleCancelEmergencyProtectorate
+              }
               onCancelTreaty={runner.handleCancelTreaty}
               onDeclareWar={runner.handleDeclareWar}
             />

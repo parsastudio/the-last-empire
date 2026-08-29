@@ -116,26 +116,40 @@ export class BattleCalculator {
 
     let auxiliaryGuarantor: AuxiliaryGuarantorDefense | undefined = undefined;
 
+    let auxAir = 0;
+    let auxArm = 0;
+    let auxAD = 0;
+    let auxInf = 0;
+    let effectiveDefenseBudget = 0;
+
     if (
       guarantorNation &&
       guarantorNation.isAlive &&
       guarantorNation.id !== attacker.id
     ) {
       const defGdp = getNationGdp(defender, provincesMap);
-      const defenseBudget = Math.floor(defGdp * 0.3);
+      const isEmergency = Boolean(defender.isEmergencyProtectorate);
+      const budgetMultiplier = isEmergency ? 3.0 : 0.3;
+      const rawBudget = Math.floor(defGdp * budgetMultiplier);
+      const guarantorGdp = getNationGdp(guarantorNation, provincesMap);
+      const maxSuperpowerLimit = Math.floor(guarantorGdp * 0.3);
+      effectiveDefenseBudget = Math.min(rawBudget, maxSuperpowerLimit);
+
       const gTech = guarantorNation.military.techLevel;
 
-      const auxAir = Math.floor(
-        (defenseBudget * 0.35) / MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
+      auxAir = Math.floor(
+        (effectiveDefenseBudget * 0.4) /
+          MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
       );
-      const auxArm = Math.floor(
-        (defenseBudget * 0.3) / MILITARY_UNIT_STATS.ARMOR.moneyCost,
+      auxAD = Math.floor(
+        (effectiveDefenseBudget * 0.25) /
+          MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
       );
-      const auxAD = Math.floor(
-        (defenseBudget * 0.2) / MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
+      auxArm = Math.floor(
+        (effectiveDefenseBudget * 0.25) / MILITARY_UNIT_STATS.ARMOR.moneyCost,
       );
-      const auxInf = Math.floor(
-        (defenseBudget * 0.15) / MILITARY_UNIT_STATS.INFANTRY.moneyCost,
+      auxInf = Math.floor(
+        (effectiveDefenseBudget * 0.1) / MILITARY_UNIT_STATS.INFANTRY.moneyCost,
       );
 
       defAirForce += auxAir;
@@ -148,11 +162,13 @@ export class BattleCalculator {
         guarantorName: guarantorNation.name,
         guarantorFlagCode: guarantorNation.flagCode,
         techLevel: gTech,
+        isEmergencyProtectorate: isEmergency,
         deployedInfantry: auxInf,
         deployedArmor: auxArm,
         deployedAirDefense: auxAD,
         deployedAirForce: auxAir,
-        budgetValuation: defenseBudget,
+        initialBudgetValuation: effectiveDefenseBudget,
+        damageCostIncurred: 0,
       };
     }
 
@@ -232,6 +248,42 @@ export class BattleCalculator {
       rawDefAirLoss: airPhase.rawDefAirLoss,
       isFullCapitulation,
     });
+
+    if (auxiliaryGuarantor && effectiveDefenseBudget > 0) {
+      const auxAirLoss = Math.min(
+        auxAir,
+        Math.floor(
+          casualty.netDefAirLost * (auxAir / Math.max(1, defAirForce)),
+        ),
+      );
+      const auxADLoss = Math.min(
+        auxAD,
+        Math.floor(
+          casualty.netDefAirDefenseLost * (auxAD / Math.max(1, defAirDefense)),
+        ),
+      );
+      const auxArmLoss = Math.min(
+        auxArm,
+        Math.floor(casualty.netDefArmorLost * (auxArm / Math.max(1, defArmor))),
+      );
+      const auxInfLoss = Math.min(
+        auxInf,
+        Math.floor(
+          casualty.netDefInfantryLost * (auxInf / Math.max(1, defInfantry)),
+        ),
+      );
+
+      const totalLossMoney =
+        auxAirLoss * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
+        auxADLoss * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
+        auxArmLoss * MILITARY_UNIT_STATS.ARMOR.moneyCost +
+        auxInfLoss * MILITARY_UNIT_STATS.INFANTRY.moneyCost;
+
+      auxiliaryGuarantor.damageCostIncurred = Math.min(
+        effectiveDefenseBudget,
+        totalLossMoney,
+      );
+    }
 
     const defenderGdp = getNationGdp(defender, provincesMap);
     const guaranteedLootPool =

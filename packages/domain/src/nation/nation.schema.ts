@@ -43,6 +43,7 @@ export const NationSchema = z.object({
   doctrine: AiDoctrineTypeSchema.default("DOMESTIC_INDUSTRIALIST"),
   doctrineWeights: AiDoctrineWeightsSchema.optional(),
   securityGuarantorId: z.string().nullable().optional().default(null),
+  isEmergencyProtectorate: z.boolean().default(false).optional(),
 });
 
 export type ActiveModifier = z.infer<typeof ActiveModifierSchema>;
