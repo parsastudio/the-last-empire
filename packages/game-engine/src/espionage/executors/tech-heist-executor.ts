@@ -16,7 +16,7 @@ export class TechHeistExecutor {
     target: Nation,
     superiority: TechSuperiorityDelta,
     isSuccess: boolean,
-    outcome: EspionageOutcome,
+    _outcome: EspionageOutcome,
     provincesMap: Record<string, Province>,
   ): {
     updatedSource: Nation;
@@ -36,7 +36,7 @@ export class TechHeistExecutor {
         updatedSource: source,
         updatedTarget: target,
         updatedProvinces,
-        message: `نفوذ به سرورهای محرمانه ${target.name} شکست خورد و کدهای نفوذی مسدود شدند (-۱۰ اعتبار جهانی).`,
+        message: `نفوذ به سرورهای محرمانه ${target.name} شکست خورد و ردپای هکرها شناسایی گردید (-۷۵ همسویی، -۱۰ اعتبار جهانی).`,
       };
     }
 
@@ -59,10 +59,7 @@ export class TechHeistExecutor {
       totalPointsGained: gMil,
     };
 
-    const message =
-      outcome === "CLEAN_SUCCESS"
-        ? `سرقت فناوری با موفقیت انجام شد! دانشمندان شما موفق شدند ۰.۵ سطح فناوری نظامی از کشور ${target.name} استخراج و بومی‌سازی کنند.`
-        : `سرقت فناوری (۰.۵ سطح نظامی) موفق بود اما سازمان اطلاعات ${target.name} منشأ نفوذ را شناسایی کرد (-۲۵ همسویی هدف، -۱۰ اعتبار جهانی).`;
+    const message = `سرقت فوق‌محرمانه فناوری با موفقیت کامل و بدون ردپا انجام شد! دانشمندان شما ۰.۵ سطح فناوری نظامی از ${target.name} استخراج و بومی‌سازی کردند.`;
 
     return {
       updatedSource,

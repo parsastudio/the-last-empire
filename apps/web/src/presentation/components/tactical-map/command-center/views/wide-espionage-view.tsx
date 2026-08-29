@@ -107,12 +107,12 @@ export function WideEspionageView({
                 <EspionageTierCard
                   tier={1}
                   title="شنود ماهواره‌ای و کشف زرادخانه (Strategic Recon)"
-                  subtitle="نفوذ سیگنالی و آشکارسازی فوری ترکیب تمام یگان‌های ارتش، پدافند موشکی و موجودی واقعی خزانه کشور هدف (۶٪ GDP)."
+                  subtitle="نفوذ سیگنالی و آشکارسازی فوری ترکیب تمام یگان‌های ارتش، پدافند موشکی و موجودی واقعی خزانه کشور هدف (۴٪ GDP)."
                   icon={Radio}
                   iconColorClass="text-primary"
                   borderColorClass="border-primary/40"
                   cost={form.tier1Cost}
-                  successRate={form.tier1SuccessRate}
+                  successRate={1.0}
                   isExecutedThisTurn={form.isTierExecuted(1)}
                   canAfford={nation.treasury >= form.tier1Cost}
                   isExecuting={form.isSubmitting}

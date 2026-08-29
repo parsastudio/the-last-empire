@@ -10,7 +10,7 @@ import { NationGettersUtility, CountryRegistry } from "@geopolitics/domain";
 export class ReconTierExecutor {
   public static execute(
     target: Nation,
-    outcome: EspionageOutcome,
+    _outcome: EspionageOutcome,
     provincesMap?: Record<string, Province>,
     allNations?: Record<string, Nation>,
   ): { reconData: EspionageReconData; message: string } {
@@ -60,14 +60,7 @@ export class ReconTierExecutor {
       guarantorAuxiliaryValuation,
     };
 
-    let message = "";
-    if (outcome === "CLEAN_SUCCESS") {
-      message = `شنود ماهواره‌ای کامل با موفقیت انجام شد. تمام مختصات نظامی و خزانه‌داری ${target.name} بدون هیچ ردیابی آشکار گردید.`;
-    } else if (outcome === "COMPROMISED_SUCCESS") {
-      message = `شنود ماهواره‌ای موفق بود اما فرکانس نفوذ رصد شد (-۱۵ دیدگاه با ${target.name}).`;
-    } else {
-      message = `شبکه ضدجاسوسی ${target.name} سیگنال‌های شنود را مختل کرد و عملیات شناسایی ناکام ماند.`;
-    }
+    const message = `شنود ماهواره‌ای کامل با موفقیت ۱۰۰٪ انجام شد. تمام مختصات نظامی و خزانه‌داری ${target.name} بدون هیچ ردیابی آشکار گردید.`;
 
     return { reconData, message };
   }
