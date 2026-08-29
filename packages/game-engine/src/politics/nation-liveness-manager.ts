@@ -68,6 +68,7 @@ export class NationLivenessManager {
 
       const updatedRelations = { ...nation.relations };
       let relationsChanged = false;
+      let hadWarWithEliminated = false;
 
       for (const targetId of Object.keys(updatedRelations)) {
         const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
@@ -75,6 +76,9 @@ export class NationLivenessManager {
           deadCanonicalIds.has(canonicalTarget) ||
           deadCanonicalIds.has(targetId)
         ) {
+          if (updatedRelations[targetId]?.stance === "WAR") {
+            hadWarWithEliminated = true;
+          }
           delete updatedRelations[targetId];
           relationsChanged = true;
         }
@@ -91,9 +95,19 @@ export class NationLivenessManager {
         nextWarFocus = null;
       }
 
+      const hasRemainingActiveWars = Object.values(updatedRelations).some(
+        (r) => r.stance === "WAR",
+      );
+
+      const nextCooldown =
+        nation.isAi && hadWarWithEliminated && !hasRemainingActiveWars
+          ? 5
+          : nation.postWarCooldownTurns || 0;
+
       updatedNations[id] = {
         ...nation,
         warFocusTargetId: nextWarFocus,
+        postWarCooldownTurns: nextCooldown,
         relations: relationsChanged ? updatedRelations : nation.relations,
       };
     }

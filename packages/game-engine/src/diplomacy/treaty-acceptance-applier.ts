@@ -91,6 +91,12 @@ export class TreatyAcceptanceApplier {
       if (receiverWarFocus === sender.id) receiverWarFocus = null;
     }
 
+    const isPeace = proposal.proposalType === "PEACE_TREATY";
+    const senderCooldown =
+      sender.isAi && isPeace ? 5 : sender.postWarCooldownTurns || 0;
+    const receiverCooldown =
+      receiver.isAi && isPeace ? 5 : receiver.postWarCooldownTurns || 0;
+
     const updatedSender = {
       ...sender,
       globalReputation: Math.min(
@@ -98,6 +104,7 @@ export class TreatyAcceptanceApplier {
         sender.globalReputation + reputationBonus,
       ),
       warFocusTargetId: senderWarFocus,
+      postWarCooldownTurns: senderCooldown,
       relations: {
         ...sender.relations,
         [senderRel.targetNationId]: updatedSenderRel,
@@ -111,6 +118,7 @@ export class TreatyAcceptanceApplier {
         receiver.globalReputation + reputationBonus,
       ),
       warFocusTargetId: receiverWarFocus,
+      postWarCooldownTurns: receiverCooldown,
       relations: {
         ...receiver.relations,
         [receiverRel.targetNationId]: updatedReceiverRel,
