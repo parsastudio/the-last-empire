@@ -43,7 +43,15 @@ export class DiplomaticTurnProcessor {
 
     let isAtWar = false;
     const relKeys = Object.keys(nation.relations);
-    const newRels: Record<string, RelationProfile> = { ...nation.relations };
+    const newRels: Record<string, RelationProfile> = {};
+
+    for (let i = 0; i < relKeys.length; i++) {
+      const key = relKeys[i]!;
+      const r = nation.relations[key];
+      if (r) {
+        newRels[key] = { ...r };
+      }
+    }
 
     const reachableTargets = matrixCache
       ? matrixCache.getReachableTargets(nation, allNations || {}, provincesMap)

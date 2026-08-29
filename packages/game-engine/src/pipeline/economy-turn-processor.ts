@@ -22,7 +22,6 @@ export class EconomyTurnProcessor {
       nation.government.stability,
       ownedProvinces,
     );
-    let updated = { ...nation };
     let updatedProvinces = demoResult.updatedProvinces;
 
     const currentProvincesMap: Record<string, Province> = { ...provincesMap };
@@ -32,57 +31,55 @@ export class EconomyTurnProcessor {
     }
 
     const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(
-      updated,
+      nation,
       currentProvincesMap,
     );
 
     const navalSecurityIncome = Math.floor(
-      (updated.navalFleet || 0) * 50_000_000_000 * 0.06,
+      (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
     );
 
-    const gdp = getNationGdp(updated, currentProvincesMap);
+    const gdp = getNationGdp(nation, currentProvincesMap);
 
     let securityFee = 0;
-    if (updated.securityGuarantorId) {
+    let nextSecurityGuarantorId = nation.securityGuarantorId ?? null;
+
+    if (nation.securityGuarantorId) {
       const gCanonical = CountryRegistry.resolveCanonicalId(
-        updated.securityGuarantorId,
+        nation.securityGuarantorId,
       );
       const guarantor =
-        allNations[gCanonical] || allNations[updated.securityGuarantorId];
+        allNations[gCanonical] || allNations[nation.securityGuarantorId];
       if (guarantor && guarantor.isAlive) {
         securityFee = Math.floor(gdp * 0.1);
       } else {
-        updated.securityGuarantorId = null;
+        nextSecurityGuarantorId = null;
       }
     }
 
     let warSubsidiesReceived = 0;
-    const isAtWar = Object.values(updated.relations || {}).some(
+    const isAtWar = Object.values(nation.relations || {}).some(
       (r) => r.stance === "WAR",
     );
 
     if (isAtWar) {
-      for (const rel of Object.values(updated.relations || {})) {
+      for (const rel of Object.values(nation.relations || {})) {
         if (rel.stance === "STRATEGIC_PARTNERSHIP") {
           const partnerCanonical = CountryRegistry.resolveCanonicalId(
             rel.targetNationId,
           );
           const partner =
             allNations[partnerCanonical] || allNations[rel.targetNationId];
-          if (partner && partner.isAlive) {
-            const partnerGdp = getNationGdp(partner, currentProvincesMap);
-            const subsidy = Math.floor(partnerGdp * 0.02);
-            if (partner.treasury >= subsidy && subsidy > 0) {
-              partner.treasury = Math.max(0, partner.treasury - subsidy);
-              warSubsidiesReceived += subsidy;
-            }
+          if (partner && partner.isAlive && partner.treasury > gdp * 0.05) {
+            const subsidy = Math.floor(gdp * 0.02);
+            warSubsidiesReceived += subsidy;
           }
         }
       }
     }
 
     const fiscalResult = FiscalRevenueCalculator.calculate(
-      updated,
+      nation,
       allNations,
       currentProvincesMap,
     );
@@ -91,12 +88,12 @@ export class EconomyTurnProcessor {
       fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesReceived;
 
     const maintenanceCost = payrollBreakdown.total;
-    const debtInterest = Math.floor(updated.nationalDebt * 0.07);
+    const debtInterest = Math.floor(nation.nationalDebt * 0.07);
 
     let actualRepayment = 0;
-    let newDebt = updated.nationalDebt;
+    let newDebt = nation.nationalDebt;
 
-    if (updated.isAi && newDebt > 0 && totalIncome > 0) {
+    if (nation.isAi && newDebt > 0 && totalIncome > 0) {
       const maxRepayment = Math.floor(totalIncome * 0.3);
       actualRepayment = Math.min(newDebt, maxRepayment);
       newDebt -= actualRepayment;
@@ -106,22 +103,23 @@ export class EconomyTurnProcessor {
       maintenanceCost + securityFee + actualRepayment + debtInterest;
     const netChange = totalIncome - totalExpenses;
 
-    let newTreasury = updated.treasury + netChange;
+    let newTreasury = nation.treasury + netChange;
 
     if (newTreasury < 0) {
       const deficit = Math.abs(newTreasury);
       const maxDebtLimit = Math.floor(gdp * 0.8);
-      if (newDebt + deficit > maxDebtLimit && updated.securityGuarantorId) {
-        updated.securityGuarantorId = null;
+      if (newDebt + deficit > maxDebtLimit && nextSecurityGuarantorId) {
+        nextSecurityGuarantorId = null;
       }
       newDebt += deficit;
       newTreasury = 0;
     }
 
-    updated = {
-      ...updated,
+    let updated: Nation = {
+      ...nation,
       treasury: newTreasury,
       nationalDebt: newDebt,
+      securityGuarantorId: nextSecurityGuarantorId,
     };
 
     if (this.bankruptcyManager.isBankrupt(updated, currentProvincesMap)) {

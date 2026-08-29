@@ -6,6 +6,7 @@ import {
   CountryRegistry,
   DiplomacyLockManager,
   GeopoliticalReachResolver,
+  getNationGdp,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -58,6 +59,8 @@ export class AIWarDeclarationEvaluator {
         rankMap,
       );
 
+    const sourceGdp = getNationGdp(nation, provincesMap);
+
     for (let i = 0; i < targets.length; i++) {
       const targetNation = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
@@ -90,10 +93,16 @@ export class AIWarDeclarationEvaluator {
           provincesMap,
         );
 
+      const targetGdp = !targetNation.isAi
+        ? getNationGdp(targetNation, provincesMap)
+        : undefined;
+
       const warUtility = UtilityDecisionEngine.calculateWarUtility(
         nation,
         targetNation,
         vector,
+        sourceGdp,
+        targetGdp,
       );
 
       if (warUtility > highestWarUtility) {
