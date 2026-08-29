@@ -50,8 +50,9 @@ export class StrategicManifestBuilder {
           gdp: p.gdp,
           population: p.population,
           governmentType: p.startingGovernment,
-          militaryTier: p.militaryTier,
-          startingTechLevel: p.startingTechLevel,
+          domesticTechLevel: p.domesticTechLevel,
+          equipmentTechLevel: p.equipmentTechLevel,
+          startingTechLevel: p.startingTechLevel ?? p.domesticTechLevel,
         };
       },
     );
@@ -131,12 +132,15 @@ export class StrategicManifestBuilder {
       const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
       const startingStability = 50;
 
-      const militaryTier = profile.militaryTier || 5;
       const hasSeaAccess = provList.some((p) => p.hasSeaAccess);
-      const startingTech = profile.startingTechLevel;
+      const domesticTech =
+        profile.domesticTechLevel ?? profile.startingTechLevel ?? 1.0;
+      const equipmentTech = profile.equipmentTechLevel ?? domesticTech;
+
       const stack = MilitaryDistributionEngine.calculateStartingStack(
-        militaryTier,
-        startingTech,
+        gdp,
+        domesticTech,
+        equipmentTech,
       );
 
       const startingInfantry = stack.infantry;
@@ -144,9 +148,9 @@ export class StrategicManifestBuilder {
       const startingAirDefense = stack.airDefense;
       const startingAirForce = stack.airForce;
       const startingDroneMissile = stack.droneMissile;
-      const techLevel = profile.startingTechLevel ?? stack.techLevel;
+      const techLevel = domesticTech;
 
-      const industrialLevel = Math.max(1, Math.min(5, techLevel));
+      const industrialLevel = Math.max(1, Math.min(5, Math.floor(techLevel)));
       const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
 
       manifestNations.push({

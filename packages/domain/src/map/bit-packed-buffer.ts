@@ -43,4 +43,12 @@ export class BitPackedBuffer {
   public loadArrayBuffer(arrayBuffer: ArrayBuffer): void {
     this.buffer = new Uint16Array(arrayBuffer);
   }
+
+  public toUint8ArrayBuffer(): Uint8Array {
+    return new Uint8Array(
+      this.buffer.buffer,
+      this.buffer.byteOffset,
+      this.buffer.byteLength,
+    );
+  }
 }
