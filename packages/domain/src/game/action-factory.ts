@@ -6,6 +6,7 @@ import {
   BuyProvinceAction,
   DiplomaticProposalAction,
   RespondDiplomaticProposalAction,
+  SignPeaceSettlementAction,
   UpgradeDevelopmentAction,
   ExecuteEspionageAction,
   RepayDebtAction,
@@ -132,6 +133,20 @@ export class ActionFactory {
       type: "RESPOND_DIPLOMATIC_PROPOSAL",
       proposalId,
       accept,
+    };
+  }
+
+  public static signPeaceSettlement(
+    nationId: string,
+    targetNationId: string,
+    proposalId?: string,
+  ): SignPeaceSettlementAction {
+    return {
+      id: this.createId("peace-settlement"),
+      nationId,
+      targetNationId,
+      type: "SIGN_PEACE_SETTLEMENT",
+      proposalId,
     };
   }
 

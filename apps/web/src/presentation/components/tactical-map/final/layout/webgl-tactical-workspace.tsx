@@ -12,6 +12,7 @@ import { DirectAttackModal } from "@/presentation/components/tactical-map/modals
 import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
 import { BuyProvinceModal } from "@/presentation/components/tactical-map/modals/buy-province-modal";
+import { PeaceNegotiationModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/peace-negotiation-modal";
 import {
   LayerController,
   TacticalLayer,
@@ -60,6 +61,9 @@ export function WebGLTacticalWorkspace({
   const selectedCoalitionAlert = useUiStore(
     (state) => state.selectedCoalitionAlert,
   );
+  const selectedPeaceTargetCode = useUiStore(
+    (state) => state.selectedPeaceTargetCode,
+  );
 
   const setActiveTab = useUiStore((state) => state.setActiveTab);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
@@ -69,6 +73,9 @@ export function WebGLTacticalWorkspace({
   );
   const setSelectedCoalitionAlert = useUiStore(
     (state) => state.setSelectedCoalitionAlert,
+  );
+  const setSelectedPeaceTargetCode = useUiStore(
+    (state) => state.setSelectedPeaceTargetCode,
   );
 
   const {
@@ -267,6 +274,15 @@ export function WebGLTacticalWorkspace({
         provincesMap={effectiveGameState?.provinces}
         nationsMap={effectiveGameState?.nations}
         onClose={() => setBuyProvinceState({ isOpen: false, provinceId: null })}
+      />
+
+      <PeaceNegotiationModal
+        isOpen={selectedPeaceTargetCode !== null}
+        humanNation={humanNation}
+        targetNationId={selectedPeaceTargetCode}
+        nationsMap={effectiveGameState?.nations}
+        provincesMap={effectiveGameState?.provinces}
+        onClose={() => setSelectedPeaceTargetCode(null)}
       />
 
       <BattleDebriefModal

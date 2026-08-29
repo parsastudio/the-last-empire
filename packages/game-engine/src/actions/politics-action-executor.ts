@@ -5,6 +5,7 @@ import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-applier";
 import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
+import { PeaceSettlementExecutor } from "@/engine/diplomacy/peace-settlement-executor";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
@@ -36,6 +37,17 @@ export class PoliticsActionExecutor {
     const sourceKey = nation.id;
 
     switch (action.type) {
+      case "SIGN_PEACE_SETTLEMENT": {
+        const newState = PeaceSettlementExecutor.execute(state, action);
+        return {
+          newState,
+          resultData: {
+            success: true,
+            message: "معاهده صلح با موفقیت امضا و شروط آن اعمال گردید.",
+          },
+        };
+      }
+
       case "EXECUTE_ESPIONAGE_OPERATION": {
         const { newState, result } = EspionageManager.executeOperation(
           state,
@@ -53,6 +65,21 @@ export class PoliticsActionExecutor {
         if (!proposal) return { newState: state };
 
         if (action.accept) {
+          if (proposal.proposalType === "PEACE_TREATY") {
+            const settlementAction = {
+              id: `peace-${Date.now()}`,
+              nationId: proposal.receiverNationId,
+              targetNationId: proposal.senderNationId,
+              type: "SIGN_PEACE_SETTLEMENT" as const,
+              proposalId: proposal.id,
+            };
+            return {
+              newState: PeaceSettlementExecutor.execute(
+                state,
+                settlementAction,
+              ),
+            };
+          }
           return {
             newState: TreatyAcceptanceApplier.applyAcceptance(state, proposal),
           };

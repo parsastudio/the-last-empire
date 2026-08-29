@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   ShieldX,
   Lock,
+  Handshake,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
@@ -53,13 +54,14 @@ export function DiplomacyActionButtons({
           className="w-full p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-right transition-all cursor-pointer space-y-1 shadow-sm"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black">
-              ارسال معاهده صلح و آتش‌بس (گام رو به بالا: دیپلماسی عادی)
+            <span className="text-xs font-black flex items-center gap-1.5">
+              <Handshake size={16} />
+              ورود به میز مذاکرات آتش‌بس و شروط صلح
             </span>
             <ArrowUpCircle size={16} className="text-emerald-400" />
           </div>
           <p className="text-[10px] text-muted-foreground">
-            پیشنهاد پایان جنگ و بازگشت به روابط عادی بین‌المللی
+            بررسی زنده تراز قوا، بسته غرامت مالی یا واگذاری ارضی برای پایان جنگ
           </p>
         </button>
       );
