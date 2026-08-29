@@ -13,6 +13,7 @@ import {
   TreatyEvaluator,
 } from "@geopolitics/game-engine";
 import { DiplomaticProposalFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
+import { useUiStore } from "@/presentation/stores/use-ui-store";
 
 interface UseDiplomacyActionsRunnerProps {
   targetName: string;
@@ -38,6 +39,9 @@ export function useDiplomacyActionsRunner({
   targetNation,
 }: UseDiplomacyActionsRunnerProps) {
   const { dispatchAction } = useGameActions();
+  const setSelectedPeaceTargetCode = useUiStore(
+    (state) => state.setSelectedPeaceTargetCode,
+  );
 
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -112,16 +116,8 @@ export function useDiplomacyActionsRunner({
     }
   };
 
-  const handlePeaceTreaty = async () => {
-    const action = ActionFactory.diplomaticProposal(
-      nationId,
-      targetNationId,
-      "PEACE_TREATY",
-    );
-    const res = await dispatchAction(action);
-    if (res.success && res.resultData) {
-      setFeedbackModal(res.resultData as DiplomaticProposalFeedback);
-    }
+  const handleOpenPeaceNegotiations = () => {
+    setSelectedPeaceTargetCode(targetNationId);
   };
 
   const handleNonAggression = async () => {
@@ -214,7 +210,7 @@ export function useDiplomacyActionsRunner({
     securityGuaranteeCost,
     guaranteeValidation,
     handleSendAid,
-    handlePeaceTreaty: () => executeOrConfirm(handlePeaceTreaty, false),
+    handlePeaceTreaty: handleOpenPeaceNegotiations,
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),
     handleStrategicPartnership: () =>
       executeOrConfirm(handleStrategicPartnership, false),

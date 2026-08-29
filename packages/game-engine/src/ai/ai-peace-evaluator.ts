@@ -6,12 +6,9 @@ import {
   CountryRegistry,
   DiplomacyLockManager,
   GlobalCoalition,
+  PeaceTermsCalculator,
 } from "@geopolitics/domain";
-import {
-  GeopoliticalVectorCalculator,
-  GeopoliticalVector,
-} from "@/engine/ai/geopolitical-vector-calculator";
-import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
+import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class AIPeaceEvaluator {
   public static evaluate(
@@ -19,7 +16,7 @@ export class AIPeaceEvaluator {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
-    vectorsByTarget?: Map<string, GeopoliticalVector>,
+    _vectorsByTarget?: Map<string, GeopoliticalVector>,
     globalCoalition?: GlobalCoalition | null,
   ): GameAction | null {
     if (!nation.relations) return null;
@@ -57,22 +54,20 @@ export class AIPeaceEvaluator {
         continue;
       }
 
-      const vector =
-        vectorsByTarget?.get(canonicalTarget) ??
-        GeopoliticalVectorCalculator.calculate(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        );
-
-      const peaceUtility = UtilityDecisionEngine.calculatePeaceUtility(
+      const sourceTwmi = PeaceTermsCalculator.calculateTwmi(
         nation,
+        allNations,
+        provincesMap,
+      );
+      const targetTwmi = PeaceTermsCalculator.calculateTwmi(
         targetNation,
-        vector,
+        allNations,
+        provincesMap,
       );
 
-      if (peaceUtility >= 60) {
+      const ratio = sourceTwmi / targetTwmi;
+
+      if (ratio < 1.0) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,

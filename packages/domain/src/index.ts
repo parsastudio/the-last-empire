@@ -1,5 +1,7 @@
 export * from "./data/countries";
 export * from "./diplomacy/diplomacy.schema";
+export * from "./diplomacy/peace-terms.schema";
+export * from "./diplomacy/peace-terms-calculator.utility";
 export * from "./diplomacy/nation-relation-resolver.utility";
 export * from "./diplomacy/geopolitical-reach-resolver.utility";
 export * from "./diplomacy/security-guarantee-validator.utility";

@@ -352,7 +352,7 @@ export function ReportCard({
 
           {isIncomingInteractiveProposal && activePendingProposal && (
             <ProposalActionButtons
-              proposalId={activePendingProposal.id}
+              proposal={activePendingProposal}
               humanNationId={humanNationId!}
               sourceNationName={sourceName}
             />

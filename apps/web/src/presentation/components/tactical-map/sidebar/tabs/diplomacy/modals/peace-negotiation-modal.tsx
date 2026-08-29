@@ -1,0 +1,275 @@
+"use client";
+
+import React, { useMemo, useState } from "react";
+import {
+  Coins,
+  MapPin,
+  ShieldAlert,
+  Swords,
+  Scroll,
+  Trophy,
+  CheckCircle2,
+  XCircle,
+  TrendingUp,
+  TrendingDown,
+  Scale,
+  Ban,
+} from "lucide-react";
+import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
+import {
+  Nation,
+  Province,
+  PeaceTermsCalculator,
+  ActionFactory,
+  CountryRegistry,
+} from "@geopolitics/domain";
+import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+
+interface PeaceNegotiationModalProps {
+  isOpen: boolean;
+  humanNation: Nation | null;
+  targetNationId: string | null;
+  nationsMap?: Record<string, Nation>;
+  provincesMap?: Record<string, Province>;
+  onClose: () => void;
+}
+
+export function PeaceNegotiationModal({
+  isOpen,
+  humanNation,
+  targetNationId,
+  nationsMap,
+  provincesMap,
+  onClose,
+}: PeaceNegotiationModalProps) {
+  const { dispatchAction, isSubmitting } = useGameActions();
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const targetNation = useMemo(() => {
+    if (!targetNationId || !nationsMap) return null;
+    const canonical = CountryRegistry.resolveCanonicalId(targetNationId);
+    return nationsMap[canonical] || nationsMap[targetNationId] || null;
+  }, [targetNationId, nationsMap]);
+
+  const terms = useMemo(() => {
+    if (!humanNation || !targetNation) return null;
+    return PeaceTermsCalculator.calculateTerms(
+      humanNation,
+      targetNation,
+      nationsMap,
+      provincesMap,
+    );
+  }, [humanNation, targetNation, nationsMap, provincesMap]);
+
+  if (!isOpen || !humanNation || !targetNation || !terms) {
+    return null;
+  }
+
+  const humanFlag = getFlagEmoji(humanNation.flagCode || humanNation.id);
+  const targetFlag = getFlagEmoji(targetNation.flagCode || targetNation.id);
+
+  const isDominantAi = terms.ratio >= 2.0;
+  const isCrushedAi = terms.ratio <= 0.5;
+  const isWhitePeace = terms.settlementType === "WHITE_PEACE";
+
+  const handleSignTreaty = async () => {
+    if (isProcessing || isSubmitting) return;
+    try {
+      setIsProcessing(true);
+      const action = ActionFactory.signPeaceSettlement(
+        humanNation.id,
+        targetNation.id,
+      );
+      const res = await dispatchAction(
+        action,
+        "معاهده صلح با موفقیت به تصویب رسید.",
+      );
+      if (res.success) {
+        onClose();
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <UnifiedModalShell
+      isOpen={isOpen}
+      title={`میز مذاکرات آتش‌بس و شروط صلح با ${targetNation.name}`}
+      subtitle="ارزیابی زنده شاخص توان نبرد و پیش‌نویس معاهده ترک مخاصمه"
+      maxWidthClass="max-w-xl"
+      onClose={onClose}
+    >
+      <div className="space-y-4 text-right dir-rtl font-sans pb-1">
+        <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-4 rounded-3xl flex items-center justify-between gap-3 shadow-md backdrop-blur-xl">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-secondary/80 border border-border/70 flex items-center justify-center text-3xl shadow-inner select-none shrink-0">
+              {humanFlag}
+            </div>
+            <div className="space-y-0.5">
+              <span className="text-sm font-black text-foreground block">
+                {humanNation.name}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono block">
+                توان نبرد:{" "}
+                {PersianNumberFormatter.formatCurrency(terms.targetTwmi, true)}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <div className="p-2 rounded-xl bg-secondary border border-border/70 text-foreground shadow-sm">
+              <Scale size={18} />
+            </div>
+            <span className="text-[9px] font-mono font-black text-muted-foreground">
+              تراز قوا: {PersianNumberFormatter.toPersianDigits(terms.ratio)}x
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 text-left dir-ltr">
+            <div className="w-12 h-12 rounded-2xl bg-secondary/80 border border-border/70 flex items-center justify-center text-3xl shadow-inner select-none shrink-0">
+              {targetFlag}
+            </div>
+            <div className="space-y-0.5 text-right">
+              <span className="text-sm font-black text-foreground block">
+                {targetNation.name}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono block">
+                توان نبرد:{" "}
+                {PersianNumberFormatter.formatCurrency(terms.sourceTwmi, true)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          className={`p-4.5 rounded-3xl border space-y-3 shadow-lg relative overflow-hidden ${
+            isDominantAi
+              ? "bg-rose-950/25 border-rose-500/50"
+              : isCrushedAi
+                ? "bg-emerald-950/25 border-emerald-500/50"
+                : isWhitePeace
+                  ? "bg-secondary/40 border-border/70"
+                  : terms.isAiOffering
+                    ? "bg-emerald-950/20 border-emerald-500/40"
+                    : "bg-amber-950/20 border-amber-500/40"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Scroll size={16} className="text-foreground shrink-0" />
+              <h4 className="text-xs font-black text-foreground">
+                {terms.headline}
+              </h4>
+            </div>
+            <span
+              className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${
+                isDominantAi
+                  ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                  : terms.isAiOffering
+                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                    : "bg-amber-500/20 text-amber-300 border-amber-500/40"
+              }`}
+            >
+              {isDominantAi
+                ? "برتری مطلق حریف"
+                : isCrushedAi
+                  ? "استیصال و سقوط حریف"
+                  : isWhitePeace
+                    ? "موازنه برابر"
+                    : terms.isAiOffering
+                      ? "پیشنهاد باج حریف"
+                      : "مطالبه باج حریف"}
+            </span>
+          </div>
+
+          <p className="text-xs text-foreground/90 leading-relaxed font-sans font-medium">
+            {terms.description}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-border/40 font-mono text-xs">
+            {terms.moneyAmount > 0 && (
+              <div className="bg-background/80 p-3 rounded-2xl border border-border/50 space-y-1">
+                <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
+                  <Coins size={12} className="text-gdp" />
+                  <span>
+                    {terms.isAiOffering
+                      ? "غرامت پرداختی به خزانه شما:"
+                      : "غرامت مطالبه‌شده از خزانه شما:"}
+                  </span>
+                </span>
+                <span
+                  className={`font-black text-sm block ${
+                    terms.isAiOffering ? "text-gdp" : "text-military"
+                  }`}
+                >
+                  {terms.isAiOffering ? "+" : "-"}
+                  {PersianNumberFormatter.formatCurrency(
+                    terms.moneyAmount,
+                    true,
+                  )}
+                </span>
+              </div>
+            )}
+
+            {terms.concededProvincesNames.length > 0 && (
+              <div className="bg-background/80 p-3 rounded-2xl border border-border/50 space-y-1">
+                <span className="text-[10px] text-muted-foreground font-sans flex items-center gap-1">
+                  <MapPin size={12} className="text-primary" />
+                  <span>
+                    {terms.isAiOffering
+                      ? "استان‌های واگذارشده به شما:"
+                      : "استان‌های مورد مطالبه حریف:"}
+                  </span>
+                </span>
+                <span className="font-black text-foreground text-xs block truncate font-sans">
+                  {terms.concededProvincesNames.join("، ")}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 font-sans">
+          <button
+            type="button"
+            onClick={onClose}
+            className="py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <Swords size={15} />
+            <span>رد شروط و تداوم نبرد</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSignTreaty}
+            disabled={!terms.canAffordTerms || isProcessing || isSubmitting}
+            className={`py-3.5 rounded-2xl font-black text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 border ${
+              isDominantAi
+                ? "bg-rose-600 hover:bg-rose-500 text-white border-rose-500/40 shadow-rose-600/20"
+                : "bg-gdp hover:bg-gdp/90 text-primary-foreground border-gdp/30 shadow-gdp/20"
+            }`}
+          >
+            {isDominantAi ? (
+              <>
+                <Skull size={15} />
+                <span>پذیرش تسلیم و انحلال</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 size={15} />
+                <span>امضا و تصویب معاهده صلح</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </UnifiedModalShell>
+  );
+}
+
+function Skull({ size, className }: { size: number; className?: string }) {
+  return <ShieldAlert size={size} className={className} />;
+}

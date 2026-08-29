@@ -61,6 +61,14 @@ export const RespondDiplomaticProposalActionSchema = z.object({
   accept: z.boolean(),
 });
 
+export const SignPeaceSettlementActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  targetNationId: z.string(),
+  type: z.literal("SIGN_PEACE_SETTLEMENT"),
+  proposalId: z.string().optional(),
+});
+
 export const UpgradeDevelopmentActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -123,6 +131,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   BuyProvinceActionSchema,
   DiplomaticProposalActionSchema,
   RespondDiplomaticProposalActionSchema,
+  SignPeaceSettlementActionSchema,
   UpgradeDevelopmentActionSchema,
   ExecuteEspionageActionSchema,
   RepayDebtActionSchema,
@@ -153,6 +162,9 @@ export type DiplomaticProposalAction = z.infer<
 >;
 export type RespondDiplomaticProposalAction = z.infer<
   typeof RespondDiplomaticProposalActionSchema
+>;
+export type SignPeaceSettlementAction = z.infer<
+  typeof SignPeaceSettlementActionSchema
 >;
 export type UpgradeDevelopmentAction = z.infer<
   typeof UpgradeDevelopmentActionSchema
