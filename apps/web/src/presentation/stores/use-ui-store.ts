@@ -11,6 +11,17 @@ export interface CoalitionAlertData {
   turn: number;
 }
 
+export interface ExportSalesBuyerItem {
+  nationId: string;
+  amount: number;
+}
+
+export interface ExportSalesModalData {
+  buyers: ExportSalesBuyerItem[];
+  totalProfit: number;
+  turn: number;
+}
+
 interface UiStoreState {
   activeTab: SidebarTabType | null;
   activeSubTab: string | null;
@@ -20,6 +31,7 @@ interface UiStoreState {
   selectedCoalitionAlert: CoalitionAlertData | null;
   selectedPeaceTargetCode: string | null;
   isVictoryDebriefOpen: boolean;
+  selectedExportSalesModal: ExportSalesModalData | null;
 
   setActiveTab: (
     tab: SidebarTabType | null,
@@ -33,6 +45,7 @@ interface UiStoreState {
   setSelectedCoalitionAlert: (data: CoalitionAlertData | null) => void;
   setSelectedPeaceTargetCode: (code: string | null) => void;
   setIsVictoryDebriefOpen: (open: boolean) => void;
+  setSelectedExportSalesModal: (data: ExportSalesModalData | null) => void;
   closeActiveTab: () => void;
 }
 
@@ -45,6 +58,7 @@ export const useUiStore = create<UiStoreState>((set) => ({
   selectedCoalitionAlert: null,
   selectedPeaceTargetCode: null,
   isVictoryDebriefOpen: false,
+  selectedExportSalesModal: null,
 
   setActiveTab: (tab, subTab = null, targetCode = null) =>
     set((state) => ({
@@ -80,6 +94,11 @@ export const useUiStore = create<UiStoreState>((set) => ({
   setIsVictoryDebriefOpen: (open) =>
     set({
       isVictoryDebriefOpen: open,
+    }),
+
+  setSelectedExportSalesModal: (data) =>
+    set({
+      selectedExportSalesModal: data,
     }),
 
   closeActiveTab: () =>

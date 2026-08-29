@@ -44,7 +44,7 @@ export class SecurityGuaranteeValidator {
     const clientTech = client.military.techLevel || 1.0;
     const guarantorTech = guarantor.military.techLevel || 1.0;
     const techDiff = Number((guarantorTech - clientTech).toFixed(1));
-    const isTechValid = techDiff >= 1.0;
+    const isTechValid = techDiff > 0;
 
     const rel = NationRelationResolver.getRelation(
       client.relations,
@@ -68,7 +68,7 @@ export class SecurityGuaranteeValidator {
         reason = "GDP کشور ضامن نباید بیش از ۱۰ برابر کشور شما باشد.";
       }
     } else if (!isTechValid) {
-      reason = "سطح فناوری نظامی ضامن باید حداقل ۱.۰ لول بالاتر باشد.";
+      reason = "سطح فناوری نظامی کشور ضامن باید بالاتر از شما باشد.";
     }
 
     const isValid = isGdpValid && isTechValid && isNotWar && isTensionValid;

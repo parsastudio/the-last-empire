@@ -53,6 +53,7 @@ function calculateLogPriority(
     case "DIPLOMATIC_PROPOSAL_SENT":
       return isHumanInvolved ? 6 : 10;
 
+    case "ARMS_EXPORT_SUMMARY":
     case "FOREIGN_AID_SENT":
     case "ARMS_TRADE":
       return isHumanInvolved ? 7 : 11;
@@ -135,6 +136,10 @@ export function useWideReports({
           const isTarget = srcCanonical === canonicalHuman;
           const isMember = memberIds.includes(canonicalHuman);
           return isTarget || isMember;
+        }
+
+        if (log.eventCode === "ARMS_EXPORT_SUMMARY") {
+          return srcCanonical === canonicalHuman;
         }
 
         if (log.eventCode === "ESPIONAGE_OPERATION") {

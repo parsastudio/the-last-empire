@@ -6,8 +6,6 @@ import {
   getProvinceGdp,
 } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
-import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
-import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { PeaceTermsPackage, PeaceSettlementType } from "./peace-terms.schema";
 
@@ -24,23 +22,20 @@ export class PeaceTermsCalculator {
       Math.floor(gdp * 0.8) - nation.nationalDebt,
     );
 
-    const fiscal = FiscalRevenueCalculator.calculate(
-      nation,
-      nationsMap,
-      provincesMap,
+    const armyValuation = MilitaryPricingCalculator.calculateTotalArmyValuation(
+      nation.military,
     );
-    const payroll = MilitaryPayrollCalculator.calculatePayroll(
-      nation,
-      provincesMap,
+
+    const estimatedRevenue = Math.floor(gdp * 0.05);
+    const estimatedPayroll = Math.min(
+      Math.floor(gdp * 0.06),
+      Math.floor(armyValuation * 0.06),
     );
     const debtInterest = Math.floor(nation.nationalDebt * 0.07);
     const securityFee = nation.securityGuarantorId ? Math.floor(gdp * 0.1) : 0;
 
     const netTurnIncome =
-      fiscal.totalRevenue - (payroll.total + debtInterest + securityFee);
-    const armyValuation = MilitaryPricingCalculator.calculateTotalArmyValuation(
-      nation.military,
-    );
+      estimatedRevenue - (estimatedPayroll + debtInterest + securityFee);
 
     let guarantorValuation = 0;
     if (nation.securityGuarantorId && nationsMap) {
@@ -61,7 +56,24 @@ export class PeaceTermsCalculator {
       armyValuation +
       guarantorValuation;
 
-    return Math.max(1_000_000_000, totalScore);
+    let activeWarsCount = 0;
+    if (nationsMap && nation.relations) {
+      const sourceCanonical = CountryRegistry.resolveCanonicalId(nation.id);
+      for (const [targetId, rel] of Object.entries(nation.relations)) {
+        if (rel.stance === "WAR") {
+          const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+          if (canonicalTarget !== sourceCanonical) {
+            const enemy = nationsMap[canonicalTarget] || nationsMap[targetId];
+            if (enemy && enemy.isAlive) {
+              activeWarsCount++;
+            }
+          }
+        }
+      }
+    }
+
+    const dispersionFactor = 1 + 0.5 * Math.max(0, activeWarsCount - 1);
+    return Math.max(1_000_000_000, Math.floor(totalScore / dispersionFactor));
   }
 
   public static calculateTerms(

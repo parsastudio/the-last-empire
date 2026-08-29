@@ -1,6 +1,7 @@
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 export class TurnLogFormatter {
   private static resolveName(
@@ -161,13 +162,22 @@ export class TurnLogFormatter {
       }
 
       case "ARMS_TRADE": {
-        const qty = String(params["quantity"] || "۱");
-        const unitName = String(params["unitName"] || "یگان رزمی");
+        const amountNum = Number(params["amount"] || 0);
+        const formattedAmount = PersianNumberFormatter.formatCurrency(
+          amountNum,
+          true,
+        );
         const role = String(params["role"] || "BUYER");
         if (role === "BUYER") {
-          return `واردات فوری تسلیحات: ${qty} یگان ${unitName} از کشور ${targetName} تحویل ارتش شد.`;
+          return `خرید و واردات فوری تسلیحات به ارزش ${formattedAmount} از کشور ${targetName}.`;
         }
-        return `صادرات تسلیحات: ${qty} یگان ${unitName} به ${targetName} صادر و سود آن به خزانه واریز گردید.`;
+        return `فروش و صادرات تسلیحات به ارزش ${formattedAmount} به کشور ${targetName}.`;
+      }
+
+      case "ARMS_EXPORT_SUMMARY": {
+        const count = Number(params["buyersCount"] || 0);
+        const profit = Number(params["totalProfit"] || 0);
+        return `مجموعاً ${PersianNumberFormatter.toPersianDigits(count)} کشور از صنایع دفاعی شما تسلیحات خریداری کردند و مبلغ ${PersianNumberFormatter.formatCurrency(profit, true)} سود به خزانه واریز گردید.`;
       }
 
       case "TERRITORY_PURCHASED": {
