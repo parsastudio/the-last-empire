@@ -8,6 +8,7 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { CountryRegistry } from "@/domain/data/countries";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
+import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { useAttackForcesDeployment } from "./hooks/use-attack-forces-deployment";
 import { useAttackForecastCalculator } from "./hooks/use-attack-forecast-calculator";
@@ -85,11 +86,39 @@ export function useDirectAttackForm({
     humanNation,
     targetNation,
     targetGuarantorNation,
+    dronesToLaunch: deployment.dronesToLaunch,
     infantryToDeploy: deployment.infantryToDeploy,
     armorToDeploy: deployment.armorToDeploy,
     airForceToDeploy: deployment.airForceToDeploy,
     provincesMap: gameState?.provinces,
   });
+
+  const handleAutoOptimizeDeploy = useCallback(() => {
+    if (!humanNation || !targetNation) return;
+
+    const result = AttackDeploymentOptimizer.calculateOptimalDeployment(
+      humanNation,
+      targetNation,
+      gameState?.provinces,
+      targetGuarantorNation,
+      reach.attackType,
+      deployment.navalFleetCount,
+    );
+
+    deployment.applyOptimizedDeploy(
+      result.drones,
+      result.airForce,
+      result.armor,
+      result.infantry,
+    );
+  }, [
+    humanNation,
+    targetNation,
+    gameState?.provinces,
+    targetGuarantorNation,
+    reach.attackType,
+    deployment,
+  ]);
 
   const handleExecuteAttack = useCallback(async () => {
     if (
@@ -104,6 +133,7 @@ export function useDirectAttackForm({
     const action = ActionFactory.initiateBattle(
       humanNation.id,
       targetNation.id,
+      deployment.dronesToLaunch,
       deployment.infantryToDeploy,
       deployment.armorToDeploy,
       deployment.airForceToDeploy,
@@ -169,11 +199,14 @@ export function useDirectAttackForm({
     setArmorToDeploy: deployment.setArmorToDeploy,
     airForceToDeploy: deployment.airForceToDeploy,
     setAirForceToDeploy: deployment.setAirForceToDeploy,
+    dronesToLaunch: deployment.dronesToLaunch,
+    setDronesToLaunch: deployment.setDronesToLaunch,
     totalLogisticsCost: deployment.totalLogisticsCost,
     canAfford: deployment.canAfford,
     hasSelectedInfantry: deployment.hasSelectedInfantry,
     isSubmitting,
     handleExecuteQuickRecon: recon.handleExecuteQuickRecon,
+    handleAutoOptimizeDeploy,
     handleExecuteAttack,
   };
 }

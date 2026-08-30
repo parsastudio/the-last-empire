@@ -18,16 +18,16 @@ export class WarDeclarationExecutor {
     receiverRel: RelationProfile,
     treatyEvaluator: TreatyEvaluator,
   ): { newState: GameState; resultData: unknown } {
-    const hasLandBorder = GeopoliticalReachResolver.hasDirectLandBorder(
+    const canReach = GeopoliticalReachResolver.canReachForWarOrStrike(
       nation,
       receiver,
       state.provinces,
     );
 
-    if (!hasLandBorder) {
+    if (!canReach) {
       throw new GameError(
-        "INVALID_ACTION",
-        `امکان اعلان جنگ به کشور ${receiver.name} وجود ندارد: عدم وجود مرز زمینی مشترک.`,
+        "GEOPOLITICAL_REACH_DENIED",
+        `امکان اعلان جنگ به کشور ${receiver.name} وجود ندارد: عدم وجود مرز زمینی مشترک یا دسترسی دریایی با حداقل ۱ ناوگان فعال.`,
       );
     }
 

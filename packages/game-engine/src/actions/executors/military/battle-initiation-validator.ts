@@ -1,6 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
-import { Nation, GameError, NationRelationResolver } from "@geopolitics/domain";
+import {
+  Nation,
+  GameError,
+  NationRelationResolver,
+  GeopoliticalReachResolver,
+} from "@geopolitics/domain";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 export class BattleInitiationValidator {
@@ -24,6 +29,18 @@ export class BattleInitiationValidator {
 
     if (!target.isAlive) {
       throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
+    }
+
+    const canReach = GeopoliticalReachResolver.canReachForWarOrStrike(
+      nation,
+      target,
+      state.provinces,
+    );
+    if (!canReach) {
+      throw new GameError(
+        "GEOPOLITICAL_REACH_DENIED",
+        "امکان آغاز عملیات تهاجم وجود ندارد: عدم وجود مرز زمینی یا عدم دسترسی به آب‌های آزاد با ناوگان دریایی.",
+      );
     }
 
     const attackedTargets = nation.attackedTargetIdsThisTurn || [];
@@ -81,10 +98,10 @@ export class BattleInitiationValidator {
       );
     }
 
-    if (action.dronesToLaunch > nation.military.droneMissile) {
+    if ((action.dronesToLaunch || 0) > (nation.military.droneMissile || 0)) {
       throw new GameError(
         "INSUFFICIENT_RESOURCES",
-        "تعداد پهپادهای درخواستی بیشتر از موجودی انبار است.",
+        "تعداد پهپادهای درخواستی بیشتر از موجودی زرادخانه کشور است.",
       );
     }
   }

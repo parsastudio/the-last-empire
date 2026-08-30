@@ -1,97 +1,40 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  BattleSpoilsDetails,
+  CasualtyMetrics,
+} from "@/domain/reports/combat-report.schema";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
-import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { ExtraCapturedMilitaryUnits } from "@/engine/combat/loot/battle-loot-manager";
-import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
-import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
-
-export interface SpoilsCollectionResult {
-  extraCapturedUnits?: ExtraCapturedMilitaryUnits;
-  extraTreasuryLooted: number;
-  spoilsData: BattleSpoilsDetails;
-}
 
 export class BattleSpoilsCollector {
-  public static collect(
-    defender: Nation,
-    calcResult: BattleCalculationResult,
+  public static collectSpoils(
     conquest: ProvinceConquestResult,
-    isTotalAnnexation: boolean,
-  ): SpoilsCollectionResult {
-    let extraCapturedUnits: ExtraCapturedMilitaryUnits | undefined = undefined;
-    let extraTreasuryLooted = 0;
-
-    if (isTotalAnnexation) {
-      const survivingDefenderInf = Math.max(
-        0,
-        (defender.military.infantry || 0) -
-          calcResult.defenderCasualties.infantryLost,
-      );
-      const survivingDefenderArmor = Math.max(
-        0,
-        (defender.military.armor || 0) -
-          calcResult.defenderCasualties.armorLost,
-      );
-      const survivingDefenderAD = Math.max(
-        0,
-        (defender.military.airDefense || 0) -
-          calcResult.defenderCasualties.airDefenseLost,
-      );
-      const survivingDefenderAir = Math.max(
-        0,
-        (defender.military.airForce || 0) -
-          calcResult.defenderCasualties.airForceLost,
-      );
-      const survivingDefenderDrones = Math.max(
-        0,
-        defender.military.droneMissile || 0,
-      );
-
-      extraCapturedUnits = {
-        infantry: survivingDefenderInf,
-        armor: survivingDefenderArmor,
-        airDefense: survivingDefenderAD,
-        airForce: survivingDefenderAir,
-        droneMissile: survivingDefenderDrones,
-      };
-
-      extraTreasuryLooted = Math.max(
-        0,
-        defender.treasury - calcResult.treasuryLooted,
-      );
-    }
-
-    let gainedPop = 0;
-    let gainedGdp = 0;
-    for (let i = 0; i < conquest.conqueredProvincesList.length; i++) {
-      const p = conquest.conqueredProvincesList[i]!;
-      gainedPop += p.population || 0;
-      gainedGdp += getProvinceGdp(p);
-    }
-
-    const totalLootedTreasury =
-      calcResult.treasuryLooted + (extraTreasuryLooted || 0);
-
-    const spoilsData: BattleSpoilsDetails = {
+    treasuryLooted: number,
+    defenderCasualties: CasualtyMetrics,
+  ): BattleSpoilsDetails {
+    return {
       conqueredPixels: conquest.conqueredPixels,
       conqueredProvincesCount: conquest.conqueredProvincesList.length,
       conqueredProvincesNames: conquest.conqueredProvincesList.map(
         (p) => p.nameFa,
       ),
-      gainedPopulation: gainedPop,
-      gainedGdp: gainedGdp,
-      lootedTreasury: totalLootedTreasury,
-      capturedInfantry: extraCapturedUnits?.infantry || 0,
-      capturedArmor: extraCapturedUnits?.armor || 0,
-      capturedAirDefense: extraCapturedUnits?.airDefense || 0,
-      capturedAirForce: extraCapturedUnits?.airForce || 0,
-      capturedDrones: extraCapturedUnits?.droneMissile || 0,
-    };
-
-    return {
-      extraCapturedUnits,
-      extraTreasuryLooted,
-      spoilsData,
+      gainedPopulation: conquest.conqueredProvincesList.reduce(
+        (sum, p) => sum + (p.population || 0),
+        0,
+      ),
+      gainedGdp: conquest.conqueredProvincesGdp,
+      lootedTreasury: treasuryLooted,
+      capturedInfantry: Math.floor(
+        (defenderCasualties.infantryLost || 0) * 0.1,
+      ),
+      capturedArmor: Math.floor((defenderCasualties.armorLost || 0) * 0.1),
+      capturedAirDefense: Math.floor(
+        (defenderCasualties.airDefenseLost || 0) * 0.1,
+      ),
+      capturedAirForce: Math.floor(
+        (defenderCasualties.airForceLost || 0) * 0.1,
+      ),
+      capturedDrones: Math.floor(
+        (defenderCasualties.droneMissileLost || 0) * 0.1,
+      ),
     };
   }
 }

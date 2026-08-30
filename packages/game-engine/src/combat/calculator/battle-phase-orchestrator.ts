@@ -1,3 +1,4 @@
+import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
 import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
 import { GroundEngagementPhase } from "@/engine/combat/phases/ground-engagement-phase";
 import {
@@ -22,10 +23,15 @@ export interface PhaseOrchestrationResult {
     rawDefAirLoss: number;
     defArmorDestroyedByAir: number;
   };
+  missilePhaseOutput: {
+    rawDefAirDefenseLost: number;
+    destroyedFactories: number;
+  };
 }
 
 export class BattlePhaseOrchestrator {
   public static executePhases(
+    deployedDrones: number,
     defAirDefense: number,
     deployedAirForce: number,
     defAirForce: number,
@@ -33,6 +39,7 @@ export class BattlePhaseOrchestrator {
     defArmor: number,
     deployedInfantry: number,
     defInfantry: number,
+    attDroneMult: number,
     defAdMult: number,
     attAirMult: number,
     defAirMult: number,
@@ -40,7 +47,16 @@ export class BattlePhaseOrchestrator {
     defArmorMult: number,
     attInfMult: number,
     defInfMult: number,
+    targetFactoriesCount?: number,
   ): PhaseOrchestrationResult {
+    const missilePhase = MissileInterceptionPhase.calculate({
+      deployedDrones,
+      defAirDefense,
+      attDroneMult,
+      defAdMult,
+      targetFactoriesCount,
+    });
+
     const airPhase = AirSupremacyPhase.calculate({
       deployedAirForce,
       defAirForce,
@@ -48,7 +64,7 @@ export class BattlePhaseOrchestrator {
       attAirMult,
       defAirMult,
       defArmorMult,
-      defAirDefenseRemainingEff: defAirDefense * defAdMult,
+      defAirDefenseRemainingEff: missilePhase.defAirDefenseRemainingEff,
     });
 
     const groundPhase = GroundEngagementPhase.calculate({
@@ -63,6 +79,20 @@ export class BattlePhaseOrchestrator {
       defArmorMult,
       defInfMult,
     });
+
+    let phase1Winner: "ATTACKER" | "DEFENDER" | "DRAW" | "SKIPPED" = "SKIPPED";
+    if (deployedDrones > 0) {
+      if (
+        missilePhase.rawDefAirDefenseLost > 0 ||
+        missilePhase.destroyedFactories > 0
+      ) {
+        phase1Winner = "ATTACKER";
+      } else if (defAirDefense > 0) {
+        phase1Winner = "DEFENDER";
+      } else {
+        phase1Winner = "DRAW";
+      }
+    }
 
     let phase2Winner: "ATTACKER" | "DEFENDER" | "DRAW" = "DRAW";
     if (deployedAirForce > 0 || defAirForce > 0) {
@@ -79,11 +109,12 @@ export class BattlePhaseOrchestrator {
 
     return {
       phase1Missile: {
-        dronesLaunched: 0,
+        dronesLaunched: deployedDrones,
         defAirDefense,
-        airDefenseLost: 0,
-        dronesIntercepted: 0,
-        phaseWinner: "SKIPPED",
+        airDefenseLost: missilePhase.rawDefAirDefenseLost,
+        dronesIntercepted: Math.min(deployedDrones, defAirDefense * 2),
+        destroyedFactories: missilePhase.destroyedFactories,
+        phaseWinner: phase1Winner,
       },
       phase2Air: {
         attAirForce: deployedAirForce,
@@ -106,6 +137,7 @@ export class BattlePhaseOrchestrator {
       },
       groundPhaseOutput: groundPhase,
       airPhaseOutput: airPhase,
+      missilePhaseOutput: missilePhase,
     };
   }
 }

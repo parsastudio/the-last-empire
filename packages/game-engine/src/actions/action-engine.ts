@@ -60,10 +60,13 @@ export class ActionEngine {
 
       switch (action.type) {
         case "SET_ECONOMIC_DOCTRINE":
+        case "BUILD_FACTORY":
+        case "EQUIP_DOMESTIC_MACHINERY":
+        case "INVEST_INDUSTRIAL_RESEARCH":
+        case "BUY_INDUSTRIAL_EQUIPMENT":
         case "BUY_PROVINCE":
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
-        case "UPGRADE_DEVELOPMENT":
           newState = EconomyActionExecutor.execute(
             state,
             action,

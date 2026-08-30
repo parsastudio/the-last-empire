@@ -1,122 +1,51 @@
-import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
+import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { CountryRegistry } from "@/domain/data/countries";
-import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
-import {
-  NationGettersUtility,
-  NationMutatorUtility,
-  NationRelationResolver,
-} from "@geopolitics/domain";
+import { NationGettersUtility, TurnLogBuilder } from "@geopolitics/domain";
 
 export class NationLivenessManager {
   public updateLiveness(state: GameState): GameState {
     const updatedNations: Record<string, Nation> = { ...state.nations };
-    const deadCanonicalIds = new Set<string>();
-    const newAnnexationLogs: TurnLogEntry[] = [];
+    const logs = [...state.turnLogs];
+    let hasChanges = false;
 
-    for (const [id, nation] of Object.entries(updatedNations)) {
-      const canonicalId = CountryRegistry.resolveCanonicalId(id);
-      const hasProvinces = NationGettersUtility.isAlive(id, state.provinces);
+    for (const [id, nation] of Object.entries(state.nations)) {
+      if (!nation.isAlive) continue;
 
-      if (!hasProvinces) {
-        deadCanonicalIds.add(canonicalId);
-        deadCanonicalIds.add(id);
+      const isStillAlive = NationGettersUtility.isAlive(
+        nation.id,
+        state.provinces,
+      );
 
-        if (nation.isAlive) {
-          newAnnexationLogs.push(
-            TurnLogBuilder.createLogEntry(
-              state.currentTurn,
-              nation.id,
-              "CRITICAL",
-              "NATION_COLLAPSED",
-              "GLOBAL_ANNEXATION",
-              "GLOBAL",
-            ),
-          );
-        }
+      if (!isStillAlive) {
+        hasChanges = true;
+        updatedNations[id] = {
+          ...nation,
+          isAlive: false,
+          treasury: 0,
+          nationalDebt: 0,
+        };
 
-        updatedNations[id] = NationMutatorUtility.createDefeatedNation(nation);
+        logs.push(
+          TurnLogBuilder.createNationalLog(
+            state.currentTurn,
+            nation.id,
+            "DOMESTIC",
+            "CRITICAL",
+            "NATION_COLLAPSED",
+            {},
+          ),
+        );
       }
     }
 
-    if (deadCanonicalIds.size === 0) {
-      return {
-        ...state,
-        nations: updatedNations,
-      };
+    if (!hasChanges) {
+      return state;
     }
-
-    for (const [id, nation] of Object.entries(updatedNations)) {
-      if (!nation.isAlive) {
-        continue;
-      }
-
-      const updatedRelations = { ...nation.relations };
-      let relationsChanged = false;
-      let hadWarWithEliminated = false;
-
-      for (const targetId of Object.keys(updatedRelations)) {
-        const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-        if (
-          deadCanonicalIds.has(canonicalTarget) ||
-          deadCanonicalIds.has(targetId)
-        ) {
-          if (updatedRelations[targetId]?.stance === "WAR") {
-            hadWarWithEliminated = true;
-          }
-          delete updatedRelations[targetId];
-          relationsChanged = true;
-        }
-      }
-
-      let nextWarFocus = nation.warFocusTargetId;
-      if (
-        nextWarFocus &&
-        (deadCanonicalIds.has(
-          CountryRegistry.resolveCanonicalId(nextWarFocus),
-        ) ||
-          deadCanonicalIds.has(nextWarFocus))
-      ) {
-        nextWarFocus = null;
-      }
-
-      const nextCooldown = NationRelationResolver.calculatePostWarCooldown(
-        {
-          isAi: nation.isAi,
-          relations: updatedRelations,
-          postWarCooldownTurns: nation.postWarCooldownTurns,
-        },
-        hadWarWithEliminated,
-      );
-
-      updatedNations[id] = {
-        ...nation,
-        warFocusTargetId: nextWarFocus,
-        postWarCooldownTurns: nextCooldown,
-        relations: relationsChanged ? updatedRelations : nation.relations,
-      };
-    }
-
-    const filteredProposals = state.pendingProposals.filter((proposal) => {
-      const senderCanonical = CountryRegistry.resolveCanonicalId(
-        proposal.senderNationId,
-      );
-      const receiverCanonical = CountryRegistry.resolveCanonicalId(
-        proposal.receiverNationId,
-      );
-      return (
-        !deadCanonicalIds.has(senderCanonical) &&
-        !deadCanonicalIds.has(proposal.senderNationId) &&
-        !deadCanonicalIds.has(receiverCanonical) &&
-        !deadCanonicalIds.has(proposal.receiverNationId)
-      );
-    });
 
     return {
       ...state,
       nations: updatedNations,
-      pendingProposals: filteredProposals,
-      turnLogs: [...state.turnLogs, ...newAnnexationLogs],
+      turnLogs: logs,
     };
   }
 }

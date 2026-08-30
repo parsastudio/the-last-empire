@@ -124,24 +124,16 @@ export const InvestResearchActionSchema = z.object({
   type: z.literal("INVEST_RESEARCH"),
 });
 
-export const StrategicIndustrialStrikeActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("STRATEGIC_INDUSTRIAL_STRIKE"),
-  targetNationId: z.string(),
-  targetProvinceId: z.number().positive(),
-  dronesToLaunch: z.number().positive(),
-});
-
 export const InitiateBattleActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   type: z.literal("INITIATE_BATTLE"),
   targetNationId: z.string(),
   targetProvinceId: z.number().positive().optional(),
-  infantryToDeploy: z.number().positive(),
-  armorToDeploy: z.number().nonnegative().optional(),
-  airForceToDeploy: z.number().nonnegative().optional(),
+  dronesToLaunch: z.number().nonnegative().default(0),
+  infantryToDeploy: z.number().positive().default(1),
+  armorToDeploy: z.number().nonnegative().default(0),
+  airForceToDeploy: z.number().nonnegative().default(0),
   attackType: z.enum(["LAND", "NAVAL"]).optional(),
 });
 
@@ -162,7 +154,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   RepayDebtActionSchema,
   RequestLoanActionSchema,
   InvestResearchActionSchema,
-  StrategicIndustrialStrikeActionSchema,
   InitiateBattleActionSchema,
 ]);
 
@@ -207,9 +198,6 @@ export type ExecuteEspionageAction = z.infer<
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
 export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
-export type StrategicIndustrialStrikeAction = z.infer<
-  typeof StrategicIndustrialStrikeActionSchema
->;
 export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;

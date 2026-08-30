@@ -4,7 +4,7 @@ export * from "./actions/military-action-executor";
 export * from "./actions/politics-action-executor";
 export * from "./actions/executors/economy/province-trade-executor";
 export * from "./actions/executors/economy/national-debt-executor";
-export * from "./actions/executors/economy/development-upgrade-executor";
+export * from "./actions/executors/economy/factory-action-executor";
 export * from "./actions/executors/military/naval-fleet-executor";
 export * from "./actions/executors/military/battle-initiation-validator";
 export * from "./actions/executors/politics/war-declaration-executor";
@@ -28,6 +28,7 @@ export * from "./ai/procurement/ai-posture-evaluator";
 export * from "./ai/procurement/ai-wartime-loan-evaluator";
 export * from "./ai/procurement/ai-arms-seller-matcher";
 export * from "./ai/procurement/ai-arms-import-planner";
+export * from "./ai/procurement/ai-machinery-import-planner";
 export * from "./ai/procurement/ai-domestic-recruitment-planner";
 export * from "./ai/procurement/ai-naval-procurement-planner";
 export * from "./ai/ai-procurement-planner";
@@ -75,7 +76,6 @@ export * from "./diplomacy/treaty-acceptance-applier";
 export * from "./diplomacy/peace-settlement-executor";
 
 export * from "./economy/economy-calculators";
-export * from "./economy/demographics/demographics-engine";
 
 export * from "./espionage/espionage-calculator";
 export * from "./espionage/espionage-manager";
