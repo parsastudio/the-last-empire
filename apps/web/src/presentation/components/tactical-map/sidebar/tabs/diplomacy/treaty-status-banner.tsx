@@ -8,6 +8,7 @@ import {
   Skull,
 } from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { getDiplomaticStanceLabel } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 interface TreatyStatusBannerProps {
   stance: DiplomaticStance | string;
@@ -42,7 +43,7 @@ export function TreatyStatusBanner({
           در حال نبرد نظامی فعال (متخاصم)
         </span>
         <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-400">
-          وضعیت فعلی
+          {getDiplomaticStanceLabel(stance)}
         </span>
       </div>
     );
@@ -70,7 +71,7 @@ export function TreatyStatusBanner({
           شراکت استراتژیک و اقتصادی (فعال)
         </span>
         <span className="text-[9px] font-mono bg-gdp/20 px-2 py-0.5 rounded text-gdp">
-          وضعیت فعلی
+          {getDiplomaticStanceLabel(stance)}
         </span>
       </div>
     );
@@ -84,7 +85,7 @@ export function TreatyStatusBanner({
           پیمان عدم تخاصم (فعال)
         </span>
         <span className="text-[9px] font-mono bg-treasury/20 px-2 py-0.5 rounded text-treasury">
-          وضعیت فعلی
+          {getDiplomaticStanceLabel(stance)}
         </span>
       </div>
     );
@@ -97,7 +98,7 @@ export function TreatyStatusBanner({
         دیپلماسی عادی و بی‌طرف (فعال)
       </span>
       <span className="text-[9px] font-mono bg-background px-2 py-0.5 rounded text-muted-foreground">
-        وضعیت فعلی
+        {getDiplomaticStanceLabel(stance)}
       </span>
     </div>
   );

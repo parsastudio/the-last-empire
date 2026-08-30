@@ -1,6 +1,7 @@
 import React from "react";
 import { Coins, Wallet, Anchor, Swords, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 interface AttackCostSummaryProps {
   totalLogisticsCost: number;
@@ -37,10 +38,7 @@ export function AttackCostSummary({
     !hasNavalCapacity ||
     isSubmitting;
 
-  const formattedRegionName = targetRegionName.startsWith("استان")
-    ? targetRegionName
-    : `استان ${targetRegionName}`;
-
+  const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
   const isNaval = attackType === "NAVAL";
 
   return (

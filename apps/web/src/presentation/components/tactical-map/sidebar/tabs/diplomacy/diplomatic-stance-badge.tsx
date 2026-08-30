@@ -11,7 +11,9 @@ import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 import {
   getPostureLabel,
   getPostureBadgeClass,
-} from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-resolver";
+  getDiplomaticStanceLabel,
+  getDiplomaticStanceBadgeClass,
+} from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 interface DiplomaticStanceBadgeProps {
   stance: DiplomaticStance;
@@ -24,14 +26,6 @@ export function DiplomaticStanceBadge({
   posture,
   hasSecurityGuarantee = false,
 }: DiplomaticStanceBadgeProps) {
-  if (stance === "WAR") {
-    return (
-      <span className="px-2 py-0.5 rounded-md bg-rose-600/25 text-rose-500 border border-rose-500/40 text-[9px] font-bold flex items-center gap-1 font-sans">
-        <Swords size={10} /> وضعیت نبرد
-      </span>
-    );
-  }
-
   if (hasSecurityGuarantee) {
     return (
       <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[9px] font-bold flex items-center gap-1 font-sans">
@@ -40,18 +34,32 @@ export function DiplomaticStanceBadge({
     );
   }
 
+  if (stance === "WAR") {
+    return (
+      <span
+        className={`px-2 py-0.5 rounded-md text-[9px] font-bold flex items-center gap-1 font-sans ${getDiplomaticStanceBadgeClass(stance)}`}
+      >
+        <Swords size={10} /> {getDiplomaticStanceLabel(stance)}
+      </span>
+    );
+  }
+
   if (stance === "STRATEGIC_PARTNERSHIP") {
     return (
-      <span className="px-2 py-0.5 rounded-md bg-gdp/20 text-gdp border border-gdp/30 text-[9px] font-bold flex items-center gap-1 font-sans">
-        <CheckCircle2 size={10} /> شراکت استراتژیک
+      <span
+        className={`px-2 py-0.5 rounded-md text-[9px] font-bold flex items-center gap-1 font-sans ${getDiplomaticStanceBadgeClass(stance)}`}
+      >
+        <CheckCircle2 size={10} /> {getDiplomaticStanceLabel(stance)}
       </span>
     );
   }
 
   if (stance === "NON_AGGRESSION_PACT") {
     return (
-      <span className="px-2 py-0.5 rounded-md bg-treasury/20 text-treasury border border-treasury/30 text-[9px] font-bold flex items-center gap-1 font-sans">
-        <Handshake size={10} /> عدم تخاصم
+      <span
+        className={`px-2 py-0.5 rounded-md text-[9px] font-bold flex items-center gap-1 font-sans ${getDiplomaticStanceBadgeClass(stance)}`}
+      >
+        <Handshake size={10} /> {getDiplomaticStanceLabel(stance)}
       </span>
     );
   }
@@ -70,8 +78,10 @@ export function DiplomaticStanceBadge({
   }
 
   return (
-    <span className="px-2 py-0.5 rounded-md bg-secondary text-muted-foreground border border-border/60 text-[9px] font-bold flex items-center gap-1 font-sans">
-      <Globe size={10} /> دیپلماسی عادی
+    <span
+      className={`px-2 py-0.5 rounded-md text-[9px] font-bold flex items-center gap-1 font-sans ${getDiplomaticStanceBadgeClass(stance)}`}
+    >
+      <Globe size={10} /> {getDiplomaticStanceLabel(stance)}
     </span>
   );
 }

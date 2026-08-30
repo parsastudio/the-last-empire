@@ -1,5 +1,4 @@
 import React from "react";
-import { Shield, ShieldAlert, Plane, Radio } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
@@ -10,6 +9,7 @@ import { AttackCostSummary } from "@/presentation/components/tactical-map/modals
 import { AttackIntelPanel } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 import { NavalTransportCapacityCard } from "@/presentation/components/tactical-map/modals/attack/naval-transport-capacity-card";
 import { useDirectAttackForm } from "@/presentation/components/tactical-map/modals/attack/use-direct-attack-form";
+import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
 
 interface DirectAttackModalProps {
   isOpen: boolean;
@@ -100,40 +100,40 @@ export function DirectAttackModal({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             <UnitDeploymentSlider
-              label="پیاده‌نظام رزمی"
-              unitName="یگان"
-              icon={Shield}
-              iconColorClass="text-primary"
+              label={MILITARY_UNIT_VISUALS.INFANTRY.nameFa}
+              unitName={MILITARY_UNIT_VISUALS.INFANTRY.unitLabelFa}
+              icon={MILITARY_UNIT_VISUALS.INFANTRY.icon}
+              iconColorClass={MILITARY_UNIT_VISUALS.INFANTRY.colorClass}
               availableCount={humanNation.military.infantry}
               selectedCount={form.infantryToDeploy}
               onChange={form.setInfantryToDeploy}
             />
 
             <UnitDeploymentSlider
-              label="لشکر زرهی و تانک‌ها"
-              unitName="یگان"
-              icon={ShieldAlert}
-              iconColorClass="text-military"
+              label={MILITARY_UNIT_VISUALS.ARMOR.nameFa}
+              unitName={MILITARY_UNIT_VISUALS.ARMOR.unitLabelFa}
+              icon={MILITARY_UNIT_VISUALS.ARMOR.icon}
+              iconColorClass={MILITARY_UNIT_VISUALS.ARMOR.colorClass}
               availableCount={humanNation.military.armor || 0}
               selectedCount={form.armorToDeploy}
               onChange={form.setArmorToDeploy}
             />
 
             <UnitDeploymentSlider
-              label="اسکادران جنگنده‌ها"
-              unitName="فروند"
-              icon={Plane}
-              iconColorClass="text-gdp"
+              label={MILITARY_UNIT_VISUALS.AIR_FORCE.nameFa}
+              unitName={MILITARY_UNIT_VISUALS.AIR_FORCE.unitLabelFa}
+              icon={MILITARY_UNIT_VISUALS.AIR_FORCE.icon}
+              iconColorClass={MILITARY_UNIT_VISUALS.AIR_FORCE.colorClass}
               availableCount={humanNation.military.airForce}
               selectedCount={form.airForceToDeploy}
               onChange={form.setAirForceToDeploy}
             />
 
             <UnitDeploymentSlider
-              label="پهپاد و موشک‌های نقطه‌زن"
-              unitName="یگان"
-              icon={Radio}
-              iconColorClass="text-treasury"
+              label={MILITARY_UNIT_VISUALS.DRONE_MISSILE.nameFa}
+              unitName={MILITARY_UNIT_VISUALS.DRONE_MISSILE.unitLabelFa}
+              icon={MILITARY_UNIT_VISUALS.DRONE_MISSILE.icon}
+              iconColorClass={MILITARY_UNIT_VISUALS.DRONE_MISSILE.colorClass}
               availableCount={humanNation.military.droneMissile}
               selectedCount={form.dronesToLaunch}
               onChange={form.setDronesToLaunch}

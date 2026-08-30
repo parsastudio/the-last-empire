@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useMemo, useCallback, useRef, useEffect } from "react";
 import {
   UnitType,
   MILITARY_UNIT_STATS,
@@ -8,7 +8,7 @@ import {
   Nation,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 
 export interface QuickUnitBatchInfo {
   type: UnitType;
@@ -19,11 +19,6 @@ export interface QuickUnitBatchInfo {
   canAfford: boolean;
   remainingRoom: number;
   isCapReached: boolean;
-}
-
-export interface FloatingFeedback {
-  id: string;
-  text: string;
 }
 
 const ALL_TYPES: UnitType[] = [
@@ -46,15 +41,7 @@ export function useQuickRecruitBatch({
   currentGdp,
 }: UseQuickRecruitBatchProps) {
   const { dispatchAction } = useGameActions();
-  const [floatingFeedbacks, setFloatingFeedbacks] = useState<
-    Record<UnitType, FloatingFeedback[]>
-  >({
-    INFANTRY: [],
-    ARMOR: [],
-    AIR_DEFENSE: [],
-    AIR_FORCE: [],
-    DRONE_MISSILE: [],
-  });
+  const { feedbacks, triggerFeedback } = useFloatingFeedback();
 
   const baselineTreasuryRef = useRef<number>(nation.treasury);
   const prevNationIdRef = useRef<string>(nationId);
@@ -148,26 +135,7 @@ export function useQuickRecruitBatch({
     async (info: QuickUnitBatchInfo) => {
       if (!info.canAfford || info.isCapReached) return;
 
-      TacticalSound.playCoinSound();
-
-      const newId = `${Date.now()}-${Math.random()}`;
-      setFloatingFeedbacks((prev) => ({
-        ...prev,
-        [info.type]: [
-          ...prev[info.type],
-          {
-            id: newId,
-            text: `+${info.batchQuantity}`,
-          },
-        ],
-      }));
-
-      setTimeout(() => {
-        setFloatingFeedbacks((prev) => ({
-          ...prev,
-          [info.type]: prev[info.type].filter((f) => f.id !== newId),
-        }));
-      }, 600);
+      triggerFeedback(info.type, info.batchQuantity);
 
       const action = ActionFactory.recruitUnit(
         nationId,
@@ -177,12 +145,12 @@ export function useQuickRecruitBatch({
 
       await dispatchAction(action);
     },
-    [nationId, dispatchAction],
+    [nationId, dispatchAction, triggerFeedback],
   );
 
   return {
     batchList,
-    floatingFeedbacks,
+    floatingFeedbacks: feedbacks,
     handleBuyBatch,
   };
 }

@@ -2,6 +2,8 @@ import React from "react";
 import { AlertTriangle, ShieldAlert, Radio, Flame } from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
+import { getDiplomaticStanceLabel } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 interface AttackStatusAlertsProps {
   isLandNeighbor: boolean;
@@ -23,21 +25,7 @@ export function AttackStatusAlerts({
   targetRegionName,
 }: AttackStatusAlertsProps) {
   const isAccessible = isLandNeighbor || isNavalValid;
-  const formattedRegionName = targetRegionName.startsWith("استان")
-    ? targetRegionName
-    : `استان ${targetRegionName}`;
-
-  const getStancePersianLabel = (stance: DiplomaticStance) => {
-    switch (stance) {
-      case "STRATEGIC_PARTNERSHIP":
-        return "شراکت استراتژیک";
-      case "NON_AGGRESSION_PACT":
-        return "پیمان عدم تخاصم";
-      case "NORMAL_DIPLOMACY":
-      default:
-        return "دیپلماسی عادی و صلح";
-    }
-  };
+  const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
 
   return (
     <div className="space-y-3 dir-rtl text-right font-sans">
@@ -70,7 +58,7 @@ export function AttackStatusAlerts({
                   هشدار امنیتی: تهاجم غافلگیرانه بدون اعلان جنگ رسمی
                 </span>
                 <span className="text-[10px] text-muted-foreground font-mono block">
-                  وضعیت فعلی روابط: {getStancePersianLabel(currentStance)}
+                  وضعیت فعلی روابط: {getDiplomaticStanceLabel(currentStance)}
                 </span>
               </div>
             </div>

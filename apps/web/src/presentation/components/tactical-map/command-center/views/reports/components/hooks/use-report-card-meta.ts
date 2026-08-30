@@ -2,15 +2,14 @@ import { useMemo } from "react";
 import {
   TurnLogEntry,
   Nation,
-  CountryRegistry,
   TurnLogFormatter,
   PendingDiplomaticProposal,
   BattleFullReportData,
 } from "@geopolitics/domain";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { ExportSalesBuyerItem } from "@/presentation/stores/use-ui-store";
 import { ReportCardStylerUtility } from "../utils/report-card-styler.utility";
 import { usePendingProposalMatcher } from "./use-pending-proposal-matcher";
+import { NationResolverUtility } from "@/presentation/utils/nation-resolver.utility";
 
 interface UseReportCardMetaProps {
   log: TurnLogEntry;
@@ -25,24 +24,15 @@ export function useReportCardMeta({
   humanNationId,
   pendingProposals = [],
 }: UseReportCardMetaProps) {
-  const sourceCanonical = CountryRegistry.resolveCanonicalId(
-    log.sourceNationId,
+  const source = useMemo(
+    () => NationResolverUtility.resolve(log.sourceNationId, nationsMap),
+    [log.sourceNationId, nationsMap],
   );
-  const sourceNation = nationsMap ? nationsMap[sourceCanonical] : null;
-  const sourceName = sourceNation ? sourceNation.name : log.sourceNationId;
-  const sourceFlag = getFlagEmoji(sourceNation?.flagCode || sourceCanonical);
 
-  let targetName: string | null = null;
-  let targetFlag: string | null = null;
-
-  if (log.targetNationId) {
-    const targetCanonical = CountryRegistry.resolveCanonicalId(
-      log.targetNationId,
-    );
-    const targetNation = nationsMap ? nationsMap[targetCanonical] : null;
-    targetName = targetNation ? targetNation.name : log.targetNationId;
-    targetFlag = getFlagEmoji(targetNation?.flagCode || targetCanonical);
-  }
+  const target = useMemo(() => {
+    if (!log.targetNationId) return null;
+    return NationResolverUtility.resolve(log.targetNationId, nationsMap);
+  }, [log.targetNationId, nationsMap]);
 
   const dynamicMessage = useMemo(() => {
     return TurnLogFormatter.formatMessage(log, nationsMap);
@@ -83,7 +73,7 @@ export function useReportCardMeta({
     log,
     humanNationId,
     pendingProposals,
-    sourceCanonical,
+    sourceCanonical: source.canonicalId,
   });
 
   const isIncomingInteractiveProposal = Boolean(activePendingProposal);
@@ -105,12 +95,12 @@ export function useReportCardMeta({
   ]);
 
   return {
-    sourceCanonical,
-    sourceName,
-    sourceFlag,
-    sourceNation,
-    targetName,
-    targetFlag,
+    sourceCanonical: source.canonicalId,
+    sourceName: source.name,
+    sourceFlag: source.flagEmoji,
+    sourceNation: source.nation,
+    targetName: target?.name ?? null,
+    targetFlag: target?.flagEmoji ?? null,
     dynamicMessage,
     battleReportData,
     isCoalitionFormed,

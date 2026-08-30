@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useMemo, useCallback, useRef, useEffect } from "react";
 import {
   UnitType,
   MILITARY_UNIT_STATS,
@@ -8,10 +8,9 @@ import {
   getNationGdp,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { FloatingFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
+import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 
 export interface AlliedUnitProcurementInfo {
   type: UnitType;
@@ -48,15 +47,7 @@ export function useAlliedArmsProcurement({
   currentGdp,
 }: UseAlliedArmsProcurementProps) {
   const { dispatchAction } = useGameActions();
-  const [floatingFeedbacks, setFloatingFeedbacks] = useState<
-    Record<UnitType, FloatingFeedback[]>
-  >({
-    INFANTRY: [],
-    ARMOR: [],
-    AIR_DEFENSE: [],
-    AIR_FORCE: [],
-    DRONE_MISSILE: [],
-  });
+  const { feedbacks, triggerFeedback } = useFloatingFeedback();
 
   const baselineTreasuryRef = useRef<number>(buyerNation.treasury);
   const prevBuyerIdRef = useRef<string>(buyerNation.id);
@@ -197,26 +188,7 @@ export function useAlliedArmsProcurement({
     async (info: AlliedUnitProcurementInfo) => {
       if (!info.canAfford || info.isCapReached) return;
 
-      TacticalSound.playCoinSound();
-
-      const newId = `${Date.now()}-${Math.random()}`;
-      setFloatingFeedbacks((prev) => ({
-        ...prev,
-        [info.type]: [
-          ...prev[info.type],
-          {
-            id: newId,
-            text: `+${info.batchQuantity}`,
-          },
-        ],
-      }));
-
-      setTimeout(() => {
-        setFloatingFeedbacks((prev) => ({
-          ...prev,
-          [info.type]: prev[info.type].filter((f) => f.id !== newId),
-        }));
-      }, 600);
+      triggerFeedback(info.type, info.batchQuantity);
 
       const action = ActionFactory.buyArmsMarket(
         buyerNation.id,
@@ -227,14 +199,14 @@ export function useAlliedArmsProcurement({
 
       await dispatchAction(action);
     },
-    [buyerNation.id, sellerNation.id, dispatchAction],
+    [buyerNation.id, sellerNation.id, dispatchAction, triggerFeedback],
   );
 
   return {
     batchList,
     techMultiplier,
     techDelta,
-    floatingFeedbacks,
+    floatingFeedbacks: feedbacks,
     handleBuyAlliedBatch,
   };
 }

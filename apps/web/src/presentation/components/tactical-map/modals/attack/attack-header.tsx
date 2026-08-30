@@ -1,6 +1,7 @@
 import React from "react";
 import { Swords, Anchor, ArrowLeft } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 interface AttackHeaderProps {
   attackerName: string;
@@ -27,11 +28,7 @@ export function AttackHeader({
 }: AttackHeaderProps) {
   const attackerFlag = getFlagEmoji(attackerFlagCode || attackerCode);
   const defenderFlag = getFlagEmoji(defenderFlagCode || defenderCode);
-
-  const formattedTarget = targetRegionName.startsWith("استان")
-    ? targetRegionName
-    : `استان ${targetRegionName}`;
-
+  const formattedTarget = ProvinceNameFormatter.format(targetRegionName);
   const isNaval = attackType === "NAVAL";
 
   return (

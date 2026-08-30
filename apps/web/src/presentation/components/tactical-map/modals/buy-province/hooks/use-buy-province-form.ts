@@ -9,14 +9,8 @@ import {
   NationGettersUtility,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-
-function getCleanProvinceName(rawName: string): string {
-  const trimmed = rawName.trim();
-  if (trimmed.startsWith("استان ")) {
-    return trimmed;
-  }
-  return `استان ${trimmed}`;
-}
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
+import { NationResolverUtility } from "@/presentation/utils/nation-resolver.utility";
 
 interface UseBuyProvinceFormProps {
   provinceId: number | null;
@@ -40,15 +34,12 @@ export function useBuyProvinceForm({
     return provincesMap[provinceId.toString()] || null;
   }, [provinceId, provincesMap]);
 
-  const ownerNation = useMemo(() => {
-    if (!province || !nationsMap) return null;
-    const canonicalOwner = CountryRegistry.resolveCanonicalId(
-      province.ownerNationId,
-    );
-    return (
-      nationsMap[canonicalOwner] || nationsMap[province.ownerNationId] || null
-    );
+  const ownerEntity = useMemo(() => {
+    if (!province) return null;
+    return NationResolverUtility.resolve(province.ownerNationId, nationsMap);
   }, [province, nationsMap]);
+
+  const ownerNation = ownerEntity?.nation ?? null;
 
   const sellerOwnedProvinces = useMemo(() => {
     if (!ownerNation || !provincesMap) return [];
@@ -110,7 +101,7 @@ export function useBuyProvinceForm({
       CountryRegistry.resolveCanonicalId(province.ownerNationId);
 
   const formattedProvinceName = province
-    ? getCleanProvinceName(province.nameFa)
+    ? ProvinceNameFormatter.format(province.nameFa)
     : "استان نامشخص";
 
   const capacityPercentage = useMemo(() => {
