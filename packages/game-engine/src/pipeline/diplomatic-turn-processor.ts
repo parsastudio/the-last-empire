@@ -7,13 +7,15 @@ import {
   GeopoliticalReachResolver,
   NationGettersUtility,
   TerritoryClaimsUtility,
+  PendingProposalManagerUtility,
 } from "@geopolitics/domain";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
 export class DiplomaticTurnProcessor {
   public static processPendingProposalsForAi(state: GameState): GameState {
-    const validPendingProposals = state.pendingProposals.filter(
-      (proposal) => state.currentTurn <= proposal.expiresTurn,
+    const validPendingProposals = PendingProposalManagerUtility.filterValidTurn(
+      state.pendingProposals,
+      state.currentTurn,
     );
 
     if (validPendingProposals.length === state.pendingProposals.length) {

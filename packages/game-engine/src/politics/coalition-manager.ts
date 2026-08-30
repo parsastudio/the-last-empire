@@ -6,6 +6,7 @@ import {
   NationGettersUtility,
   getNationGdp,
   TurnLogBuilder,
+  GameStateMetricsUtility,
 } from "@geopolitics/domain";
 
 export class CoalitionManager {
@@ -23,15 +24,12 @@ export class CoalitionManager {
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
     if (aliveNations.length <= 1) return state;
 
-    const totalWorldPixels = Object.values(state.provinces || {}).reduce(
-      (sum, p) => sum + (p.pixelCount || 0),
-      0,
-    );
-
-    const totalWorldGdp = aliveNations.reduce(
-      (sum, n) =>
-        sum + getNationGdp(n, state.provinces, undefined, provincesByOwnerMap),
-      0,
+    const totalWorldPixels =
+      GameStateMetricsUtility.getTotalWorldTerritoryPixels(state.provinces);
+    const totalWorldGdp = GameStateMetricsUtility.getTotalGlobalGdp(
+      aliveNations,
+      state.provinces,
+      provincesByOwnerMap,
     );
 
     let hegemonicNation: Nation | null = null;

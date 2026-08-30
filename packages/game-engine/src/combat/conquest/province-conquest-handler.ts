@@ -1,6 +1,7 @@
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
+import { ProvinceDegradationUtility } from "@geopolitics/domain";
 
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
@@ -65,20 +66,14 @@ export class ProvinceConquestHandler {
           CountryRegistry.resolveCanonicalId(targetProv.ownerNationId) ===
             cleanDefenderId
         ) {
-          const nextPopulation = Math.max(
-            10,
-            Math.floor(targetProv.population * 0.75),
-          );
-          const nextProductivity = Math.max(
-            100,
-            Math.floor((targetProv.perCapitaProductivity || 5000) * 0.75),
-          );
+          const { population, perCapitaProductivity } =
+            ProvinceDegradationUtility.applyConquestDegradation(targetProv);
 
           const conqueredProv: Province = {
             ...targetProv,
             ownerNationId: cleanAttackerId,
-            population: nextPopulation,
-            perCapitaProductivity: nextProductivity,
+            population,
+            perCapitaProductivity,
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
           conqueredPixels = targetProv.pixelCount;

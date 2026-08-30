@@ -1,9 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
-import { CountryRegistry } from "@/domain/data/countries";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
-import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import {
+  NationRelationResolver,
+  NationGettersUtility,
+} from "@geopolitics/domain";
 import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
@@ -16,18 +18,14 @@ export class BattleExecutionEngine {
     state: GameState,
     action: InitiateBattleAction,
   ): { state: GameState; reportData: BattleFullReportData | null } {
-    const canonicalAttackerId = CountryRegistry.resolveCanonicalId(
+    const attacker = NationGettersUtility.resolveNation(
       action.nationId,
+      state.nations,
     );
-    const canonicalDefenderId = CountryRegistry.resolveCanonicalId(
+    const defender = NationGettersUtility.resolveNation(
       action.targetNationId,
+      state.nations,
     );
-
-    const attacker =
-      state.nations[canonicalAttackerId] || state.nations[action.nationId];
-    const defender =
-      state.nations[canonicalDefenderId] ||
-      state.nations[action.targetNationId];
 
     if (!attacker || !defender || !attacker.isAlive || !defender.isAlive) {
       return { state, reportData: null };
@@ -40,14 +38,11 @@ export class BattleExecutionEngine {
     const betrayalResult =
       DiplomaticBetrayalCalculator.calculatePenalty(currentStance);
 
-    const guarantorCanonical = defender.securityGuarantorId
-      ? CountryRegistry.resolveCanonicalId(defender.securityGuarantorId)
-      : null;
-
-    const guarantorNation = guarantorCanonical
-      ? state.nations[guarantorCanonical] ||
-        state.nations[defender.securityGuarantorId!] ||
-        null
+    const guarantorNation = defender.securityGuarantorId
+      ? NationGettersUtility.resolveNation(
+          defender.securityGuarantorId,
+          state.nations,
+        )
       : null;
 
     const calcResult = BattleCalculator.calculateBattle(
@@ -100,23 +95,15 @@ export class BattleExecutionEngine {
       : null;
     const attackType = action.attackType || "LAND";
 
-    const fullReportData: BattleFullReportData = {
-      attackerId: attacker.id,
-      defenderId: defender.id,
-      targetProvinceName: targetProvinceObj?.nameFa,
+    const fullReportData = BattleLogFactory.assembleReportData(
+      attacker,
+      defender,
+      calcResult,
+      targetProvinceObj,
       attackType,
-      isAttackerVictory: calcResult.isAttackerVictory,
-      isFullCapitulation: !isDefenderAlive,
-      valuationRatio: calcResult.valuationRatio,
-      treasuryLooted: calcResult.treasuryLooted,
-      attackerCasualties: calcResult.attackerCasualties,
-      defenderCasualties: calcResult.defenderCasualties,
-      phase1Missile: calcResult.phase1Missile,
-      phase2Air: calcResult.phase2Air,
-      phase3Ground: calcResult.phase3Ground,
-      spoils: spoilsResult.spoilsData,
-      auxiliaryGuarantor: calcResult.auxiliaryGuarantor,
-    };
+      !isDefenderAlive,
+      spoilsResult.spoilsData,
+    );
 
     const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,

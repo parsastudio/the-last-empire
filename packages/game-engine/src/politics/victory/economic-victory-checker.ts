@@ -1,5 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { getNationGdp, GameStateMetricsUtility } from "@geopolitics/domain";
 import {
   VictoryCondition,
   VictoryStatus,
@@ -8,9 +8,9 @@ import {
 export class EconomicVictoryChecker implements VictoryCondition {
   public evaluate(state: GameState): VictoryStatus | null {
     const aliveNations = Object.values(state.nations).filter((n) => n.isAlive);
-    const totalGlobalGdp = aliveNations.reduce(
-      (sum, n) => sum + getNationGdp(n, state.provinces),
-      0,
+    const totalGlobalGdp = GameStateMetricsUtility.getTotalGlobalGdp(
+      aliveNations,
+      state.provinces,
     );
     if (totalGlobalGdp <= 0) {
       return null;
