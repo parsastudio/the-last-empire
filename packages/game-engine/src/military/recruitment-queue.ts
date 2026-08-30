@@ -58,18 +58,39 @@ export class RecruitmentQueueManager {
     const unitStat = MILITARY_UNIT_STATS[unitType];
     const turnsRemaining = unitStat ? unitStat.buildTurns : 1;
 
-    const newOrder: RecruitmentOrder = {
-      id: `${unitType}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      unitType,
-      quantity,
-      turnsRemaining,
-      totalCost: totalMoney,
-    };
+    const existingIndex = nation.recruitmentQueue.findIndex(
+      (order) =>
+        order.unitType === unitType && order.turnsRemaining === turnsRemaining,
+    );
+
+    let updatedQueue: RecruitmentOrder[];
+
+    if (existingIndex >= 0) {
+      updatedQueue = nation.recruitmentQueue.map((order, index) => {
+        if (index === existingIndex) {
+          return {
+            ...order,
+            quantity: order.quantity + quantity,
+            totalCost: order.totalCost + totalMoney,
+          };
+        }
+        return order;
+      });
+    } else {
+      const newOrder: RecruitmentOrder = {
+        id: `${unitType}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        unitType,
+        quantity,
+        turnsRemaining,
+        totalCost: totalMoney,
+      };
+      updatedQueue = [...nation.recruitmentQueue, newOrder];
+    }
 
     return {
       ...nation,
       treasury: nation.treasury - totalMoney,
-      recruitmentQueue: [...nation.recruitmentQueue, newOrder],
+      recruitmentQueue: updatedQueue,
     };
   }
 

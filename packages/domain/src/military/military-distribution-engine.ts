@@ -106,7 +106,6 @@ export class MilitaryDistributionEngine {
       airDefense: quantities.AIR_DEFENSE,
       airForce: quantities.AIR_FORCE,
       droneMissile: quantities.DRONE_MISSILE,
-      experience: 10,
       techLevel: nativeTech,
       branchTech: initialBranchTech,
     };

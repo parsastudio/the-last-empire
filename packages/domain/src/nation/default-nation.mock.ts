@@ -23,7 +23,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
     airDefense: 10,
     airForce: 20,
     droneMissile: 5,
-    experience: 10,
     techLevel: 1,
     branchTech: {
       infantry: 1,

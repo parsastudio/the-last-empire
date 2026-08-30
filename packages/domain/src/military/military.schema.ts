@@ -22,7 +22,6 @@ export const MilitaryStackSchema = z.object({
   airDefense: z.number().nonnegative().default(0),
   airForce: z.number().nonnegative(),
   droneMissile: z.number().nonnegative(),
-  experience: z.number().min(0).max(100),
   techLevel: z.number().positive(),
   branchTech: BranchTechRatingSchema.optional(),
 });
