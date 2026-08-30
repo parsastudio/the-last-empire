@@ -48,10 +48,7 @@ export function MilitaryForcesSection({
           })}
         </div>
 
-        <MilitaryReadinessCard
-          techLevel={model.techLevel}
-          experience={model.experience}
-        />
+        <MilitaryReadinessCard techLevel={model.techLevel} />
       </div>
     </div>
   );

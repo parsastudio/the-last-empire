@@ -22,7 +22,6 @@ export interface MilitaryUnitItemViewModel {
 export interface MilitaryForcesViewModel {
   units: MilitaryUnitItemViewModel[];
   techLevel: number;
-  experience: number;
 }
 
 export interface MilitaryValuationViewModel {
@@ -45,7 +44,6 @@ export function selectMilitaryForcesViewModel(
       airDefense: 0,
       airForce: 0,
       droneMissile: 0,
-      experience: 0,
       techLevel: 1.0,
       branchTech: MilitaryInventoryHelper.initializeBranchTech(1.0),
     },
@@ -112,7 +110,6 @@ export function selectMilitaryForcesViewModel(
   return {
     units,
     techLevel: activeNation.military.techLevel,
-    experience: activeNation.military.experience,
   };
 }
 
