@@ -35,78 +35,45 @@ export class NationPowerScoreEvaluator {
     const equipmentTech =
       input.equipmentTechLevel ?? profile?.equipmentTechLevel ?? domesticTech;
 
-    let activeCombatPower = 0;
-
-    if (input.military) {
-      activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
-        id: canonicalId,
-        name: input.name || profile?.nameFa || canonicalId,
-        isAi: true,
-        isAlive: true,
-        flagCode: profile?.flagCode || "IR",
-        economicStance: "BALANCED_MIXED",
-        treasury: 100000,
-        nationalDebt: 0,
-        industrialLevel: 1,
-        navalFleet: input.navalFleet ?? 0,
-        government: {
-          type:
-            (input.governmentType as GovernmentType) ||
-            profile?.startingGovernment ||
-            "DEMOCRACY",
-          stability: input.stability ?? 50,
-          turnsInPower: 1,
-        },
-        military: input.military,
-        recruitmentQueue: [],
-        relations: {},
-        activeModifiers: [],
-        globalReputation: input.globalReputation ?? 50,
-        executedEspionageTiers: [],
-        attackedTargetIdsThisTurn: [],
-        warFocusTargetId: null,
-        postWarCooldownTurns: 0,
-        doctrine: "DOMESTIC_INDUSTRIALIST",
-        securityGuarantorId: null,
-      });
-    } else {
-      const stack = MilitaryDistributionEngine.calculateStartingStack(
+    const stack =
+      input.military ??
+      MilitaryDistributionEngine.calculateStartingStack(
         input.gdp,
         domesticTech,
         equipmentTech,
       );
-      activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
-        id: canonicalId,
-        name: input.name || profile?.nameFa || canonicalId,
-        isAi: true,
-        isAlive: true,
-        flagCode: profile?.flagCode || "IR",
-        economicStance: "BALANCED_MIXED",
-        treasury: 100000,
-        nationalDebt: 0,
-        industrialLevel: 1,
-        navalFleet: input.navalFleet ?? 0,
-        government: {
-          type:
-            (input.governmentType as GovernmentType) ||
-            profile?.startingGovernment ||
-            "DEMOCRACY",
-          stability: input.stability ?? 50,
-          turnsInPower: 1,
-        },
-        military: stack,
-        recruitmentQueue: [],
-        relations: {},
-        activeModifiers: [],
-        globalReputation: input.globalReputation ?? 50,
-        executedEspionageTiers: [],
-        attackedTargetIdsThisTurn: [],
-        warFocusTargetId: null,
-        postWarCooldownTurns: 0,
-        doctrine: "DOMESTIC_INDUSTRIALIST",
-        securityGuarantorId: null,
-      });
-    }
+
+    const activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
+      id: canonicalId,
+      name: input.name || profile?.nameFa || canonicalId,
+      isAi: true,
+      isAlive: true,
+      flagCode: profile?.flagCode || "IR",
+      economicStance: "BALANCED_MIXED",
+      treasury: 100000,
+      nationalDebt: 0,
+      industrialLevel: 1,
+      navalFleet: input.navalFleet ?? 0,
+      government: {
+        type:
+          (input.governmentType as GovernmentType) ||
+          profile?.startingGovernment ||
+          "DEMOCRACY",
+        stability: input.stability ?? 50,
+        turnsInPower: 1,
+      },
+      military: stack,
+      recruitmentQueue: [],
+      relations: {},
+      activeModifiers: [],
+      globalReputation: input.globalReputation ?? 50,
+      executedEspionageTiers: [],
+      attackedTargetIdsThisTurn: [],
+      warFocusTargetId: null,
+      postWarCooldownTurns: 0,
+      doctrine: "DOMESTIC_INDUSTRIALIST",
+      securityGuarantorId: null,
+    });
 
     const effectiveFieldTech = Math.max(domesticTech, equipmentTech);
     const techMultiplier =

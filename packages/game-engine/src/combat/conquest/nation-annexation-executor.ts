@@ -2,9 +2,9 @@ import {
   Nation,
   Province,
   CountryRegistry,
-  DIPLOMACY_CONFIG,
   NationMutatorUtility,
   NationGettersUtility,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
@@ -19,7 +19,7 @@ export class NationAnnexationExecutor {
     nations: Record<string, Nation>,
     winnerId: string,
     loserId: string,
-    postWarCooldown: number = DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS,
+    _postWarCooldown?: number,
   ): AnnexationExecutionResult {
     const winnerCanonical = CountryRegistry.resolveCanonicalId(winnerId);
     const loserCanonical = CountryRegistry.resolveCanonicalId(loserId);
@@ -56,8 +56,13 @@ export class NationAnnexationExecutor {
       delete winnerRelations[loserCanonical];
       delete winnerRelations[loserId];
 
-      const hasOtherWars = Object.values(winnerRelations).some(
-        (r) => r.stance === "WAR",
+      const postWarCooldown = NationRelationResolver.calculatePostWarCooldown(
+        {
+          isAi: winnerObj.isAi,
+          relations: winnerRelations,
+          postWarCooldownTurns: winnerObj.postWarCooldownTurns,
+        },
+        true,
       );
 
       updatedNations[winnerObj.id] = {
@@ -68,8 +73,7 @@ export class NationAnnexationExecutor {
           winnerObj.warFocusTargetId === loserCanonical
             ? null
             : winnerObj.warFocusTargetId,
-        postWarCooldownTurns:
-          winnerObj.isAi && !hasOtherWars ? postWarCooldown : 0,
+        postWarCooldownTurns: postWarCooldown,
         relations: winnerRelations,
       };
     }

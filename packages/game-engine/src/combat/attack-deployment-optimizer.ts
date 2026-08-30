@@ -1,14 +1,9 @@
-import {
-  Nation,
-  Province,
-  getNationGdp,
-  GuarantorBudgetCalculatorUtility,
-  NationGettersUtility,
-} from "@geopolitics/domain";
+import { Nation, NationGettersUtility } from "@geopolitics/domain";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 import { DeploymentStepSearch } from "@/engine/combat/optimizer/deployment-step-search";
+import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
 
 export interface OptimalDeploymentResult {
   infantry: number;
@@ -22,7 +17,7 @@ export class AttackDeploymentOptimizer {
   public static calculateOptimalDeployment(
     attacker: Nation,
     defender: Nation,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, import("@geopolitics/domain").Province>,
     guarantorNation?: Nation | null,
     attackType: "LAND" | "NAVAL" = "LAND",
     navalFleetCount = 0,
@@ -93,20 +88,18 @@ export class AttackDeploymentOptimizer {
       effectiveGuarantor.isAlive &&
       effectiveGuarantor.id !== attacker.id
     ) {
-      const defGdp = getNationGdp(defender, provincesMap);
-      const guarantorGdp = getNationGdp(effectiveGuarantor, provincesMap);
-      const defenseBudget = GuarantorBudgetCalculatorUtility.calculateBudget(
-        defGdp,
-        guarantorGdp,
-        Boolean(defender.isEmergencyProtectorate),
-      );
-      const auxUnits =
-        GuarantorBudgetCalculatorUtility.calculateAuxiliaryUnits(defenseBudget);
+      const guarantorRes =
+        GuarantorInterventionCalculator.calculateIntervention(
+          attacker,
+          defender,
+          provincesMap,
+          effectiveGuarantor,
+        );
 
-      defAirForce += auxUnits.auxAir;
-      defArmor += auxUnits.auxArm;
-      defAirDefense += auxUnits.auxAD;
-      defInfantry += auxUnits.auxInf;
+      defAirForce += guarantorRes.auxAir;
+      defArmor += guarantorRes.auxArm;
+      defAirDefense += guarantorRes.auxAD;
+      defInfantry += guarantorRes.auxInf;
     }
 
     const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);

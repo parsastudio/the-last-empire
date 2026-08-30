@@ -4,6 +4,7 @@ import {
   RelationProfile,
   DiplomaticStance,
 } from "@/domain/diplomacy/diplomacy.schema";
+import { DIPLOMACY_CONFIG } from "@/domain/diplomacy/diplomacy.config";
 
 export class NationRelationResolver {
   public static getRelation(
@@ -125,6 +126,30 @@ export class NationRelationResolver {
       sourceNation.globalReputation <= -30 ||
       targetNation.globalReputation <= -30
     );
+  }
+
+  public static calculatePostWarCooldown(
+    nation: {
+      isAi: boolean;
+      relations?: Record<string, RelationProfile>;
+      postWarCooldownTurns?: number;
+    },
+    hasConcludedWar: boolean,
+    allNations?: Record<string, Nation>,
+  ): number {
+    if (!nation.isAi) {
+      return 0;
+    }
+    if (!hasConcludedWar) {
+      return nation.postWarCooldownTurns || 0;
+    }
+    const hasRemainingActiveWars = nation.relations
+      ? Object.values(nation.relations).some((r) => r.stance === "WAR")
+      : false;
+
+    return hasRemainingActiveWars
+      ? 0
+      : DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS;
   }
 }
 

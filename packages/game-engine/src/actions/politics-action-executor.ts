@@ -6,7 +6,10 @@ import { TreatyAcceptanceApplier } from "@/engine/diplomacy/treaty-acceptance-ap
 import { DiplomaticAcceptanceEvaluator } from "@/engine/diplomacy/diplomatic-acceptance-evaluator";
 import { PeaceSettlementExecutor } from "@/engine/diplomacy/peace-settlement-executor";
 import { GameError } from "@/domain/shared/domain-utilities";
-import { SecurityGuaranteeValidator } from "@geopolitics/domain";
+import {
+  SecurityGuaranteeValidator,
+  NationRelationResolver,
+} from "@geopolitics/domain";
 import { DiplomaticProposalExecutor } from "@/engine/diplomacy/executors/diplomatic-proposal-executor";
 import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-declaration-executor";
 import { TreatyTerminationExecutor } from "@/engine/actions/executors/politics/treaty-termination-executor";
@@ -84,12 +87,14 @@ export class PoliticsActionExecutor {
           state.nations[action.targetNationId];
         if (!receiver) return { newState: state };
 
-        const senderRel =
-          nation.relations[canonicalTargetId] ||
-          nation.relations[action.targetNationId];
-        const receiverRel =
-          receiver.relations[canonicalSourceId] ||
-          receiver.relations[action.nationId];
+        const senderRel = NationRelationResolver.getRelation(
+          nation.relations,
+          canonicalTargetId,
+        );
+        const receiverRel = NationRelationResolver.getRelation(
+          receiver.relations,
+          canonicalSourceId,
+        );
         if (!senderRel || !receiverRel) return { newState: state };
 
         if (action.proposalType === "EMERGENCY_PROTECTORATE") {
