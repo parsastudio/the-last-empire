@@ -1,5 +1,9 @@
 import React from "react";
 import { Zap } from "lucide-react";
+import {
+  ActionColorVariant,
+  ActionVariantStyleUtility,
+} from "./utils/action-variant-style.utility";
 
 interface PercentageOption {
   pct: number;
@@ -10,7 +14,7 @@ interface PercentageOption {
 interface PercentageSelectorProps {
   disabled?: boolean;
   options?: PercentageOption[];
-  colorVariant?: "primary" | "gdp" | "military" | "treasury";
+  colorVariant?: ActionColorVariant;
   onSelect: (percentage: number) => void;
 }
 
@@ -25,19 +29,7 @@ export function PercentageSelector({
   colorVariant = "gdp",
   onSelect,
 }: PercentageSelectorProps) {
-  const getMaxButtonColor = () => {
-    switch (colorVariant) {
-      case "military":
-        return "bg-rose-500/20 hover:bg-rose-500/30 border-rose-500/40 text-rose-500";
-      case "primary":
-        return "bg-primary/20 hover:bg-primary/30 border-primary/40 text-primary";
-      case "treasury":
-        return "bg-treasury/20 hover:bg-treasury/30 border-treasury/40 text-treasury";
-      case "gdp":
-      default:
-        return "bg-gdp/20 hover:bg-gdp/30 border-gdp/40 text-gdp";
-    }
-  };
+  const maxButtonClass = ActionVariantStyleUtility.getMaxButtonBg(colorVariant);
 
   return (
     <div className="grid grid-cols-4 gap-1.5 pt-1 font-sans dir-rtl">
@@ -49,7 +41,7 @@ export function PercentageSelector({
               type="button"
               disabled={disabled}
               onClick={() => onSelect(opt.pct)}
-              className={`py-1 rounded-lg border text-[9px] font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1 disabled:opacity-30 ${getMaxButtonColor()}`}
+              className={`py-1 rounded-lg border text-[9px] font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1 disabled:opacity-30 ${maxButtonClass}`}
             >
               <Zap size={10} />
               <span>{opt.label || "۱۰۰٪"}</span>

@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import { Zap, LucideIcon } from "lucide-react";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import {
+  ActionColorVariant,
+  ActionVariantStyleUtility,
+} from "./utils/action-variant-style.utility";
 
 export interface AmountActionInfoRow {
   label: string;
@@ -17,7 +21,7 @@ export interface AmountActionFormProps {
   maxAmount: number;
   step?: number;
   confirmLabel: string;
-  colorVariant?: "gdp" | "military" | "primary" | "treasury";
+  colorVariant?: ActionColorVariant;
   icon?: LucideIcon;
   infoRows?: AmountActionInfoRow[];
   warningText?: string;
@@ -71,19 +75,7 @@ export function AmountActionForm({
     }
   };
 
-  const getButtonBg = () => {
-    switch (colorVariant) {
-      case "military":
-        return "bg-military hover:bg-military/90 shadow-military/20 text-primary-foreground";
-      case "primary":
-        return "bg-primary hover:bg-primary/90 shadow-primary/20 text-primary-foreground";
-      case "treasury":
-        return "bg-amber-500 hover:bg-amber-500/90 shadow-amber-500/20 text-primary-foreground";
-      case "gdp":
-      default:
-        return "bg-gdp hover:bg-gdp/90 shadow-gdp/20 text-primary-foreground";
-    }
-  };
+  const buttonBgClass = ActionVariantStyleUtility.getButtonBg(colorVariant);
 
   return (
     <div className="space-y-4 text-right dir-rtl font-sans">
@@ -156,7 +148,7 @@ export function AmountActionForm({
       <button
         onClick={handleExecute}
         disabled={safeMax === 0 || currentAmount <= 0 || isSubmitting}
-        className={`w-full py-3.5 rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${getButtonBg()}`}
+        className={`w-full py-3.5 rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${buttonBgClass}`}
       >
         <Icon size={15} />
         <span>

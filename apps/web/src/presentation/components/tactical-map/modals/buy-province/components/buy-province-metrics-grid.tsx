@@ -52,10 +52,7 @@ export function BuyProvinceMetricsGrid({
           <span>وسعت خاک:</span>
         </div>
         <span className="font-black text-foreground text-xs block truncate">
-          {PersianNumberFormatter.toPersianDigits(
-            (pixelCount || 0).toLocaleString("en-US"),
-          )}{" "}
-          پیکسل
+          {PersianNumberFormatter.formatNumberWithCommas(pixelCount || 0)} پیکسل
         </span>
         <span className="text-[8px] text-muted-foreground font-sans block">
           گسترش مرزهای ملی

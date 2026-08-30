@@ -100,8 +100,8 @@ export function AttackDiscoveredIntelGrid({
             <span>پیاده‌نظام</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.toPersianDigits(
-              (targetNation.military.infantry || 0).toLocaleString("en-US"),
+            {PersianNumberFormatter.formatNumberWithCommas(
+              targetNation.military.infantry || 0,
             )}
           </span>
         </div>
@@ -112,8 +112,8 @@ export function AttackDiscoveredIntelGrid({
             <span>زرهی</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.toPersianDigits(
-              (targetNation.military.armor || 0).toLocaleString("en-US"),
+            {PersianNumberFormatter.formatNumberWithCommas(
+              targetNation.military.armor || 0,
             )}
           </span>
         </div>
@@ -124,8 +124,8 @@ export function AttackDiscoveredIntelGrid({
             <span>پدافند</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.toPersianDigits(
-              (targetNation.military.airDefense || 0).toLocaleString("en-US"),
+            {PersianNumberFormatter.formatNumberWithCommas(
+              targetNation.military.airDefense || 0,
             )}
           </span>
         </div>
@@ -136,8 +136,8 @@ export function AttackDiscoveredIntelGrid({
             <span>جنگنده</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.toPersianDigits(
-              (targetNation.military.airForce || 0).toLocaleString("en-US"),
+            {PersianNumberFormatter.formatNumberWithCommas(
+              targetNation.military.airForce || 0,
             )}
           </span>
         </div>
@@ -148,8 +148,8 @@ export function AttackDiscoveredIntelGrid({
             <span>موشک</span>
           </div>
           <span className="font-extrabold text-foreground block">
-            {PersianNumberFormatter.toPersianDigits(
-              (targetNation.military.droneMissile || 0).toLocaleString("en-US"),
+            {PersianNumberFormatter.formatNumberWithCommas(
+              targetNation.military.droneMissile || 0,
             )}
           </span>
         </div>

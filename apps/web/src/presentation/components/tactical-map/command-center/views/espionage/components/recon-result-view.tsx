@@ -42,9 +42,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             پیاده‌نظام:
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.toPersianDigits(
-              data.infantry.toLocaleString("en-US"),
-            )}
+            {PersianNumberFormatter.formatNumberWithCommas(data.infantry)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -52,9 +50,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             زرهی و تانک:
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.toPersianDigits(
-              data.armor.toLocaleString("en-US"),
-            )}
+            {PersianNumberFormatter.formatNumberWithCommas(data.armor)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -62,9 +58,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             پدافند موشکی:
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.toPersianDigits(
-              data.airDefense.toLocaleString("en-US"),
-            )}
+            {PersianNumberFormatter.formatNumberWithCommas(data.airDefense)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -72,9 +66,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             جنگنده‌ها:
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.toPersianDigits(
-              data.airForce.toLocaleString("en-US"),
-            )}
+            {PersianNumberFormatter.formatNumberWithCommas(data.airForce)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
@@ -82,9 +74,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             پهپاد و موشک:
           </span>
           <span className="font-bold text-foreground block mt-0.5">
-            {PersianNumberFormatter.toPersianDigits(
-              data.droneMissile.toLocaleString("en-US"),
-            )}
+            {PersianNumberFormatter.formatNumberWithCommas(data.droneMissile)}
           </span>
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">

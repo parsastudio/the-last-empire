@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import confetti from "canvas-confetti";
 import {
   Swords,
   Flame,
@@ -14,6 +13,7 @@ import { UnifiedModalShell } from "@/presentation/components/common/unified-moda
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { BattlePhaseCards } from "./components/battle-phase-cards";
 import { BattleCasualtyTable } from "./components/battle-casualty-table";
 import { BattleSpoilsCard } from "./components/battle-spoils-card";
@@ -42,14 +42,7 @@ export function BattleDebriefModal({
 
   useEffect(() => {
     if (isOpen && isHumanWinner) {
-      try {
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.6 },
-          colors: ["#10b981", "#f59e0b", "#3b82f6", "#ffffff"],
-        });
-      } catch {}
+      TacticalEffects.fireVictoryConfetti(120);
     }
   }, [isOpen, isHumanWinner]);
 

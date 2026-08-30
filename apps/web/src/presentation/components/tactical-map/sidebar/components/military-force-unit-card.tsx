@@ -38,9 +38,7 @@ export function MilitaryForceUnitCard({
           </div>
         </div>
         <span className="text-xs font-extrabold text-foreground font-mono">
-          {PersianNumberFormatter.toPersianDigits(
-            count.toLocaleString("en-US"),
-          )}
+          {PersianNumberFormatter.formatNumberWithCommas(count)}
         </span>
       </div>
 
