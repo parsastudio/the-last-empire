@@ -5,6 +5,8 @@ import {
   CountryRegistry,
   MilitaryPowerCalculator,
   MILITARY_UNIT_STATS,
+  DebtCalculatorUtility,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 
 export class AIWartimeLoanEvaluator {
@@ -14,11 +16,8 @@ export class AIWartimeLoanEvaluator {
     gdp: number,
     currentTreasury: number,
   ): { action: GameAction; amount: number } | null {
-    const maxDebtLimit = Math.floor(gdp * 0.8);
-    const availableLoanHeadroom = Math.max(
-      0,
-      maxDebtLimit - nation.nationalDebt,
-    );
+    const availableLoanHeadroom =
+      DebtCalculatorUtility.getAvailableLoanHeadroom(nation.nationalDebt, gdp);
 
     if (availableLoanHeadroom <= 0) {
       return null;
@@ -78,8 +77,7 @@ export class AIWartimeLoanEvaluator {
       const canonical = CountryRegistry.resolveCanonicalId(
         nation.warFocusTargetId,
       );
-      const focus =
-        allNations[canonical] || allNations[nation.warFocusTargetId];
+      const focus = NationGettersUtility.resolveNation(canonical, allNations);
       if (focus && focus.isAlive) {
         return focus;
       }
@@ -88,7 +86,7 @@ export class AIWartimeLoanEvaluator {
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       if (rel.stance === "WAR") {
         const canonical = CountryRegistry.resolveCanonicalId(targetId);
-        const enemy = allNations[canonical] || allNations[targetId];
+        const enemy = NationGettersUtility.resolveNation(canonical, allNations);
         if (enemy && enemy.isAlive && enemy.id !== nation.id) {
           return enemy;
         }

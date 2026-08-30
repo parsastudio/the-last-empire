@@ -2,7 +2,10 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { EspionageReconData } from "@/domain/espionage/espionage.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility, CountryRegistry } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  GuarantorBudgetCalculatorUtility,
+} from "@geopolitics/domain";
 
 export class ReconTierExecutor {
   public static execute(
@@ -23,17 +26,22 @@ export class ReconTierExecutor {
     let guarantorAuxiliaryValuation: number | undefined = undefined;
 
     if (target.securityGuarantorId && allNations) {
-      const gCanonical = CountryRegistry.resolveCanonicalId(
+      const guarantor = NationGettersUtility.resolveNation(
         target.securityGuarantorId,
+        allNations,
       );
-      const guarantor =
-        allNations[gCanonical] || allNations[target.securityGuarantorId];
       if (guarantor && guarantor.isAlive) {
+        const guarantorGdp = getNationGdp(guarantor, provincesMap);
         guarantorNationId = guarantor.id;
         guarantorName = guarantor.name;
         guarantorFlagCode = guarantor.flagCode;
         guarantorTechLevel = guarantor.military.techLevel;
-        guarantorAuxiliaryValuation = Math.floor(targetGdp * 0.3);
+        guarantorAuxiliaryValuation =
+          GuarantorBudgetCalculatorUtility.calculateBudget(
+            targetGdp,
+            guarantorGdp,
+            Boolean(target.isEmergencyProtectorate),
+          );
       }
     }
 

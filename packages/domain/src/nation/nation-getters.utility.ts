@@ -1,5 +1,6 @@
 import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
+import { CountryRegistry } from "@/domain/data/countries";
 import {
   NationRankCandidateInput,
   NationRankCalculatorUtility,
@@ -10,6 +11,19 @@ import { NationDemographicsResolverUtility } from "@/domain/nation/getters/natio
 export type { NationRankCandidateInput };
 
 export class NationGettersUtility {
+  public static resolveNation(
+    identifier: unknown,
+    nationsMap?: Record<string, Nation>,
+  ): Nation | null {
+    if (!nationsMap || identifier === null || identifier === undefined) {
+      return null;
+    }
+    const canonical = CountryRegistry.resolveCanonicalId(identifier);
+    const rawKey =
+      typeof identifier === "string" ? identifier : String(identifier);
+    return nationsMap[canonical] || nationsMap[rawKey] || null;
+  }
+
   public static calculateRankMapFromCandidates =
     NationRankCalculatorUtility.calculateRankMapFromCandidates.bind(
       NationRankCalculatorUtility,

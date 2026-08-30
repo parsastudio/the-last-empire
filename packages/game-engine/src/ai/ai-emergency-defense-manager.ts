@@ -9,6 +9,8 @@ import {
   UnitType,
   getNationGdp,
   TurnLogBuilder,
+  DebtCalculatorUtility,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 
 export interface ReactiveDefenseEvent {
@@ -47,11 +49,11 @@ export class AIEmergencyDefenseManager {
 
     const powerGap = targetPower - defenderPower;
     const defenderGdp = getNationGdp(defender, state.provinces);
-    const maxDebtLimit = Math.floor(defenderGdp * 0.8);
-    const availableLoanHeadroom = Math.max(
-      0,
-      maxDebtLimit - defender.nationalDebt,
-    );
+    const availableLoanHeadroom =
+      DebtCalculatorUtility.getAvailableLoanHeadroom(
+        defender.nationalDebt,
+        defenderGdp,
+      );
 
     if (availableLoanHeadroom <= 0) {
       return { newState: state, defenseEvent: { type: "MAX_DEBT" } };
@@ -196,7 +198,8 @@ export class AIEmergencyDefenseManager {
     techLevel: number,
   ): number {
     const stat = MILITARY_UNIT_STATS[unitType];
-    const techMultiplier = 1 + (Math.max(1, techLevel) - 1) * 0.5;
+    const techMultiplier =
+      MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
     return stat.weightPower * techMultiplier;
   }
 }

@@ -53,6 +53,7 @@ export * from "./combat/battle-execution-engine";
 export * from "./combat/combat-modifier-resolver";
 export * from "./combat/final/bit-packed-grid-state";
 export * from "./combat/conquest/province-conquest-handler";
+export * from "./combat/conquest/nation-annexation-executor";
 export * from "./combat/logging/battle-log-factory";
 export * from "./combat/loot/battle-loot-manager";
 export * from "./combat/phases/air-supremacy-phase";

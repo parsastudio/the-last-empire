@@ -6,15 +6,15 @@ import {
   TurnLogBuilder,
   PeaceTermsCalculator,
   TurnLogEntry,
+  NationGettersUtility,
 } from "@geopolitics/domain";
-import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
 
 export class AiWarResolutionSweep {
   public static resolveAiWars(state: GameState): GameState {
-    const updatedNations: Record<string, Nation> = { ...state.nations };
-    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+    let updatedNations: Record<string, Nation> = { ...state.nations };
+    let updatedProvinces: Record<string, Province> = { ...state.provinces };
     const newLogs: TurnLogEntry[] = [];
-    let isMapDirty = false;
 
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
@@ -43,8 +43,10 @@ export class AiWarResolutionSweep {
         if (processedPairs.has(pairKey)) continue;
         processedPairs.add(pairKey);
 
-        const targetNation =
-          updatedNations[canonicalB] || updatedNations[targetId];
+        const targetNation = NationGettersUtility.resolveNation(
+          canonicalB,
+          updatedNations,
+        );
         if (!targetNation || !targetNation.isAlive || !targetNation.isAi)
           continue;
 
@@ -89,63 +91,17 @@ export class AiWarResolutionSweep {
 
         if (!winnerHoldsCapturedProvince) continue;
 
-        const remainingLoserProvinces = allProvinces.filter(
-          (p) =>
-            CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
-            loserCanonical,
-        );
+        const annexationResult =
+          NationAnnexationExecutor.executeTotalAnnexation(
+            updatedProvinces,
+            updatedNations,
+            winner.id,
+            loser.id,
+            5,
+          );
 
-        for (let p = 0; p < remainingLoserProvinces.length; p++) {
-          const prov = remainingLoserProvinces[p]!;
-          updatedProvinces[prov.provinceId.toString()] = {
-            ...prov,
-            ownerNationId: winnerCanonical,
-            originalNationId: winnerCanonical,
-          };
-        }
-
-        isMapDirty = true;
-
-        const winnerObj = updatedNations[winner.id]!;
-        const winnerRelations = { ...winnerObj.relations };
-        delete winnerRelations[loserCanonical];
-        delete winnerRelations[loser.id];
-
-        const hasOtherWars = Object.values(winnerRelations).some(
-          (r) => r.stance === "WAR",
-        );
-
-        updatedNations[winner.id] = {
-          ...winnerObj,
-          treasury: winnerObj.treasury + Math.max(0, loser.treasury),
-          warFocusTargetId:
-            winnerObj.warFocusTargetId === loserCanonical
-              ? null
-              : winnerObj.warFocusTargetId,
-          postWarCooldownTurns: !hasOtherWars ? 5 : 0,
-          relations: winnerRelations,
-        };
-
-        updatedNations[loser.id] = {
-          ...loser,
-          isAlive: false,
-          treasury: 0,
-          nationalDebt: 0,
-          warFocusTargetId: null,
-          recruitmentQueue: [],
-          executedEspionageTiers: [],
-          attackedTargetIdsThisTurn: [],
-          postWarCooldownTurns: 0,
-          military: {
-            ...loser.military,
-            infantry: 0,
-            armor: 0,
-            airDefense: 0,
-            airForce: 0,
-            droneMissile: 0,
-          },
-          relations: {},
-        };
+        updatedProvinces = annexationResult.updatedProvinces;
+        updatedNations = annexationResult.updatedNations;
 
         newLogs.push(
           TurnLogBuilder.createAnnexationLog(
@@ -155,10 +111,6 @@ export class AiWarResolutionSweep {
           ),
         );
       }
-    }
-
-    if (isMapDirty) {
-      BitPackedGridState.getInstance().markDirty();
     }
 
     return {

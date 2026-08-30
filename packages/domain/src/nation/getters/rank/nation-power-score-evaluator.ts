@@ -109,7 +109,8 @@ export class NationPowerScoreEvaluator {
     }
 
     const effectiveFieldTech = Math.max(domesticTech, equipmentTech);
-    const techMultiplier = 1 + (Math.max(1, effectiveFieldTech) - 1) * 0.5;
+    const techMultiplier =
+      MilitaryPowerCalculator.calculateTechMultiplier(effectiveFieldTech);
 
     const navalPower = (input.navalFleet ?? 0) * 1500 * techMultiplier;
     const totalBattlefieldPower = activeCombatPower + navalPower;

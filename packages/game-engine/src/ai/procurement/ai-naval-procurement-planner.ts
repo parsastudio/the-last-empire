@@ -4,12 +4,11 @@ import {
   Nation,
   Province,
   NationGettersUtility,
+  NAVAL_FLEET_CONFIG,
 } from "@geopolitics/domain";
+import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 export class AINavalProcurementPlanner {
-  public static readonly FLEET_COST = 50_000_000_000;
-  public static readonly MIN_TREASURY_THRESHOLD = 80_000_000_000;
-
   public static planNaval(
     nation: Nation,
     effectiveTreasury: number,
@@ -19,17 +18,23 @@ export class AINavalProcurementPlanner {
     const currentFleet = nation.navalFleet || 0;
     const totalInfantry = nation.military.infantry || 0;
     const totalArmor = nation.military.armor || 0;
-    const currentCapacity = currentFleet * 60;
-    const targetCapacity = totalInfantry * 1 + totalArmor * 4;
+    const currentCapacity = NavalDeploymentClamper.calculateMaxCapacity(
+      "NAVAL",
+      currentFleet,
+    );
+    const targetCapacity = NavalDeploymentClamper.calculateRequiredCapacity(
+      totalInfantry,
+      totalArmor,
+    );
 
     if (
       hasSea &&
-      effectiveTreasury >= this.MIN_TREASURY_THRESHOLD &&
+      effectiveTreasury >= NAVAL_FLEET_CONFIG.MIN_TREASURY_THRESHOLD &&
       currentCapacity < targetCapacity
     ) {
       return {
         action: ActionFactory.buyNavalFleet(nation.id, 1),
-        cost: this.FLEET_COST,
+        cost: NAVAL_FLEET_CONFIG.FLEET_UNIT_COST,
       };
     }
 

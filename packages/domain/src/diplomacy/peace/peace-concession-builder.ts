@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
 import {
   PeaceTermsPackage,
   PeaceSettlementType,
@@ -31,7 +32,10 @@ export class PeaceConcessionBuilder {
     const canAfford =
       humanNation.treasury >= demandedMoney ||
       humanNation.treasury +
-        Math.max(0, Math.floor(humanGdp * 0.8) - humanNation.nationalDebt) >=
+        DebtCalculatorUtility.getAvailableLoanHeadroom(
+          humanNation.nationalDebt,
+          humanGdp,
+        ) >=
         demandedMoney;
 
     return {
@@ -173,7 +177,10 @@ export class PeaceConcessionBuilder {
     const canAfford =
       humanNation.treasury >= demandedMoney ||
       humanNation.treasury +
-        Math.max(0, Math.floor(humanGdp * 0.8) - humanNation.nationalDebt) >=
+        DebtCalculatorUtility.getAvailableLoanHeadroom(
+          humanNation.nationalDebt,
+          humanGdp,
+        ) >=
         demandedMoney;
 
     return {

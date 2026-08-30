@@ -1,11 +1,13 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { BuyNavalFleetAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError, NationGettersUtility } from "@geopolitics/domain";
+import {
+  GameError,
+  NationGettersUtility,
+  NAVAL_FLEET_CONFIG,
+} from "@geopolitics/domain";
 
 export class NavalFleetExecutor {
-  public static readonly FLEET_UNIT_PRICE = 50_000_000_000;
-
   public static execute(
     state: GameState,
     nation: Nation,
@@ -24,7 +26,7 @@ export class NavalFleetExecutor {
       );
     }
 
-    const fleetCost = this.FLEET_UNIT_PRICE * action.quantity;
+    const fleetCost = NAVAL_FLEET_CONFIG.FLEET_UNIT_COST * action.quantity;
     if (nation.treasury < fleetCost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",

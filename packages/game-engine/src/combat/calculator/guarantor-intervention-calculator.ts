@@ -3,6 +3,7 @@ import {
   Province,
   MILITARY_UNIT_STATS,
   getNationGdp,
+  GuarantorBudgetCalculatorUtility,
 } from "@geopolitics/domain";
 import { AuxiliaryGuarantorDefense } from "@/domain/reports/combat-report.schema";
 
@@ -37,34 +38,26 @@ export class GuarantorInterventionCalculator {
     }
 
     const defGdp = getNationGdp(defender, provincesMap);
-    const isEmergency = Boolean(defender.isEmergencyProtectorate);
-    const budgetMultiplier = isEmergency ? 3.0 : 0.3;
-    const rawBudget = Math.floor(defGdp * budgetMultiplier);
     const guarantorGdp = getNationGdp(guarantorNation, provincesMap);
-    const maxSuperpowerLimit = Math.floor(guarantorGdp * 0.3);
-    const effectiveDefenseBudget = Math.min(rawBudget, maxSuperpowerLimit);
+    const isEmergency = Boolean(defender.isEmergencyProtectorate);
 
-    const gTech = guarantorNation.military.techLevel;
+    const effectiveDefenseBudget =
+      GuarantorBudgetCalculatorUtility.calculateBudget(
+        defGdp,
+        guarantorGdp,
+        isEmergency,
+      );
 
-    const auxAir = Math.floor(
-      (effectiveDefenseBudget * 0.4) / MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
-    );
-    const auxAD = Math.floor(
-      (effectiveDefenseBudget * 0.25) /
-        MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
-    );
-    const auxArm = Math.floor(
-      (effectiveDefenseBudget * 0.25) / MILITARY_UNIT_STATS.ARMOR.moneyCost,
-    );
-    const auxInf = Math.floor(
-      (effectiveDefenseBudget * 0.1) / MILITARY_UNIT_STATS.INFANTRY.moneyCost,
-    );
+    const { auxAir, auxAD, auxArm, auxInf } =
+      GuarantorBudgetCalculatorUtility.calculateAuxiliaryUnits(
+        effectiveDefenseBudget,
+      );
 
     const auxiliaryGuarantor: AuxiliaryGuarantorDefense = {
       guarantorId: guarantorNation.id,
       guarantorName: guarantorNation.name,
       guarantorFlagCode: guarantorNation.flagCode,
-      techLevel: gTech,
+      techLevel: guarantorNation.military.techLevel,
       isEmergencyProtectorate: isEmergency,
       deployedInfantry: auxInf,
       deployedArmor: auxArm,

@@ -8,27 +8,31 @@ import {
   SignPeaceSettlementAction,
   GameError,
   getProvinceGdp,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
+import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
 
 export class PeaceSettlementExecutor {
   public static execute(
     state: GameState,
     action: SignPeaceSettlementAction,
   ): GameState {
-    const canonicalSource = CountryRegistry.resolveCanonicalId(action.nationId);
-    const canonicalTarget = CountryRegistry.resolveCanonicalId(
-      action.targetNationId,
+    const sourceNation = NationGettersUtility.resolveNation(
+      action.nationId,
+      state.nations,
     );
-
-    const sourceNation =
-      state.nations[canonicalSource] || state.nations[action.nationId];
-    const targetNation =
-      state.nations[canonicalTarget] || state.nations[action.targetNationId];
+    const targetNation = NationGettersUtility.resolveNation(
+      action.targetNationId,
+      state.nations,
+    );
 
     if (!sourceNation || !targetNation) {
       throw new GameError("NATION_NOT_FOUND", "یکی از طرفین معاهده یافت نشد.");
     }
+
+    const canonicalSource = CountryRegistry.resolveCanonicalId(sourceNation.id);
+    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
 
     const humanCanonical = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
@@ -50,8 +54,8 @@ export class PeaceSettlementExecutor {
       state.provinces,
     );
 
-    const updatedProvinces: Record<string, Province> = { ...state.provinces };
-    const updatedNations: Record<string, Nation> = { ...state.nations };
+    let updatedProvinces: Record<string, Province> = { ...state.provinces };
+    let updatedNations: Record<string, Nation> = { ...state.nations };
 
     const isFullCapitulation = terms.settlementType === "FULL_CAPITULATION";
     const winnerNation = terms.isAiOffering ? humanNation : aiNation;
@@ -126,46 +130,16 @@ export class PeaceSettlementExecutor {
     const newLogs = [];
 
     if (isFullCapitulation) {
-      const conqueredProvs = Object.values(updatedProvinces).filter(
-        (p) =>
-          CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
-          loserCanonical,
+      const annexationResult = NationAnnexationExecutor.executeTotalAnnexation(
+        updatedProvinces,
+        updatedNations,
+        winnerNation.id,
+        loserNation.id,
+        winnerNation.isAi ? 5 : 0,
       );
 
-      for (let i = 0; i < conqueredProvs.length; i++) {
-        const p = conqueredProvs[i]!;
-        updatedProvinces[p.provinceId.toString()] = {
-          ...p,
-          ownerNationId: winnerCanonical,
-          originalNationId: winnerCanonical,
-        };
-      }
-
-      BitPackedGridState.getInstance().markDirty();
-
-      updatedNations[loserNation.id] = {
-        ...updatedNations[loserNation.id]!,
-        isAlive: false,
-        treasury: 0,
-        nationalDebt: 0,
-        warFocusTargetId: null,
-        relations: {},
-      };
-
-      const winnerObj = updatedNations[winnerNation.id]!;
-      const winnerRelations = { ...winnerObj.relations };
-      delete winnerRelations[loserCanonical];
-      delete winnerRelations[loserNation.id];
-
-      updatedNations[winnerNation.id] = {
-        ...winnerObj,
-        warFocusTargetId:
-          winnerObj.warFocusTargetId === loserCanonical
-            ? null
-            : winnerObj.warFocusTargetId,
-        postWarCooldownTurns: winnerNation.isAi ? 5 : 0,
-        relations: winnerRelations,
-      };
+      updatedProvinces = annexationResult.updatedProvinces;
+      updatedNations = annexationResult.updatedNations;
 
       newLogs.push(
         TurnLogBuilder.createAnnexationLog(

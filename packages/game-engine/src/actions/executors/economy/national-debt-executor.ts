@@ -6,6 +6,7 @@ import {
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { DebtCalculatorUtility } from "@geopolitics/domain";
 
 export class NationalDebtExecutor {
   public static handleRequestLoan(
@@ -20,8 +21,8 @@ export class NationalDebtExecutor {
         "مبلغ وام باید بزرگتر از صفر باشد.",
       );
     }
-    const maxManualDebtLimit = Math.floor(
-      getNationGdp(nation, state.provinces) * 0.8,
+    const maxManualDebtLimit = DebtCalculatorUtility.getMaxDebtLimit(
+      getNationGdp(nation, state.provinces),
     );
     if (nation.nationalDebt + action.amount > maxManualDebtLimit) {
       throw new GameError(
