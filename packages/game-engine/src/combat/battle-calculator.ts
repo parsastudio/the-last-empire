@@ -10,12 +10,10 @@ import {
 } from "@/domain/reports/combat-report.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
-import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
-import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
-import { GroundEngagementPhase } from "@/engine/combat/phases/ground-engagement-phase";
 import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
+import { BattleLootEvaluator } from "@/engine/combat/calculator/battle-loot-evaluator";
+import { BattlePhaseOrchestrator } from "@/engine/combat/calculator/battle-phase-orchestrator";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -109,93 +107,37 @@ export class BattleCalculator {
     let defArmor = defender.military.armor || 0;
     let defInfantry = defender.military.infantry || 0;
 
-    let auxiliaryGuarantor: AuxiliaryGuarantorDefense | undefined = undefined;
-
-    let auxAir = 0;
-    let auxArm = 0;
-    let auxAD = 0;
-    let auxInf = 0;
-    let effectiveDefenseBudget = 0;
-
-    if (
-      guarantorNation &&
-      guarantorNation.isAlive &&
-      guarantorNation.id !== attacker.id
-    ) {
-      const defGdp = getNationGdp(defender, provincesMap);
-      const isEmergency = Boolean(defender.isEmergencyProtectorate);
-      const budgetMultiplier = isEmergency ? 3.0 : 0.3;
-      const rawBudget = Math.floor(defGdp * budgetMultiplier);
-      const guarantorGdp = getNationGdp(guarantorNation, provincesMap);
-      const maxSuperpowerLimit = Math.floor(guarantorGdp * 0.3);
-      effectiveDefenseBudget = Math.min(rawBudget, maxSuperpowerLimit);
-
-      const gTech = guarantorNation.military.techLevel;
-
-      auxAir = Math.floor(
-        (effectiveDefenseBudget * 0.4) /
-          MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
-      );
-      auxAD = Math.floor(
-        (effectiveDefenseBudget * 0.25) /
-          MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
-      );
-      auxArm = Math.floor(
-        (effectiveDefenseBudget * 0.25) / MILITARY_UNIT_STATS.ARMOR.moneyCost,
-      );
-      auxInf = Math.floor(
-        (effectiveDefenseBudget * 0.1) / MILITARY_UNIT_STATS.INFANTRY.moneyCost,
+    const guarantorResult =
+      GuarantorInterventionCalculator.calculateIntervention(
+        attacker,
+        defender,
+        provincesMap,
+        guarantorNation,
       );
 
-      defAirForce += auxAir;
-      defArmor += auxArm;
-      defAirDefense += auxAD;
-      defInfantry += auxInf;
+    defAirForce += guarantorResult.auxAir;
+    defArmor += guarantorResult.auxArm;
+    defAirDefense += guarantorResult.auxAD;
+    defInfantry += guarantorResult.auxInf;
 
-      auxiliaryGuarantor = {
-        guarantorId: guarantorNation.id,
-        guarantorName: guarantorNation.name,
-        guarantorFlagCode: guarantorNation.flagCode,
-        techLevel: gTech,
-        isEmergencyProtectorate: isEmergency,
-        deployedInfantry: auxInf,
-        deployedArmor: auxArm,
-        deployedAirDefense: auxAD,
-        deployedAirForce: auxAir,
-        initialBudgetValuation: effectiveDefenseBudget,
-        damageCostIncurred: 0,
-      };
-    }
-
-    const missilePhase = MissileInterceptionPhase.calculate({
+    const phasesResult = BattlePhaseOrchestrator.executePhases(
       deployedDrones,
       defAirDefense,
-      attDroneMult,
-      defAdMult,
-    });
-
-    const airPhase = AirSupremacyPhase.calculate({
       deployedAirForce,
       defAirForce,
-      defArmor,
-      attAirMult,
-      defAirMult,
-      defArmorMult,
-      defAirDefenseRemainingEff: missilePhase.defAirDefenseRemainingEff,
-    });
-
-    const groundPhase = GroundEngagementPhase.calculate({
       deployedArmor,
+      defArmor,
       deployedInfantry,
       defInfantry,
-      defArmorAfterAirRaw: airPhase.defArmorAfterAirRaw,
-      defArmorAfterAirEff: airPhase.defArmorAfterAirEff,
-      defArmorDestroyedByAir: airPhase.defArmorDestroyedByAir,
+      attDroneMult,
+      defAdMult,
+      attAirMult,
+      defAirMult,
       attArmorMult,
-      attInfMult,
       defArmorMult,
+      attInfMult,
       defInfMult,
-    });
+    );
 
     const attackerDeployedPower = Math.max(
       0.1,
@@ -232,66 +174,46 @@ export class BattleCalculator {
       defArmor,
       defAirDefense,
       defAirForce,
-      rawAttInfantryLost: groundPhase.rawAttInfantryLost,
-      rawAttArmorLoss: groundPhase.rawAttArmorLoss,
-      rawAttAirLoss: airPhase.rawAttAirLoss,
-      rawDefInfantryLost: groundPhase.rawDefInfantryLost,
-      rawDefArmorLost: groundPhase.rawDefArmorLost,
-      rawDefAirDefenseLost: missilePhase.rawDefAirDefenseLost,
-      rawDefAirLoss: airPhase.rawDefAirLoss,
+      rawAttInfantryLost: phasesResult.groundPhaseOutput.rawAttInfantryLost,
+      rawAttArmorLoss: phasesResult.groundPhaseOutput.rawAttArmorLoss,
+      rawAttAirLoss: phasesResult.airPhaseOutput.rawAttAirLoss,
+      rawDefInfantryLost: phasesResult.groundPhaseOutput.rawDefInfantryLost,
+      rawDefArmorLost: phasesResult.groundPhaseOutput.rawDefArmorLost,
+      rawDefAirDefenseLost:
+        phasesResult.missilePhaseOutput.rawDefAirDefenseLost,
+      rawDefAirLoss: phasesResult.airPhaseOutput.rawDefAirLoss,
     });
 
-    if (auxiliaryGuarantor && effectiveDefenseBudget > 0) {
-      const auxAirLoss = Math.min(
-        auxAir,
-        Math.floor(
-          casualty.netDefAirLost * (auxAir / Math.max(1, defAirForce)),
-        ),
-      );
-      const auxADLoss = Math.min(
-        auxAD,
-        Math.floor(
-          casualty.netDefAirDefenseLost * (auxAD / Math.max(1, defAirDefense)),
-        ),
-      );
-      const auxArmLoss = Math.min(
-        auxArm,
-        Math.floor(casualty.netDefArmorLost * (auxArm / Math.max(1, defArmor))),
-      );
-      const auxInfLoss = Math.min(
-        auxInf,
-        Math.floor(
-          casualty.netDefInfantryLost * (auxInf / Math.max(1, defInfantry)),
-        ),
-      );
-
-      const totalLossMoney =
-        auxAirLoss * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-        auxADLoss * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
-        auxArmLoss * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-        auxInfLoss * MILITARY_UNIT_STATS.INFANTRY.moneyCost;
-
-      auxiliaryGuarantor.damageCostIncurred = Math.min(
-        effectiveDefenseBudget,
-        totalLossMoney,
+    if (
+      guarantorResult.auxiliaryGuarantor &&
+      guarantorResult.effectiveDefenseBudget > 0
+    ) {
+      GuarantorInterventionCalculator.calculateGuarantorDamageCost(
+        guarantorResult.auxiliaryGuarantor,
+        guarantorResult.effectiveDefenseBudget,
+        guarantorResult.auxAir,
+        guarantorResult.auxAD,
+        guarantorResult.auxArm,
+        guarantorResult.auxInf,
+        defAirForce,
+        defAirDefense,
+        defArmor,
+        defInfantry,
+        casualty.netDefAirLost,
+        casualty.netDefAirDefenseLost,
+        casualty.netDefArmorLost,
+        casualty.netDefInfantryLost,
       );
     }
 
-    const defenderGdp = getNationGdp(defender, provincesMap);
-    const guaranteedLootPool =
-      Math.max(0, defender.treasury) + Math.floor(defenderGdp * 0.05);
-
-    const defenderTotalTerritory =
-      NationGettersUtility.getTerritoryPixelCount(defender.id, provincesMap) ||
-      1;
-    const treasuryLootRatio = groundPhase.isAttackerVictory
-      ? Math.min(0.2, 1000 / defenderTotalTerritory)
-      : 0;
-
-    const treasuryLooted = Math.floor(guaranteedLootPool * treasuryLootRatio);
+    const treasuryLooted = BattleLootEvaluator.calculateLoot(
+      defender,
+      phasesResult.groundPhaseOutput.isAttackerVictory,
+      provincesMap,
+    );
 
     let severity: ReportSeverity = "INFO";
-    if (groundPhase.isAttackerVictory) {
+    if (phasesResult.groundPhaseOutput.isAttackerVictory) {
       severity = "VICTORY";
     } else {
       severity =
@@ -300,45 +222,8 @@ export class BattleCalculator {
           : "DEFEAT";
     }
 
-    let phase1Winner: "ATTACKER" | "DEFENDER" | "DRAW" | "SKIPPED" = "SKIPPED";
-    if (deployedDrones > 0) {
-      if (casualty.netDefAirDefenseLost > 0) {
-        phase1Winner = "ATTACKER";
-      } else if (defAirDefense > 0) {
-        phase1Winner = "DEFENDER";
-      } else {
-        phase1Winner = "DRAW";
-      }
-    }
-
-    let phase2Winner: "ATTACKER" | "DEFENDER" | "DRAW" = "DRAW";
-    if (deployedAirForce > 0 || defAirForce > 0) {
-      const attAirLossRatio =
-        deployedAirForce > 0 ? casualty.netAttAirLost / deployedAirForce : 1;
-      const defAirLossRatio =
-        defAirForce > 0 ? casualty.netDefAirLost / defAirForce : 1;
-
-      if (
-        casualty.netDefAirLost > casualty.netAttAirLost ||
-        (airPhase.defArmorDestroyedByAir > 0 &&
-          casualty.netAttAirLost <= casualty.netDefAirLost)
-      ) {
-        phase2Winner = "ATTACKER";
-      } else if (casualty.netAttAirLost > casualty.netDefAirLost) {
-        phase2Winner = "DEFENDER";
-      } else if (attAirLossRatio < defAirLossRatio) {
-        phase2Winner = "ATTACKER";
-      } else if (defAirLossRatio < attAirLossRatio) {
-        phase2Winner = "DEFENDER";
-      }
-    }
-
-    const phase3Winner = groundPhase.isAttackerVictory
-      ? "ATTACKER"
-      : "DEFENDER";
-
     return {
-      isAttackerVictory: groundPhase.isAttackerVictory,
+      isAttackerVictory: phasesResult.groundPhaseOutput.isAttackerVictory,
       isFullCapitulation: false,
       valuationRatio,
       dronesUsed: deployedDrones,
@@ -347,33 +232,10 @@ export class BattleCalculator {
       treasuryLooted,
       deploymentMoneyCost,
       severity,
-      phase1Missile: {
-        dronesLaunched: deployedDrones,
-        defAirDefense,
-        airDefenseLost: casualty.netDefAirDefenseLost,
-        dronesIntercepted: Math.min(deployedDrones, defAirDefense * 2),
-        phaseWinner: phase1Winner,
-      },
-      phase2Air: {
-        attAirForce: deployedAirForce,
-        defAirForce,
-        attAirLost: casualty.netAttAirLost,
-        defAirLost: casualty.netDefAirLost,
-        defArmorDestroyedByAir: airPhase.defArmorDestroyedByAir,
-        phaseWinner: phase2Winner,
-      },
-      phase3Ground: {
-        attArmor: deployedArmor,
-        defArmor,
-        attArmorLost: casualty.netAttArmorLost,
-        defArmorLost: casualty.netDefArmorLost,
-        attInfantry: deployedInfantry,
-        defInfantry,
-        attInfantryLost: casualty.netAttInfantryLost,
-        defInfantryLost: casualty.netDefInfantryLost,
-        phaseWinner: phase3Winner,
-      },
-      auxiliaryGuarantor,
+      phase1Missile: phasesResult.phase1Missile,
+      phase2Air: phasesResult.phase2Air,
+      phase3Ground: phasesResult.phase3Ground,
+      auxiliaryGuarantor: guarantorResult.auxiliaryGuarantor,
     };
   }
 }
