@@ -8,7 +8,6 @@ export class NationMutatorUtility {
       treasury: 0,
       nationalDebt: 0,
       warFocusTargetId: null,
-      recruitmentQueue: [],
       executedEspionageTiers: [],
       attackedTargetIdsThisTurn: [],
       postWarCooldownTurns: 0,

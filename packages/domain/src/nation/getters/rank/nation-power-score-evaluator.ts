@@ -63,7 +63,6 @@ export class NationPowerScoreEvaluator {
         turnsInPower: 1,
       },
       military: stack,
-      recruitmentQueue: [],
       relations: {},
       activeModifiers: [],
       globalReputation: input.globalReputation ?? 50,

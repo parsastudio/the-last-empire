@@ -135,7 +135,6 @@ export class NationProfileAssigner {
         turnsInPower: 5,
       },
       military: baseMilitary,
-      recruitmentQueue: [],
       relations: {},
       activeModifiers: [],
       globalReputation: 50,

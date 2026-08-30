@@ -23,7 +23,7 @@ export function MilitarySubTabsHeader({
     },
     {
       id: "domestic" as const,
-      label: "صنایع دفاعی و ساخت بومی (۱ نوبت)",
+      label: "صنایع دفاعی و ساخت بومی (تحویل فوری)",
       icon: Hammer,
       badge: "تولید ملی",
     },

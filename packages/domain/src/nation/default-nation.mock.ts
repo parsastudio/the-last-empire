@@ -32,7 +32,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
       droneMissile: 1,
     },
   },
-  recruitmentQueue: [],
   relations: {},
   activeModifiers: [],
   globalReputation: 50,

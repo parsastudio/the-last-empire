@@ -67,10 +67,7 @@ export class ArmsMarketManager {
 
     const buyerGdp = getNationGdp(buyer, state.provinces);
     const currentValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuationWithQueue(
-        buyer.military,
-        buyer.recruitmentQueue,
-      );
+      MilitaryPricingCalculator.calculateTotalArmyValuation(buyer.military);
     const maxValuation = Math.floor(buyerGdp);
     const addedValuation = baseUnitPrice * quantity;
 
@@ -84,7 +81,6 @@ export class ArmsMarketManager {
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       buyerGdp,
       buyer.military,
-      buyer.recruitmentQueue,
     );
     const q = quotas[unitType];
 

@@ -97,13 +97,6 @@ export const RequestLoanActionSchema = z.object({
   amount: z.number().positive(),
 });
 
-export const CancelRecruitmentActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("CANCEL_RECRUITMENT"),
-  orderId: z.string(),
-});
-
 export const InvestResearchActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -136,7 +129,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   ExecuteEspionageActionSchema,
   RepayDebtActionSchema,
   RequestLoanActionSchema,
-  CancelRecruitmentActionSchema,
   InvestResearchActionSchema,
   InitiateBattleActionSchema,
 ]);
@@ -174,9 +166,6 @@ export type ExecuteEspionageAction = z.infer<
 >;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
-export type CancelRecruitmentAction = z.infer<
-  typeof CancelRecruitmentActionSchema
->;
 export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
 export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
 export type GameAction = z.infer<typeof GameActionSchema>;

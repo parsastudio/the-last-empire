@@ -1,5 +1,5 @@
 import React from "react";
-import { Plus, Coins, ShieldCheck } from "lucide-react";
+import { Plus, Coins, ShieldCheck, Zap } from "lucide-react";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { QuickUnitBatchInfo } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
 import { FloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
@@ -54,6 +54,10 @@ export function QuickUnitRecruitCard({
               )}
               )
             </span>
+            <span className="flex items-center gap-0.5 text-emerald-400 font-sans">
+              <Zap size={10} />
+              تحویل آنی
+            </span>
           </div>
         </div>
       </div>
@@ -81,7 +85,7 @@ export function QuickUnitRecruitCard({
             onClick={() => onBuy(info)}
             disabled={!info.canAfford}
             className="py-2.5 px-4 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-black font-mono transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.03] active:scale-[0.96] flex items-center gap-1.5 border border-gdp/30"
-            title={`سفارش با هزینه ${PersianNumberFormatter.formatCurrency(info.batchCost)}`}
+            title={`خرید فوری با هزینه ${PersianNumberFormatter.formatCurrency(info.batchCost)}`}
           >
             <Plus size={14} strokeWidth={3} />
             <Coins size={12} className="opacity-90 shrink-0" />
