@@ -52,8 +52,8 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
         />
 
         <CapacityMeterBadge
-          capacityPct={metrics.capacityPercentage}
-          population={metrics.population}
+          totalActiveFactories={metrics.totalActiveFactories}
+          totalMaxSlots={metrics.totalMaxSlots}
         />
 
         <div className="w-[1px] h-6 bg-border/80 shrink-0 hidden sm:block" />

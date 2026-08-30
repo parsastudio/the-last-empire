@@ -41,7 +41,8 @@ export class NationProfileAssigner {
       profile?.startingTechLevel ??
       item.startingTechLevel ??
       1.0;
-    const equipmentTech = profile?.equipmentTechLevel ?? domesticTech;
+    const equipmentTech =
+      item.equipmentTechLevel ?? profile?.equipmentTechLevel ?? domesticTech;
 
     const dynamicStack = MilitaryDistributionEngine.calculateStartingStack(
       item.gdp,
@@ -118,6 +119,8 @@ export class NationProfileAssigner {
       item.gdp,
     );
 
+    const industrialLevel = item.industrialLevel ?? domesticTech;
+
     return {
       id: cleanId,
       name: item.nameFa,
@@ -127,7 +130,8 @@ export class NationProfileAssigner {
       economicStance: "BALANCED_MIXED",
       treasury: item.startingTreasury,
       nationalDebt: 0,
-      industrialLevel: item.industrialLevel,
+      industrialLevel,
+      equipmentTechLevel: equipmentTech,
       navalFleet: initialNavalFleet,
       government: {
         type: govType,
@@ -181,9 +185,7 @@ export class NationProfileAssigner {
       nameFa: fallback.nameFa,
       nameEn: fallback.nameEn,
       gdp: fallback.gdp,
-      perCapitaProductivity: fallback.perCapitaProductivity,
       population: fallback.population,
-      maxPopulationCapacity: fallback.maxPopulationCapacity,
       territoryPixelCount: 1000,
       provinceIds: [],
       hasSeaAccess: true,
@@ -196,7 +198,8 @@ export class NationProfileAssigner {
       startingAirForce: dynamicStack.airForce,
       startingDroneMissile: dynamicStack.droneMissile,
       startingTechLevel: dynamicStack.techLevel,
-      industrialLevel: 1,
+      industrialLevel: fallback.domesticTechLevel,
+      equipmentTechLevel: fallback.equipmentTechLevel,
       startingStability: 50,
       aiDoctrine: fallback.aiDoctrine,
     };

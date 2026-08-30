@@ -3,6 +3,7 @@ import {
   Province,
   NationGettersUtility,
   getNationGdp,
+  CountryRegistry,
 } from "@geopolitics/domain";
 
 export interface NationOverviewViewModel {
@@ -13,10 +14,11 @@ export interface NationOverviewViewModel {
   rank: number;
   gdp: number;
   population: number;
-  maxPopulationCapacity: number;
-  perCapitaProductivity: number;
+  totalActiveFactories: number;
+  totalMaxSlots: number;
   territoryPixelCount: number;
-  infrastructureLevel: number;
+  industrialLevel: number;
+  equipmentTechLevel: number;
   treasury: number;
   nationalDebt: number;
   stability: number;
@@ -29,6 +31,19 @@ export function selectNationOverviewViewModel(
   nationsMap?: Record<string, Nation>,
   provincesMap?: Record<string, Province>,
 ): NationOverviewViewModel {
+  const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+  let totalActiveFactories = 0;
+  let totalMaxSlots = 0;
+
+  if (provincesMap) {
+    for (const p of Object.values(provincesMap)) {
+      if (CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId) {
+        totalActiveFactories += p.factoriesCount;
+        totalMaxSlots += p.maxSlots;
+      }
+    }
+  }
+
   return {
     id: nation.id,
     name: nation.name,
@@ -37,22 +52,14 @@ export function selectNationOverviewViewModel(
     rank: NationGettersUtility.getRank(nation.id, nationsMap, provincesMap),
     gdp: getNationGdp(nation, provincesMap),
     population: NationGettersUtility.getPopulation(nation.id, provincesMap),
-    maxPopulationCapacity: NationGettersUtility.getMaxPopulationCapacity(
-      nation.id,
-      provincesMap,
-    ),
-    perCapitaProductivity: NationGettersUtility.getPerCapitaProductivity(
-      nation.id,
-      provincesMap,
-    ),
+    totalActiveFactories,
+    totalMaxSlots,
     territoryPixelCount: NationGettersUtility.getTerritoryPixelCount(
       nation.id,
       provincesMap,
     ),
-    infrastructureLevel: NationGettersUtility.getInfrastructureLevel(
-      nation.id,
-      provincesMap,
-    ),
+    industrialLevel: nation.industrialLevel,
+    equipmentTechLevel: nation.equipmentTechLevel,
     treasury: nation.treasury,
     nationalDebt: nation.nationalDebt,
     stability: nation.government.stability,

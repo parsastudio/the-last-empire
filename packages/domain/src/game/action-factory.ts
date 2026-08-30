@@ -1,5 +1,9 @@
 import {
   SetEconomicDoctrineAction,
+  BuildFactoryAction,
+  EquipDomesticMachineryAction,
+  InvestIndustrialResearchAction,
+  BuyIndustrialEquipmentAction,
   RecruitUnitAction,
   BuyArmsMarketAction,
   BuyNavalFleetAction,
@@ -7,11 +11,11 @@ import {
   DiplomaticProposalAction,
   RespondDiplomaticProposalAction,
   SignPeaceSettlementAction,
-  UpgradeDevelopmentAction,
   ExecuteEspionageAction,
   RepayDebtAction,
   RequestLoanAction,
   InvestResearchAction,
+  StrategicIndustrialStrikeAction,
   InitiateBattleAction,
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
@@ -33,6 +37,52 @@ export class ActionFactory {
       nationId,
       type: "SET_ECONOMIC_DOCTRINE",
       stance,
+    };
+  }
+
+  public static buildFactory(
+    nationId: string,
+    provinceId: number,
+  ): BuildFactoryAction {
+    return {
+      id: this.createId("build-factory"),
+      nationId,
+      type: "BUILD_FACTORY",
+      provinceId,
+    };
+  }
+
+  public static equipDomesticMachinery(
+    nationId: string,
+  ): EquipDomesticMachineryAction {
+    return {
+      id: this.createId("equip-machinery"),
+      nationId,
+      type: "EQUIP_DOMESTIC_MACHINERY",
+    };
+  }
+
+  public static investIndustrialResearch(
+    nationId: string,
+  ): InvestIndustrialResearchAction {
+    return {
+      id: this.createId("ind-research"),
+      nationId,
+      type: "INVEST_INDUSTRIAL_RESEARCH",
+    };
+  }
+
+  public static buyIndustrialEquipment(
+    nationId: string,
+    sellerNationId: string,
+    quantity: number,
+  ): BuyIndustrialEquipmentAction {
+    return {
+      id: this.createId("buy-equipment"),
+      nationId,
+      type: "BUY_INDUSTRIAL_EQUIPMENT",
+      sellerNationId,
+      quantity,
     };
   }
 
@@ -149,14 +199,6 @@ export class ActionFactory {
     };
   }
 
-  public static upgradeDevelopment(nationId: string): UpgradeDevelopmentAction {
-    return {
-      id: this.createId("development"),
-      nationId,
-      type: "UPGRADE_DEVELOPMENT",
-    };
-  }
-
   public static executeEspionage(
     nationId: string,
     targetNationId: string,
@@ -200,11 +242,26 @@ export class ActionFactory {
     };
   }
 
+  public static strategicIndustrialStrike(
+    nationId: string,
+    targetNationId: string,
+    targetProvinceId: number,
+    dronesToLaunch: number,
+  ): StrategicIndustrialStrikeAction {
+    return {
+      id: this.createId("strike"),
+      nationId,
+      targetNationId,
+      targetProvinceId,
+      dronesToLaunch,
+      type: "STRATEGIC_INDUSTRIAL_STRIKE",
+    };
+  }
+
   public static initiateBattle(
     nationId: string,
     targetNationId: string,
-    dronesToLaunch: number,
-    infantryToDeploy?: number,
+    infantryToDeploy: number,
     armorToDeploy?: number,
     airForceToDeploy?: number,
     targetProvinceId?: number,
@@ -215,7 +272,6 @@ export class ActionFactory {
       nationId,
       type: "INITIATE_BATTLE",
       targetNationId,
-      dronesToLaunch,
       infantryToDeploy,
       armorToDeploy,
       airForceToDeploy,

@@ -14,9 +14,9 @@ export const ProvinceSchema = z.object({
     x: z.number(),
     y: z.number(),
   }),
-  population: z.number().nonnegative().default(0),
-  perCapitaProductivity: z.number().nonnegative().default(5000),
-  maxPopulationCapacity: z.number().nonnegative().default(100000),
+  population: z.number().nonnegative().default(1000000),
+  maxSlots: z.number().nonnegative().default(1),
+  factoriesCount: z.number().nonnegative().default(1),
 });
 
 export type Province = z.infer<typeof ProvinceSchema>;

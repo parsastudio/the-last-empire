@@ -8,7 +8,6 @@ import {
   FiscalRevenueCalculator,
   MilitaryPayrollCalculator,
 } from "@geopolitics/game-engine";
-import { DemographicsCalculator } from "@/domain/nation/demographics-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export interface HumanResourceMetrics {
@@ -16,10 +15,10 @@ export interface HumanResourceMetrics {
   treasury: number;
   netIncomePerTurn: number;
   grossIncomePerTurn: number;
-  population: number;
-  maxPopulationCapacity: number;
-  capacityPercentage: number;
-  perCapitaProductivity: number;
+  totalActiveFactories: number;
+  totalMaxSlots: number;
+  industrialLevel: number;
+  equipmentTechLevel: number;
   stability: number;
   currentTurn: number;
 }
@@ -33,10 +32,10 @@ export function selectHumanResourceMetrics(
       treasury: 0,
       netIncomePerTurn: 0,
       grossIncomePerTurn: 0,
-      population: 0,
-      maxPopulationCapacity: 100000000,
-      capacityPercentage: 0,
-      perCapitaProductivity: 5000,
+      totalActiveFactories: 0,
+      totalMaxSlots: 0,
+      industrialLevel: 1.0,
+      equipmentTechLevel: 1.0,
       stability: 0,
       currentTurn: 1,
     };
@@ -53,27 +52,25 @@ export function selectHumanResourceMetrics(
       treasury: 0,
       netIncomePerTurn: 0,
       grossIncomePerTurn: 0,
-      population: 0,
-      maxPopulationCapacity: 100000000,
-      capacityPercentage: 0,
-      perCapitaProductivity: 5000,
+      totalActiveFactories: 0,
+      totalMaxSlots: 0,
+      industrialLevel: 1.0,
+      equipmentTechLevel: 1.0,
       stability: 0,
       currentTurn: gameState.currentTurn,
     };
   }
 
-  const population = NationGettersUtility.getPopulation(
-    nation.id,
-    gameState.provinces,
-  );
-  const maxCapacity = NationGettersUtility.getMaxPopulationCapacity(
-    nation.id,
-    gameState.provinces,
-  );
-  const productivity = NationGettersUtility.getPerCapitaProductivity(
-    nation.id,
-    gameState.provinces,
-  );
+  let totalActiveFactories = 0;
+  let totalMaxSlots = 0;
+  for (const p of Object.values(gameState.provinces || {})) {
+    if (
+      CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalHumanId
+    ) {
+      totalActiveFactories += p.factoriesCount;
+      totalMaxSlots += p.maxSlots;
+    }
+  }
 
   const fiscalResult = FiscalRevenueCalculator.calculate(
     nation,
@@ -117,20 +114,15 @@ export function selectHumanResourceMetrics(
     payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.07);
   const netIncome = totalGrossIncome - totalExpenses;
 
-  const demoMetrics = DemographicsCalculator.getMetrics(
-    population,
-    maxCapacity,
-  );
-
   return {
     nation,
     treasury: nation.treasury,
     netIncomePerTurn: netIncome,
     grossIncomePerTurn: totalGrossIncome,
-    population,
-    maxPopulationCapacity: demoMetrics.maxPopulationCapacity,
-    capacityPercentage: demoMetrics.capacityPercentage,
-    perCapitaProductivity: productivity,
+    totalActiveFactories,
+    totalMaxSlots,
+    industrialLevel: nation.industrialLevel,
+    equipmentTechLevel: nation.equipmentTechLevel,
     stability: nation.government.stability,
     currentTurn: gameState.currentTurn,
   };
