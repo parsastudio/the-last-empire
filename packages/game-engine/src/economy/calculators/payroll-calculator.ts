@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 
 export interface BreakdownMilitaryPayroll {
   infantry: number;
@@ -22,29 +22,34 @@ export class MilitaryPayrollCalculator {
     provincesMap?: Record<string, Province>,
   ): BreakdownMilitaryPayroll {
     const rawInfantry = Math.floor(
-      (nation.military.infantry || 0) *
-        MILITARY_UNIT_STATS.INFANTRY.moneyCost *
-        this.PAYROLL_RATE,
+      MilitaryPricingCalculator.calculateUnitValuation(
+        "INFANTRY",
+        nation.military.infantry || 0,
+      ) * this.PAYROLL_RATE,
     );
     const rawArmor = Math.floor(
-      (nation.military.armor || 0) *
-        MILITARY_UNIT_STATS.ARMOR.moneyCost *
-        this.PAYROLL_RATE,
+      MilitaryPricingCalculator.calculateUnitValuation(
+        "ARMOR",
+        nation.military.armor || 0,
+      ) * this.PAYROLL_RATE,
     );
     const rawAirDefense = Math.floor(
-      (nation.military.airDefense || 0) *
-        MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost *
-        this.PAYROLL_RATE,
+      MilitaryPricingCalculator.calculateUnitValuation(
+        "AIR_DEFENSE",
+        nation.military.airDefense || 0,
+      ) * this.PAYROLL_RATE,
     );
     const rawAirForce = Math.floor(
-      (nation.military.airForce || 0) *
-        MILITARY_UNIT_STATS.AIR_FORCE.moneyCost *
-        this.PAYROLL_RATE,
+      MilitaryPricingCalculator.calculateUnitValuation(
+        "AIR_FORCE",
+        nation.military.airForce || 0,
+      ) * this.PAYROLL_RATE,
     );
     const rawDroneMissile = Math.floor(
-      (nation.military.droneMissile || 0) *
-        MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost *
-        this.PAYROLL_RATE,
+      MilitaryPricingCalculator.calculateUnitValuation(
+        "DRONE_MISSILE",
+        nation.military.droneMissile || 0,
+      ) * this.PAYROLL_RATE,
     );
 
     const rawTotal =

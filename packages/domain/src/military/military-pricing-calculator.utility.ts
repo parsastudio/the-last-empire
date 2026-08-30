@@ -9,6 +9,13 @@ export class MilitaryPricingCalculator {
     return MILITARY_UNIT_STATS[unitType].moneyCost;
   }
 
+  public static calculateUnitValuation(
+    unitType: UnitType,
+    quantity: number,
+  ): number {
+    return (quantity || 0) * this.calculateUnitTypePrice(unitType);
+  }
+
   public static calculateArmsImportMultiplier(
     buyerTechLevel: number,
     sellerTechLevel: number,

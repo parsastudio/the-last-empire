@@ -10,8 +10,8 @@ import {
   getNationGdp,
   TurnLogBuilder,
   DebtCalculatorUtility,
-  NationGettersUtility,
 } from "@geopolitics/domain";
+import { AIArmsSellerMatcher } from "@/engine/ai/procurement/ai-arms-seller-matcher";
 
 export interface ReactiveDefenseEvent {
   type: "PURCHASED" | "NO_SELLER" | "MAX_DEBT" | "NONE";
@@ -59,7 +59,10 @@ export class AIEmergencyDefenseManager {
       return { newState: state, defenseEvent: { type: "MAX_DEBT" } };
     }
 
-    const bestSeller = this.findBestArmsSeller(defender, state.nations);
+    const bestSeller = AIArmsSellerMatcher.findBestArmsSeller(
+      defender,
+      state.nations,
+    );
     if (!bestSeller) {
       return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
@@ -158,35 +161,6 @@ export class AIEmergencyDefenseManager {
         unitName: bestUnit.nameFa,
       },
     };
-  }
-
-  private static findBestArmsSeller(
-    buyer: Nation,
-    nationsMap: Record<string, Nation>,
-  ): Nation | null {
-    const sellers: Nation[] = [];
-
-    for (const nation of Object.values(nationsMap)) {
-      if (!nation.isAlive || nation.id === buyer.id) continue;
-
-      const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
-      const rel =
-        nation.relations[canonicalBuyer] || nation.relations[buyer.id];
-
-      const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
-      const tension = rel ? (rel.tension ?? 10) : 10;
-
-      if (stance !== "WAR" && tension < 50) {
-        sellers.push(nation);
-      }
-    }
-
-    if (sellers.length === 0) {
-      return null;
-    }
-
-    sellers.sort((a, b) => b.military.techLevel - a.military.techLevel);
-    return sellers[0]!;
   }
 
   private static selectBestPurchasableUnit(): (typeof MILITARY_UNIT_STATS)[UnitType] {

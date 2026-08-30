@@ -33,6 +33,54 @@ export class NationRelationResolver {
     return this.getStance(relationsMap, targetNationId) === "WAR";
   }
 
+  public static getActiveWarEnemies(
+    nation: Nation,
+    allNations?: Record<string, Nation>,
+  ): Nation[] {
+    if (!nation.relations) return [];
+    const enemies: Nation[] = [];
+    const sourceCanonical = CountryRegistry.resolveCanonicalId(nation.id);
+
+    for (const [targetId, rel] of Object.entries(nation.relations)) {
+      if (rel.stance === "WAR") {
+        const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+        if (canonicalTarget !== sourceCanonical) {
+          const enemy = allNations
+            ? allNations[canonicalTarget] || allNations[targetId]
+            : null;
+          if (enemy && enemy.isAlive) {
+            enemies.push(enemy);
+          }
+        }
+      }
+    }
+
+    return enemies;
+  }
+
+  public static countActiveWars(
+    nation: Nation,
+    allNations?: Record<string, Nation>,
+  ): number {
+    if (!nation.relations) return 0;
+    if (!allNations) {
+      return Object.values(nation.relations).filter((r) => r.stance === "WAR")
+        .length;
+    }
+    return this.getActiveWarEnemies(nation, allNations).length;
+  }
+
+  public static isAtWar(
+    nation: Nation,
+    allNations?: Record<string, Nation>,
+  ): boolean {
+    if (!nation.relations) return false;
+    if (!allNations) {
+      return Object.values(nation.relations).some((r) => r.stance === "WAR");
+    }
+    return this.countActiveWars(nation, allNations) > 0;
+  }
+
   public static hasCommonEnemy(
     nationA: Nation,
     nationB: Nation,

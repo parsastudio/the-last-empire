@@ -26,4 +26,12 @@ export class AIArmsSellerMatcher {
     sellers.sort((a, b) => b.military.techLevel - a.military.techLevel);
     return sellers;
   }
+
+  public static findBestArmsSeller(
+    buyer: Nation,
+    allNations: Record<string, Nation>,
+  ): Nation | null {
+    const sellers = this.findEligibleArmsSellers(buyer, allNations);
+    return sellers.length > 0 ? sellers[0]! : null;
+  }
 }

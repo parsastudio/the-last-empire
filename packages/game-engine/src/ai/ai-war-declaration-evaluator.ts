@@ -7,6 +7,7 @@ import {
   DiplomacyLockManager,
   GeopoliticalReachResolver,
   getNationGdp,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -34,17 +35,8 @@ export class AIWarDeclarationEvaluator {
       return null;
     }
 
-    for (const key in nation.relations) {
-      const rel = nation.relations[key];
-      if (rel && rel.stance === "WAR") {
-        const canonical = CountryRegistry.resolveCanonicalId(
-          rel.targetNationId,
-        );
-        const target = allNations[canonical] || allNations[rel.targetNationId];
-        if (target && target.isAlive) {
-          return null;
-        }
-      }
+    if (NationRelationResolver.isAtWar(nation, allNations)) {
+      return null;
     }
 
     let bestTargetId: string | null = null;

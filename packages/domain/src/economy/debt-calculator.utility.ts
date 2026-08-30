@@ -12,4 +12,16 @@ export class DebtCalculatorUtility {
     const maxLimit = this.getMaxDebtLimit(gdp);
     return Math.max(0, maxLimit - nationalDebt);
   }
+
+  public static calculateProportionalDebtRelief(
+    currentDebt: number,
+    lostProvincesGdp: number,
+    totalGdpBefore: number,
+  ): number {
+    if (currentDebt <= 0 || totalGdpBefore <= 0 || lostProvincesGdp <= 0) {
+      return 0;
+    }
+    const share = Math.min(1.0, Math.max(0, lostProvincesGdp / totalGdpBefore));
+    return Math.floor(currentDebt * share);
+  }
 }

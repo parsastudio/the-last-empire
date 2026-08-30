@@ -118,11 +118,10 @@ export class GeopoliticalVectorCalculator {
     );
 
     if (target.securityGuarantorId && allNations) {
-      const gCanonical = CountryRegistry.resolveCanonicalId(
+      const guarantor = NationGettersUtility.resolveNation(
         target.securityGuarantorId,
+        allNations,
       );
-      const guarantor =
-        allNations[gCanonical] || allNations[target.securityGuarantorId];
       if (guarantor && guarantor.isAlive && guarantor.id !== source.id) {
         const guarantorTechMult =
           MilitaryPowerCalculator.calculateTechMultiplier(
@@ -137,22 +136,10 @@ export class GeopoliticalVectorCalculator {
       }
     }
 
-    let activeEnemyWarsCount = 0;
-    if (allNations && target.relations) {
-      const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
-      for (const [otherId, otherRel] of Object.entries(target.relations)) {
-        if (otherRel.stance === "WAR") {
-          const canonicalOther = CountryRegistry.resolveCanonicalId(otherId);
-          if (canonicalOther !== sourceCanonical) {
-            const otherNation =
-              allNations[canonicalOther] || allNations[otherId];
-            if (otherNation && otherNation.isAlive) {
-              activeEnemyWarsCount++;
-            }
-          }
-        }
-      }
-    }
+    const activeEnemyWarsCount = NationRelationResolver.countActiveWars(
+      target,
+      allNations,
+    );
 
     const effectiveTargetPower =
       activeEnemyWarsCount > 0

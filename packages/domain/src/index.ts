@@ -9,6 +9,7 @@ export * from "./diplomacy/nation-relation-resolver.utility";
 export * from "./diplomacy/geopolitical-reach-resolver.utility";
 export * from "./diplomacy/security-guarantee-validator.utility";
 export * from "./diplomacy/guarantor-budget-calculator.utility";
+export * from "./diplomacy/security-fee-calculator.utility";
 export * from "./economy/debt-calculator.utility";
 export * from "./espionage/espionage.schema";
 export * from "./game/action.schema";

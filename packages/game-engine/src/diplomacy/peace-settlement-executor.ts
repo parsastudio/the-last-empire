@@ -9,6 +9,7 @@ import {
   GameError,
   getProvinceGdp,
   NationGettersUtility,
+  DebtCalculatorUtility,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
@@ -101,12 +102,12 @@ export class PeaceSettlementExecutor {
         }
       }
 
-      const cededShare =
-        totalLoserGdpBefore > 0
-          ? Math.min(1.0, cededGdp / totalLoserGdpBefore)
-          : 0;
       const curDebt = updatedNations[loserNation.id]?.nationalDebt || 0;
-      const debtRelief = Math.floor(curDebt * cededShare);
+      const debtRelief = DebtCalculatorUtility.calculateProportionalDebtRelief(
+        curDebt,
+        cededGdp,
+        totalLoserGdpBefore,
+      );
 
       updatedNations[loserNation.id] = {
         ...updatedNations[loserNation.id]!,
