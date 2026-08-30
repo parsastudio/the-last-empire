@@ -1,51 +1,9 @@
 import React from "react";
-import {
-  Shield,
-  ShieldAlert,
-  Crosshair,
-  Plane,
-  Radio,
-  Plus,
-  Coins,
-  ShieldCheck,
-  LucideIcon,
-} from "lucide-react";
-import { UnitType, PersianNumberFormatter } from "@geopolitics/domain";
-import {
-  QuickUnitBatchInfo,
-  FloatingFeedback,
-} from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
-
-const UNIT_ICONS: Record<
-  UnitType,
-  { icon: LucideIcon; color: string; bg: string }
-> = {
-  INFANTRY: {
-    icon: Shield,
-    color: "text-primary",
-    bg: "bg-primary/10 border-primary/20",
-  },
-  ARMOR: {
-    icon: ShieldAlert,
-    color: "text-military",
-    bg: "bg-military/10 border-military/20",
-  },
-  AIR_DEFENSE: {
-    icon: Crosshair,
-    color: "text-diplomacy",
-    bg: "bg-diplomacy/10 border-diplomacy/20",
-  },
-  AIR_FORCE: {
-    icon: Plane,
-    color: "text-gdp",
-    bg: "bg-gdp/10 border-gdp/20",
-  },
-  DRONE_MISSILE: {
-    icon: Radio,
-    color: "text-treasury",
-    bg: "bg-treasury/10 border-treasury/20",
-  },
-};
+import { Plus, Coins, ShieldCheck } from "lucide-react";
+import { PersianNumberFormatter } from "@geopolitics/domain";
+import { QuickUnitBatchInfo } from "@/presentation/components/tactical-map/sidebar/tabs/military/hooks/use-quick-recruit-batch";
+import { FloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
+import { MILITARY_UNIT_VISUALS } from "@/presentation/configs/military-unit-visuals.config";
 
 interface QuickUnitRecruitCardProps {
   info: QuickUnitBatchInfo;
@@ -58,8 +16,8 @@ export function QuickUnitRecruitCard({
   feedbacks,
   onBuy,
 }: QuickUnitRecruitCardProps) {
-  const iconMeta = UNIT_ICONS[info.type];
-  const Icon = iconMeta.icon;
+  const visual = MILITARY_UNIT_VISUALS[info.type];
+  const Icon = visual.icon;
 
   return (
     <div
@@ -73,7 +31,7 @@ export function QuickUnitRecruitCard({
     >
       <div className="flex items-center gap-3">
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${iconMeta.bg} ${iconMeta.color}`}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${visual.bgClass} ${visual.colorClass}`}
         >
           <Icon size={18} />
         </div>
@@ -91,8 +49,8 @@ export function QuickUnitRecruitCard({
             </span>
             <span className="text-[9px] text-foreground font-sans">
               (ظرفیت باقی‌مانده:{" "}
-              {PersianNumberFormatter.toPersianDigits(
-                info.remainingRoom.toLocaleString("en-US"),
+              {PersianNumberFormatter.formatNumberWithCommas(
+                info.remainingRoom,
               )}
               )
             </span>
@@ -131,7 +89,10 @@ export function QuickUnitRecruitCard({
               {PersianNumberFormatter.formatCurrency(info.batchCost)}
             </span>
             <span className="text-[10px] font-medium opacity-85 mr-0.5">
-              ({PersianNumberFormatter.toPersianDigits(info.batchQuantity)}{" "}
+              (
+              {PersianNumberFormatter.formatNumberWithCommas(
+                info.batchQuantity,
+              )}{" "}
               یگان)
             </span>
           </button>

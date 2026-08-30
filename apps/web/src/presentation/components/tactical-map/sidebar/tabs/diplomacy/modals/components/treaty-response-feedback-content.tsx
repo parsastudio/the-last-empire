@@ -1,5 +1,6 @@
 import React from "react";
 import { Check, X, Globe, ShieldCheck, Skull } from "lucide-react";
+import { getProposalTypeName } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 export interface DiplomaticProposalFeedbackData {
   proposalType:
@@ -20,35 +21,6 @@ export interface DiplomaticProposalFeedbackData {
   message?: string;
 }
 
-function getProposalName(
-  type: DiplomaticProposalFeedbackData["proposalType"],
-): string {
-  switch (type) {
-    case "STRATEGIC_PARTNERSHIP":
-      return "شراکت استراتژیک";
-    case "SECURITY_GUARANTEE":
-      return "پیمان چتر امنیتی";
-    case "EMERGENCY_PROTECTORATE":
-      return "معاهده تحت‌الحمایگی استعماری";
-    case "CANCEL_SECURITY_GUARANTEE":
-      return "لغو چتر امنیتی";
-    case "CANCEL_EMERGENCY_PROTECTORATE":
-      return "لغو معاهده استعماری";
-    case "NON_AGGRESSION_PACT":
-      return "پیمان عدم تخاصم";
-    case "PEACE_TREATY":
-      return "معاهده صلح";
-    case "SEND_FOREIGN_AID":
-      return "کمک مالی";
-    case "DECLARE_WAR":
-      return "اعلان جنگ";
-    case "CANCEL_TREATY":
-      return "تنزل روابط و لغو معاهده";
-    default:
-      return "معاهده دیپلماتیک";
-  }
-}
-
 interface TreatyResponseFeedbackContentProps {
   feedback: DiplomaticProposalFeedbackData;
   flagEmoji: string;
@@ -61,7 +33,7 @@ export function TreatyResponseFeedbackContent({
   onClose,
 }: TreatyResponseFeedbackContentProps) {
   const isAccepted = feedback.accepted;
-  const proposalName = getProposalName(feedback.proposalType);
+  const proposalName = getProposalTypeName(feedback.proposalType);
   const isCancel = feedback.proposalType === "CANCEL_TREATY";
   const isSecurityCancel =
     feedback.proposalType === "CANCEL_SECURITY_GUARANTEE" ||

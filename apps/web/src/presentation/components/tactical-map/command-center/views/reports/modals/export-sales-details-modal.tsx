@@ -1,14 +1,10 @@
 import React from "react";
 import { ShoppingCart, Coins, Award, Globe, TrendingUp } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import {
-  Nation,
-  CountryRegistry,
-  NationGettersUtility,
-} from "@geopolitics/domain";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { Nation, NationGettersUtility } from "@geopolitics/domain";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ExportSalesModalData } from "@/presentation/stores/use-ui-store";
+import { NationResolverUtility } from "@/presentation/utils/nation-resolver.utility";
 
 interface ExportSalesDetailsModalProps {
   isOpen: boolean;
@@ -26,21 +22,15 @@ export function ExportSalesDetailsModal({
   if (!isOpen || !data) return null;
 
   const buyersWithDetails = data.buyers.map((item) => {
-    const canonical = CountryRegistry.resolveCanonicalId(item.nationId);
-    const nation = nationsMap
-      ? nationsMap[canonical] || nationsMap[item.nationId]
-      : null;
-    const name = nation ? nation.name : item.nationId;
-    const flagCode = nation?.flagCode || item.nationId;
-    const flag = getFlagEmoji(flagCode);
-    const rank = nation
-      ? NationGettersUtility.getRank(nation.id, nationsMap)
+    const resolved = NationResolverUtility.resolve(item.nationId, nationsMap);
+    const rank = resolved.nation
+      ? NationGettersUtility.getRank(resolved.nation.id, nationsMap)
       : 99;
 
     return {
       nationId: item.nationId,
-      name,
-      flag,
+      name: resolved.name,
+      flag: resolved.flagEmoji,
       amount: item.amount,
       rank,
     };

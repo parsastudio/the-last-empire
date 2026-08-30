@@ -1,5 +1,6 @@
 import React from "react";
 import { Flag } from "lucide-react";
+import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 interface ConqueredProvincesListProps {
   provincesNames?: string[];
@@ -17,20 +18,15 @@ export function ConqueredProvincesList({
         <span>استان‌های تصرف‌شده:</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {provincesNames.map((name, idx) => {
-          const formattedName = name.startsWith("استان")
-            ? name
-            : `استان ${name}`;
-          return (
-            <span
-              key={idx}
-              className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
-            >
-              <span>📍</span>
-              <span>{formattedName}</span>
-            </span>
-          );
-        })}
+        {provincesNames.map((name, idx) => (
+          <span
+            key={idx}
+            className="bg-secondary/70 border border-border/70 px-2.5 py-1 rounded-xl text-xs font-bold font-sans text-foreground flex items-center gap-1.5 shadow-sm"
+          >
+            <span>📍</span>
+            <span>{ProvinceNameFormatter.format(name)}</span>
+          </span>
+        ))}
       </div>
     </div>
   );
