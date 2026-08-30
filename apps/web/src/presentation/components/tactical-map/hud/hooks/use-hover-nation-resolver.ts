@@ -13,7 +13,6 @@ import {
   NationGettersUtility,
   NationRelationResolver,
   DiplomaticStance,
-  DemographicsCalculator,
 } from "@geopolitics/domain";
 
 interface UseHoverNationResolverProps {
@@ -53,11 +52,15 @@ export function useHoverNationResolver({
         : 99;
       const realGdp = ownerNation ? getNationGdp(ownerNation, provincesMap) : 0;
 
-      const provinceGdp = getProvinceGdp(province);
-      const demoMetrics = DemographicsCalculator.getMetrics(
-        province.population,
-        province.maxPopulationCapacity,
+      const provinceGdp = getProvinceGdp(
+        province,
+        ownerNation?.equipmentTechLevel ?? 1.0,
       );
+
+      const activeSlotsPct =
+        province.maxSlots > 0
+          ? Math.round((province.factoriesCount / province.maxSlots) * 100)
+          : 100;
 
       let stanceLabel = "دیپلماسی عادی";
       let rawStance: DiplomaticStance = "NORMAL_DIPLOMACY";
@@ -98,7 +101,7 @@ export function useHoverNationResolver({
         isOwnCountry,
         regionName: province.nameFa,
         regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
-        regionCapacityPercentage: demoMetrics.capacityPercentage,
+        regionCapacityPercentage: activeSlotsPct,
         totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
         gdpSharePct,
       };

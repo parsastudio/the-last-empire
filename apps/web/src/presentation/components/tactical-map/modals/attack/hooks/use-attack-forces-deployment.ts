@@ -1,13 +1,17 @@
-import { useState, useMemo, useCallback } from "react";
+"use client";
+
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
+import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
+import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 interface UseAttackForcesDeploymentProps {
   humanNation: Nation | null;
   isOpen: boolean;
   targetNationId: string | null;
   targetProvinceId: number | null;
-  attackType: "LAND" | "NAVAL";
+  attackType?: "LAND" | "NAVAL";
 }
 
 export function useAttackForcesDeployment({
@@ -15,50 +19,71 @@ export function useAttackForcesDeployment({
   isOpen,
   targetNationId,
   targetProvinceId,
-  attackType,
+  attackType = "LAND",
 }: UseAttackForcesDeploymentProps) {
-  const [infantryToDeploy, setInfantryToDeploy] = useState<number>(0);
+  const [infantryToDeploy, setInfantryToDeploy] = useState<number>(1);
   const [armorToDeploy, setArmorToDeploy] = useState<number>(0);
   const [airForceToDeploy, setAirForceToDeploy] = useState<number>(0);
-  const [dronesToLaunch, setDronesToLaunch] = useState<number>(0);
 
-  const [prevKey, setPrevKey] = useState<string | null>(null);
-  const currentKey = `${humanNation?.id}-${isOpen}-${targetNationId}-${targetProvinceId}`;
+  useEffect(() => {
+    if (isOpen && humanNation) {
+      const defaultInf = Math.max(
+        1,
+        Math.min(
+          humanNation.military.infantry,
+          Math.ceil(humanNation.military.infantry * 0.7),
+        ),
+      );
+      const defaultArm = Math.min(
+        humanNation.military.armor || 0,
+        Math.ceil((humanNation.military.armor || 0) * 0.7),
+      );
+      const defaultAir = Math.min(
+        humanNation.military.airForce,
+        Math.ceil(humanNation.military.airForce * 0.7),
+      );
 
-  if (currentKey !== prevKey) {
-    setPrevKey(currentKey);
-    setInfantryToDeploy(humanNation ? humanNation.military.infantry : 0);
-    setArmorToDeploy(humanNation ? humanNation.military.armor || 0 : 0);
-    setAirForceToDeploy(humanNation ? humanNation.military.airForce : 0);
-    setDronesToLaunch(0);
-  }
+      setInfantryToDeploy(defaultInf);
+      setArmorToDeploy(defaultArm);
+      setAirForceToDeploy(defaultAir);
+    }
+  }, [isOpen, targetNationId, targetProvinceId, humanNation]);
 
-  const rawForceValue = useMemo(() => {
+  const navalFleetCount = humanNation?.navalFleet || 0;
+
+  const hasNavalCapacity = useMemo(() => {
+    if (attackType !== "NAVAL") return true;
+    const maxCapacity = NavalDeploymentClamper.calculateMaxCapacity(
+      "NAVAL",
+      navalFleetCount,
+    );
+    const required = NavalDeploymentClamper.calculateRequiredCapacity(
+      infantryToDeploy,
+      armorToDeploy,
+    );
+    return maxCapacity >= required && navalFleetCount > 0;
+  }, [attackType, navalFleetCount, infantryToDeploy, armorToDeploy]);
+
+  const totalForceCost = useMemo(() => {
     return (
       infantryToDeploy * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
       armorToDeploy * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      airForceToDeploy * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      dronesToLaunch * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
+      airForceToDeploy * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost
     );
-  }, [infantryToDeploy, armorToDeploy, airForceToDeploy, dronesToLaunch]);
+  }, [infantryToDeploy, armorToDeploy, airForceToDeploy]);
 
-  const totalLogisticsCost = Math.floor(rawForceValue * 0.05);
+  const { moneyCost: totalLogisticsCost } = useMemo(() => {
+    return CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
+  }, [totalForceCost]);
+
   const canAfford = (humanNation?.treasury || 0) >= totalLogisticsCost;
   const hasSelectedInfantry = infantryToDeploy > 0;
 
-  const navalFleetCount = humanNation?.navalFleet || 0;
-  const maxNavalCapacity = navalFleetCount * 60;
-  const requiredNavalLoad = infantryToDeploy * 1 + armorToDeploy * 4;
-  const hasNavalCapacity =
-    attackType !== "NAVAL" ||
-    (navalFleetCount > 0 && requiredNavalLoad <= maxNavalCapacity);
-
   const applyOptimizedDeploy = useCallback(
-    (drones: number, airForce: number, armor: number, infantry: number) => {
-      setDronesToLaunch(drones);
+    (airForce: number, armor: number, infantry: number) => {
       setAirForceToDeploy(airForce);
       setArmorToDeploy(armor);
-      setInfantryToDeploy(infantry);
+      setInfantryToDeploy(Math.max(1, infantry));
     },
     [],
   );
@@ -70,13 +95,11 @@ export function useAttackForcesDeployment({
     setArmorToDeploy,
     airForceToDeploy,
     setAirForceToDeploy,
-    dronesToLaunch,
-    setDronesToLaunch,
+    navalFleetCount,
+    hasNavalCapacity,
     totalLogisticsCost,
     canAfford,
     hasSelectedInfantry,
-    navalFleetCount,
-    hasNavalCapacity,
     applyOptimizedDeploy,
   };
 }

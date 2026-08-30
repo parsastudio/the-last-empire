@@ -80,7 +80,7 @@ export function DirectAttackModal({
           targetNation={form.targetNation}
           forecast={form.forecast}
           onExecuteRecon={form.handleExecuteQuickRecon}
-          onAutoOptimizeDeploy={form.handleAutoOptimizeDeploy}
+          onAutoOptimizeDeploy={() => {}}
         />
 
         <AttackStatusAlerts
@@ -98,7 +98,7 @@ export function DirectAttackModal({
             تخصیص ترکیب یگان‌های رزمی به میدان نبرد
           </span>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
             <UnitDeploymentSlider
               label={MILITARY_UNIT_VISUALS.INFANTRY.nameFa}
               unitName={MILITARY_UNIT_VISUALS.INFANTRY.unitLabelFa}
@@ -127,16 +127,6 @@ export function DirectAttackModal({
               availableCount={humanNation.military.airForce}
               selectedCount={form.airForceToDeploy}
               onChange={form.setAirForceToDeploy}
-            />
-
-            <UnitDeploymentSlider
-              label={MILITARY_UNIT_VISUALS.DRONE_MISSILE.nameFa}
-              unitName={MILITARY_UNIT_VISUALS.DRONE_MISSILE.unitLabelFa}
-              icon={MILITARY_UNIT_VISUALS.DRONE_MISSILE.icon}
-              iconColorClass={MILITARY_UNIT_VISUALS.DRONE_MISSILE.colorClass}
-              availableCount={humanNation.military.droneMissile}
-              selectedCount={form.dronesToLaunch}
-              onChange={form.setDronesToLaunch}
             />
           </div>
         </div>

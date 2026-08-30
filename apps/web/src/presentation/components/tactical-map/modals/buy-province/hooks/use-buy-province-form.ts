@@ -81,8 +81,8 @@ export function useBuyProvinceForm({
 
   const provinceGdp = useMemo(() => {
     if (!province) return 0;
-    return getProvinceGdp(province);
-  }, [province]);
+    return getProvinceGdp(province, ownerNation?.equipmentTechLevel ?? 1.0);
+  }, [province, ownerNation]);
 
   const purchasePrice = useMemo(() => {
     if (!provinceGdp) return 10_000_000_000;
@@ -103,12 +103,6 @@ export function useBuyProvinceForm({
   const formattedProvinceName = province
     ? ProvinceNameFormatter.format(province.nameFa)
     : "استان نامشخص";
-
-  const capacityPercentage = useMemo(() => {
-    if (!province) return 0;
-    const maxCap = Math.max(1, province.maxPopulationCapacity || 100000);
-    return Math.round((province.population / maxCap) * 100);
-  }, [province]);
 
   const handleExecutePurchase = useCallback(async () => {
     if (
@@ -173,7 +167,6 @@ export function useBuyProvinceForm({
     shortageAmount,
     isOwnCountry,
     formattedProvinceName,
-    capacityPercentage,
     isSubmitting,
     handleExecutePurchase,
   };
