@@ -45,12 +45,6 @@ export class StabilityCalculator {
       }
     }
 
-    const rep = nation.globalReputation ?? 50;
-    if (rep > 50) {
-      const repBonus = ((Math.min(100, rep) - 50) / 50) * 1.5;
-      delta += repBonus;
-    }
-
     const stabilityModifier = ModifierManager.getModifierImpact(
       nation,
       "STABILITY_DELTA",

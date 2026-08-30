@@ -72,7 +72,6 @@ export class NationProfileAssigner {
       airDefense: 0,
       airForce: 0,
       droneMissile: 0,
-      experience: 10,
       techLevel: domesticTech,
       branchTech:
         dynamicStack.branchTech ||

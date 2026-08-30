@@ -73,10 +73,7 @@ export class BattleLootManager {
       );
     }
 
-    return {
-      ...updatedMilitary,
-      experience: Math.min(100, updatedMilitary.experience + 5),
-    };
+    return updatedMilitary;
   }
 
   public static applyDefenderCasualties(
@@ -91,7 +88,6 @@ export class BattleLootManager {
         airDefense: 0,
         airForce: 0,
         droneMissile: 0,
-        experience: 0,
         techLevel: defenderMilitary.techLevel,
         branchTech: defenderMilitary.branchTech,
       };
