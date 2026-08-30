@@ -4,6 +4,7 @@ import { AuxiliaryGuarantorDefense } from "@/domain/reports/combat-report.schema
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { AttackFogReconCard } from "./components/attack-fog-recon-card";
 import { AttackDiscoveredIntelGrid } from "./components/attack-discovered-intel-grid";
+import { AttackForecastVisualUtility } from "./utils/attack-forecast-visual.utility";
 
 export interface TacticalForecast {
   winProbability: number;
@@ -49,19 +50,9 @@ export function AttackIntelPanel({
     ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
     : "";
 
-  const probColor =
-    forecast.winProbability >= 75
-      ? "text-gdp"
-      : forecast.winProbability >= 50
-        ? "text-treasury"
-        : "text-military";
-
-  const probBg =
-    forecast.winProbability >= 75
-      ? "bg-gdp/15 border-gdp/30"
-      : forecast.winProbability >= 50
-        ? "bg-treasury/15 border-treasury/30"
-        : "bg-military/15 border-military/30";
+  const probStyle = AttackForecastVisualUtility.resolveProbabilityStyle(
+    forecast.winProbability,
+  );
 
   return (
     <div className="space-y-3 font-sans dir-rtl text-right">
@@ -71,16 +62,16 @@ export function AttackIntelPanel({
           canAffordRecon={canAffordRecon}
           isExecutingRecon={isExecutingRecon}
           winProbability={forecast.winProbability}
-          probBg={probBg}
-          probColor={probColor}
+          probBg={probStyle.bgClass}
+          probColor={probStyle.textColorClass}
           onExecuteRecon={onExecuteRecon}
         />
       ) : (
         <AttackDiscoveredIntelGrid
           targetNation={targetNation}
           forecast={forecast}
-          probBg={probBg}
-          probColor={probColor}
+          probBg={probStyle.bgClass}
+          probColor={probStyle.textColorClass}
           auxFlag={auxFlag}
           onAutoOptimizeDeploy={onAutoOptimizeDeploy}
         />

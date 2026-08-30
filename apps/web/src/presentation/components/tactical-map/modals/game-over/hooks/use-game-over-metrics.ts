@@ -102,7 +102,7 @@ export function useGameOverMetrics(
       : 0;
     const finalPopNum = popCount / 1e6;
     const finalPopulation = `${PersianNumberFormatter.toPersianDigits(finalPopNum.toFixed(1))}M نفر`;
-    const conqueredPixels = `${PersianNumberFormatter.toPersianDigits(pixelCount.toLocaleString("en-US"))} پیکسل`;
+    const conqueredPixels = `${PersianNumberFormatter.formatNumberWithCommas(pixelCount)} پیکسل`;
 
     let reasonTitle = "پایان بازی و سرنوشت جهان";
     let reasonDescription = "";

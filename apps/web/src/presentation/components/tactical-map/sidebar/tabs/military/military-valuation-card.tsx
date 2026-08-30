@@ -49,9 +49,7 @@ export function MilitaryValuationCard({
         <span className="text-[10px] font-mono bg-secondary/80 px-2 py-0.5 rounded-lg text-muted-foreground border border-border/50 flex items-center gap-1">
           <Layers size={11} />
           <span>
-            {PersianNumberFormatter.toPersianDigits(
-              metrics.totalUnits.toLocaleString("en-US"),
-            )}{" "}
+            {PersianNumberFormatter.formatNumberWithCommas(metrics.totalUnits)}{" "}
             یگان فعال
           </span>
         </span>

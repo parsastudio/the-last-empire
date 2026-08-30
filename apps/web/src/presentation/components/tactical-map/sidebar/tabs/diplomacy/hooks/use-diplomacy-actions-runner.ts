@@ -15,6 +15,18 @@ import {
 import { DiplomaticProposalFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 
+const DEFAULT_INVALID_GUARANTEE: SecurityGuaranteeValidationResult = {
+  isValid: false,
+  reason: "اطلاعات کشور در دسترس نیست.",
+  gdpRatio: 1,
+  techDiff: 0,
+  tension: 0,
+  isGdpValid: false,
+  isTechValid: false,
+  isTensionValid: false,
+  isNotWar: false,
+};
+
 interface UseDiplomacyActionsRunnerProps {
   targetNationId: string;
   nationId: string;
@@ -68,17 +80,7 @@ export function useDiplomacyActionsRunner({
 
   const guaranteeValidation = useMemo<SecurityGuaranteeValidationResult>(() => {
     if (!clientNation || !targetNation) {
-      return {
-        isValid: false,
-        reason: "اطلاعات کشور در دسترس نیست.",
-        gdpRatio: 1,
-        techDiff: 0,
-        tension: 0,
-        isGdpValid: false,
-        isTechValid: false,
-        isTensionValid: false,
-        isNotWar: false,
-      };
+      return DEFAULT_INVALID_GUARANTEE;
     }
     return SecurityGuaranteeValidator.validate(
       clientNation,
@@ -90,17 +92,7 @@ export function useDiplomacyActionsRunner({
 
   const emergencyValidation = useMemo<SecurityGuaranteeValidationResult>(() => {
     if (!clientNation || !targetNation) {
-      return {
-        isValid: false,
-        reason: "اطلاعات کشور در دسترس نیست.",
-        gdpRatio: 1,
-        techDiff: 0,
-        tension: 0,
-        isGdpValid: false,
-        isTechValid: false,
-        isTensionValid: false,
-        isNotWar: false,
-      };
+      return DEFAULT_INVALID_GUARANTEE;
     }
     return SecurityGuaranteeValidator.validate(
       clientNation,

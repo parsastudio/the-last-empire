@@ -47,9 +47,7 @@ export function RecruitmentQueueCard({
             <div className="space-y-0.5 text-right">
               <span className="text-xs font-bold text-foreground block font-sans">
                 {getUnitNameFa(item.unitType)} (
-                {PersianNumberFormatter.toPersianDigits(
-                  item.quantity.toLocaleString("en-US"),
-                )}{" "}
+                {PersianNumberFormatter.formatNumberWithCommas(item.quantity)}{" "}
                 یگان)
               </span>
               <span className="text-[10px] text-gdp font-bold block font-sans">

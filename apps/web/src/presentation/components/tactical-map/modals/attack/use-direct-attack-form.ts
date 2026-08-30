@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import confetti from "canvas-confetti";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -10,6 +9,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
+import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { useAttackForcesDeployment } from "./hooks/use-attack-forces-deployment";
 import { useAttackForecastCalculator } from "./hooks/use-attack-forecast-calculator";
 import { useAttackTerritoryReach } from "./hooks/use-attack-territory-reach";
@@ -157,14 +157,7 @@ export function useDirectAttackForm({
         });
 
         if (report.isAttackerVictory) {
-          try {
-            confetti({
-              particleCount: 160,
-              spread: 90,
-              origin: { y: 0.65 },
-              colors: ["#10b981", "#f59e0b", "#3b82f6", "#ffffff"],
-            });
-          } catch {}
+          TacticalEffects.fireVictoryConfetti(160);
         }
       }
     }

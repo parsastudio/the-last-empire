@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import confetti from "canvas-confetti";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
+import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { GameOverHeroBanner } from "./game-over/components/game-over-hero-banner";
 import { VictoryStatsCard } from "./game-over/components/victory-stats-card";
 import { GameOverActionButtons } from "./game-over/components/game-over-action-buttons";
@@ -40,13 +40,7 @@ export function GameOverModal({
 }: GameOverModalProps) {
   useEffect(() => {
     if (isOpen && isVictory) {
-      try {
-        confetti({
-          particleCount: 140,
-          spread: 80,
-          origin: { y: 0.6 },
-        });
-      } catch {}
+      TacticalEffects.fireVictoryConfetti(140);
     }
   }, [isOpen, isVictory]);
 
