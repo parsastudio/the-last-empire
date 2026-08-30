@@ -244,7 +244,7 @@ export class ActionFactory {
   public static initiateBattle(
     nationId: string,
     targetNationId: string,
-    dronesToLaunch: number,
+    dronesToLaunch = 0,
     infantryToDeploy?: number,
     armorToDeploy?: number,
     airForceToDeploy?: number,

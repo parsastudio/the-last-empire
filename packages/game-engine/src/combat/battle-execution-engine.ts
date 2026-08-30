@@ -1,28 +1,27 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
-import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { BattleCalculator } from "@/engine/combat/battle-calculator";
-import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
-import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
+import {
+  BattleCalculator,
+  BattleCalculationResult,
+} from "@/engine/combat/battle-calculator";
 import { BattleStateMutator } from "@/engine/combat/execution/battle-state-mutator";
 import { BattleSpoilsCollector } from "@/engine/combat/execution/battle-spoils-collector";
+import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
-import {
-  CountryRegistry,
-  GameError,
-  NationGettersUtility,
-} from "@geopolitics/domain";
+import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
+import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@geopolitics/domain";
 
-export interface BattleEngineExecutionResult {
+export interface BattleExecutionResult {
   state: GameState;
-  reportData: BattleFullReportData;
+  reportData: unknown;
 }
 
 export class BattleExecutionEngine {
   public executeBattle(
     state: GameState,
     action: InitiateBattleAction,
-  ): BattleEngineExecutionResult {
+  ): BattleExecutionResult {
     const canonicalAttackerId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
@@ -31,17 +30,10 @@ export class BattleExecutionEngine {
     );
 
     const attacker =
-      state.nations[canonicalAttackerId] || state.nations[action.nationId];
+      state.nations[canonicalAttackerId] || state.nations[action.nationId]!;
     const defender =
       state.nations[canonicalDefenderId] ||
-      state.nations[action.targetNationId];
-
-    if (!attacker || !defender) {
-      throw new GameError(
-        "NATION_NOT_FOUND",
-        "طرفین درگیری در سامانه یافت نشدند.",
-      );
-    }
+      state.nations[action.targetNationId]!;
 
     const guarantorNation = defender.securityGuarantorId
       ? NationGettersUtility.resolveNation(
@@ -50,62 +42,62 @@ export class BattleExecutionEngine {
         )
       : null;
 
-    const calculationResult = BattleCalculator.calculateBattle(
+    const calcResult = BattleCalculator.calculateBattle(
       attacker,
       defender,
+      action.dronesToLaunch || 0,
       action.infantryToDeploy,
       action.armorToDeploy,
       action.airForceToDeploy,
       state.provinces,
       guarantorNation,
-    );
-
-    const conquestResult = ProvinceConquestHandler.handleConquest(
-      state.provinces,
-      attacker.id,
-      defender.id,
-      calculationResult.isAttackerVictory,
       action.targetProvinceId,
     );
 
+    let updatedProvinces = { ...state.provinces };
+    if (
+      action.targetProvinceId &&
+      calcResult.phase1Missile.destroyedFactories > 0
+    ) {
+      const targetProv = updatedProvinces[action.targetProvinceId.toString()];
+      if (targetProv) {
+        updatedProvinces[action.targetProvinceId.toString()] = {
+          ...targetProv,
+          factoriesCount: Math.max(
+            0,
+            targetProv.factoriesCount -
+              calcResult.phase1Missile.destroyedFactories,
+          ),
+        };
+      }
+    }
+
+    const conquestResult = ProvinceConquestHandler.handleConquest(
+      updatedProvinces,
+      attacker.id,
+      defender.id,
+      calcResult.isAttackerVictory,
+      action.targetProvinceId,
+    );
+
+    updatedProvinces = conquestResult.updatedProvinces;
     const isDefenderAnnexed =
-      calculationResult.isAttackerVictory &&
+      calcResult.isAttackerVictory &&
       conquestResult.remainingDefenderProvinces.length === 0;
 
     const spoilsData = BattleSpoilsCollector.collectSpoils(
       conquestResult,
-      calculationResult.treasuryLooted,
-      calculationResult.defenderCasualties,
-    );
-
-    const attackType = action.attackType || "LAND";
-    const targetProvince = action.targetProvinceId
-      ? state.provinces[action.targetProvinceId.toString()]
-      : conquestResult.conqueredProvincesList[0] || null;
-
-    const battleLogs = BattleLogFactory.createBattleLogs(
-      state.currentTurn,
-      attacker,
       defender,
-      calculationResult,
-      "",
-      state.humanNationId,
-      isDefenderAnnexed,
-      targetProvince,
-      attackType,
-      spoilsData,
+      calcResult,
     );
 
-    let updatedProvinces = conquestResult.updatedProvinces;
-    let updatedNations = BattleStateMutator.mutateAfterBattle(
+    let updatedNations = BattleStateMutator.mutate(
       state.nations,
       attacker,
       defender,
-      calculationResult,
+      calcResult,
       spoilsData,
       isDefenderAnnexed,
-      calculationResult.auxiliaryGuarantor,
-      state.currentTurn,
     );
 
     if (isDefenderAnnexed) {
@@ -119,29 +111,29 @@ export class BattleExecutionEngine {
       updatedNations = annexationResult.updatedNations;
     }
 
-    const updatedAttackedList = [
-      ...(updatedNations[attacker.id]?.attackedTargetIdsThisTurn || []),
-      canonicalDefenderId,
-    ];
+    const targetProvince = action.targetProvinceId
+      ? state.provinces[action.targetProvinceId.toString()]
+      : null;
 
-    if (updatedNations[attacker.id]) {
-      updatedNations[attacker.id] = {
-        ...updatedNations[attacker.id]!,
-        attackedTargetIdsThisTurn: updatedAttackedList,
-      };
-    }
+    const attackType = action.attackType || "LAND";
 
-    const nextState: GameState = {
-      ...state,
-      provinces: updatedProvinces,
-      nations: updatedNations,
-      turnLogs: [...state.turnLogs, ...battleLogs],
-    };
+    const battleLogs = BattleLogFactory.createBattleLogs(
+      state.currentTurn,
+      attacker,
+      defender,
+      calcResult,
+      "",
+      state.humanNationId,
+      isDefenderAnnexed,
+      targetProvince,
+      attackType,
+      spoilsData,
+    );
 
     const reportData = BattleLogFactory.assembleReportData(
       attacker,
       defender,
-      calculationResult,
+      calcResult,
       targetProvince,
       attackType,
       isDefenderAnnexed,
@@ -149,7 +141,12 @@ export class BattleExecutionEngine {
     );
 
     return {
-      state: nextState,
+      state: {
+        ...state,
+        provinces: updatedProvinces,
+        nations: updatedNations,
+        turnLogs: [...state.turnLogs, ...battleLogs],
+      },
       reportData,
     };
   }

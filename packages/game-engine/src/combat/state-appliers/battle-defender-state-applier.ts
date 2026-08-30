@@ -1,95 +1,65 @@
-import {
-  Nation,
-  CountryRegistry,
-  DebtCalculatorUtility,
-} from "@geopolitics/domain";
+import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
-import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
-import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 
-export interface DefenderStateApplierInput {
+export interface BattleDefenderStateInput {
   defender: Nation;
   attackerId: string;
   calcResult: BattleCalculationResult;
-  conquest: ProvinceConquestResult;
-  isDefenderAlive: boolean;
+  spoilsData?: BattleSpoilsDetails;
 }
 
 export class BattleDefenderStateApplier {
-  public static apply(input: DefenderStateApplierInput): Nation {
-    const { defender, attackerId, calcResult, conquest, isDefenderAlive } =
-      input;
+  public static apply(input: BattleDefenderStateInput): Nation {
+    const { defender, calcResult, spoilsData } = input;
+    const casualties = calcResult.defenderCasualties;
 
-    const cleanAttackerId = CountryRegistry.resolveCanonicalId(attackerId);
-
-    const updatedMilitary = BattleLootManager.applyDefenderCasualties(
-      defender.military,
-      calcResult,
-      isDefenderAlive,
+    const nextInfantry = Math.max(
+      0,
+      defender.military.infantry - casualties.infantryLost,
+    );
+    const nextArmor = Math.max(
+      0,
+      (defender.military.armor || 0) - casualties.armorLost,
+    );
+    const nextAirDefense = Math.max(
+      0,
+      (defender.military.airDefense || 0) - casualties.airDefenseLost,
+    );
+    const nextAirForce = Math.max(
+      0,
+      defender.military.airForce - casualties.airForceLost,
+    );
+    const nextDrones = Math.max(
+      0,
+      defender.military.droneMissile - casualties.droneMissileLost,
     );
 
-    const updatedRelations = { ...defender.relations };
+    const looted = spoilsData?.lootedTreasury ?? calcResult.treasuryLooted ?? 0;
+    const nextTreasury = Math.max(0, defender.treasury - looted);
 
-    const isProvinceLost =
-      calcResult.isAttackerVictory &&
-      (conquest.conqueredPixels > 0 || Boolean(calcResult.isFullCapitulation));
-
-    if (isDefenderAlive) {
-      updatedRelations[cleanAttackerId] = {
-        targetNationId: cleanAttackerId,
-        stance: "WAR",
-        alignment: -100,
-        tension: 100,
-      };
-    }
-
-    const currentFocus = defender.warFocusTargetId;
-    const nextWarFocus =
-      !currentFocus || currentFocus === cleanAttackerId
-        ? cleanAttackerId
-        : currentFocus;
-
-    const combatStabilityDelta =
-      StabilityCalculator.calculateDefenderBattleStabilityDelta(
-        defender.government.type,
-        isProvinceLost,
-      );
-
-    const nextStability = isDefenderAlive
-      ? StabilityCalculator.clampStability(
-          defender.government.stability + combatStabilityDelta,
-        )
-      : 0;
-
-    let updatedDebt = defender.nationalDebt;
-    if (
-      isDefenderAlive &&
-      conquest.conqueredProvincesList.length > 0 &&
-      defender.nationalDebt > 0
-    ) {
-      const debtRelief = DebtCalculatorUtility.calculateProportionalDebtRelief(
-        defender.nationalDebt,
-        conquest.conqueredProvincesGdp || 0,
-        conquest.totalDefenderGdpBefore,
-      );
-      updatedDebt = Math.max(0, defender.nationalDebt - debtRelief);
+    let nextStability = defender.government.stability;
+    if (calcResult.isAttackerVictory) {
+      nextStability = Math.max(0, nextStability - 8);
+    } else {
+      nextStability = Math.min(100, nextStability + 4);
     }
 
     return {
       ...defender,
-      isAlive: isDefenderAlive,
+      treasury: nextTreasury,
       government: {
         ...defender.government,
         stability: nextStability,
       },
-      treasury: isDefenderAlive
-        ? Math.max(0, defender.treasury - calcResult.treasuryLooted)
-        : 0,
-      nationalDebt: isDefenderAlive ? updatedDebt : 0,
-      military: updatedMilitary,
-      relations: isDefenderAlive ? updatedRelations : {},
-      warFocusTargetId: isDefenderAlive ? nextWarFocus : null,
+      military: {
+        ...defender.military,
+        infantry: nextInfantry,
+        armor: nextArmor,
+        airDefense: nextAirDefense,
+        airForce: nextAirForce,
+        droneMissile: nextDrones,
+      },
     };
   }
 }
