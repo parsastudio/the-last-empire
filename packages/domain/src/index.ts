@@ -22,6 +22,7 @@ export * from "./game/formatters/war-log-formatter";
 export * from "./game/formatters/diplomacy-log-formatter";
 export * from "./game/formatters/national-events-log-formatter";
 export * from "./game/log-formatter.utility";
+export * from "./game/turn-log-window.utility";
 export * from "./map/bit-packed-buffer";
 export * from "./map/bit-packed-cell.utility";
 export * from "./map/client-map-path-resolver";

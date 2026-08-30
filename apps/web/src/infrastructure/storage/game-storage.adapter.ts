@@ -1,4 +1,8 @@
-import { GameState, BitPackedBuffer } from "@geopolitics/domain";
+import {
+  GameState,
+  BitPackedBuffer,
+  TurnLogWindowUtility,
+} from "@geopolitics/domain";
 import {
   db,
   SavedGameStateRecord,
@@ -7,18 +11,21 @@ import { BitPackedGridState } from "@geopolitics/game-engine";
 import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export class GameStorageAdapter {
-  private static readonly MAX_LOGS_PER_GAME = 300;
-
   public async saveGameState(gameId: string, state: GameState): Promise<void> {
-    const cappedTurnLogs = state.turnLogs.slice(
-      -GameStorageAdapter.MAX_LOGS_PER_GAME,
+    const prunedLogs = TurnLogWindowUtility.pruneLogs(
+      state.turnLogs,
+      state.currentTurn,
     );
     const normalizedState: GameState = {
       ...state,
-      turnLogs: cappedTurnLogs,
+      turnLogs: prunedLogs,
     };
 
     const now = Date.now();
+    const minTurn = Math.max(
+      1,
+      state.currentTurn - (TurnLogWindowUtility.MAX_RETAINED_TURNS - 1),
+    );
 
     await db.transaction("rw", db.gameStates, db.turnLogs, async () => {
       await db.gameStates.put({
@@ -27,8 +34,17 @@ export class GameStorageAdapter {
         timestamp: now,
       });
 
-      if (cappedTurnLogs.length > 0) {
-        const logRecords = cappedTurnLogs.map((log) => ({
+      await db.turnLogs
+        .where("gameId")
+        .equals(gameId)
+        .and(
+          (item) =>
+            item.turn < minTurn && item.log.eventCode !== "VICTORY_ACHIEVED",
+        )
+        .delete();
+
+      if (prunedLogs.length > 0) {
+        const logRecords = prunedLogs.map((log) => ({
           id: `${gameId}_${log.id}`,
           gameId,
           turn: log.turn,

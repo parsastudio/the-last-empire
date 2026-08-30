@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
 import {
   GameState,
   GameAction,
@@ -36,144 +35,136 @@ interface GameStoreState {
 
 const orchestrator = new TurnProgressionOrchestrator();
 
-export const useGameStore = create<GameStoreState>()(
-  immer((set, get) => ({
-    gameState: null,
-    loading: false,
-    error: null,
-    activeGameId: "default_game",
+export const useGameStore = create<GameStoreState>((set, get) => ({
+  gameState: null,
+  loading: false,
+  error: null,
+  activeGameId: "default_game",
 
-    loadGame: async (gameId) => {
-      set((draft) => {
-        draft.loading = true;
-        draft.error = null;
-        draft.activeGameId = gameId;
-      });
+  loadGame: async (gameId) => {
+    set({
+      loading: true,
+      error: null,
+      activeGameId: gameId,
+    });
 
-      try {
-        const updatedState = await GamePersistenceService.loadGameState(gameId);
-        if (updatedState) {
-          set((draft) => {
-            draft.gameState = updatedState;
-            draft.loading = false;
-          });
-          return true;
-        }
-
-        set((draft) => {
-          draft.error = "اطلاعات پرونده بازی یافت نشد.";
-          draft.loading = false;
-        });
-        return false;
-      } catch {
-        set((draft) => {
-          draft.error = "خطا در بارگذاری اطلاعات از حافظه محلی.";
-          draft.loading = false;
-        });
-        return false;
-      }
-    },
-
-    createCampaign: async (nationId, governmentType, gameId, manifest) => {
-      set((draft) => {
-        draft.loading = true;
-        draft.error = null;
-        draft.activeGameId = gameId;
-      });
-
-      try {
-        const initialState =
-          await CampaignInitializationService.createInitialGameState(
-            nationId,
-            governmentType,
-            gameId,
-            manifest,
-          );
-
-        await GamePersistenceService.saveGameState(gameId, initialState);
-
-        set((draft) => {
-          draft.gameState = initialState;
-          draft.loading = false;
+    try {
+      const updatedState = await GamePersistenceService.loadGameState(gameId);
+      if (updatedState) {
+        set({
+          gameState: updatedState,
+          loading: false,
         });
         return true;
-      } catch {
-        set((draft) => {
-          draft.error = "خطا در ساخت کمپین جدید.";
-          draft.loading = false;
-        });
-        return false;
-      }
-    },
-
-    dispatchAction: async (action, onSuccessMessage) => {
-      const { activeGameId, gameState } = get();
-      if (!gameState) {
-        return {
-          success: false,
-          message: "اطلاعات پرونده بازی یافت نشد.",
-        };
       }
 
-      const result = ActionEngine.execute(gameState, action);
-      if (result.success && result.newState) {
-        set((draft) => {
-          draft.gameState = result.newState ?? null;
-        });
-        void GamePersistenceService.saveGameState(
-          activeGameId,
-          result.newState,
+      set({
+        error: "اطلاعات پرونده بازی یافت نشد.",
+        loading: false,
+      });
+      return false;
+    } catch {
+      set({
+        error: "خطا در بارگذاری اطلاعات از حافظه محلی.",
+        loading: false,
+      });
+      return false;
+    }
+  },
+
+  createCampaign: async (nationId, governmentType, gameId, manifest) => {
+    set({
+      loading: true,
+      error: null,
+      activeGameId: gameId,
+    });
+
+    try {
+      const initialState =
+        await CampaignInitializationService.createInitialGameState(
+          nationId,
+          governmentType,
+          gameId,
+          manifest,
         );
 
-        return {
-          success: true,
-          message: onSuccessMessage || result.message,
-          resultData: result.resultData,
-        };
-      }
+      await GamePersistenceService.saveGameState(gameId, initialState);
 
+      set({
+        gameState: initialState,
+        loading: false,
+      });
+      return true;
+    } catch {
+      set({
+        error: "خطا در ساخت کمپین جدید.",
+        loading: false,
+      });
+      return false;
+    }
+  },
+
+  dispatchAction: async (action, onSuccessMessage) => {
+    const { activeGameId, gameState } = get();
+    if (!gameState) {
       return {
         success: false,
-        message: result.message || "امکان اجرای این دستور وجود ندارد.",
+        message: "اطلاعات پرونده بازی یافت نشد.",
       };
-    },
+    }
 
-    advanceNextTurn: async () => {
-      const { activeGameId, gameState } = get();
-      if (!gameState) {
-        return null;
-      }
-      try {
-        const prng = new SeededRandom(
-          gameState.seed || Math.floor(Math.random() * 1000000),
-        );
+    const result = ActionEngine.execute(gameState, action);
+    if (result.success && result.newState) {
+      set({
+        gameState: result.newState,
+      });
+      void GamePersistenceService.saveGameState(activeGameId, result.newState);
 
-        const nextState = orchestrator.advanceTurn(gameState, prng);
+      return {
+        success: true,
+        message: onSuccessMessage || result.message,
+        resultData: result.resultData,
+      };
+    }
 
-        set((draft) => {
-          draft.gameState = nextState;
-        });
+    return {
+      success: false,
+      message: result.message || "امکان اجرای این دستور وجود ندارد.",
+    };
+  },
 
-        void GamePersistenceService.saveGameState(activeGameId, nextState);
-        return nextState;
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    },
+  advanceNextTurn: async () => {
+    const { activeGameId, gameState } = get();
+    if (!gameState) {
+      return null;
+    }
+    try {
+      const prng = new SeededRandom(
+        gameState.seed || Math.floor(Math.random() * 1000000),
+      );
 
-    enableSandboxMode: async () => {
-      const { activeGameId, gameState } = get();
-      if (!gameState) return;
+      const nextState = orchestrator.advanceTurn(gameState, prng);
 
-      set((draft) => {
-        if (draft.gameState) {
-          draft.gameState.isSandboxMode = true;
-        }
+      set({
+        gameState: nextState,
       });
 
-      const updatedState = { ...gameState, isSandboxMode: true };
-      void GamePersistenceService.saveGameState(activeGameId, updatedState);
-    },
-  })),
-);
+      void GamePersistenceService.saveGameState(activeGameId, nextState);
+      return nextState;
+    } catch {
+      return null;
+    }
+  },
+
+  enableSandboxMode: async () => {
+    const { activeGameId, gameState } = get();
+    if (!gameState) return;
+
+    const updatedState = { ...gameState, isSandboxMode: true };
+    set({
+      gameState: updatedState,
+    });
+
+    void GamePersistenceService.saveGameState(activeGameId, updatedState);
+  },
+}));

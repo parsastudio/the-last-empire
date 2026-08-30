@@ -10,6 +10,7 @@ import { CoalitionManager } from "@/engine/politics/coalition-manager";
 import { TurnStateLogger } from "@/engine/diagnostics/turn-state-logger";
 import { AiWarResolutionSweep } from "@/engine/ai/ai-war-resolution-sweep";
 import { TurnExportSalesAggregator } from "@/engine/orchestrator/turn-export-sales-aggregator";
+import { TurnLogWindowUtility } from "@geopolitics/domain";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -132,11 +133,14 @@ export class TurnProgressionOrchestrator {
       };
     }
 
-    const cappedLogs = workingState.turnLogs.slice(-300);
+    const prunedLogs = TurnLogWindowUtility.pruneLogs(
+      workingState.turnLogs,
+      workingState.currentTurn,
+    );
 
     const finalState: GameState = {
       ...workingState,
-      turnLogs: cappedLogs,
+      turnLogs: prunedLogs,
       seed: prng.getSeed(),
     };
 
