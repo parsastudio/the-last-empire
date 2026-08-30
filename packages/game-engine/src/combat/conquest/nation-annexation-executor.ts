@@ -3,6 +3,8 @@ import {
   Province,
   CountryRegistry,
   DIPLOMACY_CONFIG,
+  NationMutatorUtility,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
@@ -17,7 +19,7 @@ export class NationAnnexationExecutor {
     nations: Record<string, Nation>,
     winnerId: string,
     loserId: string,
-    postWarCooldown = DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS,
+    postWarCooldown: number = DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS,
   ): AnnexationExecutionResult {
     const winnerCanonical = CountryRegistry.resolveCanonicalId(winnerId);
     const loserCanonical = CountryRegistry.resolveCanonicalId(loserId);
@@ -25,9 +27,9 @@ export class NationAnnexationExecutor {
     const updatedProvinces: Record<string, Province> = { ...provinces };
     const updatedNations: Record<string, Nation> = { ...nations };
 
-    const loserProvs = Object.values(updatedProvinces).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === loserCanonical,
+    const loserProvs = NationGettersUtility.getOwnedProvinces(
+      loserCanonical,
+      updatedProvinces,
     );
 
     for (let i = 0; i < loserProvs.length; i++) {
@@ -43,26 +45,8 @@ export class NationAnnexationExecutor {
 
     const loserObj = updatedNations[loserCanonical] || updatedNations[loserId];
     if (loserObj) {
-      updatedNations[loserObj.id] = {
-        ...loserObj,
-        isAlive: false,
-        treasury: 0,
-        nationalDebt: 0,
-        warFocusTargetId: null,
-        recruitmentQueue: [],
-        executedEspionageTiers: [],
-        attackedTargetIdsThisTurn: [],
-        postWarCooldownTurns: 0,
-        military: {
-          ...loserObj.military,
-          infantry: 0,
-          armor: 0,
-          airDefense: 0,
-          airForce: 0,
-          droneMissile: 0,
-        },
-        relations: {},
-      };
+      updatedNations[loserObj.id] =
+        NationMutatorUtility.createDefeatedNation(loserObj);
     }
 
     const winnerObj =

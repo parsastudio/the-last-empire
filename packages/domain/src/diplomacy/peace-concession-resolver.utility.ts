@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { PeaceTermsPackage } from "@/domain/diplomacy/peace-terms.schema";
 import { PeaceCapitulationBuilder } from "@/domain/diplomacy/peace/peace-capitulation-builder";
 import { PeaceWhitePeaceBuilder } from "@/domain/diplomacy/peace/peace-white-peace-builder";
@@ -18,23 +18,14 @@ export class PeaceConcessionResolverUtility {
   ): PeaceTermsPackage {
     const ratio = Number((aiTwmi / humanTwmi).toFixed(2));
 
-    const aiCanonical = CountryRegistry.resolveCanonicalId(aiNation.id);
-    const humanCanonical = CountryRegistry.resolveCanonicalId(humanNation.id);
-
-    const allAiProvinces = provincesMap
-      ? Object.values(provincesMap).filter(
-          (p) =>
-            CountryRegistry.resolveCanonicalId(p.ownerNationId) === aiCanonical,
-        )
-      : [];
-
-    const allHumanProvinces = provincesMap
-      ? Object.values(provincesMap).filter(
-          (p) =>
-            CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
-            humanCanonical,
-        )
-      : [];
+    const allAiProvinces = NationGettersUtility.getOwnedProvinces(
+      aiNation.id,
+      provincesMap,
+    );
+    const allHumanProvinces = NationGettersUtility.getOwnedProvinces(
+      humanNation.id,
+      provincesMap,
+    );
 
     const aiGdp = getNationGdp(aiNation, provincesMap);
     const humanGdp = getNationGdp(humanNation, provincesMap);

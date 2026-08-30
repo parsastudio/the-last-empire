@@ -27,16 +27,14 @@ export class RecruitmentQueueManager {
     }
 
     const gdp = getNationGdp(nation, provincesMap);
-    const currentValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
+    const currentTotalValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuationWithQueue(
+        nation.military,
+        nation.recruitmentQueue,
+      );
     const maxValuation = Math.floor(gdp);
 
-    let queuedCost = 0;
-    for (let i = 0; i < nation.recruitmentQueue.length; i++) {
-      queuedCost += nation.recruitmentQueue[i]!.totalCost;
-    }
-
-    if (currentValuation + queuedCost + totalMoney > maxValuation) {
+    if (currentTotalValuation + totalMoney > maxValuation) {
       throw new GameError(
         "INVALID_ACTION",
         "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",

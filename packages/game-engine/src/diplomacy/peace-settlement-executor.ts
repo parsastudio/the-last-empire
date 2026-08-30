@@ -8,8 +8,10 @@ import {
   SignPeaceSettlementAction,
   GameError,
   getProvinceGdp,
+  getNationGdp,
   NationGettersUtility,
   DebtCalculatorUtility,
+  PendingProposalManagerUtility,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
@@ -85,20 +87,21 @@ export class PeaceSettlementExecutor {
     }
 
     if (terms.concededProvinceIds.length > 0) {
-      const loserProvsBefore = Object.values(updatedProvinces).filter(
-        (p) =>
-          CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
-          loserCanonical,
+      const loserProvsBefore = NationGettersUtility.getOwnedProvinces(
+        loserCanonical,
+        updatedProvinces,
+      );
+      const totalLoserGdpBefore = getNationGdp(
+        loserCanonical,
+        updatedProvinces,
+        loserProvsBefore,
       );
 
-      let totalLoserGdpBefore = 0;
       let cededGdp = 0;
       for (let i = 0; i < loserProvsBefore.length; i++) {
         const p = loserProvsBefore[i]!;
-        const pGdp = getProvinceGdp(p);
-        totalLoserGdpBefore += pGdp;
         if (terms.concededProvinceIds.includes(p.provinceId)) {
-          cededGdp += pGdp;
+          cededGdp += getProvinceGdp(p);
         }
       }
 
@@ -218,14 +221,11 @@ export class PeaceSettlementExecutor {
       );
     }
 
-    const filteredProposals = state.pendingProposals.filter((p) => {
-      const pSrc = CountryRegistry.resolveCanonicalId(p.senderNationId);
-      const pRec = CountryRegistry.resolveCanonicalId(p.receiverNationId);
-      const isThisPair =
-        (pSrc === canonicalSource && pRec === canonicalTarget) ||
-        (pSrc === canonicalTarget && pRec === canonicalSource);
-      return !isThisPair;
-    });
+    const filteredProposals = PendingProposalManagerUtility.removeBilateral(
+      state.pendingProposals,
+      sourceNation.id,
+      targetNation.id,
+    );
 
     return {
       ...state,
