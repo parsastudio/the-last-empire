@@ -4,9 +4,40 @@ import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { Province } from "@/domain/province/province.schema";
-import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
+import {
+  BattleSpoilsDetails,
+  BattleFullReportData,
+} from "@/domain/reports/combat-report.schema";
 
 export class BattleLogFactory {
+  public static assembleReportData(
+    attacker: Nation,
+    defender: Nation,
+    calcResult: BattleCalculationResult,
+    targetProvince: Province | null | undefined,
+    attackType: "LAND" | "NAVAL",
+    isFullCapitulation: boolean,
+    spoilsData?: BattleSpoilsDetails,
+  ): BattleFullReportData {
+    return {
+      attackerId: attacker.id,
+      defenderId: defender.id,
+      targetProvinceName: targetProvince?.nameFa,
+      attackType,
+      isAttackerVictory: calcResult.isAttackerVictory,
+      isFullCapitulation,
+      valuationRatio: calcResult.valuationRatio,
+      treasuryLooted: calcResult.treasuryLooted,
+      attackerCasualties: calcResult.attackerCasualties,
+      defenderCasualties: calcResult.defenderCasualties,
+      phase1Missile: calcResult.phase1Missile,
+      phase2Air: calcResult.phase2Air,
+      phase3Ground: calcResult.phase3Ground,
+      spoils: spoilsData,
+      auxiliaryGuarantor: calcResult.auxiliaryGuarantor,
+    };
+  }
+
   public static createBattleLogs(
     currentTurn: number,
     attacker: Nation,
@@ -58,23 +89,15 @@ export class BattleLogFactory {
       }
     }
 
-    const fullReportData = {
-      attackerId: attacker.id,
-      defenderId: defender.id,
-      targetProvinceName: targetProvince?.nameFa,
+    const fullReportData = this.assembleReportData(
+      attacker,
+      defender,
+      calcResult,
+      targetProvince,
       attackType,
-      isAttackerVictory: calcResult.isAttackerVictory,
-      isFullCapitulation: isDefenderAnnexed,
-      valuationRatio: calcResult.valuationRatio,
-      treasuryLooted: calcResult.treasuryLooted,
-      attackerCasualties: calcResult.attackerCasualties,
-      defenderCasualties: calcResult.defenderCasualties,
-      phase1Missile: calcResult.phase1Missile,
-      phase2Air: calcResult.phase2Air,
-      phase3Ground: calcResult.phase3Ground,
-      spoils: spoilsData,
-      auxiliaryGuarantor: calcResult.auxiliaryGuarantor,
-    };
+      isDefenderAnnexed,
+      spoilsData,
+    );
 
     if (isHumanInvolved) {
       const actorNation = isAttackerHuman ? attacker : defender;

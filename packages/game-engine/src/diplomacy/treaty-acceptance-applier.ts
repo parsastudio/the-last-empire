@@ -2,6 +2,7 @@ import {
   GameState,
   PendingDiplomaticProposal,
   CountryRegistry,
+  PendingProposalManagerUtility,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { DiplomaticLogSynchronizer } from "@/engine/diplomacy/appliers/diplomatic-log-synchronizer";
@@ -74,8 +75,9 @@ export class TreatyAcceptanceApplier {
       receiver.id,
     );
 
-    const remainingProposals = state.pendingProposals.filter(
-      (p) => p.id !== proposal.id,
+    const remainingProposals = PendingProposalManagerUtility.removeById(
+      state.pendingProposals,
+      proposal.id,
     );
 
     return {
@@ -110,8 +112,9 @@ export class TreatyAcceptanceApplier {
       state.currentTurn,
     );
 
-    const remainingProposals = state.pendingProposals.filter(
-      (p) => p.id !== proposal.id,
+    const remainingProposals = PendingProposalManagerUtility.removeById(
+      state.pendingProposals,
+      proposal.id,
     );
 
     return {
@@ -127,8 +130,9 @@ export class TreatyAcceptanceApplier {
   ): GameState {
     return {
       ...state,
-      pendingProposals: state.pendingProposals.filter(
-        (p) => p.id !== proposalId,
+      pendingProposals: PendingProposalManagerUtility.removeById(
+        state.pendingProposals,
+        proposalId,
       ),
     };
   }

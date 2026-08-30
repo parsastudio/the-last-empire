@@ -3,6 +3,7 @@ import {
   PendingDiplomaticProposal,
   Nation,
   TurnLogBuilder,
+  PendingProposalManagerUtility,
 } from "@geopolitics/domain";
 
 export class SecurityGuaranteeApplier {
@@ -26,8 +27,9 @@ export class SecurityGuaranteeApplier {
       "INFO",
     );
 
-    const remainingProposals = state.pendingProposals.filter(
-      (p) => p.id !== proposal.id,
+    const remainingProposals = PendingProposalManagerUtility.removeById(
+      state.pendingProposals,
+      proposal.id,
     );
 
     return {

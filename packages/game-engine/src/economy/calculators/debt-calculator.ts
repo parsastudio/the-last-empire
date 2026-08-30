@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { ProvinceDegradationUtility } from "@geopolitics/domain";
 
 export class BankruptcyManager {
   public isBankrupt(
@@ -18,9 +19,8 @@ export class BankruptcyManager {
   ): { updatedNation: Nation; updatedProvinces: Province[] } {
     const updatedProvinces = provinces.map((p) => ({
       ...p,
-      perCapitaProductivity: Math.max(
-        100,
-        Math.floor((p.perCapitaProductivity || 5000) * 0.75),
+      perCapitaProductivity: ProvinceDegradationUtility.degradeProductivity(
+        p.perCapitaProductivity,
       ),
     }));
 

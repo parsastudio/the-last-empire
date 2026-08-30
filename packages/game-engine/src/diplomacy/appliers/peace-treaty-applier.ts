@@ -2,6 +2,7 @@ import {
   Nation,
   RelationProfile,
   PendingDiplomaticProposal,
+  DIPLOMACY_CONFIG,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 
@@ -35,9 +36,13 @@ export class PeaceTreatyApplier {
 
     const isPeace = proposal.proposalType === "PEACE_TREATY";
     const senderCooldown =
-      sender.isAi && isPeace ? 5 : sender.postWarCooldownTurns || 0;
+      sender.isAi && isPeace
+        ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
+        : sender.postWarCooldownTurns || 0;
     const receiverCooldown =
-      receiver.isAi && isPeace ? 5 : receiver.postWarCooldownTurns || 0;
+      receiver.isAi && isPeace
+        ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
+        : receiver.postWarCooldownTurns || 0;
 
     const updatedSender: Nation = {
       ...sender,

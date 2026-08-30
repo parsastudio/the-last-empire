@@ -1,4 +1,9 @@
-import { Nation, DiplomaticStance, CountryRegistry } from "@geopolitics/domain";
+import {
+  Nation,
+  DiplomaticStance,
+  CountryRegistry,
+  DIPLOMACY_CONFIG,
+} from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
 import {
@@ -90,7 +95,7 @@ export class BattleAttackerStateApplier {
 
     const postWarCooldown =
       attacker.isAi && isTotalAnnexation && !hasOtherWars
-        ? 5
+        ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
         : attacker.isAi
           ? attacker.postWarCooldownTurns || 0
           : 0;

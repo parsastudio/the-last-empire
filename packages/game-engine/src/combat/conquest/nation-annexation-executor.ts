@@ -1,4 +1,9 @@
-import { Nation, Province, CountryRegistry } from "@geopolitics/domain";
+import {
+  Nation,
+  Province,
+  CountryRegistry,
+  DIPLOMACY_CONFIG,
+} from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export interface AnnexationExecutionResult {
@@ -12,7 +17,7 @@ export class NationAnnexationExecutor {
     nations: Record<string, Nation>,
     winnerId: string,
     loserId: string,
-    postWarCooldown = 5,
+    postWarCooldown = DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS,
   ): AnnexationExecutionResult {
     const winnerCanonical = CountryRegistry.resolveCanonicalId(winnerId);
     const loserCanonical = CountryRegistry.resolveCanonicalId(loserId);
