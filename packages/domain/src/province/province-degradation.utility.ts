@@ -32,4 +32,13 @@ export class ProvinceDegradationUtility {
       ),
     };
   }
+
+  public static degradeProvincesProductivity(
+    provinces: Province[],
+  ): Province[] {
+    return provinces.map((p) => ({
+      ...p,
+      perCapitaProductivity: this.degradeProductivity(p.perCapitaProductivity),
+    }));
+  }
 }

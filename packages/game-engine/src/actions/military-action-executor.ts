@@ -2,6 +2,7 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
+import { Nation } from "@/domain/nation/nation.schema";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
@@ -21,12 +22,16 @@ export class MilitaryActionExecutor {
   public static execute(
     state: GameState,
     action: GameAction,
+    sourceNation?: Nation,
+    canonicalSourceId?: string,
   ): MilitaryExecutionOutput {
-    const canonicalSourceId = CountryRegistry.resolveCanonicalId(
-      action.nationId,
-    );
+    const canonicalId =
+      canonicalSourceId ?? CountryRegistry.resolveCanonicalId(action.nationId);
     const nation =
-      state.nations[canonicalSourceId] || state.nations[action.nationId];
+      sourceNation ??
+      state.nations[canonicalId] ??
+      state.nations[action.nationId];
+
     if (!nation) return { newState: state };
 
     const sourceKey = nation.id;
@@ -141,7 +146,7 @@ export class MilitaryActionExecutor {
           nation,
           target,
           action,
-          canonicalSourceId,
+          canonicalId,
           canonicalTargetId,
         );
 

@@ -4,9 +4,9 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { AIThreatCalculator } from "@/engine/ai/ai-threat-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@geopolitics/domain";
+import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class AISabotagePlanner {
   public static planSabotageTier2(
@@ -112,11 +112,13 @@ export class AISabotagePlanner {
           continue;
         }
 
-        const evalResult = AIThreatCalculator.evaluate(
+        const vector = GeopoliticalVectorCalculator.calculate(
           nation,
           target,
+          allNations,
           provincesMap,
         );
+
         const hasDefenses =
           (target.military.airDefense || 0) > 0 ||
           (target.military.armor || 0) > 0 ||
@@ -124,7 +126,7 @@ export class AISabotagePlanner {
 
         const isPreStrikeValid = nation.military.infantry > 1 && hasDefenses;
         const isAsymmetricValid =
-          evalResult.powerRatio > 1.5 && rel.alignment <= -30 && hasDefenses;
+          vector.powerRatio > 1.5 && rel.alignment <= -30 && hasDefenses;
 
         if (isPreStrikeValid || isAsymmetricValid) {
           return {

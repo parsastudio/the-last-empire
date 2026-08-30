@@ -17,12 +17,8 @@ export class BankruptcyManager {
     nation: Nation,
     provinces: Province[],
   ): { updatedNation: Nation; updatedProvinces: Province[] } {
-    const updatedProvinces = provinces.map((p) => ({
-      ...p,
-      perCapitaProductivity: ProvinceDegradationUtility.degradeProductivity(
-        p.perCapitaProductivity,
-      ),
-    }));
+    const updatedProvinces =
+      ProvinceDegradationUtility.degradeProvincesProductivity(provinces);
 
     return {
       updatedNation: {
