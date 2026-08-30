@@ -64,7 +64,12 @@ export class ActionEngine {
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
         case "UPGRADE_DEVELOPMENT":
-          newState = EconomyActionExecutor.execute(state, action);
+          newState = EconomyActionExecutor.execute(
+            state,
+            action,
+            sourceNation,
+            canonicalSourceId,
+          );
           break;
 
         case "RECRUIT_UNIT":
@@ -73,7 +78,12 @@ export class ActionEngine {
         case "CANCEL_RECRUITMENT":
         case "INVEST_RESEARCH":
         case "INITIATE_BATTLE": {
-          const milResult = MilitaryActionExecutor.execute(state, action);
+          const milResult = MilitaryActionExecutor.execute(
+            state,
+            action,
+            sourceNation,
+            canonicalSourceId,
+          );
           newState = milResult.newState;
           resultData = milResult.resultData;
           break;

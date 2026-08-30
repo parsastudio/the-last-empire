@@ -76,7 +76,7 @@ export class AIEmergencyDefenseManager {
       MilitaryPricingCalculator.calculateUnitTypePrice(bestUnit.type) * 1.5,
     );
 
-    const unitSinglePower = this.calculateSingleUnitPower(
+    const unitSinglePower = MilitaryPowerCalculator.calculateUnitTypePower(
       bestUnit.type,
       bestSeller.military.techLevel,
     );
@@ -165,15 +165,5 @@ export class AIEmergencyDefenseManager {
 
   private static selectBestPurchasableUnit(): (typeof MILITARY_UNIT_STATS)[UnitType] {
     return MILITARY_UNIT_STATS.ARMOR;
-  }
-
-  private static calculateSingleUnitPower(
-    unitType: UnitType,
-    techLevel: number,
-  ): number {
-    const stat = MILITARY_UNIT_STATS[unitType];
-    const techMultiplier =
-      MilitaryPowerCalculator.calculateTechMultiplier(techLevel);
-    return stat.weightPower * techMultiplier;
   }
 }

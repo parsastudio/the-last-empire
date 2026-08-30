@@ -1,11 +1,21 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
+import { UnitType } from "@/domain/military/military.schema";
 
 export class MilitaryPowerCalculator {
   public static calculateTechMultiplier(techLevel: number): number {
     const safeTech = Math.max(1, techLevel || 1);
     return 1 + (safeTech - 1) * 0.5;
+  }
+
+  public static calculateUnitTypePower(
+    unitType: UnitType,
+    techLevel: number,
+  ): number {
+    const stat = MILITARY_UNIT_STATS[unitType];
+    const techMultiplier = this.calculateTechMultiplier(techLevel);
+    return stat.weightPower * techMultiplier;
   }
 
   public static calculateLandAndAirPower(nation: Nation): number {
