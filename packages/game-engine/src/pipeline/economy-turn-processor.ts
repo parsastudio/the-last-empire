@@ -3,7 +3,6 @@ import { Province } from "@/domain/province/province.schema";
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator";
-import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
 import {
@@ -27,11 +26,7 @@ export class EconomyTurnProcessor {
     updatedProvinces: Province[];
     bankruptcyLog?: TurnLogEntry;
   } {
-    const demoResult = DemographicsEngine.processNaturalDemographics(
-      nation.government.stability,
-      ownedProvinces,
-    );
-    let updatedProvinces = demoResult.updatedProvinces;
+    let updatedProvinces = [...ownedProvinces];
 
     const currentProvincesMap: Record<string, Province> = { ...provincesMap };
     for (let p = 0; p < updatedProvinces.length; p++) {

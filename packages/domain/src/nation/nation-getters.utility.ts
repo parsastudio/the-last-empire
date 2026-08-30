@@ -1,84 +1,110 @@
-import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { CountryRegistry } from "@/domain/data/countries";
-import {
-  NationRankCandidateInput,
-  NationRankCalculatorUtility,
-} from "@/domain/nation/getters/nation-rank-calculator.utility";
+import { Province } from "@/domain/province/province.schema";
+import { NationRankCalculatorUtility } from "@/domain/nation/getters/nation-rank-calculator.utility";
 import { NationTerritoryResolverUtility } from "@/domain/nation/getters/nation-territory-resolver.utility";
-import { NationDemographicsResolverUtility } from "@/domain/nation/getters/nation-demographics-resolver.utility";
-
-export type { NationRankCandidateInput };
+import { NationRankCandidateInput } from "@/domain/nation/getters/rank/nation-power-score-evaluator";
 
 export class NationGettersUtility {
   public static resolveNation(
-    identifier: unknown,
-    nationsMap?: Record<string, Nation>,
+    targetIdentifier: string,
+    allNations?: Record<string, Nation>,
   ): Nation | null {
-    if (!nationsMap || identifier === null || identifier === undefined) {
-      return null;
-    }
-    const canonical = CountryRegistry.resolveCanonicalId(identifier);
-    const rawKey =
-      typeof identifier === "string" ? identifier : String(identifier);
-    return nationsMap[canonical] || nationsMap[rawKey] || null;
+    return NationTerritoryResolverUtility.resolveNation(
+      targetIdentifier,
+      allNations,
+    );
   }
 
-  public static calculateRankMapFromCandidates =
-    NationRankCalculatorUtility.calculateRankMapFromCandidates.bind(
-      NationRankCalculatorUtility,
+  public static getOwnedProvinces(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): Province[] {
+    return NationTerritoryResolverUtility.getOwnedProvinces(
+      nationId,
+      provincesMap,
+      provincesByOwnerMap,
     );
-  public static calculateRankMap =
-    NationRankCalculatorUtility.calculateRankMap.bind(
-      NationRankCalculatorUtility,
-    );
-  public static getRank = NationRankCalculatorUtility.getRank.bind(
-    NationRankCalculatorUtility,
-  );
+  }
 
-  public static buildProvincesByOwnerMap =
-    NationTerritoryResolverUtility.buildProvincesByOwnerMap.bind(
-      NationTerritoryResolverUtility,
-    );
-  public static getOwnedProvinces =
-    NationTerritoryResolverUtility.getOwnedProvinces.bind(
-      NationTerritoryResolverUtility,
-    );
-  public static getTerritoryPixelCount =
-    NationTerritoryResolverUtility.getTerritoryPixelCount.bind(
-      NationTerritoryResolverUtility,
-    );
-  public static hasSeaAccess = NationTerritoryResolverUtility.hasSeaAccess.bind(
-    NationTerritoryResolverUtility,
-  );
-  public static isAlive = NationTerritoryResolverUtility.isAlive.bind(
-    NationTerritoryResolverUtility,
-  );
-
-  public static getPopulation =
-    NationDemographicsResolverUtility.getPopulation.bind(
-      NationDemographicsResolverUtility,
-    );
-  public static getMaxPopulationCapacity =
-    NationDemographicsResolverUtility.getMaxPopulationCapacity.bind(
-      NationDemographicsResolverUtility,
-    );
-  public static getPerCapitaProductivity =
-    NationDemographicsResolverUtility.getPerCapitaProductivity.bind(
-      NationDemographicsResolverUtility,
-    );
-
-  public static getInfrastructureLevel(
-    nationOrId: Nation | string,
-    _provincesMap?: Record<string, Province> | Province[] | unknown,
+  public static getTerritoryPixelCount(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
   ): number {
-    if (
-      typeof nationOrId === "object" &&
-      nationOrId !== null &&
-      "industrialLevel" in nationOrId
-    ) {
-      return nationOrId.industrialLevel || 1;
+    return NationTerritoryResolverUtility.getTerritoryPixelCount(
+      nationId,
+      provincesMap,
+      ownedProvinces,
+      provincesByOwnerMap,
+    );
+  }
+
+  public static hasSeaAccess(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): boolean {
+    return NationTerritoryResolverUtility.hasSeaAccess(
+      nationId,
+      provincesMap,
+      ownedProvinces,
+      provincesByOwnerMap,
+    );
+  }
+
+  public static getPopulation(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): number {
+    const provs =
+      ownedProvinces ??
+      NationTerritoryResolverUtility.getOwnedProvinces(
+        nationId,
+        provincesMap,
+        provincesByOwnerMap,
+      );
+
+    let total = 0;
+    for (let i = 0; i < provs.length; i++) {
+      total += provs[i]!.population || 0;
     }
-    return 1;
+    return total;
+  }
+
+  public static getRank(
+    nationId: string,
+    allNations?: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+    rankMap?: Map<string, number>,
+  ): number {
+    return NationRankCalculatorUtility.getRank(
+      nationId,
+      allNations,
+      provincesMap,
+      rankMap,
+    );
+  }
+
+  public static calculateGlobalRankMap(
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): Map<string, number> {
+    return NationRankCalculatorUtility.calculateGlobalRankMap(
+      allNations,
+      provincesMap,
+    );
+  }
+
+  public static calculateRankMapFromCandidates(
+    candidates: NationRankCandidateInput[],
+  ): Map<string, number> {
+    return NationRankCalculatorUtility.calculateRankMapFromCandidates(
+      candidates,
+    );
   }
 }
