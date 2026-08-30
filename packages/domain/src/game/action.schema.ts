@@ -130,10 +130,10 @@ export const InitiateBattleActionSchema = z.object({
   type: z.literal("INITIATE_BATTLE"),
   targetNationId: z.string(),
   targetProvinceId: z.number().positive().optional(),
-  dronesToLaunch: z.number().nonnegative().default(0),
-  infantryToDeploy: z.number().positive().default(1),
-  armorToDeploy: z.number().nonnegative().default(0),
-  airForceToDeploy: z.number().nonnegative().default(0),
+  dronesToLaunch: z.number().nonnegative().optional(),
+  infantryToDeploy: z.number().positive().optional(),
+  armorToDeploy: z.number().nonnegative().optional(),
+  airForceToDeploy: z.number().nonnegative().optional(),
   attackType: z.enum(["LAND", "NAVAL"]).optional(),
 });
 

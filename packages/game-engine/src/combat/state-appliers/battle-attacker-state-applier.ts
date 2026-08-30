@@ -1,124 +1,78 @@
-import {
-  Nation,
-  DiplomaticStance,
-  CountryRegistry,
-  NationRelationResolver,
-} from "@geopolitics/domain";
+import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
-import {
-  BattleLootManager,
-  ExtraCapturedMilitaryUnits,
-} from "@/engine/combat/loot/battle-loot-manager";
-import { StabilityCalculator } from "@/engine/politics/stability-calculator";
+import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
+import { CountryRegistry } from "@/domain/data/countries";
 
-export interface AttackerStateApplierInput {
+export interface BattleAttackerStateInput {
   attacker: Nation;
   defenderId: string;
-  defenderTechLevel: number;
   calcResult: BattleCalculationResult;
-  currentStance: DiplomaticStance;
-  betrayalResult: BetrayalEvaluation;
-  isDefenderEliminated?: boolean;
-  extraCapturedUnits?: ExtraCapturedMilitaryUnits;
-  extraTreasuryLooted?: number;
+  spoilsData?: BattleSpoilsDetails;
+  isDefenderAnnexed?: boolean;
 }
 
 export class BattleAttackerStateApplier {
-  public static apply(input: AttackerStateApplierInput): Nation {
-    const {
-      attacker,
-      defenderId,
-      defenderTechLevel,
-      calcResult,
-      currentStance,
-      betrayalResult,
-      isDefenderEliminated,
-      extraCapturedUnits,
-      extraTreasuryLooted,
-    } = input;
+  public static apply(input: BattleAttackerStateInput): Nation {
+    const { attacker, defenderId, calcResult, spoilsData } = input;
+    const canonicalDefender = CountryRegistry.resolveCanonicalId(defenderId);
 
-    const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
-
-    const updatedMilitary = BattleLootManager.applyAttackerForcesAndSpoils(
-      attacker.military,
-      defenderTechLevel,
-      calcResult,
-      extraCapturedUnits,
+    const prevAttacked = attacker.attackedTargetIdsThisTurn || [];
+    const attackedTargetIdsThisTurn = Array.from(
+      new Set([...prevAttacked, canonicalDefender, defenderId]),
     );
 
-    const baseWarRepPenalty = currentStance !== "WAR" ? 15 : 0;
-    const totalRepPenalty =
-      baseWarRepPenalty +
-      (betrayalResult.hasBetrayed ? betrayalResult.reputationPenalty : 0);
-
-    const updatedRelations = { ...attacker.relations };
-    updatedRelations[cleanDefenderId] = {
-      targetNationId: cleanDefenderId,
-      stance: "WAR",
-      alignment: -100,
-      tension: 100,
-    };
-
-    const combatStabilityDelta =
-      StabilityCalculator.calculateAttackerBattleStabilityDelta(
-        attacker.government.type,
-        calcResult.isAttackerVictory,
-      );
-
-    const nextStability = StabilityCalculator.clampStability(
-      attacker.government.stability + combatStabilityDelta,
-    );
-
-    const actualDeploymentCost = attacker.isAi
-      ? Math.min(
-          calcResult.deploymentMoneyCost,
-          Math.max(0, Math.floor(attacker.treasury * 0.6)),
-        )
-      : calcResult.deploymentMoneyCost;
-
-    const totalLoot = calcResult.treasuryLooted + (extraTreasuryLooted || 0);
-
-    const updatedTreasury = Math.max(
+    const casualties = calcResult.attackerCasualties;
+    const nextInfantry = Math.max(
       0,
-      attacker.treasury - actualDeploymentCost + totalLoot,
+      attacker.military.infantry - casualties.infantryLost,
+    );
+    const nextArmor = Math.max(
+      0,
+      (attacker.military.armor || 0) - casualties.armorLost,
+    );
+    const nextAirDefense = Math.max(
+      0,
+      (attacker.military.airDefense || 0) - casualties.airDefenseLost,
+    );
+    const nextAirForce = Math.max(
+      0,
+      attacker.military.airForce - casualties.airForceLost,
+    );
+    const nextDrones = Math.max(
+      0,
+      attacker.military.droneMissile - casualties.droneMissileLost,
     );
 
-    const isTotalAnnexation =
-      Boolean(calcResult.isFullCapitulation) || Boolean(isDefenderEliminated);
-
-    const nextWarFocus = isTotalAnnexation ? null : cleanDefenderId;
-
-    const postWarCooldown = NationRelationResolver.calculatePostWarCooldown(
-      {
-        isAi: attacker.isAi,
-        relations: updatedRelations,
-        postWarCooldownTurns: attacker.postWarCooldownTurns,
-      },
-      isTotalAnnexation,
+    const looted = spoilsData?.lootedTreasury ?? calcResult.treasuryLooted ?? 0;
+    const deploymentCost = calcResult.deploymentMoneyCost || 0;
+    const nextTreasury = Math.max(
+      0,
+      attacker.treasury + looted - deploymentCost,
     );
 
-    const currentAttackedTargets = attacker.attackedTargetIdsThisTurn || [];
-    const updatedAttackedTargets = Array.from(
-      new Set([...currentAttackedTargets, cleanDefenderId, defenderId]),
-    );
+    let nextStability = attacker.government.stability;
+    if (calcResult.isAttackerVictory) {
+      nextStability = Math.min(100, nextStability + 3);
+    } else {
+      nextStability = Math.max(0, nextStability - 5);
+    }
 
     return {
       ...attacker,
+      treasury: nextTreasury,
+      attackedTargetIdsThisTurn,
       government: {
         ...attacker.government,
         stability: nextStability,
       },
-      globalReputation: Math.max(
-        -100,
-        attacker.globalReputation - totalRepPenalty,
-      ),
-      treasury: updatedTreasury,
-      military: updatedMilitary,
-      relations: updatedRelations,
-      warFocusTargetId: nextWarFocus,
-      postWarCooldownTurns: postWarCooldown,
-      attackedTargetIdsThisTurn: updatedAttackedTargets,
+      military: {
+        ...attacker.military,
+        infantry: nextInfantry,
+        armor: nextArmor,
+        airDefense: nextAirDefense,
+        airForce: nextAirForce,
+        droneMissile: nextDrones,
+      },
     };
   }
 }
