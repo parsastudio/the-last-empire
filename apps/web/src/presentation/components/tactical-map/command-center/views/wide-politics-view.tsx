@@ -2,7 +2,7 @@ import React from "react";
 import { EconomicDoctrineControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/economic-doctrine-control-card";
 import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/imf-loan-card";
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
-import { IndustrialManagementCard } from "@/presentation/components/tactical-map/command-center/views/components/industry/industrial-management-card";
+import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
 import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -29,28 +29,29 @@ export function WidePoliticsView({
           nationsMap={nationsMap}
           provincesMap={provincesMap}
         />
+        <ActiveModifiersCard modifiers={nation.activeModifiers} />
       </div>
 
       <div className="space-y-5">
-        <ActiveModifiersCard modifiers={nation.activeModifiers} />
-        <ImfLoanCard
-          nationId={nation.id}
-          nationalDebt={nation.nationalDebt}
-          gdp={gdp}
-          treasury={nation.treasury}
-        />
-        <IndustrialManagementCard
+        <IndustryTechUpgradeCard
           nationId={nation.id}
           treasury={nation.treasury}
           industrialLevel={nation.industrialLevel}
-          equipmentTechLevel={nation.equipmentTechLevel}
         />
+
         <MilitaryTechUpgradeCard
           nationId={nation.id}
           treasury={nation.treasury}
           techLevel={nation.military.techLevel}
           gdp={gdp}
           provincesMap={provincesMap}
+        />
+
+        <ImfLoanCard
+          nationId={nation.id}
+          nationalDebt={nation.nationalDebt}
+          gdp={gdp}
+          treasury={nation.treasury}
         />
       </div>
     </div>
