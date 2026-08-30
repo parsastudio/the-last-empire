@@ -10,7 +10,10 @@ import {
   GeopoliticalVectorCalculator,
   GeopoliticalVector,
 } from "@/engine/ai/geopolitical-vector-calculator";
-import { AIPosture } from "@/engine/ai/ai-procurement-planner";
+import {
+  AIPosture,
+  AIPostureEvaluator,
+} from "@/engine/ai/procurement/ai-posture-evaluator";
 
 export class GeopoliticalMatrixCache {
   private provincesByOwnerMap: Map<string, Province[]>;
@@ -113,36 +116,24 @@ export class GeopoliticalMatrixCache {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): AIPosture {
-    if (nation.warFocusTargetId) {
-      return "WAR";
-    }
+    const reachableTargets = this.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    const vectorsByTarget = this.getVectorsForNation(
+      nation,
+      allNations,
+      provincesMap,
+    );
 
-    let isWar = false;
-    let maxTension = 0;
-    const targets = this.getReachableTargets(nation, allNations, provincesMap);
-
-    for (let i = 0; i < targets.length; i++) {
-      const target = targets[i]!;
-      const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[target.id];
-
-      if (rel && rel.stance === "WAR") {
-        isWar = true;
-      }
-
-      const vector = this.getVector(nation, target, allNations, provincesMap);
-      if (vector.isNeighbor && vector.tension > maxTension) {
-        maxTension = vector.tension;
-      }
-    }
-
-    if (isWar) {
-      return "WAR";
-    }
-    if (maxTension >= 55) {
-      return "THREAT";
-    }
-    return "PEACE";
+    return AIPostureEvaluator.evaluatePosture(
+      nation,
+      allNations,
+      provincesMap,
+      this.rankMap,
+      vectorsByTarget,
+      reachableTargets,
+    );
   }
 }

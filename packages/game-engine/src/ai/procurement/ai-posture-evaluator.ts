@@ -3,6 +3,7 @@ import {
   Province,
   CountryRegistry,
   GeopoliticalReachResolver,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -38,10 +39,12 @@ export class AIPostureEvaluator {
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i]!;
       const canonicalTarget = CountryRegistry.resolveCanonicalId(target.id);
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[target.id];
+      const isWar = NationRelationResolver.isWar(
+        nation.relations,
+        canonicalTarget,
+      );
 
-      if (rel && rel.stance === "WAR") {
+      if (isWar) {
         return "WAR";
       }
 

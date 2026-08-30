@@ -1,4 +1,8 @@
-import { Nation, CountryRegistry } from "@geopolitics/domain";
+import {
+  Nation,
+  CountryRegistry,
+  NationRelationResolver,
+} from "@geopolitics/domain";
 
 export class AIArmsSellerMatcher {
   public static findEligibleArmsSellers(
@@ -13,8 +17,10 @@ export class AIArmsSellerMatcher {
       const canonicalSeller = CountryRegistry.resolveCanonicalId(seller.id);
       if (canonicalSeller === canonicalBuyer) continue;
 
-      const rel =
-        seller.relations[canonicalBuyer] || seller.relations[buyer.id];
+      const rel = NationRelationResolver.getRelation(
+        seller.relations,
+        canonicalBuyer,
+      );
       const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
       const tension = rel ? (rel.tension ?? 10) : 10;
 

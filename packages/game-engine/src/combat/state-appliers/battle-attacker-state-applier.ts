@@ -2,7 +2,7 @@ import {
   Nation,
   DiplomaticStance,
   CountryRegistry,
-  DIPLOMACY_CONFIG,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
@@ -89,16 +89,14 @@ export class BattleAttackerStateApplier {
 
     const nextWarFocus = isTotalAnnexation ? null : cleanDefenderId;
 
-    const hasOtherWars = Object.entries(updatedRelations).some(
-      ([key, r]) => key !== cleanDefenderId && r.stance === "WAR",
+    const postWarCooldown = NationRelationResolver.calculatePostWarCooldown(
+      {
+        isAi: attacker.isAi,
+        relations: updatedRelations,
+        postWarCooldownTurns: attacker.postWarCooldownTurns,
+      },
+      isTotalAnnexation,
     );
-
-    const postWarCooldown =
-      attacker.isAi && isTotalAnnexation && !hasOtherWars
-        ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
-        : attacker.isAi
-          ? attacker.postWarCooldownTurns || 0
-          : 0;
 
     const currentAttackedTargets = attacker.attackedTargetIdsThisTurn || [];
     const updatedAttackedTargets = Array.from(

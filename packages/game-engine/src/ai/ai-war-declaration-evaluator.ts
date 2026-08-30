@@ -56,8 +56,10 @@ export class AIWarDeclarationEvaluator {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
         targetNation.id,
       );
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[targetNation.id];
+      const rel = NationRelationResolver.getRelation(
+        nation.relations,
+        canonicalTarget,
+      );
 
       if (
         rel &&

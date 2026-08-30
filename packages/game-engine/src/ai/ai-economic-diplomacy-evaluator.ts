@@ -7,6 +7,7 @@ import {
   GeopoliticalReachResolver,
   getNationGdp,
   GlobalCoalition,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import {
@@ -52,8 +53,10 @@ export class AIEconomicDiplomacyEvaluator {
         continue;
       }
 
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[targetNation.id];
+      const rel = NationRelationResolver.getRelation(
+        nation.relations,
+        canonicalTarget,
+      );
 
       if (!rel || rel.stance === "WAR") continue;
 

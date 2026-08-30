@@ -7,6 +7,7 @@ import {
   DiplomacyLockManager,
   GeopoliticalReachResolver,
   SecurityGuaranteeValidator,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -65,8 +66,10 @@ export class AITreatyEvaluator {
       const canonicalTarget = CountryRegistry.resolveCanonicalId(
         targetNation.id,
       );
-      const rel =
-        nation.relations[canonicalTarget] || nation.relations[targetNation.id];
+      const rel = NationRelationResolver.getRelation(
+        nation.relations,
+        canonicalTarget,
+      );
 
       if (
         !rel ||

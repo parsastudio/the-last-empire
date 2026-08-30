@@ -5,6 +5,7 @@ import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import {
   NationGettersUtility,
   NationMutatorUtility,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 
 export class NationLivenessManager {
@@ -79,14 +80,14 @@ export class NationLivenessManager {
         nextWarFocus = null;
       }
 
-      const hasRemainingActiveWars = Object.values(updatedRelations).some(
-        (r) => r.stance === "WAR",
+      const nextCooldown = NationRelationResolver.calculatePostWarCooldown(
+        {
+          isAi: nation.isAi,
+          relations: updatedRelations,
+          postWarCooldownTurns: nation.postWarCooldownTurns,
+        },
+        hadWarWithEliminated,
       );
-
-      const nextCooldown =
-        nation.isAi && hadWarWithEliminated && !hasRemainingActiveWars
-          ? 5
-          : nation.postWarCooldownTurns || 0;
 
       updatedNations[id] = {
         ...nation,
