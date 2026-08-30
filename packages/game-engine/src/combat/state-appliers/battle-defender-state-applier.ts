@@ -1,4 +1,8 @@
-import { Nation, CountryRegistry } from "@geopolitics/domain";
+import {
+  Nation,
+  CountryRegistry,
+  DebtCalculatorUtility,
+} from "@geopolitics/domain";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleLootManager } from "@/engine/combat/loot/battle-loot-manager";
@@ -64,10 +68,11 @@ export class BattleDefenderStateApplier {
       conquest.conqueredProvincesList.length > 0 &&
       defender.nationalDebt > 0
     ) {
-      const totalGdpBefore = Math.max(1, conquest.totalDefenderGdpBefore);
-      const lostGdp = conquest.conqueredProvincesGdp || 0;
-      const share = Math.min(1.0, Math.max(0, lostGdp / totalGdpBefore));
-      const debtRelief = Math.floor(defender.nationalDebt * share);
+      const debtRelief = DebtCalculatorUtility.calculateProportionalDebtRelief(
+        defender.nationalDebt,
+        conquest.conqueredProvincesGdp || 0,
+        conquest.totalDefenderGdpBefore,
+      );
       updatedDebt = Math.max(0, defender.nationalDebt - debtRelief);
     }
 

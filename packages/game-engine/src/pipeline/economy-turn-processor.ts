@@ -7,7 +7,13 @@ import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
-import { CountryRegistry, TurnLogBuilder } from "@geopolitics/domain";
+import {
+  CountryRegistry,
+  TurnLogBuilder,
+  SecurityFeeCalculatorUtility,
+  NationRelationResolver,
+  NationGettersUtility,
+} from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -52,14 +58,15 @@ export class EconomyTurnProcessor {
     let nextIsEmergency = nation.isEmergencyProtectorate ?? false;
 
     if (nation.securityGuarantorId) {
-      const gCanonical = CountryRegistry.resolveCanonicalId(
+      const guarantor = NationGettersUtility.resolveNation(
         nation.securityGuarantorId,
+        allNations,
       );
-      const guarantor =
-        allNations[gCanonical] || allNations[nation.securityGuarantorId];
       if (guarantor && guarantor.isAlive) {
-        const feeRatio = nextIsEmergency ? 0.3 : 0.1;
-        securityFee = Math.floor(gdp * feeRatio);
+        securityFee = SecurityFeeCalculatorUtility.calculateSecurityFee(
+          gdp,
+          nextIsEmergency,
+        );
       } else {
         nextSecurityGuarantorId = null;
         nextIsEmergency = false;
@@ -67,18 +74,15 @@ export class EconomyTurnProcessor {
     }
 
     let warSubsidiesReceived = 0;
-    const isAtWar = Object.values(nation.relations || {}).some(
-      (r) => r.stance === "WAR",
-    );
+    const isAtWar = NationRelationResolver.isAtWar(nation, allNations);
 
     if (isAtWar) {
       for (const rel of Object.values(nation.relations || {})) {
         if (rel.stance === "STRATEGIC_PARTNERSHIP") {
-          const partnerCanonical = CountryRegistry.resolveCanonicalId(
+          const partner = NationGettersUtility.resolveNation(
             rel.targetNationId,
+            allNations,
           );
-          const partner =
-            allNations[partnerCanonical] || allNations[rel.targetNationId];
           if (partner && partner.isAlive && partner.treasury > gdp * 0.05) {
             const subsidy = Math.floor(gdp * 0.02);
             warSubsidiesReceived += subsidy;

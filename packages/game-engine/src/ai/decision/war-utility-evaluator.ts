@@ -1,4 +1,4 @@
-import { Nation, CountryRegistry } from "@geopolitics/domain";
+import { Nation, NationRelationResolver } from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class WarUtilityEvaluator {
@@ -29,21 +29,13 @@ export class WarUtilityEvaluator {
     }
 
     let opportunismBonus = 0;
-    if (target.relations) {
-      const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
-      for (const [relId, rel] of Object.entries(target.relations)) {
-        if (rel.stance === "WAR") {
-          const cRel = CountryRegistry.resolveCanonicalId(relId);
-          if (cRel !== sourceCanonical) {
-            const other = allNations
-              ? allNations[cRel] || allNations[relId]
-              : null;
-            if (!other || other.isAlive) {
-              opportunismBonus += 25;
-              break;
-            }
-          }
-        }
+    if (allNations) {
+      const activeEnemies = NationRelationResolver.getActiveWarEnemies(
+        target,
+        allNations,
+      );
+      if (activeEnemies.some((e) => e.id !== source.id)) {
+        opportunismBonus += 25;
       }
     }
 

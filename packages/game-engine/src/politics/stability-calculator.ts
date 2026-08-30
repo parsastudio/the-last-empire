@@ -2,6 +2,7 @@ import type { Nation } from "@/domain/nation/nation.schema";
 import type { GovernmentType } from "@/domain/politics/politics.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { GovernmentSystem } from "@/engine/politics/government-system";
+import { NationRelationResolver } from "@geopolitics/domain";
 
 export class StabilityCalculator {
   public static clampStability(stability: number): number {
@@ -36,9 +37,7 @@ export class StabilityCalculator {
     const traits = GovernmentSystem.getTraits(nation.government.type);
     let delta = 0;
 
-    const warActive =
-      isAtWar ??
-      Object.values(nation.relations || {}).some((r) => r.stance === "WAR");
+    const warActive = isAtWar ?? NationRelationResolver.isAtWar(nation);
 
     if (!warActive) {
       if (nation.government.stability < 85) {
