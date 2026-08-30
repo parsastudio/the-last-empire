@@ -7,6 +7,7 @@ import {
   LandNeighborResolver,
   NationGettersUtility,
 } from "@geopolitics/domain";
+import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 export class AIAttackPlanner {
   public static planAttack(
@@ -55,11 +56,11 @@ export class AIAttackPlanner {
       availableArmor,
       Math.ceil(availableArmor * deployRatio),
     );
-    let airForceToDeploy = Math.min(
+    const airForceToDeploy = Math.min(
       availableAirForce,
       Math.ceil(availableAirForce * deployRatio),
     );
-    let dronesToLaunch = Math.min(
+    const dronesToLaunch = Math.min(
       availableDrones,
       Math.ceil(availableDrones * deployRatio),
     );
@@ -70,20 +71,15 @@ export class AIAttackPlanner {
         return null;
       }
 
-      const maxNavalCapacity = fleetCount * 60;
-      const load = infantryToDeploy * 1 + armorToDeploy * 4;
+      const clamped = NavalDeploymentClamper.clamp(
+        infantryToDeploy,
+        armorToDeploy,
+        "NAVAL",
+        fleetCount,
+      );
 
-      if (load > maxNavalCapacity) {
-        const scale = maxNavalCapacity / load;
-        armorToDeploy = Math.floor(armorToDeploy * scale);
-        infantryToDeploy = Math.max(
-          1,
-          Math.min(
-            availableInfantry,
-            Math.floor(maxNavalCapacity - armorToDeploy * 4),
-          ),
-        );
-      }
+      infantryToDeploy = clamped.inf;
+      armorToDeploy = clamped.arm;
     }
 
     return ActionFactory.initiateBattle(
@@ -106,8 +102,10 @@ export class AIAttackPlanner {
       const canonicalFocusId = CountryRegistry.resolveCanonicalId(
         nation.warFocusTargetId,
       );
-      const focusNation =
-        allNations[canonicalFocusId] || allNations[nation.warFocusTargetId];
+      const focusNation = NationGettersUtility.resolveNation(
+        canonicalFocusId,
+        allNations,
+      );
 
       if (focusNation && focusNation.isAlive) {
         const rel =
@@ -122,8 +120,10 @@ export class AIAttackPlanner {
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       if (rel.stance === "WAR") {
         const canonicalTargetId = CountryRegistry.resolveCanonicalId(targetId);
-        const targetNation =
-          allNations[canonicalTargetId] || allNations[targetId];
+        const targetNation = NationGettersUtility.resolveNation(
+          canonicalTargetId,
+          allNations,
+        );
         if (
           targetNation &&
           targetNation.isAlive &&
@@ -145,7 +145,10 @@ export class AIAttackPlanner {
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       if (rel.stance === "WAR") {
         const canonical = CountryRegistry.resolveCanonicalId(targetId);
-        const target = allNations[canonical] || allNations[targetId];
+        const target = NationGettersUtility.resolveNation(
+          canonical,
+          allNations,
+        );
         if (target && target.isAlive && target.id !== nation.id) {
           count++;
         }

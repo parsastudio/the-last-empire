@@ -1,5 +1,9 @@
-import { Nation, UnitType } from "@geopolitics/domain";
-import { MilitaryInventoryHelper } from "@geopolitics/domain";
+import {
+  Nation,
+  UnitType,
+  MilitaryInventoryHelper,
+  MilitaryPowerCalculator,
+} from "@geopolitics/domain";
 
 export class CombatModifierResolver {
   public static calculateDeploymentCosts(forceCost: number): {
@@ -13,8 +17,6 @@ export class CombatModifierResolver {
       nation.military,
       unitType,
     );
-    const techMult = 1 + (Math.max(1, branchTech) - 1) * 0.5;
-
-    return techMult;
+    return MilitaryPowerCalculator.calculateTechMultiplier(branchTech);
   }
 }

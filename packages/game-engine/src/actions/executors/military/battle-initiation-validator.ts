@@ -1,6 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { Nation, GameError, NationRelationResolver } from "@geopolitics/domain";
+import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 export class BattleInitiationValidator {
   public static validate(
@@ -54,10 +55,16 @@ export class BattleInitiationValidator {
 
     if (action.attackType === "NAVAL") {
       const fleetCount = nation.navalFleet || 0;
-      const maxCapacityPoints = fleetCount * 60;
+      const maxCapacityPoints = NavalDeploymentClamper.calculateMaxCapacity(
+        "NAVAL",
+        fleetCount,
+      );
       const infantryCount = action.infantryToDeploy || 0;
       const armorCount = action.armorToDeploy || 0;
-      const requiredPoints = infantryCount * 1 + armorCount * 4;
+      const requiredPoints = NavalDeploymentClamper.calculateRequiredCapacity(
+        infantryCount,
+        armorCount,
+      );
 
       if (fleetCount <= 0 || requiredPoints > maxCapacityPoints) {
         throw new GameError(

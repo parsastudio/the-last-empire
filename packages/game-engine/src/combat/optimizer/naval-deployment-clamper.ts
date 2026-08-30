@@ -1,3 +1,5 @@
+import { NAVAL_FLEET_CONFIG } from "@geopolitics/domain";
+
 export interface NavalClampResult {
   inf: number;
   arm: number;
@@ -10,8 +12,15 @@ export class NavalDeploymentClamper {
     navalFleetCount: number,
   ): number {
     return attackType === "NAVAL"
-      ? Math.max(0, navalFleetCount * 60)
+      ? Math.max(0, navalFleetCount * NAVAL_FLEET_CONFIG.CAPACITY_PER_FLEET)
       : Infinity;
+  }
+
+  public static calculateRequiredCapacity(inf: number, arm: number): number {
+    return (
+      inf * NAVAL_FLEET_CONFIG.UNIT_CAPACITY_WEIGHTS.INFANTRY +
+      arm * NAVAL_FLEET_CONFIG.UNIT_CAPACITY_WEIGHTS.ARMOR
+    );
   }
 
   public static clamp(
@@ -25,7 +34,7 @@ export class NavalDeploymentClamper {
     let curArm = arm;
 
     if (attackType === "NAVAL" && maxNavalCap < Infinity) {
-      while (curInf * 1 + curArm * 4 > maxNavalCap) {
+      while (this.calculateRequiredCapacity(curInf, curArm) > maxNavalCap) {
         if (curArm > 0 && curArm * 4 >= curInf) {
           curArm = Math.max(0, curArm - 1);
         } else if (curInf > 1) {

@@ -50,7 +50,7 @@ export class AIDomesticRecruitmentPlanner {
       return {
         actions,
         spentMoney: 0,
-        remainingGlobalValuation,
+        remainingGlobalValuation: globalRemainingValuation,
       };
     }
 

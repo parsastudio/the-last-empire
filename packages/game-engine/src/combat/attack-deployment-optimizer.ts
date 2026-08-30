@@ -1,9 +1,9 @@
 import {
   Nation,
   Province,
-  MILITARY_UNIT_STATS,
   getNationGdp,
-  CountryRegistry,
+  GuarantorBudgetCalculatorUtility,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
@@ -39,13 +39,11 @@ export class AttackDeploymentOptimizer {
 
     let effectiveGuarantor = guarantorNation;
     if (!effectiveGuarantor && defender.securityGuarantorId && allNations) {
-      const gCanonical = CountryRegistry.resolveCanonicalId(
-        defender.securityGuarantorId,
-      );
       effectiveGuarantor =
-        allNations[gCanonical] ||
-        allNations[defender.securityGuarantorId] ||
-        null;
+        NationGettersUtility.resolveNation(
+          defender.securityGuarantorId,
+          allNations,
+        ) || null;
     }
 
     const testBattle = (d: number, inf: number, arm: number, af: number) => {
@@ -96,19 +94,19 @@ export class AttackDeploymentOptimizer {
       effectiveGuarantor.id !== attacker.id
     ) {
       const defGdp = getNationGdp(defender, provincesMap);
-      const defenseBudget = Math.floor(defGdp * 0.3);
-      defAirForce += Math.floor(
-        (defenseBudget * 0.35) / MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
+      const guarantorGdp = getNationGdp(effectiveGuarantor, provincesMap);
+      const defenseBudget = GuarantorBudgetCalculatorUtility.calculateBudget(
+        defGdp,
+        guarantorGdp,
+        Boolean(defender.isEmergencyProtectorate),
       );
-      defArmor += Math.floor(
-        (defenseBudget * 0.3) / MILITARY_UNIT_STATS.ARMOR.moneyCost,
-      );
-      defAirDefense += Math.floor(
-        (defenseBudget * 0.2) / MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost,
-      );
-      defInfantry += Math.floor(
-        (defenseBudget * 0.15) / MILITARY_UNIT_STATS.INFANTRY.moneyCost,
-      );
+      const auxUnits =
+        GuarantorBudgetCalculatorUtility.calculateAuxiliaryUnits(defenseBudget);
+
+      defAirForce += auxUnits.auxAir;
+      defArmor += auxUnits.auxArm;
+      defAirDefense += auxUnits.auxAD;
+      defInfantry += auxUnits.auxInf;
     }
 
     const attDroneMult = CombatModifierResolver.getUnitMultiplier(

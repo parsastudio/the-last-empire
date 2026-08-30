@@ -3,6 +3,9 @@ import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
+import { GuarantorBudgetCalculatorUtility } from "@/domain/diplomacy/guarantor-budget-calculator.utility";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export class TwmiCalculatorUtility {
   public static calculateTwmi(
@@ -12,9 +15,9 @@ export class TwmiCalculatorUtility {
   ): number {
     const gdp = getNationGdp(nation, provincesMap);
     const treasury = Math.max(0, nation.treasury);
-    const loanHeadroom = Math.max(
-      0,
-      Math.floor(gdp * 0.8) - nation.nationalDebt,
+    const loanHeadroom = DebtCalculatorUtility.getAvailableLoanHeadroom(
+      nation.nationalDebt,
+      gdp,
     );
 
     const armyValuation = MilitaryPricingCalculator.calculateTotalArmyValuation(
@@ -37,18 +40,17 @@ export class TwmiCalculatorUtility {
 
     let guarantorValuation = 0;
     if (nation.securityGuarantorId && nationsMap) {
-      const gCanonical = CountryRegistry.resolveCanonicalId(
+      const guarantor = NationGettersUtility.resolveNation(
         nation.securityGuarantorId,
+        nationsMap,
       );
-      const guarantor =
-        nationsMap[gCanonical] || nationsMap[nation.securityGuarantorId];
       if (guarantor && guarantor.isAlive) {
-        const forceMultiplier = nation.isEmergencyProtectorate ? 3.0 : 0.3;
-        const rawBudget = Math.floor(gdp * forceMultiplier);
-        const maxSuperpowerLimit = Math.floor(
-          getNationGdp(guarantor, provincesMap) * 0.3,
+        const guarantorGdp = getNationGdp(guarantor, provincesMap);
+        guarantorValuation = GuarantorBudgetCalculatorUtility.calculateBudget(
+          gdp,
+          guarantorGdp,
+          Boolean(nation.isEmergencyProtectorate),
         );
-        guarantorValuation = Math.min(rawBudget, maxSuperpowerLimit);
       }
     }
 
@@ -66,7 +68,10 @@ export class TwmiCalculatorUtility {
         if (rel.stance === "WAR") {
           const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
           if (canonicalTarget !== sourceCanonical) {
-            const enemy = nationsMap[canonicalTarget] || nationsMap[targetId];
+            const enemy = NationGettersUtility.resolveNation(
+              canonicalTarget,
+              nationsMap,
+            );
             if (enemy && enemy.isAlive) {
               activeWarsCount++;
             }

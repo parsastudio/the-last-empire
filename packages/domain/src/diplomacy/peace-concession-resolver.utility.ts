@@ -6,6 +6,7 @@ import { PeaceTermsPackage } from "@/domain/diplomacy/peace-terms.schema";
 import { PeaceCapitulationBuilder } from "@/domain/diplomacy/peace/peace-capitulation-builder";
 import { PeaceWhitePeaceBuilder } from "@/domain/diplomacy/peace/peace-white-peace-builder";
 import { PeaceConcessionBuilder } from "@/domain/diplomacy/peace/peace-concession-builder";
+import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
 
 export class PeaceConcessionResolverUtility {
   public static resolveTerms(
@@ -41,12 +42,18 @@ export class PeaceConcessionResolverUtility {
     const maxAiCash = Math.max(
       0,
       aiNation.treasury +
-        Math.max(0, Math.floor(aiGdp * 0.8) - aiNation.nationalDebt),
+        DebtCalculatorUtility.getAvailableLoanHeadroom(
+          aiNation.nationalDebt,
+          aiGdp,
+        ),
     );
     const maxHumanCash = Math.max(
       0,
       humanNation.treasury +
-        Math.max(0, Math.floor(humanGdp * 0.8) - humanNation.nationalDebt),
+        DebtCalculatorUtility.getAvailableLoanHeadroom(
+          humanNation.nationalDebt,
+          humanGdp,
+        ),
     );
 
     if (ratio >= 2.0) {
