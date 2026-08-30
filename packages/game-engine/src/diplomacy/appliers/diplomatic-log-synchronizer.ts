@@ -1,4 +1,8 @@
-import { TurnLogEntry } from "@/domain/game/game-state.schema";
+import {
+  TurnLogEntry,
+  TurnLogEventCode,
+  TurnLogLevel,
+} from "@/domain/game/game-state.schema";
 import {
   PendingDiplomaticProposal,
   CountryRegistry,
@@ -23,8 +27,10 @@ export class DiplomaticLogSynchronizer {
     );
 
     let foundMatchingLog = false;
-    const targetEventCode = isAccepted ? "TREATY_ACCEPTED" : "TREATY_REJECTED";
-    const targetLevel = isAccepted ? "INFO" : "WARNING";
+    const targetEventCode: TurnLogEventCode = isAccepted
+      ? "TREATY_ACCEPTED"
+      : "TREATY_REJECTED";
+    const targetLevel: TurnLogLevel = isAccepted ? "INFO" : "WARNING";
 
     const updatedLogs = currentLogs.map((log) => {
       const isMatchingProposalId =
@@ -45,8 +51,8 @@ export class DiplomaticLogSynchronizer {
         foundMatchingLog = true;
         return {
           ...log,
-          eventCode: targetEventCode as const,
-          level: targetLevel as const,
+          eventCode: targetEventCode,
+          level: targetLevel,
           category: "DIPLOMACY" as const,
           params: {
             ...log.params,

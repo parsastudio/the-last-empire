@@ -67,16 +67,14 @@ export class ArmsMarketManager {
 
     const buyerGdp = getNationGdp(buyer, state.provinces);
     const currentValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(buyer.military);
+      MilitaryPricingCalculator.calculateTotalArmyValuationWithQueue(
+        buyer.military,
+        buyer.recruitmentQueue,
+      );
     const maxValuation = Math.floor(buyerGdp);
     const addedValuation = baseUnitPrice * quantity;
 
-    let queuedValuation = 0;
-    for (let i = 0; i < buyer.recruitmentQueue.length; i++) {
-      queuedValuation += buyer.recruitmentQueue[i]!.totalCost;
-    }
-
-    if (currentValuation + queuedValuation + addedValuation > maxValuation) {
+    if (currentValuation + addedValuation > maxValuation) {
       throw new GameError(
         "INVALID_ACTION",
         "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",

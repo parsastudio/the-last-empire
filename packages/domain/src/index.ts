@@ -43,6 +43,7 @@ export * from "./nation/gdp-calculator.utility";
 export * from "./nation/nation.schema";
 export * from "./nation/nation-doctrine.schema";
 export * from "./nation/nation-doctrine.config";
+export * from "./nation/nation-mutator.utility";
 export * from "./nation/getters/nation-territory-resolver.utility";
 export * from "./nation/getters/nation-demographics-resolver.utility";
 export * from "./nation/getters/nation-rank-calculator.utility";

@@ -1,7 +1,13 @@
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
-import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
-import { ProvinceDegradationUtility } from "@geopolitics/domain";
+import {
+  getProvinceGdp,
+  getNationGdp,
+} from "@/domain/nation/gdp-calculator.utility";
+import {
+  ProvinceDegradationUtility,
+  NationGettersUtility,
+} from "@geopolitics/domain";
 
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
@@ -25,15 +31,15 @@ export class ProvinceConquestHandler {
     const cleanAttackerId = CountryRegistry.resolveCanonicalId(attackerId);
     const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
 
-    const defenderProvincesBefore = Object.values(updatedProvinces).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
+    const defenderProvincesBefore = NationGettersUtility.getOwnedProvinces(
+      cleanDefenderId,
+      updatedProvinces,
     );
-
-    let totalDefenderGdpBefore = 0;
-    for (let i = 0; i < defenderProvincesBefore.length; i++) {
-      totalDefenderGdpBefore += getProvinceGdp(defenderProvincesBefore[i]!);
-    }
+    const totalDefenderGdpBefore = getNationGdp(
+      cleanDefenderId,
+      updatedProvinces,
+      defenderProvincesBefore,
+    );
 
     let conqueredPixels = 0;
     let conqueredProvincesGdp = 0;
@@ -83,9 +89,9 @@ export class ProvinceConquestHandler {
       }
     }
 
-    const remainingDefenderProvinces = Object.values(updatedProvinces).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === cleanDefenderId,
+    const remainingDefenderProvinces = NationGettersUtility.getOwnedProvinces(
+      cleanDefenderId,
+      updatedProvinces,
     );
 
     return {

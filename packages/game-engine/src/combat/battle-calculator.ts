@@ -68,39 +68,8 @@ export class BattleCalculator {
     const { moneyCost: deploymentMoneyCost } =
       CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
 
-    const attDroneMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "DRONE_MISSILE",
-    );
-    const attAirMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "AIR_FORCE",
-    );
-    const attArmorMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "ARMOR",
-    );
-    const attInfMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "INFANTRY",
-    );
-
-    const defAdMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "AIR_DEFENSE",
-    );
-    const defAirMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "AIR_FORCE",
-    );
-    const defArmorMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "ARMOR",
-    );
-    const defInfMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "INFANTRY",
-    );
+    const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);
+    const defMults = CombatModifierResolver.resolveAllUnitMultipliers(defender);
 
     let defAirDefense = defender.military.airDefense || 0;
     let defAirForce = defender.military.airForce || 0;
@@ -129,36 +98,42 @@ export class BattleCalculator {
       defArmor,
       deployedInfantry,
       defInfantry,
-      attDroneMult,
-      defAdMult,
-      attAirMult,
-      defAirMult,
-      attArmorMult,
-      defArmorMult,
-      attInfMult,
-      defInfMult,
+      attMults.droneMissile,
+      defMults.airDefense,
+      attMults.airForce,
+      defMults.airForce,
+      attMults.armor,
+      defMults.armor,
+      attMults.infantry,
+      defMults.infantry,
     );
 
     const attackerDeployedPower = Math.max(
       0.1,
-      deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.weightPower * attInfMult +
-        deployedArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * attArmorMult +
+      deployedInfantry *
+        MILITARY_UNIT_STATS.INFANTRY.weightPower *
+        attMults.infantry +
+        deployedArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * attMults.armor +
         deployedAirForce *
           MILITARY_UNIT_STATS.AIR_FORCE.weightPower *
-          attAirMult +
+          attMults.airForce +
         deployedDrones *
           MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower *
-          attDroneMult,
+          attMults.droneMissile,
     );
 
     const defenderTotalPower = Math.max(
       0.1,
-      defInfantry * MILITARY_UNIT_STATS.INFANTRY.weightPower * defInfMult +
-        defArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * defArmorMult +
+      defInfantry *
+        MILITARY_UNIT_STATS.INFANTRY.weightPower *
+        defMults.infantry +
+        defArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * defMults.armor +
         defAirDefense *
           MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower *
-          defAdMult +
-        defAirForce * MILITARY_UNIT_STATS.AIR_FORCE.weightPower * defAirMult,
+          defMults.airDefense +
+        defAirForce *
+          MILITARY_UNIT_STATS.AIR_FORCE.weightPower *
+          defMults.airForce,
     );
 
     const valuationRatio = Number(

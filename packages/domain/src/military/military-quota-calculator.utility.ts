@@ -75,15 +75,11 @@ export class MilitaryQuotaCalculator {
       "DRONE_MISSILE",
     ];
 
-    const currentTotalValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(military);
-
-    let queuedCost = 0;
-    for (let i = 0; i < recruitmentQueue.length; i++) {
-      queuedCost += recruitmentQueue[i]!.totalCost;
-    }
-
-    const totalValuation = currentTotalValuation + queuedCost;
+    const totalValuation =
+      MilitaryPricingCalculator.calculateTotalArmyValuationWithQueue(
+        military,
+        recruitmentQueue,
+      );
     const maxGlobalValuation = Math.floor(gdp);
     const remainingGlobalValuation = Math.max(
       0,

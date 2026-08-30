@@ -109,44 +109,14 @@ export class AttackDeploymentOptimizer {
       defInfantry += auxUnits.auxInf;
     }
 
-    const attDroneMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "DRONE_MISSILE",
-    );
-    const attAirMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "AIR_FORCE",
-    );
-    const attArmorMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "ARMOR",
-    );
-    const attInfMult = CombatModifierResolver.getUnitMultiplier(
-      attacker,
-      "INFANTRY",
-    );
-
-    const defAdMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "AIR_DEFENSE",
-    );
-    const defAirMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "AIR_FORCE",
-    );
-    const defArmorMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "ARMOR",
-    );
-    const defInfMult = CombatModifierResolver.getUnitMultiplier(
-      defender,
-      "INFANTRY",
-    );
+    const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);
+    const defMults = CombatModifierResolver.resolveAllUnitMultipliers(defender);
 
     const neededDrones =
       defAirDefense > 0
         ? Math.ceil(
-            (defAirDefense * defAdMult * 4.0) / Math.max(0.1, attDroneMult),
+            (defAirDefense * defMults.airDefense * 4.0) /
+              Math.max(0.1, attMults.droneMissile),
           )
         : 0;
     let drones = Math.min(maxDrones, Math.max(0, neededDrones));
@@ -154,8 +124,9 @@ export class AttackDeploymentOptimizer {
     const neededAir =
       defAirForce > 0 || defArmor > 0
         ? Math.ceil(
-            (defAirForce * defAirMult * 1.6 + defArmor * defArmorMult * 0.6) /
-              Math.max(0.1, attAirMult),
+            (defAirForce * defMults.airForce * 1.6 +
+              defArmor * defMults.armor * 0.6) /
+              Math.max(0.1, attMults.airForce),
           ) + 2
         : 0;
     let air = Math.min(maxAir, Math.max(0, neededAir));
@@ -163,15 +134,18 @@ export class AttackDeploymentOptimizer {
     const neededArmor =
       defArmor > 0 || defInfantry > 0
         ? Math.ceil(
-            (defArmor * defArmorMult * 1.5 + defInfantry * defInfMult * 0.3) /
-              Math.max(0.1, attArmorMult),
+            (defArmor * defMults.armor * 1.5 +
+              defInfantry * defMults.infantry * 0.3) /
+              Math.max(0.1, attMults.armor),
           ) + 2
         : 0;
     let armor = Math.min(maxArmor, Math.max(0, neededArmor));
 
     const neededInf =
-      Math.ceil((defInfantry * defInfMult * 1.5) / Math.max(0.1, attInfMult)) +
-      5;
+      Math.ceil(
+        (defInfantry * defMults.infantry * 1.5) /
+          Math.max(0.1, attMults.infantry),
+      ) + 5;
     let infantry = Math.max(1, Math.min(maxInf, neededInf));
 
     const initialClamped = NavalDeploymentClamper.clamp(

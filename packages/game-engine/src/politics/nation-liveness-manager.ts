@@ -2,7 +2,10 @@ import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
-import { NationGettersUtility } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  NationMutatorUtility,
+} from "@geopolitics/domain";
 
 export class NationLivenessManager {
   public updateLiveness(state: GameState): GameState {
@@ -31,26 +34,7 @@ export class NationLivenessManager {
           );
         }
 
-        updatedNations[id] = {
-          ...nation,
-          isAlive: false,
-          treasury: 0,
-          nationalDebt: 0,
-          warFocusTargetId: null,
-          recruitmentQueue: [],
-          executedEspionageTiers: [],
-          attackedTargetIdsThisTurn: [],
-          postWarCooldownTurns: 0,
-          military: {
-            ...nation.military,
-            infantry: 0,
-            armor: 0,
-            airDefense: 0,
-            airForce: 0,
-            droneMissile: 0,
-          },
-          relations: {},
-        };
+        updatedNations[id] = NationMutatorUtility.createDefeatedNation(nation);
       }
     }
 
