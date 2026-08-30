@@ -1,11 +1,7 @@
 import React from "react";
-import { Info, Swords, Coins, Rocket, LucideIcon } from "lucide-react";
+import { Info, Swords, Coins, LucideIcon } from "lucide-react";
 
-export type ContextActionType =
-  | "profile"
-  | "attack"
-  | "strike"
-  | "buy_province";
+export type ContextActionType = "profile" | "attack" | "buy_province";
 
 interface QuickActionButtonProps {
   icon: LucideIcon;
@@ -80,13 +76,6 @@ export function MapContextMenu({
               colorClass="text-gdp"
               bgHoverClass="hover:bg-gdp/15"
               onClick={() => onSelectAction("buy_province")}
-            />
-            <QuickActionButton
-              icon={Rocket}
-              label="ضربت موشکی"
-              colorClass="text-rose-400"
-              bgHoverClass="hover:bg-rose-500/15"
-              onClick={() => onSelectAction("strike")}
             />
             <QuickActionButton
               icon={Swords}

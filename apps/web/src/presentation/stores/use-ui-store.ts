@@ -35,11 +35,6 @@ export type ActiveModalState =
       targetProvinceId?: number | null;
     }
   | {
-      type: "STRATEGIC_STRIKE";
-      targetNationId: string;
-      targetProvinceId: number;
-    }
-  | {
       type: "BUY_PROVINCE";
       provinceId: number;
     }

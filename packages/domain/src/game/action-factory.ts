@@ -15,7 +15,6 @@ import {
   RepayDebtAction,
   RequestLoanAction,
   InvestResearchAction,
-  StrategicIndustrialStrikeAction,
   InitiateBattleAction,
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
@@ -242,26 +241,11 @@ export class ActionFactory {
     };
   }
 
-  public static strategicIndustrialStrike(
-    nationId: string,
-    targetNationId: string,
-    targetProvinceId: number,
-    dronesToLaunch: number,
-  ): StrategicIndustrialStrikeAction {
-    return {
-      id: this.createId("strike"),
-      nationId,
-      targetNationId,
-      targetProvinceId,
-      dronesToLaunch,
-      type: "STRATEGIC_INDUSTRIAL_STRIKE",
-    };
-  }
-
   public static initiateBattle(
     nationId: string,
     targetNationId: string,
-    infantryToDeploy: number,
+    dronesToLaunch: number,
+    infantryToDeploy?: number,
     armorToDeploy?: number,
     airForceToDeploy?: number,
     targetProvinceId?: number,
@@ -272,6 +256,7 @@ export class ActionFactory {
       nationId,
       type: "INITIATE_BATTLE",
       targetNationId,
+      dronesToLaunch,
       infantryToDeploy,
       armorToDeploy,
       airForceToDeploy,

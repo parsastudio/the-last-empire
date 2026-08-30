@@ -1,7 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Swords, Plane, ShieldAlert, BarChart3, Trophy } from "lucide-react";
+import {
+  Swords,
+  Flame,
+  Plane,
+  ShieldAlert,
+  BarChart3,
+  Trophy,
+} from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -26,7 +33,7 @@ export function BattleDebriefModal({
   humanNationId,
   onClose,
 }: BattleDebriefModalProps) {
-  const [activeStep, setActiveStep] = useState<2 | 3 | 4 | 5>(2);
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | 4 | 5>(1);
 
   const isAttackerWin = reportData?.isAttackerVictory ?? false;
   const isHumanAttacker = humanNationId === reportData?.attackerId;
@@ -120,19 +127,20 @@ export function BattleDebriefModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-1.5 font-sans">
+        <div className="grid grid-cols-5 gap-1.5 font-sans">
           {[
-            { step: 2, title: "۱. هوایی", icon: Plane },
-            { step: 3, title: "۲. زمینی", icon: ShieldAlert },
-            { step: 4, title: "۳. تلفات", icon: BarChart3 },
-            { step: 5, title: "۴. غنائم", icon: Trophy },
+            { step: 1, title: "۱. موشکی", icon: Flame },
+            { step: 2, title: "۲. هوایی", icon: Plane },
+            { step: 3, title: "۳. زمینی", icon: ShieldAlert },
+            { step: 4, title: "۴. تلفات", icon: BarChart3 },
+            { step: 5, title: "۵. غنائم", icon: Trophy },
           ].map((item) => {
             const Icon = item.icon;
             const isActive = activeStep === item.step;
             return (
               <button
                 key={item.step}
-                onClick={() => setActiveStep(item.step as 2 | 3 | 4 | 5)}
+                onClick={() => setActiveStep(item.step as 1 | 2 | 3 | 4 | 5)}
                 className={`py-2 px-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   isActive
                     ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"
@@ -148,7 +156,7 @@ export function BattleDebriefModal({
 
         {activeStep <= 3 ? (
           <BattlePhaseCards
-            activeStep={activeStep as 2 | 3}
+            activeStep={activeStep as 1 | 2 | 3}
             reportData={reportData}
             attackerName={attackerName}
             defenderName={defenderName}

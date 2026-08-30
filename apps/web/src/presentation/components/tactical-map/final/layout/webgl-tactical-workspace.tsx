@@ -104,17 +104,6 @@ export function WebGLTacticalWorkspace({
     [openModal],
   );
 
-  const handleSelectCountryStrikeContext = useCallback(
-    (iso3: string, provinceId: number) => {
-      openModal({
-        type: "STRATEGIC_STRIKE",
-        targetNationId: iso3,
-        targetProvinceId: provinceId,
-      });
-    },
-    [openModal],
-  );
-
   const handleSelectBuyProvinceContext = useCallback(
     (provinceId?: number) => {
       if (provinceId) {
@@ -188,7 +177,6 @@ export function WebGLTacticalWorkspace({
         scaleRef={scaleRef}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
-        onSelectCountryStrikeContext={handleSelectCountryStrikeContext}
         onSelectBuyProvinceContext={(_, pid) =>
           handleSelectBuyProvinceContext(pid)
         }

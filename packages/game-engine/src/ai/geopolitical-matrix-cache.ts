@@ -3,51 +3,62 @@ import {
   Province,
   CountryRegistry,
   NationGettersUtility,
-  GeopoliticalReachResolver,
   TerritoryClaimsUtility,
 } from "@geopolitics/domain";
 import {
-  GeopoliticalVectorCalculator,
   GeopoliticalVector,
+  GeopoliticalVectorCalculator,
 } from "@/engine/ai/geopolitical-vector-calculator";
 import {
   AIPosture,
-  AIPostureEvaluator,
-} from "@/engine/ai/procurement/ai-posture-evaluator";
+  AIProcurementPlanner,
+} from "@/engine/ai/ai-procurement-planner";
 
 export class GeopoliticalMatrixCache {
-  private provincesByOwnerMap: Map<string, Province[]>;
   private rankMap: Map<string, number>;
+  private provincesByOwnerMap: Map<string, Province[]>;
   private occupiedTerritoryMap: Map<string, number>;
+  private vectorsCache = new Map<string, Map<string, GeopoliticalVector>>();
+  private postureCache = new Map<string, AIPosture>();
 
-  constructor(
-    allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province>,
+  private constructor(
+    rankMap: Map<string, number>,
+    provincesByOwnerMap: Map<string, Province[]>,
+    occupiedTerritoryMap: Map<string, number>,
   ) {
-    this.provincesByOwnerMap =
-      NationGettersUtility.buildProvincesByOwnerMap(provincesMap);
-    this.rankMap = NationGettersUtility.calculateRankMap(
-      allNations,
-      provincesMap,
-      this.provincesByOwnerMap,
-    );
-    this.occupiedTerritoryMap =
-      TerritoryClaimsUtility.buildOccupiedTerritoryMap(provincesMap);
+    this.rankMap = rankMap;
+    this.provincesByOwnerMap = provincesByOwnerMap;
+    this.occupiedTerritoryMap = occupiedTerritoryMap;
   }
 
   public static build(
     allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province>,
+    provinces: Record<string, Province> | Province[],
   ): GeopoliticalMatrixCache {
-    return new GeopoliticalMatrixCache(allNations, provincesMap);
-  }
+    const provincesByOwnerMap =
+      NationGettersUtility.buildProvincesByOwnerMap(provinces);
 
-  public getProvincesByOwnerMap(): Map<string, Province[]> {
-    return this.provincesByOwnerMap;
+    const rankMap = NationGettersUtility.calculateRankMap(
+      allNations,
+      Array.isArray(provinces) ? undefined : provinces,
+    );
+
+    const occupiedTerritoryMap =
+      TerritoryClaimsUtility.buildOccupiedTerritoryMap(provinces);
+
+    return new GeopoliticalMatrixCache(
+      rankMap,
+      provincesByOwnerMap,
+      occupiedTerritoryMap,
+    );
   }
 
   public getRankMap(): Map<string, number> {
     return this.rankMap;
+  }
+
+  public getProvincesByOwnerMap(): Map<string, Province[]> {
+    return this.provincesByOwnerMap;
   }
 
   public getOccupiedTerritoryMap(): Map<string, number> {
@@ -55,41 +66,11 @@ export class GeopoliticalMatrixCache {
   }
 
   public getOwnedProvinces(nationId: string): Province[] {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    return this.provincesByOwnerMap.get(canonicalId) || [];
-  }
-
-  public getReachableTargets(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-  ): Nation[] {
-    return GeopoliticalReachResolver.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-      this.rankMap,
-      this.getOwnedProvinces(nation.id),
-      this.provincesByOwnerMap,
-    );
-  }
-
-  public getVector(
-    source: Nation,
-    target: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-  ): GeopoliticalVector {
-    const sourceProvs = this.getOwnedProvinces(source.id);
-    return GeopoliticalVectorCalculator.calculate(
-      source,
-      target,
-      allNations,
-      provincesMap,
-      sourceProvs,
-      undefined,
-      this.provincesByOwnerMap,
-      this.occupiedTerritoryMap,
+    const canonical = CountryRegistry.resolveCanonicalId(nationId);
+    return (
+      this.provincesByOwnerMap.get(canonical) ??
+      this.provincesByOwnerMap.get(nationId) ??
+      []
     );
   }
 
@@ -98,16 +79,34 @@ export class GeopoliticalMatrixCache {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): Map<string, GeopoliticalVector> {
-    const targets = this.getReachableTargets(nation, allNations, provincesMap);
-    const map = new Map<string, GeopoliticalVector>();
+    const canonicalSource = CountryRegistry.resolveCanonicalId(nation.id);
+    const cached = this.vectorsCache.get(canonicalSource);
+    if (cached) return cached;
 
-    for (let i = 0; i < targets.length; i++) {
-      const target = targets[i]!;
-      const targetCanonical = CountryRegistry.resolveCanonicalId(target.id);
-      const vector = this.getVector(nation, target, allNations, provincesMap);
-      map.set(targetCanonical, vector);
+    const map = new Map<string, GeopoliticalVector>();
+    const myProvs = this.getOwnedProvinces(canonicalSource);
+
+    for (const other of Object.values(allNations)) {
+      if (!other.isAlive || other.id === nation.id) continue;
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(other.id);
+      if (canonicalTarget === canonicalSource) continue;
+
+      const vector = GeopoliticalVectorCalculator.calculate(
+        nation,
+        other,
+        allNations,
+        provincesMap,
+        myProvs,
+        undefined,
+        this.provincesByOwnerMap,
+        this.occupiedTerritoryMap,
+      );
+
+      map.set(canonicalTarget, vector);
+      map.set(other.id, vector);
     }
 
+    this.vectorsCache.set(canonicalSource, map);
     return map;
   }
 
@@ -116,24 +115,37 @@ export class GeopoliticalMatrixCache {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): AIPosture {
-    const reachableTargets = this.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-    );
-    const vectorsByTarget = this.getVectorsForNation(
-      nation,
-      allNations,
-      provincesMap,
-    );
+    const canonical = CountryRegistry.resolveCanonicalId(nation.id);
+    const cached = this.postureCache.get(canonical);
+    if (cached) return cached;
 
-    return AIPostureEvaluator.evaluatePosture(
+    const posture = AIProcurementPlanner.evaluatePosture(
       nation,
       allNations,
       provincesMap,
       this.rankMap,
-      vectorsByTarget,
-      reachableTargets,
     );
+
+    this.postureCache.set(canonical, posture);
+    return posture;
+  }
+
+  public getReachableTargets(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): Nation[] {
+    const vectors = this.getVectorsForNation(nation, allNations, provincesMap);
+    const targets: Nation[] = [];
+
+    for (const other of Object.values(allNations)) {
+      if (!other.isAlive || other.id === nation.id) continue;
+      const vector = vectors.get(CountryRegistry.resolveCanonicalId(other.id));
+      if (vector && vector.proximityTier !== "NONE") {
+        targets.push(other);
+      }
+    }
+
+    return targets;
   }
 }

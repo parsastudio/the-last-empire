@@ -9,7 +9,6 @@ import { ResearchManager } from "@/engine/politics/research-manager";
 import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
 import { NavalFleetExecutor } from "@/engine/actions/executors/military/naval-fleet-executor";
 import { BattleInitiationValidator } from "@/engine/actions/executors/military/battle-initiation-validator";
-import { StrategicStrikeExecutor } from "@/engine/actions/executors/military/strategic-strike-executor";
 
 export interface MilitaryExecutionOutput {
   newState: GameState;
@@ -106,19 +105,6 @@ export class MilitaryActionExecutor {
             },
           },
         };
-      }
-
-      case "STRATEGIC_INDUSTRIAL_STRIKE": {
-        const targetCanonical = CountryRegistry.resolveCanonicalId(
-          action.targetNationId,
-        );
-        const target =
-          state.nations[targetCanonical] ||
-          state.nations[action.targetNationId];
-        if (!target) {
-          throw new GameError("NATION_NOT_FOUND", "کشور هدف یافت نشد.");
-        }
-        return StrategicStrikeExecutor.execute(state, action, nation, target);
       }
 
       case "INITIATE_BATTLE": {

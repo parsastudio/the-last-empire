@@ -1,98 +1,137 @@
-import { Nation, TurnLogBuilder } from "@geopolitics/domain";
+import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
-import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
-import { BetrayalEvaluation } from "@/engine/diplomacy/diplomacy-engine";
-import { DiplomaticStance } from "@geopolitics/domain";
-import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
-import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
-import { ExtraCapturedMilitaryUnits } from "@/engine/combat/loot/battle-loot-manager";
-import { TurnLogEntry } from "@/domain/game/game-state.schema";
-
-export interface BattleStateMutationResult {
-  updatedNations: Record<string, Nation>;
-  guarantorLogs: TurnLogEntry[];
-  updatedAttacker: Nation;
-  updatedDefender: Nation;
-}
+import {
+  BattleSpoilsDetails,
+  AuxiliaryGuarantorDefense,
+} from "@/domain/reports/combat-report.schema";
 
 export class BattleStateMutator {
-  public static mutate(
-    currentNations: Record<string, Nation>,
+  public static mutateAfterBattle(
+    nations: Record<string, Nation>,
     attacker: Nation,
     defender: Nation,
-    guarantorNation: Nation | null,
     calcResult: BattleCalculationResult,
-    conquest: ProvinceConquestResult,
-    currentStance: DiplomaticStance,
-    betrayalResult: BetrayalEvaluation,
-    isDefenderAlive: boolean,
-    currentTurn: number,
-    extraCapturedUnits?: ExtraCapturedMilitaryUnits,
-    extraTreasuryLooted = 0,
-  ): BattleStateMutationResult {
-    const updatedAttacker = BattleAttackerStateApplier.apply({
-      attacker,
-      defenderId: defender.id,
-      defenderTechLevel: defender.military.techLevel,
-      calcResult,
-      currentStance,
-      betrayalResult,
-      isDefenderEliminated: !isDefenderAlive,
-      extraCapturedUnits,
-      extraTreasuryLooted,
-    });
+    spoilsData: BattleSpoilsDetails,
+    isDefenderAnnexed: boolean,
+    auxiliaryGuarantor?: AuxiliaryGuarantorDefense,
+    _currentTurn = 1,
+  ): Record<string, Nation> {
+    const updatedNations: Record<string, Nation> = { ...nations };
 
-    const updatedDefender = BattleDefenderStateApplier.apply({
-      defender,
-      attackerId: attacker.id,
-      calcResult,
-      conquest,
-      isDefenderAlive,
-    });
+    const attCasualties = calcResult.attackerCasualties;
+    const defCasualties = calcResult.defenderCasualties;
 
-    const baseNations: Record<string, Nation> = {
-      ...currentNations,
-      [attacker.id]: updatedAttacker,
-      [defender.id]: updatedDefender,
+    const newAttMil = {
+      ...attacker.military,
+      infantry: Math.max(
+        0,
+        attacker.military.infantry -
+          attCasualties.infantryLost +
+          spoilsData.capturedInfantry,
+      ),
+      armor: Math.max(
+        0,
+        (attacker.military.armor || 0) -
+          attCasualties.armorLost +
+          spoilsData.capturedArmor,
+      ),
+      airForce: Math.max(
+        0,
+        attacker.military.airForce -
+          attCasualties.airForceLost +
+          spoilsData.capturedAirForce,
+      ),
+      airDefense: Math.max(
+        0,
+        (attacker.military.airDefense || 0) + spoilsData.capturedAirDefense,
+      ),
+      droneMissile: Math.max(
+        0,
+        attacker.military.droneMissile -
+          calcResult.dronesUsed +
+          spoilsData.capturedDrones,
+      ),
     };
 
-    const guarantorLogs: TurnLogEntry[] = [];
-    if (guarantorNation && calcResult.auxiliaryGuarantor) {
-      const damage = calcResult.auxiliaryGuarantor.damageCostIncurred || 0;
-      if (damage > 0) {
-        const curG = baseNations[guarantorNation.id] || guarantorNation;
-        let nextTreasury = curG.treasury - damage;
-        let nextDebt = curG.nationalDebt;
-        if (nextTreasury < 0) {
-          nextDebt += Math.abs(nextTreasury);
-          nextTreasury = 0;
-        }
+    const newDefMil = {
+      ...defender.military,
+      infantry: Math.max(
+        0,
+        defender.military.infantry - defCasualties.infantryLost,
+      ),
+      armor: Math.max(
+        0,
+        (defender.military.armor || 0) - defCasualties.armorLost,
+      ),
+      airForce: Math.max(
+        0,
+        defender.military.airForce - defCasualties.airForceLost,
+      ),
+      airDefense: Math.max(
+        0,
+        (defender.military.airDefense || 0) - defCasualties.airDefenseLost,
+      ),
+      droneMissile: Math.max(
+        0,
+        defender.military.droneMissile - defCasualties.droneMissileLost,
+      ),
+    };
 
-        baseNations[guarantorNation.id] = {
-          ...curG,
-          treasury: nextTreasury,
-          nationalDebt: nextDebt,
-        };
+    const attTreasury = Math.max(
+      0,
+      attacker.treasury -
+        calcResult.deploymentMoneyCost +
+        calcResult.treasuryLooted,
+    );
+    const defTreasury = Math.max(
+      0,
+      defender.treasury - calcResult.treasuryLooted,
+    );
 
-        guarantorLogs.push(
-          TurnLogBuilder.createNationalLog(
-            currentTurn,
-            guarantorNation.id,
-            "MILITARY",
-            "WARNING",
-            "GUARANTOR_CASUALTY_COST_INCURRED",
-            { cost: damage },
-            defender.id,
+    const attStabilityDelta = calcResult.isAttackerVictory ? 3 : -5;
+    const defStabilityDelta = calcResult.isAttackerVictory ? -8 : 4;
+
+    updatedNations[attacker.id] = {
+      ...attacker,
+      military: newAttMil,
+      treasury: attTreasury,
+      government: {
+        ...attacker.government,
+        stability: Math.min(
+          100,
+          Math.max(10, attacker.government.stability + attStabilityDelta),
+        ),
+      },
+    };
+
+    if (!isDefenderAnnexed) {
+      updatedNations[defender.id] = {
+        ...defender,
+        military: newDefMil,
+        treasury: defTreasury,
+        government: {
+          ...defender.government,
+          stability: Math.min(
+            100,
+            Math.max(10, defender.government.stability + defStabilityDelta),
           ),
-        );
+        },
+      };
+    }
+
+    if (auxiliaryGuarantor && auxiliaryGuarantor.damageCostIncurred > 0) {
+      const gNation = updatedNations[auxiliaryGuarantor.guarantorId];
+      if (gNation) {
+        updatedNations[auxiliaryGuarantor.guarantorId] = {
+          ...gNation,
+          treasury: Math.max(
+            0,
+            gNation.treasury - auxiliaryGuarantor.damageCostIncurred,
+          ),
+        };
       }
     }
 
-    return {
-      updatedNations: baseNations,
-      guarantorLogs,
-      updatedAttacker,
-      updatedDefender,
-    };
+    return updatedNations;
   }
 }

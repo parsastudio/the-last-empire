@@ -3,12 +3,14 @@ export interface MissilePhaseInput {
   defAirDefense: number;
   attDroneMult: number;
   defAdMult: number;
+  targetFactoriesCount?: number;
 }
 
 export interface MissilePhaseOutput {
   rawDefAirDefenseLost: number;
   defAirDefenseRemainingRaw: number;
   defAirDefenseRemainingEff: number;
+  destroyedFactories: number;
 }
 
 export class MissileInterceptionPhase {
@@ -35,10 +37,17 @@ export class MissileInterceptionPhase {
     const defAirDefenseRemainingEff =
       defAirDefenseRemainingRaw * input.defAdMult;
 
+    const maxDestroyableFactories = input.targetFactoriesCount ?? 999;
+    const destroyedFactories = Math.min(
+      maxDestroyableFactories,
+      Math.floor(missilesLeakedEff * 0.5),
+    );
+
     return {
       rawDefAirDefenseLost,
       defAirDefenseRemainingRaw,
       defAirDefenseRemainingEff,
+      destroyedFactories,
     };
   }
 }

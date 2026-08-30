@@ -2,7 +2,7 @@ import React from "react";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { Flame, ShieldCheck, Ban } from "lucide-react";
+import { Flame, ShieldCheck, Ban, Factory } from "lucide-react";
 
 interface BattlePhaseMissileCardProps {
   reportData: BattleFullReportData;
@@ -118,6 +118,20 @@ export function BattlePhaseMissileCard({
                 فروند 💥
               </span>
             </div>
+            {reportData.phase1Missile.destroyedFactories > 0 && (
+              <div className="flex justify-between items-center text-sm pt-1 border-t border-border/40">
+                <span className="text-rose-400 font-sans flex items-center gap-1">
+                  <Factory size={13} />
+                  <span>کارخانه‌های هدف تخریب‌شده:</span>
+                </span>
+                <span className="font-black text-rose-400 text-base">
+                  {PersianNumberFormatter.toPersianDigits(
+                    reportData.phase1Missile.destroyedFactories,
+                  )}{" "}
+                  سوله 🏭
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
+import { CountryRegistry } from "@/domain/data/countries";
 import { NationRankCalculatorUtility } from "@/domain/nation/getters/nation-rank-calculator.utility";
 import { NationTerritoryResolverUtility } from "@/domain/nation/getters/nation-territory-resolver.utility";
 import { NationRankCandidateInput } from "@/domain/nation/getters/rank/nation-power-score-evaluator";
@@ -9,10 +10,42 @@ export class NationGettersUtility {
     targetIdentifier: string,
     allNations?: Record<string, Nation>,
   ): Nation | null {
-    return NationTerritoryResolverUtility.resolveNation(
-      targetIdentifier,
-      allNations,
-    );
+    if (!allNations) return null;
+    const canonical = CountryRegistry.resolveCanonicalId(targetIdentifier);
+    return allNations[canonical] || allNations[targetIdentifier] || null;
+  }
+
+  public static isAlive(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
+  ): boolean {
+    const provs =
+      ownedProvinces ?? this.getOwnedProvinces(nationId, provincesMap);
+    return provs.length > 0;
+  }
+
+  public static buildProvincesByOwnerMap(
+    provinces: Record<string, Province> | Province[],
+  ): Map<string, Province[]> {
+    const map = new Map<string, Province[]>();
+    const provList = Array.isArray(provinces)
+      ? provinces
+      : Object.values(provinces);
+
+    for (let i = 0; i < provList.length; i++) {
+      const p = provList[i]!;
+      const canonicalOwner = CountryRegistry.resolveCanonicalId(
+        p.ownerNationId,
+      );
+      let list = map.get(canonicalOwner);
+      if (!list) {
+        list = [];
+        map.set(canonicalOwner, list);
+      }
+      list.push(p);
+    }
+    return map;
   }
 
   public static getOwnedProvinces(
@@ -94,7 +127,17 @@ export class NationGettersUtility {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
   ): Map<string, number> {
-    return NationRankCalculatorUtility.calculateGlobalRankMap(
+    return NationRankCalculatorUtility.calculateRankMap(
+      allNations,
+      provincesMap,
+    );
+  }
+
+  public static calculateRankMap(
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): Map<string, number> {
+    return NationRankCalculatorUtility.calculateRankMap(
       allNations,
       provincesMap,
     );
