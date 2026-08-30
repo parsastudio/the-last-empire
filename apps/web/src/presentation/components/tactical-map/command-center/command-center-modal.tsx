@@ -27,6 +27,12 @@ export function getCommandCenterMeta(
         subtitle:
           "مدیریت یگان‌ها، ساخت بومی تحویل فوری و واردات تسلیحاتی با قیمت متغیر بر اساس سطح فناوری",
       };
+    case "industry":
+      return {
+        title: "وزارت صنایع و معادن، نوسازی و بازار ماشین‌آلات",
+        subtitle:
+          "احداث و بازسازی کارخانجات، ارتقای خطوط تولید و واردات تجهیزات صنعتی",
+      };
     case "politics":
       return {
         title: "دیوان عالی سیاست، دکترین مالی و قوانین",
@@ -103,6 +109,7 @@ export function CommandCenterModal({
 
         <CommandCenterTabRouter
           activeTab={activeTab}
+          activeSubTab={activeSubTab}
           selectedTargetCode={selectedTargetCode}
           nation={nation}
           gameState={gameState}

@@ -2,15 +2,17 @@ import React from "react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { WideOverviewView } from "@/presentation/components/tactical-map/command-center/views/wide-overview-view";
 import { WideMilitaryView } from "@/presentation/components/tactical-map/command-center/views/wide-military-view";
+import { WideIndustryView } from "@/presentation/components/tactical-map/command-center/views/wide-industry-view";
 import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
-import { WideEspionageView } from "@/presentation/components/tactical-map/command-center/views/wide-espionage-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
+import { WideEspionageView } from "@/presentation/components/tactical-map/command-center/views/wide-espionage-view";
 import { WideReportsView } from "@/presentation/components/tactical-map/command-center/views/wide-reports-view";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 
 interface CommandCenterTabRouterProps {
   activeTab: SidebarTabType;
+  activeSubTab?: string | null;
   selectedTargetCode?: string | null;
   nation: Nation;
   gameState?: GameState | null;
@@ -24,6 +26,7 @@ interface CommandCenterTabRouterProps {
 
 export function CommandCenterTabRouter({
   activeTab,
+  activeSubTab,
   selectedTargetCode,
   nation,
   gameState,
@@ -33,6 +36,7 @@ export function CommandCenterTabRouter({
   switch (activeTab) {
     case "overview":
       return <WideOverviewView nation={nation} gameState={gameState} />;
+
     case "military":
       return (
         <WideMilitaryView
@@ -42,6 +46,17 @@ export function CommandCenterTabRouter({
           selectedTargetCode={selectedTargetCode}
         />
       );
+
+    case "industry":
+      return (
+        <WideIndustryView
+          nation={nation}
+          nationsMap={gameState?.nations}
+          provincesMap={gameState?.provinces}
+          initialSubTab={activeSubTab}
+        />
+      );
+
     case "politics":
       return (
         <WidePoliticsView
@@ -50,6 +65,19 @@ export function CommandCenterTabRouter({
           provincesMap={gameState?.provinces}
         />
       );
+
+    case "diplomacy":
+      return (
+        <WideDiplomacyView
+          selectedTargetCode={selectedTargetCode}
+          nationsMap={gameState?.nations}
+          humanNationId={gameState?.humanNationId || nation.id}
+          provincesMap={gameState?.provinces}
+          onFocusCountry={onFocusCountry}
+          onNavigateTab={onNavigateTab}
+        />
+      );
+
     case "espionage":
       return (
         <WideEspionageView
@@ -59,27 +87,18 @@ export function CommandCenterTabRouter({
           selectedTargetCode={selectedTargetCode}
         />
       );
-    case "diplomacy":
-      return (
-        <WideDiplomacyView
-          selectedTargetCode={selectedTargetCode}
-          nationsMap={gameState?.nations}
-          humanNationId={nation.id}
-          provincesMap={gameState?.provinces}
-          onFocusCountry={onFocusCountry}
-          onNavigateTab={onNavigateTab}
-        />
-      );
+
     case "reports":
       return (
         <WideReportsView
-          logs={gameState?.turnLogs}
-          currentTurn={gameState?.currentTurn ?? 1}
-          humanNationId={nation.id}
+          logs={gameState?.turnLogs || []}
+          currentTurn={gameState?.currentTurn || 1}
+          humanNationId={gameState?.humanNationId || nation.id}
           nationsMap={gameState?.nations}
-          pendingProposals={gameState?.pendingProposals}
+          pendingProposals={gameState?.pendingProposals || []}
         />
       );
+
     default:
       return null;
   }
