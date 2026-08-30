@@ -20,6 +20,7 @@ interface WebGLMapCanvasProps {
   scaleRef?: React.RefObject<number>;
   onSelectCountryContext?: (iso3: string) => void;
   onSelectCountryAttackContext?: (iso3: string, provinceId?: number) => void;
+  onSelectCountryStrikeContext?: (iso3: string, provinceId: number) => void;
   onSelectBuyProvinceContext?: (iso3: string, provinceId?: number) => void;
 }
 
@@ -32,6 +33,7 @@ export function WebGLMapCanvas({
   scaleRef: externalScaleRef,
   onSelectCountryContext,
   onSelectCountryAttackContext,
+  onSelectCountryStrikeContext,
   onSelectBuyProvinceContext,
 }: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -122,6 +124,12 @@ export function WebGLMapCanvas({
         onSelectCountryContext(iso3);
       } else if (action === "attack" && onSelectCountryAttackContext) {
         onSelectCountryAttackContext(iso3, provinceId);
+      } else if (
+        action === "strike" &&
+        onSelectCountryStrikeContext &&
+        provinceId
+      ) {
+        onSelectCountryStrikeContext(iso3, provinceId);
       } else if (action === "buy_province" && onSelectBuyProvinceContext) {
         onSelectBuyProvinceContext(iso3, provinceId);
       }
@@ -130,6 +138,7 @@ export function WebGLMapCanvas({
       closeContextMenu,
       onSelectCountryContext,
       onSelectCountryAttackContext,
+      onSelectCountryStrikeContext,
       onSelectBuyProvinceContext,
     ],
   );

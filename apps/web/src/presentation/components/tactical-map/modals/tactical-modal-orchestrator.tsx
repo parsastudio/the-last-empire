@@ -5,11 +5,13 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
 import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
+import { StrategicStrikeModal } from "@/presentation/components/tactical-map/modals/strategic-strike/strategic-strike-modal";
 import { BuyProvinceModal } from "@/presentation/components/tactical-map/modals/buy-province-modal";
 import { PeaceNegotiationModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/peace-negotiation-modal";
 import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
 import { ExportSalesDetailsModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/export-sales-details-modal";
+import { CountryRegistry } from "@/domain/data/countries";
 
 interface TacticalModalOrchestratorProps {
   humanNation: Nation | null;
@@ -60,6 +62,28 @@ export function TacticalModalOrchestrator({
           onClose={closeModal}
         />
       );
+
+    case "STRATEGIC_STRIKE": {
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(
+        activeModal.targetNationId,
+      );
+      const targetNation =
+        gameState?.nations[canonicalTarget] ||
+        gameState?.nations[activeModal.targetNationId] ||
+        null;
+      const targetProv =
+        gameState?.provinces[activeModal.targetProvinceId.toString()] || null;
+
+      return (
+        <StrategicStrikeModal
+          isOpen={true}
+          attacker={humanNation}
+          targetNation={targetNation}
+          targetProvince={targetProv}
+          onClose={closeModal}
+        />
+      );
+    }
 
     case "BUY_PROVINCE":
       return (

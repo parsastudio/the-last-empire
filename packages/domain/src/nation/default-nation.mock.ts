@@ -1,5 +1,4 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { AI_DOCTRINE_PRESETS } from "@/domain/nation/nation-doctrine.config";
 
 export const DEFAULT_NATION_MOCK: Nation = {
   id: "IRN",
@@ -8,9 +7,10 @@ export const DEFAULT_NATION_MOCK: Nation = {
   isAlive: true,
   flagCode: "IR",
   economicStance: "BALANCED_MIXED",
-  treasury: 100000,
+  treasury: 50_000_000_000,
   nationalDebt: 0,
-  industrialLevel: 1,
+  industrialLevel: 1.0,
+  equipmentTechLevel: 1.0,
   navalFleet: 0,
   government: {
     type: "DEMOCRACY",
@@ -21,16 +21,9 @@ export const DEFAULT_NATION_MOCK: Nation = {
     infantry: 100,
     armor: 20,
     airDefense: 10,
-    airForce: 20,
-    droneMissile: 5,
-    techLevel: 1,
-    branchTech: {
-      infantry: 1,
-      armor: 1,
-      airDefense: 1,
-      airForce: 1,
-      droneMissile: 1,
-    },
+    airForce: 15,
+    droneMissile: 50,
+    techLevel: 1.0,
   },
   relations: {},
   activeModifiers: [],
@@ -40,6 +33,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   warFocusTargetId: null,
   postWarCooldownTurns: 0,
   doctrine: "DOMESTIC_INDUSTRIALIST",
-  doctrineWeights: AI_DOCTRINE_PRESETS.DOMESTIC_INDUSTRIALIST,
   securityGuarantorId: null,
+  isEmergencyProtectorate: false,
 };

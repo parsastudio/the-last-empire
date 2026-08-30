@@ -14,6 +14,7 @@ export interface NationRankCandidateInput {
   domesticTechLevel?: number;
   equipmentTechLevel?: number;
   startingTechLevel?: number;
+  industrialLevel?: number;
   navalFleet?: number;
   stability?: number;
   globalReputation?: number;
@@ -52,7 +53,8 @@ export class NationPowerScoreEvaluator {
       economicStance: "BALANCED_MIXED",
       treasury: 100000,
       nationalDebt: 0,
-      industrialLevel: 1,
+      industrialLevel: input.industrialLevel ?? domesticTech,
+      equipmentTechLevel: equipmentTech,
       navalFleet: input.navalFleet ?? 0,
       government: {
         type:

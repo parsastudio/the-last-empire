@@ -9,6 +9,7 @@ import {
   MilitaryPowerCalculator,
   NationGettersUtility,
   TerritoryClaimsUtility,
+  getNationGdp,
 } from "@geopolitics/domain";
 
 export interface GeopoliticalVector {
@@ -127,8 +128,7 @@ export class GeopoliticalVectorCalculator {
           MilitaryPowerCalculator.calculateTechMultiplier(
             guarantor.military.techLevel,
           );
-        const targetGdp =
-          NationGettersUtility.getPopulation(target.id, provincesMap) * 5000;
+        const targetGdp = getNationGdp(target, provincesMap);
         const auxiliaryPower = Math.floor(
           targetGdp * 0.3 * 0.000000001 * guarantorTechMult * 4,
         );
