@@ -35,7 +35,6 @@ export class BattleCalculator {
   public static calculateBattle(
     attacker: Nation,
     defender: Nation,
-    dronesToLaunch: number,
     infantryToDeploy?: number,
     armorToDeploy?: number,
     airForceToDeploy?: number,
@@ -54,16 +53,11 @@ export class BattleCalculator {
       attacker.military.airForce,
       Math.max(0, airForceToDeploy ?? attacker.military.airForce),
     );
-    const deployedDrones = Math.min(
-      attacker.military.droneMissile,
-      Math.max(0, dronesToLaunch || 0),
-    );
 
     const totalForceCost =
       deployedInfantry * MILITARY_UNIT_STATS.INFANTRY.moneyCost +
       deployedArmor * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      deployedDrones * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost;
+      deployedAirForce * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost;
 
     const { moneyCost: deploymentMoneyCost } =
       CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
@@ -90,7 +84,6 @@ export class BattleCalculator {
     defInfantry += guarantorResult.auxInf;
 
     const phasesResult = BattlePhaseOrchestrator.executePhases(
-      deployedDrones,
       defAirDefense,
       deployedAirForce,
       defAirForce,
@@ -98,7 +91,6 @@ export class BattleCalculator {
       defArmor,
       deployedInfantry,
       defInfantry,
-      attMults.droneMissile,
       defMults.airDefense,
       attMults.airForce,
       defMults.airForce,
@@ -116,10 +108,7 @@ export class BattleCalculator {
         deployedArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * attMults.armor +
         deployedAirForce *
           MILITARY_UNIT_STATS.AIR_FORCE.weightPower *
-          attMults.airForce +
-        deployedDrones *
-          MILITARY_UNIT_STATS.DRONE_MISSILE.weightPower *
-          attMults.droneMissile,
+          attMults.airForce,
     );
 
     const defenderTotalPower = Math.max(
@@ -144,7 +133,7 @@ export class BattleCalculator {
       deployedInfantry,
       deployedArmor,
       deployedAirForce,
-      deployedDrones,
+      deployedDrones: 0,
       defInfantry,
       defArmor,
       defAirDefense,
@@ -154,32 +143,9 @@ export class BattleCalculator {
       rawAttAirLoss: phasesResult.airPhaseOutput.rawAttAirLoss,
       rawDefInfantryLost: phasesResult.groundPhaseOutput.rawDefInfantryLost,
       rawDefArmorLost: phasesResult.groundPhaseOutput.rawDefArmorLost,
-      rawDefAirDefenseLost:
-        phasesResult.missilePhaseOutput.rawDefAirDefenseLost,
+      rawDefAirDefenseLost: 0,
       rawDefAirLoss: phasesResult.airPhaseOutput.rawDefAirLoss,
     });
-
-    if (
-      guarantorResult.auxiliaryGuarantor &&
-      guarantorResult.effectiveDefenseBudget > 0
-    ) {
-      GuarantorInterventionCalculator.calculateGuarantorDamageCost(
-        guarantorResult.auxiliaryGuarantor,
-        guarantorResult.effectiveDefenseBudget,
-        guarantorResult.auxAir,
-        guarantorResult.auxAD,
-        guarantorResult.auxArm,
-        guarantorResult.auxInf,
-        defAirForce,
-        defAirDefense,
-        defArmor,
-        defInfantry,
-        casualty.netDefAirLost,
-        casualty.netDefAirDefenseLost,
-        casualty.netDefArmorLost,
-        casualty.netDefInfantryLost,
-      );
-    }
 
     const treasuryLooted = BattleLootEvaluator.calculateLoot(
       defender,
@@ -201,7 +167,7 @@ export class BattleCalculator {
       isAttackerVictory: phasesResult.groundPhaseOutput.isAttackerVictory,
       isFullCapitulation: false,
       valuationRatio,
-      dronesUsed: deployedDrones,
+      dronesUsed: 0,
       attackerCasualties: casualty.attackerCasualties,
       defenderCasualties: casualty.defenderCasualties,
       treasuryLooted,

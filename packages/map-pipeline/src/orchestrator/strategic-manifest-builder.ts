@@ -9,6 +9,7 @@ import {
   NationGettersUtility,
   NationRankCandidateInput,
   CountryRegistry,
+  IndustryCalculator,
 } from "@geopolitics/domain";
 import { MilitaryDistributionEngine } from "@geopolitics/domain";
 import { ProvinceClusterInfo } from "@/infrastructure/core/types/map-pipeline.types";
@@ -81,36 +82,37 @@ export class StrategicManifestBuilder {
 
       const population = profile.population;
       const gdp = profile.gdp;
-      const perCapitaProductivity =
-        population > 0 ? Math.floor(gdp / population) : 5000;
-      const maxPopulationCapacity = Math.floor(population / 0.95);
-      const startingTreasury = Math.floor(gdp * 0.05);
+      const domesticTech =
+        profile.domesticTechLevel ?? profile.startingTechLevel ?? 1.0;
+      const equipmentTech = profile.equipmentTechLevel ?? domesticTech;
+      const industrialLevel = domesticTech;
 
+      const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
+        gdp,
+        industrialLevel,
+      );
+      const slotDistribution =
+        IndustryCalculator.distributeFactoriesToProvinces(
+          totalFactories,
+          provCount,
+        );
+
+      const startingTreasury = Math.floor(gdp * 0.05);
       const equalPopulationShare = Math.floor(population / provCount);
-      const equalCapacityShare = Math.floor(maxPopulationCapacity / provCount);
 
       let distributedPopulation = 0;
-      let distributedCapacity = 0;
 
       for (let pIndex = 0; pIndex < provList.length; pIndex++) {
         const pInfo = provList[pIndex]!;
         provIds.push(pInfo.provinceId);
 
         const isLast = pIndex === provList.length - 1;
-
         const provPopulation = isLast
           ? Math.max(1, population - distributedPopulation)
           : Math.max(1, equalPopulationShare);
 
-        const provCapacity = isLast
-          ? Math.max(
-              provPopulation,
-              maxPopulationCapacity - distributedCapacity,
-            )
-          : Math.max(provPopulation, equalCapacityShare);
-
         distributedPopulation += provPopulation;
-        distributedCapacity += provCapacity;
+        const assignedSlots = slotDistribution[pIndex] ?? 1;
 
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
@@ -124,18 +126,14 @@ export class StrategicManifestBuilder {
           maritimeNeighborsTier2: [],
           centerCoordinates: pInfo.centerCoordinates,
           population: provPopulation,
-          perCapitaProductivity,
-          maxPopulationCapacity: provCapacity,
+          maxSlots: assignedSlots,
+          factoriesCount: assignedSlots,
         });
       }
 
       const defaultGov = profile.startingGovernment ?? "DEMOCRACY";
       const startingStability = 50;
-
       const hasSeaAccess = provList.some((p) => p.hasSeaAccess);
-      const domesticTech =
-        profile.domesticTechLevel ?? profile.startingTechLevel ?? 1.0;
-      const equipmentTech = profile.equipmentTechLevel ?? domesticTech;
 
       const stack = MilitaryDistributionEngine.calculateStartingStack(
         gdp,
@@ -143,14 +141,6 @@ export class StrategicManifestBuilder {
         equipmentTech,
       );
 
-      const startingInfantry = stack.infantry;
-      const startingArmor = stack.armor;
-      const startingAirDefense = stack.airDefense;
-      const startingAirForce = stack.airForce;
-      const startingDroneMissile = stack.droneMissile;
-      const techLevel = domesticTech;
-
-      const industrialLevel = Math.max(1, Math.min(5, Math.floor(techLevel)));
       const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
 
       manifestNations.push({
@@ -160,22 +150,21 @@ export class StrategicManifestBuilder {
         nameFa: profile.nameFa,
         nameEn: profile.nameEn,
         gdp,
-        perCapitaProductivity,
         population,
-        maxPopulationCapacity,
         territoryPixelCount: totalCountryPixels,
         provinceIds: provIds,
         hasSeaAccess,
         startingTreasury,
         initialRank: computedRank,
         defaultGovernment: defaultGov,
-        startingInfantry,
-        startingArmor,
-        startingAirDefense,
-        startingAirForce,
-        startingDroneMissile,
-        startingTechLevel: techLevel,
+        startingInfantry: stack.infantry,
+        startingArmor: stack.armor,
+        startingAirDefense: stack.airDefense,
+        startingAirForce: stack.airForce,
+        startingDroneMissile: stack.droneMissile,
+        startingTechLevel: domesticTech,
         industrialLevel,
+        equipmentTechLevel: equipmentTech,
         startingStability,
       });
     }

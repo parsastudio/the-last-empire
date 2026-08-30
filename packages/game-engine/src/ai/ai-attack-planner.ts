@@ -6,6 +6,7 @@ import {
   CountryRegistry,
   LandNeighborResolver,
   NationGettersUtility,
+  GeopoliticalReachResolver,
 } from "@geopolitics/domain";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
@@ -16,13 +17,44 @@ export class AIAttackPlanner {
     provincesMap?: Record<string, Province>,
     ownedProvinces?: Province[],
   ): GameAction | null {
-    if (!nation.isAlive || !nation.relations) {
+    if (!nation.isAlive || !nation.relations || !provincesMap) {
       return null;
     }
 
     const targetNation = this.resolveActiveWarTarget(nation, allNations);
     if (!targetNation || !targetNation.isAlive) {
       return null;
+    }
+
+    const targetProvs = NationGettersUtility.getOwnedProvinces(
+      targetNation.id,
+      provincesMap,
+    );
+    if (targetProvs.length === 0) return null;
+
+    const availableDrones = nation.military.droneMissile || 0;
+    const canReach = GeopoliticalReachResolver.canReachForWarOrStrike(
+      nation,
+      targetNation,
+      provincesMap,
+    );
+
+    if (
+      canReach &&
+      availableDrones >= 5 &&
+      nation.doctrine === "DOMESTIC_INDUSTRIALIST"
+    ) {
+      const strikeTarget = [...targetProvs].sort(
+        (a, b) => b.factoriesCount - a.factoriesCount,
+      )[0]!;
+      if (strikeTarget.factoriesCount > 0) {
+        return ActionFactory.strategicIndustrialStrike(
+          nation.id,
+          targetNation.id,
+          strikeTarget.provinceId,
+          Math.min(availableDrones, 10),
+        );
+      }
     }
 
     const availableInfantry = nation.military.infantry || 0;
@@ -46,7 +78,6 @@ export class AIAttackPlanner {
 
     const availableArmor = nation.military.armor || 0;
     const availableAirForce = nation.military.airForce || 0;
-    const availableDrones = nation.military.droneMissile || 0;
 
     let infantryToDeploy = Math.max(
       1,
@@ -59,10 +90,6 @@ export class AIAttackPlanner {
     const airForceToDeploy = Math.min(
       availableAirForce,
       Math.ceil(availableAirForce * deployRatio),
-    );
-    const dronesToLaunch = Math.min(
-      availableDrones,
-      Math.ceil(availableDrones * deployRatio),
     );
 
     if (targetResolution.attackType === "NAVAL") {
@@ -85,7 +112,6 @@ export class AIAttackPlanner {
     return ActionFactory.initiateBattle(
       nation.id,
       targetNation.id,
-      dronesToLaunch,
       infantryToDeploy,
       armorToDeploy,
       airForceToDeploy,
@@ -199,7 +225,6 @@ export class AIAttackPlanner {
     );
 
     const hasNavalFleets = (nation.navalFleet || 0) > 0;
-
     if (!sourceSea || !hasNavalFleets) {
       return null;
     }
