@@ -91,6 +91,7 @@ export function useDirectAttackForm({
     armorToDeploy: deployment.armorToDeploy,
     airForceToDeploy: deployment.airForceToDeploy,
     provincesMap: gameState?.provinces,
+    targetProvinceId: targetProvinceId || undefined,
   });
 
   const handleAutoOptimizeDeploy = useCallback(() => {
@@ -103,6 +104,7 @@ export function useDirectAttackForm({
       targetGuarantorNation,
       reach.attackType,
       deployment.navalFleetCount,
+      targetProvinceId || undefined,
     );
 
     deployment.applyOptimizedDeploy(
@@ -118,6 +120,7 @@ export function useDirectAttackForm({
     targetGuarantorNation,
     reach.attackType,
     deployment,
+    targetProvinceId,
   ]);
 
   const handleExecuteAttack = useCallback(async () => {
