@@ -11,7 +11,6 @@ import {
   ExecuteEspionageAction,
   RepayDebtAction,
   RequestLoanAction,
-  CancelRecruitmentAction,
   InvestResearchAction,
   InitiateBattleAction,
 } from "@/domain/game/action.schema";
@@ -190,18 +189,6 @@ export class ActionFactory {
       nationId,
       type: "REQUEST_LOAN",
       amount,
-    };
-  }
-
-  public static cancelRecruitment(
-    nationId: string,
-    orderId: string,
-  ): CancelRecruitmentAction {
-    return {
-      id: this.createId("cancel"),
-      nationId,
-      type: "CANCEL_RECRUITMENT",
-      orderId,
     };
   }
 

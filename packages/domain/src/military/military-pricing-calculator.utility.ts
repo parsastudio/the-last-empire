@@ -1,5 +1,5 @@
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { UnitType, RecruitmentOrder } from "@/domain/military/military.schema";
+import { UnitType } from "@/domain/military/military.schema";
 
 export class MilitaryPricingCalculator {
   public static readonly MAX_IMPORT_TECH_MULTIPLIER = 3.0;
@@ -59,32 +59,6 @@ export class MilitaryPricingCalculator {
       (military.airDefense || 0) * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
       (military.airForce || 0) * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (military.droneMissile || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
-    );
-  }
-
-  public static calculateQueueValuation(
-    recruitmentQueue: readonly RecruitmentOrder[] = [],
-  ): number {
-    let total = 0;
-    for (let i = 0; i < recruitmentQueue.length; i++) {
-      total += recruitmentQueue[i]!.totalCost;
-    }
-    return total;
-  }
-
-  public static calculateTotalArmyValuationWithQueue(
-    military: {
-      infantry?: number;
-      armor?: number;
-      airDefense?: number;
-      airForce?: number;
-      droneMissile?: number;
-    },
-    recruitmentQueue: readonly RecruitmentOrder[] = [],
-  ): number {
-    return (
-      this.calculateTotalArmyValuation(military) +
-      this.calculateQueueValuation(recruitmentQueue)
     );
   }
 }

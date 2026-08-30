@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { GovernmentStateSchema } from "@/domain/politics/politics.schema";
-import {
-  MilitaryStackSchema,
-  RecruitmentOrderSchema,
-} from "@/domain/military/military.schema";
+import { MilitaryStackSchema } from "@/domain/military/military.schema";
 import { RelationProfileSchema } from "@/domain/diplomacy/diplomacy.schema";
 import {
   AiDoctrineTypeSchema,
@@ -32,7 +29,6 @@ export const NationSchema = z.object({
   navalFleet: z.number().nonnegative().default(0),
   government: GovernmentStateSchema,
   military: MilitaryStackSchema,
-  recruitmentQueue: z.array(RecruitmentOrderSchema),
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
   globalReputation: z.number().min(-100).max(100),

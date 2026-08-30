@@ -1,6 +1,5 @@
 import React from "react";
 import { MilitaryForcesSection } from "@/presentation/components/tactical-map/sidebar/military-forces-section";
-import { RecruitmentQueueCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/recruitment-queue-card";
 import { MilitaryValuationCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-valuation-card";
 import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import { Nation } from "@/domain/nation/nation.schema";
@@ -33,10 +32,6 @@ export function MilitaryOverviewTab({
             treasury={nation.treasury}
             techLevel={nation.military.techLevel}
             provincesMap={provincesMap}
-          />
-          <RecruitmentQueueCard
-            queue={nation.recruitmentQueue}
-            nationId={nation.id}
           />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
-import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
+import { DomesticRecruitmentManager } from "@/engine/military/domestic-recruitment-manager";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
@@ -16,7 +16,6 @@ export interface MilitaryExecutionOutput {
 }
 
 export class MilitaryActionExecutor {
-  private static recruitmentManager = new RecruitmentQueueManager();
   private static battleEngine = new BattleExecutionEngine();
 
   public static execute(
@@ -49,7 +48,7 @@ export class MilitaryActionExecutor {
             ...state,
             nations: {
               ...state.nations,
-              [sourceKey]: this.recruitmentManager.enqueueOrder(
+              [sourceKey]: DomesticRecruitmentManager.executeRecruitment(
                 nation,
                 action.unitType,
                 action.quantity,
@@ -80,27 +79,6 @@ export class MilitaryActionExecutor {
             action,
             sourceKey,
           ),
-        };
-      }
-
-      case "CANCEL_RECRUITMENT": {
-        if (!nation.recruitmentQueue.some((o) => o.id === action.orderId)) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "سفارش مورد نظر در صف ساخت یافت نشد.",
-          );
-        }
-        return {
-          newState: {
-            ...state,
-            nations: {
-              ...state.nations,
-              [sourceKey]: this.recruitmentManager.cancelOrder(
-                nation,
-                action.orderId,
-              ),
-            },
-          },
         };
       }
 

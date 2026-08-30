@@ -30,14 +30,8 @@ export function QuickMilitaryRecruitmentGrid({
     },
   );
 
-  let queuedCost = 0;
-  for (let i = 0; i < (nation.recruitmentQueue || []).length; i++) {
-    queuedCost += nation.recruitmentQueue[i]!.totalCost;
-  }
-
   const currentValuation =
-    MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military) +
-    queuedCost;
+    MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
 
   const capacityRatio =
     currentGdp > 0
@@ -55,7 +49,7 @@ export function QuickMilitaryRecruitmentGrid({
         <div className="flex items-center gap-2">
           <Zap size={15} className="text-gdp animate-pulse" />
           <span className="text-xs font-black text-foreground">
-            تجهیز ضربتی ارتش (سقف ارزش = ۱۰۰٪ GDP)
+            تجهیز ضربتی ارتش و تحویل آنی (سقف ارزش = ۱۰۰٪ GDP)
           </span>
         </div>
 

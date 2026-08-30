@@ -26,15 +26,6 @@ export const MilitaryStackSchema = z.object({
   branchTech: BranchTechRatingSchema.optional(),
 });
 
-export const RecruitmentOrderSchema = z.object({
-  id: z.string(),
-  unitType: UnitTypeSchema,
-  quantity: z.number().positive(),
-  turnsRemaining: z.number().nonnegative(),
-  totalCost: z.number().nonnegative(),
-});
-
 export type UnitType = z.infer<typeof UnitTypeSchema>;
 export type BranchTechRating = z.infer<typeof BranchTechRatingSchema>;
 export type MilitaryStack = z.infer<typeof MilitaryStackSchema>;
-export type RecruitmentOrder = z.infer<typeof RecruitmentOrderSchema>;

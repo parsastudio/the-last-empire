@@ -3,12 +3,10 @@ import { Province } from "@/domain/province/province.schema";
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
 import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator";
-import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { DemographicsEngine } from "@/engine/economy/demographics/demographics-engine";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
 import {
-  CountryRegistry,
   TurnLogBuilder,
   SecurityFeeCalculatorUtility,
   NationRelationResolver,
@@ -17,7 +15,6 @@ import {
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
-  private static recruitmentQueue = new RecruitmentQueueManager();
 
   public static process(
     nation: Nation,
@@ -151,8 +148,6 @@ export class EconomyTurnProcessor {
         updated.id,
       );
     }
-
-    updated = this.recruitmentQueue.processTurnQueue(updated);
 
     return { updatedNation: updated, updatedProvinces, bankruptcyLog };
   }

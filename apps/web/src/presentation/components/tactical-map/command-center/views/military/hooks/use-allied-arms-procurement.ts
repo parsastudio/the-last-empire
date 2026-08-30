@@ -82,23 +82,17 @@ export function useAlliedArmsProcurement({
     MilitaryPricingCalculator.calculateTotalArmyValuation(buyerNation.military);
   const maxValuation = Math.floor(effectiveBuyerGdp);
 
-  let queuedCost = 0;
-  for (let i = 0; i < (buyerNation.recruitmentQueue || []).length; i++) {
-    queuedCost += buyerNation.recruitmentQueue[i]!.totalCost;
-  }
-
   const remainingValuationCapacity = Math.max(
     0,
-    maxValuation - (currentValuation + queuedCost),
+    maxValuation - currentValuation,
   );
 
   const quotas = useMemo(() => {
     return MilitaryQuotaCalculator.calculateQuotas(
       effectiveBuyerGdp,
       buyerNation.military,
-      buyerNation.recruitmentQueue,
     );
-  }, [effectiveBuyerGdp, buyerNation.military, buyerNation.recruitmentQueue]);
+  }, [effectiveBuyerGdp, buyerNation.military]);
 
   const techMultiplier = useMemo(() => {
     return MilitaryPricingCalculator.calculateArmsImportMultiplier(

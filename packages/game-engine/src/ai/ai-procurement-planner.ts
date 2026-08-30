@@ -82,7 +82,6 @@ export class AIProcurementPlanner {
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       gdp,
       nation.military,
-      nation.recruitmentQueue,
     );
 
     const currentTotalValuation =

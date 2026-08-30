@@ -84,7 +84,7 @@ export * from "./initializers/nation-profile-assigner";
 export * from "./initializers/global-ai-initializer";
 
 export * from "./military/arms-market-manager";
-export * from "./military/recruitment-queue";
+export * from "./military/domestic-recruitment-manager";
 
 export * from "./orchestrator/turn-export-sales-aggregator";
 export * from "./orchestrator/turn-progression.orchestrator";

@@ -1,8 +1,4 @@
-import {
-  UnitType,
-  MilitaryStack,
-  RecruitmentOrder,
-} from "@/domain/military/military.schema";
+import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 
@@ -29,40 +25,24 @@ export class MilitaryQuotaCalculator {
   public static getUnitCurrentCount(
     military: MilitaryStack,
     unitType: UnitType,
-    recruitmentQueue: RecruitmentOrder[] = [],
   ): number {
-    let count = 0;
     switch (unitType) {
       case "INFANTRY":
-        count = military.infantry || 0;
-        break;
+        return military.infantry || 0;
       case "ARMOR":
-        count = military.armor || 0;
-        break;
+        return military.armor || 0;
       case "AIR_DEFENSE":
-        count = military.airDefense || 0;
-        break;
+        return military.airDefense || 0;
       case "AIR_FORCE":
-        count = military.airForce || 0;
-        break;
+        return military.airForce || 0;
       case "DRONE_MISSILE":
-        count = military.droneMissile || 0;
-        break;
+        return military.droneMissile || 0;
     }
-
-    for (let i = 0; i < recruitmentQueue.length; i++) {
-      if (recruitmentQueue[i]!.unitType === unitType) {
-        count += recruitmentQueue[i]!.quantity;
-      }
-    }
-
-    return count;
   }
 
   public static calculateQuotas(
     gdp: number,
     military: MilitaryStack,
-    recruitmentQueue: RecruitmentOrder[] = [],
   ): Record<UnitType, UnitBudgetQuota> {
     const ratios = this.getUnitRatios();
     const result: Partial<Record<UnitType, UnitBudgetQuota>> = {};
@@ -76,10 +56,7 @@ export class MilitaryQuotaCalculator {
     ];
 
     const totalValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuationWithQueue(
-        military,
-        recruitmentQueue,
-      );
+      MilitaryPricingCalculator.calculateTotalArmyValuation(military);
     const maxGlobalValuation = Math.floor(gdp);
     const remainingGlobalValuation = Math.max(
       0,
@@ -92,11 +69,7 @@ export class MilitaryQuotaCalculator {
       const unitPrice = MILITARY_UNIT_STATS[type].moneyCost;
       const budgetCap = Math.floor(gdp * ratio);
       const maxUnits = unitPrice > 0 ? Math.floor(budgetCap / unitPrice) : 0;
-      const currentUnits = this.getUnitCurrentCount(
-        military,
-        type,
-        recruitmentQueue,
-      );
+      const currentUnits = this.getUnitCurrentCount(military, type);
       const remainingQuotaRoom = Math.max(0, maxUnits - currentUnits);
       const maxGlobalUnits =
         unitPrice > 0 ? Math.floor(remainingGlobalValuation / unitPrice) : 0;

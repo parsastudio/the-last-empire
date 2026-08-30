@@ -66,23 +66,14 @@ export function useQuickRecruitBatch({
     MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
   const maxValuation = Math.floor(currentGdp);
 
-  let queuedCost = 0;
-  for (let i = 0; i < (nation.recruitmentQueue || []).length; i++) {
-    queuedCost += nation.recruitmentQueue[i]!.totalCost;
-  }
-
   const remainingValuationCapacity = Math.max(
     0,
-    maxValuation - (currentValuation + queuedCost),
+    maxValuation - currentValuation,
   );
 
   const quotas = useMemo(() => {
-    return MilitaryQuotaCalculator.calculateQuotas(
-      currentGdp,
-      nation.military,
-      nation.recruitmentQueue,
-    );
-  }, [currentGdp, nation.military, nation.recruitmentQueue]);
+    return MilitaryQuotaCalculator.calculateQuotas(currentGdp, nation.military);
+  }, [currentGdp, nation.military]);
 
   const batchList = useMemo<QuickUnitBatchInfo[]>(() => {
     return ALL_TYPES.map((type) => {
