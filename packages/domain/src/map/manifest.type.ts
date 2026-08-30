@@ -12,8 +12,8 @@ export interface FinalManifestProvince {
   maritimeNeighborsTier2?: number[];
   centerCoordinates: { x: number; y: number };
   population: number;
-  perCapitaProductivity: number;
-  maxPopulationCapacity: number;
+  maxSlots: number;
+  factoriesCount: number;
 }
 
 export interface FinalManifestNation {
@@ -23,9 +23,7 @@ export interface FinalManifestNation {
   nameFa: string;
   nameEn: string;
   gdp: number;
-  perCapitaProductivity: number;
   population: number;
-  maxPopulationCapacity: number;
   territoryPixelCount: number;
   provinceIds: number[];
   hasSeaAccess: boolean;
@@ -39,6 +37,7 @@ export interface FinalManifestNation {
   startingDroneMissile: number;
   startingTechLevel: number;
   industrialLevel: number;
+  equipmentTechLevel?: number;
   startingStability: number;
   aiDoctrine?: AiDoctrineType;
 }

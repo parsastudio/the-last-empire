@@ -55,11 +55,10 @@ export function WideOverviewView({ nation, gameState }: WideOverviewViewProps) {
         />
 
         <ResourcesSection
-          population={model.population}
-          maxPopulationCapacity={model.maxPopulationCapacity}
-          perCapitaProductivity={model.perCapitaProductivity}
-          industrialLevel={nation.industrialLevel}
-          infrastructureLevel={model.infrastructureLevel}
+          totalActiveFactories={model.totalActiveFactories}
+          totalMaxSlots={model.totalMaxSlots}
+          industrialLevel={model.industrialLevel}
+          equipmentTechLevel={model.equipmentTechLevel}
         />
       </div>
     </div>

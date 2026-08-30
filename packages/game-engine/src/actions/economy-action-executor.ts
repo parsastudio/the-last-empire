@@ -5,7 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceTradeExecutor } from "@/engine/actions/executors/economy/province-trade-executor";
 import { NationalDebtExecutor } from "@/engine/actions/executors/economy/national-debt-executor";
-import { DevelopmentUpgradeExecutor } from "@/engine/actions/executors/economy/development-upgrade-executor";
+import { FactoryActionExecutor } from "@/engine/actions/executors/economy/factory-action-executor";
 
 export class EconomyActionExecutor {
   public static execute(
@@ -44,6 +44,40 @@ export class EconomyActionExecutor {
         };
       }
 
+      case "BUILD_FACTORY": {
+        return FactoryActionExecutor.executeBuildFactory(
+          state,
+          action,
+          nation,
+          buyerKey,
+        );
+      }
+
+      case "EQUIP_DOMESTIC_MACHINERY": {
+        return FactoryActionExecutor.executeEquipDomesticMachinery(
+          state,
+          nation,
+          buyerKey,
+        );
+      }
+
+      case "INVEST_INDUSTRIAL_RESEARCH": {
+        return FactoryActionExecutor.executeInvestIndustrialResearch(
+          state,
+          nation,
+          buyerKey,
+        );
+      }
+
+      case "BUY_INDUSTRIAL_EQUIPMENT": {
+        return FactoryActionExecutor.executeBuyIndustrialEquipment(
+          state,
+          action,
+          nation,
+          buyerKey,
+        );
+      }
+
       case "BUY_PROVINCE": {
         return ProvinceTradeExecutor.execute(
           state,
@@ -68,15 +102,6 @@ export class EconomyActionExecutor {
           state,
           action,
           nation,
-          buyerKey,
-        );
-      }
-
-      case "UPGRADE_DEVELOPMENT": {
-        return DevelopmentUpgradeExecutor.execute(
-          state,
-          nation,
-          canonicalId,
           buyerKey,
         );
       }

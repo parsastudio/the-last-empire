@@ -9,6 +9,7 @@ import {
   ProximityTier,
 } from "@/domain/diplomacy/reach/proximity-tier-resolver";
 import { ReachableTargetsResolver } from "@/domain/diplomacy/reach/reachable-targets-resolver";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export type { GeopoliticalReachTier, ProximityTier };
 
@@ -20,12 +21,41 @@ export class GeopoliticalReachResolver {
   public static readonly MIN_SUPERPOWERS =
     GeopoliticalTierClassifier.MIN_SUPERPOWERS;
 
-  public static getSuperpowerCutoffRank(totalAlive: number): number {
-    return GeopoliticalTierClassifier.getSuperpowerCutoffRank(totalAlive);
+  public static hasDirectLandBorder(
+    source: Nation,
+    target: Nation,
+    provincesMap?: Record<string, Province>,
+    sourceProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): boolean {
+    return ProximityTierResolver.hasDirectLandBorder(
+      source,
+      target,
+      provincesMap,
+      sourceProvinces,
+      provincesByOwnerMap,
+    );
   }
 
-  public static getRegionalCutoffRank(totalAlive: number): number {
-    return GeopoliticalTierClassifier.getRegionalCutoffRank(totalAlive);
+  public static canReachForWarOrStrike(
+    source: Nation,
+    target: Nation,
+    provincesMap?: Record<string, Province>,
+  ): boolean {
+    const hasLand = this.hasDirectLandBorder(source, target, provincesMap);
+    if (hasLand) return true;
+
+    const sourceSea = NationGettersUtility.hasSeaAccess(
+      source.id,
+      provincesMap,
+    );
+    const targetSea = NationGettersUtility.hasSeaAccess(
+      target.id,
+      provincesMap,
+    );
+    const hasNavalFleet = (source.navalFleet || 0) > 0;
+
+    return sourceSea && targetSea && hasNavalFleet;
   }
 
   public static getReachTier(
@@ -89,54 +119,6 @@ export class GeopoliticalReachResolver {
       allNations,
       provincesMap,
       rankMap,
-    );
-  }
-
-  public static hasDirectLandBorder(
-    source: Nation,
-    target: Nation,
-    provincesMap?: Record<string, Province>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): boolean {
-    return ProximityTierResolver.hasDirectLandBorder(
-      source,
-      target,
-      provincesMap,
-      sourceProvinces,
-      provincesByOwnerMap,
-    );
-  }
-
-  public static isImmediateMaritimeNeighbor(
-    source: Nation,
-    target: Nation,
-    provincesMap?: Record<string, Province>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): boolean {
-    return ProximityTierResolver.isImmediateMaritimeNeighbor(
-      source,
-      target,
-      provincesMap,
-      sourceProvinces,
-      provincesByOwnerMap,
-    );
-  }
-
-  public static hasRegionalMaritimeConnection(
-    source: Nation,
-    target: Nation,
-    provincesMap?: Record<string, Province>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): boolean {
-    return ProximityTierResolver.hasRegionalMaritimeConnection(
-      source,
-      target,
-      provincesMap,
-      sourceProvinces,
-      provincesByOwnerMap,
     );
   }
 }

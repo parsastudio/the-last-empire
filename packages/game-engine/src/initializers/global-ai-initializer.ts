@@ -5,6 +5,7 @@ import {
   CountryRegistry,
   FinalMapManifest,
   FinalManifestNation,
+  IndustryCalculator,
 } from "@geopolitics/domain";
 import { NationProfileAssigner } from "@/engine/initializers/nation-profile-assigner";
 
@@ -17,12 +18,10 @@ export class DiplomaticMatrixGenerator {
 
     for (const target of allNations) {
       if (target.id === currentId) continue;
-      const baselineAlignment = 0;
-
       relations[target.id] = {
         targetNationId: target.id,
         stance: "NORMAL_DIPLOMACY",
-        alignment: baselineAlignment,
+        alignment: 0,
         tension: 10,
       };
     }
@@ -46,37 +45,13 @@ export class GlobalAiInitializer {
     const manifestProvinces = manifest.provinces || [];
     const manifestItems: FinalManifestNation[] = manifest.nations || [];
 
-    for (const pItem of manifestProvinces) {
-      const canonicalCountryId = CountryRegistry.resolveCanonicalId(
-        pItem.countryId,
-      );
-      provinces[pItem.provinceId.toString()] = {
-        provinceId: pItem.provinceId,
-        nameFa: pItem.nameFa,
-        ownerNationId: canonicalCountryId,
-        originalNationId: pItem.originalCountryId
-          ? CountryRegistry.resolveCanonicalId(pItem.originalCountryId)
-          : canonicalCountryId,
-        pixelCount: pItem.pixelCount,
-        hasSeaAccess: pItem.hasSeaAccess,
-        landNeighbors: pItem.landNeighbors,
-        maritimeNeighborsTier1: pItem.maritimeNeighborsTier1 || [],
-        maritimeNeighborsTier2: pItem.maritimeNeighborsTier2 || [],
-        centerCoordinates: pItem.centerCoordinates,
-        population: pItem.population ?? 100000,
-        perCapitaProductivity: pItem.perCapitaProductivity ?? 5000,
-        maxPopulationCapacity: pItem.maxPopulationCapacity ?? 150000,
-      };
+    const provsByCountry = new Map<string, typeof manifestProvinces>();
+    for (const p of manifestProvinces) {
+      const cId = CountryRegistry.resolveCanonicalId(p.countryId);
+      const list = provsByCountry.get(cId) || [];
+      list.push(p);
+      provsByCountry.set(cId, list);
     }
-
-    const nationsMetaData = manifestItems.map((item) => ({
-      id: CountryRegistry.resolveCanonicalId(item.code || item.id),
-      govType:
-        CountryRegistry.resolveCanonicalId(item.code || item.id) ===
-          CountryRegistry.resolveCanonicalId(humanNationId) && humanGovType
-          ? humanGovType
-          : item.defaultGovernment,
-    }));
 
     for (const item of manifestItems) {
       const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
@@ -89,12 +64,55 @@ export class GlobalAiInitializer {
         govToApply,
       );
 
-      nation.relations = this.relationsGenerator.generateInitialRelations(
-        cleanId,
-        nationsMetaData,
+      const countryProvs = provsByCountry.get(cleanId) || [];
+      const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
+        item.gdp,
+        nation.industrialLevel,
+      );
+      const factoryDist = IndustryCalculator.distributeFactoriesToProvinces(
+        totalFactories,
+        countryProvs.length,
       );
 
+      for (let i = 0; i < countryProvs.length; i++) {
+        const pItem = countryProvs[i]!;
+        const slots = factoryDist[i] ?? 1;
+        provinces[pItem.provinceId.toString()] = {
+          provinceId: pItem.provinceId,
+          nameFa: pItem.nameFa,
+          ownerNationId: cleanId,
+          originalNationId: pItem.originalCountryId
+            ? CountryRegistry.resolveCanonicalId(pItem.originalCountryId)
+            : cleanId,
+          pixelCount: pItem.pixelCount,
+          hasSeaAccess: pItem.hasSeaAccess,
+          landNeighbors: pItem.landNeighbors,
+          maritimeNeighborsTier1: pItem.maritimeNeighborsTier1 || [],
+          maritimeNeighborsTier2: pItem.maritimeNeighborsTier2 || [],
+          centerCoordinates: pItem.centerCoordinates,
+          population: pItem.population ?? 1000000,
+          maxSlots: slots,
+          factoriesCount: slots,
+        };
+      }
+
       nations[cleanId] = nation;
+    }
+
+    const nationsMetaData = manifestItems.map((item) => ({
+      id: CountryRegistry.resolveCanonicalId(item.code || item.id),
+      govType:
+        CountryRegistry.resolveCanonicalId(item.code || item.id) ===
+          CountryRegistry.resolveCanonicalId(humanNationId) && humanGovType
+          ? humanGovType
+          : item.defaultGovernment,
+    }));
+
+    for (const nation of Object.values(nations)) {
+      nation.relations = this.relationsGenerator.generateInitialRelations(
+        nation.id,
+        nationsMetaData,
+      );
     }
 
     return { nations, provinces };

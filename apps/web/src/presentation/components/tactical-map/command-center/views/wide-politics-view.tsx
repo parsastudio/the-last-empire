@@ -2,7 +2,7 @@ import React from "react";
 import { EconomicDoctrineControlCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/economic-doctrine-control-card";
 import { ImfLoanCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/imf-loan-card";
 import { ActiveModifiersCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/active-modifiers-card";
-import { DevelopmentUpgradesSection } from "@/presentation/components/tactical-map/command-center/views/components/development-upgrades-section";
+import { IndustrialManagementCard } from "@/presentation/components/tactical-map/command-center/views/components/industry/industrial-management-card";
 import { MilitaryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/military/military-tech-upgrade-card";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -39,11 +39,11 @@ export function WidePoliticsView({
           gdp={gdp}
           treasury={nation.treasury}
         />
-        <DevelopmentUpgradesSection
+        <IndustrialManagementCard
           nationId={nation.id}
           treasury={nation.treasury}
-          gdp={gdp}
-          developmentLevel={nation.industrialLevel}
+          industrialLevel={nation.industrialLevel}
+          equipmentTechLevel={nation.equipmentTechLevel}
         />
         <MilitaryTechUpgradeCard
           nationId={nation.id}
