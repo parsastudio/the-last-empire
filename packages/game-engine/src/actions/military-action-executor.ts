@@ -1,12 +1,13 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameAction } from "@/domain/game/action.schema";
-import { GameError, NationGettersUtility } from "@geopolitics/domain";
+import { GameError } from "@geopolitics/domain";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RecruitmentQueueManager } from "@/engine/military/recruitment-queue";
 import { BattleExecutionEngine } from "@/engine/combat/battle-execution-engine";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
-import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { NavalFleetExecutor } from "@/engine/actions/executors/military/naval-fleet-executor";
+import { BattleInitiationValidator } from "@/engine/actions/executors/military/battle-initiation-validator";
 
 export interface MilitaryExecutionOutput {
   newState: GameState;
@@ -67,35 +68,13 @@ export class MilitaryActionExecutor {
       }
 
       case "BUY_NAVAL_FLEET": {
-        const hasSea = NationGettersUtility.hasSeaAccess(
-          nation.id,
-          state.provinces,
-        );
-        if (!hasSea) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "کشور شما به آب‌های آزاد دسترسی ندارد و امکان تجهیز ناوگان دریایی وجود ندارد.",
-          );
-        }
-        const fleetCost = 50_000_000_000 * action.quantity;
-        if (nation.treasury < fleetCost) {
-          throw new GameError(
-            "INSUFFICIENT_FUNDS",
-            "موجودی خزانه برای خرید ناوگان دریایی کافی نیست.",
-          );
-        }
         return {
-          newState: {
-            ...state,
-            nations: {
-              ...state.nations,
-              [sourceKey]: {
-                ...nation,
-                treasury: nation.treasury - fleetCost,
-                navalFleet: (nation.navalFleet || 0) + action.quantity,
-              },
-            },
-          },
+          newState: NavalFleetExecutor.execute(
+            state,
+            nation,
+            action,
+            sourceKey,
+          ),
         };
       }
 
@@ -149,76 +128,22 @@ export class MilitaryActionExecutor {
         const canonicalTargetId = CountryRegistry.resolveCanonicalId(
           action.targetNationId,
         );
-        if (
-          action.nationId === action.targetNationId ||
-          canonicalSourceId === canonicalTargetId
-        ) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "امکان تهاجم به کشور خودی وجود ندارد.",
-          );
-        }
         const target =
           state.nations[canonicalTargetId] ||
           state.nations[action.targetNationId];
-        if (!target || !target.isAlive) {
-          throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
+
+        if (!target) {
+          throw new GameError("NATION_NOT_FOUND", "کشور هدف یافت نشد.");
         }
 
-        const attackedTargets = nation.attackedTargetIdsThisTurn || [];
-        if (
-          attackedTargets.includes(canonicalTargetId) ||
-          attackedTargets.includes(action.targetNationId)
-        ) {
-          throw new GameError(
-            "INVALID_ACTION",
-            `در هر نوبت تنها یک بار امکان تهاجم نظامی علیه کشور ${target.name} وجود دارد. برای تهاجم مجدد باید نوبت را به پایان برسانید.`,
-          );
-        }
-
-        const isCurrentWar = NationRelationResolver.isWar(
-          nation.relations,
-          action.targetNationId,
+        BattleInitiationValidator.validate(
+          state,
+          nation,
+          target,
+          action,
+          canonicalSourceId,
+          canonicalTargetId,
         );
-
-        if (
-          nation.isAi &&
-          !isCurrentWar &&
-          (nation.postWarCooldownTurns || 0) > 0
-        ) {
-          throw new GameError(
-            "INVALID_ACTION",
-            `امکان آغاز تهاجم نظامی جدید وجود ندارد: کشور در دوره سردسازی پس از جنگ قرار دارد.`,
-          );
-        }
-
-        if (action.attackType === "NAVAL") {
-          const fleetCount = nation.navalFleet || 0;
-          const maxCapacityPoints = fleetCount * 60;
-          const infantryCount = action.infantryToDeploy || 0;
-          const armorCount = action.armorToDeploy || 0;
-          const requiredPoints = infantryCount * 1 + armorCount * 4;
-
-          if (fleetCount <= 0 || requiredPoints > maxCapacityPoints) {
-            throw new GameError(
-              "INVALID_ACTION",
-              "ظرفیت ترابری ناوگان دریایی شما برای حمل این حجم از ادوات زمینی کافی نیست.",
-            );
-          }
-        }
-
-        if (nation.military.infantry <= 0) {
-          throw new GameError(
-            "INVALID_ACTION",
-            "برای آغاز تهاجم حداقل به ۱ یگان پیاده‌نظام نیاز است.",
-          );
-        }
-        if (action.dronesToLaunch > nation.military.droneMissile) {
-          throw new GameError(
-            "INSUFFICIENT_RESOURCES",
-            "تعداد پهپادهای درخواستی بیشتر از موجودی انبار است.",
-          );
-        }
 
         const battleResult = this.battleEngine.executeBattle(state, action);
         return {

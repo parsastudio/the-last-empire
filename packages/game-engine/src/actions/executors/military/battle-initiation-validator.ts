@@ -1,0 +1,84 @@
+import { GameState } from "@/domain/game/game-state.schema";
+import { InitiateBattleAction } from "@/domain/game/action.schema";
+import { Nation, GameError, NationRelationResolver } from "@geopolitics/domain";
+
+export class BattleInitiationValidator {
+  public static validate(
+    state: GameState,
+    nation: Nation,
+    target: Nation,
+    action: InitiateBattleAction,
+    canonicalSourceId: string,
+    canonicalTargetId: string,
+  ): void {
+    if (
+      action.nationId === action.targetNationId ||
+      canonicalSourceId === canonicalTargetId
+    ) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "امکان تهاجم به کشور خودی وجود ندارد.",
+      );
+    }
+
+    if (!target.isAlive) {
+      throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال و زنده نیست.");
+    }
+
+    const attackedTargets = nation.attackedTargetIdsThisTurn || [];
+    if (
+      attackedTargets.includes(canonicalTargetId) ||
+      attackedTargets.includes(action.targetNationId)
+    ) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `در هر نوبت تنها یک بار امکان تهاجم نظامی علیه کشور ${target.name} وجود دارد. برای تهاجم مجدد باید نوبت را به پایان برسانید.`,
+      );
+    }
+
+    const isCurrentWar = NationRelationResolver.isWar(
+      nation.relations,
+      action.targetNationId,
+    );
+
+    if (
+      nation.isAi &&
+      !isCurrentWar &&
+      (nation.postWarCooldownTurns || 0) > 0
+    ) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "امکان آغاز تهاجم نظامی جدید وجود ندارد: کشور در دوره سردسازی پس از جنگ قرار دارد.",
+      );
+    }
+
+    if (action.attackType === "NAVAL") {
+      const fleetCount = nation.navalFleet || 0;
+      const maxCapacityPoints = fleetCount * 60;
+      const infantryCount = action.infantryToDeploy || 0;
+      const armorCount = action.armorToDeploy || 0;
+      const requiredPoints = infantryCount * 1 + armorCount * 4;
+
+      if (fleetCount <= 0 || requiredPoints > maxCapacityPoints) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "ظرفیت ترابری ناوگان دریایی شما برای حمل این حجم از ادوات زمینی کافی نیست.",
+        );
+      }
+    }
+
+    if (nation.military.infantry <= 0) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "برای آغاز تهاجم حداقل به ۱ یگان پیاده‌نظام نیاز است.",
+      );
+    }
+
+    if (action.dronesToLaunch > nation.military.droneMissile) {
+      throw new GameError(
+        "INSUFFICIENT_RESOURCES",
+        "تعداد پهپادهای درخواستی بیشتر از موجودی انبار است.",
+      );
+    }
+  }
+}
