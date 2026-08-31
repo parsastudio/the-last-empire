@@ -4,7 +4,6 @@ import {
   FinalManifestNation,
   MilitaryInventoryHelper,
   MilitaryStack,
-  CountryDefaultsUtility,
   NationDoctrineResolver,
   MilitaryDistributionEngine,
   IndustryCalculator,
@@ -36,14 +35,8 @@ export class NationProfileAssigner {
     }
 
     const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
-    const profile = CountryRegistry.getCountry(cleanId);
-    const domesticTech =
-      profile?.domesticTechLevel ??
-      profile?.startingTechLevel ??
-      item.startingTechLevel ??
-      1.0;
-    const equipmentTech =
-      item.equipmentTechLevel ?? profile?.equipmentTechLevel ?? domesticTech;
+    const domesticTech = item.startingTechLevel ?? 1.0;
+    const equipmentTech = item.equipmentTechLevel ?? domesticTech;
 
     const dynamicStack = MilitaryDistributionEngine.calculateStartingStack(
       item.gdp,
@@ -170,51 +163,10 @@ export class NationProfileAssigner {
       (m) => CountryRegistry.resolveCanonicalId(m.code || m.id) === canonicalId,
     );
 
-    if (found) {
-      return this.buildNationFromManifest(found, isHuman, customGovType);
+    if (!found) {
+      throw new Error(`کشور ${id} در مانیفست استراتژیک نقشه تعریف نشده است.`);
     }
 
-    const profile = CountryRegistry.getCountry(canonicalId);
-    const fallback = CountryDefaultsUtility.getFallbackProfile(
-      canonicalId,
-      profile,
-    );
-    const dynamicStack = MilitaryDistributionEngine.calculateStartingStack(
-      fallback.gdp,
-      fallback.domesticTechLevel,
-      fallback.equipmentTechLevel,
-    );
-
-    const fallbackManifestItem: FinalManifestNation = {
-      id: canonicalId,
-      code: fallback.code,
-      flagCode: fallback.flagCode,
-      nameFa: fallback.nameFa,
-      nameEn: fallback.nameEn,
-      gdp: fallback.gdp,
-      population: fallback.population,
-      territoryPixelCount: 1000,
-      provinceIds: [],
-      hasSeaAccess: true,
-      startingTreasury: Math.floor(fallback.gdp * 0.05),
-      initialRank: 1,
-      defaultGovernment: fallback.startingGovernment,
-      startingInfantry: dynamicStack.infantry,
-      startingArmor: dynamicStack.armor,
-      startingAirDefense: dynamicStack.airDefense,
-      startingAirForce: dynamicStack.airForce,
-      startingDroneMissile: dynamicStack.droneMissile,
-      startingTechLevel: dynamicStack.techLevel,
-      industrialLevel: fallback.domesticTechLevel,
-      equipmentTechLevel: fallback.equipmentTechLevel,
-      startingStability: 50,
-      aiDoctrine: fallback.aiDoctrine,
-    };
-
-    return this.buildNationFromManifest(
-      fallbackManifestItem,
-      isHuman,
-      customGovType,
-    );
+    return this.buildNationFromManifest(found, isHuman, customGovType);
   }
 }

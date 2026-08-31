@@ -1,7 +1,6 @@
 import {
   GameState,
   CountryRegistry,
-  ALL_COUNTRY_PROFILES,
   FinalMapManifest,
   FinalManifestNation,
   ClientMapPathResolver,
@@ -21,36 +20,42 @@ export class CampaignInitializationService {
     let activeManifest: FinalMapManifest | null = manifest ?? null;
 
     if (!activeManifest) {
-      try {
-        const manifestUrl = ClientMapPathResolver.getMapStrategicClientUrl(
-          "map1",
-          "manifest.json",
-        );
-        const res = await fetch(manifestUrl, {
-          cache: "no-store",
-        });
-        if (res.ok) {
-          activeManifest = await res.json();
-        }
-      } catch {}
-    }
-
-    if (activeManifest) {
-      CountryRegistry.initializeFromManifest(activeManifest);
-    }
-
-    let detectedNations: string[] = [];
-
-    if (activeManifest && activeManifest.nations) {
-      detectedNations = activeManifest.nations.map((n: FinalManifestNation) =>
-        CountryRegistry.resolveCanonicalId(n.code || n.id),
+      const manifestUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+        "map1",
+        "manifest.json",
       );
-    } else {
-      detectedNations = ALL_COUNTRY_PROFILES.map((p) => p.code.toUpperCase());
+      const res = await fetch(manifestUrl, {
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        throw new Error(
+          "امکان خواندن مانیفست استراتژیک اولیه نقشه از سرور وجود ندارد.",
+        );
+      }
+      activeManifest = await res.json();
     }
+
+    if (
+      !activeManifest ||
+      !Array.isArray(activeManifest.nations) ||
+      activeManifest.nations.length === 0
+    ) {
+      throw new Error(
+        "مانیفست استراتژیک نقشه نامعتبر است یا هیچ کشوری در آن تعریف نشده است.",
+      );
+    }
+
+    CountryRegistry.initializeFromManifest(activeManifest);
+
+    const detectedNations = activeManifest.nations.map(
+      (n: FinalManifestNation) =>
+        CountryRegistry.resolveCanonicalId(n.code || n.id),
+    );
 
     if (!detectedNations.includes(normalizedHumanId)) {
-      detectedNations.push(normalizedHumanId);
+      throw new Error(
+        `کشور انتخاب‌شده (${nationId}) در مانیفست استراتژیک وجود ندارد.`,
+      );
     }
 
     const initResult = this.aiInitializer.initializeAllNations(
