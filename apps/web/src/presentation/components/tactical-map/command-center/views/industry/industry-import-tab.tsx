@@ -1,18 +1,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ShoppingCart, ShieldCheck } from "lucide-react";
+import { ShoppingCart, ShieldCheck, Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
+import { CountryRegistry } from "@/domain/data/countries";
 import { MachinerySellerCard } from "./components/machinery-seller-card";
-import {
-  MachineryTrancheCard,
-  MachineryTrancheInfo,
-} from "./components/machinery-tranche-card";
+import { MachineryImportCountryView } from "./components/machinery-import-country-view";
 
 interface IndustryImportTabProps {
   nation: Nation;
@@ -26,8 +20,7 @@ export function IndustryImportTab({
   provincesMap,
 }: IndustryImportTabProps) {
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { dispatchAction } = useGameActions();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const totalFactories = useMemo(() => {
     if (!provincesMap) return 10;
@@ -37,139 +30,79 @@ export function IndustryImportTab({
     return Math.max(1, count);
   }, [provincesMap, nation.id]);
 
-  const currentEquipmentTech = nation.equipmentTechLevel;
+  const minBatchTech = useMemo(() => {
+    if (!nation.factoryTiers || nation.factoryTiers.length === 0) {
+      return nation.equipmentTechLevel;
+    }
+    return Math.min(...nation.factoryTiers.map((b) => b.techLevel));
+  }, [nation.factoryTiers, nation.equipmentTechLevel]);
 
   const sellers = useMemo(() => {
     if (!nationsMap) return [];
     return Object.values(nationsMap)
       .filter(
         (n) =>
-          n.isAlive &&
-          n.id !== nation.id &&
-          n.industrialLevel > currentEquipmentTech,
+          n.isAlive && n.id !== nation.id && n.industrialLevel > minBatchTech,
       )
       .sort((a, b) => b.industrialLevel - a.industrialLevel);
-  }, [nationsMap, nation.id, currentEquipmentTech]);
+  }, [nationsMap, nation.id, minBatchTech]);
+
+  const filteredSellers = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return sellers;
+    return sellers.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.id.toLowerCase().includes(q) ||
+        s.flagCode.toLowerCase().includes(q),
+    );
+  }, [sellers, searchQuery]);
 
   const selectedSeller = useMemo(() => {
-    return sellers.find((s) => s.id === selectedSellerId) || sellers[0] || null;
-  }, [sellers, selectedSellerId]);
+    if (!selectedSellerId || !nationsMap) return null;
+    const canonical = CountryRegistry.resolveCanonicalId(selectedSellerId);
+    return nationsMap[canonical] || nationsMap[selectedSellerId] || null;
+  }, [selectedSellerId, nationsMap]);
 
-  const tranches = useMemo<MachineryTrancheInfo[]>(() => {
-    if (!selectedSeller) return [];
-
-    const sellerTech = selectedSeller.industrialLevel;
-    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
-      currentEquipmentTech,
-      sellerTech,
+  if (selectedSeller) {
+    return (
+      <MachineryImportCountryView
+        buyerNation={nation}
+        sellerNation={selectedSeller}
+        totalFactories={totalFactories}
+        onBack={() => setSelectedSellerId(null)}
+      />
     );
-
-    const baseIncome =
-      totalFactories *
-      IndustryCalculator.calculateFactoryYield(currentEquipmentTech);
-
-    const isMaxedOut = currentEquipmentTech >= sellerTech;
-
-    const configs = [
-      {
-        percentage: 0.1,
-        percentageLabel: "۱۰٪ کارخانه‌ها",
-        badgeTitle: "بسته چابک واردات خطوط",
-        calcQty: Math.max(1, Math.round(totalFactories * 0.1)),
-      },
-      {
-        percentage: 0.25,
-        percentageLabel: "۲۵٪ کارخانه‌ها",
-        badgeTitle: "بسته توسعه استراتژیک",
-        calcQty: Math.max(
-          1,
-          Math.min(totalFactories, Math.round(totalFactories * 0.25)),
-        ),
-      },
-      {
-        percentage: 1.0,
-        percentageLabel: "۱۰۰٪ کارخانه‌ها",
-        badgeTitle: "نوسازی جامع و سراسری",
-        calcQty: totalFactories,
-      },
-    ];
-
-    return configs.map((cfg) => {
-      const quantity = cfg.calcQty;
-      const totalCost = quantity * unitCost;
-      const projectedTech = IndustryCalculator.calculateNewEquipmentTechLevel(
-        totalFactories,
-        currentEquipmentTech,
-        quantity,
-        sellerTech,
-      );
-      const newIncome =
-        totalFactories *
-        IndustryCalculator.calculateFactoryYield(projectedTech);
-      const projectedIncomeDelta = Math.max(0, newIncome - baseIncome);
-      const canAfford = nation.treasury >= totalCost && totalCost > 0;
-
-      return {
-        percentage: cfg.percentage,
-        percentageLabel: cfg.percentageLabel,
-        badgeTitle: cfg.badgeTitle,
-        quantity,
-        totalFactories,
-        totalCost,
-        currentTech: currentEquipmentTech,
-        targetTech: sellerTech,
-        projectedTech,
-        projectedIncomeDelta,
-        canAfford,
-        isMaxedOut,
-      };
-    });
-  }, [selectedSeller, totalFactories, currentEquipmentTech, nation.treasury]);
-
-  const handlePurchaseTranche = async (quantity: number) => {
-    if (!selectedSeller || isSubmitting) return;
-
-    setIsSubmitting(true);
-    try {
-      const action = ActionFactory.buyIndustrialEquipment(
-        nation.id,
-        selectedSeller.id,
-        quantity,
-      );
-      await dispatchAction(
-        action,
-        `تجهیزات صنعتی برای ${PersianNumberFormatter.formatNumberWithCommas(quantity)} کارخانه از ${selectedSeller.name} خریداری شد.`,
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  }
 
   return (
-    <div className="space-y-5 dir-rtl text-right font-sans animate-in fade-in duration-200">
-      <div className="bg-card/90 border border-border/80 p-4.5 rounded-3xl space-y-2 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-2xl bg-primary/15 text-primary border border-primary/30">
-            <ShoppingCart size={18} />
-          </div>
+    <div className="space-y-4 dir-rtl text-right font-sans animate-in fade-in duration-200">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-secondary/30 border border-border/60 rounded-2xl">
+        <div className="flex items-center gap-2">
+          <ShoppingCart size={16} className="text-primary" />
           <div>
-            <h3 className="text-sm font-black text-foreground">
-              بازار بین‌المللی تجهیزات و بسته‌های نوسازی خطوط تولید
+            <h3 className="text-xs font-black text-foreground">
+              فهرست صادرکنندگان تجهیزات و ماشین‌آلات پیشرفته
             </h3>
-            <span className="text-[11px] text-muted-foreground">
-              نوسازی کارخانجات در بسته‌های ۱۰٪، ۲۵٪ یا ۱۰۰٪ (محاسبه قیمت: ۳۰٪ به
-              ازای هر لول اختلاف).
+            <span className="text-[10px] text-muted-foreground">
+              روی هر کشور کلیک کنید تا میز واردات خطوط تولید و تجهیز رده‌ها با
+              لول آن کشور باز شود.
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs bg-secondary/80 px-3.5 py-1.5 rounded-2xl border border-border/70 shrink-0">
-          <span className="text-muted-foreground font-sans">
-            تعداد کل کارخانجات کشور:
-          </span>
-          <span className="font-black text-foreground">
-            {PersianNumberFormatter.formatNumberWithCommas(totalFactories)} سوله
-          </span>
+        <div className="relative min-w-[220px]">
+          <Search
+            size={13}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="text"
+            placeholder="جستجوی نام یا نماد صادرکننده..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
+          />
         </div>
       </div>
 
@@ -180,47 +113,20 @@ export function IndustryImportTab({
             پیشرفته‌ترین صنایع در اختیار شماست
           </span>
           <p className="text-xs text-muted-foreground">
-            هیچ کشوری در جهان فناوری صنعتی بالاتری نسبت به تراز تجهیزات فعلی شما
+            هیچ کشوری در جهان فناوری صنعتی بالاتری نسبت به خطوط تولید فعلی شما
             ندارد.
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
-              انتخاب کشور صادرکننده ماشین‌آلات پیشرفته
-            </span>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-              {sellers.map((seller) => (
-                <MachinerySellerCard
-                  key={seller.id}
-                  seller={seller}
-                  isSelected={selectedSeller?.id === seller.id}
-                  onSelect={setSelectedSellerId}
-                />
-              ))}
-            </div>
-          </div>
-
-          {selectedSeller && (
-            <div className="space-y-2 pt-2">
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
-                بسته‌های نوسازی خطوط تولید با فناوری {selectedSeller.name}
-              </span>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                {tranches.map((tranche) => (
-                  <MachineryTrancheCard
-                    key={tranche.percentage}
-                    tranche={tranche}
-                    isSubmitting={isSubmitting}
-                    onExecute={handlePurchaseTranche}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {filteredSellers.map((seller) => (
+            <MachinerySellerCard
+              key={seller.id}
+              seller={seller}
+              isSelected={false}
+              onSelect={setSelectedSellerId}
+            />
+          ))}
         </div>
       )}
     </div>

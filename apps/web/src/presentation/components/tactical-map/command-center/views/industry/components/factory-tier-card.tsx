@@ -16,6 +16,7 @@ import { FactoryTierUpgradeItem } from "../hooks/use-factory-tier-procurement";
 interface FactoryTierCardProps {
   item: FactoryTierUpgradeItem;
   totalFactories: number;
+  actionLabel?: string;
   feedbacks?: { id: string; text: string }[];
   isSubmitting?: boolean;
   onUpgrade: (item: FactoryTierUpgradeItem) => void;
@@ -24,6 +25,7 @@ interface FactoryTierCardProps {
 export function FactoryTierCard({
   item,
   totalFactories,
+  actionLabel = "ارتقای بومی",
   feedbacks = [],
   isSubmitting = false,
   onUpgrade,
@@ -85,21 +87,34 @@ export function FactoryTierCard({
             </div>
           </div>
 
-          <div
-            className={`px-2.5 py-1 rounded-xl border font-mono font-bold text-[11px] flex items-center gap-1 shrink-0 ${
-              isMaxedOut
-                ? "bg-gdp/15 text-gdp border-gdp/40"
-                : "bg-primary/15 text-primary border-primary/40"
-            }`}
-          >
-            <Sparkles size={11} />
-            <span>
-              سطح{" "}
-              {PersianNumberFormatter.toPersianDigits(
-                batch.techLevel.toFixed(1),
-              )}
-            </span>
-          </div>
+          {isMaxedOut ? (
+            <div className="px-2.5 py-1 rounded-xl border font-mono font-bold text-[11px] flex items-center gap-1 shrink-0 bg-gdp/15 text-gdp border-gdp/40">
+              <Sparkles size={11} />
+              <span>
+                سطح{" "}
+                {PersianNumberFormatter.toPersianDigits(
+                  batch.techLevel.toFixed(1),
+                )}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 font-mono text-[11px] font-black shrink-0">
+              <span className="text-muted-foreground bg-secondary/80 border border-border/60 px-2 py-0.5 rounded-lg">
+                لِوِل{" "}
+                {PersianNumberFormatter.toPersianDigits(
+                  batch.techLevel.toFixed(1),
+                )}
+              </span>
+              <ArrowLeft
+                size={13}
+                className="text-gdp shrink-0 animate-pulse"
+              />
+              <span className="text-gdp bg-gdp/15 border border-gdp/30 px-2 py-0.5 rounded-lg">
+                لِوِل{" "}
+                {PersianNumberFormatter.toPersianDigits(targetTech.toFixed(1))}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="bg-background/70 border border-border/70 p-3.5 rounded-2xl space-y-2 shadow-inner font-mono text-xs">
@@ -145,12 +160,12 @@ export function FactoryTierCard({
         </div>
       </div>
 
-      <div className="relative pt-1">
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 pointer-events-none flex flex-col items-center z-20">
+      <div className="relative pt-1 space-y-2 font-mono">
+        <div className="absolute -top-7 left-1/2 -translate-x-1/2 pointer-events-none flex flex-col items-center z-30 select-none">
           {feedbacks.map((f) => (
             <span
               key={f.id}
-              className="text-xs font-black font-mono text-gdp drop-shadow-xl animate-out fade-out slide-out-to-top-3 duration-700 whitespace-nowrap bg-background/95 px-3 py-0.5 rounded-xl border border-gdp/50 shadow-lg"
+              className="text-sm font-black font-mono text-emerald-400 drop-shadow-[0_2px_10px_rgba(16,185,129,0.9)] tracking-wide animate-out fade-out slide-out-to-top-6 duration-700 whitespace-nowrap"
             >
               {f.text}
             </span>
@@ -158,10 +173,10 @@ export function FactoryTierCard({
         </div>
 
         {isMaxedOut ? (
-          <div className="w-full py-3 bg-emerald-950/30 text-emerald-300 rounded-2xl text-xs font-bold border border-emerald-500/40 flex items-center justify-center gap-2 select-none shadow-inner">
-            <CheckCircle2 size={15} className="text-gdp" />
+          <div className="w-full py-2.5 bg-emerald-950/20 text-emerald-400/90 rounded-2xl text-[11px] font-bold border border-emerald-500/30 flex items-center justify-center gap-1.5 select-none shadow-inner font-sans">
+            <CheckCircle2 size={14} className="text-gdp" />
             <span>
-              مجهز به بالاترین سطح فناوری (سطح{" "}
+              مجهز به سقف فناوری (سطح{" "}
               {PersianNumberFormatter.toPersianDigits(
                 batch.techLevel.toFixed(1),
               )}
@@ -169,32 +184,32 @@ export function FactoryTierCard({
             </span>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => onUpgrade(item)}
-            disabled={!canAfford || isSubmitting}
-            className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-500 hover:from-emerald-400 hover:to-teal-400 disabled:from-secondary disabled:to-secondary disabled:text-muted-foreground text-black rounded-2xl text-xs font-black font-mono transition-all cursor-pointer shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-between border border-emerald-300/40"
-            title={`ارتقای ${batchQuantity} سوله به سطح ${targetTech.toFixed(1)}`}
-          >
-            <div className="flex items-center gap-1.5 font-sans">
-              <div className="w-5 h-5 rounded-md bg-black/20 flex items-center justify-center">
-                <Plus size={12} strokeWidth={3} />
-              </div>
-              <span className="text-xs font-black">
-                ارتقای بومی (
-                {PersianNumberFormatter.formatNumberWithCommas(batchQuantity)}{" "}
-                سوله)
+          <>
+            <div className="flex items-center justify-between px-1 text-[11px]">
+              <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
+                <Coins size={11} className="text-amber-400" />
+                <span>مبلغ سرمایه‌گذاری بسته:</span>
+              </span>
+              <span className="font-extrabold text-foreground text-xs">
+                {PersianNumberFormatter.formatCurrency(batchCost, true)}
               </span>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded-xl border border-black/10">
-              <Coins size={12} className="text-amber-950 shrink-0" />
-              <span className="text-xs font-extrabold">
-                {PersianNumberFormatter.formatCurrency(batchCost, true)}
+            <button
+              type="button"
+              onClick={() => onUpgrade(item)}
+              disabled={!canAfford || isSubmitting}
+              className="w-full py-2.5 px-3.5 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-bold font-sans transition-all cursor-pointer shadow-md shadow-gdp/15 hover:scale-[1.005] active:scale-[0.995] flex items-center justify-center gap-1.5 border border-gdp/30"
+              title={`ارتقای ${batchQuantity} سوله به سطح ${targetTech.toFixed(1)}`}
+            >
+              <Plus size={13} strokeWidth={2.5} />
+              <span>
+                {actionLabel} (
+                {PersianNumberFormatter.formatNumberWithCommas(batchQuantity)}{" "}
+                سوله)
               </span>
-              <ArrowLeft size={11} className="opacity-80" />
-            </div>
-          </button>
+            </button>
+          </>
         )}
       </div>
     </div>
