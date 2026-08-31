@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback, RefObject } from "react";
 import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
 import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
 import { BitPackedGridState } from "@geopolitics/game-engine";
-import { ClientMapPathResolver, Province } from "@geopolitics/domain";
+import { ClientMapPathResolver, Province, Nation } from "@geopolitics/domain";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 
 interface UseWebGLMapRendererProps {
@@ -11,6 +11,8 @@ interface UseWebGLMapRendererProps {
   positionRef: RefObject<CameraPosition>;
   scaleRef: RefObject<number>;
   provincesMap?: Record<string, Province>;
+  nationsMap?: Record<string, Nation>;
+  humanNationId?: string;
   activeLayer?: "political" | "gdp";
   hoveredGpuIndex?: number;
 }
@@ -21,12 +23,15 @@ export function useWebGLMapRenderer({
   positionRef,
   scaleRef,
   provincesMap,
+  nationsMap,
+  humanNationId,
   activeLayer = "political",
   hoveredGpuIndex = 0,
 }: UseWebGLMapRendererProps) {
   const rendererRef = useRef<WebGLMapRenderer | null>(null);
   const paletteTextureRef = useRef<WebGLTexture | null>(null);
   const gdpTextureRef = useRef<WebGLTexture | null>(null);
+  const diplomaticTextureRef = useRef<WebGLTexture | null>(null);
   const hoveredGpuIndexRef = useRef<number>(hoveredGpuIndex);
   const lastVersionRef = useRef<number>(-1);
   const animFrameIdRef = useRef<number | null>(null);
@@ -99,6 +104,17 @@ export function useWebGLMapRenderer({
       renderer.setPaletteTexture(paletteTex);
     }
 
+    const dipTex = WebGLPaletteTextureManager.createDiplomaticTexture(
+      gl,
+      provincesMap,
+      nationsMap,
+      humanNationId,
+    );
+    if (dipTex) {
+      diplomaticTextureRef.current = dipTex;
+      renderer.setDiplomaticPaletteTexture(dipTex);
+    }
+
     const gdpPaletteTex = WebGLPaletteTextureManager.createGdpPaletteTexture(
       gl,
       provincesMap,
@@ -114,7 +130,7 @@ export function useWebGLMapRenderer({
     lastVersionRef.current = gridState.getVersion();
 
     requestRender();
-  }, [gl, provincesMap, requestRender]);
+  }, [gl, provincesMap, nationsMap, humanNationId, requestRender]);
 
   useEffect(() => {
     if (!gl || !paletteTextureRef.current) return;
@@ -125,6 +141,18 @@ export function useWebGLMapRenderer({
     );
     requestRender();
   }, [gl, provincesMap, requestRender]);
+
+  useEffect(() => {
+    if (!gl || !diplomaticTextureRef.current) return;
+    WebGLPaletteTextureManager.updateDiplomaticTexture(
+      gl,
+      diplomaticTextureRef.current,
+      provincesMap,
+      nationsMap,
+      humanNationId,
+    );
+    requestRender();
+  }, [gl, provincesMap, nationsMap, humanNationId, requestRender]);
 
   useEffect(() => {
     if (!gl || !gdpTextureRef.current) return;

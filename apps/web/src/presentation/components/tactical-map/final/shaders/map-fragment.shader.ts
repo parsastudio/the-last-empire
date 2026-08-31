@@ -9,6 +9,7 @@ uniform sampler2D u_terrainTexture;
 uniform usampler2D u_liveStateTexture;
 uniform sampler2D u_paletteTexture;
 uniform sampler2D u_gdpPaletteTexture;
+uniform sampler2D u_diplomaticPaletteTexture;
 
 uniform vec2 u_texelSize;
 uniform float u_scale;
@@ -23,6 +24,43 @@ vec4 sampleCountryColor(uint pid) {
     return texture(u_gdpPaletteTexture, vec2(u, v));
   }
   return texture(u_paletteTexture, vec2(u, v));
+}
+
+vec4 sampleDiplomaticColor(uint pid) {
+  if (pid <= 1u) return vec4(0.0);
+  float u = (float(pid & 255u) + 0.5) / 256.0;
+  float v = (float((pid >> 8u) & 255u) + 0.5) / 256.0;
+  return texture(u_diplomaticPaletteTexture, vec2(u, v));
+}
+
+float calculateBorderDistance3px(vec2 uv, uint centerPid, int centerCountryId) {
+  float minD = 4.0;
+  vec2 o = u_texelSize;
+
+  vec2 dirs[4] = vec2[4](
+    vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0)
+  );
+
+  for (int d = 0; d < 4; d++) {
+    vec2 dir = dirs[d];
+    for (float step = 1.0; step <= 3.0; step += 1.0) {
+      if (step >= minD) break;
+      uint neighborRaw = texture(u_liveStateTexture, uv + dir * step * o).r;
+      uint neighborPid = neighborRaw & 4095u;
+      if (neighborPid <= 1u) {
+        minD = min(minD, step);
+        break;
+      } else if (neighborPid != centerPid) {
+        vec4 c = sampleCountryColor(neighborPid);
+        int neighborCountry = int(floor(c.a * 255.0 + 0.5));
+        if (neighborCountry != centerCountryId) {
+          minD = min(minD, step);
+          break;
+        }
+      }
+    }
+  }
+  return minD;
 }
 
 void main() {
@@ -64,13 +102,11 @@ void main() {
   float coastBorder = 0.0;
   float provBorder = 0.0;
   float hoveredPerimeter = 0.0;
-  float minEdgeDist = 1e6;
 
   if (pW <= 1u) {
     float b = 1.0 - smoothstep(coastStroke - edgeSoft, coastStroke + edgeSoft, dW);
     coastBorder = max(coastBorder, b);
     if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-    minEdgeDist = min(minEdgeDist, dW);
   } else if (pW != centerPid) {
     vec4 cW = sampleCountryColor(pW);
     int cW_country = int(floor(cW.a * 255.0 + 0.5));
@@ -78,7 +114,6 @@ void main() {
       float b = 1.0 - smoothstep(halfStroke - edgeSoft, halfStroke + edgeSoft, dW);
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-      minEdgeDist = min(minEdgeDist, dW);
     } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dW));
     }
@@ -88,7 +123,6 @@ void main() {
     float b = 1.0 - smoothstep(coastStroke - edgeSoft, coastStroke + edgeSoft, dE);
     coastBorder = max(coastBorder, b);
     if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-    minEdgeDist = min(minEdgeDist, dE);
   } else if (pE != centerPid) {
     vec4 cE = sampleCountryColor(pE);
     int cE_country = int(floor(cE.a * 255.0 + 0.5));
@@ -96,7 +130,6 @@ void main() {
       float b = 1.0 - smoothstep(halfStroke - edgeSoft, halfStroke + edgeSoft, dE);
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-      minEdgeDist = min(minEdgeDist, dE);
     } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dE));
     }
@@ -106,7 +139,6 @@ void main() {
     float b = 1.0 - smoothstep(coastStroke - edgeSoft, coastStroke + edgeSoft, dN);
     coastBorder = max(coastBorder, b);
     if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-    minEdgeDist = min(minEdgeDist, dN);
   } else if (pN != centerPid) {
     vec4 cN = sampleCountryColor(pN);
     int cN_country = int(floor(cN.a * 255.0 + 0.5));
@@ -114,7 +146,6 @@ void main() {
       float b = 1.0 - smoothstep(halfStroke - edgeSoft, halfStroke + edgeSoft, dN);
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-      minEdgeDist = min(minEdgeDist, dN);
     } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dN));
     }
@@ -124,7 +155,6 @@ void main() {
     float b = 1.0 - smoothstep(coastStroke - edgeSoft, coastStroke + edgeSoft, dS);
     coastBorder = max(coastBorder, b);
     if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-    minEdgeDist = min(minEdgeDist, dS);
   } else if (pS != centerPid) {
     vec4 cS = sampleCountryColor(pS);
     int cS_country = int(floor(cS.a * 255.0 + 0.5));
@@ -132,7 +162,6 @@ void main() {
       float b = 1.0 - smoothstep(halfStroke - edgeSoft, halfStroke + edgeSoft, dS);
       intBorder = max(intBorder, b);
       if (isHovered) hoveredPerimeter = max(hoveredPerimeter, b);
-      minEdgeDist = min(minEdgeDist, dS);
     } else if (isHovered) {
       provBorder = max(provBorder, 1.0 - smoothstep(provStroke - edgeSoft, provStroke + edgeSoft, dS));
     }
@@ -163,10 +192,19 @@ void main() {
 
   vec3 baseColor = mix(terrainColor.rgb, effectiveCenterColor, blendOpacity);
 
-  if (minEdgeDist < 12.0) {
-    float glowFactor = exp(-minEdgeDist / 4.0) * (isHovered ? 0.14 : 0.07);
-    vec3 glowColor = effectiveCenterColor * 1.20 + vec3(0.02);
-    baseColor = mix(baseColor, glowColor, glowFactor);
+  if (u_activeLayer == 0) {
+    vec4 dipData = sampleDiplomaticColor(centerPid);
+    float dipIntensity = dipData.a;
+
+    if (dipIntensity > 0.05) {
+      float borderDist = calculateBorderDistance3px(v_texCoord, centerPid, centerCountryId);
+
+      float innerRim3px = max(0.0, 1.0 - borderDist / 3.0) * dipIntensity;
+      float borderEdgeHighlight = max(0.0, 1.0 - borderDist / 1.5) * dipIntensity;
+
+      baseColor = mix(baseColor, dipData.rgb, innerRim3px * 0.75);
+      baseColor = mix(baseColor, dipData.rgb * 1.45 + vec3(0.12), borderEdgeHighlight * 0.55);
+    }
   }
 
   float mainBorderFactor = max(intBorder, coastBorder);

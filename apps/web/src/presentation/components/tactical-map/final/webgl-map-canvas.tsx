@@ -10,6 +10,7 @@ import { ContextActionType } from "@/presentation/components/tactical-map/contex
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
+import { DiplomaticStampsOverlay } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/diplomatic-stamps-overlay";
 
 interface WebGLMapCanvasProps {
   provincesMap?: Record<string, Province>;
@@ -102,6 +103,8 @@ export function WebGLMapCanvas({
     positionRef,
     scaleRef,
     provincesMap,
+    nationsMap,
+    humanNationId,
     activeLayer,
     hoveredGpuIndex,
   });
@@ -147,6 +150,13 @@ export function WebGLMapCanvas({
       <canvas
         ref={canvasRef}
         className="pointer-events-none absolute inset-0 w-full h-full block"
+      />
+      <DiplomaticStampsOverlay
+        positionRef={positionRef}
+        scaleRef={scaleRef}
+        nationsMap={nationsMap}
+        provincesMap={provincesMap}
+        humanNationId={humanNationId}
       />
       <WebGLHoverHud hoverPos={hoverPos} hoverData={hoverData} />
       <WebGLContextMenuWrapper
