@@ -71,6 +71,7 @@ export class FactoryActionExecutor {
 
   public static executeEquipDomesticMachinery(
     state: GameState,
+    action: EquipDomesticMachineryAction,
     nation: Nation,
     buyerKey: string,
   ): GameState {
@@ -89,25 +90,34 @@ export class FactoryActionExecutor {
       );
     }
 
-    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
-      nation.equipmentTechLevel,
-      nation.industrialLevel,
-    );
-    const totalCost = totalFactories * unitCost;
-
-    if (totalCost <= 0) {
+    const targetTech = nation.industrialLevel;
+    if (nation.equipmentTechLevel >= targetTech) {
       throw new GameError(
         "INVALID_ACTION",
         "تجهیزات کارخانجات شما در حال حاضر در بالاترین سطح دانش بومی کشور قرار دارد.",
       );
     }
 
+    const qty = Math.min(totalFactories, action.quantity ?? totalFactories);
+    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
+      nation.equipmentTechLevel,
+      targetTech,
+    );
+    const totalCost = qty * unitCost;
+
     if (nation.treasury < totalCost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای نوسازی بومی تمامی خطوط تولید کارخانجات کافی نیست.",
+        "موجودی خزانه برای نوسازی این تعداد کارخانه کافی نیست.",
       );
     }
+
+    const newEquipTech = IndustryCalculator.calculateNewEquipmentTechLevel(
+      totalFactories,
+      nation.equipmentTechLevel,
+      qty,
+      targetTech,
+    );
 
     return {
       ...state,
@@ -116,7 +126,7 @@ export class FactoryActionExecutor {
         [buyerKey]: {
           ...nation,
           treasury: nation.treasury - totalCost,
-          equipmentTechLevel: nation.industrialLevel,
+          equipmentTechLevel: newEquipTech,
         },
       },
     };
@@ -191,19 +201,6 @@ export class FactoryActionExecutor {
       );
     }
 
-    const unitPrice = IndustryCalculator.calculateEquipmentImportPrice(
-      sellerTech,
-      buyer.equipmentTechLevel,
-    );
-    const totalCost = action.quantity * unitPrice;
-
-    if (buyer.treasury < totalCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای واردات این حجم از ابزارآلات صنعتی کافی نیست.",
-      );
-    }
-
     const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
     let totalBuyerFactories = 0;
     for (const p of Object.values(state.provinces)) {
@@ -221,10 +218,24 @@ export class FactoryActionExecutor {
       );
     }
 
+    const qty = Math.min(totalBuyerFactories, action.quantity);
+    const unitPrice = IndustryCalculator.calculateModernizeUnitCost(
+      buyer.equipmentTechLevel,
+      sellerTech,
+    );
+    const totalCost = qty * unitPrice;
+
+    if (buyer.treasury < totalCost) {
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "موجودی خزانه برای واردات این حجم از ابزارآلات صنعتی کافی نیست.",
+      );
+    }
+
     const newEquipTech = IndustryCalculator.calculateNewEquipmentTechLevel(
       totalBuyerFactories,
       buyer.equipmentTechLevel,
-      action.quantity,
+      qty,
       sellerTech,
     );
 

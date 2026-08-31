@@ -23,6 +23,7 @@ export const EquipDomesticMachineryActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   type: z.literal("EQUIP_DOMESTIC_MACHINERY"),
+  quantity: z.number().positive().optional(),
 });
 
 export const InvestIndustrialResearchActionSchema = z.object({

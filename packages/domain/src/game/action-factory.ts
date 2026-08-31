@@ -53,11 +53,13 @@ export class ActionFactory {
 
   public static equipDomesticMachinery(
     nationId: string,
+    quantity?: number,
   ): EquipDomesticMachineryAction {
     return {
       id: this.createId("equip-machinery"),
       nationId,
       type: "EQUIP_DOMESTIC_MACHINERY",
+      quantity,
     };
   }
 

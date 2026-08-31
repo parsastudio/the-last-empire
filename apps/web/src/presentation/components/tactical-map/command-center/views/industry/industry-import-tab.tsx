@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { ShoppingCart, Cpu, Loader2, ShieldCheck, Zap } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { ShoppingCart, ShieldCheck } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
-import { CountryRegistry } from "@/domain/data/countries";
+import { MachinerySellerCard } from "./components/machinery-seller-card";
+import {
+  MachineryTrancheCard,
+  MachineryTrancheInfo,
+} from "./components/machinery-tranche-card";
 
 interface IndustryImportTabProps {
   nation: Nation;
@@ -26,59 +29,116 @@ export function IndustryImportTab({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { dispatchAction } = useGameActions();
 
-  const totalFactories = provincesMap
-    ? Object.values(provincesMap)
-        .filter((p) => p.ownerNationId === nation.id)
-        .reduce((sum, p) => sum + p.factoriesCount, 0)
-    : 10;
+  const totalFactories = useMemo(() => {
+    if (!provincesMap) return 10;
+    const count = Object.values(provincesMap)
+      .filter((p) => p.ownerNationId === nation.id)
+      .reduce((sum, p) => sum + p.factoriesCount, 0);
+    return Math.max(1, count);
+  }, [provincesMap, nation.id]);
 
   const currentEquipmentTech = nation.equipmentTechLevel;
 
-  const sellers = nationsMap
-    ? Object.values(nationsMap).filter(
+  const sellers = useMemo(() => {
+    if (!nationsMap) return [];
+    return Object.values(nationsMap)
+      .filter(
         (n) =>
           n.isAlive &&
           n.id !== nation.id &&
           n.industrialLevel > currentEquipmentTech,
       )
-    : [];
+      .sort((a, b) => b.industrialLevel - a.industrialLevel);
+  }, [nationsMap, nation.id, currentEquipmentTech]);
 
-  sellers.sort((a, b) => b.industrialLevel - a.industrialLevel);
+  const selectedSeller = useMemo(() => {
+    return sellers.find((s) => s.id === selectedSellerId) || sellers[0] || null;
+  }, [sellers, selectedSellerId]);
 
-  const selectedSeller =
-    sellers.find((s) => s.id === selectedSellerId) || sellers[0] || null;
+  const tranches = useMemo<MachineryTrancheInfo[]>(() => {
+    if (!selectedSeller) return [];
 
-  const techDiff = selectedSeller
-    ? Math.max(0, selectedSeller.industrialLevel - currentEquipmentTech)
-    : 0;
+    const sellerTech = selectedSeller.industrialLevel;
+    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
+      currentEquipmentTech,
+      sellerTech,
+    );
 
-  const importCost = selectedSeller
-    ? Math.floor(
+    const baseIncome =
+      totalFactories *
+      IndustryCalculator.calculateFactoryYield(currentEquipmentTech);
+
+    const isMaxedOut = currentEquipmentTech >= sellerTech;
+
+    const configs = [
+      {
+        percentage: 0.1,
+        percentageLabel: "۱۰٪ کارخانه‌ها",
+        badgeTitle: "بسته چابک واردات خطوط",
+        calcQty: Math.max(1, Math.round(totalFactories * 0.1)),
+      },
+      {
+        percentage: 0.25,
+        percentageLabel: "۲۵٪ کارخانه‌ها",
+        badgeTitle: "بسته توسعه استراتژیک",
+        calcQty: Math.max(
+          1,
+          Math.min(totalFactories, Math.round(totalFactories * 0.25)),
+        ),
+      },
+      {
+        percentage: 1.0,
+        percentageLabel: "۱۰۰٪ کارخانه‌ها",
+        badgeTitle: "نوسازی جامع و سراسری",
+        calcQty: totalFactories,
+      },
+    ];
+
+    return configs.map((cfg) => {
+      const quantity = cfg.calcQty;
+      const totalCost = quantity * unitCost;
+      const projectedTech = IndustryCalculator.calculateNewEquipmentTechLevel(
+        totalFactories,
+        currentEquipmentTech,
+        quantity,
+        sellerTech,
+      );
+      const newIncome =
         totalFactories *
-          IndustryCalculator.calculateModernizeUnitCost(
-            currentEquipmentTech,
-            selectedSeller.industrialLevel,
-          ) *
-          1.25,
-      )
-    : 0;
+        IndustryCalculator.calculateFactoryYield(projectedTech);
+      const projectedIncomeDelta = Math.max(0, newIncome - baseIncome);
+      const canAfford = nation.treasury >= totalCost && totalCost > 0;
 
-  const canAfford = selectedSeller
-    ? nation.treasury >= importCost && importCost > 0
-    : false;
+      return {
+        percentage: cfg.percentage,
+        percentageLabel: cfg.percentageLabel,
+        badgeTitle: cfg.badgeTitle,
+        quantity,
+        totalFactories,
+        totalCost,
+        currentTech: currentEquipmentTech,
+        targetTech: sellerTech,
+        projectedTech,
+        projectedIncomeDelta,
+        canAfford,
+        isMaxedOut,
+      };
+    });
+  }, [selectedSeller, totalFactories, currentEquipmentTech, nation.treasury]);
 
-  const handlePurchaseEquipment = async () => {
-    if (!selectedSeller || !canAfford || isSubmitting) return;
+  const handlePurchaseTranche = async (quantity: number) => {
+    if (!selectedSeller || isSubmitting) return;
+
     setIsSubmitting(true);
     try {
       const action = ActionFactory.buyIndustrialEquipment(
         nation.id,
         selectedSeller.id,
-        techDiff,
+        quantity,
       );
       await dispatchAction(
         action,
-        `قرارداد واردات ماشین‌آلات صنعتی پیشرفته از ${selectedSeller.name} منعقد و تراز خطوط تولید به لِوِل ${PersianNumberFormatter.toPersianDigits(selectedSeller.industrialLevel.toFixed(1))} ارتقا یافت.`,
+        `تجهیزات صنعتی برای ${PersianNumberFormatter.formatNumberWithCommas(quantity)} کارخانه از ${selectedSeller.name} خریداری شد.`,
       );
     } finally {
       setIsSubmitting(false);
@@ -86,31 +146,36 @@ export function IndustryImportTab({
   };
 
   return (
-    <div className="space-y-6 dir-rtl text-right font-sans animate-in fade-in duration-200">
-      <div className="bg-card/90 border border-border/80 p-5 rounded-3xl space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ShoppingCart size={18} className="text-primary" />
-            <h3 className="text-sm font-black text-foreground">
-              بازار بین‌المللی تجهیزات و خطوط تولید صنعتی
-            </h3>
+    <div className="space-y-5 dir-rtl text-right font-sans animate-in fade-in duration-200">
+      <div className="bg-card/90 border border-border/80 p-4.5 rounded-3xl space-y-2 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-2xl bg-primary/15 text-primary border border-primary/30">
+            <ShoppingCart size={18} />
           </div>
-          <span className="text-xs font-mono font-bold text-muted-foreground">
-            تعداد کارخانجات نیازمند ارتقا:{" "}
-            {PersianNumberFormatter.formatNumberWithCommas(totalFactories)}
-          </span>
+          <div>
+            <h3 className="text-sm font-black text-foreground">
+              بازار بین‌المللی تجهیزات و بسته‌های نوسازی خطوط تولید
+            </h3>
+            <span className="text-[11px] text-muted-foreground">
+              نوسازی کارخانجات در بسته‌های ۱۰٪، ۲۵٪ یا ۱۰۰٪ (محاسبه قیمت: ۳۰٪ به
+              ازای هر لول اختلاف).
+            </span>
+          </div>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          در صورتی که دانش بومی کشور برای ساخت ماشین‌آلات پیشرفته کافی نباشد،
-          می‌توانید فناوری و خطوط تولید را مستقیماً از قطب‌های صنعتی جهان وارد
-          نمایید تا بهره‌وری کارخانجات فوراً افزایش یابد.
-        </p>
+        <div className="flex items-center gap-2 font-mono text-xs bg-secondary/80 px-3.5 py-1.5 rounded-2xl border border-border/70 shrink-0">
+          <span className="text-muted-foreground font-sans">
+            تعداد کل کارخانجات کشور:
+          </span>
+          <span className="font-black text-foreground">
+            {PersianNumberFormatter.formatNumberWithCommas(totalFactories)} سوله
+          </span>
+        </div>
       </div>
 
       {sellers.length === 0 ? (
-        <div className="p-8 bg-card/60 border border-border/60 rounded-3xl text-center space-y-2">
-          <ShieldCheck size={28} className="text-emerald-400 mx-auto" />
+        <div className="p-12 bg-card/60 border border-border/60 rounded-3xl text-center space-y-2">
+          <ShieldCheck size={32} className="text-emerald-400 mx-auto" />
           <span className="text-sm font-black text-foreground block">
             پیشرفته‌ترین صنایع در اختیار شماست
           </span>
@@ -120,135 +185,40 @@ export function IndustryImportTab({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div className="lg:col-span-2 space-y-3">
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono block px-1">
-              کشورهای صادرکننده ماشین‌آلات پیشرفته
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
+              انتخاب کشور صادرکننده ماشین‌آلات پیشرفته
             </span>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pl-1">
-              {sellers.map((seller) => {
-                const isSelected = selectedSeller?.id === seller.id;
-                const flag = getFlagEmoji(seller.flagCode || seller.id);
-                const sellerCost = Math.floor(
-                  totalFactories *
-                    IndustryCalculator.calculateModernizeUnitCost(
-                      currentEquipmentTech,
-                      seller.industrialLevel,
-                    ) *
-                    1.25,
-                );
-
-                return (
-                  <div
-                    key={seller.id}
-                    onClick={() => setSelectedSellerId(seller.id)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2.5 ${
-                      isSelected
-                        ? "bg-primary/10 border-primary shadow-md"
-                        : "bg-secondary/40 border-border/60 hover:bg-secondary/70 hover:border-border"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">{flag}</span>
-                        <div>
-                          <span className="text-xs font-black text-foreground block">
-                            {seller.name}
-                          </span>
-                          <span className="text-[10px] font-mono text-muted-foreground">
-                            {CountryRegistry.resolveCanonicalId(seller.id)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1 bg-background/80 px-2 py-0.5 rounded-lg border border-border/50 text-[11px] font-mono font-bold text-gdp">
-                        <Cpu size={11} />
-                        <span>
-                          لِوِل{" "}
-                          {PersianNumberFormatter.toPersianDigits(
-                            seller.industrialLevel.toFixed(1),
-                          )}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs pt-1 border-t border-border/40 font-mono">
-                      <span className="text-[10px] text-muted-foreground font-sans">
-                        مجموع هزینه قرارداد:
-                      </span>
-                      <span className="font-bold text-foreground">
-                        {PersianNumberFormatter.formatCurrency(sellerCost)}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+              {sellers.map((seller) => (
+                <MachinerySellerCard
+                  key={seller.id}
+                  seller={seller}
+                  isSelected={selectedSeller?.id === seller.id}
+                  onSelect={setSelectedSellerId}
+                />
+              ))}
             </div>
           </div>
 
           {selectedSeller && (
-            <div className="bg-card/90 border border-border/80 p-5 rounded-3xl space-y-4 shadow-sm flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-border/60">
-                  <Zap size={16} className="text-primary" />
-                  <h4 className="text-xs font-black text-foreground">
-                    خلاصه قرارداد واردات
-                  </h4>
-                </div>
+            <div className="space-y-2 pt-2">
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
+                بسته‌های نوسازی خطوط تولید با فناوری {selectedSeller.name}
+              </span>
 
-                <div className="space-y-2 text-xs font-mono">
-                  <div className="flex justify-between items-center bg-secondary/40 p-2.5 rounded-xl border border-border/50">
-                    <span className="text-muted-foreground font-sans">
-                      تأمین‌کننده:
-                    </span>
-                    <span className="font-bold text-foreground">
-                      {selectedSeller.name}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center bg-secondary/40 p-2.5 rounded-xl border border-border/50">
-                    <span className="text-muted-foreground font-sans">
-                      جهش فناوری:
-                    </span>
-                    <span className="font-bold text-gdp">
-                      {PersianNumberFormatter.toPersianDigits(
-                        currentEquipmentTech.toFixed(1),
-                      )}{" "}
-                      ➔{" "}
-                      {PersianNumberFormatter.toPersianDigits(
-                        selectedSeller.industrialLevel.toFixed(1),
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center bg-secondary/40 p-2.5 rounded-xl border border-border/50">
-                    <span className="text-muted-foreground font-sans">
-                      کل مبلغ قابل پرداخت:
-                    </span>
-                    <span className="font-bold text-foreground">
-                      {PersianNumberFormatter.formatCurrency(importCost)}
-                    </span>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                {tranches.map((tranche) => (
+                  <MachineryTrancheCard
+                    key={tranche.percentage}
+                    tranche={tranche}
+                    isSubmitting={isSubmitting}
+                    onExecute={handlePurchaseTranche}
+                  />
+                ))}
               </div>
-
-              <button
-                onClick={handlePurchaseEquipment}
-                disabled={!canAfford || isSubmitting}
-                className="w-full py-3.5 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-lg shadow-primary/20 flex items-center justify-center gap-1.5"
-              >
-                {isSubmitting ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <ShoppingCart size={14} />
-                )}
-                <span>
-                  {!canAfford
-                    ? "موجودی خزانه ناکافی است"
-                    : `انعقاد قرارداد واردات (${PersianNumberFormatter.formatCurrency(importCost)})`}
-                </span>
-              </button>
             </div>
           )}
         </div>

@@ -1,6 +1,3 @@
-import { Province } from "@/domain/province/province.schema";
-import { Nation } from "@/domain/nation/nation.schema";
-
 export class IndustryCalculator {
   public static readonly BASE_FACTORY_YIELD = 250_000_000;
   public static readonly SUBSISTENCE_YIELD = 125_000_000;
@@ -8,7 +5,9 @@ export class IndustryCalculator {
   public static readonly FACTORY_REBUILD_COST = 1_000_000_000;
   public static readonly RESEARCH_BASE_COST = 20_000_000_000;
   public static readonly RESEARCH_STEP = 0.1;
+  public static readonly MACHINERY_BASE_UNIT_PRICE = 2_000_000_000;
   public static readonly IMPORT_BASE_PRICE = 2_000_000_000;
+  public static readonly LEVEL_SURCHARGE_RATE = 0.3;
 
   public static calculateFactoryYield(techLevel: number): number {
     return Math.floor(
@@ -60,11 +59,14 @@ export class IndustryCalculator {
   }
 
   public static calculateModernizeUnitCost(
-    equipmentTechLevel: number,
-    industrialLevel: number,
+    currentEquipmentTech: number,
+    targetTech: number,
   ): number {
-    const gap = Math.max(0, 1 - equipmentTechLevel / industrialLevel);
-    return Math.floor(1_000_000_000 * gap);
+    const delta = Math.max(0, targetTech - currentEquipmentTech);
+    if (delta <= 0) return 0;
+    return Math.floor(
+      this.MACHINERY_BASE_UNIT_PRICE * delta * this.LEVEL_SURCHARGE_RATE,
+    );
   }
 
   public static calculateResearchStepCost(industrialLevel: number): number {
@@ -77,26 +79,22 @@ export class IndustryCalculator {
     sellerTech: number,
     buyerTech: number,
   ): number {
-    const deltaT = Math.max(0, sellerTech - buyerTech);
-    return Math.floor(
-      this.IMPORT_BASE_PRICE * Math.pow(this.YIELD_TECH_BASE, deltaT),
-    );
+    return this.calculateModernizeUnitCost(buyerTech, sellerTech);
   }
 
   public static calculateNewEquipmentTechLevel(
     totalFactories: number,
     currentEquipmentTech: number,
-    importedQuantity: number,
-    sellerTech: number,
+    modernizedQuantity: number,
+    targetTech: number,
   ): number {
-    if (totalFactories <= 0) return currentEquipmentTech;
-    const safeQuantity = Math.min(
-      totalFactories,
-      Math.max(0, importedQuantity),
-    );
-    const oldPart = (totalFactories - safeQuantity) * currentEquipmentTech;
-    const newPart = safeQuantity * sellerTech;
-    const combined = (oldPart + newPart) / totalFactories;
-    return Number(combined.toFixed(2));
+    if (totalFactories <= 0 || targetTech <= currentEquipmentTech) {
+      return currentEquipmentTech;
+    }
+    const safeQty = Math.min(totalFactories, Math.max(0, modernizedQuantity));
+    const delta = targetTech - currentEquipmentTech;
+    const increase = (safeQty / totalFactories) * delta;
+    const finalLevel = Math.min(targetTech, currentEquipmentTech + increase);
+    return Number(finalLevel.toFixed(2));
   }
 }
