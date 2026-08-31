@@ -74,21 +74,15 @@ export function MachineryImportCountryView({
           <span>
             {techDelta > 0 ? (
               <>
-                شکاف فناوری صنعتی با صادرکننده:{" "}
+                شکاف فناوری صنعتی صادرکننده:{" "}
                 <strong className="text-primary font-mono">
                   +{PersianNumberFormatter.toPersianDigits(techDelta)}
                 </strong>{" "}
-                سطح (ضریب هزینه واردات:{" "}
-                <strong className="text-amber-400 font-mono">
-                  {PersianNumberFormatter.toPersianDigits(
-                    multiplier.toFixed(2),
-                  )}
-                  x
-                </strong>
-                ).
+                سطح (قیمت‌گذاری بر مبنای نرخ پایه ۱۰ میلیارد دلار به ازای هر لول
+                اختلاف محاسبه می‌گردد).
               </>
             ) : (
-              "سطح فناوری صنعتی این کشور برابر با شماست."
+              "سطح فناوری صنعتی این کشور برابر با تجهیزات شماست."
             )}
           </span>
         </div>

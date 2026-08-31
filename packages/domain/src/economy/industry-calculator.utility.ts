@@ -1,14 +1,15 @@
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 
 export class IndustryCalculator {
-  public static readonly BASE_FACTORY_YIELD = 500_000_000;
-  public static readonly SUBSISTENCE_YIELD = 100_000_000;
+  public static readonly BASE_FACTORY_YIELD = 5_000_000_000;
+  public static readonly SUBSISTENCE_YIELD = 500_000_000;
   public static readonly YIELD_TECH_BASE = 2.0;
-  public static readonly FACTORY_REBUILD_COST = 3_000_000_000;
+  public static readonly FACTORY_REBUILD_COST = 30_000_000_000;
   public static readonly RESEARCH_BASE_COST = 25_000_000_000;
+  public static readonly RESEARCH_GROWTH_BASE = 2.5;
   public static readonly RESEARCH_STEP = 0.1;
-  public static readonly MACHINERY_BASE_UNIT_PRICE = 1_000_000_000;
-  public static readonly IMPORT_BASE_PRICE = 1_000_000_000;
+  public static readonly MACHINERY_BASE_UNIT_PRICE = 10_000_000_000;
+  public static readonly IMPORT_BASE_PRICE = 10_000_000_000;
   public static readonly IMPORT_TECH_GAP_BASE = 1.5;
 
   public static calculateFactoryYield(techLevel: number): number {
@@ -159,7 +160,8 @@ export class IndustryCalculator {
 
   public static calculateResearchStepCost(industrialLevel: number): number {
     const k = Math.floor(industrialLevel);
-    const fullTierCost = this.RESEARCH_BASE_COST * Math.pow(2.5, k - 1);
+    const fullTierCost =
+      this.RESEARCH_BASE_COST * Math.pow(this.RESEARCH_GROWTH_BASE, k - 1);
     return Math.floor(fullTierCost / 10);
   }
 

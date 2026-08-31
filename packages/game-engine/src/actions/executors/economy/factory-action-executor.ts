@@ -37,7 +37,7 @@ export class FactoryActionExecutor {
     if (nation.treasury < cost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای بازسازی کارخانه کافی نیست (۳ میلیارد دلار نیاز است).",
+        "موجودی خزانه برای بازسازی کارخانه کافی نیست (۳۰ میلیارد دلار نیاز است).",
       );
     }
 

@@ -7,38 +7,38 @@ export interface GovernmentOption {
 }
 
 export const GOVERNMENT_TYPE_PERSIAN_MAP: Record<GovernmentType, string> = {
-  DEMOCRACY: "دموکراسی",
-  DICTATORSHIP: "حکومت دیکتاتوری",
-  MONARCHY: "پادشاهی",
-  COMMUNISM: "کمونیسم",
-  FASCISM: "فاشیسم",
+  PLURALIST_PARLIAMENTARY: "جمهوری کثرت‌گرا و پارلمانی",
+  CENTRALIZED_PRESIDENTIAL: "جمهوری ریاستی متمرکز",
+  IDEOLOGICAL_REGIME: "حاکمیت ایدئولوژیک",
+  HEREDITARY_MONARCHY: "پادشاهی سنتی و موروثی",
+  TECHNOCRATIC_ONE_PARTY: "تک‌حزبی توسعه‌گرا (تکنوکرات)",
 };
 
 export const GOVERNMENT_OPTIONS: GovernmentOption[] = [
   {
-    type: "DEMOCRACY",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.DEMOCRACY,
-    desc: "حاکمیت مردم‌سالار مبتنی بر انتخابات عمومی، پارلمان، تفکیک قوا و آزادی‌های مدنی و قانون‌مدار.",
+    type: "PLURALIST_PARLIAMENTARY",
+    name: GOVERNMENT_TYPE_PERSIAN_MAP.PLURALIST_PARLIAMENTARY,
+    desc: "دموکراسی نهادینه‌شده، تفکیک قوا، اتکا به بازار آزاد و مشارکت عمومی بر مبنای صندوق آرا.",
   },
   {
-    type: "MONARCHY",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.MONARCHY,
-    desc: "نظام پادشاهی و سلطنتی با تکیه بر سنت‌های تاریخی، ثبات نهادی و رهبری موروثی کشور.",
+    type: "CENTRALIZED_PRESIDENTIAL",
+    name: GOVERNMENT_TYPE_PERSIAN_MAP.CENTRALIZED_PRESIDENTIAL,
+    desc: "دولت اجرایی مقتدر، تمرکز اختیارات حاکمیتی، هدایت ملی و سازوکارهای انتخابی مدیریت‌شده.",
   },
   {
-    type: "COMMUNISM",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.COMMUNISM,
-    desc: "نظام اشتراکی و تک‌حزبی با تمرکز کامل بر مدیریت منابع عمومی و برابری همگانی.",
+    type: "IDEOLOGICAL_REGIME",
+    name: GOVERNMENT_TYPE_PERSIAN_MAP.IDEOLOGICAL_REGIME,
+    desc: "تصمیم‌گیری راهبردی بر مبنای دکترین عقیدتی، رهبری معنوی، آرمان‌گرایی و انسجام فراگیر.",
   },
   {
-    type: "DICTATORSHIP",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.DICTATORSHIP,
-    desc: "حکومت متمرکز با اختیارات کامل حاکمیتی، انضباط فراگیر و مدیریت مستقیم ارکان قدرت.",
+    type: "HEREDITARY_MONARCHY",
+    name: GOVERNMENT_TYPE_PERSIAN_MAP.HEREDITARY_MONARCHY,
+    desc: "ثبات خاندانی، تکیه بر سنت‌های نهادی دیرینه، پیوستگی تاریخی و اقتدار نمادین موروثی.",
   },
   {
-    type: "FASCISM",
-    name: GOVERNMENT_TYPE_PERSIAN_MAP.FASCISM,
-    desc: "نظام حاکمیت ملی‌گرا با تمرکز یکپارچه بر اقتدار میهنی، نظم سراسری و انسجام دولت.",
+    type: "TECHNOCRATIC_ONE_PARTY",
+    name: GOVERNMENT_TYPE_PERSIAN_MAP.TECHNOCRATIC_ONE_PARTY,
+    desc: "برنامه‌ریزی متمرکز دولتی، انضباط فراگیر سازمانی، نخبه‌گرایی علمی و تمرکز کامل بر رشد جهشی.",
   },
 ];
 
