@@ -6,6 +6,7 @@ import {
   MilitaryQuotaCalculator,
   ActionFactory,
   Nation,
+  ProcurementBatchCalculator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
@@ -57,15 +58,9 @@ export function useQuickRecruitBatch({
     }
   }, [nation.treasury]);
 
-  const baselineTenPercent = Math.max(
-    0,
-    Math.floor(baselineTreasuryRef.current * 0.1),
-  );
-
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
   const maxValuation = Math.floor(currentGdp);
-
   const remainingValuationCapacity = Math.max(
     0,
     maxValuation - currentValuation,
@@ -81,46 +76,29 @@ export function useQuickRecruitBatch({
       const unitPrice = stat.moneyCost;
       const q = quotas[type];
 
-      const targetBatchQuantity =
-        baselineTenPercent > 0 && unitPrice > 0
-          ? Math.max(1, Math.floor(baselineTenPercent / unitPrice))
-          : 1;
-
-      const affordableByCurrentTreasury =
-        unitPrice > 0 ? Math.floor(nation.treasury / unitPrice) : 0;
-      const affordableByValuationCap =
-        unitPrice > 0 ? Math.floor(remainingValuationCapacity / unitPrice) : 0;
-      const allowedByQuota = q.remainingRoom;
-
-      const clampedQuantity = Math.max(
-        0,
-        Math.min(
-          targetBatchQuantity,
-          affordableByCurrentTreasury,
-          affordableByValuationCap,
-          allowedByQuota,
-        ),
-      );
-
-      const isCapReached =
-        q.remainingRoom <= 0 || remainingValuationCapacity < unitPrice;
-      const displayQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
-      const batchCost = displayQuantity * unitPrice;
-      const canAfford =
-        nation.treasury >= batchCost && clampedQuantity > 0 && !isCapReached;
+      const batchResult = ProcurementBatchCalculator.calculateBatch({
+        treasury: nation.treasury,
+        baselineTreasury: baselineTreasuryRef.current,
+        budgetPercentage: 0.1,
+        unitPrice,
+        baseValuationPrice: unitPrice,
+        remainingQuotaRoom: q.remainingRoom,
+        remainingValuationCapacity,
+        minQuantity: 1,
+      });
 
       return {
         type,
         nameFa: stat.nameFa,
         unitPrice,
-        batchQuantity: displayQuantity,
-        batchCost,
-        canAfford,
-        remainingRoom: q.remainingRoom,
-        isCapReached,
+        batchQuantity: batchResult.batchQuantity,
+        batchCost: batchResult.batchCost,
+        canAfford: batchResult.canAfford,
+        remainingRoom: batchResult.remainingRoom,
+        isCapReached: batchResult.isCapReached,
       };
     });
-  }, [nation.treasury, baselineTenPercent, quotas, remainingValuationCapacity]);
+  }, [nation.treasury, quotas, remainingValuationCapacity]);
 
   const handleBuyBatch = useCallback(
     async (info: QuickUnitBatchInfo) => {

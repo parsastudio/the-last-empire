@@ -1,10 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Ship, Anchor, Coins, ShieldCheck, Zap, Lock } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import {
+  PersianNumberFormatter,
+  ActionFactory,
+  NAVAL_FLEET_CONFIG,
+  ProcurementBatchCalculator,
+} from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ActionFactory } from "@geopolitics/domain";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface NavalFleetProcurementCardProps {
@@ -25,8 +29,22 @@ export function NavalFleetProcurementCard({
     [],
   );
 
-  const fleetCost = 50_000_000_000;
-  const canAfford = treasury >= fleetCost && hasSeaAccess;
+  const fleetCost = NAVAL_FLEET_CONFIG.FLEET_UNIT_COST;
+
+  const batchInfo = useMemo(() => {
+    return ProcurementBatchCalculator.calculateBatch({
+      treasury,
+      baselineTreasury: treasury,
+      budgetPercentage: 0.1,
+      unitPrice: fleetCost,
+      baseValuationPrice: fleetCost,
+      remainingQuotaRoom: 999,
+      remainingValuationCapacity: Number.MAX_SAFE_INTEGER,
+      minQuantity: 1,
+    });
+  }, [treasury, fleetCost]);
+
+  const canAfford = hasSeaAccess && batchInfo.canAfford;
   const turnRevenue = Math.floor(navalFleetCount * fleetCost * 0.06);
 
   const handleBuy = async () => {
@@ -34,15 +52,19 @@ export function NavalFleetProcurementCard({
 
     TacticalSound.playCoinSound();
     const newId = `${Date.now()}-${Math.random()}`;
-    setFeedbacks((prev) => [...prev, { id: newId, text: "+۱ ناوگان" }]);
+    const qtyText = `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان`;
+    setFeedbacks((prev) => [...prev, { id: newId, text: qtyText }]);
     setTimeout(() => {
       setFeedbacks((prev) => prev.filter((f) => f.id !== newId));
     }, 600);
 
-    const action = ActionFactory.buyNavalFleet(nationId, 1);
+    const action = ActionFactory.buyNavalFleet(
+      nationId,
+      batchInfo.batchQuantity,
+    );
     await dispatchAction(
       action,
-      "ناوگان راهبردی جدید به نیروی دریایی ملحق شد.",
+      `${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان راهبردی جدید به نیروی دریایی ملحق شد.`,
     );
   };
 
@@ -64,7 +86,7 @@ export function NavalFleetProcurementCard({
               </span>
             </div>
             <span className="text-[10px] text-muted-foreground font-mono block">
-              قیمت قطعی: {PersianNumberFormatter.formatCurrency(fleetCost)} •
+              قیمت واحد: {PersianNumberFormatter.formatCurrency(fleetCost)} •
               بدون هزینه نگهداری
             </span>
           </div>
@@ -94,7 +116,10 @@ export function NavalFleetProcurementCard({
             >
               <Zap size={13} />
               <Coins size={12} />
-              <span>خرید فوری (۵۰B$)</span>
+              <span>
+                خرید فوری (
+                {PersianNumberFormatter.formatCurrency(batchInfo.batchCost)})
+              </span>
             </button>
           )}
         </div>

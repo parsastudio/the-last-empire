@@ -38,6 +38,7 @@ export * from "./military/military-pricing-calculator.utility";
 export * from "./military/military-unit-stats.config";
 export * from "./military/military-distribution-engine";
 export * from "./military/military-quota-calculator.utility";
+export * from "./military/procurement-batch-calculator.utility";
 export * from "./military/naval-fleet.config";
 export * from "./nation/default-nation.mock";
 export * from "./nation/gdp-calculator.utility";
