@@ -9,6 +9,7 @@ import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { FiscalRevenueCalculator } from "@/domain/economy/fiscal-revenue-calculator";
 import { MilitaryPayrollCalculator } from "@/domain/economy/payroll-calculator";
+import { NAVAL_FLEET_CONFIG } from "@/domain/military/naval-fleet.config";
 
 export class TwmiCalculatorUtility {
   public static calculateTwmi(
@@ -38,7 +39,9 @@ export class TwmiCalculatorUtility {
     );
 
     const navalSecurityIncome = Math.floor(
-      (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
+      (nation.navalFleet || 0) *
+        NAVAL_FLEET_CONFIG.FLEET_UNIT_COST *
+        NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
     );
 
     let warSubsidiesIncome = 0;

@@ -1,5 +1,5 @@
 import React from "react";
-import { Building2, Globe2, Ship, TrendingUp } from "lucide-react";
+import { Building2, Globe2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { FiscalRevenueBreakdown } from "@geopolitics/game-engine";
 import {
@@ -68,31 +68,6 @@ export function EconomicRevenuePreviewBox({
           </div>
           <span className="font-extrabold text-gdp text-xs block">
             {PersianNumberFormatter.formatCurrency(preview.globalRevenue, true)}
-          </span>
-        </div>
-      </div>
-
-      <div className="bg-background/50 border border-border/40 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-[10px] font-sans">
-        <div className="flex items-center justify-between text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <TrendingUp size={10} className="text-gdp" />
-            <span>توان صادراتی (۱۰٪ GDP):</span>
-          </span>
-          <span className="font-mono font-bold text-foreground">
-            {PersianNumberFormatter.formatCurrency(preview.exportPower, true)}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Ship size={10} className="text-cyan-400" />
-            <span>ترانزیت شاهراه (۰.۰۳٪):</span>
-          </span>
-          <span className="font-mono font-bold text-foreground">
-            {PersianNumberFormatter.formatCurrency(
-              preview.transitGateway,
-              true,
-            )}
           </span>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import {
   GameState,
   Nation,
-  NationGettersUtility,
   getNationGdp,
   SecurityFeeCalculatorUtility,
+  NAVAL_FLEET_CONFIG,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
@@ -81,7 +81,9 @@ export function selectHumanResourceMetrics(
   const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
 
   const navalSecurityIncome = Math.floor(
-    (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
+    (nation.navalFleet || 0) *
+      NAVAL_FLEET_CONFIG.FLEET_UNIT_COST *
+      NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
   );
 
   let warSubsidiesIncome = 0;
