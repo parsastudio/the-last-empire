@@ -10,9 +10,9 @@ export function useWebGLContext(
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = dimensions.width * dpr;
-    canvas.height = dimensions.height * dpr;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(dimensions.width * dpr);
+    canvas.height = Math.round(dimensions.height * dpr);
 
     const context = canvas.getContext("webgl2", {
       alpha: false,
