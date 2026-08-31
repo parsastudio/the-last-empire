@@ -34,40 +34,40 @@ function getBadgeConfig(
       return {
         label: "امپراتوری شما",
         icon: "👑",
-        bg: "rgba(6, 78, 59, 0.88)",
-        border: "rgba(52, 211, 153, 0.75)",
+        bg: "rgba(6, 78, 59, 0.92)",
+        border: "rgba(52, 211, 153, 0.8)",
         text: "#a7f3d0",
       };
     case "WAR":
       return {
         label: "جبهه نبرد",
         icon: "⚔️",
-        bg: "rgba(136, 19, 55, 0.88)",
-        border: "rgba(244, 63, 94, 0.8)",
+        bg: "rgba(136, 19, 55, 0.92)",
+        border: "rgba(244, 63, 94, 0.85)",
         text: "#fecdd3",
       };
     case "STRATEGIC_PARTNERSHIP":
       return {
         label: "شراکت استراتژیک",
         icon: "🛡️",
-        bg: "rgba(8, 51, 68, 0.88)",
-        border: "rgba(34, 211, 238, 0.75)",
+        bg: "rgba(8, 51, 68, 0.92)",
+        border: "rgba(34, 211, 238, 0.8)",
         text: "#cffafe",
       };
     case "NON_AGGRESSION_PACT":
       return {
         label: "عدم تخاصم",
         icon: "📜",
-        bg: "rgba(69, 26, 3, 0.88)",
-        border: "rgba(245, 158, 11, 0.75)",
+        bg: "rgba(69, 26, 3, 0.92)",
+        border: "rgba(245, 158, 11, 0.8)",
         text: "#fef3c7",
       };
     case "SECURITY_GUARANTEE":
       return {
         label: "چتر امنیتی",
         icon: "🌐",
-        bg: "rgba(30, 27, 75, 0.88)",
-        border: "rgba(129, 140, 248, 0.75)",
+        bg: "rgba(30, 27, 75, 0.92)",
+        border: "rgba(129, 140, 248, 0.8)",
         text: "#e0e7ff",
       };
     case "NEUTRAL":
@@ -97,18 +97,18 @@ export function DiplomaticStampsOverlay({
       const aPri =
         a.variant !== "NEUTRAL"
           ? 1000
-          : a.isSuperpower
-            ? 500
-            : a.rank <= 15
-              ? 200
+          : a.territoryPixels >= 45000
+            ? 600
+            : a.rank <= 8
+              ? 400
               : 10;
       const bPri =
         b.variant !== "NEUTRAL"
           ? 1000
-          : b.isSuperpower
-            ? 500
-            : b.rank <= 15
-              ? 200
+          : b.territoryPixels >= 45000
+            ? 600
+            : b.rank <= 8
+              ? 400
               : 10;
       if (aPri !== bPri) return bPri - aPri;
       return b.territoryPixels - a.territoryPixels;
@@ -215,10 +215,10 @@ export function DiplomaticStampsOverlay({
         const totalHeight = badgeConfig ? fontSize * 2 + 14 : fontSize + 4;
 
         const box = {
-          minX: screenX - textWidth / 2 - 6,
-          maxX: screenX + textWidth / 2 + 6,
-          minY: screenY - totalHeight / 2 - 3,
-          maxY: screenY + totalHeight / 2 + 3,
+          minX: screenX - textWidth / 2 - 8,
+          maxX: screenX + textWidth / 2 + 8,
+          minY: screenY - totalHeight / 2 - 4,
+          maxY: screenY + totalHeight / 2 + 4,
         };
 
         let collides = false;
@@ -256,9 +256,9 @@ export function DiplomaticStampsOverlay({
         ctx.fillStyle =
           item.variant !== "NEUTRAL"
             ? "#ffffff"
-            : item.isSuperpower
-              ? "#f8fafc"
-              : "#e2e8f0";
+            : item.territoryPixels >= 45000
+              ? "#ffffff"
+              : "#f8fafc";
 
         ctx.fillText(item.nationName, screenX, textY);
 
