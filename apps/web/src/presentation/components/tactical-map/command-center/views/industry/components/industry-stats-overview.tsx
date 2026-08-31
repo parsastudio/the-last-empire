@@ -6,7 +6,7 @@ interface IndustryStatsOverviewProps {
   totalActiveFactories: number;
   totalMaxSlots: number;
   nationalIndustrialOccupancy: number;
-  factoryYield: number;
+  totalFactoriesYield: number;
   industrialLevel: number;
   equipmentTechLevel: number;
 }
@@ -15,7 +15,7 @@ export function IndustryStatsOverview({
   totalActiveFactories,
   totalMaxSlots,
   nationalIndustrialOccupancy,
-  factoryYield,
+  totalFactoriesYield,
   industrialLevel,
   equipmentTechLevel,
 }: IndustryStatsOverviewProps) {
@@ -55,13 +55,13 @@ export function IndustryStatsOverview({
       <div className="bg-card/90 border border-border/80 p-4 rounded-3xl space-y-1.5 shadow-sm">
         <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
           <TrendingUp size={14} className="text-emerald-400" />
-          <span>ارزش افزوده هر کارخانه</span>
+          <span>ارزش کل تمام کارخانه‌ها</span>
         </span>
         <span className="text-lg font-black font-mono text-emerald-400 block pt-1">
-          {PersianNumberFormatter.formatCurrency(factoryYield, true)}
+          {PersianNumberFormatter.formatCurrency(totalFactoriesYield, true)}
         </span>
         <span className="text-[10px] text-muted-foreground font-mono block">
-          درآمد تضمینی پایدار در هر نوبت
+          سهم مستقیم در تولید ناخالص (GDP)
         </span>
       </div>
 

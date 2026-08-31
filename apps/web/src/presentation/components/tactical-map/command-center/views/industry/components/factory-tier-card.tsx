@@ -151,10 +151,10 @@ export function FactoryTierCard({
           <div className="flex items-center justify-between pt-2 border-t border-border/40 font-mono text-xs">
             <span className="text-muted-foreground font-sans text-[11px] flex items-center gap-1">
               <TrendingUp size={12} className="text-emerald-400" />
-              <span>درآمد نوبتی این رده:</span>
+              <span>ارزش کل:</span>
             </span>
             <span className="font-black text-emerald-400 text-xs">
-              +{PersianNumberFormatter.formatCurrency(totalTierYield, true)}
+              {PersianNumberFormatter.formatCurrency(totalTierYield, true)}
             </span>
           </div>
         </div>

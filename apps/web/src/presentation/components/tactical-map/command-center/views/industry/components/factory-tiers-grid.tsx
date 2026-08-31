@@ -11,6 +11,7 @@ interface FactoryTiersGridProps {
   batches?: FactoryBatch[];
   totalFactories: number;
   targetTechLevel: number;
+  buyerIndustrialLevel?: number;
   sellerId?: string;
   actionType?: "DOMESTIC" | "IMPORT";
   actionLabel?: string;
@@ -22,6 +23,7 @@ export function FactoryTiersGrid({
   batches,
   totalFactories,
   targetTechLevel,
+  buyerIndustrialLevel,
   sellerId,
   actionType = "DOMESTIC",
   actionLabel = "ارتقای بومی",
@@ -32,6 +34,7 @@ export function FactoryTiersGrid({
       treasury,
       batches,
       targetTechLevel,
+      buyerIndustrialLevel,
       totalFactories,
       sellerId,
       actionType,

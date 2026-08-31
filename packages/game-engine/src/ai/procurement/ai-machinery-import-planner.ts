@@ -28,7 +28,7 @@ export class AIMachineryImportPlanner {
       if (seller.industrialLevel > buyer.equipmentTechLevel) {
         eligibleSellers.push({
           nation: seller,
-          techGap: seller.industrialLevel - buyer.equipmentTechLevel,
+          techGap: seller.industrialLevel - buyer.industrialLevel,
         });
       }
     }
@@ -43,6 +43,7 @@ export class AIMachineryImportPlanner {
     const unitPrice = IndustryCalculator.calculateEquipmentImportPrice(
       bestSeller.industrialLevel,
       buyer.equipmentTechLevel,
+      buyer.industrialLevel,
     );
 
     const maxAffordable = Math.floor((availableTreasury * 0.4) / unitPrice);

@@ -26,6 +26,7 @@ interface UseFactoryTierProcurementProps {
   treasury: number;
   batches?: FactoryBatch[];
   targetTechLevel: number;
+  buyerIndustrialLevel?: number;
   totalFactories: number;
   sellerId?: string;
   actionType?: "DOMESTIC" | "IMPORT";
@@ -36,6 +37,7 @@ export function useFactoryTierProcurement({
   treasury,
   batches,
   targetTechLevel,
+  buyerIndustrialLevel,
   totalFactories,
   sellerId,
   actionType = "DOMESTIC",
@@ -57,10 +59,16 @@ export function useFactoryTierProcurement({
       const isMaxedOut = batch.techLevel >= targetTechLevel;
       const unitCost = isMaxedOut
         ? 0
-        : IndustryCalculator.calculateModernizeUnitCost(
-            batch.techLevel,
-            targetTechLevel,
-          );
+        : actionType === "IMPORT"
+          ? IndustryCalculator.calculateEquipmentImportPrice(
+              targetTechLevel,
+              batch.techLevel,
+              buyerIndustrialLevel ?? targetTechLevel,
+            )
+          : IndustryCalculator.calculateModernizeUnitCost(
+              batch.techLevel,
+              targetTechLevel,
+            );
 
       const batchResult = isMaxedOut
         ? { batchQuantity: 0, batchCost: 0, canAfford: false }
@@ -86,7 +94,13 @@ export function useFactoryTierProcurement({
         canAfford: batchResult.canAfford,
       };
     });
-  }, [consolidatedBatches, targetTechLevel, treasury]);
+  }, [
+    consolidatedBatches,
+    targetTechLevel,
+    buyerIndustrialLevel,
+    actionType,
+    treasury,
+  ]);
 
   const handleUpgradeTier = useCallback(
     async (item: FactoryTierUpgradeItem) => {

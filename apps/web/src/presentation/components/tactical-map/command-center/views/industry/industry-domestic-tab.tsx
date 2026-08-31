@@ -114,9 +114,16 @@ export function IndustryDomesticTab({
     }
   };
 
-  const factoryYield = IndustryCalculator.calculateFactoryYield(
-    nation.equipmentTechLevel,
-  );
+  const totalFactoriesYield = useMemo(() => {
+    if (nation.factoryTiers && nation.factoryTiers.length > 0) {
+      return IndustryCalculator.calculateBatchesTotalYield(nation.factoryTiers);
+    }
+    return (
+      totalActiveFactories *
+      IndustryCalculator.calculateFactoryYield(nation.equipmentTechLevel)
+    );
+  }, [nation.factoryTiers, totalActiveFactories, nation.equipmentTechLevel]);
+
   const nationalIndustrialOccupancy =
     totalMaxSlots > 0
       ? Math.round((totalActiveFactories / totalMaxSlots) * 100)
@@ -128,7 +135,7 @@ export function IndustryDomesticTab({
         totalActiveFactories={totalActiveFactories}
         totalMaxSlots={totalMaxSlots}
         nationalIndustrialOccupancy={nationalIndustrialOccupancy}
-        factoryYield={factoryYield}
+        totalFactoriesYield={totalFactoriesYield}
         industrialLevel={nation.industrialLevel}
         equipmentTechLevel={nation.equipmentTechLevel}
       />
