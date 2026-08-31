@@ -6,10 +6,11 @@ import {
   MilitaryQuotaCalculator,
   ActionFactory,
   getNationGdp,
+  Nation,
+  Province,
+  ProcurementBatchCalculator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 
 export interface AlliedUnitProcurementInfo {
@@ -68,11 +69,6 @@ export function useAlliedArmsProcurement({
     }
   }, [buyerNation.treasury]);
 
-  const baselineTenPercent = Math.max(
-    0,
-    Math.floor(baselineTreasuryRef.current * 0.1),
-  );
-
   const effectiveBuyerGdp = useMemo(() => {
     if (currentGdp !== undefined && currentGdp > 0) return currentGdp;
     return getNationGdp(buyerNation, provincesMap);
@@ -81,7 +77,6 @@ export function useAlliedArmsProcurement({
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(buyerNation.military);
   const maxValuation = Math.floor(effectiveBuyerGdp);
-
   const remainingValuationCapacity = Math.max(
     0,
     maxValuation - currentValuation,
@@ -113,7 +108,7 @@ export function useAlliedArmsProcurement({
   const batchList = useMemo<AlliedUnitProcurementInfo[]>(() => {
     return ALL_TYPES.map((type) => {
       const stat = MILITARY_UNIT_STATS[type];
-      const baseCost = stat.moneyCost;
+      const baseUnitPrice = stat.moneyCost;
       const marketUnitPrice =
         MilitaryPricingCalculator.calculateArmsImportUnitPrice(
           type,
@@ -122,37 +117,16 @@ export function useAlliedArmsProcurement({
         );
       const q = quotas[type];
 
-      const targetBatchQuantity =
-        baselineTenPercent > 0 && marketUnitPrice > 0
-          ? Math.max(1, Math.floor(baselineTenPercent / marketUnitPrice))
-          : 1;
-
-      const affordableByCurrentTreasury =
-        marketUnitPrice > 0
-          ? Math.floor(buyerNation.treasury / marketUnitPrice)
-          : 0;
-      const affordableByValuationCap =
-        baseCost > 0 ? Math.floor(remainingValuationCapacity / baseCost) : 0;
-      const allowedByQuota = q.remainingRoom;
-
-      const clampedQuantity = Math.max(
-        0,
-        Math.min(
-          targetBatchQuantity,
-          affordableByCurrentTreasury,
-          affordableByValuationCap,
-          allowedByQuota,
-        ),
-      );
-
-      const isCapReached =
-        q.remainingRoom <= 0 || remainingValuationCapacity < baseCost;
-      const displayQuantity = clampedQuantity > 0 ? clampedQuantity : 1;
-      const batchCost = displayQuantity * marketUnitPrice;
-      const canAfford =
-        buyerNation.treasury >= batchCost &&
-        clampedQuantity > 0 &&
-        !isCapReached;
+      const batchResult = ProcurementBatchCalculator.calculateBatch({
+        treasury: buyerNation.treasury,
+        baselineTreasury: baselineTreasuryRef.current,
+        budgetPercentage: 0.1,
+        unitPrice: marketUnitPrice,
+        baseValuationPrice: baseUnitPrice,
+        remainingQuotaRoom: q.remainingRoom,
+        remainingValuationCapacity,
+        minQuantity: 1,
+      });
 
       return {
         type,
@@ -160,18 +134,17 @@ export function useAlliedArmsProcurement({
         unitPrice: marketUnitPrice,
         techMultiplier,
         techDelta,
-        batchQuantity: displayQuantity,
-        batchCost,
-        canAfford,
-        remainingRoom: q.remainingRoom,
-        isCapReached,
+        batchQuantity: batchResult.batchQuantity,
+        batchCost: batchResult.batchCost,
+        canAfford: batchResult.canAfford,
+        remainingRoom: batchResult.remainingRoom,
+        isCapReached: batchResult.isCapReached,
       };
     });
   }, [
     buyerNation.treasury,
     buyerNation.military.techLevel,
     sellerNation.military.techLevel,
-    baselineTenPercent,
     quotas,
     remainingValuationCapacity,
     techMultiplier,
