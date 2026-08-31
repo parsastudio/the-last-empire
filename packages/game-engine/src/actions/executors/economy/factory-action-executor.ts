@@ -12,6 +12,21 @@ import {
 } from "@/domain/game/action.schema";
 
 export class FactoryActionExecutor {
+  private static resolveCurrentBatches(
+    nation: Nation,
+    totalProvincesFactories: number,
+  ) {
+    if (nation.factoryTiers && nation.factoryTiers.length > 0) {
+      return nation.factoryTiers;
+    }
+    return [
+      {
+        techLevel: nation.equipmentTechLevel,
+        count: totalProvincesFactories,
+      },
+    ];
+  }
+
   public static executeBuildFactory(
     state: GameState,
     action: BuildFactoryAction,
@@ -53,6 +68,26 @@ export class FactoryActionExecutor {
       factoriesCount: prov.factoriesCount + 1,
     };
 
+    let totalFactories = 0;
+    for (const p of Object.values(state.provinces)) {
+      if (
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalNation
+      ) {
+        totalFactories += p.factoriesCount;
+      }
+    }
+
+    const currentBatches = this.resolveCurrentBatches(nation, totalFactories);
+    const updatedBatches = IndustryCalculator.addFactories(
+      currentBatches,
+      1,
+      nation.industrialLevel,
+    );
+    const newAverageEquipTech = IndustryCalculator.calculateWeightedAverageTech(
+      updatedBatches,
+      nation.industrialLevel,
+    );
+
     return {
       ...state,
       provinces: {
@@ -64,6 +99,8 @@ export class FactoryActionExecutor {
         [buyerKey]: {
           ...nation,
           treasury: nation.treasury - cost,
+          factoryTiers: updatedBatches,
+          equipmentTechLevel: newAverageEquipTech,
         },
       },
     };
@@ -112,10 +149,14 @@ export class FactoryActionExecutor {
       );
     }
 
-    const newEquipTech = IndustryCalculator.calculateNewEquipmentTechLevel(
-      totalFactories,
-      nation.equipmentTechLevel,
+    const currentBatches = this.resolveCurrentBatches(nation, totalFactories);
+    const updatedBatches = IndustryCalculator.upgradeLowestFactories(
+      currentBatches,
       qty,
+      targetTech,
+    );
+    const newEquipTech = IndustryCalculator.calculateWeightedAverageTech(
+      updatedBatches,
       targetTech,
     );
 
@@ -126,6 +167,7 @@ export class FactoryActionExecutor {
         [buyerKey]: {
           ...nation,
           treasury: nation.treasury - totalCost,
+          factoryTiers: updatedBatches,
           equipmentTechLevel: newEquipTech,
         },
       },
@@ -232,10 +274,17 @@ export class FactoryActionExecutor {
       );
     }
 
-    const newEquipTech = IndustryCalculator.calculateNewEquipmentTechLevel(
+    const currentBatches = this.resolveCurrentBatches(
+      buyer,
       totalBuyerFactories,
-      buyer.equipmentTechLevel,
+    );
+    const updatedBatches = IndustryCalculator.upgradeLowestFactories(
+      currentBatches,
       qty,
+      sellerTech,
+    );
+    const newEquipTech = IndustryCalculator.calculateWeightedAverageTech(
+      updatedBatches,
       sellerTech,
     );
 
@@ -250,6 +299,7 @@ export class FactoryActionExecutor {
         [buyerKey]: {
           ...buyer,
           treasury: buyer.treasury - totalCost,
+          factoryTiers: updatedBatches,
           equipmentTechLevel: newEquipTech,
         },
         [sellerKey]: {
