@@ -14,6 +14,7 @@ export * from "./diplomacy/security-fee-calculator.utility";
 export * from "./diplomacy/pending-proposal-manager.utility";
 export * from "./economy/debt-calculator.utility";
 export * from "./economy/industry-calculator.utility";
+export * from "./economy/factory-batch.schema";
 export * from "./espionage/espionage.schema";
 export * from "./game/action.schema";
 export * from "./game/action-factory";

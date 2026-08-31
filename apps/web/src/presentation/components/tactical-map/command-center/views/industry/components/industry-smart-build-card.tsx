@@ -1,182 +1,112 @@
 import React from "react";
-import {
-  Layers,
-  BarChart3,
-  Coins,
-  Loader2,
-  CheckCircle2,
-  Wrench,
-} from "lucide-react";
-import { Province } from "@/domain/province/province.schema";
+import { Factory, Zap, Loader2, CheckCircle2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
 interface IndustrySmartBuildCardProps {
-  ownedProvinces: Province[];
+  totalActiveFactories: number;
+  totalMaxSlots: number;
   totalEmptySlots: number;
-  fixedBatchCount: number;
-  unitsToBuild: number;
-  batchTotalCost: number;
-  canAffordBatch: boolean;
-  isBatchBuilding: boolean;
-  onSmartBatchBuild: () => void;
+  batchQuantity: number;
+  batchCost: number;
+  canAfford: boolean;
+  isBuilding: boolean;
+  onBuild: () => void;
 }
 
 export function IndustrySmartBuildCard({
-  ownedProvinces,
+  totalActiveFactories,
+  totalMaxSlots,
   totalEmptySlots,
-  fixedBatchCount,
-  unitsToBuild,
-  batchTotalCost,
-  canAffordBatch,
-  isBatchBuilding,
-  onSmartBatchBuild,
+  batchQuantity,
+  batchCost,
+  canAfford,
+  isBuilding,
+  onBuild,
 }: IndustrySmartBuildCardProps) {
+  const isFull = totalEmptySlots <= 0;
+  const occupancyPct =
+    totalMaxSlots > 0
+      ? Math.round((totalActiveFactories / totalMaxSlots) * 100)
+      : 100;
+
   return (
-    <div className="bg-card/90 border border-border/80 p-6 rounded-3xl space-y-5 shadow-sm">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-border/60">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2.5 rounded-2xl bg-gdp/15 text-gdp border border-gdp/30">
-            <Layers size={18} />
-          </div>
-          <div>
-            <h3 className="text-sm font-black text-foreground">
-              احداث و توسعه هوشمند کارخانجات ملی
-            </h3>
-            <p className="text-[11px] text-muted-foreground">
-              سیستم با هر کلیک، ۱۰٪ از بودجه خزانه را به احداث در کم‌توسعه‌ترین
-              استان‌ها تخصیص می‌دهد.
-            </p>
-          </div>
+    <div className="relative p-5 rounded-3xl border border-border/80 bg-gradient-to-r from-secondary/60 via-card to-secondary/40 shadow-lg backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-5 font-sans dir-rtl text-right">
+      <div className="flex items-center gap-4 w-full md:w-auto">
+        <div className="w-14 h-14 rounded-2xl bg-gdp/15 border border-gdp/30 flex items-center justify-center text-gdp shrink-0 shadow-inner">
+          <Factory size={28} className="animate-pulse" />
         </div>
 
-        <div className="flex items-center gap-2 font-mono text-xs">
-          <span className="text-muted-foreground font-sans text-[11px]">
-            ظرفیت آزاد ساخت:
-          </span>
-          <span className="font-black text-foreground bg-secondary/80 border border-border px-3 py-1 rounded-xl">
-            {PersianNumberFormatter.formatNumberWithCommas(totalEmptySlots)}{" "}
-            سوله
-          </span>
+        <div className="space-y-1.5 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-sm font-black text-foreground">
+              احداث و توسعه زیرساخت کارخانجات ملی
+            </h3>
+            <span className="text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 px-2 py-0.5 rounded-lg">
+              قیمت پایه: ۱ میلیارد دلار / سوله
+            </span>
+          </div>
+
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            تخصیص ۱۰٪ بودجه خزانه به احداث فوری سوله با توزیع خودکار در
+            متوازن‌ترین استان‌های کشور.
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-center">
-        <div className="lg:col-span-2 bg-secondary/30 border border-border/60 p-4 rounded-2xl space-y-3">
-          <div className="flex items-center justify-between text-xs font-bold text-foreground">
-            <span className="flex items-center gap-1.5">
-              <BarChart3 size={14} className="text-gdp" />
-              <span>پایش توازن صنعتی استان‌ها</span>
-            </span>
-            <span className="text-[10px] text-muted-foreground font-normal font-mono">
-              {PersianNumberFormatter.formatNumberWithCommas(
-                ownedProvinces.length,
-              )}{" "}
-              استان تحت حاکمیت
+      <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto shrink-0">
+        <div className="bg-background/80 border border-border/60 px-4 py-2.5 rounded-2xl space-y-1 w-full sm:w-48 text-center font-mono">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground font-sans font-bold">
+            <span>ظرفیت صنعتی کشور</span>
+            <span className={isFull ? "text-emerald-400" : "text-gdp"}>
+              {PersianNumberFormatter.toPersianDigits(occupancyPct)}٪
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-[160px] overflow-y-auto pl-1">
-            {ownedProvinces.map((prov) => {
-              const ratio =
-                prov.maxSlots > 0
-                  ? Math.round((prov.factoriesCount / prov.maxSlots) * 100)
-                  : 100;
-              const isFull = prov.factoriesCount >= prov.maxSlots;
+          <div className="text-xs font-black text-foreground">
+            {PersianNumberFormatter.formatNumberWithCommas(
+              totalActiveFactories,
+            )}{" "}
+            <span className="text-[10px] text-muted-foreground font-normal">
+              از {PersianNumberFormatter.formatNumberWithCommas(totalMaxSlots)}{" "}
+              سوله
+            </span>
+          </div>
 
-              return (
-                <div
-                  key={prov.provinceId}
-                  className="p-2.5 rounded-xl bg-background/60 border border-border/50 space-y-1 text-[11px]"
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-foreground truncate max-w-[100px]">
-                      {prov.nameFa}
-                    </span>
-                    <span
-                      className={`text-[9px] font-mono font-bold ${isFull ? "text-emerald-400" : "text-gdp"}`}
-                    >
-                      {PersianNumberFormatter.toPersianDigits(ratio)}٪
-                    </span>
-                  </div>
-                  <div className="w-full bg-secondary h-1 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${isFull ? "bg-emerald-400" : "bg-gdp"}`}
-                      style={{ width: `${Math.min(100, ratio)}%` }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[9px] text-muted-foreground font-mono">
-                    <span>
-                      {PersianNumberFormatter.formatNumberWithCommas(
-                        prov.factoriesCount,
-                      )}{" "}
-                      فعال
-                    </span>
-                    <span>
-                      {PersianNumberFormatter.formatNumberWithCommas(
-                        prov.maxSlots,
-                      )}{" "}
-                      سقف
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="w-full bg-secondary h-1.5 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isFull ? "bg-emerald-400" : "bg-gdp"
+              }`}
+              style={{ width: `${Math.min(100, occupancyPct)}%` }}
+            />
           </div>
         </div>
 
-        <div className="bg-secondary/40 border border-border/70 p-4 rounded-2xl space-y-3 font-mono text-xs flex flex-col justify-between h-full">
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-muted-foreground font-sans text-[11px]">
-              <span className="flex items-center gap-1">
-                <Coins size={13} className="text-gdp" />
-                <span>بسته احداث (۱۰٪ خزانه):</span>
-              </span>
-              <span className="font-bold text-foreground">
-                {PersianNumberFormatter.formatNumberWithCommas(fixedBatchCount)}{" "}
-                سوله
-              </span>
+        <div className="w-full sm:w-auto">
+          {isFull ? (
+            <div className="py-3 px-5 bg-secondary/80 text-muted-foreground rounded-2xl text-xs font-bold border border-border/70 flex items-center justify-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-400" />
+              <span>ظرفیت ساخت استان‌ها تکمیل است</span>
             </div>
-
-            <div className="flex items-center justify-between text-muted-foreground font-sans text-[11px]">
-              <span>تعداد قابل احداث در این گام:</span>
-              <span className="font-black text-gdp">
-                {PersianNumberFormatter.formatNumberWithCommas(unitsToBuild)}{" "}
-                سوله
+          ) : (
+            <button
+              type="button"
+              onClick={onBuild}
+              disabled={!canAfford || isBuilding}
+              className="w-full sm:w-auto py-3.5 px-6 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xl shadow-gdp/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 border border-gdp/30"
+            >
+              {isBuilding ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Zap size={16} />
+              )}
+              <span>
+                {!canAfford
+                  ? "موجودی خزانه ناکافی است"
+                  : `احداث فوری ${PersianNumberFormatter.formatNumberWithCommas(batchQuantity)} سوله (${PersianNumberFormatter.formatCurrency(batchCost, true)})`}
               </span>
-            </div>
-
-            <div className="flex items-center justify-between pt-1 border-t border-border/50 text-foreground">
-              <span className="font-sans text-[11px]">مبلغ سرمایه‌گذاری:</span>
-              <span className="font-black text-sm">
-                {PersianNumberFormatter.formatCurrency(batchTotalCost, true)}
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={onSmartBatchBuild}
-            disabled={
-              !canAffordBatch || isBatchBuilding || totalEmptySlots === 0
-            }
-            className="w-full py-4 bg-gdp hover:bg-gdp/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl font-black text-xs transition-all cursor-pointer shadow-xl shadow-gdp/20 flex items-center justify-center gap-2"
-          >
-            {isBatchBuilding ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : totalEmptySlots === 0 ? (
-              <CheckCircle2 size={16} />
-            ) : (
-              <Wrench size={16} />
-            )}
-            <span>
-              {isBatchBuilding
-                ? "در حال احداث متوازن سوله‌ها در سراسر کشور..."
-                : totalEmptySlots === 0
-                  ? "تمام استان‌ها به سقف نهایی کارخانجات رسیده‌اند"
-                  : !canAffordBatch
-                    ? "موجودی خزانه برای گام بعدی کافی نیست"
-                    : `احداث هوشمند ${PersianNumberFormatter.formatNumberWithCommas(unitsToBuild)} کارخانه (${PersianNumberFormatter.formatCurrency(batchTotalCost, true)})`}
-            </span>
-          </button>
+            </button>
+          )}
         </div>
       </div>
     </div>

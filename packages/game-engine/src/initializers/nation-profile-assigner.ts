@@ -7,6 +7,7 @@ import {
   CountryDefaultsUtility,
   NationDoctrineResolver,
   MilitaryDistributionEngine,
+  IndustryCalculator,
 } from "@geopolitics/domain";
 
 type GovernmentType = Nation["government"]["type"];
@@ -120,6 +121,11 @@ export class NationProfileAssigner {
     );
 
     const industrialLevel = item.industrialLevel ?? domesticTech;
+    const initialFactoryCount =
+      IndustryCalculator.calculateStartingTotalFactories(
+        item.gdp,
+        equipmentTech,
+      );
 
     return {
       id: cleanId,
@@ -132,6 +138,7 @@ export class NationProfileAssigner {
       nationalDebt: 0,
       industrialLevel,
       equipmentTechLevel: equipmentTech,
+      factoryTiers: [{ techLevel: equipmentTech, count: initialFactoryCount }],
       navalFleet: initialNavalFleet,
       government: {
         type: govType,

@@ -6,11 +6,14 @@ import {
   Province,
   IndustryCalculator,
   ActionFactory,
+  PersianNumberFormatter,
+  ProcurementBatchCalculator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
 import { IndustryStatsOverview } from "./components/industry-stats-overview";
 import { IndustrySmartBuildCard } from "./components/industry-smart-build-card";
+import { FactoryTiersGrid } from "./components/factory-tiers-grid";
 import {
   MachineryTrancheCard,
   MachineryTrancheInfo,
@@ -50,6 +53,21 @@ export function IndustryDomesticTab({
   const currentEquipmentTech = nation.equipmentTechLevel;
   const targetDomesticTech = nation.industrialLevel;
   const isMaxedOut = currentEquipmentTech >= targetDomesticTech;
+
+  const factoryCost = IndustryCalculator.FACTORY_REBUILD_COST;
+
+  const buildBatch = useMemo(() => {
+    return ProcurementBatchCalculator.calculateBatch({
+      treasury: nation.treasury,
+      baselineTreasury: nation.treasury,
+      budgetPercentage: 0.1,
+      unitPrice: factoryCost,
+      baseValuationPrice: factoryCost,
+      remainingQuotaRoom: totalEmptySlots,
+      remainingValuationCapacity: Number.MAX_SAFE_INTEGER,
+      minQuantity: 1,
+    });
+  }, [nation.treasury, factoryCost, totalEmptySlots]);
 
   const domesticTranches = useMemo<MachineryTrancheInfo[]>(() => {
     const unitCost = IndustryCalculator.calculateModernizeUnitCost(
@@ -137,41 +155,39 @@ export function IndustryDomesticTab({
     }
   };
 
-  const factoryCost = IndustryCalculator.FACTORY_REBUILD_COST;
-  const initialTenPercentBudget = Math.floor(nation.treasury * 0.1);
-  const fixedBatchCount = Math.max(
-    1,
-    Math.floor(initialTenPercentBudget / factoryCost),
-  );
-  const affordableUnits = Math.floor(nation.treasury / factoryCost);
-  const unitsToBuild = Math.min(
-    fixedBatchCount,
-    totalEmptySlots,
-    affordableUnits,
-  );
-  const batchTotalCost = unitsToBuild * factoryCost;
-  const canAffordBatch = unitsToBuild > 0 && nation.treasury >= batchTotalCost;
-
   const handleSmartBatchBuild = async () => {
-    if (isBatchBuilding || !canAffordBatch || unitsToBuild <= 0) return;
+    if (
+      isBatchBuilding ||
+      !buildBatch.canAfford ||
+      buildBatch.batchQuantity <= 0
+    ) {
+      return;
+    }
     setIsBatchBuilding(true);
 
     try {
       const workingProvs = ownedProvinces.map((p) => ({ ...p }));
       const actionsToRun: Array<{ nationId: string; provinceId: number }> = [];
 
-      for (let i = 0; i < unitsToBuild; i++) {
+      for (let i = 0; i < buildBatch.batchQuantity; i++) {
         const available = workingProvs.filter(
           (p) => p.factoriesCount < p.maxSlots,
         );
         if (available.length === 0) break;
 
         available.sort((a, b) => {
+          const densityA =
+            a.pixelCount > 0
+              ? a.factoriesCount / a.pixelCount
+              : a.factoriesCount / a.maxSlots;
+          const densityB =
+            b.pixelCount > 0
+              ? b.factoriesCount / b.pixelCount
+              : b.factoriesCount / b.maxSlots;
+          if (densityA !== densityB) return densityA - densityB;
           const ratioA = a.maxSlots > 0 ? a.factoriesCount / a.maxSlots : 1;
           const ratioB = b.maxSlots > 0 ? b.factoriesCount / b.maxSlots : 1;
           if (ratioA !== ratioB) return ratioA - ratioB;
-          if (a.factoriesCount !== b.factoriesCount)
-            return a.factoriesCount - b.factoriesCount;
           return a.provinceId - b.provinceId;
         });
 
@@ -214,6 +230,24 @@ export function IndustryDomesticTab({
         equipmentTechLevel={nation.equipmentTechLevel}
       />
 
+      <FactoryTiersGrid
+        batches={nation.factoryTiers}
+        totalFactories={safeTotalFactories}
+        equipmentTechLevel={nation.equipmentTechLevel}
+        maxDomesticTech={nation.industrialLevel}
+      />
+
+      <IndustrySmartBuildCard
+        totalActiveFactories={totalActiveFactories}
+        totalMaxSlots={totalMaxSlots}
+        totalEmptySlots={totalEmptySlots}
+        batchQuantity={buildBatch.batchQuantity}
+        batchCost={buildBatch.batchCost}
+        canAfford={buildBatch.canAfford}
+        isBuilding={isBatchBuilding}
+        onBuild={handleSmartBatchBuild}
+      />
+
       <div className="space-y-3">
         <IndustryTechUpgradeCard
           nationId={nation.id}
@@ -247,17 +281,6 @@ export function IndustryDomesticTab({
           ))}
         </div>
       </div>
-
-      <IndustrySmartBuildCard
-        ownedProvinces={ownedProvinces}
-        totalEmptySlots={totalEmptySlots}
-        fixedBatchCount={fixedBatchCount}
-        unitsToBuild={unitsToBuild}
-        batchTotalCost={batchTotalCost}
-        canAffordBatch={canAffordBatch}
-        isBatchBuilding={isBatchBuilding}
-        onSmartBatchBuild={handleSmartBatchBuild}
-      />
     </div>
   );
 }

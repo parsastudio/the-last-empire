@@ -7,6 +7,7 @@ import {
   AiDoctrineWeightsSchema,
 } from "@/domain/nation/nation-doctrine.schema";
 import { EconomicDoctrineStanceSchema } from "@/domain/politics/economic-doctrine.schema";
+import { FactoryBatchSchema } from "@/domain/economy/factory-batch.schema";
 
 export const ActiveModifierSchema = z.object({
   id: z.string(),
@@ -27,6 +28,7 @@ export const NationSchema = z.object({
   nationalDebt: z.number().nonnegative(),
   industrialLevel: z.number().positive().default(1.0),
   equipmentTechLevel: z.number().positive().default(1.0),
+  factoryTiers: z.array(FactoryBatchSchema).default([]),
   navalFleet: z.number().nonnegative().default(0),
   government: GovernmentStateSchema,
   military: MilitaryStackSchema,
