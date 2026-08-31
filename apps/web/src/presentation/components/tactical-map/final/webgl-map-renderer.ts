@@ -10,6 +10,7 @@ export class WebGLMapRenderer {
   private liveStateTexture: WebGLTexture | null = null;
   private paletteTexture: WebGLTexture | null = null;
   private gdpPaletteTexture: WebGLTexture | null = null;
+  private diplomaticPaletteTexture: WebGLTexture | null = null;
 
   private uResolutionLoc: WebGLUniformLocation | null = null;
   private uPositionLoc: WebGLUniformLocation | null = null;
@@ -66,12 +67,17 @@ export class WebGLMapRenderer {
       const uLiveStateLoc = gl.getUniformLocation(prog, "u_liveStateTexture");
       const uPaletteLoc = gl.getUniformLocation(prog, "u_paletteTexture");
       const uGdpPaletteLoc = gl.getUniformLocation(prog, "u_gdpPaletteTexture");
+      const uDiplomaticLoc = gl.getUniformLocation(
+        prog,
+        "u_diplomaticPaletteTexture",
+      );
 
       gl.useProgram(prog);
       if (uTerrainLoc) gl.uniform1i(uTerrainLoc, 0);
       if (uLiveStateLoc) gl.uniform1i(uLiveStateLoc, 1);
       if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
       if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
+      if (uDiplomaticLoc) gl.uniform1i(uDiplomaticLoc, 4);
       if (this.uHoveredCountryLoc) gl.uniform1i(this.uHoveredCountryLoc, 0);
     }
   }
@@ -168,6 +174,12 @@ export class WebGLMapRenderer {
     this.gdpPaletteTexture = gdpPaletteTexture;
   }
 
+  public setDiplomaticPaletteTexture(
+    diplomaticPaletteTexture: WebGLTexture,
+  ): void {
+    this.diplomaticPaletteTexture = diplomaticPaletteTexture;
+  }
+
   public render(
     width: number,
     height: number,
@@ -211,6 +223,11 @@ export class WebGLMapRenderer {
     if (this.gdpPaletteTexture) {
       gl.activeTexture(gl.TEXTURE3);
       gl.bindTexture(gl.TEXTURE_2D, this.gdpPaletteTexture);
+    }
+
+    if (this.diplomaticPaletteTexture) {
+      gl.activeTexture(gl.TEXTURE4);
+      gl.bindTexture(gl.TEXTURE_2D, this.diplomaticPaletteTexture);
     }
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);

@@ -1,5 +1,5 @@
-import { Province } from "@geopolitics/domain";
-import { PaletteBufferBuilder } from "./utils/palette-buffer-builder";
+import { Province, Nation } from "@geopolitics/domain";
+import { PaletteBufferBuilder } from "@/presentation/components/tactical-map/final/utils/palette-buffer-builder";
 
 export class WebGLPaletteTextureManager {
   private static createTextureFromBuffer(
@@ -65,6 +65,39 @@ export class WebGLPaletteTextureManager {
   ): void {
     const data = new Uint8Array(256 * 256 * 4);
     PaletteBufferBuilder.fillPoliticalBuffer(data, provincesMap);
+    this.updateTextureFromBuffer(gl, texture, data);
+  }
+
+  public static createDiplomaticTexture(
+    gl: WebGL2RenderingContext,
+    provincesMap?: Record<string, Province>,
+    nationsMap?: Record<string, Nation>,
+    humanNationId?: string,
+  ): WebGLTexture | null {
+    const data = new Uint8Array(256 * 256 * 4);
+    PaletteBufferBuilder.fillDiplomaticBuffer(
+      data,
+      provincesMap,
+      nationsMap,
+      humanNationId,
+    );
+    return this.createTextureFromBuffer(gl, data);
+  }
+
+  public static updateDiplomaticTexture(
+    gl: WebGL2RenderingContext,
+    texture: WebGLTexture,
+    provincesMap?: Record<string, Province>,
+    nationsMap?: Record<string, Nation>,
+    humanNationId?: string,
+  ): void {
+    const data = new Uint8Array(256 * 256 * 4);
+    PaletteBufferBuilder.fillDiplomaticBuffer(
+      data,
+      provincesMap,
+      nationsMap,
+      humanNationId,
+    );
     this.updateTextureFromBuffer(gl, texture, data);
   }
 
