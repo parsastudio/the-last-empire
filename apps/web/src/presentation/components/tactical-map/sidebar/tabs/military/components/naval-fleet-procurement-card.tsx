@@ -45,7 +45,9 @@ export function NavalFleetProcurementCard({
   }, [treasury, fleetCost]);
 
   const canAfford = hasSeaAccess && batchInfo.canAfford;
-  const turnRevenue = Math.floor(navalFleetCount * fleetCost * 0.06);
+  const turnRevenue = Math.floor(
+    navalFleetCount * fleetCost * NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
+  );
 
   const handleBuy = async () => {
     if (!canAfford || isSubmitting) return;
