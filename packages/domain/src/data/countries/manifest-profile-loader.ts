@@ -5,19 +5,21 @@ import {
 } from "@/domain/map/manifest.type";
 import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
 import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
+import { GovernmentType } from "@/domain/politics/politics.schema";
 
 export class ManifestProfileLoader {
-  public static loadManifestData(
-    manifest: FinalMapManifest | null,
-    byIso3Map: Map<string, CountryProfile>,
-  ): {
+  public static loadManifestData(manifest: FinalMapManifest | null): {
     manifestNations: Map<string, FinalManifestNation>;
     manifestProfiles: Map<string, CountryProfile>;
   } {
     const manifestNations = new Map<string, FinalManifestNation>();
     const manifestProfiles = new Map<string, CountryProfile>();
 
-    if (!manifest || !Array.isArray(manifest.nations)) {
+    if (
+      !manifest ||
+      !Array.isArray(manifest.nations) ||
+      manifest.nations.length === 0
+    ) {
       return { manifestNations, manifestProfiles };
     }
 
@@ -30,15 +32,11 @@ export class ManifestProfileLoader {
 
       manifestNations.set(iso3, item);
 
-      const defaultProfile = byIso3Map.get(iso3);
-      const domesticTechLevel =
-        defaultProfile?.domesticTechLevel ?? item.startingTechLevel ?? 1;
-      const equipmentTechLevel =
-        defaultProfile?.equipmentTechLevel ?? domesticTechLevel;
+      const domesticTechLevel = item.startingTechLevel ?? 1;
+      const equipmentTechLevel = item.equipmentTechLevel ?? domesticTechLevel;
 
       const aiDoctrine =
         (item.aiDoctrine as AiDoctrineType) ||
-        defaultProfile?.aiDoctrine ||
         NationDoctrineResolver.resolveDoctrineType(
           iso3,
           domesticTechLevel,
@@ -48,17 +46,14 @@ export class ManifestProfileLoader {
 
       const dynamicProfile: CountryProfile = {
         code: iso3,
-        nameEn: item.nameEn || defaultProfile?.nameEn || iso3,
-        nameFa: item.nameFa || defaultProfile?.nameFa || iso3,
+        nameEn: item.nameEn || iso3,
+        nameFa: item.nameFa || iso3,
         gdp: item.gdp,
         population: item.population,
-        flagCode: String(
-          item.flagCode || defaultProfile?.flagCode || iso3.slice(0, 2),
-        ).toUpperCase(),
+        flagCode: String(item.flagCode || iso3.slice(0, 2)).toUpperCase(),
         domesticTechLevel,
         equipmentTechLevel,
-        startingGovernment:
-          item.defaultGovernment as CountryProfile["startingGovernment"],
+        startingGovernment: item.defaultGovernment as GovernmentType,
         startingTechLevel: domesticTechLevel,
         aiDoctrine,
       };
