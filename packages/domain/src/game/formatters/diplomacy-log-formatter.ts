@@ -46,7 +46,7 @@ export class DiplomacyLogFormatter {
       }
 
       case "SECURITY_GUARANTEE_SIGNED":
-        return `انعقاد پیمان چتر امنیتی: کشور ${sourceName} با پرداخت نوبتی ۱۰٪ GDP، رسماً تحت چتر تضمین دفاعی امپراتوری ${targetName} قرار گرفت.`;
+        return `انعقاد پیمان چتر امنیتی: کشور ${sourceName} با پرداخت نوبتی ۲٪ GDP، رسماً تحت چتر تضمین دفاعی امپراتوری ${targetName} قرار گرفت.`;
 
       case "SECURITY_GUARANTEE_CANCELLED": {
         const reason = String(params["reason"] || "فسخ معاهده");
@@ -54,7 +54,7 @@ export class DiplomacyLogFormatter {
       }
 
       case "EMERGENCY_PROTECTORATE_SIGNED":
-        return `امضای معاهده تحت‌الحمایگی استعماری: کشور ${sourceName} در ازای پرداخت ۳۰٪ خراج نوبتی و واگذاری استقلال سیاسی، تحت حفاظت کامل نیروی ضربت فوق‌پیشرفته ${targetName} قرار گرفت.`;
+        return `امضای معاهده تحت‌الحمایگی استعماری: کشور ${sourceName} در ازای پرداخت ۵٪ خراج نوبتی و واگذاری استقلال سیاسی، تحت حفاظت کامل نیروی ضربت فوق‌پیشرفته ${targetName} (۵۰٪ GDP) قرار گرفت.`;
 
       case "EMERGENCY_PROTECTORATE_CANCELLED":
         return `لغو معاهده تحت‌الحمایگی: کشور ${sourceName} رسماً به پیمان استعماری با امپراتوری ${targetName} پایان داد و حاکمیت مستقل خود را اعلام کرد.`;

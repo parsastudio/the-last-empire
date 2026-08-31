@@ -6,8 +6,9 @@ import {
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 
 export class MilitaryDistributionEngine {
-  public static readonly INITIAL_GDP_ARMY_RATIO = 0.3;
-  public static readonly MIN_INITIAL_GDP_ARMY_RATIO = 0.1;
+  public static readonly MAX_ARMY_GDP_RATIO = 0.2;
+  public static readonly INITIAL_GDP_ARMY_RATIO = 0.15;
+  public static readonly MIN_INITIAL_GDP_ARMY_RATIO = 0.05;
 
   public static calculateArmyBudgetRatio(
     domesticTechLevel: number,
@@ -18,11 +19,12 @@ export class MilitaryDistributionEngine {
       Math.max(nativeTech, equipmentTechLevel).toFixed(2),
     );
     const techGap = Math.max(0, fieldTech - nativeTech);
-    const penalty = techGap * 0.1;
-    return Math.max(
+    const penalty = techGap * 0.05;
+    const ratio = Math.max(
       this.MIN_INITIAL_GDP_ARMY_RATIO,
       this.INITIAL_GDP_ARMY_RATIO - penalty,
     );
+    return Math.min(this.MAX_ARMY_GDP_RATIO, ratio);
   }
 
   public static calculateStartingStack(

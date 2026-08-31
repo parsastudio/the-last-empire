@@ -89,14 +89,24 @@ export class StrategicManifestBuilder {
         profile.domesticTechLevel ?? profile.startingTechLevel ?? 1.0;
       const militaryEquipmentTech = profile.equipmentTechLevel ?? domesticTech;
       const industrialLevel = profile.industrialLevel ?? domesticTech;
+      const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
 
-      const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
-        gdp,
-        industrialLevel,
+      const totalActiveFactories =
+        IndustryCalculator.calculateStartingTotalFactories(
+          gdp,
+          industrialLevel,
+        );
+
+      const totalMaxSlots = IndustryCalculator.calculateStartingMaxSlots(
+        totalActiveFactories,
+        computedRank,
+        activeProfiles.length,
       );
+
       const slotDistribution =
-        IndustryCalculator.distributeFactoriesToProvinces(
-          totalFactories,
+        IndustryCalculator.distributeFactoriesAndSlotsToProvinces(
+          totalActiveFactories,
+          totalMaxSlots,
           provCount,
         );
 
@@ -115,7 +125,10 @@ export class StrategicManifestBuilder {
           : Math.max(1, equalPopulationShare);
 
         distributedPopulation += provPopulation;
-        const assignedSlots = slotDistribution[pIndex] ?? 1;
+        const slotPair = slotDistribution[pIndex] ?? {
+          activeCount: 1,
+          maxSlots: 1,
+        };
 
         manifestProvinces.push({
           provinceId: pInfo.provinceId,
@@ -129,8 +142,8 @@ export class StrategicManifestBuilder {
           maritimeNeighborsTier2: [],
           centerCoordinates: pInfo.centerCoordinates,
           population: provPopulation,
-          maxSlots: assignedSlots,
-          factoriesCount: assignedSlots,
+          maxSlots: slotPair.maxSlots,
+          factoriesCount: slotPair.activeCount,
         });
       }
 
@@ -143,8 +156,6 @@ export class StrategicManifestBuilder {
         domesticTech,
         militaryEquipmentTech,
       );
-
-      const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
 
       manifestNations.push({
         id: countryId,

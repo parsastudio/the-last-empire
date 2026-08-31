@@ -25,11 +25,29 @@ export class TwmiCalculatorUtility {
       nation.military,
     );
 
-    const estimatedRevenue = Math.floor(gdp * 0.05);
-    const estimatedPayroll = Math.min(
-      Math.floor(gdp * 0.06),
-      Math.floor(armyValuation * 0.06),
+    let totalPeaceGdp = 0;
+    if (nationsMap) {
+      for (const other of Object.values(nationsMap)) {
+        if (other.isAlive && other.id !== nation.id) {
+          const isEmbargoed = NationRelationResolver.isTradeEmbargoed(
+            nation,
+            other,
+          );
+          if (!isEmbargoed) {
+            totalPeaceGdp += getNationGdp(other, provincesMap);
+          }
+        }
+      }
+    }
+
+    const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
+    const transitRevenue = Math.floor(
+      totalPeaceGdp * 0.0005 * (hasSea ? 1.0 : 0.5),
     );
+    const domesticRevenue = Math.floor(gdp * 0.08);
+    const estimatedRevenue = domesticRevenue + transitRevenue;
+
+    const estimatedPayroll = Math.floor(armyValuation * 0.06);
     const debtInterest = Math.floor(nation.nationalDebt * 0.07);
     const securityFee = nation.securityGuarantorId
       ? SecurityFeeCalculatorUtility.calculateSecurityFee(

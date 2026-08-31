@@ -12,6 +12,8 @@ export interface UnitBudgetQuota {
 }
 
 export class MilitaryQuotaCalculator {
+  public static readonly MAX_VALUATION_GDP_RATIO = 0.2;
+
   public static getUnitRatios(): Record<UnitType, number> {
     return {
       ARMOR: 0.3,
@@ -57,7 +59,7 @@ export class MilitaryQuotaCalculator {
 
     const totalValuation =
       MilitaryPricingCalculator.calculateTotalArmyValuation(military);
-    const maxGlobalValuation = Math.floor(gdp);
+    const maxGlobalValuation = Math.floor(gdp * this.MAX_VALUATION_GDP_RATIO);
     const remainingGlobalValuation = Math.max(
       0,
       maxGlobalValuation - totalValuation,
@@ -67,7 +69,7 @@ export class MilitaryQuotaCalculator {
       const type = types[i]!;
       const ratio = ratios[type] || 0;
       const unitPrice = MILITARY_UNIT_STATS[type].moneyCost;
-      const budgetCap = Math.floor(gdp * ratio);
+      const budgetCap = Math.floor(maxGlobalValuation * ratio);
       const maxUnits = unitPrice > 0 ? Math.floor(budgetCap / unitPrice) : 0;
       const currentUnits = this.getUnitCurrentCount(military, type);
       const remainingQuotaRoom = Math.max(0, maxUnits - currentUnits);

@@ -25,6 +25,8 @@ export interface RecruitmentPlanResult {
 }
 
 export class AIProcurementPlanner {
+  public static readonly MAX_VALUATION_GDP_RATIO = 0.2;
+
   public static evaluatePosture =
     AIPostureEvaluator.evaluatePosture.bind(AIPostureEvaluator);
   public static calculateSpendableBudget =
@@ -88,10 +90,16 @@ export class AIProcurementPlanner {
       MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
     const maxArmyValuation =
       posture === "WAR"
-        ? Math.floor(gdp)
+        ? Math.floor(gdp * this.MAX_VALUATION_GDP_RATIO)
         : posture === "THREAT"
-          ? Math.floor(gdp * Math.max(weights.peacetimeArmyCap, 0.8))
-          : Math.floor(gdp * weights.peacetimeArmyCap);
+          ? Math.floor(
+              gdp *
+                this.MAX_VALUATION_GDP_RATIO *
+                Math.max(weights.peacetimeArmyCap, 0.8),
+            )
+          : Math.floor(
+              gdp * this.MAX_VALUATION_GDP_RATIO * weights.peacetimeArmyCap,
+            );
 
     let globalRemainingValuation = Math.max(
       0,
