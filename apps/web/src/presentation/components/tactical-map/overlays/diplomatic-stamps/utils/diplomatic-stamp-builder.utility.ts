@@ -90,19 +90,20 @@ export class DiplomaticStampBuilderUtility {
       const rank = rankMap.get(canonicalTarget) ?? 99;
       let variant: DiplomaticStampVariant = "NEUTRAL";
 
-      if (humanNation) {
+      if (humanNation && canonicalHuman) {
         const rel = NationRelationResolver.getRelation(
           humanNation.relations,
           canonicalTarget,
         );
 
         const isGuaranteed =
-          CountryRegistry.resolveCanonicalId(
-            humanNation.securityGuarantorId || "",
-          ) === canonicalTarget ||
-          CountryRegistry.resolveCanonicalId(
-            nation.securityGuarantorId || "",
-          ) === canonicalHuman;
+          (Boolean(humanNation.securityGuarantorId) &&
+            CountryRegistry.resolveCanonicalId(
+              humanNation.securityGuarantorId,
+            ) === canonicalTarget) ||
+          (Boolean(nation.securityGuarantorId) &&
+            CountryRegistry.resolveCanonicalId(nation.securityGuarantorId) ===
+              canonicalHuman);
 
         if (rel?.stance === "WAR") {
           variant = "WAR";

@@ -116,11 +116,11 @@ export class CountryRegistry {
   }
 
   public static resolveCanonicalId(identifier: unknown): string {
-    if (identifier === null || identifier === undefined) return "IRN";
+    if (identifier === null || identifier === undefined) return "";
     const str =
       typeof identifier === "string" ? identifier : String(identifier);
     const clean = str.trim().toUpperCase();
-    if (!clean) return "IRN";
+    if (!clean) return "";
 
     const profile = this.getCountry(clean);
     return profile ? profile.code.toUpperCase() : clean;
