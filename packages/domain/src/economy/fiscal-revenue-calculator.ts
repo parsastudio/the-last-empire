@@ -3,10 +3,8 @@ import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
-import {
-  EconomicDoctrineStance,
-  ECONOMIC_DOCTRINE_CONFIGS,
-} from "@/domain/politics/economic-doctrine.config";
+import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.schema";
+import { ECONOMIC_DOCTRINE_CONFIGS } from "@/domain/politics/economic-doctrine.config";
 
 export interface FiscalRevenueBreakdown {
   totalRevenue: number;

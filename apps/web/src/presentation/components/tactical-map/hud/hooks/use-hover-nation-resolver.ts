@@ -50,17 +50,19 @@ export function useHoverNationResolver({
       const realRank = ownerNation
         ? NationGettersUtility.getRank(ownerNation.id, nationsMap, provincesMap)
         : 99;
+      const realGdpRank = ownerNation
+        ? NationGettersUtility.getGdpRank(
+            ownerNation.id,
+            nationsMap,
+            provincesMap,
+          )
+        : 99;
       const realGdp = ownerNation ? getNationGdp(ownerNation, provincesMap) : 0;
 
       const provinceGdp = getProvinceGdp(
         province,
         ownerNation?.equipmentTechLevel ?? 1.0,
       );
-
-      const activeSlotsPct =
-        province.maxSlots > 0
-          ? Math.round((province.factoriesCount / province.maxSlots) * 100)
-          : 100;
 
       let stanceLabel = "دیپلماسی عادی";
       let rawStance: DiplomaticStance = "NORMAL_DIPLOMACY";
@@ -96,12 +98,12 @@ export function useHoverNationResolver({
         code: canonicalOwnerId,
         flagCode,
         rank: realRank,
+        gdpRank: realGdpRank,
         stance: stanceLabel,
         rawStance,
         isOwnCountry,
         regionName: province.nameFa,
         regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
-        regionCapacityPercentage: activeSlotsPct,
         totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
         gdpSharePct,
       };

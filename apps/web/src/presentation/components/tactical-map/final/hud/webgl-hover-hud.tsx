@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, MapPin, Building2, Landmark } from "lucide-react";
+import { Coins, MapPin, Landmark } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { DiplomaticStance } from "@geopolitics/domain";
@@ -11,12 +11,12 @@ export interface HoverCountryInfo {
   code: string;
   flagCode: string;
   rank: number;
+  gdpRank?: number;
   stance: string;
   rawStance?: DiplomaticStance;
   isOwnCountry: boolean;
   regionName?: string;
   regionGdpText?: string;
-  regionCapacityPercentage?: number;
   totalGdpText?: string;
   gdpSharePct?: number;
   hasSecurityGuarantee?: boolean;
@@ -80,15 +80,6 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
                 <MapPin size={11} />
                 {hoverData.regionName}
               </span>
-              {hoverData.regionCapacityPercentage !== undefined && (
-                <span className="text-[9px] text-muted-foreground flex items-center gap-0.5 font-mono bg-secondary/80 px-1.5 py-0.5 rounded-md border border-border/40">
-                  <Building2 size={10} className="text-treasury" />
-                  {PersianNumberFormatter.toPersianDigits(
-                    hoverData.regionCapacityPercentage,
-                  )}
-                  ٪ اشغال مسکن
-                </span>
-              )}
             </div>
 
             <div className="grid grid-cols-2 gap-1.5">
@@ -119,7 +110,10 @@ export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
                   {hoverData.totalGdpText}
                 </span>
                 <span className="text-[8px] text-muted-foreground block font-sans">
-                  رتبه #{PersianNumberFormatter.toPersianDigits(hoverData.rank)}{" "}
+                  رتبه #
+                  {PersianNumberFormatter.toPersianDigits(
+                    hoverData.gdpRank ?? hoverData.rank,
+                  )}{" "}
                   اقتصاد جهان
                 </span>
               </div>

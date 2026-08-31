@@ -14,7 +14,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   factoryTiers: [{ techLevel: 1.0, count: 20 }],
   navalFleet: 0,
   government: {
-    type: "DEMOCRACY",
+    type: "IDEOLOGICAL_REGIME",
     stability: 50,
     turnsInPower: 1,
   },

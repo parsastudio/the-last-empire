@@ -138,7 +138,9 @@ export function useSelectNationForm() {
 
   const selectedGovernment = useMemo(() => {
     if (userSelectedGovernment) return userSelectedGovernment;
-    return selectedNation ? selectedNation.defaultGovernment : "DEMOCRACY";
+    return selectedNation
+      ? selectedNation.defaultGovernment
+      : "PLURALIST_PARLIAMENTARY";
   }, [userSelectedGovernment, selectedNation]);
 
   const handleSelectNationCard = useCallback((nation: NationDetail) => {

@@ -88,7 +88,7 @@ export class NationRankCalculatorUtility {
       let population = 0;
       for (let p = 0; p < provList.length; p++) {
         const prov = provList[p]!;
-        gdp += getProvinceGdp(prov);
+        gdp += getProvinceGdp(prov, nation.equipmentTechLevel ?? 1.0);
         population += prov.population || 0;
       }
 
@@ -108,6 +108,56 @@ export class NationRankCalculatorUtility {
     return this.calculateRankMapFromCandidates(candidatesInput);
   }
 
+  public static calculateGdpRankMap(
+    nationsMap?: Record<string, Nation>,
+    provincesMap?: Record<string, Province> | Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): Map<string, number> {
+    const gdpRankMap = new Map<string, number>();
+    if (!nationsMap) return gdpRankMap;
+
+    const aliveNations = Object.values(nationsMap).filter((n) => n.isAlive);
+    if (aliveNations.length === 0) return gdpRankMap;
+
+    const ownerMap =
+      provincesByOwnerMap ??
+      NationTerritoryResolverUtility.buildProvincesByOwnerMap(provincesMap);
+
+    const candidateList = aliveNations.map((nation) => {
+      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+      const provList =
+        ownerMap.get(canonicalId) ?? ownerMap.get(nation.id) ?? [];
+
+      let gdp = 0;
+      for (let p = 0; p < provList.length; p++) {
+        const prov = provList[p]!;
+        gdp += getProvinceGdp(prov, nation.equipmentTechLevel ?? 1.0);
+      }
+
+      return {
+        id: nation.id,
+        canonicalId,
+        gdp,
+      };
+    });
+
+    candidateList.sort((a, b) => {
+      if (b.gdp !== a.gdp) {
+        return b.gdp - a.gdp;
+      }
+      return a.canonicalId.localeCompare(b.canonicalId);
+    });
+
+    for (let i = 0; i < candidateList.length; i++) {
+      const item = candidateList[i]!;
+      const rankValue = i + 1;
+      gdpRankMap.set(item.canonicalId, rankValue);
+      gdpRankMap.set(item.id, rankValue);
+    }
+
+    return gdpRankMap;
+  }
+
   public static getRank(
     nationId: string,
     nationsMap?: Record<string, Nation>,
@@ -119,6 +169,20 @@ export class NationRankCalculatorUtility {
       return rankMap.get(canonicalId) ?? rankMap.get(nationId) ?? 99;
     }
     const map = this.calculateRankMap(nationsMap, provincesMap);
+    return map.get(canonicalId) ?? map.get(nationId) ?? 99;
+  }
+
+  public static getGdpRank(
+    nationId: string,
+    nationsMap?: Record<string, Nation>,
+    provincesMap?: Record<string, Province> | Province[],
+    gdpRankMap?: Map<string, number>,
+  ): number {
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    if (gdpRankMap) {
+      return gdpRankMap.get(canonicalId) ?? gdpRankMap.get(nationId) ?? 99;
+    }
+    const map = this.calculateGdpRankMap(nationsMap, provincesMap);
     return map.get(canonicalId) ?? map.get(nationId) ?? 99;
   }
 }

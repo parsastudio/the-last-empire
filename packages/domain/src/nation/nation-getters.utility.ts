@@ -123,6 +123,20 @@ export class NationGettersUtility {
     );
   }
 
+  public static getGdpRank(
+    nationId: string,
+    allNations?: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+    gdpRankMap?: Map<string, number>,
+  ): number {
+    return NationRankCalculatorUtility.getGdpRank(
+      nationId,
+      allNations,
+      provincesMap,
+      gdpRankMap,
+    );
+  }
+
   public static calculateGlobalRankMap(
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
@@ -138,6 +152,16 @@ export class NationGettersUtility {
     provincesMap?: Record<string, Province>,
   ): Map<string, number> {
     return NationRankCalculatorUtility.calculateRankMap(
+      allNations,
+      provincesMap,
+    );
+  }
+
+  public static calculateGdpRankMap(
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+  ): Map<string, number> {
+    return NationRankCalculatorUtility.calculateGdpRankMap(
       allNations,
       provincesMap,
     );

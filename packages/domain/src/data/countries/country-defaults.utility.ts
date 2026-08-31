@@ -24,7 +24,8 @@ export class CountryDefaultsUtility {
   public static readonly DEFAULT_BASE_GDP = 50_000_000_000;
   public static readonly DEFAULT_BASE_POPULATION = 10_000_000;
   public static readonly DEFAULT_BASE_TECH_LEVEL = 1;
-  public static readonly DEFAULT_GOVERNMENT: GovernmentType = "DEMOCRACY";
+  public static readonly DEFAULT_GOVERNMENT: GovernmentType =
+    "PLURALIST_PARLIAMENTARY";
 
   public static getFallbackProfile(
     identifier: unknown,

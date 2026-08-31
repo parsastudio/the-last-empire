@@ -3,6 +3,8 @@ import {
   EconomicDoctrineConfig,
 } from "./economic-doctrine.schema";
 
+export type { EconomicDoctrineStance, EconomicDoctrineConfig };
+
 export const ECONOMIC_DOCTRINE_CONFIGS: Record<
   EconomicDoctrineStance,
   EconomicDoctrineConfig

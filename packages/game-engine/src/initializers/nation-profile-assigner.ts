@@ -18,15 +18,15 @@ export class NationProfileAssigner {
     customGovType?: GovernmentType | string,
   ): Nation {
     const validGovTypes: GovernmentType[] = [
-      "DEMOCRACY",
-      "DICTATORSHIP",
-      "MONARCHY",
-      "COMMUNISM",
-      "FASCISM",
+      "PLURALIST_PARLIAMENTARY",
+      "CENTRALIZED_PRESIDENTIAL",
+      "IDEOLOGICAL_REGIME",
+      "HEREDITARY_MONARCHY",
+      "TECHNOCRATIC_ONE_PARTY",
     ];
 
     let govType: GovernmentType =
-      (item.defaultGovernment as GovernmentType) ?? "DEMOCRACY";
+      (item.defaultGovernment as GovernmentType) ?? "PLURALIST_PARLIAMENTARY";
     if (
       customGovType &&
       validGovTypes.includes(customGovType as GovernmentType)

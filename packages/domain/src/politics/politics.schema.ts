@@ -1,11 +1,11 @@
 import { z } from "zod";
 
 export const GovernmentTypeSchema = z.enum([
-  "DEMOCRACY",
-  "DICTATORSHIP",
-  "MONARCHY",
-  "COMMUNISM",
-  "FASCISM",
+  "PLURALIST_PARLIAMENTARY",
+  "CENTRALIZED_PRESIDENTIAL",
+  "IDEOLOGICAL_REGIME",
+  "HEREDITARY_MONARCHY",
+  "TECHNOCRATIC_ONE_PARTY",
 ]);
 
 export const GovernmentStateSchema = z.object({

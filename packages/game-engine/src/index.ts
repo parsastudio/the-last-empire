@@ -94,7 +94,6 @@ export * from "./pipeline/economy-turn-processor";
 export * from "./pipeline/politics-turn-processor";
 
 export * from "./politics/coalition-manager";
-export * from "./politics/government-system";
 export * from "./politics/modifier-manager";
 export * from "./politics/nation-liveness-manager";
 export * from "./politics/research-manager";
