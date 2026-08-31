@@ -100,9 +100,9 @@ export function resolveProfileRelation(
 
     const targetCanonical = CountryRegistry.resolveCanonicalId(liveNation.id);
     hasSecurityGuarantee =
-      CountryRegistry.resolveCanonicalId(
-        humanNation.securityGuarantorId || "",
-      ) === targetCanonical;
+      Boolean(humanNation.securityGuarantorId) &&
+      CountryRegistry.resolveCanonicalId(humanNation.securityGuarantorId) ===
+        targetCanonical;
   }
 
   const guarantorNation =

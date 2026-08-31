@@ -39,9 +39,9 @@ export class DiplomaticColorModulator {
     );
 
     const isGuaranteed =
-      CountryRegistry.resolveCanonicalId(
-        humanNation.securityGuarantorId || "",
-      ) === canonicalOwner;
+      Boolean(humanNation.securityGuarantorId) &&
+      CountryRegistry.resolveCanonicalId(humanNation.securityGuarantorId) ===
+        canonicalOwner;
 
     if (stance === "WAR") {
       return { r: 244, g: 35, b: 65, intensity: 1.0 };

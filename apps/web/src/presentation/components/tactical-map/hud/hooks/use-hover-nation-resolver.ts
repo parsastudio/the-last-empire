@@ -67,6 +67,7 @@ export function useHoverNationResolver({
       let stanceLabel = "دیپلماسی عادی";
       let rawStance: DiplomaticStance = "NORMAL_DIPLOMACY";
       let isOwnCountry = false;
+      let hasSecurityGuarantee = false;
 
       if (humanNationId && nationsMap && ownerNation) {
         const canonicalHuman =
@@ -87,6 +88,16 @@ export function useHoverNationResolver({
             stanceLabel = "شراکت استراتژیک";
           else if (stance === "NON_AGGRESSION_PACT") stanceLabel = "عدم تخاصم";
           else stanceLabel = "دیپلماسی عادی";
+
+          hasSecurityGuarantee =
+            (Boolean(humanNation?.securityGuarantorId) &&
+              CountryRegistry.resolveCanonicalId(
+                humanNation?.securityGuarantorId,
+              ) === canonicalOwnerId) ||
+            (Boolean(ownerNation.securityGuarantorId) &&
+              CountryRegistry.resolveCanonicalId(
+                ownerNation.securityGuarantorId,
+              ) === canonicalHuman);
         }
       }
 
@@ -106,6 +117,7 @@ export function useHoverNationResolver({
         regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
         totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
         gdpSharePct,
+        hasSecurityGuarantee,
       };
     },
     [provincesMap, nationsMap, humanNationId],
