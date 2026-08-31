@@ -6,7 +6,6 @@ import {
   Province,
   IndustryCalculator,
   ActionFactory,
-  PersianNumberFormatter,
   ProcurementBatchCalculator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
@@ -14,10 +13,6 @@ import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/
 import { IndustryStatsOverview } from "./components/industry-stats-overview";
 import { IndustrySmartBuildCard } from "./components/industry-smart-build-card";
 import { FactoryTiersGrid } from "./components/factory-tiers-grid";
-import {
-  MachineryTrancheCard,
-  MachineryTrancheInfo,
-} from "./components/machinery-tranche-card";
 
 interface IndustryDomesticTabProps {
   nation: Nation;
@@ -29,8 +24,6 @@ export function IndustryDomesticTab({
   provincesMap,
 }: IndustryDomesticTabProps) {
   const [isBatchBuilding, setIsBatchBuilding] = useState<boolean>(false);
-  const [isSubmittingTranche, setIsSubmittingTranche] =
-    useState<boolean>(false);
   const { dispatchAction } = useGameActions();
 
   const ownedProvinces = useMemo(() => {
@@ -50,10 +43,6 @@ export function IndustryDomesticTab({
   }
 
   const safeTotalFactories = Math.max(1, totalActiveFactories);
-  const currentEquipmentTech = nation.equipmentTechLevel;
-  const targetDomesticTech = nation.industrialLevel;
-  const isMaxedOut = currentEquipmentTech >= targetDomesticTech;
-
   const factoryCost = IndustryCalculator.FACTORY_REBUILD_COST;
 
   const buildBatch = useMemo(() => {
@@ -68,92 +57,6 @@ export function IndustryDomesticTab({
       minQuantity: 1,
     });
   }, [nation.treasury, factoryCost, totalEmptySlots]);
-
-  const domesticTranches = useMemo<MachineryTrancheInfo[]>(() => {
-    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
-      currentEquipmentTech,
-      targetDomesticTech,
-    );
-
-    const baseIncome =
-      safeTotalFactories *
-      IndustryCalculator.calculateFactoryYield(currentEquipmentTech);
-
-    const configs = [
-      {
-        percentage: 0.1,
-        percentageLabel: "۱۰٪ کارخانه‌ها",
-        badgeTitle: "بسته چابک نوسازی بومی",
-        calcQty: Math.max(1, Math.round(safeTotalFactories * 0.1)),
-      },
-      {
-        percentage: 0.25,
-        percentageLabel: "۲۵٪ کارخانه‌ها",
-        badgeTitle: "بسته توسعه استراتژیک بومی",
-        calcQty: Math.max(
-          1,
-          Math.min(safeTotalFactories, Math.round(safeTotalFactories * 0.25)),
-        ),
-      },
-      {
-        percentage: 1.0,
-        percentageLabel: "۱۰۰٪ کارخانه‌ها",
-        badgeTitle: "نوسازی سراسری خطوط تولید",
-        calcQty: safeTotalFactories,
-      },
-    ];
-
-    return configs.map((cfg) => {
-      const quantity = cfg.calcQty;
-      const totalCost = quantity * unitCost;
-      const projectedTech = IndustryCalculator.calculateNewEquipmentTechLevel(
-        safeTotalFactories,
-        currentEquipmentTech,
-        quantity,
-        targetDomesticTech,
-      );
-      const newIncome =
-        safeTotalFactories *
-        IndustryCalculator.calculateFactoryYield(projectedTech);
-      const projectedIncomeDelta = Math.max(0, newIncome - baseIncome);
-      const canAfford = nation.treasury >= totalCost && totalCost > 0;
-
-      return {
-        percentage: cfg.percentage,
-        percentageLabel: cfg.percentageLabel,
-        badgeTitle: cfg.badgeTitle,
-        quantity,
-        totalFactories: safeTotalFactories,
-        totalCost,
-        currentTech: currentEquipmentTech,
-        targetTech: targetDomesticTech,
-        projectedTech,
-        projectedIncomeDelta,
-        canAfford,
-        isMaxedOut,
-      };
-    });
-  }, [
-    safeTotalFactories,
-    currentEquipmentTech,
-    targetDomesticTech,
-    nation.treasury,
-    isMaxedOut,
-  ]);
-
-  const handleModernizeTranche = async (quantity: number) => {
-    if (isSubmittingTranche || isMaxedOut) return;
-    setIsSubmittingTranche(true);
-    try {
-      const action = ActionFactory.equipDomesticMachinery(nation.id, quantity);
-      await dispatchAction(
-        action,
-        `خطوط تولید ${quantity} کارخانه با آخرین دانش بومی کشور نوسازی شد.`,
-      );
-    } finally {
-      setIsSubmittingTranche(false);
-    }
-  };
 
   const handleSmartBatchBuild = async () => {
     if (
@@ -235,7 +138,9 @@ export function IndustryDomesticTab({
         treasury={nation.treasury}
         batches={nation.factoryTiers}
         totalFactories={safeTotalFactories}
-        maxDomesticTech={nation.industrialLevel}
+        targetTechLevel={nation.industrialLevel}
+        actionType="DOMESTIC"
+        actionLabel="ارتقای بومی"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
@@ -255,32 +160,6 @@ export function IndustryDomesticTab({
           treasury={nation.treasury}
           industrialLevel={nation.industrialLevel}
         />
-      </div>
-
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">
-            بسته‌های نوسازی خطوط تولید با دانش بومی (سقف لِوِل{" "}
-            {PersianNumberFormatter.toPersianDigits(
-              targetDomesticTech.toFixed(1),
-            )}
-            )
-          </span>
-          <span className="text-[10px] font-mono text-muted-foreground">
-            نرخ تعدیل: ۳۰٪ قیمت پایه به ازای هر لول اختلاف
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          {domesticTranches.map((tranche) => (
-            <MachineryTrancheCard
-              key={tranche.percentage}
-              tranche={tranche}
-              isSubmitting={isSubmittingTranche}
-              onExecute={handleModernizeTranche}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

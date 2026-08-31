@@ -25,16 +25,20 @@ interface UseFactoryTierProcurementProps {
   nationId: string;
   treasury: number;
   batches?: FactoryBatch[];
-  maxDomesticTech: number;
+  targetTechLevel: number;
   totalFactories: number;
+  sellerId?: string;
+  actionType?: "DOMESTIC" | "IMPORT";
 }
 
 export function useFactoryTierProcurement({
   nationId,
   treasury,
   batches,
-  maxDomesticTech,
+  targetTechLevel,
   totalFactories,
+  sellerId,
+  actionType = "DOMESTIC",
 }: UseFactoryTierProcurementProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
   const [feedbacks, setFeedbacks] = useState<
@@ -45,17 +49,17 @@ export function useFactoryTierProcurement({
     if (batches && batches.length > 0) {
       return IndustryCalculator.consolidateBatches(batches);
     }
-    return [{ techLevel: maxDomesticTech, count: totalFactories }];
-  }, [batches, maxDomesticTech, totalFactories]);
+    return [{ techLevel: targetTechLevel, count: totalFactories }];
+  }, [batches, targetTechLevel, totalFactories]);
 
   const tierUpgradeItems = useMemo<FactoryTierUpgradeItem[]>(() => {
     return consolidatedBatches.map((batch, index) => {
-      const isMaxedOut = batch.techLevel >= maxDomesticTech;
+      const isMaxedOut = batch.techLevel >= targetTechLevel;
       const unitCost = isMaxedOut
         ? 0
         : IndustryCalculator.calculateModernizeUnitCost(
             batch.techLevel,
-            maxDomesticTech,
+            targetTechLevel,
           );
 
       const batchResult = isMaxedOut
@@ -76,13 +80,13 @@ export function useFactoryTierProcurement({
         rankIndex: index,
         isMaxedOut,
         unitCost,
-        targetTech: maxDomesticTech,
+        targetTech: targetTechLevel,
         batchQuantity: batchResult.batchQuantity,
         batchCost: batchResult.batchCost,
         canAfford: batchResult.canAfford,
       };
     });
-  }, [consolidatedBatches, maxDomesticTech, treasury]);
+  }, [consolidatedBatches, targetTechLevel, treasury]);
 
   const handleUpgradeTier = useCallback(
     async (item: FactoryTierUpgradeItem) => {
@@ -90,7 +94,10 @@ export function useFactoryTierProcurement({
 
       TacticalSound.playCoinSound();
       const feedbackId = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-      const feedbackText = `+${item.batchQuantity} سوله مدرن`;
+      const feedbackText =
+        actionType === "IMPORT"
+          ? `+${item.batchQuantity} سوله وارداتی`
+          : `+${item.batchQuantity} سوله مدرن`;
 
       setFeedbacks((prev) => ({
         ...prev,
@@ -109,13 +116,22 @@ export function useFactoryTierProcurement({
         }));
       }, 700);
 
-      const action = ActionFactory.equipDomesticMachinery(
-        nationId,
-        item.batchQuantity,
-      );
-      await dispatchAction(action);
+      if (actionType === "IMPORT" && sellerId) {
+        const action = ActionFactory.buyIndustrialEquipment(
+          nationId,
+          sellerId,
+          item.batchQuantity,
+        );
+        await dispatchAction(action);
+      } else {
+        const action = ActionFactory.equipDomesticMachinery(
+          nationId,
+          item.batchQuantity,
+        );
+        await dispatchAction(action);
+      }
     },
-    [nationId, isSubmitting, dispatchAction],
+    [nationId, sellerId, actionType, isSubmitting, dispatchAction],
   );
 
   return {

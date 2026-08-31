@@ -10,7 +10,10 @@ interface FactoryTiersGridProps {
   treasury: number;
   batches?: FactoryBatch[];
   totalFactories: number;
-  maxDomesticTech: number;
+  targetTechLevel: number;
+  sellerId?: string;
+  actionType?: "DOMESTIC" | "IMPORT";
+  actionLabel?: string;
 }
 
 export function FactoryTiersGrid({
@@ -18,15 +21,20 @@ export function FactoryTiersGrid({
   treasury,
   batches,
   totalFactories,
-  maxDomesticTech,
+  targetTechLevel,
+  sellerId,
+  actionType = "DOMESTIC",
+  actionLabel = "ارتقای بومی",
 }: FactoryTiersGridProps) {
   const { tierUpgradeItems, feedbacks, isSubmitting, handleUpgradeTier } =
     useFactoryTierProcurement({
       nationId,
       treasury,
       batches,
-      maxDomesticTech,
+      targetTechLevel,
       totalFactories,
+      sellerId,
+      actionType,
     });
 
   return (
@@ -38,11 +46,12 @@ export function FactoryTiersGrid({
           </div>
           <div>
             <h3 className="text-xs font-black text-foreground">
-              ناوگان کارخانجات و خطوط تولید کشور
+              خطوط تولید و رده‌های صنعتی کشور
             </h3>
             <span className="text-[10px] text-muted-foreground">
-              پایش تفکیکی رده‌های صنعتی و ارتقای فوری سوله‌ها به آخرین سطح دانش
-              بومی
+              {actionType === "IMPORT"
+                ? "انتخاب رده جهت واردات ماشین‌آلات و جهش فناوری خطوط تولید"
+                : "پایش تفکیکی رده‌های صنعتی و ارتقای فوری سوله‌ها به آخرین سطح دانش بومی"}
             </span>
           </div>
         </div>
@@ -62,6 +71,7 @@ export function FactoryTiersGrid({
             key={`${item.batch.techLevel}-${item.rankIndex}`}
             item={item}
             totalFactories={totalFactories}
+            actionLabel={actionLabel}
             feedbacks={feedbacks[item.rankIndex]}
             isSubmitting={isSubmitting}
             onUpgrade={handleUpgradeTier}
