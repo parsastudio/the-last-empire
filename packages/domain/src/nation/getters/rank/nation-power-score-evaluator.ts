@@ -45,35 +45,7 @@ export class NationPowerScoreEvaluator {
       );
 
     const activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
-      id: canonicalId,
-      name: input.name || profile?.nameFa || canonicalId,
-      isAi: true,
-      isAlive: true,
-      flagCode: profile?.flagCode || "IR",
-      economicStance: "BALANCED_MIXED",
-      treasury: 100000,
-      nationalDebt: 0,
-      industrialLevel: input.industrialLevel ?? domesticTech,
-      equipmentTechLevel: equipmentTech,
-      navalFleet: input.navalFleet ?? 0,
-      government: {
-        type:
-          (input.governmentType as GovernmentType) ||
-          profile?.startingGovernment ||
-          "DEMOCRACY",
-        stability: input.stability ?? 50,
-        turnsInPower: 1,
-      },
       military: stack,
-      relations: {},
-      activeModifiers: [],
-      globalReputation: input.globalReputation ?? 50,
-      executedEspionageTiers: [],
-      attackedTargetIdsThisTurn: [],
-      warFocusTargetId: null,
-      postWarCooldownTurns: 0,
-      doctrine: "DOMESTIC_INDUSTRIALIST",
-      securityGuarantorId: null,
     });
 
     const effectiveFieldTech = Math.max(domesticTech, equipmentTech);

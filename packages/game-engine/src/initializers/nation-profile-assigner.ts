@@ -35,13 +35,15 @@ export class NationProfileAssigner {
     }
 
     const cleanId = CountryRegistry.resolveCanonicalId(item.code || item.id);
-    const domesticTech = item.startingTechLevel ?? 1.0;
-    const equipmentTech = item.equipmentTechLevel ?? domesticTech;
+    const domesticMilitaryTech = item.startingTechLevel ?? 1.0;
+    const militaryEquipmentTech =
+      item.equipmentTechLevel ?? domesticMilitaryTech;
+    const industrialLevel = item.industrialLevel ?? 1.0;
 
     const dynamicStack = MilitaryDistributionEngine.calculateStartingStack(
       item.gdp,
-      domesticTech,
-      equipmentTech,
+      domesticMilitaryTech,
+      militaryEquipmentTech,
     );
 
     const infantry =
@@ -67,57 +69,57 @@ export class NationProfileAssigner {
       airDefense: 0,
       airForce: 0,
       droneMissile: 0,
-      techLevel: domesticTech,
+      techLevel: domesticMilitaryTech,
       branchTech:
         dynamicStack.branchTech ||
-        MilitaryInventoryHelper.initializeBranchTech(domesticTech),
+        MilitaryInventoryHelper.initializeBranchTech(domesticMilitaryTech),
     };
 
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "INFANTRY",
       infantry,
-      dynamicStack.branchTech?.infantry ?? domesticTech,
+      dynamicStack.branchTech?.infantry ?? domesticMilitaryTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "ARMOR",
       armor,
-      dynamicStack.branchTech?.armor ?? domesticTech,
+      dynamicStack.branchTech?.armor ?? domesticMilitaryTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "AIR_DEFENSE",
       airDefense,
-      dynamicStack.branchTech?.airDefense ?? domesticTech,
+      dynamicStack.branchTech?.airDefense ?? domesticMilitaryTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "AIR_FORCE",
       airForce,
-      dynamicStack.branchTech?.airForce ?? domesticTech,
+      dynamicStack.branchTech?.airForce ?? domesticMilitaryTech,
     );
     baseMilitary = MilitaryInventoryHelper.addUnits(
       baseMilitary,
       "DRONE_MISSILE",
       droneMissile,
-      dynamicStack.branchTech?.droneMissile ?? domesticTech,
+      dynamicStack.branchTech?.droneMissile ?? domesticMilitaryTech,
     );
 
-    const initialNavalFleet = item.hasSeaAccess && domesticTech > 4.5 ? 3 : 0;
+    const initialNavalFleet =
+      item.hasSeaAccess && domesticMilitaryTech > 4.5 ? 3 : 0;
 
     const doctrineProfile = NationDoctrineResolver.resolveProfileForCountry(
       cleanId,
-      domesticTech,
-      equipmentTech,
+      domesticMilitaryTech,
+      militaryEquipmentTech,
       item.gdp,
     );
 
-    const industrialLevel = item.industrialLevel ?? domesticTech;
     const initialFactoryCount =
       IndustryCalculator.calculateStartingTotalFactories(
         item.gdp,
-        equipmentTech,
+        industrialLevel,
       );
 
     return {
@@ -130,8 +132,10 @@ export class NationProfileAssigner {
       treasury: item.startingTreasury,
       nationalDebt: 0,
       industrialLevel,
-      equipmentTechLevel: equipmentTech,
-      factoryTiers: [{ techLevel: equipmentTech, count: initialFactoryCount }],
+      equipmentTechLevel: industrialLevel,
+      factoryTiers: [
+        { techLevel: industrialLevel, count: initialFactoryCount },
+      ],
       navalFleet: initialNavalFleet,
       government: {
         type: govType,

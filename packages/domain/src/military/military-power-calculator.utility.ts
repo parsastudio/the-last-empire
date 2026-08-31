@@ -1,7 +1,10 @@
-import { Nation } from "@/domain/nation/nation.schema";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
-import { UnitType } from "@/domain/military/military.schema";
+import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
+
+export interface MilitaryPowerTarget {
+  military: MilitaryStack;
+}
 
 export class MilitaryPowerCalculator {
   public static calculateTechMultiplier(techLevel: number): number {
@@ -18,31 +21,31 @@ export class MilitaryPowerCalculator {
     return stat.weightPower * techMultiplier;
   }
 
-  public static calculateLandAndAirPower(nation: Nation): number {
-    const infantry = nation.military.infantry || 0;
-    const armor = nation.military.armor || 0;
-    const airDefense = nation.military.airDefense || 0;
-    const airForce = nation.military.airForce || 0;
-    const droneMissile = nation.military.droneMissile || 0;
+  public static calculateLandAndAirPower(target: MilitaryPowerTarget): number {
+    const infantry = target.military.infantry || 0;
+    const armor = target.military.armor || 0;
+    const airDefense = target.military.airDefense || 0;
+    const airForce = target.military.airForce || 0;
+    const droneMissile = target.military.droneMissile || 0;
 
     const infTech = MilitaryInventoryHelper.getBranchTech(
-      nation.military,
+      target.military,
       "INFANTRY",
     );
     const armTech = MilitaryInventoryHelper.getBranchTech(
-      nation.military,
+      target.military,
       "ARMOR",
     );
     const adTech = MilitaryInventoryHelper.getBranchTech(
-      nation.military,
+      target.military,
       "AIR_DEFENSE",
     );
     const afTech = MilitaryInventoryHelper.getBranchTech(
-      nation.military,
+      target.military,
       "AIR_FORCE",
     );
     const drTech = MilitaryInventoryHelper.getBranchTech(
-      nation.military,
+      target.military,
       "DRONE_MISSILE",
     );
 
