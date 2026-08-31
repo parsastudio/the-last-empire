@@ -11,10 +11,7 @@ import {
 } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@geopolitics/game-engine";
 import { CountryProfileData } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
-import {
-  NationPresentationMapper,
-  getDoctrineLabel,
-} from "@/presentation/utils/nation-presentation-mapper";
+import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import {
   getPostureLabel,
   getPostureBadgeClass,
@@ -115,9 +112,6 @@ export function resolveProfileRelation(
         ] || allNations[liveNation.securityGuarantorId]
       : null;
 
-  const rawDoctrine = liveNation?.doctrine || profile?.aiDoctrine;
-  const doctrineLabel = getDoctrineLabel(rawDoctrine);
-
   return {
     code: displayCode.toUpperCase(),
     name,
@@ -138,7 +132,6 @@ export function resolveProfileRelation(
         : fallback.startingGovernment,
       stability: liveNation ? liveNation.government.stability : 50,
       tension,
-      doctrineLabel,
       guarantorName: guarantorNation?.name,
     },
   };

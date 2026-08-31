@@ -36,18 +36,18 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-rose-300 text-xs font-black">
             <Skull size={16} className="text-rose-400 animate-pulse" />
-            <span>تحت‌الحمایگی استعماری فعال (۳ برابر GDP نیرو)</span>
+            <span>تحت‌الحمایگی استعماری فعال (۵۰٪ GDP نیرو)</span>
           </div>
           <span className="text-[10px] font-mono text-rose-400 font-bold">
             {PersianNumberFormatter.formatCurrency(
               emergencyProtectorateCost,
               true,
             )}{" "}
-            / نوبت (۳۰٪ خراج)
+            / نوبت (۵٪ خراج)
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          استقرار ارتش فوق‌پیشرفته ابرقدرت در سنگرهای شما با پرداخت ۳۰٪ خراج
+          استقرار ارتش فوق‌پیشرفته ابرقدرت در سنگرهای شما با پرداخت ۵٪ خراج
           نوبتی.
         </p>
         <button
@@ -71,11 +71,11 @@ export function DiplomacySecurityUmbrellaActions({
           </div>
           <span className="text-[10px] font-mono text-cyan-400 font-bold">
             {PersianNumberFormatter.formatCurrency(securityGuaranteeCost, true)}{" "}
-            / نوبت
+            / نوبت (۲٪ GDP)
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          در صورت تهاجم دشمن، ۳۰٪ از ارتش فوق‌پیشرفته این کشور در سنگرهای شما
+          در صورت تهاجم دشمن، ۶٪ از ارتش فوق‌پیشرفته این کشور در سنگرهای شما
           مستقر می‌شود.
         </p>
         <button
@@ -105,14 +105,14 @@ export function DiplomacySecurityUmbrellaActions({
           <div className="flex items-center justify-between">
             <span className="text-xs font-black flex items-center gap-1.5">
               <Skull size={15} className="text-rose-400" />
-              استمداد و معاهده تحت‌الحمایگی استعماری (۳ برابر GDP نیرو)
+              استمداد و معاهده تحت‌الحمایگی استعماری (۵۰٪ GDP نیرو)
             </span>
             <span className="text-[9px] font-mono px-2 py-0.5 rounded-md border bg-rose-500/20 text-rose-300 border-rose-500/40">
-              ۳۰٪ خراج
+              ۵٪ خراج
             </span>
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
-            استقرار تمام‌قد ارتش ابرقدرت در خاک شما در ازای واگذاری ۳۰٪ درآمد،
+            استقرار تمام‌قد ارتش ابرقدرت در خاک شما در ازای واگذاری ۵٪ درآمد،
             ۳۰- پرستیژ و ۱۵-٪ ثبات.
           </p>
         </button>
@@ -152,11 +152,11 @@ export function DiplomacySecurityUmbrellaActions({
                 : "bg-secondary text-muted-foreground border-border/60"
             }`}
           >
-            ۱۰٪ GDP
+            ۲٪ GDP
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          اعزام ۳۰٪ نیروی ضربت فوق‌پیشرفته این کشور در زمان دفاع سرزمینی.
+          اعزام ۶٪ نیروی ضربت فوق‌پیشرفته این کشور در زمان دفاع سرزمینی.
         </p>
       </button>
 

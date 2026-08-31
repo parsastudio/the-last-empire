@@ -60,7 +60,7 @@ export function useQuickRecruitBatch({
 
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
-  const maxValuation = Math.floor(currentGdp);
+  const maxValuation = Math.floor(currentGdp * 0.2);
   const remainingValuationCapacity = Math.max(
     0,
     maxValuation - currentValuation,

@@ -77,7 +77,7 @@ export function useBuyProvinceForm({
   const isMaritimeAccessible = buyerHasSea && hasSeaAccess;
   const isGeographicallyConnected = isLandNeighbor || isMaritimeAccessible;
 
-  const costMultiplier = hasSeaAccess ? 5 : 4;
+  const costMultiplier = hasSeaAccess ? 0.75 : 0.45;
 
   const provinceGdp = useMemo(() => {
     if (!province) return 0;
@@ -85,8 +85,8 @@ export function useBuyProvinceForm({
   }, [province, ownerNation]);
 
   const purchasePrice = useMemo(() => {
-    if (!provinceGdp) return 10_000_000_000;
-    return Math.max(10_000_000_000, Math.floor(provinceGdp * costMultiplier));
+    if (!provinceGdp) return 1_000_000_000;
+    return Math.max(1_000_000_000, Math.floor(provinceGdp * costMultiplier));
   }, [provinceGdp, costMultiplier]);
 
   const buyerTreasury = humanNation?.treasury || 0;

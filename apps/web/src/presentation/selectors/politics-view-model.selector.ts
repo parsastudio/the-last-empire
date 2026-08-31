@@ -4,6 +4,7 @@ import {
   EconomicDoctrineStance,
   ECONOMIC_DOCTRINE_CONFIGS,
   NationGettersUtility,
+  getNationGdp,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
@@ -16,6 +17,8 @@ export interface EconomicDoctrinePreviewViewModel {
   hasSeaAccess: boolean;
   activeConfig: (typeof ECONOMIC_DOCTRINE_CONFIGS)[EconomicDoctrineStance];
   preview: FiscalRevenueBreakdown;
+  nationGdp: number;
+  gdpPercentage: number;
 }
 
 export interface GovernmentStabilityViewModel {
@@ -62,10 +65,18 @@ export function selectEconomicDoctrinePreview(
     provincesMap,
   );
 
+  const nationGdp = getNationGdp(nation, provincesMap);
+  const gdpPercentage =
+    nationGdp > 0
+      ? Number(((preview.totalRevenue / nationGdp) * 100).toFixed(2))
+      : 0;
+
   return {
     selectedStance,
     hasSeaAccess,
     activeConfig: ECONOMIC_DOCTRINE_CONFIGS[selectedStance],
     preview,
+    nationGdp,
+    gdpPercentage,
   };
 }

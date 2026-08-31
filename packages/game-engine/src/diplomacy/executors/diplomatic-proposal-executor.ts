@@ -67,7 +67,7 @@ export class DiplomaticProposalExecutor {
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         reputationChange: -30,
-        message: `معاهده تحت‌الحمایگی با ${receiver.name} امضا شد: اعزام ارتش ۳ برابری فوق‌پیشرفته در ازای ۳۰٪ خراج نوبتی (-۳۰ پرستیژ، -۱۵٪ ثبات).`,
+        message: `معاهده تحت‌الحمایگی با ${receiver.name} امضا شد: اعزام ارتش فوق‌پیشرفته (۵۰٪ GDP) در ازای ۵٪ خراج نوبتی (-۳۰ پرستیژ، -۱۵٪ ثبات).`,
       },
     };
   }
@@ -107,7 +107,7 @@ export class DiplomaticProposalExecutor {
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
-        message: `معاهده استعماری با ${receiver.name} لغو گردید و خراج نوبتی ۳۰٪ قطع شد.`,
+        message: `معاهده استعماری با ${receiver.name} لغو گردید و خراج نوبتی ۵٪ قطع شد.`,
       },
     };
   }

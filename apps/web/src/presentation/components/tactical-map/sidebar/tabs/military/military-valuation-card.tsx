@@ -59,7 +59,7 @@ export function MilitaryValuationCard({
         <div className="bg-secondary/40 border border-border/50 p-3 rounded-xl space-y-1">
           <span className="text-[10px] text-muted-foreground block font-sans flex items-center gap-1">
             <Coins size={12} className="text-gdp" />
-            ارزش کل زرادخانه (سقف ۱۰۰٪ GDP):
+            ارزش کل زرادخانه (سقف ۲۰٪ GDP):
           </span>
           <span className="font-extrabold text-gdp text-xs block truncate">
             {PersianNumberFormatter.formatCurrency(
@@ -69,7 +69,7 @@ export function MilitaryValuationCard({
           </span>
           <span className="text-[9px] text-muted-foreground block font-sans">
             {PersianNumberFormatter.toPersianDigits(metrics.capacityRatio)}٪ از
-            سقف مجاز GDP
+            سقف مجاز ارتش
           </span>
         </div>
 
@@ -91,8 +91,8 @@ export function MilitaryValuationCard({
       </div>
 
       <p className="text-[10px] text-muted-foreground leading-relaxed bg-secondary/20 p-2.5 rounded-xl border border-border/40 font-sans">
-        هزینه نگهداری نوبتی ارتش دقیقاً ۶٪ ارزش نیروهاست و تحت هیچ شرایطی از ۶٪
-        تولید ناخالص (GDP) کشور فراتر نمی‌رود.
+        هزینه نگهداری نوبتی ارتش ۶٪ ارزش کل یگان‌هاست و سقف مجاز ارزش ارتش معادل
+        ۲۰٪ تولید ناخالص (GDP) کشور می‌باشد.
       </p>
     </div>
   );
