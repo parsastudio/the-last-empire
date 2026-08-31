@@ -1,18 +1,20 @@
 "use client";
 
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Nation,
   Province,
   IndustryCalculator,
   ActionFactory,
-  ProcurementBatchCalculator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
 import { IndustryStatsOverview } from "./components/industry-stats-overview";
-import { IndustryModernizeCard } from "./components/industry-modernize-card";
 import { IndustrySmartBuildCard } from "./components/industry-smart-build-card";
+import {
+  MachineryTrancheCard,
+  MachineryTrancheInfo,
+} from "./components/machinery-tranche-card";
 
 interface IndustryDomesticTabProps {
   nation: Nation;
@@ -23,11 +25,10 @@ export function IndustryDomesticTab({
   nation,
   provincesMap,
 }: IndustryDomesticTabProps) {
-  const [isModernizing, setIsModernizing] = useState<boolean>(false);
   const [isBatchBuilding, setIsBatchBuilding] = useState<boolean>(false);
+  const [isSubmittingTranche, setIsSubmittingTranche] =
+    useState<boolean>(false);
   const { dispatchAction } = useGameActions();
-
-  const initialTreasuryRef = useRef<number>(nation.treasury);
 
   const ownedProvinces = useMemo(() => {
     return provincesMap
@@ -45,49 +46,111 @@ export function IndustryDomesticTab({
     totalEmptySlots += Math.max(0, p.maxSlots - p.factoriesCount);
   }
 
-  const factoryCost = IndustryCalculator.FACTORY_REBUILD_COST;
+  const safeTotalFactories = Math.max(1, totalActiveFactories);
+  const currentEquipmentTech = nation.equipmentTechLevel;
+  const targetDomesticTech = nation.industrialLevel;
+  const isMaxedOut = currentEquipmentTech >= targetDomesticTech;
 
-  const batchResult = useMemo(() => {
-    return ProcurementBatchCalculator.calculateBatch({
-      treasury: nation.treasury,
-      baselineTreasury: initialTreasuryRef.current,
-      budgetPercentage: 0.1,
-      unitPrice: factoryCost,
-      baseValuationPrice: factoryCost,
-      remainingQuotaRoom: totalEmptySlots,
-      remainingValuationCapacity: Number.MAX_SAFE_INTEGER,
-      minQuantity: 1,
-    });
-  }, [nation.treasury, factoryCost, totalEmptySlots]);
-
-  const fixedBatchCount = batchResult.batchQuantity;
-  const unitsToBuild = batchResult.canAfford ? batchResult.batchQuantity : 0;
-  const batchTotalCost = batchResult.batchCost;
-  const canAffordBatch = batchResult.canAfford && totalEmptySlots > 0;
-
-  const canModernize = nation.equipmentTechLevel < nation.industrialLevel;
-  const modernizeCost =
-    totalActiveFactories *
-    IndustryCalculator.calculateModernizeUnitCost(
-      nation.equipmentTechLevel,
-      nation.industrialLevel,
+  const domesticTranches = useMemo<MachineryTrancheInfo[]>(() => {
+    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
+      currentEquipmentTech,
+      targetDomesticTech,
     );
-  const canAffordModernize =
-    nation.treasury >= modernizeCost && modernizeCost > 0;
 
-  const handleModernizeAll = async () => {
-    if (isModernizing || !canAffordModernize) return;
-    setIsModernizing(true);
+    const baseIncome =
+      safeTotalFactories *
+      IndustryCalculator.calculateFactoryYield(currentEquipmentTech);
+
+    const configs = [
+      {
+        percentage: 0.1,
+        percentageLabel: "۱۰٪ کارخانه‌ها",
+        badgeTitle: "بسته چابک نوسازی بومی",
+        calcQty: Math.max(1, Math.round(safeTotalFactories * 0.1)),
+      },
+      {
+        percentage: 0.25,
+        percentageLabel: "۲۵٪ کارخانه‌ها",
+        badgeTitle: "بسته توسعه استراتژیک بومی",
+        calcQty: Math.max(
+          1,
+          Math.min(safeTotalFactories, Math.round(safeTotalFactories * 0.25)),
+        ),
+      },
+      {
+        percentage: 1.0,
+        percentageLabel: "۱۰۰٪ کارخانه‌ها",
+        badgeTitle: "نوسازی سراسری خطوط تولید",
+        calcQty: safeTotalFactories,
+      },
+    ];
+
+    return configs.map((cfg) => {
+      const quantity = cfg.calcQty;
+      const totalCost = quantity * unitCost;
+      const projectedTech = IndustryCalculator.calculateNewEquipmentTechLevel(
+        safeTotalFactories,
+        currentEquipmentTech,
+        quantity,
+        targetDomesticTech,
+      );
+      const newIncome =
+        safeTotalFactories *
+        IndustryCalculator.calculateFactoryYield(projectedTech);
+      const projectedIncomeDelta = Math.max(0, newIncome - baseIncome);
+      const canAfford = nation.treasury >= totalCost && totalCost > 0;
+
+      return {
+        percentage: cfg.percentage,
+        percentageLabel: cfg.percentageLabel,
+        badgeTitle: cfg.badgeTitle,
+        quantity,
+        totalFactories: safeTotalFactories,
+        totalCost,
+        currentTech: currentEquipmentTech,
+        targetTech: targetDomesticTech,
+        projectedTech,
+        projectedIncomeDelta,
+        canAfford,
+        isMaxedOut,
+      };
+    });
+  }, [
+    safeTotalFactories,
+    currentEquipmentTech,
+    targetDomesticTech,
+    nation.treasury,
+    isMaxedOut,
+  ]);
+
+  const handleModernizeTranche = async (quantity: number) => {
+    if (isSubmittingTranche || isMaxedOut) return;
+    setIsSubmittingTranche(true);
     try {
-      const action = ActionFactory.equipDomesticMachinery(nation.id);
+      const action = ActionFactory.equipDomesticMachinery(nation.id, quantity);
       await dispatchAction(
         action,
-        "تمامی خطوط تولید کارخانجات کشور به آخرین فناوری بومی مجهز شدند.",
+        `خطوط تولید ${quantity} کارخانه با آخرین دانش بومی کشور نوسازی شد.`,
       );
     } finally {
-      setIsModernizing(false);
+      setIsSubmittingTranche(false);
     }
   };
+
+  const factoryCost = IndustryCalculator.FACTORY_REBUILD_COST;
+  const initialTenPercentBudget = Math.floor(nation.treasury * 0.1);
+  const fixedBatchCount = Math.max(
+    1,
+    Math.floor(initialTenPercentBudget / factoryCost),
+  );
+  const affordableUnits = Math.floor(nation.treasury / factoryCost);
+  const unitsToBuild = Math.min(
+    fixedBatchCount,
+    totalEmptySlots,
+    affordableUnits,
+  );
+  const batchTotalCost = unitsToBuild * factoryCost;
+  const canAffordBatch = unitsToBuild > 0 && nation.treasury >= batchTotalCost;
 
   const handleSmartBatchBuild = async () => {
     if (isBatchBuilding || !canAffordBatch || unitsToBuild <= 0) return;
@@ -151,21 +214,38 @@ export function IndustryDomesticTab({
         equipmentTechLevel={nation.equipmentTechLevel}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-3">
         <IndustryTechUpgradeCard
           nationId={nation.id}
           treasury={nation.treasury}
           industrialLevel={nation.industrialLevel}
         />
+      </div>
 
-        <IndustryModernizeCard
-          totalActiveFactories={totalActiveFactories}
-          modernizeCost={modernizeCost}
-          canModernize={canModernize}
-          canAffordModernize={canAffordModernize}
-          isModernizing={isModernizing}
-          onModernizeAll={handleModernizeAll}
-        />
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">
+            بسته‌های نوسازی خطوط تولید با دانش بومی (سقف لِوِل{" "}
+            {PersianNumberFormatter.toPersianDigits(
+              targetDomesticTech.toFixed(1),
+            )}
+            )
+          </span>
+          <span className="text-[10px] font-mono text-muted-foreground">
+            نرخ تعدیل: ۳۰٪ قیمت پایه به ازای هر لول اختلاف
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          {domesticTranches.map((tranche) => (
+            <MachineryTrancheCard
+              key={tranche.percentage}
+              tranche={tranche}
+              isSubmitting={isSubmittingTranche}
+              onExecute={handleModernizeTranche}
+            />
+          ))}
+        </div>
       </div>
 
       <IndustrySmartBuildCard
