@@ -34,6 +34,7 @@ export class ManifestProfileLoader {
 
       const domesticTechLevel = item.startingTechLevel ?? 1;
       const equipmentTechLevel = item.equipmentTechLevel ?? domesticTechLevel;
+      const industrialLevel = item.industrialLevel ?? domesticTechLevel;
 
       const aiDoctrine =
         (item.aiDoctrine as AiDoctrineType) ||
@@ -53,6 +54,7 @@ export class ManifestProfileLoader {
         flagCode: String(item.flagCode || iso3.slice(0, 2)).toUpperCase(),
         domesticTechLevel,
         equipmentTechLevel,
+        industrialLevel,
         startingGovernment: item.defaultGovernment as GovernmentType,
         startingTechLevel: domesticTechLevel,
         aiDoctrine,

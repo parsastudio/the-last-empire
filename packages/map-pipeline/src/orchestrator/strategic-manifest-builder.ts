@@ -38,13 +38,15 @@ export class StrategicManifestBuilder {
     const manifestProvinces: FinalManifestProvince[] = [];
     const manifestNations: FinalManifestNation[] = [];
 
-    const activeProfiles = ALL_COUNTRY_PROFILES.filter((p: CountryProfile) => {
-      const gpuIdx = CountryRegistry.getGpuColorIndex(p.code);
-      return countryProvincesMap.has(gpuIdx);
-    });
+    const activeProfiles: CountryProfile[] = ALL_COUNTRY_PROFILES.filter(
+      (p: CountryProfile): boolean => {
+        const gpuIdx = CountryRegistry.getGpuColorIndex(p.code);
+        return countryProvincesMap.has(gpuIdx);
+      },
+    );
 
     const candidatesInput: NationRankCandidateInput[] = activeProfiles.map(
-      (p) => {
+      (p: CountryProfile): NationRankCandidateInput => {
         return {
           id: p.code,
           name: p.nameFa,
@@ -53,6 +55,7 @@ export class StrategicManifestBuilder {
           governmentType: p.startingGovernment,
           domesticTechLevel: p.domesticTechLevel,
           equipmentTechLevel: p.equipmentTechLevel,
+          industrialLevel: p.industrialLevel,
           startingTechLevel: p.startingTechLevel ?? p.domesticTechLevel,
         };
       },
@@ -61,7 +64,7 @@ export class StrategicManifestBuilder {
     const globalRankMap =
       NationGettersUtility.calculateRankMapFromCandidates(candidatesInput);
 
-    activeProfiles.sort((a, b) => {
+    activeProfiles.sort((a: CountryProfile, b: CountryProfile): number => {
       const rankA = globalRankMap.get(a.code) ?? 999;
       const rankB = globalRankMap.get(b.code) ?? 999;
       return rankA - rankB;
@@ -84,8 +87,8 @@ export class StrategicManifestBuilder {
       const gdp = profile.gdp;
       const domesticTech =
         profile.domesticTechLevel ?? profile.startingTechLevel ?? 1.0;
-      const equipmentTech = profile.equipmentTechLevel ?? domesticTech;
-      const industrialLevel = domesticTech;
+      const militaryEquipmentTech = profile.equipmentTechLevel ?? domesticTech;
+      const industrialLevel = profile.industrialLevel ?? domesticTech;
 
       const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
         gdp,
@@ -138,7 +141,7 @@ export class StrategicManifestBuilder {
       const stack = MilitaryDistributionEngine.calculateStartingStack(
         gdp,
         domesticTech,
-        equipmentTech,
+        militaryEquipmentTech,
       );
 
       const computedRank = globalRankMap.get(profile.code) ?? rankIndex + 1;
@@ -164,7 +167,7 @@ export class StrategicManifestBuilder {
         startingDroneMissile: stack.droneMissile,
         startingTechLevel: domesticTech,
         industrialLevel,
-        equipmentTechLevel: equipmentTech,
+        equipmentTechLevel: militaryEquipmentTech,
         startingStability,
       });
     }

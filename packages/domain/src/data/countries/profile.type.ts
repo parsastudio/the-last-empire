@@ -10,6 +10,7 @@ export interface CountryProfile {
   flagCode: string;
   domesticTechLevel: number;
   equipmentTechLevel: number;
+  industrialLevel: number;
   startingGovernment?: GovernmentType;
   startingTechLevel?: number;
   aiDoctrine?: AiDoctrineType;

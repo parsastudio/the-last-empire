@@ -1,8 +1,4 @@
-import {
-  ALL_COUNTRY_PROFILES,
-  CountryRegistry,
-  MAP_CONFIG,
-} from "@geopolitics/domain";
+import { CountryRegistry, MAP_CONFIG } from "@geopolitics/domain";
 import {
   MajorLandMass,
   LandComponent,

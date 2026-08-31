@@ -56,6 +56,7 @@ export class EconomyActionExecutor {
       case "EQUIP_DOMESTIC_MACHINERY": {
         return FactoryActionExecutor.executeEquipDomesticMachinery(
           state,
+          action,
           nation,
           buyerKey,
         );
