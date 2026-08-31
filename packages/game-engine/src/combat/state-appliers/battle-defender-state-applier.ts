@@ -1,6 +1,8 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
+import { CountryRegistry } from "@/domain/data/countries";
+import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 
 export interface BattleDefenderStateInput {
   defender: Nation;
@@ -11,7 +13,8 @@ export interface BattleDefenderStateInput {
 
 export class BattleDefenderStateApplier {
   public static apply(input: BattleDefenderStateInput): Nation {
-    const { defender, calcResult, spoilsData } = input;
+    const { defender, attackerId, calcResult, spoilsData } = input;
+    const canonicalAttacker = CountryRegistry.resolveCanonicalId(attackerId);
     const casualties = calcResult.defenderCasualties;
 
     const nextInfantry = Math.max(
@@ -45,9 +48,21 @@ export class BattleDefenderStateApplier {
       nextStability = Math.min(100, nextStability + 4);
     }
 
+    const updatedRelations: Record<string, RelationProfile> = {
+      ...(defender.relations || {}),
+      [canonicalAttacker]: {
+        targetNationId: canonicalAttacker,
+        stance: "WAR",
+        alignment: -100,
+        tension: 100,
+      },
+    };
+
     return {
       ...defender,
       treasury: nextTreasury,
+      warFocusTargetId: defender.warFocusTargetId || canonicalAttacker,
+      relations: updatedRelations,
       government: {
         ...defender.government,
         stability: nextStability,

@@ -10,7 +10,10 @@ import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conqu
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
 import { BattleLogFactory } from "@/engine/combat/logging/battle-log-factory";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationGettersUtility } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  NationRelationResolver,
+} from "@geopolitics/domain";
 
 export interface BattleExecutionResult {
   state: GameState;
@@ -117,12 +120,27 @@ export class BattleExecutionEngine {
 
     const attackType = action.attackType || "LAND";
 
+    const prevStance = NationRelationResolver.getStance(
+      attacker.relations,
+      defender.id,
+    );
+    let betrayalPenalty = 0;
+    if (prevStance === "STRATEGIC_PARTNERSHIP") {
+      betrayalPenalty = 40;
+    } else if (prevStance === "NON_AGGRESSION_PACT") {
+      betrayalPenalty = 25;
+    } else if (prevStance === "NORMAL_DIPLOMACY") {
+      betrayalPenalty = 15;
+    }
+
+    const betrayalPenaltyText = betrayalPenalty > 0 ? `${betrayalPenalty}` : "";
+
     const battleLogs = BattleLogFactory.createBattleLogs(
       state.currentTurn,
       attacker,
       defender,
       calcResult,
-      "",
+      betrayalPenaltyText,
       state.humanNationId,
       isDefenderAnnexed,
       targetProvince,

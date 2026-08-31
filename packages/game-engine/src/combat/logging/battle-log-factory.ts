@@ -118,7 +118,9 @@ export class BattleLogFactory {
             outcome,
             humanHeadline,
             ratio: calcResult.valuationRatio,
-            betrayalPenalty: betrayalPenaltyText ? 10 : 0,
+            betrayalPenalty: betrayalPenaltyText
+              ? Number(betrayalPenaltyText)
+              : 0,
             reportJson: JSON.stringify(fullReportData),
           },
           targetNation.id,

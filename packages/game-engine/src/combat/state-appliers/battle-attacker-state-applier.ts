@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 
 export interface BattleAttackerStateInput {
   attacker: Nation;
@@ -13,13 +14,49 @@ export interface BattleAttackerStateInput {
 
 export class BattleAttackerStateApplier {
   public static apply(input: BattleAttackerStateInput): Nation {
-    const { attacker, defenderId, calcResult, spoilsData } = input;
+    const { attacker, defenderId, calcResult, spoilsData, isDefenderAnnexed } =
+      input;
     const canonicalDefender = CountryRegistry.resolveCanonicalId(defenderId);
 
     const prevAttacked = attacker.attackedTargetIdsThisTurn || [];
     const attackedTargetIdsThisTurn = Array.from(
       new Set([...prevAttacked, canonicalDefender, defenderId]),
     );
+
+    const existingRel =
+      attacker.relations?.[canonicalDefender] ||
+      attacker.relations?.[defenderId];
+    const prevStance = existingRel ? existingRel.stance : "NORMAL_DIPLOMACY";
+
+    let reputationPenalty = 0;
+    if (prevStance === "STRATEGIC_PARTNERSHIP") {
+      reputationPenalty = 40;
+    } else if (prevStance === "NON_AGGRESSION_PACT") {
+      reputationPenalty = 25;
+    } else if (prevStance === "NORMAL_DIPLOMACY") {
+      reputationPenalty = 15;
+    }
+
+    const nextReputation = Math.max(
+      -100,
+      attacker.globalReputation - reputationPenalty,
+    );
+
+    const updatedRelations: Record<string, RelationProfile> = {
+      ...(attacker.relations || {}),
+    };
+
+    if (!isDefenderAnnexed) {
+      updatedRelations[canonicalDefender] = {
+        targetNationId: canonicalDefender,
+        stance: "WAR",
+        alignment: -100,
+        tension: 100,
+      };
+    } else {
+      delete updatedRelations[canonicalDefender];
+      delete updatedRelations[defenderId];
+    }
 
     const casualties = calcResult.attackerCasualties;
     const nextInfantry = Math.max(
@@ -60,6 +97,13 @@ export class BattleAttackerStateApplier {
     return {
       ...attacker,
       treasury: nextTreasury,
+      globalReputation: nextReputation,
+      warFocusTargetId: isDefenderAnnexed
+        ? attacker.warFocusTargetId === canonicalDefender
+          ? null
+          : attacker.warFocusTargetId
+        : canonicalDefender,
+      relations: updatedRelations,
       attackedTargetIdsThisTurn,
       government: {
         ...attacker.government,
