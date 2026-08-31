@@ -16,10 +16,12 @@ export class DiplomaticStampBuilderUtility {
     pixels: number,
     isHighPriority: boolean,
   ): number {
-    if (isHighPriority) return 0.05;
-    if (pixels > 1200) return 0.08;
-    if (pixels > 350) return 0.28;
-    return 0.65;
+    if (isHighPriority) return 0.1;
+    if (pixels >= 45000) return 0.18;
+    if (pixels >= 18000) return 0.35;
+    if (pixels >= 6000) return 0.5;
+    if (pixels >= 2000) return 0.65;
+    return 0.85;
   }
 
   public static buildStamps(
@@ -62,9 +64,9 @@ export class DiplomaticStampBuilderUtility {
           worldY: geo.centerY,
           territoryPixels: geo.totalPixels,
           effectiveRadius: geo.effectiveDiameter / 2,
-          minZoomScale: 0.05,
+          minZoomScale: 0.1,
           rank,
-          isSuperpower: rank <= 8,
+          isSuperpower: rank <= 6,
         });
       }
     }
@@ -113,7 +115,9 @@ export class DiplomaticStampBuilderUtility {
         }
       }
 
-      const isHighPriority = variant !== "NEUTRAL";
+      const isHighPriority =
+        variant === "WAR" || variant === "STRATEGIC_PARTNERSHIP";
+
       const minZoomScale = this.calculateMinZoomScale(
         geo.totalPixels,
         isHighPriority,
@@ -131,7 +135,7 @@ export class DiplomaticStampBuilderUtility {
         effectiveRadius: geo.effectiveDiameter / 2,
         minZoomScale,
         rank,
-        isSuperpower: rank <= 8,
+        isSuperpower: rank <= 6,
       });
     }
 
