@@ -21,10 +21,10 @@ export function MachineryImportCountryView({
   const techDelta = Number(
     Math.max(
       0,
-      sellerNation.industrialLevel - buyerNation.equipmentTechLevel,
+      sellerNation.industrialLevel - buyerNation.industrialLevel,
     ).toFixed(1),
   );
-  const surchargeRate = Math.round(techDelta * 30);
+  const multiplier = Math.pow(1.5, techDelta);
 
   return (
     <div className="space-y-4 font-sans dir-rtl text-right animate-in fade-in duration-200">
@@ -74,30 +74,31 @@ export function MachineryImportCountryView({
           <span>
             {techDelta > 0 ? (
               <>
-                شکاف فناوری صنعتی صادرکننده:{" "}
+                شکاف فناوری صنعتی با صادرکننده:{" "}
                 <strong className="text-primary font-mono">
                   +{PersianNumberFormatter.toPersianDigits(techDelta)}
                 </strong>{" "}
-                سطح (قیمت‌گذاری بر مبنای نرخ پایه ۲ میلیارد دلار به ازای هر لول
-                اختلاف محاسبه می‌گردد).
+                سطح (ضریب هزینه واردات:{" "}
+                <strong className="text-amber-400 font-mono">
+                  {PersianNumberFormatter.toPersianDigits(
+                    multiplier.toFixed(2),
+                  )}
+                  x
+                </strong>
+                ).
               </>
             ) : (
-              "سطح فناوری صنعتی این کشور برابر با تجهیزات شماست."
+              "سطح فناوری صنعتی این کشور برابر با شماست."
             )}
           </span>
         </div>
 
-        {surchargeRate > 0 && (
+        {techDelta > 0 && (
           <div className="flex items-center gap-1 text-[11px] font-bold text-gdp bg-gdp/10 px-2.5 py-1 rounded-xl border border-gdp/20 shrink-0">
             <TrendingUp size={12} />
             <span>
-              رشد بهره‌وری:{" "}
-              {PersianNumberFormatter.toPersianDigits(
-                (
-                  sellerNation.industrialLevel - buyerNation.equipmentTechLevel
-                ).toFixed(1),
-              )}
-              + لِوِل
+              ضریب واردات:{" "}
+              {PersianNumberFormatter.toPersianDigits(multiplier.toFixed(2))}x
             </span>
           </div>
         )}
@@ -109,6 +110,7 @@ export function MachineryImportCountryView({
         batches={buyerNation.factoryTiers}
         totalFactories={totalFactories}
         targetTechLevel={sellerNation.industrialLevel}
+        buyerIndustrialLevel={buyerNation.industrialLevel}
         sellerId={sellerNation.id}
         actionType="IMPORT"
         actionLabel="واردات و تجهیز"

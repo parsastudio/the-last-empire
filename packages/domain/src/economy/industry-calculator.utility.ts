@@ -4,12 +4,12 @@ export class IndustryCalculator {
   public static readonly BASE_FACTORY_YIELD = 500_000_000;
   public static readonly SUBSISTENCE_YIELD = 100_000_000;
   public static readonly YIELD_TECH_BASE = 2.0;
-  public static readonly FACTORY_REBUILD_COST = 2_000_000_000;
+  public static readonly FACTORY_REBUILD_COST = 3_000_000_000;
   public static readonly RESEARCH_BASE_COST = 25_000_000_000;
   public static readonly RESEARCH_STEP = 0.1;
-  public static readonly MACHINERY_BASE_UNIT_PRICE = 3_000_000_000;
-  public static readonly IMPORT_BASE_PRICE = 2_000_000_000;
-  public static readonly LEVEL_SURCHARGE_RATE = 0.3;
+  public static readonly MACHINERY_BASE_UNIT_PRICE = 1_000_000_000;
+  public static readonly IMPORT_BASE_PRICE = 1_000_000_000;
+  public static readonly IMPORT_TECH_GAP_BASE = 1.5;
 
   public static calculateFactoryYield(techLevel: number): number {
     return Math.floor(
@@ -129,22 +129,38 @@ export class IndustryCalculator {
   ): number {
     const delta = Math.max(0, targetTech - currentEquipmentTech);
     if (delta <= 0) return 0;
-    return Math.floor(
-      this.MACHINERY_BASE_UNIT_PRICE * delta * this.LEVEL_SURCHARGE_RATE,
+    return Math.floor(this.MACHINERY_BASE_UNIT_PRICE * delta);
+  }
+
+  public static calculateEquipmentImportPrice(
+    sellerIndustrialTech: number,
+    currentEquipmentTech: number,
+    buyerDomesticIndustrialTech: number,
+  ): number {
+    const upgradeDelta = Math.max(
+      0,
+      sellerIndustrialTech - currentEquipmentTech,
     );
+    if (upgradeDelta <= 0) return 0;
+    const baseUnitCost = this.calculateModernizeUnitCost(
+      currentEquipmentTech,
+      sellerIndustrialTech,
+    );
+    const countryTechGap = Math.max(
+      0,
+      sellerIndustrialTech - buyerDomesticIndustrialTech,
+    );
+    const importMultiplier = Math.pow(
+      this.IMPORT_TECH_GAP_BASE,
+      countryTechGap,
+    );
+    return Math.floor(baseUnitCost * importMultiplier);
   }
 
   public static calculateResearchStepCost(industrialLevel: number): number {
     const k = Math.floor(industrialLevel);
     const fullTierCost = this.RESEARCH_BASE_COST * Math.pow(2.5, k - 1);
     return Math.floor(fullTierCost / 10);
-  }
-
-  public static calculateEquipmentImportPrice(
-    sellerTech: number,
-    buyerTech: number,
-  ): number {
-    return this.calculateModernizeUnitCost(buyerTech, sellerTech);
   }
 
   public static calculateNewEquipmentTechLevel(

@@ -37,7 +37,7 @@ export class FactoryActionExecutor {
     if (nation.treasury < cost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای بازسازی کارخانه کافی نیست (۱ میلیارد دلار نیاز است).",
+        "موجودی خزانه برای بازسازی کارخانه کافی نیست (۳ میلیارد دلار نیاز است).",
       );
     }
 
@@ -261,11 +261,27 @@ export class FactoryActionExecutor {
     }
 
     const qty = Math.min(totalBuyerFactories, action.quantity);
-    const unitPrice = IndustryCalculator.calculateModernizeUnitCost(
-      buyer.equipmentTechLevel,
-      sellerTech,
+    const currentBatches = this.resolveCurrentBatches(
+      buyer,
+      totalBuyerFactories,
     );
-    const totalCost = qty * unitPrice;
+
+    let totalCost = 0;
+    let remainingToUpgrade = qty;
+    const consolidated = IndustryCalculator.consolidateBatches(currentBatches);
+
+    for (let i = 0; i < consolidated.length; i++) {
+      const batch = consolidated[i]!;
+      if (batch.techLevel >= sellerTech || remainingToUpgrade <= 0) continue;
+      const countToTake = Math.min(batch.count, remainingToUpgrade);
+      const unitPrice = IndustryCalculator.calculateEquipmentImportPrice(
+        sellerTech,
+        batch.techLevel,
+        buyer.industrialLevel,
+      );
+      totalCost += countToTake * unitPrice;
+      remainingToUpgrade -= countToTake;
+    }
 
     if (buyer.treasury < totalCost) {
       throw new GameError(
@@ -274,10 +290,6 @@ export class FactoryActionExecutor {
       );
     }
 
-    const currentBatches = this.resolveCurrentBatches(
-      buyer,
-      totalBuyerFactories,
-    );
     const updatedBatches = IndustryCalculator.upgradeLowestFactories(
       currentBatches,
       qty,
