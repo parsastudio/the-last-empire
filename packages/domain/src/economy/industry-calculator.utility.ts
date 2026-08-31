@@ -1,13 +1,13 @@
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 
 export class IndustryCalculator {
-  public static readonly BASE_FACTORY_YIELD = 250_000_000;
-  public static readonly SUBSISTENCE_YIELD = 125_000_000;
-  public static readonly YIELD_TECH_BASE = 2.4;
-  public static readonly FACTORY_REBUILD_COST = 1_000_000_000;
-  public static readonly RESEARCH_BASE_COST = 20_000_000_000;
+  public static readonly BASE_FACTORY_YIELD = 500_000_000;
+  public static readonly SUBSISTENCE_YIELD = 100_000_000;
+  public static readonly YIELD_TECH_BASE = 2.0;
+  public static readonly FACTORY_REBUILD_COST = 2_000_000_000;
+  public static readonly RESEARCH_BASE_COST = 25_000_000_000;
   public static readonly RESEARCH_STEP = 0.1;
-  public static readonly MACHINERY_BASE_UNIT_PRICE = 2_000_000_000;
+  public static readonly MACHINERY_BASE_UNIT_PRICE = 3_000_000_000;
   public static readonly IMPORT_BASE_PRICE = 2_000_000_000;
   public static readonly LEVEL_SURCHARGE_RATE = 0.3;
 
@@ -23,6 +23,69 @@ export class IndustryCalculator {
   ): number {
     const yieldPerFactory = this.calculateFactoryYield(industrialLevel);
     return Math.max(1, Math.round(startingGdp / yieldPerFactory));
+  }
+
+  public static calculateHeadroomRatio(
+    gdpRank: number,
+    totalNationsCount: number,
+  ): number {
+    const safeTotal = Math.max(1, totalNationsCount);
+    const midpoint = safeTotal / 2;
+    if (gdpRank <= midpoint) {
+      return 0.0;
+    }
+    const rankDelta = gdpRank - midpoint;
+    const ratio = (rankDelta / midpoint) * 2.0;
+    return Number(Math.min(2.0, Math.max(0, ratio)).toFixed(2));
+  }
+
+  public static calculateStartingMaxSlots(
+    activeFactories: number,
+    gdpRank: number,
+    totalNationsCount: number,
+  ): number {
+    const headroomRatio = this.calculateHeadroomRatio(
+      gdpRank,
+      totalNationsCount,
+    );
+    const calculatedMax = Math.ceil(activeFactories * (1 + headroomRatio));
+    return Math.max(activeFactories, Math.max(3, calculatedMax));
+  }
+
+  public static distributeFactoriesAndSlotsToProvinces(
+    totalActiveFactories: number,
+    totalMaxSlots: number,
+    provincesCount: number,
+  ): { activeCount: number; maxSlots: number }[] {
+    const safeCount = Math.max(1, provincesCount);
+    const activeShare = Math.floor(totalActiveFactories / safeCount);
+    let activeRemainder = totalActiveFactories % safeCount;
+
+    const maxShare = Math.floor(totalMaxSlots / safeCount);
+    let maxRemainder = totalMaxSlots % safeCount;
+
+    const distribution: { activeCount: number; maxSlots: number }[] = [];
+
+    for (let i = 0; i < safeCount; i++) {
+      let active = activeShare;
+      if (activeRemainder > 0) {
+        active += 1;
+        activeRemainder -= 1;
+      }
+
+      let max = maxShare;
+      if (maxRemainder > 0) {
+        max += 1;
+        maxRemainder -= 1;
+      }
+
+      active = Math.max(1, active);
+      max = Math.max(active, max);
+
+      distribution.push({ activeCount: active, maxSlots: max });
+    }
+
+    return distribution;
   }
 
   public static distributeFactoriesToProvinces(

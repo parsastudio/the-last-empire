@@ -10,6 +10,7 @@ import {
   NationGettersUtility,
   TerritoryClaimsUtility,
   getNationGdp,
+  GuarantorBudgetCalculatorUtility,
 } from "@geopolitics/domain";
 
 export interface GeopoliticalVector {
@@ -129,8 +130,14 @@ export class GeopoliticalVectorCalculator {
             guarantor.military.techLevel,
           );
         const targetGdp = getNationGdp(target, provincesMap);
+        const guarantorGdp = getNationGdp(guarantor, provincesMap);
+        const budget = GuarantorBudgetCalculatorUtility.calculateBudget(
+          targetGdp,
+          guarantorGdp,
+          Boolean(target.isEmergencyProtectorate),
+        );
         const auxiliaryPower = Math.floor(
-          targetGdp * 0.3 * 0.000000001 * guarantorTechMult * 4,
+          budget * 0.000000001 * guarantorTechMult * 4,
         );
         tPower += auxiliaryPower;
       }

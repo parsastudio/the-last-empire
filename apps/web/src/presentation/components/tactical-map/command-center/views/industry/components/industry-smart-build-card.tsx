@@ -1,6 +1,9 @@
 import React from "react";
 import { Factory, Zap, Loader2, CheckCircle2 } from "lucide-react";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import {
+  PersianNumberFormatter,
+  IndustryCalculator,
+} from "@geopolitics/domain";
 
 interface IndustrySmartBuildCardProps {
   totalActiveFactories: number;
@@ -29,6 +32,8 @@ export function IndustrySmartBuildCard({
       ? Math.round((totalActiveFactories / totalMaxSlots) * 100)
       : 100;
 
+  const unitCostText = `${PersianNumberFormatter.formatCurrency(IndustryCalculator.FACTORY_REBUILD_COST, true)} / سوله`;
+
   return (
     <div className="space-y-2.5 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
@@ -45,7 +50,7 @@ export function IndustrySmartBuildCard({
               : "bg-gdp/10 text-gdp border-gdp/30"
           }`}
         >
-          {isFull ? "ظرفیت ۱۰۰٪" : "۱ میلیارد / سوله"}
+          {isFull ? "ظرفیت ۱۰۰٪" : unitCostText}
         </span>
       </div>
 

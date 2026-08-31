@@ -36,7 +36,7 @@ export class TreatyEvaluator {
     targetGdp: number,
     _options?: unknown,
   ): number {
-    return Math.floor(targetGdp * 0.03);
+    return Math.floor(targetGdp * 0.005);
   }
 
   public applyTreatyStance(

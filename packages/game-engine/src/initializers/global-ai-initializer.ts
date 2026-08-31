@@ -65,21 +65,14 @@ export class GlobalAiInitializer {
       );
 
       const countryProvs = provsByCountry.get(cleanId) || [];
-      const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
-        item.gdp,
-        nation.equipmentTechLevel,
-      );
-      const factoryDist = IndustryCalculator.distributeFactoriesToProvinces(
-        totalFactories,
-        countryProvs.length,
-      );
-
       let allocatedFactoriesSum = 0;
 
       for (let i = 0; i < countryProvs.length; i++) {
         const pItem = countryProvs[i]!;
-        const slots = factoryDist[i] ?? 1;
-        allocatedFactoriesSum += slots;
+        const active = pItem.factoriesCount ?? 1;
+        const slots = Math.max(active, pItem.maxSlots ?? active);
+        allocatedFactoriesSum += active;
+
         provinces[pItem.provinceId.toString()] = {
           provinceId: pItem.provinceId,
           nameFa: pItem.nameFa,
@@ -95,7 +88,7 @@ export class GlobalAiInitializer {
           centerCoordinates: pItem.centerCoordinates,
           population: pItem.population ?? 1000000,
           maxSlots: slots,
-          factoriesCount: slots,
+          factoriesCount: active,
         };
       }
 
@@ -103,7 +96,12 @@ export class GlobalAiInitializer {
         {
           techLevel: nation.equipmentTechLevel,
           count:
-            allocatedFactoriesSum > 0 ? allocatedFactoriesSum : totalFactories,
+            allocatedFactoriesSum > 0
+              ? allocatedFactoriesSum
+              : IndustryCalculator.calculateStartingTotalFactories(
+                  item.gdp,
+                  nation.equipmentTechLevel,
+                ),
         },
       ];
 

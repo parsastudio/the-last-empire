@@ -98,9 +98,9 @@ export class ProvinceTradeExecutor {
       : seller.id;
 
     const provinceGdp = getProvinceGdp(province);
-    const multiplier = province.hasSeaAccess ? 5 : 4;
+    const multiplier = province.hasSeaAccess ? 0.75 : 0.45;
     const calculatedPrice = Math.max(
-      10_000_000_000,
+      1_000_000_000,
       Math.floor(provinceGdp * multiplier),
     );
     const effectiveCost = action.cost > 0 ? action.cost : calculatedPrice;

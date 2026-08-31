@@ -78,7 +78,7 @@ export class ProposalAcceptanceEvaluator {
           label: "احراز کامل نسبت GDP و برتری فناوری",
           value: 50,
         });
-        reasons.push({ label: "دریافت نوبتی ۱۰٪ درآمد پایدار", value: 50 });
+        reasons.push({ label: "دریافت نوبتی ۲٪ درآمد پایدار", value: 50 });
         break;
       }
 

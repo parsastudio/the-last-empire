@@ -75,9 +75,12 @@ export class EconomyTurnProcessor {
             rel.targetNationId,
             allNations,
           );
-          if (partner && partner.isAlive && partner.treasury > gdp * 0.05) {
-            const subsidy = Math.floor(gdp * 0.02);
-            warSubsidiesReceived += subsidy;
+          if (partner && partner.isAlive) {
+            const partnerGdp = getNationGdp(partner, currentProvincesMap);
+            const subsidy = Math.floor(partnerGdp * 0.005);
+            if (partner.treasury >= subsidy && subsidy > 0) {
+              warSubsidiesReceived += subsidy;
+            }
           }
         }
       }

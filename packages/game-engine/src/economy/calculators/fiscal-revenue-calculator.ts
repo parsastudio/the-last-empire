@@ -14,7 +14,6 @@ export interface FiscalRevenueBreakdown {
   globalRevenue: number;
   domesticBase: number;
   globalBase: number;
-  exportPower: number;
   transitGateway: number;
   activePeacePartnersCount: number;
   totalPeacePartnersGdp: number;
@@ -32,23 +31,18 @@ export class FiscalRevenueCalculator {
       nation.economicStance || "BALANCED_MIXED";
     const config = ECONOMIC_DOCTRINE_CONFIGS[stance];
 
-    const domesticBase = Math.floor(gdp * 0.5);
+    const domesticBase = Math.floor(gdp * 0.08);
 
     let totalPeaceGdp = 0;
-    let totalWorldGdp = 0;
     let activePeacePartnersCount = 0;
 
     if (nationsMap) {
       const allNations = Object.values(nationsMap);
       for (let i = 0; i < allNations.length; i++) {
         const other = allNations[i]!;
-        if (!other.isAlive) continue;
+        if (!other.isAlive || other.id === nation.id) continue;
 
         const partnerGdp = getNationGdp(other, provincesMap);
-        totalWorldGdp += partnerGdp;
-
-        if (other.id === nation.id) continue;
-
         const isEmbargoed = NationRelationResolver.isTradeEmbargoed(
           nation,
           other,
@@ -61,19 +55,14 @@ export class FiscalRevenueCalculator {
       }
     } else {
       totalPeaceGdp = gdp * 80;
-      totalWorldGdp = gdp * 100;
       activePeacePartnersCount = 100;
     }
 
-    const marketAccessRatio =
-      totalWorldGdp > 0 ? totalPeaceGdp / totalWorldGdp : 0;
-    const exportPower = Math.floor(gdp * 1.0 * marketAccessRatio);
-
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const seaFactor = hasSea ? 1.0 : 0.5;
-    const transitGateway = Math.floor(totalPeaceGdp * 0.0003 * seaFactor);
+    const transitGateway = Math.floor(totalPeaceGdp * 0.0005 * seaFactor);
 
-    const globalBase = exportPower + transitGateway;
+    const globalBase = transitGateway;
 
     const domesticRevenue = Math.floor(domesticBase * config.domesticWeight);
     const globalRevenue = Math.floor(globalBase * config.globalWeight);
@@ -85,7 +74,6 @@ export class FiscalRevenueCalculator {
       globalRevenue,
       domesticBase,
       globalBase,
-      exportPower,
       transitGateway,
       activePeacePartnersCount,
       totalPeacePartnersGdp: totalPeaceGdp,
