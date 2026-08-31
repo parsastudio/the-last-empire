@@ -1,60 +1,70 @@
 import React from "react";
-import { Factory, Sparkles, Layers } from "lucide-react";
+import { Layers, Factory } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { FactoryBatch, IndustryCalculator } from "@geopolitics/domain";
+import { FactoryBatch } from "@geopolitics/domain";
 import { FactoryTierCard } from "./factory-tier-card";
+import { useFactoryTierProcurement } from "../hooks/use-factory-tier-procurement";
 
 interface FactoryTiersGridProps {
+  nationId: string;
+  treasury: number;
   batches?: FactoryBatch[];
   totalFactories: number;
-  equipmentTechLevel: number;
   maxDomesticTech: number;
 }
 
 export function FactoryTiersGrid({
+  nationId,
+  treasury,
   batches,
   totalFactories,
-  equipmentTechLevel,
   maxDomesticTech,
 }: FactoryTiersGridProps) {
-  const consolidated = React.useMemo(() => {
-    if (batches && batches.length > 0) {
-      return IndustryCalculator.consolidateBatches(batches);
-    }
-    return [
-      {
-        techLevel: equipmentTechLevel,
-        count: totalFactories,
-      },
-    ];
-  }, [batches, equipmentTechLevel, totalFactories]);
+  const { tierUpgradeItems, feedbacks, isSubmitting, handleUpgradeTier } =
+    useFactoryTierProcurement({
+      nationId,
+      treasury,
+      batches,
+      maxDomesticTech,
+      totalFactories,
+    });
 
   return (
-    <div className="space-y-3 dir-rtl text-right font-sans">
+    <div className="space-y-3.5 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Layers size={14} className="text-gdp" />
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">
-            تفکیک خطوط تولید بر اساس سطوح فناوری فعال
-          </span>
+          <div className="p-1.5 rounded-xl bg-gdp/15 border border-gdp/30 text-gdp">
+            <Layers size={15} />
+          </div>
+          <div>
+            <h3 className="text-xs font-black text-foreground">
+              ناوگان کارخانجات و خطوط تولید کشور
+            </h3>
+            <span className="text-[10px] text-muted-foreground">
+              پایش تفکیکی رده‌های صنعتی و ارتقای فوری سوله‌ها به آخرین سطح دانش
+              بومی
+            </span>
+          </div>
         </div>
-        <span className="text-[10px] font-mono bg-secondary/80 border border-border/70 px-2.5 py-0.5 rounded-xl font-bold text-muted-foreground flex items-center gap-1">
-          <Factory size={11} className="text-gdp" />
+
+        <span className="text-[11px] font-mono bg-secondary/80 border border-border/80 px-3 py-1 rounded-xl font-bold text-muted-foreground flex items-center gap-1.5 shadow-sm">
+          <Factory size={12} className="text-gdp" />
           <span>
-            {PersianNumberFormatter.toPersianDigits(consolidated.length)} رده
-            صنعتی
+            {PersianNumberFormatter.toPersianDigits(tierUpgradeItems.length)}{" "}
+            رده فعال
           </span>
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {consolidated.map((batch, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4.5">
+        {tierUpgradeItems.map((item) => (
           <FactoryTierCard
-            key={`${batch.techLevel}-${index}`}
-            batch={batch}
+            key={`${item.batch.techLevel}-${item.rankIndex}`}
+            item={item}
             totalFactories={totalFactories}
-            maxDomesticTech={maxDomesticTech}
-            rankIndex={index}
+            feedbacks={feedbacks[item.rankIndex]}
+            isSubmitting={isSubmitting}
+            onUpgrade={handleUpgradeTier}
           />
         ))}
       </div>
