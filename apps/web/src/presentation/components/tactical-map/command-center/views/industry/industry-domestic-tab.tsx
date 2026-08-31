@@ -231,24 +231,25 @@ export function IndustryDomesticTab({
       />
 
       <FactoryTiersGrid
+        nationId={nation.id}
+        treasury={nation.treasury}
         batches={nation.factoryTiers}
         totalFactories={safeTotalFactories}
-        equipmentTechLevel={nation.equipmentTechLevel}
         maxDomesticTech={nation.industrialLevel}
       />
 
-      <IndustrySmartBuildCard
-        totalActiveFactories={totalActiveFactories}
-        totalMaxSlots={totalMaxSlots}
-        totalEmptySlots={totalEmptySlots}
-        batchQuantity={buildBatch.batchQuantity}
-        batchCost={buildBatch.batchCost}
-        canAfford={buildBatch.canAfford}
-        isBuilding={isBatchBuilding}
-        onBuild={handleSmartBatchBuild}
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+        <IndustrySmartBuildCard
+          totalActiveFactories={totalActiveFactories}
+          totalMaxSlots={totalMaxSlots}
+          totalEmptySlots={totalEmptySlots}
+          batchQuantity={buildBatch.batchQuantity}
+          batchCost={buildBatch.batchCost}
+          canAfford={buildBatch.canAfford}
+          isBuilding={isBatchBuilding}
+          onBuild={handleSmartBatchBuild}
+        />
 
-      <div className="space-y-3">
         <IndustryTechUpgradeCard
           nationId={nation.id}
           treasury={nation.treasury}
