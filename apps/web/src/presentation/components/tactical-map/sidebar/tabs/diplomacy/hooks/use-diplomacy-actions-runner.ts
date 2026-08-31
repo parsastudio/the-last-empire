@@ -67,15 +67,15 @@ export function useDiplomacyActionsRunner({
     useState<DiplomaticProposalFeedback | null>(null);
 
   const foreignAidCost = useMemo(() => {
-    return TreatyEvaluator.calculateForeignAidCost(senderGdp, targetGdp);
-  }, [senderGdp, targetGdp]);
+    return TreatyEvaluator.calculateForeignAidCost(targetGdp);
+  }, [targetGdp]);
 
   const securityGuaranteeCost = useMemo(() => {
-    return Math.floor(senderGdp * 0.1);
+    return Math.floor(senderGdp * 0.02);
   }, [senderGdp]);
 
   const emergencyProtectorateCost = useMemo(() => {
-    return Math.floor(senderGdp * 0.3);
+    return Math.floor(senderGdp * 0.05);
   }, [senderGdp]);
 
   const guaranteeValidation = useMemo<SecurityGuaranteeValidationResult>(() => {

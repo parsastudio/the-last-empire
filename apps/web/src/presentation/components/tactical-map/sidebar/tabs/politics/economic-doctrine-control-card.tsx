@@ -81,6 +81,7 @@ export function EconomicDoctrineControlCard({
         <EconomicRevenuePreviewBox
           preview={preview}
           activeConfig={activeConfig}
+          gdpPercentage={previewModel.gdpPercentage}
         />
 
         <button

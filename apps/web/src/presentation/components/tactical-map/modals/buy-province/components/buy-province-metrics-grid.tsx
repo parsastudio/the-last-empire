@@ -19,6 +19,7 @@ export function BuyProvinceMetricsGrid({
 }: BuyProvinceMetricsGridProps) {
   const activePct =
     maxSlots > 0 ? Math.round((factoriesCount / maxSlots) * 100) : 100;
+  const pctText = Math.round(costMultiplier * 100);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
@@ -71,8 +72,8 @@ export function BuyProvinceMetricsGrid({
           بسیار سودده
         </span>
         <span className="text-[8px] text-muted-foreground font-sans block">
-          بازگشت اصل سرمایه در{" "}
-          {PersianNumberFormatter.toPersianDigits(costMultiplier)} نوبت
+          قیمت مصوب: {PersianNumberFormatter.toPersianDigits(pctText)}٪ GDP
+          استان
         </span>
       </div>
     </div>

@@ -76,7 +76,7 @@ export function useAlliedArmsProcurement({
 
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(buyerNation.military);
-  const maxValuation = Math.floor(effectiveBuyerGdp);
+  const maxValuation = Math.floor(effectiveBuyerGdp * 0.2);
   const remainingValuationCapacity = Math.max(
     0,
     maxValuation - currentValuation,

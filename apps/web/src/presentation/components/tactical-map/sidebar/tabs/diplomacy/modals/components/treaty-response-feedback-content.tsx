@@ -79,10 +79,10 @@ export function TreatyResponseFeedbackContent({
             </p>
             <div className="flex flex-col gap-1.5 text-[10px] font-mono font-bold">
               <span className="px-2.5 py-1 bg-rose-500/15 text-rose-300 border border-rose-500/30 rounded-xl">
-                استقرار نیروی ضربت فوق‌پیشرفته (۳ برابر GDP)
+                استقرار نیروی ضربت فوق‌پیشرفته (۵۰٪ GDP)
               </span>
               <span className="px-2.5 py-1 bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded-xl">
-                پرداخت نوبتی ۳۰٪ خراج • ۳۰- پرستیژ • ۱۵-٪ ثبات
+                پرداخت نوبتی ۵٪ خراج • ۳۰- پرستیژ • ۱۵-٪ ثبات
               </span>
             </div>
           </div>
@@ -122,7 +122,7 @@ export function TreatyResponseFeedbackContent({
             {feedback.proposalType === "SECURITY_GUARANTEE" ? (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[11px] font-mono font-bold text-cyan-300">
                 <ShieldCheck size={12} />
-                <span>فعال‌سازی ۳۰٪ نیروی ضربت پشتیبان در زمان دفاع</span>
+                <span>فعال‌سازی ۶٪ نیروی ضربت پشتیبان در زمان دفاع</span>
               </div>
             ) : (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">

@@ -6,7 +6,6 @@ import {
   Landmark,
   ShoppingCart,
   Lock,
-  Compass,
   ShieldCheck,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@geopolitics/domain";
@@ -18,7 +17,6 @@ export interface CountryProfileData {
   governmentType: string;
   stability: number;
   tension: number;
-  doctrineLabel?: string;
   guarantorName?: string;
 }
 
@@ -73,18 +71,6 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
           </div>
           <span className="text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 px-2.5 py-0.5 rounded-lg">
             تحت حمایت {data.guarantorName}
-          </span>
-        </div>
-      )}
-
-      {data.doctrineLabel && (
-        <div className="bg-secondary/40 border border-border/50 p-3 rounded-2xl flex items-center justify-between font-sans">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Compass size={14} className="text-primary shrink-0" />
-            <span className="text-[11px] font-bold">دکترین ژئوپلیتیک:</span>
-          </div>
-          <span className="text-[10px] font-mono font-bold bg-primary/10 text-primary border border-primary/25 px-2.5 py-0.5 rounded-lg">
-            {data.doctrineLabel}
           </span>
         </div>
       )}

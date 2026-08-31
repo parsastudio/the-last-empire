@@ -3,6 +3,7 @@ import {
   Nation,
   NationGettersUtility,
   getNationGdp,
+  SecurityFeeCalculatorUtility,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
@@ -99,7 +100,7 @@ export function selectHumanResourceMetrics(
           gameState.nations[rel.targetNationId];
         if (partner && partner.isAlive) {
           const partnerGdp = getNationGdp(partner, gameState.provinces);
-          const subsidy = Math.floor(partnerGdp * 0.02);
+          const subsidy = Math.floor(partnerGdp * 0.005);
           if (partner.treasury >= subsidy && subsidy > 0) {
             warSubsidiesIncome += subsidy;
           }
@@ -110,8 +111,19 @@ export function selectHumanResourceMetrics(
 
   const totalGrossIncome =
     fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesIncome;
+
+  const humanGdp = getNationGdp(nation, gameState.provinces);
+  const securityFee = nation.securityGuarantorId
+    ? SecurityFeeCalculatorUtility.calculateSecurityFee(
+        humanGdp,
+        Boolean(nation.isEmergencyProtectorate),
+      )
+    : 0;
+
   const totalExpenses =
-    payrollBreakdown.total + Math.floor(nation.nationalDebt * 0.07);
+    payrollBreakdown.total +
+    securityFee +
+    Math.floor(nation.nationalDebt * 0.07);
   const netIncome = totalGrossIncome - totalExpenses;
 
   return {

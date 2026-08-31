@@ -7,6 +7,8 @@ import { GuarantorBudgetCalculatorUtility } from "@/domain/diplomacy/guarantor-b
 import { SecurityFeeCalculatorUtility } from "@/domain/diplomacy/security-fee-calculator.utility";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { FiscalRevenueCalculator } from "@/domain/economy/fiscal-revenue-calculator";
+import { MilitaryPayrollCalculator } from "@/domain/economy/payroll-calculator";
 
 export class TwmiCalculatorUtility {
   public static calculateTwmi(
@@ -25,29 +27,47 @@ export class TwmiCalculatorUtility {
       nation.military,
     );
 
-    let totalPeaceGdp = 0;
-    if (nationsMap) {
-      for (const other of Object.values(nationsMap)) {
-        if (other.isAlive && other.id !== nation.id) {
-          const isEmbargoed = NationRelationResolver.isTradeEmbargoed(
-            nation,
-            other,
+    const fiscalBreakdown = FiscalRevenueCalculator.calculate(
+      nation,
+      nationsMap,
+      provincesMap,
+    );
+    const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(
+      nation,
+      provincesMap,
+    );
+
+    const navalSecurityIncome = Math.floor(
+      (nation.navalFleet || 0) * 50_000_000_000 * 0.06,
+    );
+
+    let warSubsidiesIncome = 0;
+    const isAtWar = Object.values(nation.relations || {}).some(
+      (r) => r.stance === "WAR",
+    );
+
+    if (isAtWar && nationsMap) {
+      for (const rel of Object.values(nation.relations || {})) {
+        if (rel.stance === "STRATEGIC_PARTNERSHIP") {
+          const partner = NationGettersUtility.resolveNation(
+            rel.targetNationId,
+            nationsMap,
           );
-          if (!isEmbargoed) {
-            totalPeaceGdp += getNationGdp(other, provincesMap);
+          if (partner && partner.isAlive) {
+            const partnerGdp = getNationGdp(partner, provincesMap);
+            const subsidy = Math.floor(partnerGdp * 0.005);
+            if (partner.treasury >= subsidy && subsidy > 0) {
+              warSubsidiesIncome += subsidy;
+            }
           }
         }
       }
     }
 
-    const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
-    const transitRevenue = Math.floor(
-      totalPeaceGdp * 0.0005 * (hasSea ? 1.0 : 0.5),
-    );
-    const domesticRevenue = Math.floor(gdp * 0.08);
-    const estimatedRevenue = domesticRevenue + transitRevenue;
+    const totalGrossRevenue =
+      fiscalBreakdown.totalRevenue + navalSecurityIncome + warSubsidiesIncome;
 
-    const estimatedPayroll = Math.floor(armyValuation * 0.06);
+    const maintenanceCost = payrollBreakdown.total;
     const debtInterest = Math.floor(nation.nationalDebt * 0.07);
     const securityFee = nation.securityGuarantorId
       ? SecurityFeeCalculatorUtility.calculateSecurityFee(
@@ -56,8 +76,8 @@ export class TwmiCalculatorUtility {
         )
       : 0;
 
-    const netTurnIncome =
-      estimatedRevenue - (estimatedPayroll + debtInterest + securityFee);
+    const totalExpenses = maintenanceCost + debtInterest + securityFee;
+    const netTurnIncome = totalGrossRevenue - totalExpenses;
 
     let guarantorValuation = 0;
     if (nation.securityGuarantorId && nationsMap) {
