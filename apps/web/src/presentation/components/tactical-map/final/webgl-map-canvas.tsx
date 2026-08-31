@@ -152,6 +152,7 @@ export function WebGLMapCanvas({
         className="pointer-events-none absolute inset-0 w-full h-full block"
       />
       <DiplomaticStampsOverlay
+        dimensions={dimensions}
         positionRef={positionRef}
         scaleRef={scaleRef}
         nationsMap={nationsMap}
