@@ -11,6 +11,7 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import { AmountActionDialog } from "@/presentation/components/common/amount-action-dialog";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
+import { DebtCalculatorUtility } from "@geopolitics/domain";
 
 interface ImfLoanCardProps {
   nationId: string;
@@ -29,7 +30,7 @@ export function ImfLoanCard({
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
 
-  const maxDebtLimit = Math.floor(gdp * 0.8);
+  const maxDebtLimit = DebtCalculatorUtility.getMaxDebtLimit(gdp);
   const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
 
   const availableLoanBillion = Math.floor(availableLoan / 1e9);
@@ -77,7 +78,7 @@ export function ImfLoanCard({
         <div className="bg-background/40 border border-border/60 p-4 rounded-2xl space-y-3 dir-rtl text-right">
           <div className="flex items-center justify-between text-xs font-mono">
             <span className="text-muted-foreground font-sans">
-              اعتبار وام آزاد دستی (حداکثر ۸۰٪ GDP):
+              اعتبار وام آزاد دستی (حداکثر ۳۰٪ GDP):
             </span>
             <span className="font-bold text-gdp">
               {PersianNumberFormatter.formatCurrency(availableLoan)}
@@ -96,11 +97,11 @@ export function ImfLoanCard({
 
             <div className="bg-secondary/40 p-2.5 rounded-xl space-y-0.5">
               <span className="text-muted-foreground block font-sans">
-                بهره نوبتی (۷٪)
+                بهره نوبتی (۱۰٪)
               </span>
               <span className="font-bold text-treasury block">
                 {PersianNumberFormatter.formatCurrency(
-                  Math.floor(nationalDebt * 0.07),
+                  DebtCalculatorUtility.calculateInterest(nationalDebt),
                 )}
               </span>
             </div>
@@ -150,13 +151,13 @@ export function ImfLoanCard({
       <AmountActionDialog
         isOpen={isLoanModalOpen}
         title="دریافت تسهیلات اضطراری از بانک جهانی"
-        subtitle="پرداخت نوبتی ۷٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
+        subtitle="پرداخت نوبتی ۱۰٪ بهره بر اصل وام دریافتی از صندوق بین‌المللی پول"
         unitLabel="میلیارد دلار"
         maxAmount={availableLoanBillion}
         confirmLabel="دریافت وام"
         colorVariant="gdp"
         icon={ArrowUpRight}
-        emptyStateText="سقف اعتبار ملی (۸۰٪ GDP) تکمیل است."
+        emptyStateText="سقف اعتبار ملی (۳۰٪ GDP) تکمیل است."
         onClose={() => setIsLoanModalOpen(false)}
         onConfirm={handleConfirmLoan}
       />

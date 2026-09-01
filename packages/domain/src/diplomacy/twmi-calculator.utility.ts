@@ -71,7 +71,9 @@ export class TwmiCalculatorUtility {
       fiscalBreakdown.totalRevenue + navalSecurityIncome + warSubsidiesIncome;
 
     const maintenanceCost = payrollBreakdown.total;
-    const debtInterest = Math.floor(nation.nationalDebt * 0.07);
+    const debtInterest = DebtCalculatorUtility.calculateInterest(
+      nation.nationalDebt,
+    );
     const securityFee = nation.securityGuarantorId
       ? SecurityFeeCalculatorUtility.calculateSecurityFee(
           gdp,

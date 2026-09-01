@@ -1,8 +1,18 @@
 export class DebtCalculatorUtility {
-  public static readonly MAX_DEBT_RATIO = 0.8;
+  public static readonly MAX_DEBT_RATIO = 0.3;
+  public static readonly BANKRUPTCY_THRESHOLD_RATIO = 0.45;
+  public static readonly INTEREST_RATE = 0.1;
 
   public static getMaxDebtLimit(gdp: number): number {
     return Math.floor(gdp * this.MAX_DEBT_RATIO);
+  }
+
+  public static getBankruptcyLimit(gdp: number): number {
+    return Math.floor(gdp * this.BANKRUPTCY_THRESHOLD_RATIO);
+  }
+
+  public static calculateInterest(debt: number): number {
+    return Math.floor(debt * this.INTEREST_RATE);
   }
 
   public static getAvailableLoanHeadroom(

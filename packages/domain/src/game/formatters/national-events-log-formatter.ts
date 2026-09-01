@@ -11,7 +11,7 @@ export class NationalEventsLogFormatter {
   ): string {
     switch (eventCode) {
       case "NATION_BANKRUPTCY":
-        return `هشدار بحران مالی و ورشکستگی ملی: به دلیل رسیدن بدهی به ۱۰۰٪ GDP، خزانه‌داری کشور ${sourceName} تخلیه، بدهی‌ها با نکول رسمی صفر، و بهره‌وری زیرساخت‌های کشور ۲۵٪ تنزل یافت.`;
+        return `هشدار بحران مالی و ورشکستگی ملی: به دلیل رسیدن بدهی به ۴۵٪ GDP، خزانه‌داری کشور ${sourceName} تخلیه، بدهی‌ها با نکول رسمی صفر، و بهره‌وری زیرساخت‌های کشور ۲۵٪ تنزل یافت.`;
 
       case "ESPIONAGE_OPERATION": {
         const role = String(params["role"] || "ATTACKER");
