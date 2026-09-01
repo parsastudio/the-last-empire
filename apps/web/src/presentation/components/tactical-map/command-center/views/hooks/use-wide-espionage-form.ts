@@ -105,10 +105,6 @@ export function useWideEspionageForm({
     return getNationGdp(selectedTargetNation, provincesMap);
   }, [selectedTargetNation, provincesMap]);
 
-  const tier1Cost = useMemo(
-    () => EspionageManager.calculateOperationCost(targetGdp, 1),
-    [targetGdp],
-  );
   const tier2Cost = useMemo(
     () => EspionageManager.calculateOperationCost(targetGdp, 2),
     [targetGdp],
@@ -118,10 +114,6 @@ export function useWideEspionageForm({
     [targetGdp],
   );
 
-  const tier1SuccessRate = useMemo(
-    () => EspionageManager.calculateSuccessRate(1, sourceRank, targetRank),
-    [sourceRank, targetRank],
-  );
   const tier2SuccessRate = useMemo(
     () => EspionageManager.calculateSuccessRate(2, sourceRank, targetRank),
     [sourceRank, targetRank],
@@ -183,10 +175,8 @@ export function useWideEspionageForm({
     setSelectedTargetId,
     selectedTargetNation,
     targetGdp,
-    tier1Cost,
     tier2Cost,
     tier3Cost,
-    tier1SuccessRate,
     tier2SuccessRate,
     tier3SuccessRate,
     techSuperiority,
