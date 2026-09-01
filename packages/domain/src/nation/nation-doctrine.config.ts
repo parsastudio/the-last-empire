@@ -7,30 +7,35 @@ import {
 export const AI_DOCTRINE_PRESETS: Record<AiDoctrineType, AiDoctrineWeights> = {
   ARMS_IMPORTER_RENTIER: {
     armsImportRatio: 0.85,
+    machineryImportRatio: 0.8,
     researchFocusWeight: 0.2,
     developmentPriority: 0.65,
     peacetimeArmyCap: 0.6,
   },
   DOMESTIC_INDUSTRIALIST: {
     armsImportRatio: 0.15,
+    machineryImportRatio: 0.2,
     researchFocusWeight: 0.8,
     developmentPriority: 0.55,
     peacetimeArmyCap: 0.7,
   },
   MERCANTILE_ECONOMIC: {
     armsImportRatio: 0.4,
+    machineryImportRatio: 0.5,
     researchFocusWeight: 0.5,
     developmentPriority: 0.85,
     peacetimeArmyCap: 0.35,
   },
   MILITARIST_HAWK: {
     armsImportRatio: 0.35,
+    machineryImportRatio: 0.35,
     researchFocusWeight: 0.75,
     developmentPriority: 0.25,
     peacetimeArmyCap: 0.95,
   },
   GLOBAL_HEGEMON: {
     armsImportRatio: 0.1,
+    machineryImportRatio: 0.1,
     researchFocusWeight: 0.9,
     developmentPriority: 0.75,
     peacetimeArmyCap: 0.85,

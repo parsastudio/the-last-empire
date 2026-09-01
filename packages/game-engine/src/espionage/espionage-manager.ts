@@ -13,7 +13,6 @@ import {
   TurnLogBuilder,
   SeededRandom,
 } from "@/domain/shared/domain-utilities";
-import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import {
@@ -46,13 +45,13 @@ export class EspionageManager {
 
   public static calculateSuccessRate(
     tier: EspionageTier,
-    sourceRank = 50,
-    targetRank = 50,
+    sourceNation?: Nation | null,
+    targetNation?: Nation | null,
   ): number {
     return EspionageCalculator.calculateSuccessRate(
       tier,
-      sourceRank,
-      targetRank,
+      sourceNation,
+      targetNation,
     );
   }
 
@@ -112,26 +111,15 @@ export class EspionageManager {
     ) {
       throw new GameError(
         "INVALID_ACTION",
-        "کشور هدف باید حداقل ۰.۵ لول فناوری نظامی از شما بالاتر باشد.",
+        "کشور هدف باید حداقل ۰.۵ لول فناوری نظامی یا صنعتی از شما بالاتر باشد.",
       );
     }
-
-    const sourceRank = NationGettersUtility.getRank(
-      source.id,
-      state.nations,
-      state.provinces,
-    );
-    const targetRank = NationGettersUtility.getRank(
-      target.id,
-      state.nations,
-      state.provinces,
-    );
 
     const effectivePrng = prng ?? new SeededRandom(state.seed);
     const successRate = EspionageCalculator.calculateSuccessRate(
       tier,
-      sourceRank,
-      targetRank,
+      source,
+      target,
     );
     const roll = effectivePrng.nextFloat();
     const isSuccess = tier === 1 ? true : roll <= successRate;

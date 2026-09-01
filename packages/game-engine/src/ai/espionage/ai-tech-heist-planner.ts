@@ -6,7 +6,7 @@ import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { AI_DOCTRINE_PRESETS, NationGettersUtility } from "@geopolitics/domain";
+import { AI_DOCTRINE_PRESETS } from "@geopolitics/domain";
 
 export class AITechHeistPlanner {
   public static planTechHeistTier3(
@@ -29,10 +29,6 @@ export class AITechHeistPlanner {
         undefined,
         provincesByOwnerMap,
       );
-
-    const sourceRank =
-      rankMap?.get(CountryRegistry.resolveCanonicalId(nation.id)) ??
-      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
 
     const weights =
       nation.doctrineWeights ??
@@ -60,25 +56,25 @@ export class AITechHeistPlanner {
         continue;
       }
 
-      const milDelta = Number(
-        (target.military.techLevel - nation.military.techLevel).toFixed(1),
+      const superiority = EspionageCalculator.calculateTechSuperiority(
+        nation,
+        target,
       );
 
-      if (milDelta < EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST) {
+      if (
+        superiority.totalAvailablePoints <
+        EspionageCalculator.MIN_TECH_DELTA_FOR_HEIST
+      ) {
         continue;
       }
 
-      const targetRank =
-        rankMap?.get(canonicalTarget) ??
-        NationGettersUtility.getRank(target.id, allNations, provincesMap);
-
       const successRate = EspionageCalculator.calculateSuccessRate(
         3,
-        sourceRank,
-        targetRank,
+        nation,
+        target,
       );
 
-      if (successRate < 0.5) {
+      if (successRate < 0.45) {
         continue;
       }
 
@@ -94,7 +90,7 @@ export class AITechHeistPlanner {
         eligibleTargets.push({
           target,
           cost,
-          points: milDelta,
+          points: superiority.totalAvailablePoints,
         });
       }
     }

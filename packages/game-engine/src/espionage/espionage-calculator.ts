@@ -1,9 +1,19 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { EspionageTier } from "@/domain/espionage/espionage.schema";
 
+export type TechHeistMode =
+  | "DUAL"
+  | "MILITARY_ONLY"
+  | "INDUSTRIAL_ONLY"
+  | "NONE";
+
 export interface TechSuperiorityDelta {
   militaryDelta: number;
+  industrialDelta: number;
+  militaryGain: number;
+  industrialGain: number;
   totalAvailablePoints: number;
+  heistMode: TechHeistMode;
 }
 
 export class EspionageCalculator {
@@ -11,7 +21,6 @@ export class EspionageCalculator {
   public static readonly TIER_2_COST_RATIO = 0.18;
   public static readonly TIER_3_COST_RATIO = 0.4;
   public static readonly MIN_TECH_DELTA_FOR_HEIST = 0.5;
-  public static readonly TECH_HEIST_GAIN = 0.5;
 
   public static calculateOperationCost(
     targetGdp: number,
@@ -35,42 +44,75 @@ export class EspionageCalculator {
       ).toFixed(1),
     );
 
-    const isEligible = militaryDelta >= this.MIN_TECH_DELTA_FOR_HEIST;
-    const totalPoints = isEligible ? this.TECH_HEIST_GAIN : 0;
+    const industrialDelta = Number(
+      Math.max(
+        0,
+        targetNation.industrialLevel - sourceNation.industrialLevel,
+      ).toFixed(1),
+    );
+
+    const isMilSuperior = militaryDelta >= this.MIN_TECH_DELTA_FOR_HEIST;
+    const isIndSuperior = industrialDelta >= this.MIN_TECH_DELTA_FOR_HEIST;
+
+    let militaryGain = 0;
+    let industrialGain = 0;
+    let heistMode: TechHeistMode = "NONE";
+
+    if (isMilSuperior && isIndSuperior) {
+      militaryGain = Math.min(0.5, militaryDelta);
+      industrialGain = Math.min(0.5, industrialDelta);
+      heistMode = "DUAL";
+    } else if (isMilSuperior) {
+      militaryGain = Math.min(1.0, militaryDelta);
+      industrialGain = 0;
+      heistMode = "MILITARY_ONLY";
+    } else if (isIndSuperior) {
+      militaryGain = 0;
+      industrialGain = Math.min(1.0, industrialDelta);
+      heistMode = "INDUSTRIAL_ONLY";
+    }
+
+    const totalAvailablePoints = Number(
+      (militaryGain + industrialGain).toFixed(1),
+    );
 
     return {
       militaryDelta,
-      totalAvailablePoints: totalPoints,
+      industrialDelta,
+      militaryGain,
+      industrialGain,
+      totalAvailablePoints,
+      heistMode,
     };
   }
 
   public static calculateSuccessRate(
     tier: EspionageTier,
-    sourceRank = 50,
-    targetRank = 50,
+    sourceNation?: Nation | null,
+    targetNation?: Nation | null,
   ): number {
     if (tier === 1) {
       return 1.0;
     }
 
-    const rankGap = sourceRank - targetRank;
-    const rankModifier = -rankGap * 0.015;
+    const srcMil = sourceNation?.military.techLevel ?? 1.0;
+    const trgMil = targetNation?.military.techLevel ?? 1.0;
+    const srcInd = sourceNation?.industrialLevel ?? 1.0;
+    const trgInd = targetNation?.industrialLevel ?? 1.0;
 
-    let baseChance = 0.5;
-    let minRate = 0.2;
-    let maxRate = 0.85;
+    const milDelta = srcMil - trgMil;
+    const indDelta = srcInd - trgInd;
+
+    const milFactor = Math.pow(2.2, milDelta);
+    const indFactor = Math.pow(2.0, indDelta);
+    const cyberPowerRatio = (milFactor + indFactor) / 2;
 
     if (tier === 2) {
-      baseChance = 0.6;
-      minRate = 0.25;
-      maxRate = 0.9;
-    } else if (tier === 3) {
-      baseChance = 0.45;
-      minRate = 0.15;
-      maxRate = 0.85;
+      const calculatedChance = 0.6 * cyberPowerRatio;
+      return Number(Math.max(0.2, Math.min(0.9, calculatedChance)).toFixed(2));
     }
 
-    const calculated = baseChance + rankModifier;
-    return Number(Math.max(minRate, Math.min(maxRate, calculated)).toFixed(2));
+    const calculatedChance = 0.45 * cyberPowerRatio;
+    return Number(Math.max(0.15, Math.min(0.85, calculatedChance)).toFixed(2));
   }
 }

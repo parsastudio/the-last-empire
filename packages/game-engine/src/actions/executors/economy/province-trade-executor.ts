@@ -110,9 +110,9 @@ export class ProvinceTradeExecutor {
     );
 
     const provinceGdp = getProvinceGdp(province, seller.equipmentTechLevel);
-    const multiplier = province.hasSeaAccess ? 0.75 : 0.45;
+    const multiplier = province.hasSeaAccess ? 1.5 : 1.0;
     const calculatedPrice = Math.max(
-      1_000_000_000,
+      10_000_000_000,
       Math.floor(provinceGdp * multiplier),
     );
     const effectiveCost = action.cost > 0 ? action.cost : calculatedPrice;
