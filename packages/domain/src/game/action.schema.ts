@@ -16,7 +16,8 @@ export const BuildFactoryActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
   type: z.literal("BUILD_FACTORY"),
-  provinceId: z.number().positive(),
+  quantity: z.number().int().positive().default(1),
+  provinceId: z.number().positive().optional(),
 });
 
 export const EquipDomesticMachineryActionSchema = z.object({

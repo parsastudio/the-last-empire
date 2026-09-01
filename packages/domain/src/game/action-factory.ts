@@ -41,12 +41,14 @@ export class ActionFactory {
 
   public static buildFactory(
     nationId: string,
-    provinceId: number,
+    quantity = 1,
+    provinceId?: number,
   ): BuildFactoryAction {
     return {
       id: this.createId("build-factory"),
       nationId,
       type: "BUILD_FACTORY",
+      quantity,
       provinceId,
     };
   }

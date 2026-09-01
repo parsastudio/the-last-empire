@@ -3,6 +3,7 @@ import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
+import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 
 export interface BattleAttackerStateInput {
   attacker: Nation;
@@ -10,12 +11,21 @@ export interface BattleAttackerStateInput {
   calcResult: BattleCalculationResult;
   spoilsData?: BattleSpoilsDetails;
   isDefenderAnnexed?: boolean;
+  conqueredFactoriesCount?: number;
+  defenderTechLevel?: number;
 }
 
 export class BattleAttackerStateApplier {
   public static apply(input: BattleAttackerStateInput): Nation {
-    const { attacker, defenderId, calcResult, spoilsData, isDefenderAnnexed } =
-      input;
+    const {
+      attacker,
+      defenderId,
+      calcResult,
+      spoilsData,
+      isDefenderAnnexed,
+      conqueredFactoriesCount = 0,
+      defenderTechLevel = 1.0,
+    } = input;
     const canonicalDefender = CountryRegistry.resolveCanonicalId(defenderId);
 
     const prevAttacked = attacker.attackedTargetIdsThisTurn || [];
@@ -94,6 +104,21 @@ export class BattleAttackerStateApplier {
       nextStability = Math.max(0, nextStability - 5);
     }
 
+    let updatedFactoryTiers = attacker.factoryTiers;
+    let updatedEquipmentTech = attacker.equipmentTechLevel;
+
+    if (conqueredFactoriesCount > 0) {
+      updatedFactoryTiers = IndustryCalculator.addFactories(
+        attacker.factoryTiers,
+        conqueredFactoriesCount,
+        defenderTechLevel,
+      );
+      updatedEquipmentTech = IndustryCalculator.calculateWeightedAverageTech(
+        updatedFactoryTiers,
+        attacker.industrialLevel,
+      );
+    }
+
     return {
       ...attacker,
       treasury: nextTreasury,
@@ -105,6 +130,8 @@ export class BattleAttackerStateApplier {
         : canonicalDefender,
       relations: updatedRelations,
       attackedTargetIdsThisTurn,
+      factoryTiers: updatedFactoryTiers,
+      equipmentTechLevel: updatedEquipmentTech,
       government: {
         ...attacker.government,
         stability: nextStability,

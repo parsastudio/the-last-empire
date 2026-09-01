@@ -3,17 +3,27 @@ import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
+import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 
 export interface BattleDefenderStateInput {
   defender: Nation;
   attackerId: string;
   calcResult: BattleCalculationResult;
   spoilsData?: BattleSpoilsDetails;
+  lostFactoriesCount?: number;
+  destroyedFactoriesCount?: number;
 }
 
 export class BattleDefenderStateApplier {
   public static apply(input: BattleDefenderStateInput): Nation {
-    const { defender, attackerId, calcResult, spoilsData } = input;
+    const {
+      defender,
+      attackerId,
+      calcResult,
+      spoilsData,
+      lostFactoriesCount = 0,
+      destroyedFactoriesCount = 0,
+    } = input;
     const canonicalAttacker = CountryRegistry.resolveCanonicalId(attackerId);
     const casualties = calcResult.defenderCasualties;
 
@@ -58,11 +68,28 @@ export class BattleDefenderStateApplier {
       },
     };
 
+    const totalFactoriesToDeduct = lostFactoriesCount + destroyedFactoriesCount;
+    let updatedFactoryTiers = defender.factoryTiers;
+    let updatedEquipmentTech = defender.equipmentTechLevel;
+
+    if (totalFactoriesToDeduct > 0) {
+      updatedFactoryTiers = IndustryCalculator.removeFactories(
+        defender.factoryTiers,
+        totalFactoriesToDeduct,
+      );
+      updatedEquipmentTech = IndustryCalculator.calculateWeightedAverageTech(
+        updatedFactoryTiers,
+        defender.industrialLevel,
+      );
+    }
+
     return {
       ...defender,
       treasury: nextTreasury,
       warFocusTargetId: defender.warFocusTargetId || canonicalAttacker,
       relations: updatedRelations,
+      factoryTiers: updatedFactoryTiers,
+      equipmentTechLevel: updatedEquipmentTech,
       government: {
         ...defender.government,
         stability: nextStability,
