@@ -65,13 +65,43 @@ export class GlobalAiInitializer {
       );
 
       const countryProvs = provsByCountry.get(cleanId) || [];
-      let allocatedFactoriesSum = 0;
+      const provCount = countryProvs.length;
+
+      const equipTech = nation.equipmentTechLevel;
+      const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
+        item.gdp,
+        equipTech,
+      );
+      const totalSlots = IndustryCalculator.calculateStartingMaxSlots(
+        totalFactories,
+        item.initialRank || 50,
+        manifestItems.length || 100,
+      );
+
+      const factoryDist =
+        IndustryCalculator.distributeFactoriesAndSlotsToProvinces(
+          totalFactories,
+          totalSlots,
+          provCount,
+        );
+
+      let totalPixels = 0;
+      for (let p = 0; p < countryProvs.length; p++) {
+        totalPixels += countryProvs[p]!.pixelCount || 1;
+      }
 
       for (let i = 0; i < countryProvs.length; i++) {
         const pItem = countryProvs[i]!;
-        const active = pItem.factoriesCount ?? 1;
-        const slots = Math.max(active, pItem.maxSlots ?? active);
-        allocatedFactoriesSum += active;
+        const dist = factoryDist[i] || { activeCount: 1, maxSlots: 3 };
+
+        const pixelRatio =
+          totalPixels > 0
+            ? (pItem.pixelCount || 1) / totalPixels
+            : 1 / Math.max(1, provCount);
+        const provPop = Math.max(
+          10_000,
+          Math.floor((item.population || 10_000_000) * pixelRatio),
+        );
 
         provinces[pItem.provinceId.toString()] = {
           provinceId: pItem.provinceId,
@@ -86,22 +116,16 @@ export class GlobalAiInitializer {
           maritimeNeighborsTier1: pItem.maritimeNeighborsTier1 || [],
           maritimeNeighborsTier2: pItem.maritimeNeighborsTier2 || [],
           centerCoordinates: pItem.centerCoordinates,
-          population: pItem.population ?? 1000000,
-          maxSlots: slots,
-          factoriesCount: active,
+          population: provPop,
+          maxSlots: dist.maxSlots,
+          factoriesCount: dist.activeCount,
         };
       }
 
       nation.factoryTiers = [
         {
-          techLevel: nation.equipmentTechLevel,
-          count:
-            allocatedFactoriesSum > 0
-              ? allocatedFactoriesSum
-              : IndustryCalculator.calculateStartingTotalFactories(
-                  item.gdp,
-                  nation.equipmentTechLevel,
-                ),
+          techLevel: equipTech,
+          count: totalFactories,
         },
       ];
 

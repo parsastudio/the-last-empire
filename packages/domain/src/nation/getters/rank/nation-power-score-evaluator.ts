@@ -36,6 +36,9 @@ export class NationPowerScoreEvaluator {
     const equipmentTech =
       input.equipmentTechLevel ?? profile?.equipmentTechLevel ?? domesticTech;
 
+    const gdpBillion = (input.gdp || 1_000_000_000) / 1_000_000_000;
+    const economicPower = gdpBillion * (1 + (equipmentTech - 1) * 0.2);
+
     const stack =
       input.military ??
       MilitaryDistributionEngine.calculateStartingStack(
@@ -44,26 +47,22 @@ export class NationPowerScoreEvaluator {
         equipmentTech,
       );
 
-    const activeCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
+    const rawCombatPower = MilitaryPowerCalculator.calculateLandAndAirPower({
       military: stack,
     });
+    const navalCombatPower = (input.navalFleet ?? 0) * 40;
+    const militaryPower = (rawCombatPower + navalCombatPower) * 0.5;
 
-    const effectiveFieldTech = Math.max(domesticTech, equipmentTech);
-    const techMultiplier =
-      MilitaryPowerCalculator.calculateTechMultiplier(effectiveFieldTech);
+    const popMillion = (input.population || 10_000_000) / 1_000_000;
+    const demographicPower = Math.sqrt(popMillion) * 15;
 
-    const navalPower = (input.navalFleet ?? 0) * 1500 * techMultiplier;
-    const totalBattlefieldPower = activeCombatPower + navalPower;
+    const stabilityFactor = 0.85 + 0.15 * ((input.stability ?? 50) / 100);
+    const reputationFactor =
+      0.95 + 0.05 * (((input.globalReputation ?? 50) + 100) / 200);
 
-    const economicWarPotential = (input.gdp / 1_000_000_000) * techMultiplier;
+    const baseCompositePower =
+      economicPower * 0.5 + militaryPower * 0.35 + demographicPower * 0.15;
 
-    const stabilityFactor = 0.8 + 0.2 * ((input.stability ?? 50) / 100);
-    const repBonus = 1 + (((input.globalReputation ?? 50) - 50) / 50) * 0.05;
-    const resilienceMultiplier = stabilityFactor * repBonus;
-
-    return (
-      (totalBattlefieldPower * 0.6 + economicWarPotential * 0.4) *
-      resilienceMultiplier
-    );
+    return baseCompositePower * stabilityFactor * reputationFactor;
   }
 }
