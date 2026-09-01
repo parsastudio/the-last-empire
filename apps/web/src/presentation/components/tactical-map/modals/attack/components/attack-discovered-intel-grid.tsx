@@ -165,18 +165,20 @@ export function AttackDiscoveredIntelGrid({
               ? "تسلیم کامل و الحاق قطعی"
               : forecast.isVictoryPredicted
                 ? "پیروزی تاکتیکی و فتح منطقه"
-                : "ریسک بالای شکست زمینی"}
+                : "شکست قطعی خطوط زمینی"}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           <span className="text-[10px] text-muted-foreground font-sans">
-            شانس پیروزی قطعی:
+            پیش‌بینی نهایی:
           </span>
           <span
             className={`font-black text-xs px-2.5 py-0.5 rounded-xl border ${probBg} ${probColor}`}
           >
-            {PersianNumberFormatter.toPersianDigits(forecast.winProbability)}٪
+            {forecast.winProbability === 100
+              ? "۱۰۰٪ (پیروزی قطعی)"
+              : "۰٪ (شکست قطعی)"}
           </span>
         </div>
       </div>

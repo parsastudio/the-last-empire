@@ -58,13 +58,12 @@ export function AttackFogReconCard({
 
       <div className="flex items-center justify-between pt-2 border-t border-border/40 font-mono text-xs">
         <span className="text-[11px] text-muted-foreground font-sans">
-          تخمین شانس پیروزی عملیات:
+          تخمین اولیه موازنه قوا:
         </span>
         <span
           className={`font-black text-xs px-2.5 py-0.5 rounded-xl border ${probBg} ${probColor}`}
         >
-          حدوداً {PersianNumberFormatter.toPersianDigits(winProbability)}٪ (خطای
-          اطلاعاتی)
+          {winProbability === 100 ? "پیروزی محتمل" : "شکست محتمل"}
         </span>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { CountryRegistry } from "@/domain/data/countries";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
+import { useToast } from "@/presentation/context/toast-context";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
@@ -34,6 +35,7 @@ export function useDirectAttackForm({
   onClose,
 }: UseDirectAttackFormProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
+  const { showToast } = useToast();
   const openModal = useUiStore((state) => state.openModal);
 
   const targetNation = useMemo(() => {
@@ -113,6 +115,20 @@ export function useDirectAttackForm({
       result.armor,
       result.infantry,
     );
+
+    if (result.isPossible) {
+      showToast(
+        "آرایش پیروزی قطعی تنظیم شد",
+        "حداقل ادوات و نیروهای لازم برای تضمین پیروزی با کمترین تلفات چیده شد.",
+        "success",
+      );
+    } else {
+      showToast(
+        "پیروزی غیرممکن است",
+        "حتی با اعزام تمامی نیروها، شکست قطعی است. ابتدا پدافند را تضعیف کنید یا ارتش را توسعه دهید.",
+        "warning",
+      );
+    }
   }, [
     humanNation,
     targetNation,
@@ -121,6 +137,7 @@ export function useDirectAttackForm({
     reach.attackType,
     deployment,
     targetProvinceId,
+    showToast,
   ]);
 
   const handleExecuteAttack = useCallback(async () => {

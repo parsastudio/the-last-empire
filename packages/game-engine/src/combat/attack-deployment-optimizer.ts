@@ -1,7 +1,15 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { BattleCalculator } from "@/engine/combat/battle-calculator";
+import {
+  BattleCalculator,
+  BattleCalculationResult,
+} from "@/engine/combat/battle-calculator";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
+import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
+import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
+import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
+import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
+import { DeploymentStepSearch } from "@/engine/combat/optimizer/deployment-step-search";
 
 export interface OptimalDeploymentResult {
   drones: number;
@@ -9,6 +17,7 @@ export interface OptimalDeploymentResult {
   armor: number;
   infantry: number;
   winProbability: number;
+  isPossible: boolean;
 }
 
 export class AttackDeploymentOptimizer {
@@ -33,60 +42,252 @@ export class AttackDeploymentOptimizer {
         armor: 0,
         infantry: 0,
         winProbability: 0,
+        isPossible: false,
       };
     }
 
-    const optimalDrones = Math.min(
-      maxDrone,
-      Math.ceil((defender.military.airDefense || 0) * 2.2),
-    );
-    const optimalAir = Math.min(
-      maxAir,
-      Math.ceil((defender.military.airForce || 0) * 1.3),
-    );
-
-    let optimalInf = Math.max(1, Math.min(maxInf, Math.ceil(maxInf * 0.75)));
-    let optimalArm = Math.min(maxArm, Math.ceil(maxArm * 0.75));
+    let clampedMaxInf = maxInf;
+    let clampedMaxArm = maxArm;
 
     if (attackType === "NAVAL") {
-      const clamped = NavalDeploymentClamper.clamp(
-        optimalInf,
-        optimalArm,
+      const clampedMax = NavalDeploymentClamper.clamp(
+        maxInf,
+        maxArm,
         "NAVAL",
         navalFleetCount,
       );
-      optimalInf = clamped.inf;
-      optimalArm = clamped.arm;
+      clampedMaxInf = clampedMax.inf;
+      clampedMaxArm = clampedMax.arm;
     }
 
-    const calcResult = BattleCalculator.calculateBattle(
-      attacker,
-      defender,
-      optimalDrones,
-      optimalInf,
-      optimalArm,
-      optimalAir,
-      provincesMap,
-      guarantorNation,
-      targetProvinceId,
+    if (clampedMaxInf <= 0) {
+      return {
+        drones: 0,
+        airForce: 0,
+        armor: 0,
+        infantry: 0,
+        winProbability: 0,
+        isPossible: false,
+      };
+    }
+
+    const testBattle = (
+      d: number,
+      inf: number,
+      arm: number,
+      af: number,
+    ): BattleCalculationResult => {
+      let finalInf = inf;
+      let finalArm = arm;
+
+      if (attackType === "NAVAL") {
+        const clamped = NavalDeploymentClamper.clamp(
+          inf,
+          arm,
+          "NAVAL",
+          navalFleetCount,
+        );
+        finalInf = clamped.inf;
+        finalArm = clamped.arm;
+      }
+
+      return BattleCalculator.calculateBattle(
+        attacker,
+        defender,
+        d,
+        finalInf,
+        finalArm,
+        af,
+        provincesMap,
+        guarantorNation,
+        targetProvinceId,
+      );
+    };
+
+    const maxTest = testBattle(maxDrone, clampedMaxInf, clampedMaxArm, maxAir);
+
+    if (!maxTest.isAttackerVictory) {
+      return {
+        drones: maxDrone,
+        airForce: maxAir,
+        armor: clampedMaxArm,
+        infantry: clampedMaxInf,
+        winProbability: 0,
+        isPossible: false,
+      };
+    }
+
+    const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);
+    const defMults = CombatModifierResolver.resolveAllUnitMultipliers(defender);
+
+    let defAirDefense = defender.military.airDefense || 0;
+    let defAirForce = defender.military.airForce || 0;
+    let defArmor = defender.military.armor || 0;
+    let defInfantry = defender.military.infantry || 0;
+
+    const guarantorResult =
+      GuarantorInterventionCalculator.calculateIntervention(
+        attacker,
+        defender,
+        provincesMap,
+        guarantorNation,
+      );
+
+    defAirForce += guarantorResult.auxAir;
+    defArmor += guarantorResult.auxArm;
+    defAirDefense += guarantorResult.auxAD;
+    defInfantry += guarantorResult.auxInf;
+
+    const optimalDrones = this.calculateOptimalDrones(
+      maxDrone,
+      defAirDefense,
+      attMults.droneMissile,
+      defMults.airDefense,
     );
 
-    const winProbability = Math.min(
-      100,
-      Math.max(
-        0,
-        Math.round(
-          (calcResult.valuationRatio / (calcResult.valuationRatio + 1)) * 100,
-        ),
-      ),
+    const missilePhaseResult = MissileInterceptionPhase.calculate({
+      deployedDrones: optimalDrones,
+      defAirDefense,
+      attDroneMult: attMults.droneMissile,
+      defAdMult: defMults.airDefense,
+    });
+
+    const optimalAirForce = this.calculateOptimalAirForce(
+      maxAir,
+      defAirForce,
+      defArmor,
+      attMults.airForce,
+      defMults.airForce,
+      defMults.armor,
+      missilePhaseResult.defAirDefenseRemainingRaw,
     );
+
+    const groundResult = DeploymentStepSearch.findMinimalGroundForces(
+      optimalDrones,
+      optimalAirForce,
+      clampedMaxArm,
+      clampedMaxInf,
+      testBattle,
+    );
+
+    let finalInfantry = groundResult.infantry;
+    let finalArmor = groundResult.armor;
+
+    if (attackType === "NAVAL") {
+      const clamped = NavalDeploymentClamper.clamp(
+        finalInfantry,
+        finalArmor,
+        "NAVAL",
+        navalFleetCount,
+      );
+      finalInfantry = clamped.inf;
+      finalArmor = clamped.arm;
+    }
+
+    let finalVerification = testBattle(
+      optimalDrones,
+      finalInfantry,
+      finalArmor,
+      optimalAirForce,
+    );
+
+    if (!finalVerification.isAttackerVictory) {
+      finalInfantry = clampedMaxInf;
+      finalArmor = clampedMaxArm;
+      finalVerification = testBattle(
+        optimalDrones,
+        finalInfantry,
+        finalArmor,
+        optimalAirForce,
+      );
+    }
+
+    const isVictory = finalVerification.isAttackerVictory;
 
     return {
       drones: optimalDrones,
-      airForce: optimalAir,
-      armor: optimalArm,
-      infantry: optimalInf,
-      winProbability,
+      airForce: optimalAirForce,
+      armor: finalArmor,
+      infantry: finalInfantry,
+      winProbability: isVictory ? 100 : 0,
+      isPossible: isVictory,
     };
+  }
+
+  private static calculateOptimalDrones(
+    maxDrone: number,
+    defAirDefense: number,
+    attDroneMult: number,
+    defAdMult: number,
+  ): number {
+    if (defAirDefense <= 0 || maxDrone <= 0) {
+      return 0;
+    }
+
+    let low = 1;
+    let high = maxDrone;
+    let optimal = maxDrone;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const res = MissileInterceptionPhase.calculate({
+        deployedDrones: mid,
+        defAirDefense,
+        attDroneMult,
+        defAdMult,
+      });
+
+      if (res.defAirDefenseRemainingRaw === 0) {
+        optimal = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return optimal;
+  }
+
+  private static calculateOptimalAirForce(
+    maxAir: number,
+    defAirForce: number,
+    defArmor: number,
+    attAirMult: number,
+    defAirMult: number,
+    defArmorMult: number,
+    defAirDefenseRemainingRaw: number,
+  ): number {
+    if (maxAir <= 0) return 0;
+    if (defAirForce <= 0 && defArmor <= 0) return 0;
+
+    let low = 0;
+    let high = maxAir;
+    let optimal = maxAir;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const res = AirSupremacyPhase.calculate({
+        deployedAirForce: mid,
+        defAirForce,
+        defArmor,
+        attAirMult,
+        defAirMult,
+        defArmorMult,
+        defAirDefenseRemainingRaw,
+      });
+
+      const airCleared = defAirForce <= 0 || res.rawDefAirLoss >= defAirForce;
+      const armorCleared =
+        defArmor <= 0 || res.defArmorDestroyedByAir >= defArmor;
+
+      if (airCleared && armorCleared) {
+        optimal = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return optimal;
   }
 }
