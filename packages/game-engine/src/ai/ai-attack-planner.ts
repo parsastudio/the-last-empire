@@ -15,12 +15,17 @@ export class AIAttackPlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     ownedProvinces?: Province[],
+    currentTurn?: number,
   ): GameAction | null {
     if (!nation.isAlive || !nation.relations || !provincesMap) {
       return null;
     }
 
-    const targetNation = this.resolveActiveWarTarget(nation, allNations);
+    const targetNation = this.resolveActiveWarTarget(
+      nation,
+      allNations,
+      currentTurn,
+    );
     if (!targetNation || !targetNation.isAlive) {
       return null;
     }
@@ -97,6 +102,7 @@ export class AIAttackPlanner {
   private static resolveActiveWarTarget(
     nation: Nation,
     allNations: Record<string, Nation>,
+    currentTurn?: number,
   ): Nation | null {
     if (nation.warFocusTargetId) {
       const canonicalFocusId = CountryRegistry.resolveCanonicalId(
@@ -112,13 +118,27 @@ export class AIAttackPlanner {
           nation.relations[canonicalFocusId] ||
           nation.relations[nation.warFocusTargetId];
         if (rel?.stance === "WAR") {
-          return focusNation;
+          if (
+            currentTurn === undefined ||
+            rel.warDeclaredTurn === undefined ||
+            currentTurn > rel.warDeclaredTurn
+          ) {
+            return focusNation;
+          }
         }
       }
     }
 
     for (const [targetId, rel] of Object.entries(nation.relations || {})) {
       if (rel.stance === "WAR") {
+        if (
+          currentTurn !== undefined &&
+          rel.warDeclaredTurn !== undefined &&
+          currentTurn <= rel.warDeclaredTurn
+        ) {
+          continue;
+        }
+
         const canonicalTargetId = CountryRegistry.resolveCanonicalId(targetId);
         const targetNation = NationGettersUtility.resolveNation(
           canonicalTargetId,

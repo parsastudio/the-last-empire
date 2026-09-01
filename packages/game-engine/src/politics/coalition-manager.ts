@@ -87,6 +87,7 @@ export class CoalitionManager {
         stance: "WAR",
         alignment: -100,
         tension: 100,
+        warDeclaredTurn: state.currentTurn,
       };
 
       for (const otherMember of coalitionMembers) {
@@ -118,6 +119,7 @@ export class CoalitionManager {
         stance: "WAR",
         alignment: -100,
         tension: 100,
+        warDeclaredTurn: state.currentTurn,
       };
     }
 

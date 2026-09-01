@@ -78,6 +78,7 @@ export class TurnProgressionOrchestrator {
         lockedDiplomacyTargets,
         activeMatrixCache,
         workingState.globalCoalition,
+        workingState.currentTurn,
       );
 
       if (aiActions.length > 0) {

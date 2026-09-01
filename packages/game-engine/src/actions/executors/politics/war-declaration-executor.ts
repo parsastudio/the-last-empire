@@ -31,14 +31,14 @@ export class WarDeclarationExecutor {
       );
     }
 
-    const updatedSenderRel = treatyEvaluator.applyTreatyStance(
-      senderRel,
-      "DECLARE_WAR",
-    );
-    const updatedReceiverRel = treatyEvaluator.applyTreatyStance(
-      receiverRel,
-      "DECLARE_WAR",
-    );
+    const updatedSenderRel: RelationProfile = {
+      ...treatyEvaluator.applyTreatyStance(senderRel, "DECLARE_WAR"),
+      warDeclaredTurn: state.currentTurn,
+    };
+    const updatedReceiverRel: RelationProfile = {
+      ...treatyEvaluator.applyTreatyStance(receiverRel, "DECLARE_WAR"),
+      warDeclaredTurn: state.currentTurn,
+    };
 
     const newReputation = Math.max(-100, nation.globalReputation - 5);
 
