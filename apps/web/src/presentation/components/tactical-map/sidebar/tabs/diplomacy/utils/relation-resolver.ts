@@ -70,6 +70,9 @@ export function resolveProfileRelation(
   const techLevel = liveNation
     ? liveNation.military.techLevel
     : fallback.startingTechLevel;
+  const industrialLevel = liveNation
+    ? liveNation.industrialLevel
+    : fallback.industrialLevel;
 
   const rank = liveNation
     ? NationGettersUtility.getRank(liveNation.id, allNations, provincesMap)
@@ -127,6 +130,7 @@ export function resolveProfileRelation(
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
       techLevel,
+      industrialLevel,
       governmentType: liveNation
         ? liveNation.government.type
         : fallback.startingGovernment,
