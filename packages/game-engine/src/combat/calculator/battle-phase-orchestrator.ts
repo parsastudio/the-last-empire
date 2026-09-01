@@ -64,7 +64,7 @@ export class BattlePhaseOrchestrator {
       attAirMult,
       defAirMult,
       defArmorMult,
-      defAirDefenseRemainingEff: missilePhase.defAirDefenseRemainingEff,
+      defAirDefenseRemainingRaw: missilePhase.defAirDefenseRemainingRaw,
     });
 
     const groundPhase = GroundEngagementPhase.calculate({
@@ -112,7 +112,7 @@ export class BattlePhaseOrchestrator {
         dronesLaunched: deployedDrones,
         defAirDefense,
         airDefenseLost: missilePhase.rawDefAirDefenseLost,
-        dronesIntercepted: Math.min(deployedDrones, defAirDefense * 2),
+        dronesIntercepted: missilePhase.interceptedMissiles,
         destroyedFactories: missilePhase.destroyedFactories,
         phaseWinner: phase1Winner,
       },

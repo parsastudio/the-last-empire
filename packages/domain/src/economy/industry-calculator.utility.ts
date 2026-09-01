@@ -2,7 +2,7 @@ import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 
 export class IndustryCalculator {
   public static readonly BASE_FACTORY_YIELD = 5_000_000_000;
-  public static readonly SUBSISTENCE_YIELD = 500_000_000;
+  public static readonly SUBSISTENCE_YIELD = 0;
   public static readonly YIELD_TECH_BASE = 2.0;
   public static readonly FACTORY_REBUILD_COST = 30_000_000_000;
   public static readonly RESEARCH_BASE_COST = 25_000_000_000;
@@ -114,14 +114,9 @@ export class IndustryCalculator {
     equipmentTechLevel = 1.0,
   ): number {
     const activeFactories = province.factoriesCount ?? 1;
-    const maxSlots = province.maxSlots ?? activeFactories;
-    const emptySlots = Math.max(0, maxSlots - activeFactories);
-
     const activeYield =
       activeFactories * this.calculateFactoryYield(equipmentTechLevel);
-    const subsistenceYield = emptySlots * this.SUBSISTENCE_YIELD;
-
-    return Math.floor(activeYield + subsistenceYield);
+    return Math.floor(activeYield);
   }
 
   public static calculateModernizeUnitCost(
