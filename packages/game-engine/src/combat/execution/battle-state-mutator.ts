@@ -13,6 +13,8 @@ export interface BattleStateMutationInput {
   conqueredFactoriesCount?: number;
   originalLostFactoriesCount?: number;
   destroyedFactoriesCount?: number;
+  totalDefenderGdpBefore?: number;
+  totalLostGdp?: number;
 }
 
 export class BattleStateMutator {
@@ -26,6 +28,8 @@ export class BattleStateMutator {
     conqueredFactoriesCount = 0,
     originalLostFactoriesCount = 0,
     destroyedFactoriesCount = 0,
+    totalDefenderGdpBefore = 0,
+    totalLostGdp = 0,
   ): Record<string, Nation> {
     const updatedNations: Record<string, Nation> = { ...nations };
 
@@ -48,6 +52,8 @@ export class BattleStateMutator {
         spoilsData,
         lostFactoriesCount: originalLostFactoriesCount,
         destroyedFactoriesCount,
+        totalDefenderGdpBefore,
+        totalLostGdp,
       });
       updatedNations[defender.id] = updatedDefender;
     }

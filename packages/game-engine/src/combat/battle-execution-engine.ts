@@ -107,6 +107,12 @@ export class BattleExecutionEngine {
       calcResult,
     );
 
+    const destroyedFactoriesGdp =
+      actualDestroyedFactories *
+      IndustryCalculator.calculateFactoryYield(defender.equipmentTechLevel);
+    const totalLostGdp =
+      conquestResult.conqueredProvincesGdp + destroyedFactoriesGdp;
+
     let updatedNations = BattleStateMutator.mutate(
       state.nations,
       attacker,
@@ -117,6 +123,8 @@ export class BattleExecutionEngine {
       conquestResult.conqueredFactoriesCount,
       conquestResult.originalFactoriesCount,
       actualDestroyedFactories,
+      conquestResult.totalDefenderGdpBefore,
+      totalLostGdp,
     );
 
     if (isDefenderAnnexed) {
