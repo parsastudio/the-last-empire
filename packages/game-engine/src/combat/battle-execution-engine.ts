@@ -58,20 +58,49 @@ export class BattleExecutionEngine {
     );
 
     let updatedProvinces = { ...state.provinces };
-    if (
-      action.targetProvinceId &&
-      calcResult.phase1Missile.destroyedFactories > 0
-    ) {
-      const targetProv = updatedProvinces[action.targetProvinceId.toString()];
-      if (targetProv) {
-        updatedProvinces[action.targetProvinceId.toString()] = {
-          ...targetProv,
-          factoriesCount: Math.max(
-            0,
-            targetProv.factoriesCount -
-              calcResult.phase1Missile.destroyedFactories,
-          ),
-        };
+    const factoriesToDestroy = calcResult.phase1Missile.destroyedFactories;
+
+    if (factoriesToDestroy > 0) {
+      if (calcResult.isAttackerVictory) {
+        const defenderOtherProvinces = Object.values(updatedProvinces).filter(
+          (p) => {
+            const ownerCanonical = CountryRegistry.resolveCanonicalId(
+              p.ownerNationId,
+            );
+            return (
+              ownerCanonical === canonicalDefenderId &&
+              p.provinceId !== action.targetProvinceId &&
+              p.factoriesCount > 0
+            );
+          },
+        );
+
+        if (defenderOtherProvinces.length > 0) {
+          defenderOtherProvinces.sort(
+            (a, b) => b.factoriesCount - a.factoriesCount,
+          );
+          const rearProv = defenderOtherProvinces[0]!;
+          const actualDestroyed = Math.min(
+            rearProv.factoriesCount,
+            factoriesToDestroy,
+          );
+          updatedProvinces[rearProv.provinceId.toString()] = {
+            ...rearProv,
+            factoriesCount: rearProv.factoriesCount - actualDestroyed,
+          };
+        }
+      } else if (action.targetProvinceId) {
+        const targetProv = updatedProvinces[action.targetProvinceId.toString()];
+        if (targetProv && targetProv.factoriesCount > 0) {
+          const actualDestroyed = Math.min(
+            targetProv.factoriesCount,
+            factoriesToDestroy,
+          );
+          updatedProvinces[action.targetProvinceId.toString()] = {
+            ...targetProv,
+            factoriesCount: targetProv.factoriesCount - actualDestroyed,
+          };
+        }
       }
     }
 
