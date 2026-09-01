@@ -9,11 +9,11 @@ export class WarUtilityEvaluator {
     targetGdp?: number,
     allNations?: Record<string, Nation>,
   ): number {
-    if (vector.tension < 20) {
+    if (vector.tension < 35) {
       return -100;
     }
 
-    if (source.military.infantry < 2 || source.government.stability < 20) {
+    if (source.military.infantry < 2 || source.government.stability < 25) {
       return -100;
     }
 
@@ -21,11 +21,19 @@ export class WarUtilityEvaluator {
       return -100;
     }
 
+    if (vector.alignment > 10 && vector.lostProvincesCount === 0) {
+      return -100;
+    }
+
     let rawPowerAdvantage = 0;
     if (vector.powerRatio > 1.0) {
       rawPowerAdvantage = -Math.round((vector.powerRatio - 1.0) * 60);
     } else {
-      rawPowerAdvantage = Math.round((1.0 - vector.powerRatio) * 45);
+      rawPowerAdvantage = Math.round((1.0 - vector.powerRatio) * 50);
+    }
+
+    if (rawPowerAdvantage <= 0 && vector.lostProvincesCount === 0) {
+      return -100;
     }
 
     let opportunismBonus = 0;
@@ -58,11 +66,11 @@ export class WarUtilityEvaluator {
         break;
       case "REGIONAL_MARITIME":
         proximityMultiplier = 0.7;
-        distancePenalty = -10;
+        distancePenalty = -15;
         break;
       case "DISTANT_OCEAN":
         proximityMultiplier = 0.3;
-        distancePenalty = -30;
+        distancePenalty = -40;
         break;
       default:
         return -100;
@@ -74,7 +82,7 @@ export class WarUtilityEvaluator {
         : rawPowerAdvantage;
 
     const tensionScore = Math.round(vector.tension * 0.5);
-    const alignmentDampener = Math.round(vector.alignment * 0.4);
+    const alignmentDampener = Math.round(vector.alignment * 0.5);
     const stabilityScore = Math.round(
       ((source.government.stability - 50) / 50) * 15,
     );

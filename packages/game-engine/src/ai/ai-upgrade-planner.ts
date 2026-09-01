@@ -75,15 +75,29 @@ export class AIUpgradePlanner {
       }
     }
 
-    const indResearchCost = IndustryCalculator.calculateResearchStepCost(
-      nation.industrialLevel,
-    );
-    if (
-      currentTreasury >= indResearchCost * 1.5 &&
-      weights.developmentPriority >= 0.5
-    ) {
-      actions.push(ActionFactory.investIndustrialResearch(nation.id));
-      currentTreasury -= indResearchCost;
+    const maxIndSteps =
+      weights.developmentPriority >= 0.7
+        ? 3
+        : weights.developmentPriority >= 0.4
+          ? 2
+          : 1;
+    let indStepsTaken = 0;
+
+    while (indStepsTaken < maxIndSteps) {
+      const nextIndCost = IndustryCalculator.calculateResearchStepCost(
+        nation.industrialLevel +
+          indStepsTaken * IndustryCalculator.RESEARCH_STEP,
+      );
+      if (
+        currentTreasury >= nextIndCost * 1.5 &&
+        weights.developmentPriority >= 0.4
+      ) {
+        actions.push(ActionFactory.investIndustrialResearch(nation.id));
+        currentTreasury -= nextIndCost;
+        indStepsTaken++;
+      } else {
+        break;
+      }
     }
 
     const importResult = AIMachineryImportPlanner.planImport(
@@ -96,12 +110,26 @@ export class AIUpgradePlanner {
       currentTreasury = importResult.remainingTreasury;
     }
 
-    const milTechCost = ResearchManager.getMilitaryTechCost(
-      nation.military.techLevel,
-    );
-    if (currentTreasury >= milTechCost * 1.5) {
-      actions.push(ActionFactory.investResearch(nation.id));
-      currentTreasury -= milTechCost;
+    const maxMilSteps =
+      weights.researchFocusWeight >= 0.75
+        ? 3
+        : weights.researchFocusWeight >= 0.45
+          ? 2
+          : 1;
+    let milStepsTaken = 0;
+
+    while (milStepsTaken < maxMilSteps) {
+      const nextMilCost = ResearchManager.getMilitaryTechCost(
+        nation.military.techLevel +
+          milStepsTaken * ResearchManager.RESEARCH_STEP,
+      );
+      if (currentTreasury >= nextMilCost * 1.5) {
+        actions.push(ActionFactory.investResearch(nation.id));
+        currentTreasury -= nextMilCost;
+        milStepsTaken++;
+      } else {
+        break;
+      }
     }
 
     return {

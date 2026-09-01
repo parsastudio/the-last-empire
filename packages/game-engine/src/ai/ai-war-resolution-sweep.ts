@@ -7,6 +7,7 @@ import {
   PeaceTermsCalculator,
   TurnLogEntry,
   NationGettersUtility,
+  DIPLOMACY_CONFIG,
 } from "@geopolitics/domain";
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
 
@@ -97,7 +98,7 @@ export class AiWarResolutionSweep {
             updatedNations,
             winner.id,
             loser.id,
-            5,
+            DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS,
           );
 
         updatedProvinces = annexationResult.updatedProvinces;
