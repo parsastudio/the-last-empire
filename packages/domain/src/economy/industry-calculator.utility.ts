@@ -10,7 +10,7 @@ export class IndustryCalculator {
   public static readonly RESEARCH_STEP = 0.1;
   public static readonly MACHINERY_BASE_UNIT_PRICE = 10_000_000_000;
   public static readonly IMPORT_BASE_PRICE = 10_000_000_000;
-  public static readonly IMPORT_TECH_GAP_BASE = 1.5;
+  public static readonly IMPORT_TECH_GAP_BASE = 2.0;
 
   public static calculateFactoryYield(techLevel: number): number {
     return Math.floor(

@@ -1,6 +1,10 @@
 import React from "react";
 import { ArrowRight, Wallet, Cpu, TrendingUp, Info } from "lucide-react";
-import { Nation, PersianNumberFormatter } from "@geopolitics/domain";
+import {
+  Nation,
+  PersianNumberFormatter,
+  IndustryCalculator,
+} from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { FactoryTiersGrid } from "./factory-tiers-grid";
 
@@ -24,7 +28,10 @@ export function MachineryImportCountryView({
       sellerNation.industrialLevel - buyerNation.industrialLevel,
     ).toFixed(1),
   );
-  const multiplier = Math.pow(1.5, techDelta);
+  const multiplier = Math.pow(
+    IndustryCalculator.IMPORT_TECH_GAP_BASE,
+    techDelta,
+  );
 
   return (
     <div className="space-y-4 font-sans dir-rtl text-right animate-in fade-in duration-200">
@@ -74,12 +81,12 @@ export function MachineryImportCountryView({
           <span>
             {techDelta > 0 ? (
               <>
-                شکاف فناوری صنعتی صادرکننده:{" "}
+                شکاف فناوری صنعتی با صادرکننده:{" "}
                 <strong className="text-primary font-mono">
                   +{PersianNumberFormatter.toPersianDigits(techDelta)}
                 </strong>{" "}
-                سطح (قیمت‌گذاری بر مبنای نرخ پایه ۱۰ میلیارد دلار به ازای هر لول
-                اختلاف محاسبه می‌گردد).
+                سطح (قیمت‌گذاری متناسب با نرخ رشد ۲ برابری ارزش تولیدی کارخانجات
+                محاسبه می‌گردد).
               </>
             ) : (
               "سطح فناوری صنعتی این کشور برابر با تجهیزات شماست."
