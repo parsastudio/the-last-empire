@@ -137,6 +137,7 @@ export function WideDiplomacyView({
           <AdvancedDiplomacyActions
             targetName={diplomacy.selectedRelation.name}
             targetNationId={diplomacy.targetNationId}
+            targetFlagCode={diplomacy.selectedRelation.flagCode}
             nationId={activeHumanId}
             senderGdp={humanGdp}
             targetGdp={diplomacy.selectedTargetGdp}

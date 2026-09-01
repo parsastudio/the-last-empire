@@ -10,6 +10,9 @@ import { DiplomacySecurityUmbrellaActions } from "./diplomacy-security-umbrella-
 import { DiplomacyStepDownActions } from "./diplomacy-step-down-actions";
 
 interface DiplomacyActionButtonsProps {
+  targetName: string;
+  targetFlagCode?: string;
+  targetNationId: string;
   currentStance: DiplomaticStance | string;
   foreignAidCost: number;
   securityGuaranteeCost: number;
@@ -31,6 +34,9 @@ interface DiplomacyActionButtonsProps {
 }
 
 export function DiplomacyActionButtons({
+  targetName,
+  targetFlagCode,
+  targetNationId,
   currentStance,
   foreignAidCost,
   securityGuaranteeCost,
@@ -62,6 +68,9 @@ export function DiplomacyActionButtons({
       />
 
       <DiplomacySecurityUmbrellaActions
+        targetName={targetName}
+        targetFlagCode={targetFlagCode}
+        targetNationId={targetNationId}
         isWar={isWar}
         hasSecurityGuarantee={hasSecurityGuarantee}
         isEmergencyProtectorate={isEmergencyProtectorate}

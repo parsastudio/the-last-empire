@@ -10,6 +10,7 @@ import { DiplomacyActionButtons } from "@/presentation/components/tactical-map/s
 interface AdvancedDiplomacyActionsProps {
   targetName: string;
   targetNationId: string;
+  targetFlagCode?: string;
   nationId: string;
   senderGdp?: number;
   targetGdp?: number;
@@ -25,6 +26,7 @@ interface AdvancedDiplomacyActionsProps {
 export function AdvancedDiplomacyActions({
   targetName,
   targetNationId,
+  targetFlagCode,
   nationId,
   senderGdp = 100000000000,
   targetGdp = 100000000000,
@@ -63,6 +65,9 @@ export function AdvancedDiplomacyActions({
             />
 
             <DiplomacyActionButtons
+              targetName={targetName}
+              targetFlagCode={targetFlagCode || targetNation?.flagCode}
+              targetNationId={targetNationId}
               currentStance={currentStance}
               foreignAidCost={runner.foreignAidCost}
               securityGuaranteeCost={runner.securityGuaranteeCost}
