@@ -7,7 +7,7 @@ import {
   LandNeighborResolver,
   NationGettersUtility,
 } from "@geopolitics/domain";
-import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
+import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 
 export class AIAttackPlanner {
   public static planAttack(
@@ -46,54 +46,41 @@ export class AIAttackPlanner {
       return null;
     }
 
-    const activeWarCount = this.countActiveWars(nation, allNations);
-    const deployRatio = activeWarCount > 1 ? 0.65 : 0.9;
+    const guarantorNation = targetNation.securityGuarantorId
+      ? NationGettersUtility.resolveNation(
+          targetNation.securityGuarantorId,
+          allNations,
+        )
+      : null;
 
-    const availableArmor = nation.military.armor || 0;
-    const availableAirForce = nation.military.airForce || 0;
-    const availableDrones = nation.military.droneMissile || 0;
+    const fleetCount = nation.navalFleet || 0;
 
-    let infantryToDeploy = Math.max(
-      1,
-      Math.min(availableInfantry, Math.ceil(availableInfantry * deployRatio)),
-    );
-    let armorToDeploy = Math.min(
-      availableArmor,
-      Math.ceil(availableArmor * deployRatio),
-    );
-    const airForceToDeploy = Math.min(
-      availableAirForce,
-      Math.ceil(availableAirForce * deployRatio),
-    );
-    const dronesToLaunch = Math.min(
-      availableDrones,
-      Math.ceil(availableDrones * deployRatio),
-    );
-
-    if (targetResolution.attackType === "NAVAL") {
-      const fleetCount = nation.navalFleet || 0;
-      if (fleetCount <= 0) {
-        return null;
-      }
-
-      const clamped = NavalDeploymentClamper.clamp(
-        infantryToDeploy,
-        armorToDeploy,
-        "NAVAL",
+    const optimalDeployment =
+      AttackDeploymentOptimizer.calculateOptimalDeployment(
+        nation,
+        targetNation,
+        provincesMap,
+        guarantorNation,
+        targetResolution.attackType,
         fleetCount,
+        targetResolution.provinceId,
       );
 
-      infantryToDeploy = clamped.inf;
-      armorToDeploy = clamped.arm;
+    if (
+      !optimalDeployment.isPossible ||
+      optimalDeployment.winProbability <= 0 ||
+      optimalDeployment.infantry <= 0
+    ) {
+      return null;
     }
 
     return ActionFactory.initiateBattle(
       nation.id,
       targetNation.id,
-      dronesToLaunch,
-      infantryToDeploy,
-      armorToDeploy,
-      airForceToDeploy,
+      optimalDeployment.drones,
+      optimalDeployment.infantry,
+      optimalDeployment.armor,
+      optimalDeployment.airForce,
       targetResolution.provinceId,
       targetResolution.attackType,
     );
@@ -155,26 +142,6 @@ export class AIAttackPlanner {
     }
 
     return null;
-  }
-
-  private static countActiveWars(
-    nation: Nation,
-    allNations: Record<string, Nation>,
-  ): number {
-    let count = 0;
-    for (const [targetId, rel] of Object.entries(nation.relations || {})) {
-      if (rel.stance === "WAR") {
-        const canonical = CountryRegistry.resolveCanonicalId(targetId);
-        const target = NationGettersUtility.resolveNation(
-          canonical,
-          allNations,
-        );
-        if (target && target.isAlive && target.id !== nation.id) {
-          count++;
-        }
-      }
-    }
-    return count;
   }
 
   private static resolveTargetProvince(

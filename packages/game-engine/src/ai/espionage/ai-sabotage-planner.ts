@@ -12,11 +12,17 @@ export class AISabotagePlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap: Record<string, Province> | undefined,
-    currentTreasury: number,
+    geopoliticsBudget: number,
     executedTiers: string[],
     _rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
+    currentTreasury?: number,
   ): { action: GameAction; cost: number } | null {
+    const effectiveTreasury = currentTreasury ?? geopoliticsBudget;
+    if (geopoliticsBudget <= 0 || effectiveTreasury <= 0) {
+      return null;
+    }
+
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[
           CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
@@ -46,7 +52,11 @@ export class AISabotagePlanner {
             (activeWarTarget.military.armor || 0) > 0 ||
             activeWarTarget.military.airForce > 0;
 
-          if (hasDefenses && currentTreasury >= Math.floor(cost * 1.2)) {
+          if (
+            hasDefenses &&
+            geopoliticsBudget >= cost &&
+            effectiveTreasury >= cost
+          ) {
             return {
               action: ActionFactory.executeEspionage(
                 nation.id,
@@ -91,7 +101,7 @@ export class AISabotagePlanner {
         );
         const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
 
-        if (currentTreasury < Math.floor(cost * 1.2)) {
+        if (geopoliticsBudget < cost || effectiveTreasury < cost) {
           continue;
         }
 

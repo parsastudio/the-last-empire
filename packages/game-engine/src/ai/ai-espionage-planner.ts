@@ -6,6 +6,8 @@ import { AITechHeistPlanner } from "@/engine/ai/espionage/ai-tech-heist-planner"
 
 export interface EspionagePlanResult {
   actions: GameAction[];
+  spentMoney: number;
+  remainingGeopoliticsBudget: number;
   remainingTreasury: number;
 }
 
@@ -14,17 +16,29 @@ export class AIEspionagePlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
-    availableTreasury?: number,
+    geopoliticsBudget?: number,
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
     provincesByOwnerMap?: Map<string, Province[]>,
+    availableTreasury?: number,
   ): EspionagePlanResult {
+    let currentGeoBudget =
+      geopoliticsBudget !== undefined
+        ? geopoliticsBudget
+        : Math.floor(nation.treasury * 0.15);
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
-    const actions: GameAction[] = [];
 
-    if (currentTreasury <= 0) {
-      return { actions, remainingTreasury: 0 };
+    const actions: GameAction[] = [];
+    let spentMoney = 0;
+
+    if (currentGeoBudget <= 0 || currentTreasury <= 0) {
+      return {
+        actions,
+        spentMoney: 0,
+        remainingGeopoliticsBudget: 0,
+        remainingTreasury: currentTreasury,
+      };
     }
 
     const executedTiers = nation.executedEspionageTiers || [];
@@ -33,17 +47,22 @@ export class AIEspionagePlanner {
       nation,
       allNations,
       provincesMap,
-      currentTreasury,
+      currentGeoBudget,
       executedTiers,
       rankMap,
       provincesByOwnerMap,
+      currentTreasury,
     );
 
     if (sabotageAction) {
       actions.push(sabotageAction.action);
+      currentGeoBudget -= sabotageAction.cost;
       currentTreasury -= sabotageAction.cost;
+      spentMoney += sabotageAction.cost;
       return {
         actions,
+        spentMoney,
+        remainingGeopoliticsBudget: Math.max(0, currentGeoBudget),
         remainingTreasury: Math.max(0, currentTreasury),
       };
     }
@@ -52,24 +71,31 @@ export class AIEspionagePlanner {
       nation,
       allNations,
       provincesMap,
-      currentTreasury,
+      currentGeoBudget,
       executedTiers,
       rankMap,
       reachableTargets,
       provincesByOwnerMap,
+      currentTreasury,
     );
 
     if (techTheftAction) {
       actions.push(techTheftAction.action);
+      currentGeoBudget -= techTheftAction.cost;
       currentTreasury -= techTheftAction.cost;
+      spentMoney += techTheftAction.cost;
       return {
         actions,
+        spentMoney,
+        remainingGeopoliticsBudget: Math.max(0, currentGeoBudget),
         remainingTreasury: Math.max(0, currentTreasury),
       };
     }
 
     return {
       actions,
+      spentMoney: 0,
+      remainingGeopoliticsBudget: currentGeoBudget,
       remainingTreasury: currentTreasury,
     };
   }
