@@ -3,13 +3,14 @@ import {
   ActionFactory,
   Nation,
   UnitType,
+  UnitBudgetQuota,
 } from "@geopolitics/domain";
-import { UnitBudgetQuota } from "@geopolitics/domain";
 
 export interface DomesticRecruitmentPlanResult {
   actions: GameAction[];
   spentMoney: number;
   remainingGlobalValuation: number;
+  remainingBudget: number;
 }
 
 export class AIDomesticRecruitmentPlanner {
@@ -50,7 +51,8 @@ export class AIDomesticRecruitmentPlanner {
       return {
         actions,
         spentMoney: 0,
-        remainingGlobalValuation: globalRemainingValuation,
+        remainingGlobalValuation,
+        remainingBudget: targetDomesticBudget,
       };
     }
 
@@ -86,6 +88,7 @@ export class AIDomesticRecruitmentPlanner {
         0,
         globalRemainingValuation - spentMoney,
       ),
+      remainingBudget: Math.max(0, targetDomesticBudget - spentMoney),
     };
   }
 }

@@ -6,7 +6,6 @@ import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
-import { AI_DOCTRINE_PRESETS } from "@geopolitics/domain";
 
 export class AITechHeistPlanner {
   public static planTechHeistTier3(
@@ -29,15 +28,6 @@ export class AITechHeistPlanner {
         undefined,
         provincesByOwnerMap,
       );
-
-    const weights =
-      nation.doctrineWeights ??
-      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
-
-    const costMultiplier =
-      weights.armsImportRatio >= 0.6 && nation.military.techLevel < 3.5
-        ? 1.1
-        : 1.3;
 
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
       [];
@@ -74,7 +64,7 @@ export class AITechHeistPlanner {
         target,
       );
 
-      if (successRate < 0.45) {
+      if (successRate < 0.4) {
         continue;
       }
 
@@ -86,7 +76,7 @@ export class AITechHeistPlanner {
       );
       const cost = EspionageCalculator.calculateOperationCost(targetGdp, 3);
 
-      if (currentTreasury >= Math.floor(cost * costMultiplier)) {
+      if (currentTreasury >= cost) {
         eligibleTargets.push({
           target,
           cost,

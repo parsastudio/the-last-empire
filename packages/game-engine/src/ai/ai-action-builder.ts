@@ -18,6 +18,7 @@ import { AIWarDeclarationEvaluator } from "@/engine/ai/ai-war-declaration-evalua
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { AIEconomicStanceEvaluator } from "@/engine/ai/ai-economic-stance-evaluator";
+import { AiWalletBudgetAllocator } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 
 interface NationDecisionContext {
   ownedProvinces: Province[];
@@ -100,6 +101,13 @@ export class AIActionBuilder {
     const rankMap = cache.getRankMap();
     const provincesByOwnerMap = cache.getProvincesByOwnerMap();
 
+    const wallets = AiWalletBudgetAllocator.calculateWallets(
+      currentNation,
+      allNations,
+      provincesMap,
+      context.posture,
+    );
+
     const procurementResult = AIProcurementPlanner.planRecruitment(
       currentNation,
       allNations,
@@ -107,6 +115,7 @@ export class AIActionBuilder {
       undefined,
       rankMap,
       context.posture,
+      wallets,
     );
     actions.push(...procurementResult.actions);
 
@@ -118,6 +127,7 @@ export class AIActionBuilder {
       rankMap,
       context.posture,
       context.ownedProvinces,
+      procurementResult.strategicWallets,
     );
     actions.push(...upgradeResult.actions);
 

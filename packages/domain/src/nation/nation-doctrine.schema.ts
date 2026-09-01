@@ -9,11 +9,11 @@ export const AiDoctrineTypeSchema = z.enum([
 ]);
 
 export const AiDoctrineWeightsSchema = z.object({
-  armsImportRatio: z.number().min(0).max(1),
-  machineryImportRatio: z.number().min(0).max(1).default(0.3),
-  researchFocusWeight: z.number().min(0).max(1),
-  developmentPriority: z.number().min(0).max(1),
-  peacetimeArmyCap: z.number().min(0).max(1),
+  innovationWeight: z.number().min(0).max(1).default(0.25),
+  globalMarketWeight: z.number().min(0).max(1).default(0.35),
+  domesticInfraWeight: z.number().min(0).max(1).default(0.25),
+  geopoliticsWeight: z.number().min(0).max(1).default(0.15),
+  peacetimeArmyCap: z.number().min(0).max(1).default(0.7),
 });
 
 export const NationDoctrineProfileSchema = z.object({
