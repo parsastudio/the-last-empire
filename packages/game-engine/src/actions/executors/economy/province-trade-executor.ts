@@ -4,10 +4,16 @@ import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
-import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
+import {
+  getProvinceGdp,
+  getNationGdp,
+} from "@/domain/nation/gdp-calculator.utility";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
-import { NationGettersUtility } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  DebtCalculatorUtility,
+} from "@geopolitics/domain";
 
 export class ProvinceTradeExecutor {
   public static execute(
@@ -97,7 +103,13 @@ export class ProvinceTradeExecutor {
       ? canonicalTargetId
       : seller.id;
 
-    const provinceGdp = getProvinceGdp(province);
+    const totalSellerGdpBefore = getNationGdp(
+      seller,
+      state.provinces,
+      sellerProvinces,
+    );
+
+    const provinceGdp = getProvinceGdp(province, seller.equipmentTechLevel);
     const multiplier = province.hasSeaAccess ? 0.75 : 0.45;
     const calculatedPrice = Math.max(
       1_000_000_000,
@@ -121,6 +133,12 @@ export class ProvinceTradeExecutor {
         `کشور ${seller.name} به دلیل وضعیت جنگی حاضر به واگذاری این استان نیست.`,
       );
     }
+
+    const debtRelief = DebtCalculatorUtility.calculateProportionalDebtRelief(
+      seller.nationalDebt,
+      provinceGdp,
+      totalSellerGdpBefore,
+    );
 
     const updatedProvinces: Record<string, Province> = {
       ...state.provinces,
@@ -160,6 +178,7 @@ export class ProvinceTradeExecutor {
         [sellerKey]: {
           ...seller,
           treasury: seller.treasury + effectiveCost,
+          nationalDebt: Math.max(0, seller.nationalDebt - debtRelief),
         },
       },
     };

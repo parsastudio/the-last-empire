@@ -4,6 +4,7 @@ import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+import { DebtCalculatorUtility } from "@geopolitics/domain";
 
 export interface BattleDefenderStateInput {
   defender: Nation;
@@ -12,6 +13,8 @@ export interface BattleDefenderStateInput {
   spoilsData?: BattleSpoilsDetails;
   lostFactoriesCount?: number;
   destroyedFactoriesCount?: number;
+  totalDefenderGdpBefore?: number;
+  totalLostGdp?: number;
 }
 
 export class BattleDefenderStateApplier {
@@ -23,6 +26,8 @@ export class BattleDefenderStateApplier {
       spoilsData,
       lostFactoriesCount = 0,
       destroyedFactoriesCount = 0,
+      totalDefenderGdpBefore = 0,
+      totalLostGdp = 0,
     } = input;
     const canonicalAttacker = CountryRegistry.resolveCanonicalId(attackerId);
     const casualties = calcResult.defenderCasualties;
@@ -83,9 +88,18 @@ export class BattleDefenderStateApplier {
       );
     }
 
+    const debtRelief = DebtCalculatorUtility.calculateProportionalDebtRelief(
+      defender.nationalDebt,
+      totalLostGdp,
+      totalDefenderGdpBefore,
+    );
+
+    const nextNationalDebt = Math.max(0, defender.nationalDebt - debtRelief);
+
     return {
       ...defender,
       treasury: nextTreasury,
+      nationalDebt: nextNationalDebt,
       warFocusTargetId: defender.warFocusTargetId || canonicalAttacker,
       relations: updatedRelations,
       factoryTiers: updatedFactoryTiers,
