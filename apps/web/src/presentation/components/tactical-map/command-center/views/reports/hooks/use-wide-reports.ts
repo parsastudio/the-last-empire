@@ -56,6 +56,7 @@ function calculateLogPriority(
     case "ARMS_EXPORT_SUMMARY":
     case "FOREIGN_AID_SENT":
     case "ARMS_TRADE":
+    case "TERRITORY_PURCHASED":
       return isHumanInvolved ? 7 : 11;
 
     case "GENERIC_EVENT":
@@ -115,16 +116,21 @@ export function useWideReports({
         return false;
       }
 
+      const srcCanonical = CountryRegistry.resolveCanonicalId(
+        log.sourceNationId,
+      );
+      const trgCanonical = log.targetNationId
+        ? CountryRegistry.resolveCanonicalId(log.targetNationId)
+        : null;
+
+      const isHumanInvolved =
+        canonicalHuman !== null &&
+        (srcCanonical === canonicalHuman || trgCanonical === canonicalHuman);
+
       if (selectedScope === "NATIONAL") {
         if (!canonicalHuman) {
           return log.scope === "NATIONAL";
         }
-        const srcCanonical = CountryRegistry.resolveCanonicalId(
-          log.sourceNationId,
-        );
-        const trgCanonical = log.targetNationId
-          ? CountryRegistry.resolveCanonicalId(log.targetNationId)
-          : null;
 
         if (log.eventCode === "VICTORY_ACHIEVED") {
           return true;
@@ -144,24 +150,32 @@ export function useWideReports({
 
         if (log.eventCode === "ESPIONAGE_OPERATION") {
           const role = String(log.params?.["role"] || "ATTACKER");
-          if (role === "ATTACKER") {
-            return srcCanonical === canonicalHuman && log.scope === "NATIONAL";
-          }
-          if (role === "DEFENDER") {
-            return srcCanonical === canonicalHuman && log.scope === "NATIONAL";
+          if (role === "ATTACKER" || role === "DEFENDER") {
+            return isHumanInvolved;
           }
           return false;
         }
 
-        const isHumanInvolved =
-          srcCanonical === canonicalHuman || trgCanonical === canonicalHuman;
-        return isHumanInvolved && log.scope === "NATIONAL";
+        if (log.eventCode === "BATTLE_GLOBAL_NEWS") {
+          return false;
+        }
+
+        return isHumanInvolved;
       }
 
       return (
         log.scope === "GLOBAL" ||
         log.eventCode === "COALITION_FORMED" ||
-        log.eventCode === "VICTORY_ACHIEVED"
+        log.eventCode === "VICTORY_ACHIEVED" ||
+        log.eventCode === "WAR_DECLARED" ||
+        log.eventCode === "BATTLE_GLOBAL_NEWS" ||
+        log.eventCode === "NATION_ANNEXED" ||
+        log.eventCode === "NATION_COLLAPSED" ||
+        log.eventCode === "TREATY_ACCEPTED" ||
+        log.eventCode === "TREATY_CANCELLED" ||
+        log.eventCode === "SECURITY_GUARANTEE_SIGNED" ||
+        log.eventCode === "EMERGENCY_PROTECTORATE_SIGNED" ||
+        log.eventCode === "TERRITORY_PURCHASED"
       );
     });
   }, [logs, selectedTurn, selectedScope, canonicalHuman]);
@@ -174,16 +188,38 @@ export function useWideReports({
 
     for (let i = 0; i < activeTurnLogs.length; i++) {
       const log = activeTurnLogs[i]!;
-      if (log.category === "GLOBAL_WAR" || log.category === "MILITARY") {
+      if (
+        log.category === "GLOBAL_WAR" ||
+        log.category === "MILITARY" ||
+        log.eventCode === "BATTLE_TACTICAL_REPORT" ||
+        log.eventCode === "BATTLE_GLOBAL_NEWS" ||
+        log.eventCode === "WAR_DECLARED"
+      ) {
         combatCount++;
       }
-      if (log.category === "DIPLOMACY" || log.category === "GLOBAL_DIPLOMACY") {
+      if (
+        log.category === "DIPLOMACY" ||
+        log.category === "GLOBAL_DIPLOMACY" ||
+        log.eventCode === "TREATY_ACCEPTED" ||
+        log.eventCode === "TREATY_REJECTED" ||
+        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT" ||
+        log.eventCode === "TERRITORY_PURCHASED"
+      ) {
         diplomacyCount++;
       }
-      if (log.category === "ESPIONAGE") {
+      if (
+        log.category === "ESPIONAGE" ||
+        log.eventCode === "ESPIONAGE_OPERATION"
+      ) {
         espionageCount++;
       }
-      if (log.level === "CRITICAL" || log.level === "COMBAT") {
+      if (
+        log.level === "CRITICAL" ||
+        log.level === "COMBAT" ||
+        log.eventCode === "NATION_ANNEXED" ||
+        log.eventCode === "NATION_COLLAPSED" ||
+        log.eventCode === "COALITION_FORMED"
+      ) {
         criticalCount++;
       }
     }
