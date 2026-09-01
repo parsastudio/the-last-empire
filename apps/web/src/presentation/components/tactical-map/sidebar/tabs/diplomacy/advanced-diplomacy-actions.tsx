@@ -1,6 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Binary } from "lucide-react";
-import { DiplomaticStance, Province, Nation } from "@geopolitics/domain";
+import {
+  DiplomaticStance,
+  Province,
+  Nation,
+  CountryRegistry,
+} from "@geopolitics/domain";
 import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
 import { DiplomaticFeedbackModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 import { TreatyStatusBanner } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/treaty-status-banner";
@@ -49,6 +54,13 @@ export function AdvancedDiplomacyActions({
     targetNation,
   });
 
+  const isAidSentThisTurn = useMemo(() => {
+    if (!clientNation) return false;
+    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNationId);
+    const list = clientNation.sentAidTargetIdsThisTurn || [];
+    return list.includes(canonicalTarget) || list.includes(targetNationId);
+  }, [clientNation, targetNationId]);
+
   return (
     <>
       <div className="space-y-4 dir-rtl text-right font-sans">
@@ -74,6 +86,7 @@ export function AdvancedDiplomacyActions({
               emergencyProtectorateCost={runner.emergencyProtectorateCost}
               hasSecurityGuarantee={hasSecurityGuarantee}
               isEmergencyProtectorate={isEmergencyProtectorate}
+              isAidSentThisTurn={isAidSentThisTurn}
               guaranteeValidation={runner.guaranteeValidation}
               emergencyValidation={runner.emergencyValidation}
               onSendAid={runner.handleSendAid}

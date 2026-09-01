@@ -1,5 +1,5 @@
 import React from "react";
-import { HeartHandshake } from "lucide-react";
+import { HeartHandshake, CheckCircle2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
   DiplomaticStance,
@@ -19,6 +19,7 @@ interface DiplomacyActionButtonsProps {
   emergencyProtectorateCost: number;
   hasSecurityGuarantee?: boolean;
   isEmergencyProtectorate?: boolean;
+  isAidSentThisTurn?: boolean;
   guaranteeValidation?: SecurityGuaranteeValidationResult;
   emergencyValidation?: SecurityGuaranteeValidationResult;
   onSendAid: () => void;
@@ -43,6 +44,7 @@ export function DiplomacyActionButtons({
   emergencyProtectorateCost,
   hasSecurityGuarantee = false,
   isEmergencyProtectorate = false,
+  isAidSentThisTurn = false,
   guaranteeValidation,
   emergencyValidation,
   onSendAid,
@@ -87,17 +89,37 @@ export function DiplomacyActionButtons({
       {!isWar && (
         <button
           onClick={onSendAid}
-          className="w-full p-3 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-right transition-all cursor-pointer space-y-1"
+          disabled={isAidSentThisTurn}
+          className={`w-full p-3 rounded-2xl border text-right transition-all space-y-1 ${
+            isAidSentThisTurn
+              ? "bg-secondary/40 border-border/60 text-muted-foreground cursor-not-allowed opacity-75"
+              : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-500 cursor-pointer shadow-sm"
+          }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-500">
-              ارسال کمک مالی و دیپلماتیک (
-              {PersianNumberFormatter.formatCurrency(foreignAidCost)})
+            <span className="text-xs font-bold flex items-center gap-1.5">
+              {isAidSentThisTurn ? (
+                <>
+                  <CheckCircle2 size={14} className="text-emerald-400" />
+                  <span className="text-foreground">
+                    بسته کمک مالی در این نوبت واریز شد
+                  </span>
+                </>
+              ) : (
+                `ارسال کمک مالی و دیپلماتیک (${PersianNumberFormatter.formatCurrency(foreignAidCost)})`
+              )}
             </span>
-            <HeartHandshake size={14} className="text-amber-500" />
+            <HeartHandshake
+              size={14}
+              className={
+                isAidSentThisTurn ? "text-muted-foreground" : "text-amber-500"
+              }
+            />
           </div>
-          <p className="text-[10px] text-muted-foreground">
-            بهبود فوری ۲۵+ همسویی و تسهیل پذیرش گام‌های ارتقای روابط
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            {isAidSentThisTurn
+              ? "سهمیه کمک مالی به این کشور در نوبت جاری تکمیل شده است (امکان ارسال مجدد در نوبت بعد)."
+              : "بهبود فوری ۲۵+ همسویی و ۱۵- تنش دوجانبه (۱+ اعتبار جهانی)."}
           </p>
         </button>
       )}

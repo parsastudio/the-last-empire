@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
-import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 
@@ -15,11 +15,25 @@ export class ForeignAidExecutor {
     canonicalTargetId: string,
     canonicalSourceId: string,
   ): { newState: GameState; resultData: unknown } {
+    const prevSentAidList = nation.sentAidTargetIdsThisTurn || [];
+    if (
+      prevSentAidList.includes(canonicalTargetId) ||
+      prevSentAidList.includes(receiver.id)
+    ) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `بسته کمک مالی به کشور ${receiver.name} در این نوبت قبلاً ارسال شده است. ارسال مجدد در نوبت بعد امکان‌پذیر خواهد بود.`,
+      );
+    }
+
     const targetGdp = getNationGdp(receiver, state.provinces);
     const costDeduction = TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
     if (nation.treasury < costDeduction) {
-      return { newState: state, resultData: undefined };
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "موجودی خزانه برای ارسال بسته کمک مالی کافی نیست.",
+      );
     }
 
     const updatedReceiverRel = {
@@ -48,6 +62,10 @@ export class ForeignAidExecutor {
       ),
     ];
 
+    const updatedSentList = Array.from(
+      new Set([...prevSentAidList, canonicalTargetId, receiver.id]),
+    );
+
     const newState = {
       ...state,
       turnLogs: [...state.turnLogs, ...aidLogs],
@@ -57,6 +75,7 @@ export class ForeignAidExecutor {
           ...nation,
           treasury: Math.max(0, nation.treasury - costDeduction),
           globalReputation: Math.min(100, nation.globalReputation + 1),
+          sentAidTargetIdsThisTurn: updatedSentList,
           relations: {
             ...nation.relations,
             [senderTargetKey]: updatedSenderRel,
