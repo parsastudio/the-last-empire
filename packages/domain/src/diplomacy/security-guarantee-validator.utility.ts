@@ -56,7 +56,7 @@ export class SecurityGuaranteeValidator {
     const isNotWar = stance !== "WAR";
 
     if (isEmergency) {
-      const isGdpValid = gdpRatio >= 2.0;
+      const isGdpValid = gdpRatio >= 1.0;
       const isTensionValid = tension < 50;
 
       let reason: string | undefined = undefined;
@@ -66,7 +66,7 @@ export class SecurityGuaranteeValidator {
       } else if (!isTensionValid) {
         reason = "تنش با ابرقدرت حامی باید کمتر از ۵۰٪ باشد.";
       } else if (!isGdpValid) {
-        reason = "GDP ابرقدرت حامی باید حداقل ۲ برابر کشور شما باشد.";
+        reason = "GDP ابرقدرت حامی باید حداقل برابر کشور شما باشد.";
       } else if (!isTechValid) {
         reason = "سطح فناوری نظامی ابرقدرت حامی باید بالاتر از شما باشد.";
       }
@@ -87,7 +87,7 @@ export class SecurityGuaranteeValidator {
       };
     }
 
-    const isGdpValid = gdpRatio >= 2.0 && gdpRatio <= 10.0;
+    const isGdpValid = gdpRatio >= 1.0 && gdpRatio <= 10.0;
     const isTensionValid = tension < 35;
 
     let reason: string | undefined = undefined;
@@ -97,8 +97,8 @@ export class SecurityGuaranteeValidator {
     } else if (!isTensionValid) {
       reason = "تنش دیپلماتیک باید کمتر از ۳۵٪ باشد.";
     } else if (!isGdpValid) {
-      if (gdpRatio < 2.0) {
-        reason = "GDP کشور ضامن باید حداقل ۲ برابر کشور شما باشد.";
+      if (gdpRatio < 1.0) {
+        reason = "GDP کشور ضامن باید حداقل برابر کشور شما باشد.";
       } else {
         reason = "GDP کشور ضامن نباید بیش از ۱۰ برابر کشور شما باشد.";
       }

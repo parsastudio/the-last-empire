@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import {
   Skull,
-  ShieldAlert,
   Coins,
   CheckCircle2,
   XCircle,
@@ -215,13 +214,6 @@ export function EmergencyProtectorateModal({
           </div>
         </div>
 
-        {!validation.isValid && validation.reason && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-2 text-xs text-rose-300">
-            <ShieldAlert size={15} className="shrink-0 text-rose-400" />
-            <span>عدم امکان انعقاد معاهده: {validation.reason}</span>
-          </div>
-        )}
-
         <div className="pt-2">
           <button
             onClick={handleSign}
@@ -238,7 +230,7 @@ export function EmergencyProtectorateModal({
                 ? "در حال ثبت معاهده و استقرار ارتش حامی..."
                 : validation.isValid
                   ? `امضای معاهده تحت‌الحمایگی با ${targetName}`
-                  : "شروط معاهده احراز نگردیده است"}
+                  : "عدم امکان امضای معاهده"}
             </span>
           </button>
         </div>

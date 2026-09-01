@@ -7,6 +7,7 @@ import { PeaceCapitulationBuilder } from "@/domain/diplomacy/peace/peace-capitul
 import { PeaceWhitePeaceBuilder } from "@/domain/diplomacy/peace/peace-white-peace-builder";
 import { PeaceConcessionBuilder } from "@/domain/diplomacy/peace/peace-concession-builder";
 import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export class PeaceConcessionResolverUtility {
   public static resolveTerms(
@@ -61,10 +62,20 @@ export class PeaceConcessionResolverUtility {
     }
 
     if (ratio <= 0.5) {
-      const isHopeless =
-        allAiProvinces.length <= 2 || aiNation.government.stability <= 20;
+      const canonicalAi = CountryRegistry.resolveCanonicalId(aiNation.id);
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
 
-      if (isHopeless) {
+      const hasLostProvinceToOpponent = provincesMap
+        ? Object.values(provincesMap).some((p) => {
+            const owner = CountryRegistry.resolveCanonicalId(p.ownerNationId);
+            const original = CountryRegistry.resolveCanonicalId(
+              p.originalNationId || p.ownerNationId,
+            );
+            return owner === canonicalHuman && original === canonicalAi;
+          })
+        : false;
+
+      if (hasLostProvinceToOpponent) {
         return PeaceCapitulationBuilder.build(
           aiNation,
           humanNation,
