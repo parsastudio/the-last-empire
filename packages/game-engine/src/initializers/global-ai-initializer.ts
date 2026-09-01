@@ -119,6 +119,7 @@ export class GlobalAiInitializer {
           population: provPop,
           maxSlots: dist.maxSlots,
           factoriesCount: dist.activeCount,
+          factoryTiers: [{ techLevel: equipTech, count: dist.activeCount }],
         };
       }
 

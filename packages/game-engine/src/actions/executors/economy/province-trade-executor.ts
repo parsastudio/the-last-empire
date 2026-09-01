@@ -151,6 +151,26 @@ export class ProvinceTradeExecutor {
 
     BitPackedGridState.getInstance().markDirty();
 
+    const updatedBuyerBatches = NationGettersUtility.getNationFactoryTiers(
+      nation.id,
+      updatedProvinces,
+    );
+    const updatedBuyerEquipTech = NationGettersUtility.getNationEquipmentTech(
+      nation.id,
+      updatedProvinces,
+      nation.industrialLevel,
+    );
+
+    const updatedSellerBatches = NationGettersUtility.getNationFactoryTiers(
+      seller.id,
+      updatedProvinces,
+    );
+    const updatedSellerEquipTech = NationGettersUtility.getNationEquipmentTech(
+      seller.id,
+      updatedProvinces,
+      seller.industrialLevel,
+    );
+
     const buyLogs = [
       TurnLogBuilder.createGlobalDiplomacyLog(
         state.currentTurn,
@@ -174,11 +194,15 @@ export class ProvinceTradeExecutor {
         [buyerKey]: {
           ...nation,
           treasury: nation.treasury - effectiveCost,
+          factoryTiers: updatedBuyerBatches,
+          equipmentTechLevel: updatedBuyerEquipTech,
         },
         [sellerKey]: {
           ...seller,
           treasury: seller.treasury + effectiveCost,
           nationalDebt: Math.max(0, seller.nationalDebt - debtRelief),
+          factoryTiers: updatedSellerBatches,
+          equipmentTechLevel: updatedSellerEquipTech,
         },
       },
     };

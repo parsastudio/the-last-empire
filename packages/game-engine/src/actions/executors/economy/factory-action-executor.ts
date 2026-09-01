@@ -4,6 +4,7 @@ import { Province } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+import { NationGettersUtility } from "@geopolitics/domain";
 import {
   BuildFactoryAction,
   EquipDomesticMachineryAction,
@@ -12,21 +13,6 @@ import {
 } from "@/domain/game/action.schema";
 
 export class FactoryActionExecutor {
-  private static resolveCurrentBatches(
-    nation: Nation,
-    totalProvincesFactories: number,
-  ) {
-    if (nation.factoryTiers && nation.factoryTiers.length > 0) {
-      return nation.factoryTiers;
-    }
-    return [
-      {
-        techLevel: nation.equipmentTechLevel,
-        count: totalProvincesFactories,
-      },
-    ];
-  }
-
   public static executeBuildFactory(
     state: GameState,
     action: BuildFactoryAction,
@@ -109,21 +95,21 @@ export class FactoryActionExecutor {
     const updatedProvinces: Record<string, Province> = { ...state.provinces };
     for (const [pId, added] of distribution.entries()) {
       const p = updatedProvinces[pId.toString()]!;
+      const nextTiers = IndustryCalculator.addFactories(
+        p.factoryTiers,
+        added,
+        nation.industrialLevel,
+      );
       updatedProvinces[pId.toString()] = {
         ...p,
         factoriesCount: p.factoriesCount + added,
+        factoryTiers: nextTiers,
       };
     }
 
-    const totalBefore = nation.factoryTiers.reduce(
-      (sum, b) => sum + b.count,
-      0,
-    );
-    const currentBatches = this.resolveCurrentBatches(nation, totalBefore);
-    const updatedBatches = IndustryCalculator.addFactories(
-      currentBatches,
-      quantity,
-      nation.industrialLevel,
+    const updatedBatches = NationGettersUtility.getNationFactoryTiers(
+      nation.id,
+      updatedProvinces,
     );
     const newAverageEquipTech = IndustryCalculator.calculateWeightedAverageTech(
       updatedBatches,
@@ -151,10 +137,19 @@ export class FactoryActionExecutor {
     nation: Nation,
     buyerKey: string,
   ): GameState {
-    const totalFactories = nation.factoryTiers.reduce(
-      (sum, b) => sum + b.count,
-      0,
+    const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
+    const ownedProvinces = Object.values(state.provinces).filter(
+      (p) =>
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalNation,
     );
+
+    const nationalBatches = NationGettersUtility.getNationFactoryTiers(
+      nation.id,
+      state.provinces,
+      ownedProvinces,
+    );
+
+    const totalFactories = nationalBatches.reduce((sum, b) => sum + b.count, 0);
 
     if (totalFactories <= 0) {
       throw new GameError(
@@ -185,11 +180,45 @@ export class FactoryActionExecutor {
       );
     }
 
-    const currentBatches = this.resolveCurrentBatches(nation, totalFactories);
-    const updatedBatches = IndustryCalculator.upgradeLowestFactories(
-      currentBatches,
-      qty,
-      targetTech,
+    let remainingToUpgrade = qty;
+    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+
+    const sortedProvinces = [...ownedProvinces].sort((a, b) => {
+      const minTechA = a.factoryTiers.length
+        ? Math.min(...a.factoryTiers.map((t) => t.techLevel))
+        : 1.0;
+      const minTechB = b.factoryTiers.length
+        ? Math.min(...b.factoryTiers.map((t) => t.techLevel))
+        : 1.0;
+      return minTechA - minTechB;
+    });
+
+    for (let i = 0; i < sortedProvinces.length && remainingToUpgrade > 0; i++) {
+      const p = sortedProvinces[i]!;
+      const upgradableInProv = p.factoryTiers
+        .filter((t) => t.techLevel < targetTech)
+        .reduce((sum, t) => sum + t.count, 0);
+
+      if (upgradableInProv <= 0) continue;
+
+      const takeCount = Math.min(upgradableInProv, remainingToUpgrade);
+      const nextTiers = IndustryCalculator.upgradeLowestFactories(
+        p.factoryTiers,
+        takeCount,
+        targetTech,
+      );
+
+      updatedProvinces[p.provinceId.toString()] = {
+        ...p,
+        factoryTiers: nextTiers,
+      };
+
+      remainingToUpgrade -= takeCount;
+    }
+
+    const updatedBatches = NationGettersUtility.getNationFactoryTiers(
+      nation.id,
+      updatedProvinces,
     );
     const newEquipTech = IndustryCalculator.calculateWeightedAverageTech(
       updatedBatches,
@@ -198,6 +227,7 @@ export class FactoryActionExecutor {
 
     return {
       ...state,
+      provinces: updatedProvinces,
       nations: {
         ...state.nations,
         [buyerKey]: {
@@ -279,7 +309,19 @@ export class FactoryActionExecutor {
       );
     }
 
-    const totalBuyerFactories = buyer.factoryTiers.reduce(
+    const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
+    const ownedProvinces = Object.values(state.provinces).filter(
+      (p) =>
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalBuyer,
+    );
+
+    const nationalBatches = NationGettersUtility.getNationFactoryTiers(
+      buyer.id,
+      state.provinces,
+      ownedProvinces,
+    );
+
+    const totalBuyerFactories = nationalBatches.reduce(
       (sum, b) => sum + b.count,
       0,
     );
@@ -292,14 +334,10 @@ export class FactoryActionExecutor {
     }
 
     const qty = Math.min(totalBuyerFactories, action.quantity);
-    const currentBatches = this.resolveCurrentBatches(
-      buyer,
-      totalBuyerFactories,
-    );
 
     let totalCost = 0;
     let remainingToUpgrade = qty;
-    const consolidated = IndustryCalculator.consolidateBatches(currentBatches);
+    const consolidated = IndustryCalculator.consolidateBatches(nationalBatches);
 
     for (let i = 0; i < consolidated.length; i++) {
       const batch = consolidated[i]!;
@@ -321,10 +359,49 @@ export class FactoryActionExecutor {
       );
     }
 
-    const updatedBatches = IndustryCalculator.upgradeLowestFactories(
-      currentBatches,
-      qty,
-      sellerTech,
+    let provRemainingToUpgrade = qty;
+    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+
+    const sortedProvinces = [...ownedProvinces].sort((a, b) => {
+      const minTechA = a.factoryTiers.length
+        ? Math.min(...a.factoryTiers.map((t) => t.techLevel))
+        : 1.0;
+      const minTechB = b.factoryTiers.length
+        ? Math.min(...b.factoryTiers.map((t) => t.techLevel))
+        : 1.0;
+      return minTechA - minTechB;
+    });
+
+    for (
+      let i = 0;
+      i < sortedProvinces.length && provRemainingToUpgrade > 0;
+      i++
+    ) {
+      const p = sortedProvinces[i]!;
+      const upgradableInProv = p.factoryTiers
+        .filter((t) => t.techLevel < sellerTech)
+        .reduce((sum, t) => sum + t.count, 0);
+
+      if (upgradableInProv <= 0) continue;
+
+      const takeCount = Math.min(upgradableInProv, provRemainingToUpgrade);
+      const nextTiers = IndustryCalculator.upgradeLowestFactories(
+        p.factoryTiers,
+        takeCount,
+        sellerTech,
+      );
+
+      updatedProvinces[p.provinceId.toString()] = {
+        ...p,
+        factoryTiers: nextTiers,
+      };
+
+      provRemainingToUpgrade -= takeCount;
+    }
+
+    const updatedBatches = NationGettersUtility.getNationFactoryTiers(
+      buyer.id,
+      updatedProvinces,
     );
     const newEquipTech = IndustryCalculator.calculateWeightedAverageTech(
       updatedBatches,
@@ -337,6 +414,7 @@ export class FactoryActionExecutor {
 
     return {
       ...state,
+      provinces: updatedProvinces,
       nations: {
         ...state.nations,
         [buyerKey]: {

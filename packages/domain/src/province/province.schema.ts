@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FactoryBatchSchema } from "@/domain/economy/factory-batch.schema";
 
 export const ProvinceSchema = z.object({
   provinceId: z.number().positive(),
@@ -17,6 +18,7 @@ export const ProvinceSchema = z.object({
   population: z.number().nonnegative().default(1000000),
   maxSlots: z.number().nonnegative().default(1),
   factoriesCount: z.number().nonnegative().default(1),
+  factoryTiers: z.array(FactoryBatchSchema).default([]),
 });
 
 export type Province = z.infer<typeof ProvinceSchema>;

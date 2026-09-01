@@ -79,10 +79,18 @@ export class ProvinceConquestHandler {
           );
           conqueredFactoriesCount = survivingFactories;
 
+          const remainingTiers = targetProv.factoryTiers
+            ? targetProv.factoryTiers.map((t) => ({
+                ...t,
+                count: Math.floor(t.count * 0.8),
+              }))
+            : [];
+
           const conqueredProv: Province = {
             ...targetProv,
             ownerNationId: cleanAttackerId,
             factoriesCount: survivingFactories,
+            factoryTiers: remainingTiers,
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
           conqueredPixels = targetProv.pixelCount;
