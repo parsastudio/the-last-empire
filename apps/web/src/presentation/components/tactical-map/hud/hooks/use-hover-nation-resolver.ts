@@ -89,15 +89,29 @@ export function useHoverNationResolver({
           else if (stance === "NON_AGGRESSION_PACT") stanceLabel = "عدم تخاصم";
           else stanceLabel = "دیپلماسی عادی";
 
-          hasSecurityGuarantee =
-            (Boolean(humanNation?.securityGuarantorId) &&
-              CountryRegistry.resolveCanonicalId(
-                humanNation?.securityGuarantorId,
-              ) === canonicalOwnerId) ||
-            (Boolean(ownerNation.securityGuarantorId) &&
-              CountryRegistry.resolveCanonicalId(
-                ownerNation.securityGuarantorId,
-              ) === canonicalHuman);
+          const isGuarantorOfHuman =
+            Boolean(humanNation?.securityGuarantorId) &&
+            CountryRegistry.resolveCanonicalId(
+              humanNation?.securityGuarantorId,
+            ) === canonicalOwnerId;
+
+          const isHumanGuarantorOfTarget =
+            Boolean(ownerNation.securityGuarantorId) &&
+            CountryRegistry.resolveCanonicalId(
+              ownerNation.securityGuarantorId,
+            ) === canonicalHuman;
+
+          if (isGuarantorOfHuman) {
+            stanceLabel = humanNation?.isEmergencyProtectorate
+              ? "تحت‌الحمایگی استعماری"
+              : "تحت چتر امنیتی";
+            hasSecurityGuarantee = true;
+          } else if (isHumanGuarantorOfTarget) {
+            stanceLabel = ownerNation.isEmergencyProtectorate
+              ? "کشور تحت‌الحمایه شما"
+              : "تحت حمایت شما";
+            hasSecurityGuarantee = true;
+          }
         }
       }
 

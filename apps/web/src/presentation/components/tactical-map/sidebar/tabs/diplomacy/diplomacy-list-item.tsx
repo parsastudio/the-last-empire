@@ -44,6 +44,8 @@ export function DiplomacyListItem({
           <DiplomaticStanceBadge
             stance={relation.stance}
             posture={relation.posture}
+            hasSecurityGuarantee={relation.hasSecurityGuarantee}
+            isEmergencyProtectorate={relation.isEmergencyProtectorate}
           />
         </div>
       </div>

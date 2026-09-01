@@ -37,6 +37,7 @@ export interface DiplomaticRelation {
   posture: DiplomaticPosture;
   postureLabel: string;
   hasSecurityGuarantee: boolean;
+  isEmergencyProtectorate: boolean;
   profileData: CountryProfileData;
 }
 
@@ -83,6 +84,7 @@ export function resolveProfileRelation(
   let tension = 10;
   let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
   let hasSecurityGuarantee = false;
+  let isEmergencyProtectorate = false;
 
   if (humanNation && liveNation && humanNation.id !== liveNation.id) {
     const directRel =
@@ -102,10 +104,18 @@ export function resolveProfileRelation(
     posture = vector.posture;
 
     const targetCanonical = CountryRegistry.resolveCanonicalId(liveNation.id);
-    hasSecurityGuarantee =
+    const isGuarantorOfHuman =
       Boolean(humanNation.securityGuarantorId) &&
       CountryRegistry.resolveCanonicalId(humanNation.securityGuarantorId) ===
         targetCanonical;
+
+    if (isGuarantorOfHuman) {
+      if (humanNation.isEmergencyProtectorate) {
+        isEmergencyProtectorate = true;
+      } else {
+        hasSecurityGuarantee = true;
+      }
+    }
   }
 
   const guarantorNation =
@@ -130,6 +140,7 @@ export function resolveProfileRelation(
     posture,
     postureLabel: getPostureLabel(posture),
     hasSecurityGuarantee,
+    isEmergencyProtectorate,
     profileData: {
       gdp: PersianNumberFormatter.formatCurrency(realGdpNum, true),
       population: NationPresentationMapper.formatPopulation(realPopNum),
@@ -141,6 +152,7 @@ export function resolveProfileRelation(
       stability: liveNation ? liveNation.government.stability : 50,
       tension,
       guarantorName: guarantorNation?.name,
+      isEmergencyProtectorate: Boolean(liveNation?.isEmergencyProtectorate),
       isArmsEligible,
     },
   };
