@@ -65,6 +65,7 @@ export class AIActionBuilder {
     lockedTargets?: Set<string>,
     matrixCache?: GeopoliticalMatrixCache,
     globalCoalition?: GlobalCoalition | null,
+    currentTurn?: number,
   ): GameAction[] {
     const actions: GameAction[] = [];
     let currentNation = nation;
@@ -136,6 +137,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       context.ownedProvinces,
+      currentTurn,
     );
     if (attackAction) {
       actions.push(attackAction);

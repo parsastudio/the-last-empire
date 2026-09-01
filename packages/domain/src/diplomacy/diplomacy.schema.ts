@@ -32,6 +32,7 @@ export const RelationProfileSchema = z.object({
   stance: DiplomaticStanceSchema,
   alignment: z.number().min(-100).max(100).default(0),
   tension: z.number().min(0).max(100).default(10),
+  warDeclaredTurn: z.number().nonnegative().optional(),
 });
 
 export const PendingDiplomaticProposalSchema = z.object({
