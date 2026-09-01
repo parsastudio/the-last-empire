@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
+import { DebtCalculatorUtility } from "@geopolitics/domain";
 
 export class DebtCalculator {
   public static calculateBorrowingCapacity(
@@ -8,12 +9,12 @@ export class DebtCalculator {
     provincesMap?: Record<string, Province>,
   ): number {
     const gdp = getNationGdp(nation, provincesMap);
-    const maxCapacity = Math.floor(gdp * 0.8);
+    const maxCapacity = DebtCalculatorUtility.getMaxDebtLimit(gdp);
     return Math.max(0, maxCapacity - nation.nationalDebt);
   }
 
   public static calculateInterest(debt: number): number {
-    return Math.floor(debt * 0.07);
+    return DebtCalculatorUtility.calculateInterest(debt);
   }
 }
 
@@ -24,7 +25,7 @@ export class BankruptcyManager {
   ): boolean {
     const gdp = getNationGdp(nation, provincesMap);
     if (gdp <= 0) return nation.nationalDebt > 0;
-    return nation.nationalDebt >= gdp;
+    return nation.nationalDebt >= DebtCalculatorUtility.getBankruptcyLimit(gdp);
   }
 
   public applyBankruptcy(

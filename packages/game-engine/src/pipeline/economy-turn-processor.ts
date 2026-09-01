@@ -11,6 +11,7 @@ import {
   NationRelationResolver,
   NationGettersUtility,
   NAVAL_FLEET_CONFIG,
+  DebtCalculatorUtility,
 } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
@@ -99,7 +100,9 @@ export class EconomyTurnProcessor {
       fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesReceived;
 
     const maintenanceCost = payrollBreakdown.total;
-    const debtInterest = Math.floor(nation.nationalDebt * 0.07);
+    const debtInterest = DebtCalculatorUtility.calculateInterest(
+      nation.nationalDebt,
+    );
 
     let actualRepayment = 0;
     let newDebt = nation.nationalDebt;
@@ -118,7 +121,7 @@ export class EconomyTurnProcessor {
 
     if (newTreasury < 0) {
       const deficit = Math.abs(newTreasury);
-      const maxDebtLimit = Math.floor(gdp * 0.8);
+      const maxDebtLimit = DebtCalculatorUtility.getMaxDebtLimit(gdp);
       if (newDebt + deficit > maxDebtLimit && nextSecurityGuarantorId) {
         nextSecurityGuarantorId = null;
         nextIsEmergency = false;

@@ -27,7 +27,7 @@ export class NationalDebtExecutor {
     if (nation.nationalDebt + action.amount > maxManualDebtLimit) {
       throw new GameError(
         "INVALID_ACTION",
-        "سقف مجاز وام دستی (۸۰٪ تولید ناخالص داخلی) تکمیل شده است.",
+        "سقف مجاز وام دستی (۳۰٪ تولید ناخالص داخلی) تکمیل شده است.",
       );
     }
     return {

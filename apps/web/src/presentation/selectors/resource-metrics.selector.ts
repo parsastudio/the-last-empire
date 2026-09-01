@@ -4,6 +4,7 @@ import {
   getNationGdp,
   SecurityFeeCalculatorUtility,
   NAVAL_FLEET_CONFIG,
+  DebtCalculatorUtility,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
@@ -125,7 +126,7 @@ export function selectHumanResourceMetrics(
   const totalExpenses =
     payrollBreakdown.total +
     securityFee +
-    Math.floor(nation.nationalDebt * 0.07);
+    DebtCalculatorUtility.calculateInterest(nation.nationalDebt);
   const netIncome = totalGrossIncome - totalExpenses;
 
   return {
