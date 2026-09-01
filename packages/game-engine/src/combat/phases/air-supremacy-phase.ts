@@ -10,6 +10,8 @@ export interface AirSupremacyPhaseInput {
 
 export interface AirSupremacyPhaseOutput {
   rawAttAirLoss: number;
+  attAirLostToDogfight: number;
+  attAirLostToAirDefense: number;
   rawDefAirLoss: number;
   defArmorDestroyedByAir: number;
   defArmorAfterAirRaw: number;
@@ -23,6 +25,8 @@ export class AirSupremacyPhase {
     if (input.deployedAirForce === 0 && input.defAirForce === 0) {
       return {
         rawAttAirLoss: 0,
+        attAirLostToDogfight: 0,
+        attAirLostToAirDefense: 0,
         rawDefAirLoss: 0,
         defArmorDestroyedByAir: 0,
         defArmorAfterAirRaw: input.defArmor,
@@ -87,6 +91,8 @@ export class AirSupremacyPhase {
 
     return {
       rawAttAirLoss,
+      attAirLostToDogfight: dogfightAttAirLoss,
+      attAirLostToAirDefense: adAttAirLoss,
       rawDefAirLoss,
       defArmorDestroyedByAir,
       defArmorAfterAirRaw,

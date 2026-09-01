@@ -26,6 +26,10 @@ export const BattlePhaseReconDetailSchema = z.object({
   airDefenseLost: z.number().nonnegative(),
   dronesIntercepted: z.number().nonnegative(),
   destroyedFactories: z.number().nonnegative().default(0),
+  factoryDestructionScope: z
+    .enum(["OTHER_PROVINCES", "ALL_PROVINCES", "NONE"])
+    .optional()
+    .default("NONE"),
   phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW", "SKIPPED"]),
 });
 
@@ -34,6 +38,8 @@ export const BattlePhaseAirDetailSchema = z.object({
   defAirForce: z.number().nonnegative(),
   attAirLost: z.number().nonnegative(),
   defAirLost: z.number().nonnegative(),
+  attAirLostToDogfight: z.number().nonnegative().default(0),
+  attAirLostToAirDefense: z.number().nonnegative().default(0),
   defArmorDestroyedByAir: z.number().nonnegative(),
   phaseWinner: z.enum(["ATTACKER", "DEFENDER", "DRAW"]),
 });

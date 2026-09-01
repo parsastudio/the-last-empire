@@ -20,6 +20,8 @@ export interface PhaseOrchestrationResult {
   };
   airPhaseOutput: {
     rawAttAirLoss: number;
+    attAirLostToDogfight: number;
+    attAirLostToAirDefense: number;
     rawDefAirLoss: number;
     defArmorDestroyedByAir: number;
   };
@@ -107,6 +109,13 @@ export class BattlePhaseOrchestrator {
       ? "ATTACKER"
       : "DEFENDER";
 
+    const destructionScope =
+      missilePhase.destroyedFactories > 0
+        ? groundPhase.isAttackerVictory
+          ? "OTHER_PROVINCES"
+          : "ALL_PROVINCES"
+        : "NONE";
+
     return {
       phase1Missile: {
         dronesLaunched: deployedDrones,
@@ -114,12 +123,15 @@ export class BattlePhaseOrchestrator {
         airDefenseLost: missilePhase.rawDefAirDefenseLost,
         dronesIntercepted: missilePhase.interceptedMissiles,
         destroyedFactories: missilePhase.destroyedFactories,
+        factoryDestructionScope: destructionScope,
         phaseWinner: phase1Winner,
       },
       phase2Air: {
         attAirForce: deployedAirForce,
         defAirForce,
         attAirLost: airPhase.rawAttAirLoss,
+        attAirLostToDogfight: airPhase.attAirLostToDogfight,
+        attAirLostToAirDefense: airPhase.attAirLostToAirDefense,
         defAirLost: airPhase.rawDefAirLoss,
         defArmorDestroyedByAir: airPhase.defArmorDestroyedByAir,
         phaseWinner: phase2Winner,
