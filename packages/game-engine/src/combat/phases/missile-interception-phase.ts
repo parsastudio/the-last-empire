@@ -30,7 +30,11 @@ export class MissileInterceptionPhase {
     const defAirDefenseEff = input.defAirDefense * input.defAdMult;
 
     if (input.defAirDefense <= 0) {
-      const destroyedFactories = Math.floor(attMissilesEff / 12);
+      const maxPossibleFactories = Math.floor(input.deployedDrones / 12);
+      const destroyedFactories = Math.min(
+        maxPossibleFactories,
+        Math.floor(attMissilesEff / (12 * input.attDroneMult)),
+      );
       return {
         rawDefAirDefenseLost: 0,
         defAirDefenseRemainingRaw: 0,
@@ -41,30 +45,36 @@ export class MissileInterceptionPhase {
     }
 
     const interceptionRate = Math.max(
-      0.15,
+      0.1,
       Math.min(
-        0.85,
+        0.9,
         defAirDefenseEff / (defAirDefenseEff + 0.5 * attMissilesEff),
       ),
     );
 
-    const interceptedMissiles = Math.floor(attMissilesEff * interceptionRate);
-    const leakedMissiles = Math.max(0, attMissilesEff - interceptedMissiles);
+    const rawIntercepted = Math.min(
+      input.deployedDrones,
+      Math.round(input.deployedDrones * interceptionRate),
+    );
+    const rawPenetrated = Math.max(0, input.deployedDrones - rawIntercepted);
+    const penetratingPower = rawPenetrated * input.attDroneMult;
 
-    const missilesNeededToClearAD = input.defAirDefense * 2 * input.defAdMult;
+    const adSuppressionCostPerUnit = 2 * input.defAdMult;
+    const powerNeededToClearAllAD =
+      input.defAirDefense * adSuppressionCostPerUnit;
 
     let rawDefAirDefenseLost = 0;
-    let surplusMissiles = 0;
+    let surplusPenetratingPower = 0;
 
-    if (leakedMissiles <= missilesNeededToClearAD) {
+    if (penetratingPower <= powerNeededToClearAllAD) {
       rawDefAirDefenseLost = Math.min(
         input.defAirDefense,
-        Math.floor(leakedMissiles / (2 * input.defAdMult)),
+        Math.floor(penetratingPower / adSuppressionCostPerUnit),
       );
-      surplusMissiles = 0;
+      surplusPenetratingPower = 0;
     } else {
       rawDefAirDefenseLost = input.defAirDefense;
-      surplusMissiles = leakedMissiles - missilesNeededToClearAD;
+      surplusPenetratingPower = penetratingPower - powerNeededToClearAllAD;
     }
 
     const defAirDefenseRemainingRaw = Math.max(
@@ -74,14 +84,22 @@ export class MissileInterceptionPhase {
     const defAirDefenseRemainingEff =
       defAirDefenseRemainingRaw * input.defAdMult;
 
-    const destroyedFactories = Math.floor(surplusMissiles / 12);
+    const rawSurplusMissiles = Math.max(
+      0,
+      Math.floor(surplusPenetratingPower / Math.max(0.1, input.attDroneMult)),
+    );
+
+    const destroyedFactories = Math.min(
+      Math.floor(input.deployedDrones / 12),
+      Math.floor(rawSurplusMissiles / 12),
+    );
 
     return {
       rawDefAirDefenseLost,
       defAirDefenseRemainingRaw,
       defAirDefenseRemainingEff,
       destroyedFactories,
-      interceptedMissiles,
+      interceptedMissiles: rawIntercepted,
     };
   }
 }

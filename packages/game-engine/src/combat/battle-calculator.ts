@@ -14,6 +14,7 @@ import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver
 import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
 import { BattleLootEvaluator } from "@/engine/combat/calculator/battle-loot-evaluator";
 import { BattlePhaseOrchestrator } from "@/engine/combat/calculator/battle-phase-orchestrator";
+import { MilitaryPowerCalculator } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -70,12 +71,13 @@ export class BattleCalculator {
       CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
 
     const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);
-    const defMults = CombatModifierResolver.resolveAllUnitMultipliers(defender);
+    const nativeDefMults =
+      CombatModifierResolver.resolveAllUnitMultipliers(defender);
 
-    let defAirDefense = defender.military.airDefense || 0;
-    let defAirForce = defender.military.airForce || 0;
-    let defArmor = defender.military.armor || 0;
-    let defInfantry = defender.military.infantry || 0;
+    const nativeDefAirDefense = defender.military.airDefense || 0;
+    const nativeDefAirForce = defender.military.airForce || 0;
+    const nativeDefArmor = defender.military.armor || 0;
+    const nativeDefInfantry = defender.military.infantry || 0;
 
     const guarantorResult =
       GuarantorInterventionCalculator.calculateIntervention(
@@ -85,10 +87,55 @@ export class BattleCalculator {
         guarantorNation,
       );
 
-    defAirForce += guarantorResult.auxAir;
-    defArmor += guarantorResult.auxArm;
-    defAirDefense += guarantorResult.auxAD;
-    defInfantry += guarantorResult.auxInf;
+    const defAirDefense = nativeDefAirDefense + guarantorResult.auxAD;
+    const defAirForce = nativeDefAirForce + guarantorResult.auxAir;
+    const defArmor = nativeDefArmor + guarantorResult.auxArm;
+    const defInfantry = nativeDefInfantry + guarantorResult.auxInf;
+
+    const guarantorTechMult = guarantorNation
+      ? MilitaryPowerCalculator.calculateTechMultiplier(
+          guarantorNation.military.techLevel,
+        )
+      : nativeDefMults.airDefense;
+
+    const blendMultiplier = (
+      nativeCount: number,
+      nativeMult: number,
+      auxCount: number,
+      auxMult: number,
+    ): number => {
+      const total = nativeCount + auxCount;
+      if (total <= 0) return nativeMult;
+      return (nativeCount * nativeMult + auxCount * auxMult) / total;
+    };
+
+    const defMults = {
+      infantry: blendMultiplier(
+        nativeDefInfantry,
+        nativeDefMults.infantry,
+        guarantorResult.auxInf,
+        guarantorTechMult,
+      ),
+      armor: blendMultiplier(
+        nativeDefArmor,
+        nativeDefMults.armor,
+        guarantorResult.auxArm,
+        guarantorTechMult,
+      ),
+      airDefense: blendMultiplier(
+        nativeDefAirDefense,
+        nativeDefMults.airDefense,
+        guarantorResult.auxAD,
+        guarantorTechMult,
+      ),
+      airForce: blendMultiplier(
+        nativeDefAirForce,
+        nativeDefMults.airForce,
+        guarantorResult.auxAir,
+        guarantorTechMult,
+      ),
+      droneMissile: nativeDefMults.droneMissile,
+    };
 
     const targetProv =
       targetProvinceId && provincesMap
@@ -109,7 +156,7 @@ export class BattleCalculator {
       attMults.airForce,
       defMults.airForce,
       attMults.armor,
-      defArmorMults(defMults),
+      defMults.armor,
       attMults.infantry,
       defMults.infantry,
       targetProv?.factoriesCount,
@@ -198,8 +245,4 @@ export class BattleCalculator {
       auxiliaryGuarantor: guarantorResult.auxiliaryGuarantor,
     };
   }
-}
-
-function defArmorMults(defMults: { armor: number }): number {
-  return defMults.armor;
 }

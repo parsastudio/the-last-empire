@@ -10,6 +10,7 @@ import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guar
 import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
 import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
 import { DeploymentStepSearch } from "@/engine/combat/optimizer/deployment-step-search";
+import { MilitaryPowerCalculator } from "@geopolitics/domain";
 
 export interface OptimalDeploymentResult {
   drones: number;
@@ -118,12 +119,13 @@ export class AttackDeploymentOptimizer {
     }
 
     const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);
-    const defMults = CombatModifierResolver.resolveAllUnitMultipliers(defender);
+    const nativeDefMults =
+      CombatModifierResolver.resolveAllUnitMultipliers(defender);
 
-    let defAirDefense = defender.military.airDefense || 0;
-    let defAirForce = defender.military.airForce || 0;
-    let defArmor = defender.military.armor || 0;
-    let defInfantry = defender.military.infantry || 0;
+    const nativeDefAirDefense = defender.military.airDefense || 0;
+    const nativeDefAirForce = defender.military.airForce || 0;
+    const nativeDefArmor = defender.military.armor || 0;
+    const nativeDefInfantry = defender.military.infantry || 0;
 
     const guarantorResult =
       GuarantorInterventionCalculator.calculateIntervention(
@@ -133,10 +135,55 @@ export class AttackDeploymentOptimizer {
         guarantorNation,
       );
 
-    defAirForce += guarantorResult.auxAir;
-    defArmor += guarantorResult.auxArm;
-    defAirDefense += guarantorResult.auxAD;
-    defInfantry += guarantorResult.auxInf;
+    const defAirDefense = nativeDefAirDefense + guarantorResult.auxAD;
+    const defAirForce = nativeDefAirForce + guarantorResult.auxAir;
+    const defArmor = nativeDefArmor + guarantorResult.auxArm;
+    const defInfantry = nativeDefInfantry + guarantorResult.auxInf;
+
+    const guarantorTechMult = guarantorNation
+      ? MilitaryPowerCalculator.calculateTechMultiplier(
+          guarantorNation.military.techLevel,
+        )
+      : nativeDefMults.airDefense;
+
+    const blendMultiplier = (
+      nativeCount: number,
+      nativeMult: number,
+      auxCount: number,
+      auxMult: number,
+    ): number => {
+      const total = nativeCount + auxCount;
+      if (total <= 0) return nativeMult;
+      return (nativeCount * nativeMult + auxCount * auxMult) / total;
+    };
+
+    const defMults = {
+      infantry: blendMultiplier(
+        nativeDefInfantry,
+        nativeDefMults.infantry,
+        guarantorResult.auxInf,
+        guarantorTechMult,
+      ),
+      armor: blendMultiplier(
+        nativeDefArmor,
+        nativeDefMults.armor,
+        guarantorResult.auxArm,
+        guarantorTechMult,
+      ),
+      airDefense: blendMultiplier(
+        nativeDefAirDefense,
+        nativeDefMults.airDefense,
+        guarantorResult.auxAD,
+        guarantorTechMult,
+      ),
+      airForce: blendMultiplier(
+        nativeDefAirForce,
+        nativeDefMults.airForce,
+        guarantorResult.auxAir,
+        guarantorTechMult,
+      ),
+      droneMissile: nativeDefMults.droneMissile,
+    };
 
     const optimalDrones = this.calculateOptimalDrones(
       maxDrone,
@@ -156,7 +203,7 @@ export class AttackDeploymentOptimizer {
       maxAir,
       defAirForce,
       defArmor,
-      attMults.airForce,
+      attAirMults(attMults),
       defMults.airForce,
       defMults.armor,
       missilePhaseResult.defAirDefenseRemainingRaw,
@@ -290,4 +337,8 @@ export class AttackDeploymentOptimizer {
 
     return optimal;
   }
+}
+
+function attAirMults(attMults: { airForce: number }): number {
+  return attMults.airForce;
 }
