@@ -52,17 +52,8 @@ export function useAttackForecastCalculator({
       targetProvinceId,
     );
 
-    const winProbability = Math.min(
-      100,
-      Math.max(
-        0,
-        Math.round(
-          (calcResult.valuationRatio / (calcResult.valuationRatio + 1)) * 100,
-        ),
-      ),
-    );
-
     const isVictoryPredicted = calcResult.isAttackerVictory;
+    const winProbability = isVictoryPredicted ? 100 : 0;
     const isCapitulationPredicted = calcResult.valuationRatio >= 3.0;
 
     let phase1Prediction = "عملیات پرتاب موشک انجام نشد";

@@ -8,83 +8,89 @@ export interface OptimizedForces {
 }
 
 export class DeploymentStepSearch {
-  public static optimize(
-    initialInf: number,
-    initialArmor: number,
-    initialAir: number,
-    initialDrones: number,
+  public static findMinimalGroundForces(
+    drones: number,
+    airForce: number,
+    maxArmor: number,
+    maxInfantry: number,
     testBattle: (
       d: number,
       inf: number,
       arm: number,
       af: number,
     ) => BattleCalculationResult,
-  ): OptimizedForces {
-    let infantry = initialInf;
-    let armor = initialArmor;
-    let air = initialAir;
-    let drones = initialDrones;
+  ): { infantry: number; armor: number; isVictory: boolean } {
+    let lowArmor = 0;
+    let highArmor = maxArmor;
+    let bestArmor = maxArmor;
+    let bestInfantry = maxInfantry;
+    let foundVictory = false;
 
-    const isSafeVictory = (d: number, inf: number, arm: number, af: number) => {
-      const result = testBattle(d, inf, arm, af);
-      const survivingInfantry =
-        result.phase3Ground.attInfantry - result.phase3Ground.attInfantryLost;
-      return (
-        result.isAttackerVictory &&
-        survivingInfantry >= 1 &&
-        result.attackerCasualties.infantryLost < inf
+    for (
+      let arm = 0;
+      arm <= maxArmor;
+      arm = arm === 0 ? 1 : arm < 10 ? arm + 1 : arm + Math.ceil(arm * 0.2)
+    ) {
+      const inf = this.findMinimalInfantryForArmor(
+        drones,
+        airForce,
+        arm,
+        maxInfantry,
+        testBattle,
       );
-    };
 
-    let step = Math.max(1, Math.floor(infantry * 0.1));
-    while (step >= 1) {
-      while (
-        infantry - step >= 1 &&
-        isSafeVictory(drones, infantry - step, armor, air)
-      ) {
-        infantry -= step;
+      if (inf !== null) {
+        bestArmor = arm;
+        bestInfantry = inf;
+        foundVictory = true;
+        break;
       }
-      step = Math.floor(step / 2);
     }
 
-    let armStep = Math.max(1, Math.floor(armor * 0.1));
-    while (armStep >= 1) {
-      while (
-        armor - armStep >= 0 &&
-        isSafeVictory(drones, infantry, armor - armStep, air)
-      ) {
-        armor -= armStep;
+    if (!foundVictory) {
+      const maxTest = testBattle(drones, maxInfantry, maxArmor, airForce);
+      if (maxTest.isAttackerVictory) {
+        bestArmor = maxArmor;
+        bestInfantry = maxInfantry;
+        foundVictory = true;
       }
-      armStep = Math.floor(armStep / 2);
-    }
-
-    let airStep = Math.max(1, Math.floor(air * 0.1));
-    while (airStep >= 1) {
-      while (
-        air - airStep >= 0 &&
-        isSafeVictory(drones, infantry, armor, air - airStep)
-      ) {
-        air -= airStep;
-      }
-      airStep = Math.floor(airStep / 2);
-    }
-
-    let droneStep = Math.max(1, Math.floor(drones * 0.1));
-    while (droneStep >= 1) {
-      while (
-        drones - droneStep >= 0 &&
-        isSafeVictory(drones - droneStep, infantry, armor, air)
-      ) {
-        drones -= droneStep;
-      }
-      droneStep = Math.floor(droneStep / 2);
     }
 
     return {
-      infantry,
-      armor,
-      airForce: air,
-      drones,
+      armor: bestArmor,
+      infantry: bestInfantry,
+      isVictory: foundVictory,
     };
+  }
+
+  private static findMinimalInfantryForArmor(
+    drones: number,
+    airForce: number,
+    armor: number,
+    maxInfantry: number,
+    testBattle: (
+      d: number,
+      inf: number,
+      arm: number,
+      af: number,
+    ) => BattleCalculationResult,
+  ): number | null {
+    let low = 1;
+    let high = maxInfantry;
+    let result: number | null = null;
+
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const battleRes = testBattle(drones, mid, armor, airForce);
+
+      if (battleRes.isAttackerVictory) {
+        result = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return result;
   }
 }

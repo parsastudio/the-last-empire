@@ -7,13 +7,13 @@ export class AttackForecastVisualUtility {
   public static resolveProbabilityStyle(
     winProbability: number,
   ): ForecastProbabilityStyle {
-    if (winProbability >= 75) {
+    if (winProbability >= 100) {
       return {
         textColorClass: "text-gdp",
         bgClass: "bg-gdp/15 border-gdp/30",
       };
     }
-    if (winProbability >= 50) {
+    if (winProbability > 0) {
       return {
         textColorClass: "text-treasury",
         bgClass: "bg-treasury/15 border-treasury/30",
