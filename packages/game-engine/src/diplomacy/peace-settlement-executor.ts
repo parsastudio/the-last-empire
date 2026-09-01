@@ -39,6 +39,20 @@ export class PeaceSettlementExecutor {
     const canonicalSource = CountryRegistry.resolveCanonicalId(sourceNation.id);
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
 
+    const rel =
+      sourceNation.relations[canonicalTarget] ||
+      sourceNation.relations[targetNation.id];
+
+    if (
+      rel?.warDeclaredTurn !== undefined &&
+      state.currentTurn <= rel.warDeclaredTurn
+    ) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "امکان امضای معاهده صلح در همان نوبت آغاز جنگ وجود ندارد (باید حداقل یک نوبت بگذرد).",
+      );
+    }
+
     const humanCanonical = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
@@ -57,7 +71,15 @@ export class PeaceSettlementExecutor {
       aiNation,
       state.nations,
       state.provinces,
+      state.currentTurn,
     );
+
+    if (!terms.canAffordTerms) {
+      throw new GameError(
+        "INVALID_ACTION",
+        terms.description || "شروط معاهده صلح در حال حاضر قابل اجرا نیست.",
+      );
+    }
 
     let updatedProvinces: Record<string, Province> = { ...state.provinces };
     let updatedNations: Record<string, Nation> = { ...state.nations };

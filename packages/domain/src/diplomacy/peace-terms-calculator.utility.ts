@@ -22,6 +22,7 @@ export class PeaceTermsCalculator {
     aiNation: Nation,
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    currentTurn?: number,
   ): PeaceTermsPackage {
     const humanTwmi = TwmiCalculatorUtility.calculateTwmi(
       humanNation,
@@ -40,6 +41,7 @@ export class PeaceTermsCalculator {
       humanTwmi,
       aiTwmi,
       provincesMap,
+      currentTurn,
     );
   }
 }

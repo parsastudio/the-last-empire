@@ -16,6 +16,7 @@ export class AIPeaceEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
     globalCoalition?: GlobalCoalition | null,
+    currentTurn?: number,
   ): GameAction | null {
     if (!nation.relations) return null;
 
@@ -23,6 +24,14 @@ export class AIPeaceEvaluator {
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (rel.stance !== "WAR") continue;
+
+      if (
+        currentTurn !== undefined &&
+        rel.warDeclaredTurn !== undefined &&
+        currentTurn <= rel.warDeclaredTurn
+      ) {
+        continue;
+      }
 
       if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
         continue;
