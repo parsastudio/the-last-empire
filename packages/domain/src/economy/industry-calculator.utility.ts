@@ -5,7 +5,7 @@ export class IndustryCalculator {
   public static readonly SUBSISTENCE_YIELD = 0;
   public static readonly YIELD_TECH_BASE = 2.0;
   public static readonly FACTORY_REBUILD_COST = 30_000_000_000;
-  public static readonly RESEARCH_BASE_COST = 25_000_000_000;
+  public static readonly RESEARCH_BASE_COST = 200_000_000_000;
   public static readonly RESEARCH_GROWTH_BASE = 2.5;
   public static readonly RESEARCH_STEP = 0.1;
   public static readonly MACHINERY_BASE_UNIT_PRICE = 10_000_000_000;

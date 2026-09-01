@@ -43,8 +43,6 @@ export function WidePoliticsView({
           nationId={nation.id}
           treasury={nation.treasury}
           techLevel={nation.military.techLevel}
-          gdp={gdp}
-          provincesMap={provincesMap}
         />
 
         <ImfLoanCard

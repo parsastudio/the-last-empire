@@ -4,9 +4,9 @@ import {
   Nation,
   UnitType,
   MilitaryPricingCalculator,
+  UnitBudgetQuota,
 } from "@geopolitics/domain";
 import { AIArmsSellerMatcher } from "@/engine/ai/procurement/ai-arms-seller-matcher";
-import { UnitBudgetQuota } from "@geopolitics/domain";
 
 export interface ArmsImportPlanResult {
   actions: GameAction[];
@@ -17,6 +17,23 @@ export interface ArmsImportPlanResult {
 }
 
 export class AIArmsImportPlanner {
+  public static readonly MAX_IMPORT_SELLERS = 10;
+
+  private static calculateDecayWeights(count: number): number[] {
+    if (count <= 0) return [];
+    if (count === 1) return [1.0];
+
+    const rawWeights = new Array<number>(count);
+    let sum = 0;
+    for (let i = 0; i < count; i++) {
+      const w = Math.pow(11 - (i + 1), 1.4);
+      rawWeights[i] = w;
+      sum += w;
+    }
+
+    return rawWeights.map((w) => w / (sum || 1));
+  }
+
   public static planImports(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -26,15 +43,20 @@ export class AIArmsImportPlanner {
     unitTypes: UnitType[],
   ): ArmsImportPlanResult {
     const actions: GameAction[] = [];
-    let targetImportBudget = initialImportBudget;
-    let globalRemainingValuation = initialGlobalValuation;
-    let spentMoney = 0;
-    let spentValuation = 0;
+    if (initialImportBudget <= 0 || initialGlobalValuation <= 0) {
+      return {
+        actions,
+        spentMoney: 0,
+        spentValuation: 0,
+        remainingImportBudget: 0,
+        remainingGlobalValuation: initialGlobalValuation,
+      };
+    }
 
     const eligibleSellers = AIArmsSellerMatcher.findEligibleArmsSellers(
       nation,
       allNations,
-    );
+    ).slice(0, this.MAX_IMPORT_SELLERS);
 
     if (eligibleSellers.length === 0) {
       return {
@@ -42,53 +64,69 @@ export class AIArmsImportPlanner {
         spentMoney: 0,
         spentValuation: 0,
         remainingImportBudget: 0,
-        remainingGlobalValuation: globalRemainingValuation,
+        remainingGlobalValuation: initialGlobalValuation,
       };
     }
 
-    const bestSeller = eligibleSellers[0]!;
+    const weights = this.calculateDecayWeights(eligibleSellers.length);
+    let globalRemainingValuation = initialGlobalValuation;
+    let spentMoney = 0;
+    let spentValuation = 0;
 
-    for (let i = 0; i < unitTypes.length; i++) {
-      const type = unitTypes[i]!;
-      const q = quotas[type];
-      if (!q || q.remainingRoom <= 0 || targetImportBudget <= 0) continue;
+    for (let sIdx = 0; sIdx < eligibleSellers.length; sIdx++) {
+      const seller = eligibleSellers[sIdx]!;
+      const sellerWeight = weights[sIdx] || 0;
+      let sellerBudget = Math.floor(initialImportBudget * sellerWeight);
 
-      const unitPrice = MilitaryPricingCalculator.calculateArmsImportUnitPrice(
-        type,
-        nation.military.techLevel,
-        bestSeller.military.techLevel,
-      );
+      if (sellerBudget <= 0 || globalRemainingValuation <= 0) continue;
 
-      const maxUnitsByMoney = Math.floor(targetImportBudget / unitPrice);
-      const baseUnitPrice =
-        MilitaryPricingCalculator.calculateUnitTypePrice(type);
-      const maxUnitsByValuation = Math.floor(
-        globalRemainingValuation / baseUnitPrice,
-      );
-      const allowedUnits = Math.min(
-        q.remainingRoom,
-        maxUnitsByMoney,
-        maxUnitsByValuation,
-      );
+      for (let i = 0; i < unitTypes.length; i++) {
+        const type = unitTypes[i]!;
+        const q = quotas[type];
+        if (!q || q.remainingRoom <= 0 || sellerBudget <= 0) continue;
 
-      if (allowedUnits > 0) {
-        const cost = allowedUnits * unitPrice;
-        const valuationCost = allowedUnits * baseUnitPrice;
-
-        actions.push(
-          ActionFactory.buyArmsMarket(
-            nation.id,
-            bestSeller.id,
+        const unitPrice =
+          MilitaryPricingCalculator.calculateArmsImportUnitPrice(
             type,
-            allowedUnits,
-          ),
+            nation.military.techLevel,
+            seller.military.techLevel,
+          );
+
+        if (unitPrice <= 0) continue;
+
+        const maxUnitsByMoney = Math.floor(sellerBudget / unitPrice);
+        const baseUnitPrice =
+          MilitaryPricingCalculator.calculateUnitTypePrice(type);
+        const maxUnitsByValuation =
+          baseUnitPrice > 0
+            ? Math.floor(globalRemainingValuation / baseUnitPrice)
+            : 0;
+
+        const allowedUnits = Math.min(
+          q.remainingRoom,
+          maxUnitsByMoney,
+          maxUnitsByValuation,
         );
 
-        targetImportBudget -= cost;
-        spentMoney += cost;
-        spentValuation += valuationCost;
-        globalRemainingValuation -= valuationCost;
-        q.remainingRoom -= allowedUnits;
+        if (allowedUnits > 0) {
+          const cost = allowedUnits * unitPrice;
+          const valuationCost = allowedUnits * baseUnitPrice;
+
+          actions.push(
+            ActionFactory.buyArmsMarket(
+              nation.id,
+              seller.id,
+              type,
+              allowedUnits,
+            ),
+          );
+
+          sellerBudget -= cost;
+          spentMoney += cost;
+          spentValuation += valuationCost;
+          globalRemainingValuation -= valuationCost;
+          q.remainingRoom -= allowedUnits;
+        }
       }
     }
 
@@ -96,8 +134,8 @@ export class AIArmsImportPlanner {
       actions,
       spentMoney,
       spentValuation,
-      remainingImportBudget: targetImportBudget,
-      remainingGlobalValuation: globalRemainingValuation,
+      remainingImportBudget: Math.max(0, initialImportBudget - spentMoney),
+      remainingGlobalValuation,
     };
   }
 }

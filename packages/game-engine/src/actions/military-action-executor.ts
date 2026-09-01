@@ -17,6 +17,7 @@ export interface MilitaryExecutionOutput {
 
 export class MilitaryActionExecutor {
   private static battleEngine = new BattleExecutionEngine();
+  private static researchManager = new ResearchManager();
 
   public static execute(
     state: GameState,
@@ -84,8 +85,7 @@ export class MilitaryActionExecutor {
 
       case "INVEST_RESEARCH": {
         const cost = ResearchManager.getMilitaryTechCost(
-          nation,
-          state.provinces,
+          nation.military.techLevel,
         );
         if (nation.treasury < cost) {
           throw new GameError(
@@ -98,10 +98,7 @@ export class MilitaryActionExecutor {
             ...state,
             nations: {
               ...state.nations,
-              [sourceKey]: new ResearchManager().investInMilitaryTech(
-                nation,
-                state.provinces,
-              ),
+              [sourceKey]: this.researchManager.investInMilitaryTech(nation),
             },
           },
         };

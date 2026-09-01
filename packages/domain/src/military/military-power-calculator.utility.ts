@@ -7,9 +7,11 @@ export interface MilitaryPowerTarget {
 }
 
 export class MilitaryPowerCalculator {
+  public static readonly POWER_GROWTH_BASE = 2.2;
+
   public static calculateTechMultiplier(techLevel: number): number {
-    const safeTech = Math.max(1, techLevel || 1);
-    return 1 + (safeTech - 1) * 0.5;
+    const safeTech = Math.max(1.0, techLevel || 1.0);
+    return Math.pow(this.POWER_GROWTH_BASE, safeTech - 1.0);
   }
 
   public static calculateUnitTypePower(
