@@ -1,5 +1,5 @@
 import React from "react";
-import { Radio, ShieldAlert, Binary, Award, Users } from "lucide-react";
+import { ShieldAlert, Binary, Award, Users } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -105,21 +105,6 @@ export function WideEspionageView({
 
               <div className="grid grid-cols-1 gap-3.5">
                 <EspionageTierCard
-                  tier={1}
-                  title="شنود ماهواره‌ای و کشف زرادخانه (Strategic Recon)"
-                  subtitle="نفوذ سیگنالی و آشکارسازی فوری ترکیب تمام یگان‌های ارتش، پدافند موشکی و موجودی واقعی خزانه کشور هدف (۴٪ GDP)."
-                  icon={Radio}
-                  iconColorClass="text-primary"
-                  borderColorClass="border-primary/40"
-                  cost={form.tier1Cost}
-                  successRate={1.0}
-                  isExecutedThisTurn={form.isTierExecuted(1)}
-                  canAfford={nation.treasury >= form.tier1Cost}
-                  isExecuting={form.isSubmitting}
-                  onExecute={() => form.handleExecute(1)}
-                />
-
-                <EspionageTierCard
                   tier={2}
                   title="خرابکاری در پایگاه‌های تسلیحاتی و پدافند (Defense Sabotage)"
                   subtitle="انفجار و از کار انداختن مستقیم ۲۰٪ تا ۳۰٪ از سامانه‌های پدافند هوایی، تانک‌ها و جنگنده‌های آماده رزم حریف قبل از آغاز حمله نظامی شما (۱۸٪ GDP)."
@@ -164,8 +149,8 @@ export function WideEspionageView({
                   مرکز مانیتورینگ سرویس اطلاعات و جاسوسی
                 </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed font-sans">
-                  برای آغاز عملیات شنود، خرابکاری در پدافند یا سرقت فناوری، یک
-                  کشور را از ستون کناری انتخاب فرمایید.
+                  برای آغاز عملیات خرابکاری در پدافند یا سرقت فناوری، یک کشور را
+                  از ستون کناری انتخاب فرمایید.
                 </p>
               </div>
             </div>

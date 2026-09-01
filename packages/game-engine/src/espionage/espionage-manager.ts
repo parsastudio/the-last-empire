@@ -209,19 +209,44 @@ export class EspionageManager {
 
     const newLogs: TurnLogEntry[] = [];
 
-    const attackerLog = TurnLogBuilder.createNationalLog(
-      state.currentTurn,
-      source.id,
-      "ESPIONAGE",
-      outcome === "CRITICAL_FAILURE" ? "WARNING" : "INFO",
-      "ESPIONAGE_OPERATION",
-      { details: message, tier, outcome, role: "ATTACKER" },
-      target.id,
-    );
-    newLogs.push(attackerLog);
+    if (tier !== 1) {
+      const attackerLog = TurnLogBuilder.createNationalLog(
+        state.currentTurn,
+        source.id,
+        "ESPIONAGE",
+        outcome === "CRITICAL_FAILURE" ? "WARNING" : "INFO",
+        "ESPIONAGE_OPERATION",
+        { details: message, tier, outcome, role: "ATTACKER" },
+        target.id,
+      );
+      newLogs.push(attackerLog);
 
-    if (outcome === "CLEAN_SUCCESS") {
-      if (tier === 2) {
+      if (outcome === "CLEAN_SUCCESS") {
+        if (tier === 2) {
+          const defenderLog = TurnLogBuilder.createNationalLog(
+            state.currentTurn,
+            target.id,
+            "ESPIONAGE",
+            "CRITICAL",
+            "ESPIONAGE_OPERATION",
+            {
+              details:
+                "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید (منشأ خرابکاری نامشخص).",
+              tier,
+              outcome,
+              role: "DEFENDER",
+            },
+          );
+          newLogs.push(defenderLog);
+        }
+      } else if (outcome === "CRITICAL_FAILURE") {
+        let defenderMsg = "";
+        if (tier === 2) {
+          defenderMsg = `پیروزی امنیتی: عملیات خرابکاری در پایگاه‌های نظامی توسط ضدجاسوسی کشف و تیم نفوذی وابسته به ${source.name} متلاشی شد.`;
+        } else {
+          defenderMsg = `دفاع سایبری: تلاش نفوذگران وابسته به ${source.name} برای دسترسی به سرورهای محرمانه و سرقت فناوری کشف و دفع گردید.`;
+        }
+
         const defenderLog = TurnLogBuilder.createNationalLog(
           state.currentTurn,
           target.id,
@@ -229,38 +254,15 @@ export class EspionageManager {
           "CRITICAL",
           "ESPIONAGE_OPERATION",
           {
-            details:
-              "هشدار امنیتی: انفجارهای زنجیره‌ای مشکوک در پایگاه‌های تسلیحاتی کشور رخ داد و بخشی از ادوات منهدم گردید (منشأ خرابکاری نامشخص).",
+            details: defenderMsg,
             tier,
             outcome,
             role: "DEFENDER",
           },
+          source.id,
         );
         newLogs.push(defenderLog);
       }
-    } else if (outcome === "CRITICAL_FAILURE") {
-      let defenderMsg = "";
-      if (tier === 2) {
-        defenderMsg = `پیروزی امنیتی: عملیات خرابکاری در پایگاه‌های نظامی توسط ضدجاسوسی کشف و تیم نفوذی وابسته به ${source.name} متلاشی شد.`;
-      } else {
-        defenderMsg = `دفاع سایبری: تلاش نفوذگران وابسته به ${source.name} برای دسترسی به سرورهای محرمانه و سرقت فناوری کشف و دفع گردید.`;
-      }
-
-      const defenderLog = TurnLogBuilder.createNationalLog(
-        state.currentTurn,
-        target.id,
-        "ESPIONAGE",
-        "CRITICAL",
-        "ESPIONAGE_OPERATION",
-        {
-          details: defenderMsg,
-          tier,
-          outcome,
-          role: "DEFENDER",
-        },
-        source.id,
-      );
-      newLogs.push(defenderLog);
     }
 
     const updatedNations = {
