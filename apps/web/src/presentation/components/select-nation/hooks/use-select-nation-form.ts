@@ -9,14 +9,7 @@ import {
   FinalMapManifest,
 } from "@/presentation/components/select-nation/services/bit-packed-init-service";
 import { useGameStore } from "@/presentation/stores/use-game-store";
-import {
-  CountryRegistry,
-  ClientMapPathResolver,
-  NationGettersUtility,
-  NationRankCandidateInput,
-  getProvinceGdp,
-  IndustryCalculator,
-} from "@geopolitics/domain";
+import { CountryRegistry, ClientMapPathResolver } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(
@@ -26,135 +19,77 @@ function mapManifestToNationDetails(
     ? manifest.nations
     : CountryRegistry.getAllManifestNations();
 
-  const provincesByCountry = new Map<string, typeof manifest.provinces>();
-  if (manifest?.provinces) {
-    for (let i = 0; i < manifest.provinces.length; i++) {
-      const p = manifest.provinces[i]!;
-      const canonicalOwner = CountryRegistry.resolveCanonicalId(p.countryId);
-      let list = provincesByCountry.get(canonicalOwner);
-      if (!list) {
-        list = [];
-        provincesByCountry.set(canonicalOwner, list);
-      }
-      list.push(p);
-    }
-  }
+  if (!manifestItems || manifestItems.length === 0) {
+    const profiles = CountryRegistry.getAllProfiles();
+    return profiles.map((p, idx) => {
+      const gdp = p.gdp || 50_000_000_000;
+      const pop = p.population || 10_000_000;
+      const treasury = Math.floor(gdp * 0.05);
+      const rank = idx + 1;
+      const gov = p.startingGovernment || "PLURALIST_PARLIAMENTARY";
 
-  const computedNationStats = new Map<
-    string,
-    {
-      actualGdp: number;
-      actualPopulation: number;
-      startingTreasury: number;
-      domesticTechLevel: number;
-      equipmentTechLevel: number;
-    }
-  >();
-
-  const candidatesInput: NationRankCandidateInput[] = manifestItems.map(
-    (item) => {
-      const canonicalId = CountryRegistry.resolveCanonicalId(
-        item.code || item.id,
+      const summary = NationPresentationMapper.formatNationSummary(
+        p.code,
+        p.nameFa,
+        p.code,
+        p.flagCode,
+        rank,
+        gdp,
+        pop,
+        gov,
+        treasury,
       );
-      const profile = CountryRegistry.getCountry(canonicalId);
-      const provList = provincesByCountry.get(canonicalId) || [];
-
-      const domesticTechLevel =
-        profile?.domesticTechLevel ??
-        item.startingTechLevel ??
-        profile?.startingTechLevel ??
-        1.0;
-      const equipmentTechLevel =
-        item.equipmentTechLevel ??
-        profile?.equipmentTechLevel ??
-        domesticTechLevel;
-
-      let actualGdp = 0;
-      let actualPopulation = 0;
-
-      if (provList.length > 0) {
-        for (let p = 0; p < provList.length; p++) {
-          const prov = provList[p]!;
-          actualGdp += getProvinceGdp(prov, equipmentTechLevel);
-          actualPopulation += prov.population || 0;
-        }
-      } else {
-        const defaultTotalFactories =
-          IndustryCalculator.calculateStartingTotalFactories(
-            item.gdp,
-            equipmentTechLevel,
-          );
-        actualGdp =
-          defaultTotalFactories *
-          IndustryCalculator.calculateFactoryYield(equipmentTechLevel);
-        actualPopulation = item.population;
-      }
-
-      const startingTreasury =
-        item.startingTreasury ?? Math.floor(actualGdp * 0.05);
-
-      computedNationStats.set(canonicalId, {
-        actualGdp,
-        actualPopulation,
-        startingTreasury,
-        domesticTechLevel,
-        equipmentTechLevel,
-      });
 
       return {
-        id: canonicalId,
-        name: item.nameFa,
-        gdp: actualGdp,
-        population: actualPopulation,
-        domesticTechLevel,
-        equipmentTechLevel,
-        governmentType: item.defaultGovernment,
-        stability: item.startingStability ?? 50,
-        globalReputation: 50,
-        navalFleet: item.hasSeaAccess && domesticTechLevel > 4.5 ? 3 : 0,
+        id: p.code,
+        name: summary.name,
+        code: summary.code,
+        rank: summary.rank,
+        power: summary.powerLabel,
+        gdp: summary.gdpText,
+        population: summary.populationText,
+        treasury: summary.treasuryText,
+        desc: `شناسنامه استراتژیک رسمی ${p.nameFa} با رتبه جهانی #${rank}.`,
+        defaultGovernment: gov,
       };
-    },
+    });
+  }
+
+  const sortedItems = [...manifestItems].sort(
+    (a, b) => (a.initialRank || 999) - (b.initialRank || 999),
   );
-
-  const rankMap =
-    NationGettersUtility.calculateRankMapFromCandidates(candidatesInput);
-
-  const sortedItems = [...manifestItems].sort((a, b) => {
-    const cA = CountryRegistry.resolveCanonicalId(a.code || a.id);
-    const cB = CountryRegistry.resolveCanonicalId(b.code || b.id);
-    const rankA = rankMap.get(cA) ?? 999;
-    const rankB = rankMap.get(cB) ?? 999;
-    return rankA - rankB;
-  });
 
   return sortedItems.map((item) => {
     const canonicalId = CountryRegistry.resolveCanonicalId(
       item.code || item.id,
     );
-    const computedRank = rankMap.get(canonicalId) ?? item.initialRank;
-    const stats = computedNationStats.get(canonicalId) || {
-      actualGdp: item.gdp,
-      actualPopulation: item.population,
-      startingTreasury: item.startingTreasury ?? Math.floor(item.gdp * 0.05),
-      domesticTechLevel: item.startingTechLevel ?? 1,
-      equipmentTechLevel:
-        item.equipmentTechLevel ?? item.startingTechLevel ?? 1,
-    };
+    const profile = CountryRegistry.getCountry(canonicalId);
+
+    const gdp = item.gdp ?? profile?.gdp ?? 50_000_000_000;
+    const population = item.population ?? profile?.population ?? 10_000_000;
+    const treasury =
+      item.startingTreasury ??
+      (profile?.gdp ? Math.floor(gdp * 0.05) : Math.floor(gdp * 0.05));
+    const rank = item.initialRank || 1;
+    const gov =
+      item.defaultGovernment ||
+      profile?.startingGovernment ||
+      "PLURALIST_PARLIAMENTARY";
 
     const summary = NationPresentationMapper.formatNationSummary(
-      item.id,
-      item.nameFa,
-      item.code,
-      item.flagCode,
-      computedRank,
-      stats.actualGdp,
-      stats.actualPopulation,
-      item.defaultGovernment,
-      stats.startingTreasury,
+      canonicalId,
+      item.nameFa || profile?.nameFa || canonicalId,
+      item.code || canonicalId,
+      item.flagCode || profile?.flagCode || canonicalId,
+      rank,
+      gdp,
+      population,
+      gov,
+      treasury,
     );
 
     return {
-      id: item.id,
+      id: canonicalId,
       name: summary.name,
       code: summary.code,
       rank: summary.rank,
@@ -162,8 +97,8 @@ function mapManifestToNationDetails(
       gdp: summary.gdpText,
       population: summary.populationText,
       treasury: summary.treasuryText,
-      desc: `شناسنامه استراتژیک رسمی ${item.nameFa} با رتبه جهانی #${computedRank}.`,
-      defaultGovernment: item.defaultGovernment,
+      desc: `شناسنامه استراتژیک رسمی ${summary.name} با رتبه جهانی #${rank}.`,
+      defaultGovernment: gov,
     };
   });
 }
