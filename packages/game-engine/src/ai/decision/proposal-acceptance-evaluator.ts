@@ -27,6 +27,7 @@ export class ProposalAcceptanceEvaluator {
     vector: GeopoliticalVector,
     globalCoalition?: GlobalCoalition | null,
     provincesMap?: Record<string, Province>,
+    currentTurn?: number,
   ): AcceptanceEvaluation {
     const reasons: DecisionReasonItem[] = [];
 
@@ -119,6 +120,27 @@ export class ProposalAcceptanceEvaluator {
       }
 
       case "PEACE_TREATY": {
+        const canonicalSender = CountryRegistry.resolveCanonicalId(sender.id);
+        const rel =
+          receiver.relations[canonicalSender] || receiver.relations[sender.id];
+
+        if (
+          currentTurn !== undefined &&
+          rel?.warDeclaredTurn !== undefined &&
+          currentTurn <= rel.warDeclaredTurn
+        ) {
+          return {
+            willAccept: false,
+            score: -1000,
+            reasons: [
+              {
+                label: "ممنوعیت توقف جنگ در نوبت اول آغاز مخاصمه",
+                value: -1000,
+              },
+            ],
+          };
+        }
+
         reasons.push({ label: "مقاومت اولیه در جبهه نبرد", value: -50 });
 
         if (receiver.government.stability < 30) {

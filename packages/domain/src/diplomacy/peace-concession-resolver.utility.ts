@@ -16,8 +16,42 @@ export class PeaceConcessionResolverUtility {
     humanTwmi: number,
     aiTwmi: number,
     provincesMap?: Record<string, Province>,
+    currentTurn?: number,
   ): PeaceTermsPackage {
-    const ratio = Number((aiTwmi / humanTwmi).toFixed(2));
+    const ratio = Number((aiTwmi / Math.max(1, humanTwmi)).toFixed(2));
+    const canonicalAi = CountryRegistry.resolveCanonicalId(aiNation.id);
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
+
+    const rel =
+      humanNation.relations[canonicalAi] ||
+      humanNation.relations[aiNation.id] ||
+      aiNation.relations[canonicalHuman] ||
+      aiNation.relations[humanNation.id];
+
+    const warDeclaredTurn = rel?.warDeclaredTurn;
+    const turnsAtWar =
+      warDeclaredTurn !== undefined && currentTurn !== undefined
+        ? currentTurn - warDeclaredTurn
+        : 1;
+
+    if (turnsAtWar < 1) {
+      return {
+        sourceNationId: aiNation.id,
+        targetNationId: humanNation.id,
+        settlementType: "WHITE_PEACE",
+        ratio,
+        sourceTwmi: aiTwmi,
+        targetTwmi: humanTwmi,
+        isAiOffering: false,
+        moneyAmount: 0,
+        concededProvinceIds: [],
+        concededProvincesNames: [],
+        headline: "ممنوعیت پایان جنگ در نوبت اول",
+        description:
+          "به دلیل آغاز جنگ در نوبت جاری، تا سپری شدن حداقل یک نوبت کامل امکان هیچ‌گونه مذاکره صلح یا تسلیم وجود ندارد.",
+        canAffordTerms: false,
+      };
+    }
 
     const allAiProvinces = NationGettersUtility.getOwnedProvinces(
       aiNation.id,
@@ -48,6 +82,16 @@ export class PeaceConcessionResolverUtility {
         ),
     );
 
+    const hasLostProvinceToOpponent = provincesMap
+      ? Object.values(provincesMap).some((p) => {
+          const owner = CountryRegistry.resolveCanonicalId(p.ownerNationId);
+          const original = CountryRegistry.resolveCanonicalId(
+            p.originalNationId || p.ownerNationId,
+          );
+          return owner === canonicalHuman && original === canonicalAi;
+        })
+      : false;
+
     if (ratio >= 2.0) {
       return PeaceConcessionBuilder.buildHeavyAiAdvantage(
         aiNation,
@@ -62,19 +106,6 @@ export class PeaceConcessionResolverUtility {
     }
 
     if (ratio <= 0.5) {
-      const canonicalAi = CountryRegistry.resolveCanonicalId(aiNation.id);
-      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
-
-      const hasLostProvinceToOpponent = provincesMap
-        ? Object.values(provincesMap).some((p) => {
-            const owner = CountryRegistry.resolveCanonicalId(p.ownerNationId);
-            const original = CountryRegistry.resolveCanonicalId(
-              p.originalNationId || p.ownerNationId,
-            );
-            return owner === canonicalHuman && original === canonicalAi;
-          })
-        : false;
-
       if (hasLostProvinceToOpponent) {
         return PeaceCapitulationBuilder.build(
           aiNation,
