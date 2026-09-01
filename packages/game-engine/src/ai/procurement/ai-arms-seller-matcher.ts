@@ -24,7 +24,11 @@ export class AIArmsSellerMatcher {
       const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
       const tension = rel ? (rel.tension ?? 10) : 10;
 
-      if (stance !== "WAR" && tension < 50) {
+      if (
+        stance !== "WAR" &&
+        tension < 50 &&
+        seller.military.techLevel > buyer.military.techLevel
+      ) {
         sellers.push(seller);
       }
     }

@@ -84,18 +84,12 @@ export function AlliedUnitBuyGrid({
         <div className="flex items-center gap-2 text-muted-foreground font-sans text-[11px]">
           <Info size={14} className="text-primary shrink-0" />
           <span>
-            {techDelta > 0 ? (
-              <>
-                اختلاف فناوری با شما:{" "}
-                <strong className="text-amber-400 font-mono">
-                  +{PersianNumberFormatter.toPersianDigits(techDelta)}
-                </strong>{" "}
-                سطح (به ازای هر ۰.۱ اختلاف، ۵٪ افزایش قیمت بر مبنای نرخ پایه
-                اعمال شده است).
-              </>
-            ) : (
-              "سطح فناوری این کشور برابر یا پایین‌تر از شماست (خرید با قیمت پایه بومی)."
-            )}
+            برتری فناوری دفاعی صادرکننده:{" "}
+            <strong className="text-amber-400 font-mono">
+              +{PersianNumberFormatter.toPersianDigits(techDelta)}
+            </strong>{" "}
+            سطح بالاتر (به ازای هر ۰.۱ اختلاف سطح، ۵٪ افزایش قیمت نسبت به نرخ
+            پایه اعمال شده است).
           </span>
         </div>
 

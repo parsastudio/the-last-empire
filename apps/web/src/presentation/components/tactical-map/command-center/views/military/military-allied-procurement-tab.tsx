@@ -49,7 +49,11 @@ export function MilitaryAlliedProcurementTab({
         const rel = nation.relations[canonical] || nation.relations[n.id];
         const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
         const tension = rel ? (rel.tension ?? 10) : 10;
-        return stance !== "WAR" && tension < 50;
+        return (
+          stance !== "WAR" &&
+          tension < 50 &&
+          n.military.techLevel > nation.military.techLevel
+        );
       })
       .map((n) => {
         const canonical = CountryRegistry.resolveCanonicalId(n.id);
@@ -70,7 +74,13 @@ export function MilitaryAlliedProcurementTab({
         if (b.techLevel !== a.techLevel) return b.techLevel - a.techLevel;
         return a.rank - b.rank;
       });
-  }, [nationsMap, provincesMap, nation.id, nation.relations]);
+  }, [
+    nationsMap,
+    provincesMap,
+    nation.id,
+    nation.relations,
+    nation.military.techLevel,
+  ]);
 
   const filteredSellers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -106,11 +116,11 @@ export function MilitaryAlliedProcurementTab({
       <div className="p-12 bg-secondary/30 border border-border/60 rounded-3xl space-y-3 text-center dir-rtl animate-fade-smooth">
         <Users size={36} className="text-muted-foreground mx-auto" />
         <h3 className="text-sm font-black text-foreground">
-          هیچ کشوری برای معامله تسلیحاتی در دسترس نیست
+          هیچ کشوری با فناوری نظامی بالاتر در دسترس نیست
         </h3>
         <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed font-sans">
-          برای خرید تسلیحات خارجی، نباید با کشور صادرکننده در حال جنگ باشید و
-          تنش امنیتی متقابل باید زیر ۵۰٪ باشد.
+          برای واردات تسلیحات، کشور صادرکننده باید سطح فناوری دفاعی بالاتری نسبت
+          به شما داشته باشد، در وضعیت جنگ نباشد و تنش امنیتی زیر ۵۰٪ باشد.
         </p>
       </div>
     );
@@ -123,7 +133,7 @@ export function MilitaryAlliedProcurementTab({
           <ShoppingCart size={16} className="text-amber-500" />
           <div>
             <h3 className="text-xs font-black text-foreground">
-              فهرست کشورهای هم‌پیمان و صادرکنندگان مجاز
+              فهرست کشورهای هم‌پیمان با فناوری پیشرفته‌تر
             </h3>
             <span className="text-[10px] text-muted-foreground">
               روی هر کشور کلیک کنید تا زرادخانه آن باز شود (قیمت‌گذاری بر اساس

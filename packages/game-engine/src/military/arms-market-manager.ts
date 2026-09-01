@@ -34,6 +34,13 @@ export class ArmsMarketManager {
       throw new GameError("NATION_NOT_FOUND", "کشور فروشنده یافت نشد.");
     }
 
+    if (seller.military.techLevel <= buyer.military.techLevel) {
+      throw new GameError(
+        "INVALID_ACTION",
+        `سطح فناوری نظامی کشور ${seller.name} (${seller.military.techLevel.toFixed(1)}) از فناوری نظامی شما (${buyer.military.techLevel.toFixed(1)}) بالاتر نیست.`,
+      );
+    }
+
     const unitStat = MILITARY_UNIT_STATS[unitType];
 
     const rel =
