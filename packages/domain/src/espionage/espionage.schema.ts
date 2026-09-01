@@ -46,7 +46,8 @@ export const EspionageSabotageDataSchema = z.object({
 });
 
 export const EspionageTechTheftDataSchema = z.object({
-  militaryTechGained: z.number().nonnegative(),
+  militaryTechGained: z.number().nonnegative().default(0),
+  industrialTechGained: z.number().nonnegative().default(0),
   totalPointsGained: z.number().nonnegative(),
 });
 

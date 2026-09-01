@@ -10,6 +10,7 @@ export const AiDoctrineTypeSchema = z.enum([
 
 export const AiDoctrineWeightsSchema = z.object({
   armsImportRatio: z.number().min(0).max(1),
+  machineryImportRatio: z.number().min(0).max(1).default(0.3),
   researchFocusWeight: z.number().min(0).max(1),
   developmentPriority: z.number().min(0).max(1),
   peacetimeArmyCap: z.number().min(0).max(1),

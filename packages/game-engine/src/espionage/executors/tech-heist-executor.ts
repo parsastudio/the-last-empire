@@ -30,25 +30,47 @@ export class TechHeistExecutor {
       };
     }
 
-    const gMil = EspionageCalculator.TECH_HEIST_GAIN;
-    const newTechLevel = Number((source.military.techLevel + gMil).toFixed(1));
+    const milGain = superiority.militaryGain;
+    const indGain = superiority.industrialGain;
 
-    const updatedMilitary = MilitaryInventoryHelper.syncBranchTechOnUpgrade(
-      source.military,
-      newTechLevel,
-    );
+    let updatedMilitary = source.military;
+    if (milGain > 0) {
+      const newMilTech = Number(
+        (source.military.techLevel + milGain).toFixed(1),
+      );
+      updatedMilitary = MilitaryInventoryHelper.syncBranchTechOnUpgrade(
+        source.military,
+        newMilTech,
+      );
+    }
+
+    let updatedIndustrialLevel = source.industrialLevel;
+    if (indGain > 0) {
+      updatedIndustrialLevel = Number(
+        (source.industrialLevel + indGain).toFixed(1),
+      );
+    }
 
     const updatedSource: Nation = {
       ...source,
       military: updatedMilitary,
+      industrialLevel: updatedIndustrialLevel,
     };
 
     const techTheftData: EspionageTechTheftData = {
-      militaryTechGained: gMil,
-      totalPointsGained: gMil,
+      militaryTechGained: milGain,
+      industrialTechGained: indGain,
+      totalPointsGained: superiority.totalAvailablePoints,
     };
 
-    const message = `سرقت فوق‌محرمانه فناوری با موفقیت کامل و بدون ردپا انجام شد! دانشمندان شما ۰.۵ سطح فناوری نظامی از ${target.name} استخراج و بومی‌سازی کردند.`;
+    let message = "";
+    if (superiority.heistMode === "DUAL") {
+      message = `سرقت فوق‌محرمانه با موفقیت ۱۰۰٪ و بدون ردپا انجام شد! دانشمندان شما ۰.۵ لول فناوری نظامی و ۰.۵ لول دانش صنعتی (R&D) از ${target.name} استخراج و بومی‌سازی کردند.`;
+    } else if (superiority.heistMode === "MILITARY_ONLY") {
+      message = `سرقت فوق‌محرمانه با موفقیت انجام شد! ${milGain} لول فناوری نظامی و رمزنگاری پیشرفته از زرادخانه ${target.name} استخراج و به ارتش کشور اضافه گردید.`;
+    } else {
+      message = `سرقت فوق‌محرمانه با موفقیت انجام شد! ${indGain} لول فناوری صنعتی و نقشه‌های مهندسی ساخت خطوط تولید از ${target.name} استخراج شد.`;
+    }
 
     return {
       updatedSource,

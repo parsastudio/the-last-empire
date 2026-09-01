@@ -33,6 +33,34 @@ export class AIUpgradePlanner {
       nation.doctrineWeights ??
       AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
 
+    const totalDevBudget = Math.floor(
+      currentTreasury * (weights.developmentPriority ?? 0.5),
+    );
+
+    if (totalDevBudget <= 0) {
+      return { actions, remainingTreasury: currentTreasury };
+    }
+
+    const machineryImportRatio = weights.machineryImportRatio ?? 0.3;
+    let targetImportBudget = Math.floor(totalDevBudget * machineryImportRatio);
+    let targetDomesticBudget = totalDevBudget - targetImportBudget;
+
+    if (targetImportBudget > 0) {
+      const importResult = AIMachineryImportPlanner.planImport(
+        nation,
+        allNations,
+        targetImportBudget,
+      );
+
+      if (importResult.actions.length > 0) {
+        actions.push(...importResult.actions);
+        currentTreasury -= importResult.spentMoney;
+        targetImportBudget -= importResult.spentMoney;
+      } else {
+        targetDomesticBudget += targetImportBudget;
+      }
+    }
+
     const myProvs =
       ownedProvinces ??
       Object.values(provincesMap || {}).filter(
@@ -48,30 +76,40 @@ export class AIUpgradePlanner {
     }
 
     const affordableSlots = Math.floor(
-      currentTreasury / IndustryCalculator.FACTORY_REBUILD_COST,
+      targetDomesticBudget / IndustryCalculator.FACTORY_REBUILD_COST,
     );
     const slotsToBuild = Math.min(totalEmptySlots, affordableSlots);
 
     if (slotsToBuild > 0) {
       actions.push(ActionFactory.buildFactory(nation.id, slotsToBuild));
-      currentTreasury -= slotsToBuild * IndustryCalculator.FACTORY_REBUILD_COST;
+      const buildCost = slotsToBuild * IndustryCalculator.FACTORY_REBUILD_COST;
+      currentTreasury -= buildCost;
+      targetDomesticBudget -= buildCost;
     }
 
-    if (nation.equipmentTechLevel < nation.industrialLevel) {
+    if (
+      nation.equipmentTechLevel < nation.industrialLevel &&
+      targetDomesticBudget > 0
+    ) {
       let totalFactories = 0;
       for (const p of myProvs) {
         totalFactories += p.factoriesCount;
       }
-      const modernizeCost =
-        totalFactories *
-        IndustryCalculator.calculateModernizeUnitCost(
-          nation.equipmentTechLevel,
-          nation.industrialLevel,
-        );
+      const unitCost = IndustryCalculator.calculateModernizeUnitCost(
+        nation.equipmentTechLevel,
+        nation.industrialLevel,
+      );
+      const affordableModUnits =
+        unitCost > 0 ? Math.floor(targetDomesticBudget / unitCost) : 0;
+      const unitsToModernize = Math.min(totalFactories, affordableModUnits);
 
-      if (currentTreasury >= modernizeCost && modernizeCost > 0) {
-        actions.push(ActionFactory.equipDomesticMachinery(nation.id));
-        currentTreasury -= modernizeCost;
+      if (unitsToModernize > 0) {
+        actions.push(
+          ActionFactory.equipDomesticMachinery(nation.id, unitsToModernize),
+        );
+        const modCost = unitsToModernize * unitCost;
+        currentTreasury -= modCost;
+        targetDomesticBudget -= modCost;
       }
     }
 
@@ -98,16 +136,6 @@ export class AIUpgradePlanner {
       } else {
         break;
       }
-    }
-
-    const importResult = AIMachineryImportPlanner.planImport(
-      nation,
-      allNations,
-      currentTreasury,
-    );
-    if (importResult.actions.length > 0) {
-      actions.push(...importResult.actions);
-      currentTreasury = importResult.remainingTreasury;
     }
 
     const maxMilSteps =

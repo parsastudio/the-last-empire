@@ -32,10 +32,6 @@ export function useWideEspionageForm({
   );
   const { dispatchAction, isSubmitting } = useGameActions();
 
-  const sourceRank = useMemo(() => {
-    return NationGettersUtility.getRank(nation.id, nationsMap, provincesMap);
-  }, [nation.id, nationsMap, provincesMap]);
-
   const countryOptions = useMemo<EspionageTargetOption[]>(() => {
     if (!nationsMap) return [];
     const query = searchQuery.trim().toLowerCase();
@@ -91,15 +87,6 @@ export function useWideEspionageForm({
     return nationsMap[canonical] || nationsMap[selectedTargetId] || null;
   }, [nationsMap, selectedTargetId]);
 
-  const targetRank = useMemo(() => {
-    if (!selectedTargetNation) return 50;
-    return NationGettersUtility.getRank(
-      selectedTargetNation.id,
-      nationsMap,
-      provincesMap,
-    );
-  }, [selectedTargetNation, nationsMap, provincesMap]);
-
   const targetGdp = useMemo(() => {
     if (!selectedTargetNation) return 1000000000;
     return getNationGdp(selectedTargetNation, provincesMap);
@@ -115,19 +102,25 @@ export function useWideEspionageForm({
   );
 
   const tier2SuccessRate = useMemo(
-    () => EspionageManager.calculateSuccessRate(2, sourceRank, targetRank),
-    [sourceRank, targetRank],
+    () =>
+      EspionageManager.calculateSuccessRate(2, nation, selectedTargetNation),
+    [nation, selectedTargetNation],
   );
   const tier3SuccessRate = useMemo(
-    () => EspionageManager.calculateSuccessRate(3, sourceRank, targetRank),
-    [sourceRank, targetRank],
+    () =>
+      EspionageManager.calculateSuccessRate(3, nation, selectedTargetNation),
+    [nation, selectedTargetNation],
   );
 
   const techSuperiority = useMemo(() => {
     if (!selectedTargetNation) {
       return {
         militaryDelta: 0,
+        industrialDelta: 0,
+        militaryGain: 0,
+        industrialGain: 0,
         totalAvailablePoints: 0,
+        heistMode: "NONE" as const,
       };
     }
     return EspionageManager.calculateTechSuperiority(

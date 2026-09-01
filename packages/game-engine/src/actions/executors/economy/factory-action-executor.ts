@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
@@ -159,29 +159,21 @@ export class FactoryActionExecutor {
     }
 
     const targetTech = nation.industrialLevel;
-    if (nation.equipmentTechLevel >= targetTech) {
+    const hasUpgradableFactories = nationalBatches.some(
+      (b) => b.techLevel < targetTech,
+    );
+
+    if (!hasUpgradableFactories) {
       throw new GameError(
         "INVALID_ACTION",
-        "تجهیزات کارخانجات شما در حال حاضر در بالاترین سطح دانش بومی کشور قرار دارد.",
+        "تمامی کارخانجات کشور در حال حاضر در بالاترین سطح دانش بومی قرار دارند.",
       );
     }
 
     const qty = Math.min(totalFactories, action.quantity ?? totalFactories);
-    const unitCost = IndustryCalculator.calculateModernizeUnitCost(
-      nation.equipmentTechLevel,
-      targetTech,
-    );
-    const totalCost = qty * unitCost;
 
-    if (nation.treasury < totalCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای نوسازی این تعداد کارخانه کافی نیست.",
-      );
-    }
-
+    let totalCost = 0;
     let remainingToUpgrade = qty;
-    const updatedProvinces: Record<string, Province> = { ...state.provinces };
 
     const sortedProvinces = [...ownedProvinces].sort((a, b) => {
       const minTechA = a.factoryTiers.length
@@ -195,13 +187,47 @@ export class FactoryActionExecutor {
 
     for (let i = 0; i < sortedProvinces.length && remainingToUpgrade > 0; i++) {
       const p = sortedProvinces[i]!;
+      const consolidated = IndustryCalculator.consolidateBatches(
+        p.factoryTiers,
+      );
+
+      for (let j = 0; j < consolidated.length && remainingToUpgrade > 0; j++) {
+        const batch = consolidated[j]!;
+        if (batch.techLevel >= targetTech) continue;
+
+        const countToTake = Math.min(batch.count, remainingToUpgrade);
+        const unitCost = IndustryCalculator.calculateModernizeUnitCost(
+          batch.techLevel,
+          targetTech,
+        );
+        totalCost += countToTake * unitCost;
+        remainingToUpgrade -= countToTake;
+      }
+    }
+
+    if (nation.treasury < totalCost) {
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "موجودی خزانه برای نوسازی این تعداد کارخانه کافی نیست.",
+      );
+    }
+
+    let provRemainingToUpgrade = qty;
+    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+
+    for (
+      let i = 0;
+      i < sortedProvinces.length && provRemainingToUpgrade > 0;
+      i++
+    ) {
+      const p = sortedProvinces[i]!;
       const upgradableInProv = p.factoryTiers
         .filter((t) => t.techLevel < targetTech)
         .reduce((sum, t) => sum + t.count, 0);
 
       if (upgradableInProv <= 0) continue;
 
-      const takeCount = Math.min(upgradableInProv, remainingToUpgrade);
+      const takeCount = Math.min(upgradableInProv, provRemainingToUpgrade);
       const nextTiers = IndustryCalculator.upgradeLowestFactories(
         p.factoryTiers,
         takeCount,
@@ -213,7 +239,7 @@ export class FactoryActionExecutor {
         factoryTiers: nextTiers,
       };
 
-      remainingToUpgrade -= takeCount;
+      provRemainingToUpgrade -= takeCount;
     }
 
     const updatedBatches = NationGettersUtility.getNationFactoryTiers(
@@ -302,13 +328,6 @@ export class FactoryActionExecutor {
     }
 
     const sellerTech = seller.industrialLevel;
-    if (sellerTech <= buyer.equipmentTechLevel) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "سطح فناوری صنعتی فروشنده از تجهیزات فعلی شما بالاتر نیست.",
-      );
-    }
-
     const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
     const ownedProvinces = Object.values(state.provinces).filter(
       (p) =>
@@ -330,6 +349,17 @@ export class FactoryActionExecutor {
       throw new GameError(
         "INVALID_ACTION",
         "شما کارخانه فعالی برای نصب تجهیزات وارداتی ندارید.",
+      );
+    }
+
+    const hasImportableFactories = nationalBatches.some(
+      (b) => b.techLevel < sellerTech,
+    );
+
+    if (!hasImportableFactories) {
+      throw new GameError(
+        "INVALID_ACTION",
+        "سطح فناوری صنعتی فروشنده از تمام خطوط تولید فعلی شما بالاتر نیست.",
       );
     }
 
@@ -412,9 +442,51 @@ export class FactoryActionExecutor {
       ? sellerCanonical
       : seller.id;
 
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      state.humanNationId,
+    );
+    const isHumanBuyer = canonicalBuyer === canonicalHuman;
+    const isHumanSeller = sellerCanonical === canonicalHuman;
+
+    const logs = [];
+    if (isHumanBuyer) {
+      logs.push(
+        TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          buyer.id,
+          "DOMESTIC",
+          "INFO",
+          "ARMS_TRADE",
+          {
+            amount: totalCost,
+            role: "BUYER",
+            tradeType: "MACHINERY",
+          },
+          seller.id,
+        ),
+      );
+    } else if (isHumanSeller && totalCost > 0) {
+      logs.push(
+        TurnLogBuilder.createNationalLog(
+          state.currentTurn,
+          seller.id,
+          "DOMESTIC",
+          "INFO",
+          "ARMS_TRADE",
+          {
+            amount: totalCost,
+            role: "SELLER",
+            tradeType: "MACHINERY",
+          },
+          buyer.id,
+        ),
+      );
+    }
+
     return {
       ...state,
       provinces: updatedProvinces,
+      turnLogs: [...state.turnLogs, ...logs],
       nations: {
         ...state.nations,
         [buyerKey]: {

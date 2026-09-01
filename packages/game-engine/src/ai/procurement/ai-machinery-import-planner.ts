@@ -4,11 +4,12 @@ import {
   Nation,
   CountryRegistry,
   IndustryCalculator,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 
 export interface MachineryImportPlanResult {
   actions: GameAction[];
-  remainingTreasury: number;
+  spentMoney: number;
 }
 
 export class AIMachineryImportPlanner {
@@ -21,7 +22,7 @@ export class AIMachineryImportPlanner {
     const rawWeights = new Array<number>(count);
     let sum = 0;
     for (let i = 0; i < count; i++) {
-      const w = Math.pow(11 - (i + 1), 1.4);
+      const w = Math.pow(11 - (i + 1), 1.5);
       rawWeights[i] = w;
       sum += w;
     }
@@ -32,67 +33,88 @@ export class AIMachineryImportPlanner {
   public static planImport(
     buyer: Nation,
     allNations: Record<string, Nation>,
-    availableTreasury: number,
+    allocatedImportBudget: number,
   ): MachineryImportPlanResult {
     const actions: GameAction[] = [];
-    if (availableTreasury < IndustryCalculator.IMPORT_BASE_PRICE) {
-      return { actions, remainingTreasury: availableTreasury };
+    if (allocatedImportBudget < IndustryCalculator.IMPORT_BASE_PRICE) {
+      return { actions, spentMoney: 0 };
     }
 
-    const eligibleSellers: { nation: Nation; techGap: number }[] = [];
+    const eligibleSellers: { nation: Nation; industrialLevel: number }[] = [];
+    const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
 
     for (const seller of Object.values(allNations)) {
       if (!seller.isAlive || seller.id === buyer.id) continue;
       const canonicalSeller = CountryRegistry.resolveCanonicalId(seller.id);
+      if (canonicalSeller === canonicalBuyer) continue;
+
       const rel =
         buyer.relations[canonicalSeller] || buyer.relations[seller.id];
 
       if (rel?.stance === "WAR" || (rel?.tension ?? 10) >= 50) continue;
+
       if (seller.industrialLevel > buyer.equipmentTechLevel) {
         eligibleSellers.push({
           nation: seller,
-          techGap: seller.industrialLevel - buyer.industrialLevel,
+          industrialLevel: seller.industrialLevel,
         });
       }
     }
 
     if (eligibleSellers.length === 0) {
-      return { actions, remainingTreasury: availableTreasury };
+      return { actions, spentMoney: 0 };
     }
 
-    eligibleSellers.sort((a, b) => b.techGap - a.techGap);
+    eligibleSellers.sort((a, b) => b.industrialLevel - a.industrialLevel);
     const topSellers = eligibleSellers.slice(0, this.MAX_IMPORT_SELLERS);
     const weights = this.calculateDecayWeights(topSellers.length);
 
-    const totalImportBudget = Math.floor(availableTreasury * 0.4);
-    let currentTreasury = availableTreasury;
+    let remainingBudget = allocatedImportBudget;
+    let spentMoney = 0;
+
+    const buyerBatches = NationGettersUtility.getNationFactoryTiers(
+      buyer.id,
+      undefined,
+    );
+    const totalFactories = buyerBatches.reduce((sum, b) => sum + b.count, 0);
+
+    if (totalFactories <= 0) {
+      return { actions, spentMoney: 0 };
+    }
 
     for (let i = 0; i < topSellers.length; i++) {
       const seller = topSellers[i]!.nation;
       const sellerWeight = weights[i] || 0;
-      const sellerAllocatedBudget = Math.floor(
-        totalImportBudget * sellerWeight,
-      );
+      const sellerBudget = Math.floor(allocatedImportBudget * sellerWeight);
 
-      if (sellerAllocatedBudget <= 0) continue;
+      if (sellerBudget <= 0 || remainingBudget <= 0) continue;
+
+      const minTechBatch = buyerBatches.length
+        ? Math.min(...buyerBatches.map((b) => b.techLevel))
+        : buyer.equipmentTechLevel;
+
+      if (minTechBatch >= seller.industrialLevel) continue;
 
       const unitPrice = IndustryCalculator.calculateEquipmentImportPrice(
         seller.industrialLevel,
-        buyer.equipmentTechLevel,
+        minTechBatch,
         buyer.industrialLevel,
       );
 
       if (unitPrice <= 0) continue;
 
       const maxAffordable = Math.floor(
-        Math.min(currentTreasury, sellerAllocatedBudget) / unitPrice,
+        Math.min(remainingBudget, sellerBudget) / unitPrice,
       );
       if (maxAffordable <= 0) continue;
 
-      const quantityToBuy = Math.min(maxAffordable, 20);
+      const quantityToBuy = Math.min(
+        maxAffordable,
+        Math.max(1, Math.ceil(totalFactories * 0.15)),
+      );
       const totalCost = quantityToBuy * unitPrice;
 
-      if (totalCost > 0 && currentTreasury >= totalCost) {
+      if (totalCost > 0 && remainingBudget >= totalCost) {
         actions.push(
           ActionFactory.buyIndustrialEquipment(
             buyer.id,
@@ -100,13 +122,14 @@ export class AIMachineryImportPlanner {
             quantityToBuy,
           ),
         );
-        currentTreasury -= totalCost;
+        remainingBudget -= totalCost;
+        spentMoney += totalCost;
       }
     }
 
     return {
       actions,
-      remainingTreasury: currentTreasury,
+      spentMoney,
     };
   }
 }

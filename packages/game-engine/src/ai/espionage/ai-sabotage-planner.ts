@@ -5,7 +5,6 @@ import { Province } from "@/domain/province/province.schema";
 import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationGettersUtility } from "@geopolitics/domain";
 import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class AISabotagePlanner {
@@ -15,13 +14,9 @@ export class AISabotagePlanner {
     provincesMap: Record<string, Province> | undefined,
     currentTreasury: number,
     executedTiers: string[],
-    rankMap?: Map<string, number>,
+    _rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
   ): { action: GameAction; cost: number } | null {
-    const sourceRank =
-      rankMap?.get(CountryRegistry.resolveCanonicalId(nation.id)) ??
-      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
-
     const activeWarTarget = nation.warFocusTargetId
       ? allNations[
           CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
@@ -31,18 +26,10 @@ export class AISabotagePlanner {
     if (activeWarTarget && activeWarTarget.isAlive) {
       const canonical = CountryRegistry.resolveCanonicalId(activeWarTarget.id);
       if (!executedTiers.includes(`${canonical}:2`)) {
-        const targetRank =
-          rankMap?.get(canonical) ??
-          NationGettersUtility.getRank(
-            activeWarTarget.id,
-            allNations,
-            provincesMap,
-          );
-
         const successRate = EspionageCalculator.calculateSuccessRate(
           2,
-          sourceRank,
-          targetRank,
+          nation,
+          activeWarTarget,
         );
 
         if (successRate >= 0.5) {
@@ -86,14 +73,10 @@ export class AISabotagePlanner {
       }
 
       if (rel.stance === "WAR") {
-        const targetRank =
-          rankMap?.get(canonicalTarget) ??
-          NationGettersUtility.getRank(target.id, allNations, provincesMap);
-
         const successRate = EspionageCalculator.calculateSuccessRate(
           2,
-          sourceRank,
-          targetRank,
+          nation,
+          target,
         );
 
         if (successRate < 0.5) {

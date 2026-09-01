@@ -10,6 +10,7 @@ export class IndustryCalculator {
   public static readonly RESEARCH_GROWTH_BASE = 2.5;
   public static readonly RESEARCH_STEP = 0.1;
   public static readonly MACHINERY_BASE_UNIT_PRICE = 10_000_000_000;
+  public static readonly MAX_MODERNIZE_BASE_UNIT_COST = 120_000_000_000;
   public static readonly IMPORT_BASE_PRICE = 10_000_000_000;
   public static readonly IMPORT_TECH_GAP_BASE = 2.0;
 
@@ -251,31 +252,38 @@ export class IndustryCalculator {
   ): number {
     const delta = Math.max(0, targetTech - currentEquipmentTech);
     if (delta <= 0) return 0;
-    return Math.floor(this.MACHINERY_BASE_UNIT_PRICE * delta);
+    const rawCost = Math.floor(this.MACHINERY_BASE_UNIT_PRICE * delta);
+    return Math.min(this.MAX_MODERNIZE_BASE_UNIT_COST, rawCost);
   }
 
   public static calculateEquipmentImportPrice(
     sellerIndustrialTech: number,
-    currentEquipmentTech: number,
-    buyerDomesticIndustrialTech: number,
+    batchCurrentTech: number,
+    buyerDomesticIndustrialTech: number = batchCurrentTech,
   ): number {
-    const upgradeDelta = Math.max(
-      0,
-      sellerIndustrialTech - currentEquipmentTech,
-    );
+    const upgradeDelta = Math.max(0, sellerIndustrialTech - batchCurrentTech);
     if (upgradeDelta <= 0) return 0;
+
     const baseUnitCost = this.calculateModernizeUnitCost(
-      currentEquipmentTech,
+      batchCurrentTech,
       sellerIndustrialTech,
     );
-    const countryTechGap = Math.max(
-      0,
-      sellerIndustrialTech - buyerDomesticIndustrialTech,
+
+    const effectiveBaselineTech = Math.max(
+      batchCurrentTech,
+      buyerDomesticIndustrialTech,
     );
+
+    const effectiveImportGap = Math.max(
+      0,
+      sellerIndustrialTech - effectiveBaselineTech,
+    );
+
     const importMultiplier = Math.pow(
       this.IMPORT_TECH_GAP_BASE,
-      countryTechGap,
+      effectiveImportGap,
     );
+
     return Math.floor(baseUnitCost * importMultiplier);
   }
 

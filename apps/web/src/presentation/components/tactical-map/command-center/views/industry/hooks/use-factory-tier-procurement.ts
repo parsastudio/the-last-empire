@@ -37,7 +37,7 @@ export function useFactoryTierProcurement({
   treasury,
   batches,
   targetTechLevel,
-  buyerIndustrialLevel,
+  buyerIndustrialLevel = 1.0,
   totalFactories,
   sellerId,
   actionType = "DOMESTIC",
@@ -63,7 +63,7 @@ export function useFactoryTierProcurement({
           ? IndustryCalculator.calculateEquipmentImportPrice(
               targetTechLevel,
               batch.techLevel,
-              buyerIndustrialLevel ?? targetTechLevel,
+              buyerIndustrialLevel,
             )
           : IndustryCalculator.calculateModernizeUnitCost(
               batch.techLevel,
