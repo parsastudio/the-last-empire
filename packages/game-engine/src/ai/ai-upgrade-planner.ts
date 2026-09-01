@@ -4,11 +4,11 @@ import {
   Nation,
   Province,
   IndustryCalculator,
-  AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { AIPosture } from "@/engine/ai/ai-procurement-planner";
+import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
+import { AiStrategicWallets } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 
 export interface UpgradePlanResult {
   actions: GameAction[];
@@ -24,40 +24,41 @@ export class AIUpgradePlanner {
     _rankMap?: Map<string, number>,
     _precomputedPosture?: AIPosture,
     ownedProvinces?: Province[],
+    wallets?: AiStrategicWallets,
   ): UpgradePlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
     const actions: GameAction[] = [];
 
-    const weights =
-      nation.doctrineWeights ??
-      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
-
-    const totalDevBudget = Math.floor(
-      currentTreasury * (weights.developmentPriority ?? 0.5),
-    );
-
-    if (totalDevBudget <= 0) {
+    if (currentTreasury <= 0) {
       return { actions, remainingTreasury: currentTreasury };
     }
 
-    const machineryImportRatio = weights.machineryImportRatio ?? 0.3;
-    let targetImportBudget = Math.floor(totalDevBudget * machineryImportRatio);
-    let targetDomesticBudget = totalDevBudget - targetImportBudget;
+    let innovationBudget = wallets
+      ? Math.min(currentTreasury, wallets.innovation)
+      : Math.floor(currentTreasury * 0.3);
 
-    if (targetImportBudget > 0) {
+    let machineryImportBudget = wallets
+      ? Math.min(currentTreasury, wallets.globalMarket)
+      : Math.floor(currentTreasury * 0.2);
+
+    let domesticInfraBudget = wallets
+      ? Math.min(currentTreasury, wallets.domesticInfra)
+      : Math.floor(currentTreasury * 0.3);
+
+    if (machineryImportBudget > 0 && !wallets?.isEmbargoed) {
       const importResult = AIMachineryImportPlanner.planImport(
         nation,
         allNations,
-        targetImportBudget,
+        machineryImportBudget,
       );
 
       if (importResult.actions.length > 0) {
         actions.push(...importResult.actions);
         currentTreasury -= importResult.spentMoney;
-        targetImportBudget -= importResult.spentMoney;
+        machineryImportBudget = importResult.remainingBudget;
       } else {
-        targetDomesticBudget += targetImportBudget;
+        domesticInfraBudget += machineryImportBudget;
       }
     }
 
@@ -76,7 +77,7 @@ export class AIUpgradePlanner {
     }
 
     const affordableSlots = Math.floor(
-      targetDomesticBudget / IndustryCalculator.FACTORY_REBUILD_COST,
+      domesticInfraBudget / IndustryCalculator.FACTORY_REBUILD_COST,
     );
     const slotsToBuild = Math.min(totalEmptySlots, affordableSlots);
 
@@ -84,12 +85,12 @@ export class AIUpgradePlanner {
       actions.push(ActionFactory.buildFactory(nation.id, slotsToBuild));
       const buildCost = slotsToBuild * IndustryCalculator.FACTORY_REBUILD_COST;
       currentTreasury -= buildCost;
-      targetDomesticBudget -= buildCost;
+      domesticInfraBudget -= buildCost;
     }
 
     if (
       nation.equipmentTechLevel < nation.industrialLevel &&
-      targetDomesticBudget > 0
+      domesticInfraBudget > 0
     ) {
       let totalFactories = 0;
       for (const p of myProvs) {
@@ -100,7 +101,7 @@ export class AIUpgradePlanner {
         nation.industrialLevel,
       );
       const affordableModUnits =
-        unitCost > 0 ? Math.floor(targetDomesticBudget / unitCost) : 0;
+        unitCost > 0 ? Math.floor(domesticInfraBudget / unitCost) : 0;
       const unitsToModernize = Math.min(totalFactories, affordableModUnits);
 
       if (unitsToModernize > 0) {
@@ -109,51 +110,36 @@ export class AIUpgradePlanner {
         );
         const modCost = unitsToModernize * unitCost;
         currentTreasury -= modCost;
-        targetDomesticBudget -= modCost;
+        domesticInfraBudget -= modCost;
       }
     }
 
-    const maxIndSteps =
-      weights.developmentPriority >= 0.7
-        ? 3
-        : weights.developmentPriority >= 0.4
-          ? 2
-          : 1;
     let indStepsTaken = 0;
-
-    while (indStepsTaken < maxIndSteps) {
+    while (indStepsTaken < 3) {
       const nextIndCost = IndustryCalculator.calculateResearchStepCost(
         nation.industrialLevel +
           indStepsTaken * IndustryCalculator.RESEARCH_STEP,
       );
-      if (
-        currentTreasury >= nextIndCost * 1.5 &&
-        weights.developmentPriority >= 0.4
-      ) {
+      if (currentTreasury >= nextIndCost && innovationBudget >= nextIndCost) {
         actions.push(ActionFactory.investIndustrialResearch(nation.id));
         currentTreasury -= nextIndCost;
+        innovationBudget -= nextIndCost;
         indStepsTaken++;
       } else {
         break;
       }
     }
 
-    const maxMilSteps =
-      weights.researchFocusWeight >= 0.75
-        ? 3
-        : weights.researchFocusWeight >= 0.45
-          ? 2
-          : 1;
     let milStepsTaken = 0;
-
-    while (milStepsTaken < maxMilSteps) {
+    while (milStepsTaken < 3) {
       const nextMilCost = ResearchManager.getMilitaryTechCost(
         nation.military.techLevel +
           milStepsTaken * ResearchManager.RESEARCH_STEP,
       );
-      if (currentTreasury >= nextMilCost * 1.5) {
+      if (currentTreasury >= nextMilCost && innovationBudget >= nextMilCost) {
         actions.push(ActionFactory.investResearch(nation.id));
         currentTreasury -= nextMilCost;
+        innovationBudget -= nextMilCost;
         milStepsTaken++;
       } else {
         break;

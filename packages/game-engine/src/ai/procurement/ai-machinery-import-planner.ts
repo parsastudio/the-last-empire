@@ -10,6 +10,7 @@ import {
 export interface MachineryImportPlanResult {
   actions: GameAction[];
   spentMoney: number;
+  remainingBudget: number;
 }
 
 export class AIMachineryImportPlanner {
@@ -37,7 +38,7 @@ export class AIMachineryImportPlanner {
   ): MachineryImportPlanResult {
     const actions: GameAction[] = [];
     if (allocatedImportBudget < IndustryCalculator.IMPORT_BASE_PRICE) {
-      return { actions, spentMoney: 0 };
+      return { actions, spentMoney: 0, remainingBudget: allocatedImportBudget };
     }
 
     const eligibleSellers: { nation: Nation; industrialLevel: number }[] = [];
@@ -62,7 +63,7 @@ export class AIMachineryImportPlanner {
     }
 
     if (eligibleSellers.length === 0) {
-      return { actions, spentMoney: 0 };
+      return { actions, spentMoney: 0, remainingBudget: allocatedImportBudget };
     }
 
     eligibleSellers.sort((a, b) => b.industrialLevel - a.industrialLevel);
@@ -79,7 +80,7 @@ export class AIMachineryImportPlanner {
     const totalFactories = buyerBatches.reduce((sum, b) => sum + b.count, 0);
 
     if (totalFactories <= 0) {
-      return { actions, spentMoney: 0 };
+      return { actions, spentMoney: 0, remainingBudget: allocatedImportBudget };
     }
 
     for (let i = 0; i < topSellers.length; i++) {
@@ -110,7 +111,7 @@ export class AIMachineryImportPlanner {
 
       const quantityToBuy = Math.min(
         maxAffordable,
-        Math.max(1, Math.ceil(totalFactories * 0.15)),
+        Math.max(1, Math.ceil(totalFactories * 0.2)),
       );
       const totalCost = quantityToBuy * unitPrice;
 
@@ -130,6 +131,7 @@ export class AIMachineryImportPlanner {
     return {
       actions,
       spentMoney,
+      remainingBudget,
     };
   }
 }

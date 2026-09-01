@@ -63,7 +63,7 @@ export class AIArmsImportPlanner {
         actions,
         spentMoney: 0,
         spentValuation: 0,
-        remainingImportBudget: 0,
+        remainingImportBudget: initialImportBudget,
         remainingGlobalValuation: initialGlobalValuation,
       };
     }
@@ -72,11 +72,15 @@ export class AIArmsImportPlanner {
     let remainingGlobalValuation = initialGlobalValuation;
     let spentMoney = 0;
     let spentValuation = 0;
+    let remainingBudget = initialImportBudget;
 
     for (let sIdx = 0; sIdx < eligibleSellers.length; sIdx++) {
       const seller = eligibleSellers[sIdx]!;
       const sellerWeight = weights[sIdx] || 0;
-      let sellerBudget = Math.floor(initialImportBudget * sellerWeight);
+      let sellerBudget = Math.min(
+        remainingBudget,
+        Math.floor(initialImportBudget * sellerWeight),
+      );
 
       if (sellerBudget <= 0 || remainingGlobalValuation <= 0) continue;
 
@@ -92,7 +96,7 @@ export class AIArmsImportPlanner {
             seller.military.techLevel,
           );
 
-        if (unitPrice <= 0) continue;
+        if (unitPrice <= 0 || unitPrice > sellerBudget) continue;
 
         const maxUnitsByMoney = Math.floor(sellerBudget / unitPrice);
         const baseUnitPrice =
@@ -122,6 +126,7 @@ export class AIArmsImportPlanner {
           );
 
           sellerBudget -= cost;
+          remainingBudget -= cost;
           spentMoney += cost;
           spentValuation += valuationCost;
           remainingGlobalValuation -= valuationCost;
@@ -134,7 +139,7 @@ export class AIArmsImportPlanner {
       actions,
       spentMoney,
       spentValuation,
-      remainingImportBudget: Math.max(0, initialImportBudget - spentMoney),
+      remainingImportBudget: Math.max(0, remainingBudget),
       remainingGlobalValuation,
     };
   }

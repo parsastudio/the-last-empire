@@ -16,12 +16,17 @@ import { AIWartimeLoanEvaluator } from "@/engine/ai/procurement/ai-wartime-loan-
 import { AIArmsImportPlanner } from "@/engine/ai/procurement/ai-arms-import-planner";
 import { AIDomesticRecruitmentPlanner } from "@/engine/ai/procurement/ai-domestic-recruitment-planner";
 import { AINavalProcurementPlanner } from "@/engine/ai/procurement/ai-naval-procurement-planner";
+import {
+  AiWalletBudgetAllocator,
+  AiStrategicWallets,
+} from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 
 export type { AIPosture };
 
 export interface RecruitmentPlanResult {
   actions: GameAction[];
   remainingTreasury: number;
+  strategicWallets: AiStrategicWallets;
 }
 
 export class AIProcurementPlanner {
@@ -29,8 +34,6 @@ export class AIProcurementPlanner {
 
   public static evaluatePosture =
     AIPostureEvaluator.evaluatePosture.bind(AIPostureEvaluator);
-  public static calculateSpendableBudget =
-    AIPostureEvaluator.calculateSpendableBudget.bind(AIPostureEvaluator);
 
   public static planRecruitment(
     nation: Nation,
@@ -39,6 +42,7 @@ export class AIProcurementPlanner {
     availableTreasury?: number,
     rankMap?: Map<string, number>,
     precomputedPosture?: AIPosture,
+    precomputedWallets?: AiStrategicWallets,
   ): RecruitmentPlanResult {
     let effectiveTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -71,15 +75,15 @@ export class AIProcurementPlanner {
       }
     }
 
-    const spendableBudget = AIPostureEvaluator.calculateSpendableBudget(
-      posture,
-      effectiveTreasury,
-      weights.peacetimeArmyCap,
-    );
-
-    if (spendableBudget <= 0) {
-      return { actions, remainingTreasury: effectiveTreasury };
-    }
+    const wallets =
+      precomputedWallets ??
+      AiWalletBudgetAllocator.calculateWallets(
+        nation,
+        allNations,
+        provincesMap,
+        posture,
+        effectiveTreasury,
+      );
 
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       gdp,
@@ -107,7 +111,11 @@ export class AIProcurementPlanner {
     );
 
     if (globalRemainingValuation <= 0) {
-      return { actions, remainingTreasury: effectiveTreasury };
+      return {
+        actions,
+        remainingTreasury: effectiveTreasury,
+        strategicWallets: wallets,
+      };
     }
 
     const unitTypes: UnitType[] = [
@@ -118,17 +126,16 @@ export class AIProcurementPlanner {
       "INFANTRY",
     ];
 
-    const importRatio = weights.armsImportRatio;
-    let targetImportBudget = Math.floor(spendableBudget * importRatio);
-    let targetDomesticBudget = spendableBudget - targetImportBudget;
+    let importBudget = wallets.globalMarket;
+    let domesticBudget = wallets.domesticInfra;
     let totalSpent = 0;
 
-    if (targetImportBudget > 0) {
+    if (!wallets.isEmbargoed && importBudget > 0) {
       const importResult = AIArmsImportPlanner.planImports(
         nation,
         allNations,
         quotas,
-        targetImportBudget,
+        importBudget,
         globalRemainingValuation,
         unitTypes,
       );
@@ -136,23 +143,28 @@ export class AIProcurementPlanner {
       actions.push(...importResult.actions);
       totalSpent += importResult.spentMoney;
       globalRemainingValuation = importResult.remainingGlobalValuation;
+      importBudget = importResult.remainingImportBudget;
 
       if (importResult.actions.length === 0) {
-        targetDomesticBudget += targetImportBudget;
+        domesticBudget += importBudget;
       }
+    } else if (wallets.isEmbargoed) {
+      domesticBudget += importBudget;
+      importBudget = 0;
     }
 
-    if (targetDomesticBudget > 0 && globalRemainingValuation > 0) {
+    if (domesticBudget > 0 && globalRemainingValuation > 0) {
       const domesticResult = AIDomesticRecruitmentPlanner.planDomestic(
         nation,
         quotas,
-        targetDomesticBudget,
+        domesticBudget,
         globalRemainingValuation,
         unitTypes,
       );
 
       actions.push(...domesticResult.actions);
       totalSpent += domesticResult.spentMoney;
+      domesticBudget = domesticResult.remainingBudget;
     }
 
     effectiveTreasury = Math.max(0, effectiveTreasury - totalSpent);
@@ -171,6 +183,11 @@ export class AIProcurementPlanner {
     return {
       actions,
       remainingTreasury: effectiveTreasury,
+      strategicWallets: {
+        ...wallets,
+        globalMarket: importBudget,
+        domesticInfra: domesticBudget,
+      },
     };
   }
 }

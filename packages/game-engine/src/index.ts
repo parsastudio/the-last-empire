@@ -31,6 +31,7 @@ export * from "./ai/procurement/ai-arms-import-planner";
 export * from "./ai/procurement/ai-machinery-import-planner";
 export * from "./ai/procurement/ai-domestic-recruitment-planner";
 export * from "./ai/procurement/ai-naval-procurement-planner";
+export * from "./ai/procurement/ai-wallet-budget-allocator";
 export * from "./ai/ai-procurement-planner";
 export * from "./ai/ai-threat-calculator";
 export * from "./ai/ai-treaty-evaluator";
