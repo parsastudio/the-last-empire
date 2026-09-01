@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Lock,
   ShieldCheck,
+  Cpu,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 
@@ -14,6 +15,7 @@ export interface CountryProfileData {
   gdp: string;
   population: string;
   techLevel: number;
+  industrialLevel: number;
   governmentType: string;
   stability: number;
   tension: number;
@@ -51,16 +53,34 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         </div>
       </div>
 
-      <div className="bg-secondary/40 border border-border/50 p-3.5 rounded-2xl flex items-center justify-between">
-        <div className="flex items-center gap-2 font-sans text-xs">
-          <Award size={16} className="text-amber-500 shrink-0" />
-          <span className="text-muted-foreground font-bold text-[11px] whitespace-nowrap">
-            سطح فناوری دفاعی
+      <div className="grid grid-cols-2 gap-2.5">
+        <div className="bg-secondary/40 border border-border/50 p-3.5 rounded-2xl space-y-1">
+          <div className="flex items-center gap-1.5 font-sans text-xs">
+            <Award size={15} className="text-amber-500 shrink-0" />
+            <span className="text-muted-foreground font-bold text-[10px] whitespace-nowrap">
+              فناوری نظامی
+            </span>
+          </div>
+          <span className="text-xs font-bold text-amber-500 font-mono block">
+            سطح{" "}
+            {PersianNumberFormatter.toPersianDigits(data.techLevel.toFixed(1))}
           </span>
         </div>
-        <span className="text-xs font-bold text-amber-500 font-mono bg-amber-500/10 px-3 py-1 rounded-xl border border-amber-500/30 whitespace-nowrap">
-          سطح {PersianNumberFormatter.toPersianDigits(data.techLevel)}
-        </span>
+
+        <div className="bg-secondary/40 border border-border/50 p-3.5 rounded-2xl space-y-1">
+          <div className="flex items-center gap-1.5 font-sans text-xs">
+            <Cpu size={15} className="text-primary shrink-0" />
+            <span className="text-muted-foreground font-bold text-[10px] whitespace-nowrap">
+              فناوری صنعتی (R&D)
+            </span>
+          </div>
+          <span className="text-xs font-bold text-primary font-mono block">
+            سطح{" "}
+            {PersianNumberFormatter.toPersianDigits(
+              data.industrialLevel.toFixed(1),
+            )}
+          </span>
+        </div>
       </div>
 
       {data.guarantorName && (

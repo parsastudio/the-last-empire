@@ -3,6 +3,7 @@ import { ShieldCheck, ShieldX, Skull } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
 import { SecurityGuaranteeModal } from "../modals/security-guarantee-modal";
+import { EmergencyProtectorateModal } from "../modals/emergency-protectorate-modal";
 
 interface DiplomacySecurityUmbrellaActionsProps {
   targetName: string;
@@ -37,7 +38,8 @@ export function DiplomacySecurityUmbrellaActions({
   onCancelSecurityGuarantee,
   onCancelEmergencyProtectorate,
 }: DiplomacySecurityUmbrellaActionsProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGuaranteeModalOpen, setIsGuaranteeModalOpen] = useState(false);
+  const [isProtectorateModalOpen, setIsProtectorateModalOpen] = useState(false);
 
   if (isEmergencyProtectorate) {
     return (
@@ -109,43 +111,71 @@ export function DiplomacySecurityUmbrellaActions({
     isNotWar: !isWar,
   };
 
-  const activeValidation = isWar
-    ? emergencyValidation || defaultValidation
-    : guaranteeValidation || defaultValidation;
+  const safeGuaranteeVal = guaranteeValidation || defaultValidation;
+  const safeEmergencyVal = emergencyValidation || defaultValidation;
 
   return (
-    <>
+    <div className="space-y-2 font-sans">
+      {!isWar && (
+        <button
+          onClick={() => setIsGuaranteeModalOpen(true)}
+          className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black flex items-center gap-2">
+              <ShieldCheck size={16} className="text-cyan-400" />
+              <span>پیمان چتر امنیتی و دفاع سرزمینی</span>
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
+              ۲٪ GDP • بررسی شروط
+            </span>
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            مشاهده چک‌لیست شروط چهارگانه و تضمین دفاعی با اعزام ۶٪ ارتش ضامن.
+          </p>
+        </button>
+      )}
+
       <button
-        onClick={() => setIsModalOpen(true)}
-        className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+        onClick={() => setIsProtectorateModalOpen(true)}
+        className="w-full p-3.5 rounded-2xl bg-rose-950/25 hover:bg-rose-950/45 border border-rose-500/40 hover:border-rose-400 text-rose-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">
-            <ShieldCheck size={16} className="text-cyan-400" />
-            <span>پیمان چتر امنیتی و دفاع سرزمینی</span>
+            <Skull size={16} className="text-rose-400" />
+            <span>معاهده تحت‌الحمایگی استعماری اضطراری</span>
           </span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-            بررسی شروط
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30">
+            ۵٪ خراج • ۵۰٪ GDP نیرو
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          مشاهده چک‌لیست شروط چهارگانه و انعقاد تضمین دفاعی با اعزام نیروی ضربت.
+          استقرار ارتش تمام‌قد ابرقدرت در ازای پرداخت خراج نوبتی و کسر پرستیژ.
         </p>
       </button>
 
       <SecurityGuaranteeModal
-        isOpen={isModalOpen}
+        isOpen={isGuaranteeModalOpen}
         targetName={targetName}
         targetFlagCode={targetFlagCode}
         targetNationId={targetNationId}
-        isWar={isWar}
-        costPerTurn={isWar ? emergencyProtectorateCost : securityGuaranteeCost}
-        validation={activeValidation}
-        onConfirmGuarantee={
-          isWar ? onEmergencyProtectorate : onSecurityGuarantee
-        }
-        onClose={() => setIsModalOpen(false)}
+        isWar={false}
+        costPerTurn={securityGuaranteeCost}
+        validation={safeGuaranteeVal}
+        onConfirmGuarantee={onSecurityGuarantee}
+        onClose={() => setIsGuaranteeModalOpen(false)}
       />
-    </>
+
+      <EmergencyProtectorateModal
+        isOpen={isProtectorateModalOpen}
+        targetName={targetName}
+        targetFlagCode={targetFlagCode}
+        targetNationId={targetNationId}
+        costPerTurn={emergencyProtectorateCost}
+        validation={safeEmergencyVal}
+        onConfirmProtectorate={onEmergencyProtectorate}
+        onClose={() => setIsProtectorateModalOpen(false)}
+      />
+    </div>
   );
 }
