@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 export const AiDoctrineTypeSchema = z.enum([
-  "ARMS_IMPORTER_RENTIER",
-  "DOMESTIC_INDUSTRIALIST",
-  "MERCANTILE_ECONOMIC",
-  "MILITARIST_HAWK",
   "GLOBAL_HEGEMON",
+  "MILITARIST_HAWK",
+  "MERCANTILE_ECONOMIC",
+  "DOMESTIC_INDUSTRIALIST",
 ]);
 
 export const AiDoctrineWeightsSchema = z.object({
