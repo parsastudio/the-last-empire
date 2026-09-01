@@ -151,8 +151,8 @@ export class GeopoliticalVectorCalculator {
     const effectiveTargetPower =
       activeEnemyWarsCount > 0
         ? Math.max(
-            Math.round(tPower * 0.2),
-            Math.round(tPower / (1 + activeEnemyWarsCount * 0.75)),
+            Math.round(tPower * 0.4),
+            Math.round(tPower / (1 + activeEnemyWarsCount * 0.35)),
           )
         : tPower;
 

@@ -42,18 +42,26 @@ export class WarUtilityEvaluator {
         target,
         allNations,
       );
-      if (activeEnemies.some((e) => e.id !== source.id)) {
-        opportunismBonus += 25;
+      const otherWarsCount = activeEnemies.filter(
+        (e) => e.id !== source.id,
+      ).length;
+
+      if (otherWarsCount > 0) {
+        if (vector.alignment <= 0 || vector.lostProvincesCount > 0) {
+          opportunismBonus += 15;
+        } else {
+          return -100;
+        }
       }
     }
 
-    if (target.government.stability < 35) {
-      opportunismBonus += 20;
+    if (target.government.stability < 30) {
+      opportunismBonus += 10;
     }
 
     const tGdp = targetGdp ?? 50_000_000_000;
     if (target.treasury <= 0 || target.nationalDebt >= tGdp * 0.4) {
-      opportunismBonus += 15;
+      opportunismBonus += 10;
     }
 
     let proximityMultiplier = 1.0;
