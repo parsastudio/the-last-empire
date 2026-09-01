@@ -69,7 +69,7 @@ export class AIArmsImportPlanner {
     }
 
     const weights = this.calculateDecayWeights(eligibleSellers.length);
-    let globalRemainingValuation = initialGlobalValuation;
+    let remainingGlobalValuation = initialGlobalValuation;
     let spentMoney = 0;
     let spentValuation = 0;
 
@@ -78,7 +78,7 @@ export class AIArmsImportPlanner {
       const sellerWeight = weights[sIdx] || 0;
       let sellerBudget = Math.floor(initialImportBudget * sellerWeight);
 
-      if (sellerBudget <= 0 || globalRemainingValuation <= 0) continue;
+      if (sellerBudget <= 0 || remainingGlobalValuation <= 0) continue;
 
       for (let i = 0; i < unitTypes.length; i++) {
         const type = unitTypes[i]!;
@@ -99,7 +99,7 @@ export class AIArmsImportPlanner {
           MilitaryPricingCalculator.calculateUnitTypePrice(type);
         const maxUnitsByValuation =
           baseUnitPrice > 0
-            ? Math.floor(globalRemainingValuation / baseUnitPrice)
+            ? Math.floor(remainingGlobalValuation / baseUnitPrice)
             : 0;
 
         const allowedUnits = Math.min(
@@ -124,7 +124,7 @@ export class AIArmsImportPlanner {
           sellerBudget -= cost;
           spentMoney += cost;
           spentValuation += valuationCost;
-          globalRemainingValuation -= valuationCost;
+          remainingGlobalValuation -= valuationCost;
           q.remainingRoom -= allowedUnits;
         }
       }

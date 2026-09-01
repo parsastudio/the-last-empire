@@ -5,6 +5,7 @@ import {
   NationMutatorUtility,
   NationGettersUtility,
   NationRelationResolver,
+  IndustryCalculator,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
@@ -44,14 +45,10 @@ export class NationAnnexationExecutor {
     BitPackedGridState.getInstance().markDirty();
 
     const loserObj = updatedNations[loserCanonical] || updatedNations[loserId];
-    if (loserObj) {
-      updatedNations[loserObj.id] =
-        NationMutatorUtility.createDefeatedNation(loserObj);
-    }
-
     const winnerObj =
       updatedNations[winnerCanonical] || updatedNations[winnerId];
-    if (winnerObj) {
+
+    if (winnerObj && loserObj) {
       const winnerRelations = { ...winnerObj.relations };
       delete winnerRelations[loserCanonical];
       delete winnerRelations[loserId];
@@ -65,16 +62,34 @@ export class NationAnnexationExecutor {
         true,
       );
 
+      const mergedFactoryTiers = IndustryCalculator.mergeBatches(
+        winnerObj.factoryTiers,
+        loserObj.factoryTiers,
+      );
+
+      const newEquipmentTech = IndustryCalculator.calculateWeightedAverageTech(
+        mergedFactoryTiers,
+        winnerObj.industrialLevel,
+      );
+
       updatedNations[winnerObj.id] = {
         ...winnerObj,
-        treasury:
-          winnerObj.treasury + Math.max(0, loserObj ? loserObj.treasury : 0),
+        treasury: winnerObj.treasury + Math.max(0, loserObj.treasury),
+        factoryTiers: mergedFactoryTiers,
+        equipmentTechLevel: newEquipmentTech,
         warFocusTargetId:
           winnerObj.warFocusTargetId === loserCanonical
             ? null
             : winnerObj.warFocusTargetId,
         postWarCooldownTurns: postWarCooldown,
         relations: winnerRelations,
+      };
+    }
+
+    if (loserObj) {
+      updatedNations[loserObj.id] = {
+        ...NationMutatorUtility.createDefeatedNation(loserObj),
+        factoryTiers: [],
       };
     }
 

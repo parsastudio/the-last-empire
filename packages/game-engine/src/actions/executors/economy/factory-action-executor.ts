@@ -33,54 +33,96 @@ export class FactoryActionExecutor {
     nation: Nation,
     buyerKey: string,
   ): GameState {
-    const cost = IndustryCalculator.FACTORY_REBUILD_COST;
-    if (nation.treasury < cost) {
+    const quantity = Math.max(1, action.quantity || 1);
+    const totalCost = IndustryCalculator.FACTORY_REBUILD_COST * quantity;
+
+    if (nation.treasury < totalCost) {
       throw new GameError(
         "INSUFFICIENT_FUNDS",
-        "موجودی خزانه برای بازسازی کارخانه کافی نیست (۳۰ میلیارد دلار نیاز است).",
+        "موجودی خزانه برای احداث این تعداد کارخانه کافی نیست.",
       );
     }
 
-    const prov = state.provinces[action.provinceId.toString()];
-    if (!prov) {
-      throw new GameError("PROVINCE_NOT_FOUND", "استان مورد نظر یافت نشد.");
-    }
-
-    const provOwner = CountryRegistry.resolveCanonicalId(prov.ownerNationId);
     const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
-    if (provOwner !== canonicalNation) {
-      throw new GameError(
-        "UNAUTHORIZED",
-        "این استان تحت حاکمیت کشور شما قرار ندارد.",
-      );
-    }
+    const ownedProvinces: Province[] = [];
 
-    const emptySlots = Math.max(0, prov.maxSlots - prov.factoriesCount);
-    if (emptySlots <= 0) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "تمامی اسلات‌های کارخانه این استان فعال بوده و اسلات خالی جهت ساخت وجود ندارد.",
-      );
-    }
-
-    const updatedProv: Province = {
-      ...prov,
-      factoriesCount: prov.factoriesCount + 1,
-    };
-
-    let totalFactories = 0;
     for (const p of Object.values(state.provinces)) {
       if (
         CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalNation
       ) {
-        totalFactories += p.factoriesCount;
+        ownedProvinces.push(p);
       }
     }
 
-    const currentBatches = this.resolveCurrentBatches(nation, totalFactories);
+    if (ownedProvinces.length === 0) {
+      throw new GameError(
+        "PROVINCE_NOT_FOUND",
+        "هیچ استانی در قلمرو این کشور یافت نشد.",
+      );
+    }
+
+    const distribution = new Map<number, number>();
+
+    if (action.provinceId) {
+      const prov = state.provinces[action.provinceId.toString()];
+      if (!prov) {
+        throw new GameError("PROVINCE_NOT_FOUND", "استان مورد نظر یافت نشد.");
+      }
+      const provOwner = CountryRegistry.resolveCanonicalId(prov.ownerNationId);
+      if (provOwner !== canonicalNation) {
+        throw new GameError(
+          "UNAUTHORIZED",
+          "این استان تحت حاکمیت کشور شما قرار ندارد.",
+        );
+      }
+      const emptySlots = Math.max(0, prov.maxSlots - prov.factoriesCount);
+      if (emptySlots < quantity) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "اسلات خالی کافی در این استان برای احداث این تعداد کارخانه وجود ندارد.",
+        );
+      }
+      distribution.set(prov.provinceId, quantity);
+    } else {
+      const calculatedDist = IndustryCalculator.distributeNewFactories(
+        ownedProvinces,
+        quantity,
+      );
+
+      let allocatedCount = 0;
+      for (const added of calculatedDist.values()) {
+        allocatedCount += added;
+      }
+
+      if (allocatedCount < quantity) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "مجموع اسلات‌های خالی در سراسر کشور برای احداث این تعداد کارخانه کافی نیست.",
+        );
+      }
+
+      for (const [pId, added] of calculatedDist.entries()) {
+        distribution.set(pId, added);
+      }
+    }
+
+    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+    for (const [pId, added] of distribution.entries()) {
+      const p = updatedProvinces[pId.toString()]!;
+      updatedProvinces[pId.toString()] = {
+        ...p,
+        factoriesCount: p.factoriesCount + added,
+      };
+    }
+
+    const totalBefore = nation.factoryTiers.reduce(
+      (sum, b) => sum + b.count,
+      0,
+    );
+    const currentBatches = this.resolveCurrentBatches(nation, totalBefore);
     const updatedBatches = IndustryCalculator.addFactories(
       currentBatches,
-      1,
+      quantity,
       nation.industrialLevel,
     );
     const newAverageEquipTech = IndustryCalculator.calculateWeightedAverageTech(
@@ -90,15 +132,12 @@ export class FactoryActionExecutor {
 
     return {
       ...state,
-      provinces: {
-        ...state.provinces,
-        [prov.provinceId.toString()]: updatedProv,
-      },
+      provinces: updatedProvinces,
       nations: {
         ...state.nations,
         [buyerKey]: {
           ...nation,
-          treasury: nation.treasury - cost,
+          treasury: nation.treasury - totalCost,
           factoryTiers: updatedBatches,
           equipmentTechLevel: newAverageEquipTech,
         },
@@ -112,13 +151,10 @@ export class FactoryActionExecutor {
     nation: Nation,
     buyerKey: string,
   ): GameState {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-    let totalFactories = 0;
-    for (const p of Object.values(state.provinces)) {
-      if (CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId) {
-        totalFactories += p.factoriesCount;
-      }
-    }
+    const totalFactories = nation.factoryTiers.reduce(
+      (sum, b) => sum + b.count,
+      0,
+    );
 
     if (totalFactories <= 0) {
       throw new GameError(
@@ -243,15 +279,10 @@ export class FactoryActionExecutor {
       );
     }
 
-    const canonicalBuyer = CountryRegistry.resolveCanonicalId(buyer.id);
-    let totalBuyerFactories = 0;
-    for (const p of Object.values(state.provinces)) {
-      if (
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalBuyer
-      ) {
-        totalBuyerFactories += p.factoriesCount;
-      }
-    }
+    const totalBuyerFactories = buyer.factoryTiers.reduce(
+      (sum, b) => sum + b.count,
+      0,
+    );
 
     if (totalBuyerFactories <= 0) {
       throw new GameError(

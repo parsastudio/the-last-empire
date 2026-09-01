@@ -4,6 +4,17 @@ import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { BattleAttackerStateApplier } from "@/engine/combat/state-appliers/battle-attacker-state-applier";
 import { BattleDefenderStateApplier } from "@/engine/combat/state-appliers/battle-defender-state-applier";
 
+export interface BattleStateMutationInput {
+  attacker: Nation;
+  defender: Nation;
+  calcResult: BattleCalculationResult;
+  spoilsData?: BattleSpoilsDetails;
+  isDefenderAnnexed?: boolean;
+  conqueredFactoriesCount?: number;
+  originalLostFactoriesCount?: number;
+  destroyedFactoriesCount?: number;
+}
+
 export class BattleStateMutator {
   public static mutate(
     nations: Record<string, Nation>,
@@ -12,6 +23,9 @@ export class BattleStateMutator {
     calcResult: BattleCalculationResult,
     spoilsData?: BattleSpoilsDetails,
     isDefenderAnnexed = false,
+    conqueredFactoriesCount = 0,
+    originalLostFactoriesCount = 0,
+    destroyedFactoriesCount = 0,
   ): Record<string, Nation> {
     const updatedNations: Record<string, Nation> = { ...nations };
 
@@ -21,6 +35,8 @@ export class BattleStateMutator {
       calcResult,
       spoilsData,
       isDefenderAnnexed,
+      conqueredFactoriesCount,
+      defenderTechLevel: defender.equipmentTechLevel,
     });
     updatedNations[attacker.id] = updatedAttacker;
 
@@ -30,28 +46,12 @@ export class BattleStateMutator {
         attackerId: attacker.id,
         calcResult,
         spoilsData,
+        lostFactoriesCount: originalLostFactoriesCount,
+        destroyedFactoriesCount,
       });
       updatedNations[defender.id] = updatedDefender;
     }
 
     return updatedNations;
-  }
-
-  public static mutateBattleState(
-    nations: Record<string, Nation>,
-    attacker: Nation,
-    defender: Nation,
-    calcResult: BattleCalculationResult,
-    spoilsData?: BattleSpoilsDetails,
-    isDefenderAnnexed = false,
-  ): Record<string, Nation> {
-    return this.mutate(
-      nations,
-      attacker,
-      defender,
-      calcResult,
-      spoilsData,
-      isDefenderAnnexed,
-    );
   }
 }

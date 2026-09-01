@@ -39,16 +39,22 @@ export class AIUpgradePlanner {
         (p) => p.ownerNationId === nation.id,
       );
 
+    let totalEmptySlots = 0;
     for (let i = 0; i < myProvs.length; i++) {
-      const p = myProvs[i]!;
-      const emptySlots = Math.max(0, p.maxSlots - p.factoriesCount);
-      if (
-        emptySlots > 0 &&
-        currentTreasury >= IndustryCalculator.FACTORY_REBUILD_COST
-      ) {
-        actions.push(ActionFactory.buildFactory(nation.id, p.provinceId));
-        currentTreasury -= IndustryCalculator.FACTORY_REBUILD_COST;
-      }
+      totalEmptySlots += Math.max(
+        0,
+        myProvs[i]!.maxSlots - myProvs[i]!.factoriesCount,
+      );
+    }
+
+    const affordableSlots = Math.floor(
+      currentTreasury / IndustryCalculator.FACTORY_REBUILD_COST,
+    );
+    const slotsToBuild = Math.min(totalEmptySlots, affordableSlots);
+
+    if (slotsToBuild > 0) {
+      actions.push(ActionFactory.buildFactory(nation.id, slotsToBuild));
+      currentTreasury -= slotsToBuild * IndustryCalculator.FACTORY_REBUILD_COST;
     }
 
     if (nation.equipmentTechLevel < nation.industrialLevel) {

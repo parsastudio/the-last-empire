@@ -12,6 +12,7 @@ import {
   NationGettersUtility,
   DebtCalculatorUtility,
   PendingProposalManagerUtility,
+  IndustryCalculator,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
@@ -98,10 +99,13 @@ export class PeaceSettlementExecutor {
       );
 
       let cededGdp = 0;
+      let cededFactories = 0;
+
       for (let i = 0; i < loserProvsBefore.length; i++) {
         const p = loserProvsBefore[i]!;
         if (terms.concededProvinceIds.includes(p.provinceId)) {
           cededGdp += getProvinceGdp(p);
+          cededFactories += p.factoriesCount;
         }
       }
 
@@ -112,9 +116,41 @@ export class PeaceSettlementExecutor {
         totalLoserGdpBefore,
       );
 
+      const loserNationObj = updatedNations[loserNation.id]!;
+      const winnerNationObj = updatedNations[winnerNation.id]!;
+
+      const updatedLoserBatches = IndustryCalculator.removeFactories(
+        loserNationObj.factoryTiers,
+        cededFactories,
+      );
+      const updatedLoserEquipTech =
+        IndustryCalculator.calculateWeightedAverageTech(
+          updatedLoserBatches,
+          loserNationObj.industrialLevel,
+        );
+
+      const updatedWinnerBatches = IndustryCalculator.addFactories(
+        winnerNationObj.factoryTiers,
+        cededFactories,
+        loserNationObj.equipmentTechLevel,
+      );
+      const updatedWinnerEquipTech =
+        IndustryCalculator.calculateWeightedAverageTech(
+          updatedWinnerBatches,
+          winnerNationObj.industrialLevel,
+        );
+
       updatedNations[loserNation.id] = {
-        ...updatedNations[loserNation.id]!,
+        ...loserNationObj,
         nationalDebt: Math.max(0, curDebt - debtRelief),
+        factoryTiers: updatedLoserBatches,
+        equipmentTechLevel: updatedLoserEquipTech,
+      };
+
+      updatedNations[winnerNation.id] = {
+        ...winnerNationObj,
+        factoryTiers: updatedWinnerBatches,
+        equipmentTechLevel: updatedWinnerEquipTech,
       };
 
       for (let i = 0; i < terms.concededProvinceIds.length; i++) {

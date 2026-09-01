@@ -1,4 +1,5 @@
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
+import { Province } from "@/domain/province/province.schema";
 
 export class IndustryCalculator {
   public static readonly BASE_FACTORY_YIELD = 5_000_000_000;
@@ -89,24 +90,126 @@ export class IndustryCalculator {
     return distribution;
   }
 
-  public static distributeFactoriesToProvinces(
-    totalFactories: number,
-    provincesCount: number,
-  ): number[] {
-    const safeCount = Math.max(1, provincesCount);
-    const baseShare = Math.floor(totalFactories / safeCount);
-    let remainder = totalFactories % safeCount;
+  public static distributeNewFactories(
+    provinces: {
+      provinceId: number;
+      factoriesCount: number;
+      maxSlots: number;
+    }[],
+    quantity: number,
+  ): Map<number, number> {
+    const allocations = new Map<number, number>();
+    if (quantity <= 0 || provinces.length === 0) return allocations;
 
-    const distribution: number[] = [];
-    for (let i = 0; i < safeCount; i++) {
-      let slots = baseShare;
-      if (remainder > 0) {
-        slots += 1;
-        remainder -= 1;
+    const candidates = provinces
+      .filter((p) => p.maxSlots > p.factoriesCount)
+      .map((p) => ({
+        provinceId: p.provinceId,
+        current: p.factoriesCount,
+        max: p.maxSlots,
+        added: 0,
+      }));
+
+    let remaining = quantity;
+    while (remaining > 0) {
+      candidates.sort((a, b) => a.current + a.added - (b.current + b.added));
+      let allocated = false;
+
+      for (let i = 0; i < candidates.length && remaining > 0; i++) {
+        const item = candidates[i]!;
+        if (item.current + item.added < item.max) {
+          item.added += 1;
+          remaining -= 1;
+          allocated = true;
+          break;
+        }
       }
-      distribution.push(Math.max(1, slots));
+
+      if (!allocated) break;
     }
-    return distribution;
+
+    for (let i = 0; i < candidates.length; i++) {
+      const item = candidates[i]!;
+      if (item.added > 0) {
+        allocations.set(item.provinceId, item.added);
+      }
+    }
+
+    return allocations;
+  }
+
+  public static distributeFactoryDestruction(
+    provincesMap: Record<string, Province>,
+    candidateProvinces: Province[],
+    factoriesToDestroy: number,
+  ): { updatedProvinces: Record<string, Province>; actualDestroyed: number } {
+    if (factoriesToDestroy <= 0 || candidateProvinces.length === 0) {
+      return { updatedProvinces: provincesMap, actualDestroyed: 0 };
+    }
+
+    const updatedProvinces: Record<string, Province> = { ...provincesMap };
+    let totalPoolFactories = 0;
+
+    for (let i = 0; i < candidateProvinces.length; i++) {
+      totalPoolFactories += candidateProvinces[i]!.factoriesCount;
+    }
+
+    if (totalPoolFactories <= 0) {
+      return { updatedProvinces: provincesMap, actualDestroyed: 0 };
+    }
+
+    const minProtectedFloor = Math.max(1, Math.ceil(totalPoolFactories * 0.05));
+    const maxDestroyable = Math.max(0, totalPoolFactories - minProtectedFloor);
+    const actualDestroyCount = Math.min(factoriesToDestroy, maxDestroyable);
+
+    if (actualDestroyCount <= 0) {
+      return { updatedProvinces: provincesMap, actualDestroyed: 0 };
+    }
+
+    let remainingToDeduct = actualDestroyCount;
+    const sortedProvinces = [...candidateProvinces].sort(
+      (a, b) => b.factoriesCount - a.factoriesCount,
+    );
+
+    for (let i = 0; i < sortedProvinces.length && remainingToDeduct > 0; i++) {
+      const p = sortedProvinces[i]!;
+      const currentCount = p.factoriesCount;
+      if (currentCount <= 0) continue;
+
+      const proportionalShare = Math.floor(
+        (currentCount / totalPoolFactories) * actualDestroyCount,
+      );
+      const deduct = Math.max(
+        1,
+        Math.min(currentCount, Math.min(remainingToDeduct, proportionalShare)),
+      );
+
+      updatedProvinces[p.provinceId.toString()] = {
+        ...p,
+        factoriesCount: currentCount - deduct,
+      };
+
+      remainingToDeduct -= deduct;
+    }
+
+    let loopIndex = 0;
+    while (remainingToDeduct > 0 && loopIndex < sortedProvinces.length) {
+      const p = sortedProvinces[loopIndex]!;
+      const current = updatedProvinces[p.provinceId.toString()]!;
+      if (current.factoriesCount > 0) {
+        updatedProvinces[p.provinceId.toString()] = {
+          ...current,
+          factoriesCount: current.factoriesCount - 1,
+        };
+        remainingToDeduct--;
+      }
+      loopIndex++;
+    }
+
+    return {
+      updatedProvinces,
+      actualDestroyed: actualDestroyCount - remainingToDeduct,
+    };
   }
 
   public static calculateProvinceGdp(
@@ -160,22 +263,6 @@ export class IndustryCalculator {
     return Math.floor(fullTierCost / 10);
   }
 
-  public static calculateNewEquipmentTechLevel(
-    totalFactories: number,
-    currentEquipmentTech: number,
-    modernizedQuantity: number,
-    targetTech: number,
-  ): number {
-    if (totalFactories <= 0 || targetTech <= currentEquipmentTech) {
-      return currentEquipmentTech;
-    }
-    const safeQty = Math.min(totalFactories, Math.max(0, modernizedQuantity));
-    const delta = targetTech - currentEquipmentTech;
-    const increase = (safeQty / totalFactories) * delta;
-    const finalLevel = Math.min(targetTech, currentEquipmentTech + increase);
-    return Number(finalLevel.toFixed(2));
-  }
-
   public static consolidateBatches(batches?: FactoryBatch[]): FactoryBatch[] {
     if (!batches || batches.length === 0) return [];
     const map = new Map<number, number>();
@@ -220,6 +307,46 @@ export class IndustryCalculator {
     return this.consolidateBatches(list);
   }
 
+  public static removeFactories(
+    batches: FactoryBatch[] | undefined,
+    countToRemove: number,
+  ): FactoryBatch[] {
+    const consolidated = this.consolidateBatches(batches);
+    if (countToRemove <= 0 || consolidated.length === 0) return consolidated;
+
+    let remainingToRemove = countToRemove;
+    const result: FactoryBatch[] = [];
+
+    for (const batch of consolidated) {
+      if (remainingToRemove <= 0) {
+        result.push(batch);
+        continue;
+      }
+
+      if (batch.count <= remainingToRemove) {
+        remainingToRemove -= batch.count;
+      } else {
+        result.push({
+          techLevel: batch.techLevel,
+          count: batch.count - remainingToRemove,
+        });
+        remainingToRemove = 0;
+      }
+    }
+
+    return this.consolidateBatches(result);
+  }
+
+  public static mergeBatches(
+    batchesA?: FactoryBatch[],
+    batchesB?: FactoryBatch[],
+  ): FactoryBatch[] {
+    const combined: FactoryBatch[] = [];
+    if (batchesA) combined.push(...batchesA);
+    if (batchesB) combined.push(...batchesB);
+    return this.consolidateBatches(combined);
+  }
+
   public static upgradeLowestFactories(
     batches: FactoryBatch[] | undefined,
     upgradeCount: number,
@@ -257,14 +384,5 @@ export class IndustryCalculator {
     }
 
     return this.consolidateBatches(result);
-  }
-
-  public static calculateBatchesTotalYield(batches?: FactoryBatch[]): number {
-    const consolidated = this.consolidateBatches(batches);
-    let total = 0;
-    for (const b of consolidated) {
-      total += b.count * this.calculateFactoryYield(b.techLevel);
-    }
-    return total;
   }
 }

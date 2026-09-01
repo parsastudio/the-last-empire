@@ -14,6 +14,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import {
   NationGettersUtility,
   NationRelationResolver,
+  IndustryCalculator,
 } from "@geopolitics/domain";
 
 export interface BattleExecutionResult {
@@ -22,77 +23,6 @@ export interface BattleExecutionResult {
 }
 
 export class BattleExecutionEngine {
-  private static distributeFactoryDestruction(
-    provincesMap: Record<string, Province>,
-    candidateProvinces: Province[],
-    factoriesToDestroy: number,
-  ): Record<string, Province> {
-    if (factoriesToDestroy <= 0 || candidateProvinces.length === 0) {
-      return provincesMap;
-    }
-
-    const updatedProvinces = { ...provincesMap };
-    let totalPoolFactories = 0;
-
-    for (let i = 0; i < candidateProvinces.length; i++) {
-      totalPoolFactories += candidateProvinces[i]!.factoriesCount;
-    }
-
-    if (totalPoolFactories <= 0) {
-      return provincesMap;
-    }
-
-    const minProtectedFloor = Math.max(1, Math.ceil(totalPoolFactories * 0.05));
-    const maxDestroyable = Math.max(0, totalPoolFactories - minProtectedFloor);
-    const actualDestroyCount = Math.min(factoriesToDestroy, maxDestroyable);
-
-    if (actualDestroyCount <= 0) {
-      return provincesMap;
-    }
-
-    let remainingToDeduct = actualDestroyCount;
-    const sortedProvinces = [...candidateProvinces].sort(
-      (a, b) => b.factoriesCount - a.factoriesCount,
-    );
-
-    for (let i = 0; i < sortedProvinces.length && remainingToDeduct > 0; i++) {
-      const p = sortedProvinces[i]!;
-      const currentCount = p.factoriesCount;
-      if (currentCount <= 0) continue;
-
-      const proportionalShare = Math.floor(
-        (currentCount / totalPoolFactories) * actualDestroyCount,
-      );
-      const deduct = Math.max(
-        1,
-        Math.min(currentCount, Math.min(remainingToDeduct, proportionalShare)),
-      );
-
-      updatedProvinces[p.provinceId.toString()] = {
-        ...p,
-        factoriesCount: currentCount - deduct,
-      };
-
-      remainingToDeduct -= deduct;
-    }
-
-    let loopIndex = 0;
-    while (remainingToDeduct > 0 && loopIndex < sortedProvinces.length) {
-      const p = sortedProvinces[loopIndex]!;
-      const current = updatedProvinces[p.provinceId.toString()]!;
-      if (current.factoriesCount > 0) {
-        updatedProvinces[p.provinceId.toString()] = {
-          ...current,
-          factoriesCount: current.factoriesCount - 1,
-        };
-        remainingToDeduct--;
-      }
-      loopIndex++;
-    }
-
-    return updatedProvinces;
-  }
-
   public executeBattle(
     state: GameState,
     action: InitiateBattleAction,
@@ -131,45 +61,31 @@ export class BattleExecutionEngine {
 
     let updatedProvinces = { ...state.provinces };
     const factoriesToDestroy = calcResult.phase1Missile.destroyedFactories;
+    let actualDestroyedFactories = 0;
 
     if (factoriesToDestroy > 0) {
-      if (calcResult.isAttackerVictory) {
-        const defenderOtherProvinces = Object.values(updatedProvinces).filter(
-          (p) => {
-            const ownerCanonical = CountryRegistry.resolveCanonicalId(
-              p.ownerNationId,
-            );
-            return (
-              ownerCanonical === canonicalDefenderId &&
-              p.provinceId !== action.targetProvinceId &&
-              p.factoriesCount > 0
-            );
-          },
+      const candidateProvinces = Object.values(updatedProvinces).filter((p) => {
+        const ownerCanonical = CountryRegistry.resolveCanonicalId(
+          p.ownerNationId,
         );
+        const isTargetDefender = ownerCanonical === canonicalDefenderId;
+        const isNotTargetIfAttackerWon =
+          calcResult.isAttackerVictory && action.targetProvinceId
+            ? p.provinceId !== action.targetProvinceId
+            : true;
+        return (
+          isTargetDefender && isNotTargetIfAttackerWon && p.factoriesCount > 0
+        );
+      });
 
-        updatedProvinces = BattleExecutionEngine.distributeFactoryDestruction(
-          updatedProvinces,
-          defenderOtherProvinces,
-          factoriesToDestroy,
-        );
-      } else {
-        const defenderAllProvinces = Object.values(updatedProvinces).filter(
-          (p) => {
-            const ownerCanonical = CountryRegistry.resolveCanonicalId(
-              p.ownerNationId,
-            );
-            return (
-              ownerCanonical === canonicalDefenderId && p.factoriesCount > 0
-            );
-          },
-        );
+      const destructionResult = IndustryCalculator.distributeFactoryDestruction(
+        updatedProvinces,
+        candidateProvinces,
+        factoriesToDestroy,
+      );
 
-        updatedProvinces = BattleExecutionEngine.distributeFactoryDestruction(
-          updatedProvinces,
-          defenderAllProvinces,
-          factoriesToDestroy,
-        );
-      }
+      updatedProvinces = destructionResult.updatedProvinces;
+      actualDestroyedFactories = destructionResult.actualDestroyed;
     }
 
     const conquestResult = ProvinceConquestHandler.handleConquest(
@@ -198,6 +114,9 @@ export class BattleExecutionEngine {
       calcResult,
       spoilsData,
       isDefenderAnnexed,
+      conquestResult.conqueredFactoriesCount,
+      conquestResult.originalFactoriesCount,
+      actualDestroyedFactories,
     );
 
     if (isDefenderAnnexed) {

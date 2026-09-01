@@ -13,6 +13,8 @@ export interface ProvinceConquestResult {
   conqueredProvincesList: Province[];
   totalDefenderGdpBefore: number;
   conqueredProvincesGdp: number;
+  conqueredFactoriesCount: number;
+  originalFactoriesCount: number;
 }
 
 export class ProvinceConquestHandler {
@@ -40,6 +42,8 @@ export class ProvinceConquestHandler {
 
     let conqueredPixels = 0;
     let conqueredProvincesGdp = 0;
+    let conqueredFactoriesCount = 0;
+    let originalFactoriesCount = 0;
     const conqueredProvincesList: Province[] = [];
 
     if (isAttackerVictory && defenderProvincesBefore.length > 0) {
@@ -69,9 +73,11 @@ export class ProvinceConquestHandler {
           CountryRegistry.resolveCanonicalId(targetProv.ownerNationId) ===
             cleanDefenderId
         ) {
+          originalFactoriesCount = targetProv.factoriesCount;
           const survivingFactories = Math.floor(
             targetProv.factoriesCount * 0.8,
           );
+          conqueredFactoriesCount = survivingFactories;
 
           const conqueredProv: Province = {
             ...targetProv,
@@ -98,6 +104,8 @@ export class ProvinceConquestHandler {
       conqueredProvincesList,
       totalDefenderGdpBefore,
       conqueredProvincesGdp,
+      conqueredFactoriesCount,
+      originalFactoriesCount,
     };
   }
 }
