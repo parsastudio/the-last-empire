@@ -7,6 +7,7 @@ import {
   IndustryCalculator,
   ActionFactory,
   ProcurementBatchCalculator,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
@@ -105,6 +106,7 @@ export function IndustryDomesticTab({
       for (const item of actionsToRun) {
         const action = ActionFactory.buildFactory(
           item.nationId,
+          1,
           item.provinceId,
         );
         await dispatchAction(action);
@@ -114,15 +116,25 @@ export function IndustryDomesticTab({
     }
   };
 
+  const currentNationalTiers = useMemo(() => {
+    return NationGettersUtility.getNationFactoryTiers(
+      nation.id,
+      provincesMap,
+      ownedProvinces,
+    );
+  }, [nation.id, provincesMap, ownedProvinces]);
+
   const totalFactoriesYield = useMemo(() => {
-    if (nation.factoryTiers && nation.factoryTiers.length > 0) {
-      return IndustryCalculator.calculateBatchesTotalYield(nation.factoryTiers);
+    if (currentNationalTiers.length > 0) {
+      return IndustryCalculator.calculateBatchesTotalYield(
+        currentNationalTiers,
+      );
     }
     return (
       totalActiveFactories *
       IndustryCalculator.calculateFactoryYield(nation.equipmentTechLevel)
     );
-  }, [nation.factoryTiers, totalActiveFactories, nation.equipmentTechLevel]);
+  }, [currentNationalTiers, totalActiveFactories, nation.equipmentTechLevel]);
 
   const nationalIndustrialOccupancy =
     totalMaxSlots > 0
@@ -143,7 +155,7 @@ export function IndustryDomesticTab({
       <FactoryTiersGrid
         nationId={nation.id}
         treasury={nation.treasury}
-        batches={nation.factoryTiers}
+        batches={currentNationalTiers}
         totalFactories={safeTotalFactories}
         targetTechLevel={nation.industrialLevel}
         actionType="DOMESTIC"

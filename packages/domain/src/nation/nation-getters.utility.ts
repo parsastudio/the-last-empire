@@ -1,9 +1,11 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
+import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationRankCalculatorUtility } from "@/domain/nation/getters/nation-rank-calculator.utility";
 import { NationTerritoryResolverUtility } from "@/domain/nation/getters/nation-territory-resolver.utility";
 import { NationRankCandidateInput } from "@/domain/nation/getters/rank/nation-power-score-evaluator";
+import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 
 export class NationGettersUtility {
   public static resolveNation(
@@ -57,6 +59,48 @@ export class NationGettersUtility {
       nationId,
       provincesMap,
       provincesByOwnerMap,
+    );
+  }
+
+  public static getNationFactoryTiers(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    ownedProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): FactoryBatch[] {
+    const provs =
+      ownedProvinces ??
+      this.getOwnedProvinces(nationId, provincesMap, provincesByOwnerMap);
+
+    const allBatches: FactoryBatch[] = [];
+    for (let i = 0; i < provs.length; i++) {
+      const p = provs[i]!;
+      if (p.factoryTiers && p.factoryTiers.length > 0) {
+        allBatches.push(...p.factoryTiers);
+      } else if (p.factoriesCount > 0) {
+        allBatches.push({ techLevel: 1.0, count: p.factoriesCount });
+      }
+    }
+
+    return IndustryCalculator.consolidateBatches(allBatches);
+  }
+
+  public static getNationEquipmentTech(
+    nationId: string,
+    provincesMap?: Record<string, Province> | Province[],
+    fallbackTech = 1.0,
+    ownedProvinces?: Province[],
+    provincesByOwnerMap?: Map<string, Province[]>,
+  ): number {
+    const batches = this.getNationFactoryTiers(
+      nationId,
+      provincesMap,
+      ownedProvinces,
+      provincesByOwnerMap,
+    );
+    return IndustryCalculator.calculateWeightedAverageTech(
+      batches,
+      fallbackTech,
     );
   }
 

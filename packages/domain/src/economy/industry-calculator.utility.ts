@@ -19,6 +19,16 @@ export class IndustryCalculator {
     );
   }
 
+  public static calculateBatchesTotalYield(batches?: FactoryBatch[]): number {
+    if (!batches || batches.length === 0) return 0;
+    let total = 0;
+    for (let i = 0; i < batches.length; i++) {
+      const b = batches[i]!;
+      total += b.count * this.calculateFactoryYield(b.techLevel);
+    }
+    return total;
+  }
+
   public static calculateStartingTotalFactories(
     startingGdp: number,
     industrialLevel: number,
@@ -184,9 +194,13 @@ export class IndustryCalculator {
         Math.min(currentCount, Math.min(remainingToDeduct, proportionalShare)),
       );
 
+      const nextBatches = this.removeFactories(p.factoryTiers, deduct);
+      const nextCount = currentCount - deduct;
+
       updatedProvinces[p.provinceId.toString()] = {
         ...p,
-        factoriesCount: currentCount - deduct,
+        factoriesCount: nextCount,
+        factoryTiers: nextBatches,
       };
 
       remainingToDeduct -= deduct;
@@ -197,9 +211,11 @@ export class IndustryCalculator {
       const p = sortedProvinces[loopIndex]!;
       const current = updatedProvinces[p.provinceId.toString()]!;
       if (current.factoriesCount > 0) {
+        const nextBatches = this.removeFactories(current.factoryTiers, 1);
         updatedProvinces[p.provinceId.toString()] = {
           ...current,
           factoriesCount: current.factoriesCount - 1,
+          factoryTiers: nextBatches,
         };
         remainingToDeduct--;
       }
@@ -213,12 +229,19 @@ export class IndustryCalculator {
   }
 
   public static calculateProvinceGdp(
-    province: { maxSlots?: number; factoriesCount?: number },
-    equipmentTechLevel = 1.0,
+    province: {
+      maxSlots?: number;
+      factoriesCount?: number;
+      factoryTiers?: FactoryBatch[];
+    },
+    fallbackTechLevel = 1.0,
   ): number {
+    if (province.factoryTiers && province.factoryTiers.length > 0) {
+      return this.calculateBatchesTotalYield(province.factoryTiers);
+    }
     const activeFactories = province.factoriesCount ?? 1;
     const activeYield =
-      activeFactories * this.calculateFactoryYield(equipmentTechLevel);
+      activeFactories * this.calculateFactoryYield(fallbackTechLevel);
     return Math.floor(activeYield);
   }
 
