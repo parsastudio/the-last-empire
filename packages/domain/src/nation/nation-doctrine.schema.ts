@@ -12,6 +12,7 @@ export const AiDoctrineWeightsSchema = z.object({
   globalMarketWeight: z.number().min(0).max(1).default(0.35),
   domesticInfraWeight: z.number().min(0).max(1).default(0.25),
   geopoliticsWeight: z.number().min(0).max(1).default(0.15),
+  researchDisparityThreshold: z.number().positive().default(1.0),
   peacetimeArmyCap: z.number().min(0).max(1).default(0.7),
 });
 

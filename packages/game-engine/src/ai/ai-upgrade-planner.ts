@@ -4,6 +4,7 @@ import {
   Nation,
   Province,
   IndustryCalculator,
+  AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
@@ -114,35 +115,68 @@ export class AIUpgradePlanner {
       }
     }
 
-    let indStepsTaken = 0;
-    while (indStepsTaken < 3) {
-      const nextIndCost = IndustryCalculator.calculateResearchStepCost(
-        nation.industrialLevel +
-          indStepsTaken * IndustryCalculator.RESEARCH_STEP,
-      );
-      if (currentTreasury >= nextIndCost && innovationBudget >= nextIndCost) {
-        actions.push(ActionFactory.investIndustrialResearch(nation.id));
-        currentTreasury -= nextIndCost;
-        innovationBudget -= nextIndCost;
-        indStepsTaken++;
-      } else {
-        break;
-      }
-    }
+    const weights =
+      nation.doctrineWeights ??
+      AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
 
-    let milStepsTaken = 0;
-    while (milStepsTaken < 3) {
-      const nextMilCost = ResearchManager.getMilitaryTechCost(
-        nation.military.techLevel +
-          milStepsTaken * ResearchManager.RESEARCH_STEP,
-      );
-      if (currentTreasury >= nextMilCost && innovationBudget >= nextMilCost) {
-        actions.push(ActionFactory.investResearch(nation.id));
-        currentTreasury -= nextMilCost;
-        innovationBudget -= nextMilCost;
-        milStepsTaken++;
+    const threshold = weights.researchDisparityThreshold ?? 1.0;
+    let simulatedMilTech = nation.military.techLevel;
+    let simulatedIndTech = nation.industrialLevel;
+    let stepsTaken = 0;
+
+    while (stepsTaken < 4 && innovationBudget > 0 && currentTreasury > 0) {
+      const nextMilCost = ResearchManager.getMilitaryTechCost(simulatedMilTech);
+      const nextIndCost =
+        IndustryCalculator.calculateResearchStepCost(simulatedIndTech);
+
+      const costRatio = nextMilCost / Math.max(1, nextIndCost);
+
+      if (costRatio <= threshold) {
+        if (currentTreasury >= nextMilCost && innovationBudget >= nextMilCost) {
+          actions.push(ActionFactory.investResearch(nation.id));
+          currentTreasury -= nextMilCost;
+          innovationBudget -= nextMilCost;
+          simulatedMilTech = Number(
+            (simulatedMilTech + ResearchManager.RESEARCH_STEP).toFixed(1),
+          );
+          stepsTaken++;
+        } else if (
+          currentTreasury >= nextIndCost &&
+          innovationBudget >= nextIndCost
+        ) {
+          actions.push(ActionFactory.investIndustrialResearch(nation.id));
+          currentTreasury -= nextIndCost;
+          innovationBudget -= nextIndCost;
+          simulatedIndTech = Number(
+            (simulatedIndTech + IndustryCalculator.RESEARCH_STEP).toFixed(2),
+          );
+          stepsTaken++;
+        } else {
+          break;
+        }
       } else {
-        break;
+        if (currentTreasury >= nextIndCost && innovationBudget >= nextIndCost) {
+          actions.push(ActionFactory.investIndustrialResearch(nation.id));
+          currentTreasury -= nextIndCost;
+          innovationBudget -= nextIndCost;
+          simulatedIndTech = Number(
+            (simulatedIndTech + IndustryCalculator.RESEARCH_STEP).toFixed(2),
+          );
+          stepsTaken++;
+        } else if (
+          currentTreasury >= nextMilCost &&
+          innovationBudget >= nextMilCost
+        ) {
+          actions.push(ActionFactory.investResearch(nation.id));
+          currentTreasury -= nextMilCost;
+          innovationBudget -= nextMilCost;
+          simulatedMilTech = Number(
+            (simulatedMilTech + ResearchManager.RESEARCH_STEP).toFixed(1),
+          );
+          stepsTaken++;
+        } else {
+          break;
+        }
       }
     }
 
