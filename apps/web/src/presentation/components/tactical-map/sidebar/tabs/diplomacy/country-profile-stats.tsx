@@ -20,6 +20,7 @@ export interface CountryProfileData {
   stability: number;
   tension: number;
   guarantorName?: string;
+  isArmsEligible?: boolean;
 }
 
 interface CountryProfileStatsProps {
@@ -27,7 +28,7 @@ interface CountryProfileStatsProps {
 }
 
 export function CountryProfileStats({ data }: CountryProfileStatsProps) {
-  const isArmsEligible = data.tension < 50;
+  const isArmsEligible = data.isArmsEligible ?? data.tension < 50;
 
   return (
     <div className="space-y-3 font-mono text-xs dir-rtl font-sans">
@@ -112,7 +113,7 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
         ) : (
           <span className="text-[10px] font-bold text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
             <Lock size={10} />
-            تنش بالای ۵۰٪
+            {data.tension >= 50 ? "تنش بالای ۵۰٪" : "عدم برتری فناوری"}
           </span>
         )}
       </div>

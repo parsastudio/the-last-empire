@@ -35,7 +35,11 @@ export function WideMilitaryView({
       const rel = nation.relations[canonical] || nation.relations[n.id];
       const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
       const tension = rel ? (rel.tension ?? 10) : 10;
-      return stance !== "WAR" && tension < 50;
+      return (
+        stance !== "WAR" &&
+        tension < 50 &&
+        n.military.techLevel > nation.military.techLevel
+      );
     }).length;
   }, [nationsMap, nation]);
 

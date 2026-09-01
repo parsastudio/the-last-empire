@@ -115,6 +115,10 @@ export function resolveProfileRelation(
         ] || allNations[liveNation.securityGuarantorId]
       : null;
 
+  const humanTech = humanNation?.military.techLevel ?? 1.0;
+  const isArmsEligible =
+    tension < 50 && stance !== "WAR" && techLevel > humanTech;
+
   return {
     code: displayCode.toUpperCase(),
     name,
@@ -137,6 +141,7 @@ export function resolveProfileRelation(
       stability: liveNation ? liveNation.government.stability : 50,
       tension,
       guarantorName: guarantorNation?.name,
+      isArmsEligible,
     },
   };
 }
