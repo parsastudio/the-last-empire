@@ -16,6 +16,8 @@ interface DiplomacyTargetCardProps {
   alignment?: number;
   tension?: number;
   posture?: DiplomaticPosture;
+  hasSecurityGuarantee?: boolean;
+  isEmergencyProtectorate?: boolean;
 }
 
 export function DiplomacyTargetCard({
@@ -26,6 +28,8 @@ export function DiplomacyTargetCard({
   alignment = 0,
   tension = 10,
   posture,
+  hasSecurityGuarantee = false,
+  isEmergencyProtectorate = false,
 }: DiplomacyTargetCardProps) {
   const flagEmoji = getFlagEmoji(flagCode || code);
   const alignColor = getAlignmentColor(alignment);
@@ -74,6 +78,8 @@ export function DiplomacyTargetCard({
         <DiplomaticStanceBadge
           stance={stance as DiplomaticStance}
           posture={posture}
+          hasSecurityGuarantee={hasSecurityGuarantee}
+          isEmergencyProtectorate={isEmergencyProtectorate}
         />
       </div>
     </div>

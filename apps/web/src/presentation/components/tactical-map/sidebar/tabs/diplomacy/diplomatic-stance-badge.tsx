@@ -6,6 +6,7 @@ import {
   Globe,
   Compass,
   ShieldCheck,
+  Skull,
 } from "lucide-react";
 import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 import {
@@ -19,13 +20,23 @@ interface DiplomaticStanceBadgeProps {
   stance: DiplomaticStance;
   posture?: DiplomaticPosture;
   hasSecurityGuarantee?: boolean;
+  isEmergencyProtectorate?: boolean;
 }
 
 export function DiplomaticStanceBadge({
   stance,
   posture,
   hasSecurityGuarantee = false,
+  isEmergencyProtectorate = false,
 }: DiplomaticStanceBadgeProps) {
+  if (isEmergencyProtectorate) {
+    return (
+      <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[9px] font-bold flex items-center gap-1 font-sans">
+        <Skull size={10} /> تحت‌الحمایگی استعماری
+      </span>
+    );
+  }
+
   if (hasSecurityGuarantee) {
     return (
       <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[9px] font-bold flex items-center gap-1 font-sans">

@@ -122,6 +122,10 @@ export function WideDiplomacyView({
           alignment={diplomacy.selectedRelation.alignment}
           tension={diplomacy.selectedRelation.tension}
           posture={diplomacy.selectedRelation.posture}
+          hasSecurityGuarantee={diplomacy.selectedRelation.hasSecurityGuarantee}
+          isEmergencyProtectorate={
+            diplomacy.selectedRelation.isEmergencyProtectorate
+          }
         />
 
         {onFocusCountry && (
@@ -144,6 +148,9 @@ export function WideDiplomacyView({
             currentStance={diplomacy.selectedRelation.stance}
             hasSecurityGuarantee={
               diplomacy.selectedRelation.hasSecurityGuarantee
+            }
+            isEmergencyProtectorate={
+              diplomacy.selectedRelation.isEmergencyProtectorate
             }
             provincesMap={provincesMap}
             clientNation={humanNation}

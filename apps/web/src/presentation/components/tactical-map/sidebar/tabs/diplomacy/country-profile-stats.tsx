@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Lock,
   ShieldCheck,
+  Skull,
   Cpu,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@geopolitics/domain";
@@ -20,6 +21,7 @@ export interface CountryProfileData {
   stability: number;
   tension: number;
   guarantorName?: string;
+  isEmergencyProtectorate?: boolean;
   isArmsEligible?: boolean;
 }
 
@@ -85,13 +87,41 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
       </div>
 
       {data.guarantorName && (
-        <div className="bg-cyan-950/20 border border-cyan-500/40 p-3 rounded-2xl flex items-center justify-between font-sans">
-          <div className="flex items-center gap-1.5 text-xs text-cyan-300">
-            <ShieldCheck size={14} className="text-cyan-400 shrink-0" />
-            <span className="text-[11px] font-bold">چتر امنیتی فعال:</span>
+        <div
+          className={`p-3 rounded-2xl flex items-center justify-between font-sans border ${
+            data.isEmergencyProtectorate
+              ? "bg-rose-950/20 border-rose-500/40"
+              : "bg-cyan-950/20 border-cyan-500/40"
+          }`}
+        >
+          <div
+            className={`flex items-center gap-1.5 text-xs ${
+              data.isEmergencyProtectorate ? "text-rose-300" : "text-cyan-300"
+            }`}
+          >
+            {data.isEmergencyProtectorate ? (
+              <Skull
+                size={14}
+                className="text-rose-400 shrink-0 animate-pulse"
+              />
+            ) : (
+              <ShieldCheck size={14} className="text-cyan-400 shrink-0" />
+            )}
+            <span className="text-[11px] font-bold">
+              {data.isEmergencyProtectorate
+                ? "معاهده تحت‌الحمایگی استعماری:"
+                : "چتر امنیتی فعال:"}
+            </span>
           </div>
-          <span className="text-[10px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 px-2.5 py-0.5 rounded-lg">
-            تحت حمایت {data.guarantorName}
+          <span
+            className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${
+              data.isEmergencyProtectorate
+                ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
+                : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+            }`}
+          >
+            تحت {data.isEmergencyProtectorate ? "الحاق و استعمار" : "حمایت"}{" "}
+            {data.guarantorName}
           </span>
         </div>
       )}
