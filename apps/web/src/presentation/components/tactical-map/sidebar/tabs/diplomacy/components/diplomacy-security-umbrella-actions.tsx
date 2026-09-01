@@ -86,8 +86,8 @@ export function DiplomacySecurityUmbrellaActions({
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          در صورت تهاجم دشمن، ۶٪ از ارتش مدرن این کشور در سنگرهای شما مستقر
-          می‌شود.
+          در صورت تهاجم دشمن، نیروی ضربتی معادل ۶٪ GDP شما با لول تسلیحاتی این
+          کشور در سنگرهایتان مستقر می‌شود.
         </p>
         <button
           onClick={onCancelSecurityGuarantee}
@@ -100,6 +100,10 @@ export function DiplomacySecurityUmbrellaActions({
     );
   }
 
+  if (isWar) {
+    return null;
+  }
+
   const defaultValidation: SecurityGuaranteeValidationResult = {
     isValid: false,
     gdpRatio: 1,
@@ -108,7 +112,7 @@ export function DiplomacySecurityUmbrellaActions({
     isGdpValid: false,
     isTechValid: false,
     isTensionValid: false,
-    isNotWar: !isWar,
+    isNotWar: true,
   };
 
   const safeGuaranteeVal = guaranteeValidation || defaultValidation;
@@ -116,25 +120,24 @@ export function DiplomacySecurityUmbrellaActions({
 
   return (
     <div className="space-y-2 font-sans">
-      {!isWar && (
-        <button
-          onClick={() => setIsGuaranteeModalOpen(true)}
-          className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-black flex items-center gap-2">
-              <ShieldCheck size={16} className="text-cyan-400" />
-              <span>پیمان چتر امنیتی و دفاع سرزمینی</span>
-            </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-              ۲٪ GDP • بررسی شروط
-            </span>
-          </div>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
-            مشاهده چک‌لیست شروط چهارگانه و تضمین دفاعی با اعزام ۶٪ ارتش ضامن.
-          </p>
-        </button>
-      )}
+      <button
+        onClick={() => setIsGuaranteeModalOpen(true)}
+        className="w-full p-3.5 rounded-2xl bg-cyan-950/25 hover:bg-cyan-950/45 border border-cyan-500/40 hover:border-cyan-400 text-cyan-300 text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
+      >
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black flex items-center gap-2">
+            <ShieldCheck size={16} className="text-cyan-400" />
+            <span>پیمان چتر امنیتی و دفاع سرزمینی</span>
+          </span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
+            ۲٪ GDP • بررسی شروط
+          </span>
+        </div>
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          مشاهده چک‌لیست شروط و تضمین دفاعی با استقرار نیروی ضربت معادل ۶٪ GDP
+          شما.
+        </p>
+      </button>
 
       <button
         onClick={() => setIsProtectorateModalOpen(true)}

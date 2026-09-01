@@ -80,11 +80,11 @@ export class PeaceConcessionBuilder {
       sourceTwmi: aiTwmi,
       targetTwmi: humanTwmi,
       isAiOffering: true,
-      moneyAmount: Math.floor(maxAiCash * 0.8),
+      moneyAmount: maxAiCash,
       concededProvinceIds: provsToConcede.map((p) => p.provinceId),
       concededProvincesNames: provsToConcede.map((p) => p.nameFa),
-      headline: "پیشنهاد واگذاری حداکثر قلمرو و پرداخت باج سنگین",
-      description: `دولت ${aiNation.name} برای نجات بقای خود، پیشنهاد واگذاری ${provsToConcede.length} استان به همراه پرداخت بخش عمده خزانه‌اش را دارد.`,
+      headline: "پیشنهاد واگذاری حداکثر قلمرو و تخلیه کامل خزانه و وام‌ها",
+      description: `دولت ${aiNation.name} برای نجات بقای خود، پیشنهاد واگذاری ${provsToConcede.length} استان به همراه پرداخت ۱۰۰٪ کل موجودی نقد و توان استقراض خزانه‌اش را دارد.`,
       canAffordTerms: true,
     };
   }

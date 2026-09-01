@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import {
   ShieldCheck,
-  ShieldAlert,
   Coins,
   CheckCircle2,
   XCircle,
@@ -55,8 +54,8 @@ export function SecurityGuaranteeModal({
       id: "gdp",
       title: "نسبت تولید ناخالص ملی (GDP)",
       desc: isEmergency
-        ? "تولید ناخالص کشور ضامن باید حداقل ۲ برابر شما باشد."
-        : "تولید ناخالص کشور ضامن باید بین ۲ تا ۱۰ برابر شما باشد.",
+        ? "تولید ناخالص کشور ضامن باید حداقل برابر شما باشد."
+        : "تولید ناخالص کشور ضامن باید بین ۱ تا ۱۰ برابر شما باشد.",
       currentValue: `${PersianNumberFormatter.toPersianDigits(validation.gdpRatio)}x برابری`,
       isValid: validation.isGdpValid,
       icon: Scale,
@@ -143,11 +142,12 @@ export function SecurityGuaranteeModal({
         <div className="p-3.5 bg-background/50 border border-border/70 rounded-2xl flex items-start gap-2.5 text-xs text-foreground/90 leading-relaxed shadow-inner">
           <ShieldCheck size={18} className="text-cyan-400 shrink-0 mt-0.5" />
           <p className="text-[11px] text-muted-foreground">
-            با امضای این معاهده، در زمان وقوع تهاجم دشمن به استان‌های شما، معادل{" "}
+            با امضای این معاهده، در زمان تهاجم دشمن به استان‌های شما، نیروی ضربت
+            کمکی فوق‌پیشرفته‌ای{" "}
             <strong className="text-foreground font-black">
-              ۶٪ از کل ارتش مدرن {targetName}
+              به ارزش معادل ۶٪ از GDP شما (با سطح فناوری دفاعی {targetName})
             </strong>{" "}
-            به عنوان نیروی ضربت پشتیبان در سنگرهای دفاعی شما مستقر خواهد شد.
+            در خطوط دفاعی شما مستقر خواهد شد.
           </p>
         </div>
 
@@ -213,13 +213,6 @@ export function SecurityGuaranteeModal({
           </div>
         </div>
 
-        {!validation.isValid && validation.reason && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-2 text-xs text-rose-300">
-            <ShieldAlert size={15} className="shrink-0 text-rose-400" />
-            <span>عدم امکان انعقاد معاهده: {validation.reason}</span>
-          </div>
-        )}
-
         <div className="pt-2">
           <button
             onClick={handleSign}
@@ -236,7 +229,7 @@ export function SecurityGuaranteeModal({
                 ? "در حال ارسال پیش‌نویس و ثبت معاهده..."
                 : validation.isValid
                   ? `امضای رسمی پیمان چتر امنیتی با ${targetName}`
-                  : "شروط معاهده احراز نگردیده است"}
+                  : "عدم امکان امضای معاهده"}
             </span>
           </button>
         </div>
