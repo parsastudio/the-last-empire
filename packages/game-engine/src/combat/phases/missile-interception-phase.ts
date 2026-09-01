@@ -30,7 +30,7 @@ export class MissileInterceptionPhase {
     const defAirDefenseEff = input.defAirDefense * input.defAdMult;
 
     if (input.defAirDefense <= 0) {
-      const destroyedFactories = Math.floor(attMissilesEff / 6);
+      const destroyedFactories = Math.floor(attMissilesEff / 12);
       return {
         rawDefAirDefenseLost: 0,
         defAirDefenseRemainingRaw: 0,
@@ -74,7 +74,7 @@ export class MissileInterceptionPhase {
     const defAirDefenseRemainingEff =
       defAirDefenseRemainingRaw * input.defAdMult;
 
-    const destroyedFactories = Math.floor(surplusMissiles / 6);
+    const destroyedFactories = Math.floor(surplusMissiles / 12);
 
     return {
       rawDefAirDefenseLost,
