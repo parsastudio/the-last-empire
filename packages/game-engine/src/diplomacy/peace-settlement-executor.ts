@@ -13,6 +13,7 @@ import {
   DebtCalculatorUtility,
   PendingProposalManagerUtility,
   IndustryCalculator,
+  DIPLOMACY_CONFIG,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
@@ -175,7 +176,7 @@ export class PeaceSettlementExecutor {
         updatedNations,
         winnerNation.id,
         loserNation.id,
-        winnerNation.isAi ? 5 : 0,
+        winnerNation.isAi ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS : 0,
       );
 
       updatedProvinces = annexationResult.updatedProvinces;
@@ -227,7 +228,9 @@ export class PeaceSettlementExecutor {
           sObj.warFocusTargetId === canonicalTarget
             ? null
             : sObj.warFocusTargetId,
-        postWarCooldownTurns: sourceNation.isAi ? 5 : 0,
+        postWarCooldownTurns: sourceNation.isAi
+          ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
+          : 0,
         relations: sRelations,
       };
 
@@ -237,7 +240,9 @@ export class PeaceSettlementExecutor {
           tObj.warFocusTargetId === canonicalSource
             ? null
             : tObj.warFocusTargetId,
-        postWarCooldownTurns: targetNation.isAi ? 5 : 0,
+        postWarCooldownTurns: targetNation.isAi
+          ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
+          : 0,
         relations: tRelations,
       };
 
