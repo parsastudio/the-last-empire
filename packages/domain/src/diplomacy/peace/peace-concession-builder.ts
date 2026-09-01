@@ -24,10 +24,13 @@ export class PeaceConcessionBuilder {
     );
     const provsToCedeCount = Math.min(
       2,
-      Math.max(1, allHumanProvinces.length - 1),
+      Math.max(0, allHumanProvinces.length - 1),
     );
     const demandedProvs = sortedHumanProvs.slice(0, provsToCedeCount);
     const demandedMoney = Math.floor(maxHumanCash * 0.6);
+
+    const settlementType: PeaceSettlementType =
+      demandedProvs.length > 0 ? "TERRITORY_CONCESSION" : "INDEMNITY";
 
     const canAfford =
       humanNation.treasury >= demandedMoney ||
@@ -38,10 +41,20 @@ export class PeaceConcessionBuilder {
         ) >=
         demandedMoney;
 
+    const headline =
+      demandedProvs.length > 0
+        ? "صلح تلخ و آتش‌بس با واگذاری استان مرزی و تاوان سنگین"
+        : "مطالبه حداکثر غرامت نقدی و آتش‌بس اضطراری";
+
+    const description =
+      demandedProvs.length > 0
+        ? `امپراتوری ${aiNation.name} به دلیل برتری قاطع، شرط توقف تهاجم را واگذاری ${demandedProvs.length} استان و پرداخت غرامت جنگی تعیین کرده است.`
+        : `امپراتوری ${aiNation.name} به دلیل برتری قاطع، شرط توقف تهاجم و حفظ تک‌استان مادری شما را پرداخت غرامت سنگین جنگی تعیین کرده است.`;
+
     return {
       sourceNationId: aiNation.id,
       targetNationId: humanNation.id,
-      settlementType: "TERRITORY_CONCESSION",
+      settlementType,
       ratio,
       sourceTwmi: aiTwmi,
       targetTwmi: humanTwmi,
@@ -49,8 +62,8 @@ export class PeaceConcessionBuilder {
       moneyAmount: demandedMoney,
       concededProvinceIds: demandedProvs.map((p) => p.provinceId),
       concededProvincesNames: demandedProvs.map((p) => p.nameFa),
-      headline: "صلح تلخ و آتش‌بس با واگذاری استان مرزی و تاوان سنگین",
-      description: `امپراتوری ${aiNation.name} به دلیل برتری قاطع، شرط توقف تهاجم را واگذاری ${demandedProvs.length} استان و پرداخت غرامت جنگی تعیین کرده است.`,
+      headline,
+      description,
       canAffordTerms: canAfford,
     };
   }
@@ -67,15 +80,26 @@ export class PeaceConcessionBuilder {
     const sortedProvs = [...allAiProvinces].sort(
       (a, b) => getProvinceGdp(b) - getProvinceGdp(a),
     );
-    const provsToConcede = sortedProvs.slice(
-      0,
-      Math.max(1, sortedProvs.length - 1),
-    );
+    const provsToConcedeCount = Math.max(0, allAiProvinces.length - 1);
+    const provsToConcede = sortedProvs.slice(0, provsToConcedeCount);
+
+    const settlementType: PeaceSettlementType =
+      provsToConcede.length > 0 ? "TERRITORY_CONCESSION" : "INDEMNITY";
+
+    const headline =
+      provsToConcede.length > 0
+        ? "پیشنهاد واگذاری حداکثر قلمرو و تخلیه کامل خزانه و وام‌ها"
+        : "پیشنهاد تخلیه کامل خزانه و پرداخت حداکثر غرامت مالی";
+
+    const description =
+      provsToConcede.length > 0
+        ? `دولت ${aiNation.name} برای نجات بقای خود، پیشنهاد واگذاری ${provsToConcede.length} استان به همراه پرداخت ۱۰۰٪ کل موجودی نقد و توان استقراض خزانه‌اش را دارد.`
+        : `دولت ${aiNation.name} به دلیل محصور بودن در تک‌استان مادری، برای حفظ استقلال و جلوگیری از سقوط، پیشنهاد پرداخت ۱۰۰٪ موجودی نقد و توان استقراض خزانه‌اش را دارد.`;
 
     return {
       sourceNationId: aiNation.id,
       targetNationId: humanNation.id,
-      settlementType: "TERRITORY_CONCESSION",
+      settlementType,
       ratio,
       sourceTwmi: aiTwmi,
       targetTwmi: humanTwmi,
@@ -83,8 +107,8 @@ export class PeaceConcessionBuilder {
       moneyAmount: maxAiCash,
       concededProvinceIds: provsToConcede.map((p) => p.provinceId),
       concededProvincesNames: provsToConcede.map((p) => p.nameFa),
-      headline: "پیشنهاد واگذاری حداکثر قلمرو و تخلیه کامل خزانه و وام‌ها",
-      description: `دولت ${aiNation.name} برای نجات بقای خود، پیشنهاد واگذاری ${provsToConcede.length} استان به همراه پرداخت ۱۰۰٪ کل موجودی نقد و توان استقراض خزانه‌اش را دارد.`,
+      headline,
+      description,
       canAffordTerms: true,
     };
   }
@@ -102,15 +126,19 @@ export class PeaceConcessionBuilder {
     const f = (1.0 - ratio) / 0.5;
     const money = Math.floor(maxAiCash * f * 0.5);
 
-    const borderProvs = allAiProvinces.filter((p) =>
-      LandNeighborResolver.hasProvinceLandBorder(
-        p.provinceId,
-        humanNation.id,
-        provincesMap,
-      ),
-    );
+    const canCedeProvince = allAiProvinces.length > 1;
+    const borderProvs = canCedeProvince
+      ? allAiProvinces.filter((p) =>
+          LandNeighborResolver.hasProvinceLandBorder(
+            p.provinceId,
+            humanNation.id,
+            provincesMap,
+          ),
+        )
+      : [];
+
     const chosenProvs =
-      f >= 0.5 && borderProvs.length > 0
+      canCedeProvince && f >= 0.5 && borderProvs.length > 0
         ? [
             [...borderProvs].sort(
               (a, b) => getProvinceGdp(b) - getProvinceGdp(a),
@@ -155,15 +183,19 @@ export class PeaceConcessionBuilder {
     const v = (ratio - 1.0) / 1.0;
     const demandedMoney = Math.floor(maxHumanCash * v * 0.5);
 
-    const humanBorderProvs = allHumanProvinces.filter((p) =>
-      LandNeighborResolver.hasProvinceLandBorder(
-        p.provinceId,
-        aiNation.id,
-        provincesMap,
-      ),
-    );
+    const canCedeProvince = allHumanProvinces.length > 1;
+    const humanBorderProvs = canCedeProvince
+      ? allHumanProvinces.filter((p) =>
+          LandNeighborResolver.hasProvinceLandBorder(
+            p.provinceId,
+            aiNation.id,
+            provincesMap,
+          ),
+        )
+      : [];
+
     const demandedProvs =
-      v >= 0.5 && humanBorderProvs.length > 0
+      canCedeProvince && v >= 0.5 && humanBorderProvs.length > 0
         ? [
             [...humanBorderProvs].sort(
               (a, b) => getProvinceGdp(b) - getProvinceGdp(a),
