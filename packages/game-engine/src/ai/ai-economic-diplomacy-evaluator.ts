@@ -20,16 +20,23 @@ export class AIEconomicDiplomacyEvaluator {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
-    availableTreasury?: number,
+    geopoliticsBudget?: number,
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
     vectorsByTarget?: Map<string, GeopoliticalVector>,
     globalCoalition?: GlobalCoalition | null,
+    availableTreasury?: number,
   ): { action: GameAction; cost: number } | null {
+    const currentBudget =
+      geopoliticsBudget !== undefined
+        ? geopoliticsBudget
+        : Math.floor(nation.treasury * 0.15);
     const currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
-    if (currentTreasury <= 0 || !nation.relations) return null;
+    if (currentBudget <= 0 || currentTreasury <= 0 || !nation.relations) {
+      return null;
+    }
 
     const sourceGdp = getNationGdp(nation, provincesMap);
     const targets =
@@ -88,7 +95,7 @@ export class AIEconomicDiplomacyEvaluator {
 
       const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
-      if (currentTreasury < Math.floor(cost * 3.5)) {
+      if (currentBudget < cost || currentTreasury < cost) {
         continue;
       }
 

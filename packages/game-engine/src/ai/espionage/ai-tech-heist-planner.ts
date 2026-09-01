@@ -12,12 +12,18 @@ export class AITechHeistPlanner {
     nation: Nation,
     allNations: Record<string, Nation>,
     provincesMap: Record<string, Province> | undefined,
-    currentTreasury: number,
+    geopoliticsBudget: number,
     executedTiers: string[],
     rankMap?: Map<string, number>,
     reachableTargets?: Nation[],
     provincesByOwnerMap?: Map<string, Province[]>,
+    currentTreasury?: number,
   ): { action: GameAction; cost: number } | null {
+    const effectiveTreasury = currentTreasury ?? geopoliticsBudget;
+    if (geopoliticsBudget <= 0 || effectiveTreasury <= 0) {
+      return null;
+    }
+
     const targets =
       reachableTargets ??
       GeopoliticalReachResolver.getReachableTargets(
@@ -76,7 +82,7 @@ export class AITechHeistPlanner {
       );
       const cost = EspionageCalculator.calculateOperationCost(targetGdp, 3);
 
-      if (currentTreasury >= cost) {
+      if (geopoliticsBudget >= cost && effectiveTreasury >= cost) {
         eligibleTargets.push({
           target,
           cost,

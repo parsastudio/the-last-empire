@@ -135,10 +135,11 @@ export class AIActionBuilder {
       currentNation,
       allNations,
       provincesMap,
-      upgradeResult.remainingTreasury,
+      procurementResult.strategicWallets.geopolitics,
       rankMap,
       context.reachableTargets,
       provincesByOwnerMap,
+      upgradeResult.remainingTreasury,
     );
     actions.push(...espionageResult.actions);
 
@@ -158,11 +159,12 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       actions,
-      espionageResult.remainingTreasury,
+      espionageResult.remainingGeopoliticsBudget,
       lockedTargets,
       rankMap,
       context,
       globalCoalition,
+      espionageResult.remainingTreasury,
     );
 
     return actions;
@@ -173,12 +175,15 @@ export class AIActionBuilder {
     allNations: Record<string, Nation>,
     provincesMap: Record<string, Province> | undefined,
     actions: GameAction[],
-    availableTreasury?: number,
+    geopoliticsBudget?: number,
     lockedTargets?: Set<string>,
     rankMap?: Map<string, number>,
     context?: NationDecisionContext,
     globalCoalition?: GlobalCoalition | null,
+    availableTreasury?: number,
   ): void {
+    let currentGeoBudget =
+      geopoliticsBudget !== undefined ? geopoliticsBudget : 0;
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
@@ -187,15 +192,17 @@ export class AIActionBuilder {
       nation,
       allNations,
       provincesMap,
-      currentTreasury,
+      currentGeoBudget,
       rankMap,
       context?.reachableTargets,
       context?.vectorsByTarget,
       globalCoalition,
+      currentTreasury,
     );
 
     if (aidResult) {
       actions.push(aidResult.action);
+      currentGeoBudget -= aidResult.cost;
       currentTreasury -= aidResult.cost;
       if ("targetNationId" in aidResult.action) {
         aidedTargetId = aidResult.action.targetNationId;
