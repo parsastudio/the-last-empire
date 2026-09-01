@@ -2,8 +2,7 @@ import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.confi
 import { UnitType } from "@/domain/military/military.schema";
 
 export class MilitaryPricingCalculator {
-  public static readonly MAX_IMPORT_TECH_MULTIPLIER = 3.0;
-  public static readonly TECH_STEP_SURCHARGE_RATE = 0.05;
+  public static readonly ARMS_IMPORT_BASE = 2.2;
 
   public static calculateUnitTypePrice(unitType: UnitType): number {
     return MILITARY_UNIT_STATS[unitType].moneyCost;
@@ -23,14 +22,8 @@ export class MilitaryPricingCalculator {
     const buyerTech = Math.max(1.0, buyerTechLevel);
     const sellerTech = Math.max(1.0, sellerTechLevel);
     const techDelta = Math.max(0, sellerTech - buyerTech);
-    const steps = Math.round(techDelta * 10);
-    const multiplier = 1.0 + steps * this.TECH_STEP_SURCHARGE_RATE;
-    return Number(
-      Math.min(
-        this.MAX_IMPORT_TECH_MULTIPLIER,
-        Math.max(1.0, multiplier),
-      ).toFixed(2),
-    );
+    const multiplier = Math.pow(this.ARMS_IMPORT_BASE, techDelta);
+    return Number(multiplier.toFixed(2));
   }
 
   public static calculateArmsImportUnitPrice(

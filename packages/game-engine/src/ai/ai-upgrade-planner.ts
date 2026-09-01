@@ -7,10 +7,7 @@ import {
   AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import {
-  AIProcurementPlanner,
-  AIPosture,
-} from "@/engine/ai/ai-procurement-planner";
+import { AIPosture } from "@/engine/ai/ai-procurement-planner";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
 
 export interface UpgradePlanResult {
@@ -24,8 +21,8 @@ export class AIUpgradePlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
-    rankMap?: Map<string, number>,
-    precomputedPosture?: AIPosture,
+    _rankMap?: Map<string, number>,
+    _precomputedPosture?: AIPosture,
     ownedProvinces?: Province[],
   ): UpgradePlanResult {
     let currentTreasury =
@@ -88,16 +85,15 @@ export class AIUpgradePlanner {
       allNations,
       currentTreasury,
     );
-    if (importResult.action) {
-      actions.push(importResult.action);
+    if (importResult.actions.length > 0) {
+      actions.push(...importResult.actions);
       currentTreasury = importResult.remainingTreasury;
     }
 
     const milTechCost = ResearchManager.getMilitaryTechCost(
-      nation,
-      provincesMap,
+      nation.military.techLevel,
     );
-    if (currentTreasury >= milTechCost * 1.8) {
+    if (currentTreasury >= milTechCost * 1.5) {
       actions.push(ActionFactory.investResearch(nation.id));
       currentTreasury -= milTechCost;
     }
