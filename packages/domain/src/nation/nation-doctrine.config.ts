@@ -10,6 +10,7 @@ export const AI_DOCTRINE_PRESETS: Record<AiDoctrineType, AiDoctrineWeights> = {
     globalMarketWeight: 0.2,
     domesticInfraWeight: 0.3,
     geopoliticsWeight: 0.15,
+    researchDisparityThreshold: 1.2,
     peacetimeArmyCap: 0.85,
   },
   MILITARIST_HAWK: {
@@ -17,6 +18,7 @@ export const AI_DOCTRINE_PRESETS: Record<AiDoctrineType, AiDoctrineWeights> = {
     globalMarketWeight: 0.45,
     domesticInfraWeight: 0.2,
     geopoliticsWeight: 0.15,
+    researchDisparityThreshold: 2.5,
     peacetimeArmyCap: 0.95,
   },
   MERCANTILE_ECONOMIC: {
@@ -24,6 +26,7 @@ export const AI_DOCTRINE_PRESETS: Record<AiDoctrineType, AiDoctrineWeights> = {
     globalMarketWeight: 0.45,
     domesticInfraWeight: 0.25,
     geopoliticsWeight: 0.15,
+    researchDisparityThreshold: 0.8,
     peacetimeArmyCap: 0.5,
   },
   DOMESTIC_INDUSTRIALIST: {
@@ -31,6 +34,7 @@ export const AI_DOCTRINE_PRESETS: Record<AiDoctrineType, AiDoctrineWeights> = {
     globalMarketWeight: 0.25,
     domesticInfraWeight: 0.25,
     geopoliticsWeight: 0.05,
+    researchDisparityThreshold: 0.4,
     peacetimeArmyCap: 0.75,
   },
 };
