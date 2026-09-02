@@ -139,6 +139,14 @@ export const InitiateBattleActionSchema = z.object({
   attackType: z.enum(["LAND", "NAVAL"]).optional(),
 });
 
+export const ResolveDilemmaActionSchema = z.object({
+  id: z.string(),
+  nationId: z.string(),
+  type: z.literal("RESOLVE_DILEMMA"),
+  eventId: z.string(),
+  choiceId: z.string(),
+});
+
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetEconomicDoctrineActionSchema,
   BuildFactoryActionSchema,
@@ -157,6 +165,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   RequestLoanActionSchema,
   InvestResearchActionSchema,
   InitiateBattleActionSchema,
+  ResolveDilemmaActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
@@ -201,5 +210,6 @@ export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
 export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
 export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
+export type ResolveDilemmaAction = z.infer<typeof ResolveDilemmaActionSchema>;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;

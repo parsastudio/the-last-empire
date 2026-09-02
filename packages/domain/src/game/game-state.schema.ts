@@ -2,6 +2,7 @@ import { z } from "zod";
 import { NationSchema } from "@/domain/nation/nation.schema";
 import { ProvinceSchema } from "@/domain/province/province.schema";
 import { PendingDiplomaticProposalSchema } from "@/domain/diplomacy/diplomacy.schema";
+import { DilemmaEventSchema } from "@/domain/events/dilemma.schema";
 
 export const TurnLogLevelSchema = z.enum([
   "INFO",
@@ -50,6 +51,7 @@ export const TurnLogEventCodeSchema = z.enum([
   "COALITION_FORMED",
   "COALITION_MEMBER_FALLEN",
   "VICTORY_ACHIEVED",
+  "DILEMMA_RESOLVED",
   "GENERIC_EVENT",
 ]);
 
@@ -93,6 +95,7 @@ export const GameStateSchema = z.object({
   pendingProposals: z.array(PendingDiplomaticProposalSchema).default([]),
   turnLogs: z.array(TurnLogEntrySchema),
   globalCoalition: GlobalCoalitionSchema.nullable().optional(),
+  activeDilemma: DilemmaEventSchema.nullable().optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;

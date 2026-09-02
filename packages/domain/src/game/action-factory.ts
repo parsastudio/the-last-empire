@@ -16,6 +16,7 @@ import {
   RequestLoanAction,
   InvestResearchAction,
   InitiateBattleAction,
+  ResolveDilemmaAction,
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
@@ -266,6 +267,20 @@ export class ActionFactory {
       airForceToDeploy,
       targetProvinceId,
       attackType,
+    };
+  }
+
+  public static resolveDilemma(
+    nationId: string,
+    eventId: string,
+    choiceId: string,
+  ): ResolveDilemmaAction {
+    return {
+      id: this.createId("dilemma-resolve"),
+      nationId,
+      type: "RESOLVE_DILEMMA",
+      eventId,
+      choiceId,
     };
   }
 }
