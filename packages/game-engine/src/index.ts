@@ -11,6 +11,7 @@ export * from "./actions/executors/politics/war-declaration-executor";
 export * from "./actions/executors/politics/treaty-termination-executor";
 export * from "./actions/executors/politics/foreign-aid-executor";
 export * from "./actions/executors/dilemma/dilemma-action-executor";
+export * from "./actions/executors/projects/project-action-executor";
 
 export * from "./ai/geopolitical-vector-calculator";
 export * from "./ai/geopolitical-matrix-cache";

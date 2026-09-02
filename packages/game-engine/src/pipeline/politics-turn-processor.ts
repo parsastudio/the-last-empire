@@ -22,6 +22,7 @@ export class PoliticsTurnProcessor {
       attackedTargetIdsThisTurn: [],
       sentAidTargetIdsThisTurn: [],
       hasBoughtProvinceThisTurn: false,
+      boostedProjectIdsThisTurn: [],
       government: {
         ...updated.government,
         stability: newStability,

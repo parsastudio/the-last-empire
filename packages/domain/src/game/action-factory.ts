@@ -17,6 +17,7 @@ import {
   InvestResearchAction,
   InitiateBattleAction,
   ResolveDilemmaAction,
+  BoostNationalProjectAction,
 } from "@/domain/game/action.schema";
 import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
@@ -28,6 +29,7 @@ import { DiplomacyActionFactory } from "@/domain/game/actions/factories/diplomac
 import { EspionageActionFactory } from "@/domain/game/actions/factories/espionage-action.factory";
 import { PoliticsActionFactory } from "@/domain/game/actions/factories/politics-action.factory";
 import { DilemmaActionFactory } from "@/domain/game/actions/factories/dilemma-action.factory";
+import { ProjectActionFactory } from "@/domain/game/actions/factories/projects/project-action.factory";
 
 export class ActionFactory {
   public static setEconomicDoctrine(
@@ -211,5 +213,12 @@ export class ActionFactory {
     choiceId: string,
   ): ResolveDilemmaAction {
     return DilemmaActionFactory.resolveDilemma(nationId, eventId, choiceId);
+  }
+
+  public static boostProject(
+    nationId: string,
+    projectId: string,
+  ): BoostNationalProjectAction {
+    return ProjectActionFactory.boostProject(nationId, projectId);
   }
 }

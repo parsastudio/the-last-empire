@@ -48,6 +48,10 @@ import {
   ResolveDilemmaActionSchema,
   ResolveDilemmaAction,
 } from "@/domain/game/actions/schemas/dilemma-action.schema";
+import {
+  BoostNationalProjectActionSchema,
+  BoostNationalProjectAction,
+} from "@/domain/game/actions/schemas/projects/project-action.schema";
 
 export * from "@/domain/game/actions/schemas/economy-action.schema";
 export * from "@/domain/game/actions/schemas/military-action.schema";
@@ -55,6 +59,7 @@ export * from "@/domain/game/actions/schemas/diplomacy-action.schema";
 export * from "@/domain/game/actions/schemas/espionage-action.schema";
 export * from "@/domain/game/actions/schemas/politics-action.schema";
 export * from "@/domain/game/actions/schemas/dilemma-action.schema";
+export * from "@/domain/game/actions/schemas/projects/project-action.schema";
 
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetEconomicDoctrineActionSchema,
@@ -75,6 +80,7 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   InvestResearchActionSchema,
   InitiateBattleActionSchema,
   ResolveDilemmaActionSchema,
+  BoostNationalProjectActionSchema,
 ]);
 
 export const ActionResultSchema = z.object({
