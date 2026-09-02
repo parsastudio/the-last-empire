@@ -29,7 +29,7 @@ export function DiplomacyAlliesBox({
           <span className="text-[11px] font-bold">لیست متحدین:</span>
           <span className="text-[10px] flex items-center gap-1">
             <Shield size={11} />
-            فاقد هم‌پیمان رسمی
+            فاقد شریک استراتژیک
           </span>
         </div>
         <span className="text-[10px] font-mono text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-md border border-border/50">
@@ -45,7 +45,7 @@ export function DiplomacyAlliesBox({
         <div className="flex items-center gap-2">
           <Users2 size={14} className="text-primary shrink-0" />
           <span className="text-muted-foreground font-bold text-[11px]">
-            لیست متحدین رسمی:
+            لیست متحدین استراتژیک:
           </span>
         </div>
 

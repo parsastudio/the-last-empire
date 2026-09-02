@@ -8,6 +8,7 @@ import {
   GeopoliticalReachResolver,
   SecurityGuaranteeValidator,
   NationRelationResolver,
+  getNationGdp,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -16,6 +17,94 @@ import {
 import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
 
 export class AITreatyEvaluator {
+  public static evaluateTreatyCancellation(
+    nation: Nation,
+    allNations: Record<string, Nation>,
+    provincesMap?: Record<string, Province>,
+    lockedTargets?: Set<string>,
+    vectorsByTarget?: Map<string, GeopoliticalVector>,
+  ): GameAction | null {
+    if (!nation.relations) return null;
+
+    const isHawk =
+      nation.doctrine === "MILITARIST_HAWK" ||
+      nation.doctrine === "GLOBAL_HEGEMON";
+
+    const isSourceAtWar = NationRelationResolver.isAtWar(nation, allNations);
+
+    for (const [targetId, rel] of Object.entries(nation.relations)) {
+      if (
+        rel.stance !== "STRATEGIC_PARTNERSHIP" &&
+        rel.stance !== "NON_AGGRESSION_PACT"
+      ) {
+        continue;
+      }
+
+      const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
+      const targetNation = allNations[canonicalTarget] || allNations[targetId];
+      if (!targetNation || !targetNation.isAlive) continue;
+
+      if (
+        DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)
+      ) {
+        continue;
+      }
+
+      const vector =
+        vectorsByTarget?.get(canonicalTarget) ??
+        GeopoliticalVectorCalculator.calculate(
+          nation,
+          targetNation,
+          allNations,
+          provincesMap,
+        );
+
+      const isDiscreditedAlly = targetNation.globalReputation <= -25;
+
+      const hasStolenTerritory =
+        vector.lostProvincesCount > 0 &&
+        vector.powerRatio <= 0.6 &&
+        !isSourceAtWar;
+
+      const targetGdp = getNationGdp(targetNation, provincesMap);
+      const isTargetInCrisis =
+        targetNation.government.stability < 30 ||
+        targetNation.nationalDebt >= targetGdp * 0.35 ||
+        NationRelationResolver.countActiveWars(targetNation, allNations) >= 2;
+
+      const isHawkTemptation =
+        isHawk &&
+        vector.isNeighbor &&
+        vector.powerRatio <= 0.45 &&
+        vector.alignment <= 15 &&
+        !isSourceAtWar;
+
+      const isNonHawkOpportunity =
+        !isHawk &&
+        vector.isNeighbor &&
+        vector.powerRatio <= 0.3 &&
+        vector.alignment <= 5 &&
+        isTargetInCrisis &&
+        nation.government.stability >= 40 &&
+        !isSourceAtWar;
+
+      if (
+        isDiscreditedAlly ||
+        hasStolenTerritory ||
+        isHawkTemptation ||
+        isNonHawkOpportunity
+      ) {
+        return ActionFactory.diplomaticProposal(
+          nation.id,
+          targetNation.id,
+          "CANCEL_TREATY",
+        );
+      }
+    }
+
+    return null;
+  }
+
   public static evaluate(
     nation: Nation,
     allNations: Record<string, Nation>,
@@ -26,6 +115,17 @@ export class AITreatyEvaluator {
     vectorsByTarget?: Map<string, GeopoliticalVector>,
   ): GameAction | null {
     if (!nation.relations) return null;
+
+    const cancelAction = this.evaluateTreatyCancellation(
+      nation,
+      allNations,
+      provincesMap,
+      lockedTargets,
+      vectorsByTarget,
+    );
+    if (cancelAction) {
+      return cancelAction;
+    }
 
     const targets =
       reachableTargets ??
@@ -114,7 +214,7 @@ export class AITreatyEvaluator {
           vector,
         );
 
-      if (partnershipUtility >= 30) {
+      if (partnershipUtility >= 20) {
         return ActionFactory.diplomaticProposal(
           nation.id,
           targetNation.id,
@@ -125,7 +225,7 @@ export class AITreatyEvaluator {
       if (rel.stance === "NORMAL_DIPLOMACY") {
         const napUtility = UtilityDecisionEngine.calculateNapUtility(vector);
 
-        if (napUtility >= 5) {
+        if (napUtility >= 0) {
           return ActionFactory.diplomaticProposal(
             nation.id,
             targetNation.id,

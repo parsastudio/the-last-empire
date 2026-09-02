@@ -38,7 +38,6 @@ export class AIEconomicDiplomacyEvaluator {
       return null;
     }
 
-    const sourceGdp = getNationGdp(nation, provincesMap);
     const targets =
       reachableTargets ??
       GeopoliticalReachResolver.getReachableTargets(
@@ -76,23 +75,11 @@ export class AIEconomicDiplomacyEvaluator {
           provincesMap,
         );
 
-      if (vector.tension >= 30 || vector.alignment < 0) {
+      if (vector.tension > 30 || vector.alignment < 15) {
         continue;
       }
 
       const targetGdp = getNationGdp(targetNation, provincesMap);
-
-      const isDiplomaticCultivation =
-        rel.stance !== "STRATEGIC_PARTNERSHIP" &&
-        vector.alignment >= 20 &&
-        vector.tension < 15 &&
-        sourceGdp >= targetGdp * 0.8 &&
-        vector.posture === "NATURAL_ALLY";
-
-      if (!isDiplomaticCultivation) {
-        continue;
-      }
-
       const cost = TreatyEvaluator.calculateForeignAidCost(targetGdp);
 
       if (currentBudget < cost || currentTreasury < cost) {

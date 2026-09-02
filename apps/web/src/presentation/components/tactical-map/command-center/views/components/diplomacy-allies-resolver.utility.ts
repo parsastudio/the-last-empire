@@ -84,58 +84,7 @@ export class DiplomacyAlliesResolver {
             allies.push(
               this.buildAllyDetail(
                 otherNation,
-                "شراکت استراتژیک و ائتلاف دفاعی",
-                canonicalHuman,
-                nationsMap,
-                provincesMap,
-              ),
-            );
-          }
-        }
-      }
-    }
-
-    if (targetNation.securityGuarantorId) {
-      const gId = CountryRegistry.resolveCanonicalId(
-        targetNation.securityGuarantorId,
-      );
-      if (gId !== canonicalTarget && !seen.has(gId)) {
-        seen.add(gId);
-        const guarantor =
-          nationsMap[gId] || nationsMap[targetNation.securityGuarantorId];
-        if (guarantor && guarantor.isAlive) {
-          const label = targetNation.isEmergencyProtectorate
-            ? "ابرقدرت حامی استعماری"
-            : "پیمان چتر امنیتی (ضامن)";
-          allies.push(
-            this.buildAllyDetail(
-              guarantor,
-              label,
-              canonicalHuman,
-              nationsMap,
-              provincesMap,
-            ),
-          );
-        }
-      }
-    }
-
-    for (const other of Object.values(nationsMap)) {
-      if (other.isAlive && other.securityGuarantorId) {
-        const gId = CountryRegistry.resolveCanonicalId(
-          other.securityGuarantorId,
-        );
-        if (gId === canonicalTarget) {
-          const cOther = CountryRegistry.resolveCanonicalId(other.id);
-          if (!seen.has(cOther)) {
-            seen.add(cOther);
-            const label = other.isEmergencyProtectorate
-              ? "کشور تحت‌الحمایه"
-              : "تحت چتر امنیتی این کشور";
-            allies.push(
-              this.buildAllyDetail(
-                other,
-                label,
+                "شراکت استراتژیک",
                 canonicalHuman,
                 nationsMap,
                 provincesMap,
@@ -158,7 +107,7 @@ export class DiplomacyAlliesResolver {
             allies.push(
               this.buildAllyDetail(
                 other,
-                "شراکت استراتژیک و ائتلاف دفاعی",
+                "شراکت استراتژیک",
                 canonicalHuman,
                 nationsMap,
                 provincesMap,

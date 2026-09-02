@@ -184,7 +184,7 @@ export class GeopoliticalVectorCalculator {
     const tension = Math.max(0, Math.min(100, rawTension));
 
     let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
-    if (alignment >= 25 && tension < 40) {
+    if (alignment >= 20 && tension < 40) {
       posture = "NATURAL_ALLY";
     } else if (
       alignment < 0 &&
