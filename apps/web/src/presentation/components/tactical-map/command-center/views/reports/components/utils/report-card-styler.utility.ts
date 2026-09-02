@@ -10,6 +10,7 @@ import {
   Users,
   Info,
   Sparkles,
+  Factory,
   LucideIcon,
 } from "lucide-react";
 import { TurnLogEntry } from "@geopolitics/domain";
@@ -118,13 +119,30 @@ export class ReportCardStylerUtility {
         };
 
       case "FOREIGN_AID_SENT":
-      case "ARMS_TRADE":
         return {
           cardBg: "bg-emerald-950/20",
           border: "border-emerald-500/40 hover:border-emerald-500",
           icon: Coins,
           iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
         };
+
+      case "ARMS_TRADE": {
+        const isMachinery = log.params?.["tradeType"] === "MACHINERY";
+        if (isMachinery) {
+          return {
+            cardBg: "bg-cyan-950/20",
+            border: "border-cyan-500/40 hover:border-cyan-500",
+            icon: Factory,
+            iconBg: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+          };
+        }
+        return {
+          cardBg: "bg-emerald-950/20",
+          border: "border-emerald-500/40 hover:border-emerald-500",
+          icon: Coins,
+          iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+        };
+      }
 
       case "DIPLOMATIC_PROPOSAL_SENT":
       case "TREATY_ACCEPTED":

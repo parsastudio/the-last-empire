@@ -32,13 +32,25 @@ export class AIUpgradePlanner {
       return { actions, remainingTreasury: currentTreasury };
     }
 
+    const myProvs =
+      ownedProvinces ??
+      Object.values(provincesMap || {}).filter(
+        (p) => p.ownerNationId === nation.id,
+      );
+
     let innovationBudget = wallets
       ? Math.min(currentTreasury, wallets.innovation)
       : Math.floor(currentTreasury * 0.3);
 
     let machineryImportBudget = wallets
-      ? Math.min(currentTreasury, wallets.globalMarket)
-      : Math.floor(currentTreasury * 0.2);
+      ? Math.min(
+          currentTreasury,
+          Math.max(
+            wallets.globalMarket,
+            Math.floor(wallets.domesticInfra * 0.4),
+          ),
+        )
+      : Math.floor(currentTreasury * 0.25);
 
     let domesticInfraBudget = wallets
       ? Math.min(currentTreasury, wallets.domesticInfra)
@@ -49,6 +61,8 @@ export class AIUpgradePlanner {
         nation,
         allNations,
         machineryImportBudget,
+        provincesMap,
+        myProvs,
       );
 
       if (importResult.actions.length > 0) {
@@ -59,12 +73,6 @@ export class AIUpgradePlanner {
         domesticInfraBudget += machineryImportBudget;
       }
     }
-
-    const myProvs =
-      ownedProvinces ??
-      Object.values(provincesMap || {}).filter(
-        (p) => p.ownerNationId === nation.id,
-      );
 
     let totalEmptySlots = 0;
     for (let i = 0; i < myProvs.length; i++) {

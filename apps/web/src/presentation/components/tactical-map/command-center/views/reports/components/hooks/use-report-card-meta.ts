@@ -57,6 +57,8 @@ export function useReportCardMeta({
   const isCoalitionFormed = log.eventCode === "COALITION_FORMED";
   const isVictoryAchieved = log.eventCode === "VICTORY_ACHIEVED";
   const isExportSummary = log.eventCode === "ARMS_EXPORT_SUMMARY";
+  const isMachineryTrade =
+    log.eventCode === "ARMS_TRADE" && log.params?.["tradeType"] === "MACHINERY";
 
   const exportBuyersList = useMemo<ExportSalesBuyerItem[]>(() => {
     if (!isExportSummary) return [];
@@ -106,6 +108,7 @@ export function useReportCardMeta({
     isCoalitionFormed,
     isVictoryAchieved,
     isExportSummary,
+    isMachineryTrade,
     exportBuyersList,
     activePendingProposal,
     isIncomingInteractiveProposal,

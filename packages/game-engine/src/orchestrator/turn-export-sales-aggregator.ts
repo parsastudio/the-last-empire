@@ -18,6 +18,7 @@ export class TurnExportSalesAggregator {
       const isSellerTrade =
         log.eventCode === "ARMS_TRADE" &&
         log.params?.["role"] === "SELLER" &&
+        log.params?.["tradeType"] !== "MACHINERY" &&
         CountryRegistry.resolveCanonicalId(log.sourceNationId) ===
           canonicalHuman;
 
