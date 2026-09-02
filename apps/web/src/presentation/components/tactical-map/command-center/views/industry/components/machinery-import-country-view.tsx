@@ -85,8 +85,8 @@ export function MachineryImportCountryView({
                 <strong className="text-primary font-mono">
                   +{PersianNumberFormatter.toPersianDigits(techDelta)}
                 </strong>{" "}
-                سطح (قیمت‌گذاری متناسب با نرخ رشد ۲ برابری ارزش تولیدی کارخانجات
-                محاسبه می‌گردد).
+                سطح (قیمت‌گذاری متناسب با نرخ رشد ۱.۵ برابری ارزش تولیدی
+                کارخانجات محاسبه می‌گردد).
               </>
             ) : (
               "سطح فناوری صنعتی این کشور برابر با تجهیزات شماست."
