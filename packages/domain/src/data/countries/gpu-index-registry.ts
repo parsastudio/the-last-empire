@@ -1,6 +1,5 @@
 const GPU_INDEX_MAPPING: Record<string, number> = {
   TZA: 12,
-  SAH: 13,
   COD: 22,
   KEN: 24,
   ZAF: 36,
@@ -27,7 +26,6 @@ const GPU_INDEX_MAPPING: Record<string, number> = {
   PER: 42,
   COL: 43,
   GTM: 49,
-  PAN: 50,
   VEN: 51,
   ECU: 55,
   CUB: 58,

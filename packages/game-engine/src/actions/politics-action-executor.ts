@@ -186,6 +186,7 @@ export class PoliticsActionExecutor {
             nation,
             state.nations,
             state.provinces,
+            state.currentTurn,
           );
 
           if (isAccepted) {

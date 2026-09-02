@@ -5,12 +5,12 @@ import {
   SecurityFeeCalculatorUtility,
   NAVAL_FLEET_CONFIG,
   DebtCalculatorUtility,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
   MilitaryPayrollCalculator,
 } from "@geopolitics/game-engine";
-import { CountryRegistry } from "@/domain/data/countries";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;

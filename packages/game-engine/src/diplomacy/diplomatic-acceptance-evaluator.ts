@@ -13,6 +13,7 @@ export class DiplomaticAcceptanceEvaluator {
     sender: Nation,
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
+    currentTurn?: number,
   ): boolean {
     const vector = GeopoliticalVectorCalculator.calculate(
       receiver,
@@ -28,6 +29,7 @@ export class DiplomaticAcceptanceEvaluator {
       vector,
       null,
       provincesMap,
+      currentTurn,
     );
 
     return evaluation.willAccept;

@@ -3,7 +3,6 @@ export interface MissilePhaseInput {
   defAirDefense: number;
   attDroneMult: number;
   defAdMult: number;
-  targetFactoriesCount?: number;
 }
 
 export interface MissilePhaseOutput {

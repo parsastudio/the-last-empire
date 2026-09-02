@@ -37,8 +37,6 @@ function calculateLogPriority(
       return isHumanInvolved ? 3 : 6;
 
     case "WAR_DECLARED":
-    case "ALLIANCE_INTERVENTION":
-    case "ALLIANCE_BETRAYED":
     case "COALITION_MEMBER_FALLEN":
       return isHumanInvolved ? 4 : 7;
 

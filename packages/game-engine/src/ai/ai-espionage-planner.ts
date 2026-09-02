@@ -49,7 +49,6 @@ export class AIEspionagePlanner {
       provincesMap,
       currentGeoBudget,
       executedTiers,
-      rankMap,
       provincesByOwnerMap,
       currentTreasury,
     );

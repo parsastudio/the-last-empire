@@ -67,9 +67,7 @@ function mapManifestToNationDetails(
 
     const gdp = item.gdp ?? profile?.gdp ?? 50_000_000_000;
     const population = item.population ?? profile?.population ?? 10_000_000;
-    const treasury =
-      item.startingTreasury ??
-      (profile?.gdp ? Math.floor(gdp * 0.05) : Math.floor(gdp * 0.05));
+    const treasury = item.startingTreasury ?? Math.floor(gdp * 0.05);
     const rank = item.initialRank || 1;
     const gov =
       item.defaultGovernment ||

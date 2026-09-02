@@ -53,6 +53,7 @@ export class UtilityDecisionEngine {
     vector: GeopoliticalVector,
     globalCoalition?: GlobalCoalition | null,
     provincesMap?: Record<string, Province>,
+    currentTurn?: number,
   ): AcceptanceEvaluation {
     return ProposalAcceptanceEvaluator.evaluate(
       proposalType,
@@ -61,6 +62,7 @@ export class UtilityDecisionEngine {
       vector,
       globalCoalition,
       provincesMap,
+      currentTurn,
     );
   }
 }

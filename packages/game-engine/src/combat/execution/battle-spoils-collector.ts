@@ -6,7 +6,7 @@ import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 export class BattleSpoilsCollector {
   public static collectSpoils(
     conquestResult: ProvinceConquestResult,
-    defender: Nation,
+    _defender: Nation,
     calcResult: BattleCalculationResult,
   ): BattleSpoilsDetails {
     const conqueredProvs = conquestResult.conqueredProvincesList || [];
@@ -27,11 +27,6 @@ export class BattleSpoilsCollector {
       gainedPopulation,
       gainedGdp,
       lootedTreasury: calcResult.treasuryLooted || 0,
-      capturedInfantry: 0,
-      capturedArmor: 0,
-      capturedAirDefense: 0,
-      capturedAirForce: 0,
-      capturedDrones: 0,
     };
   }
 }
