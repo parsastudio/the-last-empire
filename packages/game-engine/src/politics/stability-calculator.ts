@@ -1,6 +1,9 @@
 import type { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
-import { NationRelationResolver } from "@geopolitics/domain";
+import {
+  NationRelationResolver,
+  GovernmentTraitsUtility,
+} from "@geopolitics/domain";
 
 export class StabilityCalculator {
   public static readonly PEACE_RECOVERY_RATE = 1.0;
@@ -18,26 +21,37 @@ export class StabilityCalculator {
     allNations?: Record<string, Nation>,
   ): number {
     let delta = 0;
+    const govModifiers = GovernmentTraitsUtility.getModifiers(
+      nation.government?.type,
+    );
 
     const warActive =
       isAtWar ?? NationRelationResolver.isAtWar(nation, allNations);
 
     if (!warActive) {
       if (nation.government.stability < 85) {
-        delta += this.PEACE_RECOVERY_RATE;
+        delta +=
+          this.PEACE_RECOVERY_RATE *
+          govModifiers.peaceStabilityRecoveryMultiplier;
       }
     } else {
       const activeWarsCount = allNations
         ? NationRelationResolver.countActiveWars(nation, allNations)
         : 1;
-      delta -= Math.max(1, activeWarsCount) * this.WAR_FATIGUE_PER_ENEMY;
+      delta -=
+        Math.max(1, activeWarsCount) *
+        this.WAR_FATIGUE_PER_ENEMY *
+        govModifiers.warStabilityFatigueMultiplier;
     }
 
     const reputation = nation.globalReputation ?? 0;
     if (reputation >= 30) {
       delta += this.PRESTIGE_BOOST_RATE;
     } else if (reputation <= -30) {
-      delta -= this.ISOLATION_PENALTY_RATE;
+      const penalty =
+        this.ISOLATION_PENALTY_RATE /
+        govModifiers.crisisStabilityResistanceMultiplier;
+      delta -= penalty;
     }
 
     const stabilityModifier = ModifierManager.getModifierImpact(
