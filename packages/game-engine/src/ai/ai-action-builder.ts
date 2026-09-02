@@ -19,6 +19,8 @@ import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { AIEconomicStanceEvaluator } from "@/engine/ai/ai-economic-stance-evaluator";
 import { AiWalletBudgetAllocator } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
+import { AINationalProjectPlanner } from "@/engine/ai/ai-national-project-planner";
+import { AIBuyProvincePlanner } from "@/engine/ai/ai-buy-province-planner";
 
 interface NationDecisionContext {
   ownedProvinces: Province[];
@@ -129,6 +131,16 @@ export class AIActionBuilder {
     );
     actions.push(...upgradeResult.actions);
 
+    const projectResult = AINationalProjectPlanner.planProjects(
+      currentNation,
+      upgradeResult.remainingTreasury,
+      context.posture,
+    );
+    actions.push(...projectResult.actions);
+
+    const treasuryAfterProjects =
+      upgradeResult.remainingTreasury - projectResult.spentMoney;
+
     const espionageResult = AIEspionagePlanner.planEspionage(
       currentNation,
       allNations,
@@ -137,7 +149,7 @@ export class AIActionBuilder {
       rankMap,
       context.reachableTargets,
       provincesByOwnerMap,
-      upgradeResult.remainingTreasury,
+      treasuryAfterProjects,
     );
     actions.push(...espionageResult.actions);
 
@@ -152,6 +164,21 @@ export class AIActionBuilder {
       actions.push(attackAction);
     }
 
+    const buyProvinceResult = AIBuyProvincePlanner.planBuyProvince(
+      currentNation,
+      allNations,
+      provincesMap,
+      rankMap,
+      context.reachableTargets,
+      espionageResult.remainingTreasury,
+    );
+    if (buyProvinceResult.action) {
+      actions.push(buyProvinceResult.action);
+    }
+
+    const remainingForDiplomacy =
+      espionageResult.remainingTreasury - buyProvinceResult.cost;
+
     this.appendDiplomaticAndWarActions(
       currentNation,
       allNations,
@@ -162,7 +189,7 @@ export class AIActionBuilder {
       rankMap,
       context,
       globalCoalition,
-      espionageResult.remainingTreasury,
+      remainingForDiplomacy,
     );
 
     return actions;
