@@ -90,6 +90,17 @@ export class GuarantorRetaliationApplier {
       const existingRel = defenderNation.relations?.[canonicalHuman];
       if (existingRel?.stance === "WAR") continue;
 
+      const humanRelWithDefender = humanNation.relations?.[item.nationId];
+      const hasPeacePact =
+        existingRel?.stance === "STRATEGIC_PARTNERSHIP" ||
+        existingRel?.stance === "NON_AGGRESSION_PACT" ||
+        humanRelWithDefender?.stance === "STRATEGIC_PARTNERSHIP" ||
+        humanRelWithDefender?.stance === "NON_AGGRESSION_PACT";
+
+      if (hasPeacePact) {
+        continue;
+      }
+
       const defRelations: Record<string, RelationProfile> = {
         ...(defenderNation.relations || {}),
         [canonicalHuman]: {

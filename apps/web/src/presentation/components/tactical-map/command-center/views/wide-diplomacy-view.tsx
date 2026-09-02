@@ -3,6 +3,7 @@ import { DiplomacyListItem } from "@/presentation/components/tactical-map/sideba
 import { CountryProfileStats } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/country-profile-stats";
 import { AdvancedDiplomacyActions } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/advanced-diplomacy-actions";
 import { DiplomacyTargetCard } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-target-card";
+import { DiplomacyAlliesBox } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-allies-box";
 import { Search, MapPin } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -82,6 +83,14 @@ export function WideDiplomacyView({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-in fade-in duration-200 dir-rtl text-right font-sans">
       <div className="lg:col-span-4 space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
+        <DiplomacyAlliesBox
+          targetNation={diplomacy.selectedTargetNation}
+          nationsMap={nationsMap}
+          provincesMap={provincesMap}
+          humanNationId={activeHumanId}
+          onSelectAlly={(code) => diplomacy.setActiveCode(code)}
+        />
+
         <div className="relative">
           <Search
             size={14}
