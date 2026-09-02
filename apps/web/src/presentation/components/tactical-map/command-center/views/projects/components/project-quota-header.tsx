@@ -16,49 +16,48 @@ export function ProjectQuotaHeader({
   const remainingQuota = Math.max(0, maxBoostsPerTurn - boostedCountThisTurn);
 
   return (
-    <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-4.5 rounded-3xl flex items-center justify-between gap-4 shadow-xl backdrop-blur-xl relative overflow-hidden font-sans dir-rtl text-right">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0 shadow-inner">
-          <Rocket size={22} className="animate-pulse" />
+    <div className="bg-card/95 border border-border/80 p-4.5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl backdrop-blur-2xl font-sans dir-rtl text-right">
+      <div className="flex items-center gap-3.5">
+        <div className="w-11 h-11 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0 shadow-inner">
+          <Rocket size={20} className="animate-pulse" />
         </div>
-        <div className="space-y-0.5">
-          <h3 className="text-sm font-black text-foreground">
-            توسعه و پیشبرد برنامه‌های راهبردی ملی
+        <div className="space-y-1">
+          <h3 className="text-sm md:text-base font-black text-foreground">
+            پژوهش‌ها و برنامه‌های راهبردی ملی
           </h3>
-          <span className="text-[11px] text-muted-foreground block">
-            در هر نوبت می‌توانید حداکثر به ۲ پروژه مجزا بودجه پژوهشی (هر گام ۵
-            میلیارد دلار) اختصاص دهید.
+          <span className="text-xs text-muted-foreground block font-sans">
+            سرمایه‌گذاری گام‌به‌گام در فناوری‌های کشور (هر گام ۵ میلیارد دلار)
           </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
-        <div className="flex items-center gap-2 font-mono text-xs bg-secondary/80 border border-border/70 px-3.5 py-2 rounded-2xl">
-          <Wallet size={14} className="text-gdp" />
-          <span className="text-[10px] text-muted-foreground font-sans">
-            خزانه ملی:
+      <div className="flex items-center gap-3 font-mono text-xs flex-wrap">
+        <div className="flex items-center gap-2 bg-secondary/80 border border-border/70 px-4 py-2 rounded-2xl">
+          <Wallet size={15} className="text-gdp" />
+          <span className="text-xs text-muted-foreground font-sans font-bold">
+            خزانه:
           </span>
-          <span className="font-extrabold text-gdp text-xs">
+          <span className="font-black text-gdp text-sm font-mono">
             {PersianNumberFormatter.formatCurrency(treasury, true)}
           </span>
         </div>
 
         <div
-          className={`flex items-center gap-2 font-mono text-xs border px-3.5 py-2 rounded-2xl shadow-sm ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-2xl border font-sans text-xs shadow-sm ${
             remainingQuota > 0
-              ? "bg-primary/15 border-primary/40 text-primary"
-              : "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
+              ? "bg-primary/15 border-primary/40 text-primary font-bold"
+              : "bg-emerald-500/15 border-emerald-500/40 text-emerald-400 font-bold"
           }`}
         >
           {remainingQuota > 0 ? (
-            <Rocket size={14} />
+            <Rocket size={15} />
           ) : (
-            <CheckCircle2 size={14} />
+            <CheckCircle2 size={15} />
           )}
-          <span className="text-[10px] font-sans font-bold">
+          <span className="text-xs font-extrabold">
             {remainingQuota > 0
-              ? `سهمیه نوبت: ${PersianNumberFormatter.toPersianDigits(remainingQuota)} پروژه باقی‌مانده`
-              : "تکمیل سهمیه تزریق بودجه این نوبت"}
+              ? `سهمیه این نوبت: ${PersianNumberFormatter.toPersianDigits(remainingQuota)} از ${PersianNumberFormatter.toPersianDigits(maxBoostsPerTurn)}`
+              : "تکمیل سهمیه این نوبت"}
           </span>
         </div>
       </div>

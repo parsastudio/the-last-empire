@@ -1,14 +1,16 @@
 import React from "react";
 import {
-  Coins,
   CheckCircle2,
   Lock,
   Plus,
   Shield,
   Factory,
   Globe2,
-  ChevronLeft,
+  Coins,
   Check,
+  ChevronDown,
+  Clock,
+  Sparkles,
 } from "lucide-react";
 import {
   NationalProjectConfig,
@@ -20,9 +22,11 @@ interface ProjectCardProps {
   currentSteps: number;
   isCompleted: boolean;
   isBoostedThisTurn: boolean;
+  isExpanded: boolean;
   canAfford: boolean;
   hasAvailableQuota: boolean;
   isSubmitting: boolean;
+  onToggleExpand: () => void;
   onBoost: (project: NationalProjectConfig) => void;
 }
 
@@ -31,9 +35,11 @@ export function ProjectCard({
   currentSteps,
   isCompleted,
   isBoostedThisTurn,
+  isExpanded,
   canAfford,
   hasAvailableQuota,
   isSubmitting,
+  onToggleExpand,
   onBoost,
 }: ProjectCardProps) {
   const getCategoryIcon = () => {
@@ -68,132 +74,168 @@ export function ProjectCard({
 
   return (
     <div
-      className={`relative p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-4 font-sans dir-rtl text-right shadow-lg backdrop-blur-xl ${
+      className={`rounded-3xl border transition-all duration-300 font-sans dir-rtl text-right overflow-hidden shadow-md ${
         isCompleted
           ? "bg-emerald-950/20 border-emerald-500/40 ring-1 ring-emerald-500/20"
           : isBoostedThisTurn
-            ? "bg-primary/10 border-primary/40 shadow-primary/10"
-            : "bg-card/90 border-border/80 hover:border-primary/40 hover:bg-secondary/40"
+            ? "bg-primary/10 border-primary/50 shadow-primary/10 ring-1 ring-primary/20"
+            : "bg-card/90 border-border/80 hover:border-primary/40 hover:bg-secondary/40 hover:shadow-xl"
       }`}
     >
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-3 pb-2.5 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center border shadow-sm shrink-0 ${
-                isCompleted
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                  : isBoostedThisTurn
-                    ? "bg-primary/20 text-primary border-primary/40"
-                    : "bg-secondary/80 text-foreground border-border/70"
-              }`}
-            >
-              <Icon size={18} />
-            </div>
-            <div>
-              <h4 className="text-xs font-black text-foreground">
-                {project.nameFa}
-              </h4>
-              <span className="text-[10px] text-muted-foreground font-sans block">
-                {project.taglineFa}
-              </span>
-            </div>
-          </div>
-
-          <span
-            className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-lg border ${
-              project.tier === "SHORT_TERM"
-                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                : project.tier === "MID_TERM"
-                  ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                  : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+      <div
+        onClick={onToggleExpand}
+        className="p-4 md:p-5 flex items-center justify-between gap-4 cursor-pointer select-none"
+      >
+        <div className="flex items-center gap-3.5 flex-1 min-w-0">
+          <div
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 shadow-sm ${
+              isCompleted
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                : isBoostedThisTurn
+                  ? "bg-primary/20 text-primary border-primary/40"
+                  : "bg-secondary text-foreground border-border/70"
             }`}
           >
-            {project.tier === "SHORT_TERM"
-              ? "کوتاه‌مدت"
-              : project.tier === "MID_TERM"
-                ? "میان‌مدت"
-                : "ابرپروژه بلندمدت"}
-          </span>
+            <Icon size={19} />
+          </div>
+
+          <div className="flex items-center gap-2.5 truncate">
+            <span className="text-sm md:text-base font-black text-foreground tracking-tight truncate">
+              {project.nameFa}
+            </span>
+            <span
+              className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border shrink-0 ${
+                project.tier === "SHORT_TERM"
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                  : project.tier === "MID_TERM"
+                    ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                    : "bg-rose-500/10 text-rose-400 border-rose-500/30"
+              }`}
+            >
+              {project.tier === "SHORT_TERM"
+                ? "۱۰ گام"
+                : project.tier === "MID_TERM"
+                  ? "۲۰ گام"
+                  : "۳۰ گام"}
+            </span>
+          </div>
         </div>
 
-        <p className="text-xs text-muted-foreground leading-relaxed font-sans bg-background/50 p-3 rounded-2xl border border-border/40">
-          {project.descriptionFa}
-        </p>
-      </div>
-
-      <div className="space-y-3 pt-2 border-t border-border/40">
-        <div className="space-y-1.5 font-mono">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-[10px] text-muted-foreground font-sans">
-              پیشرفت گام‌ها:
-            </span>
-            <span className="font-bold text-foreground text-[11px]">
+        <div className="flex items-center gap-3.5 shrink-0">
+          <div className="hidden md:flex flex-col items-end gap-1.5 w-36 font-mono">
+            <span className="text-xs text-muted-foreground font-bold">
               گام {PersianNumberFormatter.toPersianDigits(clampedSteps)} از{" "}
               {PersianNumberFormatter.toPersianDigits(
                 project.totalStepsRequired,
-              )}{" "}
-              ({PersianNumberFormatter.toPersianDigits(progressPercent)}٪)
+              )}
             </span>
+            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/40">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  isCompleted
+                    ? "bg-emerald-400"
+                    : isBoostedThisTurn
+                      ? "bg-primary"
+                      : "bg-gdp"
+                }`}
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </div>
 
-          <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/40">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                isCompleted
-                  ? "bg-emerald-400"
-                  : isBoostedThisTurn
-                    ? "bg-primary shadow-sm shadow-primary/40"
-                    : "bg-gdp"
+          <div onClick={(e) => e.stopPropagation()}>
+            {isCompleted ? (
+              <div className="px-3.5 py-2 bg-emerald-950/40 text-emerald-400 border border-emerald-500/40 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-sm">
+                <CheckCircle2 size={15} />
+                <span>فعال و مستقر</span>
+              </div>
+            ) : isBoostedThisTurn ? (
+              <div className="px-3.5 py-2 bg-primary/20 text-primary border border-primary/30 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-sm">
+                <Check size={15} strokeWidth={3} />
+                <span>انجام شد</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onBoost(project)}
+                disabled={isButtonDisabled}
+                className="py-2.5 px-4 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-md shadow-primary/20 flex items-center gap-1.5 border border-primary/40 disabled:border-border/60"
+              >
+                {!hasAvailableQuota ? (
+                  <Lock size={13} />
+                ) : (
+                  <Plus size={14} strokeWidth={3} />
+                )}
+                <span>تزریق بودجه</span>
+              </button>
+            )}
+          </div>
+
+          <div className="p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronDown
+              size={18}
+              className={`transition-transform duration-300 ${
+                isExpanded ? "rotate-180 text-primary" : ""
               }`}
-              style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
+      </div>
 
-        {isCompleted ? (
-          <div className="w-full py-3 bg-emerald-950/30 border border-emerald-500/40 text-emerald-400 rounded-2xl text-xs font-black flex items-center justify-center gap-2 select-none shadow-inner font-sans">
-            <CheckCircle2 size={15} />
-            <span>پروژه با موفقیت تکمیل و امتیاز فعال است</span>
+      {isExpanded && (
+        <div className="px-5 pb-5 pt-3 border-t border-border/50 bg-background/50 space-y-3.5 animate-fade-smooth text-xs">
+          <div className="space-y-1 bg-secondary/40 p-4 rounded-2xl border border-border/60 shadow-inner">
+            <span className="text-[11px] font-mono font-bold text-primary block">
+              {project.taglineFa}
+            </span>
+            <p className="text-xs md:text-sm text-foreground/90 leading-relaxed font-sans font-medium">
+              {project.descriptionFa}
+            </p>
           </div>
-        ) : isBoostedThisTurn ? (
-          <div className="w-full py-3 bg-primary/15 border border-primary/30 text-primary rounded-2xl text-xs font-black flex items-center justify-center gap-1.5 select-none font-sans">
-            <Check size={14} strokeWidth={3} />
-            <span>بودجه گام جاری تزریق شد (۱/۱)</span>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => onBoost(project)}
-            disabled={isButtonDisabled}
-            className="w-full py-3 px-4 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-md shadow-primary/20 flex items-center justify-between gap-2 border border-primary/40 disabled:border-border/60"
-          >
-            <div className="flex items-center gap-1.5">
-              {!hasAvailableQuota ? (
-                <Lock size={14} />
-              ) : (
-                <Plus size={14} strokeWidth={3} />
-              )}
-              <span>
-                {!hasAvailableQuota
-                  ? "سقف پژوهش نوبت جاری تکمیل است"
-                  : !canAfford
-                    ? "موجودی خزانه ناکافی است"
-                    : "تزریق بودجه به گام بعدی"}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+            <div className="bg-secondary/50 p-3 rounded-2xl border border-border/50 flex items-center justify-between">
+              <span className="text-muted-foreground font-sans text-xs flex items-center gap-1.5 font-bold">
+                <Clock size={13} className="text-primary" />
+                کل گام‌های لازم:
+              </span>
+              <span className="font-extrabold text-foreground text-xs font-mono">
+                {PersianNumberFormatter.toPersianDigits(
+                  project.totalStepsRequired,
+                )}{" "}
+                گام
               </span>
             </div>
 
-            {hasAvailableQuota && canAfford && (
-              <span className="font-mono text-[11px] bg-black/25 px-2.5 py-0.5 rounded-lg">
+            <div className="bg-secondary/50 p-3 rounded-2xl border border-border/50 flex items-center justify-between">
+              <span className="text-muted-foreground font-sans text-xs flex items-center gap-1.5 font-bold">
+                <Coins size={13} className="text-gdp" />
+                سرمایه هر گام:
+              </span>
+              <span className="font-extrabold text-gdp text-xs font-mono">
                 {PersianNumberFormatter.formatCurrency(
                   project.costPerStep,
                   true,
                 )}
               </span>
-            )}
-          </button>
-        )}
-      </div>
+            </div>
+
+            <div className="bg-secondary/50 p-3 rounded-2xl border border-border/50 flex items-center justify-between">
+              <span className="text-muted-foreground font-sans text-xs flex items-center gap-1.5 font-bold">
+                <Sparkles size={13} className="text-amber-400" />
+                وضعیت طرح:
+              </span>
+              <span className="font-black text-foreground font-sans text-xs">
+                {isCompleted
+                  ? "تکمیل و در حال بهره‌برداری"
+                  : isBoostedThisTurn
+                    ? "بودجه این نوبت ثبت شد"
+                    : "آماده دریافت بودجه"}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
