@@ -1,0 +1,39 @@
+import { GameState } from "@/domain/game/game-state.schema";
+import { Nation } from "@/domain/nation/nation.schema";
+import { GameError } from "@/domain/shared/domain-utilities";
+import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+
+export class InvestIndustrialResearchExecutor {
+  public static execute(
+    state: GameState,
+    nation: Nation,
+    buyerKey: string,
+  ): GameState {
+    const cost = IndustryCalculator.calculateResearchStepCost(
+      nation.industrialLevel,
+      nation.government?.type,
+    );
+    if (nation.treasury < cost) {
+      throw new GameError(
+        "INSUFFICIENT_FUNDS",
+        "موجودی خزانه برای پژوهش صنعتی بومی کافی نیست.",
+      );
+    }
+
+    const nextIndustrialLevel = Number(
+      (nation.industrialLevel + IndustryCalculator.RESEARCH_STEP).toFixed(2),
+    );
+
+    return {
+      ...state,
+      nations: {
+        ...state.nations,
+        [buyerKey]: {
+          ...nation,
+          treasury: nation.treasury - cost,
+          industrialLevel: nextIndustrialLevel,
+        },
+      },
+    };
+  }
+}

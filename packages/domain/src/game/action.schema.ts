@@ -1,151 +1,60 @@
 import { z } from "zod";
-import { UnitTypeSchema } from "@/domain/military/military.schema";
-import { DiplomaticProposalTypeSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { GameStateSchema } from "@/domain/game/game-state.schema";
-import { EspionageTierSchema } from "@/domain/espionage/espionage.schema";
-import { EconomicDoctrineStanceSchema } from "@/domain/politics/economic-doctrine.schema";
+import {
+  SetEconomicDoctrineActionSchema,
+  BuildFactoryActionSchema,
+  EquipDomesticMachineryActionSchema,
+  InvestIndustrialResearchActionSchema,
+  BuyIndustrialEquipmentActionSchema,
+  BuyProvinceActionSchema,
+  RepayDebtActionSchema,
+  RequestLoanActionSchema,
+  SetEconomicDoctrineAction,
+  BuildFactoryAction,
+  EquipDomesticMachineryAction,
+  InvestIndustrialResearchAction,
+  BuyIndustrialEquipmentAction,
+  BuyProvinceAction,
+  RepayDebtAction,
+  RequestLoanAction,
+} from "@/domain/game/actions/schemas/economy-action.schema";
+import {
+  RecruitUnitActionSchema,
+  BuyArmsMarketActionSchema,
+  BuyNavalFleetActionSchema,
+  InitiateBattleActionSchema,
+  RecruitUnitAction,
+  BuyArmsMarketAction,
+  BuyNavalFleetAction,
+  InitiateBattleAction,
+} from "@/domain/game/actions/schemas/military-action.schema";
+import {
+  DiplomaticProposalActionSchema,
+  RespondDiplomaticProposalActionSchema,
+  SignPeaceSettlementActionSchema,
+  DiplomaticProposalAction,
+  RespondDiplomaticProposalAction,
+  SignPeaceSettlementAction,
+} from "@/domain/game/actions/schemas/diplomacy-action.schema";
+import {
+  ExecuteEspionageActionSchema,
+  ExecuteEspionageAction,
+} from "@/domain/game/actions/schemas/espionage-action.schema";
+import {
+  InvestResearchActionSchema,
+  InvestResearchAction,
+} from "@/domain/game/actions/schemas/politics-action.schema";
+import {
+  ResolveDilemmaActionSchema,
+  ResolveDilemmaAction,
+} from "@/domain/game/actions/schemas/dilemma-action.schema";
 
-export const SetEconomicDoctrineActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("SET_ECONOMIC_DOCTRINE"),
-  stance: EconomicDoctrineStanceSchema,
-});
-
-export const BuildFactoryActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("BUILD_FACTORY"),
-  quantity: z.number().int().positive().default(1),
-  provinceId: z.number().positive().optional(),
-});
-
-export const EquipDomesticMachineryActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("EQUIP_DOMESTIC_MACHINERY"),
-  quantity: z.number().positive().optional(),
-});
-
-export const InvestIndustrialResearchActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("INVEST_INDUSTRIAL_RESEARCH"),
-});
-
-export const BuyIndustrialEquipmentActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("BUY_INDUSTRIAL_EQUIPMENT"),
-  sellerNationId: z.string(),
-  quantity: z.number().positive(),
-});
-
-export const RecruitUnitActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("RECRUIT_UNIT"),
-  unitType: UnitTypeSchema,
-  quantity: z.number().positive(),
-});
-
-export const BuyArmsMarketActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("BUY_ARMS_MARKET"),
-  sellerNationId: z.string(),
-  unitType: UnitTypeSchema,
-  quantity: z.number().positive(),
-});
-
-export const BuyNavalFleetActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("BUY_NAVAL_FLEET"),
-  quantity: z.number().positive(),
-});
-
-export const BuyProvinceActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("BUY_PROVINCE"),
-  targetNationId: z.string().default(""),
-  provinceId: z.number().positive(),
-  cost: z.number().nonnegative().default(0),
-});
-
-export const DiplomaticProposalActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("DIPLOMATIC_PROPOSAL"),
-  targetNationId: z.string(),
-  proposalType: DiplomaticProposalTypeSchema,
-});
-
-export const RespondDiplomaticProposalActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("RESPOND_DIPLOMATIC_PROPOSAL"),
-  proposalId: z.string(),
-  accept: z.boolean(),
-});
-
-export const SignPeaceSettlementActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  targetNationId: z.string(),
-  type: z.literal("SIGN_PEACE_SETTLEMENT"),
-  proposalId: z.string().optional(),
-});
-
-export const ExecuteEspionageActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("EXECUTE_ESPIONAGE_OPERATION"),
-  targetNationId: z.string(),
-  tier: EspionageTierSchema,
-});
-
-export const RepayDebtActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("REPAY_DEBT"),
-  amount: z.number().positive(),
-});
-
-export const RequestLoanActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("REQUEST_LOAN"),
-  amount: z.number().positive(),
-});
-
-export const InvestResearchActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("INVEST_RESEARCH"),
-});
-
-export const InitiateBattleActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("INITIATE_BATTLE"),
-  targetNationId: z.string(),
-  targetProvinceId: z.number().positive().optional(),
-  dronesToLaunch: z.number().nonnegative().optional(),
-  infantryToDeploy: z.number().positive().optional(),
-  armorToDeploy: z.number().nonnegative().optional(),
-  airForceToDeploy: z.number().nonnegative().optional(),
-  attackType: z.enum(["LAND", "NAVAL"]).optional(),
-});
-
-export const ResolveDilemmaActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("RESOLVE_DILEMMA"),
-  eventId: z.string(),
-  choiceId: z.string(),
-});
+export * from "@/domain/game/actions/schemas/economy-action.schema";
+export * from "@/domain/game/actions/schemas/military-action.schema";
+export * from "@/domain/game/actions/schemas/diplomacy-action.schema";
+export * from "@/domain/game/actions/schemas/espionage-action.schema";
+export * from "@/domain/game/actions/schemas/politics-action.schema";
+export * from "@/domain/game/actions/schemas/dilemma-action.schema";
 
 export const GameActionSchema = z.discriminatedUnion("type", [
   SetEconomicDoctrineActionSchema,
@@ -177,39 +86,5 @@ export const ActionResultSchema = z.object({
   resultData: z.unknown().optional(),
 });
 
-export type SetEconomicDoctrineAction = z.infer<
-  typeof SetEconomicDoctrineActionSchema
->;
-export type BuildFactoryAction = z.infer<typeof BuildFactoryActionSchema>;
-export type EquipDomesticMachineryAction = z.infer<
-  typeof EquipDomesticMachineryActionSchema
->;
-export type InvestIndustrialResearchAction = z.infer<
-  typeof InvestIndustrialResearchActionSchema
->;
-export type BuyIndustrialEquipmentAction = z.infer<
-  typeof BuyIndustrialEquipmentActionSchema
->;
-export type RecruitUnitAction = z.infer<typeof RecruitUnitActionSchema>;
-export type BuyArmsMarketAction = z.infer<typeof BuyArmsMarketActionSchema>;
-export type BuyNavalFleetAction = z.infer<typeof BuyNavalFleetActionSchema>;
-export type BuyProvinceAction = z.infer<typeof BuyProvinceActionSchema>;
-export type DiplomaticProposalAction = z.infer<
-  typeof DiplomaticProposalActionSchema
->;
-export type RespondDiplomaticProposalAction = z.infer<
-  typeof RespondDiplomaticProposalActionSchema
->;
-export type SignPeaceSettlementAction = z.infer<
-  typeof SignPeaceSettlementActionSchema
->;
-export type ExecuteEspionageAction = z.infer<
-  typeof ExecuteEspionageActionSchema
->;
-export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
-export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;
-export type InvestResearchAction = z.infer<typeof InvestResearchActionSchema>;
-export type InitiateBattleAction = z.infer<typeof InitiateBattleActionSchema>;
-export type ResolveDilemmaAction = z.infer<typeof ResolveDilemmaActionSchema>;
 export type GameAction = z.infer<typeof GameActionSchema>;
 export type ActionResult = z.infer<typeof ActionResultSchema>;
