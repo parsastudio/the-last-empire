@@ -9,6 +9,8 @@ import {
   Scroll,
   CheckCircle2,
   Scale,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import {
@@ -70,7 +72,7 @@ export function PeaceNegotiationModal({
   const isWhitePeace = terms.settlementType === "WHITE_PEACE";
 
   const handleSignTreaty = async () => {
-    if (isProcessing || isSubmitting) return;
+    if (isProcessing || isSubmitting || !terms.canAffordTerms) return;
     try {
       setIsProcessing(true);
       const action = ActionFactory.signPeaceSettlement(
@@ -138,6 +140,23 @@ export function PeaceNegotiationModal({
             </div>
           </div>
         </div>
+
+        {!terms.canAffordTerms && (
+          <div className="p-3.5 bg-amber-500/15 border border-amber-500/40 rounded-2xl text-xs text-amber-300 flex items-start gap-2.5 shadow-sm">
+            <AlertTriangle
+              size={18}
+              className="text-amber-400 shrink-0 mt-0.5"
+            />
+            <div className="space-y-0.5">
+              <span className="font-black block text-amber-400">
+                {terms.headline}
+              </span>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {terms.description}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div
           className={`p-4.5 rounded-3xl border space-y-3 shadow-lg relative overflow-hidden ${
@@ -241,23 +260,28 @@ export function PeaceNegotiationModal({
             type="button"
             onClick={handleSignTreaty}
             disabled={!terms.canAffordTerms || isProcessing || isSubmitting}
-            className={`py-3.5 rounded-2xl font-black text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 border ${
+            className={`py-3.5 rounded-2xl font-black text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 border disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${
               isDominantAi
                 ? "bg-rose-600 hover:bg-rose-500 text-white border-rose-500/40 shadow-rose-600/20"
                 : "bg-gdp hover:bg-gdp/90 text-primary-foreground border-gdp/30 shadow-gdp/20"
             }`}
           >
-            {isDominantAi ? (
-              <>
-                <ShieldAlert size={15} />
-                <span>پذیرش تسلیم و انحلال</span>
-              </>
+            {isProcessing || isSubmitting ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : isDominantAi ? (
+              <ShieldAlert size={15} />
             ) : (
-              <>
-                <CheckCircle2 size={15} />
-                <span>امضا و تصویب معاهده صلح</span>
-              </>
+              <CheckCircle2 size={15} />
             )}
+            <span>
+              {isProcessing || isSubmitting
+                ? "در حال پردازش معاهده صلح..."
+                : !terms.canAffordTerms
+                  ? "عدم امکان امضا در شرایط فعلی"
+                  : isDominantAi
+                    ? "پذیرش تسلیم و انحلال"
+                    : "امضا و تصویب معاهده صلح"}
+            </span>
           </button>
         </div>
       </div>

@@ -4,15 +4,12 @@ import { Province } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
-import {
-  getProvinceGdp,
-  getNationGdp,
-} from "@/domain/nation/gdp-calculator.utility";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import {
   NationGettersUtility,
   DebtCalculatorUtility,
+  ProvinceTradeValidator,
+  getNationGdp,
 } from "@geopolitics/domain";
 
 export class ProvinceTradeExecutor {
@@ -31,17 +28,6 @@ export class ProvinceTradeExecutor {
       );
     }
 
-    const currentOwnerCanonical = CountryRegistry.resolveCanonicalId(
-      province.ownerNationId,
-    );
-
-    if (currentOwnerCanonical === canonicalNationId) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "این استان در حال حاضر متعلق به خاک خود شماست.",
-      );
-    }
-
     const canonicalTargetId = CountryRegistry.resolveCanonicalId(
       action.targetNationId || province.ownerNationId,
     );
@@ -56,46 +42,18 @@ export class ProvinceTradeExecutor {
       );
     }
 
-    const sellerProvinces = Object.values(state.provinces).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
-        canonicalTargetId,
+    const validation = ProvinceTradeValidator.validate(
+      nation,
+      seller,
+      province,
+      state.provinces,
+      state.nations,
     );
 
-    if (sellerProvinces.length <= 1) {
+    if (!validation.isValid) {
       throw new GameError(
         "INVALID_ACTION",
-        `امکان خرید آخرین استان کشور ${seller.name} وجود ندارد. دولت‌ها هرگز آخرین قلمرو حاکمیتی خود را واگذار نمی‌کنند.`,
-      );
-    }
-
-    if (province.hasSeaAccess) {
-      const sellerCoastalCount = sellerProvinces.filter(
-        (p) => p.hasSeaAccess,
-      ).length;
-      if (sellerCoastalCount <= 1) {
-        throw new GameError(
-          "INVALID_ACTION",
-          `امکان خرید آخرین استان ساحلی کشور ${seller.name} وجود ندارد. دولت‌ها هرگز آخرین راه ارتباطی خود به آب‌های آزاد را واگذار نمی‌کنند.`,
-        );
-      }
-    }
-
-    const isLandNeighbor = LandNeighborResolver.hasProvinceLandBorder(
-      province.provinceId,
-      nation.id,
-      state.provinces,
-    );
-    const buyerHasSea = NationGettersUtility.hasSeaAccess(
-      nation.id,
-      state.provinces,
-    );
-    const isMaritimeAccessible = buyerHasSea && province.hasSeaAccess;
-
-    if (!isLandNeighbor && !isMaritimeAccessible) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "عدم اتصال سرزمینی: استان هدف باید با خاک کشور شما مرز زمینی مشترک داشته باشد یا هر دو متصل به آب‌های آزاد باشند.",
+        validation.reason || "امکان خرید این استان با شرایط فعلی وجود ندارد.",
       );
     }
 
@@ -103,40 +61,24 @@ export class ProvinceTradeExecutor {
       ? canonicalTargetId
       : seller.id;
 
+    const sellerProvinces = Object.values(state.provinces).filter(
+      (p) =>
+        CountryRegistry.resolveCanonicalId(p.ownerNationId) ===
+        canonicalTargetId,
+    );
+
     const totalSellerGdpBefore = getNationGdp(
       seller,
       state.provinces,
       sellerProvinces,
     );
 
-    const provinceGdp = getProvinceGdp(province, seller.equipmentTechLevel);
-    const multiplier = province.hasSeaAccess ? 1.5 : 1.0;
-    const calculatedPrice = Math.max(
-      10_000_000_000,
-      Math.floor(provinceGdp * multiplier),
-    );
-    const effectiveCost = action.cost > 0 ? action.cost : calculatedPrice;
-
-    if (nation.treasury < effectiveCost) {
-      throw new GameError(
-        "INSUFFICIENT_FUNDS",
-        `موجودی خزانه برای خرید این استان کافی نیست (هزینه: ${effectiveCost.toLocaleString("en-US")} دلار).`,
-      );
-    }
-
-    const rel =
-      seller.relations[canonicalNationId] || seller.relations[nation.id];
-
-    if (rel?.stance === "WAR") {
-      throw new GameError(
-        "INVALID_ACTION",
-        `کشور ${seller.name} به دلیل وضعیت جنگی حاضر به واگذاری این استان نیست.`,
-      );
-    }
+    const effectiveCost =
+      action.cost > 0 ? action.cost : validation.purchasePrice;
 
     const debtRelief = DebtCalculatorUtility.calculateProportionalDebtRelief(
       seller.nationalDebt,
-      provinceGdp,
+      validation.provinceGdp,
       totalSellerGdpBefore,
     );
 
@@ -194,6 +136,7 @@ export class ProvinceTradeExecutor {
         [buyerKey]: {
           ...nation,
           treasury: nation.treasury - effectiveCost,
+          hasBoughtProvinceThisTurn: true,
           factoryTiers: updatedBuyerBatches,
           equipmentTechLevel: updatedBuyerEquipTech,
         },
