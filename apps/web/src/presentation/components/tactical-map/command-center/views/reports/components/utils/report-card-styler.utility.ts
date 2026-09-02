@@ -101,8 +101,6 @@ export class ReportCardStylerUtility {
       case "WAR_DECLARED":
       case "BATTLE_TACTICAL_REPORT":
       case "BATTLE_GLOBAL_NEWS":
-      case "ALLIANCE_INTERVENTION":
-      case "ALLIANCE_BETRAYED":
       case "COALITION_MEMBER_FALLEN":
         return {
           cardBg: "bg-rose-950/20",

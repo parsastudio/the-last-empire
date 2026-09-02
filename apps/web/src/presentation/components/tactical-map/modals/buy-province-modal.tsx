@@ -1,7 +1,6 @@
 import React from "react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { Nation, Province } from "@geopolitics/domain";
 import { useBuyProvinceForm } from "./buy-province/hooks/use-buy-province-form";
 import { BuyProvinceMetricsGrid } from "./buy-province/components/buy-province-metrics-grid";
 import { BuyProvinceStatusBanners } from "./buy-province/components/buy-province-status-banners";

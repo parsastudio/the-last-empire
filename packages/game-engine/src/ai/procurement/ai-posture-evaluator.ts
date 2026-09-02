@@ -65,19 +65,4 @@ export class AIPostureEvaluator {
     if (maxTension >= 55) return "THREAT";
     return "PEACE";
   }
-
-  public static calculateSpendableBudget(
-    posture: AIPosture,
-    effectiveTreasury: number,
-    peacetimeCap = 0.5,
-  ): number {
-    const disposable = Math.max(0, effectiveTreasury);
-    if (disposable <= 0) return 0;
-
-    let postureMultiplier = peacetimeCap * 0.7;
-    if (posture === "THREAT") postureMultiplier = Math.max(0.65, peacetimeCap);
-    else if (posture === "WAR") postureMultiplier = 0.9;
-
-    return Math.floor(disposable * postureMultiplier);
-  }
 }

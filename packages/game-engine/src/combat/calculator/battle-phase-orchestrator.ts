@@ -49,14 +49,12 @@ export class BattlePhaseOrchestrator {
     defArmorMult: number,
     attInfMult: number,
     defInfMult: number,
-    targetFactoriesCount?: number,
   ): PhaseOrchestrationResult {
     const missilePhase = MissileInterceptionPhase.calculate({
       deployedDrones,
       defAirDefense,
       attDroneMult,
       defAdMult,
-      targetFactoriesCount,
     });
 
     const airPhase = AirSupremacyPhase.calculate({

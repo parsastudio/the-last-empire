@@ -6,10 +6,10 @@ import {
   MilitaryPricingCalculator,
   getNationGdp,
   UnitType,
+  DEFAULT_NATION_MOCK,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import { MilitaryPayrollCalculator } from "@geopolitics/game-engine";
-import { DEFAULT_NATION_MOCK } from "@/domain/nation/default-nation.mock";
-import { CountryRegistry } from "@/domain/data/countries";
 
 export interface MilitaryUnitItemViewModel {
   type: UnitType;

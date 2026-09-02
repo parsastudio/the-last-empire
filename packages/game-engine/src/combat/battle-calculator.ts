@@ -18,7 +18,6 @@ import { MilitaryPowerCalculator } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
-  isFullCapitulation?: boolean;
   valuationRatio: number;
   dronesUsed: number;
   attackerCasualties: CasualtyMetrics;
@@ -137,11 +136,6 @@ export class BattleCalculator {
       droneMissile: nativeDefMults.droneMissile,
     };
 
-    const targetProv =
-      targetProvinceId && provincesMap
-        ? provincesMap[targetProvinceId.toString()]
-        : undefined;
-
     const phasesResult = BattlePhaseOrchestrator.executePhases(
       deployedDrones,
       defAirDefense,
@@ -159,7 +153,6 @@ export class BattleCalculator {
       defMults.armor,
       attMults.infantry,
       defMults.infantry,
-      targetProv?.factoriesCount,
     );
 
     const attackerDeployedPower = Math.max(
@@ -231,7 +224,6 @@ export class BattleCalculator {
 
     return {
       isAttackerVictory: phasesResult.groundPhaseOutput.isAttackerVictory,
-      isFullCapitulation: false,
       valuationRatio,
       dronesUsed: deployedDrones,
       attackerCasualties: casualty.attackerCasualties,

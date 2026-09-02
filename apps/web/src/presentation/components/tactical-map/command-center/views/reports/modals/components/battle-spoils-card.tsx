@@ -3,10 +3,6 @@ import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { Trophy } from "lucide-react";
 import { BattleSpoilsMetricsGrid } from "./spoils/battle-spoils-metrics-grid";
 import { ConqueredProvincesList } from "./spoils/conquered-provinces-list";
-import {
-  CapturedUnitsGrid,
-  CapturedUnitItem,
-} from "./spoils/captured-units-grid";
 
 interface BattleSpoilsCardProps {
   reportData: BattleFullReportData;
@@ -33,34 +29,6 @@ export function BattleSpoilsCard({
   const isHumanWinner =
     (humanNationId === reportData.attackerId && isAttackerWin) ||
     (humanNationId === reportData.defenderId && !isAttackerWin);
-
-  const capturedUnitsList: CapturedUnitItem[] = [
-    {
-      label: "پیاده‌نظام اسیرشده",
-      count: spoils?.capturedInfantry || 0,
-      icon: "🪖",
-    },
-    {
-      label: "تانک و زرهی غنیمتی",
-      count: spoils?.capturedArmor || 0,
-      icon: "🛡️",
-    },
-    {
-      label: "پدافند هوایی تصاحب‌شده",
-      count: spoils?.capturedAirDefense || 0,
-      icon: "🎯",
-    },
-    {
-      label: "جنگنده‌های سالم",
-      count: spoils?.capturedAirForce || 0,
-      icon: "🛩️",
-    },
-    {
-      label: "موشک و پهپاد غنیمتی",
-      count: spoils?.capturedDrones || 0,
-      icon: "🚀",
-    },
-  ].filter((u) => u.count > 0);
 
   return (
     <div className="space-y-3.5 font-sans text-right dir-rtl animate-fade-smooth w-full overflow-x-hidden">
@@ -96,8 +64,6 @@ export function BattleSpoilsCard({
       <ConqueredProvincesList
         provincesNames={spoils?.conqueredProvincesNames}
       />
-
-      <CapturedUnitsGrid units={capturedUnitsList} />
     </div>
   );
 }

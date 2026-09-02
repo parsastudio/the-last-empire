@@ -14,7 +14,6 @@ export class AISabotagePlanner {
     provincesMap: Record<string, Province> | undefined,
     geopoliticsBudget: number,
     executedTiers: string[],
-    _rankMap?: Map<string, number>,
     provincesByOwnerMap?: Map<string, Province[]>,
     currentTreasury?: number,
   ): { action: GameAction; cost: number } | null {

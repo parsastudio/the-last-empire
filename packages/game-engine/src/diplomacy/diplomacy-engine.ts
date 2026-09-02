@@ -32,10 +32,7 @@ export class DiplomaticBetrayalCalculator {
 }
 
 export class TreatyEvaluator {
-  public static calculateForeignAidCost(
-    targetGdp: number,
-    _options?: unknown,
-  ): number {
+  public static calculateForeignAidCost(targetGdp: number): number {
     return Math.floor(targetGdp * 0.005);
   }
 

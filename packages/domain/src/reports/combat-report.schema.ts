@@ -63,11 +63,6 @@ export const BattleSpoilsDetailsSchema = z.object({
   gainedPopulation: z.number().nonnegative().default(0),
   gainedGdp: z.number().nonnegative().default(0),
   lootedTreasury: z.number().nonnegative().default(0),
-  capturedInfantry: z.number().nonnegative().default(0),
-  capturedArmor: z.number().nonnegative().default(0),
-  capturedAirDefense: z.number().nonnegative().default(0),
-  capturedAirForce: z.number().nonnegative().default(0),
-  capturedDrones: z.number().nonnegative().default(0),
 });
 
 export const AuxiliaryGuarantorDefenseSchema = z.object({
