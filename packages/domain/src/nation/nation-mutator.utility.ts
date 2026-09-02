@@ -10,6 +10,8 @@ export class NationMutatorUtility {
       warFocusTargetId: null,
       executedEspionageTiers: [],
       attackedTargetIdsThisTurn: [],
+      sentAidTargetIdsThisTurn: [],
+      hasBoughtProvinceThisTurn: false,
       postWarCooldownTurns: 0,
       military: {
         ...nation.military,

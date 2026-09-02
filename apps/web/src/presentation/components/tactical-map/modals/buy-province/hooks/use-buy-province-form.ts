@@ -2,11 +2,8 @@ import { useMemo, useCallback } from "react";
 import {
   Nation,
   Province,
-  CountryRegistry,
   ActionFactory,
-  getProvinceGdp,
-  LandNeighborResolver,
-  NationGettersUtility,
+  ProvinceTradeValidator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
@@ -41,64 +38,20 @@ export function useBuyProvinceForm({
 
   const ownerNation = ownerEntity?.nation ?? null;
 
-  const sellerOwnedProvinces = useMemo(() => {
-    if (!ownerNation || !provincesMap) return [];
-    const canonicalOwner = CountryRegistry.resolveCanonicalId(ownerNation.id);
-    return Object.values(provincesMap).filter(
-      (p) =>
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalOwner,
-    );
-  }, [ownerNation, provincesMap]);
-
-  const sellerProvincesCount = sellerOwnedProvinces.length;
-  const isLastProvince = sellerProvincesCount <= 1;
-
-  const sellerCoastalCount = useMemo(() => {
-    return sellerOwnedProvinces.filter((p) => Boolean(p.hasSeaAccess)).length;
-  }, [sellerOwnedProvinces]);
-
-  const hasSeaAccess = Boolean(province?.hasSeaAccess);
-  const isLastCoastalProvince = hasSeaAccess && sellerCoastalCount <= 1;
-
-  const isLandNeighbor = useMemo(() => {
-    if (!humanNation || !province || !provincesMap) return false;
-    return LandNeighborResolver.hasProvinceLandBorder(
-      province.provinceId,
-      humanNation.id,
+  const validation = useMemo(() => {
+    if (!humanNation || !ownerNation || !province) return null;
+    return ProvinceTradeValidator.validate(
+      humanNation,
+      ownerNation,
+      province,
       provincesMap,
+      nationsMap,
     );
-  }, [humanNation, province, provincesMap]);
-
-  const buyerHasSea = useMemo(() => {
-    if (!humanNation || !provincesMap) return false;
-    return NationGettersUtility.hasSeaAccess(humanNation.id, provincesMap);
-  }, [humanNation, provincesMap]);
-
-  const isMaritimeAccessible = buyerHasSea && hasSeaAccess;
-  const isGeographicallyConnected = isLandNeighbor || isMaritimeAccessible;
-
-  const costMultiplier = hasSeaAccess ? 1.5 : 1.0;
-
-  const provinceGdp = useMemo(() => {
-    if (!province) return 0;
-    return getProvinceGdp(province, ownerNation?.equipmentTechLevel ?? 1.0);
-  }, [province, ownerNation]);
-
-  const purchasePrice = useMemo(() => {
-    if (!provinceGdp) return 10_000_000_000;
-    return Math.max(10_000_000_000, Math.floor(provinceGdp * costMultiplier));
-  }, [provinceGdp, costMultiplier]);
+  }, [humanNation, ownerNation, province, provincesMap, nationsMap]);
 
   const buyerTreasury = humanNation?.treasury || 0;
-  const canAfford = buyerTreasury >= purchasePrice;
+  const purchasePrice = validation?.purchasePrice || 10_000_000_000;
   const remainingTreasury = Math.max(0, buyerTreasury - purchasePrice);
-  const shortageAmount = Math.max(0, purchasePrice - buyerTreasury);
-
-  const isOwnCountry =
-    !!humanNation &&
-    !!province &&
-    CountryRegistry.resolveCanonicalId(humanNation.id) ===
-      CountryRegistry.resolveCanonicalId(province.ownerNationId);
 
   const formattedProvinceName = province
     ? ProvinceNameFormatter.format(province.nameFa)
@@ -110,11 +63,7 @@ export function useBuyProvinceForm({
       !province ||
       !ownerNation ||
       isSubmitting ||
-      !canAfford ||
-      isOwnCountry ||
-      isLastProvince ||
-      isLastCoastalProvince ||
-      !isGeographicallyConnected
+      !validation?.isValid
     ) {
       return;
     }
@@ -140,11 +89,7 @@ export function useBuyProvinceForm({
     ownerNation,
     purchasePrice,
     isSubmitting,
-    canAfford,
-    isOwnCountry,
-    isLastProvince,
-    isLastCoastalProvince,
-    isGeographicallyConnected,
+    validation,
     dispatchAction,
     formattedProvinceName,
     onClose,
@@ -153,19 +98,10 @@ export function useBuyProvinceForm({
   return {
     province,
     ownerNation,
-    sellerProvincesCount,
-    hasSeaAccess,
-    isLastProvince,
-    isLastCoastalProvince,
-    isGeographicallyConnected,
-    costMultiplier,
-    provinceGdp,
+    validation,
     purchasePrice,
     buyerTreasury,
-    canAfford,
     remainingTreasury,
-    shortageAmount,
-    isOwnCountry,
     formattedProvinceName,
     isSubmitting,
     handleExecutePurchase,

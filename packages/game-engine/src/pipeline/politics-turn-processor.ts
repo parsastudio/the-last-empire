@@ -16,6 +16,7 @@ export class PoliticsTurnProcessor {
       executedEspionageTiers: [],
       attackedTargetIdsThisTurn: [],
       sentAidTargetIdsThisTurn: [],
+      hasBoughtProvinceThisTurn: false,
       government: {
         ...updated.government,
         stability: newStability,

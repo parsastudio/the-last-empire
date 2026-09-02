@@ -44,13 +44,7 @@ export function BuyProvinceModal({
     return null;
   }
 
-  const isButtonDisabled =
-    !form.canAfford ||
-    form.isOwnCountry ||
-    form.isLastProvince ||
-    form.isLastCoastalProvince ||
-    !form.isGeographicallyConnected ||
-    form.isSubmitting;
+  const isButtonDisabled = !form.validation?.isValid || form.isSubmitting;
 
   return (
     <UnifiedModalShell
@@ -101,21 +95,16 @@ export function BuyProvinceModal({
         </div>
 
         <BuyProvinceMetricsGrid
-          provinceGdp={form.provinceGdp}
+          provinceGdp={form.validation?.provinceGdp ?? 0}
           factoriesCount={form.province.factoriesCount}
           maxSlots={form.province.maxSlots}
           pixelCount={form.province.pixelCount || 0}
-          hasSeaAccess={form.hasSeaAccess}
-          costMultiplier={form.costMultiplier}
+          hasSeaAccess={Boolean(form.province.hasSeaAccess)}
+          costMultiplier={form.validation?.costMultiplier ?? 1.0}
         />
 
         <BuyProvinceStatusBanners
-          isOwnCountry={form.isOwnCountry}
-          isLastProvince={form.isLastProvince}
-          isLastCoastalProvince={form.isLastCoastalProvince}
-          isGeographicallyConnected={form.isGeographicallyConnected}
-          canAfford={form.canAfford}
-          shortageAmount={form.shortageAmount}
+          validation={form.validation}
           ownerNationName={form.ownerNation.name}
         />
 
@@ -147,7 +136,9 @@ export function BuyProvinceModal({
                 موجودی پس از پرداخت:
               </span>
               <span
-                className={`font-bold block ${form.canAfford ? "text-gdp" : "text-military"}`}
+                className={`font-bold block ${
+                  form.validation?.canAfford ? "text-gdp" : "text-military"
+                }`}
               >
                 {PersianNumberFormatter.formatCurrency(form.remainingTreasury)}
               </span>
@@ -167,17 +158,9 @@ export function BuyProvinceModal({
             <span>
               {form.isSubmitting
                 ? "در حال ثبت معاهده و انتقال مالکیت..."
-                : form.isOwnCountry
-                  ? "این استان در حال حاضر در تملک کشور شماست"
-                  : form.isLastProvince
-                    ? "امکان خرید آخرین استان کشور فروشنده وجود ندارد"
-                    : form.isLastCoastalProvince
-                      ? "فروشنده حاضر به واگذاری تنها دسترسی دریایی خود نیست"
-                      : !form.isGeographicallyConnected
-                        ? "عدم وجود پیوستگی سرزمینی یا مسیر دریایی"
-                        : !form.canAfford
-                          ? "موجودی خزانه برای این معامله کافی نیست"
-                          : `امضا و الحاق دائمی ${form.formattedProvinceName} (${PersianNumberFormatter.formatCurrency(form.purchasePrice)})`}
+                : !form.validation?.isValid
+                  ? form.validation?.reason || "شرایط خرید استان مهیا نیست"
+                  : `امضا و الحاق دائمی ${form.formattedProvinceName} (${PersianNumberFormatter.formatCurrency(form.purchasePrice)})`}
             </span>
           </button>
         </div>
