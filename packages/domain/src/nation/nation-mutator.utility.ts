@@ -12,6 +12,8 @@ export class NationMutatorUtility {
       attackedTargetIdsThisTurn: [],
       sentAidTargetIdsThisTurn: [],
       hasBoughtProvinceThisTurn: false,
+      boostedProjectIdsThisTurn: [],
+      projectProgressSteps: {},
       postWarCooldownTurns: 0,
       military: {
         ...nation.military,

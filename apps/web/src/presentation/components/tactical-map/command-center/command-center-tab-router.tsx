@@ -3,6 +3,7 @@ import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/s
 import { WideOverviewView } from "@/presentation/components/tactical-map/command-center/views/wide-overview-view";
 import { WideMilitaryView } from "@/presentation/components/tactical-map/command-center/views/wide-military-view";
 import { WideIndustryView } from "@/presentation/components/tactical-map/command-center/views/wide-industry-view";
+import { WideProjectsView } from "@/presentation/components/tactical-map/command-center/views/wide-projects-view";
 import { WidePoliticsView } from "@/presentation/components/tactical-map/command-center/views/wide-politics-view";
 import { WideDiplomacyView } from "@/presentation/components/tactical-map/command-center/views/wide-diplomacy-view";
 import { WideEspionageView } from "@/presentation/components/tactical-map/command-center/views/wide-espionage-view";
@@ -56,6 +57,9 @@ export function CommandCenterTabRouter({
           initialSubTab={activeSubTab}
         />
       );
+
+    case "projects":
+      return <WideProjectsView nation={nation} />;
 
     case "politics":
       return (
