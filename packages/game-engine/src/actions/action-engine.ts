@@ -7,6 +7,7 @@ import { MilitaryActionExecutor } from "@/engine/actions/military-action-executo
 import { PoliticsActionExecutor } from "@/engine/actions/politics-action-executor";
 import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
+import { DilemmaActionExecutor } from "@/engine/actions/executors/dilemma/dilemma-action-executor";
 
 export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
@@ -109,6 +110,18 @@ export class ActionEngine {
           const polyResult = PoliticsActionExecutor.execute(state, action);
           newState = polyResult.newState;
           resultData = polyResult.resultData;
+          break;
+        }
+
+        case "RESOLVE_DILEMMA": {
+          const dilemmaResult = DilemmaActionExecutor.execute(
+            state,
+            action,
+            sourceNation,
+            canonicalSourceId,
+          );
+          newState = dilemmaResult.newState;
+          resultData = dilemmaResult.resultData;
           break;
         }
 
