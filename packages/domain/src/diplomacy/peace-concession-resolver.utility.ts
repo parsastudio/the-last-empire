@@ -3,7 +3,6 @@ import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { PeaceTermsPackage } from "@/domain/diplomacy/peace-terms.schema";
-import { PeaceCapitulationBuilder } from "@/domain/diplomacy/peace/peace-capitulation-builder";
 import { PeaceWhitePeaceBuilder } from "@/domain/diplomacy/peace/peace-white-peace-builder";
 import { PeaceConcessionBuilder } from "@/domain/diplomacy/peace/peace-concession-builder";
 import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
@@ -48,7 +47,7 @@ export class PeaceConcessionResolverUtility {
         concededProvincesNames: [],
         headline: "ممنوعیت پایان جنگ در نوبت اول",
         description:
-          "به دلیل آغاز جنگ در نوبت جاری، تا سپری شدن حداقل یک نوبت کامل امکان هیچ‌گونه مذاکره صلح یا تسلیم وجود ندارد.",
+          "به دلیل آغاز جنگ در نوبت جاری، تا سپری شدن حداقل یک نوبت کامل امکان هیچ‌گونه مذاکره صلح وجود ندارد.",
         canAffordTerms: false,
       };
     }
@@ -82,16 +81,6 @@ export class PeaceConcessionResolverUtility {
         ),
     );
 
-    const hasLostProvinceToOpponent = provincesMap
-      ? Object.values(provincesMap).some((p) => {
-          const owner = CountryRegistry.resolveCanonicalId(p.ownerNationId);
-          const original = CountryRegistry.resolveCanonicalId(
-            p.originalNationId || p.ownerNationId,
-          );
-          return owner === canonicalHuman && original === canonicalAi;
-        })
-      : false;
-
     if (ratio >= 2.0) {
       return PeaceConcessionBuilder.buildHeavyAiAdvantage(
         aiNation,
@@ -99,24 +88,10 @@ export class PeaceConcessionResolverUtility {
         ratio,
         aiTwmi,
         humanTwmi,
-        allHumanProvinces,
-        maxHumanCash,
-        humanGdp,
       );
     }
 
     if (ratio <= 0.5) {
-      if (hasLostProvinceToOpponent) {
-        return PeaceCapitulationBuilder.build(
-          aiNation,
-          humanNation,
-          ratio,
-          aiTwmi,
-          humanTwmi,
-          allAiProvinces,
-        );
-      }
-
       return PeaceConcessionBuilder.buildHeavyHumanAdvantage(
         aiNation,
         humanNation,
