@@ -19,6 +19,8 @@ export * from "./economy/fiscal-revenue-calculator";
 export * from "./economy/payroll-calculator";
 export * from "./economy/province-trade-validator.utility";
 export * from "./espionage/espionage.schema";
+export * from "./events/dilemma.schema";
+export * from "./events/dilemma-catalog.data";
 export * from "./game/action.schema";
 export * from "./game/action-factory";
 export * from "./game/game-state.schema";
