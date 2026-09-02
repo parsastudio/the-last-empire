@@ -2,7 +2,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
-import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
 import {
   PeaceTermsPackage,
   PeaceSettlementType,
@@ -15,56 +14,21 @@ export class PeaceConcessionBuilder {
     ratio: number,
     aiTwmi: number,
     humanTwmi: number,
-    allHumanProvinces: Province[],
-    maxHumanCash: number,
-    humanGdp: number,
   ): PeaceTermsPackage {
-    const sortedHumanProvs = [...allHumanProvinces].sort(
-      (a, b) => getProvinceGdp(b) - getProvinceGdp(a),
-    );
-    const provsToCedeCount = Math.min(
-      2,
-      Math.max(0, allHumanProvinces.length - 1),
-    );
-    const demandedProvs = sortedHumanProvs.slice(0, provsToCedeCount);
-    const demandedMoney = Math.floor(maxHumanCash * 0.6);
-
-    const settlementType: PeaceSettlementType =
-      demandedProvs.length > 0 ? "TERRITORY_CONCESSION" : "INDEMNITY";
-
-    const canAfford =
-      humanNation.treasury >= demandedMoney ||
-      humanNation.treasury +
-        DebtCalculatorUtility.getAvailableLoanHeadroom(
-          humanNation.nationalDebt,
-          humanGdp,
-        ) >=
-        demandedMoney;
-
-    const headline =
-      demandedProvs.length > 0
-        ? "صلح تلخ و آتش‌بس با واگذاری استان مرزی و تاوان سنگین"
-        : "مطالبه حداکثر غرامت نقدی و آتش‌بس اضطراری";
-
-    const description =
-      demandedProvs.length > 0
-        ? `امپراتوری ${aiNation.name} به دلیل برتری قاطع، شرط توقف تهاجم را واگذاری ${demandedProvs.length} استان و پرداخت غرامت جنگی تعیین کرده است.`
-        : `امپراتوری ${aiNation.name} به دلیل برتری قاطع، شرط توقف تهاجم و حفظ تک‌استان مادری شما را پرداخت غرامت سنگین جنگی تعیین کرده است.`;
-
     return {
       sourceNationId: aiNation.id,
       targetNationId: humanNation.id,
-      settlementType,
+      settlementType: "INDEMNITY",
       ratio,
       sourceTwmi: aiTwmi,
       targetTwmi: humanTwmi,
       isAiOffering: false,
-      moneyAmount: demandedMoney,
-      concededProvinceIds: demandedProvs.map((p) => p.provinceId),
-      concededProvincesNames: demandedProvs.map((p) => p.nameFa),
-      headline,
-      description,
-      canAffordTerms: canAfford,
+      moneyAmount: 0,
+      concededProvinceIds: [],
+      concededProvincesNames: [],
+      headline: "امتناع قدرت برتر از مذاکره صلح",
+      description: `کشور ${aiNation.name} به دلیل قدرت نظامی بالاتر و برتری قاطع بر میدان نبرد، حاضر به هیچ‌گونه مذاکره صلح یا آتش‌بس با کشور شما نیست.`,
+      canAffordTerms: false,
     };
   }
 
@@ -88,13 +52,13 @@ export class PeaceConcessionBuilder {
 
     const headline =
       provsToConcede.length > 0
-        ? "پیشنهاد واگذاری حداکثر قلمرو و تخلیه کامل خزانه و وام‌ها"
+        ? "پیشنهاد واگذاری کلیه استان‌ها (به جز تک‌پایتخت) و تخلیه کامل خزانه"
         : "پیشنهاد تخلیه کامل خزانه و پرداخت حداکثر غرامت مالی";
 
     const description =
       provsToConcede.length > 0
-        ? `دولت ${aiNation.name} برای نجات بقای خود، پیشنهاد واگذاری ${provsToConcede.length} استان به همراه پرداخت ۱۰۰٪ کل موجودی نقد و توان استقراض خزانه‌اش را دارد.`
-        : `دولت ${aiNation.name} به دلیل محصور بودن در تک‌استان مادری، برای حفظ استقلال و جلوگیری از سقوط، پیشنهاد پرداخت ۱۰۰٪ موجودی نقد و توان استقراض خزانه‌اش را دارد.`;
+        ? `کشور ${aiNation.name} به دلیل استیصال در برابر قدرت شما، برای جلوگیری از نابودی کامل، پیشنهاد واگذاری ${provsToConcede.length} استان (تمام خاک به جز یک استان مادری) و پرداخت تمام دارایی‌های مالی خود را دارد.`
+        : `کشور ${aiNation.name} به دلیل محصور بودن در تک‌استان باقی‌مانده، تمام دارایی‌های نقد و توان مالی خود را برای پایان جنگ واگذار می‌کند.`;
 
     return {
       sourceNationId: aiNation.id,
@@ -206,14 +170,7 @@ export class PeaceConcessionBuilder {
     const settlementType: PeaceSettlementType =
       demandedProvs.length > 0 ? "TERRITORY_CONCESSION" : "INDEMNITY";
 
-    const canAfford =
-      humanNation.treasury >= demandedMoney ||
-      humanNation.treasury +
-        DebtCalculatorUtility.getAvailableLoanHeadroom(
-          humanNation.nationalDebt,
-          humanGdp,
-        ) >=
-        demandedMoney;
+    const canAfford = humanNation.treasury >= demandedMoney;
 
     return {
       sourceNationId: aiNation.id,

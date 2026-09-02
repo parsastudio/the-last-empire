@@ -142,13 +142,13 @@ export function PeaceNegotiationModal({
         </div>
 
         {!terms.canAffordTerms && (
-          <div className="p-3.5 bg-amber-500/15 border border-amber-500/40 rounded-2xl text-xs text-amber-300 flex items-start gap-2.5 shadow-sm">
+          <div className="p-3.5 bg-rose-500/15 border border-rose-500/40 rounded-2xl text-xs text-rose-300 flex items-start gap-2.5 shadow-sm">
             <AlertTriangle
               size={18}
-              className="text-amber-400 shrink-0 mt-0.5"
+              className="text-rose-400 shrink-0 mt-0.5"
             />
             <div className="space-y-0.5">
-              <span className="font-black block text-amber-400">
+              <span className="font-black block text-rose-400">
                 {terms.headline}
               </span>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
@@ -182,15 +182,19 @@ export function PeaceNegotiationModal({
               className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${
                 isDominantAi
                   ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
-                  : terms.isAiOffering
+                  : isCrushedAi
                     ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                    : "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                    : isWhitePeace
+                      ? "bg-secondary/40 border-border/70"
+                      : terms.isAiOffering
+                        ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                        : "bg-amber-500/20 text-amber-300 border-amber-500/40"
               }`}
             >
               {isDominantAi
-                ? "برتری مطلق حریف"
+                ? "امتناع از صلح به دلیل قدرت بالاتر"
                 : isCrushedAi
-                  ? "استیصال و سقوط حریف"
+                  ? "استیصال و واگذاری حداکثر قلمرو"
                   : isWhitePeace
                     ? "موازنه برابر"
                     : terms.isAiOffering
@@ -262,7 +266,7 @@ export function PeaceNegotiationModal({
             disabled={!terms.canAffordTerms || isProcessing || isSubmitting}
             className={`py-3.5 rounded-2xl font-black text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 border disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${
               isDominantAi
-                ? "bg-rose-600 hover:bg-rose-500 text-white border-rose-500/40 shadow-rose-600/20"
+                ? "bg-rose-600/20 text-rose-400 border-rose-500/40"
                 : "bg-gdp hover:bg-gdp/90 text-primary-foreground border-gdp/30 shadow-gdp/20"
             }`}
           >
@@ -277,10 +281,10 @@ export function PeaceNegotiationModal({
               {isProcessing || isSubmitting
                 ? "در حال پردازش معاهده صلح..."
                 : !terms.canAffordTerms
-                  ? "عدم امکان امضا در شرایط فعلی"
-                  : isDominantAi
-                    ? "پذیرش تسلیم و انحلال"
-                    : "امضا و تصویب معاهده صلح"}
+                  ? isDominantAi
+                    ? "به دلیل قدرت بالاتر حاضر به مذاکره نیست"
+                    : terms.headline
+                  : "امضا و تصویب معاهده صلح"}
             </span>
           </button>
         </div>

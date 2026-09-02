@@ -16,7 +16,6 @@ import {
   DIPLOMACY_CONFIG,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
-import { NationAnnexationExecutor } from "@/engine/combat/conquest/nation-annexation-executor";
 
 export class PeaceSettlementExecutor {
   public static execute(
@@ -82,9 +81,8 @@ export class PeaceSettlementExecutor {
     }
 
     let updatedProvinces: Record<string, Province> = { ...state.provinces };
-    let updatedNations: Record<string, Nation> = { ...state.nations };
+    const updatedNations: Record<string, Nation> = { ...state.nations };
 
-    const isFullCapitulation = terms.settlementType === "FULL_CAPITULATION";
     const winnerNation = terms.isAiOffering ? humanNation : aiNation;
     const loserNation = terms.isAiOffering ? aiNation : humanNation;
 
@@ -190,99 +188,76 @@ export class PeaceSettlementExecutor {
       BitPackedGridState.getInstance().markDirty();
     }
 
-    const newLogs = [];
+    const sObj = updatedNations[sourceNation.id]!;
+    const tObj = updatedNations[targetNation.id]!;
 
-    if (isFullCapitulation) {
-      const annexationResult = NationAnnexationExecutor.executeTotalAnnexation(
-        updatedProvinces,
-        updatedNations,
-        winnerNation.id,
-        loserNation.id,
-        winnerNation.isAi ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS : 0,
-      );
+    const sRelations = { ...sObj.relations };
+    const tRelations = { ...tObj.relations };
 
-      updatedProvinces = annexationResult.updatedProvinces;
-      updatedNations = annexationResult.updatedNations;
+    sRelations[canonicalTarget] = {
+      targetNationId: canonicalTarget,
+      stance: "NORMAL_DIPLOMACY",
+      alignment: Math.max(
+        10,
+        (sRelations[canonicalTarget]?.alignment ?? 0) + 20,
+      ),
+      tension: Math.min(
+        20,
+        Math.floor((sRelations[canonicalTarget]?.tension ?? 10) * 0.3),
+      ),
+    };
 
-      newLogs.push(
-        TurnLogBuilder.createAnnexationLog(
-          state.currentTurn,
-          winnerNation.id,
-          loserNation.id,
-        ),
-      );
-    } else {
-      const sObj = updatedNations[sourceNation.id]!;
-      const tObj = updatedNations[targetNation.id]!;
+    tRelations[canonicalSource] = {
+      targetNationId: canonicalSource,
+      stance: "NORMAL_DIPLOMACY",
+      alignment: Math.max(
+        10,
+        (tRelations[canonicalSource]?.alignment ?? 0) + 20,
+      ),
+      tension: Math.min(
+        20,
+        Math.floor((tRelations[canonicalSource]?.tension ?? 10) * 0.3),
+      ),
+    };
 
-      const sRelations = { ...sObj.relations };
-      const tRelations = { ...tObj.relations };
+    updatedNations[sourceNation.id] = {
+      ...sObj,
+      warFocusTargetId:
+        sObj.warFocusTargetId === canonicalTarget
+          ? null
+          : sObj.warFocusTargetId,
+      postWarCooldownTurns: sourceNation.isAi
+        ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
+        : 0,
+      relations: sRelations,
+    };
 
-      sRelations[canonicalTarget] = {
-        targetNationId: canonicalTarget,
-        stance: "NORMAL_DIPLOMACY",
-        alignment: Math.max(
-          10,
-          (sRelations[canonicalTarget]?.alignment ?? 0) + 20,
-        ),
-        tension: Math.min(
-          20,
-          Math.floor((sRelations[canonicalTarget]?.tension ?? 10) * 0.3),
-        ),
-      };
+    updatedNations[targetNation.id] = {
+      ...tObj,
+      warFocusTargetId:
+        tObj.warFocusTargetId === canonicalSource
+          ? null
+          : tObj.warFocusTargetId,
+      postWarCooldownTurns: targetNation.isAi
+        ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
+        : 0,
+      relations: tRelations,
+    };
 
-      tRelations[canonicalSource] = {
-        targetNationId: canonicalSource,
-        stance: "NORMAL_DIPLOMACY",
-        alignment: Math.max(
-          10,
-          (tRelations[canonicalSource]?.alignment ?? 0) + 20,
-        ),
-        tension: Math.min(
-          20,
-          Math.floor((tRelations[canonicalSource]?.tension ?? 10) * 0.3),
-        ),
-      };
-
-      updatedNations[sourceNation.id] = {
-        ...sObj,
-        warFocusTargetId:
-          sObj.warFocusTargetId === canonicalTarget
-            ? null
-            : sObj.warFocusTargetId,
-        postWarCooldownTurns: sourceNation.isAi
-          ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
-          : 0,
-        relations: sRelations,
-      };
-
-      updatedNations[targetNation.id] = {
-        ...tObj,
-        warFocusTargetId:
-          tObj.warFocusTargetId === canonicalSource
-            ? null
-            : tObj.warFocusTargetId,
-        postWarCooldownTurns: targetNation.isAi
-          ? DIPLOMACY_CONFIG.POST_WAR_COOLDOWN_TURNS
-          : 0,
-        relations: tRelations,
-      };
-
-      newLogs.push(
-        TurnLogBuilder.createGlobalDiplomacyLog(
-          state.currentTurn,
-          sourceNation.id,
-          targetNation.id,
-          "TREATY_ACCEPTED",
-          {
-            treatyLabel: terms.headline,
-            money: terms.moneyAmount,
-            provincesCount: terms.concededProvinceIds.length,
-          },
-          "INFO",
-        ),
-      );
-    }
+    const newLogs = [
+      TurnLogBuilder.createGlobalDiplomacyLog(
+        state.currentTurn,
+        sourceNation.id,
+        targetNation.id,
+        "TREATY_ACCEPTED",
+        {
+          treatyLabel: terms.headline,
+          money: terms.moneyAmount,
+          provincesCount: terms.concededProvinceIds.length,
+        },
+        "INFO",
+      ),
+    ];
 
     const filteredProposals = PendingProposalManagerUtility.removeBilateral(
       state.pendingProposals,
