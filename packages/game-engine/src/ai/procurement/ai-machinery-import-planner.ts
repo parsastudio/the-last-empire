@@ -2,6 +2,7 @@ import {
   GameAction,
   ActionFactory,
   Nation,
+  Province,
   CountryRegistry,
   IndustryCalculator,
   NationGettersUtility,
@@ -35,6 +36,8 @@ export class AIMachineryImportPlanner {
     buyer: Nation,
     allNations: Record<string, Nation>,
     allocatedImportBudget: number,
+    provincesMap?: Record<string, Province>,
+    ownedProvinces?: Province[],
   ): MachineryImportPlanResult {
     const actions: GameAction[] = [];
     if (allocatedImportBudget < IndustryCalculator.IMPORT_BASE_PRICE) {
@@ -73,10 +76,14 @@ export class AIMachineryImportPlanner {
     let remainingBudget = allocatedImportBudget;
     let spentMoney = 0;
 
-    const buyerBatches = NationGettersUtility.getNationFactoryTiers(
+    const probedBatches = NationGettersUtility.getNationFactoryTiers(
       buyer.id,
-      undefined,
+      provincesMap,
+      ownedProvinces,
     );
+
+    const buyerBatches =
+      probedBatches.length > 0 ? probedBatches : (buyer.factoryTiers ?? []);
     const totalFactories = buyerBatches.reduce((sum, b) => sum + b.count, 0);
 
     if (totalFactories <= 0) {
@@ -86,9 +93,7 @@ export class AIMachineryImportPlanner {
     for (let i = 0; i < topSellers.length; i++) {
       const seller = topSellers[i]!.nation;
       const sellerWeight = weights[i] || 0;
-      const sellerBudget = Math.floor(allocatedImportBudget * sellerWeight);
-
-      if (sellerBudget <= 0 || remainingBudget <= 0) continue;
+      const calculatedShare = Math.floor(allocatedImportBudget * sellerWeight);
 
       const minTechBatch = buyerBatches.length
         ? Math.min(...buyerBatches.map((b) => b.techLevel))
@@ -102,17 +107,18 @@ export class AIMachineryImportPlanner {
         buyer.industrialLevel,
       );
 
-      if (unitPrice <= 0) continue;
+      if (unitPrice <= 0 || remainingBudget < unitPrice) continue;
 
-      const maxAffordable = Math.floor(
-        Math.min(remainingBudget, sellerBudget) / unitPrice,
+      const effectiveBudget = Math.min(
+        remainingBudget,
+        calculatedShare >= unitPrice ? calculatedShare : remainingBudget,
       );
+
+      const maxAffordable = Math.floor(effectiveBudget / unitPrice);
       if (maxAffordable <= 0) continue;
 
-      const quantityToBuy = Math.min(
-        maxAffordable,
-        Math.max(1, Math.ceil(totalFactories * 0.2)),
-      );
+      const targetBatchCount = Math.max(1, Math.ceil(totalFactories * 0.2));
+      const quantityToBuy = Math.min(maxAffordable, targetBatchCount);
       const totalCost = quantityToBuy * unitPrice;
 
       if (totalCost > 0 && remainingBudget >= totalCost) {

@@ -37,6 +37,15 @@ export class NationalEventsLogFormatter {
           true,
         );
         const role = String(params["role"] || "BUYER");
+        const tradeType = String(params["tradeType"] || "ARMS");
+
+        if (tradeType === "MACHINERY") {
+          if (role === "BUYER") {
+            return `واردات خطوط تولید: خرید و تجهیز ماشین‌آلات صنعتی پیشرفته به ارزش ${formattedAmount} از کشور ${targetName}.`;
+          }
+          return `صادرات صنعتی و خطوط تولید: کشور ${targetName} تجهیزات و ماشین‌آلات پیشرفته صنعتی را به ارزش ${formattedAmount} از صنایع شما خریداری کرد.`;
+        }
+
         if (role === "BUYER") {
           return `خرید و واردات فوری تسلیحات به ارزش ${formattedAmount} از کشور ${targetName}.`;
         }
