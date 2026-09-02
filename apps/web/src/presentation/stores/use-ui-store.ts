@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
-import { BattleFullReportData } from "@geopolitics/domain";
+import { BattleFullReportData, DilemmaEvent } from "@geopolitics/domain";
 
 export interface CoalitionAlertData {
   targetNationId: string;
@@ -53,6 +53,10 @@ export type ActiveModalState =
   | {
       type: "EXPORT_SALES";
       data: ExportSalesModalData;
+    }
+  | {
+      type: "DILEMMA";
+      event: DilemmaEvent;
     }
   | {
       type: "VICTORY_DEBRIEF";

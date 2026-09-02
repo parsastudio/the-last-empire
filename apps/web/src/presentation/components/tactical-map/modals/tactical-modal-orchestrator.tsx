@@ -10,6 +10,7 @@ import { PeaceNegotiationModal } from "@/presentation/components/tactical-map/si
 import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
 import { ExportSalesDetailsModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/export-sales-details-modal";
+import { DilemmaModal } from "@/presentation/components/tactical-map/modals/dilemma-modal";
 
 interface TacticalModalOrchestratorProps {
   humanNation: Nation | null;
@@ -25,6 +26,17 @@ export function TacticalModalOrchestrator({
   const activeModal = useUiStore((state) => state.activeModal);
   const closeModal = useUiStore((state) => state.closeModal);
   const openCommandCenter = useUiStore((state) => state.openCommandCenter);
+
+  if (gameState?.activeDilemma && humanNation) {
+    return (
+      <DilemmaModal
+        isOpen={true}
+        dilemma={gameState.activeDilemma}
+        humanNationId={humanNation.id}
+        onClose={closeModal}
+      />
+    );
+  }
 
   if (!activeModal) return null;
 
@@ -112,6 +124,16 @@ export function TacticalModalOrchestrator({
           isOpen={true}
           data={activeModal.data}
           nationsMap={gameState?.nations}
+          onClose={closeModal}
+        />
+      );
+
+    case "DILEMMA":
+      return (
+        <DilemmaModal
+          isOpen={true}
+          dilemma={activeModal.event}
+          humanNationId={humanNation?.id || ""}
           onClose={closeModal}
         />
       );
