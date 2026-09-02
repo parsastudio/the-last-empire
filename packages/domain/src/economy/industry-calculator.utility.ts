@@ -1,5 +1,6 @@
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 import { Province } from "@/domain/province/province.schema";
+import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.utility";
 
 export class IndustryCalculator {
   public static readonly BASE_FACTORY_YIELD = 5_000_000_000;
@@ -63,6 +64,17 @@ export class IndustryCalculator {
     );
     const calculatedMax = Math.ceil(activeFactories * (1 + headroomRatio));
     return Math.max(activeFactories, Math.max(3, calculatedMax));
+  }
+
+  public static calculateFactoryBuildCost(
+    quantity = 1,
+    governmentType?: string,
+  ): number {
+    const modifier = governmentType
+      ? GovernmentTraitsUtility.getModifiers(governmentType)
+          .procurementCostMultiplier
+      : 1.0;
+    return Math.floor(this.FACTORY_REBUILD_COST * quantity * modifier);
   }
 
   public static distributeFactoriesAndSlotsToProvinces(
@@ -287,11 +299,18 @@ export class IndustryCalculator {
     return Math.floor(baseUnitCost * importMultiplier);
   }
 
-  public static calculateResearchStepCost(industrialLevel: number): number {
+  public static calculateResearchStepCost(
+    industrialLevel: number,
+    governmentType?: string,
+  ): number {
     const k = Math.floor(industrialLevel);
     const fullTierCost =
       this.RESEARCH_BASE_COST * Math.pow(this.RESEARCH_GROWTH_BASE, k - 1);
-    return Math.floor(fullTierCost / 10);
+    const modifier = governmentType
+      ? GovernmentTraitsUtility.getModifiers(governmentType)
+          .industrialResearchCostMultiplier
+      : 1.0;
+    return Math.floor((fullTierCost / 10) * modifier);
   }
 
   public static consolidateBatches(batches?: FactoryBatch[]): FactoryBatch[] {

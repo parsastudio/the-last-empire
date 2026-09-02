@@ -73,7 +73,10 @@ export function useQuickRecruitBatch({
   const batchList = useMemo<QuickUnitBatchInfo[]>(() => {
     return ALL_TYPES.map((type) => {
       const stat = MILITARY_UNIT_STATS[type];
-      const unitPrice = stat.moneyCost;
+      const unitPrice = MilitaryPricingCalculator.calculateUnitTypePrice(
+        type,
+        nation.government?.type,
+      );
       const q = quotas[type];
 
       const batchResult = ProcurementBatchCalculator.calculateBatch({
@@ -81,7 +84,7 @@ export function useQuickRecruitBatch({
         baselineTreasury: baselineTreasuryRef.current,
         budgetPercentage: 0.1,
         unitPrice,
-        baseValuationPrice: unitPrice,
+        baseValuationPrice: stat.moneyCost,
         remainingQuotaRoom: q.remainingRoom,
         remainingValuationCapacity,
         minQuantity: 1,
@@ -98,7 +101,12 @@ export function useQuickRecruitBatch({
         isCapReached: batchResult.isCapReached,
       };
     });
-  }, [nation.treasury, quotas, remainingValuationCapacity]);
+  }, [
+    nation.treasury,
+    nation.government?.type,
+    quotas,
+    remainingValuationCapacity,
+  ]);
 
   const handleBuyBatch = useCallback(
     async (info: QuickUnitBatchInfo) => {

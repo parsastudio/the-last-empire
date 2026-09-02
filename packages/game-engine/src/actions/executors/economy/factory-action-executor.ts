@@ -20,7 +20,10 @@ export class FactoryActionExecutor {
     buyerKey: string,
   ): GameState {
     const quantity = Math.max(1, action.quantity || 1);
-    const totalCost = IndustryCalculator.FACTORY_REBUILD_COST * quantity;
+    const totalCost = IndustryCalculator.calculateFactoryBuildCost(
+      quantity,
+      nation.government?.type,
+    );
 
     if (nation.treasury < totalCost) {
       throw new GameError(
@@ -273,6 +276,7 @@ export class FactoryActionExecutor {
   ): GameState {
     const cost = IndustryCalculator.calculateResearchStepCost(
       nation.industrialLevel,
+      nation.government?.type,
     );
     if (nation.treasury < cost) {
       throw new GameError(

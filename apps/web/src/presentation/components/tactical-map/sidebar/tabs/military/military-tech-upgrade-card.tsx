@@ -11,17 +11,22 @@ interface MilitaryTechUpgradeCardProps {
   nationId: string;
   treasury?: number;
   techLevel?: number;
+  governmentType?: string;
 }
 
 export function MilitaryTechUpgradeCard({
   nationId,
   treasury = 100000,
   techLevel = 1.0,
+  governmentType,
 }: MilitaryTechUpgradeCardProps) {
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
 
-  const stepResearchCost = ResearchManager.getMilitaryTechCost(techLevel);
+  const stepResearchCost = ResearchManager.getMilitaryTechCost(
+    techLevel,
+    governmentType,
+  );
   const canAffordTech = treasury >= stepResearchCost;
 
   const nextStepLevel = Number((techLevel + 0.1).toFixed(1));

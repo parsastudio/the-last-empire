@@ -1,18 +1,28 @@
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { UnitType } from "@/domain/military/military.schema";
+import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.utility";
 
 export class MilitaryPricingCalculator {
   public static readonly ARMS_IMPORT_BASE = 2.0;
 
-  public static calculateUnitTypePrice(unitType: UnitType): number {
-    return MILITARY_UNIT_STATS[unitType].moneyCost;
+  public static calculateUnitTypePrice(
+    unitType: UnitType,
+    governmentType?: string,
+  ): number {
+    const baseCost = MILITARY_UNIT_STATS[unitType].moneyCost;
+    if (!governmentType) return baseCost;
+    const modifier =
+      GovernmentTraitsUtility.getModifiers(
+        governmentType,
+      ).procurementCostMultiplier;
+    return Math.floor(baseCost * modifier);
   }
 
   public static calculateUnitValuation(
     unitType: UnitType,
     quantity: number,
   ): number {
-    return (quantity || 0) * this.calculateUnitTypePrice(unitType);
+    return (quantity || 0) * MILITARY_UNIT_STATS[unitType].moneyCost;
   }
 
   public static calculateArmsImportMultiplier(
@@ -31,7 +41,7 @@ export class MilitaryPricingCalculator {
     buyerTechLevel: number,
     sellerTechLevel: number,
   ): number {
-    const basePrice = this.calculateUnitTypePrice(unitType);
+    const basePrice = MILITARY_UNIT_STATS[unitType].moneyCost;
     const techMultiplier = this.calculateArmsImportMultiplier(
       buyerTechLevel,
       sellerTechLevel,

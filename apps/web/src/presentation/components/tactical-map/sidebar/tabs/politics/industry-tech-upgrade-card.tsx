@@ -11,18 +11,22 @@ interface IndustryTechUpgradeCardProps {
   nationId: string;
   treasury?: number;
   industrialLevel?: number;
+  governmentType?: string;
 }
 
 export function IndustryTechUpgradeCard({
   nationId,
   treasury = 100000,
   industrialLevel = 1.0,
+  governmentType,
 }: IndustryTechUpgradeCardProps) {
   const { dispatchAction } = useGameActions();
   const [isSubmittingTech, setIsSubmittingTech] = useState(false);
 
-  const stepResearchCost =
-    IndustryCalculator.calculateResearchStepCost(industrialLevel);
+  const stepResearchCost = IndustryCalculator.calculateResearchStepCost(
+    industrialLevel,
+    governmentType,
+  );
   const canAffordTech = treasury >= stepResearchCost;
 
   const nextStepLevel = Number((industrialLevel + 0.1).toFixed(1));
