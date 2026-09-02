@@ -2,7 +2,7 @@ import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.confi
 import { UnitType } from "@/domain/military/military.schema";
 
 export class MilitaryPricingCalculator {
-  public static readonly ARMS_IMPORT_BASE = 2.2;
+  public static readonly ARMS_IMPORT_BASE = 2.0;
 
   public static calculateUnitTypePrice(unitType: UnitType): number {
     return MILITARY_UNIT_STATS[unitType].moneyCost;

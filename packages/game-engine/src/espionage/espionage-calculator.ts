@@ -103,8 +103,8 @@ export class EspionageCalculator {
     const milDelta = srcMil - trgMil;
     const indDelta = srcInd - trgInd;
 
-    const milFactor = Math.pow(2.2, milDelta);
-    const indFactor = Math.pow(2.0, indDelta);
+    const milFactor = Math.pow(2.0, milDelta);
+    const indFactor = Math.pow(1.5, indDelta);
     const cyberPowerRatio = (milFactor + indFactor) / 2;
 
     if (tier === 2) {

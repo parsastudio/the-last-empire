@@ -89,7 +89,7 @@ export function MilitaryTechUpgradeCard({
         </div>
 
         <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl text-[10px] text-muted-foreground font-sans leading-relaxed">
-          هر لول کامل فناوری توان آتش و زره ارتش را ۱۲۰٪ (۲.۲ برابر نمایی) ارتقا
+          هر لول کامل فناوری توان آتش و زره ارتش را ۱۰۰٪ (۲ برابر نمایی) ارتقا
           می‌دهد.
         </div>
 
@@ -107,7 +107,7 @@ export function MilitaryTechUpgradeCard({
             {isSubmittingTech
               ? "در حال اجرای تحقیقات دفاعی..."
               : canAffordTech
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))} (+۸.۲٪ توان رزمی)`
+                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))} (+۷.۲٪ توان رزمی)`
                 : "موجودی خزانه ناکافی جهت R&D"}
           </span>
         </button>
