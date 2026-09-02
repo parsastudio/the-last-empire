@@ -20,7 +20,6 @@ export class NationAnnexationExecutor {
     nations: Record<string, Nation>,
     winnerId: string,
     loserId: string,
-    _postWarCooldown?: number,
   ): AnnexationExecutionResult {
     const winnerCanonical = CountryRegistry.resolveCanonicalId(winnerId);
     const loserCanonical = CountryRegistry.resolveCanonicalId(loserId);

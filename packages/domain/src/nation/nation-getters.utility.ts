@@ -181,16 +181,6 @@ export class NationGettersUtility {
     );
   }
 
-  public static calculateGlobalRankMap(
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-  ): Map<string, number> {
-    return NationRankCalculatorUtility.calculateRankMap(
-      allNations,
-      provincesMap,
-    );
-  }
-
   public static calculateRankMap(
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,

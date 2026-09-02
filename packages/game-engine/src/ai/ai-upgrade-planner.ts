@@ -7,7 +7,6 @@ import {
   AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
-import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
 import { AiStrategicWallets } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 
@@ -22,8 +21,6 @@ export class AIUpgradePlanner {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     availableTreasury?: number,
-    _rankMap?: Map<string, number>,
-    _precomputedPosture?: AIPosture,
     ownedProvinces?: Province[],
     wallets?: AiStrategicWallets,
   ): UpgradePlanResult {

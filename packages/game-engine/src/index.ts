@@ -58,7 +58,6 @@ export * from "./combat/final/bit-packed-grid-state";
 export * from "./combat/conquest/province-conquest-handler";
 export * from "./combat/conquest/nation-annexation-executor";
 export * from "./combat/logging/battle-log-factory";
-export * from "./combat/loot/battle-loot-manager";
 export * from "./combat/phases/air-supremacy-phase";
 export * from "./combat/phases/ground/armor-clash-calculator";
 export * from "./combat/phases/ground/infantry-engagement-calculator";

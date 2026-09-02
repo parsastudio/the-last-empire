@@ -1,7 +1,6 @@
 import {
   Nation,
   Province,
-  MILITARY_UNIT_STATS,
   getNationGdp,
   GuarantorBudgetCalculatorUtility,
 } from "@geopolitics/domain";
@@ -75,49 +74,5 @@ export class GuarantorInterventionCalculator {
       effectiveDefenseBudget,
       auxiliaryGuarantor,
     };
-  }
-
-  public static calculateGuarantorDamageCost(
-    auxiliaryGuarantor: AuxiliaryGuarantorDefense,
-    effectiveDefenseBudget: number,
-    auxAir: number,
-    auxAD: number,
-    auxArm: number,
-    auxInf: number,
-    defAirForce: number,
-    defAirDefense: number,
-    defArmor: number,
-    defInfantry: number,
-    netDefAirLost: number,
-    netDefAirDefenseLost: number,
-    netDefArmorLost: number,
-    netDefInfantryLost: number,
-  ): number {
-    const auxAirLoss = Math.min(
-      auxAir,
-      Math.floor(netDefAirLost * (auxAir / Math.max(1, defAirForce))),
-    );
-    const auxADLoss = Math.min(
-      auxAD,
-      Math.floor(netDefAirDefenseLost * (auxAD / Math.max(1, defAirDefense))),
-    );
-    const auxArmLoss = Math.min(
-      auxArm,
-      Math.floor(netDefArmorLost * (auxArm / Math.max(1, defArmor))),
-    );
-    const auxInfLoss = Math.min(
-      auxInf,
-      Math.floor(netDefInfantryLost * (auxInf / Math.max(1, defInfantry))),
-    );
-
-    const totalLossMoney =
-      auxAirLoss * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
-      auxADLoss * MILITARY_UNIT_STATS.AIR_DEFENSE.moneyCost +
-      auxArmLoss * MILITARY_UNIT_STATS.ARMOR.moneyCost +
-      auxInfLoss * MILITARY_UNIT_STATS.INFANTRY.moneyCost;
-
-    const damageCost = Math.min(effectiveDefenseBudget, totalLossMoney);
-    auxiliaryGuarantor.damageCostIncurred = damageCost;
-    return damageCost;
   }
 }

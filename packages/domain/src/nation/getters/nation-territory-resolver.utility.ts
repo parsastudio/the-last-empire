@@ -81,21 +81,4 @@ export class NationTerritoryResolverUtility {
     }
     return false;
   }
-
-  public static isAlive(
-    nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): boolean {
-    const provs =
-      ownedProvinces ??
-      this.getOwnedProvinces(nationId, provincesMap, provincesByOwnerMap);
-
-    for (let i = 0; i < provs.length; i++) {
-      const p = provs[i]!;
-      if ((p.pixelCount || 0) > 0 && (p.population || 0) > 0) return true;
-    }
-    return false;
-  }
 }

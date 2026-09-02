@@ -163,24 +163,6 @@ export class TurnLogBuilder {
     );
   }
 
-  public static createCoalitionMemberFallenLog(
-    turn: number,
-    fallenNationId: string,
-    targetNationId: string,
-    remainingCount: number,
-  ): TurnLogEntry {
-    return this.createLogEntry(
-      turn,
-      fallenNationId,
-      "CRITICAL",
-      "COALITION_MEMBER_FALLEN",
-      "GLOBAL_WAR",
-      "GLOBAL",
-      targetNationId,
-      { remainingCount },
-    );
-  }
-
   public static createVictoryLog(
     turn: number,
     winnerNationId: string,

@@ -3,21 +3,6 @@ import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { DebtCalculatorUtility } from "@geopolitics/domain";
 
-export class DebtCalculator {
-  public static calculateBorrowingCapacity(
-    nation: Nation,
-    provincesMap?: Record<string, Province>,
-  ): number {
-    const gdp = getNationGdp(nation, provincesMap);
-    const maxCapacity = DebtCalculatorUtility.getMaxDebtLimit(gdp);
-    return Math.max(0, maxCapacity - nation.nationalDebt);
-  }
-
-  public static calculateInterest(debt: number): number {
-    return DebtCalculatorUtility.calculateInterest(debt);
-  }
-}
-
 export class BankruptcyManager {
   public isBankrupt(
     nation: Nation,
