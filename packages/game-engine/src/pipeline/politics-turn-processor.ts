@@ -3,12 +3,17 @@ import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
 export class PoliticsTurnProcessor {
-  public static process(nation: Nation, isAtWar: boolean): Nation {
+  public static process(
+    nation: Nation,
+    isAtWar: boolean,
+    allNations?: Record<string, Nation>,
+  ): Nation {
     const updated = ModifierManager.updateActiveModifiers(nation);
 
     const newStability = StabilityCalculator.calculateTurnStability(
       updated,
       isAtWar,
+      allNations,
     );
 
     return {

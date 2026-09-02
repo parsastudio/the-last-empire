@@ -149,11 +149,13 @@ export class NationProfileAssigner {
       executedEspionageTiers: [],
       attackedTargetIdsThisTurn: [],
       sentAidTargetIdsThisTurn: [],
+      hasBoughtProvinceThisTurn: false,
       warFocusTargetId: null,
       postWarCooldownTurns: 0,
       doctrine: item.aiDoctrine || doctrineProfile.type,
       doctrineWeights: doctrineProfile.weights,
       securityGuarantorId: null,
+      isEmergencyProtectorate: false,
     };
   }
 

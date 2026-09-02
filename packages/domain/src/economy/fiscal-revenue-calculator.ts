@@ -5,6 +5,7 @@ import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.schema";
 import { ECONOMIC_DOCTRINE_CONFIGS } from "@/domain/politics/economic-doctrine.config";
+import { StabilityBracketUtility } from "@/domain/politics/stability-bracket.utility";
 
 export interface FiscalRevenueBreakdown {
   totalRevenue: number;
@@ -17,6 +18,8 @@ export interface FiscalRevenueBreakdown {
   activePeacePartnersCount: number;
   totalPeacePartnersGdp: number;
   stance: EconomicDoctrineStance;
+  stabilityMultiplier: number;
+  stabilityDeltaRevenue: number;
 }
 
 export class FiscalRevenueCalculator {
@@ -75,7 +78,13 @@ export class FiscalRevenueCalculator {
 
     const domesticRevenue = Math.floor(domesticBase * config.domesticWeight);
     const globalRevenue = Math.floor(globalBase * config.globalWeight);
-    const totalRevenue = domesticRevenue + globalRevenue;
+    const baseTotalRevenue = domesticRevenue + globalRevenue;
+
+    const stability = nation.government?.stability ?? 50;
+    const stabilityMultiplier =
+      StabilityBracketUtility.getRevenueMultiplier(stability);
+    const totalRevenue = Math.floor(baseTotalRevenue * stabilityMultiplier);
+    const stabilityDeltaRevenue = totalRevenue - baseTotalRevenue;
 
     return {
       totalRevenue,
@@ -88,6 +97,8 @@ export class FiscalRevenueCalculator {
       activePeacePartnersCount,
       totalPeacePartnersGdp: totalPeaceGdp,
       stance,
+      stabilityMultiplier,
+      stabilityDeltaRevenue,
     };
   }
 }

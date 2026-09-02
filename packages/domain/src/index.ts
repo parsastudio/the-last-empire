@@ -60,6 +60,7 @@ export * from "./politics/economic-doctrine.schema";
 export * from "./politics/economic-doctrine.config";
 export * from "./politics/government-label.utility";
 export * from "./politics/politics.schema";
+export * from "./politics/stability-bracket.utility";
 export * from "./province/province.schema";
 export * from "./reports/combat-report.schema";
 export * from "./shared/persian-number-formatter";
