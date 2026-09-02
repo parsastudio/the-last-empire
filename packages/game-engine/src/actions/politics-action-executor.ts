@@ -119,6 +119,7 @@ export class PoliticsActionExecutor {
             receiver,
             state.provinces,
             false,
+            state.nations,
           );
           if (!validation.isValid) {
             throw new GameError(

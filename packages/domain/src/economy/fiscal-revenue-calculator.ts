@@ -23,6 +23,8 @@ export interface FiscalRevenueBreakdown {
 }
 
 export class FiscalRevenueCalculator {
+  public static readonly AI_REVENUE_MULTIPLIER = 1.6;
+
   public static calculate(
     nation: Nation,
     nationsMap?: Record<string, Nation>,
@@ -76,8 +78,13 @@ export class FiscalRevenueCalculator {
 
     const globalBase = exportPower + transitGateway;
 
-    const domesticRevenue = Math.floor(domesticBase * config.domesticWeight);
-    const globalRevenue = Math.floor(globalBase * config.globalWeight);
+    const aiMultiplier = nation.isAi ? this.AI_REVENUE_MULTIPLIER : 1.0;
+    const domesticRevenue = Math.floor(
+      domesticBase * config.domesticWeight * aiMultiplier,
+    );
+    const globalRevenue = Math.floor(
+      globalBase * config.globalWeight * aiMultiplier,
+    );
     const baseTotalRevenue = domesticRevenue + globalRevenue;
 
     const stability = nation.government?.stability ?? 50;
