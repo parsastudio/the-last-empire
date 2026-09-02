@@ -40,7 +40,7 @@ export class AIWarDeclarationEvaluator {
     }
 
     let bestTargetId: string | null = null;
-    let highestWarUtility = 35;
+    let highestWarUtility = 45;
 
     const targets =
       reachableTargets ??
