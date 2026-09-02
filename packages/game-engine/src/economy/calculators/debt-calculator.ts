@@ -46,7 +46,7 @@ export class BankruptcyManager {
       nationalDebt: 0,
       government: {
         ...nation.government,
-        stability: Math.max(10, nation.government.stability - 25),
+        stability: Math.max(0, nation.government.stability - 20),
       },
     };
 

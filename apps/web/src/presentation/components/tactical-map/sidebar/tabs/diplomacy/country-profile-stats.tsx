@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Coins,
   Users,
@@ -10,7 +10,10 @@ import {
   Skull,
   Cpu,
 } from "lucide-react";
-import { PersianNumberFormatter } from "@geopolitics/domain";
+import {
+  PersianNumberFormatter,
+  StabilityBracketUtility,
+} from "@geopolitics/domain";
 
 export interface CountryProfileData {
   gdp: string;
@@ -31,6 +34,10 @@ interface CountryProfileStatsProps {
 
 export function CountryProfileStats({ data }: CountryProfileStatsProps) {
   const isArmsEligible = data.isArmsEligible ?? data.tension < 50;
+  const bracket = useMemo(
+    () => StabilityBracketUtility.getBracket(data.stability),
+    [data.stability],
+  );
 
   return (
     <div className="space-y-3 font-mono text-xs dir-rtl font-sans">
@@ -163,9 +170,16 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
           <span className="text-[10px] text-muted-foreground font-sans">
             ثبات سیاسی داخلی:
           </span>
-          <span className="font-bold text-gdp">
-            {PersianNumberFormatter.toPersianDigits(data.stability)}٪
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-md border ${bracket.badgeStyleClass}`}
+            >
+              {bracket.labelFa}
+            </span>
+            <span className={`font-bold ${bracket.textColorClass}`}>
+              {PersianNumberFormatter.toPersianDigits(data.stability)}٪
+            </span>
+          </div>
         </div>
       </div>
     </div>

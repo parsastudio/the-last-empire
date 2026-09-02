@@ -72,6 +72,11 @@ export class NationAnnexationExecutor {
         winnerObj.industrialLevel,
       );
 
+      const nextStability = Math.min(
+        100,
+        (winnerObj.government?.stability ?? 50) + 6,
+      );
+
       updatedNations[winnerObj.id] = {
         ...winnerObj,
         treasury: winnerObj.treasury + Math.max(0, loserObj.treasury),
@@ -83,6 +88,10 @@ export class NationAnnexationExecutor {
             : winnerObj.warFocusTargetId,
         postWarCooldownTurns: postWarCooldown,
         relations: winnerRelations,
+        government: {
+          ...winnerObj.government,
+          stability: nextStability,
+        },
       };
     }
 
