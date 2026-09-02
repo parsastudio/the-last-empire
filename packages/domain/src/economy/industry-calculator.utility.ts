@@ -8,8 +8,6 @@ import { FactoryDestructionResolverUtility } from "@/domain/economy/factory/fact
 export class IndustryCalculator {
   public static readonly BASE_FACTORY_YIELD =
     FactoryYieldCalculatorUtility.BASE_FACTORY_YIELD;
-  public static readonly SUBSISTENCE_YIELD =
-    FactoryYieldCalculatorUtility.SUBSISTENCE_YIELD;
   public static readonly YIELD_TECH_BASE =
     FactoryYieldCalculatorUtility.YIELD_TECH_BASE;
   public static readonly FACTORY_REBUILD_COST =

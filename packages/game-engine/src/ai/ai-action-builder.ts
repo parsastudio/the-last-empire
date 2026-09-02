@@ -124,8 +124,6 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       procurementResult.remainingTreasury,
-      rankMap,
-      context.posture,
       context.ownedProvinces,
       procurementResult.strategicWallets,
     );

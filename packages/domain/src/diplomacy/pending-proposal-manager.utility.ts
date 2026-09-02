@@ -32,20 +32,4 @@ export class PendingProposalManagerUtility {
   ): PendingDiplomaticProposal[] {
     return proposals.filter((p) => currentTurn <= p.expiresTurn);
   }
-
-  public static filterExcludingDead(
-    proposals: PendingDiplomaticProposal[],
-    deadCanonicalIds: Set<string>,
-  ): PendingDiplomaticProposal[] {
-    return proposals.filter((p) => {
-      const src = CountryRegistry.resolveCanonicalId(p.senderNationId);
-      const rec = CountryRegistry.resolveCanonicalId(p.receiverNationId);
-      return (
-        !deadCanonicalIds.has(src) &&
-        !deadCanonicalIds.has(p.senderNationId) &&
-        !deadCanonicalIds.has(rec) &&
-        !deadCanonicalIds.has(p.receiverNationId)
-      );
-    });
-  }
 }
