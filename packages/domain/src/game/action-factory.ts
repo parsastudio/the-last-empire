@@ -22,22 +22,19 @@ import { UnitType } from "@/domain/military/military.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
 import { EspionageTier } from "@/domain/espionage/espionage.schema";
 import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.schema";
+import { EconomyActionFactory } from "@/domain/game/actions/factories/economy-action.factory";
+import { MilitaryActionFactory } from "@/domain/game/actions/factories/military-action.factory";
+import { DiplomacyActionFactory } from "@/domain/game/actions/factories/diplomacy-action.factory";
+import { EspionageActionFactory } from "@/domain/game/actions/factories/espionage-action.factory";
+import { PoliticsActionFactory } from "@/domain/game/actions/factories/politics-action.factory";
+import { DilemmaActionFactory } from "@/domain/game/actions/factories/dilemma-action.factory";
 
 export class ActionFactory {
-  private static createId(prefix: string): string {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  }
-
   public static setEconomicDoctrine(
     nationId: string,
     stance: EconomicDoctrineStance,
   ): SetEconomicDoctrineAction {
-    return {
-      id: this.createId("doctrine"),
-      nationId,
-      type: "SET_ECONOMIC_DOCTRINE",
-      stance,
-    };
+    return EconomyActionFactory.setEconomicDoctrine(nationId, stance);
   }
 
   public static buildFactory(
@@ -45,35 +42,20 @@ export class ActionFactory {
     quantity = 1,
     provinceId?: number,
   ): BuildFactoryAction {
-    return {
-      id: this.createId("build-factory"),
-      nationId,
-      type: "BUILD_FACTORY",
-      quantity,
-      provinceId,
-    };
+    return EconomyActionFactory.buildFactory(nationId, quantity, provinceId);
   }
 
   public static equipDomesticMachinery(
     nationId: string,
     quantity?: number,
   ): EquipDomesticMachineryAction {
-    return {
-      id: this.createId("equip-machinery"),
-      nationId,
-      type: "EQUIP_DOMESTIC_MACHINERY",
-      quantity,
-    };
+    return EconomyActionFactory.equipDomesticMachinery(nationId, quantity);
   }
 
   public static investIndustrialResearch(
     nationId: string,
   ): InvestIndustrialResearchAction {
-    return {
-      id: this.createId("ind-research"),
-      nationId,
-      type: "INVEST_INDUSTRIAL_RESEARCH",
-    };
+    return EconomyActionFactory.investIndustrialResearch(nationId);
   }
 
   public static buyIndustrialEquipment(
@@ -81,13 +63,11 @@ export class ActionFactory {
     sellerNationId: string,
     quantity: number,
   ): BuyIndustrialEquipmentAction {
-    return {
-      id: this.createId("buy-equipment"),
+    return EconomyActionFactory.buyIndustrialEquipment(
       nationId,
-      type: "BUY_INDUSTRIAL_EQUIPMENT",
       sellerNationId,
       quantity,
-    };
+    );
   }
 
   public static recruitUnit(
@@ -95,13 +75,7 @@ export class ActionFactory {
     unitType: UnitType,
     quantity: number,
   ): RecruitUnitAction {
-    return {
-      id: this.createId("recruit"),
-      nationId,
-      type: "RECRUIT_UNIT",
-      unitType,
-      quantity,
-    };
+    return MilitaryActionFactory.recruitUnit(nationId, unitType, quantity);
   }
 
   public static buyArmsMarket(
@@ -110,26 +84,19 @@ export class ActionFactory {
     unitType: UnitType,
     quantity: number,
   ): BuyArmsMarketAction {
-    return {
-      id: this.createId("arms-market"),
+    return MilitaryActionFactory.buyArmsMarket(
       nationId,
-      type: "BUY_ARMS_MARKET",
       sellerNationId,
       unitType,
       quantity,
-    };
+    );
   }
 
   public static buyNavalFleet(
     nationId: string,
     quantity = 1,
   ): BuyNavalFleetAction {
-    return {
-      id: this.createId("naval-fleet"),
-      nationId,
-      type: "BUY_NAVAL_FLEET",
-      quantity,
-    };
+    return MilitaryActionFactory.buyNavalFleet(nationId, quantity);
   }
 
   public static buyProvince(
@@ -138,14 +105,12 @@ export class ActionFactory {
     provinceId: number,
     cost = 0,
   ): BuyProvinceAction {
-    return {
-      id: this.createId("buy-province"),
+    return EconomyActionFactory.buyProvince(
       nationId,
-      type: "BUY_PROVINCE",
       targetNationId,
       provinceId,
       cost,
-    };
+    );
   }
 
   public static diplomaticProposal(
@@ -153,13 +118,11 @@ export class ActionFactory {
     targetNationId: string,
     proposalType: DiplomaticProposalType,
   ): DiplomaticProposalAction {
-    return {
-      id: this.createId("diplomacy"),
+    return DiplomacyActionFactory.diplomaticProposal(
       nationId,
-      type: "DIPLOMATIC_PROPOSAL",
       targetNationId,
       proposalType,
-    };
+    );
   }
 
   public static respondDiplomaticProposal(
@@ -167,13 +130,11 @@ export class ActionFactory {
     proposalId: string,
     accept: boolean,
   ): RespondDiplomaticProposalAction {
-    return {
-      id: this.createId("diplomacy-response"),
+    return DiplomacyActionFactory.respondDiplomaticProposal(
       nationId,
-      type: "RESPOND_DIPLOMATIC_PROPOSAL",
       proposalId,
       accept,
-    };
+    );
   }
 
   public static signPeaceSettlement(
@@ -181,26 +142,18 @@ export class ActionFactory {
     targetNationId: string,
     proposalId?: string,
   ): SignPeaceSettlementAction {
-    return {
-      id: this.createId("peace-settlement"),
+    return DiplomacyActionFactory.signPeaceSettlement(
       nationId,
       targetNationId,
-      type: "SIGN_PEACE_SETTLEMENT",
       proposalId,
-    };
+    );
   }
 
   public static sendForeignAid(
     nationId: string,
     targetNationId: string,
   ): DiplomaticProposalAction {
-    return {
-      id: this.createId("aid"),
-      nationId,
-      type: "DIPLOMATIC_PROPOSAL",
-      targetNationId,
-      proposalType: "SEND_FOREIGN_AID",
-    };
+    return DiplomacyActionFactory.sendForeignAid(nationId, targetNationId);
   }
 
   public static executeEspionage(
@@ -208,42 +161,26 @@ export class ActionFactory {
     targetNationId: string,
     tier: EspionageTier,
   ): ExecuteEspionageAction {
-    return {
-      id: this.createId("espionage"),
+    return EspionageActionFactory.executeEspionage(
       nationId,
-      type: "EXECUTE_ESPIONAGE_OPERATION",
       targetNationId,
       tier,
-    };
+    );
   }
 
   public static repayDebt(nationId: string, amount: number): RepayDebtAction {
-    return {
-      id: this.createId("repay"),
-      nationId,
-      type: "REPAY_DEBT",
-      amount,
-    };
+    return EconomyActionFactory.repayDebt(nationId, amount);
   }
 
   public static requestLoan(
     nationId: string,
     amount: number,
   ): RequestLoanAction {
-    return {
-      id: this.createId("loan"),
-      nationId,
-      type: "REQUEST_LOAN",
-      amount,
-    };
+    return EconomyActionFactory.requestLoan(nationId, amount);
   }
 
   public static investResearch(nationId: string): InvestResearchAction {
-    return {
-      id: this.createId("research"),
-      nationId,
-      type: "INVEST_RESEARCH",
-    };
+    return PoliticsActionFactory.investResearch(nationId);
   }
 
   public static initiateBattle(
@@ -256,10 +193,8 @@ export class ActionFactory {
     targetProvinceId?: number,
     attackType?: "LAND" | "NAVAL",
   ): InitiateBattleAction {
-    return {
-      id: this.createId("battle"),
+    return MilitaryActionFactory.initiateBattle(
       nationId,
-      type: "INITIATE_BATTLE",
       targetNationId,
       dronesToLaunch,
       infantryToDeploy,
@@ -267,7 +202,7 @@ export class ActionFactory {
       airForceToDeploy,
       targetProvinceId,
       attackType,
-    };
+    );
   }
 
   public static resolveDilemma(
@@ -275,12 +210,6 @@ export class ActionFactory {
     eventId: string,
     choiceId: string,
   ): ResolveDilemmaAction {
-    return {
-      id: this.createId("dilemma-resolve"),
-      nationId,
-      type: "RESOLVE_DILEMMA",
-      eventId,
-      choiceId,
-    };
+    return DilemmaActionFactory.resolveDilemma(nationId, eventId, choiceId);
   }
 }
