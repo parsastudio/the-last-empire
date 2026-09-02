@@ -25,6 +25,9 @@ export function useNationalProjects(nation: Nation) {
   const [selectedTierFilter, setSelectedTierFilter] = useState<
     ProjectScopeTier | "ALL"
   >("ALL");
+  const [expandedProjectId, setExpandedProjectId] = useState<string | null>(
+    null,
+  );
   const { dispatchAction, isSubmitting } = useGameActions();
   const { showToast } = useToast();
 
@@ -55,6 +58,10 @@ export function useNationalProjects(nation: Nation) {
       return project.tier === selectedTierFilter;
     });
   }, [selectedTierFilter]);
+
+  const toggleExpand = useCallback((projectId: string) => {
+    setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
+  }, []);
 
   const handleBoostProject = useCallback(
     async (project: NationalProjectConfig) => {
@@ -104,6 +111,8 @@ export function useNationalProjects(nation: Nation) {
   return {
     selectedTierFilter,
     setSelectedTierFilter,
+    expandedProjectId,
+    toggleExpand,
     completedIds,
     boostedThisTurn,
     progressSteps,
