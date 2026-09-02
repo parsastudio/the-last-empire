@@ -13,6 +13,12 @@ export class NationalEventsLogFormatter {
       case "NATION_BANKRUPTCY":
         return `هشدار بحران مالی و ورشکستگی ملی: به دلیل رسیدن بدهی به ۴۵٪ GDP، خزانه‌داری کشور ${sourceName} تخلیه، بدهی‌ها با نکول رسمی صفر، و بهره‌وری زیرساخت‌های کشور ۲۵٪ تنزل یافت.`;
 
+      case "DILEMMA_RESOLVED": {
+        const title = String(params["eventTitle"] || "رویداد ملی");
+        const choice = String(params["choiceLabel"] || "تصمیم حاکمیت");
+        return `فرمان حاکمیتی در بحران «${title}»: گزینه «${choice}» توسط رهبری کشور ${sourceName} ابلاغ گردید.`;
+      }
+
       case "ESPIONAGE_OPERATION": {
         const role = String(params["role"] || "ATTACKER");
         const rawMsg = params["details"]

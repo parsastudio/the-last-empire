@@ -9,6 +9,7 @@ import {
   Coins,
   Users,
   Info,
+  Sparkles,
   LucideIcon,
 } from "lucide-react";
 import { TurnLogEntry } from "@geopolitics/domain";
@@ -80,6 +81,14 @@ export class ReportCardStylerUtility {
     }
 
     switch (log.eventCode) {
+      case "DILEMMA_RESOLVED":
+        return {
+          cardBg: "bg-purple-950/20",
+          border: "border-purple-500/40 hover:border-purple-500",
+          icon: Sparkles,
+          iconBg: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+        };
+
       case "NATION_ANNEXED":
       case "NATION_COLLAPSED":
         return {
