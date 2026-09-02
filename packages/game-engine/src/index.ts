@@ -10,6 +10,7 @@ export * from "./actions/executors/military/battle-initiation-validator";
 export * from "./actions/executors/politics/war-declaration-executor";
 export * from "./actions/executors/politics/treaty-termination-executor";
 export * from "./actions/executors/politics/foreign-aid-executor";
+export * from "./actions/executors/dilemma/dilemma-action-executor";
 
 export * from "./ai/geopolitical-vector-calculator";
 export * from "./ai/geopolitical-matrix-cache";
@@ -80,6 +81,8 @@ export * from "./economy/economy-calculators";
 
 export * from "./espionage/espionage-calculator";
 export * from "./espionage/espionage-manager";
+
+export * from "./events/dilemma-turn-evaluator";
 
 export * from "./initializers/nation-profile-assigner";
 export * from "./initializers/global-ai-initializer";
