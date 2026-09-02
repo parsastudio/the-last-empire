@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
+import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.utility";
 
 export interface BreakdownMilitaryPayroll {
   infantry: number;
@@ -21,42 +22,51 @@ export class MilitaryPayrollCalculator {
     nation: Nation,
     provincesMap?: Record<string, Province>,
   ): BreakdownMilitaryPayroll {
+    const govModifiers = GovernmentTraitsUtility.getModifiers(
+      nation.government?.type,
+    );
+    const effectivePayrollRate =
+      this.PAYROLL_RATE * govModifiers.maintenanceCostMultiplier;
+
     const rawInfantry = Math.floor(
       MilitaryPricingCalculator.calculateUnitValuation(
         "INFANTRY",
         nation.military.infantry || 0,
-      ) * this.PAYROLL_RATE,
+      ) * effectivePayrollRate,
     );
     const rawArmor = Math.floor(
       MilitaryPricingCalculator.calculateUnitValuation(
         "ARMOR",
         nation.military.armor || 0,
-      ) * this.PAYROLL_RATE,
+      ) * effectivePayrollRate,
     );
     const rawAirDefense = Math.floor(
       MilitaryPricingCalculator.calculateUnitValuation(
         "AIR_DEFENSE",
         nation.military.airDefense || 0,
-      ) * this.PAYROLL_RATE,
+      ) * effectivePayrollRate,
     );
     const rawAirForce = Math.floor(
       MilitaryPricingCalculator.calculateUnitValuation(
         "AIR_FORCE",
         nation.military.airForce || 0,
-      ) * this.PAYROLL_RATE,
+      ) * effectivePayrollRate,
     );
     const rawDroneMissile = Math.floor(
       MilitaryPricingCalculator.calculateUnitValuation(
         "DRONE_MISSILE",
         nation.military.droneMissile || 0,
-      ) * this.PAYROLL_RATE,
+      ) * effectivePayrollRate,
     );
 
     const rawTotal =
       rawInfantry + rawArmor + rawAirDefense + rawAirForce + rawDroneMissile;
 
     const gdp = getNationGdp(nation, provincesMap);
-    const maxAllowedPayroll = gdp > 0 ? Math.floor(gdp * 0.06) : rawTotal;
+    const maxAllowedPayroll =
+      gdp > 0
+        ? Math.floor(gdp * 0.06 * govModifiers.maintenanceCostMultiplier)
+        : rawTotal;
 
     if (rawTotal > maxAllowedPayroll && rawTotal > 0) {
       const scale = maxAllowedPayroll / rawTotal;

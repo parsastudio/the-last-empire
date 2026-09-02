@@ -59,6 +59,8 @@ export * from "./nation/territory-claims.utility";
 export * from "./politics/economic-doctrine.schema";
 export * from "./politics/economic-doctrine.config";
 export * from "./politics/government-label.utility";
+export * from "./politics/government-traits.config";
+export * from "./politics/government-traits.utility";
 export * from "./politics/politics.schema";
 export * from "./politics/stability-bracket.utility";
 export * from "./province/province.schema";

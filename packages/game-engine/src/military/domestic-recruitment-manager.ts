@@ -1,7 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { UnitType } from "@/domain/military/military.schema";
-import { GameError } from "@/domain/shared/domain-utilities";
+import { GameError, GovernmentTraitsUtility } from "@geopolitics/domain";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
@@ -22,8 +22,14 @@ export class DomesticRecruitmentManager {
       );
     }
 
-    const unitPrice =
+    const govModifiers = GovernmentTraitsUtility.getModifiers(
+      nation.government?.type,
+    );
+    const baseUnitPrice =
       MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
+    const unitPrice = Math.floor(
+      baseUnitPrice * govModifiers.procurementCostMultiplier,
+    );
     const totalMoney = unitPrice * quantity;
 
     if (nation.treasury < totalMoney) {
