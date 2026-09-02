@@ -2,6 +2,8 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
+import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export interface SecurityGuaranteeValidationResult {
   isValid: boolean;
@@ -17,11 +19,15 @@ export interface SecurityGuaranteeValidationResult {
 }
 
 export class SecurityGuaranteeValidator {
+  public static readonly TOP_TIER_PERCENTILE = 0.4;
+
   public static validate(
     client: Nation,
     guarantor: Nation,
     provincesMap?: Record<string, Province>,
     isEmergency = false,
+    allNations?: Record<string, Nation>,
+    rankMap?: Map<string, number>,
   ): SecurityGuaranteeValidationResult {
     if (client.id === guarantor.id) {
       return {
@@ -54,6 +60,40 @@ export class SecurityGuaranteeValidator {
     const tension = rel ? (rel.tension ?? 10) : 10;
     const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
     const isNotWar = stance !== "WAR";
+
+    if (allNations && client.isAi) {
+      const aliveNations = Object.values(allNations).filter((n) => n.isAlive);
+      const aliveCount = Math.max(1, aliveNations.length);
+      const topTierCutoff = Math.max(
+        1,
+        Math.ceil(aliveCount * this.TOP_TIER_PERCENTILE),
+      );
+      const canonicalClient = CountryRegistry.resolveCanonicalId(client.id);
+      const clientRank =
+        rankMap?.get(canonicalClient) ??
+        NationGettersUtility.getRank(
+          client.id,
+          allNations,
+          provincesMap,
+          rankMap,
+        );
+
+      if (clientRank <= topTierCutoff) {
+        return {
+          isValid: false,
+          reason:
+            "کشورهای حاضر در ۴۰٪ قدرت برتر جهان مجاز به پذیرش چتر امنیتی نیستند.",
+          gdpRatio,
+          techDiff,
+          tension,
+          isGdpValid: false,
+          isTechValid,
+          isTensionValid: true,
+          isNotWar,
+          isEmergencyProtectorate: isEmergency,
+        };
+      }
+    }
 
     if (isEmergency) {
       const isGdpValid = gdpRatio >= 1.0;

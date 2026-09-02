@@ -75,6 +75,7 @@ export * from "./diplomacy/diplomacy-engine";
 export * from "./diplomacy/diplomatic-acceptance-evaluator";
 export * from "./diplomacy/appliers/diplomatic-log-synchronizer";
 export * from "./diplomacy/appliers/security-guarantee-applier";
+export * from "./diplomacy/appliers/guarantor-retaliation-applier";
 export * from "./diplomacy/appliers/peace-treaty-applier";
 export * from "./diplomacy/treaty-acceptance-applier";
 export * from "./diplomacy/peace-settlement-executor";

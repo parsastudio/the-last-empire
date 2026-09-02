@@ -36,7 +36,18 @@ export class AITreatyEvaluator {
         rankMap,
       );
 
-    if (!nation.securityGuarantorId) {
+    const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
+    const nationRank = rankMap?.get(canonicalNation) ?? 99;
+    const aliveCount = Object.values(allNations).filter(
+      (n) => n.isAlive,
+    ).length;
+    const topTierCutoff = Math.max(
+      1,
+      Math.ceil(aliveCount * SecurityGuaranteeValidator.TOP_TIER_PERCENTILE),
+    );
+    const isTopFortyPercent = nationRank <= topTierCutoff;
+
+    if (!nation.securityGuarantorId && !isTopFortyPercent) {
       for (let i = 0; i < targets.length; i++) {
         const candidate = targets[i]!;
         if (
@@ -49,6 +60,9 @@ export class AITreatyEvaluator {
           nation,
           candidate,
           provincesMap,
+          false,
+          allNations,
+          rankMap,
         );
 
         if (validation.isValid) {

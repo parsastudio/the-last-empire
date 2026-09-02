@@ -16,6 +16,7 @@ import {
   NationRelationResolver,
   IndustryCalculator,
 } from "@geopolitics/domain";
+import { GuarantorRetaliationApplier } from "@/engine/diplomacy/appliers/guarantor-retaliation-applier";
 
 export interface BattleExecutionResult {
   state: GameState;
@@ -171,6 +172,14 @@ export class BattleExecutionEngine {
       attackType,
       spoilsData,
     );
+
+    const retaliationResult = GuarantorRetaliationApplier.apply(
+      { ...state, provinces: updatedProvinces, nations: updatedNations },
+      attacker.id,
+      defender.id,
+    );
+    updatedNations = retaliationResult.updatedNations;
+    battleLogs.push(...retaliationResult.retaliationLogs);
 
     const reportData = BattleLogFactory.assembleReportData(
       attacker,

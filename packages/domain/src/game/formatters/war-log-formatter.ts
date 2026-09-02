@@ -8,8 +8,19 @@ export class WarLogFormatter {
     params: Record<string, TurnLogParamValue>,
   ): string | null {
     switch (eventCode) {
-      case "WAR_DECLARED":
+      case "WAR_DECLARED": {
+        if (params["isRetaliation"]) {
+          const protectedName = String(
+            params["protectedTargetName"] || "هم‌پیمان خود",
+          );
+          const reasonText =
+            params["retaliationReason"] === "GUARANTOR"
+              ? "چتر امنیتی و دفاع سرزمینی"
+              : "پیمان دفاعی شراکت استراتژیک";
+          return `هشدار بحران ژئوپلیتیک: امپراتوری ${sourceName} در پاسخ به تهاجم شما به خاک ${protectedName}، با استناد به ${reasonText} رسماً به شما اعلان جنگ کرد و وارد جبهه نبرد شد!`;
+        }
         return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;
+      }
 
       case "VICTORY_ACHIEVED": {
         const reason = String(params["reason"] || "");

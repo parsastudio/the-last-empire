@@ -17,6 +17,7 @@ export class DiplomaticProposalExecutor {
       receiver,
       state.provinces,
       true,
+      state.nations,
     );
 
     if (!validation.isValid) {

@@ -8,6 +8,7 @@ import {
   AIEmergencyDefenseManager,
   ReactiveDefenseEvent,
 } from "@/engine/ai/ai-emergency-defense-manager";
+import { GuarantorRetaliationApplier } from "@/engine/diplomacy/appliers/guarantor-retaliation-applier";
 
 export class WarDeclarationExecutor {
   public static execute(
@@ -78,6 +79,18 @@ export class WarDeclarationExecutor {
           },
         },
       },
+    };
+
+    const retaliationResult = GuarantorRetaliationApplier.apply(
+      newState,
+      nation.id,
+      receiver.id,
+    );
+
+    newState = {
+      ...newState,
+      nations: retaliationResult.updatedNations,
+      turnLogs: [...newState.turnLogs, ...retaliationResult.retaliationLogs],
     };
 
     let defenseEvent: ReactiveDefenseEvent = { type: "NONE" };
