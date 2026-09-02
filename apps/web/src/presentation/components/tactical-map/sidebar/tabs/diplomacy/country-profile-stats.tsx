@@ -14,6 +14,8 @@ import {
   PersianNumberFormatter,
   StabilityBracketUtility,
 } from "@geopolitics/domain";
+import { DiplomacyAlliesBox } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-allies-box";
+import { NationAllyDetail } from "@/presentation/components/tactical-map/command-center/views/components/diplomacy-allies-resolver.utility";
 
 export interface CountryProfileData {
   gdp: string;
@@ -30,9 +32,15 @@ export interface CountryProfileData {
 
 interface CountryProfileStatsProps {
   data: CountryProfileData;
+  allies?: NationAllyDetail[];
+  onSelectAlly?: (code: string) => void;
 }
 
-export function CountryProfileStats({ data }: CountryProfileStatsProps) {
+export function CountryProfileStats({
+  data,
+  allies = [],
+  onSelectAlly,
+}: CountryProfileStatsProps) {
   const isArmsEligible = data.isArmsEligible ?? data.tension < 50;
   const bracket = useMemo(
     () => StabilityBracketUtility.getBracket(data.stability),
@@ -92,6 +100,8 @@ export function CountryProfileStats({ data }: CountryProfileStatsProps) {
           </span>
         </div>
       </div>
+
+      <DiplomacyAlliesBox allies={allies} onSelectAlly={onSelectAlly} />
 
       {data.guarantorName && (
         <div
