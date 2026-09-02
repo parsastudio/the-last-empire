@@ -20,7 +20,6 @@ import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { AIEconomicStanceEvaluator } from "@/engine/ai/ai-economic-stance-evaluator";
 import { AiWalletBudgetAllocator } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 import { AINationalProjectPlanner } from "@/engine/ai/ai-national-project-planner";
-import { AIBuyProvincePlanner } from "@/engine/ai/ai-buy-province-planner";
 
 interface NationDecisionContext {
   ownedProvinces: Province[];
@@ -164,21 +163,6 @@ export class AIActionBuilder {
       actions.push(attackAction);
     }
 
-    const buyProvinceResult = AIBuyProvincePlanner.planBuyProvince(
-      currentNation,
-      allNations,
-      provincesMap,
-      rankMap,
-      context.reachableTargets,
-      espionageResult.remainingTreasury,
-    );
-    if (buyProvinceResult.action) {
-      actions.push(buyProvinceResult.action);
-    }
-
-    const remainingForDiplomacy =
-      espionageResult.remainingTreasury - buyProvinceResult.cost;
-
     this.appendDiplomaticAndWarActions(
       currentNation,
       allNations,
@@ -189,7 +173,7 @@ export class AIActionBuilder {
       rankMap,
       context,
       globalCoalition,
-      remainingForDiplomacy,
+      espionageResult.remainingTreasury,
     );
 
     return actions;

@@ -21,7 +21,6 @@ export * from "./ai/decision/treaty-utility-evaluator";
 export * from "./ai/decision/proposal-acceptance-evaluator";
 export * from "./ai/ai-action-builder";
 export * from "./ai/ai-attack-planner";
-export * from "./ai/ai-buy-province-planner";
 export * from "./ai/ai-national-project-planner";
 export * from "./ai/ai-economic-diplomacy-evaluator";
 export * from "./ai/ai-economic-stance-evaluator";
