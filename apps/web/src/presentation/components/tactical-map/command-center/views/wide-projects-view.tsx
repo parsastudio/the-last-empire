@@ -3,7 +3,6 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { useNationalProjects } from "./projects/hooks/use-national-projects";
 import { ProjectQuotaHeader } from "./projects/components/project-quota-header";
 import { ProjectCard } from "./projects/components/project-card";
-import { ProjectBreakthroughModal } from "./projects/components/project-breakthrough-modal";
 import { Layers } from "lucide-react";
 import { NationalProjectEffectApplierUtility } from "@geopolitics/domain";
 
@@ -23,8 +22,8 @@ export function WideProjectsView({ nation }: WideProjectsViewProps) {
     remainingQuota,
     filteredProjects,
     isSubmitting,
-    breakthroughProject,
-    closeBreakthroughModal,
+    breakthroughProjectId,
+    dismissBreakthrough,
     handleBoostProject,
   } = useNationalProjects(nation);
 
@@ -77,6 +76,7 @@ export function WideProjectsView({ nation }: WideProjectsViewProps) {
             const currentSteps = progressSteps[project.id] || 0;
             const canAfford = nation.treasury >= project.costPerStep;
             const isExpanded = expandedProjectId === project.id;
+            const isBreakthrough = breakthroughProjectId === project.id;
 
             return (
               <ProjectCard
@@ -86,22 +86,18 @@ export function WideProjectsView({ nation }: WideProjectsViewProps) {
                 isCompleted={isCompleted}
                 isBoostedThisTurn={isBoostedThisTurn}
                 isExpanded={isExpanded}
+                isBreakthrough={isBreakthrough}
                 canAfford={canAfford}
                 hasAvailableQuota={remainingQuota > 0}
                 isSubmitting={isSubmitting}
                 onToggleExpand={() => toggleExpand(project.id)}
                 onBoost={handleBoostProject}
+                onDismissBreakthrough={dismissBreakthrough}
               />
             );
           })}
         </div>
       </div>
-
-      <ProjectBreakthroughModal
-        isOpen={Boolean(breakthroughProject)}
-        project={breakthroughProject}
-        onClose={closeBreakthroughModal}
-      />
     </div>
   );
 }
