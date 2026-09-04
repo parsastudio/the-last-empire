@@ -125,13 +125,27 @@ export function ReportCard({
           )}
 
           {isExportSummary && (
-            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-xl shrink-0">
-              <Coins size={12} />
-              درآمد صادراتی
+            <span
+              className={`flex items-center gap-1.5 text-[10px] font-mono font-bold px-3 py-1 rounded-xl shrink-0 border ${
+                log.eventCode === "MACHINERY_EXPORT_SUMMARY"
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+                  : "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+              }`}
+            >
+              {log.eventCode === "MACHINERY_EXPORT_SUMMARY" ? (
+                <Factory size={12} />
+              ) : (
+                <Coins size={12} />
+              )}
+              <span>
+                {log.eventCode === "MACHINERY_EXPORT_SUMMARY"
+                  ? "صادرات خطوط تولید"
+                  : "درآمد صادرات تسلیحات"}
+              </span>
             </span>
           )}
 
-          {isMachineryTrade && (
+          {isMachineryTrade && !isExportSummary && (
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-3 py-1 rounded-xl shrink-0">
               <Factory size={12} />
               صادرات صنعتی
@@ -181,7 +195,11 @@ export function ReportCard({
           {isExportSummary && (
             <button
               onClick={handleOpenExportDetails}
-              className="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 hover:border-emerald-400 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm"
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 shrink-0 shadow-sm border ${
+                log.eventCode === "MACHINERY_EXPORT_SUMMARY"
+                  ? "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border-cyan-500/50 hover:border-cyan-400"
+                  : "bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/50 hover:border-emerald-400"
+              }`}
             >
               <Eye size={14} />
               <span>مشاهده جزئیات و لیست خریداران</span>

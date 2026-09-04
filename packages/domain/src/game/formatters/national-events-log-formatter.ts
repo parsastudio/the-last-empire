@@ -58,6 +58,12 @@ export class NationalEventsLogFormatter {
         return `مجموعاً ${PersianNumberFormatter.toPersianDigits(count)} کشور از صنایع دفاعی شما تسلیحات خریداری کردند و مبلغ ${PersianNumberFormatter.formatCurrency(profit, true)} سود به خزانه واریز گردید.`;
       }
 
+      case "MACHINERY_EXPORT_SUMMARY": {
+        const count = Number(params["buyersCount"] || 0);
+        const profit = Number(params["totalProfit"] || 0);
+        return `مجموعاً ${PersianNumberFormatter.toPersianDigits(count)} کشور خطوط تولید و ماشین‌آلات پیشرفته صنعتی از شما خریداری کردند و مبلغ ${PersianNumberFormatter.formatCurrency(profit, true)} سود به خزانه واریز گردید.`;
+      }
+
       case "TERRITORY_PURCHASED": {
         const provName = String(params["provinceName"] || "استان");
         return `معامله و الحاق سرزمینی: کشور ${sourceName} استان (${provName}) را از کشور ${targetName} خریداری و رسماً به قلمرو خود الحاق کرد.`;

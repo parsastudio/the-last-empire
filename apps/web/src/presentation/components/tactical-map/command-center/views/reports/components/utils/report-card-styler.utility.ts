@@ -60,13 +60,18 @@ export class ReportCardStylerUtility {
     }
 
     if (isExportSummary) {
+      const isMachinery = log.eventCode === "MACHINERY_EXPORT_SUMMARY";
       return {
-        cardBg:
-          "bg-gradient-to-r from-emerald-950/30 via-card/95 to-cyan-950/20",
-        border:
-          "border-emerald-500/50 shadow-md shadow-emerald-500/10 hover:border-emerald-400",
-        icon: ShoppingCart,
-        iconBg: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+        cardBg: isMachinery
+          ? "bg-gradient-to-r from-cyan-950/30 via-card/95 to-blue-950/20"
+          : "bg-gradient-to-r from-emerald-950/30 via-card/95 to-cyan-950/20",
+        border: isMachinery
+          ? "border-cyan-500/50 shadow-md shadow-cyan-500/10 hover:border-cyan-400"
+          : "border-emerald-500/50 shadow-md shadow-emerald-500/10 hover:border-emerald-400",
+        icon: isMachinery ? Factory : ShoppingCart,
+        iconBg: isMachinery
+          ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/40"
+          : "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
       };
     }
 
