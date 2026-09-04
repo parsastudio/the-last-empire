@@ -9,8 +9,6 @@ import {
   Coins,
   Check,
   ChevronDown,
-  Clock,
-  Sparkles,
 } from "lucide-react";
 import {
   NationalProjectConfig,
@@ -103,8 +101,14 @@ export function ProjectCard({
             <span className="text-sm md:text-base font-black text-foreground tracking-tight truncate">
               {project.nameFa}
             </span>
+
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border bg-secondary/80 text-gdp border-gdp/30 shrink-0">
+              {PersianNumberFormatter.formatCurrency(project.costPerStep, true)}{" "}
+              / گام
+            </span>
+
             <span
-              className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border shrink-0 ${
+              className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border shrink-0 ${
                 project.tier === "SHORT_TERM"
                   ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
                   : project.tier === "MID_TERM"
@@ -183,56 +187,14 @@ export function ProjectCard({
       </div>
 
       {isExpanded && (
-        <div className="px-5 pb-5 pt-3 border-t border-border/50 bg-background/50 space-y-3.5 animate-fade-smooth text-xs">
-          <div className="space-y-1 bg-secondary/40 p-4 rounded-2xl border border-border/60 shadow-inner">
+        <div className="px-5 pb-5 pt-3 border-t border-border/50 bg-background/50 space-y-3 animate-fade-smooth text-xs">
+          <div className="space-y-1.5 bg-secondary/40 p-4 rounded-2xl border border-border/60 shadow-inner">
             <span className="text-[11px] font-mono font-bold text-primary block">
               {project.taglineFa}
             </span>
             <p className="text-xs md:text-sm text-foreground/90 leading-relaxed font-sans font-medium">
               {project.descriptionFa}
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-            <div className="bg-secondary/50 p-3 rounded-2xl border border-border/50 flex items-center justify-between">
-              <span className="text-muted-foreground font-sans text-xs flex items-center gap-1.5 font-bold">
-                <Clock size={13} className="text-primary" />
-                کل گام‌های لازم:
-              </span>
-              <span className="font-extrabold text-foreground text-xs font-mono">
-                {PersianNumberFormatter.toPersianDigits(
-                  project.totalStepsRequired,
-                )}{" "}
-                گام
-              </span>
-            </div>
-
-            <div className="bg-secondary/50 p-3 rounded-2xl border border-border/50 flex items-center justify-between">
-              <span className="text-muted-foreground font-sans text-xs flex items-center gap-1.5 font-bold">
-                <Coins size={13} className="text-gdp" />
-                سرمایه هر گام:
-              </span>
-              <span className="font-extrabold text-gdp text-xs font-mono">
-                {PersianNumberFormatter.formatCurrency(
-                  project.costPerStep,
-                  true,
-                )}
-              </span>
-            </div>
-
-            <div className="bg-secondary/50 p-3 rounded-2xl border border-border/50 flex items-center justify-between">
-              <span className="text-muted-foreground font-sans text-xs flex items-center gap-1.5 font-bold">
-                <Sparkles size={13} className="text-amber-400" />
-                وضعیت طرح:
-              </span>
-              <span className="font-black text-foreground font-sans text-xs">
-                {isCompleted
-                  ? "تکمیل و در حال بهره‌برداری"
-                  : isBoostedThisTurn
-                    ? "بودجه این نوبت ثبت شد"
-                    : "آماده دریافت بودجه"}
-              </span>
-            </div>
           </div>
         </div>
       )}
