@@ -3,66 +3,184 @@ import { DilemmaEvent } from "@/domain/events/dilemma.schema";
 export const GEOPOLITICAL_DILEMMA_EVENTS: readonly DilemmaEvent[] =
   Object.freeze([
     {
-      id: "superpower_sanction_threat",
-      titleFa: "اولتیماتوم تحریمی ابرقدرت جهانی",
-      headlineFa: "تهدید به محاصره اقتصادی و انسداد ترانزیت",
+      id: "superpower_ultimatum",
+      titleFa: "اولتیماتوم دیپلماتیک ابرقدرت",
+      headlineFa: "مطالبه امتیازات مرزی و تجاری",
       descriptionFa:
-        "سفیر یک ابرقدرت جهانی با اشاره به پیشرفت‌های اخیر شما، اولتیماتوم داده که یا بخشی از بازارهای خود را واگذار کنید یا تحت تحریم قرار گیرید.",
+        "یکی از قدرت‌های برتر جهانی با ارسال یادداشتی خواستار سهم‌خواهی از درآمدهای ترانزیتی شما شده است.",
       category: "GEOPOLITICAL",
       urgency: "CRITICAL",
       choices: [
         {
-          id: "concede_tariffs",
-          labelFa: "اعطای امتیازات تجاری و پرداخت باج دیپلماتیک",
+          id: "pay_diplomatic_settlement",
+          labelFa: "پرداخت سهم و مصالحه با ابرقدرت",
           descriptionFa:
-            "پرداخت غرامت و مهار خشم ابرقدرت برای حفظ دسترسی به شاهراه‌های مالی بین‌المللی.",
+            "جلوگیری از خطر انزوای بین‌المللی با پرداخت غرامت نقدی.",
           effect: {
-            treasuryDelta: -18_000_000_000,
-            stabilityDelta: -5,
-            globalReputationDelta: 4,
+            treasuryGdpPercent: -0.03,
+            globalReputationDelta: 6,
+            stabilityDelta: -4,
           },
         },
         {
-          id: "defiant_rejection",
-          labelFa: "رد قاطع اولتیماتوم و اعلام جنگ تجاری",
+          id: "defy_superpower",
+          labelFa: "رد قاطعانه اولتیماتوم و اتکا به غیرت ملی",
           descriptionFa:
-            "تقویت غرور ملی و ثبات حکومت در ازای ریسک انزوای بین‌المللی و کاهش اعتبار جهانی.",
+            "جهش غرور ملی و پایداری داخلی در ازای کسر اعتبار جهانی.",
           effect: {
-            treasuryDelta: 0,
-            stabilityDelta: 12,
-            globalReputationDelta: -15,
+            stabilityDelta: 10,
+            globalReputationDelta: -16,
           },
         },
       ],
     },
     {
-      id: "peace_ultimatum_global",
-      titleFa: "بیانیه الزام‌آور شورای بین‌الملل برای آتش‌بس",
-      headlineFa: "فشار ابرقدرت‌ها برای توقف نبردها",
+      id: "international_peace_accord",
+      titleFa: "پیشنهاد میانجی‌گری در بحران منطقه‌ای",
+      headlineFa: "فرصت ایفای نقش محوری در صلح بین‌الملل",
       descriptionFa:
-        "جامعه جهانی با صدور قطعنامه‌ای خواستار پایان فوری تهاجمات نظامی کشور و پذیرش صلح شده و تهدید به تحریم همه‌جانبه تسلیحاتی کرده است.",
+        "سازمان ملل از دولت شما خواسته به عنوان ضامن آتش‌بس در مناقشه دو کشور همسایه ایفای نقش کند.",
       category: "GEOPOLITICAL",
-      urgency: "CRITICAL",
+      urgency: "HIGH",
       choices: [
         {
-          id: "accept_global_terms",
-          labelFa: "پذیرش آتش‌بس و جلب حمایت‌های بین‌المللی",
-          descriptionFa:
-            "دریافت کمک‌های مالی و ارتقای پرستیژ جهانی در ازای افت نسبی غرور ملی.",
+          id: "host_summit",
+          labelFa: "میزبانی اجلاس صلح و تقبل هزینه‌ها",
+          descriptionFa: "کسب پرستیژ خیره‌کننده جهانی در ازای مخارج دیپلماتیک.",
           effect: {
-            treasuryDelta: 15_000_000_000,
-            globalReputationDelta: 15,
-            stabilityDelta: -4,
+            treasuryGdpPercent: -0.015,
+            globalReputationDelta: 16,
+            stabilityDelta: 4,
           },
         },
         {
-          id: "condemn_resolution",
-          labelFa: "محکوم کردن مداخله خارجی و ادامه عملیات",
-          descriptionFa:
-            "تداوم پیشروی و تقویت اقتدار داخلی در ازای کسر شدید پرستیژ و انزوای بین‌المللی.",
+          id: "stay_neutral",
+          labelFa: "اعلام بی‌طرفی و پرهیز از تعهدات خارجی",
+          descriptionFa: "تمرکز بر امور داخلی بدون صرف هزینه.",
           effect: {
-            stabilityDelta: 8,
-            globalReputationDelta: -20,
+            globalReputationDelta: -4,
+          },
+        },
+      ],
+    },
+    {
+      id: "refugee_corridor_crisis",
+      titleFa: "بحران آوارگان جنگی در مرزها",
+      headlineFa: "ورود ده‌ها هزار پناهجو از خاک همسایه",
+      descriptionFa:
+        "در پی تشدید درگیری‌ها در کشور همجوار، موج گسترده‌ای از مهاجران پشت دروازه‌های مرزی تجمع کرده‌اند.",
+      category: "GEOPOLITICAL",
+      urgency: "HIGH",
+      choices: [
+        {
+          id: "open_humanitarian_camps",
+          labelFa: "پذیرش پناهجویان و دریافت کمک‌های بین‌المللی",
+          descriptionFa:
+            "ارتقای پرستیژ حقوق بشری در ازای بار مالی بر دوش دولت.",
+          effect: {
+            treasuryGdpPercent: -0.015,
+            globalReputationDelta: 14,
+            stabilityDelta: -3,
+          },
+        },
+        {
+          id: "seal_borders",
+          labelFa: "انسداد کامل مرز با یگان‌های نظامی",
+          descriptionFa:
+            "حفظ امنیت و آرامش داخلی در ازای انتقادات تند بین‌المللی.",
+          effect: {
+            stabilityDelta: 5,
+            globalReputationDelta: -12,
+          },
+        },
+      ],
+    },
+    {
+      id: "allied_loan_guarantee_request",
+      titleFa: "درخواست ضمانت وام از سوی شریک استراتژیک",
+      headlineFa: "استمداد مالی متحد برای نجات از ورشکستگی",
+      descriptionFa:
+        "یکی از دولت‌های هم‌پیمان شما به دلیل بحران نقدینگی خواستار تضمین بدهی‌های خود توسط خزانه شماست.",
+      category: "GEOPOLITICAL",
+      urgency: "MEDIUM",
+      choices: [
+        {
+          id: "back_ally_loan",
+          labelFa: "تضمین مالی و تحکیم عمیق ائتلاف",
+          descriptionFa: "افزایش همبستگی دیپلماتیک در ازای ریسک مالی.",
+          effect: {
+            treasuryGdpPercent: -0.02,
+            globalReputationDelta: 10,
+            stabilityDelta: 3,
+          },
+        },
+        {
+          id: "refuse_guarantee",
+          labelFa: "امتناع به دلیل ملاحظات اقتصادی داخلی",
+          descriptionFa: "حفظ خزانه ملی در ازای دلسردی و رنجش شریک سیاسی.",
+          effect: {
+            globalReputationDelta: -8,
+          },
+        },
+      ],
+    },
+    {
+      id: "international_strait_claims",
+      titleFa: "ادعای تحدید حدود فلات قاره",
+      headlineFa: "مناقشه حقوقی بر سر آب‌های سرزمینی",
+      descriptionFa:
+        "کشور مجاور نقشه‌ای منتشر کرده که بخشی از آب‌های آزاد مجاور سواحل شما را جزو منطقه انحصاری خود می‌داند.",
+      category: "GEOPOLITICAL",
+      urgency: "HIGH",
+      choices: [
+        {
+          id: "show_of_force",
+          labelFa: "اعزام ناوگان و گشت‌زنی مقتدرانه",
+          descriptionFa:
+            "تثبیت حاکمیت سرزمینی و افتخار ملی در ازای هزینه سوخت و آماده‌باش.",
+          effect: {
+            treasuryGdpPercent: -0.01,
+            stabilityDelta: 7,
+            globalReputationDelta: -4,
+          },
+        },
+        {
+          id: "arbitration_court",
+          labelFa: "ارجاع پرونده به داوری بین‌المللی",
+          descriptionFa: "نمایش تعهد به حقوق بین‌الملل و ارتقای اعتبار جهانی.",
+          effect: {
+            globalReputationDelta: 10,
+            stabilityDelta: -4,
+          },
+        },
+      ],
+    },
+    {
+      id: "foreign_investment_wave",
+      titleFa: "پیشنهاد سرمایه‌گذاری هلدینگ‌های فراملی",
+      headlineFa: "توسعه زیرساخت‌ها با سرمایه خارجی",
+      descriptionFa:
+        "یک کنسرسیوم خارجی آمادگی دارد میلیاردها دلار در شبکه بنادر و جاده‌های کشور سرمایه‌گذاری کند.",
+      category: "GEOPOLITICAL",
+      urgency: "MEDIUM",
+      choices: [
+        {
+          id: "accept_investment",
+          labelFa: "پذیرش قرارداد و جذب سرمایه مستقیم",
+          descriptionFa:
+            "تزریق نقدینگی و افزایش پیوند جهانی با پذیرش نظارت خارجی.",
+          effect: {
+            treasuryGdpPercent: 0.03,
+            globalReputationDelta: 8,
+            stabilityDelta: -2,
+          },
+        },
+        {
+          id: "reject_for_sovereignty",
+          labelFa: "رد پیشنهاد به دلیل حفظ استقلال راهبردی",
+          descriptionFa: "حفظ حاکمیت مطلق اقتصادی بر زیرساخت‌های حیاتی کشور.",
+          effect: {
+            stabilityDelta: 6,
           },
         },
       ],

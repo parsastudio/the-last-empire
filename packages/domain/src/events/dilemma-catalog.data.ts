@@ -7,8 +7,8 @@ import { MILITARY_DILEMMA_EVENTS } from "@/domain/events/sources/military-dilemm
 
 export const CORE_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   ...ECONOMIC_DILEMMA_EVENTS,
-  ...DOMESTIC_DILEMMA_EVENTS,
+  ...MILITARY_DILEMMA_EVENTS,
   ...GEOPOLITICAL_DILEMMA_EVENTS,
   ...ESPIONAGE_DILEMMA_EVENTS,
-  ...MILITARY_DILEMMA_EVENTS,
+  ...DOMESTIC_DILEMMA_EVENTS,
 ]);

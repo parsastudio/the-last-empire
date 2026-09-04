@@ -2,99 +2,178 @@ import { DilemmaEvent } from "@/domain/events/dilemma.schema";
 
 export const MILITARY_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   {
-    id: "covert_arms_shipment",
-    titleFa: "درخواست محرمانه خرید تسلیحات برای جنگ نیابتی",
-    headlineFa: "سود سرشار تسلیحاتی در ازای فروش ذخایر",
+    id: "covert_arms_offer",
+    titleFa: "پیشنهاد فروش مازاد ادوات به متحدین",
+    headlineFa: "نقدینگی فوری در ازای بخشی از تجهیزات",
     descriptionFa:
-      "نمایندگان یک جناح درگیر در منطقه خواستار خرید فوری بخشی از ذخایر زرهی ارتش شما با پرداخت دوبرابر قیمت رسمی بازار نقدی هستند.",
+      "یک دولت هم‌پیمان خواستار خرید فوری تعدادی از تانک‌های رزمی ارتش شما به نرخ بالا شده است.",
     category: "MILITARY",
     urgency: "MEDIUM",
     choices: [
       {
-        id: "sell_tanks",
-        labelFa: "واگذاری فوری تانک‌ها و دریافت نقدینگی",
-        descriptionFa:
-          "تزریق ثروت کلان به خزانه ملی با کسر تعدادی از ادوات زرهی آماده رزم ارتش.",
+        id: "sell_tanks_batch",
+        labelFa: "واگذاری ادوات و دریافت وجه نقد",
+        descriptionFa: "شارژ اساسی خزانه در ازای کاهش مختصر استعداد زرهی.",
         effect: {
-          treasuryDelta: 20_000_000_000,
-          armorDelta: -10,
-          globalReputationDelta: -4,
+          treasuryGdpPercent: 0.035,
+          armorDelta: -8,
         },
       },
       {
-        id: "preserve_inventory",
-        labelFa: "حفظ حداکثر آمادگی رزمی و رد معامله",
-        descriptionFa:
-          "نگهداری تمام ادوات در زرادخانه داخلی برای تضمین تمامیت ارضی و بازدارندگی ملی.",
+        id: "keep_readiness",
+        labelFa: "حفظ کامل توان تسلیحاتی در یگان‌ها",
+        descriptionFa: "تثبیت بازدارندگی رزمی بدون کاهش ناوگان زرهی.",
         effect: {
-          treasuryDelta: 0,
-          stabilityDelta: 4,
-          globalReputationDelta: 3,
+          stabilityDelta: 3,
         },
       },
     ],
   },
   {
-    id: "strait_blockade_crisis",
-    titleFa: "انسداد تنگه بین‌المللی و بحران دریانوردی",
-    headlineFa: "دزدی دریایی و تهدید ناوگان بازرگانی",
+    id: "strait_security_incident",
+    titleFa: "تهدید امنیت در گذرگاه دریایی",
+    headlineFa: "مزاحمت برای نفتکش‌ها در آبراه ترانزیتی",
     descriptionFa:
-      "مسیر ترانزیت دریایی یکی از گلوگاه‌های اصلی با حضور دزدان دریایی و قایق‌های متخاصم مسدود شده و کشتی‌های تجاری تقاضای اسکورت دارند.",
+      "قایق‌های متخاصم تردد کشتی‌های بازرگانی در آبراه‌های نزدیک را مختل کرده‌اند.",
     category: "MILITARY",
     urgency: "CRITICAL",
     choices: [
       {
-        id: "deploy_naval_patrol",
-        labelFa: "گسیل ناوگان دریایی و سرکوب قاطع راهزنان",
+        id: "dispatch_naval_taskforce",
+        labelFa: "اعزام فوری ناوگان و برقراری گشت اسکورت",
         descriptionFa:
-          "صرف هزینه لجستیک برای پاکسازی آبراه و تثبیت اقتدار و پرستیژ جهانی نیروی دریایی.",
+          "تثبیت اقتدار دریایی و کسب اعتبار در ازای مخارج لجستیکی.",
         effect: {
-          treasuryDelta: -8_000_000_000,
-          globalReputationDelta: 12,
-          stabilityDelta: 5,
+          treasuryGdpPercent: -0.015,
+          globalReputationDelta: 10,
+          stabilityDelta: 4,
         },
       },
       {
-        id: "ignore_crisis",
-        labelFa: "بی‌تفاوتی و کاهش ریسک درگیری مستقیم",
+        id: "pass_incident",
+        labelFa: "عدم مداخله نظامی مستقیم",
         descriptionFa:
-          "عدم مداخله نظامی که منجر به سقوط اعتبار دریایی و اعتراض تجار داخلی می‌شود.",
+          "صرفه‌جویی در سوخت و مخارج در ازای لطمه به پرستیژ بین‌المللی.",
         effect: {
-          treasuryDelta: 0,
-          globalReputationDelta: -10,
+          globalReputationDelta: -12,
+          stabilityDelta: -5,
+        },
+      },
+    ],
+  },
+  {
+    id: "national_conscription_surge",
+    titleFa: "موج داوطلبان خدمت نظام",
+    headlineFa: "تقاضای بالای جوانان برای پیوستن به ارتش",
+    descriptionFa:
+      "شور میهن‌پرستی در کشور بالا گرفته و صف‌های طولانی در مراکز سربازگیری تشکیل شده است.",
+    category: "MILITARY",
+    urgency: "MEDIUM",
+    choices: [
+      {
+        id: "expand_divisions",
+        labelFa: "پذیرش سراسری و تجهیز لشکرهای جدید",
+        descriptionFa:
+          "افزایش محسوس یگان‌های پیاده در ازای هزینه تجهیز پادگان‌ها.",
+        effect: {
+          treasuryGdpPercent: -0.02,
+          infantryDelta: 35,
+          stabilityDelta: 6,
+        },
+      },
+      {
+        id: "selective_intake",
+        labelFa: "پذیرش محدود نخبگان با بودجه عادی",
+        descriptionFa:
+          "حفظ توازن مخارج و ارتقای انضباط پادگان‌ها بدون هزینه اضافی.",
+        effect: {
+          infantryDelta: 10,
+          stabilityDelta: 2,
+        },
+      },
+    ],
+  },
+  {
+    id: "ammunition_plant_modernization",
+    titleFa: "نوسازی صنایع مهمات و راکت‌سازی",
+    headlineFa: "افزایش ذخایر موشک‌های نقطه‌زن",
+    descriptionFa:
+      "ستاد کل نیروهای مسلح طرحی برای دوبرابر کردن تیراژ تولید موشک و پهپاد ارائه کرده است.",
+    category: "MILITARY",
+    urgency: "HIGH",
+    choices: [
+      {
+        id: "fund_missile_expansion",
+        labelFa: "تأمین بودجه توسعه خطوط راکت‌سازی",
+        descriptionFa: "تولید انبوه پهپاد و موشک انتحاری جهت برتری در جنگ.",
+        effect: {
+          treasuryGdpPercent: -0.025,
+          droneMissileDelta: 25,
+        },
+      },
+      {
+        id: "maintain_current_pace",
+        labelFa: "ادامه تولید در چارچوب ظرفیت‌های جاری",
+        descriptionFa: "پرهیز از تحمیل هزینه به خزانه و حفظ ذخایر ریالی.",
+        effect: {
+          stabilityDelta: 0,
+        },
+      },
+    ],
+  },
+  {
+    id: "veterans_welfare_bill",
+    titleFa: "لایحه مستمری و رفاه کهنه‌سربازان",
+    headlineFa: "مطالبات صنفی ایثارگران و بازنشستگان ارتش",
+    descriptionFa:
+      "نمایندگان نظامیان خواستار بهبود بسته‌های درمانی و مستمری کادرهای رزمی شده‌اند.",
+    category: "MILITARY",
+    urgency: "LOW",
+    choices: [
+      {
+        id: "approve_pension",
+        labelFa: "تصویب لایحه و پرداخت کمک‌معیشتی",
+        descriptionFa: "ارتقای چشمگیر انگیزه و ثبات نیروهای مسلح در کشور.",
+        effect: {
+          treasuryGdpPercent: -0.01,
+          stabilityDelta: 8,
+        },
+      },
+      {
+        id: "defer_welfare",
+        labelFa: "تعویق لایحه تا بهبود شاخص‌های مالی",
+        descriptionFa: "حفظ نقدینگی در ازای دلسردی کادرهای نظامی.",
+        effect: {
           stabilityDelta: -6,
         },
       },
     ],
   },
   {
-    id: "national_revanchism_wave",
-    titleFa: "موج ناسیونالیسم و مطالبه بازپس‌گیری خاک تاریخی",
-    headlineFa: "فشار افکار عمومی برای آغاز فتوحات سرزمینی",
+    id: "air_defense_readiness_drill",
+    titleFa: "رزمایش سراسری شبیه‌سازی تهاجم هوایی",
+    headlineFa: "تست سامانه‌های راداری و آتشبارهای موشکی",
     descriptionFa:
-      "گردهمایی‌های بزرگ ملی در پایتخت خواهان اعلام موضع قاطع و تصرف اراضی مرزی شده‌اند. شور و شوق سربازگیری در کشور به اوج رسیده است.",
+      "فرماندهی پدافند درخواست اجرای مانور شلیک زنده موشک‌های ضدهوایی جهت ارزیابی رادارها دارد.",
     category: "MILITARY",
-    urgency: "HIGH",
+    urgency: "MEDIUM",
     choices: [
       {
-        id: "mobilize_volunteers",
-        labelFa: "فراخوان سراسری سربازگیری و تجهیز لشکرهای داوطلب",
-        descriptionFa:
-          "افزایش رایگان لشکرهای پیاده‌نظام و روحیه جنگی در ازای افزایش تنش با همسایگان.",
+        id: "conduct_drill",
+        labelFa: "اجرای مانور کامل و کالیبراسیون سامانه‌ها",
+        descriptionFa: "افزایش آمادگی و واحدهای پدافندی در ازای مصرف مهمات.",
         effect: {
-          infantryDelta: 40,
-          stabilityDelta: 6,
-          globalReputationDelta: -8,
+          treasuryGdpPercent: -0.015,
+          airDefenseDelta: 8,
+          stabilityDelta: 3,
         },
       },
       {
-        id: "pacify_crowd",
-        labelFa: "دعوت به آرامش و تعهد به موازین دیپلماتیک",
-        descriptionFa:
-          "کاهش تنش و جلب احترام جامعه بین‌الملل در ازای دلسردی موقت افکار عمومی.",
+        id: "simulator_only",
+        labelFa: "اکتفا به شبیه‌سازی رایانه‌ای بدون شلیک زنده",
+        descriptionFa: "صرفه‌جویی در بودجه بدون افزایش ادوات میدانی.",
         effect: {
-          stabilityDelta: -6,
-          globalReputationDelta: 10,
+          stabilityDelta: 0,
         },
       },
     ],

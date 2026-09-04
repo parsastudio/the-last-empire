@@ -2,97 +2,178 @@ import { DilemmaEvent } from "@/domain/events/dilemma.schema";
 
 export const ECONOMIC_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   {
-    id: "oil_gas_discovery",
-    titleFa: "کشف میدان فوق‌عظیم انرژی و گاز",
-    headlineFa: "شوک اقتصادی و طمع رقبای منطقه‌ای",
+    id: "energy_reserves_boom",
+    titleFa: "کشف حوزه جدید انرژی",
+    headlineFa: "فرصت واگذاری امتیاز یا ذخیره‌سازی ملی",
     descriptionFa:
-      "تیم‌های زمین‌شناسی کشور یک میدان عظیم انرژی کشف کرده‌اند. بهره‌برداری فوری می‌تواند خزانه را متحول کند، اما طمع و حسادت قدرت‌های رقیب را برمی‌انگیزد.",
+      "اکتشافات جدید زمین‌شناسی از وجود منابع غنی انرژی حکایت دارد. نحوه بهره‌برداری نیازمند تصمیم است.",
     category: "ECONOMIC",
     urgency: "HIGH",
     choices: [
       {
-        id: "nationalize_and_sell",
-        labelFa: "مزایده فوری به شرکت‌های بین‌المللی",
+        id: "sell_concession",
+        labelFa: "مزایده بین‌المللی امتیاز استخراج",
         descriptionFa:
-          "فروش امتیاز استخراج و کسب سود سرشار نقدی در ازای افت نسبی پرستیژ استقلال ملی.",
+          "تزریق فوری نقدینگی کلان به خزانه در ازای افت جزئی پرستیژ ملی.",
         effect: {
-          treasuryDelta: 25_000_000_000,
+          treasuryGdpPercent: 0.04,
           globalReputationDelta: -5,
-          stabilityDelta: 3,
+          stabilityDelta: 2,
         },
       },
       {
         id: "strategic_reserve",
-        labelFa: "ذخیره‌سازی راهبردی و خودکفایی بومی",
-        descriptionFa:
-          "سرمایه‌گذاری خزانه در توسعه دانش استخراج بومی برای تقویت زیرساخت و ثبات کشور.",
+        labelFa: "صنایع تبدیلی و فرآوری بومی",
+        descriptionFa: "توسعه پالایشگاه‌های داخلی و جهش فناوری صنعتی کشور.",
         effect: {
-          treasuryDelta: -10_000_000_000,
+          treasuryGdpPercent: -0.02,
           industrialLevelDelta: 0.2,
+          stabilityDelta: 6,
+        },
+      },
+    ],
+  },
+  {
+    id: "supply_chain_bottleneck",
+    titleFa: "انسداد زنجیره تأمین مواد اولیه",
+    headlineFa: "کمبود فولاد و قطعات در کارخانجات",
+    descriptionFa:
+      "توقف خطوط ترانزیت واردات مواد اولیه باعث کاهش عرضه در صنایع سنگین کشور شده است.",
+    category: "ECONOMIC",
+    urgency: "MEDIUM",
+    choices: [
+      {
+        id: "subsidize_freight",
+        labelFa: "پرداخت یارانه دولتی ترانزیت هوایی",
+        descriptionFa: "خرید زمان و تداوم تولید بدون آسیب به بازدهی صنایع.",
+        effect: {
+          treasuryGdpPercent: -0.015,
+          stabilityDelta: 4,
+        },
+      },
+      {
+        id: "ration_materials",
+        labelFa: "سهمیه‌بندی منابع و انقباض موقت",
+        descriptionFa: "صرفه‌جویی در مخارج خزانه به بهای افت موقت ثبات داخلی.",
+        effect: {
+          stabilityDelta: -8,
+        },
+      },
+    ],
+  },
+  {
+    id: "hyperinflation_threat",
+    titleFa: "جهش نقدینگی و تهدید تورم",
+    headlineFa: "سیاست پولی اضطراری بانک مرکزی",
+    descriptionFa:
+      "افزایش نقدینگی در بازارها منجر به فشار تورمی و کاهش قدرت خرید اقشار عمومی شده است.",
+    category: "ECONOMIC",
+    urgency: "HIGH",
+    choices: [
+      {
+        id: "tighten_monetary",
+        labelFa: "جمع‌آوری نقدینگی با انضباط مالی",
+        descriptionFa: "مهار قطعی تورم و رشد ثبات در ازای رکود مقطعی درآمدها.",
+        effect: {
+          treasuryGdpPercent: -0.02,
+          stabilityDelta: 10,
+        },
+      },
+      {
+        id: "price_controls",
+        labelFa: "تعیین دستوری قیمت‌ها و بازرسی بازار",
+        descriptionFa: "حفظ نقدینگی دولتی در ازای نارضایتی تجار و افت ثبات.",
+        effect: {
+          stabilityDelta: -10,
+          globalReputationDelta: -4,
+        },
+      },
+    ],
+  },
+  {
+    id: "debt_relief_opportunity",
+    titleFa: "پیشنهاد تسویه زودهنگام بدهی بین‌الملل",
+    headlineFa: "تخفیف استثنایی بستانکاران خارجی",
+    descriptionFa:
+      "کنسرسیوم وام‌دهندگان پیشنهاد داده در صورت پرداخت فوری بخشی از بدهی، سود نوبتی کاهش یابد.",
+    category: "ECONOMIC",
+    urgency: "MEDIUM",
+    choices: [
+      {
+        id: "repay_bulk",
+        labelFa: "پرداخت یکجای بدهی با تخفیف",
+        descriptionFa:
+          "کاهش بار بدهی ملی و ارتقای پرستیژ اعتباری کشور در جهان.",
+        effect: {
+          treasuryGdpPercent: -0.03,
+          globalReputationDelta: 12,
+          stabilityDelta: 4,
+        },
+      },
+      {
+        id: "decline_offer",
+        labelFa: "حفظ کامل نقدینگی در خزانه",
+        descriptionFa: "نگهداری پول نقد جهت پروژه‌های توسعه و آمادگی ارتش.",
+        effect: {
+          stabilityDelta: 0,
+        },
+      },
+    ],
+  },
+  {
+    id: "industrial_patent_auction",
+    titleFa: "حراج بین‌المللی گواهی‌های صنعتی",
+    headlineFa: "فناوری نسل جدید خطوط مونتاژ",
+    descriptionFa:
+      "امتیاز چند اختراع بنیادین در زمینه رباتیک خطوط تولید در بازار آزاد عرضه شده است.",
+    category: "ECONOMIC",
+    urgency: "MEDIUM",
+    choices: [
+      {
+        id: "buy_patents",
+        labelFa: "خرید انحصاری پتنت‌ها برای کارخانجات",
+        descriptionFa: "ارتقای مستقیم لول صنعتی کشور با سرمایه‌گذاری نقدی.",
+        effect: {
+          treasuryGdpPercent: -0.025,
+          industrialLevelDelta: 0.2,
+        },
+      },
+      {
+        id: "ignore_patents",
+        labelFa: "صرف‌نظر و اتکا به پژوهشگاه‌های داخلی",
+        descriptionFa: "پرهیز از هزینه و ادامه روند عادی توسعه R&D.",
+        effect: {
+          treasuryGdpPercent: 0,
+        },
+      },
+    ],
+  },
+  {
+    id: "foreign_trade_embargo_risk",
+    titleFa: "تعرفه تنبیهی رقبای تجاری",
+    headlineFa: "وضع عوارض سنگین بر صادرات کشور",
+    descriptionFa:
+      "بلوک رقیب برای تضعیف اقتصاد شما تعرفه‌های گمرکی سنگینی بر کالاهای صادراتی وضع کرده است.",
+    category: "ECONOMIC",
+    urgency: "HIGH",
+    choices: [
+      {
+        id: "retaliate_tariffs",
+        labelFa: "اقدام متقابل و تحریم کالاهای رقیب",
+        descriptionFa: "نمایش صلابت ملی و رشد همبستگی در ازای تنش بین‌المللی.",
+        effect: {
           stabilityDelta: 8,
-          globalReputationDelta: 5,
-        },
-      },
-    ],
-  },
-  {
-    id: "neighbor_debt_default",
-    titleFa: "ورشکستگی همسایه و حراج دارایی‌های صنعتی",
-    headlineFa: "فرصت تملک کارخانجات ارزان در شرایط بحران",
-    descriptionFa:
-      "دولت کشور همسایه به دلیل ناتوانی در بازپرداخت بدهی‌های IMF اعلام نکول کرده و آماده واگذاری بخشی از تجهیزات صنعتی به قیمت نمادین است.",
-    category: "ECONOMIC",
-    urgency: "MEDIUM",
-    choices: [
-      {
-        id: "buy_cheap_machinery",
-        labelFa: "خرید فوری تجهیزات و انتقال به داخل",
-        descriptionFa:
-          "پرداخت مبلغی مناسب از خزانه برای جهش لول ماشین‌آلات و خطوط تولید بومی.",
-        effect: {
-          treasuryDelta: -15_000_000_000,
-          industrialLevelDelta: 0.2,
-          globalReputationDelta: 2,
+          globalReputationDelta: -8,
         },
       },
       {
-        id: "pass_opportunity",
-        labelFa: "حفظ نقدینگی و پرهیز از ریسک‌های همسایه",
+        id: "concede_lobby",
+        labelFa: "مذاکره و اعطای مشوق‌های ارزی",
         descriptionFa:
-          "نگهداری تمام نقدینگی در خزانه برای طرح‌های ضروری داخلی.",
+          "پرداخت یارانه صادراتی جهت ابطال تعرفه‌ها و حفظ بازارها.",
         effect: {
-          treasuryDelta: 0,
-        },
-      },
-    ],
-  },
-  {
-    id: "emergency_tax_levy",
-    titleFa: "پیشنهاد وضع مالیات اضطراری جنگی بر اصناف",
-    headlineFa: "تأمین فوری نقدینگی ارتش در ازای نارضایتی عمومی",
-    descriptionFa:
-      "وزارت اقتصاد پیشنهاد کرده برای تقویت توان مالی ارتش و پر کردن خزانه، مالیات ویژه‌ای بر ثروتمندان و بازرگانان وضع شود.",
-    category: "ECONOMIC",
-    urgency: "MEDIUM",
-    choices: [
-      {
-        id: "levy_tax",
-        labelFa: "تصویب مالیات ویژه و شارژ خزانه‌داری",
-        descriptionFa:
-          "دریافت مبالغ سنگین نقدی در ازای افت شدید شاخص ثبات سیاسی داخلی.",
-        effect: {
-          treasuryDelta: 30_000_000_000,
-          stabilityDelta: -16,
-        },
-      },
-      {
-        id: "tax_holiday",
-        labelFa: "اعطای معافیت مالیاتی و جلب رضایت مردم",
-        descriptionFa:
-          "ارتقای چشمگیر محبوبیت و پایداری حکومت در ازای خالی ماندن دست خزانه.",
-        effect: {
-          treasuryDelta: -5_000_000_000,
-          stabilityDelta: 14,
+          treasuryGdpPercent: -0.015,
+          globalReputationDelta: 6,
         },
       },
     ],
