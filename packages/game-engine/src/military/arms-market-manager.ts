@@ -122,26 +122,10 @@ export class ArmsMarketManager {
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
-    const isHumanBuyer = canonicalBuyerId === canonicalHuman;
     const isHumanSeller = canonicalSellerId === canonicalHuman;
 
     const logs = [];
-    if (isHumanBuyer) {
-      logs.push(
-        TurnLogBuilder.createNationalLog(
-          state.currentTurn,
-          buyer.id,
-          "DOMESTIC",
-          "INFO",
-          "ARMS_TRADE",
-          {
-            amount: totalCost,
-            role: "BUYER",
-          },
-          seller.id,
-        ),
-      );
-    } else if (isHumanSeller && sellerProfit > 0) {
+    if (isHumanSeller && sellerProfit > 0) {
       logs.push(
         TurnLogBuilder.createNationalLog(
           state.currentTurn,

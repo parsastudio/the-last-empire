@@ -155,27 +155,10 @@ export class BuyIndustrialEquipmentExecutor {
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
-    const isHumanBuyer = canonicalBuyer === canonicalHuman;
     const isHumanSeller = sellerCanonical === canonicalHuman;
 
     const logs = [];
-    if (isHumanBuyer) {
-      logs.push(
-        TurnLogBuilder.createNationalLog(
-          state.currentTurn,
-          buyer.id,
-          "DOMESTIC",
-          "INFO",
-          "ARMS_TRADE",
-          {
-            amount: totalCost,
-            role: "BUYER",
-            tradeType: "MACHINERY",
-          },
-          seller.id,
-        ),
-      );
-    } else if (isHumanSeller && totalCost > 0) {
+    if (isHumanSeller && totalCost > 0) {
       logs.push(
         TurnLogBuilder.createNationalLog(
           state.currentTurn,
