@@ -48,15 +48,15 @@ export function GovernmentTypeSelector({
   return (
     <div className="space-y-4 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
-          انتخاب مدل نظام سیاسی و ساختار حاکمیت
+        <span className="text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
+          انتخاب ساختار سیاسی و نظام حاکمیت
         </span>
-        <span className="text-[10px] text-muted-foreground">
-          برای مشاهده پرونده جزئیات، روی هر مدل کلیک کنید
+        <span className="text-[11px] text-muted-foreground">
+          برای مشاهده اثرات و دکترین، روی مدل مورد نظر کلیک کنید
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {options.map((gov) => {
           const isSelected = selectedType === gov.type;
           const trait =
@@ -70,21 +70,21 @@ export function GovernmentTypeSelector({
               key={gov.type}
               type="button"
               onClick={() => onSelect(gov.type)}
-              className={`p-3.5 rounded-2xl text-right transition-all border flex items-center justify-between gap-3 cursor-pointer relative overflow-hidden group ${
+              className={`p-4 rounded-2xl text-right transition-all border flex items-center justify-between gap-3.5 cursor-pointer relative overflow-hidden group ${
                 isSelected
-                  ? "bg-primary/15 border-primary shadow-xl shadow-primary/10 ring-1 ring-primary/40 scale-[1.01]"
-                  : "bg-background/50 border-border/70 hover:bg-secondary/50 hover:border-border"
+                  ? "bg-primary/15 border-primary shadow-lg shadow-primary/10 ring-1 ring-primary/40 scale-[1.01]"
+                  : "bg-background/50 border-border/70 hover:bg-secondary/60 hover:border-border"
               }`}
             >
-              <div className="flex items-center gap-3 overflow-hidden">
+              <div className="flex items-center gap-3.5 overflow-hidden">
                 <div
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${
+                  className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-secondary/70 text-muted-foreground border-border/60 group-hover:text-foreground group-hover:border-primary/40"
+                      : "bg-secondary text-muted-foreground border-border/60 group-hover:text-foreground group-hover:border-primary/40"
                   }`}
                 >
-                  <Icon size={18} />
+                  <Icon size={20} />
                 </div>
                 <div className="space-y-0.5 overflow-hidden">
                   <span
@@ -96,7 +96,7 @@ export function GovernmentTypeSelector({
                   >
                     {trait.nameFa}
                   </span>
-                  <span className="text-[9px] font-mono text-muted-foreground block truncate">
+                  <span className="text-[10px] text-muted-foreground block truncate">
                     {trait.headlineFa}
                   </span>
                 </div>
