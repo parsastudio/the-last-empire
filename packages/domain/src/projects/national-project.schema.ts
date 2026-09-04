@@ -22,10 +22,11 @@ export const NationalProjectEffectSchema = z.object({
   permanentStabilityBonus: z.number().optional(),
   fullOmniscienceIntel: z.boolean().optional(),
   procurementCostDiscountMultiplier: z.number().optional(),
-  orbitalImmunityFromMissiles: z.boolean().optional(),
+  globalReputationBonus: z.number().optional(),
+  maintenanceCostDiscountMultiplier: z.number().optional(),
   petroTributeShare: z.number().optional(),
-  doubleMaxFactorySlots: z.boolean().optional(),
-  preventDirectWarWithoutCoalition: z.boolean().optional(),
+  factorySlotExpansionRatio: z.number().optional(),
+  deterrenceWarThresholdMultiplier: z.number().optional(),
 });
 
 export const NationalProjectConfigSchema = z.object({
