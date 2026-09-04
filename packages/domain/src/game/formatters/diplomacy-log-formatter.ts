@@ -68,8 +68,14 @@ export class DiplomacyLogFormatter {
         return `گزارش ستاد کل: نیروی ضربت اعزامی شما در دفاع از خاک ${targetName} آسیب دید و مبلغ ${formattedCost} هزینه بازسازی به خزانه‌داری تحمیل شد.`;
       }
 
-      case "FOREIGN_AID_SENT":
-        return `بسته کمک مالی و اقتصادی از سوی ${sourceName} به خزانه‌داری ${targetName} واریز گردید.`;
+      case "FOREIGN_AID_SENT": {
+        const amountNum = Number(params["amount"] || 0);
+        const amountText =
+          amountNum > 0
+            ? ` به مبلغ ${PersianNumberFormatter.formatCurrency(amountNum, true)}`
+            : "";
+        return `بسته کمک مالی و اقتصادی${amountText} از سوی ${sourceName} به خزانه‌داری ${targetName} واریز گردید.`;
+      }
 
       default:
         return null;

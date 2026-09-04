@@ -4,6 +4,7 @@ import {
   Nation,
   CountryRegistry,
   PendingDiplomaticProposal,
+  PersianNumberFormatter,
 } from "@geopolitics/domain";
 import {
   Coins,
@@ -93,6 +94,7 @@ export function ReportCard({
   };
 
   const Icon = style.icon;
+  const foreignAidAmount = Number(log.params?.["amount"] || 0);
 
   return (
     <div
@@ -149,6 +151,15 @@ export function ReportCard({
             <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-3 py-1 rounded-xl shrink-0">
               <Factory size={12} />
               صادرات صنعتی
+            </span>
+          )}
+
+          {log.eventCode === "FOREIGN_AID_SENT" && foreignAidAmount > 0 && (
+            <span className="flex items-center gap-1.5 text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-1 rounded-xl shrink-0">
+              <Coins size={12} />
+              <span>
+                +{PersianNumberFormatter.formatCurrency(foreignAidAmount, true)}
+              </span>
             </span>
           )}
 
