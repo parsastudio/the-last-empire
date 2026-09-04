@@ -108,10 +108,18 @@ export class BattleAttackerStateApplier {
     let updatedEquipmentTech = attacker.equipmentTechLevel;
 
     if (conqueredFactoriesCount > 0) {
+      const effectiveTech = Math.max(
+        defenderTechLevel,
+        IndustryCalculator.getIndustrialFloor(attacker.industrialLevel),
+      );
       updatedFactoryTiers = IndustryCalculator.addFactories(
         attacker.factoryTiers,
         conqueredFactoriesCount,
-        defenderTechLevel,
+        effectiveTech,
+      );
+      updatedFactoryTiers = IndustryCalculator.applyIndustrialFloor(
+        updatedFactoryTiers,
+        attacker.industrialLevel,
       );
       updatedEquipmentTech = IndustryCalculator.calculateWeightedAverageTech(
         updatedFactoryTiers,

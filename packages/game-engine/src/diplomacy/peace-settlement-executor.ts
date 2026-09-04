@@ -150,10 +150,19 @@ export class PeaceSettlementExecutor {
           loserNationObj.industrialLevel,
         );
 
-      const updatedWinnerBatches = IndustryCalculator.addFactories(
+      const effectiveCededTech = Math.max(
+        loserNationObj.equipmentTechLevel,
+        IndustryCalculator.getIndustrialFloor(winnerNationObj.industrialLevel),
+      );
+
+      let updatedWinnerBatches = IndustryCalculator.addFactories(
         winnerNationObj.factoryTiers,
         cededFactories,
-        loserNationObj.equipmentTechLevel,
+        effectiveCededTech,
+      );
+      updatedWinnerBatches = IndustryCalculator.applyIndustrialFloor(
+        updatedWinnerBatches,
+        winnerNationObj.industrialLevel,
       );
       const updatedWinnerEquipTech =
         IndustryCalculator.calculateWeightedAverageTech(
@@ -178,10 +187,15 @@ export class PeaceSettlementExecutor {
         const pid = terms.concededProvinceIds[i]!;
         const prov = updatedProvinces[pid.toString()];
         if (prov) {
+          const flooredTiers = IndustryCalculator.applyIndustrialFloor(
+            prov.factoryTiers,
+            winnerNationObj.industrialLevel,
+          );
           updatedProvinces[pid.toString()] = {
             ...prov,
             ownerNationId: winnerCanonical,
             originalNationId: winnerCanonical,
+            factoryTiers: flooredTiers,
           };
         }
       }

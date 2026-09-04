@@ -1,6 +1,39 @@
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 
 export class FactoryBatchManagerUtility {
+  public static readonly INDUSTRIAL_FLOOR_DELTA = 1.2;
+
+  public static getIndustrialFloor(industrialLevel: number): number {
+    return Math.max(
+      1.0,
+      Number((industrialLevel - this.INDUSTRIAL_FLOOR_DELTA).toFixed(2)),
+    );
+  }
+
+  public static applyIndustrialFloor(
+    batches: FactoryBatch[] | undefined,
+    industrialLevel: number,
+  ): FactoryBatch[] {
+    const floor = this.getIndustrialFloor(industrialLevel);
+    const consolidated = this.consolidateBatches(batches);
+    if (consolidated.length === 0) return [];
+
+    let modified = false;
+    const result: FactoryBatch[] = [];
+
+    for (let i = 0; i < consolidated.length; i++) {
+      const b = consolidated[i]!;
+      if (b.techLevel < floor) {
+        result.push({ techLevel: floor, count: b.count });
+        modified = true;
+      } else {
+        result.push(b);
+      }
+    }
+
+    return modified ? this.consolidateBatches(result) : consolidated;
+  }
+
   public static consolidateBatches(batches?: FactoryBatch[]): FactoryBatch[] {
     if (!batches || batches.length === 0) return [];
     const map = new Map<number, number>();

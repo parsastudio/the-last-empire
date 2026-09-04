@@ -27,6 +27,10 @@ export class NationAnnexationExecutor {
     const updatedProvinces: Record<string, Province> = { ...provinces };
     const updatedNations: Record<string, Nation> = { ...nations };
 
+    const winnerObj =
+      updatedNations[winnerCanonical] || updatedNations[winnerId];
+    const loserObj = updatedNations[loserCanonical] || updatedNations[loserId];
+
     const loserProvs = NationGettersUtility.getOwnedProvinces(
       loserCanonical,
       updatedProvinces,
@@ -34,18 +38,22 @@ export class NationAnnexationExecutor {
 
     for (let i = 0; i < loserProvs.length; i++) {
       const p = loserProvs[i]!;
+      const flooredTiers = winnerObj
+        ? IndustryCalculator.applyIndustrialFloor(
+            p.factoryTiers,
+            winnerObj.industrialLevel,
+          )
+        : p.factoryTiers;
+
       updatedProvinces[p.provinceId.toString()] = {
         ...p,
         ownerNationId: winnerCanonical,
         originalNationId: winnerCanonical,
+        factoryTiers: flooredTiers,
       };
     }
 
     BitPackedGridState.getInstance().markDirty();
-
-    const loserObj = updatedNations[loserCanonical] || updatedNations[loserId];
-    const winnerObj =
-      updatedNations[winnerCanonical] || updatedNations[winnerId];
 
     if (winnerObj && loserObj) {
       const winnerRelations = { ...winnerObj.relations };
@@ -61,9 +69,14 @@ export class NationAnnexationExecutor {
         true,
       );
 
-      const mergedFactoryTiers = IndustryCalculator.mergeBatches(
+      let mergedFactoryTiers = IndustryCalculator.mergeBatches(
         winnerObj.factoryTiers,
         loserObj.factoryTiers,
+      );
+
+      mergedFactoryTiers = IndustryCalculator.applyIndustrialFloor(
+        mergedFactoryTiers,
+        winnerObj.industrialLevel,
       );
 
       const newEquipmentTech = IndustryCalculator.calculateWeightedAverageTech(

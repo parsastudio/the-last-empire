@@ -1,10 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
 import { Province } from "@/domain/province/province.schema";
-import {
-  BattleCalculator,
-  BattleCalculationResult,
-} from "@/engine/combat/battle-calculator";
+import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { BattleStateMutator } from "@/engine/combat/execution/battle-state-mutator";
 import { BattleSpoilsCollector } from "@/engine/combat/execution/battle-spoils-collector";
 import { ProvinceConquestHandler } from "@/engine/combat/conquest/province-conquest-handler";
@@ -95,6 +92,7 @@ export class BattleExecutionEngine {
       defender.id,
       calcResult.isAttackerVictory,
       action.targetProvinceId,
+      attacker.industrialLevel,
     );
 
     updatedProvinces = conquestResult.updatedProvinces;

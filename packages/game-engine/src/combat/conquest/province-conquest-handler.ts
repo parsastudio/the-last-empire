@@ -4,7 +4,7 @@ import {
   getProvinceGdp,
   getNationGdp,
 } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, IndustryCalculator } from "@geopolitics/domain";
 
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
@@ -24,6 +24,7 @@ export class ProvinceConquestHandler {
     defenderId: string,
     isAttackerVictory: boolean,
     targetProvinceId?: number,
+    attackerIndustrialLevel?: number,
   ): ProvinceConquestResult {
     const updatedProvinces: Record<string, Province> = { ...provinces };
 
@@ -86,15 +87,23 @@ export class ProvinceConquestHandler {
               }))
             : [];
 
+          const flooredTiers =
+            attackerIndustrialLevel !== undefined
+              ? IndustryCalculator.applyIndustrialFloor(
+                  remainingTiers,
+                  attackerIndustrialLevel,
+                )
+              : remainingTiers;
+
           const conqueredProv: Province = {
             ...targetProv,
             ownerNationId: cleanAttackerId,
             factoriesCount: survivingFactories,
-            factoryTiers: remainingTiers,
+            factoryTiers: flooredTiers,
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
           conqueredPixels = targetProv.pixelCount;
-          conqueredProvincesGdp = getProvinceGdp(targetProv);
+          conqueredProvincesGdp = getProvinceGdp(conqueredProv);
           conqueredProvincesList.push(conqueredProv);
         }
       }

@@ -4,8 +4,12 @@ import { FactoryYieldCalculatorUtility } from "@/domain/economy/factory/factory-
 import { FactoryBatchManagerUtility } from "@/domain/economy/factory/factory-batch-manager.utility";
 import { FactorySlotDistributorUtility } from "@/domain/economy/factory/factory-slot-distributor.utility";
 import { FactoryDestructionResolverUtility } from "@/domain/economy/factory/factory-destruction-resolver.utility";
+import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export class IndustryCalculator {
+  public static readonly INDUSTRIAL_FLOOR_DELTA =
+    FactoryBatchManagerUtility.INDUSTRIAL_FLOOR_DELTA;
   public static readonly BASE_FACTORY_YIELD =
     FactoryYieldCalculatorUtility.BASE_FACTORY_YIELD;
   public static readonly YIELD_TECH_BASE =
@@ -26,6 +30,68 @@ export class IndustryCalculator {
     FactoryYieldCalculatorUtility.IMPORT_BASE_PRICE;
   public static readonly IMPORT_TECH_GAP_BASE =
     FactoryYieldCalculatorUtility.IMPORT_TECH_GAP_BASE;
+
+  public static getIndustrialFloor(industrialLevel: number): number {
+    return FactoryBatchManagerUtility.getIndustrialFloor(industrialLevel);
+  }
+
+  public static applyIndustrialFloor(
+    batches: FactoryBatch[] | undefined,
+    industrialLevel: number,
+  ): FactoryBatch[] {
+    return FactoryBatchManagerUtility.applyIndustrialFloor(
+      batches,
+      industrialLevel,
+    );
+  }
+
+  public static syncProvincesAndNationFloor(
+    nationId: string,
+    industrialLevel: number,
+    provincesMap: Record<string, Province>,
+  ): {
+    updatedProvinces: Record<string, Province>;
+    updatedFactoryTiers: FactoryBatch[];
+    updatedEquipmentTech: number;
+  } {
+    const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
+    const updatedProvinces: Record<string, Province> = { ...provincesMap };
+    const nationProvinces: Province[] = [];
+
+    for (const [id, prov] of Object.entries(updatedProvinces)) {
+      if (
+        CountryRegistry.resolveCanonicalId(prov.ownerNationId) === canonicalId
+      ) {
+        const nextTiers = this.applyIndustrialFloor(
+          prov.factoryTiers,
+          industrialLevel,
+        );
+        const updatedProv: Province = {
+          ...prov,
+          factoryTiers: nextTiers,
+        };
+        updatedProvinces[id] = updatedProv;
+        nationProvinces.push(updatedProv);
+      }
+    }
+
+    const updatedFactoryTiers = NationGettersUtility.getNationFactoryTiers(
+      nationId,
+      updatedProvinces,
+      nationProvinces,
+    );
+
+    const updatedEquipmentTech = this.calculateWeightedAverageTech(
+      updatedFactoryTiers,
+      industrialLevel,
+    );
+
+    return {
+      updatedProvinces,
+      updatedFactoryTiers,
+      updatedEquipmentTech,
+    };
+  }
 
   public static calculateFactoryYield(techLevel: number): number {
     return FactoryYieldCalculatorUtility.calculateFactoryYield(techLevel);
