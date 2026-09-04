@@ -9,6 +9,7 @@ import {
   NationGettersUtility,
   DebtCalculatorUtility,
   ProvinceTradeValidator,
+  IndustryCalculator,
   getNationGdp,
 } from "@geopolitics/domain";
 
@@ -82,26 +83,36 @@ export class ProvinceTradeExecutor {
       totalSellerGdpBefore,
     );
 
+    const flooredProvTiers = IndustryCalculator.applyIndustrialFloor(
+      province.factoryTiers,
+      nation.industrialLevel,
+    );
+
     const updatedProvinces: Record<string, Province> = {
       ...state.provinces,
       [province.provinceId.toString()]: {
         ...province,
         ownerNationId: canonicalNationId,
         originalNationId: canonicalNationId,
+        factoryTiers: flooredProvTiers,
       },
     };
 
     BitPackedGridState.getInstance().markDirty();
 
-    const updatedBuyerBatches = NationGettersUtility.getNationFactoryTiers(
+    const rawBuyerBatches = NationGettersUtility.getNationFactoryTiers(
       nation.id,
       updatedProvinces,
     );
-    const updatedBuyerEquipTech = NationGettersUtility.getNationEquipmentTech(
-      nation.id,
-      updatedProvinces,
+    const updatedBuyerBatches = IndustryCalculator.applyIndustrialFloor(
+      rawBuyerBatches,
       nation.industrialLevel,
     );
+    const updatedBuyerEquipTech =
+      IndustryCalculator.calculateWeightedAverageTech(
+        updatedBuyerBatches,
+        nation.industrialLevel,
+      );
 
     const updatedSellerBatches = NationGettersUtility.getNationFactoryTiers(
       seller.id,

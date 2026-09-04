@@ -24,14 +24,24 @@ export class InvestIndustrialResearchExecutor {
       (nation.industrialLevel + IndustryCalculator.RESEARCH_STEP).toFixed(2),
     );
 
+    const { updatedProvinces, updatedFactoryTiers, updatedEquipmentTech } =
+      IndustryCalculator.syncProvincesAndNationFloor(
+        nation.id,
+        nextIndustrialLevel,
+        state.provinces,
+      );
+
     return {
       ...state,
+      provinces: updatedProvinces,
       nations: {
         ...state.nations,
         [buyerKey]: {
           ...nation,
           treasury: nation.treasury - cost,
           industrialLevel: nextIndustrialLevel,
+          factoryTiers: updatedFactoryTiers,
+          equipmentTechLevel: updatedEquipmentTech,
         },
       },
     };
