@@ -6,8 +6,10 @@ import {
   CountryRegistry,
   LandNeighborResolver,
   NationGettersUtility,
+  TwmiCalculatorUtility,
 } from "@geopolitics/domain";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
+import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
 
 export class AIAttackPlanner {
   public static planAttack(
@@ -67,20 +69,67 @@ export class AIAttackPlanner {
       );
 
     if (
-      !optimalDeployment.isPossible ||
-      optimalDeployment.winProbability <= 0 ||
-      optimalDeployment.infantry <= 0
+      optimalDeployment.isPossible &&
+      optimalDeployment.winProbability > 0 &&
+      optimalDeployment.infantry > 0
     ) {
+      return ActionFactory.initiateBattle(
+        nation.id,
+        targetNation.id,
+        optimalDeployment.drones,
+        optimalDeployment.infantry,
+        optimalDeployment.armor,
+        optimalDeployment.airForce,
+        targetResolution.provinceId,
+        targetResolution.attackType,
+      );
+    }
+
+    const sourceTwmi = TwmiCalculatorUtility.calculateTwmi(
+      nation,
+      allNations,
+      provincesMap,
+    );
+    const targetTwmi = TwmiCalculatorUtility.calculateTwmi(
+      targetNation,
+      allNations,
+      provincesMap,
+    );
+
+    if (sourceTwmi < targetTwmi) {
+      return null;
+    }
+
+    const fullInfantry = nation.military.infantry || 0;
+    const fullArmor = nation.military.armor || 0;
+    const fullAirForce = nation.military.airForce || 0;
+    const fullDrones = nation.military.droneMissile || 0;
+
+    let deployInfantry = fullInfantry;
+    let deployArmor = fullArmor;
+
+    if (targetResolution.attackType === "NAVAL") {
+      const clamped = NavalDeploymentClamper.clamp(
+        fullInfantry,
+        fullArmor,
+        "NAVAL",
+        fleetCount,
+      );
+      deployInfantry = clamped.inf;
+      deployArmor = clamped.arm;
+    }
+
+    if (deployInfantry < 1) {
       return null;
     }
 
     return ActionFactory.initiateBattle(
       nation.id,
       targetNation.id,
-      optimalDeployment.drones,
-      optimalDeployment.infantry,
-      optimalDeployment.armor,
-      optimalDeployment.airForce,
+      fullDrones,
+      deployInfantry,
+      deployArmor,
+      fullAirForce,
       targetResolution.provinceId,
       targetResolution.attackType,
     );
