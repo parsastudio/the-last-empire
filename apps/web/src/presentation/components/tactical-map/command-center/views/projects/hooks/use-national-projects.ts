@@ -28,8 +28,9 @@ export function useNationalProjects(nation: Nation) {
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(
     null,
   );
-  const [breakthroughProject, setBreakthroughProject] =
-    useState<NationalProjectConfig | null>(null);
+  const [breakthroughProjectId, setBreakthroughProjectId] = useState<
+    string | null
+  >(null);
 
   const { dispatchAction, isSubmitting } = useGameActions();
   const { showToast } = useToast();
@@ -66,8 +67,8 @@ export function useNationalProjects(nation: Nation) {
     setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
   }, []);
 
-  const closeBreakthroughModal = useCallback(() => {
-    setBreakthroughProject(null);
+  const dismissBreakthrough = useCallback(() => {
+    setBreakthroughProjectId(null);
   }, []);
 
   const handleBoostProject = useCallback(
@@ -88,7 +89,9 @@ export function useNationalProjects(nation: Nation) {
       if (res.success && res.resultData) {
         const data = res.resultData as BoostActionResultData;
         if (data.isEarlyBreakthrough) {
-          setBreakthroughProject(project);
+          TacticalEffects.fireVictoryConfetti(180);
+          TacticalSound.playCoinSound();
+          setBreakthroughProjectId(project.id);
         } else if (data.isCompleted) {
           TacticalEffects.fireVictoryConfetti(120);
           showToast(
@@ -121,8 +124,8 @@ export function useNationalProjects(nation: Nation) {
     remainingQuota,
     filteredProjects,
     isSubmitting,
-    breakthroughProject,
-    closeBreakthroughModal,
+    breakthroughProjectId,
+    dismissBreakthrough,
     handleBoostProject,
   };
 }

@@ -14,6 +14,7 @@ import {
   NationalProjectConfig,
   PersianNumberFormatter,
 } from "@geopolitics/domain";
+import { ProjectBreakthroughCardOverlay } from "./project-breakthrough-card-overlay";
 
 interface ProjectCardProps {
   project: NationalProjectConfig;
@@ -21,11 +22,13 @@ interface ProjectCardProps {
   isCompleted: boolean;
   isBoostedThisTurn: boolean;
   isExpanded: boolean;
+  isBreakthrough?: boolean;
   canAfford: boolean;
   hasAvailableQuota: boolean;
   isSubmitting: boolean;
   onToggleExpand: () => void;
   onBoost: (project: NationalProjectConfig) => void;
+  onDismissBreakthrough?: () => void;
 }
 
 export function ProjectCard({
@@ -34,12 +37,23 @@ export function ProjectCard({
   isCompleted,
   isBoostedThisTurn,
   isExpanded,
+  isBreakthrough = false,
   canAfford,
   hasAvailableQuota,
   isSubmitting,
   onToggleExpand,
   onBoost,
+  onDismissBreakthrough,
 }: ProjectCardProps) {
+  if (isBreakthrough && onDismissBreakthrough) {
+    return (
+      <ProjectBreakthroughCardOverlay
+        projectName={project.nameFa}
+        onDismiss={onDismissBreakthrough}
+      />
+    );
+  }
+
   const getCategoryIcon = () => {
     switch (project.category) {
       case "MILITARY":
