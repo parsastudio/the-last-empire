@@ -23,7 +23,7 @@ export interface FiscalRevenueBreakdown {
 }
 
 export class FiscalRevenueCalculator {
-  public static readonly AI_REVENUE_MULTIPLIER = 1.6;
+  public static readonly AI_REVENUE_MULTIPLIER = 1.4;
 
   public static calculate(
     nation: Nation,

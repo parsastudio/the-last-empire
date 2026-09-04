@@ -52,6 +52,7 @@ function calculateLogPriority(
       return isHumanInvolved ? 6 : 10;
 
     case "ARMS_EXPORT_SUMMARY":
+    case "MACHINERY_EXPORT_SUMMARY":
     case "FOREIGN_AID_SENT":
     case "ARMS_TRADE":
     case "TERRITORY_PURCHASED":
@@ -142,7 +143,10 @@ export function useWideReports({
           return isTarget || isMember;
         }
 
-        if (log.eventCode === "ARMS_EXPORT_SUMMARY") {
+        if (
+          log.eventCode === "ARMS_EXPORT_SUMMARY" ||
+          log.eventCode === "MACHINERY_EXPORT_SUMMARY"
+        ) {
           return srcCanonical === canonicalHuman;
         }
 
