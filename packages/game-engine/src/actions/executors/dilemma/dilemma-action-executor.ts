@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ResolveDilemmaAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
+import { GameError, TurnLogBuilder, getNationGdp } from "@geopolitics/domain";
 import {
   CORE_DILEMMA_EVENTS,
   MilitaryInventoryHelper,
@@ -25,11 +25,19 @@ export class DilemmaActionExecutor {
     }
 
     const effect = choice.effect;
+    const nationGdp = getNationGdp(nation, state.provinces);
 
-    const nextTreasury = Math.max(
-      0,
-      nation.treasury + (effect.treasuryDelta || 0),
-    );
+    let effectiveTreasuryDelta = effect.treasuryDelta || 0;
+    if (
+      effect.treasuryGdpPercent !== undefined &&
+      effect.treasuryGdpPercent !== 0
+    ) {
+      effectiveTreasuryDelta = Math.floor(
+        nationGdp * effect.treasuryGdpPercent,
+      );
+    }
+
+    const nextTreasury = Math.max(0, nation.treasury + effectiveTreasuryDelta);
 
     const nextStability = Math.max(
       0,
@@ -116,6 +124,23 @@ export class DilemmaActionExecutor {
       }
     }
 
+    if (effect.droneMissileDelta) {
+      if (effect.droneMissileDelta > 0) {
+        updatedMilitary = MilitaryInventoryHelper.addUnits(
+          updatedMilitary,
+          "DRONE_MISSILE",
+          effect.droneMissileDelta,
+          updatedMilitary.techLevel,
+        );
+      } else {
+        updatedMilitary = MilitaryInventoryHelper.removeUnits(
+          updatedMilitary,
+          "DRONE_MISSILE",
+          Math.abs(effect.droneMissileDelta),
+        );
+      }
+    }
+
     const updatedNation: Nation = {
       ...nation,
       treasury: nextTreasury,
@@ -139,7 +164,7 @@ export class DilemmaActionExecutor {
         choiceLabel: choice.labelFa,
       },
       undefined,
-      `فرمان حاکمیت در خصوص رویداد «${event.titleFa}»: ${choice.labelFa}`,
+      `فرمان حاکمیتی در بحران «${event.titleFa}»: ${choice.labelFa}`,
     );
 
     const newState: GameState = {

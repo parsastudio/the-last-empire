@@ -2,65 +2,180 @@ import { DilemmaEvent } from "@/domain/events/dilemma.schema";
 
 export const DOMESTIC_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   {
-    id: "factory_workers_strike",
-    titleFa: "اعتصاب سراسری اتحادیه کارخانجات صنعتی",
-    headlineFa: "فلج شدن خطوط تولید و اعتراض کارگران",
+    id: "industrial_labor_union_unrest",
+    titleFa: "اعتصاب سراسری در شهرک‌های صنعتی",
+    headlineFa: "مطالبه افزایش دستمزد و توقف چرخ کارخانه‌ها",
     descriptionFa:
-      "اتحادیه کارگران صنایع سنگین در اعتراض به دستمزدها دست از کار کشیده‌اند. بازدهی کارخانه‌ها متوقف شده و خیابان‌های صنعتی ناآرام است.",
+      "کارگران صنایع سنگین در اعتراض به شرایط معیشتی دست از کار کشیده و سوله‌ها به حالت تعلیق درآمده‌اند.",
     category: "DOMESTIC",
-    urgency: "MEDIUM",
+    urgency: "HIGH",
     choices: [
       {
-        id: "pay_subsidies",
-        labelFa: "پرداخت بسته حمایتی و افزایش دستمزد",
+        id: "approve_wage_subsidies",
+        labelFa: "اعطای بسته معیشتی و توافق با اتحادیه‌ها",
         descriptionFa:
-          "تأمین معیشت کارگران از محل خزانه ملی برای بازگشت فوری آرامش و ارتقای رضایت عمومی.",
+          "آرامش فوری و بازگشت کارخانه‌ها به تولید با جهش ثبات سیاسی.",
         effect: {
-          treasuryDelta: -12_000_000_000,
-          stabilityDelta: 10,
+          treasuryGdpPercent: -0.02,
+          stabilityDelta: 12,
         },
       },
       {
-        id: "crackdown_security",
-        labelFa: "انضباط امنیتی و بازگشایی اجباری سوله‌ها",
-        descriptionFa:
-          "حفظ سرمایه خزانه با سرکوب اعتصابات در ازای افت شدید شاخص ثبات سیاسی داخلی.",
+        id: "enforce_labor_laws",
+        labelFa: "الزام قانونی به کار و مدیریت سخت‌گیرانه",
+        descriptionFa: "حفظ نقدینگی خزانه با ریسک نارضایتی مدنی و افت ثبات.",
         effect: {
-          treasuryDelta: 0,
           stabilityDelta: -14,
-          globalReputationDelta: -6,
+          globalReputationDelta: -5,
         },
       },
     ],
   },
   {
-    id: "military_corruption_scandal",
-    titleFa: "افشای فساد مالی در ستاد تدارکات ارتش",
-    headlineFa: "اختلاس در بودجه‌های لجستیک و خرید جنگ‌افزار",
+    id: "bureaucratic_purge_demand",
+    titleFa: "کشف اختلاس در دستگاه‌های اجرایی",
+    headlineFa: "مطالبه افکار عمومی برای مبارزه با فساد",
     descriptionFa:
-      "بازرسی ویژه حاکمیت کشف کرده که بخشی از بودجه‌های نظامی به جیب ژنرال‌های ارشد رفته و آمادگی برخی پادگان‌ها صوری گزارش شده است.",
+      "رسانه‌ها اسنادی از حیف‌ومیل بودجه‌های دولتی توسط مدیران ارشد استانی منتشر کرده‌اند.",
+    category: "DOMESTIC",
+    urgency: "MEDIUM",
+    choices: [
+      {
+        id: "root_out_corruption",
+        labelFa: "برخورد قاطع قضایی و بازگرداندن اموال",
+        descriptionFa:
+          "ارتقای چشمگیر امید و اعتماد ملی و جبران بخشی از ذخایر خزانه.",
+        effect: {
+          treasuryGdpPercent: 0.015,
+          stabilityDelta: 14,
+          globalReputationDelta: 6,
+        },
+      },
+      {
+        id: "silent_administrative_reform",
+        labelFa: "تغییرات بی‌سروصدا بدون تضعیف ساختار",
+        descriptionFa: "حفظ پیوستگی مدیریتی در ازای نارضایتی افکار عمومی.",
+        effect: {
+          stabilityDelta: -8,
+        },
+      },
+    ],
+  },
+  {
+    id: "natural_disaster_rebuilding",
+    titleFa: "زلزله مهیب در استان‌های مرکزی",
+    headlineFa: "تخریب زیرساخت‌ها و نیاز به بازسازی فوری",
+    descriptionFa:
+      "زمین‌لرزه‌ای شدید باعث آسیب به جاده‌ها، خطوط انتقال و آوارگی هزاران خانوار شده است.",
+    category: "DOMESTIC",
+    urgency: "CRITICAL",
+    choices: [
+      {
+        id: "fund_reconstruction",
+        labelFa: "تخصیص بودجه اضطراری بازسازی و امداد ملی",
+        descriptionFa: "نجات آسیب‌دیدگان و تحکیم همبستگی ملت و دولت.",
+        effect: {
+          treasuryGdpPercent: -0.025,
+          stabilityDelta: 10,
+          globalReputationDelta: 4,
+        },
+      },
+      {
+        id: "lean_relief",
+        labelFa: "استفاده از ظرفیت‌های امدادی موجود بدون بودجه تازه",
+        descriptionFa:
+          "حفظ موجودی خزانه در ازای اعتراض و ناامیدی مناطق بحران‌زده.",
+        effect: {
+          stabilityDelta: -16,
+        },
+      },
+    ],
+  },
+  {
+    id: "university_student_movements",
+    titleFa: "تجمعات دانشجویی و نخبگان علمی",
+    headlineFa: "مطالبه آزادی‌های مدنی و بودجه پژوهشی",
+    descriptionFa:
+      "دانشگاه‌های پایتخت صحنه تجمعات در اعتراض به کمبود امکانات آزمایشگاهی و قوانین انضباطی است.",
+    category: "DOMESTIC",
+    urgency: "MEDIUM",
+    choices: [
+      {
+        id: "grant_campus_autonomy",
+        labelFa: "افزایش بودجه تحقیقات و گفتگوی رو در رو",
+        descriptionFa:
+          "جلوگیری از فرار مغزها و رشد دانش علمی کشور با رضایت جوانان.",
+        effect: {
+          treasuryGdpPercent: -0.01,
+          industrialLevelDelta: 0.1,
+          stabilityDelta: 8,
+        },
+      },
+      {
+        id: "disperse_movements",
+        labelFa: "اعمال انضباط دانشگاهی و حفظ نظم عمومی",
+        descriptionFa: "برقراری نظم سریع در ازای دلسردی قشر دانشگاهی.",
+        effect: {
+          stabilityDelta: -9,
+          globalReputationDelta: -4,
+        },
+      },
+    ],
+  },
+  {
+    id: "national_anthem_and_emblem_revamp",
+    titleFa: "طرح بازآفرینی نمادها و جشن‌های ملی",
+    headlineFa: "تقویت هویت تاریخی و همبستگی اجتماعی",
+    descriptionFa:
+      "شورای عالی فرهنگ پیشنهاد برگزاری مراسم‌های سراسری و بازتولید آثار فاخر تاریخی را داده است.",
+    category: "DOMESTIC",
+    urgency: "LOW",
+    choices: [
+      {
+        id: "fund_cultural_gala",
+        labelFa: "تأمین مالی رویدادها و تزریق شور ملی",
+        descriptionFa: "رشد محسوس نشاط اجتماعی و پایداری داخلی کشور.",
+        effect: {
+          treasuryGdpPercent: -0.008,
+          stabilityDelta: 9,
+          globalReputationDelta: 3,
+        },
+      },
+      {
+        id: "austerity_culture",
+        labelFa: "اولویت صرف منابع در پروژه‌های صنعتی",
+        descriptionFa: "پرهیز از هزینه در امور نمادین و تمرکز بر تولید.",
+        effect: {
+          stabilityDelta: 0,
+        },
+      },
+    ],
+  },
+  {
+    id: "provincial_autonomy_referendum_push",
+    titleFa: "مطالبات استقلال بودجه‌ای در استان‌های مرزی",
+    headlineFa: "درخواست سهم بیشتر از عواید گمرکات محلی",
+    descriptionFa:
+      "شوراهای محلی استان‌های مرزی خواستار تخصیص مستقیم درآمدهای ترانزیت به عمران بومی شده‌اند.",
     category: "DOMESTIC",
     urgency: "HIGH",
     choices: [
       {
-        id: "purge_and_reform",
-        labelFa: "پاکسازی قاطع فرماندهان و محاکمه علنی",
-        descriptionFa:
-          "ارتقای چشمگیر اعتماد و ثبات مردم در ازای افت موقت کارایی و انضباط پادگان‌ها.",
+        id: "decentralize_funds",
+        labelFa: "واگذاری سهم عمران محلی و جلب وفاداری",
+        descriptionFa: "تحکیم امنیت پایدار مرزها و رضایت ساکنان استانی.",
         effect: {
-          stabilityDelta: 15,
-          infantryDelta: -15,
-          globalReputationDelta: 5,
+          treasuryGdpPercent: -0.015,
+          stabilityDelta: 11,
         },
       },
       {
-        id: "coverup_quietly",
-        labelFa: "سرپوش گذاشتن و جریمه اداری محرمانه",
+        id: "centralize_treasury",
+        labelFa: "تأکید بر خزانه‌داری متمرکز و رد تقاضا",
         descriptionFa:
-          "بازپس‌گیری بخشی از اموال اختلاس‌شده به خزانه بدون تضعیف ساختار فرماندهی ارتش.",
+          "تداوم تمرکز منابع مالی پایتخت در ازای نارضایتی حاشیه‌نشینان.",
         effect: {
-          treasuryDelta: 10_000_000_000,
-          stabilityDelta: -8,
+          stabilityDelta: -12,
         },
       },
     ],

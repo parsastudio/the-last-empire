@@ -92,6 +92,7 @@ export const GameStateSchema = z.object({
   turnLogs: z.array(TurnLogEntrySchema),
   globalCoalition: GlobalCoalitionSchema.nullable().optional(),
   activeDilemma: DilemmaEventSchema.nullable().optional(),
+  scheduledDilemmaTurn: z.number().int().positive().nullable().optional(),
 });
 
 export type TurnLogLevel = z.infer<typeof TurnLogLevelSchema>;
