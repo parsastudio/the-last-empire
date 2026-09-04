@@ -3,6 +3,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { useNationalProjects } from "./projects/hooks/use-national-projects";
 import { ProjectQuotaHeader } from "./projects/components/project-quota-header";
 import { ProjectCard } from "./projects/components/project-card";
+import { ProjectBreakthroughModal } from "./projects/components/project-breakthrough-modal";
 import { Layers } from "lucide-react";
 import { NationalProjectEffectApplierUtility } from "@geopolitics/domain";
 
@@ -22,6 +23,8 @@ export function WideProjectsView({ nation }: WideProjectsViewProps) {
     remainingQuota,
     filteredProjects,
     isSubmitting,
+    breakthroughProject,
+    closeBreakthroughModal,
     handleBoostProject,
   } = useNationalProjects(nation);
 
@@ -93,6 +96,12 @@ export function WideProjectsView({ nation }: WideProjectsViewProps) {
           })}
         </div>
       </div>
+
+      <ProjectBreakthroughModal
+        isOpen={Boolean(breakthroughProject)}
+        project={breakthroughProject}
+        onClose={closeBreakthroughModal}
+      />
     </div>
   );
 }

@@ -28,6 +28,9 @@ export function useNationalProjects(nation: Nation) {
   const [expandedProjectId, setExpandedProjectId] = useState<string | null>(
     null,
   );
+  const [breakthroughProject, setBreakthroughProject] =
+    useState<NationalProjectConfig | null>(null);
+
   const { dispatchAction, isSubmitting } = useGameActions();
   const { showToast } = useToast();
 
@@ -63,6 +66,10 @@ export function useNationalProjects(nation: Nation) {
     setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
   }, []);
 
+  const closeBreakthroughModal = useCallback(() => {
+    setBreakthroughProject(null);
+  }, []);
+
   const handleBoostProject = useCallback(
     async (project: NationalProjectConfig) => {
       if (
@@ -81,12 +88,7 @@ export function useNationalProjects(nation: Nation) {
       if (res.success && res.resultData) {
         const data = res.resultData as BoostActionResultData;
         if (data.isEarlyBreakthrough) {
-          TacticalEffects.fireVictoryConfetti(180);
-          showToast(
-            "جهش علمی و دستاورد زودهنگام!",
-            `دانشمندان کشور با کشف فرمول جدید، پروژه «${project.nameFa}» را پیش از موعد به بهره‌برداری رساندند!`,
-            "success",
-          );
+          setBreakthroughProject(project);
         } else if (data.isCompleted) {
           TacticalEffects.fireVictoryConfetti(120);
           showToast(
@@ -119,6 +121,8 @@ export function useNationalProjects(nation: Nation) {
     remainingQuota,
     filteredProjects,
     isSubmitting,
+    breakthroughProject,
+    closeBreakthroughModal,
     handleBoostProject,
   };
 }

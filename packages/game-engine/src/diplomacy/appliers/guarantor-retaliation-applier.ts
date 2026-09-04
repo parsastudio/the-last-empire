@@ -34,20 +34,8 @@ export class GuarantorRetaliationApplier {
 
     const defendersToRetaliate: Array<{
       nationId: string;
-      reason: "GUARANTOR" | "STRATEGIC_PARTNER";
+      reason: "STRATEGIC_PARTNER";
     }> = [];
-
-    if (target.securityGuarantorId) {
-      const gCanonical = CountryRegistry.resolveCanonicalId(
-        target.securityGuarantorId,
-      );
-      if (gCanonical !== canonicalHuman) {
-        defendersToRetaliate.push({
-          nationId: gCanonical,
-          reason: "GUARANTOR",
-        });
-      }
-    }
 
     for (const [otherId, rel] of Object.entries(target.relations || {})) {
       if (rel.stance === "STRATEGIC_PARTNERSHIP") {
@@ -56,10 +44,19 @@ export class GuarantorRetaliationApplier {
           pCanonical !== canonicalHuman &&
           !defendersToRetaliate.some((d) => d.nationId === pCanonical)
         ) {
-          defendersToRetaliate.push({
-            nationId: pCanonical,
-            reason: "STRATEGIC_PARTNER",
-          });
+          const partnerNation =
+            state.nations[pCanonical] || state.nations[otherId];
+
+          const partnerRelWithTarget =
+            partnerNation?.relations?.[canonicalTarget] ||
+            partnerNation?.relations?.[target.id];
+
+          if (partnerRelWithTarget?.stance === "STRATEGIC_PARTNERSHIP") {
+            defendersToRetaliate.push({
+              nationId: pCanonical,
+              reason: "STRATEGIC_PARTNER",
+            });
+          }
         }
       }
     }
