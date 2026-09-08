@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useMemo, useCallback } from "react";
 import {
   Nation,
@@ -5,9 +7,9 @@ import {
   NationalProjectConfig,
   NationalProjectEffectApplierUtility,
   ProjectScopeTier,
+  ActionFactory,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ActionFactory } from "@/domain/game/action-factory";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { useToast } from "@/presentation/context/toast-context";
@@ -19,6 +21,73 @@ interface BoostActionResultData {
   totalSteps: number;
   isCompleted: boolean;
   isEarlyBreakthrough: boolean;
+}
+
+const TIER_SORT_WEIGHT: Record<ProjectScopeTier, number> = {
+  SHORT_TERM: 1,
+  MID_TERM: 2,
+  LONG_TERM: 3,
+};
+
+function getProjectSortGroup(
+  projectId: string,
+  completedIds: string[],
+  progressSteps: Record<string, number>,
+): number {
+  if (completedIds.includes(projectId)) {
+    return 2;
+  }
+  const steps = progressSteps[projectId] || 0;
+  if (steps > 0) {
+    return 0;
+  }
+  return 1;
+}
+
+function computeOrderedProjects(
+  completedIds: string[],
+  progressSteps: Record<string, number>,
+): NationalProjectConfig[] {
+  const indexed = NATIONAL_PROJECTS_CATALOG.map((project, index) => ({
+    project,
+    index,
+  }));
+
+  indexed.sort((a, b) => {
+    const groupA = getProjectSortGroup(
+      a.project.id,
+      completedIds,
+      progressSteps,
+    );
+    const groupB = getProjectSortGroup(
+      b.project.id,
+      completedIds,
+      progressSteps,
+    );
+
+    if (groupA !== groupB) {
+      return groupA - groupB;
+    }
+
+    const tierA = TIER_SORT_WEIGHT[a.project.tier];
+    const tierB = TIER_SORT_WEIGHT[b.project.tier];
+
+    if (tierA !== tierB) {
+      return tierA - tierB;
+    }
+
+    if (groupA === 0) {
+      const stepA = progressSteps[a.project.id] || 0;
+      const stepB = progressSteps[b.project.id] || 0;
+      if (stepB !== stepA) {
+        return stepB - stepA;
+      }
+    }
+
+    return a.index - b.index;
+  });
+
+  return indexed.map((item) => item.project);
 }
 
 export function useNationalProjects(nation: Nation) {
@@ -50,6 +119,13 @@ export function useNationalProjects(nation: Nation) {
     [nation.projectProgressSteps],
   );
 
+  const [orderedProjectsSnapshot] = useState<NationalProjectConfig[]>(() =>
+    computeOrderedProjects(
+      nation.completedProjectIds || [],
+      nation.projectProgressSteps || {},
+    ),
+  );
+
   const remainingQuota = Math.max(
     0,
     NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN -
@@ -57,11 +133,11 @@ export function useNationalProjects(nation: Nation) {
   );
 
   const filteredProjects = useMemo(() => {
-    return NATIONAL_PROJECTS_CATALOG.filter((project) => {
+    return orderedProjectsSnapshot.filter((project) => {
       if (selectedTierFilter === "ALL") return true;
       return project.tier === selectedTierFilter;
     });
-  }, [selectedTierFilter]);
+  }, [orderedProjectsSnapshot, selectedTierFilter]);
 
   const toggleExpand = useCallback((projectId: string) => {
     setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
