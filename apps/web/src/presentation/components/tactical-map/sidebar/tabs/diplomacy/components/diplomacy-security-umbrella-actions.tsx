@@ -164,7 +164,7 @@ export function DiplomacySecurityUmbrellaActions({
         targetFlagCode={targetFlagCode}
         targetNationId={targetNationId}
         isWar={false}
-        costPerTurn={securityGuaranteeCost}
+        signingCost={securityGuaranteeCost}
         validation={safeGuaranteeVal}
         onConfirmGuarantee={onSecurityGuarantee}
         onClose={() => setIsGuaranteeModalOpen(false)}

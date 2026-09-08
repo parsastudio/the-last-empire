@@ -24,7 +24,7 @@ interface SecurityGuaranteeModalProps {
   targetFlagCode?: string;
   targetNationId: string;
   isWar: boolean;
-  costPerTurn: number;
+  signingCost: number;
   validation: SecurityGuaranteeValidationResult;
   onConfirmGuarantee: () => Promise<void> | void;
   onClose: () => void;
@@ -35,7 +35,7 @@ export function SecurityGuaranteeModal({
   targetName,
   targetFlagCode,
   targetNationId,
-  costPerTurn,
+  signingCost,
   validation,
   onConfirmGuarantee,
   onClose,
@@ -128,7 +128,7 @@ export function SecurityGuaranteeModal({
             </span>
             <span className="text-xs font-black text-cyan-300 flex items-center gap-1 justify-end">
               <Coins size={12} />
-              {PersianNumberFormatter.formatCurrency(costPerTurn, true)}
+              {PersianNumberFormatter.formatCurrency(signingCost, true)}
             </span>
           </div>
         </div>

@@ -31,8 +31,6 @@ export class SecurityGuaranteeValidator {
     guarantor: Nation,
     provincesMap?: Record<string, Province>,
     isEmergency = false,
-    allNations?: Record<string, Nation>,
-    rankMap?: Map<string, number>,
   ): SecurityGuaranteeValidationResult {
     const canonicalClient = CountryRegistry.resolveCanonicalId(client.id);
     const canonicalGuarantor = CountryRegistry.resolveCanonicalId(guarantor.id);
@@ -58,10 +56,6 @@ export class SecurityGuaranteeValidator {
     const guarantorGdp = getNationGdp(guarantor, provincesMap);
     const gdpRatio = Number((guarantorGdp / Math.max(1, clientGdp)).toFixed(2));
 
-    const clientTech = client.military.techLevel || 1.0;
-    const guarantorTech = guarantor.military.techLevel || 1.0;
-    const techDiff = Number((guarantorTech - clientTech).toFixed(1));
-
     const rel = NationRelationResolver.getRelation(
       client.relations,
       canonicalGuarantor,
@@ -71,6 +65,10 @@ export class SecurityGuaranteeValidator {
     const isNotWar = stance !== "WAR";
 
     if (isEmergency) {
+      const clientTech = client.military.techLevel || 1.0;
+      const guarantorTech = guarantor.military.techLevel || 1.0;
+      const techDiff = Number((guarantorTech - clientTech).toFixed(1));
+
       const isGdpValid = gdpRatio >= 1.0;
       const isTechValid = techDiff > 0;
       const isTensionValid = tension < 50;
@@ -159,7 +157,7 @@ export class SecurityGuaranteeValidator {
       isValid,
       reason,
       gdpRatio,
-      techDiff,
+      techDiff: 0,
       tension,
       isGdpValid,
       isTechValid: true,

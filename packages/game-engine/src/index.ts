@@ -31,7 +31,6 @@ export * from "./ai/ai-threat-calculator";
 export * from "./ai/ai-treaty-evaluator";
 export * from "./ai/ai-upgrade-planner";
 export * from "./ai/ai-war-declaration-evaluator";
-export * from "./ai/ai-war-resolution-sweep";
 export * from "./ai/espionage/ai-sabotage-planner";
 export * from "./ai/espionage/ai-tech-heist-planner";
 export * from "./ai/procurement/ai-arms-import-planner";
