@@ -125,6 +125,24 @@ export class TurnLogBuilder {
     );
   }
 
+  public static createDefensePactNeutralityLog(
+    turn: number,
+    guarantorId: string,
+    targetId: string,
+    params: Record<string, TurnLogParamValue> = {},
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      guarantorId,
+      "WARNING",
+      "DEFENSE_PACT_NEUTRALITY",
+      "GLOBAL_DIPLOMACY",
+      "GLOBAL",
+      targetId,
+      params,
+    );
+  }
+
   public static createAnnexationLog(
     turn: number,
     conquerorId: string,

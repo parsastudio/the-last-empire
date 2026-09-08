@@ -17,7 +17,7 @@ export class DiplomacyLogFormatter {
             : rawType === "NON_AGGRESSION_PACT"
               ? "پیمان عدم تخاصم"
               : rawType === "SECURITY_GUARANTEE"
-                ? "پیمان چتر امنیتی و تضمین بقا"
+                ? "پیمان دفاعی و امنیت سرزمینی متقابل"
                 : rawType === "EMERGENCY_PROTECTORATE"
                   ? "معاهده استعماری تحت‌الحمایگی اضطراری"
                   : rawType === "PEACE_TREATY"
@@ -45,16 +45,26 @@ export class DiplomacyLogFormatter {
         return `تنزل روابط دیپلماتیک: کشور ${sourceName} معاهده پیشین با ${targetName} را لغو کرد و روابط به سطح (${newStanceName}) کاهش یافت.`;
       }
 
-      case "SECURITY_GUARANTEE_SIGNED":
-        return `انعقاد پیمان چتر امنیتی: کشور ${sourceName} با پرداخت نوبتی ۲٪ GDP، رسماً تحت چتر تضمین دفاعی امپراتوری ${targetName} قرار گرفت.`;
+      case "SECURITY_GUARANTEE_SIGNED": {
+        const costVal = Number(params["cost"] || 0);
+        const costText =
+          costVal > 0
+            ? ` با پرداخت هزینه یک‌باره ${PersianNumberFormatter.formatCurrency(costVal, true)} (۳٪ GDP ضامن)`
+            : "";
+        return `انعقاد پیمان دفاعی: کشور ${sourceName}${costText} رسماً تحت پوشش دفاعی امپراتوری ${targetName} قرار گرفت (ورود مستقیم به جنگ در صورت تهاجم متخاصمان).`;
+      }
 
       case "SECURITY_GUARANTEE_CANCELLED": {
         const reason = String(params["reason"] || "فسخ معاهده");
-        return `لغو چتر امنیتی: پیمان تضمین امنیت میان ${sourceName} و ${targetName} لغو گردید (${reason}).`;
+        return `لغو پیمان دفاعی: تعهد دفاعی متقابل میان ${sourceName} و ${targetName} لغو گردید (${reason}).`;
+      }
+
+      case "DEFENSE_PACT_NEUTRALITY": {
+        return `تضاد منافع و اعلام بی‌طرفی: کشور ${sourceName} به دلیل تعهد دفاعی همزمان به دو طرف نبرد (${targetName} و مهاجم)، پیمان دفاعی هر دو طرف را لغو کرده و بی‌طرف ماند.`;
       }
 
       case "EMERGENCY_PROTECTORATE_SIGNED":
-        return `امضای معاهده تحت‌الحمایگی استعماری: کشور ${sourceName} در ازای پرداخت ۵٪ خراج نوبتی و واگذاری استقلال سیاسی، تحت حفاظت کامل نیروی ضربت فوق‌پیشرفته ${targetName} (۵۰٪ GDP) قرار گرفت.`;
+        return `امضای معاهده تحت‌الحمایگی استعماری: کشور ${sourceName} در ازای پرداخت ۵٪ خراج نوبتی و واگذاری استقلال سیاسی، تحت حفاظت کامل ارتش ضربت فوق‌پیشرفته ${targetName} (۵۰٪ GDP) قرار گرفت.`;
 
       case "EMERGENCY_PROTECTORATE_CANCELLED":
         return `لغو معاهده تحت‌الحمایگی: کشور ${sourceName} رسماً به پیمان استعماری با امپراتوری ${targetName} پایان داد و حاکمیت مستقل خود را اعلام کرد.`;

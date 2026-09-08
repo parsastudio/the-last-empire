@@ -38,6 +38,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   warFocusTargetId: null,
   postWarCooldownTurns: 0,
   doctrine: "DOMESTIC_INDUSTRIALIST",
+  defenseGuarantorIds: [],
   securityGuarantorId: null,
   isEmergencyProtectorate: false,
 };

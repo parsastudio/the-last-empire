@@ -9,7 +9,7 @@ export interface AuxiliaryForcesDistribution {
 }
 
 export class GuarantorBudgetCalculatorUtility {
-  public static readonly NORMAL_BUDGET_RATIO = 0.06;
+  public static readonly NORMAL_BUDGET_RATIO = 0;
   public static readonly EMERGENCY_BUDGET_MULTIPLIER = 10;
   public static readonly GUARANTOR_MAX_LIMIT_RATIO = 0.3;
 
@@ -18,10 +18,13 @@ export class GuarantorBudgetCalculatorUtility {
     guarantorGdp: number,
     isEmergency = false,
   ): number {
-    const multiplier = isEmergency
-      ? SecurityFeeCalculatorUtility.EMERGENCY_FEE_RATIO *
-        this.EMERGENCY_BUDGET_MULTIPLIER
-      : this.NORMAL_BUDGET_RATIO;
+    if (!isEmergency) {
+      return 0;
+    }
+
+    const multiplier =
+      SecurityFeeCalculatorUtility.EMERGENCY_FEE_RATIO *
+      this.EMERGENCY_BUDGET_MULTIPLIER;
 
     const rawBudget = Math.floor(clientGdp * multiplier);
     const maxSuperpowerLimit = Math.floor(
@@ -33,6 +36,10 @@ export class GuarantorBudgetCalculatorUtility {
   public static calculateAuxiliaryUnits(
     effectiveDefenseBudget: number,
   ): AuxiliaryForcesDistribution {
+    if (effectiveDefenseBudget <= 0) {
+      return { auxAir: 0, auxAD: 0, auxArm: 0, auxInf: 0 };
+    }
+
     const auxAir = Math.floor(
       (effectiveDefenseBudget * 0.4) / MILITARY_UNIT_STATS.AIR_FORCE.moneyCost,
     );

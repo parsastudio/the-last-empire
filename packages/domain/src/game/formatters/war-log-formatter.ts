@@ -11,12 +11,14 @@ export class WarLogFormatter {
       case "WAR_DECLARED": {
         if (params["isRetaliation"]) {
           const protectedName = String(
-            params["protectedTargetName"] || "هم‌پیمان خود",
+            params["protectedTargetName"] || "متحد دفاعی خود",
           );
           const reasonText =
-            params["retaliationReason"] === "GUARANTOR"
-              ? "چتر امنیتی و دفاع سرزمینی"
-              : "پیمان دفاعی شراکت استراتژیک";
+            params["retaliationReason"] === "DEFENSE_GUARANTOR"
+              ? "پیمان دفاع سرزمینی متقابل"
+              : params["retaliationReason"] === "GUARANTOR"
+                ? "چتر امنیتی و دفاع سرزمینی"
+                : "پیمان همبستگی دفاعی";
           return `هشدار بحران ژئوپلیتیک: امپراتوری ${sourceName} در پاسخ به تهاجم شما به خاک ${protectedName}، با استناد به ${reasonText} رسماً به شما اعلان جنگ کرد و وارد جبهه نبرد شد!`;
         }
         return `اعلان جنگ رسمی: کشور ${sourceName} علیه ${targetName} بیانیه رسمی صادر کرده و فرمان آتش سراسری را ابلاغ نمود.`;

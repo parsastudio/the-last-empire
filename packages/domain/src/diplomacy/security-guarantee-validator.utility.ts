@@ -3,7 +3,8 @@ import { Province } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
+import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { SecurityFeeCalculatorUtility } from "@/domain/diplomacy/security-fee-calculator.utility";
 
 export interface SecurityGuaranteeValidationResult {
   isValid: boolean;
@@ -15,11 +16,15 @@ export interface SecurityGuaranteeValidationResult {
   isTechValid: boolean;
   isTensionValid: boolean;
   isNotWar: boolean;
+  hasSlotAvailable: boolean;
+  canAffordCost: boolean;
   isEmergencyProtectorate?: boolean;
 }
 
 export class SecurityGuaranteeValidator {
-  public static readonly TOP_TIER_PERCENTILE = 0.4;
+  public static readonly MAX_DEFENSE_PACTS = 2;
+  public static readonly MIN_DEFENSE_GDP_RATIO = 1.0;
+  public static readonly MAX_DEFENSE_GDP_RATIO = 5.0;
 
   public static validate(
     client: Nation,
@@ -29,7 +34,10 @@ export class SecurityGuaranteeValidator {
     allNations?: Record<string, Nation>,
     rankMap?: Map<string, number>,
   ): SecurityGuaranteeValidationResult {
-    if (client.id === guarantor.id) {
+    const canonicalClient = CountryRegistry.resolveCanonicalId(client.id);
+    const canonicalGuarantor = CountryRegistry.resolveCanonicalId(guarantor.id);
+
+    if (canonicalClient === canonicalGuarantor) {
       return {
         isValid: false,
         reason: "امکان انتخاب کشور خود به عنوان ضامن وجود ندارد.",
@@ -40,6 +48,8 @@ export class SecurityGuaranteeValidator {
         isTechValid: false,
         isTensionValid: true,
         isNotWar: true,
+        hasSlotAvailable: false,
+        canAffordCost: false,
         isEmergencyProtectorate: isEmergency,
       };
     }
@@ -51,52 +61,18 @@ export class SecurityGuaranteeValidator {
     const clientTech = client.military.techLevel || 1.0;
     const guarantorTech = guarantor.military.techLevel || 1.0;
     const techDiff = Number((guarantorTech - clientTech).toFixed(1));
-    const isTechValid = techDiff > 0;
 
     const rel = NationRelationResolver.getRelation(
       client.relations,
-      guarantor.id,
+      canonicalGuarantor,
     );
     const tension = rel ? (rel.tension ?? 10) : 10;
     const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
     const isNotWar = stance !== "WAR";
 
-    if (allNations && client.isAi) {
-      const aliveNations = Object.values(allNations).filter((n) => n.isAlive);
-      const aliveCount = Math.max(1, aliveNations.length);
-      const topTierCutoff = Math.max(
-        1,
-        Math.ceil(aliveCount * this.TOP_TIER_PERCENTILE),
-      );
-      const canonicalClient = CountryRegistry.resolveCanonicalId(client.id);
-      const clientRank =
-        rankMap?.get(canonicalClient) ??
-        NationGettersUtility.getRank(
-          client.id,
-          allNations,
-          provincesMap,
-          rankMap,
-        );
-
-      if (clientRank <= topTierCutoff) {
-        return {
-          isValid: false,
-          reason:
-            "کشورهای حاضر در ۴۰٪ قدرت برتر جهان مجاز به پذیرش چتر امنیتی نیستند.",
-          gdpRatio,
-          techDiff,
-          tension,
-          isGdpValid: false,
-          isTechValid,
-          isTensionValid: true,
-          isNotWar,
-          isEmergencyProtectorate: isEmergency,
-        };
-      }
-    }
-
     if (isEmergency) {
       const isGdpValid = gdpRatio >= 1.0;
+      const isTechValid = techDiff > 0;
       const isTensionValid = tension < 50;
 
       let reason: string | undefined = undefined;
@@ -123,30 +99,61 @@ export class SecurityGuaranteeValidator {
         isTechValid,
         isTensionValid,
         isNotWar,
+        hasSlotAvailable: true,
+        canAffordCost: true,
         isEmergencyProtectorate: true,
       };
     }
 
-    const isGdpValid = gdpRatio >= 1.0 && gdpRatio <= 10.0;
-    const isTensionValid = tension < 35;
+    const existingGuarantors = client.defenseGuarantorIds || [];
+    const isAlreadyGuarantor = existingGuarantors.includes(canonicalGuarantor);
+    const hasSlotAvailable =
+      existingGuarantors.length < this.MAX_DEFENSE_PACTS && !isAlreadyGuarantor;
+
+    const isGdpValid =
+      gdpRatio >= this.MIN_DEFENSE_GDP_RATIO &&
+      gdpRatio <= this.MAX_DEFENSE_GDP_RATIO;
+
+    const signingCost =
+      SecurityFeeCalculatorUtility.calculateSigningCost(guarantorGdp);
+    const canAffordCost = client.treasury >= signingCost;
+
+    const proximity = GeopoliticalReachResolver.getProximityTier(
+      client,
+      guarantor,
+      provincesMap,
+    );
+    const isReachable = proximity !== "NONE";
 
     let reason: string | undefined = undefined;
-    if (!isNotWar) {
+    if (isAlreadyGuarantor) {
+      reason = `پیمان دفاعی با کشور ${guarantor.name} در حال حاضر فعال است.`;
+    } else if (!hasSlotAvailable) {
+      reason = `سقف مجاز پیمان دفاعی تکمیل است (حداکثر ${this.MAX_DEFENSE_PACTS} کشور).`;
+    } else if (!isNotWar) {
       reason =
-        "در وضعیت جنگ امکان انعقاد پیمان امنیتی عادی وجود ندارد (از پیمان تحت‌الحمایگی اضطراری استفاده کنید).";
-    } else if (!isTensionValid) {
-      reason = "تنش دیپلماتیک باید کمتر از ۳۵٪ باشد.";
+        "امکان انعقاد پیمان دفاعی با کشور متخاصم در حال نبرد وجود ندارد.";
     } else if (!isGdpValid) {
-      if (gdpRatio < 1.0) {
-        reason = "GDP کشور ضامن باید حداقل برابر کشور شما باشد.";
+      if (gdpRatio < this.MIN_DEFENSE_GDP_RATIO) {
+        reason =
+          "تولید ناخالص (GDP) کشور ضامن باید حداقل برابر با کشور شما باشد.";
       } else {
-        reason = "GDP کشور ضامن نباید بیش از ۱۰ برابر کشور شما باشد.";
+        reason =
+          "تولید ناخالص (GDP) کشور ضامن نمی‌تواند بیش از ۵ برابر کشور شما باشد.";
       }
-    } else if (!isTechValid) {
-      reason = "سطح فناوری نظامی کشور ضامن باید بالاتر از شما باشد.";
+    } else if (!isReachable) {
+      reason =
+        "عدم دسترسی جغرافیایی یا دریایی برای برقراری ارتباط با این کشور.";
+    } else if (!canAffordCost) {
+      reason = "موجودی خزانه برای پرداخت هزینه ۳٪ از GDP کشور حامی کافی نیست.";
     }
 
-    const isValid = isGdpValid && isTechValid && isNotWar && isTensionValid;
+    const isValid =
+      hasSlotAvailable &&
+      isNotWar &&
+      isGdpValid &&
+      isReachable &&
+      canAffordCost;
 
     return {
       isValid,
@@ -155,9 +162,11 @@ export class SecurityGuaranteeValidator {
       techDiff,
       tension,
       isGdpValid,
-      isTechValid,
-      isTensionValid,
+      isTechValid: true,
+      isTensionValid: true,
       isNotWar,
+      hasSlotAvailable,
+      canAffordCost,
       isEmergencyProtectorate: false,
     };
   }
