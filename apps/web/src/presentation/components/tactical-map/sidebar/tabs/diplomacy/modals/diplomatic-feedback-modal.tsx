@@ -8,8 +8,15 @@ import {
   DiplomaticProposalFeedbackData,
 } from "./components/treaty-response-feedback-content";
 
+export interface RetaliatingGuarantorFeedbackItem {
+  id: string;
+  name: string;
+  flagCode: string;
+}
+
 export interface DiplomaticProposalFeedback extends DiplomaticProposalFeedbackData {
   defenseEvent?: ReactiveDefenseEvent;
+  retaliatingGuarantors?: RetaliatingGuarantorFeedbackItem[];
 }
 
 interface DiplomaticFeedbackModalProps {
@@ -41,6 +48,7 @@ export function DiplomaticFeedbackModal({
         <WarDeclarationFeedbackContent
           targetName={feedback.targetName}
           defense={feedback.defenseEvent}
+          retaliatingGuarantors={feedback.retaliatingGuarantors}
           onClose={onClose}
         />
       ) : (

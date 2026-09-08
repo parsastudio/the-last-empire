@@ -34,6 +34,7 @@ export const RelationProfileSchema = z.object({
   tension: z.number().min(0).max(100).default(10),
   warDeclaredTurn: z.number().nonnegative().optional(),
   warInitiatorId: z.string().optional(),
+  isIntervener: z.boolean().optional(),
 });
 
 export const PendingDiplomaticProposalSchema = z.object({

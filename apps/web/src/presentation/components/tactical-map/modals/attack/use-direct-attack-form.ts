@@ -65,8 +65,22 @@ export function useDirectAttackForm({
     );
   }, [gameState, targetNation]);
 
+  const penalty = useAttackReputationPenalty({
+    humanNation,
+    targetNation,
+  });
+
   const defenseGuarantorAnalysis = useMemo(() => {
-    if (!targetNation || !gameState || !humanNation) {
+    if (!targetNation || !gameState || !humanNation || penalty.isWarStance) {
+      return {
+        activeGuarantorNames: [],
+        mutualGuarantorNames: [],
+        partnerGuarantorNames: [],
+      };
+    }
+
+    const relWithHuman = humanNation.relations?.[targetNation.id];
+    if (relWithHuman?.isIntervener) {
       return {
         activeGuarantorNames: [],
         mutualGuarantorNames: [],
@@ -100,11 +114,10 @@ export function useDirectAttackForm({
         continue;
       }
 
-      const relWithHuman =
+      const rel =
         gNation.relations?.[humanNation.id] ||
         humanNation.relations?.[canonicalG];
-      const hasStrategicPartnership =
-        relWithHuman?.stance === "STRATEGIC_PARTNERSHIP";
+      const hasStrategicPartnership = rel?.stance === "STRATEGIC_PARTNERSHIP";
 
       if (hasStrategicPartnership) {
         partnerGuarantorNames.push(gNation.name);
@@ -119,18 +132,13 @@ export function useDirectAttackForm({
       mutualGuarantorNames,
       partnerGuarantorNames,
     };
-  }, [targetNation, gameState, humanNation]);
+  }, [targetNation, gameState, humanNation, penalty.isWarStance]);
 
   const reach = useAttackTerritoryReach({
     humanNation,
     targetNationName: targetNation?.name,
     targetProvinceId,
     gameState,
-  });
-
-  const penalty = useAttackReputationPenalty({
-    humanNation,
-    targetNation,
   });
 
   const recon = useAttackReconRunner({
