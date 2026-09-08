@@ -119,7 +119,11 @@ export class GeopoliticalVectorCalculator {
       MilitaryPowerCalculator.calculateLandAndAirPower(target),
     );
 
-    if (target.securityGuarantorId && allNations) {
+    if (
+      target.securityGuarantorId &&
+      target.isEmergencyProtectorate &&
+      allNations
+    ) {
       const guarantor = NationGettersUtility.resolveNation(
         target.securityGuarantorId,
         allNations,
@@ -134,12 +138,29 @@ export class GeopoliticalVectorCalculator {
         const budget = GuarantorBudgetCalculatorUtility.calculateBudget(
           targetGdp,
           guarantorGdp,
-          Boolean(target.isEmergencyProtectorate),
+          true,
         );
         const auxiliaryPower = Math.floor(
           budget * 0.000000001 * guarantorTechMult * 4,
         );
         tPower += auxiliaryPower;
+      }
+    }
+
+    if (
+      source.isAi &&
+      !target.isAi &&
+      target.defenseGuarantorIds &&
+      allNations
+    ) {
+      for (let i = 0; i < target.defenseGuarantorIds.length; i++) {
+        const gId = target.defenseGuarantorIds[i]!;
+        const guarantor = NationGettersUtility.resolveNation(gId, allNations);
+        if (guarantor && guarantor.isAlive && guarantor.id !== source.id) {
+          const gPower =
+            MilitaryPowerCalculator.calculateLandAndAirPower(guarantor);
+          tPower += Math.floor(gPower * 0.75);
+        }
       }
     }
 

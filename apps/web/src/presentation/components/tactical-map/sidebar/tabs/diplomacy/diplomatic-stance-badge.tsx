@@ -40,7 +40,7 @@ export function DiplomaticStanceBadge({
   if (hasSecurityGuarantee) {
     return (
       <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[9px] font-bold flex items-center gap-1 font-sans">
-        <ShieldCheck size={10} /> تحت چتر امنیتی
+        <ShieldCheck size={10} /> پیمان دفاعی متقابل
       </span>
     );
   }

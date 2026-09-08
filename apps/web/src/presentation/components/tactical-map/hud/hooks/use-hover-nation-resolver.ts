@@ -89,27 +89,43 @@ export function useHoverNationResolver({
           else if (stance === "NON_AGGRESSION_PACT") stanceLabel = "عدم تخاصم";
           else stanceLabel = "دیپلماسی عادی";
 
-          const isGuarantorOfHuman =
+          const isEmergencyGuarantorOfHuman =
             Boolean(humanNation?.securityGuarantorId) &&
             CountryRegistry.resolveCanonicalId(
               humanNation?.securityGuarantorId,
-            ) === canonicalOwnerId;
+            ) === canonicalOwnerId &&
+            Boolean(humanNation?.isEmergencyProtectorate);
 
-          const isHumanGuarantorOfTarget =
+          const isHumanEmergencyGuarantorOfTarget =
             Boolean(ownerNation.securityGuarantorId) &&
             CountryRegistry.resolveCanonicalId(
               ownerNation.securityGuarantorId,
-            ) === canonicalHuman;
+            ) === canonicalHuman &&
+            Boolean(ownerNation.isEmergencyProtectorate);
 
-          if (isGuarantorOfHuman) {
-            stanceLabel = humanNation?.isEmergencyProtectorate
-              ? "تحت‌الحمایگی استعماری"
-              : "تحت چتر امنیتی";
+          const isDefenseGuarantorOfHuman = (
+            humanNation?.defenseGuarantorIds || []
+          ).some(
+            (id) => CountryRegistry.resolveCanonicalId(id) === canonicalOwnerId,
+          );
+
+          const isHumanDefenseGuarantorOfTarget = (
+            ownerNation.defenseGuarantorIds || []
+          ).some(
+            (id) => CountryRegistry.resolveCanonicalId(id) === canonicalHuman,
+          );
+
+          if (isEmergencyGuarantorOfHuman) {
+            stanceLabel = "تحت‌الحمایگی استعماری";
             hasSecurityGuarantee = true;
-          } else if (isHumanGuarantorOfTarget) {
-            stanceLabel = ownerNation.isEmergencyProtectorate
-              ? "کشور تحت‌الحمایه شما"
-              : "تحت حمایت شما";
+          } else if (isHumanEmergencyGuarantorOfTarget) {
+            stanceLabel = "کشور تحت‌الحمایه شما";
+            hasSecurityGuarantee = true;
+          } else if (isDefenseGuarantorOfHuman) {
+            stanceLabel = "ضامن دفاعی شما (پیمان دفاعی)";
+            hasSecurityGuarantee = true;
+          } else if (isHumanDefenseGuarantorOfTarget) {
+            stanceLabel = "تحت ضمانت دفاعی شما";
             hasSecurityGuarantee = true;
           }
         }

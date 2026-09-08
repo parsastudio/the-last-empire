@@ -7,6 +7,7 @@ import {
   SecurityGuaranteeValidationResult,
   Province,
   Nation,
+  SecurityFeeCalculatorUtility,
 } from "@geopolitics/domain";
 import {
   DiplomaticBetrayalCalculator,
@@ -22,9 +23,11 @@ const DEFAULT_INVALID_GUARANTEE: SecurityGuaranteeValidationResult = {
   techDiff: 0,
   tension: 0,
   isGdpValid: false,
-  isTechValid: false,
-  isTensionValid: false,
+  isTechValid: true,
+  isTensionValid: true,
   isNotWar: false,
+  hasSlotAvailable: false,
+  canAffordCost: false,
 };
 
 interface UseDiplomacyActionsRunnerProps {
@@ -71,8 +74,8 @@ export function useDiplomacyActionsRunner({
   }, [targetGdp]);
 
   const securityGuaranteeCost = useMemo(() => {
-    return Math.floor(senderGdp * 0.02);
-  }, [senderGdp]);
+    return SecurityFeeCalculatorUtility.calculateSigningCost(targetGdp);
+  }, [targetGdp]);
 
   const emergencyProtectorateCost = useMemo(() => {
     return Math.floor(senderGdp * 0.05);

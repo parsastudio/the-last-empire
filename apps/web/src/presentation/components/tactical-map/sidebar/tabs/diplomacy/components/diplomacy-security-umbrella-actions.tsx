@@ -78,23 +78,22 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-cyan-300 text-xs font-black">
             <ShieldCheck size={16} />
-            <span>تحت چتر امنیتی این کشور قرار دارید</span>
+            <span>پیمان دفاع سرزمینی متقابل فعال است</span>
           </div>
           <span className="text-[10px] font-mono text-cyan-400 font-bold">
-            {PersianNumberFormatter.formatCurrency(securityGuaranteeCost, true)}{" "}
-            / نوبت (۲٪ GDP)
+            ورود مستقیم به جنگ
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          در صورت تهاجم دشمن، نیروی ضربتی معادل ۶٪ GDP شما با لول تسلیحاتی این
-          کشور در سنگرهایتان مستقر می‌شود.
+          در صورت وقوع تهاجم دشمن علیه خاک شما، ارتش {targetName} رسماً وارد جنگ
+          علیه متهاجم خواهد شد.
         </p>
         <button
           onClick={onCancelSecurityGuarantee}
           className="w-full py-2 bg-secondary/80 hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 border border-border/60 hover:border-rose-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           <ShieldX size={13} />
-          <span>فسخ اختیاری پیمان چتر امنیتی</span>
+          <span>فسخ اختیاری پیمان دفاعی</span>
         </button>
       </div>
     );
@@ -110,9 +109,11 @@ export function DiplomacySecurityUmbrellaActions({
     techDiff: 0,
     tension: 0,
     isGdpValid: false,
-    isTechValid: false,
-    isTensionValid: false,
+    isTechValid: true,
+    isTensionValid: true,
     isNotWar: true,
+    hasSlotAvailable: false,
+    canAffordCost: false,
   };
 
   const safeGuaranteeVal = guaranteeValidation || defaultValidation;
@@ -127,15 +128,15 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">
             <ShieldCheck size={16} className="text-cyan-400" />
-            <span>پیمان چتر امنیتی و دفاع سرزمینی</span>
+            <span>پیمان دفاعی و امنیت سرزمینی متقابل</span>
           </span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-            ۲٪ GDP • بررسی شروط
+            ۳٪ GDP ضامن • بررسی شروط
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          مشاهده چک‌لیست شروط و تضمین دفاعی با استقرار نیروی ضربت معادل ۶٪ GDP
-          شما.
+          تعهد ورود مستقیم ارتش ضامن به جنگ در صورت تهاجم دشمن (حداکثر ۲ پیمان
+          همزمان).
         </p>
       </button>
 

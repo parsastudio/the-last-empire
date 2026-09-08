@@ -54,10 +54,10 @@ export function TreatyStatusBanner({
       <div className="w-full p-3 rounded-xl bg-cyan-500/15 border border-cyan-500/40 text-cyan-300 flex items-center justify-between text-xs font-bold font-sans">
         <span className="flex items-center gap-1.5">
           <ShieldCheck size={14} className="text-cyan-400 animate-pulse" />
-          پیمان چتر امنیتی و دفاع سرزمینی (۲٪ GDP)
+          پیمان دفاع سرزمینی متقابل (ورود مستقیم به جنگ در صورت تهاجم)
         </span>
         <span className="text-[9px] font-mono bg-cyan-500/20 px-2 py-0.5 rounded text-cyan-300">
-          چتر فعال
+          پیمان دفاعی
         </span>
       </div>
     );
