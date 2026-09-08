@@ -55,7 +55,6 @@ function calculateLogPriority(
     case "MACHINERY_EXPORT_SUMMARY":
     case "FOREIGN_AID_SENT":
     case "ARMS_TRADE":
-    case "TERRITORY_PURCHASED":
       return isHumanInvolved ? 7 : 11;
 
     case "GENERIC_EVENT":
@@ -176,8 +175,7 @@ export function useWideReports({
         log.eventCode === "TREATY_ACCEPTED" ||
         log.eventCode === "TREATY_CANCELLED" ||
         log.eventCode === "SECURITY_GUARANTEE_SIGNED" ||
-        log.eventCode === "EMERGENCY_PROTECTORATE_SIGNED" ||
-        log.eventCode === "TERRITORY_PURCHASED"
+        log.eventCode === "EMERGENCY_PROTECTORATE_SIGNED"
       );
     });
   }, [logs, selectedTurn, selectedScope, canonicalHuman]);
@@ -204,8 +202,7 @@ export function useWideReports({
         log.category === "GLOBAL_DIPLOMACY" ||
         log.eventCode === "TREATY_ACCEPTED" ||
         log.eventCode === "TREATY_REJECTED" ||
-        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT" ||
-        log.eventCode === "TERRITORY_PURCHASED"
+        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT"
       ) {
         diplomacyCount++;
       }
