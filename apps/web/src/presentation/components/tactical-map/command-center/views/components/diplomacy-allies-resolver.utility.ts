@@ -20,12 +20,12 @@ export interface NationAllyDetail {
   industrialTech: number;
   allianceTypeLabel: string;
   isHuman: boolean;
+  role: "GUARANTOR";
 }
 
 export class DiplomacyAlliesResolver {
   private static buildAllyDetail(
     nation: Nation,
-    allianceTypeLabel: string,
     canonicalHuman: string,
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
@@ -51,8 +51,9 @@ export class DiplomacyAlliesResolver {
       gdpFormatted,
       militaryTech: Number(nation.military.techLevel.toFixed(1)),
       industrialTech: Number(nation.industrialLevel.toFixed(1)),
-      allianceTypeLabel,
+      allianceTypeLabel: "حامی دفاعی متعهد (ورود قطعی به جنگ)",
       isHuman: canonicalId === canonicalHuman,
+      role: "GUARANTOR",
     };
   }
 
@@ -72,7 +73,7 @@ export class DiplomacyAlliesResolver {
       : "";
 
     const seen = new Set<string>();
-    const allies: NationAllyDetail[] = [];
+    const guarantors: NationAllyDetail[] = [];
 
     const targetGuarantorIds = targetNation.defenseGuarantorIds || [];
     for (let i = 0; i < targetGuarantorIds.length; i++) {
@@ -82,10 +83,9 @@ export class DiplomacyAlliesResolver {
         seen.add(canonicalG);
         const gNation = nationsMap[canonicalG] || nationsMap[gId];
         if (gNation && gNation.isAlive) {
-          allies.push(
+          guarantors.push(
             this.buildAllyDetail(
               gNation,
-              "پیمان دفاعی متقابل",
               canonicalHuman,
               nationsMap,
               provincesMap,
@@ -95,73 +95,6 @@ export class DiplomacyAlliesResolver {
       }
     }
 
-    for (const other of Object.values(nationsMap)) {
-      if (other.isAlive && other.id !== targetNation.id) {
-        const cOther = CountryRegistry.resolveCanonicalId(other.id);
-        const otherGuarantors = other.defenseGuarantorIds || [];
-        const isTargetGuarantorOfOther = otherGuarantors.some(
-          (id) => CountryRegistry.resolveCanonicalId(id) === canonicalTarget,
-        );
-
-        if (isTargetGuarantorOfOther && !seen.has(cOther)) {
-          seen.add(cOther);
-          allies.push(
-            this.buildAllyDetail(
-              other,
-              "تحت پوشش دفاعی این کشور",
-              canonicalHuman,
-              nationsMap,
-              provincesMap,
-            ),
-          );
-        }
-      }
-    }
-
-    for (const [otherId, rel] of Object.entries(targetNation.relations || {})) {
-      if (rel.stance === "STRATEGIC_PARTNERSHIP") {
-        const canonicalOther = CountryRegistry.resolveCanonicalId(otherId);
-        if (canonicalOther !== canonicalTarget && !seen.has(canonicalOther)) {
-          seen.add(canonicalOther);
-          const otherNation = nationsMap[canonicalOther] || nationsMap[otherId];
-          if (otherNation && otherNation.isAlive) {
-            allies.push(
-              this.buildAllyDetail(
-                otherNation,
-                "شراکت استراتژیک",
-                canonicalHuman,
-                nationsMap,
-                provincesMap,
-              ),
-            );
-          }
-        }
-      }
-    }
-
-    for (const other of Object.values(nationsMap)) {
-      if (other.isAlive && other.id !== targetNation.id) {
-        const cOther = CountryRegistry.resolveCanonicalId(other.id);
-        if (!seen.has(cOther)) {
-          const rel =
-            other.relations?.[canonicalTarget] ||
-            other.relations?.[targetNation.id];
-          if (rel?.stance === "STRATEGIC_PARTNERSHIP") {
-            seen.add(cOther);
-            allies.push(
-              this.buildAllyDetail(
-                other,
-                "شراکت استراتژیک",
-                canonicalHuman,
-                nationsMap,
-                provincesMap,
-              ),
-            );
-          }
-        }
-      }
-    }
-
-    return allies.sort((a, b) => a.rank - b.rank);
+    return guarantors.sort((a, b) => a.rank - b.rank);
   }
 }

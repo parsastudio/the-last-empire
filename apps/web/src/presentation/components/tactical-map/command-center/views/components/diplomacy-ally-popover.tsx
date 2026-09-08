@@ -5,7 +5,8 @@ import {
   Coins,
   ShieldCheck,
   ArrowLeft,
-  Handshake,
+  Swords,
+  AlertTriangle,
 } from "lucide-react";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { NationAllyDetail } from "./diplomacy-allies-resolver.utility";
@@ -32,10 +33,12 @@ export function DiplomacyAllyPopover({
   }, [onClose]);
 
   return (
-    <div className="p-3 rounded-2xl bg-secondary/95 border border-primary/40 shadow-xl backdrop-blur-2xl space-y-2.5 animate-fade-smooth relative text-right dir-rtl font-sans">
-      <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
+    <div className="p-3.5 rounded-2xl bg-secondary/95 border-2 border-rose-500/50 shadow-2xl backdrop-blur-2xl space-y-3 animate-fade-smooth relative text-right dir-rtl font-sans">
+      <div className="flex items-center justify-between pb-2 border-b border-border/60">
         <div className="flex items-center gap-2">
-          <span className="text-xl select-none shrink-0">{ally.flagEmoji}</span>
+          <span className="text-2xl select-none shrink-0">
+            {ally.flagEmoji}
+          </span>
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5">
               <h4 className="text-xs font-black text-foreground">
@@ -45,11 +48,10 @@ export function DiplomacyAllyPopover({
                 {ally.code}
               </span>
             </div>
-            {ally.isHuman && (
-              <span className="text-[9px] font-bold text-emerald-400 font-sans block">
-                امپراتوری شما
-              </span>
-            )}
+            <span className="text-[10px] font-bold text-rose-400 font-sans flex items-center gap-1">
+              <Swords size={11} />
+              <span>ورود مستقیم به جنگ در صورت تهاجم</span>
+            </span>
           </div>
         </div>
 
@@ -58,11 +60,20 @@ export function DiplomacyAllyPopover({
           onClick={onClose}
           className="p-1 text-muted-foreground hover:text-foreground hover:bg-background/80 rounded-lg transition-colors cursor-pointer shrink-0"
         >
-          <X size={13} />
+          <X size={14} />
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+      <div className="p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/30 flex items-start gap-2 text-[11px] text-foreground/90 leading-relaxed">
+        <AlertTriangle size={15} className="text-rose-400 shrink-0 mt-0.5" />
+        <p>
+          این کشور ضامن تمامیت ارضی هدف است. تهاجم به این خاک، فوراً ارتش{" "}
+          <strong className="text-rose-300">{ally.name}</strong> را وارد جنگ
+          همه‌جانبه با شما خواهد کرد.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
         <div className="bg-background/60 p-2 rounded-xl border border-border/50 space-y-0.5">
           <span className="text-muted-foreground font-sans flex items-center gap-1 text-[9px]">
             <Award size={11} className="text-amber-400 shrink-0" />
@@ -98,11 +109,11 @@ export function DiplomacyAllyPopover({
 
         <div className="bg-background/60 p-2 rounded-xl border border-border/50 space-y-0.5">
           <span className="text-muted-foreground font-sans flex items-center gap-1 text-[9px]">
-            <Handshake size={11} className="text-diplomacy shrink-0" />
-            نوع پیوند:
+            <Swords size={11} className="text-rose-400 shrink-0" />
+            وضعیت در نبرد:
           </span>
-          <span className="font-extrabold text-foreground block truncate font-sans text-[9px]">
-            {ally.allianceTypeLabel}
+          <span className="font-extrabold text-rose-400 block truncate font-sans text-[9px]">
+            اعلان جنگ متقابل
           </span>
         </div>
       </div>
@@ -113,9 +124,9 @@ export function DiplomacyAllyPopover({
           onSelectCountry(ally.code);
           onClose();
         }}
-        className="w-full py-1.5 bg-primary/20 hover:bg-primary/30 text-primary border border-primary/40 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
+        className="w-full py-2 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/40 rounded-xl text-[10px] font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:scale-[1.01] active:scale-[0.99]"
       >
-        <span>مشاهده در میز دیپلماسی</span>
+        <span>بررسی شناسنامه نظامی {ally.name} در دیپلماسی</span>
         <ArrowLeft size={12} className="shrink-0" />
       </button>
     </div>

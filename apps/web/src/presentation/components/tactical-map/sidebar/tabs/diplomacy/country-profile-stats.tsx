@@ -6,7 +6,6 @@ import {
   Landmark,
   ShoppingCart,
   Lock,
-  ShieldCheck,
   Skull,
   Cpu,
 } from "lucide-react";
@@ -103,42 +102,16 @@ export function CountryProfileStats({
 
       <DiplomacyAlliesBox allies={allies} onSelectAlly={onSelectAlly} />
 
-      {data.guarantorName && (
-        <div
-          className={`p-3 rounded-2xl flex items-center justify-between font-sans border ${
-            data.isEmergencyProtectorate
-              ? "bg-rose-950/20 border-rose-500/40"
-              : "bg-cyan-950/20 border-cyan-500/40"
-          }`}
-        >
-          <div
-            className={`flex items-center gap-1.5 text-xs ${
-              data.isEmergencyProtectorate ? "text-rose-300" : "text-cyan-300"
-            }`}
-          >
-            {data.isEmergencyProtectorate ? (
-              <Skull
-                size={14}
-                className="text-rose-400 shrink-0 animate-pulse"
-              />
-            ) : (
-              <ShieldCheck size={14} className="text-cyan-400 shrink-0" />
-            )}
+      {data.isEmergencyProtectorate && data.guarantorName && (
+        <div className="p-3 rounded-2xl flex items-center justify-between font-sans border bg-rose-950/20 border-rose-500/40">
+          <div className="flex items-center gap-1.5 text-xs text-rose-300">
+            <Skull size={14} className="text-rose-400 shrink-0 animate-pulse" />
             <span className="text-[11px] font-bold">
-              {data.isEmergencyProtectorate
-                ? "معاهده تحت‌الحمایگی استعماری:"
-                : "پیمان دفاع سرزمینی:"}
+              معاهده تحت‌الحمایگی استعماری:
             </span>
           </div>
-          <span
-            className={`text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border ${
-              data.isEmergencyProtectorate
-                ? "bg-rose-500/15 text-rose-300 border-rose-500/30"
-                : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
-            }`}
-          >
-            {data.isEmergencyProtectorate ? "تحت استعمار" : "تحت پوشش دفاعی"}{" "}
-            {data.guarantorName}
+          <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border bg-rose-500/15 text-rose-300 border-rose-500/30">
+            تحت استعمار {data.guarantorName}
           </span>
         </div>
       )}
