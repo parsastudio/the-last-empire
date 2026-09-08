@@ -10,6 +10,7 @@ import {
   NationRelationResolver,
   getNationGdp,
   StrategicPartnershipCalculatorUtility,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -24,7 +25,38 @@ export class AITreatyEvaluator {
     provincesMap?: Record<string, Province>,
     lockedTargets?: Set<string>,
     vectorsByTarget?: Map<string, GeopoliticalVector>,
+    rankMap?: Map<string, number>,
   ): GameAction | null {
+    if (
+      nation.isAi &&
+      nation.defenseGuarantorIds &&
+      nation.defenseGuarantorIds.length > 0
+    ) {
+      const aliveNations = Object.values(allNations).filter((n) => n.isAlive);
+      const top20Threshold = Math.ceil(aliveNations.length * 0.2);
+      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+      const nationRank =
+        rankMap?.get(canonicalId) ??
+        rankMap?.get(nation.id) ??
+        NationGettersUtility.getRank(nation.id, allNations, provincesMap);
+
+      if (nationRank <= top20Threshold) {
+        for (let i = 0; i < nation.defenseGuarantorIds.length; i++) {
+          const targetId = nation.defenseGuarantorIds[i]!;
+          if (
+            DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)
+          ) {
+            continue;
+          }
+          return ActionFactory.diplomaticProposal(
+            nation.id,
+            targetId,
+            "CANCEL_SECURITY_GUARANTEE",
+          );
+        }
+      }
+    }
+
     if (!nation.relations) return null;
 
     const isHawk =
@@ -123,6 +155,7 @@ export class AITreatyEvaluator {
       provincesMap,
       lockedTargets,
       vectorsByTarget,
+      rankMap,
     );
     if (cancelAction) {
       return cancelAction;
@@ -137,9 +170,22 @@ export class AITreatyEvaluator {
         rankMap,
       );
 
+    const aliveNations = Object.values(allNations).filter((n) => n.isAlive);
+    const top20Threshold = Math.ceil(aliveNations.length * 0.2);
+    const canonicalNationId = CountryRegistry.resolveCanonicalId(nation.id);
+    const nationRank =
+      rankMap?.get(canonicalNationId) ??
+      rankMap?.get(nation.id) ??
+      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
+
+    const isTop20PercentAi = nation.isAi && nationRank <= top20Threshold;
+
     const currentPactsCount = (nation.defenseGuarantorIds || []).length;
 
-    if (currentPactsCount < SecurityGuaranteeValidator.MAX_DEFENSE_PACTS) {
+    if (
+      !isTop20PercentAi &&
+      currentPactsCount < SecurityGuaranteeValidator.MAX_DEFENSE_PACTS
+    ) {
       for (let i = 0; i < targets.length; i++) {
         const candidate = targets[i]!;
 
@@ -158,6 +204,8 @@ export class AITreatyEvaluator {
           candidate,
           provincesMap,
           false,
+          allNations,
+          rankMap,
         );
 
         if (validation.isValid) {

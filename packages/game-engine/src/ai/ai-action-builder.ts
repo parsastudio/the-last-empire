@@ -231,6 +231,20 @@ export class AIActionBuilder {
       return;
     }
 
+    const cancelAction = AITreatyEvaluator.evaluateTreatyCancellation(
+      nation,
+      allNations,
+      provincesMap,
+      lockedTargets,
+      context?.vectorsByTarget,
+      rankMap,
+    );
+
+    if (cancelAction) {
+      actions.push(cancelAction);
+      return;
+    }
+
     const warDeclarationAction = AIWarDeclarationEvaluator.evaluate(
       nation,
       allNations,
