@@ -3,7 +3,6 @@ import { GameAction } from "@/domain/game/action.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
-import { ProvinceTradeExecutor } from "@/engine/actions/executors/economy/province-trade-executor";
 import { NationalDebtExecutor } from "@/engine/actions/executors/economy/national-debt-executor";
 import { FactoryActionExecutor } from "@/engine/actions/executors/economy/factory-action-executor";
 
@@ -75,16 +74,6 @@ export class EconomyActionExecutor {
           state,
           action,
           nation,
-          buyerKey,
-        );
-      }
-
-      case "BUY_PROVINCE": {
-        return ProvinceTradeExecutor.execute(
-          state,
-          action,
-          nation,
-          canonicalId,
           buyerKey,
         );
       }

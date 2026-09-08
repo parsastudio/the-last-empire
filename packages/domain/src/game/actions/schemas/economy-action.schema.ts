@@ -37,15 +37,6 @@ export const BuyIndustrialEquipmentActionSchema = z.object({
   quantity: z.number().positive(),
 });
 
-export const BuyProvinceActionSchema = z.object({
-  id: z.string(),
-  nationId: z.string(),
-  type: z.literal("BUY_PROVINCE"),
-  targetNationId: z.string().default(""),
-  provinceId: z.number().positive(),
-  cost: z.number().nonnegative().default(0),
-});
-
 export const RepayDebtActionSchema = z.object({
   id: z.string(),
   nationId: z.string(),
@@ -73,6 +64,5 @@ export type InvestIndustrialResearchAction = z.infer<
 export type BuyIndustrialEquipmentAction = z.infer<
   typeof BuyIndustrialEquipmentActionSchema
 >;
-export type BuyProvinceAction = z.infer<typeof BuyProvinceActionSchema>;
 export type RepayDebtAction = z.infer<typeof RepayDebtActionSchema>;
 export type RequestLoanAction = z.infer<typeof RequestLoanActionSchema>;

@@ -11,7 +11,6 @@ export class NationMutatorUtility {
       executedEspionageTiers: [],
       attackedTargetIdsThisTurn: [],
       sentAidTargetIdsThisTurn: [],
-      hasBoughtProvinceThisTurn: false,
       boostedProjectIdsThisTurn: [],
       projectProgressSteps: {},
       postWarCooldownTurns: 0,

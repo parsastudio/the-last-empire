@@ -4,7 +4,6 @@ import {
   EquipDomesticMachineryAction,
   InvestIndustrialResearchAction,
   BuyIndustrialEquipmentAction,
-  BuyProvinceAction,
   RepayDebtAction,
   RequestLoanAction,
 } from "@/domain/game/actions/schemas/economy-action.schema";
@@ -74,22 +73,6 @@ export class EconomyActionFactory {
       type: "BUY_INDUSTRIAL_EQUIPMENT",
       sellerNationId,
       quantity,
-    };
-  }
-
-  public static buyProvince(
-    nationId: string,
-    targetNationId: string,
-    provinceId: number,
-    cost = 0,
-  ): BuyProvinceAction {
-    return {
-      id: this.createId("buy-province"),
-      nationId,
-      type: "BUY_PROVINCE",
-      targetNationId,
-      provinceId,
-      cost,
     };
   }
 

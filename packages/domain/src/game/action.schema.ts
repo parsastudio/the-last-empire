@@ -6,7 +6,6 @@ import {
   EquipDomesticMachineryActionSchema,
   InvestIndustrialResearchActionSchema,
   BuyIndustrialEquipmentActionSchema,
-  BuyProvinceActionSchema,
   RepayDebtActionSchema,
   RequestLoanActionSchema,
   SetEconomicDoctrineAction,
@@ -14,7 +13,6 @@ import {
   EquipDomesticMachineryAction,
   InvestIndustrialResearchAction,
   BuyIndustrialEquipmentAction,
-  BuyProvinceAction,
   RepayDebtAction,
   RequestLoanAction,
 } from "@/domain/game/actions/schemas/economy-action.schema";
@@ -70,7 +68,6 @@ export const GameActionSchema = z.discriminatedUnion("type", [
   RecruitUnitActionSchema,
   BuyArmsMarketActionSchema,
   BuyNavalFleetActionSchema,
-  BuyProvinceActionSchema,
   DiplomaticProposalActionSchema,
   RespondDiplomaticProposalActionSchema,
   SignPeaceSettlementActionSchema,

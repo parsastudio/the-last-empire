@@ -66,7 +66,6 @@ export class ActionEngine {
         case "EQUIP_DOMESTIC_MACHINERY":
         case "INVEST_INDUSTRIAL_RESEARCH":
         case "BUY_INDUSTRIAL_EQUIPMENT":
-        case "BUY_PROVINCE":
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
           newState = EconomyActionExecutor.execute(

@@ -32,7 +32,6 @@ export const DEFAULT_NATION_MOCK: Nation = {
   executedEspionageTiers: [],
   attackedTargetIdsThisTurn: [],
   sentAidTargetIdsThisTurn: [],
-  hasBoughtProvinceThisTurn: false,
   boostedProjectIdsThisTurn: [],
   projectProgressSteps: {},
   completedProjectIds: [],
