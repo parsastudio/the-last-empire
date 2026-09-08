@@ -43,12 +43,14 @@ export class EconomyActionFactory {
   public static equipDomesticMachinery(
     nationId: string,
     quantity?: number,
+    sourceTechLevel?: number,
   ): EquipDomesticMachineryAction {
     return {
       id: this.createId("equip-machinery"),
       nationId,
       type: "EQUIP_DOMESTIC_MACHINERY",
       quantity,
+      sourceTechLevel,
     };
   }
 
@@ -66,6 +68,7 @@ export class EconomyActionFactory {
     nationId: string,
     sellerNationId: string,
     quantity: number,
+    sourceTechLevel?: number,
   ): BuyIndustrialEquipmentAction {
     return {
       id: this.createId("buy-equipment"),
@@ -73,6 +76,7 @@ export class EconomyActionFactory {
       type: "BUY_INDUSTRIAL_EQUIPMENT",
       sellerNationId,
       quantity,
+      sourceTechLevel,
     };
   }
 

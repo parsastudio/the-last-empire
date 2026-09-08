@@ -62,6 +62,131 @@ export class BuyIndustrialEquipmentExecutor {
       );
     }
 
+    const requestedSourceTech = action.sourceTechLevel;
+
+    if (requestedSourceTech !== undefined) {
+      const roundedSource = Number(requestedSourceTech.toFixed(2));
+      if (roundedSource >= sellerTech) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "سطح فناوری صنعتی فروشنده از این رده بالاتر نیست.",
+        );
+      }
+
+      const availableInTier = nationalBatches
+        .filter((b) => Math.abs(b.techLevel - roundedSource) < 0.05)
+        .reduce((sum, b) => sum + b.count, 0);
+
+      if (availableInTier <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "هیچ کارخانه‌ای در رده انتخابی جهت واردات تجهیزات یافت نشد.",
+        );
+      }
+
+      const qty = Math.min(availableInTier, action.quantity);
+      const unitPrice = IndustryCalculator.calculateEquipmentImportPrice(
+        sellerTech,
+        roundedSource,
+        buyer.industrialLevel,
+      );
+      const totalCost = qty * unitPrice;
+
+      if (buyer.treasury < totalCost) {
+        throw new GameError(
+          "INSUFFICIENT_FUNDS",
+          "موجودی خزانه برای واردات این حجم از ابزارآلات صنعتی کافی نیست.",
+        );
+      }
+
+      let provRemainingToUpgrade = qty;
+      const updatedProvinces: Record<string, Province> = { ...state.provinces };
+
+      for (
+        let i = 0;
+        i < ownedProvinces.length && provRemainingToUpgrade > 0;
+        i++
+      ) {
+        const p = ownedProvinces[i]!;
+        const matchingInProv = p.factoryTiers
+          .filter((t) => Math.abs(t.techLevel - roundedSource) < 0.05)
+          .reduce((sum, t) => sum + t.count, 0);
+
+        if (matchingInProv <= 0) continue;
+
+        const takeCount = Math.min(matchingInProv, provRemainingToUpgrade);
+        const nextTiers = IndustryCalculator.upgradeSpecificTier(
+          p.factoryTiers,
+          takeCount,
+          roundedSource,
+          sellerTech,
+        );
+
+        updatedProvinces[p.provinceId.toString()] = {
+          ...p,
+          factoryTiers: nextTiers,
+        };
+
+        provRemainingToUpgrade -= takeCount;
+      }
+
+      const updatedBatches = NationGettersUtility.getNationFactoryTiers(
+        buyer.id,
+        updatedProvinces,
+      );
+      const newEquipTech = IndustryCalculator.calculateWeightedAverageTech(
+        updatedBatches,
+        sellerTech,
+      );
+
+      const sellerKey = state.nations[sellerCanonical]
+        ? sellerCanonical
+        : seller.id;
+
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(
+        state.humanNationId,
+      );
+      const isHumanSeller = sellerCanonical === canonicalHuman;
+
+      const logs = [];
+      if (isHumanSeller && totalCost > 0) {
+        logs.push(
+          TurnLogBuilder.createNationalLog(
+            state.currentTurn,
+            seller.id,
+            "DOMESTIC",
+            "INFO",
+            "ARMS_TRADE",
+            {
+              amount: totalCost,
+              role: "SELLER",
+              tradeType: "MACHINERY",
+            },
+            buyer.id,
+          ),
+        );
+      }
+
+      return {
+        ...state,
+        provinces: updatedProvinces,
+        turnLogs: [...state.turnLogs, ...logs],
+        nations: {
+          ...state.nations,
+          [buyerKey]: {
+            ...buyer,
+            treasury: buyer.treasury - totalCost,
+            factoryTiers: updatedBatches,
+            equipmentTechLevel: newEquipTech,
+          },
+          [sellerKey]: {
+            ...seller,
+            treasury: seller.treasury + totalCost,
+          },
+        },
+      };
+    }
+
     const hasImportableFactories = nationalBatches.some(
       (b) => b.techLevel < sellerTech,
     );
