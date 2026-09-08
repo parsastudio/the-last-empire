@@ -121,11 +121,18 @@ export class AITreatyEvaluator {
         nation.government.stability >= 40 &&
         !isSourceAtWar;
 
+      const isSaturationExpansionNeed =
+        vector.isNeighbor &&
+        vector.saturationScore >= 60 &&
+        vector.powerRatio <= 0.55 &&
+        !isSourceAtWar;
+
       if (
         isDiscreditedAlly ||
         hasStolenTerritory ||
         isHawkTemptation ||
-        isNonHawkOpportunity
+        isNonHawkOpportunity ||
+        isSaturationExpansionNeed
       ) {
         return ActionFactory.diplomaticProposal(
           nation.id,

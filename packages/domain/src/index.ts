@@ -15,6 +15,7 @@ export * from "./diplomacy/strategic-partnership-calculator.utility";
 export * from "./diplomacy/pending-proposal-manager.utility";
 export * from "./economy/debt-calculator.utility";
 export * from "./economy/industry-calculator.utility";
+export * from "./economy/territorial-saturation-calculator.utility";
 export * from "./economy/factory-batch.schema";
 export * from "./economy/fiscal-revenue-calculator";
 export * from "./economy/payroll-calculator";

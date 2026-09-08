@@ -21,7 +21,11 @@ export class WarUtilityEvaluator {
       return -100;
     }
 
-    if (vector.alignment > 10 && vector.lostProvincesCount === 0) {
+    if (
+      vector.alignment > 10 &&
+      vector.lostProvincesCount === 0 &&
+      vector.saturationScore < 60
+    ) {
       return -100;
     }
 
@@ -32,7 +36,11 @@ export class WarUtilityEvaluator {
       rawPowerAdvantage = Math.round((1.0 - vector.powerRatio) * 50);
     }
 
-    if (rawPowerAdvantage <= 0 && vector.lostProvincesCount === 0) {
+    if (
+      rawPowerAdvantage <= 0 &&
+      vector.lostProvincesCount === 0 &&
+      vector.saturationScore < 60
+    ) {
       return -100;
     }
 
@@ -47,7 +55,11 @@ export class WarUtilityEvaluator {
       ).length;
 
       if (otherWarsCount > 0) {
-        if (vector.alignment <= 0 || vector.lostProvincesCount > 0) {
+        if (
+          vector.alignment <= 0 ||
+          vector.lostProvincesCount > 0 ||
+          vector.saturationScore >= 50
+        ) {
           opportunismBonus += 15;
         } else {
           return -100;
@@ -89,6 +101,12 @@ export class WarUtilityEvaluator {
         ? Math.round(rawPowerAdvantage * proximityMultiplier)
         : rawPowerAdvantage;
 
+    let expansionistDrive = 0;
+    if (vector.saturationScore >= 50 && rawPowerAdvantage > 0) {
+      const driveFactor = (vector.saturationScore - 40) / 60;
+      expansionistDrive = Math.round(driveFactor * 25);
+    }
+
     const tensionScore = Math.round(vector.tension * 0.5);
     const alignmentDampener = Math.round(vector.alignment * 0.5);
     const stabilityScore = Math.round(
@@ -99,6 +117,7 @@ export class WarUtilityEvaluator {
       tensionScore +
         powerAdvantageScore +
         opportunismBonus +
+        expansionistDrive +
         distancePenalty -
         alignmentDampener +
         stabilityScore,
