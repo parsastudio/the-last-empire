@@ -64,11 +64,6 @@ export class NationalEventsLogFormatter {
         return `مجموعاً ${PersianNumberFormatter.toPersianDigits(count)} کشور خطوط تولید و ماشین‌آلات پیشرفته صنعتی از شما خریداری کردند و مبلغ ${PersianNumberFormatter.formatCurrency(profit, true)} سود به خزانه واریز گردید.`;
       }
 
-      case "TERRITORY_PURCHASED": {
-        const provName = String(params["provinceName"] || "استان");
-        return `معامله و الحاق سرزمینی: کشور ${sourceName} استان (${provName}) را از کشور ${targetName} خریداری و رسماً به قلمرو خود الحاق کرد.`;
-      }
-
       case "GENERIC_EVENT":
       default:
         return defaultMessage || "رویداد ثبت‌شده حاکمیتی";

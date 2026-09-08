@@ -149,7 +149,6 @@ export class NationProfileAssigner {
       executedEspionageTiers: [],
       attackedTargetIdsThisTurn: [],
       sentAidTargetIdsThisTurn: [],
-      hasBoughtProvinceThisTurn: false,
       boostedProjectIdsThisTurn: [],
       projectProgressSteps: {},
       completedProjectIds: [],

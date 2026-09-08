@@ -38,7 +38,6 @@ export const NationSchema = z.object({
   executedEspionageTiers: z.array(z.string()).default([]),
   attackedTargetIdsThisTurn: z.array(z.string()).default([]),
   sentAidTargetIdsThisTurn: z.array(z.string()).default([]),
-  hasBoughtProvinceThisTurn: z.boolean().default(false),
   boostedProjectIdsThisTurn: z.array(z.string()).default([]),
   projectProgressSteps: z.record(z.string(), z.number()).default({}),
   completedProjectIds: z.array(z.string()).default([]),

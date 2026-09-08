@@ -7,7 +7,6 @@ import {
   RecruitUnitAction,
   BuyArmsMarketAction,
   BuyNavalFleetAction,
-  BuyProvinceAction,
   DiplomaticProposalAction,
   RespondDiplomaticProposalAction,
   SignPeaceSettlementAction,
@@ -99,20 +98,6 @@ export class ActionFactory {
     quantity = 1,
   ): BuyNavalFleetAction {
     return MilitaryActionFactory.buyNavalFleet(nationId, quantity);
-  }
-
-  public static buyProvince(
-    nationId: string,
-    targetNationId: string,
-    provinceId: number,
-    cost = 0,
-  ): BuyProvinceAction {
-    return EconomyActionFactory.buyProvince(
-      nationId,
-      targetNationId,
-      provinceId,
-      cost,
-    );
   }
 
   public static diplomaticProposal(
