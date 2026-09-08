@@ -104,18 +104,6 @@ export function WebGLTacticalWorkspace({
     [openModal],
   );
 
-  const handleSelectBuyProvinceContext = useCallback(
-    (provinceId?: number) => {
-      if (provinceId) {
-        openModal({
-          type: "BUY_PROVINCE",
-          provinceId,
-        });
-      }
-    },
-    [openModal],
-  );
-
   const handleNextTurnAndRefresh = useCallback(async () => {
     if (isProcessingTurn) return;
     try {
@@ -177,9 +165,6 @@ export function WebGLTacticalWorkspace({
         scaleRef={scaleRef}
         onSelectCountryContext={handleSelectCountryContext}
         onSelectCountryAttackContext={handleSelectCountryAttackContext}
-        onSelectBuyProvinceContext={(_, pid) =>
-          handleSelectBuyProvinceContext(pid)
-        }
       />
 
       <TopHudBar metrics={metrics} />
