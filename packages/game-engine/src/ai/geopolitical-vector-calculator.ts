@@ -11,6 +11,7 @@ import {
   TerritoryClaimsUtility,
   getNationGdp,
   GuarantorBudgetCalculatorUtility,
+  TerritorialSaturationCalculatorUtility,
 } from "@geopolitics/domain";
 
 export interface GeopoliticalVector {
@@ -23,11 +24,13 @@ export interface GeopoliticalVector {
   isNavalReachable: boolean;
   powerRatio: number;
   lostProvincesCount: number;
+  saturationScore: number;
   reasons: {
     commonEnemyBonus: number;
     reputationEffect: number;
     borderFriction: number;
     revanchismPenalty: number;
+    expansionFriction: number;
   };
 }
 
@@ -187,12 +190,27 @@ export class GeopoliticalVectorCalculator {
       vulnerabilityBonus += 10;
     }
 
+    const saturationScore =
+      TerritorialSaturationCalculatorUtility.calculateSaturationScore(
+        source,
+        provincesMap,
+        myProvs,
+      );
+
+    const expansionFriction =
+      TerritorialSaturationCalculatorUtility.calculateExpansionAppetite(
+        saturationScore,
+        powerRatio,
+        isNeighbor,
+      );
+
     const storedTension = rel ? (rel.tension ?? 10) : 10;
     let rawTension =
       Math.floor(storedTension * 0.4) +
       borderFriction +
       vulnerabilityBonus +
-      revanchismPenalty;
+      revanchismPenalty +
+      expansionFriction;
 
     if (rel && rel.stance === "WAR") {
       rawTension = 100;
@@ -205,11 +223,11 @@ export class GeopoliticalVectorCalculator {
     const tension = Math.max(0, Math.min(100, rawTension));
 
     let posture: DiplomaticPosture = "NEUTRAL_COEXISTENCE";
-    if (alignment >= 20 && tension < 40) {
+    if (alignment >= 20 && tension < 40 && expansionFriction < 15) {
       posture = "NATURAL_ALLY";
     } else if (
-      alignment < 0 &&
-      tension >= 45 &&
+      (alignment < 0 || expansionFriction >= 15) &&
+      tension >= 40 &&
       sPower >= effectiveTargetPower
     ) {
       posture = "OPPORTUNISTIC_PREDATOR";
@@ -231,11 +249,13 @@ export class GeopoliticalVectorCalculator {
       isNavalReachable,
       powerRatio,
       lostProvincesCount,
+      saturationScore,
       reasons: {
         commonEnemyBonus,
         reputationEffect,
         borderFriction,
         revanchismPenalty,
+        expansionFriction,
       },
     };
   }

@@ -8,6 +8,7 @@ import {
   NationGettersUtility,
   TerritoryClaimsUtility,
   PendingProposalManagerUtility,
+  TerritorialSaturationCalculatorUtility,
 } from "@geopolitics/domain";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 
@@ -55,6 +56,19 @@ export class DiplomaticTurnProcessor {
       }
     }
 
+    const myProvs = NationGettersUtility.getOwnedProvinces(
+      nation.id,
+      provincesMap,
+      provincesByOwnerMap,
+    );
+
+    const saturationScore =
+      TerritorialSaturationCalculatorUtility.calculateSaturationScore(
+        nation,
+        provincesMap,
+        myProvs,
+      );
+
     const reachableTargets = matrixCache
       ? matrixCache.getReachableTargets(nation, allNations || {}, provincesMap)
       : GeopoliticalReachResolver.getReachableTargets(
@@ -62,11 +76,7 @@ export class DiplomaticTurnProcessor {
           allNations || {},
           provincesMap,
           rankMap,
-          NationGettersUtility.getOwnedProvinces(
-            nation.id,
-            provincesMap,
-            provincesByOwnerMap,
-          ),
+          myProvs,
           provincesByOwnerMap,
         );
 
@@ -128,8 +138,15 @@ export class DiplomaticTurnProcessor {
         if (!isReachable) {
           currentTension = Math.max(0, currentTension - 5);
         } else {
-          if (nextAlignment <= 15) {
-            currentTension = Math.min(45, currentTension + 2);
+          const maxTensionCeiling =
+            saturationScore >= 60 ? 65 : saturationScore >= 45 ? 55 : 45;
+          const tensionIncrement = saturationScore >= 60 ? 4 : 2;
+
+          if (nextAlignment <= 15 || saturationScore >= 50) {
+            currentTension = Math.min(
+              maxTensionCeiling,
+              currentTension + tensionIncrement,
+            );
           } else if (currentTension > 10) {
             currentTension = Math.max(10, currentTension - 2);
           }
