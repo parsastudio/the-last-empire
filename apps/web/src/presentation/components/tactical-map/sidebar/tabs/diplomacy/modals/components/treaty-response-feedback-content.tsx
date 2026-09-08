@@ -1,5 +1,5 @@
 import React from "react";
-import { Check, X, Globe, ShieldCheck, Skull } from "lucide-react";
+import { Check, X, Globe, ShieldCheck, Skull, Coins } from "lucide-react";
 import { getProposalTypeName } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 export interface DiplomaticProposalFeedbackData {
@@ -39,6 +39,7 @@ export function TreatyResponseFeedbackContent({
     feedback.proposalType === "CANCEL_SECURITY_GUARANTEE" ||
     feedback.proposalType === "CANCEL_EMERGENCY_PROTECTORATE";
   const isEmergency = feedback.proposalType === "EMERGENCY_PROTECTORATE";
+  const isPartnership = feedback.proposalType === "STRATEGIC_PARTNERSHIP";
 
   return (
     <div className="py-2 flex flex-col items-center justify-center gap-4 text-center dir-rtl font-sans">
@@ -56,6 +57,8 @@ export function TreatyResponseFeedbackContent({
         {isAccepted ? (
           isEmergency ? (
             <Skull size={30} className="animate-pulse" />
+          ) : isPartnership ? (
+            <Coins size={30} className="text-gdp animate-pulse" />
           ) : (
             <Check size={32} strokeWidth={3} />
           )
@@ -125,6 +128,13 @@ export function TreatyResponseFeedbackContent({
                 <span>
                   انعقاد پیمان دفاعی (ورود مستقیم ارتش حامی به جنگ در صورت تهاجم
                   دشمن)
+                </span>
+              </div>
+            ) : isPartnership ? (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-gdp/10 border border-gdp/30 rounded-full text-[11px] font-mono font-bold text-gdp">
+                <Coins size={12} />
+                <span>
+                  واریز دائمی ۰.۶٪ از GDP هر دو کشور به خزانه یکدیگر در هر نوبت
                 </span>
               </div>
             ) : (

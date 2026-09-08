@@ -9,6 +9,7 @@ import {
   SecurityGuaranteeValidator,
   NationRelationResolver,
   getNationGdp,
+  StrategicPartnershipCalculatorUtility,
 } from "@geopolitics/domain";
 import {
   GeopoliticalVectorCalculator,
@@ -157,8 +158,6 @@ export class AITreatyEvaluator {
           candidate,
           provincesMap,
           false,
-          allNations,
-          rankMap,
         );
 
         if (validation.isValid) {
@@ -195,30 +194,49 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      const vector =
-        vectorsByTarget?.get(canonicalTarget) ??
-        GeopoliticalVectorCalculator.calculate(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        );
+      const targetGdp = getNationGdp(targetNation, provincesMap);
 
-      const partnershipUtility =
-        UtilityDecisionEngine.calculateStrategicPartnershipUtility(
-          nation,
-          vector,
-        );
+      if (rel.stance === "NON_AGGRESSION_PACT") {
+        const entryFee =
+          StrategicPartnershipCalculatorUtility.calculateSigningCost(targetGdp);
 
-      if (partnershipUtility >= 20) {
-        return ActionFactory.diplomaticProposal(
-          nation.id,
-          targetNation.id,
-          "STRATEGIC_PARTNERSHIP",
-        );
+        if (nation.treasury >= entryFee) {
+          const vector =
+            vectorsByTarget?.get(canonicalTarget) ??
+            GeopoliticalVectorCalculator.calculate(
+              nation,
+              targetNation,
+              allNations,
+              provincesMap,
+            );
+
+          const partnershipUtility =
+            UtilityDecisionEngine.calculateStrategicPartnershipUtility(
+              nation,
+              vector,
+              targetGdp,
+            );
+
+          if (partnershipUtility >= 20) {
+            return ActionFactory.diplomaticProposal(
+              nation.id,
+              targetNation.id,
+              "STRATEGIC_PARTNERSHIP",
+            );
+          }
+        }
       }
 
       if (rel.stance === "NORMAL_DIPLOMACY") {
+        const vector =
+          vectorsByTarget?.get(canonicalTarget) ??
+          GeopoliticalVectorCalculator.calculate(
+            nation,
+            targetNation,
+            allNations,
+            provincesMap,
+          );
+
         const napUtility = UtilityDecisionEngine.calculateNapUtility(vector);
 
         if (napUtility >= 0) {

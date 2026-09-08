@@ -9,6 +9,9 @@ import { GameError } from "@/domain/shared/domain-utilities";
 import {
   SecurityGuaranteeValidator,
   NationRelationResolver,
+  getNationGdp,
+  StrategicPartnershipCalculatorUtility,
+  TurnLogBuilder,
 } from "@geopolitics/domain";
 import { DiplomaticProposalExecutor } from "@/engine/diplomacy/executors/diplomatic-proposal-executor";
 import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-declaration-executor";
@@ -119,12 +122,31 @@ export class PoliticsActionExecutor {
             receiver,
             state.provinces,
             false,
-            state.nations,
           );
           if (!validation.isValid) {
             throw new GameError(
               "INVALID_ACTION",
               validation.reason || "عدم احراز شرایط پیمان دفاعی.",
+            );
+          }
+        }
+
+        if (action.proposalType === "STRATEGIC_PARTNERSHIP") {
+          if (senderRel.stance !== "NON_AGGRESSION_PACT") {
+            throw new GameError(
+              "INVALID_ACTION",
+              "انعقاد شراکت استراتژیک نیازمند برقراری قبلی پیمان عدم تخاصم است.",
+            );
+          }
+          const receiverGdp = getNationGdp(receiver, state.provinces);
+          const entryFee =
+            StrategicPartnershipCalculatorUtility.calculateSigningCost(
+              receiverGdp,
+            );
+          if (nation.treasury < entryFee) {
+            throw new GameError(
+              "INSUFFICIENT_FUNDS",
+              "موجودی خزانه برای پرداخت ۳٪ هزینه ورود به شراکت استراتژیک کافی نیست.",
             );
           }
         }
@@ -225,10 +247,23 @@ export class PoliticsActionExecutor {
           }
         }
 
+        const proposalLog = TurnLogBuilder.createGlobalDiplomacyLog(
+          state.currentTurn,
+          nation.id,
+          receiver.id,
+          "DIPLOMATIC_PROPOSAL_SENT",
+          {
+            proposalId: transientProposal.id,
+            treatyType: action.proposalType,
+          },
+          "INFO",
+        );
+
         return {
           newState: {
             ...state,
             pendingProposals: [...state.pendingProposals, transientProposal],
+            turnLogs: [...state.turnLogs, proposalLog],
           },
         };
       }

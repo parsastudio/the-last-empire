@@ -8,10 +8,10 @@ import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-rev
 import {
   TurnLogBuilder,
   SecurityFeeCalculatorUtility,
-  NationRelationResolver,
   NationGettersUtility,
   NAVAL_FLEET_CONFIG,
   DebtCalculatorUtility,
+  StrategicPartnershipCalculatorUtility,
 } from "@geopolitics/domain";
 
 export class EconomyTurnProcessor {
@@ -76,23 +76,20 @@ export class EconomyTurnProcessor {
       },
     );
 
-    let warSubsidiesReceived = 0;
-    const isAtWar = NationRelationResolver.isAtWar(nation, allNations);
-
-    if (isAtWar) {
-      for (const rel of Object.values(nation.relations || {})) {
-        if (rel.stance === "STRATEGIC_PARTNERSHIP") {
-          const partner = NationGettersUtility.resolveNation(
-            rel.targetNationId,
-            allNations,
-          );
-          if (partner && partner.isAlive) {
-            const partnerGdp = getNationGdp(partner, currentProvincesMap);
-            const subsidy = Math.floor(partnerGdp * 0.005);
-            if (partner.treasury >= subsidy && subsidy > 0) {
-              warSubsidiesReceived += subsidy;
-            }
-          }
+    let partnershipIncome = 0;
+    for (const rel of Object.values(nation.relations || {})) {
+      if (rel.stance === "STRATEGIC_PARTNERSHIP") {
+        const partner = NationGettersUtility.resolveNation(
+          rel.targetNationId,
+          allNations,
+        );
+        if (partner && partner.isAlive) {
+          const partnerGdp = getNationGdp(partner, currentProvincesMap);
+          const dividend =
+            StrategicPartnershipCalculatorUtility.calculateTurnDividend(
+              partnerGdp,
+            );
+          partnershipIncome += dividend;
         }
       }
     }
@@ -104,7 +101,7 @@ export class EconomyTurnProcessor {
     );
 
     const totalIncome =
-      fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesReceived;
+      fiscalResult.totalRevenue + navalSecurityIncome + partnershipIncome;
 
     const maintenanceCost = payrollBreakdown.total;
     const debtInterest = DebtCalculatorUtility.calculateInterest(

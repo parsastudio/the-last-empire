@@ -7,19 +7,21 @@ import {
   ShieldCheck,
   Skull,
 } from "lucide-react";
-import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
+import { DiplomaticStance, PersianNumberFormatter } from "@geopolitics/domain";
 import { getDiplomaticStanceLabel } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
 interface TreatyStatusBannerProps {
   stance: DiplomaticStance | string;
   hasSecurityGuarantee?: boolean;
   isEmergencyProtectorate?: boolean;
+  dividendAmount?: number;
 }
 
 export function TreatyStatusBanner({
   stance,
   hasSecurityGuarantee = false,
   isEmergencyProtectorate = false,
+  dividendAmount = 0,
 }: TreatyStatusBannerProps) {
   if (isEmergencyProtectorate) {
     return (
@@ -68,7 +70,11 @@ export function TreatyStatusBanner({
       <div className="w-full p-3 rounded-xl bg-gdp/15 border border-gdp/40 text-gdp flex items-center justify-between text-xs font-bold font-sans">
         <span className="flex items-center gap-1.5">
           <CheckCircle2 size={14} />
-          شراکت استراتژیک و اقتصادی (فعال)
+          شراکت استراتژیک (سود نوبتی دوطرفه ۰.۶٪ GDP
+          {dividendAmount > 0
+            ? `: +${PersianNumberFormatter.formatCurrency(dividendAmount, true)}`
+            : ""}
+          )
         </span>
         <span className="text-[9px] font-mono bg-gdp/20 px-2 py-0.5 rounded text-gdp">
           {getDiplomaticStanceLabel(stance)}
@@ -82,7 +88,7 @@ export function TreatyStatusBanner({
       <div className="w-full p-3 rounded-xl bg-treasury/15 border border-treasury/40 text-treasury flex items-center justify-between text-xs font-bold font-sans">
         <span className="flex items-center gap-1.5">
           <Handshake size={14} />
-          پیمان عدم تخاصم (فعال)
+          پیمان عدم تخاصم (فعال و آماده ارتقا به شراکت)
         </span>
         <span className="text-[9px] font-mono bg-treasury/20 px-2 py-0.5 rounded text-treasury">
           {getDiplomaticStanceLabel(stance)}

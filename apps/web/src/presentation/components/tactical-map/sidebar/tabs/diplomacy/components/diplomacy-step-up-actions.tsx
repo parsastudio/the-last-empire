@@ -1,9 +1,12 @@
 import React from "react";
-import { ArrowUpCircle, Handshake } from "lucide-react";
-import { DiplomaticStance } from "@geopolitics/domain";
+import { ArrowUpCircle, Handshake, Coins } from "lucide-react";
+import { DiplomaticStance, PersianNumberFormatter } from "@geopolitics/domain";
 
 interface DiplomacyStepUpActionsProps {
   currentStance: DiplomaticStance | string;
+  strategicPartnershipCost?: number;
+  strategicPartnershipDividend?: number;
+  canAffordPartnership?: boolean;
   onPeaceTreaty: () => void;
   onNonAggression: () => void;
   onStrategicPartnership: () => void;
@@ -11,6 +14,9 @@ interface DiplomacyStepUpActionsProps {
 
 export function DiplomacyStepUpActions({
   currentStance,
+  strategicPartnershipCost = 0,
+  strategicPartnershipDividend = 0,
+  canAffordPartnership = true,
   onPeaceTreaty,
   onNonAggression,
   onStrategicPartnership,
@@ -43,12 +49,12 @@ export function DiplomacyStepUpActions({
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black">
-            پیشنهاد پیمان عدم تخاصم (گام رو به بالا: امنیت مرزی)
+            پیشنهاد پیمان عدم تخاصم (گام اول: امنیت مرزی)
           </span>
           <ArrowUpCircle size={16} className="text-emerald-400" />
         </div>
         <p className="text-[10px] text-muted-foreground">
-          تثبیت آرامش مرزها و ارتقای سطح روابط سیاسی
+          تثبیت آرامش مرزها و پیش‌نیاز ورود به شراکت استراتژیک
         </p>
       </button>
     );
@@ -58,16 +64,32 @@ export function DiplomacyStepUpActions({
     return (
       <button
         onClick={onStrategicPartnership}
-        className="w-full p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-right transition-all cursor-pointer space-y-1 shadow-sm"
+        disabled={!canAffordPartnership}
+        className="w-full p-3.5 rounded-2xl bg-gdp/15 hover:bg-gdp/25 disabled:bg-secondary/40 disabled:opacity-60 border border-gdp/40 text-gdp text-right transition-all cursor-pointer space-y-1 shadow-sm font-sans"
       >
         <div className="flex items-center justify-between">
-          <span className="text-xs font-black">
-            پیشنهاد شراکت استراتژیک (گام رو به بالا: بالاترین سطح سیاسی)
+          <span className="text-xs font-black flex items-center gap-1.5">
+            <Coins size={15} />
+            <span>انعقاد شراکت استراتژیک (پرداخت ۳٪ GDP کشور مقابل)</span>
           </span>
-          <ArrowUpCircle size={16} className="text-emerald-400" />
+          <span className="text-[10px] font-mono font-bold bg-gdp/20 px-2 py-0.5 rounded-md text-gdp border border-gdp/30">
+            {PersianNumberFormatter.formatCurrency(
+              strategicPartnershipCost,
+              true,
+            )}
+          </span>
         </div>
-        <p className="text-[10px] text-muted-foreground">
-          تسهیلات تجاری، تعرفه صفر و یارانه‌های مالی متقابل در زمان جنگ
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
+          واریز نوبتی{" "}
+          <strong className="text-gdp font-mono">
+            +
+            {PersianNumberFormatter.formatCurrency(
+              strategicPartnershipDividend,
+              true,
+            )}
+          </strong>{" "}
+          (معادل ۰.۶٪ GDP هدف) به خزانه شما در هر نوبت به همراه انتقال ۰.۶٪ از
+          GDP شما به خزانه هدف بدون هیچ‌گونه کسر موجودی.
         </p>
       </button>
     );

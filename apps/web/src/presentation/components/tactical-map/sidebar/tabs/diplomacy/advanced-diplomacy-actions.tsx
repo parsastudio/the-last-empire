@@ -61,6 +61,9 @@ export function AdvancedDiplomacyActions({
     return list.includes(canonicalTarget) || list.includes(targetNationId);
   }, [clientNation, targetNationId]);
 
+  const canAffordPartnership =
+    (clientNation?.treasury ?? 0) >= runner.strategicPartnershipCost;
+
   return (
     <>
       <div className="space-y-4 dir-rtl text-right font-sans">
@@ -74,6 +77,7 @@ export function AdvancedDiplomacyActions({
               stance={currentStance}
               hasSecurityGuarantee={hasSecurityGuarantee}
               isEmergencyProtectorate={isEmergencyProtectorate}
+              dividendAmount={runner.strategicPartnershipDividend}
             />
 
             <DiplomacyActionButtons
@@ -83,6 +87,9 @@ export function AdvancedDiplomacyActions({
               currentStance={currentStance}
               foreignAidCost={runner.foreignAidCost}
               securityGuaranteeCost={runner.securityGuaranteeCost}
+              strategicPartnershipCost={runner.strategicPartnershipCost}
+              strategicPartnershipDividend={runner.strategicPartnershipDividend}
+              canAffordPartnership={canAffordPartnership}
               emergencyProtectorateCost={runner.emergencyProtectorateCost}
               hasSecurityGuarantee={hasSecurityGuarantee}
               isEmergencyProtectorate={isEmergencyProtectorate}

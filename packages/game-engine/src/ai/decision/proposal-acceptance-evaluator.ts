@@ -5,6 +5,7 @@ import {
   GlobalCoalition,
   CountryRegistry,
   SecurityGuaranteeValidator,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
@@ -55,6 +56,37 @@ export class ProposalAcceptanceEvaluator {
     }
 
     switch (proposalType) {
+      case "STRATEGIC_PARTNERSHIP": {
+        const canonicalSender = CountryRegistry.resolveCanonicalId(sender.id);
+        const rel = NationRelationResolver.getRelation(
+          receiver.relations,
+          canonicalSender,
+        );
+
+        if (!rel || rel.stance !== "NON_AGGRESSION_PACT") {
+          return {
+            willAccept: false,
+            score: -100,
+            reasons: [
+              {
+                label: "شرط برقراری پیمان عدم تخاصم پیشین احراز نشده است",
+                value: -100,
+              },
+            ],
+          };
+        }
+
+        reasons.push({
+          label: "برقراری پیمان عدم تخاصم فعال",
+          value: 50,
+        });
+        reasons.push({
+          label: "دریافت ۳٪ حق ورودی نقدی و سود نوبتی ۰.۶٪ GDP",
+          value: 50,
+        });
+        break;
+      }
+
       case "SECURITY_GUARANTEE": {
         const validation = SecurityGuaranteeValidator.validate(
           sender,
@@ -84,31 +116,6 @@ export class ProposalAcceptanceEvaluator {
           label: "دریافت یک‌باره ۱٪ از کل GDP کشور به عنوان حق تعهد دفاعی",
           value: 40,
         });
-        break;
-      }
-
-      case "STRATEGIC_PARTNERSHIP": {
-        reasons.push({ label: "پیش‌نیاز اعتماد بنیادین", value: -20 });
-
-        const alignVal = Math.round(vector.alignment * 0.6);
-        reasons.push({ label: "همسویی استراتژیک", value: alignVal });
-
-        const tensionVal = -Math.round(vector.tension * 0.5);
-        reasons.push({ label: "تنش و اصطکاک مرزی", value: tensionVal });
-
-        if (vector.lostProvincesCount > 0) {
-          reasons.push({
-            label: "اشغال خاک مادری توسط طرف مقابل",
-            value: -50,
-          });
-        }
-
-        if (vector.reasons.commonEnemyBonus > 0) {
-          reasons.push({
-            label: "وجود دشمن مشترک",
-            value: vector.reasons.commonEnemyBonus,
-          });
-        }
         break;
       }
 

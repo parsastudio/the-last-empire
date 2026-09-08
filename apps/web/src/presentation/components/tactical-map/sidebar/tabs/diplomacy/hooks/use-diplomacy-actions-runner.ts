@@ -8,6 +8,7 @@ import {
   Province,
   Nation,
   SecurityFeeCalculatorUtility,
+  StrategicPartnershipCalculatorUtility,
 } from "@geopolitics/domain";
 import {
   DiplomaticBetrayalCalculator,
@@ -75,6 +76,18 @@ export function useDiplomacyActionsRunner({
 
   const securityGuaranteeCost = useMemo(() => {
     return SecurityFeeCalculatorUtility.calculateSigningCost(targetGdp);
+  }, [targetGdp]);
+
+  const strategicPartnershipCost = useMemo(() => {
+    return StrategicPartnershipCalculatorUtility.calculateSigningCost(
+      targetGdp,
+    );
+  }, [targetGdp]);
+
+  const strategicPartnershipDividend = useMemo(() => {
+    return StrategicPartnershipCalculatorUtility.calculateTurnDividend(
+      targetGdp,
+    );
   }, [targetGdp]);
 
   const emergencyProtectorateCost = useMemo(() => {
@@ -254,6 +267,8 @@ export function useDiplomacyActionsRunner({
     feedbackModal,
     foreignAidCost,
     securityGuaranteeCost,
+    strategicPartnershipCost,
+    strategicPartnershipDividend,
     emergencyProtectorateCost,
     guaranteeValidation,
     emergencyValidation,
