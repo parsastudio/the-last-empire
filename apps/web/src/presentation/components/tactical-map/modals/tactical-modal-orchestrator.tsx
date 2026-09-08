@@ -5,7 +5,6 @@ import { GameState } from "@/domain/game/game-state.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { CommandCenterModal } from "@/presentation/components/tactical-map/command-center/command-center-modal";
 import { DirectAttackModal } from "@/presentation/components/tactical-map/modals/direct-attack-modal";
-import { BuyProvinceModal } from "@/presentation/components/tactical-map/modals/buy-province-modal";
 import { PeaceNegotiationModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/peace-negotiation-modal";
 import { BattleDebriefModal } from "@/presentation/components/tactical-map/command-center/views/reports/modals/battle-debrief-modal";
 import { CoalitionAlertModal } from "@/presentation/components/tactical-map/modals/coalition-alert-modal";
@@ -69,18 +68,6 @@ export function TacticalModalOrchestrator({
           targetProvinceId={activeModal.targetProvinceId}
           humanNation={humanNation}
           gameState={gameState}
-          onClose={closeModal}
-        />
-      );
-
-    case "BUY_PROVINCE":
-      return (
-        <BuyProvinceModal
-          isOpen={true}
-          provinceId={activeModal.provinceId}
-          humanNation={humanNation}
-          provincesMap={gameState?.provinces}
-          nationsMap={gameState?.nations}
           onClose={closeModal}
         />
       );

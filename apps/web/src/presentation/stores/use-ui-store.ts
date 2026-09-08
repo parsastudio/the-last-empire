@@ -35,10 +35,6 @@ export type ActiveModalState =
       targetProvinceId?: number | null;
     }
   | {
-      type: "BUY_PROVINCE";
-      provinceId: number;
-    }
-  | {
       type: "PEACE_NEGOTIATION";
       targetNationId: string;
     }
