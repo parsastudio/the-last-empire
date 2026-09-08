@@ -169,6 +169,8 @@ export class GuarantorRetaliationApplier {
       }
     } else if (isTargetHuman) {
       const humanGuarantors = target.defenseGuarantorIds || [];
+      const currentAttacker = updatedNations[canonicalAttacker] || attacker;
+      const attackerGuarantors = currentAttacker.defenseGuarantorIds || [];
 
       for (let i = 0; i < humanGuarantors.length; i++) {
         const guarantorId = humanGuarantors[i]!;
@@ -182,6 +184,47 @@ export class GuarantorRetaliationApplier {
           continue;
         }
 
+        const isMutualGuarantor = attackerGuarantors.some(
+          (aId) =>
+            CountryRegistry.resolveCanonicalId(aId) === canonicalGuarantor,
+        );
+
+        if (isMutualGuarantor) {
+          const newHumanGuarantors = (target.defenseGuarantorIds || []).filter(
+            (hId) =>
+              CountryRegistry.resolveCanonicalId(hId) !== canonicalGuarantor,
+          );
+          const newAttackerGuarantors = (
+            currentAttacker.defenseGuarantorIds || []
+          ).filter(
+            (aId) =>
+              CountryRegistry.resolveCanonicalId(aId) !== canonicalGuarantor,
+          );
+
+          updatedNations[canonicalHuman] = {
+            ...target,
+            defenseGuarantorIds: newHumanGuarantors,
+          };
+          updatedNations[canonicalAttacker] = {
+            ...currentAttacker,
+            defenseGuarantorIds: newAttackerGuarantors,
+          };
+
+          retaliationLogs.push(
+            TurnLogBuilder.createDefensePactNeutralityLog(
+              state.currentTurn,
+              guarantorNation.id,
+              canonicalHuman,
+              {
+                attackerId: currentAttacker.id,
+                targetId: target.id,
+                guarantorId: guarantorNation.id,
+              },
+            ),
+          );
+          continue;
+        }
+
         const guarantorRelWithAttacker =
           guarantorNation.relations?.[canonicalAttacker];
         if (guarantorRelWithAttacker?.stance === "WAR") {
@@ -189,7 +232,7 @@ export class GuarantorRetaliationApplier {
         }
 
         const attackerRelWithGuarantor =
-          attacker.relations?.[canonicalGuarantor];
+          currentAttacker.relations?.[canonicalGuarantor];
         const hasStrategicPartnership =
           guarantorRelWithAttacker?.stance === "STRATEGIC_PARTNERSHIP" ||
           attackerRelWithGuarantor?.stance === "STRATEGIC_PARTNERSHIP";
@@ -210,9 +253,10 @@ export class GuarantorRetaliationApplier {
           },
         };
 
-        const currentAttacker = updatedNations[canonicalAttacker] || attacker;
+        const freshAttacker =
+          updatedNations[canonicalAttacker] || currentAttacker;
         const updatedAttackerRelations: Record<string, RelationProfile> = {
-          ...(currentAttacker.relations || {}),
+          ...(freshAttacker.relations || {}),
           [canonicalGuarantor]: {
             targetNationId: canonicalGuarantor,
             stance: "WAR",
@@ -229,8 +273,8 @@ export class GuarantorRetaliationApplier {
           warFocusTargetId: canonicalAttacker,
         };
 
-        updatedNations[currentAttacker.id] = {
-          ...currentAttacker,
+        updatedNations[freshAttacker.id] = {
+          ...freshAttacker,
           relations: updatedAttackerRelations,
         };
 

@@ -8,7 +8,6 @@ import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { CoalitionManager } from "@/engine/politics/coalition-manager";
 import { TurnStateLogger } from "@/engine/diagnostics/turn-state-logger";
-import { AiWarResolutionSweep } from "@/engine/ai/ai-war-resolution-sweep";
 import { TurnExportSalesAggregator } from "@/engine/orchestrator/turn-export-sales-aggregator";
 import { TurnLogWindowUtility } from "@geopolitics/domain";
 import { DilemmaTurnEvaluator } from "@/engine/events/dilemma-turn-evaluator";
@@ -109,7 +108,6 @@ export class TurnProgressionOrchestrator {
     }
 
     workingState = TurnExportSalesAggregator.aggregate(workingState);
-    workingState = AiWarResolutionSweep.resolveAiWars(workingState);
     workingState = this.livenessManager.updateLiveness(workingState);
     workingState = DilemmaTurnEvaluator.evaluate(workingState, prng);
 

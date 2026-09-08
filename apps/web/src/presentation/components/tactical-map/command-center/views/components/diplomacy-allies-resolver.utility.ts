@@ -74,6 +74,50 @@ export class DiplomacyAlliesResolver {
     const seen = new Set<string>();
     const allies: NationAllyDetail[] = [];
 
+    const targetGuarantorIds = targetNation.defenseGuarantorIds || [];
+    for (let i = 0; i < targetGuarantorIds.length; i++) {
+      const gId = targetGuarantorIds[i]!;
+      const canonicalG = CountryRegistry.resolveCanonicalId(gId);
+      if (canonicalG !== canonicalTarget && !seen.has(canonicalG)) {
+        seen.add(canonicalG);
+        const gNation = nationsMap[canonicalG] || nationsMap[gId];
+        if (gNation && gNation.isAlive) {
+          allies.push(
+            this.buildAllyDetail(
+              gNation,
+              "پیمان دفاعی متقابل",
+              canonicalHuman,
+              nationsMap,
+              provincesMap,
+            ),
+          );
+        }
+      }
+    }
+
+    for (const other of Object.values(nationsMap)) {
+      if (other.isAlive && other.id !== targetNation.id) {
+        const cOther = CountryRegistry.resolveCanonicalId(other.id);
+        const otherGuarantors = other.defenseGuarantorIds || [];
+        const isTargetGuarantorOfOther = otherGuarantors.some(
+          (id) => CountryRegistry.resolveCanonicalId(id) === canonicalTarget,
+        );
+
+        if (isTargetGuarantorOfOther && !seen.has(cOther)) {
+          seen.add(cOther);
+          allies.push(
+            this.buildAllyDetail(
+              other,
+              "تحت پوشش دفاعی این کشور",
+              canonicalHuman,
+              nationsMap,
+              provincesMap,
+            ),
+          );
+        }
+      }
+    }
+
     for (const [otherId, rel] of Object.entries(targetNation.relations || {})) {
       if (rel.stance === "STRATEGIC_PARTNERSHIP") {
         const canonicalOther = CountryRegistry.resolveCanonicalId(otherId);
