@@ -49,7 +49,7 @@ export class DiplomacyLogFormatter {
         const costVal = Number(params["cost"] || 0);
         const costText =
           costVal > 0
-            ? ` با پرداخت هزینه یک‌باره ${PersianNumberFormatter.formatCurrency(costVal, true)} (۳٪ GDP ضامن)`
+            ? ` با پرداخت هزینه یک‌باره ${PersianNumberFormatter.formatCurrency(costVal, true)} (۱٪ GDP ضامن)`
             : "";
         return `انعقاد پیمان دفاعی: کشور ${sourceName}${costText} رسماً تحت پوشش دفاعی امپراتوری ${targetName} قرار گرفت (ورود مستقیم به جنگ در صورت تهاجم متخاصمان).`;
       }
@@ -61,6 +61,12 @@ export class DiplomacyLogFormatter {
 
       case "DEFENSE_PACT_NEUTRALITY": {
         return `تضاد منافع و اعلام بی‌طرفی: کشور ${sourceName} به دلیل تعهد دفاعی همزمان به دو طرف نبرد (${targetName} و مهاجم)، پیمان دفاعی هر دو طرف را لغو کرده و بی‌طرف ماند.`;
+      }
+
+      case "DEFENSE_PACT_REFUSAL_COMPENSATION": {
+        const compVal = Number(params["compensationAmount"] || 0);
+        const compText = PersianNumberFormatter.formatCurrency(compVal, true);
+        return `امتناع ضامن از ورود به جنگ به دلیل شراکت استراتژیک با متهاجم: کشور ${sourceName} از اعلان جنگ امتناع کرد و مبلغ ${compText} (معادل ۵۰٪ حق تعهد دفاعی) را به عنوان غرامت به خزانه‌داری ${targetName} پرداخت نمود.`;
       }
 
       case "EMERGENCY_PROTECTORATE_SIGNED":

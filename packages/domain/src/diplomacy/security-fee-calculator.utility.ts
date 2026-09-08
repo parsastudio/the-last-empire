@@ -1,6 +1,6 @@
 export class SecurityFeeCalculatorUtility {
   public static readonly EMERGENCY_FEE_RATIO = 0.05;
-  public static readonly DEFENSE_PACT_SIGNING_RATIO = 0.03;
+  public static readonly DEFENSE_PACT_SIGNING_RATIO = 0.01;
 
   public static calculateSecurityFee(
     clientGdp: number,
@@ -14,5 +14,9 @@ export class SecurityFeeCalculatorUtility {
 
   public static calculateSigningCost(guarantorGdp: number): number {
     return Math.floor(guarantorGdp * this.DEFENSE_PACT_SIGNING_RATIO);
+  }
+
+  public static calculateRefusalCompensation(guarantorGdp: number): number {
+    return Math.floor(guarantorGdp * (this.DEFENSE_PACT_SIGNING_RATIO / 2));
   }
 }

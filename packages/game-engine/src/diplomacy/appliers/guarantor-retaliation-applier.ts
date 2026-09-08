@@ -5,6 +5,8 @@ import {
   TurnLogBuilder,
   RelationProfile,
   TurnLogEntry,
+  getNationGdp,
+  SecurityFeeCalculatorUtility,
 } from "@geopolitics/domain";
 
 export class GuarantorRetaliationApplier {
@@ -108,6 +110,38 @@ export class GuarantorRetaliationApplier {
           guarantorRelWithHuman?.stance === "STRATEGIC_PARTNERSHIP";
 
         if (hasStrategicPartnershipWithPlayer) {
+          const guarantorGdp = getNationGdp(guarantorNation, state.provinces);
+          const compensation =
+            SecurityFeeCalculatorUtility.calculateRefusalCompensation(
+              guarantorGdp,
+            );
+
+          const freshGuarantor =
+            updatedNations[canonicalGuarantor] || guarantorNation;
+          const freshTarget = updatedNations[canonicalTarget] || target;
+
+          updatedNations[canonicalGuarantor] = {
+            ...freshGuarantor,
+            treasury: Math.max(0, freshGuarantor.treasury - compensation),
+          };
+
+          updatedNations[canonicalTarget] = {
+            ...freshTarget,
+            treasury: freshTarget.treasury + compensation,
+          };
+
+          retaliationLogs.push(
+            TurnLogBuilder.createDefensePactRefusalCompensationLog(
+              state.currentTurn,
+              guarantorNation.id,
+              target.id,
+              {
+                compensationAmount: compensation,
+                partnerId: humanNation.id,
+                targetId: target.id,
+              },
+            ),
+          );
           continue;
         }
 
@@ -238,6 +272,38 @@ export class GuarantorRetaliationApplier {
           attackerRelWithGuarantor?.stance === "STRATEGIC_PARTNERSHIP";
 
         if (hasStrategicPartnership) {
+          const guarantorGdp = getNationGdp(guarantorNation, state.provinces);
+          const compensation =
+            SecurityFeeCalculatorUtility.calculateRefusalCompensation(
+              guarantorGdp,
+            );
+
+          const freshGuarantor =
+            updatedNations[canonicalGuarantor] || guarantorNation;
+          const freshTarget = updatedNations[canonicalHuman] || target;
+
+          updatedNations[canonicalGuarantor] = {
+            ...freshGuarantor,
+            treasury: Math.max(0, freshGuarantor.treasury - compensation),
+          };
+
+          updatedNations[canonicalHuman] = {
+            ...freshTarget,
+            treasury: freshTarget.treasury + compensation,
+          };
+
+          retaliationLogs.push(
+            TurnLogBuilder.createDefensePactRefusalCompensationLog(
+              state.currentTurn,
+              guarantorNation.id,
+              canonicalHuman,
+              {
+                compensationAmount: compensation,
+                partnerId: currentAttacker.id,
+                targetId: canonicalHuman,
+              },
+            ),
+          );
           continue;
         }
 

@@ -143,6 +143,24 @@ export class TurnLogBuilder {
     );
   }
 
+  public static createDefensePactRefusalCompensationLog(
+    turn: number,
+    guarantorId: string,
+    victimId: string,
+    params: Record<string, TurnLogParamValue> = {},
+  ): TurnLogEntry {
+    return this.createLogEntry(
+      turn,
+      guarantorId,
+      "WARNING",
+      "DEFENSE_PACT_REFUSAL_COMPENSATION",
+      "GLOBAL_DIPLOMACY",
+      "GLOBAL",
+      victimId,
+      params,
+    );
+  }
+
   public static createAnnexationLog(
     turn: number,
     conquerorId: string,

@@ -23,7 +23,7 @@ export interface SecurityGuaranteeValidationResult {
 
 export class SecurityGuaranteeValidator {
   public static readonly MAX_DEFENSE_PACTS = 2;
-  public static readonly MIN_DEFENSE_GDP_RATIO = 1.0;
+  public static readonly MIN_DEFENSE_GDP_RATIO = 0.7;
   public static readonly MAX_DEFENSE_GDP_RATIO = 5.0;
 
   public static validate(
@@ -134,7 +134,7 @@ export class SecurityGuaranteeValidator {
     } else if (!isGdpValid) {
       if (gdpRatio < this.MIN_DEFENSE_GDP_RATIO) {
         reason =
-          "تولید ناخالص (GDP) کشور ضامن باید حداقل برابر با کشور شما باشد.";
+          "تولید ناخالص (GDP) کشور ضامن باید حداقل ۰.۷ برابر کشور شما باشد.";
       } else {
         reason =
           "تولید ناخالص (GDP) کشور ضامن نمی‌تواند بیش از ۵ برابر کشور شما باشد.";
@@ -143,7 +143,7 @@ export class SecurityGuaranteeValidator {
       reason =
         "عدم دسترسی جغرافیایی یا دریایی برای برقراری ارتباط با این کشور.";
     } else if (!canAffordCost) {
-      reason = "موجودی خزانه برای پرداخت هزینه ۳٪ از GDP کشور حامی کافی نیست.";
+      reason = "موجودی خزانه برای پرداخت هزینه ۱٪ از GDP کشور حامی کافی نیست.";
     }
 
     const isValid =

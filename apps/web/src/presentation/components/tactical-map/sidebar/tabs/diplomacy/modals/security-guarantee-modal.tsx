@@ -50,7 +50,7 @@ export function SecurityGuaranteeModal({
     {
       id: "gdp",
       title: "نسبت تولید ناخالص ملی (GDP)",
-      desc: "تولید ناخالص کشور ضامن باید بین ۱ تا ۵ برابر کشور شما باشد.",
+      desc: "تولید ناخالص کشور ضامن باید بین ۰.۷ تا ۵ برابر کشور شما باشد.",
       currentValue: `${PersianNumberFormatter.toPersianDigits(validation.gdpRatio)}x برابری`,
       isValid: validation.isGdpValid,
       icon: Scale,
@@ -68,7 +68,7 @@ export function SecurityGuaranteeModal({
     {
       id: "cost",
       title: "حق تعهد امنیتی یک‌باره",
-      desc: "پرداخت یک‌باره ۳٪ از کل GDP کشور حامی به خزانه آن.",
+      desc: "پرداخت یک‌باره ۱٪ از کل GDP کشور حامی به خزانه آن.",
       currentValue: validation.canAffordCost
         ? "موجودی خزانه کافی است"
         : "کسری موجودی خزانه",
@@ -124,7 +124,7 @@ export function SecurityGuaranteeModal({
 
           <div className="text-left font-mono bg-cyan-500/10 border border-cyan-500/30 px-3.5 py-1.5 rounded-2xl">
             <span className="text-[9px] text-muted-foreground block font-sans">
-              حق تعهد یک‌باره (۳٪ GDP ضامن):
+              حق تعهد یک‌باره (۱٪ GDP ضامن):
             </span>
             <span className="text-xs font-black text-cyan-300 flex items-center gap-1 justify-end">
               <Coins size={12} />
