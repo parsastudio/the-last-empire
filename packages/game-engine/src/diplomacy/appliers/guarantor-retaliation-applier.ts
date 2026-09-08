@@ -20,132 +20,237 @@ export class GuarantorRetaliationApplier {
       state.humanNationId,
     );
     const canonicalAttacker = CountryRegistry.resolveCanonicalId(attackerId);
-
-    if (canonicalAttacker !== canonicalHuman) {
-      return { updatedNations: state.nations, retaliationLogs: [] };
-    }
-
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-    const target = state.nations[canonicalTarget] || state.nations[targetId];
 
-    if (!target || !target.isAlive) {
+    const isAttackerHuman = canonicalAttacker === canonicalHuman;
+    const isTargetHuman = canonicalTarget === canonicalHuman;
+
+    if (!isAttackerHuman && !isTargetHuman) {
       return { updatedNations: state.nations, retaliationLogs: [] };
     }
 
-    const defendersToRetaliate: Array<{
-      nationId: string;
-      reason: "STRATEGIC_PARTNER";
-    }> = [];
+    const target = state.nations[canonicalTarget] || state.nations[targetId];
+    const attacker =
+      state.nations[canonicalAttacker] || state.nations[attackerId];
 
-    for (const [otherId, rel] of Object.entries(target.relations || {})) {
-      if (rel.stance === "STRATEGIC_PARTNERSHIP") {
-        const pCanonical = CountryRegistry.resolveCanonicalId(otherId);
-        if (
-          pCanonical !== canonicalHuman &&
-          !defendersToRetaliate.some((d) => d.nationId === pCanonical)
-        ) {
-          const partnerNation =
-            state.nations[pCanonical] || state.nations[otherId];
-
-          const partnerRelWithTarget =
-            partnerNation?.relations?.[canonicalTarget] ||
-            partnerNation?.relations?.[target.id];
-
-          if (partnerRelWithTarget?.stance === "STRATEGIC_PARTNERSHIP") {
-            defendersToRetaliate.push({
-              nationId: pCanonical,
-              reason: "STRATEGIC_PARTNER",
-            });
-          }
-        }
-      }
-    }
-
-    if (defendersToRetaliate.length === 0) {
+    if (!target || !target.isAlive || !attacker || !attacker.isAlive) {
       return { updatedNations: state.nations, retaliationLogs: [] };
     }
 
     const updatedNations: Record<string, Nation> = { ...state.nations };
     const retaliationLogs: TurnLogEntry[] = [];
 
-    const humanNation = updatedNations[canonicalHuman];
-    if (!humanNation) {
-      return { updatedNations: state.nations, retaliationLogs: [] };
-    }
+    if (isAttackerHuman) {
+      const targetGuarantors = target.defenseGuarantorIds || [];
+      const humanNation = updatedNations[canonicalHuman]!;
+      const humanGuarantors = humanNation.defenseGuarantorIds || [];
 
-    const updatedHumanRelations: Record<string, RelationProfile> = {
-      ...(humanNation.relations || {}),
-    };
+      for (let i = 0; i < targetGuarantors.length; i++) {
+        const guarantorId = targetGuarantors[i]!;
+        const canonicalGuarantor =
+          CountryRegistry.resolveCanonicalId(guarantorId);
+        const guarantorNation =
+          updatedNations[canonicalGuarantor] ||
+          state.nations[canonicalGuarantor];
 
-    for (let i = 0; i < defendersToRetaliate.length; i++) {
-      const item = defendersToRetaliate[i]!;
-      const defenderNation =
-        updatedNations[item.nationId] || state.nations[item.nationId];
+        if (!guarantorNation || !guarantorNation.isAlive) {
+          continue;
+        }
 
-      if (!defenderNation || !defenderNation.isAlive) continue;
+        const isMutualGuarantor = humanGuarantors.some(
+          (hId) =>
+            CountryRegistry.resolveCanonicalId(hId) === canonicalGuarantor,
+        );
 
-      const existingRel = defenderNation.relations?.[canonicalHuman];
-      if (existingRel?.stance === "WAR") continue;
+        if (isMutualGuarantor) {
+          const newHumanGuarantors = (
+            humanNation.defenseGuarantorIds || []
+          ).filter(
+            (hId) =>
+              CountryRegistry.resolveCanonicalId(hId) !== canonicalGuarantor,
+          );
+          const newTargetGuarantors = (target.defenseGuarantorIds || []).filter(
+            (tId) =>
+              CountryRegistry.resolveCanonicalId(tId) !== canonicalGuarantor,
+          );
 
-      const humanRelWithDefender = humanNation.relations?.[item.nationId];
-      const hasPeacePact =
-        existingRel?.stance === "STRATEGIC_PARTNERSHIP" ||
-        existingRel?.stance === "NON_AGGRESSION_PACT" ||
-        humanRelWithDefender?.stance === "STRATEGIC_PARTNERSHIP" ||
-        humanRelWithDefender?.stance === "NON_AGGRESSION_PACT";
+          updatedNations[canonicalHuman] = {
+            ...humanNation,
+            defenseGuarantorIds: newHumanGuarantors,
+          };
+          updatedNations[canonicalTarget] = {
+            ...target,
+            defenseGuarantorIds: newTargetGuarantors,
+          };
 
-      if (hasPeacePact) {
-        continue;
-      }
+          retaliationLogs.push(
+            TurnLogBuilder.createDefensePactNeutralityLog(
+              state.currentTurn,
+              guarantorNation.id,
+              target.id,
+              {
+                attackerId: humanNation.id,
+                targetId: target.id,
+                guarantorId: guarantorNation.id,
+              },
+            ),
+          );
+          continue;
+        }
 
-      const defRelations: Record<string, RelationProfile> = {
-        ...(defenderNation.relations || {}),
-        [canonicalHuman]: {
-          targetNationId: canonicalHuman,
-          stance: "WAR",
-          alignment: -100,
-          tension: 100,
-          warDeclaredTurn: state.currentTurn,
-          warInitiatorId: defenderNation.id,
-        },
-      };
+        const humanRelWithGuarantor =
+          humanNation.relations?.[canonicalGuarantor];
+        const guarantorRelWithHuman =
+          guarantorNation.relations?.[canonicalHuman];
 
-      updatedNations[defenderNation.id] = {
-        ...defenderNation,
-        relations: defRelations,
-        warFocusTargetId: canonicalHuman,
-      };
+        const hasStrategicPartnershipWithPlayer =
+          humanRelWithGuarantor?.stance === "STRATEGIC_PARTNERSHIP" ||
+          guarantorRelWithHuman?.stance === "STRATEGIC_PARTNERSHIP";
 
-      updatedHumanRelations[item.nationId] = {
-        targetNationId: item.nationId,
-        stance: "WAR",
-        alignment: -100,
-        tension: 100,
-        warDeclaredTurn: state.currentTurn,
-        warInitiatorId: defenderNation.id,
-      };
+        if (hasStrategicPartnershipWithPlayer) {
+          continue;
+        }
 
-      retaliationLogs.push(
-        TurnLogBuilder.createGlobalWarLog(
-          state.currentTurn,
-          defenderNation.id,
-          canonicalHuman,
-          "WAR_DECLARED",
-          {
-            isRetaliation: true,
-            retaliationReason: item.reason,
-            protectedTargetId: canonicalTarget,
-            protectedTargetName: target.name,
+        if (guarantorRelWithHuman?.stance === "WAR") {
+          continue;
+        }
+
+        const defRelations: Record<string, RelationProfile> = {
+          ...(guarantorNation.relations || {}),
+          [canonicalHuman]: {
+            targetNationId: canonicalHuman,
+            stance: "WAR",
+            alignment: -100,
+            tension: 100,
+            warDeclaredTurn: state.currentTurn,
+            warInitiatorId: guarantorNation.id,
           },
-          "CRITICAL",
-        ),
-      );
-    }
+        };
 
-    updatedNations[canonicalHuman] = {
-      ...humanNation,
-      relations: updatedHumanRelations,
-    };
+        const currentHuman = updatedNations[canonicalHuman]!;
+        const updatedHumanRelations: Record<string, RelationProfile> = {
+          ...(currentHuman.relations || {}),
+          [canonicalGuarantor]: {
+            targetNationId: canonicalGuarantor,
+            stance: "WAR",
+            alignment: -100,
+            tension: 100,
+            warDeclaredTurn: state.currentTurn,
+            warInitiatorId: guarantorNation.id,
+          },
+        };
+
+        updatedNations[guarantorNation.id] = {
+          ...guarantorNation,
+          relations: defRelations,
+          warFocusTargetId: canonicalHuman,
+        };
+
+        updatedNations[canonicalHuman] = {
+          ...currentHuman,
+          relations: updatedHumanRelations,
+        };
+
+        retaliationLogs.push(
+          TurnLogBuilder.createGlobalWarLog(
+            state.currentTurn,
+            guarantorNation.id,
+            canonicalHuman,
+            "WAR_DECLARED",
+            {
+              isRetaliation: true,
+              retaliationReason: "DEFENSE_GUARANTOR",
+              protectedTargetId: canonicalTarget,
+              protectedTargetName: target.name,
+            },
+            "CRITICAL",
+          ),
+        );
+      }
+    } else if (isTargetHuman) {
+      const humanGuarantors = target.defenseGuarantorIds || [];
+
+      for (let i = 0; i < humanGuarantors.length; i++) {
+        const guarantorId = humanGuarantors[i]!;
+        const canonicalGuarantor =
+          CountryRegistry.resolveCanonicalId(guarantorId);
+        const guarantorNation =
+          updatedNations[canonicalGuarantor] ||
+          state.nations[canonicalGuarantor];
+
+        if (!guarantorNation || !guarantorNation.isAlive) {
+          continue;
+        }
+
+        const guarantorRelWithAttacker =
+          guarantorNation.relations?.[canonicalAttacker];
+        if (guarantorRelWithAttacker?.stance === "WAR") {
+          continue;
+        }
+
+        const attackerRelWithGuarantor =
+          attacker.relations?.[canonicalGuarantor];
+        const hasStrategicPartnership =
+          guarantorRelWithAttacker?.stance === "STRATEGIC_PARTNERSHIP" ||
+          attackerRelWithGuarantor?.stance === "STRATEGIC_PARTNERSHIP";
+
+        if (hasStrategicPartnership) {
+          continue;
+        }
+
+        const defRelations: Record<string, RelationProfile> = {
+          ...(guarantorNation.relations || {}),
+          [canonicalAttacker]: {
+            targetNationId: canonicalAttacker,
+            stance: "WAR",
+            alignment: -100,
+            tension: 100,
+            warDeclaredTurn: state.currentTurn,
+            warInitiatorId: guarantorNation.id,
+          },
+        };
+
+        const currentAttacker = updatedNations[canonicalAttacker] || attacker;
+        const updatedAttackerRelations: Record<string, RelationProfile> = {
+          ...(currentAttacker.relations || {}),
+          [canonicalGuarantor]: {
+            targetNationId: canonicalGuarantor,
+            stance: "WAR",
+            alignment: -100,
+            tension: 100,
+            warDeclaredTurn: state.currentTurn,
+            warInitiatorId: guarantorNation.id,
+          },
+        };
+
+        updatedNations[guarantorNation.id] = {
+          ...guarantorNation,
+          relations: defRelations,
+          warFocusTargetId: canonicalAttacker,
+        };
+
+        updatedNations[currentAttacker.id] = {
+          ...currentAttacker,
+          relations: updatedAttackerRelations,
+        };
+
+        retaliationLogs.push(
+          TurnLogBuilder.createGlobalWarLog(
+            state.currentTurn,
+            guarantorNation.id,
+            attacker.id,
+            "WAR_DECLARED",
+            {
+              isRetaliation: true,
+              retaliationReason: "DEFENSE_GUARANTOR",
+              protectedTargetId: canonicalHuman,
+              protectedTargetName: target.name,
+            },
+            "CRITICAL",
+          ),
+        );
+      }
+    }
 
     return { updatedNations, retaliationLogs };
   }

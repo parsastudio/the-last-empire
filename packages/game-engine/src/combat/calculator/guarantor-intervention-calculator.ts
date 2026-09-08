@@ -22,7 +22,10 @@ export class GuarantorInterventionCalculator {
     provincesMap?: Record<string, Province>,
     guarantorNation?: Nation | null,
   ): GuarantorForcesResult {
+    const isEmergency = Boolean(defender.isEmergencyProtectorate);
+
     if (
+      !isEmergency ||
       !guarantorNation ||
       !guarantorNation.isAlive ||
       guarantorNation.id === attacker.id
@@ -38,13 +41,12 @@ export class GuarantorInterventionCalculator {
 
     const defGdp = getNationGdp(defender, provincesMap);
     const guarantorGdp = getNationGdp(guarantorNation, provincesMap);
-    const isEmergency = Boolean(defender.isEmergencyProtectorate);
 
     const effectiveDefenseBudget =
       GuarantorBudgetCalculatorUtility.calculateBudget(
         defGdp,
         guarantorGdp,
-        isEmergency,
+        true,
       );
 
     const { auxAir, auxAD, auxArm, auxInf } =
@@ -57,7 +59,7 @@ export class GuarantorInterventionCalculator {
       guarantorName: guarantorNation.name,
       guarantorFlagCode: guarantorNation.flagCode,
       techLevel: guarantorNation.military.techLevel,
-      isEmergencyProtectorate: isEmergency,
+      isEmergencyProtectorate: true,
       deployedInfantry: auxInf,
       deployedArmor: auxArm,
       deployedAirDefense: auxAD,

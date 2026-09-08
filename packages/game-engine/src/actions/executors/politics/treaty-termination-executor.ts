@@ -3,6 +3,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
+import { CountryRegistry } from "@geopolitics/domain";
 
 export class TreatyTerminationExecutor {
   public static handleCancelSecurityGuarantee(
@@ -10,15 +11,21 @@ export class TreatyTerminationExecutor {
     nation: Nation,
     receiver: Nation,
   ): { newState: GameState; resultData: unknown } {
+    const canonicalReceiver = CountryRegistry.resolveCanonicalId(receiver.id);
+    const updatedGuarantorIds = (nation.defenseGuarantorIds || []).filter(
+      (id) => CountryRegistry.resolveCanonicalId(id) !== canonicalReceiver,
+    );
+
+    const updatedNation = {
+      ...nation,
+      defenseGuarantorIds: updatedGuarantorIds,
+    };
+
     const newState = {
       ...state,
       nations: {
         ...state.nations,
-        [nation.id]: {
-          ...nation,
-          securityGuarantorId: null,
-          isEmergencyProtectorate: false,
-        },
+        [nation.id]: updatedNation,
       },
       turnLogs: [
         ...state.turnLogs,
@@ -27,7 +34,7 @@ export class TreatyTerminationExecutor {
           nation.id,
           receiver.id,
           "SECURITY_GUARANTEE_CANCELLED",
-          { reason: "فسخ اختیاری" },
+          { reason: "فسخ اختیاری پیمان دفاعی" },
           "INFO",
         ),
       ],
@@ -41,7 +48,7 @@ export class TreatyTerminationExecutor {
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
-        message: `پیمان چتر امنیتی با کشور ${receiver.name} لغو گردید.`,
+        message: `پیمان دفاعی با کشور ${receiver.name} فسخ گردید.`,
       },
     };
   }

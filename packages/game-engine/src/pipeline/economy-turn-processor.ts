@@ -53,7 +53,7 @@ export class EconomyTurnProcessor {
     let nextSecurityGuarantorId = nation.securityGuarantorId ?? null;
     let nextIsEmergency = nation.isEmergencyProtectorate ?? false;
 
-    if (nation.securityGuarantorId) {
+    if (nation.securityGuarantorId && nextIsEmergency) {
       const guarantor = NationGettersUtility.resolveNation(
         nation.securityGuarantorId,
         allNations,
@@ -61,13 +61,20 @@ export class EconomyTurnProcessor {
       if (guarantor && guarantor.isAlive) {
         securityFee = SecurityFeeCalculatorUtility.calculateSecurityFee(
           gdp,
-          nextIsEmergency,
+          true,
         );
       } else {
         nextSecurityGuarantorId = null;
         nextIsEmergency = false;
       }
     }
+
+    const activeDefenseGuarantors = (nation.defenseGuarantorIds || []).filter(
+      (gId) => {
+        const g = NationGettersUtility.resolveNation(gId, allNations);
+        return g && g.isAlive;
+      },
+    );
 
     let warSubsidiesReceived = 0;
     const isAtWar = NationRelationResolver.isAtWar(nation, allNations);
@@ -136,6 +143,7 @@ export class EconomyTurnProcessor {
       nationalDebt: newDebt,
       securityGuarantorId: nextSecurityGuarantorId,
       isEmergencyProtectorate: nextIsEmergency,
+      defenseGuarantorIds: activeDefenseGuarantors,
     };
 
     let bankruptcyLog: TurnLogEntry | undefined = undefined;
