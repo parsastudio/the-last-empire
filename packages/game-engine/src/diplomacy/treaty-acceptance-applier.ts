@@ -3,6 +3,8 @@ import {
   PendingDiplomaticProposal,
   CountryRegistry,
   PendingProposalManagerUtility,
+  getNationGdp,
+  StrategicPartnershipCalculatorUtility,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { DiplomaticLogSynchronizer } from "@/engine/diplomacy/appliers/diplomatic-log-synchronizer";
@@ -49,15 +51,36 @@ export class TreatyAcceptanceApplier {
       return this.removeProposal(state, proposal.id);
     }
 
-    const { updatedSender, updatedReceiver } =
-      PeaceTreatyApplier.applyTreatyState(
-        sender,
-        receiver,
-        senderRel,
-        receiverRel,
-        proposal,
-        this.treatyEvaluator,
-      );
+    let updatedSender = sender;
+    let updatedReceiver = receiver;
+    let signingCost = 0;
+
+    if (proposal.proposalType === "STRATEGIC_PARTNERSHIP") {
+      const receiverGdp = getNationGdp(receiver, state.provinces);
+      signingCost =
+        StrategicPartnershipCalculatorUtility.calculateSigningCost(receiverGdp);
+
+      updatedSender = {
+        ...updatedSender,
+        treasury: Math.max(0, updatedSender.treasury - signingCost),
+      };
+      updatedReceiver = {
+        ...updatedReceiver,
+        treasury: updatedReceiver.treasury + signingCost,
+      };
+    }
+
+    const treatyState = PeaceTreatyApplier.applyTreatyState(
+      updatedSender,
+      updatedReceiver,
+      senderRel,
+      receiverRel,
+      proposal,
+      this.treatyEvaluator,
+    );
+
+    updatedSender = treatyState.updatedSender;
+    updatedReceiver = treatyState.updatedReceiver;
 
     const treatyLabel =
       proposal.proposalType === "STRATEGIC_PARTNERSHIP"

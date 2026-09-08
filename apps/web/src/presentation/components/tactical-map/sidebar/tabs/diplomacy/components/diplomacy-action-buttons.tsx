@@ -16,6 +16,9 @@ interface DiplomacyActionButtonsProps {
   currentStance: DiplomaticStance | string;
   foreignAidCost: number;
   securityGuaranteeCost: number;
+  strategicPartnershipCost?: number;
+  strategicPartnershipDividend?: number;
+  canAffordPartnership?: boolean;
   emergencyProtectorateCost: number;
   hasSecurityGuarantee?: boolean;
   isEmergencyProtectorate?: boolean;
@@ -41,6 +44,9 @@ export function DiplomacyActionButtons({
   currentStance,
   foreignAidCost,
   securityGuaranteeCost,
+  strategicPartnershipCost = 0,
+  strategicPartnershipDividend = 0,
+  canAffordPartnership = true,
   emergencyProtectorateCost,
   hasSecurityGuarantee = false,
   isEmergencyProtectorate = false,
@@ -64,6 +70,9 @@ export function DiplomacyActionButtons({
     <div className="space-y-2.5 font-sans">
       <DiplomacyStepUpActions
         currentStance={currentStance}
+        strategicPartnershipCost={strategicPartnershipCost}
+        strategicPartnershipDividend={strategicPartnershipDividend}
+        canAffordPartnership={canAffordPartnership}
         onPeaceTreaty={onPeaceTreaty}
         onNonAggression={onNonAggression}
         onStrategicPartnership={onStrategicPartnership}

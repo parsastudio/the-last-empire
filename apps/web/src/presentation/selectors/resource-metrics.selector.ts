@@ -6,6 +6,7 @@ import {
   NAVAL_FLEET_CONFIG,
   DebtCalculatorUtility,
   CountryRegistry,
+  StrategicPartnershipCalculatorUtility,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
@@ -87,12 +88,8 @@ export function selectHumanResourceMetrics(
       NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
   );
 
-  let warSubsidiesIncome = 0;
-  const isAtWar = Object.values(nation.relations || {}).some(
-    (r) => r.stance === "WAR",
-  );
-
-  if (isAtWar && gameState.nations) {
+  let partnershipIncome = 0;
+  if (gameState.nations) {
     for (const rel of Object.values(nation.relations || {})) {
       if (rel.stance === "STRATEGIC_PARTNERSHIP") {
         const partnerCanonical = CountryRegistry.resolveCanonicalId(
@@ -103,17 +100,18 @@ export function selectHumanResourceMetrics(
           gameState.nations[rel.targetNationId];
         if (partner && partner.isAlive) {
           const partnerGdp = getNationGdp(partner, gameState.provinces);
-          const subsidy = Math.floor(partnerGdp * 0.005);
-          if (partner.treasury >= subsidy && subsidy > 0) {
-            warSubsidiesIncome += subsidy;
-          }
+          const dividend =
+            StrategicPartnershipCalculatorUtility.calculateTurnDividend(
+              partnerGdp,
+            );
+          partnershipIncome += dividend;
         }
       }
     }
   }
 
   const totalGrossIncome =
-    fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesIncome;
+    fiscalResult.totalRevenue + navalSecurityIncome + partnershipIncome;
 
   const humanGdp = getNationGdp(nation, gameState.provinces);
   const securityFee =

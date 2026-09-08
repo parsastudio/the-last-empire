@@ -35,10 +35,12 @@ export class UtilityDecisionEngine {
   public static calculateStrategicPartnershipUtility(
     source: Nation,
     vector: GeopoliticalVector,
+    targetGdp: number,
   ): number {
     return TreatyUtilityEvaluator.calculateStrategicPartnershipUtility(
       source,
       vector,
+      targetGdp,
     );
   }
 

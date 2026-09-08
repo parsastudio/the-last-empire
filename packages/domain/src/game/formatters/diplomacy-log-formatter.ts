@@ -30,7 +30,12 @@ export class DiplomacyLogFormatter {
 
       case "TREATY_ACCEPTED": {
         const treatyLabel = String(params["treatyLabel"] || "معاهده");
-        return `توافق دیپلماتیک: کشور ${targetName} پیشنهاد (${treatyLabel}) از سوی ${sourceName} را پذیرفت و امضا کرد.`;
+        const costVal = Number(params["cost"] || 0);
+        const costNote =
+          costVal > 0
+            ? ` با پرداخت ۳٪ حق شراکت (${PersianNumberFormatter.formatCurrency(costVal, true)})`
+            : "";
+        return `توافق دیپلماتیک: کشور ${targetName} پیشنهاد (${treatyLabel}) از سوی ${sourceName} را${costNote} پذیرفت و امضا کرد.`;
       }
 
       case "TREATY_REJECTED": {

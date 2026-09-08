@@ -31,6 +31,8 @@ export class SecurityGuaranteeValidator {
     guarantor: Nation,
     provincesMap?: Record<string, Province>,
     isEmergency = false,
+    allNations?: Record<string, Nation>,
+    rankMap?: Map<string, number>,
   ): SecurityGuaranteeValidationResult {
     const canonicalClient = CountryRegistry.resolveCanonicalId(client.id);
     const canonicalGuarantor = CountryRegistry.resolveCanonicalId(guarantor.id);
