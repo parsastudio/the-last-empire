@@ -5,6 +5,7 @@ import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resol
 import { CountryRegistry } from "@/domain/data/countries";
 import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
 import { SecurityFeeCalculatorUtility } from "@/domain/diplomacy/security-fee-calculator.utility";
+import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export interface SecurityGuaranteeValidationResult {
   isValid: boolean;
@@ -65,6 +66,35 @@ export class SecurityGuaranteeValidator {
     const tension = rel ? (rel.tension ?? 10) : 10;
     const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
     const isNotWar = stance !== "WAR";
+
+    if (client.isAi && allNations) {
+      const aliveCount = Object.values(allNations).filter(
+        (n) => n.isAlive,
+      ).length;
+      const top20Threshold = Math.ceil(aliveCount * 0.2);
+      const clientRank =
+        rankMap?.get(canonicalClient) ??
+        rankMap?.get(client.id) ??
+        NationGettersUtility.getRank(client.id, allNations, provincesMap);
+
+      if (clientRank <= top20Threshold) {
+        return {
+          isValid: false,
+          reason:
+            "کشورهای هوش مصنوعی در ۲۰٪ برتر مجاز به انعقاد پیمان دفاعی نیستند.",
+          gdpRatio,
+          techDiff: 0,
+          tension,
+          isGdpValid: false,
+          isTechValid: false,
+          isTensionValid: true,
+          isNotWar,
+          hasSlotAvailable: false,
+          canAffordCost: false,
+          isEmergencyProtectorate: isEmergency,
+        };
+      }
+    }
 
     if (isEmergency) {
       const clientTech = client.military.techLevel || 1.0;
