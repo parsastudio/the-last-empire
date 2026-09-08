@@ -45,6 +45,7 @@ export const NationSchema = z.object({
   postWarCooldownTurns: z.number().nonnegative().default(0),
   doctrine: AiDoctrineTypeSchema.default("DOMESTIC_INDUSTRIALIST"),
   doctrineWeights: AiDoctrineWeightsSchema.optional(),
+  defenseGuarantorIds: z.array(z.string()).default([]),
   securityGuarantorId: z.string().nullable().optional().default(null),
   isEmergencyProtectorate: z.boolean().default(false).optional(),
 });
