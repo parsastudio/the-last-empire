@@ -70,47 +70,11 @@ export function IndustryDomesticTab({
     setIsBatchBuilding(true);
 
     try {
-      const workingProvs = ownedProvinces.map((p) => ({ ...p }));
-      const actionsToRun: Array<{ nationId: string; provinceId: number }> = [];
-
-      for (let i = 0; i < buildBatch.batchQuantity; i++) {
-        const available = workingProvs.filter(
-          (p) => p.factoriesCount < p.maxSlots,
-        );
-        if (available.length === 0) break;
-
-        available.sort((a, b) => {
-          const densityA =
-            a.pixelCount > 0
-              ? a.factoriesCount / a.pixelCount
-              : a.factoriesCount / a.maxSlots;
-          const densityB =
-            b.pixelCount > 0
-              ? b.factoriesCount / b.pixelCount
-              : b.factoriesCount / b.maxSlots;
-          if (densityA !== densityB) return densityA - densityB;
-          const ratioA = a.maxSlots > 0 ? a.factoriesCount / a.maxSlots : 1;
-          const ratioB = b.maxSlots > 0 ? b.factoriesCount / b.maxSlots : 1;
-          if (ratioA !== ratioB) return ratioA - ratioB;
-          return a.provinceId - b.provinceId;
-        });
-
-        const target = available[0]!;
-        actionsToRun.push({
-          nationId: nation.id,
-          provinceId: target.provinceId,
-        });
-        target.factoriesCount += 1;
-      }
-
-      for (const item of actionsToRun) {
-        const action = ActionFactory.buildFactory(
-          item.nationId,
-          1,
-          item.provinceId,
-        );
-        await dispatchAction(action);
-      }
+      const action = ActionFactory.buildFactory(
+        nation.id,
+        buildBatch.batchQuantity,
+      );
+      await dispatchAction(action);
     } finally {
       setIsBatchBuilding(false);
     }
