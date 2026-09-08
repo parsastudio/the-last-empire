@@ -9,7 +9,6 @@ export interface AuxiliaryForcesDistribution {
 }
 
 export class GuarantorBudgetCalculatorUtility {
-  public static readonly NORMAL_BUDGET_RATIO = 0;
   public static readonly EMERGENCY_BUDGET_MULTIPLIER = 10;
   public static readonly GUARANTOR_MAX_LIMIT_RATIO = 0.3;
 

@@ -91,6 +91,9 @@ export function DirectAttackModal({
           reputationPenalty={form.reputationPenalty}
           targetNationName={form.targetNation.name}
           targetRegionName={form.targetRegionName}
+          activeGuarantorNames={form.activeGuarantorNames}
+          mutualGuarantorNames={form.mutualGuarantorNames}
+          partnerGuarantorNames={form.partnerGuarantorNames}
         />
 
         <div className="space-y-2.5">

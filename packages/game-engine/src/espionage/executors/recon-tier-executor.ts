@@ -25,7 +25,11 @@ export class ReconTierExecutor {
     let guarantorTechLevel: number | undefined = undefined;
     let guarantorAuxiliaryValuation: number | undefined = undefined;
 
-    if (target.securityGuarantorId && allNations) {
+    if (
+      target.securityGuarantorId &&
+      target.isEmergencyProtectorate &&
+      allNations
+    ) {
       const guarantor = NationGettersUtility.resolveNation(
         target.securityGuarantorId,
         allNations,
@@ -40,8 +44,34 @@ export class ReconTierExecutor {
           GuarantorBudgetCalculatorUtility.calculateBudget(
             targetGdp,
             guarantorGdp,
-            Boolean(target.isEmergencyProtectorate),
+            true,
           );
+      }
+    } else if ((target.defenseGuarantorIds || []).length > 0 && allNations) {
+      const gNames: string[] = [];
+      let maxTech = 1.0;
+      let primaryFlag = "IR";
+      let primaryId = "";
+
+      for (let i = 0; i < target.defenseGuarantorIds.length; i++) {
+        const gId = target.defenseGuarantorIds[i]!;
+        const gNation = NationGettersUtility.resolveNation(gId, allNations);
+        if (gNation && gNation.isAlive) {
+          gNames.push(gNation.name);
+          if (gNation.military.techLevel > maxTech) {
+            maxTech = gNation.military.techLevel;
+            primaryFlag = gNation.flagCode;
+            primaryId = gNation.id;
+          }
+        }
+      }
+
+      if (gNames.length > 0) {
+        guarantorNationId = primaryId;
+        guarantorName = gNames.join(" و ");
+        guarantorFlagCode = primaryFlag;
+        guarantorTechLevel = maxTech;
+        guarantorAuxiliaryValuation = 0;
       }
     }
 
