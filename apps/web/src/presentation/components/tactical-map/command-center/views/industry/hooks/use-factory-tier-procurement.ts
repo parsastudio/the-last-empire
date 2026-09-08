@@ -135,12 +135,14 @@ export function useFactoryTierProcurement({
           nationId,
           sellerId,
           item.batchQuantity,
+          item.batch.techLevel,
         );
         await dispatchAction(action);
       } else {
         const action = ActionFactory.equipDomesticMachinery(
           nationId,
           item.batchQuantity,
+          item.batch.techLevel,
         );
         await dispatchAction(action);
       }

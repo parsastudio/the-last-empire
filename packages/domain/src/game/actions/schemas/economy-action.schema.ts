@@ -21,6 +21,7 @@ export const EquipDomesticMachineryActionSchema = z.object({
   nationId: z.string(),
   type: z.literal("EQUIP_DOMESTIC_MACHINERY"),
   quantity: z.number().positive().optional(),
+  sourceTechLevel: z.number().positive().optional(),
 });
 
 export const InvestIndustrialResearchActionSchema = z.object({
@@ -35,6 +36,7 @@ export const BuyIndustrialEquipmentActionSchema = z.object({
   type: z.literal("BUY_INDUSTRIAL_EQUIPMENT"),
   sellerNationId: z.string(),
   quantity: z.number().positive(),
+  sourceTechLevel: z.number().positive().optional(),
 });
 
 export const RepayDebtActionSchema = z.object({

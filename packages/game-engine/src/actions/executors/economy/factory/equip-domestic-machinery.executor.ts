@@ -36,6 +36,97 @@ export class EquipDomesticMachineryExecutor {
     }
 
     const targetTech = nation.industrialLevel;
+    const requestedSourceTech = action.sourceTechLevel;
+
+    if (requestedSourceTech !== undefined) {
+      const roundedSource = Number(requestedSourceTech.toFixed(2));
+      if (roundedSource >= targetTech) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "این رده از کارخانجات در حال حاضر در بالاترین سطح دانش بومی قرار دارد.",
+        );
+      }
+
+      const availableInTier = nationalBatches
+        .filter((b) => Math.abs(b.techLevel - roundedSource) < 0.05)
+        .reduce((sum, b) => sum + b.count, 0);
+
+      if (availableInTier <= 0) {
+        throw new GameError(
+          "INVALID_ACTION",
+          "هیچ کارخانه‌ای در رده انتخابی جهت ارتقا یافت نشد.",
+        );
+      }
+
+      const qty = Math.min(availableInTier, action.quantity ?? availableInTier);
+      const unitCost = IndustryCalculator.calculateModernizeUnitCost(
+        roundedSource,
+        targetTech,
+      );
+      const totalCost = qty * unitCost;
+
+      if (nation.treasury < totalCost) {
+        throw new GameError(
+          "INSUFFICIENT_FUNDS",
+          "موجودی خزانه برای نوسازی این تعداد کارخانه کافی نیست.",
+        );
+      }
+
+      let provRemainingToUpgrade = qty;
+      const updatedProvinces: Record<string, Province> = { ...state.provinces };
+
+      for (
+        let i = 0;
+        i < ownedProvinces.length && provRemainingToUpgrade > 0;
+        i++
+      ) {
+        const p = ownedProvinces[i]!;
+        const matchingInProv = p.factoryTiers
+          .filter((t) => Math.abs(t.techLevel - roundedSource) < 0.05)
+          .reduce((sum, t) => sum + t.count, 0);
+
+        if (matchingInProv <= 0) continue;
+
+        const takeCount = Math.min(matchingInProv, provRemainingToUpgrade);
+        const nextTiers = IndustryCalculator.upgradeSpecificTier(
+          p.factoryTiers,
+          takeCount,
+          roundedSource,
+          targetTech,
+        );
+
+        updatedProvinces[p.provinceId.toString()] = {
+          ...p,
+          factoryTiers: nextTiers,
+        };
+
+        provRemainingToUpgrade -= takeCount;
+      }
+
+      const updatedBatches = NationGettersUtility.getNationFactoryTiers(
+        nation.id,
+        updatedProvinces,
+      );
+      const newEquipTech = IndustryCalculator.calculateWeightedAverageTech(
+        updatedBatches,
+        targetTech,
+      );
+
+      return {
+        ...state,
+        provinces: updatedProvinces,
+        nations: {
+          ...state.nations,
+          [buyerKey]: {
+            ...nation,
+            treasury: nation.treasury - totalCost,
+            factoryTiers: updatedBatches,
+            equipmentTechLevel: newEquipTech,
+          },
+        },
+      };
+    }
+
     const hasUpgradableFactories = nationalBatches.some(
       (b) => b.techLevel < targetTech,
     );

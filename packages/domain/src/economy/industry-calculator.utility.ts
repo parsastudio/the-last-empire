@@ -274,4 +274,18 @@ export class IndustryCalculator {
       targetTech,
     );
   }
+
+  public static upgradeSpecificTier(
+    batches: FactoryBatch[] | undefined,
+    upgradeCount: number,
+    sourceTech: number,
+    targetTech: number,
+  ): FactoryBatch[] {
+    return FactoryBatchManagerUtility.upgradeSpecificTier(
+      batches,
+      upgradeCount,
+      sourceTech,
+      targetTech,
+    );
+  }
 }

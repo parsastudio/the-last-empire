@@ -49,8 +49,13 @@ export class ActionFactory {
   public static equipDomesticMachinery(
     nationId: string,
     quantity?: number,
+    sourceTechLevel?: number,
   ): EquipDomesticMachineryAction {
-    return EconomyActionFactory.equipDomesticMachinery(nationId, quantity);
+    return EconomyActionFactory.equipDomesticMachinery(
+      nationId,
+      quantity,
+      sourceTechLevel,
+    );
   }
 
   public static investIndustrialResearch(
@@ -63,11 +68,13 @@ export class ActionFactory {
     nationId: string,
     sellerNationId: string,
     quantity: number,
+    sourceTechLevel?: number,
   ): BuyIndustrialEquipmentAction {
     return EconomyActionFactory.buyIndustrialEquipment(
       nationId,
       sellerNationId,
       quantity,
+      sourceTechLevel,
     );
   }
 

@@ -156,4 +156,47 @@ export class FactoryBatchManagerUtility {
 
     return this.consolidateBatches(result);
   }
+
+  public static upgradeSpecificTier(
+    batches: FactoryBatch[] | undefined,
+    upgradeCount: number,
+    sourceTech: number,
+    targetTech: number,
+  ): FactoryBatch[] {
+    const consolidated = this.consolidateBatches(batches);
+    if (upgradeCount <= 0 || consolidated.length === 0) return consolidated;
+
+    let remainingToUpgrade = upgradeCount;
+    const result: FactoryBatch[] = [];
+    let upgradedTotal = 0;
+    const roundedSource = Number(sourceTech.toFixed(2));
+
+    for (const batch of consolidated) {
+      const isTargetBatch = Math.abs(batch.techLevel - roundedSource) < 0.05;
+
+      if (!isTargetBatch || remainingToUpgrade <= 0) {
+        result.push(batch);
+        continue;
+      }
+
+      const countToTake = Math.min(batch.count, remainingToUpgrade);
+      const unchangedCount = batch.count - countToTake;
+
+      if (unchangedCount > 0) {
+        result.push({ techLevel: batch.techLevel, count: unchangedCount });
+      }
+
+      upgradedTotal += countToTake;
+      remainingToUpgrade -= countToTake;
+    }
+
+    if (upgradedTotal > 0) {
+      result.push({
+        techLevel: Number(targetTech.toFixed(2)),
+        count: upgradedTotal,
+      });
+    }
+
+    return this.consolidateBatches(result);
+  }
 }
