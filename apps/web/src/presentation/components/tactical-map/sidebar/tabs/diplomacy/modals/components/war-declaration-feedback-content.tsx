@@ -1,18 +1,27 @@
 import React from "react";
-import { Swords, ShoppingCart, AlertTriangle, Radio } from "lucide-react";
+import {
+  Swords,
+  ShoppingCart,
+  AlertTriangle,
+  Radio,
+  ShieldAlert,
+} from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ReactiveDefenseEvent } from "@geopolitics/game-engine";
+import { RetaliatingGuarantorFeedbackItem } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 
 interface WarDeclarationFeedbackContentProps {
   targetName: string;
   defense?: ReactiveDefenseEvent;
+  retaliatingGuarantors?: RetaliatingGuarantorFeedbackItem[];
   onClose: () => void;
 }
 
 export function WarDeclarationFeedbackContent({
   targetName,
   defense,
+  retaliatingGuarantors = [],
   onClose,
 }: WarDeclarationFeedbackContentProps) {
   return (
@@ -34,6 +43,46 @@ export function WarDeclarationFeedbackContent({
           سراسری به ستاد کل ارتش صادر شد.
         </p>
       </div>
+
+      {retaliatingGuarantors.length > 0 && (
+        <div className="w-full bg-rose-950/40 border-2 border-rose-500/60 p-4 rounded-2xl space-y-2.5 shadow-lg text-right">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-black text-rose-400">
+              <ShieldAlert size={16} className="animate-pulse" />
+              <span>پیمان دفاعی فعال شد: ورود حامیان به جنگ!</span>
+            </div>
+            <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-2 py-0.5 rounded-lg">
+              طرفین متخاصم جدید
+            </span>
+          </div>
+
+          <p className="text-[11px] text-foreground/90 leading-relaxed font-sans font-medium">
+            با توجه به تعهد دفاع سرزمینی متقابل، ارتش کشورهای زیر فوراً و رسماً
+            علیه شما وارد جنگ شدند:
+          </p>
+
+          <div className="grid grid-cols-1 gap-1.5 pt-1">
+            {retaliatingGuarantors.map((g) => (
+              <div
+                key={g.id}
+                className="bg-background/80 border border-rose-500/30 p-2.5 rounded-xl flex items-center justify-between shadow-inner"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg select-none">
+                    {getFlagEmoji(g.flagCode)}
+                  </span>
+                  <span className="text-xs font-black text-foreground">
+                    {g.name}
+                  </span>
+                </div>
+                <span className="text-[9px] font-mono font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded-md">
+                  ورود به نبرد
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {defense?.type === "PURCHASED" && (
         <div className="w-full bg-gradient-to-r from-amber-950/60 via-card to-amber-950/40 border border-amber-500/50 p-4 rounded-2xl space-y-2 shadow-lg text-right">

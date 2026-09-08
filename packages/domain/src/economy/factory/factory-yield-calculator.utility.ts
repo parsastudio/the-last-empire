@@ -4,13 +4,13 @@ import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.uti
 export class FactoryYieldCalculatorUtility {
   public static readonly BASE_FACTORY_YIELD = 5_000_000_000;
   public static readonly YIELD_TECH_BASE = 1.5;
-  public static readonly FACTORY_REBUILD_COST = 10_000_000_000;
-  public static readonly RESEARCH_BASE_COST = 200_000_000_000;
+  public static readonly FACTORY_REBUILD_COST = 5_000_000_000;
+  public static readonly RESEARCH_BASE_COST = 100_000_000_000;
   public static readonly RESEARCH_GROWTH_BASE = 2.5;
   public static readonly RESEARCH_STEP = 0.1;
-  public static readonly MACHINERY_BASE_UNIT_PRICE = 3_000_000_000;
-  public static readonly MAX_MODERNIZE_BASE_UNIT_COST = 120_000_000_000;
-  public static readonly IMPORT_BASE_PRICE = 3_000_000_000;
+  public static readonly MACHINERY_BASE_UNIT_PRICE = 1_500_000_000;
+  public static readonly MAX_MODERNIZE_BASE_UNIT_COST = 60_000_000_000;
+  public static readonly IMPORT_BASE_PRICE = 1_500_000_000;
   public static readonly IMPORT_TECH_GAP_BASE = 1.5;
 
   public static calculateFactoryYield(techLevel: number): number {

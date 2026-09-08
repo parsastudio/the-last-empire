@@ -117,6 +117,7 @@ export class WarDeclarationExecutor {
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         defenseEvent,
+        retaliatingGuarantors: retaliationResult.retaliatingGuarantors,
       },
     };
   }

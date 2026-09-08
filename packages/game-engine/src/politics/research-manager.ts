@@ -3,7 +3,7 @@ import { GameError, GovernmentTraitsUtility } from "@geopolitics/domain";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
 
 export class ResearchManager {
-  public static readonly MILITARY_RESEARCH_BASE_COST = 200_000_000_000;
+  public static readonly MILITARY_RESEARCH_BASE_COST = 100_000_000_000;
   public static readonly MILITARY_RESEARCH_GROWTH_BASE = 2.5;
   public static readonly RESEARCH_STEP = 0.1;
 
