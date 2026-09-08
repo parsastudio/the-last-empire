@@ -4,6 +4,9 @@ import {
   Nation,
   TurnLogBuilder,
   PendingProposalManagerUtility,
+  CountryRegistry,
+  getNationGdp,
+  SecurityFeeCalculatorUtility,
 } from "@geopolitics/domain";
 
 export class SecurityGuaranteeApplier {
@@ -13,9 +16,26 @@ export class SecurityGuaranteeApplier {
     sender: Nation,
     receiver: Nation,
   ): GameState {
+    const canonicalReceiver = CountryRegistry.resolveCanonicalId(receiver.id);
+    const existingGuarantors = sender.defenseGuarantorIds || [];
+
+    const updatedGuarantorIds = Array.from(
+      new Set([...existingGuarantors, canonicalReceiver]),
+    ).slice(0, 2);
+
+    const guarantorGdp = getNationGdp(receiver, state.provinces);
+    const signingCost =
+      SecurityFeeCalculatorUtility.calculateSigningCost(guarantorGdp);
+
     const updatedSender = {
       ...sender,
-      securityGuarantorId: receiver.id,
+      treasury: Math.max(0, sender.treasury - signingCost),
+      defenseGuarantorIds: updatedGuarantorIds,
+    };
+
+    const updatedReceiver = {
+      ...receiver,
+      treasury: receiver.treasury + signingCost,
     };
 
     const guaranteeLog = TurnLogBuilder.createGlobalDiplomacyLog(
@@ -23,7 +43,7 @@ export class SecurityGuaranteeApplier {
       sender.id,
       receiver.id,
       "SECURITY_GUARANTEE_SIGNED",
-      {},
+      { cost: signingCost },
       "INFO",
     );
 
@@ -39,6 +59,7 @@ export class SecurityGuaranteeApplier {
       nations: {
         ...state.nations,
         [sender.id]: updatedSender,
+        [receiver.id]: updatedReceiver,
       },
     };
   }
