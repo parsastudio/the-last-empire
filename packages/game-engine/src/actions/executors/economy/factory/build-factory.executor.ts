@@ -91,23 +91,33 @@ export class BuildFactoryExecutor {
     }
 
     const updatedProvinces: Record<string, Province> = { ...state.provinces };
-    for (const [pId, added] of distribution.entries()) {
-      const p = updatedProvinces[pId.toString()]!;
-      const nextTiers = IndustryCalculator.addFactories(
-        p.factoryTiers,
-        added,
-        nation.industrialLevel,
-      );
-      updatedProvinces[pId.toString()] = {
-        ...p,
-        factoriesCount: p.factoriesCount + added,
-        factoryTiers: nextTiers,
-      };
+    const updatedOwnedProvinces: Province[] = [];
+
+    for (let i = 0; i < ownedProvinces.length; i++) {
+      const p = ownedProvinces[i]!;
+      const added = distribution.get(p.provinceId) || 0;
+      if (added > 0) {
+        const nextTiers = IndustryCalculator.addFactories(
+          p.factoryTiers,
+          added,
+          nation.industrialLevel,
+        );
+        const updatedProv: Province = {
+          ...p,
+          factoriesCount: p.factoriesCount + added,
+          factoryTiers: nextTiers,
+        };
+        updatedProvinces[p.provinceId.toString()] = updatedProv;
+        updatedOwnedProvinces.push(updatedProv);
+      } else {
+        updatedOwnedProvinces.push(p);
+      }
     }
 
     const updatedBatches = NationGettersUtility.getNationFactoryTiers(
       nation.id,
-      updatedProvinces,
+      undefined,
+      updatedOwnedProvinces,
     );
     const newAverageEquipTech = IndustryCalculator.calculateWeightedAverageTech(
       updatedBatches,
