@@ -60,6 +60,7 @@ export class ProposalAcceptanceEvaluator {
           sender,
           receiver,
           provincesMap,
+          false,
         );
 
         if (!validation.isValid) {
@@ -68,7 +69,7 @@ export class ProposalAcceptanceEvaluator {
             score: -100,
             reasons: [
               {
-                label: validation.reason || "عدم احراز شروط سه‌گانه امنیتی",
+                label: validation.reason || "عدم احراز شرایط پیمان دفاعی",
                 value: -100,
               },
             ],
@@ -76,10 +77,13 @@ export class ProposalAcceptanceEvaluator {
         }
 
         reasons.push({
-          label: "احراز کامل نسبت GDP و برتری فناوری",
-          value: 50,
+          label: "احراز نسبت GDP بین ۱ تا ۵ برابر و دسترسی سرزمینی",
+          value: 60,
         });
-        reasons.push({ label: "دریافت نوبتی ۲٪ درآمد پایدار", value: 50 });
+        reasons.push({
+          label: "دریافت یک‌باره ۳٪ از کل GDP کشور به عنوان حق تعهد دفاعی",
+          value: 40,
+        });
         break;
       }
 

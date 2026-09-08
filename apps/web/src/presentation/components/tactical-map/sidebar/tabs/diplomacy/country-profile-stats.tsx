@@ -127,7 +127,7 @@ export function CountryProfileStats({
             <span className="text-[11px] font-bold">
               {data.isEmergencyProtectorate
                 ? "معاهده تحت‌الحمایگی استعماری:"
-                : "چتر امنیتی فعال:"}
+                : "پیمان دفاع سرزمینی:"}
             </span>
           </div>
           <span
@@ -137,7 +137,7 @@ export function CountryProfileStats({
                 : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
             }`}
           >
-            تحت {data.isEmergencyProtectorate ? "الحاق و استعمار" : "حمایت"}{" "}
+            {data.isEmergencyProtectorate ? "تحت استعمار" : "تحت پوشش دفاعی"}{" "}
             {data.guarantorName}
           </span>
         </div>

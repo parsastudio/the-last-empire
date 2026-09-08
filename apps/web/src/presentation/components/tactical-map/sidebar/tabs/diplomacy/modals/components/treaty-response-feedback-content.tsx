@@ -89,9 +89,9 @@ export function TreatyResponseFeedbackContent({
         ) : isSecurityCancel ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground leading-relaxed">
-              پیمان چتر امنیتی با دولت{" "}
+              پیمان دفاعی با دولت{" "}
               <strong className="text-foreground">{feedback.targetName}</strong>{" "}
-              لغو گردید.
+              فسخ گردید.
             </p>
           </div>
         ) : isCancel ? (
@@ -123,7 +123,8 @@ export function TreatyResponseFeedbackContent({
               <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[11px] font-mono font-bold text-cyan-300">
                 <ShieldCheck size={12} />
                 <span>
-                  فعال‌سازی نیروی ضربت کمکی (معادل ۶٪ GDP شما) در زمان دفاع
+                  انعقاد پیمان دفاعی (ورود مستقیم ارتش حامی به جنگ در صورت تهاجم
+                  دشمن)
                 </span>
               </div>
             ) : (

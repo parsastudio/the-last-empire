@@ -116,12 +116,10 @@ export function selectHumanResourceMetrics(
     fiscalResult.totalRevenue + navalSecurityIncome + warSubsidiesIncome;
 
   const humanGdp = getNationGdp(nation, gameState.provinces);
-  const securityFee = nation.securityGuarantorId
-    ? SecurityFeeCalculatorUtility.calculateSecurityFee(
-        humanGdp,
-        Boolean(nation.isEmergencyProtectorate),
-      )
-    : 0;
+  const securityFee =
+    nation.securityGuarantorId && nation.isEmergencyProtectorate
+      ? SecurityFeeCalculatorUtility.calculateSecurityFee(humanGdp, true)
+      : 0;
 
   const totalExpenses =
     payrollBreakdown.total +

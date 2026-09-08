@@ -6,11 +6,10 @@ import {
   Coins,
   CheckCircle2,
   XCircle,
-  Award,
-  TrendingUp,
   Scale,
   Loader2,
-  Globe,
+  Users2,
+  Swords,
 } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import {
@@ -36,7 +35,6 @@ export function SecurityGuaranteeModal({
   targetName,
   targetFlagCode,
   targetNationId,
-  isWar,
   costPerTurn,
   validation,
   onConfirmGuarantee,
@@ -47,49 +45,45 @@ export function SecurityGuaranteeModal({
   if (!isOpen) return null;
 
   const flagEmoji = getFlagEmoji(targetFlagCode || targetNationId);
-  const isEmergency = isWar;
 
   const conditions = [
     {
       id: "gdp",
       title: "نسبت تولید ناخالص ملی (GDP)",
-      desc: isEmergency
-        ? "تولید ناخالص کشور ضامن باید حداقل برابر شما باشد."
-        : "تولید ناخالص کشور ضامن باید بین ۱ تا ۱۰ برابر شما باشد.",
+      desc: "تولید ناخالص کشور ضامن باید بین ۱ تا ۵ برابر کشور شما باشد.",
       currentValue: `${PersianNumberFormatter.toPersianDigits(validation.gdpRatio)}x برابری`,
       isValid: validation.isGdpValid,
       icon: Scale,
     },
     {
-      id: "tech",
-      title: "برتری فناوری نظامی و تسلیحاتی",
-      desc: "سطح فناوری دفاعی کشور ضامن باید از شما بالاتر باشد.",
-      currentValue:
-        validation.techDiff > 0
-          ? `+${PersianNumberFormatter.toPersianDigits(validation.techDiff)} سطح بالاتر`
-          : "عدم برتری فناوری",
-      isValid: validation.isTechValid,
-      icon: Award,
+      id: "slots",
+      title: "سقف پیمان‌های دفاعی کشور",
+      desc: "هر کشور حداکثر مجاز به بستن ۲ پیمان دفاعی فعال است.",
+      currentValue: validation.hasSlotAvailable
+        ? "ظرفیت آزاد موجود است"
+        : "سقف ۲ پیمان تکمیل است",
+      isValid: validation.hasSlotAvailable,
+      icon: Users2,
     },
     {
-      id: "tension",
-      title: "مهار تنش دیپلماتیک و حسن همجواری",
-      desc: isEmergency
-        ? "تنش دوجانبه باید زیر ۵۰٪ باشد."
-        : "تنش دوجانبه باید زیر ۳۵٪ باشد.",
-      currentValue: `${PersianNumberFormatter.toPersianDigits(validation.tension)}٪ تنش`,
-      isValid: validation.isTensionValid,
-      icon: Globe,
+      id: "cost",
+      title: "حق تعهد امنیتی یک‌باره",
+      desc: "پرداخت یک‌باره ۳٪ از کل GDP کشور حامی به خزانه آن.",
+      currentValue: validation.canAffordCost
+        ? "موجودی خزانه کافی است"
+        : "کسری موجودی خزانه",
+      isValid: validation.canAffordCost,
+      icon: Coins,
     },
     {
       id: "peace",
-      title: "وضعیت دیپلماتیک",
-      desc: isEmergency
-        ? "درخواست تحت‌الحمایگی در شرایط جنگی مجاز است."
-        : "نباید جنگ فعالی بین دو کشور برقرار باشد.",
-      currentValue: validation.isNotWar ? "صلح برقرار" : "وضعیت جنگی متخاصم",
-      isValid: isEmergency ? true : validation.isNotWar,
-      icon: TrendingUp,
+      title: "عدم تخاصم و برقراری صلح",
+      desc: "نباید هیچ حالت جنگی فعالی بین دو کشور برقرار باشد.",
+      currentValue: validation.isNotWar
+        ? "صلح برقرار است"
+        : "وضعیت جنگی متخاصم",
+      isValid: validation.isNotWar,
+      icon: Swords,
     },
   ];
 
@@ -107,8 +101,8 @@ export function SecurityGuaranteeModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="پیمان چتر امنیتی و دفاع سرزمینی"
-      subtitle={`پیش‌نویس توافق‌نامه تضمین امنیت ملی با امپراتوری ${targetName}`}
+      title="پیمان دفاعی و امنیت سرزمینی متقابل"
+      subtitle={`پیش‌نویس توافق‌نامه تعهد دفاعی با امپراتوری ${targetName}`}
       maxWidthClass="max-w-xl"
       onClose={onClose}
     >
@@ -123,14 +117,14 @@ export function SecurityGuaranteeModal({
                 {targetName}
               </span>
               <span className="text-[10px] text-cyan-300 font-mono font-bold">
-                قدرت ضامن امنیت و حامی دفاعی
+                قدرت ضامن دفاعی (تعهد ورود مستقیم به جنگ)
               </span>
             </div>
           </div>
 
           <div className="text-left font-mono bg-cyan-500/10 border border-cyan-500/30 px-3.5 py-1.5 rounded-2xl">
             <span className="text-[9px] text-muted-foreground block font-sans">
-              حق عضویت نوبتی (۲٪ GDP):
+              حق تعهد یک‌باره (۳٪ GDP ضامن):
             </span>
             <span className="text-xs font-black text-cyan-300 flex items-center gap-1 justify-end">
               <Coins size={12} />
@@ -142,18 +136,18 @@ export function SecurityGuaranteeModal({
         <div className="p-3.5 bg-background/50 border border-border/70 rounded-2xl flex items-start gap-2.5 text-xs text-foreground/90 leading-relaxed shadow-inner">
           <ShieldCheck size={18} className="text-cyan-400 shrink-0 mt-0.5" />
           <p className="text-[11px] text-muted-foreground">
-            با امضای این معاهده، در زمان تهاجم دشمن به استان‌های شما، نیروی ضربت
-            کمکی فوق‌پیشرفته‌ای{" "}
-            <strong className="text-foreground font-black">
-              به ارزش معادل ۶٪ از GDP شما (با سطح فناوری دفاعی {targetName})
-            </strong>{" "}
-            در خطوط دفاعی شما مستقر خواهد شد.
+            با امضای این پیمان، در صورت هرگونه تهاجم یا اعلان جنگ دشمن علیه خاک
+            شما، ارتش امپراتوری{" "}
+            <strong className="text-foreground font-black">{targetName}</strong>{" "}
+            به طور خودکار و مستقیم وارد جنگ علیه متهاجم خواهد شد. این رابطه
+            یک‌طرفه بوده و تعهد متقابلی برای شرکت شما در جنگ‌های هجومی حامی
+            ایجاد نمی‌کند.
           </p>
         </div>
 
         <div className="space-y-2">
           <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono px-1 block">
-            چک‌لیست احراز شروط چهارگانه معاهده
+            چک‌لیست احراز شروط پیمان دفاعی
           </span>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -197,7 +191,7 @@ export function SecurityGuaranteeModal({
 
                   <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[10px] font-mono">
                     <span className="text-muted-foreground font-sans">
-                      وضعیت فعلی:
+                      وضعیت:
                     </span>
                     <span
                       className={`font-bold ${
@@ -226,10 +220,10 @@ export function SecurityGuaranteeModal({
             )}
             <span>
               {isSubmitting
-                ? "در حال ارسال پیش‌نویس و ثبت معاهده..."
+                ? "در حال پرداخت هزینه و امضای پیمان دفاعی..."
                 : validation.isValid
-                  ? `امضای رسمی پیمان چتر امنیتی با ${targetName}`
-                  : "عدم امکان امضای معاهده"}
+                  ? `امضای رسمی پیمان دفاعی با ${targetName}`
+                  : "عدم احراز شرایط پیمان دفاعی"}
             </span>
           </button>
         </div>

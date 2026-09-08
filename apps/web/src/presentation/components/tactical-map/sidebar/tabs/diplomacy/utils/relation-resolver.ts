@@ -104,26 +104,38 @@ export function resolveProfileRelation(
     posture = vector.posture;
 
     const targetCanonical = CountryRegistry.resolveCanonicalId(liveNation.id);
-    const isGuarantorOfHuman =
+
+    const isEmergencyGuarantorOfHuman =
       Boolean(humanNation.securityGuarantorId) &&
       CountryRegistry.resolveCanonicalId(humanNation.securityGuarantorId) ===
-        targetCanonical;
+        targetCanonical &&
+      Boolean(humanNation.isEmergencyProtectorate);
 
-    if (isGuarantorOfHuman) {
-      if (humanNation.isEmergencyProtectorate) {
-        isEmergencyProtectorate = true;
-      } else {
-        hasSecurityGuarantee = true;
-      }
+    if (isEmergencyGuarantorOfHuman) {
+      isEmergencyProtectorate = true;
+    }
+
+    const hasDefensePactWithTarget = (
+      humanNation.defenseGuarantorIds || []
+    ).some((id) => CountryRegistry.resolveCanonicalId(id) === targetCanonical);
+
+    if (hasDefensePactWithTarget) {
+      hasSecurityGuarantee = true;
     }
   }
 
+  const firstDefenseGuarantorId = liveNation?.defenseGuarantorIds?.[0];
+  const emergencyGuarantorId = liveNation?.securityGuarantorId;
+
   const guarantorNation =
-    liveNation?.securityGuarantorId && allNations
-      ? allNations[
-          CountryRegistry.resolveCanonicalId(liveNation.securityGuarantorId)
-        ] || allNations[liveNation.securityGuarantorId]
-      : null;
+    emergencyGuarantorId && allNations
+      ? allNations[CountryRegistry.resolveCanonicalId(emergencyGuarantorId)] ||
+        allNations[emergencyGuarantorId]
+      : firstDefenseGuarantorId && allNations
+        ? allNations[
+            CountryRegistry.resolveCanonicalId(firstDefenseGuarantorId)
+          ] || null
+        : null;
 
   const humanTech = humanNation?.military.techLevel ?? 1.0;
   const isArmsEligible =
