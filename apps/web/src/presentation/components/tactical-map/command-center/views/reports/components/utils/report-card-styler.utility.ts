@@ -11,6 +11,7 @@ import {
   Info,
   Sparkles,
   Factory,
+  ShieldCheck,
   LucideIcon,
 } from "lucide-react";
 import { TurnLogEntry } from "@geopolitics/domain";
@@ -87,6 +88,22 @@ export class ReportCardStylerUtility {
     }
 
     switch (log.eventCode) {
+      case "DEFENSE_PACT_REFUSAL_COMPENSATION":
+        return {
+          cardBg: "bg-amber-950/20",
+          border: "border-amber-500/40 hover:border-amber-500",
+          icon: Coins,
+          iconBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        };
+
+      case "SECURITY_GUARANTEE_SIGNED":
+        return {
+          cardBg: "bg-cyan-950/20",
+          border: "border-cyan-500/40 hover:border-cyan-500",
+          icon: ShieldCheck,
+          iconBg: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+        };
+
       case "DILEMMA_RESOLVED":
         return {
           cardBg: "bg-purple-950/20",
@@ -152,6 +169,7 @@ export class ReportCardStylerUtility {
       case "DIPLOMATIC_PROPOSAL_SENT":
       case "TREATY_ACCEPTED":
       case "TREATY_REJECTED":
+      case "DEFENSE_PACT_NEUTRALITY":
         return {
           cardBg: "bg-indigo-950/20",
           border: "border-indigo-500/40 hover:border-indigo-500",

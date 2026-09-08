@@ -49,6 +49,7 @@ function calculateLogPriority(
     case "TREATY_ACCEPTED":
     case "TREATY_REJECTED":
     case "DIPLOMATIC_PROPOSAL_SENT":
+    case "DEFENSE_PACT_REFUSAL_COMPENSATION":
       return isHumanInvolved ? 6 : 10;
 
     case "ARMS_EXPORT_SUMMARY":
@@ -175,6 +176,9 @@ export function useWideReports({
         log.eventCode === "TREATY_ACCEPTED" ||
         log.eventCode === "TREATY_CANCELLED" ||
         log.eventCode === "SECURITY_GUARANTEE_SIGNED" ||
+        log.eventCode === "SECURITY_GUARANTEE_CANCELLED" ||
+        log.eventCode === "DEFENSE_PACT_NEUTRALITY" ||
+        log.eventCode === "DEFENSE_PACT_REFUSAL_COMPENSATION" ||
         log.eventCode === "EMERGENCY_PROTECTORATE_SIGNED"
       );
     });
@@ -202,7 +206,8 @@ export function useWideReports({
         log.category === "GLOBAL_DIPLOMACY" ||
         log.eventCode === "TREATY_ACCEPTED" ||
         log.eventCode === "TREATY_REJECTED" ||
-        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT"
+        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT" ||
+        log.eventCode === "DEFENSE_PACT_REFUSAL_COMPENSATION"
       ) {
         diplomacyCount++;
       }

@@ -77,11 +77,11 @@ export class ProposalAcceptanceEvaluator {
         }
 
         reasons.push({
-          label: "احراز نسبت GDP بین ۱ تا ۵ برابر و دسترسی سرزمینی",
+          label: "احراز نسبت GDP بین ۰.۷ تا ۵ برابر و دسترسی سرزمینی",
           value: 60,
         });
         reasons.push({
-          label: "دریافت یک‌باره ۳٪ از کل GDP کشور به عنوان حق تعهد دفاعی",
+          label: "دریافت یک‌باره ۱٪ از کل GDP کشور به عنوان حق تعهد دفاعی",
           value: 40,
         });
         break;

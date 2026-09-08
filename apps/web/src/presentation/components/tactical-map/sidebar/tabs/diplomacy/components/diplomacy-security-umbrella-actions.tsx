@@ -131,7 +131,7 @@ export function DiplomacySecurityUmbrellaActions({
             <span>پیمان دفاعی و امنیت سرزمینی متقابل</span>
           </span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-            ۳٪ GDP ضامن • بررسی شروط
+            ۱٪ GDP ضامن • بررسی شروط
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
