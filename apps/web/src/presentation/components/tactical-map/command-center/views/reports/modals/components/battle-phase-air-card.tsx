@@ -185,20 +185,13 @@ export function BattlePhaseAirCard({
               <span className="text-xl">{defenderFlag}</span>
               <span>نیروی هوایی و تلفات {defenderName}</span>
             </span>
-            {aux ? (
-              <span
-                className={`text-[10px] font-sans font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 border ${
-                  aux.isEmergencyProtectorate
-                    ? "bg-rose-950/40 text-rose-300 border-rose-500/40"
-                    : "bg-cyan-950/40 text-cyan-400 border-cyan-500/30"
-                }`}
-              >
+            {aux && aux.isEmergencyProtectorate ? (
+              <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 border bg-rose-950/40 text-rose-300 border-rose-500/40">
                 <span>{auxFlag}</span>
                 <span>
                   +
                   {PersianNumberFormatter.toPersianDigits(aux.deployedAirForce)}{" "}
-                  جنگنده{" "}
-                  {aux.isEmergencyProtectorate ? "تحت‌الحمایگی" : "چتر امنیتی"}
+                  جنگنده تحت‌الحمایگی
                 </span>
               </span>
             ) : (

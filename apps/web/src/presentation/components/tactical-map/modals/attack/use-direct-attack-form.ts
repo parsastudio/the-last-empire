@@ -11,6 +11,7 @@ import { useToast } from "@/presentation/context/toast-context";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
+import { NationGettersUtility } from "@geopolitics/domain";
 import { useAttackForcesDeployment } from "./hooks/use-attack-forces-deployment";
 import { useAttackForecastCalculator } from "./hooks/use-attack-forecast-calculator";
 import { useAttackTerritoryReach } from "./hooks/use-attack-territory-reach";
@@ -47,7 +48,13 @@ export function useDirectAttackForm({
   }, [gameState, targetNationId]);
 
   const targetGuarantorNation = useMemo(() => {
-    if (!gameState || !targetNation?.securityGuarantorId) return null;
+    if (
+      !gameState ||
+      !targetNation?.securityGuarantorId ||
+      !targetNation.isEmergencyProtectorate
+    ) {
+      return null;
+    }
     const canonical = CountryRegistry.resolveCanonicalId(
       targetNation.securityGuarantorId,
     );
@@ -57,6 +64,62 @@ export function useDirectAttackForm({
       null
     );
   }, [gameState, targetNation]);
+
+  const defenseGuarantorAnalysis = useMemo(() => {
+    if (!targetNation || !gameState || !humanNation) {
+      return {
+        activeGuarantorNames: [],
+        mutualGuarantorNames: [],
+        partnerGuarantorNames: [],
+      };
+    }
+
+    const activeGuarantorNames: string[] = [];
+    const mutualGuarantorNames: string[] = [];
+    const partnerGuarantorNames: string[] = [];
+
+    const targetGuarantors = targetNation.defenseGuarantorIds || [];
+    const humanGuarantors = humanNation.defenseGuarantorIds || [];
+
+    for (let i = 0; i < targetGuarantors.length; i++) {
+      const gId = targetGuarantors[i]!;
+      const canonicalG = CountryRegistry.resolveCanonicalId(gId);
+      const gNation = NationGettersUtility.resolveNation(
+        canonicalG,
+        gameState.nations,
+      );
+
+      if (!gNation || !gNation.isAlive) continue;
+
+      const isMutual = humanGuarantors.some(
+        (hId) => CountryRegistry.resolveCanonicalId(hId) === canonicalG,
+      );
+
+      if (isMutual) {
+        mutualGuarantorNames.push(gNation.name);
+        continue;
+      }
+
+      const relWithHuman =
+        gNation.relations?.[humanNation.id] ||
+        humanNation.relations?.[canonicalG];
+      const hasStrategicPartnership =
+        relWithHuman?.stance === "STRATEGIC_PARTNERSHIP";
+
+      if (hasStrategicPartnership) {
+        partnerGuarantorNames.push(gNation.name);
+        continue;
+      }
+
+      activeGuarantorNames.push(gNation.name);
+    }
+
+    return {
+      activeGuarantorNames,
+      mutualGuarantorNames,
+      partnerGuarantorNames,
+    };
+  }, [targetNation, gameState, humanNation]);
 
   const reach = useAttackTerritoryReach({
     humanNation,
@@ -225,6 +288,9 @@ export function useDirectAttackForm({
     canAfford: deployment.canAfford,
     hasSelectedInfantry: deployment.hasSelectedInfantry,
     isSubmitting,
+    activeGuarantorNames: defenseGuarantorAnalysis.activeGuarantorNames,
+    mutualGuarantorNames: defenseGuarantorAnalysis.mutualGuarantorNames,
+    partnerGuarantorNames: defenseGuarantorAnalysis.partnerGuarantorNames,
     handleExecuteQuickRecon: recon.handleExecuteQuickRecon,
     handleAutoOptimizeDeploy,
     handleExecuteAttack,

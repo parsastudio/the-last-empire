@@ -124,7 +124,7 @@ export class PoliticsActionExecutor {
           if (!validation.isValid) {
             throw new GameError(
               "INVALID_ACTION",
-              validation.reason || "عدم احراز شرایط چتر امنیتی.",
+              validation.reason || "عدم احراز شرایط پیمان دفاعی.",
             );
           }
         }

@@ -1,5 +1,12 @@
 import React from "react";
-import { AlertTriangle, ShieldAlert, Radio, Flame } from "lucide-react";
+import {
+  AlertTriangle,
+  ShieldAlert,
+  Radio,
+  Flame,
+  Swords,
+  ShieldCheck,
+} from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
@@ -13,6 +20,9 @@ interface AttackStatusAlertsProps {
   reputationPenalty: number;
   targetNationName: string;
   targetRegionName: string;
+  activeGuarantorNames?: string[];
+  mutualGuarantorNames?: string[];
+  partnerGuarantorNames?: string[];
 }
 
 export function AttackStatusAlerts({
@@ -23,6 +33,9 @@ export function AttackStatusAlerts({
   reputationPenalty,
   targetNationName,
   targetRegionName,
+  activeGuarantorNames = [],
+  mutualGuarantorNames = [],
+  partnerGuarantorNames = [],
 }: AttackStatusAlertsProps) {
   const isAccessible = isLandNeighbor || isNavalValid;
   const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
@@ -41,6 +54,63 @@ export function AttackStatusAlerts({
               دریایی به {formattedRegionName} وجود ندارد.
             </p>
           </div>
+        </div>
+      )}
+
+      {isAccessible && activeGuarantorNames.length > 0 && (
+        <div className="p-4 bg-rose-950/40 border-2 border-rose-500/60 rounded-2xl space-y-2 shadow-lg animate-fade-smooth">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-rose-400">
+              <Swords size={18} className="animate-pulse shrink-0" />
+              <span className="text-xs font-black">
+                هشدار ورود ضامن به جنگ: {activeGuarantorNames.join(" و ")}
+              </span>
+            </div>
+            <span className="text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 px-2 py-0.5 rounded-lg">
+              اعلان جنگ قطعی
+            </span>
+          </div>
+          <p className="text-[11px] text-foreground/90 leading-relaxed font-medium">
+            کشور {targetNationName} دارای پیمان دفاع سرزمینی با امپراتوری{" "}
+            <strong className="text-rose-400">
+              {activeGuarantorNames.join(" و ")}
+            </strong>{" "}
+            است. در صورت تهاجم، ارتش این کشورها رسماً و بلافاصله به شما اعلان
+            جنگ داده و جبهه نبرد جدیدی باز خواهند کرد.
+          </p>
+        </div>
+      )}
+
+      {isAccessible && mutualGuarantorNames.length > 0 && (
+        <div className="p-3.5 bg-amber-950/40 border border-amber-500/50 rounded-2xl space-y-1.5 text-xs text-amber-300 animate-fade-smooth">
+          <div className="flex items-center gap-2 font-black text-amber-400">
+            <AlertTriangle size={16} className="shrink-0" />
+            <span>
+              تضاد منافع حامی مشترک ({mutualGuarantorNames.join(" و ")})
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            کشور {mutualGuarantorNames.join(" و ")} ضامن دفاعی همزمان شما و کشور
+            هدف است. در صورت تهاجم، پیمان دفاعی هر دو کشور لغو شده و آن کشور
+            اعلام بی‌طرفی می‌کند.
+          </p>
+        </div>
+      )}
+
+      {isAccessible && partnerGuarantorNames.length > 0 && (
+        <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/50 rounded-2xl space-y-1.5 text-xs text-emerald-300 animate-fade-smooth">
+          <div className="flex items-center gap-2 font-black text-emerald-400">
+            <ShieldCheck size={16} className="shrink-0" />
+            <span>
+              پایبندی به شراکت استراتژیک با شما (
+              {partnerGuarantorNames.join(" و ")})
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-relaxed">
+            کشور {partnerGuarantorNames.join(" و ")} با شما شراکت استراتژیک
+            اقتصادی دارد؛ لذا در صورت تهاجم به این هدف، علیه شما وارد جنگ نخواهد
+            شد.
+          </p>
         </div>
       )}
 

@@ -14,6 +14,9 @@ export class NationMutatorUtility {
       boostedProjectIdsThisTurn: [],
       projectProgressSteps: {},
       postWarCooldownTurns: 0,
+      defenseGuarantorIds: [],
+      securityGuarantorId: null,
+      isEmergencyProtectorate: false,
       military: {
         ...nation.military,
         infantry: 0,

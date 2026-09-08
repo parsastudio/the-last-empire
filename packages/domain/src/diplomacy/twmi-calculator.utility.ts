@@ -74,18 +74,20 @@ export class TwmiCalculatorUtility {
     const debtInterest = DebtCalculatorUtility.calculateInterest(
       nation.nationalDebt,
     );
-    const securityFee = nation.securityGuarantorId
-      ? SecurityFeeCalculatorUtility.calculateSecurityFee(
-          gdp,
-          Boolean(nation.isEmergencyProtectorate),
-        )
-      : 0;
+    const securityFee =
+      nation.securityGuarantorId && nation.isEmergencyProtectorate
+        ? SecurityFeeCalculatorUtility.calculateSecurityFee(gdp, true)
+        : 0;
 
     const totalExpenses = maintenanceCost + debtInterest + securityFee;
     const netTurnIncome = totalGrossRevenue - totalExpenses;
 
     let guarantorValuation = 0;
-    if (nation.securityGuarantorId && nationsMap) {
+    if (
+      nation.securityGuarantorId &&
+      nation.isEmergencyProtectorate &&
+      nationsMap
+    ) {
       const guarantor = NationGettersUtility.resolveNation(
         nation.securityGuarantorId,
         nationsMap,
@@ -95,7 +97,7 @@ export class TwmiCalculatorUtility {
         guarantorValuation = GuarantorBudgetCalculatorUtility.calculateBudget(
           gdp,
           guarantorGdp,
-          Boolean(nation.isEmergencyProtectorate),
+          true,
         );
       }
     }
