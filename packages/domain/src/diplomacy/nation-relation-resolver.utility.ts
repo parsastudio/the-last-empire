@@ -150,7 +150,6 @@ export class NationRelationResolver {
       postWarCooldownTurns?: number;
     },
     hasConcludedWar: boolean,
-    allNations?: Record<string, Nation>,
   ): number {
     if (!nation.isAi) {
       return 0;

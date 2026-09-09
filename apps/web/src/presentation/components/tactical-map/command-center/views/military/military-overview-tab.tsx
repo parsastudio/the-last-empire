@@ -22,7 +22,6 @@ export function MilitaryOverviewTab({
         <div className="space-y-4">
           <MilitaryValuationCard
             military={nation.military}
-            industrialLevel={nation.industrialLevel}
             nationId={nation.id}
             nation={nation}
             provincesMap={provincesMap}

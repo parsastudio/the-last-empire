@@ -148,7 +148,6 @@ export class PeaceConcessionBuilder {
     humanTwmi: number,
     allHumanProvinces: ProvinceDynamicState[],
     maxHumanCash: number,
-    humanGdp: number,
     provincesMap?: Record<string, ProvinceDynamicState>,
   ): PeaceTermsPackage {
     const v = (ratio - 1.0) / 1.0;

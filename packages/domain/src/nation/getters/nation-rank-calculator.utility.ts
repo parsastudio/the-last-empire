@@ -100,7 +100,6 @@ export class NationRankCalculatorUtility {
         gdp,
         population,
         military: nation.military,
-        governmentType: nation.government.type,
         navalFleet: nation.navalFleet,
         stability: nation.government.stability,
         globalReputation: nation.globalReputation,

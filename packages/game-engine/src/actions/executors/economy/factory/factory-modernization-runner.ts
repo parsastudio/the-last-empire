@@ -13,7 +13,6 @@ export interface ModernizationInput {
   sourceTechLevel?: number;
   targetTech: number;
   calculateUnitCost: (sourceTech: number, targetTech: number) => number;
-  errorMessagePrefix?: string;
 }
 
 export interface ModernizationResult {

@@ -2,15 +2,12 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { MilitaryPowerCalculator } from "@/domain/military/military-power-calculator.utility";
 import { MilitaryDistributionEngine } from "@/domain/military/military-distribution-engine";
 import { MilitaryStack } from "@/domain/military/military.schema";
-import { GovernmentType } from "@/domain/politics/politics.schema";
 
 export interface NationRankCandidateInput {
   id: string;
-  name?: string;
   gdp: number;
   population?: number;
   military?: MilitaryStack;
-  governmentType?: GovernmentType | string;
   domesticTechLevel?: number;
   equipmentTechLevel?: number;
   startingTechLevel?: number;

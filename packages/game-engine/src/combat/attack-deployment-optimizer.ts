@@ -28,7 +28,6 @@ export class AttackDeploymentOptimizer {
     guarantorNation?: Nation | null,
     attackType: "LAND" | "NAVAL" = "LAND",
     navalFleetCount = 0,
-    targetProvinceId?: number,
   ): OptimalDeploymentResult {
     const maxInf = attacker.military.infantry || 0;
     const maxArm = attacker.military.armor || 0;
@@ -100,7 +99,6 @@ export class AttackDeploymentOptimizer {
         af,
         provincesMap,
         guarantorNation,
-        targetProvinceId,
       );
     };
 

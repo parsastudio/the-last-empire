@@ -126,7 +126,6 @@ export function TacticalModalOrchestrator({
         />
       );
 
-    case "VICTORY_DEBRIEF":
     default:
       return null;
   }

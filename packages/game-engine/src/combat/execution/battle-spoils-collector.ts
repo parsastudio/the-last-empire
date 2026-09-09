@@ -1,4 +1,3 @@
-import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { ProvinceConquestResult } from "@/engine/combat/conquest/province-conquest-handler";
 import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
@@ -7,7 +6,6 @@ import { MapTopologyRegistry } from "@geopolitics/domain";
 export class BattleSpoilsCollector {
   public static collectSpoils(
     conquestResult: ProvinceConquestResult,
-    _defender: Nation,
     calcResult: BattleCalculationResult,
   ): BattleSpoilsDetails {
     const conqueredProvs = conquestResult.conqueredProvincesList || [];

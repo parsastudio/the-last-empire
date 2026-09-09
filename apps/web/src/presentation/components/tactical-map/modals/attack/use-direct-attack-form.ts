@@ -151,7 +151,6 @@ export function useDirectAttackForm({
       armorToDeploy,
       airForceToDeploy,
       gameState?.provinces,
-      targetProvinceId || undefined,
     );
   }, [
     humanNation,
@@ -162,7 +161,6 @@ export function useDirectAttackForm({
     armorToDeploy,
     airForceToDeploy,
     gameState?.provinces,
-    targetProvinceId,
   ]);
 
   const handleExecuteQuickRecon = useCallback(async () => {
@@ -203,7 +201,6 @@ export function useDirectAttackForm({
       targetGuarantorNation,
       reach.attackType,
       logistics.navalFleetCount,
-      targetProvinceId || undefined,
     );
 
     setDronesToLaunch(result.drones);
@@ -225,7 +222,6 @@ export function useDirectAttackForm({
     targetGuarantorNation,
     reach.attackType,
     logistics.navalFleetCount,
-    targetProvinceId,
     showToast,
   ]);
 

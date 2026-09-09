@@ -13,7 +13,6 @@ export function useGameActions(onActionExecuted?: () => void) {
   const dispatchAction = useCallback(
     async (
       action: GameAction,
-      _successMessage?: string,
     ): Promise<{ success: boolean; resultData?: unknown }> => {
       if (isSubmitting) return { success: false };
       try {
