@@ -1,6 +1,5 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { InitiateBattleAction } from "@/domain/game/action.schema";
-import { Province } from "@/domain/province/province.schema";
 import { BattleCalculator } from "@/engine/combat/battle-calculator";
 import { BattleStateMutator } from "@/engine/combat/execution/battle-state-mutator";
 import { BattleSpoilsCollector } from "@/engine/combat/execution/battle-spoils-collector";
@@ -14,6 +13,7 @@ import {
   IndustryCalculator,
   DEFAULT_NATION_TURN_ACTIVITY,
 } from "@geopolitics/domain";
+import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
 
 export interface BattleExecutionResult {
   state: GameState;
@@ -147,15 +147,10 @@ export class BattleExecutionEngine {
       attacker.relations,
       defender.id,
     );
-    let betrayalPenalty = 0;
-    if (prevStance === "STRATEGIC_PARTNERSHIP") {
-      betrayalPenalty = 40;
-    } else if (prevStance === "NON_AGGRESSION_PACT") {
-      betrayalPenalty = 25;
-    } else if (prevStance === "NORMAL_DIPLOMACY") {
-      betrayalPenalty = 15;
-    }
 
+    const betrayalEvaluation =
+      DiplomaticBetrayalCalculator.calculatePenalty(prevStance);
+    const betrayalPenalty = betrayalEvaluation.reputationPenalty;
     const betrayalPenaltyText = betrayalPenalty > 0 ? `${betrayalPenalty}` : "";
 
     const battleLogs = BattleLogFactory.createBattleLogs(

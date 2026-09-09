@@ -6,7 +6,7 @@ import { PeaceTermsPackage } from "@/domain/diplomacy/peace-terms.schema";
 import { PeaceWhitePeaceBuilder } from "@/domain/diplomacy/peace/peace-white-peace-builder";
 import { PeaceConcessionBuilder } from "@/domain/diplomacy/peace/peace-concession-builder";
 import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
-import { CountryRegistry } from "@/domain/data/countries";
+import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 
 export class PeaceConcessionResolverUtility {
   public static resolveTerms(
@@ -18,14 +18,10 @@ export class PeaceConcessionResolverUtility {
     currentTurn?: number,
   ): PeaceTermsPackage {
     const ratio = Number((aiTwmi / Math.max(1, humanTwmi)).toFixed(2));
-    const canonicalAi = CountryRegistry.resolveCanonicalId(aiNation.id);
-    const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNation.id);
-
-    const rel =
-      humanNation.relations[canonicalAi] ||
-      humanNation.relations[aiNation.id] ||
-      aiNation.relations[canonicalHuman] ||
-      aiNation.relations[humanNation.id];
+    const rel = NationRelationResolver.getBilateralRelation(
+      humanNation,
+      aiNation,
+    );
 
     const warDeclaredTurn = rel?.warDeclaredTurn;
     const turnsAtWar =

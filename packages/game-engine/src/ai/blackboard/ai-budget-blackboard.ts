@@ -1,19 +1,11 @@
-import {
-  Nation,
-  FiscalRevenueCalculator,
-  MilitaryPayrollCalculator,
-  DebtCalculatorUtility,
-  SecurityFeeCalculatorUtility,
-  NAVAL_FLEET_CONFIG,
-  CountryRegistry,
-  AI_DOCTRINE_PRESETS,
-} from "@geopolitics/domain";
+import { Nation, AI_DOCTRINE_PRESETS } from "@geopolitics/domain";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 import {
   AiDomainNeedScores,
   AiNeedScoringEngine,
 } from "@/engine/ai/blackboard/ai-need-scoring-engine";
+import { AiDisposableBudgetCalculator } from "@/engine/ai/blackboard/ai-disposable-budget-calculator";
 
 export type NumericWalletDomain =
   | "militaryProcurement"
@@ -64,51 +56,20 @@ export class AiBudgetBlackboard {
     posture: AIPosture,
     needScores: AiDomainNeedScores,
   ): BlackboardAllocatedWallets {
-    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-    const gdp = context.getNationGdp(canonicalId);
-    const treasury = nation.treasury;
-
-    const fiscalBreakdown = FiscalRevenueCalculator.calculate(
+    const budget = AiDisposableBudgetCalculator.calculate(
       nation,
       context.state.nations,
       context.state.provinces,
-      context.aiRevenueMultiplier,
+      nation.treasury,
       context.gdpMap,
       context.totalWorldGdp,
     );
 
-    const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(
-      nation,
-      context.state.provinces,
-    );
-
-    const navalIncome = Math.floor(
-      (nation.navalFleet || 0) *
-        NAVAL_FLEET_CONFIG.FLEET_UNIT_COST *
-        NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
-    );
-
-    const grossRevenue = fiscalBreakdown.totalRevenue + navalIncome;
-    const debtInterest = DebtCalculatorUtility.calculateInterest(
-      nation.nationalDebt,
-    );
-    const securityFee = nation.securityGuarantorId
-      ? SecurityFeeCalculatorUtility.calculateSecurityFee(
-          gdp,
-          Boolean(nation.isEmergencyProtectorate),
-        )
-      : 0;
-
-    const fixedExpenses = payrollBreakdown.total + debtInterest + securityFee;
-    const turnSurplus = Math.max(0, grossRevenue - fixedExpenses);
-    const totalDisposable = Math.max(0, treasury + turnSurplus);
-
-    const isEmbargoed = nation.globalReputation <= -30;
     const weights =
       nation.doctrineWeights ??
       AI_DOCTRINE_PRESETS[nation.doctrine || "DOMESTIC_INDUSTRIALIST"];
 
-    if (totalDisposable <= 0) {
+    if (budget.totalDisposable <= 0) {
       return {
         militaryProcurement: 0,
         infrastructure: 0,
@@ -117,7 +78,7 @@ export class AiBudgetBlackboard {
         geopolitics: 0,
         emergencyReserve: 0,
         totalDisposable: 0,
-        isEmbargoed,
+        isEmbargoed: budget.isEmbargoed,
         posture,
       };
     }
@@ -130,9 +91,12 @@ export class AiBudgetBlackboard {
     }
 
     const emergencyReserve = Math.floor(
-      totalDisposable * emergencyReserveRatio,
+      budget.totalDisposable * emergencyReserveRatio,
     );
-    const distributablePool = Math.max(0, totalDisposable - emergencyReserve);
+    const distributablePool = Math.max(
+      0,
+      budget.totalDisposable - emergencyReserve,
+    );
 
     const wMilitary =
       (weights.globalMarketWeight + weights.domesticInfraWeight * 0.5) *
@@ -164,7 +128,7 @@ export class AiBudgetBlackboard {
       distributablePool * (wGeopolitics / sumWeights),
     );
 
-    if (isEmbargoed) {
+    if (budget.isEmbargoed) {
       const diverted = Math.floor(geopoliticsAlloc * 0.5);
       geopoliticsAlloc -= diverted;
       infraAlloc += diverted;
@@ -177,8 +141,8 @@ export class AiBudgetBlackboard {
       nationalProjects: projectsAlloc,
       geopolitics: geopoliticsAlloc,
       emergencyReserve,
-      totalDisposable,
-      isEmbargoed,
+      totalDisposable: budget.totalDisposable,
+      isEmbargoed: budget.isEmbargoed,
       posture,
     };
   }

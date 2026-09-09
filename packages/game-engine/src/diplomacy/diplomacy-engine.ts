@@ -2,6 +2,7 @@ import {
   DiplomaticStance,
   RelationProfile,
   DiplomaticProposalType,
+  DIPLOMACY_CONFIG,
 } from "@geopolitics/domain";
 
 export interface BetrayalEvaluation {
@@ -19,13 +20,30 @@ export class DiplomaticBetrayalCalculator {
       stance === "STRATEGIC_PARTNERSHIP" ||
       targetStance === "STRATEGIC_PARTNERSHIP"
     ) {
-      return { reputationPenalty: 30, skippedSteps: 2, hasBetrayed: true };
+      return {
+        reputationPenalty:
+          DIPLOMACY_CONFIG.BETRAYAL_PENALTIES.STRATEGIC_PARTNERSHIP,
+        skippedSteps: 2,
+        hasBetrayed: true,
+      };
     }
     if (
       stance === "NON_AGGRESSION_PACT" ||
       targetStance === "NON_AGGRESSION_PACT"
     ) {
-      return { reputationPenalty: 15, skippedSteps: 1, hasBetrayed: true };
+      return {
+        reputationPenalty:
+          DIPLOMACY_CONFIG.BETRAYAL_PENALTIES.NON_AGGRESSION_PACT,
+        skippedSteps: 1,
+        hasBetrayed: true,
+      };
+    }
+    if (stance === "NORMAL_DIPLOMACY" || targetStance === "NORMAL_DIPLOMACY") {
+      return {
+        reputationPenalty: DIPLOMACY_CONFIG.BETRAYAL_PENALTIES.NORMAL_DIPLOMACY,
+        skippedSteps: 0,
+        hasBetrayed: true,
+      };
     }
     return { reputationPenalty: 0, skippedSteps: 0, hasBetrayed: false };
   }

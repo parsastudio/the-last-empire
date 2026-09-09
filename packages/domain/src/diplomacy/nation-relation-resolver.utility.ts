@@ -5,6 +5,7 @@ import {
   DiplomaticStance,
 } from "@/domain/diplomacy/diplomacy.schema";
 import { DIPLOMACY_CONFIG } from "@/domain/diplomacy/diplomacy.config";
+import { TerritoryClaimsUtility } from "@/domain/nation/territory-claims.utility";
 
 export class NationRelationResolver {
   public static getRelation(
@@ -17,6 +18,20 @@ export class NationRelationResolver {
     return (
       relationsMap[canonicalTargetId] || relationsMap[targetNationId] || null
     );
+  }
+
+  public static getBilateralRelation(
+    nationA: { relations?: Record<string, RelationProfile> },
+    nationB: { id: string; relations?: Record<string, RelationProfile> },
+  ): RelationProfile | null {
+    const relFromA = this.getRelation(nationA.relations, nationB.id);
+    if (relFromA) return relFromA;
+
+    if ("id" in nationA && typeof nationA.id === "string") {
+      return this.getRelation(nationB.relations, nationA.id);
+    }
+
+    return null;
   }
 
   public static getStance(
@@ -155,9 +170,7 @@ export class NationRelationResolver {
 
 export class DiplomacyLockManager {
   public static createKey(idA: string, idB: string): string {
-    const cA = CountryRegistry.resolveCanonicalId(idA);
-    const cB = CountryRegistry.resolveCanonicalId(idB);
-    return `${cA}:${cB}`;
+    return TerritoryClaimsUtility.createPairKey(idA, idB);
   }
 
   public static isLocked(

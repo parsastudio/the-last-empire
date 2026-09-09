@@ -4,6 +4,8 @@ import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+import { NationRelationResolver } from "@geopolitics/domain";
+import { DiplomaticBetrayalCalculator } from "@/engine/diplomacy/diplomacy-engine";
 
 export interface BattleAttackerStateInput {
   attacker: Nation;
@@ -28,23 +30,16 @@ export class BattleAttackerStateApplier {
     } = input;
     const canonicalDefender = CountryRegistry.resolveCanonicalId(defenderId);
 
-    const existingRel =
-      attacker.relations?.[canonicalDefender] ||
-      attacker.relations?.[defenderId];
-    const prevStance = existingRel ? existingRel.stance : "NORMAL_DIPLOMACY";
+    const prevStance = NationRelationResolver.getStance(
+      attacker.relations,
+      canonicalDefender,
+    );
 
-    let reputationPenalty = 0;
-    if (prevStance === "STRATEGIC_PARTNERSHIP") {
-      reputationPenalty = 40;
-    } else if (prevStance === "NON_AGGRESSION_PACT") {
-      reputationPenalty = 25;
-    } else if (prevStance === "NORMAL_DIPLOMACY") {
-      reputationPenalty = 15;
-    }
-
+    const betrayalEvaluation =
+      DiplomaticBetrayalCalculator.calculatePenalty(prevStance);
     const nextReputation = Math.max(
       -100,
-      attacker.globalReputation - reputationPenalty,
+      attacker.globalReputation - betrayalEvaluation.reputationPenalty,
     );
 
     const updatedRelations: Record<string, RelationProfile> = {
