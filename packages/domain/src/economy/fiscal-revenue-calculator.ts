@@ -6,6 +6,7 @@ import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resol
 import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.schema";
 import { ECONOMIC_DOCTRINE_CONFIGS } from "@/domain/politics/economic-doctrine.config";
 import { StabilityBracketUtility } from "@/domain/politics/stability-bracket.utility";
+import { CountryRegistry } from "@/domain/data/countries";
 
 export interface FiscalRevenueBreakdown {
   totalRevenue: number;
@@ -30,28 +31,41 @@ export class FiscalRevenueCalculator {
     nationsMap?: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     aiRevenueMultiplier: number = FiscalRevenueCalculator.DEFAULT_AI_REVENUE_MULTIPLIER,
+    precomputedGdpMap?: Map<string, number>,
+    precomputedTotalWorldGdp?: number,
   ): FiscalRevenueBreakdown {
-    const gdp = getNationGdp(nation, provincesMap);
+    const canonicalNationId = CountryRegistry.resolveCanonicalId(nation.id);
+    const gdp =
+      precomputedGdpMap?.get(canonicalNationId) ??
+      getNationGdp(nation, provincesMap);
+
     const stance: EconomicDoctrineStance =
       nation.economicStance || "BALANCED_MIXED";
     const config = ECONOMIC_DOCTRINE_CONFIGS[stance];
-
     const domesticBase = Math.floor(gdp * 0.08);
 
     let totalPeaceGdp = 0;
-    let totalWorldGdp = 0;
+    let totalWorldGdp = precomputedTotalWorldGdp ?? 0;
     let activePeacePartnersCount = 0;
 
     if (nationsMap) {
       const allNations = Object.values(nationsMap);
+      const needWorldGdp = totalWorldGdp <= 0;
+
       for (let i = 0; i < allNations.length; i++) {
         const other = allNations[i]!;
         if (!other.isAlive) continue;
 
-        const partnerGdp = getNationGdp(other, provincesMap);
-        totalWorldGdp += partnerGdp;
+        const otherCanonical = CountryRegistry.resolveCanonicalId(other.id);
+        const partnerGdp =
+          precomputedGdpMap?.get(otherCanonical) ??
+          getNationGdp(other, provincesMap);
 
-        if (other.id === nation.id) continue;
+        if (needWorldGdp) {
+          totalWorldGdp += partnerGdp;
+        }
+
+        if (otherCanonical === canonicalNationId) continue;
 
         const isEmbargoed = NationRelationResolver.isTradeEmbargoed(
           nation,
@@ -76,7 +90,6 @@ export class FiscalRevenueCalculator {
     const hasSea = NationGettersUtility.hasSeaAccess(nation.id, provincesMap);
     const seaFactor = hasSea ? 1.0 : 0.5;
     const transitGateway = Math.floor(totalPeaceGdp * 0.0003 * seaFactor);
-
     const globalBase = exportPower + transitGateway;
 
     const appliedAiMultiplier = nation.isAi ? aiRevenueMultiplier : 1.0;

@@ -1,10 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
-import { MilitaryPayrollCalculator } from "@/engine/economy/calculators/payroll-calculator";
-import { BankruptcyManager } from "@/engine/economy/calculators/debt-calculator";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
 import {
   TurnLogBuilder,
   SecurityFeeCalculatorUtility,
@@ -12,7 +8,12 @@ import {
   NAVAL_FLEET_CONFIG,
   DebtCalculatorUtility,
   StrategicPartnershipCalculatorUtility,
+  FiscalRevenueCalculator,
+  MilitaryPayrollCalculator,
+  CountryRegistry,
 } from "@geopolitics/domain";
+import { BankruptcyManager } from "@/engine/economy/bankruptcy-manager";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class EconomyTurnProcessor {
   private static bankruptcyManager = new BankruptcyManager();
@@ -22,14 +23,14 @@ export class EconomyTurnProcessor {
     allNations: Record<string, Nation>,
     ownedProvinces: Province[],
     provincesMap: Record<string, Province>,
-    currentTurn = 1,
-    aiRevenueMultiplier = 1.4,
+    turnContext: TurnContext,
   ): {
     updatedNation: Nation;
     updatedProvinces: Province[];
     bankruptcyLog?: TurnLogEntry;
   } {
     let updatedProvinces = [...ownedProvinces];
+    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
 
     const currentProvincesMap: Record<string, Province> = { ...provincesMap };
     for (let p = 0; p < updatedProvinces.length; p++) {
@@ -48,17 +49,20 @@ export class EconomyTurnProcessor {
         NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
     );
 
-    const gdp = getNationGdp(nation, currentProvincesMap);
+    const gdp =
+      turnContext.gdpMap.get(canonicalId) ??
+      turnContext.gdpMap.get(nation.id) ??
+      0;
 
     let securityFee = 0;
     let nextSecurityGuarantorId = nation.securityGuarantorId ?? null;
     let nextIsEmergency = nation.isEmergencyProtectorate ?? false;
 
     if (nation.securityGuarantorId && nextIsEmergency) {
-      const guarantor = NationGettersUtility.resolveNation(
+      const guarantorCanonical = CountryRegistry.resolveCanonicalId(
         nation.securityGuarantorId,
-        allNations,
       );
+      const guarantor = allNations[guarantorCanonical];
       if (guarantor && guarantor.isAlive) {
         securityFee = SecurityFeeCalculatorUtility.calculateSecurityFee(
           gdp,
@@ -72,7 +76,8 @@ export class EconomyTurnProcessor {
 
     const activeDefenseGuarantors = (nation.defenseGuarantorIds || []).filter(
       (gId) => {
-        const g = NationGettersUtility.resolveNation(gId, allNations);
+        const canonical = CountryRegistry.resolveCanonicalId(gId);
+        const g = allNations[canonical];
         return g && g.isAlive;
       },
     );
@@ -80,17 +85,16 @@ export class EconomyTurnProcessor {
     let partnershipIncome = 0;
     for (const rel of Object.values(nation.relations || {})) {
       if (rel.stance === "STRATEGIC_PARTNERSHIP") {
-        const partner = NationGettersUtility.resolveNation(
+        const partnerCanonical = CountryRegistry.resolveCanonicalId(
           rel.targetNationId,
-          allNations,
         );
+        const partner = allNations[partnerCanonical];
         if (partner && partner.isAlive) {
-          const partnerGdp = getNationGdp(partner, currentProvincesMap);
-          const dividend =
+          const partnerGdp = turnContext.gdpMap.get(partnerCanonical) ?? 0;
+          partnershipIncome +=
             StrategicPartnershipCalculatorUtility.calculateTurnDividend(
               partnerGdp,
             );
-          partnershipIncome += dividend;
         }
       }
     }
@@ -99,7 +103,9 @@ export class EconomyTurnProcessor {
       nation,
       allNations,
       currentProvincesMap,
-      aiRevenueMultiplier,
+      turnContext.aiRevenueMultiplier,
+      turnContext.gdpMap,
+      turnContext.totalWorldGdp,
     );
 
     const totalIncome =
@@ -155,7 +161,7 @@ export class EconomyTurnProcessor {
       updated = bankResult.updatedNation;
       updatedProvinces = bankResult.updatedProvinces;
       bankruptcyLog = TurnLogBuilder.createBankruptcyLog(
-        currentTurn,
+        turnContext.turn,
         updated.id,
       );
     }

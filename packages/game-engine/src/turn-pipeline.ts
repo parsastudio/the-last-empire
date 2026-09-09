@@ -5,33 +5,18 @@ import { Province } from "@/domain/province/province.schema";
 import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-processor";
 import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
 import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
-import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
-import { DIFFICULTY_CONFIGS } from "@geopolitics/domain";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class TurnPipeline {
-  public processTurn(
-    state: GameState,
-    rankMap?: Map<string, number>,
-    provincesByOwnerMap?: Map<string, Province[]>,
-    matrixCache?: GeopoliticalMatrixCache,
-  ): GameState {
+  public processTurn(state: GameState, turnContext: TurnContext): GameState {
     const currentState =
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
-
-    const difficultyKey = currentState.difficulty ?? "NORMAL";
-    const aiMultiplier =
-      DIFFICULTY_CONFIGS[difficultyKey]?.aiRevenueMultiplier ?? 1.4;
 
     const updatedNations: Record<string, Nation> = {};
     const updatedProvincesMap: Record<string, Province> = {
       ...currentState.provinces,
     };
     const economyLogs: TurnLogEntry[] = [];
-
-    const ownerMap =
-      provincesByOwnerMap ??
-      matrixCache?.getProvincesByOwnerMap() ??
-      new Map<string, Province[]>();
 
     const nationKeys = Object.keys(currentState.nations);
 
@@ -41,11 +26,12 @@ export class TurnPipeline {
       if (!nation) continue;
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
-      const ownedProvinces = ownerMap.get(canonicalId) || [];
+      const ownedProvinces =
+        turnContext.provincesByOwnerMap.get(canonicalId) || [];
       const hasTerritory = ownedProvinces.length > 0;
 
       if (!nation.isAlive || !hasTerritory) {
-        updatedNations[id] = nation;
+        updatedNations[canonicalId] = nation;
         continue;
       }
 
@@ -54,9 +40,7 @@ export class TurnPipeline {
           nation,
           currentState.nations,
           updatedProvincesMap,
-          rankMap,
-          ownerMap,
-          matrixCache,
+          turnContext,
         );
 
       const {
@@ -68,8 +52,7 @@ export class TurnPipeline {
         currentState.nations,
         ownedProvinces,
         updatedProvincesMap,
-        currentState.currentTurn,
-        aiMultiplier,
+        turnContext,
       );
 
       if (bankruptcyLog) {
@@ -87,7 +70,7 @@ export class TurnPipeline {
         currentState.nations,
       );
 
-      updatedNations[id] = polNation;
+      updatedNations[canonicalId] = polNation;
     }
 
     return {

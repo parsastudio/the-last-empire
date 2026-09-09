@@ -8,8 +8,8 @@ import {
   UnitType,
   DEFAULT_NATION_MOCK,
   CountryRegistry,
+  MilitaryPayrollCalculator,
 } from "@geopolitics/domain";
-import { MilitaryPayrollCalculator } from "@geopolitics/game-engine";
 
 export interface MilitaryUnitItemViewModel {
   type: UnitType;

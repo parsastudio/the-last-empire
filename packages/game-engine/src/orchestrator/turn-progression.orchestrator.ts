@@ -5,12 +5,12 @@ import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { SeededRandom, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { ActionEngine } from "@/engine/actions/action-engine";
 import { AIActionBuilder } from "@/engine/ai/ai-action-builder";
-import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { CoalitionManager } from "@/engine/politics/coalition-manager";
 import { TurnStateLogger } from "@/engine/diagnostics/turn-state-logger";
 import { TurnExportSalesAggregator } from "@/engine/orchestrator/turn-export-sales-aggregator";
 import { TurnLogWindowUtility } from "@geopolitics/domain";
 import { DilemmaTurnEvaluator } from "@/engine/events/dilemma-turn-evaluator";
+import { TurnContextFactory } from "@/engine/pipeline/turn-context";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -30,29 +30,17 @@ export class TurnProgressionOrchestrator {
       pendingProposals: [...state.pendingProposals],
     };
 
-    let activeMatrixCache = GeopoliticalMatrixCache.build(
-      workingState.nations,
-      workingState.provinces,
-    );
+    let turnContext = TurnContextFactory.create(workingState);
 
-    workingState = this.pipeline.processTurn(
-      workingState,
-      activeMatrixCache.getRankMap(),
-      activeMatrixCache.getProvincesByOwnerMap(),
-      activeMatrixCache,
-    );
-
+    workingState = this.pipeline.processTurn(workingState, turnContext);
     workingState = this.livenessManager.updateLiveness(workingState);
 
-    activeMatrixCache = GeopoliticalMatrixCache.build(
-      workingState.nations,
-      workingState.provinces,
-    );
+    turnContext = TurnContextFactory.create(workingState);
 
     workingState = CoalitionManager.evaluateCoalitionState(
       workingState,
-      activeMatrixCache.getRankMap(),
-      activeMatrixCache.getProvincesByOwnerMap(),
+      turnContext.rankMap,
+      turnContext.provincesByOwnerMap,
     );
 
     const shuffledNationIds = Object.keys(workingState.nations);
@@ -76,7 +64,7 @@ export class TurnProgressionOrchestrator {
         workingState.nations,
         workingState.provinces,
         lockedDiplomacyTargets,
-        activeMatrixCache,
+        turnContext.matrixCache,
         workingState.globalCoalition,
         workingState.currentTurn,
       );
@@ -98,10 +86,7 @@ export class TurnProgressionOrchestrator {
           );
 
           if (hasStructuralChange) {
-            activeMatrixCache = GeopoliticalMatrixCache.build(
-              workingState.nations,
-              workingState.provinces,
-            );
+            turnContext = TurnContextFactory.create(workingState);
           }
         }
       }

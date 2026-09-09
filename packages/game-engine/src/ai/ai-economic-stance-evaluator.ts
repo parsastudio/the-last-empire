@@ -5,8 +5,8 @@ import {
   Province,
   EconomicDoctrineStance,
   ALL_ECONOMIC_DOCTRINES,
+  FiscalRevenueCalculator,
 } from "@geopolitics/domain";
-import { FiscalRevenueCalculator } from "@/engine/economy/calculators/fiscal-revenue-calculator";
 
 export class AIEconomicStanceEvaluator {
   public static evaluateBestStance(
