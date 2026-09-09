@@ -1,22 +1,19 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
-import { Nation } from "@/domain/nation/nation.schema";
-import { GameState } from "@/domain/game/game-state.schema";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import {
+  Nation,
+  GameState,
+  ActionFactory,
+  CountryRegistry,
+  BattleFullReportData,
+} from "@geopolitics/domain";
+import { AttackDeploymentOptimizer } from "@geopolitics/game-engine";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { ActionFactory } from "@/domain/game/action-factory";
-import { CountryRegistry } from "@/domain/data/countries";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { useToast } from "@/presentation/context/toast-context";
-import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
-import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
-import { NationGettersUtility } from "@geopolitics/domain";
-import { useAttackForcesDeployment } from "./hooks/use-attack-forces-deployment";
-import { useAttackForecastCalculator } from "./hooks/use-attack-forecast-calculator";
-import { useAttackTerritoryReach } from "./hooks/use-attack-territory-reach";
-import { useAttackReputationPenalty } from "./hooks/use-attack-reputation-penalty";
-import { useAttackReconRunner } from "./hooks/use-attack-recon-runner";
+import { DirectAttackSelector } from "@/presentation/selectors/direct-attack.selector";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -39,20 +36,28 @@ export function useDirectAttackForm({
   const { showToast } = useToast();
   const openModal = useUiStore((state) => state.openModal);
 
+  const [infantryToDeploy, setInfantryToDeploy] = useState<number>(1);
+  const [armorToDeploy, setArmorToDeploy] = useState<number>(0);
+  const [airForceToDeploy, setAirForceToDeploy] = useState<number>(0);
+  const [dronesToLaunch, setDronesToLaunch] = useState<number>(0);
+  const [isExecutingRecon, setIsExecutingRecon] = useState<boolean>(false);
+
+  const canonicalTargetId = useMemo(() => {
+    return targetNationId
+      ? CountryRegistry.resolveCanonicalId(targetNationId)
+      : null;
+  }, [targetNationId]);
+
   const targetNation = useMemo(() => {
-    if (!gameState || !targetNationId) return null;
-    const canonical = CountryRegistry.resolveCanonicalId(targetNationId);
-    return (
-      gameState.nations[targetNationId] || gameState.nations[canonical] || null
-    );
-  }, [gameState, targetNationId]);
+    if (!gameState || !canonicalTargetId) return null;
+    return gameState.nations[canonicalTargetId] || null;
+  }, [gameState, canonicalTargetId]);
 
   const hasAlreadyAttackedThisTurn = useMemo(() => {
-    if (!humanNation || !targetNation) return false;
-    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
-    const list = humanNation.attackedTargetIdsThisTurn || [];
-    return list.includes(canonicalTarget) || list.includes(targetNation.id);
-  }, [humanNation, targetNation]);
+    if (!humanNation || !canonicalTargetId) return false;
+    const attackedList = humanNation.attackedTargetIdsThisTurn || [];
+    return attackedList.includes(canonicalTargetId);
+  }, [humanNation, canonicalTargetId]);
 
   const targetGuarantorNation = useMemo(() => {
     if (
@@ -62,117 +67,127 @@ export function useDirectAttackForm({
     ) {
       return null;
     }
-    const canonical = CountryRegistry.resolveCanonicalId(
+    const guarantorCanonical = CountryRegistry.resolveCanonicalId(
       targetNation.securityGuarantorId,
     );
-    return (
-      gameState.nations[canonical] ||
-      gameState.nations[targetNation.securityGuarantorId] ||
-      null
-    );
+    return gameState.nations[guarantorCanonical] || null;
   }, [gameState, targetNation]);
 
-  const penalty = useAttackReputationPenalty({
-    humanNation,
-    targetNation,
-  });
+  const reach = useMemo(() => {
+    return DirectAttackSelector.selectReach(
+      humanNation,
+      targetNation,
+      targetProvinceId,
+      gameState,
+    );
+  }, [humanNation, targetNation, targetProvinceId, gameState]);
 
-  const defenseGuarantorAnalysis = useMemo(() => {
-    if (!targetNation || !gameState || !humanNation || penalty.isWarStance) {
-      return {
-        activeGuarantorNames: [],
-        mutualGuarantorNames: [],
-        partnerGuarantorNames: [],
-      };
-    }
+  useEffect(() => {
+    if (isOpen && humanNation) {
+      const availInf = humanNation.military.infantry || 0;
+      const availArm = humanNation.military.armor || 0;
+      const availAir = humanNation.military.airForce || 0;
+      const availDrone = humanNation.military.droneMissile || 0;
 
-    const relWithHuman = humanNation.relations?.[targetNation.id];
-    if (relWithHuman?.isIntervener) {
-      return {
-        activeGuarantorNames: [],
-        mutualGuarantorNames: [],
-        partnerGuarantorNames: [],
-      };
-    }
-
-    const activeGuarantorNames: string[] = [];
-    const mutualGuarantorNames: string[] = [];
-    const partnerGuarantorNames: string[] = [];
-
-    const targetGuarantors = targetNation.defenseGuarantorIds || [];
-    const humanGuarantors = humanNation.defenseGuarantorIds || [];
-
-    for (let i = 0; i < targetGuarantors.length; i++) {
-      const gId = targetGuarantors[i]!;
-      const canonicalG = CountryRegistry.resolveCanonicalId(gId);
-      const gNation = NationGettersUtility.resolveNation(
-        canonicalG,
-        gameState.nations,
+      setInfantryToDeploy(
+        Math.max(1, Math.min(availInf, Math.ceil(availInf * 0.75))),
       );
-
-      if (!gNation || !gNation.isAlive) continue;
-
-      const isMutual = humanGuarantors.some(
-        (hId) => CountryRegistry.resolveCanonicalId(hId) === canonicalG,
-      );
-
-      if (isMutual) {
-        mutualGuarantorNames.push(gNation.name);
-        continue;
-      }
-
-      const rel =
-        gNation.relations?.[humanNation.id] ||
-        humanNation.relations?.[canonicalG];
-      const hasStrategicPartnership = rel?.stance === "STRATEGIC_PARTNERSHIP";
-
-      if (hasStrategicPartnership) {
-        partnerGuarantorNames.push(gNation.name);
-        continue;
-      }
-
-      activeGuarantorNames.push(gNation.name);
+      setArmorToDeploy(Math.min(availArm, Math.ceil(availArm * 0.75)));
+      setAirForceToDeploy(Math.min(availAir, Math.ceil(availAir * 0.75)));
+      setDronesToLaunch(Math.min(availDrone, Math.ceil(availDrone * 0.75)));
     }
+  }, [isOpen, canonicalTargetId, targetProvinceId, humanNation]);
 
-    return {
-      activeGuarantorNames,
-      mutualGuarantorNames,
-      partnerGuarantorNames,
-    };
-  }, [targetNation, gameState, humanNation, penalty.isWarStance]);
+  const penalty = useMemo(() => {
+    return DirectAttackSelector.selectPenalty(humanNation, targetNation);
+  }, [humanNation, targetNation]);
 
-  const reach = useAttackTerritoryReach({
+  const guarantors = useMemo(() => {
+    return DirectAttackSelector.selectGuarantors(
+      humanNation,
+      targetNation,
+      gameState,
+      penalty.isWarStance,
+    );
+  }, [humanNation, targetNation, gameState, penalty.isWarStance]);
+
+  const logistics = useMemo(() => {
+    return DirectAttackSelector.selectLogistics(
+      humanNation,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
+      dronesToLaunch,
+      reach.attackType,
+    );
+  }, [
     humanNation,
-    targetNationName: targetNation?.name,
-    targetProvinceId,
-    gameState,
-  });
+    infantryToDeploy,
+    armorToDeploy,
+    airForceToDeploy,
+    dronesToLaunch,
+    reach.attackType,
+  ]);
 
-  const recon = useAttackReconRunner({
-    humanNation,
-    targetNation,
-    provincesMap: gameState?.provinces,
-  });
+  const recon = useMemo(() => {
+    return DirectAttackSelector.selectRecon(
+      humanNation,
+      targetNation,
+      gameState?.provinces,
+    );
+  }, [humanNation, targetNation, gameState?.provinces]);
 
-  const deployment = useAttackForcesDeployment({
-    humanNation,
-    isOpen,
-    targetNationId,
-    targetProvinceId,
-    attackType: reach.attackType,
-  });
-
-  const forecast = useAttackForecastCalculator({
+  const forecast = useMemo(() => {
+    return DirectAttackSelector.selectForecast(
+      humanNation,
+      targetNation,
+      targetGuarantorNation,
+      dronesToLaunch,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
+      gameState?.provinces,
+      targetProvinceId || undefined,
+    );
+  }, [
     humanNation,
     targetNation,
     targetGuarantorNation,
-    dronesToLaunch: deployment.dronesToLaunch,
-    infantryToDeploy: deployment.infantryToDeploy,
-    armorToDeploy: deployment.armorToDeploy,
-    airForceToDeploy: deployment.airForceToDeploy,
-    provincesMap: gameState?.provinces,
-    targetProvinceId: targetProvinceId || undefined,
-  });
+    dronesToLaunch,
+    infantryToDeploy,
+    armorToDeploy,
+    airForceToDeploy,
+    gameState?.provinces,
+    targetProvinceId,
+  ]);
+
+  const handleExecuteQuickRecon = useCallback(async () => {
+    if (
+      !humanNation ||
+      !targetNation ||
+      isExecutingRecon ||
+      !recon.canAffordRecon
+    ) {
+      return;
+    }
+    try {
+      setIsExecutingRecon(true);
+      const action = ActionFactory.executeEspionage(
+        humanNation.id,
+        targetNation.id,
+        1,
+      );
+      await dispatchAction(action);
+    } finally {
+      setIsExecutingRecon(false);
+    }
+  }, [
+    humanNation,
+    targetNation,
+    isExecutingRecon,
+    recon.canAffordRecon,
+    dispatchAction,
+  ]);
 
   const handleAutoOptimizeDeploy = useCallback(() => {
     if (!humanNation || !targetNation) return;
@@ -183,16 +198,14 @@ export function useDirectAttackForm({
       gameState?.provinces,
       targetGuarantorNation,
       reach.attackType,
-      deployment.navalFleetCount,
+      logistics.navalFleetCount,
       targetProvinceId || undefined,
     );
 
-    deployment.applyOptimizedDeploy(
-      result.drones,
-      result.airForce,
-      result.armor,
-      result.infantry,
-    );
+    setDronesToLaunch(result.drones);
+    setAirForceToDeploy(result.airForce);
+    setArmorToDeploy(result.armor);
+    setInfantryToDeploy(result.infantry);
 
     if (!result.isPossible) {
       showToast(
@@ -207,7 +220,7 @@ export function useDirectAttackForm({
     gameState?.provinces,
     targetGuarantorNation,
     reach.attackType,
-    deployment,
+    logistics.navalFleetCount,
     targetProvinceId,
     showToast,
   ]);
@@ -218,7 +231,7 @@ export function useDirectAttackForm({
       !targetNation ||
       isSubmitting ||
       hasAlreadyAttackedThisTurn ||
-      !deployment.hasNavalCapacity
+      !logistics.hasNavalCapacity
     ) {
       return;
     }
@@ -226,10 +239,10 @@ export function useDirectAttackForm({
     const action = ActionFactory.initiateBattle(
       humanNation.id,
       targetNation.id,
-      deployment.dronesToLaunch,
-      deployment.infantryToDeploy,
-      deployment.armorToDeploy,
-      deployment.airForceToDeploy,
+      dronesToLaunch,
+      infantryToDeploy,
+      armorToDeploy,
+      airForceToDeploy,
       targetProvinceId || undefined,
       reach.attackType,
     );
@@ -255,7 +268,11 @@ export function useDirectAttackForm({
     targetNation,
     isSubmitting,
     hasAlreadyAttackedThisTurn,
-    deployment,
+    logistics.hasNavalCapacity,
+    dronesToLaunch,
+    infantryToDeploy,
+    armorToDeploy,
+    airForceToDeploy,
     targetProvinceId,
     reach.attackType,
     dispatchAction,
@@ -270,35 +287,35 @@ export function useDirectAttackForm({
     isLandNeighbor: reach.isLandNeighbor,
     isNavalValid: reach.isNavalValid,
     attackType: reach.attackType,
-    navalFleetCount: deployment.navalFleetCount,
-    hasNavalCapacity: deployment.hasNavalCapacity,
-    hasAlreadyAttackedThisTurn,
-    isReconActive: recon.isReconActive,
-    reconCost: recon.reconCost,
-    canAffordRecon: recon.canAffordRecon,
-    isExecutingRecon: recon.isExecutingRecon,
+    originRegionName: reach.originRegionName,
+    targetRegionName: reach.targetRegionName,
     currentStance: penalty.currentStance,
     isWarStance: penalty.isWarStance,
     reputationPenalty: penalty.reputationPenalty,
-    originRegionName: reach.originRegionName,
-    targetRegionName: reach.targetRegionName,
+    activeGuarantorNames: guarantors.activeGuarantorNames,
+    mutualGuarantorNames: guarantors.mutualGuarantorNames,
+    partnerGuarantorNames: guarantors.partnerGuarantorNames,
+    navalFleetCount: logistics.navalFleetCount,
+    hasNavalCapacity: logistics.hasNavalCapacity,
+    totalLogisticsCost: logistics.totalLogisticsCost,
+    canAfford: logistics.canAfford,
+    hasSelectedInfantry: logistics.hasSelectedInfantry,
+    isReconActive: recon.isReconActive,
+    reconCost: recon.reconCost,
+    canAffordRecon: recon.canAffordRecon,
+    isExecutingRecon,
+    hasAlreadyAttackedThisTurn,
     forecast,
-    infantryToDeploy: deployment.infantryToDeploy,
-    setInfantryToDeploy: deployment.setInfantryToDeploy,
-    armorToDeploy: deployment.armorToDeploy,
-    setArmorToDeploy: deployment.setArmorToDeploy,
-    airForceToDeploy: deployment.airForceToDeploy,
-    setAirForceToDeploy: deployment.setAirForceToDeploy,
-    dronesToLaunch: deployment.dronesToLaunch,
-    setDronesToLaunch: deployment.setDronesToLaunch,
-    totalLogisticsCost: deployment.totalLogisticsCost,
-    canAfford: deployment.canAfford,
-    hasSelectedInfantry: deployment.hasSelectedInfantry,
+    infantryToDeploy,
+    setInfantryToDeploy,
+    armorToDeploy,
+    setArmorToDeploy,
+    airForceToDeploy,
+    setAirForceToDeploy,
+    dronesToLaunch,
+    setDronesToLaunch,
     isSubmitting,
-    activeGuarantorNames: defenseGuarantorAnalysis.activeGuarantorNames,
-    mutualGuarantorNames: defenseGuarantorAnalysis.mutualGuarantorNames,
-    partnerGuarantorNames: defenseGuarantorAnalysis.partnerGuarantorNames,
-    handleExecuteQuickRecon: recon.handleExecuteQuickRecon,
+    handleExecuteQuickRecon,
     handleAutoOptimizeDeploy,
     handleExecuteAttack,
   };
