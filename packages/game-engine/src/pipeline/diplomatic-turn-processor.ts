@@ -4,13 +4,11 @@ import {
   Province,
   RelationProfile,
   CountryRegistry,
-  GeopoliticalReachResolver,
-  NationGettersUtility,
-  TerritoryClaimsUtility,
   PendingProposalManagerUtility,
+  TerritoryClaimsUtility,
   TerritorialSaturationCalculatorUtility,
 } from "@geopolitics/domain";
-import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class DiplomaticTurnProcessor {
   public static processPendingProposalsForAi(state: GameState): GameState {
@@ -31,11 +29,9 @@ export class DiplomaticTurnProcessor {
 
   public static process(
     nation: Nation,
-    allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    rankMap?: Map<string, number>,
-    provincesByOwnerMap?: Map<string, Province[]>,
-    matrixCache?: GeopoliticalMatrixCache,
+    allNations: Record<string, Nation>,
+    provincesMap: Record<string, Province>,
+    turnContext: TurnContext,
   ): {
     updatedNation: Nation;
     isAtWar: boolean;
@@ -44,6 +40,7 @@ export class DiplomaticTurnProcessor {
       return { updatedNation: nation, isAtWar: false };
     }
 
+    const canonicalSource = CountryRegistry.resolveCanonicalId(nation.id);
     let isAtWar = false;
     const relKeys = Object.keys(nation.relations);
     const newRels: Record<string, RelationProfile> = {};
@@ -56,11 +53,7 @@ export class DiplomaticTurnProcessor {
       }
     }
 
-    const myProvs = NationGettersUtility.getOwnedProvinces(
-      nation.id,
-      provincesMap,
-      provincesByOwnerMap,
-    );
+    const myProvs = turnContext.provincesByOwnerMap.get(canonicalSource) || [];
 
     const saturationScore =
       TerritorialSaturationCalculatorUtility.calculateSaturationScore(
@@ -69,20 +62,17 @@ export class DiplomaticTurnProcessor {
         myProvs,
       );
 
-    const reachableTargets = matrixCache
-      ? matrixCache.getReachableTargets(nation, allNations || {}, provincesMap)
-      : GeopoliticalReachResolver.getReachableTargets(
-          nation,
-          allNations || {},
-          provincesMap,
-          rankMap,
-          myProvs,
-          provincesByOwnerMap,
-        );
+    const reachableTargets = turnContext.matrixCache.getReachableTargets(
+      nation,
+      allNations,
+      provincesMap,
+    );
 
     const reachableCanonicalSet = new Set(
       reachableTargets.map((t) => CountryRegistry.resolveCanonicalId(t.id)),
     );
+
+    const occupiedMap = turnContext.matrixCache.getOccupiedTerritoryMap();
 
     for (let j = 0; j < relKeys.length; j++) {
       const targetId = relKeys[j]!;
@@ -90,9 +80,7 @@ export class DiplomaticTurnProcessor {
       if (!relation) continue;
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations
-        ? allNations[canonicalTarget] || allNations[targetId]
-        : null;
+      const targetNation = allNations[canonicalTarget];
 
       if (relation.stance === "WAR") {
         if (targetNation && targetNation.isAlive) {
@@ -102,18 +90,11 @@ export class DiplomaticTurnProcessor {
 
       let nextAlignment = relation.alignment ?? 0;
       if (relation.stance !== "WAR") {
-        const lostCount = matrixCache
-          ? TerritoryClaimsUtility.getOccupiedProvinceCount(
-              nation.id,
-              targetId,
-              matrixCache.getOccupiedTerritoryMap(),
-            )
-          : TerritoryClaimsUtility.getOccupiedProvinceCount(
-              nation.id,
-              targetId,
-              undefined,
-              provincesMap,
-            );
+        const lostCount = TerritoryClaimsUtility.getOccupiedProvinceCount(
+          canonicalSource,
+          canonicalTarget,
+          occupiedMap,
+        );
 
         const revanchismBaseline =
           lostCount > 0 ? Math.max(-35, -lostCount * 12) : 0;
@@ -153,8 +134,9 @@ export class DiplomaticTurnProcessor {
         }
       }
 
-      newRels[targetId] = {
+      newRels[canonicalTarget] = {
         ...relation,
+        targetNationId: canonicalTarget,
         alignment: Math.max(-100, Math.min(100, nextAlignment)),
         tension: currentTension,
       };
@@ -163,10 +145,8 @@ export class DiplomaticTurnProcessor {
     let nextWarFocus = nation.warFocusTargetId ?? null;
     if (nextWarFocus) {
       const canonicalFocus = CountryRegistry.resolveCanonicalId(nextWarFocus);
-      const focusRel = newRels[canonicalFocus] || newRels[nextWarFocus];
-      const focusTarget = allNations
-        ? allNations[canonicalFocus] || allNations[nextWarFocus]
-        : null;
+      const focusRel = newRels[canonicalFocus];
+      const focusTarget = allNations[canonicalFocus];
       const isFocusAlive = focusTarget ? focusTarget.isAlive : true;
 
       if (!focusRel || focusRel.stance !== "WAR" || !isFocusAlive) {

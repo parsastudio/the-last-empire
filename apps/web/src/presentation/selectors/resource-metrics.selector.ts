@@ -8,11 +8,9 @@ import {
   CountryRegistry,
   StrategicPartnershipCalculatorUtility,
   GameDifficulty,
-} from "@geopolitics/domain";
-import {
   FiscalRevenueCalculator,
   MilitaryPayrollCalculator,
-} from "@geopolitics/game-engine";
+} from "@geopolitics/domain";
 
 export interface HumanResourceMetrics {
   nation: Nation | null;

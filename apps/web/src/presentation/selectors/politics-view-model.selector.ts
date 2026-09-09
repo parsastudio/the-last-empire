@@ -5,11 +5,9 @@ import {
   ECONOMIC_DOCTRINE_CONFIGS,
   NationGettersUtility,
   getNationGdp,
-} from "@geopolitics/domain";
-import {
   FiscalRevenueCalculator,
   FiscalRevenueBreakdown,
-} from "@geopolitics/game-engine";
+} from "@geopolitics/domain";
 
 export interface EconomicDoctrinePreviewViewModel {
   selectedStance: EconomicDoctrineStance;

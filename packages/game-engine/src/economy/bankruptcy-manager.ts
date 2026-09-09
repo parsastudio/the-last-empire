@@ -1,7 +1,9 @@
-import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { DebtCalculatorUtility } from "@geopolitics/domain";
+import {
+  Nation,
+  Province,
+  getNationGdp,
+  DebtCalculatorUtility,
+} from "@geopolitics/domain";
 
 export class BankruptcyManager {
   public isBankrupt(

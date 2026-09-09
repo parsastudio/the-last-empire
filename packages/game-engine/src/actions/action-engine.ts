@@ -26,8 +26,9 @@ export class ActionEngine {
     const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
-    const sourceNation =
-      state.nations[canonicalSourceId] || state.nations[action.nationId];
+    action.nationId = canonicalSourceId;
+
+    const sourceNation = state.nations[canonicalSourceId];
 
     if (!sourceNation || !sourceNation.isAlive) {
       return {
@@ -42,9 +43,9 @@ export class ActionEngine {
       const canonicalTargetId = CountryRegistry.resolveCanonicalId(
         action.targetNationId,
       );
-      const targetNation =
-        state.nations[canonicalTargetId] ||
-        state.nations[action.targetNationId];
+      action.targetNationId = canonicalTargetId;
+
+      const targetNation = state.nations[canonicalTargetId];
 
       if (!targetNation || !targetNation.isAlive) {
         return {

@@ -77,7 +77,7 @@ export * from "./diplomacy/appliers/peace-treaty-applier";
 export * from "./diplomacy/treaty-acceptance-applier";
 export * from "./diplomacy/peace-settlement-executor";
 
-export * from "./economy/economy-calculators";
+export * from "./economy/bankruptcy-manager";
 
 export * from "./espionage/espionage-calculator";
 export * from "./espionage/espionage-manager";
@@ -93,6 +93,7 @@ export * from "./military/domestic-recruitment-manager";
 export * from "./orchestrator/turn-export-sales-aggregator";
 export * from "./orchestrator/turn-progression.orchestrator";
 
+export * from "./pipeline/turn-context";
 export * from "./pipeline/diplomatic-turn-processor";
 export * from "./pipeline/economy-turn-processor";
 export * from "./pipeline/politics-turn-processor";
