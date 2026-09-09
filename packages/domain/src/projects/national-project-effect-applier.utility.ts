@@ -1,4 +1,7 @@
-import { NationalProjectConfig } from "@/domain/projects/national-project.schema";
+import {
+  NationalProjectConfig,
+  NationalProjectEffect,
+} from "@/domain/projects/national-project.schema";
 import { NATIONAL_PROJECTS_CATALOG } from "@/domain/projects/national-projects-catalog.data";
 
 export class NationalProjectEffectApplierUtility {
@@ -13,10 +16,11 @@ export class NationalProjectEffectApplierUtility {
   public static getCompletedProjects(
     completedIds: string[] = [],
   ): NationalProjectConfig[] {
+    if (!completedIds || completedIds.length === 0) return [];
     return NATIONAL_PROJECTS_CATALOG.filter((p) => completedIds.includes(p.id));
   }
 
-  public static hasEffect<K extends keyof NationalProjectConfig["effect"]>(
+  public static hasEffect<K extends keyof NationalProjectEffect>(
     completedIds: string[] = [],
     effectKey: K,
   ): boolean {
@@ -24,21 +28,32 @@ export class NationalProjectEffectApplierUtility {
     return completed.some((p) => p.effect[effectKey] !== undefined);
   }
 
-  public static getCombinedMultiplier(
+  public static getCombinedBonus<K extends keyof NationalProjectEffect>(
     completedIds: string[] = [],
-    multiplierKey:
-      | "factoryYieldBonusMultiplier"
-      | "militaryPowerBonusMultiplier"
-      | "globalTradeIncomeBonusMultiplier",
+    effectKey: K,
   ): number {
     const completed = this.getCompletedProjects(completedIds);
-    let totalMultiplier = 1.0;
+    let total = 0;
     for (let i = 0; i < completed.length; i++) {
-      const val = completed[i]!.effect[multiplierKey];
+      const val = completed[i]!.effect[effectKey];
       if (typeof val === "number") {
-        totalMultiplier += val;
+        total += val;
       }
     }
-    return totalMultiplier;
+    return total;
+  }
+
+  public static getCombinedMultiplier<K extends keyof NationalProjectEffect>(
+    completedIds: string[] = [],
+    multiplierKey: K,
+  ): number {
+    return 1.0 + this.getCombinedBonus(completedIds, multiplierKey);
+  }
+
+  public static getCombinedDiscountMultiplier<
+    K extends keyof NationalProjectEffect,
+  >(completedIds: string[] = [], discountKey: K): number {
+    const totalDiscount = this.getCombinedBonus(completedIds, discountKey);
+    return Math.max(0.1, Number((1.0 - totalDiscount).toFixed(2)));
   }
 }

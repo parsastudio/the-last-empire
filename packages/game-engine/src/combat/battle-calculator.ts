@@ -14,7 +14,10 @@ import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver
 import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
 import { BattleLootEvaluator } from "@/engine/combat/calculator/battle-loot-evaluator";
 import { BattlePhaseOrchestrator } from "@/engine/combat/calculator/battle-phase-orchestrator";
-import { MilitaryPowerCalculator } from "@geopolitics/domain";
+import {
+  MilitaryPowerCalculator,
+  NationalProjectEffectApplierUtility,
+} from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -136,6 +139,12 @@ export class BattleCalculator {
       droneMissile: nativeDefMults.droneMissile,
     };
 
+    const autoInterceptionBonus =
+      NationalProjectEffectApplierUtility.getCombinedBonus(
+        defender.completedProjectIds,
+        "autoMissileInterceptionRate",
+      );
+
     const phasesResult = BattlePhaseOrchestrator.executePhases(
       deployedDrones,
       defAirDefense,
@@ -153,6 +162,7 @@ export class BattleCalculator {
       defMults.armor,
       attMults.infantry,
       defMults.infantry,
+      autoInterceptionBonus,
     );
 
     const attackerDeployedPower = Math.max(
@@ -187,6 +197,12 @@ export class BattleCalculator {
       (attackerDeployedPower / defenderTotalPower).toFixed(2),
     );
 
+    const defCasualtyDiscount =
+      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
+        defender.completedProjectIds,
+        "defenseCasualtyReductionMultiplier",
+      );
+
     const casualty = BattleCasualtyResolver.resolve({
       deployedInfantry,
       deployedArmor,
@@ -204,6 +220,7 @@ export class BattleCalculator {
       rawDefAirDefenseLost:
         phasesResult.missilePhaseOutput.rawDefAirDefenseLost,
       rawDefAirLoss: phasesResult.airPhaseOutput.rawDefAirLoss,
+      defCasualtyDiscount,
     });
 
     const treasuryLooted = BattleLootEvaluator.calculateLoot(

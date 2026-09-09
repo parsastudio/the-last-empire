@@ -7,258 +7,259 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
     {
       id: "automation_production_lines",
       nameFa: "اتوماسیون رباتیک خطوط تولید",
-      taglineFa: "افزایش خودکار راندمان کارخانجات",
+      taglineFa: "جهش راندمان کارخانجات با هوش مصنوعی صنعتی",
       descriptionFa:
-        "نصب خطوط مونتاژ خودکار و سنسورهای هوشمند در شهرک‌های صنعتی که بازدهی مالی و عواید کلیه کارخانجات کشور را ۱۵٪ افزایش می‌دهد.",
+        "تجهیز سوله‌های صنعتی و خطوط مونتاژ به بازوهای خودکار و سنسورهای نسل جدید که بازدهی مالی و عواید کلیه کارخانجات کشور را ۱۰٪ افزایش می‌دهد.",
       category: "INDUSTRY_TECH",
       tier: "SHORT_TERM",
       totalStepsRequired: 10,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        factoryYieldBonusMultiplier: 0.15,
+        factoryYieldBonusMultiplier: 0.1,
       },
     },
     {
       id: "rapid_deployment_doctrine",
-      nameFa: "دکترین واکنش و مانور سریع ارتش",
-      taglineFa: "ارتقای قدرت ضربتی یگان‌های رزمی",
+      nameFa: "دکترین ترابری و واکنش ضربتی",
+      taglineFa: "افزایش توان آتش و چابکی یگان‌های عملیاتی",
       descriptionFa:
-        "سازمان‌دهی فرماندهی چابک و رزمایش‌های شبیه‌سازی‌شده که توان آتش و کوبندگی یگان‌های پیاده و زرهی را ۱۵٪ ارتقا می‌بخشد.",
+        "سازمان‌دهی فرماندهی چابک و رزمایش‌های شبیه‌سازی‌شده که توان آتش و راندمان رزمی یگان‌های پیاده و زرهی را ۱۰٪ ارتقا می‌بخشد.",
       category: "MILITARY",
       tier: "SHORT_TERM",
       totalStepsRequired: 10,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        militaryPowerBonusMultiplier: 0.15,
+        militaryPowerBonusMultiplier: 0.1,
       },
     },
     {
       id: "free_transit_gateways",
-      nameFa: "کریدورها و بنادر آزاد تجاری",
-      taglineFa: "گسترش درآمدهای گمرکی و بازرگانی",
+      nameFa: "توسعه بنادر و کریدورهای آزاد بازرگانی",
+      taglineFa: "گسترش درآمدهای گمرکی و عواید ترانزیت فرامرزی",
       descriptionFa:
-        "تسهیل ترخیص کالا و معافیت‌های هدفمند در گلوگاه‌های مرزی که عواید حاصل از ترانزیت و تبادلات بین‌المللی را ۲۵٪ افزایش می‌دهد.",
+        "روان‌سازی ترخیص کالا، تخفیف‌های هدفمند تعرفه‌ای و توسعه اسکله‌های بندری که عواید حاصل از مبادلات بین‌المللی را ۱۵٪ افزایش می‌دهد.",
       category: "ECONOMIC",
       tier: "SHORT_TERM",
       totalStepsRequired: 10,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        globalTradeIncomeBonusMultiplier: 0.15,
+      },
+    },
+    {
+      id: "passive_defense_fortifications",
+      nameFa: "استحکامات پدافند غیرعامل و دژهای مرزی",
+      taglineFa: "کاهش تلفات ارتش در دفاع سرزمینی",
+      descriptionFa:
+        "احداث سنگرهای بتنی، مقرهای زیرزمینی و شبکه تونل‌های تاکتیکی که تلفات ارتش خودی در دفاع از خاک میهن را ۱۵٪ کاهش می‌دهد.",
+      category: "MILITARY",
+      tier: "SHORT_TERM",
+      totalStepsRequired: 10,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        defenseCasualtyReductionMultiplier: 0.15,
+      },
+    },
+    {
+      id: "diplomatic_soft_power_network",
+      nameFa: "گسترش سفارتخانه‌ها و قدرت نرم دیپلماتیک",
+      taglineFa: "ارتقای پرستیژ و جایگاه رسمی در مجامع جهانی",
+      descriptionFa:
+        "تاسیس دفاتر رایزنی اقتصادی، کارزارهای فرهنگی و هیئت‌های دیپلماتیک فعال که پرستیژ بین‌المللی کشور را ۱۰ واحد افزایش دائمی می‌دهد.",
+      category: "GEOPOLITICAL",
+      tier: "SHORT_TERM",
+      totalStepsRequired: 10,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        globalReputationBonus: 10,
+      },
+    },
+    {
+      id: "smart_logistics_hub",
+      nameFa: "آمادگاه دیجیتال و زنجیره تأمین هوشمند",
+      taglineFa: "مهار هزینه‌های جاری نگهداری و ترابری ارتش",
+      descriptionFa:
+        "انبارداری خودکار مهمات، مدیریت مکانیزه سوخت و پایش ناوگان که مخارج نوبتی نگهداری تسلیحات و حقوق نیروها را ۱۰٪ کاهش می‌دهد.",
+      category: "MILITARY",
+      tier: "SHORT_TERM",
+      totalStepsRequired: 10,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        maintenanceCostDiscountMultiplier: 0.1,
+      },
+    },
+    {
+      id: "integrated_laser_radar_grid",
+      nameFa: "سپر پدافند موشکی و راداری یکپارچه",
+      taglineFa: "پایش آسمان و رهگیری موشک‌ها و پهپادهای مهاجم",
+      descriptionFa:
+        "استقرار رادارهای آرایه فازی و آتشبارهای واکنش سریع که ۲۰٪ از موشک‌ها و پهپادهای متخاصم را پیش از اصابت در هوا منهدم می‌سازد.",
+      category: "MILITARY",
+      tier: "MID_TERM",
+      totalStepsRequired: 20,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        autoMissileInterceptionRate: 0.2,
+      },
+    },
+    {
+      id: "continental_energy_corridor",
+      nameFa: "شاهراه انتقال انرژی و فیبر قاره‌ای",
+      taglineFa: "پایداری استراتژیک زیرساخت‌ها و ایمنی ثبات ملی",
+      descriptionFa:
+        "ایجاد رینگ انتقال نیرو و شبکه مستقل فیبرنوری که پایداری اجتماعی کشور را در تنش‌ها تضمین کرده و ۸ واحد ثبات دائمی اعطا می‌کند.",
+      category: "GEOPOLITICAL",
+      tier: "MID_TERM",
+      totalStepsRequired: 20,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        permanentStabilityBonus: 8,
+      },
+    },
+    {
+      id: "electronic_warfare_ai_hub",
+      nameFa: "مرکز جنگ الکترونیک و نظارت ماهواره‌ای",
+      taglineFa: "اشراف اطلاعاتی تاکتیکی و اختلال در ناوبری دشمن",
+      descriptionFa:
+        "تجهیز پایگاه‌های شنود سیگنالی و ماهواره‌های شناسایی که پرستیژ امنیتی کشور را ۸ واحد ارتقا داده و ۵٪ به رهگیری پدافند هوایی کمک می‌کند.",
+      category: "GEOPOLITICAL",
+      tier: "MID_TERM",
+      totalStepsRequired: 20,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        globalReputationBonus: 8,
+        autoMissileInterceptionRate: 0.05,
+      },
+    },
+    {
+      id: "nano_alloy_metallurgy",
+      nameFa: "متالورژی نانوآلیاژها و مواد ترکیبی",
+      taglineFa: "ارزان‌سازی احداث کارخانه و ساخت ادوات سنگین",
+      descriptionFa:
+        "دستیابی به فرمولاسیون کامپوزیت‌های سبک و مقاوم که مخارج احداث سوله‌ها و ساخت ماشین‌آلات و ادوات رزمی را ۱۵٪ ارزان‌تر می‌کند.",
+      category: "INDUSTRY_TECH",
+      tier: "MID_TERM",
+      totalStepsRequired: 20,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        procurementCostDiscountMultiplier: 0.15,
+      },
+    },
+    {
+      id: "national_industrial_zones",
+      nameFa: "مناطق ویژه خودکفایی و زیرساخت صنایع سنگین",
+      taglineFa: "گسترش ظرفیت سقف احداث کارخانه در سراسر کشور",
+      descriptionFa:
+        "آماده‌سازی اراضی صنعتی، شبکه برق مستقل و تأسیسات زیربنایی که سقف اسلات ساخت کارخانه را در تمام استان‌ها ۲۰٪ افزایش می‌دهد.",
+      category: "INDUSTRY_TECH",
+      tier: "MID_TERM",
+      totalStepsRequired: 20,
+      costPerStep: PROJECT_STEP_FLAT_COST,
+      effect: {
+        factorySlotExpansionRatio: 0.2,
+      },
+    },
+    {
+      id: "strategic_currency_clearing",
+      nameFa: "پیمان پیام‌رسان و تسویه دوجانبه ارزی",
+      taglineFa: "بهبود راندمان صادرات و بازدهی بازرگانی خارجی",
+      descriptionFa:
+        "راه‌اندازی سوئیفت ارزی مستقل و کانال‌های مالی پایدار با شرکا که عواید حاصل از صادرات و تجارت بین‌المللی را ۲۵٪ افزایش می‌دهد.",
+      category: "ECONOMIC",
+      tier: "MID_TERM",
+      totalStepsRequired: 20,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
         globalTradeIncomeBonusMultiplier: 0.25,
       },
     },
     {
-      id: "passive_defense_fortifications",
-      nameFa: "استحکامات پدافند غیرعامل مرزی",
-      taglineFa: "کاهش تلفات در برابر تهاجم دشمن",
+      id: "quantum_fusion_grid",
+      nameFa: "شبکه نیروگاه‌های گداخت هسته‌ای پایدار",
+      taglineFa: "انرژی ارزان؛ محرک جهش ظرفیت و بازدهی صنایع",
       descriptionFa:
-        "احداث سنگرهای بتنی و شبکه تونل‌های تاکتیکی در مرزها که تلفات ارتش خودی در هنگام دفاع سرزمینی را ۲۵٪ کاهش می‌دهد.",
-      category: "MILITARY",
-      tier: "SHORT_TERM",
-      totalStepsRequired: 10,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        defenseCasualtyReductionMultiplier: 0.25,
-      },
-    },
-    {
-      id: "diplomatic_soft_power_network",
-      nameFa: "توسعه سفارتخانه‌ها و پرستیژ دیپلماتیک",
-      taglineFa: "کسب اعتبار رسمی بین‌المللی",
-      descriptionFa:
-        "ایجاد دفاتر رایزنی اقتصادی و کارزارهای فرهنگی بین‌المللی که پرستیژ و جایگاه جهانی کشور را به میزان ۱۵ واحد ارتقا می‌دهد.",
-      category: "GEOPOLITICAL",
-      tier: "SHORT_TERM",
-      totalStepsRequired: 10,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        globalReputationBonus: 15,
-      },
-    },
-    {
-      id: "smart_logistics_hub",
-      nameFa: "زنجیره تأمین و آمادگاه هوشمند ارتش",
-      taglineFa: "مهار هزینه‌های نگهداری ماهانه",
-      descriptionFa:
-        "انبارداری دیجیتال و مکانیزاسیون سوخت‌رسانی که مخارج جاری نگهداری تسلیحات و دستمزد ماهانه ارتش را ۱۵٪ کاهش می‌دهد.",
-      category: "MILITARY",
-      tier: "SHORT_TERM",
-      totalStepsRequired: 10,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        maintenanceCostDiscountMultiplier: 0.15,
-      },
-    },
-
-    {
-      id: "integrated_laser_radar_grid",
-      nameFa: "شبکه پدافند موشکی یکپارچه",
-      taglineFa: "رهگیری پیش‌دستانه موشک‌های تهاجمی",
-      descriptionFa:
-        "سامانه‌های راداری باند بلند که ۳۵٪ از موشک‌ها و پهپادهای تهاجمی حریف را پیش از برخورد به پدافند خودی در هوا متلاشی می‌کنند.",
-      category: "MILITARY",
-      tier: "MID_TERM",
-      totalStepsRequired: 20,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        autoMissileInterceptionRate: 0.35,
-      },
-    },
-    {
-      id: "continental_energy_corridor",
-      nameFa: "کریدور فیبرنوری و لوله‌های انرژی",
-      taglineFa: "ثبات پایدار داخلی و مهار بحران‌ها",
-      descriptionFa:
-        "خطوط مواصلاتی فراملی که پایداری سیاسی و همبستگی داخلی کشور را ۱۰٪ افزایش داده و مانع افت شدید ثبات در جنگ می‌شود.",
-      category: "GEOPOLITICAL",
-      tier: "MID_TERM",
-      totalStepsRequired: 20,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        permanentStabilityBonus: 10,
-      },
-    },
-    {
-      id: "electronic_warfare_ai_hub",
-      nameFa: "مرکز شنود ماهواره‌ای و سایبری",
-      taglineFa: "اشراف کامل اطلاعاتی بر تمامی کشورها",
-      descriptionFa:
-        "سامانه پایش هوشمند که اطلاعات زرادخانه، ذخایر خزانه و سطح فناوری کلیه کشورهای جهان را بدون نیاز به ارسال جاسوس برملا می‌کند.",
-      category: "GEOPOLITICAL",
-      tier: "MID_TERM",
-      totalStepsRequired: 20,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        fullOmniscienceIntel: true,
-      },
-    },
-    {
-      id: "nano_alloy_metallurgy",
-      nameFa: "مجتمع‌های متالورژی نانوآلیاژ",
-      taglineFa: "ارزان‌سازی ساخت و نوسازی ادوات",
-      descriptionFa:
-        "تولید آلیاژهای فوق‌سبک و مستحکم که هزینه‌های احداث سوله، خرید ادوات زرهی و خطوط تولید بومی را ۲۰٪ ارزان‌تر می‌کند.",
+        "مهار انرژی گداخت که بازدهی تمام کارخانجات کشور را ۲۰٪ ارتقا داده و سقف اسلات‌های مجاز صنعتی را ۳۰٪ افزایش می‌دهد.",
       category: "INDUSTRY_TECH",
-      tier: "MID_TERM",
-      totalStepsRequired: 20,
+      tier: "LONG_TERM",
+      totalStepsRequired: 30,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        procurementCostDiscountMultiplier: 0.2,
-      },
-    },
-    {
-      id: "national_industrial_zones",
-      nameFa: "مناطق ویژه خودکفایی صنعتی",
-      taglineFa: "افزایش اسلات‌های احداث کارخانه",
-      descriptionFa:
-        "آماده‌سازی زمین‌های صنعتی و شبکه برق مستقل که ظرفیت سقف ساخت کارخانه در تمام استان‌ها را ۳۰٪ افزایش می‌دهد.",
-      category: "INDUSTRY_TECH",
-      tier: "MID_TERM",
-      totalStepsRequired: 20,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
+        factoryYieldBonusMultiplier: 0.2,
         factorySlotExpansionRatio: 0.3,
       },
     },
     {
-      id: "strategic_currency_clearing",
-      nameFa: "پیمان پیام‌رسان و تسویه ارزی دوجانبه",
-      taglineFa: "افزایش بهره‌وری ارزی از تجارت خارجی",
-      descriptionFa:
-        "راه‌اندازی سوئیفت مستقل ارزی که بازدهی عواید حاصل از صادرات و دکترین اقتصادی کشور را ۳۰٪ افزایش می‌دهد.",
-      category: "ECONOMIC",
-      tier: "MID_TERM",
-      totalStepsRequired: 20,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        globalTradeIncomeBonusMultiplier: 0.3,
-      },
-    },
-
-    {
-      id: "quantum_fusion_grid",
-      nameFa: "شبکه نیروگاه‌های گداخت هسته‌ای",
-      taglineFa: "تأمین انرژی ارزان و جهش ظرفیت صنعتی",
-      descriptionFa:
-        "دستیابی به انرژی پایدار ارزان که بازدهی تمام کارخانجات کشور را ۲۵٪ ارتقا داده و سقف اسلات‌های صنعتی را ۵۰٪ بازتر می‌کند.",
-      category: "INDUSTRY_TECH",
-      tier: "LONG_TERM",
-      totalStepsRequired: 30,
-      costPerStep: PROJECT_STEP_FLAT_COST,
-      effect: {
-        factoryYieldBonusMultiplier: 0.25,
-        factorySlotExpansionRatio: 0.5,
-      },
-    },
-    {
       id: "petro_currency_hegemony",
-      nameFa: "پتروپیمان ارزی و هژمونی مبادلات",
-      taglineFa: "اخذ سهم ثابت از نقدینگی جهان",
+      nameFa: "پیمان تجارت راهبردی انرژی و هژمونی ارزی",
+      taglineFa: "تسلط بر مبادلات ترانزیت و جریان نقدینگی بین‌الملل",
       descriptionFa:
-        "الزام مبادلات انرژی به پول ملی کشور شما که در هر نوبت معادل ۱.۵٪ از کل درآمدهای ناخالص کشورهای صلح‌آمیز را به خزانه شما واریز می‌کند.",
+        "الزام مبادلات راهبردی نفت و انرژی با پول ملی شما که عواید بازرگانی کشور را ۳۵٪ جهش داده و سهم ثابتی از گردش مالی جهانی به خزانه می‌افزاید.",
       category: "ECONOMIC",
       tier: "LONG_TERM",
       totalStepsRequired: 30,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        petroTributeShare: 0.015,
+        globalTradeIncomeBonusMultiplier: 0.35,
+        petroTributeShare: 0.002,
       },
     },
     {
       id: "strategic_deterrence_triad",
       nameFa: "تکمیل سه‌گانه بازدارندگی راهبردی",
-      taglineFa: "سپر بازدارنده در برابر تهاجم‌های ناگهانی",
+      taglineFa: "سپر بازدارنده نهایی در برابر تهاجم قدرت‌های بزرگ",
       descriptionFa:
-        "تجهیز موشک‌های قاره‌پیما و زیردریایی‌های پنهانکار که آستانه تصمیم هوش مصنوعی برای اعلان جنگ تک‌کشوری به شما را ۵۰٪ دشوارتر می‌کند.",
+        "سیلوهای موشک‌های دوربرد و زیردریایی‌های پنهانکار که تصمیم حریفان برای اعلان جنگ به شما را ۳۰٪ مهار کرده و ۱۰ امتیاز پرستیژ به همراه دارد.",
       category: "MILITARY",
       tier: "LONG_TERM",
       totalStepsRequired: 30,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        deterrenceWarThresholdMultiplier: 1.5,
+        deterrenceWarThresholdMultiplier: 1.3,
+        globalReputationBonus: 10,
       },
     },
     {
       id: "combined_arms_supremacy",
-      nameFa: "دکترین جامع برتری رزم مشترک",
-      taglineFa: "افزایش چشمگیر توان مانور تمام رسته‌ها",
+      nameFa: "دکترین جامع برتری رزم مشترک شبکه‌محور",
+      taglineFa: "هم‌افزایی رزمی حداکثری میان تمام رسته‌ها در میدان",
       descriptionFa:
-        "ادغام شبکه‌محور رادارهای پروازی، تانک‌ها و پیاده‌نظام که توان رزمی و بقای تمام یگان‌ها در میدان نبرد را ۲۵٪ ارتقا می‌دهد.",
+        "ادغام ارتباطی رادارهای هوابرد، تانک‌ها و پیاده‌نظام که قدرت رزمی و بقای کلیه یگان‌ها در صحنه نبرد را ۲۰٪ تقویت می‌نماید.",
       category: "MILITARY",
       tier: "LONG_TERM",
       totalStepsRequired: 30,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        militaryPowerBonusMultiplier: 0.25,
+        militaryPowerBonusMultiplier: 0.2,
       },
     },
     {
       id: "multilateral_treaty_architecture",
-      nameFa: "نظم نوین معاهدات بین‌المللی",
-      taglineFa: "جهش نفوذ ژئوپلیتیک و ثبات دیپلماتیک",
+      nameFa: "نظم نوین معاهدات و مجمع امنیت پایدار",
+      taglineFa: "رهبری دیپلماسی جهانی و مصونیت سیاسی دائمی",
       descriptionFa:
-        "ایجاد مجمع دائمی همکاری‌های مشترک که ۲۵+ امتیاز پرستیژ دائمی و ۱۰+ ثبات سیاسی همیشگی به دولت اعطا می‌نماید.",
+        "تأسیس نهاد دائمی همکاری‌های بین‌المللی به محوریت کشور شما که ۲۰ واحد پرستیژ جهانی و ۱۰ واحد ثبات همیشگی به دولت اعطا می‌نماید.",
       category: "GEOPOLITICAL",
       tier: "LONG_TERM",
       totalStepsRequired: 30,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        globalReputationBonus: 25,
+        globalReputationBonus: 20,
         permanentStabilityBonus: 10,
       },
     },
     {
       id: "advanced_robotics_defense_arsenal",
-      nameFa: "مجتمع‌های تسلیحاتی تمام‌خودکار",
-      taglineFa: "کاهش اساسی در هزینه‌های نوسازی و ارتش",
+      nameFa: "صنایع دفاعی خودکار و تسلیحات تمام‌رباتیک",
+      taglineFa: "کاهش بنیادین در مخارج نوسازی و هزینه‌های نگهداری ارتش",
       descriptionFa:
-        "خطوط تمام‌رباتیک ساخت تجهیزات سنگین که هزینه خرید تسلیحات و نگهداری ماهانه کل ارتش را به میزان ۳۰٪ کاهش می‌دهد.",
+        "خطوط پیشرفته مونتاژ رباتیک که هزینه ساخت ادوات جنگی را ۲۰٪ و مخارج جاری نگهداری و حقوق ارتش را ۲۰٪ کاهش می‌دهد.",
       category: "INDUSTRY_TECH",
       tier: "LONG_TERM",
       totalStepsRequired: 30,
       costPerStep: PROJECT_STEP_FLAT_COST,
       effect: {
-        procurementCostDiscountMultiplier: 0.3,
-        maintenanceCostDiscountMultiplier: 0.3,
+        procurementCostDiscountMultiplier: 0.2,
+        maintenanceCostDiscountMultiplier: 0.2,
       },
     },
   ]);

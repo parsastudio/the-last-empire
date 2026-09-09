@@ -10,6 +10,8 @@ import {
   FiscalRevenueCalculator,
   MilitaryPayrollCalculator,
   CountryRegistry,
+  NationalProjectEffectApplierUtility,
+  NationRelationResolver,
 } from "@geopolitics/domain";
 import { BankruptcyManager } from "@/engine/economy/bankruptcy-manager";
 import { TurnContext } from "@/engine/pipeline/turn-context";
@@ -94,6 +96,27 @@ export class EconomyTurnProcessor {
       }
     }
 
+    const petroTributeRate =
+      NationalProjectEffectApplierUtility.getCombinedBonus(
+        nation.completedProjectIds,
+        "petroTributeShare",
+      );
+
+    let petroTributeIncome = 0;
+    if (petroTributeRate > 0) {
+      for (const other of Object.values(turnContext.state.nations)) {
+        if (!other.isAlive || other.id === nation.id) continue;
+        const isAtWar = NationRelationResolver.isWar(
+          nation.relations,
+          other.id,
+        );
+        if (!isAtWar) {
+          const otherGdp = turnContext.getNationGdp(other.id);
+          petroTributeIncome += Math.floor(otherGdp * petroTributeRate);
+        }
+      }
+    }
+
     const fiscalResult = FiscalRevenueCalculator.calculate(
       nation,
       turnContext.state.nations,
@@ -104,7 +127,10 @@ export class EconomyTurnProcessor {
     );
 
     const totalIncome =
-      fiscalResult.totalRevenue + navalSecurityIncome + partnershipIncome;
+      fiscalResult.totalRevenue +
+      navalSecurityIncome +
+      partnershipIncome +
+      petroTributeIncome;
 
     const maintenanceCost = payrollBreakdown.total;
     const debtInterest = DebtCalculatorUtility.calculateInterest(
