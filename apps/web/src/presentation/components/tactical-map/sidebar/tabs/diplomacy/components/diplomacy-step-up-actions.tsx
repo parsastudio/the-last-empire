@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpCircle, Handshake, Coins } from "lucide-react";
+import { ArrowUpCircle, Handshake, Coins, Clock } from "lucide-react";
 import { DiplomaticStance, PersianNumberFormatter } from "@geopolitics/domain";
 
 interface DiplomacyStepUpActionsProps {
@@ -7,6 +7,7 @@ interface DiplomacyStepUpActionsProps {
   strategicPartnershipCost?: number;
   strategicPartnershipDividend?: number;
   canAffordPartnership?: boolean;
+  isPeaceCooldownActive?: boolean;
   onPeaceTreaty: () => void;
   onNonAggression: () => void;
   onStrategicPartnership: () => void;
@@ -17,6 +18,7 @@ export function DiplomacyStepUpActions({
   strategicPartnershipCost = 0,
   strategicPartnershipDividend = 0,
   canAffordPartnership = true,
+  isPeaceCooldownActive = false,
   onPeaceTreaty,
   onNonAggression,
   onStrategicPartnership,
@@ -25,17 +27,32 @@ export function DiplomacyStepUpActions({
     return (
       <button
         onClick={onPeaceTreaty}
-        className="w-full p-3.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-400 text-right transition-all cursor-pointer space-y-1 shadow-sm"
+        className={`w-full p-3.5 rounded-2xl border text-right transition-all space-y-1 shadow-sm ${
+          isPeaceCooldownActive
+            ? "bg-amber-500/10 border-amber-500/30 text-amber-400 cursor-pointer"
+            : "bg-emerald-500/15 hover:bg-emerald-500/25 border-emerald-500/40 text-emerald-400 cursor-pointer"
+        }`}
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-1.5">
-            <Handshake size={16} />
-            ورود به میز مذاکرات آتش‌بس و شروط صلح
+            {isPeaceCooldownActive ? (
+              <Clock size={16} />
+            ) : (
+              <Handshake size={16} />
+            )}
+            <span>ورود به میز مذاکرات آتش‌بس و شروط صلح</span>
           </span>
-          <ArrowUpCircle size={16} className="text-emerald-400" />
+          <ArrowUpCircle
+            size={16}
+            className={
+              isPeaceCooldownActive ? "text-amber-400" : "text-emerald-400"
+            }
+          />
         </div>
         <p className="text-[10px] text-muted-foreground">
-          بررسی زنده تراز قوا، بسته غرامت مالی یا واگذاری ارضی برای پایان جنگ
+          {isPeaceCooldownActive
+            ? "مخاصمه در نوبت جاری آغاز شده است (امکان تصویب صلح پس از گذر ۱ نوبت فعال می‌شود)."
+            : "بررسی زنده تراز قوا، بسته غرامت مالی یا واگذاری ارضی برای پایان جنگ"}
         </p>
       </button>
     );

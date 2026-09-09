@@ -37,6 +37,7 @@ export function ImfLoanCard({
   const maxRepayBillion = Math.floor(Math.min(nationalDebt, treasury) / 1e9);
 
   const isSmallDebt = nationalDebt > 0 && nationalDebt < 1e9;
+  const canAffordFullRepay = treasury >= nationalDebt && nationalDebt > 0;
 
   const handleConfirmLoan = async (billionAmount: number) => {
     const absoluteVal = billionAmount * 1e9;
@@ -51,7 +52,7 @@ export function ImfLoanCard({
   };
 
   const handleRepayFull = async () => {
-    if (nationalDebt <= 0 || treasury <= 0) return;
+    if (!canAffordFullRepay) return;
     const action = ActionFactory.repayDebt(nationId, nationalDebt);
     await dispatchAction(action);
   };
@@ -101,7 +102,8 @@ export function ImfLoanCard({
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button
               onClick={() => setIsLoanModalOpen(true)}
-              className="py-2.5 bg-secondary hover:bg-secondary/80 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+              disabled={availableLoanBillion <= 0}
+              className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
             >
               <ArrowUpRight size={13} className="text-gdp" />
               <span>درخواست وام</span>
@@ -110,11 +112,15 @@ export function ImfLoanCard({
             {isSmallDebt ? (
               <button
                 onClick={handleRepayFull}
-                disabled={treasury <= 0}
-                className="py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 text-primary-foreground rounded-xl text-xs font-bold transition-all border border-gdp/30 flex items-center justify-center gap-1 cursor-pointer shadow-md"
+                disabled={!canAffordFullRepay}
+                className="py-2.5 bg-gdp hover:bg-gdp/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground rounded-xl text-xs font-bold transition-all border border-gdp/30 flex items-center justify-center gap-1 cursor-pointer shadow-md"
               >
                 <DollarSign size={13} />
-                <span>تسویه کامل بدهی</span>
+                <span>
+                  {canAffordFullRepay
+                    ? "تسویه کامل بدهی"
+                    : "موجودی ناکافی جهت تسویه"}
+                </span>
               </button>
             ) : (
               <button
@@ -122,7 +128,7 @@ export function ImfLoanCard({
                 disabled={
                   nationalDebt <= 0 || treasury <= 0 || maxRepayBillion <= 0
                 }
-                className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
+                className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
               >
                 <ArrowDownRight size={13} className="text-military" />
                 <span>تسویه بدهی</span>
@@ -130,10 +136,10 @@ export function ImfLoanCard({
             )}
           </div>
 
-          {isSmallDebt && (
-            <div className="text-[10px] text-muted-foreground font-sans bg-secondary/30 p-2 rounded-xl border border-border/40 text-center">
-              بدهی شما کمتر از ۱ میلیارد دلار است. از دکمه «تسویه کامل» برای
-              تسویه یکجا استفاده کنید.
+          {isSmallDebt && !canAffordFullRepay && (
+            <div className="text-[10px] text-military font-sans bg-military/10 p-2 rounded-xl border border-military/30 text-center">
+              موجودی خزانه کمتر از اصل بدهی معوق (
+              {PersianNumberFormatter.formatCurrency(nationalDebt)}) است.
             </div>
           )}
         </div>

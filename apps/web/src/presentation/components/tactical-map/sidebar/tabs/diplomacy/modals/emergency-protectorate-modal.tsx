@@ -50,7 +50,7 @@ export function EmergencyProtectorateModal({
     {
       id: "gdp",
       title: "نسبت تولید ناخالص ملی (GDP)",
-      desc: "تولید ناخالص ابرقدرت حامی باید حداقل ۲ برابر کشور شما باشد.",
+      desc: "تولید ناخالص ابرقدرت حامی باید حداقل برابر یا بزرگتر از کشور شما باشد (نسبت ۱.۰x یا بیشتر).",
       currentValue: `${PersianNumberFormatter.toPersianDigits(validation.gdpRatio)}x برابری`,
       isValid: validation.isGdpValid,
       icon: Scale,

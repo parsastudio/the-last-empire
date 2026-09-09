@@ -19,6 +19,9 @@ interface DiplomacyActionButtonsProps {
   strategicPartnershipCost?: number;
   strategicPartnershipDividend?: number;
   canAffordPartnership?: boolean;
+  canAffordAid?: boolean;
+  canDeclareWar?: boolean;
+  isPeaceCooldownActive?: boolean;
   emergencyProtectorateCost: number;
   hasSecurityGuarantee?: boolean;
   isEmergencyProtectorate?: boolean;
@@ -47,6 +50,9 @@ export function DiplomacyActionButtons({
   strategicPartnershipCost = 0,
   strategicPartnershipDividend = 0,
   canAffordPartnership = true,
+  canAffordAid = true,
+  canDeclareWar = true,
+  isPeaceCooldownActive = false,
   emergencyProtectorateCost,
   hasSecurityGuarantee = false,
   isEmergencyProtectorate = false,
@@ -65,6 +71,7 @@ export function DiplomacyActionButtons({
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
   const isWar = currentStance === "WAR";
+  const isAidDisabled = isAidSentThisTurn || !canAffordAid;
 
   return (
     <div className="space-y-2.5 font-sans">
@@ -73,6 +80,7 @@ export function DiplomacyActionButtons({
         strategicPartnershipCost={strategicPartnershipCost}
         strategicPartnershipDividend={strategicPartnershipDividend}
         canAffordPartnership={canAffordPartnership}
+        isPeaceCooldownActive={isPeaceCooldownActive}
         onPeaceTreaty={onPeaceTreaty}
         onNonAggression={onNonAggression}
         onStrategicPartnership={onStrategicPartnership}
@@ -98,10 +106,10 @@ export function DiplomacyActionButtons({
       {!isWar && (
         <button
           onClick={onSendAid}
-          disabled={isAidSentThisTurn}
+          disabled={isAidDisabled}
           className={`w-full p-3 rounded-2xl border text-right transition-all space-y-1 ${
-            isAidSentThisTurn
-              ? "bg-secondary/40 border-border/60 text-muted-foreground cursor-not-allowed opacity-75"
+            isAidDisabled
+              ? "bg-secondary/40 border-border/60 text-muted-foreground cursor-not-allowed opacity-60"
               : "bg-amber-500/10 hover:bg-amber-500/20 border-amber-500/30 text-amber-500 cursor-pointer shadow-sm"
           }`}
         >
@@ -114,6 +122,8 @@ export function DiplomacyActionButtons({
                     بسته کمک مالی در این نوبت واریز شد
                   </span>
                 </>
+              ) : !canAffordAid ? (
+                `کسری موجودی خزانه جهت ارسال کمک مالی (${PersianNumberFormatter.formatCurrency(foreignAidCost)})`
               ) : (
                 `ارسال کمک مالی و دیپلماتیک (${PersianNumberFormatter.formatCurrency(foreignAidCost)})`
               )}
@@ -121,20 +131,23 @@ export function DiplomacyActionButtons({
             <HeartHandshake
               size={14}
               className={
-                isAidSentThisTurn ? "text-muted-foreground" : "text-amber-500"
+                isAidDisabled ? "text-muted-foreground" : "text-amber-500"
               }
             />
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
             {isAidSentThisTurn
               ? "سهمیه کمک مالی به این کشور در نوبت جاری تکمیل شده است (امکان ارسال مجدد در نوبت بعد)."
-              : "بهبود فوری ۲۵+ همسویی و ۱۵- تنش دوجانبه (۱+ اعتبار جهانی)."}
+              : !canAffordAid
+                ? "موجودی خزانه برای پوشش این مبلغ کمک بین‌المللی کافی نیست."
+                : "بهبود فوری ۲۵+ همسویی و ۱۵- تنش دوجانبه (۱+ اعتبار جهانی)."}
           </p>
         </button>
       )}
 
       <DiplomacyStepDownActions
         currentStance={currentStance}
+        canDeclareWar={canDeclareWar}
         onCancelTreaty={onCancelTreaty}
         onDeclareWar={onDeclareWar}
       />

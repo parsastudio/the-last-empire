@@ -47,6 +47,13 @@ export function useDirectAttackForm({
     );
   }, [gameState, targetNationId]);
 
+  const hasAlreadyAttackedThisTurn = useMemo(() => {
+    if (!humanNation || !targetNation) return false;
+    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
+    const list = humanNation.attackedTargetIdsThisTurn || [];
+    return list.includes(canonicalTarget) || list.includes(targetNation.id);
+  }, [humanNation, targetNation]);
+
   const targetGuarantorNation = useMemo(() => {
     if (
       !gameState ||
@@ -210,6 +217,7 @@ export function useDirectAttackForm({
       !humanNation ||
       !targetNation ||
       isSubmitting ||
+      hasAlreadyAttackedThisTurn ||
       !deployment.hasNavalCapacity
     ) {
       return;
@@ -246,6 +254,7 @@ export function useDirectAttackForm({
     humanNation,
     targetNation,
     isSubmitting,
+    hasAlreadyAttackedThisTurn,
     deployment,
     targetProvinceId,
     reach.attackType,
@@ -263,6 +272,7 @@ export function useDirectAttackForm({
     attackType: reach.attackType,
     navalFleetCount: deployment.navalFleetCount,
     hasNavalCapacity: deployment.hasNavalCapacity,
+    hasAlreadyAttackedThisTurn,
     isReconActive: recon.isReconActive,
     reconCost: recon.reconCost,
     canAffordRecon: recon.canAffordRecon,

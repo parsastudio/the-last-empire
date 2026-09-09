@@ -40,12 +40,17 @@ export function IndustryImportTab({
   const sellers = useMemo(() => {
     if (!nationsMap) return [];
     return Object.values(nationsMap)
-      .filter(
-        (n) =>
-          n.isAlive && n.id !== nation.id && n.industrialLevel > minBatchTech,
-      )
+      .filter((n) => {
+        if (!n.isAlive || n.id === nation.id) return false;
+        if (n.industrialLevel <= minBatchTech) return false;
+        const canonical = CountryRegistry.resolveCanonicalId(n.id);
+        const rel = nation.relations[canonical] || nation.relations[n.id];
+        const stance = rel ? rel.stance : "NORMAL_DIPLOMACY";
+        const tension = rel ? (rel.tension ?? 10) : 10;
+        return stance !== "WAR" && tension < 50;
+      })
       .sort((a, b) => b.industrialLevel - a.industrialLevel);
-  }, [nationsMap, nation.id, minBatchTech]);
+  }, [nationsMap, nation.id, nation.relations, minBatchTech]);
 
   const filteredSellers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -85,8 +90,7 @@ export function IndustryImportTab({
               فهرست صادرکنندگان تجهیزات و ماشین‌آلات پیشرفته
             </h3>
             <span className="text-[10px] text-muted-foreground">
-              روی هر کشور کلیک کنید تا میز واردات خطوط تولید و تجهیز رده‌ها با
-              لول آن کشور باز شود.
+              فقط کشورهای هم‌پیمان و دارای تنش کمتر از ۵۰٪ در دسترس هستند.
             </span>
           </div>
         </div>
@@ -110,11 +114,11 @@ export function IndustryImportTab({
         <div className="p-12 bg-card/60 border border-border/60 rounded-3xl text-center space-y-2">
           <ShieldCheck size={32} className="text-emerald-400 mx-auto" />
           <span className="text-sm font-black text-foreground block">
-            پیشرفته‌ترین صنایع در اختیار شماست
+            صادرکننده آزادی در دسترس نیست
           </span>
           <p className="text-xs text-muted-foreground">
-            هیچ کشوری در جهان فناوری صنعتی بالاتری نسبت به خطوط تولید فعلی شما
-            ندارد.
+            هیچ کشوری با فناوری صنعتی بالاتر که در وضعیت صلح و تنش زیر ۵۰٪ باشد
+            یافت نشد.
           </p>
         </div>
       ) : (

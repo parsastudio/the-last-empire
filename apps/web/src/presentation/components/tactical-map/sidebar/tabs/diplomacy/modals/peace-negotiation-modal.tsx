@@ -30,6 +30,7 @@ interface PeaceNegotiationModalProps {
   targetNationId: string | null;
   nationsMap?: Record<string, Nation>;
   provincesMap?: Record<string, Province>;
+  currentTurn?: number;
   onClose: () => void;
 }
 
@@ -39,6 +40,7 @@ export function PeaceNegotiationModal({
   targetNationId,
   nationsMap,
   provincesMap,
+  currentTurn,
   onClose,
 }: PeaceNegotiationModalProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
@@ -57,8 +59,9 @@ export function PeaceNegotiationModal({
       targetNation,
       nationsMap,
       provincesMap,
+      currentTurn,
     );
-  }, [humanNation, targetNation, nationsMap, provincesMap]);
+  }, [humanNation, targetNation, nationsMap, provincesMap, currentTurn]);
 
   if (!isOpen || !humanNation || !targetNation || !terms) {
     return null;
@@ -278,9 +281,7 @@ export function PeaceNegotiationModal({
               {isProcessing || isSubmitting
                 ? "در حال پردازش معاهده صلح..."
                 : !terms.canAffordTerms
-                  ? isDominantAi
-                    ? "به دلیل قدرت بالاتر حاضر به مذاکره نیست"
-                    : terms.headline
+                  ? terms.headline
                   : "امضا و تصویب معاهده صلح"}
             </span>
           </button>

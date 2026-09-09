@@ -13,6 +13,7 @@ interface AttackCostSummaryProps {
   isLandNeighbor: boolean;
   isNavalValid?: boolean;
   hasNavalCapacity?: boolean;
+  hasAlreadyAttackedThisTurn?: boolean;
   attackType?: "LAND" | "NAVAL";
   onExecute: () => void;
 }
@@ -27,6 +28,7 @@ export function AttackCostSummary({
   isLandNeighbor,
   isNavalValid = false,
   hasNavalCapacity = true,
+  hasAlreadyAttackedThisTurn = false,
   attackType = "LAND",
   onExecute,
 }: AttackCostSummaryProps) {
@@ -36,6 +38,7 @@ export function AttackCostSummary({
     !hasSelectedInfantry ||
     !canAfford ||
     !hasNavalCapacity ||
+    hasAlreadyAttackedThisTurn ||
     isSubmitting;
 
   const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
@@ -104,17 +107,19 @@ export function AttackCostSummary({
         <span>
           {isSubmitting
             ? "در حال ثبت دستور و گسیل ارتش..."
-            : !isAccessible
-              ? "عدم امکان دسترسی به منطقه تهاجم"
-              : isNaval && !hasNavalCapacity
-                ? "ظرفیت ترابری ناوگان دریایی ناکافی است"
-                : !hasSelectedInfantry
-                  ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
-                  : !canAfford
-                    ? "موجودی خزانه ناکافی جهت تأمین مخارج"
-                    : isNaval
-                      ? `صدور فرمان هجوم دریایی به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`
-                      : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
+            : hasAlreadyAttackedThisTurn
+              ? "تهاجم مجدد در این نوبت مجاز نیست (پایان نوبت لازم است)"
+              : !isAccessible
+                ? "عدم امکان دسترسی به منطقه تهاجم"
+                : isNaval && !hasNavalCapacity
+                  ? "ظرفیت ترابری ناوگان دریایی ناکافی است"
+                  : !hasSelectedInfantry
+                    ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
+                    : !canAfford
+                      ? "موجودی خزانه ناکافی جهت تأمین مخارج"
+                      : isNaval
+                        ? `صدور فرمان هجوم دریایی به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`
+                        : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
         </span>
       </button>
     </div>

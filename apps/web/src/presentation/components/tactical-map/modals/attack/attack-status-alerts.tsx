@@ -6,6 +6,7 @@ import {
   Flame,
   Swords,
   ShieldCheck,
+  Clock,
 } from "lucide-react";
 import { DiplomaticStance } from "@/domain/diplomacy/diplomacy.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -20,6 +21,7 @@ interface AttackStatusAlertsProps {
   reputationPenalty: number;
   targetNationName: string;
   targetRegionName: string;
+  hasAlreadyAttackedThisTurn?: boolean;
   activeGuarantorNames?: string[];
   mutualGuarantorNames?: string[];
   partnerGuarantorNames?: string[];
@@ -33,6 +35,7 @@ export function AttackStatusAlerts({
   reputationPenalty,
   targetNationName,
   targetRegionName,
+  hasAlreadyAttackedThisTurn = false,
   activeGuarantorNames = [],
   mutualGuarantorNames = [],
   partnerGuarantorNames = [],
@@ -42,6 +45,22 @@ export function AttackStatusAlerts({
 
   return (
     <div className="space-y-3 dir-rtl text-right font-sans">
+      {hasAlreadyAttackedThisTurn && (
+        <div className="p-4 bg-amber-500/15 border-2 border-amber-500/50 rounded-2xl flex items-start gap-3 text-xs text-amber-300 font-sans shadow-lg shadow-amber-500/10 animate-fade-smooth">
+          <Clock size={20} className="text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-black text-sm block text-amber-400">
+              سقف عملیات در نوبت جاری تکمیل است
+            </span>
+            <p className="text-[11px] leading-relaxed text-foreground/90">
+              شما در این دست قبلاً به مواضع {targetNationName} تهاجم نظامی
+              کرده‌اید. در هر نوبت حداکثر ۱ بار امکان صدور فرمان حمله به یک کشور
+              وجود دارد؛ برای تهاجم مجدد نوبت را به پایان برسانید.
+            </p>
+          </div>
+        </div>
+      )}
+
       {!isAccessible && (
         <div className="p-4 bg-military/15 border border-military/50 rounded-2xl flex items-start gap-3 text-xs text-military font-sans shadow-lg shadow-military/10 animate-fade-smooth">
           <ShieldAlert size={20} className="shrink-0 mt-0.5" />

@@ -9,6 +9,8 @@ import {
   Nation,
   SecurityFeeCalculatorUtility,
   StrategicPartnershipCalculatorUtility,
+  GeopoliticalReachResolver,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import {
   DiplomaticBetrayalCalculator,
@@ -40,6 +42,7 @@ interface UseDiplomacyActionsRunnerProps {
   provincesMap?: Record<string, Province>;
   clientNation?: Nation | null;
   targetNation?: Nation | null;
+  currentTurn?: number;
 }
 
 export function useDiplomacyActionsRunner({
@@ -51,6 +54,7 @@ export function useDiplomacyActionsRunner({
   provincesMap,
   clientNation,
   targetNation,
+  currentTurn,
 }: UseDiplomacyActionsRunnerProps) {
   const { dispatchAction } = useGameActions();
   const openModal = useUiStore((state) => state.openModal);
@@ -117,6 +121,27 @@ export function useDiplomacyActionsRunner({
       true,
     );
   }, [clientNation, targetNation, provincesMap]);
+
+  const canDeclareWar = useMemo(() => {
+    if (!clientNation || !targetNation) return false;
+    return GeopoliticalReachResolver.canReachForWarOrStrike(
+      clientNation,
+      targetNation,
+      provincesMap,
+    );
+  }, [clientNation, targetNation, provincesMap]);
+
+  const isPeaceCooldownActive = useMemo(() => {
+    if (!clientNation || !targetNation || currentTurn === undefined)
+      return false;
+    const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
+    const rel =
+      clientNation.relations?.[canonicalTarget] ||
+      clientNation.relations?.[targetNation.id];
+    return (
+      rel?.warDeclaredTurn !== undefined && currentTurn <= rel.warDeclaredTurn
+    );
+  }, [clientNation, targetNation, currentTurn]);
 
   const executeOrConfirm = (
     actionFn: () => Promise<void>,
@@ -241,6 +266,7 @@ export function useDiplomacyActionsRunner({
   };
 
   const handleDeclareWar = async () => {
+    if (!canDeclareWar) return;
     const action = ActionFactory.diplomaticProposal(
       nationId,
       targetNationId,
@@ -272,6 +298,8 @@ export function useDiplomacyActionsRunner({
     emergencyProtectorateCost,
     guaranteeValidation,
     emergencyValidation,
+    canDeclareWar,
+    isPeaceCooldownActive,
     handleSendAid,
     handlePeaceTreaty: handleOpenPeaceNegotiations,
     handleNonAggression: () => executeOrConfirm(handleNonAggression, false),

@@ -80,6 +80,7 @@ export function TacticalModalOrchestrator({
           targetNationId={activeModal.targetNationId}
           nationsMap={gameState?.nations}
           provincesMap={gameState?.provinces}
+          currentTurn={gameState?.currentTurn}
           onClose={closeModal}
         />
       );
