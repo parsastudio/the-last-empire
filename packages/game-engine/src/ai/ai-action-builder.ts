@@ -20,6 +20,7 @@ import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
 import { AIEconomicStanceEvaluator } from "@/engine/ai/ai-economic-stance-evaluator";
 import { AiWalletBudgetAllocator } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 import { AINationalProjectPlanner } from "@/engine/ai/ai-national-project-planner";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 interface NationDecisionContext {
   ownedProvinces: Province[];
@@ -34,12 +35,16 @@ export class AIActionBuilder {
     allNations: Record<string, Nation>,
     provincesMap?: Record<string, Province>,
     matrixCache?: GeopoliticalMatrixCache,
+    turnContext?: TurnContext,
   ): NationDecisionContext {
     const cache =
       matrixCache ??
+      turnContext?.matrixCache ??
       GeopoliticalMatrixCache.build(allNations, provincesMap || {});
 
-    const ownedProvinces = cache.getOwnedProvinces(nation.id);
+    const ownedProvinces =
+      turnContext?.getOwnedProvinces(nation.id) ??
+      cache.getOwnedProvinces(nation.id);
     const reachableTargets = cache.getReachableTargets(
       nation,
       allNations,
@@ -68,6 +73,7 @@ export class AIActionBuilder {
     matrixCache?: GeopoliticalMatrixCache,
     globalCoalition?: GlobalCoalition | null,
     currentTurn?: number,
+    turnContext?: TurnContext,
   ): GameAction[] {
     const actions: GameAction[] = [];
     let currentNation = nation;
@@ -90,6 +96,7 @@ export class AIActionBuilder {
 
     const cache =
       matrixCache ??
+      turnContext?.matrixCache ??
       GeopoliticalMatrixCache.build(allNations, provincesMap || {});
 
     const context = this.buildDecisionContext(
@@ -97,6 +104,7 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       cache,
+      turnContext,
     );
 
     const rankMap = cache.getRankMap();
@@ -107,6 +115,9 @@ export class AIActionBuilder {
       allNations,
       provincesMap,
       context.posture,
+      undefined,
+      turnContext?.gdpMap,
+      turnContext?.totalWorldGdp,
     );
 
     const procurementResult = AIProcurementPlanner.planRecruitment(

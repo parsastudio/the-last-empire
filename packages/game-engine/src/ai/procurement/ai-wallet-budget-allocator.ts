@@ -8,6 +8,7 @@ import {
   SecurityFeeCalculatorUtility,
   NAVAL_FLEET_CONFIG,
   getNationGdp,
+  CountryRegistry,
 } from "@geopolitics/domain";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 
@@ -28,8 +29,12 @@ export class AiWalletBudgetAllocator {
     provincesMap?: Record<string, Province>,
     posture: AIPosture = "PEACE",
     availableTreasury?: number,
+    precomputedGdpMap?: Map<string, number>,
+    precomputedTotalWorldGdp?: number,
   ): AiStrategicWallets {
-    const gdp = getNationGdp(nation, provincesMap);
+    const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+    const gdp =
+      precomputedGdpMap?.get(canonicalId) ?? getNationGdp(nation, provincesMap);
     const treasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
@@ -37,6 +42,9 @@ export class AiWalletBudgetAllocator {
       nation,
       allNations,
       provincesMap,
+      FiscalRevenueCalculator.DEFAULT_AI_REVENUE_MULTIPLIER,
+      precomputedGdpMap,
+      precomputedTotalWorldGdp,
     );
     const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(
       nation,
