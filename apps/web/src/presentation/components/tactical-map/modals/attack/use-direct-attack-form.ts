@@ -187,13 +187,7 @@ export function useDirectAttackForm({
       result.infantry,
     );
 
-    if (result.isPossible) {
-      showToast(
-        "آرایش پیروزی قطعی تنظیم شد",
-        "حداقل ادوات و نیروهای لازم برای تضمین پیروزی با کمترین تلفات چیده شد.",
-        "success",
-      );
-    } else {
+    if (!result.isPossible) {
       showToast(
         "پیروزی غیرممکن است",
         "حتی با اعزام تمامی نیروها، شکست قطعی است. ابتدا پدافند را تضعیف کنید یا ارتش را توسعه دهید.",
@@ -232,11 +226,7 @@ export function useDirectAttackForm({
       reach.attackType,
     );
 
-    const typeLabel = reach.attackType === "NAVAL" ? "دریایی" : "زمینی";
-    const res = await dispatchAction(
-      action,
-      `فرمان تهاجم ${typeLabel} به ${reach.targetRegionName} با موفقیت صادر گردید.`,
-    );
+    const res = await dispatchAction(action);
 
     if (res.success) {
       onClose();
@@ -259,7 +249,6 @@ export function useDirectAttackForm({
     deployment,
     targetProvinceId,
     reach.attackType,
-    reach.targetRegionName,
     dispatchAction,
     onClose,
     openModal,

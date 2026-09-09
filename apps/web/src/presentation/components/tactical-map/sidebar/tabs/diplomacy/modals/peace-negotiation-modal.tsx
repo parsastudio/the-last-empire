@@ -79,10 +79,7 @@ export function PeaceNegotiationModal({
         humanNation.id,
         targetNation.id,
       );
-      const res = await dispatchAction(
-        action,
-        "معاهده صلح با موفقیت به تصویب رسید.",
-      );
+      const res = await dispatchAction(action);
       if (res.success) {
         onClose();
       }

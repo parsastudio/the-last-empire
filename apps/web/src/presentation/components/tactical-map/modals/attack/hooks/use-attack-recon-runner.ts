@@ -53,10 +53,7 @@ export function useAttackReconRunner({
         targetNation.id,
         1,
       );
-      await dispatchAction(
-        action,
-        "شنود ماهواره‌ای مواضع دشمن با موفقیت انجام شد.",
-      );
+      await dispatchAction(action);
     } finally {
       setIsExecutingRecon(false);
     }

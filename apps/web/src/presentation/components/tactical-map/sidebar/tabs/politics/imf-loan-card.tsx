@@ -41,28 +41,19 @@ export function ImfLoanCard({
   const handleConfirmLoan = async (billionAmount: number) => {
     const absoluteVal = billionAmount * 1e9;
     const action = ActionFactory.requestLoan(nationId, absoluteVal);
-    await dispatchAction(
-      action,
-      `وام اضطراری به مبلغ ${PersianNumberFormatter.formatCurrency(absoluteVal)} دریافت شد.`,
-    );
+    await dispatchAction(action);
   };
 
   const handleConfirmRepay = async (billionAmount: number) => {
     const absoluteVal = billionAmount * 1e9;
     const action = ActionFactory.repayDebt(nationId, absoluteVal);
-    await dispatchAction(
-      action,
-      `مبلغ ${PersianNumberFormatter.formatCurrency(absoluteVal)} از بدهی ملی تسویه شد.`,
-    );
+    await dispatchAction(action);
   };
 
   const handleRepayFull = async () => {
     if (nationalDebt <= 0 || treasury <= 0) return;
     const action = ActionFactory.repayDebt(nationId, nationalDebt);
-    await dispatchAction(
-      action,
-      `کل بدهی ملی (${PersianNumberFormatter.formatCurrency(nationalDebt)}) تسویه شد.`,
-    );
+    await dispatchAction(action);
   };
 
   return (

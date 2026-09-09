@@ -41,10 +41,7 @@ export function EconomicDoctrineControlCard({
   const handleApplyDoctrine = async () => {
     if (!isChanged || isSubmitting) return;
     const action = ActionFactory.setEconomicDoctrine(nation.id, selectedStance);
-    await dispatchAction(
-      action,
-      `دکترین مالی-تجاری کشور به (${activeConfig.nameFa}) تغییر یافت.`,
-    );
+    await dispatchAction(action);
   };
 
   return (
