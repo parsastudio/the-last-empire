@@ -44,8 +44,8 @@ export class BattleInitiationValidator {
     }
 
     const attackedTargets =
-      nation.turnActivity?.attackedTargetIds ??
-      nation.attackedTargetIdsThisTurn ??
+      state.turnActivity?.[nation.id]?.attackedTargetIds ??
+      state.turnActivity?.[canonicalSourceId]?.attackedTargetIds ??
       [];
     if (
       attackedTargets.includes(canonicalTargetId) ||

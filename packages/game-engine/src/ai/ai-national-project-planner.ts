@@ -21,6 +21,7 @@ export class AINationalProjectPlanner {
     nation: Nation,
     availableTreasury?: number,
     posture: AIPosture = "PEACE",
+    boostedProjectIds: string[] = [],
   ): NationalProjectPlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -38,12 +39,8 @@ export class AINationalProjectPlanner {
     }
 
     const completedIds = nation.completedProjectIds || [];
-    const boostedThisTurn =
-      nation.turnActivity?.boostedProjectIds ??
-      nation.boostedProjectIdsThisTurn ??
-      [];
     const maxBoosts = NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN;
-    let quotaRemaining = Math.max(0, maxBoosts - boostedThisTurn.length);
+    let quotaRemaining = Math.max(0, maxBoosts - boostedProjectIds.length);
 
     if (quotaRemaining <= 0) {
       return { actions, spentMoney: 0 };
@@ -51,7 +48,7 @@ export class AINationalProjectPlanner {
 
     const progressSteps = nation.projectProgressSteps || {};
     const candidateProjects = NATIONAL_PROJECTS_CATALOG.filter(
-      (p) => !completedIds.includes(p.id) && !boostedThisTurn.includes(p.id),
+      (p) => !completedIds.includes(p.id) && !boostedProjectIds.includes(p.id),
     );
 
     if (candidateProjects.length === 0) {

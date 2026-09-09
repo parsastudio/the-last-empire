@@ -1,7 +1,4 @@
-import {
-  Nation,
-  DEFAULT_NATION_TURN_ACTIVITY,
-} from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 import { ModifierManager } from "@/engine/politics/modifier-manager";
 import { StabilityCalculator } from "@/engine/politics/stability-calculator";
 
@@ -21,11 +18,6 @@ export class PoliticsTurnProcessor {
 
     return {
       ...updated,
-      turnActivity: DEFAULT_NATION_TURN_ACTIVITY,
-      executedEspionageTiers: [],
-      attackedTargetIdsThisTurn: [],
-      sentAidTargetIdsThisTurn: [],
-      boostedProjectIdsThisTurn: [],
       government: {
         ...updated.government,
         stability: newStability,

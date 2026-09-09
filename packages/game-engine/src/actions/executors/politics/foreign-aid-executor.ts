@@ -19,9 +19,7 @@ export class ForeignAidExecutor {
     canonicalSourceId: string,
   ): { newState: GameState; resultData: unknown } {
     const prevSentAidList =
-      nation.turnActivity?.sentAidTargetIds ??
-      nation.sentAidTargetIdsThisTurn ??
-      [];
+      state.turnActivity?.[nation.id]?.sentAidTargetIds ?? [];
     if (
       prevSentAidList.includes(canonicalTargetId) ||
       prevSentAidList.includes(receiver.id)
@@ -72,20 +70,24 @@ export class ForeignAidExecutor {
       new Set([...prevSentAidList, canonicalTargetId, receiver.id]),
     );
 
+    const updatedTurnActivity = {
+      ...(state.turnActivity || {}),
+      [nation.id]: {
+        ...(state.turnActivity?.[nation.id] || DEFAULT_NATION_TURN_ACTIVITY),
+        sentAidTargetIds: updatedSentList,
+      },
+    };
+
     const newState = {
       ...state,
       turnLogs: [...state.turnLogs, ...aidLogs],
+      turnActivity: updatedTurnActivity,
       nations: {
         ...state.nations,
         [nation.id]: {
           ...nation,
           treasury: Math.max(0, nation.treasury - costDeduction),
           globalReputation: Math.min(100, nation.globalReputation + 1),
-          sentAidTargetIdsThisTurn: updatedSentList,
-          turnActivity: {
-            ...(nation.turnActivity || DEFAULT_NATION_TURN_ACTIVITY),
-            sentAidTargetIds: updatedSentList,
-          },
           relations: {
             ...nation.relations,
             [senderTargetKey]: updatedSenderRel,

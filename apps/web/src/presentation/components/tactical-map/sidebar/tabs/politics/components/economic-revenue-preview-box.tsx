@@ -1,10 +1,10 @@
 import React from "react";
 import { Building2, Globe2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { FiscalRevenueBreakdown } from "@geopolitics/game-engine";
 import {
   ECONOMIC_DOCTRINE_CONFIGS,
   EconomicDoctrineStance,
+  FiscalRevenueBreakdown,
 } from "@geopolitics/domain";
 
 interface EconomicRevenuePreviewBoxProps {

@@ -9,6 +9,7 @@ import {
   NationRelationResolver,
   getNationGdp,
   MILITARY_UNIT_STATS,
+  NationTurnActivity,
 } from "@geopolitics/domain";
 import {
   BattleCalculator,
@@ -255,6 +256,7 @@ export class DirectAttackSelector {
     humanNation: Nation | null,
     targetNation: Nation | null,
     provincesMap?: Record<string, Province>,
+    turnActivity?: NationTurnActivity,
   ): DirectAttackReconEvaluation {
     if (!humanNation || !targetNation) {
       return {
@@ -265,10 +267,7 @@ export class DirectAttackSelector {
     }
 
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
-    const executedList =
-      humanNation.turnActivity?.executedEspionageTiers ??
-      humanNation.executedEspionageTiers ??
-      [];
+    const executedList = turnActivity?.executedEspionageTiers ?? [];
     const isReconActive = executedList.includes(`${canonicalTarget}:1`);
 
     const targetGdp = getNationGdp(targetNation, provincesMap);

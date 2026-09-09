@@ -1,13 +1,11 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { BoostNationalProjectAction } from "@/domain/game/actions/schemas/projects/project-action.schema";
-import {
-  Nation,
-  DEFAULT_NATION_TURN_ACTIVITY,
-} from "@/domain/nation/nation.schema";
+import { Nation } from "@/domain/nation/nation.schema";
 import {
   GameError,
   NationalProjectEffectApplierUtility,
   TurnLogBuilder,
+  DEFAULT_NATION_TURN_ACTIVITY,
 } from "@geopolitics/domain";
 
 export class ProjectActionExecutor {
@@ -33,9 +31,7 @@ export class ProjectActionExecutor {
     }
 
     const boostedThisTurn =
-      nation.turnActivity?.boostedProjectIds ??
-      nation.boostedProjectIdsThisTurn ??
-      [];
+      state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
     if (boostedThisTurn.includes(config.id)) {
       throw new GameError(
         "INVALID_ACTION",
@@ -115,17 +111,21 @@ export class ProjectActionExecutor {
     const updatedNation: Nation = {
       ...nation,
       treasury: nextTreasury,
-      boostedProjectIdsThisTurn: updatedBoostedList,
-      turnActivity: {
-        ...(nation.turnActivity || DEFAULT_NATION_TURN_ACTIVITY),
-        boostedProjectIds: updatedBoostedList,
-      },
       projectProgressSteps: updatedStepsMap,
       completedProjectIds: updatedCompletedList,
     };
 
+    const updatedTurnActivity = {
+      ...(state.turnActivity || {}),
+      [nation.id]: {
+        ...(state.turnActivity?.[nation.id] || DEFAULT_NATION_TURN_ACTIVITY),
+        boostedProjectIds: updatedBoostedList,
+      },
+    };
+
     const newState: GameState = {
       ...state,
+      turnActivity: updatedTurnActivity,
       nations: {
         ...state.nations,
         [buyerKey]: updatedNation,

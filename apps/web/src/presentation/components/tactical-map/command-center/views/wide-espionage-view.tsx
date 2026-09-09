@@ -8,13 +8,14 @@ import { EspionageTargetSelector } from "@/presentation/components/tactical-map/
 import { EspionageTierCard } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-tier-card";
 import { EspionageResultBanner } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-result-banner";
 import { useWideEspionageForm } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-espionage-form";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
 
 interface WideEspionageViewProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
   provincesMap?: Record<string, Province>;
   selectedTargetCode?: string | null;
+  turnActivity?: NationTurnActivity;
 }
 
 export function WideEspionageView({
@@ -22,12 +23,14 @@ export function WideEspionageView({
   nationsMap,
   provincesMap,
   selectedTargetCode,
+  turnActivity,
 }: WideEspionageViewProps) {
   const form = useWideEspionageForm({
     nation,
     nationsMap,
     provincesMap,
     selectedTargetCode,
+    turnActivity,
   });
 
   const targetRank = form.selectedTargetNation

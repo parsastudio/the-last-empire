@@ -54,13 +54,11 @@ export function useDirectAttackForm({
   }, [gameState, canonicalTargetId]);
 
   const hasAlreadyAttackedThisTurn = useMemo(() => {
-    if (!humanNation || !canonicalTargetId) return false;
+    if (!humanNation || !canonicalTargetId || !gameState) return false;
     const attackedList =
-      humanNation.turnActivity?.attackedTargetIds ??
-      humanNation.attackedTargetIdsThisTurn ??
-      [];
+      gameState.turnActivity?.[humanNation.id]?.attackedTargetIds ?? [];
     return attackedList.includes(canonicalTargetId);
-  }, [humanNation, canonicalTargetId]);
+  }, [humanNation, canonicalTargetId, gameState]);
 
   const targetGuarantorNation = useMemo(() => {
     if (
@@ -137,8 +135,11 @@ export function useDirectAttackForm({
       humanNation,
       targetNation,
       gameState?.provinces,
+      humanNation && gameState
+        ? gameState.turnActivity?.[humanNation.id]
+        : undefined,
     );
-  }, [humanNation, targetNation, gameState?.provinces]);
+  }, [humanNation, targetNation, gameState]);
 
   const forecast = useMemo(() => {
     return DirectAttackSelector.selectForecast(
