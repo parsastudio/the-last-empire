@@ -1,7 +1,6 @@
 import React from "react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
-import { Nation } from "@/domain/nation/nation.schema";
-import { GameState } from "@/domain/game/game-state.schema";
+import { Nation, GameState } from "@geopolitics/domain";
 import { UnitDeploymentSlider } from "@/presentation/components/tactical-map/modals/attack/unit-deployment-slider";
 import { AttackHeader } from "@/presentation/components/tactical-map/modals/attack/attack-header";
 import { AttackStatusAlerts } from "@/presentation/components/tactical-map/modals/attack/attack-status-alerts";
