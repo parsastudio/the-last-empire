@@ -10,7 +10,7 @@ import { TurnStateLogger } from "@/engine/diagnostics/turn-state-logger";
 import { TurnExportSalesAggregator } from "@/engine/orchestrator/turn-export-sales-aggregator";
 import { TurnLogWindowUtility } from "@geopolitics/domain";
 import { DilemmaTurnEvaluator } from "@/engine/events/dilemma-turn-evaluator";
-import { TurnContextFactory } from "@/engine/pipeline/turn-context";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
@@ -30,12 +30,12 @@ export class TurnProgressionOrchestrator {
       pendingProposals: [...state.pendingProposals],
     };
 
-    let turnContext = TurnContextFactory.create(workingState);
+    const turnContext = TurnContext.create(workingState);
 
     workingState = this.pipeline.processTurn(workingState, turnContext);
     workingState = this.livenessManager.updateLiveness(workingState);
 
-    turnContext = TurnContextFactory.create(workingState);
+    turnContext.sync(workingState);
 
     workingState = CoalitionManager.evaluateCoalitionState(
       workingState,
@@ -67,6 +67,7 @@ export class TurnProgressionOrchestrator {
         turnContext.matrixCache,
         workingState.globalCoalition,
         workingState.currentTurn,
+        turnContext,
       );
 
       if (aiActions.length > 0) {
@@ -79,15 +80,7 @@ export class TurnProgressionOrchestrator {
 
         if (executedCount > 0) {
           workingState = executedState;
-          const hasStructuralChange = aiActions.some(
-            (action) =>
-              action.type === "INITIATE_BATTLE" ||
-              action.type === "EXECUTE_ESPIONAGE_OPERATION",
-          );
-
-          if (hasStructuralChange) {
-            turnContext = TurnContextFactory.create(workingState);
-          }
+          turnContext.sync(workingState);
         }
       }
     }
