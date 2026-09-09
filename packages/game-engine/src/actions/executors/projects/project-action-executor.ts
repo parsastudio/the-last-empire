@@ -90,6 +90,24 @@ export class ProjectActionExecutor {
       ? Array.from(new Set([...completedIds, config.id]))
       : completedIds;
 
+    let nextStability = nation.government.stability;
+    let nextReputation = nation.globalReputation;
+
+    if (isCompleted) {
+      if (config.effect.permanentStabilityBonus) {
+        nextStability = Math.min(
+          100,
+          nextStability + config.effect.permanentStabilityBonus,
+        );
+      }
+      if (config.effect.globalReputationBonus) {
+        nextReputation = Math.min(
+          100,
+          nextReputation + config.effect.globalReputationBonus,
+        );
+      }
+    }
+
     const newLogs = [];
     if (isCompleted) {
       const message = isSilentBreakthrough
@@ -119,8 +137,13 @@ export class ProjectActionExecutor {
     const updatedNation: Nation = {
       ...nation,
       treasury: nextTreasury,
+      globalReputation: nextReputation,
       projectProgressSteps: updatedStepsMap,
       completedProjectIds: updatedCompletedList,
+      government: {
+        ...nation.government,
+        stability: nextStability,
+      },
     };
 
     const updatedTurnActivity = {

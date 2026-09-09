@@ -3,6 +3,7 @@ import {
   UnitType,
   MilitaryInventoryHelper,
   MilitaryPowerCalculator,
+  NationalProjectEffectApplierUtility,
 } from "@geopolitics/domain";
 
 export interface NationCombatUnitMultipliers {
@@ -31,12 +32,23 @@ export class CombatModifierResolver {
   public static resolveAllUnitMultipliers(
     nation: Nation,
   ): NationCombatUnitMultipliers {
+    const projectPowerMultiplier =
+      NationalProjectEffectApplierUtility.getCombinedMultiplier(
+        nation.completedProjectIds,
+        "militaryPowerBonusMultiplier",
+      );
+
     return {
-      infantry: this.getUnitMultiplier(nation, "INFANTRY"),
-      armor: this.getUnitMultiplier(nation, "ARMOR"),
-      airDefense: this.getUnitMultiplier(nation, "AIR_DEFENSE"),
-      airForce: this.getUnitMultiplier(nation, "AIR_FORCE"),
-      droneMissile: this.getUnitMultiplier(nation, "DRONE_MISSILE"),
+      infantry:
+        this.getUnitMultiplier(nation, "INFANTRY") * projectPowerMultiplier,
+      armor: this.getUnitMultiplier(nation, "ARMOR") * projectPowerMultiplier,
+      airDefense:
+        this.getUnitMultiplier(nation, "AIR_DEFENSE") * projectPowerMultiplier,
+      airForce:
+        this.getUnitMultiplier(nation, "AIR_FORCE") * projectPowerMultiplier,
+      droneMissile:
+        this.getUnitMultiplier(nation, "DRONE_MISSILE") *
+        projectPowerMultiplier,
     };
   }
 }

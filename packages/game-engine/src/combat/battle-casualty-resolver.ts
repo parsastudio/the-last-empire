@@ -16,6 +16,7 @@ export interface CasualtyResolutionInput {
   rawDefArmorLost: number;
   rawDefAirDefenseLost: number;
   rawDefAirLoss: number;
+  defCasualtyDiscount?: number;
 }
 
 export interface CasualtyResolutionOutput {
@@ -44,11 +45,16 @@ export class BattleCasualtyResolver {
     );
     const netAttAirLost = Math.min(input.deployedAirForce, input.rawAttAirLoss);
 
+    const casualtyDiscount = input.defCasualtyDiscount ?? 1.0;
+
     const netDefInfantryLost = Math.min(
       input.defInfantry,
-      input.rawDefInfantryLost,
+      Math.round(input.rawDefInfantryLost * casualtyDiscount),
     );
-    const netDefArmorLost = Math.min(input.defArmor, input.rawDefArmorLost);
+    const netDefArmorLost = Math.min(
+      input.defArmor,
+      Math.round(input.rawDefArmorLost * casualtyDiscount),
+    );
     const netDefAirDefenseLost = Math.min(
       input.defAirDefense,
       input.rawDefAirDefenseLost,

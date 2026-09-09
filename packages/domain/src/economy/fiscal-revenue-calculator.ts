@@ -7,6 +7,7 @@ import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.sche
 import { ECONOMIC_DOCTRINE_CONFIGS } from "@/domain/politics/economic-doctrine.config";
 import { StabilityBracketUtility } from "@/domain/politics/stability-bracket.utility";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationalProjectEffectApplierUtility } from "@/domain/projects/national-project-effect-applier.utility";
 
 export interface FiscalRevenueBreakdown {
   totalRevenue: number;
@@ -42,7 +43,14 @@ export class FiscalRevenueCalculator {
     const stance: EconomicDoctrineStance =
       nation.economicStance || "BALANCED_MIXED";
     const config = ECONOMIC_DOCTRINE_CONFIGS[stance];
-    const domesticBase = Math.floor(gdp * 0.08);
+
+    const factoryYieldProjectMultiplier =
+      NationalProjectEffectApplierUtility.getCombinedMultiplier(
+        nation.completedProjectIds,
+        "factoryYieldBonusMultiplier",
+      );
+
+    const domesticBase = Math.floor(gdp * 0.08 * factoryYieldProjectMultiplier);
 
     let totalPeaceGdp = 0;
     let totalWorldGdp = precomputedTotalWorldGdp ?? 0;
@@ -92,12 +100,21 @@ export class FiscalRevenueCalculator {
     const transitGateway = Math.floor(totalPeaceGdp * 0.0003 * seaFactor);
     const globalBase = exportPower + transitGateway;
 
+    const globalTradeProjectMultiplier =
+      NationalProjectEffectApplierUtility.getCombinedMultiplier(
+        nation.completedProjectIds,
+        "globalTradeIncomeBonusMultiplier",
+      );
+
     const appliedAiMultiplier = nation.isAi ? aiRevenueMultiplier : 1.0;
     const domesticRevenue = Math.floor(
       domesticBase * config.domesticWeight * appliedAiMultiplier,
     );
     const globalRevenue = Math.floor(
-      globalBase * config.globalWeight * appliedAiMultiplier,
+      globalBase *
+        config.globalWeight *
+        appliedAiMultiplier *
+        globalTradeProjectMultiplier,
     );
     const baseTotalRevenue = domesticRevenue + globalRevenue;
 

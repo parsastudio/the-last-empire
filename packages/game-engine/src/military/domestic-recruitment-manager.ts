@@ -7,6 +7,7 @@ import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-he
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
+import { NationalProjectEffectApplierUtility } from "@/domain/projects/national-project-effect-applier.utility";
 
 export class DomesticRecruitmentManager {
   public static executeRecruitment(
@@ -25,10 +26,17 @@ export class DomesticRecruitmentManager {
     const govModifiers = GovernmentTraitsUtility.getModifiers(
       nation.government?.type,
     );
+
+    const projectDiscount =
+      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
+        nation.completedProjectIds,
+        "procurementCostDiscountMultiplier",
+      );
+
     const baseUnitPrice =
       MilitaryPricingCalculator.calculateUnitTypePrice(unitType);
     const unitPrice = Math.floor(
-      baseUnitPrice * govModifiers.procurementCostMultiplier,
+      baseUnitPrice * govModifiers.procurementCostMultiplier * projectDiscount,
     );
     const totalMoney = unitPrice * quantity;
 
@@ -40,17 +48,6 @@ export class DomesticRecruitmentManager {
     }
 
     const gdp = getNationGdp(nation, provincesMap);
-    const currentTotalValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
-    const maxValuation = Math.floor(gdp);
-
-    if (currentTotalValuation + totalMoney > maxValuation) {
-      throw new GameError(
-        "INVALID_ACTION",
-        "مجموع ارزش ارتش نمی‌تواند از ۱۰۰٪ تولید ناخالص (GDP) فراتر رود.",
-      );
-    }
-
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
       gdp,
       nation.military,

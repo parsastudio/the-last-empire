@@ -1,4 +1,8 @@
-import { Nation, NationRelationResolver } from "@geopolitics/domain";
+import {
+  Nation,
+  NationRelationResolver,
+  NationalProjectEffectApplierUtility,
+} from "@geopolitics/domain";
 import { GeopoliticalVector } from "@/engine/ai/geopolitical-vector-calculator";
 
 export class WarUtilityEvaluator {
@@ -107,6 +111,14 @@ export class WarUtilityEvaluator {
       expansionistDrive = Math.round(driveFactor * 25);
     }
 
+    const deterrenceBonus =
+      NationalProjectEffectApplierUtility.getCombinedBonus(
+        target.completedProjectIds,
+        "deterrenceWarThresholdMultiplier",
+      );
+    const deterrencePenalty =
+      deterrenceBonus > 0 ? Math.round(deterrenceBonus * 40) : 0;
+
     const tensionScore = Math.round(vector.tension * 0.5);
     const alignmentDampener = Math.round(vector.alignment * 0.5);
     const stabilityScore = Math.round(
@@ -120,7 +132,8 @@ export class WarUtilityEvaluator {
         expansionistDrive +
         distancePenalty -
         alignmentDampener +
-        stabilityScore,
+        stabilityScore -
+        deterrencePenalty,
     );
   }
 }

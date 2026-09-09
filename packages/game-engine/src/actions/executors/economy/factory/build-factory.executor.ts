@@ -5,7 +5,11 @@ import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
-import { NationGettersUtility, MapTopologyRegistry } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  MapTopologyRegistry,
+  NationalProjectEffectApplierUtility,
+} from "@geopolitics/domain";
 import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class BuildFactoryExecutor {
@@ -16,10 +20,18 @@ export class BuildFactoryExecutor {
     buyerKey: string,
   ): ExecutionResult<{ builtQuantity: number; totalCost: number }> {
     const quantity = Math.max(1, action.quantity || 1);
-    const totalCost = IndustryCalculator.calculateFactoryBuildCost(
+
+    const projectDiscount =
+      NationalProjectEffectApplierUtility.getCombinedDiscountMultiplier(
+        nation.completedProjectIds,
+        "procurementCostDiscountMultiplier",
+      );
+
+    const baseCost = IndustryCalculator.calculateFactoryBuildCost(
       quantity,
       nation.government?.type,
     );
+    const totalCost = Math.floor(baseCost * projectDiscount);
 
     if (nation.treasury < totalCost) {
       throw new GameError(
@@ -46,6 +58,17 @@ export class BuildFactoryExecutor {
       );
     }
 
+    const slotExpansionRatio =
+      NationalProjectEffectApplierUtility.getCombinedBonus(
+        nation.completedProjectIds,
+        "factorySlotExpansionRatio",
+      );
+
+    const getEffectiveMaxSlots = (provinceId: number): number => {
+      const baseMax = MapTopologyRegistry.getMaxSlots(provinceId, 1);
+      return Math.floor(baseMax * (1.0 + slotExpansionRatio));
+    };
+
     const distribution = new Map<number, number>();
 
     if (action.provinceId) {
@@ -60,8 +83,8 @@ export class BuildFactoryExecutor {
           "این استان تحت حاکمیت کشور شما قرار ندارد.",
         );
       }
-      const maxSlots = MapTopologyRegistry.getMaxSlots(prov.provinceId, 1);
-      const emptySlots = Math.max(0, maxSlots - prov.factoriesCount);
+      const effectiveMaxSlots = getEffectiveMaxSlots(prov.provinceId);
+      const emptySlots = Math.max(0, effectiveMaxSlots - prov.factoriesCount);
       if (emptySlots < quantity) {
         throw new GameError(
           "INVALID_ACTION",
@@ -70,8 +93,14 @@ export class BuildFactoryExecutor {
       }
       distribution.set(prov.provinceId, quantity);
     } else {
+      const candidateProvinces = ownedProvinces.map((p) => ({
+        provinceId: p.provinceId,
+        factoriesCount: p.factoriesCount,
+        maxSlots: getEffectiveMaxSlots(p.provinceId),
+      }));
+
       const calculatedDist = IndustryCalculator.distributeNewFactories(
-        ownedProvinces,
+        candidateProvinces,
         quantity,
       );
 

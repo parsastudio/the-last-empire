@@ -3,6 +3,7 @@ export interface MissilePhaseInput {
   defAirDefense: number;
   attDroneMult: number;
   defAdMult: number;
+  autoInterceptionBonus?: number;
 }
 
 export interface MissilePhaseOutput {
@@ -27,28 +28,34 @@ export class MissileInterceptionPhase {
 
     const attMissilesEff = input.deployedDrones * input.attDroneMult;
     const defAirDefenseEff = input.defAirDefense * input.defAdMult;
+    const autoInterceptionBonus = input.autoInterceptionBonus || 0;
 
     if (input.defAirDefense <= 0) {
-      const maxPossibleFactories = Math.floor(input.deployedDrones / 12);
+      const autoIntercepted = Math.min(
+        input.deployedDrones,
+        Math.round(input.deployedDrones * autoInterceptionBonus),
+      );
+      const penetrating = Math.max(0, input.deployedDrones - autoIntercepted);
       const destroyedFactories = Math.min(
-        maxPossibleFactories,
-        Math.floor(attMissilesEff / (12 * input.attDroneMult)),
+        Math.floor(input.deployedDrones / 12),
+        Math.floor(
+          (penetrating * input.attDroneMult) / (12 * input.attDroneMult),
+        ),
       );
       return {
         rawDefAirDefenseLost: 0,
         defAirDefenseRemainingRaw: 0,
         defAirDefenseRemainingEff: 0,
         destroyedFactories,
-        interceptedMissiles: 0,
+        interceptedMissiles: autoIntercepted,
       };
     }
 
+    const calculatedBaseRate =
+      defAirDefenseEff / (defAirDefenseEff + 0.5 * attMissilesEff);
     const interceptionRate = Math.max(
       0.1,
-      Math.min(
-        0.9,
-        defAirDefenseEff / (defAirDefenseEff + 0.5 * attMissilesEff),
-      ),
+      Math.min(0.95, calculatedBaseRate + autoInterceptionBonus),
     );
 
     const rawIntercepted = Math.min(
