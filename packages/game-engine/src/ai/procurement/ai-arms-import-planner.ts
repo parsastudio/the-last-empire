@@ -7,6 +7,7 @@ import {
   UnitBudgetQuota,
 } from "@geopolitics/domain";
 import { AIArmsSellerMatcher } from "@/engine/ai/procurement/ai-arms-seller-matcher";
+import { AiProcurementWeightsUtility } from "@/engine/ai/procurement/ai-procurement-weights.utility";
 
 export interface ArmsImportPlanResult {
   actions: GameAction[];
@@ -18,21 +19,6 @@ export interface ArmsImportPlanResult {
 
 export class AIArmsImportPlanner {
   public static readonly MAX_IMPORT_SELLERS = 10;
-
-  private static calculateDecayWeights(count: number): number[] {
-    if (count <= 0) return [];
-    if (count === 1) return [1.0];
-
-    const rawWeights = new Array<number>(count);
-    let sum = 0;
-    for (let i = 0; i < count; i++) {
-      const w = Math.pow(11 - (i + 1), 1.4);
-      rawWeights[i] = w;
-      sum += w;
-    }
-
-    return rawWeights.map((w) => w / (sum || 1));
-  }
 
   public static planImports(
     nation: Nation,
@@ -68,7 +54,10 @@ export class AIArmsImportPlanner {
       };
     }
 
-    const weights = this.calculateDecayWeights(eligibleSellers.length);
+    const weights = AiProcurementWeightsUtility.calculateDecayWeights(
+      eligibleSellers.length,
+      1.4,
+    );
     let remainingGlobalValuation = initialGlobalValuation;
     let spentMoney = 0;
     let spentValuation = 0;

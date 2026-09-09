@@ -6,7 +6,9 @@ import {
   CountryRegistry,
   IndustryCalculator,
   NationGettersUtility,
+  NationRelationResolver,
 } from "@geopolitics/domain";
+import { AiProcurementWeightsUtility } from "@/engine/ai/procurement/ai-procurement-weights.utility";
 
 export interface MachineryImportPlanResult {
   actions: GameAction[];
@@ -16,21 +18,6 @@ export interface MachineryImportPlanResult {
 
 export class AIMachineryImportPlanner {
   public static readonly MAX_IMPORT_SELLERS = 10;
-
-  private static calculateDecayWeights(count: number): number[] {
-    if (count <= 0) return [];
-    if (count === 1) return [1.0];
-
-    const rawWeights = new Array<number>(count);
-    let sum = 0;
-    for (let i = 0; i < count; i++) {
-      const w = Math.pow(11 - (i + 1), 1.5);
-      rawWeights[i] = w;
-      sum += w;
-    }
-
-    return rawWeights.map((w) => w / (sum || 1));
-  }
 
   public static planImport(
     buyer: Nation,
@@ -52,8 +39,10 @@ export class AIMachineryImportPlanner {
       const canonicalSeller = CountryRegistry.resolveCanonicalId(seller.id);
       if (canonicalSeller === canonicalBuyer) continue;
 
-      const rel =
-        buyer.relations[canonicalSeller] || buyer.relations[seller.id];
+      const rel = NationRelationResolver.getRelation(
+        buyer.relations,
+        canonicalSeller,
+      );
 
       if (rel?.stance === "WAR" || (rel?.tension ?? 10) >= 50) continue;
 
@@ -71,7 +60,10 @@ export class AIMachineryImportPlanner {
 
     eligibleSellers.sort((a, b) => b.industrialLevel - a.industrialLevel);
     const topSellers = eligibleSellers.slice(0, this.MAX_IMPORT_SELLERS);
-    const weights = this.calculateDecayWeights(topSellers.length);
+    const weights = AiProcurementWeightsUtility.calculateDecayWeights(
+      topSellers.length,
+      1.5,
+    );
 
     let remainingBudget = allocatedImportBudget;
     let spentMoney = 0;
