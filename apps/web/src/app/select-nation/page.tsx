@@ -43,7 +43,9 @@ export default function SelectNationPage() {
           nation={form.selectedNation}
           governmentOptions={GOVERNMENT_OPTIONS}
           selectedGovernment={form.selectedGovernment}
+          selectedDifficulty={form.selectedDifficulty}
           onSelectGovernment={form.setSelectedGovernment}
+          onSelectDifficulty={form.setSelectedDifficulty}
           onStartCampaign={form.handleStartCampaign}
         />
       </main>

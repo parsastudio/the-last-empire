@@ -4,6 +4,7 @@ import {
   GameAction,
   SeededRandom,
   FinalMapManifest,
+  GameDifficulty,
 } from "@geopolitics/domain";
 import {
   ActionEngine,
@@ -24,6 +25,7 @@ interface GameStoreState {
     governmentType: string,
     gameId: string,
     manifest?: FinalMapManifest | null,
+    difficulty?: GameDifficulty,
   ) => Promise<boolean>;
   dispatchAction: (
     action: GameAction,
@@ -72,7 +74,13 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
     }
   },
 
-  createCampaign: async (nationId, governmentType, gameId, manifest) => {
+  createCampaign: async (
+    nationId,
+    governmentType,
+    gameId,
+    manifest,
+    difficulty = "NORMAL",
+  ) => {
     set({
       loading: true,
       error: null,
@@ -86,6 +94,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
           governmentType,
           gameId,
           manifest,
+          difficulty,
         );
 
       await GamePersistenceService.saveGameState(gameId, initialState);

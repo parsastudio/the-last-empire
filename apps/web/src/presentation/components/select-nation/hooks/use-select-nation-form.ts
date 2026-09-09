@@ -9,7 +9,11 @@ import {
   FinalMapManifest,
 } from "@/presentation/components/select-nation/services/bit-packed-init-service";
 import { useGameStore } from "@/presentation/stores/use-game-store";
-import { CountryRegistry, ClientMapPathResolver } from "@geopolitics/domain";
+import {
+  CountryRegistry,
+  ClientMapPathResolver,
+  GameDifficulty,
+} from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
 function mapManifestToNationDetails(
@@ -112,6 +116,8 @@ export function useSelectNationForm() {
   const [userSelectedGovernment, setUserSelectedGovernment] = useState<
     string | null
   >(null);
+  const [selectedDifficulty, setSelectedDifficulty] =
+    useState<GameDifficulty>("NORMAL");
 
   useEffect(() => {
     let active = true;
@@ -188,6 +194,7 @@ export function useSelectNationForm() {
         selectedGovernment,
         gameId,
         manifest,
+        selectedDifficulty,
       );
 
       if (success) {
@@ -209,6 +216,7 @@ export function useSelectNationForm() {
   }, [
     selectedNation,
     selectedGovernment,
+    selectedDifficulty,
     createCampaignStore,
     manifest,
     router,
@@ -220,8 +228,10 @@ export function useSelectNationForm() {
     searchQuery,
     selectedNation,
     selectedGovernment,
+    selectedDifficulty,
     setSearchQuery,
     setSelectedGovernment,
+    setSelectedDifficulty,
     handleSelectNationCard,
     handleStartCampaign,
   };

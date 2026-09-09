@@ -6,13 +6,17 @@ import {
   GovernmentTypeSelector,
   GovernmentOption,
 } from "@/presentation/components/select-nation/government-type-selector";
+import { GameDifficultySelector } from "@/presentation/components/select-nation/game-difficulty-selector";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
+import { GameDifficulty } from "@geopolitics/domain";
 
 interface NationDetailsPanelProps {
   nation: NationDetail;
   governmentOptions: GovernmentOption[];
   selectedGovernment: string;
+  selectedDifficulty: GameDifficulty;
   onSelectGovernment: (type: string) => void;
+  onSelectDifficulty: (difficulty: GameDifficulty) => void;
   onStartCampaign: () => void;
 }
 
@@ -20,7 +24,9 @@ export function NationDetailsPanel({
   nation,
   governmentOptions,
   selectedGovernment,
+  selectedDifficulty,
   onSelectGovernment,
+  onSelectDifficulty,
   onStartCampaign,
 }: NationDetailsPanelProps) {
   const flagEmoji = getFlagEmoji(nation.code);
@@ -68,6 +74,11 @@ export function NationDetailsPanel({
         options={governmentOptions}
         selectedType={selectedGovernment}
         onSelect={onSelectGovernment}
+      />
+
+      <GameDifficultySelector
+        selectedDifficulty={selectedDifficulty}
+        onSelect={onSelectDifficulty}
       />
 
       <div className="pt-4 border-t border-border/80">
