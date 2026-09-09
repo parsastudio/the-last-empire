@@ -2,17 +2,16 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  Province,
   EconomicDoctrineStance,
   ALL_ECONOMIC_DOCTRINES,
   FiscalRevenueCalculator,
 } from "@geopolitics/domain";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AIEconomicStanceEvaluator {
   public static evaluateBestStance(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    context: TurnContext,
   ): GameAction | null {
     if (!nation.isAlive || !nation.isAi) {
       return null;
@@ -33,8 +32,11 @@ export class AIEconomicStanceEvaluator {
 
       const result = FiscalRevenueCalculator.calculate(
         candidateNation,
-        allNations,
-        provincesMap,
+        context.state.nations,
+        context.state.provinces,
+        context.aiRevenueMultiplier,
+        context.gdpMap,
+        context.totalWorldGdp,
       );
 
       if (result.totalRevenue > highestRevenue) {

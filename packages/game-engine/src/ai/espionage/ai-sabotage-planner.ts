@@ -1,20 +1,15 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { GeopoliticalVectorCalculator } from "@/engine/ai/geopolitical-vector-calculator";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AISabotagePlanner {
   public static planSabotageTier2(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province> | undefined,
+    context: TurnContext,
     geopoliticsBudget: number,
-    executedTiers: string[],
-    provincesByOwnerMap?: Map<string, Province[]>,
     currentTreasury?: number,
   ): { action: GameAction; cost: number } | null {
     const effectiveTreasury = currentTreasury ?? geopoliticsBudget;
@@ -22,10 +17,11 @@ export class AISabotagePlanner {
       return null;
     }
 
+    const executedTiers =
+      context.state.turnActivity?.[nation.id]?.executedEspionageTiers ?? [];
+
     const activeWarTarget = nation.warFocusTargetId
-      ? allNations[
-          CountryRegistry.resolveCanonicalId(nation.warFocusTargetId)
-        ] || allNations[nation.warFocusTargetId]
+      ? context.getNation(nation.warFocusTargetId)
       : null;
 
     if (activeWarTarget && activeWarTarget.isAlive) {
@@ -38,12 +34,7 @@ export class AISabotagePlanner {
         );
 
         if (successRate >= 0.5) {
-          const targetGdp = getNationGdp(
-            activeWarTarget,
-            provincesMap,
-            undefined,
-            provincesByOwnerMap,
-          );
+          const targetGdp = context.getNationGdp(activeWarTarget.id);
           const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
 
           const hasDefenses =
@@ -75,7 +66,7 @@ export class AISabotagePlanner {
         continue;
       }
 
-      const target = allNations[canonicalTarget] || allNations[targetId];
+      const target = context.getNation(canonicalTarget);
 
       if (!target || !target.isAlive || target.id === nation.id) {
         continue;
@@ -92,24 +83,15 @@ export class AISabotagePlanner {
           continue;
         }
 
-        const targetGdp = getNationGdp(
-          target,
-          provincesMap,
-          undefined,
-          provincesByOwnerMap,
-        );
+        const targetGdp = context.getNationGdp(target.id);
         const cost = EspionageCalculator.calculateOperationCost(targetGdp, 2);
 
         if (geopoliticsBudget < cost || effectiveTreasury < cost) {
           continue;
         }
 
-        const vector = GeopoliticalVectorCalculator.calculate(
-          nation,
-          target,
-          allNations,
-          provincesMap,
-        );
+        const vector = context.getVector(nation, target);
+        if (!vector) continue;
 
         const hasDefenses =
           (target.military.airDefense || 0) > 0 ||

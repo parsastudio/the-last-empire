@@ -2,21 +2,15 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  Province,
   CountryRegistry,
-  DiplomacyLockManager,
-  GlobalCoalition,
   PeaceTermsCalculator,
 } from "@geopolitics/domain";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AIPeaceEvaluator {
   public static evaluate(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    lockedTargets?: Set<string>,
-    globalCoalition?: GlobalCoalition | null,
-    currentTurn?: number,
+    context: TurnContext,
   ): GameAction | null {
     if (!nation.relations) return null;
 
@@ -26,32 +20,31 @@ export class AIPeaceEvaluator {
       if (rel.stance !== "WAR") continue;
 
       if (
-        currentTurn !== undefined &&
         rel.warDeclaredTurn !== undefined &&
-        currentTurn <= rel.warDeclaredTurn
+        context.turn <= rel.warDeclaredTurn
       ) {
         continue;
       }
 
-      if (DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)) {
+      if (context.isDiplomacyLocked(targetId, nation.id)) {
         continue;
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
 
-      if (globalCoalition) {
+      if (context.globalCoalition) {
         const isMemberAndTarget =
-          (globalCoalition.memberNationIds.includes(sourceCanonical) &&
-            canonicalTarget === globalCoalition.targetNationId) ||
-          (globalCoalition.memberNationIds.includes(canonicalTarget) &&
-            sourceCanonical === globalCoalition.targetNationId);
+          (context.globalCoalition.memberNationIds.includes(sourceCanonical) &&
+            canonicalTarget === context.globalCoalition.targetNationId) ||
+          (context.globalCoalition.memberNationIds.includes(canonicalTarget) &&
+            sourceCanonical === context.globalCoalition.targetNationId);
 
         if (isMemberAndTarget) {
           continue;
         }
       }
 
-      const targetNation = allNations[canonicalTarget] || allNations[targetId];
+      const targetNation = context.getNation(canonicalTarget);
 
       if (
         !targetNation ||
@@ -64,13 +57,13 @@ export class AIPeaceEvaluator {
 
       const sourceTwmi = PeaceTermsCalculator.calculateTwmi(
         nation,
-        allNations,
-        provincesMap,
+        context.state.nations,
+        context.state.provinces,
       );
       const targetTwmi = PeaceTermsCalculator.calculateTwmi(
         targetNation,
-        allNations,
-        provincesMap,
+        context.state.nations,
+        context.state.provinces,
       );
 
       const ratio = sourceTwmi / targetTwmi;

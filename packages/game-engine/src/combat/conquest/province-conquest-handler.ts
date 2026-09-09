@@ -4,7 +4,11 @@ import {
   getProvinceGdp,
   getNationGdp,
 } from "@/domain/nation/gdp-calculator.utility";
-import { NationGettersUtility, IndustryCalculator } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  IndustryCalculator,
+  MapTopologyRegistry,
+} from "@geopolitics/domain";
 
 export interface ProvinceConquestResult {
   updatedProvinces: Record<string, Province>;
@@ -61,9 +65,13 @@ export class ProvinceConquestHandler {
       }
 
       if (!conqueredProvId) {
-        const sorted = [...defenderProvincesBefore].sort(
-          (a, b) => b.pixelCount - a.pixelCount,
-        );
+        const sorted = [...defenderProvincesBefore].sort((a, b) => {
+          const pixelA =
+            a.pixelCount ?? MapTopologyRegistry.getPixelCount(a.provinceId);
+          const pixelB =
+            b.pixelCount ?? MapTopologyRegistry.getPixelCount(b.provinceId);
+          return pixelB - pixelA;
+        });
         conqueredProvId = sorted[0]!.provinceId;
       }
 
@@ -102,7 +110,9 @@ export class ProvinceConquestHandler {
             factoryTiers: flooredTiers,
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
-          conqueredPixels = targetProv.pixelCount;
+          conqueredPixels =
+            targetProv.pixelCount ??
+            MapTopologyRegistry.getPixelCount(conqueredProvId);
           conqueredProvincesGdp = getProvinceGdp(conqueredProv);
           conqueredProvincesList.push(conqueredProv);
         }

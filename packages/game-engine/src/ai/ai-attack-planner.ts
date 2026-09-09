@@ -2,7 +2,6 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  Province,
   CountryRegistry,
   LandNeighborResolver,
   NationGettersUtility,
@@ -10,23 +9,21 @@ import {
 } from "@geopolitics/domain";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AIAttackPlanner {
   public static planAttack(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    ownedProvinces?: Province[],
-    currentTurn?: number,
+    context: TurnContext,
   ): GameAction | null {
-    if (!nation.isAlive || !nation.relations || !provincesMap) {
+    if (!nation.isAlive || !nation.relations || !context.state.provinces) {
       return null;
     }
 
     const targetNation = this.resolveActiveWarTarget(
       nation,
-      allNations,
-      currentTurn,
+      context.state.nations,
+      context.turn,
     );
     if (!targetNation || !targetNation.isAlive) {
       return null;
@@ -40,8 +37,7 @@ export class AIAttackPlanner {
     const targetResolution = this.resolveTargetProvince(
       nation,
       targetNation,
-      provincesMap,
-      ownedProvinces,
+      context,
     );
 
     if (!targetResolution) {
@@ -51,7 +47,7 @@ export class AIAttackPlanner {
     const guarantorNation = targetNation.securityGuarantorId
       ? NationGettersUtility.resolveNation(
           targetNation.securityGuarantorId,
-          allNations,
+          context.state.nations,
         )
       : null;
 
@@ -61,7 +57,7 @@ export class AIAttackPlanner {
       AttackDeploymentOptimizer.calculateOptimalDeployment(
         nation,
         targetNation,
-        provincesMap,
+        context.state.provinces,
         guarantorNation,
         targetResolution.attackType,
         fleetCount,
@@ -87,13 +83,13 @@ export class AIAttackPlanner {
 
     const sourceTwmi = TwmiCalculatorUtility.calculateTwmi(
       nation,
-      allNations,
-      provincesMap,
+      context.state.nations,
+      context.state.provinces,
     );
     const targetTwmi = TwmiCalculatorUtility.calculateTwmi(
       targetNation,
-      allNations,
-      provincesMap,
+      context.state.nations,
+      context.state.provinces,
     );
 
     if (sourceTwmi < targetTwmi) {
@@ -196,17 +192,9 @@ export class AIAttackPlanner {
   private static resolveTargetProvince(
     nation: Nation,
     targetNation: Nation,
-    provincesMap: Record<string, Province> | undefined,
-    ownedProvinces?: Province[],
+    context: TurnContext,
   ): { provinceId: number; attackType: "LAND" | "NAVAL" } | null {
-    if (!provincesMap) {
-      return null;
-    }
-
-    const targetProvinceList = NationGettersUtility.getOwnedProvinces(
-      targetNation.id,
-      provincesMap,
-    );
+    const targetProvinceList = context.getOwnedProvinces(targetNation.id);
 
     if (targetProvinceList.length === 0) {
       return null;
@@ -218,7 +206,7 @@ export class AIAttackPlanner {
         LandNeighborResolver.hasProvinceLandBorder(
           prov.provinceId,
           nation.id,
-          provincesMap,
+          context.state.provinces,
         )
       ) {
         return {
@@ -230,8 +218,7 @@ export class AIAttackPlanner {
 
     const sourceSea = NationGettersUtility.hasSeaAccess(
       nation.id,
-      provincesMap,
-      ownedProvinces,
+      context.state.provinces,
     );
 
     const hasNavalFleets = (nation.navalFleet || 0) > 0;
@@ -241,7 +228,8 @@ export class AIAttackPlanner {
 
     for (let i = 0; i < targetProvinceList.length; i++) {
       const prov = targetProvinceList[i]!;
-      if (prov.hasSeaAccess) {
+      const hasSea = prov.hasSeaAccess ?? true;
+      if (hasSea) {
         return {
           provinceId: prov.provinceId,
           attackType: "NAVAL",

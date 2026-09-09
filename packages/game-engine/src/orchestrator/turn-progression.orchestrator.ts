@@ -31,12 +31,12 @@ export class TurnProgressionOrchestrator {
       turnActivity: {},
     };
 
-    const turnContext = TurnContext.create(workingState);
+    let turnContext = TurnContext.create(workingState, lockedDiplomacyTargets);
 
     workingState = this.pipeline.processTurn(workingState, turnContext);
     workingState = this.livenessManager.updateLiveness(workingState);
 
-    turnContext.sync(workingState);
+    turnContext = TurnContext.create(workingState, lockedDiplomacyTargets);
 
     workingState = CoalitionManager.evaluateCoalitionState(
       workingState,
@@ -62,14 +62,7 @@ export class TurnProgressionOrchestrator {
 
       const aiActions = AIActionBuilder.buildNationActions(
         currentNation,
-        workingState.nations,
-        workingState.provinces,
-        lockedDiplomacyTargets,
-        turnContext.matrixCache,
-        workingState.globalCoalition,
-        workingState.currentTurn,
         turnContext,
-        workingState.turnActivity?.[currentNation.id],
       );
 
       if (aiActions.length > 0) {
@@ -90,7 +83,10 @@ export class TurnProgressionOrchestrator {
           workingState = executedState;
 
           if (hasTerritorialChange) {
-            turnContext.sync(workingState);
+            turnContext = TurnContext.create(
+              workingState,
+              lockedDiplomacyTargets,
+            );
           }
         }
       }

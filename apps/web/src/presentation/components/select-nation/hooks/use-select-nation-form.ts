@@ -13,6 +13,7 @@ import {
   CountryRegistry,
   ClientMapPathResolver,
   GameDifficulty,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 
@@ -140,6 +141,7 @@ export function useSelectNationForm() {
             json.nations.length > 0
           ) {
             CountryRegistry.initializeFromManifest(json);
+            MapTopologyRegistry.initializeFromManifest(json);
             setManifest(json);
           }
         }

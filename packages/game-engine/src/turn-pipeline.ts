@@ -26,8 +26,7 @@ export class TurnPipeline {
       if (!nation) continue;
 
       const canonicalId = CountryRegistry.resolveCanonicalId(id);
-      const ownedProvinces =
-        turnContext.provincesByOwnerMap.get(canonicalId) || [];
+      const ownedProvinces = turnContext.getOwnedProvinces(canonicalId);
       const hasTerritory = ownedProvinces.length > 0;
 
       if (!nation.isAlive || !hasTerritory) {
@@ -36,24 +35,13 @@ export class TurnPipeline {
       }
 
       const { updatedNation: dipNation, isAtWar } =
-        DiplomaticTurnProcessor.process(
-          nation,
-          currentState.nations,
-          updatedProvincesMap,
-          turnContext,
-        );
+        DiplomaticTurnProcessor.process(nation, turnContext);
 
       const {
         updatedNation: ecoNation,
         updatedProvinces,
         bankruptcyLog,
-      } = EconomyTurnProcessor.process(
-        dipNation,
-        currentState.nations,
-        ownedProvinces,
-        updatedProvincesMap,
-        turnContext,
-      );
+      } = EconomyTurnProcessor.process(dipNation, turnContext);
 
       if (bankruptcyLog) {
         economyLogs.push(bankruptcyLog);
@@ -67,7 +55,7 @@ export class TurnPipeline {
       const polNation = PoliticsTurnProcessor.process(
         ecoNation,
         isAtWar,
-        currentState.nations,
+        turnContext,
       );
 
       updatedNations[canonicalId] = polNation;

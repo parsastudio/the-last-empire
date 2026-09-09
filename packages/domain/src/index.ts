@@ -42,6 +42,7 @@ export * from "./map/land-neighbor-resolver";
 export * from "./map/manifest.type";
 export * from "./map/map.config";
 export * from "./map/tactical-color-palette";
+export * from "./map/map-topology-registry";
 export * from "./military/military.schema";
 export * from "./military/military-inventory-helper";
 export * from "./military/military-power-calculator.utility";

@@ -2,50 +2,32 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  Province,
   CountryRegistry,
-  DiplomacyLockManager,
-  GeopoliticalReachResolver,
   SecurityGuaranteeValidator,
   NationRelationResolver,
-  getNationGdp,
   StrategicPartnershipCalculatorUtility,
-  NationGettersUtility,
 } from "@geopolitics/domain";
-import {
-  GeopoliticalVectorCalculator,
-  GeopoliticalVector,
-} from "@/engine/ai/geopolitical-vector-calculator";
 import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AITreatyEvaluator {
   public static evaluateTreatyCancellation(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    lockedTargets?: Set<string>,
-    vectorsByTarget?: Map<string, GeopoliticalVector>,
-    rankMap?: Map<string, number>,
+    context: TurnContext,
   ): GameAction | null {
     if (
       nation.isAi &&
       nation.defenseGuarantorIds &&
       nation.defenseGuarantorIds.length > 0
     ) {
-      const aliveNations = Object.values(allNations).filter((n) => n.isAlive);
-      const top20Threshold = Math.ceil(aliveNations.length * 0.2);
-      const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-      const nationRank =
-        rankMap?.get(canonicalId) ??
-        rankMap?.get(nation.id) ??
-        NationGettersUtility.getRank(nation.id, allNations, provincesMap);
+      const aliveNationsCount = context.aliveNations.length;
+      const top20Threshold = Math.ceil(aliveNationsCount * 0.2);
+      const nationRank = context.getRank(nation.id);
 
       if (nationRank <= top20Threshold) {
         for (let i = 0; i < nation.defenseGuarantorIds.length; i++) {
           const targetId = nation.defenseGuarantorIds[i]!;
-          if (
-            DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetId)
-          ) {
+          if (context.isDiplomacyLocked(targetId, nation.id)) {
             continue;
           }
           return ActionFactory.diplomaticProposal(
@@ -63,7 +45,7 @@ export class AITreatyEvaluator {
       nation.doctrine === "MILITARIST_HAWK" ||
       nation.doctrine === "GLOBAL_HEGEMON";
 
-    const isSourceAtWar = NationRelationResolver.isAtWar(nation, allNations);
+    const isSourceAtWar = context.isAtWar(nation);
 
     for (const [targetId, rel] of Object.entries(nation.relations)) {
       if (
@@ -74,23 +56,15 @@ export class AITreatyEvaluator {
       }
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[canonicalTarget] || allNations[targetId];
+      const targetNation = context.getNation(canonicalTarget);
       if (!targetNation || !targetNation.isAlive) continue;
 
-      if (
-        DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)
-      ) {
+      if (context.isDiplomacyLocked(targetNation.id, nation.id)) {
         continue;
       }
 
-      const vector =
-        vectorsByTarget?.get(canonicalTarget) ??
-        GeopoliticalVectorCalculator.calculate(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        );
+      const vector = context.getVector(nation, targetNation);
+      if (!vector) continue;
 
       const isDiscreditedAlly = targetNation.globalReputation <= -25;
 
@@ -99,11 +73,14 @@ export class AITreatyEvaluator {
         vector.powerRatio <= 0.6 &&
         !isSourceAtWar;
 
-      const targetGdp = getNationGdp(targetNation, provincesMap);
+      const targetGdp = context.getNationGdp(targetNation.id);
       const isTargetInCrisis =
         targetNation.government.stability < 30 ||
         targetNation.nationalDebt >= targetGdp * 0.35 ||
-        NationRelationResolver.countActiveWars(targetNation, allNations) >= 2;
+        NationRelationResolver.countActiveWars(
+          targetNation,
+          context.state.nations,
+        ) >= 2;
 
       const isHawkTemptation =
         isHawk &&
@@ -147,44 +124,19 @@ export class AITreatyEvaluator {
 
   public static evaluate(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    lockedTargets?: Set<string>,
-    rankMap?: Map<string, number>,
-    reachableTargets?: Nation[],
-    vectorsByTarget?: Map<string, GeopoliticalVector>,
+    context: TurnContext,
   ): GameAction | null {
     if (!nation.relations) return null;
 
-    const cancelAction = this.evaluateTreatyCancellation(
-      nation,
-      allNations,
-      provincesMap,
-      lockedTargets,
-      vectorsByTarget,
-      rankMap,
-    );
+    const cancelAction = this.evaluateTreatyCancellation(nation, context);
     if (cancelAction) {
       return cancelAction;
     }
 
-    const targets =
-      reachableTargets ??
-      GeopoliticalReachResolver.getReachableTargets(
-        nation,
-        allNations,
-        provincesMap,
-        rankMap,
-      );
-
-    const aliveNations = Object.values(allNations).filter((n) => n.isAlive);
-    const top20Threshold = Math.ceil(aliveNations.length * 0.2);
-    const canonicalNationId = CountryRegistry.resolveCanonicalId(nation.id);
-    const nationRank =
-      rankMap?.get(canonicalNationId) ??
-      rankMap?.get(nation.id) ??
-      NationGettersUtility.getRank(nation.id, allNations, provincesMap);
-
+    const targets = context.getReachableTargets(nation);
+    const aliveNationsCount = context.aliveNations.length;
+    const top20Threshold = Math.ceil(aliveNationsCount * 0.2);
+    const nationRank = context.getRank(nation.id);
     const isTop20PercentAi = nation.isAi && nationRank <= top20Threshold;
 
     const currentPactsCount = (nation.defenseGuarantorIds || []).length;
@@ -200,19 +152,17 @@ export class AITreatyEvaluator {
           continue;
         }
 
-        if (
-          DiplomacyLockManager.isLocked(lockedTargets, nation.id, candidate.id)
-        ) {
+        if (context.isDiplomacyLocked(candidate.id, nation.id)) {
           continue;
         }
 
         const validation = SecurityGuaranteeValidator.validate(
           nation,
           candidate,
-          provincesMap,
+          context.state.provinces,
           false,
-          allNations,
-          rankMap,
+          context.state.nations,
+          context.rankMap,
         );
 
         if (validation.isValid) {
@@ -243,63 +193,49 @@ export class AITreatyEvaluator {
         continue;
       }
 
-      if (
-        DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)
-      ) {
+      if (context.isDiplomacyLocked(targetNation.id, nation.id)) {
         continue;
       }
 
-      const targetGdp = getNationGdp(targetNation, provincesMap);
+      const targetGdp = context.getNationGdp(targetNation.id);
 
       if (rel.stance === "NON_AGGRESSION_PACT") {
         const entryFee =
           StrategicPartnershipCalculatorUtility.calculateSigningCost(targetGdp);
 
         if (nation.treasury >= entryFee) {
-          const vector =
-            vectorsByTarget?.get(canonicalTarget) ??
-            GeopoliticalVectorCalculator.calculate(
-              nation,
-              targetNation,
-              allNations,
-              provincesMap,
-            );
+          const vector = context.getVector(nation, targetNation);
+          if (vector) {
+            const partnershipUtility =
+              UtilityDecisionEngine.calculateStrategicPartnershipUtility(
+                nation,
+                vector,
+                targetGdp,
+              );
 
-          const partnershipUtility =
-            UtilityDecisionEngine.calculateStrategicPartnershipUtility(
-              nation,
-              vector,
-              targetGdp,
-            );
-
-          if (partnershipUtility >= 20) {
-            return ActionFactory.diplomaticProposal(
-              nation.id,
-              targetNation.id,
-              "STRATEGIC_PARTNERSHIP",
-            );
+            if (partnershipUtility >= 20) {
+              return ActionFactory.diplomaticProposal(
+                nation.id,
+                targetNation.id,
+                "STRATEGIC_PARTNERSHIP",
+              );
+            }
           }
         }
       }
 
       if (rel.stance === "NORMAL_DIPLOMACY") {
-        const vector =
-          vectorsByTarget?.get(canonicalTarget) ??
-          GeopoliticalVectorCalculator.calculate(
-            nation,
-            targetNation,
-            allNations,
-            provincesMap,
-          );
+        const vector = context.getVector(nation, targetNation);
+        if (vector) {
+          const napUtility = UtilityDecisionEngine.calculateNapUtility(vector);
 
-        const napUtility = UtilityDecisionEngine.calculateNapUtility(vector);
-
-        if (napUtility >= 0) {
-          return ActionFactory.diplomaticProposal(
-            nation.id,
-            targetNation.id,
-            "NON_AGGRESSION_PACT",
-          );
+          if (napUtility >= 0) {
+            return ActionFactory.diplomaticProposal(
+              nation.id,
+              targetNation.id,
+              "NON_AGGRESSION_PACT",
+            );
+          }
         }
       }
     }

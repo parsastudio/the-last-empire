@@ -1,7 +1,6 @@
 import {
   GameState,
   Nation,
-  Province,
   RelationProfile,
   CountryRegistry,
   PendingProposalManagerUtility,
@@ -29,8 +28,6 @@ export class DiplomaticTurnProcessor {
 
   public static process(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province>,
     turnContext: TurnContext,
   ): {
     updatedNation: Nation;
@@ -53,21 +50,16 @@ export class DiplomaticTurnProcessor {
       }
     }
 
-    const myProvs = turnContext.provincesByOwnerMap.get(canonicalSource) || [];
+    const myProvs = turnContext.getOwnedProvinces(canonicalSource);
 
     const saturationScore =
       TerritorialSaturationCalculatorUtility.calculateSaturationScore(
         nation,
-        provincesMap,
+        turnContext.state.provinces,
         myProvs,
       );
 
-    const reachableTargets = turnContext.matrixCache.getReachableTargets(
-      nation,
-      allNations,
-      provincesMap,
-    );
-
+    const reachableTargets = turnContext.getReachableTargets(nation);
     const reachableCanonicalSet = new Set(
       reachableTargets.map((t) => CountryRegistry.resolveCanonicalId(t.id)),
     );
@@ -80,7 +72,7 @@ export class DiplomaticTurnProcessor {
       if (!relation) continue;
 
       const canonicalTarget = CountryRegistry.resolveCanonicalId(targetId);
-      const targetNation = allNations[canonicalTarget];
+      const targetNation = turnContext.state.nations[canonicalTarget];
 
       if (relation.stance === "WAR") {
         if (targetNation && targetNation.isAlive) {
@@ -146,7 +138,7 @@ export class DiplomaticTurnProcessor {
     if (nextWarFocus) {
       const canonicalFocus = CountryRegistry.resolveCanonicalId(nextWarFocus);
       const focusRel = newRels[canonicalFocus];
-      const focusTarget = allNations[canonicalFocus];
+      const focusTarget = turnContext.state.nations[canonicalFocus];
       const isFocusAlive = focusTarget ? focusTarget.isAlive : true;
 
       if (!focusRel || focusRel.stance !== "WAR" || !isFocusAlive) {
