@@ -4,6 +4,7 @@ import {
   FinalMapManifest,
   FinalManifestNation,
   ClientMapPathResolver,
+  GameDifficulty,
 } from "@geopolitics/domain";
 import { GlobalAiInitializer } from "@geopolitics/game-engine";
 
@@ -15,6 +16,7 @@ export class CampaignInitializationService {
     governmentType: string,
     gameId: string,
     manifest?: FinalMapManifest | null,
+    difficulty: GameDifficulty = "NORMAL",
   ): Promise<GameState> {
     const normalizedHumanId = CountryRegistry.resolveCanonicalId(nationId);
     let activeManifest: FinalMapManifest | null = manifest ?? null;
@@ -70,6 +72,7 @@ export class CampaignInitializationService {
       currentTurn: 1,
       seed: Math.floor(Math.random() * 1000000),
       isGameOver: false,
+      difficulty,
       humanNationId: normalizedHumanId,
       provinces: initResult.provinces,
       nations: initResult.nations,

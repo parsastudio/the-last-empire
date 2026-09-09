@@ -7,6 +7,7 @@ import {
   DebtCalculatorUtility,
   CountryRegistry,
   StrategicPartnershipCalculatorUtility,
+  GameDifficulty,
 } from "@geopolitics/domain";
 import {
   FiscalRevenueCalculator,
@@ -24,6 +25,7 @@ export interface HumanResourceMetrics {
   equipmentTechLevel: number;
   stability: number;
   currentTurn: number;
+  difficulty: GameDifficulty;
 }
 
 export function selectHumanResourceMetrics(
@@ -41,6 +43,7 @@ export function selectHumanResourceMetrics(
       equipmentTechLevel: 1.0,
       stability: 0,
       currentTurn: 1,
+      difficulty: "NORMAL",
     };
   }
 
@@ -61,6 +64,7 @@ export function selectHumanResourceMetrics(
       equipmentTechLevel: 1.0,
       stability: 0,
       currentTurn: gameState.currentTurn,
+      difficulty: gameState.difficulty ?? "NORMAL",
     };
   }
 
@@ -136,5 +140,6 @@ export function selectHumanResourceMetrics(
     equipmentTechLevel: nation.equipmentTechLevel,
     stability: nation.government.stability,
     currentTurn: gameState.currentTurn,
+    difficulty: gameState.difficulty ?? "NORMAL",
   };
 }

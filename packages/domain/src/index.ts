@@ -25,6 +25,7 @@ export * from "./events/dilemma-catalog.data";
 export * from "./projects/national-project.schema";
 export * from "./projects/national-projects-catalog.data";
 export * from "./projects/national-project-effect-applier.utility";
+export * from "./game/difficulty.schema";
 export * from "./game/action.schema";
 export * from "./game/action-factory";
 export * from "./game/game-state.schema";

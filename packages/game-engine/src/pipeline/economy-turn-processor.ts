@@ -23,6 +23,7 @@ export class EconomyTurnProcessor {
     ownedProvinces: Province[],
     provincesMap: Record<string, Province>,
     currentTurn = 1,
+    aiRevenueMultiplier = 1.4,
   ): {
     updatedNation: Nation;
     updatedProvinces: Province[];
@@ -98,6 +99,7 @@ export class EconomyTurnProcessor {
       nation,
       allNations,
       currentProvincesMap,
+      aiRevenueMultiplier,
     );
 
     const totalIncome =

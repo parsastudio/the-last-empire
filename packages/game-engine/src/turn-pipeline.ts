@@ -6,6 +6,7 @@ import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-proce
 import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
 import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
 import { GeopoliticalMatrixCache } from "@/engine/ai/geopolitical-matrix-cache";
+import { DIFFICULTY_CONFIGS } from "@geopolitics/domain";
 
 export class TurnPipeline {
   public processTurn(
@@ -16,6 +17,10 @@ export class TurnPipeline {
   ): GameState {
     const currentState =
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
+
+    const difficultyKey = currentState.difficulty ?? "NORMAL";
+    const aiMultiplier =
+      DIFFICULTY_CONFIGS[difficultyKey]?.aiRevenueMultiplier ?? 1.4;
 
     const updatedNations: Record<string, Nation> = {};
     const updatedProvincesMap: Record<string, Province> = {
@@ -64,6 +69,7 @@ export class TurnPipeline {
         ownedProvinces,
         updatedProvincesMap,
         currentState.currentTurn,
+        aiMultiplier,
       );
 
       if (bankruptcyLog) {

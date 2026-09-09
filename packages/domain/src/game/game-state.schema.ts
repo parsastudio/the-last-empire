@@ -3,6 +3,7 @@ import { NationSchema } from "@/domain/nation/nation.schema";
 import { ProvinceSchema } from "@/domain/province/province.schema";
 import { PendingDiplomaticProposalSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DilemmaEventSchema } from "@/domain/events/dilemma.schema";
+import { GameDifficultySchema } from "@/domain/game/difficulty.schema";
 
 export const TurnLogLevelSchema = z.enum([
   "INFO",
@@ -85,6 +86,7 @@ export const GameStateSchema = z.object({
   seed: z.number(),
   isGameOver: z.boolean(),
   isSandboxMode: z.boolean().default(false).optional(),
+  difficulty: GameDifficultySchema.default("NORMAL"),
   winnerNationId: z.string().optional(),
   gameOverReason: z.string().optional(),
   humanNationId: z.string(),
