@@ -7,6 +7,7 @@ export class WebGLMapRenderer {
 
   private vao: WebGLVertexArrayObject | null = null;
   private terrainTexture: WebGLTexture | null = null;
+  private terrainPaletteTexture: WebGLTexture | null = null;
   private liveStateTexture: WebGLTexture | null = null;
   private paletteTexture: WebGLTexture | null = null;
   private gdpPaletteTexture: WebGLTexture | null = null;
@@ -64,6 +65,10 @@ export class WebGLMapRenderer {
       );
 
       const uTerrainLoc = gl.getUniformLocation(prog, "u_terrainTexture");
+      const uTerrainPaletteLoc = gl.getUniformLocation(
+        prog,
+        "u_terrainPaletteTexture",
+      );
       const uLiveStateLoc = gl.getUniformLocation(prog, "u_liveStateTexture");
       const uPaletteLoc = gl.getUniformLocation(prog, "u_paletteTexture");
       const uGdpPaletteLoc = gl.getUniformLocation(prog, "u_gdpPaletteTexture");
@@ -78,6 +83,7 @@ export class WebGLMapRenderer {
       if (uPaletteLoc) gl.uniform1i(uPaletteLoc, 2);
       if (uGdpPaletteLoc) gl.uniform1i(uGdpPaletteLoc, 3);
       if (uDiplomaticLoc) gl.uniform1i(uDiplomaticLoc, 4);
+      if (uTerrainPaletteLoc) gl.uniform1i(uTerrainPaletteLoc, 5);
       if (this.uHoveredCountryLoc) gl.uniform1i(this.uHoveredCountryLoc, 0);
     }
   }
@@ -124,17 +130,55 @@ export class WebGLMapRenderer {
     gl.vertexAttribPointer(aTexLoc, 2, gl.FLOAT, false, 16, 8);
   }
 
-  public setTerrainImage(image: HTMLImageElement): void {
+  public setTerrainData(
+    indexedGrid: Uint8Array,
+    paletteRgba: Uint8Array,
+    width = 4096,
+    height = 2048,
+  ): void {
     const gl = this.gl;
-    this.terrainTexture = gl.createTexture();
 
+    if (!this.terrainTexture) {
+      this.terrainTexture = gl.createTexture();
+    }
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.terrainTexture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.R8UI,
+      width,
+      height,
+      0,
+      gl.RED_INTEGER,
+      gl.UNSIGNED_BYTE,
+      indexedGrid,
+    );
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    if (!this.terrainPaletteTexture) {
+      this.terrainPaletteTexture = gl.createTexture();
+    }
+    gl.activeTexture(gl.TEXTURE5);
+    gl.bindTexture(gl.TEXTURE_2D, this.terrainPaletteTexture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      256,
+      1,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      paletteRgba,
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
   }
 
   public updateLiveStateTexture(
@@ -228,6 +272,11 @@ export class WebGLMapRenderer {
     if (this.diplomaticPaletteTexture) {
       gl.activeTexture(gl.TEXTURE4);
       gl.bindTexture(gl.TEXTURE_2D, this.diplomaticPaletteTexture);
+    }
+
+    if (this.terrainPaletteTexture) {
+      gl.activeTexture(gl.TEXTURE5);
+      gl.bindTexture(gl.TEXTURE_2D, this.terrainPaletteTexture);
     }
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);

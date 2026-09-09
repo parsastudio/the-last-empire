@@ -1,7 +1,18 @@
 import React, { useMemo } from "react";
-import { Trophy, Swords, Cpu, Users } from "lucide-react";
+import {
+  Trophy,
+  Swords,
+  Cpu,
+  Users,
+  ShieldCheck,
+  Compass,
+  Flame,
+  Skull,
+  LucideIcon,
+} from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import { GameDifficulty, DIFFICULTY_CONFIGS } from "@geopolitics/domain";
 
 interface NationHeaderCardProps {
   name: string;
@@ -12,7 +23,40 @@ interface NationHeaderCardProps {
   militaryTechLevel?: number;
   industrialLevel?: number;
   rank?: number;
+  difficulty?: GameDifficulty;
 }
+
+const DIFFICULTY_ICONS: Record<GameDifficulty, LucideIcon> = {
+  EASY: ShieldCheck,
+  NORMAL: Compass,
+  HARD: Flame,
+  IMPOSSIBLE: Skull,
+};
+
+const DIFFICULTY_STYLES: Record<
+  GameDifficulty,
+  {
+    border: string;
+    textColor: string;
+  }
+> = {
+  EASY: {
+    border: "border-emerald-500/30",
+    textColor: "text-emerald-400",
+  },
+  NORMAL: {
+    border: "border-primary/30",
+    textColor: "text-primary",
+  },
+  HARD: {
+    border: "border-amber-500/30",
+    textColor: "text-amber-400",
+  },
+  IMPOSSIBLE: {
+    border: "border-rose-500/30",
+    textColor: "text-rose-400",
+  },
+};
 
 export function NationHeaderCard({
   name,
@@ -23,6 +67,7 @@ export function NationHeaderCard({
   militaryTechLevel = 1.0,
   industrialLevel = 1.0,
   rank = 1,
+  difficulty = "NORMAL",
 }: NationHeaderCardProps) {
   const formatted = useMemo(() => {
     const summary = NationPresentationMapper.formatNationSummary(
@@ -58,6 +103,10 @@ export function NationHeaderCard({
     industrialLevel,
   ]);
 
+  const diffConfig = DIFFICULTY_CONFIGS[difficulty];
+  const DiffIcon = DIFFICULTY_ICONS[difficulty] ?? Compass;
+  const diffVisual = DIFFICULTY_STYLES[difficulty] ?? DIFFICULTY_STYLES.NORMAL;
+
   return (
     <div className="bg-card/90 border border-border/80 p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-xl dir-rtl text-right font-sans relative overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/60">
@@ -91,7 +140,7 @@ export function NationHeaderCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs">
         <div className="bg-background/60 border border-border/60 p-3 rounded-2xl space-y-1 shadow-sm">
           <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">
             <Users size={13} className="text-primary shrink-0" />
@@ -119,6 +168,22 @@ export function NationHeaderCard({
           </span>
           <span className="text-xs font-black text-primary block">
             لِوِل {formatted.industrialTechFormatted}
+          </span>
+        </div>
+
+        <div
+          className={`bg-background/60 border ${diffVisual.border} p-3 rounded-2xl space-y-1 shadow-sm`}
+          title={diffConfig.descriptionFa}
+        >
+          <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">
+            <DiffIcon
+              size={13}
+              className={`${diffVisual.textColor} shrink-0`}
+            />
+            <span>سطح دشواری بازی</span>
+          </span>
+          <span className={`text-xs font-black ${diffVisual.textColor} block`}>
+            {diffConfig.nameFa}
           </span>
         </div>
       </div>

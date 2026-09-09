@@ -24,11 +24,16 @@ export class MapBuildOrchestrator {
     const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
     const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
 
-    const strategicFiles = ["manifest.json", "live-state.bin"];
+    const strategicFiles = [
+      "manifest.json",
+      "live-state.bin",
+      "live-state.bin.gz",
+    ];
 
     const visualFiles = [
       "tactical_map_terrain.png",
       "terrain-raw.bin",
+      "terrain-raw.bin.gz",
       "terrain-compressed.bin",
       "terrain-compressed.bin.gz",
       "terrain-binary-stats.json",
