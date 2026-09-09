@@ -1,4 +1,7 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  Nation,
+  DEFAULT_NATION_TURN_ACTIVITY,
+} from "@/domain/nation/nation.schema";
 import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import {
   EspionageTier,
@@ -80,7 +83,10 @@ export class EspionageManager {
       throw new GameError("NATION_NOT_FOUND", "کشور هدف فعال نیست.");
     }
 
-    const executedTiers = source.executedEspionageTiers || [];
+    const executedTiers =
+      source.turnActivity?.executedEspionageTiers ??
+      source.executedEspionageTiers ??
+      [];
     const executionKey = `${canonicalTarget}:${tier}`;
 
     if (executedTiers.includes(executionKey)) {
@@ -127,10 +133,15 @@ export class EspionageManager {
       ? "CLEAN_SUCCESS"
       : "CRITICAL_FAILURE";
 
+    const updatedExecutedTiers = [...executedTiers, executionKey];
     let updatedSource: Nation = {
       ...source,
       treasury: source.treasury - cost,
-      executedEspionageTiers: [...executedTiers, executionKey],
+      executedEspionageTiers: updatedExecutedTiers,
+      turnActivity: {
+        ...(source.turnActivity || DEFAULT_NATION_TURN_ACTIVITY),
+        executedEspionageTiers: updatedExecutedTiers,
+      },
     };
     let updatedTarget: Nation = { ...target };
 

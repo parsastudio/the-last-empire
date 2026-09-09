@@ -1,4 +1,7 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  Nation,
+  DEFAULT_NATION_TURN_ACTIVITY,
+} from "@/domain/nation/nation.schema";
 
 export const DEFAULT_NATION_MOCK: Nation = {
   id: "IRN",
@@ -29,6 +32,7 @@ export const DEFAULT_NATION_MOCK: Nation = {
   relations: {},
   activeModifiers: [],
   globalReputation: 50,
+  turnActivity: DEFAULT_NATION_TURN_ACTIVITY,
   executedEspionageTiers: [],
   attackedTargetIdsThisTurn: [],
   sentAidTargetIdsThisTurn: [],

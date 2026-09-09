@@ -41,7 +41,10 @@ export class AIEspionagePlanner {
       };
     }
 
-    const executedTiers = nation.executedEspionageTiers || [];
+    const executedTiers =
+      nation.turnActivity?.executedEspionageTiers ??
+      nation.executedEspionageTiers ??
+      [];
 
     const sabotageAction = AISabotagePlanner.planSabotageTier2(
       nation,

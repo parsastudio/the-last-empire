@@ -2,7 +2,6 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  NationalProjectConfig,
   NATIONAL_PROJECTS_CATALOG,
   PROJECT_STEP_FLAT_COST,
   NationalProjectEffectApplierUtility,
@@ -39,7 +38,10 @@ export class AINationalProjectPlanner {
     }
 
     const completedIds = nation.completedProjectIds || [];
-    const boostedThisTurn = nation.boostedProjectIdsThisTurn || [];
+    const boostedThisTurn =
+      nation.turnActivity?.boostedProjectIds ??
+      nation.boostedProjectIdsThisTurn ??
+      [];
     const maxBoosts = NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN;
     let quotaRemaining = Math.max(0, maxBoosts - boostedThisTurn.length);
 

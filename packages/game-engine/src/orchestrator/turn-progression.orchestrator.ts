@@ -79,8 +79,17 @@ export class TurnProgressionOrchestrator {
           );
 
         if (executedCount > 0) {
+          const hasTerritorialChange =
+            TurnContext.hasTerritorialOwnershipChange(
+              workingState,
+              executedState,
+            );
+
           workingState = executedState;
-          turnContext.sync(workingState);
+
+          if (hasTerritorialChange) {
+            turnContext.sync(workingState);
+          }
         }
       }
     }

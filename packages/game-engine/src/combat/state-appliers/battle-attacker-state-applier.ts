@@ -1,4 +1,7 @@
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  Nation,
+  DEFAULT_NATION_TURN_ACTIVITY,
+} from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { BattleSpoilsDetails } from "@/domain/reports/combat-report.schema";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -28,8 +31,11 @@ export class BattleAttackerStateApplier {
     } = input;
     const canonicalDefender = CountryRegistry.resolveCanonicalId(defenderId);
 
-    const prevAttacked = attacker.attackedTargetIdsThisTurn || [];
-    const attackedTargetIdsThisTurn = Array.from(
+    const prevAttacked =
+      attacker.turnActivity?.attackedTargetIds ??
+      attacker.attackedTargetIdsThisTurn ??
+      [];
+    const attackedTargetIds = Array.from(
       new Set([...prevAttacked, canonicalDefender, defenderId]),
     );
 
@@ -137,7 +143,11 @@ export class BattleAttackerStateApplier {
           : attacker.warFocusTargetId
         : canonicalDefender,
       relations: updatedRelations,
-      attackedTargetIdsThisTurn,
+      attackedTargetIdsThisTurn: attackedTargetIds,
+      turnActivity: {
+        ...(attacker.turnActivity || DEFAULT_NATION_TURN_ACTIVITY),
+        attackedTargetIds,
+      },
       factoryTiers: updatedFactoryTiers,
       equipmentTechLevel: updatedEquipmentTech,
       government: {

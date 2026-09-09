@@ -265,7 +265,10 @@ export class DirectAttackSelector {
     }
 
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNation.id);
-    const executedList = humanNation.executedEspionageTiers || [];
+    const executedList =
+      humanNation.turnActivity?.executedEspionageTiers ??
+      humanNation.executedEspionageTiers ??
+      [];
     const isReconActive = executedList.includes(`${canonicalTarget}:1`);
 
     const targetGdp = getNationGdp(targetNation, provincesMap);

@@ -108,8 +108,11 @@ export function useNationalProjects(nation: Nation) {
   );
 
   const boostedThisTurn = useMemo(
-    () => nation.boostedProjectIdsThisTurn || [],
-    [nation.boostedProjectIdsThisTurn],
+    () =>
+      nation.turnActivity?.boostedProjectIds ??
+      nation.boostedProjectIdsThisTurn ??
+      [],
+    [nation.turnActivity?.boostedProjectIds, nation.boostedProjectIdsThisTurn],
   );
 
   const progressSteps = useMemo(

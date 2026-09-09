@@ -55,7 +55,10 @@ export function useDirectAttackForm({
 
   const hasAlreadyAttackedThisTurn = useMemo(() => {
     if (!humanNation || !canonicalTargetId) return false;
-    const attackedList = humanNation.attackedTargetIdsThisTurn || [];
+    const attackedList =
+      humanNation.turnActivity?.attackedTargetIds ??
+      humanNation.attackedTargetIdsThisTurn ??
+      [];
     return attackedList.includes(canonicalTargetId);
   }, [humanNation, canonicalTargetId]);
 

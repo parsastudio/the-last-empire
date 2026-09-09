@@ -1,5 +1,8 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { Nation } from "@/domain/nation/nation.schema";
+import {
+  Nation,
+  DEFAULT_NATION_TURN_ACTIVITY,
+} from "@/domain/nation/nation.schema";
 import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
@@ -15,7 +18,10 @@ export class ForeignAidExecutor {
     canonicalTargetId: string,
     canonicalSourceId: string,
   ): { newState: GameState; resultData: unknown } {
-    const prevSentAidList = nation.sentAidTargetIdsThisTurn || [];
+    const prevSentAidList =
+      nation.turnActivity?.sentAidTargetIds ??
+      nation.sentAidTargetIdsThisTurn ??
+      [];
     if (
       prevSentAidList.includes(canonicalTargetId) ||
       prevSentAidList.includes(receiver.id)
@@ -76,6 +82,10 @@ export class ForeignAidExecutor {
           treasury: Math.max(0, nation.treasury - costDeduction),
           globalReputation: Math.min(100, nation.globalReputation + 1),
           sentAidTargetIdsThisTurn: updatedSentList,
+          turnActivity: {
+            ...(nation.turnActivity || DEFAULT_NATION_TURN_ACTIVITY),
+            sentAidTargetIds: updatedSentList,
+          },
           relations: {
             ...nation.relations,
             [senderTargetKey]: updatedSenderRel,

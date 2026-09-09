@@ -133,13 +133,16 @@ export function useWideEspionageForm({
     (tier: EspionageTier) => {
       if (!selectedTargetId) return false;
       const canonical = CountryRegistry.resolveCanonicalId(selectedTargetId);
-      const list = nation.executedEspionageTiers || [];
+      const list =
+        nation.turnActivity?.executedEspionageTiers ??
+        nation.executedEspionageTiers ??
+        [];
       return (
         list.includes(`${canonical}:${tier}`) ||
         list.includes(`${selectedTargetId}:${tier}`)
       );
     },
-    [selectedTargetId, nation.executedEspionageTiers],
+    [selectedTargetId, nation.turnActivity, nation.executedEspionageTiers],
   );
 
   const handleExecute = useCallback(
