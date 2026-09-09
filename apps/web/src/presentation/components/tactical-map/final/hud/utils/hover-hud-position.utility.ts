@@ -1,31 +1,48 @@
 import React from "react";
 
 export class HoverHudPositionUtility {
+  private static readonly HUD_HEIGHT = 160;
+  private static readonly OFFSET = 18;
+
   public static calculatePosition(
     cursorPos: { x: number; y: number } | null,
   ): React.CSSProperties {
     if (!cursorPos || typeof window === "undefined") {
-      return { left: "1.5rem", bottom: "1.5rem" };
+      return { left: "-9999px", top: "-9999px" };
     }
 
-    const hudWidth = 320;
-    const hudHeight = 145;
-    const offset = 16;
+    const left = cursorPos.x + this.OFFSET;
 
-    let left = cursorPos.x + offset;
-    let top = cursorPos.y + offset;
+    const isExitingBottom =
+      cursorPos.y + this.OFFSET + this.HUD_HEIGHT > window.innerHeight - 12;
 
-    if (left + hudWidth > window.innerWidth - 20) {
-      left = Math.max(10, cursorPos.x - hudWidth - offset);
-    }
-
-    if (top + hudHeight > window.innerHeight - 20) {
-      top = Math.max(10, cursorPos.y - hudHeight - offset);
-    }
+    const top = isExitingBottom
+      ? Math.max(10, cursorPos.y - this.HUD_HEIGHT - this.OFFSET)
+      : cursorPos.y + this.OFFSET;
 
     return {
       left: `${left}px`,
       top: `${top}px`,
     };
+  }
+
+  public static applyPositionToElement(
+    element: HTMLElement | null,
+    clientX: number,
+    clientY: number,
+  ): void {
+    if (!element || typeof window === "undefined") return;
+
+    const left = clientX + this.OFFSET;
+
+    const isExitingBottom =
+      clientY + this.OFFSET + this.HUD_HEIGHT > window.innerHeight - 12;
+
+    const top = isExitingBottom
+      ? Math.max(10, clientY - this.HUD_HEIGHT - this.OFFSET)
+      : clientY + this.OFFSET;
+
+    element.style.left = `${left}px`;
+    element.style.top = `${top}px`;
   }
 }

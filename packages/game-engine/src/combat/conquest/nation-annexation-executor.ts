@@ -1,6 +1,6 @@
 import {
   Nation,
-  Province,
+  ProvinceDynamicState,
   CountryRegistry,
   NationMutatorUtility,
   NationGettersUtility,
@@ -10,13 +10,13 @@ import {
 import { BitPackedGridState } from "@/engine/combat/final/bit-packed-grid-state";
 
 export interface AnnexationExecutionResult {
-  updatedProvinces: Record<string, Province>;
+  updatedProvinces: Record<string, ProvinceDynamicState>;
   updatedNations: Record<string, Nation>;
 }
 
 export class NationAnnexationExecutor {
   public static executeTotalAnnexation(
-    provinces: Record<string, Province>,
+    provinces: Record<string, ProvinceDynamicState>,
     nations: Record<string, Nation>,
     winnerId: string,
     loserId: string,
@@ -24,7 +24,9 @@ export class NationAnnexationExecutor {
     const winnerCanonical = CountryRegistry.resolveCanonicalId(winnerId);
     const loserCanonical = CountryRegistry.resolveCanonicalId(loserId);
 
-    const updatedProvinces: Record<string, Province> = { ...provinces };
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...provinces,
+    };
     const updatedNations: Record<string, Nation> = { ...nations };
 
     const winnerObj =
@@ -46,7 +48,8 @@ export class NationAnnexationExecutor {
         : p.factoryTiers;
 
       updatedProvinces[p.provinceId.toString()] = {
-        ...p,
+        provinceId: p.provinceId,
+        factoriesCount: p.factoriesCount,
         ownerNationId: winnerCanonical,
         originalNationId: winnerCanonical,
         factoryTiers: flooredTiers,

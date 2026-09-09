@@ -72,8 +72,7 @@ export class AIUpgradePlanner {
     let totalEmptySlots = 0;
     for (let i = 0; i < myProvs.length; i++) {
       const p = myProvs[i]!;
-      const maxSlots =
-        p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
+      const maxSlots = MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
       totalEmptySlots += Math.max(0, maxSlots - p.factoriesCount);
     }
 

@@ -1,6 +1,6 @@
 import {
   Nation,
-  Province,
+  ProvinceDynamicState,
   CountryRegistry,
   NationGettersUtility,
   TerritoryClaimsUtility,
@@ -16,14 +16,14 @@ import {
 
 export class GeopoliticalMatrixCache {
   private rankMap: Map<string, number>;
-  private provincesByOwnerMap: Map<string, Province[]>;
+  private provincesByOwnerMap: Map<string, ProvinceDynamicState[]>;
   private occupiedTerritoryMap: Map<string, number>;
   private vectorsCache = new Map<string, Map<string, GeopoliticalVector>>();
   private postureCache = new Map<string, AIPosture>();
 
   private constructor(
     rankMap: Map<string, number>,
-    provincesByOwnerMap: Map<string, Province[]>,
+    provincesByOwnerMap: Map<string, ProvinceDynamicState[]>,
     occupiedTerritoryMap: Map<string, number>,
   ) {
     this.rankMap = rankMap;
@@ -33,7 +33,7 @@ export class GeopoliticalMatrixCache {
 
   public static build(
     allNations: Record<string, Nation>,
-    provinces: Record<string, Province> | Province[],
+    provinces: Record<string, ProvinceDynamicState> | ProvinceDynamicState[],
   ): GeopoliticalMatrixCache {
     const provincesByOwnerMap =
       NationGettersUtility.buildProvincesByOwnerMap(provinces);
@@ -57,7 +57,7 @@ export class GeopoliticalMatrixCache {
     return this.rankMap;
   }
 
-  public getProvincesByOwnerMap(): Map<string, Province[]> {
+  public getProvincesByOwnerMap(): Map<string, ProvinceDynamicState[]> {
     return this.provincesByOwnerMap;
   }
 
@@ -65,7 +65,7 @@ export class GeopoliticalMatrixCache {
     return this.occupiedTerritoryMap;
   }
 
-  public getOwnedProvinces(nationId: string): Province[] {
+  public getOwnedProvinces(nationId: string): ProvinceDynamicState[] {
     const canonical = CountryRegistry.resolveCanonicalId(nationId);
     return (
       this.provincesByOwnerMap.get(canonical) ??
@@ -77,7 +77,7 @@ export class GeopoliticalMatrixCache {
   public getVectorsForNation(
     nation: Nation,
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): Map<string, GeopoliticalVector> {
     const canonicalSource = CountryRegistry.resolveCanonicalId(nation.id);
     const cached = this.vectorsCache.get(canonicalSource);
@@ -113,7 +113,7 @@ export class GeopoliticalMatrixCache {
   public getPosture(
     nation: Nation,
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): AIPosture {
     const canonical = CountryRegistry.resolveCanonicalId(nation.id);
     const cached = this.postureCache.get(canonical);
@@ -133,7 +133,7 @@ export class GeopoliticalMatrixCache {
   public getReachableTargets(
     nation: Nation,
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): Nation[] {
     const vectors = this.getVectorsForNation(nation, allNations, provincesMap);
     const targets: Nation[] = [];

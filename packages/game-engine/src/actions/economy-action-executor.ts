@@ -5,6 +5,7 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
 import { NationalDebtExecutor } from "@/engine/actions/executors/economy/national-debt-executor";
 import { FactoryActionExecutor } from "@/engine/actions/executors/economy/factory-action-executor";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class EconomyActionExecutor {
   public static execute(
@@ -12,7 +13,7 @@ export class EconomyActionExecutor {
     action: GameAction,
     sourceNation?: Nation,
     canonicalNationId?: string,
-  ): GameState {
+  ): ExecutionResult {
     const canonicalId =
       canonicalNationId ?? CountryRegistry.resolveCanonicalId(action.nationId);
     const nation =
@@ -31,7 +32,7 @@ export class EconomyActionExecutor {
 
     switch (action.type) {
       case "SET_ECONOMIC_DOCTRINE": {
-        return {
+        const newState: GameState = {
           ...state,
           nations: {
             ...state.nations,
@@ -40,6 +41,10 @@ export class EconomyActionExecutor {
               economicStance: action.stance,
             },
           },
+        };
+        return {
+          newState,
+          resultData: { stance: action.stance },
         };
       }
 
@@ -97,7 +102,7 @@ export class EconomyActionExecutor {
       }
 
       default:
-        return state;
+        return { newState: state };
     }
   }
 }

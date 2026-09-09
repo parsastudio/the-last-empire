@@ -6,6 +6,7 @@ import {
   LandNeighborResolver,
   NationGettersUtility,
   TwmiCalculatorUtility,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { AttackDeploymentOptimizer } from "@/engine/combat/attack-deployment-optimizer";
 import { NavalDeploymentClamper } from "@/engine/combat/optimizer/naval-deployment-clamper";
@@ -228,7 +229,7 @@ export class AIAttackPlanner {
 
     for (let i = 0; i < targetProvinceList.length; i++) {
       const prov = targetProvinceList[i]!;
-      const hasSea = prov.hasSeaAccess ?? true;
+      const hasSea = MapTopologyRegistry.hasSeaAccess(prov.provinceId, true);
       if (hasSea) {
         return {
           provinceId: prov.provinceId,

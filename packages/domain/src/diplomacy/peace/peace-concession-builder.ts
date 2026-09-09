@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
 import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
@@ -39,7 +39,7 @@ export class PeaceConcessionBuilder {
     ratio: number,
     aiTwmi: number,
     humanTwmi: number,
-    allAiProvinces: Province[],
+    allAiProvinces: ProvinceDynamicState[],
     maxAiCash: number,
   ): PeaceTermsPackage {
     const sortedProvs = [...allAiProvinces].sort(
@@ -71,8 +71,8 @@ export class PeaceConcessionBuilder {
       isAiOffering: true,
       moneyAmount: maxAiCash,
       concededProvinceIds: provsToConcede.map((p) => p.provinceId),
-      concededProvincesNames: provsToConcede.map(
-        (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+      concededProvincesNames: provsToConcede.map((p) =>
+        MapTopologyRegistry.getNameFa(p.provinceId, ""),
       ),
       headline,
       description,
@@ -86,9 +86,9 @@ export class PeaceConcessionBuilder {
     ratio: number,
     aiTwmi: number,
     humanTwmi: number,
-    allAiProvinces: Province[],
+    allAiProvinces: ProvinceDynamicState[],
     maxAiCash: number,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): PeaceTermsPackage {
     const f = (1.0 - ratio) / 0.5;
     const money = Math.floor(maxAiCash * f * 0.5);
@@ -131,8 +131,8 @@ export class PeaceConcessionBuilder {
       isAiOffering: true,
       moneyAmount: money,
       concededProvinceIds: chosenProvs.map((p) => p.provinceId),
-      concededProvincesNames: chosenProvs.map(
-        (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+      concededProvincesNames: chosenProvs.map((p) =>
+        MapTopologyRegistry.getNameFa(p.provinceId, ""),
       ),
       headline,
       description: `دولت ${aiNation.name} برای توقف پیشروی ارتش شما، بسته مصالحه آماده کرده است.`,
@@ -146,10 +146,10 @@ export class PeaceConcessionBuilder {
     ratio: number,
     aiTwmi: number,
     humanTwmi: number,
-    allHumanProvinces: Province[],
+    allHumanProvinces: ProvinceDynamicState[],
     maxHumanCash: number,
     humanGdp: number,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): PeaceTermsPackage {
     const v = (ratio - 1.0) / 1.0;
     const demandedMoney = Math.floor(maxHumanCash * v * 0.5);
@@ -194,8 +194,8 @@ export class PeaceConcessionBuilder {
       isAiOffering: false,
       moneyAmount: demandedMoney,
       concededProvinceIds: demandedProvs.map((p) => p.provinceId),
-      concededProvincesNames: demandedProvs.map(
-        (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+      concededProvincesNames: demandedProvs.map((p) =>
+        MapTopologyRegistry.getNameFa(p.provinceId, ""),
       ),
       headline,
       description: `امپراتوری ${aiNation.name} با اتکا به برتری نظامی خود، شرط پایان جنگ را پرداخت تاوان اعلام کرده است.`,

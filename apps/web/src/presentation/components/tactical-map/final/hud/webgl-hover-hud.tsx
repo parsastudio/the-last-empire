@@ -3,7 +3,6 @@ import { Coins, MapPin, Landmark } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { DiplomaticStance } from "@geopolitics/domain";
-import { HoverHudPositionUtility } from "./utils/hover-hud-position.utility";
 import { HoverStanceBadge } from "./components/hover-stance-badge";
 
 export interface HoverCountryInfo {
@@ -23,20 +22,20 @@ export interface HoverCountryInfo {
 }
 
 interface WebGLHoverHudProps {
-  hoverPos: { x: number; y: number } | null;
+  hudRef: React.RefObject<HTMLDivElement | null>;
   hoverData: HoverCountryInfo | null;
 }
 
-export function WebGLHoverHud({ hoverPos, hoverData }: WebGLHoverHudProps) {
-  if (!hoverPos || !hoverData) return null;
+export function WebGLHoverHud({ hudRef, hoverData }: WebGLHoverHudProps) {
+  if (!hoverData) return null;
 
   const flagSymbol = getFlagEmoji(hoverData.flagCode || hoverData.code);
-  const stylePosition = HoverHudPositionUtility.calculatePosition(hoverPos);
 
   return (
     <div
+      ref={hudRef}
       className="fixed z-50 pointer-events-none w-80 animate-fade-smooth dir-rtl text-right"
-      style={stylePosition}
+      style={{ left: "-9999px", top: "-9999px" }}
     >
       <div className="bg-card/95 backdrop-blur-2xl border border-border/80 p-3 rounded-2xl shadow-2xl space-y-2 text-foreground font-sans">
         <div className="flex items-center justify-between border-b border-border/60 pb-1.5">

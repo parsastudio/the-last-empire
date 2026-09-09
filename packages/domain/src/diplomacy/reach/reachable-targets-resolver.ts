@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { GeopoliticalTierClassifier } from "@/domain/diplomacy/reach/geopolitical-tier-classifier";
@@ -9,10 +9,10 @@ export class ReachableTargetsResolver {
   public static getReachableTargets(
     source: Nation,
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    sourceProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): Nation[] {
     const sourceCanonical = CountryRegistry.resolveCanonicalId(source.id);
     const sourceTier = GeopoliticalTierClassifier.getReachTier(
@@ -60,9 +60,9 @@ export class ReachableTargetsResolver {
 
     for (let p = 0; p < myProvs.length; p++) {
       const prov = myProvs[p]!;
-      const landNeighbors =
-        prov.landNeighbors ??
-        MapTopologyRegistry.getLandNeighbors(prov.provinceId);
+      const landNeighbors = MapTopologyRegistry.getLandNeighbors(
+        prov.provinceId,
+      );
 
       for (let i = 0; i < landNeighbors.length; i++) {
         const nProv = provincesMap[landNeighbors[i]!.toString()];
@@ -80,13 +80,12 @@ export class ReachableTargetsResolver {
         }
       }
 
-      const hasSea =
-        prov.hasSeaAccess ?? MapTopologyRegistry.hasSeaAccess(prov.provinceId);
+      const hasSea = MapTopologyRegistry.hasSeaAccess(prov.provinceId);
 
       if (hasSea) {
-        const t1 =
-          prov.maritimeNeighborsTier1 ??
-          MapTopologyRegistry.getMaritimeNeighborsTier1(prov.provinceId);
+        const t1 = MapTopologyRegistry.getMaritimeNeighborsTier1(
+          prov.provinceId,
+        );
 
         for (let i = 0; i < t1.length; i++) {
           const nProv = provincesMap[t1[i]!.toString()];
@@ -108,9 +107,9 @@ export class ReachableTargetsResolver {
         }
 
         if (sourceTier === "REGIONAL_POWER") {
-          const t2 =
-            prov.maritimeNeighborsTier2 ??
-            MapTopologyRegistry.getMaritimeNeighborsTier2(prov.provinceId);
+          const t2 = MapTopologyRegistry.getMaritimeNeighborsTier2(
+            prov.provinceId,
+          );
 
           for (let i = 0; i < t2.length; i++) {
             const nProv = provincesMap[t2[i]!.toString()];
@@ -141,7 +140,7 @@ export class ReachableTargetsResolver {
     source: Nation,
     target: Nation,
     allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
   ): boolean {
     if (!allNations) return true;

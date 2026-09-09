@@ -1,5 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export class GamePersistenceService {
   private static storageAdapter = new GameStorageAdapter();
@@ -23,6 +24,8 @@ export class GamePersistenceService {
   }
 
   public static async loadGameState(gameId: string): Promise<GameState | null> {
+    await ClientFinalStateLoader.ensureManifestLoaded("map1");
+
     if (this.saveTimer && this.pendingState) {
       clearTimeout(this.saveTimer);
       this.saveTimer = null;

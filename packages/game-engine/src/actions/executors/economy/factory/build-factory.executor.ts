@@ -1,11 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { BuildFactoryAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, MapTopologyRegistry } from "@geopolitics/domain";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class BuildFactoryExecutor {
   public static execute(
@@ -13,7 +14,7 @@ export class BuildFactoryExecutor {
     action: BuildFactoryAction,
     nation: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult<{ builtQuantity: number; totalCost: number }> {
     const quantity = Math.max(1, action.quantity || 1);
     const totalCost = IndustryCalculator.calculateFactoryBuildCost(
       quantity,
@@ -28,7 +29,7 @@ export class BuildFactoryExecutor {
     }
 
     const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
-    const ownedProvinces: Province[] = [];
+    const ownedProvinces: ProvinceDynamicState[] = [];
 
     for (const p of Object.values(state.provinces)) {
       if (
@@ -59,7 +60,8 @@ export class BuildFactoryExecutor {
           "این استان تحت حاکمیت کشور شما قرار ندارد.",
         );
       }
-      const emptySlots = Math.max(0, prov.maxSlots - prov.factoriesCount);
+      const maxSlots = MapTopologyRegistry.getMaxSlots(prov.provinceId, 1);
+      const emptySlots = Math.max(0, maxSlots - prov.factoriesCount);
       if (emptySlots < quantity) {
         throw new GameError(
           "INVALID_ACTION",
@@ -90,8 +92,10 @@ export class BuildFactoryExecutor {
       }
     }
 
-    const updatedProvinces: Record<string, Province> = { ...state.provinces };
-    const updatedOwnedProvinces: Province[] = [];
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...state.provinces,
+    };
+    const updatedOwnedProvinces: ProvinceDynamicState[] = [];
 
     for (let i = 0; i < ownedProvinces.length; i++) {
       const p = ownedProvinces[i]!;
@@ -102,7 +106,7 @@ export class BuildFactoryExecutor {
           added,
           nation.industrialLevel,
         );
-        const updatedProv: Province = {
+        const updatedProv: ProvinceDynamicState = {
           ...p,
           factoriesCount: p.factoriesCount + added,
           factoryTiers: nextTiers,
@@ -124,7 +128,7 @@ export class BuildFactoryExecutor {
       nation.industrialLevel,
     );
 
-    return {
+    const newState: GameState = {
       ...state,
       provinces: updatedProvinces,
       nations: {
@@ -135,6 +139,14 @@ export class BuildFactoryExecutor {
           factoryTiers: updatedBatches,
           equipmentTechLevel: newAverageEquipTech,
         },
+      },
+    };
+
+    return {
+      newState,
+      resultData: {
+        builtQuantity: quantity,
+        totalCost,
       },
     };
   }

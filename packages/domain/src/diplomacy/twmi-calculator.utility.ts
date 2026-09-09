@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { DebtCalculatorUtility } from "@/domain/economy/debt-calculator.utility";
@@ -15,7 +15,7 @@ export class TwmiCalculatorUtility {
   public static calculateTwmi(
     nation: Nation,
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): number {
     const gdp = getNationGdp(nation, provincesMap);
     const treasury = Math.max(0, nation.treasury);

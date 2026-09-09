@@ -9,6 +9,7 @@ import { DiplomacyLockManager } from "@/domain/diplomacy/nation-relation-resolve
 import { EspionageManager } from "@/engine/espionage/espionage-manager";
 import { DilemmaActionExecutor } from "@/engine/actions/executors/dilemma/dilemma-action-executor";
 import { ProjectActionExecutor } from "@/engine/actions/executors/projects/project-action-executor";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class ActionEngine {
   public static execute(state: GameState, action: GameAction): ActionResult {
@@ -58,8 +59,7 @@ export class ActionEngine {
     }
 
     try {
-      let newState: GameState = state;
-      let resultData: unknown = undefined;
+      let execResult: ExecutionResult;
 
       switch (action.type) {
         case "SET_ECONOMIC_DOCTRINE":
@@ -69,7 +69,7 @@ export class ActionEngine {
         case "BUY_INDUSTRIAL_EQUIPMENT":
         case "REQUEST_LOAN":
         case "REPAY_DEBT":
-          newState = EconomyActionExecutor.execute(
+          execResult = EconomyActionExecutor.execute(
             state,
             action,
             sourceNation,
@@ -81,17 +81,14 @@ export class ActionEngine {
         case "BUY_ARMS_MARKET":
         case "BUY_NAVAL_FLEET":
         case "INVEST_RESEARCH":
-        case "INITIATE_BATTLE": {
-          const milResult = MilitaryActionExecutor.execute(
+        case "INITIATE_BATTLE":
+          execResult = MilitaryActionExecutor.execute(
             state,
             action,
             sourceNation,
             canonicalSourceId,
           );
-          newState = milResult.newState;
-          resultData = milResult.resultData;
           break;
-        }
 
         case "EXECUTE_ESPIONAGE_OPERATION": {
           const espResult = EspionageManager.executeOperation(
@@ -100,43 +97,36 @@ export class ActionEngine {
             action.targetNationId,
             action.tier,
           );
-          newState = espResult.newState;
-          resultData = espResult.result;
+          execResult = {
+            newState: espResult.newState,
+            resultData: espResult.result,
+          };
           break;
         }
 
         case "DIPLOMATIC_PROPOSAL":
         case "RESPOND_DIPLOMATIC_PROPOSAL":
-        case "SIGN_PEACE_SETTLEMENT": {
-          const polyResult = PoliticsActionExecutor.execute(state, action);
-          newState = polyResult.newState;
-          resultData = polyResult.resultData;
+        case "SIGN_PEACE_SETTLEMENT":
+          execResult = PoliticsActionExecutor.execute(state, action);
           break;
-        }
 
-        case "RESOLVE_DILEMMA": {
-          const dilemmaResult = DilemmaActionExecutor.execute(
+        case "RESOLVE_DILEMMA":
+          execResult = DilemmaActionExecutor.execute(
             state,
             action,
             sourceNation,
             canonicalSourceId,
           );
-          newState = dilemmaResult.newState;
-          resultData = dilemmaResult.resultData;
           break;
-        }
 
-        case "BOOST_NATIONAL_PROJECT": {
-          const projResult = ProjectActionExecutor.execute(
+        case "BOOST_NATIONAL_PROJECT":
+          execResult = ProjectActionExecutor.execute(
             state,
             action,
             sourceNation,
             canonicalSourceId,
           );
-          newState = projResult.newState;
-          resultData = projResult.resultData;
           break;
-        }
 
         default:
           return {
@@ -151,8 +141,9 @@ export class ActionEngine {
         success: true,
         actionId: targetActionId,
         message: "دستور با موفقیت اجرا شد.",
-        newState,
-        resultData,
+        newState: execResult.newState,
+        resultData: execResult.resultData,
+        logs: execResult.logs,
       };
     } catch (err) {
       const errorMsg =
@@ -193,6 +184,10 @@ export class ActionEngine {
       if (result.success && result.newState) {
         workingState = result.newState;
         executedCount++;
+
+        if (result.logs && result.logs.length > 0) {
+          workingState.turnLogs.push(...result.logs);
+        }
 
         if (
           lockedDiplomacyTargets &&

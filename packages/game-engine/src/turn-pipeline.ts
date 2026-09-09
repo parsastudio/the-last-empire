@@ -1,7 +1,7 @@
 import type { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { DiplomaticTurnProcessor } from "@/engine/pipeline/diplomatic-turn-processor";
 import { EconomyTurnProcessor } from "@/engine/pipeline/economy-turn-processor";
 import { PoliticsTurnProcessor } from "@/engine/pipeline/politics-turn-processor";
@@ -13,7 +13,7 @@ export class TurnPipeline {
       DiplomaticTurnProcessor.processPendingProposalsForAi(state);
 
     const updatedNations: Record<string, Nation> = {};
-    const updatedProvincesMap: Record<string, Province> = {
+    const updatedProvincesMap: Record<string, ProvinceDynamicState> = {
       ...currentState.provinces,
     };
     const economyLogs: TurnLogEntry[] = [];

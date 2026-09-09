@@ -6,6 +6,7 @@ import {
   NationGettersUtility,
   NAVAL_FLEET_CONFIG,
 } from "@geopolitics/domain";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class NavalFleetExecutor {
   public static execute(
@@ -13,7 +14,7 @@ export class NavalFleetExecutor {
     nation: Nation,
     action: BuyNavalFleetAction,
     sourceKey: string,
-  ): GameState {
+  ): ExecutionResult<{ quantity: number; cost: number; totalFleet: number }> {
     const hasSea = NationGettersUtility.hasSeaAccess(
       nation.id,
       state.provinces,
@@ -34,15 +35,26 @@ export class NavalFleetExecutor {
       );
     }
 
-    return {
+    const nextFleet = (nation.navalFleet || 0) + action.quantity;
+
+    const newState: GameState = {
       ...state,
       nations: {
         ...state.nations,
         [sourceKey]: {
           ...nation,
           treasury: nation.treasury - fleetCost,
-          navalFleet: (nation.navalFleet || 0) + action.quantity,
+          navalFleet: nextFleet,
         },
+      },
+    };
+
+    return {
+      newState,
+      resultData: {
+        quantity: action.quantity,
+        cost: fleetCost,
+        totalFleet: nextFleet,
       },
     };
   }

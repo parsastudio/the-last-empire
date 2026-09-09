@@ -2,10 +2,10 @@ import {
   Nation,
   UnitType,
   MilitaryQuotaCalculator,
-  IndustryCalculator,
   NATIONAL_PROJECTS_CATALOG,
   NationalProjectEffectApplierUtility,
   CountryRegistry,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
@@ -99,7 +99,7 @@ export class AiNeedScoringEngine {
     let emptySlots = 0;
     let totalSlots = 0;
     for (const p of myProvs) {
-      const maxSlots = p.maxSlots ?? 1;
+      const maxSlots = MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
       totalSlots += maxSlots;
       emptySlots += Math.max(0, maxSlots - p.factoriesCount);
     }

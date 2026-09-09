@@ -1,6 +1,6 @@
 import {
   Nation,
-  Province,
+  ProvinceDynamicState,
   CountryRegistry,
   NationRelationResolver,
   NationGettersUtility,
@@ -27,7 +27,7 @@ export class DiplomaticStampBuilderUtility {
   public static buildStamps(
     humanNationId?: string,
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): DiplomaticStampItem[] {
     if (!nationsMap || !provincesMap) return [];
 

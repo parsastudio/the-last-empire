@@ -3,7 +3,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { MapTopologyRegistry } from "@geopolitics/domain";
 import {
   BattleSpoilsDetails,
@@ -15,14 +15,13 @@ export class BattleLogFactory {
     attacker: Nation,
     defender: Nation,
     calcResult: BattleCalculationResult,
-    targetProvince: Province | null | undefined,
+    targetProvince: ProvinceDynamicState | null | undefined,
     attackType: "LAND" | "NAVAL",
     isFullCapitulation: boolean,
     spoilsData?: BattleSpoilsDetails,
   ): BattleFullReportData {
     const targetProvinceName = targetProvince
-      ? (targetProvince.nameFa ??
-        MapTopologyRegistry.getNameFa(targetProvince.provinceId, undefined))
+      ? MapTopologyRegistry.getNameFa(targetProvince.provinceId, undefined)
       : undefined;
 
     return {
@@ -52,7 +51,7 @@ export class BattleLogFactory {
     betrayalPenaltyText: string,
     humanNationId: string,
     isDefenderAnnexed = false,
-    targetProvince?: Province | null,
+    targetProvince?: ProvinceDynamicState | null,
     attackType: "LAND" | "NAVAL" = "LAND",
     spoilsData?: BattleSpoilsDetails,
   ): TurnLogEntry[] {
@@ -65,8 +64,7 @@ export class BattleLogFactory {
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
     const resolvedNameFa = targetProvince
-      ? (targetProvince.nameFa ??
-        MapTopologyRegistry.getNameFa(targetProvince.provinceId, ""))
+      ? MapTopologyRegistry.getNameFa(targetProvince.provinceId, "")
       : "";
 
     const provinceLabel = resolvedNameFa

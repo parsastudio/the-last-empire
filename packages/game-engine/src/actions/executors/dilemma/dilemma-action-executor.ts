@@ -6,6 +6,7 @@ import {
   CORE_DILEMMA_EVENTS,
   MilitaryInventoryHelper,
 } from "@geopolitics/domain";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class DilemmaActionExecutor {
   public static execute(
@@ -13,7 +14,12 @@ export class DilemmaActionExecutor {
     action: ResolveDilemmaAction,
     nation: Nation,
     buyerKey: string,
-  ): { newState: GameState; resultData: unknown } {
+  ): ExecutionResult<{
+    eventId: string;
+    choiceId: string;
+    eventTitle: string;
+    choiceLabel: string;
+  }> {
     const event = CORE_DILEMMA_EVENTS.find((e) => e.id === action.eventId);
     if (!event) {
       throw new GameError("INVALID_ACTION", "رویداد مورد نظر یافت نشد.");

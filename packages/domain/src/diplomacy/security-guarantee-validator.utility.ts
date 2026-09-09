@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -30,7 +30,7 @@ export class SecurityGuaranteeValidator {
   public static validate(
     client: Nation,
     guarantor: Nation,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     isEmergency = false,
     allNations?: Record<string, Nation>,
     rankMap?: Map<string, number>,

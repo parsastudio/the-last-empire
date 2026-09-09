@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import {
   TurnLogBuilder,
@@ -22,13 +22,13 @@ export class EconomyTurnProcessor {
     turnContext: TurnContext,
   ): {
     updatedNation: Nation;
-    updatedProvinces: Province[];
+    updatedProvinces: ProvinceDynamicState[];
     bankruptcyLog?: TurnLogEntry;
   } {
     const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
     let updatedProvinces = [...turnContext.getOwnedProvinces(canonicalId)];
 
-    const currentProvincesMap: Record<string, Province> = {
+    const currentProvincesMap: Record<string, ProvinceDynamicState> = {
       ...turnContext.state.provinces,
     };
     for (let p = 0; p < updatedProvinces.length; p++) {

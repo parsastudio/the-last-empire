@@ -12,17 +12,18 @@ export class BattleSpoilsCollector {
   ): BattleSpoilsDetails {
     const conqueredProvs = conquestResult.conqueredProvincesList || [];
     const conqueredProvincesCount = conqueredProvs.length;
-    const conqueredProvincesNames = conqueredProvs.map(
-      (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+    const conqueredProvincesNames = conqueredProvs.map((p) =>
+      MapTopologyRegistry.getNameFa(p.provinceId, ""),
     );
     const conqueredPixels = conquestResult.conqueredPixels;
     const gainedGdp = conquestResult.conqueredProvincesGdp;
 
     let gainedPopulation = 0;
     for (let i = 0; i < conqueredProvs.length; i++) {
-      gainedPopulation +=
-        conqueredProvs[i]!.population ??
-        MapTopologyRegistry.getPopulation(conqueredProvs[i]!.provinceId, 0);
+      gainedPopulation += MapTopologyRegistry.getPopulation(
+        conqueredProvs[i]!.provinceId,
+        0,
+      );
     }
 
     return {

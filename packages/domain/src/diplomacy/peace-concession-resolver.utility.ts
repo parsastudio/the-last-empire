@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { PeaceTermsPackage } from "@/domain/diplomacy/peace-terms.schema";
@@ -14,7 +14,7 @@ export class PeaceConcessionResolverUtility {
     aiNation: Nation,
     humanTwmi: number,
     aiTwmi: number,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     currentTurn?: number,
   ): PeaceTermsPackage {
     const ratio = Number((aiTwmi / Math.max(1, humanTwmi)).toFixed(2));

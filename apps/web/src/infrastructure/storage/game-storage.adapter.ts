@@ -37,6 +37,8 @@ export class GameStorageAdapter {
     buffer: BitPackedBuffer,
     mapId = "map1",
   ): Promise<boolean> {
+    await ClientFinalStateLoader.ensureManifestLoaded(mapId);
+
     const gridState = BitPackedGridState.getInstance();
     if (gridState.isBufferLoaded()) {
       return true;

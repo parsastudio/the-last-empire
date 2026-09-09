@@ -1,17 +1,22 @@
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { FactoryBatchManagerUtility } from "@/domain/economy/factory/factory-batch-manager.utility";
 
 export class FactoryDestructionResolverUtility {
   public static distributeFactoryDestruction(
-    provincesMap: Record<string, Province>,
-    candidateProvinces: Province[],
+    provincesMap: Record<string, ProvinceDynamicState>,
+    candidateProvinces: ProvinceDynamicState[],
     factoriesToDestroy: number,
-  ): { updatedProvinces: Record<string, Province>; actualDestroyed: number } {
+  ): {
+    updatedProvinces: Record<string, ProvinceDynamicState>;
+    actualDestroyed: number;
+  } {
     if (factoriesToDestroy <= 0 || candidateProvinces.length === 0) {
       return { updatedProvinces: provincesMap, actualDestroyed: 0 };
     }
 
-    const updatedProvinces: Record<string, Province> = { ...provincesMap };
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...provincesMap,
+    };
     let totalPoolFactories = 0;
 
     for (let i = 0; i < candidateProvinces.length; i++) {

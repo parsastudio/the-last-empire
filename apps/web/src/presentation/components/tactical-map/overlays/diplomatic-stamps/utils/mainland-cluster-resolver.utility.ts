@@ -1,4 +1,8 @@
-import { Province, CountryRegistry } from "@geopolitics/domain";
+import {
+  ProvinceDynamicState,
+  CountryRegistry,
+  MapTopologyRegistry,
+} from "@geopolitics/domain";
 
 export interface MainlandClusterGeometry {
   centerX: number;
@@ -10,7 +14,7 @@ export interface MainlandClusterGeometry {
 export class MainlandClusterResolver {
   public static resolveGeometry(
     nationId: string,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): MainlandClusterGeometry | null {
     if (!provincesMap) return null;
 
@@ -22,18 +26,18 @@ export class MainlandClusterResolver {
 
     if (ownedProvinces.length === 0) return null;
 
-    const provinceLookup = new Map<number, Province>();
+    const provinceLookup = new Map<number, ProvinceDynamicState>();
     for (const p of ownedProvinces) {
       provinceLookup.set(p.provinceId, p);
     }
 
     const visited = new Set<number>();
-    const clusters: Province[][] = [];
+    const clusters: ProvinceDynamicState[][] = [];
 
     for (const p of ownedProvinces) {
       if (visited.has(p.provinceId)) continue;
 
-      const cluster: Province[] = [];
+      const cluster: ProvinceDynamicState[] = [];
       const queue: number[] = [p.provinceId];
       visited.add(p.provinceId);
 
@@ -44,7 +48,10 @@ export class MainlandClusterResolver {
 
         cluster.push(currentProv);
 
-        for (const neighborId of currentProv.landNeighbors) {
+        const neighbors = MapTopologyRegistry.getLandNeighbors(
+          currentProv.provinceId,
+        );
+        for (const neighborId of neighbors) {
           if (provinceLookup.has(neighborId) && !visited.has(neighborId)) {
             visited.add(neighborId);
             queue.push(neighborId);
@@ -56,8 +63,16 @@ export class MainlandClusterResolver {
     }
 
     clusters.sort((a, b) => {
-      const pixelsA = a.reduce((sum, item) => sum + (item.pixelCount || 1), 0);
-      const pixelsB = b.reduce((sum, item) => sum + (item.pixelCount || 1), 0);
+      const pixelsA = a.reduce(
+        (sum, item) =>
+          sum + MapTopologyRegistry.getPixelCount(item.provinceId, 1),
+        0,
+      );
+      const pixelsB = b.reduce(
+        (sum, item) =>
+          sum + MapTopologyRegistry.getPixelCount(item.provinceId, 1),
+        0,
+      );
       return pixelsB - pixelsA;
     });
 
@@ -68,9 +83,13 @@ export class MainlandClusterResolver {
     let weightedSumY = 0;
 
     for (const p of mainCluster) {
-      const weight = Math.max(1, p.pixelCount || 1);
-      weightedSumX += p.centerCoordinates.x * weight;
-      weightedSumY += p.centerCoordinates.y * weight;
+      const weight = Math.max(
+        1,
+        MapTopologyRegistry.getPixelCount(p.provinceId, 1),
+      );
+      const center = MapTopologyRegistry.getCenterCoordinates(p.provinceId);
+      weightedSumX += center.x * weight;
+      weightedSumY += center.y * weight;
       totalWeight += weight;
     }
 
@@ -81,8 +100,9 @@ export class MainlandClusterResolver {
     let minDistanceSq = Infinity;
 
     for (const p of mainCluster) {
-      const dx = p.centerCoordinates.x - rawCenterX;
-      const dy = p.centerCoordinates.y - rawCenterY;
+      const center = MapTopologyRegistry.getCenterCoordinates(p.provinceId);
+      const dx = center.x - rawCenterX;
+      const dy = center.y - rawCenterY;
       const distSq = dx * dx + dy * dy;
       if (distSq < minDistanceSq) {
         minDistanceSq = distSq;
@@ -90,13 +110,12 @@ export class MainlandClusterResolver {
       }
     }
 
+    const closestCenter = MapTopologyRegistry.getCenterCoordinates(
+      closestProvince.provinceId,
+    );
     const isInsideReasonableDistance = minDistanceSq < 25000;
-    const centerX = isInsideReasonableDistance
-      ? rawCenterX
-      : closestProvince.centerCoordinates.x;
-    const centerY = isInsideReasonableDistance
-      ? rawCenterY
-      : closestProvince.centerCoordinates.y;
+    const centerX = isInsideReasonableDistance ? rawCenterX : closestCenter.x;
+    const centerY = isInsideReasonableDistance ? rawCenterY : closestCenter.y;
 
     const clusterRadius = Math.sqrt(totalWeight / Math.PI);
     const effectiveDiameter = Math.max(
