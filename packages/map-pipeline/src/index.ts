@@ -10,7 +10,6 @@ export * from "./visual-pipeline/composers/tactical-terrain-composer";
 export * from "./visual-pipeline/compression/terrain-binary-types";
 export * from "./visual-pipeline/compression/terrain-binary-builder";
 export * from "./visual-pipeline/compression/terrain-binary-serializer";
-export * from "./visual-pipeline/compression/terrain-binary-reader";
 export * from "./visual-pipeline/compression/terrain-binary-export-service";
 export * from "./visual-pipeline/exporters/tactical-terrain-exporter";
 
