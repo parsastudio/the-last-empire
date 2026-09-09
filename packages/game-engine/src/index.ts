@@ -41,6 +41,8 @@ export * from "./ai/procurement/ai-naval-procurement-planner";
 export * from "./ai/procurement/ai-posture-evaluator";
 export * from "./ai/procurement/ai-wallet-budget-allocator";
 export * from "./ai/procurement/ai-wartime-loan-evaluator";
+export * from "./ai/blackboard/ai-need-scoring-engine";
+export * from "./ai/blackboard/ai-budget-blackboard";
 
 export * from "./combat/optimizer/naval-deployment-clamper";
 export * from "./combat/optimizer/deployment-step-search";

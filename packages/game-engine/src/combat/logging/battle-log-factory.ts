@@ -4,6 +4,7 @@ import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { Province } from "@/domain/province/province.schema";
+import { MapTopologyRegistry } from "@geopolitics/domain";
 import {
   BattleSpoilsDetails,
   BattleFullReportData,
@@ -19,10 +20,15 @@ export class BattleLogFactory {
     isFullCapitulation: boolean,
     spoilsData?: BattleSpoilsDetails,
   ): BattleFullReportData {
+    const targetProvinceName = targetProvince
+      ? (targetProvince.nameFa ??
+        MapTopologyRegistry.getNameFa(targetProvince.provinceId, undefined))
+      : undefined;
+
     return {
       attackerId: attacker.id,
       defenderId: defender.id,
-      targetProvinceName: targetProvince?.nameFa,
+      targetProvinceName,
       attackType,
       isAttackerVictory: calcResult.isAttackerVictory,
       isFullCapitulation,
@@ -58,8 +64,13 @@ export class BattleLogFactory {
       CountryRegistry.resolveCanonicalId(defender.id) === canonicalHuman;
     const isHumanInvolved = isAttackerHuman || isDefenderHuman;
 
-    const provinceLabel = targetProvince?.nameFa
-      ? `استان ${targetProvince.nameFa}`
+    const resolvedNameFa = targetProvince
+      ? (targetProvince.nameFa ??
+        MapTopologyRegistry.getNameFa(targetProvince.provinceId, ""))
+      : "";
+
+    const provinceLabel = resolvedNameFa
+      ? `استان ${resolvedNameFa}`
       : "منطقه مرزی";
 
     let humanHeadline = "";

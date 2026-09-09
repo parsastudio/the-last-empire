@@ -1,4 +1,4 @@
-import { GameState } from "@/domain/game/game-state.schema";
+import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { TurnPipeline } from "@/engine/turn-pipeline";
 import { NationLivenessManager } from "@/engine/politics/nation-liveness-manager";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
@@ -12,14 +12,28 @@ import { TurnLogWindowUtility } from "@geopolitics/domain";
 import { DilemmaTurnEvaluator } from "@/engine/events/dilemma-turn-evaluator";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 
+export interface TurnProgressionOutput {
+  newState: GameState;
+  newTurnLogs: TurnLogEntry[];
+}
+
 export class TurnProgressionOrchestrator {
   private pipeline = new TurnPipeline();
   private livenessManager = new NationLivenessManager();
   private victoryChecker = new VictoryChecker();
 
   public advanceTurn(state: GameState, prng: SeededRandom): GameState {
+    const { newState } = this.advanceTurnWithLogs(state, prng);
+    return newState;
+  }
+
+  public advanceTurnWithLogs(
+    state: GameState,
+    prng: SeededRandom,
+  ): TurnProgressionOutput {
     const lockedDiplomacyTargets = new Set<string>();
     const nextTurn = state.currentTurn + 1;
+    const initialLogsCount = state.turnLogs.length;
 
     let workingState: GameState = {
       ...state,
@@ -92,7 +106,8 @@ export class TurnProgressionOrchestrator {
       }
     }
 
-    workingState = TurnExportSalesAggregator.aggregate(workingState);
+    const aggregationResult = TurnExportSalesAggregator.aggregate(workingState);
+    workingState = aggregationResult.state;
     workingState = this.livenessManager.updateLiveness(workingState);
     workingState = DilemmaTurnEvaluator.evaluate(workingState, prng);
 
@@ -119,9 +134,12 @@ export class TurnProgressionOrchestrator {
       };
     }
 
+    const currentNewLogs = workingState.turnLogs.slice(initialLogsCount);
+
     const prunedLogs = TurnLogWindowUtility.pruneLogs(
       workingState.turnLogs,
       workingState.currentTurn,
+      1,
     );
 
     const finalState: GameState = {
@@ -132,6 +150,9 @@ export class TurnProgressionOrchestrator {
 
     TurnStateLogger.logTurnState(finalState);
 
-    return finalState;
+    return {
+      newState: finalState,
+      newTurnLogs: currentNewLogs,
+    };
   }
 }

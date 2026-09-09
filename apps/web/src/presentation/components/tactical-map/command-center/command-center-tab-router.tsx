@@ -109,6 +109,7 @@ export function CommandCenterTabRouter({
           humanNationId={gameState?.humanNationId || nation.id}
           nationsMap={gameState?.nations}
           pendingProposals={gameState?.pendingProposals || []}
+          gameId={gameState?.gameId}
         />
       );
 

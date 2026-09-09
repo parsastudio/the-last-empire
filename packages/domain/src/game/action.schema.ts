@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { GameStateSchema } from "@/domain/game/game-state.schema";
+import {
+  GameStateSchema,
+  TurnLogEntrySchema,
+} from "@/domain/game/game-state.schema";
 import {
   SetEconomicDoctrineActionSchema,
   BuildFactoryActionSchema,
@@ -87,6 +90,7 @@ export const ActionResultSchema = z.object({
   error: z.string().optional(),
   newState: GameStateSchema.optional(),
   resultData: z.unknown().optional(),
+  logs: z.array(TurnLogEntrySchema).optional(),
 });
 
 export type GameAction = z.infer<typeof GameActionSchema>;

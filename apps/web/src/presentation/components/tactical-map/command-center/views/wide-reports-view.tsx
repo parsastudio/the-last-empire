@@ -9,7 +9,7 @@ import { ReportStatsOverview } from "@/presentation/components/tactical-map/comm
 import { ReportFilters } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-filters";
 import { ReportCard } from "@/presentation/components/tactical-map/command-center/views/reports/components/report-card";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { FileQuestion } from "lucide-react";
+import { FileQuestion, Loader2 } from "lucide-react";
 
 interface WideReportsViewProps {
   logs?: TurnLogEntry[];
@@ -17,6 +17,7 @@ interface WideReportsViewProps {
   humanNationId?: string;
   nationsMap?: Record<string, Nation>;
   pendingProposals?: PendingDiplomaticProposal[];
+  gameId?: string;
 }
 
 export function WideReportsView({
@@ -25,6 +26,7 @@ export function WideReportsView({
   humanNationId,
   nationsMap,
   pendingProposals = [],
+  gameId,
 }: WideReportsViewProps) {
   const {
     selectedScope,
@@ -33,10 +35,11 @@ export function WideReportsView({
     availableTurns,
     stats,
     sortedLogs,
+    isLoading,
     setSelectedScope,
     setSelectedTurn,
     setSearchQuery,
-  } = useWideReports({ logs, currentTurn, humanNationId, nationsMap });
+  } = useWideReports({ logs, currentTurn, humanNationId, nationsMap, gameId });
 
   const turnLabel =
     selectedTurn === "ALL"
@@ -58,7 +61,14 @@ export function WideReportsView({
       <ReportStatsOverview stats={stats} turnLabel={turnLabel} />
 
       <div className="space-y-2.5 pt-1">
-        {sortedLogs.length === 0 ? (
+        {isLoading ? (
+          <div className="py-20 flex flex-col items-center justify-center gap-3 text-center bg-secondary/15 rounded-3xl border border-border/40">
+            <Loader2 size={24} className="animate-spin text-primary" />
+            <span className="text-xs font-bold text-muted-foreground">
+              در حال بازیابی گزارش‌ها از پایگاه داده امنیتی...
+            </span>
+          </div>
+        ) : sortedLogs.length === 0 ? (
           <div className="py-16 flex flex-col items-center justify-center gap-2.5 text-center bg-secondary/20 rounded-2xl border border-border/40">
             <FileQuestion size={24} className="text-muted-foreground" />
             <span className="text-xs font-bold text-foreground">

@@ -11,6 +11,8 @@ export interface SavedTurnLogRecord {
   id: string;
   gameId: string;
   turn: number;
+  scope: string;
+  category: string;
   timestamp: number;
   log: TurnLogEntry;
 }
@@ -21,9 +23,10 @@ export class GameDatabase extends Dexie {
 
   constructor() {
     super("GeopoliticsEngineDB_v2");
-    this.version(2).stores({
+    this.version(3).stores({
       gameStates: "gameId, timestamp",
-      turnLogs: "id, gameId, [gameId+turn], timestamp",
+      turnLogs:
+        "id, gameId, turn, [gameId+turn], [gameId+scope], [gameId+category], [gameId+scope+turn], timestamp",
     });
   }
 }

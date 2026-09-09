@@ -8,8 +8,8 @@ import { AITreatyEvaluator } from "@/engine/ai/ai-treaty-evaluator";
 import { AIEconomicDiplomacyEvaluator } from "@/engine/ai/ai-economic-diplomacy-evaluator";
 import { AIWarDeclarationEvaluator } from "@/engine/ai/ai-war-declaration-evaluator";
 import { AIEconomicStanceEvaluator } from "@/engine/ai/ai-economic-stance-evaluator";
-import { AiWalletBudgetAllocator } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
 import { AINationalProjectPlanner } from "@/engine/ai/ai-national-project-planner";
+import { AiBudgetBlackboard } from "@/engine/ai/blackboard/ai-budget-blackboard";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AIActionBuilder {
@@ -35,50 +35,72 @@ export class AIActionBuilder {
       }
     }
 
-    const posture = context.getPosture(currentNation);
-    const wallets = AiWalletBudgetAllocator.calculateWallets(
+    const blackboard = AiBudgetBlackboard.createForNation(
       currentNation,
-      context.state.nations,
-      context.state.provinces,
-      posture,
-      undefined,
-      context.gdpMap,
-      context.totalWorldGdp,
+      context,
     );
+    const allocated = blackboard.getWallets();
+
+    const militaryProcurementWallet = {
+      innovation: 0,
+      globalMarket: Math.floor(allocated.militaryProcurement * 0.5),
+      domesticInfra: Math.floor(allocated.militaryProcurement * 0.5),
+      geopolitics: 0,
+      totalDisposable: allocated.militaryProcurement,
+      isEmbargoed: allocated.isEmbargoed,
+      posture: allocated.posture,
+    };
 
     const procurementResult = AIProcurementPlanner.planRecruitment(
       currentNation,
       context,
-      undefined,
-      wallets,
+      allocated.militaryProcurement,
+      militaryProcurementWallet,
     );
     actions.push(...procurementResult.actions);
+    const unspentProcurement = procurementResult.remainingTreasury;
+    blackboard.releaseSpillover("militaryProcurement", unspentProcurement);
+
+    const upgradeWallets = {
+      innovation: allocated.innovation,
+      globalMarket: Math.floor(allocated.infrastructure * 0.4),
+      domesticInfra: Math.floor(allocated.infrastructure * 0.6),
+      geopolitics: 0,
+      totalDisposable: allocated.infrastructure + allocated.innovation,
+      isEmbargoed: allocated.isEmbargoed,
+      posture: allocated.posture,
+    };
 
     const upgradeResult = AIUpgradePlanner.planUpgrades(
       currentNation,
       context,
-      procurementResult.remainingTreasury,
-      procurementResult.strategicWallets,
+      allocated.infrastructure + allocated.innovation,
+      upgradeWallets,
     );
     actions.push(...upgradeResult.actions);
+    const unspentUpgrade = upgradeResult.remainingTreasury;
+    blackboard.releaseSpillover("infrastructure", unspentUpgrade);
 
+    const freshWallets = blackboard.getWallets();
     const projectResult = AINationalProjectPlanner.planProjects(
       currentNation,
       context,
-      upgradeResult.remainingTreasury,
+      freshWallets.nationalProjects,
     );
     actions.push(...projectResult.actions);
+    const unspentProjects =
+      freshWallets.nationalProjects - projectResult.spentMoney;
+    blackboard.releaseSpillover("nationalProjects", unspentProjects);
 
-    const treasuryAfterProjects =
-      upgradeResult.remainingTreasury - projectResult.spentMoney;
-
+    const postProjectWallets = blackboard.getWallets();
     const espionageResult = AIEspionagePlanner.planEspionage(
       currentNation,
       context,
-      procurementResult.strategicWallets.geopolitics,
-      treasuryAfterProjects,
+      postProjectWallets.geopolitics,
+      postProjectWallets.geopolitics,
     );
     actions.push(...espionageResult.actions);
+    const remainingGeoBudget = espionageResult.remainingGeopoliticsBudget;
 
     const attackAction = AIAttackPlanner.planAttack(currentNation, context);
     if (attackAction) {
@@ -89,8 +111,8 @@ export class AIActionBuilder {
       currentNation,
       context,
       actions,
-      espionageResult.remainingGeopoliticsBudget,
-      espionageResult.remainingTreasury,
+      remainingGeoBudget,
+      currentNation.treasury,
     );
 
     return actions;

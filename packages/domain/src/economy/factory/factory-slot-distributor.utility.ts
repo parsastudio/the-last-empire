@@ -1,3 +1,5 @@
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
+
 export class FactorySlotDistributorUtility {
   public static distributeFactoriesAndSlotsToProvinces(
     totalActiveFactories: number,
@@ -39,7 +41,7 @@ export class FactorySlotDistributorUtility {
     provinces: {
       provinceId: number;
       factoriesCount: number;
-      maxSlots: number;
+      maxSlots?: number;
     }[],
     quantity: number,
   ): Map<number, number> {
@@ -47,13 +49,17 @@ export class FactorySlotDistributorUtility {
     if (quantity <= 0 || provinces.length === 0) return allocations;
 
     const candidates = provinces
-      .filter((p) => p.maxSlots > p.factoriesCount)
-      .map((p) => ({
-        provinceId: p.provinceId,
-        current: p.factoriesCount,
-        max: p.maxSlots,
-        added: 0,
-      }));
+      .map((p) => {
+        const max =
+          p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
+        return {
+          provinceId: p.provinceId,
+          current: p.factoriesCount,
+          max,
+          added: 0,
+        };
+      })
+      .filter((p) => p.max > p.current);
 
     let remaining = quantity;
     while (remaining > 0) {

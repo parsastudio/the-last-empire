@@ -4,6 +4,7 @@ import {
   Nation,
   IndustryCalculator,
   AI_DOCTRINE_PRESETS,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
@@ -70,10 +71,10 @@ export class AIUpgradePlanner {
 
     let totalEmptySlots = 0;
     for (let i = 0; i < myProvs.length; i++) {
-      totalEmptySlots += Math.max(
-        0,
-        myProvs[i]!.maxSlots - myProvs[i]!.factoriesCount,
-      );
+      const p = myProvs[i]!;
+      const maxSlots =
+        p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
+      totalEmptySlots += Math.max(0, maxSlots - p.factoriesCount);
     }
 
     const affordableSlots = Math.floor(

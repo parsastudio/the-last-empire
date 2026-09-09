@@ -2,19 +2,28 @@ import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 
+export interface ExportAggregationResult {
+  state: GameState;
+  generatedSummaryLogs: TurnLogEntry[];
+}
+
 export class TurnExportSalesAggregator {
-  public static aggregate(state: GameState): GameState {
+  public static aggregate(
+    state: GameState,
+    candidateLogs?: TurnLogEntry[],
+  ): ExportAggregationResult {
     const canonicalHuman = CountryRegistry.resolveCanonicalId(
       state.humanNationId,
     );
     const turn = state.currentTurn;
 
+    const sourceLogs = candidateLogs ?? state.turnLogs;
     const armsBuyerSpendingMap = new Map<string, number>();
     const machineryBuyerSpendingMap = new Map<string, number>();
     const nonExportLogs: TurnLogEntry[] = [];
 
-    for (let i = 0; i < state.turnLogs.length; i++) {
-      const log = state.turnLogs[i]!;
+    for (let i = 0; i < sourceLogs.length; i++) {
+      const log = sourceLogs[i]!;
       const isThisTurn = log.turn === turn;
       const isSellerTrade =
         log.eventCode === "ARMS_TRADE" &&
@@ -94,8 +103,11 @@ export class TurnExportSalesAggregator {
     }
 
     return {
-      ...state,
-      turnLogs: [...nonExportLogs, ...summaryLogs],
+      state: {
+        ...state,
+        turnLogs: [...nonExportLogs, ...summaryLogs],
+      },
+      generatedSummaryLogs: summaryLogs,
     };
   }
 }

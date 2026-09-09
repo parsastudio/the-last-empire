@@ -14,30 +14,23 @@ export interface NationalProjectPlanResult {
 }
 
 export class AINationalProjectPlanner {
-  public static readonly MIN_PEACE_TREASURY = 15_000_000_000;
-  public static readonly MIN_WAR_TREASURY = 30_000_000_000;
-
   public static planProjects(
     nation: Nation,
     context: TurnContext,
-    availableTreasury?: number,
+    allocatedBudget: number,
   ): NationalProjectPlanResult {
-    let currentTreasury =
-      availableTreasury !== undefined ? availableTreasury : nation.treasury;
+    let currentTreasury = Math.min(nation.treasury, allocatedBudget);
     const actions: GameAction[] = [];
 
-    if (!nation.isAlive || !nation.isAi) {
+    if (
+      !nation.isAlive ||
+      !nation.isAi ||
+      currentTreasury < PROJECT_STEP_FLAT_COST
+    ) {
       return { actions, spentMoney: 0 };
     }
 
     const posture = context.getPosture(nation);
-    const minTreasuryNeeded =
-      posture === "WAR" ? this.MIN_WAR_TREASURY : this.MIN_PEACE_TREASURY;
-
-    if (currentTreasury < minTreasuryNeeded) {
-      return { actions, spentMoney: 0 };
-    }
-
     const boostedProjectIds =
       context.state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
 

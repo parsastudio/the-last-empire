@@ -10,6 +10,7 @@ import {
   GameDifficulty,
   FiscalRevenueCalculator,
   MilitaryPayrollCalculator,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 
 export interface HumanResourceMetrics {
@@ -73,7 +74,8 @@ export function selectHumanResourceMetrics(
       CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalHumanId
     ) {
       totalActiveFactories += p.factoriesCount;
-      totalMaxSlots += p.maxSlots;
+      totalMaxSlots +=
+        p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
     }
   }
 

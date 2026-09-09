@@ -159,7 +159,7 @@ export class IndustryCalculator {
     provinces: {
       provinceId: number;
       factoriesCount: number;
-      maxSlots: number;
+      maxSlots?: number;
     }[],
     quantity: number,
   ): Map<number, number> {
