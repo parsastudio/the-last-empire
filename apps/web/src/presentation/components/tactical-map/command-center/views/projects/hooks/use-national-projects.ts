@@ -8,6 +8,7 @@ import {
   NationalProjectEffectApplierUtility,
   ProjectScopeTier,
   ActionFactory,
+  NationTurnActivity,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
@@ -89,7 +90,10 @@ function computeOrderedProjects(
   return indexed.map((item) => item.project);
 }
 
-export function useNationalProjects(nation: Nation) {
+export function useNationalProjects(
+  nation: Nation,
+  turnActivity?: NationTurnActivity,
+) {
   const [selectedTierFilter, setSelectedTierFilter] = useState<
     ProjectScopeTier | "ALL"
   >("ALL");
@@ -108,11 +112,8 @@ export function useNationalProjects(nation: Nation) {
   );
 
   const boostedThisTurn = useMemo(
-    () =>
-      nation.turnActivity?.boostedProjectIds ??
-      nation.boostedProjectIdsThisTurn ??
-      [],
-    [nation.turnActivity?.boostedProjectIds, nation.boostedProjectIdsThisTurn],
+    () => turnActivity?.boostedProjectIds ?? [],
+    [turnActivity?.boostedProjectIds],
   );
 
   const progressSteps = useMemo(

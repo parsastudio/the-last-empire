@@ -28,6 +28,7 @@ export class TurnProgressionOrchestrator {
       nations: { ...state.nations },
       turnLogs: [...state.turnLogs],
       pendingProposals: [...state.pendingProposals],
+      turnActivity: {},
     };
 
     const turnContext = TurnContext.create(workingState);
@@ -68,6 +69,7 @@ export class TurnProgressionOrchestrator {
         workingState.globalCoalition,
         workingState.currentTurn,
         turnContext,
+        workingState.turnActivity?.[currentNation.id],
       );
 
       if (aiActions.length > 0) {

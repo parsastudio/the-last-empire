@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { NationSchema } from "@/domain/nation/nation.schema";
+import {
+  NationSchema,
+  NationTurnActivitySchema,
+} from "@/domain/nation/nation.schema";
 import { ProvinceSchema } from "@/domain/province/province.schema";
 import { PendingDiplomaticProposalSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DilemmaEventSchema } from "@/domain/events/dilemma.schema";
@@ -94,6 +97,7 @@ export const GameStateSchema = z.object({
   nations: z.record(z.string(), NationSchema),
   pendingProposals: z.array(PendingDiplomaticProposalSchema).default([]),
   turnLogs: z.array(TurnLogEntrySchema),
+  turnActivity: z.record(z.string(), NationTurnActivitySchema).default({}),
   globalCoalition: GlobalCoalitionSchema.nullable().optional(),
   activeDilemma: DilemmaEventSchema.nullable().optional(),
   scheduledDilemmaTurn: z.number().int().positive().nullable().optional(),

@@ -84,9 +84,7 @@ export class EspionageManager {
     }
 
     const executedTiers =
-      source.turnActivity?.executedEspionageTiers ??
-      source.executedEspionageTiers ??
-      [];
+      state.turnActivity?.[source.id]?.executedEspionageTiers ?? [];
     const executionKey = `${canonicalTarget}:${tier}`;
 
     if (executedTiers.includes(executionKey)) {
@@ -133,15 +131,9 @@ export class EspionageManager {
       ? "CLEAN_SUCCESS"
       : "CRITICAL_FAILURE";
 
-    const updatedExecutedTiers = [...executedTiers, executionKey];
     let updatedSource: Nation = {
       ...source,
       treasury: source.treasury - cost,
-      executedEspionageTiers: updatedExecutedTiers,
-      turnActivity: {
-        ...(source.turnActivity || DEFAULT_NATION_TURN_ACTIVITY),
-        executedEspionageTiers: updatedExecutedTiers,
-      },
     };
     let updatedTarget: Nation = { ...target };
 
@@ -270,12 +262,21 @@ export class EspionageManager {
       [target.id]: updatedTarget,
     };
 
+    const updatedTurnActivity = {
+      ...(state.turnActivity || {}),
+      [source.id]: {
+        ...(state.turnActivity?.[source.id] || DEFAULT_NATION_TURN_ACTIVITY),
+        executedEspionageTiers: [...executedTiers, executionKey],
+      },
+    };
+
     const newState: GameState = {
       ...state,
       seed: effectivePrng.getSeed(),
       provinces: state.provinces,
       nations: updatedNations,
       turnLogs: [...state.turnLogs, ...newLogs],
+      turnActivity: updatedTurnActivity,
     };
 
     const result: EspionageExecutionResult = {

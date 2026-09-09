@@ -11,13 +11,14 @@ import {
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { EspionageTargetOption } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
-import { NationGettersUtility } from "@geopolitics/domain";
+import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
 
 interface UseWideEspionageFormProps {
   nation: Nation;
   nationsMap?: Record<string, Nation>;
   provincesMap?: Record<string, Province>;
   selectedTargetCode?: string | null;
+  turnActivity?: NationTurnActivity;
 }
 
 export function useWideEspionageForm({
@@ -25,6 +26,7 @@ export function useWideEspionageForm({
   nationsMap,
   provincesMap,
   selectedTargetCode,
+  turnActivity,
 }: UseWideEspionageFormProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [lastResult, setLastResult] = useState<EspionageExecutionResult | null>(
@@ -133,16 +135,13 @@ export function useWideEspionageForm({
     (tier: EspionageTier) => {
       if (!selectedTargetId) return false;
       const canonical = CountryRegistry.resolveCanonicalId(selectedTargetId);
-      const list =
-        nation.turnActivity?.executedEspionageTiers ??
-        nation.executedEspionageTiers ??
-        [];
+      const list = turnActivity?.executedEspionageTiers ?? [];
       return (
         list.includes(`${canonical}:${tier}`) ||
         list.includes(`${selectedTargetId}:${tier}`)
       );
     },
-    [selectedTargetId, nation.turnActivity, nation.executedEspionageTiers],
+    [selectedTargetId, turnActivity?.executedEspionageTiers],
   );
 
   const handleExecute = useCallback(

@@ -1,5 +1,5 @@
 import React from "react";
-import { Nation } from "@/domain/nation/nation.schema";
+import { Nation, NationTurnActivity } from "@geopolitics/domain";
 import { useNationalProjects } from "./projects/hooks/use-national-projects";
 import { ProjectQuotaHeader } from "./projects/components/project-quota-header";
 import { ProjectCard } from "./projects/components/project-card";
@@ -8,9 +8,13 @@ import { NationalProjectEffectApplierUtility } from "@geopolitics/domain";
 
 interface WideProjectsViewProps {
   nation: Nation;
+  turnActivity?: NationTurnActivity;
 }
 
-export function WideProjectsView({ nation }: WideProjectsViewProps) {
+export function WideProjectsView({
+  nation,
+  turnActivity,
+}: WideProjectsViewProps) {
   const {
     selectedTierFilter,
     setSelectedTierFilter,
@@ -25,7 +29,7 @@ export function WideProjectsView({ nation }: WideProjectsViewProps) {
     breakthroughProjectId,
     dismissBreakthrough,
     handleBoostProject,
-  } = useNationalProjects(nation);
+  } = useNationalProjects(nation, turnActivity);
 
   return (
     <div className="space-y-5 dir-rtl text-right font-sans animate-fade-smooth pb-6">

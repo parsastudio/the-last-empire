@@ -10,7 +10,7 @@ import { Province } from "@/domain/province/province.schema";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { useWideDiplomacy } from "@/presentation/components/tactical-map/command-center/views/hooks/use-wide-diplomacy";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { CountryRegistry } from "@/domain/data/countries";
+import { CountryRegistry, NationTurnActivity } from "@geopolitics/domain";
 
 function FocusMapButton({
   countryCode,
@@ -37,6 +37,7 @@ interface WideDiplomacyViewProps {
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   provincesMap?: Record<string, Province>;
+  turnActivity?: NationTurnActivity;
   onFocusCountry?: (code: string) => void;
   onNavigateTab?: (
     tab: SidebarTabType,
@@ -50,6 +51,7 @@ export function WideDiplomacyView({
   nationsMap,
   humanNationId,
   provincesMap,
+  turnActivity,
   onFocusCountry,
   onNavigateTab,
 }: WideDiplomacyViewProps) {
@@ -169,6 +171,7 @@ export function WideDiplomacyView({
             provincesMap={provincesMap}
             clientNation={humanNation}
             targetNation={diplomacy.selectedTargetNation}
+            turnActivity={turnActivity}
             onOpenProxy={handleOpenEspionage}
           />
         </div>

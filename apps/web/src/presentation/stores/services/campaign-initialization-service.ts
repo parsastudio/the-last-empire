@@ -78,6 +78,7 @@ export class CampaignInitializationService {
       nations: initResult.nations,
       pendingProposals: [],
       turnLogs: [],
+      turnActivity: {},
       activeDilemma: null,
       scheduledDilemmaTurn: null,
     };

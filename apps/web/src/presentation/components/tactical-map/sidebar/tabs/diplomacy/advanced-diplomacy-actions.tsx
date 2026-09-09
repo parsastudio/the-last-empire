@@ -5,6 +5,7 @@ import {
   Province,
   Nation,
   CountryRegistry,
+  NationTurnActivity,
 } from "@geopolitics/domain";
 import { BetrayalConfirmModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/betrayal-confirm-modal";
 import { DiplomaticFeedbackModal } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
@@ -26,6 +27,7 @@ interface AdvancedDiplomacyActionsProps {
   clientNation?: Nation | null;
   targetNation?: Nation | null;
   currentTurn?: number;
+  turnActivity?: NationTurnActivity;
   onOpenProxy?: () => void;
 }
 
@@ -43,6 +45,7 @@ export function AdvancedDiplomacyActions({
   clientNation,
   targetNation,
   currentTurn,
+  turnActivity,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -60,12 +63,9 @@ export function AdvancedDiplomacyActions({
   const isAidSentThisTurn = useMemo(() => {
     if (!clientNation) return false;
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNationId);
-    const list =
-      clientNation.turnActivity?.sentAidTargetIds ??
-      clientNation.sentAidTargetIdsThisTurn ??
-      [];
+    const list = turnActivity?.sentAidTargetIds ?? [];
     return list.includes(canonicalTarget) || list.includes(targetNationId);
-  }, [clientNation, targetNationId]);
+  }, [clientNation, targetNationId, turnActivity?.sentAidTargetIds]);
 
   const canAffordPartnership =
     (clientNation?.treasury ?? 0) >= runner.strategicPartnershipCost;

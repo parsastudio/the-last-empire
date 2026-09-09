@@ -21,6 +21,7 @@ export class AIEspionagePlanner {
     reachableTargets?: Nation[],
     provincesByOwnerMap?: Map<string, Province[]>,
     availableTreasury?: number,
+    executedTiersInput?: string[],
   ): EspionagePlanResult {
     let currentGeoBudget =
       geopoliticsBudget !== undefined
@@ -41,10 +42,7 @@ export class AIEspionagePlanner {
       };
     }
 
-    const executedTiers =
-      nation.turnActivity?.executedEspionageTiers ??
-      nation.executedEspionageTiers ??
-      [];
+    const executedTiers = executedTiersInput ?? [];
 
     const sabotageAction = AISabotagePlanner.planSabotageTier2(
       nation,

@@ -3,6 +3,7 @@ import {
   Nation,
   Province,
   GlobalCoalition,
+  NationTurnActivity,
 } from "@geopolitics/domain";
 import {
   AIProcurementPlanner,
@@ -74,6 +75,7 @@ export class AIActionBuilder {
     globalCoalition?: GlobalCoalition | null,
     currentTurn?: number,
     turnContext?: TurnContext,
+    turnActivity?: NationTurnActivity,
   ): GameAction[] {
     const actions: GameAction[] = [];
     let currentNation = nation;
@@ -145,6 +147,7 @@ export class AIActionBuilder {
       currentNation,
       upgradeResult.remainingTreasury,
       context.posture,
+      turnActivity?.boostedProjectIds,
     );
     actions.push(...projectResult.actions);
 
@@ -160,6 +163,7 @@ export class AIActionBuilder {
       context.reachableTargets,
       provincesByOwnerMap,
       treasuryAfterProjects,
+      turnActivity?.executedEspionageTiers,
     );
     actions.push(...espionageResult.actions);
 

@@ -12,6 +12,7 @@ import {
   NationGettersUtility,
   NationRelationResolver,
   IndustryCalculator,
+  DEFAULT_NATION_TURN_ACTIVITY,
 } from "@geopolitics/domain";
 
 export interface BattleExecutionResult {
@@ -180,12 +181,26 @@ export class BattleExecutionEngine {
       spoilsData,
     );
 
+    const prevAttacked =
+      state.turnActivity?.[attacker.id]?.attackedTargetIds ?? [];
+    const updatedAttacked = Array.from(
+      new Set([...prevAttacked, canonicalDefenderId, defender.id]),
+    );
+    const updatedTurnActivity = {
+      ...(state.turnActivity || {}),
+      [attacker.id]: {
+        ...(state.turnActivity?.[attacker.id] || DEFAULT_NATION_TURN_ACTIVITY),
+        attackedTargetIds: updatedAttacked,
+      },
+    };
+
     return {
       state: {
         ...state,
         provinces: updatedProvinces,
         nations: updatedNations,
         turnLogs: [...state.turnLogs, ...battleLogs],
+        turnActivity: updatedTurnActivity,
       },
       reportData,
     };

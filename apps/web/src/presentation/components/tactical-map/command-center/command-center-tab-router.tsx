@@ -34,6 +34,8 @@ export function CommandCenterTabRouter({
   onFocusCountry,
   onNavigateTab,
 }: CommandCenterTabRouterProps) {
+  const currentNationActivity = gameState?.turnActivity?.[nation.id];
+
   switch (activeTab) {
     case "overview":
       return <WideOverviewView nation={nation} gameState={gameState} />;
@@ -59,7 +61,12 @@ export function CommandCenterTabRouter({
       );
 
     case "projects":
-      return <WideProjectsView nation={nation} />;
+      return (
+        <WideProjectsView
+          nation={nation}
+          turnActivity={currentNationActivity}
+        />
+      );
 
     case "politics":
       return (
@@ -77,6 +84,7 @@ export function CommandCenterTabRouter({
           nationsMap={gameState?.nations}
           humanNationId={gameState?.humanNationId || nation.id}
           provincesMap={gameState?.provinces}
+          turnActivity={currentNationActivity}
           onFocusCountry={onFocusCountry}
           onNavigateTab={onNavigateTab}
         />
@@ -89,6 +97,7 @@ export function CommandCenterTabRouter({
           nationsMap={gameState?.nations}
           provincesMap={gameState?.provinces}
           selectedTargetCode={selectedTargetCode}
+          turnActivity={currentNationActivity}
         />
       );
 
