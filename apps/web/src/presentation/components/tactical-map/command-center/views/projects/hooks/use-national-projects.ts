@@ -12,7 +12,6 @@ import {
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
-import { useToast } from "@/presentation/context/toast-context";
 
 interface BoostActionResultData {
   projectId: string;
@@ -102,7 +101,6 @@ export function useNationalProjects(nation: Nation) {
   >(null);
 
   const { dispatchAction, isSubmitting } = useGameActions();
-  const { showToast } = useToast();
 
   const completedIds = useMemo(
     () => nation.completedProjectIds || [],
@@ -170,11 +168,6 @@ export function useNationalProjects(nation: Nation) {
           setBreakthroughProjectId(project.id);
         } else if (data.isCompleted) {
           TacticalEffects.fireVictoryConfetti(120);
-          showToast(
-            "تکمیل پروژه راهبردی ملی",
-            `پروژه «${project.nameFa}» با موفقیت به پایان رسید و امتیازات آن فعال شد.`,
-            "success",
-          );
         }
       }
     },
@@ -185,7 +178,6 @@ export function useNationalProjects(nation: Nation) {
       boostedThisTurn,
       isSubmitting,
       dispatchAction,
-      showToast,
     ],
   );
 

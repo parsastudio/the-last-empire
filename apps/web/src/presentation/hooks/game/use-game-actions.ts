@@ -13,17 +13,14 @@ export function useGameActions(onActionExecuted?: () => void) {
   const dispatchAction = useCallback(
     async (
       action: GameAction,
-      successMessage?: string,
+      _successMessage?: string,
     ): Promise<{ success: boolean; resultData?: unknown }> => {
       if (isSubmitting) return { success: false };
       try {
         setIsSubmitting(true);
-        const result = await dispatchStoreAction(action, successMessage);
+        const result = await dispatchStoreAction(action);
 
         if (result.success) {
-          if (successMessage) {
-            showToast("دستور صادر شد", result.message, "success");
-          }
           if (onActionExecuted) {
             onActionExecuted();
           }

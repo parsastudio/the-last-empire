@@ -67,10 +67,7 @@ export function NavalFleetProcurementCard({
       nationId,
       batchInfo.batchQuantity,
     );
-    await dispatchAction(
-      action,
-      `${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان راهبردی جدید به نیروی دریایی ملحق شد.`,
-    );
+    await dispatchAction(action);
   };
 
   return (
