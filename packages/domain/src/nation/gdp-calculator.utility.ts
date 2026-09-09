@@ -1,10 +1,13 @@
-import { Province } from "@/domain/province/province.schema";
-import { Nation } from "@/domain/nation/nation.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 
 export function getProvinceGdp(
-  province: { maxSlots?: number; factoriesCount?: number },
+  province: {
+    factoriesCount?: number;
+    factoryTiers?: FactoryBatch[];
+  },
   equipmentTechLevel = 1.0,
 ): number {
   return IndustryCalculator.calculateProvinceGdp(province, equipmentTechLevel);
@@ -12,9 +15,9 @@ export function getProvinceGdp(
 
 export function getNationGdp(
   nationOrId: { id: string; equipmentTechLevel?: number } | string,
-  provincesMap?: Record<string, Province> | Province[],
-  ownedProvinces?: Province[],
-  provincesByOwnerMap?: Map<string, Province[]>,
+  provincesMap?: Record<string, ProvinceDynamicState> | ProvinceDynamicState[],
+  ownedProvinces?: ProvinceDynamicState[],
+  provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
 ): number {
   const nationId = typeof nationOrId === "string" ? nationOrId : nationOrId.id;
   const canonicalId = CountryRegistry.resolveCanonicalId(nationId);

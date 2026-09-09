@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { HoverCountryInfo } from "@/presentation/components/tactical-map/final/hud/webgl-hover-hud";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import {
   getNationGdp,
@@ -17,7 +17,7 @@ import {
 } from "@geopolitics/domain";
 
 interface UseHoverNationResolverProps {
-  provincesMap?: Record<string, Province>;
+  provincesMap?: Record<string, ProvinceDynamicState>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
 }
@@ -135,9 +135,10 @@ export function useHoverNationResolver({
       const gdpSharePct =
         realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
 
-      const regionName =
-        province.nameFa ??
-        MapTopologyRegistry.getNameFa(province.provinceId, "منطقه نامشخص");
+      const regionName = MapTopologyRegistry.getNameFa(
+        province.provinceId,
+        "منطقه نامشخص",
+      );
 
       return {
         name: realName,

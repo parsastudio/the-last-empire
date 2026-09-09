@@ -8,12 +8,12 @@ import { WebGLContextMenuWrapper } from "@/presentation/components/tactical-map/
 import { useWebGLInteraction } from "@/presentation/hooks/tactical-map/final/use-webgl-interaction";
 import { ContextActionType } from "@/presentation/components/tactical-map/context-menu/map-context-menu";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
 import { DiplomaticStampsOverlay } from "@/presentation/components/tactical-map/overlays/diplomatic-stamps/diplomatic-stamps-overlay";
 
 interface WebGLMapCanvasProps {
-  provincesMap?: Record<string, Province>;
+  provincesMap?: Record<string, ProvinceDynamicState>;
   nationsMap?: Record<string, Nation>;
   humanNationId?: string;
   activeLayer?: "political" | "gdp";
@@ -35,6 +35,7 @@ export function WebGLMapCanvas({
 }: WebGLMapCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hudRef = useRef<HTMLDivElement | null>(null);
   const requestRenderRef = useRef<() => void>(() => {});
 
   const dimensions = useMapDimensions(containerRef);
@@ -71,7 +72,6 @@ export function WebGLMapCanvas({
   );
 
   const {
-    hoverPos,
     hoverData,
     hoveredGpuIndex,
     contextMenuState,
@@ -81,6 +81,7 @@ export function WebGLMapCanvas({
     closeContextMenu,
   } = useWebGLInteraction({
     containerRef,
+    hudRef,
     positionRef,
     scaleRef,
     isDraggingRef,
@@ -150,7 +151,7 @@ export function WebGLMapCanvas({
         provincesMap={provincesMap}
         humanNationId={humanNationId}
       />
-      <WebGLHoverHud hoverPos={hoverPos} hoverData={hoverData} />
+      <WebGLHoverHud hudRef={hudRef} hoverData={hoverData} />
       <WebGLContextMenuWrapper
         contextMenuState={contextMenuState}
         onSelectAction={handleSelectContext}

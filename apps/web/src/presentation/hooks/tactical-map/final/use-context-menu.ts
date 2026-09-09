@@ -1,8 +1,9 @@
 import { useState, useCallback } from "react";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
+import { MapTopologyRegistry } from "@geopolitics/domain";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -22,7 +23,7 @@ export function useContextMenu() {
       screenX: number,
       screenY: number,
       provinceId: number,
-      provincesMap?: Record<string, Province>,
+      provincesMap?: Record<string, ProvinceDynamicState>,
       nationsMap?: Record<string, Nation>,
       humanNationId?: string,
     ) => {
@@ -34,7 +35,10 @@ export function useContextMenu() {
       const province = provincesMap
         ? provincesMap[provinceId.toString()]
         : null;
-      const provinceName = province ? province.nameFa : `استان #${provinceId}`;
+      const provinceName = MapTopologyRegistry.getNameFa(
+        provinceId,
+        `استان #${provinceId}`,
+      );
 
       const ownerNationId = province ? province.ownerNationId : "";
       const canonicalOwnerId =

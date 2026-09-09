@@ -9,11 +9,7 @@ import { ResearchManager } from "@/engine/politics/research-manager";
 import { ArmsMarketManager } from "@/engine/military/arms-market-manager";
 import { NavalFleetExecutor } from "@/engine/actions/executors/military/naval-fleet-executor";
 import { BattleInitiationValidator } from "@/engine/actions/executors/military/battle-initiation-validator";
-
-export interface MilitaryExecutionOutput {
-  newState: GameState;
-  resultData?: unknown;
-}
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class MilitaryActionExecutor {
   private static battleEngine = new BattleExecutionEngine();
@@ -24,7 +20,7 @@ export class MilitaryActionExecutor {
     action: GameAction,
     sourceNation?: Nation,
     canonicalSourceId?: string,
-  ): MilitaryExecutionOutput {
+  ): ExecutionResult {
     const canonicalId =
       canonicalSourceId ?? CountryRegistry.resolveCanonicalId(action.nationId);
     const nation =
@@ -44,43 +40,47 @@ export class MilitaryActionExecutor {
             "تعداد یگان درخواستی باید مثبت باشد.",
           );
         }
+        const updatedNation = DomesticRecruitmentManager.executeRecruitment(
+          nation,
+          action.unitType,
+          action.quantity,
+          state.provinces,
+        );
         return {
           newState: {
             ...state,
             nations: {
               ...state.nations,
-              [sourceKey]: DomesticRecruitmentManager.executeRecruitment(
-                nation,
-                action.unitType,
-                action.quantity,
-                state.provinces,
-              ),
+              [sourceKey]: updatedNation,
             },
+          },
+          resultData: {
+            unitType: action.unitType,
+            quantity: action.quantity,
           },
         };
       }
 
       case "BUY_ARMS_MARKET": {
+        const nextState = ArmsMarketManager.executePurchase(
+          state,
+          action.nationId,
+          action.sellerNationId,
+          action.unitType,
+          action.quantity,
+        );
         return {
-          newState: ArmsMarketManager.executePurchase(
-            state,
-            action.nationId,
-            action.sellerNationId,
-            action.unitType,
-            action.quantity,
-          ),
+          newState: nextState,
+          resultData: {
+            sellerNationId: action.sellerNationId,
+            unitType: action.unitType,
+            quantity: action.quantity,
+          },
         };
       }
 
       case "BUY_NAVAL_FLEET": {
-        return {
-          newState: NavalFleetExecutor.execute(
-            state,
-            nation,
-            action,
-            sourceKey,
-          ),
-        };
+        return NavalFleetExecutor.execute(state, nation, action, sourceKey);
       }
 
       case "INVEST_RESEARCH": {
@@ -93,13 +93,18 @@ export class MilitaryActionExecutor {
             "موجودی خزانه برای پژوهش ارتقای فناوری نظامی کافی نیست.",
           );
         }
+        const updatedNation = this.researchManager.investInMilitaryTech(nation);
         return {
           newState: {
             ...state,
             nations: {
               ...state.nations,
-              [sourceKey]: this.researchManager.investInMilitaryTech(nation),
+              [sourceKey]: updatedNation,
             },
+          },
+          resultData: {
+            newTechLevel: updatedNation.military.techLevel,
+            cost,
           },
         };
       }

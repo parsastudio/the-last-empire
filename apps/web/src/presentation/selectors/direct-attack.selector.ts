@@ -1,6 +1,6 @@
 import {
   Nation,
-  Province,
+  ProvinceDynamicState,
   GameState,
   DiplomaticStance,
   CountryRegistry,
@@ -21,7 +21,7 @@ import {
 import { TacticalForecast } from "@/presentation/components/tactical-map/modals/attack/attack-intel-panel";
 
 export interface DirectAttackReachEvaluation {
-  targetProvince: Province | null;
+  targetProvince: ProvinceDynamicState | null;
   isLandNeighbor: boolean;
   isNavalValid: boolean;
   attackType: "LAND" | "NAVAL";
@@ -83,8 +83,7 @@ export class DirectAttackSelector {
         : false;
 
     const targetProvinceHasSea = targetProvince
-      ? (targetProvince.hasSeaAccess ??
-        MapTopologyRegistry.hasSeaAccess(targetProvince.provinceId))
+      ? MapTopologyRegistry.hasSeaAccess(targetProvince.provinceId, false)
       : false;
 
     const isNavalValid =
@@ -97,9 +96,10 @@ export class DirectAttackSelector {
 
     let targetRegionName = "";
     if (targetProvince) {
-      targetRegionName =
-        targetProvince.nameFa ??
-        MapTopologyRegistry.getNameFa(targetProvince.provinceId, "");
+      targetRegionName = MapTopologyRegistry.getNameFa(
+        targetProvince.provinceId,
+        "",
+      );
     } else if (targetNation) {
       targetRegionName = `خاک اصلی ${targetNation.name}`;
     }
@@ -262,7 +262,7 @@ export class DirectAttackSelector {
   public static selectRecon(
     humanNation: Nation | null,
     targetNation: Nation | null,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     turnActivity?: NationTurnActivity,
   ): DirectAttackReconEvaluation {
     if (!humanNation || !targetNation) {
@@ -296,7 +296,7 @@ export class DirectAttackSelector {
     infantry: number,
     armor: number,
     airForce: number,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     targetProvinceId?: number,
   ): TacticalForecast {
     if (!humanNation || !targetNation) {

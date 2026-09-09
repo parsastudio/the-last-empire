@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 
 export type GeopoliticalReachTier =
@@ -28,7 +28,7 @@ export class GeopoliticalTierClassifier {
   public static getReachTier(
     nation: Nation,
     allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
   ): GeopoliticalReachTier {
     const rank = NationGettersUtility.getRank(

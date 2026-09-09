@@ -1,4 +1,4 @@
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 
 export class TerritoryClaimsUtility {
@@ -9,7 +9,9 @@ export class TerritoryClaimsUtility {
   }
 
   public static buildOccupiedTerritoryMap(
-    provincesMap?: Record<string, Province> | Province[],
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
   ): Map<string, number> {
     const map = new Map<string, number>();
     if (!provincesMap) return map;
@@ -39,7 +41,9 @@ export class TerritoryClaimsUtility {
     victimId: string,
     occupierId: string,
     occupiedMap?: Map<string, number>,
-    provincesMap?: Record<string, Province> | Province[],
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
   ): number {
     const key = this.createPairKey(victimId, occupierId);
     if (occupiedMap) {

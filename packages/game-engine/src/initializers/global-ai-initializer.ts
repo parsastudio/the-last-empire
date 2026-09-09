@@ -1,6 +1,6 @@
 import {
   Nation,
-  Province,
+  ProvinceDynamicState,
   RelationProfile,
   CountryRegistry,
   FinalMapManifest,
@@ -39,11 +39,14 @@ export class GlobalAiInitializer {
     manifest: FinalMapManifest,
     humanNationId: string,
     humanGovType?: string,
-  ): { nations: Record<string, Nation>; provinces: Record<string, Province> } {
+  ): {
+    nations: Record<string, Nation>;
+    provinces: Record<string, ProvinceDynamicState>;
+  } {
     MapTopologyRegistry.initializeFromManifest(manifest);
 
     const nations: Record<string, Nation> = {};
-    const provinces: Record<string, Province> = {};
+    const provinces: Record<string, ProvinceDynamicState> = {};
 
     const manifestProvinces = manifest.provinces || [];
     const manifestItems: FinalManifestNation[] = manifest.nations || [];
@@ -88,39 +91,16 @@ export class GlobalAiInitializer {
           provCount,
         );
 
-      let totalPixels = 0;
-      for (let p = 0; p < countryProvs.length; p++) {
-        totalPixels += countryProvs[p]!.pixelCount || 1;
-      }
-
       for (let i = 0; i < countryProvs.length; i++) {
         const pItem = countryProvs[i]!;
         const dist = factoryDist[i] || { activeCount: 1, maxSlots: 3 };
 
-        const pixelRatio =
-          totalPixels > 0
-            ? (pItem.pixelCount || 1) / totalPixels
-            : 1 / Math.max(1, provCount);
-        const provPop = Math.max(
-          10_000,
-          Math.floor((item.population || 10_000_000) * pixelRatio),
-        );
-
         provinces[pItem.provinceId.toString()] = {
           provinceId: pItem.provinceId,
-          nameFa: pItem.nameFa,
           ownerNationId: cleanId,
           originalNationId: pItem.originalCountryId
             ? CountryRegistry.resolveCanonicalId(pItem.originalCountryId)
             : cleanId,
-          pixelCount: pItem.pixelCount,
-          hasSeaAccess: pItem.hasSeaAccess,
-          landNeighbors: pItem.landNeighbors || [],
-          maritimeNeighborsTier1: pItem.maritimeNeighborsTier1 || [],
-          maritimeNeighborsTier2: pItem.maritimeNeighborsTier2 || [],
-          centerCoordinates: pItem.centerCoordinates,
-          population: provPop,
-          maxSlots: dist.maxSlots,
           factoriesCount: dist.activeCount,
           factoryTiers: [{ techLevel: equipTech, count: dist.activeCount }],
         };
@@ -160,13 +140,16 @@ export class GlobalAiInitializer {
     humanNationId: string,
     humanGovType?: string,
     manifest?: FinalMapManifest | null,
-  ): { nations: Record<string, Nation>; provinces: Record<string, Province> } {
+  ): {
+    nations: Record<string, Nation>;
+    provinces: Record<string, ProvinceDynamicState>;
+  } {
     if (manifest && manifest.nations && manifest.nations.length > 0) {
       return this.initializeFromManifest(manifest, humanNationId, humanGovType);
     }
 
     const nations: Record<string, Nation> = {};
-    const provinces: Record<string, Province> = {};
+    const provinces: Record<string, ProvinceDynamicState> = {};
 
     const cleanHumanId = CountryRegistry.resolveCanonicalId(humanNationId);
     const preBuiltNations: Nation[] = [];

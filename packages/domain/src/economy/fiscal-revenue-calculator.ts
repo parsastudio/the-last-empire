@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { NationRelationResolver } from "@/domain/diplomacy/nation-relation-resolver.utility";
@@ -29,7 +29,7 @@ export class FiscalRevenueCalculator {
   public static calculate(
     nation: Nation,
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     aiRevenueMultiplier: number = FiscalRevenueCalculator.DEFAULT_AI_REVENUE_MULTIPLIER,
     precomputedGdpMap?: Map<string, number>,
     precomputedTotalWorldGdp?: number,

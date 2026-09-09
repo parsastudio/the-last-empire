@@ -26,7 +26,7 @@ export const ProvinceDynamicStateSchema = z.object({
 });
 
 export const ProvinceSchema = ProvinceDynamicStateSchema.merge(
-  ProvinceStaticTopologySchema,
+  ProvinceStaticTopologySchema.omit({ provinceId: true }).partial(),
 );
 
 export type ProvinceStaticTopology = z.infer<

@@ -1,5 +1,5 @@
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { FactoryYieldCalculatorUtility } from "@/domain/economy/factory/factory-yield-calculator.utility";
 import { FactoryBatchManagerUtility } from "@/domain/economy/factory/factory-batch-manager.utility";
 import { FactorySlotDistributorUtility } from "@/domain/economy/factory/factory-slot-distributor.utility";
@@ -48,15 +48,17 @@ export class IndustryCalculator {
   public static syncProvincesAndNationFloor(
     nationId: string,
     industrialLevel: number,
-    provincesMap: Record<string, Province>,
+    provincesMap: Record<string, ProvinceDynamicState>,
   ): {
-    updatedProvinces: Record<string, Province>;
+    updatedProvinces: Record<string, ProvinceDynamicState>;
     updatedFactoryTiers: FactoryBatch[];
     updatedEquipmentTech: number;
   } {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
-    const updatedProvinces: Record<string, Province> = { ...provincesMap };
-    const nationProvinces: Province[] = [];
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...provincesMap,
+    };
+    const nationProvinces: ProvinceDynamicState[] = [];
 
     for (const [id, prov] of Object.entries(updatedProvinces)) {
       if (
@@ -66,7 +68,7 @@ export class IndustryCalculator {
           prov.factoryTiers,
           industrialLevel,
         );
-        const updatedProv: Province = {
+        const updatedProv: ProvinceDynamicState = {
           ...prov,
           factoryTiers: nextTiers,
         };
@@ -170,10 +172,13 @@ export class IndustryCalculator {
   }
 
   public static distributeFactoryDestruction(
-    provincesMap: Record<string, Province>,
-    candidateProvinces: Province[],
+    provincesMap: Record<string, ProvinceDynamicState>,
+    candidateProvinces: ProvinceDynamicState[],
     factoriesToDestroy: number,
-  ): { updatedProvinces: Record<string, Province>; actualDestroyed: number } {
+  ): {
+    updatedProvinces: Record<string, ProvinceDynamicState>;
+    actualDestroyed: number;
+  } {
     return FactoryDestructionResolverUtility.distributeFactoryDestruction(
       provincesMap,
       candidateProvinces,

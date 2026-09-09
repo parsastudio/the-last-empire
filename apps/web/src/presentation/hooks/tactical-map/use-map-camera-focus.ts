@@ -1,7 +1,8 @@
 import { useCallback, RefObject } from "react";
 import { CountryRegistry } from "@/domain/data/countries";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
+import { MapTopologyRegistry } from "@geopolitics/domain";
 
 interface UseMapCameraFocusProps {
   mapWidth: number;
@@ -9,7 +10,7 @@ interface UseMapCameraFocusProps {
   dimensions: { width: number; height: number };
   scaleRef: RefObject<number>;
   positionRef: RefObject<CameraPosition>;
-  provincesMap?: Record<string, Province>;
+  provincesMap?: Record<string, ProvinceDynamicState>;
 }
 
 export function useMapCameraFocus({
@@ -39,9 +40,15 @@ export function useMapCameraFocus({
             prov.ownerNationId,
           );
           if (canonicalOwner === canonicalIso3) {
-            const weight = Math.max(1, prov.pixelCount);
-            sumX += prov.centerCoordinates.x * weight;
-            sumY += prov.centerCoordinates.y * weight;
+            const weight = Math.max(
+              1,
+              MapTopologyRegistry.getPixelCount(prov.provinceId, 1),
+            );
+            const center = MapTopologyRegistry.getCenterCoordinates(
+              prov.provinceId,
+            );
+            sumX += center.x * weight;
+            sumY += center.y * weight;
             totalWeight += weight;
           }
         }

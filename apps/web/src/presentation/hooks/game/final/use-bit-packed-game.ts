@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { BitPackedGridState } from "@geopolitics/game-engine";
 import { GameStorageAdapter } from "@/infrastructure/storage/game-storage.adapter";
 import { useGameStore } from "@/presentation/stores/use-game-store";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 export function useBitPackedGame(gameId = "default_game") {
   const gameState = useGameStore((state) => state.gameState);
@@ -20,6 +21,8 @@ export function useBitPackedGame(gameId = "default_game") {
     async function init() {
       setIsInitializing(true);
       try {
+        await ClientFinalStateLoader.ensureManifestLoaded("map1");
+
         const gridState = BitPackedGridState.getInstance();
         gridState.initializeSession(gameId);
 

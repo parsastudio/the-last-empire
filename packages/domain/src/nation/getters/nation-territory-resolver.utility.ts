@@ -1,12 +1,12 @@
 import { CountryRegistry } from "@/domain/data/countries";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export class NationTerritoryResolverUtility {
-  public static buildProvincesByOwnerMap(
-    provincesMap?: Record<string, Province> | Province[],
-  ): Map<string, Province[]> {
-    const map = new Map<string, Province[]>();
+  public static buildProvincesByOwnerMap<T extends ProvinceDynamicState>(
+    provincesMap?: Record<string, T> | T[],
+  ): Map<string, T[]> {
+    const map = new Map<string, T[]>();
     if (!provincesMap) return map;
 
     const list = Array.isArray(provincesMap)
@@ -27,11 +27,11 @@ export class NationTerritoryResolverUtility {
     return map;
   }
 
-  public static getOwnedProvinces(
+  public static getOwnedProvinces<T extends ProvinceDynamicState>(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): Province[] {
+    provincesMap?: Record<string, T> | T[],
+    provincesByOwnerMap?: Map<string, T[]>,
+  ): T[] {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     if (provincesByOwnerMap) {
       return (
@@ -52,9 +52,11 @@ export class NationTerritoryResolverUtility {
 
   public static getTerritoryPixelCount(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): number {
     const provs =
       ownedProvinces ??
@@ -63,17 +65,18 @@ export class NationTerritoryResolverUtility {
     let total = 0;
     for (let i = 0; i < provs.length; i++) {
       const p = provs[i]!;
-      total +=
-        p.pixelCount ?? MapTopologyRegistry.getPixelCount(p.provinceId, 0);
+      total += MapTopologyRegistry.getPixelCount(p.provinceId, 0);
     }
     return total;
   }
 
   public static hasSeaAccess(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): boolean {
     const provs =
       ownedProvinces ??
@@ -81,8 +84,7 @@ export class NationTerritoryResolverUtility {
 
     for (let i = 0; i < provs.length; i++) {
       const p = provs[i]!;
-      const hasSea =
-        p.hasSeaAccess ?? MapTopologyRegistry.hasSeaAccess(p.provinceId, false);
+      const hasSea = MapTopologyRegistry.hasSeaAccess(p.provinceId, false);
       if (hasSea) return true;
     }
     return false;

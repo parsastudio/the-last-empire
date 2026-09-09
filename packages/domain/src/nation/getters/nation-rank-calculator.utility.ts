@@ -1,8 +1,9 @@
 import { CountryRegistry } from "@/domain/data/countries";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { NationTerritoryResolverUtility } from "@/domain/nation/getters/nation-territory-resolver.utility";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 import {
   NationRankCandidateInput,
   NationPowerScoreEvaluator,
@@ -62,8 +63,10 @@ export class NationRankCalculatorUtility {
 
   public static calculateRankMap(
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province> | Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): Map<string, number> {
     if (!nationsMap) return new Map<string, number>();
 
@@ -89,7 +92,7 @@ export class NationRankCalculatorUtility {
       for (let p = 0; p < provList.length; p++) {
         const prov = provList[p]!;
         gdp += getProvinceGdp(prov, nation.equipmentTechLevel ?? 1.0);
-        population += prov.population || 0;
+        population += MapTopologyRegistry.getPopulation(prov.provinceId, 0);
       }
 
       candidatesInput[i] = {
@@ -110,8 +113,10 @@ export class NationRankCalculatorUtility {
 
   public static calculateGdpRankMap(
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province> | Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): Map<string, number> {
     const gdpRankMap = new Map<string, number>();
     if (!nationsMap) return gdpRankMap;
@@ -161,7 +166,9 @@ export class NationRankCalculatorUtility {
   public static getRank(
     nationId: string,
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province> | Province[],
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
     rankMap?: Map<string, number>,
   ): number {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
@@ -175,7 +182,9 @@ export class NationRankCalculatorUtility {
   public static getGdpRank(
     nationId: string,
     nationsMap?: Record<string, Nation>,
-    provincesMap?: Record<string, Province> | Province[],
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
     gdpRankMap?: Map<string, number>,
   ): number {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);

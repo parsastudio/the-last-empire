@@ -17,19 +17,12 @@ import { DiplomaticProposalExecutor } from "@/engine/diplomacy/executors/diploma
 import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-declaration-executor";
 import { TreatyTerminationExecutor } from "@/engine/actions/executors/politics/treaty-termination-executor";
 import { ForeignAidExecutor } from "@/engine/actions/executors/politics/foreign-aid-executor";
-
-export interface PoliticsExecutionOutput {
-  newState: GameState;
-  resultData?: unknown;
-}
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
 
-  public static execute(
-    state: GameState,
-    action: GameAction,
-  ): PoliticsExecutionOutput {
+  public static execute(state: GameState, action: GameAction): ExecutionResult {
     const canonicalSourceId = CountryRegistry.resolveCanonicalId(
       action.nationId,
     );
@@ -69,14 +62,23 @@ export class PoliticsActionExecutor {
                 state,
                 settlementAction,
               ),
+              resultData: {
+                accepted: true,
+                proposalType: proposal.proposalType,
+              },
             };
           }
           return {
             newState: TreatyAcceptanceApplier.applyAcceptance(state, proposal),
+            resultData: { accepted: true, proposalType: proposal.proposalType },
           };
         } else {
           return {
             newState: TreatyAcceptanceApplier.applyRejection(state, proposal),
+            resultData: {
+              accepted: false,
+              proposalType: proposal.proposalType,
+            },
           };
         }
       }
@@ -264,6 +266,10 @@ export class PoliticsActionExecutor {
             ...state,
             pendingProposals: [...state.pendingProposals, transientProposal],
             turnLogs: [...state.turnLogs, proposalLog],
+          },
+          resultData: {
+            proposalId: transientProposal.id,
+            pending: true,
           },
         };
       }

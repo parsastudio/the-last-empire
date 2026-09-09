@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import {
   GeopoliticalTierClassifier,
   GeopoliticalReachTier,
@@ -24,9 +24,9 @@ export class GeopoliticalReachResolver {
   public static hasDirectLandBorder(
     source: Nation,
     target: Nation,
-    provincesMap?: Record<string, Province>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
+    sourceProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): boolean {
     return ProximityTierResolver.hasDirectLandBorder(
       source,
@@ -40,7 +40,7 @@ export class GeopoliticalReachResolver {
   public static canReachForWarOrStrike(
     source: Nation,
     target: Nation,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): boolean {
     const hasLand = this.hasDirectLandBorder(source, target, provincesMap);
     if (hasLand) return true;
@@ -61,7 +61,7 @@ export class GeopoliticalReachResolver {
   public static getReachTier(
     nation: Nation,
     allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
   ): GeopoliticalReachTier {
     return GeopoliticalTierClassifier.getReachTier(
@@ -75,9 +75,9 @@ export class GeopoliticalReachResolver {
   public static getProximityTier(
     source: Nation,
     target: Nation,
-    provincesMap?: Record<string, Province>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
+    sourceProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): ProximityTier {
     return ProximityTierResolver.getProximityTier(
       source,
@@ -91,10 +91,10 @@ export class GeopoliticalReachResolver {
   public static getReachableTargets(
     source: Nation,
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
-    sourceProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    sourceProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): Nation[] {
     return ReachableTargetsResolver.getReachableTargets(
       source,
@@ -110,7 +110,7 @@ export class GeopoliticalReachResolver {
     source: Nation,
     target: Nation,
     allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
   ): boolean {
     return ReachableTargetsResolver.canInitiateDiplomacy(

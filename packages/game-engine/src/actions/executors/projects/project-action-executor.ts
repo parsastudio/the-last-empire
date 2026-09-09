@@ -7,6 +7,7 @@ import {
   TurnLogBuilder,
   DEFAULT_NATION_TURN_ACTIVITY,
 } from "@geopolitics/domain";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class ProjectActionExecutor {
   public static execute(
@@ -14,7 +15,14 @@ export class ProjectActionExecutor {
     action: BoostNationalProjectAction,
     nation: Nation,
     buyerKey: string,
-  ): { newState: GameState; resultData: unknown } {
+  ): ExecutionResult<{
+    projectId: string;
+    projectName: string;
+    currentStep: number;
+    totalSteps: number;
+    isCompleted: boolean;
+    isEarlyBreakthrough: boolean;
+  }> {
     const config = NationalProjectEffectApplierUtility.getProjectConfig(
       action.projectId,
     );

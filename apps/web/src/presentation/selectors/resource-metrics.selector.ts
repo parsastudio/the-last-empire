@@ -74,8 +74,7 @@ export function selectHumanResourceMetrics(
       CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalHumanId
     ) {
       totalActiveFactories += p.factoriesCount;
-      totalMaxSlots +=
-        p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
+      totalMaxSlots += MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
     }
   }
 

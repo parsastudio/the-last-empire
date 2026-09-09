@@ -1,11 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { BuyIndustrialEquipmentAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class BuyIndustrialEquipmentExecutor {
   public static execute(
@@ -13,7 +14,11 @@ export class BuyIndustrialEquipmentExecutor {
     action: BuyIndustrialEquipmentAction,
     buyer: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult<{
+    quantity: number;
+    totalCost: number;
+    sellerId: string;
+  }> {
     const sellerCanonical = CountryRegistry.resolveCanonicalId(
       action.sellerNationId,
     );
@@ -100,7 +105,9 @@ export class BuyIndustrialEquipmentExecutor {
       }
 
       let provRemainingToUpgrade = qty;
-      const updatedProvinces: Record<string, Province> = { ...state.provinces };
+      const updatedProvinces: Record<string, ProvinceDynamicState> = {
+        ...state.provinces,
+      };
 
       for (
         let i = 0;
@@ -167,7 +174,7 @@ export class BuyIndustrialEquipmentExecutor {
         );
       }
 
-      return {
+      const newState: GameState = {
         ...state,
         provinces: updatedProvinces,
         turnLogs: [...state.turnLogs, ...logs],
@@ -184,6 +191,16 @@ export class BuyIndustrialEquipmentExecutor {
             treasury: seller.treasury + totalCost,
           },
         },
+      };
+
+      return {
+        newState,
+        resultData: {
+          quantity: qty,
+          totalCost,
+          sellerId: seller.id,
+        },
+        logs,
       };
     }
 
@@ -225,7 +242,9 @@ export class BuyIndustrialEquipmentExecutor {
     }
 
     let provRemainingToUpgrade = qty;
-    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...state.provinces,
+    };
 
     const sortedProvinces = [...ownedProvinces].sort((a, b) => {
       const minTechA = a.factoryTiers.length
@@ -301,7 +320,7 @@ export class BuyIndustrialEquipmentExecutor {
       );
     }
 
-    return {
+    const newState: GameState = {
       ...state,
       provinces: updatedProvinces,
       turnLogs: [...state.turnLogs, ...logs],
@@ -318,6 +337,16 @@ export class BuyIndustrialEquipmentExecutor {
           treasury: seller.treasury + totalCost,
         },
       },
+    };
+
+    return {
+      newState,
+      resultData: {
+        quantity: qty,
+        totalCost,
+        sellerId: seller.id,
+      },
+      logs,
     };
   }
 }

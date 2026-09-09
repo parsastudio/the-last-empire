@@ -1,5 +1,5 @@
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationRankCalculatorUtility } from "@/domain/nation/getters/nation-rank-calculator.utility";
@@ -20,25 +20,27 @@ export class NationGettersUtility {
 
   public static isAlive(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
   ): boolean {
     const provs =
       ownedProvinces ?? this.getOwnedProvinces(nationId, provincesMap);
     return provs.length > 0;
   }
 
-  public static buildProvincesByOwnerMap(
-    provinces: Record<string, Province> | Province[],
-  ): Map<string, Province[]> {
+  public static buildProvincesByOwnerMap<T extends ProvinceDynamicState>(
+    provinces: Record<string, T> | T[],
+  ): Map<string, T[]> {
     return NationTerritoryResolverUtility.buildProvincesByOwnerMap(provinces);
   }
 
-  public static getOwnedProvinces(
+  public static getOwnedProvinces<T extends ProvinceDynamicState>(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
-  ): Province[] {
+    provincesMap?: Record<string, T> | T[],
+    provincesByOwnerMap?: Map<string, T[]>,
+  ): T[] {
     return NationTerritoryResolverUtility.getOwnedProvinces(
       nationId,
       provincesMap,
@@ -48,9 +50,11 @@ export class NationGettersUtility {
 
   public static getNationFactoryTiers(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): FactoryBatch[] {
     const provs =
       ownedProvinces ??
@@ -71,10 +75,12 @@ export class NationGettersUtility {
 
   public static getNationEquipmentTech(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
     fallbackTech = 1.0,
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): number {
     const batches = this.getNationFactoryTiers(
       nationId,
@@ -90,9 +96,11 @@ export class NationGettersUtility {
 
   public static getTerritoryPixelCount(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): number {
     return NationTerritoryResolverUtility.getTerritoryPixelCount(
       nationId,
@@ -104,9 +112,11 @@ export class NationGettersUtility {
 
   public static hasSeaAccess(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): boolean {
     return NationTerritoryResolverUtility.hasSeaAccess(
       nationId,
@@ -118,9 +128,11 @@ export class NationGettersUtility {
 
   public static getPopulation(
     nationId: string,
-    provincesMap?: Record<string, Province> | Province[],
-    ownedProvinces?: Province[],
-    provincesByOwnerMap?: Map<string, Province[]>,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): number {
     const provs =
       ownedProvinces ??
@@ -133,8 +145,7 @@ export class NationGettersUtility {
     let total = 0;
     for (let i = 0; i < provs.length; i++) {
       const p = provs[i]!;
-      total +=
-        p.population ?? MapTopologyRegistry.getPopulation(p.provinceId, 0);
+      total += MapTopologyRegistry.getPopulation(p.provinceId, 0);
     }
     return total;
   }
@@ -142,7 +153,7 @@ export class NationGettersUtility {
   public static getRank(
     nationId: string,
     allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     rankMap?: Map<string, number>,
   ): number {
     return NationRankCalculatorUtility.getRank(
@@ -156,7 +167,7 @@ export class NationGettersUtility {
   public static getGdpRank(
     nationId: string,
     allNations?: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
     gdpRankMap?: Map<string, number>,
   ): number {
     return NationRankCalculatorUtility.getGdpRank(
@@ -169,7 +180,7 @@ export class NationGettersUtility {
 
   public static calculateRankMap(
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): Map<string, number> {
     return NationRankCalculatorUtility.calculateRankMap(
       allNations,
@@ -179,7 +190,7 @@ export class NationGettersUtility {
 
   public static calculateGdpRankMap(
     allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    provincesMap?: Record<string, ProvinceDynamicState>,
   ): Map<string, number> {
     return NationRankCalculatorUtility.calculateGdpRankMap(
       allNations,

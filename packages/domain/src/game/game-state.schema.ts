@@ -3,7 +3,7 @@ import {
   NationSchema,
   NationTurnActivitySchema,
 } from "@/domain/nation/nation.schema";
-import { ProvinceSchema } from "@/domain/province/province.schema";
+import { ProvinceDynamicStateSchema } from "@/domain/province/province.schema";
 import { PendingDiplomaticProposalSchema } from "@/domain/diplomacy/diplomacy.schema";
 import { DilemmaEventSchema } from "@/domain/events/dilemma.schema";
 import { GameDifficultySchema } from "@/domain/game/difficulty.schema";
@@ -93,7 +93,7 @@ export const GameStateSchema = z.object({
   winnerNationId: z.string().optional(),
   gameOverReason: z.string().optional(),
   humanNationId: z.string(),
-  provinces: z.record(z.string(), ProvinceSchema).default({}),
+  provinces: z.record(z.string(), ProvinceDynamicStateSchema).default({}),
   nations: z.record(z.string(), NationSchema),
   pendingProposals: z.array(PendingDiplomaticProposalSchema).default([]),
   turnLogs: z.array(TurnLogEntrySchema),

@@ -1,7 +1,7 @@
 import {
   GameState,
   Nation,
-  Province,
+  ProvinceDynamicState,
   CountryRegistry,
   getNationGdp,
   DIFFICULTY_CONFIGS,
@@ -21,7 +21,7 @@ export class TurnContext {
   public readonly rankMap: Map<string, number>;
   public readonly gdpMap: Map<string, number> = new Map<string, number>();
   public totalWorldGdp = 0;
-  public readonly provincesByOwnerMap: Map<string, Province[]>;
+  public readonly provincesByOwnerMap: Map<string, ProvinceDynamicState[]>;
   public readonly matrixCache: GeopoliticalMatrixCache;
   public readonly aiRevenueMultiplier: number;
   public readonly lockedDiplomacyTargets: Set<string>;
@@ -98,7 +98,7 @@ export class TurnContext {
     return this.gdpMap.get(canonicalId) ?? this.gdpMap.get(nationId) ?? 0;
   }
 
-  public getOwnedProvinces(nationId: string): Province[] {
+  public getOwnedProvinces(nationId: string): ProvinceDynamicState[] {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     return (
       this.provincesByOwnerMap.get(canonicalId) ??

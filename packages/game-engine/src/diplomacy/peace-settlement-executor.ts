@@ -1,7 +1,7 @@
 import {
   GameState,
   Nation,
-  Province,
+  ProvinceDynamicState,
   CountryRegistry,
   TurnLogBuilder,
   PeaceTermsCalculator,
@@ -80,7 +80,9 @@ export class PeaceSettlementExecutor {
       );
     }
 
-    let updatedProvinces: Record<string, Province> = { ...state.provinces };
+    let updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...state.provinces,
+    };
     const updatedNations: Record<string, Nation> = { ...state.nations };
 
     const winnerNation = terms.isAiOffering ? humanNation : aiNation;
@@ -192,7 +194,8 @@ export class PeaceSettlementExecutor {
             winnerNationObj.industrialLevel,
           );
           updatedProvinces[pid.toString()] = {
-            ...prov,
+            provinceId: prov.provinceId,
+            factoriesCount: prov.factoriesCount,
             ownerNationId: winnerCanonical,
             originalNationId: winnerCanonical,
             factoryTiers: flooredTiers,

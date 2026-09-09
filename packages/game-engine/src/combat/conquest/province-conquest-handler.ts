@@ -1,4 +1,4 @@
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import {
   getProvinceGdp,
@@ -11,10 +11,10 @@ import {
 } from "@geopolitics/domain";
 
 export interface ProvinceConquestResult {
-  updatedProvinces: Record<string, Province>;
+  updatedProvinces: Record<string, ProvinceDynamicState>;
   conqueredPixels: number;
-  remainingDefenderProvinces: Province[];
-  conqueredProvincesList: Province[];
+  remainingDefenderProvinces: ProvinceDynamicState[];
+  conqueredProvincesList: ProvinceDynamicState[];
   totalDefenderGdpBefore: number;
   conqueredProvincesGdp: number;
   conqueredFactoriesCount: number;
@@ -23,14 +23,16 @@ export interface ProvinceConquestResult {
 
 export class ProvinceConquestHandler {
   public static handleConquest(
-    provinces: Record<string, Province>,
+    provinces: Record<string, ProvinceDynamicState>,
     attackerId: string,
     defenderId: string,
     isAttackerVictory: boolean,
     targetProvinceId?: number,
     attackerIndustrialLevel?: number,
   ): ProvinceConquestResult {
-    const updatedProvinces: Record<string, Province> = { ...provinces };
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...provinces,
+    };
 
     const cleanAttackerId = CountryRegistry.resolveCanonicalId(attackerId);
     const cleanDefenderId = CountryRegistry.resolveCanonicalId(defenderId);
@@ -49,7 +51,7 @@ export class ProvinceConquestHandler {
     let conqueredProvincesGdp = 0;
     let conqueredFactoriesCount = 0;
     let originalFactoriesCount = 0;
-    const conqueredProvincesList: Province[] = [];
+    const conqueredProvincesList: ProvinceDynamicState[] = [];
 
     if (isAttackerVictory && defenderProvincesBefore.length > 0) {
       let conqueredProvId: number | null = null;
@@ -66,10 +68,8 @@ export class ProvinceConquestHandler {
 
       if (!conqueredProvId) {
         const sorted = [...defenderProvincesBefore].sort((a, b) => {
-          const pixelA =
-            a.pixelCount ?? MapTopologyRegistry.getPixelCount(a.provinceId);
-          const pixelB =
-            b.pixelCount ?? MapTopologyRegistry.getPixelCount(b.provinceId);
+          const pixelA = MapTopologyRegistry.getPixelCount(a.provinceId);
+          const pixelB = MapTopologyRegistry.getPixelCount(b.provinceId);
           return pixelB - pixelA;
         });
         conqueredProvId = sorted[0]!.provinceId;
@@ -103,16 +103,14 @@ export class ProvinceConquestHandler {
                 )
               : remainingTiers;
 
-          const conqueredProv: Province = {
+          const conqueredProv: ProvinceDynamicState = {
             ...targetProv,
             ownerNationId: cleanAttackerId,
             factoriesCount: survivingFactories,
             factoryTiers: flooredTiers,
           };
           updatedProvinces[conqueredProvId.toString()] = conqueredProv;
-          conqueredPixels =
-            targetProv.pixelCount ??
-            MapTopologyRegistry.getPixelCount(conqueredProvId);
+          conqueredPixels = MapTopologyRegistry.getPixelCount(conqueredProvId);
           conqueredProvincesGdp = getProvinceGdp(conqueredProv);
           conqueredProvincesList.push(conqueredProv);
         }

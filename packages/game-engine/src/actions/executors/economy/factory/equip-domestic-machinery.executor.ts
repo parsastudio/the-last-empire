@@ -1,11 +1,12 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { EquipDomesticMachineryAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
+import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { GameError } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 import { NationGettersUtility } from "@geopolitics/domain";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class EquipDomesticMachineryExecutor {
   public static execute(
@@ -13,7 +14,7 @@ export class EquipDomesticMachineryExecutor {
     action: EquipDomesticMachineryAction,
     nation: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult<{ modernizedCount: number; totalCost: number }> {
     const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
     const ownedProvinces = Object.values(state.provinces).filter(
       (p) =>
@@ -73,7 +74,9 @@ export class EquipDomesticMachineryExecutor {
       }
 
       let provRemainingToUpgrade = qty;
-      const updatedProvinces: Record<string, Province> = { ...state.provinces };
+      const updatedProvinces: Record<string, ProvinceDynamicState> = {
+        ...state.provinces,
+      };
 
       for (
         let i = 0;
@@ -112,7 +115,7 @@ export class EquipDomesticMachineryExecutor {
         targetTech,
       );
 
-      return {
+      const newState: GameState = {
         ...state,
         provinces: updatedProvinces,
         nations: {
@@ -123,6 +126,14 @@ export class EquipDomesticMachineryExecutor {
             factoryTiers: updatedBatches,
             equipmentTechLevel: newEquipTech,
           },
+        },
+      };
+
+      return {
+        newState,
+        resultData: {
+          modernizedCount: qty,
+          totalCost,
         },
       };
     }
@@ -181,7 +192,9 @@ export class EquipDomesticMachineryExecutor {
     }
 
     let provRemainingToUpgrade = qty;
-    const updatedProvinces: Record<string, Province> = { ...state.provinces };
+    const updatedProvinces: Record<string, ProvinceDynamicState> = {
+      ...state.provinces,
+    };
 
     for (
       let i = 0;
@@ -219,7 +232,7 @@ export class EquipDomesticMachineryExecutor {
       targetTech,
     );
 
-    return {
+    const newState: GameState = {
       ...state,
       provinces: updatedProvinces,
       nations: {
@@ -230,6 +243,14 @@ export class EquipDomesticMachineryExecutor {
           factoryTiers: updatedBatches,
           equipmentTechLevel: newEquipTech,
         },
+      },
+    };
+
+    return {
+      newState,
+      resultData: {
+        modernizedCount: qty,
+        totalCost,
       },
     };
   }

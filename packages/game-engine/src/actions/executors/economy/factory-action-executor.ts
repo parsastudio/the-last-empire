@@ -9,6 +9,7 @@ import { BuildFactoryExecutor } from "@/engine/actions/executors/economy/factory
 import { EquipDomesticMachineryExecutor } from "@/engine/actions/executors/economy/factory/equip-domestic-machinery.executor";
 import { InvestIndustrialResearchExecutor } from "@/engine/actions/executors/economy/factory/invest-industrial-research.executor";
 import { BuyIndustrialEquipmentExecutor } from "@/engine/actions/executors/economy/factory/buy-industrial-equipment.executor";
+import { ExecutionResult } from "@/engine/actions/execution-result";
 
 export class FactoryActionExecutor {
   public static executeBuildFactory(
@@ -16,7 +17,7 @@ export class FactoryActionExecutor {
     action: BuildFactoryAction,
     nation: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult {
     return BuildFactoryExecutor.execute(state, action, nation, buyerKey);
   }
 
@@ -25,7 +26,7 @@ export class FactoryActionExecutor {
     action: EquipDomesticMachineryAction,
     nation: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult {
     return EquipDomesticMachineryExecutor.execute(
       state,
       action,
@@ -38,7 +39,7 @@ export class FactoryActionExecutor {
     state: GameState,
     nation: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult {
     return InvestIndustrialResearchExecutor.execute(state, nation, buyerKey);
   }
 
@@ -47,7 +48,7 @@ export class FactoryActionExecutor {
     action: BuyIndustrialEquipmentAction,
     buyer: Nation,
     buyerKey: string,
-  ): GameState {
+  ): ExecutionResult {
     return BuyIndustrialEquipmentExecutor.execute(
       state,
       action,
