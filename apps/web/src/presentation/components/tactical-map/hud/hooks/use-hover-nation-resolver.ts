@@ -13,6 +13,7 @@ import {
   NationGettersUtility,
   NationRelationResolver,
   DiplomaticStance,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 
 interface UseHoverNationResolverProps {
@@ -134,6 +135,10 @@ export function useHoverNationResolver({
       const gdpSharePct =
         realGdp > 0 ? Math.round((provinceGdp / realGdp) * 100) : 0;
 
+      const regionName =
+        province.nameFa ??
+        MapTopologyRegistry.getNameFa(province.provinceId, "منطقه نامشخص");
+
       return {
         name: realName,
         code: canonicalOwnerId,
@@ -143,7 +148,7 @@ export function useHoverNationResolver({
         stance: stanceLabel,
         rawStance,
         isOwnCountry,
-        regionName: province.nameFa,
+        regionName,
         regionGdpText: PersianNumberFormatter.formatCurrency(provinceGdp, true),
         totalGdpText: PersianNumberFormatter.formatCurrency(realGdp, true),
         gdpSharePct,

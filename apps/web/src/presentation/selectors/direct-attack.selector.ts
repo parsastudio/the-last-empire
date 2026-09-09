@@ -10,6 +10,7 @@ import {
   getNationGdp,
   MILITARY_UNIT_STATS,
   NationTurnActivity,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import {
   BattleCalculator,
@@ -81,7 +82,11 @@ export class DirectAttackSelector {
         ? NationGettersUtility.hasSeaAccess(humanNation.id, gameState.provinces)
         : false;
 
-    const targetProvinceHasSea = Boolean(targetProvince?.hasSeaAccess);
+    const targetProvinceHasSea = targetProvince
+      ? (targetProvince.hasSeaAccess ??
+        MapTopologyRegistry.hasSeaAccess(targetProvince.provinceId))
+      : false;
+
     const isNavalValid =
       !isLandNeighbor && attackerHasSea && targetProvinceHasSea;
     const attackType: "LAND" | "NAVAL" = isLandNeighbor ? "LAND" : "NAVAL";
@@ -92,7 +97,9 @@ export class DirectAttackSelector {
 
     let targetRegionName = "";
     if (targetProvince) {
-      targetRegionName = targetProvince.nameFa;
+      targetRegionName =
+        targetProvince.nameFa ??
+        MapTopologyRegistry.getNameFa(targetProvince.provinceId, "");
     } else if (targetNation) {
       targetRegionName = `خاک اصلی ${targetNation.name}`;
     }

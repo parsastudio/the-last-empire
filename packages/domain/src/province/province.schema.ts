@@ -25,22 +25,9 @@ export const ProvinceDynamicStateSchema = z.object({
   factoryTiers: z.array(FactoryBatchSchema).default([]),
 });
 
-export const ProvinceSchema = ProvinceDynamicStateSchema.extend({
-  nameFa: z.string().optional(),
-  pixelCount: z.number().nonnegative().optional(),
-  hasSeaAccess: z.boolean().optional(),
-  landNeighbors: z.array(z.number()).optional(),
-  maritimeNeighborsTier1: z.array(z.number()).optional(),
-  maritimeNeighborsTier2: z.array(z.number()).optional(),
-  centerCoordinates: z
-    .object({
-      x: z.number(),
-      y: z.number(),
-    })
-    .optional(),
-  population: z.number().nonnegative().optional(),
-  maxSlots: z.number().nonnegative().optional(),
-});
+export const ProvinceSchema = ProvinceDynamicStateSchema.merge(
+  ProvinceStaticTopologySchema,
+);
 
 export type ProvinceStaticTopology = z.infer<
   typeof ProvinceStaticTopologySchema

@@ -8,6 +8,7 @@ import {
   ActionFactory,
   ProcurementBatchCalculator,
   NationGettersUtility,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
@@ -38,9 +39,11 @@ export function IndustryDomesticTab({
   let totalEmptySlots = 0;
 
   for (const p of ownedProvinces) {
+    const maxSlots =
+      p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
     totalActiveFactories += p.factoriesCount;
-    totalMaxSlots += p.maxSlots;
-    totalEmptySlots += Math.max(0, p.maxSlots - p.factoriesCount);
+    totalMaxSlots += maxSlots;
+    totalEmptySlots += Math.max(0, maxSlots - p.factoriesCount);
   }
 
   const safeTotalFactories = Math.max(1, totalActiveFactories);

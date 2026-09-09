@@ -1,6 +1,7 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export interface TerritorialSaturationMetrics {
   totalSlots: number;
@@ -27,7 +28,9 @@ export class TerritorialSaturationCalculatorUtility {
 
     for (let i = 0; i < provs.length; i++) {
       const p = provs[i]!;
-      totalSlots += p.maxSlots || 1;
+      const maxSlots =
+        p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
+      totalSlots += maxSlots;
       occupiedSlots += p.factoriesCount || 0;
     }
 

@@ -83,19 +83,15 @@ export class MapTopologyRegistry {
     return this.topologyMap.get(provinceId)?.hasSeaAccess ?? fallback;
   }
 
-  public static getLandNeighbors(provinceId: number): readonly number[] {
+  public static getLandNeighbors(provinceId: number): number[] {
     return this.topologyMap.get(provinceId)?.landNeighbors ?? [];
   }
 
-  public static getMaritimeNeighborsTier1(
-    provinceId: number,
-  ): readonly number[] {
+  public static getMaritimeNeighborsTier1(provinceId: number): number[] {
     return this.topologyMap.get(provinceId)?.maritimeNeighborsTier1 ?? [];
   }
 
-  public static getMaritimeNeighborsTier2(
-    provinceId: number,
-  ): readonly number[] {
+  public static getMaritimeNeighborsTier2(provinceId: number): number[] {
     return this.topologyMap.get(provinceId)?.maritimeNeighborsTier2 ?? [];
   }
 
@@ -125,7 +121,18 @@ export class MapTopologyRegistry {
   public static composeProvince(dynamic: ProvinceDynamicState): Province {
     const topo = this.topologyMap.get(dynamic.provinceId);
     if (!topo) {
-      return { ...dynamic };
+      return {
+        ...dynamic,
+        nameFa: `استان ${dynamic.provinceId}`,
+        pixelCount: 0,
+        hasSeaAccess: false,
+        landNeighbors: [],
+        maritimeNeighborsTier1: [],
+        maritimeNeighborsTier2: [],
+        centerCoordinates: { x: 0, y: 0 },
+        population: 1000000,
+        maxSlots: 1,
+      };
     }
 
     return {

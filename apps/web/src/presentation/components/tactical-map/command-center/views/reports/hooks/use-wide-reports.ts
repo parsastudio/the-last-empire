@@ -1,74 +1,18 @@
-import { useState, useMemo, useEffect } from "react";
-import { TurnLogEntry, TurnLogScope } from "@/domain/game/game-state.schema";
-import { CountryRegistry } from "@/domain/data/countries";
-import { TurnLogFormatter } from "@/domain/game/log-formatter.utility";
-import { Nation } from "@/domain/nation/nation.schema";
+"use client";
 
-function calculateLogPriority(
-  log: TurnLogEntry,
-  canonicalHuman: string | null,
-): number {
-  const sourceCanonical = CountryRegistry.resolveCanonicalId(
-    log.sourceNationId,
-  );
-  const targetCanonical = log.targetNationId
-    ? CountryRegistry.resolveCanonicalId(log.targetNationId)
-    : null;
-
-  const isHumanInvolved =
-    canonicalHuman !== null &&
-    (sourceCanonical === canonicalHuman || targetCanonical === canonicalHuman);
-
-  if (log.eventCode === "VICTORY_ACHIEVED") {
-    return 0;
-  }
-
-  if (log.eventCode === "COALITION_FORMED") {
-    return 1;
-  }
-
-  if (log.eventCode === "BATTLE_TACTICAL_REPORT" && isHumanInvolved) {
-    return 2;
-  }
-
-  switch (log.eventCode) {
-    case "NATION_ANNEXED":
-    case "NATION_COLLAPSED":
-      return isHumanInvolved ? 3 : 6;
-
-    case "WAR_DECLARED":
-    case "COALITION_MEMBER_FALLEN":
-      return isHumanInvolved ? 4 : 7;
-
-    case "BATTLE_GLOBAL_NEWS":
-      return 8;
-
-    case "ESPIONAGE_OPERATION":
-      return isHumanInvolved ? 5 : 9;
-
-    case "TREATY_ACCEPTED":
-    case "TREATY_REJECTED":
-    case "DIPLOMATIC_PROPOSAL_SENT":
-    case "DEFENSE_PACT_REFUSAL_COMPENSATION":
-      return isHumanInvolved ? 6 : 10;
-
-    case "ARMS_EXPORT_SUMMARY":
-    case "MACHINERY_EXPORT_SUMMARY":
-    case "FOREIGN_AID_SENT":
-    case "ARMS_TRADE":
-      return isHumanInvolved ? 7 : 11;
-
-    case "GENERIC_EVENT":
-    default:
-      return 12;
-  }
-}
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { TurnLogEntry, TurnLogScope, Nation } from "@geopolitics/domain";
+import {
+  TurnLogRepository,
+  TurnLogStatsSummary,
+} from "@/infrastructure/storage/repositories/turn-log.repository";
 
 interface UseWideReportsProps {
-  logs: TurnLogEntry[];
+  logs?: TurnLogEntry[];
   currentTurn?: number;
   humanNationId?: string;
   nationsMap?: Record<string, Nation>;
+  gameId?: string;
 }
 
 export function useWideReports({
@@ -76,207 +20,75 @@ export function useWideReports({
   currentTurn = 1,
   humanNationId,
   nationsMap,
+  gameId = "default_game",
 }: UseWideReportsProps) {
   const [selectedScope, setSelectedScope] = useState<TurnLogScope>("NATIONAL");
+  const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(currentTurn);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [availableTurns, setAvailableTurns] = useState<number[]>([currentTurn]);
+  const [dbLogs, setDbLogs] = useState<TurnLogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [stats, setStats] = useState<TurnLogStatsSummary>({
+    combatCount: 0,
+    diplomacyCount: 0,
+    espionageCount: 0,
+    criticalCount: 0,
+  });
 
-  const canonicalHuman = useMemo(() => {
-    return humanNationId
-      ? CountryRegistry.resolveCanonicalId(humanNationId)
-      : null;
-  }, [humanNationId]);
+  const refreshTurnsAndStats = useCallback(async () => {
+    try {
+      const turns = await TurnLogRepository.getAvailableTurns(gameId);
+      if (turns.length > 0) {
+        setAvailableTurns(turns);
+      } else {
+        setAvailableTurns([currentTurn]);
+      }
 
-  const availableTurns = useMemo(() => {
-    const turns = Array.from(new Set(logs.map((l) => l.turn)));
-    if (turns.length === 0) return [currentTurn];
-    return turns.sort((a, b) => b - a);
-  }, [logs, currentTurn]);
+      const freshStats = await TurnLogRepository.getStatsSummary(
+        gameId,
+        selectedTurn,
+      );
+      setStats(freshStats);
+    } catch {}
+  }, [gameId, currentTurn, selectedTurn]);
 
-  const defaultTurn = availableTurns[0] ?? currentTurn;
-  const [selectedTurn, setSelectedTurn] = useState<number | "ALL">(defaultTurn);
+  const loadPagedLogs = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const pagedResult = await TurnLogRepository.getPaginatedLogs({
+        gameId,
+        turn: selectedTurn,
+        scope: selectedScope,
+        searchQuery,
+        page: 1,
+        pageSize: 50,
+      });
+
+      if (pagedResult.logs.length > 0) {
+        setDbLogs(pagedResult.logs);
+      } else if (logs.length > 0 && selectedTurn === currentTurn) {
+        setDbLogs(logs);
+      } else {
+        setDbLogs([]);
+      }
+    } catch {
+      setDbLogs(logs);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [gameId, selectedTurn, selectedScope, searchQuery, logs, currentTurn]);
 
   useEffect(() => {
-    if (selectedTurn !== "ALL") {
-      setSelectedTurn(availableTurns[0] ?? currentTurn);
-    }
-  }, [currentTurn]);
+    void refreshTurnsAndStats();
+  }, [refreshTurnsAndStats]);
 
   useEffect(() => {
-    if (availableTurns.length > 0 && selectedTurn !== "ALL") {
-      if (!availableTurns.includes(selectedTurn)) {
-        setSelectedTurn(availableTurns[0]!);
-      }
-    }
-  }, [availableTurns, selectedTurn]);
-
-  const activeTurnLogs = useMemo(() => {
-    return logs.filter((log) => {
-      if (selectedTurn !== "ALL" && log.turn !== selectedTurn) {
-        return false;
-      }
-
-      const srcCanonical = CountryRegistry.resolveCanonicalId(
-        log.sourceNationId,
-      );
-      const trgCanonical = log.targetNationId
-        ? CountryRegistry.resolveCanonicalId(log.targetNationId)
-        : null;
-
-      const isHumanInvolved =
-        canonicalHuman !== null &&
-        (srcCanonical === canonicalHuman || trgCanonical === canonicalHuman);
-
-      if (selectedScope === "NATIONAL") {
-        if (!canonicalHuman) {
-          return log.scope === "NATIONAL";
-        }
-
-        if (log.eventCode === "VICTORY_ACHIEVED") {
-          return true;
-        }
-
-        if (log.eventCode === "COALITION_FORMED") {
-          const memberIdsRaw = String(log.params?.["memberIds"] || "");
-          const memberIds = memberIdsRaw.split(",").filter(Boolean);
-          const isTarget = srcCanonical === canonicalHuman;
-          const isMember = memberIds.includes(canonicalHuman);
-          return isTarget || isMember;
-        }
-
-        if (
-          log.eventCode === "ARMS_EXPORT_SUMMARY" ||
-          log.eventCode === "MACHINERY_EXPORT_SUMMARY"
-        ) {
-          return srcCanonical === canonicalHuman;
-        }
-
-        if (log.eventCode === "ESPIONAGE_OPERATION") {
-          const role = String(log.params?.["role"] || "ATTACKER");
-          if (role === "ATTACKER" || role === "DEFENDER") {
-            return isHumanInvolved;
-          }
-          return false;
-        }
-
-        if (log.eventCode === "BATTLE_GLOBAL_NEWS") {
-          return false;
-        }
-
-        return isHumanInvolved;
-      }
-
-      return (
-        log.scope === "GLOBAL" ||
-        log.eventCode === "COALITION_FORMED" ||
-        log.eventCode === "VICTORY_ACHIEVED" ||
-        log.eventCode === "WAR_DECLARED" ||
-        log.eventCode === "BATTLE_GLOBAL_NEWS" ||
-        log.eventCode === "NATION_ANNEXED" ||
-        log.eventCode === "NATION_COLLAPSED" ||
-        log.eventCode === "TREATY_ACCEPTED" ||
-        log.eventCode === "TREATY_CANCELLED" ||
-        log.eventCode === "SECURITY_GUARANTEE_SIGNED" ||
-        log.eventCode === "SECURITY_GUARANTEE_CANCELLED" ||
-        log.eventCode === "DEFENSE_PACT_NEUTRALITY" ||
-        log.eventCode === "DEFENSE_PACT_REFUSAL_COMPENSATION" ||
-        log.eventCode === "EMERGENCY_PROTECTORATE_SIGNED"
-      );
-    });
-  }, [logs, selectedTurn, selectedScope, canonicalHuman]);
-
-  const stats = useMemo(() => {
-    let combatCount = 0;
-    let diplomacyCount = 0;
-    let espionageCount = 0;
-    let criticalCount = 0;
-
-    for (let i = 0; i < activeTurnLogs.length; i++) {
-      const log = activeTurnLogs[i]!;
-      if (
-        log.category === "GLOBAL_WAR" ||
-        log.category === "MILITARY" ||
-        log.eventCode === "BATTLE_TACTICAL_REPORT" ||
-        log.eventCode === "BATTLE_GLOBAL_NEWS" ||
-        log.eventCode === "WAR_DECLARED"
-      ) {
-        combatCount++;
-      }
-      if (
-        log.category === "DIPLOMACY" ||
-        log.category === "GLOBAL_DIPLOMACY" ||
-        log.eventCode === "TREATY_ACCEPTED" ||
-        log.eventCode === "TREATY_REJECTED" ||
-        log.eventCode === "DIPLOMATIC_PROPOSAL_SENT" ||
-        log.eventCode === "DEFENSE_PACT_REFUSAL_COMPENSATION"
-      ) {
-        diplomacyCount++;
-      }
-      if (
-        log.category === "ESPIONAGE" ||
-        log.eventCode === "ESPIONAGE_OPERATION"
-      ) {
-        espionageCount++;
-      }
-      if (
-        log.level === "CRITICAL" ||
-        log.level === "COMBAT" ||
-        log.eventCode === "NATION_ANNEXED" ||
-        log.eventCode === "NATION_COLLAPSED" ||
-        log.eventCode === "COALITION_FORMED"
-      ) {
-        criticalCount++;
-      }
-    }
-
-    return {
-      combatCount,
-      diplomacyCount,
-      espionageCount,
-      criticalCount,
-    };
-  }, [activeTurnLogs]);
+    void loadPagedLogs();
+  }, [loadPagedLogs]);
 
   const sortedLogs = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
-    const filtered = activeTurnLogs.filter((log) => {
-      if (!query) return true;
-
-      const sourceCanonical = CountryRegistry.resolveCanonicalId(
-        log.sourceNationId,
-      );
-      const sourceNation = nationsMap ? nationsMap[sourceCanonical] : null;
-      const sourceName = sourceNation ? sourceNation.name : log.sourceNationId;
-
-      let targetName = "";
-      if (log.targetNationId) {
-        const targetCanonical = CountryRegistry.resolveCanonicalId(
-          log.targetNationId,
-        );
-        const targetNation = nationsMap ? nationsMap[targetCanonical] : null;
-        targetName = targetNation ? targetNation.name : log.targetNationId;
-      }
-
-      const formatted = TurnLogFormatter.formatMessage(log, nationsMap);
-
-      return (
-        formatted.toLowerCase().includes(query) ||
-        sourceName.toLowerCase().includes(query) ||
-        targetName.toLowerCase().includes(query) ||
-        log.sourceNationId.toLowerCase().includes(query) ||
-        (log.targetNationId?.toLowerCase().includes(query) ?? false)
-      );
-    });
-
-    return filtered.sort((a, b) => {
-      const pA = calculateLogPriority(a, canonicalHuman);
-      const pB = calculateLogPriority(b, canonicalHuman);
-      if (pA !== pB) {
-        return pA - pB;
-      }
-      return b.timestamp - a.timestamp;
-    });
-  }, [activeTurnLogs, searchQuery, canonicalHuman, nationsMap]);
+    return dbLogs;
+  }, [dbLogs]);
 
   return {
     selectedScope,
@@ -285,8 +97,10 @@ export function useWideReports({
     availableTurns,
     stats,
     sortedLogs,
+    isLoading,
     setSelectedScope,
     setSelectedTurn,
     setSearchQuery,
+    reload: loadPagedLogs,
   };
 }

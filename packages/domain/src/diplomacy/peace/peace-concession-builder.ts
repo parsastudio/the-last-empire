@@ -2,6 +2,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { getProvinceGdp } from "@/domain/nation/gdp-calculator.utility";
 import { LandNeighborResolver } from "@/domain/map/land-neighbor-resolver";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 import {
   PeaceTermsPackage,
   PeaceSettlementType,
@@ -70,7 +71,9 @@ export class PeaceConcessionBuilder {
       isAiOffering: true,
       moneyAmount: maxAiCash,
       concededProvinceIds: provsToConcede.map((p) => p.provinceId),
-      concededProvincesNames: provsToConcede.map((p) => p.nameFa),
+      concededProvincesNames: provsToConcede.map(
+        (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+      ),
       headline,
       description,
       canAffordTerms: true,
@@ -113,6 +116,11 @@ export class PeaceConcessionBuilder {
     const settlementType: PeaceSettlementType =
       chosenProvs.length > 0 ? "TERRITORY_CONCESSION" : "INDEMNITY";
 
+    const headline =
+      chosenProvs.length > 0
+        ? "پیشنهاد واگذاری استان مرزی و پرداخت غرامت"
+        : "پیشنهاد پرداخت غرامت نقدی جنگی";
+
     return {
       sourceNationId: aiNation.id,
       targetNationId: humanNation.id,
@@ -123,11 +131,10 @@ export class PeaceConcessionBuilder {
       isAiOffering: true,
       moneyAmount: money,
       concededProvinceIds: chosenProvs.map((p) => p.provinceId),
-      concededProvincesNames: chosenProvs.map((p) => p.nameFa),
-      headline:
-        chosenProvs.length > 0
-          ? "پیشنهاد واگذاری استان مرزی و پرداخت غرامت"
-          : "پیشنهاد پرداخت غرامت نقدی جنگی",
+      concededProvincesNames: chosenProvs.map(
+        (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+      ),
+      headline,
       description: `دولت ${aiNation.name} برای توقف پیشروی ارتش شما، بسته مصالحه آماده کرده است.`,
       canAffordTerms: true,
     };
@@ -170,6 +177,11 @@ export class PeaceConcessionBuilder {
     const settlementType: PeaceSettlementType =
       demandedProvs.length > 0 ? "TERRITORY_CONCESSION" : "INDEMNITY";
 
+    const headline =
+      demandedProvs.length > 0
+        ? "مطالبه واگذاری استان مرزی و غرامت جنگی"
+        : "مطالبه پرداخت غرامت نقدی برای آتش‌بس";
+
     const canAfford = humanNation.treasury >= demandedMoney;
 
     return {
@@ -182,11 +194,10 @@ export class PeaceConcessionBuilder {
       isAiOffering: false,
       moneyAmount: demandedMoney,
       concededProvinceIds: demandedProvs.map((p) => p.provinceId),
-      concededProvincesNames: demandedProvs.map((p) => p.nameFa),
-      headline:
-        demandedProvs.length > 0
-          ? "مطالبه واگذاری استان مرزی و غرامت جنگی"
-          : "مطالبه پرداخت غرامت نقدی برای آتش‌بس",
+      concededProvincesNames: demandedProvs.map(
+        (p) => p.nameFa ?? MapTopologyRegistry.getNameFa(p.provinceId, ""),
+      ),
+      headline,
       description: `امپراتوری ${aiNation.name} با اتکا به برتری نظامی خود، شرط پایان جنگ را پرداخت تاوان اعلام کرده است.`,
       canAffordTerms: canAfford,
     };
