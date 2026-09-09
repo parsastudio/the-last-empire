@@ -21,6 +21,10 @@ export function CommandBreadcrumb({
         return "نمای کلی";
       case "military":
         return "ارتش و تسلیحات";
+      case "industry":
+        return "صنایع و تولید";
+      case "projects":
+        return "برنامه‌های ملی";
       case "politics":
         return "دیوان سیاست";
       case "espionage":

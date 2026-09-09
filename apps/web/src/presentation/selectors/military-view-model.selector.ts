@@ -115,7 +115,6 @@ export function selectMilitaryForcesViewModel(
 
 export function selectMilitaryValuationViewModel(
   military: MilitaryStack,
-  industrialLevel = 1,
   nationId = "IRN",
   nation?: Nation | null,
   provincesMap?: Record<string, Province>,
@@ -133,7 +132,6 @@ export function selectMilitaryValuationViewModel(
   const activeNation: Nation = nation || {
     ...DEFAULT_NATION_MOCK,
     id: CountryRegistry.resolveCanonicalId(nationId),
-    industrialLevel,
     military,
   };
 

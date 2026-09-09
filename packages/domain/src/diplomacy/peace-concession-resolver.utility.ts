@@ -130,7 +130,6 @@ export class PeaceConcessionResolverUtility {
       humanTwmi,
       allHumanProvinces,
       maxHumanCash,
-      humanGdp,
       provincesMap,
     );
   }

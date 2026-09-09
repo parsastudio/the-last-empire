@@ -297,7 +297,6 @@ export class DirectAttackSelector {
     armor: number,
     airForce: number,
     provincesMap?: Record<string, ProvinceDynamicState>,
-    targetProvinceId?: number,
   ): TacticalForecast {
     if (!humanNation || !targetNation) {
       return {
@@ -316,7 +315,6 @@ export class DirectAttackSelector {
       airForce,
       provincesMap,
       targetGuarantorNation,
-      targetProvinceId,
     );
 
     const isVictoryPredicted = calcResult.isAttackerVictory;

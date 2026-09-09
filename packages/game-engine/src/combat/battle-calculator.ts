@@ -44,7 +44,6 @@ export class BattleCalculator {
     airForceToDeploy?: number,
     provincesMap?: Record<string, Province>,
     guarantorNation?: Nation | null,
-    targetProvinceId?: number,
   ): BattleCalculationResult {
     const deployedInfantry = Math.min(
       attacker.military.infantry,
@@ -158,8 +157,8 @@ export class BattleCalculator {
       defMults.airDefense,
       attMults.airForce,
       defMults.airForce,
-      attMults.armor,
-      defMults.armor,
+      attArmorMult,
+      defArmorMult,
       attMults.infantry,
       defMults.infantry,
       autoInterceptionBonus,

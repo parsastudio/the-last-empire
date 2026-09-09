@@ -14,7 +14,6 @@ import { selectMilitaryValuationViewModel } from "@/presentation/selectors/milit
 
 interface MilitaryValuationCardProps {
   military: MilitaryStack;
-  industrialLevel?: number;
   nationId?: string;
   nation?: Nation;
   provincesMap?: Record<string, Province>;
@@ -22,7 +21,6 @@ interface MilitaryValuationCardProps {
 
 export function MilitaryValuationCard({
   military,
-  industrialLevel = 1,
   nationId = "IRN",
   nation,
   provincesMap,
@@ -31,12 +29,11 @@ export function MilitaryValuationCard({
     () =>
       selectMilitaryValuationViewModel(
         military,
-        industrialLevel,
         nationId,
         nation,
         provincesMap,
       ),
-    [military, industrialLevel, nationId, nation, provincesMap],
+    [military, nationId, nation, provincesMap],
   );
 
   return (

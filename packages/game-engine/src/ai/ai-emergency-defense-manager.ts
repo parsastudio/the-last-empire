@@ -6,7 +6,6 @@ import {
   MilitaryPricingCalculator,
   MILITARY_UNIT_STATS,
   MilitaryInventoryHelper,
-  UnitType,
   getNationGdp,
   TurnLogBuilder,
   DebtCalculatorUtility,
@@ -67,10 +66,7 @@ export class AIEmergencyDefenseManager {
       return { newState: state, defenseEvent: { type: "NO_SELLER" } };
     }
 
-    const bestUnit = this.selectBestPurchasableUnit();
-    if (!bestUnit) {
-      return { newState: state, defenseEvent: { type: "NO_SELLER" } };
-    }
+    const bestUnit = MILITARY_UNIT_STATS.ARMOR;
 
     const unitPrice = Math.floor(
       MilitaryPricingCalculator.calculateUnitTypePrice(bestUnit.type) * 1.5,
@@ -161,9 +157,5 @@ export class AIEmergencyDefenseManager {
         unitName: bestUnit.nameFa,
       },
     };
-  }
-
-  private static selectBestPurchasableUnit(): (typeof MILITARY_UNIT_STATS)[UnitType] {
-    return MILITARY_UNIT_STATS.ARMOR;
   }
 }

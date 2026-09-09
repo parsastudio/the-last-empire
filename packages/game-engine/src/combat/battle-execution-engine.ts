@@ -54,7 +54,6 @@ export class BattleExecutionEngine {
       action.airForceToDeploy,
       state.provinces,
       guarantorNation,
-      action.targetProvinceId,
     );
 
     let updatedProvinces = { ...state.provinces };
@@ -102,7 +101,6 @@ export class BattleExecutionEngine {
 
     const spoilsData = BattleSpoilsCollector.collectSpoils(
       conquestResult,
-      defender,
       calcResult,
     );
 
