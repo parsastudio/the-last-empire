@@ -18,8 +18,8 @@ export function getCommandCenterMeta(
   switch (activeTab) {
     case "overview":
       return {
-        title: `شناسنامه و وضعیت عمومی ${nationName}`,
-        subtitle: "پایش زنده اقتصاد، جمعیت، منابع و پایداری داخلی کشور",
+        title: `نمای کلی وضعیت ${nationName}`,
+        subtitle: "",
       };
     case "military":
       return {

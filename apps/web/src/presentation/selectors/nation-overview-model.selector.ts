@@ -4,6 +4,7 @@ import {
   NationGettersUtility,
   getNationGdp,
   CountryRegistry,
+  DebtCalculatorUtility,
 } from "@geopolitics/domain";
 
 export interface NationOverviewViewModel {
@@ -15,15 +16,15 @@ export interface NationOverviewViewModel {
   gdp: number;
   population: number;
   totalActiveFactories: number;
-  totalMaxSlots: number;
   territoryPixelCount: number;
+  militaryTechLevel: number;
   industrialLevel: number;
-  equipmentTechLevel: number;
   treasury: number;
   nationalDebt: number;
+  availableLoanLimit: number;
+  debtInterestPerTurn: number;
   stability: number;
   globalReputation: number;
-  economicStance: Nation["economicStance"];
 }
 
 export function selectNationOverviewViewModel(
@@ -33,16 +34,21 @@ export function selectNationOverviewViewModel(
 ): NationOverviewViewModel {
   const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
   let totalActiveFactories = 0;
-  let totalMaxSlots = 0;
 
   if (provincesMap) {
     for (const p of Object.values(provincesMap)) {
       if (CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId) {
         totalActiveFactories += p.factoriesCount;
-        totalMaxSlots += p.maxSlots;
       }
     }
   }
+
+  const gdp = getNationGdp(nation, provincesMap);
+  const maxDebt = DebtCalculatorUtility.getMaxDebtLimit(gdp);
+  const availableLoanLimit = Math.max(0, maxDebt - nation.nationalDebt);
+  const debtInterestPerTurn = DebtCalculatorUtility.calculateInterest(
+    nation.nationalDebt,
+  );
 
   return {
     id: nation.id,
@@ -50,20 +56,20 @@ export function selectNationOverviewViewModel(
     flagCode: nation.flagCode,
     governmentType: nation.government.type,
     rank: NationGettersUtility.getRank(nation.id, nationsMap, provincesMap),
-    gdp: getNationGdp(nation, provincesMap),
+    gdp,
     population: NationGettersUtility.getPopulation(nation.id, provincesMap),
     totalActiveFactories,
-    totalMaxSlots,
     territoryPixelCount: NationGettersUtility.getTerritoryPixelCount(
       nation.id,
       provincesMap,
     ),
+    militaryTechLevel: nation.military.techLevel,
     industrialLevel: nation.industrialLevel,
-    equipmentTechLevel: nation.equipmentTechLevel,
     treasury: nation.treasury,
     nationalDebt: nation.nationalDebt,
+    availableLoanLimit,
+    debtInterestPerTurn,
     stability: nation.government.stability,
     globalReputation: nation.globalReputation,
-    economicStance: nation.economicStance,
   };
 }

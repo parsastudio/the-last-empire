@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Trophy, Swords, Coins, Sparkles, Target } from "lucide-react";
+import { Swords, Coins, Sparkles, Target } from "lucide-react";
 import { GameState } from "@/domain/game/game-state.schema";
 import { VictoryChecker } from "@/engine/politics/victory-checker";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
@@ -17,94 +17,96 @@ export function VictoryProgressCard({
     return VictoryChecker.calculateProgress(gameState || null, nationId);
   }, [gameState, nationId]);
 
+  const territoryFillPercent = Math.min(
+    100,
+    (metrics.territorySharePct / metrics.territoryTargetPct) * 100,
+  );
+
+  const gdpFillPercent = Math.min(
+    100,
+    (metrics.gdpSharePct / metrics.gdpTargetPct) * 100,
+  );
+
   return (
     <div className="space-y-3 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <Trophy size={14} className="text-amber-500" />
-          <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
-            پایش استراتژیک شروط پیروزی بر جهان
+          <Target size={14} className="text-amber-500" />
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono">
+            مسیر پیروزی و سلطه بر جهان
           </span>
         </div>
         <span className="text-[9px] font-mono bg-amber-500/10 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-lg font-bold flex items-center gap-1">
           <Sparkles size={10} />
-          مسیر سلطه
+          شروط پایان کمپین
         </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        <div className="bg-background/60 border border-military/30 hover:border-military/60 p-4 rounded-2xl space-y-3 shadow-lg relative overflow-hidden transition-all group flex flex-col justify-between">
-          <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-military/60 via-rose-500/40 to-transparent" />
+        <div className="bg-card/90 border border-military/30 hover:border-military/50 p-4.5 rounded-3xl space-y-3.5 shadow-lg relative overflow-hidden transition-all flex flex-col justify-between">
+          <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-military via-rose-500/40 to-transparent" />
+
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <Swords size={15} className="text-military shrink-0" />
+            <div className="flex items-center gap-2 text-xs font-black text-foreground">
+              <Swords size={16} className="text-military shrink-0" />
               <span>سلطه نظامی و قلمرو</span>
             </div>
-            <span className="text-[9px] font-mono bg-military/15 text-military px-2 py-0.5 rounded-md font-bold border border-military/30">
-              هدف:{" "}
-              {PersianNumberFormatter.toPersianDigits(
-                metrics.territoryTargetPct,
-              )}
-              ٪
+            <span className="text-[10px] font-mono text-military font-bold bg-military/10 px-2 py-0.5 rounded-lg border border-military/20">
+              هدف: ۶۵٪ از جهان
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-2 text-center space-y-1">
-            <span className="text-3xl md:text-4xl font-black font-mono text-military tracking-tight drop-shadow-sm">
-              {PersianNumberFormatter.toPersianDigits(
-                metrics.territorySharePct,
-              )}
-              ٪
-            </span>
-            <span className="text-[10px] text-muted-foreground font-sans">
-              سهم فعال از وسعت قلمروهای جهان
-            </span>
-          </div>
+          <div className="space-y-1.5 py-1">
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl md:text-3xl font-black font-mono text-military tracking-tight">
+                {PersianNumberFormatter.toPersianDigits(
+                  metrics.territorySharePct,
+                )}
+                ٪
+              </span>
+              <span className="text-[11px] text-muted-foreground font-sans">
+                از وسعت کل نقشه
+              </span>
+            </div>
 
-          <div className="bg-secondary/50 border border-border/50 p-2 rounded-xl flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground font-sans flex items-center gap-1">
-              <Target size={11} className="text-military" />
-              پیشرفت تا فتح:
-            </span>
-            <span className="font-extrabold text-foreground">
-              {PersianNumberFormatter.toPersianDigits(
-                metrics.territoryProgressPct,
-              )}
-              ٪
-            </span>
+            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/60">
+              <div
+                className="h-full rounded-full transition-all duration-500 bg-military shadow-sm shadow-military/50"
+                style={{ width: `${territoryFillPercent}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        <div className="bg-background/60 border border-gdp/30 hover:border-gdp/60 p-4 rounded-2xl space-y-3 shadow-lg relative overflow-hidden transition-all group flex flex-col justify-between">
-          <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-gdp/60 via-emerald-500/40 to-transparent" />
+        <div className="bg-card/90 border border-gdp/30 hover:border-gdp/50 p-4.5 rounded-3xl space-y-3.5 shadow-lg relative overflow-hidden transition-all flex flex-col justify-between">
+          <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-gdp via-emerald-500/40 to-transparent" />
+
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-              <Coins size={15} className="text-gdp shrink-0" />
+            <div className="flex items-center gap-2 text-xs font-black text-foreground">
+              <Coins size={16} className="text-gdp shrink-0" />
               <span>هژمونی اقتصاد جهانی</span>
             </div>
-            <span className="text-[9px] font-mono bg-gdp/15 text-gdp px-2 py-0.5 rounded-md font-bold border border-gdp/30">
-              هدف:{" "}
-              {PersianNumberFormatter.toPersianDigits(metrics.gdpTargetPct)}٪
+            <span className="text-[10px] font-mono text-gdp font-bold bg-gdp/10 px-2 py-0.5 rounded-lg border border-gdp/20">
+              هدف: ۶۵٪ از جهان
             </span>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-2 text-center space-y-1">
-            <span className="text-3xl md:text-4xl font-black font-mono text-gdp tracking-tight drop-shadow-sm">
-              {PersianNumberFormatter.toPersianDigits(metrics.gdpSharePct)}٪
-            </span>
-            <span className="text-[10px] text-muted-foreground font-sans">
-              سهم فعال از تولید ناخالص (GDP) جهان
-            </span>
-          </div>
+          <div className="space-y-1.5 py-1">
+            <div className="flex items-baseline justify-between">
+              <span className="text-2xl md:text-3xl font-black font-mono text-gdp tracking-tight">
+                {PersianNumberFormatter.toPersianDigits(metrics.gdpSharePct)}٪
+              </span>
+              <span className="text-[11px] text-muted-foreground font-sans">
+                از تولید ناخالص کل دنیا
+              </span>
+            </div>
 
-          <div className="bg-secondary/50 border border-border/50 p-2 rounded-xl flex items-center justify-between text-[10px] font-mono">
-            <span className="text-muted-foreground font-sans flex items-center gap-1">
-              <Target size={11} className="text-gdp" />
-              پیشرفت تا هژمونی:
-            </span>
-            <span className="font-extrabold text-foreground">
-              {PersianNumberFormatter.toPersianDigits(metrics.gdpProgressPct)}٪
-            </span>
+            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/60">
+              <div
+                className="h-full rounded-full transition-all duration-500 bg-gdp shadow-sm shadow-gdp/50"
+                style={{ width: `${gdpFillPercent}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
