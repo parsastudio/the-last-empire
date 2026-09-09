@@ -1,4 +1,3 @@
-export type { Nation } from "@/domain/nation/nation.schema";
 export {
   GameError,
   type GameErrorCode,

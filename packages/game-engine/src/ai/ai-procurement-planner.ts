@@ -6,10 +6,7 @@ import {
   MilitaryQuotaCalculator,
   AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
-import {
-  AIPosture,
-  AIPostureEvaluator,
-} from "@/engine/ai/procurement/ai-posture-evaluator";
+import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
 import { AIWartimeLoanEvaluator } from "@/engine/ai/procurement/ai-wartime-loan-evaluator";
 import { AIArmsImportPlanner } from "@/engine/ai/procurement/ai-arms-import-planner";
 import { AIDomesticRecruitmentPlanner } from "@/engine/ai/procurement/ai-domestic-recruitment-planner";
@@ -30,9 +27,6 @@ export interface RecruitmentPlanResult {
 
 export class AIProcurementPlanner {
   public static readonly MAX_VALUATION_GDP_RATIO = 0.2;
-
-  public static evaluatePosture =
-    AIPostureEvaluator.evaluatePosture.bind(AIPostureEvaluator);
 
   public static planRecruitment(
     nation: Nation,
