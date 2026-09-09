@@ -1,10 +1,8 @@
 import {
   GameAction,
   Nation,
-  Province,
   UnitType,
   MilitaryPricingCalculator,
-  getNationGdp,
   MilitaryQuotaCalculator,
   AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
@@ -20,6 +18,7 @@ import {
   AiWalletBudgetAllocator,
   AiStrategicWallets,
 } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export type { AIPosture };
 
@@ -37,25 +36,15 @@ export class AIProcurementPlanner {
 
   public static planRecruitment(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    context: TurnContext,
     availableTreasury?: number,
-    rankMap?: Map<string, number>,
-    precomputedPosture?: AIPosture,
     precomputedWallets?: AiStrategicWallets,
   ): RecruitmentPlanResult {
     let effectiveTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
 
-    const gdp = getNationGdp(nation, provincesMap);
-    const posture =
-      precomputedPosture ??
-      AIPostureEvaluator.evaluatePosture(
-        nation,
-        allNations,
-        provincesMap,
-        rankMap,
-      );
+    const gdp = context.getNationGdp(nation.id);
+    const posture = context.getPosture(nation);
 
     const actions: GameAction[] = [];
     const weights =
@@ -65,7 +54,7 @@ export class AIProcurementPlanner {
     if (posture === "WAR") {
       const loanAction = AIWartimeLoanEvaluator.evaluateWartimeLoan(
         nation,
-        allNations,
+        context.state.nations,
         gdp,
         effectiveTreasury,
       );
@@ -79,10 +68,12 @@ export class AIProcurementPlanner {
       precomputedWallets ??
       AiWalletBudgetAllocator.calculateWallets(
         nation,
-        allNations,
-        provincesMap,
+        context.state.nations,
+        context.state.provinces,
         posture,
         effectiveTreasury,
+        context.gdpMap,
+        context.totalWorldGdp,
       );
 
     const quotas = MilitaryQuotaCalculator.calculateQuotas(
@@ -133,7 +124,7 @@ export class AIProcurementPlanner {
     if (!wallets.isEmbargoed && importBudget > 0) {
       const importResult = AIArmsImportPlanner.planImports(
         nation,
-        allNations,
+        context.state.nations,
         quotas,
         importBudget,
         globalRemainingValuation,
@@ -172,7 +163,7 @@ export class AIProcurementPlanner {
     const navalResult = AINavalProcurementPlanner.planNaval(
       nation,
       effectiveTreasury,
-      provincesMap,
+      context.state.provinces,
     );
 
     if (navalResult.action) {

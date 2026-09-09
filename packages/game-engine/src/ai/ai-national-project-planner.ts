@@ -6,7 +6,7 @@ import {
   PROJECT_STEP_FLAT_COST,
   NationalProjectEffectApplierUtility,
 } from "@geopolitics/domain";
-import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export interface NationalProjectPlanResult {
   actions: GameAction[];
@@ -19,9 +19,8 @@ export class AINationalProjectPlanner {
 
   public static planProjects(
     nation: Nation,
+    context: TurnContext,
     availableTreasury?: number,
-    posture: AIPosture = "PEACE",
-    boostedProjectIds: string[] = [],
   ): NationalProjectPlanResult {
     let currentTreasury =
       availableTreasury !== undefined ? availableTreasury : nation.treasury;
@@ -31,12 +30,16 @@ export class AINationalProjectPlanner {
       return { actions, spentMoney: 0 };
     }
 
+    const posture = context.getPosture(nation);
     const minTreasuryNeeded =
       posture === "WAR" ? this.MIN_WAR_TREASURY : this.MIN_PEACE_TREASURY;
 
     if (currentTreasury < minTreasuryNeeded) {
       return { actions, spentMoney: 0 };
     }
+
+    const boostedProjectIds =
+      context.state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
 
     const completedIds = nation.completedProjectIds || [];
     const maxBoosts = NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN;

@@ -1,22 +1,15 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { EspionageCalculator } from "@/engine/espionage/espionage-calculator";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { CountryRegistry } from "@/domain/data/countries";
-import { GeopoliticalReachResolver } from "@/domain/diplomacy/geopolitical-reach-resolver.utility";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AITechHeistPlanner {
   public static planTechHeistTier3(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap: Record<string, Province> | undefined,
+    context: TurnContext,
     geopoliticsBudget: number,
-    executedTiers: string[],
-    rankMap?: Map<string, number>,
-    reachableTargets?: Nation[],
-    provincesByOwnerMap?: Map<string, Province[]>,
     currentTreasury?: number,
   ): { action: GameAction; cost: number } | null {
     const effectiveTreasury = currentTreasury ?? geopoliticsBudget;
@@ -24,17 +17,10 @@ export class AITechHeistPlanner {
       return null;
     }
 
-    const targets =
-      reachableTargets ??
-      GeopoliticalReachResolver.getReachableTargets(
-        nation,
-        allNations,
-        provincesMap,
-        rankMap,
-        undefined,
-        provincesByOwnerMap,
-      );
+    const executedTiers =
+      context.state.turnActivity?.[nation.id]?.executedEspionageTiers ?? [];
 
+    const targets = context.getReachableTargets(nation);
     const eligibleTargets: { target: Nation; cost: number; points: number }[] =
       [];
 
@@ -74,12 +60,7 @@ export class AITechHeistPlanner {
         continue;
       }
 
-      const targetGdp = getNationGdp(
-        target,
-        provincesMap,
-        undefined,
-        provincesByOwnerMap,
-      );
+      const targetGdp = context.getNationGdp(target.id);
       const cost = EspionageCalculator.calculateOperationCost(targetGdp, 3);
 
       if (geopoliticsBudget >= cost && effectiveTreasury >= cost) {

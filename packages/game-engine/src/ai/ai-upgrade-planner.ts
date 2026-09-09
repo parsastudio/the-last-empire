@@ -2,13 +2,13 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  Province,
   IndustryCalculator,
   AI_DOCTRINE_PRESETS,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
 import { AiStrategicWallets } from "@/engine/ai/procurement/ai-wallet-budget-allocator";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export interface UpgradePlanResult {
   actions: GameAction[];
@@ -18,10 +18,8 @@ export interface UpgradePlanResult {
 export class AIUpgradePlanner {
   public static planUpgrades(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    context: TurnContext,
     availableTreasury?: number,
-    ownedProvinces?: Province[],
     wallets?: AiStrategicWallets,
   ): UpgradePlanResult {
     let currentTreasury =
@@ -32,11 +30,7 @@ export class AIUpgradePlanner {
       return { actions, remainingTreasury: currentTreasury };
     }
 
-    const myProvs =
-      ownedProvinces ??
-      Object.values(provincesMap || {}).filter(
-        (p) => p.ownerNationId === nation.id,
-      );
+    const myProvs = context.getOwnedProvinces(nation.id);
 
     let innovationBudget = wallets
       ? Math.min(currentTreasury, wallets.innovation)
@@ -59,9 +53,9 @@ export class AIUpgradePlanner {
     if (machineryImportBudget > 0 && !wallets?.isEmbargoed) {
       const importResult = AIMachineryImportPlanner.planImport(
         nation,
-        allNations,
+        context.state.nations,
         machineryImportBudget,
-        provincesMap,
+        context.state.provinces,
         myProvs,
       );
 

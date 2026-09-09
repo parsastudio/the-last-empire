@@ -12,6 +12,7 @@ import { GpuIndexRegistry } from "@/domain/data/countries/gpu-index-registry";
 import { ManifestProfileLoader } from "@/domain/data/countries/manifest-profile-loader";
 import { ManifestValidator } from "@/domain/data/countries/manifest-validator";
 import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 function composeAllCountryProfiles(): CountryProfile[] {
   const codes = Object.keys(COUNTRY_IDENTITY_MAP);
@@ -81,6 +82,7 @@ export class CountryRegistry {
       ManifestProfileLoader.loadManifestData(validated);
     this.manifestNations = manifestNations;
     this.manifestProfiles = manifestProfiles;
+    MapTopologyRegistry.initializeFromManifest(validated);
   }
 
   public static getAllManifestNations(): FinalManifestNation[] {

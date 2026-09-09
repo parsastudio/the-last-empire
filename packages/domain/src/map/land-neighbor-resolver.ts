@@ -1,5 +1,6 @@
 import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export class LandNeighborResolver {
   public static hasProvinceLandBorder(
@@ -14,7 +15,11 @@ export class LandNeighborResolver {
     const canonicalAttacker =
       CountryRegistry.resolveCanonicalId(attackerNationId);
 
-    return targetProv.landNeighbors.some((neighborId) => {
+    const neighbors =
+      targetProv.landNeighbors ??
+      MapTopologyRegistry.getLandNeighbors(targetProvinceId);
+
+    return neighbors.some((neighborId) => {
       const neighborProv = provincesMap[neighborId.toString()];
       if (!neighborProv) return false;
       const canonicalNeighborOwner = CountryRegistry.resolveCanonicalId(

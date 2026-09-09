@@ -5,6 +5,7 @@ import {
   FinalManifestNation,
   ClientMapPathResolver,
   GameDifficulty,
+  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { GlobalAiInitializer } from "@geopolitics/game-engine";
 
@@ -48,6 +49,7 @@ export class CampaignInitializationService {
     }
 
     CountryRegistry.initializeFromManifest(activeManifest);
+    MapTopologyRegistry.initializeFromManifest(activeManifest);
 
     const detectedNations = activeManifest.nations.map(
       (n: FinalManifestNation) =>

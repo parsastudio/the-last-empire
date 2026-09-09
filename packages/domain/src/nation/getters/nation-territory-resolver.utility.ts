@@ -1,5 +1,6 @@
 import { CountryRegistry } from "@/domain/data/countries";
 import { Province } from "@/domain/province/province.schema";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export class NationTerritoryResolverUtility {
   public static buildProvincesByOwnerMap(
@@ -61,7 +62,9 @@ export class NationTerritoryResolverUtility {
 
     let total = 0;
     for (let i = 0; i < provs.length; i++) {
-      total += provs[i]!.pixelCount || 0;
+      const p = provs[i]!;
+      total +=
+        p.pixelCount ?? MapTopologyRegistry.getPixelCount(p.provinceId, 0);
     }
     return total;
   }
@@ -77,7 +80,10 @@ export class NationTerritoryResolverUtility {
       this.getOwnedProvinces(nationId, provincesMap, provincesByOwnerMap);
 
     for (let i = 0; i < provs.length; i++) {
-      if (provs[i]!.hasSeaAccess) return true;
+      const p = provs[i]!;
+      const hasSea =
+        p.hasSeaAccess ?? MapTopologyRegistry.hasSeaAccess(p.provinceId, false);
+      if (hasSea) return true;
     }
     return false;
   }

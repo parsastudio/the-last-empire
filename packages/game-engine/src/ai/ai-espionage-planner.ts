@@ -1,8 +1,8 @@
 import { GameAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { Province } from "@/domain/province/province.schema";
 import { AISabotagePlanner } from "@/engine/ai/espionage/ai-sabotage-planner";
 import { AITechHeistPlanner } from "@/engine/ai/espionage/ai-tech-heist-planner";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export interface EspionagePlanResult {
   actions: GameAction[];
@@ -14,14 +14,9 @@ export interface EspionagePlanResult {
 export class AIEspionagePlanner {
   public static planEspionage(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
+    context: TurnContext,
     geopoliticsBudget?: number,
-    rankMap?: Map<string, number>,
-    reachableTargets?: Nation[],
-    provincesByOwnerMap?: Map<string, Province[]>,
     availableTreasury?: number,
-    executedTiersInput?: string[],
   ): EspionagePlanResult {
     let currentGeoBudget =
       geopoliticsBudget !== undefined
@@ -42,15 +37,10 @@ export class AIEspionagePlanner {
       };
     }
 
-    const executedTiers = executedTiersInput ?? [];
-
     const sabotageAction = AISabotagePlanner.planSabotageTier2(
       nation,
-      allNations,
-      provincesMap,
+      context,
       currentGeoBudget,
-      executedTiers,
-      provincesByOwnerMap,
       currentTreasury,
     );
 
@@ -69,13 +59,8 @@ export class AIEspionagePlanner {
 
     const techTheftAction = AITechHeistPlanner.planTechHeistTier3(
       nation,
-      allNations,
-      provincesMap,
+      context,
       currentGeoBudget,
-      executedTiers,
-      rankMap,
-      reachableTargets,
-      provincesByOwnerMap,
       currentTreasury,
     );
 

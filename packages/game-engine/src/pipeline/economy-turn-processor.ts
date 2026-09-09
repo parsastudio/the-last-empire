@@ -4,7 +4,6 @@ import { TurnLogEntry } from "@/domain/game/game-state.schema";
 import {
   TurnLogBuilder,
   SecurityFeeCalculatorUtility,
-  NationGettersUtility,
   NAVAL_FLEET_CONFIG,
   DebtCalculatorUtility,
   StrategicPartnershipCalculatorUtility,
@@ -20,19 +19,18 @@ export class EconomyTurnProcessor {
 
   public static process(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    ownedProvinces: Province[],
-    provincesMap: Record<string, Province>,
     turnContext: TurnContext,
   ): {
     updatedNation: Nation;
     updatedProvinces: Province[];
     bankruptcyLog?: TurnLogEntry;
   } {
-    let updatedProvinces = [...ownedProvinces];
     const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
+    let updatedProvinces = [...turnContext.getOwnedProvinces(canonicalId)];
 
-    const currentProvincesMap: Record<string, Province> = { ...provincesMap };
+    const currentProvincesMap: Record<string, Province> = {
+      ...turnContext.state.provinces,
+    };
     for (let p = 0; p < updatedProvinces.length; p++) {
       const up = updatedProvinces[p]!;
       currentProvincesMap[up.provinceId.toString()] = up;
@@ -49,10 +47,7 @@ export class EconomyTurnProcessor {
         NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
     );
 
-    const gdp =
-      turnContext.gdpMap.get(canonicalId) ??
-      turnContext.gdpMap.get(nation.id) ??
-      0;
+    const gdp = turnContext.getNationGdp(canonicalId);
 
     let securityFee = 0;
     let nextSecurityGuarantorId = nation.securityGuarantorId ?? null;
@@ -62,7 +57,7 @@ export class EconomyTurnProcessor {
       const guarantorCanonical = CountryRegistry.resolveCanonicalId(
         nation.securityGuarantorId,
       );
-      const guarantor = allNations[guarantorCanonical];
+      const guarantor = turnContext.state.nations[guarantorCanonical];
       if (guarantor && guarantor.isAlive) {
         securityFee = SecurityFeeCalculatorUtility.calculateSecurityFee(
           gdp,
@@ -77,7 +72,7 @@ export class EconomyTurnProcessor {
     const activeDefenseGuarantors = (nation.defenseGuarantorIds || []).filter(
       (gId) => {
         const canonical = CountryRegistry.resolveCanonicalId(gId);
-        const g = allNations[canonical];
+        const g = turnContext.state.nations[canonical];
         return g && g.isAlive;
       },
     );
@@ -88,9 +83,9 @@ export class EconomyTurnProcessor {
         const partnerCanonical = CountryRegistry.resolveCanonicalId(
           rel.targetNationId,
         );
-        const partner = allNations[partnerCanonical];
+        const partner = turnContext.state.nations[partnerCanonical];
         if (partner && partner.isAlive) {
-          const partnerGdp = turnContext.gdpMap.get(partnerCanonical) ?? 0;
+          const partnerGdp = turnContext.getNationGdp(partnerCanonical);
           partnershipIncome +=
             StrategicPartnershipCalculatorUtility.calculateTurnDividend(
               partnerGdp,
@@ -101,7 +96,7 @@ export class EconomyTurnProcessor {
 
     const fiscalResult = FiscalRevenueCalculator.calculate(
       nation,
-      allNations,
+      turnContext.state.nations,
       currentProvincesMap,
       turnContext.aiRevenueMultiplier,
       turnContext.gdpMap,

@@ -6,6 +6,7 @@ import { NationRankCalculatorUtility } from "@/domain/nation/getters/nation-rank
 import { NationTerritoryResolverUtility } from "@/domain/nation/getters/nation-territory-resolver.utility";
 import { NationRankCandidateInput } from "@/domain/nation/getters/rank/nation-power-score-evaluator";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export class NationGettersUtility {
   public static resolveNation(
@@ -30,24 +31,7 @@ export class NationGettersUtility {
   public static buildProvincesByOwnerMap(
     provinces: Record<string, Province> | Province[],
   ): Map<string, Province[]> {
-    const map = new Map<string, Province[]>();
-    const provList = Array.isArray(provinces)
-      ? provinces
-      : Object.values(provinces);
-
-    for (let i = 0; i < provList.length; i++) {
-      const p = provList[i]!;
-      const canonicalOwner = CountryRegistry.resolveCanonicalId(
-        p.ownerNationId,
-      );
-      let list = map.get(canonicalOwner);
-      if (!list) {
-        list = [];
-        map.set(canonicalOwner, list);
-      }
-      list.push(p);
-    }
-    return map;
+    return NationTerritoryResolverUtility.buildProvincesByOwnerMap(provinces);
   }
 
   public static getOwnedProvinces(
@@ -148,7 +132,9 @@ export class NationGettersUtility {
 
     let total = 0;
     for (let i = 0; i < provs.length; i++) {
-      total += provs[i]!.population || 0;
+      const p = provs[i]!;
+      total +=
+        p.population ?? MapTopologyRegistry.getPopulation(p.provinceId, 0);
     }
     return total;
   }

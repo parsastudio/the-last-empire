@@ -2,28 +2,16 @@ import {
   GameAction,
   ActionFactory,
   Nation,
-  Province,
   CountryRegistry,
-  DiplomacyLockManager,
-  GeopoliticalReachResolver,
-  getNationGdp,
   NationRelationResolver,
 } from "@geopolitics/domain";
-import {
-  GeopoliticalVectorCalculator,
-  GeopoliticalVector,
-} from "@/engine/ai/geopolitical-vector-calculator";
 import { UtilityDecisionEngine } from "@/engine/ai/utility-decision-engine";
+import { TurnContext } from "@/engine/pipeline/turn-context";
 
 export class AIWarDeclarationEvaluator {
   public static evaluate(
     nation: Nation,
-    allNations: Record<string, Nation>,
-    provincesMap?: Record<string, Province>,
-    lockedTargets?: Set<string>,
-    rankMap?: Map<string, number>,
-    reachableTargets?: Nation[],
-    vectorsByTarget?: Map<string, GeopoliticalVector>,
+    context: TurnContext,
   ): GameAction | null {
     if (!nation.relations) return null;
 
@@ -35,21 +23,14 @@ export class AIWarDeclarationEvaluator {
       return null;
     }
 
-    if (NationRelationResolver.isAtWar(nation, allNations)) {
+    if (context.isAtWar(nation)) {
       return null;
     }
 
     let bestTargetId: string | null = null;
     let highestWarUtility = 45;
 
-    const targets =
-      reachableTargets ??
-      GeopoliticalReachResolver.getReachableTargets(
-        nation,
-        allNations,
-        provincesMap,
-        rankMap,
-      );
+    const targets = context.getReachableTargets(nation);
 
     for (let i = 0; i < targets.length; i++) {
       const targetNation = targets[i]!;
@@ -70,29 +51,21 @@ export class AIWarDeclarationEvaluator {
         continue;
       }
 
-      if (
-        DiplomacyLockManager.isLocked(lockedTargets, nation.id, targetNation.id)
-      ) {
+      if (context.isDiplomacyLocked(targetNation.id, nation.id)) {
         continue;
       }
 
-      const vector =
-        vectorsByTarget?.get(canonicalTarget) ??
-        GeopoliticalVectorCalculator.calculate(
-          nation,
-          targetNation,
-          allNations,
-          provincesMap,
-        );
+      const vector = context.getVector(nation, targetNation);
+      if (!vector) continue;
 
-      const targetGdp = getNationGdp(targetNation, provincesMap);
+      const targetGdp = context.getNationGdp(targetNation.id);
 
       const warUtility = UtilityDecisionEngine.calculateWarUtility(
         nation,
         targetNation,
         vector,
         targetGdp,
-        allNations,
+        context.state.nations,
       );
 
       if (warUtility > highestWarUtility) {

@@ -3,6 +3,7 @@ import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 import { GeopoliticalTierClassifier } from "@/domain/diplomacy/reach/geopolitical-tier-classifier";
+import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export class ReachableTargetsResolver {
   public static getReachableTargets(
@@ -59,7 +60,10 @@ export class ReachableTargetsResolver {
 
     for (let p = 0; p < myProvs.length; p++) {
       const prov = myProvs[p]!;
-      const landNeighbors = prov.landNeighbors || [];
+      const landNeighbors =
+        prov.landNeighbors ??
+        MapTopologyRegistry.getLandNeighbors(prov.provinceId);
+
       for (let i = 0; i < landNeighbors.length; i++) {
         const nProv = provincesMap[landNeighbors[i]!.toString()];
         if (nProv) {
@@ -76,8 +80,14 @@ export class ReachableTargetsResolver {
         }
       }
 
-      if (prov.hasSeaAccess) {
-        const t1 = prov.maritimeNeighborsTier1 || [];
+      const hasSea =
+        prov.hasSeaAccess ?? MapTopologyRegistry.hasSeaAccess(prov.provinceId);
+
+      if (hasSea) {
+        const t1 =
+          prov.maritimeNeighborsTier1 ??
+          MapTopologyRegistry.getMaritimeNeighborsTier1(prov.provinceId);
+
         for (let i = 0; i < t1.length; i++) {
           const nProv = provincesMap[t1[i]!.toString()];
           if (nProv) {
@@ -98,7 +108,10 @@ export class ReachableTargetsResolver {
         }
 
         if (sourceTier === "REGIONAL_POWER") {
-          const t2 = prov.maritimeNeighborsTier2 || [];
+          const t2 =
+            prov.maritimeNeighborsTier2 ??
+            MapTopologyRegistry.getMaritimeNeighborsTier2(prov.provinceId);
+
           for (let i = 0; i < t2.length; i++) {
             const nProv = provincesMap[t2[i]!.toString()];
             if (nProv) {
