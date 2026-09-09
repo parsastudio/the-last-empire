@@ -195,8 +195,15 @@ export class AiBudgetBlackboard {
 
     this.wallets[domain] = Math.max(0, this.wallets[domain] - unusedAmount);
 
-    const recipient: NumericWalletDomain =
+    let recipient: NumericWalletDomain =
       this.wallets.posture === "WAR" ? "militaryProcurement" : "infrastructure";
+
+    if (recipient === domain) {
+      recipient =
+        domain === "militaryProcurement"
+          ? "infrastructure"
+          : "militaryProcurement";
+    }
 
     this.wallets[recipient] += unusedAmount;
   }

@@ -6,7 +6,6 @@ import { GovernmentType } from "@/domain/politics/politics.schema";
 
 export interface NationRankCandidateInput {
   id: string;
-  name?: string;
   gdp: number;
   population?: number;
   military?: MilitaryStack;

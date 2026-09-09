@@ -97,7 +97,6 @@ export class NationRankCalculatorUtility {
 
       candidatesInput[i] = {
         id: nation.id,
-        name: nation.name,
         gdp,
         population,
         military: nation.military,

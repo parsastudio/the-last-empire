@@ -142,9 +142,7 @@ export const ECONOMIC_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
         id: "ignore_patents",
         labelFa: "صرف‌نظر و اتکا به پژوهشگاه‌های داخلی",
         descriptionFa: "پرهیز از هزینه و ادامه روند عادی توسعه R&D.",
-        effect: {
-          treasuryGdpPercent: 0,
-        },
+        effect: {},
       },
     ],
   },

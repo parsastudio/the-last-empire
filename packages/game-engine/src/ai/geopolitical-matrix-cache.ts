@@ -11,8 +11,8 @@ import {
 } from "@/engine/ai/geopolitical-vector-calculator";
 import {
   AIPosture,
-  AIProcurementPlanner,
-} from "@/engine/ai/ai-procurement-planner";
+  AIPostureEvaluator,
+} from "@/engine/ai/procurement/ai-posture-evaluator";
 
 export class GeopoliticalMatrixCache {
   private rankMap: Map<string, number>;
@@ -119,7 +119,7 @@ export class GeopoliticalMatrixCache {
     const cached = this.postureCache.get(canonical);
     if (cached) return cached;
 
-    const posture = AIProcurementPlanner.evaluatePosture(
+    const posture = AIPostureEvaluator.evaluatePosture(
       nation,
       allNations,
       provincesMap,
