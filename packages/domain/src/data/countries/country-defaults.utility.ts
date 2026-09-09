@@ -2,7 +2,6 @@ import { CountryProfile } from "@/domain/data/countries/profile.type";
 import { GovernmentType } from "@/domain/politics/politics.schema";
 import { AiDoctrineType } from "@/domain/nation/nation-doctrine.schema";
 import { NationDoctrineResolver } from "@/domain/nation/nation-doctrine.config";
-import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 
 export interface NormalizedCountryFallback {
   nameFa: string;
@@ -11,7 +10,6 @@ export interface NormalizedCountryFallback {
   flagCode: string;
   gdp: number;
   population: number;
-  totalFactories: number;
   domesticTechLevel: number;
   equipmentTechLevel: number;
   startingTechLevel: number;
@@ -54,11 +52,6 @@ export class CountryDefaultsUtility {
     const industrialLevel = domesticTechLevel;
     const startingTechLevel = domesticTechLevel;
 
-    const totalFactories = IndustryCalculator.calculateStartingTotalFactories(
-      gdp,
-      industrialLevel,
-    );
-
     const startingGovernment: GovernmentType =
       profile?.startingGovernment ?? this.DEFAULT_GOVERNMENT;
 
@@ -78,7 +71,6 @@ export class CountryDefaultsUtility {
       flagCode,
       gdp,
       population,
-      totalFactories,
       domesticTechLevel,
       equipmentTechLevel,
       startingTechLevel,

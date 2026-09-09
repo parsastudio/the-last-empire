@@ -109,16 +109,6 @@ export class CountryRegistry {
     return this.byFlagCode.get(clean);
   }
 
-  public static requireCountry(identifier: unknown): CountryProfile {
-    const profile = this.getCountry(identifier);
-    if (!profile) {
-      throw new Error(
-        `شناسنامه کشور با نماد یا شناسه "${String(identifier)}" در مانیفست استراتژیک نقشه یافت نشد.`,
-      );
-    }
-    return profile;
-  }
-
   public static resolveCanonicalId(identifier: unknown): string {
     if (identifier === null || identifier === undefined) return "";
     const str =

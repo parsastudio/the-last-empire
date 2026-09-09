@@ -40,17 +40,7 @@ export * from "./strategic-pipeline/05-maritime-network/algorithms/maritime-wate
 export * from "./strategic-pipeline/05-maritime-network/algorithms/bounded-water-bfs";
 export * from "./strategic-pipeline/05-maritime-network/orchestrator/maritime-enricher-engine";
 
-export * from "./strategic-pipeline/06-spatial-indexing/row-spans/row-spans-types";
-export * from "./strategic-pipeline/06-spatial-indexing/row-spans/row-spans-builder";
-export * from "./strategic-pipeline/06-spatial-indexing/row-spans/row-spans-serializer";
-export * from "./strategic-pipeline/06-spatial-indexing/row-spans/row-spans-reader";
-export * from "./strategic-pipeline/06-spatial-indexing/row-spans/row-spans-export-service";
-
-export * from "./strategic-pipeline/06-spatial-indexing/quadtree/quadtree-types";
-export * from "./strategic-pipeline/06-spatial-indexing/quadtree/quadtree-builder";
-export * from "./strategic-pipeline/06-spatial-indexing/quadtree/quadtree-serializer";
-export * from "./strategic-pipeline/06-spatial-indexing/quadtree/quadtree-reader";
-export * from "./strategic-pipeline/06-spatial-indexing/quadtree/quadtree-export-service";
+export * from "./experiments/spatial-indexing";
 
 export * from "./orchestrator/province-partition-engine";
 export * from "./orchestrator/binary-state-exporter";

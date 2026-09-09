@@ -1,8 +1,4 @@
-import {
-  ProvinceStaticTopology,
-  ProvinceDynamicState,
-  Province,
-} from "@/domain/province/province.schema";
+import { ProvinceStaticTopology } from "@/domain/province/province.schema";
 import {
   FinalMapManifest,
   FinalManifestProvince,
@@ -49,26 +45,10 @@ export class MapTopologyRegistry {
     this.topologyMap.set(p.provinceId, topology);
   }
 
-  public static registerProvinceTopology(
-    topology: ProvinceStaticTopology,
-  ): void {
-    this.topologyMap.set(topology.provinceId, topology);
-  }
-
   public static getTopology(
     provinceId: number,
   ): ProvinceStaticTopology | undefined {
     return this.topologyMap.get(provinceId);
-  }
-
-  public static requireTopology(provinceId: number): ProvinceStaticTopology {
-    const topology = this.topologyMap.get(provinceId);
-    if (!topology) {
-      throw new Error(
-        `Province static topology not found for id ${provinceId}`,
-      );
-    }
-    return topology;
   }
 
   public static getNameFa(provinceId: number, fallback = ""): string {
@@ -110,42 +90,7 @@ export class MapTopologyRegistry {
     return this.topologyMap.get(provinceId)?.centerCoordinates ?? fallback;
   }
 
-  public static getAllTopology(): ProvinceStaticTopology[] {
-    return Array.from(this.topologyMap.values());
-  }
-
   public static isReady(): boolean {
     return this.isLoaded && this.topologyMap.size > 0;
-  }
-
-  public static composeProvince(dynamic: ProvinceDynamicState): Province {
-    const topo = this.topologyMap.get(dynamic.provinceId);
-    if (!topo) {
-      return {
-        ...dynamic,
-        nameFa: `استان ${dynamic.provinceId}`,
-        pixelCount: 0,
-        hasSeaAccess: false,
-        landNeighbors: [],
-        maritimeNeighborsTier1: [],
-        maritimeNeighborsTier2: [],
-        centerCoordinates: { x: 0, y: 0 },
-        population: 1000000,
-        maxSlots: 1,
-      };
-    }
-
-    return {
-      ...dynamic,
-      nameFa: topo.nameFa,
-      pixelCount: topo.pixelCount,
-      hasSeaAccess: topo.hasSeaAccess,
-      landNeighbors: topo.landNeighbors,
-      maritimeNeighborsTier1: topo.maritimeNeighborsTier1,
-      maritimeNeighborsTier2: topo.maritimeNeighborsTier2,
-      centerCoordinates: topo.centerCoordinates,
-      population: topo.population,
-      maxSlots: topo.maxSlots,
-    };
   }
 }

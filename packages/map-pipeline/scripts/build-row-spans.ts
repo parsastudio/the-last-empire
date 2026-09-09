@@ -1,4 +1,4 @@
-import { RowSpansExportService } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-export-service";
+import { RowSpansExportService } from "@/infrastructure/experiments/spatial-indexing/row-spans/row-spans-export-service";
 
 async function main() {
   process.stdout.write("در حال پردازش و ارزیابی تطبیق پیکسلی نقشه سطری...\n");

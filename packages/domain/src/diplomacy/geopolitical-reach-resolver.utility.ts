@@ -14,13 +14,6 @@ import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
 export type { GeopoliticalReachTier, ProximityTier };
 
 export class GeopoliticalReachResolver {
-  public static readonly SUPERPOWER_PERCENTAGE =
-    GeopoliticalTierClassifier.SUPERPOWER_PERCENTAGE;
-  public static readonly REGIONAL_PERCENTAGE =
-    GeopoliticalTierClassifier.REGIONAL_PERCENTAGE;
-  public static readonly MIN_SUPERPOWERS =
-    GeopoliticalTierClassifier.MIN_SUPERPOWERS;
-
   public static hasDirectLandBorder(
     source: Nation,
     target: Nation,

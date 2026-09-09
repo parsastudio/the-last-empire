@@ -1,12 +1,5 @@
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
 
-export interface OptimizedForces {
-  infantry: number;
-  armor: number;
-  airForce: number;
-  drones: number;
-}
-
 export class DeploymentStepSearch {
   public static findMinimalGroundForces(
     drones: number,
@@ -20,8 +13,6 @@ export class DeploymentStepSearch {
       af: number,
     ) => BattleCalculationResult,
   ): { infantry: number; armor: number; isVictory: boolean } {
-    let lowArmor = 0;
-    let highArmor = maxArmor;
     let bestArmor = maxArmor;
     let bestInfantry = maxInfantry;
     let foundVictory = false;

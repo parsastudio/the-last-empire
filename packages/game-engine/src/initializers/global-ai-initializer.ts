@@ -136,7 +136,7 @@ export class GlobalAiInitializer {
   }
 
   public initializeAllNations(
-    detectedNationsList: string[],
+    _detectedNationsList: string[],
     humanNationId: string,
     humanGovType?: string,
     manifest?: FinalMapManifest | null,
@@ -144,41 +144,11 @@ export class GlobalAiInitializer {
     nations: Record<string, Nation>;
     provinces: Record<string, ProvinceDynamicState>;
   } {
-    if (manifest && manifest.nations && manifest.nations.length > 0) {
-      return this.initializeFromManifest(manifest, humanNationId, humanGovType);
-    }
-
-    const nations: Record<string, Nation> = {};
-    const provinces: Record<string, ProvinceDynamicState> = {};
-
-    const cleanHumanId = CountryRegistry.resolveCanonicalId(humanNationId);
-    const preBuiltNations: Nation[] = [];
-
-    for (const id of detectedNationsList) {
-      const cleanId = CountryRegistry.resolveCanonicalId(id);
-      const isHuman = cleanId === cleanHumanId;
-      const govToApply = isHuman ? humanGovType : undefined;
-      const nation = this.profileAssigner.buildStartingNation(
-        cleanId,
-        isHuman,
-        govToApply,
+    if (!manifest || !manifest.nations || manifest.nations.length === 0) {
+      throw new Error(
+        "A valid map manifest is required to initialize nations.",
       );
-      preBuiltNations.push(nation);
     }
-
-    const nationsMetaData = preBuiltNations.map((n) => ({
-      id: n.id,
-      govType: n.government.type,
-    }));
-
-    for (const nation of preBuiltNations) {
-      nation.relations = this.relationsGenerator.generateInitialRelations(
-        nation.id,
-        nationsMetaData,
-      );
-      nations[nation.id] = nation;
-    }
-
-    return { nations, provinces };
+    return this.initializeFromManifest(manifest, humanNationId, humanGovType);
   }
 }

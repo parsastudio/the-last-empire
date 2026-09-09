@@ -161,15 +161,6 @@ export class TurnContext {
     );
   }
 
-  public lockDiplomacy(targetId: string, sourceId: string): void {
-    this.lockedDiplomacyTargets.add(
-      DiplomacyLockManager.createKey(sourceId, targetId),
-    );
-    this.lockedDiplomacyTargets.add(
-      DiplomacyLockManager.createKey(targetId, sourceId),
-    );
-  }
-
   public static create(
     state: GameState,
     lockedDiplomacyTargets?: Set<string>,

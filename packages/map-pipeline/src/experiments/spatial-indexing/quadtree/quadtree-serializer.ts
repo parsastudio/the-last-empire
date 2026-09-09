@@ -2,7 +2,7 @@ import {
   QuadtreeNode,
   QuadtreeBuildStats,
   QuadtreeBranchNode,
-} from "@/infrastructure/strategic-pipeline/06-spatial-indexing/quadtree/quadtree-types";
+} from "./quadtree-types";
 
 interface QueueItem {
   node: QuadtreeBranchNode;
