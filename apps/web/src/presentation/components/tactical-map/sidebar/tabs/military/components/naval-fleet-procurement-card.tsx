@@ -48,6 +48,9 @@ export function NavalFleetProcurementCard({
   const turnRevenue = Math.floor(
     navalFleetCount * fleetCost * NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
   );
+  const revenuePercentText = PersianNumberFormatter.toPersianDigits(
+    Math.round(NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE * 100),
+  );
 
   const handleBuy = async () => {
     if (!canAfford || isSubmitting) return;
@@ -131,7 +134,7 @@ export function NavalFleetProcurementCard({
         <div className="bg-background/60 p-2.5 rounded-2xl border border-border/40 space-y-0.5">
           <span className="text-muted-foreground font-sans text-[10px] flex items-center gap-1">
             <Coins size={11} className="text-gdp" />
-            درآمد امنیت بین‌المللی (۶٪):
+            درآمد امنیت بین‌المللی ({revenuePercentText}٪):
           </span>
           <span className="font-extrabold text-gdp text-xs block">
             +{PersianNumberFormatter.formatCurrency(turnRevenue, true)} / نوبت
