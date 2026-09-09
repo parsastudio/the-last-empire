@@ -25,6 +25,7 @@ interface AdvancedDiplomacyActionsProps {
   provincesMap?: Record<string, Province>;
   clientNation?: Nation | null;
   targetNation?: Nation | null;
+  currentTurn?: number;
   onOpenProxy?: () => void;
 }
 
@@ -41,6 +42,7 @@ export function AdvancedDiplomacyActions({
   provincesMap,
   clientNation,
   targetNation,
+  currentTurn,
   onOpenProxy,
 }: AdvancedDiplomacyActionsProps) {
   const runner = useDiplomacyActionsRunner({
@@ -52,6 +54,7 @@ export function AdvancedDiplomacyActions({
     provincesMap,
     clientNation,
     targetNation,
+    currentTurn,
   });
 
   const isAidSentThisTurn = useMemo(() => {
@@ -63,6 +66,8 @@ export function AdvancedDiplomacyActions({
 
   const canAffordPartnership =
     (clientNation?.treasury ?? 0) >= runner.strategicPartnershipCost;
+
+  const canAffordAid = (clientNation?.treasury ?? 0) >= runner.foreignAidCost;
 
   return (
     <>
@@ -90,6 +95,9 @@ export function AdvancedDiplomacyActions({
               strategicPartnershipCost={runner.strategicPartnershipCost}
               strategicPartnershipDividend={runner.strategicPartnershipDividend}
               canAffordPartnership={canAffordPartnership}
+              canAffordAid={canAffordAid}
+              canDeclareWar={runner.canDeclareWar}
+              isPeaceCooldownActive={runner.isPeaceCooldownActive}
               emergencyProtectorateCost={runner.emergencyProtectorateCost}
               hasSecurityGuarantee={hasSecurityGuarantee}
               isEmergencyProtectorate={isEmergencyProtectorate}

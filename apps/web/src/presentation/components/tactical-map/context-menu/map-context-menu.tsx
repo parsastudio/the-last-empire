@@ -8,6 +8,8 @@ interface QuickActionButtonProps {
   label: string;
   colorClass: string;
   bgHoverClass: string;
+  disabled?: boolean;
+  disabledReason?: string;
   onClick: (e: React.MouseEvent) => void;
 }
 
@@ -16,18 +18,26 @@ function QuickActionButton({
   label,
   colorClass,
   bgHoverClass,
+  disabled = false,
+  disabledReason,
   onClick,
 }: QuickActionButtonProps) {
   return (
     <button
+      disabled={disabled}
       onClick={(e) => {
+        if (disabled) return;
         e.stopPropagation();
         e.preventDefault();
         onClick(e);
       }}
       onMouseDown={(e) => e.stopPropagation()}
-      className={`px-3 py-1.5 ${bgHoverClass} ${colorClass} rounded-xl transition-all flex items-center gap-1.5 cursor-pointer text-xs font-bold shrink-0`}
-      title={label}
+      className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 ${
+        disabled
+          ? "bg-secondary/40 text-muted-foreground opacity-40 cursor-not-allowed"
+          : `${bgHoverClass} ${colorClass} cursor-pointer`
+      }`}
+      title={disabled && disabledReason ? disabledReason : label}
     >
       <Icon size={13} />
       <span>{label}</span>
@@ -39,6 +49,8 @@ interface MapContextMenuProps {
   position: { x: number; y: number };
   countryName: string;
   isOwnCountry?: boolean;
+  canAttack?: boolean;
+  attackDisabledReason?: string;
   onSelectAction: (action: ContextActionType) => void;
 }
 
@@ -46,6 +58,8 @@ export function MapContextMenu({
   position,
   countryName,
   isOwnCountry = false,
+  canAttack = true,
+  attackDisabledReason,
   onSelectAction,
 }: MapContextMenuProps) {
   return (
@@ -74,6 +88,8 @@ export function MapContextMenu({
             label="تهاجم سرزمینی"
             colorClass="text-military"
             bgHoverClass="hover:bg-military/15"
+            disabled={!canAttack}
+            disabledReason={attackDisabledReason}
             onClick={() => onSelectAction("attack")}
           />
         )}

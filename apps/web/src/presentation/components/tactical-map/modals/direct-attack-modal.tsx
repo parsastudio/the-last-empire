@@ -91,6 +91,7 @@ export function DirectAttackModal({
           reputationPenalty={form.reputationPenalty}
           targetNationName={form.targetNation.name}
           targetRegionName={form.targetRegionName}
+          hasAlreadyAttackedThisTurn={form.hasAlreadyAttackedThisTurn}
           activeGuarantorNames={form.activeGuarantorNames}
           mutualGuarantorNames={form.mutualGuarantorNames}
           partnerGuarantorNames={form.partnerGuarantorNames}
@@ -154,6 +155,7 @@ export function DirectAttackModal({
           isLandNeighbor={form.isLandNeighbor}
           isNavalValid={form.isNavalValid}
           hasNavalCapacity={form.hasNavalCapacity}
+          hasAlreadyAttackedThisTurn={form.hasAlreadyAttackedThisTurn}
           attackType={form.attackType}
           onExecute={form.handleExecuteAttack}
         />

@@ -101,6 +101,12 @@ export class SecurityGuaranteeValidator {
       const guarantorTech = guarantor.military.techLevel || 1.0;
       const techDiff = Number((guarantorTech - clientTech).toFixed(1));
 
+      const isAlreadyUnderOtherProtectorate =
+        Boolean(client.securityGuarantorId) &&
+        Boolean(client.isEmergencyProtectorate) &&
+        CountryRegistry.resolveCanonicalId(client.securityGuarantorId) !==
+          canonicalGuarantor;
+
       const isGdpValid = gdpRatio >= 1.0;
       const isTechValid = techDiff > 0;
       const isTensionValid = tension < 50;
@@ -109,15 +115,23 @@ export class SecurityGuaranteeValidator {
       if (!isNotWar) {
         reason =
           "نمی‌توان از کشوری که با آن در حال جنگ هستید درخواست تحت‌الحمایگی کرد.";
+      } else if (isAlreadyUnderOtherProtectorate) {
+        reason =
+          "کشور شما در حال حاضر تحت‌الحمایه کشور دیگری است. ابتدا باید معاهده قبلی را لغو کنید.";
       } else if (!isTensionValid) {
         reason = "تنش با ابرقدرت حامی باید کمتر از ۵۰٪ باشد.";
       } else if (!isGdpValid) {
-        reason = "GDP ابرقدرت حامی باید حداقل برابر کشور شما باشد.";
+        reason = "GDP ابرقدرت حامی باید حداقل برابر با کشور شما باشد.";
       } else if (!isTechValid) {
         reason = "سطح فناوری نظامی ابرقدرت حامی باید بالاتر از شما باشد.";
       }
 
-      const isValid = isGdpValid && isTechValid && isNotWar && isTensionValid;
+      const isValid =
+        isGdpValid &&
+        isTechValid &&
+        isNotWar &&
+        isTensionValid &&
+        !isAlreadyUnderOtherProtectorate;
 
       return {
         isValid,
@@ -129,7 +143,7 @@ export class SecurityGuaranteeValidator {
         isTechValid,
         isTensionValid,
         isNotWar,
-        hasSlotAvailable: true,
+        hasSlotAvailable: !isAlreadyUnderOtherProtectorate,
         canAffordCost: true,
         isEmergencyProtectorate: true,
       };
