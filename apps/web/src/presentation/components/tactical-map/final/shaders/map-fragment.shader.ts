@@ -5,7 +5,8 @@ precision highp usampler2D;
 in vec2 v_texCoord;
 out vec4 fragColor;
 
-uniform sampler2D u_terrainTexture;
+uniform usampler2D u_terrainTexture;
+uniform sampler2D u_terrainPaletteTexture;
 uniform usampler2D u_liveStateTexture;
 uniform sampler2D u_paletteTexture;
 uniform sampler2D u_gdpPaletteTexture;
@@ -15,6 +16,11 @@ uniform vec2 u_texelSize;
 uniform float u_scale;
 uniform int u_activeLayer;
 uniform int u_hoveredCountryId;
+
+vec4 sampleTerrainColor(vec2 uv) {
+  uint colorIdx = texture(u_terrainTexture, uv).r;
+  return texelFetch(u_terrainPaletteTexture, ivec2(int(colorIdx), 0), 0);
+}
 
 vec4 sampleCountryColor(uint pid) {
   if (pid <= 1u) return vec4(0.0);
@@ -64,7 +70,7 @@ float calculateBorderDistance3px(vec2 uv, uint centerPid, int centerCountryId) {
 }
 
 void main() {
-  vec4 terrainColor = texture(u_terrainTexture, v_texCoord);
+  vec4 terrainColor = sampleTerrainColor(v_texCoord);
   uint centerRaw = texture(u_liveStateTexture, v_texCoord).r;
   uint centerPid = centerRaw & 4095u;
 

@@ -2,8 +2,9 @@ import { useEffect, useRef, useCallback, RefObject } from "react";
 import { WebGLMapRenderer } from "@/presentation/components/tactical-map/final/webgl-map-renderer";
 import { WebGLPaletteTextureManager } from "@/presentation/components/tactical-map/final/webgl-palette-texture-manager";
 import { BitPackedGridState } from "@geopolitics/game-engine";
-import { ClientMapPathResolver, Province, Nation } from "@geopolitics/domain";
+import { Province, Nation } from "@geopolitics/domain";
 import { CameraPosition } from "@/presentation/hooks/tactical-map/final/map-camera-transform";
+import { ClientFinalStateLoader } from "@/infrastructure/storage/client-final-state-loader";
 
 interface UseWebGLMapRendererProps {
   gl: WebGL2RenderingContext | null;
@@ -84,16 +85,17 @@ export function useWebGLMapRenderer({
     const renderer = new WebGLMapRenderer(gl);
     rendererRef.current = renderer;
 
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = ClientMapPathResolver.getMapVisualClientUrl(
-      "map1",
-      "tactical_map_terrain.png",
-    );
-    img.onload = () => {
-      renderer.setTerrainImage(img);
-      requestRender();
-    };
+    ClientFinalStateLoader.loadTerrainRawData("map1").then((terrainData) => {
+      if (terrainData && rendererRef.current) {
+        rendererRef.current.setTerrainData(
+          terrainData.indexedGrid,
+          terrainData.palette,
+          terrainData.width,
+          terrainData.height,
+        );
+        requestRender();
+      }
+    });
 
     const paletteTex = WebGLPaletteTextureManager.createPaletteTexture(
       gl,

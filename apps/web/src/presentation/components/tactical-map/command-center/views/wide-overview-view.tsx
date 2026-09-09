@@ -34,6 +34,7 @@ export function WideOverviewView({ nation, gameState }: WideOverviewViewProps) {
         militaryTechLevel={model.militaryTechLevel}
         industrialLevel={model.industrialLevel}
         rank={model.rank}
+        difficulty={gameState?.difficulty ?? "NORMAL"}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">

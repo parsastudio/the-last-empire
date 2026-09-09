@@ -4,11 +4,10 @@ import React, { useMemo } from "react";
 import { Coins } from "lucide-react";
 import { HumanResourceMetrics } from "@/presentation/selectors/resource-metrics.selector";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { ResourceBadge } from "./components/resource-badge";
-import { CapacityMeterBadge } from "./components/capacity-meter-badge";
-import { StabilityMeterBadge } from "./components/stability-meter-badge";
-import { ThreatRadarBadge } from "./components/threat-radar-badge";
-import { DIFFICULTY_CONFIGS } from "@geopolitics/domain";
+import { ResourceBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/resource-badge";
+import { CapacityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/capacity-meter-badge";
+import { StabilityMeterBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/stability-meter-badge";
+import { ThreatRadarBadge } from "@/presentation/components/tactical-map/hud/top-bar/components/threat-radar-badge";
 
 interface TopHudBarProps {
   metrics: HumanResourceMetrics;
@@ -29,8 +28,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       formattedIncome,
     };
   }, [metrics]);
-
-  const diffConfig = DIFFICULTY_CONFIGS[metrics.difficulty ?? "NORMAL"];
 
   return (
     <header
@@ -69,18 +66,6 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">
-        <div
-          className="flex flex-col items-center leading-none font-mono px-2.5 py-1 bg-secondary/80 rounded-xl border border-border"
-          title={diffConfig.descriptionFa}
-        >
-          <span className="text-[9px] text-muted-foreground font-sans">
-            درجه سختی
-          </span>
-          <span className="text-[11px] font-bold text-foreground">
-            {diffConfig.nameFa}
-          </span>
-        </div>
-
         <div className="flex flex-col items-center leading-none font-mono px-3 py-1 bg-secondary/80 rounded-xl border border-border">
           <span className="text-[9px] text-muted-foreground font-sans">
             نوبت
