@@ -9,17 +9,11 @@ export interface TerrainProcessingContext {
   height: number;
   landMask: Uint8Array;
   oceanDistField: Float32Array;
-  landDistField: Float32Array;
 }
 
 export interface TacticalTerrainOptions {
-  enableHillshading: boolean;
-  enableBathymetryContours: boolean;
   enableCoastalVignette: boolean;
   enableTacticalGraticule: boolean;
-  sunAzimuthDegrees: number;
-  sunAltitudeDegrees: number;
-  reliefExaggeration: number;
 }
 
 export interface TacticalTerrainStats {

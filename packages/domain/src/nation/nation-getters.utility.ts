@@ -73,27 +73,6 @@ export class NationGettersUtility {
     return IndustryCalculator.consolidateBatches(allBatches);
   }
 
-  public static getNationEquipmentTech(
-    nationId: string,
-    provincesMap?:
-      | Record<string, ProvinceDynamicState>
-      | ProvinceDynamicState[],
-    fallbackTech = 1.0,
-    ownedProvinces?: ProvinceDynamicState[],
-    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
-  ): number {
-    const batches = this.getNationFactoryTiers(
-      nationId,
-      provincesMap,
-      ownedProvinces,
-      provincesByOwnerMap,
-    );
-    return IndustryCalculator.calculateWeightedAverageTech(
-      batches,
-      fallbackTech,
-    );
-  }
-
   public static getTerritoryPixelCount(
     nationId: string,
     provincesMap?:

@@ -52,8 +52,6 @@ export class WavefrontProvincePartitioner {
         },
         landNeighbors: new Set<number>(),
         population: 0,
-        perCapitaProductivity: 5000,
-        maxPopulationCapacity: 0,
       });
 
       return assignedProvinceIds;

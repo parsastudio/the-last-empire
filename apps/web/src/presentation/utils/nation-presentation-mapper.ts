@@ -2,7 +2,7 @@ import { PersianNumberFormatter } from "@/presentation/utils/persian-number-form
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { getGovernmentTypeLabel } from "@/domain/politics/government-label.utility";
 
-export interface FormattedNationPresentation {
+export interface FormattedNationSummary {
   id: string;
   name: string;
   code: string;
@@ -32,13 +32,6 @@ export class NationPresentationMapper {
     return PersianNumberFormatter.formatCompactNumber(population) + " نفر";
   }
 
-  public static formatTerritoryPixels(pixels: number): string {
-    const formatted = PersianNumberFormatter.formatNumberWithCommas(
-      Math.round(pixels),
-    );
-    return `${formatted} پیکسل`;
-  }
-
   public static formatNationSummary(
     id: string,
     nameFa: string,
@@ -49,7 +42,7 @@ export class NationPresentationMapper {
     population: number,
     governmentType: string,
     treasury?: number,
-  ): FormattedNationPresentation {
+  ): FormattedNationSummary {
     const computedTreasury = treasury ?? Math.floor(gdp * 0.05);
     const cleanCode = code.toUpperCase();
 

@@ -11,7 +11,6 @@ export interface BreakdownMilitaryPayroll {
   airForce: number;
   droneMissile: number;
   total: number;
-  rawTotal: number;
   gdpCapped: boolean;
 }
 
@@ -84,7 +83,6 @@ export class MilitaryPayrollCalculator {
         airForce,
         droneMissile,
         total,
-        rawTotal,
         gdpCapped: true,
       };
     }
@@ -96,7 +94,6 @@ export class MilitaryPayrollCalculator {
       airForce: rawAirForce,
       droneMissile: rawDroneMissile,
       total: rawTotal,
-      rawTotal,
       gdpCapped: false,
     };
   }

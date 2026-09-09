@@ -227,25 +227,9 @@ export class SliverProvinceAbsorber {
       }
     }
 
-    const combinedPopulation =
-      (targetInfo.population || 0) + (sliverInfo.population || 0);
-    const combinedCapacity =
-      (targetInfo.maxPopulationCapacity || 0) +
-      (sliverInfo.maxPopulationCapacity || 0);
-
-    const totalPop = Math.max(1, combinedPopulation);
-    const targetProd = targetInfo.perCapitaProductivity || 5000;
-    const sliverProd = sliverInfo.perCapitaProductivity || 5000;
-    const weightedProductivity = Math.round(
-      ((targetInfo.population || 0) * targetProd +
-        (sliverInfo.population || 0) * sliverProd) /
-        totalPop,
-    );
-
     targetInfo.pixelCount += sliverInfo.pixelCount;
-    targetInfo.population = combinedPopulation;
-    targetInfo.maxPopulationCapacity = combinedCapacity;
-    targetInfo.perCapitaProductivity = weightedProductivity;
+    targetInfo.population =
+      (targetInfo.population || 0) + (sliverInfo.population || 0);
 
     for (const neighbor of sliverInfo.landNeighbors) {
       if (neighbor !== targetPid && neighbor !== sliverPid) {

@@ -28,7 +28,6 @@ export * from "./ai/ai-emergency-defense-manager";
 export * from "./ai/ai-espionage-planner";
 export * from "./ai/ai-peace-evaluator";
 export * from "./ai/ai-procurement-planner";
-export * from "./ai/ai-threat-calculator";
 export * from "./ai/ai-treaty-evaluator";
 export * from "./ai/ai-upgrade-planner";
 export * from "./ai/ai-war-declaration-evaluator";

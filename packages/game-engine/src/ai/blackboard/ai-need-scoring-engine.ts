@@ -27,7 +27,11 @@ export class AiNeedScoringEngine {
     const militaryScore = this.scoreMilitaryNeed(nation, context, posture);
     const infrastructureScore = this.scoreInfrastructureNeed(nation, context);
     const innovationScore = this.scoreInnovationNeed(nation, posture);
-    const projectsScore = this.scoreNationalProjectsNeed(nation, posture);
+    const projectsScore = this.scoreNationalProjectsNeed(
+      nation,
+      context,
+      posture,
+    );
     const geopoliticsScore = this.scoreGeopoliticsNeed(
       nation,
       context,
@@ -152,11 +156,13 @@ export class AiNeedScoringEngine {
 
   private static scoreNationalProjectsNeed(
     nation: Nation,
+    context: TurnContext,
     posture: AIPosture,
   ): number {
     let score = 15;
 
-    const boostedProjectIds = contextBoostedProjects(nation);
+    const boostedProjectIds =
+      context.state.turnActivity?.[nation.id]?.boostedProjectIds ?? [];
     const completedIds = nation.completedProjectIds || [];
     const maxBoosts = NationalProjectEffectApplierUtility.MAX_BOOSTS_PER_TURN;
 
@@ -231,8 +237,4 @@ export class AiNeedScoringEngine {
 
     return Math.max(5, Math.min(100, score));
   }
-}
-
-function contextBoostedProjects(nation: Nation): string[] {
-  return nation.projectProgressSteps ? [] : [];
 }

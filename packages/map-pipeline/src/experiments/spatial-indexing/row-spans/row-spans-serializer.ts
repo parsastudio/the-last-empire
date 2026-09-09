@@ -1,7 +1,4 @@
-import {
-  BuiltRowSpans,
-  RowSpansBuildStats,
-} from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-types";
+import { BuiltRowSpans, RowSpansBuildStats } from "./row-spans-types";
 
 export class RowSpansSerializer {
   private static readonly MAGIC_NUMBER = 0x5253504e;

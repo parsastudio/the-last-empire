@@ -304,10 +304,6 @@ export class DirectAttackSelector {
         winProbability: 0,
         isVictoryPredicted: false,
         isCapitulationPredicted: false,
-        phase1Prediction: "نامشخص",
-        phase2Prediction: "نامشخص",
-        phase3Prediction: "نامشخص",
-        valuationRatio: 1,
       };
     }
 
@@ -327,35 +323,10 @@ export class DirectAttackSelector {
     const winProbability = isVictoryPredicted ? 100 : 0;
     const isCapitulationPredicted = calcResult.valuationRatio >= 3.0;
 
-    let phase1Prediction = "عملیات پرتاب موشک انجام نشد";
-    if (drones > 0) {
-      phase1Prediction =
-        calcResult.phase1Missile.phaseWinner === "ATTACKER"
-          ? "نفوذ موفق موشک‌ها و تضعیف پدافند"
-          : "رهگیری موشک‌ها توسط سامانه پدافند";
-    }
-
-    let phase2Prediction = "توازن قوای هوایی";
-    if (calcResult.phase2Air.phaseWinner === "ATTACKER") {
-      phase2Prediction = "برتری کامل شکاری‌های خودی";
-    } else if (calcResult.phase2Air.phaseWinner === "DEFENDER") {
-      phase2Prediction = "پدافند هوایی موثر مدافع";
-    }
-
-    let phase3Prediction = "ریسک بالای شکست سنگرها";
-    if (calcResult.phase3Ground.phaseWinner === "ATTACKER") {
-      phase3Prediction = "شکست قطعی خطوط زمینی دشمن";
-    }
-
     return {
       winProbability,
       isVictoryPredicted,
       isCapitulationPredicted,
-      phase1Prediction,
-      phase2Prediction,
-      phase3Prediction,
-      valuationRatio: calcResult.valuationRatio,
-      phase2Air: calcResult.phase2Air,
       auxiliaryGuarantor: calcResult.auxiliaryGuarantor,
     };
   }

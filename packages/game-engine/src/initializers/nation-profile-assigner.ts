@@ -157,22 +157,4 @@ export class NationProfileAssigner {
       isEmergencyProtectorate: false,
     };
   }
-
-  public buildStartingNation(
-    id: string,
-    isHuman: boolean,
-    customGovType?: GovernmentType | string,
-  ): Nation {
-    const canonicalId = CountryRegistry.resolveCanonicalId(id);
-    const manifestItems = CountryRegistry.getAllManifestNations();
-    const found = manifestItems.find(
-      (m) => CountryRegistry.resolveCanonicalId(m.code || m.id) === canonicalId,
-    );
-
-    if (!found) {
-      throw new Error(`کشور ${id} در مانیفست استراتژیک نقشه تعریف نشده است.`);
-    }
-
-    return this.buildNationFromManifest(found, isHuman, customGovType);
-  }
 }

@@ -54,24 +54,17 @@ export class TacticalTerrainExporter {
       width,
       height,
     );
-    const landDistField = new Float32Array(totalPixels);
 
     const ctx: TerrainProcessingContext = {
       width,
       height,
       landMask,
       oceanDistField,
-      landDistField,
     };
 
     const effectiveOptions: TacticalTerrainOptions = {
-      enableHillshading: false,
-      enableBathymetryContours: options?.enableBathymetryContours ?? true,
       enableCoastalVignette: options?.enableCoastalVignette ?? true,
       enableTacticalGraticule: options?.enableTacticalGraticule ?? true,
-      sunAzimuthDegrees: 315,
-      sunAltitudeDegrees: 45,
-      reliefExaggeration: 1.0,
     };
 
     const rgbaData = TacticalTerrainComposer.composeTerrain(

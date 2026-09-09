@@ -10,17 +10,6 @@ export interface TacticalForecast {
   winProbability: number;
   isVictoryPredicted: boolean;
   isCapitulationPredicted: boolean;
-  phase1Prediction: string;
-  phase2Prediction: string;
-  phase3Prediction: string;
-  valuationRatio: number;
-  phase2Air?: {
-    phaseWinner: string;
-    attAirForce: number;
-    defAirForce: number;
-    attAirLost: number;
-    defAirLost: number;
-  };
   auxiliaryGuarantor?: AuxiliaryGuarantorDefense;
 }
 

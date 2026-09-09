@@ -24,14 +24,7 @@ export class MapBuildOrchestrator {
     const strategicDir = ServerMapPathResolver.getMapStrategicServerDir(mapId);
     const visualDir = ServerMapPathResolver.getMapVisualServerDir(mapId);
 
-    const strategicFiles = [
-      "manifest.json",
-      "live-state.bin",
-      "row-spans-state.bin",
-      "row-spans-stats.json",
-      "quadtree-state.bin",
-      "quadtree-stats.json",
-    ];
+    const strategicFiles = ["manifest.json", "live-state.bin"];
 
     const visualFiles = [
       "tactical_map_terrain.png",

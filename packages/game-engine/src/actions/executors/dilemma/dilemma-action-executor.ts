@@ -130,6 +130,23 @@ export class DilemmaActionExecutor {
       }
     }
 
+    if (effect.airForceDelta) {
+      if (effect.airForceDelta > 0) {
+        updatedMilitary = MilitaryInventoryHelper.addUnits(
+          updatedMilitary,
+          "AIR_FORCE",
+          effect.airForceDelta,
+          updatedMilitary.techLevel,
+        );
+      } else {
+        updatedMilitary = MilitaryInventoryHelper.removeUnits(
+          updatedMilitary,
+          "AIR_FORCE",
+          Math.abs(effect.airForceDelta),
+        );
+      }
+    }
+
     if (effect.droneMissileDelta) {
       if (effect.droneMissileDelta > 0) {
         updatedMilitary = MilitaryInventoryHelper.addUnits(

@@ -1,4 +1,4 @@
-import { BuiltRowSpans } from "@/infrastructure/strategic-pipeline/06-spatial-indexing/row-spans/row-spans-types";
+import { BuiltRowSpans } from "./row-spans-types";
 
 export class RowSpansBuilder {
   public static build(
