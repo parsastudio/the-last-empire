@@ -60,7 +60,10 @@ export function AdvancedDiplomacyActions({
   const isAidSentThisTurn = useMemo(() => {
     if (!clientNation) return false;
     const canonicalTarget = CountryRegistry.resolveCanonicalId(targetNationId);
-    const list = clientNation.sentAidTargetIdsThisTurn || [];
+    const list =
+      clientNation.turnActivity?.sentAidTargetIds ??
+      clientNation.sentAidTargetIdsThisTurn ??
+      [];
     return list.includes(canonicalTarget) || list.includes(targetNationId);
   }, [clientNation, targetNationId]);
 

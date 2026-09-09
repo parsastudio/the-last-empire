@@ -17,6 +17,22 @@ export const ActiveModifierSchema = z.object({
   turnsRemaining: z.number().nonnegative(),
 });
 
+export const NationTurnActivitySchema = z.object({
+  attackedTargetIds: z.array(z.string()).default([]),
+  sentAidTargetIds: z.array(z.string()).default([]),
+  boostedProjectIds: z.array(z.string()).default([]),
+  executedEspionageTiers: z.array(z.string()).default([]),
+});
+
+export type NationTurnActivity = z.infer<typeof NationTurnActivitySchema>;
+
+export const DEFAULT_NATION_TURN_ACTIVITY: NationTurnActivity = Object.freeze({
+  attackedTargetIds: [],
+  sentAidTargetIds: [],
+  boostedProjectIds: [],
+  executedEspionageTiers: [],
+});
+
 export const NationSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -35,10 +51,11 @@ export const NationSchema = z.object({
   relations: z.record(z.string(), RelationProfileSchema),
   activeModifiers: z.array(ActiveModifierSchema),
   globalReputation: z.number().min(-100).max(100),
-  executedEspionageTiers: z.array(z.string()).default([]),
-  attackedTargetIdsThisTurn: z.array(z.string()).default([]),
-  sentAidTargetIdsThisTurn: z.array(z.string()).default([]),
-  boostedProjectIdsThisTurn: z.array(z.string()).default([]),
+  turnActivity: NationTurnActivitySchema.default(DEFAULT_NATION_TURN_ACTIVITY),
+  executedEspionageTiers: z.array(z.string()).default([]).optional(),
+  attackedTargetIdsThisTurn: z.array(z.string()).default([]).optional(),
+  sentAidTargetIdsThisTurn: z.array(z.string()).default([]).optional(),
+  boostedProjectIdsThisTurn: z.array(z.string()).default([]).optional(),
   projectProgressSteps: z.record(z.string(), z.number()).default({}),
   completedProjectIds: z.array(z.string()).default([]),
   warFocusTargetId: z.string().nullable().optional(),

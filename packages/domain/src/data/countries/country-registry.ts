@@ -57,6 +57,7 @@ export const ALL_COUNTRY_PROFILES: readonly CountryProfile[] = Object.freeze(
 export class CountryRegistry {
   private static readonly byIso3 = new Map<string, CountryProfile>();
   private static readonly byFlagCode = new Map<string, CountryProfile>();
+  private static readonly canonicalCache = new Map<string, string>();
   private static manifestProfiles = new Map<string, CountryProfile>();
   private static manifestNations = new Map<string, FinalManifestNation>();
 
@@ -74,6 +75,7 @@ export class CountryRegistry {
     manifest: FinalMapManifest | null,
   ): void {
     if (!manifest) return;
+    this.canonicalCache.clear();
     const validated = ManifestValidator.validate(manifest);
     const { manifestNations, manifestProfiles } =
       ManifestProfileLoader.loadManifestData(validated);
@@ -122,8 +124,29 @@ export class CountryRegistry {
     const clean = str.trim().toUpperCase();
     if (!clean) return "";
 
-    const profile = this.getCountry(clean);
-    return profile ? profile.code.toUpperCase() : clean;
+    const cached = this.canonicalCache.get(clean);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    let resolved = clean;
+    const manifestMatch = this.manifestProfiles.get(clean);
+    if (manifestMatch) {
+      resolved = manifestMatch.code.toUpperCase();
+    } else {
+      const iso3Match = this.byIso3.get(clean);
+      if (iso3Match) {
+        resolved = iso3Match.code.toUpperCase();
+      } else {
+        const flagMatch = this.byFlagCode.get(clean);
+        if (flagMatch) {
+          resolved = flagMatch.code.toUpperCase();
+        }
+      }
+    }
+
+    this.canonicalCache.set(clean, resolved);
+    return resolved;
   }
 
   public static getGpuColorIndex(identifier: unknown): number {

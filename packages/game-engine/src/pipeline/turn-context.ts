@@ -65,6 +65,27 @@ export class TurnContext {
     }
   }
 
+  public static hasTerritorialOwnershipChange(
+    prevState: GameState,
+    nextState: GameState,
+  ): boolean {
+    if (prevState.provinces === nextState.provinces) return false;
+
+    const prevKeys = Object.keys(prevState.provinces);
+    const nextKeys = Object.keys(nextState.provinces);
+    if (prevKeys.length !== nextKeys.length) return true;
+
+    for (let i = 0; i < nextKeys.length; i++) {
+      const key = nextKeys[i]!;
+      const prevProv = prevState.provinces[key];
+      const nextProv = nextState.provinces[key];
+      if (!prevProv || !nextProv) return true;
+      if (prevProv.ownerNationId !== nextProv.ownerNationId) return true;
+    }
+
+    return false;
+  }
+
   public getNationGdp(nationId: string): number {
     const canonicalId = CountryRegistry.resolveCanonicalId(nationId);
     return this.gdpMap.get(canonicalId) ?? this.gdpMap.get(nationId) ?? 0;
