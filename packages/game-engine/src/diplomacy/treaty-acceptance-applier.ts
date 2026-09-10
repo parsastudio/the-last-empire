@@ -5,6 +5,7 @@ import {
   PendingProposalManagerUtility,
   getNationGdp,
   StrategicPartnershipCalculatorUtility,
+  DIPLOMATIC_PROPOSAL_LABELS_FA,
 } from "@geopolitics/domain";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { DiplomaticLogSynchronizer } from "@/engine/diplomacy/appliers/diplomatic-log-synchronizer";
@@ -83,11 +84,8 @@ export class TreatyAcceptanceApplier {
     updatedReceiver = treatyState.updatedReceiver;
 
     const treatyLabel =
-      proposal.proposalType === "STRATEGIC_PARTNERSHIP"
-        ? "شراکت استراتژیک و اقتصادی"
-        : proposal.proposalType === "NON_AGGRESSION_PACT"
-          ? "پیمان عدم تخاصم"
-          : "معاهده صلح و پایان جنگ";
+      DIPLOMATIC_PROPOSAL_LABELS_FA[proposal.proposalType] ||
+      "معاهده دیپلماتیک";
 
     const finalLogs = DiplomaticLogSynchronizer.syncAcceptanceLogs(
       state.turnLogs,
@@ -120,13 +118,8 @@ export class TreatyAcceptanceApplier {
     proposal: PendingDiplomaticProposal,
   ): GameState {
     const treatyLabel =
-      proposal.proposalType === "STRATEGIC_PARTNERSHIP"
-        ? "شراکت استراتژیک"
-        : proposal.proposalType === "NON_AGGRESSION_PACT"
-          ? "عدم تخاصم"
-          : proposal.proposalType === "SECURITY_GUARANTEE"
-            ? "چتر امنیتی"
-            : "صلح";
+      DIPLOMATIC_PROPOSAL_LABELS_FA[proposal.proposalType] ||
+      "معاهده دیپلماتیک";
 
     const finalLogs = DiplomaticLogSynchronizer.syncRejectionLogs(
       state.turnLogs,

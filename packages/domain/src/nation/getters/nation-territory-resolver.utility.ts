@@ -2,6 +2,14 @@ import { CountryRegistry } from "@/domain/data/countries";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
+export interface TerritoryIndustrialCapacity {
+  totalActiveFactories: number;
+  totalMaxSlots: number;
+  totalEmptySlots: number;
+  slotSaturationRatio: number;
+  occupancyPercentage: number;
+}
+
 export class NationTerritoryResolverUtility {
   public static buildProvincesByOwnerMap<T extends ProvinceDynamicState>(
     provincesMap?: Record<string, T> | T[],
@@ -88,5 +96,44 @@ export class NationTerritoryResolverUtility {
       if (hasSea) return true;
     }
     return false;
+  }
+
+  public static getTerritoryIndustrialCapacity(
+    nationId: string,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
+  ): TerritoryIndustrialCapacity {
+    const provs =
+      ownedProvinces ??
+      this.getOwnedProvinces(nationId, provincesMap, provincesByOwnerMap);
+
+    let totalActiveFactories = 0;
+    let totalMaxSlots = 0;
+
+    for (let i = 0; i < provs.length; i++) {
+      const p = provs[i]!;
+      const maxSlots = MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
+      totalActiveFactories += p.factoriesCount || 0;
+      totalMaxSlots += maxSlots;
+    }
+
+    const totalEmptySlots = Math.max(0, totalMaxSlots - totalActiveFactories);
+    const slotSaturationRatio =
+      totalMaxSlots > 0 ? totalActiveFactories / totalMaxSlots : 1.0;
+    const occupancyPercentage =
+      totalMaxSlots > 0
+        ? Math.round((totalActiveFactories / totalMaxSlots) * 100)
+        : 100;
+
+    return {
+      totalActiveFactories,
+      totalMaxSlots,
+      totalEmptySlots,
+      slotSaturationRatio,
+      occupancyPercentage,
+    };
   }
 }

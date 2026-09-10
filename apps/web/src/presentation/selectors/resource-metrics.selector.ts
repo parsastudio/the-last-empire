@@ -1,16 +1,10 @@
 import {
   GameState,
   Nation,
-  getNationGdp,
-  SecurityFeeCalculatorUtility,
-  NAVAL_FLEET_CONFIG,
-  DebtCalculatorUtility,
   CountryRegistry,
-  StrategicPartnershipCalculatorUtility,
   GameDifficulty,
-  FiscalRevenueCalculator,
-  MilitaryPayrollCalculator,
-  MapTopologyRegistry,
+  NationGettersUtility,
+  NationalBudgetCalculator,
 } from "@geopolitics/domain";
 
 export interface HumanResourceMetrics {
@@ -67,74 +61,26 @@ export function selectHumanResourceMetrics(
     };
   }
 
-  let totalActiveFactories = 0;
-  let totalMaxSlots = 0;
-  for (const p of Object.values(gameState.provinces || {})) {
-    if (
-      CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalHumanId
-    ) {
-      totalActiveFactories += p.factoriesCount;
-      totalMaxSlots += MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
-    }
-  }
+  const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
+    canonicalHumanId,
+    gameState.provinces,
+  );
 
-  const fiscalResult = FiscalRevenueCalculator.calculate(
+  const budget = NationalBudgetCalculator.calculate(
     nation,
     gameState.nations,
     gameState.provinces,
+    nation.treasury,
+    1.0,
   );
-  const payrollBreakdown = MilitaryPayrollCalculator.calculatePayroll(nation);
-
-  const navalSecurityIncome = Math.floor(
-    (nation.navalFleet || 0) *
-      NAVAL_FLEET_CONFIG.FLEET_UNIT_COST *
-      NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE,
-  );
-
-  let partnershipIncome = 0;
-  if (gameState.nations) {
-    for (const rel of Object.values(nation.relations || {})) {
-      if (rel.stance === "STRATEGIC_PARTNERSHIP") {
-        const partnerCanonical = CountryRegistry.resolveCanonicalId(
-          rel.targetNationId,
-        );
-        const partner =
-          gameState.nations[partnerCanonical] ||
-          gameState.nations[rel.targetNationId];
-        if (partner && partner.isAlive) {
-          const partnerGdp = getNationGdp(partner, gameState.provinces);
-          const dividend =
-            StrategicPartnershipCalculatorUtility.calculateTurnDividend(
-              partnerGdp,
-            );
-          partnershipIncome += dividend;
-        }
-      }
-    }
-  }
-
-  const totalGrossIncome =
-    fiscalResult.totalRevenue + navalSecurityIncome + partnershipIncome;
-
-  const humanGdp = getNationGdp(nation, gameState.provinces);
-  const securityFee =
-    nation.securityGuarantorId && nation.isEmergencyProtectorate
-      ? SecurityFeeCalculatorUtility.calculateSecurityFee(humanGdp, true)
-      : 0;
-
-  const totalExpenses =
-    payrollBreakdown.total +
-    securityFee +
-    DebtCalculatorUtility.calculateInterest(nation.nationalDebt);
-  const netIncome = totalGrossIncome - totalExpenses;
 
   return {
     nation,
     treasury: nation.treasury,
-    netIncomePerTurn: netIncome,
-    grossIncomePerTurn: totalGrossIncome,
-    totalActiveFactories,
-    totalMaxSlots,
+    netIncomePerTurn: budget.netIncome,
+    grossIncomePerTurn: budget.grossRevenue,
+    totalActiveFactories: capacity.totalActiveFactories,
+    totalMaxSlots: capacity.totalMaxSlots,
     industrialLevel: nation.industrialLevel,
     equipmentTechLevel: nation.equipmentTechLevel,
     stability: nation.government.stability,

@@ -19,6 +19,7 @@ export * from "./economy/territorial-saturation-calculator.utility";
 export * from "./economy/factory-batch.schema";
 export * from "./economy/fiscal-revenue-calculator";
 export * from "./economy/payroll-calculator";
+export * from "./economy/national-budget-calculator";
 export * from "./espionage/espionage.schema";
 export * from "./events/dilemma.schema";
 export * from "./events/dilemma-catalog.data";

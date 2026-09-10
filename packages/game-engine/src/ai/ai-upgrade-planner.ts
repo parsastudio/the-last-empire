@@ -4,7 +4,7 @@ import {
   Nation,
   IndustryCalculator,
   AI_DOCTRINE_PRESETS,
-  MapTopologyRegistry,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { ResearchManager } from "@/engine/politics/research-manager";
 import { AIMachineryImportPlanner } from "@/engine/ai/procurement/ai-machinery-import-planner";
@@ -69,17 +69,20 @@ export class AIUpgradePlanner {
       }
     }
 
-    let totalEmptySlots = 0;
-    for (let i = 0; i < myProvs.length; i++) {
-      const p = myProvs[i]!;
-      const maxSlots = MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
-      totalEmptySlots += Math.max(0, maxSlots - p.factoriesCount);
-    }
+    const industrialCapacity =
+      NationGettersUtility.getTerritoryIndustrialCapacity(
+        nation.id,
+        context.state.provinces,
+        myProvs,
+      );
 
     const affordableSlots = Math.floor(
       domesticInfraBudget / IndustryCalculator.FACTORY_REBUILD_COST,
     );
-    const slotsToBuild = Math.min(totalEmptySlots, affordableSlots);
+    const slotsToBuild = Math.min(
+      industrialCapacity.totalEmptySlots,
+      affordableSlots,
+    );
 
     if (slotsToBuild > 0) {
       actions.push(ActionFactory.buildFactory(nation.id, slotsToBuild));
@@ -92,10 +95,7 @@ export class AIUpgradePlanner {
       nation.equipmentTechLevel < nation.industrialLevel &&
       domesticInfraBudget > 0
     ) {
-      let totalFactories = 0;
-      for (const p of myProvs) {
-        totalFactories += p.factoriesCount;
-      }
+      const totalFactories = industrialCapacity.totalActiveFactories;
       const unitCost = IndustryCalculator.calculateModernizeUnitCost(
         nation.equipmentTechLevel,
         nation.industrialLevel,

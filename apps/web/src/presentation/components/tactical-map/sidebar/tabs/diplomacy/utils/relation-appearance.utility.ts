@@ -1,17 +1,14 @@
-import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
+import {
+  DiplomaticStance,
+  DiplomaticPosture,
+  DiplomaticProposalType,
+  DIPLOMATIC_PROPOSAL_LABELS_FA,
+  DIPLOMATIC_STANCE_LABELS_FA,
+  DIPLOMATIC_POSTURE_LABELS_FA,
+} from "@geopolitics/domain";
 
 export function getPostureLabel(posture: DiplomaticPosture): string {
-  switch (posture) {
-    case "NATURAL_ALLY":
-      return "متحد طبیعی و همسو";
-    case "OPPORTUNISTIC_PREDATOR":
-      return "شکارچی و رقیب متخاصم";
-    case "WARY_BUFFER":
-      return "مدافع محتاط و نگران";
-    case "NEUTRAL_COEXISTENCE":
-    default:
-      return "همزیستی مسالمت‌آمیز";
-  }
+  return DIPLOMATIC_POSTURE_LABELS_FA[posture] || "همزیستی مسالمت‌آمیز";
 }
 
 export function getPostureBadgeClass(posture: DiplomaticPosture): string {
@@ -31,17 +28,10 @@ export function getPostureBadgeClass(posture: DiplomaticPosture): string {
 export function getDiplomaticStanceLabel(
   stance: DiplomaticStance | string,
 ): string {
-  switch (stance) {
-    case "WAR":
-      return "وضعیت نبرد";
-    case "STRATEGIC_PARTNERSHIP":
-      return "شراکت استراتژیک";
-    case "NON_AGGRESSION_PACT":
-      return "عدم تخاصم";
-    case "NORMAL_DIPLOMACY":
-    default:
-      return "دیپلماسی عادی";
+  if (stance in DIPLOMATIC_STANCE_LABELS_FA) {
+    return DIPLOMATIC_STANCE_LABELS_FA[stance as DiplomaticStance];
   }
+  return String(stance);
 }
 
 export function getDiplomaticStanceBadgeClass(
@@ -61,30 +51,10 @@ export function getDiplomaticStanceBadgeClass(
 }
 
 export function getProposalTypeName(type: string): string {
-  switch (type) {
-    case "STRATEGIC_PARTNERSHIP":
-      return "شراکت استراتژیک";
-    case "SECURITY_GUARANTEE":
-      return "پیمان چتر امنیتی";
-    case "EMERGENCY_PROTECTORATE":
-      return "معاهده تحت‌الحمایگی استعماری";
-    case "CANCEL_SECURITY_GUARANTEE":
-      return "لغو چتر امنیتی";
-    case "CANCEL_EMERGENCY_PROTECTORATE":
-      return "لغو معاهده استعماری";
-    case "NON_AGGRESSION_PACT":
-      return "پیمان عدم تخاصم";
-    case "PEACE_TREATY":
-      return "معاهده صلح";
-    case "SEND_FOREIGN_AID":
-      return "کمک مالی";
-    case "DECLARE_WAR":
-      return "اعلان جنگ";
-    case "CANCEL_TREATY":
-      return "تنزل روابط و لغو معاهده";
-    default:
-      return "معاهده دیپلماتیک";
+  if (type in DIPLOMATIC_PROPOSAL_LABELS_FA) {
+    return DIPLOMATIC_PROPOSAL_LABELS_FA[type as DiplomaticProposalType];
   }
+  return "معاهده دیپلماتیک";
 }
 
 export function getAlignmentColor(alignment: number): string {

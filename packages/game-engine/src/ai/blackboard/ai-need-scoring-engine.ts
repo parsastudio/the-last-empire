@@ -5,7 +5,7 @@ import {
   NATIONAL_PROJECTS_CATALOG,
   NationalProjectEffectApplierUtility,
   CountryRegistry,
-  MapTopologyRegistry,
+  NationGettersUtility,
 } from "@geopolitics/domain";
 import { TurnContext } from "@/engine/pipeline/turn-context";
 import { AIPosture } from "@/engine/ai/procurement/ai-posture-evaluator";
@@ -99,17 +99,16 @@ export class AiNeedScoringEngine {
   ): number {
     let score = 20;
     const myProvs = context.getOwnedProvinces(nation.id);
+    const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
+      nation.id,
+      context.state.provinces,
+      myProvs,
+    );
 
-    let emptySlots = 0;
-    let totalSlots = 0;
-    for (const p of myProvs) {
-      const maxSlots = MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
-      totalSlots += maxSlots;
-      emptySlots += Math.max(0, maxSlots - p.factoriesCount);
-    }
-
-    if (emptySlots > 0 && totalSlots > 0) {
-      score += Math.round((emptySlots / totalSlots) * 35);
+    if (capacity.totalEmptySlots > 0 && capacity.totalMaxSlots > 0) {
+      score += Math.round(
+        (capacity.totalEmptySlots / capacity.totalMaxSlots) * 35,
+      );
     }
 
     const modernizationGap = Math.max(

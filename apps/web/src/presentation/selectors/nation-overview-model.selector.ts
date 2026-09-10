@@ -3,7 +3,6 @@ import {
   Province,
   NationGettersUtility,
   getNationGdp,
-  CountryRegistry,
   DebtCalculatorUtility,
 } from "@geopolitics/domain";
 
@@ -31,20 +30,16 @@ export function selectNationOverviewViewModel(
   nationsMap?: Record<string, Nation>,
   provincesMap?: Record<string, Province>,
 ): NationOverviewViewModel {
-  const canonicalId = CountryRegistry.resolveCanonicalId(nation.id);
-  let totalActiveFactories = 0;
-
-  if (provincesMap) {
-    for (const p of Object.values(provincesMap)) {
-      if (CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalId) {
-        totalActiveFactories += p.factoriesCount;
-      }
-    }
-  }
+  const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
+    nation.id,
+    provincesMap,
+  );
 
   const gdp = getNationGdp(nation, provincesMap);
-  const maxDebt = DebtCalculatorUtility.getMaxDebtLimit(gdp);
-  const availableLoanLimit = Math.max(0, maxDebt - nation.nationalDebt);
+  const availableLoanLimit = DebtCalculatorUtility.getAvailableLoanHeadroom(
+    nation.nationalDebt,
+    gdp,
+  );
   const debtInterestPerTurn = DebtCalculatorUtility.calculateInterest(
     nation.nationalDebt,
   );
@@ -57,7 +52,7 @@ export function selectNationOverviewViewModel(
     rank: NationGettersUtility.getRank(nation.id, nationsMap, provincesMap),
     gdp,
     population: NationGettersUtility.getPopulation(nation.id, provincesMap),
-    totalActiveFactories,
+    totalActiveFactories: capacity.totalActiveFactories,
     militaryTechLevel: nation.military.techLevel,
     industrialLevel: nation.industrialLevel,
     treasury: nation.treasury,
