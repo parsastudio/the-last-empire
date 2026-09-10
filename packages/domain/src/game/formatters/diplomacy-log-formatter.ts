@@ -72,7 +72,7 @@ export class DiplomacyLogFormatter {
       case "DEFENSE_PACT_REFUSAL_COMPENSATION": {
         const compVal = Number(params["compensationAmount"] || 0);
         const compText = PersianNumberFormatter.formatCurrency(compVal, true);
-        return `امتناع ضامن از ورود به جنگ به دلیل شراکت استراتژیک با متهاجم: کشور ${sourceName} از اعلان جنگ امتناع کرد و مبلغ ${compText} (معادل ۵۰٪ حق تعهد دفاعی) را به عنوان غرامت به خزانه‌داری ${targetName} پرداخت نمود.`;
+        return `انصراف ضامن از دفاع به دلیل شراکت با مهاجم: کشور ${sourceName} از ورود به جنگ علیه شما خودداری کرد و مبلغ ${compText} غرامت نقدی به خزانه شما واریز نمود.`;
       }
 
       case "EMERGENCY_PROTECTORATE_SIGNED":

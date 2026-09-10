@@ -11,17 +11,17 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
 > = {
   AUTARKY: {
     stance: "AUTARKY",
-    nameFa: "خودکفایی بسته و اقتصاد جنگی",
+    nameFa: "اقتصاد جنگی و خودکفایی مطلق",
     tagline: "تمرکز ۱۰۰٪ بر تولید و منابع درون‌مرزی",
     description:
-      "قطع کامل اتکا به جهان، ایمنی مطلق در برابر تحریم‌ها و محاصره‌های دریایی با انضباط شدید دولتی.",
+      "۱۰۰٪ درآمد از داخل؛ مصونیت کامل در برابر تحریم‌ها، محاصره دریایی و باج‌خواهی خارجی.",
     domesticWeight: 1.0,
     globalWeight: 0.0,
     badgeText: "۱۰۰٪ بومی",
   },
   PROTECTIONISM: {
     stance: "PROTECTIONISM",
-    nameFa: "حمایت‌گرایی صنعتی و ملی",
+    nameFa: "اقتصاد ملی و حمایت از کارخانه‌ها",
     tagline: "اولویت ۷۵٪ اقتصاد داخلی و ۲۵٪ تبادلات فرامرزی",
     description:
       "حمایت از صنایع سنگین بومی و حفظ بازارهای استراتژیک در شرایط تنش‌های ژئوپلیتیک.",
@@ -31,7 +31,7 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
   },
   BALANCED_MIXED: {
     stance: "BALANCED_MIXED",
-    nameFa: "توسعه متوازن و اقتصاد مختلط",
+    nameFa: "اقتصاد متوازن (تولید ملی + تجارت آزاد)",
     tagline: "موازنه پایدار ۵۰٪ تولید ملی و ۵۰٪ بازرگانی بین‌الملل",
     description:
       "سیاست استاندارد تعادل مالی میان رفاه عمومی، درآمد داخلی و فرصت‌های تجاری با هم‌پیمانان.",
@@ -51,7 +51,7 @@ export const ECONOMIC_DOCTRINE_CONFIGS: Record<
   },
   MERCANTILE_HUB: {
     stance: "MERCANTILE_HUB",
-    nameFa: "هاب ترانزیت و تجارت فراملی",
+    nameFa: "شاهراه تجارت جهانی و امپراتوری بنادر",
     tagline: "تمرکز ۱۰۰٪ بر جریان ثروت و ترانزیت غول‌های اقتصادی جهان",
     description:
       "بهره‌برداری کامل از تنگه‌های استراتژیک و مسیرهای دریایی برای خلق ثروت نجومی بدون سقف.",

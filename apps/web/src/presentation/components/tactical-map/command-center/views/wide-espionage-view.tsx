@@ -135,7 +135,7 @@ export function WideEspionageView({
               <div className="grid grid-cols-1 gap-3.5">
                 <EspionageTierCard
                   tier={2}
-                  title="خرابکاری در پایگاه‌های تسلیحاتی و پدافند (Defense Sabotage)"
+                  title="عملیات خرابکاری در پایگاه‌های موشکی و تانک‌های حریف"
                   subtitle="انفجار و از کار انداختن مستقیم ۲۰٪ تا ۳۰٪ از سامانه‌های پدافند هوایی، تانک‌ها و جنگنده‌های آماده رزم حریف قبل از آغاز حمله نظامی شما (۱۸٪ GDP)."
                   icon={ShieldAlert}
                   iconColorClass="text-military"
@@ -150,7 +150,7 @@ export function WideEspionageView({
 
                 <EspionageTierCard
                   tier={3}
-                  title="سرقت فوق‌محرمانه اسرار و جهش فناوری (Superpower Tech Heist)"
+                  title="شبیخون سایبری: سرقت فناوری و فرمول‌های محرمانه"
                   subtitle={tier3Subtitle}
                   icon={Binary}
                   iconColorClass="text-amber-500"

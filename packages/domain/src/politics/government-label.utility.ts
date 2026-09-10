@@ -7,38 +7,38 @@ export interface GovernmentOption {
 }
 
 export const GOVERNMENT_TYPE_PERSIAN_MAP: Record<GovernmentType, string> = {
-  PLURALIST_PARLIAMENTARY: "جمهوری کثرت‌گرا و پارلمانی",
-  CENTRALIZED_PRESIDENTIAL: "جمهوری ریاستی متمرکز",
-  IDEOLOGICAL_REGIME: "حاکمیت ایدئولوژیک",
+  PLURALIST_PARLIAMENTARY: "جمهوری پارلمانی (دموکراسی)",
+  CENTRALIZED_PRESIDENTIAL: "جمهوری ریاستی مقتدر",
+  IDEOLOGICAL_REGIME: "حاکمیت ایدئولوژیک و انقلابی",
   HEREDITARY_MONARCHY: "پادشاهی سنتی و موروثی",
-  TECHNOCRATIC_ONE_PARTY: "تک‌حزبی توسعه‌گرا (تکنوکرات)",
+  TECHNOCRATIC_ONE_PARTY: "دولت تکنوکرات صنعتی (فرماندهی کارخانه‌ها)",
 };
 
 export const GOVERNMENT_OPTIONS: GovernmentOption[] = [
   {
     type: "PLURALIST_PARLIAMENTARY",
     name: GOVERNMENT_TYPE_PERSIAN_MAP.PLURALIST_PARLIAMENTARY,
-    desc: "دموکراسی نهادینه‌شده، تفکیک قوا، اتکا به بازار آزاد و مشارکت عمومی بر مبنای صندوق آرا.",
+    desc: "آزادی پژوهش و رشد سریع علم، رفاه بالا در صلح؛ اما تحمل پایین مردم در جنگ فرسایشی.",
   },
   {
     type: "CENTRALIZED_PRESIDENTIAL",
     name: GOVERNMENT_TYPE_PERSIAN_MAP.CENTRALIZED_PRESIDENTIAL,
-    desc: "دولت اجرایی مقتدر، تمرکز اختیارات حاکمیتی، هدایت ملی و سازوکارهای انتخابی مدیریت‌شده.",
+    desc: "دولت اجرایی مقتدر، اختیارات متمرکز، تصمیم‌گیری چابک نظامی و توازن در توسعه.",
   },
   {
     type: "IDEOLOGICAL_REGIME",
     name: GOVERNMENT_TYPE_PERSIAN_MAP.IDEOLOGICAL_REGIME,
-    desc: "تصمیم‌گیری راهبردی بر مبنای دکترین عقیدتی، رهبری معنوی، آرمان‌گرایی و انسجام فراگیر.",
+    desc: "بسیج سراسری ارتش، روحیه پولادین در جنگ‌های سخت و مقاومت بالا در برابر فرسودگی نظامی.",
   },
   {
     type: "HEREDITARY_MONARCHY",
     name: GOVERNMENT_TYPE_PERSIAN_MAP.HEREDITARY_MONARCHY,
-    desc: "ثبات خاندانی، تکیه بر سنت‌های نهادی دیرینه، پیوستگی تاریخی و اقتدار نمادین موروثی.",
+    desc: "ثبات سیاسی بتنی، وفاداری سنتی ارتش و ایمنی در برابر شورش، با ساختار محافظه‌کارانه.",
   },
   {
     type: "TECHNOCRATIC_ONE_PARTY",
     name: GOVERNMENT_TYPE_PERSIAN_MAP.TECHNOCRATIC_ONE_PARTY,
-    desc: "برنامه‌ریزی متمرکز دولتی، انضباط فراگیر سازمانی، نخبه‌گرایی علمی و تمرکز کامل بر رشد جهشی.",
+    desc: "ساخت کارخانه و ادوات ارزان‌تر با انضباط شدید دولتی، اما پرهزینه در نگهداری تجهیزات پیشرفته.",
   },
 ];
 

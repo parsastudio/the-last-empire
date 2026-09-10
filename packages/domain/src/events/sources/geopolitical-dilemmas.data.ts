@@ -4,7 +4,7 @@ export const GEOPOLITICAL_DILEMMA_EVENTS: readonly DilemmaEvent[] =
   Object.freeze([
     {
       id: "superpower_ultimatum",
-      titleFa: "اولتیماتوم دیپلماتیک ابرقدرت",
+      titleFa: "تهدید و باج‌خواهی ابرقدرت رقیب",
       headlineFa: "مطالبه امتیازات مرزی و تجاری",
       descriptionFa:
         "یکی از قدرت‌های برتر جهانی با ارسال یادداشتی خواستار سهم‌خواهی از درآمدهای ترانزیتی شما شده است.",
@@ -126,8 +126,8 @@ export const GEOPOLITICAL_DILEMMA_EVENTS: readonly DilemmaEvent[] =
     },
     {
       id: "international_strait_claims",
-      titleFa: "ادعای تحدید حدود فلات قاره",
-      headlineFa: "مناقشه حقوقی بر سر آب‌های سرزمینی",
+      titleFa: "ادعای مالکیت دشمن بر آب‌های ساحلی شما",
+      headlineFa: "تنش نظامی بر سر جزایر و مسیرهای دریایی",
       descriptionFa:
         "کشور مجاور نقشه‌ای منتشر کرده که بخشی از آب‌های آزاد مجاور سواحل شما را جزو منطقه انحصاری خود می‌داند.",
       category: "GEOPOLITICAL",

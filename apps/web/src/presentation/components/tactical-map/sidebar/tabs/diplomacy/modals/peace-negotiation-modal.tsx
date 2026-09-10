@@ -101,7 +101,7 @@ export function PeaceNegotiationModal({
     <UnifiedModalShell
       isOpen={isOpen}
       title={`میز مذاکرات آتش‌بس و شروط صلح با ${targetNation.name}`}
-      subtitle="ارزیابی زنده شاخص توان نبرد و پیش‌نویس معاهده ترک مخاصمه"
+      subtitle="محاسبه زنده موازنه قوا و تعیین شروط تسلیم یا آتش‌بس"
       maxWidthClass="max-w-xl"
       onClose={onClose}
     >
@@ -116,7 +116,7 @@ export function PeaceNegotiationModal({
                 {humanNation.name}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono block">
-                توان نبرد:{" "}
+                ارزش ارتش و خزانه:{" "}
                 {PersianNumberFormatter.formatCurrency(terms.targetTwmi, true)}
               </span>
             </div>
@@ -140,7 +140,7 @@ export function PeaceNegotiationModal({
                 {targetNation.name}
               </span>
               <span className="text-[10px] text-muted-foreground font-mono block">
-                توان نبرد:{" "}
+                ارزش ارتش و خزانه:{" "}
                 {PersianNumberFormatter.formatCurrency(terms.sourceTwmi, true)}
               </span>
             </div>
@@ -204,8 +204,8 @@ export function PeaceNegotiationModal({
                   : isWhitePeace
                     ? "موازنه برابر"
                     : terms.isAiOffering
-                      ? "پیشنهاد باج حریف"
-                      : "مطالبه باج حریف"}
+                      ? "پیشنهاد پرداخت غرامت توسط دشمن"
+                      : "مطالبه غرامت سنگین از شما"}
             </span>
           </div>
 
@@ -263,7 +263,7 @@ export function PeaceNegotiationModal({
             className="py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <Swords size={15} />
-            <span>رد شروط و تداوم نبرد</span>
+            <span>رد صلح و ادامه جنگ تا نابودی دشمن</span>
           </button>
 
           <button

@@ -28,7 +28,7 @@ export function TreatyStatusBanner({
       <div className="w-full p-3 rounded-xl bg-rose-950/40 border border-rose-500/60 text-rose-300 flex items-center justify-between text-xs font-bold font-sans shadow-md">
         <span className="flex items-center gap-1.5">
           <Skull size={14} className="text-rose-400 animate-pulse" />
-          معاهده تحت‌الحمایگی استعماری (۵٪ خراج نوبتی • نیروی ضربت ۵۰٪ GDP)
+          پیمان استمداد امنیتی (۵٪ خراج نوبتی • نیروی ضربت ۵۰٪ GDP)
         </span>
         <span className="text-[9px] font-mono bg-rose-500/20 px-2 py-0.5 rounded text-rose-300 font-black">
           تحت‌الحمایه

@@ -47,10 +47,10 @@ export function BattlePhaseMissileCard({
             </div>
             <div>
               <h3 className="text-sm font-black text-foreground">
-                فاز اول: ضربات موشکی پیش‌دستانه و مصاف با شبکه پدافند
+                فاز اول: رگبار موشکی و مصاف با گنبد پدافند هوایی
               </h3>
               <span className="text-[10px] text-muted-foreground">
-                سرکوب پدافند هوایی و بمباران راهبردی کارخانجات صنعتی
+                نابودی سکوهای ضدهوایی و بمباران زیرساخت‌های حیاتی
               </span>
             </div>
           </div>
@@ -96,10 +96,10 @@ export function BattlePhaseMissileCard({
           </div>
           <div>
             <h3 className="text-sm font-black text-foreground">
-              فاز اول: ضربات موشکی پیش‌دستانه و مصاف با شبکه پدافند
+              فاز اول: رگبار موشکی و مصاف با گنبد پدافند هوایی
             </h3>
             <span className="text-[10px] text-muted-foreground">
-              رهگیری موشک‌ها، سرکوب آتشبار پدافندی و انهدام کارخانجات
+              نابودی سکوهای ضدهوایی و بمباران زیرساخت‌های حیاتی
             </span>
           </div>
         </div>
@@ -187,7 +187,7 @@ export function BattlePhaseMissileCard({
                   {PersianNumberFormatter.toPersianDigits(
                     aux.deployedAirDefense,
                   )}{" "}
-                  پدافند تحت‌الحمایگی
+                  پدافند کمکی
                 </span>
               </span>
             ) : (
@@ -243,7 +243,7 @@ export function BattlePhaseMissileCard({
           <Info size={16} className="text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1 text-right">
             <span className="font-black text-amber-400 block">
-              دامنه جغرافیایی تخریب کارخانجات:
+              مناطق بمباران‌شده صنعتی:
             </span>
             <p className="text-[11px] leading-relaxed text-muted-foreground">
               {destructionScope === "OTHER_PROVINCES"

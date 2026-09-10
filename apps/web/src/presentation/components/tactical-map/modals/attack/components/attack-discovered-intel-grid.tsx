@@ -50,7 +50,7 @@ export function AttackDiscoveredIntelGrid({
           className="py-1.5 px-3 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-xl text-[11px] font-black transition-all cursor-pointer shadow-md shadow-gdp/20 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-1.5 shrink-0"
         >
           <Sparkles size={13} />
-          <span>بهترین آرایش و ترکیب تهاجم</span>
+          <span>محاسبه هوشمند کمترین تلفات و پیروزی قطعی</span>
         </button>
       </div>
 

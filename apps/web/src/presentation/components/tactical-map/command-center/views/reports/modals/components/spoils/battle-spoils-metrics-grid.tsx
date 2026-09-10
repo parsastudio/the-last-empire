@@ -16,7 +16,7 @@ export function BattleSpoilsMetricsGrid({
         <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
           <span className="flex items-center gap-1">
             <Globe2 size={13} className="text-primary" />
-            <span>مساحت خاک:</span>
+            <span>وسعت خاک تصرف‌شده:</span>
           </span>
           <span>🗺️</span>
         </div>
@@ -73,7 +73,7 @@ export function BattleSpoilsMetricsGrid({
         <div className="flex items-center justify-between text-muted-foreground text-[11px] font-sans font-bold">
           <span className="flex items-center gap-1">
             <Coins size={13} className="text-treasury" />
-            <span>غارت خزانه:</span>
+            <span>غارت مستقیم از خزانه دشمن:</span>
           </span>
           <span>💰</span>
         </div>

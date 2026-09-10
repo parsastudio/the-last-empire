@@ -30,7 +30,7 @@ export function ProjectBreakthroughCardOverlay({
               جهش بزرگ علمی ⚡
             </span>
             <h4 className="text-sm md:text-base font-black text-foreground truncate">
-              کشف غیرمنتظره فرمول نهایی!
+              شاهکار دانشمندان: جهش علمی پیش از موعد!
             </h4>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed truncate">

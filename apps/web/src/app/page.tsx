@@ -53,10 +53,11 @@ export default function MainMenuPage() {
           </div>
 
           <p className="text-xs md:text-sm text-muted-foreground max-w-md mx-auto leading-relaxed relative z-10 font-bold">
-            با <span className="text-primary font-extrabold">دیپلماسی</span>،{" "}
-            <span className="text-treasury font-extrabold">اقتصاد</span> یا{" "}
-            <span className="text-military font-extrabold">سیاست</span> امپراتور
-            جهان شو!
+            با <span className="text-military font-extrabold">قدرت نظامی</span>،{" "}
+            <span className="text-treasury font-extrabold">سلطه اقتصادی</span>{" "}
+            یا{" "}
+            <span className="text-primary font-extrabold">نفوذ دیپلماتیک</span>،
+            جهان را فتح کن!
           </p>
         </div>
 

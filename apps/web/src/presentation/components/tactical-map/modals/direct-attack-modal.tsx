@@ -40,8 +40,8 @@ export function DirectAttackModal({
 
   const modalTitle =
     form.attackType === "NAVAL"
-      ? "اتاق فرماندهی و عملیات هجوم دریایی"
-      : "اتاق فرماندهی و تهاجم مستقیم زمینی";
+      ? "اتاق جنگ: صدور فرمان عملیات آبی‌خاکی (هجوم از دریا)"
+      : "اتاق جنگ: صدور فرمان تهاجم سراسری زمینی";
 
   return (
     <UnifiedModalShell

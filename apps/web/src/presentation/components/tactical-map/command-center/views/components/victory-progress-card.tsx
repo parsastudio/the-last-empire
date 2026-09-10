@@ -49,7 +49,7 @@ export function VictoryProgressCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-black text-foreground">
               <Swords size={16} className="text-military shrink-0" />
-              <span>سلطه نظامی و قلمرو</span>
+              <span>سلطه نظامی و فتح خاک</span>
             </div>
             <span className="text-[10px] font-mono text-military font-bold bg-military/10 px-2 py-0.5 rounded-lg border border-military/20">
               هدف: ۶۵٪ از جهان
@@ -84,7 +84,7 @@ export function VictoryProgressCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-black text-foreground">
               <Coins size={16} className="text-gdp shrink-0" />
-              <span>هژمونی اقتصاد جهانی</span>
+              <span>تسخیر نبض اقتصاد جهان</span>
             </div>
             <span className="text-[10px] font-mono text-gdp font-bold bg-gdp/10 px-2 py-0.5 rounded-lg border border-gdp/20">
               هدف: ۶۵٪ از جهان
@@ -97,7 +97,7 @@ export function VictoryProgressCard({
                 {PersianNumberFormatter.toPersianDigits(metrics.gdpSharePct)}٪
               </span>
               <span className="text-[11px] text-muted-foreground font-sans">
-                از تولید ناخالص کل دنیا
+                از ثروت کل دنیا
               </span>
             </div>
 

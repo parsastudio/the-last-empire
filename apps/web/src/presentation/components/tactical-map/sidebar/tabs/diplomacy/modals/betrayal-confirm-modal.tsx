@@ -25,8 +25,8 @@ export function BetrayalConfirmModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="هشدار لغو یکباره تعهدات دیپلماتیک"
-      subtitle={`عدم رعایت گام‌به‌گام مراحل دیپلماتیک با ${targetName}`}
+      title="هشدار حمله غافلگیرانه و نقض پیمان"
+      subtitle={`شما بدون لغو قبلی معاهدات صلح قصد شبیخون به ${targetName} را دارید`}
       maxWidthClass="max-w-md"
       onClose={onClose}
     >
@@ -49,7 +49,7 @@ export function BetrayalConfirmModal({
         <div className="bg-secondary/40 border border-border/60 p-4 rounded-2xl space-y-2 font-mono text-xs">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground font-sans text-[11px]">
-              میزان کسر اعتبار و پرستیژ جهانی:
+              جریمه رسوایی بین‌المللی و انزوای دیپلماتیک:
             </span>
             <span className="font-bold text-military text-sm">
               -{PersianNumberFormatter.toPersianDigits(penalty)} امتیاز

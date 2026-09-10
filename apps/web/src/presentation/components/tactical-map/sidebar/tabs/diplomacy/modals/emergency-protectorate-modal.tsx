@@ -100,8 +100,8 @@ export function EmergencyProtectorateModal({
   return (
     <UnifiedModalShell
       isOpen={isOpen}
-      title="معاهده تحت‌الحمایگی استعماری اضطراری"
-      subtitle={`پیش‌نویس استمداد امنیتی و واگذاری خودمختاری به امپراتوری ${targetName}`}
+      title="پیمان استمداد امنیتی و استقرار ارتش ابرقدرت"
+      subtitle={`استقرار ارتش سنگین ${targetName} در سنگرهای شما در ازای خراج نوبتی`}
       maxWidthClass="max-w-xl"
       onClose={onClose}
     >
@@ -116,7 +116,7 @@ export function EmergencyProtectorateModal({
                 {targetName}
               </span>
               <span className="text-[10px] text-rose-300 font-mono font-bold">
-                ابرقدرت استعمارگر و حامی اضطراری
+                ابرقدرت حامی و نجات‌بخش
               </span>
             </div>
           </div>
@@ -138,15 +138,17 @@ export function EmergencyProtectorateModal({
             <span>پیامدهای حاکمیتی و امتیازات دفاعی معاهده:</span>
           </div>
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            استقرار ارتش سنگین ضربتی معادل{" "}
-            <strong className="text-foreground font-black">۵۰٪ GDP شما</strong>{" "}
-            در سنگرهای دفاعی، در ازای کسر دائمی{" "}
-            <strong className="text-rose-400 font-black">
-              ۳۰- امتیاز پرستیژ جهانی
+            ارتش ابرقدرت فوراً{" "}
+            <strong className="text-foreground font-black">
+              ۵۰٪ ارزش اقتصادی شما
             </strong>{" "}
-            و{" "}
+            تانک و پدافند وارد خاکتان می‌کند؛ در ازای کسر{" "}
             <strong className="text-rose-400 font-black">
-              ۱۵-٪ افت ثبات سیاسی داخلی
+              ۳۰ امتیاز اعتبار جهانی
+            </strong>{" "}
+            و پرداخت{" "}
+            <strong className="text-rose-400 font-black">
+              ۵٪ خراج در هر نوبت
             </strong>
             .
           </p>
@@ -229,7 +231,7 @@ export function EmergencyProtectorateModal({
               {isSubmitting
                 ? "در حال ثبت معاهده و استقرار ارتش حامی..."
                 : validation.isValid
-                  ? `امضای معاهده تحت‌الحمایگی با ${targetName}`
+                  ? `امضای پیمان استمداد امنیتی با ${targetName}`
                   : "عدم امکان امضای معاهده"}
             </span>
           </button>
