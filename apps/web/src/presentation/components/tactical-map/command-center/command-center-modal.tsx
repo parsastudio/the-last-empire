@@ -5,6 +5,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { GameState } from "@/domain/game/game-state.schema";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { CommandBreadcrumb } from "@/presentation/components/tactical-map/navigation/command-breadcrumb";
+import { COMMAND_CENTER_TABS_CONFIG } from "@/presentation/configs/command-center-tabs.config";
 
 export interface CommandCenterMeta {
   title: string;
@@ -15,55 +16,14 @@ export function getCommandCenterMeta(
   activeTab: SidebarTabType | null,
   nationName: string,
 ): CommandCenterMeta {
-  switch (activeTab) {
-    case "overview":
-      return {
-        title: `نمای کلی وضعیت ${nationName}`,
-        subtitle: "",
-      };
-    case "military":
-      return {
-        title: "ستاد کل نیروهای مسلح، صنایع دفاعی و بازار هم‌پیمانان",
-        subtitle:
-          "مدیریت یگان‌ها، ساخت بومی تحویل فوری و واردات تسلیحاتی با قیمت متغیر بر اساس سطح فناوری",
-      };
-    case "industry":
-      return {
-        title: "وزارت صنایع و معادن، نوسازی و بازار ماشین‌آلات",
-        subtitle:
-          "احداث و بازسازی کارخانجات، ارتقای خطوط تولید و واردات تجهیزات صنعتی",
-      };
-    case "projects":
-      return {
-        title: "سازمان ملی پژوهش‌ها و برنامه‌های راهبردی کشور",
-        subtitle:
-          "پیشبرد گام‌به‌گام پروژه‌های تمدنی (تزریق بودجه حداکثر به ۲ پروژه در هر نوبت)",
-      };
-    case "politics":
-      return {
-        title: "دیوان عالی سیاست، دکترین مالی و قوانین",
-        subtitle:
-          "تنظیم دکترین اقتصاد ملی و ترانزیت، تسهیلات بین‌المللی و تغییر رژیم",
-      };
-    case "espionage":
-      return {
-        title: "دایره عملیات ویژه و سرویس اطلاعاتی",
-        subtitle:
-          "شنود ماهواره‌ای زرادخانه، خرابکاری در پدافند دشمن و سرقت فوق‌محرمانه فناوری",
-      };
-    case "diplomacy":
-      return {
-        title: "وزارت امور خارجه و دیپلماسی",
-        subtitle: "روابط بین‌المللی، معاهدات دفاعی و ائتلاف‌های استراتژیک",
-      };
-    case "reports":
-      return {
-        title: "بایگانی گزارش‌های اطلاعاتی و حاکمیت",
-        subtitle: "ارزیابی رویدادهای ملی و گزارش‌های پایش وضعیت",
-      };
-    default:
-      return { title: "اتاق فرماندهی", subtitle: "" };
+  if (!activeTab || !COMMAND_CENTER_TABS_CONFIG[activeTab]) {
+    return { title: "اتاق فرماندهی", subtitle: "" };
   }
+  const config = COMMAND_CENTER_TABS_CONFIG[activeTab];
+  return {
+    title: config.getTitle(nationName),
+    subtitle: config.subtitle,
+  };
 }
 
 interface CommandCenterModalProps {

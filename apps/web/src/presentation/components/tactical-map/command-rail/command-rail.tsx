@@ -1,20 +1,8 @@
 import React from "react";
-import {
-  LayoutDashboard,
-  Swords,
-  Factory,
-  Rocket,
-  Landmark,
-  FileText,
-  Users,
-  Loader2,
-  ChevronRight,
-  ChevronLeft,
-  Binary,
-  LucideIcon,
-} from "lucide-react";
+import { Loader2, ChevronRight, ChevronLeft, LucideIcon } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { NextTurnButton } from "@/presentation/components/tactical-map/sidebar/next-turn-button";
+import { COMMAND_RAIL_TABS } from "@/presentation/configs/command-center-tabs.config";
 
 interface RailTabButtonProps {
   id: SidebarTabType;
@@ -98,17 +86,6 @@ export function CommandRail({
   onToggleCollapse,
   onNextTurn,
 }: CommandRailProps) {
-  const tabs = [
-    { id: "overview" as const, label: "نما", icon: LayoutDashboard },
-    { id: "military" as const, label: "ارتش و تسلیحات", icon: Swords },
-    { id: "industry" as const, label: "صنایع و تولید", icon: Factory },
-    { id: "projects" as const, label: "برنامه‌های ملی", icon: Rocket },
-    { id: "politics" as const, label: "سیاست", icon: Landmark },
-    { id: "espionage" as const, label: "جاسوسی", icon: Binary },
-    { id: "reports" as const, label: "گزارش‌ها", icon: FileText },
-    { id: "diplomacy" as const, label: "دیپلماسی", icon: Users },
-  ];
-
   return (
     <aside
       onClick={(e) => e.stopPropagation()}
@@ -131,7 +108,7 @@ export function CommandRail({
         </div>
 
         <nav className="space-y-1 overflow-y-auto overflow-x-hidden max-h-[calc(100vh-160px)] scrollbar-none">
-          {tabs.map((tab) => (
+          {COMMAND_RAIL_TABS.map((tab) => (
             <RailTabButton
               key={tab.id}
               id={tab.id}

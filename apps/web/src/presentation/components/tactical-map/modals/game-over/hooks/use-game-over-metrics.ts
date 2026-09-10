@@ -1,9 +1,12 @@
 import { useMemo } from "react";
 import { GameState } from "@/domain/game/game-state.schema";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
-import { CountryRegistry } from "@/domain/data/countries";
-import { NationGettersUtility } from "@geopolitics/domain";
+import {
+  PersianNumberFormatter,
+  getNationGdp,
+  CountryRegistry,
+  NationGettersUtility,
+  VICTORY_CONFIG,
+} from "@geopolitics/domain";
 
 export interface GameOverMetricsResult {
   isVictory: boolean;
@@ -107,13 +110,17 @@ export function useGameOverMetrics(
     let reasonTitle = "پایان بازی و سرنوشت جهان";
     let reasonDescription = "";
 
+    const targetPctText = PersianNumberFormatter.toPersianDigits(
+      VICTORY_CONFIG.TERRITORIAL_DOMINANCE_TARGET_PCT,
+    );
+
     if (isVictory) {
       if (rawReason === "ECONOMIC_DOMINANCE") {
         reasonTitle = "هژمونی و سلطه اقتصادی بر جهان";
-        reasonDescription = `امپراتوری ${winnerName} با دستیابی به بیش از ۶۵٪ کل تولید ناخالص (GDP) جهان، نبض اقتصاد بین‌الملل را در دست گرفت و پیروز مطلق کمپین شد.`;
+        reasonDescription = `امپراتوری ${winnerName} با دستیابی به بیش از ${targetPctText}٪ کل تولید ناخالص (GDP) جهان، نبض اقتصاد بین‌الملل را در دست گرفت و پیروز مطلق کمپین شد.`;
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
         reasonTitle = "سلطه سرزمینی و الحاق قلمروها";
-        reasonDescription = `ارتش ${winnerName} با فتح بیش از ۶۵٪ وسعت خاک و پیکسل‌های نقشه، جهان را یکپارچه کرد و به پیروزی قاطع رسید.`;
+        reasonDescription = `ارتش ${winnerName} با فتح بیش از ${targetPctText}٪ وسعت خاک و پیکسل‌های نقشه، جهان را یکپارچه کرد و به پیروزی قاطع رسید.`;
       } else if (rawReason === "WORLD_CONQUEST") {
         reasonTitle = "فتح کامل و تسلیم تمام کشورها";
         reasonDescription = `امپراتوری ${winnerName} تمامی کشورهای رقیب را مغلوب ساخت و تنها حاکمیت باقی‌مانده بر کره زمین شد.`;
@@ -127,10 +134,10 @@ export function useGameOverMetrics(
         reasonDescription = `کشور شما در جریان نبردها تمامی استان‌ها، قلمرو و پایداری حاکمیتی خود را از دست داد و از جغرافیای سیاسی جهان حذف گردید.`;
       } else if (rawReason === "ECONOMIC_DOMINANCE") {
         reasonTitle = "پیروزی رقیب در ماراتن اقتصادی";
-        reasonDescription = `کشور ${winnerName} توانست زودتر از سایر قدرت‌ها به بیش از ۶۵٪ ثروت و GDP کل جهان دست یابد و هژمونی اقتصادی را فتح کند.`;
+        reasonDescription = `کشور ${winnerName} توانست زودتر از سایر قدرت‌ها به بیش از ${targetPctText}٪ ثروت و GDP کل جهان دست یابد و هژمونی اقتصادی را فتح کند.`;
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
         reasonTitle = "پیروزی رقیب در فتوحات سرزمینی";
-        reasonDescription = `کشور ${winnerName} با پیشروی مداوم توانست بیش از ۶۵٪ خاک جهان را تصرف کند و به عنوان امپراتوری برتر برگزیده شود.`;
+        reasonDescription = `کشور ${winnerName} با پیشروی مداوم توانست بیش از ${targetPctText}٪ خاک جهان را تصرف کند و به عنوان امپراتوری برتر برگزیده شود.`;
       } else if (rawReason === "WORLD_CONQUEST") {
         reasonTitle = "پیروزی قاطع قدرت رقیب";
         reasonDescription = `کشور ${winnerName} موفق به برچیدن تمامی رقبا و یکپارچه‌سازی جهان شد.`;

@@ -1,6 +1,7 @@
 import React from "react";
 import { ChevronLeft, Home } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
+import { COMMAND_CENTER_TABS_CONFIG } from "@/presentation/configs/command-center-tabs.config";
 
 interface CommandBreadcrumbProps {
   activeTab: SidebarTabType;
@@ -15,28 +16,8 @@ export function CommandBreadcrumb({
   targetName,
   onNavigateTab,
 }: CommandBreadcrumbProps) {
-  const getTabLabel = (tab: SidebarTabType): string => {
-    switch (tab) {
-      case "overview":
-        return "نمای کلی";
-      case "military":
-        return "ارتش و تسلیحات";
-      case "industry":
-        return "صنایع و تولید";
-      case "projects":
-        return "برنامه‌های ملی";
-      case "politics":
-        return "دیوان سیاست";
-      case "espionage":
-        return "سرویس اطلاعات و جاسوسی";
-      case "reports":
-        return "گزارش‌های نبرد";
-      case "diplomacy":
-        return "دیپلماسی";
-      default:
-        return "اتاق فرماندهی";
-    }
-  };
+  const tabLabel =
+    COMMAND_CENTER_TABS_CONFIG[activeTab]?.shortLabel || "اتاق فرماندهی";
 
   return (
     <nav className="flex items-center gap-1.5 text-xs text-muted-foreground dir-rtl select-none overflow-x-auto scrollbar-none py-0.5">
@@ -54,7 +35,7 @@ export function CommandBreadcrumb({
         onClick={() => onNavigateTab(activeTab)}
         className="hover:text-foreground transition-colors cursor-pointer font-bold text-foreground shrink-0"
       >
-        {getTabLabel(activeTab)}
+        {tabLabel}
       </button>
 
       {subTabLabel && (

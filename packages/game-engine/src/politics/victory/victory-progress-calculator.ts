@@ -4,6 +4,7 @@ import {
   NationGettersUtility,
   getNationGdp,
   GameStateMetricsUtility,
+  VICTORY_CONFIG,
 } from "@geopolitics/domain";
 
 export interface VictoryProgressMetrics {
@@ -20,13 +21,15 @@ export class VictoryProgressCalculator {
     state: GameState | null,
     nationId: string,
   ): VictoryProgressMetrics {
+    const targetPct = VICTORY_CONFIG.TERRITORIAL_DOMINANCE_TARGET_PCT;
+
     if (!state) {
       return {
         territorySharePct: 0,
-        territoryTargetPct: 65,
+        territoryTargetPct: targetPct,
         territoryProgressPct: 0,
         gdpSharePct: 0,
-        gdpTargetPct: 65,
+        gdpTargetPct: targetPct,
         gdpProgressPct: 0,
       };
     }
@@ -37,10 +40,10 @@ export class VictoryProgressCalculator {
     if (!targetNation) {
       return {
         territorySharePct: 0,
-        territoryTargetPct: 65,
+        territoryTargetPct: targetPct,
         territoryProgressPct: 0,
         gdpSharePct: 0,
-        gdpTargetPct: 65,
+        gdpTargetPct: targetPct,
         gdpProgressPct: 0,
       };
     }
@@ -55,7 +58,10 @@ export class VictoryProgressCalculator {
       totalWorldTerritory > 0
         ? (nationTerritory / totalWorldTerritory) * 100
         : 0;
-    const territoryProgressPct = Math.min(100, (territorySharePct / 65) * 100);
+    const territoryProgressPct = Math.min(
+      100,
+      (territorySharePct / targetPct) * 100,
+    );
 
     const totalGlobalGdp = GameStateMetricsUtility.getTotalGlobalGdp(
       state.nations,
@@ -64,14 +70,14 @@ export class VictoryProgressCalculator {
     const nationGdp = getNationGdp(targetNation, state.provinces);
     const gdpSharePct =
       totalGlobalGdp > 0 ? (nationGdp / totalGlobalGdp) * 100 : 0;
-    const gdpProgressPct = Math.min(100, (gdpSharePct / 65) * 100);
+    const gdpProgressPct = Math.min(100, (gdpSharePct / targetPct) * 100);
 
     return {
       territorySharePct: Number(territorySharePct.toFixed(1)),
-      territoryTargetPct: 65,
+      territoryTargetPct: targetPct,
       territoryProgressPct: Number(territoryProgressPct.toFixed(1)),
       gdpSharePct: Number(gdpSharePct.toFixed(1)),
-      gdpTargetPct: 65,
+      gdpTargetPct: targetPct,
       gdpProgressPct: Number(gdpProgressPct.toFixed(1)),
     };
   }

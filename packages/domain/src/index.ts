@@ -70,6 +70,7 @@ export * from "./politics/government-traits.config";
 export * from "./politics/government-traits.utility";
 export * from "./politics/politics.schema";
 export * from "./politics/stability-bracket.utility";
+export * from "./politics/victory.config";
 export * from "./province/province.schema";
 export * from "./reports/combat-report.schema";
 export * from "./shared/persian-number-formatter";
