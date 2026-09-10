@@ -30,23 +30,28 @@ export function ImfLoanCard({
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const { dispatchAction } = useGameActions();
 
-  const maxDebtLimit = DebtCalculatorUtility.getMaxDebtLimit(gdp);
-  const availableLoan = Math.max(0, maxDebtLimit - nationalDebt);
+  const availableLoan = DebtCalculatorUtility.getAvailableLoanHeadroom(
+    nationalDebt,
+    gdp,
+  );
 
-  const availableLoanBillion = Math.floor(availableLoan / 1e9);
-  const maxRepayBillion = Math.floor(Math.min(nationalDebt, treasury) / 1e9);
+  const availableLoanBillion =
+    DebtCalculatorUtility.toBillionUnits(availableLoan);
+  const maxRepayBillion = DebtCalculatorUtility.toBillionUnits(
+    Math.min(nationalDebt, treasury),
+  );
 
   const isSmallDebt = nationalDebt > 0 && nationalDebt < 1e9;
   const canAffordFullRepay = treasury >= nationalDebt && nationalDebt > 0;
 
   const handleConfirmLoan = async (billionAmount: number) => {
-    const absoluteVal = billionAmount * 1e9;
+    const absoluteVal = DebtCalculatorUtility.fromBillionUnits(billionAmount);
     const action = ActionFactory.requestLoan(nationId, absoluteVal);
     await dispatchAction(action);
   };
 
   const handleConfirmRepay = async (billionAmount: number) => {
-    const absoluteVal = billionAmount * 1e9;
+    const absoluteVal = DebtCalculatorUtility.fromBillionUnits(billionAmount);
     const action = ActionFactory.repayDebt(nationId, absoluteVal);
     await dispatchAction(action);
   };

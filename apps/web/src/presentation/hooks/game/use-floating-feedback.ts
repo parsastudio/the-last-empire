@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { UnitType, GameIdGenerator } from "@geopolitics/domain";
+import { GameIdGenerator } from "@geopolitics/domain";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 export interface FloatingFeedback {
@@ -7,41 +7,73 @@ export interface FloatingFeedback {
   text: string;
 }
 
-export function useFloatingFeedback() {
-  const [feedbacks, setFeedbacks] = useState<
-    Record<UnitType, FloatingFeedback[]>
-  >({
-    INFANTRY: [],
-    ARMOR: [],
-    AIR_DEFENSE: [],
-    AIR_FORCE: [],
-    DRONE_MISSILE: [],
-  });
+export interface FloatingFeedbackOptions {
+  playSound?: boolean;
+  prefix?: string;
+  durationMs?: number;
+}
 
-  const triggerFeedback = useCallback((type: UnitType, quantity: number) => {
-    TacticalSound.playCoinSound();
+export function useFloatingFeedback<TKey extends string | number = string>() {
+  const [feedbacks, setFeedbacks] = useState<Map<TKey, FloatingFeedback[]>>(
+    () => new Map(),
+  );
 
-    const newId = GameIdGenerator.generateId("fb");
-    const newFeedback: FloatingFeedback = {
-      id: newId,
-      text: `+${quantity}`,
-    };
+  const triggerFeedback = useCallback(
+    (
+      key: TKey,
+      content: string | number,
+      options: FloatingFeedbackOptions = {},
+    ) => {
+      const { playSound = true, prefix = "+", durationMs = 600 } = options;
 
-    setFeedbacks((prev) => ({
-      ...prev,
-      [type]: [...prev[type], newFeedback],
-    }));
+      if (playSound) {
+        TacticalSound.playCoinSound();
+      }
 
-    setTimeout(() => {
-      setFeedbacks((prev) => ({
-        ...prev,
-        [type]: prev[type].filter((item) => item.id !== newId),
-      }));
-    }, 600);
-  }, []);
+      const text =
+        typeof content === "number" ? `${prefix}${content}` : content;
+
+      const newId = GameIdGenerator.generateId("fb");
+      const newFeedback: FloatingFeedback = {
+        id: newId,
+        text,
+      };
+
+      setFeedbacks((prev) => {
+        const next = new Map(prev);
+        const currentList = next.get(key) || [];
+        next.set(key, [...currentList, newFeedback]);
+        return next;
+      });
+
+      setTimeout(() => {
+        setFeedbacks((prev) => {
+          const next = new Map(prev);
+          const currentList = next.get(key);
+          if (!currentList) return prev;
+          const filtered = currentList.filter((item) => item.id !== newId);
+          if (filtered.length === 0) {
+            next.delete(key);
+          } else {
+            next.set(key, filtered);
+          }
+          return next;
+        });
+      }, durationMs);
+    },
+    [],
+  );
+
+  const getFeedbacksFor = useCallback(
+    (key: TKey): FloatingFeedback[] => {
+      return feedbacks.get(key) || [];
+    },
+    [feedbacks],
+  );
 
   return {
     feedbacks,
     triggerFeedback,
+    getFeedbacksFor,
   };
 }

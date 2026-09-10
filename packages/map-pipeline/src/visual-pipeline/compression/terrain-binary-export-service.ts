@@ -1,11 +1,7 @@
-import fs from "fs/promises";
 import path from "path";
-import zlib from "zlib";
-import { promisify } from "util";
 import { TerrainBinaryBuilder } from "@/infrastructure/visual-pipeline/compression/terrain-binary-builder";
 import { TerrainBinarySerializer } from "@/infrastructure/visual-pipeline/compression/terrain-binary-serializer";
-
-const gzipAsync = promisify(zlib.gzip);
+import { BinaryFileExportHelper } from "@/infrastructure/core/io/binary-file-export-helper";
 
 export class TerrainBinaryExportService {
   public static async generateAndExportFromRgba(
@@ -20,16 +16,13 @@ export class TerrainBinaryExportService {
       width,
       height,
     );
-    const rawOutputPath = path.join(outputDir, "terrain-raw.bin");
-    const gzOutputPath = path.join(outputDir, "terrain-raw.bin.gz");
 
-    await fs.writeFile(rawOutputPath, rawBuffer);
+    const { rawPath } = await BinaryFileExportHelper.exportRawAndGzip(
+      outputDir,
+      "terrain-raw.bin",
+      rawBuffer,
+    );
 
-    const compressed = await gzipAsync(rawBuffer, {
-      level: zlib.constants.Z_BEST_COMPRESSION,
-    });
-    await fs.writeFile(gzOutputPath, compressed);
-
-    return rawOutputPath;
+    return rawPath;
   }
 }

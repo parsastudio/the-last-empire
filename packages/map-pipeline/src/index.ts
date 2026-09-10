@@ -1,5 +1,6 @@
 export * from "./core/types/map-pipeline.types";
 export * from "./core/io/server-map-path-resolver";
+export * from "./core/io/binary-file-export-helper";
 
 export * from "./visual-pipeline/core/tactical-terrain.types";
 export * from "./visual-pipeline/algorithms/ocean-bathymetry-engine";
@@ -18,6 +19,7 @@ export * from "./strategic-pipeline/01-ingestion/land-watershed-flood";
 export * from "./strategic-pipeline/01-ingestion/island-territory-resolver";
 export * from "./strategic-pipeline/01-ingestion/water-body-classifier";
 
+export * from "./strategic-pipeline/02-topology/utils/shore-distance.utility";
 export * from "./strategic-pipeline/02-topology/component-analyzer";
 export * from "./strategic-pipeline/02-topology/land-mass-classifier";
 export * from "./strategic-pipeline/02-topology/province-count-allocator";

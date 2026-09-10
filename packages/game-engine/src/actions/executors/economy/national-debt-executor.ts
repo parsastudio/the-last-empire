@@ -22,10 +22,15 @@ export class NationalDebtExecutor {
         "مبلغ وام باید بزرگتر از صفر باشد.",
       );
     }
-    const maxManualDebtLimit = DebtCalculatorUtility.getMaxDebtLimit(
-      getNationGdp(nation, state.provinces),
-    );
-    if (nation.nationalDebt + action.amount > maxManualDebtLimit) {
+
+    const gdp = getNationGdp(nation, state.provinces);
+    if (
+      DebtCalculatorUtility.isDebtLimitExceeded(
+        nation.nationalDebt,
+        action.amount,
+        gdp,
+      )
+    ) {
       throw new GameError(
         "INVALID_ACTION",
         "سقف مجاز وام دستی (۳۰٪ تولید ناخالص داخلی) تکمیل شده است.",

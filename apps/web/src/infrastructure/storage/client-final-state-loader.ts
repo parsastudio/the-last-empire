@@ -21,6 +21,35 @@ export class ClientFinalStateLoader {
   private static cachedTerrainData: RawTerrainData | null = null;
   private static cachedLiveStateRaw: Uint8Array | null = null;
 
+  private static async fetchBinaryWithDecompression(
+    gzUrl: string,
+    rawUrl: string,
+  ): Promise<ArrayBuffer | null> {
+    let arrayBuf: ArrayBuffer | null = null;
+    try {
+      const gzRes = await fetch(gzUrl, { cache: "no-store" });
+      if (
+        gzRes.ok &&
+        gzRes.body &&
+        typeof DecompressionStream !== "undefined"
+      ) {
+        const stream = gzRes.body.pipeThrough(new DecompressionStream("gzip"));
+        arrayBuf = await new Response(stream).arrayBuffer();
+      }
+    } catch {}
+
+    if (!arrayBuf || arrayBuf.byteLength === 0) {
+      try {
+        const rawRes = await fetch(rawUrl, { cache: "no-store" });
+        if (rawRes.ok) {
+          arrayBuf = await rawRes.arrayBuffer();
+        }
+      } catch {}
+    }
+
+    return arrayBuf && arrayBuf.byteLength > 0 ? arrayBuf : null;
+  }
+
   public static async ensureManifestLoaded(
     mapId = "map1",
   ): Promise<FinalMapManifest | null> {
@@ -81,30 +110,8 @@ export class ClientFinalStateLoader {
         "live-state.bin",
       );
 
-      let arrayBuf: ArrayBuffer | null = null;
-
-      try {
-        const gzRes = await fetch(gzUrl, { cache: "no-store" });
-        if (
-          gzRes.ok &&
-          gzRes.body &&
-          typeof DecompressionStream !== "undefined"
-        ) {
-          const stream = gzRes.body.pipeThrough(
-            new DecompressionStream("gzip"),
-          );
-          arrayBuf = await new Response(stream).arrayBuffer();
-        }
-      } catch {}
-
-      if (!arrayBuf || arrayBuf.byteLength === 0) {
-        const rawRes = await fetch(rawUrl, { cache: "no-store" });
-        if (rawRes.ok) {
-          arrayBuf = await rawRes.arrayBuffer();
-        }
-      }
-
-      if (!arrayBuf || arrayBuf.byteLength === 0) {
+      const arrayBuf = await this.fetchBinaryWithDecompression(gzUrl, rawUrl);
+      if (!arrayBuf) {
         return null;
       }
 
@@ -137,29 +144,7 @@ export class ClientFinalStateLoader {
         "terrain-raw.bin",
       );
 
-      let arrayBuf: ArrayBuffer | null = null;
-
-      try {
-        const gzRes = await fetch(gzUrl, { cache: "no-store" });
-        if (
-          gzRes.ok &&
-          gzRes.body &&
-          typeof DecompressionStream !== "undefined"
-        ) {
-          const stream = gzRes.body.pipeThrough(
-            new DecompressionStream("gzip"),
-          );
-          arrayBuf = await new Response(stream).arrayBuffer();
-        }
-      } catch {}
-
-      if (!arrayBuf || arrayBuf.byteLength === 0) {
-        const rawRes = await fetch(rawUrl, { cache: "no-store" });
-        if (rawRes.ok) {
-          arrayBuf = await rawRes.arrayBuffer();
-        }
-      }
-
+      const arrayBuf = await this.fetchBinaryWithDecompression(gzUrl, rawUrl);
       if (!arrayBuf || arrayBuf.byteLength < 32) {
         return null;
       }

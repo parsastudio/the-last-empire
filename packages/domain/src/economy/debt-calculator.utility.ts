@@ -23,6 +23,23 @@ export class DebtCalculatorUtility {
     return Math.max(0, maxLimit - nationalDebt);
   }
 
+  public static isDebtLimitExceeded(
+    currentDebt: number,
+    additionalLoan: number,
+    gdp: number,
+  ): boolean {
+    const maxLimit = this.getMaxDebtLimit(gdp);
+    return currentDebt + additionalLoan > maxLimit;
+  }
+
+  public static toBillionUnits(amount: number): number {
+    return Math.floor(Math.max(0, amount) / 1e9);
+  }
+
+  public static fromBillionUnits(billionAmount: number): number {
+    return Math.max(0, billionAmount) * 1e9;
+  }
+
   public static calculateProportionalDebtRelief(
     currentDebt: number,
     lostProvincesGdp: number,
