@@ -1,7 +1,6 @@
 import React from "react";
 import { Coins, Wallet, Anchor, Swords, ShieldAlert } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
-import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
 interface AttackCostSummaryProps {
   totalLogisticsCost: number;
@@ -24,7 +23,6 @@ export function AttackCostSummary({
   canAfford,
   hasSelectedInfantry,
   isSubmitting,
-  targetRegionName,
   isLandNeighbor,
   isNavalValid = false,
   hasNavalCapacity = true,
@@ -41,7 +39,6 @@ export function AttackCostSummary({
     hasAlreadyAttackedThisTurn ||
     isSubmitting;
 
-  const formattedRegionName = ProvinceNameFormatter.format(targetRegionName);
   const isNaval = attackType === "NAVAL";
 
   return (
@@ -108,18 +105,18 @@ export function AttackCostSummary({
           {isSubmitting
             ? "در حال ثبت دستور و گسیل ارتش..."
             : hasAlreadyAttackedThisTurn
-              ? "تهاجم مجدد در این نوبت مجاز نیست (پایان نوبت لازم است)"
+              ? "تهاجم مجدد در این نوبت مجاز نیست"
               : !isAccessible
                 ? "عدم امکان دسترسی به منطقه تهاجم"
                 : isNaval && !hasNavalCapacity
                   ? "ظرفیت ترابری ناوگان دریایی ناکافی است"
                   : !hasSelectedInfantry
-                    ? "حداقل ۱ لشکر پیاده‌نظام جهت تصرف الزامی است"
+                    ? "حداقل ۱ لشکر پیاده‌نظام الزامی است"
                     : !canAfford
-                      ? "موجودی خزانه ناکافی جهت تأمین مخارج"
+                      ? "موجودی خزانه ناکافی است"
                       : isNaval
-                        ? `صدور فرمان هجوم دریایی به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`
-                        : `صدور فرمان تهاجم به ${formattedRegionName} (${PersianNumberFormatter.formatCurrency(totalLogisticsCost)})`}
+                        ? `صدور فرمان هجوم دریایی • ${PersianNumberFormatter.formatCurrency(totalLogisticsCost)}`
+                        : `صدور فرمان تهاجم زمینی • ${PersianNumberFormatter.formatCurrency(totalLogisticsCost)}`}
         </span>
       </button>
     </div>

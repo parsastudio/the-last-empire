@@ -87,7 +87,7 @@ export function NationDetailsPanel({
           className="w-full py-4 px-8 bg-gdp hover:bg-gdp/90 text-primary-foreground rounded-2xl font-black transition-all shadow-lg shadow-gdp/20 hover:shadow-gdp/30 hover:scale-[1.005] active:scale-[0.995] text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 cursor-pointer border border-gdp/30"
         >
           <Zap size={18} fill="currentColor" className="animate-pulse" />
-          <span>تایید و شروع حاکمیت بر امپراتوری {nation.name}</span>
+          <span>آغاز حاکمیت بر {nation.name}</span>
         </button>
       </div>
     </div>

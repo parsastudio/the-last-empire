@@ -51,9 +51,6 @@ export function GovernmentTypeSelector({
         <span className="text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
           انتخاب ساختار سیاسی و نظام حاکمیت
         </span>
-        <span className="text-[11px] text-muted-foreground">
-          برای مشاهده اثرات و دکترین، روی مدل مورد نظر کلیک کنید
-        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

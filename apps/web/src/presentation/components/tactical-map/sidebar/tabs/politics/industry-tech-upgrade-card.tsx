@@ -96,11 +96,6 @@ export function IndustryTechUpgradeCard({
           </div>
         </div>
 
-        <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl text-[10px] text-muted-foreground font-sans leading-relaxed">
-          هر ارتقای اعشاری (+۰.۱) باعث افزایش بهره‌وری، ارزش افزوده تولید
-          کارخانجات و توان نوسازی خطوط تولید کشور می‌گردد.
-        </div>
-
         <button
           onClick={handleInvestTech}
           disabled={!canAffordTech || isSubmittingTech}
@@ -115,7 +110,7 @@ export function IndustryTechUpgradeCard({
             {isSubmittingTech
               ? "در حال اجرای تحقیقات صنعتی..."
               : canAffordTech
-                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))} (افزایش توان تولید)`
+                ? `ارتقا به سطح ${PersianNumberFormatter.toPersianDigits(nextStepLevel.toFixed(1))}`
                 : "موجودی خزانه ناکافی جهت R&D"}
           </span>
         </button>

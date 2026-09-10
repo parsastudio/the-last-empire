@@ -37,36 +37,32 @@ export const COMMAND_CENTER_TABS_CONFIG: Record<
     label: "ارتش و تسلیحات",
     shortLabel: "ارتش و تسلیحات",
     icon: Swords,
-    getTitle: () => "ستاد کل نیروهای مسلح، صنایع دفاعی و بازار هم‌پیمانان",
-    subtitle:
-      "مدیریت یگان‌ها، ساخت بومی تحویل فوری و واردات تسلیحاتی با قیمت متغیر بر اساس سطح فناوری",
+    getTitle: () => "ستاد کل نیروهای مسلح و صنایع دفاعی",
+    subtitle: "",
   },
   industry: {
     id: "industry",
     label: "صنایع و تولید",
     shortLabel: "صنایع و تولید",
     icon: Factory,
-    getTitle: () => "وزارت صنایع و معادن، نوسازی و بازار ماشین‌آلات",
-    subtitle:
-      "احداث و بازسازی کارخانجات، ارتقای خطوط تولید و واردات تجهیزات صنعتی",
+    getTitle: () => "وزارت صنایع، نوسازی و بازار ماشین‌آلات",
+    subtitle: "",
   },
   projects: {
     id: "projects",
     label: "برنامه‌های ملی",
     shortLabel: "برنامه‌های ملی",
     icon: Rocket,
-    getTitle: () => "سازمان ملی پژوهش‌ها و برنامه‌های راهبردی کشور",
-    subtitle:
-      "پیشبرد گام‌به‌گام پروژه‌های تمدنی (تزریق بودجه حداکثر به ۲ پروژه در هر نوبت)",
+    getTitle: () => "سازمان ملی پژوهش‌ها و برنامه‌های راهبردی",
+    subtitle: "",
   },
   politics: {
     id: "politics",
     label: "دیوان سیاست",
     shortLabel: "دیوان سیاست",
     icon: Landmark,
-    getTitle: () => "دیوان عالی سیاست، دکترین مالی و قوانین",
-    subtitle:
-      "تنظیم دکترین اقتصاد ملی و ترانزیت، تسهیلات بین‌المللی و تغییر رژیم",
+    getTitle: () => "دیوان عالی سیاست و دکترین مالی",
+    subtitle: "",
   },
   espionage: {
     id: "espionage",
@@ -74,8 +70,7 @@ export const COMMAND_CENTER_TABS_CONFIG: Record<
     shortLabel: "سرویس اطلاعات",
     icon: Binary,
     getTitle: () => "دایره عملیات ویژه و سرویس اطلاعاتی",
-    subtitle:
-      "شنود ماهواره‌ای زرادخانه، خرابکاری در پدافند دشمن و سرقت فوق‌محرمانه فناوری",
+    subtitle: "",
   },
   reports: {
     id: "reports",
@@ -83,7 +78,7 @@ export const COMMAND_CENTER_TABS_CONFIG: Record<
     shortLabel: "گزارش‌ها",
     icon: FileText,
     getTitle: () => "بایگانی گزارش‌های اطلاعاتی و حاکمیت",
-    subtitle: "ارزیابی رویدادهای ملی و گزارش‌های پایش وضعیت",
+    subtitle: "",
   },
   diplomacy: {
     id: "diplomacy",
@@ -91,7 +86,7 @@ export const COMMAND_CENTER_TABS_CONFIG: Record<
     shortLabel: "دیپلماسی",
     icon: Users,
     getTitle: () => "وزارت امور خارجه و دیپلماسی",
-    subtitle: "روابط بین‌المللی، معاهدات دفاعی و ائتلاف‌های استراتژیک",
+    subtitle: "",
   },
 };
 
