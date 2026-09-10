@@ -45,15 +45,10 @@ export function DiplomacyTargetCard({
         <span className="text-3xl select-none" role="img" aria-label={name}>
           {flagEmoji}
         </span>
-        <div className="space-y-0.5 text-right">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-extrabold text-foreground">{name}</h3>
-            <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
-              {code}
-            </span>
-          </div>
-          <span className="text-[10px] text-muted-foreground font-mono block">
-            شناسنامه رسمی حاکمیت
+        <div className="flex items-center gap-2">
+          <h3 className="text-sm font-extrabold text-foreground">{name}</h3>
+          <span className="text-[9px] font-mono bg-secondary px-1.5 py-0.5 rounded text-muted-foreground">
+            {code}
           </span>
         </div>
       </div>

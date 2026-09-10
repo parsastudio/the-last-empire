@@ -29,7 +29,7 @@ export function NextTurnButton({
           />
         )}
         <span className="font-sans">
-          {isProcessing ? "در حال محاسبه نوبت..." : "پایان نوبت و ثبت تصمیمات"}
+          {isProcessing ? "در حال محاسبه نوبت..." : "پایان نوبت"}
         </span>
       </div>
       <span className="font-mono bg-black/25 px-2.5 py-1 rounded-xl text-[10px] font-bold">

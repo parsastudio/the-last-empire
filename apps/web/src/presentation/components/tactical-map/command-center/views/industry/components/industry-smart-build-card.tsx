@@ -91,11 +91,6 @@ export function IndustrySmartBuildCard({
           </div>
         </div>
 
-        <div className="bg-secondary/40 border border-border/50 p-2.5 rounded-xl text-[10px] text-muted-foreground font-sans leading-relaxed">
-          تخصیص ۱۰٪ بودجه خزانه به احداث فوری سوله با توزیع خودکار در
-          متوازن‌ترین استان‌های کشور.
-        </div>
-
         {isFull ? (
           <div className="w-full py-3 bg-secondary/80 text-muted-foreground rounded-xl text-xs font-bold border border-border/60 flex items-center justify-center gap-1.5 select-none">
             <CheckCircle2 size={14} className="text-emerald-400" />

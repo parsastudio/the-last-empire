@@ -120,22 +120,6 @@ export function ProjectCard({
               {PersianNumberFormatter.formatCurrency(project.costPerStep, true)}{" "}
               / گام
             </span>
-
-            <span
-              className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border shrink-0 ${
-                project.tier === "SHORT_TERM"
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                  : project.tier === "MID_TERM"
-                    ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                    : "bg-rose-500/10 text-rose-400 border-rose-500/30"
-              }`}
-            >
-              {project.tier === "SHORT_TERM"
-                ? "۱۰ گام"
-                : project.tier === "MID_TERM"
-                  ? "۲۰ گام"
-                  : "۳۰ گام"}
-            </span>
           </div>
         </div>
 

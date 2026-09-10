@@ -23,18 +23,9 @@ export function CapacityMeterBadge({
     >
       <Factory size={14} className="text-gdp shrink-0" />
       <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1">
-          <span className="font-bold text-gdp">
-            {PersianNumberFormatter.toPersianDigits(percentage)}%
-          </span>
-          <span className="text-[10px] text-muted-foreground font-sans">
-            (
-            {PersianNumberFormatter.formatNumberWithCommas(
-              totalActiveFactories,
-            )}{" "}
-            کارخانه)
-          </span>
-        </div>
+        <span className="font-bold text-gdp">
+          {PersianNumberFormatter.toPersianDigits(percentage)}%
+        </span>
         <div className="w-10 h-1.5 bg-background/90 rounded-full overflow-hidden border border-border/60">
           <div
             className="h-full rounded-full transition-all duration-300 bg-gdp"
