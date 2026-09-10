@@ -14,9 +14,9 @@ export interface FloatingFeedbackOptions {
 }
 
 export function useFloatingFeedback<TKey extends string | number = string>() {
-  const [feedbacks, setFeedbacks] = useState<Map<TKey, FloatingFeedback[]>>(
-    () => new Map(),
-  );
+  const [feedbacks, setFeedbacks] = useState<
+    Record<string, FloatingFeedback[]>
+  >({});
 
   const triggerFeedback = useCallback(
     (
@@ -39,25 +39,22 @@ export function useFloatingFeedback<TKey extends string | number = string>() {
         text,
       };
 
-      setFeedbacks((prev) => {
-        const next = new Map(prev);
-        const currentList = next.get(key) || [];
-        next.set(key, [...currentList, newFeedback]);
-        return next;
-      });
+      const keyStr = String(key);
+
+      setFeedbacks((prev) => ({
+        ...prev,
+        [keyStr]: [...(prev[keyStr] || []), newFeedback],
+      }));
 
       setTimeout(() => {
         setFeedbacks((prev) => {
-          const next = new Map(prev);
-          const currentList = next.get(key);
+          const currentList = prev[keyStr];
           if (!currentList) return prev;
           const filtered = currentList.filter((item) => item.id !== newId);
-          if (filtered.length === 0) {
-            next.delete(key);
-          } else {
-            next.set(key, filtered);
-          }
-          return next;
+          return {
+            ...prev,
+            [keyStr]: filtered,
+          };
         });
       }, durationMs);
     },
@@ -66,7 +63,7 @@ export function useFloatingFeedback<TKey extends string | number = string>() {
 
   const getFeedbacksFor = useCallback(
     (key: TKey): FloatingFeedback[] => {
-      return feedbacks.get(key) || [];
+      return feedbacks[String(key)] || [];
     },
     [feedbacks],
   );

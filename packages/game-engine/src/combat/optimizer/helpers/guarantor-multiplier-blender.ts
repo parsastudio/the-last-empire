@@ -3,6 +3,7 @@ import { Province } from "@/domain/province/province.schema";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
 import { MilitaryPowerCalculator } from "@geopolitics/domain";
+import { AuxiliaryGuarantorDefense } from "@/domain/reports/combat-report.schema";
 
 export interface BlendedDefenseForces {
   defAirDefense: number;
@@ -16,6 +17,7 @@ export interface BlendedDefenseForces {
     airForce: number;
     droneMissile: number;
   };
+  auxiliaryGuarantor?: AuxiliaryGuarantorDefense;
 }
 
 export class GuarantorMultiplierBlender {
@@ -97,6 +99,7 @@ export class GuarantorMultiplierBlender {
       defArmor,
       defInfantry,
       defMults,
+      auxiliaryGuarantor: guarantorResult.auxiliaryGuarantor,
     };
   }
 }
