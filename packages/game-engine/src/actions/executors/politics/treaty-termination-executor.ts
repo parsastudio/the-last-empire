@@ -4,6 +4,7 @@ import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
 import { CountryRegistry } from "@geopolitics/domain";
+import { DiplomaticResultFactory } from "@/engine/diplomacy/diplomatic-result.factory";
 
 export class TreatyTerminationExecutor {
   public static handleCancelSecurityGuarantee(
@@ -42,14 +43,14 @@ export class TreatyTerminationExecutor {
 
     return {
       newState,
-      resultData: {
+      resultData: DiplomaticResultFactory.create({
         proposalType: "CANCEL_SECURITY_GUARANTEE",
         accepted: true,
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         message: `پیمان دفاعی با کشور ${receiver.name} فسخ گردید.`,
-      },
+      }),
     };
   }
 
@@ -108,14 +109,14 @@ export class TreatyTerminationExecutor {
 
     return {
       newState,
-      resultData: {
+      resultData: DiplomaticResultFactory.create({
         proposalType: "CANCEL_TREATY",
         accepted: true,
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         reputationChange: -2,
-      },
+      }),
     };
   }
 }

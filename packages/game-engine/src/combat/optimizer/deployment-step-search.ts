@@ -1,4 +1,5 @@
 import { BattleCalculationResult } from "@/engine/combat/battle-calculator";
+import { BinarySearchOptimizer } from "@/engine/combat/optimizer/helpers/binary-search-optimizer";
 
 export class DeploymentStepSearch {
   public static findMinimalGroundForces(
@@ -66,22 +67,14 @@ export class DeploymentStepSearch {
       af: number,
     ) => BattleCalculationResult,
   ): number | null {
-    let low = 1;
-    let high = maxInfantry;
-    let result: number | null = null;
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
-      const battleRes = testBattle(drones, mid, armor, airForce);
-
-      if (battleRes.isAttackerVictory) {
-        result = mid;
-        high = mid - 1;
-      } else {
-        low = mid + 1;
-      }
+    const maxTest = testBattle(drones, maxInfantry, armor, airForce);
+    if (!maxTest.isAttackerVictory) {
+      return null;
     }
 
-    return result;
+    return BinarySearchOptimizer.findMinimalPassing(1, maxInfantry, (inf) => {
+      const battleRes = testBattle(drones, inf, armor, airForce);
+      return battleRes.isAttackerVictory;
+    });
   }
 }

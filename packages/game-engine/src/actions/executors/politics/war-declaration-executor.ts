@@ -9,6 +9,7 @@ import {
   ReactiveDefenseEvent,
 } from "@/engine/ai/ai-emergency-defense-manager";
 import { GuarantorRetaliationApplier } from "@/engine/diplomacy/appliers/guarantor-retaliation-applier";
+import { DiplomaticResultFactory } from "@/engine/diplomacy/diplomatic-result.factory";
 
 export class WarDeclarationExecutor {
   public static execute(
@@ -110,7 +111,7 @@ export class WarDeclarationExecutor {
 
     return {
       newState,
-      resultData: {
+      resultData: DiplomaticResultFactory.create({
         proposalType: "DECLARE_WAR",
         accepted: true,
         targetNationId: receiver.id,
@@ -118,7 +119,7 @@ export class WarDeclarationExecutor {
         targetFlagCode: receiver.flagCode,
         defenseEvent,
         retaliatingGuarantors: retaliationResult.retaliatingGuarantors,
-      },
+      }),
     };
   }
 }

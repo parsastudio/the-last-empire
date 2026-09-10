@@ -1,61 +1,12 @@
 import React from "react";
-import {
-  ShieldCheck,
-  Compass,
-  Flame,
-  Skull,
-  LucideIcon,
-  Check,
-} from "lucide-react";
+import { Check } from "lucide-react";
 import { GameDifficulty, DIFFICULTY_CONFIGS } from "@geopolitics/domain";
+import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficulty-visuals.config";
 
 interface GameDifficultySelectorProps {
   selectedDifficulty: GameDifficulty;
   onSelect: (difficulty: GameDifficulty) => void;
 }
-
-const DIFFICULTY_ICONS: Record<GameDifficulty, LucideIcon> = {
-  EASY: ShieldCheck,
-  NORMAL: Compass,
-  HARD: Flame,
-  IMPOSSIBLE: Skull,
-};
-
-const DIFFICULTY_VISUALS: Record<
-  GameDifficulty,
-  {
-    activeBorder: string;
-    activeBg: string;
-    badgeBg: string;
-    textColor: string;
-  }
-> = {
-  EASY: {
-    activeBorder:
-      "border-emerald-500 shadow-emerald-500/10 ring-emerald-500/40",
-    activeBg: "bg-emerald-500/15",
-    badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-    textColor: "text-emerald-400",
-  },
-  NORMAL: {
-    activeBorder: "border-primary shadow-primary/10 ring-primary/40",
-    activeBg: "bg-primary/15",
-    badgeBg: "bg-primary/20 text-primary border-primary/40",
-    textColor: "text-primary",
-  },
-  HARD: {
-    activeBorder: "border-amber-500 shadow-amber-500/10 ring-amber-500/40",
-    activeBg: "bg-amber-500/15",
-    badgeBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
-    textColor: "text-amber-400",
-  },
-  IMPOSSIBLE: {
-    activeBorder: "border-rose-500 shadow-rose-500/20 ring-rose-500/50",
-    activeBg: "bg-rose-500/20",
-    badgeBg: "bg-rose-500/25 text-rose-300 border-rose-500/50 animate-pulse",
-    textColor: "text-rose-400",
-  },
-};
 
 export function GameDifficultySelector({
   selectedDifficulty,
@@ -73,8 +24,8 @@ export function GameDifficultySelector({
         {(Object.keys(DIFFICULTY_CONFIGS) as GameDifficulty[]).map((key) => {
           const config = DIFFICULTY_CONFIGS[key];
           const isSelected = selectedDifficulty === key;
-          const Icon = DIFFICULTY_ICONS[key];
-          const visual = DIFFICULTY_VISUALS[key];
+          const visual = DIFFICULTY_VISUAL_CONFIGS[key];
+          const Icon = visual.icon;
 
           return (
             <button
