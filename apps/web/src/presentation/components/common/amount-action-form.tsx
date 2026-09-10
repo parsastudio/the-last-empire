@@ -56,6 +56,7 @@ export function AmountActionForm({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const currentAmount = Math.max(0, Math.min(amount, safeMax));
+  const fillRatio = safeMax > 0 ? (currentAmount / safeMax) * 100 : 0;
 
   const handlePercentageSelect = (pct: number) => {
     if (safeMax <= 0) return;
@@ -89,27 +90,36 @@ export function AmountActionForm({
           </span>
         </div>
 
-        <div className="space-y-2 bg-background/40 p-3.5 rounded-2xl border border-border/60">
+        <div className="space-y-2.5 bg-background/40 p-4 rounded-3xl border border-border/60 shadow-inner">
           <div className="flex justify-between items-center text-xs">
             <span className="text-muted-foreground font-sans">
               مقدار درخواستی:
             </span>
-            <span className="font-bold text-foreground text-sm font-mono">
+            <span className="font-extrabold text-foreground text-sm font-mono bg-secondary/80 px-3 py-1 rounded-xl border border-border/60 shadow-sm">
               {PersianNumberFormatter.formatNumberWithCommas(currentAmount)}{" "}
               {unitLabel}
             </span>
           </div>
 
-          <input
-            type="range"
-            min={safeMax > 0 ? step : 0}
-            max={Math.max(0, safeMax)}
-            step={step}
-            disabled={safeMax === 0}
-            value={currentAmount}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            className="w-full cursor-pointer h-2 bg-secondary rounded-lg accent-emerald-500 disabled:opacity-30"
-          />
+          <div className="relative flex items-center py-1">
+            <div className="absolute left-0 right-0 h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
+              <div
+                className="h-full bg-gradient-to-r from-primary/70 via-primary to-primary rounded-full transition-all duration-75 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+                style={{ width: `${fillRatio}%` }}
+              />
+            </div>
+
+            <input
+              type="range"
+              min={safeMax > 0 ? step : 0}
+              max={Math.max(0, safeMax)}
+              step={step}
+              disabled={safeMax === 0}
+              value={currentAmount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              className="tactical-range-input w-full relative z-10 disabled:opacity-30"
+            />
+          </div>
 
           <PercentageSelector
             disabled={safeMax === 0}
@@ -119,7 +129,7 @@ export function AmountActionForm({
         </div>
 
         {infoRows.length > 0 && (
-          <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60 font-sans">
+          <div className="bg-secondary/40 p-3.5 rounded-2xl space-y-2 text-[11px] border border-border/60 font-sans shadow-inner">
             {infoRows.map((row, idx) => (
               <div
                 key={idx}
@@ -148,7 +158,7 @@ export function AmountActionForm({
       <button
         onClick={handleExecute}
         disabled={safeMax === 0 || currentAmount <= 0 || isSubmitting}
-        className={`w-full py-3.5 rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none ${buttonBgClass}`}
+        className={`w-full py-3.5 rounded-2xl font-bold text-xs transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2 disabled:bg-secondary disabled:text-muted-foreground disabled:shadow-none hover:scale-[1.005] active:scale-[0.995] ${buttonBgClass}`}
       >
         <Icon size={15} />
         <span>
