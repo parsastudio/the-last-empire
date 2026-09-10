@@ -12,7 +12,6 @@ import {
   LayerController,
   TacticalLayer,
 } from "@/presentation/components/tactical-map/controls/layer-controller";
-import { useMapCameraFocus } from "@/presentation/hooks/tactical-map/use-map-camera-focus";
 import { useMapDimensions } from "@/presentation/hooks/tactical-map/use-map-dimensions";
 import { CountryRegistry } from "@/domain/data/countries";
 import { useBitPackedGame } from "@/presentation/hooks/game/final/use-bit-packed-game";
@@ -44,14 +43,13 @@ export function WebGLTacticalWorkspace({
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
 
-  const dimensions = useMapDimensions(containerRef);
+  useMapDimensions(containerRef);
 
   const activeModal = useUiStore((state) => state.activeModal);
   const isRailCollapsed = useUiStore((state) => state.isRailCollapsed);
   const openModal = useUiStore((state) => state.openModal);
   const openCommandCenter = useUiStore((state) => state.openCommandCenter);
   const setIsRailCollapsed = useUiStore((state) => state.setIsRailCollapsed);
-  const closeModal = useUiStore((state) => state.closeModal);
 
   const {
     gameState: effectiveGameState,
@@ -68,23 +66,6 @@ export function WebGLTacticalWorkspace({
     effectiveGameState && effectiveGameState.humanNationId
       ? effectiveGameState.nations[effectiveGameState.humanNationId] || null
       : null;
-
-  const { focusOnCountry } = useMapCameraFocus({
-    mapWidth: 4096,
-    mapHeight: 2048,
-    dimensions,
-    scaleRef,
-    positionRef,
-    provincesMap: effectiveGameState?.provinces,
-  });
-
-  const handleFocusCountryAndClose = useCallback(
-    (iso3: string) => {
-      focusOnCountry(iso3);
-      closeModal();
-    },
-    [focusOnCountry, closeModal],
-  );
 
   const handleSelectCountryContext = useCallback(
     (iso3: string) => {
@@ -188,7 +169,6 @@ export function WebGLTacticalWorkspace({
       <TacticalModalOrchestrator
         humanNation={humanNation}
         gameState={effectiveGameState}
-        onFocusCountry={handleFocusCountryAndClose}
       />
 
       <CampaignNotFoundModal isOpen={isNotFound} gameId={gameId} />
