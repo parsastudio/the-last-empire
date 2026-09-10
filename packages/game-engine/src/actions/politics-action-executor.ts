@@ -19,6 +19,7 @@ import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-
 import { TreatyTerminationExecutor } from "@/engine/actions/executors/politics/treaty-termination-executor";
 import { ForeignAidExecutor } from "@/engine/actions/executors/politics/foreign-aid-executor";
 import { ExecutionResult } from "@/engine/actions/execution-result";
+import { DiplomaticResultFactory } from "@/engine/diplomacy/diplomatic-result.factory";
 
 export class PoliticsActionExecutor {
   private static treatyEvaluator = new TreatyEvaluator();
@@ -222,14 +223,14 @@ export class PoliticsActionExecutor {
             );
             return {
               newState,
-              resultData: {
+              resultData: DiplomaticResultFactory.create({
                 proposalType: action.proposalType,
                 accepted: true,
                 targetNationId: receiver.id,
                 targetName: receiver.name,
                 targetFlagCode: receiver.flagCode,
                 reputationChange: 1,
-              },
+              }),
             };
           } else {
             const newState = TreatyAcceptanceApplier.applyRejection(
@@ -238,14 +239,14 @@ export class PoliticsActionExecutor {
             );
             return {
               newState,
-              resultData: {
+              resultData: DiplomaticResultFactory.create({
                 proposalType: action.proposalType,
                 accepted: false,
                 targetNationId: receiver.id,
                 targetName: receiver.name,
                 targetFlagCode: receiver.flagCode,
                 reputationChange: 0,
-              },
+              }),
             };
           }
         }

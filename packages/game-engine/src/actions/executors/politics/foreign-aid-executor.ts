@@ -7,6 +7,7 @@ import { RelationProfile } from "@/domain/diplomacy/diplomacy.schema";
 import { TurnLogBuilder, GameError } from "@/domain/shared/domain-utilities";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { TreatyEvaluator } from "@/engine/diplomacy/diplomacy-engine";
+import { DiplomaticResultFactory } from "@/engine/diplomacy/diplomatic-result.factory";
 
 export class ForeignAidExecutor {
   public static execute(
@@ -106,14 +107,14 @@ export class ForeignAidExecutor {
 
     return {
       newState,
-      resultData: {
+      resultData: DiplomaticResultFactory.create({
         proposalType: "SEND_FOREIGN_AID",
         accepted: true,
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         reputationChange: 1,
-      },
+      }),
     };
   }
 }

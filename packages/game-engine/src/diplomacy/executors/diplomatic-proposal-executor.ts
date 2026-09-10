@@ -5,6 +5,7 @@ import {
   GameError,
   SecurityGuaranteeValidator,
 } from "@geopolitics/domain";
+import { DiplomaticResultFactory } from "@/engine/diplomacy/diplomatic-result.factory";
 
 export class DiplomaticProposalExecutor {
   public static handleEmergencyProtectorate(
@@ -60,7 +61,7 @@ export class DiplomaticProposalExecutor {
 
     return {
       newState,
-      resultData: {
+      resultData: DiplomaticResultFactory.create({
         proposalType: "EMERGENCY_PROTECTORATE",
         accepted: true,
         targetNationId: receiver.id,
@@ -68,7 +69,7 @@ export class DiplomaticProposalExecutor {
         targetFlagCode: receiver.flagCode,
         reputationChange: -30,
         message: `معاهده تحت‌الحمایگی با ${receiver.name} امضا شد: اعزام ارتش فوق‌پیشرفته (۵۰٪ GDP) در ازای ۵٪ خراج نوبتی (-۳۰ پرستیژ، -۱۵٪ ثبات).`,
-      },
+      }),
     };
   }
 
@@ -101,14 +102,14 @@ export class DiplomaticProposalExecutor {
         },
         turnLogs: [...state.turnLogs, cancelLog],
       },
-      resultData: {
+      resultData: DiplomaticResultFactory.create({
         proposalType: "CANCEL_EMERGENCY_PROTECTORATE",
         accepted: true,
         targetNationId: receiver.id,
         targetName: receiver.name,
         targetFlagCode: receiver.flagCode,
         message: `معاهده استعماری با ${receiver.name} لغو گردید و خراج نوبتی ۵٪ قطع شد.`,
-      },
+      }),
     };
   }
 }

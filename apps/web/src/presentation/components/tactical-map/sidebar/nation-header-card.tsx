@@ -1,18 +1,9 @@
 import React, { useMemo } from "react";
-import {
-  Trophy,
-  Swords,
-  Cpu,
-  Users,
-  ShieldCheck,
-  Compass,
-  Flame,
-  Skull,
-  LucideIcon,
-} from "lucide-react";
+import { Trophy, Swords, Cpu, Users } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
 import { GameDifficulty, DIFFICULTY_CONFIGS } from "@geopolitics/domain";
+import { DIFFICULTY_VISUAL_CONFIGS } from "@/presentation/configs/game-difficulty-visuals.config";
 
 interface NationHeaderCardProps {
   name: string;
@@ -25,38 +16,6 @@ interface NationHeaderCardProps {
   rank?: number;
   difficulty?: GameDifficulty;
 }
-
-const DIFFICULTY_ICONS: Record<GameDifficulty, LucideIcon> = {
-  EASY: ShieldCheck,
-  NORMAL: Compass,
-  HARD: Flame,
-  IMPOSSIBLE: Skull,
-};
-
-const DIFFICULTY_STYLES: Record<
-  GameDifficulty,
-  {
-    border: string;
-    textColor: string;
-  }
-> = {
-  EASY: {
-    border: "border-emerald-500/30",
-    textColor: "text-emerald-400",
-  },
-  NORMAL: {
-    border: "border-primary/30",
-    textColor: "text-primary",
-  },
-  HARD: {
-    border: "border-amber-500/30",
-    textColor: "text-amber-400",
-  },
-  IMPOSSIBLE: {
-    border: "border-rose-500/30",
-    textColor: "text-rose-400",
-  },
-};
 
 export function NationHeaderCard({
   name,
@@ -104,8 +63,9 @@ export function NationHeaderCard({
   ]);
 
   const diffConfig = DIFFICULTY_CONFIGS[difficulty];
-  const DiffIcon = DIFFICULTY_ICONS[difficulty] ?? Compass;
-  const diffVisual = DIFFICULTY_STYLES[difficulty] ?? DIFFICULTY_STYLES.NORMAL;
+  const diffVisual =
+    DIFFICULTY_VISUAL_CONFIGS[difficulty] ?? DIFFICULTY_VISUAL_CONFIGS.NORMAL;
+  const DiffIcon = diffVisual.icon;
 
   return (
     <div className="bg-card/90 border border-border/80 p-5 rounded-3xl space-y-4 shadow-xl backdrop-blur-xl dir-rtl text-right font-sans relative overflow-hidden">
@@ -172,7 +132,7 @@ export function NationHeaderCard({
         </div>
 
         <div
-          className={`bg-background/60 border ${diffVisual.border} p-3 rounded-2xl space-y-1 shadow-sm`}
+          className={`bg-background/60 border ${diffVisual.borderColor} p-3 rounded-2xl space-y-1 shadow-sm`}
           title={diffConfig.descriptionFa}
         >
           <span className="text-[10px] text-muted-foreground font-sans font-bold flex items-center gap-1.5">

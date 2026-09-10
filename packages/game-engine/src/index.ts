@@ -39,6 +39,7 @@ export * from "./ai/procurement/ai-domestic-recruitment-planner";
 export * from "./ai/procurement/ai-machinery-import-planner";
 export * from "./ai/procurement/ai-naval-procurement-planner";
 export * from "./ai/procurement/ai-posture-evaluator";
+export * from "./ai/procurement/ai-procurement-weights.utility";
 export * from "./ai/procurement/ai-wallet-budget-allocator";
 export * from "./ai/procurement/ai-wartime-loan-evaluator";
 export * from "./ai/blackboard/ai-need-scoring-engine";
@@ -46,6 +47,9 @@ export * from "./ai/blackboard/ai-budget-blackboard";
 
 export * from "./combat/optimizer/naval-deployment-clamper";
 export * from "./combat/optimizer/deployment-step-search";
+export * from "./combat/optimizer/helpers/binary-search-optimizer";
+export * from "./combat/optimizer/helpers/guarantor-multiplier-blender";
+export * from "./combat/optimizer/helpers/air-missile-deployment-optimizer";
 export * from "./combat/attack-deployment-optimizer";
 export * from "./combat/calculator/guarantor-intervention-calculator";
 export * from "./combat/calculator/battle-loot-evaluator";
@@ -72,6 +76,7 @@ export * from "./diagnostics/turn-state-logger";
 
 export * from "./diplomacy/diplomacy-engine";
 export * from "./diplomacy/diplomatic-acceptance-evaluator";
+export * from "./diplomacy/diplomatic-result.factory";
 export * from "./diplomacy/appliers/diplomatic-log-synchronizer";
 export * from "./diplomacy/appliers/security-guarantee-applier";
 export * from "./diplomacy/appliers/guarantor-retaliation-applier";

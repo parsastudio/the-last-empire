@@ -1,5 +1,6 @@
 import { MissileInterceptionPhase } from "@/engine/combat/phases/missile-interception-phase";
 import { AirSupremacyPhase } from "@/engine/combat/phases/air-supremacy-phase";
+import { BinarySearchOptimizer } from "@/engine/combat/optimizer/helpers/binary-search-optimizer";
 
 export class AirMissileDeploymentOptimizer {
   public static calculateOptimalDrones(
@@ -12,28 +13,15 @@ export class AirMissileDeploymentOptimizer {
       return 0;
     }
 
-    let low = 1;
-    let high = maxDrone;
-    let optimal = maxDrone;
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
+    return BinarySearchOptimizer.findMinimalPassing(1, maxDrone, (drones) => {
       const res = MissileInterceptionPhase.calculate({
-        deployedDrones: mid,
+        deployedDrones: drones,
         defAirDefense,
         attDroneMult,
         defAdMult,
       });
-
-      if (res.defAirDefenseRemainingRaw === 0) {
-        optimal = mid;
-        high = mid - 1;
-      } else {
-        low = mid + 1;
-      }
-    }
-
-    return optimal;
+      return res.defAirDefenseRemainingRaw === 0;
+    });
   }
 
   public static calculateOptimalAirForce(
@@ -48,14 +36,9 @@ export class AirMissileDeploymentOptimizer {
     if (maxAir <= 0) return 0;
     if (defAirForce <= 0 && defArmor <= 0) return 0;
 
-    let low = 0;
-    let high = maxAir;
-    let optimal = maxAir;
-
-    while (low <= high) {
-      const mid = Math.floor((low + high) / 2);
+    return BinarySearchOptimizer.findMinimalPassing(0, maxAir, (airForce) => {
       const res = AirSupremacyPhase.calculate({
-        deployedAirForce: mid,
+        deployedAirForce: airForce,
         defAirForce,
         defArmor,
         attAirMult,
@@ -68,14 +51,7 @@ export class AirMissileDeploymentOptimizer {
       const armorCleared =
         defArmor <= 0 || res.defArmorDestroyedByAir >= defArmor;
 
-      if (airCleared && armorCleared) {
-        optimal = mid;
-        high = mid - 1;
-      } else {
-        low = mid + 1;
-      }
-    }
-
-    return optimal;
+      return airCleared && armorCleared;
+    });
   }
 }
