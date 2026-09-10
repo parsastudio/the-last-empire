@@ -43,7 +43,8 @@ export function useFactoryTierProcurement({
   actionType = "DOMESTIC",
 }: UseFactoryTierProcurementProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
-  const { triggerFeedback, getFeedbacksFor } = useFloatingFeedback<number>();
+  const { feedbacks, triggerFeedback, getFeedbacksFor } =
+    useFloatingFeedback<number>();
 
   const consolidatedBatches = useMemo(() => {
     if (batches && batches.length > 0) {
@@ -140,6 +141,7 @@ export function useFactoryTierProcurement({
 
   return {
     tierUpgradeItems,
+    feedbacks,
     getFeedbacksFor,
     isSubmitting,
     handleUpgradeTier,
