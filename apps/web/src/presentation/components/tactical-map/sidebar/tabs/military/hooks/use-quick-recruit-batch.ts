@@ -110,7 +110,7 @@ export function useQuickRecruitBatch({
     async (info: QuickUnitBatchInfo) => {
       if (!info.canAfford || info.isCapReached) return;
 
-      triggerFeedback(info.type, info.batchQuantity);
+      triggerFeedback(info.type, info.batchQuantity, { playSound: false });
 
       const action = ActionFactory.recruitUnit(
         nationId,

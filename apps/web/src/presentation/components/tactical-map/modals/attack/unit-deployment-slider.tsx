@@ -2,6 +2,7 @@ import React from "react";
 import { LucideIcon } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface UnitDeploymentSliderProps {
   label: string;
@@ -24,11 +25,17 @@ export function UnitDeploymentSlider({
 }: UnitDeploymentSliderProps) {
   const handlePercentageSelect = (pct: number) => {
     if (availableCount <= 0) return;
+    TacticalSound.playSliderTick();
     const target = Math.floor(availableCount * pct);
     onChange(target);
   };
 
   const clampedCount = Math.min(availableCount, Math.max(0, selectedCount));
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    TacticalSound.playSliderTick();
+    onChange(Number(e.target.value));
+  };
 
   return (
     <div className="bg-secondary/40 border border-border/70 p-4 rounded-3xl space-y-3 font-sans dir-rtl text-right hover:border-primary/40 transition-all shadow-sm">
@@ -62,7 +69,7 @@ export function UnitDeploymentSlider({
         max={Math.max(0, availableCount)}
         disabled={availableCount === 0}
         value={clampedCount}
-        onChange={(e) => onChange(Number(e.target.value))}
+        onChange={handleSliderChange}
         className="w-full accent-primary cursor-pointer h-2 bg-secondary rounded-lg disabled:opacity-30"
       />
 

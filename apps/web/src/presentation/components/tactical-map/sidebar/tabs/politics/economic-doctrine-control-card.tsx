@@ -6,6 +6,7 @@ import { ActionFactory } from "@/domain/game/action-factory";
 import { selectEconomicDoctrinePreview } from "@/presentation/selectors/politics-view-model.selector";
 import { EconomicDoctrineListSelector } from "./components/economic-doctrine-list-selector";
 import { EconomicRevenuePreviewBox } from "./components/economic-revenue-preview-box";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface EconomicDoctrineControlCardProps {
   nation: Nation;
@@ -37,6 +38,11 @@ export function EconomicDoctrineControlCard({
   const activeConfig = previewModel.activeConfig;
   const preview = previewModel.preview;
   const isChanged = selectedStance !== currentStance;
+
+  const handleSelectStance = (stance: EconomicDoctrineStance) => {
+    TacticalSound.playUiClick();
+    setSelectedStance(stance);
+  };
 
   const handleApplyDoctrine = async () => {
     if (!isChanged || isSubmitting) return;
@@ -72,7 +78,7 @@ export function EconomicDoctrineControlCard({
         <EconomicDoctrineListSelector
           currentStance={currentStance}
           selectedStance={selectedStance}
-          onSelectStance={setSelectedStance}
+          onSelectStance={handleSelectStance}
         />
 
         <EconomicRevenuePreviewBox

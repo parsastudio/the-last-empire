@@ -4,6 +4,7 @@ import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { GameOverHeroBanner } from "./game-over/components/game-over-hero-banner";
 import { VictoryStatsCard } from "./game-over/components/victory-stats-card";
 import { GameOverActionButtons } from "./game-over/components/game-over-action-buttons";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface GameOverModalProps {
   isOpen: boolean;
@@ -39,8 +40,13 @@ export function GameOverModal({
   onHome,
 }: GameOverModalProps) {
   useEffect(() => {
-    if (isOpen && isVictory) {
-      TacticalEffects.fireVictoryConfetti(140);
+    if (isOpen) {
+      if (isVictory) {
+        TacticalEffects.fireVictoryConfetti(140);
+        TacticalSound.playVictoryFanfare();
+      } else {
+        TacticalSound.playDefeatSound();
+      }
     }
   }, [isOpen, isVictory]);
 

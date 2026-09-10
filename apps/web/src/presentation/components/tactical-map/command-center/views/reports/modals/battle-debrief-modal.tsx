@@ -17,6 +17,7 @@ import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { BattlePhaseCards } from "./components/battle-phase-cards";
 import { BattleCasualtyTable } from "./components/battle-casualty-table";
 import { BattleSpoilsCard } from "./components/battle-spoils-card";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface BattleDebriefModalProps {
   isOpen: boolean;
@@ -43,6 +44,9 @@ export function BattleDebriefModal({
   useEffect(() => {
     if (isOpen && isHumanWinner) {
       TacticalEffects.fireVictoryConfetti(120);
+      TacticalSound.playVictoryFanfare();
+    } else if (isOpen && !isHumanWinner) {
+      TacticalSound.playDefeatSound();
     }
   }, [isOpen, isHumanWinner]);
 
@@ -60,6 +64,15 @@ export function BattleDebriefModal({
   const defenderFlag = getFlagEmoji(
     defender?.flagCode || reportData.defenderId,
   );
+
+  const handleSelectStep = (step: 1 | 2 | 3 | 4 | 5) => {
+    setActiveStep(step);
+    if (step === 1) TacticalSound.playPhaseMissile();
+    else if (step === 2) TacticalSound.playPhaseAir();
+    else if (step === 3) TacticalSound.playPhaseGround();
+    else if (step === 4) TacticalSound.playUiClick();
+    else if (step === 5) TacticalSound.playCoinSound();
+  };
 
   let modalTitle = "";
   if (isHumanAttacker) {
@@ -116,7 +129,7 @@ export function BattleDebriefModal({
 
           <div className="flex items-center gap-3 text-left dir-ltr">
             <span className="text-3xl select-none">{defenderFlag}</span>
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 text-right">
               <span className="text-sm font-black text-foreground block">
                 {defenderName}
               </span>
@@ -140,7 +153,7 @@ export function BattleDebriefModal({
             return (
               <button
                 key={item.step}
-                onClick={() => setActiveStep(item.step as 1 | 2 | 3 | 4 | 5)}
+                onClick={() => handleSelectStep(item.step as 1 | 2 | 3 | 4 | 5)}
                 className={`py-2 px-1.5 rounded-xl text-xs font-black border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   isActive
                     ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20 scale-[1.02]"

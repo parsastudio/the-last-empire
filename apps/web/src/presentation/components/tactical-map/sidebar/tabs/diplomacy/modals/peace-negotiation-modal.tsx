@@ -23,6 +23,7 @@ import {
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface PeaceNegotiationModalProps {
   isOpen: boolean;
@@ -73,6 +74,11 @@ export function PeaceNegotiationModal({
   const isDominantAi = terms.ratio >= 2.0;
   const isCrushedAi = terms.ratio <= 0.5;
   const isWhitePeace = terms.settlementType === "WHITE_PEACE";
+
+  const handleDeclinePeace = () => {
+    TacticalSound.playTreatyRejected();
+    onClose();
+  };
 
   const handleSignTreaty = async () => {
     if (isProcessing || isSubmitting || !terms.canAffordTerms) return;
@@ -253,7 +259,7 @@ export function PeaceNegotiationModal({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 font-sans">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleDeclinePeace}
             className="py-3.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground rounded-2xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <Swords size={15} />

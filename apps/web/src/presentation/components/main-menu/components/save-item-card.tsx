@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Calendar, Clock, Trash2, Check, X } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 export interface SaveItemData {
   id: string;
@@ -19,9 +20,32 @@ interface SaveItemCardProps {
 export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState<boolean>(false);
 
+  const handleCardClick = () => {
+    TacticalSound.playUiClick();
+    onSelect(save.id);
+  };
+
+  const handleStartDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    TacticalSound.playToastAlert("warning");
+    setIsConfirmingDelete(true);
+  };
+
+  const handleConfirmDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    TacticalSound.playModalClose();
+    onDelete(save.id);
+  };
+
+  const handleCancelDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    TacticalSound.playUiClick();
+    setIsConfirmingDelete(false);
+  };
+
   return (
     <div
-      onClick={() => onSelect(save.id)}
+      onClick={handleCardClick}
       className="w-full bg-background/50 hover:bg-secondary/40 border border-border/80 hover:border-primary/40 p-4 rounded-2xl text-right transition-all flex items-center justify-between gap-4 group cursor-pointer dir-rtl"
     >
       <div className="space-y-2">
@@ -54,10 +78,7 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
             </span>
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete(save.id);
-              }}
+              onClick={handleConfirmDelete}
               className="p-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition-all cursor-pointer flex items-center justify-center"
               title="تایید حذف"
             >
@@ -65,10 +86,7 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
             </button>
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsConfirmingDelete(false);
-              }}
+              onClick={handleCancelDelete}
               className="p-1 bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground rounded-lg transition-all cursor-pointer flex items-center justify-center"
               title="انصراف"
             >
@@ -78,10 +96,7 @@ export function SaveItemCard({ save, onSelect, onDelete }: SaveItemCardProps) {
         ) : (
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsConfirmingDelete(true);
-            }}
+            onClick={handleStartDelete}
             className="p-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
             title="حذف پرونده ذخیره‌شده"
           >

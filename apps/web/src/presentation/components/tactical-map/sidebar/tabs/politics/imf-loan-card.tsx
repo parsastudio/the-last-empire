@@ -12,6 +12,7 @@ import { AmountActionDialog } from "@/presentation/components/common/amount-acti
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { DebtCalculatorUtility } from "@geopolitics/domain";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface ImfLoanCardProps {
   nationId: string;
@@ -106,7 +107,10 @@ export function ImfLoanCard({
 
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button
-              onClick={() => setIsLoanModalOpen(true)}
+              onClick={() => {
+                TacticalSound.playUiClick();
+                setIsLoanModalOpen(true);
+              }}
               disabled={availableLoanBillion <= 0}
               className="py-2.5 bg-secondary hover:bg-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed text-foreground rounded-xl text-xs font-bold transition-all border border-border flex items-center justify-center gap-1 cursor-pointer"
             >
@@ -129,7 +133,10 @@ export function ImfLoanCard({
               </button>
             ) : (
               <button
-                onClick={() => setIsRepayModalOpen(true)}
+                onClick={() => {
+                  TacticalSound.playUiClick();
+                  setIsRepayModalOpen(true);
+                }}
                 disabled={
                   nationalDebt <= 0 || treasury <= 0 || maxRepayBillion <= 0
                 }

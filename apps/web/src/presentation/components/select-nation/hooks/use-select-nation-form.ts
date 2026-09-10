@@ -16,6 +16,7 @@ import {
   MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { NationPresentationMapper } from "@/presentation/utils/nation-presentation-mapper";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 function mapManifestToNationDetails(
   manifest: FinalMapManifest | null,
@@ -176,18 +177,26 @@ export function useSelectNationForm() {
   }, [userSelectedGovernment, selectedNation]);
 
   const handleSelectNationCard = useCallback((nation: NationDetail) => {
+    TacticalSound.playUiClick();
     setSelectedNationId(nation.id);
     setUserSelectedGovernment(nation.defaultGovernment);
   }, []);
 
   const setSelectedGovernment = useCallback((gov: string) => {
+    TacticalSound.playUiClick();
     setUserSelectedGovernment(gov);
+  }, []);
+
+  const handleSelectDifficulty = useCallback((diff: GameDifficulty) => {
+    TacticalSound.playUiClick();
+    setSelectedDifficulty(diff);
   }, []);
 
   const handleStartCampaign = useCallback(async () => {
     if (!selectedNation) return;
 
     try {
+      TacticalSound.playTurnAdvance();
       const { gameId } = await BitPackedInitService.initializeBitPackedSession(
         selectedNation.id,
       );
@@ -233,7 +242,7 @@ export function useSelectNationForm() {
     selectedDifficulty,
     setSearchQuery,
     setSelectedGovernment,
-    setSelectedDifficulty,
+    setSelectedDifficulty: handleSelectDifficulty,
     handleSelectNationCard,
     handleStartCampaign,
   };

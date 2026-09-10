@@ -14,6 +14,7 @@ import { useUiStore } from "@/presentation/stores/use-ui-store";
 import { useToast } from "@/presentation/context/toast-context";
 import { TacticalEffects } from "@/presentation/utils/tactical-effects";
 import { DirectAttackSelector } from "@/presentation/selectors/direct-attack.selector";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface UseDirectAttackFormProps {
   targetNationId: string | null;
@@ -194,6 +195,7 @@ export function useDirectAttackForm({
   const handleAutoOptimizeDeploy = useCallback(() => {
     if (!humanNation || !targetNation) return;
 
+    TacticalSound.playUiClick();
     const result = AttackDeploymentOptimizer.calculateOptimalDeployment(
       humanNation,
       targetNation,

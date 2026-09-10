@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { GameAction } from "@/domain/game/action.schema";
 import { useToast } from "@/presentation/context/toast-context";
 import { useGameStore } from "@/presentation/stores/use-game-store";
+import { ActionSoundResolverUtility } from "@/presentation/utils/action-sound-resolver.utility";
 
 export function useGameActions(onActionExecuted?: () => void) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -20,6 +21,8 @@ export function useGameActions(onActionExecuted?: () => void) {
         const result = await dispatchStoreAction(action);
 
         if (result.success) {
+          ActionSoundResolverUtility.resolveAndPlay(action, result.resultData);
+
           if (onActionExecuted) {
             onActionExecuted();
           }

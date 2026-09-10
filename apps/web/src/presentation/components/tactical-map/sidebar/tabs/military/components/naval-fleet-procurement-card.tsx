@@ -62,6 +62,7 @@ export function NavalFleetProcurementCard({
     triggerFeedback(
       "fleet",
       `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان`,
+      { playSound: false },
     );
 
     const action = ActionFactory.buyNavalFleet(

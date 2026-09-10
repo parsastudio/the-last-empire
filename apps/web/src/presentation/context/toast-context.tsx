@@ -9,6 +9,7 @@ import React, {
   useEffect,
 } from "react";
 import { GameIdGenerator } from "@geopolitics/domain";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -45,6 +46,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       const id = GameIdGenerator.generateId("toast");
       const newToast: StrategicToast = { id, type, title, message };
 
+      TacticalSound.playToastAlert(type);
       setToasts((prev) => [newToast, ...prev.slice(0, 4)]);
 
       const timer = setTimeout(() => {

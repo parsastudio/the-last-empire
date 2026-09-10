@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { X } from "lucide-react";
 import { useModalKeyboardShortcut } from "./hooks/use-modal-keyboard-shortcut";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface UnifiedModalShellProps {
   isOpen: boolean;
@@ -23,11 +24,22 @@ export function UnifiedModalShell({
 }: UnifiedModalShellProps) {
   useModalKeyboardShortcut(isOpen, onClose);
 
+  useEffect(() => {
+    if (isOpen) {
+      TacticalSound.playModalOpen();
+    }
+  }, [isOpen]);
+
+  const handleClose = () => {
+    TacticalSound.playModalClose();
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
-      onClick={onClose}
+      onClick={handleClose}
       onWheel={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       onMouseUp={(e) => e.stopPropagation()}
@@ -58,7 +70,7 @@ export function UnifiedModalShell({
           </div>
 
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-2xl transition-all cursor-pointer shrink-0 border border-border/60 hover:border-border"
             title="بستن پنجره"
           >

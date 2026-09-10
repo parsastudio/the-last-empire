@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ShoppingCart, Coins, Award, Globe, TrendingUp } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { Nation, NationGettersUtility } from "@geopolitics/domain";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { ExportSalesModalData } from "@/presentation/stores/use-ui-store";
 import { NationResolverUtility } from "@/presentation/utils/nation-resolver.utility";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface ExportSalesDetailsModalProps {
   isOpen: boolean;
@@ -19,6 +20,12 @@ export function ExportSalesDetailsModal({
   nationsMap,
   onClose,
 }: ExportSalesDetailsModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      TacticalSound.playCoinSound();
+    }
+  }, [isOpen]);
+
   if (!isOpen || !data) return null;
 
   const buyersWithDetails = data.buyers.map((item) => {

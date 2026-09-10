@@ -4,6 +4,7 @@ import { Nation } from "@/domain/nation/nation.schema";
 import { BitPackedCellUtility } from "@/domain/map/bit-packed-cell.utility";
 import { CountryRegistry } from "@/domain/data/countries";
 import { MapTopologyRegistry } from "@geopolitics/domain";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 export interface ContextMenuState {
   screenPos: { x: number; y: number };
@@ -31,6 +32,8 @@ export function useContextMenu() {
         setContextMenuState(null);
         return;
       }
+
+      TacticalSound.playContextMenu();
 
       const province = provincesMap
         ? provincesMap[provinceId.toString()]
