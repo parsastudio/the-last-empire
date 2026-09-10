@@ -120,7 +120,7 @@ export class ProjectActionExecutor {
           nation.id,
           "DOMESTIC",
           "INFO",
-          "DILEMMA_RESOLVED",
+          "GENERIC_EVENT",
           {
             projectTitle: config.nameFa,
             eventTitle: isSilentBreakthrough

@@ -1,7 +1,7 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { ResolveDilemmaAction } from "@/domain/game/action.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { GameError, TurnLogBuilder, getNationGdp } from "@geopolitics/domain";
+import { GameError, getNationGdp } from "@geopolitics/domain";
 import {
   CORE_DILEMMA_EVENTS,
   MilitaryInventoryHelper,
@@ -176,20 +176,6 @@ export class DilemmaActionExecutor {
       },
     };
 
-    const resolutionLog = TurnLogBuilder.createNationalLog(
-      state.currentTurn,
-      nation.id,
-      "DOMESTIC",
-      "INFO",
-      "DILEMMA_RESOLVED",
-      {
-        eventTitle: event.titleFa,
-        choiceLabel: choice.labelFa,
-      },
-      undefined,
-      `فرمان حاکمیتی در بحران «${event.titleFa}»: ${choice.labelFa}`,
-    );
-
     const newState: GameState = {
       ...state,
       activeDilemma: null,
@@ -197,7 +183,7 @@ export class DilemmaActionExecutor {
         ...state.nations,
         [buyerKey]: updatedNation,
       },
-      turnLogs: [...state.turnLogs, resolutionLog],
+      turnLogs: state.turnLogs,
     };
 
     return {
