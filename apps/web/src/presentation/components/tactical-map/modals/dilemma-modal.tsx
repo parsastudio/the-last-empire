@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { CheckCircle2, Loader2, Zap } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { DilemmaEvent, ActionFactory, getNationGdp } from "@geopolitics/domain";
@@ -27,6 +27,12 @@ export function DilemmaModal({
   const { dispatchAction, isSubmitting } = useGameActions();
   const gameState = useGameStore((state) => state.gameState);
 
+  useEffect(() => {
+    if (isOpen && dilemma) {
+      TacticalSound.playDilemmaAlert();
+    }
+  }, [isOpen, dilemma]);
+
   const humanNation = useMemo(() => {
     return gameState?.nations[humanNationId] ?? null;
   }, [gameState, humanNationId]);
@@ -45,13 +51,13 @@ export function DilemmaModal({
 
   const handleSelectChoice = (choiceId: string) => {
     setSelectedChoiceId(choiceId);
-    TacticalSound.playCoinSound();
+    TacticalSound.playUiClick();
   };
 
   const handleConfirmAndExecute = async () => {
     if (!selectedChoiceId || isSubmitting) return;
 
-    TacticalSound.playCoinSound();
+    TacticalSound.playTreatySigned();
     const action = ActionFactory.resolveDilemma(
       humanNationId,
       dilemma.id,

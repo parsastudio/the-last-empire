@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   ShieldAlert,
   Flame,
@@ -11,6 +11,7 @@ import { UnifiedModalShell } from "@/presentation/components/common/unified-moda
 import { Nation, PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { CoalitionAlertData } from "@/presentation/stores/use-ui-store";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface CoalitionAlertModalProps {
   isOpen: boolean;
@@ -25,6 +26,12 @@ export function CoalitionAlertModal({
   nationsMap,
   onClose,
 }: CoalitionAlertModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      TacticalSound.playCoalitionAlarm();
+    }
+  }, [isOpen]);
+
   if (!isOpen || !data) return null;
 
   const memberNations = data.memberIds

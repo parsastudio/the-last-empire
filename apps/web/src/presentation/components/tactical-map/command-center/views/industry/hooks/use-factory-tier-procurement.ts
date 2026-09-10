@@ -110,7 +110,10 @@ export function useFactoryTierProcurement({
           ? `+${item.batchQuantity} سوله وارداتی`
           : `+${item.batchQuantity} سوله مدرن`;
 
-      triggerFeedback(item.rankIndex, feedbackText, { durationMs: 700 });
+      triggerFeedback(item.rankIndex, feedbackText, {
+        durationMs: 700,
+        playSound: false,
+      });
 
       if (actionType === "IMPORT" && sellerId) {
         const action = ActionFactory.buyIndustrialEquipment(

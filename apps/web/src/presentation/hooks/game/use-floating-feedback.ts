@@ -24,7 +24,7 @@ export function useFloatingFeedback<TKey extends string | number = string>() {
       content: string | number,
       options: FloatingFeedbackOptions = {},
     ) => {
-      const { playSound = true, prefix = "+", durationMs = 600 } = options;
+      const { playSound = false, prefix = "+", durationMs = 600 } = options;
 
       if (playSound) {
         TacticalSound.playCoinSound();

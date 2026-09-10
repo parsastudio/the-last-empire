@@ -3,6 +3,7 @@ import { Loader2, ChevronRight, ChevronLeft, LucideIcon } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 import { NextTurnButton } from "@/presentation/components/tactical-map/sidebar/next-turn-button";
 import { COMMAND_RAIL_TABS } from "@/presentation/configs/command-center-tabs.config";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface RailTabButtonProps {
   id: SidebarTabType;
@@ -21,9 +22,14 @@ function RailTabButton({
   isCollapsed,
   onClick,
 }: RailTabButtonProps) {
+  const handleClick = () => {
+    TacticalSound.playUiClick();
+    onClick(id);
+  };
+
   return (
     <button
-      onClick={() => onClick(id)}
+      onClick={handleClick}
       className={`relative group flex items-center rounded-2xl transition-all cursor-pointer ${
         isCollapsed ? "justify-center p-2.5 w-full" : "gap-3 p-3 w-full"
       } ${
@@ -56,9 +62,14 @@ function RailToggleButton({
   isCollapsed: boolean;
   onToggle: () => void;
 }) {
+  const handleToggle = () => {
+    TacticalSound.playUiClick();
+    onToggle();
+  };
+
   return (
     <button
-      onClick={onToggle}
+      onClick={handleToggle}
       className="p-2 rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0"
       title={isCollapsed ? "باز کردن نوار فرماندهی" : "جمع کردن نوار"}
     >
@@ -86,6 +97,11 @@ export function CommandRail({
   onToggleCollapse,
   onNextTurn,
 }: CommandRailProps) {
+  const handleNextTurn = () => {
+    TacticalSound.playTurnAdvance();
+    onNextTurn();
+  };
+
   return (
     <aside
       onClick={(e) => e.stopPropagation()}
@@ -125,7 +141,7 @@ export function CommandRail({
       <div className="pt-2 border-t border-border/80 overflow-x-hidden">
         {isCollapsed ? (
           <button
-            onClick={onNextTurn}
+            onClick={handleNextTurn}
             disabled={isProcessingTurn}
             className="w-full py-3 bg-gdp hover:bg-gdp/90 disabled:opacity-50 text-primary-foreground rounded-2xl font-mono text-xs font-bold transition-all shadow-lg shadow-gdp/20 flex items-center justify-center cursor-pointer"
             title={`پایان نوبت ${currentTurn}`}
@@ -140,7 +156,7 @@ export function CommandRail({
           <NextTurnButton
             currentTurn={currentTurn}
             isProcessing={isProcessingTurn}
-            onNextTurn={onNextTurn}
+            onNextTurn={handleNextTurn}
           />
         )}
       </div>

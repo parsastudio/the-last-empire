@@ -12,6 +12,7 @@ import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { ActionFactory } from "@/domain/game/action-factory";
 import { EspionageTargetOption } from "@/presentation/components/tactical-map/command-center/views/espionage/espionage-target-selector";
 import { NationGettersUtility, NationTurnActivity } from "@geopolitics/domain";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface UseWideEspionageFormProps {
   nation: Nation;
@@ -144,6 +145,11 @@ export function useWideEspionageForm({
     [selectedTargetId, turnActivity?.executedEspionageTiers],
   );
 
+  const handleSelectTarget = (id: string) => {
+    TacticalSound.playUiClick();
+    setSelectedTargetId(id);
+  };
+
   const handleExecute = useCallback(
     async (tier: EspionageTier) => {
       if (!selectedTargetNation || isSubmitting) return;
@@ -167,7 +173,7 @@ export function useWideEspionageForm({
     setSearchQuery,
     countryOptions,
     selectedTargetId,
-    setSelectedTargetId,
+    setSelectedTargetId: handleSelectTarget,
     selectedTargetNation,
     targetGdp,
     tier2Cost,

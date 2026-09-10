@@ -18,6 +18,7 @@ import {
 } from "@geopolitics/game-engine";
 import { DiplomaticProposalFeedback } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/modals/diplomatic-feedback-modal";
 import { useUiStore } from "@/presentation/stores/use-ui-store";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 const DEFAULT_INVALID_GUARANTEE: SecurityGuaranteeValidationResult = {
   isValid: false,
@@ -152,6 +153,7 @@ export function useDiplomacyActionsRunner({
         currentStance as DiplomaticStance,
       );
       if (evaluation.hasBetrayed) {
+        TacticalSound.playToastAlert("warning");
         setConfirmModal({
           isOpen: true,
           penalty: evaluation.reputationPenalty,
@@ -161,7 +163,7 @@ export function useDiplomacyActionsRunner({
         return;
       }
     }
-    actionFn();
+    void actionFn();
   };
 
   const handleSendAid = async () => {
@@ -173,6 +175,7 @@ export function useDiplomacyActionsRunner({
   };
 
   const handleOpenPeaceNegotiations = () => {
+    TacticalSound.playUiClick();
     openModal({
       type: "PEACE_NEGOTIATION",
       targetNationId,
@@ -279,6 +282,7 @@ export function useDiplomacyActionsRunner({
   };
 
   const closeConfirmModal = () => {
+    TacticalSound.playUiClick();
     setConfirmModal((prev) => ({ ...prev, isOpen: false }));
   };
 
@@ -313,6 +317,9 @@ export function useDiplomacyActionsRunner({
     handleDeclareWar: () => executeOrConfirm(handleDeclareWar, true),
     closeConfirmModal,
     acceptConfirmModal,
-    closeFeedbackModal: () => setFeedbackModal(null),
+    closeFeedbackModal: () => {
+      TacticalSound.playUiClick();
+      setFeedbackModal(null);
+    },
   };
 }

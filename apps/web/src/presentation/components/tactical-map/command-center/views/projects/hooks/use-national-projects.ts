@@ -142,10 +142,12 @@ export function useNationalProjects(
   }, [orderedProjectsSnapshot, selectedTierFilter]);
 
   const toggleExpand = useCallback((projectId: string) => {
+    TacticalSound.playUiClick();
     setExpandedProjectId((prev) => (prev === projectId ? null : projectId));
   }, []);
 
   const dismissBreakthrough = useCallback(() => {
+    TacticalSound.playUiClick();
     setBreakthroughProjectId(null);
   }, []);
 
@@ -160,7 +162,6 @@ export function useNationalProjects(
         return;
       }
 
-      TacticalSound.playCoinSound();
       const action = ActionFactory.boostProject(nation.id, project.id);
       const res = await dispatchAction(action);
 
@@ -168,7 +169,6 @@ export function useNationalProjects(
         const data = res.resultData as BoostActionResultData;
         if (data.isEarlyBreakthrough) {
           TacticalEffects.fireVictoryConfetti(180);
-          TacticalSound.playCoinSound();
           setBreakthroughProjectId(project.id);
         } else if (data.isCompleted) {
           TacticalEffects.fireVictoryConfetti(120);

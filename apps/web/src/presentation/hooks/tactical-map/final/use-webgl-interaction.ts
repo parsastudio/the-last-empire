@@ -8,6 +8,7 @@ import { useGridPicker } from "@/presentation/hooks/tactical-map/final/use-grid-
 import { useContextMenu } from "@/presentation/hooks/tactical-map/final/use-context-menu";
 import { CountryRegistry } from "@/domain/data/countries";
 import { HoverHudPositionUtility } from "@/presentation/components/tactical-map/final/hud/utils/hover-hud-position.utility";
+import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 interface UseWebGLInteractionProps {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -95,6 +96,7 @@ export function useWebGLInteraction({
 
       if (lastHoverProvinceIdRef.current !== provinceId) {
         lastHoverProvinceIdRef.current = provinceId;
+        TacticalSound.playMapHover();
         const info = resolveHoverInfo(provinceId);
         setHoverData(info);
 
