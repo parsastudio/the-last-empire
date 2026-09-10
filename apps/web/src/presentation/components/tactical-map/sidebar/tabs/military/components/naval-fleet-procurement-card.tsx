@@ -7,7 +7,9 @@ import {
   ActionFactory,
   NAVAL_FLEET_CONFIG,
   ProcurementBatchCalculator,
+  GameIdGenerator,
 } from "@geopolitics/domain";
+import { NavalDeploymentClamper } from "@geopolitics/game-engine";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
@@ -52,11 +54,16 @@ export function NavalFleetProcurementCard({
     Math.round(NAVAL_FLEET_CONFIG.TURN_REVENUE_RATE * 100),
   );
 
+  const totalTransportCapacity = NavalDeploymentClamper.calculateMaxCapacity(
+    "NAVAL",
+    navalFleetCount,
+  );
+
   const handleBuy = async () => {
     if (!canAfford || isSubmitting) return;
 
     TacticalSound.playCoinSound();
-    const newId = `${Date.now()}-${Math.random()}`;
+    const newId = GameIdGenerator.generateId("fb-fleet");
     const qtyText = `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان`;
     setFeedbacks((prev) => [...prev, { id: newId, text: qtyText }]);
     setTimeout(() => {
@@ -154,8 +161,8 @@ export function NavalFleetProcurementCard({
             کل ظرفیت ترابری دریایی:
           </span>
           <span className="font-extrabold text-foreground text-xs block">
-            {PersianNumberFormatter.toPersianDigits(navalFleetCount * 60)} یگان
-            ظرفیت
+            {PersianNumberFormatter.toPersianDigits(totalTransportCapacity)}{" "}
+            یگان ظرفیت
           </span>
         </div>
       </div>

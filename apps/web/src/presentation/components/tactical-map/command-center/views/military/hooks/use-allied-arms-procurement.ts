@@ -74,13 +74,11 @@ export function useAlliedArmsProcurement({
     return getNationGdp(buyerNation, provincesMap);
   }, [currentGdp, buyerNation, provincesMap]);
 
-  const currentValuation =
-    MilitaryPricingCalculator.calculateTotalArmyValuation(buyerNation.military);
-  const maxValuation = Math.floor(effectiveBuyerGdp * 0.2);
-  const remainingValuationCapacity = Math.max(
-    0,
-    maxValuation - currentValuation,
-  );
+  const remainingValuationCapacity =
+    MilitaryPricingCalculator.calculateRemainingArmyValuation(
+      effectiveBuyerGdp,
+      buyerNation.military,
+    );
 
   const quotas = useMemo(() => {
     return MilitaryQuotaCalculator.calculateQuotas(

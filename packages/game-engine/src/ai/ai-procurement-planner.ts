@@ -26,7 +26,8 @@ export interface RecruitmentPlanResult {
 }
 
 export class AIProcurementPlanner {
-  public static readonly MAX_VALUATION_GDP_RATIO = 0.2;
+  public static readonly MAX_VALUATION_GDP_RATIO =
+    MilitaryPricingCalculator.MAX_ARMY_VALUATION_GDP_RATIO;
 
   public static planRecruitment(
     nation: Nation,
@@ -79,15 +80,15 @@ export class AIProcurementPlanner {
       MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
     const maxArmyValuation =
       posture === "WAR"
-        ? Math.floor(gdp * this.MAX_VALUATION_GDP_RATIO)
+        ? MilitaryPricingCalculator.calculateMaxArmyValuation(gdp)
         : posture === "THREAT"
           ? Math.floor(
-              gdp *
-                this.MAX_VALUATION_GDP_RATIO *
+              MilitaryPricingCalculator.calculateMaxArmyValuation(gdp) *
                 Math.max(weights.peacetimeArmyCap, 0.8),
             )
           : Math.floor(
-              gdp * this.MAX_VALUATION_GDP_RATIO * weights.peacetimeArmyCap,
+              MilitaryPricingCalculator.calculateMaxArmyValuation(gdp) *
+                weights.peacetimeArmyCap,
             );
 
     let globalRemainingValuation = Math.max(

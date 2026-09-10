@@ -12,7 +12,8 @@ export interface UnitBudgetQuota {
 }
 
 export class MilitaryQuotaCalculator {
-  public static readonly MAX_VALUATION_GDP_RATIO = 0.2;
+  public static readonly MAX_VALUATION_GDP_RATIO =
+    MilitaryPricingCalculator.MAX_ARMY_VALUATION_GDP_RATIO;
 
   public static getUnitRatios(): Record<UnitType, number> {
     return {
@@ -57,13 +58,10 @@ export class MilitaryQuotaCalculator {
       "DRONE_MISSILE",
     ];
 
-    const totalValuation =
-      MilitaryPricingCalculator.calculateTotalArmyValuation(military);
-    const maxGlobalValuation = Math.floor(gdp * this.MAX_VALUATION_GDP_RATIO);
-    const remainingGlobalValuation = Math.max(
-      0,
-      maxGlobalValuation - totalValuation,
-    );
+    const maxGlobalValuation =
+      MilitaryPricingCalculator.calculateMaxArmyValuation(gdp);
+    const remainingGlobalValuation =
+      MilitaryPricingCalculator.calculateRemainingArmyValuation(gdp, military);
 
     for (let i = 0; i < types.length; i++) {
       const type = types[i]!;

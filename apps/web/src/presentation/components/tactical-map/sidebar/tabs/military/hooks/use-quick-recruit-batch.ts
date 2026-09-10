@@ -58,13 +58,11 @@ export function useQuickRecruitBatch({
     }
   }, [nation.treasury]);
 
-  const currentValuation =
-    MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
-  const maxValuation = Math.floor(currentGdp * 0.2);
-  const remainingValuationCapacity = Math.max(
-    0,
-    maxValuation - currentValuation,
-  );
+  const remainingValuationCapacity =
+    MilitaryPricingCalculator.calculateRemainingArmyValuation(
+      currentGdp,
+      nation.military,
+    );
 
   const quotas = useMemo(() => {
     return MilitaryQuotaCalculator.calculateQuotas(currentGdp, nation.military);

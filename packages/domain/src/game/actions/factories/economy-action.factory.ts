@@ -8,18 +8,15 @@ import {
   RequestLoanAction,
 } from "@/domain/game/actions/schemas/economy-action.schema";
 import { EconomicDoctrineStance } from "@/domain/politics/economic-doctrine.schema";
+import { GameIdGenerator } from "@/domain/shared/utils/game-id-generator";
 
 export class EconomyActionFactory {
-  private static createId(prefix: string): string {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  }
-
   public static setEconomicDoctrine(
     nationId: string,
     stance: EconomicDoctrineStance,
   ): SetEconomicDoctrineAction {
     return {
-      id: this.createId("doctrine"),
+      id: GameIdGenerator.generateId("doctrine"),
       nationId,
       type: "SET_ECONOMIC_DOCTRINE",
       stance,
@@ -32,7 +29,7 @@ export class EconomyActionFactory {
     provinceId?: number,
   ): BuildFactoryAction {
     return {
-      id: this.createId("build-factory"),
+      id: GameIdGenerator.generateId("build-factory"),
       nationId,
       type: "BUILD_FACTORY",
       quantity,
@@ -46,7 +43,7 @@ export class EconomyActionFactory {
     sourceTechLevel?: number,
   ): EquipDomesticMachineryAction {
     return {
-      id: this.createId("equip-machinery"),
+      id: GameIdGenerator.generateId("equip-machinery"),
       nationId,
       type: "EQUIP_DOMESTIC_MACHINERY",
       quantity,
@@ -58,7 +55,7 @@ export class EconomyActionFactory {
     nationId: string,
   ): InvestIndustrialResearchAction {
     return {
-      id: this.createId("ind-research"),
+      id: GameIdGenerator.generateId("ind-research"),
       nationId,
       type: "INVEST_INDUSTRIAL_RESEARCH",
     };
@@ -71,7 +68,7 @@ export class EconomyActionFactory {
     sourceTechLevel?: number,
   ): BuyIndustrialEquipmentAction {
     return {
-      id: this.createId("buy-equipment"),
+      id: GameIdGenerator.generateId("buy-equipment"),
       nationId,
       type: "BUY_INDUSTRIAL_EQUIPMENT",
       sellerNationId,
@@ -82,7 +79,7 @@ export class EconomyActionFactory {
 
   public static repayDebt(nationId: string, amount: number): RepayDebtAction {
     return {
-      id: this.createId("repay"),
+      id: GameIdGenerator.generateId("repay"),
       nationId,
       type: "REPAY_DEBT",
       amount,
@@ -94,7 +91,7 @@ export class EconomyActionFactory {
     amount: number,
   ): RequestLoanAction {
     return {
-      id: this.createId("loan"),
+      id: GameIdGenerator.generateId("loan"),
       nationId,
       type: "REQUEST_LOAN",
       amount,

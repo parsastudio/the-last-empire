@@ -7,6 +7,7 @@ import {
   TurnLogParamValue,
 } from "@/domain/game/game-state.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { GameIdGenerator } from "@/domain/shared/utils/game-id-generator";
 
 export class TurnLogBuilder {
   public static createLogEntry(
@@ -24,10 +25,9 @@ export class TurnLogBuilder {
     const cleanTarget = targetNationId
       ? CountryRegistry.resolveCanonicalId(targetNationId)
       : undefined;
-    const randomSuffix = Math.random().toString(36).substring(2, 7);
 
     return {
-      id: `log-${cleanSource}-t${turn}-${randomSuffix}`,
+      id: GameIdGenerator.generateId(`log-${cleanSource}-t${turn}`),
       turn,
       timestamp: Date.now(),
       eventCode,

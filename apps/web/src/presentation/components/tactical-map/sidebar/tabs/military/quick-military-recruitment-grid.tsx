@@ -33,11 +33,10 @@ export function QuickMilitaryRecruitmentGrid({
   const currentValuation =
     MilitaryPricingCalculator.calculateTotalArmyValuation(nation.military);
 
-  const maxValuation = currentGdp * 0.2;
-  const capacityRatio =
-    maxValuation > 0
-      ? Math.min(100, Math.round((currentValuation / maxValuation) * 100))
-      : 100;
+  const capacityRatio = MilitaryPricingCalculator.calculateArmyCapacityRatio(
+    currentGdp,
+    currentValuation,
+  );
 
   const hasSeaAccess = NationGettersUtility.hasSeaAccess(
     nation.id,

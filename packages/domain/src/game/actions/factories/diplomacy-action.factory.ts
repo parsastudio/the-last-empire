@@ -4,19 +4,16 @@ import {
   SignPeaceSettlementAction,
 } from "@/domain/game/actions/schemas/diplomacy-action.schema";
 import { DiplomaticProposalType } from "@/domain/diplomacy/diplomacy.schema";
+import { GameIdGenerator } from "@/domain/shared/utils/game-id-generator";
 
 export class DiplomacyActionFactory {
-  private static createId(prefix: string): string {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  }
-
   public static diplomaticProposal(
     nationId: string,
     targetNationId: string,
     proposalType: DiplomaticProposalType,
   ): DiplomaticProposalAction {
     return {
-      id: this.createId("diplomacy"),
+      id: GameIdGenerator.generateId("diplomacy"),
       nationId,
       type: "DIPLOMATIC_PROPOSAL",
       targetNationId,
@@ -30,7 +27,7 @@ export class DiplomacyActionFactory {
     accept: boolean,
   ): RespondDiplomaticProposalAction {
     return {
-      id: this.createId("diplomacy-response"),
+      id: GameIdGenerator.generateId("diplomacy-response"),
       nationId,
       type: "RESPOND_DIPLOMATIC_PROPOSAL",
       proposalId,
@@ -44,7 +41,7 @@ export class DiplomacyActionFactory {
     proposalId?: string,
   ): SignPeaceSettlementAction {
     return {
-      id: this.createId("peace-settlement"),
+      id: GameIdGenerator.generateId("peace-settlement"),
       nationId,
       targetNationId,
       type: "SIGN_PEACE_SETTLEMENT",
@@ -57,7 +54,7 @@ export class DiplomacyActionFactory {
     targetNationId: string,
   ): DiplomaticProposalAction {
     return {
-      id: this.createId("aid"),
+      id: GameIdGenerator.generateId("aid"),
       nationId,
       type: "DIPLOMATIC_PROPOSAL",
       targetNationId,

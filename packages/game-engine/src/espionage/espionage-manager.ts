@@ -1,7 +1,8 @@
 import {
   Nation,
   DEFAULT_NATION_TURN_ACTIVITY,
-} from "@/domain/nation/nation.schema";
+  GameIdGenerator,
+} from "@geopolitics/domain";
 import { GameState, TurnLogEntry } from "@/domain/game/game-state.schema";
 import {
   EspionageTier,
@@ -280,7 +281,7 @@ export class EspionageManager {
     };
 
     const result: EspionageExecutionResult = {
-      id: `esp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: GameIdGenerator.generateId("esp"),
       tier,
       operationType:
         tier === 1 ? "RECON" : tier === 2 ? "SABOTAGE" : "TECH_THEFT",

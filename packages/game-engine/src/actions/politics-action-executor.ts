@@ -12,6 +12,7 @@ import {
   getNationGdp,
   StrategicPartnershipCalculatorUtility,
   TurnLogBuilder,
+  GameIdGenerator,
 } from "@geopolitics/domain";
 import { DiplomaticProposalExecutor } from "@/engine/diplomacy/executors/diplomatic-proposal-executor";
 import { WarDeclarationExecutor } from "@/engine/actions/executors/politics/war-declaration-executor";
@@ -51,7 +52,7 @@ export class PoliticsActionExecutor {
         if (action.accept) {
           if (proposal.proposalType === "PEACE_TREATY") {
             const settlementAction = {
-              id: `peace-${Date.now()}`,
+              id: GameIdGenerator.generateId("peace"),
               nationId: proposal.receiverNationId,
               targetNationId: proposal.senderNationId,
               type: "SIGN_PEACE_SETTLEMENT" as const,
@@ -196,7 +197,7 @@ export class PoliticsActionExecutor {
         }
 
         const transientProposal = {
-          id: `prop-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+          id: GameIdGenerator.generateId("prop"),
           turn: state.currentTurn,
           senderNationId: nation.id,
           receiverNationId: receiver.id,

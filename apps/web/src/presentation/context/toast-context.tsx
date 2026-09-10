@@ -8,6 +8,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
+import { GameIdGenerator } from "@geopolitics/domain";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -41,7 +42,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = useCallback(
     (title: string, message: string, type: ToastType = "info") => {
-      const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const id = GameIdGenerator.generateId("toast");
       const newToast: StrategicToast = { id, type, title, message };
 
       setToasts((prev) => [newToast, ...prev.slice(0, 4)]);

@@ -140,11 +140,10 @@ export function selectMilitaryValuationViewModel(
     provincesMap,
   );
   const gdp = getNationGdp(activeNation, provincesMap);
-  const maxArmyCap = gdp * 0.2;
-  const capacityRatio =
-    maxArmyCap > 0
-      ? Math.min(100, Math.round((totalValuation / maxArmyCap) * 100))
-      : 100;
+  const capacityRatio = MilitaryPricingCalculator.calculateArmyCapacityRatio(
+    gdp,
+    totalValuation,
+  );
 
   return {
     totalValuation,

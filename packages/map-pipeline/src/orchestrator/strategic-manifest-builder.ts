@@ -49,10 +49,8 @@ export class StrategicManifestBuilder {
       (p: CountryProfile): NationRankCandidateInput => {
         return {
           id: p.code,
-          name: p.nameFa,
           gdp: p.gdp,
           population: p.population,
-          governmentType: p.startingGovernment,
           domesticTechLevel: p.domesticTechLevel,
           equipmentTechLevel: p.equipmentTechLevel,
           industrialLevel: p.industrialLevel,

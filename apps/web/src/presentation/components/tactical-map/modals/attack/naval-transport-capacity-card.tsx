@@ -1,6 +1,7 @@
 import React from "react";
 import { Ship, Anchor, AlertTriangle, ShieldCheck } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { NavalDeploymentClamper } from "@geopolitics/game-engine";
 
 interface NavalTransportCapacityCardProps {
   navalFleetCount: number;
@@ -13,8 +14,14 @@ export function NavalTransportCapacityCard({
   infantryDeployed,
   armorDeployed,
 }: NavalTransportCapacityCardProps) {
-  const maxCapacity = navalFleetCount * 60;
-  const loadRequired = infantryDeployed * 1 + armorDeployed * 4;
+  const maxCapacity = NavalDeploymentClamper.calculateMaxCapacity(
+    "NAVAL",
+    navalFleetCount,
+  );
+  const loadRequired = NavalDeploymentClamper.calculateRequiredCapacity(
+    infantryDeployed,
+    armorDeployed,
+  );
   const isOverCapacity = loadRequired > maxCapacity || maxCapacity === 0;
   const utilizationPct =
     maxCapacity > 0

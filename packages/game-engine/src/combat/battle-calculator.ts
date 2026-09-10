@@ -11,13 +11,10 @@ import {
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { CombatModifierResolver } from "@/engine/combat/combat-modifier-resolver";
 import { BattleCasualtyResolver } from "@/engine/combat/battle-casualty-resolver";
-import { GuarantorInterventionCalculator } from "@/engine/combat/calculator/guarantor-intervention-calculator";
 import { BattleLootEvaluator } from "@/engine/combat/calculator/battle-loot-evaluator";
 import { BattlePhaseOrchestrator } from "@/engine/combat/calculator/battle-phase-orchestrator";
-import {
-  MilitaryPowerCalculator,
-  NationalProjectEffectApplierUtility,
-} from "@geopolitics/domain";
+import { GuarantorMultiplierBlender } from "@/engine/combat/optimizer/helpers/guarantor-multiplier-blender";
+import { NationalProjectEffectApplierUtility } from "@geopolitics/domain";
 
 export interface BattleCalculationResult {
   isAttackerVictory: boolean;
@@ -72,71 +69,13 @@ export class BattleCalculator {
       CombatModifierResolver.calculateDeploymentCosts(totalForceCost);
 
     const attMults = CombatModifierResolver.resolveAllUnitMultipliers(attacker);
-    const nativeDefMults =
-      CombatModifierResolver.resolveAllUnitMultipliers(defender);
 
-    const nativeDefAirDefense = defender.military.airDefense || 0;
-    const nativeDefAirForce = defender.military.airForce || 0;
-    const nativeDefArmor = defender.military.armor || 0;
-    const nativeDefInfantry = defender.military.infantry || 0;
-
-    const guarantorResult =
-      GuarantorInterventionCalculator.calculateIntervention(
-        attacker,
-        defender,
-        provincesMap,
-        guarantorNation,
-      );
-
-    const defAirDefense = nativeDefAirDefense + guarantorResult.auxAD;
-    const defAirForce = nativeDefAirForce + guarantorResult.auxAir;
-    const defArmor = nativeDefArmor + guarantorResult.auxArm;
-    const defInfantry = nativeDefInfantry + guarantorResult.auxInf;
-
-    const guarantorTechMult = guarantorNation
-      ? MilitaryPowerCalculator.calculateTechMultiplier(
-          guarantorNation.military.techLevel,
-        )
-      : nativeDefMults.airDefense;
-
-    const blendMultiplier = (
-      nativeCount: number,
-      nativeMult: number,
-      auxCount: number,
-      auxMult: number,
-    ): number => {
-      const total = nativeCount + auxCount;
-      if (total <= 0) return nativeMult;
-      return (nativeCount * nativeMult + auxCount * auxMult) / total;
-    };
-
-    const defMults = {
-      infantry: blendMultiplier(
-        nativeDefInfantry,
-        nativeDefMults.infantry,
-        guarantorResult.auxInf,
-        guarantorTechMult,
-      ),
-      armor: blendMultiplier(
-        nativeDefArmor,
-        nativeDefMults.armor,
-        guarantorResult.auxArm,
-        guarantorTechMult,
-      ),
-      airDefense: blendMultiplier(
-        nativeDefAirDefense,
-        nativeDefMults.airDefense,
-        guarantorResult.auxAD,
-        guarantorTechMult,
-      ),
-      airForce: blendMultiplier(
-        nativeDefAirForce,
-        nativeDefMults.airForce,
-        guarantorResult.auxAir,
-        guarantorTechMult,
-      ),
-      droneMissile: nativeDefMults.droneMissile,
-    };
+    const blendedDef = GuarantorMultiplierBlender.blend(
+      attacker,
+      defender,
+      provincesMap,
+      guarantorNation,
+    );
 
     const autoInterceptionBonus =
       NationalProjectEffectApplierUtility.getCombinedBonus(
@@ -146,21 +85,21 @@ export class BattleCalculator {
 
     const phasesResult = BattlePhaseOrchestrator.executePhases(
       deployedDrones,
-      defAirDefense,
+      blendedDef.defAirDefense,
       deployedAirForce,
-      defAirForce,
+      blendedDef.defAirForce,
       deployedArmor,
-      defArmor,
+      blendedDef.defArmor,
       deployedInfantry,
-      defInfantry,
+      blendedDef.defInfantry,
       attMults.droneMissile,
-      defMults.airDefense,
+      blendedDef.defMults.airDefense,
       attMults.airForce,
-      defMults.airForce,
-      attArmorMult,
-      defArmorMult,
+      blendedDef.defMults.airForce,
+      attMults.armor,
+      blendedDef.defMults.armor,
       attMults.infantry,
-      defMults.infantry,
+      blendedDef.defMults.infantry,
       autoInterceptionBonus,
     );
 
@@ -180,16 +119,18 @@ export class BattleCalculator {
 
     const defenderTotalPower = Math.max(
       0.1,
-      defInfantry *
+      blendedDef.defInfantry *
         MILITARY_UNIT_STATS.INFANTRY.weightPower *
-        defMults.infantry +
-        defArmor * MILITARY_UNIT_STATS.ARMOR.weightPower * defMults.armor +
-        defAirDefense *
+        blendedDef.defMults.infantry +
+        blendedDef.defArmor *
+          MILITARY_UNIT_STATS.ARMOR.weightPower *
+          blendedDef.defMults.armor +
+        blendedDef.defAirDefense *
           MILITARY_UNIT_STATS.AIR_DEFENSE.weightPower *
-          defMults.airDefense +
-        defAirForce *
+          blendedDef.defMults.airDefense +
+        blendedDef.defAirForce *
           MILITARY_UNIT_STATS.AIR_FORCE.weightPower *
-          defMults.airForce,
+          blendedDef.defMults.airForce,
     );
 
     const valuationRatio = Number(
@@ -207,10 +148,10 @@ export class BattleCalculator {
       deployedArmor,
       deployedAirForce,
       deployedDrones,
-      defInfantry,
-      defArmor,
-      defAirDefense,
-      defAirForce,
+      defInfantry: blendedDef.defInfantry,
+      defArmor: blendedDef.defArmor,
+      defAirDefense: blendedDef.defAirDefense,
+      defAirForce: blendedDef.defAirForce,
       rawAttInfantryLost: phasesResult.groundPhaseOutput.rawAttInfantryLost,
       rawAttArmorLoss: phasesResult.groundPhaseOutput.rawAttArmorLoss,
       rawAttAirLoss: phasesResult.airPhaseOutput.rawAttAirLoss,
@@ -250,7 +191,7 @@ export class BattleCalculator {
       phase1Missile: phasesResult.phase1Missile,
       phase2Air: phasesResult.phase2Air,
       phase3Ground: phasesResult.phase3Ground,
-      auxiliaryGuarantor: guarantorResult.auxiliaryGuarantor,
+      auxiliaryGuarantor: blendedDef.auxiliaryGuarantor,
     };
   }
 }
