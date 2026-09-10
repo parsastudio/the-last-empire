@@ -38,7 +38,6 @@ interface CommandCenterModalProps {
     subTab?: string,
     targetCode?: string,
   ) => void;
-  onFocusCountry?: (code: string) => void;
 }
 
 export function CommandCenterModal({
@@ -49,7 +48,6 @@ export function CommandCenterModal({
   gameState,
   onClose,
   onNavigateTab,
-  onFocusCountry,
 }: CommandCenterModalProps) {
   if (!activeTab || !nation) return null;
 
@@ -79,7 +77,6 @@ export function CommandCenterModal({
           selectedTargetCode={selectedTargetCode}
           nation={nation}
           gameState={gameState}
-          onFocusCountry={onFocusCountry}
           onNavigateTab={onNavigateTab}
         />
       </div>

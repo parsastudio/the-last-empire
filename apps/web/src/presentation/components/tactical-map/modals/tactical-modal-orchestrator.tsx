@@ -14,13 +14,11 @@ import { DilemmaModal } from "@/presentation/components/tactical-map/modals/dile
 interface TacticalModalOrchestratorProps {
   humanNation: Nation | null;
   gameState: GameState | null;
-  onFocusCountry: (code: string) => void;
 }
 
 export function TacticalModalOrchestrator({
   humanNation,
   gameState,
-  onFocusCountry,
 }: TacticalModalOrchestratorProps) {
   const activeModal = useUiStore((state) => state.activeModal);
   const closeModal = useUiStore((state) => state.closeModal);
@@ -49,7 +47,6 @@ export function TacticalModalOrchestrator({
           nation={humanNation}
           gameState={gameState}
           onClose={closeModal}
-          onFocusCountry={onFocusCountry}
           onNavigateTab={(
             tab: SidebarTabType,
             subTab?: string,

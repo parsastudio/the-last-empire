@@ -17,7 +17,6 @@ interface CommandCenterTabRouterProps {
   selectedTargetCode?: string | null;
   nation: Nation;
   gameState?: GameState | null;
-  onFocusCountry?: (code: string) => void;
   onNavigateTab?: (
     tab: SidebarTabType,
     subTab?: string,
@@ -31,7 +30,6 @@ export function CommandCenterTabRouter({
   selectedTargetCode,
   nation,
   gameState,
-  onFocusCountry,
   onNavigateTab,
 }: CommandCenterTabRouterProps) {
   const currentNationActivity = gameState?.turnActivity?.[nation.id];
@@ -85,7 +83,6 @@ export function CommandCenterTabRouter({
           humanNationId={gameState?.humanNationId || nation.id}
           provincesMap={gameState?.provinces}
           turnActivity={currentNationActivity}
-          onFocusCountry={onFocusCountry}
           onNavigateTab={onNavigateTab}
         />
       );
