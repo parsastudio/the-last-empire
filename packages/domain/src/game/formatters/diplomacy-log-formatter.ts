@@ -80,15 +80,6 @@ export class DiplomacyLogFormatter {
       case "EMERGENCY_PROTECTORATE_CANCELLED":
         return `لغو معاهده تحت‌الحمایگی: کشور ${sourceName} رسماً به پیمان استعماری با امپراتوری ${targetName} پایان داد و حاکمیت مستقل خود را اعلام کرد.`;
 
-      case "GUARANTOR_CASUALTY_COST_INCURRED": {
-        const costNum = Number(params["cost"] || 0);
-        const formattedCost = PersianNumberFormatter.formatCurrency(
-          costNum,
-          true,
-        );
-        return `گزارش ستاد کل: نیروی ضربت اعزامی شما در دفاع از خاک ${targetName} آسیب دید و مبلغ ${formattedCost} هزینه بازسازی به خزانه‌داری تحمیل شد.`;
-      }
-
       case "FOREIGN_AID_SENT": {
         const amountNum = Number(params["amount"] || 0);
         const amountText =

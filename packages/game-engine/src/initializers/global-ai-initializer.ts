@@ -136,7 +136,6 @@ export class GlobalAiInitializer {
   }
 
   public initializeAllNations(
-    _detectedNationsList: string[],
     humanNationId: string,
     humanGovType?: string,
     manifest?: FinalMapManifest | null,

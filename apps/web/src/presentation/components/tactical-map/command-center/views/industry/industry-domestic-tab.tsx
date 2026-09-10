@@ -145,6 +145,7 @@ export function IndustryDomesticTab({
           nationId={nation.id}
           treasury={nation.treasury}
           industrialLevel={nation.industrialLevel}
+          governmentType={nation.government?.type}
         />
       </div>
     </div>
