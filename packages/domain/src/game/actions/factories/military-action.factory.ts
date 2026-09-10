@@ -5,19 +5,16 @@ import {
   InitiateBattleAction,
 } from "@/domain/game/actions/schemas/military-action.schema";
 import { UnitType } from "@/domain/military/military.schema";
+import { GameIdGenerator } from "@/domain/shared/utils/game-id-generator";
 
 export class MilitaryActionFactory {
-  private static createId(prefix: string): string {
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-  }
-
   public static recruitUnit(
     nationId: string,
     unitType: UnitType,
     quantity: number,
   ): RecruitUnitAction {
     return {
-      id: this.createId("recruit"),
+      id: GameIdGenerator.generateId("recruit"),
       nationId,
       type: "RECRUIT_UNIT",
       unitType,
@@ -32,7 +29,7 @@ export class MilitaryActionFactory {
     quantity: number,
   ): BuyArmsMarketAction {
     return {
-      id: this.createId("arms-market"),
+      id: GameIdGenerator.generateId("arms-market"),
       nationId,
       type: "BUY_ARMS_MARKET",
       sellerNationId,
@@ -46,7 +43,7 @@ export class MilitaryActionFactory {
     quantity = 1,
   ): BuyNavalFleetAction {
     return {
-      id: this.createId("naval-fleet"),
+      id: GameIdGenerator.generateId("naval-fleet"),
       nationId,
       type: "BUY_NAVAL_FLEET",
       quantity,
@@ -64,7 +61,7 @@ export class MilitaryActionFactory {
     attackType?: "LAND" | "NAVAL",
   ): InitiateBattleAction {
     return {
-      id: this.createId("battle"),
+      id: GameIdGenerator.generateId("battle"),
       nationId,
       type: "INITIATE_BATTLE",
       targetNationId,

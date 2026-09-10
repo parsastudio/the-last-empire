@@ -62,7 +62,6 @@ export class AIAttackPlanner {
         guarantorNation,
         targetResolution.attackType,
         fleetCount,
-        targetResolution.provinceId,
       );
 
     if (

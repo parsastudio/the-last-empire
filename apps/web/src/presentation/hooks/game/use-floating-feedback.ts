@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { UnitType } from "@geopolitics/domain";
+import { UnitType, GameIdGenerator } from "@geopolitics/domain";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
 
 export interface FloatingFeedback {
@@ -21,7 +21,7 @@ export function useFloatingFeedback() {
   const triggerFeedback = useCallback((type: UnitType, quantity: number) => {
     TacticalSound.playCoinSound();
 
-    const newId = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const newId = GameIdGenerator.generateId("fb");
     const newFeedback: FloatingFeedback = {
       id: newId,
       text: `+${quantity}`,

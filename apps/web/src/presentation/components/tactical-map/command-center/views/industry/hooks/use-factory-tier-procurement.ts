@@ -6,6 +6,7 @@ import {
   IndustryCalculator,
   ActionFactory,
   ProcurementBatchCalculator,
+  GameIdGenerator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
@@ -107,7 +108,7 @@ export function useFactoryTierProcurement({
       if (item.isMaxedOut || !item.canAfford || isSubmitting) return;
 
       TacticalSound.playCoinSound();
-      const feedbackId = `${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const feedbackId = GameIdGenerator.generateId("fb-tier");
       const feedbackText =
         actionType === "IMPORT"
           ? `+${item.batchQuantity} سوله وارداتی`

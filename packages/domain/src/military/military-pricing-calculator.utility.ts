@@ -1,9 +1,10 @@
 import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
-import { UnitType } from "@/domain/military/military.schema";
+import { UnitType, MilitaryStack } from "@/domain/military/military.schema";
 import { GovernmentTraitsUtility } from "@/domain/politics/government-traits.utility";
 
 export class MilitaryPricingCalculator {
   public static readonly ARMS_IMPORT_BASE = 2.0;
+  public static readonly MAX_ARMY_VALUATION_GDP_RATIO = 0.2;
 
   public static calculateUnitTypePrice(
     unitType: UnitType,
@@ -63,5 +64,27 @@ export class MilitaryPricingCalculator {
       (military.airForce || 0) * MILITARY_UNIT_STATS.AIR_FORCE.moneyCost +
       (military.droneMissile || 0) * MILITARY_UNIT_STATS.DRONE_MISSILE.moneyCost
     );
+  }
+
+  public static calculateMaxArmyValuation(gdp: number): number {
+    return Math.floor(gdp * this.MAX_ARMY_VALUATION_GDP_RATIO);
+  }
+
+  public static calculateRemainingArmyValuation(
+    gdp: number,
+    military: MilitaryStack,
+  ): number {
+    const maxValuation = this.calculateMaxArmyValuation(gdp);
+    const currentValuation = this.calculateTotalArmyValuation(military);
+    return Math.max(0, maxValuation - currentValuation);
+  }
+
+  public static calculateArmyCapacityRatio(
+    gdp: number,
+    totalValuation: number,
+  ): number {
+    const maxValuation = this.calculateMaxArmyValuation(gdp);
+    if (maxValuation <= 0) return 100;
+    return Math.min(100, Math.round((totalValuation / maxValuation) * 100));
   }
 }
