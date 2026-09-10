@@ -3,7 +3,10 @@ import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { FactoryBatch } from "@/domain/economy/factory-batch.schema";
 import { CountryRegistry } from "@/domain/data/countries";
 import { NationRankCalculatorUtility } from "@/domain/nation/getters/nation-rank-calculator.utility";
-import { NationTerritoryResolverUtility } from "@/domain/nation/getters/nation-territory-resolver.utility";
+import {
+  NationTerritoryResolverUtility,
+  TerritoryIndustrialCapacity,
+} from "@/domain/nation/getters/nation-territory-resolver.utility";
 import { NationRankCandidateInput } from "@/domain/nation/getters/rank/nation-power-score-evaluator";
 import { IndustryCalculator } from "@/domain/economy/industry-calculator.utility";
 import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
@@ -98,6 +101,22 @@ export class NationGettersUtility {
     provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
   ): boolean {
     return NationTerritoryResolverUtility.hasSeaAccess(
+      nationId,
+      provincesMap,
+      ownedProvinces,
+      provincesByOwnerMap,
+    );
+  }
+
+  public static getTerritoryIndustrialCapacity(
+    nationId: string,
+    provincesMap?:
+      | Record<string, ProvinceDynamicState>
+      | ProvinceDynamicState[],
+    ownedProvinces?: ProvinceDynamicState[],
+    provincesByOwnerMap?: Map<string, ProvinceDynamicState[]>,
+  ): TerritoryIndustrialCapacity {
+    return NationTerritoryResolverUtility.getTerritoryIndustrialCapacity(
       nationId,
       provincesMap,
       ownedProvinces,

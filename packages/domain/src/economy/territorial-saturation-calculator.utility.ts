@@ -1,7 +1,6 @@
 import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { NationGettersUtility } from "@/domain/nation/nation-getters.utility";
-import { MapTopologyRegistry } from "@/domain/map/map-topology-registry";
 
 export interface TerritorialSaturationMetrics {
   totalSlots: number;
@@ -21,38 +20,26 @@ export class TerritorialSaturationCalculatorUtility {
       | ProvinceDynamicState[],
     ownedProvinces?: ProvinceDynamicState[],
   ): TerritorialSaturationMetrics {
-    const provs =
-      ownedProvinces ??
-      NationGettersUtility.getOwnedProvinces(nation.id, provincesMap);
-
-    let totalSlots = 0;
-    let occupiedSlots = 0;
-
-    for (let i = 0; i < provs.length; i++) {
-      const p = provs[i]!;
-      const maxSlots = MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
-      totalSlots += maxSlots;
-      occupiedSlots += p.factoriesCount || 0;
-    }
-
-    const emptySlots = Math.max(0, totalSlots - occupiedSlots);
-    const slotSaturationRatio =
-      totalSlots > 0 ? occupiedSlots / totalSlots : 1.0;
+    const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
+      nation.id,
+      provincesMap,
+      ownedProvinces,
+    );
 
     const isEquipmentModernized =
       (nation.equipmentTechLevel ?? 1.0) >=
       (nation.industrialLevel ?? 1.0) - 0.05;
 
     let baseScore = 0;
-    if (totalSlots > 0) {
-      if (emptySlots === 0) {
+    if (capacity.totalMaxSlots > 0) {
+      if (capacity.totalEmptySlots === 0) {
         baseScore = 70;
-      } else if (emptySlots <= 1) {
+      } else if (capacity.totalEmptySlots <= 1) {
         baseScore = 50;
-      } else if (slotSaturationRatio >= 0.85) {
+      } else if (capacity.slotSaturationRatio >= 0.85) {
         baseScore = 35;
       } else {
-        baseScore = Math.round(slotSaturationRatio * 30);
+        baseScore = Math.round(capacity.slotSaturationRatio * 30);
       }
     }
 
@@ -72,7 +59,7 @@ export class TerritorialSaturationCalculatorUtility {
       baseScore += 10;
     } else if (
       nation.doctrine === "DOMESTIC_INDUSTRIALIST" &&
-      emptySlots === 0
+      capacity.totalEmptySlots === 0
     ) {
       baseScore += 10;
     }
@@ -81,10 +68,10 @@ export class TerritorialSaturationCalculatorUtility {
     const isSaturated = saturationScore >= 55;
 
     return {
-      totalSlots,
-      occupiedSlots,
-      emptySlots,
-      slotSaturationRatio,
+      totalSlots: capacity.totalMaxSlots,
+      occupiedSlots: capacity.totalActiveFactories,
+      emptySlots: capacity.totalEmptySlots,
+      slotSaturationRatio: capacity.slotSaturationRatio,
       isEquipmentModernized,
       saturationScore,
       isSaturated,

@@ -2,45 +2,13 @@ import {
   LandComponent,
   ArchipelagoGroup,
 } from "@/infrastructure/core/types/map-pipeline.types";
+import { ShoreDistanceUtility } from "@/infrastructure/strategic-pipeline/02-topology/utils/shore-distance.utility";
 
 export class LandMassClassifier {
   public static readonly MINOR_MASS_THRESHOLD = 800;
   public static readonly ISOLATED_WATER_DISTANCE_THRESHOLD = 150;
   public static readonly DISTANT_OVERSEAS_DISTANCE_THRESHOLD = 500;
   public static readonly DISTANT_OVERSEAS_MIN_SIZE = 700;
-
-  private static computeMinShoreDistance(
-    compA: LandComponent,
-    compB: LandComponent,
-    width: number,
-  ): number {
-    let minD = Infinity;
-    const stepA = Math.max(1, Math.floor(compA.pixelIndices.length / 40));
-    const stepB = Math.max(1, Math.floor(compB.pixelIndices.length / 40));
-
-    for (let i = 0; i < compA.pixelIndices.length; i += stepA) {
-      const idxA = compA.pixelIndices[i]!;
-      const ax = idxA % width;
-      const ay = Math.floor(idxA / width);
-
-      for (let j = 0; j < compB.pixelIndices.length; j += stepB) {
-        const idxB = compB.pixelIndices[j]!;
-        const bx = idxB % width;
-        const by = Math.floor(idxB / width);
-
-        const rawDx = Math.abs(ax - bx);
-        const dx = Math.min(rawDx, width - rawDx);
-        const dy = ay - by;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < minD) {
-          minD = dist;
-          if (minD <= 2) return minD;
-        }
-      }
-    }
-    return minD;
-  }
 
   public static classify(
     allComponents: LandComponent[],
@@ -72,7 +40,11 @@ export class LandMassClassifier {
       for (let j = 0; j < allComponents.length; j++) {
         if (i === j) continue;
         const other = allComponents[j]!;
-        const dist = this.computeMinShoreDistance(comp, other, width);
+        const dist = ShoreDistanceUtility.computeMinShoreDistance(
+          comp,
+          other,
+          width,
+        );
         if (dist < minShoreDistance) {
           minShoreDistance = dist;
         }
@@ -90,7 +62,11 @@ export class LandMassClassifier {
           if (i === j) continue;
           const other = allComponents[j]!;
           if (other.size >= comp.size) {
-            const dist = this.computeMinShoreDistance(comp, other, width);
+            const dist = ShoreDistanceUtility.computeMinShoreDistance(
+              comp,
+              other,
+              width,
+            );
             if (dist <= this.ISOLATED_WATER_DISTANCE_THRESHOLD) {
               isIsolated = false;
               break;

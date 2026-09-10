@@ -41,15 +41,10 @@ export class BuildFactoryExecutor {
     }
 
     const canonicalNation = CountryRegistry.resolveCanonicalId(nation.id);
-    const ownedProvinces: ProvinceDynamicState[] = [];
-
-    for (const p of Object.values(state.provinces)) {
-      if (
-        CountryRegistry.resolveCanonicalId(p.ownerNationId) === canonicalNation
-      ) {
-        ownedProvinces.push(p);
-      }
-    }
+    const ownedProvinces = NationGettersUtility.getOwnedProvinces(
+      canonicalNation,
+      state.provinces,
+    );
 
     if (ownedProvinces.length === 0) {
       throw new GameError(

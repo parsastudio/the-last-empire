@@ -5,6 +5,7 @@ import { ShoppingCart, ShieldCheck, Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
 import { CountryRegistry } from "@/domain/data/countries";
+import { NationGettersUtility } from "@geopolitics/domain";
 import { MachinerySellerCard } from "./components/machinery-seller-card";
 import { MachineryImportCountryView } from "./components/machinery-import-country-view";
 
@@ -23,11 +24,11 @@ export function IndustryImportTab({
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const totalFactories = useMemo(() => {
-    if (!provincesMap) return 10;
-    const count = Object.values(provincesMap)
-      .filter((p) => p.ownerNationId === nation.id)
-      .reduce((sum, p) => sum + p.factoriesCount, 0);
-    return Math.max(1, count);
+    const capacity = NationGettersUtility.getTerritoryIndustrialCapacity(
+      nation.id,
+      provincesMap,
+    );
+    return Math.max(1, capacity.totalActiveFactories);
   }, [provincesMap, nation.id]);
 
   const minBatchTech = useMemo(() => {

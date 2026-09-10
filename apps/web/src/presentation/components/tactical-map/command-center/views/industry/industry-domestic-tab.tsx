@@ -8,7 +8,6 @@ import {
   ActionFactory,
   ProcurementBatchCalculator,
   NationGettersUtility,
-  MapTopologyRegistry,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
 import { IndustryTechUpgradeCard } from "@/presentation/components/tactical-map/sidebar/tabs/politics/industry-tech-upgrade-card";
@@ -34,19 +33,15 @@ export function IndustryDomesticTab({
       : [];
   }, [provincesMap, nation.id]);
 
-  let totalActiveFactories = 0;
-  let totalMaxSlots = 0;
-  let totalEmptySlots = 0;
+  const capacity = useMemo(() => {
+    return NationGettersUtility.getTerritoryIndustrialCapacity(
+      nation.id,
+      provincesMap,
+      ownedProvinces,
+    );
+  }, [nation.id, provincesMap, ownedProvinces]);
 
-  for (const p of ownedProvinces) {
-    const maxSlots =
-      p.maxSlots ?? MapTopologyRegistry.getMaxSlots(p.provinceId, 1);
-    totalActiveFactories += p.factoriesCount;
-    totalMaxSlots += maxSlots;
-    totalEmptySlots += Math.max(0, maxSlots - p.factoriesCount);
-  }
-
-  const safeTotalFactories = Math.max(1, totalActiveFactories);
+  const safeTotalFactories = Math.max(1, capacity.totalActiveFactories);
   const factoryCost = IndustryCalculator.FACTORY_REBUILD_COST;
 
   const buildBatch = useMemo(() => {
@@ -56,11 +51,11 @@ export function IndustryDomesticTab({
       budgetPercentage: 0.1,
       unitPrice: factoryCost,
       baseValuationPrice: factoryCost,
-      remainingQuotaRoom: totalEmptySlots,
+      remainingQuotaRoom: capacity.totalEmptySlots,
       remainingValuationCapacity: Number.MAX_SAFE_INTEGER,
       minQuantity: 1,
     });
-  }, [nation.treasury, factoryCost, totalEmptySlots]);
+  }, [nation.treasury, factoryCost, capacity.totalEmptySlots]);
 
   const handleSmartBatchBuild = async () => {
     if (
@@ -98,22 +93,21 @@ export function IndustryDomesticTab({
       );
     }
     return (
-      totalActiveFactories *
+      capacity.totalActiveFactories *
       IndustryCalculator.calculateFactoryYield(nation.equipmentTechLevel)
     );
-  }, [currentNationalTiers, totalActiveFactories, nation.equipmentTechLevel]);
-
-  const nationalIndustrialOccupancy =
-    totalMaxSlots > 0
-      ? Math.round((totalActiveFactories / totalMaxSlots) * 100)
-      : 100;
+  }, [
+    currentNationalTiers,
+    capacity.totalActiveFactories,
+    nation.equipmentTechLevel,
+  ]);
 
   return (
     <div className="space-y-6 dir-rtl text-right font-sans animate-in fade-in duration-200">
       <IndustryStatsOverview
-        totalActiveFactories={totalActiveFactories}
-        totalMaxSlots={totalMaxSlots}
-        nationalIndustrialOccupancy={nationalIndustrialOccupancy}
+        totalActiveFactories={capacity.totalActiveFactories}
+        totalMaxSlots={capacity.totalMaxSlots}
+        nationalIndustrialOccupancy={capacity.occupancyPercentage}
         totalFactoriesYield={totalFactoriesYield}
         industrialLevel={nation.industrialLevel}
         equipmentTechLevel={nation.equipmentTechLevel}
@@ -131,9 +125,9 @@ export function IndustryDomesticTab({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
         <IndustrySmartBuildCard
-          totalActiveFactories={totalActiveFactories}
-          totalMaxSlots={totalMaxSlots}
-          totalEmptySlots={totalEmptySlots}
+          totalActiveFactories={capacity.totalActiveFactories}
+          totalMaxSlots={capacity.totalMaxSlots}
+          totalEmptySlots={capacity.totalEmptySlots}
           batchQuantity={buildBatch.batchQuantity}
           batchCost={buildBatch.batchCost}
           canAfford={buildBatch.canAfford}

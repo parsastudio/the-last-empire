@@ -1,5 +1,13 @@
 import { TurnLogParamValue } from "@/domain/game/game-state.schema";
 import { PersianNumberFormatter } from "@/domain/shared/persian-number-formatter";
+import {
+  DIPLOMATIC_PROPOSAL_LABELS_FA,
+  DIPLOMATIC_STANCE_LABELS_FA,
+} from "@/domain/diplomacy/diplomacy.config";
+import {
+  DiplomaticProposalType,
+  DiplomaticStance,
+} from "@/domain/diplomacy/diplomacy.schema";
 
 export class DiplomacyLogFormatter {
   public static format(
@@ -10,21 +18,11 @@ export class DiplomacyLogFormatter {
   ): string | null {
     switch (eventCode) {
       case "DIPLOMATIC_PROPOSAL_SENT": {
-        const rawType = String(params["treatyType"] || "معاهده");
+        const rawType = String(
+          params["treatyType"] || "معاهده",
+        ) as DiplomaticProposalType;
         const treatyTypeFa =
-          rawType === "STRATEGIC_PARTNERSHIP"
-            ? "شراکت استراتژیک و اقتصادی"
-            : rawType === "NON_AGGRESSION_PACT"
-              ? "پیمان عدم تخاصم"
-              : rawType === "SECURITY_GUARANTEE"
-                ? "پیمان دفاعی و امنیت سرزمینی متقابل"
-                : rawType === "EMERGENCY_PROTECTORATE"
-                  ? "معاهده استعماری تحت‌الحمایگی اضطراری"
-                  : rawType === "PEACE_TREATY"
-                    ? "معاهده صلح"
-                    : rawType === "SEND_FOREIGN_AID"
-                      ? "کمک مالی"
-                      : rawType;
+          DIPLOMATIC_PROPOSAL_LABELS_FA[rawType] || String(rawType);
         return `پیشنهاد دیپلماتیک: کشور ${sourceName} پیشنهاد رسمی (${treatyTypeFa}) را برای ${targetName} ارسال کرد.`;
       }
 
@@ -44,9 +42,12 @@ export class DiplomacyLogFormatter {
       }
 
       case "TREATY_CANCELLED": {
-        const newStanceName = String(
-          params["newStanceName"] || "دیپلماسی عادی",
-        );
+        const rawStance = String(
+          params["newStance"] || "NORMAL_DIPLOMACY",
+        ) as DiplomaticStance;
+        const newStanceName =
+          DIPLOMATIC_STANCE_LABELS_FA[rawStance] ||
+          String(params["newStanceName"] || "دیپلماسی عادی");
         return `تنزل روابط دیپلماتیک: کشور ${sourceName} معاهده پیشین با ${targetName} را لغو کرد و روابط به سطح (${newStanceName}) کاهش یافت.`;
       }
 

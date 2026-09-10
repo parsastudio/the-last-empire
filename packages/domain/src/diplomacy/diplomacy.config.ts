@@ -1,3 +1,9 @@
+import {
+  DiplomaticProposalType,
+  DiplomaticStance,
+  DiplomaticPosture,
+} from "@/domain/diplomacy/diplomacy.schema";
+
 export const DIPLOMACY_CONFIG = {
   POST_WAR_COOLDOWN_TURNS: 8,
   BETRAYAL_PENALTIES: {
@@ -6,3 +12,33 @@ export const DIPLOMACY_CONFIG = {
     NORMAL_DIPLOMACY: 15,
   },
 } as const;
+
+export const DIPLOMATIC_PROPOSAL_LABELS_FA: Record<
+  DiplomaticProposalType,
+  string
+> = {
+  STRATEGIC_PARTNERSHIP: "شراکت استراتژیک و اقتصادی",
+  SECURITY_GUARANTEE: "پیمان دفاعی و امنیت سرزمینی متقابل",
+  EMERGENCY_PROTECTORATE: "معاهده تحت‌الحمایگی استعماری اضطراری",
+  CANCEL_SECURITY_GUARANTEE: "لغو پیمان دفاعی",
+  CANCEL_EMERGENCY_PROTECTORATE: "لغو معاهده تحت‌الحمایگی",
+  NON_AGGRESSION_PACT: "پیمان عدم تخاصم",
+  PEACE_TREATY: "معاهده صلح",
+  SEND_FOREIGN_AID: "کمک مالی و دیپلماتیک",
+  DECLARE_WAR: "اعلان جنگ رسمی",
+  CANCEL_TREATY: "تنزل روابط و لغو معاهده",
+};
+
+export const DIPLOMATIC_STANCE_LABELS_FA: Record<DiplomaticStance, string> = {
+  WAR: "وضعیت نبرد",
+  STRATEGIC_PARTNERSHIP: "شراکت استراتژیک",
+  NON_AGGRESSION_PACT: "عدم تخاصم",
+  NORMAL_DIPLOMACY: "دیپلماسی عادی",
+};
+
+export const DIPLOMATIC_POSTURE_LABELS_FA: Record<DiplomaticPosture, string> = {
+  NATURAL_ALLY: "متحد طبیعی و همسو",
+  OPPORTUNISTIC_PREDATOR: "شکارچی و رقیب متخاصم",
+  WARY_BUFFER: "مدافع محتاط و نگران",
+  NEUTRAL_COEXISTENCE: "همزیستی مسالمت‌آمیز",
+};
