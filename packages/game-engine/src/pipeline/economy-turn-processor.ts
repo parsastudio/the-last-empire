@@ -107,9 +107,22 @@ export class EconomyTurnProcessor {
       );
       updated = bankResult.updatedNation;
       updatedProvinces = bankResult.updatedProvinces;
-      bankruptcyLog = TurnLogBuilder.createBankruptcyLog(
+
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(
+        turnContext.state.humanNationId,
+      );
+      const isHuman =
+        CountryRegistry.resolveCanonicalId(updated.id) === canonicalHuman;
+
+      bankruptcyLog = TurnLogBuilder.createLogEntry(
         turnContext.turn,
         updated.id,
+        "CRITICAL",
+        "NATION_BANKRUPTCY",
+        "DOMESTIC",
+        isHuman ? "NATIONAL" : "GLOBAL",
+        undefined,
+        {},
       );
     }
 

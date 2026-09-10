@@ -1,4 +1,8 @@
-import { TurnLogEntry, TurnLogScope } from "@geopolitics/domain";
+import {
+  TurnLogEntry,
+  TurnLogScope,
+  CountryRegistry,
+} from "@geopolitics/domain";
 import { db, SavedTurnLogRecord } from "@/infrastructure/storage/game-database";
 
 export interface QueryTurnLogsOptions {
@@ -8,6 +12,7 @@ export interface QueryTurnLogsOptions {
   searchQuery?: string;
   page?: number;
   pageSize?: number;
+  humanNationId?: string;
 }
 
 export interface PaginatedTurnLogsResult {
@@ -67,6 +72,7 @@ export class TurnLogRepository {
       searchQuery = "",
       page = 1,
       pageSize = 25,
+      humanNationId,
     } = options;
 
     let collection = db.turnLogs.where("gameId").equals(gameId);
@@ -83,6 +89,19 @@ export class TurnLogRepository {
 
     let records = await collection.sortBy("timestamp");
     records = records.reverse();
+
+    records = records.filter((r) => r.log.eventCode !== "DILEMMA_RESOLVED");
+
+    if (scope === "NATIONAL" && humanNationId) {
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
+      records = records.filter((r) => {
+        const src = CountryRegistry.resolveCanonicalId(r.log.sourceNationId);
+        const trg = r.log.targetNationId
+          ? CountryRegistry.resolveCanonicalId(r.log.targetNationId)
+          : null;
+        return src === canonicalHuman || trg === canonicalHuman;
+      });
+    }
 
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
@@ -110,16 +129,41 @@ export class TurnLogRepository {
   public static async getStatsSummary(
     gameId: string,
     turn: number | "ALL" = "ALL",
+    humanNationId?: string,
+    scope: TurnLogScope = "NATIONAL",
   ): Promise<TurnLogStatsSummary> {
     let records: SavedTurnLogRecord[];
 
-    if (turn !== "ALL") {
+    if (scope && turn !== "ALL") {
+      records = await db.turnLogs
+        .where("[gameId+scope+turn]")
+        .equals([gameId, scope, turn])
+        .toArray();
+    } else if (turn !== "ALL") {
       records = await db.turnLogs
         .where("[gameId+turn]")
         .equals([gameId, turn])
         .toArray();
+    } else if (scope) {
+      records = await db.turnLogs
+        .where("[gameId+scope]")
+        .equals([gameId, scope])
+        .toArray();
     } else {
       records = await db.turnLogs.where("gameId").equals(gameId).toArray();
+    }
+
+    records = records.filter((r) => r.log.eventCode !== "DILEMMA_RESOLVED");
+
+    if (scope === "NATIONAL" && humanNationId) {
+      const canonicalHuman = CountryRegistry.resolveCanonicalId(humanNationId);
+      records = records.filter((r) => {
+        const src = CountryRegistry.resolveCanonicalId(r.log.sourceNationId);
+        const trg = r.log.targetNationId
+          ? CountryRegistry.resolveCanonicalId(r.log.targetNationId)
+          : null;
+        return src === canonicalHuman || trg === canonicalHuman;
+      });
     }
 
     let combatCount = 0;

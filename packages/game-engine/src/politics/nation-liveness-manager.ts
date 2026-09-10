@@ -1,12 +1,19 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
-import { NationGettersUtility, TurnLogBuilder } from "@geopolitics/domain";
+import {
+  NationGettersUtility,
+  TurnLogBuilder,
+  CountryRegistry,
+} from "@geopolitics/domain";
 
 export class NationLivenessManager {
   public updateLiveness(state: GameState): GameState {
     const updatedNations: Record<string, Nation> = { ...state.nations };
     const logs = [...state.turnLogs];
     let hasChanges = false;
+    const canonicalHuman = CountryRegistry.resolveCanonicalId(
+      state.humanNationId,
+    );
 
     for (const [id, nation] of Object.entries(state.nations)) {
       if (!nation.isAlive) continue;
@@ -25,13 +32,18 @@ export class NationLivenessManager {
           nationalDebt: 0,
         };
 
+        const isHuman =
+          CountryRegistry.resolveCanonicalId(nation.id) === canonicalHuman;
+
         logs.push(
-          TurnLogBuilder.createNationalLog(
+          TurnLogBuilder.createLogEntry(
             state.currentTurn,
             nation.id,
-            "DOMESTIC",
             "CRITICAL",
             "NATION_COLLAPSED",
+            "DOMESTIC",
+            isHuman ? "NATIONAL" : "GLOBAL",
+            undefined,
             {},
           ),
         );
