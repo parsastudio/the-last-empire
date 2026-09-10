@@ -116,10 +116,10 @@ export function useGameOverMetrics(
 
     if (isVictory) {
       if (rawReason === "ECONOMIC_DOMINANCE") {
-        reasonTitle = "هژمونی و سلطه اقتصادی بر جهان";
-        reasonDescription = `امپراتوری ${winnerName} با دستیابی به بیش از ${targetPctText}٪ کل تولید ناخالص (GDP) جهان، نبض اقتصاد بین‌الملل را در دست گرفت و پیروز مطلق کمپین شد.`;
+        reasonTitle = "پیروزی مطلق: تسخیر نبض اقتصاد جهان";
+        reasonDescription = `امپراتوری ${winnerName} با تصاحب بیش از ${targetPctText}٪ کل ثروت و اقتصاد دنیا، ابرقدرت بلامنازع زمین شد و تمام رقبا را به زانو درآورد.`;
       } else if (rawReason === "TERRITORIAL_DOMINANCE") {
-        reasonTitle = "سلطه سرزمینی و الحاق قلمروها";
+        reasonTitle = "پیروزی نظامی: یکپارچه‌سازی کره زمین با شمشیر و آتش";
         reasonDescription = `ارتش ${winnerName} با فتح بیش از ${targetPctText}٪ وسعت خاک و پیکسل‌های نقشه، جهان را یکپارچه کرد و به پیروزی قاطع رسید.`;
       } else if (rawReason === "WORLD_CONQUEST") {
         reasonTitle = "فتح کامل و تسلیم تمام کشورها";

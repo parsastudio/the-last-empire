@@ -6,7 +6,7 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
   Object.freeze([
     {
       id: "automation_production_lines",
-      nameFa: "اتوماسیون رباتیک خطوط تولید",
+      nameFa: "رباتیک‌سازی پیشرفته کارخانجات",
       taglineFa: "جهش راندمان کارخانجات با هوش مصنوعی صنعتی",
       descriptionFa:
         "تجهیز سوله‌های صنعتی و خطوط مونتاژ به بازوهای خودکار و سنسورهای نسل جدید که بازدهی مالی و عواید کلیه کارخانجات کشور را ۱۰٪ افزایش می‌دهد.",
@@ -48,7 +48,7 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
     },
     {
       id: "passive_defense_fortifications",
-      nameFa: "استحکامات پدافند غیرعامل و دژهای مرزی",
+      nameFa: "دژهای زیرزمینی و خطوط دفاع بتنی",
       taglineFa: "کاهش تلفات ارتش در دفاع سرزمینی",
       descriptionFa:
         "احداث سنگرهای بتنی، مقرهای زیرزمینی و شبکه تونل‌های تاکتیکی که تلفات ارتش خودی در دفاع از خاک میهن را ۱۵٪ کاهش می‌دهد.",
@@ -190,7 +190,7 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
     },
     {
       id: "petro_currency_hegemony",
-      nameFa: "پیمان تجارت راهبردی انرژی و هژمونی ارزی",
+      nameFa: "سلطه بر بازار جهانی انرژی و پترودلار",
       taglineFa: "تسلط بر مبادلات ترانزیت و جریان نقدینگی بین‌الملل",
       descriptionFa:
         "الزام مبادلات راهبردی نفت و انرژی با پول ملی شما که عواید بازرگانی کشور را ۳۵٪ جهش داده و سهم ثابتی از گردش مالی جهانی به خزانه می‌افزاید.",
@@ -205,7 +205,7 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
     },
     {
       id: "strategic_deterrence_triad",
-      nameFa: "تکمیل سه‌گانه بازدارندگی راهبردی",
+      nameFa: "سه‌گانه موشکی و بازدارندگی اتمی",
       taglineFa: "سپر بازدارنده نهایی در برابر تهاجم قدرت‌های بزرگ",
       descriptionFa:
         "سیلوهای موشک‌های دوربرد و زیردریایی‌های پنهانکار که تصمیم حریفان برای اعلان جنگ به شما را ۳۰٪ مهار کرده و ۱۰ امتیاز پرستیژ به همراه دارد.",
@@ -220,7 +220,7 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
     },
     {
       id: "combined_arms_supremacy",
-      nameFa: "دکترین جامع برتری رزم مشترک شبکه‌محور",
+      nameFa: "سامانه ماهواره‌ای هدایت یکپارچه جنگ",
       taglineFa: "هم‌افزایی رزمی حداکثری میان تمام رسته‌ها در میدان",
       descriptionFa:
         "ادغام ارتباطی رادارهای هوابرد، تانک‌ها و پیاده‌نظام که قدرت رزمی و بقای کلیه یگان‌ها در صحنه نبرد را ۲۰٪ تقویت می‌نماید.",
@@ -234,7 +234,7 @@ export const NATIONAL_PROJECTS_CATALOG: readonly NationalProjectConfig[] =
     },
     {
       id: "multilateral_treaty_architecture",
-      nameFa: "نظم نوین معاهدات و مجمع امنیت پایدار",
+      nameFa: "شورای عالی رهبری جهان (تسلط بر سازمان ملل)",
       taglineFa: "رهبری دیپلماسی جهانی و مصونیت سیاسی دائمی",
       descriptionFa:
         "تأسیس نهاد دائمی همکاری‌های بین‌المللی به محوریت کشور شما که ۲۰ واحد پرستیژ جهانی و ۱۰ واحد ثبات همیشگی به دولت اعطا می‌نماید.",

@@ -52,7 +52,7 @@ export class WarLogFormatter {
           : "";
 
         if (outcome === "CAPITULATION") {
-          return `به دلیل برتری رزمی ${ratio} برابری ارتش، حاکمیت ${targetName} به طور کامل فروپاشید و تمامی استان‌ها و غنائم تسلیحاتی تسخیر شدند.${betrayal}`;
+          return `تسلیم بی‌قیدوشرط: ارتش ${sourceName} با برتری خردکننده ${ratio} برابری، پایتخت و تمام خاک ${targetName} را فتح و غنائم آن را مصادره کرد.${betrayal}`;
         }
         if (outcome === "VICTORY") {
           return `ارتش ${sourceName} در نبرد با ${targetName} پیروز شد و استان هدف را تصرف کرد.${betrayal}`;
@@ -72,7 +72,7 @@ export class WarLogFormatter {
       }
 
       case "NATION_ANNEXED":
-        return `سقوط قطعی و تاریخی: کشور ${targetName} پس از شکست کامل نظامی، به طور مطلق توسط امپراتوری ${sourceName} تصرف و از جغرافیای جهان حذف شد.`;
+        return `سقوط کامل و الحاق خاک: امپراتوری ${sourceName} کشور ${targetName} را فتح کرد و خاک آن را به طور کامل به قلمرو خود ضمیمه نمود.`;
 
       case "NATION_COLLAPSED":
         return `فروپاشی کامل دولت: کشور ${sourceName} به دلیل از دست دادن تمامی قلمروها به طور کامل منحل گردید.`;

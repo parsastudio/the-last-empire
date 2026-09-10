@@ -45,7 +45,7 @@ export function DiplomaticStanceBadge({
     return (
       <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[9px] font-bold flex items-center gap-1 font-sans shadow-sm">
         <Skull size={10} />
-        <span>تحت‌الحمایگی استعماری</span>
+        <span>تحت استمداد ابرقدرت</span>
       </span>
     );
   }

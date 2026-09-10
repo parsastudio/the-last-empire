@@ -3,7 +3,7 @@ import { DilemmaEvent } from "@/domain/events/dilemma.schema";
 export const ESPIONAGE_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   {
     id: "defector_scientist_asylum",
-    titleFa: "پناهندگی دانشمند هسته‌ای حریف",
+    titleFa: "فرار دانشمند ارشد موشکی دشمن به خاک شما",
     headlineFa: "اسرار محرمانه تسلیحاتی در ازای حمایت",
     descriptionFa:
       "یک مقام ارشد صنایع دفاعی رقیب به همراه نقشه‌های فنی پروژه‌های موشکی به سفارت شما گریخته است.",
@@ -36,7 +36,7 @@ export const ESPIONAGE_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   },
   {
     id: "cyber_grid_intrusion",
-    titleFa: "تهاجم سایبری به شبکه راداری",
+    titleFa: "هک گسترده رادارهای پدافند هوایی",
     headlineFa: "اختلال موقت در سامانه‌های پدافند هوایی",
     descriptionFa:
       "تیم‌های پدافند سایبری نفوذ بدافزاری پیچیده به اتاق‌های فرماندهی پدافند را شناسایی کرده‌اند.",
@@ -67,7 +67,7 @@ export const ESPIONAGE_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   },
   {
     id: "mole_in_general_staff",
-    titleFa: "جاسوس نفوذی در ستاد مشترک ارتش",
+    titleFa: "کشف جاسوس فوق‌محرمانه در اتاق جنگ",
     headlineFa: "افشای برنامه‌های جابه‌جایی قوا",
     descriptionFa:
       "سرویس ضدجاسوسی مدارکی از ارسال نقشه‌های عملیاتی ارتش به سفارت کشور رقیب کشف کرده است.",

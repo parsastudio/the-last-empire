@@ -77,7 +77,7 @@ export function AdvancedDiplomacyActions({
       <div className="space-y-4 dir-rtl text-right font-sans">
         <div className="space-y-2">
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
-            نردبان معاهدات، چتر امنیتی و مدیریت روابط
+            میز دیپلماسی، پیمان‌های نظامی و روابط خارجی
           </span>
 
           <div className="space-y-2.5">
@@ -125,7 +125,7 @@ export function AdvancedDiplomacyActions({
 
         <div className="pt-3 border-t border-border/60 space-y-2">
           <span className="text-[10px] font-bold text-primary uppercase tracking-wider font-mono block">
-            دایره عملیات ویژه اطلاعاتی و سیاه
+            مرکز فرماندهی جاسوسی و خرابکاری
           </span>
 
           <button
@@ -138,7 +138,7 @@ export function AdvancedDiplomacyActions({
           >
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold text-primary">
-                ورود به دایره جاسوسی و خرابکاری در {targetName}
+                اجرای عملیات ویژه اطلاعاتی علیه {targetName}
               </span>
               <Binary size={14} className="text-primary" />
             </div>

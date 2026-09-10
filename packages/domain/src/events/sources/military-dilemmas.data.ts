@@ -3,7 +3,7 @@ import { DilemmaEvent } from "@/domain/events/dilemma.schema";
 export const MILITARY_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   {
     id: "covert_arms_offer",
-    titleFa: "پیشنهاد فروش مازاد ادوات به متحدین",
+    titleFa: "پیشنهاد خرید دلاری تانک‌های مازاد ارتش",
     headlineFa: "نقدینگی فوری در ازای بخشی از تجهیزات",
     descriptionFa:
       "یک دولت هم‌پیمان خواستار خرید فوری تعدادی از تانک‌های رزمی ارتش شما به نرخ بالا شده است.",
@@ -31,7 +31,7 @@ export const MILITARY_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   },
   {
     id: "strait_security_incident",
-    titleFa: "تهدید امنیت در گذرگاه دریایی",
+    titleFa: "راهزنی و حمله به نفتکش‌ها در تنگه استراتژیک",
     headlineFa: "مزاحمت برای نفتکش‌ها در آبراه ترانزیتی",
     descriptionFa:
       "قایق‌های متخاصم تردد کشتی‌های بازرگانی در آبراه‌های نزدیک را مختل کرده‌اند.",
@@ -151,7 +151,7 @@ export const MILITARY_DILEMMA_EVENTS: readonly DilemmaEvent[] = Object.freeze([
   },
   {
     id: "air_defense_readiness_drill",
-    titleFa: "رزمایش سراسری شبیه‌سازی تهاجم هوایی",
+    titleFa: "مانور شلیک زنده موشک و تست پدافند",
     headlineFa: "تست سامانه‌های راداری و آتشبارهای موشکی",
     descriptionFa:
       "فرماندهی پدافند درخواست اجرای مانور شلیک زنده موشک‌های ضدهوایی جهت ارزیابی رادارها دارد.",

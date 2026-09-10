@@ -117,10 +117,10 @@ export function useHoverNationResolver({
           );
 
           if (isEmergencyGuarantorOfHuman) {
-            stanceLabel = "تحت‌الحمایگی استعماری";
+            stanceLabel = "تحت استمداد ابرقدرت";
             hasSecurityGuarantee = true;
           } else if (isHumanEmergencyGuarantorOfTarget) {
-            stanceLabel = "کشور تحت‌الحمایه شما";
+            stanceLabel = "کشور تحت استمداد شما";
             hasSecurityGuarantee = true;
           } else if (isDefenseGuarantorOfHuman) {
             stanceLabel = "ضامن دفاعی شما (پیمان دفاعی)";

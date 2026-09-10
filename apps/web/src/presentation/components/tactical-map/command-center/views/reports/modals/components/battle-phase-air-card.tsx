@@ -46,7 +46,7 @@ export function BattlePhaseAirCard({
             </div>
             <div>
               <h3 className="text-sm font-black text-foreground">
-                فاز دوم: نبرد سنگین برتری هوایی، داگ‌فایت و بمباران تانک‌ها
+                فاز دوم: داگ‌فایت هوایی و بمباران سنگین تانک‌های دشمن
               </h3>
               <span className="text-[10px] text-muted-foreground">
                 حاکمیت بر آسمان و پاکسازی ستون‌های زرهی مدافع
@@ -96,7 +96,7 @@ export function BattlePhaseAirCard({
           </div>
           <div>
             <h3 className="text-sm font-black text-foreground">
-              فاز دوم: نبرد سنگین برتری هوایی، داگ‌فایت و بمباران تانک‌ها
+              فاز دوم: داگ‌فایت هوایی و بمباران سنگین تانک‌های دشمن
             </h3>
             <span className="text-[10px] text-muted-foreground">
               مصاف شکاری‌ها، دفاع پدافند و بمباران ادوات زرهی
@@ -156,7 +156,7 @@ export function BattlePhaseAirCard({
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Flame size={13} className="text-amber-400" />
-                <span>ساقط‌شده در نبرد تن‌به‌تن (Dogfight):</span>
+                <span>جنگنده‌های سرنگون‌شده در نبرد هوایی تن‌به‌تن:</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {attLostDogfight > 0
@@ -191,7 +191,7 @@ export function BattlePhaseAirCard({
                 <span>
                   +
                   {PersianNumberFormatter.toPersianDigits(aux.deployedAirForce)}{" "}
-                  جنگنده تحت‌الحمایگی
+                  جنگنده کمکی
                 </span>
               </span>
             ) : (
@@ -228,7 +228,7 @@ export function BattlePhaseAirCard({
             <div className="flex justify-between items-center bg-background/60 p-2.5 rounded-xl border border-border/40">
               <span className="text-muted-foreground font-sans flex items-center gap-1.5">
                 <Zap size={13} className="text-emerald-400" />
-                <span>تانک‌های بمباران و منهدم‌شده مدافع:</span>
+                <span>تانک‌های شکارشده توسط بمب‌افکن‌ها:</span>
               </span>
               <span className="font-black text-rose-400 text-sm">
                 {defArmorDestroyedByAir > 0

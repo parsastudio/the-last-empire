@@ -47,7 +47,7 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-rose-300 text-xs font-black">
             <Skull size={16} className="text-rose-400 animate-pulse" />
-            <span>تحت‌الحمایگی استعماری فعال (۵۰٪ GDP نیرو)</span>
+            <span>پیمان استمداد امنیتی فعال (۵۰٪ GDP نیرو)</span>
           </div>
           <span className="text-[10px] font-mono text-rose-400 font-bold">
             {PersianNumberFormatter.formatCurrency(
@@ -66,7 +66,7 @@ export function DiplomacySecurityUmbrellaActions({
           className="w-full py-2 bg-secondary/80 hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 border border-border/60 hover:border-rose-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           <ShieldX size={13} />
-          <span>لغو معاهده استعماری و احیای استقلال کامل</span>
+          <span>لغو معاهده و احیای استقلال کامل</span>
         </button>
       </div>
     );
@@ -147,7 +147,7 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">
             <Skull size={16} className="text-rose-400" />
-            <span>معاهده تحت‌الحمایگی استعماری اضطراری</span>
+            <span>پیمان استمداد و تسلیم حاکمیت به ابرقدرت</span>
           </span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30">
             ۵٪ خراج • ۵۰٪ GDP نیرو

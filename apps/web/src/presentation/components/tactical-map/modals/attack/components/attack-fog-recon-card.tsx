@@ -30,7 +30,7 @@ export function AttackFogReconCard({
           </div>
           <div className="space-y-0.5">
             <span className="text-xs font-black text-foreground block">
-              مه اطلاعاتی: داده‌های میدانی دقیق پنهان است
+              دید کور اطلاعاتی: مواضع دفاعی دشمن ناشناخته است
             </span>
             <span className="text-[10px] text-muted-foreground block font-sans">
               برآورد موازنه قوا بر مبنای داده‌های عمومی بین‌المللی (OSINT)
@@ -50,7 +50,7 @@ export function AttackFogReconCard({
             <Radio size={13} className="animate-pulse" />
           )}
           <span>
-            شنود ماهواره‌ای فوری (
+            اسکن ماهواره‌ای و کشف آرایش ارتش دشمن (
             {PersianNumberFormatter.formatCurrency(reconCost)})
           </span>
         </button>

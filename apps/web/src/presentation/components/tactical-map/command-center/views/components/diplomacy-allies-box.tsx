@@ -53,7 +53,7 @@ export function DiplomacyAlliesBox({
           </div>
           <div>
             <span className="text-foreground font-black text-xs block">
-              هشدار حامیان دفاعی (طرف‌های جنگ در صورت تهاجم)
+              هشدار حامیان دفاعی (طرف‌های مستقیم جنگ در صورت تهاجم)
             </span>
             <span className="text-[10px] text-rose-300/90 block font-medium">
               در صورت حمله شما به این کشور، ارتش این حامیان مستقیماً علیه شما

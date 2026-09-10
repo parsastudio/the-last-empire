@@ -19,9 +19,9 @@ export const DIPLOMATIC_PROPOSAL_LABELS_FA: Record<
 > = {
   STRATEGIC_PARTNERSHIP: "شراکت استراتژیک و اقتصادی",
   SECURITY_GUARANTEE: "پیمان دفاعی و امنیت سرزمینی متقابل",
-  EMERGENCY_PROTECTORATE: "معاهده تحت‌الحمایگی استعماری اضطراری",
+  EMERGENCY_PROTECTORATE: "پیمان استمداد و تسلیم حاکمیت به ابرقدرت",
   CANCEL_SECURITY_GUARANTEE: "لغو پیمان دفاعی",
-  CANCEL_EMERGENCY_PROTECTORATE: "لغو معاهده تحت‌الحمایگی",
+  CANCEL_EMERGENCY_PROTECTORATE: "لغو پیمان استمداد و اعلام استقلال",
   NON_AGGRESSION_PACT: "پیمان عدم تخاصم",
   PEACE_TREATY: "معاهده صلح",
   SEND_FOREIGN_AID: "کمک مالی و دیپلماتیک",
@@ -38,7 +38,7 @@ export const DIPLOMATIC_STANCE_LABELS_FA: Record<DiplomaticStance, string> = {
 
 export const DIPLOMATIC_POSTURE_LABELS_FA: Record<DiplomaticPosture, string> = {
   NATURAL_ALLY: "متحد طبیعی و همسو",
-  OPPORTUNISTIC_PREDATOR: "شکارچی و رقیب متخاصم",
-  WARY_BUFFER: "مدافع محتاط و نگران",
-  NEUTRAL_COEXISTENCE: "همزیستی مسالمت‌آمیز",
+  OPPORTUNISTIC_PREDATOR: "گرگ در کمین (آماده حمله و تصرف خاک)",
+  WARY_BUFFER: "سپر محتاط (نگران از قدرت شما)",
+  NEUTRAL_COEXISTENCE: "بی‌طرف و صلح‌جو",
 };

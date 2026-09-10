@@ -31,7 +31,7 @@ export function BattlePhaseGroundCard({
         <div className="flex items-center gap-3">
           <span className="text-2xl">⚔️</span>
           <h3 className="text-sm font-black text-foreground">
-            فاز سوم: پیشروی زرهی و برخورد خونین خطوط پیاده‌نظام
+            فاز سوم: پیشروی تانک‌ها و نبرد سرنوشت‌ساز پیاده‌نظام
           </h3>
         </div>
         <span
@@ -86,7 +86,7 @@ export function BattlePhaseGroundCard({
             </div>
             <div className="flex justify-between items-center text-sm pt-1 border-t border-border/30">
               <span className="text-muted-foreground font-sans">
-                پیاده‌نظام خط‌شکن:
+                لشکرهای خط‌شکن تهاجم:
               </span>
               <span className="font-black text-foreground text-base">
                 {PersianNumberFormatter.toPersianDigits(
@@ -123,7 +123,7 @@ export function BattlePhaseGroundCard({
                   +{PersianNumberFormatter.toPersianDigits(aux.deployedArmor)}{" "}
                   تانک، +
                   {PersianNumberFormatter.toPersianDigits(aux.deployedInfantry)}{" "}
-                  پیاده تحت‌الحمایگی
+                  پیاده کمکی
                 </span>
               </span>
             )}
@@ -155,7 +155,7 @@ export function BattlePhaseGroundCard({
             </div>
             <div className="flex justify-between items-center text-sm pt-1 border-t border-border/30">
               <span className="text-muted-foreground font-sans">
-                پیاده‌نظام مدافع سنگرها:
+                تکاوران و مدافعان سنگر:
               </span>
               <span className="font-black text-foreground text-base">
                 {PersianNumberFormatter.toPersianDigits(

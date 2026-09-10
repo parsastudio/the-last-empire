@@ -47,7 +47,7 @@ export function BattleSpoilsCard({
             <div className="flex items-center gap-1.5">
               <Trophy size={16} className="text-amber-400" />
               <h3 className="text-sm font-black text-foreground">
-                غنائم و فتوحات ارضی امپراتوری {winnerName}
+                کارنامه فتوحات و غنائم جنگی امپراتوری {winnerName}
               </h3>
             </div>
             <p className="text-[11px] text-muted-foreground">

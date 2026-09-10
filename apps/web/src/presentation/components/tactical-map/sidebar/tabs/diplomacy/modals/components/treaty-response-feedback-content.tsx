@@ -76,7 +76,7 @@ export function TreatyResponseFeedbackContent({
         {isEmergency && isAccepted ? (
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground leading-relaxed">
-              معاهده تحت‌الحمایگی استعماری با امپراتوری{" "}
+              پیمان استمداد امنیتی با امپراتوری{" "}
               <strong className="text-rose-400">{feedback.targetName}</strong>{" "}
               منعقد گردید.
             </p>
