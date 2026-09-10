@@ -76,7 +76,6 @@ export const AuxiliaryGuarantorDefenseSchema = z.object({
   deployedAirDefense: z.number().nonnegative(),
   deployedAirForce: z.number().nonnegative(),
   initialBudgetValuation: z.number().nonnegative(),
-  damageCostIncurred: z.number().nonnegative().default(0),
 });
 
 export const BattleFullReportDataSchema = z.object({

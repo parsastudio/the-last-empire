@@ -12,14 +12,8 @@ export interface BetrayalEvaluation {
 }
 
 export class DiplomaticBetrayalCalculator {
-  public static calculatePenalty(
-    stance: DiplomaticStance,
-    targetStance?: DiplomaticStance,
-  ): BetrayalEvaluation {
-    if (
-      stance === "STRATEGIC_PARTNERSHIP" ||
-      targetStance === "STRATEGIC_PARTNERSHIP"
-    ) {
+  public static calculatePenalty(stance: DiplomaticStance): BetrayalEvaluation {
+    if (stance === "STRATEGIC_PARTNERSHIP") {
       return {
         reputationPenalty:
           DIPLOMACY_CONFIG.BETRAYAL_PENALTIES.STRATEGIC_PARTNERSHIP,
@@ -27,10 +21,7 @@ export class DiplomaticBetrayalCalculator {
         hasBetrayed: true,
       };
     }
-    if (
-      stance === "NON_AGGRESSION_PACT" ||
-      targetStance === "NON_AGGRESSION_PACT"
-    ) {
+    if (stance === "NON_AGGRESSION_PACT") {
       return {
         reputationPenalty:
           DIPLOMACY_CONFIG.BETRAYAL_PENALTIES.NON_AGGRESSION_PACT,
@@ -38,7 +29,7 @@ export class DiplomaticBetrayalCalculator {
         hasBetrayed: true,
       };
     }
-    if (stance === "NORMAL_DIPLOMACY" || targetStance === "NORMAL_DIPLOMACY") {
+    if (stance === "NORMAL_DIPLOMACY") {
       return {
         reputationPenalty: DIPLOMACY_CONFIG.BETRAYAL_PENALTIES.NORMAL_DIPLOMACY,
         skippedSteps: 0,

@@ -31,7 +31,6 @@ export class MilitaryDistributionEngine {
     gdp: number,
     domesticTechLevel = 1.0,
     equipmentTechLevel = 1.0,
-    branchTechOverrides?: Partial<BranchTechRating>,
   ): MilitaryStack {
     const safeGdp = Math.max(1_000_000_000, gdp);
     const nativeTech = Number(Math.max(1.0, domesticTechLevel).toFixed(2));
@@ -43,11 +42,11 @@ export class MilitaryDistributionEngine {
     const totalArmyBudget = Math.floor(safeGdp * budgetRatio);
 
     const initialBranchTech: BranchTechRating = {
-      infantry: branchTechOverrides?.infantry ?? nativeTech,
-      armor: branchTechOverrides?.armor ?? nativeTech,
-      airDefense: branchTechOverrides?.airDefense ?? nativeTech,
-      airForce: branchTechOverrides?.airForce ?? nativeTech,
-      droneMissile: branchTechOverrides?.droneMissile ?? fieldTech,
+      infantry: nativeTech,
+      armor: nativeTech,
+      airDefense: nativeTech,
+      airForce: nativeTech,
+      droneMissile: fieldTech,
     };
 
     const quotaRatios: Record<UnitType, number> = {

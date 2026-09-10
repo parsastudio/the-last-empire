@@ -37,11 +37,6 @@ export class WarLogFormatter {
         return `پیمان مهار اضطراری: کشورهای [${members}] با امضای معاهده دفاع جمعی، رسماً علیه امپراتوری ${sourceName} اعلام جنگ کرده و صلح را ناممکن دانستند.`;
       }
 
-      case "COALITION_MEMBER_FALLEN": {
-        const remaining = String(params["remainingCount"] || "۰");
-        return `شکست ضلع ائتلاف جهانی: کشور ${sourceName} سقوط کرد (${remaining} قدرت متخاصم از ائتلاف باقی مانده است).`;
-      }
-
       case "BATTLE_TACTICAL_REPORT": {
         const customHeadline = params["humanHeadline"]
           ? String(params["humanHeadline"])

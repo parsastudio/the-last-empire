@@ -16,7 +16,6 @@ export interface NationOverviewViewModel {
   gdp: number;
   population: number;
   totalActiveFactories: number;
-  territoryPixelCount: number;
   militaryTechLevel: number;
   industrialLevel: number;
   treasury: number;
@@ -59,10 +58,6 @@ export function selectNationOverviewViewModel(
     gdp,
     population: NationGettersUtility.getPopulation(nation.id, provincesMap),
     totalActiveFactories,
-    territoryPixelCount: NationGettersUtility.getTerritoryPixelCount(
-      nation.id,
-      provincesMap,
-    ),
     militaryTechLevel: nation.military.techLevel,
     industrialLevel: nation.industrialLevel,
     treasury: nation.treasury,

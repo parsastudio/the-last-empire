@@ -20,7 +20,6 @@ export const NationalProjectEffectSchema = z.object({
   defenseCasualtyReductionMultiplier: z.number().optional(),
   autoMissileInterceptionRate: z.number().optional(),
   permanentStabilityBonus: z.number().optional(),
-  fullOmniscienceIntel: z.boolean().optional(),
   procurementCostDiscountMultiplier: z.number().optional(),
   globalReputationBonus: z.number().optional(),
   maintenanceCostDiscountMultiplier: z.number().optional(),

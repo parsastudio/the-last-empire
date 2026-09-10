@@ -101,6 +101,5 @@ export function useWideReports({
     setSelectedScope,
     setSelectedTurn,
     setSearchQuery,
-    reload: loadPagedLogs,
   };
 }

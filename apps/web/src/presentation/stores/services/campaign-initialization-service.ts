@@ -63,7 +63,6 @@ export class CampaignInitializationService {
     }
 
     const initResult = this.aiInitializer.initializeAllNations(
-      detectedNations,
       normalizedHumanId,
       governmentType,
       activeManifest,

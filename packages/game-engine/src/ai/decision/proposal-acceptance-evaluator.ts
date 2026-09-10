@@ -202,17 +202,6 @@ export class ProposalAcceptanceEvaluator {
         }
         break;
       }
-
-      case "CANCEL_SECURITY_GUARANTEE":
-      case "SEND_FOREIGN_AID": {
-        reasons.push({ label: "پذیرش تعهد بدون قید و شرط", value: 100 });
-        break;
-      }
-
-      case "DECLARE_WAR": {
-        reasons.push({ label: "اعلان جنگ رسمی", value: -100 });
-        break;
-      }
     }
 
     const totalScore = reasons.reduce((sum, item) => sum + item.value, 0);

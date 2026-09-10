@@ -65,7 +65,6 @@ export class GuarantorInterventionCalculator {
       deployedAirDefense: auxAD,
       deployedAirForce: auxAir,
       initialBudgetValuation: effectiveDefenseBudget,
-      damageCostIncurred: 0,
     };
 
     return {

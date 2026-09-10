@@ -30,6 +30,7 @@ export function MilitaryOverviewTab({
             nationId={nation.id}
             treasury={nation.treasury}
             techLevel={nation.military.techLevel}
+            governmentType={nation.government?.type}
           />
         </div>
       </div>
