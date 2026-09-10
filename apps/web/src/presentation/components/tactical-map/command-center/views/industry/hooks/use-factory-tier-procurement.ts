@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import {
   FactoryBatch,
   IndustryCalculator,
   ActionFactory,
   ProcurementBatchCalculator,
-  GameIdGenerator,
 } from "@geopolitics/domain";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 
 export interface FactoryTierUpgradeItem {
   batch: FactoryBatch;
@@ -44,9 +43,7 @@ export function useFactoryTierProcurement({
   actionType = "DOMESTIC",
 }: UseFactoryTierProcurementProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
-  const [feedbacks, setFeedbacks] = useState<
-    Record<number, { id: string; text: string }[]>
-  >({});
+  const { triggerFeedback, getFeedbacksFor } = useFloatingFeedback<number>();
 
   const consolidatedBatches = useMemo(() => {
     if (batches && batches.length > 0) {
@@ -107,29 +104,12 @@ export function useFactoryTierProcurement({
     async (item: FactoryTierUpgradeItem) => {
       if (item.isMaxedOut || !item.canAfford || isSubmitting) return;
 
-      TacticalSound.playCoinSound();
-      const feedbackId = GameIdGenerator.generateId("fb-tier");
       const feedbackText =
         actionType === "IMPORT"
           ? `+${item.batchQuantity} سوله وارداتی`
           : `+${item.batchQuantity} سوله مدرن`;
 
-      setFeedbacks((prev) => ({
-        ...prev,
-        [item.rankIndex]: [
-          ...(prev[item.rankIndex] || []),
-          { id: feedbackId, text: feedbackText },
-        ],
-      }));
-
-      setTimeout(() => {
-        setFeedbacks((prev) => ({
-          ...prev,
-          [item.rankIndex]: (prev[item.rankIndex] || []).filter(
-            (f) => f.id !== feedbackId,
-          ),
-        }));
-      }, 700);
+      triggerFeedback(item.rankIndex, feedbackText, { durationMs: 700 });
 
       if (actionType === "IMPORT" && sellerId) {
         const action = ActionFactory.buyIndustrialEquipment(
@@ -148,12 +128,19 @@ export function useFactoryTierProcurement({
         await dispatchAction(action);
       }
     },
-    [nationId, sellerId, actionType, isSubmitting, dispatchAction],
+    [
+      nationId,
+      sellerId,
+      actionType,
+      isSubmitting,
+      dispatchAction,
+      triggerFeedback,
+    ],
   );
 
   return {
     tierUpgradeItems,
-    feedbacks,
+    getFeedbacksFor,
     isSubmitting,
     handleUpgradeTier,
   };

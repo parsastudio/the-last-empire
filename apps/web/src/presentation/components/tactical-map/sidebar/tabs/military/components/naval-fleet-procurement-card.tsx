@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Ship, Anchor, Coins, ShieldCheck, Zap, Lock } from "lucide-react";
 import {
   PersianNumberFormatter,
   ActionFactory,
   NAVAL_FLEET_CONFIG,
   ProcurementBatchCalculator,
-  GameIdGenerator,
 } from "@geopolitics/domain";
 import { NavalDeploymentClamper } from "@geopolitics/game-engine";
 import { useGameActions } from "@/presentation/hooks/game/use-game-actions";
-import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feedback";
 
 interface NavalFleetProcurementCardProps {
   nationId: string;
@@ -27,9 +26,7 @@ export function NavalFleetProcurementCard({
   hasSeaAccess,
 }: NavalFleetProcurementCardProps) {
   const { dispatchAction, isSubmitting } = useGameActions();
-  const [feedbacks, setFeedbacks] = useState<{ id: string; text: string }[]>(
-    [],
-  );
+  const { triggerFeedback, getFeedbacksFor } = useFloatingFeedback<string>();
 
   const fleetCost = NAVAL_FLEET_CONFIG.FLEET_UNIT_COST;
 
@@ -62,13 +59,10 @@ export function NavalFleetProcurementCard({
   const handleBuy = async () => {
     if (!canAfford || isSubmitting) return;
 
-    TacticalSound.playCoinSound();
-    const newId = GameIdGenerator.generateId("fb-fleet");
-    const qtyText = `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان`;
-    setFeedbacks((prev) => [...prev, { id: newId, text: qtyText }]);
-    setTimeout(() => {
-      setFeedbacks((prev) => prev.filter((f) => f.id !== newId));
-    }, 600);
+    triggerFeedback(
+      "fleet",
+      `+${PersianNumberFormatter.toPersianDigits(batchInfo.batchQuantity)} ناوگان`,
+    );
 
     const action = ActionFactory.buyNavalFleet(
       nationId,
@@ -76,6 +70,8 @@ export function NavalFleetProcurementCard({
     );
     await dispatchAction(action);
   };
+
+  const activeFeedbacks = getFeedbacksFor("fleet");
 
   return (
     <div className="relative p-4 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-950/30 via-card to-blue-950/25 space-y-3 font-sans dir-rtl text-right shadow-lg backdrop-blur-md">
@@ -102,7 +98,7 @@ export function NavalFleetProcurementCard({
         </div>
 
         <div className="relative shrink-0">
-          {feedbacks.map((f) => (
+          {activeFeedbacks.map((f) => (
             <span
               key={f.id}
               className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-black font-mono text-cyan-400 drop-shadow-md animate-out fade-out slide-out-to-top-3 duration-500 pointer-events-none"
