@@ -3,6 +3,7 @@ import {
   CountryRegistry,
   NationGettersUtility,
   GameStateMetricsUtility,
+  VICTORY_CONFIG,
 } from "@geopolitics/domain";
 
 export interface VictoryStatus {
@@ -45,7 +46,9 @@ export class ConquestVictoryChecker implements VictoryCondition {
           state.provinces,
         );
         const territoryShare = nationPixels / totalWorldTerritory;
-        if (territoryShare >= 0.65) {
+        if (
+          territoryShare >= VICTORY_CONFIG.TERRITORIAL_DOMINANCE_TARGET_RATIO
+        ) {
           return {
             isGameOver: true,
             winnerNationId: nation.id,

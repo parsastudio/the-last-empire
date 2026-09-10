@@ -1,5 +1,9 @@
 import { GameState } from "@/domain/game/game-state.schema";
-import { getNationGdp, GameStateMetricsUtility } from "@geopolitics/domain";
+import {
+  getNationGdp,
+  GameStateMetricsUtility,
+  VICTORY_CONFIG,
+} from "@geopolitics/domain";
 import {
   VictoryCondition,
   VictoryStatus,
@@ -18,7 +22,7 @@ export class EconomicVictoryChecker implements VictoryCondition {
 
     for (const nation of aliveNations) {
       const share = getNationGdp(nation, state.provinces) / totalGlobalGdp;
-      if (share >= 0.65) {
+      if (share >= VICTORY_CONFIG.ECONOMIC_DOMINANCE_TARGET_RATIO) {
         return {
           isGameOver: true,
           winnerNationId: nation.id,
