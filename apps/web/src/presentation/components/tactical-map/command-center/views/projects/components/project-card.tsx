@@ -73,9 +73,6 @@ export function ProjectCard({
     project.totalStepsRequired,
     Math.max(0, currentSteps),
   );
-  const progressPercent = Math.round(
-    (clampedSteps / project.totalStepsRequired) * 100,
-  );
 
   const isButtonDisabled =
     isCompleted ||
@@ -86,12 +83,12 @@ export function ProjectCard({
 
   return (
     <div
-      className={`rounded-3xl border transition-all duration-300 font-sans dir-rtl text-right overflow-hidden shadow-md ${
+      className={`rounded-3xl border transition-all duration-300 font-sans dir-rtl text-right overflow-hidden shadow-md backdrop-blur-xl relative ${
         isCompleted
-          ? "bg-emerald-950/20 border-emerald-500/40 ring-1 ring-emerald-500/20"
+          ? "bg-emerald-950/20 border-emerald-500/40 ring-1 ring-emerald-500/20 shadow-emerald-950/30"
           : isBoostedThisTurn
             ? "bg-primary/10 border-primary/50 shadow-primary/10 ring-1 ring-primary/20"
-            : "bg-card/90 border-border/80 hover:border-primary/40 hover:bg-secondary/40 hover:shadow-xl"
+            : "bg-card/90 border-border/80 hover:border-primary/40 hover:bg-secondary/40 hover:shadow-xl ring-1 ring-white/5"
       }`}
     >
       <div
@@ -100,11 +97,11 @@ export function ProjectCard({
       >
         <div className="flex items-center gap-3.5 flex-1 min-w-0">
           <div
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 shadow-sm ${
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 shadow-md ${
               isCompleted
-                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
+                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-emerald-500/10"
                 : isBoostedThisTurn
-                  ? "bg-primary/20 text-primary border-primary/40"
+                  ? "bg-primary/20 text-primary border-primary/40 shadow-primary/10"
                   : "bg-secondary text-foreground border-border/70"
             }`}
           >
@@ -116,7 +113,7 @@ export function ProjectCard({
               {project.nameFa}
             </span>
 
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg border bg-secondary/80 text-gdp border-gdp/30 shrink-0">
+            <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border bg-secondary/80 text-gdp border-gdp/30 shrink-0 shadow-inner">
               {PersianNumberFormatter.formatCurrency(project.costPerStep, true)}{" "}
               / گام
             </span>
@@ -124,24 +121,31 @@ export function ProjectCard({
         </div>
 
         <div className="flex items-center gap-3.5 shrink-0">
-          <div className="hidden md:flex flex-col items-end gap-1.5 w-36 font-mono">
+          <div className="hidden md:flex flex-col items-end gap-1.5 w-40 font-mono">
             <span className="text-xs text-muted-foreground font-bold">
               گام {PersianNumberFormatter.toPersianDigits(clampedSteps)} از{" "}
               {PersianNumberFormatter.toPersianDigits(
                 project.totalStepsRequired,
               )}
             </span>
-            <div className="w-full bg-secondary h-2 rounded-full overflow-hidden border border-border/40">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  isCompleted
-                    ? "bg-emerald-400"
-                    : isBoostedThisTurn
-                      ? "bg-primary"
-                      : "bg-gdp"
-                }`}
-                style={{ width: `${progressPercent}%` }}
-              />
+
+            <div className="w-full flex items-center gap-0.5 bg-secondary/80 p-0.5 rounded-full border border-border/50 shadow-inner">
+              {Array.from({ length: project.totalStepsRequired }).map(
+                (_, idx) => (
+                  <div
+                    key={idx}
+                    className={`h-2 flex-1 rounded-full transition-all duration-300 ${
+                      idx < clampedSteps
+                        ? isCompleted
+                          ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                          : isBoostedThisTurn
+                            ? "bg-primary shadow-[0_0_6px_rgba(59,130,246,0.8)]"
+                            : "bg-gdp shadow-[0_0_6px_rgba(16,185,129,0.8)]"
+                        : "bg-background/60"
+                    }`}
+                  />
+                ),
+              )}
             </div>
           </div>
 
@@ -161,7 +165,7 @@ export function ProjectCard({
                 type="button"
                 onClick={() => onBoost(project)}
                 disabled={isButtonDisabled}
-                className="py-2.5 px-4 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-md shadow-primary/20 flex items-center gap-1.5 border border-primary/40 disabled:border-border/60"
+                className="py-2.5 px-4 bg-primary hover:bg-primary/90 disabled:bg-secondary disabled:text-muted-foreground text-primary-foreground rounded-2xl text-xs font-black transition-all cursor-pointer shadow-md shadow-primary/20 flex items-center gap-1.5 border border-primary/40 disabled:border-border/60 hover:scale-[1.02] active:scale-[0.98]"
               >
                 {!hasAvailableQuota ? (
                   <Lock size={13} />

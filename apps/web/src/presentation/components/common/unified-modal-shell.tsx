@@ -51,9 +51,9 @@ export function UnifiedModalShell({
       <div
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
-        className={`bg-card/95 border border-border/80 w-full ${maxWidthClass} max-h-[88vh] rounded-3xl p-6 shadow-2xl shadow-black/80 flex flex-col space-y-4 text-foreground backdrop-blur-3xl cursor-default text-right overflow-hidden relative ring-1 ring-white/5`}
+        className={`bg-card/95 border border-border/80 w-full ${maxWidthClass} max-h-[88vh] rounded-3xl p-6 shadow-2xl shadow-black/90 flex flex-col space-y-4 text-foreground backdrop-blur-3xl cursor-default text-right overflow-hidden relative ring-1 ring-white/10`}
       >
-        <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+        <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
         <div className="flex items-center justify-between pb-3.5 border-b border-border/60 shrink-0">
           <div className="space-y-0.5 text-right">
@@ -71,14 +71,14 @@ export function UnifiedModalShell({
 
           <button
             onClick={handleClose}
-            className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-2xl transition-all cursor-pointer shrink-0 border border-border/60 hover:border-border"
+            className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-secondary rounded-2xl transition-all cursor-pointer shrink-0 border border-border/60 hover:border-border shadow-inner"
             title="بستن پنجره"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+        <div className="flex-1 overflow-y-auto pr-1 scroll-mask-y scrollbar-thin scrollbar-thumb-border/60 scrollbar-track-transparent">
           {children}
         </div>
       </div>
