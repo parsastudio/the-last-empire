@@ -1,0 +1,46 @@
+{
+  "militaryForcesHeader": "قدرت ارکانی ارتش و سطح فناوری یگان‌ها",
+  "readinessTitle": "سطح فناوری دفاعی",
+  "techLevelBadge": "سطح {level}",
+  "efficiencyBonus": "(+{pct}٪ کارایی)",
+  "averageTech": "فناوری میانگین:",
+  "unitPrice": "قیمت واحد: {price}",
+  "remainingRoom": "(ظرفیت باقی‌مانده: {count})",
+  "instantDelivery": "تحویل آنی",
+  "capReached": "سقف ظرفیت",
+  "armyCapReached": "سقف سهمیه ارتش",
+  "techDisparity": "+{pct}٪ شکاف فناوری",
+  "navalFleetTitle": "ناوگان راهبردی دریایی (Naval Fleet)",
+  "navalFleetInStock": "موجودی: {count} فروند",
+  "navalFleetPrice": "قیمت واحد: {price} • بدون هزینه نگهداری",
+  "navalRevenue": "درآمد امنیت بین‌المللی ({pct}٪):",
+  "navalTransportCapacityPerFleet": "ظرفیت ترابری هر ناوگان:",
+  "navalTransportRatio": "۶۰ پیاده‌نظام یا ۱۵ تانک",
+  "navalTotalTransportCapacity": "کل ظرفیت ترابری دریایی:",
+  "navalTotalUnits": "{count} یگان ظرفیت",
+  "navalNoSeaAccess": "فاقد مرز دریایی",
+  "navalBuyInstant": "خرید فوری ({cost})",
+  "perTurn": "/ نوبت",
+  "quickProcurementTitle": "خرید فوری با هزینه {cost}",
+  "unitCountBadge": "({count} یگان)",
+  "INFANTRY": {
+    "name": "پیاده‌نظام رزمی",
+    "unit": "لشکر"
+  },
+  "ARMOR": {
+    "name": "لشکر زرهی و تانک‌ها",
+    "unit": "لشکر"
+  },
+  "AIR_DEFENSE": {
+    "name": "پدافند هوایی موشکی",
+    "unit": "واحد"
+  },
+  "AIR_FORCE": {
+    "name": "اسکادران جنگنده‌ها",
+    "unit": "فروند"
+  },
+  "DRONE_MISSILE": {
+    "name": "پهپاد و موشک‌های نقطه‌زن",
+    "unit": "یگان"
+  }
+}

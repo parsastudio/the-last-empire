@@ -13,7 +13,6 @@ import { useFloatingFeedback } from "@/presentation/hooks/game/use-floating-feed
 
 export interface QuickUnitBatchInfo {
   type: UnitType;
-  nameFa: string;
   unitPrice: number;
   batchQuantity: number;
   batchCost: number;
@@ -90,7 +89,6 @@ export function useQuickRecruitBatch({
 
       return {
         type,
-        nameFa: stat.nameFa,
         unitPrice,
         batchQuantity: batchResult.batchQuantity,
         batchCost: batchResult.batchCost,

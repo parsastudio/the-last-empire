@@ -13,7 +13,6 @@ import {
 
 export interface MilitaryUnitItemViewModel {
   type: UnitType;
-  nameFa: string;
   count: number;
   payrollCost: number;
   techLevel: number;
@@ -57,7 +56,6 @@ export function selectMilitaryForcesViewModel(
   const units: MilitaryUnitItemViewModel[] = [
     {
       type: "INFANTRY",
-      nameFa: "پیاده‌نظام",
       count: activeNation.military.infantry || 0,
       payrollCost: payroll.infantry,
       techLevel: MilitaryInventoryHelper.getBranchTech(
@@ -67,7 +65,6 @@ export function selectMilitaryForcesViewModel(
     },
     {
       type: "ARMOR",
-      nameFa: "زرهی و تانک",
       count: activeNation.military.armor || 0,
       payrollCost: payroll.armor,
       techLevel: MilitaryInventoryHelper.getBranchTech(
@@ -77,7 +74,6 @@ export function selectMilitaryForcesViewModel(
     },
     {
       type: "AIR_DEFENSE",
-      nameFa: "پدافند هوایی",
       count: activeNation.military.airDefense || 0,
       payrollCost: payroll.airDefense,
       techLevel: MilitaryInventoryHelper.getBranchTech(
@@ -87,7 +83,6 @@ export function selectMilitaryForcesViewModel(
     },
     {
       type: "AIR_FORCE",
-      nameFa: "نیروی هوایی",
       count: activeNation.military.airForce || 0,
       payrollCost: payroll.airForce,
       techLevel: MilitaryInventoryHelper.getBranchTech(
@@ -97,7 +92,6 @@ export function selectMilitaryForcesViewModel(
     },
     {
       type: "DRONE_MISSILE",
-      nameFa: "پهپاد و موشک",
       count: activeNation.military.droneMissile || 0,
       payrollCost: payroll.droneMissile,
       techLevel: MilitaryInventoryHelper.getBranchTech(

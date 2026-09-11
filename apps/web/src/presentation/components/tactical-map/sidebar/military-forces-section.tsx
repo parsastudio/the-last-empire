@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Swords } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -16,6 +17,8 @@ export function MilitaryForcesSection({
   nation,
   provincesMap,
 }: MilitaryForcesSectionProps) {
+  const t = useTranslations("military");
+
   const model = useMemo(
     () => selectMilitaryForcesViewModel(nation, provincesMap),
     [nation, provincesMap],
@@ -26,7 +29,7 @@ export function MilitaryForcesSection({
       <div className="flex items-center gap-2 px-1">
         <Swords size={14} className="text-military" />
         <span className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-wider font-mono">
-          قدرت ارکانی ارتش و سطح فناوری یگان‌ها
+          {t("militaryForcesHeader")}
         </span>
       </div>
 
@@ -39,7 +42,7 @@ export function MilitaryForcesSection({
                 key={unit.type}
                 icon={visual.icon}
                 iconColorClass={visual.colorClass}
-                name={unit.nameFa}
+                name={t(`${unit.type}.name`)}
                 payrollCost={unit.payrollCost}
                 count={unit.count}
                 techRating={unit.techLevel}
