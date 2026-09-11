@@ -1,4 +1,4 @@
-import { useState, useRef, RefObject } from "react";
+import { useState, useRef, RefObject, useCallback } from "react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { ProvinceDynamicState } from "@/domain/province/province.schema";
 import { useHoverNationResolver } from "@/presentation/components/tactical-map/hud/hooks/use-hover-nation-resolver";
@@ -51,113 +51,179 @@ export function useWebGLInteraction({
     humanNationId,
   });
 
-  const handlePointerMove = (clientX: number, clientY: number) => {
-    lastMousePosRef.current = { x: clientX, y: clientY };
+  const clearHoverState = useCallback(() => {
+    lastHoverProvinceIdRef.current = null;
+    setHoverData(null);
+    HoverHudPositionUtility.reset();
+    setHoveredGpuIndex((prev) => {
+      if (prev !== 0) {
+        if (onRequestRender) {
+          onRequestRender();
+        }
+        return 0;
+      }
+      return 0;
+    });
+  }, [onRequestRender]);
 
-    HoverHudPositionUtility.applyPositionToElement(
-      hudRef.current,
-      clientX,
-      clientY,
-    );
+  const handlePointerMove = useCallback(
+    (clientX: number, clientY: number) => {
+      if (
+        typeof window !== "undefined" &&
+        !window.matchMedia("(hover: hover)").matches
+      ) {
+        return;
+      }
 
-    const container = containerRef.current;
-    if (!container || isDraggingRef.current) {
-      if (contextMenuState) {
+      lastMousePosRef.current = { x: clientX, y: clientY };
+
+      HoverHudPositionUtility.applyPositionToElement(
+        hudRef.current,
+        clientX,
+        clientY,
+      );
+
+      const container = containerRef.current;
+      if (!container || isDraggingRef.current) {
+        if (contextMenuState) {
+          closeContextMenu();
+        }
+        clearHoverState();
+        return;
+      }
+
+      const rect = container.getBoundingClientRect();
+      const rx = clientX - rect.left;
+      const ry = clientY - rect.top;
+
+      const pos = positionRef.current || { x: 0, y: 0 };
+      const scale = scaleRef.current || 1;
+
+      const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
+
+      if (provinceId > 0) {
+        const prov = provincesMap?.[provinceId.toString()];
+        const gpuIdx = prov
+          ? CountryRegistry.getGpuColorIndex(prov.ownerNationId)
+          : 0;
+
+        if (hoveredGpuIndex !== gpuIdx) {
+          setHoveredGpuIndex(gpuIdx);
+          if (onRequestRender) onRequestRender();
+        }
+
+        if (lastHoverProvinceIdRef.current !== provinceId) {
+          lastHoverProvinceIdRef.current = provinceId;
+          TacticalSound.playMapHover();
+          const info = resolveHoverInfo(provinceId);
+          setHoverData(info);
+
+          requestAnimationFrame(() => {
+            HoverHudPositionUtility.applyPositionToElement(
+              hudRef.current,
+              lastMousePosRef.current.x,
+              lastMousePosRef.current.y,
+            );
+          });
+        }
+        return;
+      }
+
+      clearHoverState();
+    },
+    [
+      clearHoverState,
+      closeContextMenu,
+      containerRef,
+      contextMenuState,
+      hoveredGpuIndex,
+      hudRef,
+      isDraggingRef,
+      pickAtScreenPos,
+      positionRef,
+      provincesMap,
+      resolveHoverInfo,
+      scaleRef,
+      onRequestRender,
+    ],
+  );
+
+  const handlePointerLeave = useCallback(() => {
+    clearHoverState();
+  }, [clearHoverState]);
+
+  const handleMapClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+
+      if (isDraggingRef.current || hasDraggedRef.current || !container) {
+        return;
+      }
+
+      const rect = container.getBoundingClientRect();
+      const rx = e.clientX - rect.left;
+      const ry = e.clientY - rect.top;
+
+      const pos = positionRef.current || { x: 0, y: 0 };
+      const scale = scaleRef.current || 1;
+
+      const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
+
+      if (provinceId <= 0) {
         closeContextMenu();
+        clearHoverState();
+        return;
       }
-      if (hoverData !== null) setHoverData(null);
-      if (hoveredGpuIndex !== 0) {
-        setHoveredGpuIndex(0);
-        if (onRequestRender) onRequestRender();
-      }
-      lastHoverProvinceIdRef.current = null;
-      return;
-    }
 
-    const rect = container.getBoundingClientRect();
-    const rx = clientX - rect.left;
-    const ry = clientY - rect.top;
-
-    const pos = positionRef.current || { x: 0, y: 0 };
-    const scale = scaleRef.current || 1;
-
-    const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
-
-    if (provinceId > 0) {
       const prov = provincesMap?.[provinceId.toString()];
       const gpuIdx = prov
         ? CountryRegistry.getGpuColorIndex(prov.ownerNationId)
         : 0;
 
-      if (hoveredGpuIndex !== gpuIdx) {
-        setHoveredGpuIndex(gpuIdx);
-        if (onRequestRender) onRequestRender();
+      setHoveredGpuIndex(gpuIdx);
+      lastHoverProvinceIdRef.current = provinceId;
+
+      const info = resolveHoverInfo(provinceId);
+
+      HoverHudPositionUtility.applyPositionToElement(
+        hudRef.current,
+        e.clientX,
+        e.clientY,
+      );
+
+      setHoverData(info);
+
+      if (onRequestRender) {
+        onRequestRender();
       }
 
-      if (lastHoverProvinceIdRef.current !== provinceId) {
-        lastHoverProvinceIdRef.current = provinceId;
-        TacticalSound.playMapHover();
-        const info = resolveHoverInfo(provinceId);
-        setHoverData(info);
-
-        requestAnimationFrame(() => {
-          HoverHudPositionUtility.applyPositionToElement(
-            hudRef.current,
-            lastMousePosRef.current.x,
-            lastMousePosRef.current.y,
-          );
-        });
-      }
-      return;
-    }
-
-    lastHoverProvinceIdRef.current = null;
-    if (hoverData !== null) setHoverData(null);
-    if (hoveredGpuIndex !== 0) {
-      setHoveredGpuIndex(0);
-      if (onRequestRender) onRequestRender();
-    }
-  };
-
-  const handlePointerLeave = () => {
-    lastHoverProvinceIdRef.current = null;
-    setHoverData(null);
-    if (hoveredGpuIndex !== 0) {
-      setHoveredGpuIndex(0);
-      if (onRequestRender) onRequestRender();
-    }
-  };
-
-  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
-
-    if (isDraggingRef.current || hasDraggedRef.current || !container) {
-      return;
-    }
-
-    const rect = container.getBoundingClientRect();
-    const rx = e.clientX - rect.left;
-    const ry = e.clientY - rect.top;
-
-    const pos = positionRef.current || { x: 0, y: 0 };
-    const scale = scaleRef.current || 1;
-
-    const { provinceId } = pickAtScreenPos(rx, ry, pos, scale);
-
-    if (provinceId <= 0) {
-      closeContextMenu();
-      return;
-    }
-
-    openContextMenu(
-      e.clientX,
-      e.clientY,
-      provinceId,
-      provincesMap,
-      nationsMap,
+      openContextMenu(
+        e.clientX,
+        e.clientY,
+        provinceId,
+        provincesMap,
+        nationsMap,
+        humanNationId,
+      );
+    },
+    [
+      clearHoverState,
+      closeContextMenu,
+      containerRef,
+      hasDraggedRef,
+      hudRef,
       humanNationId,
-    );
-  };
+      isDraggingRef,
+      nationsMap,
+      openContextMenu,
+      pickAtScreenPos,
+      positionRef,
+      provincesMap,
+      resolveHoverInfo,
+      scaleRef,
+      onRequestRender,
+    ],
+  );
 
   return {
     hoverData,
@@ -167,5 +233,6 @@ export function useWebGLInteraction({
     handlePointerLeave,
     handleMapClick,
     closeContextMenu,
+    clearHoverState,
   };
 }

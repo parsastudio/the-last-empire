@@ -49,10 +49,13 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
       onMouseMove={(e) => e.stopPropagation()}
       onMouseEnter={(e) => e.stopPropagation()}
       onMouseOver={(e) => e.stopPropagation()}
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-card/90 backdrop-blur-3xl border border-border/80 px-4 py-2 rounded-3xl shadow-2xl shadow-black/80 flex items-center justify-between gap-3 text-foreground select-none w-max max-w-[95vw] dir-rtl transition-all pointer-events-auto ring-1 ring-white/10"
+      style={{
+        top: "max(0.5rem, env(safe-area-inset-top))",
+      }}
+      className="fixed left-1/2 -translate-x-1/2 z-50 bg-card/90 backdrop-blur-3xl border border-border/80 px-3 py-1.5 md:px-4 md:py-2 rounded-2xl md:rounded-3xl shadow-2xl shadow-black/80 flex items-center justify-between gap-2 md:gap-3 text-foreground select-none w-max max-w-[96vw] dir-rtl transition-all pointer-events-auto ring-1 ring-white/10"
       dir="rtl"
     >
-      <div className="flex items-center gap-2.5 overflow-x-auto scrollbar-none py-0.5 shrink-0">
+      <div className="flex items-center gap-1.5 md:gap-2.5 overflow-x-auto scrollbar-none py-0.5 shrink-0">
         <ResourceBadge
           icon={Coins}
           iconColor="text-gdp"
@@ -69,7 +72,7 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
           totalMaxSlots={metrics.totalMaxSlots}
         />
 
-        <div className="w-[1px] h-6 bg-gradient-to-b from-transparent via-border to-transparent shrink-0 hidden sm:block" />
+        <div className="w-[1px] h-5 md:h-6 bg-gradient-to-b from-transparent via-border to-transparent shrink-0 hidden sm:block" />
 
         <StabilityMeterBadge stability={metrics.stability} />
 
@@ -78,25 +81,25 @@ export function TopHudBar({ metrics }: TopHudBarProps) {
         />
       </div>
 
-      <div className="flex items-center gap-2 shrink-0 border-r border-border/80 pr-3 mr-1">
+      <div className="flex items-center gap-1.5 md:gap-2 shrink-0 border-r border-border/80 pr-2 md:pr-3 mr-0.5 md:mr-1">
         <button
           type="button"
           onClick={handleToggleMute}
-          className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
+          className={`p-1.5 md:p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
             isMuted
               ? "bg-rose-500/15 border-rose-500/40 text-rose-400 hover:bg-rose-500/25"
               : "bg-secondary/80 border-border/70 text-muted-foreground hover:text-foreground hover:bg-secondary shadow-inner"
           }`}
           title={isMuted ? "فعال‌سازی صدای بازی" : "قطع صدای بازی"}
         >
-          {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
         </button>
 
-        <div className="flex flex-col items-center leading-none font-mono px-3 py-1 bg-secondary/80 rounded-xl border border-border/70 shadow-inner">
-          <span className="text-[9px] text-muted-foreground font-sans font-bold">
+        <div className="flex flex-col items-center leading-none font-mono px-2.5 py-0.5 md:px-3 md:py-1 bg-secondary/80 rounded-xl border border-border/70 shadow-inner">
+          <span className="text-[8px] md:text-[9px] text-muted-foreground font-sans font-bold">
             نوبت
           </span>
-          <span className="text-xs font-black text-foreground">
+          <span className="text-[11px] md:text-xs font-black text-foreground">
             {PersianNumberFormatter.toPersianDigits(metrics.currentTurn)}
           </span>
         </div>

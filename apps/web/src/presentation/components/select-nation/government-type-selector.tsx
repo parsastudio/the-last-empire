@@ -46,14 +46,14 @@ export function GovernmentTypeSelector({
     GOVERNMENT_ICONS[selectedType as GovernmentType] ?? Landmark;
 
   return (
-    <div className="space-y-4 dir-rtl text-right font-sans">
+    <div className="space-y-3 sm:space-y-4 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
+        <span className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
           انتخاب ساختار سیاسی و نظام حاکمیت
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
         {options.map((gov) => {
           const isSelected = selectedType === gov.type;
           const trait =
@@ -67,25 +67,25 @@ export function GovernmentTypeSelector({
               key={gov.type}
               type="button"
               onClick={() => onSelect(gov.type)}
-              className={`p-4 rounded-2xl text-right transition-all border flex items-center justify-between gap-3.5 cursor-pointer relative overflow-hidden group ${
+              className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl text-right transition-all border flex items-center justify-between gap-2.5 cursor-pointer relative overflow-hidden group ${
                 isSelected
-                  ? "bg-primary/15 border-primary shadow-lg shadow-primary/10 ring-1 ring-primary/40 scale-[1.01]"
+                  ? "bg-primary/15 border-primary shadow-md ring-1 ring-primary/40 scale-[1.005]"
                   : "bg-background/50 border-border/70 hover:bg-secondary/60 hover:border-border"
               }`}
             >
-              <div className="flex items-center gap-3.5 overflow-hidden">
+              <div className="flex items-center gap-2.5 overflow-hidden">
                 <div
-                  className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 border transition-colors ${
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 border transition-colors ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-secondary text-muted-foreground border-border/60 group-hover:text-foreground group-hover:border-primary/40"
                   }`}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} />
                 </div>
                 <div className="space-y-0.5 overflow-hidden">
                   <span
-                    className={`text-xs font-black block truncate transition-colors ${
+                    className={`text-[11px] sm:text-xs font-black block truncate transition-colors ${
                       isSelected
                         ? "text-primary"
                         : "text-foreground group-hover:text-primary"
@@ -93,20 +93,20 @@ export function GovernmentTypeSelector({
                   >
                     {trait.nameFa}
                   </span>
-                  <span className="text-[10px] text-muted-foreground block truncate">
+                  <span className="text-[9px] sm:text-[10px] text-muted-foreground block truncate">
                     {trait.headlineFa}
                   </span>
                 </div>
               </div>
 
               <span
-                className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                   isSelected
                     ? "border-primary bg-primary text-primary-foreground"
                     : "border-border/80 bg-background"
                 }`}
               >
-                {isSelected && <Check size={12} strokeWidth={3} />}
+                {isSelected && <Check size={10} strokeWidth={3} />}
               </span>
             </button>
           );

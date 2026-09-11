@@ -42,9 +42,11 @@ export function WebGLMapCanvas({
   const gl = useWebGLContext(canvasRef, dimensions);
 
   const closeContextMenuRef = useRef<() => void>(() => {});
+  const clearHoverStateRef = useRef<() => void>(() => {});
 
   const handleDragStart = useCallback(() => {
     closeContextMenuRef.current();
+    clearHoverStateRef.current();
   }, []);
 
   const handleTransformChange = useCallback(() => {
@@ -52,10 +54,47 @@ export function WebGLMapCanvas({
   }, []);
 
   const {
+    hoverData,
+    hoveredGpuIndex,
+    contextMenuState,
+    handlePointerMove,
+    handlePointerLeave,
+    handleMapClick,
+    closeContextMenu,
+    clearHoverState,
+  } = useWebGLInteraction({
+    containerRef,
+    hudRef,
+    positionRef: externalPositionRef ?? { current: { x: 0, y: 0 } },
+    scaleRef: externalScaleRef ?? { current: 1 },
+    isDraggingRef: { current: false },
+    hasDraggedRef: { current: false },
+    provincesMap,
+    nationsMap,
+    humanNationId,
+    onRequestRender: handleTransformChange,
+  });
+
+  useEffect(() => {
+    closeContextMenuRef.current = closeContextMenu;
+    clearHoverStateRef.current = clearHoverState;
+  }, [closeContextMenu, clearHoverState]);
+
+  const handleDirectTap = useCallback(
+    (clientX: number, clientY: number) => {
+      const syntheticEvent = {
+        clientX,
+        clientY,
+      } as React.MouseEvent<HTMLDivElement>;
+
+      handleMapClick(syntheticEvent);
+    },
+    [handleMapClick],
+  );
+
+  const {
     scaleRef,
     positionRef,
-    isDraggingRef,
-    hasDraggedRef,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
@@ -69,32 +108,8 @@ export function WebGLMapCanvas({
     externalScaleRef,
     handleDragStart,
     handleTransformChange,
+    handleDirectTap,
   );
-
-  const {
-    hoverData,
-    hoveredGpuIndex,
-    contextMenuState,
-    handlePointerMove,
-    handlePointerLeave,
-    handleMapClick,
-    closeContextMenu,
-  } = useWebGLInteraction({
-    containerRef,
-    hudRef,
-    positionRef,
-    scaleRef,
-    isDraggingRef,
-    hasDraggedRef,
-    provincesMap,
-    nationsMap,
-    humanNationId,
-    onRequestRender: handleTransformChange,
-  });
-
-  useEffect(() => {
-    closeContextMenuRef.current = closeContextMenu;
-  }, [closeContextMenu]);
 
   const { requestRender } = useWebGLMapRenderer({
     gl,
@@ -120,19 +135,25 @@ export function WebGLMapCanvas({
   const handleSelectContext = useCallback(
     (action: ContextActionType, iso3: string, provinceId?: number) => {
       closeContextMenu();
+      clearHoverState();
       if (action === "profile" && onSelectCountryContext) {
         onSelectCountryContext(iso3);
       } else if (action === "attack" && onSelectCountryAttackContext) {
         onSelectCountryAttackContext(iso3, provinceId);
       }
     },
-    [closeContextMenu, onSelectCountryContext, onSelectCountryAttackContext],
+    [
+      closeContextMenu,
+      clearHoverState,
+      onSelectCountryContext,
+      onSelectCountryAttackContext,
+    ],
   );
 
   return (
     <div
       ref={containerRef}
-      className="w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden cursor-crosshair select-none"
+      className="w-screen h-screen absolute inset-0 bg-slate-950 overflow-hidden cursor-crosshair select-none touch-none overscroll-none"
       onMouseDown={handleMouseDown}
       onMouseMove={onMouseMoveCombined}
       onMouseUp={handleMouseUp}

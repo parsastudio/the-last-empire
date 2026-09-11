@@ -22,25 +22,27 @@ export function CommandConsole({
   };
 
   return (
-    <div className="flex flex-col gap-4 max-w-sm w-full">
+    <div className="flex flex-col gap-2 sm:gap-3.5 w-full">
       <button
+        type="button"
         onClick={handleNew}
-        className="w-full py-4.5 px-6 bg-gdp hover:bg-emerald-400 text-primary-foreground rounded-2xl font-black transition-all border border-emerald-400/40 shadow-2xl shadow-gdp/30 hover:shadow-gdp/50 hover:scale-[1.02] active:scale-[0.98] text-xs uppercase tracking-wider flex items-center justify-center gap-3 cursor-pointer ring-1 ring-emerald-300/30"
+        className="w-full py-2.5 sm:py-3.5 md:py-4 px-4 sm:px-6 bg-gdp hover:bg-emerald-400 text-primary-foreground rounded-xl sm:rounded-2xl font-black transition-all border border-emerald-400/40 shadow-xl shadow-gdp/25 hover:scale-[1.01] active:scale-[0.99] text-xs uppercase tracking-wider flex items-center justify-center gap-2.5 cursor-pointer ring-1 ring-emerald-300/30"
       >
         <Play
-          size={16}
+          size={15}
           fill="currentColor"
-          className="animate-tactical-pulse"
+          className="animate-tactical-pulse shrink-0"
         />
-        <span>شروع امپراتوری جدید</span>
+        <span className="truncate">شروع امپراتوری جدید</span>
       </button>
 
       <button
+        type="button"
         onClick={handleLoad}
-        className="w-full py-4.5 px-6 bg-secondary/90 hover:bg-secondary border border-border/80 text-foreground rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] text-xs tracking-wider flex items-center justify-center gap-3 cursor-pointer backdrop-blur-xl"
+        className="w-full py-2.5 sm:py-3.5 md:py-4 px-4 sm:px-6 bg-secondary/90 hover:bg-secondary border border-border/80 text-foreground rounded-xl sm:rounded-2xl font-bold transition-all shadow-md hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] text-xs tracking-wider flex items-center justify-center gap-2.5 cursor-pointer backdrop-blur-xl"
       >
-        <RotateCcw size={16} className="text-primary" />
-        <span>بازخوانی پرونده کمپین</span>
+        <RotateCcw size={15} className="text-primary shrink-0" />
+        <span className="truncate">بازخوانی پرونده کمپین</span>
       </button>
     </div>
   );

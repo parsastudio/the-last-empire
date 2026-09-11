@@ -50,7 +50,7 @@ export function DirectAttackModal({
       maxWidthClass="max-w-2xl"
       onClose={onClose}
     >
-      <div className="space-y-4 text-right dir-rtl font-sans">
+      <div className="space-y-2.5 md:space-y-4 text-right dir-rtl font-sans">
         <AttackHeader
           attackerName={humanNation.name}
           attackerCode={humanNation.id}
@@ -96,12 +96,12 @@ export function DirectAttackModal({
           partnerGuarantorNames={form.partnerGuarantorNames}
         />
 
-        <div className="space-y-2.5">
-          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono block px-1">
+        <div className="space-y-2 md:space-y-2.5">
+          <span className="text-[9px] md:text-[10px] font-black text-muted-foreground uppercase tracking-wider font-mono block px-1">
             تخصیص ترکیب یگان‌های رزمی به میدان نبرد
           </span>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-2.5">
             <UnitDeploymentSlider
               label={MILITARY_UNIT_VISUALS.INFANTRY.nameFa}
               unitName={MILITARY_UNIT_VISUALS.INFANTRY.unitLabelFa}
