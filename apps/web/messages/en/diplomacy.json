@@ -1,0 +1,78 @@
+{
+  "stances": {
+    "WAR": "State of War",
+    "STRATEGIC_PARTNERSHIP": "Strategic Partnership",
+    "NON_AGGRESSION_PACT": "Non-Aggression Pact",
+    "NORMAL_DIPLOMACY": "Normal Diplomacy"
+  },
+  "postures": {
+    "NATURAL_ALLY": "Natural Strategic Ally",
+    "OPPORTUNISTIC_PREDATOR": "Opportunistic Predator",
+    "WARY_BUFFER": "Wary Buffer State",
+    "NEUTRAL_COEXISTENCE": "Neutral Coexistence"
+  },
+  "badges": {
+    "yourEmpire": "Your Empire",
+    "underProtectorate": "Superpower Protectorate",
+    "mutualDefensePact": "Mutual Defense Pact"
+  },
+  "banners": {
+    "protectorateTitle": "Security Protectorate Treaty (5% Turn Tribute • 50% GDP Taskforce)",
+    "protectorateBadge": "Protectorate",
+    "warTitle": "Active Military Hostilities (At War)",
+    "defensePactTitle": "Mutual Territorial Defense Pact (Direct Intervention in War)",
+    "defensePactBadge": "Defense Pact",
+    "partnershipTitle": "Strategic Partnership (0.6% Bilateral Turn Dividend{dividend})",
+    "nonAggressionTitle": "Non-Aggression Pact (Active & Ready for Partnership)",
+    "normalDiplomacyTitle": "Normal Diplomatic Relations (Neutral)"
+  },
+  "actions": {
+    "tableTitle": "Diplomatic Chancellery, Treaties & Foreign Relations",
+    "espionageTitle": "Intelligence & Covert Operations Command",
+    "espionageDesc": "Execute satellite surveillance, air defense sabotage, and classified technology theft.",
+    "espionageAction": "Execute Special Intelligence Operation against {name}",
+    "enterPeaceTalks": "Enter Ceasefire & Peace Talks",
+    "peaceCooldownDesc": "Hostilities commenced this turn (peace negotiations unlock next turn).",
+    "peaceActiveDesc": "Assess balance of power, indemnity terms, or territorial concessions to end war.",
+    "proposeNonAggression": "Propose Non-Aggression Pact (Step 1: Border Security)",
+    "proposeNonAggressionDesc": "Stabilizes borders and serves as prerequisite for Strategic Partnership.",
+    "signStrategicPartnership": "Form Strategic Partnership (Fee: 3% of Target GDP)",
+    "signStrategicPartnershipDesc": "Grants +{amount} per turn (0.6% target GDP) to your treasury while transmitting 0.6% of your GDP to target without treasury deductions.",
+    "cancelNonAggression": "Revoke Non-Aggression Pact (Downgrade: Normal Diplomacy)",
+    "cancelPartnership": "Revoke Strategic Partnership (Downgrade: Non-Aggression Pact)",
+    "declareWar": "Formal War Declaration (Sever Ties & Mobilize)",
+    "cannotDeclareWar": "Cannot Declare War (No Land Border or Naval Fleet)",
+    "foreignAidSent": "Foreign aid package disbursed this turn",
+    "foreignAidQuotaReached": "Aid quota to this nation depleted for current turn (available next turn).",
+    "foreignAidInsufficient": "Insufficient treasury funds for foreign aid ({cost})",
+    "foreignAidInsufficientDesc": "Treasury reserves are insufficient to cover this foreign aid package.",
+    "sendForeignAid": "Disburse Foreign Aid Package ({cost})",
+    "sendForeignAidDesc": "Instantly yields +25 Alignment, -15 Tension, and +1 Global Reputation."
+  },
+  "umbrella": {
+    "protectorateActive": "Active Protectorate Treaty (50% GDP Taskforce)",
+    "protectorateTribute": "{cost} / turn (5% Tribute)",
+    "protectorateDesc": "Full deployment of superpower military into your redoubts in exchange for 5% turn tribute.",
+    "revokeProtectorate": "Revoke Protectorate & Restore Full Sovereignty",
+    "defensePactActive": "Mutual Territorial Defense Pact Active",
+    "defensePactIntervention": "Direct Military Intervention",
+    "defensePactDesc": "If attacked, {name} armed forces will formally intervene against the aggressor.",
+    "revokeDefensePact": "Voluntary Termination of Defense Pact",
+    "openDefenseModal": "Mutual Defense & Territorial Security Pact",
+    "openDefenseModalBadge": "1% Guarantor GDP • Review Criteria",
+    "openDefenseModalDesc": "Commitment of guarantor armed forces to enter war if invaded (max 2 concurrent pacts).",
+    "openProtectorateModal": "Protectorate Treaty & Sovereign Submission",
+    "openProtectorateModalBadge": "5% Tribute • 50% GDP Taskforce",
+    "openProtectorateModalDesc": "Full superpower military garrison in exchange for ongoing tribute and prestige loss."
+  },
+  "betrayal": {
+    "title": "Surprise Attack & Treaty Violation Warning",
+    "subtitle": "You are launching a surprise attack against {name} without prior treaty cancellation",
+    "penaltySteps": "Penalty for Bypassing {steps} Diplomatic Steps",
+    "desc": "You are bypassing formal diplomatic de-escalation protocols. This surprise aggression will provoke severe global outcry.",
+    "reputationPenalty": "International Scandal & Isolation Penalty:",
+    "points": "-{points} Points",
+    "cancel": "Cancel",
+    "confirm": "Confirm & Incur Penalty"
+  }
+}

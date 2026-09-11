@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { HeartHandshake, CheckCircle2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import {
@@ -70,6 +71,7 @@ export function DiplomacyActionButtons({
   onCancelTreaty,
   onDeclareWar,
 }: DiplomacyActionButtonsProps) {
+  const t = useTranslations("diplomacy");
   const isWar = currentStance === "WAR";
   const isAidDisabled = isAidSentThisTurn || !canAffordAid;
 
@@ -119,13 +121,17 @@ export function DiplomacyActionButtons({
                 <>
                   <CheckCircle2 size={14} className="text-emerald-400" />
                   <span className="text-foreground">
-                    بسته کمک مالی در این نوبت واریز شد
+                    {t("actions.foreignAidSent")}
                   </span>
                 </>
               ) : !canAffordAid ? (
-                `کسری موجودی خزانه جهت ارسال کمک مالی (${PersianNumberFormatter.formatCurrency(foreignAidCost)})`
+                t("actions.foreignAidInsufficient", {
+                  cost: PersianNumberFormatter.formatCurrency(foreignAidCost),
+                })
               ) : (
-                `ارسال کمک مالی و دیپلماتیک (${PersianNumberFormatter.formatCurrency(foreignAidCost)})`
+                t("actions.sendForeignAid", {
+                  cost: PersianNumberFormatter.formatCurrency(foreignAidCost),
+                })
               )}
             </span>
             <HeartHandshake
@@ -137,10 +143,10 @@ export function DiplomacyActionButtons({
           </div>
           <p className="text-[10px] text-muted-foreground leading-relaxed">
             {isAidSentThisTurn
-              ? "سهمیه کمک مالی به این کشور در نوبت جاری تکمیل شده است (امکان ارسال مجدد در نوبت بعد)."
+              ? t("actions.foreignAidQuotaReached")
               : !canAffordAid
-                ? "موجودی خزانه برای پوشش این مبلغ کمک بین‌المللی کافی نیست."
-                : "بهبود فوری ۲۵+ همسویی و ۱۵- تنش دوجانبه (۱+ اعتبار جهانی)."}
+                ? t("actions.foreignAidInsufficientDesc")
+                : t("actions.sendForeignAidDesc")}
           </p>
         </button>
       )}
