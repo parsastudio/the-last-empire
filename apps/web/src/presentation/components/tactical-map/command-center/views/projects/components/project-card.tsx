@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
   Lock,
@@ -45,10 +46,16 @@ export function ProjectCard({
   onBoost,
   onDismissBreakthrough,
 }: ProjectCardProps) {
+  const t = useTranslations("projects");
+
+  const projectName = t(`${project.id}.name`);
+  const projectTagline = t(`${project.id}.tagline`);
+  const projectDescription = t(`${project.id}.description`);
+
   if (isBreakthrough && onDismissBreakthrough) {
     return (
       <ProjectBreakthroughCardOverlay
-        projectName={project.nameFa}
+        projectName={projectName}
         onDismiss={onDismissBreakthrough}
       />
     );
@@ -110,12 +117,12 @@ export function ProjectCard({
 
           <div className="flex items-center gap-2.5 truncate">
             <span className="text-sm md:text-base font-black text-foreground tracking-tight truncate">
-              {project.nameFa}
+              {projectName}
             </span>
 
             <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-lg border bg-secondary/80 text-gdp border-gdp/30 shrink-0 shadow-inner">
               {PersianNumberFormatter.formatCurrency(project.costPerStep, true)}{" "}
-              / گام
+              / {t("stepCost")}
             </span>
           </div>
         </div>
@@ -123,10 +130,12 @@ export function ProjectCard({
         <div className="flex items-center gap-3.5 shrink-0">
           <div className="hidden md:flex flex-col items-end gap-1.5 w-40 font-mono">
             <span className="text-xs text-muted-foreground font-bold">
-              گام {PersianNumberFormatter.toPersianDigits(clampedSteps)} از{" "}
-              {PersianNumberFormatter.toPersianDigits(
-                project.totalStepsRequired,
-              )}
+              {t("stepCounter", {
+                current: PersianNumberFormatter.toPersianDigits(clampedSteps),
+                total: PersianNumberFormatter.toPersianDigits(
+                  project.totalStepsRequired,
+                ),
+              })}
             </span>
 
             <div className="w-full flex items-center gap-0.5 bg-secondary/80 p-0.5 rounded-full border border-border/50 shadow-inner">
@@ -153,12 +162,12 @@ export function ProjectCard({
             {isCompleted ? (
               <div className="px-3.5 py-2 bg-emerald-950/40 text-emerald-400 border border-emerald-500/40 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-sm">
                 <CheckCircle2 size={15} />
-                <span>فعال و مستقر</span>
+                <span>{t("activeAndDeployed")}</span>
               </div>
             ) : isBoostedThisTurn ? (
               <div className="px-3.5 py-2 bg-primary/20 text-primary border border-primary/30 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-sm">
                 <Check size={15} strokeWidth={3} />
-                <span>انجام شد</span>
+                <span>{t("completed")}</span>
               </div>
             ) : (
               <button
@@ -172,7 +181,7 @@ export function ProjectCard({
                 ) : (
                   <Plus size={14} strokeWidth={3} />
                 )}
-                <span>تزریق بودجه</span>
+                <span>{t("injectBudget")}</span>
               </button>
             )}
           </div>
@@ -192,10 +201,10 @@ export function ProjectCard({
         <div className="px-5 pb-5 pt-3 border-t border-border/50 bg-background/50 space-y-3 animate-fade-smooth text-xs">
           <div className="space-y-1.5 bg-secondary/40 p-4 rounded-2xl border border-border/60 shadow-inner">
             <span className="text-[11px] font-mono font-bold text-primary block">
-              {project.taglineFa}
+              {projectTagline}
             </span>
             <p className="text-xs md:text-sm text-foreground/90 leading-relaxed font-sans font-medium">
-              {project.descriptionFa}
+              {projectDescription}
             </p>
           </div>
         </div>
