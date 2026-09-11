@@ -52,7 +52,7 @@ function StrategicToastItem({
 
   return (
     <div
-      className={`w-84 backdrop-blur-2xl border ${style.border} ${style.bg} p-4 rounded-2xl shadow-2xl shadow-black/40 flex items-start justify-between gap-3 animate-fade-smooth dir-rtl text-right transition-all`}
+      className={`w-84 backdrop-blur-2xl border ${style.border} ${style.bg} p-4 rounded-2xl shadow-2xl shadow-black/40 flex items-start justify-between gap-3 animate-fade-smooth text-start transition-all`}
     >
       <div className="flex items-start gap-3 overflow-hidden">
         <div
@@ -86,7 +86,7 @@ export function StrategicToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-20 left-6 z-50 flex flex-col gap-3 pointer-events-auto dir-rtl">
+    <div className="fixed bottom-20 start-6 z-50 flex flex-col gap-3 pointer-events-auto">
       {toasts.map((toast) => (
         <StrategicToastItem
           key={toast.id}

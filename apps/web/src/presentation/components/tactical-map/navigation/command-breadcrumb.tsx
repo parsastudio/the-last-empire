@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, Home } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/sidebar-tabs";
 
 interface CommandBreadcrumbProps {
@@ -20,7 +20,7 @@ export function CommandBreadcrumb({
   const tabLabel = t(`rail.tabs.${activeTab}`);
 
   return (
-    <nav className="flex items-center gap-1.5 text-xs text-muted-foreground dir-rtl select-none overflow-x-auto scrollbar-none py-0.5">
+    <nav className="flex items-center gap-1.5 text-xs text-muted-foreground select-none overflow-x-auto scrollbar-none py-0.5">
       <button
         onClick={() => onNavigateTab("overview")}
         className="flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer shrink-0 font-medium"
@@ -29,7 +29,10 @@ export function CommandBreadcrumb({
         <span>{t("breadcrumb.command")}</span>
       </button>
 
-      <ChevronLeft size={12} className="shrink-0 text-muted-foreground/60" />
+      <ChevronRight
+        size={12}
+        className="shrink-0 text-muted-foreground/60 rtl:rotate-180"
+      />
 
       <button
         onClick={() => onNavigateTab(activeTab)}
@@ -40,9 +43,9 @@ export function CommandBreadcrumb({
 
       {subTabLabel && (
         <>
-          <ChevronLeft
+          <ChevronRight
             size={12}
-            className="shrink-0 text-muted-foreground/60"
+            className="shrink-0 text-muted-foreground/60 rtl:rotate-180"
           />
           <span className="text-gdp font-semibold shrink-0">{subTabLabel}</span>
         </>
@@ -50,9 +53,9 @@ export function CommandBreadcrumb({
 
       {targetName && (
         <>
-          <ChevronLeft
+          <ChevronRight
             size={12}
-            className="shrink-0 text-muted-foreground/60"
+            className="shrink-0 text-muted-foreground/60 rtl:rotate-180"
           />
           <span className="text-amber-500 font-bold shrink-0">
             {targetName}
