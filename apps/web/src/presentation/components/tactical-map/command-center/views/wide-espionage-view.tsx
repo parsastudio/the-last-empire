@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { ShieldAlert, Binary, Award, Users, Cpu } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -25,6 +26,8 @@ export function WideEspionageView({
   selectedTargetCode,
   turnActivity,
 }: WideEspionageViewProps) {
+  const t = useTranslations("espionage");
+
   const form = useWideEspionageForm({
     nation,
     nationsMap,
@@ -45,16 +48,26 @@ export function WideEspionageView({
     if (!form.selectedTargetNation) return "";
     const sup = form.techSuperiority;
     if (sup.heistMode === "DUAL") {
-      return `نفوذ سایبری به سرورهای محرمانه و سرقت ۰.۵ لول فناوری نظامی و ۰.۵ لول دانش صنعتی (R&D) کشور ${form.selectedTargetNation.name} (۴۰٪ GDP).`;
+      return t("view.subtitles.dual", { name: form.selectedTargetNation.name });
     }
     if (sup.heistMode === "MILITARY_ONLY") {
-      return `نفوذ به سرورهای نظامی و سرقت ${PersianNumberFormatter.toPersianDigits(sup.militaryGain.toFixed(1))} لول فناوری نظامی و رمزنگاری ${form.selectedTargetNation.name} (۴۰٪ GDP).`;
+      return t("view.subtitles.militaryOnly", {
+        name: form.selectedTargetNation.name,
+        points: PersianNumberFormatter.toPersianDigits(
+          sup.militaryGain.toFixed(1),
+        ),
+      });
     }
     if (sup.heistMode === "INDUSTRIAL_ONLY") {
-      return `نفوذ به سرورهای صنعتی و سرقت ${PersianNumberFormatter.toPersianDigits(sup.industrialGain.toFixed(1))} لول فناوری صنعتی و نقشه‌های R&D ${form.selectedTargetNation.name} (۴۰٪ GDP).`;
+      return t("view.subtitles.industrialOnly", {
+        name: form.selectedTargetNation.name,
+        points: PersianNumberFormatter.toPersianDigits(
+          sup.industrialGain.toFixed(1),
+        ),
+      });
     }
-    return `کشور ${form.selectedTargetNation.name} در هیچ‌کدام از شاخه‌های نظامی یا صنعتی حداقل ۰.۵ لول از شما برتر نیست.`;
-  }, [form.selectedTargetNation, form.techSuperiority]);
+    return t("view.subtitles.none", { name: form.selectedTargetNation.name });
+  }, [form.selectedTargetNation, form.techSuperiority, t]);
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200 dir-rtl text-right">
@@ -84,24 +97,28 @@ export function WideEspionageView({
                   <div>
                     <h3 className="text-sm font-extrabold text-foreground flex items-center gap-2">
                       <span>
-                        میز عملیات سیاه علیه {form.selectedTargetNation.name}
+                        {t("view.blackOpsTitle", {
+                          name: form.selectedTargetNation.name,
+                        })}
                       </span>
                       <span className="text-[10px] font-mono font-bold bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground border border-border/60">
-                        رتبه جهانی #
-                        {PersianNumberFormatter.toPersianDigits(targetRank)}
+                        {t("view.rank", {
+                          rank: PersianNumberFormatter.toPersianDigits(
+                            targetRank,
+                          ),
+                        })}
                       </span>
                     </h3>
                     <span className="text-[10px] text-muted-foreground font-mono">
-                      تولید ناخالص:{" "}
-                      {PersianNumberFormatter.formatCurrency(
-                        form.targetGdp,
-                        true,
-                      )}{" "}
-                      | پایداری نظام:{" "}
-                      {PersianNumberFormatter.toPersianDigits(
-                        form.selectedTargetNation.government.stability,
-                      )}
-                      ٪
+                      {t("view.meta", {
+                        gdp: PersianNumberFormatter.formatCurrency(
+                          form.targetGdp,
+                          true,
+                        ),
+                        stability: PersianNumberFormatter.toPersianDigits(
+                          form.selectedTargetNation.government.stability,
+                        ),
+                      })}
                     </span>
                   </div>
                 </div>
@@ -110,19 +127,21 @@ export function WideEspionageView({
                   <div className="flex items-center gap-1 bg-secondary/80 px-2.5 py-1 rounded-xl text-primary font-bold border border-primary/20">
                     <Award size={12} />
                     <span>
-                      نظامی شما: لِوِل{" "}
-                      {PersianNumberFormatter.toPersianDigits(
-                        nation.military.techLevel.toFixed(1),
-                      )}
+                      {t("view.yourMilTech", {
+                        level: PersianNumberFormatter.toPersianDigits(
+                          nation.military.techLevel.toFixed(1),
+                        ),
+                      })}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 bg-secondary/80 px-2.5 py-1 rounded-xl text-gdp font-bold border border-gdp/20">
                     <Cpu size={12} />
                     <span>
-                      صنعتی شما: لِوِل{" "}
-                      {PersianNumberFormatter.toPersianDigits(
-                        nation.industrialLevel.toFixed(1),
-                      )}
+                      {t("view.yourIndTech", {
+                        level: PersianNumberFormatter.toPersianDigits(
+                          nation.industrialLevel.toFixed(1),
+                        ),
+                      })}
                     </span>
                   </div>
                 </div>
@@ -135,8 +154,8 @@ export function WideEspionageView({
               <div className="grid grid-cols-1 gap-3.5">
                 <EspionageTierCard
                   tier={2}
-                  title="عملیات خرابکاری در پایگاه‌های موشکی و تانک‌های حریف"
-                  subtitle="انفجار و از کار انداختن مستقیم ۲۰٪ تا ۳۰٪ از سامانه‌های پدافند هوایی، تانک‌ها و جنگنده‌های آماده رزم حریف قبل از آغاز حمله نظامی شما (۱۸٪ GDP)."
+                  title={t("tiers.tier2.title")}
+                  subtitle={t("tiers.tier2.subtitle")}
                   icon={ShieldAlert}
                   iconColorClass="text-military"
                   borderColorClass="border-military/40"
@@ -150,7 +169,7 @@ export function WideEspionageView({
 
                 <EspionageTierCard
                   tier={3}
-                  title="شبیخون سایبری: سرقت فناوری و فرمول‌های محرمانه"
+                  title={t("tiers.tier3.title")}
                   subtitle={tier3Subtitle}
                   icon={Binary}
                   iconColorClass="text-amber-500"
@@ -162,7 +181,7 @@ export function WideEspionageView({
                   isDisabledCondition={
                     form.techSuperiority.totalAvailablePoints < 0.5
                   }
-                  disabledReasonText="کشور هدف باید در فناوری نظامی یا صنعتی حداقل ۰.۵ لول از شما بالاتر باشد."
+                  disabledReasonText={t("tiers.tier3.disabledReason")}
                   isExecuting={form.isSubmitting}
                   onExecute={() => form.handleExecute(3)}
                 />
@@ -175,11 +194,10 @@ export function WideEspionageView({
               </div>
               <div className="space-y-1.5 max-w-sm">
                 <h4 className="text-sm font-bold text-foreground font-sans">
-                  مرکز مانیتورینگ سرویس اطلاعات و جاسوسی
+                  {t("view.emptyTitle")}
                 </h4>
                 <p className="text-xs text-muted-foreground leading-relaxed font-sans">
-                  برای آغاز عملیات خرابکاری در پدافند یا سرقت فناوری، یک کشور را
-                  از ستون کناری انتخاب فرمایید.
+                  {t("view.emptyDesc")}
                 </p>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { EspionageExecutionResult } from "@/domain/espionage/espionage.schema";
 import { ReconResultView } from "@/presentation/components/tactical-map/command-center/views/espionage/components/recon-result-view";
@@ -10,6 +11,7 @@ export function EspionageResultBanner({
 }: {
   result: EspionageExecutionResult;
 }) {
+  const t = useTranslations("espionage.banner");
   const isSuccess = result.outcome === "CLEAN_SUCCESS";
 
   return (
@@ -28,9 +30,7 @@ export function EspionageResultBanner({
             <XCircle size={18} className="text-rose-500" />
           )}
           <span className="text-xs font-black">
-            {isSuccess
-              ? "موفقیت کامل و بدون ردپا (Clean Hit)"
-              : "شکست عملیات و افشای منشأ نفوذ"}
+            {isSuccess ? t("cleanSuccess") : t("failure")}
           </span>
         </div>
 

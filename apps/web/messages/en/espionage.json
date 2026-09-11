@@ -1,0 +1,80 @@
+{
+  "selector": {
+    "title": "Select Espionage Target Nation",
+    "targetCount": "{count} Nations",
+    "searchPlaceholder": "Search nation name or ISO...",
+    "tech": "Tech: {level}"
+  },
+  "view": {
+    "blackOpsTitle": "Covert Black Ops Room against {name}",
+    "rank": "World Rank #{rank}",
+    "meta": "GDP: {gdp} | Regime Stability: {stability}%",
+    "yourMilTech": "Your Military Tech: Level {level}",
+    "yourIndTech": "Your Industrial Tech: Level {level}",
+    "emptyTitle": "Intelligence & Espionage Monitoring Center",
+    "emptyDesc": "Select a sovereign nation from the side panel to initiate air defense sabotage or technology heists.",
+    "subtitles": {
+      "dual": "Cyber infiltration into classified mainframes, siphoning 0.5 Military Tech and 0.5 Industrial R&D from {name} (40% GDP).",
+      "militaryOnly": "Breaching military servers, siphoning {points} Military & encryption tech from {name} (40% GDP).",
+      "industrialOnly": "Infiltrating industrial servers, stealing {points} Industrial Tech & R&D blueprints from {name} (40% GDP).",
+      "none": "{name} does not hold at least a 0.5 level advantage in either military or industrial technology."
+    }
+  },
+  "tierCard": {
+    "tierLevel": "Operational Tier {tier}",
+    "successRate": "Success Probability: {rate}%",
+    "requiredBudget": "Required Operation Budget:",
+    "submitting": "Executing Infiltration Protocol...",
+    "executedThisTurn": "Operation Executed This Turn",
+    "insufficientFunds": "Insufficient Treasury Reserves",
+    "executeBtn": "Authorize Special Covert Operation"
+  },
+  "tiers": {
+    "tier2": {
+      "title": "Sabotage Enemy Missile Bases & Armored Garrisons",
+      "subtitle": "Directly detonate and disable 20% to 30% of target air defense batteries, armored tanks, and combat jets prior to offensive assault (18% GDP)."
+    },
+    "tier3": {
+      "title": "Cyber Heist: Classified Tech & Blueprint Theft",
+      "disabledReason": "Target nation must be at least 0.5 levels ahead in either military or industrial technology."
+    }
+  },
+  "banner": {
+    "cleanSuccess": "Clean Operation Success (Undetected)",
+    "failure": "Operation Compromised & Infiltration Traced"
+  },
+  "results": {
+    "recon": {
+      "title": "Uncovered Strategic Intelligence:",
+      "treasury": "Treasury: {treasury}",
+      "protectorate": "Colonial Protectorate Treaty:",
+      "defensePact": "Active Defense Pact:",
+      "guaranteedBy": "Guaranteed by {name}",
+      "strikeForce": "50% GDP Taskforce",
+      "intervention": "Direct Intervention in War",
+      "infantry": "Infantry:",
+      "armor": "Armor & Tanks:",
+      "airDefense": "Air Defense:",
+      "airForce": "Air Force:",
+      "droneMissile": "Drones & Missiles:",
+      "techLevel": "Tech Level:",
+      "techBadge": "Level {level}"
+    },
+    "sabotage": {
+      "title": "Sabotaged Enemy Hardware & Installations:",
+      "airDefense": "Air Defense Destroyed:",
+      "armor": "Tanks Destroyed:",
+      "airForce": "Aircraft Destroyed:",
+      "droneMissile": "Missiles Incinerated:",
+      "unit": "Units",
+      "jet": "Aircraft",
+      "brigade": "Units"
+    },
+    "techTheft": {
+      "title": "Extracted Classified Blueprints Applied to Nation:",
+      "milGain": "Military & Defense Tech Advance:",
+      "indGain": "Industrial Tech Advance (R&D):",
+      "levelGain": "+{points} Levels"
+    }
+  }
+}

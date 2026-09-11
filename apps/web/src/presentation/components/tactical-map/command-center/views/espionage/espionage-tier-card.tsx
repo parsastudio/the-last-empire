@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { LucideIcon, Coins, CheckCircle2, Lock, Zap } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -35,6 +36,8 @@ export function EspionageTierCard({
   isExecuting,
   onExecute,
 }: EspionageTierCardProps) {
+  const t = useTranslations("espionage.tierCard");
+
   const isButtonDisabled =
     isExecutedThisTurn || !canAfford || isDisabledCondition || isExecuting;
 
@@ -52,18 +55,20 @@ export function EspionageTierCard({
           <div>
             <h4 className="text-xs font-black text-foreground">{title}</h4>
             <span className="text-[10px] text-muted-foreground font-sans block">
-              سطح عملیاتی {PersianNumberFormatter.toPersianDigits(tier)}
+              {t("tierLevel", {
+                tier: PersianNumberFormatter.toPersianDigits(tier),
+              })}
             </span>
           </div>
         </div>
 
         <div className="flex items-center gap-1.5 font-mono text-[10px]">
           <span className="bg-secondary/80 border border-border/60 px-2 py-0.5 rounded-lg font-bold text-foreground">
-            شانس موفقیت:{" "}
-            {PersianNumberFormatter.toPersianDigits(
-              Math.round(successRate * 100),
-            )}
-            ٪
+            {t("successRate", {
+              rate: PersianNumberFormatter.toPersianDigits(
+                Math.round(successRate * 100),
+              ),
+            })}
           </span>
         </div>
       </div>
@@ -74,7 +79,7 @@ export function EspionageTierCard({
 
       <div className="flex items-center justify-between text-xs font-mono bg-secondary/40 p-2.5 rounded-xl">
         <span className="text-muted-foreground font-sans text-[10px]">
-          بودجه مورد نیاز عملیات:
+          {t("requiredBudget")}
         </span>
         <span className="font-extrabold text-gdp flex items-center gap-1">
           <Coins size={13} />
@@ -101,18 +106,18 @@ export function EspionageTierCard({
         }`}
       >
         {isExecuting ? (
-          <span>در حال اجرای عملیات و نفوذ...</span>
+          <span>{t("submitting")}</span>
         ) : isExecutedThisTurn ? (
           <>
             <CheckCircle2 size={14} />
-            <span>عملیات در این نوبت انجام شد</span>
+            <span>{t("executedThisTurn")}</span>
           </>
         ) : !canAfford ? (
-          <span>موجودی خزانه ناکافی جهت تأمین بودجه</span>
+          <span>{t("insufficientFunds")}</span>
         ) : (
           <>
             <Zap size={14} />
-            <span>صدور فرمان آغاز عملیات ویژه</span>
+            <span>{t("executeBtn")}</span>
           </>
         )}
       </button>
