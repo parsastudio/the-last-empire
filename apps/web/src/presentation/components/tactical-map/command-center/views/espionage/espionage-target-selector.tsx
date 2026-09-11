@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Search, Binary } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { PersianNumberFormatter } from "@geopolitics/domain";
@@ -27,17 +28,21 @@ export function EspionageTargetSelector({
   onSearchChange,
   onSelectTarget,
 }: EspionageTargetSelectorProps) {
+  const t = useTranslations("espionage.selector");
+
   return (
     <div className="space-y-3 bg-background/30 p-4 border border-border/60 rounded-3xl">
       <div className="flex items-center justify-between pb-1">
         <div className="flex items-center gap-2">
           <Binary size={14} className="text-primary" />
           <span className="text-xs font-bold text-foreground">
-            انتخاب کشور هدف جاسوسی
+            {t("title")}
           </span>
         </div>
         <span className="text-[10px] font-mono bg-secondary px-2 py-0.5 rounded-lg text-muted-foreground">
-          {PersianNumberFormatter.toPersianDigits(targets.length)} کشور
+          {t("targetCount", {
+            count: PersianNumberFormatter.toPersianDigits(targets.length),
+          })}
         </span>
       </div>
 
@@ -48,7 +53,7 @@ export function EspionageTargetSelector({
         />
         <input
           type="text"
-          placeholder="جستجوی نام یا نماد کشور..."
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full bg-secondary/50 border border-border rounded-xl py-2 pr-9 pl-3 text-xs text-foreground text-right focus:outline-none focus:border-primary"
@@ -93,10 +98,11 @@ export function EspionageTargetSelector({
 
               <div className="text-left font-mono text-[9px] text-muted-foreground space-y-0.5">
                 <span>
-                  فناوری:{" "}
-                  {PersianNumberFormatter.toPersianDigits(
-                    target.militaryTechLevel,
-                  )}
+                  {t("tech", {
+                    level: PersianNumberFormatter.toPersianDigits(
+                      target.militaryTechLevel,
+                    ),
+                  })}
                 </span>
               </div>
             </button>

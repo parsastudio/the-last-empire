@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { EspionageTechTheftData } from "@/domain/espionage/espionage.schema";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { Award, Cpu } from "lucide-react";
@@ -8,10 +9,12 @@ export function TechTheftResultView({
 }: {
   data: EspionageTechTheftData;
 }) {
+  const t = useTranslations("espionage.results.techTheft");
+
   return (
     <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2 font-mono text-xs">
       <span className="text-[10px] text-muted-foreground font-sans font-bold block">
-        اسرار استخراج‌شده و اعمال‌شده بر ساختار ملی شما:
+        {t("title")}
       </span>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
         {data.militaryTechGained > 0 && (
@@ -19,15 +22,15 @@ export function TechTheftResultView({
             <div className="flex items-center gap-1.5">
               <Award size={14} className="text-amber-400" />
               <span className="text-muted-foreground font-sans text-[10px]">
-                رشد فناوری نظامی و دفاعی:
+                {t("milGain")}
               </span>
             </div>
             <span className="font-bold text-amber-400 text-xs">
-              +
-              {PersianNumberFormatter.toPersianDigits(
-                data.militaryTechGained.toFixed(1),
-              )}{" "}
-              سطح
+              {t("levelGain", {
+                points: PersianNumberFormatter.toPersianDigits(
+                  data.militaryTechGained.toFixed(1),
+                ),
+              })}
             </span>
           </div>
         )}
@@ -37,15 +40,15 @@ export function TechTheftResultView({
             <div className="flex items-center gap-1.5">
               <Cpu size={14} className="text-emerald-400" />
               <span className="text-muted-foreground font-sans text-[10px]">
-                رشد فناوری صنعتی (R&D):
+                {t("indGain")}
               </span>
             </div>
             <span className="font-bold text-emerald-400 text-xs">
-              +
-              {PersianNumberFormatter.toPersianDigits(
-                data.industrialTechGained.toFixed(1),
-              )}{" "}
-              سطح
+              {t("levelGain", {
+                points: PersianNumberFormatter.toPersianDigits(
+                  data.industrialTechGained.toFixed(1),
+                ),
+              })}
             </span>
           </div>
         )}

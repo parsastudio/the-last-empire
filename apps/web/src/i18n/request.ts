@@ -24,6 +24,8 @@ export default getRequestConfig(async ({ requestLocale }) => {
     .default;
   const industry = (await import(`../../messages/${locale}/industry.json`))
     .default;
+  const espionage = (await import(`../../messages/${locale}/espionage.json`))
+    .default;
 
   return {
     locale,
@@ -36,6 +38,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       dilemmas,
       diplomacy,
       industry,
+      espionage,
     },
   };
 });

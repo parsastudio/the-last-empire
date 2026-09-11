@@ -1,10 +1,13 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { EspionageReconData } from "@/domain/espionage/espionage.schema";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { ShieldCheck, Skull, Swords } from "lucide-react";
 
 export function ReconResultView({ data }: { data: EspionageReconData }) {
+  const t = useTranslations("espionage.results.recon");
+
   const guarantorFlag =
     data.guarantorFlagCode || data.guarantorNationId
       ? getFlagEmoji(data.guarantorFlagCode || data.guarantorNationId || "")
@@ -17,9 +20,11 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
   return (
     <div className="bg-background/60 border border-border/40 p-3.5 rounded-2xl space-y-2.5 font-mono text-xs">
       <div className="flex items-center justify-between text-[10px] text-muted-foreground font-sans font-bold border-b border-border/40 pb-1.5">
-        <span>اطلاعات استراتژیک کشف‌شده:</span>
+        <span>{t("title")}</span>
         <span className="text-gdp">
-          خزانه: {PersianNumberFormatter.formatCurrency(data.treasury)}
+          {t("treasury", {
+            treasury: PersianNumberFormatter.formatCurrency(data.treasury),
+          })}
         </span>
       </div>
 
@@ -41,10 +46,8 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             ) : (
               <ShieldCheck size={14} className="text-cyan-400" />
             )}
-            <span>
-              {isEmergency ? "تحت‌الحمایگی استعماری:" : "پیمان دفاعی فعال:"}
-            </span>
-            <span>تحت ضمانت {data.guarantorName}</span>
+            <span>{isEmergency ? t("protectorate") : t("defensePact")}</span>
+            <span>{t("guaranteedBy", { name: data.guarantorName })}</span>
             <span>{guarantorFlag}</span>
           </div>
 
@@ -56,11 +59,11 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
             }`}
           >
             {isEmergency ? (
-              <span>ارتش ضربت ۵۰٪</span>
+              <span>{t("strikeForce")}</span>
             ) : (
               <>
                 <Swords size={11} />
-                <span>ورود مستقیم به نبرد</span>
+                <span>{t("intervention")}</span>
               </>
             )}
           </span>
@@ -70,7 +73,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
       <div className="grid grid-cols-3 gap-2 text-[10px]">
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
-            پیاده‌نظام:
+            {t("infantry")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
             {PersianNumberFormatter.formatNumberWithCommas(data.infantry)}
@@ -78,7 +81,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
-            زرهی و تانک:
+            {t("armor")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
             {PersianNumberFormatter.formatNumberWithCommas(data.armor)}
@@ -86,7 +89,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
-            پدافند موشکی:
+            {t("airDefense")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
             {PersianNumberFormatter.formatNumberWithCommas(data.airDefense)}
@@ -94,7 +97,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
-            جنگنده‌ها:
+            {t("airForce")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
             {PersianNumberFormatter.formatNumberWithCommas(data.airForce)}
@@ -102,7 +105,7 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
-            پهپاد و موشک:
+            {t("droneMissile")}
           </span>
           <span className="font-bold text-foreground block mt-0.5">
             {PersianNumberFormatter.formatNumberWithCommas(data.droneMissile)}
@@ -110,10 +113,12 @@ export function ReconResultView({ data }: { data: EspionageReconData }) {
         </div>
         <div className="bg-secondary/40 p-2 rounded-xl border border-border/40">
           <span className="text-muted-foreground block font-sans text-[9px]">
-            سطح فناوری:
+            {t("techLevel")}
           </span>
           <span className="font-bold text-amber-500 block mt-0.5">
-            سطح {PersianNumberFormatter.toPersianDigits(data.techLevel)}
+            {t("techBadge", {
+              level: PersianNumberFormatter.toPersianDigits(data.techLevel),
+            })}
           </span>
         </div>
       </div>
