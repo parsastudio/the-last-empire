@@ -1,0 +1,28 @@
+{
+  "header": {
+    "back": "Return to Menu",
+    "badge": "Select Starting Sovereign Realm"
+  },
+  "difficulty": {
+    "EASY": {
+      "name": "Easy",
+      "tagline": "Peaceful Expansion",
+      "description": "Ideal for novice commanders and statecraft without aggressive foreign pressure."
+    },
+    "NORMAL": {
+      "name": "Normal",
+      "tagline": "Global Equilibrium",
+      "description": "The standard balanced campaign experience with active and vigilant rival powers."
+    },
+    "HARD": {
+      "name": "Hard",
+      "tagline": "Fierce Superpower Rivalry",
+      "description": "Formidable adversaries demanding strict fiscal discipline and armed readiness."
+    },
+    "IMPOSSIBLE": {
+      "name": "Impossible",
+      "tagline": "Total Crisis & Survival",
+      "description": "A brutal world order with ruthless superpowers. Survival demands diplomatic genius."
+    }
+  }
+}
