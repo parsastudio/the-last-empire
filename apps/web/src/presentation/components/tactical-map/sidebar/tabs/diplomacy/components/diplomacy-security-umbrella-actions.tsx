@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, ShieldX, Skull } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 import { SecurityGuaranteeValidationResult } from "@geopolitics/domain";
@@ -38,6 +39,7 @@ export function DiplomacySecurityUmbrellaActions({
   onCancelSecurityGuarantee,
   onCancelEmergencyProtectorate,
 }: DiplomacySecurityUmbrellaActionsProps) {
+  const t = useTranslations("diplomacy");
   const [isGuaranteeModalOpen, setIsGuaranteeModalOpen] = useState(false);
   const [isProtectorateModalOpen, setIsProtectorateModalOpen] = useState(false);
 
@@ -47,26 +49,26 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-rose-300 text-xs font-black">
             <Skull size={16} className="text-rose-400 animate-pulse" />
-            <span>پیمان استمداد امنیتی فعال (۵۰٪ GDP نیرو)</span>
+            <span>{t("umbrella.protectorateActive")}</span>
           </div>
           <span className="text-[10px] font-mono text-rose-400 font-bold">
-            {PersianNumberFormatter.formatCurrency(
-              emergencyProtectorateCost,
-              true,
-            )}{" "}
-            / نوبت (۵٪ خراج)
+            {t("umbrella.protectorateTribute", {
+              cost: PersianNumberFormatter.formatCurrency(
+                emergencyProtectorateCost,
+                true,
+              ),
+            })}
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          استقرار ارتش فوق‌پیشرفته ابرقدرت در سنگرهای شما با پرداخت ۵٪ خراج
-          نوبتی.
+          {t("umbrella.protectorateDesc")}
         </p>
         <button
           onClick={onCancelEmergencyProtectorate}
           className="w-full py-2 bg-secondary/80 hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 border border-border/60 hover:border-rose-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           <ShieldX size={13} />
-          <span>لغو معاهده و احیای استقلال کامل</span>
+          <span>{t("umbrella.revokeProtectorate")}</span>
         </button>
       </div>
     );
@@ -78,22 +80,21 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-cyan-300 text-xs font-black">
             <ShieldCheck size={16} />
-            <span>پیمان دفاع سرزمینی متقابل فعال است</span>
+            <span>{t("umbrella.defensePactActive")}</span>
           </div>
           <span className="text-[10px] font-mono text-cyan-400 font-bold">
-            ورود مستقیم به جنگ
+            {t("umbrella.defensePactIntervention")}
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          در صورت وقوع تهاجم دشمن علیه خاک شما، ارتش {targetName} رسماً وارد جنگ
-          علیه متهاجم خواهد شد.
+          {t("umbrella.defensePactDesc", { name: targetName })}
         </p>
         <button
           onClick={onCancelSecurityGuarantee}
           className="w-full py-2 bg-secondary/80 hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 border border-border/60 hover:border-rose-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
         >
           <ShieldX size={13} />
-          <span>فسخ اختیاری پیمان دفاعی</span>
+          <span>{t("umbrella.revokeDefensePact")}</span>
         </button>
       </div>
     );
@@ -128,15 +129,14 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">
             <ShieldCheck size={16} className="text-cyan-400" />
-            <span>پیمان دفاعی و امنیت سرزمینی متقابل</span>
+            <span>{t("umbrella.openDefenseModal")}</span>
           </span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
-            ۱٪ GDP ضامن • بررسی شروط
+            {t("umbrella.openDefenseModalBadge")}
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          تعهد ورود مستقیم ارتش ضامن به جنگ در صورت تهاجم دشمن (حداکثر ۲ پیمان
-          همزمان).
+          {t("umbrella.openDefenseModalDesc")}
         </p>
       </button>
 
@@ -147,14 +147,14 @@ export function DiplomacySecurityUmbrellaActions({
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-2">
             <Skull size={16} className="text-rose-400" />
-            <span>پیمان استمداد و تسلیم حاکمیت به ابرقدرت</span>
+            <span>{t("umbrella.openProtectorateModal")}</span>
           </span>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-lg border bg-rose-500/20 text-rose-300 border-rose-500/30">
-            ۵٪ خراج • ۵۰٪ GDP نیرو
+            {t("umbrella.openProtectorateModalBadge")}
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          استقرار ارتش تمام‌قد ابرقدرت در ازای پرداخت خراج نوبتی و کسر پرستیژ.
+          {t("umbrella.openProtectorateModalDesc")}
         </p>
       </button>
 

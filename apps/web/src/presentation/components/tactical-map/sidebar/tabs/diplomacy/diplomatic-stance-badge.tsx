@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
   Handshake,
@@ -11,9 +12,7 @@ import {
 } from "lucide-react";
 import { DiplomaticStance, DiplomaticPosture } from "@geopolitics/domain";
 import {
-  getPostureLabel,
   getPostureBadgeClass,
-  getDiplomaticStanceLabel,
   getDiplomaticStanceBadgeClass,
 } from "@/presentation/components/tactical-map/sidebar/tabs/diplomacy/utils/relation-appearance.utility";
 
@@ -32,11 +31,13 @@ export function DiplomaticStanceBadge({
   isEmergencyProtectorate = false,
   isOwnCountry = false,
 }: DiplomaticStanceBadgeProps) {
+  const t = useTranslations("diplomacy");
+
   if (isOwnCountry) {
     return (
       <span className="flex items-center gap-1 text-[9px] font-bold font-sans bg-gdp/15 text-gdp border border-gdp/30 px-2 py-0.5 rounded-md shadow-sm">
         <Crown size={11} />
-        <span>امپراتوری شما</span>
+        <span>{t("badges.yourEmpire")}</span>
       </span>
     );
   }
@@ -45,7 +46,7 @@ export function DiplomaticStanceBadge({
     return (
       <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-400 border border-rose-500/40 text-[9px] font-bold flex items-center gap-1 font-sans shadow-sm">
         <Skull size={10} />
-        <span>تحت استمداد ابرقدرت</span>
+        <span>{t("badges.underProtectorate")}</span>
       </span>
     );
   }
@@ -54,13 +55,13 @@ export function DiplomaticStanceBadge({
     return (
       <span className="px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 text-[9px] font-bold flex items-center gap-1 font-sans shadow-sm">
         <ShieldCheck size={10} />
-        <span>پیمان دفاعی متقابل</span>
+        <span>{t("badges.mutualDefensePact")}</span>
       </span>
     );
   }
 
   const badgeClass = getDiplomaticStanceBadgeClass(stance);
-  const label = getDiplomaticStanceLabel(stance);
+  const label = t(`stances.${stance}`);
 
   if (stance === "WAR") {
     return (
@@ -103,7 +104,7 @@ export function DiplomaticStanceBadge({
         )}`}
       >
         <Compass size={10} />
-        <span>{getPostureLabel(posture)}</span>
+        <span>{t(`postures.${posture}`)}</span>
       </span>
     );
   }

@@ -3,12 +3,25 @@ import {
   DiplomaticPosture,
   DiplomaticProposalType,
   DIPLOMATIC_PROPOSAL_LABELS_FA,
+  DIPLOMATIC_PROPOSAL_LABELS_EN,
   DIPLOMATIC_STANCE_LABELS_FA,
+  DIPLOMATIC_STANCE_LABELS_EN,
   DIPLOMATIC_POSTURE_LABELS_FA,
+  DIPLOMATIC_POSTURE_LABELS_EN,
 } from "@geopolitics/domain";
 
-export function getPostureLabel(posture: DiplomaticPosture): string {
-  return DIPLOMATIC_POSTURE_LABELS_FA[posture] || "همزیستی مسالمت‌آمیز";
+export function getPostureLabel(
+  posture: DiplomaticPosture,
+  locale: "fa" | "en" = "fa",
+): string {
+  const map =
+    locale === "en"
+      ? DIPLOMATIC_POSTURE_LABELS_EN
+      : DIPLOMATIC_POSTURE_LABELS_FA;
+  return (
+    map[posture] ||
+    (locale === "en" ? "Neutral Coexistence" : "همزیستی مسالمت‌آمیز")
+  );
 }
 
 export function getPostureBadgeClass(posture: DiplomaticPosture): string {
@@ -27,9 +40,12 @@ export function getPostureBadgeClass(posture: DiplomaticPosture): string {
 
 export function getDiplomaticStanceLabel(
   stance: DiplomaticStance | string,
+  locale: "fa" | "en" = "fa",
 ): string {
-  if (stance in DIPLOMATIC_STANCE_LABELS_FA) {
-    return DIPLOMATIC_STANCE_LABELS_FA[stance as DiplomaticStance];
+  const map =
+    locale === "en" ? DIPLOMATIC_STANCE_LABELS_EN : DIPLOMATIC_STANCE_LABELS_FA;
+  if (stance in map) {
+    return map[stance as DiplomaticStance];
   }
   return String(stance);
 }
@@ -50,11 +66,18 @@ export function getDiplomaticStanceBadgeClass(
   }
 }
 
-export function getProposalTypeName(type: string): string {
-  if (type in DIPLOMATIC_PROPOSAL_LABELS_FA) {
-    return DIPLOMATIC_PROPOSAL_LABELS_FA[type as DiplomaticProposalType];
+export function getProposalTypeName(
+  type: string,
+  locale: "fa" | "en" = "fa",
+): string {
+  const map =
+    locale === "en"
+      ? DIPLOMATIC_PROPOSAL_LABELS_EN
+      : DIPLOMATIC_PROPOSAL_LABELS_FA;
+  if (type in map) {
+    return map[type as DiplomaticProposalType];
   }
-  return "معاهده دیپلماتیک";
+  return locale === "en" ? "Diplomatic Accord" : "معاهده دیپلماتیک";
 }
 
 export function getAlignmentColor(alignment: number): string {

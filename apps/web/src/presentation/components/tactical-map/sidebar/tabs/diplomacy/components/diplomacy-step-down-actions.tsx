@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ArrowDownCircle, ShieldAlert } from "lucide-react";
 import { DiplomaticStance } from "@geopolitics/domain";
 
@@ -15,6 +16,8 @@ export function DiplomacyStepDownActions({
   onCancelTreaty,
   onDeclareWar,
 }: DiplomacyStepDownActionsProps) {
+  const t = useTranslations("diplomacy");
+
   if (currentStance === "WAR") {
     return null;
   }
@@ -37,8 +40,8 @@ export function DiplomacyStepDownActions({
             )}
             <span>
               {!canDeclareWar
-                ? "عدم امکان اعلان جنگ (فاقد مرز زمینی یا ناوگان دریایی)"
-                : "اعلان جنگ رسمی (قطع روابط و گسیل ارتش)"}
+                ? t("actions.cannotDeclareWar")
+                : t("actions.declareWar")}
             </span>
           </span>
           <ArrowDownCircle size={15} />
@@ -56,7 +59,7 @@ export function DiplomacyStepDownActions({
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold">
-              لغو پیمان عدم تخاصم (گام رو به پایین: دیپلماسی عادی)
+              {t("actions.cancelNonAggression")}
             </span>
             <ArrowDownCircle size={15} className="text-amber-400" />
           </div>
@@ -74,7 +77,7 @@ export function DiplomacyStepDownActions({
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-extrabold">
-              لغو شراکت استراتژیک (گام رو به پایین: پیمان عدم تخاصم)
+              {t("actions.cancelPartnership")}
             </span>
             <ArrowDownCircle size={15} className="text-amber-400" />
           </div>

@@ -1,0 +1,78 @@
+{
+  "stances": {
+    "WAR": "وضعیت نبرد",
+    "STRATEGIC_PARTNERSHIP": "شراکت استراتژیک",
+    "NON_AGGRESSION_PACT": "عدم تخاصم",
+    "NORMAL_DIPLOMACY": "دیپلماسی عادی"
+  },
+  "postures": {
+    "NATURAL_ALLY": "متحد طبیعی و همسو",
+    "OPPORTUNISTIC_PREDATOR": "گرگ در کمین (آماده حمله و تصرف خاک)",
+    "WARY_BUFFER": "سپر محتاط (نگران از قدرت شما)",
+    "NEUTRAL_COEXISTENCE": "بی‌طرف و صلح‌جو"
+  },
+  "badges": {
+    "yourEmpire": "امپراتوری شما",
+    "underProtectorate": "تحت استمداد ابرقدرت",
+    "mutualDefensePact": "پیمان دفاعی متقابل"
+  },
+  "banners": {
+    "protectorateTitle": "پیمان استمداد امنیتی (۵٪ خراج نوبتی • نیروی ضربت ۵۰٪ GDP)",
+    "protectorateBadge": "تحت‌الحمایه",
+    "warTitle": "در حال نبرد نظامی فعال (متخاصم)",
+    "defensePactTitle": "پیمان دفاع سرزمینی متقابل (ورود مستقیم به جنگ در صورت تهاجم)",
+    "defensePactBadge": "پیمان دفاعی",
+    "partnershipTitle": "شراکت استراتژیک (سود نوبتی دوطرفه ۰.۶٪ GDP{dividend})",
+    "nonAggressionTitle": "پیمان عدم تخاصم (فعال و آماده ارتقا به شراکت)",
+    "normalDiplomacyTitle": "دیپلماسی عادی و بی‌طرف (فعال)"
+  },
+  "actions": {
+    "tableTitle": "میز دیپلماسی، پیمان‌های نظامی و روابط خارجی",
+    "espionageTitle": "مرکز فرماندهی جاسوسی و خرابکاری",
+    "espionageDesc": "اجرای شنود ماهواره‌ای، انهدام پدافند هوایی و سرقت مستقیم اسرار و فناوری‌های راهبردی.",
+    "espionageAction": "اجرای عملیات ویژه اطلاعاتی علیه {name}",
+    "enterPeaceTalks": "ورود به میز مذاکرات آتش‌بس و شروط صلح",
+    "peaceCooldownDesc": "مخاصمه در نوبت جاری آغاز شده است (امکان تصویب صلح پس از گذر ۱ نوبت فعال می‌شود).",
+    "peaceActiveDesc": "بررسی زنده تراز قوا، بسته غرامت مالی یا واگذاری ارضی برای پایان جنگ",
+    "proposeNonAggression": "پیشنهاد پیمان عدم تخاصم (گام اول: امنیت مرزی)",
+    "proposeNonAggressionDesc": "تثبیت آرامش مرزها و پیش‌نیاز ورود به شراکت استراتژیک",
+    "signStrategicPartnership": "انعقاد شراکت استراتژیک (پرداخت ۳٪ GDP کشور مقابل)",
+    "signStrategicPartnershipDesc": "واریز نوبتی +{amount} (معادل ۰.۶٪ GDP هدف) به خزانه شما در هر نوبت به همراه انتقال ۰.۶٪ از GDP شما به خزانه هدف بدون هیچ‌گونه کسر موجودی.",
+    "cancelNonAggression": "لغو پیمان عدم تخاصم (گام رو به پایین: دیپلماسی عادی)",
+    "cancelPartnership": "لغو شراکت استراتژیک (گام رو به پایین: پیمان عدم تخاصم)",
+    "declareWar": "اعلان جنگ رسمی (قطع روابط و گسیل ارتش)",
+    "cannotDeclareWar": "عدم امکان اعلان جنگ (فاقد مرز زمینی یا ناوگان دریایی)",
+    "foreignAidSent": "بسته کمک مالی در این نوبت واریز شد",
+    "foreignAidQuotaReached": "سهمیه کمک مالی به این کشور در نوبت جاری تکمیل شده است (امکان ارسال مجدد در نوبت بعد).",
+    "foreignAidInsufficient": "کسری موجودی خزانه جهت ارسال کمک مالی ({cost})",
+    "foreignAidInsufficientDesc": "موجودی خزانه برای پوشش این مبلغ کمک بین‌المللی کافی نیست.",
+    "sendForeignAid": "ارسال کمک مالی و دیپلماتیک ({cost})",
+    "sendForeignAidDesc": "بهبود فوری ۲۵+ همسویی و ۱۵- تنش دوجانبه (۱+ اعتبار جهانی)."
+  },
+  "umbrella": {
+    "protectorateActive": "پیمان استمداد امنیتی فعال (۵۰٪ GDP نیرو)",
+    "protectorateTribute": "{cost} / نوبت (۵٪ خراج)",
+    "protectorateDesc": "استقرار ارتش فوق‌پیشرفته ابرقدرت در سنگرهای شما با پرداخت ۵٪ خراج نوبتی.",
+    "revokeProtectorate": "لغو معاهده و احیای استقلال کامل",
+    "defensePactActive": "پیمان دفاع سرزمینی متقابل فعال است",
+    "defensePactIntervention": "ورود مستقیم به جنگ",
+    "defensePactDesc": "در صورت وقوع تهاجم دشمن علیه خاک شما، ارتش {name} رسماً وارد جنگ علیه متهاجم خواهد شد.",
+    "revokeDefensePact": "فسخ اختیاری پیمان دفاعی",
+    "openDefenseModal": "پیمان دفاعی و امنیت سرزمینی متقابل",
+    "openDefenseModalBadge": "۱٪ GDP ضامن • بررسی شروط",
+    "openDefenseModalDesc": "تعهد ورود مستقیم ارتش ضامن به جنگ در صورت تهاجم دشمن (حداکثر ۲ پیمان همزمان).",
+    "openProtectorateModal": "پیمان استمداد و تسلیم حاکمیت به ابرقدرت",
+    "openProtectorateModalBadge": "۵٪ خراج • ۵۰٪ GDP نیرو",
+    "openProtectorateModalDesc": "استقرار ارتش تمام‌قد ابرقدرت در ازای پرداخت خراج نوبتی و کسر پرستیژ."
+  },
+  "betrayal": {
+    "title": "هشدار حمله غافلگیرانه و نقض پیمان",
+    "subtitle": "شما بدون لغو قبلی معاهدات صلح قصد شبیخون به {name} را دارید",
+    "penaltySteps": "جریمه نادیده گرفتن {steps} گام دیپلماتیک",
+    "desc": "شما بدون طی کردن مراحل قانونی دیپلماتیک قصد اقدام مستقیم دارید. این رفتار غافلگیرانه باعث واکنش جامعه جهانی خواهد شد.",
+    "reputationPenalty": "جریمه رسوایی بین‌المللی و انزوای دیپلماتیک:",
+    "points": "-{points} امتیاز",
+    "cancel": "انصراف",
+    "confirm": "تایید و ریسک جریمه"
+  }
+}

@@ -29,6 +29,22 @@ export const DIPLOMATIC_PROPOSAL_LABELS_FA: Record<
   CANCEL_TREATY: "تنزل روابط و لغو معاهده",
 };
 
+export const DIPLOMATIC_PROPOSAL_LABELS_EN: Record<
+  DiplomaticProposalType,
+  string
+> = {
+  STRATEGIC_PARTNERSHIP: "Strategic & Economic Partnership",
+  SECURITY_GUARANTEE: "Mutual Defense & Territorial Security Pact",
+  EMERGENCY_PROTECTORATE: "Emergency Protectorate Treaty",
+  CANCEL_SECURITY_GUARANTEE: "Revoke Defense Pact",
+  CANCEL_EMERGENCY_PROTECTORATE: "Terminate Protectorate Treaty",
+  NON_AGGRESSION_PACT: "Non-Aggression Pact",
+  PEACE_TREATY: "Peace Treaty",
+  SEND_FOREIGN_AID: "Diplomatic & Foreign Aid",
+  DECLARE_WAR: "Official Declaration of War",
+  CANCEL_TREATY: "Downgrade Relations & Cancel Treaty",
+};
+
 export const DIPLOMATIC_STANCE_LABELS_FA: Record<DiplomaticStance, string> = {
   WAR: "وضعیت نبرد",
   STRATEGIC_PARTNERSHIP: "شراکت استراتژیک",
@@ -36,9 +52,23 @@ export const DIPLOMATIC_STANCE_LABELS_FA: Record<DiplomaticStance, string> = {
   NORMAL_DIPLOMACY: "دیپلماسی عادی",
 };
 
+export const DIPLOMATIC_STANCE_LABELS_EN: Record<DiplomaticStance, string> = {
+  WAR: "State of War",
+  STRATEGIC_PARTNERSHIP: "Strategic Partnership",
+  NON_AGGRESSION_PACT: "Non-Aggression Pact",
+  NORMAL_DIPLOMACY: "Normal Diplomacy",
+};
+
 export const DIPLOMATIC_POSTURE_LABELS_FA: Record<DiplomaticPosture, string> = {
   NATURAL_ALLY: "متحد طبیعی و همسو",
   OPPORTUNISTIC_PREDATOR: "گرگ در کمین (آماده حمله و تصرف خاک)",
   WARY_BUFFER: "سپر محتاط (نگران از قدرت شما)",
   NEUTRAL_COEXISTENCE: "بی‌طرف و صلح‌جو",
+};
+
+export const DIPLOMATIC_POSTURE_LABELS_EN: Record<DiplomaticPosture, string> = {
+  NATURAL_ALLY: "Natural Strategic Ally",
+  OPPORTUNISTIC_PREDATOR: "Opportunistic Predator",
+  WARY_BUFFER: "Wary Buffer State",
+  NEUTRAL_COEXISTENCE: "Neutral Coexistence",
 };

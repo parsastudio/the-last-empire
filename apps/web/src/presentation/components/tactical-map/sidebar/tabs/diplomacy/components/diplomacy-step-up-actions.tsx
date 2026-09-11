@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ArrowUpCircle, Handshake, Coins, Clock } from "lucide-react";
 import { DiplomaticStance, PersianNumberFormatter } from "@geopolitics/domain";
 
@@ -23,6 +24,8 @@ export function DiplomacyStepUpActions({
   onNonAggression,
   onStrategicPartnership,
 }: DiplomacyStepUpActionsProps) {
+  const t = useTranslations("diplomacy");
+
   if (currentStance === "WAR") {
     return (
       <button
@@ -40,7 +43,7 @@ export function DiplomacyStepUpActions({
             ) : (
               <Handshake size={16} />
             )}
-            <span>ورود به میز مذاکرات آتش‌بس و شروط صلح</span>
+            <span>{t("actions.enterPeaceTalks")}</span>
           </span>
           <ArrowUpCircle
             size={16}
@@ -51,8 +54,8 @@ export function DiplomacyStepUpActions({
         </div>
         <p className="text-[10px] text-muted-foreground">
           {isPeaceCooldownActive
-            ? "مخاصمه در نوبت جاری آغاز شده است (امکان تصویب صلح پس از گذر ۱ نوبت فعال می‌شود)."
-            : "بررسی زنده تراز قوا، بسته غرامت مالی یا واگذاری ارضی برای پایان جنگ"}
+            ? t("actions.peaceCooldownDesc")
+            : t("actions.peaceActiveDesc")}
         </p>
       </button>
     );
@@ -66,12 +69,12 @@ export function DiplomacyStepUpActions({
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-black">
-            پیشنهاد پیمان عدم تخاصم (گام اول: امنیت مرزی)
+            {t("actions.proposeNonAggression")}
           </span>
           <ArrowUpCircle size={16} className="text-emerald-400" />
         </div>
         <p className="text-[10px] text-muted-foreground">
-          تثبیت آرامش مرزها و پیش‌نیاز ورود به شراکت استراتژیک
+          {t("actions.proposeNonAggressionDesc")}
         </p>
       </button>
     );
@@ -87,7 +90,7 @@ export function DiplomacyStepUpActions({
         <div className="flex items-center justify-between">
           <span className="text-xs font-black flex items-center gap-1.5">
             <Coins size={15} />
-            <span>انعقاد شراکت استراتژیک (پرداخت ۳٪ GDP کشور مقابل)</span>
+            <span>{t("actions.signStrategicPartnership")}</span>
           </span>
           <span className="text-[10px] font-mono font-bold bg-gdp/20 px-2 py-0.5 rounded-md text-gdp border border-gdp/30">
             {PersianNumberFormatter.formatCurrency(
@@ -97,16 +100,12 @@ export function DiplomacyStepUpActions({
           </span>
         </div>
         <p className="text-[10px] text-muted-foreground leading-relaxed">
-          واریز نوبتی{" "}
-          <strong className="text-gdp font-mono">
-            +
-            {PersianNumberFormatter.formatCurrency(
+          {t("actions.signStrategicPartnershipDesc", {
+            amount: PersianNumberFormatter.formatCurrency(
               strategicPartnershipDividend,
               true,
-            )}
-          </strong>{" "}
-          (معادل ۰.۶٪ GDP هدف) به خزانه شما در هر نوبت به همراه انتقال ۰.۶٪ از
-          GDP شما به خزانه هدف بدون هیچ‌گونه کسر موجودی.
+            ),
+          })}
         </p>
       </button>
     );
