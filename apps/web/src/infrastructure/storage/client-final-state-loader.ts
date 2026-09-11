@@ -6,6 +6,7 @@ import {
   FinalMapManifest,
 } from "@geopolitics/domain";
 import { BitPackedGridState } from "@geopolitics/game-engine";
+import { BinaryAssetRepository } from "@/infrastructure/storage/repositories/binary-asset.repository";
 
 export interface RawTerrainData {
   width: number;
@@ -21,33 +22,19 @@ export class ClientFinalStateLoader {
   private static cachedTerrainData: RawTerrainData | null = null;
   private static cachedLiveStateRaw: Uint8Array | null = null;
 
-  private static async fetchBinaryWithDecompression(
-    gzUrl: string,
-    rawUrl: string,
+  private static async decompressGzipBuffer(
+    buffer: ArrayBuffer,
   ): Promise<ArrayBuffer | null> {
-    let arrayBuf: ArrayBuffer | null = null;
-    try {
-      const gzRes = await fetch(gzUrl, { cache: "no-store" });
-      if (
-        gzRes.ok &&
-        gzRes.body &&
-        typeof DecompressionStream !== "undefined"
-      ) {
-        const stream = gzRes.body.pipeThrough(new DecompressionStream("gzip"));
-        arrayBuf = await new Response(stream).arrayBuffer();
-      }
-    } catch {}
-
-    if (!arrayBuf || arrayBuf.byteLength === 0) {
-      try {
-        const rawRes = await fetch(rawUrl, { cache: "no-store" });
-        if (rawRes.ok) {
-          arrayBuf = await rawRes.arrayBuffer();
-        }
-      } catch {}
+    if (typeof DecompressionStream === "undefined") {
+      return null;
     }
-
-    return arrayBuf && arrayBuf.byteLength > 0 ? arrayBuf : null;
+    try {
+      const blob = new Blob([buffer]);
+      const stream = blob.stream().pipeThrough(new DecompressionStream("gzip"));
+      return await new Response(stream).arrayBuffer();
+    } catch {
+      return null;
+    }
   }
 
   public static async ensureManifestLoaded(
@@ -63,6 +50,17 @@ export class ClientFinalStateLoader {
 
     this.manifestPromise = (async () => {
       try {
+        const cacheKey = `${mapId}_manifest_json`;
+        const cachedBuf = await BinaryAssetRepository.getAsset(cacheKey);
+
+        if (cachedBuf) {
+          const text = new TextDecoder().decode(cachedBuf);
+          const manifest: FinalMapManifest = JSON.parse(text);
+          CountryRegistry.initializeFromManifest(manifest);
+          MapTopologyRegistry.initializeFromManifest(manifest);
+          return manifest;
+        }
+
         const url = ClientMapPathResolver.getMapStrategicClientUrl(
           mapId,
           "manifest.json",
@@ -72,9 +70,18 @@ export class ClientFinalStateLoader {
           return null;
         }
 
-        const manifest: FinalMapManifest = await res.json();
+        const text = await res.text();
+        const manifest: FinalMapManifest = JSON.parse(text);
         CountryRegistry.initializeFromManifest(manifest);
         MapTopologyRegistry.initializeFromManifest(manifest);
+
+        const encoded = new TextEncoder().encode(text);
+        const copyBuf = encoded.buffer.slice(
+          encoded.byteOffset,
+          encoded.byteOffset + encoded.byteLength,
+        ) as ArrayBuffer;
+        void BinaryAssetRepository.saveAsset(cacheKey, copyBuf);
+
         return manifest;
       } catch {
         return null;
@@ -101,17 +108,49 @@ export class ClientFinalStateLoader {
         return bitBuffer;
       }
 
-      const gzUrl = ClientMapPathResolver.getMapStrategicClientUrl(
-        mapId,
-        "live-state.bin.gz",
-      );
-      const rawUrl = ClientMapPathResolver.getMapStrategicClientUrl(
-        mapId,
-        "live-state.bin",
-      );
+      const cacheKey = `${mapId}_live_state_gz`;
+      const cachedGz = await BinaryAssetRepository.getAsset(cacheKey);
 
-      const arrayBuf = await this.fetchBinaryWithDecompression(gzUrl, rawUrl);
-      if (!arrayBuf) {
+      let arrayBuf: ArrayBuffer | null = null;
+
+      if (cachedGz) {
+        arrayBuf = await this.decompressGzipBuffer(cachedGz);
+      }
+
+      if (!arrayBuf || arrayBuf.byteLength === 0) {
+        const gzUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+          mapId,
+          "live-state.bin.gz",
+        );
+        const rawUrl = ClientMapPathResolver.getMapStrategicClientUrl(
+          mapId,
+          "live-state.bin",
+        );
+
+        let fetchedGzBuf: ArrayBuffer | null = null;
+        try {
+          const gzRes = await fetch(gzUrl);
+          if (gzRes.ok) {
+            fetchedGzBuf = await gzRes.arrayBuffer();
+          }
+        } catch {}
+
+        if (fetchedGzBuf && fetchedGzBuf.byteLength > 0) {
+          void BinaryAssetRepository.saveAsset(cacheKey, fetchedGzBuf);
+          arrayBuf = await this.decompressGzipBuffer(fetchedGzBuf);
+        }
+
+        if (!arrayBuf || arrayBuf.byteLength === 0) {
+          try {
+            const rawRes = await fetch(rawUrl);
+            if (rawRes.ok) {
+              arrayBuf = await rawRes.arrayBuffer();
+            }
+          } catch {}
+        }
+      }
+
+      if (!arrayBuf || arrayBuf.byteLength === 0) {
         return null;
       }
 
@@ -135,16 +174,48 @@ export class ClientFinalStateLoader {
         return this.cachedTerrainData;
       }
 
-      const gzUrl = ClientMapPathResolver.getMapVisualClientUrl(
-        mapId,
-        "terrain-raw.bin.gz",
-      );
-      const rawUrl = ClientMapPathResolver.getMapVisualClientUrl(
-        mapId,
-        "terrain-raw.bin",
-      );
+      const cacheKey = `${mapId}_terrain_raw_gz`;
+      const cachedGz = await BinaryAssetRepository.getAsset(cacheKey);
 
-      const arrayBuf = await this.fetchBinaryWithDecompression(gzUrl, rawUrl);
+      let arrayBuf: ArrayBuffer | null = null;
+
+      if (cachedGz) {
+        arrayBuf = await this.decompressGzipBuffer(cachedGz);
+      }
+
+      if (!arrayBuf || arrayBuf.byteLength < 32) {
+        const gzUrl = ClientMapPathResolver.getMapVisualClientUrl(
+          mapId,
+          "terrain-raw.bin.gz",
+        );
+        const rawUrl = ClientMapPathResolver.getMapVisualClientUrl(
+          mapId,
+          "terrain-raw.bin",
+        );
+
+        let fetchedGzBuf: ArrayBuffer | null = null;
+        try {
+          const gzRes = await fetch(gzUrl);
+          if (gzRes.ok) {
+            fetchedGzBuf = await gzRes.arrayBuffer();
+          }
+        } catch {}
+
+        if (fetchedGzBuf && fetchedGzBuf.byteLength > 0) {
+          void BinaryAssetRepository.saveAsset(cacheKey, fetchedGzBuf);
+          arrayBuf = await this.decompressGzipBuffer(fetchedGzBuf);
+        }
+
+        if (!arrayBuf || arrayBuf.byteLength < 32) {
+          try {
+            const rawRes = await fetch(rawUrl);
+            if (rawRes.ok) {
+              arrayBuf = await rawRes.arrayBuffer();
+            }
+          } catch {}
+        }
+      }
+
       if (!arrayBuf || arrayBuf.byteLength < 32) {
         return null;
       }
