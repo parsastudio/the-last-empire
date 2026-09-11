@@ -1,7 +1,6 @@
 import { GameState } from "@/domain/game/game-state.schema";
 import { Nation } from "@/domain/nation/nation.schema";
 import { UnitType } from "@/domain/military/military.schema";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { GameError, TurnLogBuilder } from "@/domain/shared/domain-utilities";
 import { CountryRegistry } from "@/domain/data/countries";
@@ -40,8 +39,6 @@ export class ArmsMarketManager {
         `سطح فناوری نظامی کشور ${seller.name} (${seller.military.techLevel.toFixed(1)}) از فناوری نظامی شما (${buyer.military.techLevel.toFixed(1)}) بالاتر نیست.`,
       );
     }
-
-    const unitStat = MILITARY_UNIT_STATS[unitType];
 
     const rel =
       seller.relations[canonicalBuyerId] || seller.relations[buyer.id];
@@ -94,7 +91,7 @@ export class ArmsMarketManager {
     if (q.remainingRoom < quantity) {
       throw new GameError(
         "INVALID_ACTION",
-        `سقف مجاز سهمیه ${unitStat.nameFa} در ارتش شما تکمیل شده است.`,
+        `سقف مجاز سهمیه ${unitType} در ارتش شما تکمیل شده است.`,
       );
     }
 

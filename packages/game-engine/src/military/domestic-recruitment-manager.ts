@@ -4,7 +4,6 @@ import { UnitType } from "@/domain/military/military.schema";
 import { GameError, GovernmentTraitsUtility } from "@geopolitics/domain";
 import { MilitaryPricingCalculator } from "@/domain/military/military-pricing-calculator.utility";
 import { MilitaryInventoryHelper } from "@/domain/military/military-inventory-helper";
-import { MILITARY_UNIT_STATS } from "@/domain/military/military-unit-stats.config";
 import { getNationGdp } from "@/domain/nation/gdp-calculator.utility";
 import { MilitaryQuotaCalculator } from "@/domain/military/military-quota-calculator.utility";
 import { NationalProjectEffectApplierUtility } from "@/domain/projects/national-project-effect-applier.utility";
@@ -57,7 +56,7 @@ export class DomesticRecruitmentManager {
     if (q.remainingRoom < quantity) {
       throw new GameError(
         "INVALID_ACTION",
-        `سقف مجاز ساخت ${MILITARY_UNIT_STATS[unitType].nameFa} تکمیل شده است.`,
+        `سقف مجاز ساخت ${unitType} تکمیل شده است.`,
       );
     }
 
