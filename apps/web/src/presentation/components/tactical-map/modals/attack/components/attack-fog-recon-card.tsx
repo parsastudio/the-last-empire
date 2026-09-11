@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Radio, AlertTriangle, Loader2 } from "lucide-react";
 import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
 
@@ -21,6 +22,8 @@ export function AttackFogReconCard({
   probColor,
   onExecuteRecon,
 }: AttackFogReconCardProps) {
+  const t = useTranslations("attack.recon");
+
   return (
     <div className="bg-gradient-to-r from-secondary/80 via-card to-secondary/80 border border-border/80 p-3.5 rounded-3xl space-y-3 shadow-md backdrop-blur-xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
@@ -30,10 +33,10 @@ export function AttackFogReconCard({
           </div>
           <div className="space-y-0.5">
             <span className="text-xs font-black text-foreground block">
-              دید کور اطلاعاتی: مواضع دفاعی دشمن ناشناخته است
+              {t("blindTitle")}
             </span>
             <span className="text-[10px] text-muted-foreground block font-sans">
-              برآورد موازنه قوا بر مبنای داده‌های عمومی بین‌المللی (OSINT)
+              {t("osintSubtitle")}
             </span>
           </div>
         </div>
@@ -50,20 +53,21 @@ export function AttackFogReconCard({
             <Radio size={13} className="animate-pulse" />
           )}
           <span>
-            اسکن ماهواره‌ای و کشف آرایش ارتش دشمن (
-            {PersianNumberFormatter.formatCurrency(reconCost)})
+            {t("scanButton", {
+              cost: PersianNumberFormatter.formatCurrency(reconCost),
+            })}
           </span>
         </button>
       </div>
 
       <div className="flex items-center justify-between pt-2 border-t border-border/40 font-mono text-xs">
         <span className="text-[11px] text-muted-foreground font-sans">
-          تخمین اولیه موازنه قوا:
+          {t("balanceEstimate")}
         </span>
         <span
           className={`font-black text-xs px-2.5 py-0.5 rounded-xl border ${probBg} ${probColor}`}
         >
-          {winProbability === 100 ? "پیروزی محتمل" : "شکست محتمل"}
+          {winProbability === 100 ? t("likelyWin") : t("likelyLoss")}
         </span>
       </div>
     </div>

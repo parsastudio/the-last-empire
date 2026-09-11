@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Swords, Anchor } from "lucide-react";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
@@ -25,6 +26,7 @@ export function AttackHeader({
   targetRegionName,
   attackType = "LAND",
 }: AttackHeaderProps) {
+  const t = useTranslations("attack.header");
   const attackerFlag = getFlagEmoji(attackerFlagCode || attackerCode);
   const defenderFlag = getFlagEmoji(defenderFlagCode || defenderCode);
   const formattedTarget = ProvinceNameFormatter.format(targetRegionName);
@@ -41,7 +43,7 @@ export function AttackHeader({
             {attackerName}
           </span>
           <span className="text-[9px] md:text-[10px] font-mono text-primary font-bold bg-primary/10 border border-primary/30 px-1.5 py-0.2 md:px-2 md:py-0.5 rounded-md md:rounded-lg inline-block">
-            فرماندهی تهاجم
+            {t("offensiveCommand")}
           </span>
         </div>
       </div>
@@ -55,7 +57,7 @@ export function AttackHeader({
           )}
         </div>
         <span className="text-[8px] md:text-[9px] font-mono font-black text-muted-foreground uppercase tracking-widest">
-          {isNaval ? "NAVAL VECTOR" : "LAND VECTOR"}
+          {isNaval ? t("navalVector") : t("landVector")}
         </span>
       </div>
 

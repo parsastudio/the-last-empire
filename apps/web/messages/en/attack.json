@@ -1,0 +1,79 @@
+{
+  "modalTitleNaval": "War Room: Authorize Amphibious Assault (Naval Incursion)",
+  "modalTitleLand": "War Room: Authorize Full-Scale Ground Offensive",
+  "header": {
+    "offensiveCommand": "Offensive Command",
+    "navalVector": "NAVAL VECTOR",
+    "landVector": "LAND VECTOR"
+  },
+  "naval": {
+    "monitoringTitle": "Naval Fleet Transport Capacity Monitor",
+    "activeFleetSubtitle": "Active Naval Fleets: {count} (Capacity Ceiling: {max} Units)",
+    "deckOccupancy": "Fleet Deck Occupancy:",
+    "noFleetWarning": "You possess zero active naval fleets to conduct amphibious assaults. Procure fleets from the military panel first.",
+    "overCapacityWarning": "Selected troop formations exceed naval sea lift capacity. Diminish infantry or armored commitments."
+  },
+  "recon": {
+    "blindTitle": "Intelligence Fog: Adversary Defensive Positions Obscured",
+    "osintSubtitle": "Estimated balance of power calculated strictly from public open-source metrics (OSINT)",
+    "scanButton": "Satellite Recon Scan & Uncover Hostile Defense Order ({cost})",
+    "balanceEstimate": "Initial Estimated Balance of Power:",
+    "likelyWin": "Likely Victory",
+    "likelyLoss": "Likely Defeat"
+  },
+  "intel": {
+    "fullIntelTitle": "Full Intelligence Superiority (Uncovered Arsenal of {name}):",
+    "autoOptimizeDeploy": "Auto-Optimize Deployment for Min Casualties & Guaranteed Win",
+    "protectorateWarning": "Intelligence Alert: Sovereign is under colonial protectorate of {name}.",
+    "strikeForceBudget": "+{budget} Taskforce Level {level}",
+    "infantry": "Infantry",
+    "armor": "Armor",
+    "airDefense": "Air Defense",
+    "airForce": "Air Force",
+    "droneMissile": "Missiles",
+    "threePhaseForecast": "3-Phase Forecast:",
+    "capitulationPredicted": "Full Capitulation & Decisive Annexation",
+    "tacticalVictoryPredicted": "Tactical Victory & Province Capture",
+    "groundDefeatPredicted": "Decisive Frontline Defeat",
+    "finalPrediction": "Final Prediction:",
+    "decisiveWin": "100% (Decisive Win)",
+    "decisiveLoss": "0% (Decisive Defeat)"
+  },
+  "alerts": {
+    "alreadyAttackedTitle": "Operational Attack Cap Reached This Turn",
+    "alreadyAttackedDesc": "You have already launched a military offensive against {name} this turn. Operations against a single adversary are capped at 1 per turn; conclude turn to attack again.",
+    "inaccessibleTitle": "No Feasible Ground or Naval Vector",
+    "inaccessibleDesc": "No shared contiguous land border or open sea lane connectivity exists to execute operations against {region}.",
+    "guarantorWarTitle": "Guarantor War Intervention Alert: {names}",
+    "guarantorWarBadge": "Automatic War",
+    "guarantorWarDesc": "{name} maintains mutual territorial defense pacts with {guarantors}. If invaded, their armed forces will immediately issue formal war declarations and open new fronts.",
+    "mutualGuarantorTitle": "Mutual Guarantor Conflict of Interest ({names})",
+    "mutualGuarantorDesc": "{names} is simultaneously a defense guarantor for both your realm and the target. Upon invasion, both pacts will dissolve and that nation will remain neutral.",
+    "partnerGuarantorTitle": "Strategic Partnership Honor ({names})",
+    "partnerGuarantorDesc": "{names} maintains a strategic economic partnership with your realm; therefore, they will not declare war against you in defense of this target.",
+    "surpriseAttackTitle": "Security Breach: Surprise Assault Without War Declaration",
+    "currentStance": "Current Bilateral Stance: {stance}",
+    "reputationPenaltyBadge": "Lose {points} Global Prestige Points",
+    "surpriseAttackDesc": "Launching a direct strike against {name} without prior formal war declaration breaches international protocols, penalizing your standing by {points} prestige points."
+  },
+  "slider": {
+    "sectionTitle": "Combat Asset Deployment Allocation to Battlefield",
+    "ofTotal": "of {total} {unit}"
+  },
+  "summary": {
+    "logisticsBilling": "Offensive Logistics & Staging Billing",
+    "treasury": "National Treasury:",
+    "navalCostLabel": "Maritime Sea Lift & Staging Cost:",
+    "landCostLabel": "Border Deployment & Staging Cost (Ground):",
+    "insufficientFundsAlert": "Treasury reserves are insufficient to cover the logistical expenditures of this offensive.",
+    "navalCapacityAlert": "Active naval fleet count cannot accommodate this volume of ground formations.",
+    "submitting": "Authorizing decree & mobilizing forces...",
+    "alreadyAttacked": "Repeat Offensive Barred This Turn",
+    "inaccessible": "No Access Vector to Target Region",
+    "insufficientNavalCapacity": "Insufficient Naval Sea Lift Capacity",
+    "infantryRequired": "At Least 1 Infantry Division Required",
+    "insufficientTreasury": "Insufficient Treasury Liquidity",
+    "executeNaval": "Authorize Amphibious Assault • {cost}",
+    "executeLand": "Authorize Ground Offensive • {cost}"
+  }
+}
