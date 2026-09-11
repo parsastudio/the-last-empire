@@ -5,6 +5,7 @@ import { SidebarTabType } from "@/presentation/components/tactical-map/sidebar/s
 import { NextTurnButton } from "@/presentation/components/tactical-map/sidebar/next-turn-button";
 import { COMMAND_RAIL_TABS } from "@/presentation/configs/command-center-tabs.config";
 import { TacticalSound } from "@/presentation/utils/tactical-sound";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 interface RailTabButtonProps {
   id: SidebarTabType;
@@ -43,7 +44,7 @@ function RailTabButton({
       title={isCollapsed ? label : undefined}
     >
       {isActive && (
-        <div className="absolute right-0 top-1.5 bottom-1.5 md:top-2 md:bottom-2 w-1 bg-white rounded-l-full animate-laser-glow" />
+        <div className="absolute end-0 top-1.5 bottom-1.5 md:top-2 md:bottom-2 w-1 bg-white rounded-s-full animate-laser-glow" />
       )}
 
       <Icon
@@ -57,7 +58,7 @@ function RailTabButton({
       )}
 
       {isCollapsed && (
-        <span className="absolute right-full mr-3 px-3 py-1.5 bg-card/95 border border-border/80 text-foreground text-[10px] rounded-xl shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap font-sans font-bold backdrop-blur-xl ring-1 ring-white/5">
+        <span className="absolute end-full me-3 px-3 py-1.5 bg-card/95 border border-border/80 text-foreground text-[10px] rounded-xl shadow-2xl opacity-0 pointer-events-none group-hover:opacity-100 transition-all duration-150 z-50 whitespace-nowrap font-sans font-bold backdrop-blur-xl ring-1 ring-white/5">
           {label}
         </span>
       )}
@@ -67,11 +68,13 @@ function RailTabButton({
 
 function RailToggleButton({
   isCollapsed,
+  isRtl,
   onToggle,
   expandLabel,
   collapseLabel,
 }: {
   isCollapsed: boolean;
+  isRtl: boolean;
   onToggle: () => void;
   expandLabel: string;
   collapseLabel: string;
@@ -87,7 +90,17 @@ function RailToggleButton({
       className="p-1.5 md:p-2.5 rounded-xl md:rounded-2xl bg-secondary/80 hover:bg-secondary border border-border/80 text-muted-foreground hover:text-foreground transition-all cursor-pointer flex items-center justify-center shrink-0 shadow-inner"
       title={isCollapsed ? expandLabel : collapseLabel}
     >
-      {isCollapsed ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
+      {isCollapsed ? (
+        isRtl ? (
+          <ChevronLeft size={15} />
+        ) : (
+          <ChevronRight size={15} />
+        )
+      ) : isRtl ? (
+        <ChevronRight size={15} />
+      ) : (
+        <ChevronLeft size={15} />
+      )}
     </button>
   );
 }
@@ -112,6 +125,7 @@ export function CommandRail({
   onNextTurn,
 }: CommandRailProps) {
   const t = useTranslations("hud.rail");
+  const { isRtl, toDigits } = useLocaleFormatter();
 
   const handleNextTurn = () => {
     TacticalSound.playTurnAdvance();
@@ -123,11 +137,12 @@ export function CommandRail({
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
-        right: "max(0.75rem, env(safe-area-inset-right))",
+        right: isRtl ? "max(0.75rem, env(safe-area-inset-right))" : undefined,
+        left: !isRtl ? "max(0.75rem, env(safe-area-inset-left))" : undefined,
         top: "max(0.5rem, env(safe-area-inset-top))",
         bottom: "max(0.5rem, env(safe-area-inset-bottom))",
       }}
-      className={`fixed z-40 bg-card/95 backdrop-blur-3xl border border-border/80 rounded-2xl md:rounded-3xl shadow-2xl flex flex-col justify-between p-2 md:p-2.5 transition-all duration-300 dir-rtl pointer-events-auto overflow-hidden ring-1 ring-white/5 ${
+      className={`fixed z-40 bg-card/95 backdrop-blur-3xl border border-border/80 rounded-2xl md:rounded-3xl shadow-2xl flex flex-col justify-between p-2 md:p-2.5 transition-all duration-300 pointer-events-auto overflow-hidden ring-1 ring-white/5 ${
         isCollapsed ? "w-13 md:w-16" : "w-44 md:w-48"
       }`}
     >
@@ -135,6 +150,7 @@ export function CommandRail({
         <div className="flex items-center justify-between px-0.5 shrink-0">
           <RailToggleButton
             isCollapsed={isCollapsed}
+            isRtl={isRtl}
             onToggle={onToggleCollapse}
             expandLabel={t("expand")}
             collapseLabel={t("collapse")}
@@ -172,7 +188,7 @@ export function CommandRail({
             {isProcessingTurn ? (
               <Loader2 size={15} className="animate-spin" />
             ) : (
-              currentTurn
+              toDigits(currentTurn)
             )}
           </button>
         ) : (

@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { Layers, Loader2, Eye, Coins } from "lucide-react";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 
 export type TacticalLayer = "political" | "gdp";
 
@@ -38,19 +39,21 @@ export function LayerController({
   onChangeLayer,
 }: LayerControllerProps) {
   const t = useTranslations("map.layers");
+  const { isRtl } = useLocaleFormatter();
 
   return (
     <div
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
       style={{
-        left: "max(0.75rem, env(safe-area-inset-left))",
+        left: isRtl ? "max(0.75rem, env(safe-area-inset-left))" : undefined,
+        right: !isRtl ? "max(0.75rem, env(safe-area-inset-right))" : undefined,
         bottom: "max(0.75rem, env(safe-area-inset-bottom))",
       }}
       className="fixed z-40 flex flex-col gap-2 pointer-events-auto"
     >
-      <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-xl md:rounded-2xl p-1 md:p-1.5 shadow-2xl flex items-center gap-1 md:gap-1.5 dir-rtl">
-        <div className="p-1.5 md:p-2 text-muted-foreground border-l border-border/60 flex items-center gap-1.5">
+      <div className="bg-card/85 backdrop-blur-xl border border-border/80 rounded-xl md:rounded-2xl p-1 md:p-1.5 shadow-2xl flex items-center gap-1 md:gap-1.5">
+        <div className="p-1.5 md:p-2 text-muted-foreground border-e border-border/60 flex items-center gap-1.5">
           {isRendering ? (
             <Loader2 size={13} className="animate-spin text-primary" />
           ) : (

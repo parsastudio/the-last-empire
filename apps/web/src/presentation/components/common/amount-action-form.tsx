@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Zap, LucideIcon } from "lucide-react";
 import { PercentageSelector } from "@/presentation/components/common/percentage-selector";
-import { PersianNumberFormatter } from "@/presentation/utils/persian-number-formatter";
+import { useLocaleFormatter } from "@/presentation/hooks/common/use-locale-formatter";
 import {
   ActionColorVariant,
   ActionVariantStyleUtility,
@@ -26,6 +26,9 @@ export interface AmountActionFormProps {
   infoRows?: AmountActionInfoRow[];
   warningText?: string;
   emptyStateText?: string;
+  submittingText?: string;
+  ceilingLabel?: string;
+  requestedLabel?: string;
   onClose: () => void;
   onConfirm: (amount: number) => Promise<void> | void;
 }
@@ -39,10 +42,14 @@ export function AmountActionForm({
   icon: Icon = Zap,
   infoRows = [],
   warningText,
-  emptyStateText = "امکان انجام این عملیات با شرایط فعلی وجود ندارد.",
+  emptyStateText = "Action unavailable under current conditions.",
+  submittingText = "Submitting order...",
+  ceilingLabel = "Maximum Permitted Limit:",
+  requestedLabel = "Requested Amount:",
   onClose,
   onConfirm,
 }: AmountActionFormProps) {
+  const { formatNumber } = useLocaleFormatter();
   const safeMax = Math.max(0, maxAmount);
   const initialAmount =
     safeMax <= 0
@@ -79,30 +86,29 @@ export function AmountActionForm({
   const buttonBgClass = ActionVariantStyleUtility.getButtonBg(colorVariant);
 
   return (
-    <div className="space-y-4 text-right dir-rtl font-sans">
+    <div className="space-y-4 text-start font-sans">
       <div className="space-y-3 font-mono text-xs">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground font-sans text-[11px]">
-            حداکثر سقف مجاز:
+            {ceilingLabel}
           </span>
           <span className="font-bold text-foreground text-xs font-mono">
-            {PersianNumberFormatter.formatNumberWithCommas(safeMax)} {unitLabel}
+            {formatNumber(safeMax)} {unitLabel}
           </span>
         </div>
 
         <div className="space-y-2.5 bg-background/40 p-4 rounded-3xl border border-border/60 shadow-inner">
           <div className="flex justify-between items-center text-xs">
             <span className="text-muted-foreground font-sans">
-              مقدار درخواستی:
+              {requestedLabel}
             </span>
             <span className="font-extrabold text-foreground text-sm font-mono bg-secondary/80 px-3 py-1 rounded-xl border border-border/60 shadow-sm">
-              {PersianNumberFormatter.formatNumberWithCommas(currentAmount)}{" "}
-              {unitLabel}
+              {formatNumber(currentAmount)} {unitLabel}
             </span>
           </div>
 
           <div className="relative flex items-center py-1">
-            <div className="absolute left-0 right-0 h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
+            <div className="absolute start-0 end-0 h-2 bg-secondary/80 border border-border/60 rounded-full overflow-hidden pointer-events-none">
               <div
                 className="h-full bg-gradient-to-r from-primary/70 via-primary to-primary rounded-full transition-all duration-75 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
                 style={{ width: `${fillRatio}%` }}
@@ -165,8 +171,8 @@ export function AmountActionForm({
           {safeMax === 0
             ? emptyStateText
             : isSubmitting
-              ? "در حال ثبت دستور..."
-              : `${confirmLabel} (${PersianNumberFormatter.formatNumberWithCommas(currentAmount)} ${unitLabel})`}
+              ? submittingText
+              : `${confirmLabel} (${formatNumber(currentAmount)} ${unitLabel})`}
         </span>
       </button>
     </div>
