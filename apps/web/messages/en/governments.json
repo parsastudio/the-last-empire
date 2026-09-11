@@ -1,0 +1,71 @@
+{
+  "selectorTitle": "Political Structure & Governance System",
+  "doctrinesAndEffects": "Governance Doctrine & Outcomes: {name}",
+  "prosTitle": "Strategic Advantages ({count})",
+  "consTitle": "Governance Challenges ({count})",
+  "PLURALIST_PARLIAMENTARY": {
+    "name": "Pluralist Parliamentary Republic",
+    "headline": "Scientific surge & peacetime prosperity • Rapid wartime fatigue",
+    "description": "An open society relying on research institutes and free markets boasting high scientific breakthroughs, but vulnerable to civil unrest during prolonged wars.",
+    "pros": [
+      "20% discount on all scientific and R&D expenditures",
+      "30% faster peacetime political stability recovery"
+    ],
+    "cons": [
+      "20% higher ongoing standing military upkeep",
+      "50% sharper stability loss during active warfare"
+    ]
+  },
+  "IDEOLOGICAL_REGIME": {
+    "name": "Ideological Revolutionary Regime",
+    "headline": "Low-cost military & high resilience in war • Scientific stagnation",
+    "description": "A doctrinally mobilized society making armed forces highly cost-effective and resistant to attrition, but penalized in technical R&D due to scientific isolation.",
+    "pros": [
+      "20% reduction in monthly armed forces payroll and maintenance",
+      "50% greater resilience against war-weariness stability loss"
+    ],
+    "cons": [
+      "20% increase in research and scientific breakthrough costs",
+      "30% slower natural stability recovery during peacetime"
+    ]
+  },
+  "TECHNOCRATIC_ONE_PARTY": {
+    "name": "Technocratic Industrial State",
+    "headline": "Inexpensive production & rapid expansion • Costly hardware upkeep",
+    "description": "Centralized engineering discipline lowering the cost of factory construction and equipment assembly, but demanding higher maintenance for complex machinery.",
+    "pros": [
+      "20% discount on domestic factory construction and machinery",
+      "15% discount on industrial production line research"
+    ],
+    "cons": [
+      "20% higher maintenance cost for advanced deployed weapon systems",
+      "25% greater stability sensitivity to national debt and fiscal crises"
+    ]
+  },
+  "HEREDITARY_MONARCHY": {
+    "name": "Hereditary Traditional Monarchy",
+    "headline": "Steadfast political stability • Costly procurement rituals",
+    "description": "Dynastic legitimacy solidifying domestic security and loyalist armed forces, accompanied by ceremonial manufacturing friction and conservative R&D pacing.",
+    "pros": [
+      "40% higher resistance against political instability drops",
+      "10% lower military maintenance expenditure in peacetime"
+    ],
+    "cons": [
+      "20% higher acquisition costs for cutting-edge modern equipment",
+      "15% increased expenditure for adopting new technologies"
+    ]
+  },
+  "CENTRALIZED_PRESIDENTIAL": {
+    "name": "Centralized Presidential Republic",
+    "headline": "Agile command through executive decrees • Symmetric balance",
+    "description": "A unified executive authority accelerating strategic defense mobilization while maintaining a balanced profile across all civil and military spheres.",
+    "pros": [
+      "10% discount on rapid unit procurement and logistics",
+      "10% increased resistance against wartime stability weariness"
+    ],
+    "cons": [
+      "10% higher administrative expenditure for armed forces bureaucracy",
+      "10% slower natural recovery of peacetime domestic stability"
+    ]
+  }
+}

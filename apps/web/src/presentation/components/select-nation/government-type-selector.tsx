@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Check,
   Landmark,
@@ -12,7 +13,6 @@ import {
   GovernmentType,
   GovernmentOption,
   GOVERNMENT_OPTIONS,
-  GOVERNMENT_TRAITS_CONFIG,
 } from "@geopolitics/domain";
 import { GovernmentTraitDetailsCard } from "./government-trait-details-card";
 
@@ -38,29 +38,25 @@ export function GovernmentTypeSelector({
   selectedType,
   onSelect,
 }: GovernmentTypeSelectorProps) {
-  const activeTrait =
-    GOVERNMENT_TRAITS_CONFIG[selectedType as GovernmentType] ??
-    GOVERNMENT_TRAITS_CONFIG.PLURALIST_PARLIAMENTARY;
-
-  const ActiveIcon =
-    GOVERNMENT_ICONS[selectedType as GovernmentType] ?? Landmark;
+  const t = useTranslations("governments");
+  const currentType = selectedType as GovernmentType;
+  const ActiveIcon = GOVERNMENT_ICONS[currentType] ?? Landmark;
 
   return (
     <div className="space-y-3 sm:space-y-4 dir-rtl text-right font-sans">
       <div className="flex items-center justify-between px-1">
         <span className="text-[11px] sm:text-xs font-black text-muted-foreground uppercase tracking-wider font-mono">
-          انتخاب ساختار سیاسی و نظام حاکمیت
+          {t("selectorTitle")}
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2.5">
         {options.map((gov) => {
           const isSelected = selectedType === gov.type;
-          const trait =
-            GOVERNMENT_TRAITS_CONFIG[gov.type as GovernmentType] ??
-            GOVERNMENT_TRAITS_CONFIG.PLURALIST_PARLIAMENTARY;
-
-          const Icon = GOVERNMENT_ICONS[gov.type as GovernmentType] ?? Landmark;
+          const govType = gov.type as GovernmentType;
+          const Icon = GOVERNMENT_ICONS[govType] ?? Landmark;
+          const name = t(`${govType}.name`);
+          const headline = t(`${govType}.headline`);
 
           return (
             <button
@@ -91,10 +87,10 @@ export function GovernmentTypeSelector({
                         : "text-foreground group-hover:text-primary"
                     }`}
                   >
-                    {trait.nameFa}
+                    {name}
                   </span>
                   <span className="text-[9px] sm:text-[10px] text-muted-foreground block truncate">
-                    {trait.headlineFa}
+                    {headline}
                   </span>
                 </div>
               </div>
@@ -113,7 +109,7 @@ export function GovernmentTypeSelector({
         })}
       </div>
 
-      <GovernmentTraitDetailsCard trait={activeTrait} icon={ActiveIcon} />
+      <GovernmentTraitDetailsCard type={currentType} icon={ActiveIcon} />
     </div>
   );
 }

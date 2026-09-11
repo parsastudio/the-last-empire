@@ -1,0 +1,46 @@
+{
+  "title": "Treasury Board & Fiscal-Trade Doctrine",
+  "seaAccess": "Maritime Gateway (100% Transit)",
+  "landlocked": "Landlocked (50% Transit)",
+  "currentPolicyBadge": "Active Policy",
+  "currentDoctrineEnacted": "Active Sovereign Doctrine",
+  "enactingDoctrine": "Ratifying in High Council...",
+  "enactDoctrineAction": "Enact & Ratify Doctrine ({name})",
+  "forecastRevenue": "Turn Gross Revenue Forecast:",
+  "domesticRevenueLabel": "Domestic Production & Taxes (8% GDP):",
+  "globalRevenueLabel": "Global Transit & Export Arteries:",
+  "networkStatus": "International Trade Network:",
+  "peacePartners": "Peace Partners: {count} Nations",
+  "doctrines": {
+    "AUTARKY": {
+      "name": "War Economy & Full Autarky",
+      "tagline": "100% reliance on sovereign domestic output",
+      "description": "100% domestic income; complete immunity against trade embargoes, naval blockades, and foreign sanctions.",
+      "badge": "100% Domestic"
+    },
+    "PROTECTIONISM": {
+      "name": "National Industrial Protectionism",
+      "tagline": "75% domestic priority and 25% cross-border trade",
+      "description": "Shielding sovereign heavy industries while securing critical export markets amidst geopolitical friction.",
+      "badge": "75% Domestic • 25% Global"
+    },
+    "BALANCED_MIXED": {
+      "name": "Balanced Mixed Economy",
+      "tagline": "50% domestic output and 50% global trade",
+      "description": "Standard balanced fiscal posture harmonizing domestic welfare with strategic commercial opportunities.",
+      "badge": "50% Domestic • 50% Global"
+    },
+    "FREE_TRADE": {
+      "name": "Free-Trade & Open Ports",
+      "tagline": "25% domestic and 75% international shipping lanes",
+      "description": "Expanding export throughput and foreign capital by leveraging unfettered access to international waters.",
+      "badge": "25% Domestic • 75% Global"
+    },
+    "MERCANTILE_HUB": {
+      "name": "Global Maritime Mercantile Hub",
+      "tagline": "100% focus on global wealth circulation and transit",
+      "description": "Full exploitation of sovereign chokepoints and maritime arteries to capture limitless global trade wealth.",
+      "badge": "100% Global Trade"
+    }
+  }
+}

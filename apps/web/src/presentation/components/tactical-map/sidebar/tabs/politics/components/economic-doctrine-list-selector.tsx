@@ -1,7 +1,7 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   EconomicDoctrineStance,
-  ECONOMIC_DOCTRINE_CONFIGS,
   ALL_ECONOMIC_DOCTRINES,
 } from "@geopolitics/domain";
 
@@ -16,12 +16,16 @@ export function EconomicDoctrineListSelector({
   selectedStance,
   onSelectStance,
 }: EconomicDoctrineListSelectorProps) {
+  const t = useTranslations("politics");
+
   return (
     <div className="grid grid-cols-1 gap-2">
       {ALL_ECONOMIC_DOCTRINES.map((stance) => {
-        const config = ECONOMIC_DOCTRINE_CONFIGS[stance];
         const isSelected = selectedStance === stance;
         const isEnacted = currentStance === stance;
+        const name = t(`doctrines.${stance}.name`);
+        const badge = t(`doctrines.${stance}.badge`);
+        const description = t(`doctrines.${stance}.description`);
 
         return (
           <button
@@ -37,21 +41,21 @@ export function EconomicDoctrineListSelector({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black text-foreground">
-                  {config.nameFa}
+                  {name}
                 </span>
                 {isEnacted && (
                   <span className="text-[9px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 rounded-md">
-                    سیاست جاری
+                    {t("currentPolicyBadge")}
                   </span>
                 )}
               </div>
               <span className="text-[9px] font-mono font-bold text-muted-foreground bg-background/80 px-2 py-0.5 rounded-md border border-border/50">
-                {config.badgeText}
+                {badge}
               </span>
             </div>
 
             <p className="text-[11px] text-muted-foreground leading-relaxed">
-              {config.description}
+              {description}
             </p>
           </button>
         );

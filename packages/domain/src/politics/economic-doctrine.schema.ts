@@ -14,12 +14,8 @@ export type EconomicDoctrineStance = z.infer<
 
 export const EconomicDoctrineConfigSchema = z.object({
   stance: EconomicDoctrineStanceSchema,
-  nameFa: z.string(),
-  tagline: z.string(),
-  description: z.string(),
   domesticWeight: z.number().min(0).max(1),
   globalWeight: z.number().min(0).max(1),
-  badgeText: z.string(),
 });
 
 export type EconomicDoctrineConfig = z.infer<
