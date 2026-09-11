@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { BattleFullReportData } from "@/domain/reports/combat-report.schema";
 import { PersianNumberFormatter } from "@geopolitics/domain";
 import { getFlagEmoji } from "@/presentation/utils/flag-emoji";
@@ -19,20 +20,20 @@ export function BattlePhaseGroundCard({
   attackerFlag,
   defenderFlag,
 }: BattlePhaseGroundCardProps) {
+  const t = useTranslations("reports.phase3");
   const aux = reportData.auxiliaryGuarantor;
   const auxFlag = aux
     ? getFlagEmoji(aux.guarantorFlagCode || aux.guarantorId)
     : "";
   const isAttackerWin = reportData.phase3Ground.phaseWinner === "ATTACKER";
+  const winnerName = isAttackerWin ? attackerName : defenderName;
 
   return (
     <div className="space-y-4 font-sans text-right dir-rtl animate-fade-smooth">
       <div className="bg-secondary/40 border border-border/80 p-4 rounded-3xl flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">⚔️</span>
-          <h3 className="text-sm font-black text-foreground">
-            فاز سوم: پیشروی تانک‌ها و نبرد سرنوشت‌ساز پیاده‌نظام
-          </h3>
+          <h3 className="text-sm font-black text-foreground">{t("title")}</h3>
         </div>
         <span
           className={`px-3.5 py-1.5 rounded-2xl text-xs font-black border flex items-center gap-1.5 ${
@@ -42,9 +43,7 @@ export function BattlePhaseGroundCard({
           }`}
         >
           <Swords size={15} />
-          <span>
-            فاتح خط مقدم: {isAttackerWin ? attackerName : defenderName}
-          </span>
+          <span>{t("winnerLabel", { name: winnerName })}</span>
         </span>
       </div>
 
@@ -53,58 +52,58 @@ export function BattlePhaseGroundCard({
           <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
             <span className="text-sm font-black text-primary flex items-center gap-2">
               <span>{attackerFlag}</span>
-              <span>لشکرهای زمینی {attackerName}</span>
+              <span>{t("attackerBranch", { name: attackerName })}</span>
             </span>
             <span className="text-xs font-mono font-bold text-muted-foreground">
-              نیروهای تهاجم
+              {t("invasionForces")}
             </span>
           </div>
 
           <div className="space-y-2 font-mono">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground font-sans">
-                تانک‌های زرهی واردشده:
+                {t("attArmor")}
               </span>
               <span className="font-black text-foreground text-base">
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.attArmor,
                 )}{" "}
-                واحد 🛡️
+                {t("armorUnit")}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground font-sans">
-                تلفات زرهی:
+                {t("attArmorLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
                 -
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.attArmorLost,
                 )}{" "}
-                واحد 💥
+                {t("armorLostUnit")}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm pt-1 border-t border-border/30">
               <span className="text-muted-foreground font-sans">
-                لشکرهای خط‌شکن تهاجم:
+                {t("attInfantry")}
               </span>
               <span className="font-black text-foreground text-base">
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.attInfantry,
                 )}{" "}
-                لشکر 🪖
+                {t("infantryUnit")}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground font-sans">
-                تلفات پیاده‌نظام:
+                {t("attInfantryLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
                 -
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.attInfantryLost,
                 )}{" "}
-                لشکر ☠️
+                {t("infantryLostUnit")}
               </span>
             </div>
           </div>
@@ -114,16 +113,20 @@ export function BattlePhaseGroundCard({
           <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
             <span className="text-sm font-black text-military flex items-center gap-2">
               <span>{defenderFlag}</span>
-              <span>لشکرهای مدافع {defenderName}</span>
+              <span>{t("defenderBranch", { name: defenderName })}</span>
             </span>
             {aux && aux.isEmergencyProtectorate && (
               <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-lg flex items-center gap-1 border bg-rose-950/40 text-rose-300 border-rose-500/40">
                 <span>{auxFlag}</span>
                 <span>
-                  +{PersianNumberFormatter.toPersianDigits(aux.deployedArmor)}{" "}
-                  تانک، +
-                  {PersianNumberFormatter.toPersianDigits(aux.deployedInfantry)}{" "}
-                  پیاده کمکی
+                  {t("auxGround", {
+                    armor: PersianNumberFormatter.toPersianDigits(
+                      aux.deployedArmor,
+                    ),
+                    infantry: PersianNumberFormatter.toPersianDigits(
+                      aux.deployedInfantry,
+                    ),
+                  })}
                 </span>
               </span>
             )}
@@ -132,48 +135,48 @@ export function BattlePhaseGroundCard({
           <div className="space-y-2 font-mono">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground font-sans">
-                تانک‌های زرهی مدافع:
+                {t("defArmor")}
               </span>
               <span className="font-black text-foreground text-base">
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.defArmor,
                 )}{" "}
-                واحد 🛡️
+                {t("armorUnit")}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground font-sans">
-                تلفات زرهی:
+                {t("defArmorLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
                 -
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.defArmorLost,
                 )}{" "}
-                واحد 💥
+                {t("armorLostUnit")}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm pt-1 border-t border-border/30">
               <span className="text-muted-foreground font-sans">
-                تکاوران و مدافعان سنگر:
+                {t("defInfantry")}
               </span>
               <span className="font-black text-foreground text-base">
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.defInfantry,
                 )}{" "}
-                لشکر 🪖
+                {t("infantryUnit")}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground font-sans">
-                تلفات پیاده‌نظام:
+                {t("defInfantryLost")}
               </span>
               <span className="font-black text-rose-400 text-base">
                 -
                 {PersianNumberFormatter.toPersianDigits(
                   reportData.phase3Ground.defInfantryLost,
                 )}{" "}
-                لشکر ☠️
+                {t("infantryLostUnit")}
               </span>
             </div>
           </div>

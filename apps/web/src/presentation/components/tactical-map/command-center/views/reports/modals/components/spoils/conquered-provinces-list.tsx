@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Flag } from "lucide-react";
 import { ProvinceNameFormatter } from "@/presentation/utils/province-name-formatter";
 
@@ -9,13 +10,15 @@ interface ConqueredProvincesListProps {
 export function ConqueredProvincesList({
   provincesNames,
 }: ConqueredProvincesListProps) {
+  const t = useTranslations("reports.spoils.provinces");
+
   if (!provincesNames || provincesNames.length === 0) return null;
 
   return (
     <div className="bg-card/90 border border-border/80 p-3 rounded-2xl space-y-2 w-full">
       <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
         <Flag size={13} className="text-primary" />
-        <span>استان‌های تصرف‌شده:</span>
+        <span>{t("title")}</span>
       </div>
       <div className="flex flex-wrap gap-1.5">
         {provincesNames.map((name, idx) => (
