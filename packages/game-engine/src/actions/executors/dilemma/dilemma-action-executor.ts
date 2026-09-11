@@ -191,8 +191,8 @@ export class DilemmaActionExecutor {
       resultData: {
         eventId: event.id,
         choiceId: choice.id,
-        eventTitle: event.titleFa,
-        choiceLabel: choice.labelFa,
+        eventTitle: event.id,
+        choiceLabel: choice.id,
       },
     };
   }

@@ -111,8 +111,8 @@ export class ProjectActionExecutor {
     const newLogs = [];
     if (isCompleted) {
       const message = isSilentBreakthrough
-        ? `جهش علمی و دستاورد زودهنگام: دانشمندان کشور با کشف فرمول جدید، پروژه راهبردی «${config.nameFa}» را پیش از موعد به بهره‌برداری رساندند!`
-        : `تکمیل برنامه راهبردی: پروژه «${config.nameFa}» با موفقیت ۱۰۰٪ به پایان رسید و امتیازات آن فعال شد.`;
+        ? `جهش علمی و دستاورد زودهنگام: دانشمندان کشور با کشف فرمول جدید، پروژه راهبردی «${config.id}» را پیش از موعد به بهره‌برداری رساندند!`
+        : `تکمیل برنامه راهبردی: پروژه «${config.id}» با موفقیت ۱۰۰٪ به پایان رسید و امتیازات آن فعال شد.`;
 
       newLogs.push(
         TurnLogBuilder.createNationalLog(
@@ -122,7 +122,7 @@ export class ProjectActionExecutor {
           "INFO",
           "GENERIC_EVENT",
           {
-            projectTitle: config.nameFa,
+            projectTitle: config.id,
             eventTitle: isSilentBreakthrough
               ? "دستاورد زودهنگام ملی"
               : "تکمیل پروژه راهبردی",
@@ -168,7 +168,7 @@ export class ProjectActionExecutor {
       newState,
       resultData: {
         projectId: config.id,
-        projectName: config.nameFa,
+        projectName: config.id,
         currentStep: finalSteps,
         totalSteps: config.totalStepsRequired,
         isCompleted,

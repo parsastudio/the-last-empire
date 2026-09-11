@@ -154,7 +154,7 @@ export class AIEmergencyDefenseManager {
         sellerFlagCode: bestSeller.flagCode,
         cost: finalCost,
         quantity: actualQuantity,
-        unitName: bestUnit.nameFa,
+        unitName: bestUnit.type,
       },
     };
   }
