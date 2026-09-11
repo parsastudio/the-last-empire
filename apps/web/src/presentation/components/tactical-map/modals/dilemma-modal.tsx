@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { CheckCircle2, Loader2, Zap } from "lucide-react";
 import { UnifiedModalShell } from "@/presentation/components/common/unified-modal-shell";
 import { DilemmaEvent, ActionFactory, getNationGdp } from "@geopolitics/domain";
@@ -23,6 +24,7 @@ export function DilemmaModal({
   humanNationId,
   onClose,
 }: DilemmaModalProps) {
+  const t = useTranslations("dilemmas");
   const [selectedChoiceId, setSelectedChoiceId] = useState<string | null>(null);
   const { dispatchAction, isSubmitting } = useGameActions();
   const gameState = useGameStore((state) => state.gameState);
@@ -70,7 +72,11 @@ export function DilemmaModal({
     }
   };
 
-  const activeChoice = dilemma.choices.find((c) => c.id === selectedChoiceId);
+  const eventTitle = t(`events.${dilemma.id}.title`);
+  const eventDescription = t(`events.${dilemma.id}.description`);
+  const activeChoiceLabel = selectedChoiceId
+    ? t(`events.${dilemma.id}.choices.${selectedChoiceId}.label`)
+    : "";
 
   return (
     <UnifiedModalShell
@@ -95,16 +101,16 @@ export function DilemmaModal({
               <span
                 className={`text-[11px] font-black ${categoryVisual.textColor}`}
               >
-                {categoryVisual.labelFa}
+                {t(`categories.${dilemma.category}`)}
               </span>
               <h3 className="text-base font-black text-foreground tracking-tight">
-                {dilemma.titleFa}
+                {eventTitle}
               </h3>
             </div>
           </div>
 
           <p className="text-xs text-foreground/90 leading-relaxed font-sans font-medium bg-background/80 border border-border/60 p-3.5 rounded-2xl shadow-inner">
-            {dilemma.descriptionFa}
+            {eventDescription}
           </p>
         </div>
 
@@ -113,6 +119,7 @@ export function DilemmaModal({
             {dilemma.choices.map((choice, idx) => (
               <DilemmaChoiceCard
                 key={choice.id}
+                eventId={dilemma.id}
                 choice={choice}
                 choiceIndex={idx}
                 isSelected={selectedChoiceId === choice.id}
@@ -139,10 +146,10 @@ export function DilemmaModal({
             )}
             <span>
               {isSubmitting
-                ? "در حال ثبت و ابلاغ فرمان حاکمیت..."
+                ? t("modal.submitting")
                 : selectedChoiceId
-                  ? `ابلاغ و اجرای فرمان (${activeChoice?.labelFa})`
-                  : "ابتدا یکی از گزینه‌های بالا را انتخاب کنید"}
+                  ? t("modal.actionConfirm", { label: activeChoiceLabel })
+                  : t("modal.actionSelectPrompt")}
             </span>
           </button>
         </div>

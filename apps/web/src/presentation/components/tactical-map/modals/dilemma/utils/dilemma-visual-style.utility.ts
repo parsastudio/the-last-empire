@@ -10,7 +10,6 @@ import { DilemmaCategory, DilemmaUrgency } from "@geopolitics/domain";
 
 export interface DilemmaCategoryVisual {
   icon: LucideIcon;
-  labelFa: string;
   textColor: string;
   bgBadge: string;
   borderColor: string;
@@ -25,7 +24,6 @@ export class DilemmaVisualStyleUtility {
       case "GEOPOLITICAL":
         return {
           icon: Globe,
-          labelFa: "بحران ژئوپلیتیک و دیپلماسی",
           textColor: "text-primary",
           bgBadge: "bg-primary/15 text-primary border-primary/30",
           borderColor: "border-primary/40",
@@ -34,7 +32,6 @@ export class DilemmaVisualStyleUtility {
       case "ECONOMIC":
         return {
           icon: Coins,
-          labelFa: "رویداد کلان اقتصادی و صنایع",
           textColor: "text-gdp",
           bgBadge: "bg-gdp/15 text-gdp border-gdp/30",
           borderColor: "border-gdp/40",
@@ -43,7 +40,6 @@ export class DilemmaVisualStyleUtility {
       case "ESPIONAGE":
         return {
           icon: Binary,
-          labelFa: "عملیات ویژه اطلاعات و امنیت",
           textColor: "text-purple-400",
           bgBadge: "bg-purple-500/15 text-purple-300 border-purple-500/30",
           borderColor: "border-purple-500/40",
@@ -52,7 +48,6 @@ export class DilemmaVisualStyleUtility {
       case "DOMESTIC":
         return {
           icon: Landmark,
-          labelFa: "ثبات سیاسی و امور حاکمیتی",
           textColor: "text-amber-400",
           bgBadge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
           borderColor: "border-amber-500/40",
@@ -62,7 +57,6 @@ export class DilemmaVisualStyleUtility {
       default:
         return {
           icon: Swords,
-          labelFa: "فرماندهی ارتش و آمادگی دفاعی",
           textColor: "text-military",
           bgBadge: "bg-military/15 text-military border-military/30",
           borderColor: "border-military/40",
@@ -82,20 +76,6 @@ export class DilemmaVisualStyleUtility {
       case "LOW":
       default:
         return "bg-secondary text-muted-foreground border-border/60";
-    }
-  }
-
-  public static getUrgencyLabel(urgency: DilemmaUrgency): string {
-    switch (urgency) {
-      case "CRITICAL":
-        return "وضعیت اضطراری";
-      case "HIGH":
-        return "اولویت بالا";
-      case "MEDIUM":
-        return "اولویت عادی";
-      case "LOW":
-      default:
-        return "گزارش دوره‌ای";
     }
   }
 }
