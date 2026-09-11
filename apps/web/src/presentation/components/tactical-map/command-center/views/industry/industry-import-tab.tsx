@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { ShoppingCart, ShieldCheck, Search } from "lucide-react";
 import { Nation } from "@/domain/nation/nation.schema";
 import { Province } from "@/domain/province/province.schema";
@@ -20,6 +21,7 @@ export function IndustryImportTab({
   nationsMap,
   provincesMap,
 }: IndustryImportTabProps) {
+  const t = useTranslations("industry.imports");
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -87,11 +89,9 @@ export function IndustryImportTab({
         <div className="flex items-center gap-2">
           <ShoppingCart size={16} className="text-primary" />
           <div>
-            <h3 className="text-xs font-black text-foreground">
-              فهرست صادرکنندگان تجهیزات و ماشین‌آلات پیشرفته
-            </h3>
+            <h3 className="text-xs font-black text-foreground">{t("title")}</h3>
             <span className="text-[10px] text-muted-foreground">
-              فقط کشورهای هم‌پیمان و دارای تنش کمتر از ۵۰٪ در دسترس هستند.
+              {t("desc")}
             </span>
           </div>
         </div>
@@ -103,7 +103,7 @@ export function IndustryImportTab({
           />
           <input
             type="text"
-            placeholder="جستجوی نام یا نماد صادرکننده..."
+            placeholder={t("searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-secondary/70 border border-border/70 rounded-xl py-1.5 pr-8 pl-3 text-xs text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary text-right"
@@ -115,11 +115,10 @@ export function IndustryImportTab({
         <div className="p-12 bg-card/60 border border-border/60 rounded-3xl text-center space-y-2">
           <ShieldCheck size={32} className="text-emerald-400 mx-auto" />
           <span className="text-sm font-black text-foreground block">
-            صادرکننده آزادی در دسترس نیست
+            {t("noExportersTitle")}
           </span>
           <p className="text-xs text-muted-foreground">
-            هیچ کشوری با فناوری صنعتی بالاتر که در وضعیت صلح و تنش زیر ۵۰٪ باشد
-            یافت نشد.
+            {t("noExportersDesc")}
           </p>
         </div>
       ) : (

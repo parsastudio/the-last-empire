@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Factory, ShoppingCart } from "lucide-react";
 
 export type IndustrySubTabType = "domestic" | "imports";
@@ -14,15 +15,17 @@ export function IndustrySubTabsHeader({
   activeTab,
   onSelectTab,
 }: IndustrySubTabsHeaderProps) {
+  const t = useTranslations("industry.tabs");
+
   const tabs = [
     {
       id: "domestic" as const,
-      label: "صنایع و بازسازی بومی",
+      label: t("domestic"),
       icon: Factory,
     },
     {
       id: "imports" as const,
-      label: "واردات ماشین‌آلات صنعتی",
+      label: t("imports"),
       icon: ShoppingCart,
     },
   ];

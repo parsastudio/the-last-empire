@@ -1,0 +1,75 @@
+{
+  "tabs": {
+    "domestic": "Domestic Industry & Reconstruction",
+    "imports": "Industrial Machinery Imports"
+  },
+  "overview": {
+    "activeFactories": "Active Industrial Facilities",
+    "totalFactoriesYield": "Total Output Value of All Facilities",
+    "gdpShareDesc": "Direct contribution to gross domestic product (GDP)",
+    "rndKnowledge": "Indigenous R&D & Knowledge",
+    "rndKnowledgeDesc": "Ceiling for domestic equipment fabrication",
+    "equipmentTier": "Assembly Equipment Tech Tier",
+    "equipmentTierDesc": "Quality of installed machinery & assembly tooling",
+    "level": "Level {level}"
+  },
+  "tiers": {
+    "headerTitle": "National Production Lines & Industrial Tiers",
+    "headerSubtitleDomestic": "Track categorized industrial tiers and immediately upgrade facilities to peak domestic tech",
+    "headerSubtitleImport": "Select an equipment tier for foreign machinery imports and industrial leapfrogging",
+    "activeTiersCount": "{count} Active Tiers",
+    "lineTier": "Production Line Tier #{rank}",
+    "maxEfficiency": "Equipment operating at peak efficiency ceiling",
+    "upgradeTarget": "Upgrade Target: Level {level}",
+    "levelLabel": "Level {level}",
+    "levelPrefix": "Level {level}",
+    "tierFactoriesLabel": "Active Tier Facilities:",
+    "shareOfTotal": "{pct}% of Total Industry",
+    "activeSheds": "{count} Active Facilities",
+    "totalValue": "Total Value:",
+    "investPackage": "Tier Package Investment:",
+    "maxTechEquipped": "Outfitted with Max Tech (Level {level})",
+    "upgradeAction": "{label} ({count} Facilities)",
+    "domesticActionDefault": "Domestic Upgrade",
+    "importActionDefault": "Import & Outfit",
+    "feedbacks": {
+      "domestic": "+{count} Modernized Facilities",
+      "import": "+{count} Imported Facilities"
+    }
+  },
+  "smartBuild": {
+    "title": "National Factory Infrastructure Construction",
+    "capacityFull": "100% Capacity",
+    "unitCost": "{cost} / Facility",
+    "occupancy": "National Industrial Slot Occupancy:",
+    "ofTotalSlots": "of {max} Slots",
+    "totalSlotsCompleted": "Permanent Slot Saturation:",
+    "allProvincesFull": "Factory construction capacity across all provinces is full",
+    "insufficientFunds": "Insufficient treasury funds",
+    "buildAction": "Instant Build {count} Facilities ({cost})"
+  },
+  "imports": {
+    "title": "Advanced Industrial Equipment & Machinery Exporters",
+    "desc": "Only allied nations with diplomatic tension below 50% are available.",
+    "searchPlaceholder": "Search exporter name or ISO...",
+    "noExportersTitle": "No Available Exporters",
+    "noExportersDesc": "No nation with superior industrial tech, at peace, and below 50% tension was found.",
+    "countryViewBack": "Exporters Directory",
+    "countryViewTitle": "Import Industrial Equipment from {name}",
+    "treasury": "National Treasury:",
+    "techGapInfo": "Industrial tech gap with exporter: +{delta} levels (Pricing scales with the 1.5x output growth rate of upgraded facilities).",
+    "techEqualInfo": "This nation's industrial technology matches your current tooling.",
+    "importMultiplier": "Import Multiplier: {mult}x"
+  },
+  "techUpgrade": {
+    "title": "Industrial Research & Technology (R&D)",
+    "stepCostLabel": "Next Step Cost (+0.1):",
+    "progressToNext": "Progress to Next Full Tier:",
+    "submitting": "Conducting Industrial R&D...",
+    "upgradeBtn": "Upgrade to Level {level}",
+    "insufficientFunds": "Insufficient Treasury Reserves for R&D"
+  },
+  "capacityMeter": {
+    "tooltip": "Active Facilities: {active} of {max} Permanent Slots"
+  }
+}

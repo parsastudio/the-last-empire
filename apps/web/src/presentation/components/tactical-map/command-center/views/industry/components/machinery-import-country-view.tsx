@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslations } from "next-intl";
 import { ArrowRight, Wallet, Cpu, TrendingUp, Info } from "lucide-react";
 import {
   Nation,
@@ -21,6 +22,7 @@ export function MachineryImportCountryView({
   totalFactories,
   onBack,
 }: MachineryImportCountryViewProps) {
+  const t = useTranslations("industry.imports");
   const sellerFlag = getFlagEmoji(sellerNation.flagCode || sellerNation.id);
   const techDelta = Number(
     Math.max(
@@ -43,18 +45,17 @@ export function MachineryImportCountryView({
             className="p-2 bg-secondary hover:bg-secondary/80 border border-border/70 rounded-xl text-foreground text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
           >
             <ArrowRight size={14} />
-            <span>فهرست صادرکنندگان</span>
+            <span>{t("countryViewBack")}</span>
           </button>
           <div className="flex items-center gap-2.5">
             <span className="text-2xl select-none">{sellerFlag}</span>
             <div className="flex items-center gap-2">
               <h4 className="text-xs font-black text-foreground">
-                واردات تجهیزات و ابزارآلات صنعتی از {sellerNation.name}
+                {t("countryViewTitle", { name: sellerNation.name })}
               </h4>
               <span className="text-[10px] font-mono font-bold bg-primary/15 text-primary border border-primary/30 px-2.5 py-0.5 rounded-lg flex items-center gap-1">
                 <Cpu size={11} />
                 <span>
-                  فناوری صنعتی: لِوِل{" "}
                   {PersianNumberFormatter.toPersianDigits(
                     sellerNation.industrialLevel.toFixed(1),
                   )}
@@ -67,7 +68,7 @@ export function MachineryImportCountryView({
         <div className="flex items-center gap-2 font-mono text-[11px] bg-secondary/80 border border-border/60 px-3 py-1.5 rounded-xl">
           <Wallet size={13} className="text-primary" />
           <span className="text-muted-foreground font-sans">
-            خزانه ملی شما:
+            {t("treasury")}
           </span>
           <span className="font-extrabold text-gdp text-xs">
             {PersianNumberFormatter.formatCurrency(buyerNation.treasury)}
@@ -79,18 +80,11 @@ export function MachineryImportCountryView({
         <div className="flex items-center gap-2 text-muted-foreground font-sans text-[11px]">
           <Info size={14} className="text-primary shrink-0" />
           <span>
-            {techDelta > 0 ? (
-              <>
-                شکاف فناوری صنعتی با صادرکننده:{" "}
-                <strong className="text-primary font-mono">
-                  +{PersianNumberFormatter.toPersianDigits(techDelta)}
-                </strong>{" "}
-                سطح (قیمت‌گذاری متناسب با نرخ رشد ۱.۵ برابری ارزش تولیدی
-                کارخانجات محاسبه می‌گردد).
-              </>
-            ) : (
-              "سطح فناوری صنعتی این کشور برابر با تجهیزات شماست."
-            )}
+            {techDelta > 0
+              ? t("techGapInfo", {
+                  delta: PersianNumberFormatter.toPersianDigits(techDelta),
+                })
+              : t("techEqualInfo")}
           </span>
         </div>
 
@@ -98,8 +92,11 @@ export function MachineryImportCountryView({
           <div className="flex items-center gap-1 text-[11px] font-bold text-gdp bg-gdp/10 px-2.5 py-1 rounded-xl border border-gdp/20 shrink-0">
             <TrendingUp size={12} />
             <span>
-              ضریب واردات:{" "}
-              {PersianNumberFormatter.toPersianDigits(multiplier.toFixed(2))}x
+              {t("importMultiplier", {
+                mult: PersianNumberFormatter.toPersianDigits(
+                  multiplier.toFixed(2),
+                ),
+              })}
             </span>
           </div>
         )}
@@ -114,7 +111,6 @@ export function MachineryImportCountryView({
         buyerIndustrialLevel={buyerNation.industrialLevel}
         sellerId={sellerNation.id}
         actionType="IMPORT"
-        actionLabel="واردات و تجهیز"
       />
     </div>
   );
