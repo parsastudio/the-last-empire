@@ -7,5 +7,7 @@
   "systemError": "خطا در سیستم",
   "success": "عملیات موفق",
   "warning": "هشدار",
-  "turn": "نوبت"
+  "turn": "نوبت",
+  "language": "تغییر زبان",
+  "tacticalEngineLoading": "در حال بارگذاری موتور تاکتیکی و پرونده استراتژیک..."
 }

@@ -7,5 +7,7 @@
   "systemError": "System Error",
   "success": "Success",
   "warning": "Warning",
-  "turn": "Turn"
+  "turn": "Turn",
+  "language": "Switch Language",
+  "tacticalEngineLoading": "Loading tactical engine and strategic dossier..."
 }

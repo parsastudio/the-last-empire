@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations, useLocale } from "next-intl";
 import { useGameResources } from "@/presentation/hooks/game/use-game-resources";
 import { TopHudBar } from "@/presentation/components/tactical-map/hud/top-bar/top-hud-bar";
 import { CommandRail } from "@/presentation/components/tactical-map/command-rail/command-rail";
@@ -39,6 +40,8 @@ interface WebGLTacticalWorkspaceProps {
 export function WebGLTacticalWorkspace({
   gameId = "default_game",
 }: WebGLTacticalWorkspaceProps) {
+  const t = useTranslations("common");
+  const locale = useLocale();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const positionRef = useRef({ x: 0, y: 0 });
   const scaleRef = useRef(1);
@@ -135,7 +138,7 @@ export function WebGLTacticalWorkspace({
     <div
       ref={containerRef}
       className="w-screen h-screen bg-background overflow-hidden relative"
-      dir="rtl"
+      dir={locale === "fa" ? "rtl" : "ltr"}
     >
       <WebGLMapCanvas
         provincesMap={effectiveGameState?.provinces}
@@ -177,7 +180,7 @@ export function WebGLTacticalWorkspace({
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background z-50">
           <div className="w-12 h-12 border-4 border-gdp border-t-transparent rounded-full animate-spin" />
           <p className="text-muted-foreground font-medium font-sans text-xs">
-            در حال بارگذاری موتور تاکتیکی و پرونده استراتژیک...
+            {t("tacticalEngineLoading")}
           </p>
         </div>
       )}
